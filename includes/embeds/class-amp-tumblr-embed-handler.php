@@ -56,7 +56,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function sanitize_raw_embeds( Document $dom ) {
 		$nodes = $dom->xpath->query(
 			sprintf(
-				'//div[ @class and @data-href and contains( concat( " ", normalize-space( @class ), " " ), " tumblr-post " ) and starts-with( @data-href, "%s" ) ]',
+				'//div[ @class and @data-href and contains( concat( " ", normalize-space( @class ), " " ), " tumblr-post " ) and starts-with( @data-href, "%s" ) and ./a[ @href ] ]',
 				$this->base_embed_url
 			)
 		);
@@ -66,10 +66,21 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		foreach ( $nodes as $node ) {
-			$iframe_src = $node->getAttribute( 'data-href' );
+			// Obtain the child link as the placeholder, accounting for possible whitespace added as sibling nodes.
+			$placeholder_element = null;
+			foreach ( $node->childNodes as $child_node ) {
+				if ( $child_node instanceof DOMElement && Tag::A === $child_node->tagName ) {
+					$placeholder_element = $child_node;
+					break;
+				}
+			}
+			if ( ! $placeholder_element instanceof DOMElement ) {
+				continue; // @codeCoverageIgnore
+			}
+			$placeholder_element->setAttribute( Attribute::PLACEHOLDER, '' );
 
 			$attributes = [
-				'src'       => $iframe_src,
+				'src'       => $node->getAttribute( 'data-href' ),
 				'layout'    => 'responsive',
 				'width'     => $this->args['width'],
 				'height'    => $this->args['height'],
@@ -94,13 +105,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 			);
 			$overflow_element->textContent = __( 'See more', 'amp' );
 			$amp_element->appendChild( $overflow_element );
-
-			// Append the original link as a placeholder node.
-			if ( $node->firstChild instanceof DOMElement && Tag::A === $node->firstChild->tagName ) {
-				$placeholder_element = $node->firstChild;
-				$placeholder_element->setAttribute( Attribute::PLACEHOLDER, '' );
-				$amp_element->appendChild( $placeholder_element );
-			}
+			$amp_element->appendChild( $placeholder_element );
 
 			$this->maybe_remove_script_sibling(
 				$node,
