@@ -54,33 +54,26 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query(
+		$placeholders = $dom->xpath->query(
 			sprintf(
-				'//div[ @class and @data-href and contains( concat( " ", normalize-space( @class ), " " ), " tumblr-post " ) and starts-with( @data-href, "%s" ) and ./a[ @href ] ]',
+				'//div[ @class and @data-href and contains( concat( " ", normalize-space( @class ), " " ), " tumblr-post " ) and starts-with( @data-href, "%s" ) ]/a[ @href ]',
 				$this->base_embed_url
 			)
 		);
 
-		if ( 0 === $nodes->length ) {
+		if ( 0 === $placeholders->length ) {
 			return;
 		}
 
-		foreach ( $nodes as $node ) {
-			// Obtain the child link as the placeholder, accounting for possible whitespace added as sibling nodes.
-			$placeholder_element = null;
-			foreach ( $node->childNodes as $child_node ) {
-				if ( $child_node instanceof DOMElement && Tag::A === $child_node->tagName ) {
-					$placeholder_element = $child_node;
-					break;
-				}
-			}
-			if ( ! $placeholder_element instanceof DOMElement ) {
+		foreach ( $placeholders as $placeholder ) {
+			$placeholder->setAttribute( Attribute::PLACEHOLDER, '' );
+			$div = $placeholder->parentNode;
+			if ( ! $div instanceof DOMElement ) {
 				continue; // @codeCoverageIgnore
 			}
-			$placeholder_element->setAttribute( Attribute::PLACEHOLDER, '' );
 
 			$attributes = [
-				'src'       => $node->getAttribute( 'data-href' ),
+				'src'       => $div->getAttribute( 'data-href' ),
 				'layout'    => 'responsive',
 				'width'     => $this->args['width'],
 				'height'    => $this->args['height'],
@@ -105,10 +98,10 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 			);
 			$overflow_element->textContent = __( 'See more', 'amp' );
 			$amp_element->appendChild( $overflow_element );
-			$amp_element->appendChild( $placeholder_element );
+			$amp_element->appendChild( $placeholder );
 
 			$this->maybe_remove_script_sibling(
-				$node,
+				$div,
 				static function ( DOMElement $script ) {
 					if ( ! $script->hasAttribute( Attribute::SRC ) ) {
 						return false;
@@ -126,7 +119,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 				}
 			);
 
-			$node->parentNode->replaceChild( $amp_element, $node );
+			$div->parentNode->replaceChild( $amp_element, $div );
 		}
 	}
 }
