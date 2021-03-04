@@ -97,7 +97,7 @@ class Event {
 	}
 
 	/**
-	 * Sanitize key.
+	 * Sanitize key to use it for an HTTP header label (alphanumeric and dashes/underscores only).
 	 *
 	 * @param string $key Unsanitized key.
 	 * @return string Sanitized key.
