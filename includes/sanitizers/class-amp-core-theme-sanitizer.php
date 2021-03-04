@@ -2013,12 +2013,19 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		add_action(
 			'wp_enqueue_scripts',
 			static function() {
-				// Bail if the dark mode stylesheet is not enqueued.
-				if ( ! wp_style_is( 'tt1-dark-mode' ) ) {
+				$theme_style_handle     = 'twenty-twenty-one-style';
+				$dark_mode_style_handle = 'tt1-dark-mode';
+
+				// Bail if the dark mode stylesheet is not enqueued or the theme stylesheet isn't registered.
+				if (
+					! wp_style_is( $dark_mode_style_handle, 'enqueued' )
+					||
+					! wp_style_is( $theme_style_handle, 'registered' )
+				) {
 					return; // @codeCoverageIgnore
 				}
 
-				wp_dequeue_style( 'tt1-dark-mode' );
+				wp_dequeue_style( $dark_mode_style_handle );
 
 				$dark_mode_css_file = get_theme_file_path(
 					sprintf( 'assets/css/style-dark-mode%s.css', is_rtl() ? '-rtl' : '' )
@@ -2036,7 +2043,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$new_styles = str_replace( '.is-dark-theme.is-dark-theme', ':root', $new_styles );
 				$new_styles = str_replace( '.respect-color-scheme-preference.is-dark-theme body', '.respect-color-scheme-preference body', $new_styles );
 
-				wp_add_inline_style( 'twenty-twenty-one-style', $new_styles );
+				wp_add_inline_style( $theme_style_handle, $new_styles );
 			},
 			11
 		);
