@@ -13,6 +13,7 @@ namespace PHPSTORM_META {
 			'admin.onboarding_wizard'           => \AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage::class,
 			'admin.options_menu'                => \AmpProject\AmpWP\Admin\OptionsMenu::class,
 			'admin.polyfills'                   => \AmpProject\AmpWP\Admin\Polyfills::class,
+			'admin.plugin_row_meta'             => \AmpProject\AmpWP\Admin\PluginRowMeta::class,
 			'amp_slug_customization_watcher'    => \AmpProject\AmpWP\AmpSlugCustomizationWatcher::class,
 			'css_transient_cache.ajax_handler'  => \AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction::class,
 			'css_transient_cache.monitor'       => \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching::class,
