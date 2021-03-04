@@ -66,7 +66,6 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		foreach ( $placeholders as $placeholder ) {
-			$placeholder->setAttribute( Attribute::PLACEHOLDER, '' );
 			$div = $placeholder->parentNode;
 			if ( ! $div instanceof DOMElement ) {
 				continue; // @codeCoverageIgnore
@@ -98,6 +97,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 			);
 			$overflow_element->textContent = __( 'See more', 'amp' );
 			$amp_element->appendChild( $overflow_element );
+			$placeholder->setAttribute( Attribute::PLACEHOLDER, '' );
 			$amp_element->appendChild( $placeholder );
 
 			$this->maybe_remove_script_sibling(
