@@ -99,7 +99,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'amend_twentytwentyone_sub_menu_toggles' => [],
 					'add_twentytwentyone_mobile_modal' => [],
 					'add_twentytwentyone_sub_menu_fix' => [],
-					'add_twentytwentyone_overflow_button_fix' => [],
 				];
 
 				// Dark mode button toggle is only supported in the Customizer for now.
@@ -2050,8 +2049,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Amend the Twenty Twenty-One stylesheet to make it compatible with the changes made to the document during
-	 * sanitization.
+	 * Amend Twenty Twenty-One Styles.
 	 */
 	public static function amend_twentytwentyone_styles() {
 		add_action(
@@ -2080,7 +2078,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				$styles = file_get_contents( $css_file ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
-				// Append any extra rules that may be needed.
+				// Append extra rules needed for nav menus according to changes made to the document during sanitization.
 				$styles .= '
 					/* Trap keyboard navigation within mobile menu when it\'s open */
 					@media only screen and (max-width: 481px) {
@@ -2108,6 +2106,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
 							display: flex;
 						}
+					}
+				';
+
+				/*
+				 * In Twenty Twenty-One, when a button is used to resize AMP elements, they can appear transparent when hovered over.
+				 * To resolve this issue, the theme's background color is used as the background color for the button
+				 * when it is in the hovered state.
+				 */
+				$styles .= '
+					button[overflow]:hover {
+						background-color: var(--global--color-background);
 					}
 				';
 
@@ -2231,21 +2240,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		AMP_DOM_Utils::add_amp_action( $this->dom->body, 'tap', "AMP.setState({{$state_vars}})" );
 		$this->dom->body->setAttribute( 'role', 'document' );
 		$this->dom->body->setAttribute( 'tabindex', '-1' );
-	}
-
-	/**
-	 * In Twenty Twenty-One, when a button is used to resize AMP elements, they can appear transparent when hovered over.
-	 * To resolve this issue, the theme's background color is used as the background color for the button
-	 * when it is in the hovered state.
-	 */
-	public static function add_twentytwentyone_overflow_button_fix() {
-		add_action(
-			'wp_enqueue_scripts',
-			static function () {
-				$style = 'button[overflow]:hover { background-color: var(--global--color-background); }';
-				wp_add_inline_style( 'twenty-twenty-one-style', $style );
-			}
-		);
 	}
 
 	/**

@@ -483,27 +483,6 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		}
 	}
 
-	/** @covers ::add_twentytwentyone_overflow_button_fix() */
-	public function test_add_twentytwentyone_overflow_button_fix() {
-		$theme_slug   = 'twentytwentyone';
-		$style_handle = 'twenty-twenty-one-style';
-
-		if ( ! wp_get_theme( $theme_slug )->exists() ) {
-			$this->markTestSkipped();
-			return;
-		}
-
-		switch_theme( $theme_slug );
-		wp_enqueue_style( $style_handle, get_theme_file_path( 'style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		AMP_Core_Theme_Sanitizer::add_twentytwentyone_overflow_button_fix();
-		wp_enqueue_scripts();
-
-		$after = implode( '', wp_styles()->registered[ $style_handle ]->extra['after'] );
-		$this->assertNotEmpty( $after );
-
-		$this->assertEquals( 'button[overflow]:hover { background-color: var(--global--color-background); }', $after );
-	}
-
 	/** @covers ::amend_twentytwentyone_styles() */
 	public function test_amend_twentytwentyone_styles() {
 		$theme_slug = 'twentytwentyone';
@@ -525,6 +504,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$after = implode( '', wp_styles()->registered[ $style_handle ]->extra['after'] );
 		$this->assertNotEmpty( $after );
 		$this->assertStringContains( '@media only screen and (max-width: 481px)', $after );
+		$this->assertStringContains( 'button[overflow]:hover', $after );
 		$this->assertStringEndsWith( '/*first*/', $after );
 	}
 
