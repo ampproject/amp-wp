@@ -78,12 +78,12 @@ class AMP_Tumblr_Embed_Handler_Test extends WP_UnitTestCase {
 
 			'url_simple'   => [
 				'https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930' . PHP_EOL,
-				'<amp-iframe src="https://embed.tumblr.com/embed/post/2JT2XTaiTxO08wh21dqQrw/92003045635" layout="responsive" width="540" height="480" resizable="" sandbox="allow-scripts allow-popups allow-same-origin"><button overflow="">See more</button><a href="https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930" placeholder="">https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930</a></amp-iframe>' . PHP_EOL . PHP_EOL,
+				'<amp-iframe src="https://embed.tumblr.com/embed/post/2JT2XTaiTxO08wh21dqQrw/92003045635" layout="responsive" width="540" height="480" resizable="" sandbox="allow-scripts allow-popups allow-same-origin"><button overflow="" type="button">See more</button><a href="https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930" placeholder="">https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930</a></amp-iframe>' . PHP_EOL . PHP_EOL,
 			],
 
 			'url_simple_2' => [
 				'https://teded.tumblr.com/post/184736320764/how-do-vaccines-work' . PHP_EOL,
-				'<amp-iframe src="https://embed.tumblr.com/embed/post/O6_eRR6K-z9QGTzdU5HrhQ/184736320764" layout="responsive" width="540" height="480" resizable="" sandbox="allow-scripts allow-popups allow-same-origin"><button overflow="">See more</button><a href="https://teded.tumblr.com/post/184736320764/how-do-vaccines-work" placeholder="">https://teded.tumblr.com/post/184736320764/how-do-vaccines-work</a></amp-iframe>' . PHP_EOL . PHP_EOL,
+				'<amp-iframe src="https://embed.tumblr.com/embed/post/O6_eRR6K-z9QGTzdU5HrhQ/184736320764" layout="responsive" width="540" height="480" resizable="" sandbox="allow-scripts allow-popups allow-same-origin"><button overflow="" type="button">See more</button><a href="https://teded.tumblr.com/post/184736320764/how-do-vaccines-work" placeholder="">https://teded.tumblr.com/post/184736320764/how-do-vaccines-work</a></amp-iframe>' . PHP_EOL . PHP_EOL,
 			],
 		];
 	}

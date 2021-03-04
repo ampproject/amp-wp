@@ -81,3 +81,11 @@ amp-carousel .amp-wp-gallery-caption {
 	margin-bottom: 1.5em;
 	max-width: 100%;
 }
+
+/*
+ * Ensure the button used to expand AMP components is placed in the bottom left hand corner of the component,
+ * where it's most likely to be seen.
+ */
+button[overflow] {
+	bottom: 0;
+}

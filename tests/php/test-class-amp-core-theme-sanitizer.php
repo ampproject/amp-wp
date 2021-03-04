@@ -483,8 +483,8 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		}
 	}
 
-	/** @covers ::add_twentytwentyone_amp_iframe_button_fix() */
-	public function test_add_twentytwentyone_amp_iframe_button_fix() {
+	/** @covers ::add_twentytwentyone_overflow_button_fix() */
+	public function test_add_twentytwentyone_overflow_button_fix() {
 		$theme_slug   = 'twentytwentyone';
 		$style_handle = 'twenty-twenty-one-style';
 
@@ -495,7 +495,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 		switch_theme( $theme_slug );
 		wp_enqueue_style( $style_handle, get_theme_file_path( 'style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		AMP_Core_Theme_Sanitizer::add_twentytwentyone_amp_iframe_button_fix();
+		AMP_Core_Theme_Sanitizer::add_twentytwentyone_overflow_button_fix();
 		wp_enqueue_scripts();
 
 		$after = implode( '', wp_styles()->registered[ $style_handle ]->extra['after'] );

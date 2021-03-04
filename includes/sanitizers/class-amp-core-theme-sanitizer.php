@@ -99,7 +99,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'amend_twentytwentyone_sub_menu_toggles' => [],
 					'add_twentytwentyone_mobile_modal' => [],
 					'add_twentytwentyone_sub_menu_fix' => [],
-					'add_twentytwentyone_amp_iframe_button_fix' => [],
+					'add_twentytwentyone_overflow_button_fix' => [],
 				];
 
 				// Dark mode button toggle is only supported in the Customizer for now.
@@ -2227,11 +2227,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * In Twenty Twenty-One, the button used to resize `amp-iframe` elements can appear transparent when it is hovered
-	 * over. To resolve this potential issue, the theme's background color is used as the background color for the button
+	 * In Twenty Twenty-One, when a button is used to resize AMP elements, they can appear transparent when hovered over.
+	 * To resolve this issue, the theme's background color is used as the background color for the button
 	 * when it is in the hovered state.
 	 */
-	public static function add_twentytwentyone_amp_iframe_button_fix() {
+	public static function add_twentytwentyone_overflow_button_fix() {
 		add_action(
 			'wp_enqueue_scripts',
 			static function () {
