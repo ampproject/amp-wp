@@ -164,11 +164,9 @@ abstract class AMP_Base_Embed_Handler {
 	 */
 	protected function maybe_remove_script_sibling( DOMElement $node, callable $match_callback ) {
 		$next_element_sibling = $node->nextSibling;
-
-		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
+		while ( $next_element_sibling && ! $next_element_sibling instanceof DOMElement ) {
 			$next_element_sibling = $next_element_sibling->nextSibling;
 		}
-
 		if ( ! $next_element_sibling instanceof DOMElement ) {
 			return;
 		}
@@ -191,11 +189,13 @@ abstract class AMP_Base_Embed_Handler {
 				)
 			);
 
-			if ( 1 !== count( $children_elements ) ) {
-				return;
-			}
-
-			if ( Tag::SCRIPT === $children_elements[0]->tagName && $match_callback( $children_elements[0] ) ) {
+			if (
+				1 === count( $children_elements )
+				&&
+				Tag::SCRIPT === $children_elements[0]->tagName
+				&&
+				$match_callback( $children_elements[0] )
+			) {
 				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 			}
 		}
