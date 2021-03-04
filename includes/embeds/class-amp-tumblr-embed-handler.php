@@ -28,13 +28,6 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected $DEFAULT_WIDTH = 540;
 
 	/**
-	 * Base URL used for identifying embeds.
-	 *
-	 * @var string
-	 */
-	protected $base_embed_url = 'https://embed.tumblr.com/embed/post/';
-
-	/**
 	 * Register embed.
 	 */
 	public function register_embed() {
@@ -55,10 +48,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
 		$placeholders = $dom->xpath->query(
-			sprintf(
-				'//div[ @class and @data-href and contains( concat( " ", normalize-space( @class ), " " ), " tumblr-post " ) and starts-with( @data-href, "%s" ) ]/a[ @href ]',
-				$this->base_embed_url
-			)
+			'//div[ @class and @data-href and contains( concat( " ", normalize-space( @class ), " " ), " tumblr-post " ) and starts-with( @data-href, "https://embed.tumblr.com/embed/post/" ) ]/a[ @href ]'
 		);
 
 		if ( 0 === $placeholders->length ) {
