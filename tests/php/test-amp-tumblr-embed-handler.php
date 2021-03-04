@@ -77,18 +77,18 @@ class AMP_Tumblr_Embed_Handler_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
 		return [
 			'no_embed'                   => [
-				'<p>Hello world.</p>',
-				'<p>Hello world.</p>' . PHP_EOL,
+				'',
+				'',
 			],
 
 			'grant-wood-american-gothic' => [
-				'https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930' . PHP_EOL,
-				'<amp-iframe src="https://embed.tumblr.com/embed/post/2JT2XTaiTxO08wh21dqQrw/92003045635" layout="responsive" width="540" height="480" resizable="" sandbox="allow-scripts allow-popups allow-same-origin"><button overflow="" type="button">See more</button><a href="https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930" placeholder="">https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930</a></amp-iframe>' . PHP_EOL . PHP_EOL,
+				'https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930',
+				'<amp-iframe src="https://embed.tumblr.com/embed/post/2JT2XTaiTxO08wh21dqQrw/92003045635" layout="responsive" width="540" height="480" resizable="" sandbox="allow-scripts allow-popups allow-same-origin"><button overflow="" type="button">See more</button><a href="https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930" placeholder="">https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930</a></amp-iframe>',
 			],
 
 			'how-do-vaccines-work'       => [
-				'https://teded.tumblr.com/post/184736320764/how-do-vaccines-work' . PHP_EOL,
-				'<amp-iframe src="https://embed.tumblr.com/embed/post/O6_eRR6K-z9QGTzdU5HrhQ/184736320764" layout="responsive" width="540" height="480" resizable="" sandbox="allow-scripts allow-popups allow-same-origin"><button overflow="" type="button">See more</button><a href="https://teded.tumblr.com/post/184736320764/how-do-vaccines-work" placeholder="">https://teded.tumblr.com/post/184736320764/how-do-vaccines-work</a></amp-iframe>' . PHP_EOL . PHP_EOL,
+				'https://teded.tumblr.com/post/184736320764/how-do-vaccines-work',
+				'<amp-iframe src="https://embed.tumblr.com/embed/post/O6_eRR6K-z9QGTzdU5HrhQ/184736320764" layout="responsive" width="540" height="480" resizable="" sandbox="allow-scripts allow-popups allow-same-origin"><button overflow="" type="button">See more</button><a href="https://teded.tumblr.com/post/184736320764/how-do-vaccines-work" placeholder="">https://teded.tumblr.com/post/184736320764/how-do-vaccines-work</a></amp-iframe>',
 			],
 		];
 	}
@@ -99,18 +99,30 @@ class AMP_Tumblr_Embed_Handler_Test extends WP_UnitTestCase {
 	 * @covers ::sanitize_raw_embeds()
 	 * @dataProvider get_conversion_data
 	 *
-	 * @param string $source   Source.
+	 * @param string $url      URL.
 	 * @param string $expected Expected content.
 	 */
-	public function test__conversion( $source, $expected ) {
+	public function test__conversion( $url, $expected ) {
 		$embed = new AMP_Tumblr_Embed_Handler();
 
-		$filtered_content = apply_filters( 'the_content', $source );
-		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		// Check with all filters applied (including wpautop).
+		$dom = AMP_DOM_Utils::get_dom_from_content( apply_filters( 'the_content', $url ) );
 		$embed->sanitize_raw_embeds( $dom );
-
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEqualMarkup( $expected, $content );
 
+		// Check with no filters applied.
+		$dom = AMP_DOM_Utils::get_dom_from_content( ( new WP_Embed() )->shortcode( [], $url ) );
+		$embed->sanitize_raw_embeds( $dom );
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEqualMarkup( $expected, $content );
+
+		// Check with no filters applied and with the script pre-remoevd.
+		$content = ( new WP_Embed() )->shortcode( [], $url );
+		$content = preg_replace( '#<script.+?</script>#', '', $content );
+		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
+		$embed->sanitize_raw_embeds( $dom );
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEqualMarkup( $expected, $content );
 	}
 
