@@ -106,10 +106,27 @@ class AMP_Tumblr_Embed_Handler_Test extends WP_UnitTestCase {
 		$embed = new AMP_Tumblr_Embed_Handler();
 
 		// Check with all filters applied (including wpautop).
-		$dom = AMP_DOM_Utils::get_dom_from_content( apply_filters( 'the_content', $url ) );
+		$content = apply_filters( 'the_content', $url );
+		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
 		$embed->sanitize_raw_embeds( $dom );
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEqualMarkup( $expected, $content );
+
+		if ( $url ) {
+			$embed_block = sprintf(
+				"<!-- wp:embed {\"url\":\"{$url}\",\"type\":\"rich\",\"providerNameSlug\":\"tumblr\",\"responsive\":true} -->\n<figure class=\"wp-block-embed is-type-rich is-provider-tumblr wp-block-embed-tumblr\"><div class=\"wp-block-embed__wrapper\">\n{$url}\n</div></figure>\n<!-- /wp:embed -->",
+				$url
+			);
+			$content     = apply_filters( 'the_content', $embed_block );
+			$dom         = AMP_DOM_Utils::get_dom_from_content( $content );
+			$embed->sanitize_raw_embeds( $dom );
+			$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+			$this->assertEqualMarkup(
+				'<figure class="wp-block-embed is-type-rich is-provider-tumblr wp-block-embed-tumblr"><div class="wp-block-embed__wrapper">' . $expected . '</div></figure>',
+				$content
+			);
+		}
 
 		// Check with no filters applied.
 		$dom = AMP_DOM_Utils::get_dom_from_content( ( new WP_Embed() )->shortcode( [], $url ) );
