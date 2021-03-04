@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+
 /**
  * Tests for Tumblr embeds.
  *
  * @coversDefaultClass \AMP_Tumblr_Embed_Handler
  */
 class AMP_Tumblr_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use MarkupComparison;
 
 	/**
 	 * Set up.
@@ -107,7 +111,7 @@ class AMP_Tumblr_Embed_Handler_Test extends WP_UnitTestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		$this->assertEquals( $expected, $content );
+		$this->assertEqualMarkup( $expected, $content );
 	}
 
 	/**
