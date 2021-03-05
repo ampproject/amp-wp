@@ -37,10 +37,10 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const { setAsyncError } = useAsyncError();
 	const { error, setError } = useContext( ErrorContext );
 
-	const [ templateModeWasOverridden, setTemplateModeWasOverridden ] = useState(); // Undefined to signal initial unstable state.
+	const [ templateModeWasOverridden, setTemplateModeWasOverridden ] = useState( null );
 	const [ themeWasOverridden, setThemeWasOverridden ] = useState( false );
 	const [ themes, setThemes ] = useState( null );
-	const [ fetchingThemes, setFetchingThemes ] = useState( false );
+	const [ fetchingThemes, setFetchingThemes ] = useState( null );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
 	const [ downloadedTheme, setDownloadedTheme ] = useState( false );
 	const [ themesAPIError, setThemesAPIError ] = useState( null );
@@ -89,10 +89,26 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 */
 	useEffect( () => {
 		/**
-		 * Wait for the `originalSelectedTheme` to become available before setting up the initial flag state.
+		 * Set up the initial flag state.
 		 */
-		if ( templateModeWasOverridden === undefined && originalSelectedTheme.availability ) {
-			setTemplateModeWasOverridden( false );
+		if ( templateModeWasOverridden === null ) {
+			/**
+			 * In case of the non-reader modes, set flag as soon as the mode
+			 * becomes available.
+			 */
+			if ( originalThemeSupport && originalThemeSupport !== READER ) {
+				setTemplateModeWasOverridden( false );
+
+				return;
+			}
+
+			/**
+			 * When dealing with a reader mode, wait for `originalSelectedTheme`
+			 * to become available.
+			 */
+			if ( originalSelectedTheme.availability ) {
+				setTemplateModeWasOverridden( false );
+			}
 		}
 
 		/**
@@ -198,11 +214,12 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 * Fetches theme data when needed.
 	 */
 	useEffect( () => {
-		if ( error || fetchingThemes || ! readerThemesRestPath || themes ) {
+		if ( fetchingThemes ) {
 			return;
 		}
 
-		if ( READER !== themeSupport ) {
+		if ( error || ! readerThemesRestPath || themes || READER !== themeSupport ) {
+			setFetchingThemes( false );
 			return;
 		}
 

@@ -92,7 +92,7 @@ export function Welcome() {
 					</a>
 
 					{
-						customizerLink && ! templateModeWasOverridden && (
+						customizerLink && templateModeWasOverridden === false && (
 							<a className="components-button is-secondary" href={ customizerLink } rel="noreferrer">
 								{ __( 'Customize Reader Theme', 'amp' ) }
 							</a>
