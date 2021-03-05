@@ -35,8 +35,6 @@ final class UserAccess implements Service, Registerable {
 
 	/**
 	 * Runs on instantiation.
-	 *
-	 * @action rest_api_init
 	 */
 	public function register() {
 		add_action( 'rest_api_init', [ $this, 'register_rest_field' ] );

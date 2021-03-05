@@ -1008,10 +1008,10 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
 		$expected_submenu = [
-			'Error Index',
+			'Error Index <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>',
 			AMP_Validation_Manager::VALIDATE_CAPABILITY,
 			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_validated_url',
-			'Error Index',
+			'Error Index <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>',
 		];
 		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );

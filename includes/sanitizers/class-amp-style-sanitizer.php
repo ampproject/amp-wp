@@ -1561,7 +1561,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed         = null;
 		$cache_key      = null;
 		$cached         = true;
-		$cache_group    = 'amp-parsed-stylesheet-v34'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group    = 'amp-parsed-stylesheet-v35'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 		$use_transients = $this->should_use_transient_caching();
 
 		$cache_impacting_options = array_merge(
@@ -1954,7 +1954,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$split_stylesheet = preg_split( $pattern, $stylesheet_string, -1, PREG_SPLIT_DELIM_CAPTURE );
-			$length           = count( $split_stylesheet );
+
+			// Ensure all instances of </style> are escaped as <\/style> (such as can occur in SVG data: URLs) to prevent
+			// the inline style from prematurely closing style[amp-custom].
+			$split_stylesheet = str_replace( '</style>', '<\/style>', $split_stylesheet, $count );
+
+			$length = count( $split_stylesheet );
 			for ( $i = 0; $i < $length; $i++ ) {
 				// Skip empty tokens.
 				if ( '' === $split_stylesheet[ $i ] ) {

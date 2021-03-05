@@ -13,7 +13,6 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Option;
 
 /**
  * OptionsMenu class.
@@ -134,6 +133,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * Add menu.
 	 */
 	public function add_menu_items() {
+		require_once ABSPATH . '/wp-admin/includes/plugin.php';
+
 		/*
 		 * Note that the admin items for Validated URLs and Validation Errors will also be placed under this admin menu
 		 * page when the current user can manage_options.

@@ -180,7 +180,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<html>
 						<head>
 							<meta name="viewport" content="width=device-width">
-							<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { initial-scale: 1.0 } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>
+							<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { initial-scale: 2.0 } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>
 						</head>
 						<body></body>
 					</html>
@@ -190,7 +190,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<html>
 						<head>
 							<meta charset="utf-8">
-							<meta name="viewport" content="width=device-width,initial-scale=1">
+							<meta name="viewport" content="width=device-width,initial-scale=2">
 						</head>
 						<body></body>
 					</html>
@@ -1818,18 +1818,21 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'external_file' => [
 				'https://stylesheets.example.com/style.css',
 				'text/css',
-				'html{background-color:lightblue}',
+				'html { background-color: lightblue; } body::after { content:"This body has no </style>." }',
+				'html{background-color:lightblue}body::after{content:"This body has no <\/style>."}',
 				[],
 			],
 			'external_file_schemeless' => [
 				'//stylesheets.example.com/style.css',
 				'text/css',
-				'html{background-color:lightblue}',
+				'html { background-color: lightblue; background-image: url("data:image/svg+xml;utf8,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' version=\\\'1.1\\\' viewBox=\\\'0 0 30 30\\\' width=\\\'30\\\' height=\\\'30\\\'><defs><style>circle{fill:red}</style></defs><circle cx=\\\'15\\\' cy=\\\'15\\\' r=\\\'15\\\'/></svg>" ); }',
+				'html{background-color:lightblue;background-image:url("data:image/svg+xml;utf8,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' version=\\\'1.1\\\' viewBox=\\\'0 0 30 30\\\' width=\\\'30\\\' height=\\\'30\\\'><defs><style>circle{fill:red}<\/style></defs><circle cx=\\\'15\\\' cy=\\\'15\\\' r=\\\'15\\\'/></svg>")}',
 				[],
 			],
 			'dynamic_file' => [
 				set_url_scheme( add_query_arg( 'action', 'kirki-styles', home_url() ), 'http' ),
 				'text/css',
+				'body{color:red}',
 				'body{color:red}',
 				[],
 			],
@@ -1837,12 +1840,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				home_url( '/style.css' ),
 				'text/css',
 				'body{color:green}',
+				'body{color:green}',
 				[],
 			],
 			'not_css_file' => [
 				home_url( '/this.is.not.css' ),
 				'image/jpeg',
 				'JPEG...',
+				null,
 				[ AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR ],
 			],
 		];
@@ -1857,9 +1862,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param string $href                 Request URL.
 	 * @param string $content_type         Content type.
 	 * @param string $response_body        Response body.
+	 * @param string $expected_stylesheet  Expected stylesheet.
 	 * @param array  $expected_error_codes Error codes when getting the stylesheet.
 	 */
-	public function test_external_stylesheet_handling( $href, $content_type, $response_body, $expected_error_codes ) {
+	public function test_external_stylesheet_handling( $href, $content_type, $response_body, $expected_stylesheet, $expected_error_codes ) {
 		$request_count = 0;
 		add_filter(
 			'pre_http_request',
@@ -1909,8 +1915,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( 1, $request_count, 'Expected HTTP request.' );
 
 		if ( empty( $expected_error_codes ) ) {
-			$this->assertCount( 1, $actual_stylesheets ); // @todo Change
-			$this->assertEquals( $response_body, $actual_stylesheets[0] );
+			$this->assertCount( 1, $actual_stylesheets );
+			$this->assertEquals( $expected_stylesheet, $actual_stylesheets[0] );
 		} else {
 			$this->assertEquals( $expected_error_codes, $found_error_codes );
 			$this->assertCount( 0, $actual_stylesheets );
@@ -3317,8 +3323,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<meta name="viewport" content="width=device-width">',
 			],
 			'viewport_merged_rules' => [
-				'<meta name="viewport" content="width=device-width,user-scalable=no"><style>@viewport{ initial-scale: 1; }</style><style>@-moz-viewport{ user-scalable: yes; }</style><style>@-o-viewport { minimum-scale: 0.5; }</style><style>@-baz-viewport { unrecognized: 1; }</style>',
-				'<meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=.5,unrecognized=1">',
+				'<meta name="viewport" content="width=device-width,user-scalable=no"><style>@viewport{ initial-scale: 2; }</style><style>@-moz-viewport{ user-scalable: yes; }</style><style>@-o-viewport { minimum-scale: 0.5; }</style><style>@-baz-viewport { unrecognized: 1; }</style>',
+				'<meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=2,minimum-scale=.5,unrecognized=1">',
 			],
 			'nested_viewport_in_at_rule' => [
 				'<style>@media screen { @viewport{ width: device-width; } }</style>',
