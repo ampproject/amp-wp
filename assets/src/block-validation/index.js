@@ -15,6 +15,7 @@ import { MoreMenuIcon, ToolbarIcon } from './icon';
 import { withAMPToolbarButton } from './with-amp-toolbar-button';
 import { Sidebar } from './sidebar';
 import { InvalidBlockOutline } from './invalid-block-outline';
+import { usePostDirtyStateChanges } from './use-post-dirty-state-changes';
 import { useValidationErrorStateUpdates } from './use-validation-error-state-updates';
 
 export const PLUGIN_NAME = 'amp-block-validation';
@@ -33,6 +34,7 @@ function AMPBlockValidation() {
 	} ), [] );
 
 	useValidationErrorStateUpdates();
+	usePostDirtyStateChanges();
 
 	return (
 		<>

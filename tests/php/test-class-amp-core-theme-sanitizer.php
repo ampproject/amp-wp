@@ -504,6 +504,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$after = implode( '', wp_styles()->registered[ $style_handle ]->extra['after'] );
 		$this->assertNotEmpty( $after );
 		$this->assertStringContains( '@media only screen and (max-width: 481px)', $after );
+		$this->assertStringContains( 'button[overflow]:hover', $after );
 		$this->assertStringEndsWith( '/*first*/', $after );
 	}
 

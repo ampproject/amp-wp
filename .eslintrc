@@ -5,6 +5,9 @@
     "plugin:import/recommended",
     "plugin:eslint-comments/recommended"
   ],
+  "env": {
+    "browser": true
+  },
   "rules": {
     "block-scoped-var": "error",
     "complexity": ["error", { "max": 20 } ],
