@@ -88,9 +88,8 @@ export function getId( mode ) {
  * @param {boolean} props.previouslySelected Optional. Whether the option was selected previously.
  * @param {Object} props.labelExtra Optional. Extra content to display on the right side of the option label.
  * @param {boolean} props.initialOpen Whether the panel should be open when the component renders.
- * @param {boolean} props.isLoading Whether the panel should be rendered in a loading state.
  */
-export function TemplateModeOption( { children, details, detailsUrl, initialOpen, isLoading = false, labelExtra = null, mode, previouslySelected = false } ) {
+export function TemplateModeOption( { children, details, detailsUrl, initialOpen, labelExtra = null, mode, previouslySelected = false } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
 	const { theme_support: themeSupport } = editedOptions;
 
@@ -136,7 +135,6 @@ export function TemplateModeOption( { children, details, detailsUrl, initialOpen
 			id={ `${ id }-container` }
 			initialOpen={ 'boolean' === typeof initialOpen ? initialOpen : ( mode && themeSupport && mode === themeSupport ) }
 			selected={ mode === themeSupport }
-			placeholder={ isLoading }
 		>
 			<div className="template-mode-selection__details">
 				<p>
@@ -157,7 +155,6 @@ TemplateModeOption.propTypes = {
 	details: PropTypes.string.isRequired,
 	detailsUrl: PropTypes.string.isRequired,
 	initialOpen: PropTypes.bool,
-	isLoading: PropTypes.bool,
 	labelExtra: PropTypes.node,
 	mode: PropTypes.oneOf( [ READER, STANDARD, TRANSITIONAL ] ).isRequired,
 	previouslySelected: PropTypes.bool,

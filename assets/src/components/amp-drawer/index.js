@@ -28,12 +28,11 @@ export const HANDLE_TYPE_RIGHT = 'right';
  * @param {any} props.heading Content for the drawer heading.
  * @param {string} props.id A unique ID for the component.
  * @param {boolean} props.initialOpen Whether the drawer should be initially open.
- * @param {boolean} props.placeholder Whether the drawer should be rendered as a placeholder.
  * @param {boolean} props.selected Whether to apply the selectable components selected CSS class.
  * @param {string} props.hiddenTitle A title to go with the button that expands the drawer.
  * @param {string} props.handleType Display style for the drawer handle. Either 'full-width' or 'right'.
  */
-export function AMPDrawer( { children = null, className, heading, handleType = HANDLE_TYPE_FULL_WIDTH, id, placeholder = false, initialOpen = false, selected = false, hiddenTitle } ) {
+export function AMPDrawer( { children = null, className, heading, handleType = HANDLE_TYPE_FULL_WIDTH, id, initialOpen = false, selected = false, hiddenTitle } ) {
 	const [ opened, setOpened ] = useState( initialOpen );
 	const [ resetStatus, setResetStatus ] = useState( null );
 
@@ -80,15 +79,6 @@ export function AMPDrawer( { children = null, className, heading, handleType = H
 			setResetStatus( 'waiting' );
 		}
 	}, [ resetStatus ] );
-
-	if ( placeholder ) {
-		return (
-			<Selectable
-				id={ id }
-				className="amp-drawer amp-drawer--placeholder"
-			/>
-		);
-	}
 
 	return (
 		<Selectable
@@ -139,6 +129,5 @@ AMPDrawer.propTypes = {
 	hiddenTitle: PropTypes.node.isRequired,
 	id: PropTypes.string.isRequired,
 	initialOpen: PropTypes.bool,
-	placeholder: PropTypes.bool,
 	selected: PropTypes.bool,
 };
