@@ -485,7 +485,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		ob_start();
 		$this->instance->add_mobile_redirect_script();
 		$output = ob_get_clean();
-		$this->assertRegExp( '#<script\b[^>]*>#', $output );
+		$this->assertStringContains( '<script type="text/javascript">', $output );
 		$this->assertStringContains( 'noampQueryVarName', $output );
 
 		add_filter(
