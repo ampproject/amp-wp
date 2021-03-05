@@ -386,7 +386,63 @@ final class MobileRedirection implements Service, Registerable {
 
 		$source = preg_replace( '/\bAMP_MOBILE_REDIRECTION\b/', wp_json_encode( $exports ), $source );
 
-		printf( '<script>%s</script>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		if ( function_exists( 'wp_print_inline_script_tag' ) ) {
+			wp_print_inline_script_tag( $source );
+		} else {
+			echo $this->get_inline_script_tag( $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+	}
+
+	/**
+	 * Wraps inline JavaScript in `<script>` tag.
+	 *
+	 * This is copied from WordPress 5.7, the version in which it was introduced.
+	 *
+	 * @see wp_get_inline_script_tag()
+	 *
+	 * @param string $javascript Inline JavaScript code.
+	 * @param array  $attributes  Optional. Key-value pairs representing `<script>` tag attributes.
+	 * @return string String containing inline JavaScript code wrapped around `<script>` tag.
+	 */
+	private function get_inline_script_tag( $javascript, $attributes = [] ) {
+		if ( ! isset( $attributes['type'] ) && ! is_admin() && ! current_theme_supports( 'html5', 'script' ) ) {
+			$attributes['type'] = 'text/javascript';
+		}
+
+		/** This filter is documented in wp-includes/script-loader.php */
+		$attributes = apply_filters( 'wp_inline_script_attributes', $attributes, $javascript );
+
+		$javascript = "\n" . trim( $javascript, "\n\r " ) . "\n";
+
+		return sprintf( "<script%s>%s</script>\n", $this->sanitize_script_attributes( $attributes ), $javascript );
+	}
+
+	/**
+	 * Sanitizes an attributes array into an attributes string to be placed inside a `<script>` tag.
+	 *
+	 * This is copied from WordPress 5.7, the version in which it was introduced.
+	 *
+	 * @see wp_sanitize_script_attributes()
+	 *
+	 * @param array $attributes Key-value pairs representing `<script>` tag attributes.
+	 * @return string String made of sanitized `<script>` tag attributes.
+	 */
+	private function sanitize_script_attributes( $attributes ) {
+		$html5_script_support = ! is_admin() && ! current_theme_supports( 'html5', 'script' );
+		$attributes_string    = '';
+
+		// If HTML5 script tag is supported, only the attribute name is added
+		// to $attributes_string for entries with a boolean value, and that are true.
+		foreach ( $attributes as $attribute_name => $attribute_value ) {
+			if ( is_bool( $attribute_value ) ) {
+				if ( $attribute_value ) {
+					$attributes_string .= $html5_script_support ? sprintf( ' %1$s="%2$s"', esc_attr( $attribute_name ), esc_attr( $attribute_name ) ) : ' ' . $attribute_name;
+				}
+			} else {
+				$attributes_string .= sprintf( ' %1$s="%2$s"', esc_attr( $attribute_name ), esc_attr( $attribute_value ) );
+			}
+		}
+		return $attributes_string;
 	}
 
 	/**

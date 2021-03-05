@@ -413,13 +413,33 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( MobileRedirection::DISABLED_STORAGE_KEY, $_COOKIE );
 	}
 
-	/** @covers MobileRedirection::add_mobile_redirect_script() */
+	/**
+	 * @covers MobileRedirection::add_mobile_redirect_script()
+	 * @covers MobileRedirection::get_inline_script_tag()
+	 * @covers MobileRedirection::sanitize_script_attributes()
+	 */
 	public function test_add_mobile_redirect_script() {
 		ob_start();
 		$this->instance->add_mobile_redirect_script();
 		$output = ob_get_clean();
+		$this->assertStringContains( '<script type="text/javascript">', $output );
+		$this->assertStringContains( 'noampQueryVarName', $output );
 
-		$this->assertStringContains( '<script>', $output );
+		add_filter(
+			'wp_inline_script_attributes',
+			function ( $attributes, $source ) {
+				if ( false !== strpos( $source, 'amp_mobile_redirect_disabled' ) ) {
+					$attributes['data-cfasync'] = 'false';
+				}
+				return $attributes;
+			},
+			10,
+			2
+		);
+		ob_start();
+		$this->instance->add_mobile_redirect_script();
+		$output = ob_get_clean();
+		$this->assertRegExp( '#<script\b[^>]*? data-cfasync="false"[^>]*>#', $output );
 		$this->assertStringContains( 'noampQueryVarName', $output );
 	}
 
