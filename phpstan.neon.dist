@@ -25,6 +25,7 @@ parameters:
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/pwa.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/twentyseventeen.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/legacy-i18n.php
+		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/wordpress-stubs-57.php
 		- %currentWorkingDirectory%/vendor/autoload.php
 		- %currentWorkingDirectory%/amp.php
 		- %currentWorkingDirectory%/includes/amp-frontend-actions.php
