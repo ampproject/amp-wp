@@ -184,6 +184,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 
 				// This is the only fetch request in the setup wizard that doesn't go to a REST endpoint.
 				// We need to use window.fetch to bypass the apiFetch middlewares that are useful for other requests.
+				/** @type {{ok: boolean}} */
 				const response = await global.fetch( wpAjaxUrl, {
 					body,
 					method: 'POST',
@@ -230,6 +231,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			setFetchingThemes( true );
 
 			try {
+				/** @type {{headers: Headers, json: Function}} */
 				const fetchedThemesResponse = await apiFetch( { path: readerThemesRestPath, parse: false } );
 
 				setThemesAPIError( fetchedThemesResponse.headers.get( 'X-AMP-Theme-API-Error' ) );
