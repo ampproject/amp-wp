@@ -234,10 +234,10 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				// The background image/video for the cover block by definition needs object-fit="cover" on the resulting amp-ing/amp-video.
 				$replacement .= ' object-fit="cover"';
 
-				// Add the fill layout to skip the needlessly obtaining the dimensions.
+				// Add the fill layout to skip needlessly obtaining the dimensions.
 				$replacement .= ' layout="fill"';
 
-				// Add object-position from the block attribute's to add to the img/video to be copied onto the amp-img/amp-video.
+				// Add object-position from the block's attributes to add to the img/video to be copied onto the amp-img/amp-video.
 				// The AMP runtime copies object-position attribute onto the underlying img/video for a given amp-img/amp-video.
 				// This is needed since the object-position property directly on an amp-img/amp-video will have no effect since
 				// since it is merely a wrapper for the underlying img/video element which actually supports the CSS property.
