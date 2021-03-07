@@ -226,8 +226,31 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Filtered block content.
 	 */
 	public function ampify_cover_block( $block_content, $block ) {
+		$is_video_background = (
+			isset( $block['attrs']['backgroundType'] )
+			&&
+			'video' === $block['attrs']['backgroundType']
+		);
+		$is_image_element    = ! (
+			! empty( $block['attrs']['hasParallax'] )
+			||
+			! empty( $block['attrs']['isRepeated'] )
+		);
+
+		// Object fit/position is not relevant when background image has fixed positioning or is repeated.
+		// In other words, it is not relevant when a <video> or a <img> is not going to be used.
+		// See <https://github.com/WordPress/gutenberg/blob/54c9066d4/packages/block-library/src/cover/save.js#L54-L72>.
+		if ( ! ( $is_video_background || $is_image_element ) ) {
+			return $block_content;
+		}
+
+		$pattern = sprintf(
+			'#<%s(?= )[^>]*? class="(?:[^"]*? )?wp-block-cover__%s-background(?: [^"]*?)?"#',
+			$is_video_background ? 'video' : 'img',
+			$is_video_background ? 'video' : 'image'
+		);
 		return preg_replace_callback(
-			'#<(?:img|video)(?= )[^>]*? class="(?:[^"]*? )?wp-block-cover__(?:image|video)-background(?: [^"]*?)?"#',
+			$pattern,
 			static function ( $matches ) use ( $block ) {
 				$replacement = $matches[0];
 
