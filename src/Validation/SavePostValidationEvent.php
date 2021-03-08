@@ -80,8 +80,7 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask implem
 
 		$this->url_validation_provider->get_url_validation(
 			get_the_permalink( $post_id ),
-			get_post_type( $post_id ),
-			true
+			get_post_type( $post_id )
 		);
 	}
 

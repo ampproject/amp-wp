@@ -26,29 +26,21 @@ export function Sidebar() {
 		isShowingReviewed: select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed(),
 	} ), [] );
 
-	const { displayedErrors, reviewedValidationErrors, unreviewedValidationErrors, validationErrors } = useSelect( ( select ) => {
-		let updatedDisplayedErrors;
-
-		const updatedValidationErrors = select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors();
-		const updatedReviewedValidationErrors = select( BLOCK_VALIDATION_STORE_KEY ).getReviewedValidationErrors();
-		const updatedUnreviewedValidationErrors = select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors();
-
-		if ( isShowingReviewed ) {
-			updatedDisplayedErrors = updatedValidationErrors;
-		} else {
-			updatedDisplayedErrors = updatedUnreviewedValidationErrors;
-
-			// If there are no unreviewed errors, we show the reviewed errors.
-			if ( 0 === updatedDisplayedErrors.length ) {
-				updatedDisplayedErrors = updatedReviewedValidationErrors;
-			}
-		}
+	const {
+		displayedErrors,
+		hasReviewedValidationErrors,
+		hasUnreviewedValidationErrors,
+		validationErrors,
+	} = useSelect( ( select ) => {
+		const allErrors = select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors();
+		const reviewedErrors = select( BLOCK_VALIDATION_STORE_KEY ).getReviewedValidationErrors();
+		const unreviewedErrors = select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors();
 
 		return {
-			displayedErrors: updatedDisplayedErrors,
-			reviewedValidationErrors: updatedReviewedValidationErrors,
-			unreviewedValidationErrors: updatedUnreviewedValidationErrors,
-			validationErrors: updatedValidationErrors,
+			displayedErrors: isShowingReviewed ? allErrors : unreviewedErrors,
+			hasReviewedValidationErrors: reviewedErrors?.length > 0,
+			hasUnreviewedValidationErrors: unreviewedErrors?.length > 0,
+			validationErrors: allErrors,
 		};
 	}, [ isShowingReviewed ] );
 
@@ -86,7 +78,7 @@ export function Sidebar() {
 					)
 			) }
 
-			{ ( 0 < reviewedValidationErrors.length && 0 < unreviewedValidationErrors.length ) && (
+			{ hasReviewedValidationErrors && hasUnreviewedValidationErrors && (
 				<div className="amp-sidebar__options">
 					<Button
 						isLink

@@ -100,7 +100,7 @@ final class URLValidationCron extends RecurringBackgroundTask implements Conditi
 		$sleep_time = $this->get_sleep_time();
 
 		foreach ( $urls as $url ) {
-			$this->url_validation_provider->get_url_validation( $url['url'], $url['type'], true );
+			$this->url_validation_provider->get_url_validation( $url['url'], $url['type'] );
 			if ( $sleep_time ) {
 				sleep( $sleep_time );
 			}
