@@ -215,7 +215,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Ampify cover block.
 	 *
-	 * This specifically fixes the layout of the block when a background video is assigned.
+	 * This ensures that the background img/video in a cover block has object-fit=cover and the appropriate object-position
+	 * attribute so that they will be carried over to to the amp-img/amp-video and propagated to the img/video in the
+	 * light shadow DOM.
 	 *
 	 * @see \AMP_Video_Sanitizer::filter_video_dimensions()
 	 *
@@ -224,14 +226,59 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Filtered block content.
 	 */
 	public function ampify_cover_block( $block_content, $block ) {
-		if ( isset( $block['attrs']['backgroundType'] ) && 'video' === $block['attrs']['backgroundType'] ) {
-			$block_content = preg_replace(
-				'/(?<=<video\s)/',
-				'layout="fill" object-fit="cover" ',
-				$block_content
-			);
+		$is_video_background = (
+			isset( $block['attrs']['backgroundType'] )
+			&&
+			'video' === $block['attrs']['backgroundType']
+		);
+		$is_image_element    = ! (
+			! empty( $block['attrs']['hasParallax'] )
+			||
+			! empty( $block['attrs']['isRepeated'] )
+		);
+
+		// Object fit/position is not relevant when background image has fixed positioning or is repeated.
+		// In other words, it is not relevant when a <video> or a <img> is not going to be used.
+		// See <https://github.com/WordPress/gutenberg/blob/54c9066d4/packages/block-library/src/cover/save.js#L54-L72>.
+		if ( ! ( $is_video_background || $is_image_element ) ) {
+			return $block_content;
 		}
-		return $block_content;
+
+		$pattern = sprintf(
+			'#<%s(?= )[^>]*? class="(?:[^"]*? )?wp-block-cover__%s-background(?: [^"]*?)?"#',
+			$is_video_background ? 'video' : 'img',
+			$is_video_background ? 'video' : 'image'
+		);
+		return preg_replace_callback(
+			$pattern,
+			static function ( $matches ) use ( $block ) {
+				$replacement = $matches[0];
+
+				// The background image/video for the cover block by definition needs object-fit="cover" on the resulting amp-ing/amp-video.
+				$replacement .= ' object-fit="cover"';
+
+				// Add the fill layout to skip needlessly obtaining the dimensions.
+				$replacement .= ' layout="fill"';
+
+				// Add object-position from the block's attributes to add to the img/video to be copied onto the amp-img/amp-video.
+				// The AMP runtime copies object-position attribute onto the underlying img/video for a given amp-img/amp-video.
+				// This is needed since the object-position property directly on an amp-img/amp-video will have no effect since
+				// since it is merely a wrapper for the underlying img/video element which actually supports the CSS property.
+				if ( isset( $block['attrs']['focalPoint']['x'], $block['attrs']['focalPoint']['y'] ) ) {
+					// See logic in Gutenberg for writing focal point to object-position attr:
+					// <https://github.com/WordPress/gutenberg/blob/54c9066/packages/block-library/src/cover/save.js#L71>.
+					$replacement .= sprintf(
+						' object-position="%d%% %d%%"',
+						round( (float) $block['attrs']['focalPoint']['x'] * 100 ),
+						round( (float) $block['attrs']['focalPoint']['y'] * 100 )
+					);
+				}
+
+				return $replacement;
+			},
+			$block_content,
+			1
+		);
 	}
 
 	/**
