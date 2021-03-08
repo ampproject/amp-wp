@@ -6,8 +6,9 @@ import { isEqual } from 'lodash';
 /**
  * WordPress dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { usePrevious } from '@wordpress/compose';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 import { getQueryArg, isURL } from '@wordpress/url';
@@ -69,9 +70,13 @@ export function useValidationErrorStateUpdates() {
 	const [ hasRequestedPreview, setHasRequestedPreview ] = useState( false );
 	const [ previousValidationErrors, setPreviousValidationErrors ] = useState( [] );
 	const [ shouldValidate, setShouldValidate ] = useState( false );
-	const unmounted = useRef( false );
 
-	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
+	const {
+		setIsFetchingErrors,
+		setFetchingErrorsRequestErrorMessage,
+		setReviewLink,
+		setValidationErrors,
+	} = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
 	const {
 		currentPostId,
@@ -96,14 +101,6 @@ export function useValidationErrorStateUpdates() {
 	} ), [] );
 
 	const wasEditedPostNew = usePrevious( isEditedPostNew );
-
-	/**
-	 * Set unmounted to true on unmount to prevent state updates after async
-	 * functions.
-	 */
-	useEffect( () => () => {
-		unmounted.current = true;
-	}, [] );
 
 	/**
 	 * Trigger validation whens editor loads only for existing posts.
@@ -159,39 +156,39 @@ export function useValidationErrorStateUpdates() {
 			return;
 		}
 
-		( async () => {
-			// The initial render is not related to `isSavingPost` flag change.
-			// Still, we're fetching the errors, so the `isFetchingErrors`
-			// flag should be set.
-			setIsFetchingErrors( true );
-			setBlockOrderBeforeSave( getClientIdsWithDescendants() );
+		const data = {
+			id: currentPostId,
+		};
 
-			const data = {
-				id: currentPostId,
-			};
+		if ( hasRequestedPreview ) {
+			data.preview_nonce = getQueryArg( previewLink, 'preview_nonce' );
+		}
 
-			if ( hasRequestedPreview ) {
-				data.preview_nonce = getQueryArg( previewLink, 'preview_nonce' );
-			}
+		// The initial render is not related to `isSavingPost` flag change.
+		// Still, we're fetching the errors, so the `isFetchingErrors`
+		// flag should be set.
+		setIsFetchingErrors( true );
+		setShouldValidate( false );
+		setHasRequestedPreview( false );
+		setFetchingErrorsRequestErrorMessage( '' );
+		setBlockOrderBeforeSave( getClientIdsWithDescendants() );
 
-			setShouldValidate( false );
-			setHasRequestedPreview( false );
-
-			const newValidation = await apiFetch( {
-				path: '/amp/v1/validate-post-url/',
-				method: 'POST',
-				data,
+		apiFetch( {
+			path: '/amp/v1/validate-post-url/',
+			method: 'POST',
+			data,
+		} )
+			.then( ( newValidation ) => {
+				setValidationErrors( newValidation.results );
+				setReviewLink( newValidation.review_link );
+			} )
+			.catch( ( error ) => {
+				setFetchingErrorsRequestErrorMessage( error?.message || __( 'Whoops! Something went wrong.', 'amp' ) );
+			} )
+			.finally( () => {
+				setIsFetchingErrors( false );
 			} );
-
-			if ( true === unmounted.current ) {
-				return;
-			}
-
-			setValidationErrors( newValidation.results );
-			setReviewLink( newValidation.review_link );
-			setIsFetchingErrors( false );
-		} )();
-	}, [ currentPostId, getClientIdsWithDescendants, hasRequestedPreview, isSavingPost, previewLink, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
+	}, [ currentPostId, getClientIdsWithDescendants, hasRequestedPreview, isSavingPost, previewLink, setFetchingErrorsRequestErrorMessage, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
 
 	/**
 	 * Runs an equality check when validation errors are received before running

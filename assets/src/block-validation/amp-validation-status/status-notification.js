@@ -2,13 +2,13 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
+import { Button } from '@wordpress/components';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { BLOCK_VALIDATION_STORE_KEY } from '../store';
-import AMPValidationErrorsKeptIcon from '../../../images/amp-validation-errors-kept.svg';
 import { StatusIcon } from '../icon';
 import { SidebarNotification } from '../../block-editor/components/sidebar-notification';
 
@@ -16,14 +16,20 @@ import { SidebarNotification } from '../../block-editor/components/sidebar-notif
  * AMP validation status notification component.
  */
 export default function AMPValidationStatusNotification() {
+	const { autosave, savePost } = useDispatch( 'core/editor' );
+
 	const {
 		ampCompatibilityBroken,
+		fetchingErrorsRequestErrorMessage,
 		hasValidationErrors,
+		isDraft,
 		isEditedPostNew,
 		isFetchingErrors,
 	} = useSelect( ( select ) => ( {
 		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
+		fetchingErrorsRequestErrorMessage: select( BLOCK_VALIDATION_STORE_KEY ).getFetchingErrorsRequestErrorMessage(),
 		hasValidationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors()?.length > 0,
+		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' )?.getEditedPostAttribute( 'status' ) ) !== -1,
 		isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
 		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 	} ), [] );
@@ -32,12 +38,31 @@ export default function AMPValidationStatusNotification() {
 		return null;
 	}
 
+	if ( fetchingErrorsRequestErrorMessage ) {
+		return (
+			<SidebarNotification
+				isError={ true }
+				message={ fetchingErrorsRequestErrorMessage }
+				action={
+					<Button
+						isLink
+						onClick={ isDraft
+							? () => savePost( { isPreview: true } )
+							: () => autosave( { isPreview: true } )
+						}
+					>
+						{ __( 'Try again', 'amp' ) }
+					</Button>
+				}
+			/>
+		);
+	}
+
 	if ( ampCompatibilityBroken ) {
 		return (
 			<SidebarNotification
-				icon={ <AMPValidationErrorsKeptIcon /> }
-				message={ __( 'AMP blocked from validation issues marked kept.', 'amp' ) }
 				isError={ true }
+				message={ __( 'AMP blocked from validation issues marked kept.', 'amp' ) }
 			/>
 		);
 	}

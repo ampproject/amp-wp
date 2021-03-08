@@ -7,7 +7,7 @@ import { act } from 'react-dom/test-utils';
  * WordPress dependencies
  */
 import { render, unmountComponentAtNode } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -15,14 +15,22 @@ import { useSelect } from '@wordpress/data';
 import AMPValidationStatusNotification from '../status-notification';
 
 jest.mock( '@wordpress/data/build/components/use-select', () => jest.fn() );
+jest.mock( '@wordpress/data/build/components/use-dispatch/use-dispatch', () => jest.fn() );
 
 describe( 'AMPValidationStatusNotification', () => {
 	let container;
 
+	const autosave = jest.fn();
+	const savePost = jest.fn();
+
+	useDispatch.mockImplementation( () => ( { autosave, savePost } ) );
+
 	function setupUseSelect( overrides ) {
 		useSelect.mockImplementation( () => ( {
 			ampCompatibilityBroken: false,
+			fetchingErrorsRequestErrorMessage: '',
 			hasValidationErrors: false,
+			isDraft: false,
 			isEditedPostNew: false,
 			isFetchingErrors: false,
 			...overrides,
@@ -30,6 +38,8 @@ describe( 'AMPValidationStatusNotification', () => {
 	}
 
 	beforeEach( () => {
+		jest.clearAllMocks();
+
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 	} );
@@ -62,6 +72,34 @@ describe( 'AMPValidationStatusNotification', () => {
 		} );
 
 		expect( container.children ).toHaveLength( 0 );
+	} );
+
+	it( 'renders error message when API request error is present', () => {
+		setupUseSelect( {
+			fetchingErrorsRequestErrorMessage: 'request error message',
+		} );
+
+		act( () => {
+			render( <AMPValidationStatusNotification />, container );
+		} );
+
+		expect( container.innerHTML ).toMatchSnapshot();
+		expect( container.innerHTML ).toContain( 'request error message' );
+		expect( container.querySelector( '.is-error' ) ).not.toBeNull();
+
+		container.querySelector( 'button' ).click();
+		expect( autosave ).toHaveBeenCalledWith( { isPreview: true } );
+
+		setupUseSelect( {
+			isDraft: true,
+			fetchingErrorsRequestErrorMessage: 'request error message',
+		} );
+
+		act( () => {
+			render( <AMPValidationStatusNotification />, container );
+		} );
+		container.querySelector( 'button' ).click();
+		expect( savePost ).toHaveBeenCalledWith( { isPreview: true } );
 	} );
 
 	it( 'renders error message when AMP compatibility is broken', () => {
