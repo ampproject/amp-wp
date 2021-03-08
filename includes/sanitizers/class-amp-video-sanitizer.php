@@ -294,6 +294,12 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 					$out['noloading'] = $value;
 					break;
 
+				// Skip copying playsinline attributes which are automatically added by amp-video:
+				// <https://github.com/ampproject/amphtml/blob/264e5c0/extensions/amp-video/0.1/amp-video.js#L234-L236>.
+				case 'playsinline':
+				case 'webkit-playsinline':
+					break;
+
 				default:
 					$out[ $name ] = $value;
 			}
