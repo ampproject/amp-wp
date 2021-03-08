@@ -57,8 +57,8 @@ export function Sidebar() {
 	return (
 		<div className="amp-sidebar">
 			<SidebarNotificationsContainer isShady={ true }>
-				<AMPValidationStatusNotification />
 				<AMPRevalidateNotification />
+				<AMPValidationStatusNotification />
 			</SidebarNotificationsContainer>
 
 			{ 0 < validationErrors.length && (

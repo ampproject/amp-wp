@@ -58,7 +58,7 @@ describe( 'AMPRevalidateNotification', () => {
 		expect( container.children ).toHaveLength( 0 );
 	} );
 
-	it( 'does not render when errors are being fetched', () => {
+	it( 'renders loading spinner when errors are being fetched', () => {
 		setupUseSelect( {
 			isFetchingErrors: true,
 		} );
@@ -67,7 +67,7 @@ describe( 'AMPRevalidateNotification', () => {
 			render( <AMPRevalidateNotification />, container );
 		} );
 
-		expect( container.children ).toHaveLength( 0 );
+		expect( container.querySelector( '.amp-spinner-container' ) ).not.toBeNull();
 	} );
 
 	it( 'renders revalidate message if post is dirty', () => {

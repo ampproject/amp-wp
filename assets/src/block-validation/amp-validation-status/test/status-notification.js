@@ -52,7 +52,7 @@ describe( 'AMPValidationStatusNotification', () => {
 		expect( container.querySelector( '.is-error' ) ).toBeNull();
 	} );
 
-	it( 'renders loading spinner when errors are being fetched', () => {
+	it( 'does not render when errors are being fetched', () => {
 		setupUseSelect( {
 			isFetchingErrors: true,
 		} );
@@ -61,7 +61,7 @@ describe( 'AMPValidationStatusNotification', () => {
 			render( <AMPValidationStatusNotification />, container );
 		} );
 
-		expect( container.querySelector( '.amp-spinner-container' ) ).not.toBeNull();
+		expect( container.children ).toHaveLength( 0 );
 	} );
 
 	it( 'renders error message when AMP compatibility is broken', () => {

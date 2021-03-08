@@ -3,6 +3,7 @@
 	overflow: hidden;
 	display: flex;
 	padding: 14px 18px;
+	min-height: 67px;
 }
 
 .sidebar-notification.is-error::before {
@@ -15,6 +16,10 @@
 	background: #d64e21;
 }
 
+.sidebar-notification.is-loading {
+	align-items: center;
+}
+
 .sidebar-notification__icon {
 	align-items: center;
 	border-radius: 50%;
@@ -22,7 +27,7 @@
 	flex: 0 0 auto;
 	height: 24px;
 	justify-content: center;
-	margin: 4px 12px 0 0;
+	margin: 0 12px 0 0;
 	position: relative;
 	width: 24px;
 }
@@ -30,6 +35,12 @@
 .sidebar-notification__icon svg {
 	height: 100%;
 	width: 100%;
+}
+
+.sidebar-notification__content {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 }
 
 .sidebar-notification__content > p {

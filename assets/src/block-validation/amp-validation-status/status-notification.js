@@ -10,7 +10,6 @@ import { useSelect } from '@wordpress/data';
 import { BLOCK_VALIDATION_STORE_KEY } from '../store';
 import AMPValidationErrorsKeptIcon from '../../../images/amp-validation-errors-kept.svg';
 import { StatusIcon } from '../icon';
-import { Loading } from '../../components/loading';
 import { SidebarNotification } from '../../block-editor/components/sidebar-notification';
 
 /**
@@ -30,7 +29,7 @@ export default function AMPValidationStatusNotification() {
 	} ), [] );
 
 	if ( isFetchingErrors ) {
-		return <Loading />;
+		return null;
 	}
 
 	if ( ampCompatibilityBroken ) {
