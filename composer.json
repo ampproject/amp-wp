@@ -13,7 +13,7 @@
     "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
-    "ampproject/amp-toolbox": "dev-add/data-hero-candidate-attribute-support",
+    "ampproject/amp-toolbox": "dev-main",
     "cweagans/composer-patches": "1.7.0",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "dev-master#bfdd976"
