@@ -87,7 +87,7 @@
     "react-test-renderer": "16.14.0",
     "rtlcss-webpack-plugin": "4.0.6",
     "svgo": "2.2.1",
-    "terser-webpack-plugin": "4.2.3",
+    "terser-webpack-plugin": "5.1.1",
     "webpackbar": "4.0.0"
   },
   "scripts": {
