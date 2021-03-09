@@ -18,5 +18,7 @@
 * [`amp_remove_endpoint`](amp_remove_endpoint.md) - Remove the AMP endpoint (and query var) from a given URL.
 * ~~[`amp_render`](amp_render.md) - Render AMP for queried post.~~
 * ~~[`amp_render_post`](amp_render_post.md) - Render AMP post template.~~
+* [`get_optimizer`](get_optimizer.md) - Optimizer instance to use.
+* [`get_optimizer_configuration`](get_optimizer_configuration.md) - Get the AmpProject\Optimizer configuration object to use.
 * ~~[`is_amp_endpoint`](is_amp_endpoint.md) - Determine whether the current response being served as AMP.~~
 * ~~[`post_supports_amp`](post_supports_amp.md) - Determine whether a given post supports AMP.~~

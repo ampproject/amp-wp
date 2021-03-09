@@ -17,7 +17,7 @@ Set AMP attributes.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:697](/includes/sanitizers/class-amp-base-sanitizer.php#L697-L705)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:717](/includes/sanitizers/class-amp-base-sanitizer.php#L717-L725)
 
 <details>
 <summary>Show Code</summary>

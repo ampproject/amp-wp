@@ -17,7 +17,7 @@ Prepare validation error.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:567](/includes/sanitizers/class-amp-base-sanitizer.php#L567-L639)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:567](/includes/sanitizers/class-amp-base-sanitizer.php#L567-L659)
 
 <details>
 <summary>Show Code</summary>
@@ -48,14 +48,34 @@ public function prepare_validation_error( array $error = [], array $data = [] ) 
 			}
 		}
 		// Capture element contents.
-		if (
-			( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) )
-			||
-			// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
-			// already be detailed in the stylesheets metabox.
-			( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) )
-		) {
-			$error['text'] = $node->textContent;
+		$is_inline_script = ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) );
+		$is_inline_style  = ( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) );
+		if ( $is_inline_script || $is_inline_style ) {
+			$text_content = $node->textContent;
+			if ( $is_inline_script ) {
+				// For inline scripts, normalize string and number literals to prevent nonces, random numbers, and timestamps
+				// from generating endless number of validation errors.
+				$error['text'] = preg_replace(
+					[
+						// Regex credit to <https://stackoverflow.com/a/5696141/93579>.
+						'/"[^"\\\\\n]*(?:\\\\.[^"\\\\\n]*)*"/s',
+						'/\'[^\'\\\\\n]*(?:\\\\.[^\'\\\\\n]*)*\'/s',
+						'/(\b|-)\d+\.\d+\b/',
+						'/(\b|-)\d+\b/',
+					],
+					[
+						'__DOUBLE_QUOTED_STRING__',
+						'__SINGLE_QUOTED_STRING__',
+						'__FLOAT__',
+						'__INT__',
+					],
+					$text_content
+				);
+			} elseif ( $is_inline_style ) {
+				// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
+				// already be detailed in the stylesheets metabox.
+				$error['text'] = $text_content;
+			}
 		}
 		// Suppress 'ver' param from enqueued scripts and styles.
 		if ( 'script' === $node->nodeName && isset( $error['node_attributes']['src'] ) && false !== strpos( $error['node_attributes']['src'], 'ver=' ) ) {
