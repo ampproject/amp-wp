@@ -31,7 +31,6 @@
 * [`amp_dev_tools_user_default_enabled`](amp_dev_tools_user_default_enabled.md) - Filters whether Developer Tools is enabled by default for a user.
 * [`amp_enable_optimizer`](amp_enable_optimizer.md) - Filter whether the generated HTML output should be run through the AMP Optimizer or not.
 * [`amp_enable_ssr`](amp_enable_ssr.md) - Filter whether the AMP Optimizer should use server-side rendering or not.
-* [`amp_enable_ssr`](amp_enable_ssr.md) - Filter whether the AMP Optimizer should use server-side rendering or not.
 * [`amp_extract_image_dimensions_batch`](amp_extract_image_dimensions_batch.md) - Filters the dimensions extracted from image URLs.
 * [`amp_extract_image_dimensions_get_user_agent`](amp_extract_image_dimensions_get_user_agent.md) - Filters the user agent for onbtaining the image dimensions.
 * [`amp_featured_image_minimum_height`](amp_featured_image_minimum_height.md) - Filters the minimum height required for a featured image.
@@ -44,7 +43,6 @@
 * [`amp_mobile_version_switcher_link_text`](amp_mobile_version_switcher_link_text.md) - Filters the text to be used in the mobile switcher link.
 * [`amp_mobile_version_switcher_styles_used`](amp_mobile_version_switcher_styles_used.md) - Filters whether the default mobile version switcher styles are printed.
 * [`amp_normalized_dimension_extractor_image_url`](amp_normalized_dimension_extractor_image_url.md) - Apply filters on the normalized image URL for dimension extraction.
-* [`amp_optimizer_config`](amp_optimizer_config.md) - Filter the configuration to be used for the AMP Optimizer.
 * [`amp_optimizer_config`](amp_optimizer_config.md) - Filter the configuration to be used for the AMP Optimizer.
 * [`amp_options_menu_is_enabled`](amp_options_menu_is_enabled.md) - Filter whether to enable the AMP settings.
 * [`amp_parsed_css_transient_caching_allowed`](amp_parsed_css_transient_caching_allowed.md) - Filters whether parsed CSS is allowed to be cached in transients.

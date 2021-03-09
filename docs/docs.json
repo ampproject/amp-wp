@@ -1,395 +1,5 @@
 {
-    "0": {
-        "file": {
-            "description": "",
-            "long_description": "",
-            "tags": []
-        },
-        "path": ".jono-hero-image-debug\/optimize.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
-        "uses": {
-            "methods": [
-                {
-                    "name": "error",
-                    "class": "\\WP_CLI",
-                    "static": true,
-                    "line": 15,
-                    "end_line": 15
-                },
-                {
-                    "name": "error",
-                    "class": "\\WP_CLI",
-                    "static": true,
-                    "line": 19,
-                    "end_line": 19
-                },
-                {
-                    "name": "__construct",
-                    "class": "\\AmpProject\\Dom\\Document",
-                    "static": false,
-                    "line": 113,
-                    "end_line": 113
-                },
-                {
-                    "name": "loadHTML",
-                    "class": "$dom",
-                    "static": false,
-                    "line": 114,
-                    "end_line": 114
-                },
-                {
-                    "name": "__construct",
-                    "class": "\\AmpProject\\Optimizer\\ErrorCollection",
-                    "static": false,
-                    "line": 116,
-                    "end_line": 116
-                },
-                {
-                    "name": "optimizeDom",
-                    "class": "get_optimizer($args)",
-                    "static": false,
-                    "line": 118,
-                    "end_line": 118
-                },
-                {
-                    "name": "saveHTML",
-                    "class": "$dom",
-                    "static": false,
-                    "line": 120,
-                    "end_line": 120
-                }
-            ],
-            "functions": [
-                {
-                    "name": "file_exists",
-                    "line": 18,
-                    "end_line": 18
-                },
-                {
-                    "name": "file_get_contents",
-                    "line": 114,
-                    "end_line": 114
-                },
-                {
-                    "name": "get_optimizer",
-                    "line": 118,
-                    "end_line": 118
-                }
-            ]
-        },
-        "functions": [
-            {
-                "name": "get_optimizer_configuration",
-                "namespace": "global",
-                "aliases": {
-                    "Document": "\\AmpProject\\Dom\\Document",
-                    "Optimizer": "\\AmpProject\\Optimizer",
-                    "WpHttpRemoteGetRequest": "\\AmpProject\\AmpWP\\RemoteRequest\\WpHttpRemoteGetRequest",
-                    "FilesystemRemoteGetRequest": "\\AmpProject\\RemoteRequest\\FilesystemRemoteGetRequest",
-                    "FallbackRemoteGetRequest": "\\AmpProject\\RemoteRequest\\FallbackRemoteGetRequest",
-                    "CachedRemoteGetRequest": "\\AmpProject\\AmpWP\\RemoteRequest\\CachedRemoteGetRequest",
-                    "ConfigurationArgument": "\\AmpProject\\AmpWP\\ConfigurationArgument",
-                    "Transformer": "\\AmpProject\\AmpWP\\Transformer"
-                },
-                "line": 28,
-                "end_line": 88,
-                "arguments": [
-                    {
-                        "name": "$args",
-                        "default": null,
-                        "type": ""
-                    }
-                ],
-                "doc": {
-                    "description": "Get the AmpProject\\Optimizer configuration object to use.",
-                    "long_description": "",
-                    "tags": [
-                        {
-                            "name": "param",
-                            "content": "Associative array of arguments to pass into the transformation engine.",
-                            "types": [
-                                "array"
-                            ],
-                            "variable": "$args"
-                        },
-                        {
-                            "name": "return",
-                            "content": "Optimizer configuration to use.",
-                            "types": [
-                                "\\AmpProject\\Optimizer\\Configuration"
-                            ]
-                        }
-                    ]
-                },
-                "hooks": [
-                    {
-                        "name": "amp_enable_ssr",
-                        "line": 42,
-                        "end_line": 42,
-                        "type": "filter",
-                        "arguments": [
-                            "$enable_ssr"
-                        ],
-                        "doc": {
-                            "description": "Filter whether the AMP Optimizer should use server-side rendering or not.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "1.5.0"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Whether the AMP Optimizer should use server-side rendering or not.",
-                                    "types": [
-                                        "bool"
-                                    ],
-                                    "variable": "$enable_ssr"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "amp_optimizer_config",
-                        "line": 68,
-                        "end_line": 79,
-                        "type": "filter",
-                        "arguments": [
-                            "array_merge(array(\\AmpProject\\Optimizer\\Configuration::KEY_TRANSFORMERS => $transformers, \\AmpProject\\Optimizer\\Transformer\\PreloadHeroImage::class => array(\\AmpProject\\Optimizer\\Configuration\\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style')), $args)"
-                        ],
-                        "doc": {
-                            "description": "Filter the configuration to be used for the AMP Optimizer.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "1.5.0"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Associative array of configuration data.",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": "$configuration"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "uses": {
-                    "functions": [
-                        {
-                            "name": "array_key_exists",
-                            "line": 31,
-                            "end_line": 31
-                        },
-                        {
-                            "name": "apply_filters",
-                            "line": 42,
-                            "end_line": 42
-                        },
-                        {
-                            "name": "array_diff",
-                            "line": 46,
-                            "end_line": 54
-                        },
-                        {
-                            "name": "array_unshift",
-                            "line": 56,
-                            "end_line": 56
-                        },
-                        {
-                            "name": "array_unshift",
-                            "line": 59,
-                            "end_line": 59
-                        },
-                        {
-                            "name": "apply_filters",
-                            "line": 68,
-                            "end_line": 79
-                        },
-                        {
-                            "name": "array_merge",
-                            "line": 70,
-                            "end_line": 78
-                        }
-                    ],
-                    "methods": [
-                        {
-                            "name": "__construct",
-                            "class": "\\AmpProject\\Optimizer\\Configuration",
-                            "static": false,
-                            "line": 81,
-                            "end_line": 81
-                        },
-                        {
-                            "name": "registerConfigurationClass",
-                            "class": "$config",
-                            "static": false,
-                            "line": 82,
-                            "end_line": 85
-                        }
-                    ]
-                }
-            },
-            {
-                "name": "get_optimizer",
-                "namespace": "global",
-                "aliases": {
-                    "Document": "\\AmpProject\\Dom\\Document",
-                    "Optimizer": "\\AmpProject\\Optimizer",
-                    "WpHttpRemoteGetRequest": "\\AmpProject\\AmpWP\\RemoteRequest\\WpHttpRemoteGetRequest",
-                    "FilesystemRemoteGetRequest": "\\AmpProject\\RemoteRequest\\FilesystemRemoteGetRequest",
-                    "FallbackRemoteGetRequest": "\\AmpProject\\RemoteRequest\\FallbackRemoteGetRequest",
-                    "CachedRemoteGetRequest": "\\AmpProject\\AmpWP\\RemoteRequest\\CachedRemoteGetRequest",
-                    "ConfigurationArgument": "\\AmpProject\\AmpWP\\ConfigurationArgument",
-                    "Transformer": "\\AmpProject\\AmpWP\\Transformer"
-                },
-                "line": 97,
-                "end_line": 111,
-                "arguments": [
-                    {
-                        "name": "$args",
-                        "default": null,
-                        "type": ""
-                    }
-                ],
-                "doc": {
-                    "description": "Optimizer instance to use.",
-                    "long_description": "",
-                    "tags": [
-                        {
-                            "name": "param",
-                            "content": "Associative array of arguments to pass into the transformation engine.",
-                            "types": [
-                                "array"
-                            ],
-                            "variable": "$args"
-                        },
-                        {
-                            "name": "return",
-                            "content": "Optimizer transformation engine to use.",
-                            "types": [
-                                "\\AmpProject\\Optimizer\\TransformationEngine"
-                            ]
-                        }
-                    ]
-                },
-                "hooks": [],
-                "uses": {
-                    "functions": [
-                        {
-                            "name": "get_optimizer_configuration",
-                            "line": 98,
-                            "end_line": 98
-                        }
-                    ],
-                    "methods": [
-                        {
-                            "name": "__construct",
-                            "class": "\\AmpProject\\RemoteRequest\\FallbackRemoteGetRequest",
-                            "static": false,
-                            "line": 100,
-                            "end_line": 103
-                        },
-                        {
-                            "name": "__construct",
-                            "class": "\\AmpProject\\AmpWP\\RemoteRequest\\WpHttpRemoteGetRequest",
-                            "static": false,
-                            "line": 101,
-                            "end_line": 101
-                        },
-                        {
-                            "name": "__construct",
-                            "class": "\\AmpProject\\RemoteRequest\\FilesystemRemoteGetRequest",
-                            "static": false,
-                            "line": 102,
-                            "end_line": 102
-                        },
-                        {
-                            "name": "getMappings",
-                            "class": "\\AmpProject\\Optimizer\\LocalFallback",
-                            "static": true,
-                            "line": 102,
-                            "end_line": 102
-                        },
-                        {
-                            "name": "__construct",
-                            "class": "\\AmpProject\\AmpWP\\RemoteRequest\\CachedRemoteGetRequest",
-                            "static": false,
-                            "line": 105,
-                            "end_line": 105
-                        },
-                        {
-                            "name": "__construct",
-                            "class": "\\AmpProject\\Optimizer\\TransformationEngine",
-                            "static": false,
-                            "line": 107,
-                            "end_line": 110
-                        }
-                    ]
-                }
-            }
-        ],
-        "hooks": [
-            {
-                "name": "amp_enable_ssr",
-                "line": 42,
-                "end_line": 42,
-                "type": "filter",
-                "arguments": [
-                    "$enable_ssr"
-                ],
-                "doc": {
-                    "description": "Filter whether the AMP Optimizer should use server-side rendering or not.",
-                    "long_description": "",
-                    "tags": [
-                        {
-                            "name": "since",
-                            "content": "1.5.0"
-                        },
-                        {
-                            "name": "param",
-                            "content": "Whether the AMP Optimizer should use server-side rendering or not.",
-                            "types": [
-                                "bool"
-                            ],
-                            "variable": "$enable_ssr"
-                        }
-                    ]
-                }
-            },
-            {
-                "name": "amp_optimizer_config",
-                "line": 68,
-                "end_line": 79,
-                "type": "filter",
-                "arguments": [
-                    "array_merge(array(\\AmpProject\\Optimizer\\Configuration::KEY_TRANSFORMERS => $transformers, \\AmpProject\\Optimizer\\Transformer\\PreloadHeroImage::class => array(\\AmpProject\\Optimizer\\Configuration\\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style')), $args)"
-                ],
-                "doc": {
-                    "description": "Filter the configuration to be used for the AMP Optimizer.",
-                    "long_description": "",
-                    "tags": [
-                        {
-                            "name": "since",
-                            "content": "1.5.0"
-                        },
-                        {
-                            "name": "param",
-                            "content": "Associative array of configuration data.",
-                            "types": [
-                                "array"
-                            ],
-                            "variable": "$configuration"
-                        }
-                    ]
-                }
-            }
-        ]
-    },
-    "3": {
+    "2": {
         "file": {
             "description": "Functions for managing legacy templates",
             "long_description": "",
@@ -450,7 +60,7 @@
         ],
         "hooks": []
     },
-    "13": {
+    "12": {
         "file": {
             "description": "AMP meta box settings.",
             "long_description": "",
@@ -542,7 +152,7 @@
             }
         ]
     },
-    "14": {
+    "13": {
         "file": {
             "description": "Class AMP_Template_Customizer",
             "long_description": "",
@@ -711,7 +321,7 @@
             }
         }
     },
-    "15": {
+    "14": {
         "file": {
             "description": "Callbacks for adding AMP-related things to the admin.",
             "long_description": "",
@@ -787,7 +397,7 @@
             }
         }
     },
-    "16": {
+    "15": {
         "file": {
             "description": "Callbacks for adding AMP-related things to the main theme.",
             "long_description": "",
@@ -882,7 +492,7 @@
         ],
         "hooks": []
     },
-    "17": {
+    "16": {
         "file": {
             "description": "AMP Helper Functions",
             "long_description": "",
@@ -2935,7 +2545,7 @@
             }
         }
     },
-    "21": {
+    "20": {
         "file": {
             "description": "Class AMP_HTTP",
             "long_description": "",
@@ -2976,7 +2586,7 @@
             }
         ]
     },
-    "22": {
+    "21": {
         "file": {
             "description": "AMP Post type support.",
             "long_description": "",
@@ -3105,7 +2715,7 @@
             }
         ]
     },
-    "24": {
+    "23": {
         "file": {
             "description": "Class AMP_Theme_Support",
             "long_description": "",
@@ -3242,7 +2852,7 @@
             }
         }
     },
-    "27": {
+    "26": {
         "file": {
             "description": "Deprecated functions.",
             "long_description": "",
@@ -3713,7 +3323,7 @@
             }
         ]
     },
-    "28": {
+    "27": {
         "file": {
             "description": "Class AMP_Base_Embed_Handler",
             "long_description": "Used by some children.",
@@ -4191,7 +3801,7 @@
         ],
         "hooks": []
     },
-    "55": {
+    "54": {
         "file": {
             "description": "Class AMP_Base_Sanitizer",
             "long_description": "",
@@ -6162,7 +5772,7 @@
         ],
         "hooks": []
     },
-    "66": {
+    "65": {
         "file": {
             "description": "Class AMP_Links_Sanitizer.",
             "long_description": "",
@@ -6229,7 +5839,7 @@
             }
         ]
     },
-    "79": {
+    "78": {
         "file": {
             "description": "Class AMP_Customizer_Design_Settings",
             "long_description": "",
@@ -6285,7 +5895,7 @@
             }
         ]
     },
-    "80": {
+    "79": {
         "file": {
             "description": "Class AMP_Customizer_Settings",
             "long_description": "",
@@ -6329,7 +5939,7 @@
             }
         ]
     },
-    "85": {
+    "84": {
         "file": {
             "description": "AMP_Post_Template class.",
             "long_description": "",
@@ -6543,7 +6153,7 @@
             }
         }
     },
-    "87": {
+    "86": {
         "file": {
             "description": "Class AMP_DOM_Utils.",
             "long_description": "",
@@ -7872,7 +7482,7 @@
         ],
         "hooks": []
     },
-    "89": {
+    "88": {
         "file": {
             "description": "Class AMP_Image_Dimension_Extractor",
             "long_description": "",
@@ -7992,7 +7602,7 @@
             }
         ]
     },
-    "93": {
+    "92": {
         "file": {
             "description": "Class AMP_Validation_Error_Taxonomy",
             "long_description": "",
@@ -8128,7 +7738,7 @@
             }
         ]
     },
-    "94": {
+    "93": {
         "file": {
             "description": "Class AMP_Validation_Manager",
             "long_description": "",
@@ -8230,7 +7840,7 @@
             }
         ]
     },
-    "102": {
+    "101": {
         "file": {
             "description": "Class OptionsMenu",
             "long_description": "",
@@ -8286,7 +7896,7 @@
             }
         ]
     },
-    "107": {
+    "106": {
         "file": {
             "description": "Fetches and formats data for AMP reader themes.",
             "long_description": "",
@@ -8352,7 +7962,7 @@
             }
         ]
     },
-    "114": {
+    "113": {
         "file": {
             "description": "Class MonitorCssTransientCaching.",
             "long_description": "",
@@ -8423,7 +8033,7 @@
             }
         ]
     },
-    "124": {
+    "123": {
         "file": {
             "description": "Class UserAccess.",
             "long_description": "",
@@ -8480,7 +8090,7 @@
             }
         ]
     },
-    "155": {
+    "154": {
         "file": {
             "description": "Class MobileRedirection.",
             "long_description": "",
