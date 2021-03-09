@@ -1,4 +1,0 @@
-DEFAULT_BASE_BRANCH=develop
-ASSETS_DIR=wp-assets
-PROJECT_SLUG=amp
-README_MD_TITLE="AMP Plugin for WordPress"
