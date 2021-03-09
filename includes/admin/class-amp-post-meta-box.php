@@ -209,7 +209,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function enqueue_block_assets() {
 		$post = get_post();
-		if ( ! in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
+		if ( ! $post instanceof WP_Post || ! in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
 			return;
 		}
 
