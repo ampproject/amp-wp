@@ -14,7 +14,7 @@ This is normally no longer needed because the validating sanitizer will automati
 
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:79](/includes/embeds/class-amp-base-embed-handler.php#L79-L81)
+:link: [includes/embeds/class-amp-base-embed-handler.php:81](/includes/embeds/class-amp-base-embed-handler.php#L81-L83)
 
 <details>
 <summary>Show Code</summary>

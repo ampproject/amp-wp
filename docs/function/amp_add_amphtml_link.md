@@ -10,7 +10,7 @@ If there are known validation errors for the current URL then do not output anyt
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:771](/includes/amp-helper-functions.php#L771-L821)
+:link: [includes/amp-helper-functions.php:652](/includes/amp-helper-functions.php#L652-L697)
 
 <details>
 <summary>Show Code</summary>
@@ -56,12 +56,7 @@ function amp_add_amphtml_link() {
 		return;
 	}
 
-	if ( AMP_Theme_Support::is_paired_available() ) {
-		$amp_url = amp_add_paired_endpoint( amp_get_current_url() );
-	} else {
-		$amp_url = amp_get_permalink( get_queried_object_id() );
-	}
-
+	$amp_url = amp_add_paired_endpoint( amp_get_current_url() );
 	if ( $amp_url ) {
 		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
