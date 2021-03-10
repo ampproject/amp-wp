@@ -12,6 +12,9 @@ use AmpProject\AmpWP\Documentation\Parser\Parser;
 use AmpProject\AmpWP\Documentation\Templating\Markdown;
 use AmpProject\AmpWP\Documentation\Templating\MustacheTemplateEngine;
 use AmpProject\AmpWP\Documentation\Templating\TemplateEngine;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RegexIterator;
 use Exception;
 use Generator;
 use WP_CLI;
@@ -74,6 +77,29 @@ final class GenerateCommand {
 				false // Using separate exit for PHPStan.
 			);
 			exit;
+		}
+
+		// Empty out all markdown files located inside of the directories.
+		$md_dirs = [
+			'class',
+			'hook',
+			'function',
+			'method',
+		];
+		foreach ( $md_dirs as $md_dir ) {
+			$iterator = new RegexIterator(
+				new RecursiveIteratorIterator(
+					new RecursiveDirectoryIterator( $destination_folder . '/' . $md_dir )
+				),
+				'/\.md$/'
+			);
+			foreach ( $iterator as $file ) {
+				if ( unlink( $file ) ) {
+					WP_CLI::line( "Cleaned: $file" );
+				} else {
+					WP_CLI::warning( "Failed to clean: $file" );
+				}
+			}
 		}
 
 		$template_engine = new MustacheTemplateEngine();
