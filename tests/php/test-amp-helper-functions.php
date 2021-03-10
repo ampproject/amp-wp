@@ -1468,8 +1468,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$post_id = self::factory()->post->create();
 		$this->assertFalse( amp_get_post_image_metadata( $post_id ) );
 
-		$first_test_image = '/tmp/test-image.jpg';
-		copy( DIR_TESTDATA . '/images/test-image.jpg', $first_test_image );
+		$first_test_image = '/tmp/test-image.png';
+		copy( DIR_TESTDATA . '/images/test-image.png', $first_test_image );
 		$attachment_id = self::factory()->attachment->create_object(
 			[
 				'file'           => $first_test_image,
@@ -1485,7 +1485,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'ImageObject', $metadata['@type'] );
 		$this->assertEquals( 50, $metadata['width'] );
 		$this->assertEquals( 50, $metadata['height'] );
-		$this->assertStringEndsWith( 'test-image.jpg', $metadata['url'] );
+		$this->assertStringEndsWith( 'test-image.png', $metadata['url'] );
 
 		delete_post_thumbnail( $post_id );
 		$this->assertFalse( amp_get_post_image_metadata( $post_id ) );
@@ -1496,7 +1496,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			]
 		);
 		$metadata = amp_get_post_image_metadata( $post_id );
-		$this->assertStringEndsWith( 'test-image.jpg', $metadata['url'] );
+		$this->assertStringEndsWith( 'test-image.png', $metadata['url'] );
 
 		// Test an 'attachment' post type.
 		$attachment_src          = 'example/attachment.jpeg';
