@@ -149,7 +149,7 @@ export function ReaderThemeCarousel() {
 		<div className="reader-theme-selection">
 			<p>
 				{
-					__( 'Choose the theme to be used for AMP pages. This theme will normally be exclusively shown to mobile visitors when using Reader template mode.', 'amp' )
+					__( 'Choose the theme to be used for AMP pages. This theme will normally be exclusively shown to mobile visitors.', 'amp' )
 				}
 			</p>
 			{ (
