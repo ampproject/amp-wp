@@ -102,7 +102,7 @@ function getReaderNotice( selected ) {
  */
 export function TemplateModes( { focusReaderThemes } ) {
 	const { editedOptions } = useContext( Options );
-	const { selectedTheme } = useContext( ReaderThemes );
+	const { selectedTheme, templateModeWasOverridden } = useContext( ReaderThemes );
 
 	const { theme_support: themeSupport } = editedOptions;
 
@@ -116,9 +116,14 @@ export function TemplateModes( { focusReaderThemes } ) {
 			<h2>
 				{ __( 'Template Mode', 'amp' ) }
 			</h2>
+			{ templateModeWasOverridden && (
+				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
+					{ __( 'Because you selected a Reader theme that is the same as your site\'s active theme, your site has automatically been switched to Transitional template mode.', 'amp' ) }
+				</AMPNotice>
+			) }
 			<TemplateModeOption
-
 				details={ __( 'In Standard Mode your site uses a single theme and there is a single version of your content. You can opt out from AMP selectively for parts of your site. Every canonical URL will be either AMP or non-AMP.', 'amp' ) }
+				detailsUrl="https://amp-wp.org/documentation/getting-started/standard/"
 				initialOpen={ false }
 				mode={ STANDARD }
 				labelExtra={ ( IS_CORE_THEME || 'object' === typeof THEME_SUPPORT_ARGS ) ? <RecommendedNotice /> : null }
@@ -136,6 +141,7 @@ export function TemplateModes( { focusReaderThemes } ) {
 			</TemplateModeOption>
 			<TemplateModeOption
 				details={ __( 'In Transitional mode the active theme\'s templates are used to generate both the AMP and non-AMP versions of your content, allowing for each canonical URL to have a corresponding (paired) AMP URL. This mode is useful to progressively transition towards a fully AMP-compatible site. Depending on your themes/plugins, a varying level of development work may be required.', 'amp' ) }
+				detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/"
 				initialOpen={ false }
 				mode={ TRANSITIONAL }
 				labelExtra={ ( IS_CORE_THEME || 'object' === typeof THEME_SUPPORT_ARGS ) ? <RecommendedNotice /> : null }
@@ -153,6 +159,7 @@ export function TemplateModes( { focusReaderThemes } ) {
 			</TemplateModeOption>
 			<TemplateModeOption
 				details={ __( 'In Reader mode, there are two versions of your site, and two different themes are used for the AMP and non-AMP versions. You have the option of using an existing AMP-compatible theme, or you can use the AMP Legacy theme (formerly known as Classic theme).', 'amp' ) }
+				detailsUrl="https://amp-wp.org/documentation/getting-started/reader/"
 				initialOpen={ false }
 				mode={ READER }
 				labelExtra={ readerNoticeSmall }

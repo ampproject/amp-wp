@@ -834,13 +834,24 @@ function amp_get_boilerplate_stylesheets() {
  * @internal
  */
 function amp_add_generator_metadata() {
-	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
+	$template_mode = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+	$reader_theme  = AMP_Options_Manager::get_option( Option::READER_THEME );
 
-	$mode     = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
-	$content .= sprintf( '; mode=%s', $mode );
+	// Account for case where the active theme has been switched to be the same as the reader theme.
+	// In this case, the behavior of the plugin is the same as transitional mode.
+	if (
+		AMP_Theme_Support::READER_MODE_SLUG === $template_mode
+		&&
+		get_stylesheet() === $reader_theme
+		&&
+		! Services::get( 'reader_theme_loader' )->is_enabled()
+	) {
+		$template_mode = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+	}
 
-	$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
-	if ( AMP_Theme_Support::READER_MODE_SLUG === $mode ) {
+	$content  = sprintf( 'AMP Plugin v%s', AMP__VERSION );
+	$content .= sprintf( '; mode=%s', $template_mode );
+	if ( AMP_Theme_Support::READER_MODE_SLUG === $template_mode ) {
 		$content .= sprintf( '; theme=%s', $reader_theme );
 	}
 

@@ -9,12 +9,14 @@ import { __ } from '@wordpress/i18n';
  */
 import { Options } from '../components/options-context-provider';
 import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
+import { ReaderThemes } from '../components/reader-themes-context-provider';
 
 /**
  * Welcome component on the settings screen.
  */
 export function Welcome() {
 	const { editedOptions } = useContext( Options );
+	const { templateModeWasOverridden } = useContext( ReaderThemes );
 
 	const {
 		customizer_link: customizerLink,
@@ -90,7 +92,7 @@ export function Welcome() {
 					</a>
 
 					{
-						customizerLink && (
+						customizerLink && templateModeWasOverridden === false && (
 							<a className="components-button is-secondary" href={ customizerLink } rel="noreferrer">
 								{ __( 'Customize Reader Theme', 'amp' ) }
 							</a>
