@@ -98,7 +98,6 @@ final class GenerateCommand {
 		}
 
 		WP_CLI::success( "Generated Markdown files stored in '{$destination_folder}'." );
-		WP_CLI::line();
 	}
 
 	/**
@@ -224,7 +223,7 @@ final class GenerateCommand {
 	 */
 	private function get_excluded_dirs() {
 		return [
-			'#^.*/amp/(assets|bin|build|docs|node_modules|tests|vendor)/*#',
+			'#^.*/amp/(assets|bin|build|docs|node_modules|tests|vendor|lib)/*#',
 		];
 	}
 
