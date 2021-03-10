@@ -31,13 +31,11 @@ final class GenerateCommand {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <source_folder>
-	 * : Path to the source folder that contains the source files to be parsed.
+	 * [<source_folder>]
+	 * : Path to the source folder that contains the source files to be parsed. Defaults to AMP plugin directory.
 	 *
-	 * <destination_folder>
-	 * : Path to the destination folder where the output should be written to.
-	 *
-	 * ## EXAMPLES
+	 * [<destination_folder>]
+	 * : Path to the destination folder where the output should be written to. Defaults to docs subdirectory of AMP plugin directory.
 	 *
 	 * @when before_wp_load
 	 *
@@ -45,6 +43,12 @@ final class GenerateCommand {
 	 * @param array $assoc_args Flags.
 	 */
 	public function __invoke( $args, $assoc_args ) {
+		if ( empty( $args[0] ) ) {
+			$args[0] = AMP__DIR__;
+		}
+		if ( empty( $args[1] ) ) {
+			$args[1] = AMP__DIR__ . '/docs';
+		}
 		list( $source_folder, $destination_folder ) = $args;
 
 		$source_folder      = realpath( $source_folder );
