@@ -15,7 +15,6 @@ use AmpProject\AmpWP\Documentation\Templating\TemplateEngine;
 use Exception;
 use Generator;
 use WP_CLI;
-use WP_CLI\Utils;
 use WP_Error;
 
 /**
@@ -38,15 +37,6 @@ final class GenerateCommand {
 	 * <destination_folder>
 	 * : Path to the destination folder where the output should be written to.
 	 *
-	 * [--format=<format>]
-	 * : Output format to generate.
-	 * ---
-	 * default: markdown
-	 * options:
-	 *   - json
-	 *   - markdown
-	 * ---
-	 *
 	 * ## EXAMPLES
 	 *
 	 * @when before_wp_load
@@ -57,68 +47,53 @@ final class GenerateCommand {
 	public function __invoke( $args, $assoc_args ) {
 		list( $source_folder, $destination_folder ) = $args;
 
-		$format = (string) Utils\get_flag_value( $assoc_args, 'format', 'json' );
-
 		$source_folder      = realpath( $source_folder );
 		$destination_folder = realpath( $destination_folder );
 
-		$output_file = $destination_folder . '/docs.json';
-
 		$data = $this->get_phpdoc_data( $source_folder );
 
-		$result = false;
-		switch ( $format ) {
-			case 'json':
-				$json   = wp_json_encode( $data, JSON_PRETTY_PRINT );
-				$result = file_put_contents( $output_file, $json ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
-				break;
-			case 'markdown':
-				try {
-					$doc_tree = new Root( $data );
-				} catch ( Exception $exception ) {
-					WP_CLI::error(
-						"Failed to build documentation object tree: {$exception->getMessage()}\n{$exception->getTraceAsString()}",
-						false // Using separate exit for PHPStan.
-					);
-					exit;
-				}
-
-				$template_engine = new MustacheTemplateEngine();
-
-				try {
-					foreach (
-						$this->generate_markdown( $doc_tree, $template_engine ) as $markdown
-					) {
-						/** @var Markdown $markdown */
-						$filepath = "{$destination_folder}/{$markdown->get_filename()}";
-						$this->ensure_dir_exists( dirname( $filepath ) );
-						$result = file_put_contents( $filepath, $markdown->get_contents() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
-					}
-				} catch ( Exception $exception ) {
-					WP_CLI::error(
-						"Failed to generate markdown files: {$exception->getMessage()}\n{$exception->getTraceAsString()}"
-					);
-				}
-				break;
-			case '':
-				WP_CLI::error( "A value of 'json' or 'markdown' is required for the --format flag." );
-				break;
-			default:
-				WP_CLI::error( "Invalid --format value '{$format}' provided. Possible values: json, markdown" );
-		}
-
-		WP_CLI::line();
-
+		$output_file = $destination_folder . '/docs.json';
+		$json        = wp_json_encode( $data, JSON_PRETTY_PRINT );
+		$result      = file_put_contents( $output_file, $json ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 		if ( false === $result ) {
 			WP_CLI::error( "Problem writing data to file '{$output_file}'" );
 			exit;
 		}
+		WP_CLI::line();
+		WP_CLI::success( "Generated JSON data saved to '{$output_file}'." );
 
-		$success_message = ( 'json' === $format )
-			? "Generated JSON data saved to '{$output_file}'."
-			: "Generated Markdown files stored in '{$destination_folder}'.";
+		try {
+			$doc_tree = new Root( $data );
+		} catch ( Exception $exception ) {
+			WP_CLI::error(
+				"Failed to build documentation object tree: {$exception->getMessage()}\n{$exception->getTraceAsString()}",
+				false // Using separate exit for PHPStan.
+			);
+			exit;
+		}
 
-		WP_CLI::success( $success_message );
+		$template_engine = new MustacheTemplateEngine();
+
+		try {
+			foreach (
+				$this->generate_markdown( $doc_tree, $template_engine ) as $markdown
+			) {
+				/** @var Markdown $markdown */
+				$filepath = "{$destination_folder}/{$markdown->get_filename()}";
+				$this->ensure_dir_exists( dirname( $filepath ) );
+				$result = file_put_contents( $filepath, $markdown->get_contents() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+				if ( false === $result ) {
+					WP_CLI::error( "Problem writing data to file '{$filepath}'" );
+					exit;
+				}
+			}
+		} catch ( Exception $exception ) {
+			WP_CLI::error(
+				"Failed to generate markdown files: {$exception->getMessage()}\n{$exception->getTraceAsString()}"
+			);
+		}
+
+		WP_CLI::success( "Generated Markdown files stored in '{$destination_folder}'." );
 		WP_CLI::line();
 	}
 
