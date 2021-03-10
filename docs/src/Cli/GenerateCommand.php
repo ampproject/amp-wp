@@ -111,7 +111,7 @@ final class GenerateCommand {
 		WP_CLI::line( sprintf( 'Extracting PHPDoc from %1$s. This may take a few minutes...', $path ) );
 		$parser  = new Parser();
 		$is_file = is_file( $path );
-		$files   = $is_file ? [ $path ] : $parser->get_files( $path, $this->get_excluded_dirs() );
+		$files   = $is_file ? [ $path ] : $parser->get_files( $path, $this->get_included_dirs() );
 		$path    = $is_file ? dirname( $path ) : $path;
 
 		if ( $files instanceof WP_Error ) {
@@ -217,13 +217,17 @@ final class GenerateCommand {
 	}
 
 	/**
-	 * Get the list of regex patterns of folders to exclude.
+	 * Get the list of regex patterns of folders to include.
+	 *
+	 * This corresponds to the `productionIncludedRootFiles` array in the project Gruntfile.
+	 *
+	 * @link https://github.com/ampproject/amp-wp/blob/b3d0f71027fad4498348d04d90357eae615c2665/Gruntfile.js#L6-L16
 	 *
 	 * @return string[] Array of regex patterns.
 	 */
-	private function get_excluded_dirs() {
+	private function get_included_dirs() {
 		return [
-			'#^.*/amp/(assets|bin|build|docs|node_modules|tests|vendor|lib)/*#',
+			'#^.*/amp/(back-compat|includes|src|templates)/*#',
 		];
 	}
 
