@@ -86,7 +86,7 @@
     "postcss-preset-env": "6.7.0",
     "react-test-renderer": "16.14.0",
     "rtlcss-webpack-plugin": "4.0.6",
-    "svgo": "2.2.1",
+    "svgo": "2.2.2",
     "terser-webpack-plugin": "4.2.3",
     "webpackbar": "4.0.0"
   },
