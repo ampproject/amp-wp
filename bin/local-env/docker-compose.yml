@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   wordpress:
-    image: wordpress
+    image: wordpress:5.6
     ports:
       - "127.0.0.1:8890:80"
     environment:
@@ -36,7 +36,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: wordpress
+      MYSQL_DATABASE: wordpress_test
 
 volumes:
   wordpress_data:
