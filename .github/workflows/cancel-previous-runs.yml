@@ -1,10 +1,10 @@
-name: Cancel previous runs
+name: Cancel
 
 on: [push]
 
 jobs:
   cancel:
-    name: 'Cancel Previous Runs'
+    name: 'Previous Runs'
     # Skip if push is from PR fork.
     if: github.event.pull_request.head.repo.fork == false
     runs-on: ubuntu-latest
