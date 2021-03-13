@@ -17,18 +17,6 @@ dc up -d >/dev/null 2>&1
 # Get the host port for the WordPress container.
 HOST_PORT=$(dc port $CONTAINER 80 | awk -F : '{printf $2}')
 
-# Wait until the database container is ready.
-echo -en $(status_message "Waiting for database connection...")
-until $(dc exec -T cli curl --http0.9 -so /dev/null mysql:3306); do
-    echo -n '.'
-    sleep 5
-done
-echo ''
-
-# Create the database if it doesn't exist.
-echo -e $(status_message "Creating the database...")
-echo "CREATE DATABASE IF NOT EXISTS wordpress;" | mysql
-
 # Wait until the WordPress site is responding to requests.
 echo -en $(status_message "Attempting to connect to WordPress...")
 until $(curl -L http://localhost:$HOST_PORT -so - 2>&1 | grep -q "WordPress"); do
@@ -36,6 +24,18 @@ until $(curl -L http://localhost:$HOST_PORT -so - 2>&1 | grep -q "WordPress"); d
     sleep 5
 done
 echo ''
+
+# Wait until the database container is ready.
+echo -en $(status_message "Waiting for database connection...")
+until $(container bash -c "echo -n > /dev/tcp/mysql/3306" >/dev/null 2>&1); do
+    echo -n '.'
+    sleep 5
+done
+echo ''
+
+# Create the database if it doesn't exist.
+echo -e $(status_message "Creating the database (if it does not exist)...")
+mysql -e 'CREATE DATABASE IF NOT EXISTS wordpress;'
 
 # If this is the test site, we reset the database so no posts/comments/etc.
 # dirty up the tests.
