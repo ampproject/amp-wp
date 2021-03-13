@@ -2,12 +2,14 @@ version: '3.1'
 
 services:
   wordpress:
-    image: wordpress:5.6
+    image: wordpress
     ports:
       - "127.0.0.1:8890:80"
     environment:
       WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_USER: root
       WORDPRESS_DB_PASSWORD: example
+      WORDPRESS_DB_NAME: wordpress
       ABSPATH: /usr/src/wordpress/
       WORDPRESS_DEBUG: 1
       WORDPRESS_CONFIG_EXTRA: |
