@@ -52,7 +52,8 @@ fi
 
 # Install WordPress.
 echo -e $(status_message "Installing WordPress...")
-wp core install --title="$SITE_TITLE" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT
+wp config list
+wp core install --title="$SITE_TITLE" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT  --quiet
 
 # Create additional users.
 echo -e $(status_message "Creating additional users...")
