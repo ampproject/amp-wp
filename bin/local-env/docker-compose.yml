@@ -6,7 +6,7 @@ services:
     ports:
       - "127.0.0.1:8890:80"
     env_file:
-      - .env.dist
+      - .env.wp
     volumes:
       - wordpress_data:/var/www/html
       - ../../:/var/www/html/wp-content/plugins/amp
@@ -21,7 +21,7 @@ services:
       - wordpress_data:/var/www/html
       - ../../:/var/www/html/wp-content/plugins/amp
     env_file:
-      - .env.dist
+      - .env.wp
     depends_on:
       - mysql
       - wordpress
