@@ -165,7 +165,7 @@ wp() {
 # Executes the given MySQL client command in the database container.
 ##
 mysql() {
-	dc exec -T -e MYSQL_PWD=example $DATABASE mysql "$@"
+	dc exec -T -e MYSQL_PWD=example $DATABASE mysql -v "$@"
 }
 
 ##
