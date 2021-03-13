@@ -27,7 +27,7 @@ echo ''
 
 # Wait until the database container is ready.
 echo -en $(status_message "Waiting for database connection...")
-until $(dc exec cli curl --http0.9 -so /dev/null mysql:3306); do
+until $(dc exec -T cli curl --http0.9 -so /dev/null mysql:3306); do
     echo -n '.'
     sleep 5
 done
