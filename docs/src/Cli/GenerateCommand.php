@@ -64,7 +64,6 @@ final class GenerateCommand {
 		$result      = file_put_contents( $output_file, $json ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 		if ( false === $result ) {
 			WP_CLI::error( "Problem writing data to file '{$output_file}'" );
-			exit;
 		}
 		WP_CLI::line();
 		WP_CLI::success( "Generated JSON data saved to '{$output_file}'." );
@@ -72,11 +71,7 @@ final class GenerateCommand {
 		try {
 			$doc_tree = new Root( $data );
 		} catch ( Exception $exception ) {
-			WP_CLI::error(
-				"Failed to build documentation object tree: {$exception->getMessage()}\n{$exception->getTraceAsString()}",
-				false // Using separate exit for PHPStan.
-			);
-			exit;
+			WP_CLI::error( "Failed to build documentation object tree: {$exception->getMessage()}\n{$exception->getTraceAsString()}" );
 		}
 
 		// Empty out all markdown files located inside of the directories.
@@ -114,7 +109,6 @@ final class GenerateCommand {
 				$result = file_put_contents( $filepath, $markdown->get_contents() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 				if ( false === $result ) {
 					WP_CLI::error( "Problem writing data to file '{$filepath}'" );
-					exit;
 				}
 			}
 		} catch ( Exception $exception ) {
@@ -142,7 +136,6 @@ final class GenerateCommand {
 
 		if ( $files instanceof WP_Error ) {
 			WP_CLI::error( sprintf( 'Problem with %1$s: %2$s', $path, $files->get_error_message() ) );
-			exit;
 		}
 
 		$parsed_data = array_map( [ $this, 'filter_internal_data' ], $parser->parse_files( $files, $path ) );
