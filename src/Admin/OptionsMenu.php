@@ -13,6 +13,7 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 
 /**
@@ -213,6 +214,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
 		$js_data = [
+			'AMP_QUERY_VAR'                 => amp_get_slug(),
+			'DEFAULT_AMP_QUERY_VAR'         => QueryVar::AMP,
 			'AMP_QUERY_VAR_CUSTOMIZED_LATE' => $amp_slug_customization_watcher->did_customize_late(),
 			'CURRENT_THEME'                 => [
 				'name'            => $theme->get( 'Name' ),
