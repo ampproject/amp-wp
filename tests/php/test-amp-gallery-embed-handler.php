@@ -78,7 +78,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 				'[gallery ids={{id1}},{{id2}},{{id3}}]',
 				'<style type="text/css"> #gallery-3 { margin: auto; } #gallery-3 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-3 img { border: 2px solid #cfcfcf; } #gallery-3 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
 				<amp-carousel width="640" height="480" type="slides" layout="responsive">
-					<figure class="slide"><a href="{{file_url1}}"><img width="50" height="50" src="{{file1}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-3-{{id1}}" layout="fill" object-fit="cover"></a>' . $amp_carousel_caption . '</figure>
+					<figure class="slide"><a href="{{file_url1}}"><img width="100" height="100" src="{{file1}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-3-{{id1}}" layout="fill" object-fit="cover"></a>' . $amp_carousel_caption . '</figure>
 					<figure class="slide"><a href="{{file_url2}}"><img width="640" height="480" src="{{file2}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></a></figure>
 					<figure class="slide"><a href="{{file_url3}}"><img width="100" height="100" src="{{file3}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' layout="fill" object-fit="cover"></a></figure>
 				</amp-carousel>',
@@ -89,7 +89,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 				'<style type="text/css"> #gallery-4 { margin: auto; } #gallery-4 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-4 img { border: 2px solid #cfcfcf; } #gallery-4 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
 				<div id="gallery-4" class="gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail">
 					<dl class="gallery-item">
-						<dt class="gallery-icon landscape"><a href="{{file_url1}}"><img width="50" height="50" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-4-{{id1}}"></a></dt>
+						<dt class="gallery-icon landscape"><a href="{{file_url1}}"><img width="100" height="100" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-4-{{id1}}"></a></dt>
 						<dd class="wp-caption-text gallery-caption" id="gallery-4-{{id1}}"> ' . self::CAPTION_TEXT . ' </dd>
 					</dl>
 					<dl class="gallery-item">
@@ -105,7 +105,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 				'[gallery amp-lightbox=false amp-carousel=true ids={{id1}},{{id2}},{{id3}}]',
 				'<style type="text/css"> #gallery-6 { margin: auto; } #gallery-6 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-6 img { border: 2px solid #cfcfcf; } #gallery-6 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
 				<amp-carousel width="640" height="480" type="slides" layout="responsive">
-					<figure class="slide"><a href="{{file_url1}}"><img width="50" height="50" src="{{file1}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-6-{{id1}}" layout="fill" object-fit="cover"></a>' . $amp_carousel_caption . '</figure>
+					<figure class="slide"><a href="{{file_url1}}"><img width="100" height="100" src="{{file1}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-6-{{id1}}" layout="fill" object-fit="cover"></a>' . $amp_carousel_caption . '</figure>
 					<figure class="slide"><a href="{{file_url2}}"><img width="640" height="480" src="{{file2}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></a></figure>
 					<figure class="slide"><a href="{{file_url3}}"><img width="100" height="100" src="{{file3}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' layout="fill" object-fit="cover"></a></figure>
 				</amp-carousel>',
@@ -114,7 +114,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 				'[gallery amp-lightbox=false amp-carousel=true link="file" ids={{id1}},{{id2}},{{id3}}]',
 				'<style type="text/css"> #gallery-8 { margin: auto; } #gallery-8 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-8 img { border: 2px solid #cfcfcf; } #gallery-8 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
 				<amp-carousel width="640" height="480" type="slides" layout="responsive">
-					<figure class="slide"><a href="{{file1}}.jpg"><img width="50" height="50" src="{{file1}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-8-{{id1}}" layout="fill" object-fit="cover"></a>' . $amp_carousel_caption . '</figure>
+					<figure class="slide"><a href="{{file1}}.jpg"><img width="100" height="100" src="{{file1}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-8-{{id1}}" layout="fill" object-fit="cover"></a>' . $amp_carousel_caption . '</figure>
 					<figure class="slide"><a href="{{file2}}.jpg"><img width="640" height="480" src="{{file2}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></a></figure>
 					<figure class="slide"><a href="{{file3}}.jpg"><img width="100" height="100" src="{{file3}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' layout="fill" object-fit="cover"></a></figure>
 				</amp-carousel>',
@@ -124,7 +124,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 				'<style type="text/css"> #gallery-10 { margin: auto; } #gallery-10 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-10 img { border: 2px solid #cfcfcf; } #gallery-10 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
 				<div data-amp-lightbox="true" id="gallery-10" class="gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail">
 					<dl class="gallery-item"><dt class="gallery-icon landscape">
-						<img width="50" height="50" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-10-{{id1}}" lightbox="">
+						<img width="100" height="100" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-10-{{id1}}" lightbox="">
 					</dt><dd class="wp-caption-text gallery-caption" id="gallery-10-{{id1}}"> ' . self::CAPTION_TEXT . ' </dd></dl>
 					<dl class="gallery-item"><dt class="gallery-icon landscape">
 						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' lightbox="">
@@ -140,7 +140,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 				'<style type="text/css"> #gallery-12 { margin: auto; } #gallery-12 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-12 img { border: 2px solid #cfcfcf; } #gallery-12 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
 				<div data-amp-lightbox="true" id="gallery-12" class="gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail">
 					<dl class="gallery-item"><dt class="gallery-icon landscape">
-						<img width="50" height="50" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-12-{{id1}}" lightbox="">
+						<img width="100" height="100" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-12-{{id1}}" lightbox="">
 					</dt><dd class="wp-caption-text gallery-caption" id="gallery-12-{{id1}}"> ' . self::CAPTION_TEXT . ' </dd></dl>
 					<dl class="gallery-item"><dt class="gallery-icon landscape">
 						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' lightbox="">
@@ -155,7 +155,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 				'[gallery amp-lightbox=true amp-carousel=true ids={{id1}},{{id2}},{{id3}}]',
 				'<style type="text/css"> #gallery-14 { margin: auto; } #gallery-14 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-14 img { border: 2px solid #cfcfcf; } #gallery-14 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
 				<amp-carousel width="640" height="480" type="slides" layout="responsive" lightbox="">' .
-					'<figure class="slide"><img width="50" height="50" src="{{file1}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-14-{{id1}}" layout="fill" object-fit="cover">' . $amp_carousel_caption . '</figure>' .
+					'<figure class="slide"><img width="100" height="100" src="{{file1}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-14-{{id1}}" layout="fill" object-fit="cover">' . $amp_carousel_caption . '</figure>' .
 					'<figure class="slide"><img width="640" height="480" src="{{file2}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></figure>' .
 					'<figure class="slide"><img width="100" height="100" src="{{file3}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' layout="fill" object-fit="cover"></figure>' .
 				'</amp-carousel>',
@@ -164,7 +164,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 				'[gallery amp-lightbox=true amp-carousel=true link="file" ids={{id1}},{{id2}},{{id3}}]',
 				'<style type="text/css"> #gallery-16 { margin: auto; } #gallery-16 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-16 img { border: 2px solid #cfcfcf; } #gallery-16 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
 				<amp-carousel width="640" height="480" type="slides" layout="responsive" lightbox="">' .
-					'<figure class="slide"><img width="50" height="50" src="{{file1}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-16-{{id1}}" layout="fill" object-fit="cover">' . $amp_carousel_caption . '</figure>' .
+					'<figure class="slide"><img width="100" height="100" src="{{file1}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-16-{{id1}}" layout="fill" object-fit="cover">' . $amp_carousel_caption . '</figure>' .
 					'<figure class="slide"><img width="640" height="480" src="{{file2}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></figure>' .
 					'<figure class="slide"><img width="100" height="100" src="{{file3}}.jpg" class="attachment-large size-large" alt="Alt text" ' . $loading_attribute . ' layout="fill" object-fit="cover"></figure>' .
 				'</amp-carousel>',
@@ -182,7 +182,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 	 */
 	public function test__conversion( $source, $expected, $use_legacy_mode = false ) {
 		$source_files = [
-			DIR_TESTDATA . '/images/test-image.jpg',
+			AMP__DIR__ . '/tests/e2e/assets/small-image-100-100.jpg',
 			DIR_TESTDATA . '/images/canola.jpg',
 			DIR_TESTDATA . '/images/gradient-square.jpg',
 		];

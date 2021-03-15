@@ -2040,7 +2040,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$new_styles = str_replace( '@media only screen', '@media only screen and (prefers-color-scheme: dark)', $styles );
 				// Allow for rules to override the light theme related rules.
 				$new_styles = str_replace( '.is-dark-theme.is-dark-theme', ':root', $new_styles );
-				$new_styles = str_replace( '.respect-color-scheme-preference.is-dark-theme body', '.respect-color-scheme-preference body', $new_styles );
+				$new_styles = str_replace( '.respect-color-scheme-preference.is-dark-theme body', '.respect-color-scheme-preference:not(._) body', $new_styles );
 
 				wp_add_inline_style( $theme_style_handle, $new_styles );
 			},
