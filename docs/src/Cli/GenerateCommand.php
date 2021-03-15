@@ -75,7 +75,8 @@ final class GenerateCommand {
 		}
 
 		// Empty out all markdown files located inside of the directories.
-		$md_dirs = [
+		$cleaned_count = 0;
+		$md_dirs       = [
 			'class',
 			'hook',
 			'function',
@@ -91,10 +92,14 @@ final class GenerateCommand {
 			foreach ( $iterator as $file ) {
 				if ( unlink( $file ) ) {
 					WP_CLI::line( "Cleaned: $file" );
+					$cleaned_count++;
 				} else {
 					WP_CLI::warning( "Failed to clean: $file" );
 				}
 			}
+		}
+		if ( $cleaned_count > 0 ) {
+			WP_CLI::success( "Cleaned $cleaned_count markdown file(s)." );
 		}
 
 		$template_engine = new MustacheTemplateEngine();
