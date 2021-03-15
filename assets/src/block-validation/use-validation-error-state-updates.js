@@ -6,28 +6,16 @@ import { isEqual } from 'lodash';
 /**
  * WordPress dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { usePrevious } from '@wordpress/compose';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
+import { getQueryArg, isURL } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
-import { AMP_VALIDITY_REST_FIELD_NAME } from './constants';
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
-
-/**
- * Handles cases where a validationError's `sources` are an object (with numeric keys).
- *
- * Note: this will no longer be an issue after https://github.com/ampproject/amp-wp/commit/bbb0e495a817a56b37554dfd721170712c92d7b8
- * but is still required for validation errors stored in the database prior to that commit.
- *
- * @param {Object} validationError
- */
-export function convertErrorSourcesToArray( validationError ) {
-	if ( ! Array.isArray( validationError.error.sources ) ) {
-		validationError.error.sources = Object.values( validationError.error.sources );
-	}
-}
 
 /**
  * Attempts to associate a validation error with a block current in the editor.
@@ -71,44 +59,164 @@ export function maybeAddClientIdToValidationError( { validationError, source, cu
 /**
  * Custom hook managing state updates through effect hooks.
  *
- * Handling state through a context provider might be preferable in other circumstances, but in this case
- * using a store is necessary because React context is not passed down over slotfills, and we need multiple
- * components within multiple slotfills to have access to the same state.
+ * Handling state through a context provider might be preferable in other
+ * circumstances, but in this case using a store is necessary because React
+ * context is not passed down over slotfills, and we need multiple components
+ * within multiple slotfills to have access to the same state.
  */
 export function useValidationErrorStateUpdates() {
-	const [ trackedValidationErrorsFromPost, setTrackedValidationErrorsFromPost ] = useState( [] );
+	const [ blockOrderBeforeSave, setBlockOrderBeforeSave ] = useState( [] );
+	const [ hasRequestedPreview, setHasRequestedPreview ] = useState( false );
+	const [ previousValidationErrors, setPreviousValidationErrors ] = useState( [] );
+	const [ shouldValidate, setShouldValidate ] = useState( false );
+	const unmounted = useRef( false );
 
-	const { setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
+	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { blockOrder, currentPost, getBlock, validationErrorsFromPost } = useSelect( ( select ) => ( {
-		blockOrder: select( 'core/block-editor' ).getClientIdsWithDescendants(),
-		currentPost: select( 'core/editor' ).getCurrentPost(),
+	const {
+		currentPostId,
+		getBlock,
+		getClientIdsWithDescendants,
+		isAutosavingPost,
+		isEditedPostNew,
+		isPreviewingPost,
+		isSavingPost,
+		previewLink,
+		validationErrors,
+	} = useSelect( ( select ) => ( {
+		currentPostId: select( 'core/editor' ).getCurrentPostId(),
 		getBlock: select( 'core/block-editor' ).getBlock,
-		validationErrorsFromPost: select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME )?.results || [],
+		getClientIdsWithDescendants: select( 'core/block-editor' ).getClientIdsWithDescendants,
+		isAutosavingPost: select( 'core/editor' ).isAutosavingPost(),
+		isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
+		isPreviewingPost: select( 'core/editor' ).isPreviewingPost(),
+		isSavingPost: select( 'core/editor' ).isSavingPost(),
+		previewLink: select( 'core/editor' ).getEditedPostPreviewLink(),
+		validationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors(),
 	} ), [] );
 
-	/*
-	 * Runs an equality check when validation errors are received before running the heavier effect.
+	const wasEditedPostNew = usePrevious( isEditedPostNew );
+
+	/**
+	 * Set unmounted to true on unmount to prevent state updates after async
+	 * functions.
+	 */
+	useEffect( () => () => {
+		unmounted.current = true;
+	}, [] );
+
+	/**
+	 * Trigger validation whens editor loads only for existing posts.
 	 */
 	useEffect( () => {
-		if ( ! isEqual( trackedValidationErrorsFromPost, validationErrorsFromPost ) ) {
-			setTrackedValidationErrorsFromPost( validationErrorsFromPost );
+		if ( ! isEditedPostNew && ! wasEditedPostNew ) {
+			setShouldValidate( true );
 		}
-	}, [ trackedValidationErrorsFromPost, validationErrorsFromPost ] );
+	}, [ isEditedPostNew, wasEditedPostNew ] );
 
-	/*
+	/**
+	 * Set flags when a post is being saved.
+	 *
+	 * Validation should not be triggered on autosaves with an exception of an
+	 * autosave initiated by a post preview request (note that "Re-validate now"
+	 * button in the sidebar issues a post preview request).
+	 */
+	useEffect( () => {
+		if ( ! isSavingPost ) {
+			return;
+		}
+
+		if ( isPreviewingPost ) {
+			setShouldValidate( true );
+			setHasRequestedPreview( true );
+			return;
+		}
+
+		if ( isAutosavingPost ) {
+			return;
+		}
+
+		setShouldValidate( true );
+	}, [ isAutosavingPost, isPreviewingPost, isSavingPost ] );
+
+	/**
+	 * Fetches validation errors for the current post's URL after the editor has
+	 * loaded and following subsequent saves.
+	 */
+	useEffect( () => {
+		if ( ! shouldValidate ) {
+			return;
+		}
+
+		// Indicate loading state as soon as post is started to be saved.
+		if ( isSavingPost ) {
+			setIsFetchingErrors( true );
+			return;
+		}
+
+		// A preview link may not be available right after saving a post.
+		if ( hasRequestedPreview && ! isURL( previewLink ) ) {
+			return;
+		}
+
+		( async () => {
+			// The initial render is not related to `isSavingPost` flag change.
+			// Still, we're fetching the errors, so the `isFetchingErrors`
+			// flag should be set.
+			setIsFetchingErrors( true );
+			setBlockOrderBeforeSave( getClientIdsWithDescendants() );
+
+			const data = {
+				id: currentPostId,
+			};
+
+			if ( hasRequestedPreview ) {
+				data.preview_nonce = getQueryArg( previewLink, 'preview_nonce' );
+			}
+
+			setShouldValidate( false );
+			setHasRequestedPreview( false );
+
+			const newValidation = await apiFetch( {
+				path: '/amp/v1/validate-post-url/',
+				method: 'POST',
+				data,
+			} );
+
+			if ( true === unmounted.current ) {
+				return;
+			}
+
+			setValidationErrors( newValidation.results );
+			setReviewLink( newValidation.review_link );
+			setIsFetchingErrors( false );
+		} )();
+	}, [ currentPostId, getClientIdsWithDescendants, hasRequestedPreview, isSavingPost, previewLink, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
+
+	/**
+	 * Runs an equality check when validation errors are received before running
+	 * the heavier effect.
+	 */
+	useEffect( () => {
+		if ( validationErrors && ! isEqual( previousValidationErrors, validationErrors ) ) {
+			setPreviousValidationErrors( validationErrors );
+		}
+	}, [ previousValidationErrors, validationErrors ] );
+
+	/**
 	 * Adds clientIds to the validation errors that are associated with blocks.
 	 */
 	useEffect( () => {
-		const newValidationErrors = trackedValidationErrorsFromPost.map( ( validationError ) => {
+		const newValidationErrors = previousValidationErrors.map( ( validationError ) => {
 			if ( ! validationError.error.sources ) {
 				return validationError;
 			}
 
-			convertErrorSourcesToArray( validationError );
-
 			for ( const source of validationError.error.sources ) {
-				// The loop can finish if the validation error (which is passed by reference below) has obtained a clientId.
+				/**
+				 * The loop can finish if the validation error (which is passed
+				 * by reference below) has obtained a clientId.
+				 */
 				if ( 'clientId' in validationError ) {
 					break;
 				}
@@ -117,8 +225,8 @@ export function useValidationErrorStateUpdates() {
 					validationError,
 					source,
 					getBlock,
-					blockOrder,
-					currentPostId: currentPost.id,
+					blockOrder: 0 < blockOrderBeforeSave.length ? blockOrderBeforeSave : getClientIdsWithDescendants(), // blockOrderBeforeSave may be empty on initial load.
+					currentPostId,
 				} );
 			}
 
@@ -126,5 +234,5 @@ export function useValidationErrorStateUpdates() {
 		} );
 
 		setValidationErrors( newValidationErrors );
-	}, [ blockOrder, currentPost.id, getBlock, setValidationErrors, trackedValidationErrorsFromPost ] );
+	}, [ blockOrderBeforeSave, currentPostId, getBlock, getClientIdsWithDescendants, setValidationErrors, previousValidationErrors ] );
 }

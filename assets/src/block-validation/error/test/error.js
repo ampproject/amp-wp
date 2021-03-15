@@ -77,6 +77,7 @@ function createTestStoreAndBlocks() {
 	dispatch( 'core/block-editor' ).insertBlocks( [ pluginBlock, themeBlock, coreBlock, unknownBlock ] );
 
 	createStore( {
+		reviewLink: 'http://site.test/wp-admin',
 		validationErrors: [
 			{
 				clientId: pluginBlock.clientId,
@@ -97,6 +98,7 @@ function createTestStoreAndBlocks() {
 				title: 'Invalid script: <code>jquery.js</code>',
 				error: {
 					type: 'js_error',
+					sources: [],
 				},
 			},
 			{
@@ -128,6 +130,7 @@ function createTestStoreAndBlocks() {
 function getTestBlock( type ) {
 	switch ( type ) {
 		case 'plugin':
+		case 'removed':
 			return pluginBlock;
 
 		case 'theme':
@@ -208,7 +211,7 @@ describe( 'Error', () => {
 				status={ status }
 				term_id={ 12 }
 				title="My test error"
-				error={ { type: 'js_error' } }
+				error={ { type: 'js_error', sources: [] } }
 			/>
 		),
 	] ) )( 'errors with associated blocks work correctly', ( status, ErrorComponent ) => {
@@ -230,6 +233,45 @@ describe( 'Error', () => {
 		container.querySelector( `.amp-error--${ newReviewed } button` ).click();
 		expect( container.querySelector( '.amp-error__details-link' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__select-block' ) ).not.toBeNull();
+	} );
+
+	it.each( [
+		VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+		VALIDATION_ERROR_ACK_REJECTED_STATUS,
+		VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+		VALIDATION_ERROR_NEW_REJECTED_STATUS,
+	].map( ( status ) => [
+		status,
+		() => (
+			<Error
+				clientId={ pluginBlock.clientId }
+				status={ status }
+				term_id={ 12 }
+				title="My test error"
+				error={ { type: 'js_error', sources: [] } }
+			/>
+		),
+	] ) )( 'errors with removed blocks work correctly', ( status, ErrorComponent ) => {
+		act( () => {
+			dispatch( 'core/block-editor' ).removeBlock( pluginBlock.clientId, false );
+			render(
+				<ErrorComponent />,
+				container,
+			);
+		} );
+
+		const newReviewed = [ VALIDATION_ERROR_NEW_REJECTED_STATUS, VALIDATION_ERROR_NEW_ACCEPTED_STATUS ].includes( status ) ? 'new' : 'reviewed';
+
+		expect( container.querySelector( 'li' ).getAttribute( 'class' ) ).toBe( 'amp-error-container' );
+		expect( container.querySelectorAll( `.amp-error--${ newReviewed }` ) ).toHaveLength( 1 );
+		expect( container.querySelector( '.amp-error--removed' ) ).not.toBeNull();
+		expect( container.querySelector( '.amp-error__details-link' ) ).toBeNull();
+		expect( container.querySelector( '.amp-error--removed button' ) ).not.toBeNull();
+		expect( container.querySelector( '.amp-error__block-type-icon' ) ).toBeNull();
+
+		container.querySelector( '.amp-error--removed button' ).click();
+		expect( container.querySelector( '.amp-error__details-link' ) ).not.toBeNull();
+		expect( container.querySelector( '.amp-error__select-block' ) ).toBeNull();
 	} );
 } );
 
@@ -259,7 +301,7 @@ describe( 'ErrorTypeIcon', () => {
 					status={ 3 }
 					term_id={ 12 }
 					title="My test error"
-					error={ { type: errorType } }
+					error={ { type: errorType, sources: [] } }
 				/>,
 				container,
 			);
@@ -316,6 +358,7 @@ describe( 'ErrorContent', () => {
 		'mu-plugin',
 		'theme',
 		'core',
+		'removed',
 	].reduce(
 		( collection, testBlockSource ) => [
 			...collection,
@@ -346,6 +389,14 @@ describe( 'ErrorContent', () => {
 		container.querySelector( `.components-button` ).click();
 
 		expect( container.innerHTML ).toContain( 'Markup status' );
+
+		if ( 'removed' === testBlockSource ) {
+			act( () => {
+				dispatch( 'core/block-editor' ).removeBlock( clientId, false );
+			} );
+			expect( container.innerHTML ).toContain( 'removed from the editor' );
+			return;
+		}
 
 		if ( null === clientId ) {
 			expect( container.innerHTML ).toContain( 'outside the post content' );

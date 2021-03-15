@@ -19,8 +19,9 @@ trait MarkupComparison {
 	 *
 	 * @param string $expected Expected markup.
 	 * @param string $actual   Actual markup.
+	 * @param string $message  Message.
 	 */
-	protected function assertEqualMarkup( $expected, $actual ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
+	protected function assertEqualMarkup( $expected, $actual, $message = '' ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
 		// Normalize whitespace (`foo   bar` => `foo bar`).
 		$actual   = preg_replace( '/\s+/', ' ', $actual );
 		$expected = preg_replace( '/\s+/', ' ', $expected );
@@ -37,7 +38,7 @@ trait MarkupComparison {
 		$actual   = preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE );
 		$expected = preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE );
 
-		$this->assertEquals( array_filter( $expected ), array_filter( $actual ) );
+		$this->assertEquals( array_filter( $expected ), array_filter( $actual ), $message );
 	}
 
 	/**
@@ -45,8 +46,9 @@ trait MarkupComparison {
 	 *
 	 * @param string $expected Expected markup.
 	 * @param string $actual   Actual markup.
+	 * @param string $message  Message.
 	 */
-	protected function assertSimilarMarkup( $expected, $actual ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
+	protected function assertSimilarMarkup( $expected, $actual, $message = '' ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
 		// Normalize whitespace (`foo   bar` => `foo bar`).
 		$actual   = preg_replace( '/\s+/', ' ', $actual );
 		$expected = preg_replace( '/\s+/', ' ', $expected );
@@ -114,6 +116,6 @@ trait MarkupComparison {
 		$actual   = array_map( $normalize_attributes, array_filter( $actual ) );
 		$expected = array_map( $normalize_attributes, array_filter( $expected ) );
 
-		$this->assertEquals( $expected, $actual );
+		$this->assertEquals( $expected, $actual, $message );
 	}
 }

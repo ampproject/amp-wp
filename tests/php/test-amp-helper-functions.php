@@ -1123,12 +1123,16 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 * @covers ::amp_add_generator_metadata()
 	 */
 	public function test_amp_add_generator_metadata() {
+		if ( ! wp_get_theme( 'twentynineteen' )->exists() ) {
+			$this->markTestSkipped( 'Theme twentynineteen not installed.' );
+		}
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		$get_generator_tag = static function() {
 			return get_echo( 'amp_add_generator_metadata' );
 		};
 
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$output = $get_generator_tag();
 		$this->assertStringContains( 'mode=reader', $output );
 		$this->assertStringContains( 'theme=legacy', $output );
@@ -1154,6 +1158,12 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 		$output = $get_generator_tag();
 		$this->assertStringContains( 'mode=standard', $output );
+		$this->assertStringNotContains( 'theme=', $output );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		switch_theme( 'twentynineteen' );
+		$output = $get_generator_tag();
+		$this->assertStringContains( 'mode=transitional', $output );
 		$this->assertStringNotContains( 'theme=', $output );
 	}
 
@@ -1474,8 +1484,8 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$post_id = self::factory()->post->create();
 		$this->assertFalse( amp_get_post_image_metadata( $post_id ) );
 
-		$first_test_image = '/tmp/test-image.jpg';
-		copy( DIR_TESTDATA . '/images/test-image.jpg', $first_test_image );
+		$first_test_image = '/tmp/test-image.png';
+		copy( DIR_TESTDATA . '/images/test-image.png', $first_test_image );
 		$attachment_id = self::factory()->attachment->create_object(
 			[
 				'file'           => $first_test_image,
@@ -1491,7 +1501,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertEquals( 'ImageObject', $metadata['@type'] );
 		$this->assertEquals( 50, $metadata['width'] );
 		$this->assertEquals( 50, $metadata['height'] );
-		$this->assertStringEndsWith( 'test-image.jpg', $metadata['url'] );
+		$this->assertStringEndsWith( 'test-image.png', $metadata['url'] );
 
 		delete_post_thumbnail( $post_id );
 		$this->assertFalse( amp_get_post_image_metadata( $post_id ) );
@@ -1502,7 +1512,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			]
 		);
 		$metadata = amp_get_post_image_metadata( $post_id );
-		$this->assertStringEndsWith( 'test-image.jpg', $metadata['url'] );
+		$this->assertStringEndsWith( 'test-image.png', $metadata['url'] );
 
 		// Test an 'attachment' post type.
 		$attachment_src          = 'example/attachment.jpeg';

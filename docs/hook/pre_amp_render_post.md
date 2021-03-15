@@ -16,7 +16,7 @@ This action is not triggered when &#039;amp&#039; theme support is present. Inst
 
 ### Source
 
-:link: [includes/deprecated.php:174](/includes/deprecated.php#L174)
+:link: [includes/deprecated.php:176](/includes/deprecated.php#L176)
 
 <details>
 <summary>Show Code</summary>

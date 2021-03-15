@@ -85,7 +85,7 @@ function ErrorSource( { clientId, blockTypeName, sources } ) {
 ErrorSource.propTypes = {
 	blockTypeName: PropTypes.string,
 	clientId: PropTypes.string,
-	sources: PropTypes.arrayOf( PropTypes.object ),
+	sources: PropTypes.arrayOf( PropTypes.object ).isRequired,
 };
 
 /**
@@ -169,13 +169,23 @@ BlockType.propTypes = {
  *
  * @param {Object} props Component props.
  * @param {Object} props.blockType Block type details.
+ * @param {boolean} props.external Flag indicating if the error comes from outside of post content.
+ * @param {boolean} props.removed Flag indicating if the block has been removed.
  * @param {string} props.clientId Block client ID
  * @param {number} props.status Number indicating the error status.
  * @param {string} props.title Error title.
  * @param {Object} props.error Error details.
  * @param {Object[]} props.error.sources Sources from the PHP backtrace for the error.
  */
-export function ErrorContent( { blockType, clientId, status, title, error: { sources } } ) {
+export function ErrorContent( {
+	blockType,
+	clientId,
+	error: { sources },
+	external,
+	removed,
+	status,
+	title,
+} ) {
 	const blockTypeTitle = blockType?.title;
 	const blockTypeName = blockType?.name;
 
@@ -184,7 +194,12 @@ export function ErrorContent( { blockType, clientId, status, title, error: { sou
 
 	return (
 		<>
-			{ ! clientId && (
+			{ removed && (
+				<p>
+					{ __( 'The block has been removed from the editor.', 'amp' ) }
+				</p>
+			) }
+			{ external && (
 				<p>
 					{ __( 'This error comes from outside the post content.', 'amp' ) }
 				</p>
@@ -201,7 +216,7 @@ export function ErrorContent( { blockType, clientId, status, title, error: { sou
 						</>
 					)
 				}
-				{ clientId && <BlockType blockTypeTitle={ blockTypeTitle } /> }
+				{ ! ( removed || external ) && <BlockType blockTypeTitle={ blockTypeTitle } /> }
 				<ErrorSource blockTypeName={ blockTypeName } clientId={ clientId } sources={ sources } />
 				<MarkupStatus status={ status } />
 			</dl>
@@ -214,6 +229,11 @@ ErrorContent.propTypes = {
 		title: PropTypes.string,
 	} ),
 	clientId: PropTypes.string,
+	error: PropTypes.shape( {
+		sources: PropTypes.arrayOf( PropTypes.object ),
+	} ).isRequired,
+	external: PropTypes.bool,
+	removed: PropTypes.bool,
 	status: PropTypes.oneOf( [
 		VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 		VALIDATION_ERROR_ACK_REJECTED_STATUS,
@@ -221,7 +241,4 @@ ErrorContent.propTypes = {
 		VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 	] ).isRequired,
 	title: PropTypes.string.isRequired,
-	error: PropTypes.shape( {
-		sources: PropTypes.arrayOf( PropTypes.object ),
-	} ).isRequired,
 };

@@ -12,7 +12,7 @@ Filters whether the default mobile version switcher styles are printed.
 
 ### Source
 
-:link: [src/MobileRedirection.php:420](/src/MobileRedirection.php#L420)
+:link: [src/MobileRedirection.php:530](/src/MobileRedirection.php#L530)
 
 <details>
 <summary>Show Code</summary>

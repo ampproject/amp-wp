@@ -8,18 +8,18 @@ Filters AMP permalink.
 
 ### Arguments
 
-* `false $amp_url` - AMP URL.
+* `string $amp_url` - AMP URL.
 * `int $post_id` - Post ID.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:747](/includes/amp-helper-functions.php#L747)
+:link: [src/PairedUrlStructure/LegacyReaderUrlStructure.php:83](/src/PairedUrlStructure/LegacyReaderUrlStructure.php#L83)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-return apply_filters( 'amp_get_permalink', $amp_url, $post_id );
+$amp_url = apply_filters( 'amp_get_permalink', $amp_url, $post_id );
 ```
 
 </details>

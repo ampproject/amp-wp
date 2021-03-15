@@ -101,7 +101,7 @@ export const addAMPAttributes = ( settings, name ) => {
 		}
 		settings.attributes.ampCarousel = {
 			type: 'boolean',
-			default: ! select( 'amp/block-editor' ).hasThemeSupport(), // @todo We could just default this to false now even in Reader mode since block styles are loaded.
+			default: ! select( 'amp/block-editor' )?.hasThemeSupport(), // @todo We could just default this to false now even in Reader mode since block styles are loaded.
 		};
 		settings.attributes.ampLightbox = {
 			type: 'boolean',

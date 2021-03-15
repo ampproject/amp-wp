@@ -475,7 +475,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$replacements = [
 			'@media only screen'           => '@media only screen and (prefers-color-scheme: dark)',
 			'.is-dark-theme.is-dark-theme' => ':root',
-			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference body',
+			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference:not(._) body',
 		];
 		foreach ( $replacements as $search => $replacement ) {
 			$this->assertStringNotContains( "$search {", $after );
@@ -504,6 +504,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$after = implode( '', wp_styles()->registered[ $style_handle ]->extra['after'] );
 		$this->assertNotEmpty( $after );
 		$this->assertStringContains( '@media only screen and (max-width: 481px)', $after );
+		$this->assertStringContains( 'button[overflow]:hover', $after );
 		$this->assertStringEndsWith( '/*first*/', $after );
 	}
 

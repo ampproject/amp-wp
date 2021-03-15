@@ -13,7 +13,7 @@ This is deprecated since the name was wrong and the use case is not clear. To re
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:788](/includes/amp-helper-functions.php#L788-L801)
+:link: [includes/amp-helper-functions.php:669](/includes/amp-helper-functions.php#L669-L682)
 
 <details>
 <summary>Show Code</summary>

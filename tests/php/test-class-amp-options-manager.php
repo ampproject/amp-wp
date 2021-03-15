@@ -612,43 +612,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_options when active theme is switched to be the same as the Reader theme.
-	 *
-	 * @covers AMP_Options_Manager::get_options()
-	 * @covers AMP_Options_Manager::get_option()
-	 * @covers AMP_Options_Manager::update_option()
-	 */
-	public function test_get_options_when_reader_theme_same_as_active_theme() {
-		if ( ! wp_get_theme( 'twentytwenty' ) ) {
-			$this->markTestSkipped();
-		}
-		if ( ! wp_get_theme( 'twentynineteen' ) ) {
-			$this->markTestSkipped();
-		}
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		switch_theme( 'twentytwenty' );
-		AMP_Options_Manager::update_options(
-			[
-				Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
-				Option::READER_THEME  => 'twentynineteen',
-			]
-		);
-
-		// Make sure the paired URL structure has been set.
-		$this->go_to( '/' );
-
-		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-		$this->assertEquals( 'twentynineteen', AMP_Options_Manager::get_option( Option::READER_THEME ) );
-
-		switch_theme( 'twentynineteen' );
-		$this->assertEquals( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-
-		switch_theme( 'twentytwenty' );
-		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-		$this->assertEquals( 'twentynineteen', AMP_Options_Manager::get_option( Option::READER_THEME ) );
-	}
-
-	/**
 	 * Tests the update_options method.
 	 *
 	 * @covers AMP_Options_Manager::update_options

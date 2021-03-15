@@ -2012,12 +2012,19 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		add_action(
 			'wp_enqueue_scripts',
 			static function() {
-				// Bail if the dark mode stylesheet is not enqueued.
-				if ( ! wp_style_is( 'tt1-dark-mode' ) ) {
+				$theme_style_handle     = 'twenty-twenty-one-style';
+				$dark_mode_style_handle = 'tt1-dark-mode';
+
+				// Bail if the dark mode stylesheet is not enqueued or the theme stylesheet isn't registered.
+				if (
+					! wp_style_is( $dark_mode_style_handle, 'enqueued' )
+					||
+					! wp_style_is( $theme_style_handle, 'registered' )
+				) {
 					return; // @codeCoverageIgnore
 				}
 
-				wp_dequeue_style( 'tt1-dark-mode' );
+				wp_dequeue_style( $dark_mode_style_handle );
 
 				$dark_mode_css_file = get_theme_file_path(
 					sprintf( 'assets/css/style-dark-mode%s.css', is_rtl() ? '-rtl' : '' )
@@ -2033,17 +2040,16 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$new_styles = str_replace( '@media only screen', '@media only screen and (prefers-color-scheme: dark)', $styles );
 				// Allow for rules to override the light theme related rules.
 				$new_styles = str_replace( '.is-dark-theme.is-dark-theme', ':root', $new_styles );
-				$new_styles = str_replace( '.respect-color-scheme-preference.is-dark-theme body', '.respect-color-scheme-preference body', $new_styles );
+				$new_styles = str_replace( '.respect-color-scheme-preference.is-dark-theme body', '.respect-color-scheme-preference:not(._) body', $new_styles );
 
-				wp_add_inline_style( 'twenty-twenty-one-style', $new_styles );
+				wp_add_inline_style( $theme_style_handle, $new_styles );
 			},
 			11
 		);
 	}
 
 	/**
-	 * Amend the Twenty Twenty-One stylesheet to make it compatible with the changes made to the document during
-	 * sanitization.
+	 * Amend Twenty Twenty-One Styles.
 	 */
 	public static function amend_twentytwentyone_styles() {
 		add_action(
@@ -2072,7 +2078,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				$styles = file_get_contents( $css_file ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
-				// Append any extra rules that may be needed.
+				// Append extra rules needed for nav menus according to changes made to the document during sanitization.
 				$styles .= '
 					/* Trap keyboard navigation within mobile menu when it\'s open */
 					@media only screen and (max-width: 481px) {
@@ -2100,6 +2106,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
 							display: flex;
 						}
+					}
+				';
+
+				/*
+				 * In Twenty Twenty-One, when a button is used to resize AMP elements, they can appear transparent when hovered over.
+				 * To resolve this issue, the theme's background color is used as the background color for the button
+				 * when it is in the hovered state.
+				 */
+				$styles .= '
+					button[overflow]:hover {
+						background-color: var(--global--color-background);
 					}
 				';
 

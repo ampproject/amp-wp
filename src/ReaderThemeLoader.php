@@ -131,7 +131,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * @return array Themes.
 	 */
 	public function filter_wp_prepare_themes_to_indicate_reader_theme( $prepared_themes ) {
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		if ( ! $this->is_enabled() ) {
 			return $prepared_themes;
 		}
 
@@ -189,7 +189,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * This is admittedly hacky, but WordPress doesn't provide a much better option.
 	 */
 	public function inject_theme_single_template_modifications() {
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		if ( ! $this->is_enabled() ) {
 			return;
 		}
 

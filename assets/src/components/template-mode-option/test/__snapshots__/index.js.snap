@@ -127,9 +127,10 @@ exports[`TemplateModeOption matches snapshot 1`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
+            height={24}
             role="img"
-            size={24}
             viewBox="0 0 24 24"
+            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -374,9 +375,10 @@ exports[`TemplateModeOption matches snapshot 2`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
+            height={24}
             role="img"
-            size={24}
             viewBox="0 0 24 24"
+            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -401,14 +403,14 @@ exports[`TemplateModeOption matches snapshot 2`] = `
           <span
             dangerouslySetInnerHTML={
               Object {
-                "__html": "Component details",
+                "__html": "Reader info",
               }
             }
           />
            
           <a
-            href="http://amp-wp.org"
-            rel="noreferrer"
+            href="https://amp-wp.org/documentation/getting-started/reader/"
+            rel="noreferrer noopener"
             target="_blank"
           >
             Learn more.
@@ -653,9 +655,10 @@ exports[`TemplateModeOption matches snapshot 3`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
+            height={24}
             role="img"
-            size={24}
             viewBox="0 0 24 24"
+            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -686,8 +689,8 @@ exports[`TemplateModeOption matches snapshot 3`] = `
           />
            
           <a
-            href="http://amp-wp.org"
-            rel="noreferrer"
+            href="https://amp-wp.org/documentation/getting-started/reader/"
+            rel="noreferrer noopener"
             target="_blank"
           >
             Learn more.

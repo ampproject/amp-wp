@@ -2,7 +2,7 @@
 /**
  * Tests for OptionsRESTController.
  *
- * @package AMP
+ * @package AmpProject\AmpWP
  */
 
 namespace AmpProject\AmpWP\Tests;
@@ -15,8 +15,6 @@ use WP_REST_Request;
 
 /**
  * Tests for OptionsRESTController.
- *
- * @group amp-options
  *
  * @coversDefaultClass \AmpProject\AmpWP\OptionsRESTController
  */

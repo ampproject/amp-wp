@@ -37,3 +37,6 @@ parameters:
 		- '#^Function apply_filters(_ref_array)? invoked with [34567] parameters, 2 required\.$#'
 		# Setting src to false indicates a bundle of dependencies.
 		- '#^Property _WP_Dependency::\$src \(string\) does not accept false\.$#'
+	earlyTerminatingMethodCalls:
+		\WP_CLI:
+			- WP_CLI::error

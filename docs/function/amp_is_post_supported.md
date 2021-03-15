@@ -8,7 +8,7 @@ Determine whether a given post supports AMP.
 
 ### Arguments
 
-* `\WP_Post $post` - Post.
+* `\WP_Post|int $post` - Post.
 
 ### Return value
 
@@ -16,7 +16,7 @@ Determine whether a given post supports AMP.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:832](/includes/amp-helper-functions.php#L832-L834)
+:link: [includes/amp-helper-functions.php:708](/includes/amp-helper-functions.php#L708-L710)
 
 <details>
 <summary>Show Code</summary>

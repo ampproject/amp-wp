@@ -12,7 +12,7 @@ Filters the length of time to sleep between validating URLs.
 
 ### Source
 
-:link: [src/Validation/URLValidationCron.php:117](/src/Validation/URLValidationCron.php#L117)
+:link: [src/Validation/URLValidationCron.php:145](/src/Validation/URLValidationCron.php#L145)
 
 <details>
 <summary>Show Code</summary>
