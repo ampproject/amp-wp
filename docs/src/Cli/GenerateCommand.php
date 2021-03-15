@@ -12,10 +12,12 @@ use AmpProject\AmpWP\Documentation\Parser\Parser;
 use AmpProject\AmpWP\Documentation\Templating\Markdown;
 use AmpProject\AmpWP\Documentation\Templating\MustacheTemplateEngine;
 use AmpProject\AmpWP\Documentation\Templating\TemplateEngine;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RegexIterator;
 use Exception;
 use Generator;
 use WP_CLI;
-use WP_CLI\Utils;
 use WP_Error;
 
 /**
@@ -32,22 +34,11 @@ final class GenerateCommand {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <source_folder>
-	 * : Path to the source folder that contains the source files to be parsed.
+	 * [<source_folder>]
+	 * : Path to the source folder that contains the source files to be parsed. Defaults to AMP plugin directory.
 	 *
-	 * <destination_folder>
-	 * : Path to the destination folder where the output should be written to.
-	 *
-	 * [--format=<format>]
-	 * : Output format to generate.
-	 * ---
-	 * default: markdown
-	 * options:
-	 *   - json
-	 *   - markdown
-	 * ---
-	 *
-	 * ## EXAMPLES
+	 * [<destination_folder>]
+	 * : Path to the destination folder where the output should be written to. Defaults to docs subdirectory of AMP plugin directory.
 	 *
 	 * @when before_wp_load
 	 *
@@ -55,71 +46,83 @@ final class GenerateCommand {
 	 * @param array $assoc_args Flags.
 	 */
 	public function __invoke( $args, $assoc_args ) {
+		if ( empty( $args[0] ) ) {
+			$args[0] = AMP__DIR__;
+		}
+		if ( empty( $args[1] ) ) {
+			$args[1] = AMP__DIR__ . '/docs';
+		}
 		list( $source_folder, $destination_folder ) = $args;
-
-		$format = (string) Utils\get_flag_value( $assoc_args, 'format', 'json' );
 
 		$source_folder      = realpath( $source_folder );
 		$destination_folder = realpath( $destination_folder );
 
-		$output_file = $destination_folder . '/docs.json';
-
 		$data = $this->get_phpdoc_data( $source_folder );
 
-		$result = false;
-		switch ( $format ) {
-			case 'json':
-				$json   = wp_json_encode( $data, JSON_PRETTY_PRINT );
-				$result = file_put_contents( $output_file, $json ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
-				break;
-			case 'markdown':
-				try {
-					$doc_tree = new Root( $data );
-				} catch ( Exception $exception ) {
-					WP_CLI::error(
-						"Failed to build documentation object tree: {$exception->getMessage()}\n{$exception->getTraceAsString()}",
-						false // Using separate exit for PHPStan.
-					);
-					exit;
-				}
-
-				$template_engine = new MustacheTemplateEngine();
-
-				try {
-					foreach (
-						$this->generate_markdown( $doc_tree, $template_engine ) as $markdown
-					) {
-						/** @var Markdown $markdown */
-						$filepath = "{$destination_folder}/{$markdown->get_filename()}";
-						$this->ensure_dir_exists( dirname( $filepath ) );
-						$result = file_put_contents( $filepath, $markdown->get_contents() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
-					}
-				} catch ( Exception $exception ) {
-					WP_CLI::error(
-						"Failed to generate markdown files: {$exception->getMessage()}\n{$exception->getTraceAsString()}"
-					);
-				}
-				break;
-			case '':
-				WP_CLI::error( "A value of 'json' or 'markdown' is required for the --format flag." );
-				break;
-			default:
-				WP_CLI::error( "Invalid --format value '{$format}' provided. Possible values: json, markdown" );
-		}
-
-		WP_CLI::line();
-
+		$output_file = $destination_folder . '/docs.json';
+		$json        = wp_json_encode( $data, JSON_PRETTY_PRINT );
+		$result      = file_put_contents( $output_file, $json ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 		if ( false === $result ) {
 			WP_CLI::error( "Problem writing data to file '{$output_file}'" );
-			exit;
+		}
+		WP_CLI::line();
+		WP_CLI::success( "Generated JSON data saved to '{$output_file}'." );
+
+		try {
+			$doc_tree = new Root( $data );
+		} catch ( Exception $exception ) {
+			WP_CLI::error( "Failed to build documentation object tree: {$exception->getMessage()}\n{$exception->getTraceAsString()}" );
 		}
 
-		$success_message = ( 'json' === $format )
-			? "Generated JSON data saved to '{$output_file}'."
-			: "Generated Markdown files stored in '{$destination_folder}'.";
+		// Empty out all markdown files located inside of the directories.
+		$cleaned_count = 0;
+		$md_dirs       = [
+			'class',
+			'hook',
+			'function',
+			'method',
+		];
+		foreach ( $md_dirs as $md_dir ) {
+			$iterator = new RegexIterator(
+				new RecursiveIteratorIterator(
+					new RecursiveDirectoryIterator( $destination_folder . '/' . $md_dir )
+				),
+				'/\.md$/'
+			);
+			foreach ( $iterator as $file ) {
+				if ( unlink( $file ) ) {
+					WP_CLI::line( "Cleaned: $file" );
+					$cleaned_count++;
+				} else {
+					WP_CLI::warning( "Failed to clean: $file" );
+				}
+			}
+		}
+		if ( $cleaned_count > 0 ) {
+			WP_CLI::success( "Cleaned $cleaned_count markdown file(s)." );
+		}
 
-		WP_CLI::success( $success_message );
-		WP_CLI::line();
+		$template_engine = new MustacheTemplateEngine();
+
+		try {
+			foreach (
+				$this->generate_markdown( $doc_tree, $template_engine ) as $markdown
+			) {
+				/** @var Markdown $markdown */
+				$filepath = "{$destination_folder}/{$markdown->get_filename()}";
+				$this->ensure_dir_exists( dirname( $filepath ) );
+				$result = file_put_contents( $filepath, $markdown->get_contents() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+				if ( false === $result ) {
+					WP_CLI::error( "Problem writing data to file '{$filepath}'" );
+				}
+			}
+		} catch ( Exception $exception ) {
+			WP_CLI::error(
+				"Failed to generate markdown files: {$exception->getMessage()}\n{$exception->getTraceAsString()}"
+			);
+		}
+
+		WP_CLI::success( "Generated Markdown files stored in '{$destination_folder}'." );
 	}
 
 	/**
@@ -133,12 +136,11 @@ final class GenerateCommand {
 		WP_CLI::line( sprintf( 'Extracting PHPDoc from %1$s. This may take a few minutes...', $path ) );
 		$parser  = new Parser();
 		$is_file = is_file( $path );
-		$files   = $is_file ? [ $path ] : $parser->get_files( $path, $this->get_excluded_dirs() );
+		$files   = $is_file ? [ $path ] : $parser->get_files( $path, $this->get_included_dirs() );
 		$path    = $is_file ? dirname( $path ) : $path;
 
 		if ( $files instanceof WP_Error ) {
 			WP_CLI::error( sprintf( 'Problem with %1$s: %2$s', $path, $files->get_error_message() ) );
-			exit;
 		}
 
 		$parsed_data = array_map( [ $this, 'filter_internal_data' ], $parser->parse_files( $files, $path ) );
@@ -239,14 +241,17 @@ final class GenerateCommand {
 	}
 
 	/**
-	 * Get the list of regex patterns of folders to exclude.
+	 * Get the list of regex patterns of folders to include.
+	 *
+	 * This corresponds to the `productionIncludedRootFiles` array in the project Gruntfile.
+	 *
+	 * @link https://github.com/ampproject/amp-wp/blob/b3d0f71027fad4498348d04d90357eae615c2665/Gruntfile.js#L6-L16
 	 *
 	 * @return string[] Array of regex patterns.
 	 */
-	private function get_excluded_dirs() {
+	private function get_included_dirs() {
 		return [
-			'#^.*/amp/(assets|bin|build|docs|node_modules|tests|vendor)/*#',
-			'#^.*/amp/lib/(common|optimizer)/*#',
+			'#^.*/amp/(back-compat|includes|src|templates)/*#',
 		];
 	}
 

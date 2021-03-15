@@ -18,18 +18,19 @@ final class DirectoryFilter extends RecursiveFilterIterator {
 	/**
 	 * @var string[]
 	 */
-	private $excluded_dirs;
+	private $included_dirs;
 
 	/**
 	 * Create a RecursiveFilterIterator from a RecursiveIterator.
 	 *
 	 * @link https://php.net/manual/en/recursivefilteriterator.construct.php
+	 *
 	 * @param RecursiveIterator $iterator      Iterator to filter.
-	 * @param string[]          $excluded_dirs Directories to exclude.
+	 * @param string[]          $included_dirs Directories to include.
 	 */
-	public function __construct( RecursiveIterator $iterator, $excluded_dirs ) {
+	public function __construct( RecursiveIterator $iterator, $included_dirs ) {
 		parent::__construct( $iterator );
-		$this->excluded_dirs = $excluded_dirs;
+		$this->included_dirs = $included_dirs;
 	}
 
 	/**
@@ -43,7 +44,7 @@ final class DirectoryFilter extends RecursiveFilterIterator {
 	public function getChildren() {
 		return new self(
 			$this->getInnerIterator()->getChildren(),
-			$this->excluded_dirs
+			$this->included_dirs
 		);
 	}
 
@@ -60,8 +61,8 @@ final class DirectoryFilter extends RecursiveFilterIterator {
 			return true;
 		}
 
-		foreach ( $this->excluded_dirs as $excluded_dir ) {
-			if ( preg_match( $excluded_dir, $directory->getPathname() ) ) {
+		foreach ( $this->included_dirs as $included_dir ) {
+			if ( ! preg_match( $included_dir, $directory->getPathname() ) ) {
 				return false;
 			}
 		}
