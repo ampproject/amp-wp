@@ -35,14 +35,14 @@ export default class Container extends Component {
 
 		this.state = {
 			isLoading: true,
-			isSwitching: false,
+			isInstalling: false,
 			isDevBuild: false,
 			error: null,
 			buildOption: { label: '', value: '' },
 			buildOptions,
 		};
 
-		this.handleActivation = this.handleActivation.bind( this );
+		this.handleInstallation = this.handleInstallation.bind( this );
 		this.handleChangeDevBuild = this.handleChangeDevBuild.bind( this );
 		this.handleChangeBuildOption = this.handleChangeBuildOption.bind(
 			this
@@ -137,14 +137,14 @@ export default class Container extends Component {
 	}
 
 	/**
-	 * Switches the AMP plugin to the selected build option.
+	 * Installs the selected build option.
 	 */
-	handleActivation() {
+	handleInstallation() {
 		const { isDevBuild, buildOption } = this.state;
-		this.setState( { isSwitching: true } );
+		this.setState( { isInstalling: true } );
 
 		apiFetch( {
-			path: '/amp-qa-tester/v1/switch',
+			path: '/amp-qa-tester/v1/install',
 			method: 'POST',
 			data: {
 				id: buildOption.value,
@@ -153,11 +153,7 @@ export default class Container extends Component {
 			},
 		} )
 			.then( () => {
-				// @todo Could this be handled better?
-				// Set a 1 second delay before reloading the page to allow for the new plugin to activate without any error.
-				this.pageReloadTimeout = setTimeout( () => {
-					window.location.reload();
-				}, 1000 );
+				window.location.reload();
 			} )
 			.catch( ( error ) => {
 				if ( error.message ) {
@@ -176,13 +172,13 @@ export default class Container extends Component {
 	showError( message = '' ) {
 		if ( ! message ) {
 			message = __(
-				'An unknown error occurred while switching build',
+				'An unknown error occurred while installing build',
 				'amp-qa-tester'
 			);
 		}
 
 		this.setState( {
-			isSwitching: false,
+			isInstalling: false,
 			error: message,
 		} );
 	}
@@ -190,7 +186,7 @@ export default class Container extends Component {
 	render() {
 		const {
 			isLoading,
-			isSwitching,
+			isInstalling,
 			error,
 			buildOption,
 			buildOptions,
@@ -227,17 +223,17 @@ export default class Container extends Component {
 					type="button"
 					className="button button-primary"
 					disabled={
-						buildOption.value === '' || isSwitching || error
+						buildOption.value === '' || isInstalling || error
 					}
-					onClick={ this.handleActivation }
+					onClick={ this.handleInstallation }
 				>
-					{ __( 'Activate selection', 'amp-qa-tester' ) }
+					{ __( 'Install selection', 'amp-qa-tester' ) }
 				</button>
 
-				{ isSwitching && (
+				{ isInstalling && (
 					<div>
-						<div className="switching" />
-						{ __( 'Switching versions…', 'amp-qa-tester' ) }
+						<div className="installing" />
+						{ __( 'Installing build…', 'amp-qa-tester' ) }
 					</div>
 				) }
 

@@ -79,7 +79,7 @@ class AdminBar {
 	 * @param object $wp_admin_bar The WP AdminBar object.
 	 */
 	public function add_menu_button( $wp_admin_bar ) {
-		if ( '' === $this->build_id || false === $this->build_id ) {
+		if ( 'release' === $this->build_id || false === $this->build_id ) {
 			$on = __( 'latest release', 'amp-qa-tester' );
 		} elseif ( filter_var( $this->build_id, FILTER_VALIDATE_INT ) ) {
 			$on = 'PR #' . $this->build_id;

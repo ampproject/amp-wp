@@ -71,7 +71,7 @@
 	transition: .05s border-color ease-in-out;
 }
 
-#amp-qa-tester-build-selector .switching {
+#amp-qa-tester-build-selector .installing {
 	border: 2px solid #eee;
 	border-radius: 50%;
 	border-top: 2px solid #333;

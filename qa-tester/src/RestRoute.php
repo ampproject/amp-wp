@@ -18,8 +18,6 @@ use WP_REST_Server;
  */
 class RestRoute {
 
-	use VersionSwitcher;
-
 	const REST_NAMESPACE = 'amp-qa-tester/v1';
 
 	/**
@@ -30,13 +28,13 @@ class RestRoute {
 	}
 
 	/**
-	 * Registers the `/switch` route that is used to switch the plugin version.
+	 * Registers the `/install` route that is used to install the specified plugin build.
 	 */
 	public function register_route() {
-		$route_uri = '/switch';
+		$route_uri = '/install';
 		$args      = [
 			'methods'             => WP_REST_Server::CREATABLE,
-			'callback'            => [ $this, 'switch_callback' ],
+			'callback'            => [ $this, 'install_callback' ],
 			'permission_callback' => static function () {
 				return current_user_can( 'update_plugins' );
 			},
@@ -97,15 +95,19 @@ class RestRoute {
 	}
 
 	/**
-	 * Handle `switch` REST route.
+	 * Handle `install` REST route.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return array|false|WP_Error
 	 */
-	public function switch_callback( WP_REST_Request $request ) {
+	public function install_callback( WP_REST_Request $request ) {
 		$build_id     = $request->get_param( 'id' );
 		$build_origin = $request->get_param( 'origin' );
 		$is_dev_build = $request->get_param( 'isDev' );
+
+		$download_url     = null;
+		$download_id      = null;
+		$plugin_installer = new PluginInstaller( $build_origin );
 
 		// If the request is for the release version, retrieve the latest version from the wordpress.org API.
 		if ( 'release' === $build_origin ) {
@@ -127,29 +129,36 @@ class RestRoute {
 				]
 			);
 
-			if ( ! is_wp_error( $response ) ) {
-				$returned_object = unserialize( wp_remote_retrieve_body( $response ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
-
-				if ( $returned_object ) {
-					update_site_option( Plugin::ID_STORAGE_KEY, '' );
-					return $this->switch_version( $returned_object->download_link, $returned_object->version, $build_origin );
-				}
+			if ( is_wp_error( $response ) ) {
+				return $response;
 			}
+
+			$returned_object = unserialize( wp_remote_retrieve_body( $response ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+
+			if ( ! isset( $returned_object->download_link, $returned_object->version ) ) {
+				return new WP_Error(
+					'amp_plugin_latest_release',
+					__( 'Failed to retrieve the download information for the latest release of the AMP plugin on WordPress.org', 'amp-qa-tester' )
+				);
+			}
+
+			$download_url = $returned_object->download_link;
+			$download_id  = $returned_object->version;
 		} else {
 			$ref   = 'branch' === $build_origin ? 'heads/' . $build_id : "pull/{$build_id}/merge";
 			$build = ( $is_dev_build ? 'dev' : 'prod' );
 
+			$download_id  = $build_id;
 			$download_url = str_replace( [ '{ref}', '{build}' ], [ $ref, $build ], Plugin::DOWNLOAD_BASE );
-			$result       = $this->switch_version( $download_url, $build_id, $build_origin );
-
-			if ( ! empty( $result ) && ! $result instanceof WP_Error ) {
-				// Store the ID so we can reference it later in the selector.
-				update_site_option( Plugin::ID_STORAGE_KEY, $build_id );
-			}
-
-			return $result;
 		}
 
-		return false;
+		$result = $plugin_installer->install( $download_url, $download_id );
+
+		if ( ! empty( $result ) && ! $result instanceof WP_Error ) {
+			// Store the ID so that it can be used as a reference to display the currently active build in the admin bar.
+			update_site_option( Plugin::ID_STORAGE_KEY, $build_id );
+		}
+
+		return $result;
 	}
 }
