@@ -96,18 +96,23 @@
 	margin: 12px 8px;
 }
 
+.amp-error .components-panel__body-title,
+.amp-error .components-panel__body-title:hover {
+	border-left: 4px solid transparent;
+}
+
 /* AMP error - new */
 .amp-error--new .components-panel__body-title,
 .amp-error--new .components-panel__body-title:hover {
 	background: #fef7f1;
-	border-left: 4px solid #d54e21;
+	border-left-color: #d54e21;
 }
 
 /* AMP error - removed */
 .amp-error--removed .components-panel__body-title,
 .amp-error--removed .components-panel__body-title:hover {
 	background: #f8f8f8;
-	border-left: 4px solid #c2c2c2;
+	border-left-color: #c2c2c2;
 }
 
 .amp-error--removed .amp-error__title-text {
