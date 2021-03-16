@@ -222,7 +222,9 @@ export default class Container extends Component {
 					</div>
 				) }
 
+				{ /*TODO: Prevent submenu from closing after clicking button to activate selection and hovering away from it */ }
 				<button
+					type="button"
 					className="button button-primary"
 					disabled={
 						buildOption.value === '' || isSwitching || error

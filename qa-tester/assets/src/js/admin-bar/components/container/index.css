@@ -1,3 +1,11 @@
+#wp-admin-bar-amp-qa-tester:focus-within {
+	outline: none;
+}
+
+#wp-admin-bar-amp-qa-tester:focus-within > #amp-qa-tester-adminbar {
+	display: block;
+}
+
 #amp-qa-tester-adminbar-inner {
 	padding: 0 6px;
 }

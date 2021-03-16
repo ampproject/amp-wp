@@ -12,7 +12,7 @@ module.exports = function ( grunt ) {
 					'assets/**',
 					'!assets/src/**',
 					'src/**',
-					'composer.json',
+					'composer.*',
 					'amp-qa-tester.php',
 				],
 				dest: 'build',
@@ -44,7 +44,7 @@ module.exports = function ( grunt ) {
 				command:
 				'cd build;' +
 				'composer install --no-dev -o;' +
-				'rm composer.json composer.lock;' +
+				'rm composer.*;' +
 				'cd ..;' +
 				'echo;' +
 				'echo "Composer dependencies for build installed successfully!"',

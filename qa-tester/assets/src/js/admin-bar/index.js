@@ -15,4 +15,9 @@ domReady( () => {
 	if ( root ) {
 		render( <Container />, root );
 	}
+
+	// Allow submenu to be focused so that it will stay open when configuring build to activate.
+	document
+		.getElementById( 'wp-admin-bar-amp-qa-tester' )
+		.setAttribute( 'tabindex', '0' );
 } );

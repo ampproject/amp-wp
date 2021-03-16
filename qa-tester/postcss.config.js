@@ -9,6 +9,7 @@ module.exports = {
 				'custom-properties': {
 					preserve: true, // Do not remove :root selector.
 				},
+				'focus-within-pseudo-class': false, // Do not use the `:focus-within` polyfill.
 			},
 			autoprefixer: {
 				grid: true,
