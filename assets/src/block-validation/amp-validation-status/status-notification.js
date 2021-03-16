@@ -2,12 +2,13 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button, ExternalLink } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import AMPValidationErrorsKeptIcon from '../../../images/amp-validation-errors-kept.svg';
 import { BLOCK_VALIDATION_STORE_KEY } from '../store';
 import { StatusIcon } from '../icon';
 import { SidebarNotification } from '../../block-editor/components/sidebar-notification';
@@ -25,6 +26,7 @@ export default function AMPValidationStatusNotification() {
 		isDraft,
 		isEditedPostNew,
 		isFetchingErrors,
+		reviewLink,
 	} = useSelect( ( select ) => ( {
 		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
 		fetchingErrorsRequestErrorMessage: select( BLOCK_VALIDATION_STORE_KEY ).getFetchingErrorsRequestErrorMessage(),
@@ -32,6 +34,7 @@ export default function AMPValidationStatusNotification() {
 		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' )?.getEditedPostAttribute( 'status' ) ) !== -1,
 		isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
 		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
+		reviewLink: select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(),
 	} ), [] );
 
 	if ( isFetchingErrors ) {
@@ -42,6 +45,7 @@ export default function AMPValidationStatusNotification() {
 		return (
 			<SidebarNotification
 				isError={ true }
+				icon={ <AMPValidationErrorsKeptIcon /> }
 				message={ fetchingErrorsRequestErrorMessage }
 				action={
 					<Button
@@ -62,7 +66,13 @@ export default function AMPValidationStatusNotification() {
 		return (
 			<SidebarNotification
 				isError={ true }
+				icon={ <AMPValidationErrorsKeptIcon /> }
 				message={ __( 'AMP blocked from validation issues marked kept.', 'amp' ) }
+				action={ reviewLink && (
+					<ExternalLink href={ reviewLink }>
+						{ __( 'View technical details', 'amp' ) }
+					</ExternalLink>
+				) }
 			/>
 		);
 	}
@@ -72,6 +82,11 @@ export default function AMPValidationStatusNotification() {
 			<SidebarNotification
 				icon={ <StatusIcon broken={ true } /> }
 				message={ __( 'AMP is working, but issues needs review.', 'amp' ) }
+				action={ reviewLink && (
+					<ExternalLink href={ reviewLink }>
+						{ __( 'View technical details', 'amp' ) }
+					</ExternalLink>
+				) }
 			/>
 		);
 	}

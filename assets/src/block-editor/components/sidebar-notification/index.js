@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.css';
-import AMPValidationErrorsKeptIcon from '../../../../images/amp-validation-errors-kept.svg';
 import { Loading } from '../../../components/loading';
 
 /**
@@ -28,15 +27,7 @@ export function SidebarNotification( {
 	isLoading = false,
 	message,
 } ) {
-	let iconElement;
-
-	if ( isLoading ) {
-		iconElement = <Loading />;
-	} else if ( isError ) {
-		iconElement = <AMPValidationErrorsKeptIcon />;
-	} else {
-		iconElement = icon;
-	}
+	const iconElement = isLoading ? <Loading /> : icon;
 
 	return (
 		<div className={

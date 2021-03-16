@@ -33,6 +33,7 @@ describe( 'AMPValidationStatusNotification', () => {
 			isDraft: false,
 			isEditedPostNew: false,
 			isFetchingErrors: false,
+			reviewLink: 'http://example.com',
 			...overrides,
 		} ) );
 	}
@@ -86,6 +87,7 @@ describe( 'AMPValidationStatusNotification', () => {
 		expect( container.innerHTML ).toMatchSnapshot();
 		expect( container.innerHTML ).toContain( 'request error message' );
 		expect( container.querySelector( '.is-error' ) ).not.toBeNull();
+		expect( container.querySelector( 'a[href="http://example.com"]' ) ).toBeNull();
 
 		container.querySelector( 'button' ).click();
 		expect( autosave ).toHaveBeenCalledWith( { isPreview: true } );
@@ -114,6 +116,7 @@ describe( 'AMPValidationStatusNotification', () => {
 		expect( container.innerHTML ).toMatchSnapshot();
 		expect( container.innerHTML ).toContain( 'validation issues marked kept' );
 		expect( container.querySelector( '.is-error' ) ).not.toBeNull();
+		expect( container.querySelector( 'a[href="http://example.com"]' ) ).not.toBeNull();
 	} );
 
 	it( 'renders message when there are AMP validation errors', () => {
@@ -128,6 +131,7 @@ describe( 'AMPValidationStatusNotification', () => {
 		expect( container.innerHTML ).toMatchSnapshot();
 		expect( container.innerHTML ).toContain( 'issues needs review' );
 		expect( container.querySelector( '.is-error' ) ).toBeNull();
+		expect( container.querySelector( 'a[href="http://example.com"]' ) ).not.toBeNull();
 	} );
 
 	it( 'renders message when there are no errors and post is new', () => {
@@ -142,6 +146,7 @@ describe( 'AMPValidationStatusNotification', () => {
 		expect( container.innerHTML ).toMatchSnapshot();
 		expect( container.innerHTML ).toContain( 'issues will be checked for when the post is saved' );
 		expect( container.querySelector( '.is-error' ) ).toBeNull();
+		expect( container.querySelector( 'a[href="http://example.com"]' ) ).toBeNull();
 	} );
 } );
 
