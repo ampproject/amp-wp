@@ -403,14 +403,14 @@ exports[`TemplateModeOption matches snapshot 2`] = `
           <span
             dangerouslySetInnerHTML={
               Object {
-                "__html": "Component details",
+                "__html": "Reader info",
               }
             }
           />
            
           <a
-            href="http://amp-wp.org"
-            rel="noreferrer"
+            href="https://amp-wp.org/documentation/getting-started/reader/"
+            rel="noreferrer noopener"
             target="_blank"
           >
             Learn more.
@@ -689,8 +689,8 @@ exports[`TemplateModeOption matches snapshot 3`] = `
           />
            
           <a
-            href="http://amp-wp.org"
-            rel="noreferrer"
+            href="https://amp-wp.org/documentation/getting-started/reader/"
+            rel="noreferrer noopener"
             target="_blank"
           >
             Learn more.

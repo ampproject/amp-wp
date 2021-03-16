@@ -14,7 +14,7 @@ This function cannot be called before the parse_query action because it needs to
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:865](/includes/amp-helper-functions.php#L865-L892)
+:link: [includes/amp-helper-functions.php:741](/includes/amp-helper-functions.php#L741-L764)
 
 <details>
 <summary>Show Code</summary>
@@ -22,10 +22,6 @@ This function cannot be called before the parse_query action because it needs to
 ```php
 function amp_is_request() {
 	global $wp_query;
-
-	if ( AMP_Validation_Manager::$is_validate_request ) {
-		return true;
-	}
 
 	$is_amp_url = (
 		amp_is_canonical()

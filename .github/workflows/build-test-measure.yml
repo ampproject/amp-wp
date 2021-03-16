@@ -6,9 +6,23 @@ on:
       - develop
       # Include all release branches.
       - '[0-9]+.[0-9]+'
+    # Don't run for irrelevant changes.
+    paths-ignore:
+      - '!.github/workflows/*'
+      - '.wordpress-org/**'
+      - '!bin/ci/**'
+      - '!bin/local-env/**'
+      - 'docs/**'
   pull_request:
     # Run workflow whenever a PR is opened, updated (synchronized), or marked ready for review.
     types: [opened, synchronize, ready_for_review]
+    # Don't run for irrelevant changes.
+    paths-ignore:
+      - '!.github/workflows/*'
+      - '.wordpress-org/**'
+      - '!bin/ci/**'
+      - '!bin/local-env/**'
+      - 'docs/**'
 
 jobs:
 

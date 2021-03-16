@@ -57,7 +57,15 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		return AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+		return (
+			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+			||
+			(
+				AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+				&&
+				get_stylesheet() === AMP_Options_Manager::get_option( Option::READER_THEME )
+			)
+		);
 	}
 
 	/**

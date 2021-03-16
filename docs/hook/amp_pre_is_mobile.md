@@ -12,7 +12,7 @@ Filters whether the current request is from a mobile device. This is provided as
 
 ### Source
 
-:link: [src/MobileRedirection.php:207](/src/MobileRedirection.php#L207)
+:link: [src/MobileRedirection.php:232](/src/MobileRedirection.php#L232)
 
 <details>
 <summary>Show Code</summary>

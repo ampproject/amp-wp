@@ -23,6 +23,7 @@
 * [`amp_content_sanitizers`](amp_content_sanitizers.md) - Filters the content sanitizers.
 * [`amp_css_transient_monitoring_sampling_range`](amp_css_transient_monitoring_sampling_range.md) - Filters the sampling range to use for monitoring the transient caching of stylesheets.
 * [`amp_css_transient_monitoring_threshold`](amp_css_transient_monitoring_threshold.md) - Filters the threshold to use for disabling transient caching of stylesheets.
+* [`amp_custom_paired_url_structure`](amp_custom_paired_url_structure.md) - Filters to allow a custom paired URL structure to be used.
 * [`amp_customizer_get_settings`](amp_customizer_get_settings.md) - Filters the AMP Customizer settings.
 * [`amp_customizer_is_enabled`](amp_customizer_is_enabled.md) - Filter whether to enable the AMP default template design settings.
 * [`amp_customizer_post_type`](amp_customizer_post_type.md) - Filter the post type to retrieve the latest for use in the AMP template customizer.

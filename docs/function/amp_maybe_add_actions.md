@@ -16,7 +16,7 @@ If the request is for an AMP page and this is in 'canonical mode,' redirect to t
 
 ### Source
 
-:link: [includes/deprecated.php:32](/includes/deprecated.php#L32-L81)
+:link: [includes/deprecated.php:34](/includes/deprecated.php#L34-L83)
 
 <details>
 <summary>Show Code</summary>

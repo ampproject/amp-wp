@@ -24,7 +24,7 @@ import '../css/elements.css';
 import '../css/core-components.css';
 import './style.css';
 import { OptionsContextProvider, Options } from '../components/options-context-provider';
-import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
+import { ReaderThemesContextProvider, ReaderThemes } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
@@ -101,17 +101,18 @@ function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
 
 	const { fetchingOptions, saveOptions } = useContext( Options );
+	const { templateModeWasOverridden } = useContext( ReaderThemes );
 
 	/**
 	 * Scroll to the focused element on load or when it changes.
 	 */
 	useEffect( () => {
-		if ( fetchingOptions ) {
+		if ( fetchingOptions || null === templateModeWasOverridden ) {
 			return;
 		}
 
 		scrollFocusedSectionIntoView( focusedSection );
-	}, [ fetchingOptions, focusedSection ] );
+	}, [ fetchingOptions, focusedSection, templateModeWasOverridden ] );
 
 	/**
 	 * Resets the focused element state when the hash changes on the page.
@@ -135,7 +136,7 @@ function Root( { appRoot } ) {
 		};
 	}, [ fetchingOptions ] );
 
-	if ( false !== fetchingOptions ) {
+	if ( false !== fetchingOptions || null === templateModeWasOverridden ) {
 		return <Loading />;
 	}
 
