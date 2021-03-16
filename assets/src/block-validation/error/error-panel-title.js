@@ -2,7 +2,6 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { VALIDATION_ERROR_ACK_REJECTED_STATUS, VALIDATION_ERROR_NEW_REJECTED_STATUS } from 'amp-block-validation';
 
 /**
  * WordPress dependencies
@@ -13,7 +12,6 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import AMPAlert from '../../../images/amp-alert.svg';
 import { ErrorTypeIcon } from './error-type-icon';
 
 /**
@@ -21,14 +19,17 @@ import { ErrorTypeIcon } from './error-type-icon';
  *
  * @param {Object} props Component props.
  * @param {Object} props.blockType
+ * @param {boolean} props.kept
  * @param {string} props.title Title string from error data.
  * @param {Object} props.error Error details.
  * @param {string} props.error.type Error type.
- * @param {number} props.status Error status.
  */
-export function ErrorPanelTitle( { blockType, title, error: { type }, status } ) {
-	const kept = status === VALIDATION_ERROR_ACK_REJECTED_STATUS || status === VALIDATION_ERROR_NEW_REJECTED_STATUS;
-
+export function ErrorPanelTitle( {
+	blockType,
+	kept,
+	title,
+	error: { type },
+} ) {
 	const [ titleText ] = title.split( ':' );
 
 	return (
@@ -45,25 +46,22 @@ export function ErrorPanelTitle( { blockType, title, error: { type }, status } )
 					</div>
 				) }
 			</div>
-			<div className="amp-error__title">
+			<div
+				className="amp-error__title"
+				title={ kept ? __( 'This error has been kept, making this URL not AMP-compatible.', 'amp' ) : '' }
+			>
 				<div className="amp-error__title-text">
 					{ titleText }
 				</div>
-				{ kept && (
-					<div className="amp-error-alert" title={ __( 'This error has been kept, making this URL not AMP-compatible.', 'amp' ) }>
-						<AMPAlert />
-						{ __( 'Kept', 'amp' ) }
-					</div>
-				) }
 			</div>
 		</>
 	);
 }
 ErrorPanelTitle.propTypes = {
 	blockType: PropTypes.object,
+	kept: PropTypes.bool,
 	title: PropTypes.string.isRequired,
 	error: PropTypes.shape( {
 		type: PropTypes.string,
 	} ).isRequired,
-	status: PropTypes.number.isRequired,
 };

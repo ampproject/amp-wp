@@ -96,6 +96,7 @@
 	margin: 12px 8px;
 }
 
+/* AMP error - generic */
 .amp-error .components-panel__body-title,
 .amp-error .components-panel__body-title:hover {
 	border-left: 4px solid transparent;
@@ -104,14 +105,21 @@
 /* AMP error - new */
 .amp-error--new .components-panel__body-title,
 .amp-error--new .components-panel__body-title:hover {
-	background: #fef7f1;
-	border-left-color: #d54e21;
+	background: #f4f4f4;
+}
+
+.amp-error--new .amp-error__title-text {
+	font-weight: 700;
 }
 
 /* AMP error - removed */
 .amp-error--removed .components-panel__body-title,
 .amp-error--removed .components-panel__body-title:hover {
 	background: #f8f8f8;
+}
+
+.amp-error--removed.amp-error--kept .components-panel__body-title,
+.amp-error--removed.amp-error--kept .components-panel__body-title:hover {
 	border-left-color: #c2c2c2;
 }
 
@@ -121,6 +129,12 @@
 
 .amp-error--removed .amp-error__icons {
 	opacity: 0.4;
+}
+
+/* AMP error - kept */
+.amp-error--kept .components-panel__body-title,
+.amp-error--kept .components-panel__body-title:hover {
+	border-left-color: #d54e21;
 }
 
 .amp-error .components-panel__body-title,
@@ -178,16 +192,6 @@
 
 .amp-error code {
 	white-space: nowrap;
-}
-
-.amp-error-alert {
-	color: #be2c23;
-	white-space: nowrap;
-}
-
-.amp-error-alert svg {
-	margin-bottom: -2px;
-	margin-right: 3px;
 }
 
 .amp-error__block-type-description {

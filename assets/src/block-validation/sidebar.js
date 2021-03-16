@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { Button, PanelBody } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
@@ -21,28 +21,21 @@ import { BLOCK_VALIDATION_STORE_KEY } from './store';
 export function Sidebar() {
 	const { setIsShowingReviewed } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { isDraft, isShowingReviewed } = useSelect( ( select ) => ( {
-		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' )?.getEditedPostAttribute( 'status' ) ) !== -1,
-		isShowingReviewed: select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed(),
-	} ), [] );
-
 	const {
 		displayedErrors,
 		hasReviewedValidationErrors,
-		hasUnreviewedValidationErrors,
-		validationErrors,
+		isShowingReviewed,
 	} = useSelect( ( select ) => {
-		const allErrors = select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors();
-		const reviewedErrors = select( BLOCK_VALIDATION_STORE_KEY ).getReviewedValidationErrors();
-		const unreviewedErrors = select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors();
+		const _isShowingReviewed = select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed();
 
 		return {
-			displayedErrors: isShowingReviewed ? allErrors : unreviewedErrors,
-			hasReviewedValidationErrors: reviewedErrors?.length > 0,
-			hasUnreviewedValidationErrors: unreviewedErrors?.length > 0,
-			validationErrors: allErrors,
+			displayedErrors: _isShowingReviewed
+				? select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors()
+				: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors(),
+			hasReviewedValidationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getReviewedValidationErrors()?.length > 0,
+			isShowingReviewed: _isShowingReviewed,
 		};
-	}, [ isShowingReviewed ] );
+	}, [] );
 
 	/**
 	 * Focus the first focusable element when the sidebar opens.
@@ -61,24 +54,15 @@ export function Sidebar() {
 				<AMPValidationStatusNotification />
 			</SidebarNotificationsContainer>
 
-			{ 0 < validationErrors.length && (
-				0 < displayedErrors.length ? (
-					<ul>
-						{ displayedErrors.map( ( validationError, index ) => (
-							<Error { ...validationError } key={ `${ validationError.clientId }${ index }` } />
-						) ) }
-					</ul>
-				)
-					: ! isDraft && (
-						<PanelBody opened={ true }>
-							<p>
-								{ __( 'All AMP validation issues have been reviewed.', 'amp' ) }
-							</p>
-						</PanelBody>
-					)
+			{ 0 < displayedErrors.length && (
+				<ul>
+					{ displayedErrors.map( ( validationError, index ) => (
+						<Error { ...validationError } key={ `${ validationError.clientId }${ index }` } />
+					) ) }
+				</ul>
 			) }
 
-			{ hasReviewedValidationErrors && hasUnreviewedValidationErrors && (
+			{ hasReviewedValidationErrors && (
 				<div className="amp-sidebar__options">
 					<Button
 						isLink

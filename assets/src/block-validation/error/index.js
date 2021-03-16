@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import {
 	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 	VALIDATION_ERROR_ACK_REJECTED_STATUS,
+	VALIDATION_ERROR_NEW_REJECTED_STATUS,
 } from 'amp-block-validation';
 
 /**
@@ -34,8 +35,9 @@ import { ErrorContent } from './error-content';
  */
 export function Error( { clientId, error, status, term_id: termId, title } ) {
 	const { selectBlock } = useDispatch( 'core/block-editor' );
-	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink() );
+	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(), [] );
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
+	const kept = status === VALIDATION_ERROR_ACK_REJECTED_STATUS || status === VALIDATION_ERROR_NEW_REJECTED_STATUS;
 	const external = ! Boolean( clientId );
 
 	const { blockType, removed } = useSelect( ( select ) => {
@@ -58,6 +60,7 @@ export function Error( { clientId, error, status, term_id: termId, title } ) {
 		'amp-error--reviewed': reviewed,
 		'amp-error--new': ! reviewed,
 		'amp-error--removed': removed,
+		'amp-error--kept': kept,
 		[ `error-${ clientId }` ]: clientId,
 	} );
 
@@ -66,7 +69,12 @@ export function Error( { clientId, error, status, term_id: termId, title } ) {
 			<PanelBody
 				className={ panelClassNames }
 				title={
-					<ErrorPanelTitle blockType={ blockType } error={ error } title={ title } status={ status } />
+					<ErrorPanelTitle
+						blockType={ blockType }
+						error={ error }
+						kept={ kept }
+						title={ title }
+					/>
 				}
 				initialOpen={ false }
 			>
