@@ -153,7 +153,7 @@ describe( 'Error', () => {
 	} );
 
 	beforeEach( () => {
-		container = document.createElement( 'ul' );
+		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 	} );
 
@@ -187,13 +187,13 @@ describe( 'Error', () => {
 
 		const newReviewed = [ VALIDATION_ERROR_NEW_REJECTED_STATUS, VALIDATION_ERROR_NEW_ACCEPTED_STATUS ].includes( status ) ? 'new' : 'reviewed';
 
-		expect( container.querySelector( 'li' ).getAttribute( 'class' ) ).toBe( 'amp-error-container' );
+		expect( container.firstChild.classList ).toContain( 'amp-error' );
 		expect( container.querySelectorAll( `.amp-error--${ newReviewed }` ) ).toHaveLength( 1 );
 		expect( container.querySelector( '.amp-error__details-link' ) ).toBeNull();
 		expect( container.querySelector( `.amp-error--${ newReviewed } button` ) ).not.toBeNull();
-		expect( container.querySelector( '.amp-error__block-type-icon' ) ).toBeNull();
 
 		container.querySelector( `.amp-error--${ newReviewed } button` ).click();
+		expect( container.querySelector( '.amp-error__block-type-icon' ) ).toBeNull();
 		expect( container.querySelector( '.amp-error__details-link' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__select-block' ) ).toBeNull();
 	} );
@@ -224,13 +224,13 @@ describe( 'Error', () => {
 
 		const newReviewed = [ VALIDATION_ERROR_NEW_REJECTED_STATUS, VALIDATION_ERROR_NEW_ACCEPTED_STATUS ].includes( status ) ? 'new' : 'reviewed';
 
-		expect( container.querySelector( 'li' ).getAttribute( 'class' ) ).toBe( 'amp-error-container' );
+		expect( container.firstChild.classList ).toContain( 'amp-error' );
 		expect( container.querySelectorAll( `.amp-error--${ newReviewed }` ) ).toHaveLength( 1 );
 		expect( container.querySelector( '.amp-error__details-link' ) ).toBeNull();
 		expect( container.querySelector( `.amp-error--${ newReviewed } button` ) ).not.toBeNull();
-		expect( container.querySelector( '.amp-error__block-type-icon' ) ).not.toBeNull();
 
 		container.querySelector( `.amp-error--${ newReviewed } button` ).click();
+		expect( container.querySelector( '.amp-error__block-type-icon' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__details-link' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__select-block' ) ).not.toBeNull();
 	} );
@@ -262,14 +262,14 @@ describe( 'Error', () => {
 
 		const newReviewed = [ VALIDATION_ERROR_NEW_REJECTED_STATUS, VALIDATION_ERROR_NEW_ACCEPTED_STATUS ].includes( status ) ? 'new' : 'reviewed';
 
-		expect( container.querySelector( 'li' ).getAttribute( 'class' ) ).toBe( 'amp-error-container' );
+		expect( container.firstChild.classList ).toContain( 'amp-error' );
 		expect( container.querySelectorAll( `.amp-error--${ newReviewed }` ) ).toHaveLength( 1 );
 		expect( container.querySelector( '.amp-error--removed' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__details-link' ) ).toBeNull();
 		expect( container.querySelector( '.amp-error--removed button' ) ).not.toBeNull();
-		expect( container.querySelector( '.amp-error__block-type-icon' ) ).toBeNull();
 
 		container.querySelector( '.amp-error--removed button' ).click();
+		expect( container.querySelector( '.amp-error__block-type-icon' ) ).toBeNull();
 		expect( container.querySelector( '.amp-error__details-link' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__select-block' ) ).toBeNull();
 	} );
@@ -277,7 +277,7 @@ describe( 'Error', () => {
 
 describe( 'ErrorTypeIcon', () => {
 	beforeEach( () => {
-		container = document.createElement( 'ul' );
+		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 	} );
 
@@ -343,7 +343,7 @@ describe( 'ErrorContent', () => {
 	} );
 
 	beforeEach( () => {
-		container = document.createElement( 'ul' );
+		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 	} );
 

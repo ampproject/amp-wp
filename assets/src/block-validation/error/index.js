@@ -19,6 +19,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import './style.css';
 import { BLOCK_VALIDATION_STORE_KEY } from '../store';
 import { ErrorPanelTitle } from './error-panel-title';
 import { ErrorContent } from './error-content';
@@ -65,53 +66,49 @@ export function Error( { clientId, error, status, term_id: termId, title } ) {
 	} );
 
 	return (
-		<li className="amp-error-container">
-			<PanelBody
-				className={ panelClassNames }
-				title={
-					<ErrorPanelTitle
-						blockType={ blockType }
-						error={ error }
-						kept={ kept }
-						title={ title }
-					/>
-				}
-				initialOpen={ false }
-			>
-				<ErrorContent
-					blockType={ blockType }
-					clientId={ clientId }
+		<PanelBody
+			className={ panelClassNames }
+			title={
+				<ErrorPanelTitle
 					error={ error }
-					external={ external }
-					removed={ removed }
-					status={ status }
+					kept={ kept }
 					title={ title }
 				/>
+			}
+			initialOpen={ false }
+		>
+			<ErrorContent
+				blockType={ blockType }
+				clientId={ clientId }
+				error={ error }
+				external={ external }
+				removed={ removed }
+				status={ status }
+			/>
 
-				<div className="amp-error__actions">
-					{ ! ( removed || external ) && (
-						<Button
-							className="amp-error__select-block"
-							isSecondary
-							onClick={ () => {
-								selectBlock( clientId );
-							} }
-						>
-							{ __( 'Select block', 'amp' ) }
-						</Button>
-					) }
-					{ detailsUrl && (
-						<ExternalLink
-							href={ detailsUrl.href }
-							className="amp-error__details-link"
-						>
-							{ __( 'View details', 'amp' ) }
-						</ExternalLink>
-					) }
-				</div>
+			<div className="amp-error__actions">
+				{ ! ( removed || external ) && (
+					<Button
+						className="amp-error__select-block"
+						isSecondary
+						onClick={ () => {
+							selectBlock( clientId );
+						} }
+					>
+						{ __( 'Select block', 'amp' ) }
+					</Button>
+				) }
+				{ detailsUrl && (
+					<ExternalLink
+						href={ detailsUrl.href }
+						className="amp-error__details-link"
+					>
+						{ __( 'View details', 'amp' ) }
+					</ExternalLink>
+				) }
+			</div>
 
-			</PanelBody>
-		</li>
+		</PanelBody>
 	);
 }
 Error.propTypes = {

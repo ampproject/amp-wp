@@ -14,6 +14,7 @@ import {
  * WordPress dependencies
  */
 import { sprintf, __ } from '@wordpress/i18n';
+import { BlockIcon } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -144,9 +145,10 @@ MarkupStatus.propTypes = {
 
 /**
  * @param {Object} props
+ * @param {Object} props.blockTypeIcon Block type icon.
  * @param {string} props.blockTypeTitle Title of the block type.
  */
-function BlockType( { blockTypeTitle } ) {
+function BlockType( { blockTypeIcon, blockTypeTitle } ) {
 	return (
 		<>
 			<dt>
@@ -155,12 +157,18 @@ function BlockType( { blockTypeTitle } ) {
 			<dd>
 				<span className="amp-error__block-type-description">
 					{ blockTypeTitle || __( 'unknown', 'amp' ) }
+					{ blockTypeIcon && (
+						<span className="amp-error__block-type-icon">
+							<BlockIcon icon={ blockTypeIcon } />
+						</span>
+					) }
 				</span>
 			</dd>
 		</>
 	);
 }
 BlockType.propTypes = {
+	blockTypeIcon: PropTypes.object,
 	blockTypeTitle: PropTypes.string,
 };
 
@@ -173,7 +181,6 @@ BlockType.propTypes = {
  * @param {boolean} props.removed Flag indicating if the block has been removed.
  * @param {string} props.clientId Block client ID
  * @param {number} props.status Number indicating the error status.
- * @param {string} props.title Error title.
  * @param {Object} props.error Error details.
  * @param {Object[]} props.error.sources Sources from the PHP backtrace for the error.
  */
@@ -184,13 +191,10 @@ export function ErrorContent( {
 	external,
 	removed,
 	status,
-	title,
 } ) {
 	const blockTypeTitle = blockType?.title;
 	const blockTypeName = blockType?.name;
-
-	// @todo Refactor AMP_Validation_Error_Taxonomy::get_error_title_from_code() to return structured data.
-	const [ titleText, nodeName ] = title.split( ':' ).map( ( item ) => item.trim() );
+	const blockTypeIcon = blockType?.icon;
 
 	return (
 		<>
@@ -205,18 +209,12 @@ export function ErrorContent( {
 				</p>
 			) }
 			<dl className="amp-error__details">
-				{
-					// If node name is empty, the title text displayed in the panel header is enough.
-					nodeName && (
-						<>
-							<dt>
-								{ titleText }
-							</dt>
-							<dd dangerouslySetInnerHTML={ { __html: nodeName } } />
-						</>
-					)
-				}
-				{ ! ( removed || external ) && <BlockType blockTypeTitle={ blockTypeTitle } /> }
+				{ ! ( removed || external ) && (
+					<BlockType
+						blockTypeIcon={ blockTypeIcon }
+						blockTypeTitle={ blockTypeTitle }
+					/>
+				) }
 				<ErrorSource blockTypeName={ blockTypeName } clientId={ clientId } sources={ sources } />
 				<MarkupStatus status={ status } />
 			</dl>
@@ -225,6 +223,7 @@ export function ErrorContent( {
 }
 ErrorContent.propTypes = {
 	blockType: PropTypes.shape( {
+		icon: PropTypes.object,
 		name: PropTypes.string,
 		title: PropTypes.string,
 	} ),
@@ -240,5 +239,4 @@ ErrorContent.propTypes = {
 		VALIDATION_ERROR_NEW_REJECTED_STATUS,
 		VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 	] ).isRequired,
-	title: PropTypes.string.isRequired,
 };

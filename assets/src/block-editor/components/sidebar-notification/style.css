@@ -1,19 +1,19 @@
 .sidebar-notification {
-	position: relative;
-	overflow: hidden;
 	display: flex;
-	padding: 14px 18px;
 	min-height: 67px;
+	overflow: hidden;
+	padding: 14px 18px;
+	position: relative;
 }
 
 .sidebar-notification.is-error::before {
+	background: #d64e21;
+	bottom: 0;
 	content: "";
+	left: 0;
 	position: absolute;
 	top: 0;
-	left: 0;
-	bottom: 0;
 	width: 5px;
-	background: #d64e21;
 }
 
 .sidebar-notification.is-loading {
@@ -56,8 +56,8 @@
  */
 .sidebar-notifications-container.is-shady {
 	background: #f4f4f4;
-	padding: 18px 10px;
 	border-bottom: 1px solid #e3e4e7;
+	padding: 18px 10px;
 }
 
 .sidebar-notifications-container.is-shady > .sidebar-notification {

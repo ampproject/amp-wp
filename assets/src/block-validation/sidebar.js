@@ -55,9 +55,14 @@ export function Sidebar() {
 			</SidebarNotificationsContainer>
 
 			{ 0 < displayedErrors.length && (
-				<ul>
-					{ displayedErrors.map( ( validationError, index ) => (
-						<Error { ...validationError } key={ `${ validationError.clientId }${ index }` } />
+				<ul className="amp-sidebar__errors-list">
+					{ displayedErrors.map( ( validationError ) => (
+						<li
+							key={ validationError.clientId }
+							className="amp-sidebar__errors-list-item"
+						>
+							<Error { ...validationError } />
+						</li>
 					) ) }
 				</ul>
 			) }
