@@ -90,6 +90,16 @@ class Plugin {
 	}
 
 	/**
+	 * Get the currently installed AMP plugin version.
+	 *
+	 * @return string|null AMP plugin version, otherwise `null` if the plugin metadata could not be retrieved.
+	 */
+	public static function get_amp_version() {
+		$meta = get_file_data( WP_PLUGIN_DIR . '/amp/amp.php', [ 'Version' => 'Version' ] );
+		return isset( $meta['Version'] ) ? $meta['Version'] : null;
+	}
+
+	/**
 	 * Loads the plugin main instance and initializes it.
 	 *
 	 * @param string $main_file Absolute path to the plugin main file.

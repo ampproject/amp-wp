@@ -120,7 +120,8 @@ class RestRoute {
 		if ( ! empty( $result ) && ! $result instanceof WP_Error ) {
 			// Store information about the currently installed build so that it can be used as reference to display
 			// the currently active build in the admin bar.
-			$build_info = compact( 'build_id', 'build_origin' );
+			$build_version = Plugin::get_amp_version();
+			$build_info    = compact( 'build_id', 'build_origin', 'build_version' );
 			update_site_option( Plugin::ID_STORAGE_KEY, $build_info );
 		}
 

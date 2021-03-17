@@ -17,7 +17,6 @@ class AdminBar {
 	/**
 	 * ID of the currently installed build.
 	 *
-	 * @since 1.0.0
 	 * @var string
 	 */
 	protected $build_id;
@@ -25,10 +24,16 @@ class AdminBar {
 	/**
 	 * Origin of the build currently installed.
 	 *
-	 * @since 1.0.0
 	 * @var string
 	 */
 	protected $build_origin;
+
+	/**
+	 * Last known installed build version.
+	 *
+	 * @var string
+	 */
+	protected $build_version;
 
 	/**
 	 * Constructor.
@@ -38,12 +43,13 @@ class AdminBar {
 	public function __construct() {
 		$build_info = get_site_option( Plugin::ID_STORAGE_KEY );
 
-		if ( false === $build_info || ! isset( $build_info['build_id'], $build_info['build_origin'] ) ) {
+		if ( false === $build_info ) {
 			return;
 		}
 
-		$this->build_id     = $build_info['build_id'];
-		$this->build_origin = $build_info['build_origin'];
+		$this->build_id      = $build_info['build_id'];
+		$this->build_origin  = $build_info['build_origin'];
+		$this->build_version = $build_info['build_version'];
 	}
 
 	/**
@@ -94,17 +100,9 @@ class AdminBar {
 	 * @param object $wp_admin_bar The WP AdminBar object.
 	 */
 	public function add_menu_button( $wp_admin_bar ) {
-		if ( 'release' === $this->build_id || false === $this->build_id ) {
-			$on = __( 'latest release', 'amp-qa-tester' );
-		} elseif ( filter_var( $this->build_id, FILTER_VALIDATE_INT ) ) {
-			$on = 'PR #' . $this->build_id;
-		} else {
-			/* translators: %s is the name of the branch */
-			$on = sprintf( __( '%s branch', 'amp-qa-tester' ), $this->build_id );
-		}
-
+		// TODO: update build name when AMP plugin is updated via usual WP ajax call.
 		/* translators: %s: the version of plugin currently running */
-		$menu_title = sprintf( __( 'Using AMP: %s', 'amp-qa-tester' ), $on );
+		$menu_title = sprintf( __( 'Using AMP: %s', 'amp-qa-tester' ), $this->get_user_friendly_build_name() );
 		$args       = [
 			'id'     => 'amp-qa-tester',
 			'title'  => '<span class="amp-qa-tester-adminbar__label">' . $menu_title . '</span>',
@@ -141,5 +139,30 @@ class AdminBar {
 
 		// Get the buffer output.
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get user-friendly name for currently installed build.
+	 *
+	 * @return string
+	 */
+	private function get_user_friendly_build_name() {
+		$current_amp_version = Plugin::get_amp_version();
+
+		if ( $this->build_version !== $current_amp_version ) {
+			return $current_amp_version;
+		}
+
+		switch ( $this->build_origin ) {
+			case 'release':
+				return $this->build_id;
+			case 'pr':
+				return 'PR # ' . $this->build_id;
+			case 'branch':
+				/* translators: %s is the name of the branch */
+				return sprintf( __( '%s branch', 'amp-qa-tester' ), $this->build_id );
+			default:
+				return __( 'Unknown version', 'amp-qa-tester' );
+		}
 	}
 }
