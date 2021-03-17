@@ -1,6 +1,6 @@
 <?php
 /**
- * Class PluginInstaller.
+ * Class BuildInstaller.
  *
  * @package AmpProject\AmpWP_QA_Tester
  */
@@ -15,12 +15,19 @@ use WP_Error;
  *
  * @since 1.0.0
  */
-class PluginInstaller {
+class BuildInstaller {
 
 	const INSTALL_LOCK_KEY = 'amp_qa_tester_switching_lock';
 
 	/**
-	 * Origin of build. Whether from WordPress.org, a branch or a PR.
+	 * Build ID.
+	 *
+	 * @var string
+	 */
+	protected $build_id;
+
+	/**
+	 * Origin of build. Whether from a tagged release, a branch or a PR.
 	 *
 	 * @var string
 	 */
@@ -29,35 +36,36 @@ class PluginInstaller {
 	/**
 	 * Constructor.
 	 *
+	 * @param string $build_id     Build ID.
 	 * @param string $build_origin Build origin.
 	 */
-	public function __construct( $build_origin ) {
+	public function __construct( $build_id, $build_origin ) {
+		$this->build_id     = $build_id;
 		$this->build_origin = $build_origin;
 	}
 
 	/**
 	 * Installs the build from the specified URL.
 	 *
-	 * @param string $url      URL for build zip.
-	 * @param string $build_id Build ID.
+	 * @param string $url URL for build zip.
 	 *
 	 * @return bool|WP_Error Whether the install was successful or not, otherwise a `WP_Error` object.
 	 */
-	public function install( $url, $build_id ) {
-		$can_install = $this->can_install( $url, $build_id );
+	public function install( $url ) {
+		$can_install = $this->can_install( $url );
 
-		if ( ! $can_install ) {
+		if ( ! $can_install || is_wp_error( $can_install ) ) {
 			return $can_install;
 		}
 
 		// Lock updating. Lock always expires after 15 seconds.
 		set_transient( self::INSTALL_LOCK_KEY, true, 15 );
 
-		$file_upgrader = $this->get_upgrader();
+		$plugin_upgrader = $this->get_upgrader();
 
 		add_filter( 'upgrader_source_selection', [ $this, 'ensure_correct_plugin_dir' ] );
 
-		$result = $file_upgrader->install( $url );
+		$result = $plugin_upgrader->install( $url );
 
 		remove_filter( 'upgrader_source_selection', [ $this, 'ensure_correct_plugin_dir' ] );
 
@@ -101,12 +109,11 @@ class PluginInstaller {
 	/**
 	 * Determine if the build can be installed.
 	 *
-	 * @param string $url      URL for build zip.
-	 * @param string $build_id Build ID.
+	 * @param string $url URL for build zip.
 	 *
 	 * @return bool|WP_Error Whether the install was successful or not, otherwise a `WP_Error` object.
 	 */
-	protected function can_install( $url, $build_id ) {
+	protected function can_install( $url ) {
 		// Ensure user can perform plugin upgrades.
 		if ( ! current_user_can( 'update_plugins' ) ) {
 			return new WP_Error(
@@ -129,7 +136,7 @@ class PluginInstaller {
 
 				return new WP_Error(
 					'build_not_found',
-					sprintf( $error_message, $build_id ),
+					sprintf( $error_message, $this->build_id ),
 					[ 'status' => 400 ]
 				);
 			}

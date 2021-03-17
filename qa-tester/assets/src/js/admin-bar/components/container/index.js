@@ -12,6 +12,7 @@ import './index.css';
 import {
 	getProtectedBranches,
 	getPullRequestsWithBuilds,
+	getReleases,
 } from '../../utils/github';
 import { BuildSelector } from '../build-selector';
 
@@ -21,11 +22,6 @@ export default class Container extends Component {
 
 		// Default build options to choose from.
 		const buildOptions = [
-			{
-				label: __( 'Latest release', 'amp-qa-tester' ),
-				value: 'release',
-				origin: 'release',
-			},
 			{
 				label: __( 'Develop branch', 'amp-qa-tester' ),
 				value: 'develop',
@@ -51,6 +47,7 @@ export default class Container extends Component {
 
 	componentDidMount() {
 		Promise.all( [
+			this.addGitHubReleases(),
 			this.addReleaseBranchOptions(),
 			this.addPullRequestOptions(),
 		] )
@@ -62,8 +59,38 @@ export default class Container extends Component {
 			} );
 	}
 
-	componentWillUnmount() {
-		clearTimeout( this.pageReloadTimeout );
+	/**
+	 * Append to the default build options a list of GitHub releases for the plugin.
+	 */
+	async addGitHubReleases() {
+		const releases = await getReleases();
+
+		// Create build options from list of releases.
+		const releaseOptions = releases.reduce(
+			( releasesWithBuild, release ) => {
+				const buildAsset = release?.assets?.find( ( asset ) => {
+					return 'amp.zip' === asset.name;
+				} );
+
+				if ( ! buildAsset ) {
+					return releasesWithBuild;
+				}
+
+				releasesWithBuild.push( {
+					label: release.name,
+					value: release.name,
+					url: buildAsset.browser_download_url,
+					origin: 'release',
+				} );
+
+				return releasesWithBuild;
+			},
+			[]
+		);
+
+		this.setState( {
+			buildOptions: this.state.buildOptions.concat( releaseOptions ),
+		} );
 	}
 
 	/**
@@ -143,14 +170,20 @@ export default class Container extends Component {
 		const { isDevBuild, buildOption } = this.state;
 		this.setState( { isInstalling: true } );
 
+		const data = {
+			id: buildOption.value,
+			origin: buildOption.origin,
+			isDev: isDevBuild,
+		};
+
+		if ( buildOption.url ) {
+			data.url = buildOption.url;
+		}
+
 		apiFetch( {
 			path: '/amp-qa-tester/v1/install',
 			method: 'POST',
-			data: {
-				id: buildOption.value,
-				origin: buildOption.origin,
-				isDev: isDevBuild,
-			},
+			data,
 		} )
 			.then( () => {
 				window.location.reload();
@@ -203,7 +236,7 @@ export default class Container extends Component {
 					onOptionSelect={ this.handleChangeBuildOption }
 				/>
 
-				{ 'release' !== buildOption.value && (
+				{ 'release' !== buildOption.origin && (
 					<div className="amp-qa-tester-checkbox">
 						<input
 							id="amp-qa-tester-is-development-build"

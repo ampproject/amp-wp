@@ -15,7 +15,7 @@ namespace AmpProject\AmpWP_QA_Tester;
 class AdminBar {
 
 	/**
-	 * Build ID of the currently installed plugin version.
+	 * ID of the currently installed build.
 	 *
 	 * @since 1.0.0
 	 * @var string
@@ -23,12 +23,27 @@ class AdminBar {
 	protected $build_id;
 
 	/**
+	 * Origin of the build currently installed.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
+	protected $build_origin;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		$this->build_id = get_site_option( Plugin::ID_STORAGE_KEY );
+		$build_info = get_site_option( Plugin::ID_STORAGE_KEY );
+
+		if ( false === $build_info || ! isset( $build_info['build_id'], $build_info['build_origin'] ) ) {
+			return;
+		}
+
+		$this->build_id     = $build_info['build_id'];
+		$this->build_origin = $build_info['build_origin'];
 	}
 
 	/**

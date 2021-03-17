@@ -29,6 +29,18 @@ const _fetch = ( resource, opts = {} ) => {
 };
 
 /**
+ * Get the list of releases.
+ *
+ * @return {Promise<Object[]>} Promise containing list of releases.
+ */
+export const getReleases = () => {
+	/* eslint-disable-next-line prettier/prettier */
+	const url = `${ baseUrl }/repos/ampproject/amp-wp/releases`;
+
+	return _fetch( url ).then( ( response ) => response.json() );
+};
+
+/**
  * Fetches all open PRs that have build zips available for download.
  *
  * @return {Promise<Object[]>} Promise containing a list of PR items.
@@ -55,7 +67,6 @@ export const getPullRequestsWithBuilds = () => {
  * @return {Promise<Object[]>} Promise containing list of protected branches.
  */
 export const getProtectedBranches = () => {
-	// Add the `protected` query to filter PR branches.
 	/* eslint-disable-next-line prettier/prettier */
 	const url = `${ baseUrl }/repos/ampproject/amp-wp/branches?protected=true`;
 
