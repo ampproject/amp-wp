@@ -14,8 +14,8 @@ import { Loading } from '../../../components/loading';
  * Notification component used in the block editor sidebar.
  *
  * @param {Object} props
- * @param {string|Object} props.action Call to action element.
- * @param {string|Object} props.icon Status icon element.
+ * @param {Object} props.action Call to action element.
+ * @param {Object} props.icon Status icon element.
  * @param {boolean} props.isLoading Flag indicating if it's a loading message.
  * @param {string} props.message Message text.
  */
