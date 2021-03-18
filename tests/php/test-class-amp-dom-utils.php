@@ -1,5 +1,6 @@
 <?php
 
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 
@@ -276,7 +277,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$html .= '<p>&#x645;&#x631;&#x62D;&#x628;&#x627; &#x628;&#x627;&#x644;&#x639;&#x627;&#x644;&#x645;! Check out &lsquo;this&rsquo; and &ldquo;that&rdquo; and&mdash;other things.</p>';
 		$html .= '</body></html>';
 
-		$document = Document::fromHtml( $html );
+		$document = Document::fromHtml( $html, Options::DEFAULTS );
 
 		$this->assertEquals( 'utf-8', $document->encoding );
 		$paragraphs = $document->getElementsByTagName( 'p' );
@@ -297,7 +298,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$body = " start <ul><li>First</li><li>Second</li></ul><style>pre::before { content:'⚡️'; }</style><script type=\"application/json\">\"⚡️\"</script><pre>\t* one\n\t* two\n\t* three</pre> end ";
 		$html = "<html><head><meta charset=\"utf-8\"></head><body data-foo=\"&gt;\">$body</body></html>";
 
-		$dom = Document::fromHtml( "<!DOCTYPE html>$html" );
+		$dom = Document::fromHtml( "<!DOCTYPE html>$html", Options::DEFAULTS );
 
 		$output = $dom->saveHTML( $dom->documentElement );
 		$this->assertEquals( $html, $output );

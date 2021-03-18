@@ -8,6 +8,7 @@
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
 use AmpProject\AmpWP\DevTools\UserAccess;
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
@@ -1177,7 +1178,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		<?php
 		$html = ob_get_clean();
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
 		$element = $dom->xpath->query( $xpath )->item( 0 );
 		$this->assertInstanceOf( 'DOMElement', $element );
@@ -1953,7 +1954,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			</html>
 		';
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
 		AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
 

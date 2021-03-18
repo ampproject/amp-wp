@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
 
@@ -3437,7 +3438,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = [] ) {
 		$expected      = isset( $expected ) ? $expected : $source;
-		$dom           = Document::fromHtml( $source );
+		$dom           = Document::fromHtml( $source, Options::DEFAULTS );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
@@ -3483,7 +3484,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$source   = '<b>Hello</b><script>document.write("hi");</script><amp-sidebar layout="nodisplay"></amp-sidebar>';
 		$expected = '<b>Hello</b><amp-sidebar layout="nodisplay"></amp-sidebar>';
 
-		$dom           = Document::fromHtml( $source );
+		$dom           = Document::fromHtml( $source, Options::DEFAULTS );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,

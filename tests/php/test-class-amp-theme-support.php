@@ -8,6 +8,7 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
@@ -1328,7 +1329,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html = ob_get_clean();
 		$html          = AMP_Theme_Support::prepare_response( $original_html );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
 		$scripts = $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
 		$this->assertSame( 3, $scripts->length );
@@ -1388,7 +1389,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
 		/** @var DOMElement $script Script. */
 		$actual_script_srcs = [];
@@ -1441,7 +1442,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
 		$script_srcs = [];
 		/**

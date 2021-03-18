@@ -2,6 +2,7 @@
 
 namespace AmpProject\AmpWP\Tests\Transformer;
 
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\ErrorComparison;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Transformer\DetermineHeroImages;
@@ -225,7 +226,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 	 * @param ErrorCollection|Error[] $expected_errors Set of expected errors.
 	 */
 	public function test_transform( $source, $expected_html, $expected_errors = [] ) {
-		$document    = Document::fromHtml( $source );
+		$document    = Document::fromHtml( $source, Options::DEFAULTS );
 		$transformer = new DetermineHeroImages();
 		$errors      = new ErrorCollection();
 

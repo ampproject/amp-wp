@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\Dom\Document;
 use AmpProject\Tag;
 
@@ -65,7 +66,14 @@ class AMP_DOM_Utils {
 	 */
 	public static function get_dom( $document, $encoding = null ) {
 		_deprecated_function( __METHOD__, '1.5.0', 'AmpProject\Dom\Document::fromHtml()' );
-		return Document::fromHtml( $document, $encoding );
+
+		$options = Options::DEFAULTS;
+
+		if ( null !== $encoding ) {
+			$options[ Document\Option::ENCODING ] = $encoding;
+		}
+
+		return Document::fromHtml( $document, $options );
 	}
 
 	/**
@@ -172,7 +180,10 @@ class AMP_DOM_Utils {
 		 */
 		$document = "<html><head></head><body>{$content}</body></html>";
 
-		return Document::fromHtml( $document, $encoding );
+		$options = Options::DEFAULTS;
+		$options[ Document\Option::ENCODING ] = $encoding;
+
+		return Document::fromHtml( $document, $options );
 	}
 
 	/**
