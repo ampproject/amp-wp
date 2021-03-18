@@ -399,12 +399,12 @@ describe( 'ErrorContent', () => {
 		}
 
 		if ( null === clientId ) {
-			expect( container.innerHTML ).toContain( 'outside the post content' );
+			expect( container.innerHTML ).toContain( 'outside the content' );
 			return;
 		}
 
 		expect( container.innerHTML ).toContain( '<dt>Source' );
-		expect( container.innerHTML ).not.toContain( 'outside the post content' );
+		expect( container.innerHTML ).not.toContain( 'outside the content' );
 
 		switch ( testBlockSource ) {
 			case 'plugin':

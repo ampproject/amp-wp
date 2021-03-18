@@ -55,16 +55,5 @@ describe( 'SidebarNotification', () => {
 		expect( container.querySelector( 'svg' ) ).not.toBeNull();
 		expect( container.querySelector( 'button' ) ).not.toBeNull();
 	} );
-
-	it( 'renders error notification', () => {
-		act( () => {
-			render(
-				<SidebarNotification message="Foobar" isError={ true } />,
-				container,
-			);
-		} );
-
-		expect( container.querySelector( '.sidebar-notification' ).classList ).toContain( 'is-error' );
-	} );
 } );
 

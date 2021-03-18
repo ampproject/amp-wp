@@ -60,7 +60,6 @@ describe( 'AMPValidationStatusNotification', () => {
 
 		expect( container.innerHTML ).toMatchSnapshot();
 		expect( container.innerHTML ).toContain( 'All issues reviewed or removed' );
-		expect( container.querySelector( '.is-error' ) ).toBeNull();
 	} );
 
 	it( 'does not render when errors are being fetched', () => {
@@ -86,7 +85,6 @@ describe( 'AMPValidationStatusNotification', () => {
 
 		expect( container.innerHTML ).toMatchSnapshot();
 		expect( container.innerHTML ).toContain( 'request error message' );
-		expect( container.querySelector( '.is-error' ) ).not.toBeNull();
 		expect( container.querySelector( 'a[href="http://example.com"]' ) ).toBeNull();
 
 		container.querySelector( 'button' ).click();
@@ -115,7 +113,6 @@ describe( 'AMPValidationStatusNotification', () => {
 
 		expect( container.innerHTML ).toMatchSnapshot();
 		expect( container.innerHTML ).toContain( 'validation issues marked kept' );
-		expect( container.querySelector( '.is-error' ) ).not.toBeNull();
 		expect( container.querySelector( 'a[href="http://example.com"]' ) ).not.toBeNull();
 	} );
 
@@ -130,7 +127,6 @@ describe( 'AMPValidationStatusNotification', () => {
 
 		expect( container.innerHTML ).toMatchSnapshot();
 		expect( container.innerHTML ).toContain( 'issues needs review' );
-		expect( container.querySelector( '.is-error' ) ).toBeNull();
 		expect( container.querySelector( 'a[href="http://example.com"]' ) ).not.toBeNull();
 	} );
 
@@ -145,7 +141,6 @@ describe( 'AMPValidationStatusNotification', () => {
 
 		expect( container.innerHTML ).toMatchSnapshot();
 		expect( container.innerHTML ).toContain( 'issues will be checked for when the post is saved' );
-		expect( container.querySelector( '.is-error' ) ).toBeNull();
 		expect( container.querySelector( 'a[href="http://example.com"]' ) ).toBeNull();
 	} );
 } );
