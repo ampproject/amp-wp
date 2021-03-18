@@ -35,7 +35,7 @@ final class DetermineHeroImages implements Transformer {
 	 *
 	 * @var string
 	 */
-	const CUSTOM_HEADER_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-custom-header ' ) ]//*[ ( self::img or self::amp-img ) and not( @data-hero ) ]";
+	const CUSTOM_HEADER_XPATH_QUERY = ".//*[ @id = 'wp-custom-header' or @id = 'masthead' or @id = 'site-header' ]//*[ ( self::img or self::amp-img ) and not( @data-hero ) and not( contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ) ]";
 
 	/**
 	 * XPath query to find the custom logo.
