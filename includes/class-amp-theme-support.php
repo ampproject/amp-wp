@@ -2117,8 +2117,6 @@ class AMP_Theme_Support {
 					Optimizer\Transformer\TransformedIdentifier::class,
 				]
 			);
-		} else {
-			array_unshift( $transformers, Transformer\DetermineHeroImages::class );
 		}
 
 		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );
