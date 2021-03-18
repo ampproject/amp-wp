@@ -2,17 +2,11 @@ version: '3.1'
 
 services:
   wordpress:
-    image: wordpress:5.6
+    image: wordpress
     ports:
       - "127.0.0.1:8890:80"
-    environment:
-      WORDPRESS_DB_HOST: mysql
-      WORDPRESS_DB_PASSWORD: example
-      ABSPATH: /usr/src/wordpress/
-      WORDPRESS_DEBUG: 1
-      WORDPRESS_CONFIG_EXTRA: |
-        define( 'SCRIPT_DEBUG', true );
-        define( 'FS_METHOD', 'direct' );
+    env_file:
+      - .env.wp
     volumes:
       - wordpress_data:/var/www/html
       - ../../:/var/www/html/wp-content/plugins/amp
@@ -26,6 +20,8 @@ services:
     volumes:
       - wordpress_data:/var/www/html
       - ../../:/var/www/html/wp-content/plugins/amp
+    env_file:
+      - .env.wp
     depends_on:
       - mysql
       - wordpress

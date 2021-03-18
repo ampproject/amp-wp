@@ -13,7 +13,7 @@ Filters whether default AMP status should be enabled or not.
 
 ### Source
 
-:link: [includes/class-amp-post-type-support.php:190](/includes/class-amp-post-type-support.php#L190)
+:link: [includes/class-amp-post-type-support.php:196](/includes/class-amp-post-type-support.php#L196)
 
 <details>
 <summary>Show Code</summary>
