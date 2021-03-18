@@ -7,12 +7,16 @@
 
 namespace AmpProject\AmpWP_QA_Tester;
 
+use WP_Admin_Bar;
+
 /**
  * Class handling the plugin's admin bar menu.
  *
  * @since 1.0.0
  */
 class AdminBar {
+
+	const ASSET_HANDLE = 'amp-qa-tester-admin-bar';
 
 	/**
 	 * ID of the currently installed build.
@@ -56,7 +60,12 @@ class AdminBar {
 	 * Registers functionality through WordPress hooks.
 	 */
 	public function register() {
+		if ( ! current_user_can( 'update_plugins' ) ) {
+			return;
+		}
+
 		add_action( 'admin_bar_menu', [ $this, 'add_menu_button' ], 99 );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_plugin_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_plugin_assets' ] );
 	}
 
@@ -74,9 +83,16 @@ class AdminBar {
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
+		// The AMP plugin only adds the `data-ampdevmode` attribute to scripts exclusively depending on `admin-bar`. The
+		// dependencies of those exclusive scripts do not get the aforementioned attribute, however, so to resolve that
+		// each dependency of this script is marked as being exclusively dependent on the admin bar.
+		foreach ( $dependencies as $dependency ) {
+			wp_scripts()->registered[ $dependency ]->deps[] = 'admin-bar';
+		}
+
 		// Enqueue scripts.
 		wp_enqueue_script(
-			'amp-qa-tester-admin-bar-script',
+			self::ASSET_HANDLE,
 			Plugin::get_asset_url( 'js/admin-bar.js' ),
 			array_merge( [ 'admin-bar' ], $dependencies ),
 			$version,
@@ -85,7 +101,7 @@ class AdminBar {
 
 		// Enqueue styling.
 		wp_enqueue_style(
-			'amp-qa-tester-admin-bar-style',
+			self::ASSET_HANDLE,
 			Plugin::get_asset_url( 'css/admin-bar-compiled.css' ),
 			[ 'admin-bar' ],
 			$version
@@ -97,9 +113,9 @@ class AdminBar {
 	/**
 	 * Render the admin bar button.
 	 *
-	 * @param object $wp_admin_bar The WP AdminBar object.
+	 * @param WP_Admin_Bar $wp_admin_bar The WP AdminBar object.
 	 */
-	public function add_menu_button( $wp_admin_bar ) {
+	public function add_menu_button( WP_Admin_Bar $wp_admin_bar ) {
 		// TODO: update build name when AMP plugin is updated via usual WP ajax call.
 		/* translators: %s: the version of plugin currently running */
 		$menu_title = sprintf( __( 'Using AMP: %s', 'amp-qa-tester' ), $this->get_user_friendly_build_name() );
