@@ -394,7 +394,7 @@ describe( 'ErrorContent', () => {
 			act( () => {
 				dispatch( 'core/block-editor' ).removeBlock( clientId, false );
 			} );
-			expect( container.innerHTML ).toContain( 'removed from the editor' );
+			expect( container.innerHTML ).toContain( 'error is no longer detected' );
 			return;
 		}
 
