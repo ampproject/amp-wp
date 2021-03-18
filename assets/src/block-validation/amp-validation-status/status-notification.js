@@ -44,7 +44,6 @@ export default function AMPValidationStatusNotification() {
 	if ( fetchingErrorsRequestErrorMessage ) {
 		return (
 			<SidebarNotification
-				isError={ true }
 				icon={ <AMPValidationErrorsKeptIcon /> }
 				message={ fetchingErrorsRequestErrorMessage }
 				action={
@@ -65,7 +64,6 @@ export default function AMPValidationStatusNotification() {
 	if ( ampCompatibilityBroken ) {
 		return (
 			<SidebarNotification
-				isError={ true }
 				icon={ <AMPValidationErrorsKeptIcon /> }
 				message={ __( 'AMP blocked from validation issues marked kept.', 'amp' ) }
 				action={ reviewLink && (

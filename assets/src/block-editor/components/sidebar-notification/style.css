@@ -6,16 +6,6 @@
 	position: relative;
 }
 
-.sidebar-notification.is-error::before {
-	background: #d64e21;
-	bottom: 0;
-	content: "";
-	left: 0;
-	position: absolute;
-	top: 0;
-	width: 5px;
-}
-
 .sidebar-notification.is-loading {
 	align-items: center;
 }

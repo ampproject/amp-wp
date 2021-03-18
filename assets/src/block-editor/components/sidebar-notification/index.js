@@ -16,26 +16,19 @@ import { Loading } from '../../../components/loading';
  * @param {Object} props
  * @param {string|Object} props.action Call to action element.
  * @param {string|Object} props.icon Status icon element.
- * @param {boolean} props.isError Flag indicating if it's an error message.
  * @param {boolean} props.isLoading Flag indicating if it's a loading message.
  * @param {string} props.message Message text.
  */
 export function SidebarNotification( {
 	action,
 	icon,
-	isError = false,
 	isLoading = false,
 	message,
 } ) {
 	const iconElement = isLoading ? <Loading /> : icon;
 
 	return (
-		<div className={
-			classnames( 'sidebar-notification', {
-				'is-error': isError,
-				'is-loading': isLoading,
-			} )
-		}>
+		<div className={ classnames( 'sidebar-notification', { 'is-loading': isLoading } ) }>
 			{ iconElement && (
 				<div className="sidebar-notification__icon">
 					{ iconElement }
@@ -57,7 +50,6 @@ export function SidebarNotification( {
 SidebarNotification.propTypes = {
 	action: PropTypes.oneOfType( [ PropTypes.element, PropTypes.node ] ),
 	icon: PropTypes.oneOfType( [ PropTypes.element, PropTypes.node ] ),
-	isError: PropTypes.bool,
 	isLoading: PropTypes.bool,
 	message: PropTypes.string.isRequired,
 };
