@@ -72,10 +72,24 @@ final class DetermineHeroImages implements Transformer {
 
 		foreach ( [ 'custom_header', 'custom_logo', 'featured_image', 'cover_blocks' ] as $hero_image_source ) {
 			if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
-				$get_candidate_method = "get_{$hero_image_source}";
-				$candidates           = $this->$get_candidate_method( $document );
+				$candidates = [];
 
-				if ( null === $candidates ) {
+				switch ( $hero_image_source ) {
+					case 'custom_header':
+						$candidates = $this->get_custom_header( $document );
+						break;
+					case 'custom_logo':
+						$candidates = $this->get_custom_logo( $document );
+						break;
+					case 'featured_image':
+						$candidates = $this->get_featured_image( $document );
+						break;
+					case 'cover_blocks':
+						$candidates = $this->get_cover_blocks( $document );
+						break;
+				}
+
+				if ( empty( $candidates ) ) {
 					continue;
 				}
 
