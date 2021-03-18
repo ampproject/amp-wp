@@ -200,7 +200,7 @@ export function ErrorContent( {
 		<>
 			{ removed && (
 				<p>
-					{ __( 'The block has been removed from the editor.', 'amp' ) }
+					{ __( 'This error is no longer detected, either because the block was removed or the editor mode was switched.', 'amp' ) }
 				</p>
 			) }
 			{ external && (
