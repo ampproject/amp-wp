@@ -1638,7 +1638,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$ordered_contains = [
 			'<html amp=""',
-			'<meta charset="' . Document::AMP_ENCODING . '">',
+			'<meta charset="' . Document\Encoding::AMP . '">',
 			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',

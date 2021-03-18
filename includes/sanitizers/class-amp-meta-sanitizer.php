@@ -295,7 +295,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			$this->dom,
 			Tag::META,
 			[
-				Attribute::CHARSET => Document::AMP_ENCODING,
+				Attribute::CHARSET => Document\Encoding::AMP,
 			]
 		);
 	}
