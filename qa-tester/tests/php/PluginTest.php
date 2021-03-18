@@ -7,16 +7,17 @@
 
 namespace AmpProject\AmpWP_QA_Tester\Tests;
 
+use AmpProject\AmpWP_QA_Tester\AdminBar;
 use AmpProject\AmpWP_QA_Tester\Plugin;
-use PHPUnit\Framework\TestCase;
+use AmpProject\AmpWP_QA_Tester\RestRoute;
 
 /**
  * Tests for Plugin.
  *
  * @package AmpProject\AmpWP_QA_Tester
- * @covers Plugin
+ * @coversDefaultClass \AmpProject\AmpWP_QA_Tester\Plugin
  */
-class PluginTest extends TestCase {
+class PluginTest extends \WP_UnitTestCase {
 
 	/**
 	 * Instance of Plugin class.
@@ -35,18 +36,12 @@ class PluginTest extends TestCase {
 	}
 
 	/**
-	 * Test register.
+	 * Test constructor method.
 	 *
-	 * @covers ::register()
+	 * @covers ::__construct()
 	 */
-	public function test_register() {
-		$this->plugin->register();
-
-		// Admin bar hooks.
-		$this->assertEquals( 99, has_action( 'admin_bar_menu', [ $this->plugin->admin_bar, 'add_menu_button' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->plugin->admin_bar, 'enqueue_plugin_assets' ] ) );
-
-		// REST route hooks.
-		$this->assertEquals( 10, has_action( 'rest_api_init', [ $this->plugin->rest_route, 'register_route' ] ) );
+	public function test___construct() {
+		$this->assertInstanceOf( AdminBar::class, $this->plugin->admin_bar );
+		$this->assertInstanceOf( RestRoute::class, $this->plugin->rest_route );
 	}
 }
