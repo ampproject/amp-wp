@@ -205,7 +205,7 @@ export function ErrorContent( {
 			) }
 			{ external && (
 				<p>
-					{ __( 'This error comes from outside the post content.', 'amp' ) }
+					{ __( 'This error comes from outside the content (e.g. header or footer).', 'amp' ) }
 				</p>
 			) }
 			<dl className="amp-error__details">
