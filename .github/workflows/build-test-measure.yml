@@ -2,8 +2,6 @@ name: Build, test & measure
 
 on:
   push:
-    paths-ignore:
-      - 'qa-tester/**'
     branches:
       - develop
       # Include all release branches.
@@ -15,6 +13,7 @@ on:
       - '!bin/ci/**'
       - '!bin/local-env/**'
       - 'docs/**'
+      - 'qa-tester/**'
   pull_request:
     # Run workflow whenever a PR is opened, updated (synchronized), or marked ready for review.
     types: [opened, synchronize, ready_for_review]
@@ -25,6 +24,7 @@ on:
       - '!bin/ci/**'
       - '!bin/local-env/**'
       - 'docs/**'
+      - 'qa-tester/**'
 
 jobs:
 
