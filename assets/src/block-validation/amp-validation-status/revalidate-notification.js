@@ -29,26 +29,16 @@ export default function AMPRevalidateNotification() {
 		isFetchingErrors,
 		isEditedPostNew,
 		isPostDirty,
-	} = useSelect( ( select ) => {
-		let _hasErrorsFromRemovedBlocks = false;
-		for ( const validationError of select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ) {
-			const { clientId } = validationError;
-			const blockDetails = clientId ? select( 'core/block-editor' ).getBlock( clientId ) : null;
-			if ( clientId && ! blockDetails ) {
-				_hasErrorsFromRemovedBlocks = true;
-				break;
-			}
-		}
-
-		return {
-			hasErrorsFromRemovedBlocks: _hasErrorsFromRemovedBlocks,
-			hasActiveMetaboxes: select( 'core/edit-post' ).hasMetaBoxes(),
-			isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' ).getEditedPostAttribute( 'status' ) ) !== -1,
-			isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
-			isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
-			isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
-		};
-	}, [] );
+	} = useSelect( ( select ) => ( {
+		hasErrorsFromRemovedBlocks: Boolean( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors().find(
+			( { clientId } ) => clientId && ! select( 'core/block-editor' ).getBlockName( clientId ) ),
+		),
+		hasActiveMetaboxes: select( 'core/edit-post' ).hasMetaBoxes(),
+		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' ).getEditedPostAttribute( 'status' ) ) !== -1,
+		isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
+		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
+		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
+	} ), [] );
 
 	const wasEditedPostNew = usePrevious( isEditedPostNew );
 	const wasFetchingErrors = usePrevious( isFetchingErrors );
