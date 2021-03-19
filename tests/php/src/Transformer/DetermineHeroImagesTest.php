@@ -155,6 +155,25 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
+			'detects first content image block'          => [
+				$input(
+					'<div class="entry-content">'
+					. '<figure class="wp-block-image size-large"><img loading="lazy" width="1024" height="768" src="https://example.com/image-block-1.jpg" alt="" class="wp-image-2135"></figure>'
+					. '</div>'
+					. '<div class="entry-content">'
+					. '<figure class="wp-block-image size-large"><img loading="lazy" width="1024" height="768" src="https://example.com/image-block-2.jpg" alt="" class="wp-image-2135"></figure>'
+					. '</div>'
+				),
+				$output(
+					'<div class="entry-content">'
+					. '<figure class="wp-block-image size-large"><img loading="lazy" width="1024" height="768" src="https://example.com/image-block-1.jpg" alt="" class="wp-image-2135" data-hero-candidate></figure>'
+					. '</div>'
+					. '<div class="entry-content">'
+					. '<figure class="wp-block-image size-large"><img loading="lazy" width="1024" height="768" src="https://example.com/image-block-2.jpg" alt="" class="wp-image-2135"></figure>'
+					. '</div>'
+				),
+			],
+
 			'detects first cover block in initial group' => [
 				$input(
 					'<div class="entry-content">'

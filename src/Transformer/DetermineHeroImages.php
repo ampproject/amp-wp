@@ -66,6 +66,13 @@ final class DetermineHeroImages implements Transformer {
 	const INITIAL_COVER_BLOCK_XPATH_QUERY = "./*[1]/descendant-or-self::div[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ]/*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover__image-background ' ) ][ not( @data-hero ) ]";
 
 	/**
+	 * XPath query to find Image Block at the beginning of post content (including nested inside of another block).
+	 *
+	 * @var string
+	 */
+	const INITIAL_IMAGE_BLOCK_XPATH_QUERY = "./*[1]/descendant-or-self::figure[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-image ' ) ]/*[ ( self::img or self::amp-img ) ][ not( @data-hero ) ]";
+
+	/**
 	 * Apply transformations to the provided DOM document.
 	 *
 	 * @param Document        $document DOM document to apply the
@@ -77,7 +84,7 @@ final class DetermineHeroImages implements Transformer {
 	public function transform( Document $document, ErrorCollection $errors ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$hero_image_elements = [];
 
-		foreach ( [ 'custom_header', 'custom_logo', 'featured_image', 'cover_blocks' ] as $hero_image_source ) {
+		foreach ( [ 'custom_header', 'custom_logo', 'featured_image', 'initial_image_block', 'initial_cover_block' ] as $hero_image_source ) {
 			if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
 				$candidates = [];
 
@@ -91,7 +98,10 @@ final class DetermineHeroImages implements Transformer {
 					case 'featured_image':
 						$candidates = $this->get_featured_image( $document );
 						break;
-					case 'cover_blocks':
+					case 'initial_image_block':
+						$candidates = $this->get_initial_content_image_block( $document );
+						break;
+					case 'initial_cover_block':
 						$candidates = $this->get_initial_content_cover_block( $document );
 						break;
 				}
@@ -168,18 +178,29 @@ final class DetermineHeroImages implements Transformer {
 	}
 
 	/**
-	 * Retrieve the first cover block that is in the first position in content.
+	 * Retrieve the first entry content.
 	 *
-	 * @param Document $document Document to retrieve the cover blocks from.
-	 * @return DOMElement|null Cover block at the beginning of the first entry content.
+	 * @param Document $document Document to retrieve the first entry content from.
+	 * @return DOMElement|null First entry content element.
 	 */
-	private function get_initial_content_cover_block( Document $document ) {
+	private function get_first_entry_content( Document $document ) {
 		$query = $document->xpath->query(
 			self::FIRST_ENTRY_CONTENT_XPATH_QUERY,
 			$document->body
 		);
 
 		$entry_content = $query->item( 0 );
+		return $entry_content instanceof DOMElement ? $entry_content : null;
+	}
+
+	/**
+	 * Retrieve the first cover block that is in the first position in content.
+	 *
+	 * @param Document $document Document to retrieve the cover block from.
+	 * @return DOMElement|null Cover block at the beginning of the first entry content.
+	 */
+	private function get_initial_content_cover_block( Document $document ) {
+		$entry_content = $this->get_first_entry_content( $document );
 		if ( ! $entry_content instanceof DOMElement ) {
 			return null;
 		}
@@ -191,6 +212,27 @@ final class DetermineHeroImages implements Transformer {
 
 		$cover_block_image = $query->item( 0 );
 		return $cover_block_image instanceof DOMElement ? $cover_block_image : null;
+	}
+
+	/**
+	 * Retrieve the first image block that is in the first position in content.
+	 *
+	 * @param Document $document Document to retrieve the image block from.
+	 * @return DOMElement|null Image block at the beginning of the first entry content.
+	 */
+	private function get_initial_content_image_block( Document $document ) {
+		$entry_content = $this->get_first_entry_content( $document );
+		if ( ! $entry_content instanceof DOMElement ) {
+			return null;
+		}
+
+		$query = $document->xpath->query(
+			self::INITIAL_IMAGE_BLOCK_XPATH_QUERY,
+			$entry_content
+		);
+
+		$image = $query->item( 0 );
+		return $image instanceof DOMElement ? $image : null;
 	}
 
 	/**
