@@ -622,6 +622,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-story-player' ],
 			],
 
+			'amp_story_player_with_poster'                 => [
+				'
+				<amp-story-player layout="fixed" width="360" height="600">
+					<a href="https://preview.amp.dev/documentation/examples/introduction/stories_in_amp/">
+						<img src="https://amp.dev/static/samples/img/story_dog2_portrait.jpg" width="360" height="600" loading="lazy" data-amp-story-player-poster-img>
+						Stories in AMP - Hello World
+					</a>
+				</amp-story-player>
+				',
+				null,
+				[ 'amp-story-player' ],
+			],
+
 			'amp_story_360'                                => [
 				'
 				<amp-story-player width="360" height="600">
