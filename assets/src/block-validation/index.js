@@ -20,7 +20,7 @@ import { useValidationErrorStateUpdates } from './use-validation-error-state-upd
 
 export const PLUGIN_NAME = 'amp-block-validation';
 export const SIDEBAR_NAME = 'amp-editor-sidebar';
-export const PLUGIN_TITLE = __( 'AMP', 'amp' );
+export const PLUGIN_TITLE = __( 'AMP Validation', 'amp' );
 
 createStore( INITIAL_STATE );
 
