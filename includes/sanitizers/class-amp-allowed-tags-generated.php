@@ -558,6 +558,7 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-player-allowed-descendants' => array(
 			'a',
 			'span',
+			'img',
 		),
 		'amp-story-social-share-allowed-descendants' => array(
 			'script',

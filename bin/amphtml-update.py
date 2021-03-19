@@ -416,8 +416,11 @@ def ParseRules(out_dir):
 				descendant_lists[list.name] = []
 				for val in list.tag:
 
+					if 'I-AMPHTML-SIZER' == val:
+						continue
+
 					# Skip tags specific to transformed AMP.
-					if val in ( 'I-AMPHTML-SIZER', 'IMG', ):
+					if 'IMG' == val and 'amp-story-player-allowed-descendants' != list.name:
 						continue
 
 					descendant_lists[list.name].append( val.lower() )
