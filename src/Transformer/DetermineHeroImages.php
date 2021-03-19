@@ -18,9 +18,11 @@ use DOMElement;
  * Determine the images to flag as data-hero so the Optimizer can preload them.
  *
  * This transformer checks for the following images in the given order:
- * 1. Custom logo
- * 2. Featured image of the page
- * 3. Block editor cover block(s)
+ * 1. Custom header
+ * 2. Custom logo
+ * 3. Featured image of the page
+ * 4. Image block in initial position of first entry content
+ * 5. Cover block image in initial position of first entry content
  *
  * It then applies the data-hero attribute to the first two of these.
  *
