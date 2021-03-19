@@ -6,8 +6,10 @@
  * @since 1.0
  */
 
+use AmpProject\AmpWP\Transformer\DetermineHeroImages;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Optimizer\Configuration;
 use AmpProject\Role;
 
 /**
@@ -99,6 +101,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'amend_twentytwentyone_sub_menu_toggles' => [],
 					'add_twentytwentyone_mobile_modal' => [],
 					'add_twentytwentyone_sub_menu_fix' => [],
+					'enable_determine_hero_images_transformer' => [],
 				];
 
 				// Dark mode button toggle is only supported in the Customizer for now.
@@ -139,6 +142,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_img_display_block_fix'        => [],
 					'add_twentytwenty_custom_logo_fix' => [],
 					'add_twentytwenty_current_page_awareness' => [],
+					'enable_determine_hero_images_transformer' => [],
 				];
 
 				$theme = wp_get_theme( 'twentytwenty' );
@@ -166,6 +170,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					],
 					'add_twentynineteen_masthead_styles' => [],
 					'adjust_twentynineteen_images'       => [],
+					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Seventeen.
@@ -201,6 +206,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					],
 					'set_twentyseventeen_quotes_icon'     => [],
 					'add_twentyseventeen_attachment_image_attributes' => [],
+					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Sixteen.
@@ -223,6 +229,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'sub_menu_button_toggle_class' => 'toggled-on',
 						'no_js_submenu_visible'        => true,
 					],
+					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Fifteen.
@@ -243,6 +250,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'sub_menu_button_toggle_class' => 'toggle-on',
 						'no_js_submenu_visible'        => true,
 					],
+					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Fourteen.
@@ -259,6 +267,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_twentyfourteen_masthead_styles' => [],
 					'add_twentyfourteen_slider_carousel' => [],
 					'add_twentyfourteen_search'          => [],
+					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Thirteen.
@@ -271,6 +280,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_nav_menu_toggle'      => [],
 					'add_nav_sub_menu_buttons' => [],
 					'add_nav_menu_styles'      => [],
+					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Twelve.
@@ -280,6 +290,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'twentytwelve-navigation',
 					],
 					'add_nav_menu_styles' => [],
+					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Eleven.
@@ -289,11 +300,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'//style[ @id = "twentyeleven-header-css" ]',
 						'//link[ @id = "dark-css" ]',
 					],
+					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Ten.
 			case 'twentyten':
-				return [];
+				return [
+					'enable_determine_hero_images_transformer' => [],
+				];
 
 			default:
 				return null;
@@ -531,6 +545,25 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				call_user_func( [ __CLASS__, $theme_feature ], $feature_args );
 			}
 		}
+	}
+
+	/**
+	 * Enable transformer that identifies hero image candidates for prerendering.
+	 *
+	 * Note that this transformer will likely be enabled by default in the future. It is only enabled by default for
+	 * core themes in the immediate term since it is known to work well with this set of themes.
+	 *
+	 * @since 2.1
+	 */
+	public static function enable_determine_hero_images_transformer() {
+		add_filter(
+			'amp_optimizer_config',
+			static function ( $config ) {
+				array_unshift( $config[ Configuration::KEY_TRANSFORMERS ], DetermineHeroImages::class );
+				return $config;
+			},
+			9
+		);
 	}
 
 	/**

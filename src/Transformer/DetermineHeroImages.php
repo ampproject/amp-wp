@@ -18,9 +18,11 @@ use DOMElement;
  * Determine the images to flag as data-hero so the Optimizer can preload them.
  *
  * This transformer checks for the following images in the given order:
- * 1. Custom logo
- * 2. Featured image of the page
- * 3. Block editor cover block(s)
+ * 1. Custom header
+ * 2. Custom logo
+ * 3. Featured image of the page
+ * 4. Image block in initial position of first entry content
+ * 5. Cover block image in initial position of first entry content
  *
  * It then applies the data-hero attribute to the first two of these.
  *
@@ -31,32 +33,46 @@ use DOMElement;
 final class DetermineHeroImages implements Transformer {
 
 	/**
-	 * XPath query to find the existing hero images (elements with data/hero attribute).
+	 * XPath query to find the custom logo.
 	 *
 	 * @var string
 	 */
-	const EXISTING_HERO_IMAGES_XPATH_QUERY = './/*[@data-hero]';
+	const CUSTOM_HEADER_XPATH_QUERY = ".//*[ @id = 'wp-custom-header' or @id = 'masthead' or @id = 'site-header' or contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-custom-header ' ) ]//*[ ( self::img or self::amp-img ) and not( @data-hero ) and not( contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ) ]";
 
 	/**
 	 * XPath query to find the custom logo.
 	 *
 	 * @var string
 	 */
-	const CUSTOM_LOGO_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
+	const CUSTOM_LOGO_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find the featured image.
 	 *
 	 * @var string
 	 */
-	const FEATURED_IMAGE_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ][ not( @data-hero ) ]";
+	const FEATURED_IMAGE_XPATH_QUERY = ".//*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ][ not( @data-hero ) ]";
 
 	/**
-	 * XPath query to find the cover blocks.
+	 * XPath query to find the first entry-content.
 	 *
 	 * @var string
 	 */
-	const COVER_BLOCKS_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ][ not( @data-hero ) ]";
+	const FIRST_ENTRY_CONTENT_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' entry-content ' ) ][1]";
+
+	/**
+	 * XPath query to find background image of a Cover Block at the beginning of post content (including nested inside of another block).
+	 *
+	 * @var string
+	 */
+	const INITIAL_COVER_BLOCK_XPATH_QUERY = "./*[1]/descendant-or-self::div[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ]/*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover__image-background ' ) ][ not( @data-hero ) ]";
+
+	/**
+	 * XPath query to find Image Block at the beginning of post content (including nested inside of another block).
+	 *
+	 * @var string
+	 */
+	const INITIAL_IMAGE_BLOCK_XPATH_QUERY = "./*[1]/descendant-or-self::figure[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-image ' ) ]/*[ ( self::img or self::amp-img ) ][ not( @data-hero ) ]";
 
 	/**
 	 * Apply transformations to the provided DOM document.
@@ -68,44 +84,57 @@ final class DetermineHeroImages implements Transformer {
 	 * @return void
 	 */
 	public function transform( Document $document, ErrorCollection $errors ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$existing_hero_images_count = $document->xpath->query(
-			self::EXISTING_HERO_IMAGES_XPATH_QUERY,
-			$document->body
-		)->length;
-
-		$available_hero_image_slots = max(
-			PreloadHeroImage::DATA_HERO_MAX - $existing_hero_images_count,
-			0
-		);
-
 		$hero_image_elements = [];
 
-		if ( count( $hero_image_elements ) < $available_hero_image_slots ) {
-			$custom_logo = $this->get_custom_logo( $document );
-			if ( null !== $custom_logo ) {
-				$hero_image_elements[] = $custom_logo;
+		foreach ( [ 'custom_header', 'custom_logo', 'featured_image', 'initial_image_block', 'initial_cover_block' ] as $hero_image_source ) {
+			if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
+				$candidate = null;
+
+				switch ( $hero_image_source ) {
+					case 'custom_header':
+						$candidate = $this->get_custom_header( $document );
+						break;
+					case 'custom_logo':
+						$candidate = $this->get_custom_logo( $document );
+						break;
+					case 'featured_image':
+						$candidate = $this->get_featured_image( $document );
+						break;
+					case 'initial_image_block':
+						$candidate = $this->get_initial_content_image_block( $document );
+						break;
+					case 'initial_cover_block':
+						$candidate = $this->get_initial_content_cover_block( $document );
+						break;
+				}
+
+				if ( $candidate instanceof DOMElement ) {
+					$hero_image_elements[] = $candidate;
+				}
 			}
 		}
 
-		if ( count( $hero_image_elements ) < $available_hero_image_slots ) {
-			$featured_image = $this->get_featured_image( $document );
-			if ( null !== $featured_image ) {
-				$hero_image_elements[] = $featured_image;
-			}
-		}
-
-		if ( count( $hero_image_elements ) < $available_hero_image_slots ) {
-			$hero_image_elements = array_merge(
-				$hero_image_elements,
-				array_filter(
-					$this->get_cover_blocks( $document )
-				)
-			);
-		}
-
-		$this->add_data_hero_attribute(
-			array_slice( $hero_image_elements, 0, $available_hero_image_slots )
+		$this->add_data_hero_candidate_attribute(
+			array_slice( $hero_image_elements, 0, PreloadHeroImage::DATA_HERO_MAX )
 		);
+	}
+
+	/**
+	 * Retrieve the element that represents the custom header.
+	 *
+	 * @param Document $document Document to retrieve the custom header from.
+	 * @return DOMElement|null Element that represents the custom header, or null
+	 *                         if not found.
+	 */
+	private function get_custom_header( Document $document ) {
+		$elements = $document->xpath->query(
+			self::CUSTOM_HEADER_XPATH_QUERY,
+			$document->body
+		);
+
+		$custom_header = $elements->item( 0 );
+
+		return $custom_header instanceof DOMElement ? $custom_header : null;
 	}
 
 	/**
@@ -145,18 +174,61 @@ final class DetermineHeroImages implements Transformer {
 	}
 
 	/**
-	 * Retrieve the element(s) that are cover blocks.
+	 * Retrieve the first entry content.
 	 *
-	 * @param Document $document Document to retrieve the cover blocks from.
-	 * @return DOMElement[] Array of elements that are cover blocks.
+	 * @param Document $document Document to retrieve the first entry content from.
+	 * @return DOMElement|null First entry content element.
 	 */
-	private function get_cover_blocks( Document $document ) {
-		$elements = $document->xpath->query(
-			self::COVER_BLOCKS_XPATH_QUERY,
+	private function get_first_entry_content( Document $document ) {
+		$query = $document->xpath->query(
+			self::FIRST_ENTRY_CONTENT_XPATH_QUERY,
 			$document->body
 		);
 
-		return iterator_to_array( $elements, false );
+		$entry_content = $query->item( 0 );
+		return $entry_content instanceof DOMElement ? $entry_content : null;
+	}
+
+	/**
+	 * Retrieve the first cover block that is in the first position in content.
+	 *
+	 * @param Document $document Document to retrieve the cover block from.
+	 * @return DOMElement|null Cover block at the beginning of the first entry content.
+	 */
+	private function get_initial_content_cover_block( Document $document ) {
+		$entry_content = $this->get_first_entry_content( $document );
+		if ( ! $entry_content instanceof DOMElement ) {
+			return null;
+		}
+
+		$query = $document->xpath->query(
+			self::INITIAL_COVER_BLOCK_XPATH_QUERY,
+			$entry_content
+		);
+
+		$cover_block_image = $query->item( 0 );
+		return $cover_block_image instanceof DOMElement ? $cover_block_image : null;
+	}
+
+	/**
+	 * Retrieve the first image block that is in the first position in content.
+	 *
+	 * @param Document $document Document to retrieve the image block from.
+	 * @return DOMElement|null Image block at the beginning of the first entry content.
+	 */
+	private function get_initial_content_image_block( Document $document ) {
+		$entry_content = $this->get_first_entry_content( $document );
+		if ( ! $entry_content instanceof DOMElement ) {
+			return null;
+		}
+
+		$query = $document->xpath->query(
+			self::INITIAL_IMAGE_BLOCK_XPATH_QUERY,
+			$entry_content
+		);
+
+		$image = $query->item( 0 );
+		return $image instanceof DOMElement ? $image : null;
 	}
 
 	/**
@@ -165,9 +237,9 @@ final class DetermineHeroImages implements Transformer {
 	 * @param DOMElement[] $hero_image_elements Elements that are viable hero
 	 *                                          images.
 	 */
-	private function add_data_hero_attribute( $hero_image_elements ) {
+	private function add_data_hero_candidate_attribute( $hero_image_elements ) {
 		foreach ( $hero_image_elements as $hero_image_element ) {
-			$hero_image_element->setAttribute( Attribute::DATA_HERO, null );
+			$hero_image_element->setAttribute( Attribute::DATA_HERO_CANDIDATE, null );
 		}
 	}
 }

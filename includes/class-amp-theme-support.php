@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
@@ -1867,7 +1868,7 @@ class AMP_Theme_Support {
 		 */
 		do_action( 'amp_server_timing_start', 'amp_dom_parse', '', [], true );
 
-		$dom = Document::fromHtml( $response );
+		$dom = Document::fromHtml( $response, Options::DEFAULTS );
 
 		if ( AMP_Validation_Manager::$is_validate_request ) {
 			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
@@ -2117,8 +2118,6 @@ class AMP_Theme_Support {
 					Optimizer\Transformer\TransformedIdentifier::class,
 				]
 			);
-		} else {
-			array_unshift( $transformers, Transformer\DetermineHeroImages::class );
 		}
 
 		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );
