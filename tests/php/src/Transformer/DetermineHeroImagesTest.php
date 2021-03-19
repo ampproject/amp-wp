@@ -137,16 +137,14 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 			'detects cover blocks'                         => [
 				$input(
 					'<div class="entry-content">'
-					. '<div class="wp-block-cover has-background-dim alignleft" style="background-image:url(https://example.com/cover-block-1.jpg)"><p class="wp-block-cover-text">This is a left aligned cover block with a background image.</p></div>'
-					. '<div class="wp-block-cover has-pale-pink-background-color has-background-dim has-left-content aligncenter" style="background-image:url(https://example.com/cover-block-2.jpg)"><p class="wp-block-cover-text"><strong>A center aligned cover image block, with a left aligned text.</strong></p></div>'
-					. '<div class="wp-block-cover has-background-dim-20 has-background-dim has-parallax alignfull" style="background-image:url(https://example.com/cover-block-3.jpg)"><p class="wp-block-cover-text">This is a full width cover block with a fixed background image with a 20% opacity.</p></div>'
+					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
+					. '<div class="wp-block-cover has-background-dim-40 has-red-background-color has-background-dim has-parallax" style="background-image:url(https://example.com/cover-block-2.jpg)"><div class="wp-block-cover__inner-container"><p class="has-text-align-center has-large-font-size">Cover Block With Parallax</p></div></div>'
 					. '</div>'
 				),
 				$output(
 					'<div class="entry-content">'
-					. '<div class="wp-block-cover has-background-dim alignleft" style="background-image:url(https://example.com/cover-block-1.jpg)" data-hero-candidate><p class="wp-block-cover-text">This is a left aligned cover block with a background image.</p></div>'
-					. '<div class="wp-block-cover has-pale-pink-background-color has-background-dim has-left-content aligncenter" style="background-image:url(https://example.com/cover-block-2.jpg)" data-hero-candidate><p class="wp-block-cover-text"><strong>A center aligned cover image block, with a left aligned text.</strong></p></div>'
-					. '<div class="wp-block-cover has-background-dim-20 has-background-dim has-parallax alignfull" style="background-image:url(https://example.com/cover-block-3.jpg)"><p class="wp-block-cover-text">This is a full width cover block with a fixed background image with a 20% opacity.</p></div>'
+					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" data-hero-candidate alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
+					. '<div class="wp-block-cover has-background-dim-40 has-red-background-color has-background-dim has-parallax" style="background-image:url(https://example.com/cover-block-2.jpg)"><div class="wp-block-cover__inner-container"><p class="has-text-align-center has-large-font-size">Cover Block With Parallax</p></div></div>'
 					. '</div>'
 				),
 			],

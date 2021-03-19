@@ -52,11 +52,11 @@ final class DetermineHeroImages implements Transformer {
 	const FEATURED_IMAGE_XPATH_QUERY = ".//*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ][ not( @data-hero ) ]";
 
 	/**
-	 * XPath query to find the cover blocks.
+	 * XPath query to find background image of Cover Blocks.
 	 *
 	 * @var string
 	 */
-	const COVER_BLOCKS_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ][ not( @data-hero ) ]";
+	const COVER_BLOCKS_XPATH_QUERY = ".//div[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ]/*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover__image-background ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * Apply transformations to the provided DOM document.
