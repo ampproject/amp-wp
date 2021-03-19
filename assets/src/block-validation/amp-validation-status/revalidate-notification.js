@@ -43,7 +43,7 @@ export default function AMPRevalidateNotification() {
 		return {
 			hasErrorsFromRemovedBlocks: _hasErrorsFromRemovedBlocks,
 			hasActiveMetaboxes: select( 'core/edit-post' ).hasMetaBoxes(),
-			isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' )?.getEditedPostAttribute( 'status' ) ) !== -1,
+			isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' ).getEditedPostAttribute( 'status' ) ) !== -1,
 			isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
 			isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 			isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
