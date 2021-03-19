@@ -119,6 +119,7 @@ class AMP_Validation_Manager {
 	 *
 	 * Keys are post IDs and values are whether the post has been re-validated.
 	 *
+	 * @deprecated In 2.1 the classic editor block validation was removed. This is not removed yet since there is a mini plugin that uses it: https://gist.github.com/westonruter/31ac0e056b8b1278c98f8a9f548fcc1a.
 	 * @var bool[]
 	 */
 	public static $posts_pending_frontend_validation = [];
@@ -195,12 +196,10 @@ class AMP_Validation_Manager {
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
-		add_action( 'save_post', [ __CLASS__, 'handle_save_post_prompting_validation' ] );
 		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'enqueue_block_validation' ] );
-		add_action( 'edit_form_top', [ __CLASS__, 'print_edit_form_validation_status' ], 10, 2 );
 
 		// Add actions for checking theme support is present to determine plugin compatibility and show validation links in the admin bar.
-		// Actions and filters involved in validation.
+		// @todo Eliminate this in favor of async validation. See <https://github.com/ampproject/amp-wp/issues/5101>.
 		add_action(
 			'activate_plugin',
 			static function() {
@@ -529,46 +528,11 @@ class AMP_Validation_Manager {
 	 *
 	 * This is intended to only apply to post edits made in the classic editor.
 	 *
-	 * @see AMP_Validation_Manager::validate_queued_posts_on_frontend()
-	 *
-	 * @param int $post_id Post ID.
+	 * @deprecated In 2.1 the classic editor block validation was removed.
+	 * @codeCoverageIgnore
 	 */
-	public static function handle_save_post_prompting_validation( $post_id ) {
-		global $pagenow;
-
-		if ( ! self::get_dev_tools_user_access()->is_user_enabled() ) {
-			return;
-		}
-
-		$post = get_post( $post_id );
-
-		$is_classic_editor_post_save = (
-			isset( $_SERVER['REQUEST_METHOD'] )
-			&&
-			'POST' === $_SERVER['REQUEST_METHOD']
-			&&
-			'post.php' === $pagenow
-			&&
-			isset( $_POST['post_ID'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			&&
-			(int) $_POST['post_ID'] === (int) $post_id // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		);
-
-		$should_validate_post = (
-			$is_classic_editor_post_save
-			&&
-			self::post_supports_validation( $post )
-			&&
-			! isset( self::$posts_pending_frontend_validation[ $post_id ] )
-		);
-		if ( $should_validate_post ) {
-			self::$posts_pending_frontend_validation[ $post_id ] = true;
-
-			// The reason for shutdown is to ensure that all postmeta changes have been saved, including whether AMP is enabled.
-			if ( ! has_action( 'shutdown', [ __CLASS__, 'validate_queued_posts_on_frontend' ] ) ) {
-				add_action( 'shutdown', [ __CLASS__, 'validate_queued_posts_on_frontend' ] );
-			}
-		}
+	public static function handle_save_post_prompting_validation() {
+		_deprecated_function( __METHOD__, '2.1' );
 	}
 
 	/**
@@ -576,45 +540,11 @@ class AMP_Validation_Manager {
 	 *
 	 * @see AMP_Validation_Manager::handle_save_post_prompting_validation()
 	 *
-	 * @return array Mapping of post ID to the result of validating or storing the validation result.
+	 * @deprecated In 2.1 the classic editor block validation was removed.
+	 * @codeCoverageIgnore
 	 */
 	public static function validate_queued_posts_on_frontend() {
-		$posts = array_filter(
-			array_map( 'get_post', array_keys( array_filter( self::$posts_pending_frontend_validation ) ) ),
-			function( $post ) {
-				return self::post_supports_validation( $post );
-			}
-		);
-
-		$validation_posts = [];
-
-		/*
-		 * It is unlikely that there will be more than one post in the array.
-		 * For the bulk recheck action, see AMP_Validated_URL_Post_Type::handle_bulk_action().
-		 */
-		foreach ( $posts as $post ) {
-			$url = amp_get_permalink( $post->ID );
-			if ( ! $url ) {
-				$validation_posts[ $post->ID ] = new WP_Error( 'no_amp_permalink' );
-				continue;
-			}
-
-			// Prevent re-validating.
-			self::$posts_pending_frontend_validation[ $post->ID ] = false;
-
-			$invalid_url_post_id = (int) get_post_meta( $post->ID, '_amp_validated_url_post_id', true );
-
-			$validity = self::validate_url_and_store( $url, $invalid_url_post_id );
-
-			// Remember the amp_validated_url post so that when the slug changes the old amp_validated_url post can be updated.
-			if ( ! is_wp_error( $validity ) && $invalid_url_post_id !== $validity['post_id'] ) {
-				update_post_meta( $post->ID, '_amp_validated_url_post_id', $validity['post_id'] );
-			}
-
-			$validation_posts[ $post->ID ] = $validity instanceof WP_Error ? $validity : $validity['post_id'];
-		}
-
-		return $validation_posts;
+		_deprecated_function( __METHOD__, '2.1' );
 	}
 
 	/**
@@ -754,101 +684,12 @@ class AMP_Validation_Manager {
 	 *
 	 * This is essentially a PHP implementation of ampBlockValidation.handleValidationErrorsStateChange() in JS.
 	 *
-	 * @param WP_Post $post The updated post.
+	 * @deprecated In 2.1 the classic editor block validation was removed.
+	 * @codeCoverageIgnore
 	 * @return void
 	 */
-	public static function print_edit_form_validation_status( $post ) {
-		if ( ! self::post_supports_validation( $post ) || ! self::get_dev_tools_user_access()->is_user_enabled() ) {
-			return;
-		}
-
-		$invalid_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( get_permalink( $post->ID ) );
-		if ( ! $invalid_url_post ) {
-			return;
-		}
-
-		// Show all validation errors which have not been explicitly acknowledged as accepted.
-		$validation_errors  = [];
-		$has_rejected_error = false;
-		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post ) as $error ) {
-			$needs_moderation = (
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['status'] || // @todo Show differently since moderated?
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['status'] ||
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $error['status']
-			);
-			if ( $needs_moderation ) {
-				$validation_errors[] = $error['data'];
-			}
-
-			if (
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['status']
-				||
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['status']
-			) {
-				$has_rejected_error = true;
-			}
-		}
-
-		// No validation errors so abort.
-		if ( empty( $validation_errors ) ) {
-			return;
-		}
-
-		echo '<div class="notice notice-warning">';
-		echo '<p>';
-		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
-		echo ' ';
-
-		// Auto-acceptance is enabled by default but can be overridden by the the `amp_validation_error_default_sanitized` filter.
-		if ( ! $has_rejected_error ) {
-			esc_html_e( 'The invalid markup has been automatically removed.', 'amp' );
-		} else {
-			/*
-			 * Even if invalid markup is removed by default, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
-			 * For example, the errors could have been stored as 'New Kept' when auto-accept was false, and now auto-accept is true.
-			 * In that case, this will block serving AMP.
-			 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
-			 */
-			esc_html_e( 'In order for AMP to be served you will have to remove the invalid markup or allow the plugin to remove it.', 'amp' );
-		}
-
-		echo sprintf(
-			' <a href="%s" target="_blank">%s</a>',
-			esc_url( get_edit_post_link( $invalid_url_post ) ),
-			esc_html__( 'Review issues', 'amp' )
-		);
-		echo '</p>';
-
-		$results      = AMP_Validation_Error_Taxonomy::summarize_validation_errors( array_unique( $validation_errors, SORT_REGULAR ) );
-		$removed_sets = [];
-		if ( ! empty( $results[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) && is_array( $results[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) ) {
-			$removed_sets[] = [
-				'label' => __( 'Invalid elements:', 'amp' ),
-				'names' => array_map( 'sanitize_key', $results[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ),
-			];
-		}
-		if ( ! empty( $results[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ) && is_array( $results[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ) ) {
-			$removed_sets[] = [
-				'label' => __( 'Invalid attributes:', 'amp' ),
-				'names' => array_map( 'sanitize_key', $results[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ),
-			];
-		}
-		// @todo There are other kinds of errors other than REMOVED_ELEMENTS and REMOVED_ATTRIBUTES.
-		foreach ( $removed_sets as $removed_set ) {
-			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
-			$items = [];
-			foreach ( $removed_set['names'] as $name => $count ) {
-				if ( 1 === (int) $count ) {
-					$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
-				} else {
-					$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
-				}
-			}
-			echo implode( ', ', $items ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo '</p>';
-		}
-
-		echo '</div>';
+	public static function print_edit_form_validation_status() {
+		_deprecated_function( __METHOD__, '2.1' );
 	}
 
 	/**
@@ -2235,6 +2076,7 @@ class AMP_Validation_Manager {
 	/**
 	 * On activating a plugin, display a notice if a plugin causes an AMP validation error.
 	 *
+	 * @todo Eliminate this in favor of async validation. See <https://github.com/ampproject/amp-wp/issues/5101>.
 	 * @return void
 	 */
 	public static function print_plugin_notice() {
