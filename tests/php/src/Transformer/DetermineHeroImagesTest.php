@@ -40,7 +40,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 		};
 
 		return [
-			'detects custom header'             => [
+			'detects custom header'                      => [
 				$input(
 					'<div class="wp-custom-header">'
 					. '<img width="789" height="539" src="https://example.com/custom-header.jpg">'
@@ -53,7 +53,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'detects custom header as amp-img'  => [
+			'detects custom header as amp-img'           => [
 				$input(
 					'<div class="wp-custom-header">'
 					. '<amp-img width="789" height="539" src="https://example.com/custom-header.jpg"></amp-img>'
@@ -66,7 +66,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'detects site icon'                 => [
+			'detects site icon'                          => [
 				$input(
 					'<div class="site-logo faux-heading">'
 					. '<a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
@@ -83,7 +83,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'detects site icon as amp-img'      => [
+			'detects site icon as amp-img'               => [
 				$input(
 					'<div class="site-logo faux-heading">'
 					. '<a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
@@ -100,7 +100,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'detects featured image'            => [
+			'detects featured image'                     => [
 				$input(
 					'<figure class="featured-media">'
 					. '<div class="featured-media-inner section-inner">'
@@ -117,7 +117,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'detects featured image as amp-img' => [
+			'detects featured image as amp-img'          => [
 				$input(
 					'<figure class="featured-media">'
 					. '<div class="featured-media-inner section-inner">'
@@ -134,7 +134,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'detects first content cover block' => [
+			'detects first content cover block'          => [
 				$input(
 					'<div class="entry-content">'
 					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
@@ -155,7 +155,24 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'ignores non-initial cover blocks'  => [
+			'detects first cover block in initial group' => [
+				$input(
+					'<div class="entry-content">'
+					. '<div class="wp-block-group"><div class="wp-block-group__inner-container">'
+					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
+					. '</div></div>'
+					. '</div>'
+				),
+				$output(
+					'<div class="entry-content">'
+					. '<div class="wp-block-group"><div class="wp-block-group__inner-container">'
+					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" data-hero-candidate alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
+					. '</div></div>'
+					. '</div>'
+				),
+			],
+
+			'ignores non-initial cover blocks'           => [
 				$input(
 					'<div class="entry-content">'
 					. '<p>Another block at beginning!</p>'

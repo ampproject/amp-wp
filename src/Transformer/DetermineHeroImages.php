@@ -56,7 +56,7 @@ final class DetermineHeroImages implements Transformer {
 	 *
 	 * @var string
 	 */
-	const FIRST_ENTRY_CONTENT = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' entry-content ' ) ][1]";
+	const FIRST_ENTRY_CONTENT_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' entry-content ' ) ][1]";
 
 	/**
 	 * XPath query to find background image of a Cover Block at the beginning of post content (including nested inside of another block).
@@ -175,7 +175,7 @@ final class DetermineHeroImages implements Transformer {
 	 */
 	private function get_initial_content_cover_block( Document $document ) {
 		$query = $document->xpath->query(
-			self::FIRST_ENTRY_CONTENT,
+			self::FIRST_ENTRY_CONTENT_XPATH_QUERY,
 			$document->body
 		);
 
