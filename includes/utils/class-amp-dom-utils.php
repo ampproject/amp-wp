@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\Tag;
 
 /**
@@ -180,7 +181,7 @@ class AMP_DOM_Utils {
 		 */
 		$document = "<html><head></head><body>{$content}</body></html>";
 
-		$options = Options::DEFAULTS;
+		$options                              = Options::DEFAULTS;
 		$options[ Document\Option::ENCODING ] = $encoding;
 
 		return Document::fromHtml( $document, $options );
@@ -386,8 +387,8 @@ class AMP_DOM_Utils {
 	 *
 	 * @deprecated Use AmpProject\Dom\Document::getElementId() instead.
 	 *
-	 * @param DOMElement $element Element to get the ID for.
-	 * @param string     $prefix  Optional. Defaults to 'amp-wp-id'.
+	 * @param DOMElement|Element $element Element to get the ID for.
+	 * @param string             $prefix  Optional. Defaults to 'amp-wp-id'.
 	 * @return string ID to use.
 	 */
 	public static function get_element_id( $element, $prefix = 'amp-wp-id' ) {
