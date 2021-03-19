@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button, ExternalLink } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 
@@ -20,21 +20,23 @@ export default function AMPValidationStatusNotification() {
 	const { autosave, savePost } = useDispatch( 'core/editor' );
 
 	const {
-		ampCompatibilityBroken,
 		fetchingErrorsRequestErrorMessage,
-		hasValidationErrors,
 		isDraft,
 		isEditedPostNew,
 		isFetchingErrors,
+		keptMarkupValidationErrorCount,
 		reviewLink,
+		unreviewedValidationErrorCount,
+		validationErrorCount,
 	} = useSelect( ( select ) => ( {
-		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
 		fetchingErrorsRequestErrorMessage: select( BLOCK_VALIDATION_STORE_KEY ).getFetchingErrorsRequestErrorMessage(),
-		hasValidationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors()?.length > 0,
 		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' )?.getEditedPostAttribute( 'status' ) ) !== -1,
 		isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
 		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
+		keptMarkupValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getKeptMarkupValidationErrors().length,
 		reviewLink: select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(),
+		unreviewedValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors().length,
+		validationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors().length,
 	} ), [] );
 
 	if ( isFetchingErrors ) {
@@ -61,11 +63,22 @@ export default function AMPValidationStatusNotification() {
 		);
 	}
 
-	if ( ampCompatibilityBroken ) {
+	if ( keptMarkupValidationErrorCount > 0 ) {
 		return (
 			<SidebarNotification
 				icon={ <AMPValidationErrorsKeptIcon /> }
-				message={ __( 'AMP blocked from validation issues marked kept.', 'amp' ) }
+				message={
+					sprintf(
+						/* translators: %d is count of validation errors whose invalid markup is kept */
+						_n(
+							'AMP is disabled due to invalid markup being kept for %d issue.',
+							'AMP is disabled due to invalid markup being kept for %d issues.',
+							keptMarkupValidationErrorCount,
+							'amp',
+						),
+						keptMarkupValidationErrorCount,
+					)
+				}
 				action={ reviewLink && (
 					<ExternalLink href={ reviewLink }>
 						{ __( 'View technical details', 'amp' ) }
@@ -75,11 +88,22 @@ export default function AMPValidationStatusNotification() {
 		);
 	}
 
-	if ( hasValidationErrors ) {
+	if ( unreviewedValidationErrorCount > 0 ) {
 		return (
 			<SidebarNotification
 				icon={ <StatusIcon broken={ true } /> }
-				message={ __( 'AMP is working, but issues needs review.', 'amp' ) }
+				message={
+					sprintf(
+						/* translators: %d is count of unreviewed validation error */
+						_n(
+							'AMP is enabled, but %d issue needs review.',
+							'AMP is enabled, but %d issues need review.',
+							unreviewedValidationErrorCount,
+							'amp',
+						),
+						unreviewedValidationErrorCount,
+					)
+				}
 				action={ reviewLink && (
 					<ExternalLink href={ reviewLink }>
 						{ __( 'View technical details', 'amp' ) }
@@ -93,15 +117,38 @@ export default function AMPValidationStatusNotification() {
 		return (
 			<SidebarNotification
 				icon={ <StatusIcon /> }
-				message={ __( 'Validation issues will be checked for when the post is saved.', 'amp' ) }
+				message={ __( 'Validation will be checked when the post is saved.', 'amp' ) }
 			/>
 		);
+	}
+
+	if ( validationErrorCount > 0 ) {
+		return <SidebarNotification
+			icon={ <StatusIcon /> }
+			message={
+				sprintf(
+					/* translators: %d is count of unreviewed validation error */
+					_n(
+						'AMP is enabled, and %d validation issue has been reviewed.',
+						'AMP is enabled, and %d validation issues have been reviewed.',
+						validationErrorCount,
+						'amp',
+					),
+					validationErrorCount,
+				)
+			}
+			action={ reviewLink && (
+				<ExternalLink href={ reviewLink }>
+					{ __( 'View technical details', 'amp' ) }
+				</ExternalLink>
+			) }
+		/>;
 	}
 
 	return (
 		<SidebarNotification
 			icon={ <StatusIcon /> }
-			message={ __( 'AMP is working. All issues reviewed or removed.', 'amp' ) }
+			message={ __( 'AMP is enabled. There are no validation issues.', 'amp' ) }
 		/>
 	);
 }

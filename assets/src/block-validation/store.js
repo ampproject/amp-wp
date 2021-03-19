@@ -28,6 +28,7 @@ export const INITIAL_STATE = {
 	isPostDirty: false,
 	isFetchingErrors: false,
 	isShowingReviewed: false,
+	keptMarkupValidationErrors: [],
 	rawValidationErrors: [],
 	reviewLink: null,
 	reviewedValidationErrors: [],
@@ -73,6 +74,11 @@ export function getStore( initialState ) {
 								status === VALIDATION_ERROR_NEW_ACCEPTED_STATUS || status === VALIDATION_ERROR_NEW_REJECTED_STATUS,
 							),
 
+						keptMarkupValidationErrors: action.validationErrors
+							.filter( ( { status } ) =>
+								status === VALIDATION_ERROR_NEW_REJECTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS,
+							),
+
 						validationErrors: action.validationErrors,
 					};
 
@@ -115,6 +121,7 @@ export function getStore( initialState ) {
 			getReviewLink: ( { reviewLink } ) => reviewLink,
 			getReviewedValidationErrors: ( { reviewedValidationErrors } ) => reviewedValidationErrors,
 			getUnreviewedValidationErrors: ( { unreviewedValidationErrors } ) => unreviewedValidationErrors,
+			getKeptMarkupValidationErrors: ( { keptMarkupValidationErrors } ) => keptMarkupValidationErrors,
 			getValidationErrors: ( { validationErrors } ) => validationErrors,
 		},
 		initialState,
