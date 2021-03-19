@@ -532,7 +532,7 @@ class AMP_Validation_Manager {
 	 * @codeCoverageIgnore
 	 */
 	public static function handle_save_post_prompting_validation() {
-		_deprecated_function( __FUNCTION__, '2.1' );
+		_deprecated_function( __METHOD__, '2.1' );
 	}
 
 	/**
@@ -544,7 +544,7 @@ class AMP_Validation_Manager {
 	 * @codeCoverageIgnore
 	 */
 	public static function validate_queued_posts_on_frontend() {
-		_deprecated_function( __FUNCTION__, '2.1' );
+		_deprecated_function( __METHOD__, '2.1' );
 	}
 
 	/**
@@ -689,7 +689,7 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function print_edit_form_validation_status() {
-		_deprecated_function( __FUNCTION__, '2.1' );
+		_deprecated_function( __METHOD__, '2.1' );
 	}
 
 	/**
