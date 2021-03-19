@@ -416,10 +416,11 @@ def ParseRules(out_dir):
 				descendant_lists[list.name] = []
 				for val in list.tag:
 
+					# Skip tags specific to transformed AMP.
 					if 'I-AMPHTML-SIZER' == val:
 						continue
 
-					# Skip tags specific to transformed AMP.
+					# The img tag is currently exclusively to transformed AMP, except as descendant of amp-story-player.
 					if 'IMG' == val and 'amp-story-player-allowed-descendants' != list.name:
 						continue
 
