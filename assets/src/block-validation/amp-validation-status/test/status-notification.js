@@ -27,13 +27,14 @@ describe( 'AMPValidationStatusNotification', () => {
 
 	function setupUseSelect( overrides ) {
 		useSelect.mockImplementation( () => ( {
-			ampCompatibilityBroken: false,
 			fetchingErrorsRequestErrorMessage: '',
-			hasValidationErrors: false,
 			isDraft: false,
 			isEditedPostNew: false,
 			isFetchingErrors: false,
+			keptMarkupValidationErrorCount: 0,
 			reviewLink: 'http://example.com',
+			unreviewedValidationErrorCount: 0,
+			validationErrorCount: 0,
 			...overrides,
 		} ) );
 	}
@@ -51,17 +52,6 @@ describe( 'AMPValidationStatusNotification', () => {
 		container = null;
 	} );
 
-	it( 'renders message when there are no AMP validation errors', () => {
-		setupUseSelect();
-
-		act( () => {
-			render( <AMPValidationStatusNotification />, container );
-		} );
-
-		expect( container.innerHTML ).toMatchSnapshot();
-		expect( container.innerHTML ).toContain( 'All issues reviewed or removed' );
-	} );
-
 	it( 'does not render when errors are being fetched', () => {
 		setupUseSelect( {
 			isFetchingErrors: true,
@@ -72,6 +62,20 @@ describe( 'AMPValidationStatusNotification', () => {
 		} );
 
 		expect( container.children ).toHaveLength( 0 );
+	} );
+
+	it( 'renders message when the post is new', () => {
+		setupUseSelect( {
+			isEditedPostNew: true,
+		} );
+
+		act( () => {
+			render( <AMPValidationStatusNotification />, container );
+		} );
+
+		expect( container.innerHTML ).toMatchSnapshot();
+		expect( container.innerHTML ).toContain( 'Validation will be checked upon saving' );
+		expect( container.querySelector( 'a[href="http://example.com"]' ) ).toBeNull();
 	} );
 
 	it( 'renders error message when API request error is present', () => {
@@ -102,9 +106,9 @@ describe( 'AMPValidationStatusNotification', () => {
 		expect( savePost ).toHaveBeenCalledWith( { isPreview: true } );
 	} );
 
-	it( 'renders error message when AMP compatibility is broken', () => {
+	it( 'renders error message when there are kept issues', () => {
 		setupUseSelect( {
-			ampCompatibilityBroken: true,
+			keptMarkupValidationErrorCount: 2,
 		} );
 
 		act( () => {
@@ -112,13 +116,13 @@ describe( 'AMPValidationStatusNotification', () => {
 		} );
 
 		expect( container.innerHTML ).toMatchSnapshot();
-		expect( container.innerHTML ).toContain( 'validation issues marked kept' );
+		expect( container.innerHTML ).toContain( 'AMP is disabled due to invalid markup being kept for 2 issues.' );
 		expect( container.querySelector( 'a[href="http://example.com"]' ) ).not.toBeNull();
 	} );
 
-	it( 'renders message when there are AMP validation errors', () => {
+	it( 'renders message when there are unreviewed issues', () => {
 		setupUseSelect( {
-			hasValidationErrors: true,
+			unreviewedValidationErrorCount: 3,
 		} );
 
 		act( () => {
@@ -126,13 +130,13 @@ describe( 'AMPValidationStatusNotification', () => {
 		} );
 
 		expect( container.innerHTML ).toMatchSnapshot();
-		expect( container.innerHTML ).toContain( 'issues needs review' );
+		expect( container.innerHTML ).toContain( 'AMP is enabled, but 3 issues need review.' );
 		expect( container.querySelector( 'a[href="http://example.com"]' ) ).not.toBeNull();
 	} );
 
-	it( 'renders message when there are no errors and post is new', () => {
+	it( 'renders message when there are reviewed issues', () => {
 		setupUseSelect( {
-			isEditedPostNew: true,
+			validationErrorCount: 1,
 		} );
 
 		act( () => {
@@ -140,8 +144,19 @@ describe( 'AMPValidationStatusNotification', () => {
 		} );
 
 		expect( container.innerHTML ).toMatchSnapshot();
-		expect( container.innerHTML ).toContain( 'issues will be checked for when the post is saved' );
-		expect( container.querySelector( 'a[href="http://example.com"]' ) ).toBeNull();
+		expect( container.innerHTML ).toContain( 'AMP is enabled, and 1 validation issue has been reviewed.' );
+		expect( container.querySelector( 'a[href="http://example.com"]' ) ).not.toBeNull();
+	} );
+
+	it( 'renders message when there are no AMP validation errors', () => {
+		setupUseSelect();
+
+		act( () => {
+			render( <AMPValidationStatusNotification />, container );
+		} );
+
+		expect( container.innerHTML ).toMatchSnapshot();
+		expect( container.innerHTML ).toContain( 'AMP is enabled. There are no validation issues.' );
 	} );
 } );
 
