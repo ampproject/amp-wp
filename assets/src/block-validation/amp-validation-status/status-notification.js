@@ -43,6 +43,15 @@ export default function AMPValidationStatusNotification() {
 		return null;
 	}
 
+	if ( isEditedPostNew ) {
+		return (
+			<SidebarNotification
+				icon={ <StatusIcon /> }
+				message={ __( 'Validation will be checked upon saving.', 'amp' ) }
+			/>
+		);
+	}
+
 	if ( fetchingErrorsRequestErrorMessage ) {
 		return (
 			<SidebarNotification
@@ -109,15 +118,6 @@ export default function AMPValidationStatusNotification() {
 						{ __( 'View technical details', 'amp' ) }
 					</ExternalLink>
 				) }
-			/>
-		);
-	}
-
-	if ( isEditedPostNew ) {
-		return (
-			<SidebarNotification
-				icon={ <StatusIcon /> }
-				message={ __( 'Validation will be checked upon saving.', 'amp' ) }
 			/>
 		);
 	}
