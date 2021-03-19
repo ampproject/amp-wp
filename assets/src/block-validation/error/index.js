@@ -42,12 +42,11 @@ export function Error( { clientId, error, status, term_id: termId, title } ) {
 	const external = ! Boolean( clientId );
 
 	const { blockType, removed } = useSelect( ( select ) => {
-		const blockDetails = clientId ? select( 'core/block-editor' ).getBlock( clientId ) : null;
-		const blockTypeDetails = blockDetails ? select( 'core/blocks' ).getBlockType( blockDetails.name ) : null;
+		const blockName = select( 'core/block-editor' ).getBlockName( clientId );
 
 		return {
-			removed: clientId && ! blockDetails,
-			blockType: blockTypeDetails,
+			removed: clientId && ! blockName,
+			blockType: select( 'core/blocks' ).getBlockType( blockName ),
 		};
 	}, [ clientId ] );
 
