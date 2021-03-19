@@ -256,6 +256,12 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 	 * Test the transform() method.
 	 *
 	 * @covers       \AmpProject\AmpWP\Transformer\DetermineHeroImages::transform()
+	 * @covers       \AmpProject\AmpWP\Transformer\DetermineHeroImages::add_data_hero_candidate_attribute()
+	 * @covers       \AmpProject\AmpWP\Transformer\DetermineHeroImages::get_custom_header()
+	 * @covers       \AmpProject\AmpWP\Transformer\DetermineHeroImages::get_custom_logo()
+	 * @covers       \AmpProject\AmpWP\Transformer\DetermineHeroImages::get_featured_image()
+	 * @covers       \AmpProject\AmpWP\Transformer\DetermineHeroImages::get_initial_content_image_block()
+	 * @covers       \AmpProject\AmpWP\Transformer\DetermineHeroImages::get_initial_content_cover_block()
 	 * @dataProvider data_transform()
 	 *
 	 * @param string                  $source          String of source HTML.
