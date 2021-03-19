@@ -9,6 +9,7 @@
 use AmpProject\AmpWP\Transformer\DetermineHeroImages;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Optimizer\Configuration;
 use AmpProject\Role;
 
 /**
@@ -558,7 +559,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		add_filter(
 			'amp_optimizer_config',
 			static function ( $config ) {
-				array_unshift( $config['transformers'], DetermineHeroImages::class );
+				array_unshift( $config[ Configuration::KEY_TRANSFORMERS ], DetermineHeroImages::class );
 				return $config;
 			},
 			9
