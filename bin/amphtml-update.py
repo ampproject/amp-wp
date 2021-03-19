@@ -78,6 +78,7 @@ def GenValidatorProtoascii(validator_directory, out_dir):
 
 	protoascii_segments = [
 		open(os.path.join(validator_directory, 'validator-main.protoascii')).read(),
+		open(os.path.join(validator_directory, 'validator-svg.protoascii')).read(),
 		open(os.path.join(validator_directory, 'validator-css.protoascii')).read()
 	]
 	extensions = glob.glob(os.path.join(validator_directory, '../extensions/*/validator-*.protoascii'))
