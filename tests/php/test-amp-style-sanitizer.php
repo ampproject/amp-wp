@@ -222,30 +222,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 							}
 						}
 					</style>
-					<style>
-						@-moz-document url-prefix(   ) {
-							.has-drop-cap {
-								/* Firefox does not even allow whitespace in the url-prefix() args. */
-								color: red;
-							}
-						}
-					</style>
-					<style>
-						@-moz-document url-prefix("http://") {
-							/* This rule will be dropped as a validation error since the url-prefix() is not empty. */
-							.has-drop-cap {
-								color: red;
-							}
-						}
-					</style>
-					<style>
-						@-moz-document url("https://example.com/") {
-							/* This rule will be dropped as a validation error since only an empty url-prefix() is allowed. */
-							.has-drop-cap {
-								color: red;
-							}
-						}
-					</style>
 					<div class="entry"><div class="entry-content"><p class="has-drop-cap">Hello</p></div></div>
 				',
 				'
@@ -253,14 +229,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				',
 				[
 					'@supports (-moz-appearance:meterbar){.entry .entry-content .has-drop-cap:not(:focus):first-letter{margin-top:.2em}}',
-					'',
 				],
 				[
 					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
 					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
-					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
-					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
-					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
 				],
 			],
 
