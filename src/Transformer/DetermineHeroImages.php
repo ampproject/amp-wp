@@ -88,34 +88,28 @@ final class DetermineHeroImages implements Transformer {
 
 		foreach ( [ 'custom_header', 'custom_logo', 'featured_image', 'initial_image_block', 'initial_cover_block' ] as $hero_image_source ) {
 			if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
-				$candidates = [];
+				$candidate = null;
 
 				switch ( $hero_image_source ) {
 					case 'custom_header':
-						$candidates = $this->get_custom_header( $document );
+						$candidate = $this->get_custom_header( $document );
 						break;
 					case 'custom_logo':
-						$candidates = $this->get_custom_logo( $document );
+						$candidate = $this->get_custom_logo( $document );
 						break;
 					case 'featured_image':
-						$candidates = $this->get_featured_image( $document );
+						$candidate = $this->get_featured_image( $document );
 						break;
 					case 'initial_image_block':
-						$candidates = $this->get_initial_content_image_block( $document );
+						$candidate = $this->get_initial_content_image_block( $document );
 						break;
 					case 'initial_cover_block':
-						$candidates = $this->get_initial_content_cover_block( $document );
+						$candidate = $this->get_initial_content_cover_block( $document );
 						break;
 				}
 
-				if ( empty( $candidates ) ) {
-					continue;
-				}
-
-				if ( is_array( $candidates ) ) {
-					$hero_image_elements = array_merge( $hero_image_elements, array_filter( $candidates ) );
-				} else {
-					$hero_image_elements[] = $candidates;
+				if ( $candidate instanceof DOMElement ) {
+					$hero_image_elements[] = $candidate;
 				}
 			}
 		}
