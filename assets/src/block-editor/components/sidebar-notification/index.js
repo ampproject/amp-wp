@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -14,8 +15,8 @@ import { Loading } from '../../../components/loading';
  * Notification component used in the block editor sidebar.
  *
  * @param {Object} props
- * @param {Object} props.action Call to action element.
- * @param {Object} props.icon Status icon element.
+ * @param {ReactNode} props.action Call to action element.
+ * @param {ReactNode} props.icon Status icon element.
  * @param {boolean} props.isLoading Flag indicating if it's a loading message.
  * @param {string} props.message Message text.
  */
@@ -48,8 +49,8 @@ export function SidebarNotification( {
 	);
 }
 SidebarNotification.propTypes = {
-	action: PropTypes.oneOfType( [ PropTypes.element, PropTypes.node ] ),
-	icon: PropTypes.oneOfType( [ PropTypes.element, PropTypes.node ] ),
+	action: PropTypes.node,
+	icon: PropTypes.node,
 	isLoading: PropTypes.bool,
 	message: PropTypes.string.isRequired,
 };
