@@ -52,11 +52,18 @@ final class DetermineHeroImages implements Transformer {
 	const FEATURED_IMAGE_XPATH_QUERY = ".//*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ][ not( @data-hero ) ]";
 
 	/**
-	 * XPath query to find background image of Cover Blocks.
+	 * XPath query to find the first entry-content.
 	 *
 	 * @var string
 	 */
-	const COVER_BLOCKS_XPATH_QUERY = ".//div[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ]/*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover__image-background ' ) ][ not( @data-hero ) ]";
+	const FIRST_ENTRY_CONTENT = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' entry-content ' ) ][1]";
+
+	/**
+	 * XPath query to find background image of a Cover Block at the beginning of post content (including nested inside of another block).
+	 *
+	 * @var string
+	 */
+	const INITIAL_COVER_BLOCK_XPATH_QUERY = "./*[1]/descendant-or-self::div[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ]/*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover__image-background ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * Apply transformations to the provided DOM document.
@@ -85,7 +92,7 @@ final class DetermineHeroImages implements Transformer {
 						$candidates = $this->get_featured_image( $document );
 						break;
 					case 'cover_blocks':
-						$candidates = $this->get_cover_blocks( $document );
+						$candidates = $this->get_initial_content_cover_block( $document );
 						break;
 				}
 
@@ -161,18 +168,29 @@ final class DetermineHeroImages implements Transformer {
 	}
 
 	/**
-	 * Retrieve the element(s) that are cover blocks.
+	 * Retrieve the first cover block that is in the first position in content.
 	 *
 	 * @param Document $document Document to retrieve the cover blocks from.
-	 * @return DOMElement[] Array of elements that are cover blocks.
+	 * @return DOMElement|null Cover block at the beginning of the first entry content.
 	 */
-	private function get_cover_blocks( Document $document ) {
-		$elements = $document->xpath->query(
-			self::COVER_BLOCKS_XPATH_QUERY,
+	private function get_initial_content_cover_block( Document $document ) {
+		$query = $document->xpath->query(
+			self::FIRST_ENTRY_CONTENT,
 			$document->body
 		);
 
-		return iterator_to_array( $elements, false );
+		$entry_content = $query->item( 0 );
+		if ( ! $entry_content instanceof DOMElement ) {
+			return null;
+		}
+
+		$query = $document->xpath->query(
+			self::INITIAL_COVER_BLOCK_XPATH_QUERY,
+			$entry_content
+		);
+
+		$cover_block_image = $query->item( 0 );
+		return $cover_block_image instanceof DOMElement ? $cover_block_image : null;
 	}
 
 	/**
