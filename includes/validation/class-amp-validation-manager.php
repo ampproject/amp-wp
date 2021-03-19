@@ -119,7 +119,7 @@ class AMP_Validation_Manager {
 	 *
 	 * Keys are post IDs and values are whether the post has been re-validated.
 	 *
-	 * @deprecated In 2.1 the classic editor block validation was removed.
+	 * @deprecated In 2.1 the classic editor block validation was removed. This is not removed yet since there is a mini plugin that uses it: https://gist.github.com/westonruter/31ac0e056b8b1278c98f8a9f548fcc1a.
 	 * @var bool[]
 	 */
 	public static $posts_pending_frontend_validation = [];
