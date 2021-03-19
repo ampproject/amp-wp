@@ -3297,6 +3297,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[],
 			],
+			'script_onerror'                          => [
+				'<html amp><head><meta charset="utf-8"><script amp-onerror>document.querySelector("script[src*=\'/v0.js\']").onerror=function(){document.querySelector(\'style[amp-boilerplate]\').textContent=\'\'}</script></head><body></body></html>',
+				null, // No change.
+				[],
+				[],
+			],
 		];
 
 		$bad_dev_mode_document = sprintf(
