@@ -117,7 +117,7 @@ export default function AMPValidationStatusNotification() {
 		return (
 			<SidebarNotification
 				icon={ <StatusIcon /> }
-				message={ __( 'Validation will be checked when the post is saved.', 'amp' ) }
+				message={ __( 'Validation will be checked upon saving.', 'amp' ) }
 			/>
 		);
 	}
