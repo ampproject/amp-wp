@@ -15,6 +15,7 @@ import {
 
 export const BLOCK_VALIDATION_STORE_KEY = 'amp/block-validation';
 
+const SET_FETCHING_ERRORS_REQUEST_ERROR_MESSAGE = 'SET_FETCHING_ERRORS_REQUEST_ERROR_MESSAGE';
 const SET_IS_FETCHING_ERRORS = 'SET_IS_FETCHING_ERRORS';
 const SET_IS_POST_DIRTY = 'SET_IS_POST_DIRTY';
 const SET_IS_SHOWING_REVIEWED = 'SET_IS_SHOWING_REVIEWED';
@@ -23,9 +24,11 @@ const SET_VALIDATION_ERRORS = 'SET_VALIDATION_ERRORS';
 
 export const INITIAL_STATE = {
 	ampCompatibilityBroken: false,
+	fetchingErrorsRequestErrorMessage: '',
 	isPostDirty: false,
 	isFetchingErrors: false,
 	isShowingReviewed: false,
+	keptMarkupValidationErrors: [],
 	rawValidationErrors: [],
 	reviewLink: null,
 	reviewedValidationErrors: [],
@@ -37,6 +40,9 @@ export function getStore( initialState ) {
 	return {
 		reducer: ( state = initialState, action ) => {
 			switch ( action.type ) {
+				case SET_FETCHING_ERRORS_REQUEST_ERROR_MESSAGE:
+					return { ...state, fetchingErrorsRequestErrorMessage: action.fetchingErrorsRequestErrorMessage };
+
 				case SET_IS_FETCHING_ERRORS:
 					return { ...state, isFetchingErrors: action.isFetchingErrors };
 
@@ -68,6 +74,11 @@ export function getStore( initialState ) {
 								status === VALIDATION_ERROR_NEW_ACCEPTED_STATUS || status === VALIDATION_ERROR_NEW_REJECTED_STATUS,
 							),
 
+						keptMarkupValidationErrors: action.validationErrors
+							.filter( ( { status } ) =>
+								status === VALIDATION_ERROR_NEW_REJECTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS,
+							),
+
 						validationErrors: action.validationErrors,
 					};
 
@@ -76,6 +87,10 @@ export function getStore( initialState ) {
 			}
 		},
 		actions: {
+			setFetchingErrorsRequestErrorMessage: ( fetchingErrorsRequestErrorMessage ) => ( {
+				type: SET_FETCHING_ERRORS_REQUEST_ERROR_MESSAGE,
+				fetchingErrorsRequestErrorMessage,
+			} ),
 			setIsFetchingErrors: ( isFetchingErrors ) => ( {
 				type: SET_IS_FETCHING_ERRORS,
 				isFetchingErrors,
@@ -99,12 +114,14 @@ export function getStore( initialState ) {
 		},
 		selectors: {
 			getAMPCompatibilityBroken: ( { ampCompatibilityBroken } ) => ampCompatibilityBroken,
+			getFetchingErrorsRequestErrorMessage: ( { fetchingErrorsRequestErrorMessage } ) => fetchingErrorsRequestErrorMessage,
 			getIsFetchingErrors: ( { isFetchingErrors } ) => isFetchingErrors,
 			getIsPostDirty: ( { isPostDirty } ) => isPostDirty,
 			getIsShowingReviewed: ( { isShowingReviewed } ) => isShowingReviewed,
 			getReviewLink: ( { reviewLink } ) => reviewLink,
 			getReviewedValidationErrors: ( { reviewedValidationErrors } ) => reviewedValidationErrors,
 			getUnreviewedValidationErrors: ( { unreviewedValidationErrors } ) => unreviewedValidationErrors,
+			getKeptMarkupValidationErrors: ( { keptMarkupValidationErrors } ) => keptMarkupValidationErrors,
 			getValidationErrors: ( { validationErrors } ) => validationErrors,
 		},
 		initialState,

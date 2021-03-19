@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
+import AMPLogoIcon from '../../images/amp-logo-icon.svg';
 import AMPToolbarIcon from '../../images/amp-icon-toolbar.svg';
 import AMPToolbarIconBroken from '../../images/amp-toolbar-icon-broken.svg';
 
@@ -75,3 +76,20 @@ ToolbarIcon.propTypes = {
 export function MoreMenuIcon() {
 	return <IconSVG hasBadge={ false } />;
 }
+
+/**
+ * The status icon to display in the editor sidebar area.
+ *
+ * @param {Object} props
+ * @param {boolean} props.broken Whether AMP is broken at the URL.
+ */
+export function StatusIcon( { broken = false } ) {
+	return (
+		<div className={ `amp-status-icon ${ broken ? 'amp-status-icon--broken' : '' }` }>
+			<AMPLogoIcon />
+		</div>
+	);
+}
+StatusIcon.propTypes = {
+	broken: PropTypes.bool,
+};

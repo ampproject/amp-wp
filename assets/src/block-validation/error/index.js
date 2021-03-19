@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import {
 	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 	VALIDATION_ERROR_ACK_REJECTED_STATUS,
+	VALIDATION_ERROR_NEW_REJECTED_STATUS,
 } from 'amp-block-validation';
 
 /**
@@ -18,6 +19,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import './style.css';
 import { BLOCK_VALIDATION_STORE_KEY } from '../store';
 import { ErrorPanelTitle } from './error-panel-title';
 import { ErrorContent } from './error-content';
@@ -34,17 +36,17 @@ import { ErrorContent } from './error-content';
  */
 export function Error( { clientId, error, status, term_id: termId, title } ) {
 	const { selectBlock } = useDispatch( 'core/block-editor' );
-	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink() );
+	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(), [] );
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
+	const kept = status === VALIDATION_ERROR_ACK_REJECTED_STATUS || status === VALIDATION_ERROR_NEW_REJECTED_STATUS;
 	const external = ! Boolean( clientId );
 
 	const { blockType, removed } = useSelect( ( select ) => {
-		const blockDetails = clientId ? select( 'core/block-editor' ).getBlock( clientId ) : null;
-		const blockTypeDetails = blockDetails ? select( 'core/blocks' ).getBlockType( blockDetails.name ) : null;
+		const blockName = select( 'core/block-editor' ).getBlockName( clientId );
 
 		return {
-			removed: clientId && ! blockDetails,
-			blockType: blockTypeDetails,
+			removed: clientId && ! blockName,
+			blockType: select( 'core/blocks' ).getBlockType( blockName ),
 		};
 	}, [ clientId ] );
 
@@ -58,52 +60,54 @@ export function Error( { clientId, error, status, term_id: termId, title } ) {
 		'amp-error--reviewed': reviewed,
 		'amp-error--new': ! reviewed,
 		'amp-error--removed': removed,
+		'amp-error--kept': kept,
 		[ `error-${ clientId }` ]: clientId,
 	} );
 
 	return (
-		<li className="amp-error-container">
-			<PanelBody
-				className={ panelClassNames }
-				title={
-					<ErrorPanelTitle blockType={ blockType } error={ error } title={ title } status={ status } />
-				}
-				initialOpen={ false }
-			>
-				<ErrorContent
-					blockType={ blockType }
-					clientId={ clientId }
+		<PanelBody
+			className={ panelClassNames }
+			title={
+				<ErrorPanelTitle
 					error={ error }
-					external={ external }
-					removed={ removed }
-					status={ status }
+					kept={ kept }
 					title={ title }
 				/>
+			}
+			initialOpen={ false }
+		>
+			<ErrorContent
+				blockType={ blockType }
+				clientId={ clientId }
+				error={ error }
+				external={ external }
+				removed={ removed }
+				status={ status }
+			/>
 
-				<div className="amp-error__actions">
-					{ ! ( removed || external ) && (
-						<Button
-							className="amp-error__select-block"
-							isSecondary
-							onClick={ () => {
-								selectBlock( clientId );
-							} }
-						>
-							{ __( 'Select block', 'amp' ) }
-						</Button>
-					) }
-					{ detailsUrl && (
-						<ExternalLink
-							href={ detailsUrl.href }
-							className="amp-error__details-link"
-						>
-							{ __( 'View details', 'amp' ) }
-						</ExternalLink>
-					) }
-				</div>
+			<div className="amp-error__actions">
+				{ ! ( removed || external ) && (
+					<Button
+						className="amp-error__select-block"
+						isSecondary
+						onClick={ () => {
+							selectBlock( clientId );
+						} }
+					>
+						{ __( 'Select block', 'amp' ) }
+					</Button>
+				) }
+				{ detailsUrl && (
+					<ExternalLink
+						href={ detailsUrl.href }
+						className="amp-error__details-link"
+					>
+						{ __( 'View details', 'amp' ) }
+					</ExternalLink>
+				) }
+			</div>
 
-			</PanelBody>
-		</li>
+		</PanelBody>
 	);
 }
 Error.propTypes = {
