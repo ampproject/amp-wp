@@ -23,7 +23,7 @@ Functionality to simplify working with Dom\Documents and DOMElements.
 * [`copy_attributes`](../method/AMP_DOM_Utils/copy_attributes.md) - Copy one or more attributes from one element to the other.
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:18](/includes/utils/class-amp-dom-utils.php#L18-L499)
+:link: [includes/utils/class-amp-dom-utils.php:20](/includes/utils/class-amp-dom-utils.php#L20-L511)
 
 <details>
 <summary>Show Code</summary>
@@ -79,7 +79,14 @@ class AMP_DOM_Utils {
 	 */
 	public static function get_dom( $document, $encoding = null ) {
 		_deprecated_function( __METHOD__, '1.5.0', 'AmpProject\Dom\Document::fromHtml()' );
-		return Document::fromHtml( $document, $encoding );
+
+		$options = Options::DEFAULTS;
+
+		if ( null !== $encoding ) {
+			$options[ Document\Option::ENCODING ] = $encoding;
+		}
+
+		return Document::fromHtml( $document, $options );
 	}
 
 	/**
@@ -186,7 +193,10 @@ class AMP_DOM_Utils {
 		 */
 		$document = "<html><head></head><body>{$content}</body></html>";
 
-		return Document::fromHtml( $document, $encoding );
+		$options                              = Options::DEFAULTS;
+		$options[ Document\Option::ENCODING ] = $encoding;
+
+		return Document::fromHtml( $document, $options );
 	}
 
 	/**
@@ -389,8 +399,8 @@ class AMP_DOM_Utils {
 	 *
 	 * @deprecated Use AmpProject\Dom\Document::getElementId() instead.
 	 *
-	 * @param DOMElement $element Element to get the ID for.
-	 * @param string     $prefix  Optional. Defaults to 'amp-wp-id'.
+	 * @param DOMElement|Element $element Element to get the ID for.
+	 * @param string             $prefix  Optional. Defaults to 'amp-wp-id'.
 	 * @return string ID to use.
 	 */
 	public static function get_element_id( $element, $prefix = 'amp-wp-id' ) {

@@ -15,7 +15,7 @@ Copy one or more attributes from one element to the other.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:479](/includes/utils/class-amp-dom-utils.php#L479-L498)
+:link: [includes/utils/class-amp-dom-utils.php:491](/includes/utils/class-amp-dom-utils.php#L491-L510)
 
 <details>
 <summary>Show Code</summary>

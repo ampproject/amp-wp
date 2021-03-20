@@ -16,7 +16,7 @@ Return valid HTML *body* content extracted from the Dom\Document passed as a par
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:187](/includes/utils/class-amp-dom-utils.php#L187-L193)
+:link: [includes/utils/class-amp-dom-utils.php:199](/includes/utils/class-amp-dom-utils.php#L199-L205)
 
 <details>
 <summary>Show Code</summary>

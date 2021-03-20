@@ -1600,8 +1600,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1279,
-                "end_line": 1302,
+                "line": 1290,
+                "end_line": 1313,
                 "arguments": [],
                 "doc": {
                     "description": "Determine whether AMP dev mode is enabled.",
@@ -1623,8 +1623,8 @@
                 "hooks": [
                     {
                         "name": "amp_dev_mode_enabled",
-                        "line": 1291,
-                        "end_line": 1301,
+                        "line": 1302,
+                        "end_line": 1312,
                         "type": "filter",
                         "arguments": [
                             "is_admin_bar_showing() && is_user_logged_in() || is_customize_preview()"
@@ -1653,23 +1653,23 @@
                     "functions": [
                         {
                             "name": "apply_filters",
-                            "line": 1291,
-                            "end_line": 1301
+                            "line": 1302,
+                            "end_line": 1312
                         },
                         {
                             "name": "is_admin_bar_showing",
-                            "line": 1297,
-                            "end_line": 1297
+                            "line": 1308,
+                            "end_line": 1308
                         },
                         {
                             "name": "is_user_logged_in",
-                            "line": 1297,
-                            "end_line": 1297
+                            "line": 1308,
+                            "end_line": 1308
                         },
                         {
                             "name": "is_customize_preview",
-                            "line": 1299,
-                            "end_line": 1299
+                            "line": 1310,
+                            "end_line": 1310
                         }
                     ]
                 }
@@ -1686,8 +1686,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1815,
-                "end_line": 1826,
+                "line": 1826,
+                "end_line": 1837,
                 "arguments": [
                     {
                         "name": "$script",
@@ -1751,18 +1751,18 @@
                     "functions": [
                         {
                             "name": "hash",
-                            "line": 1816,
-                            "end_line": 1816
+                            "line": 1827,
+                            "end_line": 1827
                         },
                         {
                             "name": "str_replace",
-                            "line": 1820,
-                            "end_line": 1824
+                            "line": 1831,
+                            "end_line": 1835
                         },
                         {
                             "name": "base64_encode",
-                            "line": 1823,
-                            "end_line": 1823
+                            "line": 1834,
+                            "end_line": 1834
                         }
                     ]
                 }
@@ -1779,8 +1779,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1836,
-                "end_line": 1838,
+                "line": 1847,
+                "end_line": 1849,
                 "arguments": [
                     {
                         "name": "$url",
@@ -1820,15 +1820,15 @@
                             "name": "add_endpoint",
                             "class": "\\AmpProject\\AmpWP\\Services::get('paired_routing')",
                             "static": false,
-                            "line": 1837,
-                            "end_line": 1837
+                            "line": 1848,
+                            "end_line": 1848
                         },
                         {
                             "name": "get",
                             "class": "\\AmpProject\\AmpWP\\Services",
                             "static": true,
-                            "line": 1837,
-                            "end_line": 1837
+                            "line": 1848,
+                            "end_line": 1848
                         }
                     ]
                 }
@@ -1845,8 +1845,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1848,
-                "end_line": 1850,
+                "line": 1859,
+                "end_line": 1861,
                 "arguments": [
                     {
                         "name": "$url",
@@ -1886,15 +1886,15 @@
                             "name": "has_endpoint",
                             "class": "\\AmpProject\\AmpWP\\Services::get('paired_routing')",
                             "static": false,
-                            "line": 1849,
-                            "end_line": 1849
+                            "line": 1860,
+                            "end_line": 1860
                         },
                         {
                             "name": "get",
                             "class": "\\AmpProject\\AmpWP\\Services",
                             "static": true,
-                            "line": 1849,
-                            "end_line": 1849
+                            "line": 1860,
+                            "end_line": 1860
                         }
                     ]
                 }
@@ -1911,8 +1911,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1860,
-                "end_line": 1862,
+                "line": 1871,
+                "end_line": 1873,
                 "arguments": [
                     {
                         "name": "$url",
@@ -1952,15 +1952,15 @@
                             "name": "remove_endpoint",
                             "class": "\\AmpProject\\AmpWP\\Services::get('paired_routing')",
                             "static": false,
-                            "line": 1861,
-                            "end_line": 1861
+                            "line": 1872,
+                            "end_line": 1872
                         },
                         {
                             "name": "get",
                             "class": "\\AmpProject\\AmpWP\\Services",
                             "static": true,
-                            "line": 1861,
-                            "end_line": 1861
+                            "line": 1872,
+                            "end_line": 1872
                         }
                     ]
                 }
@@ -2087,8 +2087,8 @@
             },
             "6": {
                 "name": "amp_analytics_entries",
-                "line": 1117,
-                "end_line": 1117,
+                "line": 1128,
+                "end_line": 1128,
                 "type": "filter",
                 "arguments": [
                     "$analytics_entries"
@@ -2114,8 +2114,8 @@
             },
             "7": {
                 "name": "amp_print_analytics",
-                "line": 1162,
-                "end_line": 1162,
+                "line": 1173,
+                "end_line": 1173,
                 "type": "action",
                 "arguments": [
                     "$analytics_entries"
@@ -2141,8 +2141,8 @@
             },
             "8": {
                 "name": "amp_content_embed_handlers",
-                "line": 1239,
-                "end_line": 1265,
+                "line": 1250,
+                "end_line": 1276,
                 "type": "filter",
                 "arguments": [
                     "array('AMP_Core_Block_Handler' => array(), 'AMP_Twitter_Embed_Handler' => array(), 'AMP_YouTube_Embed_Handler' => array(), 'AMP_Crowdsignal_Embed_Handler' => array(), 'AMP_DailyMotion_Embed_Handler' => array(), 'AMP_Vimeo_Embed_Handler' => array(), 'AMP_SoundCloud_Embed_Handler' => array(), 'AMP_Instagram_Embed_Handler' => array(), 'AMP_Issuu_Embed_Handler' => array(), 'AMP_Meetup_Embed_Handler' => array(), 'AMP_Facebook_Embed_Handler' => array(), 'AMP_Pinterest_Embed_Handler' => array(), 'AMP_Playlist_Embed_Handler' => array(), 'AMP_Reddit_Embed_Handler' => array(), 'AMP_TikTok_Embed_Handler' => array(), 'AMP_Tumblr_Embed_Handler' => array(), 'AMP_Gallery_Embed_Handler' => array(), 'AMP_Gfycat_Embed_Handler' => array(), 'AMP_Imgur_Embed_Handler' => array(), 'AMP_Scribd_Embed_Handler' => array(), 'AMP_WordPress_TV_Embed_Handler' => array())",
@@ -2182,8 +2182,8 @@
             },
             "9": {
                 "name": "amp_dev_mode_enabled",
-                "line": 1291,
-                "end_line": 1301,
+                "line": 1302,
+                "end_line": 1312,
                 "type": "filter",
                 "arguments": [
                     "is_admin_bar_showing() && is_user_logged_in() || is_customize_preview()"
@@ -2209,8 +2209,8 @@
             },
             "10": {
                 "name": "amp_to_amp_linking_enabled",
-                "line": 1343,
-                "end_line": 1346,
+                "line": 1354,
+                "end_line": 1357,
                 "type": "filter",
                 "arguments": [
                     "\\AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === \\AMP_Options_Manager::get_option(\\AmpProject\\AmpWP\\Option::THEME_SUPPORT)"
@@ -2236,8 +2236,8 @@
             },
             "11": {
                 "name": "amp_to_amp_excluded_urls",
-                "line": 1410,
-                "end_line": 1410,
+                "line": 1421,
+                "end_line": 1421,
                 "type": "filter",
                 "arguments": [
                     "array()"
@@ -2263,8 +2263,8 @@
             },
             "12": {
                 "name": "amp_content_sanitizers",
-                "line": 1427,
-                "end_line": 1427,
+                "line": 1438,
+                "end_line": 1438,
                 "type": "filter",
                 "arguments": [
                     "$sanitizers",
@@ -2304,8 +2304,8 @@
             },
             "13": {
                 "name": "amp_dev_mode_element_xpaths",
-                "line": 1440,
-                "end_line": 1440,
+                "line": 1451,
+                "end_line": 1451,
                 "type": "filter",
                 "arguments": [
                     "array()"
@@ -2331,8 +2331,8 @@
             },
             "14": {
                 "name": "amp_parsed_css_transient_caching_allowed",
-                "line": 1480,
-                "end_line": 1480,
+                "line": 1491,
+                "end_line": 1491,
                 "type": "filter",
                 "arguments": [
                     "true"
@@ -2358,8 +2358,8 @@
             },
             "15": {
                 "name": "amp_site_icon_url",
-                "line": 1608,
-                "end_line": 1608,
+                "line": 1619,
+                "end_line": 1619,
                 "type": "filter",
                 "arguments": [
                     "$logo_image_url"
@@ -2385,8 +2385,8 @@
             },
             "16": {
                 "name": "amp_post_template_metadata",
-                "line": 1681,
-                "end_line": 1681,
+                "line": 1692,
+                "end_line": 1692,
                 "type": "filter",
                 "arguments": [
                     "$metadata",
@@ -2421,8 +2421,8 @@
             },
             "17": {
                 "name": "amp_schemaorg_metadata",
-                "line": 1695,
-                "end_line": 1695,
+                "line": 1706,
+                "end_line": 1706,
                 "type": "filter",
                 "arguments": [
                     "$metadata"
@@ -2635,8 +2635,8 @@
         "hooks": {
             "1": {
                 "name": "amp_supportable_templates",
-                "line": 788,
-                "end_line": 788,
+                "line": 789,
+                "end_line": 789,
                 "type": "filter",
                 "arguments": [
                     "$templates"
@@ -2662,8 +2662,8 @@
             },
             "9": {
                 "name": "amp_enable_optimizer",
-                "line": 1988,
-                "end_line": 1988,
+                "line": 1989,
+                "end_line": 1989,
                 "type": "filter",
                 "arguments": [
                     "$enable_optimizer"
@@ -2689,8 +2689,8 @@
             },
             "13": {
                 "name": "amp_enable_ssr",
-                "line": 2107,
-                "end_line": 2107,
+                "line": 2108,
+                "end_line": 2108,
                 "type": "filter",
                 "arguments": [
                     "$enable_ssr"
@@ -2716,8 +2716,8 @@
             },
             "14": {
                 "name": "amp_optimizer_config",
-                "line": 2133,
-                "end_line": 2144,
+                "line": 2132,
+                "end_line": 2143,
                 "type": "filter",
                 "arguments": [
                     "array_merge(array(\\AmpProject\\Optimizer\\Configuration::KEY_TRANSFORMERS => $transformers, \\AmpProject\\Optimizer\\Transformer\\PreloadHeroImage::class => array(\\AmpProject\\Optimizer\\Configuration\\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style')), $args)"
@@ -6186,8 +6186,8 @@
             {
                 "name": "AMP_DOM_Utils",
                 "namespace": "global",
-                "line": 18,
-                "end_line": 499,
+                "line": 20,
+                "end_line": 511,
                 "final": false,
                 "abstract": false,
                 "extends": "",
@@ -6198,11 +6198,13 @@
                         "name": "get_dom",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 66,
-                        "end_line": 69,
+                        "line": 68,
+                        "end_line": 78,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -6271,8 +6273,8 @@
                             "functions": [
                                 {
                                     "name": "_deprecated_function",
-                                    "line": 67,
-                                    "end_line": 67,
+                                    "line": 69,
+                                    "end_line": 69,
                                     "deprecation_version": "1.5.0"
                                 }
                             ],
@@ -6281,8 +6283,8 @@
                                     "name": "fromHtml",
                                     "class": "\\AmpProject\\Dom\\Document",
                                     "static": true,
-                                    "line": 68,
-                                    "end_line": 68
+                                    "line": 77,
+                                    "end_line": 77
                                 }
                             ]
                         }
@@ -6291,11 +6293,13 @@
                         "name": "is_valid_head_node",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 82,
-                        "end_line": 85,
+                        "line": 91,
+                        "end_line": 94,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -6351,8 +6355,8 @@
                             "functions": [
                                 {
                                     "name": "_deprecated_function",
-                                    "line": 83,
-                                    "end_line": 83,
+                                    "line": 92,
+                                    "end_line": 92,
                                     "deprecation_version": "1.5.0"
                                 }
                             ],
@@ -6361,15 +6365,15 @@
                                     "name": "isValidHeadNode",
                                     "class": "\\AmpProject\\Dom\\Document::fromNode($node)",
                                     "static": false,
-                                    "line": 84,
-                                    "end_line": 84
+                                    "line": 93,
+                                    "end_line": 93
                                 },
                                 {
                                     "name": "fromNode",
                                     "class": "\\AmpProject\\Dom\\Document",
                                     "static": true,
-                                    "line": 84,
-                                    "end_line": 84
+                                    "line": 93,
+                                    "end_line": 93
                                 }
                             ]
                         }
@@ -6378,11 +6382,13 @@
                         "name": "get_amp_bind_placeholder_prefix",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 102,
-                        "end_line": 105,
+                        "line": 111,
+                        "end_line": 114,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -6433,8 +6439,8 @@
                             "functions": [
                                 {
                                     "name": "_deprecated_function",
-                                    "line": 103,
-                                    "end_line": 103,
+                                    "line": 112,
+                                    "end_line": 112,
                                     "deprecation_version": "1.2.1"
                                 }
                             ]
@@ -6444,11 +6450,13 @@
                         "name": "get_dom_from_content",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 162,
-                        "end_line": 176,
+                        "line": 171,
+                        "end_line": 188,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -6508,8 +6516,8 @@
                             "functions": [
                                 {
                                     "name": "get_bloginfo",
-                                    "line": 165,
-                                    "end_line": 165
+                                    "line": 174,
+                                    "end_line": 174
                                 }
                             ],
                             "methods": [
@@ -6517,8 +6525,8 @@
                                     "name": "fromHtml",
                                     "class": "\\AmpProject\\Dom\\Document",
                                     "static": true,
-                                    "line": 175,
-                                    "end_line": 175
+                                    "line": 187,
+                                    "end_line": 187
                                 }
                             ]
                         }
@@ -6527,11 +6535,13 @@
                         "name": "get_content_from_dom",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 187,
-                        "end_line": 193,
+                        "line": 199,
+                        "end_line": 205,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -6577,8 +6587,8 @@
                             "functions": [
                                 {
                                     "name": "preg_replace",
-                                    "line": 188,
-                                    "end_line": 192
+                                    "line": 200,
+                                    "end_line": 204
                                 }
                             ],
                             "methods": [
@@ -6586,8 +6596,8 @@
                                     "name": "saveHTML",
                                     "class": "$dom",
                                     "static": false,
-                                    "line": 191,
-                                    "end_line": 191
+                                    "line": 203,
+                                    "end_line": 203
                                 }
                             ]
                         }
@@ -6596,11 +6606,13 @@
                         "name": "get_content_from_dom_node",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 208,
-                        "end_line": 211,
+                        "line": 220,
+                        "end_line": 223,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -6673,8 +6685,8 @@
                             "functions": [
                                 {
                                     "name": "_deprecated_function",
-                                    "line": 209,
-                                    "end_line": 209,
+                                    "line": 221,
+                                    "end_line": 221,
                                     "deprecation_version": "1.5.0"
                                 }
                             ],
@@ -6683,8 +6695,8 @@
                                     "name": "saveHTML",
                                     "class": "$dom",
                                     "static": false,
-                                    "line": 210,
-                                    "end_line": 210
+                                    "line": 222,
+                                    "end_line": 222
                                 }
                             ]
                         }
@@ -6693,11 +6705,13 @@
                         "name": "create_node",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 224,
-                        "end_line": 229,
+                        "line": 236,
+                        "end_line": 241,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -6767,15 +6781,15 @@
                                     "name": "createElement",
                                     "class": "$dom",
                                     "static": false,
-                                    "line": 225,
-                                    "end_line": 225
+                                    "line": 237,
+                                    "end_line": 237
                                 },
                                 {
                                     "name": "add_attributes_to_node",
                                     "class": "\\AMP_DOM_Utils",
                                     "static": true,
-                                    "line": 226,
-                                    "end_line": 226
+                                    "line": 238,
+                                    "end_line": 238
                                 }
                             ]
                         }
@@ -6784,11 +6798,13 @@
                         "name": "get_node_attributes_as_assoc_array",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 241,
-                        "end_line": 252,
+                        "line": 253,
+                        "end_line": 264,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -6831,8 +6847,8 @@
                                     "name": "hasAttributes",
                                     "class": "$node",
                                     "static": false,
-                                    "line": 243,
-                                    "end_line": 243
+                                    "line": 255,
+                                    "end_line": 255
                                 }
                             ]
                         }
@@ -6841,11 +6857,13 @@
                         "name": "add_attributes_to_node",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 262,
-                        "end_line": 275,
+                        "line": 274,
+                        "end_line": 287,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -6894,8 +6912,8 @@
                                     "name": "setAttribute",
                                     "class": "$node",
                                     "static": false,
-                                    "line": 265,
-                                    "end_line": 265
+                                    "line": 277,
+                                    "end_line": 277
                                 }
                             ]
                         }
@@ -6904,11 +6922,13 @@
                         "name": "is_node_empty",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 287,
-                        "end_line": 289,
+                        "line": 299,
+                        "end_line": 301,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -6951,8 +6971,8 @@
                                     "name": "hasChildNodes",
                                     "class": "$node",
                                     "static": false,
-                                    "line": 288,
-                                    "end_line": 288
+                                    "line": 300,
+                                    "end_line": 300
                                 }
                             ]
                         }
@@ -6961,11 +6981,13 @@
                         "name": "has_class",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 358,
-                        "end_line": 366,
+                        "line": 370,
+                        "end_line": 378,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -7021,27 +7043,27 @@
                                     "name": "hasAttribute",
                                     "class": "$element",
                                     "static": false,
-                                    "line": 359,
-                                    "end_line": 359
+                                    "line": 371,
+                                    "end_line": 371
                                 },
                                 {
                                     "name": "getAttribute",
                                     "class": "$element",
                                     "static": false,
-                                    "line": 363,
-                                    "end_line": 363
+                                    "line": 375,
+                                    "end_line": 375
                                 }
                             ],
                             "functions": [
                                 {
                                     "name": "in_array",
-                                    "line": 365,
-                                    "end_line": 365
+                                    "line": 377,
+                                    "end_line": 377
                                 },
                                 {
                                     "name": "preg_split",
-                                    "line": 365,
-                                    "end_line": 365
+                                    "line": 377,
+                                    "end_line": 377
                                 }
                             ]
                         }
@@ -7050,11 +7072,13 @@
                         "name": "get_element_id",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 382,
-                        "end_line": 390,
+                        "line": 394,
+                        "end_line": 402,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -7093,7 +7117,8 @@
                                     "name": "param",
                                     "content": "Element to get the ID for.",
                                     "types": [
-                                        "\\DOMElement"
+                                        "\\DOMElement",
+                                        "\\AmpProject\\Dom\\Element"
                                     ],
                                     "variable": "$element"
                                 },
@@ -7118,8 +7143,8 @@
                             "functions": [
                                 {
                                     "name": "_deprecated_function",
-                                    "line": 383,
-                                    "end_line": 387,
+                                    "line": 395,
+                                    "end_line": 399,
                                     "deprecation_version": "1.5.1"
                                 }
                             ],
@@ -7128,15 +7153,15 @@
                                     "name": "getElementId",
                                     "class": "\\AmpProject\\Dom\\Document::fromNode($element)",
                                     "static": false,
-                                    "line": 389,
-                                    "end_line": 389
+                                    "line": 401,
+                                    "end_line": 401
                                 },
                                 {
                                     "name": "fromNode",
                                     "class": "\\AmpProject\\Dom\\Document",
                                     "static": true,
-                                    "line": 389,
-                                    "end_line": 389
+                                    "line": 401,
+                                    "end_line": 401
                                 }
                             ]
                         }
@@ -7145,11 +7170,13 @@
                         "name": "add_amp_action",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 404,
-                        "end_line": 420,
+                        "line": 416,
+                        "end_line": 432,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -7211,36 +7238,36 @@
                                     "name": "hasAttribute",
                                     "class": "$element",
                                     "static": false,
-                                    "line": 407,
-                                    "end_line": 407
-                                },
-                                {
-                                    "name": "setAttribute",
-                                    "class": "$element",
-                                    "static": false,
-                                    "line": 409,
-                                    "end_line": 409
-                                },
-                                {
-                                    "name": "setAttribute",
-                                    "class": "$element",
-                                    "static": false,
-                                    "line": 413,
+                                    "line": 419,
                                     "end_line": 419
+                                },
+                                {
+                                    "name": "setAttribute",
+                                    "class": "$element",
+                                    "static": false,
+                                    "line": 421,
+                                    "end_line": 421
+                                },
+                                {
+                                    "name": "setAttribute",
+                                    "class": "$element",
+                                    "static": false,
+                                    "line": 425,
+                                    "end_line": 431
                                 },
                                 {
                                     "name": "merge_amp_actions",
                                     "class": "\\AMP_DOM_Utils",
                                     "static": true,
-                                    "line": 415,
-                                    "end_line": 418
+                                    "line": 427,
+                                    "end_line": 430
                                 },
                                 {
                                     "name": "getAttribute",
                                     "class": "$element",
                                     "static": false,
-                                    "line": 416,
-                                    "end_line": 416
+                                    "line": 428,
+                                    "end_line": 428
                                 }
                             ]
                         }
@@ -7249,11 +7276,13 @@
                         "name": "merge_amp_actions",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 431,
-                        "end_line": 469,
+                        "line": 443,
+                        "end_line": 481,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -7307,43 +7336,43 @@
                             "functions": [
                                 {
                                     "name": "preg_match_all",
-                                    "line": 435,
-                                    "end_line": 435
+                                    "line": 447,
+                                    "end_line": 447
                                 },
                                 {
                                     "name": "array_walk",
-                                    "line": 449,
-                                    "end_line": 462
+                                    "line": 461,
+                                    "end_line": 474
                                 },
                                 {
                                     "name": "preg_match_all",
-                                    "line": 453,
-                                    "end_line": 453
+                                    "line": 465,
+                                    "end_line": 465
                                 },
                                 {
                                     "name": "array_merge",
-                                    "line": 460,
-                                    "end_line": 460
+                                    "line": 472,
+                                    "end_line": 472
                                 },
                                 {
                                     "name": "implode",
-                                    "line": 464,
-                                    "end_line": 464
+                                    "line": 476,
+                                    "end_line": 476
                                 },
                                 {
                                     "name": "array_unique",
-                                    "line": 464,
-                                    "end_line": 464
+                                    "line": 476,
+                                    "end_line": 476
                                 },
                                 {
                                     "name": "array_filter",
-                                    "line": 464,
-                                    "end_line": 464
+                                    "line": 476,
+                                    "end_line": 476
                                 },
                                 {
                                     "name": "implode",
-                                    "line": 468,
-                                    "end_line": 468
+                                    "line": 480,
+                                    "end_line": 480
                                 }
                             ]
                         }
@@ -7352,11 +7381,13 @@
                         "name": "copy_attributes",
                         "namespace": "",
                         "aliases": {
+                            "Options": "\\AmpProject\\AmpWP\\Dom\\Options",
                             "Document": "\\AmpProject\\Dom\\Document",
+                            "Element": "\\AmpProject\\Dom\\Element",
                             "Tag": "\\AmpProject\\Tag"
                         },
-                        "line": 479,
-                        "end_line": 498,
+                        "line": 491,
+                        "end_line": 510,
                         "final": false,
                         "abstract": false,
                         "static": true,
@@ -7428,57 +7459,57 @@
                                     "name": "hasAttribute",
                                     "class": "$from",
                                     "static": false,
-                                    "line": 481,
-                                    "end_line": 481
+                                    "line": 493,
+                                    "end_line": 493
                                 },
                                 {
                                     "name": "getAttribute",
                                     "class": "$from",
                                     "static": false,
-                                    "line": 482,
-                                    "end_line": 482
+                                    "line": 494,
+                                    "end_line": 494
                                 },
                                 {
                                     "name": "hasAttribute",
                                     "class": "$to",
                                     "static": false,
-                                    "line": 483,
-                                    "end_line": 483
+                                    "line": 495,
+                                    "end_line": 495
                                 },
                                 {
                                     "name": "merge_amp_actions",
                                     "class": "\\AMP_DOM_Utils",
                                     "static": true,
-                                    "line": 486,
-                                    "end_line": 486
+                                    "line": 498,
+                                    "end_line": 498
                                 },
                                 {
                                     "name": "getAttribute",
                                     "class": "$to",
                                     "static": false,
-                                    "line": 486,
-                                    "end_line": 486
+                                    "line": 498,
+                                    "end_line": 498
                                 },
                                 {
                                     "name": "getAttribute",
                                     "class": "$to",
                                     "static": false,
-                                    "line": 489,
-                                    "end_line": 489
+                                    "line": 501,
+                                    "end_line": 501
                                 },
                                 {
                                     "name": "getAttribute",
                                     "class": "$to",
                                     "static": false,
-                                    "line": 492,
-                                    "end_line": 492
+                                    "line": 504,
+                                    "end_line": 504
                                 },
                                 {
                                     "name": "setAttribute",
                                     "class": "$to",
                                     "static": false,
-                                    "line": 495,
-                                    "end_line": 495
+                                    "line": 507,
+                                    "end_line": 507
                                 }
                             ]
                         }
@@ -7770,7 +7801,7 @@
         "includes": [
             {
                 "name": "",
-                "line": 2318,
+                "line": 2160,
                 "type": "Require"
             }
         ],
@@ -7778,8 +7809,8 @@
         "hooks": [
             {
                 "name": "amp_validation_error_default_sanitized",
-                "line": 297,
-                "end_line": 297,
+                "line": 296,
+                "end_line": 296,
                 "type": "filter",
                 "arguments": [
                     "$accepted",
@@ -7820,8 +7851,8 @@
             },
             {
                 "name": "amp_validation_error",
-                "line": 706,
-                "end_line": 706,
+                "line": 636,
+                "end_line": 636,
                 "type": "filter",
                 "arguments": [
                     "$error",
@@ -8106,7 +8137,7 @@
             }
         ]
     },
-    "161": {
+    "162": {
         "file": {
             "description": "Class MobileRedirection.",
             "long_description": "",
@@ -8258,7 +8289,7 @@
             }
         }
     },
-    "165": {
+    "166": {
         "file": {
             "description": "Class PairedRouting.",
             "long_description": "",
@@ -8298,7 +8329,7 @@
             }
         ]
     },
-    "166": {
+    "167": {
         "file": {
             "description": "Class PairedUrl.",
             "long_description": "",
@@ -8765,7 +8796,7 @@
         ],
         "hooks": []
     },
-    "167": {
+    "168": {
         "file": {
             "description": "Class LegacyReaderUrlStructure.",
             "long_description": "",
@@ -8864,7 +8895,7 @@
             }
         ]
     },
-    "171": {
+    "172": {
         "file": {
             "description": "Abstract class PairedUrlStructure.",
             "long_description": "",
@@ -9091,7 +9122,7 @@
         ],
         "hooks": []
     },
-    "185": {
+    "186": {
         "file": {
             "description": "Provides settings to be used in site scanning.",
             "long_description": "",
@@ -9139,7 +9170,7 @@
             }
         ]
     },
-    "186": {
+    "187": {
         "file": {
             "description": "WP cron process to validate URLs in the background.",
             "long_description": "",

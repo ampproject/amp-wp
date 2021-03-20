@@ -12,7 +12,7 @@ If the element does not have an ID, create one first.
 
 ### Arguments
 
-* `\DOMElement $element` - Element to get the ID for.
+* `\DOMElement|\AmpProject\Dom\Element $element` - Element to get the ID for.
 * `string $prefix` - Optional. Defaults to &#039;amp-wp-id&#039;.
 
 ### Return value
@@ -21,7 +21,7 @@ If the element does not have an ID, create one first.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:382](/includes/utils/class-amp-dom-utils.php#L382-L390)
+:link: [includes/utils/class-amp-dom-utils.php:394](/includes/utils/class-amp-dom-utils.php#L394-L402)
 
 <details>
 <summary>Show Code</summary>
