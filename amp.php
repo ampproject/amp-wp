@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 2.1.0-beta1
+ * Version: 2.1.0-beta1-20210320T024948Z-4bf1b79c7
  * License: GPLv2 or later
  * Requires at least: 4.9
  * Requires PHP: 5.6
@@ -15,7 +15,7 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '2.1.0-beta1' );
+define( 'AMP__VERSION', '2.1.0-beta1-20210320T024948Z-4bf1b79c7' );
 
 /**
  * Errors encountered while loading the plugin.
@@ -150,18 +150,6 @@ if ( count( $_amp_missing_functions ) > 0 ) {
 }
 
 unset( $_amp_required_extensions, $_amp_missing_extensions, $_amp_required_constructs, $_amp_missing_classes, $_amp_missing_functions, $_amp_required_extension, $_amp_construct_type, $_amp_construct, $_amp_constructs );
-
-// DEV_CODE. This block of code is removed during the build process.
-if ( ! file_exists( AMP__DIR__ . '/vendor/autoload.php' ) || ! file_exists( AMP__DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( AMP__DIR__ . '/assets/js/amp-block-editor.js' ) ) {
-	$_amp_load_errors->add(
-		'build_required',
-		sprintf(
-			/* translators: %s: composer install && npm install && npm run build:prod */
-			__( 'You appear to be running the AMP plugin from source. Please do %s to finish installation.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
-			'<code>composer install &amp;&amp; npm install &amp;&amp; npm run build:prod</code>'
-		)
-	);
-}
 
 /**
  * Displays an admin notice about why the plugin is unable to load.
