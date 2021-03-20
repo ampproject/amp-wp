@@ -171,7 +171,8 @@ class AdminBar {
 
 		switch ( $this->build_origin ) {
 			case 'release':
-				return $this->build_id;
+				/* translators: %s is the name of the release */
+				return sprintf( __( '%s release', 'amp-qa-tester' ), $this->build_id );
 			case 'pr':
 				return 'PR # ' . $this->build_id;
 			case 'branch':

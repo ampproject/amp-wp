@@ -77,8 +77,8 @@ export default class Container extends Component {
 				}
 
 				releasesWithBuild.push( {
-					label: release.name,
-					value: release.name,
+					label: `${ release.name } release`,
+					value: release.tag_name,
 					url: buildAsset.browser_download_url,
 					origin: 'release',
 				} );
