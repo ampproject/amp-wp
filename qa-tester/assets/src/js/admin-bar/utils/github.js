@@ -52,6 +52,7 @@ export const getPullRequestsWithBuilds = () => {
 		q: 'repo:ampproject/amp-wp is:pr commenter:app/github-actions in:comments "Download development build"',
 		sort: 'created',
 		order: 'desc',
+		per_page: 100, // max number of results per page.
 	};
 
 	url.search = new URLSearchParams( params ).toString();
