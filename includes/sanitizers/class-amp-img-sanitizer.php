@@ -108,7 +108,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			// Skip element if already inside of an AMP element as a noscript fallback.
+			// Skip element if already inside of an AMP element as a noscript fallback or is a child of `amp-story-player`.
 			if (
 				$this->is_inside_amp_noscript( $node )
 				||
