@@ -47,6 +47,7 @@ export const getReleases = () => {
  */
 export const getPullRequestsWithBuilds = () => {
 	const url = new URL( `${ baseUrl }/search/issues` );
+	// @todo Should this be limited to open PRs only?
 	const params = {
 		/* eslint-disable-next-line prettier/prettier */
 		q: 'repo:ampproject/amp-wp is:pr commenter:app/github-actions in:comments "Download development build"',

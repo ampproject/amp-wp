@@ -30,7 +30,7 @@ export default class Container extends Component {
 		];
 
 		this.state = {
-			isLoading: true,
+			isLoading: null,
 			isInstalling: false,
 			isDevBuild: false,
 			error: null,
@@ -40,23 +40,34 @@ export default class Container extends Component {
 
 		this.handleInstallation = this.handleInstallation.bind( this );
 		this.handleChangeDevBuild = this.handleChangeDevBuild.bind( this );
-		this.handleChangeBuildOption = this.handleChangeBuildOption.bind(
-			this
-		);
+		/* eslint-disable-next-line prettier/prettier */
+		this.handleChangeBuildOption = this.handleChangeBuildOption.bind( this );
 	}
 
 	componentDidMount() {
-		Promise.all( [
-			this.addGitHubReleases(),
-			this.addReleaseBranchOptions(),
-			this.addPullRequestOptions(),
-		] )
-			.then( () => {
-				this.setState( { isLoading: false } );
-			} )
-			.catch( ( error ) => {
-				this.setState( { isLoading: false, error } );
-			} );
+		// Only fetch build options when hovering over submenu the first time.
+		global.jQuery( '#wp-admin-bar-amp-qa-tester' ).hoverIntent( {
+			over: () => {
+				if ( null !== this.state.isLoading ) {
+					return;
+				}
+
+				this.setState( { isLoading: true } );
+
+				Promise.all( [
+					this.addGitHubReleases(),
+					this.addReleaseBranchOptions(),
+					this.addPullRequestOptions(),
+				] )
+					.then( () => {
+						this.setState( { isLoading: false } );
+					} )
+					.catch( ( error ) => {
+						this.setState( { isLoading: false, error } );
+					} );
+			},
+			out: () => {},
+		} );
 	}
 
 	/**
@@ -226,7 +237,7 @@ export default class Container extends Component {
 		} = this.state;
 
 		if ( isLoading ) {
-			return <p>{ __( 'Loading…', 'amp-qa-tester' ) }</p>;
+			return <p>{ __( 'Fetching build options…', 'amp-qa-tester' ) }</p>;
 		}
 
 		return (
