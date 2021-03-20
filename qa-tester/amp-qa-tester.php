@@ -25,7 +25,7 @@ use WP_Error;
  *
  * @var WP_Error
  */
-$load_errors = new WP_Error();
+$_amp_qa_load_errors = new WP_Error();
 
 /**
  * Loads the plugin.
@@ -51,6 +51,17 @@ function load_plugin() {
 				__( 'At least PHP version %1$s is required. Your site is currently running on PHP %2$s.', 'amp-qa-tester' ),
 				$min_php_version,
 				PHP_VERSION
+			)
+		);
+	}
+
+	if ( 'amp' === basename( dirname( __DIR__ ) ) ) {
+		$_amp_qa_load_errors->add(
+			'incorrect_plugin_location',
+			__(
+				'Please move the plugin outside of the AMP plugin directory (preferably to the the plugin directory),
+				otherwise you will risk removing this plugin when installing AMP plugin builds.',
+				'amp-qa-tester'
 			)
 		);
 	}
