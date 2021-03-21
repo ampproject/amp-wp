@@ -1,8 +1,19 @@
-## Hook `amp_content_embed_handlers`
+## Filter `amp_content_embed_handlers`
+
+```php
+apply_filters( 'amp_content_embed_handlers', $handlers, $post );
+```
+
+Filters the content embed handlers.
+
+### Arguments
+
+* `array $handlers` - Handlers.
+* `\WP_Post $post` - Post. Deprecated. It will be null when `amp_is_canonical()`.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1353](../../includes/amp-helper-functions.php#L1353-L1379)
+:link: [includes/amp-helper-functions.php:1250](/includes/amp-helper-functions.php#L1250-L1276)
 
 <details>
 <summary>Show Code</summary>

@@ -10,7 +10,7 @@ Add action to do post template rendering at template_redirect action.
 
 ### Source
 
-:link: [includes/deprecated.php:104](../../includes/deprecated.php#L104-L107)
+:link: [includes/deprecated.php:106](/includes/deprecated.php#L106-L109)
 
 <details>
 <summary>Show Code</summary>

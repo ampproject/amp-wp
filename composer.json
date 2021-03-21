@@ -5,7 +5,7 @@
   "homepage": "https://github.com/ampproject/amp-wp",
   "license": "GPL-2.0-or-later",
   "require": {
-    "php": "^5.6 || ^7.0",
+    "php": "^5.6 || ^7.0 || ^8.0",
     "ext-curl": "*",
     "ext-date": "*",
     "ext-dom": "*",
@@ -13,24 +13,28 @@
     "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
-    "ampproject/common": "*",
-    "ampproject/optimizer": "*",
-    "cweagans/composer-patches": "1.6.7",
+    "ampproject/amp-toolbox": "^0.2",
+    "cweagans/composer-patches": "1.7.0",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "dev-master#bfdd976"
   },
   "require-dev": {
-    "civicrm/composer-downloads-plugin": "^2.1",
-    "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
+    "automattic/vipwpcs": "^2.2",
+    "civicrm/composer-downloads-plugin": "^3.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
+    "google/cloud-storage": "^1.22",
     "mikey179/vfsstream": "1.6.8",
     "mustache/mustache": "^2",
     "php-stubs/wordpress-stubs": "^5.3.2",
-    "phpcompatibility/phpcompatibility-wp": "2.1.0",
+    "phpcompatibility/phpcompatibility-wp": "2.1.1",
     "phpdocumentor/reflection": "~3.0",
+    "phpunit/phpunit": "^5.7 || ^6.5 || ^7.5",
     "roave/security-advisories": "dev-master",
-    "sirbrillig/phpcs-variable-analysis": "2.8.3",
-    "wp-coding-standards/wpcs": "2.3.0",
-    "xwp/wp-dev-lib": "1.6.4"
+    "sirbrillig/phpcs-variable-analysis": "2.11.0",
+    "wp-cli/export-command": "^2.0",
+    "wp-cli/extension-command": "^2.0",
+    "wp-cli/wp-cli": "^2.4",
+    "wp-coding-standards/wpcs": "2.3.0"
   },
   "suggest": {
     "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
@@ -45,15 +49,16 @@
   "extra": {
     "downloads": {
       "phpstan": {
-        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
         "path": "vendor/bin/phpstan",
-        "type": "phar"
+        "type": "phar",
+        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar"
       }
     },
     "patches": {
       "sabberworm/php-css-parser": {
-        "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch",
-        "Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "patches/php-css-parser-commit-10a2501.patch"
+        "1. Add additional validation for size unit <https://github.com/sabberworm/PHP-CSS-Parser/pull/193>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/3bc5ded67d77a52b81608cfc97f23b1bb0678e2f%5E...468da3441945e9c1bf402a3340b1d8326723f7d9.patch",
+        "2. Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/d42b64793f2edaffeb663c63e9de79069cdc0831%5E...113df5d55e94e21c6402021dfa959924941d4c29.patch",
+        "3. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/westonruter/PHP-CSS-Parser/compare/master...10a2501c119abafced3e4014aa3c0a3453a86f67.patch"
       }
     }
   },
@@ -80,33 +85,16 @@
       "tests/php/validation/"
     ],
     "files": [
+      "tests/php/register-wp-cli-commands.php",
       "docs/includes/register-wp-cli-commands.php"
     ]
   },
-  "repositories": [
-    {
-      "type": "path",
-      "url": "lib/common",
-      "options": {
-        "symlink": true
-      }
-    },
-    {
-      "type": "path",
-      "url": "lib/optimizer",
-      "options": {
-        "symlink": true
-      }
-    },
-    {
-      "type": "vcs",
-      "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
-      "no-api": true
-    }
-  ],
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
-    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi"
+    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi",
+    "pre-commit": [
+      "npm run lint:staged"
+    ]
   }
 }

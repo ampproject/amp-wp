@@ -1,0 +1,95 @@
+/*
+ * Errors list in AMP sidebar.
+ */
+.amp-sidebar__errors-list,
+.amp-sidebar__errors-list-item {
+	margin-bottom: 0;
+	margin-top: 0;
+}
+
+.amp-sidebar__errors-list-item > .components-panel__body {
+	border-top-width: 0;
+}
+
+/*
+ * Options in AMP sidebar.
+ */
+.amp-sidebar__options {
+	margin: 12px 8px;
+}
+
+/*
+ * AMP icons.
+ */
+.amp-plugin-icon {
+	align-items: center;
+	display: flex;
+	height: 100%;
+	justify-content: center;
+	position: relative;
+	width: 100%;
+}
+
+.amp-toolbar-icon svg {
+	fill: #000;
+}
+
+.amp-plugin-icon--has-badge svg {
+	margin-left: -5px;
+}
+
+.amp-toolbar-broken-icon svg {
+	fill: none;
+}
+
+.amp-error-count-badge {
+	align-items: center;
+	background: #bb522e;
+	border: 2px solid transparent;
+	border-radius: 8px;
+	color: #fff;
+	display: flex;
+	flex-shrink: 0;
+	font-size: 10px;
+	height: 16px;
+	justify-content: center;
+	position: absolute;
+	right: -6px;
+	top: -5px;
+	width: 16px;
+}
+
+.is-pressed .amp-error-count-badge {
+	border-color: #1e1e1e;
+}
+
+.is-pressed .amp-plugin-icon:not(.amp-plugin-icon--broken) svg {
+	fill: #fff;
+}
+
+/*
+ * AMP status icon.
+ */
+.amp-status-icon path {
+	fill: #005af0;
+}
+
+.amp-status-icon::after {
+	background: #bb522e;
+	border-radius: 50%;
+	content: "";
+	display: block;
+	height: 12px;
+	opacity: 0;
+	position: absolute;
+	right: -6px;
+	top: -3px;
+	transform: scale(0);
+	transition: opacity 120ms ease-out, transform 180ms ease-out;
+	width: 12px;
+}
+
+.amp-status-icon.amp-status-icon--broken::after {
+	opacity: 1;
+	transform: none;
+}

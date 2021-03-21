@@ -28,8 +28,7 @@ import { ReaderThemesContextProvider, ReaderThemes } from '../components/reader-
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
-import { AMPNotice, NOTICE_TYPE_ERROR, NOTICE_TYPE_SUCCESS } from '../components/amp-notice';
-import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
+import { ErrorContextProvider } from '../components/error-context-provider';
 import { AMPDrawer } from '../components/amp-drawer';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
@@ -38,6 +37,7 @@ import { MobileRedirection } from './mobile-redirection';
 import { SettingsFooter } from './settings-footer';
 import { PluginSuppression } from './plugin-suppression';
 import { Analytics } from './analytics';
+import { PairedUrlStructure } from './paired-url-structure';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -69,31 +69,6 @@ Providers.propTypes = {
 };
 
 /**
- * Renders an error notice.
- *
- * @param {Object} props Component props.
- * @param {string} props.errorMessage Error message text.
- */
-function ErrorNotice( { errorMessage } ) {
-	return (
-		<div className="amp-error-notice">
-			<AMPNotice type={ NOTICE_TYPE_ERROR }>
-				<p>
-					<strong>
-						{ __( 'Error:', 'amp' ) }
-					</strong>
-					{ ' ' }
-					{ errorMessage }
-				</p>
-			</AMPNotice>
-		</div>
-	);
-}
-ErrorNotice.propTypes = {
-	errorMessage: PropTypes.string,
-};
-
-/**
  * Scrolls to the first focusable element in a section, or to the section if no focusable elements are found.
  *
  * @param {string} focusedSectionId A section ID.
@@ -118,60 +93,26 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 
 /**
  * Settings page application root.
+ *
+ * @param {Object} props
+ * @param {Element} props.appRoot App root.
  */
-function Root() {
+function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
 
-	const { didSaveOptions, fetchingOptions, hasOptionsChanges, saveOptions } = useContext( Options );
-	const { error } = useContext( ErrorContext );
-	const { downloadingTheme } = useContext( ReaderThemes );
-	const [ savedNoticeClass, setSavedNoticeClass ] = useState( '' );
-
-	/**
-	 * Show the success notice after options have saved.
-	 */
-	useEffect( () => {
-		if ( didSaveOptions && ! downloadingTheme ) {
-			setSavedNoticeClass( 'visible' );
-		}
-	}, [ didSaveOptions, downloadingTheme ] );
-
-	/**
-	 * If the success notice is showing and updates have been made, hide the notice.
-	 */
-	useEffect( () => {
-		if ( 'visible' === savedNoticeClass && hasOptionsChanges ) {
-			setSavedNoticeClass( 'dismissed' );
-		}
-	}, [ savedNoticeClass, hasOptionsChanges ] );
-
-	/**
-	 * Hide the success notice after several seconds.
-	 */
-	useEffect( () => {
-		if ( 'visible' === savedNoticeClass ) {
-			const timeout = setTimeout( () => {
-				setSavedNoticeClass( 'dismissed' );
-			}, 9000 );
-
-			return () => {
-				clearTimeout( timeout );
-			};
-		}
-
-		return () => undefined;
-	}, [ savedNoticeClass ] );
+	const { fetchingOptions, saveOptions } = useContext( Options );
+	const { templateModeWasOverridden } = useContext( ReaderThemes );
 
 	/**
 	 * Scroll to the focused element on load or when it changes.
 	 */
 	useEffect( () => {
-		if ( fetchingOptions ) {
+		if ( fetchingOptions || null === templateModeWasOverridden ) {
 			return;
 		}
 
 		scrollFocusedSectionIntoView( focusedSection );
-	}, [ fetchingOptions, focusedSection ] );
+	}, [ fetchingOptions, focusedSection, templateModeWasOverridden ] );
 
 	/**
 	 * Resets the focused element state when the hash changes on the page.
@@ -195,7 +136,7 @@ function Root() {
 		};
 	}, [ fetchingOptions ] );
 
-	if ( false !== fetchingOptions ) {
+	if ( false !== fetchingOptions || null === templateModeWasOverridden ) {
 		return <Loading />;
 	}
 
@@ -249,22 +190,16 @@ function Root() {
 				>
 					<Analytics />
 				</AMPDrawer>
+				<PairedUrlStructure focusedSection={ focusedSection } />
 				<SettingsFooter />
 			</form>
-			<UnsavedChangesWarning excludeUserContext={ true } />
-			{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }
-			<AMPNotice
-				className={ `amp-save-success-notice ${ savedNoticeClass }` }
-				type={ NOTICE_TYPE_SUCCESS }
-				aria-hidden={ 'visible' !== savedNoticeClass }
-			>
-				<p>
-					{ __( 'Settings saved', 'amp' ) }
-				</p>
-			</AMPNotice>
+			<UnsavedChangesWarning excludeUserContext={ true } appRoot={ appRoot } />
 		</>
 	);
 }
+Root.propTypes = {
+	appRoot: PropTypes.instanceOf( global.Element ),
+};
 
 domReady( () => {
 	const root = document.getElementById( 'amp-settings-root' );
@@ -273,7 +208,7 @@ domReady( () => {
 		render( (
 			<ErrorContextProvider>
 				<Providers>
-					<Root />
+					<Root appRoot={ root } />
 				</Providers>
 			</ErrorContextProvider>
 		), root );

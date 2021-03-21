@@ -35,6 +35,7 @@ class AMP_Options_Manager {
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
 		Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
+		Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 		Option::PLUGIN_CONFIGURED       => false,
 	];
 
@@ -159,33 +160,15 @@ class AMP_Options_Manager {
 			 * Filters default options.
 			 *
 			 * @internal
-			 * @param array $defaults Default options.
+			 * @param array $defaults        Default options.
+			 * @param array $current_options Current options.
 			 */
-			(array) apply_filters( 'amp_default_options', $defaults ),
+			(array) apply_filters( 'amp_default_options', $defaults, $options ),
 			$options
 		);
 
 		// Ensure current template mode.
-		if (
-			AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
-			&&
-			get_stylesheet() === $options[ Option::READER_THEME ]
-			&&
-			! isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		) {
-			/*
-			 * When Reader mode is selected and a Reader theme has been chosen, if the active theme switches to be the
-			 * same as the Reader theme, then transparently switch the mode from Reader to Transitional while the
-			 * active theme and the Reader theme are the same. Remember that Reader mode means having two separate
-			 * templates for AMP and non-AMP, whereas Transitional mode means using the same templates. Otherwise, there
-			 * is no difference whatsoever between Reader and Transitional modes, as they are both Paired AMP modes.
-			 * By dynamically changing the mode from Reader to Transitional in the options getter here, if the active
-			 * theme is switched again to be different than what was selected as the Reader theme, then the site will
-			 * go back to being in Reader mode as opposed to Transitional.
-			 * @todo It would be preferable to rather invoke methods of ReaderThemeLoader here, but that risks an infinite loop and is a circular dependency.
-			 */
-			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-		} elseif ( 'native' === $options[ Option::THEME_SUPPORT ] ) {
+		if ( 'native' === $options[ Option::THEME_SUPPORT ] ) {
 			// The slug 'native' is the old term for 'standard'.
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
 		} elseif ( 'paired' === $options[ Option::THEME_SUPPORT ] ) {
@@ -241,8 +224,8 @@ class AMP_Options_Manager {
 				(array) get_post_types_by_support( AMP_Post_Type_Support::SLUG )
 			);
 
-			// Make sure that all post types get enabled if all templates were supported since they are now independently controlled.
-			if ( ! empty( $options[ Option::ALL_TEMPLATES_SUPPORTED ] ) ) {
+			// Make sure that all post types get enabled if all templates were supported since they are now independently controlled. This only applies to non-Reader mode.
+			if ( ! empty( $options[ Option::ALL_TEMPLATES_SUPPORTED ] ) && AMP_Theme_Support::READER_MODE_SLUG !== $options[ Option::THEME_SUPPORT ] ) {
 				$options[ Option::SUPPORTED_POST_TYPES ] = array_merge(
 					$options[ Option::SUPPORTED_POST_TYPES ],
 					AMP_Post_Type_Support::get_eligible_post_types()

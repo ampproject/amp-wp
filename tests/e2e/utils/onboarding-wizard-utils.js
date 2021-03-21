@@ -4,7 +4,7 @@
 import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
 export const NEXT_BUTTON_SELECTOR = '#next-button';
-export const PREV_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button:not(.is-primary)';
+export const PREV_BUTTON_SELECTOR = '.amp-settings-nav__prev-next button:not(.is-primary)';
 
 export async function goToOnboardingWizard() {
 	await visitAdminPage( 'index.php' );
@@ -37,16 +37,20 @@ export async function moveToTemplateModeScreen( { technical } ) {
 	await expect( page ).toMatchElement( '.template-mode-option' );
 }
 
-export async function clickMode( mode ) {
-	await page.evaluate( ( templateMode ) => {
-		const el = document.querySelector( `#template-mode-${ templateMode }` );
+export async function scrollToElement( { selector, click = false } ) {
+	await page.evaluate( ( options ) => {
+		const el = document.querySelector( options.selector );
 		if ( el ) {
-			el.scrollIntoView( { block: 'center', inline: 'center' } );
+			el.scrollIntoView( { block: 'start', inline: 'center' } );
+			if ( options.click ) {
+				el.click();
+			}
 		}
-	}, mode );
-	await expect( page ).toMatchElement( `#template-mode-${ mode }` );
-	await page.click( `#template-mode-${ mode }` );
-	await expect( page ).toMatchElement( `#template-mode-${ mode }:checked` );
+	}, ( { selector, click } ) );
+}
+
+export async function clickMode( mode ) {
+	await scrollToElement( { selector: `#template-mode-${ mode }`, click: true } );
 }
 
 export async function moveToReaderThemesScreen( { technical } ) {
@@ -100,7 +104,7 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 	}
 
 	await clickNextButton();
-	await page.waitFor( 1000 );
+	await page.waitForTimeout( 1000 );
 	await page.waitForSelector( '.done__preview-container' );
 }
 
@@ -144,7 +148,7 @@ export function testTitle( { text, element = 'h1' } ) {
  */
 export async function cleanUpSettings() {
 	await visitAdminPage( 'admin.php', 'page=amp-options' );
-	await page.waitForSelector( '.settings-footer' );
+	await page.waitForSelector( '.amp-settings-nav' );
 	await page.evaluate( async () => {
 		await Promise.all( [
 			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: { amp_dev_tools_enabled: true } } ),

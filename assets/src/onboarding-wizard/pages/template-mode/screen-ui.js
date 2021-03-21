@@ -64,6 +64,7 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 		<form>
 			<TemplateModeOption
 				details={ sectionText.standard.details }
+				detailsUrl="https://amp-wp.org/documentation/getting-started/standard/"
 				initialOpen={ true }
 				mode="standard"
 				previouslySelected={ savedCurrentMode === 'standard' && technicalQuestionChanged && ! firstTimeInWizard }
@@ -75,6 +76,7 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 
 			<TemplateModeOption
 				details={ sectionText.transitional.details }
+				detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/"
 				initialOpen={ true }
 				mode="transitional"
 				previouslySelected={ savedCurrentMode === 'transitional' && technicalQuestionChanged && ! firstTimeInWizard }
@@ -86,6 +88,7 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 
 			<TemplateModeOption
 				details={ sectionText.reader.details }
+				detailsUrl="https://amp-wp.org/documentation/getting-started/reader/"
 				initialOpen={ true }
 				mode="reader"
 				previouslySelected={ savedCurrentMode === 'reader' && technicalQuestionChanged && ! firstTimeInWizard }

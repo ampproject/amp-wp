@@ -129,7 +129,19 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			$this->process_element( $link, Attribute::HREF );
 		}
 
-		$form_query = $this->dom->xpath->query( '//form[ @action and translate( @method, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "get" ]' );
+		$form_query = $this->dom->xpath->query(
+			'
+			//form[
+				@action
+				and
+				(
+					not( @method )
+					or
+					translate( @method, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "get"
+				)
+			]
+			'
+		);
 		foreach ( $form_query as $form ) {
 			$this->process_element( $form, Attribute::ACTION );
 		}
@@ -138,6 +150,23 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $admin_bar_container && $admin_bar_placeholder ) {
 			$admin_bar_placeholder->parentNode->replaceChild( $admin_bar_container, $admin_bar_placeholder );
 		}
+	}
+
+	/**
+	 * Check if element is descendant of a template element.
+	 *
+	 * @param DOMElement $node Node.
+	 * @return bool Descendant of template.
+	 */
+	private function is_descendant_of_template_element( DOMElement $node ) {
+		while ( $node instanceof DOMElement ) {
+			$parent = $node->parentNode;
+			if ( $parent instanceof DOMElement && Tag::TEMPLATE === $parent->tagName ) {
+				return true;
+			}
+			$node = $parent;
+		}
+		return false;
 	}
 
 	/**
@@ -151,6 +180,11 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Skip page anchor links or non-frontend links.
 		if ( empty( $url ) || '#' === substr( $url, 0, 1 ) || ! $this->is_frontend_url( $url ) ) {
+			return;
+		}
+
+		// Skip links with template variables.
+		if ( preg_match( '/{{[^}]+?}}/', $url ) && $this->is_descendant_of_template_element( $element ) ) {
 			return;
 		}
 
@@ -183,19 +217,14 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 		$query_vars = [];
 
+		// Add rel=amphtml.
 		if ( ! $excluded ) {
 			$rel[] = Attribute::REL_AMPHTML;
 			$rel   = array_diff(
 				$rel,
 				[ Attribute::REL_NOAMPHTML ]
 			);
-
 			$element->setAttribute( Attribute::REL, implode( ' ', $rel ) );
-
-			// Only add the AMP query var when requested (in Transitional or Reader mode).
-			if ( ! empty( $this->args['paired'] ) ) {
-				$query_vars[ amp_get_slug() ] = '';
-			}
 		}
 
 		/**
@@ -211,18 +240,32 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$query_vars = apply_filters( 'amp_to_amp_linking_element_query_vars', $query_vars, $excluded, $url, $element, $rel );
 
-		if ( $query_vars ) {
-			if ( Tag::FORM === $element->nodeName ) {
-				foreach ( $query_vars as $name => $value ) {
-					$input = $this->dom->createElement( Tag::INPUT );
-					$input->setAttribute( Attribute::NAME, $name );
-					$input->setAttribute( Attribute::VALUE, $value );
-					$input->setAttribute( Attribute::TYPE, 'hidden' );
-					$element->appendChild( $input );
-				}
-			} else {
-				$url = add_query_arg( $query_vars, $url );
-				$element->setAttribute( $attribute_name, $url );
+		if ( ! empty( $query_vars ) ) {
+			$url = add_query_arg( $query_vars, $url );
+		}
+
+		// Only add the AMP query var when requested (in Transitional or Reader mode).
+		if ( ! $excluded && ! empty( $this->args['paired'] ) ) {
+			$url = amp_add_paired_endpoint( $url );
+		}
+
+		$element->setAttribute( $attribute_name, $url );
+
+		// Given that form action query vars get overridden by the inputs, they need to be extracted and added as inputs.
+		if ( Tag::FORM === $element->nodeName ) {
+			$query = wp_parse_url( $url, PHP_URL_QUERY );
+			if ( $query ) {
+				$parsed_query_vars = [];
+				wp_parse_str( $query, $parsed_query_vars );
+				$query_vars = array_merge( $query_vars, $parsed_query_vars );
+			}
+
+			foreach ( $query_vars as $name => $value ) {
+				$input = $this->dom->createElement( Tag::INPUT );
+				$input->setAttribute( Attribute::NAME, $name );
+				$input->setAttribute( Attribute::VALUE, $value );
+				$input->setAttribute( Attribute::TYPE, 'hidden' );
+				$element->appendChild( $input );
 			}
 		}
 	}

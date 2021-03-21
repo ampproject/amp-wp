@@ -18,7 +18,7 @@ Get regex pattern for matching HTML attributes from a given tag name.
 
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:93](../../includes/embeds/class-amp-base-embed-handler.php#L93-L111)
+:link: [includes/embeds/class-amp-base-embed-handler.php:95](/includes/embeds/class-amp-base-embed-handler.php#L95-L113)
 
 <details>
 <summary>Show Code</summary>
@@ -31,7 +31,7 @@ protected function match_element_attributes( $html, $tag_name, $attribute_names 
 		implode(
 			'',
 			array_map(
-				function ( $attr_name ) {
+				static function ( $attr_name ) {
 					return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>[^"]+)")?', preg_quote( $attr_name, '/' ) );
 				},
 				$attribute_names

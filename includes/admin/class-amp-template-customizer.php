@@ -71,13 +71,14 @@ class AMP_Template_Customizer {
 	 * @since 0.4
 	 * @access public
 	 *
-	 * @param WP_Customize_Manager $wp_customize Customizer instance.
+	 * @param WP_Customize_Manager $wp_customize        Customizer instance.
+	 * @param ReaderThemeLoader    $reader_theme_loader Reader theme loader.
 	 * @return AMP_Template_Customizer Instance.
 	 */
-	public static function init( WP_Customize_Manager $wp_customize ) {
-		/** @var ReaderThemeLoader $reader_theme_loader */
-		$reader_theme_loader = Services::get( 'reader_theme_loader' );
-
+	public static function init( WP_Customize_Manager $wp_customize, ReaderThemeLoader $reader_theme_loader = null ) {
+		if ( null === $reader_theme_loader ) {
+			$reader_theme_loader = Services::get( 'reader_theme_loader' );
+		}
 		$self = new self( $wp_customize, $reader_theme_loader );
 
 		$is_reader_mode   = ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
@@ -116,6 +117,9 @@ class AMP_Template_Customizer {
 		$self->set_refresh_setting_transport();
 		$self->remove_cover_template_section();
 		$self->remove_homepage_settings_section();
+		if ( get_template() === 'twentytwentyone' ) {
+			add_action( 'customize_controls_print_footer_scripts', [ $self, 'add_dark_mode_toggler_button_notice' ] );
+		}
 		return $self;
 	}
 
@@ -214,6 +218,23 @@ class AMP_Template_Customizer {
 		if ( count( array_diff( $control_ids, $static_front_page_control_ids ) ) === 0 ) {
 			$this->wp_customize->remove_section( $section_id );
 		}
+	}
+
+	/**
+	 * Add notice that the dark mode toggler button is not currently available on AMP pages.
+	 */
+	public function add_dark_mode_toggler_button_notice() {
+		$message = __( 'While dark mode works on AMP pages, the toggle button is not currently available. It appears here only for preview purposes.', 'amp' );
+		?>
+		<script>
+			wp.customize.control( 'respect_user_color_preference', function ( control ) {
+				control.notifications.add( new wp.customize.Notification( 'amp_dark_mode_toggler_availability_notice', {
+					message: <?php echo wp_json_encode( $message ); ?>,
+					type: 'info'
+				} ) );
+			} );
+		</script>
+		<?php
 	}
 
 	/**
@@ -532,7 +553,7 @@ class AMP_Template_Customizer {
 			<li id="accordion-section-{{ data.id }}" class="accordion-section control-section control-section-{{ data.type }}">
 				<h3 class="accordion-section-title">
 					<button type="button" class="button button-secondary" aria-label="<?php esc_attr_e( 'Import settings', 'amp' ); ?>">
-						<?php echo esc_html( _ex( 'Import', 'theme', 'amp' ) ); ?>
+						<?php echo esc_html( _x( 'Import', 'theme', 'amp' ) ); ?>
 					</button>
 					<details>
 						<summary>{{ data.title }}</summary>

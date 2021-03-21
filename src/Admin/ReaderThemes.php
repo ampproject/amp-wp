@@ -12,6 +12,7 @@ use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
+use WP_Error;
 use WP_Theme;
 use WP_Upgrader;
 
@@ -42,6 +43,13 @@ final class ReaderThemes {
 	 * @var bool
 	 */
 	private $can_install_themes;
+
+	/**
+	 * The error resulting from a failed themes_api request.
+	 *
+	 * @var null|WP_Error
+	 */
+	private $themes_api_error;
 
 	/**
 	 * The default reader theme.
@@ -170,6 +178,15 @@ final class ReaderThemes {
 	}
 
 	/**
+	 * Provides the themes api error, or null if there is no error.
+	 *
+	 * @return null|WP_Error
+	 */
+	public function get_themes_api_error() {
+		return $this->themes_api_error;
+	}
+
+	/**
 	 * Gets a reader theme by slug.
 	 *
 	 * @param string $slug Theme slug.
@@ -189,7 +206,7 @@ final class ReaderThemes {
 	/**
 	 * Retrieves theme data.
 	 *
-	 * @return array Theme data from the wordpress.org API.
+	 * @return array Theme data from the wordpress.org API, or an empty array on failure.
 	 */
 	public function get_default_reader_themes() {
 		if ( null !== $this->default_reader_themes ) {
@@ -198,29 +215,61 @@ final class ReaderThemes {
 
 		$cache_key = 'amp_themes_wporg';
 		$response  = get_transient( $cache_key );
+
 		if ( ! $response ) {
-			// Note: This can be used to refresh the hardcoded raw theme data.
 			require_once ABSPATH . 'wp-admin/includes/theme.php';
 
 			$response = themes_api(
 				'query_themes',
 				[
 					'author'   => 'wordpressdotorg',
-					'per_page' => 24, // There are only 12 as of 05/2020.
+					'per_page' => 24, // There are only 13 as of 12/2020.
 				]
 			);
 
-			if ( ! is_wp_error( $response ) ) {
-				set_transient( $cache_key, $response, DAY_IN_SECONDS );
+			if ( is_array( $response ) ) {
+				$response = (object) $response;
 			}
-		}
 
-		if ( is_wp_error( $response ) ) {
-			return [];
-		}
+			/**
+			 * The response must minimally be an object with a themes array.
+			 *
+			 * @see https://wordpress.org/support/topic/issue-during-activating-the-updated-plugins/#post-13383737
+			 */
+			if (
+				! is_object( $response )
+				|| ! property_exists( $response, 'themes' )
+				|| ! is_array( $response->themes )
+				|| is_wp_error( $response )
+			) {
+				$message = __( 'The request for reader themes from WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.', 'amp' );
+				if ( is_wp_error( $response ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
+					$message .= ' ' . __( 'Error:', 'amp' );
+					if ( $response->get_error_message() ) {
+						$message .= sprintf( ' %s (%s).', $response->get_error_message(), $response->get_error_code() );
+					} else {
+						$message .= ' ' . $response->get_error_code() . '.';
+					}
+				}
 
-		if ( is_array( $response ) ) {
-			$response = (object) $response;
+				$this->themes_api_error = new WP_Error(
+					'amp_themes_api_invalid_response',
+					$message
+				);
+
+				return [];
+			}
+
+			if ( empty( $response->themes ) ) {
+				$this->themes_api_error = new WP_Error(
+					'amp_themes_api_empty_themes_array',
+					__( 'The default reader themes cannot be displayed because a plugin appears to be overriding the themes response from WordPress.org.', 'amp' )
+				);
+				return [];
+			}
+
+			// Store the transient only if the response was valid.
+			set_transient( $cache_key, $response, DAY_IN_SECONDS );
 		}
 
 		$supported_themes = array_diff(
@@ -335,8 +384,11 @@ final class ReaderThemes {
 		}
 
 		if ( null === $this->can_install_themes ) {
-			if ( ! class_exists( 'WP_Upgrader' ) ) {
+			if ( ! function_exists( 'request_filesystem_credentials' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/file.php';
+			}
+
+			if ( ! class_exists( 'WP_Upgrader' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 			}
 

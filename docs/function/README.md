@@ -1,60 +1,25 @@
 ## Functions
 
-* ~~[`_amp_backcompat_use_v03_templates_callback`](_amp_backcompat_use_v03_templates_callback.md) - Callback for getting the legacy templates directory.~~
-* [`_amp_bootstrap_customizer`](_amp_bootstrap_customizer.md) - Bootstraps the AMP customizer.
-* ~~[`_amp_xdebug_admin_notice`](_amp_xdebug_admin_notice.md) - Print admin notice if the Xdebug extension is loaded.~~
-* [`amp_activate`](amp_activate.md) - Handle activation of plugin.
-* [`amp_add_admin_bar_view_link`](amp_add_admin_bar_view_link.md) - Add &quot;View AMP&quot; admin bar item for Transitional/Reader mode.
 * [`amp_add_amphtml_link`](amp_add_amphtml_link.md) - Add amphtml link.
-* [`amp_add_frontend_actions`](amp_add_frontend_actions.md) - Add frontend actions.
-* [`amp_add_generator_metadata`](amp_add_generator_metadata.md) - Add generator metadata.
+* [`amp_add_paired_endpoint`](amp_add_paired_endpoint.md) - Turn a given URL into a paired AMP URL.
 * ~~[`amp_add_post_template_actions`](amp_add_post_template_actions.md) - Add post template actions.~~
-* ~~[`amp_admin_pointer`](amp_admin_pointer.md) - Bootstrap the AMP admin pointer class.~~
-* [`amp_after_setup_theme`](amp_after_setup_theme.md) - Set up AMP.
 * ~~[`amp_backcompat_use_v03_templates`](amp_backcompat_use_v03_templates.md) - Add hooks to use legacy AMP post templates from before v0.4.~~
-* [`amp_bootstrap_plugin`](amp_bootstrap_plugin.md) - Bootstrap plugin.
-* [`amp_correct_query_when_is_front_page`](amp_correct_query_when_is_front_page.md) - Fix up WP_Query for front page when amp query var is present.
-* [`amp_deactivate`](amp_deactivate.md) - Handle deactivation of plugin.
-* [`amp_filter_font_style_loader_tag_with_crossorigin_anonymous`](amp_filter_font_style_loader_tag_with_crossorigin_anonymous.md) - Explicitly opt-in to CORS mode by adding the crossorigin attribute to font stylesheet links.
-* [`amp_filter_script_loader_tag`](amp_filter_script_loader_tag.md) - Add AMP script attributes to enqueued scripts.
-* [`amp_force_query_var_value`](amp_force_query_var_value.md) - Make sure the `amp` query var has an explicit value.
 * ~~[`amp_frontend_add_canonical`](amp_frontend_add_canonical.md) - Add amphtml link to frontend.~~
 * [`amp_generate_script_hash`](amp_generate_script_hash.md) - Generate hash for inline amp-script.
-* [`amp_get_analytics`](amp_get_analytics.md) - Retrieve analytics data added in backend.
-* [`amp_get_asset_url`](amp_get_asset_url.md) - Get AMP asset URL.
-* [`amp_get_boilerplate_code`](amp_get_boilerplate_code.md) - Get AMP boilerplate code.
-* [`amp_get_boilerplate_stylesheets`](amp_get_boilerplate_stylesheets.md) - Get AMP boilerplate stylesheets.
-* [`amp_get_content_embed_handlers`](amp_get_content_embed_handlers.md) - Get content embed handlers.
-* [`amp_get_content_sanitizers`](amp_get_content_sanitizers.md) - Get content sanitizers.
-* [`amp_get_current_url`](amp_get_current_url.md) - Get the URL for the current request.
 * [`amp_get_permalink`](amp_get_permalink.md) - Retrieves the full AMP-specific permalink for the given post ID.
-* [`amp_get_post_image_metadata`](amp_get_post_image_metadata.md) - Grabs featured image or the first attached image for the post.
-* [`amp_get_publisher_logo`](amp_get_publisher_logo.md) - Get the publisher logo.
-* [`amp_get_schemaorg_metadata`](amp_get_schemaorg_metadata.md) - Get schema.org metadata for the current query.
 * [`amp_get_slug`](amp_get_slug.md) - Get the slug used in AMP for the query var, endpoint, and post type support.
-* [`amp_init`](amp_init.md) - Init AMP.
+* [`amp_has_paired_endpoint`](amp_has_paired_endpoint.md) - Determine a given URL is for a paired AMP request.
 * [`amp_is_available`](amp_is_available.md) - Determine whether AMP is available for the current URL.
 * [`amp_is_canonical`](amp_is_canonical.md) - Whether this is in &#039;canonical mode&#039;.
 * [`amp_is_dev_mode`](amp_is_dev_mode.md) - Determine whether AMP dev mode is enabled.
 * [`amp_is_legacy`](amp_is_legacy.md) - Determines whether the legacy AMP post templates are being used.
 * [`amp_is_post_supported`](amp_is_post_supported.md) - Determine whether a given post supports AMP.
 * [`amp_is_request`](amp_is_request.md) - Determine whether the current request is for an AMP page.
-* ~~[`amp_load_classes`](amp_load_classes.md) - Load classes.~~
 * ~~[`amp_maybe_add_actions`](amp_maybe_add_actions.md) - Conditionally add AMP actions or render the transitional mode template(s).~~
-* ~~[`amp_post_meta_box`](amp_post_meta_box.md) - Bootstrap AMP post meta box.~~
-* ~~[`amp_post_template_add_boilerplate_css`](amp_post_template_add_boilerplate_css.md) - Print boilerplate CSS.~~
-* ~~[`amp_post_template_add_schemaorg_metadata`](amp_post_template_add_schemaorg_metadata.md) - Print Schema.org metadata.~~
-* ~~[`amp_post_template_add_scripts`](amp_post_template_add_scripts.md) - Print scripts.~~
 * ~~[`amp_prepare_render`](amp_prepare_render.md) - Add action to do post template rendering at template_redirect action.~~
-* [`amp_print_analytics`](amp_print_analytics.md) - Print analytics data.
-* [`amp_print_schemaorg_metadata`](amp_print_schemaorg_metadata.md) - Output schema.org metadata.
-* [`amp_redirect_old_slug_to_new_url`](amp_redirect_old_slug_to_new_url.md) - Redirects the old AMP URL to the new AMP URL.
-* [`amp_register_default_scripts`](amp_register_default_scripts.md) - Register default scripts for AMP components.
-* [`amp_register_default_styles`](amp_register_default_styles.md) - Register default styles.
-* [`amp_remove_endpoint`](amp_remove_endpoint.md) - Remove the AMP endpoint (and query var) from a given URL.
+* ~~[`amp_remove_endpoint`](amp_remove_endpoint.md) - Remove the AMP endpoint (and query var) from a given URL.~~
+* [`amp_remove_paired_endpoint`](amp_remove_paired_endpoint.md) - Remove the paired AMP endpoint from a given URL.
 * ~~[`amp_render`](amp_render.md) - Render AMP for queried post.~~
 * ~~[`amp_render_post`](amp_render_post.md) - Render AMP post template.~~
-* [`amp_render_scripts`](amp_render_scripts.md) - Generate HTML for AMP scripts that have not yet been printed.
-* [`amp_wp_kses_mustache`](amp_wp_kses_mustache.md) - Filters content and keeps only allowable HTML elements by amp-mustache.
 * ~~[`is_amp_endpoint`](is_amp_endpoint.md) - Determine whether the current response being served as AMP.~~
 * ~~[`post_supports_amp`](post_supports_amp.md) - Determine whether a given post supports AMP.~~

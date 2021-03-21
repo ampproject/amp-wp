@@ -25,15 +25,20 @@ class Test_Carousel extends WP_UnitTestCase {
 	 * @return array[] An associative array, including the slides and captions, the DOM, and the expected markup.
 	 */
 	public function get_carousel_data() {
-		$dom    = new Document();
 		$src    = 'https://example.com/img.png';
 		$width  = '1200';
 		$height = '800';
-		$image  = AMP_DOM_Utils::create_node(
-			$dom,
-			'amp-img',
-			compact( 'src', 'width', 'height' )
+
+		$dom = Document::fromHtmlFragment(
+			sprintf(
+				'<amp-img src="%s" width="%s" height="%s"></amp-img>',
+				$src,
+				$width,
+				$height
+			)
 		);
+
+		$image = $dom->body->firstChild;
 
 		$caption_element = AMP_DOM_Utils::create_node( $dom, 'a', [ 'href' => 'example.org' ] );
 		$caption_element->appendChild( new DOMText( 'Example caption' ) );

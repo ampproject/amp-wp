@@ -18,7 +18,7 @@ Determine whether a given post supports AMP.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:835](../../includes/amp-helper-functions.php#L835-L837)
+:link: [includes/amp-helper-functions.php:723](/includes/amp-helper-functions.php#L723-L725)
 
 <details>
 <summary>Show Code</summary>

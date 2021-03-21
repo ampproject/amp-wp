@@ -1,8 +1,10 @@
 /**
- * Internal dependencies
- */
-/**
  * WordPress dependencies
+ */
+import { activateTheme, deleteTheme, installTheme } from '@wordpress/e2e-test-utils';
+
+/**
+ * Internal dependencies
  */
 import {
 	moveToTemplateModeScreen,
@@ -11,9 +13,6 @@ import {
 	testPreviousButton,
 	cleanUpSettings,
 } from '../../utils/onboarding-wizard-utils';
-import { installTheme } from '../../utils/install-theme';
-import { activateTheme } from '../../utils/activate-theme';
-import { deleteTheme } from '../../utils/delete-theme';
 
 describe( 'Template mode', () => {
 	beforeEach( async () => {
@@ -88,12 +87,12 @@ describe( 'Stepper item modifications', () => {
 describe( 'Template mode recommendations with non-reader-theme active', () => {
 	beforeEach( async () => {
 		await cleanUpSettings();
-		await installTheme( 'astra' );
-		await activateTheme( 'astra' );
+		await installTheme( 'hestia' );
+		await activateTheme( 'hestia' );
 	} );
 
 	afterEach( async () => {
-		await deleteTheme( 'astra', 'twentytwenty' );
+		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
 	} );
 
 	it( 'makes correct recommendations when user is not technical and the current theme is not a reader theme', async () => {

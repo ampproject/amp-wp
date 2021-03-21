@@ -28,6 +28,13 @@ use WP_Customize_Manager;
 final class ReaderThemeLoader implements Service, Registerable {
 
 	/**
+	 * Paired routing service.
+	 *
+	 * @var PairedRouting
+	 */
+	private $paired_routing;
+
+	/**
 	 * Reader theme.
 	 *
 	 * @var WP_Theme
@@ -49,6 +56,15 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * @var bool
 	 */
 	private $theme_overridden = false;
+
+	/**
+	 * ReaderThemeLoader constructor.
+	 *
+	 * @param PairedRouting $paired_routing Paired routing service.
+	 */
+	public function __construct( PairedRouting $paired_routing ) {
+		$this->paired_routing = $paired_routing;
+	}
 
 	/**
 	 * Is Reader mode with a Reader theme selected.
@@ -95,15 +111,6 @@ final class ReaderThemeLoader implements Service, Registerable {
 	}
 
 	/**
-	 * Is an AMP request.
-	 *
-	 * @return bool Whether AMP request.
-	 */
-	public function is_amp_request() {
-		return isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	}
-
-	/**
 	 * Register the service with the system.
 	 *
 	 * @return void
@@ -124,11 +131,16 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * @return array Themes.
 	 */
 	public function filter_wp_prepare_themes_to_indicate_reader_theme( $prepared_themes ) {
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		if ( ! $this->is_enabled() ) {
 			return $prepared_themes;
 		}
 
-		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		$reader_theme_obj = $this->get_reader_theme();
+		if ( ! $reader_theme_obj instanceof WP_Theme ) {
+			return $prepared_themes;
+		}
+		$reader_theme = $reader_theme_obj->get_stylesheet();
+
 		if ( isset( $prepared_themes[ $reader_theme ] ) ) {
 
 			// Make sure the AMP Reader theme appears right after the active theme in the list.
@@ -164,7 +176,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 						'a' => [ 'href' => true ],
 					]
 				),
-				esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) )
+				esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) . '#reader-themes' )
 			);
 		}
 
@@ -177,11 +189,15 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * This is admittedly hacky, but WordPress doesn't provide a much better option.
 	 */
 	public function inject_theme_single_template_modifications() {
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		if ( ! $this->is_enabled() ) {
 			return;
 		}
 
-		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		$reader_theme = $this->get_reader_theme();
+		if ( ! $reader_theme instanceof WP_Theme ) {
+			return;
+		}
+
 		?>
 		<script>
 			(function( themeSingleTmpl ) {
@@ -195,7 +211,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 					`
 					<# if ( data.ampReaderThemeNotice ) { #>
 						<div class="notice notice-info notice-alt inline">
-							<p>{{{ data.ampReaderThemeNotice }}}</p>
+							<p>{{{ data.ampReaderThemeNotice }}}</p><?php // phpcs:ignore WordPressVIPMinimum.Security.Mustache.OutputNotation -- Contains link and already sanitized with Kses. ?>
 						</div>
 					<# } #>
 					`
@@ -208,7 +224,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 						return `
 							${startDiv}
 							<# if ( data.ampActiveReaderTheme ) { #>
-								<a href="{{{ data.actions.customize }}}" class="button button-primary customize load-customize hide-if-no-customize">
+								<a href="{{ data.actions.customize }}" class="button button-primary customize load-customize hide-if-no-customize">
 									<?php esc_html_e( 'Customize', 'default' ); ?>
 								</a>
 								<a href="<?php echo esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ); ?>" class="button button-secondary">
@@ -240,7 +256,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 							${startDiv}
 							<# if ( data.ampActiveReaderTheme ) { #>
 								<h2 class="theme-name" id="{{ data.id }}-name">
-									<span><?php echo esc_html( _x( 'Reader:', 'prefix for theme card in list', 'amp' ) ); ?></span> {{{ data.name }}}
+									<span><?php echo esc_html( _x( 'Reader:', 'prefix for theme card in list', 'amp' ) ); ?></span> {{ data.name }}
 								</h2>
 							<# } else if
 						`;
@@ -249,7 +265,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 				}
 			}) (
 				document.getElementById( 'tmpl-theme' ),
-				document.querySelector( <?php echo wp_json_encode( sprintf( '#%s-name > span', $reader_theme ) ); ?> )
+				document.querySelector( <?php echo wp_json_encode( sprintf( '#%s-name > span', $reader_theme->get_stylesheet() ) ); ?> )
 			);
 		</script>
 		<?php
@@ -264,6 +280,10 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * @return WP_Theme|null Theme if selected and no errors.
 	 */
 	public function get_reader_theme() {
+		if ( $this->reader_theme instanceof WP_Theme ) {
+			return $this->reader_theme;
+		}
+
 		$reader_theme_slug = AMP_Options_Manager::get_option( Option::READER_THEME );
 		if ( ! $reader_theme_slug ) {
 			return null;
@@ -298,7 +318,8 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 */
 	public function override_theme() {
 		$this->theme_overridden = false;
-		if ( ! $this->is_enabled() || ! $this->is_amp_request() ) {
+
+		if ( ! $this->is_enabled() || ! $this->paired_routing->has_endpoint() ) {
 			return;
 		}
 
@@ -361,6 +382,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 				return array_diff( $components, [ 'widgets' ] );
 			}
 		);
+		remove_theme_support( 'widgets-block-editor' );
 	}
 
 	/**

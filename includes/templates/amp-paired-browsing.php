@@ -6,10 +6,11 @@
  */
 
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Admin\PairedBrowsing;
 
-$url         = remove_query_arg( [ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, QueryVar::NOAMP ] );
+$url         = remove_query_arg( [ PairedBrowsing::APP_QUERY_VAR, QueryVar::NOAMP ], amp_get_current_url() );
 $non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $url );
-$amp_url     = add_query_arg( amp_get_slug(), '1', $url );
+$amp_url     = amp_add_paired_endpoint( $url );
 ?>
 
 <!DOCTYPE html>
@@ -43,19 +44,11 @@ $amp_url     = add_query_arg( amp_get_slug(), '1', $url );
 						<span class="general">
 							<?php esc_html_e( 'The navigated URL is not available for paired browsing.', 'amp' ); ?>
 						</span>
-
-						<span class="invalid-amp">
-							<?php esc_html_e( 'The navigated page does not have an AMP counterpart due to invalid AMP markup being kept.', 'amp' ); ?>
-						</span>
 					</div>
 
 					<div class="dialog-buttons">
-						<button class="button exit">
-							<?php esc_html_e( 'Exit', 'amp' ); ?>
-						</button>
-						<button class="button go-back">
-							<?php esc_html_e( 'Go Back', 'amp' ); ?>
-						</button>
+						<a href="#" class="button exit" hidden><?php esc_html_e( 'Exit', 'amp' ); ?></a>
+						<button class="button go-back"><?php esc_html_e( 'Go Back', 'amp' ); ?></button>
 					</div>
 				</div>
 			</div>

@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Attribute;
 use AMP_Theme_Support;
+use AMP_HTTP;
 
 /**
  * Service for redirecting mobile users to the AMP version of a page.
@@ -41,14 +42,42 @@ final class MobileRedirection implements Service, Registerable {
 	const DISABLED_STORAGE_KEY = 'amp_mobile_redirect_disabled';
 
 	/**
+	 * PairedRouting instance.
+	 *
+	 * @var PairedRouting
+	 */
+	private $paired_routing;
+
+	/**
+	 * MobileRedirection constructor.
+	 *
+	 * @param PairedRouting $paired_routing Paired Routing.
+	 */
+	public function __construct( PairedRouting $paired_routing ) {
+		$this->paired_routing = $paired_routing;
+	}
+
+	/**
 	 * Register.
 	 */
 	public function register() {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
-		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && ! amp_is_canonical() ) {
 			add_action( 'template_redirect', [ $this, 'redirect' ], PHP_INT_MAX );
+
+			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
+			// A low priority is used so that sites can continue overriding this if they have done so.
+			add_filter( 'amp_to_amp_linking_enabled', '__return_true', 0 );
+
+			add_filter( 'comment_post_redirect', [ $this, 'filter_comment_post_redirect' ] );
+
+			// Amend the comments/respond links to go to non-AMP page when in legacy Reader mode.
+			if ( amp_is_legacy() ) {
+				add_filter( 'get_comments_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For get_comments_link().
+				add_filter( 'respond_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For comments_popup_link().
+			}
 		}
 	}
 
@@ -84,7 +113,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return string AMP URL.
 	 */
 	public function get_current_amp_url() {
-		$url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
+		$url = $this->paired_routing->add_endpoint( amp_get_current_url() );
 		$url = remove_query_arg( QueryVar::NOAMP, $url );
 		return $url;
 	}
@@ -141,10 +170,6 @@ final class MobileRedirection implements Service, Registerable {
 			if ( ! $js && $this->is_redirection_disabled_via_cookie() ) {
 				$this->set_mobile_redirection_disabled_cookie( false );
 			}
-
-			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
-			// A low priority is used so that sites can continue overriding this if they have done so.
-			add_filter( 'amp_to_amp_linking_enabled', '__return_true', 0 );
 
 			add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
 			add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
@@ -214,6 +239,7 @@ final class MobileRedirection implements Service, Registerable {
 			return false;
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__ -- Value is used only in pattern matching. Logic not used by default since requires amp_mobile_client_side_redirection filter opt-in.
 		$current_user_agent = wp_unslash( $_SERVER['HTTP_USER_AGENT'] );
 		$regex_regex        = sprintf( '#%s#', self::REGEX_REGEX );
 		foreach ( $this->get_mobile_user_agents() as $user_agent_pattern ) {
@@ -304,7 +330,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return bool True if disabled, false otherwise.
 	 */
 	public function is_redirection_disabled_via_query_param() {
-		return isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_MOBILE === wp_unslash( $_GET[ QueryVar::NOAMP ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_MOBILE === wp_unslash( $_GET[ QueryVar::NOAMP ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	}
 
 	/**
@@ -327,11 +353,13 @@ final class MobileRedirection implements Service, Registerable {
 			$value   = '1';
 			$expires = 0; // Time till expiry. Setting it to `0` means the cookie will only last for the current browser session.
 
+			// phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE -- Cookies not used by default. Requires amp_mobile_client_side_redirection filter opt-in
 			$_COOKIE[ self::DISABLED_STORAGE_KEY ] = $value;
 		} else {
 			$value   = null;
 			$expires = time() - YEAR_IN_SECONDS;
 
+			// phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE -- Cookies not used by default. Requires amp_mobile_client_side_redirection filter opt-in
 			unset( $_COOKIE[ self::DISABLED_STORAGE_KEY ] );
 		}
 
@@ -349,12 +377,14 @@ final class MobileRedirection implements Service, Registerable {
 		// addressed in PHP 7.3 (see <https://github.com/php/php-src/commit/5cb825df7251aeb28b297f071c35b227a3949f01>),
 		// which now allows setting the cookie attribute via an options array.
 		if ( 70300 <= PHP_VERSION_ID ) {
+			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie -- Cookies not used by default. Requires amp_mobile_client_side_redirection filter opt-in
 			setcookie(
 				self::DISABLED_STORAGE_KEY,
 				$value,
 				compact( 'expires', 'path', 'secure', 'httponly', 'samesite', 'domain' )
 			);
 		} else {
+			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie -- Cookies not used by default. Requires amp_mobile_client_side_redirection filter opt-in
 			setcookie(
 				self::DISABLED_STORAGE_KEY,
 				$value,
@@ -386,7 +416,63 @@ final class MobileRedirection implements Service, Registerable {
 
 		$source = preg_replace( '/\bAMP_MOBILE_REDIRECTION\b/', wp_json_encode( $exports ), $source );
 
-		printf( '<script>%s</script>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		if ( function_exists( 'wp_print_inline_script_tag' ) ) {
+			wp_print_inline_script_tag( $source );
+		} else {
+			echo $this->get_inline_script_tag( $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+	}
+
+	/**
+	 * Wraps inline JavaScript in `<script>` tag.
+	 *
+	 * This is copied from WordPress 5.7, the version in which it was introduced.
+	 *
+	 * @see wp_get_inline_script_tag()
+	 *
+	 * @param string $javascript Inline JavaScript code.
+	 * @param array  $attributes  Optional. Key-value pairs representing `<script>` tag attributes.
+	 * @return string String containing inline JavaScript code wrapped around `<script>` tag.
+	 */
+	private function get_inline_script_tag( $javascript, $attributes = [] ) {
+		if ( ! isset( $attributes['type'] ) && ! is_admin() && ! current_theme_supports( 'html5', 'script' ) ) {
+			$attributes['type'] = 'text/javascript';
+		}
+
+		/** This filter is documented in wp-includes/script-loader.php */
+		$attributes = apply_filters( 'wp_inline_script_attributes', $attributes, $javascript );
+
+		$javascript = "\n" . trim( $javascript, "\n\r " ) . "\n";
+
+		return sprintf( "<script%s>%s</script>\n", $this->sanitize_script_attributes( $attributes ), $javascript );
+	}
+
+	/**
+	 * Sanitizes an attributes array into an attributes string to be placed inside a `<script>` tag.
+	 *
+	 * This is copied from WordPress 5.7, the version in which it was introduced.
+	 *
+	 * @see wp_sanitize_script_attributes()
+	 *
+	 * @param array $attributes Key-value pairs representing `<script>` tag attributes.
+	 * @return string String made of sanitized `<script>` tag attributes.
+	 */
+	private function sanitize_script_attributes( $attributes ) {
+		$html5_script_support = ! is_admin() && ! current_theme_supports( 'html5', 'script' );
+		$attributes_string    = '';
+
+		// If HTML5 script tag is supported, only the attribute name is added
+		// to $attributes_string for entries with a boolean value, and that are true.
+		foreach ( $attributes as $attribute_name => $attribute_value ) {
+			if ( is_bool( $attribute_value ) ) {
+				if ( $attribute_value ) {
+					$attributes_string .= $html5_script_support ? sprintf( ' %1$s="%2$s"', esc_attr( $attribute_name ), esc_attr( $attribute_name ) ) : ' ' . $attribute_name;
+				}
+			} else {
+				$attributes_string .= sprintf( ' %1$s="%2$s"', esc_attr( $attribute_name ), esc_attr( $attribute_value ) );
+			}
+		}
+		return $attributes_string;
 	}
 
 	/**
@@ -399,6 +485,35 @@ final class MobileRedirection implements Service, Registerable {
 			'<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">',
 			esc_url( $this->get_current_amp_url() )
 		);
+	}
+
+	/**
+	 * Redirect to AMP page after submitting comment if the URL is on this site.
+	 *
+	 * This avoids the need for a secondary redirect after having been redirected to the non-AMP URL.
+	 *
+	 * @param string $url URL.
+	 * @return string Amended URL.
+	 */
+	public function filter_comment_post_redirect( $url ) {
+		if (
+			isset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] )
+			&&
+			wp_parse_url( home_url(), PHP_URL_HOST ) === wp_parse_url( $url, PHP_URL_HOST )
+		) {
+			$url = $this->paired_routing->add_endpoint( $url );
+		}
+		return $url;
+	}
+
+	/**
+	 * Add `?noamp=mobile` to a given URL.
+	 *
+	 * @param string $url URL.
+	 * @return string Amended URL.
+	 */
+	public function add_noamp_mobile_query_var( $url ) {
+		return add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $url );
 	}
 
 	/**
@@ -416,6 +531,17 @@ final class MobileRedirection implements Service, Registerable {
 			return;
 		}
 		$source = file_get_contents( AMP__DIR__ . '/assets/css/amp-mobile-version-switcher' . ( is_rtl() ? '-rtl' : '' ) . '.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+
+		if ( 'twentytwentyone' === get_template() ) {
+			// When on a non-AMP page and the mobile menu is open, the mobile version link is incorrectly shown at the
+			// top of the page. In that case, the mobile version link is hidden.
+			$source .= '
+				body.lock-scrolling > #amp-mobile-version-switcher {
+					display: none;
+				}
+			';
+		}
+
 		printf( '<style>%s</style>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
@@ -428,7 +554,7 @@ final class MobileRedirection implements Service, Registerable {
 		$is_amp = amp_is_request();
 		if ( $is_amp ) {
 			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
-			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
+			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $this->paired_routing->remove_endpoint( amp_get_current_url() ) );
 			$text = __( 'Exit mobile version', 'amp' );
 		} else {
 			$rel  = [ Attribute::REL_AMPHTML ];

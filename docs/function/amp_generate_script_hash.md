@@ -6,7 +6,7 @@ function amp_generate_script_hash( $script );
 
 Generate hash for inline amp-script.
 
-The sha384 hash used by amp-script is represented not as hexadecimal but as base64url, which is defined in RFC 4648 under section 5, &quot;Base 64 Encoding with URL and Filename Safe Alphabet&quot;. It is sometimes referred to as &quot;web safe&quot;.
+The sha384 hash used by amp-script is represented not as hexadecimal but as base64url, which is defined in RFC 4648 under section 5, "Base 64 Encoding with URL and Filename Safe Alphabet". It is sometimes referred to as "web safe".
 
 ### Arguments
 
@@ -18,7 +18,7 @@ The sha384 hash used by amp-script is represented not as hexadecimal but as base
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1926](../../includes/amp-helper-functions.php#L1926-L1937)
+:link: [includes/amp-helper-functions.php:1826](/includes/amp-helper-functions.php#L1826-L1837)
 
 <details>
 <summary>Show Code</summary>

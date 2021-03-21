@@ -158,7 +158,7 @@ final class ServerTiming implements Service, Registerable, Delayed {
 		return implode(
 			',',
 			array_map(
-				static function ( $event ) {
+				static function ( Event $event ) {
 					return $event->get_header_string();
 				},
 				$this->events

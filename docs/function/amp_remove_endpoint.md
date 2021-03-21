@@ -1,5 +1,7 @@
 ## Function `amp_remove_endpoint`
 
+> :warning: This function is deprecated: Use amp_remove_paired_endpoint() instead.
+
 ```php
 function amp_remove_endpoint( $url );
 ```
@@ -16,21 +18,14 @@ Remove the AMP endpoint (and query var) from a given URL.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:741](../../includes/amp-helper-functions.php#L741-L750)
+:link: [includes/amp-helper-functions.php:641](/includes/amp-helper-functions.php#L641-L643)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
 function amp_remove_endpoint( $url ) {
-
-	// Strip endpoint.
-	$url = preg_replace( ':/' . preg_quote( amp_get_slug(), ':' ) . '(?=/?(\?|#|$)):', '', $url );
-
-	// Strip query var.
-	$url = remove_query_arg( amp_get_slug(), $url );
-
-	return $url;
+	return amp_remove_paired_endpoint( $url );
 }
 ```
 

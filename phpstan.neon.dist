@@ -1,6 +1,15 @@
 includes:
 	# @see https://github.com/phpstan/phpstan-src/blob/b9f62d63f2deaa0a5e97f51073e41a422c48aa01/conf/bleedingEdge.neon
 	- phar://phpstan.phar/conf/bleedingEdge.neon
+services:
+	-
+		class: AmpProject\AmpWP\Tests\PhpStan\ServiceContainerDynamicReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
+	-
+		class: AmpProject\AmpWP\Tests\PhpStan\ServicesDynamicReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicStaticMethodReturnTypeExtension
 parameters:
 	level: 3
 	inferPrivatePropertyTypeFromConstructor: true
@@ -12,7 +21,6 @@ parameters:
 	autoload_files:
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/wordpress-defines.php
 		- %currentWorkingDirectory%/vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
-		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/php-cli-tools.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/wp-cli.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/pwa.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/twentyseventeen.php
@@ -27,3 +35,8 @@ parameters:
 	ignoreErrors:
 		# Uses func_get_args()
 		- '#^Function apply_filters(_ref_array)? invoked with [34567] parameters, 2 required\.$#'
+		# Setting src to false indicates a bundle of dependencies.
+		- '#^Property _WP_Dependency::\$src \(string\) does not accept false\.$#'
+	earlyTerminatingMethodCalls:
+		\WP_CLI:
+			- WP_CLI::error

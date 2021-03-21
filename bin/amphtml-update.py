@@ -8,8 +8,8 @@ A bash script, amphtml-update.sh, is provided to automatically run this script. 
 
 from within a Linux environment such as VVV.
 
-See the Updating Allowed Tags and Attributes section of the Contributing guide
-https://github.com/ampproject/amp-wp/blob/develop/contributing.md#updating-allowed-tags-and-attributes.
+See the Updating Allowed Tags and Attributes section of the Engineering Guidelines
+https://github.com/ampproject/amp-wp/wiki/Engineering-Guidelines#updating-allowed-tags-and-attributes.
 
 Then have fun sanitizing your AMP posts!
 """
@@ -78,6 +78,7 @@ def GenValidatorProtoascii(validator_directory, out_dir):
 
 	protoascii_segments = [
 		open(os.path.join(validator_directory, 'validator-main.protoascii')).read(),
+		open(os.path.join(validator_directory, 'validator-svg.protoascii')).read(),
 		open(os.path.join(validator_directory, 'validator-css.protoascii')).read()
 	]
 	extensions = glob.glob(os.path.join(validator_directory, '../extensions/*/validator-*.protoascii'))
@@ -416,7 +417,11 @@ def ParseRules(out_dir):
 				for val in list.tag:
 
 					# Skip tags specific to transformed AMP.
-					if val in ( 'I-AMPHTML-SIZER', ):
+					if 'I-AMPHTML-SIZER' == val:
+						continue
+
+					# The img tag is currently exclusively to transformed AMP, except as descendant of amp-story-player.
+					if 'IMG' == val and 'amp-story-player-allowed-descendants' != list.name:
 						continue
 
 					descendant_lists[list.name].append( val.lower() )
@@ -532,7 +537,7 @@ def GetTagRules(tag_spec):
 
 	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
 		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
-			matches = re.search( r'(amp-\S+) extension .js script', also_requires_tag_warning )
+			matches = re.search( r'(amp-\S+) extension( \.js)? script', also_requires_tag_warning )
 			if not matches:
 				raise Exception( 'Unexpected also_requires_tag_warning format: ' + also_requires_tag_warning )
 			requires_extension_list.add(matches.group(1))

@@ -12,7 +12,7 @@ Determine whether AMP is available for the current URL.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:405](../../includes/amp-helper-functions.php#L405-L543)
+:link: [includes/amp-helper-functions.php:332](/includes/amp-helper-functions.php#L332-L525)
 
 <details>
 <summary>Show Code</summary>
@@ -21,29 +21,84 @@ Determine whether AMP is available for the current URL.
 function amp_is_available() {
 	global $pagenow, $wp_query;
 
-	// Short-circuit for admin requests or requests to non-frontend pages.
-	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
+	// Short-circuit for cron, CLI, admin requests or requests to non-frontend pages.
+	if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) || is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php', 'repair.php' ], true ) ) {
 		return false;
 	}
 
-	$warn = function () {
-		static $warned = false;
-		if ( $warned ) {
+	$warn = static function () {
+		static $already_warned_sources = [];
+
+		try {
+			$likely_culprit_detector = Services::get( 'dev_tools.likely_culprit_detector' );
+			$closest_source          = $likely_culprit_detector->analyze_backtrace();
+		} catch ( InvalidService $e ) {
+			$closest_source = [
+				'type' => 'exception',
+				'name' => 'invalid_service',
+			];
+		}
+
+		$closest_source_identifier = $closest_source['type'] . ':' . $closest_source['name'];
+		if ( in_array( $closest_source_identifier, $already_warned_sources, true ) ) {
 			return;
 		}
+
 		$message = sprintf(
-			/* translators: %1$s: amp_is_available(), %2$s: amp_is_request(), %3$s: is_amp_endpoint(), %4$s: the current action, %5$s: the wp action, %6$s: the WP_Query class, %7$s: the amp_skip_post() function */
-			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly. WordPress is currently doing the "%4$s" action. Calling this function before the "%5$s" action means it will not have access to %6$s and the queried object to determine if it is an AMP response, thus neither the "%7$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
-			'amp_is_available()',
-			'amp_is_request()',
-			'is_amp_endpoint()',
-			current_action(),
-			'wp',
-			'WP_Query',
-			'amp_skip_post()'
+			/* translators: 1: amp_is_available() function, 2: amp_is_request() function, 3: is_amp_endpoint() function */
+			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly.', 'amp' ),
+			'`amp_is_available()`',
+			'`amp_is_request()`',
+			'`is_amp_endpoint()`'
 		);
+
+		$current_hook = current_action();
+		if ( $current_hook ) {
+			/* translators: placeholder is the current hook */
+			$message .= ' ' . sprintf(
+				'WordPress is currently doing the %s hook.',
+				'`' . $current_hook . '`'
+			);
+		} else {
+			$message .= ' ' . __( 'WordPress is not currently doing any hook.', 'amp' );
+		}
+
+		$message .= ' ' . sprintf(
+			/* translators: 1: the wp action, 2: the WP_Query class, 3: the amp_skip_post() function */
+			__( 'Calling this function before the %1$s action means it will not have access to %2$s and the queried object to determine if it is an AMP response, thus neither the %3$s filter nor the AMP enabled toggle will be considered.', 'amp' ),
+			'`wp`',
+			'`WP_Query`',
+			'`amp_skip_post()`'
+		);
+
+		if ( ! empty( $closest_source['type'] ) && ! empty( $closest_source['name'] ) ) {
+			$translated_string = false;
+
+			switch ( $closest_source['type'] ) {
+				case 'plugin':
+					/* translators: placeholder is the slug of the plugin */
+					$translated_string = __( 'It appears the plugin with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'mu-plugin':
+					/* translators: placeholder is the slug of the must-use plugin */
+					$translated_string = __( 'It appears the must-use plugin with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'theme':
+					/* translators: placeholder is the slug of the theme */
+					$translated_string = __( 'It appears the theme with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'exception':
+					$translated_string = __( 'The function was called too early (before the plugins_loaded action) to determine the plugin source.', 'amp' );
+					break;
+			}
+
+			if ( $translated_string ) {
+				$message .= ' ' . sprintf( $translated_string, '`' . $closest_source['name'] . '`' );
+			}
+		}
+
 		_doing_it_wrong( 'amp_is_available', esc_html( $message ), '2.0.0' );
-		$warned = true;
+		$already_warned_sources[] = $closest_source_identifier;
 	};
 
 	// Make sure the parse_request action has triggered before trying to read from the REST_REQUEST constant, which is set during rest_api_loaded().

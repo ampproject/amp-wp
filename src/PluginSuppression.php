@@ -13,6 +13,7 @@ use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\DevTools\CallbackReflection;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Block_Type_Registry;
@@ -38,12 +39,42 @@ final class PluginSuppression implements Service, Registerable {
 	private $plugin_registry;
 
 	/**
+	 * Callback reflector to use.
+	 *
+	 * @var CallbackReflection
+	 */
+	private $callback_reflection;
+
+	/**
+	 * Paired Routing.
+	 *
+	 * @var PairedRouting
+	 */
+	private $paired_routing;
+
+	/**
+	 * Original render callbacks for blocks.
+	 *
+	 * Populated via the `register_block_type_args` filter at the moment the block is first registered. This is useful
+	 * to detect a suppressed plugin's blocks which had their `render_callback` wrapped by another function before
+	 * plugin suppression is started at the `wp` action.
+	 *
+	 * @see gutenberg_current_parsed_block_tracking()
+	 * @var array
+	 */
+	private $original_block_render_callbacks = [];
+
+	/**
 	 * Instantiate the plugin suppression service.
 	 *
-	 * @param PluginRegistry $plugin_registry Plugin registry to use.
+	 * @param PluginRegistry     $plugin_registry     Plugin registry to use.
+	 * @param CallbackReflection $callback_reflection Callback reflector to use.
+	 * @param PairedRouting      $paired_routing      Paired routing service to use.
 	 */
-	public function __construct( PluginRegistry $plugin_registry ) {
-		$this->plugin_registry = $plugin_registry;
+	public function __construct( PluginRegistry $plugin_registry, CallbackReflection $callback_reflection, PairedRouting $paired_routing ) {
+		$this->plugin_registry     = $plugin_registry;
+		$this->callback_reflection = $callback_reflection;
+		$this->paired_routing      = $paired_routing;
 	}
 
 	/**
@@ -53,6 +84,26 @@ final class PluginSuppression implements Service, Registerable {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
+		add_filter(
+			'register_block_type_args',
+			function ( $props, $block_name ) {
+				if ( isset( $props['render_callback'] ) ) {
+					$this->original_block_render_callbacks[ $block_name ] = $props['render_callback'];
+				}
+				return $props;
+			},
+			~PHP_INT_MAX,
+			2
+		);
+
+		// Priority 8 needed to run before ReaderThemeLoader::override_theme() at priority 9.
+		add_action( 'plugins_loaded', [ $this, 'initialize' ], 8 );
+	}
+
+	/**
+	 * Initialize.
+	 */
+	public function initialize() {
 		// When a Reader theme is selected and an AMP request is being made, start suppressing as early as possible.
 		// This can be done because we know it is an AMP page due to the query parameter, but it also _has_ to be done
 		// specifically for the case of accessing the AMP Customizer (in which customize.php is requested with the query
@@ -60,6 +111,7 @@ final class PluginSuppression implements Service, Registerable {
 		// could be done early for Transitional mode as well since a query parameter is also used for frontend requests
 		// but there is no similar need to suppress the registration of Customizer controls in Transitional mode since
 		// there is no separate Customizer for AMP in Transitional mode (or legacy Reader mode).
+		// @todo This check could be replaced with ( ! amp_is_canonical() && $this->paired_routing->has_endpoint() ).
 		if ( $this->is_reader_theme_request() ) {
 			$this->suppress_plugins();
 		} else {
@@ -82,7 +134,7 @@ final class PluginSuppression implements Service, Registerable {
 			&&
 			ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
 			&&
-			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$this->paired_routing->has_endpoint()
 		);
 	}
 
@@ -416,11 +468,22 @@ final class PluginSuppression implements Service, Registerable {
 		$registry = WP_Block_Type_Registry::get_instance();
 
 		foreach ( $registry->get_all_registered() as $block_type ) {
-			if ( ! $block_type->is_dynamic() || ! $this->is_callback_plugin_suppressed( $block_type->render_callback, $suppressed_plugins ) ) {
+			if ( ! $block_type->is_dynamic() ) {
 				continue;
 			}
-			unset( $block_type->script, $block_type->style );
-			$block_type->render_callback = '__return_empty_string';
+
+			if (
+				$this->is_callback_plugin_suppressed( $block_type->render_callback, $suppressed_plugins )
+				||
+				(
+					isset( $this->original_block_render_callbacks[ $block_type->name ] )
+					&&
+					$this->is_callback_plugin_suppressed( $this->original_block_render_callbacks[ $block_type->name ], $suppressed_plugins )
+				)
+			) {
+				unset( $block_type->script, $block_type->style );
+				$block_type->render_callback = '__return_empty_string';
+			}
 		}
 	}
 
@@ -473,7 +536,7 @@ final class PluginSuppression implements Service, Registerable {
 	 * @return bool Whether from suppressed plugin.
 	 */
 	private function is_callback_plugin_suppressed( $callback, $suppressed_plugins ) {
-		$source = AMP_Validation_Manager::get_source( $callback );
+		$source = $this->callback_reflection->get_source( $callback );
 		return (
 			isset( $source['type'], $source['name'] ) &&
 			'plugin' === $source['type'] &&

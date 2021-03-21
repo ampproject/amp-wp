@@ -42,22 +42,16 @@ class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
 		];
 
 		$data = [
-			'poll.fm'          => [
+			'poll.fm'        => [
 				'https://poll.fm/7012505',
 				'<p><iframe title="Which design do you prefer?" src="https://poll.fm/7012505/embed" frameborder="0" class="cs-iframe-embed"></iframe></p>',
 				$poll_response,
 			],
 
-			'polldaddy_poll'   => [
+			'polldaddy_poll' => [
 				'https://polldaddy.com/poll/7012505/',
 				'<p><iframe title="Which design do you prefer?" src="https://poll.fm/7012505/embed" frameborder="0" class="cs-iframe-embed"></iframe></p>',
 				$poll_response,
-			],
-
-			'polldaddy_survey' => [
-				'https://rydk.polldaddy.com/s/test-survey',
-				'<p><a href="https://rydk.polldaddy.com/s/test-survey" target="_blank">View Survey</a></p>',
-				$survey_response,
 			],
 		];
 

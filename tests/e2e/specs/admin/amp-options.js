@@ -1,14 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage } from '@wordpress/e2e-test-utils';
+import { visitAdminPage, activateTheme, installTheme } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
-import { completeWizard, cleanUpSettings, clickMode } from '../../utils/onboarding-wizard-utils';
-import { installTheme } from '../../utils/install-theme';
-import { activateTheme } from '../../utils/activate-theme';
+import { completeWizard, cleanUpSettings, clickMode, scrollToElement } from '../../utils/onboarding-wizard-utils';
 
 describe( 'AMP settings screen newly activated', () => {
 	beforeEach( async () => {
@@ -55,8 +53,9 @@ describe( 'Settings screen when reader theme is active theme', () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
 		await clickMode( 'reader' );
-		await expect( page ).toClick( '#template-mode-reader-container .components-panel__body-toggle' );
+		await scrollToElement( { selector: '#template-mode-reader-container .components-panel__body-toggle', click: true } );
 
+		await scrollToElement( { selector: '#reader-themes .amp-notice__body' } );
 		await expect( page ).toMatchElement( '.amp-notice__body', { text: /^Your active theme/ } );
 
 		await activateTheme( 'twentytwenty' );
@@ -99,6 +98,42 @@ describe( 'AMP Settings Screen after wizard', () => {
 				'#wpadminbar',
 			],
 		} );
+	} );
+} );
+
+describe( 'Saving', () => {
+	beforeEach( async () => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+	} );
+
+	afterEach( async () => {
+		await cleanUpSettings();
+	} );
+
+	it( 'allows saving', async () => {
+		const testSave = async () => {
+			await expect( page ).toClick( 'button', { text: 'Save' } );
+			await expect( page ).toMatchElement( 'button[disabled].is-busy', { text: 'Saving' } );
+			await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
+			await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
+		};
+
+		// Save button exists.
+		await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
+
+		// Toggle transistional mode.
+		await expect( page ).toClick( '#template-mode-transitional' );
+
+		// Button should be enabled.
+		await expect( page ).toMatchElement( 'button:not([disabled])', { text: 'Save' } );
+
+		await testSave();
+
+		// Success notice should disappear on additional change.
+		await expect( page ).toClick( '#template-mode-standard' );
+		await expect( page ).not.toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
+
+		await testSave();
 	} );
 } );
 

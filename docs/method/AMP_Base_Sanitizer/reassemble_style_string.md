@@ -16,7 +16,7 @@ Reassemble a style string that can be used in a &#039;style&#039; attribute.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:764](../../includes/sanitizers/class-amp-base-sanitizer.php#L764-L783)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:791](/includes/sanitizers/class-amp-base-sanitizer.php#L791-L810)
 
 <details>
 <summary>Show Code</summary>

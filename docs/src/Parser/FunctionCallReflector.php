@@ -46,7 +46,7 @@ final class FunctionCallReflector extends BaseReflector {
 
 		if ( $short_name instanceof ArrayDimFetch ) {
 			$var = $short_name->var->name;
-			$dim = $short_name->dim->name
+			$dim = isset( $short_name->dim->name )
 				? $short_name->dim->name->parts[0]
 				: false;
 

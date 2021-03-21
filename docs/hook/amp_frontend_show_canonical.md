@@ -1,10 +1,19 @@
-## Hook `amp_frontend_show_canonical`
+## Filter `amp_frontend_show_canonical`
 
-> :warning: This function is deprecated: Remove amp_add_amphtml_link() call on wp_head action instead.
+> :warning: This filter is deprecated: Remove amp_add_amphtml_link() call on wp_head action instead.
+
+```php
+apply_filters( 'amp_frontend_show_canonical' );
+```
+
+Filters whether to show the amphtml link on the frontend.
+
+This is deprecated since the name was wrong and the use case is not clear. To remove this from being printed, instead of using the filter you can rather do:
+     add_action( &#039;template_redirect&#039;, static function () {         remove_action( &#039;wp_head&#039;, &#039;amp_add_amphtml_link&#039; );     } );
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:776](../../includes/amp-helper-functions.php#L776-L789)
+:link: [includes/amp-helper-functions.php:669](/includes/amp-helper-functions.php#L669-L682)
 
 <details>
 <summary>Show Code</summary>

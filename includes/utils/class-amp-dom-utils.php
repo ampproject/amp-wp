@@ -5,7 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\Tag;
 
 /**
@@ -13,7 +15,7 @@ use AmpProject\Tag;
  *
  * Functionality to simplify working with Dom\Documents and DOMElements.
  *
- * @internal
+ * @since 0.2
  */
 class AMP_DOM_Utils {
 
@@ -65,7 +67,14 @@ class AMP_DOM_Utils {
 	 */
 	public static function get_dom( $document, $encoding = null ) {
 		_deprecated_function( __METHOD__, '1.5.0', 'AmpProject\Dom\Document::fromHtml()' );
-		return Document::fromHtml( $document, $encoding );
+
+		$options = Options::DEFAULTS;
+
+		if ( null !== $encoding ) {
+			$options[ Document\Option::ENCODING ] = $encoding;
+		}
+
+		return Document::fromHtml( $document, $options );
 	}
 
 	/**
@@ -172,7 +181,10 @@ class AMP_DOM_Utils {
 		 */
 		$document = "<html><head></head><body>{$content}</body></html>";
 
-		return Document::fromHtml( $document, $encoding );
+		$options                              = Options::DEFAULTS;
+		$options[ Document\Option::ENCODING ] = $encoding;
+
+		return Document::fromHtml( $document, $options );
 	}
 
 	/**
@@ -375,8 +387,8 @@ class AMP_DOM_Utils {
 	 *
 	 * @deprecated Use AmpProject\Dom\Document::getElementId() instead.
 	 *
-	 * @param DOMElement $element Element to get the ID for.
-	 * @param string     $prefix  Optional. Defaults to 'amp-wp-id'.
+	 * @param DOMElement|Element $element Element to get the ID for.
+	 * @param string             $prefix  Optional. Defaults to 'amp-wp-id'.
 	 * @return string ID to use.
 	 */
 	public static function get_element_id( $element, $prefix = 'amp-wp-id' ) {

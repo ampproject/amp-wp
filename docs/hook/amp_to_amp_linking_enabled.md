@@ -1,8 +1,18 @@
-## Hook `amp_to_amp_linking_enabled`
+## Filter `amp_to_amp_linking_enabled`
+
+```php
+apply_filters( 'amp_to_amp_linking_enabled', $amp_to_amp_linking_enabled );
+```
+
+Filters whether AMP-to-AMP linking should be enabled.
+
+### Arguments
+
+* `bool $amp_to_amp_linking_enabled` - Whether AMP-to-AMP linking should be enabled.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1457](../../includes/amp-helper-functions.php#L1457-L1460)
+:link: [includes/amp-helper-functions.php:1354](/includes/amp-helper-functions.php#L1354-L1357)
 
 <details>
 <summary>Show Code</summary>

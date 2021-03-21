@@ -76,10 +76,11 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo Should we consider just eliminating the .wp-block-embed__wrapper element since unnecessary?
 			// For visual parity with blocks in non-AMP pages, override the oEmbed's natural responsive dimensions with the aspect ratio specified in the wp-embed-aspect-* class name.
 			if ( $responsive_width && $responsive_height ) {
-				$amp_element = $this->dom->xpath->query( './div[ contains( @class, "wp-block-embed__wrapper" ) ]/*[ @layout = "responsive" ]', $node )->item( 0 );
+				$amp_element = $this->dom->xpath->query( './div[ contains( @class, "wp-block-embed__wrapper" ) ]/*[ @layout = "responsive" or @layout = "intrinsic"  ]', $node )->item( 0 );
 				if ( $amp_element instanceof DOMElement ) {
 					$amp_element->setAttribute( 'width', $responsive_width );
 					$amp_element->setAttribute( 'height', $responsive_height );
+					$amp_element->setAttribute( 'layout', 'responsive' );
 				}
 			}
 

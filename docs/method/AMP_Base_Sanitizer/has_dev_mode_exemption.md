@@ -1,6 +1,6 @@
 ## Method `AMP_Base_Sanitizer::has_dev_mode_exemption()`
 
-> :warning: This function is deprecated: Use AmpProject\DevMode::hasExemptionForNode( $node ) instead.
+> :warning: This method is deprecated: Use AmpProject\DevMode::hasExemptionForNode( $node ) instead.
 
 ```php
 protected function has_dev_mode_exemption( \DOMNode $node );
@@ -18,7 +18,7 @@ Check whether a node is exempt from validation during dev mode.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:436](../../includes/sanitizers/class-amp-base-sanitizer.php#L436-L439)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:437](/includes/sanitizers/class-amp-base-sanitizer.php#L437-L440)
 
 <details>
 <summary>Show Code</summary>

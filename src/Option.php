@@ -44,6 +44,53 @@ interface Option {
 	const DISABLE_CSS_TRANSIENT_CACHING = 'amp_css_transient_monitor_disable_caching';
 
 	/**
+	 * Indicate the structure for paired AMP URLs.
+	 *
+	 * Default value: 'query_var'
+	 *
+	 * @var string
+	 */
+	const PAIRED_URL_STRUCTURE = 'paired_url_structure';
+
+	/**
+	 * Query var paired URL structure.
+	 *
+	 * This is the default, where all AMP URLs end in `?amp=1`.
+	 *
+	 * @var string
+	 */
+	const PAIRED_URL_STRUCTURE_QUERY_VAR = 'query_var';
+
+	/**
+	 * Path suffix paired URL structure.
+	 *
+	 * This adds `/amp/` to all URLs, even pages and archives. This is a popular option for those who feel query params
+	 * are bad for SEO.
+	 *
+	 * @var string
+	 */
+	const PAIRED_URL_STRUCTURE_PATH_SUFFIX = 'path_suffix';
+
+	/**
+	 * Legacy transitional paired URL structure.
+	 *
+	 * This involves using `?amp` for all paired AMP URLs.
+	 *
+	 * @var string
+	 */
+	const PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL = 'legacy_transitional';
+
+	/**
+	 * Legacy transitional paired URL structure.
+	 *
+	 * This involves using `/amp/` for all non-hierarchical post URLs which lack endpoints or query vars, or else using
+	 * the same `?amp` as used by legacy transitional.
+	 *
+	 * @var string
+	 */
+	const PAIRED_URL_STRUCTURE_LEGACY_READER = 'legacy_reader';
+
+	/**
 	 * Redirect mobile visitors to the AMP version of a page when the site is in Transitional or Reader mode.
 	 *
 	 * Default value: false

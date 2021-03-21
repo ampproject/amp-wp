@@ -39,7 +39,7 @@ const OBSERVED_CONSOLE_MESSAGE_TYPES = {
 const pageEvents = [];
 
 // The Jest timeout is increased because these tests are a bit slow
-jest.setTimeout( PUPPETEER_TIMEOUT || 100000 );
+jest.setTimeout( PUPPETEER_TIMEOUT || 300000 );
 
 /**
  * Adds an event listener to the page to handle additions of page event
@@ -200,7 +200,7 @@ beforeAll( async () => {
 	observeConsoleLogging();
 	await setBrowserViewport( 'large' );
 	await page.setDefaultNavigationTimeout( 10000 );
-	await page.setDefaultTimeout( 3000 );
+	await page.setDefaultTimeout( 10000 );
 } );
 
 // eslint-disable-next-line jest/require-top-level-describe

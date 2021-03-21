@@ -5,7 +5,6 @@ namespace AmpProject\AmpWP\Tests;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -15,10 +14,9 @@ use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use WP_Customize_Manager;
 use WP_Customize_Panel;
 use WP_Theme;
-use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\ReaderThemeLoader */
-final class ReaderThemeLoaderTest extends WP_UnitTestCase {
+final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility, LoadsCoreThemes;
 
@@ -27,7 +25,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 
 	public function setUp() {
 		parent::setUp();
-		$this->instance = new ReaderThemeLoader();
+		$this->instance = $this->injector->make( ReaderThemeLoader::class );
 
 		$this->register_core_themes();
 	}
@@ -59,19 +57,10 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertTrue( $this->instance->is_enabled() );
 		$this->assertNotEquals( get_template(), $reader_theme_slug );
 
-		$_GET[ amp_get_slug() ] = true;
+		set_query_var( amp_get_slug(), 1 );
 		$this->instance->override_theme();
 		$this->assertEquals( get_template(), $reader_theme_slug );
 		$this->assertTrue( $this->instance->is_enabled() );
-	}
-
-	/** @covers ::is_amp_request() */
-	public function test_is_amp_request() {
-		$_GET[ amp_get_slug() ] = '1';
-		$this->assertTrue( $this->instance->is_amp_request() );
-
-		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$this->assertFalse( $this->instance->is_amp_request() );
 	}
 
 	public function test__construct() {
@@ -98,12 +87,17 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		switch_theme( $active_theme_slug );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
+		$this->assertEquals( $active_theme_slug, get_stylesheet() );
+		$this->assertEquals( $reader_theme_slug, $this->instance->get_reader_theme()->get_stylesheet() );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
-		$themes = $this->instance->filter_wp_prepare_themes_to_indicate_reader_theme( wp_prepare_themes_for_js() );
+		// Note that this is added via filter and not called directly because the filtered value is keyed by theme slug,
+		// but the return value of wp_prepare_themes_for_js() is keyed with numeric indices.
+		$this->instance->register(); // This adds a `wp_prepare_themes_for_js` filter.
+		$themes = wp_prepare_themes_for_js();
 		$this->assertEquals( $active_theme_slug, $themes[0]['id'] );
 		$this->assertStringNotContains( 'AMP', $themes[0]['description'] );
-		$this->assertArrayHasKey( 'delete', $themes[0]['actions'] );
+		$this->assertArrayHasKey( 'delete', $themes[0]['actions'], 'The delete key is expected even though the theme is active because the delete option is hidden via the JS template.' );
 		$this->assertStringNotContains( amp_get_slug() . '=', $themes[0]['actions']['customize'] );
 		$this->assertArrayNotHasKey( 'ampActiveReaderTheme', $themes[0] );
 		$this->assertArrayNotHasKey( 'ampReaderThemeNotice', $themes[0] );
@@ -117,6 +111,15 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 
 	/** @covers ::inject_theme_single_template_modifications() */
 	public function test_inject_theme_single_template_modifications() {
+		$active_theme_slug = 'twentytwenty';
+		$reader_theme_slug = 'twentynineteen';
+		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
+			$this->markTestSkipped();
+		}
+		switch_theme( $active_theme_slug );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
+
 		$output = get_echo( [ $this->instance, 'inject_theme_single_template_modifications' ] );
 		$this->assertStringContains( '<script>', $output );
 	}
@@ -178,7 +181,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertEquals( 'Twenty Twenty', get_option( 'current_theme' ) );
 		$this->assertFalse( has_filter( 'sidebars_widgets' ) );
 		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
-		$_GET[ amp_get_slug() ] = 1;
+		set_query_var( amp_get_slug(), 1 );
 		$this->instance->override_theme();
 		$this->assertTrue( $this->instance->is_theme_overridden() );
 		$active_theme = $this->instance->get_active_theme();
@@ -201,14 +204,19 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 	/** @covers ::disable_widgets() */
 	public function test_disable_widgets() {
 		remove_all_filters( 'sidebars_widgets' );
+		remove_filter( 'customize_loaded_components', 'gutenberg_remove_widgets_panel' ); // Added in Gutenberg v8.9.0.
+		add_theme_support( 'widgets-block-editor' );
+
 		$this->assertNotEmpty( wp_get_sidebars_widgets() );
 		$this->assertContains( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
+		$this->assertTrue( current_theme_supports( 'widgets-block-editor' ) );
 
 		$this->instance->disable_widgets();
 
 		$this->assertTrue( has_filter( 'sidebars_widgets' ) );
 		$this->assertEquals( [], wp_get_sidebars_widgets() );
 		$this->assertNotContains( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
+		$this->assertFalse( current_theme_supports( 'widgets-block-editor' ) );
 	}
 
 	/** @covers ::customize_previewable_devices() */

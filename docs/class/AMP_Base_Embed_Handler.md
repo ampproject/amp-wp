@@ -9,9 +9,12 @@ Class AMP_Base_Embed_Handler
 * [`__construct`](../method/AMP_Base_Embed_Handler/__construct.md) - Constructor.
 * [`get_scripts`](../method/AMP_Base_Embed_Handler/get_scripts.md) - Get mapping of AMP component names to AMP script URLs.
 * [`match_element_attributes`](../method/AMP_Base_Embed_Handler/match_element_attributes.md) - Get regex pattern for matching HTML attributes from a given tag name.
+* [`get_child_elements`](../method/AMP_Base_Embed_Handler/get_child_elements.md) - Get all child elements of the specified element.
+* [`unwrap_p_element`](../method/AMP_Base_Embed_Handler/unwrap_p_element.md) - Replace an element&#039;s parent with itself if the parent is a &lt;p&gt; tag which has no attributes and has no other children.
+* [`maybe_remove_script_sibling`](../method/AMP_Base_Embed_Handler/maybe_remove_script_sibling.md) - Removes the node&#039;s nearest `&lt;script&gt;` sibling with a `src` attribute containing the base `src` URL provided.
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:15](../../includes/embeds/class-amp-base-embed-handler.php#L15-L112)
+:link: [includes/embeds/class-amp-base-embed-handler.php:17](/includes/embeds/class-amp-base-embed-handler.php#L17-L203)
 
 <details>
 <summary>Show Code</summary>
@@ -102,7 +105,7 @@ abstract class AMP_Base_Embed_Handler {
 			implode(
 				'',
 				array_map(
-					function ( $attr_name ) {
+					static function ( $attr_name ) {
 						return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>[^"]+)")?', preg_quote( $attr_name, '/' ) );
 					},
 					$attribute_names
@@ -113,6 +116,95 @@ abstract class AMP_Base_Embed_Handler {
 			return null;
 		}
 		return wp_array_slice_assoc( $matches, $attribute_names );
+	}
+
+	/**
+	 * Get all child elements of the specified element.
+	 *
+	 * @since 2.0.6
+	 *
+	 * @param DOMElement $node Element.
+	 * @return DOMElement[] Array of child elements for specified element.
+	 */
+	protected function get_child_elements( DOMElement $node ) {
+		return array_filter(
+			iterator_to_array( $node->childNodes ),
+			static function ( DOMNode $child ) {
+				return $child instanceof DOMElement;
+			}
+		);
+	}
+
+	/**
+	 * Replace an element's parent with itself if the parent is a <p> tag which has no attributes and has no other children.
+	 *
+	 * This usually happens while `wpautop()` processes the element.
+	 *
+	 * @since 2.0.6
+	 * @see AMP_Tag_And_Attribute_Sanitizer::remove_node()
+	 *
+	 * @param DOMElement $node Node.
+	 */
+	protected function unwrap_p_element( DOMElement $node ) {
+		$parent_node = $node->parentNode;
+		if (
+			$parent_node instanceof DOMElement
+			&&
+			'p' === $parent_node->tagName
+			&&
+			false === $parent_node->hasAttributes()
+			&&
+			1 === count( $this->get_child_elements( $parent_node ) )
+		) {
+			$parent_node->parentNode->replaceChild( $node, $parent_node );
+		}
+	}
+
+	/**
+	 * Removes the node's nearest `<script>` sibling with a `src` attribute containing the base `src` URL provided.
+	 *
+	 * @since 2.1
+	 *
+	 * @param DOMElement $node           The DOMNode to whose sibling is the script to be removed.
+	 * @param callable   $match_callback Callback which is passed the script element to determine if it is a match.
+	 */
+	protected function maybe_remove_script_sibling( DOMElement $node, callable $match_callback ) {
+		$next_element_sibling = $node->nextSibling;
+		while ( $next_element_sibling && ! $next_element_sibling instanceof DOMElement ) {
+			$next_element_sibling = $next_element_sibling->nextSibling;
+		}
+		if ( ! $next_element_sibling instanceof DOMElement ) {
+			return;
+		}
+
+		// Handle case where script is immediately following.
+		if ( Tag::SCRIPT === $next_element_sibling->tagName && $match_callback( $next_element_sibling ) ) {
+			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+			return;
+		}
+
+		// Handle case where script is wrapped in paragraph by wpautop.
+		if ( 'p' === $next_element_sibling->tagName ) {
+			/** @var DOMElement[] $children_elements */
+			$children_elements = array_values(
+				array_filter(
+					iterator_to_array( $next_element_sibling->childNodes ),
+					static function ( DOMNode $child ) {
+						return $child instanceof DOMElement;
+					}
+				)
+			);
+
+			if (
+				1 === count( $children_elements )
+				&&
+				Tag::SCRIPT === $children_elements[0]->tagName
+				&&
+				$match_callback( $children_elements[0] )
+			) {
+				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+			}
+		}
 	}
 }
 ```

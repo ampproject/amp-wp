@@ -986,6 +986,12 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			[ 'details', 'delete' ],
 			array_keys( $filtered_actions )
 		);
+
+		$pagenow = 'post.php';
+		$actions = AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, get_term( $term_this_taxonomy ) );
+		$this->assertTrue( array_key_exists( 'copy', $actions ) );
+		$this->assertStringContains( 'Copy to clipboard', $actions['copy'] );
+
 	}
 
 	/**
@@ -1002,10 +1008,10 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
 		$expected_submenu = [
-			'Error Index',
+			'Error Index <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>',
 			AMP_Validation_Manager::VALIDATE_CAPABILITY,
 			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_validated_url',
-			'Error Index',
+			'Error Index <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>',
 		];
 		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );
@@ -1520,5 +1526,57 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			'type'            => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			'node_type'       => XML_ELEMENT_NODE,
 		];
+	}
+
+	/**
+	 * Test get_error_details_json.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::get_error_details_json()
+	 */
+	public function test_get_error_details_json() {
+		$error            = $this->get_mock_error();
+		$error['sources'] = [
+			[
+				'type' => 'plugin',
+				'name' => 'bar',
+			],
+		];
+
+		$post_id         = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
+		$GLOBALS['post'] = get_post( $post_id );
+		$errors          = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $GLOBALS['post'] );
+
+		AMP_Validation_Error_Taxonomy::reset_validation_error_row_index();
+		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $errors[0]['term'] ), true );
+
+		// Verify the name of the node type is used instead of its ID.
+		$this->assertEquals( 'ELEMENT', $result['node_type'] );
+		// Verify the status of the error is correctly set.
+		$this->assertEquals( true, $result['removed'] );
+		$this->assertEquals( false, $result['reviewed'] );
+
+		unset( $error['node_type'], $result['node_type'], $result['removed'], $result['reviewed'] );
+		// Verify the other contents of the stored validation error (including sources) are retrieved.
+		$this->assertEquals( $error, $result );
+
+		$error = [
+			'node_type' => XML_ATTRIBUTE_NODE,
+		];
+
+		add_filter( 'amp_validation_error_sanitized', '__return_false' );
+		$post_id         = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
+		$GLOBALS['post'] = get_post( $post_id );
+		$errors          = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $GLOBALS['post'] );
+
+		AMP_Validation_Error_Taxonomy::reset_validation_error_row_index();
+		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $errors[0]['term'] ), true );
+
+		// Verify the name of the node type is used instead of its ID.
+		$this->assertEquals( 'ATTRIBUTE', $result['node_type'] );
+		// Verify the status of the error is correctly set.
+		$this->assertEquals( false, $result['removed'] );
+		$this->assertEquals( true, $result['reviewed'] );
+
+		unset( $GLOBALS['post'] );
 	}
 }

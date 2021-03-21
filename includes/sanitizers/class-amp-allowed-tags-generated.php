@@ -15,8 +15,8 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 1060;
-	private static $minimum_validator_revision_required = 474;
+	private static $spec_file_revision = 1162;
+	private static $minimum_validator_revision_required = 475;
 
 	private static $descendant_tag_lists = array(
 		'amp-mega-menu-allowed-descendants' => array(
@@ -54,6 +54,7 @@ class AMP_Allowed_Tags_Generated {
 			'p',
 			'path',
 			'section',
+			'select',
 			'span',
 			'strike',
 			'strong',
@@ -70,6 +71,7 @@ class AMP_Allowed_Tags_Generated {
 			'tr',
 			'u',
 			'ul',
+			'use',
 		),
 		'amp-nested-menu-allowed-descendants' => array(
 			'a',
@@ -102,6 +104,7 @@ class AMP_Allowed_Tags_Generated {
 			'p',
 			'path',
 			'section',
+			'select',
 			'span',
 			'strike',
 			'strong',
@@ -118,6 +121,7 @@ class AMP_Allowed_Tags_Generated {
 			'tr',
 			'u',
 			'ul',
+			'use',
 		),
 		'amp-story-bookend-allowed-descendants' => array(
 			'script',
@@ -242,7 +246,6 @@ class AMP_Allowed_Tags_Generated {
 			'amp-fit-text',
 			'amp-font',
 			'amp-gist',
-			'amp-google-vrview-image',
 			'amp-img',
 			'amp-install-serviceworker',
 			'amp-list',
@@ -250,6 +253,12 @@ class AMP_Allowed_Tags_Generated {
 			'amp-pixel',
 			'amp-state',
 			'amp-story-360',
+			'amp-story-auto-analytics',
+			'amp-story-interactive-binary-poll',
+			'amp-story-interactive-poll',
+			'amp-story-interactive-quiz',
+			'amp-story-interactive-results',
+			'amp-story-panning-media',
 			'amp-timeago',
 			'amp-twitter',
 			'amp-video',
@@ -396,7 +405,6 @@ class AMP_Allowed_Tags_Generated {
 			'amp-gfycat',
 			'amp-gist',
 			'amp-google-document-embed',
-			'amp-google-vrview-image',
 			'amp-hulu',
 			'amp-ima-video',
 			'amp-image-slider',
@@ -546,6 +554,14 @@ class AMP_Allowed_Tags_Generated {
 			'view',
 			'vkern',
 			'wbr',
+		),
+		'amp-story-player-allowed-descendants' => array(
+			'a',
+			'span',
+			'img',
+		),
+		'amp-story-social-share-allowed-descendants' => array(
+			'script',
 		),
 	);
 
@@ -808,6 +824,8 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'alt' => array(),
+					'always-serve-npa' => array(),
+					'block-rtc' => array(),
 					'json' => array(),
 					'media' => array(),
 					'noloading' => array(
@@ -823,6 +841,11 @@ class AMP_Allowed_Tags_Generated {
 							'protocol' => array(
 								'https',
 							),
+						),
+					),
+					'sticky' => array(
+						'value' => array(
+							'',
 						),
 					),
 					'template' => array(),
@@ -903,6 +926,8 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'alt' => array(),
+					'always-serve-npa' => array(),
+					'block-rtc' => array(),
 					'data-multi-size' => array(
 						'dispatch_key' => 2,
 						'mandatory' => true,
@@ -1467,6 +1492,7 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'prefetch' => array(),
 					'query' => array(),
 					'src' => array(
 						'value_url' => array(
@@ -1511,6 +1537,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'auto-advance-loops' => array(
 						'value_regex' => '([^,]+\\s+(\\d+),\\s*)*(\\d+)',
+					),
+					'controls' => array(
+						'value_regex' => '([^,]+\\s+(always|auto|never),\\s*)*(always|auto|never)',
 					),
 					'data-amp-bind-advance-count' => array(),
 					'data-amp-bind-auto-advance' => array(),
@@ -1590,6 +1619,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'auto-advance-loops' => array(
 						'value_regex' => '([^,]+\\s+(\\d+),\\s*)*(\\d+)',
+					),
+					'controls' => array(
+						'value_regex' => '([^,]+\\s+(always|auto|never),\\s*)*(always|auto|never)',
 					),
 					'data-amp-bind-advance-count' => array(),
 					'data-amp-bind-auto-advance' => array(),
@@ -1744,8 +1776,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'renderer' => array(
 						'value_casei' => array(
-							'svg',
+							'canvas',
 							'html',
+							'svg',
 						),
 					),
 					'src' => array(
@@ -2257,6 +2290,11 @@ class AMP_Allowed_Tags_Generated {
 							'hours',
 							'minutes',
 							'seconds',
+						),
+					),
+					'data-count-up' => array(
+						'value' => array(
+							'',
 						),
 					),
 					'end-date' => array(
@@ -2827,6 +2865,8 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'alt' => array(),
+					'always-serve-npa' => array(),
+					'block-rtc' => array(),
 					'json' => array(),
 					'media' => array(),
 					'noloading' => array(
@@ -2873,6 +2913,8 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'alt' => array(),
+					'always-serve-npa' => array(),
+					'block-rtc' => array(),
 					'data-multi-size' => array(
 						'dispatch_key' => 2,
 						'mandatory' => true,
@@ -3298,6 +3340,87 @@ class AMP_Allowed_Tags_Generated {
 						'amp-gist',
 					),
 					'spec_url' => 'https://amp.dev/documentation/components/amp-gist/',
+				),
+			),
+		),
+		'amp-google-assistant-assistjs-config' => array(
+			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
+					'requires_extension' => array(
+						'amp-google-assistant-assistjs',
+					),
+				),
+			),
+		),
+		'amp-google-assistant-inline-suggestion-bar' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-google-assistant-assistjs',
+					),
+				),
+			),
+		),
+		'amp-google-assistant-voice-bar' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-google-assistant-assistjs',
+					),
+				),
+			),
+		),
+		'amp-google-assistant-voice-button' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-google-assistant-assistjs',
+					),
 				),
 			),
 		),
@@ -3892,7 +4015,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'data-media-id' => array(
-						'value_regex_casei' => '[0-9a-z]{8}',
+						'value_regex_casei' => '[0-9a-z]{8}|outstream',
 					),
 					'data-player-id' => array(
 						'mandatory' => true,
@@ -4094,6 +4217,7 @@ class AMP_Allowed_Tags_Generated {
 							'protocol' => array(
 								'https',
 								'amp-state',
+								'amp-script',
 							),
 						),
 					),
@@ -4693,6 +4817,37 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-onetap-google' => array(
+			array(
+				'attr_spec_list' => array(
+					'data-src' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
+					'requires_extension' => array(
+						'amp-onetap-google',
+					),
+					'unique' => true,
+				),
+			),
+		),
 		'amp-ooyala-player' => array(
 			array(
 				'attr_spec_list' => array(
@@ -5179,6 +5334,11 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '[0-9]+',
 					),
 					'media' => array(),
+					'nodom' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'noloading' => array(
 						'value' => array(
 							'',
@@ -5642,6 +5802,23 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'entity' => array(),
+					'entity-logo-src' => array(
+						'value_url' => array(
+							'protocol' => array(
+								'http',
+								'https',
+							),
+						),
+					),
+					'entity-url' => array(
+						'value_url' => array(
+							'protocol' => array(
+								'http',
+								'https',
+							),
+						),
+					),
 					'live-story' => array(
 						'value' => array(
 							'',
@@ -5713,8 +5890,10 @@ class AMP_Allowed_Tags_Generated {
 							'amp-pixel',
 							'amp-sidebar',
 							'amp-story-auto-ads',
+							'amp-story-auto-analytics',
 							'amp-story-bookend',
 							'amp-story-page',
+							'amp-story-social-share',
 						),
 						'mandatory_min_num_child_tags' => 1,
 					),
@@ -5728,6 +5907,11 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-360' => array(
 			array(
 				'attr_spec_list' => array(
+					'controls' => array(
+						'value' => array(
+							'gyroscope',
+						),
+					),
 					'duration' => array(
 						'value_regex' => '([0-9\\.]+)\\s*(s|ms)',
 					),
@@ -5741,6 +5925,15 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '-?\\d+\\.?\\d*',
 					),
 					'pitch-start' => array(
+						'value_regex' => '-?\\d+\\.?\\d*',
+					),
+					'scene-heading' => array(
+						'value_regex' => '-?\\d+\\.?\\d*',
+					),
+					'scene-pitch' => array(
+						'value_regex' => '-?\\d+\\.?\\d*',
+					),
+					'scene-roll' => array(
 						'value_regex' => '-?\\d+\\.?\\d*',
 					),
 					'zoom-end' => array(
@@ -5758,12 +5951,12 @@ class AMP_Allowed_Tags_Generated {
 							3,
 							7,
 							1,
-							4,
 						),
 					),
 					'child_tags' => array(
 						'child_tag_name_oneof' => array(
 							'amp-img',
+							'amp-video',
 						),
 						'mandatory_num_child_tags' => 1,
 					),
@@ -5821,6 +6014,21 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'spec_url' => 'https://amp.dev/documentation/components/amp-story-auto-ads/',
 					'unique' => true,
+				),
+			),
+		),
+		'amp-story-auto-analytics' => array(
+			array(
+				'attr_spec_list' => array(
+					'gtag-id' => array(
+						'mandatory' => true,
+						'value_regex' => '[A-Z]{1,2}-[A-Z0-9-]+',
+					),
+				),
+				'tag_spec' => array(
+					'requires_extension' => array(
+						'amp-story-auto-analytics',
+					),
 				),
 			),
 		),
@@ -5894,6 +6102,9 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-grid-layer' => array(
 			array(
 				'attr_spec_list' => array(
+					'anchor' => array(
+						'value_regex' => 'top|bottom|left|right|(top|bottom)[ -](left|right)|(left|right)[ -](top|bottom)',
+					),
 					'aspect-ratio' => array(
 						'value_regex' => '\\d+:\\d+',
 					),
@@ -5901,6 +6112,12 @@ class AMP_Allowed_Tags_Generated {
 						'value' => array(
 							'landscape-half-left',
 							'landscape-half-right',
+						),
+					),
+					'preset' => array(
+						'value' => array(
+							'2021-background',
+							'2021-foreground',
 						),
 					),
 					'template' => array(
@@ -5929,6 +6146,243 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-story-interactive-binary-poll' => array(
+			array(
+				'attr_spec_list' => array(
+					'chip-style' => array(
+						'value' => array(
+							'shadow',
+							'flat',
+							'transparent',
+						),
+					),
+					'endpoint' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_empty' => false,
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'id' => array(
+						'mandatory' => true,
+					),
+					'option-1-confetti' => array(),
+					'option-1-text' => array(
+						'mandatory' => true,
+					),
+					'option-2-confetti' => array(),
+					'option-2-text' => array(
+						'mandatory' => true,
+					),
+					'prompt-size' => array(
+						'value' => array(
+							'small',
+							'medium',
+							'large',
+						),
+					),
+					'prompt-text' => array(),
+					'theme' => array(
+						'value' => array(
+							'light',
+							'dark',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-story-grid-layer',
+					'requires_extension' => array(
+						'amp-story-interactive',
+					),
+				),
+			),
+		),
+		'amp-story-interactive-poll' => array(
+			array(
+				'attr_spec_list' => array(
+					'chip-style' => array(
+						'value' => array(
+							'shadow',
+							'flat',
+							'transparent',
+						),
+					),
+					'endpoint' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_empty' => false,
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'id' => array(
+						'mandatory' => true,
+					),
+					'option-1-confetti' => array(),
+					'option-1-results-category' => array(),
+					'option-1-text' => array(
+						'mandatory' => true,
+					),
+					'option-2-confetti' => array(),
+					'option-2-results-category' => array(),
+					'option-2-text' => array(
+						'mandatory' => true,
+					),
+					'option-3-confetti' => array(),
+					'option-3-results-category' => array(),
+					'option-3-text' => array(),
+					'option-4-confetti' => array(),
+					'option-4-results-category' => array(),
+					'option-4-text' => array(),
+					'prompt-size' => array(
+						'value' => array(
+							'small',
+							'medium',
+							'large',
+						),
+					),
+					'prompt-text' => array(),
+					'theme' => array(
+						'value' => array(
+							'light',
+							'dark',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-story-grid-layer',
+					'requires_extension' => array(
+						'amp-story-interactive',
+					),
+				),
+			),
+		),
+		'amp-story-interactive-quiz' => array(
+			array(
+				'attr_spec_list' => array(
+					'chip-style' => array(
+						'value' => array(
+							'shadow',
+							'flat',
+							'transparent',
+						),
+					),
+					'endpoint' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_empty' => false,
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'id' => array(
+						'mandatory' => true,
+					),
+					'option-1-confetti' => array(),
+					'option-1-correct' => array(),
+					'option-1-text' => array(
+						'mandatory' => true,
+					),
+					'option-2-confetti' => array(),
+					'option-2-correct' => array(),
+					'option-2-text' => array(
+						'mandatory' => true,
+					),
+					'option-3-confetti' => array(),
+					'option-3-correct' => array(),
+					'option-3-text' => array(),
+					'option-4-confetti' => array(),
+					'option-4-correct' => array(),
+					'option-4-text' => array(),
+					'prompt-size' => array(
+						'value' => array(
+							'small',
+							'medium',
+							'large',
+						),
+					),
+					'prompt-text' => array(),
+					'theme' => array(
+						'value' => array(
+							'light',
+							'dark',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-story-grid-layer',
+					'mandatory_oneof' => array(
+						'option-1-correct',
+						'option-2-correct',
+						'option-3-correct',
+						'option-4-correct',
+					),
+					'requires_extension' => array(
+						'amp-story-interactive',
+					),
+				),
+			),
+		),
+		'amp-story-interactive-results' => array(
+			array(
+				'attr_spec_list' => array(
+					'chip-style' => array(
+						'value' => array(
+							'flat',
+							'transparent',
+						),
+					),
+					'option-1-image' => array(),
+					'option-1-results-category' => array(
+						'mandatory' => true,
+					),
+					'option-1-results-threshold' => array(
+						'value_regex' => '\\d+(\\.\\d+)?',
+					),
+					'option-1-text' => array(),
+					'option-2-image' => array(),
+					'option-2-results-category' => array(
+						'mandatory' => true,
+					),
+					'option-2-results-threshold' => array(
+						'value_regex' => '\\d+(\\.\\d+)?',
+					),
+					'option-2-text' => array(),
+					'option-3-image' => array(),
+					'option-3-results-category' => array(),
+					'option-3-results-threshold' => array(
+						'value_regex' => '\\d+(\\.\\d+)?',
+					),
+					'option-3-text' => array(),
+					'option-4-image' => array(),
+					'option-4-results-category' => array(),
+					'option-4-results-threshold' => array(
+						'value_regex' => '\\d+(\\.\\d+)?',
+					),
+					'option-4-text' => array(),
+					'prompt-text' => array(),
+					'theme' => array(
+						'value' => array(
+							'light',
+							'dark',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-story-grid-layer',
+					'requires_extension' => array(
+						'amp-story-interactive',
+					),
+				),
+			),
+		),
 		'amp-story-page' => array(
 			array(
 				'attr_spec_list' => array(
@@ -5953,6 +6407,7 @@ class AMP_Allowed_Tags_Generated {
 							'amp-analytics',
 							'amp-pixel',
 							'amp-story-animation',
+							'amp-story-auto-analytics',
 							'amp-story-cta-layer',
 							'amp-story-grid-layer',
 							'amp-story-page-attachment',
@@ -6001,6 +6456,22 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'cta-image' => array(
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'cta-image-2' => array(
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
 					'layout' => array(
 						'mandatory' => true,
 						'value' => array(
@@ -6021,6 +6492,23 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-story-panning-media' => array(
+			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+						),
+					),
+					'mandatory_ancestor' => 'amp-story-grid-layer',
+					'requires_extension' => array(
+						'amp-story-panning-media',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-panning-media',
+				),
+			),
+		),
 		'amp-story-player' => array(
 			array(
 				'attr_spec_list' => array(),
@@ -6032,16 +6520,38 @@ class AMP_Allowed_Tags_Generated {
 							3,
 							7,
 							4,
+							9,
 						),
 					),
-					'child_tags' => array(
-						'child_tag_name_oneof' => array(
-							'a',
-						),
-					),
+					'descendant_tag_list' => 'amp-story-player-allowed-descendants',
 					'requires_extension' => array(
 						'amp-story-player',
 					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-player/',
+				),
+			),
+		),
+		'amp-story-social-share' => array(
+			array(
+				'attr_spec_list' => array(
+					'layout' => array(
+						'mandatory' => true,
+						'value' => array(
+							'nodisplay',
+						),
+					),
+					'src' => array(
+						'value_url' => array(
+							'protocol' => array(
+								'http',
+								'https',
+							),
+						),
+					),
+				),
+				'tag_spec' => array(
+					'descendant_tag_list' => 'amp-story-social-share-allowed-descendants',
+					'mandatory_ancestor' => 'amp-story',
 				),
 			),
 		),
@@ -6322,6 +6832,7 @@ class AMP_Allowed_Tags_Generated {
 							2,
 							3,
 							7,
+							9,
 							1,
 							4,
 						),
@@ -6435,6 +6946,7 @@ class AMP_Allowed_Tags_Generated {
 							2,
 							3,
 							7,
+							9,
 							1,
 							4,
 						),
@@ -6598,9 +7110,7 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
-					'poster' => array(
-						'mandatory' => true,
-					),
+					'poster' => array(),
 					'referrerpolicy' => array(),
 					'rotate-to-fullscreen' => array(
 						'value' => array(
@@ -6632,86 +7142,6 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-video-iframe',
 					),
-					'spec_name' => 'AMP-VIDEO-IFRAME[poster]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-video-iframe/',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'album' => array(),
-					'alt' => array(),
-					'artist' => array(),
-					'artwork' => array(),
-					'attribution' => array(),
-					'autoplay' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'data-amp-bind-src' => array(),
-					'dock' => array(
-						'requires_extension' => array(
-							'amp-video-docking',
-						),
-					),
-					'implements-media-session' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'implements-rotate-to-fullscreen' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'lightbox' => array(),
-					'lightbox-thumbnail-id' => array(
-						'value_regex_casei' => '^[a-z][a-z\\d_-]*',
-					),
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'referrerpolicy' => array(),
-					'rotate-to-fullscreen' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'src' => array(
-						'disallowed_value_regex' => '__amp_source_origin',
-						'mandatory' => true,
-						'value_url' => array(
-							'protocol' => array(
-								'https',
-							),
-						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							6,
-							2,
-							3,
-							7,
-							9,
-							1,
-							4,
-						),
-					),
-					'reference_points' => array(
-						'AMP-VIDEO-IFRAME > [placeholder]' => array(
-							'mandatory' => true,
-							'unique' => true,
-						),
-					),
-					'requires_extension' => array(
-						'amp-video-iframe',
-					),
-					'spec_name' => 'AMP-VIDEO-IFRAME with [placeholder]',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-video-iframe/',
 				),
 			),
@@ -7797,9 +8227,15 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'amp-nested-submenu' => array(),
-					'amp-nested-submenu-close' => array(),
-					'amp-nested-submenu-open' => array(),
+					'amp-nested-submenu' => array(
+						'dispatch_key' => 2,
+					),
+					'amp-nested-submenu-close' => array(
+						'dispatch_key' => 2,
+					),
+					'amp-nested-submenu-open' => array(
+						'dispatch_key' => 2,
+					),
 				),
 				'tag_spec' => array(
 					'disallowed_ancestor' => array(
@@ -7919,6 +8355,90 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(),
 			),
 		),
+		'feblend' => array(
+			array(
+				'attr_spec_list' => array(
+					'alignment-baseline' => array(),
+					'baseline-shift' => array(),
+					'clip' => array(),
+					'clip-path' => array(),
+					'clip-rule' => array(),
+					'color' => array(),
+					'color-interpolation' => array(),
+					'color-interpolation-filters' => array(),
+					'color-profile' => array(),
+					'color-rendering' => array(),
+					'cursor' => array(),
+					'direction' => array(),
+					'display' => array(),
+					'dominant-baseline' => array(),
+					'enable-background' => array(),
+					'fill' => array(),
+					'fill-opacity' => array(),
+					'fill-rule' => array(),
+					'filter' => array(),
+					'flood-color' => array(),
+					'flood-opacity' => array(),
+					'focusable' => array(),
+					'font-family' => array(),
+					'font-size' => array(),
+					'font-size-adjust' => array(),
+					'font-stretch' => array(),
+					'font-style' => array(),
+					'font-variant' => array(),
+					'font-weight' => array(),
+					'glyph-orientation-horizontal' => array(),
+					'glyph-orientation-vertical' => array(),
+					'height' => array(),
+					'image-rendering' => array(),
+					'in' => array(),
+					'in2' => array(),
+					'kerning' => array(),
+					'letter-spacing' => array(),
+					'lighting-color' => array(),
+					'marker-end' => array(),
+					'marker-mid' => array(),
+					'marker-start' => array(),
+					'mask' => array(),
+					'mode' => array(),
+					'opacity' => array(),
+					'overflow' => array(),
+					'pointer-events' => array(),
+					'result' => array(),
+					'shape-rendering' => array(),
+					'stop-color' => array(),
+					'stop-opacity' => array(),
+					'stroke' => array(),
+					'stroke-dasharray' => array(),
+					'stroke-dashoffset' => array(),
+					'stroke-linecap' => array(),
+					'stroke-linejoin' => array(),
+					'stroke-miterlimit' => array(),
+					'stroke-opacity' => array(),
+					'stroke-width' => array(),
+					'style' => array(),
+					'text-anchor' => array(),
+					'text-decoration' => array(),
+					'text-rendering' => array(),
+					'unicode-bidi' => array(),
+					'vector-effect' => array(),
+					'visibility' => array(),
+					'width' => array(),
+					'word-spacing' => array(),
+					'writing-mode' => array(),
+					'x' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
 		'fecolormatrix' => array(
 			array(
 				'attr_spec_list' => array(
@@ -7985,6 +8505,87 @@ class AMP_Allowed_Tags_Generated {
 					'type' => array(),
 					'unicode-bidi' => array(),
 					'values' => array(),
+					'vector-effect' => array(),
+					'visibility' => array(),
+					'width' => array(),
+					'word-spacing' => array(),
+					'writing-mode' => array(),
+					'x' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fecomponenttransfer' => array(
+			array(
+				'attr_spec_list' => array(
+					'alignment-baseline' => array(),
+					'baseline-shift' => array(),
+					'clip' => array(),
+					'clip-path' => array(),
+					'clip-rule' => array(),
+					'color' => array(),
+					'color-interpolation' => array(),
+					'color-interpolation-filters' => array(),
+					'color-profile' => array(),
+					'color-rendering' => array(),
+					'cursor' => array(),
+					'direction' => array(),
+					'display' => array(),
+					'dominant-baseline' => array(),
+					'enable-background' => array(),
+					'fill' => array(),
+					'fill-opacity' => array(),
+					'fill-rule' => array(),
+					'filter' => array(),
+					'flood-color' => array(),
+					'flood-opacity' => array(),
+					'focusable' => array(),
+					'font-family' => array(),
+					'font-size' => array(),
+					'font-size-adjust' => array(),
+					'font-stretch' => array(),
+					'font-style' => array(),
+					'font-variant' => array(),
+					'font-weight' => array(),
+					'glyph-orientation-horizontal' => array(),
+					'glyph-orientation-vertical' => array(),
+					'height' => array(),
+					'image-rendering' => array(),
+					'kerning' => array(),
+					'letter-spacing' => array(),
+					'lighting-color' => array(),
+					'marker-end' => array(),
+					'marker-mid' => array(),
+					'marker-start' => array(),
+					'mask' => array(),
+					'opacity' => array(),
+					'overflow' => array(),
+					'pointer-events' => array(),
+					'result' => array(),
+					'shape-rendering' => array(),
+					'stop-color' => array(),
+					'stop-opacity' => array(),
+					'stroke' => array(),
+					'stroke-dasharray' => array(),
+					'stroke-dashoffset' => array(),
+					'stroke-linecap' => array(),
+					'stroke-linejoin' => array(),
+					'stroke-miterlimit' => array(),
+					'stroke-opacity' => array(),
+					'stroke-width' => array(),
+					'style' => array(),
+					'text-anchor' => array(),
+					'text-decoration' => array(),
+					'text-rendering' => array(),
+					'unicode-bidi' => array(),
 					'vector-effect' => array(),
 					'visibility' => array(),
 					'width' => array(),
@@ -8091,6 +8692,369 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'feconvolvematrix' => array(
+			array(
+				'attr_spec_list' => array(
+					'alignment-baseline' => array(),
+					'baseline-shift' => array(),
+					'bias' => array(),
+					'clip' => array(),
+					'clip-path' => array(),
+					'clip-rule' => array(),
+					'color' => array(),
+					'color-interpolation' => array(),
+					'color-interpolation-filters' => array(),
+					'color-profile' => array(),
+					'color-rendering' => array(),
+					'cursor' => array(),
+					'direction' => array(),
+					'display' => array(),
+					'divisor' => array(),
+					'dominant-baseline' => array(),
+					'edgemode' => array(),
+					'enable-background' => array(),
+					'fill' => array(),
+					'fill-opacity' => array(),
+					'fill-rule' => array(),
+					'filter' => array(),
+					'flood-color' => array(),
+					'flood-opacity' => array(),
+					'focusable' => array(),
+					'font-family' => array(),
+					'font-size' => array(),
+					'font-size-adjust' => array(),
+					'font-stretch' => array(),
+					'font-style' => array(),
+					'font-variant' => array(),
+					'font-weight' => array(),
+					'glyph-orientation-horizontal' => array(),
+					'glyph-orientation-vertical' => array(),
+					'height' => array(),
+					'image-rendering' => array(),
+					'in' => array(),
+					'kernelmatrix' => array(),
+					'kernelunitlength' => array(),
+					'kerning' => array(),
+					'letter-spacing' => array(),
+					'lighting-color' => array(),
+					'marker-end' => array(),
+					'marker-mid' => array(),
+					'marker-start' => array(),
+					'mask' => array(),
+					'opacity' => array(),
+					'order' => array(),
+					'overflow' => array(),
+					'pointer-events' => array(),
+					'preservealpha' => array(),
+					'result' => array(),
+					'shape-rendering' => array(),
+					'stop-color' => array(),
+					'stop-opacity' => array(),
+					'stroke' => array(),
+					'stroke-dasharray' => array(),
+					'stroke-dashoffset' => array(),
+					'stroke-linecap' => array(),
+					'stroke-linejoin' => array(),
+					'stroke-miterlimit' => array(),
+					'stroke-opacity' => array(),
+					'stroke-width' => array(),
+					'style' => array(),
+					'targetx' => array(),
+					'targety' => array(),
+					'text-anchor' => array(),
+					'text-decoration' => array(),
+					'text-rendering' => array(),
+					'unicode-bidi' => array(),
+					'vector-effect' => array(),
+					'visibility' => array(),
+					'width' => array(),
+					'word-spacing' => array(),
+					'writing-mode' => array(),
+					'x' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fediffuselighting' => array(
+			array(
+				'attr_spec_list' => array(
+					'alignment-baseline' => array(),
+					'baseline-shift' => array(),
+					'clip' => array(),
+					'clip-path' => array(),
+					'clip-rule' => array(),
+					'color' => array(),
+					'color-interpolation' => array(),
+					'color-interpolation-filters' => array(),
+					'color-profile' => array(),
+					'color-rendering' => array(),
+					'cursor' => array(),
+					'diffuseconstant' => array(),
+					'direction' => array(),
+					'display' => array(),
+					'dominant-baseline' => array(),
+					'enable-background' => array(),
+					'fill' => array(),
+					'fill-opacity' => array(),
+					'fill-rule' => array(),
+					'filter' => array(),
+					'flood-color' => array(),
+					'flood-opacity' => array(),
+					'focusable' => array(),
+					'font-family' => array(),
+					'font-size' => array(),
+					'font-size-adjust' => array(),
+					'font-stretch' => array(),
+					'font-style' => array(),
+					'font-variant' => array(),
+					'font-weight' => array(),
+					'glyph-orientation-horizontal' => array(),
+					'glyph-orientation-vertical' => array(),
+					'height' => array(),
+					'image-rendering' => array(),
+					'in' => array(),
+					'kernelunitlength' => array(),
+					'kerning' => array(),
+					'letter-spacing' => array(),
+					'lighting-color' => array(),
+					'marker-end' => array(),
+					'marker-mid' => array(),
+					'marker-start' => array(),
+					'mask' => array(),
+					'opacity' => array(),
+					'overflow' => array(),
+					'pointer-events' => array(),
+					'result' => array(),
+					'shape-rendering' => array(),
+					'stop-color' => array(),
+					'stop-opacity' => array(),
+					'stroke' => array(),
+					'stroke-dasharray' => array(),
+					'stroke-dashoffset' => array(),
+					'stroke-linecap' => array(),
+					'stroke-linejoin' => array(),
+					'stroke-miterlimit' => array(),
+					'stroke-opacity' => array(),
+					'stroke-width' => array(),
+					'style' => array(),
+					'surfacescale' => array(),
+					'text-anchor' => array(),
+					'text-decoration' => array(),
+					'text-rendering' => array(),
+					'unicode-bidi' => array(),
+					'vector-effect' => array(),
+					'visibility' => array(),
+					'width' => array(),
+					'word-spacing' => array(),
+					'writing-mode' => array(),
+					'x' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fedisplacementmap' => array(
+			array(
+				'attr_spec_list' => array(
+					'alignment-baseline' => array(),
+					'baseline-shift' => array(),
+					'clip' => array(),
+					'clip-path' => array(),
+					'clip-rule' => array(),
+					'color' => array(),
+					'color-interpolation' => array(),
+					'color-interpolation-filters' => array(),
+					'color-profile' => array(),
+					'color-rendering' => array(),
+					'cursor' => array(),
+					'direction' => array(),
+					'display' => array(),
+					'dominant-baseline' => array(),
+					'enable-background' => array(),
+					'fill' => array(),
+					'fill-opacity' => array(),
+					'fill-rule' => array(),
+					'filter' => array(),
+					'flood-color' => array(),
+					'flood-opacity' => array(),
+					'focusable' => array(),
+					'font-family' => array(),
+					'font-size' => array(),
+					'font-size-adjust' => array(),
+					'font-stretch' => array(),
+					'font-style' => array(),
+					'font-variant' => array(),
+					'font-weight' => array(),
+					'glyph-orientation-horizontal' => array(),
+					'glyph-orientation-vertical' => array(),
+					'height' => array(),
+					'image-rendering' => array(),
+					'in' => array(),
+					'in2' => array(),
+					'kerning' => array(),
+					'letter-spacing' => array(),
+					'lighting-color' => array(),
+					'marker-end' => array(),
+					'marker-mid' => array(),
+					'marker-start' => array(),
+					'mask' => array(),
+					'opacity' => array(),
+					'overflow' => array(),
+					'pointer-events' => array(),
+					'result' => array(),
+					'scale' => array(),
+					'shape-rendering' => array(),
+					'stop-color' => array(),
+					'stop-opacity' => array(),
+					'stroke' => array(),
+					'stroke-dasharray' => array(),
+					'stroke-dashoffset' => array(),
+					'stroke-linecap' => array(),
+					'stroke-linejoin' => array(),
+					'stroke-miterlimit' => array(),
+					'stroke-opacity' => array(),
+					'stroke-width' => array(),
+					'style' => array(),
+					'text-anchor' => array(),
+					'text-decoration' => array(),
+					'text-rendering' => array(),
+					'unicode-bidi' => array(),
+					'vector-effect' => array(),
+					'visibility' => array(),
+					'width' => array(),
+					'word-spacing' => array(),
+					'writing-mode' => array(),
+					'x' => array(),
+					'xchannelselector' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+					'ychannelselector' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fedistantlight' => array(
+			array(
+				'attr_spec_list' => array(
+					'azimuth' => array(),
+					'elevation' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fedropshadow' => array(
+			array(
+				'attr_spec_list' => array(
+					'alignment-baseline' => array(),
+					'baseline-shift' => array(),
+					'clip' => array(),
+					'clip-path' => array(),
+					'clip-rule' => array(),
+					'color' => array(),
+					'color-interpolation' => array(),
+					'color-interpolation-filters' => array(),
+					'color-profile' => array(),
+					'color-rendering' => array(),
+					'cursor' => array(),
+					'direction' => array(),
+					'display' => array(),
+					'dominant-baseline' => array(),
+					'dx' => array(),
+					'dy' => array(),
+					'enable-background' => array(),
+					'fill' => array(),
+					'fill-opacity' => array(),
+					'fill-rule' => array(),
+					'filter' => array(),
+					'flood-color' => array(),
+					'flood-opacity' => array(),
+					'focusable' => array(),
+					'font-family' => array(),
+					'font-size' => array(),
+					'font-size-adjust' => array(),
+					'font-stretch' => array(),
+					'font-style' => array(),
+					'font-variant' => array(),
+					'font-weight' => array(),
+					'glyph-orientation-horizontal' => array(),
+					'glyph-orientation-vertical' => array(),
+					'height' => array(),
+					'image-rendering' => array(),
+					'kerning' => array(),
+					'letter-spacing' => array(),
+					'lighting-color' => array(),
+					'marker-end' => array(),
+					'marker-mid' => array(),
+					'marker-start' => array(),
+					'mask' => array(),
+					'opacity' => array(),
+					'overflow' => array(),
+					'pointer-events' => array(),
+					'result' => array(),
+					'shape-rendering' => array(),
+					'stddeviation' => array(),
+					'stop-color' => array(),
+					'stop-opacity' => array(),
+					'stroke' => array(),
+					'stroke-dasharray' => array(),
+					'stroke-dashoffset' => array(),
+					'stroke-linecap' => array(),
+					'stroke-linejoin' => array(),
+					'stroke-miterlimit' => array(),
+					'stroke-opacity' => array(),
+					'stroke-width' => array(),
+					'style' => array(),
+					'text-anchor' => array(),
+					'text-decoration' => array(),
+					'text-rendering' => array(),
+					'unicode-bidi' => array(),
+					'vector-effect' => array(),
+					'visibility' => array(),
+					'width' => array(),
+					'word-spacing' => array(),
+					'writing-mode' => array(),
+					'x' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'mandatory_parent' => 'filter',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
 		'feflood' => array(
 			array(
 				'attr_spec_list' => array(
@@ -8168,6 +9132,98 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fefunca' => array(
+			array(
+				'attr_spec_list' => array(
+					'amplitude' => array(),
+					'exponent' => array(),
+					'intercept' => array(),
+					'offset' => array(),
+					'slope' => array(),
+					'table' => array(),
+					'tablevalues' => array(),
+					'type' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'mandatory_parent' => 'fecomponenttransfer',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fefuncb' => array(
+			array(
+				'attr_spec_list' => array(
+					'amplitude' => array(),
+					'exponent' => array(),
+					'intercept' => array(),
+					'offset' => array(),
+					'slope' => array(),
+					'table' => array(),
+					'tablevalues' => array(),
+					'type' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'mandatory_parent' => 'fecomponenttransfer',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fefuncg' => array(
+			array(
+				'attr_spec_list' => array(
+					'amplitude' => array(),
+					'exponent' => array(),
+					'intercept' => array(),
+					'offset' => array(),
+					'slope' => array(),
+					'table' => array(),
+					'tablevalues' => array(),
+					'type' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'mandatory_parent' => 'fecomponenttransfer',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fefuncr' => array(
+			array(
+				'attr_spec_list' => array(
+					'amplitude' => array(),
+					'exponent' => array(),
+					'intercept' => array(),
+					'offset' => array(),
+					'slope' => array(),
+					'table' => array(),
+					'tablevalues' => array(),
+					'type' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'mandatory_parent' => 'fecomponenttransfer',
 					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
@@ -8353,6 +9409,90 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'femorphology' => array(
+			array(
+				'attr_spec_list' => array(
+					'alignment-baseline' => array(),
+					'baseline-shift' => array(),
+					'clip' => array(),
+					'clip-path' => array(),
+					'clip-rule' => array(),
+					'color' => array(),
+					'color-interpolation' => array(),
+					'color-interpolation-filters' => array(),
+					'color-profile' => array(),
+					'color-rendering' => array(),
+					'cursor' => array(),
+					'direction' => array(),
+					'display' => array(),
+					'dominant-baseline' => array(),
+					'enable-background' => array(),
+					'fill' => array(),
+					'fill-opacity' => array(),
+					'fill-rule' => array(),
+					'filter' => array(),
+					'flood-color' => array(),
+					'flood-opacity' => array(),
+					'focusable' => array(),
+					'font-family' => array(),
+					'font-size' => array(),
+					'font-size-adjust' => array(),
+					'font-stretch' => array(),
+					'font-style' => array(),
+					'font-variant' => array(),
+					'font-weight' => array(),
+					'glyph-orientation-horizontal' => array(),
+					'glyph-orientation-vertical' => array(),
+					'height' => array(),
+					'image-rendering' => array(),
+					'in' => array(),
+					'kerning' => array(),
+					'letter-spacing' => array(),
+					'lighting-color' => array(),
+					'marker-end' => array(),
+					'marker-mid' => array(),
+					'marker-start' => array(),
+					'mask' => array(),
+					'opacity' => array(),
+					'operator' => array(),
+					'overflow' => array(),
+					'pointer-events' => array(),
+					'radius' => array(),
+					'result' => array(),
+					'shape-rendering' => array(),
+					'stop-color' => array(),
+					'stop-opacity' => array(),
+					'stroke' => array(),
+					'stroke-dasharray' => array(),
+					'stroke-dashoffset' => array(),
+					'stroke-linecap' => array(),
+					'stroke-linejoin' => array(),
+					'stroke-miterlimit' => array(),
+					'stroke-opacity' => array(),
+					'stroke-width' => array(),
+					'style' => array(),
+					'text-anchor' => array(),
+					'text-decoration' => array(),
+					'text-rendering' => array(),
+					'unicode-bidi' => array(),
+					'vector-effect' => array(),
+					'visibility' => array(),
+					'width' => array(),
+					'word-spacing' => array(),
+					'writing-mode' => array(),
+					'x' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
 		'feoffset' => array(
 			array(
 				'attr_spec_list' => array(
@@ -8418,6 +9558,299 @@ class AMP_Allowed_Tags_Generated {
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
+					'unicode-bidi' => array(),
+					'vector-effect' => array(),
+					'visibility' => array(),
+					'width' => array(),
+					'word-spacing' => array(),
+					'writing-mode' => array(),
+					'x' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fepointlight' => array(
+			array(
+				'attr_spec_list' => array(
+					'x' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+					'z' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fespecularlighting' => array(
+			array(
+				'attr_spec_list' => array(
+					'alignment-baseline' => array(),
+					'baseline-shift' => array(),
+					'clip' => array(),
+					'clip-path' => array(),
+					'clip-rule' => array(),
+					'color' => array(),
+					'color-interpolation' => array(),
+					'color-interpolation-filters' => array(),
+					'color-profile' => array(),
+					'color-rendering' => array(),
+					'cursor' => array(),
+					'direction' => array(),
+					'display' => array(),
+					'dominant-baseline' => array(),
+					'enable-background' => array(),
+					'fill' => array(),
+					'fill-opacity' => array(),
+					'fill-rule' => array(),
+					'filter' => array(),
+					'flood-color' => array(),
+					'flood-opacity' => array(),
+					'focusable' => array(),
+					'font-family' => array(),
+					'font-size' => array(),
+					'font-size-adjust' => array(),
+					'font-stretch' => array(),
+					'font-style' => array(),
+					'font-variant' => array(),
+					'font-weight' => array(),
+					'glyph-orientation-horizontal' => array(),
+					'glyph-orientation-vertical' => array(),
+					'height' => array(),
+					'image-rendering' => array(),
+					'in' => array(),
+					'kernelunitlength' => array(),
+					'kerning' => array(),
+					'letter-spacing' => array(),
+					'lighting-color' => array(),
+					'marker-end' => array(),
+					'marker-mid' => array(),
+					'marker-start' => array(),
+					'mask' => array(),
+					'opacity' => array(),
+					'overflow' => array(),
+					'pointer-events' => array(),
+					'result' => array(),
+					'shape-rendering' => array(),
+					'specularconstant' => array(),
+					'specularexponent' => array(),
+					'stop-color' => array(),
+					'stop-opacity' => array(),
+					'stroke' => array(),
+					'stroke-dasharray' => array(),
+					'stroke-dashoffset' => array(),
+					'stroke-linecap' => array(),
+					'stroke-linejoin' => array(),
+					'stroke-miterlimit' => array(),
+					'stroke-opacity' => array(),
+					'stroke-width' => array(),
+					'style' => array(),
+					'surfacescale' => array(),
+					'text-anchor' => array(),
+					'text-decoration' => array(),
+					'text-rendering' => array(),
+					'unicode-bidi' => array(),
+					'vector-effect' => array(),
+					'visibility' => array(),
+					'width' => array(),
+					'word-spacing' => array(),
+					'writing-mode' => array(),
+					'x' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fespotlight' => array(
+			array(
+				'attr_spec_list' => array(
+					'limitingconeangle' => array(),
+					'pointsatx' => array(),
+					'pointsaty' => array(),
+					'pointsatz' => array(),
+					'specularexponent' => array(),
+					'x' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+					'z' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'fetile' => array(
+			array(
+				'attr_spec_list' => array(
+					'alignment-baseline' => array(),
+					'baseline-shift' => array(),
+					'clip' => array(),
+					'clip-path' => array(),
+					'clip-rule' => array(),
+					'color' => array(),
+					'color-interpolation' => array(),
+					'color-interpolation-filters' => array(),
+					'color-profile' => array(),
+					'color-rendering' => array(),
+					'cursor' => array(),
+					'direction' => array(),
+					'display' => array(),
+					'dominant-baseline' => array(),
+					'enable-background' => array(),
+					'fill' => array(),
+					'fill-opacity' => array(),
+					'fill-rule' => array(),
+					'filter' => array(),
+					'flood-color' => array(),
+					'flood-opacity' => array(),
+					'focusable' => array(),
+					'font-family' => array(),
+					'font-size' => array(),
+					'font-size-adjust' => array(),
+					'font-stretch' => array(),
+					'font-style' => array(),
+					'font-variant' => array(),
+					'font-weight' => array(),
+					'glyph-orientation-horizontal' => array(),
+					'glyph-orientation-vertical' => array(),
+					'height' => array(),
+					'image-rendering' => array(),
+					'in' => array(),
+					'kerning' => array(),
+					'letter-spacing' => array(),
+					'lighting-color' => array(),
+					'marker-end' => array(),
+					'marker-mid' => array(),
+					'marker-start' => array(),
+					'mask' => array(),
+					'opacity' => array(),
+					'overflow' => array(),
+					'pointer-events' => array(),
+					'result' => array(),
+					'shape-rendering' => array(),
+					'stop-color' => array(),
+					'stop-opacity' => array(),
+					'stroke' => array(),
+					'stroke-dasharray' => array(),
+					'stroke-dashoffset' => array(),
+					'stroke-linecap' => array(),
+					'stroke-linejoin' => array(),
+					'stroke-miterlimit' => array(),
+					'stroke-opacity' => array(),
+					'stroke-width' => array(),
+					'style' => array(),
+					'text-anchor' => array(),
+					'text-decoration' => array(),
+					'text-rendering' => array(),
+					'unicode-bidi' => array(),
+					'vector-effect' => array(),
+					'visibility' => array(),
+					'width' => array(),
+					'word-spacing' => array(),
+					'writing-mode' => array(),
+					'x' => array(),
+					'xml:lang' => array(),
+					'xml:space' => array(),
+					'xmlns' => array(),
+					'xmlns:xlink' => array(),
+					'y' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
+				),
+			),
+		),
+		'feturbulence' => array(
+			array(
+				'attr_spec_list' => array(
+					'alignment-baseline' => array(),
+					'basefrequency' => array(),
+					'baseline-shift' => array(),
+					'clip' => array(),
+					'clip-path' => array(),
+					'clip-rule' => array(),
+					'color' => array(),
+					'color-interpolation' => array(),
+					'color-interpolation-filters' => array(),
+					'color-profile' => array(),
+					'color-rendering' => array(),
+					'cursor' => array(),
+					'direction' => array(),
+					'display' => array(),
+					'dominant-baseline' => array(),
+					'enable-background' => array(),
+					'fill' => array(),
+					'fill-opacity' => array(),
+					'fill-rule' => array(),
+					'filter' => array(),
+					'flood-color' => array(),
+					'flood-opacity' => array(),
+					'focusable' => array(),
+					'font-family' => array(),
+					'font-size' => array(),
+					'font-size-adjust' => array(),
+					'font-stretch' => array(),
+					'font-style' => array(),
+					'font-variant' => array(),
+					'font-weight' => array(),
+					'glyph-orientation-horizontal' => array(),
+					'glyph-orientation-vertical' => array(),
+					'height' => array(),
+					'image-rendering' => array(),
+					'kerning' => array(),
+					'letter-spacing' => array(),
+					'lighting-color' => array(),
+					'marker-end' => array(),
+					'marker-mid' => array(),
+					'marker-start' => array(),
+					'mask' => array(),
+					'numoctaves' => array(),
+					'opacity' => array(),
+					'overflow' => array(),
+					'pointer-events' => array(),
+					'result' => array(),
+					'seed' => array(),
+					'shape-rendering' => array(),
+					'stitchtiles' => array(),
+					'stop-color' => array(),
+					'stop-opacity' => array(),
+					'stroke' => array(),
+					'stroke-dasharray' => array(),
+					'stroke-dashoffset' => array(),
+					'stroke-linecap' => array(),
+					'stroke-linejoin' => array(),
+					'stroke-miterlimit' => array(),
+					'stroke-opacity' => array(),
+					'stroke-width' => array(),
+					'style' => array(),
+					'text-anchor' => array(),
+					'text-decoration' => array(),
+					'text-rendering' => array(),
+					'type' => array(),
 					'unicode-bidi' => array(),
 					'vector-effect' => array(),
 					'visibility' => array(),
@@ -9325,7 +10758,6 @@ class AMP_Allowed_Tags_Generated {
 						'disallowed_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'value_url' => array(
-							'allow_relative' => true,
 							'protocol' => array(
 								'data',
 								'http',
@@ -9338,7 +10770,59 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'noscript',
 					'mandatory_ancestor_suggested_alternative' => 'amp-img',
+					'spec_name' => 'noscript > img',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-img/',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'alt' => array(),
+					'attribution' => array(),
+					'data-amp-story-player-poster-img' => array(
+						'dispatch_key' => 2,
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'decoding' => array(
+						'value' => array(
+							'async',
+						),
+					),
+					'height' => array(
+						'value_regex' => '[0-9]+',
+					),
+					'loading' => array(
+						'mandatory' => true,
+						'value' => array(
+							'lazy',
+						),
+					),
+					'sizes' => array(),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'width' => array(
+						'value_regex' => '[0-9]+',
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-story-player',
+					'mandatory_parent' => 'a',
+					'spec_name' => 'amp-story-player > img',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-player/',
 				),
 			),
 		),
@@ -10292,7 +11776,7 @@ class AMP_Allowed_Tags_Generated {
 					'hreflang' => array(),
 					'media' => array(),
 					'rel' => array(
-						'disallowed_value_regex' => '(^|\\s)(canonical|components|import|manifest|preload|serviceworker|stylesheet|subresource)(\\s|$)',
+						'disallowed_value_regex' => '(^|\\s)(canonical|components|import|manifest|modulepreload|preload|serviceworker|stylesheet|subresource)(\\s|$)',
 						'mandatory' => true,
 					),
 					'sizes' => array(),
@@ -10386,6 +11870,38 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'as' => array(
+						'mandatory' => true,
+						'value' => array(
+							'script',
+						),
+					),
+					'crossorigin' => array(
+						'mandatory' => true,
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'href' => array(
+						'mandatory' => true,
+						'value_regex' => '.*\\.mjs$',
+					),
+					'rel' => array(
+						'dispatch_key' => 2,
+						'mandatory' => true,
+						'value_casei' => array(
+							'modulepreload',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'head',
+					'spec_name' => 'link rel=modulepreload',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
 					'as' => array(),
 					'charset' => array(
 						'value_casei' => array(
@@ -10396,6 +11912,16 @@ class AMP_Allowed_Tags_Generated {
 					'crossorigin' => array(),
 					'href' => array(),
 					'hreflang' => array(),
+					'imagesizes' => array(),
+					'imagesrcset' => array(
+						'disallowed_value_regex' => '__amp_source_origin',
+						'value_url' => array(
+							'protocol' => array(
+								'http',
+								'https',
+							),
+						),
+					),
 					'media' => array(),
 					'rel' => array(
 						'dispatch_key' => 2,
@@ -10422,7 +11948,7 @@ class AMP_Allowed_Tags_Generated {
 					'crossorigin' => array(),
 					'href' => array(
 						'mandatory' => true,
-						'value_regex' => 'https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css|https://fast\\.fonts\\.net/.*|https://fonts\\.googleapis\\.com/css2?\\?.*|https://fonts\\.googleapis\\.com/icon\\?.*|https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|https://maxcdn\\.bootstrapcdn\\.com/font-awesome/([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+/css/[0-9a-zA-Z-]+\\.css|https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z-]+\\.css|https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css',
+						'value_regex' => 'https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css|https://fast\\.fonts\\.net/.*|https://fonts\\.googleapis\\.com/css2?\\?.*|https://fonts\\.googleapis\\.com/icon\\?.*|https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|https://maxcdn\\.bootstrapcdn\\.com/font-awesome/([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|https://(use|pro|kit)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+/css/[0-9a-zA-Z-]+\\.css|https://(use|pro|kit)\\.fontawesome\\.com/[0-9a-zA-Z-]+\\.css|https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css',
 					),
 					'integrity' => array(),
 					'media' => array(),
@@ -11235,6 +12761,42 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'head',
 					'spec_name' => 'meta name=amp-to-amp-navigation',
+					'unique' => true,
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value_casei' => array(
+							'amp-story-generator-name',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=amp-story-generator-name',
+					'unique' => true,
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value_casei' => array(
+							'amp-story-generator-version',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=amp-story-generator-version',
 					'unique' => true,
 				),
 			),
@@ -12078,9 +13640,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'mandatory_alternatives' => 'amphtml engine v0.js script',
+					'mandatory_alternatives' => 'amphtml engine script',
 					'mandatory_parent' => 'head',
-					'spec_name' => 'amphtml engine v0.js script',
+					'spec_name' => 'amphtml engine script',
 					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
@@ -12121,9 +13683,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'mandatory_alternatives' => 'amphtml engine v0.js script',
+					'mandatory_alternatives' => 'amphtml engine script',
 					'mandatory_parent' => 'head',
-					'spec_name' => 'amphtml engine v0.js lts script',
+					'spec_name' => 'amphtml engine script (LTS)',
 					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
@@ -12203,6 +13765,25 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-ima-video',
 					'spec_name' => 'amp-ima-video > script[type=application/json]',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'amp-onerror' => array(
+						'dispatch_key' => 2,
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'cdata' => array(
+					'mandatory_cdata' => 'document.querySelector("script[src*=\'/v0.js\']").onerror=function(){document.querySelector(\'style[amp-boilerplate]\').textContent=\'\'}',
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'head',
+					'spec_name' => 'script amp-onerror',
+					'unique' => true,
 				),
 			),
 			array(
@@ -12517,7 +14098,6 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
-					'spec_name' => 'amp-ad-custom extension .js script',
 				),
 			),
 			array(
@@ -12548,7 +14128,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
-					'spec_name' => 'amp-ad extension .js script',
+					'spec_name' => 'amp-ad extension script',
 				),
 			),
 			array(
@@ -13970,6 +15550,36 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-google-assistant-assistjs',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'name' => 'amp-google-document-embed',
 						'requires_usage' => true,
 						'version' => array(
@@ -14933,6 +16543,36 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-onetap-google',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'name' => 'amp-ooyala-player',
 						'requires_usage' => true,
 						'version' => array(
@@ -15691,12 +17331,103 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-story-auto-analytics',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-story-interactive',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-story-panning-media',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'name' => 'amp-story-player',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
 						),
 					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-player/',
 				),
 			),
 			array(
@@ -15746,6 +17477,26 @@ class AMP_Allowed_Tags_Generated {
 						'amp-story',
 					),
 					'spec_name' => 'amp-story-bookend extension .json script',
+					'unique' => true,
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'nonce' => array(),
+					'type' => array(
+						'dispatch_key' => 3,
+						'mandatory' => true,
+						'value_casei' => array(
+							'application/json',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-story-social-share',
+					'requires_extension' => array(
+						'amp-story',
+					),
+					'spec_name' => 'amp-story-social-share extension .json script',
 					'unique' => true,
 				),
 			),
@@ -16129,7 +17880,6 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
-					'spec_name' => 'amp-video-docking',
 				),
 			),
 			array(
@@ -16190,7 +17940,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
-					'spec_name' => 'amp-video extension .js script',
+					'spec_name' => 'amp-video extension script',
 				),
 			),
 			array(
@@ -16457,6 +18207,11 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'access-hide' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'data-amp-bind-data-expand' => array(),
 					'expanded' => array(
 						'value' => array(
@@ -16863,6 +18618,7 @@ class AMP_Allowed_Tags_Generated {
 							'media',
 							'page',
 							'supports',
+							'-moz-document',
 						),
 						'declaration' => array(),
 						'validate_keyframes' => false,
@@ -18524,9 +20280,7 @@ class AMP_Allowed_Tags_Generated {
 		'aria-valuenow' => array(),
 		'aria-valuetext' => array(),
 		'autoscroll' => array(),
-		'class' => array(
-			'disallowed_value_regex' => '(^|\\W)i-amphtml-',
-		),
+		'class' => array(),
 		'content' => array(),
 		'data-amp-bind-aria-activedescendant' => array(),
 		'data-amp-bind-aria-atomic' => array(),
@@ -19019,6 +20773,8 @@ class AMP_Allowed_Tags_Generated {
 						'pulse',
 						'rotate-in-left',
 						'rotate-in-right',
+						'scale-fade-down',
+						'scale-fade-up',
 						'twirl-in',
 						'whoosh-in-left',
 						'whoosh-in-right',
@@ -19071,6 +20827,8 @@ class AMP_Allowed_Tags_Generated {
 						'pulse',
 						'rotate-in-left',
 						'rotate-in-right',
+						'scale-fade-down',
+						'scale-fade-up',
 						'twirl-in',
 						'whoosh-in-left',
 						'whoosh-in-right',
@@ -19169,6 +20927,8 @@ class AMP_Allowed_Tags_Generated {
 						'pulse',
 						'rotate-in-left',
 						'rotate-in-right',
+						'scale-fade-down',
+						'scale-fade-up',
 						'twirl-in',
 						'whoosh-in-left',
 						'whoosh-in-right',
@@ -19249,17 +21009,6 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'spec_name' => 'AMP-STORY-GRID-LAYER default',
 				'spec_url' => 'https://amp.dev/documentation/components/amp-story/',
-			),
-		),
-		'AMP-VIDEO-IFRAME > [placeholder]' => array(
-			'attr_spec_list' => array(
-				'placeholder' => array(
-					'mandatory' => true,
-				),
-			),
-			'tag_spec' => array(
-				'spec_name' => 'AMP-VIDEO-IFRAME > [placeholder]',
-				'spec_url' => 'https://amp.dev/documentation/components/amp-video-iframe/',
 			),
 		),
 	);

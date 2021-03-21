@@ -13,7 +13,7 @@ AMP_Base_Sanitizer constructor.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:107](../../includes/sanitizers/class-amp-base-sanitizer.php#L107-L116)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:107](/includes/sanitizers/class-amp-base-sanitizer.php#L107-L116)
 
 <details>
 <summary>Show Code</summary>

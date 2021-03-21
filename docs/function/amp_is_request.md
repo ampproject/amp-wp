@@ -6,7 +6,7 @@ function amp_is_request();
 
 Determine whether the current request is for an AMP page.
 
-This function cannot be called before the parse_query action because it needs to be able to determine the queried object is able to be served as AMP. If &#039;amp&#039; theme support is not present, this function returns true just if the query var is present. If theme support is present, then it returns true in transitional mode if an AMP template is available and the query var is present, or else in standard mode if just the template is available.
+This function cannot be called before the parse_query action because it needs to be able to determine the queried object is able to be served as AMP. If 'amp' theme support is not present, this function returns true just if the query var is present. If theme support is present, then it returns true in transitional mode if an AMP template is available and the query var is present, or else in standard mode if just the template is available.
 
 ### Return value
 
@@ -14,7 +14,7 @@ This function cannot be called before the parse_query action because it needs to
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:853](../../includes/amp-helper-functions.php#L853-L886)
+:link: [includes/amp-helper-functions.php:741](/includes/amp-helper-functions.php#L741-L764)
 
 <details>
 <summary>Show Code</summary>
@@ -23,20 +23,10 @@ This function cannot be called before the parse_query action because it needs to
 function amp_is_request() {
 	global $wp_query;
 
-	if ( AMP_Validation_Manager::$is_validate_request ) {
-		return true;
-	}
-
 	$is_amp_url = (
 		amp_is_canonical()
 		||
-		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		||
-		(
-			$wp_query instanceof WP_Query
-			&&
-			false !== $wp_query->get( amp_get_slug(), false )
-		)
+		amp_has_paired_endpoint()
 	);
 
 	// If AMP is not available, then it's definitely not an AMP endpoint.

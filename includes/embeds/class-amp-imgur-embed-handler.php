@@ -23,70 +23,14 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
-
-			// Before 4.9 the embedding Imgur is not working properly, register embed for that case.
-			wp_embed_register_handler( 'amp-imgur', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
-		} else {
-			add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 3 );
-		}
+		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 3 );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
-			wp_embed_unregister_handler( 'amp-imgur', -1 );
-		} else {
-			remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
-		}
-	}
-
-	/**
-	 * Oembed.
-	 *
-	 * @param array  $matches Matches.
-	 * @param array  $attr Attributes.
-	 * @param string $url URL.
-	 * @return string Embed.
-	 */
-	public function oembed( $matches, $attr, $url ) {
-		return $this->render( [ 'url' => $url ] );
-	}
-
-	/**
-	 * Render embed.
-	 *
-	 * @param array $args Args.
-	 * @return string Embed.
-	 */
-	public function render( $args ) {
-		$args = wp_parse_args(
-			$args,
-			[
-				'url' => false,
-			]
-		);
-
-		if ( empty( $args['url'] ) ) {
-			return '';
-		}
-
-		$this->did_convert_elements = true;
-
-		$id = $this->get_imgur_id_from_url( $args['url'] );
-		if ( false === $id ) {
-			return '';
-		}
-		return AMP_HTML_Utils::build_tag(
-			'amp-imgur',
-			[
-				'width'         => $this->args['width'],
-				'height'        => $this->args['height'],
-				'data-imgur-id' => $id,
-			]
-		);
+		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
 	}
 
 	/**
@@ -99,14 +43,12 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function filter_embed_oembed_html( $return, $url, $attr ) {
 		$parsed_url = wp_parse_url( $url );
-		if ( false !== strpos( $parsed_url['host'], 'imgur.com' ) ) {
-			if ( preg_match( '/width=["\']?(\d+)/', $return, $matches ) ) {
-				$attr['width'] = $matches[1];
-			}
-			if ( preg_match( '/height=["\']?(\d+)/', $return, $matches ) ) {
-				$attr['height'] = $matches[1];
-			}
 
+		if ( ! isset( $parsed_url['host'], $parsed_url['path'] ) ) {
+			return $return;
+		}
+
+		if ( false !== strpos( $parsed_url['host'], 'imgur.com' ) ) {
 			if ( empty( $attr['height'] ) ) {
 				return $return;
 			}
@@ -118,7 +60,7 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 				$attributes['width']  = 'auto';
 			}
 
-			$attributes['data-imgur-id'] = $this->get_imgur_id_from_url( $url );
+			$attributes['data-imgur-id'] = $this->get_imgur_id_from_url( $parsed_url );
 			if ( false === $attributes['data-imgur-id'] ) {
 				return $return;
 			}
@@ -134,19 +76,15 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Get Imgur ID from URL.
 	 *
-	 * @param string $url URL.
+	 * @param array $parsed_url Parsed URL.
 	 * @return bool|string ID / false.
 	 */
-	protected function get_imgur_id_from_url( $url ) {
-		$parsed_url = wp_parse_url( $url );
-		$pieces     = explode( '/gallery/', $parsed_url['path'] );
-		if ( ! isset( $pieces[1] ) ) {
-			if ( ! preg_match( '/\/([A-Za-z0-9]+)/', $parsed_url['path'], $matches ) ) {
-				return false;
-			}
-			return $matches[1];
+	protected function get_imgur_id_from_url( $parsed_url ) {
+
+		if ( ! preg_match( '#^(?:/(a|gallery))?/([A-Za-z0-9]+)#', $parsed_url['path'], $matches ) ) {
+			return false;
 		}
 
-		return $pieces[1];
+		return ! empty( $matches[1] ) ? "a/{$matches[2]}" : $matches[2];
 	}
 }

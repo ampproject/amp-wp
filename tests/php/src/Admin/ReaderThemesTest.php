@@ -13,10 +13,12 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_UnitTestCase;
 use Closure;
+use WP_Error;
 
 /**
  * Tests for reader themes.
@@ -27,7 +29,7 @@ use Closure;
  */
 class ReaderThemesTest extends WP_UnitTestCase {
 
-	use ThemesApiRequestMocking, LoadsCoreThemes;
+	use AssertContainsCompatibility, ThemesApiRequestMocking, LoadsCoreThemes;
 
 	/**
 	 * Test instance.
@@ -48,6 +50,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
 		}
 
+		delete_transient( 'amp_themes_wporg' );
 		$this->add_reader_themes_request_filter();
 
 		switch_theme( 'twentytwenty' );
@@ -102,6 +105,90 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		$this->assertContains( 'child-of-core', $available_theme_slugs );
 		$this->assertNotContains( 'custom', $available_theme_slugs );
 		$this->assertNotContains( 'with-legacy', $available_theme_slugs );
+	}
+
+	/**
+	 * Test that themes API success does not result in a WP_Error.
+	 *
+	 * @covers ::get_themes
+	 * @covers ::get_default_reader_themes
+	 */
+	public function test_themes_api_success() {
+		$this->reader_themes->get_themes();
+
+		$this->assertNull( $this->reader_themes->get_themes_api_error() );
+	}
+
+	/**
+	 * Test that a themes API failure results in a WP_Error.
+	 *
+	 * @covers ::get_themes
+	 * @covers ::get_default_reader_themes
+	 */
+	public function test_themes_api_failure() {
+		add_filter( 'themes_api_result', '__return_null' );
+
+		$this->reader_themes->get_themes();
+
+		$error = $this->reader_themes->get_themes_api_error();
+		$this->assertWPError( $error );
+		$this->assertEquals(
+			'The request for reader themes from WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.',
+			$error->get_error_message()
+		);
+
+		remove_filter( 'themes_api_result', '__return_null' );
+	}
+
+	/**
+	 * Test that a themes API response with an empty themes array results in a WP_Error.
+	 *
+	 * @covers ::get_themes
+	 * @covers ::get_default_reader_themes
+	 */
+	public function test_themes_api_empty_array() {
+		$filter_cb = static function() {
+			return (object) [ 'themes' => [] ];
+		};
+		add_filter( 'themes_api_result', $filter_cb );
+
+		$this->reader_themes->get_themes();
+
+		$error = $this->reader_themes->get_themes_api_error();
+		$this->assertWPError( $this->reader_themes->get_themes_api_error() );
+		$this->assertEquals(
+			'The default reader themes cannot be displayed because a plugin appears to be overriding the themes response from WordPress.org.',
+			$error->get_error_message()
+		);
+	}
+
+	/**
+	 * Test that an error is stored in state when themes_api returns an error.
+	 *
+	 * @covers ::get_themes
+	 * @covers ::get_default_reader_themes
+	 */
+	public function test_themes_api_wp_error() {
+		$filter_cb = static function() {
+			return new WP_Error(
+				'amp_test_error',
+				'Test message'
+			);
+		};
+		add_filter( 'themes_api_result', $filter_cb );
+
+		$this->reader_themes->get_themes();
+
+		$error = $this->reader_themes->get_themes_api_error();
+		$this->assertWPError( $this->reader_themes->get_themes_api_error() );
+		$this->assertStringStartsWith(
+			'The request for reader themes from WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.',
+			$error->get_error_message()
+		);
+		if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
+			$this->assertStringContains( 'Test message', $error->get_error_message() );
+			$this->assertStringContains( 'amp_test_error', $error->get_error_message() );
+		}
 	}
 
 	/**
@@ -257,7 +344,9 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 * @covers ::theme_data_exists
 	 */
 	public function test_theme_data_exists() {
-		$this->assertFalse( ( new ReaderThemes() )->theme_data_exists( 'neve' ) );
+		if ( ( new ReaderThemes() )->theme_data_exists( 'neve' ) ) {
+			$this->markTestSkipped( 'Neve is already installed.' );
+		}
 
 		$neve_theme        = [
 			'name'         => 'Neve',

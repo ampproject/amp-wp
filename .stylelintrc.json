@@ -1,5 +1,5 @@
 {
-  "extends": "stylelint-config-wordpress",
+  "extends": "@wordpress/stylelint-config",
   "rules": {
     "font-weight-notation": null,
     "function-url-quotes": null,

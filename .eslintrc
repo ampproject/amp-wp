@@ -5,6 +5,9 @@
     "plugin:import/recommended",
     "plugin:eslint-comments/recommended"
   ],
+  "env": {
+    "browser": true
+  },
   "rules": {
     "block-scoped-var": "error",
     "complexity": ["error", { "max": 20 } ],
@@ -57,7 +60,7 @@
     "react/no-unused-prop-types": "error",
     "react/self-closing-comp": "error",
     "import/no-unresolved": [ "error", {
-      "ignore": [ "jquery", "amp-block-editor-data", "amp-settings" ]
+      "ignore": [ "jquery", "amp-block-editor-data", "amp-settings", "amp-block-validation" ]
     } ],
     "import/order": [ "error", { "groups": [ "builtin", [ "external", "unknown" ], "internal", "parent", "sibling", "index" ] } ],
     "jsdoc/check-indentation": "error",

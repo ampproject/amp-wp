@@ -7,9 +7,11 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\AmpWpPluginFactory;
+use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Services;
 
 /**
  * Handle activation of plugin.
@@ -21,11 +23,6 @@ use AmpProject\AmpWP\QueryVar;
  */
 function amp_activate( $network_wide = false ) {
 	AmpWpPluginFactory::create()->activate( $network_wide );
-	amp_after_setup_theme();
-	if ( ! did_action( 'amp_init' ) ) {
-		amp_init();
-	}
-	flush_rewrite_rules();
 }
 
 /**
@@ -38,16 +35,6 @@ function amp_activate( $network_wide = false ) {
  */
 function amp_deactivate( $network_wide = false ) {
 	AmpWpPluginFactory::create()->deactivate( $network_wide );
-	// We need to manually remove the amp endpoint.
-	global $wp_rewrite;
-	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
-		if ( amp_get_slug() === $endpoint[1] ) {
-			unset( $wp_rewrite->endpoints[ $index ] );
-			break;
-		}
-	}
-
-	flush_rewrite_rules( false );
 }
 
 /**
@@ -121,8 +108,6 @@ function amp_init() {
 	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
-	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
 
 	add_action(
@@ -138,9 +123,6 @@ function amp_init() {
 
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_filter( 'request', 'amp_force_query_var_value' );
-
-	// Redirect the old url of amp page to the updated url.
-	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {
@@ -235,7 +217,10 @@ function amp_init() {
  * @internal
  */
 function amp_after_setup_theme() {
-	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
+	// Ensure AMP_QUERY_VAR is set since some plugins still try reading it instead of using amp_get_slug().
+	if ( ! defined( 'AMP_QUERY_VAR' ) ) {
+		define( 'AMP_QUERY_VAR', amp_get_slug() );
+	}
 
 	/** This filter is documented in includes/amp-helper-functions.php */
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
@@ -275,87 +260,39 @@ function amp_force_query_var_value( $query_vars ) {
 }
 
 /**
- * Fix up WP_Query for front page when amp query var is present.
- *
- * Normally the front page would not get served if a query var is present other than preview, page, paged, and cpage.
- *
- * @since 0.6
- * @internal
- * @see WP_Query::parse_query()
- * @link https://github.com/WordPress/wordpress-develop/blob/0baa8ae85c670d338e78e408f8d6e301c6410c86/src/wp-includes/class-wp-query.php#L951-L971
- *
- * @param WP_Query $query Query.
- */
-function amp_correct_query_when_is_front_page( WP_Query $query ) {
-	$is_front_page_query = (
-		$query->is_main_query()
-		&&
-		$query->is_home()
-		&&
-		// Is AMP endpoint.
-		false !== $query->get( amp_get_slug(), false )
-		&&
-		// Is query not yet fixed uo up to be front page.
-		! $query->is_front_page()
-		&&
-		// Is showing pages on front.
-		'page' === get_option( 'show_on_front' )
-		&&
-		// Has page on front set.
-		get_option( 'page_on_front' )
-		&&
-		// See line in WP_Query::parse_query() at <https://github.com/WordPress/wordpress-develop/blob/0baa8ae/src/wp-includes/class-wp-query.php#L961>.
-		0 === count( array_diff( array_keys( wp_parse_args( $query->query ) ), [ amp_get_slug(), 'preview', 'page', 'paged', 'cpage' ] ) )
-	);
-	if ( $is_front_page_query ) {
-		$query->is_home     = false;
-		$query->is_page     = true;
-		$query->is_singular = true;
-		$query->set( 'page_id', get_option( 'page_on_front' ) );
-	}
-}
-
-/**
  * Whether this is in 'canonical mode'.
  *
  * Themes can register support for this with `add_theme_support( AMP_Theme_Support::SLUG )`:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG );
+ * ```
  *
  * This will serve templates in AMP-first, allowing you to use AMP components in your theme templates.
  * If you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'paired' => true,
- *      ) );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG, array(
+ *     'paired' => true,
+ * ) );
+ * ```
  *
- * Transitional mode is also implied if you define a template_dir:
+ * Transitional mode is also implied if you define a `template_dir`:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'template_dir' => 'amp',
- *      ) );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG, array(
+ *     'template_dir' => 'amp',
+ * ) );
+ * ```
  *
  * If you want to have AMP-specific templates in addition to serving AMP-first, do:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'paired'       => false,
- *          'template_dir' => 'amp',
- *      ) );
- *
- * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
- * for example to always serve the Category template in AMP:
- *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'templates_supported' => array(
- *              'is_category' => true,
- *          ),
- *      ) );
- *
- * Or if you want to force AMP to be used on all templates:
- *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'templates_supported' => 'all',
- *      ) );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG, array(
+ *     'paired'       => false,
+ *     'template_dir' => 'amp',
+ * ) );
+ * ```
  *
  * @see AMP_Theme_Support::read_theme_support()
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
@@ -384,16 +321,6 @@ function amp_is_legacy() {
 }
 
 /**
- * Add frontend actions.
- *
- * @since 0.2
- * @internal
- */
-function amp_add_frontend_actions() {
-	add_action( 'wp_head', 'amp_add_amphtml_link' );
-}
-
-/**
  * Determine whether AMP is available for the current URL.
  *
  * @since 2.0
@@ -405,29 +332,84 @@ function amp_add_frontend_actions() {
 function amp_is_available() {
 	global $pagenow, $wp_query;
 
-	// Short-circuit for admin requests or requests to non-frontend pages.
-	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
+	// Short-circuit for cron, CLI, admin requests or requests to non-frontend pages.
+	if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) || is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php', 'repair.php' ], true ) ) {
 		return false;
 	}
 
-	$warn = function () {
-		static $warned = false;
-		if ( $warned ) {
+	$warn = static function () {
+		static $already_warned_sources = [];
+
+		try {
+			$likely_culprit_detector = Services::get( 'dev_tools.likely_culprit_detector' );
+			$closest_source          = $likely_culprit_detector->analyze_backtrace();
+		} catch ( InvalidService $e ) {
+			$closest_source = [
+				'type' => 'exception',
+				'name' => 'invalid_service',
+			];
+		}
+
+		$closest_source_identifier = $closest_source['type'] . ':' . $closest_source['name'];
+		if ( in_array( $closest_source_identifier, $already_warned_sources, true ) ) {
 			return;
 		}
+
 		$message = sprintf(
-			/* translators: %1$s: amp_is_available(), %2$s: amp_is_request(), %3$s: is_amp_endpoint(), %4$s: the current action, %5$s: the wp action, %6$s: the WP_Query class, %7$s: the amp_skip_post() function */
-			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly. WordPress is currently doing the "%4$s" action. Calling this function before the "%5$s" action means it will not have access to %6$s and the queried object to determine if it is an AMP response, thus neither the "%7$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
-			'amp_is_available()',
-			'amp_is_request()',
-			'is_amp_endpoint()',
-			current_action(),
-			'wp',
-			'WP_Query',
-			'amp_skip_post()'
+			/* translators: 1: amp_is_available() function, 2: amp_is_request() function, 3: is_amp_endpoint() function */
+			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly.', 'amp' ),
+			'`amp_is_available()`',
+			'`amp_is_request()`',
+			'`is_amp_endpoint()`'
 		);
+
+		$current_hook = current_action();
+		if ( $current_hook ) {
+			/* translators: placeholder is the current hook */
+			$message .= ' ' . sprintf(
+				'WordPress is currently doing the %s hook.',
+				'`' . $current_hook . '`'
+			);
+		} else {
+			$message .= ' ' . __( 'WordPress is not currently doing any hook.', 'amp' );
+		}
+
+		$message .= ' ' . sprintf(
+			/* translators: 1: the wp action, 2: the WP_Query class, 3: the amp_skip_post() function */
+			__( 'Calling this function before the %1$s action means it will not have access to %2$s and the queried object to determine if it is an AMP response, thus neither the %3$s filter nor the AMP enabled toggle will be considered.', 'amp' ),
+			'`wp`',
+			'`WP_Query`',
+			'`amp_skip_post()`'
+		);
+
+		if ( ! empty( $closest_source['type'] ) && ! empty( $closest_source['name'] ) ) {
+			$translated_string = false;
+
+			switch ( $closest_source['type'] ) {
+				case 'plugin':
+					/* translators: placeholder is the slug of the plugin */
+					$translated_string = __( 'It appears the plugin with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'mu-plugin':
+					/* translators: placeholder is the slug of the must-use plugin */
+					$translated_string = __( 'It appears the must-use plugin with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'theme':
+					/* translators: placeholder is the slug of the theme */
+					$translated_string = __( 'It appears the theme with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'exception':
+					$translated_string = __( 'The function was called too early (before the plugins_loaded action) to determine the plugin source.', 'amp' );
+					break;
+			}
+
+			if ( $translated_string ) {
+				$message .= ' ' . sprintf( $translated_string, '`' . $closest_source['name'] . '`' );
+			}
+		}
+
 		_doing_it_wrong( 'amp_is_available', esc_html( $message ), '2.0.0' );
-		$warned = true;
+		$already_warned_sources[] = $closest_source_identifier;
 	};
 
 	// Make sure the parse_request action has triggered before trying to read from the REST_REQUEST constant, which is set during rest_api_loaded().
@@ -549,30 +531,6 @@ function _amp_bootstrap_customizer() {
 }
 
 /**
- * Redirects the old AMP URL to the new AMP URL.
- *
- * If post slug is updated the amp page with old post slug will be redirected to the updated url.
- *
- * @since 0.5
- * @internal
- *
- * @param string $link New URL of the post.
- * @return string URL to be redirected.
- */
-function amp_redirect_old_slug_to_new_url( $link ) {
-
-	if ( amp_is_request() && ! amp_is_canonical() ) {
-		if ( ! amp_is_legacy() ) {
-			$link = add_query_arg( amp_get_slug(), '', $link );
-		} else {
-			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
-		}
-	}
-
-	return $link;
-}
-
-/**
  * Get the slug used in AMP for the query var, endpoint, and post type support.
  *
  * The return value can be overridden by previously defining a AMP_QUERY_VAR
@@ -618,6 +576,7 @@ function amp_get_current_url() {
 		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 	}
 	if ( ! isset( $parsed_url['host'] ) ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$parsed_url['host'] = isset( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
 	}
 
@@ -636,6 +595,7 @@ function amp_get_current_url() {
 	$current_url .= '/';
 
 	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
 	}
 	return esc_url_raw( $current_url );
@@ -644,99 +604,32 @@ function amp_get_current_url() {
 /**
  * Retrieves the full AMP-specific permalink for the given post ID.
  *
+ * On a site in Standard mode, this is the same as `get_permalink()`.
+ *
  * @since 0.1
  *
  * @param int $post_id Post ID.
  * @return string AMP permalink.
  */
 function amp_get_permalink( $post_id ) {
-
-	// When theme support is present (i.e. not using legacy Reader post templates), the plain query var should always be used.
-	if ( ! amp_is_legacy() ) {
-		$permalink = get_permalink( $post_id );
-		if ( ! amp_is_canonical() ) {
-			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
-		}
-		return $permalink;
-	}
-
-	/**
-	 * Filters the AMP permalink to short-circuit normal generation.
-	 *
-	 * Returning a non-false value in this filter will cause the `get_permalink()` to get called and the `amp_get_permalink` filter to not apply.
-	 *
-	 * @since 0.4
-	 * @since 1.0 This filter does not apply when 'amp' theme support is present.
-	 *
-	 * @param false $url     Short-circuited URL.
-	 * @param int   $post_id Post ID.
-	 */
-	$pre_url = apply_filters( 'amp_pre_get_permalink', false, $post_id );
-
-	if ( false !== $pre_url ) {
-		return $pre_url;
-	}
-
-	$permalink = get_permalink( $post_id );
-
 	if ( amp_is_canonical() ) {
-		$amp_url = $permalink;
-	} else {
-		$parsed_url    = wp_parse_url( get_permalink( $post_id ) );
-		$structure     = get_option( 'permalink_structure' );
-		$use_query_var = (
-			// If pretty permalinks aren't available, then query var must be used.
-			empty( $structure )
-			||
-			// If there are existing query vars, then always use the amp query var as well.
-			! empty( $parsed_url['query'] )
-			||
-			// If the post type is hierarchical then the /amp/ endpoint isn't available.
-			is_post_type_hierarchical( get_post_type( $post_id ) )
-			||
-			// Attachment pages don't accept the /amp/ endpoint.
-			'attachment' === get_post_type( $post_id )
-		);
-		if ( $use_query_var ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $permalink );
-		} else {
-			$amp_url = preg_replace( '/#.*/', '', $permalink );
-			$amp_url = trailingslashit( $amp_url ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
-			if ( ! empty( $parsed_url['fragment'] ) ) {
-				$amp_url .= '#' . $parsed_url['fragment'];
-			}
-		}
+		return get_permalink( $post_id );
 	}
-
-	/**
-	 * Filters AMP permalink.
-	 *
-	 * @since 0.2
-	 * @since 1.0 This filter does not apply when 'amp' theme support is present.
-	 *
-	 * @param false $amp_url AMP URL.
-	 * @param int   $post_id Post ID.
-	 */
-	return apply_filters( 'amp_get_permalink', $amp_url, $post_id );
+	return amp_add_paired_endpoint( get_permalink( $post_id ) );
 }
 
 /**
  * Remove the AMP endpoint (and query var) from a given URL.
  *
  * @since 0.7
+ * @since 2.1 Deprecated.
+ * @deprecated Use amp_remove_paired_endpoint() instead.
  *
  * @param string $url URL.
  * @return string URL with AMP stripped.
  */
 function amp_remove_endpoint( $url ) {
-
-	// Strip endpoint.
-	$url = preg_replace( ':/' . preg_quote( amp_get_slug(), ':' ) . '(?=/?(\?|#|$)):', '', $url );
-
-	// Strip query var.
-	$url = remove_query_arg( amp_get_slug(), $url );
-
-	return $url;
+	return amp_remove_paired_endpoint( $url );
 }
 
 /**
@@ -786,12 +679,7 @@ function amp_add_amphtml_link() {
 		return;
 	}
 
-	if ( AMP_Theme_Support::is_paired_available() ) {
-		$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
-	} else {
-		$amp_url = amp_get_permalink( get_queried_object_id() );
-	}
-
+	$amp_url = amp_add_paired_endpoint( amp_get_current_url() );
 	if ( $amp_url ) {
 		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
@@ -804,7 +692,7 @@ function amp_add_amphtml_link() {
  * @since 2.0 Formerly known as post_supports_amp().
  * @see AMP_Post_Type_Support::get_support_errors()
  *
- * @param WP_Post $post Post.
+ * @param WP_Post|int $post Post.
  * @return bool Whether the post supports AMP.
  */
 function amp_is_post_supported( $post ) {
@@ -846,13 +734,7 @@ function amp_is_request() {
 	$is_amp_url = (
 		amp_is_canonical()
 		||
-		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		||
-		(
-			$wp_query instanceof WP_Query
-			&&
-			false !== $wp_query->get( amp_get_slug(), false )
-		)
+		amp_has_paired_endpoint()
 	);
 
 	// If AMP is not available, then it's definitely not an AMP endpoint.
@@ -942,13 +824,24 @@ function amp_get_boilerplate_stylesheets() {
  * @internal
  */
 function amp_add_generator_metadata() {
-	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
+	$template_mode = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+	$reader_theme  = AMP_Options_Manager::get_option( Option::READER_THEME );
 
-	$mode     = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
-	$content .= sprintf( '; mode=%s', $mode );
+	// Account for case where the active theme has been switched to be the same as the reader theme.
+	// In this case, the behavior of the plugin is the same as transitional mode.
+	if (
+		AMP_Theme_Support::READER_MODE_SLUG === $template_mode
+		&&
+		get_stylesheet() === $reader_theme
+		&&
+		! Services::get( 'reader_theme_loader' )->is_enabled()
+	) {
+		$template_mode = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+	}
 
-	$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
-	if ( AMP_Theme_Support::READER_MODE_SLUG === $mode ) {
+	$content  = sprintf( 'AMP Plugin v%s', AMP__VERSION );
+	$content .= sprintf( '; mode=%s', $template_mode );
+	if ( AMP_Theme_Support::READER_MODE_SLUG === $template_mode ) {
 		$content .= sprintf( '; theme=%s', $reader_theme );
 	}
 
@@ -1376,7 +1269,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 /**
  * Determine whether AMP dev mode is enabled.
  *
- * When enabled, the <html> element will get the data-ampdevmode attribute and the plugin will add the same attribute
+ * When enabled, the `<html>` element will get the data-ampdevmode attribute and the plugin will add the same attribute
  * to elements associated with the admin bar and other elements that are provided by the `amp_dev_mode_element_xpaths`
  * filter.
  *
@@ -1394,7 +1287,7 @@ function amp_is_dev_mode() {
 	 * queries for the expressions returned by the 'amp_dev_mode_element_xpaths' filter.
 	 *
 	 * @since 1.3
-	 * @param bool Whether AMP dev mode is enabled.
+	 * @param bool $is_dev_mode_enabled Whether AMP dev mode is enabled.
 	 */
 	return apply_filters(
 		'amp_dev_mode_enabled',
@@ -1464,6 +1357,7 @@ function amp_get_content_sanitizers( $post = null ) {
 				'force_svg_support' => [], // Always replace 'no-svg' class with 'svg' if it exists.
 			],
 		],
+		'AMP_Srcset_Sanitizer'            => [],
 		'AMP_Img_Sanitizer'               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
@@ -1586,8 +1480,8 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 
-	// Force style sanitizer, meta sanitizer, and validating sanitizer to be at end.
-	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
+	// Force layout, style, meta, and validating sanitizers to be at the end.
+	foreach ( [ 'AMP_Layout_Sanitizer', 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];
 			unset( $sanitizers[ $class_name ] );
@@ -1855,15 +1749,14 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 
 	$is_amp_request = amp_is_request();
 
+	$current_url = remove_query_arg( array_merge( wp_removable_query_args(), [ QueryVar::NOAMP ] ), amp_get_current_url() );
 	if ( $is_amp_request ) {
-		$href = amp_remove_endpoint( amp_get_current_url() );
-	} elseif ( is_singular() ) {
-		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
+		$amp_url     = $current_url;
+		$non_amp_url = amp_remove_paired_endpoint( $current_url );
 	} else {
-		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+		$amp_url     = amp_add_paired_endpoint( $current_url );
+		$non_amp_url = $current_url;
 	}
-
-	$href = remove_query_arg( QueryVar::NOAMP, $href );
 
 	$icon = $is_amp_request ? Icon::logo() : Icon::link();
 	$attr = [
@@ -1875,7 +1768,10 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		[
 			'id'    => 'amp',
 			'title' => $icon->to_html( $attr ) . ' ' . esc_html__( 'AMP', 'amp' ),
-			'href'  => esc_url( $href ),
+			'href'  => esc_url( $is_amp_request ? $non_amp_url : $amp_url ),
+			'meta'  => [
+				'title' => esc_attr( $is_amp_request ? __( 'Validate URL', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			],
 		]
 	);
 
@@ -1884,7 +1780,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 			'parent' => 'amp',
 			'id'     => 'amp-view',
 			'title'  => esc_html( $is_amp_request ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
-			'href'   => esc_url( $href ),
+			'href'   => esc_url( $is_amp_request ? $non_amp_url : $amp_url ),
 		]
 	);
 
@@ -1928,4 +1824,40 @@ function amp_generate_script_hash( $script ) {
 		base64_encode( $sha384 ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	);
 	return 'sha384-' . $hash;
+}
+
+/**
+ * Turn a given URL into a paired AMP URL.
+ *
+ * @since 2.1
+ *
+ * @param string $url URL.
+ * @return string AMP URL.
+ */
+function amp_add_paired_endpoint( $url ) {
+	return Services::get( 'paired_routing' )->add_endpoint( $url );
+}
+
+/**
+ * Determine a given URL is for a paired AMP request.
+ *
+ * @since 2.1
+ *
+ * @param string $url URL to examine. If empty, will use the current URL.
+ * @return bool True if the AMP query parameter is set with the required value, false if not.
+ */
+function amp_has_paired_endpoint( $url = '' ) {
+	return Services::get( 'paired_routing' )->has_endpoint( $url );
+}
+
+/**
+ * Remove the paired AMP endpoint from a given URL.
+ *
+ * @since 2.1
+ *
+ * @param string $url URL.
+ * @return string URL with AMP stripped.
+ */
+function amp_remove_paired_endpoint( $url ) {
+	return Services::get( 'paired_routing' )->remove_endpoint( $url );
 }

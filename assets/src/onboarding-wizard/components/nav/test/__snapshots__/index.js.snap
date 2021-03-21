@@ -2,15 +2,16 @@
 
 exports[`Nav matches snapshot 1`] = `
 <div
-  className="onboarding-wizard-nav"
+  className="amp-settings-nav"
 >
   <div
-    className="onboarding-wizard-nav__inner"
+    className="amp-settings-nav__inner"
   >
     <div
-      className="onboarding-wizard-nav__close"
+      className="amp-settings-nav__close"
     >
       <a
+        aria-describedby={null}
         className="components-button is-link"
         href="http://site.test/wp-admin"
       >
@@ -52,14 +53,15 @@ exports[`Nav matches snapshot 1`] = `
       </a>
     </div>
     <div
-      className="onboarding-wizard-nav__prev-next"
+      className="amp-settings-nav__prev-next"
     >
       <span
-        className="onboarding-wizard-nav__placeholder"
+        className="amp-settings-nav__placeholder"
       >
          
       </span>
       <button
+        aria-describedby={null}
         className="components-button is-primary"
         disabled={false}
         id="next-button"

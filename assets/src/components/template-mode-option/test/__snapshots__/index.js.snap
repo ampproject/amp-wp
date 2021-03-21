@@ -114,6 +114,7 @@ exports[`TemplateModeOption matches snapshot 1`] = `
       className="components-panel__body-title"
     >
       <button
+        aria-describedby={null}
         aria-expanded={false}
         className="components-button components-panel__body-toggle"
         onClick={[Function]}
@@ -133,7 +134,7 @@ exports[`TemplateModeOption matches snapshot 1`] = `
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M17 9.4L12 14 7 9.4l-1 1.2 6 5.4 6-5.4z"
+              d="M17.5 11.6L12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z"
             />
           </svg>
         </span>
@@ -361,6 +362,7 @@ exports[`TemplateModeOption matches snapshot 2`] = `
       className="components-panel__body-title"
     >
       <button
+        aria-describedby={null}
         aria-expanded={true}
         className="components-button components-panel__body-toggle"
         onClick={[Function]}
@@ -380,7 +382,7 @@ exports[`TemplateModeOption matches snapshot 2`] = `
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M12 8l-6 5.4 1 1.2 5-4.6 5 4.6 1-1.2z"
+              d="M6.5 12.4L12 8l5.5 4.4-.9 1.2L12 10l-4.5 3.6-1-1.2z"
             />
           </svg>
         </span>
@@ -401,14 +403,14 @@ exports[`TemplateModeOption matches snapshot 2`] = `
           <span
             dangerouslySetInnerHTML={
               Object {
-                "__html": "Component details",
+                "__html": "Reader info",
               }
             }
           />
            
           <a
-            href="http://amp-wp.org"
-            rel="noreferrer"
+            href="https://amp-wp.org/documentation/getting-started/reader/"
+            rel="noreferrer noopener"
             target="_blank"
           >
             Learn more.
@@ -640,6 +642,7 @@ exports[`TemplateModeOption matches snapshot 3`] = `
       className="components-panel__body-title"
     >
       <button
+        aria-describedby={null}
         aria-expanded={true}
         className="components-button components-panel__body-toggle"
         onClick={[Function]}
@@ -659,7 +662,7 @@ exports[`TemplateModeOption matches snapshot 3`] = `
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M12 8l-6 5.4 1 1.2 5-4.6 5 4.6 1-1.2z"
+              d="M6.5 12.4L12 8l5.5 4.4-.9 1.2L12 10l-4.5 3.6-1-1.2z"
             />
           </svg>
         </span>
@@ -686,8 +689,8 @@ exports[`TemplateModeOption matches snapshot 3`] = `
           />
            
           <a
-            href="http://amp-wp.org"
-            rel="noreferrer"
+            href="https://amp-wp.org/documentation/getting-started/reader/"
+            rel="noreferrer noopener"
             target="_blank"
           >
             Learn more.

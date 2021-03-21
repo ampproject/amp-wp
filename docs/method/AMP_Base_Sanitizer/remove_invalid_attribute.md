@@ -21,7 +21,7 @@ Also, calls the mutation callback for it. This tracks all the attributes that we
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:504](../../includes/sanitizers/class-amp-base-sanitizer.php#L504-L532)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:505](/includes/sanitizers/class-amp-base-sanitizer.php#L505-L533)
 
 <details>
 <summary>Show Code</summary>

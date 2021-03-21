@@ -14,7 +14,9 @@ built
 /amphtml
 .env
 .idea/
-/lib/*/vendor/
-/lib/*/composer.lock
 /phpcs.xml
 /phpunit.xml
+/*.sql
+
+# Generated via bin/transform-readme.php
+/readme.txt

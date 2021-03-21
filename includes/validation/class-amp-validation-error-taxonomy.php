@@ -5,9 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Icon;
-use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Services;
 
 /**
@@ -205,6 +203,20 @@ class AMP_Validation_Error_Taxonomy {
 	const ERROR_STATUS = 'error_status';
 
 	/**
+	 * Key for the transient storing error index counts.
+	 *
+	 * @var string
+	 */
+	const TRANSIENT_KEY_ERROR_INDEX_COUNTS = 'amp_error_index_counts';
+
+	/**
+	 * Current row index for the validated URL's validation error being displayed.
+	 *
+	 * @var int
+	 */
+	protected static $current_validation_error_row_index = 0;
+
+	/**
 	 * Whether the terms_clauses filter should apply to a term query for validation errors to limit to a given status.
 	 *
 	 * This is set to false when calling wp_count_terms() for the admin menu and for the views.
@@ -220,7 +232,6 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return void
 	 */
 	public static function register() {
-		/** @var DevToolsUserAccess $dev_tools_user_access */
 		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
 
 		// Show in the admin menu if dev tools are enabled for the user or if the user is on any dev tools screen.
@@ -279,6 +290,10 @@ class AMP_Validation_Error_Taxonomy {
 		if ( is_admin() ) {
 			self::add_admin_hooks();
 		}
+
+		add_action( 'created_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
+		add_action( 'edited_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
+		add_action( 'delete_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
 	}
 
 	/**
@@ -315,6 +330,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function delete_empty_terms() {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$empty_term_ids = $wpdb->get_col(
 			$wpdb->prepare( "SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s AND count = 0", self::TAXONOMY_SLUG )
 		);
@@ -595,6 +611,16 @@ class AMP_Validation_Error_Taxonomy {
 			$args
 		);
 
+		$cache_key     = wp_json_encode( $args );
+		$cached_counts = get_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
+		if ( empty( $cached_counts ) ) {
+			$cached_counts = [];
+		}
+
+		if ( isset( $cached_counts[ $cache_key ] ) ) {
+			return $cached_counts[ $cache_key ];
+		}
+
 		$groups = null;
 		if ( isset( $args['group'] ) ) {
 			$groups = self::sanitize_term_status( $args['group'], [ 'multiple' => true ] );
@@ -613,7 +639,13 @@ class AMP_Validation_Error_Taxonomy {
 		if ( isset( $args['group'] ) ) {
 			remove_filter( 'terms_clauses', $filter );
 		}
-		return (int) $term_count;
+
+		$result = (int) $term_count;
+
+		$cached_counts[ $cache_key ] = $result;
+		set_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS, $cached_counts, DAY_IN_SECONDS );
+
+		return $result;
 	}
 
 	/**
@@ -1076,7 +1108,8 @@ class AMP_Validation_Error_Taxonomy {
 		// If the error status query var is valid, pass it along in the redirect $url.
 		$groups = [];
 		if ( isset( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$groups = self::sanitize_term_status( wp_unslash( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), [ 'multiple' => true ] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$groups = self::sanitize_term_status( wp_unslash( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), [ 'multiple' => true ] );
 		}
 		if ( ! empty( $groups ) ) {
 			$url = add_query_arg(
@@ -1098,7 +1131,8 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 		self::$should_filter_terms_clauses_for_error_validation_status = true;
-		$groups = self::sanitize_term_status( wp_unslash( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), [ 'multiple' => true ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$groups = self::sanitize_term_status( wp_unslash( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), [ 'multiple' => true ] );
 		if ( empty( $groups ) ) {
 			return;
 		}
@@ -1355,7 +1389,8 @@ class AMP_Validation_Error_Taxonomy {
 
 		$selected_groups = [];
 		if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$selected_groups = self::sanitize_term_status( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ], [ 'multiple' => true ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$selected_groups = self::sanitize_term_status( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ], [ 'multiple' => true ] );
 		}
 		if ( ! empty( $selected_groups ) ) {
 			sort( $selected_groups );
@@ -1486,6 +1521,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function render_clear_empty_button() {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->term_taxonomy WHERE taxonomy = %s AND count = 0", self::TAXONOMY_SLUG ) );
 		if ( $count > 0 ) {
 			wp_nonce_field( self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce', false );
@@ -1566,6 +1602,73 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Get the validation data and source info from the validated URL if available (as it should be).
+	 *
+	 * @param WP_Term $term Term.
+	 * @return array|null Validation data if successfully retrieved from the validated URL post, or else null.
+	 */
+	private static function get_current_validation_error_data_from_post( WP_Term $term ) {
+		$post = get_post();
+		if ( ! $post instanceof WP_Post || AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $post->post_type ) {
+			return null;
+		}
+
+		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $post );
+		if ( ! isset( $validation_errors[ self::$current_validation_error_row_index ] ) ) {
+			return null;
+		}
+
+		$validation_error = $validation_errors[ self::$current_validation_error_row_index ];
+		if ( $term->term_id !== $validation_error['term']->term_id ) {
+			return null;
+		}
+
+		return $validation_error['data'];
+	}
+
+	/**
+	 * Returns JSON-formatted error details for an error term.
+	 *
+	 * @param WP_Term $term Term.
+	 * @return string Encoded JSON.
+	 */
+	public static function get_error_details_json( WP_Term $term ) {
+		$validation_data = self::get_current_validation_error_data_from_post( $term );
+
+		// Fall back to obtaining the validation data from the term itself (without sources).
+		if ( null === $validation_data ) {
+			$validation_data = json_decode( $term->description, true );
+		}
+
+		// Total failure to obtain the validation data.
+		if ( ! is_array( $validation_data ) ) {
+			return wp_json_encode( [] );
+		}
+
+		// Convert the numeric constant value of the node_type to its constant name.
+		$xml_reader_reflection_class = new ReflectionClass( 'XMLReader' );
+		$constants                   = $xml_reader_reflection_class->getConstants();
+		foreach ( $constants as $key => $value ) {
+			if ( $validation_data['node_type'] === $value ) {
+				$validation_data['node_type'] = $key;
+				break;
+			}
+		}
+
+		$validation_data['removed']  = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+		$validation_data['reviewed'] = (bool) ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+
+		return wp_json_encode( $validation_data );
+	}
+
+	/**
+	 * Reset the index for the current validation error being displayed.
+	 */
+	public static function reset_validation_error_row_index() {
+		self::$current_validation_error_row_index = 0;
+	}
+
+	/**
 	 * Add row actions.
 	 *
 	 * @param array   $actions Actions.
@@ -1592,6 +1695,12 @@ class AMP_Validation_Error_Taxonomy {
 				'<button type="button" aria-label="%s" class="single-url-detail-toggle button-link">%s</button>',
 				esc_attr__( 'Toggle error details', 'amp' ),
 				esc_html__( 'Details', 'amp' )
+			);
+
+			$actions['copy'] = sprintf(
+				'<button type="button" class="single-url-detail-copy button-link" data-error-json="%s">%s</button>',
+				esc_attr( self::get_error_details_json( $term ) ),
+				esc_html__( 'Copy to clipboard', 'amp' )
 			);
 		} elseif ( 'edit-tags.php' === $pagenow ) {
 			$actions['details'] = sprintf(
@@ -1620,7 +1729,9 @@ class AMP_Validation_Error_Taxonomy {
 			}
 		}
 
-		$actions = wp_array_slice_assoc( $actions, [ 'details', 'delete' ] );
+		$actions = wp_array_slice_assoc( $actions, [ 'details', 'delete', 'copy' ] );
+
+		self::$current_validation_error_row_index++;
 
 		return $actions;
 	}
@@ -1630,14 +1741,8 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function add_admin_menu_validation_error_item() {
 		$menu_item_label = esc_html__( 'Error Index', 'amp' );
-		$new_error_count = self::get_validation_error_count(
-			[
-				'group' => [ self::VALIDATION_ERROR_NEW_REJECTED_STATUS, self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ],
-			]
-		);
-		if ( $new_error_count ) {
-			$menu_item_label .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $new_error_count ) ) . '</span></span>';
-		}
+		// Append markup to display a loading spinner while the unreviewed count is being fetched.
+		$menu_item_label .= ' <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>';
 
 		$post_menu_slug = 'edit.php?post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
 		$term_menu_slug = 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
@@ -2125,7 +2230,7 @@ class AMP_Validation_Error_Taxonomy {
 				?>
 				<dt><?php echo esc_html( self::get_source_key_label( $key, $validation_error ) ); ?></dt>
 				<dd class="detailed">
-					<?php if ( in_array( $key, [ 'node_name', 'parent_name', 'required_parent_name', 'required_attr_value' ], true ) ) : ?>
+					<?php if ( in_array( $key, [ 'node_name', 'parent_name', 'required_parent_name', 'required_attr_value', 'css_selector', 'class_name' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
 					<?php elseif ( 'css_property_name' === $key ) : ?>
 						<?php
@@ -2225,7 +2330,6 @@ class AMP_Validation_Error_Taxonomy {
 				</dd>
 			<?php endforeach; ?>
 		</dl>
-
 		<?php
 
 		$output = ob_get_clean();
@@ -2333,7 +2437,6 @@ class AMP_Validation_Error_Taxonomy {
 		// Fall back to using the theme/plugin editors if no external editor is offered.
 		if ( ! $edit_url ) {
 			if ( 'plugin' === $source['type'] && current_user_can( 'edit_plugins' ) ) {
-				/** @var PluginRegistry $plugin_registry */
 				$plugin_registry = Services::get( 'plugin_registry' );
 				$plugin          = $plugin_registry->get_plugin_from_slug( $source['name'] );
 				if ( $plugin ) {
@@ -2387,7 +2490,6 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				break;
 			case 'plugin':
-				/** @var PluginRegistry $plugin_registry */
 				$plugin_registry = Services::get( 'plugin_registry' );
 				$plugin          = $plugin_registry->get_plugin_from_slug( $name );
 				if ( $plugin && ! empty( $plugin['data']['Name'] ) ) {
@@ -2969,6 +3071,14 @@ class AMP_Validation_Error_Taxonomy {
 					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['css_property_name'] ) );
 				}
 				return $title;
+			case AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR:
+				return esc_html__( 'Illegal CSS selector', 'amp' );
+			case AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME:
+				$title = esc_html__( 'Disallowed class name', 'amp' );
+				if ( isset( $validation_error['class_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['class_name'] ) );
+				}
+				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG:
 			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS:
@@ -3134,10 +3244,9 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX:
 				return sprintf(
-					/* translators: %1$s is the attribute name, %2$s is the invalid attribute value */
-					esc_html__( 'The attribute %1$s is set to the invalid value %2$s', 'amp' ),
-					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
-					'<code>' . esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) . '</code>'
+					/* translators: %s is the attribute name */
+					esc_html__( 'The attribute %s is set to an invalid value', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL:
@@ -3174,6 +3283,14 @@ class AMP_Validation_Error_Taxonomy {
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
+			case AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSIONS:
+				return sprintf(
+					/* translators: %1$s is the attribute name, %2$s is the tag name */
+					esc_html__( 'Multiple image candidates with the same width or pixel density found in attribute %1$s in tag %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['parent_name'] ) . '</code>'
+				);
+
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_HEIGHT:
@@ -3181,12 +3298,20 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_FIXED_HEIGHT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_WIDTH:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHTS:
-				return sprintf(
-					/* translators: %1$s is the invalid attribute value, %2$s is the attribute name */
-					esc_html__( 'Invalid value %1$s for attribute %2$s', 'amp' ),
-					'<code>' . esc_html( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) . '</code>',
-					'<code>' . esc_html( $validation_error['attribute'] ) . '</code>'
-				);
+				if ( isset( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) ) {
+					return sprintf(
+						/* translators: %1$s is the invalid attribute value, %2$s is the attribute name */
+						esc_html__( 'Invalid value %1$s for attribute %2$s', 'amp' ),
+						'<code>' . esc_html( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) . '</code>',
+						'<code>' . esc_html( $validation_error['attribute'] ) . '</code>'
+					);
+				} else {
+					return sprintf(
+						/* translators: %s is the invalid attribute value */
+						esc_html__( 'Invalid or missing value for attribute %s', 'amp' ),
+						'<code>' . esc_html( $validation_error['attribute'] ) . '</code>'
+					);
+				}
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS:
 				return esc_html__( 'Inconsistent units for width and height', 'amp' );
@@ -3250,6 +3375,10 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Parent element', 'amp' );
 			case 'css_property_name':
 				return __( 'CSS property', 'amp' );
+			case 'css_selector':
+				return __( 'CSS selector', 'amp' );
+			case 'class_name':
+				return __( 'Class name', 'amp' );
 			case 'duplicate_oneof_attrs':
 				return __( 'Mutually exclusive attributes', 'amp' );
 			case 'text':
@@ -3303,6 +3432,8 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'URL', 'amp' );
 			case 'message':
 				return __( 'Message', 'amp' );
+			case 'duplicate_dimensions':
+				return __( 'Duplicate dimensions', 'amp' );
 			default:
 				return $key;
 		}
@@ -3337,5 +3468,12 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		return sprintf( '<span class="status-text">%s %s</span>', $icon->to_html(), esc_html( $text ) );
+	}
+
+	/**
+	 * Deletes cached term counts.
+	 */
+	public static function clear_cached_counts() {
+		delete_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
 	}
 }

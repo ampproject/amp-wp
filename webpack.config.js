@@ -22,6 +22,23 @@ const sharedConfig = {
 		filename: '[name].js',
 		chunkFilename: '[name].js',
 	},
+	// TODO: Remove the `module` override once @wordpress/scripts upgrades to PostCSS 8.
+	module: {
+		...defaultConfig.module,
+		rules: defaultConfig.module.rules.map(
+			( rule ) => {
+				const postCssLoader = Array.isArray( rule.use ) && rule.use.find(
+					( loader ) => loader.loader && loader.loader.includes( 'postcss-loader' ),
+				);
+
+				if ( postCssLoader ) {
+					postCssLoader.loader = 'postcss-loader';
+				}
+
+				return rule;
+			},
+		),
+	},
 	plugins: [
 		...defaultConfig.plugins
 			.map(
@@ -62,6 +79,7 @@ const ampValidation = {
 		'amp-validated-urls-index': './assets/src/amp-validation/amp-validated-urls-index.js',
 		'amp-validation-detail-toggle': './assets/src/amp-validation/amp-validation-detail-toggle.js',
 		'amp-validation-single-error-url-details': './assets/src/amp-validation/amp-validation-single-error-url-details.js',
+		'amp-validation-counts': './assets/src/amp-validation/counts/index.js',
 	},
 	plugins: [
 		...sharedConfig.plugins,
@@ -77,6 +95,7 @@ const blockEditor = {
 	externals: {
 		// Make localized data importable.
 		'amp-block-editor-data': 'ampBlockEditor',
+		'amp-block-validation': 'ampBlockValidation',
 	},
 	entry: {
 		'amp-block-editor': './assets/src/block-editor/index.js',
@@ -234,6 +253,7 @@ const setup = {
 					case '@wordpress/dom-ready':
 					case '@wordpress/html-entities':
 					case '@wordpress/url':
+					case '@wordpress/i18n':
 						return defaultRequestToHandle( handle );
 
 					default:
@@ -247,6 +267,7 @@ const setup = {
 					case '@wordpress/dom-ready':
 					case '@wordpress/html-entities':
 					case '@wordpress/url':
+					case '@wordpress/i18n':
 						return defaultRequestToExternal( external );
 
 					default:
@@ -293,6 +314,7 @@ const settingsPage = {
 				switch ( handle ) {
 					case 'lodash':
 					case '@wordpress/api-fetch':
+					case '@wordpress/i18n':
 						return defaultRequestToHandle( handle );
 
 					default:
@@ -303,6 +325,7 @@ const settingsPage = {
 				switch ( external ) {
 					case 'lodash':
 					case '@wordpress/api-fetch':
+					case '@wordpress/i18n':
 						return defaultRequestToExternal( external );
 
 					default:

@@ -17,7 +17,7 @@ Check whether or not sanitization should occur in response to validation error.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:543](../../includes/sanitizers/class-amp-base-sanitizer.php#L543-L549)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:544](/includes/sanitizers/class-amp-base-sanitizer.php#L544-L550)
 
 <details>
 <summary>Show Code</summary>

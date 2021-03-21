@@ -8,6 +8,7 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
@@ -82,7 +83,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		remove_theme_support( 'custom-header' );
 		$_REQUEST                = []; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		$_SERVER['QUERY_STRING'] = '';
-		unset( $_SERVER['REQUEST_URI'] );
+		$_SERVER['REQUEST_URI']  = '';
 		unset( $_SERVER['REQUEST_METHOD'] );
 		unset( $GLOBALS['content_width'] );
 		if ( isset( $GLOBALS['wp_customize'] ) ) {
@@ -214,22 +215,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$post_id = self::factory()->post->create( [ 'post_title' => 'Test' ] );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 
-		// Test transitional mode singular, where not on endpoint that it causes amphtml link to be added.
-		remove_action( 'wp_head', 'amp_add_amphtml_link' );
+		// Test transitional mode singular.
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertFalse( amp_is_request() );
 		AMP_Theme_Support::finish_init();
-		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
-		// Test transitional mode homepage, where still not on endpoint that it causes amphtml link to be added.
-		remove_action( 'wp_head', 'amp_add_amphtml_link' );
+		// Test transitional mode homepage.
 		$this->go_to( home_url() );
 		$this->assertFalse( amp_is_request() );
 		AMP_Theme_Support::finish_init();
-		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
 		// Test canonical, so amphtml link is not added and init finalizes.
-		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
@@ -240,7 +236,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( amp_is_request() );
 		AMP_Theme_Support::finish_init();
-		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 		$this->assertEquals( 10, has_filter( 'index_template_hierarchy', [ 'AMP_Theme_Support', 'filter_amp_template_hierarchy' ] ), 'Expected add_amp_template_filters to have been called since template_dir is not empty' );
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ), 'Expected add_hooks to have been called' );
 		$this->assertTrue( current_theme_supports( 'amp' ) );
@@ -279,171 +274,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->go_to( amp_get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
 		$this->assertTrue( current_theme_supports( 'amp' ) );
-	}
-
-	/**
-	 * Test that attempting to access an AMP post in Reader mode that does not support AMP.
-	 *
-	 * @covers AMP_Theme_Support::finish_init()
-	 */
-	public function test_finish_init_when_accessing_singular_post_that_does_not_support_amp() {
-		$post          = self::factory()->post->create();
-		$requested_url = get_permalink( $post );
-		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-		$this->assertTrue( amp_is_post_supported( $post ) );
-		add_filter( 'amp_skip_post', '__return_true' );
-		$this->assertFalse( amp_is_post_supported( $post ) );
-
-		$redirected = false;
-		add_filter(
-			'wp_redirect',
-			function ( $url ) use ( $requested_url, &$redirected ) {
-				$this->assertEquals( $requested_url, $url );
-				$redirected = true;
-				return null;
-			}
-		);
-		$this->go_to( amp_get_permalink( $post ) );
-		$this->assertTrue( $redirected );
-	}
-
-	/**
-	 * Test that attempting to access an AMP page in Reader Mode for a non-singular query will redirect to the non-AMP version.
-	 *
-	 * @covers AMP_Theme_Support::finish_init()
-	 */
-	public function test_finish_init_when_accessing_non_singular_amp_page_in_reader_mode() {
-		$requested_url = home_url( '/?s=hello' );
-		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-		$redirected = false;
-		add_filter(
-			'wp_redirect',
-			function ( $url ) use ( $requested_url, &$redirected ) {
-				$this->assertEquals( $requested_url, $url );
-				$redirected = true;
-				return null;
-			}
-		);
-		$this->go_to( add_query_arg( amp_get_slug(), '', $requested_url ) );
-		$this->assertTrue( $redirected );
-	}
-
-	/**
-	 * Test ensure_proper_amp_location for canonical.
-	 *
-	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
-	 */
-	public function test_ensure_proper_amp_location_canonical() {
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$e = null;
-
-		// Already canonical.
-		$_SERVER['REQUEST_URI'] = '/foo/bar/';
-		$this->assertFalse( AMP_Theme_Support::ensure_proper_amp_location( false ) );
-
-		// URL query param.
-		$_GET[ amp_get_slug() ] = '';
-		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
-		try {
-			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
-		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
-		$this->assertStringContains( 'headers already sent', $e->getMessage() );
-		$e = null;
-
-		// Endpoint.
-		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		set_query_var( amp_get_slug(), '' );
-		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
-		try {
-			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
-		$this->assertStringContains( 'headers already sent', $e->getMessage() );
-		$e = null;
-	}
-
-	/**
-	 * Test ensure_proper_amp_location for transitional.
-	 *
-	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
-	 */
-	public function test_ensure_proper_amp_location_transitional() {
-		add_theme_support(
-			AMP_Theme_Support::SLUG,
-			[
-				'template_dir' => './',
-			]
-		);
-		$e = null;
-
-		// URL query param, no redirection.
-		$_GET[ amp_get_slug() ] = '';
-		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
-		$this->assertFalse( AMP_Theme_Support::ensure_proper_amp_location( false ) );
-
-		// Endpoint, redirect.
-		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		set_query_var( amp_get_slug(), '' );
-		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
-		try {
-			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location( false ) );
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
-		$this->assertStringContains( 'headers already sent', $e->getMessage() );
-	}
-
-	/**
-	 * Test redirect_non_amp_url.
-	 *
-	 * @covers AMP_Theme_Support::redirect_non_amp_url()
-	 */
-	public function test_redirect_non_amp_url() {
-		$e = null;
-
-		$redirect_status_code = null;
-		add_filter(
-			'wp_redirect_status',
-			static function( $code ) use ( &$redirect_status_code ) {
-				$redirect_status_code = $code;
-				return $code;
-			},
-			PHP_INT_MAX
-		);
-
-		// Try AMP URL param.
-		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
-		try {
-			$redirect_status_code = null;
-			$this->assertTrue( AMP_Theme_Support::redirect_non_amp_url( 302 ) );
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
-		$this->assertTrue( isset( $e ) );
-		$this->assertStringContains( 'headers already sent', $e->getMessage() );
-		$this->assertSame( 302, $redirect_status_code );
-		$e = null;
-
-		// Try AMP URL endpoint.
-		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
-		try {
-			$redirect_status_code = null;
-			$this->assertTrue( AMP_Theme_Support::redirect_non_amp_url( 301 ) );
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
-		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
-		$this->assertStringContains( 'headers already sent', $e->getMessage() );
-		$this->assertSame( 301, $redirect_status_code );
-		$e = null;
-
-		// Make sure that if the URL doesn't have AMP that there should be no redirect.
-		$_SERVER['REQUEST_URI'] = '/foo/bar';
-		$this->assertFalse( AMP_Theme_Support::redirect_non_amp_url() );
 	}
 
 	/**
@@ -948,9 +778,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_form_defaults', [ self::TESTED_CLASS, 'filter_comment_form_defaults' ] ) );
 		$this->assertEquals( 10, has_filter( 'comment_reply_link', [ self::TESTED_CLASS, 'filter_comment_reply_link' ] ) );
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', [ self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ] ) );
-		$this->assertEquals( 100, has_action( 'comment_form', [ self::TESTED_CLASS, 'amend_comment_form' ] ) );
-		$this->assertEquals( 10, has_filter( 'get_comments_link', [ self::TESTED_CLASS, 'amend_comments_link' ] ) );
-		$this->assertEquals( 10, has_filter( 'respond_link', [ self::TESTED_CLASS, 'amend_comments_link' ] ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', [ self::TESTED_CLASS, 'amend_header_image_with_video_header' ] ) );
 	}
@@ -970,63 +797,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$property = $this->get_private_property( $embed_handler, 'args' );
 			$this->assertEquals( $content_width, $property['content_max_width'] );
 		}
-	}
-
-	/**
-	 * Test amend_comment_form().
-	 *
-	 * @covers AMP_Theme_Support::amend_comment_form()
-	 */
-	public function test_amend_comment_form() {
-		$post_id = self::factory()->post->create();
-		$this->go_to( get_permalink( $post_id ) );
-		$this->assertTrue( is_singular() );
-
-		// Test AMP-first.
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->assertTrue( amp_is_canonical() );
-		$output = get_echo( [ 'AMP_Theme_Support', 'amend_comment_form' ] );
-		$this->assertStringNotContains( '<input type="hidden" name="redirect_to"', $output );
-
-		// Test transitional AMP.
-		delete_option( AMP_Options_Manager::OPTION_NAME );
-		add_theme_support(
-			AMP_Theme_Support::SLUG,
-			[
-				'template_dir' => 'amp-templates',
-			]
-		);
-		$this->assertFalse( amp_is_canonical() );
-		$output = get_echo( [ 'AMP_Theme_Support', 'amend_comment_form' ] );
-		$this->assertStringContains( '<input type="hidden" name="redirect_to"', $output );
-	}
-
-	/**
-	 * Test amend_comments_link().
-	 *
-	 * @covers AMP_Theme_Support::amend_comments_link
-	 */
-	public function test_amend_comments_link() {
-		$post_id       = self::factory()->post->create();
-		$comments_link = get_comments_link( $post_id );
-
-		// Test Transitional mode.
-		$this->set_template_mode( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->assertStringEndsNotWith( 'noamp=mobile#respond', AMP_Theme_Support::amend_comments_link( $comments_link ) );
-
-		// Test legacy reader mode without mobile redirection.
-		delete_option( AMP_Options_Manager::OPTION_NAME );
-		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
-		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, false );
-		$this->assertStringEndsNotWith( 'noamp=mobile#respond', AMP_Theme_Support::amend_comments_link( $comments_link ) );
-
-		// Test legacy Reader mode with mobile redirection.
-		delete_option( AMP_Options_Manager::OPTION_NAME );
-		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
-		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
-		$this->assertStringEndsWith( 'noamp=mobile#respond', AMP_Theme_Support::amend_comments_link( $comments_link ) );
 	}
 
 	/**
@@ -1059,25 +829,48 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_current_canonical_url.
+	 * Test get_current_canonical_url when using Standard mode.
 	 *
 	 * @covers AMP_Theme_Support::get_current_canonical_url()
 	 */
-	public function test_get_current_canonical_url() {
-		global $post, $wp;
-		$home_url = home_url( '/' );
-		$this->assertEquals( $home_url, AMP_Theme_Support::get_current_canonical_url() );
+	public function test_get_current_canonical_url_in_standard_mode() {
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 
-		$added_query_vars = [
-			'foo' => 'bar',
-		];
-		$wp->query_vars   = $added_query_vars;
-		$this->assertEquals( add_query_arg( $added_query_vars, $home_url ), AMP_Theme_Support::get_current_canonical_url() );
+		$post = self::factory()->post->create_and_get(
+			[
+				'post_type'   => 'post',
+				'post_name'   => amp_get_slug(),
+				'post_status' => 'publish',
+			]
+		);
 
-		$post = self::factory()->post->create_and_get();
-		$this->go_to( get_permalink( $post ) );
-		$this->assertEquals( wp_get_canonical_url(), AMP_Theme_Support::get_current_canonical_url() );
+		$current_url = home_url( get_permalink( $post ) );
+		$this->go_to( $current_url );
+		$this->assertEquals( $current_url, AMP_Theme_Support::get_current_canonical_url() );
+	}
 
+	/**
+	 * Test get_current_canonical_url when using Transitional mode (a Paired AMP mode).
+	 *
+	 * @covers AMP_Theme_Support::get_current_canonical_url()
+	 */
+	public function test_get_current_canonical_url_in_paired_amp() {
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+
+		$post = self::factory()->post->create_and_get(
+			[
+				'post_type'   => 'post',
+				'post_name'   => amp_get_slug(),
+				'post_status' => 'publish',
+			]
+		);
+
+		$canonical_url = get_permalink( $post );
+		$amphtml_url   = amp_add_paired_endpoint( $canonical_url );
+		$this->go_to( $amphtml_url );
+		$this->assertEquals( $canonical_url, AMP_Theme_Support::get_current_canonical_url() );
 	}
 
 	/**
@@ -1396,40 +1189,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				},
 			],
 
-			'admin_bar_scripts_have_dev_mode_with_paired_browsing_client' => [
-				static function () {
-					AMP_Theme_Support::setup_paired_browsing_client();
-					wp_enqueue_script( 'admin-bar' );
-					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
-				},
-				function ( DOMXPath $xpath ) {
-					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
-					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
-					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/amp-paired-browsing-client" ) ]' );
-					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
-						$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
-					}
-				},
-			],
-
-			'admin_bar_scripts_have_dev_mode_with_paired_browsing_app' => [
-				static function () {
-					$_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] = 1;
-					AMP_Theme_Support::serve_paired_browsing_experience( 'foo' );
-					unset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					wp_enqueue_script( 'admin-bar' );
-					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
-				},
-				function ( DOMXPath $xpath ) {
-					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
-					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
-					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/amp-paired-browsing-app" ) ]' );
-					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
-						$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
-					}
-				},
-			],
-
 			'hoverintent_enqueued_prevents_dev_mode' => [
 				function () {
 					if ( ! wp_script_is( 'hoverintent-js', 'registered' ) ) {
@@ -1570,7 +1329,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html = ob_get_clean();
 		$html          = AMP_Theme_Support::prepare_response( $original_html );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
 		$scripts = $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
 		$this->assertSame( 3, $scripts->length );
@@ -1630,7 +1389,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
 		/** @var DOMElement $script Script. */
 		$actual_script_srcs = [];
@@ -1683,7 +1442,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
 		$script_srcs = [];
 		/**
@@ -1880,7 +1639,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$ordered_contains = [
 			'<html amp=""',
-			'<meta charset="' . Document::AMP_ENCODING . '">',
+			'<meta charset="' . Document\Encoding::AMP . '">',
 			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',
@@ -2088,6 +1847,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		</head>
 		<body><!-- </body></html> -->
 		<div id="dynamic-id-0"></div>
+		<!-- 2nd image is needed for testing <noscript> as first is SSR'ed -->
+		<img width="100" height="100" src="https://example.com/hero.png">
 		<img width="100" height="100" src="https://example.com/test.png">
 		<audio src="https://example.com/audios/myaudio.mp3"></audio>
 		<amp-ad type="a9"
@@ -2120,20 +1881,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Returns the "Server-Timing" headers.
-	 *
-	 * @return array Server-Timing headers.
-	 */
-	private function get_server_timing_headers() {
-		return array_filter(
-			AMP_HTTP::$headers_sent,
-			static function( $header ) {
-				return 'Server-Timing' === $header['name'];
-			}
-		);
-	}
-
-	/**
 	 * Test prepare_response for responses that do not trigger standard template actions.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
@@ -2145,9 +1892,49 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
-		// HTML bit no template actions triggered.
+		// JSON.
+		$input = '{"success":true}';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// Nothing, for redirect.
+		$input = '';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML, but a fragment.
+		$input = '<ul><li>one</li><li>two</li><li>three</li></ul>';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML, but still a fragment.
+		$input = '<html><header><h1>HellO!</h1></header></html>';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML but no template actions triggered.
 		$input = '<html><head></head></html>';
 		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML with AMP attribute.
+		$input  = '<html amp><head></head>Hello</html>';
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		// HTML with AMP emoji attribute.
+		$input  = '<html ⚡><head></head>Hello</html>';
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		// HTML with alternative AMP emoji attribute.
+		$input  = '<html lang="en-US" ⚡️ foo="" bar="baz"><head></head>Hello</html>';
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html lang="en-US" amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		// HTML with doctype, comments, and whitespace before head.
+		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\namp>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
 
 		$get_do_action = static function ( $action ) {
 			return get_echo( 'do_action', [ $action ] );
@@ -2160,6 +1947,51 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$this->assertStringContains( '<html amp', $output );
 			$this->assertStringContains( '<meta charset="utf-8">', $output );
 		}
+	}
+
+	/**
+	 * Test prepare_response for responses that throw an exception.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_throwing_exception() {
+		// Set up temporary capture of error log to test error log output.
+		$capture = tmpfile();
+		$backup  = ini_set( // phpcs:ignore WordPress.PHP.IniSet.Risky
+			'error_log',
+			stream_get_meta_data( $capture )['uri']
+		);
+
+		add_filter(
+			'amp_schemaorg_metadata',
+			static function () {
+				throw new RuntimeException( 'FAILURE', 42 );
+			}
+		);
+
+		if ( ! function_exists( 'newrelic_disable_autorum' ) ) {
+
+			/**
+			 * Define newrelic_disable_autorum to allow passing line.
+			 */
+			function newrelic_disable_autorum() {
+				return true;
+			}
+		}
+
+		wp();
+		$output = AMP_Theme_Support::finish_output_buffering( $this->get_original_html() );
+
+		// Verify that error log was properly populated.
+		$this->assertRegExp(
+			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- FAILURE \(42\) \[RuntimeException\].*/',
+			stream_get_contents( $capture )
+		);
+
+		// Reset error log back to initial settings.
+		ini_set( 'error_log', $backup ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+
+		$this->assertStringContains( 'Failed to prepare AMP page', $output );
 	}
 
 	/**
@@ -2176,7 +2008,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				AMP_Theme_Support::PAIRED_FLAG => true,
 			]
 		);
-		$this->go_to( home_url( '/?amp' ) );
+		$this->go_to( home_url( '/?amp=1' ) );
 		add_filter(
 			'amp_content_sanitizers',
 			static function( $sanitizers ) {
@@ -2251,89 +2083,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
 		$this->assertContains( $style_slug, wp_styles()->queue );
-	}
-
-	/**
-	 * Test the enqueuing in setup_paired_browsing_client().
-	 *
-	 * @covers AMP_Theme_Support::setup_paired_browsing_client()
-	 */
-	public function test_setup_paired_browsing_client_enqueuing() {
-		$handle = 'amp-paired-browsing-client';
-
-		// The conditions aren't met, so this should not enqueue the script.
-		$_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] = '1';
-		AMP_Theme_Support::setup_paired_browsing_client();
-		$this->assertFalse( wp_script_is( $handle ) );
-
-		// Only one condition is met, so this should still not enqueue the script.
-		unset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		AMP_Theme_Support::setup_paired_browsing_client();
-		$this->assertFalse( wp_script_is( $handle ) );
-
-		// Both of the conditions to enqueue are met.
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-		AMP_Theme_Support::setup_paired_browsing_client();
-		$this->assertTrue( wp_script_is( $handle ) );
-	}
-
-	/**
-	 * Gets the test data for test_setup_paired_browsing_client_filter().
-	 *
-	 * @return array The test data.
-	 */
-	public function get_setup_paired_browsing_data() {
-		$original_script_tag      = '<script src="foo"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$script_tag_with_dev_mode = '<script data-ampdevmode src="foo"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-
-		return [
-			'no_parent_of_dependency'      => [
-				'',
-				$original_script_tag,
-				null,
-			],
-			'wrong_parent_of_dependency'   => [
-				'different-handle-completely',
-				$original_script_tag,
-				null,
-			],
-			'correct_parent_of_dependency' => [
-				'amp-paired-browsing-client',
-				$original_script_tag,
-				$script_tag_with_dev_mode,
-			],
-		];
-	}
-
-	/**
-	 * Test the filter in setup_paired_browsing_client().
-	 *
-	 * @dataProvider get_setup_paired_browsing_data
-	 * @covers AMP_Theme_Support::setup_paired_browsing_client()
-	 *
-	 * @param string $parent_of_dependency The script that has a dependency on the dependency handle.
-	 * @param string $original_script_tag  The <script> tag passed to the filter.
-	 * @param string $expected             The expected return value.
-	 */
-	public function test_setup_paired_browsing_client_filter( $parent_of_dependency, $original_script_tag, $expected ) {
-		if ( null === $expected ) {
-			$expected = $original_script_tag;
-		}
-
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->go_to( get_permalink( self::factory()->post->create() ) );
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-		$src               = 'https://example.com/script.js';
-		$dependency_handle = 'foo-handle';
-
-		wp_enqueue_script( $dependency_handle, $src, [], '0.1.0', true );
-		wp_enqueue_script( $parent_of_dependency, $src, [ $dependency_handle ], '0.1', true );
-		AMP_Theme_Support::setup_paired_browsing_client();
-
-		$this->assertEquals(
-			$expected,
-			apply_filters( 'script_loader_tag', $original_script_tag, $dependency_handle, '' )
-		);
 	}
 
 	/**

@@ -11,7 +11,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { enforceFileType, getNoticeTemplate } from '../helpers';
+import { enforceFileType, getNoticeTemplate, hasMinimumDimensions } from '../helpers';
 
 const { wp } = window;
 
@@ -27,14 +27,33 @@ const NOTICE_CLASSNAME = 'notice notice-warning notice-alt inline';
 const FeaturedImageSelectionError = wp.media.View.extend( {
 	className: NOTICE_CLASSNAME,
 	template: ( () => {
-		const message = sprintf(
-			/* translators: 1: image width in pixels. 2: image height in pixels. 3: required minimum width in pixels. 4: required minimum height in pixels. */
-			__( 'The selected image is too small (%1$s by %2$s pixels). It should have a size of at least %3$s by %4$s pixels.', 'amp' ),
+		let message = sprintf(
+			/* translators: 1: image width in pixels. 2: image height in pixels. */
+			__( 'The selected image is too small (%1$s by %2$s pixels).', 'amp' ),
 			'{{width}}',
 			'{{height}}',
+		);
+
+		message += ' <# if ( minWidth && minHeight ) { #>';
+		message += sprintf(
+			/* translators: 1: required minimum width in pixels. 2: required minimum height in pixels. */
+			__( 'It should have a size of at least %1$s by %2$s pixels.', 'amp' ),
 			'{{minWidth}}',
 			'{{minHeight}}',
 		);
+		message += '<# } else if ( minWidth ) { #>';
+		message += sprintf(
+			/* translators: placeholder is required minimum width in pixels. */
+			__( 'It should have a width of at least %s pixels.', 'amp' ),
+			'{{minWidth}}',
+		);
+		message += '<# } else if ( minHeight ) { #>';
+		message += sprintf(
+			/* translators: placeholder is required minimum height in pixels. */
+			__( 'It should have a height of at least %s pixels.', 'amp' ),
+			'{{minHeight}}',
+		);
+		message += '<# } #>';
 
 		return getNoticeTemplate( message );
 	} )(),
@@ -117,7 +136,16 @@ export const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 			! attachment ||
 			'image' !== attachment.get( 'type' ) ||
 			! attachment.get( 'width' ) ||
-			( attachment.get( 'width' ) >= minWidth && attachment.get( 'height' ) >= minHeight )
+			hasMinimumDimensions(
+				{
+					width: attachment.get( 'width' ),
+					height: attachment.get( 'height' ),
+				},
+				{
+					width: minWidth,
+					height: minHeight,
+				},
+			)
 		) {
 			this.secondary.unset( 'select-error' );
 		} else {

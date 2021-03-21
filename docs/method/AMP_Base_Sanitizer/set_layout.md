@@ -16,7 +16,7 @@ Sets the layout, and possibly the &#039;height&#039; and &#039;width&#039; attri
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:283](../../includes/sanitizers/class-amp-base-sanitizer.php#L283-L357)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:283](/includes/sanitizers/class-amp-base-sanitizer.php#L283-L358)
 
 <details>
 <summary>Show Code</summary>
@@ -60,6 +60,7 @@ public function set_layout( $attributes ) {
 				$attributes['style'] = $this->reassemble_style_string( $styles );
 			}
 			$attributes['layout'] = 'fill';
+			unset( $attributes['height'], $attributes['width'] );
 			return $attributes;
 		}
 		// Apply fill layout if width & height are 100%.

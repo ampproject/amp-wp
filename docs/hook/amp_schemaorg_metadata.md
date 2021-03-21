@@ -1,8 +1,20 @@
-## Hook `amp_schemaorg_metadata`
+## Filter `amp_schemaorg_metadata`
+
+```php
+apply_filters( 'amp_schemaorg_metadata', $metadata );
+```
+
+Filters Schema.org metadata for a query.
+
+Check the the main query for the context for which metadata should be added.
+
+### Arguments
+
+* `array $metadata` - Metadata.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1808](../../includes/amp-helper-functions.php#L1808)
+:link: [includes/amp-helper-functions.php:1706](/includes/amp-helper-functions.php#L1706)
 
 <details>
 <summary>Show Code</summary>

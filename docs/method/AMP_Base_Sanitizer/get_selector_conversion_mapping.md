@@ -12,7 +12,7 @@ Get mapping of HTML selectors to the AMP component selectors which they may be c
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:139](../../includes/sanitizers/class-amp-base-sanitizer.php#L139-L141)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:139](/includes/sanitizers/class-amp-base-sanitizer.php#L139-L141)
 
 <details>
 <summary>Show Code</summary>

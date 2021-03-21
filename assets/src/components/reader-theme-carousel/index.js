@@ -20,6 +20,7 @@ import { AMPNotice, NOTICE_TYPE_WARNING } from '../amp-notice';
 import { ThemeCard } from '../theme-card';
 import { Carousel, DEFAULT_MOBILE_BREAKPOINT } from '../carousel';
 import { useWindowWidth } from '../../utils/use-window-width';
+import { ThemesAPIError } from '../themes-api-error';
 
 /**
  * Component for selecting a reader theme.
@@ -148,23 +149,25 @@ export function ReaderThemeCarousel() {
 		<div className="reader-theme-selection">
 			<p>
 				{
-					// @todo Probably improve this text.
-					__( 'Select the theme template for mobile visitors', 'amp' )
+					__( 'Choose the theme to be used for AMP pages. This theme will normally be exclusively shown to mobile visitors.', 'amp' )
 				}
 			</p>
-			{ currentTheme && currentTheme.is_reader_theme && (
-				<AMPNotice>
-					<p>
-						{
-							sprintf(
-								/* translators: placeholder is the name of a WordPress theme. */
-								__( 'Your active theme “%s” is not available as a reader theme. If you wish to use it, Transitional mode may be the best option for you.', 'amp' ),
-								currentTheme.name,
-							)
-						}
-					</p>
-				</AMPNotice>
+			{ (
+				currentTheme && currentTheme.is_reader_theme && (
+					<AMPNotice>
+						<p>
+							{
+								sprintf(
+									/* translators: placeholder is the name of a WordPress theme. */
+									__( 'Your active theme “%s” is not listed below because it is already AMP-compatible. If you wish to use your active theme for both AMP and non-AMP pages, then Transitional template mode is what you should choose.', 'amp' ),
+									currentTheme.name,
+								)
+							}
+						</p>
+					</AMPNotice>
+				)
 			) }
+			<ThemesAPIError />
 			<div>
 				{
 					hasUnavailableThemes && (
@@ -172,19 +175,21 @@ export function ReaderThemeCarousel() {
 							<p>
 								{ AMP_QUERY_VAR_CUSTOMIZED_LATE
 								/* dangerouslySetInnerHTML reason: Injection of code tags. */
-									? <span
-										dangerouslySetInnerHTML={ {
-											__html: sprintf(
-											/* translators: 1: customized AMP query var, 2: default query var, 3: the AMP_QUERY_VAR constant name, 4: the amp_query_var filter, 5: the plugins_loaded action */
-												__( 'The following themes are not available because your site (probably the active theme) has customized the AMP query var too late (it is set to %1$s as opposed to the default of %2$s). Please make sure that any customizations done by defining the %3$s constant or adding an %4$s filter are done before the %5$s action with priority 8.', 'amp' ),
-												`<code>${ AMP_QUERY_VAR }</code>`,
-												`<code>${ DEFAULT_AMP_QUERY_VAR }</code>`,
-												'<code>AMP_QUERY_VAR</code>',
-												'<code>amp_query_var</code>',
-												'<code>plugins_loaded</code>',
-											),
-										} }
-									/>
+									? (
+										<span
+											dangerouslySetInnerHTML={ {
+												__html: sprintf(
+													/* translators: 1: customized AMP query var, 2: default query var, 3: the AMP_QUERY_VAR constant name, 4: the amp_query_var filter, 5: the plugins_loaded action */
+													__( 'The following themes are not available because your site (probably the active theme) has customized the AMP query var too late (it is set to %1$s as opposed to the default of %2$s). Please make sure that any customizations done by defining the %3$s constant or adding an %4$s filter are done before the %5$s action with priority 8.', 'amp' ),
+													`<code>${ AMP_QUERY_VAR }</code>`,
+													`<code>${ DEFAULT_AMP_QUERY_VAR }</code>`,
+													'<code>AMP_QUERY_VAR</code>',
+													'<code>amp_query_var</code>',
+													'<code>plugins_loaded</code>',
+												),
+											} }
+										/>
+									)
 									: __( 'Some supported themes cannot be installed automatically on this site. To use, please install them manually or contact your hosting provider.', 'amp' )
 								}
 							</p>

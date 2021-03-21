@@ -3,20 +3,21 @@
  */
 import PropTypes from 'prop-types';
 import { ReactElement } from 'react';
+import { isFunction, isObject, isString } from 'lodash';
 
 /**
  * WordPress dependencies
  */
-import { __, _x } from '@wordpress/i18n';
-import { cloneElement, render } from '@wordpress/element';
-import { TextControl, SelectControl, ToggleControl, Notice, PanelBody, FontSizePicker } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
+import { SelectControl, ToggleControl, Notice, PanelBody } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
+import { cloneElement, isValidElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH, POST_PREVIEW_CLASS } from '../constants';
+import { TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH } from '../constants';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../common/constants';
 
 const ampLayoutOptions = [
@@ -66,11 +67,9 @@ const ampLayoutOptions = [
 		],
 	},
 	{
-		// Not supported by video.
 		value: 'intrinsic',
 		label: __( 'Intrinsic', 'amp' ),
 		notAvailable: [
-			'core/video',
 			'core-embed/youtube',
 			'core-embed/facebook',
 			'core-embed/instagram',
@@ -91,6 +90,10 @@ const ampLayoutOptions = [
  * @return {Object} Modified block settings.
  */
 export const addAMPAttributes = ( settings, name ) => {
+	if ( ! isObject( settings ) || ! isString( name ) ) {
+		return settings;
+	}
+
 	// AMP Carousel settings.
 	if ( 'core/gallery' === name ) {
 		if ( ! settings.attributes ) {
@@ -98,7 +101,7 @@ export const addAMPAttributes = ( settings, name ) => {
 		}
 		settings.attributes.ampCarousel = {
 			type: 'boolean',
-			default: ! select( 'amp/block-editor' ).hasThemeSupport(), // @todo We could just default this to false now even in Reader mode since block styles are loaded.
+			default: ! select( 'amp/block-editor' )?.hasThemeSupport(), // @todo We could just default this to false now even in Reader mode since block styles are loaded.
 		};
 		settings.attributes.ampLightbox = {
 			type: 'boolean',
@@ -114,38 +117,6 @@ export const addAMPAttributes = ( settings, name ) => {
 		settings.attributes.ampLightbox = {
 			type: 'boolean',
 			default: false,
-		};
-	}
-
-	const isTextBlock = TEXT_BLOCKS.includes( name );
-
-	// Fit-text for text blocks.
-	if ( isTextBlock ) {
-		if ( ! settings.attributes ) {
-			settings.attributes = {};
-		}
-		settings.attributes.ampFitText = {
-			type: 'boolean',
-			default: false,
-		};
-		settings.attributes.minFont = {
-			default: MIN_FONT_SIZE,
-			source: 'attribute',
-			selector: 'amp-fit-text',
-			attribute: 'min-font-size',
-		};
-		settings.attributes.maxFont = {
-			default: MAX_FONT_SIZE,
-			source: 'attribute',
-			selector: 'amp-fit-text',
-			attribute: 'max-font-size',
-		};
-		settings.attributes.height = {
-			// Needs to be higher than the maximum font size, which defaults to MAX_FONT_SIZE
-			default: 'core/image' === name ? 200 : Math.ceil( MAX_FONT_SIZE / 10 ) * 10,
-			source: 'attribute',
-			selector: 'amp-fit-text',
-			attribute: 'height',
 		};
 	}
 
@@ -165,68 +136,106 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 /**
- * Filters blocks' save function.
+ * Removes `amp-fit-text` related attributes on blocks via block deprecation.
  *
- * @param {Object} element        Element to be saved.
- * @param {string} blockType      Block type.
- * @param {string} blockType.name Block type name.
- * @param {Object} attributes     Attributes.
+ * @param {Object} settings Block settings.
+ * @param {string} name     Block name.
  *
- * @return {Object} Output element.
+ * @return {Object} Modified block settings.
  */
-export const filterBlocksSave = ( element, blockType, attributes ) => { // eslint-disable-line complexity
-	const fitTextProps = {
-		layout: 'fixed-height',
-	};
-
-	if ( 'core/paragraph' === blockType.name && ! attributes.ampFitText ) {
-		const content = getAmpFitTextContent( attributes.content );
-		if ( content !== attributes.content ) {
-			return cloneElement(
-				element,
-				{
-					key: 'new',
-					value: content,
-				},
-			);
-		}
-	} else if ( TEXT_BLOCKS.includes( blockType.name ) && attributes.ampFitText ) {
-		if ( attributes.minFont ) {
-			fitTextProps[ 'min-font-size' ] = attributes.minFont;
-		}
-		if ( attributes.maxFont ) {
-			fitTextProps[ 'max-font-size' ] = attributes.maxFont;
-		}
-		if ( attributes.height ) {
-			fitTextProps.height = attributes.height;
-		}
-
-		fitTextProps.children = element;
-
-		return <amp-fit-text { ...fitTextProps } />;
+export const removeAmpFitTextFromBlocks = ( settings, name ) => {
+	if ( ! isObject( settings ) || ! isString( name ) ) {
+		return settings;
 	}
 
-	return element;
+	if ( TEXT_BLOCKS.includes( name ) ) {
+		if ( ! settings.deprecated ) {
+			settings.deprecated = [];
+		}
+
+		settings.deprecated.unshift( {
+			supports: settings.supports,
+			attributes: {
+				...( settings.attributes || {} ),
+				ampFitText: {
+					type: 'boolean',
+					default: false,
+				},
+				minFont: {
+					default: MIN_FONT_SIZE,
+					source: 'attribute',
+					selector: 'amp-fit-text',
+					attribute: 'min-font-size',
+				},
+				maxFont: {
+					default: MAX_FONT_SIZE,
+					source: 'attribute',
+					selector: 'amp-fit-text',
+					attribute: 'max-font-size',
+				},
+				height: {
+					// Needs to be higher than the maximum font size, which defaults to MAX_FONT_SIZE
+					default: 'core/image' === name ? 200 : Math.ceil( MAX_FONT_SIZE / 10 ) * 10,
+					source: 'attribute',
+					selector: 'amp-fit-text',
+					attribute: 'height',
+				},
+			},
+			save( props ) {
+				/* eslint-disable react/prop-types */
+				const { attributes } = props;
+				const fitTextProps = { layout: 'fixed-height' };
+
+				if ( attributes.minFont ) {
+					fitTextProps[ 'min-font-size' ] = attributes.minFont;
+				}
+				if ( attributes.maxFont ) {
+					fitTextProps[ 'max-font-size' ] = attributes.maxFont;
+				}
+				if ( attributes.height ) {
+					fitTextProps.height = attributes.height;
+				}
+				/* eslint-enable react/prop-types */
+
+				fitTextProps.children = settings.save( props );
+
+				return <amp-fit-text { ...fitTextProps } />;
+			},
+			isEligible( { ampFitText } ) {
+				return undefined !== ampFitText;
+			},
+			migrate( attributes ) {
+				const deprecatedAttrs = [ 'ampFitText', 'minFont', 'maxFont', 'height' ];
+				deprecatedAttrs.forEach( ( attr ) => delete attributes[ attr ] );
+				return attributes;
+			},
+		} );
+	}
+
+	return settings;
 };
 
 /**
- * Returns the inner content of an AMP Fit Text tag.
+ * Remove the `class` attribute from `amp-fit-text` elements so that it can be deprecated successfully.
  *
- * @param {string} content Original content.
+ * The `class` attribute is added by the `core/generated-class-name/save-props` block editor filter; it is unwanted and
+ * interferes with successful deprecation of the block. By filtering the saved element the `class` attribute can be
+ * removed and the deprecation of the block and proceed without error.
  *
- * @return {string} Modified content.
+ * @see removeAmpFitTextFromBlocks
+ *
+ * @param {ReactElement} element Block save result.
+ *
+ * @return {ReactElement} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
  */
-export const getAmpFitTextContent = ( content ) => {
-	const contentRegex = /<amp-fit-text\b[^>]*>(.*?)<\/amp-fit-text>/;
-	const match = contentRegex.exec( content );
-
-	let newContent = content;
-
-	if ( match && match[ 1 ] ) {
-		newContent = match[ 1 ];
+export const removeClassFromAmpFitTextBlocks = ( element ) => {
+	if ( isValidElement( element ) && 'amp-fit-text' === element.type && undefined !== element.props.className ) {
+		const { className, ...props } = element.props;
+		props.className = null;
+		element = cloneElement( element, props );
 	}
 
-	return newContent;
+	return element;
 };
 
 /**
@@ -266,6 +275,10 @@ export const getLayoutOptions = ( block ) => {
  * @return {Function} Edit function.
  */
 export const filterBlocksEdit = ( BlockEdit ) => {
+	if ( ! isFunction( BlockEdit ) ) {
+		return BlockEdit;
+	}
+
 	const EnhancedBlockEdit = function( props ) {
 		const { attributes: { ampLayout }, name } = props;
 
@@ -277,8 +290,6 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 			inspectorControls = setUpImageInspectorControls( props );
 		} else if ( MEDIA_BLOCKS.includes( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
 			inspectorControls = setUpInspectorControls( props );
-		} else if ( TEXT_BLOCKS.includes( name ) ) {
-			inspectorControls = setUpTextBlocksInspectorControls( props );
 		}
 
 		// Return just inspector controls in case of 'nodisplay'.
@@ -374,12 +385,18 @@ setUpInspectorControls.propTypes = {
 /**
  * Get AMP Layout select control.
  *
+ * @deprecated As of v2.1. Blocks with the `ampLayout` attribute will still be able to use the control.
+ *
  * @param {Object} props Props.
  *
  * @return {ReactElement} Element.
  */
-const AmpLayoutControl = ( props ) => {
+export const AmpLayoutControl = ( props ) => {
 	const { name, attributes: { ampLayout }, setAttributes } = props;
+
+	if ( undefined === ampLayout ) {
+		return null;
+	}
 
 	let label = __( 'AMP Layout', 'amp' );
 
@@ -388,17 +405,32 @@ const AmpLayoutControl = ( props ) => {
 	}
 
 	return (
-		<SelectControl
-			label={ label }
-			value={ ampLayout }
-			options={ getLayoutOptions( name ) }
-			onChange={ ( value ) => {
-				setAttributes( { ampLayout: value } );
-				if ( 'core/image' === props.name ) {
-					setImageBlockLayoutAttributes( props, value );
-				}
-			} }
-		/>
+		<>
+			<Notice
+				status="warning"
+				isDismissible={ false }
+			>
+				<span dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						/* translators: placeholder is link to support forum. */
+						__( 'The AMP Layout setting is deprecated and is slated for removal. Please <a href="%s" target="_blank" rel="noreferrer">report</a> if you need it.', 'amp' ),
+						'https://wordpress.org/support/plugin/amp/#new-topic-0',
+					),
+				} } />
+			</Notice>
+
+			<SelectControl
+				label={ label }
+				value={ ampLayout }
+				options={ getLayoutOptions( name ) }
+				onChange={ ( value ) => {
+					setAttributes( { ampLayout: value } );
+					if ( 'core/image' === props.name ) {
+						setImageBlockLayoutAttributes( props, value );
+					}
+				} }
+			/>
+		</>
 	);
 };
 
@@ -413,167 +445,48 @@ AmpLayoutControl.propTypes = {
 /**
  * Get AMP Noloading toggle control.
  *
+ * @deprecated As of v2.1. Blocks with the `ampNoLoading` attribute will still be able to use the control.
+ *
  * @param {Object} props Props.
  *
  * @return {ReactElement} Element.
  */
-const AmpNoloadingToggle = ( props ) => {
+export const AmpNoloadingToggle = ( props ) => {
 	const { attributes: { ampNoLoading }, setAttributes } = props;
+
+	if ( undefined === ampNoLoading ) {
+		return null;
+	}
 
 	const label = __( 'AMP Noloading', 'amp' );
 
 	return (
-		<ToggleControl
-			label={ label }
-			checked={ ampNoLoading }
-			onChange={ () => setAttributes( { ampNoLoading: ! ampNoLoading } ) }
-		/>
+		<>
+			<Notice
+				status="warning"
+				isDismissible={ false }
+			>
+				<span dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						/* translators: placeholder is link to support forum. */
+						__( 'The AMP Noloading setting is deprecated and is slated for removal. Please <a href="%s" target="_blank" rel="noreferrer">report</a> if you need it.', 'amp' ),
+						'https://wordpress.org/support/plugin/amp/#new-topic-0',
+					),
+				} } />
+			</Notice>
+
+			<ToggleControl
+				label={ label }
+				checked={ ampNoLoading }
+				onChange={ () => setAttributes( { ampNoLoading: ! ampNoLoading } ) }
+			/>
+		</>
 	);
 };
 
 AmpNoloadingToggle.propTypes = {
 	attributes: PropTypes.shape( {
 		ampNoLoading: PropTypes.bool,
-	} ),
-	setAttributes: PropTypes.func.isRequired,
-};
-
-/**
- * Setup inspector controls for text blocks.
- *
- * @todo Consider wrapping the render function to delete the original font size in text settings when ampFitText.
- *
- * @param {Object} props Props.
- * @param {Function} props.setAttributes Callback to set attributes.
- * @param {Object} props.attributes Attributes.
- * @param {boolean} props.isSelected Is selected.
- *
- * @return {ReactElement} Inspector Controls.
- */
-const setUpTextBlocksInspectorControls = ( props ) => {
-	const { isSelected, attributes, setAttributes } = props;
-	const { ampFitText } = attributes;
-	let { minFont, maxFont, height } = attributes;
-
-	const FONT_SIZES = [
-		{
-			name: 'small',
-			shortName: _x( 'S', 'font size', 'amp' ),
-			size: 14,
-		},
-		{
-			name: 'regular',
-			shortName: _x( 'M', 'font size', 'amp' ),
-			size: 16,
-		},
-		{
-			name: 'large',
-			shortName: _x( 'L', 'font size', 'amp' ),
-			size: 36,
-		},
-		{
-			name: 'larger',
-			shortName: _x( 'XL', 'font size', 'amp' ),
-			size: 48,
-		},
-	];
-
-	if ( ! isSelected ) {
-		return null;
-	}
-
-	const label = __( 'Automatically fit text to container', 'amp' );
-
-	if ( ampFitText ) {
-		maxFont = parseInt( maxFont );
-		height = parseInt( height );
-		minFont = parseInt( minFont );
-	}
-
-	return (
-		<InspectorControls>
-			<PanelBody
-				title={ __( 'AMP Settings', 'amp' ) }
-				className={ ampFitText ? 'is-amp-fit-text' : '' }
-			>
-				<ToggleControl
-					label={ label }
-					checked={ ampFitText }
-					onChange={ () => setAttributes( { ampFitText: ! ampFitText } ) }
-				/>
-			</PanelBody>
-			{ ampFitText && (
-				<>
-					<TextControl
-						label={ __( 'Height', 'amp' ) }
-						value={ height }
-						min={ 1 }
-						onChange={ ( nextHeight ) => {
-							setAttributes( { height: nextHeight } );
-						} }
-					/>
-					{ maxFont > height && (
-						<Notice
-							status="error"
-							isDismissible={ false }
-						>
-							{ __( 'The height must be greater than the max font size.', 'amp' ) }
-						</Notice>
-					) }
-					<PanelBody title={ __( 'Minimum font size', 'amp' ) }>
-						<FontSizePicker
-							fallbackFontSize={ 14 }
-							value={ minFont }
-							fontSizes={ FONT_SIZES }
-							onChange={ ( nextMinFont ) => {
-								if ( ! nextMinFont ) {
-									nextMinFont = MIN_FONT_SIZE; // @todo Supplying fallbackFontSize should be done automatically by the component?
-								}
-
-								if ( parseInt( nextMinFont ) <= maxFont ) {
-									setAttributes( { minFont: nextMinFont } );
-								}
-							} }
-						/>
-					</PanelBody>
-					{ minFont > maxFont && (
-						<Notice
-							status="error"
-							isDismissible={ false }
-						>
-							{ __( 'The min font size must less than the max font size.', 'amp' ) }
-						</Notice>
-					) }
-					<PanelBody title={ __( 'Maximum font size', 'amp' ) }>
-						<FontSizePicker
-							fallbackFontSize={ 48 }
-							value={ maxFont }
-							fontSizes={ FONT_SIZES }
-							onChange={ ( nextMaxFont ) => {
-								if ( ! nextMaxFont ) {
-									nextMaxFont = MAX_FONT_SIZE; // @todo Supplying fallbackFontSize should be done automatically by the component?
-								}
-
-								setAttributes( {
-									maxFont: nextMaxFont,
-									height: Math.max( nextMaxFont, height ),
-								} );
-							} }
-						/>
-					</PanelBody>
-				</>
-			) }
-		</InspectorControls>
-	);
-};
-
-setUpTextBlocksInspectorControls.propTypes = {
-	isSelected: PropTypes.bool,
-	attributes: PropTypes.shape( {
-		ampFitText: PropTypes.bool,
-		minFont: PropTypes.number,
-		maxFont: PropTypes.number,
-		height: PropTypes.number,
 	} ),
 	setAttributes: PropTypes.func.isRequired,
 };
@@ -718,30 +631,4 @@ setUpGalleryInspectorControls.propTypes = {
 export const isAMPEnabled = () => {
 	const { getEditedPostAttribute } = select( 'core/editor' );
 	return getEditedPostAttribute( 'amp_enabled' ) || false;
-};
-
-/**
- * Renders the 'Preview AMP' button in the DOM right after the non-AMP 'Preview' button.
- *
- * @param {Object} PreviewComponent The 'Preview AMP' component to render into the DOM.
- */
-export const renderPreviewButton = ( PreviewComponent ) => {
-	const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
-	const ampPreviewButtonWrapperId = 'amp-wrapper-post-preview';
-
-	// Exit if the non-AMP 'Preview' button doesn't exist.
-	if ( ! postPreviewButton || ! postPreviewButton.nextSibling ) {
-		return;
-	}
-
-	const buttonWrapper = document.createElement( 'div' );
-	buttonWrapper.id = ampPreviewButtonWrapperId;
-
-	render(
-		<PreviewComponent />,
-		buttonWrapper,
-	);
-
-	// Insert the new AMP preview button after the non-AMP 'Preview' button.
-	postPreviewButton.parentNode.insertBefore( buttonWrapper, postPreviewButton.nextSibling );
 };

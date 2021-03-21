@@ -21,7 +21,7 @@ const cropImageText = 'Crop Image';
 describe( 'Featured Image Notice', () => {
 	beforeEach( async () => {
 		await createNewPost( { postType: 'post' } );
-		await clickButton( 'Document' );
+		await clickButton( 'Post' );
 		await clickButton( 'Featured image' );
 		await clickButton( 'Set featured image' );
 	} );

@@ -5,10 +5,10 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\DevTools\BlockSources;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
@@ -70,19 +70,11 @@ class AMP_Validation_Manager {
 	const PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY = 'amp_plugin_activation_validation_errors';
 
 	/**
-	 * The name of the REST API field with the AMP validation results.
-	 *
-	 * @var string
-	 */
-	const VALIDITY_REST_FIELD_NAME = 'amp_validity';
-
-	/**
 	 * The errors encountered when validating.
 	 *
-	 * @var array[][] {
-	 *     @type array  $error     Error code.
-	 *     @type bool   $sanitized Whether sanitized.
-	 *     @type string $slug      Hash of the error.
+	 * @var array[] {
+	 *     @type array $error     Error data.
+	 *     @type bool  $sanitized Whether sanitized.
 	 * }
 	 */
 	public static $validation_results = [];
@@ -127,6 +119,7 @@ class AMP_Validation_Manager {
 	 *
 	 * Keys are post IDs and values are whether the post has been re-validated.
 	 *
+	 * @deprecated In 2.1 the classic editor block validation was removed. This is not removed yet since there is a mini plugin that uses it: https://gist.github.com/westonruter/31ac0e056b8b1278c98f8a9f548fcc1a.
 	 * @var bool[]
 	 */
 	public static $posts_pending_frontend_validation = [];
@@ -184,44 +177,11 @@ class AMP_Validation_Manager {
 	protected static $amp_admin_bar_item_added = false;
 
 	/**
-	 * Cached template directory to prevent infinite recursion.
-	 *
-	 * @see get_template_directory()
-	 * @var string
-	 */
-	protected static $template_directory;
-
-	/**
-	 * Cached template slug to prevent infinite recursion.
-	 *
-	 * @see get_template()
-	 * @var string
-	 */
-	protected static $template_slug;
-
-	/**
-	 * Cached stylesheet directory to prevent infinite recursion.
-	 *
-	 * @see get_stylesheet_directory()
-	 * @var string
-	 */
-	protected static $stylesheet_directory;
-
-	/**
-	 * Cached stylesheet slug to prevent infinite recursion.
-	 *
-	 * @see get_stylesheet()
-	 * @var string
-	 */
-	protected static $stylesheet_slug;
-
-	/**
 	 * Get dev tools user access service.
 	 *
-	 * @return DevToolsUserAccess
+	 * @return UserAccess
 	 */
 	private static function get_dev_tools_user_access() {
-		/** @var DevToolsUserAccess $service */
 		$service = Services::get( 'dev_tools.user_access' );
 		return $service;
 	}
@@ -236,13 +196,10 @@ class AMP_Validation_Manager {
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
-		add_action( 'save_post', [ __CLASS__, 'handle_save_post_prompting_validation' ] );
 		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'enqueue_block_validation' ] );
-		add_action( 'edit_form_top', [ __CLASS__, 'print_edit_form_validation_status' ], 10, 2 );
-		add_action( 'rest_api_init', [ __CLASS__, 'add_rest_api_fields' ] );
 
 		// Add actions for checking theme support is present to determine plugin compatibility and show validation links in the admin bar.
-		// Actions and filters involved in validation.
+		// @todo Eliminate this in favor of async validation. See <https://github.com/ampproject/amp-wp/issues/5101>.
 		add_action(
 			'activate_plugin',
 			static function() {
@@ -359,21 +316,28 @@ class AMP_Validation_Manager {
 		}
 
 		$is_amp_request = amp_is_request();
-
-		$current_url = amp_get_current_url();
-		$non_amp_url = amp_remove_endpoint( $current_url );
-		$non_amp_url = add_query_arg(
-			QueryVar::NOAMP,
-			amp_is_canonical() ? QueryVar::NOAMP_AVAILABLE : QueryVar::NOAMP_MOBILE,
-			$non_amp_url
-		);
-
-		$amp_url = remove_query_arg(
+		$current_url    = remove_query_arg(
 			array_merge( wp_removable_query_args(), [ QueryVar::NOAMP ] ),
-			$current_url
+			amp_get_current_url()
 		);
-		if ( ! amp_is_canonical() ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $amp_url );
+
+		if ( amp_is_canonical() ) {
+			$amp_url     = $current_url;
+			$non_amp_url = add_query_arg(
+				QueryVar::NOAMP,
+				QueryVar::NOAMP_AVAILABLE,
+				$current_url
+			);
+		} elseif ( $is_amp_request ) {
+			$amp_url     = $current_url;
+			$non_amp_url = add_query_arg(
+				QueryVar::NOAMP,
+				QueryVar::NOAMP_MOBILE,
+				amp_remove_paired_endpoint( $current_url )
+			);
+		} else {
+			$amp_url     = amp_add_paired_endpoint( $current_url );
+			$non_amp_url = $current_url;
 		}
 
 		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url ) ?: $amp_url );
@@ -436,24 +400,6 @@ class AMP_Validation_Manager {
 			$wp_admin_bar->add_node( $validate_item );
 		}
 
-		if (
-			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
-			&&
-			AMP_Theme_Support::is_paired_available()
-			&&
-			amp_is_dev_mode()
-		) {
-			// Construct admin bar item to link to paired browsing experience.
-			$paired_browsing_item = [
-				'parent' => 'amp',
-				'id'     => 'amp-paired-browsing',
-				'title'  => esc_html__( 'Paired Browsing', 'amp' ),
-				'href'   => AMP_Theme_Support::get_paired_browsing_url(),
-			];
-
-			$wp_admin_bar->add_node( $paired_browsing_item );
-		}
-
 		// Add settings link to admin bar.
 		if ( current_user_can( 'manage_options' ) ) {
 			$wp_admin_bar->add_node(
@@ -500,7 +446,7 @@ class AMP_Validation_Manager {
 		 * This can't just easily add an amp_validation_error_sanitized filter because the the filter_sanitizer_args() method
 		 * currently needs to obtain the list of overrides to create a parsed_cache_variant.
 		 */
-		foreach ( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] as $slug => $data ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		foreach ( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] as $slug => $data ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			if ( ! isset( $data[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) ) {
 				continue;
 			}
@@ -574,11 +520,6 @@ class AMP_Validation_Manager {
 	 * Add hooks for doing determining sources for validation errors during preprocessing/sanitizing.
 	 */
 	public static function add_validation_error_sourcing() {
-		self::set_theme_variables();
-
-		// Call again at setup_theme in case a plugin has dynamically changed the theme.
-		add_action( 'setup_theme', [ __CLASS__, 'set_theme_variables' ], ~PHP_INT_MAX );
-
 		add_action( 'wp', [ __CLASS__, 'wrap_widget_callbacks' ] );
 
 		add_action( 'all', [ __CLASS__, 'wrap_hook_callbacks' ] );
@@ -593,61 +534,15 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Set theme variables.
-	 */
-	public static function set_theme_variables() {
-		self::$template_directory   = wp_normalize_path( get_template_directory() );
-		self::$template_slug        = get_template();
-		self::$stylesheet_directory = wp_normalize_path( get_stylesheet_directory() );
-		self::$stylesheet_slug      = get_stylesheet();
-	}
-
-	/**
 	 * Handle save_post action to queue re-validation of the post on the frontend.
 	 *
 	 * This is intended to only apply to post edits made in the classic editor.
 	 *
-	 * @see AMP_Validation_Manager::get_amp_validity_rest_field() The method responsible for validation post changes via Gutenberg.
-	 * @see AMP_Validation_Manager::validate_queued_posts_on_frontend()
-	 *
-	 * @param int $post_id Post ID.
+	 * @deprecated In 2.1 the classic editor block validation was removed.
+	 * @codeCoverageIgnore
 	 */
-	public static function handle_save_post_prompting_validation( $post_id ) {
-		global $pagenow;
-
-		if ( ! self::get_dev_tools_user_access()->is_user_enabled() ) {
-			return;
-		}
-
-		$post = get_post( $post_id );
-
-		$is_classic_editor_post_save = (
-			isset( $_SERVER['REQUEST_METHOD'] )
-			&&
-			'POST' === $_SERVER['REQUEST_METHOD']
-			&&
-			'post.php' === $pagenow
-			&&
-			isset( $_POST['post_ID'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			&&
-			(int) $_POST['post_ID'] === (int) $post_id // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		);
-
-		$should_validate_post = (
-			$is_classic_editor_post_save
-			&&
-			self::post_supports_validation( $post )
-			&&
-			! isset( self::$posts_pending_frontend_validation[ $post_id ] )
-		);
-		if ( $should_validate_post ) {
-			self::$posts_pending_frontend_validation[ $post_id ] = true;
-
-			// The reason for shutdown is to ensure that all postmeta changes have been saved, including whether AMP is enabled.
-			if ( ! has_action( 'shutdown', [ __CLASS__, 'validate_queued_posts_on_frontend' ] ) ) {
-				add_action( 'shutdown', [ __CLASS__, 'validate_queued_posts_on_frontend' ] );
-			}
-		}
+	public static function handle_save_post_prompting_validation() {
+		_deprecated_function( __METHOD__, '2.1' );
 	}
 
 	/**
@@ -655,118 +550,11 @@ class AMP_Validation_Manager {
 	 *
 	 * @see AMP_Validation_Manager::handle_save_post_prompting_validation()
 	 *
-	 * @return array Mapping of post ID to the result of validating or storing the validation result.
+	 * @deprecated In 2.1 the classic editor block validation was removed.
+	 * @codeCoverageIgnore
 	 */
 	public static function validate_queued_posts_on_frontend() {
-		$posts = array_filter(
-			array_map( 'get_post', array_keys( array_filter( self::$posts_pending_frontend_validation ) ) ),
-			function( $post ) {
-				return self::post_supports_validation( $post );
-			}
-		);
-
-		$validation_posts = [];
-
-		/*
-		 * It is unlikely that there will be more than one post in the array.
-		 * For the bulk recheck action, see AMP_Validated_URL_Post_Type::handle_bulk_action().
-		 */
-		foreach ( $posts as $post ) {
-			$url = amp_get_permalink( $post->ID );
-			if ( ! $url ) {
-				$validation_posts[ $post->ID ] = new WP_Error( 'no_amp_permalink' );
-				continue;
-			}
-
-			// Prevent re-validating.
-			self::$posts_pending_frontend_validation[ $post->ID ] = false;
-
-			$invalid_url_post_id = (int) get_post_meta( $post->ID, '_amp_validated_url_post_id', true );
-
-			$validity = self::validate_url_and_store( $url, $invalid_url_post_id );
-
-			// Remember the amp_validated_url post so that when the slug changes the old amp_validated_url post can be updated.
-			if ( ! is_wp_error( $validity ) && $invalid_url_post_id !== $validity['post_id'] ) {
-				update_post_meta( $post->ID, '_amp_validated_url_post_id', $validity['post_id'] );
-			}
-
-			$validation_posts[ $post->ID ] = $validity instanceof WP_Error ? $validity : $validity['post_id'];
-		}
-
-		return $validation_posts;
-	}
-
-	/**
-	 * Adds fields to the REST API responses, in order to display validation errors.
-	 *
-	 * @return void
-	 */
-	public static function add_rest_api_fields() {
-		register_rest_field(
-			AMP_Post_Type_Support::get_post_types_for_rest_api(),
-			self::VALIDITY_REST_FIELD_NAME,
-			[
-				'get_callback' => [ __CLASS__, 'get_amp_validity_rest_field' ],
-				'schema'       => [
-					'description' => __( 'AMP validity status', 'amp' ),
-					'type'        => 'object',
-				],
-			]
-		);
-	}
-
-	/**
-	 * Adds a field to the REST API responses to display the validation status.
-	 *
-	 * First, get existing errors for the post.
-	 * If there are none, validate the post and return any errors.
-	 *
-	 * @param array           $post_data  Data for the post.
-	 * @param string          $field_name The name of the field to add.
-	 * @param WP_REST_Request $request    The name of the field to add.
-	 * @return array|null $validation_data Validation data if it's available, or null.
-	 */
-	public static function get_amp_validity_rest_field( $post_data, $field_name, $request ) {
-		if ( ! current_user_can( 'edit_post', $post_data['id'] ) || ! self::get_dev_tools_user_access()->is_user_enabled() || ! self::post_supports_validation( $post_data['id'] ) ) {
-			return null;
-		}
-		$post = get_post( $post_data['id'] );
-
-		$validation_status_post = null;
-		if ( in_array( $request->get_method(), [ 'PUT', 'POST' ], true ) ) {
-			if ( ! isset( self::$posts_pending_frontend_validation[ $post->ID ] ) ) {
-				self::$posts_pending_frontend_validation[ $post->ID ] = true;
-			}
-			$results = self::validate_queued_posts_on_frontend();
-			if ( isset( $results[ $post->ID ] ) && is_int( $results[ $post->ID ] ) ) {
-				$validation_status_post = get_post( $results[ $post->ID ] );
-			}
-		}
-
-		if ( empty( $validation_status_post ) ) {
-			$validation_status_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( amp_get_permalink( $post->ID ) );
-		}
-
-		$field = [
-			'results'     => [],
-			'review_link' => null,
-		];
-
-		if ( $validation_status_post ) {
-			$field['review_link'] = get_edit_post_link( $validation_status_post->ID, 'raw' );
-			foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
-				$field['results'][] = [
-					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $result['status'],
-					'title'       => AMP_Validation_Error_Taxonomy::get_error_title_from_code( $result['data'] ),
-					'error'       => $result['data'],
-					'status'      => $result['status'],
-					'term_status' => $result['term_status'],
-					'forced'      => $result['forced'],
-				];
-			}
-		}
-
-		return $field;
+		_deprecated_function( __METHOD__, '2.1' );
 	}
 
 	/**
@@ -906,101 +694,12 @@ class AMP_Validation_Manager {
 	 *
 	 * This is essentially a PHP implementation of ampBlockValidation.handleValidationErrorsStateChange() in JS.
 	 *
-	 * @param WP_Post $post The updated post.
+	 * @deprecated In 2.1 the classic editor block validation was removed.
+	 * @codeCoverageIgnore
 	 * @return void
 	 */
-	public static function print_edit_form_validation_status( $post ) {
-		if ( ! self::post_supports_validation( $post ) || ! self::get_dev_tools_user_access()->is_user_enabled() ) {
-			return;
-		}
-
-		$invalid_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( get_permalink( $post->ID ) );
-		if ( ! $invalid_url_post ) {
-			return;
-		}
-
-		// Show all validation errors which have not been explicitly acknowledged as accepted.
-		$validation_errors  = [];
-		$has_rejected_error = false;
-		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post ) as $error ) {
-			$needs_moderation = (
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['status'] || // @todo Show differently since moderated?
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['status'] ||
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $error['status']
-			);
-			if ( $needs_moderation ) {
-				$validation_errors[] = $error['data'];
-			}
-
-			if (
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['status']
-				||
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['status']
-			) {
-				$has_rejected_error = true;
-			}
-		}
-
-		// No validation errors so abort.
-		if ( empty( $validation_errors ) ) {
-			return;
-		}
-
-		echo '<div class="notice notice-warning">';
-		echo '<p>';
-		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
-		echo ' ';
-
-		// Auto-acceptance is enabled by default but can be overridden by the the `amp_validation_error_default_sanitized` filter.
-		if ( ! $has_rejected_error ) {
-			esc_html_e( 'The invalid markup has been automatically removed.', 'amp' );
-		} else {
-			/*
-			 * Even if invalid markup is removed by default, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
-			 * For example, the errors could have been stored as 'New Kept' when auto-accept was false, and now auto-accept is true.
-			 * In that case, this will block serving AMP.
-			 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
-			 */
-			esc_html_e( 'In order for AMP to be served you will have to remove the invalid markup or allow the plugin to remove it.', 'amp' );
-		}
-
-		echo sprintf(
-			' <a href="%s" target="_blank">%s</a>',
-			esc_url( get_edit_post_link( $invalid_url_post ) ),
-			esc_html__( 'Review issues', 'amp' )
-		);
-		echo '</p>';
-
-		$results      = AMP_Validation_Error_Taxonomy::summarize_validation_errors( array_unique( $validation_errors, SORT_REGULAR ) );
-		$removed_sets = [];
-		if ( ! empty( $results[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) && is_array( $results[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) ) {
-			$removed_sets[] = [
-				'label' => __( 'Invalid elements:', 'amp' ),
-				'names' => array_map( 'sanitize_key', $results[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ),
-			];
-		}
-		if ( ! empty( $results[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ) && is_array( $results[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ) ) {
-			$removed_sets[] = [
-				'label' => __( 'Invalid attributes:', 'amp' ),
-				'names' => array_map( 'sanitize_key', $results[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ),
-			];
-		}
-		// @todo There are other kinds of errors other than REMOVED_ELEMENTS and REMOVED_ATTRIBUTES.
-		foreach ( $removed_sets as $removed_set ) {
-			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
-			$items = [];
-			foreach ( $removed_set['names'] as $name => $count ) {
-				if ( 1 === (int) $count ) {
-					$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
-				} else {
-					$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
-				}
-			}
-			echo implode( ', ', $items ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo '</p>';
-		}
-
-		echo '</div>';
+	public static function print_edit_form_validation_status() {
+		_deprecated_function( __METHOD__, '2.1' );
 	}
 
 	/**
@@ -1246,7 +945,7 @@ class AMP_Validation_Manager {
 			}
 		}
 
-		$sources = array_unique( $sources, SORT_REGULAR );
+		$sources = array_values( array_unique( $sources, SORT_REGULAR ) );
 
 		return $sources;
 	}
@@ -1311,7 +1010,8 @@ class AMP_Validation_Manager {
 		}
 		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $source['block_name'] );
 		if ( $block_type && $block_type->is_dynamic() ) {
-			$callback_source = self::get_source( $block_type->render_callback );
+			$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
+			$callback_source     = $callback_reflection->get_source( $block_type->render_callback );
 			if ( $callback_source ) {
 				$source = array_merge(
 					$source,
@@ -1340,8 +1040,9 @@ class AMP_Validation_Manager {
 	 */
 	public static function wrap_widget_callbacks() {
 		global $wp_registered_widgets;
+		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
 		foreach ( $wp_registered_widgets as $widget_id => &$registered_widget ) {
-			$source = self::get_source( $registered_widget['callback'] );
+			$source = $callback_reflection->get_source( $registered_widget['callback'] );
 			if ( ! $source ) {
 				continue;
 			}
@@ -1373,10 +1074,12 @@ class AMP_Validation_Manager {
 			return;
 		}
 
+		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
+
 		self::$current_hook_source_stack[ $hook ] = [];
 		foreach ( $wp_filter[ $hook ]->callbacks as $priority => &$callbacks ) {
 			foreach ( $callbacks as &$callback ) {
-				$source = self::get_source( $callback['function'] );
+				$source = $callback_reflection->get_source( $callback['function'] );
 				if ( ! $source ) {
 					continue;
 				}
@@ -1469,7 +1172,10 @@ class AMP_Validation_Manager {
 		if ( ! isset( $shortcode_tags[ $tag ] ) ) {
 			return $output;
 		}
-		$source = self::get_source( $shortcode_tags[ $tag ] );
+
+		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
+
+		$source = $callback_reflection->get_source( $shortcode_tags[ $tag ] );
 		if ( empty( $source ) ) {
 			return $output;
 		}
@@ -1552,89 +1258,28 @@ class AMP_Validation_Manager {
 	/**
 	 * Gets the plugin or theme of the callback, if one exists.
 	 *
+	 * @deprecated 2.0.2 Use \AmpProject\AmpWP\DevTools\CallbackReflection::get_source().
+	 * @codeCoverageIgnore
+	 *
 	 * @param string|array|callable $callback The callback for which to get the plugin.
 	 * @return array|null {
 	 *     The source data.
 	 *
-	 *     @type string $type Source type (core, plugin, mu-plugin, or theme).
-	 *     @type string $name Source name.
+	 *     @type string $type     Source type (core, plugin, mu-plugin, or theme).
+	 *     @type string $name     Source name.
+	 *     @type string $file     Relative file path based on the type.
 	 *     @type string $function Normalized function name.
 	 *     @type ReflectionMethod|ReflectionFunction $reflection Reflection.
 	 * }
 	 */
 	public static function get_source( $callback ) {
-		$reflection = null;
-		try {
-			if ( is_string( $callback ) && is_callable( $callback ) ) {
-				// The $callback is a function or static method.
-				$exploded_callback = explode( '::', $callback, 2 );
-				if ( 2 === count( $exploded_callback ) ) {
-					$reflection = new ReflectionMethod( $exploded_callback[0], $exploded_callback[1] );
-				} else {
-					$reflection = new ReflectionFunction( $callback );
-				}
-			} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
-				$reflection = new ReflectionMethod( $callback[0], $callback[1] );
-
-				// Handle the special case of the class being a widget, in which case the display_callback method should
-				// actually map to the underling widget method. It is the display_callback in the end that is wrapped.
-				if ( 'WP_Widget' === $reflection->getDeclaringClass()->getName() && 'display_callback' === $reflection->getName() ) {
-					$reflection = new ReflectionMethod( $callback[0], 'widget' );
-				}
-			} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
-				$reflection = new ReflectionFunction( $callback );
-			}
-		} catch ( Exception $e ) {
-			return null;
-		}
-
-		// The reflection is needed later for AMP_Validation_Manager::has_parameters_passed_by_reference().
-		if ( ! $reflection ) {
-			return null;
-		}
-
-		$source = compact( 'reflection' );
-
-		/** @var PluginRegistry $plugin_registry */
-		$plugin_registry = Services::get( 'plugin_registry' );
-
-		// Identify the type, name, and relative file path.
-		$file         = wp_normalize_path( $reflection->getFileName() );
-		$slug_pattern = '(?<slug>[^/]+)';
-		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( $plugin_registry->get_plugin_dir() ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
-			$source['type'] = 'plugin';
-			$source['name'] = $matches['slug'];
-			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];
-		} elseif ( ! empty( self::$template_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . '(?P<file>.*$):s', $file, $matches ) ) {
-			$source['type'] = 'theme';
-			$source['name'] = self::$template_slug;
-			$source['file'] = $matches['file'];
-		} elseif ( ! empty( self::$stylesheet_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . '(?P<file>.*$):s', $file, $matches ) ) {
-			$source['type'] = 'theme';
-			$source['name'] = self::$stylesheet_slug;
-			$source['file'] = $matches['file'];
-		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
-			$source['type'] = 'mu-plugin';
-			$source['name'] = $matches['slug'];
-			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];
-		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( ABSPATH ) ), ':' ) . '(?P<slug>wp-admin|wp-includes)/(?P<file>.*$):s', $file, $matches ) ) {
-			$source['type'] = 'core';
-			$source['name'] = $matches['slug'];
-			$source['file'] = $matches['file'];
-		}
-
-		// If a file was identified, then also supply the line number.
-		if ( isset( $source['file'] ) ) {
-			$source['line'] = $reflection->getStartLine();
-		}
-
-		if ( $reflection instanceof ReflectionMethod ) {
-			$source['function'] = $reflection->getDeclaringClass()->getName() . '::' . $reflection->getName();
-		} else {
-			$source['function'] = $reflection->getName();
-		}
-
-		return $source;
+		_deprecated_function(
+			__METHOD__,
+			'2.0.2',
+			'\AmpProject\AmpWP\DevTools\CallbackReflection::get_source'
+		);
+		return Services::get( 'dev_tools.callback_reflection' )
+			->get_source( $callback );
 	}
 
 	/**
@@ -1755,7 +1400,7 @@ class AMP_Validation_Manager {
 			return false;
 		}
 
-		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( ! hash_equals( self::get_amp_validate_nonce(), $validate_key ) ) {
 			return new WP_Error(
 				'http_request_failed',
@@ -2122,6 +1767,9 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function validate_url( $url ) {
+		if ( ! amp_is_canonical() && ! amp_has_paired_endpoint( $url ) ) {
+			$url = amp_add_paired_endpoint( $url );
+		}
 
 		$added_query_vars = [
 			self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
@@ -2140,8 +1788,8 @@ class AMP_Validation_Manager {
 			$r = wp_remote_get(
 				$validation_url,
 				[
-					'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
-					'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
+					'cookies'     => wp_unslash( $_COOKIE ), // phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE -- Pass along cookies so private pages and drafts can be accessed.
+					'timeout'     => 15, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout -- Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
 					/** This filter is documented in wp-includes/class-wp-http-streams.php */
 					'sslverify'   => apply_filters( 'https_local_ssl_verify', false ),
 					'redirection' => 0, // Because we're in a loop for redirection.
@@ -2285,7 +1933,7 @@ class AMP_Validation_Manager {
 	 */
 	public static function serialize_validation_error_messages( $messages ) {
 		$encoded_messages = base64_encode( wp_json_encode( array_unique( $messages ) ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-		return wp_hash( $encoded_messages ) . ':' . $encoded_messages;
+		return wp_hash( $encoded_messages . wp_nonce_tick(), 'nonce' ) . ':' . $encoded_messages;
 	}
 
 	/**
@@ -2299,7 +1947,14 @@ class AMP_Validation_Manager {
 	 */
 	public static function unserialize_validation_error_messages( $serialized ) {
 		$parts = explode( ':', $serialized, 2 );
-		if ( count( $parts ) !== 2 || wp_hash( $parts[1] ) !== $parts[0] ) {
+		if (
+			count( $parts ) !== 2
+			||
+			! hash_equals(
+				$parts[0],
+				wp_hash( $parts[1] . wp_nonce_tick(), 'nonce' )
+			)
+		) {
 			return null;
 		}
 		return json_decode( base64_decode( $parts[1] ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
@@ -2434,6 +2089,7 @@ class AMP_Validation_Manager {
 	/**
 	 * On activating a plugin, display a notice if a plugin causes an AMP validation error.
 	 *
+	 * @todo Eliminate this in favor of async validation. See <https://github.com/ampproject/amp-wp/issues/5101>.
 	 * @return void
 	 */
 	public static function print_plugin_notice() {
@@ -2448,8 +2104,7 @@ class AMP_Validation_Manager {
 			$invalid_plugins = isset( $errors[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ]['plugin'] ) ? array_unique( $errors[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ]['plugin'] ) : null;
 			if ( isset( $invalid_plugins ) ) {
 				$reported_plugins = [];
-				/** @var PluginRegistry $plugin_registry */
-				$plugin_registry = Services::get( 'plugin_registry' );
+				$plugin_registry  = Services::get( 'plugin_registry' );
 				foreach ( $invalid_plugins as $plugin_slug ) {
 					$plugin_data        = $plugin_registry->get_plugin_from_slug( $plugin_slug );
 					$plugin_name        = is_array( $plugin_data ) ? $plugin_data['data']['Name'] : $plugin_slug;
@@ -2505,6 +2160,13 @@ class AMP_Validation_Manager {
 			return;
 		}
 
+		$editor_support = Services::get( 'editor.editor_support' );
+
+		// Block validation script uses features only available beginning with WP 5.3.
+		if ( ! $editor_support->editor_supports_amp_block_editor_features() ) {
+			return; // @codeCoverageIgnore
+		}
+
 		$slug = 'amp-block-validation';
 
 		$asset_file   = AMP__DIR__ . '/assets/js/' . $slug . '.asset.php';
@@ -2529,14 +2191,40 @@ class AMP_Validation_Manager {
 
 		wp_styles()->add_data( $slug, 'rtl', 'replace' );
 
+		$block_sources = Services::has( 'dev_tools.block_sources' ) ? Services::get( 'dev_tools.block_sources' ) : null;
+
+		$plugin_registry = Services::get( 'plugin_registry' );
+
+		$plugin_names = array_map(
+			static function ( $plugin ) {
+				return isset( $plugin['Name'] ) ? $plugin['Name'] : '';
+			},
+			$plugin_registry->get_plugins()
+		);
+
 		$data = [
-			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
+			'HTML_ATTRIBUTE_ERROR_TYPE'            => AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE,
+			'HTML_ELEMENT_ERROR_TYPE'              => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+			'JS_ERROR_TYPE'                        => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+			'CSS_ERROR_TYPE'                       => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+			'VALIDATION_ERROR_NEW_REJECTED_STATUS' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+			'VALIDATION_ERROR_NEW_ACCEPTED_STATUS' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			'VALIDATION_ERROR_ACK_REJECTED_STATUS' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+			'VALIDATION_ERROR_ACK_ACCEPTED_STATUS' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			'isSanitizationAutoAccepted'           => self::is_sanitization_auto_accepted(),
+			'blockSources'                         => $block_sources ? $block_sources->get_block_sources() : null,
+			'pluginNames'                          => $plugin_names,
+			'themeName'                            => wp_get_theme()->get( 'Name' ),
+			'themeSlug'                            => wp_get_theme()->get_stylesheet(),
 		];
 
-		wp_localize_script(
+		wp_add_inline_script(
 			$slug,
-			'ampBlockValidation',
-			$data
+			sprintf(
+				'var ampBlockValidation = %s;',
+				wp_json_encode( $data )
+			),
+			'before'
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {

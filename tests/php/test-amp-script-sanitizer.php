@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 
@@ -59,7 +60,7 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 		if ( null === $expected ) {
 			$expected = $source;
 		}
-		$dom = Document::fromHtml( $source );
+		$dom = Document::fromHtml( $source, Options::DEFAULTS );
 		$this->assertSame( 1, $dom->getElementsByTagName( 'noscript' )->length );
 		$sanitizer = new AMP_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
@@ -108,7 +109,7 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 			'use_document_element' => true,
 		];
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 		AMP_Content_Sanitizer::sanitize_document( $dom, amp_get_content_sanitizers(), $args );
 
 		$content = $dom->saveHTML( $dom->documentElement );
@@ -116,6 +117,6 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertRegExp( '/<!-- Google Tag Manager -->\s*<!-- End Google Tag Manager -->/', $content );
 		$this->assertStringContains( '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>', $content );
 		$this->assertStringContains( 'Has script? <!--noscript-->Nope!<!--/noscript-->', $content );
-		$this->assertStringContains( '<!--noscript--><amp-iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="400" layout="fixed-height" width="auto" sandbox="allow-scripts allow-same-origin" data-amp-original-style="display:none;visibility:hidden" class="amp-wp-b3bfe1b"><span placeholder="" class="amp-wp-iframe-placeholder"></span><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="0" width="0" data-amp-original-style="display:none;visibility:hidden" class="amp-wp-b3bfe1b"></iframe></noscript></amp-iframe><!--/noscript-->', $content );
+		$this->assertStringContains( '<!--noscript--><amp-iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="400" layout="fixed-height" width="auto" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" data-amp-original-style="display:none;visibility:hidden" class="amp-wp-b3bfe1b"><span placeholder="" class="amp-wp-iframe-placeholder"></span><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="0" width="0" data-amp-original-style="display:none;visibility:hidden" class="amp-wp-b3bfe1b"></iframe></noscript></amp-iframe><!--/noscript-->', $content );
 	}
 }

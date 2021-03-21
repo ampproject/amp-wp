@@ -10,7 +10,6 @@ Class AMP_Base_Sanitizer
 * [`init`](../method/AMP_Base_Sanitizer/init.md) - Run logic before any sanitizers are run.
 * [`sanitize`](../method/AMP_Base_Sanitizer/sanitize.md) - Sanitize the HTML contained in the DOMDocument received by the constructor
 * [`get_scripts`](../method/AMP_Base_Sanitizer/get_scripts.md) - Return array of values that would be valid as an HTML `script` element.
-* ~~[`get_styles`](../method/AMP_Base_Sanitizer/get_styles.md) - Return array of values that would be valid as an HTML `style` attribute.~~
 * [`get_stylesheets`](../method/AMP_Base_Sanitizer/get_stylesheets.md) - Get stylesheets.
 * ~~[`get_body_node`](../method/AMP_Base_Sanitizer/get_body_node.md) - Get HTML body as DOMElement from Dom\Document received by the constructor.~~
 * [`sanitize_dimension`](../method/AMP_Base_Sanitizer/sanitize_dimension.md) - Sanitizes a CSS dimension specifier while being sensitive to dimension context.
@@ -34,7 +33,7 @@ Class AMP_Base_Sanitizer
 * [`get_validate_response_data`](../method/AMP_Base_Sanitizer/get_validate_response_data.md) - Get data that is returned in validate responses.
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:16](../../includes/sanitizers/class-amp-base-sanitizer.php#L16-L796)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:16](/includes/sanitizers/class-amp-base-sanitizer.php#L16-L823)
 
 <details>
 <summary>Show Code</summary>
@@ -348,6 +347,7 @@ abstract class AMP_Base_Sanitizer {
 					$attributes['style'] = $this->reassemble_style_string( $styles );
 				}
 				$attributes['layout'] = 'fill';
+				unset( $attributes['height'], $attributes['width'] );
 				return $attributes;
 			}
 
@@ -621,8 +621,34 @@ abstract class AMP_Base_Sanitizer {
 			}
 
 			// Capture element contents.
-			if ( ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) || 'style' === $node->nodeName ) {
-				$error['text'] = $node->textContent;
+			$is_inline_script = ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) );
+			$is_inline_style  = ( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) );
+			if ( $is_inline_script || $is_inline_style ) {
+				$text_content = $node->textContent;
+				if ( $is_inline_script ) {
+					// For inline scripts, normalize string and number literals to prevent nonces, random numbers, and timestamps
+					// from generating endless number of validation errors.
+					$error['text'] = preg_replace(
+						[
+							// Regex credit to <https://stackoverflow.com/a/5696141/93579>.
+							'/"[^"\\\\\n]*(?:\\\\.[^"\\\\\n]*)*"/s',
+							'/\'[^\'\\\\\n]*(?:\\\\.[^\'\\\\\n]*)*\'/s',
+							'/(\b|-)\d+\.\d+\b/',
+							'/(\b|-)\d+\b/',
+						],
+						[
+							'__DOUBLE_QUOTED_STRING__',
+							'__SINGLE_QUOTED_STRING__',
+							'__FLOAT__',
+							'__INT__',
+						],
+						$text_content
+					);
+				} elseif ( $is_inline_style ) {
+					// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
+					// already be detailed in the stylesheets metabox.
+					$error['text'] = $text_content;
+				}
 			}
 
 			// Suppress 'ver' param from enqueued scripts and styles.

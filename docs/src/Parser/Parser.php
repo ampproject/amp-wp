@@ -35,12 +35,13 @@ final class Parser {
 	 * Get the files to parse.
 	 *
 	 * @param string $directory     Directory to look in for files.
-	 * @param array  $excluded_dirs List of regex patterns to exclude.
+	 * @param array  $included_dirs List of regex patterns to include.
+	 *
 	 * @return array|WP_Error Array of files, or WP_Error if a problem occurred.
 	 */
-	public function get_files( $directory, $excluded_dirs ) {
+	public function get_files( $directory, $included_dirs ) {
 		$directories          = new RecursiveDirectoryIterator( $directory );
-		$filtered_directories = new DirectoryFilter( $directories, $excluded_dirs );
+		$filtered_directories = new DirectoryFilter( $directories, $included_dirs );
 		$iterable_files       = new RecursiveIteratorIterator( $filtered_directories );
 
 		$files = [];
@@ -174,8 +175,8 @@ final class Parser {
 	 *
 	 * This function fixes text by merging consecutive lines of text into a
 	 * single line. A special exception is made for text appearing in `<code>`
-	 * and `<pre>` tags, as newlines appearing in those tags are always
-	 * intentional.
+	 * and `<pre>` tags or wrapped in triple backticks (```), as newlines
+	 * appearing in those are always intentional.
 	 *
 	 * @param string $text Text for which to fix the newlines.
 	 *
@@ -188,6 +189,15 @@ final class Parser {
 		// Replace newline characters within 'code' and 'pre' tags with replacement string.
 		$text = preg_replace_callback(
 			'/(?<=<pre><code>)(.+)(?=<\/code><\/pre>)/s',
+			static function ( $matches ) use ( $replacement_string ) {
+				return preg_replace( '/[\n\r]/', $replacement_string, $matches[1] );
+			},
+			$text
+		);
+
+		// Replace newline characters within triple backticks with replacement string.
+		$text = preg_replace_callback(
+			'/(?<=```)(.+)(?=```)/s',
 			static function ( $matches ) use ( $replacement_string ) {
 				return preg_replace( '/[\n\r]/', $replacement_string, $matches[1] );
 			},

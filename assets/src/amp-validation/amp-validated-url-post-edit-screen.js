@@ -8,6 +8,8 @@ import { __, _n, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import setValidationErrorRowsSeenClass from './set-validation-error-rows-seen-class';
+import { handleCopyToClipboardButtons } from './copy-to-clipboard-buttons';
+import { getURLValidationTableRows } from './get-url-validation-table-rows';
 
 /**
  * The id for the 'Showing x of y errors' notice.
@@ -32,6 +34,7 @@ domReady( () => {
 	handleBulkActions();
 	watchForUnsavedChanges();
 	setupStylesheetsMetabox();
+	handleCopyToClipboardButtons();
 } );
 
 let beforeUnloadPromptAdded = false;
@@ -43,11 +46,11 @@ const addBeforeUnloadPrompt = () => {
 	if ( beforeUnloadPromptAdded ) {
 		return;
 	}
-	window.addEventListener( 'beforeunload', onBeforeUnload );
+	global.addEventListener( 'beforeunload', onBeforeUnload );
 
 	// Remove prompt when clicking trash or update.
 	document.querySelector( '#major-publishing-actions' ).addEventListener( 'click', () => {
-		window.removeEventListener( 'beforeunload', onBeforeUnload );
+		global.removeEventListener( 'beforeunload', onBeforeUnload );
 	} );
 
 	beforeUnloadPromptAdded = true;
@@ -378,6 +381,21 @@ const handleBulkActions = () => {
 				updateSelectBorderColor( select );
 				addBeforeUnloadPrompt();
 			}
+		} );
+	} );
+
+	// Handle click on bulk "Mark reviewed" and "Mark unreviewed" buttons.
+	global.addEventListener( 'click', ( { target } ) => {
+		if ( ! target.classList.contains( 'reviewed-toggle' ) ) {
+			return;
+		}
+
+		const markingAsReviewed = target.classList.contains( 'reviewed' );
+
+		getURLValidationTableRows( { checkedOnly: true } ).forEach( ( row ) => {
+			row.querySelector( 'input[type=checkbox].amp-validation-error-status-review' ).checked = markingAsReviewed;
+			row.classList.toggle( 'new', ! markingAsReviewed );
+			addBeforeUnloadPrompt();
 		} );
 	} );
 };

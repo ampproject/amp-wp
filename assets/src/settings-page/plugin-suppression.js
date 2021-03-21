@@ -318,15 +318,29 @@ export function PluginSuppression() {
 		suppressible_plugins: suppressiblePlugins,
 	} = editedOptions;
 
+	const Description = () => (
+		<p>
+			{ __( 'When a plugin adds markup that is not allowed in AMP you may let the AMP plugin remove it, or you may suppress the plugin from running on AMP pages. The following list includes all active plugins on your site, with any of those detected to be generating invalid AMP markup appearing first.', 'amp' ) }
+		</p>
+	);
+
 	if ( ! suppressiblePlugins || 0 === Object.keys( suppressiblePlugins ).length ) {
-		return null;
+		return (
+			<>
+				<Description />
+				<p>
+					<em>
+						{ __( 'You have no suppressible plugins active.', 'amp' ) }
+					</em>
+
+				</p>
+			</>
+		);
 	}
 
 	return (
 		<>
-			<p>
-				{ __( 'When a plugin adds markup that is not allowed in AMP you may let the AMP plugin remove it, or you may suppress the plugin from running on AMP pages. The following list includes all active plugins on your site, with any of those detected to be generating invalid AMP markup appearing first.', 'amp' ) }
-			</p>
+			<Description />
 			<table id="suppressed-plugins-table" className="wp-list-table widefat fixed">
 				<thead>
 					<tr>

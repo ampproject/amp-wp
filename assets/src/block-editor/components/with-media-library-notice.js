@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { isFunction } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { dispatch } from '@wordpress/data';
@@ -21,6 +26,10 @@ const { wp } = window;
  * @return {Function} The wrapped component.
  */
 export default ( InitialMediaUpload, minImageDimensions ) => {
+	if ( ! isFunction( InitialMediaUpload ) ) {
+		return InitialMediaUpload;
+	}
+
 	const { width: EXPECTED_WIDTH, height: EXPECTED_HEIGHT } = minImageDimensions;
 
 	/**
@@ -43,6 +52,10 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 			if ( 'editor-post-featured-image__media-modal' === this.props.modalClass ) {
 				this.initFeaturedImage = this.initFeaturedImage.bind( this );
 				this.initFeaturedImage();
+			} else {
+				// Restore the original`onOpen` callback as it will be overridden by the parent class.
+				this.frame.off( 'open', this.onOpen );
+				this.frame.on( 'open', super.onOpen.bind( this ) );
 			}
 		}
 

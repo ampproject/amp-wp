@@ -17,7 +17,7 @@ Sanitizes a CSS dimension specifier while being sensitive to dimension context.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:226](../../includes/sanitizers/class-amp-base-sanitizer.php#L226-L253)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:226](/includes/sanitizers/class-amp-base-sanitizer.php#L226-L253)
 
 <details>
 <summary>Show Code</summary>

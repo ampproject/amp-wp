@@ -1,8 +1,20 @@
-## Hook `amp_query_var`
+## Filter `amp_query_var`
+
+```php
+apply_filters( 'amp_query_var', $query_var );
+```
+
+Filter the AMP query variable.
+
+Warning: This filter may become deprecated.
+
+### Arguments
+
+* `string $query_var` - The AMP query variable.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:606](../../includes/amp-helper-functions.php#L606)
+:link: [includes/amp-helper-functions.php:564](/includes/amp-helper-functions.php#L564)
 
 <details>
 <summary>Show Code</summary>

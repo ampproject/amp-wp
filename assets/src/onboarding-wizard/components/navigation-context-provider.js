@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useState, useContext, useEffect, useMemo } from '@wordpress/element';
+import { createContext, useState, useContext, useMemo } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -25,7 +25,7 @@ export const Navigation = createContext();
 export function NavigationContextProvider( { children, pages } ) {
 	const [ activePageIndex, setActivePageIndex ] = useState( 0 );
 	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 2.1.
-	const { editedOptions, readerModeWasOverridden } = useContext( Options );
+	const { editedOptions } = useContext( Options );
 
 	const { theme_support: themeSupport } = editedOptions;
 
@@ -40,15 +40,6 @@ export function NavigationContextProvider( { children, pages } ) {
 	const currentPage = adaptedPages[ activePageIndex ];
 
 	const isLastPage = activePageIndex === adaptedPages.length - 1;
-
-	useEffect( () => {
-		if ( readerModeWasOverridden && 'done' === currentPage.slug ) {
-			// If reader mode is overridden, the Theme Selection page will be removed, and means `activePageIndex` will
-			// point to the Done page instead of Summary. To overcome this we decrement `activePageIndex` by 1 so that
-			// it points to the Summary page.
-			setActivePageIndex( activePageIndex - 1 );
-		}
-	}, [ currentPage.slug, activePageIndex, adaptedPages, readerModeWasOverridden ] );
 
 	/**
 	 * Navigates back to the previous page.
@@ -81,6 +72,7 @@ export function NavigationContextProvider( { children, pages } ) {
 					moveBack,
 					moveForward,
 					pages: adaptedPages,
+					setActivePageIndex,
 					setCanGoForward,
 				}
 			}

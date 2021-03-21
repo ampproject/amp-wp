@@ -21,6 +21,7 @@ final class Hook implements Leaf {
 
 	use LeafConstruction;
 	use HasDocBlock;
+	use HasArguments;
 	use HasCodeLinks;
 
 	/**
@@ -34,22 +35,9 @@ final class Hook implements Leaf {
 			'line'      => 0,
 			'end_line'  => 0,
 			'type'      => '',
-			'arguments' => [],
 			'doc'       => new DocBlock( [] ),
+			'arguments' => [],
 		];
-	}
-
-	/**
-	 * Process the arguments entry.
-	 *
-	 * @param array $value Array of argument entries.
-	 */
-	private function process_arguments( $value ) {
-		$this->arguments = [];
-
-		foreach ( $value as $argument ) {
-			$this->arguments[] = new Argument( $argument, $this );
-		}
 	}
 
 	/**
@@ -62,20 +50,83 @@ final class Hook implements Leaf {
 	}
 
 	/**
-	 * Check if a description is available.
+	 * Get the type of the hook with the first letter in uppercase.
 	 *
-	 * @return bool Whether a description is available.
+	 * @return string Capitalized hook type.
 	 */
-	public function has_description() {
-		return true;
+	public function get_capitalized_type() {
+		return ucfirst( $this->type );
 	}
 
 	/**
-	 * Get the description of the hook.
+	 * Check whether the hook is an action.
 	 *
-	 * @return string Description of the hook.
+	 * @return bool Whether the hook is an action.
 	 */
-	public function get_description() {
-		return 'TODO';
+	public function is_action() {
+		return 'action' === $this->type;
+	}
+
+	/**
+	 * Check whether the hook is a filter.
+	 *
+	 * @return bool Whether the hook is a filter.
+	 */
+	public function is_filter() {
+		return 'filter' === $this->type;
+	}
+
+	/**
+	 * Get the signature of the method.
+	 *
+	 * @return string Method signature.
+	 */
+	public function get_signature() {
+		return sprintf(
+			'%s( \'%s\'%s );',
+			'action' === $this->type ? 'do_action' : 'apply_filters',
+			$this->name,
+			count( $this->arguments ) > 0
+				? ', ' . implode( ', ', $this->get_argument_names() )
+				: ''
+		);
+	}
+
+	/**
+	 * Process the type entry.
+	 *
+	 * @param string $value Value of the type entry.
+	 */
+	private function process_type( $value ) {
+		switch ( $value ) {
+			case 'filter_deprecated':
+			case 'filter_reference':
+				$this->type = 'filter';
+				break;
+			case 'action_deprecated':
+			case 'action_reference':
+				$this->type = 'action';
+				break;
+			default:
+				$this->type = $value;
+		}
+	}
+
+	/**
+	 * Process the arguments entry.
+	 */
+	private function process_arguments() {
+		if ( empty( $this->doc->tags ) ) {
+			$this->arguments = [];
+			return;
+		}
+
+		foreach ( $this->doc->tags as $tag ) {
+			if ( 'param' !== $tag->name || ! isset( $tag->variable ) ) {
+				continue;
+			}
+
+			$this->arguments[] = new Argument( [ 'name' => $tag->variable ], $this );
+		}
 	}
 }

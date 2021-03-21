@@ -6,6 +6,8 @@
  * @since 0.6
  */
 
+use AmpProject\AmpWP\Services;
+
 /**
  * Post meta box class.
  *
@@ -188,7 +190,7 @@ class AMP_Post_Meta_Box {
 				'ampPostMetaBox.boot( %s );',
 				wp_json_encode(
 					[
-						'previewLink'     => esc_url_raw( add_query_arg( amp_get_slug(), '', get_preview_post_link( $post ) ) ),
+						'previewLink'     => esc_url_raw( amp_add_paired_endpoint( get_preview_post_link( $post ) ) ),
 						'canonical'       => amp_is_canonical(),
 						'enabled'         => empty( $support_errors ),
 						'canSupport'      => 0 === count( array_diff( $support_errors, [ 'post-status-disabled' ] ) ),
@@ -209,7 +211,12 @@ class AMP_Post_Meta_Box {
 	 */
 	public function enqueue_block_assets() {
 		$post = get_post();
-		if ( ! in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
+		if ( ! $post instanceof WP_Post || ! in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
+			return;
+		}
+
+		$editor_support = Services::get( 'editor.editor_support' );
+		if ( ! $editor_support->editor_supports_amp_block_editor_features() ) {
 			return;
 		}
 
@@ -242,17 +249,25 @@ class AMP_Post_Meta_Box {
 			true
 		);
 
+		$is_standard_mode = amp_is_canonical();
+
+		list( $featured_image_minimum_width, $featured_image_minimum_height ) = self::get_featured_image_dimensions();
+
 		$data = [
-			'ampSlug'         => amp_get_slug(),
-			'errorMessages'   => $this->get_error_messages( $status_and_errors['errors'] ),
-			'hasThemeSupport' => ! amp_is_legacy(),
-			'isStandardMode'  => amp_is_canonical(),
+			'ampUrl'                     => $is_standard_mode ? null : amp_add_paired_endpoint( get_permalink( $post ) ),
+			'ampPreviewLink'             => $is_standard_mode ? null : amp_add_paired_endpoint( get_preview_post_link( $post ) ),
+			'errorMessages'              => $this->get_error_messages( $status_and_errors['errors'] ),
+			'hasThemeSupport'            => ! amp_is_legacy(),
+			'isStandardMode'             => $is_standard_mode,
+			'featuredImageMinimumWidth'  => $featured_image_minimum_width,
+			'featuredImageMinimumHeight' => $featured_image_minimum_height,
+			'ampBlocksInUse'             => $is_standard_mode ? $this->get_amp_blocks_in_use() : [],
 		];
 
-		wp_localize_script(
+		wp_add_inline_script(
 			self::BLOCK_ASSET_HANDLE,
-			'ampBlockEditor',
-			$data
+			sprintf( 'var ampBlockEditor = %s;', wp_json_encode( $data ) ),
+			'before'
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
@@ -267,6 +282,46 @@ class AMP_Post_Meta_Box {
 				'after'
 			);
 		}
+	}
+
+	/**
+	 * Returns a tuple of width and height featured image dimensions after filtering.
+	 *
+	 * @return int[] {
+	 *     Minimum dimensions.
+	 *
+	 *     @type int $0 Image width in pixels. May be zero to disable the dimension constraint.
+	 *     @type int $1 Image height in pixels. May be zero to disable the dimension constraint.
+	 * }
+	 */
+	public static function get_featured_image_dimensions() {
+		$default_width  = 1200;
+		$default_height = 675;
+
+		/**
+		 * Filters the minimum height required for a featured image.
+		 *
+		 * @since 2.0.9
+		 *
+		 * @param int $featured_image_minimum_height The minimum height of the image, defaults to 675.
+		 *                                           Returning a number less than or equal to zero disables the minimum constraint.
+		 */
+		$featured_image_minimum_height = (int) apply_filters( 'amp_featured_image_minimum_height', $default_height );
+
+		/**
+		 * Filters the minimum width required for a featured image.
+		 *
+		 * @since 2.0.9
+		 *
+		 * @param int $featured_image_minimum_width The minimum width of the image, defaults to 1200.
+		 *                                          Returning a number less than or equal to zero disables the minimum constraint.
+		 */
+		$featured_image_minimum_width = (int) apply_filters( 'amp_featured_image_minimum_width', $default_width );
+
+		return [
+			max( $featured_image_minimum_width, 0 ),
+			max( $featured_image_minimum_height, 0 ),
+		];
 	}
 
 	/**
@@ -371,7 +426,10 @@ class AMP_Post_Meta_Box {
 		if ( in_array( 'skip-post', $errors, true ) ) {
 			$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
 		}
-		if ( count( array_diff( $errors, [ 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ] ) ) > 0 ) {
+		if ( in_array( 'invalid-post', $errors, true ) ) {
+			$error_messages[] = __( 'The post data could not be successfully retrieved.', 'amp' );
+		}
+		if ( count( array_diff( $errors, [ 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template', 'invalid-post' ] ) ) > 0 ) {
 			$error_messages[] = __( 'Unavailable for an unknown reason.', 'amp' );
 		}
 
@@ -401,7 +459,7 @@ class AMP_Post_Meta_Box {
 			update_post_meta(
 				$post_id,
 				self::STATUS_POST_META_KEY,
-				$_POST[ self::STATUS_INPUT_NAME ] // Note: The sanitize_callback has been supplied in the register_meta() call above.
+				$_POST[ self::STATUS_INPUT_NAME ] // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The sanitize_callback has been supplied in the register_meta() call above.
 			);
 		}
 	}
@@ -409,7 +467,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Modify post preview link.
 	 *
-	 * Add the AMP query var is the amp-preview flag is set.
+	 * Add the AMP query var if the amp-preview flag is set.
 	 *
 	 * @since 0.6
 	 *
@@ -424,7 +482,7 @@ class AMP_Post_Meta_Box {
 		);
 
 		if ( $is_amp ) {
-			$link = add_query_arg( amp_get_slug(), true, $link );
+			$link = amp_add_paired_endpoint( $link );
 		}
 
 		return $link;
@@ -523,5 +581,20 @@ class AMP_Post_Meta_Box {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get the list of AMP block names used in the current post.
+	 *
+	 * @since 2.1
+	 *
+	 * @return string[]
+	 */
+	public function get_amp_blocks_in_use() {
+		// Normalize the AMP block names to include the `amp/` namespace.
+		$amp_blocks        = substr_replace( AMP_Editor_Blocks::AMP_BLOCKS, 'amp/', 0, 0 );
+		$amp_blocks_in_use = array_filter( $amp_blocks, 'has_block' );
+
+		return array_values( $amp_blocks_in_use );
 	}
 }

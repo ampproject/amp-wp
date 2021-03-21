@@ -27,8 +27,8 @@ jest.mock( '../../user-context-provider' );
 let container;
 
 const getNavButtons = ( containerElement ) => ( {
-	nextButton: containerElement.querySelector( '.onboarding-wizard-nav__prev-next button.is-primary' ),
-	prevButton: containerElement.querySelector( '.onboarding-wizard-nav__prev-next button:not(.is-primary)' ),
+	nextButton: containerElement.querySelector( '.amp-settings-nav__prev-next button.is-primary' ),
+	prevButton: containerElement.querySelector( '.amp-settings-nav__prev-next button:not(.is-primary)' ),
 } );
 
 const MyPageComponent = () => <div />;
@@ -123,7 +123,7 @@ describe( 'Nav', () => {
 		} );
 
 		const { nextButton } = getNavButtons( container );
-		let closeButton = container.querySelector( '.onboarding-wizard-nav__close a' );
+		let closeButton = container.querySelector( '.amp-settings-nav__close a' );
 
 		expect( closeButton ).not.toBeNull();
 
@@ -131,7 +131,7 @@ describe( 'Nav', () => {
 			nextButton.dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
 		} );
 
-		closeButton = container.querySelector( '.onboarding-wizard-nav__close a' );
+		closeButton = container.querySelector( '.amp-settings-nav__close a' );
 		expect( closeButton ).toBeNull();
 	} );
 
@@ -146,7 +146,7 @@ describe( 'Nav', () => {
 		} );
 
 		const { nextButton } = getNavButtons( container );
-		let closeButton = container.querySelector( '.onboarding-wizard-nav__close a' );
+		let closeButton = container.querySelector( '.amp-settings-nav__close a' );
 
 		expect( closeButton ).not.toBeNull();
 
@@ -154,7 +154,7 @@ describe( 'Nav', () => {
 			nextButton.dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
 		} );
 
-		closeButton = container.querySelector( '.onboarding-wizard-nav__close a' );
+		closeButton = container.querySelector( '.amp-settings-nav__close a' );
 		expect( closeButton ).not.toBeNull();
 	} );
 } );

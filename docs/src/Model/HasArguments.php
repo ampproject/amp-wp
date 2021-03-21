@@ -28,7 +28,7 @@ trait HasArguments {
 	}
 
 	/**
-	 * Check if arugments are available.
+	 * Check if arguments are available.
 	 *
 	 * @return bool Whether arguments are available.
 	 */

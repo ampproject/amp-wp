@@ -26,7 +26,7 @@ export const TemplateModeOverride = createContext();
  */
 export function TemplateModeOverrideContextProvider( { children } ) {
 	const { editedOptions, originalOptions, updateOptions, readerModeWasOverridden, setReaderModeWasOverridden } = useContext( Options );
-	const { currentPage: { slug: currentPageSlug } } = useContext( Navigation );
+	const { activePageIndex, currentPage: { slug: currentPageSlug }, setActivePageIndex } = useContext( Navigation );
 	const { selectedTheme, currentTheme } = useContext( ReaderThemes );
 	const { developerToolsOption, fetchingUser, originalDeveloperToolsOption } = useContext( User );
 	const [ respondedToDeveloperToolsOptionChange, setRespondedToDeveloperToolsOptionChange ] = useState( false );
@@ -61,10 +61,25 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 	 */
 	useEffect( () => {
 		if ( 'summary' === currentPageSlug && 'reader' === themeSupport && selectedTheme.name === currentTheme.name ) {
-			updateOptions( { theme_support: 'transitional' } );
-			setReaderModeWasOverridden( true );
+			if ( ! readerModeWasOverridden ) {
+				updateOptions( { theme_support: 'transitional' } );
+				setReaderModeWasOverridden( true );
+				setActivePageIndex( activePageIndex - 1 );
+			} else {
+				setReaderModeWasOverridden( false );
+			}
 		}
-	}, [ selectedTheme.name, currentTheme.name, themeSupport, currentPageSlug, updateOptions, setReaderModeWasOverridden ] );
+	}, [
+		activePageIndex,
+		selectedTheme.name,
+		currentTheme.name,
+		themeSupport,
+		currentPageSlug,
+		readerModeWasOverridden,
+		updateOptions,
+		setReaderModeWasOverridden,
+		setActivePageIndex,
+	] );
 
 	/**
 	 * Unset theme support in current session if the user changes their answer on the technical screen.

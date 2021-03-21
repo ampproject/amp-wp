@@ -1,8 +1,20 @@
-## Hook `amp_dev_mode_enabled`
+## Filter `amp_dev_mode_enabled`
+
+```php
+apply_filters( 'amp_dev_mode_enabled', $is_dev_mode_enabled );
+```
+
+Filters whether AMP mode is enabled.
+
+When enabled, the data-ampdevmode attribute will be added to the document element and it will allow the attributes to be added to the admin bar. It will also add the attribute to all elements which match the queries for the expressions returned by the &#039;amp_dev_mode_element_xpaths&#039; filter.
+
+### Arguments
+
+* `bool $is_dev_mode_enabled` - Whether AMP dev mode is enabled.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1405](../../includes/amp-helper-functions.php#L1405-L1415)
+:link: [includes/amp-helper-functions.php:1302](/includes/amp-helper-functions.php#L1302-L1312)
 
 <details>
 <summary>Show Code</summary>

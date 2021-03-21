@@ -86,6 +86,14 @@ final class ObsoleteBlockAttributeRemoverTest extends WP_UnitTestCase {
 				',
 				0, // Expect props.
 			],
+			'huge_post'                 => [
+				'
+				<!-- wp:paragraph -->'
+				. str_repeat( 'a', 111101 ) .
+				'<!-- /wp:paragraph -->
+				',
+				0, // Expect props.
+			],
 		];
 	}
 
@@ -116,6 +124,8 @@ final class ObsoleteBlockAttributeRemoverTest extends WP_UnitTestCase {
 		);
 
 		$filtered_response = $this->instance->filter_rest_prepare_post( clone $response );
+		$this->assertNotNull( $filtered_response );
+
 		if ( $expected_prop_count > 0 ) {
 			$this->assertNotEquals( $response->data['content']['raw'], $filtered_response->data['content']['raw'] );
 		} else {

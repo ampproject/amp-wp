@@ -7,17 +7,17 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeLoader;
-use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /**
  * Class Test_AMP_Template_Customizer
  *
  * @covers AMP_Template_Customizer
  */
-class Test_AMP_Template_Customizer extends WP_UnitTestCase {
+class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility;
 	use PrivateAccess;
@@ -159,10 +159,10 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwenty' );
 
-		/** @var ReaderThemeLoader $reader_theme_loader */
-		$reader_theme_loader = Services::get( 'reader_theme_loader' );
+		$reader_theme_loader = $this->injector->make( ReaderThemeLoader::class );
 
-		$_GET[ amp_get_slug() ] = '1';
+		$post = self::factory()->post->create();
+		$this->go_to( amp_get_permalink( $post ) );
 		$reader_theme_loader->override_theme();
 		$this->assertTrue( $reader_theme_loader->is_theme_overridden() );
 
@@ -190,6 +190,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$this->assertFalse( has_action( 'customize_controls_print_footer_scripts', [ $instance, 'print_legacy_controls_templates' ] ) );
 		$this->assertFalse( has_action( 'customize_preview_init', [ $instance, 'init_legacy_preview' ] ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_legacy_customizer_scripts' ] ) );
+		$this->assertFalse( has_action( 'customize_controls_print_footer_scripts', [ $instance, 'add_dark_mode_toggler_button_notice' ] ) );
 
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
 			$this->assertEquals( 'refresh', $setting->transport );
@@ -197,6 +198,24 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 
 		$this->assertNull( $wp_customize->get_section( 'cover_template_options' ) );
 		$this->assertNull( $wp_customize->get_section( 'static_front_page' ) );
+	}
+
+	/**
+	 * @covers AMP_Template_Customizer::init()
+	 * @covers AMP_Template_Customizer::add_dark_mode_toggler_button_notice()
+	 */
+	public function test_init_for_twentytwentyone() {
+		if ( ! wp_get_theme( 'twentytwentyone' )->exists() ) {
+			$this->markTestSkipped();
+		}
+		switch_theme( 'twentytwentyone' );
+
+		$wp_customize = $this->get_customize_manager();
+		$instance     = AMP_Template_Customizer::init( $wp_customize );
+		$this->assertEquals( 10, has_action( 'customize_controls_print_footer_scripts', [ $instance, 'add_dark_mode_toggler_button_notice' ] ) );
+
+		$output = get_echo( [ $instance, 'add_dark_mode_toggler_button_notice' ] );
+		$this->assertStringContains( 'wp.customize.control', $output );
 	}
 
 	/**
@@ -214,9 +233,10 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwenty' );
 
-		/** @var ReaderThemeLoader $reader_theme_loader */
-		$reader_theme_loader = Services::get( 'reader_theme_loader' );
+		$reader_theme_loader = $this->injector->make( ReaderThemeLoader::class );
 
+		$post = self::factory()->post->create();
+		$this->go_to( get_permalink( $post ) );
 		$reader_theme_loader->override_theme();
 		$this->assertFalse( $reader_theme_loader->is_theme_overridden() );
 
@@ -415,9 +435,8 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		);
 
 		// Switch to Reader theme.
-		/** @var ReaderThemeLoader $reader_theme_loader */
-		$reader_theme_loader    = Services::get( 'reader_theme_loader' );
-		$_GET[ amp_get_slug() ] = '1';
+		$reader_theme_loader = $this->injector->make( ReaderThemeLoader::class );
+		$this->go_to( amp_get_permalink( self::factory()->post->create() ) );
 		$reader_theme_loader->override_theme();
 		$this->assertTrue( $reader_theme_loader->is_theme_overridden() );
 		$this->assertEquals( $reader_theme_slug, get_stylesheet() );
@@ -425,7 +444,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		// Initialize Customizer.
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$wp_customize = $this->get_customize_manager();
-		$instance     = AMP_Template_Customizer::init( $wp_customize );
+		$instance     = AMP_Template_Customizer::init( $wp_customize, $reader_theme_loader );
 		add_theme_support( 'custom-background' );
 		$wp_customize->register_controls();
 		$wp_customize->nav_menus->customize_register();

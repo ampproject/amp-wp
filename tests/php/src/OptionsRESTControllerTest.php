@@ -2,29 +2,23 @@
 /**
  * Tests for OptionsRESTController.
  *
- * @package AMP
+ * @package AmpProject\AmpWP
  */
 
 namespace AmpProject\AmpWP\Tests;
 
 use AMP_Options_Manager;
-use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\OptionsRESTController;
 use AmpProject\AmpWP\PluginRegistry;
-use AmpProject\AmpWP\PluginSuppression;
-use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_REST_Request;
-use WP_UnitTestCase;
 
 /**
  * Tests for OptionsRESTController.
  *
- * @group amp-options
- *
  * @coversDefaultClass \AmpProject\AmpWP\OptionsRESTController
  */
-class OptionsRESTControllerTest extends WP_UnitTestCase {
+class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 
 	use ThemesApiRequestMocking;
 
@@ -47,7 +41,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 
 		$this->add_reader_themes_request_filter();
 
-		$this->controller = new OptionsRESTController( new ReaderThemes(), new PluginSuppression( new PluginRegistry() ) );
+		$this->controller = $this->injector->make( OptionsRESTController::class );
 	}
 
 	/**
@@ -70,7 +64,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 	 */
 	public function test_get_items() {
 		$data = $this->controller->get_items( new WP_REST_Request( 'GET', '/amp/v1/options' ) )->get_data();
-		$this->assertEquals(
+		$this->assertEqualSets(
 			[
 				'theme_support',
 				'reader_theme',
@@ -87,12 +81,17 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 				'supportable_templates',
 				'onboarding_wizard_link',
 				'customizer_link',
+				'paired_url_structure',
+				'paired_url_examples',
+				'amp_slug',
+				'custom_paired_endpoint_sources',
+				'endpoint_path_slug_conflicts',
+				'rewrite_using_permalinks',
 			],
 			array_keys( $data )
 		);
 
-		/** @var PluginRegistry $plugin_registry */
-		$plugin_registry = Services::get( 'plugin_registry' );
+		$plugin_registry = $this->injector->make( PluginRegistry::class );
 
 		$this->assertEqualSets( array_keys( $plugin_registry->get_plugins( true ) ), array_keys( $data['suppressible_plugins'] ) );
 		$this->assertEquals( null, $data['preview_permalink'] );

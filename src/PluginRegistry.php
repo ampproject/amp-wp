@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP;
 use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
- * Suppress plugins from running by removing their hooks and nullifying their shortcodes, widgets, and blocks.
+ * Get information about plugins and their current status.
  *
  * @package AmpProject\AmpWP
  * @internal
@@ -103,6 +103,7 @@ final class PluginRegistry implements Service {
 	 * the plugins directory.
 	 *
 	 * @param string $plugin_slug Plugin slug.
+	 * @param bool   $must_use    Whether the slug is for a must-use plugin.
 	 * @return array|null {
 	 *     Plugin data if found, otherwise null.
 	 *
@@ -110,8 +111,8 @@ final class PluginRegistry implements Service {
 	 *     @type array  $data Plugin data.
 	 * }
 	 */
-	public function get_plugin_from_slug( $plugin_slug ) {
-		$plugins = $this->get_plugins_data();
+	public function get_plugin_from_slug( $plugin_slug, $must_use = false ) {
+		$plugins = $must_use ? $this->get_mu_plugins_data() : $this->get_plugins_data();
 		if ( isset( $plugins[ $plugin_slug ] ) ) {
 			return [
 				'file' => $plugin_slug,
@@ -139,5 +140,15 @@ final class PluginRegistry implements Service {
 		return get_plugins(
 			$this->plugin_folder ? '/' . trim( $this->plugin_folder, '/' ) : ''
 		);
+	}
+
+	/**
+	 * Gets the MU plugins on the site.
+	 *
+	 * @return array[]
+	 */
+	private function get_mu_plugins_data() {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		return get_mu_plugins();
 	}
 }

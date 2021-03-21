@@ -225,10 +225,11 @@ final class SimpleInjector implements Injector {
 		InjectionChain $injection_chain,
 		$interface_or_class
 	) {
-		if ( $injection_chain->has_resolution( $interface_or_class ) ) {
+		if ( $injection_chain->is_in_chain( $interface_or_class ) ) {
 			// Circular reference detected, aborting.
 			throw FailedToMakeInstance::for_circular_reference(
-				$interface_or_class
+				$interface_or_class,
+				$injection_chain
 			);
 		}
 

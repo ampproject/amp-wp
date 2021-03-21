@@ -275,7 +275,7 @@ class AMP_Post_Template {
 	 */
 	private function build_post_data() {
 		$post_title              = get_the_title( $this->post );
-		$post_publish_timestamp  = get_the_date( 'U', $this->post );
+		$post_publish_timestamp  = $this->build_post_publish_timestamp();
 		$post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
 		$post_author             = get_userdata( $this->post->post_author );
 
@@ -292,6 +292,33 @@ class AMP_Post_Template {
 
 		$this->build_post_featured_image();
 		$this->build_post_comments_data();
+	}
+
+	/**
+	 * Build post publish timestamp.
+	 *
+	 * We can't use `get_the_date( 'U' )` because it always returns the non-GMT value.
+	 *
+	 * @return int Post publish UTC timestamp.
+	 */
+	private function build_post_publish_timestamp() {
+		$format = 'U';
+
+		if ( empty( $this->post->post_date_gmt ) || '0000-00-00 00:00:00' === $this->post->post_date_gmt ) {
+			$timestamp = time();
+		} else {
+			$timestamp = (int) get_post_time( $format, true, $this->post, true );
+		}
+
+		/** This filter is documented in wp-includes/general-template.php. */
+		$filtered_timestamp = apply_filters( 'get_the_date', $timestamp, $format, $this->post );
+
+		// Guard against a plugin poorly filtering get_the_date to be something other than a Unix timestamp.
+		if ( is_int( $filtered_timestamp ) ) {
+			$timestamp = $filtered_timestamp;
+		}
+
+		return $timestamp;
 	}
 
 	/**

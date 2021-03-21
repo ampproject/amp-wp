@@ -7,6 +7,8 @@
 
 namespace AmpProject\AmpWP;
 
+use AmpProject\AmpWP\Infrastructure\Injector;
+use AmpProject\AmpWP\Infrastructure\Plugin;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer;
 
@@ -23,6 +25,27 @@ use AmpProject\AmpWP\Infrastructure\ServiceContainer;
 final class Services {
 
 	/**
+	 * Plugin object instance.
+	 *
+	 * @var Plugin
+	 */
+	private static $plugin;
+
+	/**
+	 * Service container object instance.
+	 *
+	 * @var ServiceContainer
+	 */
+	private static $container;
+
+	/**
+	 * Dependency injector object instance.
+	 *
+	 * @var Injector
+	 */
+	private static $injector;
+
+	/**
 	 * Get a particular service out of the service container.
 	 *
 	 * @param string $service Service ID to retrieve.
@@ -33,17 +56,51 @@ final class Services {
 	}
 
 	/**
-	 * Get an instance of the service container.
+	 * Check if a particular service has been registered in the service container.
 	 *
-	 * @return ServiceContainer
+	 * @param string $service Service ID to retrieve.
+	 * @return bool
 	 */
-	public static function get_container() {
-		static $container = null;
+	public static function has( $service ) {
+		return self::get_container()->has( $service );
+	}
 
-		if ( null === $container ) {
-			$container = AmpWpPluginFactory::create()->get_container();
+	/**
+	 * Get an instance of the plugin.
+	 *
+	 * @return Plugin Plugin object instance.
+	 */
+	public static function get_plugin() {
+		if ( null === self::$plugin ) {
+			self::$plugin = AmpWpPluginFactory::create();
 		}
 
-		return $container;
+		return self::$plugin;
+	}
+
+	/**
+	 * Get an instance of the service container.
+	 *
+	 * @return ServiceContainer Service container object instance.
+	 */
+	public static function get_container() {
+		if ( null === self::$container ) {
+			self::$container = self::get_plugin()->get_container();
+		}
+
+		return self::$container;
+	}
+
+	/**
+	 * Get an instance of the dependency injector.
+	 *
+	 * @return Injector Dependency injector object instance.
+	 */
+	public static function get_injector() {
+		if ( null === self::$injector ) {
+			self::$injector = self::get_container()->get( 'injector' );
+		}
+
+		return self::$injector;
 	}
 }

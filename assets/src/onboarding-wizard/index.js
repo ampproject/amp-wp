@@ -94,7 +94,7 @@ domReady( () => {
 		render(
 
 			<Providers>
-				<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } />
+				<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } appRoot={ root } />
 			</Providers>,
 			root,
 		);
