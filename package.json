@@ -28,7 +28,7 @@
     "@wordpress/dom-ready": "2.13.0",
     "@wordpress/element": "2.19.1",
     "@wordpress/escape-html": "1.11.1",
-    "@wordpress/html-entities": "2.10.1",
+    "@wordpress/html-entities": "2.11.0",
     "@wordpress/i18n": "3.18.0",
     "@wordpress/icons": "2.9.1",
     "@wordpress/is-shallow-equal": "3.1.0",
