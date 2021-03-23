@@ -24,7 +24,7 @@
     "@wordpress/autop": "2.12.0",
     "@wordpress/components": "12.0.8",
     "@wordpress/compose": "3.25.0",
-    "@wordpress/date": "3.13.1",
+    "@wordpress/date": "3.14.0",
     "@wordpress/dom-ready": "2.13.0",
     "@wordpress/element": "2.19.1",
     "@wordpress/escape-html": "1.11.1",
