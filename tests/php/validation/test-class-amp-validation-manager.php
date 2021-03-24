@@ -2082,20 +2082,20 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 */
 	public function get_validation_errors() {
 		return [
-			'simple error' => [
+			'simple error'                         => [
 				[
 					[
 						'code' => 'example',
 					],
-				]
+				],
 			],
 			'error containing a huge HTML comment' => [
 				[
 					[
 						'code' => 'example',
 						'text' => '<!-- ' . str_repeat( 'a', 1000000 ) . ' -->',
-					]
-				]
+					],
+				],
 			],
 		];
 	}
@@ -2108,7 +2108,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers AMP_Validation_Manager::validate_url()
 	 * @covers AMP_Validation_Manager::validate_url_and_store()
 	 *
-	 * @param array	$validation_errors Validation errors.
+	 * @param array $validation_errors Validation errors.
 	 */
 	public function test_validate_url( $validation_errors ) {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
