@@ -20,8 +20,8 @@ import { registerBlockType, createBlock } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { Error } from '..';
-import { createStore } from '../../store';
+import { Error } from '../index';
+import { createStore } from '../../../store';
 
 let container, pluginBlock, themeBlock, coreBlock, unknownBlock;
 

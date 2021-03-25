@@ -13,8 +13,8 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ToolbarIcon } from './icon';
-import { PLUGIN_NAME, SIDEBAR_NAME } from '.';
+import { ToolbarIcon } from '../icon';
+import { PLUGIN_NAME, SIDEBAR_NAME } from '../../plugins/amp-block-validation';
 
 /**
  * AMP button displaying in the block toolbar.

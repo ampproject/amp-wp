@@ -11,7 +11,7 @@ import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { MoreMenuIcon, ToolbarIcon, StatusIcon } from '../icon';
+import { MoreMenuIcon, ToolbarIcon, StatusIcon } from '../index';
 
 let container;
 

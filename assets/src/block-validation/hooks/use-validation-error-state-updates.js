@@ -16,7 +16,7 @@ import { getQueryArg, isURL } from '@wordpress/url';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from './store';
+import { BLOCK_VALIDATION_STORE_KEY } from '../store';
 
 /**
  * Attempts to associate a validation error with a block current in the editor.

@@ -13,7 +13,7 @@ import { createReduxStore, dispatch, register, select, useSelect } from '@wordpr
  * Internal dependencies
  */
 import { usePostDirtyStateChanges } from '../use-post-dirty-state-changes';
-import { BLOCK_VALIDATION_STORE_KEY, createStore } from '../store';
+import { BLOCK_VALIDATION_STORE_KEY, createStore } from '../../store';
 
 jest.mock( '@wordpress/data/build/components/use-select', () => jest.fn() );
 jest.mock( '@wordpress/compose/build/hooks/use-debounce', () => ( fn ) => fn );
