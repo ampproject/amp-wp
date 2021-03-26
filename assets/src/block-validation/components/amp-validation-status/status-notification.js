@@ -12,18 +12,19 @@ import AMPValidationErrorsKeptIcon from '../../../../images/amp-validation-error
 import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
 import { StatusIcon } from '../icon';
 import { SidebarNotification } from '../sidebar-notification';
+import { useErrorsFetchingStateChanges } from '../../hooks/use-errors-fetching-state-changes';
 
 /**
  * AMP validation status notification component.
  */
 export default function AMPValidationStatusNotification() {
 	const { autosave, savePost } = useDispatch( 'core/editor' );
+	const { isFetchingErrors } = useErrorsFetchingStateChanges();
 
 	const {
 		fetchingErrorsRequestErrorMessage,
 		isDraft,
 		isEditedPostNew,
-		isFetchingErrors,
 		keptMarkupValidationErrorCount,
 		reviewLink,
 		unreviewedValidationErrorCount,
@@ -32,7 +33,6 @@ export default function AMPValidationStatusNotification() {
 		fetchingErrorsRequestErrorMessage: select( BLOCK_VALIDATION_STORE_KEY ).getFetchingErrorsRequestErrorMessage(),
 		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' ).getEditedPostAttribute( 'status' ) ) !== -1,
 		isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
-		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 		keptMarkupValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getKeptMarkupValidationErrors().length,
 		reviewLink: select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(),
 		unreviewedValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors().length,

@@ -3,9 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { usePrevious } from '@wordpress/compose';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -13,21 +11,19 @@ import { useEffect, useState } from '@wordpress/element';
 import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
 import BellIcon from '../../../../images/bell-icon.svg';
 import { SidebarNotification } from '../sidebar-notification';
+import { useErrorsFetchingStateChanges } from '../../hooks/use-errors-fetching-state-changes';
 
 /**
  * AMP re-validate status message.
  */
 export default function AMPRevalidateNotification() {
-	const [ didFetchErrors, setDidFetchErrors ] = useState( false );
-	const [ loadingMessage, setLoadingMessage ] = useState( '' );
 	const { autosave, savePost } = useDispatch( 'core/editor' );
+	const { isFetchingErrors, fetchingErrorsMessage } = useErrorsFetchingStateChanges();
 
 	const {
 		hasErrorsFromRemovedBlocks,
 		hasActiveMetaboxes,
 		isDraft,
-		isFetchingErrors,
-		isEditedPostNew,
 		isPostDirty,
 	} = useSelect( ( select ) => ( {
 		hasErrorsFromRemovedBlocks: Boolean( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors().find(
@@ -35,42 +31,12 @@ export default function AMPRevalidateNotification() {
 		),
 		hasActiveMetaboxes: select( 'core/edit-post' ).hasMetaBoxes(),
 		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' ).getEditedPostAttribute( 'status' ) ) !== -1,
-		isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
-		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
 	} ), [] );
 
-	const wasEditedPostNew = usePrevious( isEditedPostNew );
-	const wasFetchingErrors = usePrevious( isFetchingErrors );
-
-	useEffect( () => {
-		if ( didFetchErrors ) {
-			return;
-		}
-
-		// Set up the state right after errors fetching has finished.
-		if ( ! isFetchingErrors && wasFetchingErrors ) {
-			setDidFetchErrors( true );
-		}
-	}, [ didFetchErrors, isFetchingErrors, wasFetchingErrors ] );
-
-	/**
-	 * Display best-suited loading message depending if the post has been
-	 * already validated or not, or the editor has just been opened.
-	 */
-	useEffect( () => {
-		if ( didFetchErrors ) {
-			setLoadingMessage( __( 'Re-validating page content.', 'amp' ) );
-		} else if ( isEditedPostNew || wasEditedPostNew ) {
-			setLoadingMessage( __( 'Validating page content.', 'amp' ) );
-		} else {
-			setLoadingMessage( __( 'Loading…', 'amp' ) );
-		}
-	}, [ didFetchErrors, isEditedPostNew, wasEditedPostNew ] );
-
 	if ( isFetchingErrors ) {
 		return (
-			<SidebarNotification message={ loadingMessage } isLoading={ true } />
+			<SidebarNotification message={ fetchingErrorsMessage } isLoading={ true } />
 		);
 	}
 
