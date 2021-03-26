@@ -35,7 +35,7 @@ export default function AMPBlockValidation() {
 	return (
 		<>
 			<PluginSidebarMoreMenuItem
-				icon={ <MoreMenuIcon /> }
+				icon={ <PLUGIN_ICON /> }
 				target={ SIDEBAR_NAME }
 			>
 				{ PLUGIN_TITLE }
