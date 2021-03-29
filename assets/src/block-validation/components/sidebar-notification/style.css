@@ -1,8 +1,8 @@
 .sidebar-notification {
 	display: flex;
+	margin-top: 15px;
 	min-height: 67px;
 	overflow: hidden;
-	padding: 14px 18px;
 	position: relative;
 }
 
@@ -30,15 +30,37 @@
 .sidebar-notification__content {
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
 }
 
 .sidebar-notification__content > p {
 	margin: 0;
 }
 
-.sidebar-notification__content > p + p {
+.sidebar-notification__content > p + p,
+.sidebar-notification__action {
 	margin-top: 4px;
+}
+
+/*
+ * Small sidebar notification.
+ */
+.sidebar-notification.is-small {
+	min-height: 36px;
+}
+
+.sidebar-notification.is-small .sidebar-notification__content p {
+	font-size: 11px;
+}
+
+/*
+ * Sidebar notification within a container.
+ */
+.sidebar-notifications-container .sidebar-notification {
+	padding: 14px 18px;
+}
+
+.sidebar-notifications-container .sidebar-notification:first-child {
+	margin-top: 0;
 }
 
 /*
@@ -50,11 +72,7 @@
 	padding: 18px 10px;
 }
 
-.sidebar-notifications-container.is-shady > .sidebar-notification {
+.sidebar-notifications-container.is-shady .sidebar-notification {
 	background: #fff;
 	border-radius: 15px;
-}
-
-.sidebar-notifications-container.is-shady > .sidebar-notification + .sidebar-notification {
-	margin-top: 15px;
 }

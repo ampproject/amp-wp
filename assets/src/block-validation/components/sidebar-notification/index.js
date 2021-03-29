@@ -18,18 +18,23 @@ import { Loading } from '../../../components/loading';
  * @param {ReactNode} props.action Call to action element.
  * @param {ReactNode} props.icon Status icon element.
  * @param {boolean} props.isLoading Flag indicating if it's a loading message.
+ * @param {boolean} props.isSmall Flag indicating if the notification is small.
  * @param {string} props.message Message text.
  */
 export function SidebarNotification( {
 	action,
 	icon,
 	isLoading = false,
+	isSmall = false,
 	message,
 } ) {
 	const iconElement = isLoading ? <Loading /> : icon;
 
 	return (
-		<div className={ classnames( 'sidebar-notification', { 'is-loading': isLoading } ) }>
+		<div className={ classnames( 'sidebar-notification', {
+			'is-loading': isLoading,
+			'is-small': isSmall,
+		} ) }>
 			{ iconElement && (
 				<div className="sidebar-notification__icon">
 					{ iconElement }
@@ -40,9 +45,9 @@ export function SidebarNotification( {
 					{ message }
 				</p>
 				{ action && (
-					<p>
+					<div className="sidebar-notification__action">
 						{ action }
-					</p>
+					</div>
 				) }
 			</div>
 		</div>
@@ -52,6 +57,7 @@ SidebarNotification.propTypes = {
 	action: PropTypes.node,
 	icon: PropTypes.node,
 	isLoading: PropTypes.bool,
+	isSmall: PropTypes.bool,
 	message: PropTypes.string.isRequired,
 };
 
