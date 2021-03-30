@@ -21,17 +21,13 @@ export default function AMPRevalidateNotification() {
 	const { isFetchingErrors, fetchingErrorsMessage } = useErrorsFetchingStateChanges();
 
 	const {
-		hasErrorsFromRemovedBlocks,
-		hasActiveMetaboxes,
 		isDraft,
 		isPostDirty,
+		maybeIsPostDirty,
 	} = useSelect( ( select ) => ( {
-		hasErrorsFromRemovedBlocks: Boolean( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors().find(
-			( { clientId } ) => clientId && ! select( 'core/block-editor' ).getBlockName( clientId ) ),
-		),
-		hasActiveMetaboxes: select( 'core/edit-post' ).hasMetaBoxes(),
 		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' ).getEditedPostAttribute( 'status' ) ) !== -1,
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
+		maybeIsPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getMaybeIsPostDirty(),
 	} ), [] );
 
 	if ( isFetchingErrors ) {
@@ -40,23 +36,14 @@ export default function AMPRevalidateNotification() {
 		);
 	}
 
-	/**
-	 * For posts where meta boxes are present, it's impossible to tell
-	 * if a meta box content has changed or not. Because of that, a dirty
-	 * state is ignored and it's always possible to save a post.
-	 * Likewise, we always display the re-validate message if there are
-	 * active meta boxes. Also show a re-validate message if there are validation
-	 * errors which used to be in the content but are no longer found, potentially
-	 * due to switching from the visual editor to the code editor.
-	 */
-	if ( ! isPostDirty && ! hasActiveMetaboxes && ! hasErrorsFromRemovedBlocks ) {
+	if ( ! isPostDirty && ! maybeIsPostDirty ) {
 		return null;
 	}
 
 	return (
 		<SidebarNotification
 			icon={ <BellIcon /> }
-			message={ hasActiveMetaboxes || ! isPostDirty
+			message={ maybeIsPostDirty
 				? __( 'Page content may have changed.', 'amp' )
 				: __( 'Page content has changed.', 'amp' ) }
 			action={ isDraft ? (
