@@ -139,7 +139,7 @@ export default function AMPDocumentStatusNotification() {
 							/* translators: %d is count of unreviewed validation error */
 							_n(
 								'Your AMP page is working, but %d issue needs review.',
-								'Your AMP page is working, but %d issues need review. ',
+								'Your AMP page is working, but %d issues need review.',
 								unreviewedValidationErrorCount,
 								'amp',
 							),
