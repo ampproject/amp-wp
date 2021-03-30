@@ -2,7 +2,6 @@
 	display: flex;
 	margin-top: 15px;
 	min-height: 67px;
-	overflow: hidden;
 	position: relative;
 }
 
@@ -22,7 +21,7 @@
 	width: 24px;
 }
 
-.sidebar-notification__icon svg {
+.sidebar-notification__icon * {
 	height: 100%;
 	width: 100%;
 }
@@ -75,4 +74,5 @@
 .sidebar-notifications-container.is-shady .sidebar-notification {
 	background: #fff;
 	border-radius: 15px;
+	overflow: hidden;
 }

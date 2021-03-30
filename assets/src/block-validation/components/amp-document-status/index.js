@@ -21,10 +21,13 @@ import AMPToggle from './amp-toggle';
  * AMP document status notification component.
  */
 export default function AMPDocumentStatusNotification() {
-	const { openGeneralSidebar } = useDispatch( 'core/edit-post' );
-
 	const { isAMPEnabled } = useAMPDocumentToggle();
 	const { isFetchingErrors, fetchingErrorsMessage } = useErrorsFetchingStateChanges();
+
+	const {
+		openGeneralSidebar,
+		closePublishSidebar,
+	} = useDispatch( 'core/edit-post' );
 
 	const {
 		keptMarkupValidationErrorCount,
@@ -53,6 +56,11 @@ export default function AMPDocumentStatusNotification() {
 		);
 	}
 
+	const openBlockValidationSidebar = () => {
+		closePublishSidebar();
+		openGeneralSidebar( `${ PLUGIN_NAME }/${ SIDEBAR_NAME }` );
+	};
+
 	if ( keptMarkupValidationErrorCount > 0 ) {
 		return (
 			<>
@@ -75,7 +83,7 @@ export default function AMPDocumentStatusNotification() {
 				/>
 				<PanelRow>
 					<Button
-						onClick={ () => openGeneralSidebar( `${ PLUGIN_NAME }/${ SIDEBAR_NAME }` ) }
+						onClick={ openBlockValidationSidebar }
 						isDefault={ true }
 						isSmall={ true }
 					>
@@ -113,7 +121,7 @@ export default function AMPDocumentStatusNotification() {
 				/>
 				<PanelRow>
 					<Button
-						onClick={ () => openGeneralSidebar( `${ PLUGIN_NAME }/${ SIDEBAR_NAME }` ) }
+						onClick={ openBlockValidationSidebar }
 						isDefault={ true }
 						isSmall={ true }
 					>

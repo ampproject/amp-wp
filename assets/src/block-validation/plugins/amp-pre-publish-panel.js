@@ -2,26 +2,26 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
+import { PluginPrePublishPanel } from '@wordpress/edit-post';
 
 /**
  * Internal dependencies
  */
 import AMPDocumentStatusNotification from '../components/amp-document-status';
 
-export const PLUGIN_NAME = 'amp-block-validation-document-setting-panel';
+export const PLUGIN_NAME = 'amp-block-validation-pre-publish-panel';
 export const PLUGIN_ICON = '';
 
 /**
- * AMP block validation document settings panel.
+ * AMP block validation pre-publish panel.
  */
-export default function AMPDocumentSettingPanel() {
+export default function AMPPrePublishPanel() {
 	return (
-		<PluginDocumentSettingPanel
+		<PluginPrePublishPanel
 			title={ __( 'AMP', 'amp' ) }
 			initialOpen={ true }
 		>
 			<AMPDocumentStatusNotification />
-		</PluginDocumentSettingPanel>
+		</PluginPrePublishPanel>
 	);
 }
