@@ -33,6 +33,7 @@ describe( 'AMPRevalidateNotification', () => {
 			isDraft: false,
 			isFetchingErrors: false,
 			isPostDirty: false,
+			maybeIsPostDirty: false,
 			...overrides,
 		} ) );
 	}
@@ -116,11 +117,11 @@ describe( 'AMPRevalidateNotification', () => {
 		expect( savePost ).toHaveBeenCalledWith( { isPreview: true } );
 	} );
 
-	it( 'always revalidate status message if there are active meta boxes', () => {
+	it( 'always renders revalidate status message if there are active meta boxes', () => {
 		setupUseSelect( {
 			isDraft: false,
 			isPostDirty: false,
-			hasActiveMetaboxes: true,
+			maybeIsPostDirty: true,
 		} );
 
 		act( () => {
