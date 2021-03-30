@@ -80,7 +80,7 @@ export default function AMPDocumentStatusNotification() {
 				<PanelRow>
 					<Button
 						onClick={ openBlockValidationSidebar }
-						isDefault={ true }
+						isSecondary={ true }
 						isSmall={ true }
 					>
 						{ __( 'Open AMP Validation sidebar', 'amp' ) }
@@ -113,7 +113,7 @@ export default function AMPDocumentStatusNotification() {
 				<PanelRow>
 					<Button
 						onClick={ openBlockValidationSidebar }
-						isDefault={ true }
+						isSecondary={ true }
 						isSmall={ true }
 					>
 						{ _n(
@@ -151,7 +151,7 @@ export default function AMPDocumentStatusNotification() {
 				<PanelRow>
 					<Button
 						onClick={ openBlockValidationSidebar }
-						isDefault={ true }
+						isSecondary={ true }
 						isSmall={ true }
 					>
 						{ _n(
