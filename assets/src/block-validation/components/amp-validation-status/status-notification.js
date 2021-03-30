@@ -8,10 +8,10 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import AMPValidationErrorsKeptIcon from '../../../images/amp-validation-errors-kept.svg';
-import { BLOCK_VALIDATION_STORE_KEY } from '../store';
+import AMPValidationErrorsKeptIcon from '../../../../images/amp-validation-errors-kept.svg';
+import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
 import { StatusIcon } from '../icon';
-import { SidebarNotification } from '../../block-editor/components/sidebar-notification';
+import { SidebarNotification } from '../sidebar-notification';
 
 /**
  * AMP validation status notification component.

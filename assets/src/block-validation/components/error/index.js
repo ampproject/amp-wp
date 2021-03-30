@@ -20,7 +20,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.css';
-import { BLOCK_VALIDATION_STORE_KEY } from '../store';
+import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
 import { ErrorPanelTitle } from './error-panel-title';
 import { ErrorContent } from './error-content';
 

@@ -6,7 +6,7 @@ import { dispatch, select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY, createStore, INITIAL_STATE } from '../store';
+import { BLOCK_VALIDATION_STORE_KEY, createStore, INITIAL_STATE } from '../index';
 import { rawValidationErrors } from './__data__/raw-validation-errors';
 
 describe( 'Block validation data store', () => {

@@ -15,8 +15,8 @@ import '@wordpress/block-editor'; // Block editor data store needed.
 /**
  * Internal dependencies
  */
-import { createStore } from '../store';
-import { withAMPToolbarButton } from '../with-amp-toolbar-button';
+import { createStore } from '../../../store';
+import { withAMPToolbarButton } from '../index';
 
 let container, block;
 let toolbarButtonWasRendered = false;

@@ -7,7 +7,7 @@ import { useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from './store';
+import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
 
 /**
  * Adds a style rule for all blocks with validation errors.

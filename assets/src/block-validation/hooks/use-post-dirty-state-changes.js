@@ -8,7 +8,7 @@ import { subscribe, useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from './store';
+import { BLOCK_VALIDATION_STORE_KEY } from '../store';
 
 const DELAY_MS = 500;
 
