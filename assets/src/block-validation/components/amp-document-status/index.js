@@ -9,6 +9,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import AMPValidationErrorsKeptIcon from '../../../../images/amp-validation-errors-kept.svg';
+import BellIcon from '../../../../images/bell-icon.svg';
 import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
 import { StatusIcon } from '../icon';
 import { SidebarNotification } from '../sidebar-notification';
@@ -30,9 +31,13 @@ export default function AMPDocumentStatusNotification() {
 	} = useDispatch( 'core/edit-post' );
 
 	const {
+		isPostDirty,
+		maybeIsPostDirty,
 		keptMarkupValidationErrorCount,
 		unreviewedValidationErrorCount,
 	} = useSelect( ( select ) => ( {
+		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
+		maybeIsPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getMaybeIsPostDirty(),
 		keptMarkupValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getKeptMarkupValidationErrors().length,
 		unreviewedValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors().length,
 	} ), [] );
@@ -60,6 +65,30 @@ export default function AMPDocumentStatusNotification() {
 		closePublishSidebar();
 		openGeneralSidebar( `${ PLUGIN_NAME }/${ SIDEBAR_NAME }` );
 	};
+
+	if ( isPostDirty || maybeIsPostDirty ) {
+		return (
+			<>
+				<AMPToggle />
+				<SidebarNotification
+					icon={ <BellIcon /> }
+					message={ maybeIsPostDirty
+						? __( 'Page content may have changed. Trigger page validation in the AMP Validation sidebar.', 'amp' )
+						: __( 'Page content has changed. Trigger page validation in the AMP Validation sidebar.', 'amp' ) }
+					isSmall={ true }
+				/>
+				<PanelRow>
+					<Button
+						onClick={ openBlockValidationSidebar }
+						isDefault={ true }
+						isSmall={ true }
+					>
+						{ __( 'Open AMP Validation sidebar', 'amp' ) }
+					</Button>
+				</PanelRow>
+			</>
+		);
+	}
 
 	if ( keptMarkupValidationErrorCount > 0 ) {
 		return (

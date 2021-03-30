@@ -47,6 +47,10 @@
 	min-height: 36px;
 }
 
+.sidebar-notification.is-small .sidebar-notification__content {
+	padding-top: 4px;
+}
+
 .sidebar-notification.is-small .sidebar-notification__content p {
 	font-size: 11px;
 }
