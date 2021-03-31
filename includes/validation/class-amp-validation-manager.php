@@ -1848,7 +1848,22 @@ class AMP_Validation_Manager {
 		$response = ltrim( $response );
 
 		// Strip HTML comments that may have been injected at the end of the response (e.g. by a caching plugin).
-		$response = preg_replace( '/}\s*?<!--.*?-->\s*$/s', '}', $response );
+		while ( ! empty( $response ) ) {
+			$response = rtrim( $response );
+			$length   = strlen( $response );
+
+			if ( $length < 3 || '-' !== $response[ $length - 3 ] || '-' !== $response[ $length - 2 ] || '>' !== $response[ $length - 1 ] ) {
+				break;
+			}
+
+			$start = strrpos( $response, '<!--' );
+
+			if ( false === $start ) {
+				break;
+			}
+
+			$response = substr( $response, 0, $start );
+		}
 
 		if ( '' === $response ) {
 			return new WP_Error( 'white_screen_of_death' );
