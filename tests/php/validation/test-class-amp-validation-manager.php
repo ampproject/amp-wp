@@ -2194,7 +2194,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		add_filter( 'pre_http_request', $filter, 10, 3 );
 		$r = AMP_Validation_Manager::validate_url( $validated_url );
-		$this->assertEquals( PREG_NO_ERROR, preg_last_error(), 'Expected no preg error. An error of 2 means PREG_BACKTRACK_LIMIT_ERROR.' );
 		$this->assertInternalType( 'array', $r );
 		$this->assertEquals( $validation_errors, wp_list_pluck( $r['results'], 'error' ) );
 		$this->assertEquals( $validated_url, $r['url'] );
