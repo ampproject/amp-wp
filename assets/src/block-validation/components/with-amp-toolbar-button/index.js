@@ -12,7 +12,7 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from './store';
+import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
 import { AMPToolbarButton } from './amp-toolbar-button';
 
 /**

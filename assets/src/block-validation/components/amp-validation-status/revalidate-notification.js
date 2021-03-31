@@ -10,9 +10,9 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY } from '../store';
-import BellIcon from '../../../images/bell-icon.svg';
-import { SidebarNotification } from '../../block-editor/components/sidebar-notification';
+import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
+import BellIcon from '../../../../images/bell-icon.svg';
+import { SidebarNotification } from '../sidebar-notification';
 
 /**
  * AMP re-validate status message.

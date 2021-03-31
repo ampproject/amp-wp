@@ -13,13 +13,13 @@ import { select, useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { maybeAddClientIdToValidationError, useValidationErrorStateUpdates } from '../use-validation-error-state-updates';
-import { BLOCK_VALIDATION_STORE_KEY, createStore } from '../store';
+import { BLOCK_VALIDATION_STORE_KEY, createStore } from '../../store';
 
 // This allows us to tweak the returned value on each test
 jest.mock( '@wordpress/data/build/components/use-select', () => jest.fn() );
 
 jest.mock( '@wordpress/api-fetch', () => () => new Promise( ( resolve ) => {
-	resolve( { review_link: 'http://site.test/wp-admin', results: require( './__data__/raw-validation-errors' ).rawValidationErrors } );
+	resolve( { review_link: 'http://site.test/wp-admin', results: require( '../../store/test/__data__/raw-validation-errors' ).rawValidationErrors } );
 } ) );
 
 createStore( {
@@ -48,7 +48,7 @@ describe( 'useValidationErrorStateUpdates', () => {
 			isPreviewingPost: false,
 			isSavingPost: false,
 			previewLink: '',
-			validationErrorsFromPost: require( './__data__/raw-validation-errors' ).rawValidationErrors,
+			validationErrorsFromPost: require( '../../store/test/__data__/raw-validation-errors' ).rawValidationErrors,
 			...overrides,
 		} ) );
 	}

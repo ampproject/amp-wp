@@ -2,18 +2,18 @@
  * WordPress dependencies
  */
 import { Button } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import './style.css';
-import { SidebarNotificationsContainer } from '../block-editor/components/sidebar-notification';
-import { AMPRevalidateNotification, AMPValidationStatusNotification } from './amp-validation-status';
-import { Error } from './error';
-import { BLOCK_VALIDATION_STORE_KEY } from './store';
+import { SidebarNotificationsContainer } from '../sidebar-notification';
+import { AMPRevalidateNotification, AMPValidationStatusNotification } from '../amp-validation-status';
+import { Error } from '../error';
+import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
 
 /**
  * Editor sidebar.
