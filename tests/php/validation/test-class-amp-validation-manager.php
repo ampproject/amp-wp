@@ -171,9 +171,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		remove_filter( 'wp', [ 'AMP_Validation_Manager', 'maybe_fail_validate_request' ] );
 		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter( 'wp_die_ajax_handler', static function () {
-			return static function () {};
-		} );
+		add_filter(
+			'wp_die_ajax_handler',
+			static function () {
+				return static function () {};
+			} 
+		);
 
 		$get_output = static function () {
 			ob_start();
@@ -201,9 +204,14 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::$is_validate_request = true;
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
-		add_filter( 'amp_skip_post', static function ( $skipped, $_post_id ) use ( $post_id ) {
-			return $_post_id === $post_id;
-		}, 10, 2 );
+		add_filter(
+			'amp_skip_post',
+			static function ( $skipped, $_post_id ) use ( $post_id ) {
+				return $_post_id === $post_id;
+			},
+			10,
+			2 
+		);
 
 		$this->go_to( amp_get_permalink( $post_id ) );
 		$output = $get_output();

@@ -418,7 +418,7 @@ class AMP_Validation_Manager {
 	/**
 	 * Override validation error statuses (when requested).
 	 *
-	 * When a query var is present along with the required nonce, override the status of the status of the invalid markup
+	 * When a query var is present along with the required nonce, override the status of the invalid markup
 	 * as requested.
 	 *
 	 * @since 1.5.0
