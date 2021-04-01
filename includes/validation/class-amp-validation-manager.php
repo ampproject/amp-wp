@@ -473,7 +473,7 @@ class AMP_Validation_Manager {
 			$message = __( 'The requested URL is not an AMP page. AMP may have been disabled for the URL. If so, you can forget the Validated URL.', 'amp' );
 		} else {
 			$code    = 'AMP_NOT_REQUESTED';
-			$message = __( 'The URL as requested is not an AMP page.', 'amp' );
+			$message = __( 'The requested URL is not an AMP page.', 'amp' );
 		}
 		wp_send_json( compact( 'code', 'message' ), 400 );
 	}
