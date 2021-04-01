@@ -50,8 +50,8 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'simple_image'                             => [
-				'<p><img src="https://placehold.it/300x300" width="300" height="300" /></p>',
-				'<p><amp-img src="https://placehold.it/300x300" width="300" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/300x300" width="300" height="300"></noscript></amp-img></p>',
+				'<p><img src="https://placehold.it/300x300" width="300" height="300" class="align-center" id="placeholder" style="height:auto" /></p>',
+				'<p><amp-img src="https://placehold.it/300x300" width="300" height="300" class="align-center amp-wp-enforced-sizes" id="placeholder" style="height:auto" layout="intrinsic"><noscript><img src="https://placehold.it/300x300" width="300" height="300"></noscript></amp-img></p>',
 				[
 					'add_noscript_fallback' => true,
 				],

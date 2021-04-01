@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Dom\Document;
+use AmpProject\Attribute;
 
 /**
  * Trait AMP_Noscript_Fallback
@@ -84,10 +85,13 @@ trait AMP_Noscript_Fallback {
 		// Remove all non-allowed attributes preemptively to prevent doubled validation errors.
 		for ( $i = $old_element->attributes->length - 1; $i >= 0; $i-- ) {
 			$attribute = $old_element->attributes->item( $i );
-			if ( isset( $this->noscript_fallback_allowed_attributes[ $attribute->nodeName ] ) ) {
-				continue;
+			if (
+				! isset( $this->noscript_fallback_allowed_attributes[ $attribute->nodeName ] )
+				||
+				in_array( $attribute->nodeName, [ Attribute::ID, Attribute::CLASS_, Attribute::STYLE ] )
+			) {
+				$old_element->removeAttribute( $attribute->nodeName );
 			}
-			$old_element->removeAttribute( $attribute->nodeName );
 		}
 	}
 }
