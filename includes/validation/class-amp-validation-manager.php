@@ -1775,10 +1775,7 @@ class AMP_Validation_Manager {
 			self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
 			self::CACHE_BUST_QUERY_VAR => wp_rand(),
 		];
-		if ( ! amp_is_canonical() ) {
-			$added_query_vars[ amp_get_slug() ] = '1';
-		}
-		$validation_url = add_query_arg( $added_query_vars, $url );
+		$validation_url   = add_query_arg( $added_query_vars, $url );
 
 		$r = null;
 
