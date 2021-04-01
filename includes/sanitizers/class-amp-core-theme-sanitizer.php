@@ -158,17 +158,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Twenty Nineteen.
 			case 'twentynineteen':
 				return [
-					'dequeue_scripts'                    => [
+					'dequeue_scripts'              => [
 						'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
 						'twentynineteen-priority-menu',
 						'twentynineteen-touch-navigation', // @todo There could be an AMP implementation of this, similar to what is implemented on ampproject.org.
 					],
-					'remove_actions'                     => [
+					'remove_actions'               => [
 						'wp_print_footer_scripts' => [
 							'twentynineteen_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
 						],
 					],
-					'adjust_twentynineteen_images'       => [],
+					'adjust_twentynineteen_images' => [],
 					'enable_determine_hero_images_transformer' => [],
 				];
 
