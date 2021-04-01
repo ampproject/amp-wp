@@ -18,11 +18,15 @@
   "bugs": {
     "url": "https://github.com/ampproject/amp-wp/issues"
   },
+  "engines": {
+    "node": ">= 15",
+    "npm": ">= 7"
+  },
   "dependencies": {
     "@babel/polyfill": "7.12.1",
     "@wordpress/api-fetch": "3.22.0",
     "@wordpress/autop": "2.12.0",
-    "@wordpress/components": "12.0.8",
+    "@wordpress/components": "13.0.0",
     "@wordpress/compose": "3.25.0",
     "@wordpress/date": "3.14.0",
     "@wordpress/dom-ready": "2.13.0",
