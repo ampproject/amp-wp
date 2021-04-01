@@ -77,10 +77,15 @@ button[overflow] {
 	bottom: 0;
 }
 
-/* Ensure any object-fit/object-position properties set on the custom element will be inherited to the shadow element. */
-amp-video > video,
-amp-img > img,
-amp-anim > img {
+/*
+ * Ensure relevant properties for "replaced elements" which are set on sanitizer-converted custom elements will be
+ * inherited to the actual replaced element which is the shadow element and also to the noscript fallback element.
+ */
+amp-anim img,
+amp-iframe iframe,
+amp-img img,
+amp-video video {
+	image-rendering: inherit;
 	object-fit: inherit;
 	object-position: inherit;
 }
