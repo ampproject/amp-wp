@@ -6,9 +6,10 @@
  * Additionally, in side of \AMP_Img_Sanitizer::determine_dimensions() it could $amp_img->setAttribute( 'object-fit', 'contain' )
  * so that the following rules wouldn't be needed.
  */
+/* This needs to be limited to just when the sizes are unknown! */
 amp-img.amp-wp-enforced-sizes[layout="intrinsic"] > img,
 amp-anim.amp-wp-enforced-sizes[layout="intrinsic"] > img {
-	object-fit: contain;
+	/*object-fit: contain;*/
 }
 
 /**
@@ -88,4 +89,12 @@ amp-carousel .amp-wp-gallery-caption {
  */
 button[overflow] {
 	bottom: 0;
+}
+
+/* Ensure any object-fit/object-position properties set on the custom element will be inherited to the shadow element. */
+amp-video > video,
+amp-img > img,
+amp-anim > img {
+	object-fit: inherit;
+	object-position: inherit;
 }
