@@ -82,9 +82,13 @@ button[overflow] {
  * inherited to the actual replaced element which is the shadow element and also to the noscript fallback element.
  */
 amp-anim img,
+amp-anim noscript,
 amp-iframe iframe,
+amp-iframe noscript,
 amp-img img,
-amp-video video {
+amp-img noscript,
+amp-video video,
+amp-video noscript {
 	image-rendering: inherit;
 	object-fit: inherit;
 	object-position: inherit;
