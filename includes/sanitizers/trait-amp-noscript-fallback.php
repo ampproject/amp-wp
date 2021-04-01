@@ -82,13 +82,14 @@ trait AMP_Noscript_Fallback {
 		$noscript->appendChild( $old_element );
 		$new_element->appendChild( $noscript );
 
-		// Remove all non-allowed attributes preemptively to prevent doubled validation errors.
 		for ( $i = $old_element->attributes->length - 1; $i >= 0; $i-- ) {
 			$attribute = $old_element->attributes->item( $i );
 			if (
+				// Remove all non-allowed attributes preemptively to prevent doubled validation errors.
 				! isset( $this->noscript_fallback_allowed_attributes[ $attribute->nodeName ] )
 				||
-				in_array( $attribute->nodeName, [ Attribute::ID, Attribute::CLASS_, Attribute::STYLE ] )
+				// Remove attributes which are likely to cause styling conflicts, as the noscript fallback should get treated like it has fill layout.
+				in_array( $attribute->nodeName, [ Attribute::ID, Attribute::CLASS_, Attribute::STYLE ], true )
 			) {
 				$old_element->removeAttribute( $attribute->nodeName );
 			}

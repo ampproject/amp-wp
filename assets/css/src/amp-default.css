@@ -1,3 +1,13 @@
+/*
+ * Prevent cases of amp-img converted from img to appear with stretching by using object-fit to scale. Only do this for
+ * amp-img/amp-anim elements that we converted from <img> via AMP_Img_Sanitizer. This is key for images that get 100%
+ * width such as in the post content so that the contents do not get stretched or cropped.
+ * See <https://github.com/ampproject/amphtml/issues/21371#issuecomment-475443219>.
+ */
+.amp-wp-enforced-sizes {
+	object-fit: contain;
+}
+
 /**
  * Override a style rule in Twenty Sixteen and Twenty Seventeen.
  * It set display:none for audio elements.
