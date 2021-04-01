@@ -1,16 +1,3 @@
-
-/*
- * Prevent cases of amp-img converted from img to appear with stretching by using object-fit to scale.
- * See <https://github.com/ampproject/amphtml/issues/21371#issuecomment-475443219>.
- * Also use object-fit:contain in worst case scenario when we can't figure out dimensions for an image.
- * Additionally, in side of \AMP_Img_Sanitizer::determine_dimensions() it could $amp_img->setAttribute( 'object-fit', 'contain' )
- * so that the following rules wouldn't be needed.
- */
-amp-img.amp-wp-unknown-size > img,
-amp-anim.amp-wp-unknown-size > img {
-	object-fit: contain;
-}
-
 /**
  * Override a style rule in Twenty Sixteen and Twenty Seventeen.
  * It set display:none for audio elements.
