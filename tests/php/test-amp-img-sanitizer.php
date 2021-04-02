@@ -403,6 +403,11 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test converter.
 	 *
+	 * @covers AMP_Img_Sanitizer::sanitize()
+	 * @covers AMP_Noscript_Fallback::initialize_noscript_allowed_attributes()
+	 * @covers AMP_Noscript_Fallback::is_inside_amp_noscript()
+	 * @covers AMP_Noscript_Fallback::append_old_node_noscript()
+	 *
 	 * @param string   $source               Source.
 	 * @param string   $expected             Expected.
 	 * @param array    $args                 Args.
@@ -445,6 +450,8 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test that amp-anim does not get included for a PNG.
+	 *
+	 * @covers AMP_Img_Sanitizer::sanitize()
 	 */
 	public function test_no_gif_no_image_scripts() {
 		$source   = '<img src="https://placehold.it/350x150.png" width="350" height="150" alt="Placeholder!" />';
@@ -466,6 +473,8 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test that amp-anim does get included for a GIF.
+	 *
+	 * @covers AMP_Img_Sanitizer::sanitize()
 	 */
 	public function test_no_gif_image_scripts() {
 		$source   = '<img src="https://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!" />';
@@ -489,6 +498,8 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test an Image block wrapped in an <a>, that links to the media file, with 'lightbox' selected.
 	 *
 	 * This should have the <a> stripped, as it interferes with the lightbox.
+	 *
+	 * @covers AMP_Img_Sanitizer::sanitize()
 	 */
 	public function test_image_block_link_to_media_file_with_lightbox() {
 		$source   = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
@@ -508,6 +519,8 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test an Image block wrapped in an <a>, that has right-alignment, links to the media file, and has 'lightbox' selected.
 	 *
 	 * This should have the <a> stripped, as it interferes with the lightbox.
+	 *
+	 * @covers AMP_Img_Sanitizer::sanitize()
 	 */
 	public function test_image_block_link_to_media_file_and_alignment_with_lightbox() {
 		$source   = sprintf( '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure></div>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
