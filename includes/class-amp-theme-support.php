@@ -1401,6 +1401,7 @@ class AMP_Theme_Support {
 				),
 			],
 		];
+
 		$link_elements = $dom->head->getElementsByTagName( Tag::LINK );
 		/**
 		 * Link element.
@@ -1500,32 +1501,16 @@ class AMP_Theme_Support {
 			}
 		}
 
-		/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-		 *
-		 * "2. Next, preload the AMP runtime v0.js <script> tag with <link as=script href=https://cdn.ampproject.org/v0.js rel=preload>.
-		 * The AMP runtime should start downloading as soon as possible because the AMP boilerplate hides the document via body { visibility:hidden }
-		 * until the AMP runtime has loaded. Preloading the AMP runtime tells the browser to download the script with a higher priority."
-		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
+		/*
+		 * "3. If your page includes render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, amp-story),
+		 * preload those extensions as they're required by the AMP runtime for rendering the page."
+		 * @TODO: Move into RewriteAmpUrls transformer, as that will support self-hosting as well.
 		 */
 		$prioritized_preloads = [];
 		if ( ! isset( $links[ Attribute::REL_PRELOAD ] ) ) {
 			$links[ Attribute::REL_PRELOAD ] = [];
 		}
 
-		$prioritized_preloads[] = AMP_DOM_Utils::create_node(
-			$dom,
-			Tag::LINK,
-			[
-				Attribute::REL  => Attribute::REL_PRELOAD,
-				Attribute::AS_  => RequestDestination::SCRIPT,
-				Attribute::HREF => $runtime_src,
-			]
-		);
-
-		/*
-		 * "3. If your page includes render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, amp-story),
-		 * preload those extensions as they're required by the AMP runtime for rendering the page."
-		 */
 		$amp_script_handles = array_keys( $amp_scripts );
 		foreach ( array_intersect( Amp::RENDER_DELAYING_EXTENSIONS, $amp_script_handles ) as $script_handle ) {
 			if ( ! in_array( $script_handle, Amp::RENDER_DELAYING_EXTENSIONS, true ) ) {
@@ -1991,6 +1976,8 @@ class AMP_Theme_Support {
 			}
 		}
 
+		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
+
 		$enable_optimizer = array_key_exists( ConfigurationArgument::ENABLE_OPTIMIZER, $args )
 			? $args[ ConfigurationArgument::ENABLE_OPTIMIZER ]
 			: true;
@@ -2048,8 +2035,6 @@ class AMP_Theme_Support {
 			 */
 			do_action( 'amp_server_timing_stop', 'amp_optimizer' );
 		}
-
-		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
 		$can_serve = AMP_Validation_Manager::finalize_validation( $dom );
 
@@ -2110,6 +2095,10 @@ class AMP_Theme_Support {
 	private static function get_optimizer_configuration( $args ) {
 		$transformers = Optimizer\Configuration::DEFAULT_TRANSFORMERS;
 
+		$enable_esm = array_key_exists( ConfigurationArgument::ENABLE_ESM, $args )
+				? $args[ ConfigurationArgument::ENABLE_ESM ]
+				: true;
+
 		$enable_ssr = array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
 			? $args[ ConfigurationArgument::ENABLE_SSR ]
 			: true;
@@ -2122,6 +2111,15 @@ class AMP_Theme_Support {
 		 * @param bool $enable_ssr Whether the AMP Optimizer should use server-side rendering or not.
 		 */
 		$enable_ssr = apply_filters( 'amp_enable_ssr', $enable_ssr );
+
+		/**
+		 * Filter whether the AMP Optimizer should use ES modules for the runtime and extensions.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param bool $enable_esm Whether the AMP Optimizer should use ES modules for the runtime and extensions.
+		 */
+		$enable_esm = apply_filters( 'amp_enable_esm', $enable_esm );
 
 		// In debugging mode, we don't use server-side rendering, as it further obfuscates the HTML markup.
 		if ( ! $enable_ssr ) {
@@ -2152,6 +2150,9 @@ class AMP_Theme_Support {
 					Optimizer\Configuration::KEY_TRANSFORMERS => $transformers,
 					Optimizer\Transformer\PreloadHeroImage::class => [
 						Optimizer\Configuration\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
+					],
+					Optimizer\Transformer\RewriteAmpUrls::class => [
+						Optimizer\Configuration\RewriteAmpUrlsConfiguration::ESM_MODULES_ENABLED => $enable_esm,
 					],
 				],
 				$args

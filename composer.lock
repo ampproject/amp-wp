@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8ce341eb95c49935f972bd22a8b30c43",
+    "content-hash": "78ef7663621eb649b73432e8a13f5c0d",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "0.3.0",
+            "version": "dev-add/20-rewrite-amp-urls-transformer",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "227563fe216069b2f33a652f8524d344662ba2e7"
+                "reference": "0329bdb4fb421267c1e1397a202bc0a82981ffa8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/227563fe216069b2f33a652f8524d344662ba2e7",
-                "reference": "227563fe216069b2f33a652f8524d344662ba2e7",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/0329bdb4fb421267c1e1397a202bc0a82981ffa8",
+                "reference": "0329bdb4fb421267c1e1397a202bc0a82981ffa8",
                 "shasum": ""
             },
             "require": {
@@ -63,7 +63,7 @@
                 "Apache-2.0"
             ],
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
-            "time": "2021-03-29T21:05:18+00:00"
+            "time": "2021-04-02T16:38:40+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -5581,6 +5581,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "ampproject/amp-toolbox": 20,
         "sabberworm/php-css-parser": 20,
         "roave/security-advisories": 20
     },
