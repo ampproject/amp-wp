@@ -53,6 +53,13 @@ trait AMP_Noscript_Fallback {
 				}
 			}
 		}
+
+		// Remove attributes which are likely to cause styling conflicts, as the noscript fallback should get treated like it has fill layout.
+		unset(
+			$this->noscript_fallback_allowed_attributes[ Attribute::ID ],
+			$this->noscript_fallback_allowed_attributes[ Attribute::CLASS_ ],
+			$this->noscript_fallback_allowed_attributes[ Attribute::STYLE ]
+		);
 	}
 
 	/**
@@ -82,15 +89,10 @@ trait AMP_Noscript_Fallback {
 		$noscript->appendChild( $old_element );
 		$new_element->appendChild( $noscript );
 
+		// Remove all non-allowed attributes preemptively to prevent doubled validation errors, only leaving the attributes required.
 		for ( $i = $old_element->attributes->length - 1; $i >= 0; $i-- ) {
 			$attribute = $old_element->attributes->item( $i );
-			if (
-				// Remove all non-allowed attributes preemptively to prevent doubled validation errors.
-				! isset( $this->noscript_fallback_allowed_attributes[ $attribute->nodeName ] )
-				||
-				// Remove attributes which are likely to cause styling conflicts, as the noscript fallback should get treated like it has fill layout.
-				in_array( $attribute->nodeName, [ Attribute::ID, Attribute::CLASS_, Attribute::STYLE ], true )
-			) {
+			if ( ! isset( $this->noscript_fallback_allowed_attributes[ $attribute->nodeName ] ) ) {
 				$old_element->removeAttribute( $attribute->nodeName );
 			}
 		}
