@@ -106,6 +106,9 @@ function amp_post_template_add_editor_color_styles() {
 	}
 
 	foreach ( $color_palette as $color_option ) {
+		// There is no standard way to retrieve or derive the `color` style property when the editor color is being used
+		// for the background, so the best alternative at the moment is to guess a good default value based on the
+		// luminance of the editor color.
 		$text_color = 127 > amp_get_relative_luminance_from_hex( $color_option['color'] ) ? '#fff' : '#000';
 
 		printf(
@@ -127,7 +130,7 @@ function amp_post_template_add_editor_color_styles() {
  * @see https://github.com/WordPress/wordpress-develop/blob/acbbbd18b32b5429264622141a6d058b64f3a5ad/src/wp-content/themes/twentytwentyone/classes/class-twenty-twenty-one-custom-colors.php#L138-L156
  * @since 2.1
  *
- * @param $hex string Color hex value.
+ * @param string $hex Color hex value.
  * @return int Relative luminance value.
  */
 function amp_get_relative_luminance_from_hex( $hex ) {
