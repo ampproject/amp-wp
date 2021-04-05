@@ -110,7 +110,7 @@ function amp_post_template_add_editor_color_styles() {
 
 		printf(
 			':root .has-%1$s-color { color: %2$s }
-				:root .has-%1$s-background-color { color: %3$s; background-color: %2$s }',
+			:root .has-%1$s-background-color { color: %3$s; background-color: %2$s }',
 			$color_option['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			$color_option['color'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			$text_color // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
