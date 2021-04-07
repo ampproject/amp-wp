@@ -78,6 +78,7 @@ def GenValidatorProtoascii(validator_directory, out_dir):
 
 	protoascii_segments = [
 		open(os.path.join(validator_directory, 'validator-main.protoascii')).read(),
+		open(os.path.join(validator_directory, 'validator-svg.protoascii')).read(),
 		open(os.path.join(validator_directory, 'validator-css.protoascii')).read()
 	]
 	extensions = glob.glob(os.path.join(validator_directory, '../extensions/*/validator-*.protoascii'))
@@ -416,7 +417,11 @@ def ParseRules(out_dir):
 				for val in list.tag:
 
 					# Skip tags specific to transformed AMP.
-					if val in ( 'I-AMPHTML-SIZER', 'IMG', ):
+					if 'I-AMPHTML-SIZER' == val:
+						continue
+
+					# The img tag is currently exclusively to transformed AMP, except as descendant of amp-story-player.
+					if 'IMG' == val and 'amp-story-player-allowed-descendants' != list.name:
 						continue
 
 					descendant_lists[list.name].append( val.lower() )

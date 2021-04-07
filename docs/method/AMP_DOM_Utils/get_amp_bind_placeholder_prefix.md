@@ -16,7 +16,7 @@ This contains a random string to prevent HTML content containing this data- attr
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:102](/includes/utils/class-amp-dom-utils.php#L102-L105)
+:link: [includes/utils/class-amp-dom-utils.php:111](/includes/utils/class-amp-dom-utils.php#L111-L114)
 
 <details>
 <summary>Show Code</summary>

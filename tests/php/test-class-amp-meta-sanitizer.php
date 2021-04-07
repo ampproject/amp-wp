@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
 
@@ -219,7 +220,7 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 	 * @param string  $expected_content Expected content after sanitization.
 	 */
 	public function test_sanitize( $source_content, $expected_content ) {
-		$dom       = Document::fromHtml( $source_content );
+		$dom       = Document::fromHtml( $source_content, Options::DEFAULTS );
 		$sanitizer = new AMP_Meta_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
@@ -236,23 +237,23 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 	public function test_initial_scale_removal() {
 		$html = '<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head></html>';
 
-		$dom       = Document::fromHtml( $html );
+		$dom       = Document::fromHtml( $html, Options::DEFAULTS );
 		$sanitizer = new AMP_Meta_Sanitizer( $dom, [] );
 		$sanitizer->sanitize();
 		$this->assertEquals( 'width=device-width', $dom->viewport->getAttribute( 'content' ) );
 
-		$dom       = Document::fromHtml( $html );
+		$dom       = Document::fromHtml( $html, Options::DEFAULTS );
 		$sanitizer = new AMP_Meta_Sanitizer( $dom, [ 'remove_initial_scale_viewport_property' => true ] );
 		$sanitizer->sanitize();
 		$this->assertEquals( 'width=device-width', $dom->viewport->getAttribute( 'content' ) );
 
-		$dom       = Document::fromHtml( $html );
+		$dom       = Document::fromHtml( $html, Options::DEFAULTS );
 		$sanitizer = new AMP_Meta_Sanitizer( $dom, [ 'remove_initial_scale_viewport_property' => false ] );
 		$sanitizer->sanitize();
 		$this->assertEquals( 'width=device-width,initial-scale=1', $dom->viewport->getAttribute( 'content' ) );
 
 		$html      = '<html><head><meta name="viewport" content="width=device-width, initial-scale=2"></head></html>';
-		$dom       = Document::fromHtml( $html );
+		$dom       = Document::fromHtml( $html, Options::DEFAULTS );
 		$sanitizer = new AMP_Meta_Sanitizer( $dom, [ 'remove_initial_scale_viewport_property' => true ] );
 		$sanitizer->sanitize();
 		$this->assertEquals( 'width=device-width,initial-scale=2', $dom->viewport->getAttribute( 'content' ) );

@@ -17,7 +17,7 @@ Check whether a given element has a specific class.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:358](/includes/utils/class-amp-dom-utils.php#L358-L366)
+:link: [includes/utils/class-amp-dom-utils.php:370](/includes/utils/class-amp-dom-utils.php#L370-L378)
 
 <details>
 <summary>Show Code</summary>

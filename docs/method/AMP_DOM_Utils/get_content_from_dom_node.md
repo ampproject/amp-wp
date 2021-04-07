@@ -19,7 +19,7 @@ Return valid HTML content extracted from the DOMNode passed as a parameter.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:208](/includes/utils/class-amp-dom-utils.php#L208-L211)
+:link: [includes/utils/class-amp-dom-utils.php:220](/includes/utils/class-amp-dom-utils.php#L220-L223)
 
 <details>
 <summary>Show Code</summary>
