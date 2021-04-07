@@ -418,7 +418,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertStringContains( '<meta name="viewport" content="maximum-scale=1.0,width=device-width">', $sanitized_html );
 
 		// MathML script was added.
-		$this->assertStringContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContains( 'https://cdn.ampproject.org/v0/amp-mathml-0.1.js', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 
 	/**
@@ -1641,36 +1641,36 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$ordered_contains = [
 			'<html amp=""',
 			'<meta charset="' . Document\Encoding::AMP . '">',
-			'<meta name="viewport" content="width=device-width">',
-			'<meta name="generator" content="AMP Plugin',
-			'<title>',
 			'<link rel="preconnect" href="https://cdn.ampproject.org">',
-			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
-			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">',
-			'<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>',
+			'<meta name="viewport" content="width=device-width">',
+			'<link as="script" crossorigin="anonymous" href="https://cdn.ampproject.org/v0.mjs" rel="modulepreload">',
+			'<meta name="generator" content="AMP Plugin',
+			'<script type="module" src="https://cdn.ampproject.org/v0.mjs" async crossorigin="anonymous"></script>',
 
-			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>',
-			'<script src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js" async="" custom-element="amp-experiment"></script>',
+			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.mjs" type="module" crossorigin="anonymous"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-experiment-0.1.mjs" async="" custom-element="amp-experiment" type="module" crossorigin="anonymous"></script>',
 
-			'#<script( type=[\'"]text/javascript[\'"])? src=[\'"]https\://cdn\.ampproject\.org/v0/amp-ad-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-ad[\'"]>\s*</script>#s',
-			'#<script src=[\'"]https\://cdn\.ampproject\.org/v0/amp-audio-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-audio[\'"]>\s*</script>#s',
-			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-0.1.js" async custom-element="amp-list"></script>',
-			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-ad-0.1.mjs" async="" custom-element="amp-ad" type="module" crossorigin="anonymous"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-audio-0.1.mjs" async="" custom-element="amp-audio" type="module" crossorigin="anonymous"></script>',
+			'<script type="module" src="https://cdn.ampproject.org/v0/amp-list-0.1.mjs" async custom-element="amp-list" crossorigin="anonymous"></script>',
+			'<script type="module" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.mjs" async custom-element="amp-mathml" crossorigin="anonymous"></script>',
 
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
+			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
 
 			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
 
+			'<title>',
+			'<link rel="canonical" href="',
 			'<script type="application/ld+json">{"@context"',
 
 			'#<style amp-boilerplate(="")?>#',
 			'#<noscript><style amp-boilerplate(="")?>#',
-			'<link rel="canonical" href="',
 			'</head>',
 		];
 
