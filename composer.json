@@ -9,6 +9,7 @@
     "ext-curl": "*",
     "ext-date": "*",
     "ext-dom": "*",
+    "ext-filter": "*",
     "ext-iconv": "*",
     "ext-json": "*",
     "ext-libxml": "*",
