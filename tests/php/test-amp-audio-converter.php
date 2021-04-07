@@ -58,12 +58,12 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 
 			'audio_with_allowlisted_attributes__enabled' => [
 				'<audio src="https://example.com/audio/file.ogg" class="test" loop="loop" muted></audio>',
-				'<amp-audio src="https://example.com/audio/file.ogg" class="test" loop="" muted="" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" class="test" loop="loop" muted></audio></noscript></amp-audio>',
+				'<amp-audio src="https://example.com/audio/file.ogg" class="test" loop="" muted="" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" loop="loop" muted></audio></noscript></amp-audio>',
 			],
 
 			'audio_with_allowlisted_attributes__disabled' => [
 				'<audio src="https://example.com/audio/file.ogg" class="test" loop="false" muted="false"></audio>',
-				'<amp-audio src="https://example.com/audio/file.ogg" class="test" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" class="test" loop="false" muted="false"></audio></noscript></amp-audio>',
+				'<amp-audio src="https://example.com/audio/file.ogg" class="test" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" loop="false" muted="false"></audio></noscript></amp-audio>',
 			],
 
 			'audio_with_children' => [
@@ -177,7 +177,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 						<source type="audio/mpeg" src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3?_=1">
 						<a href="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3" fallback="">https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3</a>
 						<noscript>
-							<audio class="wp-audio-shortcode amp-wp-199b6f0" id="audio-87-1" preload="none" controls="controls" data-amp-original-style="width: 100%;">
+							<audio preload="none" controls="controls">
 								<source type="audio/mpeg" src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3?_=1">
 							</audio>
 						</noscript>

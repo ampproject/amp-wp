@@ -37,21 +37,21 @@ final class DetermineHeroImages implements Transformer {
 	 *
 	 * @var string
 	 */
-	const CUSTOM_HEADER_XPATH_QUERY = ".//*[ @id = 'wp-custom-header' or @id = 'masthead' or @id = 'site-header' or contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-custom-header ' ) ]//*[ ( self::img or self::amp-img ) and not( @data-hero ) and not( contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ) ]";
+	const CUSTOM_HEADER_XPATH_QUERY = ".//*[ @id = 'wp-custom-header' or @id = 'masthead' or @id = 'site-header' or contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-custom-header ' ) ]//amp-img[ not( @data-hero ) and not( contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ) ]";
 
 	/**
 	 * XPath query to find the custom logo.
 	 *
 	 * @var string
 	 */
-	const CUSTOM_LOGO_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
+	const CUSTOM_LOGO_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//amp-img[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find the featured image.
 	 *
 	 * @var string
 	 */
-	const FEATURED_IMAGE_XPATH_QUERY = ".//*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ][ not( @data-hero ) ]";
+	const FEATURED_IMAGE_XPATH_QUERY = ".//amp-img[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find the first entry-content.
@@ -65,14 +65,14 @@ final class DetermineHeroImages implements Transformer {
 	 *
 	 * @var string
 	 */
-	const INITIAL_COVER_BLOCK_XPATH_QUERY = "./*[1]/descendant-or-self::div[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ]/*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover__image-background ' ) ][ not( @data-hero ) ]";
+	const INITIAL_COVER_BLOCK_XPATH_QUERY = "./*[1]/descendant-or-self::div[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ]/amp-img[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover__image-background ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find Image Block at the beginning of post content (including nested inside of another block).
 	 *
 	 * @var string
 	 */
-	const INITIAL_IMAGE_BLOCK_XPATH_QUERY = "./*[1]/descendant-or-self::figure[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-image ' ) ]/*[ ( self::img or self::amp-img ) ][ not( @data-hero ) ]";
+	const INITIAL_IMAGE_BLOCK_XPATH_QUERY = "./*[1]/descendant-or-self::figure[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-image ' ) ]/amp-img[ not( @data-hero ) ]";
 
 	/**
 	 * Apply transformations to the provided DOM document.
