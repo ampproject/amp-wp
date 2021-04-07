@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP_QA_Tester;
 
 use WP_Admin_Bar;
+use WP_Dependencies;
 
 /**
  * Class handling the plugin's admin bar menu.
@@ -70,6 +71,22 @@ class AdminBar {
 	}
 
 	/**
+	 * Get all script dependencies for the provided dependencies.
+	 *
+	 * @param WP_Dependencies $dependencies_object Dependencies object (WP_Scripts or WP_Styles).
+	 * @param string[]        $dependency_handles  Handles of the (enqueued) dependencies.
+	 * @return string[] All dependencies of dependencies.
+	 */
+	private function get_all_dependencies( WP_Dependencies $dependencies_object, $dependency_handles ) {
+		$original_handles_to_do     = $dependencies_object->to_do;
+		$dependencies_object->to_do = [];
+		$dependencies_object->all_deps( $dependency_handles, true );
+		$all_dependencies           = $dependencies_object->to_do;
+		$dependencies_object->to_do = $original_handles_to_do;
+		return $all_dependencies;
+	}
+
+	/**
 	 * Enqueue the plugin assets.
 	 */
 	public function enqueue_plugin_assets() {
@@ -83,12 +100,7 @@ class AdminBar {
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
-		// The AMP plugin only adds the `data-ampdevmode` attribute to scripts exclusively depending on `admin-bar`. The
-		// dependencies of those exclusive scripts do not get the aforementioned attribute, however, so to resolve that
-		// each dependency of this script is marked as being exclusively dependent on the admin bar.
-		foreach ( $dependencies as $dependency ) {
-			wp_scripts()->registered[ $dependency ]->deps[] = 'admin-bar';
-		}
+		$dependencies[] = 'hoverIntent';
 
 		// Enqueue scripts.
 		wp_enqueue_script(
@@ -106,8 +118,25 @@ class AdminBar {
 			[ 'admin-bar' ],
 			$version
 		);
-
 		wp_styles()->add_data( 'amp-qa-tester-admin-bar-style', 'rtl', 'replace' );
+
+		// Explicitly mark all scripts and styles (and their dependencies) as being part of AMP dev mode.
+		// This is necessary because not all dependencies (and their recursive dependencies) will have a dependency
+		// on the admin-bar, and thus the AMP plugin won't opt them in to dev mode automatically.
+		if ( amp_is_request() ) {
+			$script_dev_mode_handles = $this->get_all_dependencies( wp_scripts(), $dependencies );
+			add_filter(
+				'script_loader_tag',
+				function ( $tag, $handle ) use ( $script_dev_mode_handles ) {
+					if ( in_array( $handle, $script_dev_mode_handles, true ) ) {
+						$tag = preg_replace( '/(?<=<script)/', ' data-ampdevmode ', $tag );
+					}
+					return $tag;
+				},
+				10,
+				2
+			);
+		}
 	}
 
 	/**
