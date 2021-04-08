@@ -90,54 +90,6 @@ const ampValidation = {
 	],
 };
 
-const styles = {
-	...sharedConfig,
-	entry: {
-		'admin-tables': './assets/css/src/admin-tables.css',
-		'amp-block-editor': './assets/css/src/amp-block-editor.css',
-		'amp-customizer': './assets/css/src/amp-customizer.css',
-		'amp-customizer-legacy': './assets/css/src/amp-customizer-legacy.css',
-		'amp-default': './assets/css/src/amp-default.css',
-		'amp-icons': './assets/css/src/amp-icons.css',
-		'amp-mobile-version-switcher': './assets/css/src/amp-mobile-version-switcher.css',
-		'amp-playlist-shortcode': './assets/css/src/amp-playlist-shortcode.css',
-		'amp-post-meta-box': './assets/css/src/amp-post-meta-box.css',
-		'amp-validation-error-taxonomy': './assets/css/src/amp-validation-error-taxonomy.css',
-		'amp-validation-single-error-url': './assets/css/src/amp-validation-single-error-url.css',
-		'amp-validation-tooltips': './assets/css/src/amp-validation-tooltips.css',
-	},
-	module: {
-		...sharedConfig.module,
-		rules: sharedConfig.module.rules.map(
-			( rule ) => {
-				const cssLoader = Array.isArray( rule.use ) && rule.use.find(
-					( loader ) => loader.loader && loader.loader.includes( '/css-loader' ),
-				);
-
-				/**
-				 * Prevent "Module not found: Error: Can't resolve ..."
-				 * being thrown for `url()` CSS rules.
-				 */
-				if ( cssLoader ) {
-					cssLoader.options = {
-						...cssLoader?.options,
-						url: false,
-					};
-				}
-
-				return rule;
-			},
-		),
-	},
-	plugins: [
-		...sharedConfig.plugins,
-		new WebpackBar( {
-			name: 'Styles',
-			color: '#b763ff',
-		} ),
-	],
-};
-
 const blockEditor = {
 	...sharedConfig,
 	externals: {
@@ -384,6 +336,54 @@ const settingsPage = {
 		new WebpackBar( {
 			name: 'Settings page',
 			color: '#67b255',
+		} ),
+	],
+};
+
+const styles = {
+	...sharedConfig,
+	entry: {
+		'admin-tables': './assets/css/src/admin-tables.css',
+		'amp-block-editor': './assets/css/src/amp-block-editor.css',
+		'amp-customizer': './assets/css/src/amp-customizer.css',
+		'amp-customizer-legacy': './assets/css/src/amp-customizer-legacy.css',
+		'amp-default': './assets/css/src/amp-default.css',
+		'amp-icons': './assets/css/src/amp-icons.css',
+		'amp-mobile-version-switcher': './assets/css/src/amp-mobile-version-switcher.css',
+		'amp-playlist-shortcode': './assets/css/src/amp-playlist-shortcode.css',
+		'amp-post-meta-box': './assets/css/src/amp-post-meta-box.css',
+		'amp-validation-error-taxonomy': './assets/css/src/amp-validation-error-taxonomy.css',
+		'amp-validation-single-error-url': './assets/css/src/amp-validation-single-error-url.css',
+		'amp-validation-tooltips': './assets/css/src/amp-validation-tooltips.css',
+	},
+	module: {
+		...sharedConfig.module,
+		rules: sharedConfig.module.rules.map(
+			( rule ) => {
+				const cssLoader = Array.isArray( rule.use ) && rule.use.find(
+					( loader ) => loader.loader && loader.loader.includes( '/css-loader' ),
+				);
+
+				/**
+				 * Prevent "Module not found: Error: Can't resolve ..."
+				 * being thrown for `url()` CSS rules.
+				 */
+				if ( cssLoader ) {
+					cssLoader.options = {
+						...cssLoader?.options,
+						url: false,
+					};
+				}
+
+				return rule;
+			},
+		),
+	},
+	plugins: [
+		...sharedConfig.plugins,
+		new WebpackBar( {
+			name: 'Styles',
+			color: '#b763ff',
 		} ),
 	],
 };
