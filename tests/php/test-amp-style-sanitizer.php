@@ -2949,7 +2949,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 					$this->assertStringContains( '.wp-block-audio figcaption', $amphtml_source, 'Expected block-library/style.css' );
 					$this->assertStringContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
-					$this->assertStringContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
+					$this->assertStringContains( 'amp-img img', $amphtml_source, 'Expected amp-default.css' );
 					$this->assertStringContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
 					$this->assertStringNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
 					$this->assertStringContains( 'admin-bar', $amphtml_dom->body->getAttribute( 'class' ) );
