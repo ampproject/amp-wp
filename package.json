@@ -98,6 +98,7 @@
     "build:dev": "cross-env NODE_ENV=development npm-run-all 'build:!(dev|prod)'",
     "build:prod": "cross-env NODE_ENV=production npm-run-all 'build:!(dev|prod)'",
     "build:prepare": "grunt clean",
+    "build:css": "wp-scripts build",
     "build:js": "wp-scripts build",
     "build:run": "grunt build",
     "build:zip": "grunt create-build-zip",
