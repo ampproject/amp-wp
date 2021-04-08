@@ -5,10 +5,8 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\DevTools\BlockSources;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
-use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
