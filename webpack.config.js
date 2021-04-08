@@ -380,7 +380,9 @@ const styles = {
 		),
 	},
 	plugins: [
-		...sharedConfig.plugins,
+		...sharedConfig.plugins.filter(
+			( plugin ) => plugin.constructor.name !== 'DependencyExtractionWebpackPlugin',
+		),
 		new WebpackBar( {
 			name: 'Styles',
 			color: '#b763ff',
