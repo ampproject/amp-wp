@@ -369,6 +369,22 @@ final class ReaderThemeLoader implements Service, Registerable {
 		$this->disable_widgets();
 		add_filter( 'customize_previewable_devices', [ $this, 'customize_previewable_devices' ] );
 		add_action( 'customize_register', [ $this, 'remove_customizer_themes_panel' ], 11 );
+
+		// Add fallback style for cover block in case theme palette of active theme is not the same as the reader theme.
+		add_action(
+			'wp_enqueue_scripts',
+			function () {
+				wp_add_inline_style(
+					'amp-default',
+					'
+						.wp-block-cover {
+							background: black;
+							color: white;
+						}
+					'
+				);
+			}
+		);
 	}
 
 	/**
