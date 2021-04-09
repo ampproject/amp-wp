@@ -19,11 +19,10 @@ use DOMElement;
  * Determine the images to flag as data-hero so the Optimizer can preload them.
  *
  * This transformer checks for the following images in the given order:
- * 1. Custom logo
- * 2. Header images
- * 3. Featured image of the page
- * 4. Image block in initial position of first entry content
- * 5. Cover block image in initial position of first entry content
+ * 1. Header images (including Custom Logo and Custom Header)
+ * 2. Featured image of the page
+ * 3. Image block in initial position of first entry content
+ * 4. Cover block image in initial position of first entry content
  *
  * It then applies the data-hero attribute to the first two of these.
  *
@@ -39,16 +38,6 @@ final class DetermineHeroImages implements Transformer {
 	 * @var string
 	 */
 	const PRECEDING_NON_LAZY_IMAGE_XPATH_QUERY = "preceding::amp-img[ not( @data-hero ) ][ not( noscript/img/@loading ) or noscript/img/@loading != 'lazy' ]";
-
-	/**
-	 * XPath query to find the custom logo.
-	 *
-	 * Note that the .custom-logo-link may be an `span` when the `custom-logo` theme support is configured with `unlink-homepage-logo`.
-	 *
-	 * @see get_custom_logo()
-	 * @var string
-	 */
-	const CUSTOM_LOGO_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//amp-img[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find the featured image.
@@ -91,16 +80,13 @@ final class DetermineHeroImages implements Transformer {
 		$hero_image_elements = [];
 
 		// @todo Beyond initial image block and cover block, what about an initial embed block?
-		foreach ( [ 'custom_logo', 'header_images', 'featured_image', 'initial_image_block', 'initial_cover_block' ] as $hero_image_source ) {
+		foreach ( [ 'header_images', 'featured_image', 'initial_image_block', 'initial_cover_block' ] as $hero_image_source ) {
 			if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
 				$candidate = null;
 
 				switch ( $hero_image_source ) {
 					case 'header_images':
 						$candidate = $this->get_header_images( $document );
-						break;
-					case 'custom_logo':
-						$candidate = $this->get_custom_logo( $document );
 						break;
 					case 'featured_image':
 						$candidate = $this->get_featured_image( $document );
@@ -131,6 +117,9 @@ final class DetermineHeroImages implements Transformer {
 	/**
 	 * Retrieve the images in the header.
 	 *
+	 * This returns all non-tiny images which occur before the main content, or else a tiny image that has `logo` in the
+	 * class name.
+	 *
 	 * @param Document $document Document to retrieve the header images from.
 	 * @return DOMElement[] Header images.
 	 */
@@ -155,30 +144,20 @@ final class DetermineHeroImages implements Transformer {
 		return array_filter(
 			iterator_to_array( $query ),
 			static function ( DOMElement $element ) {
+				// A custom logo may in fact be tiny and yet since it is in the header it should be prerendered.
+				// Note that a theme may not be using `the_custom_logo()` template tag and that is why the `custom-logo`
+				// class is not being checked for specifically.
+				if (
+					$element->hasAttribute( Attribute::CLASS_ )
+					&&
+					false !== strpos( $element->getAttribute( Attribute::CLASS_ ), 'logo' )
+				) {
+					return true;
+				}
+
 				return ! ( new ImageDimensions( $element ) )->isTiny();
 			}
 		);
-	}
-
-	/**
-	 * Retrieve the element that represents the custom logo using.
-	 *
-	 * Note that this image may be "tiny" so it will not be included via `get_header_images()` above, but given that the
-	 * logo is in the header it should be prerendered.
-	 *
-	 * @param Document $document Document to retrieve the custom logo from.
-	 * @return DOMElement|null Element that represents the custom logo, or null
-	 *                         if not found.
-	 */
-	private function get_custom_logo( Document $document ) {
-		$elements = $document->xpath->query(
-			self::CUSTOM_LOGO_XPATH_QUERY,
-			$document->body
-		);
-
-		$custom_logo = $elements->item( 0 );
-
-		return $custom_logo instanceof DOMElement ? $custom_logo : null;
 	}
 
 	/**
