@@ -3,6 +3,7 @@
  */
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const IgnoreEmitPlugin = require( 'ignore-emit-webpack-plugin' );
 const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
@@ -389,6 +390,30 @@ const styles = {
 		} ),
 	],
 };
+
+/**
+ * Get JS chunk names for a list of style entry points.
+ *
+ * @param {Array} entries List of style entry points.
+ *
+ * @return {Array} List of JS chunk names.
+ */
+const extractChunkNamesForStylesheets = ( entries ) =>
+	entries
+		.map( ( entryPath ) => {
+			const match = entryPath.match( /^.*\/(.*)\..*$/ );
+
+			return match && match[ 1 ] ? `${ match[ 1 ] }.js` : null;
+		} )
+		.filter( Boolean );
+
+/**
+ * Do not generate empty JS chunks for stylesheets.
+ */
+styles.plugins = [
+	...styles.plugins,
+	new IgnoreEmitPlugin( extractChunkNamesForStylesheets( Object.values( styles.entry ) ) ),
+];
 
 const mobileRedirection = {
 	...sharedConfig,
