@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\ImageDimensions;
 use AmpProject\Optimizer\Transformer;
 use AmpProject\Optimizer\Transformer\PreloadHeroImage;
 use DOMElement;
@@ -18,8 +19,8 @@ use DOMElement;
  * Determine the images to flag as data-hero so the Optimizer can preload them.
  *
  * This transformer checks for the following images in the given order:
- * 1. Custom header
- * 2. Custom logo
+ * 1. Custom logo
+ * 2. Header images
  * 3. Featured image of the page
  * 4. Image block in initial position of first entry content
  * 5. Cover block image in initial position of first entry content
@@ -33,18 +34,21 @@ use DOMElement;
 final class DetermineHeroImages implements Transformer {
 
 	/**
-	 * XPath query to find the custom logo.
+	 * XPath query to find preceding which are not lazy-loaded.
 	 *
 	 * @var string
 	 */
-	const CUSTOM_HEADER_XPATH_QUERY = ".//*[ @id = 'wp-custom-header' or @id = 'masthead' or @id = 'site-header' or contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-custom-header ' ) ]//amp-img[ not( @data-hero ) and not( contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ) ]";
+	const PRECEDING_NON_LAZY_IMAGE_XPATH_QUERY = "preceding::amp-img[ not( @data-hero ) ][ not( noscript/img/@loading ) or noscript/img/@loading != 'lazy' ]";
 
 	/**
 	 * XPath query to find the custom logo.
 	 *
+	 * Note that the .custom-logo-link may be an `span` when the `custom-logo` theme support is configured with `unlink-homepage-logo`.
+	 *
+	 * @see get_custom_logo()
 	 * @var string
 	 */
-	const CUSTOM_LOGO_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//amp-img[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
+	const CUSTOM_LOGO_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//amp-img[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find the featured image.
@@ -58,7 +62,7 @@ final class DetermineHeroImages implements Transformer {
 	 *
 	 * @var string
 	 */
-	const FIRST_ENTRY_CONTENT_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' entry-content ' ) ][1]";
+	const FIRST_ENTRY_CONTENT_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' entry-content ' ) ]";
 
 	/**
 	 * XPath query to find background image of a Cover Block at the beginning of post content (including nested inside of another block).
@@ -86,13 +90,14 @@ final class DetermineHeroImages implements Transformer {
 	public function transform( Document $document, ErrorCollection $errors ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$hero_image_elements = [];
 
-		foreach ( [ 'custom_header', 'custom_logo', 'featured_image', 'initial_image_block', 'initial_cover_block' ] as $hero_image_source ) {
+		// @todo Beyond initial image block and cover block, what about an initial embed block?
+		foreach ( [ 'custom_logo', 'header_images', 'featured_image', 'initial_image_block', 'initial_cover_block' ] as $hero_image_source ) {
 			if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
 				$candidate = null;
 
 				switch ( $hero_image_source ) {
-					case 'custom_header':
-						$candidate = $this->get_custom_header( $document );
+					case 'header_images':
+						$candidate = $this->get_header_images( $document );
 						break;
 					case 'custom_logo':
 						$candidate = $this->get_custom_logo( $document );
@@ -109,36 +114,57 @@ final class DetermineHeroImages implements Transformer {
 				}
 
 				if ( $candidate instanceof DOMElement ) {
-					$hero_image_elements[] = $candidate;
+					$hero_image_elements[ spl_object_hash( $candidate ) ] = $candidate;
+				} elseif ( is_array( $candidate ) ) {
+					foreach ( $candidate as $hero_image_element ) {
+						$hero_image_elements[ spl_object_hash( $hero_image_element ) ] = $hero_image_element;
+					}
 				}
 			}
 		}
 
 		$this->add_data_hero_candidate_attribute(
-			array_slice( $hero_image_elements, 0, PreloadHeroImage::DATA_HERO_MAX )
+			array_slice( array_values( $hero_image_elements ), 0, PreloadHeroImage::DATA_HERO_MAX )
 		);
 	}
 
 	/**
-	 * Retrieve the element that represents the custom header.
+	 * Retrieve the images in the header.
 	 *
-	 * @param Document $document Document to retrieve the custom header from.
-	 * @return DOMElement|null Element that represents the custom header, or null
-	 *                         if not found.
+	 * @param Document $document Document to retrieve the header images from.
+	 * @return DOMElement[] Header images.
 	 */
-	private function get_custom_header( Document $document ) {
-		$elements = $document->xpath->query(
-			self::CUSTOM_HEADER_XPATH_QUERY,
-			$document->body
+	private function get_header_images( Document $document ) {
+		// Note that 3,508 out of 3,923 themes on WP.org  (89%) use the <main> element.
+		$after_header_element = $document->getElementsByTagName( 'main' )->item( 0 );
+
+		// If a theme happens to not use the <main> element, then fall back to using the first entry-content.
+		if ( ! $after_header_element instanceof DOMElement ) {
+			$after_header_element = $this->get_first_entry_content( $document );
+		}
+
+		if ( ! $after_header_element instanceof DOMElement ) {
+			return [];
+		}
+
+		$query = $document->xpath->query(
+			self::PRECEDING_NON_LAZY_IMAGE_XPATH_QUERY,
+			$after_header_element
 		);
 
-		$custom_header = $elements->item( 0 );
-
-		return $custom_header instanceof DOMElement ? $custom_header : null;
+		return array_filter(
+			iterator_to_array( $query ),
+			static function ( DOMElement $element ) {
+				return ! ( new ImageDimensions( $element ) )->isTiny();
+			}
+		);
 	}
 
 	/**
-	 * Retrieve the element that represents the custom logo.
+	 * Retrieve the element that represents the custom logo using.
+	 *
+	 * Note that this image may be "tiny" so it will not be included via `get_header_images()` above, but given that the
+	 * logo is in the header it should be prerendered.
 	 *
 	 * @param Document $document Document to retrieve the custom logo from.
 	 * @return DOMElement|null Element that represents the custom logo, or null
