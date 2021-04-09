@@ -2124,6 +2124,7 @@ class AMP_Theme_Support {
 		}
 
 		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );
+		array_unshift( $transformers, Transformer\DetermineHeroImages::class );
 
 		/**
 		 * Filter the configuration to be used for the AMP Optimizer.
