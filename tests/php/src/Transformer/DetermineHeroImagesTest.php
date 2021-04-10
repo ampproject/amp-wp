@@ -79,7 +79,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'ignores image after main'                   => [
+			'ignores image after main'                     => [
 				$input(
 					'<main></main><footer>'
 					. '<amp-img width="789" height="539" src="https://example.com/banner.jpg"></amp-img>'
@@ -92,7 +92,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'detects featured image'                     => [
+			'detects featured image'                       => [
 				$input(
 					'<figure class="featured-media">'
 					. '<div class="featured-media-inner section-inner">'
@@ -109,7 +109,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'detects first content cover block'          => [
+			'detects first content cover block'            => [
 				$input(
 					'<div class="entry-content">'
 					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
@@ -130,7 +130,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'detects first content image block'          => [
+			'detects first content image block'            => [
 				$input(
 					'<div class="entry-content">'
 					. '<figure class="wp-block-image size-large"><amp-img loading="lazy" width="1024" height="768" src="https://example.com/image-block-1.jpg" alt="" class="wp-image-2135"></amp-img></figure>'
@@ -149,7 +149,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'detects first cover block in initial group' => [
+			'detects first cover block in initial group'   => [
 				$input(
 					'<div class="entry-content">'
 					. '<div class="wp-block-group"><div class="wp-block-group__inner-container">'
@@ -166,7 +166,24 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'ignores non-initial cover blocks'           => [
+			'detects first YouTube block in initial group' => [
+				$input(
+					'<div class="entry-content">'
+					. '<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube"><div class="wp-block-embed__wrapper">'
+					. '<amp-youtube data-videoid="xrGAQCq9BMU" layout="responsive" width="16" height="9" title="NASA at Saturn: Cassini\'s Grand Finale" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:56.25%"></i-amphtml-sizer><a placeholder href="https://youtu.be/xrGAQCq9BMU"><amp-img src="https://i.ytimg.com/vi/xrGAQCq9BMU/hqdefault.jpg" layout="fill" object-fit="cover" alt="NASA at Saturn: Cassini\'s Grand Finale" class="amp-wp-enforced-sizes i-amphtml-layout-fill i-amphtml-layout-size-defined"></amp-img></a></amp-youtube>'
+					. '</div></figure>'
+					. '</div>'
+				),
+				$output(
+					'<div class="entry-content">'
+					. '<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube"><div class="wp-block-embed__wrapper">'
+					. '<amp-youtube data-videoid="xrGAQCq9BMU" layout="responsive" width="16" height="9" title="NASA at Saturn: Cassini\'s Grand Finale" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:56.25%"></i-amphtml-sizer><a placeholder href="https://youtu.be/xrGAQCq9BMU"><amp-img src="https://i.ytimg.com/vi/xrGAQCq9BMU/hqdefault.jpg" data-hero-candidate layout="fill" object-fit="cover" alt="NASA at Saturn: Cassini\'s Grand Finale" class="amp-wp-enforced-sizes i-amphtml-layout-fill i-amphtml-layout-size-defined"></amp-img></a></amp-youtube>'
+					. '</div></figure>'
+					. '</div>'
+				),
+			],
+
+			'ignores non-initial cover blocks'             => [
 				$input(
 					'<div class="entry-content">'
 					. '<p>Another block at beginning!</p>'

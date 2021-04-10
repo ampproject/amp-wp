@@ -21,8 +21,7 @@ use DOMElement;
  * This transformer checks for the following images in the given order:
  * 1. Header images (including Custom Logo and Custom Header)
  * 2. Featured image of the page
- * 3. Image block in initial position of first entry content
- * 4. Cover block image in initial position of first entry content
+ * 3. Image which is descendant of first child of first entry content
  *
  * It then applies the data-hero attribute to the first two of these.
  *
@@ -54,18 +53,11 @@ final class DetermineHeroImages implements Transformer {
 	const FIRST_ENTRY_CONTENT_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' entry-content ' ) ]";
 
 	/**
-	 * XPath query to find background image of a Cover Block at the beginning of post content (including nested inside of another block).
+	 * XPath query to find an image at the beginning of entry content (including nested inside of another block).
 	 *
 	 * @var string
 	 */
-	const INITIAL_COVER_BLOCK_XPATH_QUERY = "./*[1]/descendant-or-self::div[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ]/amp-img[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover__image-background ' ) ][ not( @data-hero ) ]";
-
-	/**
-	 * XPath query to find Image Block at the beginning of post content (including nested inside of another block).
-	 *
-	 * @var string
-	 */
-	const INITIAL_IMAGE_BLOCK_XPATH_QUERY = "./*[1]/descendant-or-self::figure[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-image ' ) ]/amp-img[ not( @data-hero ) ]";
+	const INITIAL_CONTENT_IMAGE_XPATH_QUERY = './*[1]//amp-img[ not( @data-hero ) ]';
 
 	/**
 	 * Apply transformations to the provided DOM document.
@@ -79,8 +71,7 @@ final class DetermineHeroImages implements Transformer {
 	public function transform( Document $document, ErrorCollection $errors ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$hero_image_elements = [];
 
-		// @todo Beyond initial image block and cover block, what about an initial embed block?
-		foreach ( [ 'header_images', 'featured_image', 'initial_image_block', 'initial_cover_block' ] as $hero_image_source ) {
+		foreach ( [ 'header_images', 'featured_image', 'initial_content_image' ] as $hero_image_source ) {
 			if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
 				$candidate = null;
 
@@ -91,11 +82,8 @@ final class DetermineHeroImages implements Transformer {
 					case 'featured_image':
 						$candidate = $this->get_featured_image( $document );
 						break;
-					case 'initial_image_block':
-						$candidate = $this->get_initial_content_image_block( $document );
-						break;
-					case 'initial_cover_block':
-						$candidate = $this->get_initial_content_cover_block( $document );
+					case 'initial_content_image':
+						$candidate = $this->get_initial_content_image( $document );
 						break;
 				}
 
@@ -195,40 +183,19 @@ final class DetermineHeroImages implements Transformer {
 	}
 
 	/**
-	 * Retrieve the first cover block that is in the first position in content.
+	 * Retrieve the first image that is in the first position in content.
 	 *
-	 * @param Document $document Document to retrieve the cover block from.
-	 * @return DOMElement|null Cover block at the beginning of the first entry content.
+	 * @param Document $document Document to retrieve the image from.
+	 * @return DOMElement|null Image at the beginning of the first entry content.
 	 */
-	private function get_initial_content_cover_block( Document $document ) {
+	private function get_initial_content_image( Document $document ) {
 		$entry_content = $this->get_first_entry_content( $document );
 		if ( ! $entry_content instanceof DOMElement ) {
 			return null;
 		}
 
 		$query = $document->xpath->query(
-			self::INITIAL_COVER_BLOCK_XPATH_QUERY,
-			$entry_content
-		);
-
-		$cover_block_image = $query->item( 0 );
-		return $cover_block_image instanceof DOMElement ? $cover_block_image : null;
-	}
-
-	/**
-	 * Retrieve the first image block that is in the first position in content.
-	 *
-	 * @param Document $document Document to retrieve the image block from.
-	 * @return DOMElement|null Image block at the beginning of the first entry content.
-	 */
-	private function get_initial_content_image_block( Document $document ) {
-		$entry_content = $this->get_first_entry_content( $document );
-		if ( ! $entry_content instanceof DOMElement ) {
-			return null;
-		}
-
-		$query = $document->xpath->query(
-			self::INITIAL_IMAGE_BLOCK_XPATH_QUERY,
+			self::INITIAL_CONTENT_IMAGE_XPATH_QUERY,
 			$entry_content
 		);
 
