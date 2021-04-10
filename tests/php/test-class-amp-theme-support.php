@@ -1641,11 +1641,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$ordered_contains = [
 			'<html amp=""',
 			'<meta charset="' . Document\Encoding::AMP . '">',
+			'<meta name="viewport" content="width=device-width">',
 			'<link rel="preconnect" href="https://cdn.ampproject.org">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">',
-			'<meta name="viewport" content="width=device-width">',
 			'<link as="script" crossorigin="anonymous" href="https://cdn.ampproject.org/v0.mjs" rel="modulepreload">',
 			'<meta name="generator" content="AMP Plugin',
 			'<script type="module" src="https://cdn.ampproject.org/v0.mjs" async crossorigin="anonymous"></script>',
