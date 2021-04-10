@@ -26,6 +26,10 @@ describe( 'Block validation data store', () => {
 		dispatch( BLOCK_VALIDATION_STORE_KEY ).setMaybeIsPostDirty( false );
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getMaybeIsPostDirty() ).toBe( false );
 
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getFetchingErrorsRequestErrorMessage() ).toBe( '' );
+		dispatch( BLOCK_VALIDATION_STORE_KEY ).setFetchingErrorsRequestErrorMessage( 'Error message' );
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getFetchingErrorsRequestErrorMessage() ).toBe( 'Error message' );
+
 		dispatch( BLOCK_VALIDATION_STORE_KEY ).setReviewLink( 'http://example.com' );
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink() ).toBe( 'http://example.com' );
 
