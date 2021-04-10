@@ -33,7 +33,7 @@ use DOMElement;
 final class DetermineHeroImages implements Transformer {
 
 	/**
-	 * XPath query to find preceding which are not lazy-loaded.
+	 * XPath query to find preceding images which are not lazy-loaded.
 	 *
 	 * @var string
 	 */

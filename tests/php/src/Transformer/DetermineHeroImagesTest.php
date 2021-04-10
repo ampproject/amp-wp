@@ -40,84 +40,59 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 		};
 
 		return [
-			'detects custom header'                      => [
+			'detects custom header as in document with main' => [
 				$input(
-					'<div class="wp-custom-header">'
+					'<header>'
 					. '<amp-img width="789" height="539" src="https://example.com/custom-header.jpg"></amp-img>'
-					. '</div>'
+					. '</header><main></main>'
 				),
 				$output(
-					'<div class="wp-custom-header">'
+					'<header>'
 					. '<amp-img width="789" height="539" src="https://example.com/custom-header.jpg" data-hero-candidate></amp-img>'
-					. '</div>'
+					. '</header><main></main>'
 				),
 			],
 
-			'detects custom header as amp-img'           => [
+			'detects custom header as in document with entry-content' => [
 				$input(
-					'<div class="wp-custom-header">'
+					'<div class="my-header">'
 					. '<amp-img width="789" height="539" src="https://example.com/custom-header.jpg"></amp-img>'
-					. '</div>'
+					. '</div><div class="hfeed"><div class="hentry"><div class="entry-content"></div></div></div>'
 				),
 				$output(
-					'<div class="wp-custom-header">'
+					'<div class="my-header">'
 					. '<amp-img width="789" height="539" src="https://example.com/custom-header.jpg" data-hero-candidate></amp-img>'
-					. '</div>'
+					. '</div><div class="hfeed"><div class="hentry"><div class="entry-content"></div></div></div>'
 				),
 			],
 
-			'detects site icon'                          => [
+			'ignores header image which was originally lazy-loaded' => [
 				$input(
-					'<div class="site-logo faux-heading">'
-					. '<a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
-					. '<amp-img width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px"></amp-img>'
-					. '</a>'
-					. '</div>'
+					'<header>'
+					. '<amp-img width="789" height="539" src="https://example.com/custom-header.jpg"><noscript><img loading="lazy" width="789" height="539" src="https://example.com/custom-header.jpg"></noscript></amp-img>'
+					. '</header><main></main>'
 				),
 				$output(
-					'<div class="site-logo faux-heading">'
-					. '<a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
-					. '<amp-img width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px" data-hero-candidate></amp-img>'
-					. '</a>'
-					. '</div>'
+					'<header>'
+					. '<amp-img width="789" height="539" src="https://example.com/custom-header.jpg"><noscript><img loading="lazy" width="789" height="539" src="https://example.com/custom-header.jpg"></noscript></amp-img>'
+					. '</header><main></main>'
 				),
 			],
 
-			'detects site icon as amp-img'               => [
+			'ignores image after main'                   => [
 				$input(
-					'<div class="site-logo faux-heading">'
-					. '<a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
-					. '<amp-img width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px"></amp-img>'
-					. '</a>'
-					. '</div>'
+					'<main></main><footer>'
+					. '<amp-img width="789" height="539" src="https://example.com/banner.jpg"></amp-img>'
+					. '</footer>'
 				),
 				$output(
-					'<div class="site-logo faux-heading">'
-					. '<a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
-					. '<amp-img width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px" data-hero-candidate></amp-img>'
-					. '</a>'
-					. '</div>'
+					'<main></main><footer>'
+					. '<amp-img width="789" height="539" src="https://example.com/banner.jpg"></amp-img>'
+					. '</footer>'
 				),
 			],
 
 			'detects featured image'                     => [
-				$input(
-					'<figure class="featured-media">'
-					. '<div class="featured-media-inner section-inner">'
-					. '<amp-img width="640" height="480" src="https://example.com/featured-image.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" loading="lazy" srcset="https://example.com/featured-image_640.jpg 640w, https://example.com/featured-image_300.jpg 300w" sizes="(max-width: 640px) 100vw, 640px"></amp-img>'
-					. '</div>'
-					. '</figure>'
-				),
-				$output(
-					'<figure class="featured-media">'
-					. '<div class="featured-media-inner section-inner">'
-					. '<amp-img width="640" height="480" src="https://example.com/featured-image.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" loading="lazy" srcset="https://example.com/featured-image_640.jpg 640w, https://example.com/featured-image_300.jpg 300w" sizes="(max-width: 640px) 100vw, 640px" data-hero-candidate></amp-img>'
-					. '</div>'
-					. '</figure>'
-				),
-			],
-
-			'detects featured image as amp-img'          => [
 				$input(
 					'<figure class="featured-media">'
 					. '<div class="featured-media-inner section-inner">'
@@ -212,41 +187,45 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'site icon and custom header are prioritized over cover blocks' => [
+			'site icon and custom header are prioritized over content block' => [
 				$input(
-					'<div class="entry-content">'
-					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
-					. '</div>'
-					. '<a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
+					'<header><a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
 					. '<amp-img width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px"></amp-img>'
 					. '</a>'
-					. '<div class="wp-custom-header"><amp-img width="640" height="480" src="https://example.com/custom-header.jpg"></amp-img></div>'
-				),
-				$output(
-					'<div class="entry-content">'
+					. '<div class="wp-custom-header"><amp-img width="640" height="480" src="https://example.com/custom-header.jpg"></amp-img></div></header>'
+					. '<div class="entry-content">'
 					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
 					. '</div>'
-					. '<a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
-					. '<amp-img width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px" data-hero-candidate></amp-img>'
+				),
+				$output(
+					'<header><a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
+					. '<amp-img data-hero-candidate width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px"></amp-img>'
 					. '</a>'
-					. '<div class="wp-custom-header"><amp-img width="640" height="480" src="https://example.com/custom-header.jpg" data-hero-candidate></amp-img></div>'
+					. '<div class="wp-custom-header"><amp-img data-hero-candidate width="640" height="480" src="https://example.com/custom-header.jpg"></amp-img></div></header>'
+					. '<div class="entry-content">'
+					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
+					. '</div>'
 				),
 			],
 
 			'featured image and custom header prioritized over cover blocks' => [
 				$input(
-					'<div class="entry-content">'
+					'<header><a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
+					. '<amp-img width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px"></amp-img>'
+					. '</a>'
+					. '<div class="wp-custom-header"><amp-img width="640" height="480" src="https://example.com/custom-header.jpg"></amp-img></div></header>'
+					. '<div class="entry-content">'
 					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
 					. '</div>'
-					. '<amp-img width="640" height="480" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" src="https://example.com/featured-image.jpg"></amp-img>'
-					. '<div class="wp-custom-header"><amp-img width="640" height="480" src="https://example.com/custom-header.jpg"></amp-img></div>'
 				),
 				$output(
-					'<div class="entry-content">'
+					'<header><a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
+					. '<amp-img data-hero-candidate width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px"></amp-img>'
+					. '</a>'
+					. '<div class="wp-custom-header"><amp-img data-hero-candidate width="640" height="480" src="https://example.com/custom-header.jpg"></amp-img></div></header>'
+					. '<div class="entry-content">'
 					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
 					. '</div>'
-					. '<amp-img width="640" height="480" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" src="https://example.com/featured-image.jpg" data-hero-candidate></amp-img>'
-					. '<div class="wp-custom-header"><amp-img width="640" height="480" src="https://example.com/custom-header.jpg" data-hero-candidate></amp-img></div>'
 				),
 			],
 		];
