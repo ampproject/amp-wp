@@ -9,11 +9,11 @@ namespace AmpProject\AmpWP\Transformer;
 
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\ImageDimensions;
 use AmpProject\Optimizer\Transformer;
 use AmpProject\Optimizer\Transformer\PreloadHeroImage;
-use DOMElement;
 
 /**
  * Determine the images to flag as data-hero so the Optimizer can preload them.
@@ -87,7 +87,7 @@ final class DetermineHeroImages implements Transformer {
 						break;
 				}
 
-				if ( $candidate instanceof DOMElement ) {
+				if ( $candidate instanceof Element ) {
 					$hero_image_elements[ spl_object_hash( $candidate ) ] = $candidate;
 				} elseif ( is_array( $candidate ) ) {
 					foreach ( $candidate as $hero_image_element ) {
@@ -109,18 +109,18 @@ final class DetermineHeroImages implements Transformer {
 	 * class name.
 	 *
 	 * @param Document $document Document to retrieve the header images from.
-	 * @return DOMElement[] Header images.
+	 * @return Element[] Header images.
 	 */
 	private function get_header_images( Document $document ) {
 		// Note that 3,508 out of 3,923 themes on WP.org  (89%) use the <main> element.
 		$after_header_element = $document->getElementsByTagName( 'main' )->item( 0 );
 
 		// If a theme happens to not use the <main> element, then fall back to using the first entry-content.
-		if ( ! $after_header_element instanceof DOMElement ) {
+		if ( ! $after_header_element instanceof Element ) {
 			$after_header_element = $this->get_first_entry_content( $document );
 		}
 
-		if ( ! $after_header_element instanceof DOMElement ) {
+		if ( ! $after_header_element instanceof Element ) {
 			return [];
 		}
 
@@ -131,7 +131,7 @@ final class DetermineHeroImages implements Transformer {
 
 		return array_filter(
 			iterator_to_array( $query ),
-			static function ( DOMElement $element ) {
+			static function ( Element $element ) {
 				// A custom logo may in fact be tiny and yet since it is in the header it should be prerendered.
 				// Note that a theme may not be using `the_custom_logo()` template tag and that is why the `custom-logo`
 				// class is not being checked for specifically.
@@ -152,8 +152,7 @@ final class DetermineHeroImages implements Transformer {
 	 * Retrieve the element that represents the featured image.
 	 *
 	 * @param Document $document Document to retrieve the featured image from.
-	 * @return DOMElement|null Element that represents the featured image, or
-	 *                         null if not found.
+	 * @return Element|null Element that represents the featured image, or null if not found.
 	 */
 	private function get_featured_image( Document $document ) {
 		$elements = $document->xpath->query(
@@ -163,14 +162,14 @@ final class DetermineHeroImages implements Transformer {
 
 		$featured_image = $elements->item( 0 );
 
-		return $featured_image instanceof DOMElement ? $featured_image : null;
+		return $featured_image instanceof Element ? $featured_image : null;
 	}
 
 	/**
 	 * Retrieve the first entry content.
 	 *
 	 * @param Document $document Document to retrieve the first entry content from.
-	 * @return DOMElement|null First entry content element.
+	 * @return Element|null First entry content element.
 	 */
 	private function get_first_entry_content( Document $document ) {
 		$query = $document->xpath->query(
@@ -179,18 +178,18 @@ final class DetermineHeroImages implements Transformer {
 		);
 
 		$entry_content = $query->item( 0 );
-		return $entry_content instanceof DOMElement ? $entry_content : null;
+		return $entry_content instanceof Element ? $entry_content : null;
 	}
 
 	/**
 	 * Retrieve the first image that is in the first position in content.
 	 *
 	 * @param Document $document Document to retrieve the image from.
-	 * @return DOMElement|null Image at the beginning of the first entry content.
+	 * @return Element|null Image at the beginning of the first entry content.
 	 */
 	private function get_initial_content_image( Document $document ) {
 		$entry_content = $this->get_first_entry_content( $document );
-		if ( ! $entry_content instanceof DOMElement ) {
+		if ( ! $entry_content instanceof Element ) {
 			return null;
 		}
 
@@ -200,14 +199,17 @@ final class DetermineHeroImages implements Transformer {
 		);
 
 		$image = $query->item( 0 );
-		return $image instanceof DOMElement ? $image : null;
+		if ( $image instanceof Element && ! ( new ImageDimensions( $image ) )->isTiny() ) {
+			return $image;
+		}
+
+		return null;
 	}
 
 	/**
 	 * Add the data-hero attribute to viable hero images.
 	 *
-	 * @param DOMElement[] $hero_image_elements Elements that are viable hero
-	 *                                          images.
+	 * @param Element[] $hero_image_elements Elements that are viable hero images.
 	 */
 	private function add_data_hero_candidate_attribute( $hero_image_elements ) {
 		foreach ( $hero_image_elements as $hero_image_element ) {
