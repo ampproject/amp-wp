@@ -1561,7 +1561,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed         = null;
 		$cache_key      = null;
 		$cached         = true;
-		$cache_group    = 'amp-parsed-stylesheet-v35'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group    = 'amp-parsed-stylesheet-v36'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 		$use_transients = $this->should_use_transient_caching();
 
 		$cache_impacting_options = array_merge(
@@ -2157,24 +2157,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$this->process_css_declaration_block( $css_item, $css_list, $options )
 				);
 			} elseif ( $css_item instanceof AtRuleBlockList ) {
-				if (
-					'-moz-document' === $css_item->atRuleName()
-					&&
-					'url-prefix()' === $css_item->atRuleArgs()
-					&&
-					in_array( 'supports', $options['allowed_at_rules'], true )
-				) {
-					// Replace `@-moz-document url-prefix()` with `@supports (-moz-appearance:meterbar)` as an alternative
-					// way to provide Firefox-specific style rules. This is a workaround since @-moz-document is not
-					// yet allowed in AMP, and this use of @supports is another recognized Firefox-specific CSS hack,
-					// per <http://browserhacks.com/#hack-8e9b5504d9fda44ec75169381b3c3157>.
-					// For adding @-moz-document to AMP, see <https://github.com/ampproject/amphtml/issues/26406>.
-					$new_css_item = new AtRuleBlockList( 'supports', '(-moz-appearance:meterbar)' );
-					$new_css_item->setContents( $css_item->getContents() );
-					$this->replace_inside_css_list( $css_list, $css_item, [ $new_css_item ] );
-					$css_item  = $new_css_item; // To process_css_list below.
-					$sanitized = false;
-				} elseif ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
+				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$error                = [
 						'code'      => self::CSS_SYNTAX_INVALID_AT_RULE,
 						'at_rule'   => $css_item->atRuleName(),

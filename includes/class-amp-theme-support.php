@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
@@ -1790,6 +1791,9 @@ class AMP_Theme_Support {
 			if ( is_bool( $status_code ) ) {
 				$status_code = 200; // Not a web server environment.
 			}
+			if ( ! headers_sent() ) {
+				header( 'Content-Type: application/json; charset=utf-8' );
+			}
 			return wp_json_encode(
 				[
 					'status_code' => $status_code,
@@ -1823,6 +1827,19 @@ class AMP_Theme_Support {
 				$response
 			)
 		) ) {
+			if ( AMP_Validation_Manager::$is_validate_request ) {
+				if ( ! headers_sent() ) {
+					status_header( 400 );
+					header( 'Content-Type: application/json; charset=utf-8' );
+				}
+				return wp_json_encode(
+					[
+						'code'    => 'RENDERED_PAGE_NOT_AMP',
+						'message' => __( 'The requested URL did not result in an AMP page being rendered.', 'amp' ),
+					]
+				);
+			}
+
 			return $response;
 		}
 
@@ -1867,7 +1884,7 @@ class AMP_Theme_Support {
 		 */
 		do_action( 'amp_server_timing_start', 'amp_dom_parse', '', [], true );
 
-		$dom = Document::fromHtml( $response );
+		$dom = Document::fromHtml( $response, Options::DEFAULTS );
 
 		if ( AMP_Validation_Manager::$is_validate_request ) {
 			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
@@ -2117,8 +2134,6 @@ class AMP_Theme_Support {
 					Optimizer\Transformer\TransformedIdentifier::class,
 				]
 			);
-		} else {
-			array_unshift( $transformers, Transformer\DetermineHeroImages::class );
 		}
 
 		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );

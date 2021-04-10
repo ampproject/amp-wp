@@ -14,7 +14,7 @@ Previously, this only filtered the Site Icon, as that was the only possible sche
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1608](/includes/amp-helper-functions.php#L1608)
+:link: [includes/amp-helper-functions.php:1619](/includes/amp-helper-functions.php#L1619)
 
 <details>
 <summary>Show Code</summary>

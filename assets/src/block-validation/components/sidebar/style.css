@@ -1,0 +1,19 @@
+/*
+ * Errors list in AMP sidebar.
+ */
+.amp-sidebar__errors-list,
+.amp-sidebar__errors-list-item {
+	margin-bottom: 0;
+	margin-top: 0;
+}
+
+.amp-sidebar__errors-list-item > .components-panel__body {
+	border-top-width: 0;
+}
+
+/*
+ * Options in AMP sidebar.
+ */
+.amp-sidebar__options {
+	margin: 12px 8px;
+}

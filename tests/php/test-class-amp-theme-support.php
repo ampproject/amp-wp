@@ -8,6 +8,7 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
@@ -77,6 +78,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		parent::tearDown();
 		unset( $GLOBALS['show_admin_bar'] );
+		AMP_Validation_Manager::$is_validate_request = false;
 		AMP_Validation_Manager::reset_validation_results();
 		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
 		remove_theme_support( 'custom-header' );
@@ -1328,7 +1330,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html = ob_get_clean();
 		$html          = AMP_Theme_Support::prepare_response( $original_html );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
 		$scripts = $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
 		$this->assertSame( 3, $scripts->length );
@@ -1388,7 +1390,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
 		/** @var DOMElement $script Script. */
 		$actual_script_srcs = [];
@@ -1441,7 +1443,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
 		$script_srcs = [];
 		/**
@@ -1638,7 +1640,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$ordered_contains = [
 			'<html amp=""',
-			'<meta charset="' . Document::AMP_ENCODING . '">',
+			'<meta charset="' . Document\Encoding::AMP . '">',
 			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',
@@ -1755,6 +1757,19 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		unset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] );
 		unset( $_SERVER['REQUEST_METHOD'] );
+	}
+
+	/**
+	 * Test prepare_response when validating an invalid AMP page.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_for_validating_invalid_amp_page() {
+		AMP_Validation_Manager::$is_validate_request = true;
+
+		$response = AMP_Theme_Support::prepare_response( '' );
+		$this->assertJson( $response );
+		$this->assertStringContains( 'RENDERED_PAGE_NOT_AMP', $response );
 	}
 
 	/**

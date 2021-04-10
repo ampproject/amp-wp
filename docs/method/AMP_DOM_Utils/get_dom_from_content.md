@@ -17,7 +17,7 @@ Return a valid Dom\Document representing arbitrary HTML content passed as a para
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:162](/includes/utils/class-amp-dom-utils.php#L162-L176)
+:link: [includes/utils/class-amp-dom-utils.php:171](/includes/utils/class-amp-dom-utils.php#L171-L188)
 
 <details>
 <summary>Show Code</summary>
@@ -34,7 +34,9 @@ public static function get_dom_from_content( $content, $encoding = null ) {
 	 * We can later use this to extract our nodes.
 	 */
 	$document = "<html><head></head><body>{$content}</body></html>";
-	return Document::fromHtml( $document, $encoding );
+	$options                              = Options::DEFAULTS;
+	$options[ Document\Option::ENCODING ] = $encoding;
+	return Document::fromHtml( $document, $options );
 }
 ```
 

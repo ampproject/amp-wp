@@ -6,9 +6,23 @@ on:
       - develop
       # Include all release branches.
       - '[0-9]+.[0-9]+'
+    # Don't run for irrelevant changes.
+    paths-ignore:
+      - '!.github/workflows/*'
+      - '.wordpress-org/**'
+      - '!bin/ci/**'
+      - '!bin/local-env/**'
+      - 'docs/**'
   pull_request:
     # Run workflow whenever a PR is opened, updated (synchronized), or marked ready for review.
     types: [opened, synchronize, ready_for_review]
+    # Don't run for irrelevant changes.
+    paths-ignore:
+      - '!.github/workflows/*'
+      - '.wordpress-org/**'
+      - '!bin/ci/**'
+      - '!bin/local-env/**'
+      - 'docs/**'
 
 jobs:
 
@@ -18,6 +32,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
 
       - name: Get npm cache directory
         id: npm-cache
@@ -47,6 +70,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
 
       - name: Get npm cache directory
         id: npm-cache
@@ -172,6 +204,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
+
       - name: Get npm cache directory
         id: npm-cache
         run: echo "::set-output name=dir::$(npm config get cache)"
@@ -214,6 +255,15 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -349,6 +399,15 @@ jobs:
             sleep 1
           done
 
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
+
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
@@ -453,6 +512,15 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
 
       - name: Get Composer Cache Directory
         id: composer-cache

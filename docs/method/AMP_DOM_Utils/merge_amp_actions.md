@@ -17,7 +17,7 @@ Merge two sets of AMP events &amp; actions.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:431](/includes/utils/class-amp-dom-utils.php#L431-L469)
+:link: [includes/utils/class-amp-dom-utils.php:443](/includes/utils/class-amp-dom-utils.php#L443-L481)
 
 <details>
 <summary>Show Code</summary>

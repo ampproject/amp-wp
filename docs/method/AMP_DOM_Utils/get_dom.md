@@ -19,7 +19,7 @@ Return a valid Dom\Document representing HTML document passed as a parameter.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:66](/includes/utils/class-amp-dom-utils.php#L66-L69)
+:link: [includes/utils/class-amp-dom-utils.php:68](/includes/utils/class-amp-dom-utils.php#L68-L78)
 
 <details>
 <summary>Show Code</summary>
@@ -27,7 +27,11 @@ Return a valid Dom\Document representing HTML document passed as a parameter.
 ```php
 public static function get_dom( $document, $encoding = null ) {
 	_deprecated_function( __METHOD__, '1.5.0', 'AmpProject\Dom\Document::fromHtml()' );
-	return Document::fromHtml( $document, $encoding );
+	$options = Options::DEFAULTS;
+	if ( null !== $encoding ) {
+		$options[ Document\Option::ENCODING ] = $encoding;
+	}
+	return Document::fromHtml( $document, $options );
 }
 ```
 
