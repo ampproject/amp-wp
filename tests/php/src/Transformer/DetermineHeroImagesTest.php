@@ -183,6 +183,19 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
+			'ignores tiny image at beginning of entry content' => [
+				$input(
+					'<div class="entry-content">'
+					. '<p><amp-img src="https://s.w.org/images/core/emoji/13.0.1/72x72/1f642.png" alt="🙂" class="wp-smiley amp-wp-enforced-sizes amp-wp-843f19c i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" width="72" height="72" noloading="" layout="intrinsic" data-amp-original-style="height: 1em; max-height: 1em;"></amp-img></p>'
+					. '</div>'
+				),
+				$output(
+					'<div class="entry-content">'
+					. '<p><amp-img src="https://s.w.org/images/core/emoji/13.0.1/72x72/1f642.png" alt="🙂" class="wp-smiley amp-wp-enforced-sizes amp-wp-843f19c i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" width="72" height="72" noloading="" layout="intrinsic" data-amp-original-style="height: 1em; max-height: 1em;"></amp-img></p>'
+					. '</div>'
+				),
+			],
+
 			'ignores non-initial cover blocks'             => [
 				$input(
 					'<div class="entry-content">'
