@@ -1642,14 +1642,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<html amp=""',
 			'<meta charset="' . Document\Encoding::AMP . '">',
 			'<meta name="viewport" content="width=device-width">',
+			'<link as="script" crossorigin="anonymous" href="https://cdn.ampproject.org/v0.mjs" rel="modulepreload">',
 			'<link rel="preconnect" href="https://cdn.ampproject.org">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">',
-			'<link as="script" crossorigin="anonymous" href="https://cdn.ampproject.org/v0.mjs" rel="modulepreload">',
 			'<meta name="generator" content="AMP Plugin',
-			'<script type="module" src="https://cdn.ampproject.org/v0.mjs" async crossorigin="anonymous"></script>',
+			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 
+			'<script type="module" src="https://cdn.ampproject.org/v0.mjs" async crossorigin="anonymous"></script>',
 			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.mjs" type="module" crossorigin="anonymous"></script>',
 			'<script src="https://cdn.ampproject.org/v0/amp-experiment-0.1.mjs" async="" custom-element="amp-experiment" type="module" crossorigin="anonymous"></script>',
 
@@ -1660,7 +1661,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
-			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
 
 			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
