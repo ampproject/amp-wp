@@ -20,6 +20,8 @@ module.exports = {
 		'<rootDir>/node_modules',
 		'<rootDir>/build/',
 		'<rootDir>/tests/shared',
+		'<rootDir>/assets/src/block-editor/plugins',
+		'<rootDir>/assets/src/block-validation/plugins',
 	],
 	modulePathIgnorePatterns: [
 		'<rootDir>/assets/src/components/.*/__mocks__',
