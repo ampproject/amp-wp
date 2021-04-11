@@ -15,8 +15,7 @@ use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\CliCommand;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
@@ -35,25 +34,7 @@ use WP_Error;
  * @since 2.1.0 Refactored into service-based architecture.
  * @internal
  */
-final class ValidationCommand implements Service, Registerable, Conditional {
-
-	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return defined( 'WP_CLI' ) && WP_CLI;
-	}
-
-	/**
-	 * Register the service.
-	 *
-	 * @return void
-	 */
-	public function register() {
-		WP_CLI::add_command( 'amp validation', $this );
-	}
+final class ValidationCommand implements Service, CliCommand {
 
 	/**
 	 * The WP-CLI flag to force validation.
@@ -115,6 +96,16 @@ final class ValidationCommand implements Service, Registerable, Conditional {
 	 * @var array
 	 */
 	private $assoc_args;
+
+	/**
+	 * Get the name under which to register the CLI command.
+	 *
+	 * @return string The name under which to register the CLI command.
+	 */
+	public static function get_command_name()
+	{
+		return 'amp validation';
+	}
 
 	/**
 	 * Crawl the entire site to get AMP validation results.
