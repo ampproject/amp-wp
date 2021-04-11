@@ -35,7 +35,7 @@ class Test_AMP_Nav_Menu_Toggle_Sanitizer extends WP_UnitTestCase {
 			}
 			return ' data-amp-bind-class="&quot;' . $class . '&quot; + ( navMenuToggledOn ? &quot; ' . $toggle_class . '&quot; : \'\' )"';
 		};
-		$amp_get_toggle_attrs    = function( $class = '', $toggle_class = 'toggled-on' ) {
+		$amp_get_toggle_attrs    = function( $class = '', $toggle_class = 'toggled-on' ) { // phpcs:ignore Generic.Formatting.MultipleStatementAlignment.NotSameWarning -- Sniff has a bug.
 			return ' on="tap:AMP.setState({ navMenuToggledOn: ! navMenuToggledOn })" aria-expanded="false" data-amp-bind-aria-expanded="navMenuToggledOn ? \'true\' : \'false\'"' . ( ! empty( $toggle_class ) ? ' data-amp-bind-class="&quot;' . $class . '&quot; + ( navMenuToggledOn ? &quot; ' . $toggle_class . '&quot; : \'\' )"' : '' );
 		};
 
