@@ -1,27 +1,59 @@
 <?php
 /**
- * Class AMP_CLI_Validation_Command.
+ * Class ValidationCommand.
  *
  * Commands that deal with validation of AMP markup.
  *
- * @package AMP
+ * @package AmpProject\AmpWP
  */
 
+namespace AmpProject\AmpWP\Cli;
+
+use AMP_Options_Manager;
+use AMP_Theme_Support;
+use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Error_Taxonomy;
+use AMP_Validation_Manager;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLScanningContext;
+use Exception;
+use WP_CLI;
 use WP_CLI\Utils;
+use WP_Error;
 
 /**
  * Crawls the site for validation errors or resets the stored validation errors.
  *
  * @since 1.0
  * @since 1.3.0 Renamed subcommands.
+ * @since 2.1.0 Refactored into service-based architecture.
  * @internal
  */
-final class AMP_CLI_Validation_Command {
+final class ValidationCommand implements Service, Registerable, Conditional {
+
+	/**
+	 * Check whether the conditional object is currently needed.
+	 *
+	 * @return bool Whether the conditional object is needed.
+	 */
+	public static function is_needed() {
+		return defined( 'WP_CLI' ) && WP_CLI;
+	}
+
+	/**
+	 * Register the service.
+	 *
+	 * @return void
+	 */
+	public function register() {
+		WP_CLI::add_command( 'amp validation', $this );
+	}
 
 	/**
 	 * The WP-CLI flag to force validation.
@@ -161,6 +193,7 @@ final class AMP_CLI_Validation_Command {
 
 		if ( empty( $table_validation_by_type ) ) {
 			WP_CLI::error( 'No validation results were obtained from the URLs.' );
+
 			return;
 		}
 
@@ -192,6 +225,7 @@ final class AMP_CLI_Validation_Command {
 	 * Provides the ScannableURLProvider instance.
 	 *
 	 * @return ScannableURLProvider
+	 * @throws WP_CLI\ExitException If templates are disallowed by current config.
 	 */
 	private function get_validation_url_provider() {
 		if ( ! is_null( $this->scannable_url_provider ) ) {
@@ -231,7 +265,12 @@ final class AMP_CLI_Validation_Command {
 
 			$disallowed_templates = array_diff( $include_conditionals, $allowed_templates );
 			if ( ! empty( $disallowed_templates ) ) {
-				WP_CLI::error( sprintf( 'Templates not supported in legacy Reader mode with current configuration: %s', implode( ',', $disallowed_templates ) ) );
+				WP_CLI::error(
+					sprintf(
+						'Templates not supported in legacy Reader mode with current configuration: %s',
+						implode( ',', $disallowed_templates )
+					)
+				);
 			}
 
 			if ( empty( $include_conditionals ) ) {
@@ -318,11 +357,22 @@ final class AMP_CLI_Validation_Command {
 	 */
 	public function reset( /** @noinspection PhpUnusedParameterInspection */ $args, $assoc_args ) {
 		global $wpdb;
-		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
+		WP_CLI::confirm(
+			'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?',
+			$assoc_args
+		);
 
 		// Delete all posts.
-		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
+		$count = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s",
+				AMP_Validated_URL_Post_Type::POST_TYPE_SLUG
+			)
+		);
+		$query = $wpdb->prepare(
+			"SELECT ID FROM $wpdb->posts WHERE post_type = %s",
+			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG
+		);
 		$posts = new WP_CLI\Iterators\Query( $query, 10000 );
 
 		$progress = WP_CLI\Utils\make_progress_bar(
@@ -338,8 +388,16 @@ final class AMP_CLI_Validation_Command {
 		$progress->finish();
 
 		// Delete all terms. Note that many terms should get deleted when their post counts go to zero above.
-		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$query = $wpdb->prepare( "SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		$count = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				"SELECT COUNT( * ) FROM $wpdb->term_taxonomy WHERE taxonomy = %s",
+				AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG
+			)
+		);
+		$query = $wpdb->prepare(
+			"SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s",
+			AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG
+		);
 		$terms = new WP_CLI\Iterators\Query( $query, 10000 );
 
 		$progress = WP_CLI\Utils\make_progress_bar(
@@ -361,7 +419,7 @@ final class AMP_CLI_Validation_Command {
 	 * Generate the authorization nonce needed for a validate request.
 	 *
 	 * @subcommand generate-nonce
-	 * @alias nonce
+	 * @alias      nonce
 	 */
 	public function generate_nonce() {
 		WP_CLI::line( AMP_Validation_Manager::get_amp_validate_nonce() );
@@ -383,12 +441,15 @@ final class AMP_CLI_Validation_Command {
 	 *     wp amp validation check-url $( wp option get home )/?p=1
 	 *
 	 * @subcommand check-url
-	 * @alias check
+	 * @alias      check
 	 *
 	 * @param array $args Args.
+	 * @throws WP_CLI\ExitException If the home URL is missing a scheme or host.
+	 * @throws WP_CLI\ExitException If the supplied URL does not belong to the current site.
+	 * @throws WP_CLI\ExitException If an error occurred during the validation.
 	 */
 	public function check_url( $args ) {
-		list( $url ) = $args;
+		list($url) = $args;
 
 		$host            = wp_parse_url( $url, PHP_URL_HOST );
 		$parsed_home_url = wp_parse_url( home_url( '/' ) );

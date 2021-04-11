@@ -20,10 +20,10 @@ use AmpProject\AmpWP\Validation\SavePostValidationEvent;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\Optimizer;
-
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
 use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
+use WP_CLI;
 
 use function is_user_logged_in;
 
@@ -73,11 +73,14 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.onboarding_menu'             => Admin\OnboardingWizardSubmenu::class,
 		'admin.onboarding_wizard'           => Admin\OnboardingWizardSubmenuPage::class,
 		'admin.options_menu'                => Admin\OptionsMenu::class,
-		'admin.polyfills'                   => Admin\Polyfills::class,
 		'admin.paired_browsing'             => Admin\PairedBrowsing::class,
-		'admin.validation_counts'           => Admin\ValidationCounts::class,
 		'admin.plugin_row_meta'             => Admin\PluginRowMeta::class,
+		'admin.polyfills'                   => Admin\Polyfills::class,
+		'admin.validation_counts'           => Admin\ValidationCounts::class,
 		'amp_slug_customization_watcher'    => AmpSlugCustomizationWatcher::class,
+		'background_task_deactivator'       => BackgroundTaskDeactivator::class,
+		'cli.command_namespace'             => Cli\CommandNamespaceRegistration::class,
+		'cli.validation_command'            => Cli\ValidationCommand::class,
 		'css_transient_cache.ajax_handler'  => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'       => BackgroundTask\MonitorCssTransientCaching::class,
 		'dev_tools.block_sources'           => DevTools\BlockSources::class,
@@ -91,21 +94,20 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'mobile_redirection'                => MobileRedirection::class,
 		'obsolete_block_attribute_remover'  => ObsoleteBlockAttributeRemover::class,
 		'optimizer'                         => OptimizerService::class,
+		'paired_routing'                    => PairedRouting::class,
+		'paired_url'                        => PairedUrl::class,
 		'plugin_activation_notice'          => Admin\PluginActivationNotice::class,
 		'plugin_registry'                   => PluginRegistry::class,
 		'plugin_suppression'                => PluginSuppression::class,
 		'reader_theme_loader'               => ReaderThemeLoader::class,
 		'rest.options_controller'           => OptionsRESTController::class,
 		'rest.validation_counts_controller' => Validation\ValidationCountsRestController::class,
+		'save_post_validation_event'        => SavePostValidationEvent::class,
 		'server_timing'                     => Instrumentation\ServerTiming::class,
 		'site_health_integration'           => Admin\SiteHealth::class,
-		'validated_url_stylesheet_gc'       => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
-		'url_validation_rest_controller'    => Validation\URLValidationRESTController::class,
 		'url_validation_cron'               => URLValidationCron::class,
-		'save_post_validation_event'        => SavePostValidationEvent::class,
-		'background_task_deactivator'       => BackgroundTaskDeactivator::class,
-		'paired_routing'                    => PairedRouting::class,
-		'paired_url'                        => PairedUrl::class,
+		'url_validation_rest_controller'    => Validation\URLValidationRESTController::class,
+		'validated_url_stylesheet_gc'       => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
 	];
 
 	/**
