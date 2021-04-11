@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Transformer;
+namespace AmpProject\AmpWP\Optimizer\Transformer;
 
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;

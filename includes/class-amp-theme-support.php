@@ -2123,7 +2123,7 @@ class AMP_Theme_Support {
 			);
 		}
 
-		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );
+		array_unshift($transformers, \AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata::class );
 
 		/**
 		 * Filter the configuration to be used for the AMP Optimizer.
@@ -2147,8 +2147,8 @@ class AMP_Theme_Support {
 
 		$config = new Optimizer\Configuration( $configuration );
 		$config->registerConfigurationClass(
-			Transformer\AmpSchemaOrgMetadata::class,
-			Transformer\AmpSchemaOrgMetadataConfiguration::class
+				\AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata::class,
+				\AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration::class
 		);
 
 		return $config;
