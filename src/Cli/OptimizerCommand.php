@@ -48,9 +48,9 @@ final class OptimizerCommand implements Service, CliCommand
 	 * # Test <amp-img> SSR transformations and store them in a new file named 'output.html'.
 	 * $ echo '<amp-img src="image.jpg" width="500" height="500">' | wp amp optimizer optimize > output.html
 	 *
-	 * @param $args
-	 * @param $assoc_args
-	 * @throws WP_CLI\ExitException
+	 * @param array $args       Array of positional arguments.
+	 * @param array $assoc_args Associative array of associative arguments.
+	 * @throws WP_CLI\ExitException If the requested file could not be read.
 	 */
 	public function optimize( $args, $assoc_args )
 	{
