@@ -2072,87 +2072,18 @@ class AMP_Theme_Support {
 	 * @return Optimizer\TransformationEngine Optimizer transformation engine to use.
 	 */
 	private static function get_optimizer( $args ) {
-		$configuration = self::get_optimizer_configuration( $args );
-
-		$fallback_remote_request_pipeline = new FallbackRemoteGetRequest(
-			new WpHttpRemoteGetRequest(),
-			new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
+		add_filter(
+			'amp_enable_ssr',
+			static function () use ( $args ) {
+				return array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
+					? $args[ ConfigurationArgument::ENABLE_SSR ]
+					: true;
+			}
 		);
 
-		$cached_remote_request = new CachedRemoteGetRequest( $fallback_remote_request_pipeline, WEEK_IN_SECONDS );
-
-		return new Optimizer\TransformationEngine(
-			$configuration,
-			$cached_remote_request
-		);
+		return Services::get( 'optimizer' );
 	}
 
-	/**
-	 * Get the AmpProject\Optimizer configuration object to use.
-	 *
-	 * @param array $args Associative array of arguments to pass into the transformation engine.
-	 * @return Optimizer\Configuration Optimizer configuration to use.
-	 */
-	private static function get_optimizer_configuration( $args ) {
-		$transformers = Optimizer\Configuration::DEFAULT_TRANSFORMERS;
-
-		$enable_ssr = array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
-			? $args[ ConfigurationArgument::ENABLE_SSR ]
-			: true;
-
-		/**
-		 * Filter whether the AMP Optimizer should use server-side rendering or not.
-		 *
-		 * @since 1.5.0
-		 *
-		 * @param bool $enable_ssr Whether the AMP Optimizer should use server-side rendering or not.
-		 */
-		$enable_ssr = apply_filters( 'amp_enable_ssr', $enable_ssr );
-
-		// In debugging mode, we don't use server-side rendering, as it further obfuscates the HTML markup.
-		if ( ! $enable_ssr ) {
-			$transformers = array_diff(
-				$transformers,
-				[
-					Optimizer\Transformer\AmpRuntimeCss::class,
-					Optimizer\Transformer\PreloadHeroImage::class,
-					Optimizer\Transformer\RewriteAmpUrls::class,
-					Optimizer\Transformer\ServerSideRendering::class,
-					Optimizer\Transformer\TransformedIdentifier::class,
-				]
-			);
-		}
-
-		array_unshift($transformers, \AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata::class );
-
-		/**
-		 * Filter the configuration to be used for the AMP Optimizer.
-		 *
-		 * @since 1.5.0
-		 *
-		 * @param array $configuration Associative array of configuration data.
-		 */
-		$configuration = apply_filters(
-			'amp_optimizer_config',
-			array_merge(
-				[
-					Optimizer\Configuration::KEY_TRANSFORMERS => $transformers,
-					Optimizer\Transformer\PreloadHeroImage::class => [
-						Optimizer\Configuration\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
-					],
-				],
-				$args
-			)
-		);
-
-		$config = new Optimizer\Configuration( $configuration );
-		$config->registerConfigurationClass(
-				\AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata::class,
-				\AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration::class
-		);
-
-		return $config;
-	}
 
 	/**
 	 * Adds 'data-amp-layout' to the allowed <img> attributes for wp_kses().
