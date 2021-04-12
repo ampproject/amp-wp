@@ -11,6 +11,7 @@ namespace AmpProject\AmpWP\Cli;
 
 use AmpProject\AmpWP\Infrastructure\CliCommand;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Optimizer\OptimizerService;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\TransformationEngine;
@@ -26,6 +27,13 @@ final class OptimizerCommand implements Service, CliCommand
 {
 
 	/**
+	 * Optimizer service instance to use.
+	 *
+	 * @var OptimizerService
+	 */
+	private $optimizerService;
+
+	/**
 	 * Get the name under which to register the CLI command.
 	 *
 	 * @return string The name under which to register the CLI command.
@@ -33,6 +41,16 @@ final class OptimizerCommand implements Service, CliCommand
 	public static function get_command_name()
 	{
 		return 'amp optimizer';
+	}
+
+	/**
+	 * OptimizerCommand constructor.
+	 *
+	 * @param OptimizerService $optimizerService Optimizer service instance to use.
+	 */
+	public function __construct(OptimizerService $optimizerService)
+	{
+		$this->optimizerService = $optimizerService;
 	}
 
 	/**
@@ -77,9 +95,8 @@ final class OptimizerCommand implements Service, CliCommand
 		}
 
 		$html          = file_get_contents( $file );
-		$optimizer     = new TransformationEngine();
 		$errors        = new ErrorCollection();
-		$optimizedHtml = $optimizer->optimizeHtml( $html, $errors );
+		$optimizedHtml = $this->optimizerService->optimizeHtml( $html, $errors );
 
 		WP_CLI::line( $optimizedHtml );
 
