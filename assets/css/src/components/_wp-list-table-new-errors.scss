@@ -7,6 +7,7 @@
 	}
 
 	> tr {
+
 		&,
 		&.expanded + .details {
 			background: #fff;
@@ -19,6 +20,7 @@
 	}
 
 	> tr.new {
+
 		.row-title,
 		.column-primary > :first-child {
 			font-weight: 600;
