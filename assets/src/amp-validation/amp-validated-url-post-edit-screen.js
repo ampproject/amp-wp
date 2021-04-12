@@ -301,14 +301,17 @@ const handleRowEvents = () => {
 		const reviewCheckbox = row.querySelector( '.amp-validation-error-status-review' );
 
 		if ( statusSelect ) {
-			/*
-			 * Handle a change in the error status, like from 'Removed' to 'Kept'. It gets the data-color value
-			 * from the newly-selected <option> and sets this as the border color of the <select>.
-			 */
 			statusSelect.addEventListener( 'change', ( event ) => {
 				if ( event.target.matches( 'select' ) ) {
+					/*
+					 * Handle a change in the error status, like from 'Removed' to 'Kept'. It gets the data-color value
+					 * from the newly-selected <option> and sets this as the border color of the <select>.
+					 */
 					updateSelectBorderColor( event.target );
 				}
+
+				// Toggle the 'kept' state for the row depending on the error status.
+				row.classList.toggle( 'kept' );
 			} );
 		}
 

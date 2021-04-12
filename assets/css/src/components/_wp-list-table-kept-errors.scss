@@ -1,0 +1,17 @@
+// Row left border indicating error status.
+.wp-list-table.table-view-list > tbody > tr {
+	&.expanded + tr > :first-child {
+		border-left: 4px solid transparent; // Push the details content so that it aligns with the title row.
+	}
+
+	&.kept {
+		> :first-child,
+		&.expanded + tr > :first-child {
+			border-left: 4px solid #d54e21;
+		}
+
+		.check-column input {
+			margin-left: 4px;
+		}
+	}
+}
