@@ -192,8 +192,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			BackgroundTask\BackgroundTaskDeactivator::class,
 			PairedRouting::class,
 			Injector::class,
-			Optimizer\Configuration::class,
-			Optimizer\TransformationEngine::class,
 		];
 	}
 

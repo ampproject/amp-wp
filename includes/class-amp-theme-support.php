@@ -2078,7 +2078,7 @@ class AMP_Theme_Support {
 			}
 		);
 
-		return Services::get( 'optimizer' );
+		return Services::get( 'injector' )->make( OptimizerService::class );
 	}
 
 	/**
