@@ -281,18 +281,6 @@ const handleSearching = () => {
 };
 
 /**
- * Update border color for select element.
- *
- * @param {HTMLSelectElement} select Select element.
- */
-const updateSelectBorderColor = ( select ) => {
-	const newOption = select.options[ select.selectedIndex ];
-	if ( newOption ) {
-		select.style.borderColor = newOption.getAttribute( 'data-color' );
-	}
-};
-
-/**
  * Handles events that may occur for a row.
  */
 const handleRowEvents = () => {
@@ -301,18 +289,8 @@ const handleRowEvents = () => {
 		const reviewCheckbox = row.querySelector( '.amp-validation-error-status-review' );
 
 		if ( statusSelect ) {
-			statusSelect.addEventListener( 'change', ( event ) => {
-				if ( event.target.matches( 'select' ) ) {
-					/*
-					 * Handle a change in the error status, like from 'Removed' to 'Kept'. It gets the data-color value
-					 * from the newly-selected <option> and sets this as the border color of the <select>.
-					 */
-					updateSelectBorderColor( event.target );
-				}
-
-				// Toggle the 'kept' state for the row depending on the error status.
-				row.classList.toggle( 'kept' );
-			} );
+			// Toggle the 'kept' state for the row depending on the error status.
+			statusSelect.addEventListener( 'change', () => row.classList.toggle( 'kept' ) );
 		}
 
 		if ( reviewCheckbox ) {
@@ -368,9 +346,11 @@ const handleBulkActions = () => {
 	// Handle click on bulk "Remove" button.
 	removeButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
-			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
+			const row = select.closest( 'tr' );
+
+			if ( row.querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '3'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS.
-				updateSelectBorderColor( select );
+				row.classList.remove( 'kept' );
 				addBeforeUnloadPrompt();
 			}
 		} );
@@ -379,9 +359,11 @@ const handleBulkActions = () => {
 	// Handle click on bulk "Keep" button.
 	keepButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
-			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
+			const row = select.closest( 'tr' );
+
+			if ( row.querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '2'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS.
-				updateSelectBorderColor( select );
+				row.classList.add( 'kept' );
 				addBeforeUnloadPrompt();
 			}
 		} );

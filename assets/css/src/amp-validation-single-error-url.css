@@ -155,17 +155,6 @@ tr.expanded .single-url-detail-toggle::after {
 	border-right: 1px solid #a0a5aa;
 }
 
-.amp-validation-error-status-dropdown {
-	display: flex;
-}
-
-.amp-validation-error-status {
-	margin-left: 5px;
-	width: auto;
-	float: none;
-	border-width: 2px;
-}
-
 #amp-invalid-markup > .amp-icon::before {
 	margin-right: 3px;
 	margin-left: -2px;
