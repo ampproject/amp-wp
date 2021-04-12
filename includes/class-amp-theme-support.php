@@ -2084,7 +2084,6 @@ class AMP_Theme_Support {
 		return Services::get( 'optimizer' );
 	}
 
-
 	/**
 	 * Adds 'data-amp-layout' to the allowed <img> attributes for wp_kses().
 	 *

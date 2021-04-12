@@ -210,7 +210,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	protected function get_delegations() {
 		return [
-			Injector::class => static function () {
+			Injector::class         => static function () {
 				return Services::get( 'injector' );
 			},
 			RemoteGetRequest::class => static function () {

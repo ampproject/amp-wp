@@ -35,8 +35,7 @@ final class AmpWPConfiguration extends DefaultConfiguration {
 	 *
 	 * Note: They will only be applied once, when this method is hit for the first time.
 	 */
-	public function apply_filters()
-	{
+	public function apply_filters() {
 		if ( $this->already_applied ) {
 			return;
 		}
@@ -66,7 +65,7 @@ final class AmpWPConfiguration extends DefaultConfiguration {
 			);
 		}
 
-		array_unshift($transformers, WpTransformer\AmpSchemaOrgMetadata::class );
+		array_unshift( $transformers, WpTransformer\AmpSchemaOrgMetadata::class );
 
 		$this->registerConfigurationClass(
 			WpTransformer\AmpSchemaOrgMetadata::class,
@@ -83,7 +82,7 @@ final class AmpWPConfiguration extends DefaultConfiguration {
 		$this->configuration = apply_filters(
 			'amp_optimizer_config',
 			[
-				self::KEY_TRANSFORMERS => $transformers,
+				self::KEY_TRANSFORMERS              => $transformers,
 				Transformer\PreloadHeroImage::class => [
 					Configuration\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
 				],
@@ -100,11 +99,10 @@ final class AmpWPConfiguration extends DefaultConfiguration {
 	 * @return mixed Configuration value for the requested key.
 	 * @throws UnknownConfigurationKey If the key was not found.
 	 */
-	public function get($key)
-	{
+	public function get( $key ) {
 		$this->apply_filters();
 
-		return parent::get($key);
+		return parent::get( $key );
 	}
 
 	/**
@@ -113,10 +111,9 @@ final class AmpWPConfiguration extends DefaultConfiguration {
 	 * @param string $transformer FQCN of the transformer to get the configuration for.
 	 * @return TransformerConfiguration Transformer-specific configuration.
 	 */
-	public function getTransformerConfiguration($transformer)
-	{
+	public function getTransformerConfiguration( $transformer ) {
 		$this->apply_filters();
 
-		return parent::getTransformerConfiguration($transformer);
+		return parent::getTransformerConfiguration( $transformer );
 	}
 }
