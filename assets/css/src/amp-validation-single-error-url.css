@@ -27,7 +27,7 @@
 	border: none;
 	text-align: left;
 	line-height: 1.682;
-	color: #0073aa;
+	color: #1e1e1e;
 	cursor: pointer;
 }
 
@@ -50,15 +50,6 @@
 
 tr.expanded .single-url-detail-toggle::after {
 	transform: rotate(180deg);
-}
-
-/** Striped table overrides. */
-table.striped > tbody > tr.odd {
-	background: #f9f9f9;
-}
-
-table.striped > tbody > tr.even {
-	background: #fff;
 }
 
 /** Hide original details content. */

@@ -6,6 +6,6 @@ import domReady from '@wordpress/dom-ready';
 /**
  * Internal dependencies
  */
-import setValidationErrorRowsSeenClass from './set-validation-error-rows-seen-class';
+import setValidationErrorRowsClasses from './set-validation-error-rows-classes';
 
-domReady( setValidationErrorRowsSeenClass );
+domReady( setValidationErrorRowsClasses );

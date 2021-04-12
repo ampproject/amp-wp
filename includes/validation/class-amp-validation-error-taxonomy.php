@@ -1844,7 +1844,7 @@ class AMP_Validation_Error_Taxonomy {
 				} else {
 					$content .= '<p>';
 					$content .= sprintf(
-						'<a href="%s">%s',
+						'<a class="row-title" href="%s">%s',
 						admin_url(
 							add_query_arg(
 								[

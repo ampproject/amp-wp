@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import setValidationErrorRowsSeenClass from './set-validation-error-rows-seen-class';
+import setValidationErrorRowsClasses from './set-validation-error-rows-classes';
 
 const OPEN_CLASS = 'is-open';
 
@@ -81,5 +81,5 @@ domReady( () => {
 			} );
 		} );
 
-	setValidationErrorRowsSeenClass();
+	setValidationErrorRowsClasses();
 } );

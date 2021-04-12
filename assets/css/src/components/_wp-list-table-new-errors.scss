@@ -1,0 +1,27 @@
+// Grey background and bold title to indicate new errors.
+.wp-list-table.table-view-list > tbody {
+
+	td,
+	.row-title {
+		color: #1e1e1e;
+	}
+
+	> tr {
+		&,
+		&.expanded + .details {
+			background: #fff;
+		}
+
+		&.new,
+		&.new.expanded + .details {
+			background: #f4f4f4;
+		}
+	}
+
+	> tr.new {
+		.row-title,
+		.column-primary > :first-child {
+			font-weight: 600;
+		}
+	}
+}
