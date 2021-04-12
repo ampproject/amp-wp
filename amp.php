@@ -64,6 +64,11 @@ $_amp_required_extensions = array(
 			'DOMXPath',
 		),
 	),
+	'filter' => array(
+		'functions' => array(
+			'filter_var',
+		),
+	),
 	// Required by PHP-CSS-Parser.
 	'iconv'  => array(
 		'functions' => array( 'iconv' ),
