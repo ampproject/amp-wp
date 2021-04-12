@@ -1,3 +1,7 @@
+@import './components/amp-stylesheet-list';
+@import './components/amp-stylesheet-summary';
+@import './components/wp-list-table-grid-lines';
+
 #col-left {
 	display: none;
 }
@@ -88,7 +92,7 @@ details[open] > .single-error-detail-summary::after {
 }
 
 dl.detailed dt {
-	font-weight: bold;
+	font-weight: 600;
 	margin-bottom: 0.5em;
 }
 
@@ -97,7 +101,7 @@ dl.detailed dd + dt {
 }
 
 dl.detailed .element-attributes th {
-	font-weight: bold;
+	font-weight: 600;
 	text-align: right;
 }
 
@@ -137,7 +141,7 @@ dl.detailed details > summary {
 
 .details-attributes__title {
 	margin-left: 0;
-	font-weight: bold;
+	font-weight: 600;
 }
 
 .details-attributes__list {
@@ -257,51 +261,6 @@ dl.detailed details > summary {
 	margin-left: 10px;
 }
 
-tr.expanded.new + tr > td:first-of-type,
-.wp-list-table > tbody > .new > td,
-.wp-list-table > tbody > .new > th {
-	background-color: #fef7f1;
-}
-
-tr.expanded + tr > td:first-of-type {
-	border-left: solid 4px transparent;
-}
-
-tr.expanded.new + tr > td:first-of-type,
-.wp-list-table .new th.check-column {
-	border-left: 4px solid #d54e21;
-}
-
-.wp-list-table th.column-error_code:first-child,
-.wp-list-table td.column-error_code:first-child {
-	border-left: 4px solid transparent;
-}
-
-.wp-list-table .new td.column-error_code:first-child {
-	border-left: 4px solid #d54e21;
-}
-
-.wp-list-table > tbody > tr > th,
-.wp-list-table > tbody > tr > td {
-	box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-}
-
-.wp-list-table > tbody > tr:last-child > th,
-.wp-list-table > tbody > tr.expanded > th,
-.wp-list-table > tbody > tr:last-child > td,
-.wp-list-table > tbody > tr.expanded > td {
-	box-shadow: none;
-}
-
-.wp-list-table > tbody > tr.unapproved + tr.approved th,
-.wp-list-table > tbody > tr.unapproved + tr.approved td {
-	border-top: 1px solid rgba(0, 0, 0, 0.03);
-}
-
-body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
-	margin-left: 4px;
-}
-
 .row-actions .amp_validation_error_accept > a {
 	color: #006505;
 }
@@ -369,145 +328,6 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 }
 
 .validation-error-sources th {
-	font-weight: bold;
+	font-weight: 600;
 	text-align: right;
-}
-
-/* Stylesheets */
-.amp-stylesheet-summary {
-	margin-bottom: 1em;
-}
-
-.amp-stylesheet-summary span.amp-icon {
-	font-size: 16px;
-	vertical-align: middle;
-}
-
-.amp-stylesheet-summary th {
-	text-align: right;
-	padding-right: 1ex;
-	font-weight: normal;
-}
-
-.amp-stylesheet-summary td {
-	font-weight: bold;
-	text-align: right;
-}
-
-.stylesheet-details {
-	display: none;
-}
-
-.stylesheet.expanded + .stylesheet-details {
-	display: table-row;
-}
-
-.stylesheet-details dl.detailed {
-	margin-bottom: 0;
-	padding-bottom: 0;
-}
-
-.shaken-stylesheet {
-	display: block;
-	white-space: pre-wrap;
-	tab-size: 4;
-	background: none;
-	padding: 0;
-	margin: 0;
-	line-height: 1;
-}
-
-.shaken-stylesheet del,
-.shaken-stylesheet ins {
-	display: block;
-	text-decoration: none;
-	padding: 1px 4px 1px 8px;
-	border-left: solid 4px #bbb;
-}
-
-.shaken-stylesheet.removed-styles-shown del {
-	border-left-color: #f00;
-	color: #888;
-	background: #fff9f9;
-}
-
-.shaken-stylesheet.removed-styles-shown ins {
-	border-left-color: #008000;
-}
-
-.shaken-stylesheet:not(.removed-styles-shown) del {
-	display: none;
-}
-
-.shaken-stylesheet .declaration-block {
-	display: block;
-	margin-top: 1em;
-	margin-bottom: 1em;
-}
-
-#amp_stylesheets .amp-stylesheet-list th {
-	overflow-wrap: normal;
-}
-
-#amp_stylesheets .column-stylesheet_order {
-	width: 5%;
-	text-align: right;
-}
-
-#amp_stylesheets .column-original_size,
-#amp_stylesheets .column-minified,
-#amp_stylesheets .column-final_size,
-#amp_stylesheets .column-percentage {
-	width: 8%;
-	text-align: right;
-}
-
-#amp_stylesheets .column-markup {
-	width: 10%;
-	white-space: nowrap;
-}
-
-#amp_stylesheets .column-origin {
-	width: 15%;
-}
-
-#amp_stylesheets .column-stylesheet_expand {
-	width: 12px;
-}
-
-#amp_stylesheets .column-priority {
-	width: 7%;
-	text-align: right;
-}
-
-#amp_stylesheets .column-stylesheet_included {
-	width: 5%;
-	white-space: nowrap;
-	text-align: center;
-}
-
-#amp_stylesheets .column-percentage {
-	text-align: center;
-}
-
-#amp_stylesheets .column-source {
-	width: 25%;
-}
-
-.toggle-stylesheet-details {
-	border: none;
-	background: none;
-	cursor: pointer;
-}
-
-.toggle-stylesheet-details::after {
-	display: block;
-}
-
-.stylesheet-origin-markup {
-	padding: 0;
-}
-
-#amp_stylesheets label {
-	user-select: none;
 }

@@ -353,7 +353,7 @@ const styles = {
 		'amp-mobile-version-switcher': './assets/css/src/amp-mobile-version-switcher.css',
 		'amp-playlist-shortcode': './assets/css/src/amp-playlist-shortcode.css',
 		'amp-post-meta-box': './assets/css/src/amp-post-meta-box.css',
-		'amp-validation-error-taxonomy': './assets/css/src/amp-validation-error-taxonomy.css',
+		'amp-validation-error-taxonomy': './assets/css/src/amp-validation-error-taxonomy.scss',
 		'amp-validation-single-error-url': './assets/css/src/amp-validation-single-error-url.css',
 		'amp-validation-tooltips': './assets/css/src/amp-validation-tooltips.css',
 	},

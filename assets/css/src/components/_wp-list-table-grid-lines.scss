@@ -1,0 +1,15 @@
+// Grid lines between table rows.
+.wp-list-table.table-view-list > tbody > tr {
+	> td,
+	> th {
+		box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+	}
+
+	&:last-child,
+	&.expanded {
+		> td,
+		> th {
+			box-shadow: none;
+		}
+	}
+}
