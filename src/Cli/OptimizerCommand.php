@@ -23,34 +23,32 @@ use WP_CLI;
  * @since 2.1.0
  * @internal
  */
-final class OptimizerCommand implements Service, CliCommand
-{
+final class OptimizerCommand implements Service, CliCommand {
+
 
 	/**
 	 * Optimizer service instance to use.
 	 *
 	 * @var OptimizerService
 	 */
-	private $optimizerService;
+	private $optimizer_service;
 
 	/**
 	 * Get the name under which to register the CLI command.
 	 *
 	 * @return string The name under which to register the CLI command.
 	 */
-	public static function get_command_name()
-	{
+	public static function get_command_name() {
 		return 'amp optimizer';
 	}
 
 	/**
 	 * OptimizerCommand constructor.
 	 *
-	 * @param OptimizerService $optimizerService Optimizer service instance to use.
+	 * @param OptimizerService $optimizer_service Optimizer service instance to use.
 	 */
-	public function __construct(OptimizerService $optimizerService)
-	{
-		$this->optimizerService = $optimizerService;
+	public function __construct( OptimizerService $optimizer_service ) {
+		$this->optimizer_service = $optimizer_service;
 	}
 
 	/**
@@ -70,8 +68,7 @@ final class OptimizerCommand implements Service, CliCommand
 	 * @param array $assoc_args Associative array of associative arguments.
 	 * @throws WP_CLI\ExitException If the requested file could not be read.
 	 */
-	public function optimize( $args, $assoc_args )
-	{
+	public function optimize( $args, $assoc_args ) {
 		$file = '-';
 
 		if ( count( $args ) > 0 ) {
@@ -79,7 +76,7 @@ final class OptimizerCommand implements Service, CliCommand
 		}
 
 		if (
-			$file !== '-'
+			'-' !== $file
 			&&
 			(
 				! is_file( $file )
@@ -90,15 +87,15 @@ final class OptimizerCommand implements Service, CliCommand
 			WP_CLI::error( "Could not read file: '{$file}'." );
 		}
 
-		if ( $file === '-' ) {
+		if ( '-' === $file ) {
 			$file = 'php://stdin';
 		}
 
-		$html          = file_get_contents( $file );
-		$errors        = new ErrorCollection();
-		$optimizedHtml = $this->optimizerService->optimizeHtml( $html, $errors );
+		$html           = file_get_contents( $file );
+		$errors         = new ErrorCollection();
+		$optimized_html = $this->optimizer_service->optimizeHtml( $html, $errors );
 
-		WP_CLI::line( $optimizedHtml );
+		WP_CLI::line( $optimized_html );
 
 		/** @var Error $error */
 		foreach ( $errors as $error ) {

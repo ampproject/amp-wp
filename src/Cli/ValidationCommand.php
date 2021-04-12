@@ -102,8 +102,7 @@ final class ValidationCommand implements Service, CliCommand {
 	 *
 	 * @return string The name under which to register the CLI command.
 	 */
-	public static function get_command_name()
-	{
+	public static function get_command_name() {
 		return 'amp validation';
 	}
 

@@ -41,8 +41,8 @@ final class AmpSchemaOrgMetadataConfiguration extends BaseTransformerConfigurati
 
 		// In WP-CLI context, the global query object can be null, which
 		// throws a fatal in get_queried_object().
-		if ( $wp_query === null ) {
-			$wp_query = new WP_Query();
+		if ( null === $wp_query ) {
+			$wp_query = new WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
 		return [
