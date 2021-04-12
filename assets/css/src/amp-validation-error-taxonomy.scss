@@ -45,7 +45,6 @@ th.column-included {
 }
 
 details[open] .details-attributes__summary {
-	font-weight: 600;
 	margin-bottom: 15px;
 }
 
@@ -67,7 +66,7 @@ details[open] .details-attributes__summary {
 .toggle-stylesheet-details::after {
 	order: 99;
 	width: 12px;
-	height: 12px;
+	height: 6px;
 	background-image: url("../images/down-triangle.svg");
 	background-size: cover;
 	background-position: center;
@@ -189,7 +188,7 @@ dl.detailed details > summary {
 .column-details .error-details-toggle::before,
 .column-details .error-details-toggle::after {
 	width: 12px;
-	height: 10px;
+	height: 6px;
 	background-image: url("../images/down-triangle.svg");
 	background-size: cover;
 	background-position: center;
