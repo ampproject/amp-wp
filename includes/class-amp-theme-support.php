@@ -8,9 +8,9 @@
 use AmpProject\Amp;
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
+use AmpProject\AmpWP\Optimizer\OptimizerService;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Transformer;
@@ -18,9 +18,6 @@ use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Optimizer;
-use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
-use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
-use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\RequestDestination;
 use AmpProject\Tag;
 
@@ -2069,7 +2066,7 @@ class AMP_Theme_Support {
 	 * Optimizer instance to use.
 	 *
 	 * @param array $args Associative array of arguments to pass into the transformation engine.
-	 * @return Optimizer\TransformationEngine Optimizer transformation engine to use.
+	 * @return OptimizerService Optimizer transformation engine to use.
 	 */
 	private static function get_optimizer( $args ) {
 		add_filter(
