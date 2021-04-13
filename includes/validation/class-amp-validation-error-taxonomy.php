@@ -1906,7 +1906,7 @@ class AMP_Validation_Error_Taxonomy {
 				$is_removed = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
 				if ( 'post.php' === $pagenow ) {
-					$status_select_name  = sprintf(
+					$status_select_name = sprintf(
 						'%s[%s][%s]',
 						AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY,
 						$term->slug,
