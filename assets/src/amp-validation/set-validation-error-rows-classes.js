@@ -15,9 +15,16 @@ export default function() {
 			row.classList.toggle( 'new', Boolean( parseInt( input.value ) ) );
 		}
 
-		const select = row.querySelector( '.amp-validation-error-status' );
-		if ( select ) {
-			row.classList.toggle( 'kept', select.value === '2' ); // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS.
+		const statusField = row.querySelector( '.amp-validation-error-status' );
+
+		if ( ! statusField ) {
+			return;
+		}
+
+		if ( statusField.tagName === 'SELECT' ) {
+			row.classList.toggle( 'kept', statusField.value === '2' ); // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS.
+		} else {
+			row.classList.toggle( 'kept', statusField.value === '0' ); // '0' -> kept; '1' -> removed
 		}
 	} );
 }
