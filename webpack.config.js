@@ -401,11 +401,9 @@ const styles = {
 const extractChunkNamesForStylesheets = ( entries ) =>
 	entries
 		.map( ( entryPath ) => {
-			const match = entryPath.match( /^.*\/(.*)\..*$/ );
-
-			return match && match[ 1 ] ? `${ match[ 1 ] }.js` : null;
-		} )
-		.filter( Boolean );
+			const match = entryPath.match( /([^\/]+)\.s?css$/ );
+			return `${ match[ 1 ] }.js`;
+		} );
 
 /**
  * Do not generate empty JS chunks for stylesheets.

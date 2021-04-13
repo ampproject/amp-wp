@@ -8,7 +8,13 @@ describe( 'Enable AMP Toggle', () => {
 		await deactivatePlugin( 'gutenberg' );
 		await createNewPost();
 
-		await expect( page ).toMatchElement( 'label[for="amp-enabled"]', { text: 'Enable AMP' } );
+		// Open the AMP panel if collapsed.
+		const [ collapsedPanel ] = await page.$x( '//button[ contains( @class, "components-panel__body-toggle" ) and @aria-expanded="false" and contains( text(), "AMP" ) ]' );
+		if ( collapsedPanel ) {
+			await collapsedPanel.click();
+		}
+
+		await expect( page ).toMatchElement( 'label[for^="amp-toggle-"]', { text: 'Enable AMP' } );
 
 		await activatePlugin( 'gutenberg' );
 	} );
