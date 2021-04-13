@@ -14,7 +14,7 @@ export function hasThemeSupport( state ) {
  *
  * @param {Object} state The editor state.
  *
- * @return {string} Whether the DevTools are enabled.
+ * @return {boolean} Whether the DevTools are enabled.
  */
 export function isDevToolsEnabled( state ) {
 	return state.isDevToolsEnabled;
