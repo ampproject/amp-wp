@@ -298,9 +298,7 @@ jobs:
         run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
       - name: Build plugin
-        run: |
-          npm run build:js
-          npm run build:css
+        run: npm run build:js
 
       - name: Start Docker environment
         run: npm run env:start
@@ -441,9 +439,7 @@ jobs:
           CI: true
 
       - name: Build plugin
-        run: |
-          npm run build:js
-          npm run build:css
+        run: npm run build:js
 
       # Scan the logs for failing tests and surface that information by creating annotations and log file decorations.
       - name: Setup problem matcher to provide annotations for PHPUnit
