@@ -1,4 +1,3 @@
-
 /**
  * Set the initial class names on the errors rows.
  *
