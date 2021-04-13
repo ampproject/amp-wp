@@ -34,11 +34,13 @@ export default function AMPDocumentStatusNotification() {
 		isPostDirty,
 		maybeIsPostDirty,
 		keptMarkupValidationErrorCount,
+		reviewedValidationErrorCount,
 		unreviewedValidationErrorCount,
 	} = useSelect( ( select ) => ( {
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
 		maybeIsPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getMaybeIsPostDirty(),
 		keptMarkupValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getKeptMarkupValidationErrors().length,
+		reviewedValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getReviewedValidationErrors().length,
 		unreviewedValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors().length,
 	} ), [] );
 
@@ -183,9 +185,33 @@ export default function AMPDocumentStatusNotification() {
 			</PanelRow>
 			<SidebarNotification
 				icon={ <StatusIcon /> }
-				message={ __( 'Your AMP page is working. All issues are reviewed or removed.', 'amp' ) }
+				message={
+					reviewedValidationErrorCount > 0
+						? sprintf(
+							/* translators: %d is count of unreviewed validation error */
+							_n(
+								'Your AMP page is working. %d issue was reviewed.',
+								'Your AMP page is working. %d issues were reviewed.',
+								reviewedValidationErrorCount,
+								'amp',
+							),
+							reviewedValidationErrorCount,
+						)
+						: __( 'Your AMP page has no validation issues.', 'amp' )
+				}
 				isSmall={ true }
 			/>
+			{ reviewedValidationErrorCount > 0 && (
+				<PanelRow>
+					<Button
+						onClick={ openBlockValidationSidebar }
+						isSecondary={ true }
+						isSmall={ true }
+					>
+						{ __( 'Open AMP Validation sidebar', 'amp' ) }
+					</Button>
+				</PanelRow>
+			) }
 		</>
 	);
 }
