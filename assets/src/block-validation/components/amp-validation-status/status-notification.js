@@ -102,11 +102,12 @@ export default function AMPValidationStatusNotification() {
 			<SidebarNotification
 				icon={ <StatusIcon broken={ true } /> }
 				message={
+					// @todo De-duplicate with what is in AMPDocumentStatusNotification.
 					sprintf(
 						/* translators: %d is count of unreviewed validation error */
 						_n(
-							'AMP is enabled, but %d issue needs review.',
-							'AMP is enabled, but %d issues need review.',
+							'AMP is valid, but %d issue needs review.',
+							'AMP is valid, but %d issues need review.',
 							unreviewedValidationErrorCount,
 							'amp',
 						),
@@ -126,11 +127,12 @@ export default function AMPValidationStatusNotification() {
 		return <SidebarNotification
 			icon={ <StatusIcon /> }
 			message={
+				// @todo De-duplicate with what is in AMPDocumentStatusNotification.
 				sprintf(
 					/* translators: %d is count of unreviewed validation error */
 					_n(
-						'AMP is enabled, and %d validation issue has been reviewed.',
-						'AMP is enabled, and %d validation issues have been reviewed.',
+						'AMP is valid. %d issue was reviewed.',
+						'AMP is valid. %d issues were reviewed.',
 						validationErrorCount,
 						'amp',
 					),
@@ -145,10 +147,11 @@ export default function AMPValidationStatusNotification() {
 		/>;
 	}
 
+	// @todo De-duplicate with what is in AMPDocumentStatusNotification.
 	return (
 		<SidebarNotification
 			icon={ <StatusIcon /> }
-			message={ __( 'AMP is enabled. There are no validation issues.', 'amp' ) }
+			message={ __( 'No AMP validation issues detected.', 'amp' ) }
 		/>
 	);
 }

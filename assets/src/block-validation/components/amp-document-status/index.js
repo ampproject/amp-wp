@@ -81,8 +81,8 @@ export default function AMPDocumentStatusNotification() {
 				<SidebarNotification
 					icon={ <BellIcon /> }
 					message={ maybeIsPostDirty
-						? __( 'Page content may have changed. Trigger page validation in the AMP Validation sidebar.', 'amp' )
-						: __( 'Page content has changed. Trigger page validation in the AMP Validation sidebar.', 'amp' ) }
+						? __( 'Content may have changed. Trigger validation in the AMP Validation sidebar.', 'amp' )
+						: __( 'Content has changed. Trigger validation in the AMP Validation sidebar.', 'amp' ) }
 					isSmall={ true }
 				/>
 				<PanelRow>
@@ -91,7 +91,7 @@ export default function AMPDocumentStatusNotification() {
 						isSecondary={ true }
 						isSmall={ true }
 					>
-						{ __( 'Open AMP Validation sidebar', 'amp' ) }
+						{ __( 'Open AMP Validation', 'amp' ) }
 					</Button>
 				</PanelRow>
 			</>
@@ -147,11 +147,12 @@ export default function AMPDocumentStatusNotification() {
 				<SidebarNotification
 					icon={ <StatusIcon broken={ true } /> }
 					message={
+						// @todo De-duplicate with what is in AMPValidationStatusNotification.
 						sprintf(
 							/* translators: %d is count of unreviewed validation error */
 							_n(
-								'Your AMP page is working, but %d issue needs review.',
-								'Your AMP page is working, but %d issues need review.',
+								'AMP is valid, but %d issue needs review.',
+								'AMP is valid, but %d issues need review.',
 								unreviewedValidationErrorCount,
 								'amp',
 							),
@@ -186,18 +187,19 @@ export default function AMPDocumentStatusNotification() {
 			<SidebarNotification
 				icon={ <StatusIcon /> }
 				message={
+					// @todo De-duplicate with what is in AMPValidationStatusNotification.
 					reviewedValidationErrorCount > 0
 						? sprintf(
 							/* translators: %d is count of unreviewed validation error */
 							_n(
-								'Your AMP page is working. %d issue was reviewed.',
-								'Your AMP page is working. %d issues were reviewed.',
+								'AMP is valid. %d issue was reviewed.',
+								'AMP is valid. %d issues were reviewed.',
 								reviewedValidationErrorCount,
 								'amp',
 							),
 							reviewedValidationErrorCount,
 						)
-						: __( 'Your AMP page has no validation issues.', 'amp' )
+						: __( 'No AMP validation issues detected.', 'amp' )
 				}
 				isSmall={ true }
 			/>
@@ -208,7 +210,7 @@ export default function AMPDocumentStatusNotification() {
 						isSecondary={ true }
 						isSmall={ true }
 					>
-						{ __( 'Open AMP Validation sidebar', 'amp' ) }
+						{ __( 'Open AMP Validation', 'amp' ) }
 					</Button>
 				</PanelRow>
 			) }

@@ -46,9 +46,9 @@ export function useErrorsFetchingStateChanges() {
 	 */
 	useEffect( () => {
 		if ( didFetchErrors ) {
-			setFetchingErrorsMessage( __( 'Re-validating page content.', 'amp' ) );
+			setFetchingErrorsMessage( __( 'Re-validating content.', 'amp' ) );
 		} else if ( isEditedPostNew || wasEditedPostNew ) {
-			setFetchingErrorsMessage( __( 'Validating page content.', 'amp' ) );
+			setFetchingErrorsMessage( __( 'Validating content.', 'amp' ) );
 		} else if ( isFetchingErrors ) {
 			setFetchingErrorsMessage( __( 'Loading…', 'amp' ) );
 		} else {
