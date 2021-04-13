@@ -130,7 +130,7 @@ describe( 'AMPValidationStatusNotification', () => {
 		} );
 
 		expect( container.innerHTML ).toMatchSnapshot();
-		expect( container.innerHTML ).toContain( 'AMP is enabled, but 3 issues need review.' );
+		expect( container.innerHTML ).toContain( 'AMP is valid, but 3 issues need review.' );
 		expect( container.querySelector( 'a[href="http://example.com"]' ) ).not.toBeNull();
 	} );
 
@@ -144,7 +144,7 @@ describe( 'AMPValidationStatusNotification', () => {
 		} );
 
 		expect( container.innerHTML ).toMatchSnapshot();
-		expect( container.innerHTML ).toContain( 'AMP is enabled, and 1 validation issue has been reviewed.' );
+		expect( container.innerHTML ).toContain( 'AMP is valid. 1 issue was reviewed.' );
 		expect( container.querySelector( 'a[href="http://example.com"]' ) ).not.toBeNull();
 	} );
 
@@ -156,7 +156,7 @@ describe( 'AMPValidationStatusNotification', () => {
 		} );
 
 		expect( container.innerHTML ).toMatchSnapshot();
-		expect( container.innerHTML ).toContain( 'AMP is enabled. There are no validation issues.' );
+		expect( container.innerHTML ).toContain( 'No AMP validation issues detected.' );
 	} );
 } );
 

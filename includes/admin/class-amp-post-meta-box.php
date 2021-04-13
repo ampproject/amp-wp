@@ -258,6 +258,7 @@ class AMP_Post_Meta_Box {
 			'ampPreviewLink'             => $is_standard_mode ? null : amp_add_paired_endpoint( get_preview_post_link( $post ) ),
 			'errorMessages'              => $this->get_error_messages( $status_and_errors['errors'] ),
 			'hasThemeSupport'            => ! amp_is_legacy(),
+			'isDevToolsEnabled'          => Services::get( 'dev_tools.user_access' )->is_user_enabled(),
 			'isStandardMode'             => $is_standard_mode,
 			'featuredImageMinimumWidth'  => $featured_image_minimum_width,
 			'featuredImageMinimumHeight' => $featured_image_minimum_height,
