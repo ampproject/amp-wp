@@ -15,6 +15,7 @@ final class IconTest extends TestCase {
 	public function get_icon_types() {
 		$types = [
 			'invalid',
+			'removed',
 			'link',
 			'valid',
 			'warning',
@@ -33,6 +34,7 @@ final class IconTest extends TestCase {
 	 * @dataProvider get_icon_types
 	 * @covers ::__construct()
 	 * @covers ::invalid()
+	 * @covers ::removed()
 	 * @covers ::link()
 	 * @covers ::valid()
 	 * @covers ::warning()

@@ -22,6 +22,11 @@ final class Icon {
 	const INVALID = 'amp-invalid';
 
 	/**
+	 * Indicates there are validation errors for the AMP page that were removed.
+	 */
+	const REMOVED = 'amp-removed';
+
+	/**
 	 * Indicate an AMP version of the page is available.
 	 */
 	const LINK = 'amp-link';
@@ -64,6 +69,15 @@ final class Icon {
 	 */
 	public static function invalid() {
 		return new self( self::INVALID );
+	}
+
+	/**
+	 * Removed icon.
+	 *
+	 * @return Icon
+	 */
+	public static function removed() {
+		return new self( self::REMOVED );
 	}
 
 	/**
@@ -111,11 +125,12 @@ final class Icon {
 		// When updating the colors here, also do so for 'assets/css/src/amp-icons.css'.
 		switch ( $this->icon ) {
 			case self::INVALID:
-				return '#dc3232';
+				return '#bb532e';
 			case self::LINK:
 				return '#00a0d2';
 			case self::VALID:
-				return '#46b450';
+			case self::REMOVED:
+				return '#489697';
 			case self::WARNING:
 				return '#ffc733';
 			default:

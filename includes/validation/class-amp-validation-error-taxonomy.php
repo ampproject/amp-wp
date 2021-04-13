@@ -3446,7 +3446,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function get_status_text_with_icon( $sanitization, $include_reviewed = false ) {
 		if ( $sanitization['term_status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
-			$icon = Icon::valid();
+			$icon = Icon::removed();
 			$text = __( 'Removed', 'amp' );
 		} else {
 			$icon = Icon::invalid();
