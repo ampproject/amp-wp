@@ -107,7 +107,7 @@ describe( 'AMPDocumentStatusNotification', () => {
 		} );
 
 		expect( container.innerHTML ).toContain( 'Enable AMP' );
-		expect( container.innerHTML ).toContain( 'Page content has changed.' );
+		expect( container.innerHTML ).toContain( 'Content has changed.' );
 		expect( container.querySelector( 'svg' ) ).not.toBeNull();
 		expect( container.querySelector( 'button' ).textContent ).toContain( 'Open' );
 
@@ -120,7 +120,7 @@ describe( 'AMPDocumentStatusNotification', () => {
 			render( <AMPDocumentStatusNotification />, container );
 		} );
 
-		expect( container.innerHTML ).toContain( 'Page content may have changed.' );
+		expect( container.innerHTML ).toContain( 'Content may have changed.' );
 
 		// Simulate button click.
 		container.querySelector( 'button' ).click();
@@ -153,7 +153,7 @@ describe( 'AMPDocumentStatusNotification', () => {
 		} );
 
 		expect( container.innerHTML ).toContain( 'Enable AMP' );
-		expect( container.innerHTML ).toContain( 'Your AMP page is working, but 1 issue needs review.' );
+		expect( container.innerHTML ).toContain( 'AMP is valid, but 1 issue needs review.' );
 		expect( container.querySelector( 'svg' ) ).not.toBeNull();
 		expect( container.querySelector( 'button' ).textContent ).toContain( 'Review' );
 	} );
@@ -166,7 +166,7 @@ describe( 'AMPDocumentStatusNotification', () => {
 		} );
 
 		expect( container.innerHTML ).toContain( 'Enable AMP' );
-		expect( container.innerHTML ).toContain( 'Your AMP page is working. All issues are reviewed or removed.' );
+		expect( container.innerHTML ).toContain( 'No AMP validation issues detected.' );
 		expect( container.querySelector( 'svg' ) ).not.toBeNull();
 		expect( container.querySelector( 'button' ) ).toBeNull();
 	} );

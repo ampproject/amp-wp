@@ -44,8 +44,8 @@ export default function AMPRevalidateNotification() {
 		<SidebarNotification
 			icon={ <BellIcon /> }
 			message={ maybeIsPostDirty
-				? __( 'Page content may have changed.', 'amp' )
-				: __( 'Page content has changed.', 'amp' ) }
+				? __( 'Content may have changed.', 'amp' )
+				: __( 'Content has changed.', 'amp' ) }
 			action={ isDraft ? (
 				<Button
 					isLink
