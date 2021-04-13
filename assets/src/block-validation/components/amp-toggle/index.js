@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { FormToggle, PanelRow } from '@wordpress/components';
+import { FormToggle } from '@wordpress/components';
 import { useRef } from '@wordpress/element';
 
 /**
@@ -23,7 +23,7 @@ export default function AMPToggle() {
 	const htmlId = useRef( `amp-toggle-${ Math.random().toString( 32 ).substr( -4 ) }` );
 
 	return (
-		<PanelRow>
+		<>
 			<label htmlFor={ htmlId.current }>
 				{ __( 'Enable AMP', 'amp' ) }
 			</label>
@@ -32,6 +32,6 @@ export default function AMPToggle() {
 				onChange={ toggleAMP }
 				id={ htmlId.current }
 			/>
-		</PanelRow>
+		</>
 	);
 }

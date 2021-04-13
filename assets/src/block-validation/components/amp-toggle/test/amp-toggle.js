@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import AMPToggle from '../amp-toggle';
+import AMPToggle from '../index';
 import { useAMPDocumentToggle } from '../../../hooks/use-amp-document-toggle';
 
 jest.mock( '../../../hooks/use-amp-document-toggle', () => ( { useAMPDocumentToggle: jest.fn() } ) );

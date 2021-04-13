@@ -10,6 +10,17 @@ export function hasThemeSupport( state ) {
 }
 
 /**
+ * Returns whether the current user has the AMP DevTools enabled.
+ *
+ * @param {Object} state The editor state.
+ *
+ * @return {string} Whether the DevTools are enabled.
+ */
+export function isDevToolsEnabled( state ) {
+	return state.isDevToolsEnabled;
+}
+
+/**
  * Returns whether the current site is in Standard mode (AMP-first) as opposed to Transitional (paired).
  *
  * @param {Object} state Editor state.

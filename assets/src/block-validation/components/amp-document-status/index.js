@@ -16,7 +16,7 @@ import { SidebarNotification } from '../sidebar-notification';
 import { useAMPDocumentToggle } from '../../hooks/use-amp-document-toggle';
 import { useErrorsFetchingStateChanges } from '../../hooks/use-errors-fetching-state-changes';
 import { PLUGIN_NAME, SIDEBAR_NAME } from '../../plugins/amp-block-validation';
-import AMPToggle from './amp-toggle';
+import AMPToggle from '../amp-toggle';
 
 /**
  * AMP document status notification component.
@@ -44,14 +44,18 @@ export default function AMPDocumentStatusNotification() {
 
 	if ( ! isAMPEnabled ) {
 		return (
-			<AMPToggle />
+			<PanelRow>
+				<AMPToggle />
+			</PanelRow>
 		);
 	}
 
 	if ( isFetchingErrors ) {
 		return (
 			<>
-				<AMPToggle />
+				<PanelRow>
+					<AMPToggle />
+				</PanelRow>
 				<SidebarNotification
 					message={ fetchingErrorsMessage }
 					isLoading={ true }
@@ -69,7 +73,9 @@ export default function AMPDocumentStatusNotification() {
 	if ( isPostDirty || maybeIsPostDirty ) {
 		return (
 			<>
-				<AMPToggle />
+				<PanelRow>
+					<AMPToggle />
+				</PanelRow>
 				<SidebarNotification
 					icon={ <BellIcon /> }
 					message={ maybeIsPostDirty
@@ -93,7 +99,9 @@ export default function AMPDocumentStatusNotification() {
 	if ( keptMarkupValidationErrorCount > 0 ) {
 		return (
 			<>
-				<AMPToggle />
+				<PanelRow>
+					<AMPToggle />
+				</PanelRow>
 				<SidebarNotification
 					icon={ <AMPValidationErrorsKeptIcon /> }
 					message={
@@ -131,7 +139,9 @@ export default function AMPDocumentStatusNotification() {
 	if ( unreviewedValidationErrorCount > 0 ) {
 		return (
 			<>
-				<AMPToggle />
+				<PanelRow>
+					<AMPToggle />
+				</PanelRow>
 				<SidebarNotification
 					icon={ <StatusIcon broken={ true } /> }
 					message={
@@ -168,7 +178,9 @@ export default function AMPDocumentStatusNotification() {
 
 	return (
 		<>
-			<AMPToggle />
+			<PanelRow>
+				<AMPToggle />
+			</PanelRow>
 			<SidebarNotification
 				icon={ <StatusIcon /> }
 				message={ __( 'Your AMP page is working. All issues are reviewed or removed.', 'amp' ) }
