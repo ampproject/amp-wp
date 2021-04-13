@@ -371,7 +371,7 @@ const styles = {
 				 */
 				if ( cssLoader ) {
 					cssLoader.options = {
-						...cssLoader?.options,
+						...cssLoader.options,
 						url: false,
 					};
 				}
