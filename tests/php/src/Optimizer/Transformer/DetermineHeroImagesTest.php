@@ -1,6 +1,6 @@
 <?php
 
-namespace AmpProject\AmpWP\Tests\Transformer;
+namespace AmpProject\AmpWP\Tests\Optimizer\Transformer;
 
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\ErrorComparison;
