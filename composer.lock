@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1efdcf33d1b6d08088d44841ff086b50",
+    "content-hash": "b20118f8fc191f3d41e6cd1c46eae8f5",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "dev-update/hero-image-ssr",
+            "version": "0.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "7f57154ea8bc0d2a82d02d580adbce7a57a4b5e0"
+                "reference": "aab8738f43c76f013dcd81eb36b7e95144371a51"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/7f57154ea8bc0d2a82d02d580adbce7a57a4b5e0",
-                "reference": "7f57154ea8bc0d2a82d02d580adbce7a57a4b5e0",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/aab8738f43c76f013dcd81eb36b7e95144371a51",
+                "reference": "aab8738f43c76f013dcd81eb36b7e95144371a51",
                 "shasum": ""
             },
             "require": {
@@ -69,9 +69,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/update/hero-image-ssr"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.4.0"
             },
-            "time": "2021-04-11T06:10:25+00:00"
+            "time": "2021-04-13T17:38:47+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -2987,12 +2987,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "aa48fe959b0236eede9c51a38f47df2bb81ef137"
+                "reference": "7cc7126a8a1c71197c85c04b147b24257393cd11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/aa48fe959b0236eede9c51a38f47df2bb81ef137",
-                "reference": "aa48fe959b0236eede9c51a38f47df2bb81ef137",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/7cc7126a8a1c71197c85c04b147b24257393cd11",
+                "reference": "7cc7126a8a1c71197c85c04b147b24257393cd11",
                 "shasum": ""
             },
             "conflict": {
@@ -3155,6 +3155,7 @@
                 "propel/propel1": ">=1,<=1.7.1",
                 "pterodactyl/panel": "<0.7.19|>=1-rc.0,<=1-rc.6",
                 "pusher/pusher-php-server": "<2.2.1",
+                "pwweb/laravel-core": "<=0.3.6-beta",
                 "rainlab/debugbar-plugin": "<3.1",
                 "robrichards/xmlseclibs": "<3.0.4",
                 "sabberworm/php-css-parser": ">=1,<1.0.1|>=2,<2.0.1|>=3,<3.0.1|>=4,<4.0.1|>=5,<5.0.9|>=5.1,<5.1.3|>=5.2,<5.2.1|>=6,<6.0.2|>=7,<7.0.4|>=8,<8.0.1|>=8.1,<8.1.1|>=8.2,<8.2.1|>=8.3,<8.3.1",
@@ -3162,8 +3163,9 @@
                 "scheb/two-factor-bundle": ">=0,<3.26|>=4,<4.11",
                 "sensiolabs/connect": "<4.2.3",
                 "serluck/phpwhois": "<=4.2.6",
-                "shopware/core": "<=6.3.4",
-                "shopware/platform": "<=6.3.5.1",
+                "shopware/core": "<=6.3.5.2",
+                "shopware/platform": "<=6.3.5.2",
+                "shopware/production": "<=6.3.5.2",
                 "shopware/shopware": "<5.6.9",
                 "silverstripe/admin": ">=1.0.3,<1.0.4|>=1.1,<1.1.1",
                 "silverstripe/assets": ">=1,<1.4.7|>=1.5,<1.5.2",
@@ -3319,7 +3321,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-09T08:01:23+00:00"
+            "time": "2021-04-13T16:02:59+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
@@ -5951,7 +5953,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "ampproject/amp-toolbox": 20,
         "sabberworm/php-css-parser": 20,
         "roave/security-advisories": 20
     },
