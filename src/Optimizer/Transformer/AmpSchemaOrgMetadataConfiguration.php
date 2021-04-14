@@ -5,11 +5,11 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Transformer;
+namespace AmpProject\AmpWP\Optimizer\Transformer;
 
 use AmpProject\Optimizer\Configuration\BaseTransformerConfiguration;
 use AmpProject\Optimizer\Exception\InvalidConfigurationValue;
-use AmpProject\Optimizer\Transformer\TransformedIdentifier;
+use WP_Query;
 
 /**
  * Configuration for the AmpSchemaOrgMetadata transformer.
@@ -37,6 +37,14 @@ final class AmpSchemaOrgMetadataConfiguration extends BaseTransformerConfigurati
 	 * @return array Associative array of allowed keys and their respective default values.
 	 */
 	protected function getAllowedKeys() {
+		global $wp_query;
+
+		// In WP-CLI context, the global query object can be null, which
+		// throws a fatal in get_queried_object().
+		if ( null === $wp_query ) {
+			$wp_query = new WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
 		return [
 			self::METADATA => (array) amp_get_schemaorg_metadata(),
 		];

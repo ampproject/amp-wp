@@ -12,11 +12,18 @@ use AmpProject\AmpWP\BackgroundTask;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation;
+use AmpProject\AmpWP\Optimizer\AmpWPConfiguration;
+use AmpProject\AmpWP\Optimizer\OptimizerService;
+use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
+use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
+use AmpProject\Optimizer;
 
-use function is_user_logged_in;
+use AmpProject\RemoteGetRequest;
+use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
+use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
 
 /**
  * The AmpWpPlugin class is the composition root of the plugin.
@@ -69,6 +76,10 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.validation_counts'           => Admin\ValidationCounts::class,
 		'admin.plugin_row_meta'             => Admin\PluginRowMeta::class,
 		'amp_slug_customization_watcher'    => AmpSlugCustomizationWatcher::class,
+		'cli.command_namespace'             => Cli\CommandNamespaceRegistration::class,
+		'cli.optimizer_command'             => Cli\OptimizerCommand::class,
+		'cli.transformer_command'           => Cli\TransformerCommand::class,
+		'cli.validation_command'            => Cli\ValidationCommand::class,
 		'css_transient_cache.ajax_handler'  => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'       => BackgroundTask\MonitorCssTransientCaching::class,
 		'dev_tools.block_sources'           => DevTools\BlockSources::class,
@@ -81,6 +92,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'extra_theme_and_plugin_headers'    => ExtraThemeAndPluginHeaders::class,
 		'mobile_redirection'                => MobileRedirection::class,
 		'obsolete_block_attribute_remover'  => ObsoleteBlockAttributeRemover::class,
+		'optimizer'                         => OptimizerService::class,
 		'plugin_activation_notice'          => Admin\PluginActivationNotice::class,
 		'plugin_registry'                   => PluginRegistry::class,
 		'plugin_suppression'                => PluginSuppression::class,
@@ -126,7 +138,9 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @return array<string> Associative array of fully qualified class names.
 	 */
 	protected function get_bindings() {
-		return [];
+		return [
+			Optimizer\Configuration::class => AmpWPConfiguration::class,
+		];
 	}
 
 	/**
@@ -196,8 +210,16 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	protected function get_delegations() {
 		return [
-			Injector::class => static function () {
+			Injector::class         => static function () {
 				return Services::get( 'injector' );
+			},
+			RemoteGetRequest::class => static function () {
+				$fallback_pipeline = new FallbackRemoteGetRequest(
+					new WpHttpRemoteGetRequest(),
+					new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
+				);
+
+				return new CachedRemoteGetRequest( $fallback_pipeline, WEEK_IN_SECONDS );
 			},
 		];
 	}

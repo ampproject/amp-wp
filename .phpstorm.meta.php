@@ -30,6 +30,7 @@ namespace PHPSTORM_META {
 			'injector'                          => \AmpProject\AmpWP\Infrastructure\Injector::class,
 			'mobile_redirection'                => \AmpProject\AmpWP\MobileRedirection::class,
 			'obsolete_block_attribute_remover'  => \AmpProject\AmpWP\ObsoleteBlockAttributeRemover::class,
+			'optimizer'                         => \AmpProject\AmpWP\Optimizer\OptimizerService::class,
 			'plugin_activation_notice'          => \AmpProject\AmpWP\Admin\PluginActivationNotice::class,
 			'plugin_registry'                   => \AmpProject\AmpWP\PluginRegistry::class,
 			'plugin_suppression'                => \AmpProject\AmpWP\PluginSuppression::class,
