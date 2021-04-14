@@ -160,14 +160,10 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 				// Wrapped in a closure so it is lazily evaluated. Otherwise,
 				// is_user_logged_in() breaks because it's used too early.
 				'verbose' => static function () {
-					return
-						is_user_logged_in()
-						&&
-						current_user_can( 'manage_options' )
-						&&
-						isset( $_GET[ QueryVar::VERBOSE_SERVER_TIMING ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-						&&
-						filter_var(
+					return is_user_logged_in()
+						&& current_user_can( 'manage_options' )
+						&& isset( $_GET[ QueryVar::VERBOSE_SERVER_TIMING ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						&& filter_var(
 							$_GET[ QueryVar::VERBOSE_SERVER_TIMING ], // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 							FILTER_VALIDATE_BOOLEAN
 						);
