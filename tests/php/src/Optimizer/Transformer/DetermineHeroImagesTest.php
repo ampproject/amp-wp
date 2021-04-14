@@ -92,23 +92,6 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'detects featured image'                       => [
-				$input(
-					'<figure class="featured-media">'
-					. '<div class="featured-media-inner section-inner">'
-					. '<amp-img width="640" height="480" src="https://example.com/featured-image.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" loading="lazy" srcset="https://example.com/featured-image_640.jpg 640w, https://example.com/featured-image_300.jpg 300w" sizes="(max-width: 640px) 100vw, 640px"></amp-img>'
-					. '</div>'
-					. '</figure>'
-				),
-				$output(
-					'<figure class="featured-media">'
-					. '<div class="featured-media-inner section-inner">'
-					. '<amp-img width="640" height="480" src="https://example.com/featured-image.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" loading="lazy" srcset="https://example.com/featured-image_640.jpg 640w, https://example.com/featured-image_300.jpg 300w" sizes="(max-width: 640px) 100vw, 640px" data-hero-candidate></amp-img>'
-					. '</div>'
-					. '</figure>'
-				),
-			],
-
 			'detects first content cover block'            => [
 				$input(
 					'<div class="entry-content">'
@@ -268,7 +251,6 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::add_data_hero_candidate_attribute()
 	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_custom_header()
 	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_custom_logo()
-	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_featured_image()
 	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_initial_content_image_block()
 	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_initial_content_cover_block()
 	 * @dataProvider data_transform()

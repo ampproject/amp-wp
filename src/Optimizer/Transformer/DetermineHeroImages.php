@@ -39,13 +39,6 @@ final class DetermineHeroImages implements Transformer {
 	const PRECEDING_NON_LAZY_IMAGE_XPATH_QUERY = "preceding::amp-img[ not( @data-hero ) ][ not( noscript/img/@loading ) or noscript/img/@loading != 'lazy' ]";
 
 	/**
-	 * XPath query to find the featured image.
-	 *
-	 * @var string
-	 */
-	const FEATURED_IMAGE_XPATH_QUERY = ".//amp-img[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ][ not( @data-hero ) ]";
-
-	/**
 	 * XPath query to find the first entry-content.
 	 *
 	 * @var string
@@ -71,16 +64,13 @@ final class DetermineHeroImages implements Transformer {
 	public function transform( Document $document, ErrorCollection $errors ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$hero_image_elements = [];
 
-		foreach ( [ 'header_images', 'featured_image', 'initial_content_image' ] as $hero_image_source ) {
+		foreach ( [ 'header_images', 'initial_content_image' ] as $hero_image_source ) {
 			if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
 				$candidate = null;
 
 				switch ( $hero_image_source ) {
 					case 'header_images':
 						$candidate = $this->get_header_images( $document );
-						break;
-					case 'featured_image':
-						$candidate = $this->get_featured_image( $document );
 						break;
 					case 'initial_content_image':
 						$candidate = $this->get_initial_content_image( $document );
@@ -107,6 +97,14 @@ final class DetermineHeroImages implements Transformer {
 	 *
 	 * This returns all non-tiny images which occur before the main content, or else a tiny image that has `logo` in the
 	 * class name.
+	 *
+	 * Note that the `HeroCandidateFiltering` service will have already identified the Header Image and Custom Logo for
+	 * any theme using the standard `the_header_image_tag()` and `the_custom_logo()` template tags, respectively. This
+	 * remains for here as a fallback to identify Header Images and Custom Logos being rendered via non-standard
+	 * template tags.
+	 *
+	 * @see \AmpProject\AmpWP\Optimizer\HeroCandidateFiltering::add_custom_logo_data_hero_candidate_attribute()
+	 * @see \AmpProject\AmpWP\Optimizer\HeroCandidateFiltering::filter_header_image_tag()
 	 *
 	 * @param Document $document Document to retrieve the header images from.
 	 * @return Element[] Header images.
@@ -146,23 +144,6 @@ final class DetermineHeroImages implements Transformer {
 				return ! ( new ImageDimensions( $element ) )->isTiny();
 			}
 		);
-	}
-
-	/**
-	 * Retrieve the element that represents the featured image.
-	 *
-	 * @param Document $document Document to retrieve the featured image from.
-	 * @return Element|null Element that represents the featured image, or null if not found.
-	 */
-	private function get_featured_image( Document $document ) {
-		$elements = $document->xpath->query(
-			self::FEATURED_IMAGE_XPATH_QUERY,
-			$document->body
-		);
-
-		$featured_image = $elements->item( 0 );
-
-		return $featured_image instanceof Element ? $featured_image : null;
 	}
 
 	/**
