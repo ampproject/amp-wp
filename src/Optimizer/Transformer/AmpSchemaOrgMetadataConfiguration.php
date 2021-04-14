@@ -5,11 +5,10 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Transformer;
+namespace AmpProject\AmpWP\Optimizer\Transformer;
 
 use AmpProject\Optimizer\Configuration\BaseTransformerConfiguration;
 use AmpProject\Optimizer\Exception\InvalidConfigurationValue;
-use AmpProject\Optimizer\Transformer\TransformedIdentifier;
 
 /**
  * Configuration for the AmpSchemaOrgMetadata transformer.

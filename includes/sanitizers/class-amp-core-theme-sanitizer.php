@@ -6,7 +6,7 @@
  * @since 1.0
  */
 
-use AmpProject\AmpWP\Transformer\DetermineHeroImages;
+use AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\Configuration;
