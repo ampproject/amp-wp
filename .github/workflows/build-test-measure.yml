@@ -494,6 +494,148 @@ jobs:
         run: vendor/bin/phpunit --testsuite external-http
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
+  #-----------------------------------------------------------------------------------------------------------------------
+
+  feature-test-php:
+    name: "Feature test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
+    runs-on: ubuntu-latest
+    env:
+      WP_VERSION: ${{ matrix.wp }}
+      WP_CLI_TEST_DBHOST: 127.0.0.1:${{ job.services.mysql.ports['3306'] }}
+    services:
+      mysql:
+        image: mariadb:latest
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_ROOT_PASSWORD:
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    continue-on-error: ${{ matrix.experimental == true }}
+    strategy:
+      fail-fast: false
+      matrix:
+        coverage: [false]
+        php: ['7.3', '7.2', '7.1']
+        wp: ['latest']
+        include:
+          - php: '8.0'
+            wp: 'trunk'
+            experimental: true
+            coverage: false
+
+          - php: '7.4'
+            wp: 'latest'
+            coverage: false
+
+          - php: '7.4'
+            wp: 'latest'
+            coverage: true
+
+          - php: '7.0'
+            wp: '5.1'
+            coverage: false
+
+          - php: '5.6'
+            wp: '5.0'
+            coverage: false
+
+          - php: '5.6'
+            wp: '4.9'
+            coverage: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
+          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
+          ini-values: pcov.directory=.
+
+      - name: Shutdown default MySQL service
+        run: sudo service mysql stop
+
+      - name: Verify MariaDB connection
+        run: |
+          while ! mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; do
+            sleep 1
+          done
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install Node dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Build plugin
+        run: npm run build:js
+
+      - name: Prepare tests
+        run: composer prepare-tests
+
+      - name: Setup PCOV
+        if: ${{ matrix.coverage == true }}
+        # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, making pcov/clobber
+        # unable to be installed.
+        run: |
+          composer remove --dev phpdocumentor/reflection
+          composer require --dev --ignore-platform-reqs pcov/clobber
+          vendor/bin/pcov clobber
+
+      - name: Setup Behat coverage extension
+        if: ${{ matrix.coverage == true }}
+        run: composer require --dev --ignore-platform-reqs dvdoug/behat-code-coverage
+
+      - name: Run tests
+        if: ${{ matrix.coverage == false }}
+        run: vendor/bin/behat
+
+      - name: Run tests with coverage
+        if: ${{ matrix.coverage == true }}
+        run: |
+          vendor/bin/behat --config=behat-with-coverage.yml
+          bash <(curl -s https://codecov.io/bash) -cF php -f "$PWD/build/logs/clover-behat.xml"
+
 #-----------------------------------------------------------------------------------------------------------------------
 
   build-zip:
