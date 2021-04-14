@@ -1809,7 +1809,18 @@ class AMP_Theme_Support {
 				$response
 			)
 		) ) {
-			if ( AMP_Validation_Manager::$is_validate_request ) {
+			// Detect whether redirect happened and prevent failing a validation request when that happens,
+			// since \AMP_Validation_Manager::validate_url() follows redirects.
+			$sent_location_header = false;
+			foreach ( headers_list() as $sent_header ) {
+				if ( preg_match( '#^location:#i', $sent_header ) ) {
+					$sent_location_header = true;
+					break;
+				}
+			}
+			$did_redirect = $status_code >= 300 && $status_code < 400 && $sent_location_header;
+
+			if ( AMP_Validation_Manager::$is_validate_request && ! $did_redirect ) {
 				if ( ! headers_sent() ) {
 					status_header( 400 );
 					header( 'Content-Type: application/json; charset=utf-8' );

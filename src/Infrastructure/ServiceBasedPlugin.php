@@ -293,7 +293,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 
 		$this->service_container->put( $id, $service );
 
-		if ( $service instanceof CliCommand && is_callable( $service ) && defined( 'WP_CLI' ) && WP_CLI ) {
+		if ( $service instanceof CliCommand && defined( 'WP_CLI' ) && WP_CLI ) {
 			WP_CLI::add_command( $service::get_command_name(), $service );
 		}
 
