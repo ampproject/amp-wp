@@ -12,6 +12,7 @@ namespace AmpProject\AmpWP\Cli;
 use AmpProject\AmpWP\Infrastructure\CliCommand;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Optimizer\Configuration;
+use AmpProject\Optimizer\Exception\UnknownConfigurationClass;
 use WP_CLI;
 use WP_CLI\Utils;
 
@@ -209,7 +210,12 @@ final class TransformerCommand implements Service, CliCommand {
 
 		$assoc_args = array_merge( $defaults, $assoc_args );
 
-		$config_array = $this->configuration->getTransformerConfiguration( $transformer_class )->toArray();
+		try {
+			$config_array = $this->configuration->getTransformerConfiguration( $transformer_class )->toArray();
+		} catch ( UnknownConfigurationClass $exception ) {
+			WP_CLI::error( $exception->getMessage() );
+			return;
+		}
 
 		$config_entries = [];
 		foreach ( $config_array as $key => $value ) {
