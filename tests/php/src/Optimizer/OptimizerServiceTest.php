@@ -20,7 +20,7 @@ final class OptimizerServiceTest extends TestCase {
 	 * @covers \AmpProject\AmpWP\Optimizer\OptimizerService::optimizeDom()
 	 * @covers \AmpProject\AmpWP\Optimizer\OptimizerService::optimizeHtml()
 	 */
-	public function testMethodForwarding() {
+	public function test_method_forwarding() {
 		$html                  = self::HERO_IMAGE_MARKUP . self::HERO_IMAGE_MARKUP . self::HERO_IMAGE_MARKUP;
 		$document              = Document::fromHtml( $html );
 		$transformation_engine = new TransformationEngine();
