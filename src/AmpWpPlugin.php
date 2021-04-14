@@ -81,6 +81,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'background_task_deactivator'       => BackgroundTaskDeactivator::class,
 		'cli.command_namespace'             => Cli\CommandNamespaceRegistration::class,
 		'cli.optimizer_command'             => Cli\OptimizerCommand::class,
+		'cli.transformer_command'           => Cli\TransformerCommand::class,
 		'cli.validation_command'            => Cli\ValidationCommand::class,
 		'css_transient_cache.ajax_handler'  => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'       => BackgroundTask\MonitorCssTransientCaching::class,
