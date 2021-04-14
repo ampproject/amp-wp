@@ -209,8 +209,7 @@ final class TransformerCommand implements Service, CliCommand {
 
 		$assoc_args = array_merge( $defaults, $assoc_args );
 
-		$config_array = $this->configuration->getTransformerConfiguration( $transformer_class )
-											->toArray();
+		$config_array = $this->configuration->getTransformerConfiguration( $transformer_class )->toArray();
 
 		$config_entries = [];
 		foreach ( $config_array as $key => $value ) {
