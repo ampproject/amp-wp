@@ -25,8 +25,6 @@ use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
 use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
 
-use function is_user_logged_in;
-
 /**
  * The AmpWpPlugin class is the composition root of the plugin.
  *
@@ -78,6 +76,10 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.validation_counts'           => Admin\ValidationCounts::class,
 		'admin.plugin_row_meta'             => Admin\PluginRowMeta::class,
 		'amp_slug_customization_watcher'    => AmpSlugCustomizationWatcher::class,
+		'cli.command_namespace'             => Cli\CommandNamespaceRegistration::class,
+		'cli.optimizer_command'             => Cli\OptimizerCommand::class,
+		'cli.transformer_command'           => Cli\TransformerCommand::class,
+		'cli.validation_command'            => Cli\ValidationCommand::class,
 		'css_transient_cache.ajax_handler'  => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'       => BackgroundTask\MonitorCssTransientCaching::class,
 		'dev_tools.block_sources'           => DevTools\BlockSources::class,

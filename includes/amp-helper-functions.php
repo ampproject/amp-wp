@@ -124,14 +124,6 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_filter( 'request', 'amp_force_query_var_value' );
 
-	if ( defined( 'WP_CLI' ) && WP_CLI ) {
-		if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {
-			WP_CLI::add_command( 'amp', 'AMP_CLI_Namespace' );
-		}
-
-		WP_CLI::add_command( 'amp validation', 'AMP_CLI_Validation_Command' );
-	}
-
 	/*
 	 * Broadcast plugin updates.
 	 * Note that AMP_Options_Manager::get_option( Option::VERSION, '0.0' ) cannot be used because

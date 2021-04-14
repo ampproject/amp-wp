@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "4a6b2be4a05510fcb9d1b5c6ae60b96bac265e75"
+                "reference": "19e9c5312ee856a051e8de73eaa932e152f16710"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/4a6b2be4a05510fcb9d1b5c6ae60b96bac265e75",
-                "reference": "4a6b2be4a05510fcb9d1b5c6ae60b96bac265e75",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/19e9c5312ee856a051e8de73eaa932e152f16710",
+                "reference": "19e9c5312ee856a051e8de73eaa932e152f16710",
                 "shasum": ""
             },
             "require": {
@@ -67,7 +67,7 @@
                 "Apache-2.0"
             ],
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
-            "time": "2021-04-11T19:52:37+00:00"
+            "time": "2021-04-14T13:49:22+00:00"
         },
         {
             "name": "cweagans/composer-patches",
