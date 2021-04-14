@@ -501,7 +501,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       WP_VERSION: ${{ matrix.wp }}
-      WP_CLI_TEST_DBHOST: 127.0.0.1:${{ job.services.mysql.ports['3306'] }}
     services:
       mysql:
         image: mariadb:latest
@@ -611,6 +610,8 @@ jobs:
         run: npm run build:js
 
       - name: Prepare tests
+        env:
+          WP_CLI_TEST_DBHOST: 127.0.0.1:${{ job.services.mysql.ports['3306'] }}
         run: composer prepare-tests
 
       - name: Setup PCOV
@@ -628,10 +629,14 @@ jobs:
 
       - name: Run tests
         if: ${{ matrix.coverage == false }}
+        env:
+          WP_CLI_TEST_DBHOST: 127.0.0.1:${{ job.services.mysql.ports['3306'] }}
         run: vendor/bin/behat
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true }}
+        env:
+          WP_CLI_TEST_DBHOST: 127.0.0.1:${{ job.services.mysql.ports['3306'] }}
         run: |
           vendor/bin/behat --config=behat-with-coverage.yml
           bash <(curl -s https://codecov.io/bash) -cF php -f "$PWD/build/logs/clover-behat.xml"
