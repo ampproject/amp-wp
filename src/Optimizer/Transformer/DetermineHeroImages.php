@@ -16,14 +16,11 @@ use AmpProject\Optimizer\Transformer;
 use AmpProject\Optimizer\Transformer\PreloadHeroImage;
 
 /**
- * Determine the images to flag as data-hero so the Optimizer can preload them.
+ * Determine the images to flag with data-hero-candidate so the Optimizer can prerender them.
  *
  * This transformer checks for the following images in the given order:
  * 1. Header images (including Custom Logo and Custom Header)
- * 2. Featured image of the page
- * 3. Image which is descendant of first child of first entry content
- *
- * It then applies the data-hero attribute to the first two of these.
+ * 2. Image which is descendant of first child of first entry content
  *
  * @package AmpProject\AmpWP
  * @since   2.1
