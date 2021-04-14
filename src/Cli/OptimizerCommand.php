@@ -14,7 +14,6 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Optimizer\OptimizerService;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
-use AmpProject\Optimizer\TransformationEngine;
 use WP_CLI;
 
 /**
@@ -67,7 +66,7 @@ final class OptimizerCommand implements Service, CliCommand {
 	 * @param array $assoc_args Associative array of associative arguments.
 	 * @throws WP_CLI\ExitException If the requested file could not be read.
 	 */
-	public function optimize( $args, $assoc_args ) {
+	public function optimize( $args, /** @noinspection PhpUnusedParameterInspection */ $assoc_args ) {
 		$file = '-';
 
 		if ( count( $args ) > 0 ) {

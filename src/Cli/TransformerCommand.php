@@ -214,6 +214,7 @@ final class TransformerCommand implements Service, CliCommand {
 			$config_array = $this->configuration->getTransformerConfiguration( $transformer_class )->toArray();
 		} catch ( UnknownConfigurationClass $exception ) {
 			WP_CLI::error( $exception->getMessage() );
+
 			return;
 		}
 

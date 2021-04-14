@@ -439,7 +439,7 @@ final class ValidationCommand implements Service, CliCommand {
 	 * @throws WP_CLI\ExitException If an error occurred during the validation.
 	 */
 	public function check_url( $args ) {
-		list($url) = $args;
+		list( $url ) = $args;
 
 		$host            = wp_parse_url( $url, PHP_URL_HOST );
 		$parsed_home_url = wp_parse_url( home_url( '/' ) );
