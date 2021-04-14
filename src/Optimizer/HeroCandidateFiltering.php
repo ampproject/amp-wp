@@ -15,7 +15,7 @@ use AmpProject\Attribute;
 use WP_Post;
 
 /**
- * Service which uses WordPress hooks to inject data-hero-candidate attributes on logos, headers, and featured images.
+ * Service which uses WordPress hooks to inject data-hero-candidate attributes on logos, headers, and the primary featured image.
  *
  * @package AmpProject\AmpWP
  * @since 2.1.0
@@ -63,7 +63,6 @@ final class HeroCandidateFiltering implements Service, Delayed, Conditional, Reg
 	 * Add data-hero-candidate to attributes array.
 	 *
 	 * @param array $attrs Attributes.
-	 *
 	 * @return array Amended attributes.
 	 */
 	public function add_custom_logo_data_hero_candidate_attribute( $attrs ) {
@@ -123,7 +122,6 @@ final class HeroCandidateFiltering implements Service, Delayed, Conditional, Reg
 	 * Add data-hero-candidate to attributes array.
 	 *
 	 * @param array $attrs Attributes.
-	 *
 	 * @return array Amended attributes.
 	 */
 	public function add_data_hero_candidate_attribute( $attrs ) {
