@@ -1,11 +1,12 @@
 <?php
-
 /**
  * Central bootstrapping entry point for all non-autoloaded files.
  *
  * This file is mainly used for taking direct control of included files off from Composer's
  * "files" directive, as that one can easily include the files multiple times, leading to
- * redeclaration fatal error.
+ * redeclaration fatal errors.
+ *
+ * @package AmpProject/AmpWP
  */
 
 $files_to_include = [
