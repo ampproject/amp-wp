@@ -16,13 +16,24 @@ export function usePostDirtyStateChanges() {
 	const [ content, setContent ] = useState( null );
 	const [ updatedContent, setUpdatedContent ] = useState();
 	const subscription = useRef( null );
-	const { setIsPostDirty } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
+
+	const {
+		setIsPostDirty,
+		setMaybeIsPostDirty,
+	} = useDispatch( BLOCK_VALIDATION_STORE_KEY );
+
 	const {
 		getEditedPostContent,
+		hasErrorsFromRemovedBlocks,
+		hasActiveMetaboxes,
 		isPostDirty,
 		isSavingOrPreviewingPost,
 	} = useSelect( ( select ) => ( {
 		getEditedPostContent: select( 'core/editor' ).getEditedPostContent,
+		hasErrorsFromRemovedBlocks: Boolean( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors().find(
+			( { clientId } ) => clientId && ! select( 'core/block-editor' ).getBlockName( clientId ) ),
+		),
+		hasActiveMetaboxes: select( 'core/edit-post' ).hasMetaBoxes(),
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
 		isSavingOrPreviewingPost:
 			( select( 'core/editor' ).isSavingPost() && ! select( 'core/editor' ).isAutosavingPost() ) ||
@@ -73,6 +84,18 @@ export function usePostDirtyStateChanges() {
 			setIsPostDirty( true );
 		}
 	}, [ content, getEditedPostContent, setIsPostDirty, updatedContent ] );
+
+	/**
+	 * Post may have changed.
+	 *
+	 * In some cases it's hard to tell if a post content has changed or not.
+	 * Examples are meta box content changes or presence of validation errors
+	 * which used to be in the content but are no longer found, potentially
+	 * due to switching from the visual editor to the code editor.
+	 */
+	useEffect( () => {
+		setMaybeIsPostDirty( ! isPostDirty && ( hasActiveMetaboxes || hasErrorsFromRemovedBlocks ) );
+	}, [ hasActiveMetaboxes, hasErrorsFromRemovedBlocks, isPostDirty, setMaybeIsPostDirty ] );
 
 	/**
 	 * Keep internal content state in sync with editor state.

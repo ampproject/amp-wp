@@ -2,4 +2,4 @@
 
 exports[`SidebarNotification renders notification without icon and call to action 1`] = `"<div class=\\"sidebar-notification\\"><div class=\\"sidebar-notification__content\\"><p>Foobar</p></div></div>"`;
 
-exports[`SidebarNotification renders status message with icon and call to action 1`] = `"<div class=\\"sidebar-notification\\"><div class=\\"sidebar-notification__icon\\"><svg></svg></div><div class=\\"sidebar-notification__content\\"><p>Foobar</p><p><button></button></p></div></div>"`;
+exports[`SidebarNotification renders status message with icon and call to action 1`] = `"<div class=\\"sidebar-notification\\"><div class=\\"sidebar-notification__icon\\"><svg></svg></div><div class=\\"sidebar-notification__content\\"><p>Foobar</p><div class=\\"sidebar-notification__action\\"><button></button></div></div></div>"`;

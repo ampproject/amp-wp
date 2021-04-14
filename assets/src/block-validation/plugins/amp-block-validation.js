@@ -14,6 +14,7 @@ import { Sidebar } from '../components/sidebar';
 import { InvalidBlockOutline } from '../components/invalid-block-outline';
 import { usePostDirtyStateChanges } from '../hooks/use-post-dirty-state-changes';
 import { useValidationErrorStateUpdates } from '../hooks/use-validation-error-state-updates';
+import { useAMPDocumentToggle } from '../hooks/use-amp-document-toggle';
 
 export const PLUGIN_NAME = 'amp-block-validation';
 export const SIDEBAR_NAME = 'amp-editor-sidebar';
@@ -28,9 +29,14 @@ export default function AMPBlockValidation() {
 		broken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
 		errorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors()?.length || 0,
 	} ), [] );
+	const { isAMPEnabled } = useAMPDocumentToggle();
 
 	useValidationErrorStateUpdates();
 	usePostDirtyStateChanges();
+
+	if ( ! isAMPEnabled ) {
+		return null;
+	}
 
 	return (
 		<>

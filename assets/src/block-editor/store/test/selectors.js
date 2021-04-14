@@ -3,6 +3,7 @@
  */
 import {
 	hasThemeSupport,
+	isDevToolsEnabled,
 	isStandardMode,
 	getErrorMessages,
 	getAmpPreviewLink,
@@ -16,6 +17,14 @@ describe( 'selectors', () => {
 			const state = { hasThemeSupport: false };
 
 			expect( hasThemeSupport( state ) ).toBe( false );
+		} );
+	} );
+
+	describe( 'isDevToolsEnabled', () => {
+		it( 'should return whether Dev Tools are enabled', () => {
+			const state = { isDevToolsEnabled: true };
+
+			expect( isDevToolsEnabled( state ) ).toBe( true );
 		} );
 	} );
 
