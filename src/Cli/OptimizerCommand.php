@@ -25,7 +25,6 @@ use WP_CLI;
  */
 final class OptimizerCommand implements Service, CliCommand {
 
-
 	/**
 	 * Optimizer service instance to use.
 	 *

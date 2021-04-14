@@ -23,7 +23,6 @@ use WP_CLI\Utils;
  */
 final class TransformerCommand implements Service, CliCommand {
 
-
 	/**
 	 * @var Configuration
 	 */
