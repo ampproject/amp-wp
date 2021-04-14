@@ -1813,7 +1813,7 @@ class AMP_Theme_Support {
 			// since \AMP_Validation_Manager::validate_url() follows redirects.
 			$sent_location_header = false;
 			foreach ( headers_list() as $sent_header ) {
-				if ( preg_match( '#^location:#i', $sent_header, $matches ) ) {
+				if ( preg_match( '#^location:#i', $sent_header ) ) {
 					$sent_location_header = true;
 					break;
 				}
