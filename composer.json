@@ -35,7 +35,7 @@
     "wp-cli/export-command": "^2.0",
     "wp-cli/extension-command": "^2.0",
     "wp-cli/wp-cli": "^2.4",
-    "wp-cli/wp-cli-tests": "^3.0",
+    "wp-cli/wp-cli-tests": "^3.0.11",
     "wp-coding-standards/wpcs": "2.3.0"
   },
   "suggest": {
