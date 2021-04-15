@@ -65,7 +65,11 @@ final class AmpWPConfiguration extends DefaultConfiguration {
 			);
 		}
 
-		array_unshift( $transformers, WpTransformer\AmpSchemaOrgMetadata::class );
+		array_unshift(
+			$transformers,
+			WpTransformer\DetermineHeroImages::class,
+			WpTransformer\AmpSchemaOrgMetadata::class
+		);
 
 		$this->registerConfigurationClass(
 			WpTransformer\AmpSchemaOrgMetadata::class,
