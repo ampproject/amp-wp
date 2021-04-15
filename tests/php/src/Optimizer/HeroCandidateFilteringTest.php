@@ -102,6 +102,8 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 			[ 'post_content' => __FUNCTION__ ]
 		);
 
+		$search_request_uri = sprintf( '/?s=%s&orderby=ID&order=asc', __FUNCTION__ );
+
 		$initial_attrs = [ 'data-foo' => 'bar' ];
 		$merged_attrs  = array_merge(
 			$initial_attrs,
@@ -109,7 +111,7 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 		);
 
 		// Make sure attachment doesn't get data-hero-candidate when it wasn't assigned as a featured image.
-		$this->go_to( '/?s=' . __FUNCTION__ );
+		$this->go_to( $search_request_uri );
 		$this->assertTrue( is_search() );
 		$this->assertEquals(
 			$post_ids,
@@ -122,7 +124,7 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 		);
 
 		// When attachment is featured image of second post, it still does not get the attribute.
-		$this->go_to( '/?s=' . __FUNCTION__ );
+		$this->go_to( $search_request_uri );
 		set_post_thumbnail( $post_ids[1], $attachment->ID );
 		$this->assertEquals(
 			$initial_attrs,
@@ -132,7 +134,7 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 		// When attachment is featured image of first post, it does get the attribute.
 		delete_post_thumbnail( $post_ids[1] );
 		set_post_thumbnail( $post_ids[0], $attachment->ID );
-		$this->go_to( '/?s=' . __FUNCTION__ );
+		$this->go_to( $search_request_uri );
 		$this->assertEquals(
 			$merged_attrs,
 			$this->instance->filter_attachment_image_attributes( $initial_attrs, $attachment )
