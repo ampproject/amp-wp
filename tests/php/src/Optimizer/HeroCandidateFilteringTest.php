@@ -160,9 +160,9 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 	}
 
 	/** @covers ::add_data_hero_candidate_attribute()  */
-	public function add_data_hero_candidate_attribute() {
+	public function test_add_data_hero_candidate_attribute() {
 		$this->assertEquals(
-			$array_with_attr,
+			self::ARRAY_WITH_DATA_HERO_CANDIDATE_ATTR,
 			$this->instance->add_data_hero_candidate_attribute( [] )
 		);
 
