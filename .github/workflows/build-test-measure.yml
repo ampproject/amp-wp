@@ -625,7 +625,11 @@ jobs:
 
       - name: Setup Behat coverage extension
         if: ${{ matrix.coverage == true }}
-        run: composer require --dev --ignore-platform-reqs dvdoug/behat-code-coverage
+        # phpunit/phpunit has to be removed as the one in use provides an older version of phpunit/php-code-coverage,
+        # making dvdoug/behat-code-coverage unable to be installed.
+        run: |
+          composer remove --dev phpunit/phpunit
+          composer require --dev --ignore-platform-reqs dvdoug/behat-code-coverage
 
       - name: Run tests
         if: ${{ matrix.coverage == false }}
