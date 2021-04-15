@@ -111,7 +111,7 @@ final class HeroCandidateFiltering implements Service, Delayed, Conditional, Reg
 		if (
 			$post instanceof WP_Post
 			&&
-			get_post_thumbnail_id( $post ) === $attachment->ID
+			(int) get_post_thumbnail_id( $post ) === $attachment->ID
 		) {
 			$attrs = $this->add_data_hero_candidate_attribute( $attrs );
 		}

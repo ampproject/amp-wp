@@ -113,7 +113,7 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 		// Make sure attachment doesn't get data-hero-candidate when it wasn't assigned as a featured image.
 		$this->go_to( $search_request_uri );
 		$this->assertTrue( is_search() );
-		$this->assertEquals(
+		$this->assertSame(
 			$post_ids,
 			wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ),
 			'Expected query to match the posts created.'
