@@ -639,9 +639,6 @@ jobs:
       - name: Prepare test database
         run: composer prepare-tests
 
-      - name: Check Behat environment
-        run: WP_CLI_TEST_DEBUG_BEHAT_ENV=1 composer behat
-
       - name: Run tests
         if: ${{ matrix.coverage == false }}
         run: vendor/bin/behat
