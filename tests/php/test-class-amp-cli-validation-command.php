@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Cli\ValidationCommand;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
@@ -14,7 +15,7 @@ use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
  *
  * @since 1.0
  *
- * @coversDefaultClass AMP_CLI_Validation_Command
+ * @coversDefaultClass ValidationCommand
  */
 class Test_AMP_CLI_Validation_Command extends WP_UnitTestCase {
 
@@ -23,7 +24,7 @@ class Test_AMP_CLI_Validation_Command extends WP_UnitTestCase {
 	/**
 	 * Store a reference to the validation command object.
 	 *
-	 * @var AMP_CLI_Validation_Command
+	 * @var ValidationCommand
 	 */
 	private $validation;
 
@@ -36,7 +37,7 @@ class Test_AMP_CLI_Validation_Command extends WP_UnitTestCase {
 		parent::setUp();
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->validation = new AMP_CLI_Validation_Command();
+		$this->validation = new ValidationCommand();
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 
@@ -64,7 +65,7 @@ class Test_AMP_CLI_Validation_Command extends WP_UnitTestCase {
 		// All of the posts created above should be present in $validated_urls.
 		$this->assertEmpty( array_diff( $post_permalinks, $this->get_validated_urls() ) );
 
-		$this->validation = new AMP_CLI_Validation_Command();
+		$this->validation = new ValidationCommand();
 		for ( $i = 0; $i < $number_of_terms; $i++ ) {
 			$terms[] = self::factory()->category->create();
 		}

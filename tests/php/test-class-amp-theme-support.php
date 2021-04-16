@@ -1394,7 +1394,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		/** @var DOMElement $script Script. */
 		$actual_script_srcs = [];
-		foreach ( $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' ) as $script ) {
+		foreach ( $dom->xpath->query( '//script[ not( @amp-onerror ) and ( not( @type ) or @type = "text/javascript" ) ]' ) as $script ) {
 			$actual_script_srcs[] = $script->getAttribute( 'src' );
 		}
 
