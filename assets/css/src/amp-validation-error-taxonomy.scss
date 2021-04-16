@@ -40,9 +40,8 @@ th.column-included {
 
 /* Details column */
 .column-details .details-attributes__summary {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+	padding-right: 15px;
+	position: relative;
 }
 
 details[open] .details-attributes__summary {
@@ -57,6 +56,11 @@ details[open] .details-attributes__summary {
 	cursor: pointer;
 }
 
+.column-details .notice details > summary::marker,
+.column-details .details-attributes__summary::marker {
+	content: none;
+}
+
 .column-details .details-attributes__summary::-webkit-details-marker,
 .column-details .notice details > summary::-webkit-details-marker {
 	display: none;
@@ -65,13 +69,15 @@ details[open] .details-attributes__summary {
 .details-attributes__summary::after,
 .single-error-detail-summary::after,
 .toggle-stylesheet-details::after {
-	order: 99;
-	width: 12px;
-	height: 6px;
 	background-image: url("../images/down-triangle.svg");
-	background-size: cover;
 	background-position: center;
+	background-size: cover;
 	content: "";
+	height: 6px;
+	position: absolute;
+	right: 0;
+	top: 7px;
+	width: 12px;
 }
 
 tr.expanded .details-attributes__summary::after,
