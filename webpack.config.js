@@ -77,7 +77,6 @@ const ampValidation = {
 	...sharedConfig,
 	entry: {
 		'amp-validated-url-post-edit-screen': './assets/src/amp-validation/amp-validated-url-post-edit-screen.js',
-		'amp-validated-urls-index': './assets/src/amp-validation/amp-validated-urls-index.js',
 		'amp-validation-detail-toggle': './assets/src/amp-validation/amp-validation-detail-toggle.js',
 		'amp-validation-single-error-url-details': './assets/src/amp-validation/amp-validation-single-error-url-details.js',
 		'amp-validation-counts': './assets/src/amp-validation/counts/index.js',

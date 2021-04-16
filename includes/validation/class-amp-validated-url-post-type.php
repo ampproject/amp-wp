@@ -354,21 +354,6 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
-			$asset_file   = AMP__DIR__ . '/assets/js/amp-validated-urls-index.asset.php';
-			$asset        = require $asset_file;
-			$dependencies = $asset['dependencies'];
-			$version      = $asset['version'];
-
-			wp_enqueue_script(
-				'amp-validated-urls-index',
-				amp_get_asset_url( 'js/amp-validated-urls-index.js' ),
-				$dependencies,
-				$version,
-				true
-			);
-		}
-
 		// Enqueue this on both the 'AMP Validated URLs' page and the single URL page.
 		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id || self::POST_TYPE_SLUG === $screen->id ) {
 			wp_enqueue_style(
