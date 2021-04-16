@@ -7,7 +7,6 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import setValidationErrorRowsClasses from './set-validation-error-rows-classes';
 import { handleCopyToClipboardButtons } from './copy-to-clipboard-buttons';
 import { getURLValidationTableRows } from './get-url-validation-table-rows';
 
@@ -29,7 +28,6 @@ domReady( () => {
 	handleShowAll();
 	handleFiltering();
 	handleSearching();
-	setValidationErrorRowsClasses();
 	handleRowEvents();
 	handleBulkActions();
 	watchForUnsavedChanges();
