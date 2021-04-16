@@ -14,7 +14,7 @@ export default function() {
 /**
  * Set the initial 'new' (aka 'unseen') class names on the rows based on the presence of a hidden input value.
  *
- * @param {Element} row HTML row element.
+ * @param {HTMLTableRowElement} row HTML row element.
  */
 function setStatusNew( row ) {
 	// Look inside the `.column-status` only so that the AMP Validated URLs table is not affected.
@@ -30,7 +30,7 @@ function setStatusNew( row ) {
 /**
  * Set the 'kept' class names based on the select input field state.
  *
- * @param {Element} row HTML row element.
+ * @param {HTMLTableRowElement} row HTML row element.
  */
 function setStatusKept( row ) {
 	const input = row.querySelector( '.amp-validation-error-status' );
