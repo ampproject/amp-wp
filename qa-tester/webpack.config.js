@@ -27,13 +27,8 @@ const sharedConfig = {
 				style: false,
 			},
 		},
-		// https://cssnano.co/docs/presets
 		minimizer: defaultConfig.optimization.minimizer.concat( [
-			new OptimizeCSSAssetsPlugin( {
-				cssProcessorPluginOptions: {
-					preset: 'default',
-				},
-			} ),
+			new OptimizeCSSAssetsPlugin( {} ),
 		] ),
 	},
 	plugins: [
