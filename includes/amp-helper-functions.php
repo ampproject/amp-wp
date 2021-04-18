@@ -1870,13 +1870,18 @@ function amp_add_editor_color_styles( $color_palette ) {
 		// luminance of the editor color.
 		$text_color = 127 > amp_get_relative_luminance_from_hex( $color_option['color'] ) ? '#fff' : '#000';
 
-		// @todo Shouldn't the .has-X-color rule come _after_?
 		printf(
-			':root .has-%1$s-color { color: %2$s }
-			:root .has-%1$s-background-color { color: %3$s; background-color: %2$s }',
+			':root .has-%1$s-background-color { background-color: %2$s; color: %3$s; }',
 			$color_option['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			$color_option['color'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			$text_color // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		);
+	}
+	foreach ( $color_palette as $color_option ) {
+		printf(
+			':root .has-%1$s-color { color: %2$s; }',
+			$color_option['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			$color_option['color'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		);
 	}
 	echo '</style>';
