@@ -6,6 +6,10 @@
 	display: block;
 }
 
+#amp-qa-tester-adminbar-inner {
+	min-width: 200px;
+}
+
 #amp-qa-tester-adminbar-inner > .ab-submenu {
 	padding: 6px;
 }

@@ -1,0 +1,113 @@
+button.primary {
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  background: #2271b1;
+  border-color: #2271b1;
+  border-radius: 3px;
+  border-style: solid;
+  border-width: 1px;
+  height: 28px;
+  line-height: 26px;
+  margin: 4px 0;
+  padding: 0 10px 1px;
+
+  &[disabled] {
+	color: #a7aaad;
+	cursor: default;
+	background: #f6f7f7;
+	border-color: #dcdcde;
+  }
+
+  &:not([disabled]):hover {
+	background: #135e96;
+	border-color: #135e96;
+	color: #fff;
+  }
+
+  &:focus {
+	background: #f6f7f7;
+	border-color: #3582c4;
+	box-shadow: 0 0 0 1px #fff, 0 0 0 3px #2271b1;
+	color: #0a4b78;
+
+	/* Only visible in Windows High Contrast mode */
+	outline: 2px solid transparent;
+  }
+
+  &:active {
+	background: #135e96;
+	border-color: #135e96;
+	box-shadow: none;
+	color: #fff;
+  }
+}
+
+.checkbox {
+	margin: 4px 0 0;
+
+  label {
+	user-select: none;
+  }
+
+  label,
+  input {
+	cursor: pointer;
+	vertical-align: middle;
+  }
+
+  input {
+	width: 16px;
+	height: 16px;
+  }
+}
+
+.error {
+  background-color: #8b0000;
+  display: flex;
+  margin: 4px 0 0;
+  padding: 0 4px;
+
+  > span {
+	color: #f1f1f1;
+	flex: auto;
+	line-height: 1.5;
+  }
+
+  > button.dismiss {
+	border: none;
+	background: none;
+	cursor: pointer;
+
+	&::before {
+	  content: url('data:image/svg+xml;charset=utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 24 24"><path fill="%23f1f1f1" d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8zm5 11l-3-3 3-3-2-2-3 3-3-3-2 2 3 3-3 3 2 2 3-3 3 3z"/></svg>');
+	  display: block;
+	  speak: never;
+	  height: 20px;
+	  text-align: center;
+	  width: 20px;
+	}
+  }
+}
+
+.loading {
+  animation: spin 1s linear infinite;
+  border: 2px solid #eee;
+  border-radius: 50%;
+  border-top: 2px solid #333;
+  float: left;
+  height: 14px;
+  margin: 6px;
+  width: 14px;
+}
+
+@keyframes spin {
+
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}

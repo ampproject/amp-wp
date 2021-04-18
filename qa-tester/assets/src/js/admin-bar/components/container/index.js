@@ -8,7 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import './style.css';
+import './style.scss';
 import {
 	getProtectedBranches,
 	getPullRequestsWithBuilds,
@@ -237,7 +237,12 @@ export default class Container extends Component {
 		} = this.state;
 
 		if ( isLoading ) {
-			return <p>{ __( 'Fetching build options…', 'amp-qa-tester' ) }</p>;
+			return (
+				<>
+					<div className="loading" />
+					<p>{ __( 'Fetching build options…', 'amp-qa-tester' ) }</p>
+				</>
+			);
 		}
 
 		return (
@@ -248,15 +253,15 @@ export default class Container extends Component {
 				/>
 
 				{ 'release' !== buildOption.origin && (
-					<div className="amp-qa-tester-checkbox">
+					<div className="checkbox">
 						<input
-							id="amp-qa-tester-is-development-build"
+							id="is-development-build"
 							type="checkbox"
 							checked={ this.state.isDevBuild }
 							onChange={ this.handleChangeDevBuild }
 						/>
 
-						<label htmlFor="amp-qa-tester-is-development-build">
+						<label htmlFor="is-development-build">
 							{ __( 'Development build', 'amp-qa-tester' ) }
 						</label>
 					</div>
@@ -265,7 +270,7 @@ export default class Container extends Component {
 				{ /*TODO: Prevent submenu from closing after clicking button to activate selection and hovering away from it */ }
 				<button
 					type="button"
-					className="button button-primary"
+					className="primary"
 					disabled={
 						buildOption.value === '' || isInstalling || error
 					}
@@ -276,7 +281,7 @@ export default class Container extends Component {
 
 				{ isInstalling && (
 					<div>
-						<div className="installing" />
+						<div className="loading" />
 						{ __( 'Installing build…', 'amp-qa-tester' ) }
 					</div>
 				) }
@@ -289,7 +294,7 @@ export default class Container extends Component {
 						</span>
 						<button
 							type="button"
-							className="notice-dismiss"
+							className="dismiss"
 							onClick={ () => this.setState( { error: null } ) }
 						/>
 					</div>
