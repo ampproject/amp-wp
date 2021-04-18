@@ -8,7 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import './index.css';
+import './style.css';
 import {
 	getProtectedBranches,
 	getPullRequestsWithBuilds,

@@ -111,19 +111,28 @@ class AdminBar {
 			true
 		);
 
-		// Enqueue styling.
+		// Enqueue styling for light DOM.
 		wp_enqueue_style(
 			self::ASSET_HANDLE,
-			Plugin::get_asset_url( 'css/admin-bar-compiled.css' ),
+			Plugin::get_asset_url( 'css/admin-bar-light-dom-compiled.css' ),
 			[ 'admin-bar' ],
 			$version
 		);
 		wp_styles()->add_data( 'amp-qa-tester-admin-bar-style', 'rtl', 'replace' );
 
+		// Pass URL for CSS file to be loaded in shadow DOM.
+		$css_url = Plugin::get_asset_url( 'css/admin-bar-compiled' . ( is_rtl() ? '-rtl' : '' ) . '.css' );
+		wp_add_inline_script(
+			self::ASSET_HANDLE,
+			sprintf( 'var ampQaTester = %s;', wp_json_encode( compact( 'css_url' ) ) ),
+			'before'
+		);
+
 		// Explicitly mark all scripts and styles (and their dependencies) as being part of AMP dev mode.
 		// This is necessary because not all dependencies (and their recursive dependencies) will have a dependency
 		// on the admin-bar, and thus the AMP plugin won't opt them in to dev mode automatically.
-		if ( amp_is_request() ) {
+		$is_amp_request = function_exists( 'amp_is_request' ) ? amp_is_request() : is_amp_endpoint();
+		if ( $is_amp_request ) {
 			$script_dev_mode_handles = $this->get_all_dependencies( wp_scripts(), $dependencies );
 			add_filter(
 				'script_loader_tag',

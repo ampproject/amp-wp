@@ -1,0 +1,11 @@
+#wp-admin-bar-amp-qa-tester:focus-within {
+	outline: none;
+}
+
+#wp-admin-bar-amp-qa-tester:focus-within > .ab-sub-wrapper {
+	display: block;
+}
+
+#amp-qa-tester-adminbar-inner > .ab-submenu {
+	padding: 6px;
+}

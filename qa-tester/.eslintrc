@@ -6,6 +6,11 @@
   "globals": {
     "fetch": false
   },
+  "rules": {
+    "import/no-unresolved": [ "error", {
+      "ignore": [ "amp-qa-tester-data" ]
+    } ]
+  },
   "overrides": [
     {
       "files":[
