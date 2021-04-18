@@ -143,6 +143,15 @@ interface Option {
 	const READER_THEME = 'reader_theme';
 
 	/**
+	 * Primary theme color palette.
+	 *
+	 * When using a Reader theme, this is a cache of of the editor-color-palette theme support.
+	 *
+	 * @var string
+	 */
+	const PRIMARY_THEME_COLOR_PALETTE = 'primary_theme_color_palette';
+
+	/**
 	 * The key of the option storing whether the setup wizard has been completed.
 	 *
 	 * @var boolean

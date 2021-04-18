@@ -1853,3 +1853,63 @@ function amp_has_paired_endpoint( $url = '' ) {
 function amp_remove_paired_endpoint( $url ) {
 	return Services::get( 'paired_routing' )->remove_endpoint( $url );
 }
+
+/**
+ * Print editor color styles.
+ *
+ * @internal
+ * @since 2.1
+ *
+ * @param array $color_palette Color palette.
+ */
+function amp_add_editor_color_styles( $color_palette ) {
+	echo '<style class="editor-styles">';
+	foreach ( $color_palette as $color_option ) {
+		// There is no standard way to retrieve or derive the `color` style property when the editor color is being used
+		// for the background, so the best alternative at the moment is to guess a good default value based on the
+		// luminance of the editor color.
+		$text_color = 127 > amp_get_relative_luminance_from_hex( $color_option['color'] ) ? '#fff' : '#000';
+
+		// @todo Shouldn't the .has-X-color rule come _after_?
+		printf(
+			':root .has-%1$s-color { color: %2$s }
+			:root .has-%1$s-background-color { color: %3$s; background-color: %2$s }',
+			$color_option['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			$color_option['color'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			$text_color // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		);
+	}
+	echo '</style>';
+}
+
+/**
+ * Get relative luminance from color hex value.
+ *
+ * Copied from `\Twenty_Twenty_One_Custom_Colors::get_relative_luminance_from_hex()`.
+ *
+ * @internal
+ * @see https://github.com/WordPress/wordpress-develop/blob/acbbbd18b32b5429264622141a6d058b64f3a5ad/src/wp-content/themes/twentytwentyone/classes/class-twenty-twenty-one-custom-colors.php#L138-L156
+ * @since 2.1
+ *
+ * @param string $hex Color hex value.
+ * @return int Relative luminance value.
+ */
+function amp_get_relative_luminance_from_hex( $hex ) {
+
+	// Remove the "#" symbol from the beginning of the color.
+	$hex = ltrim( $hex, '#' );
+
+	// Make sure there are 6 digits for the below calculations.
+	if ( 3 === strlen( $hex ) ) {
+		$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+	}
+
+	// Get red, green, blue.
+	$red   = hexdec( substr( $hex, 0, 2 ) );
+	$green = hexdec( substr( $hex, 2, 2 ) );
+	$blue  = hexdec( substr( $hex, 4, 2 ) );
+
+	// Calculate the luminance.
+	$lum = ( 0.2126 * $red ) + ( 0.7152 * $green ) + ( 0.0722 * $blue );
+	return (int) round( $lum );
+}

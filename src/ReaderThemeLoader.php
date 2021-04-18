@@ -69,22 +69,27 @@ final class ReaderThemeLoader implements Service, Registerable {
 	/**
 	 * Is Reader mode with a Reader theme selected.
 	 *
+	 * @param array $options Options to check. If omitted, the currently-saved options are used.
 	 * @return bool Whether new Reader mode.
 	 */
-	public function is_enabled() {
+	public function is_enabled( $options = null ) {
 		// If the theme was overridden then we know it is enabled. We can't check get_template() at this point because
 		// it will be identical to $reader_theme.
 		if ( $this->is_theme_overridden() ) {
 			return true;
 		}
 
+		if ( null === $options ) {
+			$options = AMP_Options_Manager::get_options();
+		}
+
 		// If Reader mode is not enabled, then a Reader theme is definitely not going to be served.
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== $options[ Option::THEME_SUPPORT ] ) {
 			return false;
 		}
 
 		// If the Legacy Reader mode is active, then a Reader theme is not going to be served.
-		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		$reader_theme = $options[ Option::READER_THEME ];
 		if ( ReaderThemes::DEFAULT_READER_THEME === $reader_theme ) {
 			return false;
 		}
@@ -122,6 +127,40 @@ final class ReaderThemeLoader implements Service, Registerable {
 
 		add_filter( 'wp_prepare_themes_for_js', [ $this, 'filter_wp_prepare_themes_to_indicate_reader_theme' ] );
 		add_action( 'admin_print_footer_scripts-themes.php', [ $this, 'inject_theme_single_template_modifications' ] );
+
+		add_action(
+			'amp_options_updating',
+			function ( $options ) {
+				if ( $this->is_enabled( $options ) ) {
+					$options[ Option::PRIMARY_THEME_COLOR_PALETTE ] = $this->get_editor_color_palette_theme_support();
+				} else {
+					$options[ Option::PRIMARY_THEME_COLOR_PALETTE ] = null;
+				}
+				return $options;
+			}
+		);
+
+		// @todo Also do this when the theme has been updated?
+		add_action(
+			'after_switch_theme',
+			function () {
+				if ( $this->is_enabled() ) {
+					AMP_Options_Manager::update_option( Option::PRIMARY_THEME_COLOR_PALETTE, $this->get_editor_color_palette_theme_support() );
+				} else {
+					AMP_Options_Manager::update_option( Option::PRIMARY_THEME_COLOR_PALETTE, null );
+				}
+			}
+		);
+	}
+
+	/**
+	 * Get the editor color palette theme support.
+	 *
+	 * @return array|null
+	 */
+	public function get_editor_color_palette_theme_support() {
+		$palette = current( (array) get_theme_support( 'editor-color-palette' ) );
+		return is_array( $palette ) ? $palette : null;
 	}
 
 	/**
@@ -370,19 +409,25 @@ final class ReaderThemeLoader implements Service, Registerable {
 		add_filter( 'customize_previewable_devices', [ $this, 'customize_previewable_devices' ] );
 		add_action( 'customize_register', [ $this, 'remove_customizer_themes_panel' ], 11 );
 
-		// Add fallback style for cover block in case theme palette of active theme is not the same as the reader theme.
+		// @todo This doesn't seem to actually be needed.
 		add_action(
-			'wp_enqueue_scripts',
+			'after_setup_theme',
 			function () {
-				wp_add_inline_style(
-					'amp-default',
-					'
-						.wp-block-cover {
-							background: black;
-							color: white;
-						}
-					'
-				);
+				$editor_color_palette = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_COLOR_PALETTE );
+				if ( $editor_color_palette ) {
+					add_theme_support( 'editor-color-palette', $editor_color_palette );
+				}
+			},
+			100
+		);
+
+		add_action(
+			'wp_print_styles',
+			function () {
+				$editor_color_palette = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_COLOR_PALETTE );
+				if ( $editor_color_palette ) {
+					amp_add_editor_color_styles( $editor_color_palette );
+				}
 			}
 		);
 	}
