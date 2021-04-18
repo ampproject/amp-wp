@@ -13,9 +13,11 @@ import { useDispatch, useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import AMPRevalidateNotification from '../revalidate-notification';
+import { useErrorsFetchingStateChanges } from '../../../hooks/use-errors-fetching-state-changes';
 
 jest.mock( '@wordpress/data/build/components/use-select', () => jest.fn() );
 jest.mock( '@wordpress/data/build/components/use-dispatch/use-dispatch', () => jest.fn() );
+jest.mock( '../../../hooks/use-errors-fetching-state-changes', () => ( { useErrorsFetchingStateChanges: jest.fn() } ) );
 
 describe( 'AMPRevalidateNotification', () => {
 	let container;
@@ -31,6 +33,7 @@ describe( 'AMPRevalidateNotification', () => {
 			isDraft: false,
 			isFetchingErrors: false,
 			isPostDirty: false,
+			maybeIsPostDirty: false,
 			...overrides,
 		} ) );
 	}
@@ -40,6 +43,11 @@ describe( 'AMPRevalidateNotification', () => {
 
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
+
+		useErrorsFetchingStateChanges.mockImplementation( () => ( {
+			isFetchingErrors: false,
+			fetchingErrorsMessage: '',
+		} ) );
 	} );
 
 	afterEach( () => {
@@ -59,15 +67,17 @@ describe( 'AMPRevalidateNotification', () => {
 	} );
 
 	it( 'renders loading spinner when errors are being fetched', () => {
-		setupUseSelect( {
+		useErrorsFetchingStateChanges.mockImplementation( () => ( {
 			isFetchingErrors: true,
-		} );
+			fetchingErrorsMessage: 'Loading',
+		} ) );
 
 		act( () => {
 			render( <AMPRevalidateNotification />, container );
 		} );
 
 		expect( container.querySelector( '.amp-spinner-container' ) ).not.toBeNull();
+		expect( container.innerHTML ).toContain( 'Loading' );
 	} );
 
 	it( 'renders revalidate message if post is dirty', () => {
@@ -107,11 +117,11 @@ describe( 'AMPRevalidateNotification', () => {
 		expect( savePost ).toHaveBeenCalledWith( { isPreview: true } );
 	} );
 
-	it( 'always revalidate status message if there are active meta boxes', () => {
+	it( 'always renders revalidate status message if there are active meta boxes', () => {
 		setupUseSelect( {
 			isDraft: false,
 			isPostDirty: false,
-			hasActiveMetaboxes: true,
+			maybeIsPostDirty: true,
 		} );
 
 		act( () => {

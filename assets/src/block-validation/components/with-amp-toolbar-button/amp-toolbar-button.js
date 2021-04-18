@@ -15,6 +15,7 @@ import { useDispatch } from '@wordpress/data';
  */
 import { ToolbarIcon } from '../icon';
 import { PLUGIN_NAME, SIDEBAR_NAME } from '../../plugins/amp-block-validation';
+import { useAMPDocumentToggle } from '../../hooks/use-amp-document-toggle';
 
 /**
  * AMP button displaying in the block toolbar.
@@ -25,6 +26,12 @@ import { PLUGIN_NAME, SIDEBAR_NAME } from '../../plugins/amp-block-validation';
  */
 export function AMPToolbarButton( { clientId, count } ) {
 	const { openGeneralSidebar } = useDispatch( 'core/edit-post' );
+
+	const { isAMPEnabled } = useAMPDocumentToggle();
+
+	if ( ! isAMPEnabled ) {
+		return null;
+	}
 
 	return (
 		<BlockControls>

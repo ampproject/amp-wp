@@ -157,7 +157,66 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$this->assertEquals( 101, has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 
-		$this->assertFalse( has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
+		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'maybe_fail_validate_request' ] ) );
+		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'override_validation_error_statuses' ] ) );
+	}
+
+	/**
+	 * Test ::maybe_fail_validate_request().
+	 *
+	 * @covers AMP_Validation_Manager::maybe_fail_validate_request()
+	 */
+	public function test_maybe_fail_validate_request() {
+		$post_id = self::factory()->post->create();
+
+		remove_filter( 'wp', [ 'AMP_Validation_Manager', 'maybe_fail_validate_request' ] );
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter(
+			'wp_die_ajax_handler',
+			static function () {
+				return static function () {};
+			} 
+		);
+
+		$get_output = static function () {
+			ob_start();
+			AMP_Validation_Manager::maybe_fail_validate_request();
+			return ob_get_clean();
+		};
+
+		// Verify there is no output if it is not a validation request.
+		AMP_Validation_Manager::$is_validate_request = false;
+		$this->assertEmpty( $get_output() );
+
+		// Verify there is no output if it is an AMP request.
+		AMP_Validation_Manager::$is_validate_request = true;
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->go_to( get_permalink( $post_id ) );
+		$this->assertEmpty( $get_output() );
+
+		// Verify correct response if not an AMP page.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		$output = $get_output();
+		$this->assertJson( $output );
+		$this->assertStringContains( 'AMP_NOT_REQUESTED', $output );
+
+		// Verify correct response if AMP not available.
+		AMP_Validation_Manager::$is_validate_request = true;
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+
+		add_filter(
+			'amp_skip_post',
+			static function ( $skipped, $_post_id ) use ( $post_id ) {
+				return $_post_id === $post_id;
+			},
+			10,
+			2 
+		);
+
+		$this->go_to( amp_get_permalink( $post_id ) );
+		$output = $get_output();
+		$this->assertJson( $output );
+		$this->assertStringContains( 'AMP_NOT_AVAILABLE', $output );
 	}
 
 	/**

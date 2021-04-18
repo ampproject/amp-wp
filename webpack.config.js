@@ -3,6 +3,7 @@
  */
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const IgnoreEmitPlugin = require( 'ignore-emit-webpack-plugin' );
 const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
@@ -340,6 +341,78 @@ const settingsPage = {
 	],
 };
 
+const styles = {
+	...sharedConfig,
+	entry: {
+		'admin-tables': './assets/css/src/admin-tables.css',
+		'amp-block-editor': './assets/css/src/amp-block-editor.css',
+		'amp-customizer': './assets/css/src/amp-customizer.css',
+		'amp-customizer-legacy': './assets/css/src/amp-customizer-legacy.css',
+		'amp-default': './assets/css/src/amp-default.css',
+		'amp-icons': './assets/css/src/amp-icons.css',
+		'amp-mobile-version-switcher': './assets/css/src/amp-mobile-version-switcher.css',
+		'amp-playlist-shortcode': './assets/css/src/amp-playlist-shortcode.css',
+		'amp-post-meta-box': './assets/css/src/amp-post-meta-box.css',
+		'amp-validation-error-taxonomy': './assets/css/src/amp-validation-error-taxonomy.css',
+		'amp-validation-single-error-url': './assets/css/src/amp-validation-single-error-url.css',
+		'amp-validation-tooltips': './assets/css/src/amp-validation-tooltips.css',
+	},
+	module: {
+		...sharedConfig.module,
+		rules: sharedConfig.module.rules.map(
+			( rule ) => {
+				const cssLoader = Array.isArray( rule.use ) && rule.use.find(
+					( loader ) => loader.loader && loader.loader.includes( '/css-loader' ),
+				);
+
+				/**
+				 * Prevent "Module not found: Error: Can't resolve ..."
+				 * being thrown for `url()` CSS rules.
+				 */
+				if ( cssLoader ) {
+					cssLoader.options = {
+						...cssLoader.options,
+						url: false,
+					};
+				}
+
+				return rule;
+			},
+		),
+	},
+	plugins: [
+		...sharedConfig.plugins.filter(
+			( plugin ) => plugin.constructor.name !== 'DependencyExtractionWebpackPlugin',
+		),
+		new WebpackBar( {
+			name: 'Styles',
+			color: '#b763ff',
+		} ),
+	],
+};
+
+/**
+ * Get JS chunk names for a list of style entry points.
+ *
+ * @param {Array} entries List of style entry points.
+ *
+ * @return {Array} List of JS chunk names.
+ */
+const extractChunkNamesForStylesheets = ( entries ) =>
+	entries
+		.map( ( entryPath ) => {
+			const match = entryPath.match( /([^\/]+)\.s?css$/ );
+			return `${ match[ 1 ] }.js`;
+		} );
+
+/**
+ * Do not generate empty JS chunks for stylesheets.
+ */
+styles.plugins = [
+	...styles.plugins,
+	new IgnoreEmitPlugin( extractChunkNamesForStylesheets( Object.values( styles.entry ) ) ),
+];
+
 const mobileRedirection = {
 	...sharedConfig,
 	entry: {
@@ -363,5 +436,6 @@ module.exports = [
 	wpPolyfills,
 	setup,
 	settingsPage,
+	styles,
 	mobileRedirection,
 ];

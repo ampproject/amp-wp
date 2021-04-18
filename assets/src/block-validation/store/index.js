@@ -19,6 +19,7 @@ const SET_FETCHING_ERRORS_REQUEST_ERROR_MESSAGE = 'SET_FETCHING_ERRORS_REQUEST_E
 const SET_IS_FETCHING_ERRORS = 'SET_IS_FETCHING_ERRORS';
 const SET_IS_POST_DIRTY = 'SET_IS_POST_DIRTY';
 const SET_IS_SHOWING_REVIEWED = 'SET_IS_SHOWING_REVIEWED';
+const SET_MAYBE_IS_POST_DIRTY = 'SET_MAYBE_IS_POST_DIRTY';
 const SET_REVIEW_LINK = 'SET_REVIEW_LINK';
 const SET_VALIDATION_ERRORS = 'SET_VALIDATION_ERRORS';
 
@@ -29,6 +30,7 @@ export const INITIAL_STATE = {
 	isFetchingErrors: false,
 	isShowingReviewed: false,
 	keptMarkupValidationErrors: [],
+	maybeIsPostDirty: false,
 	rawValidationErrors: [],
 	reviewLink: null,
 	reviewedValidationErrors: [],
@@ -51,6 +53,9 @@ export function getStore( initialState ) {
 
 				case SET_IS_SHOWING_REVIEWED:
 					return { ...state, isShowingReviewed: action.isShowingReviewed };
+
+				case SET_MAYBE_IS_POST_DIRTY:
+					return { ...state, maybeIsPostDirty: action.maybeIsPostDirty };
 
 				case SET_REVIEW_LINK:
 					return { ...state, reviewLink: action.reviewLink };
@@ -103,6 +108,10 @@ export function getStore( initialState ) {
 				type: SET_IS_SHOWING_REVIEWED,
 				isShowingReviewed,
 			} ),
+			setMaybeIsPostDirty: ( maybeIsPostDirty ) => ( {
+				type: SET_MAYBE_IS_POST_DIRTY,
+				maybeIsPostDirty,
+			} ),
 			setReviewLink: ( reviewLink ) => ( {
 				type: SET_REVIEW_LINK,
 				reviewLink,
@@ -118,6 +127,7 @@ export function getStore( initialState ) {
 			getIsFetchingErrors: ( { isFetchingErrors } ) => isFetchingErrors,
 			getIsPostDirty: ( { isPostDirty } ) => isPostDirty,
 			getIsShowingReviewed: ( { isShowingReviewed } ) => isShowingReviewed,
+			getMaybeIsPostDirty: ( { maybeIsPostDirty } ) => maybeIsPostDirty,
 			getReviewLink: ( { reviewLink } ) => reviewLink,
 			getReviewedValidationErrors: ( { reviewedValidationErrors } ) => reviewedValidationErrors,
 			getUnreviewedValidationErrors: ( { unreviewedValidationErrors } ) => unreviewedValidationErrors,

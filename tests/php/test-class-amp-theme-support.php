@@ -78,6 +78,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		parent::tearDown();
 		unset( $GLOBALS['show_admin_bar'] );
+		AMP_Validation_Manager::$is_validate_request = false;
 		AMP_Validation_Manager::reset_validation_results();
 		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
 		remove_theme_support( 'custom-header' );
@@ -417,7 +418,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertStringContains( '<meta name="viewport" content="maximum-scale=1.0,width=device-width">', $sanitized_html );
 
 		// MathML script was added.
-		$this->assertStringContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContains( 'https://cdn.ampproject.org/v0/amp-mathml-0.1.js', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 
 	/**
@@ -1393,7 +1394,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		/** @var DOMElement $script Script. */
 		$actual_script_srcs = [];
-		foreach ( $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' ) as $script ) {
+		foreach ( $dom->xpath->query( '//script[ not( @amp-onerror ) and ( not( @type ) or @type = "text/javascript" ) ]' ) as $script ) {
 			$actual_script_srcs[] = $script->getAttribute( 'src' );
 		}
 
@@ -1641,23 +1642,22 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<html amp=""',
 			'<meta charset="' . Document\Encoding::AMP . '">',
 			'<meta name="viewport" content="width=device-width">',
-			'<meta name="generator" content="AMP Plugin',
-			'<title>',
+			'<link as="script" crossorigin="anonymous" href="https://cdn.ampproject.org/v0.mjs" rel="modulepreload">',
 			'<link rel="preconnect" href="https://cdn.ampproject.org">',
-			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
-			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">',
-			'<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>',
+			'<meta name="generator" content="AMP Plugin',
+			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 
-			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>',
-			'<script src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js" async="" custom-element="amp-experiment"></script>',
+			'<script type="module" src="https://cdn.ampproject.org/v0.mjs" async crossorigin="anonymous"></script>',
+			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.mjs" type="module" crossorigin="anonymous"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-experiment-0.1.mjs" async="" custom-element="amp-experiment" type="module" crossorigin="anonymous"></script>',
 
-			'#<script( type=[\'"]text/javascript[\'"])? src=[\'"]https\://cdn\.ampproject\.org/v0/amp-ad-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-ad[\'"]>\s*</script>#s',
-			'#<script src=[\'"]https\://cdn\.ampproject\.org/v0/amp-audio-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-audio[\'"]>\s*</script>#s',
-			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-0.1.js" async custom-element="amp-list"></script>',
-			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-ad-0.1.mjs" async="" custom-element="amp-ad" type="module" crossorigin="anonymous"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-audio-0.1.mjs" async="" custom-element="amp-audio" type="module" crossorigin="anonymous"></script>',
+			'<script type="module" src="https://cdn.ampproject.org/v0/amp-list-0.1.mjs" async custom-element="amp-list" crossorigin="anonymous"></script>',
+			'<script type="module" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.mjs" async custom-element="amp-mathml" crossorigin="anonymous"></script>',
 
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
@@ -1665,11 +1665,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
 
+			'<title>',
+			'<link rel="canonical" href="',
 			'<script type="application/ld+json">{"@context"',
 
 			'#<style amp-boilerplate(="")?>#',
 			'#<noscript><style amp-boilerplate(="")?>#',
-			'<link rel="canonical" href="',
 			'</head>',
 		];
 
@@ -1756,6 +1757,19 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		unset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] );
 		unset( $_SERVER['REQUEST_METHOD'] );
+	}
+
+	/**
+	 * Test prepare_response when validating an invalid AMP page.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_for_validating_invalid_amp_page() {
+		AMP_Validation_Manager::$is_validate_request = true;
+
+		$response = AMP_Theme_Support::prepare_response( '' );
+		$this->assertJson( $response );
+		$this->assertStringContains( 'RENDERED_PAGE_NOT_AMP', $response );
 	}
 
 	/**

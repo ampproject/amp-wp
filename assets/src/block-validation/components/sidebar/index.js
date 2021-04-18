@@ -10,8 +10,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.css';
-import { SidebarNotificationsContainer } from '../sidebar-notification';
-import { AMPRevalidateNotification, AMPValidationStatusNotification } from '../amp-validation-status';
+import AMPValidationStatus from '../amp-validation-status';
 import { Error } from '../error';
 import { BLOCK_VALIDATION_STORE_KEY } from '../../store';
 
@@ -49,10 +48,7 @@ export function Sidebar() {
 
 	return (
 		<div className="amp-sidebar">
-			<SidebarNotificationsContainer isShady={ true }>
-				<AMPRevalidateNotification />
-				<AMPValidationStatusNotification />
-			</SidebarNotificationsContainer>
+			<AMPValidationStatus />
 
 			{ 0 < displayedErrors.length && (
 				<ul className="amp-sidebar__errors-list">

@@ -36,7 +36,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic">
 						<span placeholder="" class="amp-wp-iframe-placeholder"></span>
 						<noscript>
-							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class"></iframe>
+							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0"></iframe>
 						</noscript>
 					</amp-iframe>
 				',
@@ -60,7 +60,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'
 					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic">
 						<noscript>
-							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class"></iframe>
+							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0"></iframe>
 						</noscript>
 					</amp-iframe>
 				',
@@ -181,7 +181,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'
 					<amp-iframe src="https://example.com/iframe" id="myIframe" height="400" layout="fixed-height" width="auto" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation">
 						<noscript>
-							<iframe src="https://example.com/iframe" id="myIframe"></iframe>
+							<iframe src="https://example.com/iframe"></iframe>
 						</noscript>
 					</amp-iframe>
 				',
@@ -296,7 +296,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 			],
 
 			'amp_iframe_with_fallback'                  => [
-				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic"><noscript><iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class"></iframe></noscript></amp-iframe>',
+				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic"><noscript><iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0"></iframe></noscript></amp-iframe>',
 				null,
 			],
 
@@ -364,7 +364,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic">
 						<span placeholder="" class="amp-wp-iframe-placeholder"></span>
 						<noscript>
-							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class"></iframe>
+							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0"></iframe>
 						</noscript>
 					</amp-iframe>
 				',
@@ -380,7 +380,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="1" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic">
 						<span placeholder="" class="amp-wp-iframe-placeholder"></span>
 						<noscript>
-							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="1" class="iframe-class"></iframe>
+							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="1"></iframe>
 						</noscript>
 					</amp-iframe>
 				',
@@ -441,7 +441,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'
 					<amp-iframe title="Why Backbone" id="talk_frame_48643" src="https://speakerdeck.com/player/4648d440a3230130452522b217532879" width="640" height="480" style="border:0; padding:0; margin:0; background:transparent;" frameborder="0" allowtransparency="" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic" class="amp-wp-enforced-sizes">
 						<noscript>
-							<iframe title="Why Backbone" id="talk_frame_48643" src="https://speakerdeck.com/player/4648d440a3230130452522b217532879" width="640" height="480" style="border:0; padding:0; margin:0; background:transparent;" frameborder="0"></iframe>
+							<iframe title="Why Backbone" src="https://speakerdeck.com/player/4648d440a3230130452522b217532879" width="640" height="480" frameborder="0"></iframe>
 						</noscript>
 					</amp-iframe>',
 			],
@@ -580,7 +580,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'
 					<amp-iframe src="https://example.com/video/132886713" layout="fill" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation">
 						<noscript>
-							<iframe style="width: 100%; height: 100%; position: absolute; left: 0px; top: 0px;" src="https://example.com/video/132886713" width="100%" height="100%"></iframe>
+							<iframe src="https://example.com/video/132886713" width="100%" height="100%"></iframe>
 						</noscript>
 					</amp-iframe>
 				',
