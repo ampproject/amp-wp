@@ -17,8 +17,7 @@ export default function() {
  * @param {HTMLTableRowElement} row HTML row element.
  */
 function setStatusNew( row ) {
-	// Look inside the `.column-status` only so that the AMP Validated URLs table is not affected.
-	const input = row.querySelector( '.column-status .amp-validation-error-new' );
+	const input = row.querySelector( '.amp-validation-error-new' );
 
 	if ( ! input ) {
 		return;
