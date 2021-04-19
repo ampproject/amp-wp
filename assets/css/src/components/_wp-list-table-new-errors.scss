@@ -2,7 +2,7 @@
 .wp-list-table.table-view-list > tbody {
 
 	td,
-	.row-title {
+	.row-title:not(:hover) {
 		color: #1e1e1e;
 	}
 
