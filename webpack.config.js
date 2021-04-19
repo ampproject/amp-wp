@@ -348,7 +348,7 @@ const styles = {
 		'amp-customizer': './assets/css/src/amp-customizer.css',
 		'amp-customizer-legacy': './assets/css/src/amp-customizer-legacy.css',
 		'amp-default': './assets/css/src/amp-default.css',
-		'amp-icons': './assets/css/src/amp-icons.css',
+		'amp-icons': './assets/css/src/amp-icons.scss',
 		'amp-mobile-version-switcher': './assets/css/src/amp-mobile-version-switcher.css',
 		'amp-playlist-shortcode': './assets/css/src/amp-playlist-shortcode.css',
 		'amp-post-meta-box': './assets/css/src/amp-post-meta-box.css',
