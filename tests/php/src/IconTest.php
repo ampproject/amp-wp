@@ -39,15 +39,12 @@ final class IconTest extends TestCase {
 	 * @covers ::valid()
 	 * @covers ::warning()
 	 * @covers ::logo()
-	 * @covers ::get_color()
 	 * @covers ::to_html()
 	 */
 	public function test_types( $type ) {
 		/** @var Icon $icon */
 		$icon = Icon::$type();
 		$this->assertInstanceOf( Icon::class, $icon );
-
-		$this->assertInternalType( 'string', $icon->get_color() );
 
 		$html = $icon->to_html();
 		$this->assertStringStartsWith( '<span ', $html );

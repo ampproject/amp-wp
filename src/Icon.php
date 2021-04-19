@@ -117,28 +117,6 @@ final class Icon {
 	}
 
 	/**
-	 * Get color for current icon.
-	 *
-	 * @return string Hex color for icon.
-	 */
-	public function get_color() {
-		// When updating the colors here, also do so for 'assets/css/src/amp-icons.css'.
-		switch ( $this->icon ) {
-			case self::INVALID:
-				return '#bb532e';
-			case self::LINK:
-				return '#00a0d2';
-			case self::VALID:
-			case self::REMOVED:
-				return '#489697';
-			case self::WARNING:
-				return '#ffc733';
-			default:
-				return '';
-		}
-	}
-
-	/**
 	 * Render icon as HTML.
 	 *
 	 * @param array $attributes List of attributes to add to HTML output.
