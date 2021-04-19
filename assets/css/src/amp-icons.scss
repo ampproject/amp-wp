@@ -26,6 +26,7 @@ $amp-icon-accent-orange: #ffc733;
 
 	// Invalid.
 	&.amp-invalid {
+
 		@extend %amp-icon-rounded-base;
 
 		&::before {
@@ -43,6 +44,7 @@ $amp-icon-accent-orange: #ffc733;
 
 	// Valid.
 	&.amp-valid {
+
 		@extend %amp-icon-rounded-base;
 
 		&::before {
@@ -59,6 +61,7 @@ $amp-icon-accent-orange: #ffc733;
 
 	// Removed.
 	&.amp-removed::before {
+
 		@extend %amp-icon-rounded-base;
 
 		background: $amp-icon-accent-green-light url("../images/amp-delete.svg") no-repeat center;
