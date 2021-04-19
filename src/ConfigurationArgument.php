@@ -16,6 +16,7 @@ namespace AmpProject\AmpWP;
  */
 interface ConfigurationArgument {
 
+	const ENABLE_ESM       = 'enable_esm';
 	const ENABLE_OPTIMIZER = 'enable_optimizer';
 	const ENABLE_SSR       = 'enable_ssr';
 }

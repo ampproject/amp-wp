@@ -33,6 +33,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
+
       - name: Get npm cache directory
         id: npm-cache
         run: echo "::set-output name=dir::$(npm config get cache)"
@@ -61,6 +70,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
 
       - name: Get npm cache directory
         id: npm-cache
@@ -186,6 +204,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
+
       - name: Get npm cache directory
         id: npm-cache
         run: echo "::set-output name=dir::$(npm config get cache)"
@@ -210,9 +237,14 @@ jobs:
           CI: true
 
       - name: Run unit tests (with coverage)
-        run: |
-          npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
-          bash <(curl -s https://codecov.io/bash) -cF javascript -f build/logs/lcov.info
+        run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
+
+      - name: Upload code coverage report
+        uses: codecov/codecov-action@v1.4.0
+        with:
+          file: build/logs/lcov.info
+          flags: javascript
+          fail_ci_if_error: true
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -228,6 +260,15 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -262,9 +303,7 @@ jobs:
         run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
       - name: Build plugin
-        run: |
-          npm run build:js
-          npm run build:css
+        run: npm run build:js
 
       - name: Start Docker environment
         run: npm run env:start
@@ -363,6 +402,15 @@ jobs:
             sleep 1
           done
 
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
+
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
@@ -396,9 +444,7 @@ jobs:
           CI: true
 
       - name: Build plugin
-        run: |
-          npm run build:js
-          npm run build:css
+        run: npm run build:js
 
       # Scan the logs for failing tests and surface that information by creating annotations and log file decorations.
       - name: Setup problem matcher to provide annotations for PHPUnit
@@ -430,10 +476,16 @@ jobs:
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true }}
-        run: |
-          vendor/bin/phpunit --coverage-clover build/logs/clover.xml
-          bash <(curl -s https://codecov.io/bash) -cF php -f "$PWD/build/logs/clover.xml"
+        run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
+
+      - name: Upload code coverage report
+        if: ${{ matrix.coverage == true }}
+        uses: codecov/codecov-action@v1.4.0
+        with:
+          file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+          flags: php
+          fail_ci_if_error: true
 
       - name: Run external HTTP tests
         if: ${{ matrix.external-http == true }}
@@ -467,6 +519,15 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
 
       - name: Get Composer Cache Directory
         id: composer-cache

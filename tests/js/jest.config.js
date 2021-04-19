@@ -13,11 +13,15 @@ module.exports = {
 		'<rootDir>/build',
 		'<rootDir>/tests/shared',
 		'<rootDir>/vendor',
+		'<rootDir>/assets/src/block-editor/plugins',
+		'<rootDir>/assets/src/block-validation/plugins',
 	],
 	coveragePathIgnorePatterns: [
 		'<rootDir>/node_modules',
 		'<rootDir>/build/',
 		'<rootDir>/tests/shared',
+		'<rootDir>/assets/src/block-editor/plugins',
+		'<rootDir>/assets/src/block-validation/plugins',
 	],
 	modulePathIgnorePatterns: [
 		'<rootDir>/assets/src/components/.*/__mocks__',

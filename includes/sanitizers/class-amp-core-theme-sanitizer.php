@@ -6,10 +6,8 @@
  * @since 1.0
  */
 
-use AmpProject\AmpWP\Transformer\DetermineHeroImages;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
-use AmpProject\Optimizer\Configuration;
 use AmpProject\Role;
 
 /**
@@ -101,7 +99,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'amend_twentytwentyone_sub_menu_toggles' => [],
 					'add_twentytwentyone_mobile_modal' => [],
 					'add_twentytwentyone_sub_menu_fix' => [],
-					'enable_determine_hero_images_transformer' => [],
 				];
 
 				// Dark mode button toggle is only supported in the Customizer for now.
@@ -142,7 +139,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_img_display_block_fix'        => [],
 					'add_twentytwenty_custom_logo_fix' => [],
 					'add_twentytwenty_current_page_awareness' => [],
-					'enable_determine_hero_images_transformer' => [],
 				];
 
 				$theme = wp_get_theme( 'twentytwenty' );
@@ -158,19 +154,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Twenty Nineteen.
 			case 'twentynineteen':
 				return [
-					'dequeue_scripts'                    => [
+					'dequeue_scripts'              => [
 						'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
 						'twentynineteen-priority-menu',
 						'twentynineteen-touch-navigation', // @todo There could be an AMP implementation of this, similar to what is implemented on ampproject.org.
 					],
-					'remove_actions'                     => [
+					'remove_actions'               => [
 						'wp_print_footer_scripts' => [
 							'twentynineteen_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
 						],
 					],
-					'add_twentynineteen_masthead_styles' => [],
-					'adjust_twentynineteen_images'       => [],
-					'enable_determine_hero_images_transformer' => [],
+					'adjust_twentynineteen_images' => [],
 				];
 
 			// Twenty Seventeen.
@@ -206,7 +200,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					],
 					'set_twentyseventeen_quotes_icon'     => [],
 					'add_twentyseventeen_attachment_image_attributes' => [],
-					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Sixteen.
@@ -229,7 +222,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'sub_menu_button_toggle_class' => 'toggled-on',
 						'no_js_submenu_visible'        => true,
 					],
-					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Fifteen.
@@ -250,7 +242,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'sub_menu_button_toggle_class' => 'toggle-on',
 						'no_js_submenu_visible'        => true,
 					],
-					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Fourteen.
@@ -267,7 +258,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_twentyfourteen_masthead_styles' => [],
 					'add_twentyfourteen_slider_carousel' => [],
 					'add_twentyfourteen_search'          => [],
-					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Thirteen.
@@ -280,7 +270,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_nav_menu_toggle'      => [],
 					'add_nav_sub_menu_buttons' => [],
 					'add_nav_menu_styles'      => [],
-					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Twelve.
@@ -290,7 +279,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'twentytwelve-navigation',
 					],
 					'add_nav_menu_styles' => [],
-					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Eleven.
@@ -300,14 +288,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'//style[ @id = "twentyeleven-header-css" ]',
 						'//link[ @id = "dark-css" ]',
 					],
-					'enable_determine_hero_images_transformer' => [],
 				];
 
 			// Twenty Ten.
 			case 'twentyten':
-				return [
-					'enable_determine_hero_images_transformer' => [],
-				];
+				return [];
 
 			default:
 				return null;
@@ -545,25 +530,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				call_user_func( [ __CLASS__, $theme_feature ], $feature_args );
 			}
 		}
-	}
-
-	/**
-	 * Enable transformer that identifies hero image candidates for prerendering.
-	 *
-	 * Note that this transformer will likely be enabled by default in the future. It is only enabled by default for
-	 * core themes in the immediate term since it is known to work well with this set of themes.
-	 *
-	 * @since 2.1
-	 */
-	public static function enable_determine_hero_images_transformer() {
-		add_filter(
-			'amp_optimizer_config',
-			static function ( $config ) {
-				array_unshift( $config[ Configuration::KEY_TRANSFORMERS ], DetermineHeroImages::class );
-				return $config;
-			},
-			9
-		);
 	}
 
 	/**
@@ -938,70 +904,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Add required styles for featured image header in Twenty Nineteen.
+	 * Add required styles for Twenty Seventeen header.
 	 *
-	 * The following is necessary because the styles in the theme apply to the featured img,
-	 * and the CSS parser will then convert the selectors to amp-img. Nevertheless, object-fit
-	 * does not apply on amp-img and it needs to apply on an actual img.
-	 *
-	 * @link https://github.com/WordPress/wordpress-develop/blob/5.0/src/wp-content/themes/twentynineteen/style.css#L2276-L2299
-	 * @since 1.0
-	 */
-	public static function add_twentynineteen_masthead_styles() {
-		add_action(
-			'wp_enqueue_scripts',
-			static function() {
-				ob_start();
-				?>
-				<style>
-				.site-header.featured-image .site-featured-image .post-thumbnail amp-img > img {
-					height: auto;
-					left: 50%;
-					max-width: 1000%;
-					min-height: 100%;
-					min-width: 100vw;
-					position: absolute;
-					top: 50%;
-					transform: translateX(-50%) translateY(-50%);
-					width: auto;
-					z-index: 1;
-					/* When image filters are active, make it grayscale to colorize it blue. */
-				}
-
-				@supports (object-fit: cover) {
-					.site-header.featured-image .site-featured-image .post-thumbnail amp-img > img {
-						height: 100%;
-						left: 0;
-						object-fit: cover;
-						top: 0;
-						transform: none;
-						width: 100%;
-					}
-				}
-				</style>
-				<?php
-				$styles = str_replace( [ '<style>', '</style>' ], '', ob_get_clean() );
-				wp_add_inline_style( get_template() . '-style', $styles );
-			},
-			11
-		);
-	}
-
-	/**
-	 * Add required styles for video and image headers.
-	 *
-	 * This is currently used exclusively for Twenty Seventeen.
+	 * This is required since JS is not applying the required styles at runtime.
 	 *
 	 * @since 1.0
-	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1687
-	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1743
 	 */
 	public static function add_twentyseventeen_masthead_styles() {
-		/*
-		 * The following is necessary because the styles in the theme apply to img and video,
-		 * and the CSS parser will then convert the selectors to amp-img and amp-video respectively.
-		 * Nevertheless, object-fit does not apply on amp-img and it needs to apply on an actual img.
-		 */
 		add_action(
 			'wp_enqueue_scripts',
 			static function() {
@@ -1009,50 +918,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				ob_start();
 				?>
 				<style>
-				.has-header-image .custom-header-media amp-img > img,
-				.has-header-video .custom-header-media amp-video > video{
-					position: fixed;
-					height: auto;
-					left: 50%;
-					max-width: 1000%;
-					min-height: 100%;
-					min-width: 100%;
-					min-width: 100vw; /* vw prevents 1px gap on left that 100% has */
-					width: auto;
-					top: 50%;
-					padding-bottom: 1px; /* Prevent header from extending beyond the footer */
-					-ms-transform: translateX(-50%) translateY(-50%);
-					-moz-transform: translateX(-50%) translateY(-50%);
-					-webkit-transform: translateX(-50%) translateY(-50%);
-					transform: translateX(-50%) translateY(-50%);
-				}
-				.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
-					bottom: 0;
-					position: absolute;
-					top: auto;
-					-ms-transform: translateX(-50%) translateY(0);
-					-moz-transform: translateX(-50%) translateY(0);
-					-webkit-transform: translateX(-50%) translateY(0);
-					transform: translateX(-50%) translateY(0);
-				}
-				/* For browsers that support object-fit */
-				@supports ( object-fit: cover ) {
-					.has-header-image .custom-header-media amp-img > img,
-					.has-header-video .custom-header-media amp-video > video,
-					.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
-						height: 100%;
-						left: 0;
-						-o-object-fit: cover;
-						object-fit: cover;
-						top: 0;
-						-ms-transform: none;
-						-moz-transform: none;
-						-webkit-transform: none;
-						transform: none;
-						width: 100%;
-					}
-				}
-
 				.navigation-top.site-navigation-fixed {
 					display: none;
 				}
@@ -1555,7 +1420,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							font-size: 32px;
 							line-height: 46px;
 						}
-						.featured-content .post-thumbnail amp-img > img {
+						.featured-content .post-thumbnail amp-img {
 							object-fit: cover;
 							object-position: top;
 						}

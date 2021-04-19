@@ -906,11 +906,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->go_to( home_url( '/' ) );
 		$this->assertFalse( amp_is_available() );
 		$this->assertFalse( amp_is_request() );
-
-		// When the user passes a flag to the WP-CLI command, it forces AMP validation no matter whether the user disabled AMP on any template.
-		AMP_Validation_Manager::$is_validate_request = true;
-		$this->assertTrue( amp_is_available() );
-		$this->assertTrue( amp_is_request() );
 	}
 
 	/**
