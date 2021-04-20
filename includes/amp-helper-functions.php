@@ -1906,8 +1906,17 @@ function amp_add_theme_support_styles( $features = '' ) {
 		}
 	}
 
+	if ( ! empty( $features['editor-gradient-presets'] ) ) {
+		foreach ( $features['editor-gradient-presets'] as $preset ) {
+			printf(
+				'.has-%s-gradient-background { background: %s }',
+				$preset['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				$preset['gradient'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			);
+		}
+	}
+
 	// @todo editor-font-sizes.
-	// @todo editor-gradient-presets.
 	echo '</style>';
 }
 
