@@ -1892,7 +1892,7 @@ function amp_add_theme_support_styles( $features = '' ) {
 
 			printf(
 				':root .has-%1$s-background-color { background-color: %2$s; color: %3$s; }',
-				$color_option['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				sanitize_key( $color_option['slug'] ),
 				$color_option['color'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				$text_color // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
@@ -1900,7 +1900,7 @@ function amp_add_theme_support_styles( $features = '' ) {
 		foreach ( $features['editor-color-palette'] as $color_option ) {
 			printf(
 				':root .has-%1$s-color { color: %2$s; }',
-				$color_option['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				sanitize_key( $color_option['slug'] ),
 				$color_option['color'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 		}
@@ -1910,13 +1910,22 @@ function amp_add_theme_support_styles( $features = '' ) {
 		foreach ( $features['editor-gradient-presets'] as $preset ) {
 			printf(
 				'.has-%s-gradient-background { background: %s }',
-				$preset['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				sanitize_key( $preset['slug'] ),
 				$preset['gradient'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 		}
 	}
 
-	// @todo editor-font-sizes.
+	if ( ! empty( $features['editor-font-sizes'] ) ) {
+		foreach ( $features['editor-font-sizes'] as $font_size ) {
+			printf(
+				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$fpx }',
+				sanitize_key( $font_size['slug'] ),
+				(float) $font_size['size']
+			);
+		}
+	}
+
 	echo '</style>';
 }
 
