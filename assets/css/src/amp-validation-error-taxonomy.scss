@@ -1,5 +1,6 @@
 @import "./components/amp-stylesheet-list";
 @import "./components/amp-stylesheet-summary";
+@import "./components/error-details-toggle";
 @import "./components/wp-list-table-grid-lines";
 @import "./components/wp-list-table-kept-errors";
 @import "./components/wp-list-table-new-errors";
@@ -183,38 +184,6 @@ dl.detailed {
 	> div {
 		padding-left: 25px;
 	}
-}
-
-/* Error details toggle button */
-.manage-column.column-sources_with_invalid_output .error-details-toggle {
-	margin: 0;
-}
-
-.error-details-toggle {
-	float: right;
-	display: flex;
-	flex-direction: column;
-	height: 14px;
-	padding: 0;
-	margin: 0;
-	background: none;
-	border: none;
-	cursor: pointer;
-}
-
-.column-details .error-details-toggle::before,
-.column-details .error-details-toggle::after {
-	width: 12px;
-	height: 6px;
-	background-image: url("../images/down-triangle.svg");
-	background-size: cover;
-	background-position: center;
-	content: "";
-}
-
-.error-details-toggle.is-open::before,
-.error-details-toggle.is-open::after {
-	transform: rotate(180deg);
 }
 
 /* Status text icons */
