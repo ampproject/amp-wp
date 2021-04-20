@@ -14,7 +14,6 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Optimizer\Configuration;
 use AmpProject\Optimizer\Exception\UnknownConfigurationClass;
 use WP_CLI;
-use WP_CLI\Utils;
 
 /**
  * Commands that deal with the transformers registered with the AMP optimizer.
@@ -30,6 +29,11 @@ final class TransformerCommand implements Service, CliCommand {
 	private $configuration;
 
 	/**
+	 * @var WordPressFrontendLoader
+	 */
+	private $frontend_loader;
+
+	/**
 	 * Get the name under which to register the CLI command.
 	 *
 	 * @return string The name under which to register the CLI command.
@@ -41,10 +45,12 @@ final class TransformerCommand implements Service, CliCommand {
 	/**
 	 * TransformerCommand constructor.
 	 *
-	 * @param Configuration $configuration Configuration object instance to use.
+	 * @param Configuration           $configuration   Configuration object instance to use.
+	 * @param WordPressFrontendLoader $frontend_loader Frontend loader object instance to use.
 	 */
-	public function __construct( Configuration $configuration ) {
-		$this->configuration = $configuration;
+	public function __construct( Configuration $configuration, WordPressFrontendLoader $frontend_loader ) {
+		$this->configuration   = $configuration;
+		$this->frontend_loader = $frontend_loader;
 	}
 
 	/**
@@ -85,16 +91,15 @@ final class TransformerCommand implements Service, CliCommand {
 	 * +----------------------+--------+
 	 *
 	 * @subcommand list
+	 * @when before_wp_load
 	 *
 	 * @param array $args       Array of positional arguments.
 	 * @param array $assoc_args Associative array of associative arguments.
 	 * @throws WP_CLI\ExitException If the requested file could not be read.
 	 */
 	public function list_( $args, $assoc_args ) {
-		$strict = Utils\get_flag_value( $assoc_args, 'strict' );
-		if ( $strict && empty( $args ) ) {
-			WP_CLI::error( 'The --strict option can only be used in combination with a filter.' );
-		}
+		// Load a full frontend request to ensure all filters can be processed.
+		$this->frontend_loader->run();
 
 		$default_fields = [
 			'transformer',
@@ -186,11 +191,16 @@ final class TransformerCommand implements Service, CliCommand {
 	 * $ wp amp optimizer transformer config AmpRuntimeCss --format=json
 	 * {"canary":false,"styles":"","version":""}
 	 *
+	 * @when before_wp_load
+	 *
 	 * @param array $args       Array of positional arguments.
 	 * @param array $assoc_args Associative array of associative arguments.
 	 * @throws WP_CLI\ExitException If the requested file could not be read.
 	 */
 	public function config( $args, $assoc_args ) {
+		// Load a full frontend request to ensure all filters can be processed.
+		$this->frontend_loader->run();
+
 		$transformer       = array_shift( $args );
 		$transformer_class = $this->deduce_transformer_class( $transformer );
 
