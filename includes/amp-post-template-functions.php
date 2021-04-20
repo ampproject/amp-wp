@@ -28,7 +28,7 @@ function amp_post_template_init_hooks() {
 		function () {
 			$color_palette = current( (array) get_theme_support( 'editor-color-palette' ) );
 			if ( is_array( $color_palette ) ) {
-				amp_add_editor_color_styles( $color_palette );
+				amp_add_theme_support_styles( $color_palette );
 			}
 		}
 	);

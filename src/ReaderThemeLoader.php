@@ -132,9 +132,9 @@ final class ReaderThemeLoader implements Service, Registerable {
 			'amp_options_updating',
 			function ( $options ) {
 				if ( $this->is_enabled( $options ) ) {
-					$options[ Option::PRIMARY_THEME_COLOR_PALETTE ] = $this->get_editor_color_palette_theme_support();
+					$options[ Option::PRIMARY_THEME_SUPPORT ] = $this->get_theme_support_features();
 				} else {
-					$options[ Option::PRIMARY_THEME_COLOR_PALETTE ] = null;
+					$options[ Option::PRIMARY_THEME_SUPPORT ] = null;
 				}
 				return $options;
 			}
@@ -145,22 +145,30 @@ final class ReaderThemeLoader implements Service, Registerable {
 			'after_switch_theme',
 			function () {
 				if ( $this->is_enabled() ) {
-					AMP_Options_Manager::update_option( Option::PRIMARY_THEME_COLOR_PALETTE, $this->get_editor_color_palette_theme_support() );
+					AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, $this->get_theme_support_features() );
 				} else {
-					AMP_Options_Manager::update_option( Option::PRIMARY_THEME_COLOR_PALETTE, null );
+					AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, null );
 				}
 			}
 		);
 	}
 
 	/**
-	 * Get the editor color palette theme support.
+	 * Get the theme support features.
 	 *
-	 * @return array|null
+	 * @return array Theme support features.
 	 */
-	public function get_editor_color_palette_theme_support() {
-		$palette = current( (array) get_theme_support( 'editor-color-palette' ) );
-		return is_array( $palette ) ? $palette : null;
+	public function get_theme_support_features() {
+		$features     = [];
+		$feature_keys = [
+			'editor-color-palette',
+			'editor-gradient-presets',
+			'editor-font-sizes',
+		];
+		foreach ( $feature_keys as $feature_key ) {
+			$features[ $feature_key ] = current( (array) get_theme_support( $feature_key ) );
+		}
+		return $features;
 	}
 
 	/**
@@ -413,7 +421,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 		add_action(
 			'after_setup_theme',
 			function () {
-				$editor_color_palette = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_COLOR_PALETTE );
+				$editor_color_palette = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
 				if ( $editor_color_palette ) {
 					add_theme_support( 'editor-color-palette', $editor_color_palette );
 				}
@@ -424,9 +432,9 @@ final class ReaderThemeLoader implements Service, Registerable {
 		add_action(
 			'wp_head',
 			function () {
-				$editor_color_palette = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_COLOR_PALETTE );
-				if ( $editor_color_palette ) {
-					amp_add_editor_color_styles( $editor_color_palette );
+				$theme_support_features = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
+				if ( $theme_support_features ) {
+					amp_add_theme_support_styles( $theme_support_features );
 				}
 			},
 			9 // Because wp_print_styles happens at priority 8, and we want the primary theme's colors to override any conflicting theme color assignments.

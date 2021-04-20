@@ -1855,35 +1855,59 @@ function amp_remove_paired_endpoint( $url ) {
 }
 
 /**
- * Print editor color styles.
+ * Print theme support styles.
+ *
+ * @todo This could be a service.
  *
  * @internal
  * @since 2.1
  *
- * @param array $color_palette Color palette.
+ * @param array|string $features Theme support features or empty string. If empty string, then current theme's color palette is used.
  */
-function amp_add_editor_color_styles( $color_palette ) {
-	echo '<style class="editor-styles">';
-	foreach ( $color_palette as $color_option ) {
-		// There is no standard way to retrieve or derive the `color` style property when the editor color is being used
-		// for the background, so the best alternative at the moment is to guess a good default value based on the
-		// luminance of the editor color.
-		$text_color = 127 > amp_get_relative_luminance_from_hex( $color_option['color'] ) ? '#fff' : '#000';
+function amp_add_theme_support_styles( $features = '' ) {
+	$feature_keys = [
+		'editor-color-palette',
+		'editor-gradient-presets',
+		'editor-font-sizes',
+	];
 
-		printf(
-			':root .has-%1$s-background-color { background-color: %2$s; color: %3$s; }',
-			$color_option['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			$color_option['color'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			$text_color // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		);
+	if ( empty( $features ) ) {
+		$features = [];
+		foreach ( $feature_keys as $feature_key ) {
+			$features[ $feature_key ] = current( (array) get_theme_support( $feature_key ) );
+		}
 	}
-	foreach ( $color_palette as $color_option ) {
-		printf(
-			':root .has-%1$s-color { color: %2$s; }',
-			$color_option['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			$color_option['color'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		);
+	if ( ! is_array( $features ) ) {
+		return;
 	}
+
+	echo '<style id="amp-wp-theme-support-feature-styles">';
+
+	if ( ! empty( $features['editor-color-palette'] ) ) {
+		foreach ( $features['editor-color-palette'] as $color_option ) {
+			// There is no standard way to retrieve or derive the `color` style property when the editor color is being used
+			// for the background, so the best alternative at the moment is to guess a good default value based on the
+			// luminance of the editor color.
+			$text_color = 127 > amp_get_relative_luminance_from_hex( $color_option['color'] ) ? '#fff' : '#000';
+
+			printf(
+				':root .has-%1$s-background-color { background-color: %2$s; color: %3$s; }',
+				$color_option['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				$color_option['color'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				$text_color // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			);
+		}
+		foreach ( $features['editor-color-palette'] as $color_option ) {
+			printf(
+				':root .has-%1$s-color { color: %2$s; }',
+				$color_option['slug'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				$color_option['color'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			);
+		}
+	}
+
+	// @todo editor-font-sizes.
+	// @todo editor-gradient-presets.
 	echo '</style>';
 }
 
