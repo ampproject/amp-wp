@@ -23,15 +23,7 @@ function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_head', 'wp_generator' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_block_styles' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_default_styles' );
-	add_action(
-		'amp_post_template_head',
-		function () {
-			$color_palette = current( (array) get_theme_support( 'editor-color-palette' ) );
-			if ( is_array( $color_palette ) ) {
-				amp_add_theme_support_styles( $color_palette );
-			}
-		}
-	);
+	add_action( 'amp_post_template_head', 'amp_post_template_add_theme_support_styles' );
 	add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
 	add_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' );
 
@@ -108,6 +100,16 @@ function amp_post_template_add_block_styles() {
  */
 function amp_post_template_add_default_styles() {
 	wp_print_styles( 'amp-default' );
+}
+
+/**
+ * Print styles for theme support in legacy post template.
+ *
+ * @since 2.1
+ * @internal
+ */
+function amp_post_template_add_theme_support_styles() {
+	amp_add_theme_support_styles();
 }
 
 /**

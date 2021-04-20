@@ -1862,9 +1862,9 @@ function amp_remove_paired_endpoint( $url ) {
  * @internal
  * @since 2.1
  *
- * @param array|string $features Theme support features or empty string. If empty string, then current theme's color palette is used.
+ * @param array|null $features Theme support features or empty string. If empty, then current theme's color palette is used.
  */
-function amp_add_theme_support_styles( $features = '' ) {
+function amp_add_theme_support_styles( $features = null ) {
 	$feature_keys = [
 		'editor-color-palette',
 		'editor-gradient-presets',
