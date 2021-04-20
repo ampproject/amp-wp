@@ -77,31 +77,6 @@ th.column-included {
 	background-image: url("../images/amp-logo-gray.svg");
 }
 
-.single-error-detail {
-	margin: 5px 0 5px 0;
-}
-
-.single-error-detail-summary::after {
-	display: inline-block;
-}
-
-.single-error-detail-summary strong {
-	margin-right: 10px;
-	font-size: 15px;
-}
-
-.single-error-detail ul.secondary-details-array .details-attributes__attr {
-	margin-left: 20px;
-}
-
-.single-error-detail ul.secondary-details-array .details-attributes__value {
-	margin-left: 30px;
-}
-
-.single-error-detail .details-attributes__value {
-	margin-left: 10px;
-}
-
 .row-actions .amp_validation_error_accept > a {
 	color: #006505;
 }
