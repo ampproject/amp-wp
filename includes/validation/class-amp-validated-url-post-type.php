@@ -2367,7 +2367,7 @@ class AMP_Validated_URL_Post_Type {
 				</th>
 				<td>
 					<?php echo esc_html( number_format_i18n( $included_original_size + $excluded_original_size ) ); ?>
-					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_html_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 			<tr>
@@ -2376,7 +2376,7 @@ class AMP_Validated_URL_Post_Type {
 				</th>
 				<td>
 					<?php echo esc_html( number_format_i18n( $included_final_size + $excluded_final_size ) ); ?>
-					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_html_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 			<tr>
@@ -2422,7 +2422,7 @@ class AMP_Validated_URL_Post_Type {
 				</th>
 				<td>
 					<?php echo esc_html( number_format_i18n( $excluded_final_size ) ); ?>
-					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_html_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 		</table>
@@ -2453,12 +2453,12 @@ class AMP_Validated_URL_Post_Type {
 				<th class="column-stylesheet_order"><?php esc_html_e( 'Order', 'amp' ); ?></th>
 				<th class="column-original_size">
 					<?php esc_html_e( 'Original', 'amp' ); ?>
-					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
+					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_html_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
 				</th>
 				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
 				<th class="column-final_size">
 					<?php esc_html_e( 'Final', 'amp' ); ?>
-					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
+					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_html_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
 				</th>
 				<th class="column-percentage"><?php esc_html_e( 'Percent', 'amp' ); ?></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
