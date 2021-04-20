@@ -24,6 +24,38 @@ use AMP_Options_Manager;
 final class ReaderThemeSupportFeatures implements Service, Registerable {
 
 	/**
+	 * Theme feature slug for editor-color-palette.
+	 *
+	 * @var string
+	 */
+	const FEATURE_EDITOR_COLOR_PALETTE = 'editor-color-palette';
+
+	/**
+	 * Theme feature slug for editor-gradient-presets.
+	 *
+	 * @var string
+	 */
+	const FEATURE_EDITOR_GRADIENT_PRESETS = 'editor-gradient-presets';
+
+	/**
+	 * Theme feature slug for editor-font-sizes.
+	 *
+	 * @var string
+	 */
+	const FEATURE_EDITOR_FONT_SIZES = 'editor-font-sizes';
+
+	/**
+	 * Supported features.
+	 *
+	 * @var string[]
+	 */
+	const SUPPORTED_FEATURES = [
+		self::FEATURE_EDITOR_COLOR_PALETTE,
+		self::FEATURE_EDITOR_GRADIENT_PRESETS,
+		self::FEATURE_EDITOR_FONT_SIZES,
+	];
+
+	/**
 	 * Reader theme loader.
 	 *
 	 * @var ReaderThemeLoader
@@ -97,13 +129,8 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * @return array Theme support features.
 	 */
 	public function get_theme_support_features() {
-		$features     = [];
-		$feature_keys = [
-			'editor-color-palette',
-			'editor-gradient-presets',
-			'editor-font-sizes',
-		];
-		foreach ( $feature_keys as $feature_key ) {
+		$features = [];
+		foreach ( self::SUPPORTED_FEATURES as $feature_key ) {
 			$features[ $feature_key ] = current( (array) get_theme_support( $feature_key ) );
 		}
 		return $features;
@@ -135,12 +162,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		if ( $this->reader_theme_loader->is_enabled() ) {
 			$features = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
 		} elseif ( amp_is_legacy() ) {
-			$feature_keys = [
-				'editor-color-palette',
-				'editor-gradient-presets',
-				'editor-font-sizes',
-			];
-			foreach ( $feature_keys as $feature_key ) {
+			foreach ( self::SUPPORTED_FEATURES as $feature_key ) {
 				$features[ $feature_key ] = current( (array) get_theme_support( $feature_key ) );
 			}
 		}
@@ -149,10 +171,9 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			return;
 		}
 
-		echo '<style id="amp-wp-theme-support-feature-styles">';
-
-		if ( ! empty( $features['editor-color-palette'] ) ) {
-			foreach ( $features['editor-color-palette'] as $color_option ) {
+		if ( ! empty( $features[ self::FEATURE_EDITOR_COLOR_PALETTE ] ) ) {
+			echo '<style id="amp-wp-theme-support-editor-color-palette">';
+			foreach ( $features[ self::FEATURE_EDITOR_COLOR_PALETTE ] as $color_option ) {
 				// There is no standard way to retrieve or derive the `color` style property when the editor color is being used
 				// for the background, so the best alternative at the moment is to guess a good default value based on the
 				// luminance of the editor color.
@@ -165,36 +186,39 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 					$text_color // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				);
 			}
-			foreach ( $features['editor-color-palette'] as $color_option ) {
+			foreach ( $features[ self::FEATURE_EDITOR_COLOR_PALETTE ] as $color_option ) {
 				printf(
 					':root .has-%1$s-color { color: %2$s; }',
 					sanitize_key( $color_option['slug'] ),
 					$color_option['color'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				);
 			}
+			echo '</style>';
 		}
 
-		if ( ! empty( $features['editor-gradient-presets'] ) ) {
-			foreach ( $features['editor-gradient-presets'] as $preset ) {
+		if ( ! empty( $features[ self::FEATURE_EDITOR_GRADIENT_PRESETS ] ) ) {
+			echo '<style id="amp-wp-theme-support-editor-gradient-presets">';
+			foreach ( $features[ self::FEATURE_EDITOR_GRADIENT_PRESETS ] as $preset ) {
 				printf(
 					'.has-%s-gradient-background { background: %s }',
 					sanitize_key( $preset['slug'] ),
 					$preset['gradient'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				);
 			}
+			echo '</style>';
 		}
 
-		if ( ! empty( $features['editor-font-sizes'] ) ) {
-			foreach ( $features['editor-font-sizes'] as $font_size ) {
+		if ( ! empty( $features[ self::FEATURE_EDITOR_FONT_SIZES ] ) ) {
+			echo '<style id="amp-wp-theme-support-editor-font-sizes">';
+			foreach ( $features[ self::FEATURE_EDITOR_FONT_SIZES ] as $font_size ) {
 				printf(
 					':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$fpx }',
 					sanitize_key( $font_size['slug'] ),
 					(float) $font_size['size']
 				);
 			}
+			echo '</style>';
 		}
-
-		echo '</style>';
 	}
 
 	/**
