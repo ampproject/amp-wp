@@ -2335,7 +2335,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		if ( $wrap_with_details ) {
-			$output = '<details open class="details-attributes">' . $output . '</details>';
+			$output = '<details class="details-attributes">' . $output . '</details>';
 		}
 
 		return $output;
