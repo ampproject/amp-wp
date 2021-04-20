@@ -1379,7 +1379,7 @@ class AMP_Validated_URL_Post_Type {
 			} else {
 				$output[] = '<details class="source">';
 				$output[] = sprintf(
-					'<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>',
+					'<summary class="details-attributes__summary"><strong class="source"><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>',
 					'mu-plugin' === $type ? esc_html__( 'Must-Use Plugins', 'amp' ) : esc_html__( 'Plugins', 'amp' ),
 					$count
 				);
@@ -1407,7 +1407,7 @@ class AMP_Validated_URL_Post_Type {
 				$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( $core_sources[0] ) );
 			} else {
 				$output[] = '<details class="source">';
-				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
+				$output[] = sprintf( '<summary class="details-attributes__summary"><strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
 				$output[] = '<div>';
 				$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
 				$output[] = '</div>';
