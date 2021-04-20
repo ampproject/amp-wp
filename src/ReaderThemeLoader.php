@@ -417,16 +417,17 @@ final class ReaderThemeLoader implements Service, Registerable {
 		add_filter( 'customize_previewable_devices', [ $this, 'customize_previewable_devices' ] );
 		add_action( 'customize_register', [ $this, 'remove_customizer_themes_panel' ], 11 );
 
-		// @todo This doesn't seem to actually be needed.
 		add_action(
 			'after_setup_theme',
 			function () {
-				$editor_color_palette = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
-				if ( $editor_color_palette ) {
-					add_theme_support( 'editor-color-palette', $editor_color_palette );
+				$theme_support_features = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
+				foreach ( $theme_support_features as $support => $feature ) {
+					if ( is_array( $feature ) ) {
+						add_theme_support( $support, $feature );
+					}
 				}
 			},
-			100
+			100 // After the theme has added its own theme support.
 		);
 
 		add_action(
