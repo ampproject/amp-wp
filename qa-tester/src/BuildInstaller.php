@@ -160,10 +160,10 @@ class BuildInstaller {
 	 * @return DestructivePluginUpgrader File upgrader.
 	 */
 	protected function get_upgrader() {
-		include_once ABSPATH . 'wp-admin/includes/file.php';
-		include_once ABSPATH . 'wp-admin/includes/plugin.php';
-		include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader-skin.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader-skin.php';
 
 		return new DestructivePluginUpgrader( new WP_Ajax_Upgrader_Skin() );
 	}
