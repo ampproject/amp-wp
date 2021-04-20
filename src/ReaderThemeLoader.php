@@ -127,48 +127,6 @@ final class ReaderThemeLoader implements Service, Registerable {
 
 		add_filter( 'wp_prepare_themes_for_js', [ $this, 'filter_wp_prepare_themes_to_indicate_reader_theme' ] );
 		add_action( 'admin_print_footer_scripts-themes.php', [ $this, 'inject_theme_single_template_modifications' ] );
-
-		add_action(
-			'amp_options_updating',
-			function ( $options ) {
-				if ( $this->is_enabled( $options ) ) {
-					$options[ Option::PRIMARY_THEME_SUPPORT ] = $this->get_theme_support_features();
-				} else {
-					$options[ Option::PRIMARY_THEME_SUPPORT ] = null;
-				}
-				return $options;
-			}
-		);
-
-		// @todo Also do this when the theme has been updated?
-		add_action(
-			'after_switch_theme',
-			function () {
-				if ( $this->is_enabled() ) {
-					AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, $this->get_theme_support_features() );
-				} else {
-					AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, null );
-				}
-			}
-		);
-	}
-
-	/**
-	 * Get the theme support features.
-	 *
-	 * @return array Theme support features.
-	 */
-	public function get_theme_support_features() {
-		$features     = [];
-		$feature_keys = [
-			'editor-color-palette',
-			'editor-gradient-presets',
-			'editor-font-sizes',
-		];
-		foreach ( $feature_keys as $feature_key ) {
-			$features[ $feature_key ] = current( (array) get_theme_support( $feature_key ) );
-		}
-		return $features;
 	}
 
 	/**
@@ -416,30 +374,6 @@ final class ReaderThemeLoader implements Service, Registerable {
 		$this->disable_widgets();
 		add_filter( 'customize_previewable_devices', [ $this, 'customize_previewable_devices' ] );
 		add_action( 'customize_register', [ $this, 'remove_customizer_themes_panel' ], 11 );
-
-		add_action(
-			'after_setup_theme',
-			function () {
-				$theme_support_features = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
-				foreach ( $theme_support_features as $support => $feature ) {
-					if ( is_array( $feature ) ) {
-						add_theme_support( $support, $feature );
-					}
-				}
-			},
-			100 // After the theme has added its own theme support.
-		);
-
-		add_action(
-			'wp_head',
-			function () {
-				$theme_support_features = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
-				if ( $theme_support_features ) {
-					amp_add_theme_support_styles( $theme_support_features );
-				}
-			},
-			9 // Because wp_print_styles happens at priority 8, and we want the primary theme's colors to override any conflicting theme color assignments.
-		);
 	}
 
 	/**

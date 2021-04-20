@@ -40,6 +40,7 @@ namespace PHPSTORM_META {
 			'plugin_registry'                    => \AmpProject\AmpWP\PluginRegistry::class,
 			'plugin_suppression'                 => \AmpProject\AmpWP\PluginSuppression::class,
 			'reader_theme_loader'                => \AmpProject\AmpWP\ReaderThemeLoader::class,
+			'reader_theme_support_features'      => \AmpProject\AmpWP\ReaderThemeSupportFeatures::class,
 			'rest.options_controller'            => \AmpProject\AmpWP\OptionsRESTController::class,
 			'rest.validation_counts_controller'  => \AmpProject\AmpWP\Validation\ValidationCountsRestController::class,
 			'server_timing'                      => \AmpProject\AmpWP\Instrumentation\ServerTiming::class,
