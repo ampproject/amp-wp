@@ -422,13 +422,14 @@ final class ReaderThemeLoader implements Service, Registerable {
 		);
 
 		add_action(
-			'wp_print_styles',
+			'wp_head',
 			function () {
 				$editor_color_palette = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_COLOR_PALETTE );
 				if ( $editor_color_palette ) {
 					amp_add_editor_color_styles( $editor_color_palette );
 				}
-			}
+			},
+			9 // Because wp_print_styles happens at priority 8, and we want the primary theme's colors to override any conflicting theme color assignments.
 		);
 	}
 
