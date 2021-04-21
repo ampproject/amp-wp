@@ -10,9 +10,8 @@ class IgnoreExtraneousStyleAssets {
 
 	generateIgnoreRegex( entries ) {
 		const expression = entries
-			.map( ( entry ) => [ `${ entry }.js`, `${ entry }.asset.php` ] )
-			.flat()
-			.join( '|' );
+			.reduce( ( acc, entry ) => `${ acc }|${ entry }.js|${ entry }.asset.php`, '' )
+			.substr( 1 );
 
 		return new RegExp( expression );
 	}
