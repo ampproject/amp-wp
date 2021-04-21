@@ -1,7 +1,7 @@
 {
   "root": true,
   "extends": [
-    "plugin:@wordpress/eslint-plugin/recommended"
+    "plugin:@wordpress/eslint-plugin/recommended-with-formatting"
   ],
   "globals": {
     "fetch": false

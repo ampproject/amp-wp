@@ -38,9 +38,11 @@ export default class Container extends Component {
 			buildOptions,
 		};
 
+		this.adminBarSubmenuWrapper = document.getElementById( 'amp-qa-tester-adminbar' );
+
+		this.dismissError = this.dismissError.bind( this );
 		this.handleInstallation = this.handleInstallation.bind( this );
 		this.handleChangeDevBuild = this.handleChangeDevBuild.bind( this );
-		/* eslint-disable-next-line prettier/prettier */
 		this.handleChangeBuildOption = this.handleChangeBuildOption.bind( this );
 	}
 
@@ -191,6 +193,8 @@ export default class Container extends Component {
 			data.url = buildOption.url;
 		}
 
+		this.adminBarSubmenuWrapper.classList.toggle( 'installing', true );
+
 		apiFetch( {
 			path: '/amp-qa-tester/v1/install',
 			method: 'POST',
@@ -200,6 +204,9 @@ export default class Container extends Component {
 				window.location.reload();
 			} )
 			.catch( ( error ) => {
+				this.adminBarSubmenuWrapper.classList.toggle( 'installing', false );
+				this.adminBarSubmenuWrapper.classList.toggle( 'install-error', true );
+
 				if ( error.message ) {
 					this.showError( error.message );
 				} else {
@@ -225,6 +232,14 @@ export default class Container extends Component {
 			isInstalling: false,
 			error: message,
 		} );
+	}
+
+	/**
+	 * Dismiss shown error.
+	 */
+	dismissError() {
+		this.setState( { error: null } );
+		this.adminBarSubmenuWrapper.classList.toggle( 'install-error', false );
 	}
 
 	render() {
@@ -289,13 +304,12 @@ export default class Container extends Component {
 				{ error && (
 					<div className="error">
 						<span>
-							{ /* eslint-disable-next-line prettier/prettier */ }
 							{ `${ __( 'Error', 'amp-qa-tester' ) }: ${ error }` }
 						</span>
 						<button
 							type="button"
 							className="dismiss"
-							onClick={ () => this.setState( { error: null } ) }
+							onClick={ this.dismissError }
 						/>
 					</div>
 				) }

@@ -1,3 +1,8 @@
+#amp-qa-tester-adminbar.ab-sub-wrapper.installing,
+#amp-qa-tester-adminbar.ab-sub-wrapper.install-error {
+	display: block;
+}
+
 #wp-admin-bar-amp-qa-tester:focus-within {
 	outline: none;
 }

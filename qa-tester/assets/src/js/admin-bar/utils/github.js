@@ -34,7 +34,6 @@ const _fetch = ( resource, opts = {} ) => {
  * @return {Promise<Object[]>} Promise containing list of releases.
  */
 export const getReleases = () => {
-	/* eslint-disable-next-line prettier/prettier */
 	const url = `${ baseUrl }/repos/ampproject/amp-wp/releases`;
 
 	return _fetch( url ).then( ( response ) => response.json() );
@@ -49,7 +48,6 @@ export const getPullRequestsWithBuilds = () => {
 	const url = new URL( `${ baseUrl }/search/issues` );
 	// @todo Should this be limited to open PRs only?
 	const params = {
-		/* eslint-disable-next-line prettier/prettier */
 		q: 'repo:ampproject/amp-wp is:pr commenter:app/github-actions in:comments "Download development build"',
 		sort: 'created',
 		order: 'desc',
@@ -69,7 +67,6 @@ export const getPullRequestsWithBuilds = () => {
  * @return {Promise<Object[]>} Promise containing list of protected branches.
  */
 export const getProtectedBranches = () => {
-	/* eslint-disable-next-line prettier/prettier */
 	const url = `${ baseUrl }/repos/ampproject/amp-wp/branches?protected=true`;
 
 	return _fetch( url ).then( ( response ) => response.json() );

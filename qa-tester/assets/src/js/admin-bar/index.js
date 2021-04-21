@@ -16,7 +16,6 @@ domReady( () => {
 		return;
 	}
 
-	/* eslint-disable-next-line prettier/prettier */
 	const adminBarItem = document.getElementById( 'wp-admin-bar-amp-qa-tester' );
 	const shadow = root.attachShadow( { mode: 'open' } );
 
