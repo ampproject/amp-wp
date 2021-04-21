@@ -63,6 +63,61 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		$this->assertTrue( $this->instance->is_enabled() );
 	}
 
+	/** @covers ::is_enabled() */
+	public function test_is_enabled_with_options_supplied() {
+		$active_theme_slug = 'twentytwenty';
+		$reader_theme_slug = 'twentynineteen';
+		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
+			$this->markTestSkipped();
+		}
+
+		switch_theme( $active_theme_slug );
+
+		$this->assertFalse(
+			$this->instance->is_enabled(
+				[
+					Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				]
+			)
+		);
+
+		$this->assertFalse(
+			$this->instance->is_enabled(
+				[
+					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
+					Option::READER_THEME  => ReaderThemes::DEFAULT_READER_THEME,
+				]
+			)
+		);
+
+		$this->assertFalse(
+			$this->instance->is_enabled(
+				[
+					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
+					Option::READER_THEME  => $active_theme_slug,
+				]
+			)
+		);
+
+		$this->assertTrue(
+			$this->instance->is_enabled(
+				[
+					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
+					Option::READER_THEME  => $reader_theme_slug,
+				]
+			)
+		);
+
+		$this->assertFalse(
+			$this->instance->is_enabled(
+				[
+					Option::THEME_SUPPORT => AMP_Theme_Support::STANDARD_MODE_SLUG,
+					Option::READER_THEME  => $reader_theme_slug,
+				]
+			)
+		);
+	}
+
 	public function test__construct() {
 		$this->assertInstanceOf( ReaderThemeLoader::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
