@@ -252,6 +252,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				$link = $this->dom->createElement( 'a' );
 				$link->setAttribute( 'href', 'https://amp-wp.org/?p=5463' );
 				$link->setAttribute( 'target', '_blank' );
+				$link->setAttribute( 'rel', 'nofollow noreferrer noopener' );
 				$link->appendChild( $this->dom->createTextNode( __( 'Learn More', 'amp' ) ) );
 				$small->appendChild( $link );
 				$p->appendChild( $small );
