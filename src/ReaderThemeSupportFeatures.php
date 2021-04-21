@@ -93,7 +93,6 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			9 // Because wp_print_styles happens at priority 8, and we want the primary theme's colors to override any conflicting theme color assignments.
 		);
 
-
 		// @todo Also do this when the theme has been updated?
 	}
 
@@ -128,7 +127,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 *
 	 * @return array Theme support features.
 	 */
-	public function get_theme_support_features() {
+	private function get_theme_support_features() {
 		$features = [];
 		foreach ( self::SUPPORTED_FEATURES as $feature_key ) {
 			$features[ $feature_key ] = current( (array) get_theme_support( $feature_key ) );
@@ -153,9 +152,6 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 
 	/**
 	 * Print theme support styles.
-	 *
-	 * @internal
-	 * @since 2.1
 	 */
 	public function print_theme_support_styles() {
 		$features = [];
@@ -167,58 +163,101 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			}
 		}
 
-		if ( empty( $features ) ) {
-			return;
-		}
-
-		if ( ! empty( $features[ self::FEATURE_EDITOR_COLOR_PALETTE ] ) ) {
-			echo '<style id="amp-wp-theme-support-editor-color-palette">';
-			foreach ( $features[ self::FEATURE_EDITOR_COLOR_PALETTE ] as $color_option ) {
-				// There is no standard way to retrieve or derive the `color` style property when the editor color is being used
-				// for the background, so the best alternative at the moment is to guess a good default value based on the
-				// luminance of the editor color.
-				$text_color = 127 > $this->get_relative_luminance_from_hex( $color_option['color'] ) ? '#fff' : '#000';
-
-				printf(
-					':root .has-%1$s-background-color { background-color: %2$s; color: %3$s; }',
-					sanitize_key( $color_option['slug'] ),
-					$color_option['color'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					$text_color // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				);
+		foreach ( self::SUPPORTED_FEATURES as $feature ) {
+			if ( empty( $features[ $feature ] ) || ! is_array( $features[ $feature ] ) ) {
+				continue;
 			}
-			foreach ( $features[ self::FEATURE_EDITOR_COLOR_PALETTE ] as $color_option ) {
-				printf(
-					':root .has-%1$s-color { color: %2$s; }',
-					sanitize_key( $color_option['slug'] ),
-					$color_option['color'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				);
+			$value = $features[ $feature ];
+			switch ( $feature ) {
+				case self::FEATURE_EDITOR_COLOR_PALETTE:
+					$this->print_editor_color_palette_styles( $value );
+					break;
+				case self::FEATURE_EDITOR_FONT_SIZES:
+					$this->print_editor_font_sizes_styles( $value );
+					break;
+				case self::FEATURE_EDITOR_GRADIENT_PRESETS:
+					$this->print_editor_gradient_presets_styles( $value );
+					break;
 			}
-			echo '</style>';
 		}
+	}
 
-		if ( ! empty( $features[ self::FEATURE_EDITOR_GRADIENT_PRESETS ] ) ) {
-			echo '<style id="amp-wp-theme-support-editor-gradient-presets">';
-			foreach ( $features[ self::FEATURE_EDITOR_GRADIENT_PRESETS ] as $preset ) {
-				printf(
-					'.has-%s-gradient-background { background: %s }',
-					sanitize_key( $preset['slug'] ),
-					$preset['gradient'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				);
+	/**
+	 * Print editor-color-palette styles.
+	 *
+	 * @param array $color_palette Color palette.
+	 */
+	private function print_editor_color_palette_styles( array $color_palette ) {
+		echo '<style id="amp-wp-theme-support-editor-color-palette">';
+		foreach ( $color_palette as $color_option ) {
+			if ( ! isset( $color_option['slug'], $color_option['color'] ) ) {
+				continue;
 			}
-			echo '</style>';
-		}
 
-		if ( ! empty( $features[ self::FEATURE_EDITOR_FONT_SIZES ] ) ) {
-			echo '<style id="amp-wp-theme-support-editor-font-sizes">';
-			foreach ( $features[ self::FEATURE_EDITOR_FONT_SIZES ] as $font_size ) {
-				printf(
-					':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$fpx }',
-					sanitize_key( $font_size['slug'] ),
-					(float) $font_size['size']
-				);
-			}
-			echo '</style>';
+			// There is no standard way to retrieve or derive the `color` style property when the editor color is being used
+			// for the background, so the best alternative at the moment is to guess a good default value based on the
+			// luminance of the editor color.
+			$text_color = 127 > $this->get_relative_luminance_from_hex( $color_option['color'] ) ? '#fff' : '#000';
+
+			printf(
+				':root .has-%1$s-background-color { background-color: %2$s; color: %3$s; }',
+				sanitize_key( $color_option['slug'] ),
+				$color_option['color'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				$text_color // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			);
 		}
+		foreach ( $color_palette as $color_option ) {
+			if ( ! isset( $color_option['slug'], $color_option['color'] ) ) {
+				continue;
+			}
+
+			printf(
+				':root .has-%1$s-color { color: %2$s; }',
+				sanitize_key( $color_option['slug'] ),
+				$color_option['color'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			);
+		}
+		echo '</style>';
+	}
+
+	/**
+	 * Print editor-font-sizes styles.
+	 *
+	 * @param array $font_sizes Font sizes.
+	 */
+	private function print_editor_font_sizes_styles( array $font_sizes ) {
+		echo '<style id="amp-wp-theme-support-editor-font-sizes">';
+		foreach ( $font_sizes as $font_size ) {
+			if ( ! isset( $font_size['slug'], $font_size['size'] ) ) {
+				continue;
+			}
+			printf(
+				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$fpx }',
+				sanitize_key( $font_size['slug'] ),
+				(float) $font_size['size']
+			);
+		}
+		echo '</style>';
+	}
+
+	/**
+	 * Print editor-gradient-presets styles.
+	 *
+	 * @param array $gradient_presets Gradient presets.
+	 */
+	private function print_editor_gradient_presets_styles( array $gradient_presets ) {
+		echo '<style id="amp-wp-theme-support-editor-gradient-presets">';
+		foreach ( $gradient_presets as $preset ) {
+			if ( ! isset( $preset['slug'], $preset['gradient'] ) ) {
+				continue;
+			}
+			printf(
+				'.has-%s-gradient-background { background: %s }',
+				sanitize_key( $preset['slug'] ),
+				$preset['gradient'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			);
+		}
+		echo '</style>';
 	}
 
 	/**
@@ -226,14 +265,12 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 *
 	 * Copied from `\Twenty_Twenty_One_Custom_Colors::get_relative_luminance_from_hex()`.
 	 *
-	 * @internal
 	 * @see https://github.com/WordPress/wordpress-develop/blob/acbbbd18b32b5429264622141a6d058b64f3a5ad/src/wp-content/themes/twentytwentyone/classes/class-twenty-twenty-one-custom-colors.php#L138-L156
-	 * @since 2.1
 	 *
 	 * @param string $hex Color hex value.
 	 * @return int Relative luminance value.
 	 */
-	public function get_relative_luminance_from_hex( $hex ) {
+	private function get_relative_luminance_from_hex( $hex ) {
 
 		// Remove the "#" symbol from the beginning of the color.
 		$hex = ltrim( $hex, '#' );
