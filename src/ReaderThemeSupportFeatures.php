@@ -154,6 +154,10 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * Print theme support styles.
 	 */
 	public function print_theme_support_styles() {
+		if ( ! amp_is_request() ) {
+			return;
+		}
+
 		$features = [];
 		if ( $this->reader_theme_loader->is_enabled() ) {
 			$features = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
