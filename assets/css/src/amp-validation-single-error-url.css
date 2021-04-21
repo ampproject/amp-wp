@@ -27,7 +27,7 @@
 	border: none;
 	text-align: left;
 	line-height: 1.682;
-	color: #0073aa;
+	color: #1e1e1e;
 	cursor: pointer;
 }
 
@@ -39,7 +39,7 @@
 	align-items: center;
 	justify-content: center;
 	width: 12px;
-	height: 18px;
+	height: 12px;
 	margin-top: 5px;
 	background-image: url("../images/down-triangle.svg");
 	background-size: contain;
@@ -50,15 +50,6 @@
 
 tr.expanded .single-url-detail-toggle::after {
 	transform: rotate(180deg);
-}
-
-/** Striped table overrides. */
-table.striped > tbody > tr.odd {
-	background: #f9f9f9;
-}
-
-table.striped > tbody > tr.even {
-	background: #fff;
 }
 
 /** Hide original details content. */
@@ -162,17 +153,6 @@ table.striped > tbody > tr.even {
 	margin-right: 15px;
 	height: 30px;
 	border-right: 1px solid #a0a5aa;
-}
-
-.amp-validation-error-status-dropdown {
-	display: flex;
-}
-
-.amp-validation-error-status {
-	margin-left: 5px;
-	width: auto;
-	float: none;
-	border-width: 2px;
 }
 
 #amp-invalid-markup > .amp-icon::before {

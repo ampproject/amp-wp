@@ -6,15 +6,15 @@
  */
 
 use AmpProject\AmpWP\Dom\Options;
-use AmpProject\AmpWP\Transformer\AmpSchemaOrgMetadata;
-use AmpProject\AmpWP\Transformer\AmpSchemaOrgMetadataConfiguration;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\ErrorCollection;
 
 /**
  * Test Site_Health.
  *
- * @coversDefaultClass \AmpProject\AmpWP\Transformer\AmpSchemaOrgMetadata
+ * @coversDefaultClass \AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata
  */
 class AmpSchemaOrgMetadataTest extends WP_UnitTestCase {
 

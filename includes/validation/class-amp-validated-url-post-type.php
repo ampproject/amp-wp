@@ -354,21 +354,6 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
-			$asset_file   = AMP__DIR__ . '/assets/js/amp-validated-urls-index.asset.php';
-			$asset        = require $asset_file;
-			$dependencies = $asset['dependencies'];
-			$version      = $asset['version'];
-
-			wp_enqueue_script(
-				'amp-validated-urls-index',
-				amp_get_asset_url( 'js/amp-validated-urls-index.js' ),
-				$dependencies,
-				$version,
-				true
-			);
-		}
-
 		// Enqueue this on both the 'AMP Validated URLs' page and the single URL page.
 		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id || self::POST_TYPE_SLUG === $screen->id ) {
 			wp_enqueue_style(
@@ -635,7 +620,7 @@ class AMP_Validated_URL_Post_Type {
 					$counts['new_accepted']
 				);
 			}
-			$icon     = ( $counts['new_accepted'] + $counts['new_rejected'] ) > 0 ? Icon::warning() : Icon::valid();
+			$icon     = ( $counts['new_accepted'] + $counts['new_rejected'] ) > 0 ? Icon::removed() : Icon::valid();
 			$result[] = sprintf(
 				'<span class="status-text %s" title="%s">%s %s: %s</span>',
 				esc_attr( $counts['new_accepted'] > 0 ? 'has-new' : '' ),
@@ -1394,7 +1379,7 @@ class AMP_Validated_URL_Post_Type {
 			} else {
 				$output[] = '<details class="source">';
 				$output[] = sprintf(
-					'<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>',
+					'<summary class="details-attributes__summary"><strong class="source"><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>',
 					'mu-plugin' === $type ? esc_html__( 'Must-Use Plugins', 'amp' ) : esc_html__( 'Plugins', 'amp' ),
 					$count
 				);
@@ -1422,7 +1407,7 @@ class AMP_Validated_URL_Post_Type {
 				$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( $core_sources[0] ) );
 			} else {
 				$output[] = '<details class="source">';
-				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
+				$output[] = sprintf( '<summary class="details-attributes__summary"><strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
 				$output[] = '<div>';
 				$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
 				$output[] = '</div>';
@@ -2157,7 +2142,7 @@ class AMP_Validated_URL_Post_Type {
 						if ( 0 < ( $counts['new_rejected'] + $counts['new_accepted'] ) ) {
 							?>
 							<strong id="amp-invalid-markup" class="status-text">
-								<span class="amp-icon amp-warning"></span>
+								<span class="amp-icon amp-invalid"></span>
 								<?php esc_html_e( 'Invalid markup not reviewed', 'amp' ); ?>
 							</strong>
 							<?php

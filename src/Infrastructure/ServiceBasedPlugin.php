@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Infrastructure;
 
 use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer\LazilyInstantiatedService;
+use WP_CLI;
 
 /**
  * This abstract base plugin provides all the boilerplate code for working with
@@ -292,6 +293,10 @@ abstract class ServiceBasedPlugin implements Plugin {
 
 		$this->service_container->put( $id, $service );
 
+		if ( $service instanceof CliCommand && defined( 'WP_CLI' ) && WP_CLI ) {
+			WP_CLI::add_command( $service::get_command_name(), $service );
+		}
+
 		if ( $service instanceof Registerable ) {
 			$service->register();
 		}
@@ -324,7 +329,17 @@ abstract class ServiceBasedPlugin implements Plugin {
 		 * The services will be properly instantiated once they are retrieved
 		 * from the service container.
 		 */
-		if ( ! is_a( $class, Registerable::class, true ) ) {
+		if (
+			! is_a( $class, Registerable::class, true )
+			&&
+			(
+				! defined( 'WP_CLI' )
+				||
+				! WP_CLI
+				||
+				! is_a( $class, CliCommand::class, true )
+			)
+		) {
 			return new LazilyInstantiatedService(
 				function () use ( $class ) {
 					return $this->injector->make( $class );

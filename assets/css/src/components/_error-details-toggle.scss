@@ -1,0 +1,37 @@
+// Error details toggle button used in head and foot of WP list table.
+.error-details-toggle {
+	background: none;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	flex-direction: column;
+	float: right;
+	height: 14px;
+	margin: 0;
+	padding: 0;
+
+	.manage-column.column-sources_with_invalid_output & {
+		margin: 0;
+	}
+
+	.column-details & {
+
+		&::before,
+		&::after {
+			background-image: url("../images/down-triangle.svg");
+			background-position: center;
+			background-size: cover;
+			content: "";
+			height: 6px;
+			width: 12px;
+		}
+	}
+
+	&.is-open {
+
+		&::before,
+		&::after {
+			transform: rotate(180deg);
+		}
+	}
+}

@@ -11,9 +11,6 @@ class RowToggler {
 		this.tr = tr;
 		this.index = index;
 		this.activeTermId = activeTermId;
-
-		// Since we're adding additional rows, we need to override default .striped tables styles.
-		this.tr.classList.add( this.index % 2 ? 'odd' : 'even' );
 	}
 
 	/**
@@ -55,7 +52,6 @@ class RowToggler {
 	createNewTr() {
 		this.newTr = document.createElement( 'tr' );
 		this.newTr.classList.add( 'details' );
-		this.newTr.classList.add( this.index % 2 ? 'odd' : 'even' );
 
 		const newCell = document.createElement( 'td' );
 		newCell.setAttribute( 'colspan', this.getRowColspan() );
