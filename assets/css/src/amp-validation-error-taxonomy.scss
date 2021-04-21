@@ -1,0 +1,149 @@
+@import "./components/amp-stylesheet-list";
+@import "./components/amp-stylesheet-summary";
+@import "./components/details-column";
+@import "./components/error-details-toggle";
+@import "./components/wp-list-table-grid-lines";
+@import "./components/wp-list-table-kept-errors";
+@import "./components/wp-list-table-new-errors";
+@import "./components/wp-list-table-markup-status-icon";
+
+#col-left {
+	display: none;
+}
+
+#col-right {
+	float: none;
+	width: auto;
+}
+
+/* Move the 'All dates' filter to the right of the new status and type filters */
+#filter-by-date {
+	float: none;
+}
+
+/* Improve column widths */
+td.column-details pre,
+td.column-sources pre {
+	overflow: auto;
+}
+
+th.column-created_date_gmt,
+th.column-error_type {
+	width: 15%;
+}
+
+td.column-error_code .error-code {
+	font-family: Consolas, Monaco, monospace;
+}
+
+th.column-included {
+	width: 15%;
+}
+
+/* Status text icons */
+.status-text {
+	display: flex;
+	align-items: center;
+	padding-bottom: 0.6rem;
+}
+
+#amp-enabled-icon.status-text::before {
+	margin-right: 4px;
+	background-size: 20px 20px;
+	height: 20px;
+	width: 20px;
+	content: "";
+	min-width: 20px;
+}
+
+.status-text > .amp-icon::before {
+	margin-right: 6px;
+	height: 20px;
+	width: 20px;
+	min-width: 20px;
+}
+
+.wp-heading-inline .status-text > .amp-icon::before {
+	font-size: 23px;
+	vertical-align: middle;
+	margin-right: inherit;
+}
+
+.status-text.amp-enabled::before {
+	background-image: url("../images/amp-logo-icon.svg");
+}
+
+.status-text.amp-disabled::before {
+	background-image: url("../images/amp-logo-gray.svg");
+}
+
+.row-actions .amp_validation_error_accept > a {
+	color: #006505;
+}
+
+.row-actions .amp_validation_error_reject > a {
+	color: #a00;
+}
+
+.notice.accept-reject-error .button.accept {
+	background: #006505;
+	border-color: #006505;
+}
+
+.notice.accept-reject-error .button.reject {
+	background: #a00;
+	border-color: #a00;
+}
+
+.notice.error-details {
+	margin-top: 1px;
+}
+
+.notice.error-details.unreviewed {
+	background-color: #fff;
+	border-left-color: #c65632;
+}
+
+.wp-heading-inline .status-text {
+	display: inline-block;
+	vertical-align: middle;
+	padding-bottom: 0;
+}
+
+.wp-heading-inline .status-text::before {
+	display: inline-block;
+}
+
+.wp-heading-inline code {
+	font-size: 1rem;
+}
+
+.validation-error-sources {
+	border-collapse: collapse;
+}
+
+.validation-error-sources tbody:not(:first-child) {
+	border-top: solid 1px #ddd;
+	margin: 0;
+}
+
+.validation-error-sources td,
+.validation-error-sources th {
+	vertical-align: top;
+	padding: 2px 4px;
+}
+
+.validation-error-sources tbody > tr:first-child > th,
+.validation-error-sources tbody > tr:first-child > td {
+	padding-top: 0.75em;
+}
+
+.validation-error-sources tbody > tr:last-child > th,
+.validation-error-sources tbody > tr:last-child > td {
+	padding-bottom: 0.75em;
+}
+
+.validation-error-sources th {
+	font-weight: 600;
+	text-align: right;
+}

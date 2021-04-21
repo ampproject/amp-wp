@@ -1844,7 +1844,7 @@ class AMP_Validation_Error_Taxonomy {
 				} else {
 					$content .= '<p>';
 					$content .= sprintf(
-						'<a href="%s">%s',
+						'<a class="row-title" href="%s">%s',
 						admin_url(
 							add_query_arg(
 								[
@@ -1906,11 +1906,7 @@ class AMP_Validation_Error_Taxonomy {
 				$is_removed = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
 				if ( 'post.php' === $pagenow ) {
-					$valid_color   = Icon::valid()->get_color();
-					$invalid_color = Icon::invalid()->get_color();
-
-					$status_border_color = sprintf( 'border-color: %s;', $is_removed ? $valid_color : $invalid_color );
-					$status_select_name  = sprintf(
+					$status_select_name = sprintf(
 						'%s[%s][%s]',
 						AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY,
 						$term->slug,
@@ -1923,11 +1919,11 @@ class AMP_Validation_Error_Taxonomy {
 						<label for="<?php echo esc_attr( $status_select_name ); ?>" class="screen-reader-text">
 							<?php esc_html_e( 'Markup Status', 'amp' ); ?>
 						</label>
-						<select class="amp-validation-error-status" name="<?php echo esc_attr( $status_select_name ); ?>" style="<?php echo esc_attr( $status_border_color ); ?>">
-							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( $is_removed ); ?> data-color="<?php echo esc_attr( $valid_color ); ?>">
+						<select class="amp-validation-error-status" name="<?php echo esc_attr( $status_select_name ); ?>">
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( $is_removed ); ?>>
 								<?php esc_html_e( 'Removed', 'amp' ); ?>
 							</option>
-							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( ! $is_removed ); ?> data-color="<?php echo esc_attr( $invalid_color ); ?>">
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( ! $is_removed ); ?>>
 								<?php esc_html_e( 'Kept', 'amp' ); ?>
 							</option>
 						</select>
@@ -2339,7 +2335,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		if ( $wrap_with_details ) {
-			$output = '<details open class="details-attributes">' . $output . '</details>';
+			$output = '<details class="details-attributes">' . $output . '</details>';
 		}
 
 		return $output;
@@ -3450,7 +3446,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function get_status_text_with_icon( $sanitization, $include_reviewed = false ) {
 		if ( $sanitization['term_status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
-			$icon = Icon::valid();
+			$icon = Icon::removed();
 			$text = __( 'Removed', 'amp' );
 		} else {
 			$icon = Icon::invalid();
