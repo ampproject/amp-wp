@@ -144,6 +144,9 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			return;
 		}
 		$theme_support_features = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
+		if ( ! is_array( $theme_support_features ) ) {
+			return;
+		}
 		foreach ( $theme_support_features as $support => $feature ) {
 			if ( is_array( $feature ) ) {
 				add_theme_support( $support, $feature );
