@@ -84,11 +84,18 @@ final class ReaderThemeLoader implements Service, Registerable {
 		}
 
 		// If Reader mode is not enabled, then a Reader theme is definitely not going to be served.
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== $options[ Option::THEME_SUPPORT ] ) {
+		if (
+			! isset( $options[ Option::THEME_SUPPORT ] )
+			||
+			AMP_Theme_Support::READER_MODE_SLUG !== $options[ Option::THEME_SUPPORT ]
+		) {
 			return false;
 		}
 
 		// If the Legacy Reader mode is active, then a Reader theme is not going to be served.
+		if ( ! isset( $options[ Option::READER_THEME ] ) ) {
+			return false;
+		}
 		$reader_theme = $options[ Option::READER_THEME ];
 		if ( ReaderThemes::DEFAULT_READER_THEME === $reader_theme ) {
 			return false;
