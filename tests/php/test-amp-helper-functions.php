@@ -147,6 +147,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	public function test_amp_init_migration() {
 		global $wp_actions;
 		remove_all_actions( 'init' );
+		remove_all_actions( 'admin_init' );
 		remove_all_actions( 'after_setup_theme' );
 		$wp_actions = [];
 
@@ -225,6 +226,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
 		do_action( 'after_setup_theme' );
 		do_action( 'init' );
+		do_action( 'admin_init' );
 		$this->assertEquals( 2, did_action( 'amp_init' ) );
 		$this->assertEquals( 1, did_action( 'amp_plugin_update' ) );
 		$this->assertNotEquals( $options, get_option( AMP_Options_Manager::OPTION_NAME ), 'Expected DB to now be updated.' );

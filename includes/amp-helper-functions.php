@@ -134,9 +134,10 @@ function amp_init() {
 	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
 
 	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
-		// This waits to happen until the very end of init to ensure that amp theme support and amp post type support have all been added.
+		// This waits to happen until the very end of admin_init to ensure that amp theme support and amp post type
+		// support have all been added, and that the settings have been registered.
 		add_action(
-			'init',
+			'admin_init',
 			static function () use ( $old_version ) {
 				/**
 				 * Triggers when after amp_init when the plugin version has updated.
