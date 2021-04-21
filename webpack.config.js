@@ -349,7 +349,10 @@ const styles = {
 		const entries = {};
 		const dir = './assets/css/src';
 		fs.readdirSync( dir ).forEach( ( fileName ) => {
-			entries[ fileName.replace( /\.[^/.]+$/, '' ) ] = `${ dir }/${ fileName }`;
+			const fullPath = `${ dir }/${ fileName }`;
+			if ( ! fs.lstatSync( fullPath ).isDirectory() ) {
+				entries[ fileName.replace( /\.[^/.]+$/, '' ) ] = fullPath;
+			}
 		} );
 
 		return entries;
