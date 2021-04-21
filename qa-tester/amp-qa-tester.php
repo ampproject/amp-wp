@@ -55,17 +55,6 @@ function load_plugin() {
 		);
 	}
 
-	if ( 'amp' === basename( dirname( __DIR__ ) ) ) {
-		$_amp_qa_load_errors->add(
-			'incorrect_plugin_location',
-			__(
-				'Please move the plugin outside of the AMP plugin directory (preferably to the the plugin directory),
-				otherwise you will risk removing this plugin when installing AMP plugin builds.',
-				'amp-qa-tester'
-			)
-		);
-	}
-
 	if ( version_compare( get_bloginfo( 'version' ), $min_wp_version, '<' ) ) {
 		$_amp_qa_load_errors->add(
 			'insufficient_wp_version',
