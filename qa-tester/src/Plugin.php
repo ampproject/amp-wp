@@ -95,8 +95,7 @@ class Plugin {
 	 * @return string|null AMP plugin version, otherwise `null` if the plugin metadata could not be retrieved.
 	 */
 	public static function get_amp_version() {
-		$meta = get_file_data( WP_PLUGIN_DIR . '/amp/amp.php', [ 'Version' => 'Version' ] );
-		return isset( $meta['Version'] ) ? $meta['Version'] : null;
+		return defined( 'AMP__VERSION' ) ? AMP__VERSION : null;
 	}
 
 	/**
