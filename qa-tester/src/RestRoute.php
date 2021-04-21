@@ -75,7 +75,18 @@ class RestRoute {
 				],
 
 				'url'    => [
-					'validate_callback' => 'wp_http_validate_url',
+					'validate_callback' => static function ( $param ) {
+						// phpcs:disable Squiz.Commenting.InlineComment.InvalidEndChar, Squiz.Strings.ConcatenationSpacing.PaddingFound
+						return (bool) preg_match(
+							'#^' .
+							'https://storage\.googleapis\.com/ampwp_github_artifacts/refs/[^/]+/[^/]+/amp\.zip' . // either builds on GCS
+							'|' .                                                                                 // or
+							'https://github\.com/ampproject/amp-wp/releases/download/[^/]+/amp\.zip' .            // releases on GitHub
+							'$#',
+							$param
+						);
+						// phpcs:enable
+					},
 					'sanitize_callback' => 'esc_url_raw',
 					'required'          => false,
 				],
