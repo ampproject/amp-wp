@@ -305,7 +305,7 @@ jobs:
         # Setting a multi-line output requires escaping line-feeds. See <https://github.community/t/set-output-truncates-multiline-strings/16852/3>.
         run: |
           body="QA tester plugin build for ${{ github.event.pull_request.head.sha }} is ready :bellhop_bell:!
-          Download the build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-qa-tester.zip)"
+          [Download](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-qa-tester.zip) the build"
           body="${body//$'\n'/'%0A'}"
           echo "::set-output name=body::$body"
 
