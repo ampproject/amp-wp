@@ -136,10 +136,10 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	}
 
 	/**
-	 * Add theme support from primary theme.
+	 * Add theme support from primary theme when a Reader theme has overridden.
 	 */
 	public function add_primary_theme_support() {
-		if ( ! $this->reader_theme_loader->is_enabled() ) {
+		if ( ! $this->reader_theme_loader->is_theme_overridden() ) {
 			return;
 		}
 		$theme_support_features = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
