@@ -167,15 +167,16 @@
 	border-left: 4px solid transparent;
 }
 
-/* AMP error - new */
-.amp-error--new .components-panel__body-title {
+/* AMP error - reviewed */
+.amp-error--reviewed .components-panel__body-title {
 	background: #f4f4f4;
 }
 
-.amp-error--new .components-panel__body-title:hover {
+.amp-error--reviewed .components-panel__body-title:hover {
 	background: #e8e8e8;
 }
 
+/* AMP error - new */
 .amp-error--new .amp-error__title {
 	font-weight: 700;
 }
