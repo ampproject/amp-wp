@@ -11,6 +11,11 @@ const WebpackBar = require( 'webpackbar' );
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
+/**
+ * Internal dependencies
+ */
+const IgnoreExtraneousStyleAssets = require( '../bin/ignore-extraneous-style-assets' );
+
 const sharedConfig = {
 	...defaultConfig,
 	output: {
@@ -41,6 +46,7 @@ const sharedConfig = {
 		new RtlCssPlugin( {
 			filename: '../css/[name]-compiled-rtl.css',
 		} ),
+		new IgnoreExtraneousStyleAssets(),
 	],
 };
 
