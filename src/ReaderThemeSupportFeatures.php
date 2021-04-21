@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AMP_Options_Manager;
+use AMP_Theme_Support;
 
 /**
  * Stores the primary theme's theme support features when Reader template mode is active and then adds the necessary styles to support them.
@@ -151,10 +152,23 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	}
 
 	/**
+	 * Determines whether the request is for an AMP page in Reader mode.
+	 *
+	 * @return bool Whether AMP Reader request.
+	 */
+	private function is_reader_request() {
+		return (
+			( amp_is_legacy() || $this->reader_theme_loader->is_theme_overridden() )
+			&&
+			amp_is_request()
+		);
+	}
+
+	/**
 	 * Print theme support styles.
 	 */
 	public function print_theme_support_styles() {
-		if ( ! amp_is_request() ) {
+		if ( ! $this->is_reader_request() ) {
 			return;
 		}
 
