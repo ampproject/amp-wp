@@ -42,8 +42,8 @@ export function BuildSelector( { buildOptions, onOptionSelect } ) {
 		return term === ''
 			? buildOptions.slice( 0, 5 ) // Show the first 5 options by default.
 			: buildOptions.filter( ( option ) =>
-					option.label.toLowerCase().includes( term )
-			  );
+				option.label.toLowerCase().includes( term )
+			);
 	}, [ term, buildOptions ] );
 
 	return (
