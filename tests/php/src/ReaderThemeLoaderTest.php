@@ -94,6 +94,14 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 			$this->instance->is_enabled(
 				[
 					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
+				]
+			)
+		);
+
+		$this->assertFalse(
+			$this->instance->is_enabled(
+				[
+					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
 					Option::READER_THEME  => $active_theme_slug,
 				]
 			)
