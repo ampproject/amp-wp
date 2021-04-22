@@ -15,6 +15,10 @@
 	font-size: 14px;
 }
 
+.reader-theme-selection .amp-setting-toggle {
+	margin: 1rem 0 0.5rem;
+}
+
 .choose-reader-theme__unavailable .choose-reader-theme__grid {
 	display: grid;
 	gap: 1rem;

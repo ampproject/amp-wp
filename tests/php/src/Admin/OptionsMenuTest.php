@@ -11,6 +11,9 @@ use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
+use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
@@ -39,6 +42,14 @@ class OptionsMenuTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader() );
+	}
+
+	/** @covers ::__construct() */
+	public function test__construct() {
+		$this->assertInstanceOf( OptionsMenu::class, $this->instance );
+		$this->assertInstanceOf( Service::class, $this->instance );
+		$this->assertInstanceOf( Registerable::class, $this->instance );
+		$this->assertInstanceOf( Conditional::class, $this->instance );
 	}
 
 	/**

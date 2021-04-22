@@ -2,13 +2,13 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings'; // From WP inline script.
+import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings'; // From WP inline script.
 
 /**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useMemo } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -23,24 +23,7 @@ import { ThemesAPIError } from '../themes-api-error';
  * Component for selecting a reader theme.
  */
 export function ReaderThemeSelection() {
-	const { fetchingThemes, themes } = useContext( ReaderThemes );
-
-	// Separate available themes (both installed and installable) from those that need to be installed manually.
-	const { availableThemes, unavailableThemes } = useMemo(
-		() => ( themes || [] ).reduce(
-			( collections, theme ) => {
-				if ( ( AMP_QUERY_VAR_CUSTOMIZED_LATE && theme.slug !== LEGACY_THEME_SLUG ) || theme.availability === 'non-installable' ) {
-					collections.unavailableThemes.push( theme );
-				} else {
-					collections.availableThemes.push( theme );
-				}
-
-				return collections;
-			},
-			{ availableThemes: [], unavailableThemes: [] },
-		),
-		[ themes ],
-	);
+	const { availableThemes, fetchingThemes, unavailableThemes } = useContext( ReaderThemes );
 
 	if ( fetchingThemes ) {
 		return <Loading />;
