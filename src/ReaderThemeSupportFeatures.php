@@ -108,12 +108,6 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		add_filter( 'amp_options_updating', [ $this, 'filter_amp_options_updating' ] );
 		add_action( 'after_switch_theme', [ $this, 'update_cached_theme_support' ] );
 
-		add_action(
-			'after_setup_theme',
-			[ $this, 'add_primary_theme_support' ],
-			100 // After the theme has added its own theme support.
-		);
-
 		add_action( 'amp_post_template_head', [ $this, 'print_theme_support_styles' ] );
 		add_action(
 			'wp_head',
@@ -195,24 +189,6 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			}
 		}
 		return $features;
-	}
-
-	/**
-	 * Add theme support from primary theme when a Reader theme has overridden.
-	 */
-	public function add_primary_theme_support() {
-		if ( ! $this->reader_theme_loader->is_theme_overridden() ) {
-			return;
-		}
-		$theme_support_features = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
-		if ( ! is_array( $theme_support_features ) ) {
-			return;
-		}
-		foreach ( $theme_support_features as $support => $feature ) {
-			if ( is_array( $feature ) ) {
-				add_theme_support( $support, $feature ); // @todo Problem: $feature is now a subset.
-			}
-		}
 	}
 
 	/**
