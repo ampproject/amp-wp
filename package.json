@@ -57,7 +57,7 @@
     "@wordpress/edit-post": "3.27.0",
     "@wordpress/eslint-plugin": "9.0.1",
     "@wordpress/hooks": "2.12.0",
-    "@wordpress/jest-puppeteer-axe": "3.0.1",
+    "@wordpress/jest-puppeteer-axe": "3.0.3",
     "@wordpress/plugins": "2.25.0",
     "@wordpress/scripts": "14.1.0",
     "babel-plugin-inline-react-svg": "2.0.1",
