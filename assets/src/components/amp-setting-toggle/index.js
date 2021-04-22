@@ -32,13 +32,15 @@ export function AMPSettingToggle( { checked, disabled = false, onChange, text, t
 				label={ (
 					<div className="amp-setting-toggle__label-text">
 						{
-							isValidElement( title )
-								? title
-								: (
-									<h3>
-										{ title }
-									</h3>
-								)
+							title && (
+								isValidElement( title )
+									? title
+									: (
+										<h3>
+											{ title }
+										</h3>
+									)
+							)
 						}
 						{ text && (
 							<p>
@@ -56,5 +58,5 @@ AMPSettingToggle.propTypes = {
 	disabled: PropTypes.bool,
 	onChange: PropTypes.func.isRequired,
 	text: PropTypes.string,
-	title: PropTypes.node.isRequired,
+	title: PropTypes.node,
 };

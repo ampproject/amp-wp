@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings'; // From WP inline script.
+import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings'; // From WP inline script.
 
 /**
  * WordPress dependencies
@@ -12,11 +12,11 @@ import { useContext, useMemo, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { CheckboxControl } from '@wordpress/components';
 import { ReaderThemes } from '../reader-themes-context-provider';
 import { Loading } from '../loading';
 import './style.css';
-import { AMPNotice, NOTICE_TYPE_WARNING } from '../amp-notice';
+import { AMPNotice, NOTICE_TYPE_INFO } from '../amp-notice';
+import { AMPSettingToggle } from '../amp-setting-toggle';
 import { ThemeCard } from '../theme-card';
 import { Carousel, DEFAULT_MOBILE_BREAKPOINT } from '../carousel';
 import { useWindowWidth } from '../../utils/use-window-width';
@@ -37,29 +37,11 @@ export function ReaderThemeCarousel() {
 	 */
 
 	/** @type {Theme[]} themes */
-	const { currentTheme, fetchingThemes, selectedTheme, themes } = useContext( ReaderThemes );
+	const { availableThemes, currentTheme, fetchingThemes, selectedTheme, themes, unavailableThemes } = useContext( ReaderThemes );
 	const [ includeUnavailableThemes, setIncludeUnavailableThemes ] = useState( false );
 
-	// Separate available themes (both installed and installable) from those that need to be installed manually.
-	const { hasUnavailableThemes, shownThemes } = useMemo(
-		() => ( themes || [] )
-			.reduce(
-				( collection, theme ) => {
-					if ( ( AMP_QUERY_VAR_CUSTOMIZED_LATE && theme.slug !== LEGACY_THEME_SLUG ) || theme.availability === 'non-installable' ) {
-						collection.hasUnavailableThemes = true;
-						if ( includeUnavailableThemes ) {
-							collection.shownThemes.push( theme );
-						}
-					} else {
-						collection.shownThemes.push( theme );
-					}
-
-					return collection;
-				},
-				{ shownThemes: [], hasUnavailableThemes: false },
-			),
-		[ includeUnavailableThemes, themes ],
-	);
+	const hasUnavailableThemes = unavailableThemes.length > 0;
+	const shownThemes = includeUnavailableThemes ? themes : availableThemes;
 
 	const isMobile = windowWidth < DEFAULT_MOBILE_BREAKPOINT;
 
@@ -74,7 +56,7 @@ export function ReaderThemeCarousel() {
 							name: theme.slug,
 							Item: () => (
 								<ThemeCard
-									disabled={ 'non-installable' === theme.availability }
+									disabled={ unavailableThemes.includes( theme ) }
 									ElementName="div"
 									screenshotUrl={ theme.screenshot_url }
 									{ ...theme }
@@ -106,7 +88,7 @@ export function ReaderThemeCarousel() {
 									return (
 										<ThemeCard
 											key={ `theme-card-${ theme.slug }` }
-											disabled={ 'non-installable' === theme.availability }
+											disabled={ unavailableThemes.includes( theme ) }
 											ElementName="div"
 											screenshotUrl={ theme.screenshot_url }
 											{ ...theme }
@@ -119,7 +101,7 @@ export function ReaderThemeCarousel() {
 				}
 			) );
 		},
-		[ isMobile, shownThemes ],
+		[ isMobile, shownThemes, unavailableThemes ],
 	);
 
 	const highlightedItemIndex = useMemo(
@@ -171,7 +153,7 @@ export function ReaderThemeCarousel() {
 			<div>
 				{
 					hasUnavailableThemes && (
-						<AMPNotice type={ NOTICE_TYPE_WARNING }>
+						<AMPNotice type={ NOTICE_TYPE_INFO }>
 							<p>
 								{ AMP_QUERY_VAR_CUSTOMIZED_LATE
 								/* dangerouslySetInnerHTML reason: Injection of code tags. */
@@ -180,7 +162,7 @@ export function ReaderThemeCarousel() {
 											dangerouslySetInnerHTML={ {
 												__html: sprintf(
 													/* translators: 1: customized AMP query var, 2: default query var, 3: the AMP_QUERY_VAR constant name, 4: the amp_query_var filter, 5: the plugins_loaded action */
-													__( 'The following themes are not available because your site (probably the active theme) has customized the AMP query var too late (it is set to %1$s as opposed to the default of %2$s). Please make sure that any customizations done by defining the %3$s constant or adding an %4$s filter are done before the %5$s action with priority 8.', 'amp' ),
+													__( 'Some of the themes below are not available because your site (probably the active theme) has customized the AMP query var too late (it is set to %1$s as opposed to the default of %2$s). Please make sure that any customizations done by defining the %3$s constant or adding an %4$s filter are done before the %5$s action with priority 8.', 'amp' ),
 													`<code>${ AMP_QUERY_VAR }</code>`,
 													`<code>${ DEFAULT_AMP_QUERY_VAR }</code>`,
 													'<code>AMP_QUERY_VAR</code>',
@@ -193,8 +175,8 @@ export function ReaderThemeCarousel() {
 									: __( 'Some supported themes cannot be installed automatically on this site. To use, please install them manually or contact your hosting provider.', 'amp' )
 								}
 							</p>
-							<CheckboxControl
-								label={ __( 'Show unavailable themes', 'amp' ) }
+							<AMPSettingToggle
+								text={ __( 'Show unavailable themes', 'amp' ) }
 								onChange={ ( checked ) => {
 									setIncludeUnavailableThemes( checked );
 								} }
