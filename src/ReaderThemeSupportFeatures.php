@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AMP_Options_Manager;
+use Theme_Upgrader;
 
 /**
  * Stores the primary theme's theme support features when Reader template mode is active and then adds the necessary styles to support them.
@@ -113,8 +114,16 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 */
 	public function register() {
 		add_filter( 'amp_options_updating', [ $this, 'filter_amp_options_updating' ] );
-		add_action( 'after_switch_theme', [ $this, 'handle_after_switch_theme' ] );
+		add_action( 'after_switch_theme', [ $this, 'handle_theme_update' ] );
 		add_action( self::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT, [ $this, 'update_cached_theme_support' ] );
+		add_action(
+			'upgrader_process_complete',
+			function ( $upgrader ) {
+				if ( $upgrader instanceof Theme_Upgrader ) {
+					$this->update_cached_theme_support();
+				}
+			}
+		);
 
 		add_action( 'amp_post_template_head', [ $this, 'print_theme_support_styles' ] );
 		add_action(
@@ -162,14 +171,14 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	}
 
 	/**
-	 * Handle updating the cached primary_theme_support after switching theme.
+	 * Handle updating the cached primary_theme_support after updating/switching theme.
 	 *
 	 * In the case of switching the theme via WP-CLI, it could be that the next request is for an AMP page and
 	 * the `check_theme_switched()` function will run in the context of a Reader theme being loaded. In that case,
 	 * the added theme support won't be for the primary theme and we need to schedule an immediate event in WP-Cron to
 	 * try again in the context of a cron request in which a Reader theme will never be overriding the primary theme.
 	 */
-	public function handle_after_switch_theme() {
+	public function handle_theme_update() {
 		if ( $this->reader_theme_loader->is_theme_overridden() ) {
 			wp_schedule_single_event( time(), self::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT );
 		} else {
