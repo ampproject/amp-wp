@@ -73,6 +73,13 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	const KEY_GRADIENT = 'gradient';
 
 	/**
+	 * Action fired when the cached primary_theme_support should be updated.
+	 *
+	 * @var string
+	 */
+	const ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT = 'amp_update_cached_primary_theme_support';
+
+	/**
 	 * Supported features.
 	 *
 	 * @var array[]
@@ -106,7 +113,8 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 */
 	public function register() {
 		add_filter( 'amp_options_updating', [ $this, 'filter_amp_options_updating' ] );
-		add_action( 'after_switch_theme', [ $this, 'update_cached_theme_support' ] );
+		add_action( 'after_switch_theme', [ $this, 'handle_after_switch_theme' ] );
+		add_action( self::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT, [ $this, 'update_cached_theme_support' ] );
 
 		add_action( 'amp_post_template_head', [ $this, 'print_theme_support_styles' ] );
 		add_action(
@@ -151,6 +159,22 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			$options[ Option::PRIMARY_THEME_SUPPORT ] = null;
 		}
 		return $options;
+	}
+
+	/**
+	 * Handle updating the cached primary_theme_support after switching theme.
+	 *
+	 * In the case of switching the theme via WP-CLI, it could be that the next request is for an AMP page and
+	 * the `check_theme_switched()` function will run in the context of a Reader theme being loaded. In that case,
+	 * the added theme support won't be for the primary theme and we need to schedule an immediate event in WP-Cron to
+	 * try again in the context of a cron request in which a Reader theme will never be overriding the primary theme.
+	 */
+	public function handle_after_switch_theme() {
+		if ( $this->reader_theme_loader->is_theme_overridden() ) {
+			wp_schedule_single_event( time(), self::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT );
+		} else {
+			$this->update_cached_theme_support();
+		}
 	}
 
 	/**
