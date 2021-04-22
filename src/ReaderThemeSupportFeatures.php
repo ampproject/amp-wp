@@ -10,7 +10,6 @@ namespace AmpProject\AmpWP;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AMP_Options_Manager;
-use AMP_Theme_Support;
 
 /**
  * Stores the primary theme's theme support features when Reader template mode is active and then adds the necessary styles to support them.
@@ -46,14 +45,42 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	const FEATURE_EDITOR_FONT_SIZES = 'editor-font-sizes';
 
 	/**
+	 * Key slug.
+	 *
+	 * @var string
+	 */
+	const KEY_SLUG = 'slug';
+
+	/**
+	 * Key size.
+	 *
+	 * @var string
+	 */
+	const KEY_SIZE = 'size';
+
+	/**
+	 * Key color.
+	 *
+	 * @var string
+	 */
+	const KEY_COLOR = 'color';
+
+	/**
+	 * Key gradient.
+	 *
+	 * @var string
+	 */
+	const KEY_GRADIENT = 'gradient';
+
+	/**
 	 * Supported features.
 	 *
-	 * @var string[]
+	 * @var array[]
 	 */
 	const SUPPORTED_FEATURES = [
-		self::FEATURE_EDITOR_COLOR_PALETTE,
-		self::FEATURE_EDITOR_GRADIENT_PRESETS,
-		self::FEATURE_EDITOR_FONT_SIZES,
+		self::FEATURE_EDITOR_COLOR_PALETTE    => [ self::KEY_SLUG, self::KEY_COLOR ],
+		self::FEATURE_EDITOR_GRADIENT_PRESETS => [ self::KEY_SLUG, self::KEY_GRADIENT ],
+		self::FEATURE_EDITOR_FONT_SIZES       => [ self::KEY_SLUG, self::KEY_SIZE ],
 	];
 
 	/**
@@ -98,6 +125,26 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	}
 
 	/**
+	 * Check whether all the required props are present for a given feature item.
+	 *
+	 * @param string $feature Feature name.
+	 * @param array  $props   Props to check.
+	 *
+	 * @return bool Whether all are present.
+	 */
+	public function has_required_feature_props( $feature, $props ) {
+		if ( empty( $props ) || ! is_array( $props ) ) {
+			return false;
+		}
+		foreach ( self::SUPPORTED_FEATURES[ $feature ] as $required_prop ) {
+			if ( ! array_key_exists( $required_prop, $props ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Filter the AMP options when they are updated to add the primary theme's features.
 	 *
 	 * @param array $options Options.
@@ -105,7 +152,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 */
 	public function filter_amp_options_updating( $options ) {
 		if ( $this->reader_theme_loader->is_enabled( $options ) ) {
-			$options[ Option::PRIMARY_THEME_SUPPORT ] = $this->get_theme_support_features();
+			$options[ Option::PRIMARY_THEME_SUPPORT ] = $this->get_theme_support_features( true );
 		} else {
 			$options[ Option::PRIMARY_THEME_SUPPORT ] = null;
 		}
@@ -117,7 +164,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 */
 	public function update_cached_theme_support() {
 		if ( $this->reader_theme_loader->is_enabled() ) {
-			AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, $this->get_theme_support_features() );
+			AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, $this->get_theme_support_features( true ) );
 		} else {
 			AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, null );
 		}
@@ -126,12 +173,26 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	/**
 	 * Get the theme support features.
 	 *
+	 * @param bool $reduced Whether to reduce the feature props down to just what is required.
 	 * @return array Theme support features.
 	 */
-	private function get_theme_support_features() {
+	private function get_theme_support_features( $reduced = false ) {
 		$features = [];
-		foreach ( self::SUPPORTED_FEATURES as $feature_key ) {
-			$features[ $feature_key ] = current( (array) get_theme_support( $feature_key ) );
+		foreach ( array_keys( self::SUPPORTED_FEATURES ) as $feature_key ) {
+			$feature_value = current( (array) get_theme_support( $feature_key ) );
+			if ( ! is_array( $feature_value ) || empty( $feature_value ) ) {
+				continue;
+			}
+			if ( $reduced ) {
+				$features[ $feature_key ] = [];
+				foreach ( $feature_value as $item ) {
+					if ( $this->has_required_feature_props( $feature_key, $item ) ) {
+						$features[ $feature_key ][] = wp_array_slice_assoc( $item, self::SUPPORTED_FEATURES[ $feature_key ] );
+					}
+				}
+			} else {
+				$features[ $feature_key ] = $feature_value;
+			}
 		}
 		return $features;
 	}
@@ -149,7 +210,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		}
 		foreach ( $theme_support_features as $support => $feature ) {
 			if ( is_array( $feature ) ) {
-				add_theme_support( $support, $feature );
+				add_theme_support( $support, $feature ); // @todo Problem: $feature is now a subset.
 			}
 		}
 	}
@@ -179,12 +240,14 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		if ( $this->reader_theme_loader->is_enabled() ) {
 			$features = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
 		} elseif ( amp_is_legacy() ) {
-			foreach ( self::SUPPORTED_FEATURES as $feature_key ) {
-				$features[ $feature_key ] = current( (array) get_theme_support( $feature_key ) );
-			}
+			$features = $this->get_theme_support_features();
 		}
 
-		foreach ( self::SUPPORTED_FEATURES as $feature ) {
+		if ( empty( $features ) ) {
+			return;
+		}
+
+		foreach ( array_keys( self::SUPPORTED_FEATURES ) as $feature ) {
 			if ( empty( $features[ $feature ] ) || ! is_array( $features[ $feature ] ) ) {
 				continue;
 			}
@@ -211,31 +274,31 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	private function print_editor_color_palette_styles( array $color_palette ) {
 		echo '<style id="amp-wp-theme-support-editor-color-palette">';
 		foreach ( $color_palette as $color_option ) {
-			if ( ! isset( $color_option['slug'], $color_option['color'] ) ) {
+			if ( ! $this->has_required_feature_props( self::FEATURE_EDITOR_COLOR_PALETTE, $color_option ) ) {
 				continue;
 			}
 
 			// There is no standard way to retrieve or derive the `color` style property when the editor color is being used
 			// for the background, so the best alternative at the moment is to guess a good default value based on the
 			// luminance of the editor color.
-			$text_color = 127 > $this->get_relative_luminance_from_hex( $color_option['color'] ) ? '#fff' : '#000';
+			$text_color = 127 > $this->get_relative_luminance_from_hex( $color_option[ self::KEY_COLOR ] ) ? '#fff' : '#000';
 
 			printf(
 				':root .has-%1$s-background-color { background-color: %2$s; color: %3$s; }',
-				sanitize_key( $color_option['slug'] ),
-				$color_option['color'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				sanitize_key( $color_option[ self::KEY_SLUG ] ),
+				$color_option[ self::KEY_COLOR ], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				$text_color // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 		}
 		foreach ( $color_palette as $color_option ) {
-			if ( ! isset( $color_option['slug'], $color_option['color'] ) ) {
+			if ( ! isset( $color_option[ self::KEY_SLUG ], $color_option[ self::KEY_COLOR ] ) ) {
 				continue;
 			}
 
 			printf(
 				':root .has-%1$s-color { color: %2$s; }',
-				sanitize_key( $color_option['slug'] ),
-				$color_option['color'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				sanitize_key( $color_option[ self::KEY_SLUG ] ),
+				$color_option[ self::KEY_COLOR ] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 		}
 		echo '</style>';
@@ -249,13 +312,13 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	private function print_editor_font_sizes_styles( array $font_sizes ) {
 		echo '<style id="amp-wp-theme-support-editor-font-sizes">';
 		foreach ( $font_sizes as $font_size ) {
-			if ( ! isset( $font_size['slug'], $font_size['size'] ) ) {
+			if ( ! $this->has_required_feature_props( self::FEATURE_EDITOR_FONT_SIZES, $font_size ) ) {
 				continue;
 			}
 			printf(
 				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$fpx }',
-				sanitize_key( $font_size['slug'] ),
-				(float) $font_size['size']
+				sanitize_key( $font_size[ self::KEY_SLUG ] ),
+				(float) $font_size[ self::KEY_SIZE ]
 			);
 		}
 		echo '</style>';
@@ -268,14 +331,14 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 */
 	private function print_editor_gradient_presets_styles( array $gradient_presets ) {
 		echo '<style id="amp-wp-theme-support-editor-gradient-presets">';
-		foreach ( $gradient_presets as $preset ) {
-			if ( ! isset( $preset['slug'], $preset['gradient'] ) ) {
+		foreach ( $gradient_presets as $gradient_preset ) {
+			if ( ! $this->has_required_feature_props( self::FEATURE_EDITOR_GRADIENT_PRESETS, $gradient_preset ) ) {
 				continue;
 			}
 			printf(
 				'.has-%s-gradient-background { background: %s }',
-				sanitize_key( $preset['slug'] ),
-				$preset['gradient'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				sanitize_key( $gradient_preset[ self::KEY_SLUG ] ),
+				$gradient_preset[ self::KEY_GRADIENT ] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 		}
 		echo '</style>';
