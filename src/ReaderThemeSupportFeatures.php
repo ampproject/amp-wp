@@ -131,8 +131,6 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			[ $this, 'print_theme_support_styles' ],
 			9 // Because wp_print_styles happens at priority 8, and we want the primary theme's colors to override any conflicting theme color assignments.
 		);
-
-		// @todo Also do this when the theme has been updated?
 	}
 
 	/**
