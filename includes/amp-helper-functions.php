@@ -1362,6 +1362,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_O2_Player_Sanitizer'         => [],
 		'AMP_Audio_Sanitizer'             => [],
 		'AMP_Playbuzz_Sanitizer'          => [],
+		'AMP_Object_Sanitizer'            => [],
 		'AMP_Iframe_Sanitizer'            => [
 			'add_placeholder'    => true,
 			'current_origin'     => $current_origin,
