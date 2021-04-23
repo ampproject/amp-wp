@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d7894b7f1a234aa8a66be0f4c9808b17",
+    "content-hash": "d94392c0c59201d458d0f3139fa0b7fe",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "c274d073817054e55eae5017246509f23af5b055"
+                "reference": "907038ed6fc7f0140d8b8647ca8ec4727d4ae458"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/c274d073817054e55eae5017246509f23af5b055",
-                "reference": "c274d073817054e55eae5017246509f23af5b055",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/907038ed6fc7f0140d8b8647ca8ec4727d4ae458",
+                "reference": "907038ed6fc7f0140d8b8647ca8ec4727d4ae458",
                 "shasum": ""
             },
             "require": {
@@ -72,7 +72,7 @@
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
                 "source": "https://github.com/ampproject/amp-toolbox-php/tree/main"
             },
-            "time": "2021-04-19T01:26:04+00:00"
+            "time": "2021-04-23T01:27:00+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -229,7 +229,7 @@
                 "issues": "https://github.com/sabberworm/PHP-CSS-Parser/issues",
                 "source": "https://github.com/sabberworm/PHP-CSS-Parser/tree/master"
             },
-            "time": "2020-11-18T12:10:42+00:00"
+            "time": "2021-04-23T05:58:34+00:00"
         },
         {
             "name": "willwashburn/stream",
@@ -286,16 +286,16 @@
     "packages-dev": [
         {
             "name": "automattic/vipwpcs",
-            "version": "dev-fix/667-properescaping-overreach",
+            "version": "2.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/VIP-Coding-Standards.git",
-                "reference": "cc1022e0b4f1d0872db5e56c12d4e6f02d0ee952"
+                "reference": "90173cec6f4df2af9a31627f4880874d788459ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/VIP-Coding-Standards/zipball/cc1022e0b4f1d0872db5e56c12d4e6f02d0ee952",
-                "reference": "cc1022e0b4f1d0872db5e56c12d4e6f02d0ee952",
+                "url": "https://api.github.com/repos/Automattic/VIP-Coding-Standards/zipball/90173cec6f4df2af9a31627f4880874d788459ab",
+                "reference": "90173cec6f4df2af9a31627f4880874d788459ab",
                 "shasum": ""
             },
             "require": {
@@ -334,7 +334,7 @@
                 "source": "https://github.com/Automattic/VIP-Coding-Standards",
                 "wiki": "https://github.com/Automattic/VIP-Coding-Standards/wiki"
             },
-            "time": "2021-04-20T13:28:52+00:00"
+            "time": "2021-04-23T14:52:17+00:00"
         },
         {
             "name": "behat/behat",
@@ -852,16 +852,16 @@
         },
         {
             "name": "google/auth",
-            "version": "v1.15.0",
+            "version": "v1.15.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-auth-library-php.git",
-                "reference": "b346c07de6613e26443d7b4830e5e1933b830dc4"
+                "reference": "4e0c9367719df9703e96f5ad613041b87742471c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/b346c07de6613e26443d7b4830e5e1933b830dc4",
-                "reference": "b346c07de6613e26443d7b4830e5e1933b830dc4",
+                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/4e0c9367719df9703e96f5ad613041b87742471c",
+                "reference": "4e0c9367719df9703e96f5ad613041b87742471c",
                 "shasum": ""
             },
             "require": {
@@ -875,7 +875,7 @@
             "require-dev": {
                 "guzzlehttp/promises": "0.1.1|^1.3",
                 "kelvinmo/simplejwt": "^0.2.5|^0.5.1",
-                "phpseclib/phpseclib": "^2",
+                "phpseclib/phpseclib": "^2.0.31",
                 "phpunit/phpunit": "^4.8.36|^5.7",
                 "sebastian/comparator": ">=1.2.3",
                 "squizlabs/php_codesniffer": "^3.5"
@@ -903,9 +903,9 @@
             "support": {
                 "docs": "https://googleapis.github.io/google-auth-library-php/master/",
                 "issues": "https://github.com/googleapis/google-auth-library-php/issues",
-                "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.15.0"
+                "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.15.1"
             },
-            "time": "2021-02-05T20:50:04+00:00"
+            "time": "2021-04-21T17:42:05+00:00"
         },
         {
             "name": "google/cloud-core",
@@ -2988,12 +2988,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "593c4de369ca852cf3b86037f19435d47c136448"
+                "reference": "3c97c13698c448fdbbda20acb871884a2d8f45b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/593c4de369ca852cf3b86037f19435d47c136448",
-                "reference": "593c4de369ca852cf3b86037f19435d47c136448",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/3c97c13698c448fdbbda20acb871884a2d8f45b1",
+                "reference": "3c97c13698c448fdbbda20acb871884a2d8f45b1",
                 "shasum": ""
             },
             "conflict": {
@@ -3124,7 +3124,7 @@
                 "onelogin/php-saml": "<2.10.4",
                 "oneup/uploader-bundle": "<1.9.3|>=2,<2.1.5",
                 "openid/php-openid": "<2.3",
-                "openmage/magento-lts": "<19.4.8|>=20,<20.0.4",
+                "openmage/magento-lts": "<=19.4.12|>=20,<=20.0.8",
                 "orchid/platform": ">=9,<9.4.4",
                 "oro/crm": ">=1.7,<1.7.4",
                 "oro/platform": ">=1.7,<1.7.4",
@@ -3133,7 +3133,7 @@
                 "paragonie/random_compat": "<2",
                 "passbolt/passbolt_api": "<2.11",
                 "paypal/merchant-sdk-php": "<3.12",
-                "pear/archive_tar": "<1.4.12",
+                "pear/archive_tar": "<1.4.13",
                 "personnummer/personnummer": "<3.0.2",
                 "phpfastcache/phpfastcache": ">=5,<5.0.13",
                 "phpmailer/phpmailer": "<6.1.6",
@@ -3326,7 +3326,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-16T20:01:44+00:00"
+            "time": "2021-04-22T17:19:04+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
@@ -5960,7 +5960,6 @@
     "stability-flags": {
         "ampproject/amp-toolbox": 20,
         "sabberworm/php-css-parser": 20,
-        "automattic/vipwpcs": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,
