@@ -4,6 +4,7 @@ namespace AmpProject\AmpWP\Tests;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\ReaderThemeLoader;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -58,6 +59,12 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 			'slug'  => 'white',
 			'color' => '#FFFFFF',
 		],
+	];
+
+	const TEST_ALL_THEME_SUPPORTS = [
+		ReaderThemeSupportFeatures::FEATURE_EDITOR_GRADIENT_PRESETS => self::TEST_GRADIENT_PRESETS,
+		ReaderThemeSupportFeatures::FEATURE_EDITOR_COLOR_PALETTE    => self::TEST_COLOR_PALETTE,
+		ReaderThemeSupportFeatures::FEATURE_EDITOR_FONT_SIZES       => self::TEST_FONT_SIZES,
 	];
 
 	/**
@@ -124,25 +131,19 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 
 	/** @return array[] */
 	public function get_data_for_test_filter_amp_options_updating() {
-		$theme_supports = [
-			ReaderThemeSupportFeatures::FEATURE_EDITOR_GRADIENT_PRESETS => self::TEST_GRADIENT_PRESETS,
-			ReaderThemeSupportFeatures::FEATURE_EDITOR_COLOR_PALETTE    => self::TEST_COLOR_PALETTE,
-			ReaderThemeSupportFeatures::FEATURE_EDITOR_FONT_SIZES       => self::TEST_FONT_SIZES,
-		];
-
 		return [
 			'standard'      => [
-				$theme_supports,
+				self::TEST_ALL_THEME_SUPPORTS,
 				[ Option::THEME_SUPPORT => AMP_Theme_Support::STANDARD_MODE_SLUG ],
 				null,
 			],
 			'transitional'  => [
-				$theme_supports,
+				self::TEST_ALL_THEME_SUPPORTS,
 				[ Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ],
 				null,
 			],
 			'reader_legacy' => [
-				$theme_supports,
+				self::TEST_ALL_THEME_SUPPORTS,
 				[
 					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
 					Option::READER_THEME  => ReaderThemes::DEFAULT_READER_THEME,
@@ -150,12 +151,12 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 				null,
 			],
 			'reader_theme'  => [
-				$theme_supports,
+				self::TEST_ALL_THEME_SUPPORTS,
 				[
 					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
 					Option::READER_THEME  => self::THEME_READER,
 				],
-				$theme_supports,
+				self::TEST_ALL_THEME_SUPPORTS,
 			],
 		];
 	}
@@ -201,27 +202,72 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		}
 	}
 
-	/** @covers ::handle_theme_update() */
+	/**
+	 * @covers ::handle_theme_update()
+	 * @covers ::update_cached_theme_support()
+	 */
 	public function test_handle_theme_update_with_reader_theme_not_enabled() {
-		AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, [] );
+		AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, self::TEST_ALL_THEME_SUPPORTS );
 
 		/** @var ReaderThemeLoader $reader_theme_loader */
 		$reader_theme_loader = $this->get_private_property( $this->instance, 'reader_theme_loader' );
-		$this->assertFalse( $reader_theme_loader->is_theme_overridden() );
 		$this->assertFalse( $reader_theme_loader->is_enabled() );
+		$this->assertFalse( $reader_theme_loader->is_theme_overridden() );
 		$this->instance->handle_theme_update();
 		$this->assertFalse( wp_next_scheduled( ReaderThemeSupportFeatures::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT ) );
 		$this->assertNull( AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT ) );
 	}
 
-	/** @covers ::handle_theme_update() */
+	/**
+	 * @covers ::handle_theme_update()
+	 * @covers ::update_cached_theme_support()
+	 */
 	public function test_handle_theme_update_with_reader_theme_enabled_but_not_overriding() {
-		$this->markTestIncomplete();
+		if ( ! wp_get_theme( self::THEME_PRIMARY )->exists() || ! wp_get_theme( self::THEME_READER )->exists() ) {
+			$this->markTestSkipped();
+		}
+		AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, null );
+		switch_theme( self::THEME_PRIMARY );
+		AMP_Options_Manager::update_option( Option::READER_THEME, self::THEME_READER );
+
+		/** @var ReaderThemeLoader $reader_theme_loader */
+		$reader_theme_loader = $this->get_private_property( $this->instance, 'reader_theme_loader' );
+		$this->assertTrue( $reader_theme_loader->is_enabled() );
+		$this->assertFalse( $reader_theme_loader->is_theme_overridden() );
+		$this->instance->handle_theme_update();
+		$this->assertFalse( wp_next_scheduled( ReaderThemeSupportFeatures::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT ) );
+
+		$primary_theme_support = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
+		$this->assertInternalType( 'array', $primary_theme_support );
+		$this->assertEqualSets( array_keys( self::TEST_ALL_THEME_SUPPORTS ), array_keys( $primary_theme_support ) );
 	}
 
 	/** @covers ::handle_theme_update() */
 	public function test_handle_theme_update_with_reader_theme_enabled_and_overriding() {
-		$this->markTestIncomplete();
+		if ( ! wp_get_theme( self::THEME_PRIMARY )->exists() || ! wp_get_theme( self::THEME_READER )->exists() ) {
+			$this->markTestSkipped();
+		}
+		AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, null );
+		switch_theme( self::THEME_PRIMARY );
+		AMP_Options_Manager::update_option( Option::READER_THEME, self::THEME_READER );
+
+		/** @var ReaderThemeLoader $reader_theme_loader */
+		$reader_theme_loader = $this->get_private_property( $this->instance, 'reader_theme_loader' );
+
+		/** @var PairedRouting $paired_routing */
+		$paired_routing = $this->get_private_property( $reader_theme_loader, 'paired_routing' );
+
+		$this->go_to( $paired_routing->add_endpoint( home_url() ) );
+		$this->assertTrue( $paired_routing->has_endpoint() );
+
+		$reader_theme_loader->override_theme();
+		$this->assertTrue( $reader_theme_loader->is_enabled() );
+		$this->assertTrue( $reader_theme_loader->is_theme_overridden() );
+
+		$this->instance->handle_theme_update();
+		$next_scheduled = wp_next_scheduled( ReaderThemeSupportFeatures::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT );
+		$this->assertNotFalse( $next_scheduled );
+		$this->assertLessThanOrEqual( time(), wp_next_scheduled( ReaderThemeSupportFeatures::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT ) );
 	}
 
 	/** @covers ::update_cached_theme_support() */
