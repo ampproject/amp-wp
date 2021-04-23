@@ -176,9 +176,7 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		}
 
 		switch_theme( self::THEME_PRIMARY );
-		foreach ( $theme_supports as $feature => $supports ) {
-			add_theme_support( $feature, $supports );
-		}
+		$this->add_theme_supports( $theme_supports );
 
 		$filtered = $this->instance->filter_amp_options_updating( $initial_options );
 		$this->assertArraySubset( $initial_options, $filtered );
@@ -270,19 +268,75 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->assertLessThanOrEqual( time(), wp_next_scheduled( ReaderThemeSupportFeatures::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT ) );
 	}
 
-	/** @covers ::update_cached_theme_support() */
-	public function test_update_cached_theme_support() {
-		$this->markTestIncomplete();
-	}
-
 	/** @covers ::get_theme_support_features() */
 	public function test_get_theme_support_features() {
-		$this->markTestIncomplete();
+		$this->add_theme_supports( self::TEST_ALL_THEME_SUPPORTS );
+		add_theme_support(
+			'custom-logo',
+			[
+				'height' => 480,
+				'width'  => 720,
+			]
+		);
+		$non_reduced = $this->instance->get_theme_support_features( false );
+		$reduced     = $this->instance->get_theme_support_features( true );
+
+		$this->assertEqualSets( array_keys( $non_reduced ), array_keys( self::TEST_ALL_THEME_SUPPORTS ) );
+		$this->assertEqualSets( array_keys( $reduced ), array_keys( self::TEST_ALL_THEME_SUPPORTS ) );
+		foreach ( array_keys( self::TEST_ALL_THEME_SUPPORTS ) as $feature ) {
+			$this->assertNotEquals( $reduced[ $feature ], $non_reduced[ $feature ] );
+			$this->assertArraySubset( $reduced[ $feature ], $non_reduced[ $feature ] );
+		}
 	}
 
 	/** @covers ::is_reader_request() */
 	public function test_is_reader_request() {
-		$this->markTestIncomplete();
+		if ( ! wp_get_theme( self::THEME_PRIMARY )->exists() || ! wp_get_theme( self::THEME_READER )->exists() ) {
+			$this->markTestSkipped();
+		}
+
+		$post_id = self::factory()->post->create();
+
+		/** @var ReaderThemeLoader $reader_theme_loader */
+		$reader_theme_loader = $this->get_private_property( $this->instance, 'reader_theme_loader' );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->go_to( get_permalink( $post_id ) );
+		$this->assertFalse( $this->instance->is_reader_request() );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
+		$this->go_to( get_permalink( $post_id ) );
+		$this->assertFalse( $this->instance->is_reader_request() );
+
+		$this->go_to( amp_get_permalink( $post_id ) );
+		$reader_theme_loader->override_theme();
+		$this->assertFalse( $reader_theme_loader->is_enabled() );
+		$this->assertTrue( $this->instance->is_reader_request() );
+
+		switch_theme( self::THEME_PRIMARY );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, self::THEME_READER );
+		$this->go_to( amp_get_permalink( $post_id ) );
+		$reader_theme_loader->override_theme();
+		$this->assertTrue( $reader_theme_loader->is_enabled() );
+		$this->assertTrue( $this->instance->is_reader_request() );
+	}
+
+	/** @covers ::print_theme_support_styles() */
+	public function test_print_theme_support_styles_non_reader() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->add_theme_supports( self::TEST_ALL_THEME_SUPPORTS );
+		$this->go_to( '/' );
+		$this->assertEmpty( get_echo( [ $this->instance, 'print_theme_support_styles' ] ) );
+	}
+
+	/** @return array */
+	public function get_data_for_test_print_theme_support_styles_reader() {
+		return [
+			'legacy_theme' => [ true ],
+			'reader_theme' => [ false ],
+		];
 	}
 
 	/**
@@ -290,13 +344,74 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 	 * @covers ::print_editor_color_palette_styles()
 	 * @covers ::print_editor_font_sizes_styles()
 	 * @covers ::print_editor_gradient_presets_styles()
+	 *
+	 * @dataProvider get_data_for_test_print_theme_support_styles_reader
+	 *
+	 * @param int $is_legacy
 	 */
-	public function test_print_theme_support_styles() {
-		$this->markTestIncomplete();
+	public function test_print_theme_support_styles_reader( $is_legacy ) {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		if ( $is_legacy ) {
+			AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
+			$this->add_theme_supports( self::TEST_ALL_THEME_SUPPORTS );
+		} else {
+			if ( ! wp_get_theme( self::THEME_PRIMARY )->exists() || ! wp_get_theme( self::THEME_READER )->exists() ) {
+				$this->markTestSkipped();
+			}
+			switch_theme( self::THEME_PRIMARY );
+			AMP_Options_Manager::update_option( Option::READER_THEME, self::THEME_READER );
+			AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, self::TEST_ALL_THEME_SUPPORTS );
+		}
+
+		$post_id = self::factory()->post->create();
+		$this->go_to( amp_get_permalink( $post_id ) );
+		$this->assertTrue( amp_is_request() );
+
+		/** @var ReaderThemeLoader $reader_theme_loader */
+		$reader_theme_loader = $this->get_private_property( $this->instance, 'reader_theme_loader' );
+		$reader_theme_loader->override_theme();
+		$this->assertEquals( $is_legacy, amp_is_legacy() );
+		$this->assertEquals( ! $is_legacy, $reader_theme_loader->is_enabled() );
+		$this->assertEquals( ! $is_legacy, $reader_theme_loader->is_theme_overridden() );
+
+		$output = get_echo( [ $this->instance, 'print_theme_support_styles' ] );
+
+		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-color-palette">', $output );
+		$this->assertStringContains( '.has-white-background-color { background-color: #FFFFFF; color: #000; }', $output );
+		$this->assertStringContains( '.has-black-color { color: #000000; }', $output );
+		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
+		$this->assertStringContains( ':root .is-gigantic-text, :root .has-gigantic-font-size { font-size: 144px; }', $output );
+		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-gradient-presets">', $output );
+		$this->assertStringContains( '.has-yellow-to-purple-gradient-background { background: linear-gradient(160deg, #EEEADD 0%, #D1D1E4 100%); }', $output );
 	}
 
-	/**  */
-	public function test_get_relative_luminance_from_hex() {
-		$this->markTestIncomplete();
+	/** @return array */
+	public function get_data_for_test_get_relative_luminance_from_hex() {
+		return [
+			'black' => [ '#000000', 0 ],
+			'red'   => [ '#FF0000', 54 ],
+			'white' => [ '#FFFFFF', 255 ],
+		];
+	}
+
+	/**
+	 * @covers ::get_relative_luminance_from_hex()
+	 *
+	 * @dataProvider get_data_for_test_get_relative_luminance_from_hex
+	 * @param string $hex       Hex.
+	 * @param string $luminance Luminance.
+	 */
+	public function test_get_relative_luminance_from_hex( $hex, $luminance ) {
+		$this->assertEquals(
+			$luminance,
+			$this->instance->get_relative_luminance_from_hex( $hex )
+		);
+	}
+
+	/** @param array $features */
+	private function add_theme_supports( $features ) {
+		foreach ( $features as $feature => $supports ) {
+			add_theme_support( $feature, $supports );
+		}
 	}
 }

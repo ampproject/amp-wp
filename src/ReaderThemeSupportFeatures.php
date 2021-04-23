@@ -201,7 +201,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * @param bool $reduced Whether to reduce the feature props down to just what is required.
 	 * @return array Theme support features.
 	 */
-	private function get_theme_support_features( $reduced = false ) {
+	public function get_theme_support_features( $reduced = false ) {
 		$features = [];
 		foreach ( array_keys( self::SUPPORTED_FEATURES ) as $feature_key ) {
 			$feature_value = current( (array) get_theme_support( $feature_key ) );
@@ -227,7 +227,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 *
 	 * @return bool Whether AMP Reader request.
 	 */
-	private function is_reader_request() {
+	public function is_reader_request() {
 		return (
 			( amp_is_legacy() || $this->reader_theme_loader->is_theme_overridden() )
 			&&
@@ -323,7 +323,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 				continue;
 			}
 			printf(
-				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$fpx }',
+				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$spx; }',
 				sanitize_key( $font_size[ self::KEY_SLUG ] ),
 				(float) $font_size[ self::KEY_SIZE ]
 			);
@@ -343,7 +343,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 				continue;
 			}
 			printf(
-				'.has-%s-gradient-background { background: %s }',
+				'.has-%s-gradient-background { background: %s; }',
 				sanitize_key( $gradient_preset[ self::KEY_SLUG ] ),
 				$gradient_preset[ self::KEY_GRADIENT ] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
@@ -361,7 +361,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * @param string $hex Color hex value.
 	 * @return int Relative luminance value.
 	 */
-	private function get_relative_luminance_from_hex( $hex ) {
+	public function get_relative_luminance_from_hex( $hex ) {
 
 		// Remove the "#" symbol from the beginning of the color.
 		$hex = ltrim( $hex, '#' );
