@@ -16,6 +16,10 @@ class AMP_Object_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers ::add_buffering_hooks()
 	 */
 	public function test_add_buffering_hooks() {
+		if ( ! function_exists( 'gutenberg_register_block_core_file' ) ) {
+			$this->markTestSkipped( 'Gutenberg v10.5 or later required.' );
+		}
+
 		AMP_Object_Sanitizer::add_buffering_hooks();
 
 		do_blocks(
@@ -27,7 +31,7 @@ class AMP_Object_Sanitizer_Test extends WP_UnitTestCase {
 					<a href="https://example.com/content/uploads/2021/04/example.pdf" class="wp-block-file__button" download>Download</a>
 				</div>
 			<!-- /wp:file -->
-		' 
+		'
 		);
 
 		ob_start();
