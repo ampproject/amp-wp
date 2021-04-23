@@ -38,9 +38,12 @@ final class DetermineHeroImages implements Transformer {
 	/**
 	 * XPath query to find the first entry-content.
 	 *
+	 * Note that the 'entry-content' class name is the classic form for what the h-entry spec now has as 'e-content'.
+	 *
+	 * @link https://microformats.org/wiki/h-entry
 	 * @var string
 	 */
-	const FIRST_ENTRY_CONTENT_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' entry-content ' ) ]";
+	const FIRST_ENTRY_CONTENT_XPATH_QUERY = ".//*[ @class ][ contains( concat( ' ', normalize-space( @class ), ' ' ), ' entry-content ' ) or contains( concat( ' ', normalize-space( @class ), ' ' ), ' e-content ' ) ]";
 
 	/**
 	 * XPath query to find an image at the beginning of entry content (including nested inside of another block).
