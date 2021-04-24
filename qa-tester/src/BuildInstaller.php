@@ -80,7 +80,7 @@ class BuildInstaller {
 	 *
 	 * @param string $source File source location.
 	 *
-	 * @return string|string[]|WP_Error
+	 * @return string|WP_Error
 	 */
 	public function ensure_correct_plugin_dir( $source ) {
 		$slug_dir   = Plugin::PLUGIN_SLUG;

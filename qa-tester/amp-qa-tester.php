@@ -19,6 +19,7 @@
 namespace AmpProject\AmpWP_QA_Tester;
 
 use WP_Error;
+global $_amp_qa_load_errors;
 
 /**
  * Errors encountered while loading the plugin.
@@ -95,16 +96,16 @@ function display_errors_admin_notice() {
 	<div class="notice notice-error">
 		<p>
 			<strong><?php esc_html_e( 'AMP QA Tester failed to initialize.', 'amp-qa-tester' ); ?></strong>
-			<ul>
-				<?php foreach ( array_keys( $_amp_qa_load_errors->errors ) as $error_code ) : ?>
-					<?php foreach ( $_amp_qa_load_errors->get_error_messages( $error_code ) as $message ) : ?>
-						<li>
-							<?php echo wp_kses_post( $message ); ?>
-						</li>
-					<?php endforeach; ?>
-				<?php endforeach; ?>
-			</ul>
 		</p>
+		<ul>
+			<?php foreach ( array_keys( $_amp_qa_load_errors->errors ) as $error_code ) : ?>
+				<?php foreach ( $_amp_qa_load_errors->get_error_messages( $error_code ) as $message ) : ?>
+					<li>
+						<?php echo wp_kses_post( $message ); ?>
+					</li>
+				<?php endforeach; ?>
+			<?php endforeach; ?>
+		</ul>
 	</div>
 	<?php
 }
