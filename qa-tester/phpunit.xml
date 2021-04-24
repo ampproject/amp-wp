@@ -5,41 +5,23 @@
 	convertErrorsToExceptions="true"
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
-	defaultTestSuite="default"
-	>
-	<php>
-		<const name="WP_TEST_ACTIVATED_PLUGINS" value="gutenberg/gutenberg.php,pwa/pwa.php" />
-	</php>
+>
 	<testsuites>
 		<!-- Default test suite to run all tests -->
 		<testsuite name="default">
-			<directory prefix="test-" suffix=".php">./tests/php/</directory>
-			<directory suffix="Test.php">./tests/php/src</directory>
-		</testsuite>
-		<testsuite name="external-http">
-			<directory prefix="test-" suffix="embed-handler.php">tests/</directory>
+			<directory suffix="Test.php" >./tests/php/</directory>
 		</testsuite>
 	</testsuites>
-	<groups>
-		<exclude>
-			<group>external-http</group>
-		</exclude>
-	</groups>
 	<filter>
 		<whitelist processUncoveredFilesFromWhitelist="false">
 			<directory suffix=".php">./</directory>
 			<exclude>
 				<directory suffix=".php">assets</directory>
-				<directory suffix=".php">back-compat</directory>
 				<directory suffix=".php">bin</directory>
 				<directory suffix=".php">build</directory>
-				<directory suffix=".php">docs</directory>
 				<directory suffix=".php">node_modules</directory>
-				<directory suffix=".php">qa-tester</directory>
-				<directory suffix=".php">svn</directory>
 				<directory suffix=".php">tests</directory>
 				<directory suffix=".php">vendor</directory>
-				<file>.phpstorm.meta.php</file>
 			</exclude>
 		</whitelist>
 	</filter>

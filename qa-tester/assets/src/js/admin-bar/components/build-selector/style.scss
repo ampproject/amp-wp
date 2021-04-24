@@ -1,0 +1,28 @@
+@import "~@reach/combobox/styles.css";
+
+[data-reach-combobox-input] {
+	width: 300px;
+	line-height: 2;
+}
+
+[data-reach-combobox-popover] {
+	color: #222;
+	width: 100%;
+	position: absolute;
+}
+
+[data-reach-combobox-popover]:hover {
+	color: #222;
+}
+
+[data-reach-combobox-option] {
+	font-size: 12px;
+}
+
+[data-user-value] {
+	font-weight: bold;
+}
+
+[data-suggested-value] {
+	font-weight: normal;
+}

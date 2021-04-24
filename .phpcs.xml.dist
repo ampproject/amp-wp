@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <ruleset name="WordPress Coding Standards for AMP">
 
+	<!-- Exclude the QA tester plugin -->
+	<exclude-pattern>qa-tester/*</exclude-pattern>
+
 	<!-- Exclude stub files as they are auto-generated -->
 	<exclude-pattern>tests/php/static-analysis-stubs/*</exclude-pattern>
 
