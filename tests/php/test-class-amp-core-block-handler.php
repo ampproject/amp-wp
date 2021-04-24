@@ -159,6 +159,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * @covers \AMP_Core_Block_Handler::ampify_file_block()
 	 */
 	public function test_ampify_file_block() {
+
 		$handler = new AMP_Core_Block_Handler();
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
@@ -175,13 +176,16 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		'
 		);
 
-		$this->assertTrue( wp_script_is( 'wp-block-library-file' ) );
+		if ( function_exists( 'gutenberg_register_block_core_file' ) ) {
+			$this->assertTrue( wp_script_is( 'wp-block-library-file' ) );
 
-		ob_start();
-		do_action( 'wp_print_footer_scripts' );
-		ob_end_clean();
+			ob_start();
+			do_action( 'wp_print_footer_scripts' );
+			ob_end_clean();
 
-		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
+			$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
+		}
+
 		$this->assertStringContains( '<div style="display: block;" class="wp-block-file">', $content );
 	}
 
