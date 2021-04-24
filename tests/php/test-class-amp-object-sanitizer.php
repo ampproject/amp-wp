@@ -65,12 +65,17 @@ class AMP_Object_Sanitizer_Test extends WP_UnitTestCase {
 
 			'object element with PDF content type'     => [
 				'<object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" type="application/pdf"></object>',
-				'<amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf"></amp-google-document-embed>',
+				'<amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" class="wp-block-file__embed"></amp-google-document-embed>',
+			],
+
+			'object element with PDF content type and title'     => [
+				'<object data="https://docs.google.com/document/d/e/2PACX-1vQcy6GoJ2yCKMxe4SNALCPCYWV2Ufg-e6D3djyaJluQXubAfKA3toPqVxWaWK-lJFm4Nyxv-swrkvyN/pub" type="application/pdf" aria-label="Embed of Test Document"></object>',
+				'<amp-google-document-embed layout="fixed-height" height="600" src="https://docs.google.com/document/d/e/2PACX-1vQcy6GoJ2yCKMxe4SNALCPCYWV2Ufg-e6D3djyaJluQXubAfKA3toPqVxWaWK-lJFm4Nyxv-swrkvyN/pub" class="wp-block-file__embed" title="Embed of Test Document"></amp-google-document-embed>',
 			],
 
 			'object element with PDF content type and height' => [
 				'<object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" type="application/pdf" style="height: 1000px"></object>',
-				'<amp-google-document-embed layout="fixed-height" height="1000px" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf"></amp-google-document-embed>',
+				'<amp-google-document-embed layout="fixed-height" height="1000px" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" class="wp-block-file__embed"></amp-google-document-embed>',
 			],
 		];
 	}

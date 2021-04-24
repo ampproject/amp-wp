@@ -69,16 +69,19 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed_style = $this->parse_style_string( $element->getAttribute( Attribute::STYLE ) );
 		$embed_height = isset( $parsed_style['height'] ) ? $parsed_style['height'] : self::DEFAULT_PDF_EMBED_HEIGHT;
 
-		$amp_element = AMP_DOM_Utils::create_node(
-			$element->ownerDocument,
-			'amp-google-document-embed',
-			[
-				Attribute::LAYOUT => Layout::FIXED_HEIGHT,
-				Attribute::HEIGHT => $embed_height,
-				Attribute::SRC    => $element->getAttribute( 'data' ),
-			]
-		);
+		$attributes = [
+			Attribute::LAYOUT => Layout::FIXED_HEIGHT,
+			Attribute::HEIGHT => $embed_height,
+			Attribute::SRC    => $element->getAttribute( 'data' ),
+			Attribute::CLASS_ => 'wp-block-file__embed' // retain original styling for element.
+		];
 
+		$title = $element->getAttribute( 'aria-label' );
+		if (  '' !== $title ) {
+			$attributes[ Attribute::TITLE ] = $title;
+		}
+
+		$amp_element = AMP_DOM_Utils::create_node( $element->ownerDocument, 'amp-google-document-embed', $attributes );
 		$element->parentNode->replaceChild( $amp_element, $element );
 	}
 }
