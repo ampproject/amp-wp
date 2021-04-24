@@ -73,12 +73,24 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 			Attribute::LAYOUT => Layout::FIXED_HEIGHT,
 			Attribute::HEIGHT => $embed_height,
 			Attribute::SRC    => $element->getAttribute( 'data' ),
-			Attribute::CLASS_ => 'wp-block-file__embed' // retain original styling for element.
 		];
 
 		$title = $element->getAttribute( 'aria-label' );
-		if (  '' !== $title ) {
+		if ( '' !== $title ) {
 			$attributes[ Attribute::TITLE ] = $title;
+		}
+
+		// If it is a block, retain original styling for element.
+		if (
+			$element->parentNode instanceof DOMElement
+			&&
+			in_array(
+				'wp-block-file',
+				explode( ' ', $element->parentNode->getAttribute( Attribute::CLASS_ ) ),
+				true
+			)
+		) {
+			$attributes[ Attribute::CLASS_ ] = 'wp-block-file__embed';
 		}
 
 		$amp_element = AMP_DOM_Utils::create_node( $element->ownerDocument, 'amp-google-document-embed', $attributes );
