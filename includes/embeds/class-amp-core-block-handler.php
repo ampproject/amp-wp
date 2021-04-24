@@ -50,6 +50,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		'core/categories' => 'ampify_categories_block',
 		'core/archives'   => 'ampify_archives_block',
 		'core/video'      => 'ampify_video_block',
+		'core/file'       => 'ampify_file_block',
 	];
 
 	/**
@@ -207,6 +208,32 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				$block_content
 			);
 		}
+
+		return $block_content;
+	}
+
+	public function ampify_file_block( $block_content, $block ) {
+		if ( empty( $block['attrs']['displayPreview'] ) || '.pdf' !== substr( $block['attrs']['href'], -4 ) ) {
+			return $block_content;
+		}
+
+		add_action(
+			'wp_print_footer_scripts',
+			static function() {
+				if ( wp_script_is( 'wp-block-library-file' ) ) {
+					wp_dequeue_script( 'wp-block-library-file' );
+				}
+			},
+			0
+		);
+
+		// In Twenty Twenty the PDF embed fails to render due to the parent of the embed having
+		// the style rule `display: flex`. Overriding the display to `block` seems to do the trick.
+		$block_content = preg_replace(
+			'/(?<=<div\s)[^>]*class=(?:"|"[^"]*\s)wp-block-file(?:"|\s[^"]*")[^>]*>/',
+			'style="display: block;" $0',
+			$block_content
+		);
 
 		return $block_content;
 	}

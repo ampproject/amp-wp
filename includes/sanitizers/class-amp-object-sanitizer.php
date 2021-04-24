@@ -26,23 +26,6 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 	const DEFAULT_PDF_EMBED_HEIGHT = 600;
 
 	/**
-	 * Add filters to manipulate output during output buffering before the DOM is constructed.
-	 *
-	 * @param array $args Args.
-	 */
-	public static function add_buffering_hooks( $args = [] ) {
-		add_action(
-			'wp_print_footer_scripts',
-			static function() {
-				if ( wp_script_is( 'wp-block-library-file' ) ) {
-					wp_dequeue_script( 'wp-block-library-file' );
-				}
-			},
-			0
-		);
-	}
-
-	/**
 	 * Sanitize `object` elements from the HTML contained in this instance's Dom\Document.
 	 */
 	public function sanitize() {
@@ -62,6 +45,8 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Sanitize PDF embeds.
+	 *
+	 * @see \AMP_Core_Block_Handler::ampify_file_block()
 	 *
 	 * @param DOMElement $element Object element.
 	 */
