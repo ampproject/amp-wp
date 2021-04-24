@@ -85,7 +85,7 @@ class RestRoute {
 							')$#',
 							$param
 						);
-						// phpcs:enable
+						// phpcs:enable Squiz.Commenting.InlineComment.InvalidEndChar, Squiz.Strings.ConcatenationSpacing.PaddingFound
 					},
 					'sanitize_callback' => 'esc_url_raw',
 					'required'          => false,
