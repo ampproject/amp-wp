@@ -34,7 +34,7 @@
     "@wordpress/escape-html": "1.12.2",
     "@wordpress/html-entities": "2.11.0",
     "@wordpress/i18n": "3.19.0",
-    "@wordpress/icons": "2.10.0",
+    "@wordpress/icons": "2.10.2",
     "@wordpress/is-shallow-equal": "3.1.2",
     "@wordpress/url": "2.22.0",
     "classnames": "2.3.1",
