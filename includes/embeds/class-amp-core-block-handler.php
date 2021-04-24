@@ -212,6 +212,17 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		return $block_content;
 	}
 
+	/**
+	 * Ampify file block.
+	 *
+	 * Inject the an inline style attribute to handle PDF embeds not being displayed in some themes (eg. Twenty Twenty).
+	 *
+	 * @see \AMP_Object_Sanitizer::sanitize_pdf()
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 * @return string Filtered block content.
+	 */
 	public function ampify_file_block( $block_content, $block ) {
 		if ( empty( $block['attrs']['displayPreview'] ) || '.pdf' !== substr( $block['attrs']['href'], -4 ) ) {
 			return $block_content;
@@ -229,13 +240,11 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 
 		// In Twenty Twenty the PDF embed fails to render due to the parent of the embed having
 		// the style rule `display: flex`. Overriding the display to `block` seems to do the trick.
-		$block_content = preg_replace(
+		return preg_replace(
 			'/(?<=<div\s)[^>]*class=(?:"|"[^"]*\s)wp-block-file(?:"|\s[^"]*")[^>]*>/',
 			'style="display: block;" $0',
 			$block_content
 		);
-
-		return $block_content;
 	}
 
 	/**
