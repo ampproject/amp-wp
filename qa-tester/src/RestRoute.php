@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP_QA_Tester;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Server;
+use WP_REST_Response;
 
 /**
  * Class handling the plugin's rest route.
@@ -110,7 +111,7 @@ class RestRoute {
 	 * Handle `install` REST route.
 	 *
 	 * @param WP_REST_Request $request Request.
-	 * @return bool|WP_Error
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function install_callback( WP_REST_Request $request ) {
 		$build_id     = $request->get_param( 'id' );
