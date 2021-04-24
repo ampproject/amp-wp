@@ -13,35 +13,6 @@
 class AMP_Object_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
-	 * @covers ::add_buffering_hooks()
-	 */
-	public function test_add_buffering_hooks() {
-		if ( ! function_exists( 'gutenberg_register_block_core_file' ) ) {
-			$this->markTestSkipped( 'Gutenberg v10.5 or later required.' );
-		}
-
-		AMP_Object_Sanitizer::add_buffering_hooks();
-
-		do_blocks(
-			'
-			<!-- wp:file {"id":42,"href":"https://example.com/content/uploads/2021/04/example.pdf","displayPreview":true} -->
-				<div class="wp-block-file">
-					<object class="wp-block-file__embed" data="https://example.com/content/uploads/2021/04/example.pdf" type="application/pdf" style="width:100%;height:600px" aria-label="Embed of example."></object>
-					<a href="https://example.com/content/uploads/2021/04/example.pdf">example</a>
-					<a href="https://example.com/content/uploads/2021/04/example.pdf" class="wp-block-file__button" download>Download</a>
-				</div>
-			<!-- /wp:file -->
-		'
-		);
-
-		ob_start();
-		do_action( 'wp_print_footer_scripts' );
-		ob_end_clean();
-
-		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
-	}
-
-	/**
 	 * Data for converter test.
 	 *
 	 * @return array Data.
@@ -51,11 +22,6 @@ class AMP_Object_Sanitizer_Test extends WP_UnitTestCase {
 			'no object element'                        => [
 				'<p>Hello World.</p>',
 				'<p>Hello World.</p>',
-			],
-
-			'object element with no type attribute'    => [
-				'<object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf"></object>',
-				'<object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf"></object>',
 			],
 
 			'object element with non-PDF content type' => [

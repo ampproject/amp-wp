@@ -159,27 +159,29 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * @covers \AMP_Core_Block_Handler::ampify_file_block()
 	 */
 	public function test_ampify_file_block() {
-		$post_id = self::factory()->post->create(
-			[
-				'post_title'   => 'File',
-				'post_content' => '
-					<!-- wp:file {"id":42,"href":"https://example.com/content/uploads/2021/04/example.pdf","displayPreview":true} -->
-					<div class="wp-block-file">
-						<object class="wp-block-file__embed" data="https://example.com/content/uploads/2021/04/example.pdf" type="application/pdf" style="width:100%;height:600px" aria-label="Embed of example."></object>
-						<a href="https://example.com/content/uploads/2021/04/example.pdf">example</a>
-						<a href="https://example.com/content/uploads/2021/04/example.pdf" class="wp-block-file__button" download>Download</a>
-					</div>
-					<!-- /wp:file -->
-				',
-			]
-		);
-
 		$handler = new AMP_Core_Block_Handler();
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
 
-		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
+		$content = do_blocks(
+			'
+			<!-- wp:file {"id":42,"href":"https://example.com/content/uploads/2021/04/example.pdf","displayPreview":true} -->
+				<div class="wp-block-file">
+					<object class="wp-block-file__embed" data="https://example.com/content/uploads/2021/04/example.pdf" type="application/pdf" style="width:100%;height:600px" aria-label="Embed of example."></object>
+					<a href="https://example.com/content/uploads/2021/04/example.pdf">example</a>
+					<a href="https://example.com/content/uploads/2021/04/example.pdf" class="wp-block-file__button" download>Download</a>
+				</div>
+			<!-- /wp:file -->
+		'
+		);
 
+		$this->assertTrue( wp_script_is( 'wp-block-library-file' ) );
+
+		ob_start();
+		do_action( 'wp_print_footer_scripts' );
+		ob_end_clean();
+
+		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
 		$this->assertStringContains( '<div style="display: block;" class="wp-block-file">', $content );
 	}
 
