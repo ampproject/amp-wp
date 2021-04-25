@@ -481,6 +481,11 @@ jobs:
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
+      - name: Run external HTTP tests
+        if: ${{ matrix.external-http == true }}
+        run: vendor/bin/phpunit --testsuite external-http
+        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
+
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true }}
         uses: codecov/codecov-action@v1.4.1
@@ -488,11 +493,6 @@ jobs:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php,unit
           fail_ci_if_error: true
-
-      - name: Run external HTTP tests
-        if: ${{ matrix.external-http == true }}
-        run: vendor/bin/phpunit --testsuite external-http
-        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
   #-----------------------------------------------------------------------------------------------------------------------
 
