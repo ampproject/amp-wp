@@ -4,7 +4,7 @@ Feature: List the optimizer transformers via the command line
     Given a WP installation with the AMP plugin
 
   Scenario: Show all configuration data
-    When I run `wp amp optimizer transformer config AmpRuntimeCss`
+    When I run the WP-CLI command `amp optimizer transformer config AmpRuntimeCss`
 
     Then STDERR should be empty
 
@@ -15,7 +15,7 @@ Feature: List the optimizer transformers via the command line
       | version |       |
 
   Scenario: Show specific fields
-    When I run `wp amp optimizer transformer config AmpRuntimeCss --fields=key`
+    When I run the WP-CLI command `amp optimizer transformer config AmpRuntimeCss --fields=key`
 
     Then STDERR should be empty
 
@@ -36,7 +36,7 @@ Feature: List the optimizer transformers via the command line
       """
 
   Scenario: Show a specific configuration key
-    When I run `wp amp optimizer transformer config AmpRuntimeCss --key=canary`
+    When I run the WP-CLI command `amp optimizer transformer config AmpRuntimeCss --key=canary`
 
     Then STDERR should be empty
 
@@ -55,7 +55,7 @@ Feature: List the optimizer transformers via the command line
       """
 
   Scenario: Show a specific field
-    When I run `wp amp optimizer transformer config AmpRuntimeCss --field=key`
+    When I run the WP-CLI command `amp optimizer transformer config AmpRuntimeCss --field=key`
 
     Then STDERR should be empty
 
@@ -67,7 +67,7 @@ Feature: List the optimizer transformers via the command line
       """
 
   Scenario: Handle lack of configuration
-    When I try `wp amp optimizer transformer config ServerSideRendering`
+    When I try the WP-CLI command `amp optimizer transformer config ServerSideRendering`
 
     Then STDOUT should be empty
 
@@ -77,7 +77,7 @@ Feature: List the optimizer transformers via the command line
       """
 
   Scenario: Display in JSON format
-    When I run `wp amp optimizer transformer config AmpRuntimeCss --format=json`
+    When I run the WP-CLI command `amp optimizer transformer config AmpRuntimeCss --format=json`
 
     Then STDERR should be empty
 
@@ -91,7 +91,7 @@ Feature: List the optimizer transformers via the command line
     Given I run `echo ' '`
     Then save STDOUT as {TRAILING_SPACE}
 
-    When I run `wp amp optimizer transformer config AmpRuntimeCss --format=yaml`
+    When I run the WP-CLI command `amp optimizer transformer config AmpRuntimeCss --format=yaml`
 
     Then STDERR should be empty
 
