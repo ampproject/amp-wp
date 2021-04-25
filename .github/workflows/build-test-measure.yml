@@ -640,19 +640,15 @@ jobs:
         run: composer prepare-tests
 
       - name: Run tests
-        if: ${{ matrix.coverage == false }}
+        env:
+          BEHAT_CODE_COVERAGE: ${{ matrix.coverage }}
         run: vendor/bin/behat
-
-      - name: Run tests with coverage
-        if: ${{ matrix.coverage == true }}
-        run: |
-          vendor/bin/behat --config=behat-with-coverage.yml
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true }}
         uses: codecov/codecov-action@v1.4.1
         with:
-          file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover-behat.xml
+          directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover-behat
           flags: php
           fail_ci_if_error: true
 
