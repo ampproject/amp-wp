@@ -637,7 +637,7 @@ jobs:
           BEHAT_CODE_COVERAGE: ${{ matrix.coverage }}
         run: vendor/bin/behat
 
-      - name: Check coverage folder
+      - name: Retrieve list of coverage files
         if: ${{ matrix.coverage == true }}
         run: |
           FILES=$(ls -d -1 "$GITHUB_WORKSPACE/build/logs/clover-behat/"*.* | xargs echo | sed 's/ /,/g')
@@ -648,7 +648,7 @@ jobs:
         if: ${{ matrix.coverage == true }}
         uses: codecov/codecov-action@v1.4.1
         with:
-          files: $COVERAGE_FILES
+          files: ${{ env.COVERAGE_FILES }}
           flags: php,feature
           fail_ci_if_error: true
 
