@@ -637,6 +637,10 @@ jobs:
           BEHAT_CODE_COVERAGE: ${{ matrix.coverage }}
         run: vendor/bin/behat
 
+      - name: Check coverage folder
+        if: ${{ matrix.coverage == true }}
+        run: ls -l "$GITHUB_WORKSPACE/build/logs/clover-behat/"
+
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true }}
         uses: codecov/codecov-action@v1.4.1
