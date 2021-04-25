@@ -641,7 +641,7 @@ jobs:
         if: ${{ matrix.coverage == true }}
         uses: codecov/codecov-action@v1.4.1
         with:
-          directory: build/logs/clover-behat
+          directory: ./build/logs/clover-behat/
           flags: php
           fail_ci_if_error: true
 
