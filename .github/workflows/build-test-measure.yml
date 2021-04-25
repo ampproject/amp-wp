@@ -609,13 +609,15 @@ jobs:
       - name: Build plugin
         run: npm run build:js
 
-      - name: Setup code coverage abstraction library
+      - name: Update PHPUnit to get latest php-code-coverage library
         if: ${{ matrix.coverage == true }}
-        # phpdocumentor/reflection and phpunit/phpunit have to be removed as they make use of an outdated dependencies,
-        # making phpunit/php-code-coverage unable to be installed.
+        # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency.
+        # phpunit/phpunit has to be updated as the one in use provides an older version of phpunit/php-code-coverage,
+        # but we need the v9.x branch.
+        # It cannot be removed, as it is a requirement of wp-cli/wp-cli-tests as well.
         run: |
-          composer remove --dev phpdocumentor/reflection phpunit/phpunit
-          composer require --dev --ignore-platform-reqs "phpunit/php-code-coverage:^9.2.6"
+          composer remove --dev phpdocumentor/reflection
+          composer require --dev --ignore-platform-reqs --update-with-all-dependencies phpunit/phpunit
 
       - name: Configure DB environment
         run: |
