@@ -6,7 +6,10 @@
  */
 
 use AmpProject\Attribute;
+use AmpProject\Dom\Element;
+use AmpProject\Extension;
 use AmpProject\Layout;
+use AmpProject\Tag;
 
 /**
  * Class AMP_Object_Sanitizer
@@ -29,15 +32,15 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize `object` elements from the HTML contained in this instance's Dom\Document.
 	 */
 	public function sanitize() {
-		$elements = $this->dom->getElementsByTagName( 'object' );
+		$elements = $this->dom->getElementsByTagName( Tag::OBJECT );
 
 		if ( 0 === $elements->length ) {
 			return;
 		}
 
-		/** @var DOMElement $element */
+		/** @var Element $element */
 		foreach ( $elements as $element ) {
-			if ( $element->getAttribute( Attribute::TYPE ) === 'application/pdf' ) {
+			if ( $element->getAttribute( Attribute::TYPE ) === Attribute::TYPE_PDF ) {
 				$this->sanitize_pdf( $element );
 			}
 		}
@@ -48,26 +51,26 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @see \AMP_Core_Block_Handler::ampify_file_block()
 	 *
-	 * @param DOMElement $element Object element.
+	 * @param Element $element Object element.
 	 */
-	public function sanitize_pdf( DOMElement $element ) {
+	public function sanitize_pdf( Element $element ) {
 		$parsed_style = $this->parse_style_string( $element->getAttribute( Attribute::STYLE ) );
 		$embed_height = isset( $parsed_style['height'] ) ? $parsed_style['height'] : self::DEFAULT_PDF_EMBED_HEIGHT;
 
 		$attributes = [
 			Attribute::LAYOUT => Layout::FIXED_HEIGHT,
 			Attribute::HEIGHT => $embed_height,
-			Attribute::SRC    => $element->getAttribute( 'data' ),
+			Attribute::SRC    => $element->getAttribute( Attribute::DATA ),
 		];
 
-		$title = $element->getAttribute( 'aria-label' );
+		$title = $element->getAttribute( Attribute::ARIA_LABEL );
 		if ( '' !== $title ) {
 			$attributes[ Attribute::TITLE ] = $title;
 		}
 
 		// If it is a block, retain original styling for element.
 		if (
-			$element->parentNode instanceof DOMElement
+			$element->parentNode instanceof Element
 			&&
 			in_array(
 				'wp-block-file',
@@ -78,7 +81,7 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 			$attributes[ Attribute::CLASS_ ] = 'wp-block-file__embed';
 		}
 
-		$amp_element = AMP_DOM_Utils::create_node( $element->ownerDocument, 'amp-google-document-embed', $attributes );
+		$amp_element = AMP_DOM_Utils::create_node( $element->ownerDocument, Extension::GOOGLE_DOCUMENT_EMBED, $attributes );
 		$element->parentNode->replaceChild( $amp_element, $element );
 	}
 }

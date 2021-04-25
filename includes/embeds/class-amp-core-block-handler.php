@@ -215,7 +215,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Ampify file block.
 	 *
-	 * Inject the an inline style attribute to handle PDF embeds not being displayed in some themes (eg. Twenty Twenty).
+	 * Inject an inline style attribute to handle PDF embeds not being displayed in some themes (eg. Twenty Twenty).
 	 *
 	 * @see \AMP_Object_Sanitizer::sanitize_pdf()
 	 *
@@ -230,7 +230,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 
 		add_action(
 			'wp_print_footer_scripts',
-			static function() {
+			static function () {
 				if ( wp_script_is( 'wp-block-library-file' ) ) {
 					wp_dequeue_script( 'wp-block-library-file' );
 				}
