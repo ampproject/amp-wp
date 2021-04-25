@@ -5,7 +5,7 @@ use SebastianBergmann\CodeCoverage\Driver\Selector;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Report\Clover;
 
-$root_folder = dirname( dirname( __DIR__ ) );
+$root_folder = realpath( dirname( dirname( __DIR__ ) ) );
 
 if ( ! class_exists( 'SebastianBergmann\CodeCoverage\Filter' ) ) {
 	require "{$root_folder}/vendor/autoload.php";
@@ -35,7 +35,6 @@ register_shutdown_function(
 		$filename        = "clover-behat/{$feature_suffix}-{$scenario_suffix}.xml";
 		$destination     = "{$root_folder}/build/logs/{$filename}";
 
-		var_dump( getcwd() );
 		var_dump( $destination );
 
 		( new Clover() )->process( $coverage, $destination, $name );
