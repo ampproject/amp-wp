@@ -497,7 +497,7 @@ jobs:
   #-----------------------------------------------------------------------------------------------------------------------
 
   feature-test-php:
-    name: "Feature test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
+    name: "Feature test: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     runs-on: ubuntu-latest
     env:
       WP_VERSION: ${{ matrix.wp }}
@@ -515,34 +515,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        coverage: [false]
         php: ['7.3', '7.2', '7.1']
         wp: ['latest']
         include:
           - php: '8.0'
             wp: 'trunk'
             experimental: true
-            coverage: false
 
           - php: '7.4'
             wp: 'latest'
-            coverage: false
 
           - php: '7.4'
             wp: 'latest'
-            coverage: true
 
           - php: '7.0'
             wp: '5.1'
-            coverage: false
 
           - php: '5.6'
             wp: '5.0'
-            coverage: false
 
           - php: '5.6'
             wp: '4.9'
-            coverage: false
 
     steps:
       - name: Checkout
@@ -553,8 +546,6 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
-          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
-          ini-values: pcov.directory=.
 
       - name: Shutdown default MySQL service
         run: sudo service mysql stop
@@ -609,23 +600,6 @@ jobs:
       - name: Build plugin
         run: npm run build:js
 
-      - name: Setup PCOV
-        if: ${{ matrix.coverage == true }}
-        # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, making pcov/clobber
-        # unable to be installed.
-        run: |
-          composer remove --dev phpdocumentor/reflection
-          composer require --dev --ignore-platform-reqs pcov/clobber
-          vendor/bin/pcov clobber
-
-      - name: Setup Behat coverage extension
-        if: ${{ matrix.coverage == true }}
-        # phpunit/phpunit has to be updated at the same time as the one in use provides an older version of
-        # phpunit/php-code-coverage, making dvdoug/behat-code-coverage unable to be installed.
-        # It cannot be removed, as it is a requirement of wp-cli/wp-cli-tests as well.
-        run: |
-           composer require --dev --ignore-platform-reqs --update-with-all-dependencies dvdoug/behat-code-coverage phpunit/phpunit
-
       - name: Configure DB environment
         run: |
           export MYSQL_HOST=127.0.0.1
@@ -640,21 +614,7 @@ jobs:
         run: composer prepare-tests
 
       - name: Run tests
-        if: ${{ matrix.coverage == false }}
         run: vendor/bin/behat
-
-      - name: Run tests with coverage
-        if: ${{ matrix.coverage == true }}
-        run: |
-          vendor/bin/behat --config=behat-with-coverage.yml
-
-      - name: Upload code coverage report
-        if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v1.4.1
-        with:
-          file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover-behat.xml
-          flags: php
-          fail_ci_if_error: true
 
 #-----------------------------------------------------------------------------------------------------------------------
 

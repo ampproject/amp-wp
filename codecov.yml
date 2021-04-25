@@ -2,8 +2,8 @@
 
 codecov:
   notify:
-    # Wait for Jest & PHPUnit $ Behat reports before notifying
-    after_n_builds: 3
+    # Wait for Jest & PHPUnit reports before notifying
+    after_n_builds: 2
 
 coverage:
   status:
@@ -35,8 +35,8 @@ comment:
   require_changes: true
   branches:
     - 'develop'
-  # Wait for Jest & PHPUnit & Behat reports before commenting
-  after_n_builds: 3
+  # Wait for Jest & PHPUnit reports before commenting
+  after_n_builds: 2
 
 # See https://docs.codecov.io/docs/ignoring-paths
 ignore:
