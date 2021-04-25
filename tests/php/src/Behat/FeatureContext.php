@@ -94,7 +94,12 @@ final class FeatureContext extends WP_CLI_FeatureContext {
 	 * @When /^I (run|try) the WP-CLI command `([^`]+)`$/
 	 */
 	public function when_i_run_the_wp_cli_command( $mode, $command ) {
-		$command = "wp {$command} --require={PROJECT_DIR}/tests/php/maybe-generate-wp-cli-coverage.php";
+		$command = "wp {$command}";
+
+		if ( getenv( 'BEHAT_CODE_COVERAGE' ) ) {
+			$command = "{$command} --require={PROJECT_DIR}/tests/php/maybe-generate-wp-cli-coverage.php";
+		}
+
 		$command = $this->replace_variables( $command );
 
 		$this->result = $this->wpcli_tests_invoke_proc(

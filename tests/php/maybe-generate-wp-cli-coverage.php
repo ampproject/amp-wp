@@ -5,10 +5,6 @@ use SebastianBergmann\CodeCoverage\Driver\Selector;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Report\Clover;
 
-if ( ! getenv( 'BEHAT_CODE_COVERAGE' ) ) {
-	return;
-}
-
 $root_folder = dirname( dirname( __DIR__ ) );
 
 if ( ! class_exists( 'SebastianBergmann\CodeCoverage\Filter' ) ) {
