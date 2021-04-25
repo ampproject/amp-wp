@@ -486,7 +486,7 @@ jobs:
         uses: codecov/codecov-action@v1.4.1
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
-          flags: php
+          flags: php,unit
           fail_ci_if_error: true
 
       - name: Run external HTTP tests
@@ -642,7 +642,7 @@ jobs:
         uses: codecov/codecov-action@v1.4.1
         with:
           directory: ./build/logs/clover-behat/
-          flags: php
+          flags: php,feature
           fail_ci_if_error: true
 
 #-----------------------------------------------------------------------------------------------------------------------
