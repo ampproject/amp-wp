@@ -37,11 +37,6 @@ register_shutdown_function(
 		$filename        = "clover-behat/{$feature_suffix}-{$scenario_suffix}.xml";
 		$destination     = "{$project_dir}/build/logs/{$filename}";
 
-		var_dump( getenv( 'BEHAT_PROJECT_DIR' ) );
-		var_dump( $project_dir );
-		var_dump( $destination );
-		var_dump( getcwd() );
-
 		( new Clover() )->process( $coverage, $destination, $name );
 	}
 );
