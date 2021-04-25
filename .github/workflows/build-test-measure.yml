@@ -609,14 +609,13 @@ jobs:
       - name: Build plugin
         run: npm run build:js
 
-      - name: Setup PCOV
+      - name: Setup code coverage abstraction library
         if: ${{ matrix.coverage == true }}
-        # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, making pcov/clobber
-        # unable to be installed.
+        # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, making
+        # phpunit/php-code-coverage unable to be installed.
         run: |
           composer remove --dev phpdocumentor/reflection
-          composer require --dev --ignore-platform-reqs pcov/clobber
-          vendor/bin/pcov clobber
+          composer require --dev --ignore-platform-reqs "phpunit/php-code-coverage:^9.2.6"
 
       - name: Configure DB environment
         run: |
