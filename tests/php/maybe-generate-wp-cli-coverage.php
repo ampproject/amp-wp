@@ -15,12 +15,12 @@ if ( ! class_exists( 'SebastianBergmann\CodeCoverage\Filter' ) ) {
 	require "{$root_folder}/vendor/autoload.php";
 }
 
-$filter = new Filter;
+$filter = new Filter();
 $filter->includeDirectory( "{$root_folder}/includes" );
 $filter->includeDirectory( "{$root_folder}/src" );
 
 $coverage = new CodeCoverage(
-	( new Selector )->forLineCoverage( $filter ),
+	( new Selector() )->forLineCoverage( $filter ),
 	$filter
 );
 

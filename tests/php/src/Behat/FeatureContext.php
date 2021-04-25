@@ -49,32 +49,28 @@ final class FeatureContext extends WP_CLI_FeatureContext {
 	/**
 	 * @BeforeFeature
 	 */
-	public static function store_feature( BeforeFeatureScope $scope )
-	{
+	public static function store_feature( BeforeFeatureScope $scope ) {
 		self::$feature = $scope->getFeature();
 	}
 
 	/**
 	 * @BeforeScenario
 	 */
-	public function store_scenario( BeforeScenarioScope $scope )
-	{
+	public function store_scenario( BeforeScenarioScope $scope ) {
 		$this->scenario = $scope->getScenario();
 	}
 
 	/**
 	 * @AfterScenario
 	 */
-	public function forget_scenario( AfterScenarioScope $scope )
-	{
+	public function forget_scenario( AfterScenarioScope $scope ) {
 		$this->scenario = null;
 	}
 
 	/**
 	 * @AfterFeature
 	 */
-	public static function forget_feature( AfterFeatureScope $scope )
-	{
+	public static function forget_feature( AfterFeatureScope $scope ) {
 		self::$feature = null;
 	}
 
@@ -97,8 +93,7 @@ final class FeatureContext extends WP_CLI_FeatureContext {
 	/**
 	 * @When /^I (run|try) the WP-CLI command `([^`]+)`$/
 	 */
-	public function when_i_run_the_wp_cli_command( $mode, $command )
-	{
+	public function when_i_run_the_wp_cli_command( $mode, $command ) {
 		$command = "wp {$command} --require={PROJECT_DIR}/tests/php/maybe-generate-wp-cli-coverage.php";
 		$command = $this->replace_variables( $command );
 
@@ -107,7 +102,7 @@ final class FeatureContext extends WP_CLI_FeatureContext {
 				$command,
 				[
 					'BEHAT_FEATURE_TITLE'  => self::$feature->getTitle(),
-					'BEHAT_SCENARIO_TITLE' => $this->scenario->getTitle()
+					'BEHAT_SCENARIO_TITLE' => $this->scenario->getTitle(),
 				]
 			),
 			$mode
