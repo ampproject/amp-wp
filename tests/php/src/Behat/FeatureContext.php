@@ -28,17 +28,11 @@ final class FeatureContext extends WP_CLI_FeatureContext {
 	public function given_a_wp_installation_with_the_amp_plugin() {
 		$this->install_wp();
 
-		// Copy the current source files into the WordPress installation as a plugin.
-		$amp_plugin_dir = $this->variables['RUN_DIR'] . '/wp-content/plugins/amp';
-		$this->ensure_dir_exists( $amp_plugin_dir );
-		self::copy_dir( realpath( self::get_vendor_dir() . '/../' ), $amp_plugin_dir );
-
-		// Regenerate the autoloader so that it is created with a new hash in the class name.
-		// This is needed to avoid a fatal error on class redeclaration, as the Composer
-		// autoloader that is copied is the same one that was already loaded into the process
-		// by Behat to find its files.
-		$this->proc( 'rm -rf vendor/autoload.php vendor/composer/autoload_*', [], $amp_plugin_dir )->run_check();
-		$this->proc( 'composer dumpautoload', [], $amp_plugin_dir )->run_check();
+		// Symlink the current project folder into the WP folder as a plugin.
+		$project_dir = realpath( self::get_vendor_dir() . '/../' );
+		$plugin_dir  = $this->variables['RUN_DIR'] . '/wp-content/plugins';
+		$this->ensure_dir_exists( $plugin_dir );
+		$this->proc( "ln -s {$project_dir} {$plugin_dir}/amp" )->run_check();
 
 		// Activate the previously copied plugin.
 		$this->proc( 'wp plugin activate amp' )->run_check();
