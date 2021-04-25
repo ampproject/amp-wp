@@ -96,7 +96,8 @@ final class FeatureContext extends WP_CLI_FeatureContext {
 	public function when_i_run_the_wp_cli_command( $mode, $command ) {
 		$command = "wp {$command}";
 
-		if ( getenv( 'BEHAT_CODE_COVERAGE' ) ) {
+		$with_code_coverage = getenv( 'BEHAT_CODE_COVERAGE' );
+		if ( in_array( $with_code_coverage, [ true, 'true', 1, '1' ], true ) ) {
 			$command = "{$command} --require={PROJECT_DIR}/tests/php/maybe-generate-wp-cli-coverage.php";
 		}
 
