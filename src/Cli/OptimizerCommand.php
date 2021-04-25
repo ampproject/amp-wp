@@ -17,7 +17,11 @@ use AmpProject\Optimizer\ErrorCollection;
 use WP_CLI;
 
 /**
- * Commands that deal with the AMP optimizer.
+ * Commands that deal with the AMP optimizer. (EXPERIMENTAL)
+ *
+ * Note: The Optimizer CLI commands are to be considered experimental, as
+ * the output they produce is currently not guaranteed to be consistent
+ * with the corresponding output from the web server code path.
  *
  * @since 2.1.0
  * @internal
@@ -50,7 +54,11 @@ final class OptimizerCommand implements Service, CliCommand {
 	}
 
 	/**
-	 * Run a file through the AMP Optimizer.
+	 * Run a file through the AMP Optimizer. (EXPERIMENTAL)
+	 *
+	 * Note: The Optimizer CLI commands are to be considered experimental, as
+	 * the output they produce is currently not guaranteed to be consistent
+	 * with the corresponding output from the web server code path.
 	 *
 	 * ## OPTIONS
 	 *
