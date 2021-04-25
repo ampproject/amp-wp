@@ -17,7 +17,11 @@ use WP_CLI;
 use WP_CLI\Utils;
 
 /**
- * Commands that deal with the transformers registered with the AMP optimizer.
+ * Commands that deal with the transformers registered with the AMP optimizer. (EXPERIMENTAL)
+ *
+ * Note: The Optimizer CLI commands are to be considered experimental, as
+ * the output they produce is currently not guaranteed to be consistent
+ * with the corresponding output from the web server code path.
  *
  * @since 2.1.0
  * @internal
@@ -48,7 +52,11 @@ final class TransformerCommand implements Service, CliCommand {
 	}
 
 	/**
-	 * List the transformers registered with the AMP Optimizer.
+	 * List the transformers registered with the AMP Optimizer. (EXPERIMENTAL)
+	 *
+	 * Note: The Optimizer CLI commands are to be considered experimental, as
+	 * the output they produce is currently not guaranteed to be consistent
+	 * with the corresponding output from the web server code path.
 	 *
 	 * ## OPTIONS
 	 *
@@ -135,7 +143,11 @@ final class TransformerCommand implements Service, CliCommand {
 	}
 
 	/**
-	 * List the configuration of a given transformer.
+	 * List the configuration of a given transformer. (EXPERIMENTAL)
+	 *
+	 * Note: The Optimizer CLI commands are to be considered experimental, as
+	 * the output they produce is currently not guaranteed to be consistent
+	 * with the corresponding output from the web server code path.
 	 *
 	 * ## OPTIONS
 	 *
