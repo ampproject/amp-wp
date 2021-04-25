@@ -107,6 +107,7 @@ final class FeatureContext extends WP_CLI_FeatureContext {
 			$this->proc_with_env(
 				$command,
 				[
+					'BEHAT_PROJECT_DIR'    => $this->variables['PROJECT_DIR'],
 					'BEHAT_FEATURE_TITLE'  => self::$feature->getTitle(),
 					'BEHAT_SCENARIO_TITLE' => $this->scenario->getTitle(),
 				]

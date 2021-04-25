@@ -20,6 +20,8 @@ $coverage = new CodeCoverage(
 	$filter
 );
 
+$project_dir = getenv( 'BEHAT_PROJECT_DIR' );
+
 $feature  = getenv( 'BEHAT_FEATURE_TITLE' );
 $scenario = getenv( 'BEHAT_SCENARIO_TITLE' );
 $name     = "{$feature} - {$scenario}";
@@ -27,13 +29,13 @@ $name     = "{$feature} - {$scenario}";
 $coverage->start( $name );
 
 register_shutdown_function(
-	static function () use ( $coverage, $root_folder, $feature, $scenario, $name ) {
+	static function () use ( $coverage, $project_dir, $feature, $scenario, $name ) {
 		$coverage->stop();
 
 		$feature_suffix  = preg_replace( '/[^a-z0-9]+/', '-', strtolower( $feature ) );
 		$scenario_suffix = preg_replace( '/[^a-z0-9]+/', '-', strtolower( $scenario ) );
 		$filename        = "clover-behat/{$feature_suffix}-{$scenario_suffix}.xml";
-		$destination     = "{$root_folder}/build/logs/{$filename}";
+		$destination     = "{$project_dir}/build/logs/{$filename}";
 
 		var_dump( $destination );
 
