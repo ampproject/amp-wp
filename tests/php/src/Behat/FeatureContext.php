@@ -34,7 +34,7 @@ final class FeatureContext extends WP_CLI_FeatureContext {
 		$this->ensure_dir_exists( $plugin_dir );
 		$this->proc( "ln -s {$project_dir} {$plugin_dir}/amp" )->run_check();
 
-		// Activate the previously copied plugin.
+		// Activate the plugin.
 		$this->proc( 'wp plugin activate amp' )->run_check();
 	}
 
