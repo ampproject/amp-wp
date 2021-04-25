@@ -618,14 +618,6 @@ jobs:
           composer require --dev --ignore-platform-reqs pcov/clobber
           vendor/bin/pcov clobber
 
-      - name: Setup Behat coverage extension
-        if: ${{ matrix.coverage == true }}
-        # phpunit/phpunit has to be updated at the same time as the one in use provides an older version of
-        # phpunit/php-code-coverage, making dvdoug/behat-code-coverage unable to be installed.
-        # It cannot be removed, as it is a requirement of wp-cli/wp-cli-tests as well.
-        run: |
-           composer require --dev --ignore-platform-reqs --update-with-all-dependencies dvdoug/behat-code-coverage phpunit/phpunit
-
       - name: Configure DB environment
         run: |
           export MYSQL_HOST=127.0.0.1
@@ -648,7 +640,7 @@ jobs:
         if: ${{ matrix.coverage == true }}
         uses: codecov/codecov-action@v1.4.1
         with:
-          directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover-behat
+          directory: build/logs/clover-behat
           flags: php
           fail_ci_if_error: true
 
