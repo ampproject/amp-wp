@@ -611,10 +611,10 @@ jobs:
 
       - name: Setup code coverage abstraction library
         if: ${{ matrix.coverage == true }}
-        # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, making
-        # phpunit/php-code-coverage unable to be installed.
+        # phpdocumentor/reflection and phpunit/phpunit have to be removed as they make use of an outdated dependencies,
+        # making phpunit/php-code-coverage unable to be installed.
         run: |
-          composer remove --dev phpdocumentor/reflection
+          composer remove --dev phpdocumentor/reflection phpunit/phpunit
           composer require --dev --ignore-platform-reqs "phpunit/php-code-coverage:^9.2.6"
 
       - name: Configure DB environment
