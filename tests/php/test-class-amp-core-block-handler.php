@@ -189,7 +189,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
 
-		$this->assertStringContains( '<div style="display: block;" class="wp-block-file">', $content );
+		$this->assertStringContains( '<style id="amp-wp-file-block">', $content );
 	}
 
 	/**
@@ -218,7 +218,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
 
-		$this->assertStringNotContains( '<div style="display: block;" class="wp-block-file">', $content );
+		$this->assertStringNotContains( '<style id="amp-wp-file-block">', $content );
 	}
 
 	/**
@@ -247,7 +247,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
 
-		$this->assertStringNotContains( '<div style="display: block;" class="wp-block-file">', $content );
+		$this->assertStringNotContains( '<style id="amp-wp-file-block">', $content );
 	}
 
 	/**

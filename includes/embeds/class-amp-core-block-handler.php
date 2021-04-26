@@ -245,12 +245,15 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		);
 
 		// In Twenty Twenty the PDF embed fails to render due to the parent of the embed having
-		// the style rule `display: flex`. Overriding the display to `block` seems to do the trick.
-		return preg_replace(
-			'/(?<=<div\s)[^>]*class=(?:"|"[^"]*\s)wp-block-file(?:"|\s[^"]*")[^>]*>/',
-			'style="display: block;" $0',
-			$block_content
+		// the style rule `display: flex`. Ensuring the element has 100% width fixes that issue.
+		$block_content = preg_replace(
+			':(?=</div>):',
+			'<style id="amp-wp-file-block">.wp-block-file > .wp-block-file__embed { width:100% }</style>',
+			$block_content,
+			1
 		);
+
+		return $block_content;
 	}
 
 	/**
