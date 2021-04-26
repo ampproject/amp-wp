@@ -154,39 +154,100 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that style attribute is injected into parent of PDF embed.
+	 * Test embedding a PDF.
 	 *
 	 * @covers \AMP_Core_Block_Handler::ampify_file_block()
 	 */
-	public function test_ampify_file_block() {
+	public function test_ampify_file_block_pdf_preview() {
 
 		$handler = new AMP_Core_Block_Handler();
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
 
+		// Since at the time the File block is not yet in a stable Gutenberg release, so gutenberg_register_block_core_file() is not present.
+		if ( ! wp_script_is( 'wp-block-library-file' ) ) {
+			wp_register_script( 'wp-block-library-file', home_url( '/wp-block-library-file.js' ), [], '1', true );
+		}
+
 		$content = do_blocks(
 			'
-			<!-- wp:file {"id":42,"href":"https://example.com/content/uploads/2021/04/example.pdf","displayPreview":true} -->
+			<!-- wp:file {"id":42,"href":"https://example.com/content/uploads/2021/04/example.pdf?foo=bar","displayPreview":true} -->
 				<div class="wp-block-file">
 					<object class="wp-block-file__embed" data="https://example.com/content/uploads/2021/04/example.pdf" type="application/pdf" style="width:100%;height:600px" aria-label="Embed of example."></object>
 					<a href="https://example.com/content/uploads/2021/04/example.pdf">example</a>
 					<a href="https://example.com/content/uploads/2021/04/example.pdf" class="wp-block-file__button" download>Download</a>
 				</div>
 			<!-- /wp:file -->
-		'
+			'
 		);
 
-		if ( function_exists( 'gutenberg_register_block_core_file' ) ) {
-			$this->assertTrue( wp_script_is( 'wp-block-library-file' ) );
+		$this->assertTrue( wp_script_is( 'wp-block-library-file' ) );
 
-			ob_start();
-			do_action( 'wp_print_footer_scripts' );
-			ob_end_clean();
+		ob_start();
+		wp_print_footer_scripts();
+		ob_end_clean();
 
-			$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
-		}
+		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
 
 		$this->assertStringContains( '<div style="display: block;" class="wp-block-file">', $content );
+	}
+
+	/**
+	 * Test PDF in File block without preview.
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_file_block()
+	 */
+	public function test_ampify_file_block_pdf_non_preview() {
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		// Since at the time the File block is not yet in a stable Gutenberg release, so gutenberg_register_block_core_file() is not present.
+		if ( ! wp_script_is( 'wp-block-library-file' ) ) {
+			wp_register_script( 'wp-block-library-file', home_url( '/wp-block-library-file.js' ), [], '1', true );
+		}
+
+		$content = do_blocks(
+			'
+			<!-- wp:file {"id":2924,"href":"https://example.com/content/uploads/2021/04/example.pdf","displayPreview":false} -->
+			<div class="wp-block-file"><a href="https://example.com/content/uploads/2021/04/example.pdf">example</a><a href="https://example.com/content/uploads/2021/04/example.pdf" class="wp-block-file__button" download>Download</a></div>
+			<!-- /wp:file -->
+			'
+		);
+
+		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
+
+		$this->assertStringNotContains( '<div style="display: block;" class="wp-block-file">', $content );
+	}
+
+	/**
+	 * Test PDF in File block without preview.
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_file_block()
+	 */
+	public function test_ampify_file_block_non_pdf() {
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		// Since at the time the File block is not yet in a stable Gutenberg release, so gutenberg_register_block_core_file() is not present.
+		if ( ! wp_script_is( 'wp-block-library-file' ) ) {
+			wp_register_script( 'wp-block-library-file', home_url( '/wp-block-library-file.js' ), [], '1', true );
+		}
+
+		$content = do_blocks(
+			'
+			<!-- wp:file {"id":821,"href":"https://example.com/content/uploads/2021/04/example.mp3"} -->
+			<div class="wp-block-file"><a href="https://example.com/content/uploads/2021/04/example.mp3">example</a><a href="https://example.com/content/uploads/2021/04/example.mp3" class="wp-block-file__button" download>Download</a></div>
+			<!-- /wp:file -->
+			'
+		);
+
+		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
+
+		$this->assertStringNotContains( '<div style="display: block;" class="wp-block-file">', $content );
 	}
 
 	/**

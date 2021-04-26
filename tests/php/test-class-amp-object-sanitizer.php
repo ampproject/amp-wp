@@ -6,7 +6,7 @@
  */
 
 /**
- * Class AMP_Audio_Converter_Test
+ * Class AMP_Object_Sanitizer_Test
  *
  * @coversDefaultClass \AMP_Object_Sanitizer
  */
