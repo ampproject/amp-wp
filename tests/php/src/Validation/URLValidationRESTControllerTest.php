@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-namespace AmpProject\AmpWP\Tests;
+namespace AmpProject\AmpWP\Tests\Validation;
 
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
