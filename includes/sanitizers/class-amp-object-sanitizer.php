@@ -29,6 +29,19 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 	const DEFAULT_PDF_EMBED_HEIGHT = 600;
 
 	/**
+	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	 *
+	 * @return array Mapping.
+	 */
+	public function get_selector_conversion_mapping() {
+		return [
+			Tag::OBJECT => [
+				Extension::GOOGLE_DOCUMENT_EMBED,
+			],
+		];
+	}
+
+	/**
 	 * Sanitize `object` elements from the HTML contained in this instance's Dom\Document.
 	 */
 	public function sanitize() {
