@@ -40,7 +40,11 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 
 		/** @var Element $element */
 		foreach ( iterator_to_array( $elements ) as $element ) {
-			if ( $element->getAttribute( Attribute::TYPE ) === Attribute::TYPE_PDF ) {
+			if (
+				$element->getAttribute( Attribute::TYPE ) === Attribute::TYPE_PDF
+				&&
+				$element->hasAttribute( Attribute::DATA )
+			) {
 				$this->sanitize_pdf( $element );
 			}
 		}
@@ -68,17 +72,11 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 			$attributes[ Attribute::TITLE ] = $title;
 		}
 
-		// If it is a block, retain original styling for element.
-		if (
-			$element->parentNode instanceof Element
-			&&
-			in_array(
-				'wp-block-file',
-				explode( ' ', $element->parentNode->getAttribute( Attribute::CLASS_ ) ),
-				true
-			)
-		) {
-			$attributes[ Attribute::CLASS_ ] = 'wp-block-file__embed';
+		$attributes_to_copy = [ Attribute::ID, Attribute::CLASS_ ];
+		foreach ( $attributes_to_copy as $attribute_name ) {
+			if ( $element->hasAttribute( $attribute_name ) ) {
+				$attributes[ $attribute_name ] = $element->getAttribute( $attribute_name );
+			}
 		}
 
 		$amp_element = AMP_DOM_Utils::create_node( $element->ownerDocument, Extension::GOOGLE_DOCUMENT_EMBED, $attributes );

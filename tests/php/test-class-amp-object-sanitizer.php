@@ -35,8 +35,8 @@ class AMP_Object_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'two object elements with PDF content type' => [
-				'<object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot1.pdf" type="application/pdf"></object><object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot2.pdf" type="application/pdf"></object>',
-				'<amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot1.pdf"></amp-google-document-embed><amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot2.pdf"></amp-google-document-embed>',
+				'<object class="first" data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot1.pdf" type="application/pdf"></object><object id="second" data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot2.pdf" type="application/pdf"></object>',
+				'<amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot1.pdf" class="first"></amp-google-document-embed><amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot2.pdf" id="second"></amp-google-document-embed>',
 			],
 
 			'GB file block with PDF content type'       => [

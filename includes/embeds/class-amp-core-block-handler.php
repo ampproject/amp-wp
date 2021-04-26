@@ -215,7 +215,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Ampify file block.
 	 *
-	 * Inject an inline style attribute to handle PDF embeds not being displayed in some themes (eg. Twenty Twenty).
+	 * Fix handling of PDF previews by dequeuing wp-block-library-file and ensuring preview element has 100% width.
 	 *
 	 * @see \AMP_Object_Sanitizer::sanitize_pdf()
 	 *
