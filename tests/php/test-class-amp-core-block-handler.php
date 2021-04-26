@@ -164,11 +164,6 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
 
-		// Since at the time the File block is not yet in a stable Gutenberg release, so gutenberg_register_block_core_file() is not present.
-		if ( ! wp_script_is( 'wp-block-library-file' ) ) {
-			wp_register_script( 'wp-block-library-file', home_url( '/wp-block-library-file.js' ), [], '1', true );
-		}
-
 		$content = do_blocks(
 			'
 			<!-- wp:file {"id":42,"href":"https://example.com/content/uploads/2021/04/example.pdf?foo=bar","displayPreview":true} -->
@@ -181,13 +176,15 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 			'
 		);
 
-		$this->assertTrue( wp_script_is( 'wp-block-library-file' ) );
+		if ( wp_script_is( 'wp-block-library-file', 'registered' ) ) {
+			$this->assertTrue( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
 
-		ob_start();
-		wp_print_footer_scripts();
-		ob_end_clean();
+			ob_start();
+			wp_print_footer_scripts();
+			ob_end_clean();
 
-		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
+			$this->assertFalse( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
+		}
 
 		$this->assertStringContains( '<style id="amp-wp-file-block">', $content );
 	}
@@ -203,11 +200,6 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
 
-		// Since at the time the File block is not yet in a stable Gutenberg release, so gutenberg_register_block_core_file() is not present.
-		if ( ! wp_script_is( 'wp-block-library-file' ) ) {
-			wp_register_script( 'wp-block-library-file', home_url( '/wp-block-library-file.js' ), [], '1', true );
-		}
-
 		$content = do_blocks(
 			'
 			<!-- wp:file {"id":2924,"href":"https://example.com/content/uploads/2021/04/example.pdf","displayPreview":false} -->
@@ -216,7 +208,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 			'
 		);
 
-		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
+		$this->assertFalse( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
 
 		$this->assertStringNotContains( '<style id="amp-wp-file-block">', $content );
 	}
@@ -232,11 +224,6 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
 
-		// Since at the time the File block is not yet in a stable Gutenberg release, so gutenberg_register_block_core_file() is not present.
-		if ( ! wp_script_is( 'wp-block-library-file' ) ) {
-			wp_register_script( 'wp-block-library-file', home_url( '/wp-block-library-file.js' ), [], '1', true );
-		}
-
 		$content = do_blocks(
 			'
 			<!-- wp:file {"id":821,"href":"https://example.com/content/uploads/2021/04/example.mp3"} -->
@@ -245,7 +232,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 			'
 		);
 
-		$this->assertFalse( wp_script_is( 'wp-block-library-file' ) );
+		$this->assertFalse( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
 
 		$this->assertStringNotContains( '<style id="amp-wp-file-block">', $content );
 	}
