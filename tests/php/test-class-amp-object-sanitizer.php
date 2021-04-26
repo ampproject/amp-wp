@@ -19,22 +19,27 @@ class AMP_Object_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_data() {
 		return [
-			'no object element'                        => [
+			'no object element'                         => [
 				'<p>Hello World.</p>',
 				'<p>Hello World.</p>',
 			],
 
-			'object element with non-PDF content type' => [
+			'object element with non-PDF content type'  => [
 				'<object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" type="application/example"></object>',
 				'<object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" type="application/example"></object>',
 			],
 
-			'object element with PDF content type'     => [
+			'object element with PDF content type'      => [
 				'<object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" type="application/pdf"></object>',
 				'<amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf"></amp-google-document-embed>',
 			],
 
-			'GB file block with PDF content type'      => [
+			'two object elements with PDF content type' => [
+				'<object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot1.pdf" type="application/pdf"></object><object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot2.pdf" type="application/pdf"></object>',
+				'<amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot1.pdf"></amp-google-document-embed><amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot2.pdf"></amp-google-document-embed>',
+			],
+
+			'GB file block with PDF content type'       => [
 				'<div class="wp-block-file"><object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" type="application/pdf" class="wp-block-file__embed"></object></div>',
 				'<div class="wp-block-file"><amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" class="wp-block-file__embed"></amp-google-document-embed></div>',
 			],

@@ -39,7 +39,7 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		/** @var Element $element */
-		foreach ( $elements as $element ) {
+		foreach ( iterator_to_array( $elements ) as $element ) {
 			if ( $element->getAttribute( Attribute::TYPE ) === Attribute::TYPE_PDF ) {
 				$this->sanitize_pdf( $element );
 			}
