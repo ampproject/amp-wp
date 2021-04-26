@@ -83,12 +83,13 @@ final class Polyfills implements Delayed, Service, Registerable {
 			$asset_handle = 'wp-api-fetch';
 			$asset_file   = AMP__DIR__ . "/assets/js/{$asset_handle}.asset.php";
 			$asset        = require $asset_file;
+			$dependencies = $asset['dependencies'];
 			$version      = $asset['version'];
 
 			$wp_scripts->add(
 				$asset_handle,
 				amp_get_asset_url( "js/{$asset_handle}.js" ),
-				[],
+				$dependencies,
 				$version,
 				true
 			);
