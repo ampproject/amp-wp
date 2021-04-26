@@ -224,7 +224,13 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Filtered block content.
 	 */
 	public function ampify_file_block( $block_content, $block ) {
-		if ( empty( $block['attrs']['displayPreview'] ) || '.pdf' !== substr( $block['attrs']['href'], -4 ) ) {
+		if (
+			empty( $block['attrs']['displayPreview'] )
+			||
+			empty( $block['attrs']['href'] )
+			||
+			'.pdf' !== substr( wp_parse_url( $block['attrs']['href'], PHP_URL_PATH ), -4 )
+		) {
 			return $block_content;
 		}
 
