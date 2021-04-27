@@ -1107,6 +1107,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'p>*:not(iframe){color:purple}',
 				'p>*:not(amp-iframe){color:purple}',
 			],
+			'object' => [
+				'<p><object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" type="application/pdf"></object></p>',
+				'p>*:not(object){color:purple}',
+				'p>*:not(amp-google-document-embed){color:purple}',
+			],
 			'audio' => [
 				'<audio src="http://example.com/foo.mp3" height="100" width="200"></audio>',
 				'audio{border:solid 1px yellow}',
