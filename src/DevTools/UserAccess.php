@@ -11,8 +11,6 @@ namespace AmpProject\AmpWP\DevTools;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;
-use AMP_Validated_URL_Post_Type;
-use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
