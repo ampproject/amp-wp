@@ -90,7 +90,7 @@ final class UserAccess implements Service, Registerable {
 			 * @param bool $enabled DevTools enabled.
 			 * @param int  $user_id User ID.
 			 */
-			$enabled = apply_filters( 'amp_dev_tools_user_default_enabled', $enabled, $user->ID );
+			$enabled = (bool) apply_filters( 'amp_dev_tools_user_default_enabled', $enabled, $user->ID );
 		}
 		return rest_sanitize_boolean( $enabled );
 	}

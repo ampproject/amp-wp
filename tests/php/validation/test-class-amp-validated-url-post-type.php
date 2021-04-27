@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
@@ -123,7 +124,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::update_validated_url_menu_item()
 	 */
 	public function test_update_validated_url_menu_item() {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_user->ID );
 		global $submenu;
 
 		$original_submenu = $submenu;
@@ -153,7 +155,11 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		];
 
 		AMP_Validated_URL_Post_Type::update_validated_url_menu_item();
+		$this->assertSame( 'Validated URLs', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
 
+		update_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, wp_json_encode( true ) );
+
+		AMP_Validated_URL_Post_Type::update_validated_url_menu_item();
 		$this->assertSame( 'Validated URLs <span class="awaiting-mod"><span id="new-validation-url-count" class="loading"></span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
 
 		$submenu = $original_submenu;

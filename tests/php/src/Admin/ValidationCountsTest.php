@@ -89,7 +89,7 @@ class ValidationCountsTest extends WP_UnitTestCase {
 		$this->assertTrue( ValidationCounts::is_needed() );
 
 		// Should not be needed when in Reader mode and not on a devtools screen.
-		unset( $_GET['post'], $_GET['post_type'], $_GET['taxonomy'], $_GET['action'] );
+		unset( $_GET['post'], $_GET['post_type'], $_GET['taxonomy'], $_GET['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertFalse( ValidationCounts::is_needed() );
 
@@ -112,7 +112,7 @@ class ValidationCountsTest extends WP_UnitTestCase {
 
 		// Should be needed when not on a dev tools screen, dev tools has never been configured for the user, but is enabled through a filter.
 		add_filter( 'amp_dev_tools_user_default_enabled', '__return_true' );
-		unset( $_GET['post'], $_GET['post_type'], $_GET['taxonomy'], $_GET['action'] );
+		unset( $_GET['post'], $_GET['post_type'], $_GET['taxonomy'], $_GET['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		delete_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
 		$this->assertTrue( ValidationCounts::is_needed() );
 	}
