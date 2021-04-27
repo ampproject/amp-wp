@@ -234,15 +234,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			return $block_content;
 		}
 
-		add_action(
-			'wp_print_footer_scripts',
-			static function () {
-				if ( wp_script_is( 'wp-block-library-file' ) ) {
-					wp_dequeue_script( 'wp-block-library-file' );
-				}
-			},
-			0
-		);
+		add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_library_file_script' ], 0 );
 
 		// In Twenty Twenty the PDF embed fails to render due to the parent of the embed having
 		// the style rule `display: flex`. Ensuring the element has 100% width fixes that issue.
@@ -254,6 +246,13 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		);
 
 		return $block_content;
+	}
+
+	/**
+	 * Dequeue wp-block-library-file script.
+	 */
+	public function dequeue_block_library_file_script() {
+		wp_dequeue_script( 'wp-block-library-file' );
 	}
 
 	/**

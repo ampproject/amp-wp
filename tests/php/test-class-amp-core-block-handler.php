@@ -157,6 +157,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * Test embedding a PDF.
 	 *
 	 * @covers \AMP_Core_Block_Handler::ampify_file_block()
+	 * @covers \AMP_Core_Block_Handler::dequeue_block_library_file_script()
 	 */
 	public function test_ampify_file_block_pdf_preview() {
 
@@ -178,11 +179,13 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		if ( wp_script_is( 'wp-block-library-file', 'registered' ) ) {
 			$this->assertTrue( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
+		}
 
-			ob_start();
-			wp_print_footer_scripts();
-			ob_end_clean();
+		ob_start();
+		wp_print_footer_scripts();
+		ob_end_clean();
 
+		if ( wp_script_is( 'wp-block-library-file', 'registered' ) ) {
 			$this->assertFalse( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
 		}
 
