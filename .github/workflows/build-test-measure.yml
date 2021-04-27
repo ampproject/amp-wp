@@ -528,9 +528,10 @@ jobs:
             wp: 'latest'
             coverage: false
 
-          - php: '7.4'
-            wp: 'latest'
-            coverage: true
+          # TODO: Enable this once codecov upload merging works as expected.
+          # - php: '7.4'
+          #  wp: 'latest'
+          #  coverage: true
 
           - php: '7.0'
             wp: '5.1'
