@@ -2,7 +2,7 @@
 
 ![Banner](.wordpress-org/banner-1544x500.png)
 
-The official AMP Plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across both mobile and desktop.
+[Page Experience](https://developers.google.com/search/docs/guides/page-experience) is a new ranking signal capturing how users perceive the experience of interacting with a web page. AMP is a powerful an cost-effective tool enabling many optimizations and best practices automatically on your site, and making it easier for you to bring good page experiences to your users. The official AMP Plugin, supported by the AMP team, makes it easy to bring the power of AMP to your WordPress site.
 
 **Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [albertomedina](https://profiles.wordpress.org/albertomedina), [schlessera](https://profiles.wordpress.org/schlessera), [swissspidy](https://profiles.wordpress.org/swissspidy), [pierlo](https://profiles.wordpress.org/pierlo), [delawski](https://profiles.wordpress.org/delawski/), [johnwatkins0](https://profiles.wordpress.org/johnwatkins0), [joshuawold](https://profiles.wordpress.org/joshuawold)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages), [framework](https://wordpress.org/plugins/tags/framework),[performance](https://wordpress.org/plugins/tags/performance)
