@@ -160,7 +160,7 @@ const customizer = {
 
 const WORDPRESS_NAMESPACE = '@wordpress/';
 const BABEL_NAMESPACE = '@babel/';
-const gutenbergPackages = [ '@babel/polyfill', '@wordpress/dom-ready', '@wordpress/i18n', '@wordpress/url' ].map(
+const gutenbergPackages = [ '@babel/polyfill', '@wordpress/dom-ready', '@wordpress/i18n', '@wordpress/hooks', '@wordpress/url' ].map(
 	( packageName ) => {
 		if ( 0 !== packageName.indexOf( WORDPRESS_NAMESPACE ) && 0 !== packageName.indexOf( BABEL_NAMESPACE ) ) {
 			return null;

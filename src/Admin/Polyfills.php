@@ -51,7 +51,7 @@ final class Polyfills implements Delayed, Service, Registerable {
 				'lodash',
 				amp_get_asset_url( 'js/vendor/lodash.js' ),
 				[],
-				'4.17.19',
+				'4.17.21',
 				true
 			);
 
@@ -62,7 +62,7 @@ final class Polyfills implements Delayed, Service, Registerable {
 		 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
 		 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
 		 */
-		$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-polyfill', 'wp-url' ];
+		$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-hooks', 'wp-polyfill', 'wp-url' ];
 		foreach ( $handles as $handle ) {
 			if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
 				$asset_file   = AMP__DIR__ . "/assets/js/{$handle}.asset.php";
@@ -83,12 +83,13 @@ final class Polyfills implements Delayed, Service, Registerable {
 			$asset_handle = 'wp-api-fetch';
 			$asset_file   = AMP__DIR__ . "/assets/js/{$asset_handle}.asset.php";
 			$asset        = require $asset_file;
+			$dependencies = $asset['dependencies'];
 			$version      = $asset['version'];
 
 			$wp_scripts->add(
 				$asset_handle,
 				amp_get_asset_url( "js/{$asset_handle}.js" ),
-				[],
+				$dependencies,
 				$version,
 				true
 			);
