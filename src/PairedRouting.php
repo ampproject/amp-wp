@@ -97,6 +97,13 @@ final class PairedRouting implements Service, Registerable {
 	const CUSTOM_PAIRED_ENDPOINT_SOURCES = 'custom_paired_endpoint_sources';
 
 	/**
+	 * Action which is triggered when the late-defined slug needs to be updated in options.
+	 *
+	 * @var string
+	 */
+	const ACTION_UPDATE_LATE_DEFINED_SLUG_OPTION = 'amp_update_late_defined_slug_option';
+
+	/**
 	 * Paired URL service.
 	 *
 	 * @var PairedUrl
@@ -180,6 +187,23 @@ final class PairedRouting implements Service, Registerable {
 
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ], 10, 2 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
+
+		add_action(
+			self::ACTION_UPDATE_LATE_DEFINED_SLUG_OPTION,
+			function () {
+				AMP_Options_Manager::update_option( Option::LATE_DEFINED_SLUG, $this->get_late_defined_slug() );
+			}
+		);
+
+		add_action(
+			AmpSlugCustomizationWatcher::LATE_DETERMINATION_ACTION,
+			function () {
+				$late_defined_slug = $this->get_late_defined_slug();
+				if ( AMP_Options_Manager::get_option( Option::LATE_DEFINED_SLUG ) !== $late_defined_slug ) {
+					wp_schedule_single_event( time(), self::ACTION_UPDATE_LATE_DEFINED_SLUG_OPTION );
+				}
+			}
+		);
 
 		add_action( 'template_redirect', [ $this, 'redirect_extraneous_paired_endpoint' ], 9 );
 
@@ -665,6 +689,15 @@ final class PairedRouting implements Service, Registerable {
 	}
 
 	/**
+	 * Get the late defined slug, or null if it was not defined late.
+	 *
+	 * @return string|null Slug or null.
+	 */
+	public function get_late_defined_slug() {
+		return $this->amp_slug_customization_watcher->did_customize_late() ? amp_get_slug() : null;
+	}
+
+	/**
 	 * Sanitize options.
 	 *
 	 * Note that in a REST API context this is redundant with the enum defined in the schema.
@@ -675,11 +708,7 @@ final class PairedRouting implements Service, Registerable {
 	 */
 	public function sanitize_options( $options, $new_options ) {
 		// Cache the AMP slug in options when it is defined late so that it can be referred to early at plugins_loaded.
-		if ( $this->amp_slug_customization_watcher->did_customize_late() ) {
-			$options[ Option::LATE_DEFINED_SLUG ] = amp_get_slug();
-		} else {
-			$options[ Option::LATE_DEFINED_SLUG ] = null;
-		}
+		$options[ Option::LATE_DEFINED_SLUG ] = $this->get_late_defined_slug();
 
 		if (
 			isset( $new_options[ Option::PAIRED_URL_STRUCTURE ] )
