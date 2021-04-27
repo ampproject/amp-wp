@@ -1,5 +1,6 @@
 /assets/css/*.css
 /bin
 /build
+/qa-tester
 /tests
 /vendor

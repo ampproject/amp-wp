@@ -57,6 +57,7 @@ final class AmpWPConfiguration extends DefaultConfiguration {
 				$transformers,
 				[
 					Transformer\AmpRuntimeCss::class,
+					Transformer\OptimizeAmpBind::class,
 					Transformer\PreloadHeroImage::class,
 					Transformer\RewriteAmpUrls::class,
 					Transformer\ServerSideRendering::class,

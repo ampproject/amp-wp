@@ -1,0 +1,5 @@
+**/*.min.js
+node_modules/**
+vendor/**
+assets/js/*.js
+build/*

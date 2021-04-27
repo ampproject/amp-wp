@@ -279,7 +279,7 @@ class AMP_Options_Manager {
 	public static function get_option( $option, $default = false ) {
 		$amp_options = self::get_options();
 
-		if ( ! isset( $amp_options[ $option ] ) ) {
+		if ( ! array_key_exists( $option, $amp_options ) ) {
 			return $default;
 		}
 

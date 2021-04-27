@@ -413,7 +413,6 @@ li.error-kept {
 }
 
 #paired-url-structure .amp-paired-url-examples summary {
-	display: inline-block;
 	padding-right: 4px;
 	user-select: none;
 }
