@@ -99,11 +99,6 @@ final class TransformerCommand implements Service, CliCommand {
 	 * @throws WP_CLI\ExitException If the requested file could not be read.
 	 */
 	public function list_( $args, $assoc_args ) {
-		$strict = Utils\get_flag_value( $assoc_args, 'strict' );
-		if ( $strict && empty( $args ) ) {
-			WP_CLI::error( 'The --strict option can only be used in combination with a filter.' );
-		}
-
 		$default_fields = [
 			'transformer',
 			'source',
