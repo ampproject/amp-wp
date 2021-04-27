@@ -234,6 +234,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			return $block_content;
 		}
 
+		add_action( 'wp_print_scripts', [ $this, 'dequeue_block_library_file_script' ], 0 );
 		add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_library_file_script' ], 0 );
 
 		// In Twenty Twenty the PDF embed fails to render due to the parent of the embed having
