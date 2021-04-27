@@ -1758,13 +1758,16 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		'class' => 'ab-icon',
 	];
 
+	$non_amp_view_title = __( 'View non-AMP version', 'amp' );
+	$amp_view_title     = __( 'View AMP version', 'amp' );
+
 	$wp_admin_bar->add_node(
 		[
 			'id'    => 'amp',
 			'title' => $icon->to_html( $attr ) . ' ' . esc_html__( 'AMP', 'amp' ),
 			'href'  => esc_url( $is_amp_request ? $non_amp_url : $amp_url ),
 			'meta'  => [
-				'title' => esc_attr( $is_amp_request ? __( 'Validate URL', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+				'title' => esc_attr( $is_amp_request ? $non_amp_view_title : $amp_view_title ),
 			],
 		]
 	);
@@ -1773,7 +1776,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		[
 			'parent' => 'amp',
 			'id'     => 'amp-view',
-			'title'  => esc_html( $is_amp_request ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			'title'  => esc_html( $is_amp_request ? $non_amp_view_title : $amp_view_title ),
 			'href'   => esc_url( $is_amp_request ? $non_amp_url : $amp_url ),
 		]
 	);
