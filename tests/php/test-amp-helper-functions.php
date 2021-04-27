@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 
 /**
  * Class Test_AMP_Helper_Functions
@@ -268,6 +269,36 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		);
 
 		$this->assertSame( 'lite', amp_get_slug() );
+	}
+
+	/**
+	 * Test amp_get_slug() when late-defined slugs are involved.
+	 *
+	 * @covers ::amp_get_slug()
+	 */
+	public function test_amp_get_slug_late() {
+		$this->assertSame( 'amp', amp_get_slug() );
+
+		unset( $GLOBALS['wp_actions'][ AmpSlugCustomizationWatcher::LATE_DETERMINATION_ACTION ] );
+		$this->assertEquals( 0, did_action( AmpSlugCustomizationWatcher::LATE_DETERMINATION_ACTION ) );
+		AMP_Options_Manager::update_option( Option::LATE_DEFINED_SLUG, 'mobile' );
+
+		add_filter(
+			'amp_query_var',
+			static function () {
+				return 'lite';
+			}
+		);
+
+		$this->assertEquals( 'mobile', amp_get_slug() );
+		$this->assertEquals( 'mobile', amp_get_slug( false ) );
+		$this->assertEquals( 'lite', amp_get_slug( true ) );
+
+		do_action( AmpSlugCustomizationWatcher::LATE_DETERMINATION_ACTION );
+
+		$this->assertEquals( 'lite', amp_get_slug() );
+		$this->assertEquals( 'lite', amp_get_slug( false ) );
+		$this->assertEquals( 'lite', amp_get_slug( true ) );
 	}
 
 	/** @covers ::amp_is_canonical() */

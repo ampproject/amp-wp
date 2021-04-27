@@ -3,6 +3,7 @@
 namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -628,16 +629,47 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 
 	/** @covers ::sanitize_options() */
 	public function test_sanitize_options() {
-		$this->assertEmpty(
+		$this->assertEquals(
+			[
+				Option::LATE_DEFINED_SLUG => null,
+			],
 			$this->instance->sanitize_options(
 				[],
 				[ Option::PAIRED_URL_STRUCTURE => 'bogus' ]
 			)
 		);
 
+		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
+		$amp_slug_customization_watcher = $this->get_private_property( $this->instance, 'amp_slug_customization_watcher' );
+
+		$this->assertFalse( $amp_slug_customization_watcher->did_customize_late() );
 		foreach ( array_keys( PairedRouting::PAIRED_URL_STRUCTURES ) as $paired_url_structure ) {
 			$this->assertEquals(
-				[ Option::PAIRED_URL_STRUCTURE => $paired_url_structure ],
+				[
+					Option::LATE_DEFINED_SLUG    => null,
+					Option::PAIRED_URL_STRUCTURE => $paired_url_structure,
+				],
+				$this->instance->sanitize_options(
+					[],
+					[ Option::PAIRED_URL_STRUCTURE => $paired_url_structure ]
+				)
+			);
+		}
+
+		add_filter(
+			'amp_query_var',
+			static function () {
+				return 'lite';
+			}
+		);
+		$amp_slug_customization_watcher->determine_late_customization();
+		$this->assertTrue( $amp_slug_customization_watcher->did_customize_late() );
+		foreach ( array_keys( PairedRouting::PAIRED_URL_STRUCTURES ) as $paired_url_structure ) {
+			$this->assertEquals(
+				[
+					Option::LATE_DEFINED_SLUG    => 'lite',
+					Option::PAIRED_URL_STRUCTURE => $paired_url_structure,
+				],
 				$this->instance->sanitize_options(
 					[],
 					[ Option::PAIRED_URL_STRUCTURE => $paired_url_structure ]
