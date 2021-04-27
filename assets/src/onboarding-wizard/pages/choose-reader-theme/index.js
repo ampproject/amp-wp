@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings'; // From WP inline script.
-
-/**
  * WordPress dependencies
  */
 import { useEffect, useContext } from '@wordpress/element';
@@ -35,9 +30,7 @@ export function ChooseReaderTheme() {
 			themes &&
 			readerTheme &&
 			canGoForward === false &&
-			! AMP_QUERY_VAR_CUSTOMIZED_LATE
-				? themes.map( ( { slug } ) => slug ).includes( readerTheme )
-				: readerTheme === LEGACY_THEME_SLUG
+			themes.map( ( { slug } ) => slug ).includes( readerTheme )
 		) {
 			setCanGoForward( true );
 		}
