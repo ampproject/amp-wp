@@ -78,7 +78,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function filter_rendered_block( $block_content, $block ) {
 		if ( ! isset( $block['blockName'] ) ) {
-			return $block_content;
+			return $block_content; // @codeCoverageIgnore
 		}
 
 		if ( isset( $block['attrs'] ) && 'core/shortcode' !== $block['blockName'] ) {
@@ -278,15 +278,15 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		$selects = $dom->xpath->query( '//form/select[ @name = "cat" ]' );
 		foreach ( $selects as $select ) {
 			if ( ! $select instanceof DOMElement ) {
-				continue;
+				continue; // @codeCoverageIgnore
 			}
 			$form = $select->parentNode;
 			if ( ! $form instanceof DOMElement || ! $form->parentNode instanceof DOMElement ) {
-				continue;
+				continue; // @codeCoverageIgnore
 			}
 			$script = $dom->xpath->query( './/script[ contains( text(), "onCatChange" ) ]', $form->parentNode )->item( 0 );
 			if ( ! $script instanceof DOMElement ) {
-				continue;
+				continue; // @codeCoverageIgnore
 			}
 
 			$this->category_widget_count++;
@@ -311,7 +311,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		$selects = $dom->xpath->query( '//select[ @name = "archive-dropdown" and starts-with( @id, "archives-dropdown-" ) ]' );
 		foreach ( $selects as $select ) {
 			if ( ! $select instanceof DOMElement ) {
-				continue;
+				continue; // @codeCoverageIgnore
 			}
 
 			$script = $dom->xpath->query( './/script[ contains( text(), "onSelectChange" ) ]', $select->parentNode )->item( 0 );

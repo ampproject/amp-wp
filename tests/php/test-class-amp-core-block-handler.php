@@ -71,6 +71,9 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Core_Block_Handler::register_embed()
 	 * @covers AMP_Core_Block_Handler::unregister_embed()
+	 * @covers AMP_Core_Block_Handler::filter_rendered_block()
+	 * @covers AMP_Core_Block_Handler::ampify_archives_block()
+	 * @covers AMP_Core_Block_Handler::ampify_categories_block()
 	 */
 	public function test_register_and_unregister_embed() {
 		$handler = new AMP_Core_Block_Handler();
@@ -151,6 +154,29 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
 		$this->assertStringContains( '<video width="560" height="320" ', $content );
+	}
+
+	/**
+	 * Check that no transformation is made when external video (not yet anyway).
+	 *
+	 * @link https://github.com/ampproject/amp-wp/issues/5233
+	 * @covers \AMP_Core_Block_Handler::ampify_video_block()
+	 */
+	public function test_ampify_video_block_without_attachment() {
+		$post_id = self::factory()->post->create(
+			[
+				'post_title'   => 'Video',
+				'post_content' => '<!-- wp:video --><figure class="wp-block-video"><video controls src="https://example.com/foo.mp4"></video></figure><!-- /wp:video -->',
+			]
+		);
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
+
+		$this->assertStringContains( '<video controls src="https://example.com/foo.mp4">', $content );
 	}
 
 	/**
@@ -244,6 +270,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * Test process_categories_widgets.
 	 *
 	 * @covers AMP_Core_Block_Handler::process_categories_widgets()
+	 * @covers AMP_Core_Block_Handler::sanitize_raw_embeds()
 	 * @see WP_Widget_Categories
 	 */
 	public function test_process_categories_widgets() {
@@ -317,6 +344,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * Test process_archives_widgets.
 	 *
 	 * @covers AMP_Core_Block_Handler::process_archives_widgets()
+	 * @covers AMP_Core_Block_Handler::sanitize_raw_embeds()
 	 * @see WP_Widget_Archives
 	 */
 	public function test_process_archives_widgets() {
@@ -395,7 +423,9 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * Test process_text_widgets.
 	 *
 	 * @covers AMP_Core_Block_Handler::process_text_widgets()
-	 * @see WP_Widget_Archives
+	 * @covers AMP_Core_Block_Handler::sanitize_raw_embeds()
+	 * @covers AMP_Core_Block_Handler::preserve_widget_text_element_dimensions()
+	 * @see WP_Widget_Text
 	 */
 	public function test_process_text_widgets() {
 		$instance_count = 2;
