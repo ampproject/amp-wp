@@ -356,6 +356,8 @@ class AMP_Validation_Manager {
 			]
 		);
 
+		$validate_url_title = __( 'Validate URL', 'amp' );
+
 		$parent = [
 			'id'    => 'amp',
 			'title' => sprintf(
@@ -364,13 +366,16 @@ class AMP_Validation_Manager {
 				esc_html__( 'AMP', 'amp' )
 			),
 			'href'  => esc_url( $href ),
+			'meta'  => [
+				'title' => esc_attr( $is_amp_request ? $validate_url_title : __( 'View AMP version', 'amp' ) ),
+			],
 		];
 
 		// Construct admin bar item for validation.
 		$validate_item = [
 			'parent' => 'amp',
 			'id'     => 'amp-validity',
-			'title'  => esc_html__( 'Validate URL', 'amp' ),
+			'title'  => esc_html( $validate_url_title ),
 			'href'   => esc_url( $validate_url ),
 		];
 
