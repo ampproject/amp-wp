@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Icon;
@@ -532,9 +533,21 @@ function _amp_bootstrap_customizer() {
  *
  * @since 0.7
  *
+ * @param bool $ignore_late_defined_slug Whether to ignore the late defined slug.
  * @return string Slug used for query var, endpoint, and post type support.
  */
-function amp_get_slug() {
+function amp_get_slug( $ignore_late_defined_slug = false ) {
+
+	// When a slug was defined late according to AmpSlugCustomizationWatcher, the slug will be stored in the
+	// LATE_DEFINED_SLUG option by the PairedRouting service so that it can be used early. This is only needed until
+	// the after_setup_theme action fires, because at that time the late-defined slug will have been established.
+	if ( ! $ignore_late_defined_slug && ! did_action( AmpSlugCustomizationWatcher::LATE_DETERMINATION_ACTION ) ) {
+		$slug = AMP_Options_Manager::get_option( Option::LATE_DEFINED_SLUG );
+		if ( ! empty( $slug ) && is_string( $slug ) ) {
+			return $slug;
+		}
+	}
+
 	/**
 	 * Filter the AMP query variable.
 	 *

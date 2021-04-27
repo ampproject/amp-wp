@@ -118,6 +118,13 @@ final class PairedRouting implements Service, Registerable {
 	private $callback_reflection;
 
 	/**
+	 * AMP slug customization watcher.
+	 *
+	 * @var AmpSlugCustomizationWatcher
+	 */
+	private $amp_slug_customization_watcher;
+
+	/**
 	 * Plugin registry.
 	 *
 	 * @var PluginRegistry
@@ -150,16 +157,18 @@ final class PairedRouting implements Service, Registerable {
 	/**
 	 * PairedRouting constructor.
 	 *
-	 * @param Injector           $injector            Injector.
-	 * @param CallbackReflection $callback_reflection Callback reflection.
-	 * @param PluginRegistry     $plugin_registry     Plugin registry.
-	 * @param PairedUrl          $paired_url          Paired URL service.
+	 * @param Injector                    $injector                       Injector.
+	 * @param CallbackReflection          $callback_reflection            Callback reflection.
+	 * @param PluginRegistry              $plugin_registry                Plugin registry.
+	 * @param PairedUrl                   $paired_url                     Paired URL service.
+	 * @param AmpSlugCustomizationWatcher $amp_slug_customization_watcher AMP slug customization watcher.
 	 */
-	public function __construct( Injector $injector, CallbackReflection $callback_reflection, PluginRegistry $plugin_registry, PairedUrl $paired_url ) {
-		$this->injector            = $injector;
-		$this->callback_reflection = $callback_reflection;
-		$this->plugin_registry     = $plugin_registry;
-		$this->paired_url          = $paired_url;
+	public function __construct( Injector $injector, CallbackReflection $callback_reflection, PluginRegistry $plugin_registry, PairedUrl $paired_url, AmpSlugCustomizationWatcher $amp_slug_customization_watcher ) {
+		$this->injector                       = $injector;
+		$this->callback_reflection            = $callback_reflection;
+		$this->plugin_registry                = $plugin_registry;
+		$this->paired_url                     = $paired_url;
+		$this->amp_slug_customization_watcher = $amp_slug_customization_watcher;
 	}
 
 	/**
@@ -665,6 +674,13 @@ final class PairedRouting implements Service, Registerable {
 	 * @return array Sanitized options.
 	 */
 	public function sanitize_options( $options, $new_options ) {
+		// Cache the AMP slug in options when it is defined late so that it can be referred to early at plugins_loaded.
+		if ( $this->amp_slug_customization_watcher->did_customize_late() ) {
+			$options[ Option::LATE_DEFINED_SLUG ] = amp_get_slug();
+		} else {
+			$options[ Option::LATE_DEFINED_SLUG ] = null;
+		}
+
 		if (
 			isset( $new_options[ Option::PAIRED_URL_STRUCTURE ] )
 			&&
