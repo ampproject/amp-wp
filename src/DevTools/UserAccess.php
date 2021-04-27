@@ -9,12 +9,14 @@
 
 namespace AmpProject\AmpWP\DevTools;
 
+use AMP_Options_Manager;
+use AMP_Theme_Support;
+use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Error_Taxonomy;
+use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
-use AMP_Options_Manager;
-use AMP_Theme_Support;
-use AMP_Validation_Manager;
 use WP_Error;
 use WP_User;
 
@@ -88,7 +90,7 @@ final class UserAccess implements Service, Registerable {
 			 * @param bool $enabled DevTools enabled.
 			 * @param int  $user_id User ID.
 			 */
-			$enabled = (bool) apply_filters( 'amp_dev_tools_user_default_enabled', $enabled, $user->ID );
+			$enabled = apply_filters( 'amp_dev_tools_user_default_enabled', $enabled, $user->ID );
 		}
 		return rest_sanitize_boolean( $enabled );
 	}
