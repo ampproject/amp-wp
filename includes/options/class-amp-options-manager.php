@@ -79,7 +79,7 @@ class AMP_Options_Manager {
 		sort( $new_post_types );
 		if ( $old_post_types !== $new_post_types ) {
 			// Flush rewrite rules.
-			add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+			add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK ); // @todo Why is this being added anymore?
 			flush_rewrite_rules( false );
 		}
 	}
