@@ -1939,13 +1939,19 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		global $wp_rewrite;
 		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
 		$wp_rewrite->init();
-		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-		$wp_rewrite->flush_rules();
 
 		$permalink = get_permalink( self::factory()->post->create() );
 		$this->assertNotContains( '?', $permalink );
-		$url = $permalink . $suffix;
+
+		$paired_routing = $this->injector->make( \AmpProject\AmpWP\PairedRouting::class );
+
+		$url                    = $permalink . $suffix;
+		$_SERVER['REQUEST_URI'] = wp_parse_url( $permalink, PHP_URL_PATH ) . $suffix;
+
+		$paired_routing->initialize_paired_request();
+
 		$this->go_to( $url );
+		$this->assertFalse( is_404(), 'Expected singular query.' );
 		$this->assertTrue( is_singular(), 'Expected singular query.' );
 		$this->assertTrue( amp_is_available(), 'Expected AMP to be available.' );
 		$this->assertEquals( $is_amp, amp_has_paired_endpoint() );

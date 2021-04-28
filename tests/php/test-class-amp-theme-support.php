@@ -51,7 +51,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Validation_Manager::reset_validation_results();
 		unset( $GLOBALS['current_screen'] );
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
-		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 		remove_theme_support( 'amp' );
 		$this->register_core_themes();
 	}

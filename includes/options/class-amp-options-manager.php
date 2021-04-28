@@ -60,28 +60,6 @@ class AMP_Options_Manager {
 				'sanitize_callback' => [ __CLASS__, 'validate_options' ],
 			]
 		);
-
-		add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'maybe_flush_rewrite_rules' ], 10, 2 );
-	}
-
-	/**
-	 * Flush rewrite rules if the supported_post_types have changed.
-	 *
-	 * @since 0.6.2
-	 *
-	 * @param array $old_options Old options.
-	 * @param array $new_options New options.
-	 */
-	public static function maybe_flush_rewrite_rules( $old_options, $new_options ) {
-		$old_post_types = isset( $old_options[ Option::SUPPORTED_POST_TYPES ] ) ? $old_options[ Option::SUPPORTED_POST_TYPES ] : [];
-		$new_post_types = isset( $new_options[ Option::SUPPORTED_POST_TYPES ] ) ? $new_options[ Option::SUPPORTED_POST_TYPES ] : [];
-		sort( $old_post_types );
-		sort( $new_post_types );
-		if ( $old_post_types !== $new_post_types ) {
-			// Flush rewrite rules.
-			add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK ); // @todo Why is this being added anymore?
-			flush_rewrite_rules( false );
-		}
 	}
 
 	/**
