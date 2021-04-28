@@ -1611,6 +1611,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers ::amp_render_scripts()
 	 */
 	public function test_prepare_response() {
+		remove_theme_support( 'block-templates' ); // Needed to prevent gutenberg_the_skip_link() from outputting anything.
+
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
