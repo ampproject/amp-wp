@@ -152,6 +152,11 @@ class Test_Site_Health extends WP_UnitTestCase {
 			'test' => 'amp_slug_definition_timing',
 		];
 
+		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
+		$amp_slug_customization_watcher = $this->get_private_property( $this->instance, 'amp_slug_customization_watcher' );
+		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_late', false );
+		$this->assertFalse( $amp_slug_customization_watcher->did_customize_late() );
+
 		$this->assertArraySubset(
 			array_merge(
 				$data,
@@ -171,7 +176,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 
 		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
 		$amp_slug_customization_watcher = $this->get_private_property( $this->instance, 'amp_slug_customization_watcher' );
-		$amp_slug_customization_watcher->determine_late_customization();
+		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_late', true );
 		$this->assertTrue( $amp_slug_customization_watcher->did_customize_late() );
 
 		$this->assertArraySubset(
