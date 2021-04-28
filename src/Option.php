@@ -143,6 +143,16 @@ interface Option {
 	const READER_THEME = 'reader_theme';
 
 	/**
+	 * Theme support features from the primary theme.
+	 *
+	 * When using a Reader theme, the theme support features from the primary theme are stored in this option so that
+	 * they will be available when the Reader theme is active.
+	 *
+	 * @var string
+	 */
+	const PRIMARY_THEME_SUPPORT = 'primary_theme_support';
+
+	/**
 	 * The key of the option storing whether the setup wizard has been completed.
 	 *
 	 * @var boolean

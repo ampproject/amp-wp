@@ -13,6 +13,7 @@ on:
       - '!bin/ci/**'
       - '!bin/local-env/**'
       - 'docs/**'
+      - 'qa-tester/**'
   pull_request:
     # Run workflow whenever a PR is opened, updated (synchronized), or marked ready for review.
     types: [opened, synchronize, ready_for_review]
@@ -23,6 +24,7 @@ on:
       - '!bin/ci/**'
       - '!bin/local-env/**'
       - 'docs/**'
+      - 'qa-tester/**'
 
 jobs:
 
@@ -240,7 +242,7 @@ jobs:
         run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
 
       - name: Upload code coverage report
-        uses: codecov/codecov-action@v1.4.0
+        uses: codecov/codecov-action@v1.4.1
         with:
           file: build/logs/lcov.info
           flags: javascript
@@ -481,7 +483,7 @@ jobs:
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v1.4.0
+        uses: codecov/codecov-action@v1.4.1
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php
@@ -629,21 +631,16 @@ jobs:
     needs: upload-to-gcs
 
     outputs:
-      pr_number: ${{ steps.get-pr-number.outputs.num }}
       comment_body: ${{ steps.get-comment-body.outputs.body }}
 
     steps:
-      - name: Get PR number
-        id: get-pr-number
-        run: echo "::set-output name=num::$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')"
-
       - name: Check if a comment was already made
         id: find-comment
         uses: peter-evans/find-comment@v1
         with:
-          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          issue-number: ${{ github.event.pull_request.number }}
           comment-author: github-actions[bot]
-          body-includes: Download [development build]
+          body-includes: Plugin builds for
 
       - name: Get comment body
         id: get-comment-body
@@ -659,7 +656,7 @@ jobs:
         if: ${{ steps.find-comment.outputs.comment-id == '' }}
         uses: peter-evans/create-or-update-comment@v1
         with:
-          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          issue-number: ${{ github.event.pull_request.number }}
           body: ${{ steps.get-comment-body.outputs.body }}
 
       - name: Update comment on PR with links to plugin builds

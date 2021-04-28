@@ -25,10 +25,7 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 	public function test__valid_post() {
 		$user_id = self::factory()->user->create();
 		$post_id = self::factory()->post->create( [ 'post_author' => $user_id ] );
-
-		// Set global for WP<5.2 where get_the_content() doesn't take the $post parameter.
-		$GLOBALS['post'] = get_post( $post_id );
-		setup_postdata( $post_id );
+		$this->go_to( get_permalink( $post_id ) );
 
 		$output = get_echo( 'amp_render_post', [ $post_id ] );
 

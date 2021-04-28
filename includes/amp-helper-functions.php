@@ -107,6 +107,7 @@ function amp_init() {
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
+	add_action( 'wp_loaded', 'amp_bootstrap_support' );
 
 	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
 
@@ -134,9 +135,10 @@ function amp_init() {
 	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
 
 	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
-		// This waits to happen until the very end of init to ensure that amp theme support and amp post type support have all been added.
+		// This waits to happen until the very end of admin_init to ensure that amp theme support and amp post type
+		// support have all been added, and that the settings have been registered.
 		add_action(
-			'init',
+			'admin_init',
 			static function () use ( $old_version ) {
 				/**
 				 * Triggers when after amp_init when the plugin version has updated.
@@ -1361,6 +1363,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_O2_Player_Sanitizer'         => [],
 		'AMP_Audio_Sanitizer'             => [],
 		'AMP_Playbuzz_Sanitizer'          => [],
+		'AMP_Object_Sanitizer'            => [],
 		'AMP_Iframe_Sanitizer'            => [
 			'add_placeholder'    => true,
 			'current_origin'     => $current_origin,

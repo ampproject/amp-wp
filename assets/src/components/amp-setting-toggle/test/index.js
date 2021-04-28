@@ -66,4 +66,34 @@ describe( 'AMPSettingToggle', () => {
 		expect( container.querySelector( 'p' ).textContent ).toBe( 'My text' );
 		expect( container.querySelector( 'input:checked' ) ).not.toBeNull();
 	} );
+
+	it( 'renders title if it is a valid element', () => {
+		act( () => {
+			render(
+				<AMPSettingToggle
+					title={ (
+						<h6>
+							{ 'My title' }
+						</h6>
+					) }
+					onChange={ () => null }
+					checked={ false }
+				/>,
+				container,
+			);
+		} );
+
+		expect( container.querySelector( 'h6' ).textContent ).toBe( 'My title' );
+	} );
+
+	it( 'does not render title if nothing is passed', () => {
+		act( () => {
+			render(
+				<AMPSettingToggle onChange={ () => null } checked={ false } />,
+				container,
+			);
+		} );
+
+		expect( container.querySelector( 'h3' ) ).toBeNull();
+	} );
 } );

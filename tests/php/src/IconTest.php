@@ -15,6 +15,7 @@ final class IconTest extends TestCase {
 	public function get_icon_types() {
 		$types = [
 			'invalid',
+			'removed',
 			'link',
 			'valid',
 			'warning',
@@ -33,19 +34,17 @@ final class IconTest extends TestCase {
 	 * @dataProvider get_icon_types
 	 * @covers ::__construct()
 	 * @covers ::invalid()
+	 * @covers ::removed()
 	 * @covers ::link()
 	 * @covers ::valid()
 	 * @covers ::warning()
 	 * @covers ::logo()
-	 * @covers ::get_color()
 	 * @covers ::to_html()
 	 */
 	public function test_types( $type ) {
 		/** @var Icon $icon */
 		$icon = Icon::$type();
 		$this->assertInstanceOf( Icon::class, $icon );
-
-		$this->assertInternalType( 'string', $icon->get_color() );
 
 		$html = $icon->to_html();
 		$this->assertStringStartsWith( '<span ', $html );
