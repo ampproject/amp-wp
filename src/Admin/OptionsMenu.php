@@ -214,28 +214,26 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
 		$js_data = [
-			'AMP_QUERY_VAR'                 => amp_get_slug(),
-			'DEFAULT_AMP_QUERY_VAR'         => QueryVar::AMP,
-			'AMP_QUERY_VAR_CUSTOMIZED_LATE' => $amp_slug_customization_watcher->did_customize_late(),
-			'CURRENT_THEME'                 => [
+			'AMP_QUERY_VAR'               => amp_get_slug(),
+			'CURRENT_THEME'               => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
 				'is_reader_theme' => $is_reader_theme,
 				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
-			'OPTIONS_REST_PATH'             => '/amp/v1/options',
-			'READER_THEMES_REST_PATH'       => '/amp/v1/reader-themes',
-			'IS_CORE_THEME'                 => in_array(
+			'OPTIONS_REST_PATH'           => '/amp/v1/options',
+			'READER_THEMES_REST_PATH'     => '/amp/v1/reader-themes',
+			'IS_CORE_THEME'               => in_array(
 				get_stylesheet(),
 				AMP_Core_Theme_Sanitizer::get_supported_themes(),
 				true
 			),
-			'LEGACY_THEME_SLUG'             => ReaderThemes::DEFAULT_READER_THEME,
-			'USING_FALLBACK_READER_THEME'   => $this->reader_themes->using_fallback_theme(),
-			'THEME_SUPPORT_ARGS'            => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_SUPPORTS_READER_MODE'    => AMP_Theme_Support::supports_reader_mode(),
-			'UPDATES_NONCE'                 => wp_create_nonce( 'updates' ),
+			'LEGACY_THEME_SLUG'           => ReaderThemes::DEFAULT_READER_THEME,
+			'USING_FALLBACK_READER_THEME' => $this->reader_themes->using_fallback_theme(),
+			'THEME_SUPPORT_ARGS'          => AMP_Theme_Support::get_theme_support_args(),
+			'THEME_SUPPORTS_READER_MODE'  => AMP_Theme_Support::supports_reader_mode(),
+			'UPDATES_NONCE'               => wp_create_nonce( 'updates' ),
 		];
 
 		wp_add_inline_script(

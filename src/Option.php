@@ -155,9 +155,16 @@ interface Option {
 	/**
 	 * The key of the option storing whether the setup wizard has been completed.
 	 *
-	 * @var boolean
+	 * @var string
 	 */
 	const PLUGIN_CONFIGURED = 'plugin_configured';
+
+	/**
+	 * Cached slug when it is defined late.
+	 *
+	 * @var string
+	 */
+	const LATE_DEFINED_SLUG = 'late_defined_slug';
 
 	/**
 	 * Suppressed plugins

@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { AMP_QUERY_VAR_CUSTOMIZED_LATE, USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
+import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
 
 /**
  * Internal dependencies
@@ -282,7 +282,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const { availableThemes, unavailableThemes } = useMemo(
 		() => ( filteredThemes || [] ).reduce(
 			( collections, theme ) => {
-				if ( ( AMP_QUERY_VAR_CUSTOMIZED_LATE && theme.slug !== LEGACY_THEME_SLUG ) || theme.availability === 'non-installable' ) {
+				if ( theme.availability === 'non-installable' ) {
 					collections.unavailableThemes.push( theme );
 				} else {
 					collections.availableThemes.push( theme );

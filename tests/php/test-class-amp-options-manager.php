@@ -89,49 +89,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$registered_settings = get_registered_settings();
 		$this->assertArrayHasKey( AMP_Options_Manager::OPTION_NAME, $registered_settings );
 		$this->assertEquals( 'array', $registered_settings[ AMP_Options_Manager::OPTION_NAME ]['type'] );
-		$this->assertEquals( 10, has_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ 'AMP_Options_Manager', 'maybe_flush_rewrite_rules' ] ) );
-	}
-
-	/**
-	 * Test maybe_flush_rewrite_rules.
-	 *
-	 * @covers AMP_Options_Manager::maybe_flush_rewrite_rules()
-	 */
-	public function test_maybe_flush_rewrite_rules() {
-		global $wp_rewrite;
-		$wp_rewrite->init();
-		AMP_Options_Manager::register_settings();
-		$dummy_rewrite_rules = [ 'previous' => true ];
-
-		// Check change to supported_post_types.
-		update_option( 'rewrite_rules', $dummy_rewrite_rules );
-		AMP_Options_Manager::maybe_flush_rewrite_rules(
-			[ Option::SUPPORTED_POST_TYPES => [ 'page' ] ],
-			[]
-		);
-		$this->assertEmpty( get_option( 'rewrite_rules' ) );
-
-		// Check update of supported_post_types but no change.
-		update_option( 'rewrite_rules', $dummy_rewrite_rules );
-		update_option(
-			AMP_Options_Manager::OPTION_NAME,
-			[
-				[ Option::SUPPORTED_POST_TYPES => [ 'page' ] ],
-				[ Option::SUPPORTED_POST_TYPES => [ 'page' ] ],
-			]
-		);
-		$this->assertEquals( $dummy_rewrite_rules, get_option( 'rewrite_rules' ) );
-
-		// Check changing a different property.
-		update_option( 'rewrite_rules', [ 'previous' => true ] );
-		update_option(
-			AMP_Options_Manager::OPTION_NAME,
-			[
-				[ 'foo' => 'new' ],
-				[ 'foo' => 'old' ],
-			]
-		);
-		$this->assertEquals( $dummy_rewrite_rules, get_option( 'rewrite_rules' ) );
 	}
 
 	/**
@@ -161,6 +118,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::READER_THEME            => 'legacy',
 				Option::PLUGIN_CONFIGURED       => false,
 				Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				Option::LATE_DEFINED_SLUG       => null,
 			],
 			AMP_Options_Manager::get_options()
 		);

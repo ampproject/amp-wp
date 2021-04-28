@@ -6,8 +6,10 @@
  */
 
 use AmpProject\AmpWP\Admin\SiteHealth;
+use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
@@ -83,14 +85,19 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
 		$this->assertArrayNotHasKey( 'amp_icu_version', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_xdebug_extension', $tests['direct'] );
+		$this->assertEquals( QueryVar::AMP, amp_get_slug() );
+		$this->assertArrayNotHasKey( 'amp_slug_definition_timing', $tests['direct'] );
 
 		// Test that the the ICU version test is added only when site URL is an IDN.
 		add_filter( 'site_url', [ self::class, 'get_idn' ], 10, 4 );
+		add_filter( 'amp_query_var', [ self::class, 'get_lite_query_var' ] );
 
 		$tests = $this->instance->add_tests( [] );
 		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
+		$this->assertArrayHasKey( 'amp_slug_definition_timing', $tests['direct'] );
 
 		remove_filter( 'site_url', [ self::class, 'get_idn' ] );
+		remove_filter( 'amp_query_var', [ self::class, 'get_lite_query_var' ] );
 	}
 
 	/**
@@ -132,6 +139,59 @@ class Test_Site_Health extends WP_UnitTestCase {
 				]
 			),
 			$this->instance->persistent_object_cache()
+		);
+	}
+
+	/**
+	 * Test slug_definition_timing.
+	 *
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::slug_definition_timing()
+	 */
+	public function test_slug_definition_timing() {
+		$data = [
+			'test' => 'amp_slug_definition_timing',
+		];
+
+		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
+		$amp_slug_customization_watcher = $this->get_private_property( $this->instance, 'amp_slug_customization_watcher' );
+		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_late', false );
+		$this->assertFalse( $amp_slug_customization_watcher->did_customize_late() );
+
+		$this->assertArraySubset(
+			array_merge(
+				$data,
+				[
+					'label'  => 'The AMP slug (query var) was defined early',
+					'status' => 'good',
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'green',
+					],
+				]
+			),
+			$this->instance->slug_definition_timing()
+		);
+
+		add_filter( 'amp_query_var', [ self::class, 'get_lite_query_var' ] );
+
+		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
+		$amp_slug_customization_watcher = $this->get_private_property( $this->instance, 'amp_slug_customization_watcher' );
+		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_late', true );
+		$this->assertTrue( $amp_slug_customization_watcher->did_customize_late() );
+
+		$this->assertArraySubset(
+			array_merge(
+				$data,
+				[
+					'label'  => 'The AMP slug (query var) was defined late',
+					'status' => 'recommended',
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'orange',
+					],
+				]
+			),
+			$this->instance->slug_definition_timing()
 		);
 	}
 
@@ -238,6 +298,8 @@ class Test_Site_Health extends WP_UnitTestCase {
 			'amp_css_transient_caching_threshold',
 			'amp_css_transient_caching_sampling_range',
 			'amp_css_transient_caching_transient_count',
+			'amp_slug_query_var',
+			'amp_slug_defined_late',
 		];
 		foreach ( $keys as $key ) {
 			$this->assertArrayHasKey( $key, $debug_info['amp_wp']['fields'], "Expected key: $key" );
@@ -470,11 +532,20 @@ class Test_Site_Health extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Get a an IDN for testing purposes.
+	 * Get an IDN for testing purposes.
 	 *
 	 * @return string
 	 */
 	public static function get_idn() {
 		return 'https://foo.xn--57h.bar.com';
+	}
+
+	/**
+	 * Get an AMP query var for testing purposes.
+	 *
+	 * @return string
+	 */
+	public static function get_lite_query_var() {
+		return 'lite';
 	}
 }

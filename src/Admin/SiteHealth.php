@@ -10,12 +10,14 @@ namespace AmpProject\AmpWP\Admin;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Post_Type_Support;
+use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVar;
 
 /**
  * Class SiteHealth
@@ -33,6 +35,13 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 * @var MonitorCssTransientCaching
 	 */
 	private $css_transient_caching;
+
+	/**
+	 * Service that checks when the AMP slug was defined.
+	 *
+	 * @var AmpSlugCustomizationWatcher
+	 */
+	private $amp_slug_customization_watcher;
 
 	/**
 	 * Check whether the conditional object is currently needed.
@@ -55,10 +64,12 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	/**
 	 * SiteHealth constructor.
 	 *
-	 * @param MonitorCssTransientCaching $css_transient_caching CSS transient caching monitoring service.
+	 * @param MonitorCssTransientCaching  $css_transient_caching          CSS transient caching monitoring service.
+	 * @param AmpSlugCustomizationWatcher $amp_slug_customization_watcher AMP slug customization watcher.
 	 */
-	public function __construct( MonitorCssTransientCaching $css_transient_caching ) {
-		$this->css_transient_caching = $css_transient_caching;
+	public function __construct( MonitorCssTransientCaching $css_transient_caching, AmpSlugCustomizationWatcher $amp_slug_customization_watcher ) {
+		$this->css_transient_caching          = $css_transient_caching;
+		$this->amp_slug_customization_watcher = $amp_slug_customization_watcher;
 	}
 
 	/**
@@ -73,6 +84,15 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	}
 
 	/**
+	 * Get badge label.
+	 *
+	 * @return string AMP.
+	 */
+	private function get_badge_label() {
+		return esc_html__( 'AMP', 'amp' );
+	}
+
+	/**
 	 * Adds Site Health tests related to this plugin.
 	 *
 	 * @param array $tests The Site Health tests.
@@ -83,7 +103,13 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 			'label' => esc_html__( 'Persistent object cache', 'amp' ),
 			'test'  => [ $this, 'persistent_object_cache' ],
 		];
-		$tests['direct']['amp_curl_multi_functions']    = [
+		if ( ! amp_is_canonical() && QueryVar::AMP !== amp_get_slug() ) {
+			$tests['direct']['amp_slug_definition_timing'] = [
+				'label' => esc_html__( 'AMP slug (query var) definition timing', 'amp' ),
+				'test'  => [ $this, 'slug_definition_timing' ],
+			];
+		}
+		$tests['direct']['amp_curl_multi_functions'] = [
 			'label' => esc_html__( 'cURL multi functions', 'amp' ),
 			'test'  => [ $this, 'curl_multi_functions' ],
 		];
@@ -129,28 +155,69 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 */
 	public function persistent_object_cache() {
 		$is_using_object_cache = wp_using_ext_object_cache();
-		$data                  = [
+
+		return [
 			'badge'       => [
-				'label' => esc_html__( 'AMP', 'amp' ),
+				'label' => $this->get_badge_label(),
 				'color' => $is_using_object_cache ? 'green' : 'orange',
 			],
 			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ),
 			'actions'     => $this->get_persistent_object_cache_learn_more_action(),
 			'test'        => 'amp_persistent_object_cache',
+			'status'      => $is_using_object_cache ? 'good' : 'recommended',
+			'label'       => $is_using_object_cache
+				? esc_html__( 'Persistent object caching is enabled', 'amp' )
+				: esc_html__( 'Persistent object caching is not enabled', 'amp' ),
+		];
+	}
+
+	/**
+	 * Gets the test result data for whether the AMP slug (query var) was defined late.
+	 *
+	 * @return array The test data.
+	 */
+	public function slug_definition_timing() {
+		$is_defined_late = $this->amp_slug_customization_watcher->did_customize_late();
+
+		$data = [];
+
+		$data['test']  = 'amp_slug_definition_timing';
+		$data['badge'] = [
+			'label' => $this->get_badge_label(),
+			'color' => $is_defined_late ? 'orange' : 'green',
 		];
 
-		$status = $is_using_object_cache ? 'good' : 'recommended';
-		$label  = $is_using_object_cache
-			? __( 'Persistent object caching is enabled', 'amp' )
-			: __( 'Persistent object caching is not enabled', 'amp' );
+		$data['status'] = $is_defined_late ? 'recommended' : 'good';
 
-		return array_merge(
-			$data,
-			[
-				'status' => $status,
-				'label'  => esc_html( $label ),
-			]
+		$data['label'] = $is_defined_late
+			? esc_html__( 'The AMP slug (query var) was defined late', 'amp' )
+			: esc_html__( 'The AMP slug (query var) was defined early', 'amp' );
+
+		$data['description'] = sprintf(
+			/* translators: %s is 'plugins_loaded'  */
+			esc_html__( 'For best results, the AMP slug (query var) should be available early in WordPress\'s execution flow, specifically before the %s action occurs (at priority 4). This slug is used to construct the paired AMP URLs.', 'amp' ),
+			'<code>plugins_loaded</code>'
 		);
+		$data['description'] .= ' ';
+
+		if ( $is_defined_late ) {
+			$data['description'] .= sprintf(
+				/* translators: %1$s is the value of the slug, %2$s is the constant name, %3$s is the filter name */
+				esc_html__( 'Your AMP slug (%1$s) is defined late, most likely in the theme via the %2$s filter or %3$s constant. Make sure this is being defined in a plugin at the top level so it happens before %4$s. While a late-defined AMP slug will still work, it requires extra work to make the slug available earlier in WordPress execution by storing it in an option.', 'amp' ),
+				sprintf( '<code>%s</code>', esc_html( amp_get_slug() ) ),
+				'<code>amp_query_var</code>',
+				'<code>AMP_QUERY_VAR</code>',
+				'<code>plugins_loaded</code>'
+			);
+		} else {
+			$data['description'] .= sprintf(
+				/* translators: %1$s is the value of the slug */
+				esc_html__( 'Your AMP slug (%s) is defined early so you\'re good to go!', 'amp' ),
+				sprintf( '<code>%s</code>', esc_html( amp_get_slug() ) )
+			);
+		}
+
+		return $data;
 	}
 
 	/**
@@ -172,7 +239,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 
 		$data = [
 			'badge'       => [
-				'label' => esc_html__( 'AMP', 'amp' ),
+				'label' => $this->get_badge_label(),
 				'color' => $undefined_curl_functions ? 'orange' : 'green',
 			],
 			'description' => esc_html__( 'The AMP plugin is able to more efficiently determine the dimensions of images lacking width or height by making parallel requests via cURL multi.', 'amp' ),
@@ -245,7 +312,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 
 		$data = [
 			'badge'       => [
-				'label' => esc_html__( 'AMP', 'amp' ),
+				'label' => $this->get_badge_label(),
 				'color' => $is_proper_version ? 'green' : 'orange',
 			],
 			'description' => esc_html(
@@ -312,7 +379,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 
 		$data = [
 			'badge'       => [
-				'label' => esc_html__( 'AMP', 'amp' ),
+				'label' => $this->get_badge_label(),
 				'color' => $color,
 			],
 			'description' => wp_kses(
@@ -377,7 +444,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 			compact( 'status', 'label', 'description' ),
 			[
 				'badge' => [
-					'label' => esc_html__( 'AMP', 'amp' ),
+					'label' => $this->get_badge_label(),
 					'color' => $color,
 				],
 				'test'  => 'amp_xdebug_extension',
@@ -396,9 +463,19 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 			$debugging_information,
 			[
 				'amp_wp' => [
-					'label'       => esc_html__( 'AMP', 'amp' ),
+					'label'       => $this->get_badge_label(),
 					'description' => esc_html__( 'Debugging information for the Official AMP Plugin for WordPress.', 'amp' ),
 					'fields'      => [
+						'amp_slug_query_var'      => [
+							'label'   => 'AMP slug query var',
+							'value'   => amp_get_slug(),
+							'private' => false,
+						],
+						'amp_slug_defined_late'   => [
+							'label'   => 'AMP slug defined late',
+							'value'   => $this->amp_slug_customization_watcher->did_customize_late() ? 'true' : 'false',
+							'private' => false,
+						],
 						'amp_mode_enabled'        => [
 							'label'   => 'AMP mode enabled',
 							'value'   => AMP_Options_Manager::get_option( Option::THEME_SUPPORT ),
