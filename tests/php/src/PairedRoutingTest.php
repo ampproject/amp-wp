@@ -93,7 +93,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	 *
 	 * @dataProvider get_data_for_test_get_late_defined_slug
 	 * @param string|null $slug            Slug.
-	 * @param string|null $customized_late Customized late.
+	 * @param bool        $customized_late Customized late.
 	 */
 	public function test_get_late_defined_slug( $slug, $customized_late ) {
 		if ( $slug ) {
