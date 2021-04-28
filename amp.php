@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: AMP
- * Description: Enable AMP on your WordPress site, the WordPress way.
+ * Description: Great Page Experiences on WordPress, powered by AMP.
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
