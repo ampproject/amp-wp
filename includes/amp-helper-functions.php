@@ -532,6 +532,7 @@ function _amp_bootstrap_customizer() {
  * may be deprecated in the future. Normally the slug should be just 'amp'.
  *
  * @since 0.7
+ * @since 2.1 Added $ignore_late_defined_slug argument.
  *
  * @param bool $ignore_late_defined_slug Whether to ignore the late defined slug.
  * @return string Slug used for query var, endpoint, and post type support.
