@@ -1,12 +1,16 @@
 ## Function `amp_get_slug`
 
 ```php
-function amp_get_slug();
+function amp_get_slug( $ignore_late_defined_slug = false );
 ```
 
 Get the slug used in AMP for the query var, endpoint, and post type support.
 
 The return value can be overridden by previously defining a AMP_QUERY_VAR constant or by adding a 'amp_query_var' filter, but *warning* this ability may be deprecated in the future. Normally the slug should be just 'amp'.
+
+### Arguments
+
+* `bool $ignore_late_defined_slug` - Whether to ignore the late defined slug.
 
 ### Return value
 
@@ -14,13 +18,24 @@ The return value can be overridden by previously defining a AMP_QUERY_VAR consta
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:554](/includes/amp-helper-functions.php#L554-L565)
+:link: [includes/amp-helper-functions.php:540](/includes/amp-helper-functions.php#L540-L562)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-function amp_get_slug() {
+function amp_get_slug( $ignore_late_defined_slug = false ) {
+
+	// When a slug was defined late according to AmpSlugCustomizationWatcher, the slug will be stored in the
+	// LATE_DEFINED_SLUG option by the PairedRouting service so that it can be used early. This is only needed until
+	// the after_setup_theme action fires, because at that time the late-defined slug will have been established.
+	if ( ! $ignore_late_defined_slug && ! did_action( AmpSlugCustomizationWatcher::LATE_DETERMINATION_ACTION ) ) {
+		$slug = AMP_Options_Manager::get_option( Option::LATE_DEFINED_SLUG );
+		if ( ! empty( $slug ) && is_string( $slug ) ) {
+			return $slug;
+		}
+	}
+
 	/**
 	 * Filter the AMP query variable.
 	 *

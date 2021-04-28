@@ -12,7 +12,7 @@ Filters to allow a custom paired URL structure to be used.
 
 ### Source
 
-:link: [src/PairedRouting.php:193](/src/PairedRouting.php#L193)
+:link: [src/PairedRouting.php:238](/src/PairedRouting.php#L238)
 
 <details>
 <summary>Show Code</summary>

@@ -12,13 +12,13 @@ Filter whether the AMP Optimizer should use server-side rendering or not.
 
 ### Source
 
-:link: [includes/class-amp-theme-support.php:2108](/includes/class-amp-theme-support.php#L2108)
+:link: [src/Optimizer/AmpWPConfiguration.php:52](/src/Optimizer/AmpWPConfiguration.php#L52)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-$enable_ssr = apply_filters( 'amp_enable_ssr', $enable_ssr );
+$enable_ssr = apply_filters( 'amp_enable_ssr', true );
 ```
 
 </details>

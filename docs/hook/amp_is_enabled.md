@@ -10,7 +10,7 @@ Useful if the plugin is network activated and you want to turn it off on select 
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:55](/includes/amp-helper-functions.php#L55)
+:link: [includes/amp-helper-functions.php:56](/includes/amp-helper-functions.php#L56)
 
 <details>
 <summary>Show Code</summary>
