@@ -56,12 +56,108 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	public function test_register() {
 		remove_all_actions( 'plugins_loaded' ); // @todo This is needed because the instance already got registered.
 		$this->instance->register();
+
 		$this->assertEquals( 10, has_filter( 'amp_rest_options_schema', [ $this->instance, 'filter_rest_options_schema' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_rest_options', [ $this->instance, 'filter_rest_options' ] ) );
+
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
+
+		$this->assertEquals( 10, has_action( PairedRouting::ACTION_UPDATE_LATE_DEFINED_SLUG_OPTION, [ $this->instance, 'update_late_defined_slug_option' ] ) );
+		$this->assertEquals( 10, has_action( 'after_setup_theme', [ $this->instance, 'check_stale_late_defined_slug_option' ] ) );
+
 		$this->assertEquals( 9, has_action( 'template_redirect', [ $this->instance, 'redirect_extraneous_paired_endpoint' ] ) );
 		$this->assertEquals( 7, has_action( 'plugins_loaded', [ $this->instance, 'initialize_paired_request' ] ) );
+	}
+
+	/** @return array */
+	public function get_data_for_test_get_late_defined_slug() {
+		return [
+			'not_customized'   => [
+				null,
+				false,
+			],
+			'customized_early' => [
+				'lite',
+				false,
+			],
+			'customized_late'  => [
+				'mobile',
+				true,
+			],
+		];
+	}
+
+	/**
+	 * @covers ::get_late_defined_slug()
+	 *
+	 * @dataProvider get_data_for_test_get_late_defined_slug
+	 * @param string|null $slug            Slug.
+	 * @param string|null $customized_late Customized late.
+	 */
+	public function test_get_late_defined_slug( $slug, $customized_late ) {
+		if ( $slug ) {
+			add_filter(
+				'amp_query_var',
+				static function () use ( $slug ) {
+					return $slug;
+				}
+			);
+			$this->assertEquals( amp_get_slug(), $slug );
+		}
+
+		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
+		$amp_slug_customization_watcher = $this->get_private_property( $this->instance, 'amp_slug_customization_watcher' );
+
+		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_early', ! $customized_late );
+		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_late', $customized_late );
+
+		if ( $customized_late ) {
+			$this->assertEquals( amp_get_slug(), $this->instance->get_late_defined_slug() );
+		} else {
+			$this->assertNull( $this->instance->get_late_defined_slug() );
+		}
+	}
+
+	/** @covers ::update_late_defined_slug_option() */
+	public function test_update_late_defined_slug_option() {
+		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
+		$amp_slug_customization_watcher = $this->get_private_property( $this->instance, 'amp_slug_customization_watcher' );
+
+		$this->assertFalse( $amp_slug_customization_watcher->did_customize_late() );
+		$this->instance->update_late_defined_slug_option();
+		$this->assertNull( AMP_Options_Manager::get_option( Option::LATE_DEFINED_SLUG ) );
+
+		add_filter(
+			'amp_query_var',
+			static function () {
+				return 'lite';
+			}
+		);
+		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_late', true );
+		$this->assertTrue( $amp_slug_customization_watcher->did_customize_late() );
+		$this->instance->update_late_defined_slug_option();
+		$this->assertEquals( 'lite', AMP_Options_Manager::get_option( Option::LATE_DEFINED_SLUG ) );
+	}
+
+	/** @covers ::check_stale_late_defined_slug_option() */
+	public function test_check_stale_late_defined_slug_option() {
+		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
+		$amp_slug_customization_watcher = $this->get_private_property( $this->instance, 'amp_slug_customization_watcher' );
+
+		$this->instance->check_stale_late_defined_slug_option();
+		$this->assertFalse( wp_next_scheduled( PairedRouting::ACTION_UPDATE_LATE_DEFINED_SLUG_OPTION ) );
+
+		add_filter(
+			'amp_query_var',
+			static function () {
+				return 'lite';
+			}
+		);
+		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_late', true );
+		$this->assertTrue( $amp_slug_customization_watcher->did_customize_late() );
+		$this->instance->check_stale_late_defined_slug_option();
+		$this->assertNotFalse( wp_next_scheduled( PairedRouting::ACTION_UPDATE_LATE_DEFINED_SLUG_OPTION ) );
 	}
 
 	/** @return array */
