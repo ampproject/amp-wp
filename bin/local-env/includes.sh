@@ -5,6 +5,7 @@ DOCKER_COMPOSE_FILE_OPTIONS="-f $(dirname "$0")/docker-compose.yml"
 # These are the containers and values for the development site.
 CLI='cli'
 CONTAINER='wordpress'
+DATABASE='mysql'
 SITE_TITLE='AMP Dev'
 
 ##
@@ -156,6 +157,15 @@ dc() {
 ##
 wp() {
 	dc exec -T -u xfs $CLI wp "$@"
+}
+
+##
+# MySQL CLI.
+#
+# Executes the given MySQL client command in the database container.
+##
+mysql() {
+	dc exec -T -e MYSQL_PWD=example $DATABASE mysql "$@"
 }
 
 ##

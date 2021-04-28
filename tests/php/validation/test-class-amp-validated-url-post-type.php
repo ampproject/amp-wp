@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
@@ -89,9 +90,6 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validated_URL_Post_Type::add_admin_hooks();
 
-		$this->assertEquals( 10, has_filter( 'dashboard_glance_items', [ self::TESTED_CLASS, 'filter_dashboard_glance_items' ] ) );
-		$this->assertEquals( 10, has_action( 'rightnow_end', [ self::TESTED_CLASS, 'print_dashboard_glance_styles' ] ) );
-
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ self::TESTED_CLASS, 'enqueue_edit_post_screen_scripts' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_action( 'add_meta_boxes', [ self::TESTED_CLASS, 'add_meta_boxes' ] ) );
 		$this->assertEquals( 10, has_action( 'edit_form_top', [ self::TESTED_CLASS, 'print_url_as_title' ] ) );
@@ -126,7 +124,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::update_validated_url_menu_item()
 	 */
 	public function test_update_validated_url_menu_item() {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_user->ID );
 		global $submenu;
 
 		$original_submenu = $submenu;
@@ -155,19 +154,13 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			],
 		];
 
-		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
-			[
-				[
-					'code' => 'hello',
-				],
-			],
-			get_permalink( self::factory()->post->create() )
-		);
-		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
+		AMP_Validated_URL_Post_Type::update_validated_url_menu_item();
+		$this->assertSame( 'Validated URLs', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
+
+		update_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, wp_json_encode( true ) );
 
 		AMP_Validated_URL_Post_Type::update_validated_url_menu_item();
-
-		$this->assertSame( 'Validated URLs <span class="awaiting-mod"><span class="new-validation-error-urls-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
+		$this->assertSame( 'Validated URLs <span class="awaiting-mod"><span id="new-validation-url-count" class="loading"></span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
 
 		$submenu = $original_submenu;
 	}
@@ -830,7 +823,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// If there is a 'core' source, it should appear in the column output.
 		$error_summary['sources_with_invalid_output']['core'] = [];
 		$sources_column                                       = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary['sources_with_invalid_output'], $post_id ] );
-		$this->assertStringContains( '<strong><span class="dashicons dashicons-wordpress-alt"></span>Other (0)</strong>', $sources_column );
+		$this->assertStringContains( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>Other (0)</strong>', $sources_column );
 
 		// Even if there is a hook in the sources, it should not appear in the column if there is any other source.
 		$hook_name = 'wp_header';
@@ -1652,32 +1645,6 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$link    = AMP_Validated_URL_Post_Type::get_recheck_url( get_post( $post_id ) );
 		$this->assertStringContains( AMP_Validated_URL_Post_Type::VALIDATE_ACTION, $link );
 		$this->assertStringContains( wp_create_nonce( AMP_Validated_URL_Post_Type::NONCE_ACTION ), $link );
-	}
-
-	/**
-	 * Test for filter_dashboard_glance_items()
-	 *
-	 * @covers \AMP_Validated_URL_Post_Type::filter_dashboard_glance_items()
-	 */
-	public function test_filter_dashboard_glance_items() {
-
-		// There are no validation errors, so this should return the argument unchanged.
-		$this->assertEmpty( AMP_Validated_URL_Post_Type::filter_dashboard_glance_items( [] ) );
-
-		// Create validation errors, so that the method returns items.
-		$post_id = self::factory()->post->create();
-		AMP_Validated_URL_Post_Type::store_validation_errors(
-			[
-				[ 'code' => 'accepted' ],
-				[ 'code' => 'rejected' ],
-				[ 'code' => 'new' ],
-			],
-			get_permalink( $post_id )
-		);
-		$items = AMP_Validated_URL_Post_Type::filter_dashboard_glance_items( [] );
-		$this->assertStringContains( '1 URL w/ new AMP errors', $items[0] );
-		$this->assertStringContains( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, $items[0] );
-		$this->assertStringContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, $items[0] );
 	}
 
 	/**

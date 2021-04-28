@@ -1,0 +1,28 @@
+// Add markup status icon next to the dropdown.
+.wp-list-table.table-view-list > tbody > tr {
+
+	.amp-validation-error-status-dropdown {
+		align-items: center;
+		display: flex;
+	}
+
+	.amp-validation-error-status-dropdown::after {
+		background: #d3e5e5 url("../images/amp-delete.svg") no-repeat center;
+		background-size: 20px auto;
+		border-radius: 5px;
+		content: "";
+		display: inline-block;
+		height: 20px;
+		width: 20px;
+	}
+
+	&.kept .amp-validation-error-status-dropdown::after {
+		background-color: #f7ded4;
+		background-image: url("../images/amp-alert.svg");
+		background-size: 18px auto;
+	}
+
+	select.amp-validation-error-status {
+		margin-right: 10px;
+	}
+}

@@ -154,18 +154,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Twenty Nineteen.
 			case 'twentynineteen':
 				return [
-					'dequeue_scripts'                    => [
+					'dequeue_scripts'              => [
 						'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
 						'twentynineteen-priority-menu',
 						'twentynineteen-touch-navigation', // @todo There could be an AMP implementation of this, similar to what is implemented on ampproject.org.
 					],
-					'remove_actions'                     => [
+					'remove_actions'               => [
 						'wp_print_footer_scripts' => [
 							'twentynineteen_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
 						],
 					],
-					'add_twentynineteen_masthead_styles' => [],
-					'adjust_twentynineteen_images'       => [],
+					'adjust_twentynineteen_images' => [],
 				];
 
 			// Twenty Seventeen.
@@ -905,70 +904,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Add required styles for featured image header in Twenty Nineteen.
+	 * Add required styles for Twenty Seventeen header.
 	 *
-	 * The following is necessary because the styles in the theme apply to the featured img,
-	 * and the CSS parser will then convert the selectors to amp-img. Nevertheless, object-fit
-	 * does not apply on amp-img and it needs to apply on an actual img.
-	 *
-	 * @link https://github.com/WordPress/wordpress-develop/blob/5.0/src/wp-content/themes/twentynineteen/style.css#L2276-L2299
-	 * @since 1.0
-	 */
-	public static function add_twentynineteen_masthead_styles() {
-		add_action(
-			'wp_enqueue_scripts',
-			static function() {
-				ob_start();
-				?>
-				<style>
-				.site-header.featured-image .site-featured-image .post-thumbnail amp-img > img {
-					height: auto;
-					left: 50%;
-					max-width: 1000%;
-					min-height: 100%;
-					min-width: 100vw;
-					position: absolute;
-					top: 50%;
-					transform: translateX(-50%) translateY(-50%);
-					width: auto;
-					z-index: 1;
-					/* When image filters are active, make it grayscale to colorize it blue. */
-				}
-
-				@supports (object-fit: cover) {
-					.site-header.featured-image .site-featured-image .post-thumbnail amp-img > img {
-						height: 100%;
-						left: 0;
-						object-fit: cover;
-						top: 0;
-						transform: none;
-						width: 100%;
-					}
-				}
-				</style>
-				<?php
-				$styles = str_replace( [ '<style>', '</style>' ], '', ob_get_clean() );
-				wp_add_inline_style( get_template() . '-style', $styles );
-			},
-			11
-		);
-	}
-
-	/**
-	 * Add required styles for video and image headers.
-	 *
-	 * This is currently used exclusively for Twenty Seventeen.
+	 * This is required since JS is not applying the required styles at runtime.
 	 *
 	 * @since 1.0
-	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1687
-	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L1743
 	 */
 	public static function add_twentyseventeen_masthead_styles() {
-		/*
-		 * The following is necessary because the styles in the theme apply to img and video,
-		 * and the CSS parser will then convert the selectors to amp-img and amp-video respectively.
-		 * Nevertheless, object-fit does not apply on amp-img and it needs to apply on an actual img.
-		 */
 		add_action(
 			'wp_enqueue_scripts',
 			static function() {
@@ -976,50 +918,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				ob_start();
 				?>
 				<style>
-				.has-header-image .custom-header-media amp-img > img,
-				.has-header-video .custom-header-media amp-video > video{
-					position: fixed;
-					height: auto;
-					left: 50%;
-					max-width: 1000%;
-					min-height: 100%;
-					min-width: 100%;
-					min-width: 100vw; /* vw prevents 1px gap on left that 100% has */
-					width: auto;
-					top: 50%;
-					padding-bottom: 1px; /* Prevent header from extending beyond the footer */
-					-ms-transform: translateX(-50%) translateY(-50%);
-					-moz-transform: translateX(-50%) translateY(-50%);
-					-webkit-transform: translateX(-50%) translateY(-50%);
-					transform: translateX(-50%) translateY(-50%);
-				}
-				.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
-					bottom: 0;
-					position: absolute;
-					top: auto;
-					-ms-transform: translateX(-50%) translateY(0);
-					-moz-transform: translateX(-50%) translateY(0);
-					-webkit-transform: translateX(-50%) translateY(0);
-					transform: translateX(-50%) translateY(0);
-				}
-				/* For browsers that support object-fit */
-				@supports ( object-fit: cover ) {
-					.has-header-image .custom-header-media amp-img > img,
-					.has-header-video .custom-header-media amp-video > video,
-					.has-header-image:not(.twentyseventeen-front-page):not(.home) .custom-header-media amp-img > img {
-						height: 100%;
-						left: 0;
-						-o-object-fit: cover;
-						object-fit: cover;
-						top: 0;
-						-ms-transform: none;
-						-moz-transform: none;
-						-webkit-transform: none;
-						transform: none;
-						width: 100%;
-					}
-				}
-
 				.navigation-top.site-navigation-fixed {
 					display: none;
 				}
@@ -1522,7 +1420,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							font-size: 32px;
 							line-height: 46px;
 						}
-						.featured-content .post-thumbnail amp-img > img {
+						.featured-content .post-thumbnail amp-img {
 							object-fit: cover;
 							object-position: top;
 						}
@@ -2012,12 +1910,19 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		add_action(
 			'wp_enqueue_scripts',
 			static function() {
-				// Bail if the dark mode stylesheet is not enqueued.
-				if ( ! wp_style_is( 'tt1-dark-mode' ) ) {
+				$theme_style_handle     = 'twenty-twenty-one-style';
+				$dark_mode_style_handle = 'tt1-dark-mode';
+
+				// Bail if the dark mode stylesheet is not enqueued or the theme stylesheet isn't registered.
+				if (
+					! wp_style_is( $dark_mode_style_handle, 'enqueued' )
+					||
+					! wp_style_is( $theme_style_handle, 'registered' )
+				) {
 					return; // @codeCoverageIgnore
 				}
 
-				wp_dequeue_style( 'tt1-dark-mode' );
+				wp_dequeue_style( $dark_mode_style_handle );
 
 				$dark_mode_css_file = get_theme_file_path(
 					sprintf( 'assets/css/style-dark-mode%s.css', is_rtl() ? '-rtl' : '' )
@@ -2033,17 +1938,16 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$new_styles = str_replace( '@media only screen', '@media only screen and (prefers-color-scheme: dark)', $styles );
 				// Allow for rules to override the light theme related rules.
 				$new_styles = str_replace( '.is-dark-theme.is-dark-theme', ':root', $new_styles );
-				$new_styles = str_replace( '.respect-color-scheme-preference.is-dark-theme body', '.respect-color-scheme-preference body', $new_styles );
+				$new_styles = str_replace( '.respect-color-scheme-preference.is-dark-theme body', '.respect-color-scheme-preference:not(._) body', $new_styles );
 
-				wp_add_inline_style( 'twenty-twenty-one-style', $new_styles );
+				wp_add_inline_style( $theme_style_handle, $new_styles );
 			},
 			11
 		);
 	}
 
 	/**
-	 * Amend the Twenty Twenty-One stylesheet to make it compatible with the changes made to the document during
-	 * sanitization.
+	 * Amend Twenty Twenty-One Styles.
 	 */
 	public static function amend_twentytwentyone_styles() {
 		add_action(
@@ -2072,7 +1976,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				$styles = file_get_contents( $css_file ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
-				// Append any extra rules that may be needed.
+				// Append extra rules needed for nav menus according to changes made to the document during sanitization.
 				$styles .= '
 					/* Trap keyboard navigation within mobile menu when it\'s open */
 					@media only screen and (max-width: 481px) {
@@ -2100,6 +2004,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
 							display: flex;
 						}
+					}
+				';
+
+				/*
+				 * In Twenty Twenty-One, when a button is used to resize AMP elements, they can appear transparent when hovered over.
+				 * To resolve this issue, the theme's background color is used as the background color for the button
+				 * when it is in the hovered state.
+				 */
+				$styles .= '
+					button[overflow]:hover {
+						background-color: var(--global--color-background);
 					}
 				';
 

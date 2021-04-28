@@ -6,7 +6,7 @@ apply_filters( 'amp_pre_get_permalink', $url, $post_id );
 
 Filters the AMP permalink to short-circuit normal generation.
 
-Returning a non-false value in this filter will cause the `get_permalink()` to get called and the `amp_get_permalink` filter to not apply.
+Returning a string value in this filter will bypass the `get_permalink()` from being called and the `amp_get_permalink` filter will not apply.
 
 ### Arguments
 
@@ -15,7 +15,7 @@ Returning a non-false value in this filter will cause the `get_permalink()` to g
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:729](/includes/amp-helper-functions.php#L729)
+:link: [src/PairedUrlStructure/LegacyReaderUrlStructure.php:42](/src/PairedUrlStructure/LegacyReaderUrlStructure.php#L42)
 
 <details>
 <summary>Show Code</summary>

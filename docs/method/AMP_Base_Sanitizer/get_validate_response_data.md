@@ -14,7 +14,7 @@ The array returned is merged with the overall validate response data.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:800](/includes/sanitizers/class-amp-base-sanitizer.php#L800-L802)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:820](/includes/sanitizers/class-amp-base-sanitizer.php#L820-L822)
 
 <details>
 <summary>Show Code</summary>

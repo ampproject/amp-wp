@@ -6,20 +6,17 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
+use AmpProject\AmpWP\Optimizer\OptimizerService;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Services;
-use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Optimizer;
-use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
-use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
-use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\RequestDestination;
 use AmpProject\Tag;
 
@@ -1387,7 +1384,7 @@ class AMP_Theme_Support {
 	 */
 	public static function ensure_required_markup( Document $dom, $script_handles = [] ) {
 		// Gather all links.
-		$links         = [
+		$links = [
 			Attribute::REL_PRECONNECT => [
 				// Include preconnect link for AMP CDN for browsers that don't support preload.
 				AMP_DOM_Utils::create_node(
@@ -1400,7 +1397,9 @@ class AMP_Theme_Support {
 				),
 			],
 		];
+
 		$link_elements = $dom->head->getElementsByTagName( Tag::LINK );
+
 		/**
 		 * Link element.
 		 *
@@ -1499,32 +1498,16 @@ class AMP_Theme_Support {
 			}
 		}
 
-		/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-		 *
-		 * "2. Next, preload the AMP runtime v0.js <script> tag with <link as=script href=https://cdn.ampproject.org/v0.js rel=preload>.
-		 * The AMP runtime should start downloading as soon as possible because the AMP boilerplate hides the document via body { visibility:hidden }
-		 * until the AMP runtime has loaded. Preloading the AMP runtime tells the browser to download the script with a higher priority."
-		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
+		/*
+		 * "3. If your page includes render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, amp-story),
+		 * preload those extensions as they're required by the AMP runtime for rendering the page."
+		 * @TODO: Move into RewriteAmpUrls transformer, as that will support self-hosting as well.
 		 */
 		$prioritized_preloads = [];
 		if ( ! isset( $links[ Attribute::REL_PRELOAD ] ) ) {
 			$links[ Attribute::REL_PRELOAD ] = [];
 		}
 
-		$prioritized_preloads[] = AMP_DOM_Utils::create_node(
-			$dom,
-			Tag::LINK,
-			[
-				Attribute::REL  => Attribute::REL_PRELOAD,
-				Attribute::AS_  => RequestDestination::SCRIPT,
-				Attribute::HREF => $runtime_src,
-			]
-		);
-
-		/*
-		 * "3. If your page includes render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, amp-story),
-		 * preload those extensions as they're required by the AMP runtime for rendering the page."
-		 */
 		$amp_script_handles = array_keys( $amp_scripts );
 		foreach ( array_intersect( Amp::RENDER_DELAYING_EXTENSIONS, $amp_script_handles ) as $script_handle ) {
 			if ( ! in_array( $script_handle, Amp::RENDER_DELAYING_EXTENSIONS, true ) ) {
@@ -1790,6 +1773,9 @@ class AMP_Theme_Support {
 			if ( is_bool( $status_code ) ) {
 				$status_code = 200; // Not a web server environment.
 			}
+			if ( ! headers_sent() ) {
+				header( 'Content-Type: application/json; charset=utf-8' );
+			}
 			return wp_json_encode(
 				[
 					'status_code' => $status_code,
@@ -1823,6 +1809,30 @@ class AMP_Theme_Support {
 				$response
 			)
 		) ) {
+			// Detect whether redirect happened and prevent failing a validation request when that happens,
+			// since \AMP_Validation_Manager::validate_url() follows redirects.
+			$sent_location_header = false;
+			foreach ( headers_list() as $sent_header ) {
+				if ( preg_match( '#^location:#i', $sent_header ) ) {
+					$sent_location_header = true;
+					break;
+				}
+			}
+			$did_redirect = $status_code >= 300 && $status_code < 400 && $sent_location_header;
+
+			if ( AMP_Validation_Manager::$is_validate_request && ! $did_redirect ) {
+				if ( ! headers_sent() ) {
+					status_header( 400 );
+					header( 'Content-Type: application/json; charset=utf-8' );
+				}
+				return wp_json_encode(
+					[
+						'code'    => 'RENDERED_PAGE_NOT_AMP',
+						'message' => __( 'The requested URL did not result in an AMP page being rendered.', 'amp' ),
+					]
+				);
+			}
+
 			return $response;
 		}
 
@@ -1867,7 +1877,7 @@ class AMP_Theme_Support {
 		 */
 		do_action( 'amp_server_timing_start', 'amp_dom_parse', '', [], true );
 
-		$dom = Document::fromHtml( $response );
+		$dom = Document::fromHtml( $response, Options::DEFAULTS );
 
 		if ( AMP_Validation_Manager::$is_validate_request ) {
 			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
@@ -1974,6 +1984,8 @@ class AMP_Theme_Support {
 			}
 		}
 
+		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
+
 		$enable_optimizer = array_key_exists( ConfigurationArgument::ENABLE_OPTIMIZER, $args )
 			? $args[ ConfigurationArgument::ENABLE_OPTIMIZER ]
 			: true;
@@ -2032,8 +2044,6 @@ class AMP_Theme_Support {
 			do_action( 'amp_server_timing_stop', 'amp_optimizer' );
 		}
 
-		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
-
 		$can_serve = AMP_Validation_Manager::finalize_validation( $dom );
 
 		// Redirect to the non-AMP version if not on an AMP-first site.
@@ -2066,90 +2076,20 @@ class AMP_Theme_Support {
 	 * Optimizer instance to use.
 	 *
 	 * @param array $args Associative array of arguments to pass into the transformation engine.
-	 * @return Optimizer\TransformationEngine Optimizer transformation engine to use.
+	 * @return OptimizerService Optimizer transformation engine to use.
 	 */
 	private static function get_optimizer( $args ) {
-		$configuration = self::get_optimizer_configuration( $args );
-
-		$fallback_remote_request_pipeline = new FallbackRemoteGetRequest(
-			new WpHttpRemoteGetRequest(),
-			new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
+		add_filter(
+			'amp_enable_ssr',
+			static function () use ( $args ) {
+				return array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
+					? $args[ ConfigurationArgument::ENABLE_SSR ]
+					: true;
+			},
+			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		);
 
-		$cached_remote_request = new CachedRemoteGetRequest( $fallback_remote_request_pipeline, WEEK_IN_SECONDS );
-
-		return new Optimizer\TransformationEngine(
-			$configuration,
-			$cached_remote_request
-		);
-	}
-
-	/**
-	 * Get the AmpProject\Optimizer configuration object to use.
-	 *
-	 * @param array $args Associative array of arguments to pass into the transformation engine.
-	 * @return Optimizer\Configuration Optimizer configuration to use.
-	 */
-	private static function get_optimizer_configuration( $args ) {
-		$transformers = Optimizer\Configuration::DEFAULT_TRANSFORMERS;
-
-		$enable_ssr = array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
-			? $args[ ConfigurationArgument::ENABLE_SSR ]
-			: true;
-
-		/**
-		 * Filter whether the AMP Optimizer should use server-side rendering or not.
-		 *
-		 * @since 1.5.0
-		 *
-		 * @param bool $enable_ssr Whether the AMP Optimizer should use server-side rendering or not.
-		 */
-		$enable_ssr = apply_filters( 'amp_enable_ssr', $enable_ssr );
-
-		// In debugging mode, we don't use server-side rendering, as it further obfuscates the HTML markup.
-		if ( ! $enable_ssr ) {
-			$transformers = array_diff(
-				$transformers,
-				[
-					Optimizer\Transformer\AmpRuntimeCss::class,
-					Optimizer\Transformer\PreloadHeroImage::class,
-					Optimizer\Transformer\ServerSideRendering::class,
-					Optimizer\Transformer\TransformedIdentifier::class,
-				]
-			);
-		} else {
-			array_unshift( $transformers, Transformer\DetermineHeroImages::class );
-		}
-
-		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );
-
-		/**
-		 * Filter the configuration to be used for the AMP Optimizer.
-		 *
-		 * @since 1.5.0
-		 *
-		 * @param array $configuration Associative array of configuration data.
-		 */
-		$configuration = apply_filters(
-			'amp_optimizer_config',
-			array_merge(
-				[
-					Optimizer\Configuration::KEY_TRANSFORMERS => $transformers,
-					Optimizer\Transformer\PreloadHeroImage::class => [
-						Optimizer\Configuration\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
-					],
-				],
-				$args
-			)
-		);
-
-		$config = new Optimizer\Configuration( $configuration );
-		$config->registerConfigurationClass(
-			Transformer\AmpSchemaOrgMetadata::class,
-			Transformer\AmpSchemaOrgMetadataConfiguration::class
-		);
-
-		return $config;
+		return Services::get( 'injector' )->make( OptimizerService::class );
 	}
 
 	/**

@@ -69,22 +69,34 @@ final class ReaderThemeLoader implements Service, Registerable {
 	/**
 	 * Is Reader mode with a Reader theme selected.
 	 *
+	 * @param array $options Options to check. If omitted, the currently-saved options are used.
 	 * @return bool Whether new Reader mode.
 	 */
-	public function is_enabled() {
+	public function is_enabled( $options = null ) {
 		// If the theme was overridden then we know it is enabled. We can't check get_template() at this point because
 		// it will be identical to $reader_theme.
 		if ( $this->is_theme_overridden() ) {
 			return true;
 		}
 
+		if ( null === $options ) {
+			$options = AMP_Options_Manager::get_options();
+		}
+
 		// If Reader mode is not enabled, then a Reader theme is definitely not going to be served.
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		if (
+			! isset( $options[ Option::THEME_SUPPORT ] )
+			||
+			AMP_Theme_Support::READER_MODE_SLUG !== $options[ Option::THEME_SUPPORT ]
+		) {
 			return false;
 		}
 
 		// If the Legacy Reader mode is active, then a Reader theme is not going to be served.
-		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		if ( ! isset( $options[ Option::READER_THEME ] ) ) {
+			return false;
+		}
+		$reader_theme = $options[ Option::READER_THEME ];
 		if ( ReaderThemes::DEFAULT_READER_THEME === $reader_theme ) {
 			return false;
 		}
@@ -131,7 +143,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * @return array Themes.
 	 */
 	public function filter_wp_prepare_themes_to_indicate_reader_theme( $prepared_themes ) {
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		if ( ! $this->is_enabled() ) {
 			return $prepared_themes;
 		}
 
@@ -189,7 +201,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * This is admittedly hacky, but WordPress doesn't provide a much better option.
 	 */
 	public function inject_theme_single_template_modifications() {
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		if ( ! $this->is_enabled() ) {
 			return;
 		}
 

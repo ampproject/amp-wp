@@ -39,7 +39,7 @@ const OBSERVED_CONSOLE_MESSAGE_TYPES = {
 const pageEvents = [];
 
 // The Jest timeout is increased because these tests are a bit slow
-jest.setTimeout( PUPPETEER_TIMEOUT || 100000 );
+jest.setTimeout( PUPPETEER_TIMEOUT || 300000 );
 
 /**
  * Adds an event listener to the page to handle additions of page event

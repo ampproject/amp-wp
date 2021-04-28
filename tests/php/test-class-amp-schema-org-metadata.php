@@ -5,15 +5,16 @@
  * @package AmpProject\AmpWP
  */
 
-use AmpProject\AmpWP\Transformer\AmpSchemaOrgMetadata;
-use AmpProject\AmpWP\Transformer\AmpSchemaOrgMetadataConfiguration;
+use AmpProject\AmpWP\Dom\Options;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\ErrorCollection;
 
 /**
  * Test Site_Health.
  *
- * @coversDefaultClass \AmpProject\AmpWP\Transformer\AmpSchemaOrgMetadata
+ * @coversDefaultClass \AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata
  */
 class AmpSchemaOrgMetadataTest extends WP_UnitTestCase {
 
@@ -55,7 +56,7 @@ class AmpSchemaOrgMetadataTest extends WP_UnitTestCase {
 	 */
 	public function test_transform( $json, $expected ) {
 		$html        = '<html><head><script type="application/ld+json">%s</script></head><body>Test</body></html>';
-		$dom         = Document::fromHtml( sprintf( $html, $json ) );
+		$dom         = Document::fromHtml( sprintf( $html, $json ), Options::DEFAULTS );
 		$transformer = new AmpSchemaOrgMetadata( new AmpSchemaOrgMetadataConfiguration() );
 		$errors      = new ErrorCollection();
 		$transformer->transform( $dom, $errors );

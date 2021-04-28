@@ -5,10 +5,8 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Icon;
-use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
@@ -270,13 +268,6 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_post_list_screen_scripts' ] );
 
-		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
-
-		if ( $dev_tools_user_access->is_user_enabled() ) {
-			add_filter( 'dashboard_glance_items', [ __CLASS__, 'filter_dashboard_glance_items' ] );
-			add_action( 'rightnow_end', [ __CLASS__, 'print_dashboard_glance_styles' ] );
-		}
-
 		// Edit post screen hooks.
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_edit_post_screen_scripts' ] );
 		add_action( 'add_meta_boxes', [ __CLASS__, 'add_meta_boxes' ], PHP_INT_MAX );
@@ -361,21 +352,6 @@ class AMP_Validated_URL_Post_Type {
 
 		if ( ! $screen instanceof \WP_Screen ) {
 			return;
-		}
-
-		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
-			$asset_file   = AMP__DIR__ . '/assets/js/amp-validated-urls-index.asset.php';
-			$asset        = require $asset_file;
-			$dependencies = $asset['dependencies'];
-			$version      = $asset['version'];
-
-			wp_enqueue_script(
-				'amp-validated-urls-index',
-				amp_get_asset_url( 'js/amp-validated-urls-index.js' ),
-				$dependencies,
-				$version,
-				true
-			);
 		}
 
 		// Enqueue this on both the 'AMP Validated URLs' page and the single URL page.
@@ -490,11 +466,12 @@ class AMP_Validated_URL_Post_Type {
 				$menu_name_label = get_post_type_object( self::POST_TYPE_SLUG )->labels->menu_name;
 				$submenu_item[0] = $menu_name_label;
 
-				// Display the count of new validation errors next to the label, if there are any.
-				$new_validation_error_url_count = self::get_validation_error_urls_count();
-				if ( 0 < $new_validation_error_url_count ) {
-					$submenu_item[0] .= ' <span class="awaiting-mod"><span class="new-validation-error-urls-count">' . esc_html( number_format_i18n( $new_validation_error_url_count ) ) . '</span></span>';
+				$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
+				if ( $dev_tools_user_access->is_user_enabled() ) {
+					// Append markup to display a loading spinner while the unreviewed count is being fetched.
+					$submenu_item[0] .= ' <span class="awaiting-mod"><span id="new-validation-url-count" class="loading"></span></span>';
 				}
+
 				break;
 			}
 		}
@@ -507,7 +484,7 @@ class AMP_Validated_URL_Post_Type {
 	 *
 	 * @return int Count of new validation error URLs.
 	 */
-	protected static function get_validation_error_urls_count() {
+	public static function get_validation_error_urls_count() {
 		$count = get_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 		if ( false !== $count ) {
 			// Handle case where integer stored in transient gets returned as string when persistent object cache is not
@@ -647,7 +624,7 @@ class AMP_Validated_URL_Post_Type {
 					$counts['new_accepted']
 				);
 			}
-			$icon     = ( $counts['new_accepted'] + $counts['new_rejected'] ) > 0 ? Icon::warning() : Icon::valid();
+			$icon     = ( $counts['new_accepted'] + $counts['new_rejected'] ) > 0 ? Icon::removed() : Icon::valid();
 			$result[] = sprintf(
 				'<span class="status-text %s" title="%s">%s %s: %s</span>',
 				esc_attr( $counts['new_accepted'] > 0 ? 'has-new' : '' ),
@@ -1406,7 +1383,7 @@ class AMP_Validated_URL_Post_Type {
 			} else {
 				$output[] = '<details class="source">';
 				$output[] = sprintf(
-					'<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>',
+					'<summary class="details-attributes__summary"><strong class="source"><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>',
 					'mu-plugin' === $type ? esc_html__( 'Must-Use Plugins', 'amp' ) : esc_html__( 'Plugins', 'amp' ),
 					$count
 				);
@@ -1434,7 +1411,7 @@ class AMP_Validated_URL_Post_Type {
 				$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( $core_sources[0] ) );
 			} else {
 				$output[] = '<details class="source">';
-				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
+				$output[] = sprintf( '<summary class="details-attributes__summary"><strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
 				$output[] = '<div>';
 				$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
 				$output[] = '</div>';
@@ -2169,7 +2146,7 @@ class AMP_Validated_URL_Post_Type {
 						if ( 0 < ( $counts['new_rejected'] + $counts['new_accepted'] ) ) {
 							?>
 							<strong id="amp-invalid-markup" class="status-text">
-								<span class="amp-icon amp-warning"></span>
+								<span class="amp-icon amp-invalid"></span>
 								<?php esc_html_e( 'Invalid markup not reviewed', 'amp' ); ?>
 							</strong>
 							<?php
@@ -2371,7 +2348,7 @@ class AMP_Validated_URL_Post_Type {
 				</th>
 				<td>
 					<?php echo esc_html( number_format_i18n( $included_original_size + $excluded_original_size ) ); ?>
-					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_html_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 			<tr>
@@ -2380,7 +2357,7 @@ class AMP_Validated_URL_Post_Type {
 				</th>
 				<td>
 					<?php echo esc_html( number_format_i18n( $included_final_size + $excluded_final_size ) ); ?>
-					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_html_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 			<tr>
@@ -2426,7 +2403,7 @@ class AMP_Validated_URL_Post_Type {
 				</th>
 				<td>
 					<?php echo esc_html( number_format_i18n( $excluded_final_size ) ); ?>
-					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_html_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 		</table>
@@ -2457,12 +2434,12 @@ class AMP_Validated_URL_Post_Type {
 				<th class="column-stylesheet_order"><?php esc_html_e( 'Order', 'amp' ); ?></th>
 				<th class="column-original_size">
 					<?php esc_html_e( 'Original', 'amp' ); ?>
-					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
+					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_html_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
 				</th>
 				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
 				<th class="column-final_size">
 					<?php esc_html_e( 'Final', 'amp' ); ?>
-					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
+					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_html_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
 				</th>
 				<th class="column-percentage"><?php esc_html_e( 'Percent', 'amp' ); ?></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
@@ -2927,69 +2904,6 @@ class AMP_Validated_URL_Post_Type {
 			add_query_arg( rawurlencode_deep( $args ), admin_url() ),
 			self::NONCE_ACTION
 		);
-	}
-
-	/**
-	 * Filter At a Glance items add AMP Validation Errors.
-	 *
-	 * @param array $items At a glance items.
-	 * @return array Items.
-	 */
-	public static function filter_dashboard_glance_items( $items ) {
-		$count = self::get_validation_error_urls_count();
-
-		if ( 0 !== $count ) {
-			$items[] = sprintf(
-				'<a class="amp-validation-errors" href="%s">%s</a>',
-				esc_url(
-					admin_url(
-						add_query_arg(
-							[
-								'post_type' => self::POST_TYPE_SLUG,
-								AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => [
-									AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-									AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-								],
-							],
-							'edit.php'
-						)
-					)
-				),
-				esc_html(
-					sprintf(
-						/* translators: %s is the validation error count */
-						_n(
-							'%s URL w/ new AMP errors',
-							'%s URLs w/ new AMP errors',
-							$count,
-							'amp'
-						),
-						number_format_i18n( $count )
-					)
-				)
-			);
-		}
-		return $items;
-	}
-
-	/**
-	 * Print styles for the At a Glance widget.
-	 */
-	public static function print_dashboard_glance_styles() {
-		?>
-		<style>
-			#dashboard_right_now .amp-validation-errors {
-				color: #a00;
-			}
-			#dashboard_right_now .amp-validation-errors:before {
-				content: "\f534";
-			}
-			#dashboard_right_now .amp-validation-errors:hover {
-				color: #dc3232;
-				border: none;
-			}
-		</style>
-		<?php
 	}
 
 	/**

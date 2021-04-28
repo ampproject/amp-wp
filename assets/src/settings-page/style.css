@@ -114,6 +114,10 @@ html {
 	margin-bottom: 2.5rem;
 }
 
+.template-modes > h2 + .amp-notice {
+	margin-bottom: 0.5rem;
+}
+
 .template-modes .template-mode-option {
 	margin-bottom: 0.5rem;
 }
@@ -409,7 +413,6 @@ li.error-kept {
 }
 
 #paired-url-structure .amp-paired-url-examples summary {
-	display: inline-block;
 	padding-right: 4px;
 	user-select: none;
 }

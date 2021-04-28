@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
 
@@ -125,7 +126,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-ad'                                       => [
-				'<amp-ad width="300" height="250" type="foo"></amp-ad>',
+				'<amp-ad width="300" height="250" type="foo" block-rtc always-serve-npa></amp-ad>',
 				null, // No change.
 				[ 'amp-ad' ],
 			],
@@ -506,8 +507,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'',
 						'
 						<amp-story standalone entity="User" entity-logo-src="https://example.com/logo/1x1.png" entity-url="https://example.com/profile/user" live-story-disabled supports-landscape title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
+							<amp-story-auto-analytics gtag-id="UA-ANALYTICS"></amp-story-auto-analytics>
 							<amp-story-page id="my-first-page" next-page-no-ad>
-								<amp-story-grid-layer template="fill">
+								<amp-story-grid-layer template="fill" anchor="top" aspect-ratio="1:2" preset="2021-foreground">
 									<amp-img id="object1" animate-in="rotate-in-left" src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
 									</amp-img>
 									<!-- Note: The viewbox attribute must currently be lower-case due to https://github.com/ampproject/amp-wp/issues/2045 -->
@@ -543,7 +545,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									<a href="https://example.com">Click me.</a>
 									<button>Hello</button>
 								</amp-story-cta-layer>
-								<amp-story-page-attachment layout="nodisplay" theme="dark" data-cta-text="Read more" data-title="My title">
+								<amp-story-page-attachment layout="nodisplay" theme="dark" data-cta-text="Read more" data-title="My title" cta-image="https://example.com/image.png">
 									<h1>My title</h1>
 									<p>Lots of interesting text with <a href="https://example.ampproject.org">links</a>!</p>
 									<p>More text and a YouTube video!</p>
@@ -585,6 +587,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							 		<amp-story-panning-media layout="fill"></amp-story-panning-media>
 								</amp-story-grid-layer>
 						 	</amp-story-page>
+							<amp-story-social-share layout="nodisplay">
+								<script type="application/json">{"shareProviders": ["facebook","whatsapp"]}</script>
+							</amp-story-social-share>
 							<amp-story-bookend src="bookendv1.json" layout="nodisplay"></amp-story-bookend>
 							<amp-analytics id="75a1fdc3143c" type="googleanalytics"><script type="application/json">{"vars":{"account":"UA-XXXXXX-1"},"triggers":{"trackPageview":{"on":"visible","request":"pageview"}}}</script></amp-analytics>
 						</amp-story>
@@ -594,7 +599,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					return [
 						$html,
 						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
-						[ 'amp-story', 'amp-analytics', 'amp-story-360', 'amp-twitter', 'amp-youtube', 'amp-video', 'amp-story-interactive', 'amp-story-panning-media' ],
+						[ 'amp-story', 'amp-story-auto-analytics', 'amp-analytics', 'amp-story-360', 'amp-twitter', 'amp-youtube', 'amp-video', 'amp-story-interactive', 'amp-story-panning-media' ],
 						[
 							[
 								'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG,
@@ -621,6 +626,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-story-player' ],
 			],
 
+			'amp_story_player_with_poster'                 => [
+				'
+				<amp-story-player layout="fixed" width="360" height="600">
+					<a href="https://preview.amp.dev/documentation/examples/introduction/stories_in_amp/">
+						<img src="https://amp.dev/static/samples/img/story_dog2_portrait.jpg" width="360" height="600" loading="lazy" data-amp-story-player-poster-img>
+						Stories in AMP - Hello World
+					</a>
+				</amp-story-player>
+				',
+				null,
+				[ 'amp-story-player' ],
+			],
+
 			'amp_story_360'                                => [
 				'
 				<amp-story-player width="360" height="600">
@@ -634,6 +652,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				',
 				null,
 				[ 'amp-story-player' ],
+			],
+
+			'amp_google_assistant_assistjs'                => [
+				// Note: the first line is commented out because it is broken in AMP currently.
+				'
+					<!--<amp-google-assistant-assistjs-config layout="nodisplay"><script type="application/json">{"devMode": true, "projectId": "aog-assistjs-demos"}</script></amp-google-assistant-assistjs-config>-->
+					<amp-google-assistant-voice-button layout="responsive" width="150" height="40"></amp-google-assistant-voice-button>
+					<amp-google-assistant-voice-bar layout="responsive" width="150" height="40"></amp-google-assistant-voice-bar>
+					<amp-google-assistant-inline-suggestion-bar layout="responsive" width="150" height="40"></amp-google-assistant-inline-suggestion-bar>
+				',
+				null,
+				[ 'amp-google-assistant-assistjs' ],
 			],
 
 			'reference-points-bad'                         => [
@@ -735,7 +765,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'base_carousel'                                => [
 				'
-					<amp-base-carousel width="4" height="3" auto-advance="true" layout="responsive" heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)" visible-count="(min-width: 600px) 4, 3" advance-count="(min-width: 600px) 4, 3">
+					<amp-base-carousel width="4" height="3" auto-advance="true" controls="auto" layout="responsive" heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)" visible-count="(min-width: 600px) 4, 3" advance-count="(min-width: 600px) 4, 3">
 						<div lightbox-thumbnail-id="food">first slide</div>
 						<div lightbox-exclude>second slide</div>
 					</amp-base-carousel>
@@ -1915,9 +1945,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'amp-bodymovin-animation'                      => [
 				'
 					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json"></amp-bodymovin-animation>
-					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="true"></amp-bodymovin-animation>
-					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="false"></amp-bodymovin-animation>
-					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="5"></amp-bodymovin-animation>
+					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="true" renderer="html"></amp-bodymovin-animation>
+					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="false" renderer="canvas"></amp-bodymovin-animation>
+					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="5" renderer="svg"></amp-bodymovin-animation>
 				',
 				null,
 				[ 'amp-bodymovin-animation' ],
@@ -2171,7 +2201,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-form', 'amp-recaptcha-input' ],
 			],
 
-			// @todo The poster should not be allowed if there is a placeholder.
 			'amp-video-iframe'                             => [
 				'<amp-video-iframe src="https://example.com/video/" width="500" height="500" poster="https://example.com/poster.jpg" autoplay dock implements-media-session implements-rotate-to-fullscreen referrerpolicy></amp-video-iframe>',
 				null,
@@ -2971,6 +3000,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				[ 'amp-onetap-google' ],
 			],
+
+			'svg_filter_primitives'                        => [
+				// Example from <https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feBlend>.
+				'
+					<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<defs>
+							<filter id="spotlight">
+								<feflood result="floodFill" x="0" y="0" width="100%" height="100%" flood-color="green" flood-opacity="1"></feflood>
+								<feblend in="SourceGraphic" in2="floodFill" mode="multiply"></feblend>
+							</filter>
+						</defs>
+						<image xlink:href="//developer.mozilla.org/files/6457/mdn_logo_only_color.png" x="10%" y="10%" width="80%" height="80%" style="filter:url(#spotlight);"></image>
+					</svg>
+				',
+				null,
+				[],
+			],
 		];
 	}
 
@@ -3283,6 +3329,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[],
 			],
+			'modulepreload_link'                      => [
+				'<html amp><head><meta charset="utf-8"><link rel="modulepreload" as="script" crossorigin="anonymous" href="https://example.com/module.mjs"></head><body></body></html>',
+				null, // No change.
+				[],
+				[],
+			],
+			'script_onerror'                          => [
+				'<html amp><head><meta charset="utf-8"><script amp-onerror>document.querySelector("script[src*=\'/v0.js\']").onerror=function(){document.querySelector(\'style[amp-boilerplate]\').textContent=\'\'}</script></head><body></body></html>',
+				null, // No change.
+				[],
+				[],
+			],
 		];
 
 		$bad_dev_mode_document = sprintf(
@@ -3437,7 +3495,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = [] ) {
 		$expected      = isset( $expected ) ? $expected : $source;
-		$dom           = Document::fromHtml( $source );
+		$dom           = Document::fromHtml( $source, Options::DEFAULTS );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
@@ -3483,7 +3541,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$source   = '<b>Hello</b><script>document.write("hi");</script><amp-sidebar layout="nodisplay"></amp-sidebar>';
 		$expected = '<b>Hello</b><amp-sidebar layout="nodisplay"></amp-sidebar>';
 
-		$dom           = Document::fromHtml( $source );
+		$dom           = Document::fromHtml( $source, Options::DEFAULTS );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,

@@ -3,3 +3,7 @@
 	display: flex;
 	justify-content: center;
 }
+
+.amp-spinner-container .components-spinner {
+	margin: 0;
+}

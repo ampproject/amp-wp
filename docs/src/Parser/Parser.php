@@ -35,12 +35,13 @@ final class Parser {
 	 * Get the files to parse.
 	 *
 	 * @param string $directory     Directory to look in for files.
-	 * @param array  $excluded_dirs List of regex patterns to exclude.
+	 * @param array  $included_dirs List of regex patterns to include.
+	 *
 	 * @return array|WP_Error Array of files, or WP_Error if a problem occurred.
 	 */
-	public function get_files( $directory, $excluded_dirs ) {
+	public function get_files( $directory, $included_dirs ) {
 		$directories          = new RecursiveDirectoryIterator( $directory );
-		$filtered_directories = new DirectoryFilter( $directories, $excluded_dirs );
+		$filtered_directories = new DirectoryFilter( $directories, $included_dirs );
 		$iterable_files       = new RecursiveIteratorIterator( $filtered_directories );
 
 		$files = [];

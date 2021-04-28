@@ -14,7 +14,7 @@ Filters whether to skip the post from AMP.
 
 ### Source
 
-:link: [includes/class-amp-post-type-support.php:140](/includes/class-amp-post-type-support.php#L140)
+:link: [includes/class-amp-post-type-support.php:146](/includes/class-amp-post-type-support.php#L146)
 
 <details>
 <summary>Show Code</summary>

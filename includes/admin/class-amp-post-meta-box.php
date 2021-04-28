@@ -211,7 +211,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function enqueue_block_assets() {
 		$post = get_post();
-		if ( ! in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
+		if ( ! $post instanceof WP_Post || ! in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
 			return;
 		}
 
@@ -258,6 +258,7 @@ class AMP_Post_Meta_Box {
 			'ampPreviewLink'             => $is_standard_mode ? null : amp_add_paired_endpoint( get_preview_post_link( $post ) ),
 			'errorMessages'              => $this->get_error_messages( $status_and_errors['errors'] ),
 			'hasThemeSupport'            => ! amp_is_legacy(),
+			'isDevToolsEnabled'          => Services::get( 'dev_tools.user_access' )->is_user_enabled(),
 			'isStandardMode'             => $is_standard_mode,
 			'featuredImageMinimumWidth'  => $featured_image_minimum_width,
 			'featuredImageMinimumHeight' => $featured_image_minimum_height,
@@ -426,7 +427,10 @@ class AMP_Post_Meta_Box {
 		if ( in_array( 'skip-post', $errors, true ) ) {
 			$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
 		}
-		if ( count( array_diff( $errors, [ 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ] ) ) > 0 ) {
+		if ( in_array( 'invalid-post', $errors, true ) ) {
+			$error_messages[] = __( 'The post data could not be successfully retrieved.', 'amp' );
+		}
+		if ( count( array_diff( $errors, [ 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template', 'invalid-post' ] ) ) > 0 ) {
 			$error_messages[] = __( 'Unavailable for an unknown reason.', 'amp' );
 		}
 

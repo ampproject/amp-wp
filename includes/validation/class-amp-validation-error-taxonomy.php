@@ -1741,13 +1741,11 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function add_admin_menu_validation_error_item() {
 		$menu_item_label = esc_html__( 'Error Index', 'amp' );
-		$new_error_count = self::get_validation_error_count(
-			[
-				'group' => [ self::VALIDATION_ERROR_NEW_REJECTED_STATUS, self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ],
-			]
-		);
-		if ( $new_error_count ) {
-			$menu_item_label .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $new_error_count ) ) . '</span></span>';
+
+		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
+		if ( $dev_tools_user_access->is_user_enabled() ) {
+			// Append markup to display a loading spinner while the unreviewed count is being fetched.
+			$menu_item_label .= ' <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>';
 		}
 
 		$post_menu_slug = 'edit.php?post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
@@ -1850,7 +1848,7 @@ class AMP_Validation_Error_Taxonomy {
 				} else {
 					$content .= '<p>';
 					$content .= sprintf(
-						'<a href="%s">%s',
+						'<a class="row-title" href="%s">%s',
 						admin_url(
 							add_query_arg(
 								[
@@ -1912,11 +1910,7 @@ class AMP_Validation_Error_Taxonomy {
 				$is_removed = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
 				if ( 'post.php' === $pagenow ) {
-					$valid_color   = Icon::valid()->get_color();
-					$invalid_color = Icon::invalid()->get_color();
-
-					$status_border_color = sprintf( 'border-color: %s;', $is_removed ? $valid_color : $invalid_color );
-					$status_select_name  = sprintf(
+					$status_select_name = sprintf(
 						'%s[%s][%s]',
 						AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY,
 						$term->slug,
@@ -1929,11 +1923,11 @@ class AMP_Validation_Error_Taxonomy {
 						<label for="<?php echo esc_attr( $status_select_name ); ?>" class="screen-reader-text">
 							<?php esc_html_e( 'Markup Status', 'amp' ); ?>
 						</label>
-						<select class="amp-validation-error-status" name="<?php echo esc_attr( $status_select_name ); ?>" style="<?php echo esc_attr( $status_border_color ); ?>">
-							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( $is_removed ); ?> data-color="<?php echo esc_attr( $valid_color ); ?>">
+						<select class="amp-validation-error-status" name="<?php echo esc_attr( $status_select_name ); ?>">
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( $is_removed ); ?>>
 								<?php esc_html_e( 'Removed', 'amp' ); ?>
 							</option>
-							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( ! $is_removed ); ?> data-color="<?php echo esc_attr( $invalid_color ); ?>">
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( ! $is_removed ); ?>>
 								<?php esc_html_e( 'Kept', 'amp' ); ?>
 							</option>
 						</select>
@@ -2345,7 +2339,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		if ( $wrap_with_details ) {
-			$output = '<details open class="details-attributes">' . $output . '</details>';
+			$output = '<details class="details-attributes">' . $output . '</details>';
 		}
 
 		return $output;
@@ -3456,7 +3450,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function get_status_text_with_icon( $sanitization, $include_reviewed = false ) {
 		if ( $sanitization['term_status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
-			$icon = Icon::valid();
+			$icon = Icon::removed();
 			$text = __( 'Removed', 'amp' );
 		} else {
 			$icon = Icon::invalid();

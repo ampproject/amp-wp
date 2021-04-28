@@ -9,11 +9,12 @@
     "ext-curl": "*",
     "ext-date": "*",
     "ext-dom": "*",
+    "ext-filter": "*",
     "ext-iconv": "*",
     "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
-    "ampproject/amp-toolbox": "^0.1",
+    "ampproject/amp-toolbox": "dev-main",
     "cweagans/composer-patches": "1.7.0",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "dev-master#bfdd976"
@@ -26,14 +27,15 @@
     "mikey179/vfsstream": "1.6.8",
     "mustache/mustache": "^2",
     "php-stubs/wordpress-stubs": "^5.3.2",
-    "phpcompatibility/phpcompatibility-wp": "2.1.0",
+    "phpcompatibility/phpcompatibility-wp": "2.1.1",
     "phpdocumentor/reflection": "~3.0",
     "phpunit/phpunit": "^5.7 || ^6.5 || ^7.5",
     "roave/security-advisories": "dev-master",
-    "sirbrillig/phpcs-variable-analysis": "2.10.2",
+    "sirbrillig/phpcs-variable-analysis": "2.11.0",
     "wp-cli/export-command": "^2.0",
     "wp-cli/extension-command": "^2.0",
     "wp-cli/wp-cli": "^2.4",
+    "wp-cli/wp-cli-tests": "^3.0.11",
     "wp-coding-standards/wpcs": "2.3.0"
   },
   "suggest": {
@@ -75,10 +77,7 @@
       "includes/"
     ],
     "files": [
-      "back-compat/back-compat.php",
-      "includes/amp-helper-functions.php",
-      "includes/admin/functions.php",
-      "includes/deprecated.php"
+      "includes/bootstrap.php"
     ]
   },
   "autoload-dev": {
@@ -107,6 +106,7 @@
     "pre-commit": [
       "npm run lint:staged"
     ],
+    "prepare-tests": "install-package-tests",
     "scope-dependencies": [
       "php-scoper add-prefix --output-dir=third-party --force --quiet",
       "echo '{ \"autoload\": { \"classmap\": [\"\"] } }' > third-party/composer.json",

@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
+import { AMP_QUERY_VAR_CUSTOMIZED_LATE, USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
 
 /**
  * Internal dependencies
@@ -17,6 +17,7 @@ import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
 import { useAsyncError } from '../../utils/use-async-error';
 import { Options } from '../options-context-provider';
 import { ErrorContext } from '../error-context-provider';
+import { READER, TRANSITIONAL } from '../../common/constants';
 
 export const ReaderThemes = createContext();
 
@@ -36,16 +37,17 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const { setAsyncError } = useAsyncError();
 	const { error, setError } = useContext( ErrorContext );
 
+	const [ templateModeWasOverridden, setTemplateModeWasOverridden ] = useState( null );
 	const [ themeWasOverridden, setThemeWasOverridden ] = useState( false );
 	const [ themes, setThemes ] = useState( null );
-	const [ fetchingThemes, setFetchingThemes ] = useState( false );
+	const [ fetchingThemes, setFetchingThemes ] = useState( null );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
 	const [ downloadedTheme, setDownloadedTheme ] = useState( false );
 	const [ themesAPIError, setThemesAPIError ] = useState( null );
 
-	const { editedOptions, originalOptions, updateOptions, savingOptions } = useContext( Options );
+	const { didSaveOptions, editedOptions, originalOptions, updateOptions, savingOptions } = useContext( Options );
 
-	const { reader_theme: originalReaderTheme } = originalOptions;
+	const { reader_theme: originalReaderTheme, theme_support: originalThemeSupport } = originalOptions;
 	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
@@ -82,8 +84,57 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
 
 	/**
-	 * If the currently selected theme is not installable, is the active theme, or unavailable for selection, set the
-	 * Reader theme to AMP Legacy.
+	 * If the currently selected Reader theme is the same as the active theme, change the template mode from Reader to
+	 * Transitional and also set the Reader theme to AMP Legacy.
+	 */
+	useEffect( () => {
+		/**
+		 * Set up the initial flag state.
+		 */
+		if ( templateModeWasOverridden === null ) {
+			/**
+			 * In case of the non-reader modes, set flag as soon as the mode
+			 * becomes available.
+			 */
+			if ( originalThemeSupport && originalThemeSupport !== READER ) {
+				setTemplateModeWasOverridden( false );
+
+				return;
+			}
+
+			/**
+			 * When dealing with a reader mode, wait for `originalSelectedTheme`
+			 * to become available.
+			 */
+			if ( originalSelectedTheme.availability ) {
+				setTemplateModeWasOverridden( false );
+			}
+		}
+
+		/**
+		 * Recheck the flag if and only if the options have been saved.
+		 */
+		if ( templateModeWasOverridden ) {
+			if ( didSaveOptions ) {
+				setTemplateModeWasOverridden( false );
+			}
+
+			return;
+		}
+
+		if ( originalThemeSupport === READER && originalSelectedTheme.availability === 'active' ) {
+			updateOptions(
+				{
+					theme_support: TRANSITIONAL,
+					reader_theme: LEGACY_THEME_SLUG,
+				},
+			);
+			setTemplateModeWasOverridden( true );
+		}
+	}, [ didSaveOptions, originalThemeSupport, originalSelectedTheme.availability, templateModeWasOverridden, updateOptions ] );
+
+	/**
+	 * If the currently selected theme is not installable or unavailable for selection, set the Reader theme to AMP Legacy.
 	 */
 	useEffect( () => {
 		if ( themeWasOverridden ) { // Only do this once.
@@ -92,7 +143,6 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 
 		if (
 			selectedTheme.availability === 'non-installable' ||
-			originalSelectedTheme.availability === 'active' ||
 			USING_FALLBACK_READER_THEME
 		) {
 			updateOptions( { reader_theme: LEGACY_THEME_SLUG } );
@@ -134,6 +184,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 
 				// This is the only fetch request in the setup wizard that doesn't go to a REST endpoint.
 				// We need to use window.fetch to bypass the apiFetch middlewares that are useful for other requests.
+				/** @type {{ok: boolean}} */
 				const response = await global.fetch( wpAjaxUrl, {
 					body,
 					method: 'POST',
@@ -164,11 +215,12 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 * Fetches theme data when needed.
 	 */
 	useEffect( () => {
-		if ( error || fetchingThemes || ! readerThemesRestPath || themes ) {
+		if ( fetchingThemes ) {
 			return;
 		}
 
-		if ( 'reader' !== themeSupport ) {
+		if ( error || ! readerThemesRestPath || themes || READER !== themeSupport ) {
+			setFetchingThemes( false );
 			return;
 		}
 
@@ -179,6 +231,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			setFetchingThemes( true );
 
 			try {
+				/** @type {{headers: Headers, json: Function}} */
 				const fetchedThemesResponse = await apiFetch( { path: readerThemesRestPath, parse: false } );
 
 				setThemesAPIError( fetchedThemesResponse.headers.get( 'X-AMP-Theme-API-Error' ) );
@@ -222,18 +275,41 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 		return { filteredThemes: newFilteredThemes };
 	}, [ hideCurrentlyActiveTheme, themes ] );
 
+	/**
+	 * Separate available themes (both installed and installable) from those
+	 * that need to be installed manually.
+	 */
+	const { availableThemes, unavailableThemes } = useMemo(
+		() => ( filteredThemes || [] ).reduce(
+			( collections, theme ) => {
+				if ( ( AMP_QUERY_VAR_CUSTOMIZED_LATE && theme.slug !== LEGACY_THEME_SLUG ) || theme.availability === 'non-installable' ) {
+					collections.unavailableThemes.push( theme );
+				} else {
+					collections.availableThemes.push( theme );
+				}
+
+				return collections;
+			},
+			{ availableThemes: [], unavailableThemes: [] },
+		),
+		[ filteredThemes ],
+	);
+
 	return (
 		<ReaderThemes.Provider
 			value={
 				{
+					availableThemes,
 					currentTheme,
 					downloadedTheme,
 					downloadingTheme,
 					downloadingThemeError,
 					fetchingThemes,
-					themes: filteredThemes,
 					selectedTheme: selectedTheme || {},
+					templateModeWasOverridden,
+					themes: filteredThemes,
 					themesAPIError,
+					unavailableThemes,
 				}
 			}
 		>

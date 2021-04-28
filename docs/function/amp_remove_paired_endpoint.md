@@ -16,29 +16,14 @@ Remove the paired AMP endpoint from a given URL.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:2022](/includes/amp-helper-functions.php#L2022-L2039)
+:link: [includes/amp-helper-functions.php:1871](/includes/amp-helper-functions.php#L1871-L1873)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
 function amp_remove_paired_endpoint( $url ) {
-	$slug = amp_get_slug();
-
-	// Strip endpoint, including /amp/, /amp/amp/, /amp/foo/.
-	$url = preg_replace(
-		sprintf(
-			':(/%s(/[^/?#]+)?)+(?=/?(\?|#|$)):',
-			preg_quote( $slug, ':' )
-		),
-		'',
-		$url
-	);
-
-	// Strip query var, including ?amp, ?amp=1, etc.
-	$url = remove_query_arg( $slug, $url );
-
-	return $url;
+	return Services::get( 'paired_routing' )->remove_endpoint( $url );
 }
 ```
 

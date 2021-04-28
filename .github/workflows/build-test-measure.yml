@@ -6,9 +6,25 @@ on:
       - develop
       # Include all release branches.
       - '[0-9]+.[0-9]+'
+    # Don't run for irrelevant changes.
+    paths-ignore:
+      - '!.github/workflows/*'
+      - '.wordpress-org/**'
+      - '!bin/ci/**'
+      - '!bin/local-env/**'
+      - 'docs/**'
+      - 'qa-tester/**'
   pull_request:
     # Run workflow whenever a PR is opened, updated (synchronized), or marked ready for review.
     types: [opened, synchronize, ready_for_review]
+    # Don't run for irrelevant changes.
+    paths-ignore:
+      - '!.github/workflows/*'
+      - '.wordpress-org/**'
+      - '!bin/ci/**'
+      - '!bin/local-env/**'
+      - 'docs/**'
+      - 'qa-tester/**'
 
 jobs:
 
@@ -18,6 +34,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
 
       - name: Get npm cache directory
         id: npm-cache
@@ -48,6 +73,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
+
       - name: Get npm cache directory
         id: npm-cache
         run: echo "::set-output name=dir::$(npm config get cache)"
@@ -68,7 +102,13 @@ jobs:
       - name: Validate package.json
         run: npm run lint:pkg-json
 
-      - name: Detect coding standard violations (ESLint)
+      - name: Detect ESLint coding standard violations
+        if: github.event.pull_request.head.repo.fork == true
+        run: npm run lint:js
+
+      - name: Generate ESLint coding standard violations report
+        # Prevent generating the ESLint report if run from a PR fork
+        if: github.event.pull_request.head.repo.fork == false
         run: npm run lint:js:report
         continue-on-error: true
 
@@ -166,6 +206,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
+
       - name: Get npm cache directory
         id: npm-cache
         run: echo "::set-output name=dir::$(npm config get cache)"
@@ -190,9 +239,14 @@ jobs:
           CI: true
 
       - name: Run unit tests (with coverage)
-        run: |
-          npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
-          bash <(curl -s https://codecov.io/bash) -cF javascript -f build/logs/lcov.info
+        run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
+
+      - name: Upload code coverage report
+        uses: codecov/codecov-action@v1.4.1
+        with:
+          file: build/logs/lcov.info
+          flags: javascript
+          fail_ci_if_error: true
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -208,6 +262,15 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -242,9 +305,7 @@ jobs:
         run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
       - name: Build plugin
-        run: |
-          npm run build:js
-          npm run build:css
+        run: npm run build:js
 
       - name: Start Docker environment
         run: npm run env:start
@@ -335,6 +396,15 @@ jobs:
             sleep 1
           done
 
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
+
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
@@ -391,9 +461,7 @@ jobs:
           CI: true
 
       - name: Build plugin
-        run: |
-          npm run build:js
-          npm run build:css
+        run: npm run build:js
 
       # Scan the logs for failing tests and surface that information by creating annotations and log file decorations.
       - name: Setup problem matcher to provide annotations for PHPUnit
@@ -425,15 +493,180 @@ jobs:
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true }}
-        run: |
-          vendor/bin/phpunit --coverage-clover build/logs/clover.xml
-          bash <(curl -s https://codecov.io/bash) -cF php -f "$PWD/build/logs/clover.xml"
+        run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Run external HTTP tests
         if: ${{ matrix.external-http == true }}
         run: vendor/bin/phpunit --testsuite external-http
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
+
+      - name: Upload code coverage report
+        if: ${{ matrix.coverage == true }}
+        uses: codecov/codecov-action@v1.4.1
+        with:
+          file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+          flags: php,unit
+          fail_ci_if_error: true
+
+  #-----------------------------------------------------------------------------------------------------------------------
+
+  feature-test-php:
+    name: "Feature test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
+    runs-on: ubuntu-latest
+    env:
+      WP_VERSION: ${{ matrix.wp }}
+    services:
+      mysql:
+        image: mariadb:latest
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_ROOT_PASSWORD:
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    continue-on-error: ${{ matrix.experimental == true }}
+    strategy:
+      fail-fast: false
+      matrix:
+        coverage: [false]
+        php: ['7.3', '7.2', '7.1']
+        wp: ['latest']
+        include:
+          - php: '8.0'
+            wp: 'trunk'
+            experimental: true
+            coverage: false
+
+          - php: '7.4'
+            wp: 'latest'
+            coverage: false
+
+          # TODO: Enable this once codecov upload merging works as expected.
+          # - php: '7.4'
+          #  wp: 'latest'
+          #  coverage: true
+
+          - php: '7.0'
+            wp: '5.1'
+            coverage: false
+
+          - php: '5.6'
+            wp: '5.0'
+            coverage: false
+
+          - php: '5.6'
+            wp: '4.9'
+            coverage: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
+          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
+          ini-values: pcov.directory=.
+
+      - name: Shutdown default MySQL service
+        run: sudo service mysql stop
+
+      - name: Verify MariaDB connection
+        run: |
+          while ! mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; do
+            sleep 1
+          done
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install Node dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Build plugin
+        run: npm run build:js
+
+      - name: Update PHPUnit to get latest php-code-coverage library
+        if: ${{ matrix.coverage == true }}
+        # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency.
+        # phpunit/phpunit has to be updated as the one in use provides an older version of phpunit/php-code-coverage,
+        # but we need the v9.x branch.
+        # It cannot be removed, as it is a requirement of wp-cli/wp-cli-tests as well.
+        run: |
+          composer remove --dev phpdocumentor/reflection
+          composer require --dev --ignore-platform-reqs --update-with-all-dependencies phpunit/phpunit
+
+      - name: Configure DB environment
+        run: |
+          export MYSQL_HOST=127.0.0.1
+          export MYSQL_TCP_PORT=${{ job.services.mysql.ports['3306'] }}
+          echo "WP_CLI_TEST_DBROOTUSER=root" >> $GITHUB_ENV
+          echo "WP_CLI_TEST_DBROOTPASS=" >> $GITHUB_ENV
+          echo "WP_CLI_TEST_DBUSER=wp_cli_test" >> $GITHUB_ENV
+          echo "WP_CLI_TEST_DBPASS=password1" >> $GITHUB_ENV
+          echo "WP_CLI_TEST_DBHOST=$MYSQL_HOST:$MYSQL_TCP_PORT" >> $GITHUB_ENV
+
+      - name: Prepare test database
+        run: composer prepare-tests
+
+      - name: Run tests
+        env:
+          BEHAT_CODE_COVERAGE: ${{ matrix.coverage }}
+        run: vendor/bin/behat
+
+      - name: Retrieve list of coverage files
+        if: ${{ matrix.coverage == true }}
+        run: |
+          FILES=$(ls -d -1 "$GITHUB_WORKSPACE/build/logs/clover-behat/"*.* | xargs echo | sed 's/ /,/g')
+          echo $FILES
+          echo "COVERAGE_FILES=$FILES" >> $GITHUB_ENV
+
+      - name: Upload code coverage report
+        if: ${{ matrix.coverage == true }}
+        uses: codecov/codecov-action@v1.4.1
+        with:
+          files: ${{ env.COVERAGE_FILES }}
+          flags: php,feature
+          fail_ci_if_error: true
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -462,6 +695,15 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.nvm.outputs.NVMRC }}
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -558,21 +800,16 @@ jobs:
     needs: upload-to-gcs
 
     outputs:
-      pr_number: ${{ steps.get-pr-number.outputs.num }}
       comment_body: ${{ steps.get-comment-body.outputs.body }}
 
     steps:
-      - name: Get PR number
-        id: get-pr-number
-        run: echo "::set-output name=num::$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')"
-
       - name: Check if a comment was already made
         id: find-comment
         uses: peter-evans/find-comment@v1
         with:
-          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          issue-number: ${{ github.event.pull_request.number }}
           comment-author: github-actions[bot]
-          body-includes: Download [development build]
+          body-includes: Plugin builds for
 
       - name: Get comment body
         id: get-comment-body
@@ -589,7 +826,7 @@ jobs:
         if: ${{ steps.find-comment.outputs.comment-id == '' }}
         uses: peter-evans/create-or-update-comment@v1
         with:
-          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          issue-number: ${{ github.event.pull_request.number }}
           body: ${{ steps.get-comment-body.outputs.body }}
 
       - name: Update comment on PR with links to plugin builds

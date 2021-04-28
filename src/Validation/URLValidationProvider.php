@@ -8,7 +8,6 @@
 
 namespace AmpProject\AmpWP\Validation;
 
-use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use WP_Error;
@@ -97,37 +96,20 @@ final class URLValidationProvider {
 	/**
 	 * Validates a URL, stores the results, and increments the counts.
 	 *
+	 * @see AMP_Validation_Manager::validate_url_and_store()
+	 *
 	 * @param string $url  The URL to validate.
 	 * @param string $type The type of template, post, or taxonomy.
-	 * @param bool   $force_revalidate Whether to force revalidation regardless of whether the current results are stale.
-	 * @return array|WP_Error Associative array containing validity result and whether the URL was revalidated, or a WP_Error on failure.
+	 * @return array|WP_Error Associative array containing validity result or a WP_Error on failure.
 	 */
-	public function get_url_validation( $url, $type, $force_revalidate = false ) {
-		$validity    = null;
-		$revalidated = true;
-
-		if ( ! $force_revalidate ) {
-			$url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $url );
-
-			if ( $url_post && empty( AMP_Validated_URL_Post_Type::get_post_staleness( $url_post ) ) ) {
-				$validity    = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $url_post );
-				$revalidated = false;
-			}
-		}
-
-		if ( is_null( $validity ) ) {
-			$validity = AMP_Validation_Manager::validate_url_and_store( $url );
-		}
-
+	public function get_url_validation( $url, $type ) {
+		$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 		if ( is_wp_error( $validity ) ) {
 			return $validity;
 		}
 
-		if ( $validity && isset( $validity['results'] ) ) {
-			$this->update_state_from_validity( $validity, $type );
-		}
-
-		return compact( 'validity', 'revalidated' );
+		$this->update_state_from_validity( $validity, $type );
+		return $validity;
 	}
 
 	/**

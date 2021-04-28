@@ -13,7 +13,8 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Services;
 
 /**
  * OptionsMenu class.
@@ -134,6 +135,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * Add menu.
 	 */
 	public function add_menu_items() {
+		require_once ABSPATH . '/wp-admin/includes/plugin.php';
+
 		/*
 		 * Note that the admin items for Validated URLs and Validation Errors will also be placed under this admin menu
 		 * page when the current user can manage_options.
@@ -180,6 +183,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
 
+		$amp_slug_customization_watcher = Services::get( 'amp_slug_customization_watcher' );
+
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
@@ -209,25 +214,28 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
 		$js_data = [
-			'CURRENT_THEME'               => [
+			'AMP_QUERY_VAR'                 => amp_get_slug(),
+			'DEFAULT_AMP_QUERY_VAR'         => QueryVar::AMP,
+			'AMP_QUERY_VAR_CUSTOMIZED_LATE' => $amp_slug_customization_watcher->did_customize_late(),
+			'CURRENT_THEME'                 => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
 				'is_reader_theme' => $is_reader_theme,
 				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
-			'OPTIONS_REST_PATH'           => '/amp/v1/options',
-			'READER_THEMES_REST_PATH'     => '/amp/v1/reader-themes',
-			'IS_CORE_THEME'               => in_array(
+			'OPTIONS_REST_PATH'             => '/amp/v1/options',
+			'READER_THEMES_REST_PATH'       => '/amp/v1/reader-themes',
+			'IS_CORE_THEME'                 => in_array(
 				get_stylesheet(),
 				AMP_Core_Theme_Sanitizer::get_supported_themes(),
 				true
 			),
-			'LEGACY_THEME_SLUG'           => ReaderThemes::DEFAULT_READER_THEME,
-			'USING_FALLBACK_READER_THEME' => $this->reader_themes->using_fallback_theme(),
-			'THEME_SUPPORT_ARGS'          => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_SUPPORTS_READER_MODE'  => AMP_Theme_Support::supports_reader_mode(),
-			'UPDATES_NONCE'               => wp_create_nonce( 'updates' ),
+			'LEGACY_THEME_SLUG'             => ReaderThemes::DEFAULT_READER_THEME,
+			'USING_FALLBACK_READER_THEME'   => $this->reader_themes->using_fallback_theme(),
+			'THEME_SUPPORT_ARGS'            => AMP_Theme_Support::get_theme_support_args(),
+			'THEME_SUPPORTS_READER_MODE'    => AMP_Theme_Support::supports_reader_mode(),
+			'UPDATES_NONCE'                 => wp_create_nonce( 'updates' ),
 		];
 
 		wp_add_inline_script(

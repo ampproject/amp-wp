@@ -50,7 +50,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		'core/categories' => 'ampify_categories_block',
 		'core/archives'   => 'ampify_archives_block',
 		'core/video'      => 'ampify_video_block',
-		'core/cover'      => 'ampify_cover_block',
+		'core/file'       => 'ampify_file_block',
 	];
 
 	/**
@@ -78,7 +78,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function filter_rendered_block( $block_content, $block ) {
 		if ( ! isset( $block['blockName'] ) ) {
-			return $block_content;
+			return $block_content; // @codeCoverageIgnore
 		}
 
 		if ( isset( $block['attrs'] ) && 'core/shortcode' !== $block['blockName'] ) {
@@ -213,25 +213,47 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Ampify cover block.
+	 * Ampify file block.
 	 *
-	 * This specifically fixes the layout of the block when a background video is assigned.
+	 * Fix handling of PDF previews by dequeuing wp-block-library-file and ensuring preview element has 100% width.
 	 *
-	 * @see \AMP_Video_Sanitizer::filter_video_dimensions()
+	 * @see \AMP_Object_Sanitizer::sanitize_pdf()
 	 *
 	 * @param string $block_content The block content about to be appended.
 	 * @param array  $block         The full block, including name and attributes.
 	 * @return string Filtered block content.
 	 */
-	public function ampify_cover_block( $block_content, $block ) {
-		if ( isset( $block['attrs']['backgroundType'] ) && 'video' === $block['attrs']['backgroundType'] ) {
-			$block_content = preg_replace(
-				'/(?<=<video\s)/',
-				'layout="fill" object-fit="cover" ',
-				$block_content
-			);
+	public function ampify_file_block( $block_content, $block ) {
+		if (
+			empty( $block['attrs']['displayPreview'] )
+			||
+			empty( $block['attrs']['href'] )
+			||
+			'.pdf' !== substr( wp_parse_url( $block['attrs']['href'], PHP_URL_PATH ), -4 )
+		) {
+			return $block_content;
 		}
+
+		add_action( 'wp_print_scripts', [ $this, 'dequeue_block_library_file_script' ], 0 );
+		add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_library_file_script' ], 0 );
+
+		// In Twenty Twenty the PDF embed fails to render due to the parent of the embed having
+		// the style rule `display: flex`. Ensuring the element has 100% width fixes that issue.
+		$block_content = preg_replace(
+			':(?=</div>):',
+			'<style id="amp-wp-file-block">.wp-block-file > .wp-block-file__embed { width:100% }</style>',
+			$block_content,
+			1
+		);
+
 		return $block_content;
+	}
+
+	/**
+	 * Dequeue wp-block-library-file script.
+	 */
+	public function dequeue_block_library_file_script() {
+		wp_dequeue_script( 'wp-block-library-file' );
 	}
 
 	/**
@@ -257,15 +279,15 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		$selects = $dom->xpath->query( '//form/select[ @name = "cat" ]' );
 		foreach ( $selects as $select ) {
 			if ( ! $select instanceof DOMElement ) {
-				continue;
+				continue; // @codeCoverageIgnore
 			}
 			$form = $select->parentNode;
 			if ( ! $form instanceof DOMElement || ! $form->parentNode instanceof DOMElement ) {
-				continue;
+				continue; // @codeCoverageIgnore
 			}
 			$script = $dom->xpath->query( './/script[ contains( text(), "onCatChange" ) ]', $form->parentNode )->item( 0 );
 			if ( ! $script instanceof DOMElement ) {
-				continue;
+				continue; // @codeCoverageIgnore
 			}
 
 			$this->category_widget_count++;
@@ -290,7 +312,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		$selects = $dom->xpath->query( '//select[ @name = "archive-dropdown" and starts-with( @id, "archives-dropdown-" ) ]' );
 		foreach ( $selects as $select ) {
 			if ( ! $select instanceof DOMElement ) {
-				continue;
+				continue; // @codeCoverageIgnore
 			}
 
 			$script = $dom->xpath->query( './/script[ contains( text(), "onSelectChange" ) ]', $select->parentNode )->item( 0 );

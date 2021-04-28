@@ -97,6 +97,16 @@ class Event {
 	}
 
 	/**
+	 * Sanitize key to use it for an HTTP header label (alphanumeric and dashes/underscores only).
+	 *
+	 * @param string $key Unsanitized key.
+	 * @return string Sanitized key.
+	 */
+	private function sanitize_key( $key ) {
+		return preg_replace( '/[^a-zA-Z0-9_-]+/', '_', $key );
+	}
+
+	/**
 	 * Get the server timing header string.
 	 *
 	 * @return string Server timing header string representing this event.
@@ -108,19 +118,19 @@ class Event {
 			if ( is_float( $value ) ) {
 				$property_strings[] = sprintf(
 					';%s="%.1f"',
-					addslashes( $property ),
+					$this->sanitize_key( $property ),
 					$value
 				);
 			} else {
 				$property_strings[] = sprintf(
 					';%s="%s"',
-					addslashes( $property ),
+					$this->sanitize_key( $property ),
 					addslashes( $value )
 				);
 			}
 		}
 
-		$event_string = addslashes( $this->get_name() );
+		$event_string = $this->sanitize_key( $this->get_name() );
 
 		$description = $this->get_description();
 		if ( ! empty( $description ) ) {

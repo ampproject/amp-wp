@@ -124,14 +124,6 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_filter( 'request', 'amp_force_query_var_value' );
 
-	if ( defined( 'WP_CLI' ) && WP_CLI ) {
-		if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {
-			WP_CLI::add_command( 'amp', 'AMP_CLI_Namespace' );
-		}
-
-		WP_CLI::add_command( 'amp validation', 'AMP_CLI_Validation_Command' );
-	}
-
 	/*
 	 * Broadcast plugin updates.
 	 * Note that AMP_Options_Manager::get_option( Option::VERSION, '0.0' ) cannot be used because
@@ -142,9 +134,10 @@ function amp_init() {
 	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
 
 	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
-		// This waits to happen until the very end of init to ensure that amp theme support and amp post type support have all been added.
+		// This waits to happen until the very end of admin_init to ensure that amp theme support and amp post type
+		// support have all been added, and that the settings have been registered.
 		add_action(
-			'init',
+			'admin_init',
 			static function () use ( $old_version ) {
 				/**
 				 * Triggers when after amp_init when the plugin version has updated.
@@ -478,16 +471,6 @@ function amp_is_available() {
 		( isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_AVAILABLE === $_GET[ QueryVar::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	) {
 		return false;
-	}
-
-	/*
-	 * If this is a URL for validation, and validation is forced for all URLs, return true.
-	 * Normally, this would be false if the user has deselected a template,
-	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
-	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
-	 */
-	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
-		return true;
 	}
 
 	$queried_object = get_queried_object();
@@ -834,13 +817,24 @@ function amp_get_boilerplate_stylesheets() {
  * @internal
  */
 function amp_add_generator_metadata() {
-	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
+	$template_mode = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+	$reader_theme  = AMP_Options_Manager::get_option( Option::READER_THEME );
 
-	$mode     = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
-	$content .= sprintf( '; mode=%s', $mode );
+	// Account for case where the active theme has been switched to be the same as the reader theme.
+	// In this case, the behavior of the plugin is the same as transitional mode.
+	if (
+		AMP_Theme_Support::READER_MODE_SLUG === $template_mode
+		&&
+		get_stylesheet() === $reader_theme
+		&&
+		! Services::get( 'reader_theme_loader' )->is_enabled()
+	) {
+		$template_mode = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+	}
 
-	$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
-	if ( AMP_Theme_Support::READER_MODE_SLUG === $mode ) {
+	$content  = sprintf( 'AMP Plugin v%s', AMP__VERSION );
+	$content .= sprintf( '; mode=%s', $template_mode );
+	if ( AMP_Theme_Support::READER_MODE_SLUG === $template_mode ) {
 		$content .= sprintf( '; theme=%s', $reader_theme );
 	}
 
@@ -1368,6 +1362,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_O2_Player_Sanitizer'         => [],
 		'AMP_Audio_Sanitizer'             => [],
 		'AMP_Playbuzz_Sanitizer'          => [],
+		'AMP_Object_Sanitizer'            => [],
 		'AMP_Iframe_Sanitizer'            => [
 			'add_placeholder'    => true,
 			'current_origin'     => $current_origin,
@@ -1763,13 +1758,16 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		'class' => 'ab-icon',
 	];
 
+	$non_amp_view_title = __( 'View non-AMP version', 'amp' );
+	$amp_view_title     = __( 'View AMP version', 'amp' );
+
 	$wp_admin_bar->add_node(
 		[
 			'id'    => 'amp',
 			'title' => $icon->to_html( $attr ) . ' ' . esc_html__( 'AMP', 'amp' ),
 			'href'  => esc_url( $is_amp_request ? $non_amp_url : $amp_url ),
 			'meta'  => [
-				'title' => esc_attr( $is_amp_request ? __( 'Validate URL', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+				'title' => esc_attr( $is_amp_request ? $non_amp_view_title : $amp_view_title ),
 			],
 		]
 	);
@@ -1778,7 +1776,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		[
 			'parent' => 'amp',
 			'id'     => 'amp-view',
-			'title'  => esc_html( $is_amp_request ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			'title'  => esc_html( $is_amp_request ? $non_amp_view_title : $amp_view_title ),
 			'href'   => esc_url( $is_amp_request ? $non_amp_url : $amp_url ),
 		]
 	);

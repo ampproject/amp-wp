@@ -35,7 +35,7 @@ describe( 'TemplateModeOption', () => {
 	it( 'matches snapshot', () => {
 		let wrapper = create(
 			<OptionsContextProvider>
-				<TemplateModeOption details="Component details" mode={ STANDARD }>
+				<TemplateModeOption mode={ STANDARD } details="Standard info" detailsUrl="https://amp-wp.org/documentation/getting-started/standard/">
 					<div>
 						{ 'Component children' }
 					</div>
@@ -46,7 +46,7 @@ describe( 'TemplateModeOption', () => {
 
 		wrapper = create(
 			<OptionsContextProvider>
-				<TemplateModeOption details="Component details" mode={ READER } previouslySelected={ true } />
+				<TemplateModeOption mode={ READER } previouslySelected={ true } details="Reader info" detailsUrl="https://amp-wp.org/documentation/getting-started/reader/" />
 			</OptionsContextProvider>,
 		);
 		expect( wrapper.toJSON() ).toMatchSnapshot();
@@ -55,6 +55,7 @@ describe( 'TemplateModeOption', () => {
 			<OptionsContextProvider>
 				<TemplateModeOption
 					details="Component details"
+					detailsUrl="https://amp-wp.org/documentation/getting-started/reader/"
 					mode={ READER }
 					previouslySelected={ true }
 					initialOpen={ true }
@@ -74,12 +75,12 @@ describe( 'TemplateModeOption', () => {
 		act( () => {
 			render(
 				<OptionsContextProvider>
-					<TemplateModeOption mode={ READER }>
+					<TemplateModeOption mode={ READER } details="Reader info" detailsUrl="https://amp-wp.org/documentation/getting-started/reader/">
 						<div id="reader-mode-children">
 							{ 'children' }
 						</div>
 					</TemplateModeOption>
-					<TemplateModeOption mode={ STANDARD }>
+					<TemplateModeOption mode={ STANDARD } details="Standard info" detailsUrl="https://amp-wp.org/documentation/getting-started/standard/">
 						<div id="standard-mode-children">
 							{ 'children' }
 						</div>
@@ -98,12 +99,12 @@ describe( 'TemplateModeOption', () => {
 		act( () => {
 			render(
 				<OptionsContextProvider>
-					<TemplateModeOption mode={ TRANSITIONAL }>
+					<TemplateModeOption mode={ TRANSITIONAL } details="Transitional info" detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/">
 						<div id="reader-mode-children">
 							{ 'children' }
 						</div>
 					</TemplateModeOption>
-					<TemplateModeOption mode={ STANDARD } initialOpen={ true }>
+					<TemplateModeOption mode={ STANDARD } initialOpen={ true } details="Standard info" detailsUrl="https://amp-wp.org/documentation/getting-started/standard/">
 						<div id="standard-mode-children">
 							{ 'children' }
 						</div>
@@ -121,7 +122,7 @@ describe( 'TemplateModeOption', () => {
 		act( () => {
 			render(
 				<OptionsContextProvider>
-					<TemplateModeOption mode={ TRANSITIONAL } initialOpen={ true }>
+					<TemplateModeOption mode={ TRANSITIONAL } initialOpen={ true } details="Transitional info" detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/">
 						<div id="transitional-mode-children">
 							{ 'children' }
 						</div>
@@ -138,7 +139,7 @@ describe( 'TemplateModeOption', () => {
 		act( () => {
 			render(
 				<OptionsContextProvider>
-					<TemplateModeOption mode={ TRANSITIONAL } initialOpen={ false }>
+					<TemplateModeOption mode={ TRANSITIONAL } initialOpen={ false } details="Transitional info" detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/">
 						<div id="transitional-mode-children">
 							{ 'children' }
 						</div>

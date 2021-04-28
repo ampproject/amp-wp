@@ -1,13 +1,10 @@
-
 /*
- * Prevent cases of amp-img converted from img to appear with stretching by using object-fit to scale.
+ * Prevent cases of amp-img converted from img to appear with stretching by using object-fit to scale. Only do this for
+ * amp-img/amp-anim elements that we converted from <img> via AMP_Img_Sanitizer. This is key for images that get 100%
+ * width such as in the post content so that the contents do not get stretched or cropped.
  * See <https://github.com/ampproject/amphtml/issues/21371#issuecomment-475443219>.
- * Also use object-fit:contain in worst case scenario when we can't figure out dimensions for an image.
- * Additionally, in side of \AMP_Img_Sanitizer::determine_dimensions() it could $amp_img->setAttribute( 'object-fit', 'contain' )
- * so that the following rules wouldn't be needed.
  */
-amp-img.amp-wp-enforced-sizes[layout="intrinsic"] > img,
-amp-anim.amp-wp-enforced-sizes[layout="intrinsic"] > img {
+.amp-wp-enforced-sizes {
 	object-fit: contain;
 }
 
@@ -80,4 +77,29 @@ amp-carousel .amp-wp-gallery-caption {
 .wp-video {
 	margin-bottom: 1.5em;
 	max-width: 100%;
+}
+
+/*
+ * Ensure the button used to expand AMP components is placed in the bottom left hand corner of the component,
+ * where it's most likely to be seen.
+ */
+button[overflow] {
+	bottom: 0;
+}
+
+/*
+ * Ensure relevant properties for "replaced elements" which are set on sanitizer-converted custom elements will be
+ * inherited to the actual replaced element which is the shadow element and also to the noscript fallback element.
+ */
+amp-anim img,
+amp-anim noscript,
+amp-iframe iframe,
+amp-iframe noscript,
+amp-img img,
+amp-img noscript,
+amp-video video,
+amp-video noscript {
+	image-rendering: inherit;
+	object-fit: inherit;
+	object-position: inherit;
 }

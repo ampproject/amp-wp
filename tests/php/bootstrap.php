@@ -42,9 +42,6 @@ function amp_unit_test_load_plugin_file() {
 
 tests_add_filter( 'muplugins_loaded', 'amp_unit_test_load_plugin_file' );
 
-// Start up the WP testing environment.
-require $_test_root . '/includes/bootstrap.php';
-
 /*
  * Load WP CLI. Its test bootstrap file can't be required as it will load
  * duplicate class names which are already in use.
@@ -52,3 +49,9 @@ require $_test_root . '/includes/bootstrap.php';
 define( 'WP_CLI_ROOT', TESTS_PLUGIN_DIR . '/vendor/wp-cli/wp-cli' );
 define( 'WP_CLI_VENDOR_DIR', TESTS_PLUGIN_DIR . '/vendor' );
 require_once WP_CLI_ROOT . '/php/utils.php';
+
+$logger = new WP_CLI\Loggers\Regular( true );
+WP_CLI::set_logger( $logger );
+
+// Start up the WP testing environment.
+require $_test_root . '/includes/bootstrap.php';

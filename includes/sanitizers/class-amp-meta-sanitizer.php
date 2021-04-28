@@ -25,6 +25,15 @@ use AmpProject\Tag;
 class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = [ // phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
+		'remove_initial_scale_viewport_property' => true,
+	];
+
+	/**
 	 * Tag.
 	 *
 	 * @var string HTML <meta> tag to identify and replace with AMP version.
@@ -191,6 +200,17 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
+			// Remove initial-scale=1 to leave just width=device-width in order to avoid a tap delay hurts FID.
+			if (
+				! empty( $this->args['remove_initial_scale_viewport_property'] )
+				&&
+				isset( $parsed_rules['initial-scale'] )
+				&&
+				abs( (float) $parsed_rules['initial-scale'] - 1.0 ) < 0.0001
+			) {
+				unset( $parsed_rules['initial-scale'] );
+			}
+
 			$viewport_value = implode(
 				',',
 				array_map(
@@ -275,7 +295,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			$this->dom,
 			Tag::META,
 			[
-				Attribute::CHARSET => Document::AMP_ENCODING,
+				Attribute::CHARSET => Document\Encoding::AMP,
 			]
 		);
 	}

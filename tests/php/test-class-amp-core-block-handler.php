@@ -8,15 +8,17 @@
 
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 
 /**
  * Tests for AMP_Core_Block_Handler.
  *
  * @package AMP
- * @covers AMP_Core_Block_Handler
+ * @coversDefaultClass AMP_Core_Block_Handler
  */
 class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
+	use MarkupComparison;
 	use AssertContainsCompatibility;
 	use WithoutBlockPreRendering {
 		setUp as public prevent_block_pre_render;
@@ -69,6 +71,9 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Core_Block_Handler::register_embed()
 	 * @covers AMP_Core_Block_Handler::unregister_embed()
+	 * @covers AMP_Core_Block_Handler::filter_rendered_block()
+	 * @covers AMP_Core_Block_Handler::ampify_archives_block()
+	 * @covers AMP_Core_Block_Handler::ampify_categories_block()
 	 */
 	public function test_register_and_unregister_embed() {
 		$handler = new AMP_Core_Block_Handler();
@@ -113,12 +118,12 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$handler->register_embed();
 
 		$audio_placeholder_block = "<!-- wp:audio -->\n<figure class=\"wp-block-audio\"><audio controls></audio></figure>\n<!-- /wp:audio -->";
-		$audio_populated_block   = "<!-- wp:audio -->\n<figure class=\"wp-block-audio\"><audio controls src=\"https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3\"></audio></figure>\n<!-- /wp:audio -->";
+		$audio_populated_block   = "<!-- wp:audio -->\n<figure class=\"wp-block-audio\"><audio controls src=\"https://example.com/content/uploads/2019/02/do-you-know-I-am-batman.mp3\"></audio></figure>\n<!-- /wp:audio -->";
 		$this->assertEmpty( apply_filters( 'the_content', $audio_placeholder_block ) );
 		$this->assertNotEmpty( apply_filters( 'the_content', $audio_populated_block ) );
 
 		$image_placeholder_block = "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img alt=\"\"/></figure>\n<!-- /wp:image -->";
-		$image_populated_block   = "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img src=\"https://wordpressdev.lndo.site/content/uploads/2019/02/1200px-American_bison_k5680-1-1024x668.jpg\" alt=\"\"/></figure>\n<!-- /wp:image -->";
+		$image_populated_block   = "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img src=\"https://example.com/content/uploads/2019/02/1200px-American_bison_k5680-1-1024x668.jpg\" alt=\"\"/></figure>\n<!-- /wp:image -->";
 		$this->assertEmpty( apply_filters( 'the_content', $image_placeholder_block ) );
 		$this->assertNotEmpty( apply_filters( 'the_content', $image_populated_block ) );
 	}
@@ -152,22 +157,16 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that cover video gets fill layout and object-fit=cover.
+	 * Check that no transformation is made when external video (not yet anyway).
 	 *
-	 * @covers \AMP_Core_Block_Handler::ampify_cover_block()
+	 * @link https://github.com/ampproject/amp-wp/issues/5233
+	 * @covers \AMP_Core_Block_Handler::ampify_video_block()
 	 */
-	public function test_ampify_cover_block() {
-		$attachment_id = $this->get_video_attachment_id();
-
+	public function test_ampify_video_block_without_attachment() {
 		$post_id = self::factory()->post->create(
 			[
-				'post_title'   => 'Cover Video',
-				'post_content' => sprintf(
-					"<!-- wp:cover {\"url\":%s,\"id\":%s,\"backgroundType\":\"video\",\"align\":\"center\"} -->\n<div class=\"wp-block-cover aligncenter has-background-dim\"><video class=\"wp-block-cover__video-background\" autoplay muted loop src=\"%s\"></video><div class=\"wp-block-cover__inner-container\"><!-- wp:paragraph {\"align\":\"center\",\"placeholder\":\"Write title…\",\"fontSize\":\"large\"} -->\n<p class=\"has-text-align-center has-large-font-size\">Compare the video and image blocks.<br>This block is centered.</p>\n<!-- /wp:paragraph --></div></div>\n<!-- /wp:cover -->",
-					wp_json_encode( wp_get_attachment_url( $attachment_id ) ),
-					wp_json_encode( $attachment_id ),
-					esc_attr( wp_get_attachment_url( $attachment_id ) )
-				),
+				'post_title'   => 'Video',
+				'post_content' => '<!-- wp:video --><figure class="wp-block-video"><video controls src="https://example.com/foo.mp4"></video></figure><!-- /wp:video -->',
 			]
 		);
 
@@ -177,15 +176,101 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
-		$this->assertStringContains( '<video layout="fill" object-fit="cover"', $content );
-		$this->assertStringNotContains( 'width=', $content );
-		$this->assertStringNotContains( 'height=', $content );
+		$this->assertStringContains( '<video controls src="https://example.com/foo.mp4">', $content );
+	}
+
+	/**
+	 * Test embedding a PDF.
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_file_block()
+	 * @covers \AMP_Core_Block_Handler::dequeue_block_library_file_script()
+	 */
+	public function test_ampify_file_block_pdf_preview() {
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$content = do_blocks(
+			'
+			<!-- wp:file {"id":42,"href":"https://example.com/content/uploads/2021/04/example.pdf?foo=bar","displayPreview":true} -->
+				<div class="wp-block-file">
+					<object class="wp-block-file__embed" data="https://example.com/content/uploads/2021/04/example.pdf" type="application/pdf" style="width:100%;height:600px" aria-label="Embed of example."></object>
+					<a href="https://example.com/content/uploads/2021/04/example.pdf">example</a>
+					<a href="https://example.com/content/uploads/2021/04/example.pdf" class="wp-block-file__button" download>Download</a>
+				</div>
+			<!-- /wp:file -->
+			'
+		);
+
+		if ( wp_script_is( 'wp-block-library-file', 'registered' ) ) {
+			$this->assertTrue( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
+		}
+
+		ob_start();
+		wp_print_footer_scripts();
+		ob_end_clean();
+
+		if ( wp_script_is( 'wp-block-library-file', 'registered' ) ) {
+			$this->assertFalse( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
+		}
+
+		$this->assertStringContains( '<style id="amp-wp-file-block">', $content );
+	}
+
+	/**
+	 * Test PDF in File block without preview.
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_file_block()
+	 */
+	public function test_ampify_file_block_pdf_non_preview() {
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$content = do_blocks(
+			'
+			<!-- wp:file {"id":2924,"href":"https://example.com/content/uploads/2021/04/example.pdf","displayPreview":false} -->
+			<div class="wp-block-file"><a href="https://example.com/content/uploads/2021/04/example.pdf">example</a><a href="https://example.com/content/uploads/2021/04/example.pdf" class="wp-block-file__button" download>Download</a></div>
+			<!-- /wp:file -->
+			'
+		);
+
+		$this->assertFalse( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
+
+		$this->assertStringNotContains( '<style id="amp-wp-file-block">', $content );
+	}
+
+	/**
+	 * Test PDF in File block without preview.
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_file_block()
+	 */
+	public function test_ampify_file_block_non_pdf() {
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$content = do_blocks(
+			'
+			<!-- wp:file {"id":821,"href":"https://example.com/content/uploads/2021/04/example.mp3"} -->
+			<div class="wp-block-file"><a href="https://example.com/content/uploads/2021/04/example.mp3">example</a><a href="https://example.com/content/uploads/2021/04/example.mp3" class="wp-block-file__button" download>Download</a></div>
+			<!-- /wp:file -->
+			'
+		);
+
+		$this->assertFalse( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
+
+		$this->assertStringNotContains( '<style id="amp-wp-file-block">', $content );
 	}
 
 	/**
 	 * Test process_categories_widgets.
 	 *
 	 * @covers AMP_Core_Block_Handler::process_categories_widgets()
+	 * @covers AMP_Core_Block_Handler::sanitize_raw_embeds()
 	 * @see WP_Widget_Categories
 	 */
 	public function test_process_categories_widgets() {
@@ -259,6 +344,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * Test process_archives_widgets.
 	 *
 	 * @covers AMP_Core_Block_Handler::process_archives_widgets()
+	 * @covers AMP_Core_Block_Handler::sanitize_raw_embeds()
 	 * @see WP_Widget_Archives
 	 */
 	public function test_process_archives_widgets() {
@@ -337,7 +423,9 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * Test process_text_widgets.
 	 *
 	 * @covers AMP_Core_Block_Handler::process_text_widgets()
-	 * @see WP_Widget_Archives
+	 * @covers AMP_Core_Block_Handler::sanitize_raw_embeds()
+	 * @covers AMP_Core_Block_Handler::preserve_widget_text_element_dimensions()
+	 * @see WP_Widget_Text
 	 */
 	public function test_process_text_widgets() {
 		$instance_count = 2;

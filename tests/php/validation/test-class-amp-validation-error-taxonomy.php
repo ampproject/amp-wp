@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
@@ -1005,13 +1006,28 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$original_submenu = $submenu;
 
 		AMP_Validation_Error_Taxonomy::register();
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_user->ID );
+
 		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
 		$expected_submenu = [
 			'Error Index',
 			AMP_Validation_Manager::VALIDATE_CAPABILITY,
 			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_validated_url',
 			'Error Index',
+		];
+		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
+		$this->assertEquals( $expected_submenu, end( $amp_options ) );
+
+		$submenu = $original_submenu;
+		update_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, wp_json_encode( true ) );
+
+		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
+		$expected_submenu = [
+			'Error Index <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>',
+			AMP_Validation_Manager::VALIDATE_CAPABILITY,
+			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_validated_url',
+			'Error Index <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>',
 		];
 		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );
@@ -1220,7 +1236,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
 		// Test the 'details' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'details', $term_id );
-		$this->assertStringContains( '<details open class="details-attributes"><summary class="details-attributes__summary"', $filtered_content );
+		$this->assertStringContains( '<details class="details-attributes"><summary class="details-attributes__summary"', $filtered_content );
 
 		// Test the 'error_type' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error_type', $term_id );

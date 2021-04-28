@@ -1,0 +1,207 @@
+.amp-error .components-panel__body-toggle.components-button {
+	padding-left: 14px;
+	padding-right: 14px;
+}
+
+.amp-error.components-panel__body.is-opened > .components-panel__body-title {
+	margin-bottom: 10px;
+}
+
+/*
+ * AMP error - panel title (expand/collapse button).
+ */
+.amp-error__panel-title {
+	align-items: baseline;
+	display: flex;
+	flex-flow: row nowrap;
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 1.5;
+	width: calc(100% - 32px); /* 32px accounts for the expand/collapse chevron */
+}
+
+.amp-error__icons {
+	align-items: center;
+	display: flex;
+	flex: 0 0 auto;
+	flex-flow: column nowrap;
+	padding-right: 0.5rem;
+	position: relative;
+	top: -1px; /* Fine-tune icon vertical position */
+}
+
+.amp-error__error-type-icon {
+	align-items: center;
+	background-color: currentColor;
+	border: 1px solid;
+	border-radius: 12px;
+	color: #707070;
+	display: flex;
+	height: 24px;
+	justify-content: center;
+	width: 24px;
+}
+
+.amp-error__title {
+	flex: 1 1 auto;
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+.amp-error:not(.is-opened) .amp-error__title {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/*
+ * AMP error - details.
+ */
+.amp-error code {
+	white-space: nowrap;
+}
+
+.amp-error__block-type-description {
+	align-items: center;
+	display: flex;
+	margin-right: 2px;
+}
+
+.amp-error__block-type-icon {
+	align-items: center;
+	display: inline-flex;
+	height: 10px;
+	margin-left: 5px;
+	width: 24px;
+}
+
+.amp-error__block-type-icon .block-editor-block-icon {
+	background: #f0f0f1;
+	background: rgba(0, 0, 0, 0.07); /* Borrowed from `code` and `kbd` */
+	border-radius: 5px;
+	padding: 2px;
+}
+
+.amp-error__details dt {
+	float: left;
+	font-weight: 600;
+}
+
+.amp-error__details dt::after {
+	content: ":";
+	margin-right: 7px;
+}
+
+.amp-error__details dd {
+	margin-bottom: 8px;
+	margin-left: 0;
+
+}
+
+.amp-error__kept-removed {
+	display: flex;
+}
+
+.amp-error__kept-removed--removed > span,
+.amp-error__kept-removed--kept > span {
+	align-items: center;
+	background: #fcddd3;
+	border-radius: 5px;
+	display: flex;
+	height: 24px;
+	justify-content: center;
+	margin-left: 5px;
+	margin-top: -5px;
+	transform: translateY(2px);
+	width: 24px;
+}
+
+.amp-error__kept-removed--removed > span {
+	background: #d2e5e5;
+}
+
+/*
+ * AMP error - actions.
+ */
+.amp-error__actions {
+	display: flex;
+	justify-content: space-between;
+}
+
+.amp-error__actions > * + * {
+	margin-left: 10px;
+}
+
+.components-button.amp-error__select-block {
+	align-items: center;
+	display: inline-flex;
+}
+
+.amp-error__details-link svg {
+	height: 15px;
+	margin-left: 6px;
+	width: 15px;
+}
+
+.amp-error__select-block svg {
+	fill: none;
+	margin-right: 9px;
+}
+
+.amp-error__details-link {
+	align-items: center;
+	display: flex;
+}
+
+.amp-error__details-link svg path {
+	fill: currentColor;
+}
+
+/*
+ * AMP error - panel title states.
+ */
+
+/* AMP error - base state */
+.amp-error .components-panel__body-title,
+.amp-error .components-panel__body-title:hover {
+	border-left: 4px solid transparent;
+}
+
+/* AMP error - reviewed */
+.amp-error--reviewed .components-panel__body-title {
+	background: #f4f4f4;
+}
+
+.amp-error--reviewed .components-panel__body-title:hover {
+	background: #e8e8e8;
+}
+
+/* AMP error - new */
+.amp-error--new .amp-error__title {
+	font-weight: 700;
+}
+
+/* AMP error - removed */
+.amp-error--removed .components-panel__body-title,
+.amp-error--removed .components-panel__body-title:hover {
+	background: #f8f8f8;
+}
+
+.amp-error--removed.amp-error--kept .components-panel__body-title,
+.amp-error--removed.amp-error--kept .components-panel__body-title:hover {
+	border-left-color: #c2c2c2;
+}
+
+.amp-error--removed .amp-error__title {
+	color: #808080;
+}
+
+.amp-error--removed .amp-error__icons {
+	opacity: 0.4;
+}
+
+/* AMP error - kept */
+.amp-error--kept .components-panel__body-title,
+.amp-error--kept .components-panel__body-title:hover {
+	border-left-color: #d54e21;
+}

@@ -2,13 +2,13 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings'; // From WP inline script.
+import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings'; // From WP inline script.
 
 /**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useMemo } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -17,31 +17,13 @@ import { ReaderThemes } from '../reader-themes-context-provider';
 import { Loading } from '../loading';
 import './style.css';
 import { ThemeCard } from '../theme-card';
-import { AMPNotice } from '../amp-notice';
 import { ThemesAPIError } from '../themes-api-error';
 
 /**
  * Component for selecting a reader theme.
  */
 export function ReaderThemeSelection() {
-	const { currentTheme, fetchingThemes, themes } = useContext( ReaderThemes );
-
-	// Separate available themes (both installed and installable) from those that need to be installed manually.
-	const { availableThemes, unavailableThemes } = useMemo(
-		() => ( themes || [] ).reduce(
-			( collections, theme ) => {
-				if ( ( AMP_QUERY_VAR_CUSTOMIZED_LATE && theme.slug !== LEGACY_THEME_SLUG ) || theme.availability === 'non-installable' ) {
-					collections.unavailableThemes.push( theme );
-				} else {
-					collections.availableThemes.push( theme );
-				}
-
-				return collections;
-			},
-			{ availableThemes: [], unavailableThemes: [] },
-		),
-		[ themes ],
-	);
+	const { availableThemes, fetchingThemes, unavailableThemes } = useContext( ReaderThemes );
 
 	if ( fetchingThemes ) {
 		return <Loading />;
@@ -54,19 +36,6 @@ export function ReaderThemeSelection() {
 					__( 'Select the theme template for mobile visitors', 'amp' )
 				}
 			</p>
-			{ currentTheme && currentTheme.is_reader_theme && (
-				<AMPNotice>
-					<p>
-						{
-							sprintf(
-								/* translators: placeholder is the name of a WordPress theme. */
-								__( 'Your active theme “%s” is not available as a reader theme. If you wish to use it, Transitional mode may be the best option for you.', 'amp' ),
-								currentTheme.name,
-							)
-						}
-					</p>
-				</AMPNotice>
-			) }
 			<ThemesAPIError />
 			<div>
 				{ 0 < availableThemes.length && (
