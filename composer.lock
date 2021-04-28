@@ -286,16 +286,16 @@
     "packages-dev": [
         {
             "name": "automattic/vipwpcs",
-            "version": "2.3.1",
+            "version": "2.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/VIP-Coding-Standards.git",
-                "reference": "90173cec6f4df2af9a31627f4880874d788459ab"
+                "reference": "efacebef421334d54b99afa92fb8fa645336a8a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/VIP-Coding-Standards/zipball/90173cec6f4df2af9a31627f4880874d788459ab",
-                "reference": "90173cec6f4df2af9a31627f4880874d788459ab",
+                "url": "https://api.github.com/repos/Automattic/VIP-Coding-Standards/zipball/efacebef421334d54b99afa92fb8fa645336a8a7",
+                "reference": "efacebef421334d54b99afa92fb8fa645336a8a7",
                 "shasum": ""
             },
             "require": {
@@ -334,7 +334,7 @@
                 "source": "https://github.com/Automattic/VIP-Coding-Standards",
                 "wiki": "https://github.com/Automattic/VIP-Coding-Standards/wiki"
             },
-            "time": "2021-04-23T14:52:17+00:00"
+            "time": "2021-04-28T16:41:50+00:00"
         },
         {
             "name": "behat/behat",
