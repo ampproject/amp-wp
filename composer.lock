@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a6058fda10827da7ccfc7041bdd0c33c",
+    "content-hash": "440442cdca0a388fd2b250eee232aa90",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "dev-main",
+            "version": "0.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "8e1dfacf4f4df8835c6a9ed1d3be8b4a7bf7b92e"
+                "reference": "41790b00a08f1e3f50e6f02b67b2b562616be16a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/8e1dfacf4f4df8835c6a9ed1d3be8b4a7bf7b92e",
-                "reference": "8e1dfacf4f4df8835c6a9ed1d3be8b4a7bf7b92e",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/41790b00a08f1e3f50e6f02b67b2b562616be16a",
+                "reference": "41790b00a08f1e3f50e6f02b67b2b562616be16a",
                 "shasum": ""
             },
             "require": {
@@ -44,7 +44,6 @@
                 "ext-json": "Provides native implementation of json_encode()/json_decode().",
                 "ext-mbstring": "Used by Dom\\Document to convert encoding to UTF-8 if needed."
             },
-            "default-branch": true,
             "bin": [
                 "bin/amp"
             ],
@@ -70,9 +69,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/main"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.5.0"
             },
-            "time": "2021-04-25T07:16:15+00:00"
+            "time": "2021-04-29T01:25:12+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -5965,7 +5964,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "ampproject/amp-toolbox": 20,
         "sabberworm/php-css-parser": 20,
         "roave/security-advisories": 20
     },
