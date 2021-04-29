@@ -1,0 +1,116 @@
+version: 2
+updates:
+- package-ecosystem: composer
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "12:00"
+    timezone: America/Los_Angeles
+  open-pull-requests-limit: 10
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "12:00"
+    timezone: America/Los_Angeles
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: copy-webpack-plugin
+    versions:
+    - ">= 8.a, < 9"
+  - dependency-name: postcss-loader
+    versions:
+    - ">= 5.a, < 6"
+  - dependency-name: postcss-nested
+    versions:
+    - "> 5.0.1, < 6"
+  - dependency-name: react
+    versions:
+    - ">= 17.a, < 18"
+  - dependency-name: terser-webpack-plugin
+    versions:
+    - ">= 5.a, < 6"
+  - dependency-name: eslint-plugin-jsdoc
+    versions:
+    - 32.0.0
+    - 32.0.1
+    - 32.0.2
+    - 32.1.0
+    - 32.3.2
+  - dependency-name: eslint
+    versions:
+    - 7.24.0
+  - dependency-name: "@wordpress/components"
+    versions:
+    - 12.0.6
+    - 13.0.1
+  - dependency-name: "@wordpress/jest-puppeteer-axe"
+    versions:
+    - 3.0.0
+    - 3.0.2
+  - dependency-name: "@wordpress/plugins"
+    versions:
+    - 2.25.1
+  - dependency-name: "@wordpress/dom-ready"
+    versions:
+    - 2.13.1
+  - dependency-name: classnames
+    versions:
+    - 2.3.0
+  - dependency-name: eslint-plugin-react
+    versions:
+    - 7.23.0
+  - dependency-name: eslint-plugin-jest
+    versions:
+    - 24.2.0
+    - 24.3.1
+  - dependency-name: clipboard
+    versions:
+    - 2.0.7
+  - dependency-name: postcss
+    versions:
+    - 8.2.7
+  - dependency-name: svgo
+    versions:
+    - 2.2.0
+  - dependency-name: "@wordpress/block-editor"
+    versions:
+    - 5.2.2
+    - 5.2.3
+    - 5.2.5
+    - 5.2.8
+    - 5.2.9
+  - dependency-name: "@wordpress/blocks"
+    versions:
+    - 7.0.2
+    - 7.0.4
+    - 7.0.5
+  - dependency-name: copy-webpack-plugin
+    versions:
+    - 7.0.0
+  - dependency-name: "@babel/core"
+    versions:
+    - 7.12.17
+  - dependency-name: babel-plugin-inline-react-svg
+    versions:
+    - 2.0.0
+  - dependency-name: "@wordpress/edit-post"
+    versions:
+    - 3.26.7
+  - dependency-name: "@wordpress/scripts"
+    versions:
+    - 13.0.2
+  - dependency-name: "@wordpress/e2e-test-utils"
+    versions:
+    - 5.0.0
+    - 5.0.1
+  - dependency-name: "@wordpress/eslint-plugin"
+    versions:
+    - 8.0.1
+- package-ecosystem: github-actions
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "12:00"
+    timezone: America/Los_Angeles
+  open-pull-requests-limit: 10
