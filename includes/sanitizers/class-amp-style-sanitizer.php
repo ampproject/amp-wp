@@ -13,21 +13,24 @@ use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
-use Sabberworm\CSS\RuleSet\DeclarationBlock;
-use Sabberworm\CSS\CSSList\CSSList;
-use Sabberworm\CSS\Property\Selector;
-use Sabberworm\CSS\RuleSet\RuleSet;
-use Sabberworm\CSS\Property\AtRule;
-use Sabberworm\CSS\Rule\Rule;
-use Sabberworm\CSS\CSSList\KeyFrame;
-use Sabberworm\CSS\RuleSet\AtRuleSet;
-use Sabberworm\CSS\OutputFormat;
-use Sabberworm\CSS\Property\Import;
-use Sabberworm\CSS\CSSList\AtRuleBlockList;
-use Sabberworm\CSS\Value\RuleValueList;
-use Sabberworm\CSS\Value\URL;
-use Sabberworm\CSS\Value\Value;
-use Sabberworm\CSS\CSSList\Document as CSSDocument;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\RuleSet\DeclarationBlock;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\CSSList\CSSList;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\Property\Selector;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\RuleSet\RuleSet;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\Property\AtRule;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\Rule\Rule;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\CSSList\KeyFrame;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\RuleSet\AtRuleSet;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\OutputFormat;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\Property\Import;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\CSSList\AtRuleBlockList;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\Value\RuleValueList;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\Value\URL;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\Value\Value;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\CSSList\Document as CSSDocument;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\Settings as CSSSettings;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\Parser as CSSParser;
+use AmpProject\AmpWP\ScopedDependencies\Sabberworm\CSS\OutputFormat as CSSOutputFormat;
 
 /**
  * Class AMP_Style_Sanitizer
@@ -376,6 +379,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Determine whether the version of PHP-CSS-Parser loaded has all required features for tree shaking and CSS processing.
 	 *
+	 * @codeCoverageIgnore
+	 * @deprecated As of v2.1 a patched version of PHP-CSS-Parser is now bundled with the plugin.
 	 * @since 1.0.2
 	 *
 	 * @return bool Returns true if the plugin's forked version of PHP-CSS-Parser is loaded by Composer.
@@ -1803,8 +1808,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
 			$stylesheet_string = $this->remove_spaces_from_url_values( $stylesheet_string );
 
-			$parser_settings = Sabberworm\CSS\Settings::create();
-			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
+			$parser_settings = CSSSettings::create();
+			$css_parser      = new CSSParser( $stylesheet_string, $parser_settings );
 			$css_document    = $css_parser->parse(); // @todo If 'utf-8' is not $css_parser->getCharset() then issue warning?
 
 			if ( ! empty( $options['stylesheet_url'] ) ) {
@@ -1904,7 +1909,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $parsed_stylesheet['css_document'] ) ) {
 			$css_document = $parsed_stylesheet['css_document'];
 
-			$output_format = Sabberworm\CSS\OutputFormat::createCompact();
+			$output_format = CSSOutputFormat::createCompact();
 			$output_format->setSemicolonAfterLastRule( false );
 
 			$before_declaration_block          = sprintf( '/*%s*/', chr( 1 ) );
@@ -1915,15 +1920,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$before_at_rule                    = sprintf( '/*%s*/', chr( 6 ) );
 			$after_at_rule                     = sprintf( '/*%s*/', chr( 7 ) );
 
-			// Add comments to stylesheet if PHP-CSS-Parser has the required extensions for tree shaking.
-			if ( self::has_required_php_css_parser() ) {
-				$output_format->set( 'BeforeDeclarationBlock', $before_declaration_block );
-				$output_format->set( 'SpaceBeforeSelectorSeparator', $between_selectors );
-				$output_format->set( 'AfterDeclarationBlockSelectors', $after_declaration_block_selectors );
-				$output_format->set( 'AfterDeclarationBlock', $after_declaration_block );
-				$output_format->set( 'BeforeAtRuleBlock', $before_at_rule );
-				$output_format->set( 'AfterAtRuleBlock', $after_at_rule );
-			}
+			$output_format->set( 'BeforeDeclarationBlock', $before_declaration_block );
+			$output_format->set( 'SpaceBeforeSelectorSeparator', $between_selectors );
+			$output_format->set( 'AfterDeclarationBlockSelectors', $after_declaration_block_selectors );
+			$output_format->set( 'AfterDeclarationBlock', $after_declaration_block );
+			$output_format->set( 'BeforeAtRuleBlock', $before_at_rule );
+			$output_format->set( 'AfterAtRuleBlock', $after_at_rule );
 			$output_format->set( 'SpaceBetweenRules', $between_properties );
 
 			$stylesheet_string = $css_document->render( $output_format );

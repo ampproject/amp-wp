@@ -2341,14 +2341,6 @@ class AMP_Validated_URL_Post_Type {
 
 		?>
 
-		<?php if ( ! AMP_Style_Sanitizer::has_required_php_css_parser() ) : ?>
-			<div class="notice notice-alt notice-warning inline">
-				<p>
-					<?php esc_html_e( 'AMP CSS processing is limited because a conflicting version of PHP-CSS-Parser has been loaded by another plugin or theme. Tree shaking is not available.', 'amp' ); ?>
-				</p>
-			</div>
-		<?php endif; ?>
-
 		<table class="amp-stylesheet-summary">
 			<tr>
 				<th>

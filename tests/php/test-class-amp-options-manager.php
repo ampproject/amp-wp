@@ -73,7 +73,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_init() {
 		AMP_Options_Manager::init();
-		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'render_php_css_parser_conflict_notice' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'insecure_connection_notice' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'reader_theme_fallback_notice' ] ) );
 	}
@@ -667,17 +666,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			add_theme_support( 'amp', $args );
 		}
 		$this->assertEquals( $expected_mode, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-	}
-
-	/** @covers AMP_Options_Manager::render_php_css_parser_conflict_notice() */
-	public function test_render_php_css_parser_conflict_notice() {
-		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'render_php_css_parser_conflict_notice' ] ) );
-
-		set_current_screen( 'themes' );
-		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'render_php_css_parser_conflict_notice' ] ) );
-
-		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
-		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'render_php_css_parser_conflict_notice' ] ) );
 	}
 
 	/** @covers AMP_Options_Manager::insecure_connection_notice() */

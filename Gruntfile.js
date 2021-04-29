@@ -3,7 +3,7 @@
 module.exports = function( grunt ) {
 	'use strict';
 
-	// Root paths to include in the plugin build ZIP when running `npm run build:prod`.
+	// Root paths to include in the plugin build ZIP.
 	const productionIncludedRootFiles = [
 		'LICENSE',
 		'amp.php',
@@ -12,7 +12,6 @@ module.exports = function( grunt ) {
 		'includes',
 		'src',
 		'templates',
-		'vendor',
 	];
 
 	// These patterns paths will be excluded from among the above directory.
@@ -43,6 +42,17 @@ module.exports = function( grunt ) {
 		'vendor/ampproject/amp-toolbox/conceptual-diagram.svg',
 		'vendor/ampproject/amp-toolbox/phpstan.neon.dist',
 		'vendor/bin',
+		'third-party/composer.json',
+		'scoper.inc.php',
+	];
+
+	// These will be removed from the Composer build of the plugin prior to creating a ZIP.
+	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
+	const productionComposerExcludedFilePatterns = [
+		'vendor',
+		'composer.lock',
+		'third-party/composer.json',
+		'scoper.inc.php',
 	];
 
 	grunt.initConfig( {
@@ -81,10 +91,12 @@ module.exports = function( grunt ) {
 			composer_install: {
 				command: [
 					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
+					'mkdir -p build/vendor/bin',
+					'cp vendor/bin/php-scoper build/vendor/bin/',
 					'cd build',
 					'composer install --no-dev -o',
-					'composer remove cweagans/composer-patches --update-no-dev -o',
-					'rm -rf ' + productionVendorExcludedFilePatterns.join( ' ' ),
+					'COMPOSER_DISCARD_CHANGES=true composer remove --no-interaction --no-scripts --update-no-dev -o cweagans/composer-patches sabberworm/php-css-parser',
+					'rm -rf ' + ( 'composer' === process.env.BUILD_TYPE ? productionComposerExcludedFilePatterns : productionVendorExcludedFilePatterns ).join( ' ' ),
 				].join( ' && ' ),
 			},
 			create_build_zip: {
@@ -155,6 +167,9 @@ module.exports = function( grunt ) {
 			paths.push( 'readme.txt' );
 
 			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
+			paths.push( 'scoper.inc.php' ); // Copy in order generate scoped Composer dependencies.
+
+			//  Also copy recently built assets.
 			paths.push( 'assets/js/**/*.js' );
 			paths.push( 'assets/js/**/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
@@ -164,30 +179,44 @@ module.exports = function( grunt ) {
 				paths.push( 'assets/css/*.css.map' );
 			}
 
+			// Get build version from amp.php.
+			const versionRegex = /(\*\s+Version:\s+)(?<version>\d+(\.\d+)+)(?<identifier>-\w+)?/;
+			const { groups: matches } = grunt.file.read( 'amp.php' ).match( versionRegex );
+
+			if ( ! matches || ! matches.version ) {
+				throw new Error( 'Plugin version could not be retrieved from amp.php' );
+			}
+
+			const version = matches.version;
+
 			grunt.config.set( 'copy', {
 				build: {
 					src: paths,
 					dest: 'build',
 					expand: true,
 					options: {
-						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and README.md.
+						noProcess: [ '**/*', '!amp.php', '!composer.json' ],
 						process( content, srcpath ) {
-							let matches, version, versionRegex;
-							if ( /amp\.php$/.test( srcpath ) ) {
-								versionRegex = /(\*\s+Version:\s+)(\d+(\.\d+)+-\w+)/;
-
+							if ( /^amp\.php$/.test( srcpath ) ) {
 								// If not a stable build (e.g. 0.7.0-beta), amend the version with the git commit and current timestamp.
-								matches = content.match( versionRegex );
-								if ( matches ) {
-									version = matches[ 2 ] + '-' + versionAppend;
-									console.log( 'Updating version in amp.php to ' + version ); // eslint-disable-line no-console
-									content = content.replace( versionRegex, '$1' + version );
-									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + version );
+								if ( matches.identifier ) {
+									const pluginVersion = version + matches.identifier + '-' + versionAppend;
+									console.log( 'Updating version in amp.php to ' + pluginVersion ); // eslint-disable-line no-console
+									content = content.replace( versionRegex, '$1' + pluginVersion );
+									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + pluginVersion );
 								}
 
 								// Remove dev mode code blocks.
 								content = content.replace( /\n\/\/\s*DEV_CODE.+?\n}\n/s, '' );
+
+								if ( 'composer' === process.env.BUILD_TYPE ) {
+									content = content.replace( "require_once AMP__DIR__ . '/vendor/autoload.php';", '' );
+								}
+							} else if ( /^composer\.json$/.test( srcpath ) && 'composer' === process.env.BUILD_TYPE ) {
+								console.log( 'Setting version in composer.json to ' + version ); // eslint-disable-line no-console
+								content = content.replace( /"name": "ampproject\/amp-wp",/, '$&\n  "version": "' + version + '",' );
 							}
+
 							return content;
 						},
 					},

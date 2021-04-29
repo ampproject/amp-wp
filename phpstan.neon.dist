@@ -26,6 +26,7 @@ parameters:
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/twentyseventeen.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/legacy-i18n.php
 		- %currentWorkingDirectory%/vendor/autoload.php
+		- %currentWorkingDirectory%/third-party/vendor/scoper-autoload.php
 		- %currentWorkingDirectory%/amp.php
 		- %currentWorkingDirectory%/includes/amp-frontend-actions.php
 		- %currentWorkingDirectory%/includes/amp-post-template-functions.php

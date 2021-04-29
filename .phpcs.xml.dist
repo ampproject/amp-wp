@@ -131,6 +131,10 @@
 		</properties>
 	</rule>
 
+	<rule ref="Squiz.Commenting.FileComment.Missing">
+		<exclude-pattern>scoper.inc.php</exclude-pattern>
+	</rule>
+
 	<arg value="s"/>
 	<arg name="extensions" value="php"/>
 	<file>.</file>
@@ -146,4 +150,5 @@
 	<exclude-pattern type="relative">^build/*</exclude-pattern>
 	<exclude-pattern>includes/sanitizers/class-amp-allowed-tags-generated.php</exclude-pattern>
 	<exclude-pattern>assets/js/*.asset.php</exclude-pattern>
+	<exclude-pattern>third-party/*</exclude-pattern>
 </ruleset>

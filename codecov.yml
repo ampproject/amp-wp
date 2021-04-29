@@ -42,6 +42,8 @@ comment:
 ignore:
   - "/bin"
   - "/back-compat"
+  - "/third-party"
   - "/docs/**/*"
   - ".phpstorm.meta.php"
   - "/qa-tester/**"
+  - "scoper.inc.php"
