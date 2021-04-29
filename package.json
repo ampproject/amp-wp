@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "7.12.1",
-    "@wordpress/api-fetch": "3.22.0",
+    "@wordpress/api-fetch": "3.23.1",
     "@wordpress/autop": "2.12.2",
     "@wordpress/components": "13.0.2",
     "@wordpress/compose": "3.25.2",
