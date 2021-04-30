@@ -330,8 +330,10 @@ describe( 'ErrorTypeIcon', () => {
 		}
 
 		if ( ! expectedClass ) {
+			// eslint-disable-next-line jest/no-conditional-expect
 			expect( container.querySelector( 'svg[class^=amp-error__error-type-icon]' ) ).toBeNull();
 		} else {
+			// eslint-disable-next-line jest/no-conditional-expect
 			expect( container.querySelector( expectedClass ) ).not.toBeNull();
 		}
 	} );
@@ -394,11 +396,13 @@ describe( 'ErrorContent', () => {
 			act( () => {
 				dispatch( 'core/block-editor' ).removeBlock( clientId, false );
 			} );
+			// eslint-disable-next-line jest/no-conditional-expect
 			expect( container.innerHTML ).toContain( 'error is no longer detected' );
 			return;
 		}
 
 		if ( null === clientId ) {
+			// eslint-disable-next-line jest/no-conditional-expect
 			expect( container.innerHTML ).toContain( 'outside the content' );
 			return;
 		}
@@ -406,6 +410,7 @@ describe( 'ErrorContent', () => {
 		expect( container.innerHTML ).toContain( '<dt>Source' );
 		expect( container.innerHTML ).not.toContain( 'outside the content' );
 
+		/* eslint-disable jest/no-conditional-expect */
 		switch ( testBlockSource ) {
 			case 'plugin':
 				expect( container.innerHTML ).toContain( 'test plugin block' );
@@ -429,6 +434,7 @@ describe( 'ErrorContent', () => {
 
 			default:
 				break;
+			/* eslint-enable jest/no-conditional-expect */
 		}
 
 		expect( container.innerHTML ).toContain(
