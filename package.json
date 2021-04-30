@@ -48,7 +48,7 @@
     "@babel/core": "7.13.16",
     "@babel/plugin-proposal-class-properties": "7.13.0",
     "@wordpress/babel-preset-default": "5.2.2",
-    "@wordpress/block-editor": "5.3.0",
+    "@wordpress/block-editor": "5.3.3",
     "@wordpress/blocks": "8.0.3",
     "@wordpress/browserslist-config": "3.0.3",
     "@wordpress/data": "4.27.3",
