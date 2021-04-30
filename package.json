@@ -56,7 +56,7 @@
     "@wordpress/e2e-test-utils": "5.1.3",
     "@wordpress/edit-post": "3.27.2",
     "@wordpress/eslint-plugin": "9.0.3",
-    "@wordpress/hooks": "2.12.2",
+    "@wordpress/hooks": "2.12.3",
     "@wordpress/jest-puppeteer-axe": "3.0.3",
     "@wordpress/plugins": "2.25.3",
     "@wordpress/scripts": "14.1.1",
