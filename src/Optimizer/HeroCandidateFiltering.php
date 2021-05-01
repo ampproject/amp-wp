@@ -104,7 +104,7 @@ final class HeroCandidateFiltering implements Service, Delayed, Conditional, Reg
 		$queried_post = get_queried_object();
 		if ( is_singular() && $queried_post instanceof WP_Post ) {
 			$post = $queried_post;
-		} elseif ( $wp_query->is_main_query() && $wp_query->post_count > 0 ) {
+		} elseif ( $wp_query->is_main_query() && isset( $wp_query->posts[0] ) ) {
 			$post = $wp_query->posts[0];
 		}
 
