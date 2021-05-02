@@ -6,6 +6,8 @@
  */
 
 use AmpProject\Dom\Document;
+use AmpProject\Tag;
+use AmpProject\Attribute;
 
 /**
  * Class AMP_Instagram_Embed_Handler
@@ -16,7 +18,7 @@ use AmpProject\Dom\Document;
  */
 class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	const SHORT_URL_HOST = 'instagr.am';
-	const URL_PATTERN    = '#https?:\/\/(www\.)?instagr(\.am|am\.com)\/(p|tv)\/([A-Za-z0-9-_]+)#i';
+	const URL_PATTERN    = '#https?:\/\/(www\.)?instagr(\.am|am\.com)\/(p|tv|reel)\/([A-Za-z0-9-_]+)#i';
 
 	/**
 	 * Default width.
@@ -42,7 +44,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Tag.
 	 *
-	 * @var string AMP amp-facebook tag
+	 * @var string AMP amp-instagram tag.
 	 */
 	private $amp_tag = 'amp-instagram';
 
@@ -170,20 +172,34 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 */
 	private function create_amp_instagram_and_replace_node( $dom, $node ) {
-		$instagram_id = $this->get_instagram_id_from_url( $node->getAttribute( 'data-instgrm-permalink' ) );
+		$permalink    = $node->getAttribute( 'data-instgrm-permalink' );
+		$instagram_id = $this->get_instagram_id_from_url( $permalink );
 
-		$node_args = [
-			'data-shortcode' => $instagram_id,
-			'layout'         => 'responsive',
-			'width'          => $this->DEFAULT_WIDTH,
-			'height'         => $this->DEFAULT_HEIGHT,
-		];
+		if ( $instagram_id ) {
+			$node_args = [
+				'data-shortcode' => $instagram_id,
+				'layout'         => 'responsive',
+				'width'          => $this->DEFAULT_WIDTH,
+				'height'         => $this->DEFAULT_HEIGHT,
+			];
 
-		if ( true === $node->hasAttribute( 'data-instgrm-captioned' ) ) {
-			$node_args['data-captioned'] = '';
+			if ( true === $node->hasAttribute( 'data-instgrm-captioned' ) ) {
+				$node_args['data-captioned'] = '';
+			}
+
+			$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, $node_args );
+		} else {
+			$new_node = AMP_DOM_Utils::create_node(
+				$dom,
+				Tag::A,
+				[
+					Attribute::HREF   => esc_url_raw( $permalink ),
+					Attribute::CLASS_ => 'amp-wp-embed-fallback',
+				]
+			);
+
+			$new_node->textContent = esc_html( $permalink );
 		}
-
-		$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, $node_args );
 
 		$this->sanitize_embed_script( $node );
 
