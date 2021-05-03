@@ -198,7 +198,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 				]
 			);
 
-			$new_node->textContent = esc_html( $permalink );
+			$new_node->textContent = __( 'View on Instagram', 'amp' );
 		}
 
 		$this->sanitize_embed_script( $node );
