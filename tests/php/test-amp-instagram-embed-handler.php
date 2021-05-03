@@ -139,7 +139,7 @@ class AMP_Instagram_Embed_Handler_Test extends WP_UnitTestCase {
 
 			'blockquote_unsupported_permalink'       => [
 				wpautop( '<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/unsupported/post_id"><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'<a href="https://www.instagram.com/unsupported/post_id" class="amp-wp-embed-fallback">https://www.instagram.com/unsupported/post_id</a>' . "\n\n",
+				'<a href="https://www.instagram.com/unsupported/post_id" class="amp-wp-embed-fallback">View on Instagram</a>' . "\n\n",
 			],
 		];
 	}
