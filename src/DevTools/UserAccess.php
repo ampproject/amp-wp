@@ -9,12 +9,12 @@
 
 namespace AmpProject\AmpWP\DevTools;
 
-use AmpProject\AmpWP\Infrastructure\Registerable;
-use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Option;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Validation_Manager;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Option;
 use WP_Error;
 use WP_User;
 

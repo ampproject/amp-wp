@@ -97,6 +97,13 @@ final class PairedRouting implements Service, Registerable {
 	const CUSTOM_PAIRED_ENDPOINT_SOURCES = 'custom_paired_endpoint_sources';
 
 	/**
+	 * Action which is triggered when the late-defined slug needs to be updated in options.
+	 *
+	 * @var string
+	 */
+	const ACTION_UPDATE_LATE_DEFINED_SLUG_OPTION = 'amp_update_late_defined_slug_option';
+
+	/**
 	 * Paired URL service.
 	 *
 	 * @var PairedUrl
@@ -116,6 +123,13 @@ final class PairedRouting implements Service, Registerable {
 	 * @var CallbackReflection
 	 */
 	private $callback_reflection;
+
+	/**
+	 * AMP slug customization watcher.
+	 *
+	 * @var AmpSlugCustomizationWatcher
+	 */
+	private $amp_slug_customization_watcher;
 
 	/**
 	 * Plugin registry.
@@ -150,16 +164,18 @@ final class PairedRouting implements Service, Registerable {
 	/**
 	 * PairedRouting constructor.
 	 *
-	 * @param Injector           $injector            Injector.
-	 * @param CallbackReflection $callback_reflection Callback reflection.
-	 * @param PluginRegistry     $plugin_registry     Plugin registry.
-	 * @param PairedUrl          $paired_url          Paired URL service.
+	 * @param Injector                    $injector                       Injector.
+	 * @param CallbackReflection          $callback_reflection            Callback reflection.
+	 * @param PluginRegistry              $plugin_registry                Plugin registry.
+	 * @param PairedUrl                   $paired_url                     Paired URL service.
+	 * @param AmpSlugCustomizationWatcher $amp_slug_customization_watcher AMP slug customization watcher.
 	 */
-	public function __construct( Injector $injector, CallbackReflection $callback_reflection, PluginRegistry $plugin_registry, PairedUrl $paired_url ) {
-		$this->injector            = $injector;
-		$this->callback_reflection = $callback_reflection;
-		$this->plugin_registry     = $plugin_registry;
-		$this->paired_url          = $paired_url;
+	public function __construct( Injector $injector, CallbackReflection $callback_reflection, PluginRegistry $plugin_registry, PairedUrl $paired_url, AmpSlugCustomizationWatcher $amp_slug_customization_watcher ) {
+		$this->injector                       = $injector;
+		$this->callback_reflection            = $callback_reflection;
+		$this->plugin_registry                = $plugin_registry;
+		$this->paired_url                     = $paired_url;
+		$this->amp_slug_customization_watcher = $amp_slug_customization_watcher;
 	}
 
 	/**
@@ -172,10 +188,39 @@ final class PairedRouting implements Service, Registerable {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ], 10, 2 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
+		add_action( self::ACTION_UPDATE_LATE_DEFINED_SLUG_OPTION, [ $this, 'update_late_defined_slug_option' ] );
+		add_action( AmpSlugCustomizationWatcher::LATE_DETERMINATION_ACTION, [ $this, 'check_stale_late_defined_slug_option' ] );
+
 		add_action( 'template_redirect', [ $this, 'redirect_extraneous_paired_endpoint' ], 9 );
 
 		// Priority 7 needed to run before PluginSuppression::initialize() at priority 8.
 		add_action( 'plugins_loaded', [ $this, 'initialize_paired_request' ], 7 );
+	}
+
+	/**
+	 * Get the late defined slug, or null if it was not defined late.
+	 *
+	 * @return string|null Slug or null.
+	 */
+	public function get_late_defined_slug() {
+		return $this->amp_slug_customization_watcher->did_customize_late() ? amp_get_slug() : null;
+	}
+
+	/**
+	 * Update late-defined slug option.
+	 */
+	public function update_late_defined_slug_option() {
+		AMP_Options_Manager::update_option( Option::LATE_DEFINED_SLUG, $this->get_late_defined_slug() );
+	}
+
+	/**
+	 * Check whether the late-defined slug option is stale and a single event needs to be scheduled to update it.
+	 */
+	public function check_stale_late_defined_slug_option() {
+		$late_defined_slug = $this->get_late_defined_slug();
+		if ( AMP_Options_Manager::get_option( Option::LATE_DEFINED_SLUG ) !== $late_defined_slug ) {
+			wp_schedule_single_event( time(), self::ACTION_UPDATE_LATE_DEFINED_SLUG_OPTION );
+		}
 	}
 
 	/**
@@ -651,6 +696,7 @@ final class PairedRouting implements Service, Registerable {
 		}
 
 		$defaults[ Option::PAIRED_URL_STRUCTURE ] = $value;
+		$defaults[ Option::LATE_DEFINED_SLUG ]    = null;
 
 		return $defaults;
 	}
@@ -665,6 +711,9 @@ final class PairedRouting implements Service, Registerable {
 	 * @return array Sanitized options.
 	 */
 	public function sanitize_options( $options, $new_options ) {
+		// Cache the AMP slug in options when it is defined late so that it can be referred to early at plugins_loaded.
+		$options[ Option::LATE_DEFINED_SLUG ] = $this->get_late_defined_slug();
+
 		if (
 			isset( $new_options[ Option::PAIRED_URL_STRUCTURE ] )
 			&&

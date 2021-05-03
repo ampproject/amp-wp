@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Icon;
@@ -532,10 +533,23 @@ function _amp_bootstrap_customizer() {
  * may be deprecated in the future. Normally the slug should be just 'amp'.
  *
  * @since 0.7
+ * @since 2.1 Added $ignore_late_defined_slug argument.
  *
+ * @param bool $ignore_late_defined_slug Whether to ignore the late defined slug.
  * @return string Slug used for query var, endpoint, and post type support.
  */
-function amp_get_slug() {
+function amp_get_slug( $ignore_late_defined_slug = false ) {
+
+	// When a slug was defined late according to AmpSlugCustomizationWatcher, the slug will be stored in the
+	// LATE_DEFINED_SLUG option by the PairedRouting service so that it can be used early. This is only needed until
+	// the after_setup_theme action fires, because at that time the late-defined slug will have been established.
+	if ( ! $ignore_late_defined_slug && ! did_action( AmpSlugCustomizationWatcher::LATE_DETERMINATION_ACTION ) ) {
+		$slug = AMP_Options_Manager::get_option( Option::LATE_DEFINED_SLUG );
+		if ( ! empty( $slug ) && is_string( $slug ) ) {
+			return $slug;
+		}
+	}
+
 	/**
 	 * Filter the AMP query variable.
 	 *
@@ -1759,13 +1773,16 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		'class' => 'ab-icon',
 	];
 
+	$non_amp_view_title = __( 'View non-AMP version', 'amp' );
+	$amp_view_title     = __( 'View AMP version', 'amp' );
+
 	$wp_admin_bar->add_node(
 		[
 			'id'    => 'amp',
 			'title' => $icon->to_html( $attr ) . ' ' . esc_html__( 'AMP', 'amp' ),
 			'href'  => esc_url( $is_amp_request ? $non_amp_url : $amp_url ),
 			'meta'  => [
-				'title' => esc_attr( $is_amp_request ? __( 'Validate URL', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+				'title' => esc_attr( $is_amp_request ? $non_amp_view_title : $amp_view_title ),
 			],
 		]
 	);
@@ -1774,7 +1791,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		[
 			'parent' => 'amp',
 			'id'     => 'amp-view',
-			'title'  => esc_html( $is_amp_request ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			'title'  => esc_html( $is_amp_request ? $non_amp_view_title : $amp_view_title ),
 			'href'   => esc_url( $is_amp_request ? $non_amp_url : $amp_url ),
 		]
 	);

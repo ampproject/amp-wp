@@ -12,23 +12,20 @@ Filter the configuration to be used for the AMP Optimizer.
 
 ### Source
 
-:link: [includes/class-amp-theme-support.php:2132](/includes/class-amp-theme-support.php#L2132-L2143)
+:link: [src/Optimizer/AmpWPConfiguration.php:87](/src/Optimizer/AmpWPConfiguration.php#L87-L95)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-$configuration = apply_filters(
+$this->configuration = apply_filters(
 	'amp_optimizer_config',
-	array_merge(
-		[
-			Optimizer\Configuration::KEY_TRANSFORMERS => $transformers,
-			Optimizer\Transformer\PreloadHeroImage::class => [
-				Optimizer\Configuration\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
-			],
+	[
+		self::KEY_TRANSFORMERS              => $transformers,
+		Transformer\PreloadHeroImage::class => [
+			Configuration\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
 		],
-		$args
-	)
+	]
 );
 ```
 

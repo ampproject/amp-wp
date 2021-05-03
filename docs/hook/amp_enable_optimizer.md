@@ -12,7 +12,7 @@ Filter whether the generated HTML output should be run through the AMP Optimizer
 
 ### Source
 
-:link: [includes/class-amp-theme-support.php:1989](/includes/class-amp-theme-support.php#L1989)
+:link: [includes/class-amp-theme-support.php:2001](/includes/class-amp-theme-support.php#L2001)
 
 <details>
 <summary>Show Code</summary>

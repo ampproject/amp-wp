@@ -466,8 +466,12 @@ class AMP_Validated_URL_Post_Type {
 				$menu_name_label = get_post_type_object( self::POST_TYPE_SLUG )->labels->menu_name;
 				$submenu_item[0] = $menu_name_label;
 
-				// Append markup to display a loading spinner while the unreviewed count is being fetched.
-				$submenu_item[0] .= ' <span class="awaiting-mod"><span id="new-validation-url-count" class="loading"></span></span>';
+				$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
+				if ( $dev_tools_user_access->is_user_enabled() ) {
+					// Append markup to display a loading spinner while the unreviewed count is being fetched.
+					$submenu_item[0] .= ' <span class="awaiting-mod"><span id="new-validation-url-count" class="loading"></span></span>';
+				}
+
 				break;
 			}
 		}

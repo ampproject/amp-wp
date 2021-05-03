@@ -189,6 +189,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	protected function get_shared_instances() {
 		return [
+			AmpSlugCustomizationWatcher::class,
 			PluginRegistry::class,
 			Instrumentation\StopWatch::class,
 			DevTools\CallbackReflection::class,

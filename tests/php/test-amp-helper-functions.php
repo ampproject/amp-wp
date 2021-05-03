@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 
 /**
  * Class Test_AMP_Helper_Functions
@@ -268,6 +269,36 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		);
 
 		$this->assertSame( 'lite', amp_get_slug() );
+	}
+
+	/**
+	 * Test amp_get_slug() when late-defined slugs are involved.
+	 *
+	 * @covers ::amp_get_slug()
+	 */
+	public function test_amp_get_slug_late() {
+		$this->assertSame( 'amp', amp_get_slug() );
+
+		unset( $GLOBALS['wp_actions'][ AmpSlugCustomizationWatcher::LATE_DETERMINATION_ACTION ] );
+		$this->assertEquals( 0, did_action( AmpSlugCustomizationWatcher::LATE_DETERMINATION_ACTION ) );
+		AMP_Options_Manager::update_option( Option::LATE_DEFINED_SLUG, 'mobile' );
+
+		add_filter(
+			'amp_query_var',
+			static function () {
+				return 'lite';
+			}
+		);
+
+		$this->assertEquals( 'mobile', amp_get_slug() );
+		$this->assertEquals( 'mobile', amp_get_slug( false ) );
+		$this->assertEquals( 'lite', amp_get_slug( true ) );
+
+		do_action( AmpSlugCustomizationWatcher::LATE_DETERMINATION_ACTION );
+
+		$this->assertEquals( 'lite', amp_get_slug() );
+		$this->assertEquals( 'lite', amp_get_slug( false ) );
+		$this->assertEquals( 'lite', amp_get_slug( true ) );
 	}
 
 	/** @covers ::amp_is_canonical() */
@@ -1908,13 +1939,19 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		global $wp_rewrite;
 		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
 		$wp_rewrite->init();
-		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-		$wp_rewrite->flush_rules();
 
 		$permalink = get_permalink( self::factory()->post->create() );
 		$this->assertNotContains( '?', $permalink );
-		$url = $permalink . $suffix;
+
+		$paired_routing = $this->injector->make( \AmpProject\AmpWP\PairedRouting::class );
+
+		$url                    = $permalink . $suffix;
+		$_SERVER['REQUEST_URI'] = wp_parse_url( $permalink, PHP_URL_PATH ) . $suffix;
+
+		$paired_routing->initialize_paired_request();
+
 		$this->go_to( $url );
+		$this->assertFalse( is_404(), 'Expected singular query.' );
 		$this->assertTrue( is_singular(), 'Expected singular query.' );
 		$this->assertTrue( amp_is_available(), 'Expected AMP to be available.' );
 		$this->assertEquals( $is_amp, amp_has_paired_endpoint() );

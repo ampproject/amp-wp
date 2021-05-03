@@ -833,6 +833,7 @@ class AMP_Theme_Support {
 		if ( has_action( 'wp_head', 'print_emoji_detection_script' ) ) {
 			remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 			remove_action( 'wp_print_styles', 'print_emoji_styles' );
+			remove_action( 'wp_footer', 'gutenberg_the_skip_link' ); // Temporary workaround for <https://github.com/ampproject/amp-wp/issues/6115>.
 			add_action( 'wp_print_styles', [ __CLASS__, 'print_emoji_styles' ] );
 			add_filter( 'the_title', 'wp_staticize_emoji' );
 			add_filter( 'the_excerpt', 'wp_staticize_emoji' );
@@ -2085,7 +2086,8 @@ class AMP_Theme_Support {
 				return array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
 					? $args[ ConfigurationArgument::ENABLE_SSR ]
 					: true;
-			}
+			},
+			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		);
 
 		return Services::get( 'injector' )->make( OptimizerService::class );

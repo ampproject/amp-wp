@@ -19,6 +19,13 @@ use AmpProject\AmpWP\Infrastructure\Service;
 final class AmpSlugCustomizationWatcher implements Service, Registerable {
 
 	/**
+	 * Action at which a slug can be considered late-defined, which is the ideal case.
+	 *
+	 * @var string
+	 */
+	const LATE_DETERMINATION_ACTION = 'after_setup_theme';
+
+	/**
 	 * Whether the slug was customized early (at plugins_loaded action, priority 8).
 	 *
 	 * @var bool
@@ -68,10 +75,10 @@ final class AmpSlugCustomizationWatcher implements Service, Registerable {
 	 * determined, so for Reader themes to apply the logic in `ReaderThemeLoader` must run beforehand.
 	 */
 	public function determine_early_customization() {
-		if ( QueryVar::AMP !== amp_get_slug() ) {
+		if ( QueryVar::AMP !== amp_get_slug( true ) ) {
 			$this->is_customized_early = true;
 		} else {
-			add_action( 'after_setup_theme', [ $this, 'determine_late_customization' ], 4 );
+			add_action( self::LATE_DETERMINATION_ACTION, [ $this, 'determine_late_customization' ], 4 );
 		}
 	}
 
@@ -90,7 +97,7 @@ final class AmpSlugCustomizationWatcher implements Service, Registerable {
 	 * @see amp_after_setup_theme()
 	 */
 	public function determine_late_customization() {
-		if ( QueryVar::AMP !== amp_get_slug() ) {
+		if ( QueryVar::AMP !== amp_get_slug( true ) ) {
 			$this->is_customized_late = true;
 		}
 	}
