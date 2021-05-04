@@ -75,7 +75,7 @@ class AMP_Admin_Support {
 	 *
 	 * @since 2.1
 	 *
-	 * @return void
+	 * @return void|array
 	 */
 	public function wp_ajax_amp_diagnostic() {
 
@@ -126,7 +126,7 @@ class AMP_Admin_Support {
 		if ( defined( 'TESTS_PLUGIN_DIR' ) ) {
 			return [
 				'endpoint' => sprintf( '%s/api/v1/amp-wp/', $endpoint ),
-				'data' => $data,
+				'data'     => $data,
 			];
 		}
 
