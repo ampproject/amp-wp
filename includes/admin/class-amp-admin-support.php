@@ -40,13 +40,20 @@ class AMP_Admin_Support {
 	 * @since 2.1
 	 */
 	public function init() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		add_action( 'admin_menu', [ $this, 'admin_menu' ] );
+		if (
+			! current_user_can( 'manage_options' )
+			&& ! defined( 'TESTS_PLUGIN_DIR' ) // @see tests/php/bootstrap.php
+		) {
+			return;
+		}
+
+		add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ] );
+		add_action( 'admin_menu', [ $this, 'admin_menu' ], 20 );
 
 		/**
 		 * AJAX responder.
 		 */
-		add_action( 'wp_ajax_amp_diagnostic', [ $this, 'amp_diagnostic' ] );
+		add_action( 'wp_ajax_amp_diagnostic', [ $this, 'wp_ajax_amp_diagnostic' ] );
 
 		/**
 		 * Add Diagnostic link to Admin Bar.
@@ -76,14 +83,16 @@ class AMP_Admin_Support {
 	 *
 	 * @since 2.1
 	 *
-	 * @return void
+	 * @return void|array
 	 */
-	public function amp_diagnostic() {
+	public function wp_ajax_amp_diagnostic() {
 
 		if (
-			! current_user_can( 'manage_options' )
-			|| ! check_ajax_referer( 'amp-diagnostic' )
-
+			(
+				! current_user_can( 'manage_options' )
+				|| ! check_ajax_referer( 'amp-diagnostic' )
+			)
+			&& ! defined( 'TESTS_PLUGIN_DIR' ) // @see tests/php/bootstrap.php
 		) {
 			exit;
 		}
@@ -98,6 +107,19 @@ class AMP_Admin_Support {
 			'post_ids' => ( ! empty( $post_id ) ) ? [ $post_id ] : [],
 			'term_ids' => [],
 		];
+
+		if ( empty( $post_id ) ) {
+			$scannable_url_provider = new \AmpProject\AmpWP\Validation\ScannableURLProvider(
+				new \AmpProject\AmpWP\Validation\URLScanningContext(
+					100,  // limit per type.
+					[],   // include conditionals.
+					false // include_unsupported.
+				)
+			);
+
+			$urls = wp_list_pluck( $scannable_url_provider->get_urls(), 'url' );
+			$args['urls'] = $urls;
+		}
 
 		$amp_data_object = new AMP_Prepare_Data( $args );
 		$data            = $amp_data_object->get_data();
@@ -120,6 +142,16 @@ class AMP_Admin_Support {
 		 */
 		if ( $is_synthetic ) {
 			$data['site_info']['is_synthetic_data'] = true;
+		}
+
+		/**
+		 * @see tests/php/bootstrap.php
+		 */
+		if ( defined( 'TESTS_PLUGIN_DIR' ) ) {
+			return [
+				'endpoint' => sprintf( '%s/api/v1/amp-wp/', $endpoint ),
+				'data'     => $data,
+			];
 		}
 
 		// Send data to server.
@@ -167,7 +199,7 @@ class AMP_Admin_Support {
 	 *
 	 * @param string $hook The current admin page.
 	 */
-	public function enqueue_assets( $hook ) {
+	public function admin_enqueue_scripts( $hook ) {
 		if ( 'amp_page_amp-support' !== $hook ) {
 			return;
 		}
@@ -192,7 +224,6 @@ class AMP_Admin_Support {
 	 * @return void
 	 */
 	public function admin_menu() {
-
 		add_submenu_page(
 			AMP_Options_Manager::OPTION_NAME,
 			esc_html__( 'Support', 'amp' ),
@@ -213,7 +244,21 @@ class AMP_Admin_Support {
 	public function support_page() {
 		$post_id = filter_input( INPUT_GET, 'post_id', FILTER_SANITIZE_NUMBER_INT );
 
-		$args            = [ 'post_ids' => $post_id ];
+		if ( empty( $post_id ) ) {
+			$scannable_url_provider = new \AmpProject\AmpWP\Validation\ScannableURLProvider(
+				new \AmpProject\AmpWP\Validation\URLScanningContext(
+					100,  // limit per type.
+					[],   // include conditionals.
+					false // include_unsupported.
+				)
+			);
+
+			$urls = wp_list_pluck( $scannable_url_provider->get_urls(), 'url' );
+			$args = [ 'urls' => $urls ];
+		} else {
+			$args = [ 'post_ids' => $post_id ];
+		}
+
 		$amp_data_object = new AMP_Prepare_Data( $args );
 		$data            = $amp_data_object->get_data();
 
@@ -571,9 +616,9 @@ class AMP_Admin_Support {
 	 *
 	 * @return string[] Filtered array of plugin's metadata.
 	 */
-	public function plugin_row_meta( $plugin_meta, $plugin_file ) {
-
-		if ( 'amp/amp.php' === $plugin_file ) {
+	public function plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $status ) {
+		global $post;
+		if ( 'amp/amp.php' === $plugin_file || 'amp-wp/amp.php' === $plugin_file ) {
 			$plugin_meta[] = sprintf(
 				'<a href="%s">%s</a>',
 				esc_url(
@@ -720,7 +765,5 @@ class AMP_Admin_Support {
 			\WP_CLI::log( sprintf( '%-25s : %s', $key, $value ) );
 		}
 		\WP_CLI::log( sprintf( "%'=100s" . PHP_EOL, '' ) );
-
-
 	}
 }

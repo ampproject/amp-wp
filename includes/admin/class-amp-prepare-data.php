@@ -176,6 +176,8 @@ class AMP_Prepare_Data {
 	 */
 	public function get_site_info() {
 
+		global $wpdb;
+
 		$wp_type = 'single';
 
 		if ( is_multisite() ) {
@@ -196,28 +198,27 @@ class AMP_Prepare_Data {
 		}
 
 		$site_info = [
-			'site_url'                     => static::get_home_url(),
-			'site_title'                   => get_bloginfo( 'site_title' ),
-			'php_version'                  => phpversion(),
-			'mysql_version'                => '',
-			'wp_version'                   => get_bloginfo( 'version' ),
-			'wp_language'                  => get_bloginfo( 'language' ),
-			'wp_https_status'              => is_ssl() ? true : false,
-			'wp_multisite'                 => $wp_type,
-			'wp_active_theme'              => $active_theme,
-			'object_cache_status'          => wp_using_ext_object_cache(),
-			'libxml_version'               => ( defined( 'LIBXML_VERSION' ) ) ? LIBXML_VERSION : '',
-			'is_defined_curl_multi'        => ( function_exists( 'curl_multi_init' ) ),
-			'stylesheet_transient_caching' => '',
-			'loopback_requests'            => $loopback_status,
-			'amp_mode'                     => ( ! empty( $amp_settings['theme_support'] ) ) ? $amp_settings['theme_support'] : '',
-			'amp_version'                  => ( ! empty( $amp_settings['version'] ) ) ? $amp_settings['version'] : '',
-			'amp_plugin_configured'        => ( ! empty( $amp_settings['plugin_configured'] ) ) ? true : false,
-			'amp_all_templates_supported'  => ( ! empty( $amp_settings['all_templates_supported'] ) ) ? true : false,
-			'amp_supported_post_types'     => ( ! empty( $amp_settings['supported_post_types'] ) && is_array( $amp_settings['supported_post_types'] ) ) ? $amp_settings['supported_post_types'] : [],
-			'amp_supported_templates'      => ( ! empty( $amp_settings['supported_templates'] ) && is_array( $amp_settings['supported_templates'] ) ) ? $amp_settings['supported_templates'] : [],
-			'amp_mobile_redirect'          => ( ! empty( $amp_settings['mobile_redirect'] ) ) ? true : false,
-			'amp_reader_theme'             => ( ! empty( $amp_settings['reader_theme'] ) ) ? $amp_settings['reader_theme'] : '',
+			'site_url'                    => static::get_home_url(),
+			'site_title'                  => get_bloginfo( 'site_title' ),
+			'php_version'                 => phpversion(),
+			'mysql_version'               => $wpdb->get_var( 'SELECT VERSION();' ), // phpcs:ignore
+			'wp_version'                  => get_bloginfo( 'version' ),
+			'wp_language'                 => get_bloginfo( 'language' ),
+			'wp_https_status'             => is_ssl() ? true : false,
+			'wp_multisite'                => $wp_type,
+			'wp_active_theme'             => $active_theme,
+			'object_cache_status'         => wp_using_ext_object_cache(),
+			'libxml_version'              => ( defined( 'LIBXML_VERSION' ) ) ? LIBXML_VERSION : '',
+			'is_defined_curl_multi'       => ( function_exists( 'curl_multi_init' ) ),
+			'loopback_requests'           => $loopback_status,
+			'amp_mode'                    => ( ! empty( $amp_settings['theme_support'] ) ) ? $amp_settings['theme_support'] : '',
+			'amp_version'                 => ( ! empty( $amp_settings['version'] ) ) ? $amp_settings['version'] : '',
+			'amp_plugin_configured'       => ( ! empty( $amp_settings['plugin_configured'] ) ) ? true : false,
+			'amp_all_templates_supported' => ( ! empty( $amp_settings['all_templates_supported'] ) ) ? true : false,
+			'amp_supported_post_types'    => ( ! empty( $amp_settings['supported_post_types'] ) && is_array( $amp_settings['supported_post_types'] ) ) ? $amp_settings['supported_post_types'] : [],
+			'amp_supported_templates'     => ( ! empty( $amp_settings['supported_templates'] ) && is_array( $amp_settings['supported_templates'] ) ) ? $amp_settings['supported_templates'] : [],
+			'amp_mobile_redirect'         => ( ! empty( $amp_settings['mobile_redirect'] ) ) ? true : false,
+			'amp_reader_theme'            => ( ! empty( $amp_settings['reader_theme'] ) ) ? $amp_settings['reader_theme'] : '',
 		];
 
 		return $site_info;
@@ -273,6 +274,8 @@ class AMP_Prepare_Data {
 
 		$error_log_path = ini_get( 'error_log' );
 
+		// $error_log_path might be a relative path/filename.
+		// In this case, we would have to iterate many directories to find them.
 		if ( empty( $error_log_path ) || ! file_exists( $error_log_path ) ) {
 			return [
 				'log_errors' => ini_get( 'log_errors' ),
@@ -306,13 +309,13 @@ class AMP_Prepare_Data {
 	 *
 	 * @return array Plugin detail.
 	 */
-	protected static function normalize_plugin_info( $plugin_file ) {
+	public static function normalize_plugin_info( $plugin_file ) {
 
 		$absolute_plugin_file = WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $plugin_file;
 		if ( ! file_exists( $absolute_plugin_file ) ) {
 			return [];
 		}
-		$plugin_data          = get_plugin_data( $absolute_plugin_file );
+		$plugin_data = get_plugin_data( $absolute_plugin_file );
 
 		$slug = explode( '/', $plugin_file );
 		$slug = $slug[0];
@@ -351,7 +354,7 @@ class AMP_Prepare_Data {
 	 *
 	 * @return array Normalize theme information.
 	 */
-	protected static function normalize_theme_info( $theme_object ) {
+	public static function normalize_theme_info( $theme_object ) {
 
 		if ( empty( $theme_object ) || ! is_a( $theme_object, 'WP_Theme' ) ) {
 			return [];
@@ -398,7 +401,7 @@ class AMP_Prepare_Data {
 	 *
 	 * @return array List of errors.
 	 */
-	protected static function get_errors() {
+	public static function get_errors() {
 
 		$error_data      = [];
 		$amp_error_terms = get_terms(
@@ -447,7 +450,7 @@ class AMP_Prepare_Data {
 	}
 
 	/**
-	 * Normalises the error data.
+	 * Normalize error data.
 	 *
 	 * @since 2.1
 	 *
@@ -455,7 +458,7 @@ class AMP_Prepare_Data {
 	 *
 	 * @return array|mixed|null
 	 */
-	protected static function normalize_error( $error_data ) {
+	public static function normalize_error( $error_data ) {
 
 		if ( empty( $error_data ) || ! is_array( $error_data ) ) {
 			return [];
@@ -488,7 +491,7 @@ class AMP_Prepare_Data {
 	 *
 	 * @return array Normalized error source data.
 	 */
-	protected static function normalize_error_source( $source ) {
+	public static function normalize_error_source( $source ) {
 
 		if ( empty( $source ) || ! is_array( $source ) ) {
 			return [];
@@ -569,7 +572,7 @@ class AMP_Prepare_Data {
 	 *
 	 * @return array List amp validated URLs.
 	 */
-	protected function get_amp_urls() {
+	public function get_amp_urls() {
 
 		global $wpdb;
 
@@ -729,7 +732,7 @@ class AMP_Prepare_Data {
 	 *
 	 * @return array AMP stylesheet used info.
 	 */
-	protected static function get_stylesheet_info( $post_id ) {
+	public static function get_stylesheet_info( $post_id ) {
 
 		$stylesheets = get_post_meta( $post_id, \AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true );
 
@@ -833,7 +836,7 @@ class AMP_Prepare_Data {
 	 *
 	 * @return string Content after removing home_url.
 	 */
-	protected static function remove_domain( $content ) {
+	public static function remove_domain( $content ) {
 
 		if ( empty( $content ) ) {
 			return '';
@@ -861,7 +864,7 @@ class AMP_Prepare_Data {
 	 *
 	 * @return string Hash value of provided object.
 	 */
-	protected static function generate_hash( $object ) {
+	public static function generate_hash( $object ) {
 
 		if ( empty( $object ) ) {
 			return '';
