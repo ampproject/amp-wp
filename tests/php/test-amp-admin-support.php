@@ -7,6 +7,7 @@
  */
 
 use AmpProject\AmpWP\Admin\GoogleFonts;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
@@ -42,6 +43,7 @@ class AMP_Admin_Support_Test extends WP_UnitTestCase {
 			new ReaderThemes(),
 			new RESTPreloader()
 		);
+
 		$this->instance = new \AMP_Admin_Support();
 	}
 
@@ -205,6 +207,82 @@ class AMP_Admin_Support_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test admin_bar_menu method.
+	 *
+	 * @covers ::admin_bar_menu()
+	 */
+	public function test_admin_bar_menu() {
+		$this->go_to( home_url( '/' ) );
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+		$admin_bar = new WP_Admin_Bar();
+
+		// AMP-first mode.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+		$this->instance->admin_bar_menu( $admin_bar );
+
+		$node = $admin_bar->get_node( 'amp-diagnostic' );
+		$this->assertInternalType( 'object', $node );
+		$this->assertStringContains( 'page=amp-support', $node->href );
+	}
+
+	/**
+	 * Test amp_validated_url_status_actions method.
+	 *
+	 * @covers ::amp_validated_url_status_actions()
+	 */
+	public function test_amp_validated_url_status_actions() {
+		$post = (object) [
+			'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+			'ID'        => 123,
+		];
+
+		$actions = $this->instance->amp_validated_url_status_actions( [], $post );
+
+		$this->assertStringContains(
+			'page=amp-support',
+			$actions['send-diagnostic']
+		);
+		$this->assertStringContains(
+			'post_id=123',
+			$actions['send-diagnostic']
+		);
+	}
+
+	/**
+	 * Test post_row_actions method.
+	 *
+	 * @covers ::post_row_actions()
+	 */
+	public function test_post_row_actions() {
+		$post = (object) [
+			'post_type' => 'post',
+			'ID'        => 123,
+		];
+
+		$actions = $this->instance->post_row_actions( [], $post );
+
+		$this->assertEmpty( $actions );
+
+		$post = (object) [
+			'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+			'ID'        => 123,
+		];
+
+		$actions = $this->instance->post_row_actions( [], $post );
+
+		$this->assertStringContains(
+			'page=amp-support',
+			$actions['send-diagnostic']
+		);
+		$this->assertStringContains(
+			'post_id=123',
+			$actions['send-diagnostic']
+		);
+	}
+
+	/**
 	 * Test plugin_row_meta method.
 	 *
 	 * @covers ::plugin_row_meta()
@@ -252,6 +330,69 @@ class AMP_Admin_Support_Test extends WP_UnitTestCase {
 				[],
 				''
 			)
+		);
+	}
+
+	/**
+	 * Test amp_send_diagnostic method.
+	 *
+	 * @covers ::amp_send_diagnostic()
+	 */
+	public function test_amp_send_diagnostic() {
+		ob_start();
+		$summary = $this->instance->amp_send_diagnostic( [], [ 'print' => 'json-pretty' ] );
+		$output  = ob_get_clean();
+
+		$this->assertEquals(
+			7,
+			count( $summary )
+		);
+		$this->assertStringContains(
+			'site_url',
+			$output
+		);
+		$this->assertStringContains(
+			'wp_active_theme',
+			$output
+		);
+		$this->assertStringContains(
+			'amp_supported_templates',
+			$output
+		);
+		$this->assertStringContains(
+			'plugins',
+			$output
+		);
+		$this->assertStringContains(
+			'themes',
+			$output
+		);
+		$this->assertStringContains(
+			'errors',
+			$output
+		);
+		$this->assertStringContains(
+			'error_sources',
+			$output
+		);
+		$this->assertStringContains(
+			'error_log',
+			$output
+		);
+
+		ob_start();
+		$summary = $this->instance->amp_send_diagnostic(
+			[],
+			[
+				'is-synthetic' => 'true',
+				'print'        => 'json-pretty',
+			]
+		);
+		$output  = ob_get_clean();
+
+		$this->assertEquals(
+			8,
+			count( $summary )
 		);
 	}
 }
