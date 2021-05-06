@@ -27,7 +27,7 @@
     "@wordpress/api-fetch": "3.23.1",
     "@wordpress/autop": "2.12.2",
     "@wordpress/components": "13.0.3",
-    "@wordpress/compose": "3.25.2",
+    "@wordpress/compose": "3.25.3",
     "@wordpress/date": "3.15.1",
     "@wordpress/dom-ready": "2.13.2",
     "@wordpress/element": "2.20.2",
