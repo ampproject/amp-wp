@@ -5455,26 +5455,26 @@
         },
         {
             "name": "wp-cli/extension-command",
-            "version": "v2.0.14",
+            "version": "v2.0.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/extension-command.git",
-                "reference": "13ad58b97123c61a0760d2fefdd844ff53cfa4bd"
+                "reference": "4a018d5a77113edeeab767db564ba004916e2906"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/extension-command/zipball/13ad58b97123c61a0760d2fefdd844ff53cfa4bd",
-                "reference": "13ad58b97123c61a0760d2fefdd844ff53cfa4bd",
+                "url": "https://api.github.com/repos/wp-cli/extension-command/zipball/4a018d5a77113edeeab767db564ba004916e2906",
+                "reference": "4a018d5a77113edeeab767db564ba004916e2906",
                 "shasum": ""
             },
             "require": {
                 "composer/semver": "^1.4 || ^2 || ^3",
-                "wp-cli/wp-cli": "dev-master"
+                "wp-cli/wp-cli": "^2.5"
             },
             "require-dev": {
                 "wp-cli/entity-command": "^1.3 || ^2",
                 "wp-cli/scaffold-command": "^1.2 || ^2",
-                "wp-cli/wp-cli-tests": "^2.1.6"
+                "wp-cli/wp-cli-tests": "^3.0.11"
             },
             "type": "wp-cli-package",
             "extra": {
@@ -5545,9 +5545,9 @@
             "homepage": "https://github.com/wp-cli/extension-command",
             "support": {
                 "issues": "https://github.com/wp-cli/extension-command/issues",
-                "source": "https://github.com/wp-cli/extension-command/tree/v2.0.14"
+                "source": "https://github.com/wp-cli/extension-command/tree/v2.0.15"
             },
-            "time": "2020-12-07T19:28:04+00:00"
+            "time": "2021-05-05T06:48:05+00:00"
         },
         {
             "name": "wp-cli/mustangostang-spyc",
