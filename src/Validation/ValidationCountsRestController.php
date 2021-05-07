@@ -49,6 +49,8 @@ final class ValidationCountsRestController extends WP_REST_Controller implements
 		$this->namespace             = 'amp/v1';
 		$this->rest_base             = 'unreviewed-validation-counts';
 		$this->dev_tools_user_access = $user_access;
+
+		add_filter( 'posts_where', [ AMP_Validation_Error_Taxonomy::class, 'filter_posts_where_for_validation_error_status' ], 10, 2 );
 	}
 
 	/**
