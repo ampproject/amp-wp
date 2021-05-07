@@ -8,7 +8,6 @@
 namespace AmpProject\AmpWP\Tests\Validation;
 
 use AMP_Validated_URL_Post_Type;
-use AMP_Validation_Error_Taxonomy;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Validation\ValidationCountsRestController;
@@ -35,7 +34,6 @@ class ValidationCountsRestControllerTest extends DependencyInjectedTestCase {
 		parent::setUp();
 
 		$this->controller = $this->injector->make( ValidationCountsRestController::class );
-		$this->assertSame( 10, has_filter( 'posts_where', [ AMP_Validation_Error_Taxonomy::class, 'filter_posts_where_for_validation_error_status' ] ) );
 	}
 
 	/**
