@@ -30,6 +30,8 @@ function amp_is_enabled() {
 	 *
 	 * @since 0.2
 	 * @since 2.0 Filter now runs earlier at plugins_loaded (with earliest priority) rather than at the after_setup_theme action.
+	 *
+	 * @param bool $enabled Whether the AMP plugin's functionality should be enabled.
 	 */
 	return (bool) apply_filters( 'amp_is_enabled', true );
 }
