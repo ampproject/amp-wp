@@ -15,6 +15,26 @@ use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 
 /**
+ * Determine whether AMP is enabled on the current site.
+ *
+ * @since 2.1.1
+ * @internal
+ *
+ * @return bool Whether enabled.
+ */
+function amp_is_enabled() {
+	/**
+	 * Filters whether AMP is enabled on the current site.
+	 *
+	 * Useful if the plugin is network activated and you want to turn it off on select sites.
+	 *
+	 * @since 0.2
+	 * @since 2.0 Filter now runs earlier at plugins_loaded (with earliest priority) rather than at the after_setup_theme action.
+	 */
+	return (bool) apply_filters( 'amp_is_enabled', true );
+}
+
+/**
  * Handle activation of plugin.
  *
  * @since 0.2
@@ -23,7 +43,9 @@ use AmpProject\AmpWP\Services;
  * @param bool $network_wide Whether the activation was done network-wide.
  */
 function amp_activate( $network_wide = false ) {
-	AmpWpPluginFactory::create()->activate( $network_wide );
+	if ( amp_is_enabled() ) {
+		AmpWpPluginFactory::create()->activate( $network_wide );
+	}
 }
 
 /**
@@ -35,7 +57,9 @@ function amp_activate( $network_wide = false ) {
  * @param bool $network_wide Whether the activation was done network-wide.
  */
 function amp_deactivate( $network_wide = false ) {
-	AmpWpPluginFactory::create()->deactivate( $network_wide );
+	if ( amp_is_enabled() ) {
+		AmpWpPluginFactory::create()->deactivate( $network_wide );
+	}
 }
 
 /**
@@ -45,15 +69,7 @@ function amp_deactivate( $network_wide = false ) {
  * @internal
  */
 function amp_bootstrap_plugin() {
-	/**
-	 * Filters whether AMP is enabled on the current site.
-	 *
-	 * Useful if the plugin is network activated and you want to turn it off on select sites.
-	 *
-	 * @since 0.2
-	 * @since 2.0 Filter now runs earlier at plugins_loaded (with earliest priority) rather than at the after_setup_theme action.
-	 */
-	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
+	if ( ! amp_is_enabled() ) {
 		return;
 	}
 
@@ -1846,11 +1862,17 @@ function amp_generate_script_hash( $script ) {
  * @return string AMP URL.
  */
 function amp_add_paired_endpoint( $url ) {
-	if ( ! did_action( 'plugins_loaded' ) ) {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Function cannot be called before the plugins_loaded action.', 'amp' ), '2.1.1' );
+	try {
+		return Services::get( 'paired_routing' )->add_endpoint( $url );
+	} catch ( InvalidService $e ) {
+		if ( ! amp_is_enabled() ) {
+			$reason = __( 'Function called while AMP is disabled via `amp_is_enabled` filter.', 'amp' );
+		} else {
+			$reason = __( 'Function cannot be called before services are registered.', 'amp' );
+		}
+		_doing_it_wrong( __FUNCTION__, esc_html( $reason ) . ' ' . esc_html( $e->getMessage() ), '2.1.1' );
 		return $url;
 	}
-	return Services::get( 'paired_routing' )->add_endpoint( $url );
 }
 
 /**
@@ -1862,11 +1884,17 @@ function amp_add_paired_endpoint( $url ) {
  * @return bool True if the AMP query parameter is set with the required value, false if not.
  */
 function amp_has_paired_endpoint( $url = '' ) {
-	if ( ! did_action( 'plugins_loaded' ) ) {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Function cannot be called before the plugins_loaded action.', 'amp' ), '2.1.1' );
+	try {
+		return Services::get( 'paired_routing' )->has_endpoint( $url );
+	} catch ( InvalidService $e ) {
+		if ( ! amp_is_enabled() ) {
+			$reason = __( 'Function called while AMP is disabled via `amp_is_enabled` filter.', 'amp' );
+		} else {
+			$reason = __( 'Function cannot be called before services are registered.', 'amp' );
+		}
+		_doing_it_wrong( __FUNCTION__, esc_html( $reason ) . ' ' . esc_html( $e->getMessage() ), '2.1.1' );
 		return false;
 	}
-	return Services::get( 'paired_routing' )->has_endpoint( $url );
 }
 
 /**
@@ -1878,9 +1906,15 @@ function amp_has_paired_endpoint( $url = '' ) {
  * @return string URL with AMP stripped.
  */
 function amp_remove_paired_endpoint( $url ) {
-	if ( ! did_action( 'plugins_loaded' ) ) {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Function cannot be called before the plugins_loaded action.', 'amp' ), '2.1.1' );
+	try {
+		return Services::get( 'paired_routing' )->remove_endpoint( $url );
+	} catch ( InvalidService $e ) {
+		if ( ! amp_is_enabled() ) {
+			$reason = __( 'Function called while AMP is disabled via `amp_is_enabled` filter.', 'amp' );
+		} else {
+			$reason = __( 'Function cannot be called before services are registered.', 'amp' );
+		}
+		_doing_it_wrong( __FUNCTION__, esc_html( $reason ) . ' ' . esc_html( $e->getMessage() ), '2.1.1' );
 		return $url;
 	}
-	return Services::get( 'paired_routing' )->remove_endpoint( $url );
 }
