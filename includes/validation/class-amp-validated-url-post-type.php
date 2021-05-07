@@ -492,6 +492,14 @@ class AMP_Validated_URL_Post_Type {
 			return (int) $count;
 		}
 
+		// Make sure filter is added in REST API context which is otherwise only added via AMP_Validation_Error_Taxonomy::add_admin_hooks().
+		$callback   = [ AMP_Validation_Error_Taxonomy::class, 'filter_posts_where_for_validation_error_status' ];
+		$priority   = 10;
+		$has_filter = has_filter( 'posts_where', $callback );
+		if ( false === $has_filter ) {
+			add_filter( 'posts_where', $callback, $priority, 2 );
+		}
+
 		$query = new WP_Query(
 			[
 				'post_type'              => self::POST_TYPE_SLUG,
@@ -503,6 +511,11 @@ class AMP_Validated_URL_Post_Type {
 				'update_post_term_cache' => false,
 			]
 		);
+
+		// Remove filter if we added it in this method.
+		if ( false === $has_filter ) {
+			remove_filter( 'posts_where', $callback, $priority );
+		}
 
 		$count = $query->found_posts;
 
