@@ -14,7 +14,7 @@ By supplying XPath queries to this filter, the data-ampdevmode attribute will au
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1449](/includes/amp-helper-functions.php#L1449)
+:link: [includes/amp-helper-functions.php:1467](/includes/amp-helper-functions.php#L1467)
 
 <details>
 <summary>Show Code</summary>
