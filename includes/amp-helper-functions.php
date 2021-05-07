@@ -1846,6 +1846,10 @@ function amp_generate_script_hash( $script ) {
  * @return string AMP URL.
  */
 function amp_add_paired_endpoint( $url ) {
+	if ( ! did_action( 'plugins_loaded' ) ) {
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Function cannot be called before the plugins_loaded action.', 'amp' ), '2.1.1' );
+		return $url;
+	}
 	return Services::get( 'paired_routing' )->add_endpoint( $url );
 }
 
@@ -1858,6 +1862,10 @@ function amp_add_paired_endpoint( $url ) {
  * @return bool True if the AMP query parameter is set with the required value, false if not.
  */
 function amp_has_paired_endpoint( $url = '' ) {
+	if ( ! did_action( 'plugins_loaded' ) ) {
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Function cannot be called before the plugins_loaded action.', 'amp' ), '2.1.1' );
+		return false;
+	}
 	return Services::get( 'paired_routing' )->has_endpoint( $url );
 }
 
@@ -1870,5 +1878,9 @@ function amp_has_paired_endpoint( $url = '' ) {
  * @return string URL with AMP stripped.
  */
 function amp_remove_paired_endpoint( $url ) {
+	if ( ! did_action( 'plugins_loaded' ) ) {
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Function cannot be called before the plugins_loaded action.', 'amp' ), '2.1.1' );
+		return $url;
+	}
 	return Services::get( 'paired_routing' )->remove_endpoint( $url );
 }
