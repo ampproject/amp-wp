@@ -1,0 +1,23 @@
+# Drafts release notes as pull requests are merged into the default branch.
+
+name: Release Drafter
+
+on:
+  push:
+    branches:
+      - develop
+  # Also run workflow on updates to pull requests to auto-label them.
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  update_release_draft:
+    name: Update release draft
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update release draft
+        uses: release-drafter/release-drafter@fe52e97d262833ae07d05efaf1a239df3f1b5cd4
+        with:
+          config-name: release-drafter.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
