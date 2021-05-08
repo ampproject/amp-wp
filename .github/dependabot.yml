@@ -1,5 +1,7 @@
 version: 2
 updates:
+
+# Config for AMP plugin.
 - package-ecosystem: composer
   directory: "/"
   schedule:
@@ -7,6 +9,7 @@ updates:
     time: "12:00"
     timezone: America/Los_Angeles
   open-pull-requests-limit: 10
+
 - package-ecosystem: npm
   directory: "/"
   schedule:
@@ -107,6 +110,32 @@ updates:
   - dependency-name: "@wordpress/eslint-plugin"
     versions:
     - 8.0.1
+- package-ecosystem: github-actions
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "12:00"
+    timezone: America/Los_Angeles
+  open-pull-requests-limit: 10
+
+  # Config for QA Tester plugin.
+- package-ecosystem: composer
+  directory: "/qa-tester"
+  schedule:
+    interval: daily
+    time: "12:00"
+    timezone: America/Los_Angeles
+  open-pull-requests-limit: 10
+
+- package-ecosystem: npm
+  directory: "/qa-tester"
+  schedule:
+    interval: daily
+    time: "12:00"
+    timezone: America/Los_Angeles
+  open-pull-requests-limit: 10
+
+# Config for GitHub Actions.
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
