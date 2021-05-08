@@ -1,0 +1,63 @@
+name: Plugin Documentation
+
+on:
+  workflow_dispatch:
+
+env:
+  BRANCH_NAME: update/docs
+
+jobs:
+  generate_docs:
+    name: 'Generate documentation'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Detect if PR already exists
+        id: detect_pr
+        run: echo ::set-output name=exists::$(gh api --silent -X GET "repos/ampproject/amp-wp/branches/${{ env.BRANCH_NAME }}" 2> /dev/null && echo 1 || echo 0)
+
+      # Cancel workflow run if there is already an open PR.
+      - name: Cancel workflow run if a PR is already open
+        if: steps.detect_pr.outputs.exists == 0
+        run: gh api -X POST "repos/ampproject/amp-wp/actions/runs/${{ github.run_id }}/cancel"
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
+
+      - name: Generate plugin documentation
+        run: ./vendor/bin/wp amp docs generate
+
+      - name: Detect changes
+        id: detect_changes
+        run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo "0" || echo "1")
+
+      # Cancel workflow run if there are no updates to docs.
+      - name: Cancel workflow run if no updates to documentation
+        if: steps.detect_changes.outputs.changed == 0
+        run: gh api -X POST "repos/ampproject/amp-wp/actions/runs/${{ github.run_id }}/cancel"
+
+      - name: Commit changes
+        run: |
+          git checkout ${{ env.BRANCH_NAME }}
+          git add --all .
+          git commit -m "Update documentation - $(date +'%Y-%m-%d')"
+
+      - name: Create pull request
+        run: gh pr create --title "Update documentation" --body "" --label Documentation
