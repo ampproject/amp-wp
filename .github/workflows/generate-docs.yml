@@ -55,7 +55,7 @@ jobs:
 
       - name: Commit changes
         run: |
-          git checkout ${{ env.BRANCH_NAME }}
+          git checkout -b ${{ env.BRANCH_NAME }}
           git add --all .
           git commit -m "Update documentation - $(date +'%Y-%m-%d')"
 
