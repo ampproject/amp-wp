@@ -17,8 +17,10 @@ jobs:
 
       # Cancel workflow run if there is already an open PR.
       - name: Cancel workflow run if a PR is already open
-        if: steps.detect_pr.outputs.exists == 0
+        if: steps.detect_pr.outputs.exists == 1
         run: gh api -X POST "repos/ampproject/amp-wp/actions/runs/${{ github.run_id }}/cancel"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -46,12 +48,14 @@ jobs:
 
       - name: Detect changes
         id: detect_changes
-        run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo "0" || echo "1")
+        run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo 1 || echo 0)
 
       # Cancel workflow run if there are no updates to docs.
       - name: Cancel workflow run if no updates to documentation
-        if: steps.detect_changes.outputs.changed == 0
+        if: steps.detect_changes.outputs.changed == 1
         run: gh api -X POST "repos/ampproject/amp-wp/actions/runs/${{ github.run_id }}/cancel"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit changes
         run: |
@@ -61,3 +65,5 @@ jobs:
 
       - name: Create pull request
         run: gh pr create --title "Update documentation" --body "" --label Documentation
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
