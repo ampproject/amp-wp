@@ -5,22 +5,12 @@ on:
 
 env:
   BRANCH_NAME: update/docs
-  REPO_NAME: ampproject/amp-wp
+  PR_NAME: Update documentation
 
 jobs:
-  precheck:
-    name: Pre-checks
-    runs-on: ubuntu-latest
-    steps:
-      - name: Detect if PR already exists
-        id: detect_pr
-        # Fail if the branch exists, otherwise carry on.
-        run: gh api --silent -X GET "repos/${{ env.REPO_NAME }}/branches/${{ env.BRANCH_NAME }}" 2> /dev/null && exit 1 || true
-
   generate_docs:
     name: 'Generate documentation'
     runs-on: ubuntu-latest
-    needs: precheck
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -77,12 +67,12 @@ jobs:
 
       - name: Detect changes
         id: detect_changes
-        run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo 1 || echo 0)
+        run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo 0 || echo 1)
 
       # Cancel workflow run if there are no updates to docs.
       - name: Cancel workflow run if no updates to documentation
         if: steps.detect_changes.outputs.changed == 1
-        run: gh api -X POST "repos/${{ env.REPO_NAME }}/actions/runs/${{ github.run_id }}/cancel"
+        run: gh api -X POST "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/cancel"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -91,11 +81,27 @@ jobs:
           git config --global user.email "pierregordon@protonmail.com"
           git config --global user.name "Pierre Gordon"
 
-      - name: Commit changes
+      - name: Check if remote branch exists
+        id: remote-branch
+        run: echo ::set-output name=exists::$([[ -z $(git ls-remote --heads origin ${{ env.BRANCH_NAME }}) ]] && echo "0" || echo "1")
+
+      - name: Create branch to base pull request on
+        if: steps.remote-branch.outputs.exists == 0
         run: |
           git checkout -b ${{ env.BRANCH_NAME }}
+
+      - name: Fetch existing branch to add commits to
+        if: steps.remote-branch.outputs.exists == 1
+        run: |
+          git fetch --all --prune
+          git checkout ${{ env.BRANCH_NAME }}
+          git pull --no-rebase
+
+      - name: Commit and push changes
+        run: |
           git add --all .
           git commit -m "Update documentation - $(date +'%Y-%m-%d')"
+          git push origin ${{ env.BRANCH_NAME }}
 
       - name: Create pull request
         run: |
