@@ -48,22 +48,23 @@ jobs:
           docker-compose up -d
 
           echo "Getting env vars"
-          MYSQL_PWD=$(docker-compose exec mysql printenv MYSQL_ROOT_PASSWORD)
-          WORDPRESS_DB_NAME=$(docker-compose exec wordpress printenv WORDPRESS_DB_NAME)
+          MYSQL_PWD=$(docker-compose exec -T mysql printenv MYSQL_ROOT_PASSWORD)
+          WORDPRESS_DB_NAME=$(docker-compose exec -T wordpress printenv WORDPRESS_DB_NAME)
           HOST_PORT=$(docker-compose port wordpress 80 | awk -F : '{printf $2}')
 
           echo "Creating db"
-          docker-compose exec -e MYSQL_PWD="MYSQL_PWD" mysql mysql -e 'CREATE DATABASE IF NOT EXISTS $WORDPRESS_DB_NAME'
+          docker-compose exec -T -e MYSQL_PWD="$MYSQL_PWD" mysql mysql -e 'CREATE DATABASE IF NOT EXISTS $WORDPRESS_DB_NAME'
+
           echo "Installing WP"
-          docker-compose exec cli wp core install --title="Docs" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT
+          docker-compose exec -T cli wp core install --title="Docs" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT
 
           echo "Activating AMP plugin"
           touch assets/js/amp-block-editor.js
-          docker-compose exec cli wp plugin activate amp
+          docker-compose exec -T cli wp plugin activate amp
         working-directory: bin/local-env
 
       - name: Generate plugin documentation
-        run: docker-compose exec cli wp amp docs generate
+        run: docker-compose exec -T cli wp amp docs generate
         working-directory: bin/local-env
 
       - name: Detect changes
