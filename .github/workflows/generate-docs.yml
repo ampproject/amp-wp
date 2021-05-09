@@ -77,7 +77,7 @@ jobs:
 
       - name: Detect changes
         id: detect_changes
-        run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo 0 || echo 1)
+        run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo 1 || echo 0)
 
       # Cancel workflow run if there are no updates to docs.
       - name: Cancel workflow run if no updates to documentation
