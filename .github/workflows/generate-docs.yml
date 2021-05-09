@@ -9,7 +9,7 @@ env:
 
 jobs:
   precheck:
-    name: 'Run pre-checks'
+    name: Pre-checks
     runs-on: ubuntu-latest
     steps:
       - name: Detect if PR already exists
@@ -46,13 +46,19 @@ jobs:
       - name: Setup WordPress
         run: |
           docker-compose up -d
-          MYSQL_PASSWORD=$(docker-compose exec mysql printenv MYSQL_ROOT_PASSWORD)
+
+          echo "Getting env vars"
+          MYSQL_PWD=$(docker-compose exec mysql printenv MYSQL_ROOT_PASSWORD)
           WORDPRESS_DB_NAME=$(docker-compose exec wordpress printenv WORDPRESS_DB_NAME)
           HOST_PORT=$(docker-compose port wordpress 80 | awk -F : '{printf $2}')
 
-          docker-compose exec -e MYSQL_PWD="$MYSQL_PASSWORD" mysql mysql -e 'CREATE DATABASE IF NOT EXISTS $WORDPRESS_DB_NAME'
+          echo "Creating db"
+          docker-compose exec -e MYSQL_PWD="MYSQL_PWD" mysql mysql -e 'CREATE DATABASE IF NOT EXISTS $WORDPRESS_DB_NAME'
+          echo "Installing WP"
           docker-compose exec cli wp core install --title="Docs" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT
 
+          echo "Activating AMP plugin"
+          touch assets/js/amp-block-editor.js
           docker-compose exec cli wp plugin activate amp
         working-directory: bin/local-env
 
@@ -62,7 +68,7 @@ jobs:
 
       - name: Detect changes
         id: detect_changes
-        run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo 1 || echo 0)
+        run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo 0 || echo 1)
 
       # Cancel workflow run if there are no updates to docs.
       - name: Cancel workflow run if no updates to documentation
