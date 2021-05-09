@@ -67,7 +67,7 @@ jobs:
           docker-compose exec -T cli wp core install --title="Docs" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT
 
           echo "Activating AMP plugin"
-          touch assets/js/amp-block-editor.js
+          touch ../../assets/js/amp-block-editor.js
           docker-compose exec -T cli wp plugin activate amp
         working-directory: bin/local-env
 
