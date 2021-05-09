@@ -58,9 +58,10 @@ jobs:
               echo -n '.'
               sleep 5
           done
+          echo ''
 
           echo "Creating db"
-          docker-compose exec -T -e MYSQL_PWD="$MYSQL_PWD" mysql mysql -e 'CREATE DATABASE IF NOT EXISTS $WORDPRESS_DB_NAME'
+          docker-compose exec -T -e MYSQL_PWD="$MYSQL_PWD" mysql mysql -e "CREATE DATABASE IF NOT EXISTS $WORDPRESS_DB_NAME"
 
           echo "Installing WP"
           docker-compose exec -T cli wp core install --title="Docs" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT
