@@ -52,6 +52,13 @@ jobs:
           WORDPRESS_DB_NAME=$(docker-compose exec -T wordpress printenv WORDPRESS_DB_NAME)
           HOST_PORT=$(docker-compose port wordpress 80 | awk -F : '{printf $2}')
 
+          # Wait until the database container is ready.
+          echo -en "Waiting for database connection..."
+          until $(docker-compose exec -T wordpress bash -c "echo -n > /dev/tcp/mysql/3306" >/dev/null 2>&1); do
+              echo -n '.'
+              sleep 5
+          done
+
           echo "Creating db"
           docker-compose exec -T -e MYSQL_PWD="$MYSQL_PWD" mysql mysql -e 'CREATE DATABASE IF NOT EXISTS $WORDPRESS_DB_NAME'
 
