@@ -86,6 +86,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Configure git user
+        run: |
+          git config --global user.email "pierregordon@protonmail.com"
+          git config --global user.name "Pierre Gordon"
+
       - name: Commit changes
         run: |
           git checkout -b ${{ env.BRANCH_NAME }}
