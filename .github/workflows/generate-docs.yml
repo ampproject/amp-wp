@@ -5,23 +5,23 @@ on:
 
 env:
   BRANCH_NAME: update/docs
+  REPO_NAME: ampproject/amp-wp
 
 jobs:
-  generate_docs:
-    name: 'Generate documentation'
+  precheck:
+    name: 'Run pre-checks'
     runs-on: ubuntu-latest
     steps:
       - name: Detect if PR already exists
         id: detect_pr
-        run: echo ::set-output name=exists::$(gh api --silent -X GET "repos/ampproject/amp-wp/branches/${{ env.BRANCH_NAME }}" 2> /dev/null && echo 1 || echo 0)
+        # Fail if the branch exists, otherwise carry on.
+        run: gh api --silent -X GET "repos/${{ env.REPO_NAME }}/branches/${{ env.BRANCH_NAME }}" 2> /dev/null && exit 1 || true
 
-      # Cancel workflow run if there is already an open PR.
-      - name: Cancel workflow run if a PR is already open
-        if: steps.detect_pr.outputs.exists == 1
-        run: gh api -X POST "repos/ampproject/amp-wp/actions/runs/${{ github.run_id }}/cancel"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+  generate_docs:
+    name: 'Generate documentation'
+    runs-on: ubuntu-latest
+    needs: precheck
+    steps:
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -43,8 +43,22 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
+      - name: Setup WordPress
+        run: |
+          docker-compose up -d
+          MYSQL_PASSWORD=$(docker-compose exec mysql printenv MYSQL_ROOT_PASSWORD)
+          WORDPRESS_DB_NAME=$(docker-compose exec wordpress printenv WORDPRESS_DB_NAME)
+          HOST_PORT=$(docker-compose port wordpress 80 | awk -F : '{printf $2}')
+
+          docker-compose exec -e MYSQL_PWD="$MYSQL_PASSWORD" mysql mysql -e 'CREATE DATABASE IF NOT EXISTS $WORDPRESS_DB_NAME'
+          docker-compose exec cli wp core install --title="Docs" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT
+
+          docker-compose exec cli wp plugin activate amp
+        working-directory: bin/local-env
+
       - name: Generate plugin documentation
-        run: ./vendor/bin/wp amp docs generate
+        run: docker-compose exec cli wp amp docs generate
+        working-directory: bin/local-env
 
       - name: Detect changes
         id: detect_changes
@@ -53,7 +67,7 @@ jobs:
       # Cancel workflow run if there are no updates to docs.
       - name: Cancel workflow run if no updates to documentation
         if: steps.detect_changes.outputs.changed == 1
-        run: gh api -X POST "repos/ampproject/amp-wp/actions/runs/${{ github.run_id }}/cancel"
+        run: gh api -X POST "repos/${{ env.REPO_NAME }}/actions/runs/${{ github.run_id }}/cancel"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
