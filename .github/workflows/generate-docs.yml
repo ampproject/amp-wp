@@ -72,7 +72,7 @@ jobs:
         working-directory: bin/local-env
 
       - name: Generate plugin documentation
-        run: docker-compose exec -T cli wp amp docs generate
+        run: docker-compose exec -T -u $(id --user) cli wp amp docs generate
         working-directory: bin/local-env
 
       - name: Detect changes
