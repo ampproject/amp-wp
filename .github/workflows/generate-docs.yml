@@ -98,6 +98,8 @@ jobs:
           git commit -m "Update documentation - $(date +'%Y-%m-%d')"
 
       - name: Create pull request
-        run: gh pr create --title "Update documentation" --body "" --label Documentation
+        run: |
+          git push -u origin ${{ env.BRANCH_NAME }}
+          gh pr create --title "Update documentation" --body "" --label Documentation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
