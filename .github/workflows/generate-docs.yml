@@ -65,16 +65,8 @@ jobs:
         run: docker-compose exec -T -u $(id --user) cli wp amp docs generate
         working-directory: bin/local-env
 
-      - name: Detect changes
-        id: detect_changes
-        run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo 0 || echo 1)
-
-      # Cancel workflow run if there are no updates to docs.
-      - name: Cancel workflow run if no updates to documentation
-        if: steps.detect_changes.outputs.changed == 1
-        run: gh api -X POST "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/cancel"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Stop workflow run if there are no changes
+        run: "[[ -z $(git status --porcelain) ]] || exit 1"
 
       - name: Configure git user
         run: |
