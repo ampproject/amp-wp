@@ -68,7 +68,7 @@ jobs:
         working-directory: bin/local-env
 
       - name: Stop workflow run if there are no changes
-        run: "[[ -z $(git status --porcelain) ]] || exit 1"
+        run: "[[ -z $(git status --porcelain) ]] && exit 1"
 
       - name: Configure git user
         run: |
