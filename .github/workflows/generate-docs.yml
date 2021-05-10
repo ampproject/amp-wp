@@ -5,7 +5,6 @@ on:
 
 env:
   BRANCH_NAME: update/docs
-  PR_NAME: Update documentation
 
 jobs:
   generate_docs:
@@ -83,7 +82,7 @@ jobs:
           git fetch --all --prune
           git checkout ${{ env.BRANCH_NAME }}
           git pull --no-rebase
-          git merge --no-edit ${GITHUB_REF#refs/heads/}
+          git merge --no-edit origin/${GITHUB_REF#refs/heads/}
 
       - name: Generate plugin documentation
         run: docker-compose exec -T -u $(id --user) cli wp amp docs generate
@@ -97,7 +96,7 @@ jobs:
         if: steps.changes.outputs.changed == 1
         run: |
           git add --all .
-          git commit -m "Update documentation - $(date +'%Y-%m-%d')"
+          git commit -m "Update documentation"
           git push origin ${{ env.BRANCH_NAME }}
 
       - name: Create pull request
