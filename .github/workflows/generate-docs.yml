@@ -115,7 +115,7 @@ jobs:
         if: steps.changes.outputs.changed == 1 && steps.remote-branch.outputs.exists == 0
         run: |
           git push -u origin "$HEAD_BRANCH"
-          gh pr create --base "$BASE_BRANCH" --title "Update documentation for `$BASE_BRANCH` branch" --body "" --label Documentation
+          gh pr create --base "$BASE_BRANCH" --title "Update documentation for \`$BASE_BRANCH\` branch" --body "" --label Documentation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BASE_BRANCH: ${{ steps.branches.outputs.base }}
