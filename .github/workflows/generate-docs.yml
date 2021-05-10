@@ -101,9 +101,9 @@ jobs:
           git push origin ${{ env.BRANCH_NAME }}
 
       - name: Create pull request
-        if: steps.changes.outputs.changed == 1
+        if: steps.changes.outputs.changed == 1 && steps.remote-branch.outputs.exists == 0
         run: |
           git push -u origin ${{ env.BRANCH_NAME }}
-          gh pr create --base ${GITHUB_REF#refs/heads/} --title "Update documentation" --body "" --label Documentation
+          gh pr create --base ${GITHUB_REF#refs/heads/} --title "Update documentation for `${GITHUB_REF#refs/heads/}` branch" --body "" --label Documentation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
