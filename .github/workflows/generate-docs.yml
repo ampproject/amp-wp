@@ -11,6 +11,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
+          # Fetch history for all branches and tags to allow for successful merge of base branch if needed.
           fetch-depth: 0
 
       - name: Determine branch names
@@ -44,28 +45,33 @@ jobs:
         run: |
           docker-compose up -d
 
-          echo "Getting env vars"
+          echo "::group::Get environment vars from containers"
           MYSQL_PWD=$(docker-compose exec -T mysql printenv MYSQL_ROOT_PASSWORD)
           WORDPRESS_DB_NAME=$(docker-compose exec -T wordpress printenv WORDPRESS_DB_NAME)
           HOST_PORT=$(docker-compose port wordpress 80 | awk -F : '{printf $2}')
+          echo "::endgroup::"
 
-          # Wait until the database container is ready.
+          echo "::group::Wait for database container to be ready"
           echo -en "Waiting for database connection..."
           until $(docker-compose exec -T wordpress bash -c "echo -n > /dev/tcp/mysql/3306" >/dev/null 2>&1); do
               echo -n '.'
               sleep 5
           done
           echo ''
+          echo "::endgroup::"
 
-          echo "Creating db"
+          echo "::group::Installing WordPress"
           docker-compose exec -T -e MYSQL_PWD="$MYSQL_PWD" mysql mysql -e "CREATE DATABASE IF NOT EXISTS $WORDPRESS_DB_NAME"
+          docker-compose exec -T cli wp core install \
+            --title="Docs" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT
+          echo "::endgroup::"
 
-          echo "Installing WP"
-          docker-compose exec -T cli wp core install --title="Docs" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT
-
-          echo "Activating AMP plugin"
+          echo "::group::Activate AMP plugin"
+          # Building the JS assets is required for the plugin to activate successfully, but since we're only generating
+          # the docs we simply create the file being checked for to save some time.
           touch ../../assets/js/amp-block-editor.js
           docker-compose exec -T cli wp plugin activate amp
+          echo "::endgroup::"
         working-directory: bin/local-env
 
       - name: Configure git user
