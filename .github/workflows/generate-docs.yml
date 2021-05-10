@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -62,11 +64,6 @@ jobs:
           docker-compose exec -T cli wp plugin activate amp
         working-directory: bin/local-env
 
-      - name: Configure git user
-        run: |
-          git config --global user.email "pierregordon@protonmail.com"
-          git config --global user.name "Pierre Gordon"
-
       - name: Check if remote branch exists
         id: remote-branch
         run: echo ::set-output name=exists::$([[ -z $(git ls-remote --heads origin ${{ env.BRANCH_NAME }}) ]] && echo "0" || echo "1")
@@ -79,10 +76,8 @@ jobs:
       - name: Fetch existing branch to add commits to
         if: steps.remote-branch.outputs.exists == 1
         run: |
-          git fetch --all --prune
           git checkout ${{ env.BRANCH_NAME }}
-          git pull --no-rebase
-          git merge --no-edit origin/${GITHUB_REF#refs/heads/}
+          git merge --no-edit ${GITHUB_REF#refs/heads/}
 
       - name: Generate plugin documentation
         run: docker-compose exec -T -u $(id --user) cli wp amp docs generate
@@ -91,6 +86,12 @@ jobs:
       - name: Check if there are changes
         id: changes
         run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo "0" || echo "1")
+
+      - name: Configure git user
+        if: steps.changes.outputs.changed == 1
+        run: |
+          git config user.email "pierregordon@protonmail.com"
+          git config user.name "Pierre Gordon"
 
       - name: Commit and push changes
         if: steps.changes.outputs.changed == 1
