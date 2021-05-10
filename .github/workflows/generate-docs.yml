@@ -3,9 +3,6 @@ name: Plugin Documentation
 on:
   workflow_dispatch:
 
-env:
-  BRANCH_NAME: update/docs
-
 jobs:
   generate_docs:
     name: 'Generate documentation'
@@ -15,6 +12,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
+      - name: Determine branch names
+        id: branches
+        run: |
+          run: echo "::set-output name=base::$(echo ${GITHUB_REF#refs/heads/})"
+          run: echo "::set-output name=head::$(echo "update/docs-$BASE_BRANCH")"
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -71,18 +74,24 @@ jobs:
 
       - name: Check if remote branch exists
         id: remote-branch
-        run: echo ::set-output name=exists::$([[ -z $(git ls-remote --heads origin ${{ env.BRANCH_NAME }}) ]] && echo "0" || echo "1")
+        run: echo ::set-output name=exists::$([[ -z $(git ls-remote --heads origin "$HEAD_BRANCH" ) ]] && echo "0" || echo "1")
+        env:
+          HEAD_BRANCH: ${{ steps.branches.outputs.head }}
 
       - name: Create branch to base pull request on
         if: steps.remote-branch.outputs.exists == 0
-        run: |
-          git checkout -b ${{ env.BRANCH_NAME }}
+        run: git checkout -b "$HEAD_BRANCH"
+        env:
+          HEAD_BRANCH: ${{ steps.branches.outputs.head }}
 
       - name: Fetch existing branch to add commits to
         if: steps.remote-branch.outputs.exists == 1
         run: |
-          git checkout ${{ env.BRANCH_NAME }}
-          git merge --no-edit ${GITHUB_REF#refs/heads/}
+          git checkout "$HEAD_BRANCH"
+          git merge --no-edit "$BASE_BRANCH"
+        env:
+          BASE_BRANCH: ${{ steps.branches.outputs.base }}
+          HEAD_BRANCH: ${{ steps.branches.outputs.head }}
 
       - name: Generate plugin documentation
         run: docker-compose exec -T -u $(id --user) cli wp amp docs generate
@@ -97,12 +106,16 @@ jobs:
         run: |
           git add --all .
           git commit -m "Update documentation"
-          git push origin ${{ env.BRANCH_NAME }}
+          git push origin "$HEAD_BRANCH"
+        env:
+          HEAD_BRANCH: ${{ steps.branches.outputs.head }}
 
       - name: Create pull request
         if: steps.changes.outputs.changed == 1 && steps.remote-branch.outputs.exists == 0
         run: |
-          git push -u origin ${{ env.BRANCH_NAME }}
-          gh pr create --base ${GITHUB_REF#refs/heads/} --title "Update documentation for `${GITHUB_REF#refs/heads/}` branch" --body "" --label Documentation
+          git push -u origin "$HEAD_BRANCH"
+          gh pr create --base "$BASE_BRANCH" --title "Update documentation for `$BASE_BRANCH` branch" --body "" --label Documentation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_BRANCH: ${{ steps.branches.outputs.base }}
+          HEAD_BRANCH: ${{ steps.branches.outputs.head }}
