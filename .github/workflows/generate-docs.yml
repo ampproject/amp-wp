@@ -16,7 +16,8 @@ jobs:
       - name: Determine branch names
         id: branches
         run: |
-          echo "::set-output name=base::$(echo ${GITHUB_REF#refs/heads/})"
+          BASE_BRANCH=${GITHUB_REF#refs/heads/}
+          echo "::set-output name=base::$(echo "$BASE_BRANCH")"
           echo "::set-output name=head::$(echo "update/docs-$BASE_BRANCH")"
 
       - name: Setup PHP
