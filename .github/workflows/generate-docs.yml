@@ -63,6 +63,27 @@ jobs:
           docker-compose exec -T cli wp plugin activate amp
         working-directory: bin/local-env
 
+      - name: Configure git user
+        run: |
+          git config --global user.email "pierregordon@protonmail.com"
+          git config --global user.name "Pierre Gordon"
+
+      - name: Check if remote branch exists
+        id: remote-branch
+        run: echo ::set-output name=exists::$([[ -z $(git ls-remote --heads origin ${{ env.BRANCH_NAME }}) ]] && echo "0" || echo "1")
+
+      - name: Create branch to base pull request on
+        if: steps.remote-branch.outputs.exists == 0
+        run: |
+          git checkout -b ${{ env.BRANCH_NAME }}
+
+      - name: Fetch existing branch to add commits to
+        if: steps.remote-branch.outputs.exists == 1
+        run: |
+          git fetch --all --prune
+          git checkout ${{ env.BRANCH_NAME }}
+          git pull --no-rebase
+
       - name: Generate plugin documentation
         run: docker-compose exec -T -u $(id --user) cli wp amp docs generate
         working-directory: bin/local-env
@@ -70,29 +91,6 @@ jobs:
       - name: Check if there are changes
         id: changes
         run: echo ::set-output name=changed::$([[ -z $(git status --porcelain) ]] && echo "0" || echo "1")
-
-      - name: Configure git user
-        if: steps.changes.outputs.changed == 1
-        run: |
-          git config --global user.email "pierregordon@protonmail.com"
-          git config --global user.name "Pierre Gordon"
-
-      - name: Check if remote branch exists
-        id: remote-branch
-        if: steps.changes.outputs.changed == 1
-        run: echo ::set-output name=exists::$([[ -z $(git ls-remote --heads origin ${{ env.BRANCH_NAME }}) ]] && echo "0" || echo "1")
-
-      - name: Create branch to base pull request on
-        if: steps.changes.outputs.changed == 1 && steps.remote-branch.outputs.exists == 0
-        run: |
-          git checkout -b ${{ env.BRANCH_NAME }}
-
-      - name: Fetch existing branch to add commits to
-        if: steps.changes.outputs.changed == 1 && steps.remote-branch.outputs.exists == 1
-        run: |
-          git fetch --all --prune
-          git checkout ${{ env.BRANCH_NAME }}
-          git pull --no-rebase
 
       - name: Commit and push changes
         if: steps.changes.outputs.changed == 1
