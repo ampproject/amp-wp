@@ -83,6 +83,7 @@ jobs:
           git fetch --all --prune
           git checkout ${{ env.BRANCH_NAME }}
           git pull --no-rebase
+          git merge --no-edit ${GITHUB_REF#refs/heads/}
 
       - name: Generate plugin documentation
         run: docker-compose exec -T -u $(id --user) cli wp amp docs generate
