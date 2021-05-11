@@ -101,6 +101,10 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function test_show_notice_for_supported_post_type() {
 		global $post;
 
+		if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '<' ) ) {
+			$this->markTestSkipped();
+		}
+
 		set_current_screen( 'edit.php' );
 		$post = $this->factory()->post->create();
 		setup_postdata( get_post( $post ) );
@@ -111,7 +115,10 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		if ( $this->instance->editor_supports_amp_block_editor_features() ) {
 			$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
 		} else {
-			$this->assertContains( 'AMP f', wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+			$this->assertContains(
+				'AMP functionality is not available',
+				wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
+			);
 		}
 		unset( $GLOBALS['current_screen'] );
 		unset( $GLOBALS['wp_scripts'] );
