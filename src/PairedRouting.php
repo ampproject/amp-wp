@@ -468,18 +468,6 @@ final class PairedRouting implements Service, Registerable {
 
 			$this->did_request_endpoint = true;
 		}
-
-		// @todo Also do same for $_GET?
-		if ( $this->did_request_endpoint && isset( $this->suspended_environment_variables['REQUEST_URI'] ) ) {
-			$old_query_string = wp_parse_url( $this->suspended_environment_variables['REQUEST_URI'][0], PHP_URL_QUERY );
-			$new_query_string = wp_parse_url( $this->suspended_environment_variables['REQUEST_URI'][1], PHP_URL_QUERY );
-			if ( $old_query_string !== $new_query_string ) {
-				$this->suspended_environment_variables['QUERY_STRING'] = [
-					(string) $old_query_string,
-					(string) $new_query_string,
-				];
-			}
-		}
 	}
 
 	/**
