@@ -34,7 +34,11 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 	/** @covers ::has_support_from_gutenberg_plugin */
 	public function test_has_support_from_gutenberg_plugin() {
-		if ( defined( 'GUTENBERG_VERSION' ) ) {
+		if (
+			defined( 'GUTENBERG_VERSION' )
+			&&
+			version_compare( GUTENBERG_VERSION, EditorSupport::GB_MIN_VERSION, '>=' )
+		) {
 			$this->assertTrue( $this->instance->has_support_from_gutenberg_plugin() );
 		} else {
 			if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '>=' ) ) {
@@ -46,7 +50,11 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	}
 
 	public function test_editor_supports_amp_block_editor_features() {
-		if ( defined( 'GUTENBERG_VERSION' ) ) {
+		if (
+			defined( 'GUTENBERG_VERSION' )
+			&&
+			version_compare( GUTENBERG_VERSION, EditorSupport::GB_MIN_VERSION, '>=' )
+		) {
 			$this->assertTrue( $this->instance->editor_supports_amp_block_editor_features() );
 		} else {
 			if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '>=' ) ) {

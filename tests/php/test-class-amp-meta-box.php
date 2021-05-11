@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Editor\EditorSupport;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
@@ -118,8 +119,12 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		set_current_screen( 'post.php' );
 		get_current_screen()->is_block_editor = true;
 
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The block editor is not available' );
+		if (
+			defined( 'GUTENBERG_VERSION' )
+			&&
+			version_compare( GUTENBERG_VERSION, EditorSupport::GB_MIN_VERSION, '>=' )
+		) {
+			$this->markTestSkipped( 'The version of Gutenberg installed is not compatible with the plugin.' );
 		}
 
 		// If a post type doesn't have AMP enabled, the script shouldn't be enqueued.
