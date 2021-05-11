@@ -436,9 +436,9 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->instance->initialize_paired_request();
 		$this->assertFalse( $this->get_private_property( $this->instance, 'did_request_endpoint' ) );
-		$this->assertEquals( 10, has_filter( 'do_parse_request', [ $this->instance, 'extract_endpoint_from_environment_before_parse_request' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'do_parse_request', [ $this->instance, 'extract_endpoint_from_environment_before_parse_request' ] ) );
 		$this->assertEquals( 10, has_filter( 'request', [ $this->instance, 'filter_request_after_endpoint_extraction' ] ) );
-		$this->assertEquals( 10, has_action( 'parse_request', [ $this->instance, 'restore_path_endpoint_in_environment' ] ) );
+		$this->assertEquals( defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, has_action( 'parse_request', [ $this->instance, 'restore_path_endpoint_in_environment' ] ) ); // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		if ( $filtering_unique_post_slug ) {
 			$this->assertEquals( 10, has_filter( 'wp_unique_post_slug', [ $this->instance, 'filter_unique_post_slug' ] ) );
 		} else {

@@ -401,7 +401,7 @@ final class PairedRouting implements Service, Registerable {
 		$this->detect_endpoint_in_environment();
 		add_filter( 'do_parse_request', [ $this, 'extract_endpoint_from_environment_before_parse_request' ], PHP_INT_MAX );
 		add_filter( 'request', [ $this, 'filter_request_after_endpoint_extraction' ] );
-		add_action( 'parse_request', [ $this, 'restore_path_endpoint_in_environment' ] );
+		add_action( 'parse_request', [ $this, 'restore_path_endpoint_in_environment' ], defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX ); // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 
 		// Reserve the 'amp' slug for paired URL structures that use paths.
 		if ( $this->is_using_path_suffix() ) {
