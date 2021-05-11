@@ -153,6 +153,17 @@ final class PairedRouting implements Service, Registerable {
 	private $did_request_endpoint;
 
 	/**
+	 * Current nesting level for the request.
+	 *
+	 * This is used to capture cases where `WP::parse_request()` is called from inside of a `request`
+	 * filter, a case of a nested/recursive request. It is similar in concept to `ob_get_level()` for
+	 * output buffering.
+	 *
+	 * @var int
+	 */
+	private $current_request_nesting_level = 0;
+
+	/**
 	 * Original environment variables that were rewritten before parsing the request.
 	 *
 	 * @see PairedRouting::detect_endpoint_in_environment()
@@ -388,9 +399,9 @@ final class PairedRouting implements Service, Registerable {
 
 		// Run necessary logic to properly route a request using the registered paired URL structures.
 		$this->detect_endpoint_in_environment();
-		add_filter( 'do_parse_request', [ $this, 'extract_endpoint_from_environment_before_parse_request' ] );
+		add_filter( 'do_parse_request', [ $this, 'extract_endpoint_from_environment_before_parse_request' ], PHP_INT_MAX );
 		add_filter( 'request', [ $this, 'filter_request_after_endpoint_extraction' ] );
-		add_action( 'parse_request', [ $this, 'restore_path_endpoint_in_environment' ] );
+		add_action( 'parse_request', [ $this, 'restore_path_endpoint_in_environment' ], defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX ); // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 
 		// Reserve the 'amp' slug for paired URL structures that use paths.
 		if ( $this->is_using_path_suffix() ) {
@@ -472,11 +483,28 @@ final class PairedRouting implements Service, Registerable {
 	 * @return bool Passed-through argument.
 	 */
 	public function extract_endpoint_from_environment_before_parse_request( $do_parse_request ) {
-		if ( $this->did_request_endpoint ) {
+		// If request parsing was aborted, then there's nothing for us to do.
+		if ( ! $do_parse_request ) {
+			return $do_parse_request;
+		}
+
+		// Only do something if doing the outermost request. Note that this function runs with the
+		// latest priority in order to make sure that any other `do_parse_request` filter will have
+		// already applied, and thus we know that the request is indeed going to be parsed.
+		if (
+			$this->did_request_endpoint
+			&&
+			0 === $this->current_request_nesting_level
+		) {
 			foreach ( $this->suspended_environment_variables as $var_name => list( , $new_path ) ) {
 				$_SERVER[ $var_name ] = wp_slash( $new_path ); // Because of wp_magic_quotes().
 			}
 		}
+
+		// Increase the nesting level so we can prevent calling ourselves for any recursive calls
+		// to `WP::parse_request()` during the `request` filter.
+		$this->current_request_nesting_level++;
+
 		return $do_parse_request;
 	}
 
@@ -501,7 +529,17 @@ final class PairedRouting implements Service, Registerable {
 	 * @param WP $wp WP object.
 	 */
 	public function restore_path_endpoint_in_environment( WP $wp ) {
-		if ( ! $this->did_request_endpoint ) {
+		// Since the request has finished the parsing which was detected above in the
+		// `PairedRouting::extract_endpoint_from_environment_before_parse_request()`
+		// method, now decrement the level.
+		$this->current_request_nesting_level--;
+
+		// Only run for the outermost/root request when an AMP endpoint was requested.
+		if (
+			! $this->did_request_endpoint
+			||
+			0 !== $this->current_request_nesting_level
+		) {
 			return;
 		}
 		foreach ( $this->suspended_environment_variables as $var_name => list( $old_path, ) ) {

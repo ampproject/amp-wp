@@ -322,6 +322,39 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 				'/amp/',
 				true,
 			],
+			'path_suffix_mode_amp_with_subrequest'  => [
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
+				'/amp/',
+				true,
+				function ( $query ) {
+					static $recursing = false;
+					global $wp;
+
+					if ( $recursing ) {
+						return $query;
+					}
+					$recursing = true;
+
+					$old_request_uri = $_SERVER['REQUEST_URI'];
+					$old_wp_request  = $wp->request;
+
+					$post = self::factory()->post->create();
+					$path = wp_parse_url( get_permalink( $post ), PHP_URL_PATH );
+
+					$_SERVER['REQUEST_URI'] = $path;
+					$wp->matched_rule       = null;
+					$wp->parse_request();
+
+					$query = $wp->query_vars;
+
+					$_SERVER['REQUEST_URI'] = $old_request_uri;
+					$wp->request            = $old_wp_request;
+
+					$recursing = false;
+					return $query;
+				},
+			],
 			'path_suffix_transitional_mode_non_amp' => [
 				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
@@ -364,8 +397,9 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	 * @param string $structure
 	 * @param string $request_uri
 	 * @param bool $did_request_endpoint
+	 * @param callable $nested_request_callback
 	 */
-	public function test_initialize_paired_request_integration( $mode, $structure, $request_uri, $did_request_endpoint ) {
+	public function test_initialize_paired_request_integration( $mode, $structure, $request_uri, $did_request_endpoint, $nested_request_callback = null ) {
 		global $wp;
 		$post_id = self::factory()->post->create();
 		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
@@ -376,10 +410,17 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$request_uri = rtrim( wp_parse_url( $permalink, PHP_URL_PATH ), '/' ) . $request_uri;
 
 		$request_uri_during_parse_request = null;
+		$first_request                    = true;
 		add_filter(
 			'request',
-			function ( $query_vars ) use ( &$request_uri_during_parse_request ) {
-				$request_uri_during_parse_request = $_SERVER['REQUEST_URI'];
+			function ( $query_vars ) use ( &$request_uri_during_parse_request, &$first_request, $nested_request_callback ) {
+				if ( $first_request ) {
+					$request_uri_during_parse_request = $_SERVER['REQUEST_URI'];
+					$first_request                    = false;
+				}
+				if ( $nested_request_callback ) {
+					$query_vars = $nested_request_callback( $query_vars );
+				}
 				return $query_vars;
 			}
 		);
@@ -436,9 +477,9 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->instance->initialize_paired_request();
 		$this->assertFalse( $this->get_private_property( $this->instance, 'did_request_endpoint' ) );
-		$this->assertEquals( 10, has_filter( 'do_parse_request', [ $this->instance, 'extract_endpoint_from_environment_before_parse_request' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'do_parse_request', [ $this->instance, 'extract_endpoint_from_environment_before_parse_request' ] ) );
 		$this->assertEquals( 10, has_filter( 'request', [ $this->instance, 'filter_request_after_endpoint_extraction' ] ) );
-		$this->assertEquals( 10, has_action( 'parse_request', [ $this->instance, 'restore_path_endpoint_in_environment' ] ) );
+		$this->assertEquals( defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, has_action( 'parse_request', [ $this->instance, 'restore_path_endpoint_in_environment' ] ) ); // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		if ( $filtering_unique_post_slug ) {
 			$this->assertEquals( 10, has_filter( 'wp_unique_post_slug', [ $this->instance, 'filter_unique_post_slug' ] ) );
 		} else {
