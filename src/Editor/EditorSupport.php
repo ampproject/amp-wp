@@ -25,14 +25,14 @@ final class EditorSupport implements Registerable, Service {
 	 *
 	 * @var string
 	 */
-	const GB_MIN_VERSION = '5.4.0';
+	const GB_MIN_VERSION = '9.2.0';
 
 	/**
 	 * The minimum version of WordPress supported by editor features.
 	 *
 	 * @var string
 	 */
-	const WP_MIN_VERSION = '5.3';
+	const WP_MIN_VERSION = '5.6';
 
 	/**
 	 * Runs on instantiation.
