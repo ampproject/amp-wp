@@ -122,7 +122,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		if (
 			defined( 'GUTENBERG_VERSION' )
 			&&
-			version_compare( GUTENBERG_VERSION, EditorSupport::GB_MIN_VERSION, '>=' )
+			version_compare( GUTENBERG_VERSION, EditorSupport::GB_MIN_VERSION, '<' )
 		) {
 			$this->markTestSkipped( 'The version of Gutenberg installed is not compatible with the plugin.' );
 		}
