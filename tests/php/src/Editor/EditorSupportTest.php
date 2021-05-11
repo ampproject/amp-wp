@@ -93,10 +93,6 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function test_show_notice_for_supported_post_type() {
 		global $post;
 
-		if ( version_compare( get_bloginfo( 'version' ), '5.3', '<=' ) ) {
-			$this->markTestSkipped();
-		}
-
 		set_current_screen( 'edit.php' );
 		$post = $this->factory()->post->create();
 		setup_postdata( get_post( $post ) );
