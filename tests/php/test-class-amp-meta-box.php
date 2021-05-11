@@ -119,6 +119,10 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		set_current_screen( 'post.php' );
 		get_current_screen()->is_block_editor = true;
 
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'The block editor is not available' );
+		}
+
 		if (
 			defined( 'GUTENBERG_VERSION' )
 			&&
