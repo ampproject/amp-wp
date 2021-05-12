@@ -40,7 +40,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
 
@@ -78,7 +78,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
 
@@ -211,7 +211,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
 
@@ -268,7 +268,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
 
@@ -409,7 +409,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
 
@@ -571,7 +571,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
 
@@ -686,7 +686,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
 
