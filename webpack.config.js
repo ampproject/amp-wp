@@ -233,9 +233,7 @@ const wpPolyfills = {
 const setup = {
 	...sharedConfig,
 	entry: {
-		'amp-onboarding-wizard': [
-			'./assets/src/onboarding-wizard',
-		],
+		'amp-onboarding-wizard': './assets/src/onboarding-wizard',
 	},
 	externals: {
 		'amp-settings': 'ampSettings',
@@ -286,15 +284,9 @@ const setup = {
 const settingsPage = {
 	...sharedConfig,
 	entry: {
-		'wp-api-fetch': [
-			'./assets/src/polyfills/api-fetch.js',
-		],
-		'wp-components': [
-			'@wordpress/components/build-style/style.css',
-		],
-		'amp-settings': [
-			'./assets/src/settings-page',
-		],
+		'wp-api-fetch': './assets/src/polyfills/api-fetch.js',
+		'wp-components': '@wordpress/components/build-style/style.css',
+		'amp-settings': './assets/src/settings-page',
 	},
 	externals: {
 		'amp-settings': 'ampSettings',
