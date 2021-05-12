@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
 
       - name: Get npm cache directory
         id: npm-cache
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
 
       - name: Get npm cache directory
         id: npm-cache
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -147,7 +147,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -203,7 +203,7 @@ jobs:
 
     steps:
       - name: Check out source files
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
 
       - name: Get Composer Cache Directory
         id: composer-cache
