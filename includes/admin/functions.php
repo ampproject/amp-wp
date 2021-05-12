@@ -39,6 +39,7 @@ function amp_admin_get_preview_permalink() {
 	/**
 	 * Filter the post type to retrieve the latest for use in the AMP template customizer.
 	 *
+	 * @todo This filter doesn't actually do anything at present. Instead of array_unique() below, an array_intersect() should have been used.
 	 * @param string $post_type Post type slug. Default 'post'.
 	 */
 	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
@@ -46,7 +47,7 @@ function amp_admin_get_preview_permalink() {
 	// Make sure the desired post type is actually supported, and if so, prefer it.
 	$supported_post_types = AMP_Post_Type_Support::get_supported_post_types();
 	if ( in_array( $post_type, $supported_post_types, true ) ) {
-		$supported_post_types = array_unique( array_merge( [ $post_type ], $supported_post_types ) );
+		$supported_post_types = array_values( array_unique( array_merge( [ $post_type ], $supported_post_types ) ) );
 	}
 
 	// Bail if there are no supported post types.
