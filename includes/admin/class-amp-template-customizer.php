@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\ReaderThemeLoader;
 use AmpProject\AmpWP\Services;
 
@@ -85,6 +86,8 @@ class AMP_Template_Customizer {
 		$has_reader_theme = ( ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) ); // @todo Verify that the theme actually exists.
 
 		if ( $is_reader_mode ) {
+			add_action( 'customize_controls_init', [ $self, 'set_reader_preview_url' ] );
+
 			if ( $has_reader_theme ) {
 				add_action( 'customize_save_after', [ $self, 'store_modified_theme_mod_setting_timestamps' ] );
 			}
@@ -121,6 +124,18 @@ class AMP_Template_Customizer {
 			add_action( 'customize_controls_print_footer_scripts', [ $self, 'add_dark_mode_toggler_button_notice' ] );
 		}
 		return $self;
+	}
+
+	/**
+	 * Set the preview URL when using a Reader theme if the AMP preview permalink was requested and no URL was provided.
+	 */
+	public function set_reader_preview_url() {
+		if ( isset( $_GET[ QueryVar::AMP_PREVIEW ] ) && ! isset( $_GET['url'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$url = amp_admin_get_preview_permalink();
+			if ( $url ) {
+				$this->wp_customize->set_preview_url( $url );
+			}
+		}
 	}
 
 	/**

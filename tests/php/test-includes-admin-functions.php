@@ -70,6 +70,16 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 		$this->assertFalse( has_action( 'admin_menu', 'amp_add_customizer_link' ) );
 	}
 
+	/** @covers ::amp_admin_get_preview_permalink() */
+	public function test_amp_admin_get_preview_permalink() {
+		$this->markTestIncomplete();
+	}
+
+	/** @covers ::amp_get_customizer_url() */
+	public function test_amp_get_customizer_url() {
+		$this->markTestIncomplete();
+	}
+
 	/** @covers ::amp_add_customizer_link() */
 	public function test_amp_add_customizer_link_legacy() {
 		global $submenu;
@@ -112,5 +122,6 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 
 		$this->assertArrayHasKey( 'themes.php', $submenu );
 		$this->assertEquals( 'AMP', $submenu['themes.php'][0][0] );
+		$this->assertEquals( 'customize.php?amp_preview=1&amp=1', $submenu['themes.php'][0][2] );
 	}
 }

@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVar;
 
 /**
  * Sets up the AMP template editor for the Customizer.
@@ -98,7 +99,7 @@ function amp_get_customizer_url() {
 	}
 
 	$args = [
-		'url' => amp_admin_get_preview_permalink(),
+		QueryVar::AMP_PREVIEW => '1',
 	];
 	if ( $is_legacy ) {
 		$args['autofocus[panel]'] = AMP_Template_Customizer::PANEL_ID;

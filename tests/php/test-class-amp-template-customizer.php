@@ -69,6 +69,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		}
 
 		$instance = AMP_Template_Customizer::init( $wp_customize );
+		$this->assertFalse( has_action( 'customize_controls_init', [ $instance, 'set_reader_preview_url' ] ) );
 		$this->assertEquals( 0, did_action( 'amp_customizer_init' ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_customizer_scripts' ] ) );
 
@@ -93,6 +94,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		}
 
 		$instance = AMP_Template_Customizer::init( $wp_customize );
+		$this->assertFalse( has_action( 'customize_controls_init', [ $instance, 'set_reader_preview_url' ] ) );
 		$this->assertEquals( 0, did_action( 'amp_customizer_init' ) );
 		$this->assertFalse( has_action( 'customize_save_after', [ $instance, 'store_modified_theme_mod_setting_timestamps' ] ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_customizer_scripts' ] ) );
@@ -127,6 +129,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		}
 
 		$instance = AMP_Template_Customizer::init( $wp_customize );
+		$this->assertEquals( 10, has_action( 'customize_controls_init', [ $instance, 'set_reader_preview_url' ] ) );
 		$this->assertFalse( has_action( 'customize_save_after', [ $instance, 'store_modified_theme_mod_setting_timestamps' ] ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_customizer_scripts' ] ) );
 		$this->assertEquals( 1, did_action( 'amp_customizer_init' ) );
@@ -181,6 +184,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		}
 
 		$instance = AMP_Template_Customizer::init( $wp_customize );
+		$this->assertEquals( 10, has_action( 'customize_controls_init', [ $instance, 'set_reader_preview_url' ] ) );
 		$this->assertEquals( 10, has_action( 'customize_save_after', [ $instance, 'store_modified_theme_mod_setting_timestamps' ] ) );
 		$this->assertEquals( 10, has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_customizer_scripts' ] ) );
 		$this->assertEquals( 10, has_action( 'customize_controls_print_footer_scripts', [ $instance, 'render_setting_import_section_template' ] ) );
