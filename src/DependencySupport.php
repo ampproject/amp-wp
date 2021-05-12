@@ -9,6 +9,7 @@
 
 namespace AmpProject\AmpWP;
 
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
@@ -16,7 +17,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  *
  * @internal
  */
-class DependencySupport implements Service {
+class DependencySupport implements Service, Delayed {
 
 	/**
 	 * The minimum version of Gutenberg supported.
@@ -31,6 +32,15 @@ class DependencySupport implements Service {
 	 * @var string
 	 */
 	const WP_MIN_VERSION = '5.6';
+
+	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		return 'plugins_loaded';
+	}
 
 	/**
 	 * Determines whether core or Gutenberg provides minimal support.
