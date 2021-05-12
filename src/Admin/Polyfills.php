@@ -134,7 +134,7 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable {
 				),
 				'after'
 			);
-	   }
+		}
 	}
 
 	/**
@@ -174,7 +174,7 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable {
 	 *
 	 * @return bool Whether or not the script was overridden.
 	 */
-	public function override_script($scripts, $handle, $src, $deps = [], $ver = false, $in_footer = false ) {
+	public function override_script( $scripts, $handle, $src, $deps = [], $ver = false, $in_footer = false ) {
 		$script = $scripts->query( $handle, 'registered' );
 
 		if ( $script ) {
@@ -229,7 +229,7 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable {
 	 *                                 Default 'all'. Accepts media types like 'all', 'print' and 'screen', or media queries like
 	 *                                 '(orientation: portrait)' and '(max-width: 640px)'.
 	 */
-	public function override_style( $styles, $handle, $src, $deps = array(), $ver = false, $media = 'all' ) {
+	public function override_style( $styles, $handle, $src, $deps = [], $ver = false, $media = 'all' ) {
 		$style = $styles->query( $handle, 'registered' );
 		if ( $style ) {
 			$styles->remove( $handle );

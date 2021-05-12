@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Editor\EditorSupport;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
@@ -126,7 +126,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		if (
 			defined( 'GUTENBERG_VERSION' )
 			&&
-			version_compare( GUTENBERG_VERSION, EditorSupport::GB_MIN_VERSION, '<' )
+			version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '<' )
 		) {
 			$this->markTestSkipped( 'The version of Gutenberg installed is not compatible with the plugin.' );
 		}

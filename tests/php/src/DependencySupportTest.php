@@ -21,7 +21,7 @@ class DependencySupportTest extends WP_UnitTestCase {
 		$gutenberg_supported = defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
 			? GUTENBERG_VERSION
 			: null;
-		$wp_supported = version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' );
+		$wp_supported        = version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' );
 
 		if ( $gutenberg_supported && $wp_supported ) {
 			$this->assertTrue( $this->instance->has_support() );

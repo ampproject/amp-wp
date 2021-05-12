@@ -6,6 +6,7 @@
  *
  * @package AmpProject\AmpWP
  */
+
 namespace AmpProject\AmpWP;
 
 use AmpProject\AmpWP\Infrastructure\Service;
