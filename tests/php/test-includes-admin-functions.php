@@ -131,10 +131,24 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 				},
 			],
 			'reader_theme'  => [
-				'options' => [
-					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
-					Option::READER_THEME  => 'twentynineteen',
-				],
+				'options' => function () {
+					$theme = current(
+						array_filter(
+							wp_get_themes(),
+							static function ( WP_Theme $theme ) {
+								return 0 === strpos( $theme->get_stylesheet(), 'twenty' );
+							}
+						)
+					);
+					if ( ! $theme instanceof WP_Theme ) {
+						$this->markTestSkipped( 'Lacking theme being installed.' );
+					}
+
+					return [
+						Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
+						Option::READER_THEME  => $theme->get_stylesheet(),
+					];
+				},
 				function () {
 					$this->assertFalse( amp_is_legacy() );
 					$this->assertEquals( 'customize.php?amp_preview=1&amp=1', amp_get_customizer_url() );
@@ -155,10 +169,13 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 	 * @dataProvider get_data_for_test_amp_get_customizer_url
 	 * @covers ::amp_get_customizer_url()
 	 *
-	 * @param array    $options Options.
-	 * @param callable $assert  Assert.
+	 * @param array|Closure $options Options or callback to get the options.
+	 * @param Closure       $assert  Assert.
 	 */
 	public function test_amp_get_customizer_url( $options, $assert ) {
+		if ( $options instanceof Closure ) {
+			$options = $options();
+		}
 		AMP_Options_Manager::update_options( $options );
 		$assert();
 	}
