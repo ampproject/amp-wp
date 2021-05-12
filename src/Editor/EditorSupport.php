@@ -10,6 +10,7 @@
 namespace AmpProject\AmpWP\Editor;
 
 use AMP_Post_Type_Support;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
@@ -20,19 +21,17 @@ use AmpProject\AmpWP\Infrastructure\Service;
  */
 final class EditorSupport implements Registerable, Service {
 
-	/**
-	 * The minimum version of Gutenberg supported by editor features.
-	 *
-	 * @var string
-	 */
-	const GB_MIN_VERSION = '9.2.0';
+	/** @var DependencySupport */
+	private $dependency_support;
 
 	/**
-	 * The minimum version of WordPress supported by editor features.
+	 * Constructor.
 	 *
-	 * @var string
+	 * @param DependencySupport $dependency_support
 	 */
-	const WP_MIN_VERSION = '5.6';
+	public function __construct( DependencySupport $dependency_support ) {
+		$this->dependency_support = $dependency_support;
+	}
 
 	/**
 	 * Runs on instantiation.
@@ -84,30 +83,6 @@ final class EditorSupport implements Registerable, Service {
 	 * @return bool
 	 */
 	public function editor_supports_amp_block_editor_features() {
-		// Check for plugin constant here as well as in the function because editor features won't work in
-		// supported WP versions if an old, unsupported GB version is overriding the editor.
-		if ( defined( 'GUTENBERG_VERSION' ) ) {
-			return $this->has_support_from_gutenberg_plugin();
-		}
-
-		return $this->has_support_from_core();
-	}
-
-	/**
-	 * Returns whether the Gutenberg plugin provides minimal support.
-	 *
-	 * @return bool
-	 */
-	public function has_support_from_gutenberg_plugin() {
-		return defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, self::GB_MIN_VERSION, '>=' );
-	}
-
-	/**
-	 * Returns whether WP core provides minimum Gutenberg support.
-	 *
-	 * @return bool
-	 */
-	public function has_support_from_core() {
-		return version_compare( get_bloginfo( 'version' ), self::WP_MIN_VERSION, '>=' );
+		return $this->dependency_support->has_support();
 	}
 }

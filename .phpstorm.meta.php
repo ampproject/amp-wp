@@ -23,6 +23,7 @@ namespace PHPSTORM_META {
 			'cli.validation_command'             => \AmpProject\AmpWP\CliCli\ValidationCommand::class,
 			'css_transient_cache.ajax_handler'   => \AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction::class,
 			'css_transient_cache.monitor'        => \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching::class,
+			'dependency_support'                 => \AmpProject\AmpWP\DependencySupport::class,
 			'dev_tools.block_sources'            => \AmpProject\AmpWP\DevTools\BlockSources::class,
 			'dev_tools.callback_reflection'      => \AmpProject\AmpWP\DevTools\CallbackReflection::class,
 			'dev_tools.error_page'               => \AmpProject\AmpWP\DevTools\ErrorPage::class,

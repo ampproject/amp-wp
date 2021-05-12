@@ -2,6 +2,7 @@
 
 namespace AmpProject\AmpWP\Tests\Editor;
 
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Editor\EditorSupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -37,11 +38,11 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		if (
 			defined( 'GUTENBERG_VERSION' )
 			&&
-			version_compare( GUTENBERG_VERSION, EditorSupport::GB_MIN_VERSION, '>=' )
+			version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
 		) {
 			$this->assertTrue( $this->instance->has_support_from_gutenberg_plugin() );
 		} else {
-			if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '>=' ) ) {
+			if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' ) ) {
 				$this->assertTrue( $this->instance->has_support_from_core() );
 			} else {
 				$this->assertFalse( $this->instance->has_support_from_core() );
@@ -53,11 +54,11 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		if (
 			defined( 'GUTENBERG_VERSION' )
 			&&
-			version_compare( GUTENBERG_VERSION, EditorSupport::GB_MIN_VERSION, '>=' )
+			version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
 		) {
 			$this->assertTrue( $this->instance->editor_supports_amp_block_editor_features() );
 		} else {
-			if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '>=' ) ) {
+			if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' ) ) {
 				$this->assertTrue( $this->instance->editor_supports_amp_block_editor_features() );
 			} else {
 				$this->assertFalse( $this->instance->editor_supports_amp_block_editor_features() );
@@ -67,7 +68,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 	/** @covers ::has_support_from_core() */
 	public function test_has_support_from_core() {
-		if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '>=' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' ) ) {
 			$this->assertTrue( $this->instance->has_support_from_core() );
 		} else {
 			$this->assertFalse( $this->instance->has_support_from_core() );
@@ -101,7 +102,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function test_show_notice_for_supported_post_type() {
 		global $post;
 
-		if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '<' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '<' ) ) {
 			$this->markTestSkipped();
 		}
 
