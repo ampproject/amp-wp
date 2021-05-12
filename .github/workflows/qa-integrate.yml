@@ -29,7 +29,7 @@ jobs:
         run: echo "::set-output name=dir::$(npm config get cache)"
 
       - name: Configure npm cache
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -57,7 +57,7 @@ jobs:
         run: echo "::set-output name=dir::$(npm config get cache)"
 
       - name: Configure npm cache
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -102,7 +102,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -170,7 +170,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -210,7 +210,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -224,7 +224,7 @@ jobs:
         run: echo "::set-output name=dir::$(npm config get cache)"
 
       - name: Configure npm cache
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
