@@ -279,7 +279,9 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$wp_customize = $this->get_customize_manager();
 		$instance     = AMP_Template_Customizer::init( $wp_customize );
 		$instance->init_legacy_preview();
-		$this->assertEquals( 10, has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.7', '<' ) ) {
+			$this->assertEquals( 10, has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		}
 		$this->assertEquals( 10, has_action( 'amp_customizer_enqueue_preview_scripts', [ $instance, 'enqueue_legacy_preview_scripts' ] ) );
 		$this->assertNull( $wp_customize->get_messenger_channel() );
 	}
@@ -290,7 +292,9 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$wp_customize->start_previewing_theme();
 		$instance = AMP_Template_Customizer::init( $wp_customize );
 		$instance->init_legacy_preview();
-		$this->assertEquals( 10, has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.7', '<' ) ) {
+			$this->assertEquals( 10, has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		}
 		$this->assertEquals( 10, has_action( 'amp_customizer_enqueue_preview_scripts', [ $instance, 'enqueue_legacy_preview_scripts' ] ) );
 		$this->assertEquals( '123', $wp_customize->get_messenger_channel() );
 
