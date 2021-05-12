@@ -71,8 +71,8 @@ class AMP_Template_Customizer {
 	 * @since 0.4
 	 * @access public
 	 *
-	 * @param WP_Customize_Manager $wp_customize        Customizer instance.
-	 * @param ReaderThemeLoader    $reader_theme_loader Reader theme loader.
+	 * @param WP_Customize_Manager   $wp_customize        Customizer instance.
+	 * @param ReaderThemeLoader|null $reader_theme_loader Reader theme loader.
 	 * @return AMP_Template_Customizer Instance.
 	 */
 	public static function init( WP_Customize_Manager $wp_customize, ReaderThemeLoader $reader_theme_loader = null ) {
