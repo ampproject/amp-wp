@@ -194,9 +194,5 @@ function amp_bootstrap_admin() {
  */
 function amp_should_use_new_onboarding() {
 	$dependency_support = Services::get( 'dependency_support' );
-	if ( ! $dependency_support->has_support() ) {
-		return false;
-	}
-
-	return true;
+	return $dependency_support->has_support();
 }

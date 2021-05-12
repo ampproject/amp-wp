@@ -7,6 +7,7 @@
  */
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 
@@ -36,7 +37,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 		parent::setUp();
 
 		if ( ! amp_should_use_new_onboarding() ) {
-			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+			$this->markTestSkipped( sprintf( 'Requires WordPress %s or later.', DependencySupport::WP_MIN_VERSION ) );
 		}
 
 		delete_transient( 'amp_themes_wporg' );

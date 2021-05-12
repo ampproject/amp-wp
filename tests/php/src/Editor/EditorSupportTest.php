@@ -17,7 +17,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->instance = new EditorSupport();
+		$this->instance = new EditorSupport( new DependencySupport() );
 	}
 
 	public function test_it_can_be_initialized() {
@@ -33,23 +33,6 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		$this->assertEquals( 99, has_action( 'admin_enqueue_scripts', [ $this->instance, 'maybe_show_notice' ] ) );
 	}
 
-	/** @covers ::has_support_from_gutenberg_plugin */
-	public function test_has_support_from_gutenberg_plugin() {
-		if (
-			defined( 'GUTENBERG_VERSION' )
-			&&
-			version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
-		) {
-			$this->assertTrue( $this->instance->has_support_from_gutenberg_plugin() );
-		} else {
-			if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' ) ) {
-				$this->assertTrue( $this->instance->has_support_from_core() );
-			} else {
-				$this->assertFalse( $this->instance->has_support_from_core() );
-			}
-		}
-	}
-
 	public function test_editor_supports_amp_block_editor_features() {
 		if (
 			defined( 'GUTENBERG_VERSION' )
@@ -63,15 +46,6 @@ final class EditorSupportTest extends WP_UnitTestCase {
 			} else {
 				$this->assertFalse( $this->instance->editor_supports_amp_block_editor_features() );
 			}
-		}
-	}
-
-	/** @covers ::has_support_from_core() */
-	public function test_has_support_from_core() {
-		if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' ) ) {
-			$this->assertTrue( $this->instance->has_support_from_core() );
-		} else {
-			$this->assertFalse( $this->instance->has_support_from_core() );
 		}
 	}
 

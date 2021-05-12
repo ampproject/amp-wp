@@ -27,7 +27,7 @@ final class EditorSupport implements Registerable, Service {
 	/**
 	 * Constructor.
 	 *
-	 * @param DependencySupport $dependency_support
+	 * @param DependencySupport $dependency_support DependencySupport instance.
 	 */
 	public function __construct( DependencySupport $dependency_support ) {
 		$this->dependency_support = $dependency_support;

@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\Polyfills;
+use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -46,6 +47,7 @@ class PolyfillsTest extends WP_UnitTestCase {
 		$this->assertInstanceOf( Polyfills::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Delayed::class, $this->instance );
+		$this->assertInstanceOf( Conditional::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 	}
 
@@ -66,9 +68,14 @@ class PolyfillsTest extends WP_UnitTestCase {
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
 
-		// These should pass in WP 4.9 tests.
+		// These should pass in WP < 5.6.
 		$this->assertTrue( wp_script_is( 'lodash', 'registered' ) );
+		$this->assertContains( '_.noConflict();', $wp_scripts->print_inline_script( 'lodash', 'after', false ) );
+
 		$this->assertTrue( wp_script_is( 'wp-api-fetch', 'registered' ) );
+		$this->assertContains( 'createRootURLMiddleware', $wp_scripts->print_inline_script( 'wp-api-fetch', 'after', false ) );
+		$this->assertContains( 'createNonceMiddleware', $wp_scripts->print_inline_script( 'wp-api-fetch', 'after', false ) );
+
 		$this->assertTrue( wp_script_is( 'wp-hooks', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'wp-i18n', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'wp-dom-ready', 'registered' ) );
