@@ -262,7 +262,8 @@ class AMP_Template_Customizer {
 		// action and in `WP_Customize_Manager::customize_preview_init()` the `wp_robots_no_robots()` function is added
 		// to the `wp_robots` filter.
 		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.7', '<' ) ) {
-			add_action( 'amp_post_template_head', 'wp_no_robots' );
+			// There is code coverage for this, but code coverage is only collected for the latest WP version.
+			add_action( 'amp_post_template_head', 'wp_no_robots' ); // @codeCoverageIgnore
 		}
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_legacy_preview_scripts' ] );

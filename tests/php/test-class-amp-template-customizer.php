@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\ReaderThemeLoader;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
@@ -204,6 +205,30 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$this->assertNull( $wp_customize->get_section( 'static_front_page' ) );
 	}
 
+	/** @covers AMP_Template_Customizer::set_reader_preview_url() */
+	public function test_set_reader_preview_url() {
+		$post_id      = self::factory()->post->create();
+		$wp_customize = $this->get_customize_manager();
+		$instance     = AMP_Template_Customizer::init( $wp_customize );
+
+		$this->assertEquals( amp_get_permalink( $post_id ), amp_admin_get_preview_permalink() );
+		$this->assertEquals( home_url( '/' ), $wp_customize->get_preview_url() );
+
+		$instance->set_reader_preview_url();
+		$this->assertEquals( home_url( '/' ), $wp_customize->get_preview_url() );
+
+		$_GET[ QueryVar::AMP_PREVIEW ] = '1';
+		$instance->set_reader_preview_url();
+		$this->assertNotEquals( home_url( '/' ), $wp_customize->get_preview_url() );
+		$this->assertEquals( amp_admin_get_preview_permalink(), $wp_customize->get_preview_url() );
+
+		$wp_customize->set_preview_url( home_url( '/foo/' ) );
+		$_GET[ QueryVar::AMP_PREVIEW ] = '1';
+		$_GET['url']                   = home_url( '/foo/' );
+		$instance->set_reader_preview_url();
+		$this->assertEquals( home_url( '/foo/' ), $wp_customize->get_preview_url() );
+	}
+
 	/**
 	 * @covers AMP_Template_Customizer::init()
 	 * @covers AMP_Template_Customizer::add_dark_mode_toggler_button_notice()
@@ -285,6 +310,8 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$instance->init_legacy_preview();
 		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.7', '<' ) ) {
 			$this->assertEquals( 10, has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		} else {
+			$this->assertFalse( has_action( 'amp_post_template_head', 'wp_no_robots' ) );
 		}
 		$this->assertEquals( 10, has_action( 'amp_customizer_enqueue_preview_scripts', [ $instance, 'enqueue_legacy_preview_scripts' ] ) );
 		$this->assertNull( $wp_customize->get_messenger_channel() );
@@ -298,6 +325,8 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$instance->init_legacy_preview();
 		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.7', '<' ) ) {
 			$this->assertEquals( 10, has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		} else {
+			$this->assertFalse( has_action( 'amp_post_template_head', 'wp_no_robots' ) );
 		}
 		$this->assertEquals( 10, has_action( 'amp_customizer_enqueue_preview_scripts', [ $instance, 'enqueue_legacy_preview_scripts' ] ) );
 		$this->assertEquals( '123', $wp_customize->get_messenger_channel() );
