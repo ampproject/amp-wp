@@ -374,6 +374,7 @@ li.error-kept {
 }
 
 #plugin-suppression .amp-drawer__panel-body-inner > p,
+#paired-url-structure .amp-drawer__panel-body-inner > p,
 .amp-analytics .amp-drawer__panel-body-inner p,
 #paired-url-structure .amp-drawer__panel-body-inner {
 	margin-top: 0;
@@ -393,6 +394,10 @@ li.error-kept {
 	margin-top: 5px;
 	margin-bottom: 5px;
 	line-height: 1.5;
+}
+
+#paired-url-structure ul {
+	margin-top: 1.5rem;
 }
 
 #paired-url-structure .amp-notice--large {
