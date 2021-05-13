@@ -145,6 +145,51 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 		$this->assertStringContains( 'body{color:blue', $output );
 	}
 
+	/** @covers ::amp_add_custom_analytics() */
+	public function test_amp_add_custom_analytics() {
+		$post_id = self::factory()->post->create();
+		$this->go_to( get_permalink( $post_id ) );
+
+		$uuid1 = 'a6a13d59-a5bb-40a8-af3f-657d12d523bd';
+		$uuid2 = 'b6a13d59-a5bb-40a8-af3f-657d12d523bd';
+
+		add_filter(
+			'amp_analytics_entries',
+			static function () use ( $uuid1 ) {
+				return [
+					$uuid1 => [
+						'type'        => 'foo',
+						'config_data' => [
+							'bar' => true,
+						],
+					],
+				];
+			}
+		);
+
+		add_filter(
+			'amp_post_template_analytics',
+			function ( $analytics, WP_Post $queried_oject ) use ( $uuid2, $post_id ) {
+				$this->assertEquals( $post_id, $queried_oject->ID );
+
+				$analytics[ $uuid2 ] = [
+					'type'        => 'baz',
+					'config_data' => [
+						'quux' => true,
+					],
+				];
+
+				return $analytics;
+			},
+			10,
+			2
+		);
+
+		$analytics = amp_add_custom_analytics();
+		$this->assertArrayHasKey( $uuid1, $analytics );
+		$this->assertArrayHasKey( $uuid2, $analytics );
+	}
+
 	/** @covers ::amp_post_template_add_analytics_data() */
 	public function test_amp_post_template_add_analytics_data() {
 		$this->assertEmpty( get_echo( 'amp_post_template_add_analytics_data' ) );
