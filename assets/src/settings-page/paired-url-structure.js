@@ -138,7 +138,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 			<p dangerouslySetInnerHTML={
 				{ __html:
 					sprintf(
-						/* translators: 1: AMP Analytics docs URL */
+						/* translators: 1: AMP Paired URL Structure documentation URL */
 						__( 'When using the Transitional or Reader template modes, your site is in a “Paired AMP” configuration. Canonical URLs are non-AMP and separate AMP versions of your pages have AMP-specific URLs. The structure of a paired AMP URL is not important, whether using a query parameter or path suffix. The use of a query parameter is the most compatible across various sites and doesn\'t result in a 404 if the AMP plugin is deactivated. <em>Note: Changing the paired URL structure can cause AMP pages to disappear from search results until your site is re-indexed.</em> If you\'re migrating from another AMP plugin with a different paired URL structure, then you may want to change this setting. Otherwise we recommend leaving it as is. <a href="%1$s" target="_blank">Learn more</a>', 'amp' ),
 						__( 'https://amp-wp.org/?p=10004', 'amp' ),
 					),
