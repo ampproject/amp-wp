@@ -72,6 +72,9 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 
 	/** @covers ::amp_admin_get_preview_permalink() */
 	public function test_amp_admin_get_preview_permalink() {
+		// No posts exist yet.
+		$this->assertNull( amp_admin_get_preview_permalink() );
+
 		$page_id = self::factory()->post->create(
 			[
 				'post_type' => 'page',
@@ -223,5 +226,30 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'themes.php', $submenu );
 		$this->assertEquals( 'AMP', $submenu['themes.php'][0][0] );
 		$this->assertEquals( 'customize.php?amp_preview=1&amp=1', $submenu['themes.php'][0][2] );
+	}
+
+	/** @covers ::amp_editor_core_blocks() */
+	public function test_amp_editor_core_blocks() {
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'Requires block editor.' );
+		}
+
+		remove_all_filters( 'wp_kses_allowed_html' );
+		amp_editor_core_blocks();
+		$this->assertTrue( has_filter( 'wp_kses_allowed_html' ) );
+	}
+
+	/** @covers ::amp_bootstrap_admin() */
+	public function test_amp_bootstrap_admin() {
+		remove_all_actions( 'admin_enqueue_scripts' );
+		remove_all_actions( 'post_submitbox_misc_actions' );
+		amp_bootstrap_admin();
+		$this->assertTrue( has_action( 'admin_enqueue_scripts' ) );
+		$this->assertTrue( has_action( 'post_submitbox_misc_actions' ) );
+	}
+
+	/** @covers ::amp_should_use_new_onboarding() */
+	public function test_amp_should_use_new_onboarding() {
+		$this->markTestIncomplete( 'This function may be eliminated as of https://github.com/ampproject/amp-wp/pull/6225' );
 	}
 }
