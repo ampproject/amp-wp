@@ -103,18 +103,24 @@ jobs:
         run: npm run lint:pkg-json
 
       - name: Detect ESLint coding standard violations
-        if: github.event.pull_request.head.repo.fork == true
+        if: >
+          github.event.pull_request.head.repo.fork == true ||
+          github.event.pull_request.user.login == 'dependabot'
         run: npm run lint:js
 
       - name: Generate ESLint coding standard violations report
         # Prevent generating the ESLint report if run from a PR fork
-        if: github.event.pull_request.head.repo.fork == false
+        if: >
+          github.event.pull_request.head.repo.fork == false &&
+          github.event.pull_request.user.login != 'dependabot'
         run: npm run lint:js:report
         continue-on-error: true
 
       - name: Annotate code linting results
         # The action cannot annotate the PR diff when run from a PR fork
-        if: github.event.pull_request.head.repo.fork == false
+        if: >
+          github.event.pull_request.head.repo.fork == false &&
+          github.event.pull_request.user.login != 'dependabot'
         uses: ataylorme/eslint-annotate-action@1.1.2
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
@@ -658,7 +664,9 @@ jobs:
   build-zip:
     name: 'Build: ${{ matrix.build }} build ZIP'
     # Only run if it is not a draft PR and the PR is not from a forked repository.
-    if: ( github.event.pull_request.draft || github.event.pull_request.head.repo.fork ) == false
+    if: >
+      ( github.event.pull_request.draft || github.event.pull_request.head.repo.fork ) == false &&
+      github.event.pull_request.user.login != 'dependabot'
     runs-on: ubuntu-latest
     needs:
       - lint-css
