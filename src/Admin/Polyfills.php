@@ -52,8 +52,6 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable {
 			return;
 		}
 
-		error_log('loading');
-
 		$this->register_shimmed_scripts( wp_scripts() );
 		$this->register_shimmed_styles( wp_styles() );
 	}
