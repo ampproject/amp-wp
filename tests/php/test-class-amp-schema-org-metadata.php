@@ -86,7 +86,5 @@ class AmpSchemaOrgMetadataTest extends WP_UnitTestCase {
 
 		$xpath_query = '//script[ @type = "application/ld+json" ]';
 		$this->assertEquals( 0, $dom->xpath->query( $xpath_query )->length );
-
-		remove_filter( 'amp_schemaorg_metadata', '__return_empty_array' );
 	}
 }
