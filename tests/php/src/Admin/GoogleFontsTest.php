@@ -42,7 +42,6 @@ class GoogleFontsTest extends WP_UnitTestCase {
 
 	public function test__construct() {
 		$this->assertInstanceOf( GoogleFonts::class, $this->instance );
-		$this->assertInstanceOf( Delayed::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 	}
