@@ -10,11 +10,9 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AmpProject\AmpWP\DevTools\UserAccess;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 
 /**
@@ -23,7 +21,7 @@ use AmpProject\AmpWP\Services;
  * @since 2.0
  * @internal
  */
-final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registerable, Service {
+final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Service {
 	/**
 	 * Handle for JS file.
 	 *
@@ -74,15 +72,6 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		$this->google_fonts   = $google_fonts;
 		$this->reader_themes  = $reader_themes;
 		$this->rest_preloader = $rest_preloader;
-	}
-
-	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return amp_should_use_new_onboarding();
 	}
 
 	/**
@@ -149,7 +138,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 			<div>
 			<div>
 			<div>
-			<div class="amp" id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
+			<div class="amp" id="<?php echo esc_attr( self::APP_ROOT_ID ); ?>"></div>
 
 			<style>
 			#wpfooter { display:none; }

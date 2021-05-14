@@ -185,14 +185,3 @@ function amp_bootstrap_admin() {
 	$post_meta_box = new AMP_Post_Meta_Box();
 	$post_meta_box->init();
 }
-
-/**
- * Whether to activate the new onboarding feature.
- *
- * @internal
- * @return bool
- */
-function amp_should_use_new_onboarding() {
-	$dependency_support = Services::get( 'dependency_support' );
-	return $dependency_support->has_support();
-}

@@ -47,6 +47,13 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable {
 	 * Runs on instantiation.
 	 */
 	public function register() {
+		$screen = get_current_screen();
+		if ( ! empty( $screen->is_block_editor ) ) {
+			return;
+		}
+
+		error_log('loading');
+
 		$this->register_shimmed_scripts( wp_scripts() );
 		$this->register_shimmed_styles( wp_styles() );
 	}
@@ -74,7 +81,7 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable {
 		 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
 		 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
 		 */
-		$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-hooks', 'wp-polyfill', 'wp-url' ];
+		$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-hooks', 'wp-html-entities', 'wp-polyfill', 'wp-url' ];
 		foreach ( $handles as $handle ) {
 			$asset_file   = AMP__DIR__ . "/assets/js/{$handle}.asset.php";
 			$asset        = require $asset_file;

@@ -188,9 +188,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 
 		$options[ Option::SUPPRESSED_PLUGINS ] = $this->plugin_suppression->prepare_suppressed_plugins_for_response( $options[ Option::SUPPRESSED_PLUGINS ] );
 
-		$options[ self::ONBOARDING_WIZARD_LINK ] = amp_should_use_new_onboarding()
-			? get_admin_url( null, add_query_arg( [ 'page' => OnboardingWizardSubmenu::SCREEN_ID ], 'admin.php' ) )
-			: null;
+		$options[ self::ONBOARDING_WIZARD_LINK ] = get_admin_url( null, add_query_arg( [ 'page' => OnboardingWizardSubmenu::SCREEN_ID ], 'admin.php' ) );
 
 		$options[ self::CUSTOMIZER_LINK ] = amp_get_customizer_url();
 
