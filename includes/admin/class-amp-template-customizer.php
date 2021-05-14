@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\ReaderThemeLoader;
 use AmpProject\AmpWP\Services;
 
@@ -71,8 +72,8 @@ class AMP_Template_Customizer {
 	 * @since 0.4
 	 * @access public
 	 *
-	 * @param WP_Customize_Manager $wp_customize        Customizer instance.
-	 * @param ReaderThemeLoader    $reader_theme_loader Reader theme loader.
+	 * @param WP_Customize_Manager   $wp_customize        Customizer instance.
+	 * @param ReaderThemeLoader|null $reader_theme_loader Reader theme loader.
 	 * @return AMP_Template_Customizer Instance.
 	 */
 	public static function init( WP_Customize_Manager $wp_customize, ReaderThemeLoader $reader_theme_loader = null ) {
@@ -85,6 +86,8 @@ class AMP_Template_Customizer {
 		$has_reader_theme = ( ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) ); // @todo Verify that the theme actually exists.
 
 		if ( $is_reader_mode ) {
+			add_action( 'customize_controls_init', [ $self, 'set_reader_preview_url' ] );
+
 			if ( $has_reader_theme ) {
 				add_action( 'customize_save_after', [ $self, 'store_modified_theme_mod_setting_timestamps' ] );
 			}
@@ -121,6 +124,18 @@ class AMP_Template_Customizer {
 			add_action( 'customize_controls_print_footer_scripts', [ $self, 'add_dark_mode_toggler_button_notice' ] );
 		}
 		return $self;
+	}
+
+	/**
+	 * Set the preview URL when using a Reader theme if the AMP preview permalink was requested and no URL was provided.
+	 */
+	public function set_reader_preview_url() {
+		if ( isset( $_GET[ QueryVar::AMP_PREVIEW ] ) && ! isset( $_GET['url'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$url = amp_admin_get_preview_permalink();
+			if ( $url ) {
+				$this->wp_customize->set_preview_url( $url );
+			}
+		}
 	}
 
 	/**
@@ -243,7 +258,14 @@ class AMP_Template_Customizer {
 	 * @since 0.4
 	 */
 	public function init_legacy_preview() {
-		add_action( 'amp_post_template_head', 'wp_no_robots' );
+		// This is only needed in WP<5.7 because in 5.7 the `wp_robots()` function runs at the `amp_post_template_head`
+		// action and in `WP_Customize_Manager::customize_preview_init()` the `wp_robots_no_robots()` function is added
+		// to the `wp_robots` filter.
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.7', '<' ) ) {
+			// There is code coverage for this, but code coverage is only collected for the latest WP version.
+			add_action( 'amp_post_template_head', 'wp_no_robots' ); // @codeCoverageIgnore
+		}
+
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_legacy_preview_scripts' ] );
 		add_action( 'amp_customizer_enqueue_preview_scripts', [ $this, 'enqueue_legacy_preview_scripts' ] );
 
