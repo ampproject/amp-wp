@@ -2,22 +2,21 @@
 /**
  * Class to determine support for AMP plugin features.
  *
- * @since 2.1.2
- *
  * @package AmpProject\AmpWP
  */
 
 namespace AmpProject\AmpWP;
 
-use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
  * DependencySupport class.
  *
  * @internal
+ * @package AmpProject\AmpWP
+ * @since 2.1.2
  */
-class DependencySupport implements Service, Delayed {
+class DependencySupport implements Service {
 
 	/**
 	 * The minimum version of Gutenberg supported.
@@ -32,15 +31,6 @@ class DependencySupport implements Service, Delayed {
 	 * @var string
 	 */
 	const WP_MIN_VERSION = '5.6';
-
-	/**
-	 * Get the action to use for registering the service.
-	 *
-	 * @return string Registration action to use.
-	 */
-	public static function get_registration_action() {
-		return 'plugins_loaded';
-	}
 
 	/**
 	 * Determines whether core or Gutenberg provides minimal support.

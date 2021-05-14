@@ -21,12 +21,6 @@ class DependencySupportTest extends WP_UnitTestCase {
 
 	public function test_it_can_be_initialized() {
 		$this->assertInstanceOf( Service::class, $this->instance );
-		$this->assertInstanceOf( Delayed::class, $this->instance );
-	}
-
-	/** @covers ::get_registration_action() */
-	public function test_get_registration_action() {
-		$this->assertSame( 'plugins_loaded', DependencySupport::get_registration_action() );
 	}
 
 	public function test_has_support() {
