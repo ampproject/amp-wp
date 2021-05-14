@@ -19,6 +19,8 @@ use AmpProject\Extension;
 use AmpProject\Optimizer;
 use AmpProject\RequestDestination;
 use AmpProject\Tag;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration;
 
 /**
  * Class AMP_Theme_Support
@@ -123,6 +125,13 @@ class AMP_Theme_Support {
 	 * @var bool
 	 */
 	protected static $is_output_buffering = false;
+
+	/**
+	 * Schema.org metadata
+	 *
+	 * @var array
+	 */
+	protected static $metadata;
 
 	/**
 	 * Initialize.
@@ -1622,6 +1631,9 @@ class AMP_Theme_Support {
 			newrelic_disable_autorum();
 		}
 
+		// Obtain Schema.org metadata so that it will be available.
+		self::$metadata = (array) amp_get_schemaorg_metadata();
+
 		ob_start( [ __CLASS__, 'finish_output_buffering' ] );
 		self::$is_output_buffering = true;
 	}
@@ -2086,6 +2098,18 @@ class AMP_Theme_Support {
 				return array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
 					? $args[ ConfigurationArgument::ENABLE_SSR ]
 					: true;
+			},
+			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+		);
+
+		// Supply the Schema.org metadata, previously obtained just before output buffering began, to the AmpSchemaOrgMetadataConfiguration.
+		add_filter(
+			'amp_optimizer_config',
+			function ( $config ) {
+				if ( is_array( self::$metadata ) ) {
+					$config[ AmpSchemaOrgMetadata::class ][ AmpSchemaOrgMetadataConfiguration::METADATA ] = self::$metadata;
+				}
+				return $config;
 			},
 			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		);
