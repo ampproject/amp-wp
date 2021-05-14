@@ -1982,7 +1982,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 
 		add_filter(
-			'amp_schemaorg_metadata',
+			'amp_enable_optimizer',
 			static function () {
 				throw new RuntimeException( 'FAILURE', 42 );
 			}

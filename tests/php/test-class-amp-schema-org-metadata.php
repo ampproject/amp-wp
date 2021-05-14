@@ -55,10 +55,21 @@ class AmpSchemaOrgMetadataTest extends WP_UnitTestCase {
 	 * @param int    $expected Expected count of valid JSON+LD schema.
 	 */
 	public function test_transform( $json, $expected ) {
-		$html        = '<html><head><script type="application/ld+json">%s</script></head><body>Test</body></html>';
-		$dom         = Document::fromHtml( sprintf( $html, $json ), Options::DEFAULTS );
-		$transformer = new AmpSchemaOrgMetadata( new AmpSchemaOrgMetadataConfiguration() );
-		$errors      = new ErrorCollection();
+		$html          = '<html><head><script type="application/ld+json">%s</script></head><body>Test</body></html>';
+		$dom           = Document::fromHtml( sprintf( $html, $json ), Options::DEFAULTS );
+		$configuration = new AmpSchemaOrgMetadataConfiguration(
+			[
+				AmpSchemaOrgMetadataConfiguration::METADATA => [
+					'@context'  => 'http://schema.org',
+					'publisher' => [
+						'@type' => 'Organization',
+						'name'  => 'Acme',
+					],
+				],
+			]
+		);
+		$transformer   = new AmpSchemaOrgMetadata( $configuration );
+		$errors        = new ErrorCollection();
 		$transformer->transform( $dom, $errors );
 		$this->assertEquals( $expected, substr_count( $dom->saveHTML(), 'schema.org' ) );
 	}
@@ -69,8 +80,6 @@ class AmpSchemaOrgMetadataTest extends WP_UnitTestCase {
 	 * @covers ::transform
 	 */
 	public function test_empty_metadata_configuration() {
-		add_filter( 'amp_schemaorg_metadata', '__return_empty_array' );
-
 		$dom         = new Document();
 		$transformer = new AmpSchemaOrgMetadata( new AmpSchemaOrgMetadataConfiguration() );
 		$transformer->transform( $dom, new ErrorCollection() );
