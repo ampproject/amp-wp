@@ -93,11 +93,11 @@ final class HeroCandidateFiltering implements Service, Delayed, Conditional, Reg
 	 *
 	 * Only the featured image for the singular queried object post or the first post in the loop will be identified.
 	 *
-	 * @param string[] $attrs      Array of attribute values for the image markup, keyed by attribute name.
-	 * @param WP_Post  $attachment Image attachment post.
+	 * @param string[]     $attrs      Array of attribute values for the image markup, keyed by attribute name.
+	 * @param WP_Post|null $attachment Image attachment post.
 	 * @return string[] Filtered attributes.
 	 */
-	public function filter_attachment_image_attributes( $attrs, WP_Post $attachment ) {
+	public function filter_attachment_image_attributes( $attrs, $attachment = null ) {
 		global $wp_query;
 
 		$post         = null;
@@ -110,6 +110,8 @@ final class HeroCandidateFiltering implements Service, Delayed, Conditional, Reg
 
 		if (
 			$post instanceof WP_Post
+			&&
+			$attachment instanceof WP_Post
 			&&
 			(int) get_post_thumbnail_id( $post ) === $attachment->ID
 		) {
