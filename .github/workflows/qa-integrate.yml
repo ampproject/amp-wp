@@ -90,7 +90,7 @@ jobs:
         if: >
           ! ( github.event.pull_request.head.repo.fork == true ||
           github.event.pull_request.user.login == 'dependabot[bot]' )
-        uses: ataylorme/eslint-annotate-action@1.1.2
+        uses: ataylorme/eslint-annotate-action@1.2.0
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
           report-json: 'qa-tester/lint-js-report.json'
