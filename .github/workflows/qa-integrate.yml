@@ -74,14 +74,14 @@ jobs:
       - name: Detect ESLint coding standard violations
         if: >
           github.event.pull_request.head.repo.fork == true ||
-          github.event.pull_request.user.login == 'dependabot'
+          github.event.pull_request.user.login == 'dependabot[bot]'
         run: npm run lint:js
 
       - name: Generate ESLint coding standard violations report
         # Prevent generating the ESLint report if PR is from a fork or authored by Dependabot.
         if: >
           ! ( github.event.pull_request.head.repo.fork == true ||
-          github.event.pull_request.user.login == 'dependabot' )
+          github.event.pull_request.user.login == 'dependabot[bot]' )
         run: npm run lint:js:report
         continue-on-error: true
 
@@ -89,7 +89,7 @@ jobs:
         # The action cannot annotate the PR when run from a PR fork or was authored by Dependabot.
         if: >
           ! ( github.event.pull_request.head.repo.fork == true ||
-          github.event.pull_request.user.login == 'dependabot' )
+          github.event.pull_request.user.login == 'dependabot[bot]' )
         uses: ataylorme/eslint-annotate-action@1.1.2
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
@@ -213,7 +213,7 @@ jobs:
     if: >
       github.event.pull_request.draft == false &&
       github.event.pull_request.head.repo.fork == false &&
-      github.event.pull_request.user.login != 'dependabot'
+      github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
