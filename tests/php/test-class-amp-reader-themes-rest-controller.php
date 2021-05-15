@@ -7,7 +7,6 @@
  */
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 

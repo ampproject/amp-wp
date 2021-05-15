@@ -3,7 +3,6 @@
 namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\DependencySupport;
-use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_UnitTestCase;
 
