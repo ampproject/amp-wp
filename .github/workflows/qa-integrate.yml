@@ -71,12 +71,26 @@ jobs:
       - name: Validate package.json
         run: npm run lint:pkg-json
 
-      - name: Detect coding standard violations (ESLint)
+      - name: Detect ESLint coding standard violations
+        if: >
+          github.event.pull_request.head.repo.fork == true ||
+          github.event.pull_request.user.login == 'dependabot'
+        run: npm run lint:js
+
+      - name: Generate ESLint coding standard violations report
+        # Prevent generating the ESLint report if PR is from a fork or authored by Dependabot.
+        if: >
+          ! ( github.event.pull_request.head.repo.fork == true ||
+          github.event.pull_request.user.login == 'dependabot' )
         run: npm run lint:js:report
         continue-on-error: true
 
       - name: Annotate code linting results
-        uses: ataylorme/eslint-annotate-action@1.0.4
+        # The action cannot annotate the PR when run from a PR fork or was authored by Dependabot.
+        if: >
+          ! ( github.event.pull_request.head.repo.fork == true ||
+          github.event.pull_request.user.login == 'dependabot' )
+        uses: ataylorme/eslint-annotate-action@1.1.2
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
           report-json: 'qa-tester/lint-js-report.json'
@@ -195,7 +209,11 @@ jobs:
   release-zip:
     name: Build release build ZIP and upload as GHA artifact
     needs: [unit-test-php]
-    if: github.event.pull_request.draft == false
+    # Only run if the PR was not authored by Dependabot and it is not a draft or not from a fork.
+    if: >
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.fork == false &&
+      github.event.pull_request.user.login != 'dependabot'
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
