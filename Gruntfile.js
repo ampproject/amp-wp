@@ -123,17 +123,24 @@ module.exports = function( grunt ) {
 		spawnQueue.push(
 			{
 				cmd: 'git',
-				args: [ '--no-pager', 'log', '-1', '--format=%h', '--date=short' ],
-			},
-			{
-				cmd: 'git',
 				args: [ 'ls-files' ],
 			},
 		);
 
+		// If the script is executed within a GHA job in a PR, use the last PR commit hash instead of the one from the
+		// currently checked out merge commit.
+		if ( ! process.env.LAST_PR_COMMIT_HASH ) {
+			spawnQueue.push(
+				{
+					cmd: 'git',
+					args: [ '--no-pager', 'log', '-1', '--format=%h', '--date=short' ],
+				},
+			);
+		}
+
 		function finalize() {
+			const lsOutput = stdout.shift();
 			const commitHash = process.env.LAST_PR_COMMIT_HASH ? process.env.LAST_PR_COMMIT_HASH.slice( 0, 9 ) : stdout.shift();
-			const lsOutput = process.env.LAST_PR_COMMIT_HASH ? stdout[ 1 ] : stdout.shift();
 			const versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			const paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
