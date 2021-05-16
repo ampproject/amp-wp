@@ -131,19 +131,9 @@ module.exports = function( grunt ) {
 			},
 		);
 
-		// If the script is executed within a GHA job in a PR, use the last PR commit hash instead of the one from the
-		// currently checked out merge commit.
-		if ( Boolean( process.env.LAST_PR_COMMIT_HASH ) ) {
-			spawnQueue[ 0 ] = {
-				cmd: 'echo',
-				// eslint-disable-next-line no-template-curly-in-string
-				args: [ `${ process.env.LAST_PR_COMMIT_HASH.slice( 0, 9 ) }` ],
-			};
-		}
-
 		function finalize() {
-			const commitHash = stdout.shift();
-			const lsOutput = stdout.shift();
+			const commitHash = process.env.LAST_PR_COMMIT_HASH ? process.env.LAST_PR_COMMIT_HASH.slice( 0, 9 ) : stdout.shift();
+			const lsOutput = process.env.LAST_PR_COMMIT_HASH ? stdout[ 1 ] : stdout.shift();
 			const versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			const paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
