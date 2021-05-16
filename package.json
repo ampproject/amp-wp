@@ -62,7 +62,7 @@
     "@wordpress/scripts": "15.0.1",
     "babel-plugin-inline-react-svg": "2.0.1",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
-    "copy-webpack-plugin": "6.4.0",
+    "copy-webpack-plugin": "6.4.1",
     "cross-env": "7.0.3",
     "enzyme": "3.11.0",
     "eslint": "7.26.0",
