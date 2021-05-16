@@ -131,7 +131,8 @@ module.exports = function( grunt ) {
 			},
 		);
 
-		// Use the parent commit hash instead of the one of the merge commit when the script is run via a GHA PR event.
+		// If the script is executed within a GHA job in a PR, use the commit hash from the parent of the merge
+		// commit (which would be the last commit of the PR).
 		if ( Boolean( process.env.GITHUB_HEAD_REF ) ) {
 			spawnQueue[ 0 ].args.push( 'HEAD~' );
 		}

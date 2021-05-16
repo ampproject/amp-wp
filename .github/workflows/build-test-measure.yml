@@ -684,6 +684,9 @@ jobs:
     steps:
       - name: Check out source files
         uses: actions/checkout@v2
+        with:
+          # By default, the fetch depth is 1. To get the last PR commit we'd need to increment that by 1.
+          fetch-depth: 2
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
