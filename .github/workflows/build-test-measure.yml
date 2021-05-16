@@ -742,6 +742,8 @@ jobs:
         run: |
           npm run build:${{ matrix.build }}
           mv amp.zip builds/${{ matrix.build }}/amp.zip
+        env:
+          LAST_PR_COMMIT_HASH: ${{ github.event.pull_request.head.sha }}
 
       - name: Retrieve branch name
         id: retrieve-branch-name
@@ -815,8 +817,8 @@ jobs:
         # Setting a multi-line output requires escaping line-feeds. See <https://github.community/t/set-output-truncates-multiline-strings/16852/3>.
         run: |
           body="Plugin builds for ${{ github.event.pull_request.head.sha }} are ready :bellhop_bell:!
-          - Download [development build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
-          - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip)"
+          - Download [development build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip?${{ github.sha }})
+          - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip?${{ github.sha }})"
           body="${body//$'\n'/'%0A'}"
           echo "::set-output name=body::$body"
 
