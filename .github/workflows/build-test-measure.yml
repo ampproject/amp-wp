@@ -745,6 +745,8 @@ jobs:
         run: |
           npm run build:${{ matrix.build }}
           mv amp.zip builds/${{ matrix.build }}/amp.zip
+        env:
+          LAST_PR_COMMIT_HASH: ${{ github.event.pull_request.head.sha }}
 
       - name: Retrieve branch name
         id: retrieve-branch-name

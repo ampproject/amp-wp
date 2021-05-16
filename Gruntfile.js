@@ -131,10 +131,14 @@ module.exports = function( grunt ) {
 			},
 		);
 
-		// If the script is executed within a GHA job in a PR, use the commit hash from the parent of the merge
-		// commit (which would be the last commit of the PR).
-		if ( Boolean( process.env.GITHUB_HEAD_REF ) ) {
-			spawnQueue[ 0 ].args.push( 'HEAD~' );
+		// If the script is executed within a GHA job in a PR, use the last PR commit hash instead of the one from the
+		// currently checked out merge commit.
+		if ( Boolean( process.env.LAST_PR_COMMIT_HASH ) ) {
+			spawnQueue[ 0 ] = {
+				cmd: 'echo',
+				// eslint-disable-next-line no-template-curly-in-string
+				args: [ `${ process.env.LAST_PR_COMMIT_HASH.slice( 0, 9 ) }` ],
+			};
 		}
 
 		function finalize() {
