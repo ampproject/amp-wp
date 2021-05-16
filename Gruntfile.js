@@ -131,6 +131,11 @@ module.exports = function( grunt ) {
 			},
 		);
 
+		// Use the parent commit hash instead of the one of the merge commit when the script is run via a GHA PR event.
+		if ( Boolean( process.env.GITHUB_HEAD_REF ) ) {
+			spawnQueue[ 0 ].args.push( 'HEAD~' );
+		}
+
 		function finalize() {
 			const commitHash = stdout.shift();
 			const lsOutput = stdout.shift();
