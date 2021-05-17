@@ -146,11 +146,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 	/** @covers ::maybe_show_notice() */
 	public function test_maybe_show_notice_for_gutenberg_4_9() {
-		if (
-			! defined( 'GUTENBERG_VERSION' )
-			||
-			( defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, '4.9.0', '<=' ) )
-		) {
+		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '4.9.0', '>' ) ) {
 			$this->markTestSkipped( 'Test only applicable to Gutenberg v4.9.0 and older.' );
 		}
 
