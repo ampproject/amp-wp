@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
 
@@ -98,16 +99,21 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->instance->enqueue_admin_assets();
 
 		$this->assertTrue( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
-		$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
-		$script_data = wp_scripts()->get_data( AMP_Post_Meta_Box::ASSETS_HANDLE, 'after' );
 
-		if ( empty( $script_data ) ) {
-			$this->markTestIncomplete( 'Script data could not be found.' );
+		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
+			$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
+			$script_data = wp_scripts()->get_data( AMP_Post_Meta_Box::ASSETS_HANDLE, 'after' );
+
+			if ( empty( $script_data ) ) {
+				$this->markTestIncomplete( 'Script data could not be found.' );
+			}
+
+			// Test inline script boot.
+			$this->assertNotSame( false, stripos( wp_json_encode( $script_data ), 'ampPostMetaBox.boot(' ) );
+			unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
+		} else {
+			$this->assertFalse( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 		}
-
-		// Test inline script boot.
-		$this->assertNotSame( false, stripos( wp_json_encode( $script_data ), 'ampPostMetaBox.boot(' ) );
-		unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
 	}
 
 	/**
@@ -257,25 +263,38 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		$amp_status_markup = '<div class="misc-pub-section misc-amp-status"';
 		$checkbox_enabled  = '<input id="amp-status-enabled" type="radio" name="amp_status" value="enabled"  checked=\'checked\'>';
+		$no_support_notice = '<div class="notice notice-info notice-alt inline">';
 
 		// This is not in AMP 'canonical mode' but rather reader or transitional mode.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
 		$this->assertStringContains( $amp_status_markup, $output );
-		$this->assertStringContains( $checkbox_enabled, $output );
+		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
+			$this->assertStringContains( $checkbox_enabled, $output );
+		} else {
+			$this->assertStringContains( $no_support_notice, $output );
+		}
 
 		// This is in AMP-first mode with a template that can be rendered.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
 		$this->assertStringContains( $amp_status_markup, $output );
-		$this->assertStringContains( $checkbox_enabled, $output );
+		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
+			$this->assertStringContains( $checkbox_enabled, $output );
+		} else {
+			$this->assertStringContains( $no_support_notice, $output );
+		}
 
 		// Post type no longer supports AMP, so no status input.
 		$supported_post_types = array_diff( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ), [ 'post' ] );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertStringContains( 'This post type is not', $output );
-		$this->assertStringNotContains( $checkbox_enabled, $output );
+		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
+			$this->assertStringContains( 'This post type is not', $output );
+			$this->assertStringNotContains( $checkbox_enabled, $output );
+		} else {
+			$this->assertStringContains( $no_support_notice, $output );
+		}
 		$supported_post_types[] = 'post';
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 
@@ -283,8 +302,12 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertStringContains( 'There are no supported templates.', wp_strip_all_tags( $output ) );
-		$this->assertStringNotContains( $checkbox_enabled, $output );
+		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
+			$this->assertStringContains( 'There are no supported templates.', wp_strip_all_tags( $output ) );
+			$this->assertStringNotContains( $checkbox_enabled, $output );
+		} else {
+			$this->assertStringContains( $no_support_notice, $output );
+		}
 
 		// User doesn't have the capability to display the metabox.
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
