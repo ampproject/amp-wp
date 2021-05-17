@@ -51,13 +51,10 @@ class DependencySupportTest extends WP_UnitTestCase {
 
 	/** @covers ::has_support_from_gutenberg_plugin */
 	public function test_has_support_from_gutenberg_plugin() {
-		if ( ! defined( 'GUTENBERG_VERSION' ) ) {
-			$this->markTestSkipped();
-			return;
-		}
-
-		if ( version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' ) ) {
+		if ( defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' ) ) {
 			$this->assertTrue( $this->instance->has_support_from_gutenberg_plugin() );
+		} else {
+			$this->assertFalse( $this->instance->has_support_from_gutenberg_plugin() );
 		}
 	}
 }
