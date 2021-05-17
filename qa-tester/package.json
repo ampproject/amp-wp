@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@wordpress/babel-preset-default": "^5.0.1",
-    "@wordpress/browserslist-config": "^3.0.1",
+    "@wordpress/browserslist-config": "^4.0.0",
     "@wordpress/eslint-plugin": "^8.0.2",
     "@wordpress/scripts": "^13.0.3",
     "babel-plugin-inline-react-svg": "^2.0.1",
