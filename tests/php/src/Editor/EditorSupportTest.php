@@ -140,4 +140,32 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		unset( $GLOBALS['current_screen'] );
 		unset( $GLOBALS['wp_scripts'] );
 	}
+
+	/** @covers ::maybe_show_notice() */
+	public function test_maybe_show_notice_for_gutenberg_4_9() {
+		if ( defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, '4.9.0', '<=' ) ) {
+			$this->markTestSkipped( 'Test only applicable to Gutenberg v4.9.0 and older.' );
+		}
+
+		register_post_type(
+			'my-gb-post-type',
+			[
+				'public'       => true,
+				'show_in_rest' => true,
+				'supports'     => [ 'editor' ],
+			]
+		);
+
+		set_current_screen( 'edit.php' );
+		$post = $this->factory()->post->create( [ 'post_type' => 'my-gutenberg-post-type' ] );
+		setup_postdata( get_post( $post ) );
+
+		$this->instance->maybe_show_notice();
+		$this->assertContains(
+			'AMP functionality is not available',
+			wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
+		);
+		unset( $GLOBALS['current_screen'] );
+		unset( $GLOBALS['wp_scripts'] );
+	}
 }

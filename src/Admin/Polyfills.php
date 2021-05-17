@@ -54,6 +54,11 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable {
 			}
 		}
 
+		// Applicable to Gutenberg v5.5.0 and older.
+		if ( function_exists('is_gutenberg_page') && is_gutenberg_page() ) {
+			return;
+		}
+
 		$this->register_shimmed_scripts( wp_scripts() );
 		$this->register_shimmed_styles( wp_styles() );
 	}
