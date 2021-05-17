@@ -89,7 +89,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @param RESTPreloader     $rest_preloader An instance of the RESTPreloader class.
 	 * @param DependencySupport $dependency_support An instance of the DependencySupport class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support) {
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support ) {
 		$this->google_fonts       = $google_fonts;
 		$this->reader_themes      = $reader_themes;
 		$this->rest_preloader     = $rest_preloader;
