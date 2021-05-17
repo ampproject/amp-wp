@@ -66,6 +66,6 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 				<?php endif; ?>
 				<a href="#amp_status" class="cancel-amp-status hide-if-no-js button-cancel"><?php esc_html_e( 'Cancel', 'amp' ); ?></a>
 			</div>
-		<?php endif; ?>
-	</div>
+		</div>
+	<?php endif; ?>
 </div>
