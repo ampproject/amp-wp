@@ -54,7 +54,7 @@ final class EditorSupport implements Registerable, Service {
 			! empty( $screen->is_block_editor )
 			||
 			// Applicable to Gutenberg v5.5.0 and older.
-			( function_exists('is_gutenberg_page') && ! is_gutenberg_page() )
+			( function_exists( 'is_gutenberg_page' ) && ! is_gutenberg_page() )
 		) {
 			return;
 		}
