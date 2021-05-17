@@ -47,9 +47,11 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable {
 	 * Runs on instantiation.
 	 */
 	public function register() {
-		$screen = get_current_screen();
-		if ( ! empty( $screen->is_block_editor ) ) {
-			return;
+		if ( function_exists( 'get_current_screen' ) ) {
+			$screen = get_current_screen();
+			if ( ! empty( $screen->is_block_editor ) ) {
+				return;
+			}
 		}
 
 		$this->register_shimmed_scripts( wp_scripts() );
