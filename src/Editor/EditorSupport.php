@@ -76,7 +76,7 @@ final class EditorSupport implements Registerable, Service {
 							wp.data.dispatch( "core/notices" ).createWarningNotice( %s )
 						}
 					);',
-					wp_json_encode( __( 'AMP functionality is not available since your version of the Block Editor is too old. Please either update WordPress core to the latest version or activate the Gutenberg plugin. As a last resort, you may use the Classic Editor plugin instead.', 'amp' ) )
+					wp_json_encode( __( 'AMP functionality is not available since your version of the Block Editor is too old. Please either update WordPress core to the latest version or activate the Gutenberg plugin.', 'amp' ) )
 				)
 			);
 		}
