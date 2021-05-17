@@ -22,6 +22,7 @@ class DependencySupportTest extends WP_UnitTestCase {
 		$this->assertInstanceOf( Service::class, $this->instance );
 	}
 
+	/** @covers ::has_support() */
 	public function test_has_support() {
 		$gutenberg_supported = defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
 			? GUTENBERG_VERSION
@@ -52,6 +53,7 @@ class DependencySupportTest extends WP_UnitTestCase {
 	public function test_has_support_from_gutenberg_plugin() {
 		if ( ! defined( 'GUTENBERG_VERSION' ) ) {
 			$this->markTestSkipped();
+			return;
 		}
 
 		if ( version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' ) ) {
