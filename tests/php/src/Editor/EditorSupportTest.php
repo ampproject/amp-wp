@@ -6,10 +6,13 @@ use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Editor\EditorSupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Editor\EditorSupport */
 final class EditorSupportTest extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/** @var EditorSupport */
 	private $instance;
@@ -161,7 +164,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		setup_postdata( get_post( $post ) );
 
 		$this->instance->maybe_show_notice();
-		$this->assertContains(
+		$this->assertStringContains(
 			'AMP functionality is not available',
 			wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
 		);
