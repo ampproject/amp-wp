@@ -174,8 +174,6 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
 
-		$amp_slug_customization_watcher = Services::get( 'amp_slug_customization_watcher' );
-
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
