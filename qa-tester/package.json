@@ -15,7 +15,7 @@
   "dependencies": {
     "@reach/combobox": "^0.14.0",
     "@wordpress/api-fetch": "^5.0.0",
-    "@wordpress/dom-ready": "^2.12.1",
+    "@wordpress/dom-ready": "^3.0.0",
     "@wordpress/element": "^3.0.0",
     "@wordpress/i18n": "^4.0.0"
   },
