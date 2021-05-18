@@ -44,8 +44,7 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
-		return $dev_tools_user_access->is_user_enabled();
+		return Services::get( 'dependency_support' )->has_support() && Services::get( 'dev_tools.user_access' )->is_user_enabled();
 	}
 
 	/**

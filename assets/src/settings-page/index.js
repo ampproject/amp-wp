@@ -4,6 +4,7 @@
 import PropTypes from 'prop-types';
 import {
 	CURRENT_THEME,
+	HAS_DEPENDENCY_SUPPORT,
 	OPTIONS_REST_PATH,
 	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
@@ -30,6 +31,7 @@ import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
 import { ErrorContextProvider } from '../components/error-context-provider';
 import { AMPDrawer } from '../components/amp-drawer';
+import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
@@ -142,6 +144,11 @@ function Root( { appRoot } ) {
 
 	return (
 		<>
+			{ ! HAS_DEPENDENCY_SUPPORT && (
+				<AMPNotice className="not-has-dependency-support" size={ NOTICE_SIZE_LARGE }>
+					{ __( 'You are using an old version of WordPress. Please upgrade to access all of the features of the AMP plugin.', 'amp' ) }
+				</AMPNotice>
+			) }
 			<Welcome />
 			<form onSubmit={ ( event ) => {
 				event.preventDefault();

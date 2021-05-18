@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Admin\ValidationCounts;
 
 /**
  * Class AMP_Validation_Error_Taxonomy
@@ -1742,8 +1743,7 @@ class AMP_Validation_Error_Taxonomy {
 	public static function add_admin_menu_validation_error_item() {
 		$menu_item_label = esc_html__( 'Error Index', 'amp' );
 
-		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
-		if ( $dev_tools_user_access->is_user_enabled() ) {
+		if ( ValidationCounts::is_needed() ) {
 			// Append markup to display a loading spinner while the unreviewed count is being fetched.
 			$menu_item_label .= ' <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>';
 		}

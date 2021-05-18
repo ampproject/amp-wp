@@ -13,7 +13,7 @@ fi
 
 case "$WP_VERSION" in
 	"4.9")
-		gb_version=""
+		gb_version="4.9.0"
 		;;
 	"5.0" | "5.1")
 		gb_version="6.9.0"

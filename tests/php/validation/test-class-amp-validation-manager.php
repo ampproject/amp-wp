@@ -175,7 +175,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			'wp_die_ajax_handler',
 			static function () {
 				return static function () {};
-			} 
+			}
 		);
 
 		$get_output = static function () {
@@ -210,7 +210,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				return $_post_id === $post_id;
 			},
 			10,
-			2 
+			2
 		);
 
 		$this->go_to( amp_get_permalink( $post_id ) );
@@ -522,8 +522,8 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		if ( ! function_exists( 'do_blocks' ) ) {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
-		if ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) {
-			$this->markTestSkipped( 'The WP version is less than 4.9, so Gutenberg did not init.' );
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped( 'Gutenberg for WP < 5.0 is not supported.' );
 		}
 
 		$priority = has_filter( 'the_content', 'do_blocks' );
@@ -1183,8 +1183,8 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		if ( ! function_exists( 'do_blocks' ) ) {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
-		if ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) {
-			$this->markTestSkipped( 'The WP version is less than 4.9, so Gutenberg did not init.' );
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped( 'Gutenberg for WP < 5.0 is not supported.' );
 		}
 
 		global $post;

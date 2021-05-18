@@ -8,7 +8,6 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Options } from '../components/options-context-provider';
-import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
 import { ReaderThemes } from '../components/reader-themes-context-provider';
 
 /**
@@ -23,14 +22,6 @@ export function Welcome() {
 		onboarding_wizard_link: onboardingWizardLink,
 		plugin_configured: pluginConfigured,
 	} = editedOptions;
-
-	if ( ! onboardingWizardLink ) {
-		return (
-			<AMPNotice size={ NOTICE_SIZE_LARGE }>
-				{ __( 'You are using an old version of WordPress. Please upgrade to access all of the features of the AMP plugin.', 'amp' ) }
-			</AMPNotice>
-		);
-	}
 
 	return (
 		<div className="settings-welcome">
