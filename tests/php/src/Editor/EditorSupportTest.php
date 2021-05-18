@@ -135,8 +135,9 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		);
 
 		set_current_screen( 'edit.php' );
-		$post = $this->factory()->post->create( [ 'post_type' => 'my-gutenberg-post-type' ] );
+		$post = $this->factory()->post->create( [ 'post_type' => 'my-gb-post-type' ] );
 		setup_postdata( get_post( $post ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$this->instance->maybe_show_notice();
 		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
@@ -150,24 +151,16 @@ final class EditorSupportTest extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Test only applicable to Gutenberg v4.9.0 and older.' );
 		}
 
-		register_post_type(
-			'my-gb-post-type',
-			[
-				'public'       => true,
-				'show_in_rest' => true,
-				'supports'     => [ 'editor' ],
-			]
-		);
+		$this->assertFalse( $this->instance->editor_supports_amp_block_editor_features() );
 
 		set_current_screen( 'edit.php' );
-		$post = $this->factory()->post->create( [ 'post_type' => 'my-gutenberg-post-type' ] );
+		$post = $this->factory()->post->create();
 		setup_postdata( get_post( $post ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$this->instance->maybe_show_notice();
-		$this->assertStringContains(
-			'AMP functionality is not available',
-			wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
-		);
+		$inline_script = wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false );
+		$this->assertStringContains( 'AMP functionality is not available', $inline_script );
 		unset( $GLOBALS['current_screen'] );
 		unset( $GLOBALS['wp_scripts'] );
 	}
