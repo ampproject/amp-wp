@@ -30,6 +30,10 @@ html {
 	margin-bottom: 0.55rem;
 }
 
+#amp-settings .not-has-dependency-support {
+	margin-bottom: 2.5rem;
+}
+
 /* Welcome section. */
 .settings-welcome {
 	margin-bottom: 2.5rem;

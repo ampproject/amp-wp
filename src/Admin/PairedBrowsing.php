@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Services;
 use AmpProject\DevMode;
 use WP_Post;
 use WP_Admin_Bar;
@@ -58,12 +59,16 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 	 */
 	public static function is_needed() {
 		return (
-			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
-			||
+			Services::get( 'dependency_support' )->has_support()
+			&&
 			(
-				AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
-				&&
-				get_stylesheet() === AMP_Options_Manager::get_option( Option::READER_THEME )
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+				||
+				(
+					AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+					&&
+					get_stylesheet() === AMP_Options_Manager::get_option( Option::READER_THEME )
+				)
 			)
 		);
 	}

@@ -10,11 +10,10 @@ namespace AmpProject\AmpWP\Admin;
 use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Services;
 
 /**
  * OptionsMenu class.
@@ -60,6 +59,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 */
 	private $rest_preloader;
 
+	/** @var DependencySupport */
+	private $dependency_support;
+
 	/**
 	 * Check whether the conditional object is currently needed.
 	 *
@@ -82,14 +84,16 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	/**
 	 * OptionsMenu constructor.
 	 *
-	 * @param GoogleFonts   $google_fonts An instance of the GoogleFonts service.
-	 * @param ReaderThemes  $reader_themes An instance of the ReaderThemes class.
-	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
+	 * @param GoogleFonts       $google_fonts An instance of the GoogleFonts service.
+	 * @param ReaderThemes      $reader_themes An instance of the ReaderThemes class.
+	 * @param RESTPreloader     $rest_preloader An instance of the RESTPreloader class.
+	 * @param DependencySupport $dependency_support An instance of the DependencySupport class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader ) {
-		$this->google_fonts   = $google_fonts;
-		$this->reader_themes  = $reader_themes;
-		$this->rest_preloader = $rest_preloader;
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support ) {
+		$this->google_fonts       = $google_fonts;
+		$this->reader_themes      = $reader_themes;
+		$this->rest_preloader     = $rest_preloader;
+		$this->dependency_support = $dependency_support;
 	}
 
 	/**
@@ -183,8 +187,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
 
-		$amp_slug_customization_watcher = Services::get( 'amp_slug_customization_watcher' );
-
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
@@ -222,6 +224,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
+			'HAS_DEPENDENCY_SUPPORT'      => $this->dependency_support->has_support(),
 			'OPTIONS_REST_PATH'           => '/amp/v1/options',
 			'READER_THEMES_REST_PATH'     => '/amp/v1/reader-themes',
 			'IS_CORE_THEME'               => in_array(

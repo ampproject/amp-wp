@@ -155,17 +155,3 @@ function amp_bootstrap_admin() {
 	$post_meta_box = new AMP_Post_Meta_Box();
 	$post_meta_box->init();
 }
-
-/**
- * Whether to activate the new onboarding feature.
- *
- * @internal
- * @return bool
- */
-function amp_should_use_new_onboarding() {
-	if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-		return false;
-	}
-
-	return true;
-}
