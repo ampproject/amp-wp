@@ -14,7 +14,7 @@ In practice the `customize_register` hook should be used instead.
 
 ### Source
 
-:link: [includes/admin/class-amp-template-customizer.php:316](/includes/admin/class-amp-template-customizer.php#L316)
+:link: [includes/admin/class-amp-template-customizer.php:338](/includes/admin/class-amp-template-customizer.php#L338)
 
 <details>
 <summary>Show Code</summary>
