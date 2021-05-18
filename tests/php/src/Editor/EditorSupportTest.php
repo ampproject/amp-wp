@@ -62,7 +62,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function test_dont_show_notice_for_unsupported_post_type() {
 		global $post;
 
-		set_current_screen( 'edit.php' );
+		set_current_screen( 'post.php' );
 		register_post_type( 'my-post-type' );
 		$post = $this->factory()->post->create( [ 'post_type' => 'my-post-type' ] );
 		setup_postdata( get_post( $post ) );
@@ -83,7 +83,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 			$this->markTestSkipped();
 		}
 
-		set_current_screen( 'edit.php' );
+		set_current_screen( 'post.php' );
 		$post = $this->factory()->post->create();
 		setup_postdata( get_post( $post ) );
 
@@ -106,7 +106,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function test_maybe_show_notice_for_unsupported_user() {
 		global $post;
 
-		set_current_screen( 'edit.php' );
+		set_current_screen( 'post.php' );
 		$post = $this->factory()->post->create();
 		setup_postdata( get_post( $post ) );
 
@@ -134,7 +134,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 			]
 		);
 
-		set_current_screen( 'edit.php' );
+		set_current_screen( 'post.php' );
 		$post = $this->factory()->post->create( [ 'post_type' => 'my-gb-post-type' ] );
 		setup_postdata( get_post( $post ) );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
@@ -147,13 +147,15 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 	/** @covers ::maybe_show_notice() */
 	public function test_maybe_show_notice_for_gutenberg_4_9() {
+		global $post;
 		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '4.9.0', '>' ) ) {
 			$this->markTestSkipped( 'Test only applicable to Gutenberg v4.9.0 and older.' );
 		}
 
 		$this->assertFalse( $this->instance->editor_supports_amp_block_editor_features() );
 
-		set_current_screen( 'edit.php' );
+		gutenberg_register_packages_scripts();
+		set_current_screen( 'post.php' );
 		$post = $this->factory()->post->create();
 		setup_postdata( get_post( $post ) );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
