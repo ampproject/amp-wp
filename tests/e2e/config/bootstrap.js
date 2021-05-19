@@ -15,6 +15,11 @@ import {
 } from '@wordpress/e2e-test-utils';
 
 /**
+ * Internal dependencies
+ */
+import { cleanUpSettings } from '../utils/onboarding-wizard-utils';
+
+/**
  * Environment variables
  */
 const { PUPPETEER_TIMEOUT } = process.env;
@@ -216,6 +221,7 @@ beforeAll( async () => {
 	observeConsoleLogging();
 	await setupBrowser();
 	await trashAllPosts();
+	await cleanUpSettings();
 	await page.setDefaultNavigationTimeout( 10000 );
 	await page.setDefaultTimeout( 10000 );
 } );
