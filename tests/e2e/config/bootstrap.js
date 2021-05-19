@@ -9,9 +9,10 @@ import { get } from 'lodash';
 import {
 	clearLocalStorage,
 	enablePageDialogAccept,
+	isOfflineMode,
 	setBrowserViewport,
+	trashAllPosts,
 } from '@wordpress/e2e-test-utils';
-import { isOfflineMode } from '@wordpress/e2e-test-utils/build/offline-mode';
 
 /**
  * Environment variables
@@ -122,6 +123,11 @@ function observeConsoleLogging() {
 			return;
 		}
 
+		// WordPress still bundles jQuery Migrate, which logs to the console.
+		if ( text.includes( 'JQMIGRATE' ) ) {
+			return;
+		}
+
 		const logFunction = OBSERVED_CONSOLE_MESSAGE_TYPES[ type ];
 
 		// As of Puppeteer 1.6.1, `message.text()` wrongly returns an object of
@@ -189,6 +195,16 @@ async function runAxeTestsForBlockEditor() {
 }
 
 /**
+ * Set up browser.
+ */
+async function setupBrowser() {
+	await setBrowserViewport( {
+		width: 1600,
+		height: 1000,
+	} );
+}
+
+/**
  * Before every test suite run, delete all content created by the test. This ensures
  * other posts/comments/etc. aren't dirtying tests and tests don't depend on
  * each other's side-effects.
@@ -198,7 +214,8 @@ beforeAll( async () => {
 	capturePageEventsForTearDown();
 	enablePageDialogAccept();
 	observeConsoleLogging();
-	await setBrowserViewport( 'large' );
+	await setupBrowser();
+	await trashAllPosts();
 	await page.setDefaultNavigationTimeout( 10000 );
 	await page.setDefaultTimeout( 10000 );
 } );
@@ -207,7 +224,7 @@ beforeAll( async () => {
 afterEach( async () => {
 	await clearLocalStorage();
 	await runAxeTestsForBlockEditor();
-	await setBrowserViewport( 'large' );
+	await setupBrowser();
 } );
 
 // eslint-disable-next-line jest/require-top-level-describe
