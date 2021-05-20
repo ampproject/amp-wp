@@ -6,6 +6,8 @@
 
 /qa-tester/ @pierlon
 
+/.github/workflows/ @pierlon
+
 /webpack.config.js @delawski @pierlon
 
 /assets/src/*.js @delawski
