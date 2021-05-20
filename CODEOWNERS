@@ -1,0 +1,11 @@
+/package.json      @pierlon
+/package-lock.json @pierlon
+
+/composer.json     @pierlon
+/composer.lock     @pierlon
+
+/qa-tester/ @pierlon
+
+/webpack.config.js @delawski @pierlon
+
+/assets/src/*.js @delawski
