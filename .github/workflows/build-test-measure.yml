@@ -321,7 +321,7 @@ jobs:
       - name: Run E2E and visual regression tests
         run: npm run test:e2e:percy
         env:
-          PERCY_TOKEN: ${{ env.PERCY_TOKEN }}
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
 
       - name: Stop Docker environment
         run: npm run env:stop
