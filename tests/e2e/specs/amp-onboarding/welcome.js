@@ -4,6 +4,11 @@
 import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
 /**
+ * External dependencies
+ */
+import percySnapshot from '@percy/puppeteer';
+
+/**
  * Internal dependencies
  */
 import { testPreviousButton, testNextButton } from '../../utils/onboarding-wizard-utils';
@@ -19,5 +24,7 @@ describe( 'welcome', () => {
 
 		testPreviousButton( { exists: false } );
 		testNextButton( { text: 'Next' } );
+
+		await percySnapshot( page, 'Onboarding Wizard: Welcome screen' );
 	} );
 } );
