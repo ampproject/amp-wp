@@ -318,8 +318,10 @@ jobs:
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
-      - name: Run E2E tests
-        run: npm run test:e2e:ci
+      - name: Run E2E and visual regression tests
+        run: npm run test:e2e:percy
+        env:
+          PERCY_TOKEN: ${{ env.PERCY_TOKEN }}
 
       - name: Stop Docker environment
         run: npm run env:stop
