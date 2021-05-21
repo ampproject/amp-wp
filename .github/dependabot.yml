@@ -38,6 +38,8 @@ updates:
   - dependency-name: copy-webpack-plugin
     versions:
     - ">= 7"
+  # Updates are handled via the `workflow-name` GHA workflow.
+  - dependency-name: @wordpress/*
 
 # Config for QA Tester plugin.
 - package-ecosystem: composer
