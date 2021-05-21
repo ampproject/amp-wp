@@ -1,7 +1,9 @@
 name: Auto-merge
 
 on:
-  pull_request
+  pull_request:
+    # Only run workflow when a PR is opened.
+    types: [opened]
 
 jobs:
   automerge-dependencies:
