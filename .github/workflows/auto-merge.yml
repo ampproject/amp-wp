@@ -1,0 +1,17 @@
+name: Auto-merge
+
+on:
+  pull_request
+
+jobs:
+  automerge-dependencies:
+    name: Automerge dependencies
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Auto-merge `@wordpress` dependency updates
+        if: startsWith( ${{ github.event.pull_request.title }}, 'Bump @wordpress' )
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
