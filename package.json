@@ -32,7 +32,7 @@
     "@wordpress/dom-ready": "3.0.0",
     "@wordpress/element": "2.20.3",
     "@wordpress/escape-html": "2.0.0",
-    "@wordpress/html-entities": "2.11.2",
+    "@wordpress/html-entities": "3.1.0",
     "@wordpress/i18n": "4.0.0",
     "@wordpress/icons": "2.10.3",
     "@wordpress/is-shallow-equal": "4.0.0",
