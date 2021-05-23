@@ -2918,8 +2918,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$specificity_multiplier++;
 					}
 
-					$new_selector  = $old_selector->getSelector();
-					$new_selector .= ':not(' . str_repeat( '#_', $specificity_multiplier ) . ')'; // Here "_" is just a short single-char ID.
+					$new_selector = $old_selector->getSelector();
+
+					if ( '#_)' === substr( $new_selector, -3 ) ) {
+						$new_selector = rtrim( $new_selector, ')' ) . str_repeat( '#_', $specificity_multiplier ) . ')';
+					} else {
+						$new_selector .= ':not(' . str_repeat( '#_', $specificity_multiplier ) . ')'; // Here "_" is just a short single-char ID.
+					}
 
 					return new Selector( $new_selector );
 				},
