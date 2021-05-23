@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
+use AmpProject\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
@@ -46,15 +47,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const STYLE_AMP_KEYFRAMES_GROUP_INDEX = 1;
 
 	// Error codes raised during parsing CSS. See get_css_parser_validation_error_codes.
-	const CSS_SYNTAX_INVALID_AT_RULE         = 'CSS_SYNTAX_INVALID_AT_RULE';
-	const CSS_SYNTAX_INVALID_DECLARATION     = 'CSS_SYNTAX_INVALID_DECLARATION';
-	const CSS_SYNTAX_INVALID_PROPERTY        = 'CSS_SYNTAX_INVALID_PROPERTY';
-	const CSS_SYNTAX_INVALID_PROPERTY_NOLIST = 'CSS_SYNTAX_INVALID_PROPERTY_NOLIST';
-	const CSS_SYNTAX_INVALID_IMPORTANT       = 'CSS_SYNTAX_INVALID_IMPORTANT';
-	const CSS_SYNTAX_PARSE_ERROR             = 'CSS_SYNTAX_PARSE_ERROR';
-	const CSS_DISALLOWED_SELECTOR            = 'CSS_DISALLOWED_SELECTOR';
-	const STYLESHEET_FETCH_ERROR             = 'STYLESHEET_FETCH_ERROR';
-	const STYLESHEET_TOO_LONG                = 'STYLESHEET_TOO_LONG';
+	const CSS_SYNTAX_INVALID_AT_RULE           = 'CSS_SYNTAX_INVALID_AT_RULE';
+	const CSS_SYNTAX_INVALID_DECLARATION       = 'CSS_SYNTAX_INVALID_DECLARATION';
+	const CSS_SYNTAX_INVALID_PROPERTY          = 'CSS_SYNTAX_INVALID_PROPERTY';
+	const CSS_SYNTAX_INVALID_PROPERTY_NOLIST   = 'CSS_SYNTAX_INVALID_PROPERTY_NOLIST';
+	const CSS_SYNTAX_INVALID_IMPORTANT         = 'CSS_SYNTAX_INVALID_IMPORTANT';
+	const CSS_SYNTAX_PARSE_ERROR               = 'CSS_SYNTAX_PARSE_ERROR';
+	const CSS_DISALLOWED_SELECTOR              = 'CSS_DISALLOWED_SELECTOR';
+	const STYLESHEET_FETCH_ERROR               = 'STYLESHEET_FETCH_ERROR';
+	const STYLESHEET_TOO_LONG                  = 'STYLESHEET_TOO_LONG';
+	const INLINE_STYLE_TOO_LONG                = 'INLINE_STYLE_TOO_LONG';
+	const STYLESHEET_AND_INLINE_STYLE_TOO_LONG = 'STYLESHEET_AND_INLINE_STYLE_TOO_LONG';
 
 	// Error code when encountering 'i-amphtml-' prefixing a class name in an HTML class attribute.
 	const DISALLOWED_ATTR_CLASS_NAME = 'DISALLOWED_ATTR_CLASS_NAME';
@@ -130,6 +133,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string[] $focus_within_classes       Class names in selectors that should be replaced with :focus-within pseudo classes.
 	 *      @type string[] $low_priority_plugins       Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
 	 *      @type bool     $allow_transient_caching    Whether to allow caching parsed CSS in transients. This may need to be disabled when there is highly-variable CSS content.
+	 *      @type bool     $transform_inline_styles    Whether to convert inline styles to style[amp-custom] rules.
 	 * }
 	 */
 	protected $args;
@@ -152,6 +156,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'focus_within_classes'      => [ 'focus' ],
 		'low_priority_plugins'      => [ 'query-monitor' ],
 		'allow_transient_caching'   => true,
+		'transform_inline_styles'   => true,
 	];
 
 	/**
@@ -179,6 +184,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * }
 	 */
 	private $pending_stylesheets = [];
+
+	/**
+	 * Stylesheet groups.
+	 *
+	 * @var array
+	 */
+	private $stylesheet_groups = [];
 
 	/**
 	 * Spec for style[amp-custom] cdata.
@@ -956,11 +968,54 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $this->dom->xpath->query( "//*[ @style $dev_mode_predicate ]" ) as $element ) {
 			$elements[] = $element;
 		}
-		foreach ( $elements as $element ) {
-			$this->collect_inline_styles( $element );
+		if ( $this->args['transform_inline_styles'] ) {
+			foreach ( $elements as $element ) {
+				$this->collect_inline_styles( $element );
+			}
 		}
 
 		$this->finalize_styles();
+
+		if ( ! $this->args['transform_inline_styles'] ) {
+			$total_inline_style_size = 0;
+
+			$amp_custom_size = isset( $this->stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['final_size'] )
+				? $this->stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['final_size'] : 0;
+
+			foreach ( $elements as $element ) {
+				$value = $element->getAttribute( Attribute::STYLE );
+
+				$attribute_byte_length = strlen( $value );
+				if ( $attribute_byte_length > 1000 ) {
+					$this->remove_invalid_attribute(
+						$element,
+						Attribute::STYLE,
+						[ 'code' => self::INLINE_STYLE_TOO_LONG ]
+					);
+					continue;
+				}
+
+				if ( false !== stripos( $value, '!important' ) ) {
+					$this->remove_invalid_attribute(
+						$element,
+						Attribute::STYLE,
+						[ 'code' => self::CSS_SYNTAX_INVALID_IMPORTANT ]
+					);
+					continue;
+				}
+
+				if ( $amp_custom_size + $total_inline_style_size + $attribute_byte_length > $this->style_custom_cdata_spec['max_bytes'] ) {
+					$this->remove_invalid_attribute(
+						$element,
+						Attribute::STYLE,
+						[ 'code' => self::STYLESHEET_AND_INLINE_STYLE_TOO_LONG ]
+					);
+					continue;
+				}
+
+				$total_inline_style_size += $attribute_byte_length;
+			}
+		}
 
 		$this->did_convert_elements = true;
 
@@ -2815,7 +2870,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see https://www.ampproject.org/docs/fundamentals/spec#keyframes-stylesheet
 	 */
 	private function finalize_styles() {
-		$stylesheet_groups = [
+		$this->stylesheet_groups = [
 			self::STYLE_AMP_CUSTOM_GROUP_INDEX    => [
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-custom.css */",
 				'cdata_spec'          => $this->style_custom_cdata_spec,
@@ -2836,7 +2891,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $this->pending_stylesheets as $i => $pending_stylesheet ) {
 			foreach ( $pending_stylesheet['tokens'] as $j => $part ) {
 				if ( is_string( $part ) && 0 === strpos( $part, '@import' ) ) {
-					$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part; // @todo Not currently relayed in stylesheet data.
+					$this->stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part; // @todo Not currently relayed in stylesheet data.
 					unset( $this->pending_stylesheets[ $i ]['tokens'][ $j ] );
 				}
 			}
@@ -2847,8 +2902,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Process the pending stylesheets.
-		foreach ( array_keys( $stylesheet_groups ) as $group ) {
-			$stylesheet_groups[ $group ]['included_count'] = $this->finalize_stylesheet_group( $group, $stylesheet_groups[ $group ] );
+		foreach ( array_keys( $this->stylesheet_groups ) as $group ) {
+			$this->finalize_stylesheet_group( $group );
 		}
 
 		// If we're not working with the document element (e.g. for Customizer rendered partials) then there is nothing left to do.
@@ -2857,15 +2912,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Add style[amp-custom] to document.
-		if ( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['included_count'] > 0 ) {
+		if ( $this->stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['included_count'] > 0 ) {
 			/*
 			 * On AMP-first themes when there are new/rejected validation errors present, a parsed stylesheet may include
 			 * @import rules. These must be moved to the beginning to be honored.
 			 */
-			$css = $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['import_front_matter'];
+			$css = $this->stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['import_front_matter'];
 
 			$css .= implode( '', $this->get_stylesheets() );
-			$css .= $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['source_map_comment'];
+			$css .= $this->stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['source_map_comment'];
 
 			// Create the style[amp-custom] element and add it to the <head>.
 			$this->amp_custom_style_element = $this->dom->createElement( 'style' );
@@ -2888,8 +2943,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Add style[amp-keyframes] to document.
-		if ( $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['included_count'] > 0 ) {
-			$css = $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['import_front_matter'];
+		if ( $this->stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['included_count'] > 0 ) {
+			$css = $this->stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['import_front_matter'];
 
 			$css .= implode(
 				'',
@@ -2903,7 +2958,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					'serialized'
 				)
 			);
-			$css .= $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['source_map_comment'];
+			$css .= $this->stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['source_map_comment'];
 
 			$style_element = $this->dom->createElement( 'style' );
 			$style_element->setAttribute( 'amp-keyframes', '' );
@@ -3291,13 +3346,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 1.2
 	 *
-	 * @param int   $group        Group name (either self::STYLE_AMP_CUSTOM_GROUP_INDEX or self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ).
-	 * @param array $group_config Group config.
-	 * @return int Number of included stylesheets in group.
+	 * @param int $group Group name (either self::STYLE_AMP_CUSTOM_GROUP_INDEX or self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ).
 	 */
-	private function finalize_stylesheet_group( $group, $group_config ) {
+	private function finalize_stylesheet_group( $group ) {
 		$included_count = 0;
-		$max_bytes      = $group_config['cdata_spec']['max_bytes'] - strlen( $group_config['source_map_comment'] );
+		$max_bytes      = $this->stylesheet_groups[ $group ]['cdata_spec']['max_bytes'] - strlen( $this->stylesheet_groups[ $group ]['source_map_comment'] );
 
 		$previously_seen_stylesheet_index = [];
 		foreach ( $this->pending_stylesheets as $pending_stylesheet_index => &$pending_stylesheet ) {
@@ -3514,7 +3567,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		return $included_count;
+		$this->stylesheet_groups[ $group ]['included_count'] = $included_count;
+		$this->stylesheet_groups[ $group ]['final_size']     = $current_concatenated_size;
 	}
 
 	/**
