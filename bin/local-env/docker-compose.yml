@@ -28,7 +28,7 @@ services:
     command: tail -f /dev/null
 
   mysql:
-    image: mysql:5.7
+    image: mariadb:10
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
