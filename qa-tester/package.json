@@ -14,16 +14,16 @@
   },
   "dependencies": {
     "@reach/combobox": "^0.14.0",
-    "@wordpress/api-fetch": "^5.0.0",
-    "@wordpress/dom-ready": "^3.0.0",
-    "@wordpress/element": "^3.0.0",
+    "@wordpress/api-fetch": "^5.1.0",
+    "@wordpress/dom-ready": "^3.1.0",
+    "@wordpress/element": "^3.1.0",
     "@wordpress/i18n": "^4.0.0"
   },
   "devDependencies": {
-    "@wordpress/babel-preset-default": "^6.0.0",
+    "@wordpress/babel-preset-default": "^6.1.0",
     "@wordpress/browserslist-config": "^4.0.0",
     "@wordpress/eslint-plugin": "^9.0.5",
-    "@wordpress/scripts": "^16.0.0",
+    "@wordpress/scripts": "^16.1.0",
     "babel-plugin-inline-react-svg": "^2.0.1",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "eslint-plugin-eslint-comments": "^3.2.0",
