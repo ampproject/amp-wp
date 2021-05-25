@@ -4,6 +4,11 @@
 import { visitAdminPage, activateTheme, installTheme } from '@wordpress/e2e-test-utils';
 
 /**
+ * External dependencies
+ */
+import percySnapshot from '@percy/puppeteer';
+
+/**
  * Internal dependencies
  */
 import { completeWizard, cleanUpSettings, clickMode, scrollToElement } from '../../utils/onboarding-wizard-utils';
@@ -15,6 +20,10 @@ describe( 'AMP settings screen newly activated', () => {
 
 	it( 'should not display the old welcome notice', async () => {
 		await expect( page ).not.toMatchElement( '.amp-welcome-notice h2', { text: 'Welcome to AMP for WordPress' } );
+
+		// Hide the warning notice about the site not being served over HTTPS.
+		const percyCss = '.notice.notice-warning { display: none }';
+		await percySnapshot( page, 'Settings Page', { percyCss } );
 	} );
 
 	it( 'has main page components', async () => {
