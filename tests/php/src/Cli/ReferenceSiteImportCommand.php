@@ -280,8 +280,9 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 			}
 		);
 
-		WP_CLI::runcommand( 'plugin delete ' . implode( ' ', $plugins ) );
-	}
+		if ( count( $plugins ) > 0 ) {
+			WP_CLI::runcommand( 'plugin delete ' . implode( ' ', $plugins ) );
+		}
 
 		$themes = json_decode(
 			WP_CLI::runcommand(
