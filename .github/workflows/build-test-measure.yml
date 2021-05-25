@@ -316,6 +316,7 @@ jobs:
       - name: Start Docker environment
         run: npm run env:start
         env:
+          WP_VERSION: 5.5
           COMPOSE_INTERACTIVE_NO_CLI: true
 
       - name: Run E2E and visual regression tests
