@@ -31,7 +31,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           QUERY: 'repo:ampproject/amp-wp is:pr is:open is:merged in:title Update Gutenberg packages after'
 
-      - name: Determine if with package updates are needed
+      - name: Determine if package updates are needed
         id: release-status
         run: echo "::set-output name=outdated::$(php -r "echo json_encode(version_compare('$LATEST_VER', '$LAST_VER', '>'));")"
         env:
@@ -143,4 +143,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BASE_BRANCH: ${{ steps.branches.outputs.base }}
           HEAD_BRANCH: ${{ steps.branches.outputs.head }}
-
