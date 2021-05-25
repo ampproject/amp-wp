@@ -33,10 +33,10 @@ jobs:
 
       - name: Determine if package updates are needed
         id: release-status
-        run: echo "::set-output name=outdated::$(php -r "echo json_encode(version_compare('$LATEST_VER', '$LAST_VER', '>'));")"
+        run: echo "::set-output name=outdated::$(php -r 'echo json_encode(version_compare($argv[1], $argv[2], ">"));' "$LATEST_VER" "$LAST_VER")"
         env:
-          LAST_VER: ${{ steps.last-release.version }}
-          LATEST_VER: ${{ steps.latest-release.version }}
+          LAST_VER: ${{ steps.last-release.outputs.version }}
+          LATEST_VER: ${{ steps.latest-release.outputs.version }}
 
   update-packages:
     name: Update Gutenberg npm dependencies
