@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage, activateTheme, installTheme } from '@wordpress/e2e-test-utils';
+import { visitAdminPage, activateTheme, installTheme, activatePlugin, deactivatePlugin } from '@wordpress/e2e-test-utils';
 
 /**
  * External dependencies
@@ -23,7 +23,12 @@ describe( 'AMP settings screen newly activated', () => {
 
 		// Hide the warning notice about the site not being served over HTTPS.
 		const percyCss = '.notice.notice-warning { display: none }';
-		await percySnapshot( page, 'Settings Page', { percyCss } );
+
+		await deactivatePlugin( 'gutenberg' );
+		await percySnapshot( page, 'Settings Page without Gutenberg active', { percyCss } );
+
+		await activatePlugin( 'gutenberg' );
+		await percySnapshot( page, 'Settings Page with Gutenberg active', { percyCss } );
 	} );
 
 	it( 'has main page components', async () => {
