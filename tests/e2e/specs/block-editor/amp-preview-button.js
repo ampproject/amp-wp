@@ -4,6 +4,11 @@
 import { createNewPost, visitAdminPage, activatePlugin, deactivatePlugin } from '@wordpress/e2e-test-utils';
 
 /**
+ * External dependencies
+ */
+import percySnapshot from '@percy/puppeteer';
+
+/**
  * Internal dependencies
  */
 import { cleanUpSettings } from '../../utils/onboarding-wizard-utils';
@@ -17,6 +22,8 @@ describe( 'AMP Preview button', () => {
 		await page.waitForSelector( postPreviewBtnSelector );
 
 		await expect( page ).toMatchElement( ampPreviewBtnSelector );
+
+		await percySnapshot( page, 'New post via Block Editor with Gutenberg active' );
 	} );
 
 	it( 'is rendered when Gutenberg is disabled', async () => {
@@ -26,6 +33,8 @@ describe( 'AMP Preview button', () => {
 		await page.waitForSelector( postPreviewBtnSelector );
 
 		await expect( page ).toMatchElement( ampPreviewBtnSelector );
+
+		await percySnapshot( page, 'New post via Block Editor with Gutenberg disabled' );
 
 		await activatePlugin( 'gutenberg' );
 	} );
@@ -52,6 +61,8 @@ describe( 'AMP Preview button', () => {
 		await page.waitForSelector( postPreviewBtnSelector );
 
 		await expect( page ).not.toMatchElement( ampPreviewBtnSelector );
+
+		await percySnapshot( page, 'New post via Block Editor when in Standard mode' );
 
 		await cleanUpSettings();
 	} );
