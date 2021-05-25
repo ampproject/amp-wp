@@ -283,6 +283,25 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		WP_CLI::runcommand( 'plugin delete ' . implode( ' ', $plugins ) );
 	}
 
+		$themes = json_decode(
+			WP_CLI::runcommand(
+				'theme list --fields=name,status --format=json',
+				[ 'return' => true ]
+			),
+			JSON_OBJECT_AS_ARRAY
+		);
+
+		$themes = array_reduce(
+			$themes,
+			static function ( $themes, $theme ) {
+				return 'inactive' === $theme['status'] ? $themes . ' ' . $theme['name'] : $themes;
+			},
+			''
+		);
+
+		WP_CLI::runcommand( 'theme delete ' . $themes );
+	}
+
 	/**
 	 * Empty the site's options.
 	 *
