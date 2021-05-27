@@ -1670,14 +1670,22 @@ function amp_get_schemaorg_metadata() {
 
 	$queried_object = get_queried_object();
 	if ( $queried_object instanceof WP_Post ) {
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.3', '>=' ) ) {
+			$date_published = mysql2date( 'c', $queried_object->post_date, false );
+			$date_modified   = mysql2date( 'c', $queried_object->post_modified, false );
+		} else {
+			$date_published = mysql2date( 'c', $queried_object->post_date_gmt, false );
+			$date_modified   = mysql2date( 'c', $queried_object->post_modified_gmt, false );
+		}
+
 		$metadata = array_merge(
 			$metadata,
 			[
 				'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 				'mainEntityOfPage' => get_permalink(),
 				'headline'         => get_the_title(),
-				'datePublished'    => mysql2date( 'c', $queried_object->post_date_gmt, false ),
-				'dateModified'     => mysql2date( 'c', $queried_object->post_modified_gmt, false ),
+				'datePublished'    => $date_published,
+				'dateModified'      => $date_modified,
 			]
 		);
 

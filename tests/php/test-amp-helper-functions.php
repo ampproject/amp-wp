@@ -1762,6 +1762,29 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertEquals( $metadata['publisher']['logo']['url'], amp_get_publisher_logo() );
 	}
 
+	/** @covers ::amp_get_schemaorg_metadata() */
+	public function test_amp_get_schemaorg_metadata_time_offset() {
+		$post_id = self::factory()->post->create(
+			[
+				'post_date'     => '2021-02-18 12:55:00',
+				'post_date_gmt' => '2021-02-18 19:55:00'
+			]
+		);
+
+		add_filter(
+			'pre_option_gmt_offset',
+			static function () {
+				return '-7';
+			}
+		);
+
+		$this->go_to( get_permalink( $post_id ) );
+		$metadata = amp_get_schemaorg_metadata();
+
+		$this->assertSame( '2021-02-18T12:55:00-07:00', $metadata[ 'datePublished' ] );
+		$this->assertSame( '2021-02-18T12:55:00-07:00', $metadata[ 'dateModified' ] );
+	}
+
 	/**
 	 * Test amp_print_schemaorg_metadata().
 	 *
