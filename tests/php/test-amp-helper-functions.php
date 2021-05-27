@@ -1767,7 +1767,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$post_id = self::factory()->post->create(
 			[
 				'post_date'     => '2021-02-18 12:55:00',
-				'post_date_gmt' => '2021-02-18 19:55:00'
+				'post_date_gmt' => '2021-02-18 19:55:00',
 			]
 		);
 
@@ -1781,8 +1781,10 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->go_to( get_permalink( $post_id ) );
 		$metadata = amp_get_schemaorg_metadata();
 
-		$this->assertSame( '2021-02-18T12:55:00-07:00', $metadata[ 'datePublished' ] );
-		$this->assertSame( '2021-02-18T12:55:00-07:00', $metadata[ 'dateModified' ] );
+		$expected = version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ? '2021-02-18T19:55:00+00:00' : '2021-02-18T12:55:00-07:00';
+
+		$this->assertSame( $expected, $metadata['datePublished'] );
+		$this->assertSame( $expected, $metadata['dateModified'] );
 	}
 
 	/**

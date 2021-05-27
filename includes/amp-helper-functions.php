@@ -1672,10 +1672,10 @@ function amp_get_schemaorg_metadata() {
 	if ( $queried_object instanceof WP_Post ) {
 		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.3', '>=' ) ) {
 			$date_published = mysql2date( 'c', $queried_object->post_date, false );
-			$date_modified   = mysql2date( 'c', $queried_object->post_modified, false );
+			$date_modified  = mysql2date( 'c', $queried_object->post_modified, false );
 		} else {
 			$date_published = mysql2date( 'c', $queried_object->post_date_gmt, false );
-			$date_modified   = mysql2date( 'c', $queried_object->post_modified_gmt, false );
+			$date_modified  = mysql2date( 'c', $queried_object->post_modified_gmt, false );
 		}
 
 		$metadata = array_merge(
@@ -1685,7 +1685,7 @@ function amp_get_schemaorg_metadata() {
 				'mainEntityOfPage' => get_permalink(),
 				'headline'         => get_the_title(),
 				'datePublished'    => $date_published,
-				'dateModified'      => $date_modified,
+				'dateModified'     => $date_modified,
 			]
 		);
 
