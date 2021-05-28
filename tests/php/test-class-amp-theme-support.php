@@ -75,6 +75,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$wp_styles    = null;
 		$wp_admin_bar = null;
 
+		$this->set_private_property( AMP_Theme_Support::class, 'metadata', null );
+
 		parent::tearDown();
 		unset( $GLOBALS['show_admin_bar'] );
 		AMP_Validation_Manager::$is_validate_request = false;
@@ -1631,6 +1633,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$original_html = $this->get_original_html();
+
+		$this->set_private_property( AMP_Theme_Support::class, 'metadata', amp_get_schemaorg_metadata() );
 
 		$call_prepare_response = static function() use ( $original_html ) {
 			AMP_HTTP::$headers_sent                     = [];
