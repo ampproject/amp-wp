@@ -843,6 +843,7 @@ class AMP_Theme_Support {
 			remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 			remove_action( 'wp_print_styles', 'print_emoji_styles' );
 			remove_action( 'wp_footer', 'gutenberg_the_skip_link' ); // Temporary workaround for <https://github.com/ampproject/amp-wp/issues/6115>.
+			remove_action( 'wp_footer', 'the_block_template_skip_link' ); // Temporary workaround for <https://github.com/ampproject/amp-wp/issues/6115>.
 			add_action( 'wp_print_styles', [ __CLASS__, 'print_emoji_styles' ] );
 			add_filter( 'the_title', 'wp_staticize_emoji' );
 			add_filter( 'the_excerpt', 'wp_staticize_emoji' );
