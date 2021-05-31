@@ -29,6 +29,7 @@ import { ReaderThemesContextProvider, ReaderThemes } from '../components/reader-
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
+import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
 import { AMPDrawer } from '../components/amp-drawer';
 import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
@@ -51,19 +52,23 @@ const { ajaxurl: wpAjaxUrl } = global;
  */
 function Providers( { children } ) {
 	return (
-		<SiteSettingsProvider>
-			<OptionsContextProvider optionsRestPath={ OPTIONS_REST_PATH } populateDefaultValues={ true }>
-				<ReaderThemesContextProvider
-					currentTheme={ CURRENT_THEME }
-					readerThemesRestPath={ READER_THEMES_REST_PATH }
-					hideCurrentlyActiveTheme={ true }
-					updatesNonce={ UPDATES_NONCE }
-					wpAjaxUrl={ wpAjaxUrl }
-				>
-					{ children }
-				</ReaderThemesContextProvider>
-			</OptionsContextProvider>
-		</SiteSettingsProvider>
+		<ErrorContextProvider>
+			<ErrorBoundary fullScreen={ true }>
+				<SiteSettingsProvider>
+					<OptionsContextProvider optionsRestPath={ OPTIONS_REST_PATH } populateDefaultValues={ true }>
+						<ReaderThemesContextProvider
+							currentTheme={ CURRENT_THEME }
+							readerThemesRestPath={ READER_THEMES_REST_PATH }
+							hideCurrentlyActiveTheme={ true }
+							updatesNonce={ UPDATES_NONCE }
+							wpAjaxUrl={ wpAjaxUrl }
+						>
+							{ children }
+						</ReaderThemesContextProvider>
+					</OptionsContextProvider>
+				</SiteSettingsProvider>
+			</ErrorBoundary>
+		</ErrorContextProvider>
 	);
 }
 Providers.propTypes = {
@@ -213,11 +218,9 @@ domReady( () => {
 
 	if ( root ) {
 		render( (
-			<ErrorContextProvider>
-				<Providers>
-					<Root appRoot={ root } />
-				</Providers>
-			</ErrorContextProvider>
+			<Providers>
+				<Root appRoot={ root } />
+			</Providers>
 		), root );
 	}
 } );
