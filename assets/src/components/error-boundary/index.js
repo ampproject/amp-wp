@@ -22,7 +22,6 @@ export class ErrorBoundary extends Component {
 	static propTypes = {
 		children: PropTypes.any,
 		exitLink: PropTypes.string,
-		fullScreen: PropTypes.bool,
 	}
 
 	constructor( props ) {
@@ -46,9 +45,9 @@ export class ErrorBoundary extends Component {
 
 	render() {
 		const { error } = this.state;
-		const { children, exitLink, fullScreen } = this.props;
+		const { children, exitLink } = this.props;
 
-		if ( error && fullScreen ) {
+		if ( error ) {
 			return (
 				<ErrorScreen error={ error } finishLink={ exitLink } />
 			);

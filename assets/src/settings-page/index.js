@@ -53,7 +53,7 @@ const { ajaxurl: wpAjaxUrl } = global;
 function Providers( { children } ) {
 	return (
 		<ErrorContextProvider>
-			<ErrorBoundary fullScreen={ true }>
+			<ErrorBoundary>
 				<SiteSettingsProvider>
 					<OptionsContextProvider optionsRestPath={ OPTIONS_REST_PATH } populateDefaultValues={ true }>
 						<ReaderThemesContextProvider

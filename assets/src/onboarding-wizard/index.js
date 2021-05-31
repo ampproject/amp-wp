@@ -49,8 +49,7 @@ const { ajaxurl: wpAjaxUrl } = global;
 export function Providers( { children } ) {
 	return (
 		<ErrorContextProvider>
-			<ErrorBoundary exitLink={ FINISH_LINK } fullScreen={ true }>
-
+			<ErrorBoundary exitLink={ FINISH_LINK }>
 				<OptionsContextProvider
 					delaySave={ true }
 					hasErrorBoundary={ true }
