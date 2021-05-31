@@ -8,21 +8,32 @@ exports[`ErrorScreen matches snapshot 1`] = `
     className="error-screen components-panel"
   >
     <h1>
-      The setup wizard has experienced an error.
+      Something went wrong.
     </h1>
-    <p>
-      <span
+    <p
+      dangerouslySetInnerHTML={
+        Object {
+          "__html": "The application failed",
+        }
+      }
+    />
+    <details>
+      <summary>
+        Details
+      </summary>
+      <pre
         dangerouslySetInnerHTML={
           Object {
-            "__html": "The application failed",
+            "__html": "ReferenceError: foo is not defined",
           }
         }
       />
-       
+    </details>
+    <p>
       <a
         href="http://my-exit-link.com"
       >
-        Return to AMP settings.
+        Go to homepage
       </a>
     </p>
   </div>
