@@ -29,18 +29,28 @@ export function ErrorScreen( { error, finishLink, title } ) {
 				<h1>
 					{ title || __( 'Something went wrong.', 'amp' ) }
 				</h1>
-				<p>
-					{ /* dangerouslySetInnerHTML reason: WordPress sometimes sends back HTML in error messages. */ }
-					<span
-						dangerouslySetInnerHTML={ { __html: error.message || __( 'There was an error loading the page.', 'amp' ) } }
-					/>
-					{ ' ' }
-					{ finishLink?.url && finishLink?.label && (
+
+				{ /* dangerouslySetInnerHTML reason: WordPress sometimes sends back HTML in error messages. */ }
+				<p dangerouslySetInnerHTML={ {
+					__html: error.message || __( 'There was an error loading the page.', 'amp' ),
+				} } />
+
+				{ error?.stack && (
+					<details>
+						<summary>
+							{ __( 'Details', 'amp' ) }
+						</summary>
+						<pre dangerouslySetInnerHTML={ { __html: error.stack } } />
+					</details>
+				) }
+
+				{ finishLink?.url && finishLink?.label && (
+					<p>
 						<a href={ finishLink.url }>
 							{ finishLink.label }
 						</a>
-					) }
-				</p>
+					</p>
+				) }
 			</Panel>
 		</div>
 	);
@@ -49,6 +59,7 @@ export function ErrorScreen( { error, finishLink, title } ) {
 ErrorScreen.propTypes = {
 	error: PropTypes.shape( {
 		message: PropTypes.string,
+		stack: PropTypes.string,
 	} ).isRequired,
 	finishLink: PropTypes.shape( {
 		label: PropTypes.string.isRequired,
