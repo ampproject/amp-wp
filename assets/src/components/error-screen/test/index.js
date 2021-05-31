@@ -20,7 +20,8 @@ describe( 'ErrorScreen', () => {
 				error={ {
 					message: 'The application failed',
 					stack: 'ReferenceError: foo is not defined',
-				} } />,
+				} }
+			/>,
 		);
 		expect( wrapper.toJSON() ).toMatchSnapshot();
 	} );
