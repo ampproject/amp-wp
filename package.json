@@ -26,7 +26,7 @@
     "@babel/polyfill": "7.12.1",
     "@wordpress/api-fetch": "5.0.0",
     "@wordpress/autop": "3.0.0",
-    "@wordpress/components": "13.0.3",
+    "@wordpress/components": "14.1.1",
     "@wordpress/compose": "4.0.0",
     "@wordpress/date": "4.0.0",
     "@wordpress/dom-ready": "3.0.0",
