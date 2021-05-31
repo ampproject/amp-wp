@@ -19,24 +19,25 @@ import './style.css';
  *
  * @param {Object} props Component props.
  * @param {Object} props.error Error object containing a message string.
- * @param {string} props.finishLink The link to return to the admin.
+ * @param {Object} props.finishLink The link to return to the admin.
+ * @param {string} props.title Custom message title.
  */
-export function ErrorScreen( { error, finishLink } ) {
+export function ErrorScreen( { error, finishLink, title } ) {
 	return (
 		<div className="error-screen-container">
 			<Panel className="error-screen">
 				<h1>
-					{ __( 'The setup wizard has experienced an error.', 'amp' ) }
+					{ title || __( 'Something went wrong.', 'amp' ) }
 				</h1>
 				<p>
 					{ /* dangerouslySetInnerHTML reason: WordPress sometimes sends back HTML in error messages. */ }
 					<span
-						dangerouslySetInnerHTML={ { __html: error.message || __( 'There was an error loading the setup wizard.', 'amp' ) } }
+						dangerouslySetInnerHTML={ { __html: error.message || __( 'There was an error loading the page.', 'amp' ) } }
 					/>
 					{ ' ' }
-					{ finishLink && (
-						<a href={ finishLink }>
-							{ __( 'Return to AMP settings.', 'amp' ) }
+					{ finishLink?.url && finishLink?.label && (
+						<a href={ finishLink.url }>
+							{ finishLink.label }
 						</a>
 					) }
 				</p>
@@ -49,5 +50,9 @@ ErrorScreen.propTypes = {
 	error: PropTypes.shape( {
 		message: PropTypes.string,
 	} ).isRequired,
-	finishLink: PropTypes.string.isRequired,
+	finishLink: PropTypes.shape( {
+		label: PropTypes.string.isRequired,
+		url: PropTypes.string.isRequired,
+	} ),
+	title: PropTypes.string,
 };

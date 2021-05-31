@@ -22,6 +22,7 @@ export class ErrorBoundary extends Component {
 	static propTypes = {
 		children: PropTypes.any,
 		exitLink: PropTypes.string,
+		title: PropTypes.string,
 	}
 
 	constructor( props ) {
@@ -45,11 +46,15 @@ export class ErrorBoundary extends Component {
 
 	render() {
 		const { error } = this.state;
-		const { children, exitLink } = this.props;
+		const { children, exitLink, title } = this.props;
 
 		if ( error ) {
 			return (
-				<ErrorScreen error={ error } finishLink={ exitLink } />
+				<ErrorScreen
+					error={ error }
+					finishLink={ exitLink }
+					title={ title }
+				/>
 			);
 		}
 

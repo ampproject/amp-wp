@@ -3,6 +3,7 @@
  */
 import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
+import { __ } from '@wordpress/i18n';
 
 /**
  * External dependencies
@@ -49,7 +50,13 @@ const { ajaxurl: wpAjaxUrl } = global;
 export function Providers( { children } ) {
 	return (
 		<ErrorContextProvider>
-			<ErrorBoundary exitLink={ FINISH_LINK }>
+			<ErrorBoundary
+				exitLink={ {
+					label: __( 'Return to AMP settings.', 'amp' ),
+					url: FINISH_LINK,
+				} }
+				title={ __( 'The setup wizard has experienced an error.', 'amp' ) }
+			>
 				<OptionsContextProvider
 					delaySave={ true }
 					hasErrorBoundary={ true }
