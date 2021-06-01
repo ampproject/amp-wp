@@ -259,22 +259,27 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 				[
 					'status'      => 'recommended',
 					'label'       => esc_html(
-						_n(
-							'A cURL multi function is not defined',
-							'Some cURL multi functions are not defined',
-							count( $undefined_curl_functions ),
-							'amp'
+						sprintf(
+							/* translators: %s is count of functions */
+							_n(
+								'There is %s undefined cURL multi function',
+								'There are %s undefined cURL multi functions',
+								count( $undefined_curl_functions ),
+								'amp'
+							),
+							number_format_i18n( count( $undefined_curl_functions ) )
 						)
 					),
 					'description' => wp_kses(
 						sprintf(
-							/* translators: %s: the name(s) of the cURL multi PHP function(s) */
+							/* translators: %1$s: the count of functions, %2$s: the name(s) of the cURL multi PHP function(s) */
 							_n(
-								'The following cURL multi function is not defined: %s.',
-								'The following cURL multi functions are not defined: %s.',
+								'The following %1$s cURL multi function is not defined: %2$s.',
+								'The following %1$s cURL multi functions are not defined: %2$s.',
 								count( $undefined_curl_functions ),
 								'amp'
 							),
+							number_format_i18n( count( $undefined_curl_functions ) ),
 							implode(
 								', ',
 								array_map(

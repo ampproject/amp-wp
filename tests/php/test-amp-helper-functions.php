@@ -1762,6 +1762,49 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertEquals( $metadata['publisher']['logo']['url'], amp_get_publisher_logo() );
 	}
 
+	/** @covers ::amp_get_schemaorg_metadata() */
+	public function test_amp_get_schemaorg_metadata_time_offset() {
+
+		add_filter(
+			'wp_insert_post_data',
+			function ( $data ) {
+				return array_merge(
+					$data,
+					[
+						'post_modified'     => '2021-02-19 12:55:00',
+						'post_modified_gmt' => '2021-02-19 19:55:00',
+					]
+				);
+			}
+		);
+		$post_id = wp_insert_post(
+			[
+				'post_title'    => 'Test',
+				'post_content'  => 'Test',
+				'post_type'     => 'post',
+				'post_status'   => 'publish',
+				'post_date'     => '2021-02-18 12:55:00',
+				'post_date_gmt' => '2021-02-18 19:55:00',
+			],
+			true
+		);
+
+		add_filter(
+			'pre_option_gmt_offset',
+			static function () {
+				return '-7';
+			}
+		);
+
+		$this->go_to( get_permalink( $post_id ) );
+		$metadata           = amp_get_schemaorg_metadata();
+		$expected_published = version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ? '2021-02-18T19:55:00+00:00' : '2021-02-18T12:55:00-07:00';
+		$expected_modified  = version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ? '2021-02-19T19:55:00+00:00' : '2021-02-19T12:55:00-07:00';
+
+		$this->assertSame( $expected_published, $metadata['datePublished'] );
+		$this->assertSame( $expected_modified, $metadata['dateModified'] );
+	}
+
 	/**
 	 * Test amp_print_schemaorg_metadata().
 	 *
