@@ -121,12 +121,12 @@ jobs:
         id: packages
         run: |
           # Get list of latest package versions.
-          PACKAGES=$(npm outdated --parseable | cut -d':' -f 4 | grep @wordpress || echo 0)
+          PACKAGES=$(npm outdated --parseable | cut -d':' -f 4 | grep @wordpress | paste -s -d' ' || echo 0)
           echo "::set-output name=list::$(echo "$PACKAGES")"
 
       - name: Update packages
         if: steps.packages.outputs.list != 0
-        run: npm i $(echo "$PACKAGES" | paste -s -d' ')
+        run: npm i $(echo "$PACKAGES")
         env:
           PACKAGES: ${{ steps.packages.outputs.list }}
 
