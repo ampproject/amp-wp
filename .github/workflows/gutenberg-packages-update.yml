@@ -26,6 +26,9 @@ jobs:
         run: |
           PR_TITLE=$(gh api -X GET search/issues -f q='${{ env.QUERY }}' -f sort='created' -f order='desc' --jq '.items.[].title' | head -n 1)
           LAST_VERSION=$(sed -r 's/.+ v(.+) .+/\1/' <<< "$PR_TITLE")
+          if ! egrep -q '^[0-9][0-9]*(\.[0-9][0-9]*)*$' <<< "$LAST_VERSION"; then
+            LAST_VERSION='0.0.0'
+          fi
           echo "::set-output name=version::$(echo "$LAST_VERSION")"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -33,7 +36,10 @@ jobs:
 
       - name: Determine if package updates are needed
         id: release-status
-        run: echo "::set-output name=outdated::$(php -r 'echo json_encode(version_compare($argv[1], $argv[2], ">"));' "$LATEST_VER" "$LAST_VER")"
+        run: |
+          echo "Last version: $LAST_VER"
+          echo "Latest version: $LATEST_VER"
+          echo "::set-output name=outdated::$(php -r 'echo json_encode(version_compare($argv[1], $argv[2], ">"));' "$LATEST_VER" "$LAST_VER")"
         env:
           LAST_VER: ${{ steps.last-release.outputs.version }}
           LATEST_VER: ${{ steps.latest-release.outputs.version }}
