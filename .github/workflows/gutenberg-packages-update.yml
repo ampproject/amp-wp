@@ -47,7 +47,7 @@ jobs:
   update-packages:
     name: Update Gutenberg npm dependencies
     # Run job if there is a new Gutenberg release.
-    if: needs.check-gutenberg-release.outputs.should-update == true
+    if: needs.check-gutenberg-release.outputs.should-update == 'true'
     runs-on: ubuntu-latest
     needs: check-gutenberg-release
     steps:
