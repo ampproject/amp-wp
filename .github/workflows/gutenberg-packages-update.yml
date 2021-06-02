@@ -32,7 +32,7 @@ jobs:
           echo "::set-output name=version::$(echo "$LAST_VERSION")"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          QUERY: 'repo:ampproject/amp-wp is:pr author:app/github-actions is:open is:merged in:title Update Gutenberg packages after'
+          QUERY: 'repo:ampproject/amp-wp is:pr author:app/github-actions -state:closed in:title Update Gutenberg packages after'
 
       - name: Determine if package updates are needed
         id: release-status
