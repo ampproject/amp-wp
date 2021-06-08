@@ -19,10 +19,11 @@ import './style.css';
  *
  * @param {Object} props Component props.
  * @param {Object} props.error Error object containing a message string.
- * @param {Object} props.finishLink The link to return to the admin.
+ * @param {string} props.finishLinkLabel Label of a link to return to the admin.
+ * @param {string} props.finishLinkUrl Url of a link to return to the admin.
  * @param {string} props.title Custom message title.
  */
-export function ErrorScreen( { error, finishLink, title } ) {
+export function ErrorScreen( { error, finishLinkLabel, finishLinkUrl, title } ) {
 	return (
 		<div className="error-screen-container">
 			<Panel className="error-screen">
@@ -44,10 +45,10 @@ export function ErrorScreen( { error, finishLink, title } ) {
 					</details>
 				) }
 
-				{ finishLink?.url && finishLink?.label && (
+				{ finishLinkUrl && finishLinkLabel && (
 					<p>
-						<a href={ finishLink.url }>
-							{ finishLink.label }
+						<a href={ finishLinkUrl }>
+							{ finishLinkLabel }
 						</a>
 					</p>
 				) }
@@ -61,9 +62,7 @@ ErrorScreen.propTypes = {
 		message: PropTypes.string,
 		stack: PropTypes.string,
 	} ).isRequired,
-	finishLink: PropTypes.shape( {
-		label: PropTypes.string.isRequired,
-		url: PropTypes.string.isRequired,
-	} ),
+	finishLinkLabel: PropTypes.string,
+	finishLinkUrl: PropTypes.string,
 	title: PropTypes.string,
 };

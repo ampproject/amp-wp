@@ -51,10 +51,8 @@ export function Providers( { children } ) {
 	return (
 		<ErrorContextProvider>
 			<ErrorBoundary
-				exitLink={ {
-					label: __( 'Return to AMP settings.', 'amp' ),
-					url: FINISH_LINK,
-				} }
+				exitLinkLabel={ __( 'Return to AMP settings.', 'amp' ) }
+				exitLinkUrl={ FINISH_LINK }
 				title={ __( 'The setup wizard has experienced an error.', 'amp' ) }
 			>
 				<OptionsContextProvider

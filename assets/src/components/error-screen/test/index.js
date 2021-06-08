@@ -13,10 +13,8 @@ describe( 'ErrorScreen', () => {
 	it( 'matches snapshot', () => {
 		const wrapper = create(
 			<ErrorScreen
-				finishLink={ {
-					url: 'http://my-exit-link.com',
-					label: 'Go to homepage',
-				} }
+				finishLinkLabel="Go to homepage"
+				finishLinkUrl="http://my-exit-link.com"
 				error={ {
 					message: 'The application failed',
 					stack: 'ReferenceError: foo is not defined',
