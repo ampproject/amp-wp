@@ -2,7 +2,8 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Panel } from '@wordpress/components';
+import { ClipboardButton, Panel } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -24,6 +25,8 @@ import './style.css';
  * @param {string} props.title Custom message title.
  */
 export function ErrorScreen( { error, finishLinkLabel, finishLinkUrl, title } ) {
+	const [ hasCopied, setHasCopied ] = useState( false );
+
 	return (
 		<div className="error-screen-container">
 			<Panel className="error-screen">
@@ -42,6 +45,15 @@ export function ErrorScreen( { error, finishLinkLabel, finishLinkUrl, title } ) 
 							{ __( 'Details', 'amp' ) }
 						</summary>
 						<pre dangerouslySetInnerHTML={ { __html: error.stack } } />
+						<ClipboardButton
+							isSmall={ true }
+							isSecondary={ true }
+							text={ error.stack }
+							onCopy={ () => setHasCopied( true ) }
+							onFinishCopy={ () => setHasCopied( false ) }
+						>
+							{ hasCopied ? __( 'Copied!', 'amp' ) : __( 'Copy Error', 'amp' ) }
+						</ClipboardButton>
 					</details>
 				) }
 
