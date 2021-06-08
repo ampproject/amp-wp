@@ -28,6 +28,14 @@ exports[`ErrorScreen matches snapshot 1`] = `
           }
         }
       />
+      <button
+        aria-describedby={null}
+        className="components-button components-clipboard-button is-secondary is-small"
+        onCopy={[Function]}
+        type="button"
+      >
+        Copy Error
+      </button>
     </details>
     <p>
       <a

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ClipboardButton, Panel } from '@wordpress/components';
+import { Panel } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 
 /**
@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
+import ClipboardButton from '../clipboard-button';
 import './style.css';
 
 /**
