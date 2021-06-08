@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVar;
 
 /**
  * Sets up the AMP template editor for the Customizer.
@@ -38,6 +39,7 @@ function amp_admin_get_preview_permalink() {
 	/**
 	 * Filter the post type to retrieve the latest for use in the AMP template customizer.
 	 *
+	 * @todo This filter doesn't actually do anything at present. Instead of array_unique() below, an array_intersect() should have been used.
 	 * @param string $post_type Post type slug. Default 'post'.
 	 */
 	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
@@ -45,7 +47,7 @@ function amp_admin_get_preview_permalink() {
 	// Make sure the desired post type is actually supported, and if so, prefer it.
 	$supported_post_types = AMP_Post_Type_Support::get_supported_post_types();
 	if ( in_array( $post_type, $supported_post_types, true ) ) {
-		$supported_post_types = array_unique( array_merge( [ $post_type ], $supported_post_types ) );
+		$supported_post_types = array_values( array_unique( array_merge( [ $post_type ], $supported_post_types ) ) );
 	}
 
 	// Bail if there are no supported post types.
@@ -98,7 +100,7 @@ function amp_get_customizer_url() {
 	}
 
 	$args = [
-		'url' => amp_admin_get_preview_permalink(),
+		QueryVar::AMP_PREVIEW => '1',
 	];
 	if ( $is_legacy ) {
 		$args['autofocus[panel]'] = AMP_Template_Customizer::PANEL_ID;
@@ -128,37 +130,6 @@ function amp_add_customizer_link() {
 		'edit_theme_options',
 		$customizer_url
 	);
-}
-
-/**
- * Add custom analytics.
- *
- * This is currently only used for legacy AMP post templates.
- *
- * @since 0.5
- * @see amp_get_analytics()
- * @internal
- *
- * @param array $analytics Analytics.
- * @return array Analytics.
- */
-function amp_add_custom_analytics( $analytics = [] ) {
-	$analytics = amp_get_analytics( $analytics );
-
-	/**
-	 * Add amp-analytics tags.
-	 *
-	 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
-	 * This filter should be used to alter entries for legacy AMP templates.
-	 *
-	 * @since 0.4
-	 *
-	 * @param array   $analytics An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
-	 * @param WP_Post $post      The current post.
-	 */
-	$analytics = apply_filters( 'amp_post_template_analytics', $analytics, get_queried_object() );
-
-	return $analytics;
 }
 
 /**
@@ -201,18 +172,4 @@ function amp_bootstrap_support() {
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		\WP_CLI::add_command( 'amp send-diagnostic', [ $admin_support, 'amp_send_diagnostic' ] );
 	}
-}
-
-/**
- * Whether to activate the new onboarding feature.
- *
- * @internal
- * @return bool
- */
-function amp_should_use_new_onboarding() {
-	if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-		return false;
-	}
-
-	return true;
 }

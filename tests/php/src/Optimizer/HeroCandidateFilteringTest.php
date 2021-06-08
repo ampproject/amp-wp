@@ -97,12 +97,22 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 	public function test_filter_attachment_image_attributes() {
 		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', 0 );
 		$attachment    = get_post( $attachment_id );
-		$post_ids      = self::factory()->post->create_many(
-			2,
-			[ 'post_content' => __FUNCTION__ ]
-		);
+		$post_ids      = [
+			self::factory()->post->create(
+				[
+					'post_date'    => '2021-02-03 04:05:06',
+					'post_content' => __FUNCTION__,
+				]
+			),
+			self::factory()->post->create(
+				[
+					'post_date'    => '2020-01-02 03:04:05',
+					'post_content' => __FUNCTION__,
+				]
+			),
+		];
 
-		$search_request_uri = sprintf( '/?s=%s&orderby=ID&order=asc', __FUNCTION__ );
+		$search_request_uri = sprintf( '/?s=%s', __FUNCTION__ );
 
 		$initial_attrs = [ 'data-foo' => 'bar' ];
 		$merged_attrs  = array_merge(
@@ -140,6 +150,20 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 			$this->instance->filter_attachment_image_attributes( $initial_attrs, $attachment )
 		);
 
+		// When on the page for posts, the the first post in the loop is considered and not the queried object (the page for posts).
+		$page_for_posts = self::factory()->post->create( [ 'post_type' => 'page' ] );
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_for_posts', $page_for_posts );
+		$this->go_to( get_permalink( $page_for_posts ) );
+		$this->assertEquals(
+			wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ),
+			$post_ids
+		);
+		$this->assertEquals(
+			$merged_attrs,
+			$this->instance->filter_attachment_image_attributes( $initial_attrs, $attachment )
+		);
+
 		// When on the singular post without a featured image, no attribute is added.
 		delete_post_thumbnail( $post_ids[0] );
 		set_post_thumbnail( $post_ids[1], $attachment->ID );
@@ -156,6 +180,15 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 		$this->assertEquals(
 			$merged_attrs,
 			$this->instance->filter_attachment_image_attributes( $initial_attrs, $attachment )
+		);
+
+		// When no attachment is provided, then no filtering is done.
+		delete_post_thumbnail( $post_ids[1] );
+		set_post_thumbnail( $post_ids[0], $attachment->ID );
+		$this->go_to( get_permalink( $post_ids[0] ) );
+		$this->assertEquals(
+			$initial_attrs,
+			$this->instance->filter_attachment_image_attributes( $initial_attrs, null )
 		);
 	}
 

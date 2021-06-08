@@ -103,19 +103,25 @@ jobs:
         run: npm run lint:pkg-json
 
       - name: Detect ESLint coding standard violations
-        if: github.event.pull_request.head.repo.fork == true
+        if: >
+          github.event.pull_request.head.repo.fork == true ||
+          github.event.pull_request.user.login == 'dependabot[bot]'
         run: npm run lint:js
 
       - name: Generate ESLint coding standard violations report
-        # Prevent generating the ESLint report if run from a PR fork
-        if: github.event.pull_request.head.repo.fork == false
+        # Prevent generating the ESLint report if PR is from a fork or authored by Dependabot.
+        if: >
+          ! ( github.event.pull_request.head.repo.fork == true ||
+          github.event.pull_request.user.login == 'dependabot[bot]' )
         run: npm run lint:js:report
         continue-on-error: true
 
       - name: Annotate code linting results
-        # The action cannot annotate the PR diff when run from a PR fork
-        if: github.event.pull_request.head.repo.fork == false
-        uses: ataylorme/eslint-annotate-action@1.1.2
+        # The action cannot annotate the PR when run from a PR fork or was authored by Dependabot.
+        if: >
+          ! ( github.event.pull_request.head.repo.fork == true ||
+          github.event.pull_request.user.login == 'dependabot[bot]' )
+        uses: ataylorme/eslint-annotate-action@1.2.0
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
           report-json: 'lint-js-report.json'
@@ -242,7 +248,7 @@ jobs:
         run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
 
       - name: Upload code coverage report
-        uses: codecov/codecov-action@v1.4.1
+        uses: codecov/codecov-action@v1.5.0
         with:
           file: build/logs/lcov.info
           flags: javascript
@@ -488,7 +494,7 @@ jobs:
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v1.4.1
+        uses: codecov/codecov-action@v1.5.0
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php,unit
@@ -647,7 +653,7 @@ jobs:
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v1.4.1
+        uses: codecov/codecov-action@v1.5.0
         with:
           files: ${{ env.COVERAGE_FILES }}
           flags: php,feature
@@ -657,8 +663,11 @@ jobs:
 
   build-zip:
     name: 'Build: ${{ matrix.build }} build ZIP'
-    # Only run if it is not a draft PR and the PR is not from a forked repository.
-    if: ( github.event.pull_request.draft || github.event.pull_request.head.repo.fork ) == false
+    # Only run if the PR was not authored by Dependabot and it is not a draft or not from a fork.
+    if: >
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.fork == false &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     needs:
       - lint-css
@@ -733,6 +742,8 @@ jobs:
         run: |
           npm run build:${{ matrix.build }}
           mv amp.zip builds/${{ matrix.build }}/amp.zip
+        env:
+          LAST_PR_COMMIT_HASH: ${{ github.event.pull_request.head.sha }}
 
       - name: Retrieve branch name
         id: retrieve-branch-name
@@ -806,8 +817,8 @@ jobs:
         # Setting a multi-line output requires escaping line-feeds. See <https://github.community/t/set-output-truncates-multiline-strings/16852/3>.
         run: |
           body="Plugin builds for ${{ github.event.pull_request.head.sha }} are ready :bellhop_bell:!
-          - Download [development build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
-          - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip)"
+          - Download [development build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip?${{ github.sha }})
+          - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip?${{ github.sha }})"
           body="${body//$'\n'/'%0A'}"
           echo "::set-output name=body::$body"
 

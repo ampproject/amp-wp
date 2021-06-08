@@ -14,7 +14,7 @@ In practice the `customize_controls_enqueue_scripts` hook should be used instead
 
 ### Source
 
-:link: [includes/admin/class-amp-template-customizer.php:632](/includes/admin/class-amp-template-customizer.php#L632)
+:link: [includes/admin/class-amp-template-customizer.php:654](/includes/admin/class-amp-template-customizer.php#L654)
 
 <details>
 <summary>Show Code</summary>

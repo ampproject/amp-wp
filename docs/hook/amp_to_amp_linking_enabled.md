@@ -12,7 +12,7 @@ Filters whether AMP-to-AMP linking should be enabled.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1351](/includes/amp-helper-functions.php#L1351-L1354)
+:link: [includes/amp-helper-functions.php:1369](/includes/amp-helper-functions.php#L1369-L1372)
 
 <details>
 <summary>Show Code</summary>

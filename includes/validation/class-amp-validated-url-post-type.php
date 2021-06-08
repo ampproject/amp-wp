@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Admin\OptionsMenu;
+use AmpProject\AmpWP\Admin\ValidationCounts;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
@@ -466,8 +467,7 @@ class AMP_Validated_URL_Post_Type {
 				$menu_name_label = get_post_type_object( self::POST_TYPE_SLUG )->labels->menu_name;
 				$submenu_item[0] = $menu_name_label;
 
-				$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
-				if ( $dev_tools_user_access->is_user_enabled() ) {
+				if ( ValidationCounts::is_needed() ) {
 					// Append markup to display a loading spinner while the unreviewed count is being fetched.
 					$submenu_item[0] .= ' <span class="awaiting-mod"><span id="new-validation-url-count" class="loading"></span></span>';
 				}
@@ -492,6 +492,14 @@ class AMP_Validated_URL_Post_Type {
 			return (int) $count;
 		}
 
+		// Make sure filter is added in REST API context which is otherwise only added via AMP_Validation_Error_Taxonomy::add_admin_hooks().
+		$callback   = [ AMP_Validation_Error_Taxonomy::class, 'filter_posts_where_for_validation_error_status' ];
+		$priority   = 10;
+		$has_filter = has_filter( 'posts_where', $callback );
+		if ( false === $has_filter ) {
+			add_filter( 'posts_where', $callback, $priority, 2 );
+		}
+
 		$query = new WP_Query(
 			[
 				'post_type'              => self::POST_TYPE_SLUG,
@@ -503,6 +511,11 @@ class AMP_Validated_URL_Post_Type {
 				'update_post_term_cache' => false,
 			]
 		);
+
+		// Remove filter if we added it in this method.
+		if ( false === $has_filter ) {
+			remove_filter( 'posts_where', $callback, $priority );
+		}
 
 		$count = $query->found_posts;
 

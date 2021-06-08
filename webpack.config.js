@@ -160,7 +160,7 @@ const customizer = {
 
 const WORDPRESS_NAMESPACE = '@wordpress/';
 const BABEL_NAMESPACE = '@babel/';
-const gutenbergPackages = [ '@babel/polyfill', '@wordpress/dom-ready', '@wordpress/i18n', '@wordpress/hooks', '@wordpress/url' ].map(
+const gutenbergPackages = [ '@babel/polyfill', '@wordpress/dom-ready', '@wordpress/i18n', '@wordpress/hooks', '@wordpress/html-entities', '@wordpress/url' ].map(
 	( packageName ) => {
 		if ( 0 !== packageName.indexOf( WORDPRESS_NAMESPACE ) && 0 !== packageName.indexOf( BABEL_NAMESPACE ) ) {
 			return null;
@@ -230,12 +230,10 @@ const wpPolyfills = {
 	],
 };
 
-const setup = {
+const onboardingWizard = {
 	...sharedConfig,
 	entry: {
-		'amp-onboarding-wizard': [
-			'./assets/src/onboarding-wizard',
-		],
+		'amp-onboarding-wizard': './assets/src/onboarding-wizard',
 	},
 	externals: {
 		'amp-settings': 'ampSettings',
@@ -246,7 +244,7 @@ const setup = {
 		),
 		new DependencyExtractionWebpackPlugin( {
 			useDefaults: false,
-			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			// Most dependencies will be bundled for the AMP onboarding wizard for compatibility across WP versions.
 			requestToHandle: ( handle ) => {
 				switch ( handle ) {
 					case 'lodash':
@@ -286,15 +284,9 @@ const setup = {
 const settingsPage = {
 	...sharedConfig,
 	entry: {
-		'wp-api-fetch': [
-			'./assets/src/polyfills/api-fetch.js',
-		],
-		'wp-components': [
-			'@wordpress/components/build-style/style.css',
-		],
-		'amp-settings': [
-			'./assets/src/settings-page',
-		],
+		'wp-api-fetch': './assets/src/polyfills/api-fetch.js',
+		'wp-components': '@wordpress/components/build-style/style.css',
+		'amp-settings': './assets/src/settings-page',
 	},
 	externals: {
 		'amp-settings': 'ampSettings',
@@ -410,7 +402,7 @@ module.exports = [
 	admin,
 	customizer,
 	wpPolyfills,
-	setup,
+	onboardingWizard,
 	settingsPage,
 	styles,
 	mobileRedirection,

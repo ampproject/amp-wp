@@ -163,6 +163,11 @@ class AMP_Post_Meta_Box {
 
 		wp_styles()->add_data( self::ASSETS_HANDLE, 'rtl', 'replace' );
 
+		// Abort if version of WordPress is too old.
+		if ( ! Services::get( 'dependency_support' )->has_support_from_core() ) {
+			return;
+		}
+
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSETS_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];

@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
@@ -50,7 +51,8 @@ class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
 		$this->options_menu_instance = new OptionsMenu(
 			new GoogleFonts(),
 			new ReaderThemes(),
-			new RESTPreloader()
+			new RESTPreloader(),
+			new DependencySupport()
 		);
 		$this->instance              = new AnalyticsOptionsSubmenu( $this->options_menu_instance );
 	}

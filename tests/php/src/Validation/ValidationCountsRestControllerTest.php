@@ -66,6 +66,7 @@ class ValidationCountsRestControllerTest extends DependencyInjectedTestCase {
 	 * Test ::get_items().
 	 *
 	 * @covers ::get_items()
+	 * @covers AMP_Validated_URL_Post_Type::get_validation_error_urls_count()
 	 */
 	public function test_get_items() {
 		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
@@ -83,6 +84,19 @@ class ValidationCountsRestControllerTest extends DependencyInjectedTestCase {
 			$response->get_data()
 		);
 
+		add_filter(
+			'amp_validation_error_sanitized',
+			function ( $removed, $data ) {
+				if ( 'reviewed' === $data['code'] ) {
+					$removed = true;
+				}
+				return $removed;
+			},
+			10,
+			2
+		);
+
+		// One URL with one unreviewed error.
 		AMP_Validated_URL_Post_Type::store_validation_errors(
 			[
 				[
@@ -91,11 +105,49 @@ class ValidationCountsRestControllerTest extends DependencyInjectedTestCase {
 			],
 			get_permalink( self::factory()->post->create() )
 		);
-
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals(
 			[
 				'validated_urls' => 1,
+				'errors'         => 1,
+			],
+			$response->get_data()
+		);
+
+		// Two URLs one with an unreviewed error, and another with an unreviewed error and a reviewed one.
+		AMP_Validated_URL_Post_Type::store_validation_errors(
+			[
+				[
+					'code' => 'foobar',
+				],
+				[
+					'code' => 'reviewed',
+				],
+			],
+			get_permalink( self::factory()->post->create() )
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals(
+			[
+				'validated_urls' => 2,
+				'errors'         => 1,
+			],
+			$response->get_data()
+		);
+
+		// Three URLs one with an unreviewed error, another with an unreviewed error and a reviewed one, and another with only reviewed (no change from previous).
+		AMP_Validated_URL_Post_Type::store_validation_errors(
+			[
+				[
+					'code' => 'reviewed',
+				],
+			],
+			get_permalink( self::factory()->post->create() )
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals(
+			[
+				'validated_urls' => 2,
 				'errors'         => 1,
 			],
 			$response->get_data()

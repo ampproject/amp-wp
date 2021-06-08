@@ -75,6 +75,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$wp_styles    = null;
 		$wp_admin_bar = null;
 
+		$this->set_private_property( AMP_Theme_Support::class, 'metadata', null );
+
 		parent::tearDown();
 		unset( $GLOBALS['show_admin_bar'] );
 		AMP_Validation_Manager::$is_validate_request = false;
@@ -1344,6 +1346,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::ensure_required_markup()
 	 */
 	public function test_unneeded_scripts_get_removed() {
+		wp_styles(); // Needed after <https://core.trac.wordpress.org/changeset/50836>.
+
 		wp();
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
@@ -1417,6 +1421,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::ensure_required_markup()
 	 */
 	public function test_duplicate_scripts_are_removed() {
+		wp_styles(); // Needed after <https://core.trac.wordpress.org/changeset/50836>.
+
 		wp();
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
@@ -1532,6 +1538,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::is_output_buffering()
 	 */
 	public function test_finish_output_buffering() {
+		wp_styles(); // Needed after <https://core.trac.wordpress.org/changeset/50836>.
+
 		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -1625,6 +1633,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$original_html = $this->get_original_html();
+
+		$this->set_private_property( AMP_Theme_Support::class, 'metadata', amp_get_schemaorg_metadata() );
 
 		$call_prepare_response = static function() use ( $original_html ) {
 			AMP_HTTP::$headers_sent                     = [];
@@ -1976,7 +1986,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 
 		add_filter(
-			'amp_schemaorg_metadata',
+			'amp_enable_optimizer',
 			static function () {
 				throw new RuntimeException( 'FAILURE', 42 );
 			}

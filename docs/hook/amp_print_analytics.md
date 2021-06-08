@@ -14,7 +14,7 @@ This is useful for printing additional `amp-analytics` tags to the page without 
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1170](/includes/amp-helper-functions.php#L1170)
+:link: [includes/amp-helper-functions.php:1188](/includes/amp-helper-functions.php#L1188)
 
 <details>
 <summary>Show Code</summary>

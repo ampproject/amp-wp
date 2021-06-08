@@ -2,13 +2,13 @@
 
 ![Banner](.wordpress-org/banner-1544x500.png)
 
-The official AMP Plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across both mobile and desktop.
+An easier path to great Page Experience for everyone. Powered by AMP.
 
-**Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [albertomedina](https://profiles.wordpress.org/albertomedina), [schlessera](https://profiles.wordpress.org/schlessera), [swissspidy](https://profiles.wordpress.org/swissspidy), [pierlo](https://profiles.wordpress.org/pierlo), [johnwatkins0](https://profiles.wordpress.org/johnwatkins0), [joshuawold](https://profiles.wordpress.org/joshuawold), [ryankienstra](https://profiles.wordpress.org/ryankienstra)  
-**Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages), [framework](https://wordpress.org/plugins/tags/framework), [components](https://wordpress.org/plugins/tags/components), [blocks](https://wordpress.org/plugins/tags/blocks), [performance](https://wordpress.org/plugins/tags/performance), [ux](https://wordpress.org/plugins/tags/ux), [seo](https://wordpress.org/plugins/tags/seo), [official](https://wordpress.org/plugins/tags/official)  
+**Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [albertomedina](https://profiles.wordpress.org/albertomedina), [schlessera](https://profiles.wordpress.org/schlessera), [swissspidy](https://profiles.wordpress.org/swissspidy), [pierlo](https://profiles.wordpress.org/pierlo), [delawski](https://profiles.wordpress.org/delawski/), [johnwatkins0](https://profiles.wordpress.org/johnwatkins0), [joshuawold](https://profiles.wordpress.org/joshuawold)  
+**Tags:** [page experience](https://wordpress.org/plugins/tags/page-experience), [performance](https://wordpress.org/plugins/tags/performance), [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages)  
 **Requires at least:** 4.9  
 **Tested up to:** 5.7  
-**Stable tag:** 2.0.11  
+**Stable tag:** 2.1.2  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.6
 
@@ -18,7 +18,7 @@ The official AMP Plugin, supported by the AMP team. Formerly Accelerated Mobile 
 
 ## Description
 
-This official plugin from the AMP project enables AMP content publishing with WordPress in a way that is fully and seamlessly integrated with the standard mechanisms of the platform.
+[Page Experience](https://developers.google.com/search/docs/guides/page-experience) (PX) is a set of ranking signals—including [Core Web Vitals](https://web.dev/vitals/#core-web-vitals) (CWV)—measuring the user experience of interacting with a web page. AMP is a powerful tool which applies many optimizations and best practices automatically on your site, making it easier for you to achieve good page experience for your visitors. The official AMP Plugin, supported by the AMP team, makes it easy to bring the power of AMP to your WordPress site, seamlessly integrating with the normal publishing flow and allowing the use of existing themes and plugins.
 
 [![Play video on YouTube](https://i1.ytimg.com/vi/s52JNMT59s8/hqdefault.jpg)](https://www.youtube.com/watch?v=s52JNMT59s8&list=PLXTOW_XMsIDRGRr5QDffrvND8Qh1RndFb)
 

@@ -70,4 +70,11 @@ interface QueryVar {
 	 * @var string
 	 */
 	const VERBOSE_SERVER_TIMING = 'amp_verbose_server_timing';
+
+	/**
+	 * Query parameter provided to customize.php to indicate that the preview should be loaded with an AMP URL.
+	 *
+	 * @var string
+	 */
+	const AMP_PREVIEW = 'amp_preview';
 }

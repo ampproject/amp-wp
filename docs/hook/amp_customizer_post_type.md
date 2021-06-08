@@ -12,7 +12,7 @@ Filter the post type to retrieve the latest for use in the AMP template customiz
 
 ### Source
 
-:link: [includes/admin/functions.php:43](/includes/admin/functions.php#L43)
+:link: [includes/admin/functions.php:45](/includes/admin/functions.php#L45)
 
 <details>
 <summary>Show Code</summary>
