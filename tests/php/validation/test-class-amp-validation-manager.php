@@ -1227,8 +1227,31 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers AMP_Validation_Manager::wrap_widget_callbacks()
 	 */
 	public function test_wrap_widget_callbacks() {
-		global $wp_registered_widgets, $_wp_sidebars_widgets;
+		global $wp_registered_widgets, $_wp_sidebars_widgets, $wp_widget_factory;
 		$this->go_to( amp_get_permalink( self::factory()->post->create() ) );
+
+		update_option(
+			'widget_search',
+			[
+				2               => [
+					'title' => '',
+				],
+				'_multi_widget' => 1,
+			]
+		);
+		update_option(
+			'widget_archives',
+			[
+				2               => [
+					'title' => '',
+				],
+				'_multi_widget' => 1,
+			]
+		);
+
+		$wp_registered_widgets = [];
+		$wp_widget_factory     = new WP_Widget_Factory();
+		wp_widgets_init();
 
 		$search_widget_id = 'search-2';
 		$this->assertArrayHasKey( $search_widget_id, $wp_registered_widgets );
