@@ -29,6 +29,7 @@ import google
 from collections import defaultdict
 import imp
 import re
+import urllib
 
 seen_spec_names = set()
 
@@ -43,12 +44,10 @@ def SetupOutDir(out_dir):
 	Args:
 		out_dir: directory name of the output directory.
 	"""
-	logging.info('entering ...')
 
 	if os.path.exists(out_dir):
 		subprocess.check_call(['rm', '-rf', out_dir])
 	os.mkdir(out_dir)
-	logging.info('... done')
 
 
 def GenValidatorPb2Py(validator_directory, out_dir):
@@ -58,14 +57,11 @@ def GenValidatorPb2Py(validator_directory, out_dir):
 		validator_directory: directory name of the validator.
 		out_dir: directory name of the output directory.
 	"""
-	logging.info('entering ...')
 
 	os.chdir( validator_directory )
 	subprocess.check_call(['protoc', 'validator.proto', '--python_out=%s' % out_dir])
 	os.chdir( out_dir )
 	open('__init__.py', 'w').close()
-	logging.info('... done')
-
 
 def GenValidatorProtoascii(validator_directory, out_dir):
 	"""Assembles the validator protoascii file from the main and extensions.
@@ -74,7 +70,6 @@ def GenValidatorProtoascii(validator_directory, out_dir):
 		validator_directory: directory for where the validator is located, inside the amphtml repo.
 		out_dir: directory name of the output directory.
 	"""
-	logging.info('entering ...')
 
 	protoascii_segments = [
 		open(os.path.join(validator_directory, 'validator-main.protoascii')).read(),
@@ -89,19 +84,16 @@ def GenValidatorProtoascii(validator_directory, out_dir):
 	f.write(''.join(protoascii_segments))
 	f.close()
 
-	logging.info('... done')
 
-
-def GeneratePHP(out_dir):
+def GeneratePHP(repo_directory, out_dir):
 	"""Generates PHP for WordPress AMP plugin to consume.
 
 	Args:
 		validator_directory: directory for where the validator is located, inside the amphtml repo.
 		out_dir: directory name of the output directory
 	"""
-	logging.info('entering ...')
 
-	allowed_tags, attr_lists, descendant_lists, reference_points, versions = ParseRules(out_dir)
+	allowed_tags, attr_lists, descendant_lists, reference_points, versions = ParseRules(repo_directory, out_dir)
 
 	expected_spec_names = (
 		'style amp-custom',
@@ -132,11 +124,7 @@ def GeneratePHP(out_dir):
 	# Write the php file to STDOUT.
 	print output
 
-	logging.info('... done')
-
 def GenerateHeaderPHP(out):
-	logging.info('entering ...')
-
 	# Output the file's header
 	out.append('<?php')
 	out.append('/**')
@@ -155,67 +143,45 @@ def GenerateHeaderPHP(out):
 	out.append(' */')
 	out.append('class AMP_Allowed_Tags_Generated {')
 	out.append('')
-	logging.info('... done')
-
 
 def GenerateSpecVersionPHP(out, versions):
-	logging.info('entering ...')
-
 	# Output the version of the spec file and matching validator version
 	if versions['spec_file_revision']:
 		out.append('\tprivate static $spec_file_revision = %d;' % versions['spec_file_revision'])
 	if versions['min_validator_revision_required']:
 		out.append('\tprivate static $minimum_validator_revision_required = %d;' % versions['min_validator_revision_required'])
-	logging.info('... done')
 
 def GenerateDescendantListsPHP(out, descendant_lists):
-	logging.info('entering ...')
-
 	out.append('')
 	out.append('\tprivate static $descendant_tag_lists = %s;' % Phpize( descendant_lists, 1 ).lstrip() )
-	logging.info('... done')
 
 
 def GenerateAllowedTagsPHP(out, allowed_tags):
-	logging.info('entering ...')
-
-  # Output the allowed tags dictionary along with each tag's allowed attributes
+	# Output the allowed tags dictionary along with each tag's allowed attributes
 	out.append('')
 	out.append('\tprivate static $allowed_tags = %s;' % Phpize( allowed_tags, 1 ).lstrip() )
-	logging.info('... done')
 
 
 def GenerateLayoutAttributesPHP(out, attr_lists):
-	logging.info('entering ...')
-
 	# Output the attribute list allowed for layouts.
 	out.append('')
 	out.append('\tprivate static $layout_allowed_attrs = %s;' % Phpize( attr_lists['$AMP_LAYOUT_ATTRS'], 1 ).lstrip() )
 	out.append('')
-	logging.info('... done')
 
 
 def GenerateGlobalAttributesPHP(out, attr_lists):
-	logging.info('entering ...')
-
 	# Output the globally allowed attribute list.
 	out.append('')
 	out.append('\tprivate static $globally_allowed_attrs = %s;' % Phpize( attr_lists['$GLOBAL_ATTRS'], 1 ).lstrip() )
 	out.append('')
-	logging.info('... done')
 
 def GenerateReferencePointsPHP(out, reference_points):
-	logging.info('entering ...')
-
 	# Output the reference points.
 	out.append('')
 	out.append('\tprivate static $reference_points = %s;' % Phpize( reference_points, 1 ).lstrip() )
 	out.append('')
-	logging.info('... done')
 
 def GenerateFooterPHP(out):
-	logging.info('entering ...')
-
 	# Output the footer.
 	out.append('''
 	/**
@@ -332,12 +298,8 @@ def GenerateFooterPHP(out):
 	out.append('}')
 	out.append('')
 
-	logging.info('... done')
 
-
-def ParseRules(out_dir):
-	logging.info('entering ...')
-
+def ParseRules(repo_directory, out_dir):
 	# These imports happen late, within this method because they don't necessarily
 	# exist when the module starts running, and the ones that probably do
 	# are checked by CheckPrereqs.
@@ -389,8 +351,8 @@ def ParseRules(out_dir):
 				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_denylist and tag_spec.tag_name != 'HTML':
 					continue
 
-				# Ignore deprecated tags
-				if tag_spec.HasField('deprecation'):
+				# Ignore deprecated tags (except for amp-sidebar in amp-story for now).
+				if tag_spec.HasField('deprecation') and 'AMP-SIDEBAR' != tag_spec.tag_name:
 					continue
 
 				# Handle the special $REFERENCE_POINT tag
@@ -405,34 +367,91 @@ def ParseRules(out_dir):
 					tag_list = []
 				else:
 					tag_list = allowed_tags[UnicodeEscape(tag_spec.tag_name).lower()]
-				# AddTag(allowed_tags, tag_spec, attr_lists)
 
 				gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
 				if gotten_tag_spec is not None:
 					tag_list.append(gotten_tag_spec)
 					allowed_tags[UnicodeEscape(tag_spec.tag_name).lower()] = tag_list
 		elif 'descendant_tag_list' == field_desc.name:
-			for list in field_val:
-				descendant_lists[list.name] = []
-				for val in list.tag:
+			for _list in field_val:
+				descendant_lists[_list.name] = []
+				for val in _list.tag:
 
 					# Skip tags specific to transformed AMP.
 					if 'I-AMPHTML-SIZER' == val:
 						continue
 
 					# The img tag is currently exclusively to transformed AMP, except as descendant of amp-story-player.
-					if 'IMG' == val and 'amp-story-player-allowed-descendants' != list.name:
+					if 'IMG' == val and 'amp-story-player-allowed-descendants' != _list.name:
 						continue
 
-					descendant_lists[list.name].append( val.lower() )
+					descendant_lists[_list.name].append( val.lower() )
 
-	logging.info('... done')
+	# Separate extension scripts from non-extension scripts
+	extension_scripts = defaultdict(list)
+	script_tags = []
+	for script_tag in allowed_tags['script']:
+		if 'extension_spec' in script_tag['tag_spec']:
+			extension_scripts[script_tag['tag_spec']['extension_spec']['name']].append(script_tag)
+		else:
+			script_tags.append(script_tag)
+
+	extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.extensions.json' ) ) )
+	extension_versions = dict()
+	for extension in extensions:
+		if extension['name'] not in extension_versions:
+			extension_versions[ extension['name'] ] = {
+				'versions': [],
+				'latest': None,
+			}
+
+		if type(extension['version']) == list:
+			extension_versions[ extension['name'] ]['versions'].extend( extension['version'] )
+		else:
+			extension_versions[ extension['name'] ]['versions'].append( extension['version'] )
+		if extension_versions[ extension['name'] ]['latest'] is not None and extension_versions[ extension['name'] ]['latest'] != extension['latestVersion']:
+			logging.info('Warning: latestVersion mismatch for ' + extension['name'])
+		extension_versions[ extension['name'] ]['latest'] = extension['latestVersion']
+		if 'options' in extension and 'npm' in extension['options'] and extension['options']['npm'] == True:
+			extension_versions[ extension['name'] ]['bento'] = {
+				'version': extension['version'],
+				'has_css': extension['options'].get( 'hasCss', False ),
+			}
+
+	# Merge extension scripts (e.g. Bento and non-Bento) into one script per extension.
+	for extension_name in sorted(extension_scripts):
+		if extension_name not in extension_versions:
+			raise Exception( 'There is a script for an unknown extension: ' + extension_name );
+
+		extension_script_list = extension_scripts[extension_name]
+		validator_versions = set(extension_script_list[0]['tag_spec']['extension_spec']['version'])
+		for extension_script in extension_script_list[1:]:
+			validator_versions.update(extension_script['tag_spec']['extension_spec']['version'])
+		if 'latest' in validator_versions:
+			validator_versions.remove('latest')
+
+		bundle_versions = set( extension_versions[extension_name]['versions'] )
+		if not validator_versions.issubset( bundle_versions ):
+			logging.info( 'Validator versions are not a subset of bundle versions: ' + extension_name )
+
+		validator_versions = sorted( validator_versions, key=lambda version: map(int, version.split('.') ) )
+		extension_script_list[0]['tag_spec']['extension_spec']['version'] = validator_versions
+
+		if 'bento' in extension_versions[extension_name]:
+			extension_script_list[0]['tag_spec']['extension_spec']['bento'] = extension_versions[extension_name]['bento']
+
+		extension_script_list[0]['tag_spec']['extension_spec']['latest'] = extension_versions[extension_name]['latest']
+
+		if 'version_name' in extension_script_list[0]['tag_spec']['extension_spec']:
+			del extension_script_list[0]['tag_spec']['extension_spec']['version_name']
+		script_tags.append(extension_script_list[0])
+
+	allowed_tags['script'] = script_tags
+
 	return allowed_tags, attr_lists, descendant_lists, reference_points, versions
 
 
 def GetTagSpec(tag_spec, attr_lists):
-	logging.info('entering ...')
-
 	tag_dict = GetTagRules(tag_spec)
 	if tag_dict is None:
 		return None
@@ -447,7 +466,6 @@ def GetTagSpec(tag_spec, attr_lists):
 	# Then merge the spec-specific attributes on top to override any list definitions.
 	attr_dict.update(GetAttrs(tag_spec.attrs))
 
-	logging.info('... done')
 	tag_spec_dict = {'tag_spec':tag_dict, 'attr_spec_list':attr_dict}
 	if tag_spec.HasField('cdata'):
 		cdata_dict = {}
@@ -499,6 +517,7 @@ def GetTagSpec(tag_spec, attr_lists):
 						raise Exception( 'Missing error_message for disallowed_cdata_regex.' );
 					if entry['error_message'] not in ( 'contents', 'html comments', 'CSS i-amphtml- name prefix' ):
 						raise Exception( 'Unexpected error_message "%s" for disallowed_cdata_regex.' % entry['error_message'] );
+					entry['regex'] = EscapeRegex( entry['regex'] )
 			tag_spec_dict['cdata'] = cdata_dict
 
 	if 'spec_name' not in tag_spec_dict['tag_spec']:
@@ -511,17 +530,12 @@ def GetTagSpec(tag_spec, attr_lists):
 	else:
 		spec_name = tag_spec_dict['tag_spec']['spec_name']
 
-	if '$reference_point' != spec_name:
-		if spec_name in seen_spec_names:
-			raise Exception( 'Already seen spec_name: %s' % spec_name )
-		seen_spec_names.add( spec_name )
+	seen_spec_names.add( spec_name )
 
 	return tag_spec_dict
 
 
 def GetTagRules(tag_spec):
-	logging.info('entering ...')
-
 	tag_rules = {}
 
 	if hasattr(tag_spec, 'also_requires_tag') and tag_spec.also_requires_tag:
@@ -602,11 +616,6 @@ def GetTagRules(tag_spec):
 		if 'name' not in extension_spec:
 			raise Exception( 'Missing required name field' )
 
-		# Get the versions and sort.
-		versions = set( extension_spec['version'] )
-		versions.remove( 'latest' )
-		extension_spec['version'] = sorted( versions, key=lambda version: map(int, version.split('.') ) )
-
 		# Unused since amp_filter_script_loader_tag() and \AMP_Tag_And_Attribute_Sanitizer::get_rule_spec_list_to_validate() just hard-codes the check for amp-mustache.
 		if 'extension_type' in extension_spec:
 			del extension_spec['extension_type']
@@ -673,13 +682,10 @@ def GetTagRules(tag_spec):
 		if mandatory_of_spec:
 			tag_rules[ mandatory_of_constraint ] = mandatory_of_spec
 
-	logging.info('... done')
 	return tag_rules
 
 
 def GetAttrs(attrs):
-	logging.info('entering ...')
-
 	attr_dict = {}
 	for attr_spec in attrs:
 
@@ -702,13 +708,10 @@ def GetAttrs(attrs):
 			# Add attribute name and alternative_names
 			attr_dict[UnicodeEscape(name)] = value_dict
 
-	logging.info('... done')
 	return attr_dict
 
 
 def GetValues(attr_spec):
-	logging.info('entering ...')
-
 	value_dict = {}
 
 	# Ignore transformed AMP for now.
@@ -724,7 +727,7 @@ def GetValues(attr_spec):
 
 	# Add disallowed value regex
 	if attr_spec.HasField('disallowed_value_regex'):
-		value_dict['disallowed_value_regex'] = attr_spec.disallowed_value_regex
+		value_dict['disallowed_value_regex'] = EscapeRegex( attr_spec.disallowed_value_regex )
 
 	# dispatch_key is an int
 	if attr_spec.HasField('dispatch_key'):
@@ -744,11 +747,11 @@ def GetValues(attr_spec):
 
 	# value_regex
 	if attr_spec.HasField('value_regex'):
-		value_dict['value_regex'] = attr_spec.value_regex
+		value_dict['value_regex'] = EscapeRegex( attr_spec.value_regex )
 
 	# value_regex_casei
 	if attr_spec.HasField('value_regex_casei'):
-		value_dict['value_regex_casei'] = attr_spec.value_regex_casei
+		value_dict['value_regex_casei'] = EscapeRegex( attr_spec.value_regex_casei )
 
 	#value_properties is a dictionary of dictionaries
 	if attr_spec.HasField('value_properties'):
@@ -784,7 +787,6 @@ def GetValues(attr_spec):
 			requires_extension_list.append(requires_extension)
 		value_dict['requires_extension'] = requires_extension_list
 
-	logging.info('... done')
 	return value_dict
 
 
@@ -797,6 +799,9 @@ def UnicodeEscape(string):
 		An escaped string.
 	"""
 	return ('' + string).encode('unicode-escape')
+
+def EscapeRegex(string):
+	return re.sub( r'(?<!\\)/', r'\\/', string )
 
 def GetMandatoryOf( attr, constraint ):
 	"""Gets the attributes with the passed mandatory_*of constraint, if there are any.
@@ -847,25 +852,25 @@ def Phpize(data, indent=0):
 		php_exported = re.sub( r'^', '\t' * indent, php_exported, flags=re.MULTILINE )
 	return php_exported
 
-def Main( validator_directory, out_dir ):
+def Main( repo_directory, out_dir ):
 	"""The main method, which executes all build steps and runs the tests."""
 	logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s', level=logging.INFO)
 
-	validator_directory = os.path.realpath(validator_directory)
+	validator_directory = os.path.realpath( os.path.join( repo_directory, 'validator' ) )
 	out_dir = os.path.realpath(out_dir)
 
 	SetupOutDir(out_dir)
 	GenValidatorProtoascii(validator_directory, out_dir)
 	GenValidatorPb2Py(validator_directory, out_dir)
 	GenValidatorProtoascii(validator_directory,out_dir)
-	GeneratePHP(out_dir)
+	GeneratePHP(repo_directory, out_dir)
 
 if __name__ == '__main__':
 	if len( sys.argv ) == 0:
 		Die( "Error: Must supply amphtml directory as first argument" )
-	validator_directory = os.path.join( sys.argv[1], 'validator' )
-	if not os.path.exists( validator_directory ):
+	repo_directory = sys.argv[1]
+	if not os.path.exists( repo_directory ):
 		Die( "Error: The amphtml directory does not exist: %s" % validator_directory )
-	validator_directory = os.path.realpath( validator_directory )
+	repo_directory = os.path.realpath( repo_directory )
 	out_dir = os.path.join( tempfile.gettempdir(), 'amp_wp' )
-	Main( validator_directory, out_dir )
+	Main( repo_directory, out_dir )

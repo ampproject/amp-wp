@@ -77,7 +77,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-script-intrinsic'                         => [
 				'
-				<amp-script src="https://example.com/hello-world.js" layout="intrinsic" width="200" height="123">
+				<amp-script src="https://example.com/hello-world.js" layout="intrinsic" width="200" height="123" sandbox="allow-forms">
 					<button>Hello amp-script!</button>
 				</amp-script>
 				',
@@ -520,6 +520,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									<h2 scale-start="1.0" scale-end="200.1" translate-x="100px" translate-y="200px">Scaled</h2>
 									<amp-twitter width="375" height="472" layout="responsive" data-tweetid="885634330868850689"></amp-twitter>
 									<amp-twitter interactive width="375" height="472" layout="responsive" data-tweetid="885634330868850689"></amp-twitter>
+									<amp-video autoplay loop width="720" height="960" poster="https://amp.dev/static/samples/img/story_video_dog_cover.jpg" layout="responsive" cache="google">
+										<source src="https://amp.dev/static/samples/video/story_video_dog.mp4" type="video/mp4">
+									</amp-video>
+									<amp-date-display datetime="2017-08-02T15:05:05.000" layout="fixed" width="360" height="20"><template type="amp-mustache"><div>{{dayName}} {{day}} {{monthName}} {{year}} {{hourTwoDigit}}:{{minuteTwoDigit}}:{{secondTwoDigit}}</div></template></amp-date-display>
 								</amp-story-grid-layer>
 								<amp-pixel src="https://example.com/tracker/foo" layout="nodisplay"></amp-pixel>
 							</amp-story-page>
@@ -586,6 +590,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								<amp-story-grid-layer template="fill">
 							 		<amp-story-panning-media layout="fill"></amp-story-panning-media>
 								</amp-story-grid-layer>
+								<amp-story-page-outlink layout="nodisplay" cta-image="https://example.com/img/logo.jpg" cta-accent-color="navy" cta-accent-element="background">
+									<a href="https://www.google.com/search?q=why+do+cats+purr+so+loud" title="Link Description"></a>
+								</amp-story-page-outlink>
 						 	</amp-story-page>
 							<amp-story-social-share layout="nodisplay">
 								<script type="application/json">{"shareProviders": ["facebook","whatsapp"]}</script>
@@ -599,7 +606,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					return [
 						$html,
 						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
-						[ 'amp-story', 'amp-story-auto-analytics', 'amp-analytics', 'amp-story-360', 'amp-twitter', 'amp-youtube', 'amp-video', 'amp-story-interactive', 'amp-story-panning-media' ],
+						[
+							'amp-story',
+							'amp-story-auto-analytics',
+							'amp-analytics',
+							'amp-story-360',
+							'amp-twitter',
+							'amp-youtube',
+							'amp-video',
+							'amp-story-interactive',
+							'amp-story-panning-media',
+							'amp-date-display',
+							'amp-mustache',
+						],
 						[
 							[
 								'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG,
@@ -2243,7 +2262,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-script-1'                                 => [
-				'<amp-script layout="container" src="https://example.com/hello-world.js"><button id="hello">Insert Hello World!</button></amp-script>',
+				'<amp-script layout="container" src="https://example.com/hello-world.js" sandboxed><button id="hello">Insert Hello World!</button></amp-script>',
 				null,
 				[ 'amp-script' ],
 			],
@@ -2834,6 +2853,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				<button on="tap:sidebar1">Open Sidebar</button>
 				<amp-sidebar id="sidebar1" layout="nodisplay" style="width:300px">
 					<amp-nested-menu layout="fill">
+						<svg viewbox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
 						<ul>
 							<li>
 								<h4 amp-nested-submenu-open>Open Sub-Menu</h4>
@@ -3016,6 +3036,143 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				',
 				null,
 				[],
+			],
+
+			'amp-iframely'                                 => [
+				'
+					<amp-iframely data-id="UjEwgS" width="400" height="140" layout="responsive" resizable></amp-iframely>
+					<amp-iframely data-id="JQfo4N" data-domain="cdn.iframe.ly" width="400" height="225" layout="responsive"></amp-iframely>
+					<amp-iframely data-id="CsmRlq" width="400" height="213" layout="responsive"></amp-iframely>
+					<amp-iframely data-url="https://iframely.com/" data-key="8a237467d51be2771401abcabbd46d92" height="200" width="400" layout="responsive"></amp-iframely>
+				',
+				null,
+				[ 'amp-iframely' ],
+			],
+
+			'amp-render'                                   => [
+				'
+				    <!-- Valid: amp-render with only src attribute -->
+				    <amp-render
+				      width="10"
+				      height="10"
+				      src="amp-state:source">
+				    </amp-render>
+
+				    <!-- Valid: amp-render with only [src] attribute -->
+				    <amp-render width="10" height="10" data-amp-bind-src="srcUrl"> </amp-render>
+
+				    <!-- Valid: amp-render with relative URL as src attribute -->
+				    <amp-render width="10" height="10" src="/path/to/data.json"> </amp-render>
+
+				    <!-- Valid: amp-render with both src and [src] attributes -->
+				    <amp-render
+				      width="10"
+				      height="10"
+				      src="https://data.com/articles.json?ref=CANONICAL_URL"
+				      data-amp-bind-src="foo.bar">
+				    </amp-render>
+
+				    <!-- Valid: amp-render with binding="refresh" attribute -->
+				    <amp-render
+				      width="10"
+				      height="10"
+				      src="https://data.com/articles.json?ref=CANONICAL_URL"
+				      binding="refresh">
+				    </amp-render>
+
+				    <!-- Valid: amp-render with binding="no" attribute -->
+				    <amp-render
+				      width="10"
+				      height="10"
+				      src="https://data.com/articles.json?ref=CANONICAL_URL"
+				      binding="no">
+				    </amp-render>
+
+				    <!-- Valid: amp-render with binding="always" attribute -->
+				    <amp-render
+				      width="10"
+				      height="10"
+				      src="https://data.com/articles.json?ref=CANONICAL_URL"
+				      binding="always">
+				    </amp-render>
+
+				    <!-- Valid: amp-render with credentials="include" -->
+				    <amp-render
+				      width="10"
+				      height="10"
+				      src="amp-script:scriptFn.dataFn"
+				      credentials="include">
+				    </amp-render>
+
+				    <!-- Valid: amp-render with credentials="omit" -->
+				    <amp-render
+				      width="10"
+				      height="10"
+				      src="https://data.com/articles.json?ref=CANONICAL_URL"
+				      credentials="omit">
+				    </amp-render>
+
+				    <!-- Valid: amp-render with xssi-prefix attribute -->
+				    <amp-render
+				      width="10"
+				      height="10"
+				      src="https://data.com/articles.json?ref=CANONICAL_URL"
+				      xssi-prefix="({[">
+				    </amp-render>
+
+				    <!-- Valid: amp-render with key attribute -->
+				    <amp-render
+				      width="10"
+				      height="10"
+				      src="https://data.com/articles.json?ref=CANONICAL_URL"
+				      key="name">
+				    </amp-render>
+				',
+				null,
+				[ 'amp-render', 'amp-bind' ],
+			],
+
+			'amp-stream-gallery'                           => [
+				'
+					<amp-stream-gallery width="4" height="3" loop="true">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" loop="false">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true, false">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true, (max-height: 1000px) true, false">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" min-item-width="200">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" min-item-width="(min-width: 800px) 300, 100">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" min-item-width="(min-width: 800px) 200, (max-height: 1000px) 300, 100">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" min-visible-count="2">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" min-visible-count="3.2">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" min-visible-count="(min-width: 800px) 3.2, 1">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" min-visible-count="(min-width: 800px) 3, (max-height: 1000px) 3, 1.1">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" controls="always">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" controls="auto">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" controls="never">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" controls="(min-width: 800px) never, auto">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" controls="(min-width: 800px) always, (max-height: 1000px) auto, never">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true, false">
+					</amp-stream-gallery>
+					<amp-stream-gallery width="4" height="3" loop="(min-width: 800px) true,(max-height: 1000px) true,false">
+					</amp-stream-gallery>
+				',
+				null,
+				[ 'amp-stream-gallery' ],
 			],
 		];
 	}
