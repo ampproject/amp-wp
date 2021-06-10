@@ -97,6 +97,13 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	protected $original_wp_registered_widgets;
 
 	/**
+	 * Backed up $wp_widget_factory.
+	 *
+	 * @var WP_Widget_Factory
+	 */
+	protected $original_wp_widget_factory;
+
+	/**
 	 * Setup.
 	 *
 	 * @inheritdoc
@@ -111,6 +118,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$dom_document->appendChild( $this->node );
 		AMP_Validation_Manager::reset_validation_results();
 		$this->original_wp_registered_widgets = $GLOBALS['wp_registered_widgets'];
+		$this->original_wp_widget_factory     = $GLOBALS['wp_widget_factory'];
 
 		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
 			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
@@ -127,6 +135,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 */
 	public function tearDown() {
 		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets;
+		$GLOBALS['wp_widget_factory']     = $this->original_wp_widget_factory;
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Validation_Manager::$validation_error_status_overrides = [];
 		$_REQUEST = [];
@@ -1224,6 +1233,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	/**
 	 * Test wrap_widget_callbacks.
 	 *
+	 * @group widgets
 	 * @covers AMP_Validation_Manager::wrap_widget_callbacks()
 	 */
 	public function test_wrap_widget_callbacks() {
