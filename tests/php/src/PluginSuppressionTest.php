@@ -271,7 +271,10 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 	}
 
-	/** @covers ::maybe_suppress_plugins() */
+	/**
+	 * @group widgets
+	 * @covers ::maybe_suppress_plugins()
+	 */
 	public function test_maybe_suppress_plugins_not_amp_endpoint() {
 		$url = home_url( '/' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
@@ -287,7 +290,10 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 	}
 
-	/** @covers ::maybe_suppress_plugins() */
+	/**
+	 * @group widgets
+	 * @covers ::maybe_suppress_plugins()
+	 */
 	public function test_maybe_suppress_plugins_yes_amp_endpoint() {
 		$url = home_url( '/' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );

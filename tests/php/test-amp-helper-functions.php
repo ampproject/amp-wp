@@ -1693,6 +1693,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		remove_filter( 'amp_site_icon_url', [ __CLASS__, 'mock_site_icon' ] );
 		delete_option( 'site_icon' );
 		remove_theme_mod( 'custom_logo' );
+		delete_option( 'site_logo' ); // As of Gutenberg v10.8.0.
 
 		// Test page.
 		$this->go_to( get_permalink( $page_id ) );
