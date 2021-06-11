@@ -192,7 +192,7 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 
 				{
 					conflicts.post_type && (
-						<li key="post_type">
+						<li>
 							{
 								sprintf(
 									/* translators: %s is post type label */
@@ -213,7 +213,7 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 
 				{
 					conflicts.taxonomy && (
-						<li key="taxonomy">
+						<li>
 							{
 								sprintf(
 									/* translators: %s is taxonomy label */
@@ -233,7 +233,7 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 				}
 
 				{ conflicts.rewrite && (
-					<li key="rewrite">
+					<li>
 						{ __( 'Rewrite rules: ', 'amp' ) }
 						{
 							conflicts.rewrite
