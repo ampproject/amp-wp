@@ -437,7 +437,7 @@ def ParseRules(repo_directory, out_dir):
 		validator_versions = sorted( validator_versions, key=lambda version: map(int, version.split('.') ) )
 		extension_script_list[0]['tag_spec']['extension_spec']['version'] = validator_versions
 
-		if 'bento' in extension_versions[extension_name]:
+		if 'bento' in extension_versions[extension_name] and extension_versions[extension_name]['bento']['version'] in validator_versions:
 			extension_script_list[0]['tag_spec']['extension_spec']['bento'] = extension_versions[extension_name]['bento']
 
 		extension_script_list[0]['tag_spec']['extension_spec']['latest'] = extension_versions[extension_name]['latest']
