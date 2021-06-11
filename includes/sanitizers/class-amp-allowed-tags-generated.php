@@ -15922,6 +15922,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'bento' => array(
+							'has_css' => true,
+							'version' => '1.0',
+						),
 						'latest' => '0.1',
 						'name' => 'amp-facebook',
 						'requires_usage' => true,
@@ -15953,6 +15957,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'bento' => array(
+							'has_css' => false,
+							'version' => '1.0',
+						),
 						'latest' => '0.1',
 						'name' => 'amp-facebook-comments',
 						'requires_usage' => true,
@@ -16020,6 +16028,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'bento' => array(
+							'has_css' => true,
+							'version' => '1.0',
+						),
 						'latest' => '0.1',
 						'name' => 'amp-facebook-page',
 						'requires_usage' => true,
@@ -17656,6 +17668,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'bento' => array(
+							'has_css' => false,
+							'version' => '1.0',
+						),
 						'latest' => '1.0',
 						'name' => 'amp-render',
 						'requires_usage' => true,
@@ -17785,6 +17801,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'bento' => array(
+							'has_css' => true,
+							'version' => '1.0',
+						),
 						'latest' => '0.1',
 						'name' => 'amp-sidebar',
 						'requires_usage' => true,
