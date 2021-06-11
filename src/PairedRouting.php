@@ -406,7 +406,7 @@ final class PairedRouting implements Service, Registerable {
 			if (
 				$amp_slug === $post_type->query_var
 				||
-				isset( $post_type->rewrite['slug'] ) && $post_type->rewrite['slug'] === $amp_slug
+				( isset( $post_type->rewrite['slug'] ) && $post_type->rewrite['slug'] === $amp_slug )
 			) {
 				$conflicts['post_type'] = [
 					'name'  => $post_type->name,
@@ -422,7 +422,7 @@ final class PairedRouting implements Service, Registerable {
 			if (
 				$amp_slug === $taxonomy->query_var
 				||
-				isset( $taxonomy->rewrite['slug'] ) && $taxonomy->rewrite['slug'] === $amp_slug
+				( isset( $taxonomy->rewrite['slug'] ) && $taxonomy->rewrite['slug'] === $amp_slug )
 			) {
 				$conflicts['taxonomy'] = [
 					'name'  => $taxonomy->name,
