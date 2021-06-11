@@ -251,8 +251,8 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 	);
 }
 SlugConflictsNotice.propTypes = {
-	slug: PropTypes.string,
-	conflicts: PropTypes.object,
+	slug: PropTypes.string.isRequired,
+	conflicts: PropTypes.object.isRequired,
 };
 
 /**
@@ -276,7 +276,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 
 	const isCustom = 'custom' === editedOptions.paired_url_structure;
 
-	const endpointSuffixAvailable = editedOptions.endpoint_path_slug_conflicts.length === 0;
+	const endpointSuffixAvailable = editedOptions.endpoint_path_slug_conflicts === null;
 
 	return (
 		<AMPDrawer
@@ -313,7 +313,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 			/>
 
 			{ ! endpointSuffixAvailable && (
-				<SlugConflictsNotice conflicts={ editedOptions.endpoint_path_slug_conflicts } />
+				<SlugConflictsNotice slug={ slug } conflicts={ editedOptions.endpoint_path_slug_conflicts } />
 			) }
 
 			<ul>

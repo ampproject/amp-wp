@@ -288,7 +288,7 @@ final class PairedRouting implements Service, Registerable {
 					'readonly' => true,
 				],
 				self::ENDPOINT_PATH_SLUG_CONFLICTS => [
-					'type'     => 'array',
+					'type'     => 'object',
 					'readonly' => true,
 				],
 				self::REWRITE_USING_PERMALINKS     => [
@@ -335,7 +335,7 @@ final class PairedRouting implements Service, Registerable {
 	/**
 	 * Get the entities that are already using the AMP slug.
 	 *
-	 * @return array Conflict data.
+	 * @return array|null Conflict data or null if there are no conflicts.
 	 * @global WP_Rewrite $wp_rewrite
 	 */
 	public function get_endpoint_path_slug_conflicts() {
@@ -456,6 +456,10 @@ final class PairedRouting implements Service, Registerable {
 			if ( isset( $wp_rewrite->$key ) && $amp_slug === $wp_rewrite->$key ) {
 				$conflicts['rewrite'][] = $key;
 			}
+		}
+
+		if ( empty( $conflicts ) ) {
+			return null;
 		}
 
 		return $conflicts;
