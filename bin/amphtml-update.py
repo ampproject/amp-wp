@@ -412,7 +412,7 @@ def ParseRules(repo_directory, out_dir):
 		if extension_versions[ extension['name'] ]['latest'] is not None and extension_versions[ extension['name'] ]['latest'] != extension['latestVersion']:
 			logging.info('Warning: latestVersion mismatch for ' + extension['name'])
 		extension_versions[ extension['name'] ]['latest'] = extension['latestVersion']
-		if 'options' in extension and 'npm' in extension['options'] and extension['options']['npm'] == True:
+		if 'options' in extension and 'wrapper' in extension['options'] and extension['options']['wrapper'] == 'bento':
 			extension_versions[ extension['name'] ]['bento'] = {
 				'version': extension['version'],
 				'has_css': extension['options'].get( 'hasCss', False ),
