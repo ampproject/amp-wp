@@ -293,6 +293,13 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 			[ 'posts', 'terms', 'users', 'post_types', 'taxonomies' ],
 			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
 		);
+
+		// Rewrite endpoint.
+		add_rewrite_endpoint( 'amp', E_ALL );
+		$this->assertEquals(
+			[ 'posts', 'terms', 'users', 'post_types', 'taxonomies', 'rewrite' ],
+			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
+		);
 	}
 
 	/** @return array */

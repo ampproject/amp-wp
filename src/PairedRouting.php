@@ -333,8 +333,11 @@ final class PairedRouting implements Service, Registerable {
 	 * Get the entities that are already using the AMP slug.
 	 *
 	 * @return array Conflict data.
+	 * @global WP_Rewrite $wp_rewrite
 	 */
 	public function get_endpoint_path_slug_conflicts() {
+		global $wp_rewrite;
+
 		$conflicts = [];
 		$amp_slug  = amp_get_slug();
 
@@ -383,6 +386,29 @@ final class PairedRouting implements Service, Registerable {
 				isset( $taxonomy->rewrite['slug'] ) && $taxonomy->rewrite['slug'] === $amp_slug
 			) {
 				$conflicts['taxonomies'][] = $taxonomy->name;
+			}
+		}
+
+		foreach ( $wp_rewrite->endpoints as $endpoint ) {
+			if ( isset( $endpoint[1] ) && $amp_slug === $endpoint[1] ) {
+				$conflicts['rewrite'][] = 'endpoint';
+				break;
+			}
+		}
+		foreach (
+			[
+				'author_base',
+				'comments_base',
+				'search_base',
+				'pagination_base',
+				'feed_base',
+				'comments_pagination_base',
+			]
+			as
+			$key
+		) {
+			if ( isset( $wp_rewrite->$key ) && $amp_slug === $wp_rewrite->$key ) {
+				$conflicts['rewrite'][] = $key;
 			}
 		}
 
