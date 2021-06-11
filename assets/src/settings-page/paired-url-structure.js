@@ -164,30 +164,25 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 					) )
 				) }
 
-				{
-					conflicts.user && (
-						[ conflicts.user ].map( ( entity ) => (
-					<li>
-							{
-								conflicts.user.edit_link ? (
-									<a href={ conflicts.user.edit_link } target="_blank" rel="noreferrer">
-										{ __( 'User', 'amp' ) }
-									</a>
-								) : (
-									__( 'User', 'amp' )
-								)
-							}
-							{ ': ' + conflicts.user.name }
-							{ ' ' }
-							<small>
-								{
-									/* translators: %d is entity ID */
-									sprintf( __( '(ID: %d)', 'amp' ), conflicts.user.id )
-								}
-							</small>
-						</li>
-					)
-				}
+				<li>
+					{
+						conflicts.user.edit_link ? (
+							<a href={ conflicts.user.edit_link } target="_blank" rel="noreferrer">
+								{ __( 'User', 'amp' ) }
+							</a>
+						) : (
+							__( 'User', 'amp' )
+						)
+					}
+					{ ': ' + conflicts.user.name }
+					{ ' ' }
+					<small>
+						{
+							/* translators: %d is entity ID */
+							sprintf( __( '(ID: %d)', 'amp' ), conflicts.user.id )
+						}
+					</small>
+				</li>
 
 				{
 					conflicts.post_type && (
