@@ -358,6 +358,7 @@ final class PairedRouting implements Service, Registerable {
 					return [
 						'id'        => $post->ID,
 						'edit_link' => get_edit_post_link( $post->ID, 'raw' ),
+						'title'     => $post->post_title,
 						'post_type' => $post->post_type,
 						'label'     => isset( $post_type->labels->singular_name )
 									? $post_type->labels->singular_name
@@ -382,6 +383,7 @@ final class PairedRouting implements Service, Registerable {
 						'id'        => $term->term_id,
 						'edit_link' => get_edit_term_link( $term->term_id, $term->taxonomy ),
 						'taxonomy'  => $term->taxonomy,
+						'name'      => $term->name,
 						'label'     => isset( $taxonomy->labels->singular_name )
 									? $taxonomy->labels->singular_name
 									: null,
@@ -396,7 +398,7 @@ final class PairedRouting implements Service, Registerable {
 			$conflicts['user'] = [
 				'id'        => $user->ID,
 				'edit_link' => get_edit_user_link( $user->ID ),
-				'label'     => $user->display_name,
+				'name'      => $user->display_name,
 			];
 		}
 

@@ -89,6 +89,173 @@ function getCustomPairedStructureSources( sources ) {
 }
 
 /**
+ * Slug conflicts notice.
+ *
+ * @param {Object} props           Component props.
+ * @param {string} props.slug      Slug.
+ * @param {Object} props.conflicts Conflicts.
+ */
+function SlugConflictsNotice( { slug, conflicts } ) {
+	return (
+		<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
+			<p>
+				{
+					sprintf(
+						/* translators: %s is the AMP slug */
+						__( 'There are one or more entities that are already using the “%s” URL slug. For this reason, you cannot currently use the path suffix or legacy reader paired URL structures. See below for the source of the slug conflict(s):', 'amp' ),
+						slug,
+					)
+				}
+			</p>
+			<ul>
+				{ conflicts.posts && (
+					conflicts.posts.map( ( entity ) => (
+						<li key={ `post-${ entity.id }` }>
+							{
+								entity.edit_link ? (
+									<a href={ entity.edit_link } target="_blank" rel="noreferrer">
+										{ entity.label || entity.post_type }
+									</a>
+								) : (
+									entity.label || entity.post_type
+								)
+							}
+							{
+								entity.title && (
+									': ' + entity.title
+								)
+							}
+							{ ' ' }
+							<small>
+								{
+									/* translators: %d is entity ID */
+									sprintf( __( '(ID: %d)', 'amp' ), entity.id )
+								}
+							</small>
+						</li>
+					) )
+				) }
+
+				{ conflicts.terms && (
+					conflicts.terms.map( ( entity ) => (
+						<li key={ `term-${ entity.id }` }>
+							{
+								entity.edit_link ? (
+									<a href={ entity.edit_link } target="_blank" rel="noreferrer">
+										{ entity.label || entity.post_type }
+									</a>
+								) : (
+									entity.label || entity.post_type
+								)
+							}
+							{
+								entity.name && (
+									': ' + entity.name
+								)
+							}
+							{ ' ' }
+							<small>
+								{
+									/* translators: %d is entity ID */
+									sprintf( __( '(ID: %d)', 'amp' ), entity.id )
+								}
+							</small>
+						</li>
+					) )
+				) }
+
+				{
+					conflicts.user && (
+						[ conflicts.user ].map( ( entity ) => (
+							<li key={ `user-${ entity.id }` }>
+								{
+									entity.edit_link ? (
+										<a href={ entity.edit_link } target="_blank" rel="noreferrer">
+											{ __( 'User', 'amp' ) }
+										</a>
+									) : (
+										__( 'User', 'amp' )
+									)
+								}
+								{ ': ' + entity.name }
+								{ ' ' }
+								<small>
+									{
+										/* translators: %d is entity ID */
+										sprintf( __( '(ID: %d)', 'amp' ), entity.id )
+									}
+								</small>
+							</li>
+						) )
+					)
+				}
+
+				{
+					conflicts.post_type && (
+						<li key="post_type">
+							{
+								sprintf(
+									/* translators: %s is post type label */
+									__( 'Post type: %s', 'amp' ),
+									conflicts.post_type.label,
+								)
+							}
+							{ ' ' }
+							<small>
+								{
+									/* translators: %s is entity name */
+									sprintf( __( '(name: %s)', 'amp' ), conflicts.post_type.name )
+								}
+							</small>
+						</li>
+					)
+				}
+
+				{
+					conflicts.taxonomy && (
+						<li key="taxonomy">
+							{
+								sprintf(
+									/* translators: %s is taxonomy label */
+									__( 'Taxonomy: %s', 'amp' ),
+									conflicts.taxonomy.label,
+								)
+							}
+							{ ' ' }
+							<small>
+								{
+									/* translators: %s is entity name */
+									sprintf( __( '(name: %s)', 'amp' ), conflicts.taxonomy.name )
+								}
+							</small>
+						</li>
+					)
+				}
+
+				{ conflicts.rewrite && (
+					<li key="rewrite">
+						{ __( 'Rewrite rules: ', 'amp' ) }
+						{
+							conflicts.rewrite
+								.map( ( entity ) => (
+									<code key={ entity }>
+										{ entity }
+									</code>
+								) )
+								.reduce( ( prev, curr ) => [ prev, ', ', curr ] )
+						}
+					</li>
+				) }
+			</ul>
+		</AMPNotice>
+	);
+}
+SlugConflictsNotice.propTypes = {
+	slug: PropTypes.string,
+	conflicts: PropTypes.object,
+};
+
+/**
  * Component rendering the paired URL structure.
  *
  * @param {Object} props Component props.
@@ -146,17 +313,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 			/>
 
 			{ ! endpointSuffixAvailable && (
-				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
-					<p>
-						{
-							sprintf(
-								/* translators: %s is the AMP slug */
-								__( 'There is a post, term, user, or some other entity that is already using the “%s” URL slug. For this reason, you cannot currently use the path suffix or legacy reader paired URL structures.', 'amp' ),
-								slug,
-							)
-						}
-					</p>
-				</AMPNotice>
+				<SlugConflictsNotice conflicts={ editedOptions.endpoint_path_slug_conflicts } />
 			) }
 
 			<ul>
@@ -201,7 +358,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 						</code>
 						{ ! endpointSuffixAvailable && (
 							<em>
-								{ ' ' + __( '(unavailable due to slug conflict)', 'amp' ) }
+								{ ' ' + __( '(unavailable due to slug conflict per above)', 'amp' ) }
 							</em>
 						) }
 						{ ! editedOptions.rewrite_using_permalinks && (
@@ -253,7 +410,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 						</code>
 						{ ! endpointSuffixAvailable && (
 							<em>
-								{ ' ' + __( '(unavailable due to slug conflict)', 'amp' ) }
+								{ ' ' + __( '(unavailable due to slug conflict per above)', 'amp' ) }
 							</em>
 						) }
 						{ ! editedOptions.rewrite_using_permalinks && (
