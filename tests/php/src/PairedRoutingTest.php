@@ -276,28 +276,28 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 			]
 		);
 		$this->assertEquals(
-			[ 'posts', 'terms', 'users' ],
+			[ 'posts', 'terms', 'user' ],
 			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
 		);
 
 		// Post types.
 		register_post_type( amp_get_slug() );
 		$this->assertEquals(
-			[ 'posts', 'terms', 'users', 'post_types' ],
+			[ 'posts', 'terms', 'user', 'post_type' ],
 			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
 		);
 
 		// Taxonomies.
 		register_taxonomy( amp_get_slug(), 'post' );
 		$this->assertEquals(
-			[ 'posts', 'terms', 'users', 'post_types', 'taxonomies' ],
+			[ 'posts', 'terms', 'user', 'post_type', 'taxonomy' ],
 			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
 		);
 
 		// Rewrite endpoint.
 		add_rewrite_endpoint( 'amp', E_ALL );
 		$this->assertEquals(
-			[ 'posts', 'terms', 'users', 'post_types', 'taxonomies', 'rewrite' ],
+			[ 'posts', 'terms', 'user', 'post_type', 'taxonomy', 'rewrite' ],
 			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
 		);
 	}
