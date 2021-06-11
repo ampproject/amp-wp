@@ -252,7 +252,14 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 }
 SlugConflictsNotice.propTypes = {
 	slug: PropTypes.string.isRequired,
-	conflicts: PropTypes.object.isRequired,
+	conflicts: PropTypes.shape( {
+		post_type: PropTypes.object,
+		posts: PropTypes.arrayOf( PropTypes.object ),
+		rewrite: PropTypes.arrayOf( PropTypes.string ),
+		taxonomy: PropTypes.object,
+		terms: PropTypes.arrayOf( PropTypes.object ),
+		user: PropTypes.object,
+	} ).isRequired,
 };
 
 /**
