@@ -167,26 +167,25 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 				{
 					conflicts.user && (
 						[ conflicts.user ].map( ( entity ) => (
-							<li key={ `user-${ entity.id }` }>
+					<li>
+							{
+								conflicts.user.edit_link ? (
+									<a href={ conflicts.user.edit_link } target="_blank" rel="noreferrer">
+										{ __( 'User', 'amp' ) }
+									</a>
+								) : (
+									__( 'User', 'amp' )
+								)
+							}
+							{ ': ' + conflicts.user.name }
+							{ ' ' }
+							<small>
 								{
-									entity.edit_link ? (
-										<a href={ entity.edit_link } target="_blank" rel="noreferrer">
-											{ __( 'User', 'amp' ) }
-										</a>
-									) : (
-										__( 'User', 'amp' )
-									)
+									/* translators: %d is entity ID */
+									sprintf( __( '(ID: %d)', 'amp' ), conflicts.user.id )
 								}
-								{ ': ' + entity.name }
-								{ ' ' }
-								<small>
-									{
-										/* translators: %d is entity ID */
-										sprintf( __( '(ID: %d)', 'amp' ), entity.id )
-									}
-								</small>
-							</li>
-						) )
+							</small>
+						</li>
 					)
 				}
 
