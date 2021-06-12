@@ -6,29 +6,34 @@ on:
       - develop
       # Include all release branches.
       - '[0-9]+.[0-9]+'
-    # Don't run for irrelevant changes.
-    paths-ignore:
-      - '!.github/workflows/*'
-      - '.wordpress-org/**'
-      - '!bin/ci/**'
-      - '!bin/local-env/**'
-      - 'docs/**'
-      - 'qa-tester/**'
   pull_request:
     # Run workflow whenever a PR is opened, updated (synchronized), or marked ready for review.
     types: [opened, synchronize, ready_for_review]
-    # Don't run for irrelevant changes.
-    paths-ignore:
-      - '!.github/workflows/*'
-      - '.wordpress-org/**'
-      - '!bin/ci/**'
-      - '!bin/local-env/**'
-      - 'docs/**'
-      - 'qa-tester/**'
 
 jobs:
+  pre-run:
+    name: 'Pre run'
+    runs-on: ubuntu-latest
+    outputs:
+      changed-file-count: ${{ steps.determine-file-count.outputs.count }}
+    steps:
+      - id: determine-file-count
+        name: Determine if there are any permitted files that changed that should make the workflow continue
+        run: |
+          CHANGED_FILES=$(git diff --name-only ${{ github.base.ref }} ${{ github.head.ref }} | awk 'NF { print "\""$0"\""}' | tr "\n" ",")
+          echo "Changed files: "$CHANGED_FILES"
+
+          echo "::set-output name=count::${{ $(php -f bin/has-changed-paths.php "$IGNORE_REGEX_LIST" "$CHANGED_FILES") }}"
+        env:
+          IGNORE_REGEX_LIST: |
+            \.github\/(?!workflows)
+            \.wordpress-org\/
+            docs\/
+            qa-tester\/
 
   lint-css:
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-file-count > 0
     name: 'Lint: CSS'
     runs-on: ubuntu-latest
     steps:
@@ -68,6 +73,8 @@ jobs:
 
   lint-js:
     name: 'Lint: JS'
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-file-count > 0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -130,6 +137,8 @@ jobs:
 
   lint-php:
     name: 'Lint: PHP'
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-file-count > 0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -173,6 +182,8 @@ jobs:
   static-analysis-php:
     name: 'Static Analysis: PHP'
     runs-on: ubuntu-latest
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-file-count > 0
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -207,6 +218,8 @@ jobs:
   unit-test-js:
     name: 'Unit test: JS'
     runs-on: ubuntu-latest
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-file-count > 0
 
     steps:
       - name: Checkout
@@ -258,6 +271,8 @@ jobs:
 
   e2e-test-js:
     name: 'E2E test: JS'
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-file-count > 0
     runs-on: ubuntu-latest
 
     steps:
@@ -334,6 +349,8 @@ jobs:
   unit-test-php:
     name: "Unit test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     runs-on: ubuntu-latest
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-file-count > 0
     env:
       WP_CORE_DIR: /tmp/wordpress
     services:
@@ -504,6 +521,8 @@ jobs:
 
   feature-test-php:
     name: "Feature test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-file-count > 0
     runs-on: ubuntu-latest
     env:
       WP_VERSION: ${{ matrix.wp }}
