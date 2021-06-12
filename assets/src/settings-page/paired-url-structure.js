@@ -142,10 +142,10 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 							{
 								entity.edit_link ? (
 									<a href={ entity.edit_link } target="_blank" rel="noreferrer">
-										{ entity.label || entity.post_type }
+										{ entity.label || entity.taxonomy }
 									</a>
 								) : (
-									entity.label || entity.post_type
+									entity.label || entity.taxonomy
 								)
 							}
 							{
@@ -191,7 +191,7 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 								sprintf(
 									/* translators: %s is post type label */
 									__( 'Post type: %s', 'amp' ),
-									conflicts.post_type.label,
+									conflicts.post_type.label || '--',
 								)
 							}
 							{ ' ' }
@@ -212,7 +212,7 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 								sprintf(
 									/* translators: %s is taxonomy label */
 									__( 'Taxonomy: %s', 'amp' ),
-									conflicts.taxonomy.label,
+									conflicts.taxonomy.label || '--',
 								)
 							}
 							{ ' ' }
@@ -247,12 +247,34 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 SlugConflictsNotice.propTypes = {
 	slug: PropTypes.string.isRequired,
 	conflicts: PropTypes.shape( {
-		post_type: PropTypes.object,
-		posts: PropTypes.arrayOf( PropTypes.object ),
+		post_type: PropTypes.shape( {
+			name: PropTypes.string.isRequired,
+			label: PropTypes.string,
+		} ),
+		posts: PropTypes.arrayOf( PropTypes.shape( {
+			id: PropTypes.number.isRequired,
+			edit_link: PropTypes.string,
+			label: PropTypes.string,
+			post_type: PropTypes.string.isRequired,
+			title: PropTypes.string,
+		} ) ),
 		rewrite: PropTypes.arrayOf( PropTypes.string ),
-		taxonomy: PropTypes.object,
-		terms: PropTypes.arrayOf( PropTypes.object ),
-		user: PropTypes.object,
+		taxonomy: PropTypes.shape( {
+			name: PropTypes.string.isRequired,
+			label: PropTypes.string,
+		} ),
+		terms: PropTypes.arrayOf( PropTypes.shape( {
+			id: PropTypes.number.isRequired,
+			edit_link: PropTypes.string,
+			label: PropTypes.string,
+			taxonomy: PropTypes.string.isRequired,
+			name: PropTypes.string,
+		} ) ),
+		user: PropTypes.shape( {
+			id: PropTypes.number.isRequired,
+			edit_link: PropTypes.string,
+			name: PropTypes.string.isRequired,
+		} ),
 	} ).isRequired,
 };
 
