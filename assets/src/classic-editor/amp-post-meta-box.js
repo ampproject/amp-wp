@@ -7,7 +7,6 @@ import jQuery from 'jquery';
  * AMP Post Meta Box.
  *
  * @todo Rename this to be just the ampEditPostScreen?
- *
  * @since 0.6
  */
 window.ampPostMetaBox = ( function( $ ) {

@@ -23,7 +23,10 @@ use WP_Query;
 use WP_Rewrite;
 use WP;
 use WP_Hook;
+use WP_Post;
+use WP_Term;
 use WP_Term_Query;
+use WP_User;
 
 /**
  * Service for routing users to and from paired AMP URLs.
@@ -285,7 +288,7 @@ final class PairedRouting implements Service, Registerable {
 					'readonly' => true,
 				],
 				self::ENDPOINT_PATH_SLUG_CONFLICTS => [
-					'type'     => 'array',
+					'type'     => 'object',
 					'readonly' => true,
 				],
 				self::REWRITE_USING_PERMALINKS     => [
@@ -332,9 +335,12 @@ final class PairedRouting implements Service, Registerable {
 	/**
 	 * Get the entities that are already using the AMP slug.
 	 *
-	 * @return array Conflict data.
+	 * @return array|null Conflict data or null if there are no conflicts.
+	 * @global WP_Rewrite $wp_rewrite
 	 */
 	public function get_endpoint_path_slug_conflicts() {
+		global $wp_rewrite;
+
 		$conflicts = [];
 		$amp_slug  = amp_get_slug();
 
@@ -342,37 +348,73 @@ final class PairedRouting implements Service, Registerable {
 			[
 				'post_type'      => 'any',
 				'name'           => $amp_slug,
-				'fields'         => 'ids',
 				'posts_per_page' => 100,
 			]
 		);
 		if ( $post_query->post_count > 0 ) {
-			$conflicts['posts'] = $post_query->posts;
+			$conflicts['posts'] = array_map(
+				static function ( WP_Post $post ) {
+					$post_type = get_post_type_object( $post->post_type );
+					return [
+						'id'        => $post->ID,
+						'edit_link' => get_edit_post_link( $post->ID, 'raw' ),
+						'title'     => $post->post_title,
+						'post_type' => $post->post_type,
+						'label'     => isset( $post_type->labels->singular_name )
+									? $post_type->labels->singular_name
+									: null,
+					];
+				},
+				$post_query->posts
+			);
 		}
 
 		$term_query = new WP_Term_Query(
 			[
 				'slug'       => $amp_slug,
-				'fields'     => 'ids',
 				'hide_empty' => false,
 			]
 		);
 		if ( $term_query->terms ) {
-			$conflicts['terms'] = $term_query->terms;
+			$conflicts['terms'] = array_map(
+				static function ( WP_Term $term ) {
+					$taxonomy = get_taxonomy( $term->taxonomy );
+					return [
+						'id'        => $term->term_id,
+						'edit_link' => get_edit_term_link( $term->term_id, $term->taxonomy ),
+						'taxonomy'  => $term->taxonomy,
+						'name'      => $term->name,
+						'label'     => isset( $taxonomy->labels->singular_name )
+									? $taxonomy->labels->singular_name
+									: null,
+					];
+				},
+				$term_query->terms
+			);
 		}
 
 		$user = get_user_by( 'slug', $amp_slug );
-		if ( $user ) {
-			$conflicts['users'] = [ $user->ID ];
+		if ( $user instanceof WP_User ) {
+			$conflicts['user'] = [
+				'id'        => $user->ID,
+				'edit_link' => get_edit_user_link( $user->ID ),
+				'name'      => $user->display_name,
+			];
 		}
 
 		foreach ( get_post_types( [], 'objects' ) as $post_type ) {
 			if (
 				$amp_slug === $post_type->query_var
 				||
-				isset( $post_type->rewrite['slug'] ) && $post_type->rewrite['slug'] === $amp_slug
+				( isset( $post_type->rewrite['slug'] ) && $post_type->rewrite['slug'] === $amp_slug )
 			) {
-				$conflicts['post_types'][] = $post_type->name;
+				$conflicts['post_type'] = [
+					'name'  => $post_type->name,
+					'label' => isset( $post_type->labels->name )
+							? $post_type->labels->name
+							: null,
+				];
+				break;
 			}
 		}
 
@@ -380,10 +422,44 @@ final class PairedRouting implements Service, Registerable {
 			if (
 				$amp_slug === $taxonomy->query_var
 				||
-				isset( $taxonomy->rewrite['slug'] ) && $taxonomy->rewrite['slug'] === $amp_slug
+				( isset( $taxonomy->rewrite['slug'] ) && $taxonomy->rewrite['slug'] === $amp_slug )
 			) {
-				$conflicts['taxonomies'][] = $taxonomy->name;
+				$conflicts['taxonomy'] = [
+					'name'  => $taxonomy->name,
+					'label' => isset( $taxonomy->labels->name )
+							? $taxonomy->labels->name
+							: null,
+
+				];
+				break;
 			}
+		}
+
+		foreach ( $wp_rewrite->endpoints as $endpoint ) {
+			if ( isset( $endpoint[1] ) && $amp_slug === $endpoint[1] ) {
+				$conflicts['rewrite'][] = 'endpoint';
+				break;
+			}
+		}
+		foreach (
+			[
+				'author_base',
+				'comments_base',
+				'search_base',
+				'pagination_base',
+				'feed_base',
+				'comments_pagination_base',
+			]
+			as
+			$key
+		) {
+			if ( isset( $wp_rewrite->$key ) && $amp_slug === $wp_rewrite->$key ) {
+				$conflicts['rewrite'][] = $key;
+			}
+		}
+
+		if ( empty( $conflicts ) ) {
+			return null;
 		}
 
 		return $conflicts;

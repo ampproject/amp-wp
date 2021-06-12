@@ -27,7 +27,6 @@ import {
  * @param {Object} dimensions        An object with minimum required width and height values.
  * @param {number} dimensions.width  Required media width in pixels.
  * @param {number} dimensions.height Required media height in pixels.
- *
  * @return {boolean} Whether the media has the minimum dimensions.
  */
 export const hasMinimumDimensions = ( media, dimensions ) => {
@@ -46,8 +45,6 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
 /**
  * Get minimum dimensions for a featured image.
  *
- * @see https://developers.google.com/search/docs/data-types/article#article_types
- *
  * "Images should be at least 1200 pixels wide.
  * For best results, provide multiple high-resolution images (minimum of 800,000 pixels when multiplying width and height)
  * with the following aspect ratios: 16x9, 4x3, and 1x1."
@@ -55,6 +52,7 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
  * Given this requirement, this function ensures the right aspect ratio.
  * The 16/9 aspect ratio is chosen because it has the smallest height for the given width.
  *
+ * @see https://developers.google.com/search/docs/data-types/article#article_types
  * @return {Object} Minimum dimensions including width and height.
  */
 export const getMinimumFeaturedImageDimensions = () => {
@@ -76,7 +74,6 @@ export const getMinimumFeaturedImageDimensions = () => {
  * @param {number}  dimensions.width           Minimum required width value.
  * @param {number}  dimensions.height          Minimum required height value.
  * @param {boolean} required                   Whether the image is required or not.
- *
  * @return {string[]|null} Validation errors, or null if there were no errors.
  */
 export const validateFeaturedImage = ( media, dimensions, required ) => {
