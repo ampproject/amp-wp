@@ -86,7 +86,6 @@ const ampLayoutOptions = [
  *
  * @param {Object} settings Block settings.
  * @param {string} name     Block name.
- *
  * @return {Object} Modified block settings.
  */
 export const addAMPAttributes = ( settings, name ) => {
@@ -140,7 +139,6 @@ export const addAMPAttributes = ( settings, name ) => {
  *
  * @param {Object} settings Block settings.
  * @param {string} name     Block name.
- *
  * @return {Object} Modified block settings.
  */
 export const removeAmpFitTextFromBlocks = ( settings, name ) => {
@@ -223,9 +221,7 @@ export const removeAmpFitTextFromBlocks = ( settings, name ) => {
  * removed and the deprecation of the block and proceed without error.
  *
  * @see removeAmpFitTextFromBlocks
- *
  * @param {ReactElement} element Block save result.
- *
  * @return {ReactElement} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
  */
 export const removeClassFromAmpFitTextBlocks = ( element ) => {
@@ -242,7 +238,6 @@ export const removeClassFromAmpFitTextBlocks = ( element ) => {
  * Get layout options depending on the block.
  *
  * @param {string} block Block name.
- *
  * @return {Object[]} Options.
  */
 export const getLayoutOptions = ( block ) => {
@@ -271,7 +266,6 @@ export const getLayoutOptions = ( block ) => {
  * Filters blocks edit function of all blocks.
  *
  * @param {Function} BlockEdit function.
- *
  * @return {Function} Edit function.
  */
 export const filterBlocksEdit = ( BlockEdit ) => {
@@ -358,7 +352,6 @@ export const setImageBlockLayoutAttributes = ( props, layout ) => {
  * Default setup for inspector controls.
  *
  * @param {Object} props Props.
- *
  * @return {ReactElement} Inspector Controls.
  */
 export const setUpInspectorControls = ( props ) => {
@@ -386,9 +379,7 @@ setUpInspectorControls.propTypes = {
  * Get AMP Layout select control.
  *
  * @deprecated As of v2.1. Blocks with the `ampLayout` attribute will still be able to use the control.
- *
  * @param {Object} props Props.
- *
  * @return {ReactElement} Element.
  */
 export const AmpLayoutControl = ( props ) => {
@@ -446,9 +437,7 @@ AmpLayoutControl.propTypes = {
  * Get AMP Noloading toggle control.
  *
  * @deprecated As of v2.1. Blocks with the `ampNoLoading` attribute will still be able to use the control.
- *
  * @param {Object} props Props.
- *
  * @return {ReactElement} Element.
  */
 export const AmpNoloadingToggle = ( props ) => {
@@ -495,7 +484,6 @@ AmpNoloadingToggle.propTypes = {
  * Get AMP Lightbox toggle control.
  *
  * @param {Object} props Props.
- *
  * @return {ReactElement} Element.
  */
 const AmpLightboxToggle = ( props ) => {
@@ -538,7 +526,6 @@ AmpLightboxToggle.propTypes = {
  * @param {Object}   props.attributes             Block attributes.
  * @param {Object}   props.attributes.ampCarousel AMP Carousel toggle value.
  * @param {Function} props.setAttributes          Callback to update attributes.
- *
  * @return {Object} Element.
  */
 const AmpCarouselToggle = ( props ) => {
@@ -565,7 +552,6 @@ AmpCarouselToggle.propTypes = {
  *
  * @param {Object}  props            Props.
  * @param {boolean} props.isSelected Whether the current block has been selected or not.
- *
  * @return {Object} Inspector Controls.
  */
 const setUpImageInspectorControls = ( props ) => {
@@ -596,7 +582,6 @@ setUpImageInspectorControls.propTypes = {
  *
  * @param {Object}  props            Props.
  * @param {boolean} props.isSelected Whether the current block has been selected or not.
- *
  * @return {Object} Inspector controls.
  */
 const setUpGalleryInspectorControls = ( props ) => {

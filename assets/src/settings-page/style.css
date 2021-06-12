@@ -389,6 +389,15 @@ li.error-kept {
 	margin-bottom: 1em;
 }
 
+#paired-url-structure .amp-drawer__panel-body-inner .amp-notice ul {
+	margin-top: 1rem;
+}
+
+#paired-url-structure .amp-drawer__panel-body-inner .amp-notice li {
+	list-style: disc;
+	margin: 0;
+}
+
 .amp-drawer__panel-body-inner .amp-paired-url-examples {
 	margin-top: 0.5em;
 	margin-bottom: 0;

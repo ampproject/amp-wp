@@ -16,7 +16,6 @@ import { __ } from '@wordpress/i18n';
  * @param {Object} props Component props.
  * @param {string} props.name Block's name.
  * @param {string} props.url URL.
- *
  * @return {ReactElement} Placeholder.
  */
 const MediaPlaceholder = ( { name, url } ) => {
