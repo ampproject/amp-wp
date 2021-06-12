@@ -248,7 +248,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 
 	/** @covers ::get_endpoint_path_slug_conflicts() */
 	public function test_get_endpoint_path_slug_conflicts() {
-		$this->assertCount( 0, $this->instance->get_endpoint_path_slug_conflicts() );
+		$this->assertNull( $this->instance->get_endpoint_path_slug_conflicts() );
 
 		// Posts.
 		self::factory()->post->create( [ 'post_name' => amp_get_slug() ] );
