@@ -23,7 +23,7 @@ jobs:
       - id: determine-file-count
         name: Determine if there are any permitted files that changed that should make the workflow continue
         run: |
-          CHANGED_FILES=$(git diff --name-only ${{ github.base.ref }} ${{ github.head.ref }})
+          CHANGED_FILES=$(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }})
           echo "Changed files: "$CHANGED_FILES"
 
           echo "::set-output name=count::$(php -f bin/has-changed-paths.php "$IGNORE_REGEX_LIST" "$CHANGED_FILES")"
