@@ -27,10 +27,11 @@ jobs:
         name: Determine if permitted files have changed that should make the workflow run continue
         run: |
           CHANGED_FILES=$(git diff --name-only FETCH_HEAD HEAD)
-          echo "Changed files: "$CHANGED_FILES""
+          echo -e "Changed files:\n$CHANGED_FILES\n"
+          echo -e "Regex list:\n$IGNORE_REGEX_LIST\n"
 
           FILE_COUNT=$(php -f bin/has-changed-paths.php "$IGNORE_REGEX_LIST" "$CHANGED_FILES")
-          echo "File count: "$FILE_COUNT""
+          echo "Changed file count: $FILE_COUNT"
 
           echo "::set-output name=count::$FILE_COUNT"
         env:
