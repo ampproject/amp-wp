@@ -32,7 +32,7 @@ jobs:
           FILE_COUNT=$(php -f bin/determine-changed-files-count.php "$IGNORE_REGEX_LIST" "$CHANGED_FILES")
           echo "Changed file count: $FILE_COUNT"
 
-          echo "::set-output name=count::0"
+          echo "::set-output name=count::$FILE_COUNT"
         env:
           IGNORE_REGEX_LIST: |
             \.github\/(?!workflows)
