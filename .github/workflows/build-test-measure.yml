@@ -28,7 +28,7 @@ jobs:
         run: |
           CHANGED_FILES=$(git diff --name-only FETCH_HEAD HEAD)
           echo -e "Changed files:\n$CHANGED_FILES\n"
-          echo -e "Regex list:\n$IGNORE_REGEX_LIST\n"
+          echo -e "Regex list:\n$IGNORE_REGEX_LIST"
 
           FILE_COUNT=$(php -f bin/has-changed-paths.php "$IGNORE_REGEX_LIST" "$CHANGED_FILES")
           echo "Changed file count: $FILE_COUNT"
