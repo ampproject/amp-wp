@@ -29,7 +29,7 @@ jobs:
           CHANGED_FILES=$(git diff --name-only FETCH_HEAD HEAD)
           echo -e "Changed files:\n$CHANGED_FILES\n"
 
-          FILE_COUNT=$(php -f bin/has-changed-paths.php "$IGNORE_REGEX_LIST" "$CHANGED_FILES")
+          FILE_COUNT=$(php -f bin/determine-changed-files-count.php "$IGNORE_REGEX_LIST" "$CHANGED_FILES")
           echo "Changed file count: $FILE_COUNT"
 
           echo "::set-output name=count::0"
