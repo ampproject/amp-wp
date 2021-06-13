@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
 
       - id: determine-file-count
         name: Determine if there are any permitted files that changed that should make the workflow run continue
