@@ -24,12 +24,15 @@ jobs:
         run: git fetch --depth=1 --no-tags origin ${{ github.base_ref }}
 
       - id: determine-file-count
-        name: Determine if there are any permitted files that changed that should make the workflow run continue
+        name: Determine if permitted files have changed that should make the workflow run continue
         run: |
           CHANGED_FILES=$(git diff --name-only FETCH_HEAD HEAD)
-          echo "Changed files: "$CHANGED_FILES"
+          echo "Changed files: "$CHANGED_FILES""
 
-          echo "::set-output name=count::$(php -f bin/has-changed-paths.php "$IGNORE_REGEX_LIST" "$CHANGED_FILES")"
+          FILE_COUNT=$(php -f bin/has-changed-paths.php "$IGNORE_REGEX_LIST" "$CHANGED_FILES")
+          echo "File count: "$FILE_COUNT""
+
+          echo "::set-output name=count::$FILE_COUNT"
         env:
           IGNORE_REGEX_LIST: |
             \.github\/(?!workflows)
