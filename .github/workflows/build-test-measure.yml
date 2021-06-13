@@ -17,10 +17,13 @@ jobs:
     outputs:
       changed-file-count: ${{ steps.determine-file-count.outputs.count }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - id: determine-file-count
         name: Determine if there are any permitted files that changed that should make the workflow continue
         run: |
-          CHANGED_FILES=$(git diff --name-only ${{ github.base.ref }} ${{ github.head.ref }} | awk 'NF { print "\""$0"\""}' | tr "\n" ",")
+          CHANGED_FILES=$(git diff --name-only ${{ github.base.ref }} ${{ github.head.ref }})
           echo "Changed files: "$CHANGED_FILES"
 
           echo "::set-output name=count::$(php -f bin/has-changed-paths.php "$IGNORE_REGEX_LIST" "$CHANGED_FILES")"
