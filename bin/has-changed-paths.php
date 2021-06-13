@@ -1,9 +1,7 @@
 <?php
 
-$pattern = str_replace( "\n", '|', $argv[1] );
-$changed_files = explode( "\n", $argv[2] );
-
-var_dump( $pattern, $changed_files );
+$pattern = str_replace( "\n", '|', rtrim( $argv[1]) );
+$changed_files = explode( "\n", rtrim( $argv[2] ) );
 
 $filtered_files = preg_grep("/^${pattern}$/m", $changed_files, PREG_GREP_INVERT );
 
