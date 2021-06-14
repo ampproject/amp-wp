@@ -14,10 +14,12 @@
  * @package AMP
  */
 
-$file_pattern = $argv[1];
+$file_pattern = sprintf( '/^%s$/m', preg_quote( $argv[1], '/' ) );
 $changed_files  = explode( "\n", rtrim( $argv[2] ) );
 $preg_grep_flags = isset( $argv[3] ) && trim( $argv[3] ) === '--invert' ? PREG_GREP_INVERT : 0;
 
-$filtered_files = preg_grep( "/^${$file_pattern}$/m", $changed_files, $preg_grep_flags );
+var_dump($file_pattern, $changed_files, $preg_grep_flags);
+
+$filtered_files = preg_grep( $file_pattern, $changed_files, $preg_grep_flags );
 
 echo $filtered_files ? count( $filtered_files ) : 0;

@@ -34,11 +34,7 @@ jobs:
 
           echo "::set-output name=count::$FILE_COUNT"
         env:
-          IGNORE_PATH_REGEX_LIST: >
-            \.github\/(?!workflows)|
-            \.wordpress-org\/|
-            docs\/|
-            qa-tester\/
+          IGNORE_PATH_REGEX_LIST: \.github\/(?!workflows)|\.wordpress-org\/|docs\/|qa-tester\/
 
   lint-css:
     needs: pre-run

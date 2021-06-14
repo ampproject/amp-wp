@@ -35,8 +35,7 @@ jobs:
 
           echo "::set-output name=count::$FILE_COUNT"
         env:
-          PATH_REGEX_LIST: >
-            qa-tester\/
+          PATH_REGEX_LIST: \.github\/workflows\/qa-integrate.yml|qa-tester\/
 
   lint-css:
     name: 'Lint: CSS'
