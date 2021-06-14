@@ -14,7 +14,7 @@
  * @package AMP
  */
 
-$file_pattern = sprintf( '/^%s$/m', preg_quote( $argv[1], '/' ) );
+$file_pattern = sprintf( '/^%s$/m', $argv[1] );
 $changed_files  = explode( "\n", rtrim( $argv[2] ) );
 $preg_grep_flags = isset( $argv[3] ) && trim( $argv[3] ) === '--invert' ? PREG_GREP_INVERT : 0;
 
