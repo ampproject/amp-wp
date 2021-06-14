@@ -2,14 +2,15 @@ name: Auto-merge
 
 on:
   pull_request:
-    # Only run workflow when a PR is opened.
-    types: [opened]
+    types: [opened, synchronize]
 
 jobs:
   automerge-dependencies:
     name: Automerge dependencies
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
+    if: >
+      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.auto_merge == null
     steps:
       - name: Enable auto-merge for the PR
         run: gh pr merge --auto --merge "$PR_URL"
