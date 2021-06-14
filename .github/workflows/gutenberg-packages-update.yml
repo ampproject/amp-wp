@@ -25,7 +25,7 @@ jobs:
       - name: Get release version from last PR
         id: last-release
         run: |
-          RESULT=$(gh api -X GET search/issues -f q='${{ env.QUERY }}' -f sort='created' -f order='desc' --jq '.items.[0]|[.number, .title]|join("\n")')
+          readarray -t RESULT < <(gh api -X GET search/issues -f q='${{ env.QUERY }}' -f sort='created' -f order='desc' --jq '.items.[0]|[.number, .title]|join("\n")')
           PR_NUM=${RESULT[0]}
           PR_TITLE=${RESULT[1]}
 
