@@ -159,18 +159,17 @@ const customizer = {
 };
 
 const WORDPRESS_NAMESPACE = '@wordpress/';
-const BABEL_NAMESPACE = '@babel/';
-const gutenbergPackages = [ '@babel/polyfill', '@wordpress/dom-ready', '@wordpress/i18n', '@wordpress/hooks', '@wordpress/html-entities', '@wordpress/url' ].map(
+const gutenbergPackages = [ '@wordpress/polyfill', '@wordpress/dom-ready', '@wordpress/i18n', '@wordpress/hooks', '@wordpress/html-entities', '@wordpress/url' ].map(
 	( packageName ) => {
-		if ( 0 !== packageName.indexOf( WORDPRESS_NAMESPACE ) && 0 !== packageName.indexOf( BABEL_NAMESPACE ) ) {
+		if ( 0 !== packageName.indexOf( WORDPRESS_NAMESPACE ) ) {
 			return null;
 		}
 
 		const camelCaseName = '@wordpress/i18n' === packageName
 			? 'i18n'
-			: camelCaseDash( packageName.replace( WORDPRESS_NAMESPACE, '' ).replace( BABEL_NAMESPACE, '' ) );
+			: camelCaseDash( packageName.replace( WORDPRESS_NAMESPACE, '' ) );
 
-		const handle = packageName.replace( WORDPRESS_NAMESPACE, 'wp-' ).replace( BABEL_NAMESPACE, 'wp-' );
+		const handle = packageName.replace( WORDPRESS_NAMESPACE, 'wp-' );
 
 		return {
 			camelCaseName,
