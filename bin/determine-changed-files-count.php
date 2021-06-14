@@ -18,8 +18,6 @@ $file_pattern    = sprintf( '/^%s$/m', $argv[1] );
 $changed_files   = explode( "\n", trim( $argv[2] ) );
 $preg_grep_flags = isset( $argv[3] ) && trim( $argv[3] ) === '--invert' ? PREG_GREP_INVERT : 0;
 
-var_dump($file_pattern, $changed_files, $preg_grep_flags);
-
 $filtered_files = preg_grep( $file_pattern, $changed_files, $preg_grep_flags );
 
 echo $filtered_files ? count( $filtered_files ) : 0;

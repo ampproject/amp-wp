@@ -33,12 +33,15 @@ jobs:
           CHANGED_FILES=$(git diff --name-only FETCH_HEAD HEAD)
           echo -e "Changed files:\n$CHANGED_FILES\n"
 
-          FILE_COUNT=$(php -f bin/determine-changed-files-count.php "$PATH_REGEX_LIST" "$CHANGED_FILES")
+          FILE_COUNT=$(php -f ../bin/determine-changed-files-count.php "$PATH_REGEX" "$CHANGED_FILES")
           echo "Changed file count: $FILE_COUNT"
 
           echo "::set-output name=count::$FILE_COUNT"
         env:
-          PATH_REGEX_LIST: \.github\/workflows\/qa-integrate.yml|qa-tester\/
+          # Paths:
+          # - .github/workflows/qa-integrate.yml
+          # - qa-tester/
+          PATH_REGEX: \.github\/workflows\/qa-integrate\.yml|qa-tester\/
 
   lint-css:
     name: 'Lint: CSS'
