@@ -41,7 +41,8 @@ jobs:
       - name: Determine modified files for PR
         if: ${{ github.base_ref != null }}
         run: |
-          MODIFIED_FILES=$(git diff --name-only FETCH_HEAD HEAD)
+          MODIFIED_FILES=$(git diff --name-only FETCH_HEAD HEAD | base64)
+          echo "$MODIFIED_FILES"
           echo "MODIFIED_FILES=$MODIFIED_FILES" >> $GITHUB_ENV
 
       - name: Determine modified files for commit
