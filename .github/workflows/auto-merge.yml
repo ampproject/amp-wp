@@ -12,9 +12,6 @@ jobs:
     if: github.actor == 'dependabot[bot]'
     steps:
       - name: Enable auto-merge for the PR
-        if: >
-          # Auto merge `@wordpress/` dependency PRs
-          startsWith( ${{ github.event.pull_request.title }}, 'Bump @wordpress' )
         run: gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
