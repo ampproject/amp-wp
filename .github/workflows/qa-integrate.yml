@@ -21,19 +21,37 @@ jobs:
     outputs:
       changed-file-count: ${{ steps.determine-file-count.outputs.count }}
     steps:
+      - name: Checkout last 2 commits
+        # Fetch last 2 commits if it's not a PR, so that we can determine the list of modified files.
+        if: ${{ github.base_ref == null }}
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
       - name: Checkout
+        # Do usual checkout if it's a PR.
+        if: ${{ github.base_ref != null }}
         uses: actions/checkout@v2
 
       - name: Fetch base branch
+        # Only fetch base ref if it's a PR.
+        if: ${{ github.base_ref != null }}
         run: git fetch --depth=1 --no-tags origin ${{ github.base_ref }}
 
-      - id: determine-file-count
-        name: Determine if permitted files have changed that should make the workflow run continue
-        run: |
-          CHANGED_FILES=$(git diff --name-only FETCH_HEAD HEAD)
-          echo -e "Changed files:\n$CHANGED_FILES\n"
+      - name: Determine modified files for PR
+        if: ${{ github.base_ref != null }}
+        run: echo "MODIFIED_FILES=$(git diff --name-only FETCH_HEAD HEAD)" >> $GITHUB_ENV
 
-          FILE_COUNT=$(php -f ../bin/determine-changed-files-count.php "$PATH_REGEX" "$CHANGED_FILES")
+      - name: Determine modified files for commit
+        if: ${{ github.base_ref == null }}
+        run: echo "MODIFIED_FILES=$(git diff --name-only HEAD~1 HEAD)" >> $GITHUB_ENV
+
+      - id: determine-file-count
+        name: Determine if modified files should make the workflow run continue
+        run: |
+          echo -e "Modified files:\n$MODIFIED_FILES\n"
+
+          FILE_COUNT=$(php -f ../bin/determine-modified-files-count.php "$PATH_REGEX" "$MODIFIED_FILES")
           echo "Changed file count: $FILE_COUNT"
 
           echo "::set-output name=count::$FILE_COUNT"
