@@ -23,7 +23,6 @@
     "npm": ">= 7"
   },
   "dependencies": {
-    "@babel/polyfill": "7.12.1",
     "@wordpress/api-fetch": "5.1.1",
     "@wordpress/autop": "3.1.1",
     "@wordpress/components": "14.1.2",
