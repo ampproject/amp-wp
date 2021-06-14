@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Services;
 use WP_UnitTestCase;
 
 /**
@@ -80,6 +81,11 @@ class ValidationCountsTest extends WP_UnitTestCase {
 	 */
 	public function test_is_needed() {
 		$this->assertFalse( ValidationCounts::is_needed() );
+
+		// If dependency support is absent, then abort because is_needed will never be true.
+		if ( ! Services::get( 'dependency_support' )->has_support() ) {
+			return;
+		}
 
 		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
 		wp_set_current_user( $admin_user->ID );

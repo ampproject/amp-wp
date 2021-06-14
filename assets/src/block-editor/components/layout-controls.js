@@ -17,7 +17,6 @@ import { __, sprintf } from '@wordpress/i18n';
  * @param {Object}   props.attributes           Block attributes.
  * @param {Function} props.setAttributes        Callback to update block attributes.
  * @param {Array}    props.ampLayoutOptions     Layout options.
- *
  * @return {ReactElement} Controls.
  */
 const LayoutControls = ( { attributes, setAttributes, ampLayoutOptions } ) => {

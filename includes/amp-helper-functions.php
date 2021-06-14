@@ -914,11 +914,21 @@ function amp_register_default_scripts( $wp_scripts ) {
 	);
 
 	// Register all AMP components as defined in the spec.
-	foreach ( AMP_Allowed_Tags_Generated::get_extension_specs() as $extension_name => $extension_spec ) {
+	$extension_specs = AMP_Allowed_Tags_Generated::get_extension_specs();
+	if ( isset( $extension_specs['amp-carousel'] ) && '0.1' === $extension_specs['amp-carousel']['latest'] ) {
+		/*
+		 * The latestVersion of amp-carousel is 0.1 in https://github.com/ampproject/amphtml/blob/main/build-system/compile/bundles.config.extensions.json
+		 * But we have been using 0.2 since https://github.com/ampproject/amp-wp/pull/3115
+		 * Therefore, we override the latest version to also be 0.2 since it has been shown to be stable.
+		 */
+		$extension_specs['amp-carousel']['latest'] = '0.2';
+	}
+
+	foreach ( $extension_specs as $extension_name => $extension_spec ) {
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
 			$extension_name,
-			end( $extension_spec['version'] )
+			$extension_spec['latest']
 		);
 
 		$wp_scripts->add(
@@ -927,14 +937,6 @@ function amp_register_default_scripts( $wp_scripts ) {
 			[ 'amp-runtime' ],
 			null
 		);
-	}
-
-	if ( $wp_scripts->query( 'amp-experiment', 'registered' ) ) {
-		/*
-		 * Version 1.0 of amp-experiment is still experimental and requires the user to enable it.
-		 * @todo Revisit once amp-experiment is no longer experimental.
-		 */
-		$wp_scripts->registered['amp-experiment']->src = 'https://cdn.ampproject.org/v0/amp-experiment-0.1.js';
 	}
 }
 
@@ -1670,14 +1672,22 @@ function amp_get_schemaorg_metadata() {
 
 	$queried_object = get_queried_object();
 	if ( $queried_object instanceof WP_Post ) {
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.3', '>=' ) ) {
+			$date_published = mysql2date( 'c', $queried_object->post_date, false );
+			$date_modified  = mysql2date( 'c', $queried_object->post_modified, false );
+		} else {
+			$date_published = mysql2date( 'c', $queried_object->post_date_gmt, false );
+			$date_modified  = mysql2date( 'c', $queried_object->post_modified_gmt, false );
+		}
+
 		$metadata = array_merge(
 			$metadata,
 			[
 				'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 				'mainEntityOfPage' => get_permalink(),
 				'headline'         => get_the_title(),
-				'datePublished'    => mysql2date( 'c', $queried_object->post_date_gmt, false ),
-				'dateModified'     => mysql2date( 'c', $queried_object->post_modified_gmt, false ),
+				'datePublished'    => $date_published,
+				'dateModified'     => $date_modified,
 			]
 		);
 

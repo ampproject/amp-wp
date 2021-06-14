@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\ReaderThemeLoader;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
@@ -69,6 +70,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		}
 
 		$instance = AMP_Template_Customizer::init( $wp_customize );
+		$this->assertFalse( has_action( 'customize_controls_init', [ $instance, 'set_reader_preview_url' ] ) );
 		$this->assertEquals( 0, did_action( 'amp_customizer_init' ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_customizer_scripts' ] ) );
 
@@ -93,6 +95,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		}
 
 		$instance = AMP_Template_Customizer::init( $wp_customize );
+		$this->assertFalse( has_action( 'customize_controls_init', [ $instance, 'set_reader_preview_url' ] ) );
 		$this->assertEquals( 0, did_action( 'amp_customizer_init' ) );
 		$this->assertFalse( has_action( 'customize_save_after', [ $instance, 'store_modified_theme_mod_setting_timestamps' ] ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_customizer_scripts' ] ) );
@@ -127,6 +130,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		}
 
 		$instance = AMP_Template_Customizer::init( $wp_customize );
+		$this->assertEquals( 10, has_action( 'customize_controls_init', [ $instance, 'set_reader_preview_url' ] ) );
 		$this->assertFalse( has_action( 'customize_save_after', [ $instance, 'store_modified_theme_mod_setting_timestamps' ] ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_customizer_scripts' ] ) );
 		$this->assertEquals( 1, did_action( 'amp_customizer_init' ) );
@@ -181,6 +185,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		}
 
 		$instance = AMP_Template_Customizer::init( $wp_customize );
+		$this->assertEquals( 10, has_action( 'customize_controls_init', [ $instance, 'set_reader_preview_url' ] ) );
 		$this->assertEquals( 10, has_action( 'customize_save_after', [ $instance, 'store_modified_theme_mod_setting_timestamps' ] ) );
 		$this->assertEquals( 10, has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_customizer_scripts' ] ) );
 		$this->assertEquals( 10, has_action( 'customize_controls_print_footer_scripts', [ $instance, 'render_setting_import_section_template' ] ) );
@@ -198,6 +203,30 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 
 		$this->assertNull( $wp_customize->get_section( 'cover_template_options' ) );
 		$this->assertNull( $wp_customize->get_section( 'static_front_page' ) );
+	}
+
+	/** @covers AMP_Template_Customizer::set_reader_preview_url() */
+	public function test_set_reader_preview_url() {
+		$post_id      = self::factory()->post->create();
+		$wp_customize = $this->get_customize_manager();
+		$instance     = AMP_Template_Customizer::init( $wp_customize );
+
+		$this->assertEquals( amp_get_permalink( $post_id ), amp_admin_get_preview_permalink() );
+		$this->assertEquals( home_url( '/' ), $wp_customize->get_preview_url() );
+
+		$instance->set_reader_preview_url();
+		$this->assertEquals( home_url( '/' ), $wp_customize->get_preview_url() );
+
+		$_GET[ QueryVar::AMP_PREVIEW ] = '1';
+		$instance->set_reader_preview_url();
+		$this->assertNotEquals( home_url( '/' ), $wp_customize->get_preview_url() );
+		$this->assertEquals( amp_admin_get_preview_permalink(), $wp_customize->get_preview_url() );
+
+		$wp_customize->set_preview_url( home_url( '/foo/' ) );
+		$_GET[ QueryVar::AMP_PREVIEW ] = '1';
+		$_GET['url']                   = home_url( '/foo/' );
+		$instance->set_reader_preview_url();
+		$this->assertEquals( home_url( '/foo/' ), $wp_customize->get_preview_url() );
 	}
 
 	/**
@@ -279,7 +308,11 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$wp_customize = $this->get_customize_manager();
 		$instance     = AMP_Template_Customizer::init( $wp_customize );
 		$instance->init_legacy_preview();
-		$this->assertEquals( 10, has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.7', '<' ) ) {
+			$this->assertEquals( 10, has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		} else {
+			$this->assertFalse( has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		}
 		$this->assertEquals( 10, has_action( 'amp_customizer_enqueue_preview_scripts', [ $instance, 'enqueue_legacy_preview_scripts' ] ) );
 		$this->assertNull( $wp_customize->get_messenger_channel() );
 	}
@@ -290,7 +323,11 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$wp_customize->start_previewing_theme();
 		$instance = AMP_Template_Customizer::init( $wp_customize );
 		$instance->init_legacy_preview();
-		$this->assertEquals( 10, has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.7', '<' ) ) {
+			$this->assertEquals( 10, has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		} else {
+			$this->assertFalse( has_action( 'amp_post_template_head', 'wp_no_robots' ) );
+		}
 		$this->assertEquals( 10, has_action( 'amp_customizer_enqueue_preview_scripts', [ $instance, 'enqueue_legacy_preview_scripts' ] ) );
 		$this->assertEquals( '123', $wp_customize->get_messenger_channel() );
 

@@ -80,17 +80,17 @@
         "includes": [
             {
                 "name": "",
-                "line": 167,
+                "line": 172,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 240,
+                "line": 245,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 366,
+                "line": 371,
                 "type": "Include"
             }
         ],
@@ -98,8 +98,8 @@
         "hooks": [
             {
                 "name": "amp_featured_image_minimum_height",
-                "line": 310,
-                "end_line": 310,
+                "line": 315,
+                "end_line": 315,
                 "type": "filter",
                 "arguments": [
                     "$default_height"
@@ -125,8 +125,8 @@
             },
             {
                 "name": "amp_featured_image_minimum_width",
-                "line": 320,
-                "end_line": 320,
+                "line": 325,
+                "end_line": 325,
                 "type": "filter",
                 "arguments": [
                     "$default_width"
@@ -168,17 +168,17 @@
         "includes": [
             {
                 "name": "",
-                "line": 327,
+                "line": 349,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 582,
+                "line": 604,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 650,
+                "line": 672,
                 "type": "Require"
             }
         ],
@@ -186,8 +186,8 @@
         "hooks": {
             "0": {
                 "name": "amp_customizer_init",
-                "line": 105,
-                "end_line": 105,
+                "line": 108,
+                "end_line": 108,
                 "type": "action",
                 "arguments": [
                     "$self"
@@ -213,8 +213,8 @@
             },
             "1": {
                 "name": "amp_customizer_register_ui",
-                "line": 280,
-                "end_line": 280,
+                "line": 302,
+                "end_line": 302,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -240,8 +240,8 @@
             },
             "2": {
                 "name": "amp_customizer_register_settings",
-                "line": 316,
-                "end_line": 316,
+                "line": 338,
+                "end_line": 338,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -267,8 +267,8 @@
             },
             "9": {
                 "name": "amp_customizer_enqueue_scripts",
-                "line": 632,
-                "end_line": 632,
+                "line": 654,
+                "end_line": 654,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -294,8 +294,8 @@
             },
             "11": {
                 "name": "amp_customizer_enqueue_preview_scripts",
-                "line": 723,
-                "end_line": 723,
+                "line": 745,
+                "end_line": 745,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -335,11 +335,11 @@
         "path": "includes\/admin\/functions.php",
         "root": "\/app\/public\/content\/plugins\/amp",
         "functions": [],
-        "hooks": {
-            "0": {
+        "hooks": [
+            {
                 "name": "amp_customizer_post_type",
-                "line": 43,
-                "end_line": 43,
+                "line": 45,
+                "end_line": 45,
                 "type": "filter",
                 "arguments": [
                     "'post'"
@@ -348,6 +348,10 @@
                     "description": "Filter the post type to retrieve the latest for use in the AMP template customizer.",
                     "long_description": "",
                     "tags": [
+                        {
+                            "name": "todo",
+                            "content": "This filter doesn't actually do anything at present. Instead of array_unique() below, an array_intersect() should have been used."
+                        },
                         {
                             "name": "param",
                             "content": "Post type slug. Default 'post'.",
@@ -358,44 +362,8 @@
                         }
                     ]
                 }
-            },
-            "2": {
-                "name": "amp_post_template_analytics",
-                "line": 159,
-                "end_line": 159,
-                "type": "filter",
-                "arguments": [
-                    "$analytics",
-                    "get_queried_object()"
-                ],
-                "doc": {
-                    "description": "Add amp-analytics tags.",
-                    "long_description": "This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting. This filter should be used to alter entries for legacy AMP templates.",
-                    "tags": [
-                        {
-                            "name": "since",
-                            "content": "0.4"
-                        },
-                        {
-                            "name": "param",
-                            "content": "An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.",
-                            "types": [
-                                "array"
-                            ],
-                            "variable": "$analytics"
-                        },
-                        {
-                            "name": "param",
-                            "content": "The current post.",
-                            "types": [
-                                "\\WP_Post"
-                            ],
-                            "variable": "$post"
-                        }
-                    ]
-                }
             }
-        }
+        ]
     },
     "15": {
         "file": {
@@ -2620,6 +2588,59 @@
             }
         }
     },
+    "17": {
+        "file": {
+            "description": "Callbacks for adding content to an AMP template.",
+            "long_description": "",
+            "tags": [
+                {
+                    "name": "package",
+                    "content": "AMP"
+                }
+            ]
+        },
+        "path": "includes\/amp-post-template-functions.php",
+        "root": "\/app\/public\/content\/plugins\/amp",
+        "functions": [],
+        "hooks": [
+            {
+                "name": "amp_post_template_analytics",
+                "line": 154,
+                "end_line": 154,
+                "type": "filter",
+                "arguments": [
+                    "$analytics",
+                    "get_queried_object()"
+                ],
+                "doc": {
+                    "description": "Add amp-analytics tags.",
+                    "long_description": "This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting. This filter should be used to alter entries for legacy AMP templates.",
+                    "tags": [
+                        {
+                            "name": "since",
+                            "content": "0.4"
+                        },
+                        {
+                            "name": "param",
+                            "content": "An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.",
+                            "types": [
+                                "array"
+                            ],
+                            "variable": "$analytics"
+                        },
+                        {
+                            "name": "param",
+                            "content": "The current post.",
+                            "types": [
+                                "\\WP_Post"
+                            ],
+                            "variable": "$post"
+                        }
+                    ]
+                }
+            }
+        ]
+    },
     "21": {
         "file": {
             "description": "Class AMP_HTTP",
@@ -2807,8 +2828,8 @@
         "hooks": {
             "1": {
                 "name": "amp_supportable_templates",
-                "line": 785,
-                "end_line": 785,
+                "line": 794,
+                "end_line": 794,
                 "type": "filter",
                 "arguments": [
                     "$templates"
@@ -2834,8 +2855,8 @@
             },
             "9": {
                 "name": "amp_enable_optimizer",
-                "line": 2001,
-                "end_line": 2001,
+                "line": 2013,
+                "end_line": 2013,
                 "type": "filter",
                 "arguments": [
                     "$enable_optimizer"
@@ -7783,12 +7804,12 @@
         "includes": [
             {
                 "name": "",
-                "line": 949,
+                "line": 950,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 990,
+                "line": 991,
                 "type": "Require"
             }
         ],
@@ -7796,8 +7817,8 @@
         "hooks": [
             {
                 "name": "amp_validation_error_sanitized",
-                "line": 527,
-                "end_line": 527,
+                "line": 528,
+                "end_line": 528,
                 "type": "filter",
                 "arguments": [
                     "null",
@@ -8021,12 +8042,12 @@
         "includes": [
             {
                 "name": "",
-                "line": 138,
+                "line": 142,
                 "type": "Require Once"
             },
             {
                 "name": "",
-                "line": 189,
+                "line": 191,
                 "type": "Require"
             }
         ],
@@ -8034,8 +8055,8 @@
         "hooks": [
             {
                 "name": "amp_options_menu_is_enabled",
-                "line": 79,
-                "end_line": 79,
+                "line": 81,
+                "end_line": 81,
                 "type": "filter",
                 "arguments": [
                     "true"
@@ -8198,7 +8219,7 @@
             }
         ]
     },
-    "134": {
+    "135": {
         "file": {
             "description": "Class UserAccess.",
             "long_description": "",
@@ -8255,7 +8276,7 @@
             }
         ]
     },
-    "168": {
+    "169": {
         "file": {
             "description": "Class MobileRedirection.",
             "long_description": "",
@@ -8407,7 +8428,7 @@
             }
         }
     },
-    "170": {
+    "171": {
         "file": {
             "description": "Class AmpWPConfiguration.",
             "long_description": "",
@@ -8478,7 +8499,7 @@
             }
         ]
     },
-    "178": {
+    "179": {
         "file": {
             "description": "Class PairedRouting.",
             "long_description": "",
@@ -8495,8 +8516,8 @@
         "hooks": [
             {
                 "name": "amp_custom_paired_url_structure",
-                "line": 238,
-                "end_line": 238,
+                "line": 249,
+                "end_line": 249,
                 "type": "filter",
                 "arguments": [
                     "null"
@@ -8518,7 +8539,7 @@
             }
         ]
     },
-    "179": {
+    "180": {
         "file": {
             "description": "Class PairedUrl.",
             "long_description": "",
@@ -8985,7 +9006,7 @@
         ],
         "hooks": []
     },
-    "180": {
+    "181": {
         "file": {
             "description": "Class LegacyReaderUrlStructure.",
             "long_description": "",
@@ -9084,7 +9105,7 @@
             }
         ]
     },
-    "184": {
+    "185": {
         "file": {
             "description": "Abstract class PairedUrlStructure.",
             "long_description": "",
@@ -9311,7 +9332,7 @@
         ],
         "hooks": []
     },
-    "196": {
+    "197": {
         "file": {
             "description": "Provides settings to be used in site scanning.",
             "long_description": "",
@@ -9359,7 +9380,7 @@
             }
         ]
     },
-    "197": {
+    "198": {
         "file": {
             "description": "WP cron process to validate URLs in the background.",
             "long_description": "",

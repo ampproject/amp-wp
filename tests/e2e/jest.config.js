@@ -15,5 +15,8 @@ module.exports = {
 		'.git',
 		'node_modules',
 	],
-	reporters: [ [ 'jest-silent-reporter', { useDots: true } ] ],
+	reporters: [
+		[ 'jest-silent-reporter', { useDots: true } ],
+		'<rootDir>/../../node_modules/@wordpress/scripts/config/jest-github-actions-reporter',
+	],
 };
