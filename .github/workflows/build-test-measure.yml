@@ -36,15 +36,16 @@ jobs:
 
       - name: Determine modified files for PR
         if: ${{ github.base_ref != null }}
-        run: echo "MODIFIED_FILES=$(git diff --name-only FETCH_HEAD HEAD)" >> $GITHUB_ENV
+        run: echo "MODIFIED_FILES=$(git diff --name-only FETCH_HEAD HEAD | base64 )" >> $GITHUB_ENV
 
       - name: Determine modified files for commit
         if: ${{ github.base_ref == null }}
-        run: echo "MODIFIED_FILES=$(git diff --name-only HEAD~1 HEAD)" >> $GITHUB_ENV
+        run: echo "MODIFIED_FILES=$(git diff --name-only HEAD~1 HEAD | base64)" >> $GITHUB_ENV
 
       - id: determine-file-count
         name: Determine if modified files should make the workflow run continue
         run: |
+          MODIFIED_FILES=$(echo "$MODIFIED_FILES" | base64 -d)
           echo -e "Modified files:\n$MODIFIED_FILES\n"
 
           FILE_COUNT=$(php -f bin/determine-modified-files-count.php "$IGNORE_PATH_REGEX" "$MODIFIED_FILES" --invert)
