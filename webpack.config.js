@@ -173,7 +173,7 @@ const gutenbergPackages = [ '@wordpress/polyfill', '@wordpress/dom-ready', '@wor
 
 		return {
 			camelCaseName,
-			entryPath: 'polyfill' === camelCaseName ? path.resolve( __dirname, 'assets/src/polyfills/wp-polyfill' ) : packageName,
+			entryPath: 'polyfill' === camelCaseName ? require.resolve( '@wordpress/babel-preset-default/build/polyfill' ) : packageName,
 			handle,
 			packageName,
 		};
