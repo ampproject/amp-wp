@@ -17,7 +17,7 @@ export const ErrorContext = createContext();
  * @param {any} props.children Component children.
  */
 export function ErrorContextProvider( { children } ) {
-	const [ error, setError ] = useState( error );
+	const [ error, setError ] = useState( null );
 
 	return (
 		<ErrorContext.Provider value={ { error, setError } }>
