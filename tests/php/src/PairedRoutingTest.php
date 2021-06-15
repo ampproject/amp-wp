@@ -248,7 +248,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 
 	/** @covers ::get_endpoint_path_slug_conflicts() */
 	public function test_get_endpoint_path_slug_conflicts() {
-		$this->assertCount( 0, $this->instance->get_endpoint_path_slug_conflicts() );
+		$this->assertNull( $this->instance->get_endpoint_path_slug_conflicts() );
 
 		// Posts.
 		self::factory()->post->create( [ 'post_name' => amp_get_slug() ] );
@@ -276,21 +276,28 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 			]
 		);
 		$this->assertEquals(
-			[ 'posts', 'terms', 'users' ],
+			[ 'posts', 'terms', 'user' ],
 			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
 		);
 
 		// Post types.
 		register_post_type( amp_get_slug() );
 		$this->assertEquals(
-			[ 'posts', 'terms', 'users', 'post_types' ],
+			[ 'posts', 'terms', 'user', 'post_type' ],
 			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
 		);
 
 		// Taxonomies.
 		register_taxonomy( amp_get_slug(), 'post' );
 		$this->assertEquals(
-			[ 'posts', 'terms', 'users', 'post_types', 'taxonomies' ],
+			[ 'posts', 'terms', 'user', 'post_type', 'taxonomy' ],
+			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
+		);
+
+		// Rewrite endpoint.
+		add_rewrite_endpoint( 'amp', E_ALL );
+		$this->assertEquals(
+			[ 'posts', 'terms', 'user', 'post_type', 'taxonomy', 'rewrite' ],
 			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
 		);
 	}
