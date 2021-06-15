@@ -63,8 +63,6 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
 
-		$this->assertEquals( 10, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_update_paired_url' ] ) );
-
 		$this->assertEquals( 10, has_action( PairedRouting::ACTION_UPDATE_LATE_DEFINED_SLUG_OPTION, [ $this->instance, 'update_late_defined_slug_option' ] ) );
 		$this->assertEquals( 10, has_action( 'after_setup_theme', [ $this->instance, 'check_stale_late_defined_slug_option' ] ) );
 
@@ -498,6 +496,8 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_action( 'parse_query', [ $this->instance, 'correct_query_when_is_front_page' ] ) );
 		$this->assertEquals( 10, has_action( 'wp', [ $this->instance, 'add_paired_request_hooks' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ $this->instance, 'add_permalink_settings_notice' ] ) );
+
+		$this->assertEquals( 10, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_update_paired_url' ] ) );
 	}
 
 	/** @covers ::initialize_paired_request() */
