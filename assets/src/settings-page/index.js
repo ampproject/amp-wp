@@ -33,6 +33,7 @@ import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
 import { AMPDrawer } from '../components/amp-drawer';
 import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
+import { ErrorScreen } from '../components/error-screen';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
@@ -216,11 +217,24 @@ Root.propTypes = {
 domReady( () => {
 	const root = document.getElementById( 'amp-settings-root' );
 
-	if ( root ) {
-		render( (
-			<Providers>
-				<Root appRoot={ root } />
-			</Providers>
-		), root );
+	if ( ! root ) {
+		return;
 	}
+
+	const errorHandler = ( error ) => {
+		// Handle only own errors.
+		if ( error?.filename?.match( /amp-settings(\.min)?\.js/ ) ) {
+			render( <ErrorScreen error={ error } />, root );
+		}
+	};
+
+	global.addEventListener( 'error', errorHandler );
+
+	render(
+		<Providers>
+			<Root appRoot={ root } />
+		</Providers>,
+		root,
+		() => global.removeEventListener( 'error', errorHandler ),
+	);
 } );

@@ -32,6 +32,7 @@ import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
+import { ErrorScreen } from '../components/error-screen';
 import { PAGES } from './pages';
 import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
@@ -94,13 +95,24 @@ Providers.propTypes = {
 domReady( () => {
 	const root = document.getElementById( APP_ROOT_ID );
 
-	if ( root ) {
-		render(
-
-			<Providers>
-				<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } appRoot={ root } />
-			</Providers>,
-			root,
-		);
+	if ( ! root ) {
+		return;
 	}
+
+	const errorHandler = ( error ) => {
+		// Handle only own errors.
+		if ( error?.filename?.match( /amp-onboarding-wizard(\.min)?\.js/ ) ) {
+			render( <ErrorScreen error={ error } />, root );
+		}
+	};
+
+	global.addEventListener( 'error', errorHandler );
+
+	render(
+		<Providers>
+			<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } appRoot={ root } />
+		</Providers>,
+		root,
+		() => global.removeEventListener( 'error', errorHandler ),
+	);
 } );
