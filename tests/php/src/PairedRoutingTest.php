@@ -1244,9 +1244,12 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$old_value = AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
 		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_LEGACY_READER );
 
+		$amp_slug = amp_get_slug();
+		$amp_slug = ( ! empty( $amp_slug ) ) ? $amp_slug : 'amp';
+
 		// Perform test.
-		$input_url       = home_url( '/template-comments/comment-page-2/amp/comment-page-2/?queryParam=hello' );
-		$expected_result = home_url( '/template-comments/comment-page-2/amp/?queryParam=hello' );
+		$input_url       = home_url( "/template-comments/comment-page-2/{$amp_slug}/comment-page-2/?queryParam=hello" );
+		$expected_result = home_url( "/template-comments/comment-page-2/{$amp_slug}/?queryParam=hello" );
 		$output_url      = $this->instance->maybe_update_paired_url( $input_url );
 
 		$this->assertEquals( $expected_result, $output_url );
