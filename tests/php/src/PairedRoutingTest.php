@@ -63,6 +63,8 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
 
+		$this->assertEquals( 10, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_update_paired_url' ] ) );
+
 		$this->assertEquals( 10, has_action( PairedRouting::ACTION_UPDATE_LATE_DEFINED_SLUG_OPTION, [ $this->instance, 'update_late_defined_slug_option' ] ) );
 		$this->assertEquals( 10, has_action( 'after_setup_theme', [ $this->instance, 'check_stale_late_defined_slug_option' ] ) );
 
@@ -1233,5 +1235,24 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 			$date_archive_url,
 			$redirected_url
 		);
+	}
+
+	/** @covers ::maybe_update_paired_url */
+	public function test_maybe_update_paired_url() {
+
+		// Mock the value of paired URL structure.
+		$old_value = AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_LEGACY_READER );
+
+		// Perform test.
+		$input_url       = home_url( '/template-comments/comment-page-2/amp/comment-page-2/?queryParam=hello' );
+		$expected_result = home_url( '/template-comments/comment-page-2/amp/?queryParam=hello' );
+		$output_url      = $this->instance->maybe_update_paired_url( $input_url );
+
+		$this->assertEquals( $expected_result, $output_url );
+
+
+		// Reset the value of paired URL structure.
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $old_value );
 	}
 }
