@@ -488,8 +488,9 @@ final class PairedRouting implements Service, Registerable {
 
 		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
 		add_action( 'wp', [ $this, 'add_paired_request_hooks' ] );
-
 		add_action( 'admin_notices', [ $this, 'add_permalink_settings_notice' ] );
+
+		add_filter( 'redirect_canonical', [ $this, 'maybe_update_paired_url' ] );
 	}
 
 	/**
@@ -770,6 +771,35 @@ final class PairedRouting implements Service, Registerable {
 			</p>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Update canonical URL for legacy reader paired urls.
+	 *
+	 * @param string $redirect_url Canonical redirect URL.
+	 *
+	 * @return string Updated canonical URL.
+	 */
+	public function maybe_update_paired_url( $redirect_url ) {
+
+		global $wp_rewrite;
+
+		/**
+		 * To address issue AMP version of a comment page.
+		 * Reference: https://github.com/ampproject/amp-wp/issues/6355
+		 */
+		if ( ! empty( $redirect_url ) &&
+		     ! empty( $wp_rewrite->comments_pagination_base ) &&
+		     AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) === Option::PAIRED_URL_STRUCTURE_LEGACY_READER
+		) {
+
+			// Reference: https://regex101.com/r/544758/1/
+			$regex        = "#/({$wp_rewrite->comments_pagination_base}-[0-9]+?)/amp/\\1(/+)?($|\?)#";
+			$redirect_url = preg_replace( $regex, '/\\1/amp\\2\\3', $redirect_url );
+
+		}
+
+		return $redirect_url;
 	}
 
 	/**
