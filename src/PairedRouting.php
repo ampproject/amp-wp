@@ -787,11 +787,11 @@ final class PairedRouting implements Service, Registerable {
 			! empty( $wp_rewrite->comments_pagination_base ) &&
 			AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) === Option::PAIRED_URL_STRUCTURE_LEGACY_READER
 		) {
-
-			$regex = sprintf(
+			$amp_slug = amp_get_slug();
+			$regex    = sprintf(
 				":/(%s-[0-9]+?)/%s/\\1(/+)?($|\?|\#):",
 				preg_quote( $wp_rewrite->comments_pagination_base, ':' ),
-				preg_quote( amp_get_slug(), ':' )
+				preg_quote( $amp_slug, ':' )
 			);
 
 			$redirect_url = preg_replace( $regex, "/\\1/{$amp_slug}\\2\\3", $redirect_url );
