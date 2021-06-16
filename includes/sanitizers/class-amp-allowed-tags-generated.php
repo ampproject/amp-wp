@@ -15509,7 +15509,7 @@ class AMP_Allowed_Tags_Generated {
 					'extension_spec' => array(
 						'latest' => '0.1',
 						'name' => 'amp-cache-url',
-						'requires_usage' => true,
+						'requires_usage' => false,
 						'version' => array(
 							'0.1',
 						),
