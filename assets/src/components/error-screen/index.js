@@ -45,7 +45,9 @@ export function ErrorScreen( { error, finishLinkLabel, finishLinkUrl, title } ) 
 						<summary>
 							{ __( 'Details', 'amp' ) }
 						</summary>
-						<pre dangerouslySetInnerHTML={ { __html: error.stack } } />
+						<pre>
+							{ error.stack }
+						</pre>
 						<ClipboardButton
 							isSmall={ true }
 							isSecondary={ true }
