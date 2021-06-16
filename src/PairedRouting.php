@@ -799,7 +799,6 @@ final class PairedRouting implements Service, Registerable {
 			);
 
 			$redirect_url = preg_replace( $regex, "/\\1/{$amp_slug}\\2\\3", $redirect_url );
-
 		}
 
 		return $redirect_url;
