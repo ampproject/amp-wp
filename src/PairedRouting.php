@@ -783,10 +783,6 @@ final class PairedRouting implements Service, Registerable {
 
 		global $wp_rewrite;
 
-		/**
-		 * To address issue AMP version of a comment page.
-		 * Reference: https://github.com/ampproject/amp-wp/issues/6355
-		 */
 		if ( ! empty( $redirect_url ) &&
 			! empty( $wp_rewrite->comments_pagination_base ) &&
 			AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) === Option::PAIRED_URL_STRUCTURE_LEGACY_READER
