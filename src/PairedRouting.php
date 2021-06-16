@@ -489,8 +489,6 @@ final class PairedRouting implements Service, Registerable {
 		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
 		add_action( 'wp', [ $this, 'add_paired_request_hooks' ] );
 		add_action( 'admin_notices', [ $this, 'add_permalink_settings_notice' ] );
-
-		add_filter( 'redirect_canonical', [ $this, 'maybe_update_paired_url' ] );
 	}
 
 	/**
@@ -685,6 +683,7 @@ final class PairedRouting implements Service, Registerable {
 			if ( $this->is_using_path_suffix() ) {
 				// Filter priority of 0 to purge /amp/ before other filters manipulate it.
 				add_filter( 'get_pagenum_link', [ $this, 'filter_get_pagenum_link' ], 0 );
+				add_filter( 'redirect_canonical', [ $this, 'maybe_update_paired_url' ] );
 			}
 		} else {
 			add_action( 'wp_head', 'amp_add_amphtml_link' );
@@ -794,12 +793,17 @@ final class PairedRouting implements Service, Registerable {
 		) {
 
 			$amp_slug = amp_get_slug();
-			$amp_slug = ( ! empty( $amp_slug ) ) ? preg_quote( $amp_slug, '\\' ) : 'amp';
+			$amp_slug = ( ! empty( $amp_slug ) ) ? $amp_slug : 'amp';
 
 			/**
 			 * Reference: https://regex101.com/r/544758/1/
 			 */
-			$regex        = "#/({$wp_rewrite->comments_pagination_base}-[0-9]+?)/{$amp_slug}/\\1(/+)?($|\?)#";
+			$regex = sprintf(
+				":/(%s-[0-9]+?)/%s/\\1(/+)?($|\?|\#):",
+				preg_quote( $wp_rewrite->comments_pagination_base, ':' ),
+				preg_quote( $amp_slug, ':' )
+			);
+
 			$redirect_url = preg_replace( $regex, "/\\1/{$amp_slug}\\2\\3", $redirect_url );
 
 		}

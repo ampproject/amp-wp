@@ -496,8 +496,6 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_action( 'parse_query', [ $this->instance, 'correct_query_when_is_front_page' ] ) );
 		$this->assertEquals( 10, has_action( 'wp', [ $this->instance, 'add_paired_request_hooks' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ $this->instance, 'add_permalink_settings_notice' ] ) );
-
-		$this->assertEquals( 10, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_update_paired_url' ] ) );
 	}
 
 	/** @covers ::initialize_paired_request() */
@@ -617,8 +615,10 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 1000, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
 		if ( $using_path_suffix ) {
 			$this->assertEquals( 0, has_filter( 'get_pagenum_link', [ $this->instance, 'filter_get_pagenum_link' ] ) );
+			$this->assertEquals( 10, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_update_paired_url' ] ) );
 		} else {
 			$this->assertFalse( has_filter( 'get_pagenum_link', [ $this->instance, 'filter_get_pagenum_link' ] ) );
+			$this->assertFalse( has_filter( 'redirect_canonical', [ $this->instance, 'maybe_update_paired_url' ] ) );
 		}
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 	}
