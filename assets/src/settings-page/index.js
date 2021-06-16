@@ -45,6 +45,8 @@ import { PairedUrlStructure } from './paired-url-structure';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
+let errorHandler;
+
 /**
  * Context providers for the settings page.
  *
@@ -52,6 +54,8 @@ const { ajaxurl: wpAjaxUrl } = global;
  * @param {any} props.children Context consumers.
  */
 function Providers( { children } ) {
+	global.removeEventListener( 'error', errorHandler );
+
 	return (
 		<ErrorContextProvider>
 			<ErrorBoundary>
@@ -221,10 +225,10 @@ domReady( () => {
 		return;
 	}
 
-	const errorHandler = ( error ) => {
+	errorHandler = ( event ) => {
 		// Handle only own errors.
-		if ( error?.filename?.match( /amp-settings(\.min)?\.js/ ) ) {
-			render( <ErrorScreen error={ error } />, root );
+		if ( /amp-settings(\.min)?\.js/.test( event?.filename ) ) {
+			render( <ErrorScreen error={ event.error } />, root );
 		}
 	};
 
@@ -235,6 +239,5 @@ domReady( () => {
 			<Root appRoot={ root } />
 		</Providers>,
 		root,
-		() => global.removeEventListener( 'error', errorHandler ),
 	);
 } );

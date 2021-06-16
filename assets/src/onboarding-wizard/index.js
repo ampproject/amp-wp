@@ -42,6 +42,8 @@ import { TemplateModeOverrideContextProvider } from './components/template-mode-
 
 const { ajaxurl: wpAjaxUrl } = global;
 
+let errorHandler;
+
 /**
  * Context providers for the application.
  *
@@ -49,6 +51,8 @@ const { ajaxurl: wpAjaxUrl } = global;
  * @param {any} props.children Component children.
  */
 export function Providers( { children } ) {
+	global.removeEventListener( 'error', errorHandler );
+
 	return (
 		<ErrorContextProvider>
 			<ErrorBoundary
@@ -99,10 +103,10 @@ domReady( () => {
 		return;
 	}
 
-	const errorHandler = ( error ) => {
+	errorHandler = ( event ) => {
 		// Handle only own errors.
-		if ( error?.filename?.match( /amp-onboarding-wizard(\.min)?\.js/ ) ) {
-			render( <ErrorScreen error={ error } />, root );
+		if ( /amp-onboarding-wizard(\.min)?\.js/.test( event?.filename ) ) {
+			render( <ErrorScreen error={ event.error } />, root );
 		}
 	};
 
@@ -113,6 +117,5 @@ domReady( () => {
 			<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } appRoot={ root } />
 		</Providers>,
 		root,
-		() => global.removeEventListener( 'error', errorHandler ),
 	);
 } );
