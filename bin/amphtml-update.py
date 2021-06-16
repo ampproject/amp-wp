@@ -434,6 +434,10 @@ def ParseRules(repo_directory, out_dir):
 		if not validator_versions.issubset( bundle_versions ):
 			logging.info( 'Validator versions are not a subset of bundle versions: ' + extension_name )
 
+		if 'bento' in extension_versions[extension_name] and extension_versions[extension_name]['bento']['version'] not in validator_versions:
+			logging.info( 'Skipping bento for ' + extension_name + ' since version ' + extension_versions[extension_name]['bento']['version'] + ' is not yet valid' )
+			del extension_versions[extension_name]['bento']
+
 		validator_versions = sorted( validator_versions, key=lambda version: map(int, version.split('.') ) )
 		extension_script_list[0]['tag_spec']['extension_spec']['version'] = validator_versions
 
