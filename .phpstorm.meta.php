@@ -52,6 +52,7 @@ namespace PHPSTORM_META {
 			'background_task_deactivator'        => \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator::class,
 			'paired_routing'                     => \AmpProject\AmpWP\PairedRouting::class,
 			'paired_url'                         => \AmpProject\AmpWP\PairedUrl::class,
+			'support'                            => \AmpProject\AmpWP\Support\SupportService::class,
 		] )
 	);
 
