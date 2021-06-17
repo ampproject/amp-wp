@@ -155,14 +155,3 @@ function amp_bootstrap_admin() {
 	$post_meta_box = new AMP_Post_Meta_Box();
 	$post_meta_box->init();
 }
-
-/**
- * Bootstraps AMP admin support class.
- *
- * @since 2.1
- * @internal
- */
-function amp_bootstrap_support() {
-	$admin_support = new AMP_Admin_Support();
-	$admin_support->init();
-}
