@@ -615,10 +615,10 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 1000, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
 		if ( $using_path_suffix ) {
 			$this->assertEquals( 0, has_filter( 'get_pagenum_link', [ $this->instance, 'filter_get_pagenum_link' ] ) );
-			$this->assertEquals( 10, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_update_paired_url' ] ) );
+			$this->assertEquals( 10, has_filter( 'redirect_canonical', [ $this->instance, 'filter_redirect_canonical_to_fix_cpage_requests' ] ) );
 		} else {
 			$this->assertFalse( has_filter( 'get_pagenum_link', [ $this->instance, 'filter_get_pagenum_link' ] ) );
-			$this->assertFalse( has_filter( 'redirect_canonical', [ $this->instance, 'maybe_update_paired_url' ] ) );
+			$this->assertFalse( has_filter( 'redirect_canonical', [ $this->instance, 'filter_redirect_canonical_to_fix_cpage_requests' ] ) );
 		}
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 	}
@@ -1237,8 +1237,8 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		);
 	}
 
-	/** @covers ::maybe_update_paired_url */
-	public function test_maybe_update_paired_url() {
+	/** @covers ::filter_redirect_canonical_to_fix_cpage_requests() */
+	public function test_filter_redirect_canonical_to_fix_cpage_requests() {
 
 		// Mock the value of paired URL structure.
 		$old_value = AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
@@ -1249,7 +1249,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		// Perform test.
 		$input_url       = home_url( "/template-comments/comment-page-2/{$amp_slug}/comment-page-2/?queryParam=hello" );
 		$expected_result = home_url( "/template-comments/comment-page-2/{$amp_slug}/?queryParam=hello" );
-		$output_url      = $this->instance->maybe_update_paired_url( $input_url );
+		$output_url      = $this->instance->filter_redirect_canonical_to_fix_cpage_requests( $input_url );
 
 		$this->assertEquals( $expected_result, $output_url );
 

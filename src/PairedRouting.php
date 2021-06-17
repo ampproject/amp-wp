@@ -683,7 +683,7 @@ final class PairedRouting implements Service, Registerable {
 			if ( $this->is_using_path_suffix() ) {
 				// Filter priority of 0 to purge /amp/ before other filters manipulate it.
 				add_filter( 'get_pagenum_link', [ $this, 'filter_get_pagenum_link' ], 0 );
-				add_filter( 'redirect_canonical', [ $this, 'maybe_update_paired_url' ] );
+				add_filter( 'redirect_canonical', [ $this, 'filter_redirect_canonical_to_fix_cpage_requests' ] );
 			}
 		} else {
 			add_action( 'wp_head', 'amp_add_amphtml_link' );
@@ -773,12 +773,12 @@ final class PairedRouting implements Service, Registerable {
 	}
 
 	/**
-	 * Update canonical URL for legacy reader paired urls.
+	 * Fix up canonical redirect URLs to put the comments pagination base in the right place.
 	 *
 	 * @param string $redirect_url Canonical redirect URL.
 	 * @return string Updated canonical URL.
 	 */
-	public function maybe_update_paired_url( $redirect_url ) {
+	public function filter_redirect_canonical_to_fix_cpage_requests( $redirect_url ) {
 
 		global $wp_rewrite;
 
