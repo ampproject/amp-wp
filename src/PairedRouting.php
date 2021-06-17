@@ -776,16 +776,18 @@ final class PairedRouting implements Service, Registerable {
 	 * Update canonical URL for legacy reader paired urls.
 	 *
 	 * @param string $redirect_url Canonical redirect URL.
-	 *
 	 * @return string Updated canonical URL.
 	 */
 	public function maybe_update_paired_url( $redirect_url ) {
 
 		global $wp_rewrite;
 
-		if ( ! empty( $redirect_url ) &&
-			! empty( $wp_rewrite->comments_pagination_base ) &&
-			AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) === Option::PAIRED_URL_STRUCTURE_LEGACY_READER
+		if (
+			! empty( $redirect_url )
+			&&
+			get_query_var( 'cpage' )
+			&&
+			! empty( $wp_rewrite->comments_pagination_base )
 		) {
 			$amp_slug = amp_get_slug();
 			$regex    = sprintf(
