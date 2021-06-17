@@ -276,7 +276,7 @@ jobs:
     needs: pre-run
     # Only run if the PR was not authored by Dependabot and it is not a draft or not from a fork.
     if: >
-      needs.pre-run.outputs.changed-file-count > 0
+      needs.pre-run.outputs.changed-file-count > 0 &&
       github.event.pull_request.draft == false &&
       github.event.pull_request.head.repo.fork == false &&
       github.event.pull_request.user.login != 'dependabot[bot]'
