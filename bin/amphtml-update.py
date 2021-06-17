@@ -412,7 +412,7 @@ def ParseRules(repo_directory, out_dir):
 		if extension_versions[ extension['name'] ]['latest'] is not None and extension_versions[ extension['name'] ]['latest'] != extension['latestVersion']:
 			logging.info('Warning: latestVersion mismatch for ' + extension['name'])
 		extension_versions[ extension['name'] ]['latest'] = extension['latestVersion']
-		if 'options' in extension and 'npm' in extension['options'] and extension['options']['npm'] == True:
+		if 'options' in extension and 'wrapper' in extension['options'] and extension['options']['wrapper'] == 'bento':
 			extension_versions[ extension['name'] ]['bento'] = {
 				'version': extension['version'],
 				'has_css': extension['options'].get( 'hasCss', False ),
@@ -434,10 +434,14 @@ def ParseRules(repo_directory, out_dir):
 		if not validator_versions.issubset( bundle_versions ):
 			logging.info( 'Validator versions are not a subset of bundle versions: ' + extension_name )
 
+		if 'bento' in extension_versions[extension_name] and extension_versions[extension_name]['bento']['version'] not in validator_versions:
+			logging.info( 'Skipping bento for ' + extension_name + ' since version ' + extension_versions[extension_name]['bento']['version'] + ' is not yet valid' )
+			del extension_versions[extension_name]['bento']
+
 		validator_versions = sorted( validator_versions, key=lambda version: map(int, version.split('.') ) )
 		extension_script_list[0]['tag_spec']['extension_spec']['version'] = validator_versions
 
-		if 'bento' in extension_versions[extension_name]:
+		if 'bento' in extension_versions[extension_name] and extension_versions[extension_name]['bento']['version'] in validator_versions:
 			extension_script_list[0]['tag_spec']['extension_spec']['bento'] = extension_versions[extension_name]['bento']
 
 		extension_script_list[0]['tag_spec']['extension_spec']['latest'] = extension_versions[extension_name]['latest']
