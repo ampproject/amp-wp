@@ -27,6 +27,7 @@ import './style.css';
  */
 export function ErrorScreen( { error, finishLinkLabel, finishLinkUrl, title } ) {
 	const [ hasCopied, setHasCopied ] = useState( false );
+	const { message, stack } = error;
 
 	return (
 		<div className="error-screen-container">
@@ -37,21 +38,21 @@ export function ErrorScreen( { error, finishLinkLabel, finishLinkUrl, title } ) 
 
 				{ /* dangerouslySetInnerHTML reason: WordPress sometimes sends back HTML in error messages. */ }
 				<p dangerouslySetInnerHTML={ {
-					__html: error.message || __( 'There was an error loading the page.', 'amp' ),
+					__html: message || __( 'There was an error loading the page.', 'amp' ),
 				} } />
 
-				{ error?.stack && (
+				{ stack && (
 					<details>
 						<summary>
 							{ __( 'Details', 'amp' ) }
 						</summary>
 						<pre>
-							{ error.stack }
+							{ stack }
 						</pre>
 						<ClipboardButton
 							isSmall={ true }
 							isSecondary={ true }
-							text={ error.stack }
+							text={ JSON.stringify( { message, stack }, null, 2 ) }
 							onCopy={ () => setHasCopied( true ) }
 							onFinishCopy={ () => setHasCopied( false ) }
 						>
