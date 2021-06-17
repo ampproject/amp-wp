@@ -794,7 +794,7 @@ final class PairedRouting implements Service, Registerable {
 		) {
 			$amp_slug = amp_get_slug();
 			$regex    = sprintf(
-				":/(%s-[0-9]+?)/%s/\\1(/+)?($|\?|\#):",
+				":/(%s-[0-9]+)/%s/\\1(/*)($|\?|\#):",
 				preg_quote( $wp_rewrite->comments_pagination_base, ':' ),
 				preg_quote( $amp_slug, ':' )
 			);

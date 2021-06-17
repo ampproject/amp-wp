@@ -1237,26 +1237,68 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		);
 	}
 
-	/** @covers ::filter_redirect_canonical_to_fix_cpage_requests() */
-	public function test_filter_redirect_canonical_to_fix_cpage_requests() {
+	/** @return array */
+	public function get_data_to_test_filter_redirect_canonical_to_fix_cpage_requests() {
+		return [
+			'trailing_slashed'                            => [
+				'/comment-page-2/%s/comment-page-2/',
+				'/comment-page-2/%s/',
+			],
+			'untrailing_slashed'                          => [
+				'/comment-page-2/%s/comment-page-2',
+				'/comment-page-2/%s',
+			],
+			'trailing_slashed_with_query_param'           => [
+				'/comment-page-2/%s/comment-page-2/?queryParam=hello',
+				'/comment-page-2/%s/?queryParam=hello',
+			],
+			'untrailing_slashed_with_query_param'         => [
+				'/comment-page-2/%s/comment-page-2?queryParam=hello',
+				'/comment-page-2/%s?queryParam=hello',
+			],
+			'trailing_slashed_with_fragment_identifier'   => [
+				'/comment-page-2/%s/comment-page-2/#footer',
+				'/comment-page-2/%s/#footer',
+			],
+			'untrailing_slashed_with_fragment_identifier' => [
+				'/comment-page-2/%s/comment-page-2#footer',
+				'/comment-page-2/%s#footer',
+			],
+		];
+	}
 
-		// Mock the value of paired URL structure.
-		$old_value = AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
-		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_LEGACY_READER );
+	/**
+	 * @dataProvider get_data_to_test_filter_redirect_canonical_to_fix_cpage_requests
+	 *
+	 * @param string $input  Input.
+	 * @param string $output Output.
+	 *
+	 * @covers ::filter_redirect_canonical_to_fix_cpage_requests()
+	 */
+	public function test_filter_redirect_canonical_to_fix_cpage_requests( $input, $output ) {
+		$post = self::factory()->post->create();
+		self::factory()->comment->create_many( 10, [ 'comment_post_ID' => $post ] );
+		update_option( 'page_comments', 1 );
+		update_option( 'comments_per_page', 5 );
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
 
-		$amp_slug = amp_get_slug();
+		$permalink = get_permalink( $post );
+		$amp_slug  = amp_get_slug();
+		foreach (
+			[ Option::PAIRED_URL_STRUCTURE_LEGACY_READER, Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX ]
+			as
+			$paired_url_structure
+		) {
+			AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $paired_url_structure );
 
-		// Perform test.
-		$input_url       = home_url( "/template-comments/comment-page-2/{$amp_slug}/comment-page-2/?queryParam=hello" );
-		$expected_result = home_url( "/template-comments/comment-page-2/{$amp_slug}/?queryParam=hello" );
+			$input_url       = untrailingslashit( $permalink ) . sprintf( $input, $amp_slug );
+			$expected_result = untrailingslashit( $permalink ) . sprintf( $output, $amp_slug );
 
-		$this->go_to( $input_url );
+			$this->go_to( $input_url );
 
-		$output_url = $this->instance->filter_redirect_canonical_to_fix_cpage_requests( $input_url );
+			$output_url = $this->instance->filter_redirect_canonical_to_fix_cpage_requests( $input_url );
 
-		$this->assertEquals( $expected_result, $output_url );
-
-		// Reset the value of paired URL structure.
-		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $old_value );
+			$this->assertEquals( $expected_result, $output_url, "Failed for $paired_url_structure" );
+		}
 	}
 }
