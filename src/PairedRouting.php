@@ -683,7 +683,7 @@ final class PairedRouting implements Service, Registerable {
 			if ( $this->is_using_path_suffix() ) {
 				// Filter priority of 0 to purge /amp/ before other filters manipulate it.
 				add_filter( 'get_pagenum_link', [ $this, 'filter_get_pagenum_link' ], 0 );
-				add_filter( 'redirect_canonical', [ $this, 'filter_redirect_canonical_to_fix_cpage_requests' ] );
+				add_filter( 'redirect_canonical', [ $this, 'filter_redirect_canonical_to_fix_cpage_requests' ], 0 );
 			}
 		} else {
 			add_action( 'wp_head', 'amp_add_amphtml_link' );

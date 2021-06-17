@@ -615,7 +615,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 1000, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
 		if ( $using_path_suffix ) {
 			$this->assertEquals( 0, has_filter( 'get_pagenum_link', [ $this->instance, 'filter_get_pagenum_link' ] ) );
-			$this->assertEquals( 10, has_filter( 'redirect_canonical', [ $this->instance, 'filter_redirect_canonical_to_fix_cpage_requests' ] ) );
+			$this->assertEquals( 0, has_filter( 'redirect_canonical', [ $this->instance, 'filter_redirect_canonical_to_fix_cpage_requests' ] ) );
 		} else {
 			$this->assertFalse( has_filter( 'get_pagenum_link', [ $this->instance, 'filter_get_pagenum_link' ] ) );
 			$this->assertFalse( has_filter( 'redirect_canonical', [ $this->instance, 'filter_redirect_canonical_to_fix_cpage_requests' ] ) );
