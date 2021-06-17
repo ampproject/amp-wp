@@ -706,6 +706,7 @@ final class PairedRouting implements Service, Registerable {
 	 *
 	 * @param string $link Pagenum link.
 	 * @return string Fixed pagenum link.
+	 * @global WP_Rewrite $wp_rewrite
 	 */
 	public function filter_get_pagenum_link( $link ) {
 		global $wp_rewrite;
@@ -777,15 +778,17 @@ final class PairedRouting implements Service, Registerable {
 	 *
 	 * @param string $redirect_url Canonical redirect URL.
 	 * @return string Updated canonical URL.
+	 * @global WP_Rewrite $wp_rewrite
 	 */
 	public function filter_redirect_canonical_to_fix_cpage_requests( $redirect_url ) {
-
 		global $wp_rewrite;
 
 		if (
 			! empty( $redirect_url )
 			&&
 			get_query_var( 'cpage' )
+			&&
+			$wp_rewrite instanceof WP_Rewrite
 			&&
 			! empty( $wp_rewrite->comments_pagination_base )
 		) {
