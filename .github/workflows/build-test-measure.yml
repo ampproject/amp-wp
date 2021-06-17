@@ -17,7 +17,7 @@ jobs:
     outputs:
       changed-file-count: ${{ steps.determine-file-count.outputs.count }}
     steps:
-      - name: Checkout last 2 commits
+      - name: Checkout including last 2 commits
         # Fetch last 2 commits if it's not a PR, so that we can determine the list of modified files.
         if: ${{ github.base_ref == null }}
         uses: actions/checkout@v2
