@@ -15509,7 +15509,7 @@ class AMP_Allowed_Tags_Generated {
 					'extension_spec' => array(
 						'latest' => '0.1',
 						'name' => 'amp-cache-url',
-						'requires_usage' => true,
+						'requires_usage' => false,
 						'version' => array(
 							'0.1',
 						),
@@ -17656,6 +17656,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'bento' => array(
+							'has_css' => false,
+							'version' => '1.0',
+						),
 						'latest' => '1.0',
 						'name' => 'amp-render',
 						'requires_usage' => true,
