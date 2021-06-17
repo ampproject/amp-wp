@@ -21,13 +21,9 @@ exports[`ErrorScreen matches snapshot 1`] = `
       <summary>
         Details
       </summary>
-      <pre
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "ReferenceError: foo is not defined",
-          }
-        }
-      />
+      <pre>
+        ReferenceError: foo is not defined
+      </pre>
       <button
         aria-describedby={null}
         className="components-button components-clipboard-button is-secondary is-small"
