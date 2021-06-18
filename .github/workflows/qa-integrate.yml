@@ -56,9 +56,9 @@ jobs:
           echo -e "Modified files:\n$MODIFIED_FILES\n"
 
           FILE_COUNT=$(php -f ../bin/determine-modified-files-count.php "$IGNORE_PATH_REGEX" "$MODIFIED_FILES")
-          PHP_FILE_COUNT=$(php -f ../bin/determine-modified-files-count.php "qa-tester\/.+\.php" "$MODIFIED_FILES")
+          PHP_FILE_COUNT=$(php -f ../bin/determine-modified-files-count.php "qa-tester\/(.+\.php|composer\.(json|lock))" "$MODIFIED_FILES")
           CSS_FILE_COUNT=$(php -f ../bin/determine-modified-files-count.php "qa-tester\/.+\.s?css" "$MODIFIED_FILES")
-          JS_FILE_COUNT=$(php -f ../bin/determine-modified-files-count.php "qa-tester\/.+\.(js|snap)" "$MODIFIED_FILES")
+          JS_FILE_COUNT=$(php -f ../bin/determine-modified-files-count.php "qa-tester\/(.+\.(js|snap)|package\.(json|lock))" "$MODIFIED_FILES")
 
           echo "Changed file count: $FILE_COUNT"
           echo "Changed PHP file count: $PHP_FILE_COUNT"
