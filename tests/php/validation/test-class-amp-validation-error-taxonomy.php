@@ -1031,8 +1031,8 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			'Error Index',
 		];
 		if ( Services::get( 'dependency_support' )->has_support() ) {
-			$expected_submenu[0] .= ' <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>';
-			$expected_submenu[3] .= ' <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>';
+			$expected_submenu[0] .= ' <span class="awaiting-mod"><span id="new-error-index-count" class="amp-count-loading"></span></span>';
+			$expected_submenu[3] .= ' <span class="awaiting-mod"><span id="new-error-index-count" class="amp-count-loading"></span></span>';
 		}
 		$amp_options = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );
