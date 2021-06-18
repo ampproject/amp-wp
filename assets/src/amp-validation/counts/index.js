@@ -22,7 +22,7 @@ function updateMenuItem( itemEl, count ) {
 	if ( isNaN( count ) || count === 0 ) {
 		itemEl.parentNode.parentNode.removeChild( itemEl.parentNode );
 	} else {
-		itemEl.classList.remove( 'loading' );
+		itemEl.classList.remove( 'amp-count-loading' );
 		itemEl.textContent = count.toLocaleString();
 	}
 }

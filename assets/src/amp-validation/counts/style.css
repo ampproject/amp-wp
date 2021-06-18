@@ -9,7 +9,7 @@
 	}
 }
 
-#toplevel_page_amp-options > ul > li span.loading {
+#toplevel_page_amp-options .amp-count-loading {
 	animation-duration: 0.75s;
 	animation-iteration-count: infinite;
 	animation-name: rotate-forever;
