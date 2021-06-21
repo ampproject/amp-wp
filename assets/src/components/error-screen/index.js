@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Panel } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 
@@ -39,6 +39,15 @@ export function ErrorScreen( { error, finishLinkLabel, finishLinkUrl, title } ) 
 				{ /* dangerouslySetInnerHTML reason: WordPress sometimes sends back HTML in error messages. */ }
 				<p dangerouslySetInnerHTML={ {
 					__html: message || __( 'There was an error loading the page.', 'amp' ),
+				} } />
+
+				{ /* dangerouslySetInnerHTML reason: The message contains a link to the AMP support forum. */ }
+				<p dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						// translators: %s is the AMP support forum URL.
+						__( 'Please submit details to our <a href="%s" target="_blank" rel="noreferrer noopener">support forum</a>.', 'amp' ),
+						__( 'https://wordpress.org/support/plugin/amp/', 'amp' ),
+					),
 				} } />
 
 				{ stack && (
