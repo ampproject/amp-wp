@@ -227,7 +227,7 @@ domReady( () => {
 
 	errorHandler = ( event ) => {
 		// Handle only own errors.
-		if ( /amp-settings(\.min)?\.js/.test( event?.filename ) ) {
+		if ( event.filename && /amp-settings(\.min)?\.js/.test( event.filename ) ) {
 			render( <ErrorScreen error={ event.error } />, root );
 		}
 	};

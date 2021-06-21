@@ -105,7 +105,7 @@ domReady( () => {
 
 	errorHandler = ( event ) => {
 		// Handle only own errors.
-		if ( /amp-onboarding-wizard(\.min)?\.js/.test( event?.filename ) ) {
+		if ( event.filename && /amp-onboarding-wizard(\.min)?\.js/.test( event.filename ) ) {
 			render( <ErrorScreen error={ event.error } />, root );
 		}
 	};
