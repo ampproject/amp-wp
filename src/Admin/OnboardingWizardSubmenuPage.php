@@ -133,7 +133,8 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		// <head> tag was opened prior to this action and hasn't been closed.
 		?>
 		</head>
-		<body>
+		<body class="no-js">
+			<script>document.body.className = document.body.className.replace('no-js','js');</script>
 			<?php // The admin footer template closes three divs. ?>
 			<div>
 			<div>
