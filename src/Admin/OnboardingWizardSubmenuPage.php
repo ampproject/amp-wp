@@ -62,16 +62,25 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	private $rest_preloader;
 
 	/**
+	 * RESTPreloader instance.
+	 *
+	 * @var LoadingError
+	 */
+	private $loading_error;
+
+	/**
 	 * OnboardingWizardSubmenuPage constructor.
 	 *
-	 * @param GoogleFonts   $google_fonts  An instance of the GoogleFonts service.
-	 * @param ReaderThemes  $reader_themes An instance of the ReaderThemes class.
+	 * @param GoogleFonts   $google_fonts   An instance of the GoogleFonts service.
+	 * @param ReaderThemes  $reader_themes  An instance of the ReaderThemes class.
 	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
+	 * @param LoadingError  $loading_error  An instance of the LoadingError class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader ) {
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, LoadingError $loading_error ) {
 		$this->google_fonts   = $google_fonts;
 		$this->reader_themes  = $reader_themes;
 		$this->rest_preloader = $rest_preloader;
+		$this->loading_error  = $loading_error;
 	}
 
 	/**
@@ -140,7 +149,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			<div>
 			<div>
 			<div class="amp" id="<?php echo esc_attr( self::APP_ROOT_ID ); ?>">
-				<?php LoadingError::render(); ?>
+				<?php $this->loading_error->render(); ?>
 			</div>
 
 			<style>

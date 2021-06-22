@@ -7,6 +7,8 @@
 
 namespace AmpProject\AmpWP;
 
+use AmpProject\AmpWP\Infrastructure\Service;
+
 /**
  * Client-side app loading error markup and styles.
  *
@@ -14,15 +16,15 @@ namespace AmpProject\AmpWP;
  * @since 2.1.3
  * @internal
  */
-final class LoadingError {
+final class LoadingError implements Service {
 
 	/**
 	 * Render error message along with necessary styles.
 	 */
-	public static function render() {
+	public function render() {
 		?>
 		<div id="amp-pre-loading-spinner" class="amp-spinner-container">
-			<img src="<?php echo esc_url( admin_url( 'images/loading.gif' ) ); ?>" alt="Loading" width="16" height="16">
+			<img src="<?php echo esc_url( admin_url( 'images/loading.gif' ) ); ?>" alt="<?php esc_html_e( 'Loading', 'amp' ); ?>" width="16" height="16" decoding="async">
 		</div>
 
 		<div id="amp-loading-failure" class="error-screen-container">
