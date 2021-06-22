@@ -13,6 +13,7 @@ use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\LoadingError;
 
 /**
  * AMP setup wizard submenu page class.
@@ -137,7 +138,9 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			<div>
 			<div>
 			<div>
-			<div class="amp" id="<?php echo esc_attr( self::APP_ROOT_ID ); ?>"></div>
+			<div class="amp" id="<?php echo esc_attr( self::APP_ROOT_ID ); ?>">
+				<?php LoadingError::print(); ?>
+			</div>
 
 			<style>
 			#wpfooter { display:none; }

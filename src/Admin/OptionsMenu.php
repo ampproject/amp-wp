@@ -14,6 +14,7 @@ use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\LoadingError;
 
 /**
  * OptionsMenu class.
@@ -276,7 +277,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				<?php settings_errors(); ?>
 
 				<div class="amp amp-settings">
-					<div id="amp-settings-root"></div>
+					<div id="amp-settings-root">
+						<?php LoadingError::print(); ?>
+					</div>
 				</div>
 			</form>
 		</div>
