@@ -1,7 +1,7 @@
-* {
+.error-screen-container,
+.error-screen-container * {
 	box-sizing: border-box;
 }
-
 
 .error-screen-container {
 	margin: 3rem auto;
