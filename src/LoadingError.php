@@ -17,9 +17,9 @@ namespace AmpProject\AmpWP;
 final class LoadingError {
 
 	/**
-	 * Print error message along with necessary styles.
+	 * Render error message along with necessary styles.
 	 */
-	public static function print() {
+	public static function render() {
 		?>
 		<div id="amp-loading-failure" class="error-screen-container">
 			<div class="error-screen components-panel">

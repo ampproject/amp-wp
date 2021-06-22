@@ -278,7 +278,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 				<div class="amp amp-settings">
 					<div id="amp-settings-root">
-						<?php LoadingError::print(); ?>
+						<?php LoadingError::render(); ?>
 					</div>
 				</div>
 			</form>

@@ -139,7 +139,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			<div>
 			<div>
 			<div class="amp" id="<?php echo esc_attr( self::APP_ROOT_ID ); ?>">
-				<?php LoadingError::print(); ?>
+				<?php LoadingError::render(); ?>
 			</div>
 
 			<style>
