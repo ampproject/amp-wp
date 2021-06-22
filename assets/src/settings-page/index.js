@@ -59,11 +59,16 @@ function Providers( { children } ) {
 	return (
 		<ErrorContextProvider>
 			<ErrorBoundary>
-				<SiteSettingsProvider>
-					<OptionsContextProvider optionsRestPath={ OPTIONS_REST_PATH } populateDefaultValues={ true }>
+				<SiteSettingsProvider hasErrorBoundary={ true }>
+					<OptionsContextProvider
+						hasErrorBoundary={ true }
+						optionsRestPath={ OPTIONS_REST_PATH }
+						populateDefaultValues={ true }
+					>
 						<ReaderThemesContextProvider
 							currentTheme={ CURRENT_THEME }
 							readerThemesRestPath={ READER_THEMES_REST_PATH }
+							hasErrorBoundary={ true }
 							hideCurrentlyActiveTheme={ true }
 							updatesNonce={ UPDATES_NONCE }
 							wpAjaxUrl={ wpAjaxUrl }

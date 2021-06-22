@@ -13,6 +13,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { ErrorContext } from '../error-context-provider';
+import { useAsyncError } from '../../utils/use-async-error';
 
 export const SiteSettings = createContext();
 
@@ -21,12 +22,14 @@ export const SiteSettings = createContext();
  *
  * @param {Object} props Component props.
  * @param {any} props.children Component children.
+ * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
  */
-export function SiteSettingsProvider( { children } ) {
+export function SiteSettingsProvider( { children, hasErrorBoundary = false } ) {
 	const [ settings, setSettings ] = useState( {} );
 	const [ fetchingSiteSettings, setFetchingSiteSettings ] = useState( false );
 
 	const { error, setError } = useContext( ErrorContext );
+	const { setAsyncError } = useAsyncError();
 
 	useEffect( () => {
 		if ( error || Object.keys( settings ).length || fetchingSiteSettings ) {
@@ -50,6 +53,10 @@ export function SiteSettingsProvider( { children } ) {
 				}
 
 				setError( e );
+
+				if ( hasErrorBoundary ) {
+					setAsyncError( e );
+				}
 				return;
 			}
 
@@ -59,7 +66,7 @@ export function SiteSettingsProvider( { children } ) {
 		return () => {
 			unmounted = true;
 		};
-	}, [ error, settings, fetchingSiteSettings, setError ] );
+	}, [ error, settings, fetchingSiteSettings, setError, hasErrorBoundary, setAsyncError ] );
 
 	return (
 		<SiteSettings.Provider value={ { settings, fetchingSiteSettings } }>
@@ -70,4 +77,5 @@ export function SiteSettingsProvider( { children } ) {
 
 SiteSettingsProvider.propTypes = {
 	children: PropTypes.any,
+	hasErrorBoundary: PropTypes.bool,
 };
