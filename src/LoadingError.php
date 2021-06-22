@@ -37,7 +37,7 @@ final class LoadingError {
 					wp_kses(
 						sprintf(
 							/* translators: %s is the AMP support forum URL. */
-							__( 'Oops! Something went wrong. Please open your browser console to see the error messages and share them on the <a href="%s" target="_blank" rel="noreferrer noopener">support forum</a>.', 'amp' ),
+							__( 'Check your connection and open your browser console to see if there are any error messages. You may share them on the <a href="%s" target="_blank" rel="noreferrer noopener">support forum</a>.', 'amp' ),
 							esc_url( __( 'https://wordpress.org/support/plugin/amp/', 'amp' ) )
 						),
 						[
@@ -59,12 +59,12 @@ final class LoadingError {
 		<style>
 			#amp-loading-failure {
 				visibility: hidden;
-				animation: amp-wp-show-element 5s steps(1, end) 0s 1 normal both;
+				animation: amp-wp-show-element 30s steps(1, end) 0s 1 normal both;
 			}
 
 			#amp-pre-loading-spinner {
 				visibility: visible;
-				animation: amp-wp-hide-element 5s steps(1, end) 0s 1 normal both; /* This could probably reuse amp-wp-show-element if reversed. */
+				animation: amp-wp-hide-element 30s steps(1, end) 0s 1 normal both; /* This could probably reuse amp-wp-show-element if reversed. */
 			}
 
 			.amp-loading-failure-noscript {
