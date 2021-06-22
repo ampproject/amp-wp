@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 
 const TIMEOUT = 4000;
 
-// Adapted from @wordpress/components: <https://github.com/WordPress/gutenberg/blob/3c00d85/packages/components/src/clipboard-button/index.js#L18-L69>.
+// Adapted from @wordpress/components: <https://github.com/WordPress/gutenberg/blob/3c00d85b12ee45365e3ab329301a07312d99ffdf/packages/components/src/clipboard-button/index.js#L18-L69>.
 export default function ClipboardButton( {
 	children,
 	onCopy,
