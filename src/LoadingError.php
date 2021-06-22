@@ -24,7 +24,7 @@ final class LoadingError implements Service {
 	public function render() {
 		?>
 		<div id="amp-pre-loading-spinner" class="amp-spinner-container">
-			<img src="<?php echo esc_url( admin_url( 'images/loading.gif' ) ); ?>" alt="<?php esc_html_e( 'Loading', 'amp' ); ?>" width="16" height="16" decoding="async">
+			<img src="<?php echo esc_url( admin_url( 'images/loading.gif' ) ); ?>" alt="<?php esc_attr_e( 'Loading', 'amp' ); ?>" width="16" height="16" decoding="async">
 		</div>
 
 		<div id="amp-loading-failure" class="error-screen-container">
