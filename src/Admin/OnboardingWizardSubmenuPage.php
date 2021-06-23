@@ -62,7 +62,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	private $rest_preloader;
 
 	/**
-	 * RESTPreloader instance.
+	 * LoadingError instance.
 	 *
 	 * @var LoadingError
 	 */
