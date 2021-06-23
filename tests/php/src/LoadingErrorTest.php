@@ -27,7 +27,7 @@ class LoadingErrorTest extends DependencyInjectedTestCase {
 	/** @covers ::render() */
 	public function test_render() {
 		$output = get_echo( [ $this->instance, 'render' ] );
-		$this->assertStringContains( 'loading.gif', $output );
+		$this->assertStringContains( '<span class="amp-loading-spinner">', $output );
 		$this->assertStringContains( '<div id="amp-loading-failure"', $output );
 		$this->assertStringContains( '<p class="amp-loading-failure-script">', $output );
 		$this->assertStringContains( '<p class="amp-loading-failure-noscript">', $output );
