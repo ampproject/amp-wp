@@ -14,6 +14,7 @@ use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\LoadingError;
 
 /**
  * OptionsMenu class.
@@ -59,6 +60,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 */
 	private $rest_preloader;
 
+	/** @var LoadingError */
+	private $loading_error;
+
 	/** @var DependencySupport */
 	private $dependency_support;
 
@@ -88,12 +92,14 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @param ReaderThemes      $reader_themes An instance of the ReaderThemes class.
 	 * @param RESTPreloader     $rest_preloader An instance of the RESTPreloader class.
 	 * @param DependencySupport $dependency_support An instance of the DependencySupport class.
+	 * @param LoadingError      $loading_error An instance of the LoadingError class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support ) {
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support, LoadingError $loading_error ) {
 		$this->google_fonts       = $google_fonts;
 		$this->reader_themes      = $reader_themes;
 		$this->rest_preloader     = $rest_preloader;
 		$this->dependency_support = $dependency_support;
+		$this->loading_error      = $loading_error;
 	}
 
 	/**
@@ -276,7 +282,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				<?php settings_errors(); ?>
 
 				<div class="amp amp-settings">
-					<div id="amp-settings-root"></div>
+					<div id="amp-settings-root">
+						<?php $this->loading_error->render(); ?>
+					</div>
 				</div>
 			</form>
 		</div>

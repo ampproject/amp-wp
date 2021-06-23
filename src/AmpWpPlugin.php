@@ -112,6 +112,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'background_task_deactivator'        => BackgroundTaskDeactivator::class,
 		'paired_routing'                     => PairedRouting::class,
 		'paired_url'                         => PairedUrl::class,
+		'loading_error'                      => LoadingError::class,
 	];
 
 	/**
@@ -200,6 +201,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			ReaderThemeSupportFeatures::class,
 			BackgroundTask\BackgroundTaskDeactivator::class,
 			PairedRouting::class,
+			LoadingError::class,
 			Injector::class,
 		];
 	}

@@ -86,6 +86,10 @@
 	flex-wrap: wrap;
 }
 
+.amp .components-button.is-small {
+	font-size: 0.875rem;
+}
+
 
 .amp .components-toggle-control .components-base-control__field {
 	align-items: center;

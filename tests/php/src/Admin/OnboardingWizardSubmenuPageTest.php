@@ -102,7 +102,7 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 
 		$this->onboarding_wizard_submenu_page->render();
 
-		$this->assertStringContains( '<div class="amp" id="amp-onboarding-wizard"></div>', ob_get_clean() );
+		$this->assertStringContains( '<div class="amp" id="amp-onboarding-wizard">', ob_get_clean() );
 	}
 
 	/**

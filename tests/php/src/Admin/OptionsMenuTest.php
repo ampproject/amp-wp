@@ -15,6 +15,7 @@ use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\LoadingError;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
@@ -42,7 +43,7 @@ class OptionsMenuTest extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport() );
+		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError() );
 	}
 
 	/** @covers ::__construct() */

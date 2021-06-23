@@ -8,21 +8,43 @@ exports[`ErrorScreen matches snapshot 1`] = `
     className="error-screen components-panel"
   >
     <h1>
-      The setup wizard has experienced an error.
+      Something went wrong.
     </h1>
-    <p>
-      <span
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "The application failed",
-          }
+    <p
+      dangerouslySetInnerHTML={
+        Object {
+          "__html": "The application failed",
         }
-      />
-       
+      }
+    />
+    <p
+      dangerouslySetInnerHTML={
+        Object {
+          "__html": "Please submit details to our <a href=\\"https://wordpress.org/support/plugin/amp/\\" target=\\"_blank\\" rel=\\"noreferrer noopener\\">support forum</a>.",
+        }
+      }
+    />
+    <details>
+      <summary>
+        Details
+      </summary>
+      <pre>
+        ReferenceError: foo is not defined
+      </pre>
+      <button
+        aria-describedby={null}
+        className="components-button components-clipboard-button is-secondary is-small"
+        onCopy={[Function]}
+        type="button"
+      >
+        Copy Error
+      </button>
+    </details>
+    <p>
       <a
         href="http://my-exit-link.com"
       >
-        Return to AMP settings.
+        Go to homepage
       </a>
     </p>
   </div>
