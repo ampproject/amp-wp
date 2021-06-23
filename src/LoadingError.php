@@ -24,7 +24,11 @@ final class LoadingError implements Service {
 	public function render() {
 		?>
 		<div id="amp-pre-loading-spinner" class="amp-spinner-container">
-			<img src="<?php echo esc_url( admin_url( 'images/loading.gif' ) ); ?>" alt="<?php esc_attr_e( 'Loading', 'amp' ); ?>" width="16" height="16" decoding="async">
+			<span class="amp-loading-spinner">
+				<span class="screen-reader-text">
+					<?php esc_html_e( 'Loading', 'amp' ); ?>
+				</span>
+			</span>
 		</div>
 
 		<div id="amp-loading-failure" class="error-screen-container">
@@ -91,6 +95,15 @@ final class LoadingError implements Service {
 				}
 			}
 
+			@keyframes amp-loading-spinner {
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
 			body.no-js #amp-loading-failure {
 				animation: none;
 				visibility: visible;
@@ -103,6 +116,30 @@ final class LoadingError implements Service {
 			body.no-js #amp-pre-loading-spinner,
 			body.no-js .amp-loading-failure-script {
 				display: none;
+			}
+
+			.amp-spinner-container .amp-loading-spinner {
+				display: inline-block;
+				background-color: #949494;
+				width: 18px;
+				height: 18px;
+				opacity: 0.7;
+				margin: 5px 11px 0;
+				border-radius: 100%;
+				position: relative;
+			}
+
+			.amp-spinner-container .amp-loading-spinner::before {
+				content: '';
+				position: absolute;
+				background-color: #fff;
+				width: calc(18px / 4.5);
+				height: calc(18px / 4.5);
+				border-radius: 100%;
+				transform-origin: calc(18px / 3) calc(18px / 3);
+				top: calc((18px - 18px * (2 / 3)) / 2);
+				left: calc((18px - 18px * (2 / 3)) / 2);
+				animation: amp-loading-spinner 1s infinite linear;
 			}
 		</style>
 		<?php
