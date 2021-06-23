@@ -469,7 +469,7 @@ class AMP_Validated_URL_Post_Type {
 
 				if ( ValidationCounts::is_needed() ) {
 					// Append markup to display a loading spinner while the unreviewed count is being fetched.
-					$submenu_item[0] .= ' <span class="awaiting-mod"><span id="new-validation-url-count" class="amp-count-loading"></span></span>';
+					$submenu_item[0] .= ' <span id="new-validation-url-count" class="awaiting-mod"><span class="amp-count-loading"></span></span>';
 				}
 
 				break;

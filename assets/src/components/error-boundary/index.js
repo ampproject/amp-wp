@@ -21,8 +21,9 @@ import { ErrorScreen } from '../error-screen';
 export class ErrorBoundary extends Component {
 	static propTypes = {
 		children: PropTypes.any,
-		exitLink: PropTypes.string,
-		fullScreen: PropTypes.bool,
+		exitLinkLabel: PropTypes.string,
+		exitLinkUrl: PropTypes.string,
+		title: PropTypes.string,
 	}
 
 	constructor( props ) {
@@ -46,11 +47,16 @@ export class ErrorBoundary extends Component {
 
 	render() {
 		const { error } = this.state;
-		const { children, exitLink, fullScreen } = this.props;
+		const { children, exitLinkLabel, exitLinkUrl, title } = this.props;
 
-		if ( error && fullScreen ) {
+		if ( error ) {
 			return (
-				<ErrorScreen error={ error } finishLink={ exitLink } />
+				<ErrorScreen
+					error={ error }
+					finishLinkLabel={ exitLinkLabel }
+					finishLinkUrl={ exitLinkUrl }
+					title={ title }
+				/>
 			);
 		}
 

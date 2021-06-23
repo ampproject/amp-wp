@@ -162,7 +162,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 		AMP_Validated_URL_Post_Type::update_validated_url_menu_item();
 		if ( Services::get( 'dependency_support' )->has_support() ) {
-			$this->assertSame( 'Validated URLs <span class="awaiting-mod"><span id="new-validation-url-count" class="amp-count-loading"></span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
+			$this->assertSame( 'Validated URLs <span id="new-validation-url-count" class="awaiting-mod"><span class="amp-count-loading"></span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
 		} else {
 			$this->assertSame( 'Validated URLs', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
 		}

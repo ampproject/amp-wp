@@ -22,3 +22,8 @@
 	border-radius: 50%;
 	display: inline-block;
 }
+
+body.no-js #new-validation-url-count,
+body.no-js #new-error-index-count {
+	display: none;
+}

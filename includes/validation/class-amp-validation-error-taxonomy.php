@@ -1745,7 +1745,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		if ( ValidationCounts::is_needed() ) {
 			// Append markup to display a loading spinner while the unreviewed count is being fetched.
-			$menu_item_label .= ' <span class="awaiting-mod"><span id="new-error-index-count" class="amp-count-loading"></span></span>';
+			$menu_item_label .= ' <span id="new-error-index-count" class="awaiting-mod"><span class="amp-count-loading"></span></span>';
 		}
 
 		$post_menu_slug = 'edit.php?post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;

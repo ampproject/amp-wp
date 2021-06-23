@@ -3,6 +3,7 @@
  */
 import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
+import { __ } from '@wordpress/i18n';
 
 /**
  * External dependencies
@@ -31,6 +32,7 @@ import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
+import { ErrorScreen } from '../components/error-screen';
 import { PAGES } from './pages';
 import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
@@ -40,6 +42,8 @@ import { TemplateModeOverrideContextProvider } from './components/template-mode-
 
 const { ajaxurl: wpAjaxUrl } = global;
 
+let errorHandler;
+
 /**
  * Context providers for the application.
  *
@@ -47,10 +51,15 @@ const { ajaxurl: wpAjaxUrl } = global;
  * @param {any} props.children Component children.
  */
 export function Providers( { children } ) {
+	global.removeEventListener( 'error', errorHandler );
+
 	return (
 		<ErrorContextProvider>
-			<ErrorBoundary exitLink={ FINISH_LINK } fullScreen={ true }>
-
+			<ErrorBoundary
+				exitLinkLabel={ __( 'Return to AMP settings.', 'amp' ) }
+				exitLinkUrl={ FINISH_LINK }
+				title={ __( 'The setup wizard has experienced an error.', 'amp' ) }
+			>
 				<OptionsContextProvider
 					delaySave={ true }
 					hasErrorBoundary={ true }
@@ -90,13 +99,23 @@ Providers.propTypes = {
 domReady( () => {
 	const root = document.getElementById( APP_ROOT_ID );
 
-	if ( root ) {
-		render(
-
-			<Providers>
-				<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } appRoot={ root } />
-			</Providers>,
-			root,
-		);
+	if ( ! root ) {
+		return;
 	}
+
+	errorHandler = ( event ) => {
+		// Handle only own errors.
+		if ( event.filename && /amp-onboarding-wizard(\.min)?\.js/.test( event.filename ) ) {
+			render( <ErrorScreen error={ event.error } />, root );
+		}
+	};
+
+	global.addEventListener( 'error', errorHandler );
+
+	render(
+		<Providers>
+			<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } appRoot={ root } />
+		</Providers>,
+		root,
+	);
 } );
