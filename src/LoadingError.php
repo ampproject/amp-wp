@@ -124,7 +124,6 @@ final class LoadingError implements Service {
 				width: 18px;
 				height: 18px;
 				opacity: 0.7;
-				margin: 5px 11px 0;
 				border-radius: 100%;
 				position: relative;
 			}
