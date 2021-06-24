@@ -21,7 +21,7 @@ final class ErrorPageTest extends DependencyInjectedTestCase {
 		$output = $this->injector->make( ErrorPage::class )
 			->with_title( 'Error Page Title' )
 			->with_message( 'Error Page Message' )
-			->with_exception( new RuntimeException( 'FAILURE', 42 ) )
+			->with_throwable( new RuntimeException( 'FAILURE', 42 ) )
 			->with_response_code( 123 )
 			->with_back_link( 'https://back.example.com', 'Go Back' )
 			->render();
@@ -44,6 +44,7 @@ final class ErrorPageTest extends DependencyInjectedTestCase {
 		$this->assertStringContains( '<meta name="viewport"', $output );
 		$this->assertStringContains( '<body id="error-page">', $output );
 		$this->assertStringContains( '<style type="text/css">', $output );
+		$this->assertStringContains( 'If you get stuck', $output );
 		$this->assertStringContains( 'button button-large', $output );
 		$this->assertStringContains( 'https://back.example.com', $output );
 		$this->assertStringContains( 'Go Back', $output );
