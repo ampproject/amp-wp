@@ -1666,34 +1666,10 @@ class AMP_Theme_Support {
 
 		try {
 			$response = self::prepare_response( $response );
+		} catch ( Error $error ) { // Only PHP 7+.
+			$response = self::render_error_page( $error );
 		} catch ( Exception $exception ) {
-			$title   = __( 'Failed to prepare AMP page', 'amp' );
-			$message = __( 'A PHP error occurred while trying to prepare the AMP response. This may not be caused by the AMP plugin but by some other active plugin or the current theme. You will need to review the error details to determine the source of the error.', 'amp' );
-
-			$error_page = Services::get( 'dev_tools.error_page' );
-
-			$error_page
-				->with_title( $title )
-				->with_message( $message )
-				->with_exception( $exception )
-				->with_response_code( 500 );
-
-			// Add link to non-AMP version if not canonical.
-			if ( ! amp_is_canonical() ) {
-				$non_amp_url = amp_remove_paired_endpoint( amp_get_current_url() );
-
-				// Prevent user from being redirected back to AMP version.
-				if ( true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
-					$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $non_amp_url );
-				}
-
-				$error_page->with_back_link(
-					$non_amp_url,
-					__( 'Go to non-AMP version', 'amp' )
-				);
-			}
-
-			$response = $error_page->render();
+			$response = self::render_error_page( $exception );
 		}
 
 		/**
@@ -1706,6 +1682,41 @@ class AMP_Theme_Support {
 		 */
 		do_action( 'amp_server_timing_send' );
 		return $response;
+	}
+
+	/**
+	 * Render error page.
+	 *
+	 * @param Throwable $throwable Exception or (as of PHP7) Error.
+	 */
+	private static function render_error_page( $throwable ) {
+		$title   = __( 'Failed to prepare AMP page', 'amp' );
+		$message = __( 'A PHP error occurred while trying to prepare the AMP response. This may not be caused by the AMP plugin but by some other active plugin or the current theme. You will need to review the error details to determine the source of the error.', 'amp' );
+
+		$error_page = Services::get( 'dev_tools.error_page' );
+
+		$error_page
+			->with_title( $title )
+			->with_message( $message )
+			->with_throwable( $throwable )
+			->with_response_code( 500 );
+
+		// Add link to non-AMP version if not canonical.
+		if ( ! amp_is_canonical() ) {
+			$non_amp_url = amp_remove_paired_endpoint( amp_get_current_url() );
+
+			// Prevent user from being redirected back to AMP version.
+			if ( true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+				$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $non_amp_url );
+			}
+
+			$error_page->with_back_link(
+				$non_amp_url,
+				__( 'Go to non-AMP version', 'amp' )
+			);
+		}
+
+		return $error_page->render();
 	}
 
 	/**

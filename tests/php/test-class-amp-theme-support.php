@@ -1663,7 +1663,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<html amp=""',
 			'<meta charset="' . Document\Encoding::AMP . '">',
 			'<meta name="viewport" content="width=device-width">',
-			'<link as="script" crossorigin="anonymous" href="https://cdn.ampproject.org/v0.mjs" rel="modulepreload">',
+			'<link rel="modulepreload" href="https://cdn.ampproject.org/v0.mjs" as="script" crossorigin="anonymous">',
 			'<link rel="preconnect" href="https://cdn.ampproject.org">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
@@ -1988,6 +1988,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test prepare_response for responses that throw an exception.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
+	 * @covers AMP_Theme_Support::render_error_page()
 	 */
 	public function test_prepare_response_throwing_exception() {
 		// Set up temporary capture of error log to test error log output.
@@ -2020,6 +2021,49 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Verify that error log was properly populated.
 		$this->assertRegExp(
 			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- FAILURE \(42\) \[RuntimeException\].*/',
+			stream_get_contents( $capture )
+		);
+
+		// Reset error log back to initial settings.
+		ini_set( 'error_log', $backup ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+
+		$this->assertStringContains( 'Failed to prepare AMP page', $output );
+	}
+
+	/**
+	 * Test prepare_response for responses that throw a fatal error.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 * @covers AMP_Theme_Support::render_error_page()
+	 */
+	public function test_prepare_response_throwing_error() {
+		if ( PHP_MAJOR_VERSION < 7 ) {
+			$this->markTestSkipped( 'Requires PHP 7.' );
+		}
+
+		// Set up temporary capture of error log to test error log output.
+		$capture = tmpfile();
+		$backup  = ini_set( // phpcs:ignore WordPress.PHP.IniSet.Risky
+			'error_log',
+			stream_get_meta_data( $capture )['uri']
+		);
+
+		add_filter(
+			'amp_enable_optimizer',
+			static function ( $enabled ) {
+				if ( AMP_Theme_Support::DOES_NOT_EXIST === true ) { // phpcs:ignore
+					$enabled = true;
+				}
+				return $enabled;
+			}
+		);
+
+		wp();
+		$output = AMP_Theme_Support::finish_output_buffering( $this->get_original_html() );
+
+		// Verify that error log was properly populated.
+		$this->assertRegExp(
+			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- (Undefined class constant \'DOES_NOT_EXIST\'|Undefined constant AMP_Theme_Support::DOES_NOT_EXIST) \(0\) \[Error\].*/',
 			stream_get_contents( $capture )
 		);
 
