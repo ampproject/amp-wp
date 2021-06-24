@@ -236,8 +236,9 @@ final class ErrorPage implements Service {
 	</head>
 	<body id="error-page">
 		<h1>{$this->render_title()}</h1>
-		<p>{$this->render_message()}</p>
+		{$this->render_message()}
 		{$this->render_source()}
+		{$this->render_support_link()}
 		{$this->render_throwable()}
 		{$this->render_back_link()}
 	</body>
@@ -260,7 +261,29 @@ HTML;
 	 * @return string KSES-sanitized message.
 	 */
 	private function render_message() {
-		return wp_kses_post( $this->message );
+		return '<p>' . wp_kses_post( $this->message ) . '</p>';
+	}
+
+	/**
+	 * Render support link.
+	 *
+	 * @return string
+	 */
+	private function render_support_link() {
+		return '<p>' . wp_kses(
+			sprintf(
+				/* translators: %s is the AMP support forum URL. */
+				__( 'If you get stuck, you may want to share any details in a new topic on the plugin\'s <a href="%s" target="_blank" rel="noreferrer noopener">support forum</a>.', 'amp' ),
+				esc_url( __( 'https://wordpress.org/support/plugin/amp/', 'amp' ) )
+			),
+			[
+				'a' => [
+					'href'   => true,
+					'target' => true,
+					'rel'    => true,
+				],
+			]
+		) . '</p>';
 	}
 
 	/**

@@ -44,6 +44,7 @@ final class ErrorPageTest extends DependencyInjectedTestCase {
 		$this->assertStringContains( '<meta name="viewport"', $output );
 		$this->assertStringContains( '<body id="error-page">', $output );
 		$this->assertStringContains( '<style type="text/css">', $output );
+		$this->assertStringContains( 'If you get stuck', $output );
 		$this->assertStringContains( 'button button-large', $output );
 		$this->assertStringContains( 'https://back.example.com', $output );
 		$this->assertStringContains( 'Go Back', $output );
