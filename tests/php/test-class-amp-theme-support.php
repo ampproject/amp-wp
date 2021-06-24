@@ -2063,7 +2063,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Verify that error log was properly populated.
 		$this->assertRegExp(
-			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- Undefined class constant \'DOES_NOT_EXIST\' \(0\) \[Error\].*/',
+			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- (Undefined class constant \'DOES_NOT_EXIST\'|Undefined constant AMP_Theme_Support::DOES_NOT_EXIST) \(0\) \[Error\].*/',
 			stream_get_contents( $capture )
 		);
 
