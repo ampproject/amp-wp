@@ -1663,7 +1663,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<html amp=""',
 			'<meta charset="' . Document\Encoding::AMP . '">',
 			'<meta name="viewport" content="width=device-width">',
-			'<link as="script" crossorigin="anonymous" href="https://cdn.ampproject.org/v0.mjs" rel="modulepreload">',
+			'<link rel="modulepreload" href="https://cdn.ampproject.org/v0.mjs" as="script" crossorigin="anonymous">',
 			'<link rel="preconnect" href="https://cdn.ampproject.org">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
