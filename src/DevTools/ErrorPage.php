@@ -8,7 +8,10 @@
 namespace AmpProject\AmpWP\DevTools;
 
 use AmpProject\AmpWP\Infrastructure\Service;
+use Error;
 use Exception;
+use InvalidArgumentException;
+use Throwable;
 
 /**
  * Produces an error page similar to wp_die().
@@ -52,11 +55,11 @@ final class ErrorPage implements Service {
 	private $link_text = '';
 
 	/**
-	 * Exception of the error page.
+	 * Throwable of the error page.
 	 *
-	 * @var Exception
+	 * @var Throwable
 	 */
-	private $exception;
+	private $throwable;
 
 	/**
 	 * Response code of the error page.
@@ -118,13 +121,18 @@ final class ErrorPage implements Service {
 	}
 
 	/**
-	 * Set the exception of the error page.
+	 * Set the throwable of the error page.
 	 *
-	 * @param Exception $exception Exception to use.
+	 * @param Throwable $throwable Exception or Error to use. The Throwable type does not exist in PHP 5,
+	 *                             which is why type is absent from the function parameter.
+	 * @throws InvalidArgumentException If $throwable is not an Exception or an Error.
 	 * @return self
 	 */
-	public function with_exception( Exception $exception ) {
-		$this->exception = $exception;
+	public function with_throwable( $throwable ) {
+		if ( ! ( $throwable instanceof Exception || $throwable instanceof Error ) ) {
+			throw new InvalidArgumentException( 'Parameter must be Throwable (Exception or Error).' );
+		}
+		$this->throwable = $throwable;
 		return $this;
 	}
 
@@ -163,7 +171,7 @@ final class ErrorPage implements Service {
 	}
 
 	/**
-	 * Send the exception that was caught to the error log.
+	 * Send the throwable that was caught to the error log.
 	 */
 	private function send_to_error_log() {
 		// Don't send to error log if fatal errors are not to be reported.
@@ -172,16 +180,18 @@ final class ErrorPage implements Service {
 			return;
 		}
 
-		error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			sprintf(
-				"%s - %s (%s) [%s]\n%s",
-				$this->message,
-				$this->exception->getMessage(),
-				$this->exception->getCode(),
-				get_class( $this->exception ),
-				$this->exception->getTraceAsString()
-			)
-		);
+		if ( null !== $this->throwable ) {
+			error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				sprintf(
+					"%s - %s (%s) [%s]\n%s",
+					$this->message,
+					$this->throwable->getMessage(),
+					$this->throwable->getCode(),
+					get_class( $this->throwable ),
+					$this->throwable->getTraceAsString()
+				)
+			);
+		}
 	}
 
 	/**
@@ -228,7 +238,7 @@ final class ErrorPage implements Service {
 		<h1>{$this->render_title()}</h1>
 		<p>{$this->render_message()}</p>
 		{$this->render_source()}
-		{$this->render_exception()}
+		{$this->render_throwable()}
 		{$this->render_back_link()}
 	</body>
 </html>
@@ -254,12 +264,16 @@ HTML;
 	}
 
 	/**
-	 * Render the source of the exception file.
+	 * Render the source of the throwable.
 	 *
 	 * @return string File source data.
 	 */
 	private function render_source() {
-		$source = $this->likely_culprit_detector->analyze_exception( $this->exception );
+		if ( null === $this->throwable ) {
+			return '';
+		}
+
+		$source = $this->likely_culprit_detector->analyze_throwable( $this->throwable );
 
 		if ( ! empty( $source['type'] ) && ! empty( $source['name'] ) ) {
 			$name_markup = "<strong><code>{$source['name']}</code></strong>";
@@ -291,15 +305,14 @@ HTML;
 	}
 
 	/**
-	 * Render the exception of the error page.
+	 * Render the throwable of the error page.
 	 *
-	 * The exception details are only rendered if both WP_DEBUG and
-	 * WP_DEBUG_DISPLAY are true.
+	 * The exception/error details are only rendered if both WP_DEBUG and WP_DEBUG_DISPLAY are true.
 	 *
-	 * @return string HTML describing the exception that was thrown.
+	 * @return string HTML describing the exception/error that was thrown.
 	 */
-	private function render_exception() {
-		if ( null === $this->exception ) {
+	private function render_throwable() {
+		if ( null === $this->throwable ) {
 			return '';
 		}
 
@@ -321,24 +334,24 @@ HTML;
 			[
 				sprintf(
 					'<strong>%s</strong> (%s) [<em>%s</em>]',
-					esc_html( $this->exception->getMessage() ),
-					esc_html( $this->exception->getCode() ),
-					esc_html( get_class( $this->exception ) )
+					esc_html( $this->throwable->getMessage() ),
+					esc_html( $this->throwable->getCode() ),
+					esc_html( get_class( $this->throwable ) )
 				),
 				sprintf(
 					'<em>%s:%d</em>',
-					esc_html( $this->exception->getFile() ),
-					esc_html( $this->exception->getLine() )
+					esc_html( $this->throwable->getFile() ),
+					esc_html( $this->throwable->getLine() )
 				),
 				'',
 				sprintf(
 					'<small>%s</small>',
-					esc_html( $this->exception->getTraceAsString() )
+					esc_html( $this->throwable->getTraceAsString() )
 				),
 			]
 		);
 
-		return "<hr><pre class='exception'>{$contents}</pre>";
+		return "<hr><pre class='throwable'>{$contents}</pre>";
 	}
 
 	/**
@@ -408,7 +421,7 @@ HTML;
 		line-height: 1.5;
 		margin: 25px 0 20px;
 	}
-	#error-page .exception,
+	#error-page .throwable,
 	code {
 		font-family: Consolas, Monaco, monospace;
 		overflow-x: auto;

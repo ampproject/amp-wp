@@ -8,7 +8,10 @@
 namespace AmpProject\AmpWP\DevTools;
 
 use AmpProject\AmpWP\Infrastructure\Service;
+use Error;
 use Exception;
+use InvalidArgumentException;
+use Throwable;
 
 /**
  * Go through a debug backtrace and detect the extension that is likely to have
@@ -54,7 +57,9 @@ final class LikelyCulpritDetector implements Service {
 	/**
 	 * Detect the themes and plugins responsible for causing the exception.
 	 *
-	 * @param Exception $exception Exception to analyze.
+	 * @param Throwable $throwable Exception or Error to analyze. The Throwable type does not exist in PHP 5,
+	 *                             which is why type is absent from the function parameter.
+	 * @throws InvalidArgumentException If $throwable is not an Exception or an Error.
 	 * @return array {
 	 *     Type and name of extension that is the likely culprit.
 	 *
@@ -62,9 +67,12 @@ final class LikelyCulpritDetector implements Service {
 	 *     @type string $name Name. Empty if none matched.
 	 * }
 	 */
-	public function analyze_exception( Exception $exception ) {
-		$trace = $exception->getTrace();
-		array_unshift( $trace, [ FileReflection::SOURCE_FILE => $exception->getFile() ] );
+	public function analyze_throwable( $throwable ) {
+		if ( ! ( $throwable instanceof Exception || $throwable instanceof Error ) ) {
+			throw new InvalidArgumentException( 'Parameter must be Throwable (Exception or Error).' );
+		}
+		$trace = $throwable->getTrace();
+		array_unshift( $trace, [ FileReflection::SOURCE_FILE => $throwable->getFile() ] );
 		return $this->analyze_trace( $trace );
 	}
 

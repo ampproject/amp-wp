@@ -217,7 +217,7 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * Tests LikelyCulpritDetector::analyze_exception
+	 * Tests LikelyCulpritDetector::analyze_throwable
 	 *
 	 * @dataProvider single_step_trace_data()
 	 *
@@ -225,9 +225,9 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 	 * @param string   $expected_type Expected source type.
 	 * @param string   $expected_name Expected source name.
 	 *
-	 * @covers ::analyze_exception
+	 * @covers ::analyze_throwable
 	 */
-	public function test_analyze_exception( $file_stack, $expected_type, $expected_name ) {
+	public function test_analyze_throwable( $file_stack, $expected_type, $expected_name ) {
 		$trace     = $this->get_trace_from_file_stack( $file_stack );
 		$exception = new RuntimeException();
 		$this->set_private_property(
@@ -240,7 +240,7 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 		// method and not stored as a property. Therefore, we can only test
 		// the first "file" that is encountered.
 
-		$source = $this->likely_culprit_detector->analyze_exception( $exception );
+		$source = $this->likely_culprit_detector->analyze_throwable( $exception );
 
 		$this->assertEquals( $expected_type, $source['type'] );
 		$this->assertEquals( $expected_name, $source['name'] );

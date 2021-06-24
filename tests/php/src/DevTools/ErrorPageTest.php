@@ -21,7 +21,7 @@ final class ErrorPageTest extends DependencyInjectedTestCase {
 		$output = $this->injector->make( ErrorPage::class )
 			->with_title( 'Error Page Title' )
 			->with_message( 'Error Page Message' )
-			->with_exception( new RuntimeException( 'FAILURE', 42 ) )
+			->with_throwable( new RuntimeException( 'FAILURE', 42 ) )
 			->with_response_code( 123 )
 			->with_back_link( 'https://back.example.com', 'Go Back' )
 			->render();
