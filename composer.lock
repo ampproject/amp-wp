@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "87317406a9dc6a575f3a5b23048eb5a8277a3048"
+                "reference": "eea2e2416a2d858a17d947fe978ac02e62abcda0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/87317406a9dc6a575f3a5b23048eb5a8277a3048",
-                "reference": "87317406a9dc6a575f3a5b23048eb5a8277a3048",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/eea2e2416a2d858a17d947fe978ac02e62abcda0",
+                "reference": "eea2e2416a2d858a17d947fe978ac02e62abcda0",
                 "shasum": ""
             },
             "require": {
@@ -73,7 +73,7 @@
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
                 "source": "https://github.com/ampproject/amp-toolbox-php/tree/main"
             },
-            "time": "2021-06-24T00:30:00+00:00"
+            "time": "2021-06-24T05:45:26+00:00"
         },
         {
             "name": "cweagans/composer-patches",
