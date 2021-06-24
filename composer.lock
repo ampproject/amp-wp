@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d914bcf0ddd6b4470acad67de7d29256",
+    "content-hash": "fce79e8016e43fda3ee3335f06d46f88",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "0.5.2",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "062370f09366e91bec955b01520848f943d8d28a"
+                "reference": "87317406a9dc6a575f3a5b23048eb5a8277a3048"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/062370f09366e91bec955b01520848f943d8d28a",
-                "reference": "062370f09366e91bec955b01520848f943d8d28a",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/87317406a9dc6a575f3a5b23048eb5a8277a3048",
+                "reference": "87317406a9dc6a575f3a5b23048eb5a8277a3048",
                 "shasum": ""
             },
             "require": {
@@ -33,17 +33,19 @@
                 "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
                 "ext-zip": "*",
                 "php-parallel-lint/php-parallel-lint": "^1.2",
-                "phpcompatibility/phpcompatibility-wp": "2.1.1",
+                "phpcompatibility/php-compatibility": "^9",
                 "phpunit/phpunit": "^5 || ^6 || ^7 || ^8 || ^9",
                 "roave/security-advisories": "dev-master",
-                "sirbrillig/phpcs-variable-analysis": "2.11.0",
+                "sirbrillig/phpcs-variable-analysis": "2.11.1",
                 "squizlabs/php_codesniffer": "^3",
-                "yoast/phpunit-polyfills": "^0.2.0"
+                "yoast/phpunit-polyfills": "^0.2.0 || ^1.0.0"
             },
             "suggest": {
                 "ext-json": "Provides native implementation of json_encode()/json_decode().",
-                "ext-mbstring": "Used by Dom\\Document to convert encoding to UTF-8 if needed."
+                "ext-mbstring": "Used by Dom\\Document to convert encoding to UTF-8 if needed.",
+                "nette/php-generator": "Needed to generate the validator spec PHP classes and interfaces."
             },
+            "default-branch": true,
             "bin": [
                 "bin/amp"
             ],
@@ -69,9 +71,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.5.2"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/main"
             },
-            "time": "2021-05-06T01:53:44+00:00"
+            "time": "2021-06-24T00:30:00+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -5967,6 +5969,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "ampproject/amp-toolbox": 20,
         "sabberworm/php-css-parser": 20,
         "roave/security-advisories": 20
     },
@@ -5987,5 +5990,5 @@
     "platform-overrides": {
         "php": "5.6"
     },
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.0.0"
 }
