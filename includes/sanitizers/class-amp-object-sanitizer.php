@@ -9,7 +9,6 @@ use AmpProject\Attribute;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
 use AmpProject\Layout;
-use AmpProject\Tag;
 
 /**
  * Class AMP_Object_Sanitizer
@@ -35,7 +34,7 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function get_selector_conversion_mapping() {
 		return [
-			Tag::OBJECT => [
+			'object' => [
 				Extension::GOOGLE_DOCUMENT_EMBED,
 			],
 		];
@@ -45,7 +44,7 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize `object` elements from the HTML contained in this instance's Dom\Document.
 	 */
 	public function sanitize() {
-		$elements = $this->dom->getElementsByTagName( Tag::OBJECT );
+		$elements = $this->dom->getElementsByTagName( 'object' );
 
 		if ( 0 === $elements->length ) {
 			return;
