@@ -6,29 +6,78 @@ on:
       - develop
       # Include all release branches.
       - '[0-9]+.[0-9]+'
-    # Don't run for irrelevant changes.
-    paths-ignore:
-      - '!.github/workflows/*'
-      - '.wordpress-org/**'
-      - '!bin/ci/**'
-      - '!bin/local-env/**'
-      - 'docs/**'
-      - 'qa-tester/**'
   pull_request:
     # Run workflow whenever a PR is opened, updated (synchronized), or marked ready for review.
     types: [opened, synchronize, ready_for_review]
-    # Don't run for irrelevant changes.
-    paths-ignore:
-      - '!.github/workflows/*'
-      - '.wordpress-org/**'
-      - '!bin/ci/**'
-      - '!bin/local-env/**'
-      - 'docs/**'
-      - 'qa-tester/**'
 
 jobs:
+  pre-run:
+    name: 'Pre run'
+    runs-on: ubuntu-latest
+    outputs:
+      changed-file-count: ${{ steps.determine-file-counts.outputs.count }}
+      changed-php-count: ${{ steps.determine-file-counts.outputs.php-count }}
+      changed-css-count: ${{ steps.determine-file-counts.outputs.css-count }}
+      changed-js-count: ${{ steps.determine-file-counts.outputs.js-count }}
+    steps:
+      - name: Checkout including last 2 commits
+        # Fetch last 2 commits if it's not a PR, so that we can determine the list of modified files.
+        if: ${{ github.base_ref == null }}
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Checkout
+        # Do usual checkout if it's a PR.
+        if: ${{ github.base_ref != null }}
+        uses: actions/checkout@v2
+
+      - name: Fetch base branch
+        # Only fetch base ref if it's a PR.
+        if: ${{ github.base_ref != null }}
+        run: git fetch --depth=1 --no-tags origin ${{ github.base_ref }}
+
+      - name: Determine modified files for PR
+        if: ${{ github.base_ref != null }}
+        run: echo "MODIFIED_FILES=$(git diff --name-only FETCH_HEAD HEAD | base64 -w 0)" >> $GITHUB_ENV
+
+      - name: Determine modified files for commit
+        if: ${{ github.base_ref == null }}
+        run: echo "MODIFIED_FILES=$(git diff --name-only HEAD~1 HEAD | base64 -w 0)" >> $GITHUB_ENV
+
+      - id: determine-file-counts
+        name: Determine if modified files should make the workflow run continue
+        run: |
+          MODIFIED_FILES=$(echo "$MODIFIED_FILES" | base64 -d)
+          echo -e "Modified files:\n$MODIFIED_FILES\n"
+
+          FILE_COUNT=$(php -f bin/determine-modified-files-count.php "$IGNORE_PATH_REGEX" "$MODIFIED_FILES" --invert)
+          PHP_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.php|composer\.(json|lock)" "$MODIFIED_FILES")
+          CSS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.s?css" "$MODIFIED_FILES")
+          JS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.(js|snap)|package\.(json|lock)" "$MODIFIED_FILES")
+
+          echo "Changed file count: $FILE_COUNT"
+          echo "Changed PHP file count: $PHP_FILE_COUNT"
+          echo "Changed CSS file count: $CSS_FILE_COUNT"
+          echo "Changed JS file count: $JS_FILE_COUNT"
+
+          echo "::set-output name=count::$FILE_COUNT"
+          echo "::set-output name=php-count::$PHP_FILE_COUNT"
+          echo "::set-output name=css-count::$CSS_FILE_COUNT"
+          echo "::set-output name=js-count::$JS_FILE_COUNT"
+        env:
+          # Ignore Paths:
+          # - .github/
+          # - !.github/workflows
+          # - .github/workflows/qa-integrate.yml
+          # - .wordpress-org/
+          # - docs/
+          # - qa-tester/
+          IGNORE_PATH_REGEX: \.github\/(?:(?!workflows)|(?=workflows\/qa-integrate\.yml))|\.wordpress-org\/|docs\/|qa-tester\/
 
   lint-css:
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-css-count > 0
     name: 'Lint: CSS'
     runs-on: ubuntu-latest
     steps:
@@ -68,6 +117,8 @@ jobs:
 
   lint-js:
     name: 'Lint: JS'
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-js-count > 0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -103,19 +154,25 @@ jobs:
         run: npm run lint:pkg-json
 
       - name: Detect ESLint coding standard violations
-        if: github.event.pull_request.head.repo.fork == true
+        if: >
+          github.event.pull_request.head.repo.fork == true ||
+          github.event.pull_request.user.login == 'dependabot[bot]'
         run: npm run lint:js
 
       - name: Generate ESLint coding standard violations report
-        # Prevent generating the ESLint report if run from a PR fork
-        if: github.event.pull_request.head.repo.fork == false
+        # Prevent generating the ESLint report if PR is from a fork or authored by Dependabot.
+        if: >
+          ! ( github.event.pull_request.head.repo.fork == true ||
+          github.event.pull_request.user.login == 'dependabot[bot]' )
         run: npm run lint:js:report
         continue-on-error: true
 
       - name: Annotate code linting results
-        # The action cannot annotate the PR diff when run from a PR fork
-        if: github.event.pull_request.head.repo.fork == false
-        uses: ataylorme/eslint-annotate-action@1.1.2
+        # The action cannot annotate the PR when run from a PR fork or was authored by Dependabot.
+        if: >
+          ! ( github.event.pull_request.head.repo.fork == true ||
+          github.event.pull_request.user.login == 'dependabot[bot]' )
+        uses: ataylorme/eslint-annotate-action@1.2.0
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
           report-json: 'lint-js-report.json'
@@ -124,6 +181,8 @@ jobs:
 
   lint-php:
     name: 'Lint: PHP'
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-php-count > 0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -167,6 +226,8 @@ jobs:
   static-analysis-php:
     name: 'Static Analysis: PHP'
     runs-on: ubuntu-latest
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-php-count > 0
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -201,6 +262,8 @@ jobs:
   unit-test-js:
     name: 'Unit test: JS'
     runs-on: ubuntu-latest
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-js-count > 0
 
     steps:
       - name: Checkout
@@ -242,7 +305,7 @@ jobs:
         run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
 
       - name: Upload code coverage report
-        uses: codecov/codecov-action@v1.4.1
+        uses: codecov/codecov-action@v1.5.2
         with:
           file: build/logs/lcov.info
           flags: javascript
@@ -252,6 +315,8 @@ jobs:
 
   e2e-test-js:
     name: 'E2E test: JS'
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-file-count > 0
     runs-on: ubuntu-latest
 
     steps:
@@ -328,6 +393,8 @@ jobs:
   unit-test-php:
     name: "Unit test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     runs-on: ubuntu-latest
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-file-count > 0
     env:
       WP_CORE_DIR: /tmp/wordpress
     services:
@@ -488,7 +555,7 @@ jobs:
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v1.4.1
+        uses: codecov/codecov-action@v1.5.2
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php,unit
@@ -498,6 +565,8 @@ jobs:
 
   feature-test-php:
     name: "Feature test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
+    needs: pre-run
+    if: needs.pre-run.outputs.changed-file-count > 0
     runs-on: ubuntu-latest
     env:
       WP_VERSION: ${{ matrix.wp }}
@@ -647,7 +716,7 @@ jobs:
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v1.4.1
+        uses: codecov/codecov-action@v1.5.2
         with:
           files: ${{ env.COVERAGE_FILES }}
           flags: php,feature
@@ -657,14 +726,14 @@ jobs:
 
   build-zip:
     name: 'Build: ${{ matrix.build }} build ZIP'
-    # Only run if it is not a draft PR and the PR is not from a forked repository.
-    if: ( github.event.pull_request.draft || github.event.pull_request.head.repo.fork ) == false
+    # Only run if the PR was not authored by Dependabot and it is not a draft or not from a fork.
+    if: >
+      needs.pre-run.outputs.changed-file-count > 0 &&
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.fork == false &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    needs: pre-run
     runs-on: ubuntu-latest
-    needs:
-      - lint-css
-      - lint-js
-      - lint-php
-      - static-analysis-php
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
@@ -733,6 +802,8 @@ jobs:
         run: |
           npm run build:${{ matrix.build }}
           mv amp.zip builds/${{ matrix.build }}/amp.zip
+        env:
+          LAST_PR_COMMIT_HASH: ${{ github.event.pull_request.head.sha }}
 
       - name: Retrieve branch name
         id: retrieve-branch-name
@@ -806,8 +877,8 @@ jobs:
         # Setting a multi-line output requires escaping line-feeds. See <https://github.community/t/set-output-truncates-multiline-strings/16852/3>.
         run: |
           body="Plugin builds for ${{ github.event.pull_request.head.sha }} are ready :bellhop_bell:!
-          - Download [development build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
-          - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip)"
+          - Download [development build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip?${{ github.sha }})
+          - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip?${{ github.sha }})"
           body="${body//$'\n'/'%0A'}"
           echo "::set-output name=body::$body"
 

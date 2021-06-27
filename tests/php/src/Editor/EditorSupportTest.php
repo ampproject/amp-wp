@@ -2,13 +2,17 @@
 
 namespace AmpProject\AmpWP\Tests\Editor;
 
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Editor\EditorSupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Editor\EditorSupport */
 final class EditorSupportTest extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/** @var EditorSupport */
 	private $instance;
@@ -16,7 +20,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->instance = new EditorSupport();
+		$this->instance = new EditorSupport( new DependencySupport() );
 	}
 
 	public function test_it_can_be_initialized() {
@@ -32,37 +36,19 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		$this->assertEquals( 99, has_action( 'admin_enqueue_scripts', [ $this->instance, 'maybe_show_notice' ] ) );
 	}
 
-	/** @covers ::has_support_from_gutenberg_plugin */
-	public function test_has_support_from_gutenberg_plugin() {
-		if ( defined( 'GUTENBERG_VERSION' ) ) {
-			$this->assertTrue( $this->instance->has_support_from_gutenberg_plugin() );
-		} else {
-			if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '>=' ) ) {
-				$this->assertTrue( $this->instance->has_support_from_core() );
-			} else {
-				$this->assertFalse( $this->instance->has_support_from_core() );
-			}
-		}
-	}
-
 	public function test_editor_supports_amp_block_editor_features() {
-		if ( defined( 'GUTENBERG_VERSION' ) ) {
+		if (
+			defined( 'GUTENBERG_VERSION' )
+			&&
+			version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
+		) {
 			$this->assertTrue( $this->instance->editor_supports_amp_block_editor_features() );
 		} else {
-			if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '>=' ) ) {
+			if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' ) ) {
 				$this->assertTrue( $this->instance->editor_supports_amp_block_editor_features() );
 			} else {
 				$this->assertFalse( $this->instance->editor_supports_amp_block_editor_features() );
 			}
-		}
-	}
-
-	/** @covers ::has_support_from_core() */
-	public function test_has_support_from_core() {
-		if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '>=' ) ) {
-			$this->assertTrue( $this->instance->has_support_from_core() );
-		} else {
-			$this->assertFalse( $this->instance->has_support_from_core() );
 		}
 	}
 
@@ -76,7 +62,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function test_dont_show_notice_for_unsupported_post_type() {
 		global $post;
 
-		set_current_screen( 'edit.php' );
+		set_current_screen( 'post.php' );
 		register_post_type( 'my-post-type' );
 		$post = $this->factory()->post->create( [ 'post_type' => 'my-post-type' ] );
 		setup_postdata( get_post( $post ) );
@@ -93,11 +79,11 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function test_show_notice_for_supported_post_type() {
 		global $post;
 
-		if ( version_compare( get_bloginfo( 'version' ), '5.3', '<=' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '<' ) ) {
 			$this->markTestSkipped();
 		}
 
-		set_current_screen( 'edit.php' );
+		set_current_screen( 'post.php' );
 		$post = $this->factory()->post->create();
 		setup_postdata( get_post( $post ) );
 
@@ -107,7 +93,10 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		if ( $this->instance->editor_supports_amp_block_editor_features() ) {
 			$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
 		} else {
-			$this->assertContains( 'AMP f', wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+			$this->assertContains(
+				'AMP functionality is not available',
+				wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
+			);
 		}
 		unset( $GLOBALS['current_screen'] );
 		unset( $GLOBALS['wp_scripts'] );
@@ -117,7 +106,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function test_maybe_show_notice_for_unsupported_user() {
 		global $post;
 
-		set_current_screen( 'edit.php' );
+		set_current_screen( 'post.php' );
 		$post = $this->factory()->post->create();
 		setup_postdata( get_post( $post ) );
 
@@ -145,12 +134,35 @@ final class EditorSupportTest extends WP_UnitTestCase {
 			]
 		);
 
-		set_current_screen( 'edit.php' );
-		$post = $this->factory()->post->create( [ 'post_type' => 'my-gutenberg-post-type' ] );
+		set_current_screen( 'post.php' );
+		$post = $this->factory()->post->create( [ 'post_type' => 'my-gb-post-type' ] );
 		setup_postdata( get_post( $post ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$this->instance->maybe_show_notice();
 		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+		unset( $GLOBALS['current_screen'] );
+		unset( $GLOBALS['wp_scripts'] );
+	}
+
+	/** @covers ::maybe_show_notice() */
+	public function test_maybe_show_notice_for_gutenberg_4_9() {
+		global $post;
+		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '4.9.0', '>' ) ) {
+			$this->markTestSkipped( 'Test only applicable to Gutenberg v4.9.0 and older.' );
+		}
+
+		$this->assertFalse( $this->instance->editor_supports_amp_block_editor_features() );
+
+		gutenberg_register_packages_scripts();
+		set_current_screen( 'post.php' );
+		$post = $this->factory()->post->create();
+		setup_postdata( get_post( $post ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		$this->instance->maybe_show_notice();
+		$inline_script = wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false );
+		$this->assertStringContains( 'AMP functionality is not available', $inline_script );
 		unset( $GLOBALS['current_screen'] );
 		unset( $GLOBALS['wp_scripts'] );
 	}

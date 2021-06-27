@@ -67,6 +67,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @var string[]
 	 */
 	const SERVICES = [
+		'dependency_support'                 => DependencySupport::class, // Needs to be registered first as other services depend on it.
 		'admin.analytics_menu'               => Admin\AnalyticsOptionsSubmenu::class,
 		'admin.google_fonts'                 => Admin\GoogleFonts::class,
 		'admin.onboarding_menu'              => Admin\OnboardingWizardSubmenu::class,
@@ -111,6 +112,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'background_task_deactivator'        => BackgroundTaskDeactivator::class,
 		'paired_routing'                     => PairedRouting::class,
 		'paired_url'                         => PairedUrl::class,
+		'loading_error'                      => LoadingError::class,
 	];
 
 	/**
@@ -192,12 +194,14 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			AmpSlugCustomizationWatcher::class,
 			PluginRegistry::class,
 			Instrumentation\StopWatch::class,
+			DependencySupport::class,
 			DevTools\CallbackReflection::class,
 			DevTools\FileReflection::class,
 			ReaderThemeLoader::class,
 			ReaderThemeSupportFeatures::class,
 			BackgroundTask\BackgroundTaskDeactivator::class,
 			PairedRouting::class,
+			LoadingError::class,
 			Injector::class,
 		];
 	}

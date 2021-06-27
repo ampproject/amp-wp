@@ -4,6 +4,7 @@
 import PropTypes from 'prop-types';
 import {
 	CURRENT_THEME,
+	HAS_DEPENDENCY_SUPPORT,
 	OPTIONS_REST_PATH,
 	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
@@ -28,8 +29,11 @@ import { ReaderThemesContextProvider, ReaderThemes } from '../components/reader-
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
+import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
 import { AMPDrawer } from '../components/amp-drawer';
+import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
+import { ErrorScreen } from '../components/error-screen';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
@@ -41,6 +45,8 @@ import { PairedUrlStructure } from './paired-url-structure';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
+let errorHandler;
+
 /**
  * Context providers for the settings page.
  *
@@ -48,20 +54,31 @@ const { ajaxurl: wpAjaxUrl } = global;
  * @param {any} props.children Context consumers.
  */
 function Providers( { children } ) {
+	global.removeEventListener( 'error', errorHandler );
+
 	return (
-		<SiteSettingsProvider>
-			<OptionsContextProvider optionsRestPath={ OPTIONS_REST_PATH } populateDefaultValues={ true }>
-				<ReaderThemesContextProvider
-					currentTheme={ CURRENT_THEME }
-					readerThemesRestPath={ READER_THEMES_REST_PATH }
-					hideCurrentlyActiveTheme={ true }
-					updatesNonce={ UPDATES_NONCE }
-					wpAjaxUrl={ wpAjaxUrl }
-				>
-					{ children }
-				</ReaderThemesContextProvider>
-			</OptionsContextProvider>
-		</SiteSettingsProvider>
+		<ErrorContextProvider>
+			<ErrorBoundary>
+				<SiteSettingsProvider hasErrorBoundary={ true }>
+					<OptionsContextProvider
+						hasErrorBoundary={ true }
+						optionsRestPath={ OPTIONS_REST_PATH }
+						populateDefaultValues={ true }
+					>
+						<ReaderThemesContextProvider
+							currentTheme={ CURRENT_THEME }
+							readerThemesRestPath={ READER_THEMES_REST_PATH }
+							hasErrorBoundary={ true }
+							hideCurrentlyActiveTheme={ true }
+							updatesNonce={ UPDATES_NONCE }
+							wpAjaxUrl={ wpAjaxUrl }
+						>
+							{ children }
+						</ReaderThemesContextProvider>
+					</OptionsContextProvider>
+				</SiteSettingsProvider>
+			</ErrorBoundary>
+		</ErrorContextProvider>
 	);
 }
 Providers.propTypes = {
@@ -142,6 +159,11 @@ function Root( { appRoot } ) {
 
 	return (
 		<>
+			{ ! HAS_DEPENDENCY_SUPPORT && (
+				<AMPNotice className="not-has-dependency-support" size={ NOTICE_SIZE_LARGE }>
+					{ __( 'You are using an old version of WordPress. Please upgrade to access all of the features of the AMP plugin.', 'amp' ) }
+				</AMPNotice>
+			) }
 			<Welcome />
 			<form onSubmit={ ( event ) => {
 				event.preventDefault();
@@ -204,13 +226,23 @@ Root.propTypes = {
 domReady( () => {
 	const root = document.getElementById( 'amp-settings-root' );
 
-	if ( root ) {
-		render( (
-			<ErrorContextProvider>
-				<Providers>
-					<Root appRoot={ root } />
-				</Providers>
-			</ErrorContextProvider>
-		), root );
+	if ( ! root ) {
+		return;
 	}
+
+	errorHandler = ( event ) => {
+		// Handle only own errors.
+		if ( event.filename && /amp-settings(\.min)?\.js/.test( event.filename ) ) {
+			render( <ErrorScreen error={ event.error } />, root );
+		}
+	};
+
+	global.addEventListener( 'error', errorHandler );
+
+	render(
+		<Providers>
+			<Root appRoot={ root } />
+		</Providers>,
+		root,
+	);
 } );

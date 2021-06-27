@@ -10,12 +10,10 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AmpProject\AmpWP\DevTools\UserAccess;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\LoadingError;
 
 /**
  * AMP setup wizard submenu page class.
@@ -23,7 +21,7 @@ use AmpProject\AmpWP\Services;
  * @since 2.0
  * @internal
  */
-final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registerable, Service {
+final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Service {
 	/**
 	 * Handle for JS file.
 	 *
@@ -64,25 +62,25 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	private $rest_preloader;
 
 	/**
+	 * LoadingError instance.
+	 *
+	 * @var LoadingError
+	 */
+	private $loading_error;
+
+	/**
 	 * OnboardingWizardSubmenuPage constructor.
 	 *
-	 * @param GoogleFonts   $google_fonts  An instance of the GoogleFonts service.
-	 * @param ReaderThemes  $reader_themes An instance of the ReaderThemes class.
+	 * @param GoogleFonts   $google_fonts   An instance of the GoogleFonts service.
+	 * @param ReaderThemes  $reader_themes  An instance of the ReaderThemes class.
 	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
+	 * @param LoadingError  $loading_error  An instance of the LoadingError class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader ) {
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, LoadingError $loading_error ) {
 		$this->google_fonts   = $google_fonts;
 		$this->reader_themes  = $reader_themes;
 		$this->rest_preloader = $rest_preloader;
-	}
-
-	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return amp_should_use_new_onboarding();
+		$this->loading_error  = $loading_error;
 	}
 
 	/**
@@ -144,12 +142,15 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		// <head> tag was opened prior to this action and hasn't been closed.
 		?>
 		</head>
-		<body>
+		<body class="no-js">
+			<script>document.body.className = document.body.className.replace('no-js','js');</script>
 			<?php // The admin footer template closes three divs. ?>
 			<div>
 			<div>
 			<div>
-			<div class="amp" id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
+			<div class="amp" id="<?php echo esc_attr( self::APP_ROOT_ID ); ?>">
+				<?php $this->loading_error->render(); ?>
+			</div>
 
 			<style>
 			#wpfooter { display:none; }
@@ -184,8 +185,6 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
-
-		$amp_slug_customization_watcher = Services::get( 'amp_slug_customization_watcher' );
 
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
 		$asset        = require $asset_file;

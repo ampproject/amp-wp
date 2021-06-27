@@ -426,7 +426,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$spec_name = 'link rel=stylesheet for fonts'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'link' ) as $spec_rule ) {
 			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
-				$this->allowed_font_src_regex = '@^(' . $spec_rule[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['href']['value_regex'] . ')$@';
+				$this->allowed_font_src_regex = '/^(' . $spec_rule[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['href']['value_regex'] . ')$/';
 				break;
 			}
 		}
@@ -1508,8 +1508,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$status = $response->getStatusCode();
 
 		if ( $status < 200 || $status >= 300 ) {
-			/* translators: %s: the fetched URL */
-			return new WP_Error( "http_{$status}", sprintf( __( 'Failed to fetch: %s', 'amp' ), $url ) );
+			/* translators: %1$s: the URL, %2$d: the HTTP status code, %3$s: the HTTP status message */
+			return new WP_Error( "http_{$status}", sprintf( __( 'Failed to fetch: %1$s (HTTP %2$d: %3$s)', 'amp' ), $url, $status, get_status_header_desc( $status ) ) );
 		}
 
 		$content_type = (array) $response->getHeader( 'content-type' );

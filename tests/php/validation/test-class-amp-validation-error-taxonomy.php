@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 
@@ -1024,12 +1025,16 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
 		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
 		$expected_submenu = [
-			'Error Index <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>',
+			'Error Index',
 			AMP_Validation_Manager::VALIDATE_CAPABILITY,
 			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_validated_url',
-			'Error Index <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>',
+			'Error Index',
 		];
-		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
+		if ( Services::get( 'dependency_support' )->has_support() ) {
+			$expected_submenu[0] .= ' <span id="new-error-index-count" class="awaiting-mod"><span class="amp-count-loading"></span></span>';
+			$expected_submenu[3] .= ' <span id="new-error-index-count" class="awaiting-mod"><span class="amp-count-loading"></span></span>';
+		}
+		$amp_options = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );
 
 		$submenu = $original_submenu;

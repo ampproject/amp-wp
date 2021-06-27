@@ -20,9 +20,8 @@ import './style.css';
  */
 function updateMenuItem( itemEl, count ) {
 	if ( isNaN( count ) || count === 0 ) {
-		itemEl.parentNode.parentNode.removeChild( itemEl.parentNode );
+		itemEl.parentNode.removeChild( itemEl );
 	} else {
-		itemEl.classList.remove( 'loading' );
 		itemEl.textContent = count.toLocaleString();
 	}
 }

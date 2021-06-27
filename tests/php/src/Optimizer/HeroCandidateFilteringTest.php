@@ -181,6 +181,15 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 			$merged_attrs,
 			$this->instance->filter_attachment_image_attributes( $initial_attrs, $attachment )
 		);
+
+		// When no attachment is provided, then no filtering is done.
+		delete_post_thumbnail( $post_ids[1] );
+		set_post_thumbnail( $post_ids[0], $attachment->ID );
+		$this->go_to( get_permalink( $post_ids[0] ) );
+		$this->assertEquals(
+			$initial_attrs,
+			$this->instance->filter_attachment_image_attributes( $initial_attrs, null )
+		);
 	}
 
 	/** @covers ::add_data_hero_candidate_attribute()  */

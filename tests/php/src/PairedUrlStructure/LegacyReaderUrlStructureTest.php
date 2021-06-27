@@ -29,19 +29,25 @@ class LegacyReaderUrlStructureTest extends DependencyInjectedTestCase {
 		$amp_pre_get_permalink_count = 0;
 		add_filter(
 			'amp_pre_get_permalink',
-			static function ( $pre ) use ( &$amp_pre_get_permalink_count ) {
+			function ( $pre, $filtered_post_id ) use ( $post_id, &$amp_pre_get_permalink_count ) {
 				$amp_pre_get_permalink_count++;
+				$this->assertSame( $post_id, $filtered_post_id );
 				return $pre;
-			}
+			},
+			10,
+			2
 		);
 
 		$amp_get_permalink_count = 0;
 		add_filter(
 			'amp_get_permalink',
-			static function ( $pre ) use ( &$amp_get_permalink_count ) {
+			function ( $pre, $filtered_post_id ) use ( $post_id, &$amp_get_permalink_count ) {
 				$amp_get_permalink_count++;
+				$this->assertSame( $post_id, $filtered_post_id );
 				return $pre;
-			}
+			},
+			10,
+			2
 		);
 
 		// Non-post URL.
@@ -59,6 +65,12 @@ class LegacyReaderUrlStructureTest extends DependencyInjectedTestCase {
 		);
 		$this->assertEquals( 1, $amp_pre_get_permalink_count );
 		$this->assertEquals( 1, $amp_get_permalink_count );
+		$this->assertEquals(
+			trailingslashit( trailingslashit( $post_permalink_url ) . $slug ),
+			$this->instance->add_endpoint( trailingslashit( $post_permalink_url ) . $slug )
+		);
+		$this->assertEquals( 2, $amp_pre_get_permalink_count );
+		$this->assertEquals( 2, $amp_get_permalink_count );
 
 		// Try overriding a post URL with pre-filter.
 		$pre_post_permalink_url       = $post_permalink_url . 'pre-filter-amp/';
@@ -77,8 +89,8 @@ class LegacyReaderUrlStructureTest extends DependencyInjectedTestCase {
 			$pre_post_permalink_url,
 			$this->instance->add_endpoint( $post_permalink_url )
 		);
-		$this->assertEquals( 2, $amp_pre_get_permalink_count );
-		$this->assertEquals( 1, $amp_get_permalink_count );
+		$this->assertEquals( 3, $amp_pre_get_permalink_count );
+		$this->assertEquals( 2, $amp_get_permalink_count );
 		remove_filter( 'amp_pre_get_permalink', $filter_amp_pre_get_permalink, 10 );
 
 		// Try overriding a post URL with post-filter.
@@ -99,8 +111,8 @@ class LegacyReaderUrlStructureTest extends DependencyInjectedTestCase {
 			$return_post_permalink_url,
 			$this->instance->add_endpoint( $post_permalink_url )
 		);
-		$this->assertEquals( 3, $amp_pre_get_permalink_count );
-		$this->assertEquals( 2, $amp_get_permalink_count );
+		$this->assertEquals( 4, $amp_pre_get_permalink_count );
+		$this->assertEquals( 3, $amp_get_permalink_count );
 	}
 
 	/** @covers ::add_endpoint() */

@@ -19,6 +19,8 @@ use AmpProject\Extension;
 use AmpProject\Optimizer;
 use AmpProject\RequestDestination;
 use AmpProject\Tag;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration;
 
 /**
  * Class AMP_Theme_Support
@@ -123,6 +125,13 @@ class AMP_Theme_Support {
 	 * @var bool
 	 */
 	protected static $is_output_buffering = false;
+
+	/**
+	 * Schema.org metadata
+	 *
+	 * @var array
+	 */
+	protected static $metadata;
 
 	/**
 	 * Initialize.
@@ -834,6 +843,7 @@ class AMP_Theme_Support {
 			remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 			remove_action( 'wp_print_styles', 'print_emoji_styles' );
 			remove_action( 'wp_footer', 'gutenberg_the_skip_link' ); // Temporary workaround for <https://github.com/ampproject/amp-wp/issues/6115>.
+			remove_action( 'wp_footer', 'the_block_template_skip_link' ); // Temporary workaround for <https://github.com/ampproject/amp-wp/issues/6115>.
 			add_action( 'wp_print_styles', [ __CLASS__, 'print_emoji_styles' ] );
 			add_filter( 'the_title', 'wp_staticize_emoji' );
 			add_filter( 'the_excerpt', 'wp_staticize_emoji' );
@@ -1622,6 +1632,9 @@ class AMP_Theme_Support {
 			newrelic_disable_autorum();
 		}
 
+		// Obtain Schema.org metadata so that it will be available.
+		self::$metadata = (array) amp_get_schemaorg_metadata();
+
 		ob_start( [ __CLASS__, 'finish_output_buffering' ] );
 		self::$is_output_buffering = true;
 	}
@@ -1653,34 +1666,10 @@ class AMP_Theme_Support {
 
 		try {
 			$response = self::prepare_response( $response );
+		} catch ( Error $error ) { // Only PHP 7+.
+			$response = self::render_error_page( $error );
 		} catch ( Exception $exception ) {
-			$title   = __( 'Failed to prepare AMP page', 'amp' );
-			$message = __( 'A PHP error occurred while trying to prepare the AMP response. This may not be caused by the AMP plugin but by some other active plugin or the current theme. You will need to review the error details to determine the source of the error.', 'amp' );
-
-			$error_page = Services::get( 'dev_tools.error_page' );
-
-			$error_page
-				->with_title( $title )
-				->with_message( $message )
-				->with_exception( $exception )
-				->with_response_code( 500 );
-
-			// Add link to non-AMP version if not canonical.
-			if ( ! amp_is_canonical() ) {
-				$non_amp_url = amp_remove_paired_endpoint( amp_get_current_url() );
-
-				// Prevent user from being redirected back to AMP version.
-				if ( true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
-					$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $non_amp_url );
-				}
-
-				$error_page->with_back_link(
-					$non_amp_url,
-					__( 'Go to non-AMP version', 'amp' )
-				);
-			}
-
-			$response = $error_page->render();
+			$response = self::render_error_page( $exception );
 		}
 
 		/**
@@ -1693,6 +1682,41 @@ class AMP_Theme_Support {
 		 */
 		do_action( 'amp_server_timing_send' );
 		return $response;
+	}
+
+	/**
+	 * Render error page.
+	 *
+	 * @param Throwable $throwable Exception or (as of PHP7) Error.
+	 */
+	private static function render_error_page( $throwable ) {
+		$title   = __( 'Failed to prepare AMP page', 'amp' );
+		$message = __( 'A PHP error occurred while trying to prepare the AMP response. This may not be caused by the AMP plugin but by some other active plugin or the current theme. You will need to review the error details to determine the source of the error.', 'amp' );
+
+		$error_page = Services::get( 'dev_tools.error_page' );
+
+		$error_page
+			->with_title( $title )
+			->with_message( $message )
+			->with_throwable( $throwable )
+			->with_response_code( 500 );
+
+		// Add link to non-AMP version if not canonical.
+		if ( ! amp_is_canonical() ) {
+			$non_amp_url = amp_remove_paired_endpoint( amp_get_current_url() );
+
+			// Prevent user from being redirected back to AMP version.
+			if ( true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+				$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $non_amp_url );
+			}
+
+			$error_page->with_back_link(
+				$non_amp_url,
+				__( 'Go to non-AMP version', 'amp' )
+			);
+		}
+
+		return $error_page->render();
 	}
 
 	/**
@@ -2086,6 +2110,18 @@ class AMP_Theme_Support {
 				return array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
 					? $args[ ConfigurationArgument::ENABLE_SSR ]
 					: true;
+			},
+			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+		);
+
+		// Supply the Schema.org metadata, previously obtained just before output buffering began, to the AmpSchemaOrgMetadataConfiguration.
+		add_filter(
+			'amp_optimizer_config',
+			function ( $config ) {
+				if ( is_array( self::$metadata ) ) {
+					$config[ AmpSchemaOrgMetadata::class ][ AmpSchemaOrgMetadataConfiguration::METADATA ] = self::$metadata;
+				}
+				return $config;
 			},
 			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		);

@@ -23,7 +23,10 @@ use WP_Query;
 use WP_Rewrite;
 use WP;
 use WP_Hook;
+use WP_Post;
+use WP_Term;
 use WP_Term_Query;
+use WP_User;
 
 /**
  * Service for routing users to and from paired AMP URLs.
@@ -153,6 +156,17 @@ final class PairedRouting implements Service, Registerable {
 	private $did_request_endpoint;
 
 	/**
+	 * Current nesting level for the request.
+	 *
+	 * This is used to capture cases where `WP::parse_request()` is called from inside of a `request`
+	 * filter, a case of a nested/recursive request. It is similar in concept to `ob_get_level()` for
+	 * output buffering.
+	 *
+	 * @var int
+	 */
+	private $current_request_nesting_level = 0;
+
+	/**
 	 * Original environment variables that were rewritten before parsing the request.
 	 *
 	 * @see PairedRouting::detect_endpoint_in_environment()
@@ -274,7 +288,7 @@ final class PairedRouting implements Service, Registerable {
 					'readonly' => true,
 				],
 				self::ENDPOINT_PATH_SLUG_CONFLICTS => [
-					'type'     => 'array',
+					'type'     => 'object',
 					'readonly' => true,
 				],
 				self::REWRITE_USING_PERMALINKS     => [
@@ -321,9 +335,12 @@ final class PairedRouting implements Service, Registerable {
 	/**
 	 * Get the entities that are already using the AMP slug.
 	 *
-	 * @return array Conflict data.
+	 * @return array|null Conflict data or null if there are no conflicts.
+	 * @global WP_Rewrite $wp_rewrite
 	 */
 	public function get_endpoint_path_slug_conflicts() {
+		global $wp_rewrite;
+
 		$conflicts = [];
 		$amp_slug  = amp_get_slug();
 
@@ -331,37 +348,73 @@ final class PairedRouting implements Service, Registerable {
 			[
 				'post_type'      => 'any',
 				'name'           => $amp_slug,
-				'fields'         => 'ids',
 				'posts_per_page' => 100,
 			]
 		);
 		if ( $post_query->post_count > 0 ) {
-			$conflicts['posts'] = $post_query->posts;
+			$conflicts['posts'] = array_map(
+				static function ( WP_Post $post ) {
+					$post_type = get_post_type_object( $post->post_type );
+					return [
+						'id'        => $post->ID,
+						'edit_link' => get_edit_post_link( $post->ID, 'raw' ),
+						'title'     => $post->post_title,
+						'post_type' => $post->post_type,
+						'label'     => isset( $post_type->labels->singular_name )
+									? $post_type->labels->singular_name
+									: null,
+					];
+				},
+				$post_query->posts
+			);
 		}
 
 		$term_query = new WP_Term_Query(
 			[
 				'slug'       => $amp_slug,
-				'fields'     => 'ids',
 				'hide_empty' => false,
 			]
 		);
 		if ( $term_query->terms ) {
-			$conflicts['terms'] = $term_query->terms;
+			$conflicts['terms'] = array_map(
+				static function ( WP_Term $term ) {
+					$taxonomy = get_taxonomy( $term->taxonomy );
+					return [
+						'id'        => $term->term_id,
+						'edit_link' => get_edit_term_link( $term->term_id, $term->taxonomy ),
+						'taxonomy'  => $term->taxonomy,
+						'name'      => $term->name,
+						'label'     => isset( $taxonomy->labels->singular_name )
+									? $taxonomy->labels->singular_name
+									: null,
+					];
+				},
+				$term_query->terms
+			);
 		}
 
 		$user = get_user_by( 'slug', $amp_slug );
-		if ( $user ) {
-			$conflicts['users'] = [ $user->ID ];
+		if ( $user instanceof WP_User ) {
+			$conflicts['user'] = [
+				'id'        => $user->ID,
+				'edit_link' => get_edit_user_link( $user->ID ),
+				'name'      => $user->display_name,
+			];
 		}
 
 		foreach ( get_post_types( [], 'objects' ) as $post_type ) {
 			if (
 				$amp_slug === $post_type->query_var
 				||
-				isset( $post_type->rewrite['slug'] ) && $post_type->rewrite['slug'] === $amp_slug
+				( isset( $post_type->rewrite['slug'] ) && $post_type->rewrite['slug'] === $amp_slug )
 			) {
-				$conflicts['post_types'][] = $post_type->name;
+				$conflicts['post_type'] = [
+					'name'  => $post_type->name,
+					'label' => isset( $post_type->labels->name )
+							? $post_type->labels->name
+							: null,
+				];
+				break;
 			}
 		}
 
@@ -369,10 +422,44 @@ final class PairedRouting implements Service, Registerable {
 			if (
 				$amp_slug === $taxonomy->query_var
 				||
-				isset( $taxonomy->rewrite['slug'] ) && $taxonomy->rewrite['slug'] === $amp_slug
+				( isset( $taxonomy->rewrite['slug'] ) && $taxonomy->rewrite['slug'] === $amp_slug )
 			) {
-				$conflicts['taxonomies'][] = $taxonomy->name;
+				$conflicts['taxonomy'] = [
+					'name'  => $taxonomy->name,
+					'label' => isset( $taxonomy->labels->name )
+							? $taxonomy->labels->name
+							: null,
+
+				];
+				break;
 			}
+		}
+
+		foreach ( $wp_rewrite->endpoints as $endpoint ) {
+			if ( isset( $endpoint[1] ) && $amp_slug === $endpoint[1] ) {
+				$conflicts['rewrite'][] = 'endpoint';
+				break;
+			}
+		}
+		foreach (
+			[
+				'author_base',
+				'comments_base',
+				'search_base',
+				'pagination_base',
+				'feed_base',
+				'comments_pagination_base',
+			]
+			as
+			$key
+		) {
+			if ( isset( $wp_rewrite->$key ) && $amp_slug === $wp_rewrite->$key ) {
+				$conflicts['rewrite'][] = $key;
+			}
+		}
+
+		if ( empty( $conflicts ) ) {
+			return null;
 		}
 
 		return $conflicts;
@@ -388,9 +475,9 @@ final class PairedRouting implements Service, Registerable {
 
 		// Run necessary logic to properly route a request using the registered paired URL structures.
 		$this->detect_endpoint_in_environment();
-		add_filter( 'do_parse_request', [ $this, 'extract_endpoint_from_environment_before_parse_request' ] );
+		add_filter( 'do_parse_request', [ $this, 'extract_endpoint_from_environment_before_parse_request' ], PHP_INT_MAX );
 		add_filter( 'request', [ $this, 'filter_request_after_endpoint_extraction' ] );
-		add_action( 'parse_request', [ $this, 'restore_path_endpoint_in_environment' ] );
+		add_action( 'parse_request', [ $this, 'restore_path_endpoint_in_environment' ], defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX ); // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 
 		// Reserve the 'amp' slug for paired URL structures that use paths.
 		if ( $this->is_using_path_suffix() ) {
@@ -401,7 +488,6 @@ final class PairedRouting implements Service, Registerable {
 
 		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
 		add_action( 'wp', [ $this, 'add_paired_request_hooks' ] );
-
 		add_action( 'admin_notices', [ $this, 'add_permalink_settings_notice' ] );
 	}
 
@@ -472,11 +558,28 @@ final class PairedRouting implements Service, Registerable {
 	 * @return bool Passed-through argument.
 	 */
 	public function extract_endpoint_from_environment_before_parse_request( $do_parse_request ) {
-		if ( $this->did_request_endpoint ) {
+		// If request parsing was aborted, then there's nothing for us to do.
+		if ( ! $do_parse_request ) {
+			return $do_parse_request;
+		}
+
+		// Only do something if doing the outermost request. Note that this function runs with the
+		// latest priority in order to make sure that any other `do_parse_request` filter will have
+		// already applied, and thus we know that the request is indeed going to be parsed.
+		if (
+			$this->did_request_endpoint
+			&&
+			0 === $this->current_request_nesting_level
+		) {
 			foreach ( $this->suspended_environment_variables as $var_name => list( , $new_path ) ) {
 				$_SERVER[ $var_name ] = wp_slash( $new_path ); // Because of wp_magic_quotes().
 			}
 		}
+
+		// Increase the nesting level so we can prevent calling ourselves for any recursive calls
+		// to `WP::parse_request()` during the `request` filter.
+		$this->current_request_nesting_level++;
+
 		return $do_parse_request;
 	}
 
@@ -501,7 +604,17 @@ final class PairedRouting implements Service, Registerable {
 	 * @param WP $wp WP object.
 	 */
 	public function restore_path_endpoint_in_environment( WP $wp ) {
-		if ( ! $this->did_request_endpoint ) {
+		// Since the request has finished the parsing which was detected above in the
+		// `PairedRouting::extract_endpoint_from_environment_before_parse_request()`
+		// method, now decrement the level.
+		$this->current_request_nesting_level--;
+
+		// Only run for the outermost/root request when an AMP endpoint was requested.
+		if (
+			! $this->did_request_endpoint
+			||
+			0 !== $this->current_request_nesting_level
+		) {
 			return;
 		}
 		foreach ( $this->suspended_environment_variables as $var_name => list( $old_path, ) ) {
@@ -570,6 +683,7 @@ final class PairedRouting implements Service, Registerable {
 			if ( $this->is_using_path_suffix() ) {
 				// Filter priority of 0 to purge /amp/ before other filters manipulate it.
 				add_filter( 'get_pagenum_link', [ $this, 'filter_get_pagenum_link' ], 0 );
+				add_filter( 'redirect_canonical', [ $this, 'filter_redirect_canonical_to_fix_cpage_requests' ], 0 );
 			}
 		} else {
 			add_action( 'wp_head', 'amp_add_amphtml_link' );
@@ -592,6 +706,7 @@ final class PairedRouting implements Service, Registerable {
 	 *
 	 * @param string $link Pagenum link.
 	 * @return string Fixed pagenum link.
+	 * @global WP_Rewrite $wp_rewrite
 	 */
 	public function filter_get_pagenum_link( $link ) {
 		global $wp_rewrite;
@@ -656,6 +771,38 @@ final class PairedRouting implements Service, Registerable {
 			</p>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Fix up canonical redirect URLs to put the comments pagination base in the right place.
+	 *
+	 * @param string $redirect_url Canonical redirect URL.
+	 * @return string Updated canonical URL.
+	 * @global WP_Rewrite $wp_rewrite
+	 */
+	public function filter_redirect_canonical_to_fix_cpage_requests( $redirect_url ) {
+		global $wp_rewrite;
+
+		if (
+			! empty( $redirect_url )
+			&&
+			get_query_var( 'cpage' )
+			&&
+			$wp_rewrite instanceof WP_Rewrite
+			&&
+			! empty( $wp_rewrite->comments_pagination_base )
+		) {
+			$amp_slug = amp_get_slug();
+			$regex    = sprintf(
+				":/(%s-[0-9]+)/%s/\\1(/*)($|\?|\#):",
+				preg_quote( $wp_rewrite->comments_pagination_base, ':' ),
+				preg_quote( $amp_slug, ':' )
+			);
+
+			$redirect_url = preg_replace( $regex, "/\\1/{$amp_slug}\\2\\3", $redirect_url );
+		}
+
+		return $redirect_url;
 	}
 
 	/**

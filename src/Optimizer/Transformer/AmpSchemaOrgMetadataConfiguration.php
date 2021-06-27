@@ -46,7 +46,7 @@ final class AmpSchemaOrgMetadataConfiguration extends BaseTransformerConfigurati
 		}
 
 		return [
-			self::METADATA => (array) amp_get_schemaorg_metadata(),
+			self::METADATA => [],
 		];
 	}
 

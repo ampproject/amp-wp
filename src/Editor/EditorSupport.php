@@ -10,6 +10,7 @@
 namespace AmpProject\AmpWP\Editor;
 
 use AMP_Post_Type_Support;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
@@ -20,19 +21,17 @@ use AmpProject\AmpWP\Infrastructure\Service;
  */
 final class EditorSupport implements Registerable, Service {
 
-	/**
-	 * The minimum version of Gutenberg supported by editor features.
-	 *
-	 * @var string
-	 */
-	const GB_MIN_VERSION = '5.4.0';
+	/** @var DependencySupport */
+	private $dependency_support;
 
 	/**
-	 * The minimum version of WordPress supported by editor features.
+	 * Constructor.
 	 *
-	 * @var string
+	 * @param DependencySupport $dependency_support DependencySupport instance.
 	 */
-	const WP_MIN_VERSION = '5.3';
+	public function __construct( DependencySupport $dependency_support ) {
+		$this->dependency_support = $dependency_support;
+	}
 
 	/**
 	 * Runs on instantiation.
@@ -51,7 +50,13 @@ final class EditorSupport implements Registerable, Service {
 			return;
 		}
 
-		if ( ! isset( $screen->is_block_editor ) || false === $screen->is_block_editor ) {
+		$is_block_editor = (
+			! empty( $screen->is_block_editor )
+			||
+			// Applicable to Gutenberg v5.5.0 and older.
+			( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() )
+		);
+		if ( ! $is_block_editor ) {
 			return;
 		}
 
@@ -63,19 +68,21 @@ final class EditorSupport implements Registerable, Service {
 			return;
 		}
 
-		if ( current_user_can( 'manage_options' ) ) {
-			wp_add_inline_script(
-				'wp-edit-post',
-				sprintf(
-					'wp.domReady(
-						function () {
-							wp.data.dispatch( "core/notices" ).createWarningNotice( %s )
-						}
-					);',
-					wp_json_encode( __( 'AMP functionality is not available since your version of the Block Editor is too old. Please either update WordPress core to the latest version or activate the Gutenberg plugin. As a last resort, you may use the Classic Editor plugin instead.', 'amp' ) )
-				)
-			);
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
 		}
+
+		wp_add_inline_script(
+			'wp-edit-post',
+			sprintf(
+				'wp.domReady(
+					function () {
+						wp.data.dispatch( "core/notices" ).createWarningNotice( %s )
+					}
+				);',
+				wp_json_encode( __( 'AMP functionality is not available since your version of the Block Editor is too old. Please either update WordPress core to the latest version or activate the Gutenberg plugin.', 'amp' ) )
+			)
+		);
 	}
 
 	/**
@@ -84,30 +91,6 @@ final class EditorSupport implements Registerable, Service {
 	 * @return bool
 	 */
 	public function editor_supports_amp_block_editor_features() {
-		// Check for plugin constant here as well as in the function because editor features won't work in
-		// supported WP versions if an old, unsupported GB version is overriding the editor.
-		if ( defined( 'GUTENBERG_VERSION' ) ) {
-			return $this->has_support_from_gutenberg_plugin();
-		}
-
-		return $this->has_support_from_core();
-	}
-
-	/**
-	 * Returns whether the Gutenberg plugin provides minimal support.
-	 *
-	 * @return bool
-	 */
-	public function has_support_from_gutenberg_plugin() {
-		return defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, self::GB_MIN_VERSION, '>=' );
-	}
-
-	/**
-	 * Returns whether WP core provides minimum Gutenberg support.
-	 *
-	 * @return bool
-	 */
-	public function has_support_from_core() {
-		return version_compare( get_bloginfo( 'version' ), self::WP_MIN_VERSION, '>=' );
+		return $this->dependency_support->has_support();
 	}
 }
