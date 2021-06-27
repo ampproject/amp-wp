@@ -6,6 +6,8 @@ on:
   push:
     branches:
       - develop
+      # Include all release branches.
+      - '[0-9]+.[0-9]+'
   # Also run workflow on updates to pull requests to auto-label them.
   pull_request:
     types: [opened, reopened, synchronize]
@@ -15,9 +17,17 @@ jobs:
     name: Update release draft
     runs-on: ubuntu-latest
     steps:
+      - name: Determine name of release branch
+        id: release-branch
+        run: |
+          RELEASE_BRANCH=$(REF=${GITHUB_BASE_REF:-$GITHUB_REF} && echo ${REF#refs/heads/} | sed 's/\//-/g')
+          echo "Release branch name: ${RELEASE_BRANCH}"
+          echo "::set-output name=name::${RELEASE_BRANCH}"
+
       - name: Update release draft
         uses: release-drafter/release-drafter@fe52e97d262833ae07d05efaf1a239df3f1b5cd4
         with:
-          config-name: release-drafter.yml
+          commitish: ${{ steps.release-branch.outputs.name }}
+          filter-by-commitish: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
