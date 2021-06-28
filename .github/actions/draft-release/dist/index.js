@@ -755,270 +755,6 @@ module.exports = {"uChars":[128,165,169,178,184,216,226,235,238,244,248,251,253,
 
 /***/ }),
 
-/***/ 119:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-
-// CONCATENATED MODULE: ./src/utils/make_release.js
-const { context } = __webpack_require__(469);
-const github = __webpack_require__(790);
-
-const makeRelease = async (tagName, body, commitish) => {
-	const { owner, repo } = context.repo;
-
-	const {
-		data: { id: releaseId }
-	} = await github.repos.getReleaseByTag({
-		owner,
-		repo,
-		tag: tagName
-	});
-
-	let releaseResponse;
-
-	if (!releaseId) {
-		releaseResponse = await github.repos.createRelease({
-			owner,
-			repo,
-			tag_name: tagName,
-			name: tagName,
-			body,
-			draft: true,
-			prerelease: false,
-			target_commitish: commitish
-		});
-	} else {
-		releaseResponse = await github.repos.updateRelease({
-			owner,
-			repo,
-			body
-		});
-	}
-
-	return releaseResponse;
-};
-
-/* harmony default export */ var make_release = (makeRelease);
-
-// EXTERNAL MODULE: ./src/utils/paginate_by_path.js
-var paginate_by_path = __webpack_require__(306);
-var paginate_by_path_default = /*#__PURE__*/__webpack_require__.n(paginate_by_path);
-
-// EXTERNAL MODULE: ./src/github.js
-var src_github = __webpack_require__(790);
-var undefined = /*#__PURE__*/__webpack_require__.n(src_github);
-
-// CONCATENATED MODULE: ./src/utils/release_draft.js
-/* module decorator */ module = __webpack_require__.hmd(module);
-
-
-
-const findIssuesWithinMilestoneQuery = `
-	query (
-	  $after: String
-	  $searchQuery: String!
-	) {
-	  search(query: $searchQuery, type: ISSUE, first: 100, after: $after) {
-		pageInfo {
-		  endCursor
-		  hasNextPage
-		}
-		nodes {
-		  ... on Issue {
-			title
-			number
-			author {
-			  ... on User {
-				name
-				login
-			  }
-			}
-			participants(first: 100) {
-			  nodes {
-				login
-				name
-			  }
-			}
-		  }
-		  ... on PullRequest {
-			number
-			title
-			bodyText
-			author {
-			  ... on User {
-				name
-				login
-			  }
-			}
-			participants(first: 100) {
-			  nodes {
-				login
-				name
-			  }
-			}
-			commits(first: 200) {
-			  nodes {
-				commit {
-				  authors(first: 10) {
-					nodes {
-					  user {
-						login
-						name
-					  }
-					}
-				  }
-				}
-			  }
-			}
-		  }
-		}
-	  }
-	}
-`;
-
-class release_draft_ReleaseDraft {
-	constructor(milestone) {
-		this.milestone = milestone;
-
-		this.changelogEntries = new Map();
-		this.contributorEntries = new Map();
-
-		this.authorsToIgnore = ['CLAassistant', 'dependabot', 'dependabot-preview[bot]', 'googlebot', 'renovate-bot'];
-
-		this.graphQlVariables = {
-			searchQuery: `repo:ampproject/amp-wp milestone:v${milestone} is:closed`
-		};
-	}
-
-	generate() {
-		const data = paginate_by_path_default()(undefined.a.graphql, findIssuesWithinMilestoneQuery, this.graphQlVariables, ['search']);
-
-		data.search.nodes.forEach(issueOrPr => {
-			// Skip if author is in ignore list, or an empty author object was returned (usually happens when the author is a bot).
-			if (this.authorsToIgnore.includes(issueOrPr.author.login) || Object.entries(issueOrPr.author).length === 0) {
-				return;
-			}
-
-			// Add issue/PR author as a contributor.
-			if (!this.contributorEntries.has(issueOrPr.author.login)) {
-				this.contributorEntries.set(issueOrPr.author.login, issueOrPr.author.name);
-			}
-
-			// Add participants of issue/PR to list of contributors.
-			issueOrPr.participants.nodes.forEach(participant => {
-				if (!this.contributorEntries.has(participant.login)) {
-					this.contributorEntries.set(participant.login, participant.name);
-				}
-			});
-
-			const { closedItems } = this.changelogEntries.get(issueOrPr.number).closedItems;
-			const currentChangelogEntry = {
-				title: issueOrPr.title,
-				closedItems: [issueOrPr.number, ...(closedItems || [])]
-			};
-
-			// It's a PR if it has commits.
-			if ('commits' in issueOrPr) {
-				this.handlePr(issueOrPr, currentChangelogEntry);
-			} else {
-				// It's an issue.
-				this.handleIssue(issueOrPr, currentChangelogEntry);
-			}
-		});
-
-		return {
-			changelog: this.generateChangelog(),
-			contributors: this.generateContributors()
-		};
-	}
-
-	handlePr(pr, currentChangelogEntry) {
-		const commits = pr.commits.nodes;
-
-		// Retrieve list of commit authors and add them as contributors.
-		commits.forEach(commit => {
-			const authors = commit.commit.authors.nodes;
-
-			authors.forEach(author => {
-				if (!this.contributorEntries.has(author.user.login)) {
-					this.contributorEntries.set(author.user.login, author.user.name);
-				}
-			});
-		});
-
-		const closedItems = [...pr.bodyText.matchAll(/(?:Fixes|Fixed|Fix|Closes|Closed|Close)\s+#(\d+)/gi)];
-
-		// Add changelog entry for PR if it doesn't close any issues/PRs.
-		if (closedItems.length === 0) {
-			this.changelogEntries.set(pr.number, currentChangelogEntry);
-			return;
-		}
-
-		closedItems.forEach(([, closedItemNumber]) => {
-			const itemNumber = parseInt(closedItemNumber, 10);
-			if (!this.changelogEntries.has(itemNumber)) {
-				this.changelogEntries.set(itemNumber, { closedItems: [pr.number] });
-			} else {
-				const closedItemNumberEntry = this.changelogEntries.get(itemNumber);
-				if (closedItemNumberEntry.closedItems.includes(pr.number)) {
-					return;
-				}
-				closedItemNumberEntry.closedItems.push(pr.number);
-			}
-		});
-	}
-
-	handleIssue(issue, currentChangelogEntry) {
-		this.changelogEntries.set(issue.number, currentChangelogEntry);
-	}
-
-	generateChangelog() {
-		return [...this.changelogEntries.entries()]
-			.map(([itemNumber, details]) => {
-				if (!details.title) {
-					throw new Error(`Title for #${itemNumber} was not set. Is it apart of the milestone?`);
-				}
-
-				return `- ${details.title}. (${details.closedItems.map(closedItem => `#${closedItem}`).join(', ')})`;
-			})
-			.join('\n');
-	}
-
-	generateContributors() {
-		return [...this.contributorEntries.entries()]
-			.filter(([username]) => !this.authorsToIgnore.includes(username))
-			.sort(([aUsername, aName], [bUsername, bName]) => {
-				const aComparator = aName || aUsername;
-				const bComparator = bName || bUsername;
-
-				if (aComparator.toLowerCase() < bComparator.toLowerCase()) {
-					return -1;
-				}
-				if (aComparator.toLowerCase() > bComparator.toLowerCase()) {
-					return 1;
-				}
-				return 0;
-			})
-			.map(([username, name]) => (name === null ? `@${username}` : `${name} (@${username})`))
-			.join(', ');
-	}
-}
-
-module.exports = release_draft_ReleaseDraft;
-
-// CONCATENATED MODULE: ./src/utils/index.js
-/* concated harmony reexport */ __webpack_require__.d(__webpack_exports__, "makeRelease", function() { return make_release; });
-/* concated harmony reexport */ __webpack_require__.d(__webpack_exports__, "paginateByPath", function() { return paginate_by_path_default.a; });
-/* concated harmony reexport */ __webpack_require__.d(__webpack_exports__, "ReleaseDraft", function() { return release_draft_ReleaseDraft; });
-
-
-
-
-
-/***/ }),
-
 /***/ 127:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -1446,6 +1182,275 @@ module.exports = [["0","\u0000",127],["8ea1","｡",62],["a1a1","　、。，．�
 
 /***/ }),
 
+/***/ 235:
+/***/ (function(__unusedmodule, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+
+// CONCATENATED MODULE: ./src/utils/make_release.js
+const core = __webpack_require__(470);
+const github = __webpack_require__(469);
+const { RequestError } = __webpack_require__(463);
+
+const makeRelease = async (tagName, body, commitish) => {
+	const { owner, repo } = github.context.repo;
+	const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+
+	let release;
+	try {
+		release = await octokit.rest.repos.getReleaseByTag({
+			owner,
+			repo,
+			tag: tagName
+		});
+	} catch (error) {
+		if (error instanceof RequestError && error.status === 404) {
+			release = null;
+		} else {
+			throw error;
+		}
+	}
+
+	let releaseResponse;
+
+	if (!release) {
+		releaseResponse = await octokit.rest.repos.createRelease({
+			owner,
+			repo,
+			tag_name: tagName,
+			name: tagName,
+			body,
+			draft: true,
+			prerelease: false,
+			target_commitish: commitish
+		});
+		core.info(`Created ${tagName} release`);
+	} else {
+		releaseResponse = await octokit.rest.repos.updateRelease({
+			owner,
+			repo,
+			release_id: release.id,
+			tag_name: tagName,
+			name: tagName,
+			body
+		});
+		core.info(`Updated ${tagName} release`);
+	}
+
+	return releaseResponse;
+};
+
+/* harmony default export */ var make_release = (makeRelease);
+
+// CONCATENATED MODULE: ./src/utils/release_body.js
+const release_body_github = __webpack_require__(469);
+const paginateByPath = __webpack_require__(306);
+
+const findIssuesWithinMilestoneQuery = `
+	query (
+	  $after: String
+	  $searchQuery: String!
+	) {
+	  search(query: $searchQuery, type: ISSUE, first: 100, after: $after) {
+		pageInfo {
+		  endCursor
+		  hasNextPage
+		}
+		nodes {
+		  ... on Issue {
+			title
+			number
+			author {
+			  ... on User {
+				name
+				login
+			  }
+			}
+			participants(first: 100) {
+			  nodes {
+				login
+				name
+			  }
+			}
+		  }
+		  ... on PullRequest {
+			number
+			title
+			bodyText
+			author {
+			  ... on User {
+				name
+				login
+			  }
+			}
+			participants(first: 100) {
+			  nodes {
+				login
+				name
+			  }
+			}
+			commits(first: 200) {
+			  nodes {
+				commit {
+				  authors(first: 10) {
+					nodes {
+					  user {
+						login
+						name
+					  }
+					}
+				  }
+				}
+			  }
+			}
+		  }
+		}
+	  }
+	}
+`;
+
+class ReleaseBody {
+	constructor(milestone) {
+		this.milestone = milestone;
+
+		this.changelogEntries = new Map();
+		this.contributorEntries = new Map();
+
+		this.authorsToIgnore = ['CLAassistant', 'dependabot', 'dependabot-preview[bot]', 'googlebot', 'renovate-bot'];
+
+		this.graphQlVariables = {
+			// searchQuery: `repo:${process.env.GITHUB_REPOSITORY} milestone:${milestone} is:closed`
+			searchQuery: `repo:ampproject/amp-wp milestone:${milestone} is:closed`
+		};
+	}
+
+	async generate() {
+		const octokit = release_body_github.getOctokit(process.env.GITHUB_TOKEN);
+		const { search } = await paginateByPath(octokit.graphql, findIssuesWithinMilestoneQuery, this.graphQlVariables, [
+			'search'
+		]);
+
+		search.nodes.forEach(issueOrPr => {
+			// Skip if author is in ignore list, or an empty author object was returned (usually happens when the author is a bot).
+			if (this.authorsToIgnore.includes(issueOrPr.author.login) || Object.entries(issueOrPr.author).length === 0) {
+				return;
+			}
+
+			// Add issue/PR author as a contributor.
+			if (!this.contributorEntries.has(issueOrPr.author.login)) {
+				this.contributorEntries.set(issueOrPr.author.login, issueOrPr.author.name);
+			}
+
+			// Add participants of issue/PR to list of contributors.
+			issueOrPr.participants.nodes.forEach(participant => {
+				if (!this.contributorEntries.has(participant.login)) {
+					this.contributorEntries.set(participant.login, participant.name);
+				}
+			});
+
+			const currentClosedItems =
+				'closedItems' in (this.changelogEntries.get(issueOrPr.number) || {})
+					? this.changelogEntries.get(issueOrPr.number).closedItems
+					: [];
+			const currentChangelogEntry = {
+				title: issueOrPr.title,
+				closedItems: [issueOrPr.number, ...currentClosedItems]
+			};
+
+			// It's a PR if it has commits.
+			if ('commits' in issueOrPr) {
+				this.handlePr(issueOrPr, currentChangelogEntry);
+			} else {
+				// It's an issue.
+				this.handleIssue(issueOrPr, currentChangelogEntry);
+			}
+		});
+
+		return `##Changelog:\n${this.generateChangelog()}\n\n##Contributors:\n${this.generateContributors()}`;
+	}
+
+	handlePr(pr, currentChangelogEntry) {
+		const commits = pr.commits.nodes;
+
+		// Retrieve list of commit authors and add them as contributors.
+		commits.forEach(commit => {
+			const authors = commit.commit.authors.nodes;
+
+			authors.forEach(author => {
+				if (!this.contributorEntries.has(author.user.login)) {
+					this.contributorEntries.set(author.user.login, author.user.name);
+				}
+			});
+		});
+
+		const closedItems = [...pr.bodyText.matchAll(/(?:Fixes|Fixed|Fix|Closes|Closed|Close)\s+#(\d+)/gi)];
+
+		// Add changelog entry for PR if it doesn't close any issues/PRs.
+		if (closedItems.length === 0) {
+			this.changelogEntries.set(pr.number, currentChangelogEntry);
+			return;
+		}
+
+		closedItems.forEach(([, closedItemNumber]) => {
+			const itemNumber = parseInt(closedItemNumber, 10);
+			if (!this.changelogEntries.has(itemNumber)) {
+				this.changelogEntries.set(itemNumber, { closedItems: [pr.number] });
+			} else {
+				const closedItemNumberEntry = this.changelogEntries.get(itemNumber);
+				if (closedItemNumberEntry.closedItems.includes(pr.number)) {
+					return;
+				}
+				closedItemNumberEntry.closedItems.push(pr.number);
+			}
+		});
+	}
+
+	handleIssue(issue, currentChangelogEntry) {
+		this.changelogEntries.set(issue.number, currentChangelogEntry);
+	}
+
+	generateChangelog() {
+		return [...this.changelogEntries.entries()]
+			.map(([itemNumber, details]) => {
+				if (!details.title) {
+					throw new Error(`Title for #${itemNumber} was not set. Is it apart of the milestone?`);
+				}
+
+				return `- ${details.title}. (${details.closedItems.map(closedItem => `#${closedItem}`).join(', ')})`;
+			})
+			.join('\n');
+	}
+
+	generateContributors() {
+		return [...this.contributorEntries.entries()]
+			.filter(([username]) => !this.authorsToIgnore.includes(username))
+			.sort(([aUsername, aName], [bUsername, bName]) => {
+				const aComparator = aName || aUsername;
+				const bComparator = bName || bUsername;
+
+				if (aComparator.toLowerCase() < bComparator.toLowerCase()) {
+					return -1;
+				}
+				if (aComparator.toLowerCase() > bComparator.toLowerCase()) {
+					return 1;
+				}
+				return 0;
+			})
+			.map(([username, name]) => (name === null ? `@${username}` : `${name} (@${username})`))
+			.join(', ');
+	}
+}
+
+// CONCATENATED MODULE: ./src/utils/index.js
+/* concated harmony reexport */ __webpack_require__.d(__webpack_exports__, "makeRelease", function() { return make_release; });
+/* concated harmony reexport */ __webpack_require__.d(__webpack_exports__, "ReleaseBody", function() { return ReleaseBody; });
+
+
+
+
+/***/ }),
+
 /***/ 262:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -1549,17 +1554,17 @@ function register(state, name, method, options) {
 var Buffer = __webpack_require__(572).Buffer;
 
 // Single-byte codec. Needs a 'chars' string parameter that contains 256 or 128 chars that
-// correspond to encoded bytes (if 128 - then lower half is ASCII). 
+// correspond to encoded bytes (if 128 - then lower half is ASCII).
 
 exports._sbcs = SBCSCodec;
 function SBCSCodec(codecOptions, iconv) {
     if (!codecOptions)
         throw new Error("SBCS codec is called without the data.")
-    
+
     // Prepare char buffer for decoding.
     if (!codecOptions.chars || (codecOptions.chars.length !== 128 && codecOptions.chars.length !== 256))
         throw new Error("Encoding '"+codecOptions.type+"' has incorrect 'chars' (must be of len 128 or 256)");
-    
+
     if (codecOptions.chars.length === 128) {
         var asciiString = "";
         for (var i = 0; i < 128; i++)
@@ -1568,7 +1573,7 @@ function SBCSCodec(codecOptions, iconv) {
     }
 
     this.decodeBuf = Buffer.from(codecOptions.chars, 'ucs2');
-    
+
     // Encoding buffer.
     var encodeBuf = Buffer.alloc(65536, iconv.defaultCharSingleByte.charCodeAt(0));
 
@@ -1590,7 +1595,7 @@ SBCSEncoder.prototype.write = function(str) {
     var buf = Buffer.alloc(str.length);
     for (var i = 0; i < str.length; i++)
         buf[i] = this.encodeBuf[str.charCodeAt(i)];
-    
+
     return buf;
 }
 
@@ -2504,7 +2509,7 @@ Utf16Decoder.prototype.write = function(buf) {
         // Codec is not chosen yet. Accumulate initial bytes.
         this.initialBufs.push(buf);
         this.initialBufsLen += buf.length;
-        
+
         if (this.initialBufsLen < 16) // We need more bytes to use space heuristic (see below)
             return '';
 
@@ -5091,7 +5096,7 @@ Utf32Decoder.prototype.write = function(src) {
     if (overflow.length > 0) {
         for (; i < src.length && overflow.length < 4; i++)
             overflow.push(src[i]);
-        
+
         if (overflow.length === 4) {
             // NOTE: codepoint is a signed int32 and can be negative.
             // NOTE: We copied this block from below to help V8 optimize it (it works with array, not buffer).
@@ -5130,7 +5135,7 @@ function _writeCodepoint(dst, offset, codepoint, badChar) {
     if (codepoint < 0 || codepoint > 0x10FFFF) {
         // Not a valid Unicode codepoint
         codepoint = badChar;
-    } 
+    }
 
     // Ephemeral Planes: Write high surrogate.
     if (codepoint >= 0x10000) {
@@ -5202,7 +5207,7 @@ function Utf32AutoDecoder(options, codec) {
 }
 
 Utf32AutoDecoder.prototype.write = function(buf) {
-    if (!this.decoder) { 
+    if (!this.decoder) {
         // Codec is not chosen yet. Accumulate initial bytes.
         this.initialBufs.push(buf);
         this.initialBufsLen += buf.length;
@@ -5446,7 +5451,7 @@ function InternalDecoderCesu8(options, codec) {
 }
 
 InternalDecoderCesu8.prototype.write = function(buf) {
-    var acc = this.acc, contBytes = this.contBytes, accBytes = this.accBytes, 
+    var acc = this.acc, contBytes = this.contBytes, accBytes = this.accBytes,
         res = '';
     for (var i = 0; i < buf.length; i++) {
         var curByte = buf[i];
@@ -6231,7 +6236,7 @@ exports.HttpClient = HttpClient;
 
 var Buffer = __webpack_require__(572).Buffer;
 
-// NOTE: Due to 'stream' module being pretty large (~100Kb, significant in browser environments), 
+// NOTE: Due to 'stream' module being pretty large (~100Kb, significant in browser environments),
 // we opt to dependency-inject it instead of creating a hard dependency.
 module.exports = function(stream_module) {
     var Transform = stream_module.Transform;
@@ -6313,7 +6318,7 @@ module.exports = function(stream_module) {
     IconvLiteDecoderStream.prototype._flush = function(done) {
         try {
             var res = this.conv.end();
-            if (res && res.length) this.push(res, this.encoding);                
+            if (res && res.length) this.push(res, this.encoding);
             done();
         }
         catch (e) {
@@ -23653,11 +23658,11 @@ module.exports = safer
 // require()-s are direct to support Browserify.
 
 module.exports = {
-    
+
     // == Japanese/ShiftJIS ====================================================
     // All japanese encodings are based on JIS X set of standards:
     // JIS X 0201 - Single-byte encoding of ASCII + ¥ + Kana chars at 0xA1-0xDF.
-    // JIS X 0208 - Main set of 6879 characters, placed in 94x94 plane, to be encoded by 2 bytes. 
+    // JIS X 0208 - Main set of 6879 characters, placed in 94x94 plane, to be encoded by 2 bytes.
     //              Has several variations in 1978, 1983, 1990 and 1997.
     // JIS X 0212 - Supplementary plane of 6067 chars in 94x94 plane. 1990. Effectively dead.
     // JIS X 0213 - Extension and modern replacement of 0208 and 0212. Total chars: 11233.
@@ -23675,7 +23680,7 @@ module.exports = {
     //               0x8F, (0xA1-0xFE)x2 - 0212 plane (94x94).
     //  * JIS X 208: 7-bit, direct encoding of 0208. Byte ranges: 0x21-0x7E (94 values). Uncommon.
     //               Used as-is in ISO2022 family.
-    //  * ISO2022-JP: Stateful encoding, with escape sequences to switch between ASCII, 
+    //  * ISO2022-JP: Stateful encoding, with escape sequences to switch between ASCII,
     //                0201-1976 Roman, 0208-1978, 0208-1983.
     //  * ISO2022-JP-1: Adds esc seq for 0212-1990.
     //  * ISO2022-JP-2: Adds esc seq for GB2313-1980, KSX1001-1992, ISO8859-1, ISO8859-7.
@@ -23787,7 +23792,7 @@ module.exports = {
     //  * Windows CP 951: Microsoft variant of Big5-HKSCS-2001. Seems to be never public. http://me.abelcheung.org/articles/research/what-is-cp951/
     //  * Big5-2003 (Taiwan standard) almost superset of cp950.
     //  * Unicode-at-on (UAO) / Mozilla 1.8. Falling out of use on the Web. Not supported by other browsers.
-    //  * Big5-HKSCS (-2001, -2004, -2008). Hong Kong standard. 
+    //  * Big5-HKSCS (-2001, -2004, -2008). Hong Kong standard.
     //    many unicode code points moved from PUA to Supplementary plane (U+2XXXX) over the years.
     //    Plus, it has 4 combining sequences.
     //    Seems that Mozilla refused to support it for 10 yrs. https://bugzilla.mozilla.org/show_bug.cgi?id=162431 https://bugzilla.mozilla.org/show_bug.cgi?id=310299
@@ -23798,7 +23803,7 @@ module.exports = {
     //    In the encoder, it might make sense to support encoding old PUA mappings to Big5 bytes seq-s.
     //    Official spec: http://www.ogcio.gov.hk/en/business/tech_promotion/ccli/terms/doc/2003cmp_2008.txt
     //                   http://www.ogcio.gov.hk/tc/business/tech_promotion/ccli/terms/doc/hkscs-2008-big5-iso.txt
-    // 
+    //
     // Current understanding of how to deal with Big5(-HKSCS) is in the Encoding Standard, http://encoding.spec.whatwg.org/#big5-encoder
     // Unicode mapping (http://www.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/OTHER/BIG5.TXT) is said to be wrong.
 
@@ -23869,16 +23874,15 @@ module.exports = [["0","\u0000",128],["a1","｡",62],["8140","　、。，．・
 /***/ }),
 
 /***/ 676:
-/***/ (function(__unusedmodule, __webpack_exports__, __webpack_require__) {
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return main; });
+const fs = __webpack_require__(747);
+const path = __webpack_require__(622);
 const core = __webpack_require__(470);
-const { context } = __webpack_require__(469);
-const { ReleaseDraft, makeRelease } = __webpack_require__(119);
+const github = __webpack_require__(469);
+const { ReleaseBody, makeRelease } = __webpack_require__(235);
 
-function main() {
+async function main() {
 	try {
 		const milestone = core.getInput('milestone', { required: true });
 
@@ -23887,19 +23891,37 @@ function main() {
 			throw new Error('Milestone name is invalid.');
 		}
 
-		const tagName = milestone;
-		const releaseDraft = new ReleaseDraft(milestone).generate();
-		const releaseBranch = context.ref.replace('refs/heads/', '');
+		// Get tag name from plugin main PHP file.
+		let tagName = '';
+		const pluginFile = fs.readFileSync(path.resolve(process.cwd(), 'amp.php')).toString();
+		const matches = /\*\s+Version:\s+(\d+(\.\d+)+-\w+)/.exec(pluginFile);
+		if (matches && matches[1]) {
+			[, tagName] = matches;
+		}
 
+		// Get target branch.
+		const targetBranch = github.context.ref.replace('refs/heads/', '');
+
+		core.info(`Tag: ${tagName}`);
+		core.info(`Milestone: ${milestone}`);
+		core.info(`Target branch: ${targetBranch}`);
+
+		// Generate release body.
+		const releaseBody = await new ReleaseBody(milestone).generate();
+
+		// Make GitHub release.
 		const {
-			data: { upload_url: assetUploadUrl }
-		} = makeRelease(tagName, releaseDraft, releaseBranch);
+			data: { html_url: htmlUrl, upload_url: assetUploadUrl }
+		} = await makeRelease(tagName, releaseBody, targetBranch);
 
+		core.info(`Release draft URL: ${htmlUrl}`);
 		core.setOutput('asset_upload_url', assetUploadUrl);
 	} catch (error) {
-		core.setFailed(error.message);
+		core.setFailed(error.stack);
 	}
 }
+
+main().catch(core.error);
 
 
 /***/ }),
@@ -24159,23 +24181,6 @@ exports.request = request;
 /***/ (function(module) {
 
 module.exports = require("zlib");
-
-/***/ }),
-
-/***/ 790:
-/***/ (function(__unusedmodule, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-const { GitHub } = __webpack_require__(469);
-
-// Use only one instance of the GitHub client (Ocktokit).
-if (!global.github) {
-	global.github = new GitHub(process.env.GITHUB_TOKEN);
-}
-
-/* harmony default export */ __webpack_exports__["default"] = (global.github);
-
 
 /***/ }),
 
@@ -25794,8 +25799,8 @@ Utf7Encoder.prototype.write = function(str) {
     // Naive implementation.
     // Non-direct chars are encoded as "+<base64>-"; single "+" char is encoded as "+-".
     return Buffer.from(str.replace(nonDirectChars, function(chunk) {
-        return "+" + (chunk === '+' ? '' : 
-            this.iconv.encode(chunk, 'utf16-be').toString('base64').replace(/=+$/, '')) 
+        return "+" + (chunk === '+' ? '' :
+            this.iconv.encode(chunk, 'utf16-be').toString('base64').replace(/=+$/, ''))
             + "-";
     }.bind(this)));
 }
@@ -25817,7 +25822,7 @@ var base64Chars = [];
 for (var i = 0; i < 256; i++)
     base64Chars[i] = base64Regex.test(String.fromCharCode(i));
 
-var plusChar = '+'.charCodeAt(0), 
+var plusChar = '+'.charCodeAt(0),
     minusChar = '-'.charCodeAt(0),
     andChar = '&'.charCodeAt(0);
 
@@ -26303,7 +26308,7 @@ function DBCSCodec(codecOptions, iconv) {
     this.decodeTables = [];
     this.decodeTables[0] = UNASSIGNED_NODE.slice(0); // Create root node.
 
-    // Sometimes a MBCS char corresponds to a sequence of unicode chars. We store them as arrays of integers here. 
+    // Sometimes a MBCS char corresponds to a sequence of unicode chars. We store them as arrays of integers here.
     this.decodeTableSeq = [];
 
     // Actual mapping tables consist of chunks. Use them to fill up decode tables.
@@ -26354,7 +26359,7 @@ function DBCSCodec(codecOptions, iconv) {
 
     this.defaultCharUnicode = iconv.defaultCharUnicode;
 
-    
+
     // Encode tables: Unicode -> DBCS.
 
     // `encodeTable` is array mapping from unicode char to encoded char. All its values are integers for performance.
@@ -26363,7 +26368,7 @@ function DBCSCodec(codecOptions, iconv) {
     //         == UNASSIGNED -> no conversion found. Output a default char.
     //         <= SEQ_START  -> it's an index in encodeTableSeq, see below. The character starts a sequence.
     this.encodeTable = [];
-    
+
     // `encodeTableSeq` is used when a sequence of unicode characters is encoded as a single code. We use a tree of
     // objects where keys correspond to characters in sequence and leafs are the encoded dbcs values. A special DEF_CHAR key
     // means end of sequence (needed when one sequence is a strict subsequence of another).
@@ -26381,7 +26386,7 @@ function DBCSCodec(codecOptions, iconv) {
                 for (var j = val.from; j <= val.to; j++)
                     skipEncodeChars[j] = true;
         }
-        
+
     // Use decode trie to recursively fill out encode tables.
     this._fillEncodeTable(0, 0, skipEncodeChars);
 
@@ -26459,7 +26464,7 @@ DBCSCodec.prototype._addDecodeChunk = function(chunk) {
                 else
                     writeTable[curAddr++] = code; // Basic char
             }
-        } 
+        }
         else if (typeof part === "number") { // Integer, meaning increasing sequence starting with prev character.
             var charCode = writeTable[curAddr - 1] + 1;
             for (var l = 0; l < part; l++)
@@ -26490,7 +26495,7 @@ DBCSCodec.prototype._setEncodeChar = function(uCode, dbcsCode) {
 }
 
 DBCSCodec.prototype._setEncodeSequence = function(seq, dbcsCode) {
-    
+
     // Get the root of character tree according to first character of the sequence.
     var uCode = seq[0];
     var bucket = this._getEncodeBucket(uCode);
@@ -26564,7 +26569,7 @@ function DBCSEncoder(options, codec) {
     // Encoder state
     this.leadSurrogate = -1;
     this.seqObj = undefined;
-    
+
     // Static data
     this.encodeTable = codec.encodeTable;
     this.encodeTableSeq = codec.encodeTableSeq;
@@ -26586,7 +26591,7 @@ DBCSEncoder.prototype.write = function(str) {
         }
         else {
             var uCode = nextChar;
-            nextChar = -1;    
+            nextChar = -1;
         }
 
         // 1. Handle surrogates.
@@ -26608,7 +26613,7 @@ DBCSEncoder.prototype.write = function(str) {
                     // Incomplete surrogate pair - only trail surrogate found.
                     uCode = UNASSIGNED;
                 }
-                
+
             }
         }
         else if (leadSurrogate !== -1) {
@@ -26649,7 +26654,7 @@ DBCSEncoder.prototype.write = function(str) {
             var subtable = this.encodeTable[uCode >> 8];
             if (subtable !== undefined)
                 dbcsCode = subtable[uCode & 0xFF];
-            
+
             if (dbcsCode <= SEQ_START) { // Sequence start
                 seqObj = this.encodeTableSeq[SEQ_START-dbcsCode];
                 continue;
@@ -26672,7 +26677,7 @@ DBCSEncoder.prototype.write = function(str) {
         // 3. Write dbcsCode character.
         if (dbcsCode === UNASSIGNED)
             dbcsCode = this.defaultCharSingleByte;
-        
+
         if (dbcsCode < 0x100) {
             newBuf[j++] = dbcsCode;
         }
@@ -26724,7 +26729,7 @@ DBCSEncoder.prototype.end = function() {
         newBuf[j++] = this.defaultCharSingleByte;
         this.leadSurrogate = -1;
     }
-    
+
     return newBuf.slice(0, j);
 }
 
@@ -26748,7 +26753,7 @@ function DBCSDecoder(options, codec) {
 
 DBCSDecoder.prototype.write = function(buf) {
     var newBuf = Buffer.alloc(buf.length*2),
-        nodeIdx = this.nodeIdx, 
+        nodeIdx = this.nodeIdx,
         prevBytes = this.prevBytes, prevOffset = this.prevBytes.length,
         seqStart = -this.prevBytes.length, // idx of the start of current parsed sequence.
         uCode;
@@ -26759,7 +26764,7 @@ DBCSDecoder.prototype.write = function(buf) {
         // Lookup in current trie node.
         var uCode = this.decodeTables[nodeIdx][curByte];
 
-        if (uCode >= 0) { 
+        if (uCode >= 0) {
             // Normal character, just use it.
         }
         else if (uCode === UNASSIGNED) { // Unknown char.
@@ -26771,9 +26776,9 @@ DBCSDecoder.prototype.write = function(buf) {
             if (i >= 3) {
                 var ptr = (buf[i-3]-0x81)*12600 + (buf[i-2]-0x30)*1260 + (buf[i-1]-0x81)*10 + (curByte-0x30);
             } else {
-                var ptr = (prevBytes[i-3+prevOffset]-0x81)*12600 + 
-                          (((i-2 >= 0) ? buf[i-2] : prevBytes[i-2+prevOffset])-0x30)*1260 + 
-                          (((i-1 >= 0) ? buf[i-1] : prevBytes[i-1+prevOffset])-0x81)*10 + 
+                var ptr = (prevBytes[i-3+prevOffset]-0x81)*12600 +
+                          (((i-2 >= 0) ? buf[i-2] : prevBytes[i-2+prevOffset])-0x30)*1260 +
+                          (((i-1 >= 0) ? buf[i-1] : prevBytes[i-1+prevOffset])-0x81)*10 +
                           (curByte-0x30);
             }
             var idx = findIdx(this.gb18030.gbChars, ptr);
@@ -26796,7 +26801,7 @@ DBCSDecoder.prototype.write = function(buf) {
             throw new Error("iconv-lite internal error: invalid decoding table value " + uCode + " at " + nodeIdx + "/" + curByte);
 
         // Write the character to buffer, handling higher planes using surrogate pair.
-        if (uCode >= 0x10000) { 
+        if (uCode >= 0x10000) {
             uCode -= 0x10000;
             var uCodeLead = 0xD800 | (uCode >> 10);
             newBuf[j++] = uCodeLead & 0xFF;
@@ -26887,7 +26892,7 @@ iconv.encode = function encode(str, encoding, options) {
 
     var res = encoder.write(str);
     var trail = encoder.end();
-    
+
     return (trail && trail.length > 0) ? Buffer.concat([res, trail]) : res;
 }
 
@@ -26927,7 +26932,7 @@ iconv._codecDataCache = {};
 iconv.getCodec = function getCodec(encoding) {
     if (!iconv.encodings)
         iconv.encodings = __webpack_require__(707); // Lazy load all encoding definitions.
-    
+
     // Canonicalize encoding name: strip all non-alphanumeric chars and appended year.
     var enc = iconv._canonicalizeEncoding(encoding);
 
@@ -26951,7 +26956,7 @@ iconv.getCodec = function getCodec(encoding) {
 
                 if (!codecOptions.encodingName)
                     codecOptions.encodingName = enc;
-                
+
                 enc = codecDef.type;
                 break;
 
@@ -27049,29 +27054,7 @@ if (false) {}
 /******/ },
 /******/ function(__webpack_require__) { // webpackRuntimeModules
 /******/ 	"use strict";
-/******/ 
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	!function() {
-/******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = function(exports) {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	}();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getter */
-/******/ 	!function() {
-/******/ 		// define getter function for harmony exports
-/******/ 		var hasOwnProperty = Object.prototype.hasOwnProperty;
-/******/ 		__webpack_require__.d = function(exports, name, getter) {
-/******/ 			if(!hasOwnProperty.call(exports, name)) {
-/******/ 				Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 			}
-/******/ 		};
-/******/ 	}();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/node module decorator */
 /******/ 	!function() {
 /******/ 		__webpack_require__.nmd = function(module) {
@@ -27088,60 +27071,28 @@ if (false) {}
 /******/ 			return module;
 /******/ 		};
 /******/ 	}();
-/******/ 	
-/******/ 	/* webpack/runtime/create fake namespace object */
+/******/
+/******/ 	/* webpack/runtime/make namespace object */
 /******/ 	!function() {
-/******/ 		// create a fake namespace object
-/******/ 		// mode & 1: value is a module id, require it
-/******/ 		// mode & 2: merge all properties of value into the ns
-/******/ 		// mode & 4: return value when already ns object
-/******/ 		// mode & 8|1: behave like require
-/******/ 		__webpack_require__.t = function(value, mode) {
-/******/ 			if(mode & 1) value = this(value);
-/******/ 			if(mode & 8) return value;
-/******/ 			if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 			var ns = Object.create(null);
-/******/ 			__webpack_require__.r(ns);
-/******/ 			Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 			if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 			return ns;
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = function(exports) {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
 /******/ 	}();
-/******/ 	
-/******/ 	/* webpack/runtime/compat get default export */
+/******/
+/******/ 	/* webpack/runtime/define property getter */
 /******/ 	!function() {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = function(module) {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				function getDefault() { return module['default']; } :
-/******/ 				function getModuleExports() { return module; };
-/******/ 			__webpack_require__.d(getter, 'a', getter);
-/******/ 			return getter;
+/******/ 		// define getter function for harmony exports
+/******/ 		var hasOwnProperty = Object.prototype.hasOwnProperty;
+/******/ 		__webpack_require__.d = function(exports, name, getter) {
+/******/ 			if(!hasOwnProperty.call(exports, name)) {
+/******/ 				Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 			}
 /******/ 		};
 /******/ 	}();
-/******/ 	
-/******/ 	/* webpack/runtime/harmony module decorator */
-/******/ 	!function() {
-/******/ 		__webpack_require__.hmd = function(module) {
-/******/ 			module = Object.create(module);
-/******/ 			if (!module.children) module.children = [];
-/******/ 			Object.defineProperty(module, 'loaded', {
-/******/ 				enumerable: true,
-/******/ 				get: function () { return module.l; }
-/******/ 			});
-/******/ 			Object.defineProperty(module, 'id', {
-/******/ 				enumerable: true,
-/******/ 				get: function () { return module.i; }
-/******/ 			});
-/******/ 			Object.defineProperty(module, 'exports', {
-/******/ 				enumerable: true,
-/******/ 				set: function () {
-/******/ 					throw new Error('ES Modules may not assign module.exports or exports.*, Use ESM export syntax, instead: ' + module.id);
-/******/ 				}
-/******/ 			});
-/******/ 			return module;
-/******/ 		};
-/******/ 	}();
-/******/ 	
+/******/
 /******/ }
 );

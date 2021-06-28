@@ -1,21 +1,30 @@
-const { context } = require('@actions/github');
-const github = require('../github');
+const core = require('@actions/core');
+const github = require('@actions/github');
+const { RequestError } = require('@octokit/request-error');
 
 const makeRelease = async (tagName, body, commitish) => {
-	const { owner, repo } = context.repo;
+	const { owner, repo } = github.context.repo;
+	const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
 
-	const {
-		data: { id: releaseId }
-	} = await github.repos.getReleaseByTag({
-		owner,
-		repo,
-		tag: tagName
-	});
+	let release;
+	try {
+		release = await octokit.rest.repos.getReleaseByTag({
+			owner,
+			repo,
+			tag: tagName
+		});
+	} catch (error) {
+		if (error instanceof RequestError && error.status === 404) {
+			release = null;
+		} else {
+			throw error;
+		}
+	}
 
 	let releaseResponse;
 
-	if (!releaseId) {
-		releaseResponse = await github.repos.createRelease({
+	if (!release) {
+		releaseResponse = await octokit.rest.repos.createRelease({
 			owner,
 			repo,
 			tag_name: tagName,
@@ -25,12 +34,17 @@ const makeRelease = async (tagName, body, commitish) => {
 			prerelease: false,
 			target_commitish: commitish
 		});
+		core.info(`Created ${tagName} release`);
 	} else {
-		releaseResponse = await github.repos.updateRelease({
+		releaseResponse = await octokit.rest.repos.updateRelease({
 			owner,
 			repo,
+			release_id: release.id,
+			tag_name: tagName,
+			name: tagName,
 			body
 		});
+		core.info(`Updated ${tagName} release`);
 	}
 
 	return releaseResponse;

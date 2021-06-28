@@ -8,10 +8,6 @@ This action drafts a release for the specified milestone and release branch.
 
 **Required** Milestone name.
 
-### `release_branch`
-
-**Required** Release branch name.
-
 ## Outputs
 
 ### `asset_upload_url`
@@ -20,6 +16,10 @@ The URL for uploading assets to the release.
 
 ## Example usage
 
-uses: actions/hello-world-javascript-action@v1.1
+```yaml
+uses: ./.github/actions/draft-release
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 with:
-who-to-greet: 'Mona the Octocat'
+  milestone: v3.2.1
+```

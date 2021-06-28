@@ -1,8 +1,10 @@
+const fs = require('fs');
+const path = require('path');
 const core = require('@actions/core');
-const { context } = require('@actions/github');
-const { ReleaseDraft, makeRelease } = require('./utils');
+const github = require('@actions/github');
+const { ReleaseBody, makeRelease } = require('./utils');
 
-export default function main() {
+async function main() {
 	try {
 		const milestone = core.getInput('milestone', { required: true });
 
@@ -11,16 +13,34 @@ export default function main() {
 			throw new Error('Milestone name is invalid.');
 		}
 
-		const tagName = milestone;
-		const releaseDraft = new ReleaseDraft(milestone).generate();
-		const releaseBranch = context.ref.replace('refs/heads/', '');
+		// Get tag name from plugin main PHP file.
+		let tagName = '';
+		const pluginFile = fs.readFileSync(path.resolve(process.cwd(), 'amp.php')).toString();
+		const matches = /\*\s+Version:\s+(\d+(\.\d+)+-\w+)/.exec(pluginFile);
+		if (matches && matches[1]) {
+			[, tagName] = matches;
+		}
 
+		// Get target branch.
+		const targetBranch = github.context.ref.replace('refs/heads/', '');
+
+		core.info(`Tag: ${tagName}`);
+		core.info(`Milestone: ${milestone}`);
+		core.info(`Target branch: ${targetBranch}`);
+
+		// Generate release body.
+		const releaseBody = await new ReleaseBody(milestone).generate();
+
+		// Make GitHub release.
 		const {
-			data: { upload_url: assetUploadUrl }
-		} = makeRelease(tagName, releaseDraft, releaseBranch);
+			data: { html_url: htmlUrl, upload_url: assetUploadUrl }
+		} = await makeRelease(tagName, releaseBody, targetBranch);
 
+		core.info(`Release draft URL: ${htmlUrl}`);
 		core.setOutput('asset_upload_url', assetUploadUrl);
 	} catch (error) {
-		core.setFailed(error.message);
+		core.setFailed(error.stack);
 	}
 }
+
+main().catch(core.error);

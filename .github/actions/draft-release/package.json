@@ -15,6 +15,7 @@
     "@actions/core": "^1.2.7",
     "@actions/github": "^5.0.0",
     "@octokit/action": "^3.8.1",
+    "@octokit/request-error": "^2.1.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
