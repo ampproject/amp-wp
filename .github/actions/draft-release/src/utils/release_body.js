@@ -74,8 +74,7 @@ export default class ReleaseBody {
 		this.authorsToIgnore = ['CLAassistant', 'dependabot', 'dependabot-preview[bot]', 'googlebot', 'renovate-bot'];
 
 		this.graphQlVariables = {
-			// searchQuery: `repo:${process.env.GITHUB_REPOSITORY} milestone:${milestone} is:closed`
-			searchQuery: `repo:ampproject/amp-wp milestone:${milestone} is:closed`
+			searchQuery: `repo:${process.env.GITHUB_REPOSITORY} milestone:${milestone} is:closed`
 		};
 	}
 
