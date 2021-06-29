@@ -4,8 +4,6 @@
 /composer.json     @pierlon
 /composer.lock     @pierlon
 
-/qa-tester/ @pierlon
-
 /.github/workflows/ @pierlon
 
 /webpack.config.js @delawski @pierlon

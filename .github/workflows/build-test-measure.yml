@@ -69,11 +69,9 @@ jobs:
           # Ignore Paths:
           # - .github/
           # - !.github/workflows
-          # - .github/workflows/qa-integrate.yml
           # - .wordpress-org/
           # - docs/
-          # - qa-tester/
-          IGNORE_PATH_REGEX: \.github\/(?:(?!workflows)|(?=workflows\/qa-integrate\.yml))|\.wordpress-org\/|docs\/|qa-tester\/
+          IGNORE_PATH_REGEX: \.github\/(?!workflows)|\.wordpress-org\/|docs\/
 
   lint-css:
     needs: pre-run
