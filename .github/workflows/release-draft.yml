@@ -2,9 +2,10 @@ name: Release Draft
 
 on:
   workflow_dispatch:
-    milestone:
-      description: 'Milestone name (eg. v3.2.1)'
-      required: true
+    inputs:
+      milestone:
+        description: 'Milestone name (eg. v3.2.1)'
+        required: true
 
 jobs:
   draft_release:
