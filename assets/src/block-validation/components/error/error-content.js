@@ -177,7 +177,7 @@ BlockType.propTypes = {
  *
  * @param {Object}   props               Component props.
  * @param {Object}   props.blockType     Block type details.
- * @param {boolean}  props.external      Flag indicating if the error comes from outside of post content.
+ * @param {boolean}  props.isExternal      Flag indicating if the error comes from outside of post content.
  * @param {boolean}  props.removed       Flag indicating if the block has been removed.
  * @param {string}   props.clientId      Block client ID
  * @param {number}   props.status        Number indicating the error status.
@@ -188,7 +188,7 @@ export function ErrorContent( {
 	blockType,
 	clientId,
 	error: { sources },
-	external,
+	isExternal,
 	removed,
 	status,
 } ) {
@@ -203,13 +203,13 @@ export function ErrorContent( {
 					{ __( 'This error is no longer detected, either because the block was removed or the editor mode was switched.', 'amp' ) }
 				</p>
 			) }
-			{ external && (
+			{ isExternal && (
 				<p>
 					{ __( 'This error comes from outside the content (e.g. header or footer).', 'amp' ) }
 				</p>
 			) }
 			<dl className="amp-error__details">
-				{ ! ( removed || external ) && (
+				{ ! ( removed || isExternal ) && (
 					<BlockType
 						blockTypeIcon={ blockTypeIcon }
 						blockTypeTitle={ blockTypeTitle }
@@ -231,7 +231,7 @@ ErrorContent.propTypes = {
 	error: PropTypes.shape( {
 		sources: PropTypes.arrayOf( PropTypes.object ),
 	} ).isRequired,
-	external: PropTypes.bool,
+	isExternal: PropTypes.bool,
 	removed: PropTypes.bool,
 	status: PropTypes.oneOf( [
 		VALIDATION_ERROR_ACK_ACCEPTED_STATUS,

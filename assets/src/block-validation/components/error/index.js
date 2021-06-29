@@ -39,7 +39,7 @@ export function Error( { clientId, error, status, term_id: termId, title } ) {
 	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(), [] );
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
 	const kept = status === VALIDATION_ERROR_ACK_REJECTED_STATUS || status === VALIDATION_ERROR_NEW_REJECTED_STATUS;
-	const external = ! Boolean( clientId );
+	const isExternal = ! Boolean( clientId );
 
 	const { blockType, removed } = useSelect( ( select ) => {
 		const blockName = select( 'core/block-editor' ).getBlockName( clientId );
@@ -80,13 +80,13 @@ export function Error( { clientId, error, status, term_id: termId, title } ) {
 				blockType={ blockType }
 				clientId={ clientId }
 				error={ error }
-				external={ external }
+				isExternal={ isExternal }
 				removed={ removed }
 				status={ status }
 			/>
 
 			<div className="amp-error__actions">
-				{ ! ( removed || external ) && (
+				{ ! ( removed || isExternal ) && (
 					<Button
 						className="amp-error__select-block"
 						isSecondary
