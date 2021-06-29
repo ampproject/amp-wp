@@ -44,4 +44,3 @@ ignore:
   - "/back-compat"
   - "/docs/**/*"
   - ".phpstorm.meta.php"
-  - "/qa-tester/**"
