@@ -29,7 +29,7 @@ async function main() {
 		core.info(`Target branch: ${targetBranch}`);
 
 		// Generate release body.
-		const releaseBody = await new ReleaseBody(milestone).generate();
+		const releaseBody = await new ReleaseBody(process.env.GITHUB_REPOSITORY, milestone).generate();
 
 		// Make GitHub release.
 		const {

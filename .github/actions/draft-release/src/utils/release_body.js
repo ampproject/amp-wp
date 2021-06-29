@@ -65,16 +65,14 @@ const findIssuesWithinMilestoneQuery = `
 `;
 
 export default class ReleaseBody {
-	constructor(milestone) {
-		this.milestone = milestone;
-
+	constructor(repo, milestone) {
 		this.changelogEntries = new Map();
 		this.contributorEntries = new Map();
 
 		this.authorsToIgnore = ['CLAassistant', 'dependabot', 'dependabot-preview[bot]', 'googlebot', 'renovate-bot'];
 
 		this.graphQlVariables = {
-			searchQuery: `repo:${process.env.GITHUB_REPOSITORY} milestone:${milestone} is:closed`
+			searchQuery: `repo:${repo} milestone:${milestone} is:closed`
 		};
 	}
 
