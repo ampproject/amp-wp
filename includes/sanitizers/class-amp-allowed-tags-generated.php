@@ -855,6 +855,8 @@ class AMP_Allowed_Tags_Generated {
 					'sticky' => array(
 						'value' => array(
 							'',
+							'top',
+							'bottom',
 						),
 					),
 					'template' => array(),
@@ -5420,11 +5422,13 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'template' => array(),
 					'xssi-prefix' => array(),
 				),
 				'tag_spec' => array(
 					'amp_layout' => array(
 						'supported_layouts' => array(
+							5,
 							6,
 							2,
 							3,
