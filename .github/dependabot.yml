@@ -41,23 +41,6 @@ updates:
   # Updates are handled via the `gutenberg-packages-update` GHA workflow.
   - dependency-name: "@wordpress/*"
 
-# Config for QA Tester plugin.
-- package-ecosystem: composer
-  directory: "/qa-tester"
-  schedule:
-    interval: daily
-    time: "12:00"
-    timezone: America/Los_Angeles
-  open-pull-requests-limit: 10
-
-- package-ecosystem: npm
-  directory: "/qa-tester"
-  schedule:
-    interval: daily
-    time: "12:00"
-    timezone: America/Los_Angeles
-  open-pull-requests-limit: 10
-
 # Config for GitHub Actions.
 - package-ecosystem: github-actions
   directory: "/"

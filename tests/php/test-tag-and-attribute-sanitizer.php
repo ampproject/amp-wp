@@ -3127,9 +3127,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				      src="https://data.com/articles.json?ref=CANONICAL_URL"
 				      key="name">
 				    </amp-render>
+
+				    <!-- Valid: amp-render with template attribute -->
+				    <amp-render width="10" height="10"
+				      src="https://data.com/articles.json?ref=CANONICAL_URL"
+				      template="found">
+				    </amp-render>
+				    <template id="found" type="amp-mustache"></template>
 				',
 				null,
-				[ 'amp-render', 'amp-bind' ],
+				[ 'amp-render', 'amp-bind', 'amp-mustache' ],
 			],
 
 			'amp-stream-gallery'                           => [

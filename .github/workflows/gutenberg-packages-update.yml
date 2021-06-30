@@ -56,17 +56,18 @@ jobs:
         run: |
           PR_NUM=$(gh api -X GET search/issues -f q='${{ env.QUERY }}' -f sort='created' -f order='desc' --jq '.items.[0].number')
           echo "::set-output name=num::$(echo $PR_NUM)"
+          echo "Latest PR number: ${PR_NUM}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           QUERY: 'repo:ampproject/amp-wp is:pr author:app/github-actions is:open in:title Update Gutenberg packages after'
 
       # Needed to later close PR.
       - name: Checkout repo
-        if: ${{ steps.latest-pr.num != '' }}
+        if: steps.latest-pr.num != ''
         uses: actions/checkout@v2
 
       - name: Close latest open PR
-        if: ${{ steps.latest-pr.num != '' }}
+        if: steps.latest-pr.num != ''
         run: gh pr close ${{ env.PR_NUM }} --delete-branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
