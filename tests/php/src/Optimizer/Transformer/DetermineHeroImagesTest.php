@@ -213,14 +213,14 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
-			'site icon and custom header are prioritized over content block' => [
+			'site icon and custom header and content block' => [
 				$input(
 					'<header><a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
 					. '<amp-img width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px"></amp-img>'
 					. '</a>'
 					. '<div class="wp-custom-header"><amp-img width="640" height="480" src="https://example.com/custom-header.jpg"></amp-img></div></header>'
 					. '<div class="entry-content">'
-					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
+					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
 					. '</div>'
 				),
 				$output(
@@ -229,19 +229,19 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 					. '</a>'
 					. '<div class="wp-custom-header"><amp-img data-hero-candidate width="640" height="480" src="https://example.com/custom-header.jpg"></amp-img></div></header>'
 					. '<div class="entry-content">'
-					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
+					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" data-hero-candidate alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
 					. '</div>'
 				),
 			],
 
-			'featured image and custom header prioritized over cover blocks' => [
+			'featured image and custom header and cover blocks' => [
 				$input(
 					'<header><a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
 					. '<amp-img width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px"></amp-img>'
 					. '</a>'
 					. '<div class="wp-custom-header"><amp-img width="640" height="480" src="https://example.com/custom-header.jpg"></amp-img></div></header>'
 					. '<div class="entry-content">'
-					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
+					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
 					. '</div>'
 				),
 				$output(
@@ -250,7 +250,7 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 					. '</a>'
 					. '<div class="wp-custom-header"><amp-img data-hero-candidate width="640" height="480" src="https://example.com/custom-header.jpg"></amp-img></div></header>'
 					. '<div class="entry-content">'
-					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img loading="lazy" width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
+					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-hero-candidate data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
 					. '</div>'
 				),
 			],

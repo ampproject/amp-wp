@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a6058fda10827da7ccfc7041bdd0c33c",
+    "content-hash": "360e988356c89017b1ee483be99c5f87",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "dev-main",
+            "version": "v0.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "507c8658f18931c653f27f9b1972b99489276ae3"
+                "reference": "500012f27cc27f4d72525cf0f010602fb95e2f6f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/507c8658f18931c653f27f9b1972b99489276ae3",
-                "reference": "507c8658f18931c653f27f9b1972b99489276ae3",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/500012f27cc27f4d72525cf0f010602fb95e2f6f",
+                "reference": "500012f27cc27f4d72525cf0f010602fb95e2f6f",
                 "shasum": ""
             },
             "require": {
@@ -46,7 +46,6 @@
                 "ext-mbstring": "Used by Dom\\Document to convert encoding to UTF-8 if needed.",
                 "nette/php-generator": "Needed to generate the validator spec PHP classes and interfaces."
             },
-            "default-branch": true,
             "bin": [
                 "bin/amp"
             ],
@@ -72,9 +71,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/main"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/v0.6.0"
             },
-            "time": "2021-06-24T17:00:02+00:00"
+            "time": "2021-06-30T15:16:48+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -5967,7 +5966,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "ampproject/amp-toolbox": 20,
         "sabberworm/php-css-parser": 20,
         "roave/security-advisories": 20
     },
