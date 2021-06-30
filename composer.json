@@ -14,7 +14,7 @@
     "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
-    "ampproject/amp-toolbox": "dev-main",
+    "ampproject/amp-toolbox": "dev-add/55-optimize-hero-images-transformer",
     "cweagans/composer-patches": "1.7.1",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "dev-master#bfdd976"
