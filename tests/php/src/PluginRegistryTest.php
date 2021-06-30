@@ -73,25 +73,30 @@ final class PluginRegistryTest extends TestCase {
 	public function test_get_mu_plugins_data() {
 		$plugin_registry = new PluginRegistry();
 
+		$expected_keys = [
+			'Name',
+			'PluginURI',
+			'Version',
+			'Description',
+			'Author',
+			'AuthorURI',
+			'TextDomain',
+			'DomainPath',
+			'Network',
+			'RequiresWP',
+			'RequiresPHP',
+			'Title',
+			'AuthorName',
+		];
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.8', '>=' ) ) {
+			$expected_keys[] = 'UpdateURI';
+		}
+
 		$plugins = $this->call_private_method( $plugin_registry, 'get_mu_plugins_data' );
 		$this->assertInternalType( 'array', $plugins );
 		foreach ( $plugins as $plugin_data ) {
 			$this->assertEqualSets(
-				[
-					'Name',
-					'PluginURI',
-					'Version',
-					'Description',
-					'Author',
-					'AuthorURI',
-					'TextDomain',
-					'DomainPath',
-					'Network',
-					'RequiresWP',
-					'RequiresPHP',
-					'Title',
-					'AuthorName',
-				],
+				$expected_keys,
 				array_keys( $plugin_data )
 			);
 		}
