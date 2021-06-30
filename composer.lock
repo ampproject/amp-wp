@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e5377f8bfb7da87f0e559eb750908cb7",
+    "content-hash": "4d7d392e957acda0acceee8b3ae1ed69",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "dev-add/55-optimize-hero-images-transformer",
+            "version": "v0.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "af51a4636e0f9b77f5556d26834d270e9b7fa444"
+                "reference": "500012f27cc27f4d72525cf0f010602fb95e2f6f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/af51a4636e0f9b77f5556d26834d270e9b7fa444",
-                "reference": "af51a4636e0f9b77f5556d26834d270e9b7fa444",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/500012f27cc27f4d72525cf0f010602fb95e2f6f",
+                "reference": "500012f27cc27f4d72525cf0f010602fb95e2f6f",
                 "shasum": ""
             },
             "require": {
@@ -71,9 +71,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/add/55-optimize-hero-images-transformer"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/v0.6.0"
             },
-            "time": "2021-06-30T03:00:01+00:00"
+            "time": "2021-06-30T15:16:48+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -5969,7 +5969,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "ampproject/amp-toolbox": 20,
         "sabberworm/php-css-parser": 20,
         "roave/security-advisories": 20
     },
