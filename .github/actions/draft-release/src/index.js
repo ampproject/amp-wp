@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const core = require('@actions/core');
 const github = require('@actions/github');
-const { ReleaseBody, makeRelease } = require('./utils');
+const { makeRelease } = require('./utils');
+const ReleaseChangelog = require('../../../../bin/release-changelog/changelog');
 
 async function main() {
 	try {
@@ -28,8 +29,10 @@ async function main() {
 		core.info(`Milestone: ${milestone}`);
 		core.info(`Target branch: ${targetBranch}`);
 
-		// Generate release body.
-		const releaseBody = await new ReleaseBody(process.env.GITHUB_REPOSITORY, milestone).generate();
+		// Generate release changelog.
+		const repo = process.env.GITHUB_REPOSITORY;
+		const token = process.env.GITHUB_TOKEN;
+		const releaseBody = await new ReleaseChangelog(repo, milestone, token).generate();
 
 		// Make GitHub release.
 		const {

@@ -50,4 +50,4 @@ const makeRelease = async (tagName, body, commitish) => {
 	return releaseResponse;
 };
 
-export default makeRelease;
+module.exports = makeRelease;
