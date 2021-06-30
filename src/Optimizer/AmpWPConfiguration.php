@@ -58,7 +58,7 @@ final class AmpWPConfiguration extends DefaultConfiguration {
 				[
 					Transformer\AmpRuntimeCss::class,
 					Transformer\OptimizeAmpBind::class,
-					Transformer\PreloadHeroImage::class,
+					Transformer\OptimizeHeroImages::class,
 					Transformer\RewriteAmpUrls::class,
 					Transformer\ServerSideRendering::class,
 					Transformer\TransformedIdentifier::class,
@@ -87,9 +87,10 @@ final class AmpWPConfiguration extends DefaultConfiguration {
 		$this->configuration = apply_filters(
 			'amp_optimizer_config',
 			[
-				self::KEY_TRANSFORMERS              => $transformers,
-				Transformer\PreloadHeroImage::class => [
-					Configuration\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
+				self::KEY_TRANSFORMERS                => $transformers,
+				Transformer\OptimizeHeroImages::class => [
+					Configuration\OptimizeHeroImagesConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
+					Configuration\OptimizeHeroImagesConfiguration::MAX_HERO_IMAGE_COUNT          => PHP_INT_MAX,
 				],
 			]
 		);
