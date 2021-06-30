@@ -1,8 +1,11 @@
-name: Auto-merge
+name: Automerge
 
 on:
-  pull_request:
-    types: [opened, synchronize]
+  # ⚠️ WARNING: Secrets can be accessed by forks when triggered via this event!
+  # In this case no code is checked out and no cache is being saved, so this workflow should be fine.
+  # See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/.
+  pull_request_target:
+    types: [opened, reopened, synchronize]
 
 jobs:
   automerge-dependencies:
@@ -16,4 +19,4 @@ jobs:
         run: gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.AUTOMERGE_TOKEN }}
