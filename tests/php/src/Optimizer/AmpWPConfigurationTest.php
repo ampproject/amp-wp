@@ -3,8 +3,8 @@
 namespace AmpProject\AmpWP\Tests\Optimizer;
 
 use AmpProject\AmpWP\Optimizer\AmpWPConfiguration;
-use AmpProject\Optimizer\Configuration\PreloadHeroImageConfiguration;
-use AmpProject\Optimizer\Transformer\PreloadHeroImage;
+use AmpProject\Optimizer\Configuration\OptimizeHeroImagesConfiguration;
+use AmpProject\Optimizer\Transformer\OptimizeHeroImages;
 use AmpProject\Optimizer\Transformer\ServerSideRendering;
 use AmpProject\Optimizer\TransformerConfiguration;
 use WP_UnitTestCase;
@@ -44,12 +44,12 @@ final class AmpWPConfigurationTest extends WP_UnitTestCase {
 	 */
 	public function test_get_unfiltered_transformer_configuration_key() {
 		$configuration             = new AmpWPConfiguration();
-		$transformer_configuration = $configuration->getTransformerConfiguration( PreloadHeroImage::class );
+		$transformer_configuration = $configuration->getTransformerConfiguration( OptimizeHeroImages::class );
 
 		$this->assertInstanceOf( TransformerConfiguration::class, $transformer_configuration );
 		$this->assertEquals(
 			'data-amp-original-style',
-			$transformer_configuration->get( PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE )
+			$transformer_configuration->get( OptimizeHeroImagesConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE )
 		);
 	}
 
@@ -59,19 +59,19 @@ final class AmpWPConfigurationTest extends WP_UnitTestCase {
 	 */
 	public function test_get_filtered_transformer_configuration_key() {
 		$configuration_filter = static function ( $configuration ) {
-			$configuration[ PreloadHeroImage::class ]['inlineStyleBackupAttribute'] = 'data-backup-style';
+			$configuration[ OptimizeHeroImages::class ]['inlineStyleBackupAttribute'] = 'data-backup-style';
 			return $configuration;
 		};
 
 		add_filter( 'amp_optimizer_config', $configuration_filter );
 
 		$configuration             = new AmpWPConfiguration();
-		$transformer_configuration = $configuration->getTransformerConfiguration( PreloadHeroImage::class );
+		$transformer_configuration = $configuration->getTransformerConfiguration( OptimizeHeroImages::class );
 
 		$this->assertInstanceOf( TransformerConfiguration::class, $transformer_configuration );
 		$this->assertEquals(
 			'data-backup-style',
-			$transformer_configuration->get( PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE )
+			$transformer_configuration->get( OptimizeHeroImagesConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE )
 		);
 
 		remove_filter( 'amp_optimizer_config', $configuration_filter );

@@ -13,7 +13,6 @@ use AmpProject\Dom\Element;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\ImageDimensions;
 use AmpProject\Optimizer\Transformer;
-use AmpProject\Optimizer\Transformer\PreloadHeroImage;
 
 /**
  * Determine the images to flag with data-hero-candidate so the Optimizer can prerender them.
@@ -65,30 +64,28 @@ final class DetermineHeroImages implements Transformer {
 		$hero_image_elements = [];
 
 		foreach ( [ 'header_images', 'initial_content_image' ] as $hero_image_source ) {
-			if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
-				$candidate = null;
+			$candidate = null;
 
-				switch ( $hero_image_source ) {
-					case 'header_images':
-						$candidate = $this->get_header_images( $document );
-						break;
-					case 'initial_content_image':
-						$candidate = $this->get_initial_content_image( $document );
-						break;
-				}
+			switch ( $hero_image_source ) {
+				case 'header_images':
+					$candidate = $this->get_header_images( $document );
+					break;
+				case 'initial_content_image':
+					$candidate = $this->get_initial_content_image( $document );
+					break;
+			}
 
-				if ( $candidate instanceof Element ) {
-					$hero_image_elements[ spl_object_hash( $candidate ) ] = $candidate;
-				} elseif ( is_array( $candidate ) ) {
-					foreach ( $candidate as $hero_image_element ) {
-						$hero_image_elements[ spl_object_hash( $hero_image_element ) ] = $hero_image_element;
-					}
+			if ( $candidate instanceof Element ) {
+				$hero_image_elements[ spl_object_hash( $candidate ) ] = $candidate;
+			} elseif ( is_array( $candidate ) ) {
+				foreach ( $candidate as $hero_image_element ) {
+					$hero_image_elements[ spl_object_hash( $hero_image_element ) ] = $hero_image_element;
 				}
 			}
 		}
 
 		$this->add_data_hero_candidate_attribute(
-			array_slice( array_values( $hero_image_elements ), 0, PreloadHeroImage::DATA_HERO_MAX )
+			array_values( $hero_image_elements )
 		);
 	}
 
