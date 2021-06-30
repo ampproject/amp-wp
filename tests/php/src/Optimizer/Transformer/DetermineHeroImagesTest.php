@@ -79,6 +79,19 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 				),
 			],
 
+			'detects custom header as in document with amp-wp-article-content' => [
+				$input(
+					'<div class="my-header">'
+					. '<amp-img width="789" height="539" src="https://example.com/custom-header.jpg"></amp-img>'
+					. '</div><div class="h-feed"><div class="h-entry"><div class="amp-wp-article-content"></div></div></div>'
+				),
+				$output(
+					'<div class="my-header">'
+					. '<amp-img width="789" height="539" src="https://example.com/custom-header.jpg" data-hero-candidate></amp-img>'
+					. '</div><div class="h-feed"><div class="h-entry"><div class="amp-wp-article-content"></div></div></div>'
+				),
+			],
+
 			'ignores header image which was originally lazy-loaded' => [
 				$input(
 					'<header>'
