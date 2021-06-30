@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "fc4742c0b25d9d9ca191915fd17627dae318b76c"
+                "reference": "af51a4636e0f9b77f5556d26834d270e9b7fa444"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/fc4742c0b25d9d9ca191915fd17627dae318b76c",
-                "reference": "fc4742c0b25d9d9ca191915fd17627dae318b76c",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/af51a4636e0f9b77f5556d26834d270e9b7fa444",
+                "reference": "af51a4636e0f9b77f5556d26834d270e9b7fa444",
                 "shasum": ""
             },
             "require": {
@@ -73,7 +73,7 @@
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
                 "source": "https://github.com/ampproject/amp-toolbox-php/tree/add/55-optimize-hero-images-transformer"
             },
-            "time": "2021-06-29T23:50:09+00:00"
+            "time": "2021-06-30T03:00:01+00:00"
         },
         {
             "name": "cweagans/composer-patches",
