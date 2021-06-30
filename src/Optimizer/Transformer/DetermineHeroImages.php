@@ -38,11 +38,21 @@ final class DetermineHeroImages implements Transformer {
 	 * XPath query to find the first entry-content.
 	 *
 	 * Note that the 'entry-content' class name is the classic form for what the h-entry spec now has as 'e-content'.
+	 * The 'amp-wp-article-content' class name is used in legacy Reader templates. Note that 'entry-content' isn't
+	 * simply just added to templates/single.php and templates/page.php because these templates are frequently forked.
 	 *
 	 * @link https://microformats.org/wiki/h-entry
 	 * @var string
 	 */
-	const FIRST_ENTRY_CONTENT_XPATH_QUERY = ".//*[ @class ][ contains( concat( ' ', normalize-space( @class ), ' ' ), ' entry-content ' ) or contains( concat( ' ', normalize-space( @class ), ' ' ), ' e-content ' ) ]";
+	const FIRST_ENTRY_CONTENT_XPATH_QUERY = "
+		.//*[ @class ][
+			contains( concat( ' ', normalize-space( @class ), ' ' ), ' entry-content ' )
+			or
+			contains( concat( ' ', normalize-space( @class ), ' ' ), ' e-content ' )
+			or
+			contains( concat( ' ', normalize-space( @class ), ' ' ), ' amp-wp-article-content ' )
+		]
+	";
 
 	/**
 	 * XPath query to find an image at the beginning of entry content (including nested inside of another block).
