@@ -1611,8 +1611,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1305,
-                "end_line": 1328,
+                "line": 1307,
+                "end_line": 1330,
                 "arguments": [],
                 "doc": {
                     "description": "Determine whether AMP dev mode is enabled.",
@@ -1634,8 +1634,8 @@
                 "hooks": [
                     {
                         "name": "amp_dev_mode_enabled",
-                        "line": 1317,
-                        "end_line": 1327,
+                        "line": 1319,
+                        "end_line": 1329,
                         "type": "filter",
                         "arguments": [
                             "is_admin_bar_showing() && is_user_logged_in() || is_customize_preview()"
@@ -1664,23 +1664,23 @@
                     "functions": [
                         {
                             "name": "apply_filters",
-                            "line": 1317,
-                            "end_line": 1327
+                            "line": 1319,
+                            "end_line": 1329
                         },
                         {
                             "name": "is_admin_bar_showing",
-                            "line": 1323,
-                            "end_line": 1323
+                            "line": 1325,
+                            "end_line": 1325
                         },
                         {
                             "name": "is_user_logged_in",
-                            "line": 1323,
-                            "end_line": 1323
+                            "line": 1325,
+                            "end_line": 1325
                         },
                         {
                             "name": "is_customize_preview",
-                            "line": 1325,
-                            "end_line": 1325
+                            "line": 1327,
+                            "end_line": 1327
                         }
                     ]
                 }
@@ -1698,8 +1698,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1845,
-                "end_line": 1856,
+                "line": 1855,
+                "end_line": 1866,
                 "arguments": [
                     {
                         "name": "$script",
@@ -1763,18 +1763,18 @@
                     "functions": [
                         {
                             "name": "hash",
-                            "line": 1846,
-                            "end_line": 1846
+                            "line": 1856,
+                            "end_line": 1856
                         },
                         {
                             "name": "str_replace",
-                            "line": 1850,
-                            "end_line": 1854
+                            "line": 1860,
+                            "end_line": 1864
                         },
                         {
                             "name": "base64_encode",
-                            "line": 1853,
-                            "end_line": 1853
+                            "line": 1863,
+                            "end_line": 1863
                         }
                     ]
                 }
@@ -1792,8 +1792,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1866,
-                "end_line": 1878,
+                "line": 1876,
+                "end_line": 1888,
                 "arguments": [
                     {
                         "name": "$url",
@@ -1833,54 +1833,54 @@
                             "name": "add_endpoint",
                             "class": "\\AmpProject\\AmpWP\\Services::get('paired_routing')",
                             "static": false,
-                            "line": 1868,
-                            "end_line": 1868
+                            "line": 1878,
+                            "end_line": 1878
                         },
                         {
                             "name": "get",
                             "class": "\\AmpProject\\AmpWP\\Services",
                             "static": true,
-                            "line": 1868,
-                            "end_line": 1868
+                            "line": 1878,
+                            "end_line": 1878
                         },
                         {
                             "name": "getMessage",
                             "class": "$e",
                             "static": false,
-                            "line": 1875,
-                            "end_line": 1875
+                            "line": 1885,
+                            "end_line": 1885
                         }
                     ],
                     "functions": [
                         {
                             "name": "amp_is_enabled",
-                            "line": 1870,
-                            "end_line": 1870
+                            "line": 1880,
+                            "end_line": 1880
                         },
                         {
                             "name": "__",
-                            "line": 1871,
-                            "end_line": 1871
+                            "line": 1881,
+                            "end_line": 1881
                         },
                         {
                             "name": "__",
-                            "line": 1873,
-                            "end_line": 1873
+                            "line": 1883,
+                            "end_line": 1883
                         },
                         {
                             "name": "_doing_it_wrong",
-                            "line": 1875,
-                            "end_line": 1875
+                            "line": 1885,
+                            "end_line": 1885
                         },
                         {
                             "name": "esc_html",
-                            "line": 1875,
-                            "end_line": 1875
+                            "line": 1885,
+                            "end_line": 1885
                         },
                         {
                             "name": "esc_html",
-                            "line": 1875,
-                            "end_line": 1875
+                            "line": 1885,
+                            "end_line": 1885
                         }
                     ]
                 }
@@ -1898,8 +1898,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1888,
-                "end_line": 1900,
+                "line": 1898,
+                "end_line": 1910,
                 "arguments": [
                     {
                         "name": "$url",
@@ -1939,54 +1939,54 @@
                             "name": "has_endpoint",
                             "class": "\\AmpProject\\AmpWP\\Services::get('paired_routing')",
                             "static": false,
-                            "line": 1890,
-                            "end_line": 1890
+                            "line": 1900,
+                            "end_line": 1900
                         },
                         {
                             "name": "get",
                             "class": "\\AmpProject\\AmpWP\\Services",
                             "static": true,
-                            "line": 1890,
-                            "end_line": 1890
+                            "line": 1900,
+                            "end_line": 1900
                         },
                         {
                             "name": "getMessage",
                             "class": "$e",
                             "static": false,
-                            "line": 1897,
-                            "end_line": 1897
+                            "line": 1907,
+                            "end_line": 1907
                         }
                     ],
                     "functions": [
                         {
                             "name": "amp_is_enabled",
-                            "line": 1892,
-                            "end_line": 1892
+                            "line": 1902,
+                            "end_line": 1902
                         },
                         {
                             "name": "__",
-                            "line": 1893,
-                            "end_line": 1893
+                            "line": 1903,
+                            "end_line": 1903
                         },
                         {
                             "name": "__",
-                            "line": 1895,
-                            "end_line": 1895
+                            "line": 1905,
+                            "end_line": 1905
                         },
                         {
                             "name": "_doing_it_wrong",
-                            "line": 1897,
-                            "end_line": 1897
+                            "line": 1907,
+                            "end_line": 1907
                         },
                         {
                             "name": "esc_html",
-                            "line": 1897,
-                            "end_line": 1897
+                            "line": 1907,
+                            "end_line": 1907
                         },
                         {
                             "name": "esc_html",
-                            "line": 1897,
-                            "end_line": 1897
+                            "line": 1907,
+                            "end_line": 1907
                         }
                     ]
                 }
@@ -2004,8 +2004,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1910,
-                "end_line": 1922,
+                "line": 1920,
+                "end_line": 1932,
                 "arguments": [
                     {
                         "name": "$url",
@@ -2045,54 +2045,54 @@
                             "name": "remove_endpoint",
                             "class": "\\AmpProject\\AmpWP\\Services::get('paired_routing')",
                             "static": false,
-                            "line": 1912,
-                            "end_line": 1912
+                            "line": 1922,
+                            "end_line": 1922
                         },
                         {
                             "name": "get",
                             "class": "\\AmpProject\\AmpWP\\Services",
                             "static": true,
-                            "line": 1912,
-                            "end_line": 1912
+                            "line": 1922,
+                            "end_line": 1922
                         },
                         {
                             "name": "getMessage",
                             "class": "$e",
                             "static": false,
-                            "line": 1919,
-                            "end_line": 1919
+                            "line": 1929,
+                            "end_line": 1929
                         }
                     ],
                     "functions": [
                         {
                             "name": "amp_is_enabled",
-                            "line": 1914,
-                            "end_line": 1914
+                            "line": 1924,
+                            "end_line": 1924
                         },
                         {
                             "name": "__",
-                            "line": 1915,
-                            "end_line": 1915
+                            "line": 1925,
+                            "end_line": 1925
                         },
                         {
                             "name": "__",
-                            "line": 1917,
-                            "end_line": 1917
+                            "line": 1927,
+                            "end_line": 1927
                         },
                         {
                             "name": "_doing_it_wrong",
-                            "line": 1919,
-                            "end_line": 1919
+                            "line": 1929,
+                            "end_line": 1929
                         },
                         {
                             "name": "esc_html",
-                            "line": 1919,
-                            "end_line": 1919
+                            "line": 1929,
+                            "end_line": 1929
                         },
                         {
                             "name": "esc_html",
-                            "line": 1919,
-                            "end_line": 1919
+                            "line": 1929,
+                            "end_line": 1929
                         }
                     ]
                 }
@@ -2227,8 +2227,8 @@
             },
             "6": {
                 "name": "amp_analytics_entries",
-                "line": 1143,
-                "end_line": 1143,
+                "line": 1145,
+                "end_line": 1145,
                 "type": "filter",
                 "arguments": [
                     "$analytics_entries"
@@ -2254,8 +2254,8 @@
             },
             "7": {
                 "name": "amp_print_analytics",
-                "line": 1188,
-                "end_line": 1188,
+                "line": 1190,
+                "end_line": 1190,
                 "type": "action",
                 "arguments": [
                     "$analytics_entries"
@@ -2281,8 +2281,8 @@
             },
             "8": {
                 "name": "amp_content_embed_handlers",
-                "line": 1265,
-                "end_line": 1291,
+                "line": 1267,
+                "end_line": 1293,
                 "type": "filter",
                 "arguments": [
                     "array('AMP_Core_Block_Handler' => array(), 'AMP_Twitter_Embed_Handler' => array(), 'AMP_YouTube_Embed_Handler' => array(), 'AMP_Crowdsignal_Embed_Handler' => array(), 'AMP_DailyMotion_Embed_Handler' => array(), 'AMP_Vimeo_Embed_Handler' => array(), 'AMP_SoundCloud_Embed_Handler' => array(), 'AMP_Instagram_Embed_Handler' => array(), 'AMP_Issuu_Embed_Handler' => array(), 'AMP_Meetup_Embed_Handler' => array(), 'AMP_Facebook_Embed_Handler' => array(), 'AMP_Pinterest_Embed_Handler' => array(), 'AMP_Playlist_Embed_Handler' => array(), 'AMP_Reddit_Embed_Handler' => array(), 'AMP_TikTok_Embed_Handler' => array(), 'AMP_Tumblr_Embed_Handler' => array(), 'AMP_Gallery_Embed_Handler' => array(), 'AMP_Gfycat_Embed_Handler' => array(), 'AMP_Imgur_Embed_Handler' => array(), 'AMP_Scribd_Embed_Handler' => array(), 'AMP_WordPress_TV_Embed_Handler' => array())",
@@ -2322,8 +2322,8 @@
             },
             "9": {
                 "name": "amp_dev_mode_enabled",
-                "line": 1317,
-                "end_line": 1327,
+                "line": 1319,
+                "end_line": 1329,
                 "type": "filter",
                 "arguments": [
                     "is_admin_bar_showing() && is_user_logged_in() || is_customize_preview()"
@@ -2349,8 +2349,8 @@
             },
             "10": {
                 "name": "amp_to_amp_linking_enabled",
-                "line": 1369,
-                "end_line": 1372,
+                "line": 1371,
+                "end_line": 1374,
                 "type": "filter",
                 "arguments": [
                     "\\AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === \\AMP_Options_Manager::get_option(\\AmpProject\\AmpWP\\Option::THEME_SUPPORT)"
@@ -2376,8 +2376,8 @@
             },
             "11": {
                 "name": "amp_to_amp_excluded_urls",
-                "line": 1437,
-                "end_line": 1437,
+                "line": 1439,
+                "end_line": 1439,
                 "type": "filter",
                 "arguments": [
                     "array()"
@@ -2403,8 +2403,8 @@
             },
             "12": {
                 "name": "amp_content_sanitizers",
-                "line": 1454,
-                "end_line": 1454,
+                "line": 1456,
+                "end_line": 1456,
                 "type": "filter",
                 "arguments": [
                     "$sanitizers",
@@ -2444,8 +2444,8 @@
             },
             "13": {
                 "name": "amp_dev_mode_element_xpaths",
-                "line": 1467,
-                "end_line": 1467,
+                "line": 1469,
+                "end_line": 1469,
                 "type": "filter",
                 "arguments": [
                     "array()"
@@ -2471,8 +2471,8 @@
             },
             "14": {
                 "name": "amp_parsed_css_transient_caching_allowed",
-                "line": 1507,
-                "end_line": 1507,
+                "line": 1509,
+                "end_line": 1509,
                 "type": "filter",
                 "arguments": [
                     "true"
@@ -2498,8 +2498,8 @@
             },
             "15": {
                 "name": "amp_site_icon_url",
-                "line": 1635,
-                "end_line": 1635,
+                "line": 1637,
+                "end_line": 1637,
                 "type": "filter",
                 "arguments": [
                     "$logo_image_url"
@@ -2525,8 +2525,8 @@
             },
             "16": {
                 "name": "amp_post_template_metadata",
-                "line": 1708,
-                "end_line": 1708,
+                "line": 1718,
+                "end_line": 1718,
                 "type": "filter",
                 "arguments": [
                     "$metadata",
@@ -2561,8 +2561,8 @@
             },
             "17": {
                 "name": "amp_schemaorg_metadata",
-                "line": 1722,
-                "end_line": 1722,
+                "line": 1732,
+                "end_line": 1732,
                 "type": "filter",
                 "arguments": [
                     "$metadata"
@@ -2855,8 +2855,8 @@
             },
             "9": {
                 "name": "amp_enable_optimizer",
-                "line": 2013,
-                "end_line": 2013,
+                "line": 2025,
+                "end_line": 2025,
                 "type": "filter",
                 "arguments": [
                     "$enable_optimizer"
@@ -8042,12 +8042,12 @@
         "includes": [
             {
                 "name": "",
-                "line": 142,
+                "line": 148,
                 "type": "Require Once"
             },
             {
                 "name": "",
-                "line": 191,
+                "line": 197,
                 "type": "Require"
             }
         ],
@@ -8055,8 +8055,8 @@
         "hooks": [
             {
                 "name": "amp_options_menu_is_enabled",
-                "line": 81,
-                "end_line": 81,
+                "line": 85,
+                "end_line": 85,
                 "type": "filter",
                 "arguments": [
                     "true"
@@ -8276,7 +8276,7 @@
             }
         ]
     },
-    "169": {
+    "170": {
         "file": {
             "description": "Class MobileRedirection.",
             "long_description": "",
@@ -8428,7 +8428,7 @@
             }
         }
     },
-    "171": {
+    "172": {
         "file": {
             "description": "Class AmpWPConfiguration.",
             "long_description": "",
@@ -8473,10 +8473,10 @@
             {
                 "name": "amp_optimizer_config",
                 "line": 87,
-                "end_line": 95,
+                "end_line": 96,
                 "type": "filter",
                 "arguments": [
-                    "array(self::KEY_TRANSFORMERS => $transformers, \\AmpProject\\Optimizer\\Transformer\\PreloadHeroImage::class => array(\\AmpProject\\Optimizer\\Configuration\\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style'))"
+                    "array(self::KEY_TRANSFORMERS => $transformers, \\AmpProject\\Optimizer\\Transformer\\OptimizeHeroImages::class => array(\\AmpProject\\Optimizer\\Configuration\\OptimizeHeroImagesConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style', \\AmpProject\\Optimizer\\Configuration\\OptimizeHeroImagesConfiguration::MAX_HERO_IMAGE_COUNT => PHP_INT_MAX))"
                 ],
                 "doc": {
                     "description": "Filter the configuration to be used for the AMP Optimizer.",
@@ -8499,7 +8499,7 @@
             }
         ]
     },
-    "179": {
+    "180": {
         "file": {
             "description": "Class PairedRouting.",
             "long_description": "",
@@ -8516,8 +8516,8 @@
         "hooks": [
             {
                 "name": "amp_custom_paired_url_structure",
-                "line": 249,
-                "end_line": 249,
+                "line": 252,
+                "end_line": 252,
                 "type": "filter",
                 "arguments": [
                     "null"
@@ -8539,7 +8539,7 @@
             }
         ]
     },
-    "180": {
+    "181": {
         "file": {
             "description": "Class PairedUrl.",
             "long_description": "",
@@ -9006,7 +9006,7 @@
         ],
         "hooks": []
     },
-    "181": {
+    "182": {
         "file": {
             "description": "Class LegacyReaderUrlStructure.",
             "long_description": "",
@@ -9023,8 +9023,8 @@
         "hooks": [
             {
                 "name": "amp_pre_get_permalink",
-                "line": 42,
-                "end_line": 42,
+                "line": 44,
+                "end_line": 44,
                 "type": "filter",
                 "arguments": [
                     "false",
@@ -9064,8 +9064,8 @@
             },
             {
                 "name": "amp_get_permalink",
-                "line": 83,
-                "end_line": 83,
+                "line": 81,
+                "end_line": 81,
                 "type": "filter",
                 "arguments": [
                     "$amp_url",
@@ -9105,7 +9105,7 @@
             }
         ]
     },
-    "185": {
+    "186": {
         "file": {
             "description": "Abstract class PairedUrlStructure.",
             "long_description": "",
@@ -9332,7 +9332,7 @@
         ],
         "hooks": []
     },
-    "197": {
+    "198": {
         "file": {
             "description": "Provides settings to be used in site scanning.",
             "long_description": "",
@@ -9380,7 +9380,7 @@
             }
         ]
     },
-    "198": {
+    "199": {
         "file": {
             "description": "WP cron process to validate URLs in the background.",
             "long_description": "",
