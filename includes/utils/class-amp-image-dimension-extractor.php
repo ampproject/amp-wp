@@ -211,7 +211,7 @@ class AMP_Image_Dimension_Extractor {
 		foreach ( $dimensions as $url => $value ) {
 
 			// Check whether some other callback attached to the filter already provided dimensions for this image.
-			if ( is_array( $value ) ) {
+			if ( ! empty( $value ) && is_array( $value ) ) {
 				continue;
 			}
 
