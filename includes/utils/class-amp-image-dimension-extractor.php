@@ -217,13 +217,29 @@ class AMP_Image_Dimension_Extractor {
 
 			// Try to get attachment id from media path.
 			$attachment_id      = static::get_attachment_id_from_path( $attached_path );
+			$attachment_id      = ( ! empty( $attachment_id ) && 0 < (int) $attachment_id ) ? (int) $attachment_id : 0;
 			$possible_dimension = [];
 
-			if ( ! empty( $attachment_id ) && 0 < (int) $attachment_id ) {
-				// If attachment is exist fetch size from there.
+			// If attachment is exist fetch size from attachment metadata.
+			if ( ! empty( $attachment_id ) ) {
 				$possible_dimension = wp_get_attachment_metadata( $attachment_id );
-			} else {
-				// If not exists then whether file contain dimension or not.
+			}
+
+			// If attachment is exist and dimension not available in metadata then try to fetch from file system.
+			if ( ! empty( $attachment_id ) && ( empty( $possible_dimension ) || ! is_array( $possible_dimension ) ) ) {
+				$image_file = wp_get_original_image_path( $attachment_id );
+				$imagesize  = wp_getimagesize( $image_file );
+
+				if ( ! empty( $imagesize ) && is_array( $imagesize ) ) {
+					$possible_dimension = [
+						'width'  => (int) $imagesize[0],
+						'height' => (int) $imagesize[1],
+					];
+				}
+			}
+
+			// If not exists then whether file contain dimension or not.
+			if ( empty( $attachment_id ) ) {
 				$basename                   = basename( $attached_path );
 				$filename_without_extension = explode( '.', $basename );
 				$extension                  = array_pop( $filename_without_extension );
