@@ -235,7 +235,7 @@ class AMP_Image_Dimension_Extractor {
 
 			// If attachment is exist and dimension not available in metadata then try to fetch from file system.
 			if ( ! empty( $attachment_id ) && ( empty( $possible_dimension ) || ! is_array( $possible_dimension ) ) ) {
-				$image_file = wp_get_original_image_path( $attachment_id );
+				$image_file = sprintf( '%s/%s', trim( $upload_dir['basedir'] ), $attached_path );
 				$imagesize  = wp_getimagesize( $image_file );
 
 				if ( ! empty( $imagesize ) && is_array( $imagesize ) ) {
