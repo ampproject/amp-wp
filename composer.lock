@@ -197,21 +197,17 @@
                 "shasum": ""
             },
             "require": {
-                "ext-iconv": "*",
-                "php": ">=5.6.20"
+                "php": ">=5.3.2"
             },
             "require-dev": {
                 "codacy/coverage": "^1.4",
-                "phpunit/phpunit": "^4.8.36"
-            },
-            "suggest": {
-                "ext-mbstring": "for parsing UTF-8 CSS"
+                "phpunit/phpunit": "~4.8"
             },
             "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Sabberworm\\CSS\\": "src/"
+                    "Sabberworm\\CSS\\": "lib/Sabberworm/CSS/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
