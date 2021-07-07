@@ -172,14 +172,22 @@ class AMP_Image_Dimension_Extractor {
 
 		global $wpdb;
 
-		$attachment_id = $wpdb->get_col( // phpcs:ignore
-			$wpdb->prepare(
-				"SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_wp_attached_file' AND meta_value=%s ORDER BY post_id ASC;",
-				$path
-			)
-		);
+		$cache_key     = md5( $path );
+		$cache_group   = 'amp_attachment_id_from_path';
+		$attachment_id = wp_cache_get( $cache_key, $cache_group );
 
-		$attachment_id = ( ! empty( $attachment_id ) && is_array( $attachment_id ) ) ? array_pop( $attachment_id ) : 0;
+		if ( empty( $attachment_id ) ) {
+			$attachment_id = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+				$wpdb->prepare(
+					"SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_wp_attached_file' AND meta_value=%s ORDER BY post_id ASC;",
+					$path
+				)
+			);
+
+			$attachment_id = ( ! empty( $attachment_id ) && is_array( $attachment_id ) ) ? array_pop( $attachment_id ) : 0;
+
+			wp_cache_set( $cache_key, $attachment_id, $cache_group, 3 * HOUR_IN_SECONDS );
+		}
 
 		return (int) $attachment_id;
 	}
