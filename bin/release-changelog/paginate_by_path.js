@@ -35,6 +35,7 @@ async function paginateByPath( queryFn, query, variables, paginatePath ) {
 	}
 
 	while ( hasNextPage( data ) ) {
+		// eslint-disable-next-line no-await-in-loop
 		const newData = await queryFn( query, {
 			...variables,
 			after: _.get( data, [ ...pageInfoPath, 'endCursor' ] ),
