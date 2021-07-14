@@ -2056,6 +2056,7 @@ class AMP_Validated_URL_Post_Type {
 			'CSS_BUDGET_BYTES'              => $css_budget_bytes,
 			'CSS_BUDGET_WARNING_PERCENTAGE' => AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE,
 			'POST_ID'                       => $post->ID,
+			'RECHECK_URL'                   => self::get_recheck_url( $post ),
 			'VALIDATED_URLS_REST_PATH'      => '/amp/v1/validated-urls',
 		];
 

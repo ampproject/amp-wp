@@ -110,8 +110,7 @@ final class ValidatedUrlData {
 		if ( empty( $stylesheets ) ) {
 			return new WP_Error(
 				'amp_validated_url_stylesheets_no_longer_available',
-				__( 'Stylesheet information for this URL is no longer available. Such data is automatically deleted after a week to reduce database storage. It is of little value to store long-term given that it becomes stale as themes and plugins are updated. To obtain the latest stylesheet information, recheck this URL.', 'amp' ),
-				[ 'status' => 404 ]
+				__( 'Stylesheet information for this URL is no longer available. Such data is automatically deleted after a week to reduce database storage. It is of little value to store long-term given that it becomes stale as themes and plugins are updated. To obtain the latest stylesheet information, recheck this URL.', 'amp' )
 			);
 		}
 
@@ -120,8 +119,7 @@ final class ValidatedUrlData {
 		if ( ! is_array( $stylesheets ) ) {
 			return new WP_Error(
 				'amp_validated_url_stylesheets_missing',
-				__( 'Unable to retrieve stylesheets data for this URL.', 'amp' ),
-				[ 'status' => 404 ]
+				__( 'Unable to retrieve stylesheets data for this URL.', 'amp' )
 			);
 		}
 
