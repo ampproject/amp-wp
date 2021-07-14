@@ -78,8 +78,8 @@ export default function Stylesheets( {
 Stylesheets.propTypes = {
 	fetching: PropTypes.bool,
 	stats: PropTypes.object,
-	stylesheets: PropTypes.oneOf( [
-		PropTypes.array,
+	stylesheets: PropTypes.oneOfType( [
+		PropTypes.arrayOf( PropTypes.object ),
 		PropTypes.shape( {
 			errors: PropTypes.object,
 		} ),
