@@ -24,6 +24,7 @@ import {
 	NOTICE_TYPE_WARNING,
 } from '../components/amp-notice';
 import StylesheetsSummary from './components/stylesheets-summary';
+import StylesheetsTable from './components/stylesheets-table';
 
 /**
  * Stylesheets validation data.
@@ -72,6 +73,7 @@ export default function Stylesheets( {
 				</AMPNotice>
 			) }
 			<StylesheetsSummary stats={ stats } />
+			<StylesheetsTable stats={ stats } stylesheets={ stylesheets } />
 		</>
 	);
 }

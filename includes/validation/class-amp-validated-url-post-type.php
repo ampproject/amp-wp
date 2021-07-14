@@ -2038,7 +2038,7 @@ class AMP_Validated_URL_Post_Type {
 		wp_enqueue_style(
 			self::AMP_VALIDATED_URL_PAGE_SCRIPT_HANDLE,
 			amp_get_asset_url( 'css/' . self::AMP_VALIDATED_URL_PAGE_SCRIPT_HANDLE . '.css' ),
-			[],
+			[ 'wp-components' ],
 			$version
 		);
 
