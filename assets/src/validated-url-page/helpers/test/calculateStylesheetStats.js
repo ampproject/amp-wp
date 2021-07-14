@@ -11,7 +11,6 @@ import {
 describe( 'calculateStylesheetStats', () => {
 	it( 'returns null if no stylesheets are provided', () => {
 		expect( calculateStylesheetStats() ).toBeNull();
-		expect( calculateStylesheetStats( [] ) ).toBeNull();
 	} );
 
 	it( 'returns correct sizes prior and after minification', () => {
