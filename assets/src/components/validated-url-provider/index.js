@@ -80,7 +80,6 @@ export function ValidatedUrlProvider( {
 				}
 
 				setValidatedUrl( fetchedValidatedUrl );
-				setStylesheetStats( calculateStylesheetStats( fetchedValidatedUrl?.stylesheets, cssBudgetBytes, cssBudgetWarningPercentage ) );
 			} catch ( e ) {
 				if ( hasUnmounted.current === true ) {
 					return;
@@ -97,7 +96,23 @@ export function ValidatedUrlProvider( {
 
 			setFetchingValidatedUrl( false );
 		} )();
-	}, [ cssBudgetBytes, cssBudgetWarningPercentage, error, fetchingValidatedUrl, hasErrorBoundary, postId, setAsyncError, setError, validatedUrl, validatedUrlsRestPath ] );
+	}, [ error, fetchingValidatedUrl, hasErrorBoundary, postId, setAsyncError, setError, validatedUrl, validatedUrlsRestPath ] );
+
+	/**
+	 * Calculate stylesheet stats.
+	 */
+	useEffect( () => {
+		if (
+			! validatedUrl?.stylesheets ||
+			validatedUrl.stylesheets?.errors ||
+			! Array.isArray( validatedUrl.stylesheets ) ||
+			validatedUrl.stylesheets.length === 0
+		) {
+			return;
+		}
+
+		setStylesheetStats( calculateStylesheetStats( [ ...validatedUrl.stylesheets ], cssBudgetBytes, cssBudgetWarningPercentage ) );
+	}, [ cssBudgetBytes, cssBudgetWarningPercentage, validatedUrl.stylesheets ] );
 
 	return (
 		<ValidatedUrl.Provider
