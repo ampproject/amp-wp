@@ -8,6 +8,7 @@
 
 namespace AmpProject\AmpWP\Validation;
 
+use AMP_Style_Sanitizer;
 use AMP_Validated_URL_Post_Type;
 use WP_Error;
 use WP_Post;
@@ -123,8 +124,74 @@ final class ValidatedUrlData {
 			);
 		}
 
+		foreach ( $stylesheets as $key => $stylesheet ) {
+			$stylesheets[ $key ]['original_tag_abbr'] = $this->format_stylesheet_original_tag_abbreviation( $stylesheet['origin'] );
+			$stylesheets[ $key ]['original_tag']      = $this->format_stylesheet_original_tag( $stylesheet['element']['name'], $stylesheet['element']['attributes'] );
+		}
+
 		$this->stylesheets = $stylesheets;
 
 		return $this->stylesheets;
+	}
+
+	/**
+	 * Format stylesheet original tag abbreviation.
+	 *
+	 * @param string $origin Original element.
+	 *
+	 * @return string Formatted tag abbreviation.
+	 */
+	private function format_stylesheet_original_tag_abbreviation( $origin ) {
+		if ( 'link_element' === $origin ) {
+			return '<link …>'; // @todo Consider adding the basename of the CSS file.
+		}
+
+		if ( 'style_element' === $origin ) {
+			return '<style>';
+		}
+
+		if ( 'style_attribute' === $origin ) {
+			return 'style="…"';
+		}
+
+		return '?';
+	}
+
+	/**
+	 * Construct stylesheet original tag name based on the attributes.
+	 *
+	 * @param string $name       Original element name.
+	 * @param array  $attributes Original element attributes.
+	 *
+	 * @return string
+	 */
+	private function format_stylesheet_original_tag( $name, $attributes ) {
+		$result = '<' . $name;
+
+		if ( ! empty( $attributes ) ) {
+			if ( ! empty( $attributes['class'] ) ) {
+				$attributes['class'] = trim( preg_replace( '/(^|\s)amp-wp-\w+(\s|$)/', ' ', $attributes['class'] ) );
+				if ( empty( $attributes['class'] ) ) {
+					unset( $attributes['class'] );
+				}
+			}
+			if ( isset( $attributes[ AMP_Style_Sanitizer::ORIGINAL_STYLE_ATTRIBUTE_NAME ] ) ) {
+				$attributes['style'] = $attributes[ AMP_Style_Sanitizer::ORIGINAL_STYLE_ATTRIBUTE_NAME ];
+				unset( $attributes[ AMP_Style_Sanitizer::ORIGINAL_STYLE_ATTRIBUTE_NAME ] );
+			}
+			if ( ! empty( $attributes ) ) {
+				foreach ( $attributes as $attribute_name => $attribute_value ) {
+					if ( '' === $attribute_value ) {
+						$result .= ' ' . sprintf( '%s', esc_html( $attribute_name ) );
+					} else {
+						$result .= ' ' . sprintf( '%s="%s"', esc_html( $attribute_name ), esc_attr( $attribute_value ) );
+					}
+				}
+			}
+		}
+
+		$result .= '>';
+
+		return $result;
 	}
 }

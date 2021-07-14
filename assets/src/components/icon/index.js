@@ -107,7 +107,7 @@ StatusIcon.propTypes = {
  * @param {boolean} props.isValid Flag indicating the icon is for a valid status.
  * @param {boolean} props.isBoxed Whether the icon should be contained in a box.
  */
-export function ValidationStatusIcon( { isError, isWarning, isValid, isBoxed = false } ) {
+export function ValidationStatusIcon( { isError, isWarning, isValid, isBoxed = false, ...rest } ) {
 	let type;
 
 	if ( isError ) {
@@ -121,7 +121,10 @@ export function ValidationStatusIcon( { isError, isWarning, isValid, isBoxed = f
 	}
 
 	return (
-		<span className={ `amp-validation-status-icon amp-validation-status-icon--${ type } ${ isBoxed ? 'amp-validation-status-icon--boxed' : '' }` }>
+		<span
+			className={ `amp-validation-status-icon amp-validation-status-icon--${ type } ${ isBoxed ? 'amp-validation-status-icon--boxed' : '' }` }
+			{ ...rest }
+		>
 			{ isValid && <AMPValidIcon /> }
 			{ isWarning && <AMPWarningIcon /> }
 			{ isError && <AMPAlertIcon /> }
