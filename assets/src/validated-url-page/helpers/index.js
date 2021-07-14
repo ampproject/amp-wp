@@ -14,7 +14,7 @@ export const STYLESHEETS_BUDGET_STATUS_EXCEEDED = 'exceeded';
  * @return {Object|null} Stylesheets sizes data or null.
  */
 export function calculateStylesheetStats( stylesheets, budgetBytes, budgetWarningPercentage ) {
-	if ( ! stylesheets || stylesheets?.length === 0 ) {
+	if ( ! stylesheets || stylesheets?.errors || stylesheets?.length === 0 ) {
 		return null;
 	}
 

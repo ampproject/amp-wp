@@ -30,9 +30,9 @@ import {
  * Render stylesheets summary table.
  *
  * @param {Object} props Component props.
- * @param {Object} props.stylesheetSizes Stylesheet sizes object.
+ * @param {Object} props.stats Stylesheet stats object.
  */
-export default function StylesheetsSummary( { stylesheetSizes } ) {
+export default function StylesheetsSummary( { stats } ) {
 	const {
 		included,
 		excluded,
@@ -41,7 +41,7 @@ export default function StylesheetsSummary( { stylesheetSizes } ) {
 			budgetBytes,
 			status,
 		},
-	} = stylesheetSizes;
+	} = stats;
 
 	return (
 		<>
@@ -119,7 +119,7 @@ export default function StylesheetsSummary( { stylesheetSizes } ) {
 	);
 }
 StylesheetsSummary.propTypes = {
-	stylesheetSizes: PropTypes.shape( {
+	stats: PropTypes.shape( {
 		included: PropTypes.shape( {
 			originalSize: PropTypes.number,
 			finalSize: PropTypes.number,

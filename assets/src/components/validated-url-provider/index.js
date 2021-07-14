@@ -44,7 +44,7 @@ export function ValidatedUrlProvider( {
 	validatedUrlsRestPath,
 } ) {
 	const [ validatedUrl, setValidatedUrl ] = useState( {} );
-	const [ stylesheetSizes, setStylesheetSizes ] = useState( {} );
+	const [ stylesheetStats, setStylesheetStats ] = useState();
 	const [ fetchingValidatedUrl, setFetchingValidatedUrl ] = useState( null );
 
 	const { error, setError } = useContext( ErrorContext );
@@ -80,7 +80,7 @@ export function ValidatedUrlProvider( {
 				}
 
 				setValidatedUrl( fetchedValidatedUrl );
-				setStylesheetSizes( calculateStylesheetStats( fetchedValidatedUrl?.stylesheets, cssBudgetBytes, cssBudgetWarningPercentage ) );
+				setStylesheetStats( calculateStylesheetStats( fetchedValidatedUrl?.stylesheets, cssBudgetBytes, cssBudgetWarningPercentage ) );
 			} catch ( e ) {
 				if ( hasUnmounted.current === true ) {
 					return;
@@ -103,7 +103,7 @@ export function ValidatedUrlProvider( {
 		<ValidatedUrl.Provider
 			value={ {
 				fetchingValidatedUrl,
-				stylesheetSizes,
+				stylesheetStats,
 				validatedUrl,
 			} }
 		>

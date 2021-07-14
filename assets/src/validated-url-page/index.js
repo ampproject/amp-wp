@@ -19,12 +19,11 @@ import { render, useContext } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Loading } from '../components/loading';
 import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
 import { ErrorScreen } from '../components/error-screen';
 import { ValidatedUrl, ValidatedUrlProvider } from '../components/validated-url-provider';
-import StylesheetsSummary from './components/stylesheets-summary';
+import Stylesheets from './stylesheets';
 
 let errorHandler;
 
@@ -63,15 +62,16 @@ Providers.propTypes = {
 function Root() {
 	const {
 		fetchingValidatedUrl,
-		stylesheetSizes,
+		stylesheetStats,
+		validatedUrl,
 	} = useContext( ValidatedUrl );
 
-	if ( fetchingValidatedUrl !== false ) {
-		return <Loading />;
-	}
-
 	return (
-		<StylesheetsSummary stylesheetSizes={ stylesheetSizes } />
+		<Stylesheets
+			fetching={ fetchingValidatedUrl }
+			stats={ stylesheetStats }
+			stylesheets={ validatedUrl.stylesheets }
+		/>
 	);
 }
 
