@@ -2,7 +2,10 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { RECHECK_URL } from 'amp-settings'; // From WP inline script.
+import {
+	HAS_REQUIRED_PHP_CSS_PARSER,
+	RECHECK_URL,
+} from 'amp-settings'; // From WP inline script.
 
 /**
  * WordPress dependencies
@@ -18,6 +21,7 @@ import {
 	AMPNotice,
 	NOTICE_SIZE_LARGE,
 	NOTICE_TYPE_INFO,
+	NOTICE_TYPE_WARNING,
 } from '../components/amp-notice';
 import StylesheetsSummary from './components/stylesheets-summary';
 
@@ -60,7 +64,16 @@ export default function Stylesheets( {
 		);
 	}
 
-	return <StylesheetsSummary stats={ stats } />;
+	return (
+		<>
+			{ ! HAS_REQUIRED_PHP_CSS_PARSER && (
+				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
+					{ __( 'AMP CSS processing is limited because a conflicting version of PHP-CSS-Parser has been loaded by another plugin or theme. Tree shaking is not available.', 'amp' ) }
+				</AMPNotice>
+			) }
+			<StylesheetsSummary stats={ stats } />
+		</>
+	);
 }
 Stylesheets.propTypes = {
 	fetching: PropTypes.bool,

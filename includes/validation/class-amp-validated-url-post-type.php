@@ -2055,6 +2055,7 @@ class AMP_Validated_URL_Post_Type {
 			'APP_ROOT_ID'                   => self::AMP_VALIDATED_URL_PAGE_APP_ROOT_ID,
 			'CSS_BUDGET_BYTES'              => $css_budget_bytes,
 			'CSS_BUDGET_WARNING_PERCENTAGE' => AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE,
+			'HAS_REQUIRED_PHP_CSS_PARSER'   => AMP_Style_Sanitizer::has_required_php_css_parser(),
 			'POST_ID'                       => $post->ID,
 			'RECHECK_URL'                   => self::get_recheck_url( $post ),
 			'VALIDATED_URLS_REST_PATH'      => '/amp/v1/validated-urls',
