@@ -49,7 +49,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		return is_admin() && ! wp_doing_ajax();
+		return ( ! wp_doing_ajax() );
 	}
 
 	/**
@@ -81,6 +81,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 		add_filter( 'site_status_test_result', [ $this, 'modify_test_result' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
 		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
+		add_action( 'template_redirect', [ $this, 'render_random_string_page' ] );
 	}
 
 	/**
@@ -103,6 +104,12 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 			'label' => esc_html__( 'Persistent object cache', 'amp' ),
 			'test'  => [ $this, 'persistent_object_cache' ],
 		];
+
+		$tests['direct']['amp_page_cache'] = [
+			'label' => esc_html__( 'Page cache', 'amp' ),
+			'test'  => [ $this, 'page_cache' ],
+		];
+
 		if ( ! amp_is_canonical() && QueryVar::AMP !== amp_get_slug() ) {
 			$tests['direct']['amp_slug_definition_timing'] = [
 				'label' => esc_html__( 'AMP slug (query var) definition timing', 'amp' ),
@@ -169,6 +176,77 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 				? esc_html__( 'Persistent object caching is enabled', 'amp' )
 				: esc_html__( 'Persistent object caching is not enabled', 'amp' ),
 		];
+	}
+
+	/**
+	 * Get the test result data for whether there is page cache or not.
+	 *
+	 * @return array
+	 */
+	public function page_cache() {
+
+		$is_using_page_cache = $this->is_site_has_page_cache();
+
+		return [
+			'badge'       => [
+				'label' => $this->get_badge_label(),
+				'color' => $is_using_page_cache ? 'green' : 'orange',
+			],
+			'description' => esc_html__( 'The AMP plugin performs at its best when page object cache is enabled.', 'amp' ),
+			'test'        => 'amp_page_cache',
+			'status'      => $is_using_page_cache ? 'good' : 'recommended',
+			'label'       => $is_using_page_cache
+				? esc_html__( 'Page caching is enabled', 'amp' )
+				: esc_html__( 'Page caching is not enabled', 'amp' ),
+		];
+	}
+
+	/**
+	 * Check if site has page cache enable or not.
+	 *
+	 * @return bool True if site has page cache. Otherwise False.
+	 */
+	private function is_site_has_page_cache() {
+
+		$request_url    = home_url( '?amp_page_cache=1' );
+		$has_page_cache = false;
+		$response_list  = [];
+		$request_args   = [];
+
+		for ( $i = 1; $i <= 3; $i++ ) {
+			$response = wp_remote_get( $request_url, $request_args );
+			if ( ! empty( $response ) && ! is_wp_error( $response ) ) {
+				$response = wp_remote_retrieve_body( $response );
+			} else {
+				$response = false;
+			}
+
+			$response_list[ $i ] = $response;
+
+			if ( false === $has_page_cache &&
+				! empty( $response_list[ $i - 1 ] ) &&
+				! empty( $response_list[ $i ] ) &&
+				$response_list[ $i - 1 ] === $response_list[ $i ]
+			) {
+				$has_page_cache = true;
+			}
+		}
+
+		return $has_page_cache;
+	}
+
+	/**
+	 * To render random string on the page.
+	 *
+	 * @return void
+	 */
+	public function render_random_string_page() {
+
+		$query_var = filter_input( INPUT_GET, 'amp_page_cache', FILTER_SANITIZE_STRING );
+
+		if ( ! empty( $query_var ) ) {
+			die( esc_html( wp_rand( 1000, 10000 ) ) );
+		}
 	}
 
 	/**
