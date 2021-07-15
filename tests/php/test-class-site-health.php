@@ -71,6 +71,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'site_status_test_result', [ $this->instance, 'modify_test_result' ] ) );
 		$this->assertEquals( 10, has_filter( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_print_styles-site-health.php', [ $this->instance, 'add_styles' ] ) );
+		$this->assertEquals( 10, has_action( 'template_redirect', [ $this->instance, 'render_random_string_page' ] ) );
 	}
 
 	/**
@@ -82,6 +83,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$tests = $this->instance->add_tests( [] );
 		$this->assertArrayHasKey( 'direct', $tests );
 		$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
+		$this->assertArrayHasKey( 'amp_page_cache', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
 		$this->assertArrayNotHasKey( 'amp_icu_version', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_xdebug_extension', $tests['direct'] );
@@ -529,6 +531,48 @@ class Test_Site_Health extends WP_UnitTestCase {
 		);
 
 		remove_filter( 'site_url', [ self::class, 'get_idn' ] );
+	}
+
+	/**
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::is_site_has_page_cache()
+	 */
+	public function test_is_site_has_page_cache_without_page_cache() {
+
+		/**
+		 * Mock the http request.
+		 */
+		$callback_wp_remote = static function () {
+
+			return [
+				'body' => wp_rand( 1000, 10000 ),
+			];
+		};
+		add_filter( 'pre_http_request', $callback_wp_remote );
+
+		$this->assertFalse( $this->call_private_method( $this->instance, 'is_site_has_page_cache' ) );
+
+		remove_filter( 'pre_http_request', $callback_wp_remote );
+	}
+
+	/**
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::is_site_has_page_cache()
+	 */
+	public function test_is_site_has_page_cache_with_page_cache() {
+
+		/**
+		 * Mock the http request.
+		 */
+		$callback_wp_remote = static function () {
+
+			return [
+				'body' => '1345',
+			];
+		};
+		add_filter( 'pre_http_request', $callback_wp_remote );
+
+		$this->assertTrue( $this->call_private_method( $this->instance, 'is_site_has_page_cache' ) );
+
+		remove_filter( 'pre_http_request', $callback_wp_remote );
 	}
 
 	/**
