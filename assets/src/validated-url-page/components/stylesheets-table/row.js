@@ -15,6 +15,7 @@ import { Button } from '@wordpress/components';
  */
 import FormattedMemoryValue from '../../../components/formatted-memory-value';
 import { ValidationStatusIcon } from '../../../components/icon';
+import ShakenTokensDiff from '../../../components/shaken-tokens-diff';
 
 export default function StylesheetsTableRow( {
 	finalSize,
@@ -22,10 +23,12 @@ export default function StylesheetsTableRow( {
 	isExcessive,
 	isExcluded,
 	isIncluded,
+	origin,
 	originalSize,
 	orignalTag,
 	orignalTagAbbr,
 	priority,
+	shakenTokens,
 	totalFinalSize,
 } ) {
 	const [ expanded, setExpanded ] = useState( false );
@@ -114,6 +117,15 @@ export default function StylesheetsTableRow( {
 									{ orignalTag }
 								</code>
 							</dd>
+							<dt>
+								{ __( 'CSS Code', 'amp' ) }
+							</dt>
+							<dd>
+								<ShakenTokensDiff
+									tokens={ shakenTokens }
+									isStyleAttribute={ origin === 'style_attribute' }
+								/>
+							</dd>
 						</dl>
 					</td>
 				</tr>
@@ -127,9 +139,11 @@ StylesheetsTableRow.propTypes = {
 	isExcessive: PropTypes.bool,
 	isExcluded: PropTypes.bool,
 	isIncluded: PropTypes.bool,
+	origin: PropTypes.string,
 	originalSize: PropTypes.number,
 	orignalTag: PropTypes.string,
 	orignalTagAbbr: PropTypes.string,
 	priority: PropTypes.number,
+	shakenTokens: PropTypes.array,
 	totalFinalSize: PropTypes.number,
 };
