@@ -18,17 +18,18 @@ export default function StylesheetsTable( { stylesheets, stats } ) {
 			<tbody>
 				{ stylesheets.map( ( stylesheet, index ) => (
 					<StylesheetsTableRow
-						key={ stylesheet.hash }
-						index={ index }
-						originalSize={ stylesheet.original_size }
 						finalSize={ stylesheet.final_size }
-						totalFinalSize={ totalFinalSize }
-						priority={ stylesheet.priority }
+						index={ index }
+						isExcessive={ stats.excessive.stylesheets.includes( stylesheet.hash ) }
+						isExcluded={ stats.excluded.stylesheets.includes( stylesheet.hash ) }
+						isIncluded={ stats.included.stylesheets.includes( stylesheet.hash ) }
+						key={ stylesheet.hash }
+						originalSize={ stylesheet.original_size }
 						orignalTag={ stylesheet.original_tag }
 						orignalTagAbbr={ stylesheet.original_tag_abbr }
-						isIncluded={ stats.included.stylesheets.includes( stylesheet.hash ) }
-						isExcluded={ stats.excluded.stylesheets.includes( stylesheet.hash ) }
-						isExcessive={ stats.excessive.stylesheets.includes( stylesheet.hash ) }
+						priority={ stylesheet.priority }
+						shakenTokens={ stylesheet.shaken_tokens }
+						totalFinalSize={ totalFinalSize }
 					/>
 				) ) }
 			</tbody>
@@ -37,12 +38,13 @@ export default function StylesheetsTable( { stylesheets, stats } ) {
 }
 StylesheetsTable.propTypes = {
 	stylesheets: PropTypes.arrayOf( PropTypes.shape( {
+		final_size: PropTypes.number,
 		hash: PropTypes.string,
 		original_size: PropTypes.number,
-		final_size: PropTypes.number,
-		priority: PropTypes.number,
 		original_tag: PropTypes.string,
 		original_tag_abbr: PropTypes.string,
+		priority: PropTypes.number,
+		shaken_tokens: PropTypes.array,
 	} ) ),
 	stats: PropTypes.shape( {
 		included: PropTypes.shape( {
