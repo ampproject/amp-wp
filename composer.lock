@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f7e3c12124ffb51cf165e13a755e20bc",
+    "content-hash": "319e8c1f3e076079c5c80d70c986e1db",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
@@ -196,13 +196,13 @@
                 "reference": "bfdd976",
                 "shasum": ""
             },
-			"require": {
-			  "php": ">=5.3.2"
-			},
+            "require": {
+                "php": ">=5.3.2"
+            },
             "require-dev": {
                 "codacy/coverage": "^1.4",
-				"phpunit/phpunit": "~4.8"
-			},
+                "phpunit/phpunit": "~4.8"
+            },
             "default-branch": true,
             "type": "library",
             "autoload": {
@@ -3930,16 +3930,16 @@
         },
         {
             "name": "sirbrillig/phpcs-variable-analysis",
-            "version": "v2.11.1",
+            "version": "v2.11.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sirbrillig/phpcs-variable-analysis.git",
-                "reference": "9df9ade5961a3505d0d24b0e6be2ab82e335f753"
+                "reference": "3fad28475bfbdbf8aa5c440f8a8f89824983d85e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sirbrillig/phpcs-variable-analysis/zipball/9df9ade5961a3505d0d24b0e6be2ab82e335f753",
-                "reference": "9df9ade5961a3505d0d24b0e6be2ab82e335f753",
+                "url": "https://api.github.com/repos/sirbrillig/phpcs-variable-analysis/zipball/3fad28475bfbdbf8aa5c440f8a8f89824983d85e",
+                "reference": "3fad28475bfbdbf8aa5c440f8a8f89824983d85e",
                 "shasum": ""
             },
             "require": {
@@ -3979,7 +3979,7 @@
                 "source": "https://github.com/sirbrillig/phpcs-variable-analysis",
                 "wiki": "https://github.com/sirbrillig/phpcs-variable-analysis/wiki"
             },
-            "time": "2021-06-18T20:54:59+00:00"
+            "time": "2021-07-06T23:45:17+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
