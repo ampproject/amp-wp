@@ -3371,87 +3371,6 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
-		'amp-google-assistant-assistjs-config' => array(
-			array(
-				'attr_spec_list' => array(),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							1,
-						),
-					),
-					'requires_extension' => array(
-						'amp-google-assistant-assistjs',
-					),
-				),
-			),
-		),
-		'amp-google-assistant-inline-suggestion-bar' => array(
-			array(
-				'attr_spec_list' => array(
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							4,
-						),
-					),
-					'requires_extension' => array(
-						'amp-google-assistant-assistjs',
-					),
-				),
-			),
-		),
-		'amp-google-assistant-voice-bar' => array(
-			array(
-				'attr_spec_list' => array(
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							4,
-						),
-					),
-					'requires_extension' => array(
-						'amp-google-assistant-assistjs',
-					),
-				),
-			),
-		),
-		'amp-google-assistant-voice-button' => array(
-			array(
-				'attr_spec_list' => array(
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							4,
-						),
-					),
-					'requires_extension' => array(
-						'amp-google-assistant-assistjs',
-					),
-				),
-			),
-		),
 		'amp-google-document-embed' => array(
 			array(
 				'attr_spec_list' => array(
@@ -7748,6 +7667,44 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-wistia-player',
 					),
+				),
+			),
+		),
+		'amp-wordpress-embed' => array(
+			array(
+				'attr_spec_list' => array(
+					'data-url' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							9,
+							1,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-wordpress-embed',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-wordpress-embed/',
 				),
 			),
 		),
@@ -15955,6 +15912,7 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
+							'1.0',
 						),
 					),
 				),
@@ -16361,37 +16319,6 @@ class AMP_Allowed_Tags_Generated {
 					'extension_spec' => array(
 						'latest' => '0.1',
 						'name' => 'amp-gist',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'crossorigin' => array(
-						'value' => array(
-							'anonymous',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'latest' => '0.1',
-						'name' => 'amp-google-assistant-assistjs',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
@@ -18850,6 +18777,37 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'latest' => '1.0',
+						'name' => 'amp-wordpress-embed',
+						'requires_usage' => true,
+						'version' => array(
+							'1.0',
 						),
 					),
 				),

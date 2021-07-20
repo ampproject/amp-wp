@@ -673,18 +673,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-story-player' ],
 			],
 
-			'amp_google_assistant_assistjs'                => [
-				// Note: the first line is commented out because it is broken in AMP currently.
-				'
-					<!--<amp-google-assistant-assistjs-config layout="nodisplay"><script type="application/json">{"devMode": true, "projectId": "aog-assistjs-demos"}</script></amp-google-assistant-assistjs-config>-->
-					<amp-google-assistant-voice-button layout="responsive" width="150" height="40"></amp-google-assistant-voice-button>
-					<amp-google-assistant-voice-bar layout="responsive" width="150" height="40"></amp-google-assistant-voice-bar>
-					<amp-google-assistant-inline-suggestion-bar layout="responsive" width="150" height="40"></amp-google-assistant-inline-suggestion-bar>
-				',
-				null,
-				[ 'amp-google-assistant-assistjs' ],
-			],
-
 			'reference-points-bad'                         => [
 				'<div lightbox-thumbnail-id update items pagination separator option selected disabled>BAD REFERENCE POINTS</div>',
 				'<div>BAD REFERENCE POINTS</div>',
@@ -3180,6 +3168,51 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				',
 				null,
 				[ 'amp-stream-gallery' ],
+			],
+
+			'amp-tiktok'                                   => [
+				'
+				  <amp-tiktok width="500" height="800">
+				    <blockquote
+				      placeholder
+				      class="tiktok-embed"
+				      cite="https://www.tiktok.com/@countingprimes/video/6948210747285441798"
+				      data-video-id="6948210747285441798"
+				      style="max-width: 605px; min-width: 325px">
+				      <section>
+				        <a
+				          target="_blank"
+				          title="@countingprimes"
+				          href="https://www.tiktok.com/@countingprimes">@countingprimes</a>
+				        <p>
+				          VIM is great.... right up until you start typing the commands into every
+				          single text editor you see. I’d like to apologize for all my unneeded
+				          “:wq”’s
+				        </p>
+				        <a
+				          target="_blank"
+				          title="♬ original sound - countingprimes"
+				          href="https://www.tiktok.com/music/original-sound-6948210588145175302">♬ original sound - countingprimes</a>
+				      </section>
+				    </blockquote>
+				  </amp-tiktok>
+				',
+				null,
+				[ 'amp-tiktok' ],
+			],
+
+			'amp-wordpress-embed'                          => [
+				'
+				<amp-wordpress-embed
+				  data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
+				  layout="fixed"
+				  height="400"
+				  width="600">
+				  <button overflow>Load more</button>
+				</amp-wordpress-embed>
+				',
+				null,
+				[ 'amp-wordpress-embed' ],
 			],
 		];
 	}
