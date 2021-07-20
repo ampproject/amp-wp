@@ -1,0 +1,19 @@
+{
+  "name": "ampproject/php-css-parser-install-plugin",
+  "type": "composer-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "composer-plugin-api": "^2.0"
+  },
+  "require-dev": {
+    "composer/composer": "^2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "AmpProject\\AmpWP\\PhpCssParserInstall\\": "./src"
+    }
+  },
+  "extra": {
+    "class": "AmpProject\\AmpWP\\PhpCssParserInstall\\Plugin"
+  }
+}
