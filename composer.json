@@ -24,7 +24,7 @@
     "civicrm/composer-downloads-plugin": "^3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
     "google/cloud-storage": "^1.22",
-    "mikey179/vfsstream": "1.6.8",
+    "mikey179/vfsstream": "1.6.9",
     "mustache/mustache": "^2",
     "php-stubs/wordpress-stubs": "^5.3.2",
     "phpcompatibility/phpcompatibility-wp": "2.1.1",
