@@ -42,6 +42,7 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
 	const [ originalOptions, setOriginalOptions ] = useState( {} );
+	const [ modifiedOptions, setModifiedOptions ] = useState( {} );
 
 	const { error, setError } = useContext( ErrorContext );
 	const { setAsyncError } = useAsyncError();
@@ -162,10 +163,12 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 			return;
 		}
 
+		setModifiedOptions( { ...modifiedOptions, ...updates } );
+
 		setUpdates( {} );
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ delaySave, hasErrorBoundary, optionsRestPath, setAsyncError, originalOptions, setError, updates ] );
+	}, [ delaySave, hasErrorBoundary, optionsRestPath, setAsyncError, originalOptions, setError, updates, modifiedOptions ] );
 
 	/**
 	 * Updates options in state.
@@ -200,6 +203,7 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 					updateOptions,
 					readerModeWasOverridden,
 					setReaderModeWasOverridden,
+					modifiedOptions,
 				}
 			}
 		>

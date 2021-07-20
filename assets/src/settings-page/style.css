@@ -538,3 +538,7 @@ li.error-kept {
 	height: 24px;
 	width: 24px;
 }
+
+.notice p {
+	font-size: 13px;
+}

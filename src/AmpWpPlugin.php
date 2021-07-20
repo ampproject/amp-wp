@@ -96,6 +96,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'obsolete_block_attribute_remover'   => ObsoleteBlockAttributeRemover::class,
 		'optimizer'                          => OptimizerService::class,
 		'optimizer.hero_candidate_filtering' => HeroCandidateFiltering::class,
+		'page_cache_flush_needed_notice'     => Admin\PageCacheFlushNeededNotice::class,
 		'plugin_activation_notice'           => Admin\PluginActivationNotice::class,
 		'plugin_registry'                    => PluginRegistry::class,
 		'plugin_suppression'                 => PluginSuppression::class,

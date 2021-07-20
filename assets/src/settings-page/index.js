@@ -8,6 +8,7 @@ import {
 	OPTIONS_REST_PATH,
 	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
+	SHOW_PAGE_CACHE_NOTICE,
 } from 'amp-settings';
 
 /**
@@ -42,6 +43,7 @@ import { SettingsFooter } from './settings-footer';
 import { PluginSuppression } from './plugin-suppression';
 import { Analytics } from './analytics';
 import { PairedUrlStructure } from './paired-url-structure';
+import { PageCacheFlushNeededNotice } from './page-cache-flush-needed-notice';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -117,7 +119,7 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
 
-	const { fetchingOptions, saveOptions } = useContext( Options );
+	const { fetchingOptions, saveOptions, modifiedOptions } = useContext( Options );
 	const { templateModeWasOverridden } = useContext( ReaderThemes );
 
 	/**
@@ -157,6 +159,11 @@ function Root( { appRoot } ) {
 		return <Loading />;
 	}
 
+	const shouldShowPageCacheFlushNotice = (
+		( true === SHOW_PAGE_CACHE_NOTICE ) ||
+		( 'object' === typeof modifiedOptions && ( modifiedOptions.theme_support || modifiedOptions.reader_theme ) )
+	);
+
 	return (
 		<>
 			{ ! HAS_DEPENDENCY_SUPPORT && (
@@ -164,6 +171,13 @@ function Root( { appRoot } ) {
 					{ __( 'You are using an old version of WordPress. Please upgrade to access all of the features of the AMP plugin.', 'amp' ) }
 				</AMPNotice>
 			) }
+
+			{
+				shouldShowPageCacheFlushNotice && (
+					<PageCacheFlushNeededNotice />
+				)
+			}
+
 			<Welcome />
 			<form onSubmit={ ( event ) => {
 				event.preventDefault();

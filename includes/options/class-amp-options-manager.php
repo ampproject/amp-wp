@@ -381,7 +381,16 @@ class AMP_Options_Manager {
 		$amp_options = self::get_options();
 
 		$amp_options[ $option ] = $value;
-		return update_option( self::OPTION_NAME, $amp_options, false );
+
+		$flag = update_option( self::OPTION_NAME, $amp_options, false );
+
+		if ( $flag &&
+			( 'theme_support' === $option || 'reader_theme' === $option )
+		) {
+			self::maybe_trigger_page_cache_flush_needed_action();
+		}
+
+		return $flag;
 	}
 
 	/**
@@ -396,7 +405,26 @@ class AMP_Options_Manager {
 			$options
 		);
 
-		return update_option( self::OPTION_NAME, $amp_options, false );
+		$flag = update_option( self::OPTION_NAME, $amp_options, false );
+
+		if ( $flag &&
+			( isset( $options['theme_support'] ) || isset( $options['reader_theme'] ) )
+		) {
+			self::maybe_trigger_page_cache_flush_needed_action();
+		}
+
+		return $flag;
+	}
+
+	/**
+	 * Trigger page cache flush needed action.
+	 *
+	 * @return void
+	 */
+	private static function maybe_trigger_page_cache_flush_needed_action() {
+		if ( defined( 'WP_CACHE' ) && true === WP_CACHE ) {
+			do_action( 'amp_page_cache_flush_needed' );
+		}
 	}
 
 	/**
