@@ -96,6 +96,7 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 	 * @covers ::render()
 	 */
 	public function test_render() {
+		wp_scripts(); // Make sure $wp_scripts global is defined for wp_check_widget_editor_deps().
 		set_current_screen( 'admin_page_amp-onboarding-wizard' );
 
 		ob_start();
