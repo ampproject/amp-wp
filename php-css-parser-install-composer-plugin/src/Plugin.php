@@ -64,7 +64,24 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
 	public function uninstall( Composer $composer, IOInterface $io ) {
 	}
 
-	/** @inerhitDoc */
+	/**
+	 * Returns an array of event names this subscriber wants to listen to.
+	 *
+	 * The array keys are event names and the value can be:
+	 *
+	 * * The method name to call (priority defaults to 0)
+	 * * An array composed of the method name to call and the priority
+	 * * An array of arrays composed of the method names to call and respective
+	 *   priorities, or 0 if unset
+	 *
+	 * For instance:
+	 *
+	 * * array('eventName' => 'methodName')
+	 * * array('eventName' => array('methodName', $priority))
+	 * * array('eventName' => array(array('methodName1', $priority), array('methodName2'))
+	 *
+	 * @return array The event names to listen to
+	 */
 	public static function getSubscribedEvents() {
 		return [
 			ScriptEvents::PRE_AUTOLOAD_DUMP => 'onPreAutoloadDump',
@@ -103,9 +120,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
 		}
 
 		unset( $lock_data['packages'][ $package_key ]['suggest'] );
-		$lock_data['packages'][ $package_key ]['require']                                = [
+		$lock_data['packages'][ $package_key ]['require'] = [
 			'php' => '>=5.3.2',
 		];
+
 		$lock_data['packages'][ $package_key ]['autoload']['psr-4']['Sabberworm\\CSS\\'] = 'lib/Sabberworm/CSS/';
 
 		$package_locker->setLockData(
