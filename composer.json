@@ -20,6 +20,7 @@
     "sabberworm/php-css-parser": "dev-master#bfdd976"
   },
   "require-dev": {
+    "ampproject/php-css-parser-install-plugin": "*",
     "automattic/vipwpcs": "^2.2",
     "civicrm/composer-downloads-plugin": "^3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
@@ -90,6 +91,12 @@
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
+  "repositories": [
+    {
+      "type": "path",
+      "url": "./php-css-parser-install-composer-plugin"
+    }
+  ],
   "scripts": {
     "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi",
     "pre-commit": [
