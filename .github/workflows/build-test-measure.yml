@@ -26,6 +26,7 @@ jobs:
       changed-php-count: ${{ steps.determine-file-counts.outputs.php-count }}
       changed-css-count: ${{ steps.determine-file-counts.outputs.css-count }}
       changed-js-count: ${{ steps.determine-file-counts.outputs.js-count }}
+      changed-gha-workflow-count: ${{ steps.determine-file-counts.outputs.gha-workflow-count }}
     steps:
       - name: Checkout including last 2 commits
         # Fetch last 2 commits if it's not a PR, so that we can determine the list of modified files.
@@ -62,16 +63,19 @@ jobs:
           PHP_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.php|composer\.(json|lock)" "$MODIFIED_FILES")
           CSS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.s?css" "$MODIFIED_FILES")
           JS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php "(.+\.(js|snap)|package\.(json|lock))" "$MODIFIED_FILES")
+          GHA_WORKFLOW_COUNT=$(php -f bin/determine-modified-files-count.php "(\.github\/workflows\/.+\.yml)" "$MODIFIED_FILES")
 
           echo "Changed file count: $FILE_COUNT"
           echo "Changed PHP file count: $PHP_FILE_COUNT"
           echo "Changed CSS file count: $CSS_FILE_COUNT"
           echo "Changed JS file count: $JS_FILE_COUNT"
+          echo "Changed GHA workflow file count: $GHA_WORKFLOW_COUNT"
 
           echo "::set-output name=count::$FILE_COUNT"
           echo "::set-output name=php-count::$PHP_FILE_COUNT"
           echo "::set-output name=css-count::$CSS_FILE_COUNT"
           echo "::set-output name=js-count::$JS_FILE_COUNT"
+          echo "::set-output name=gha-workflow-count::$GHA_WORKFLOW_COUNT"
         env:
           # Ignore Paths:
           # - .github/
@@ -82,7 +86,7 @@ jobs:
 
   lint-css:
     needs: pre-run
-    if: needs.pre-run.outputs.changed-css-count > 0
+    if: needs.pre-run.outputs.changed-css-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     name: 'Lint: CSS'
     runs-on: ubuntu-latest
     steps:
@@ -112,7 +116,7 @@ jobs:
   lint-js:
     name: 'Lint: JS'
     needs: pre-run
-    if: needs.pre-run.outputs.changed-js-count > 0
+    if: needs.pre-run.outputs.changed-js-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -165,7 +169,7 @@ jobs:
   lint-php:
     name: 'Lint: PHP'
     needs: pre-run
-    if: needs.pre-run.outputs.changed-php-count > 0
+    if: needs.pre-run.outputs.changed-php-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -210,7 +214,7 @@ jobs:
     name: 'Static Analysis: PHP'
     runs-on: ubuntu-latest
     needs: pre-run
-    if: needs.pre-run.outputs.changed-php-count > 0
+    if: needs.pre-run.outputs.changed-php-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -249,7 +253,7 @@ jobs:
     name: 'Unit test: JS'
     runs-on: ubuntu-latest
     needs: pre-run
-    if: needs.pre-run.outputs.changed-js-count > 0
+    if: needs.pre-run.outputs.changed-js-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
 
     steps:
       - name: Checkout
