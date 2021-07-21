@@ -2,7 +2,7 @@
 /**
  * Class PageCacheFlushNeededNotice.
  *
- * Adds an admin notice to to notice admin user to flush page cache.
+ * Adds an admin notice for admin user to flush page cache.
  *
  * @since   2.2
  *
@@ -11,11 +11,8 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use AMP_Options_Manager;
-use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Option;
 
 /**
  * Class PageCacheFlushNeededNotice
@@ -50,6 +47,7 @@ final class PageCacheFlushNeededNotice implements Service, Registerable {
 	 * Runs on instantiation.
 	 */
 	public function register() {
+
 		add_action( 'amp_page_cache_flush_needed', [ $this, 'trigger_admin_notice' ] );
 		add_action( 'wp_ajax_' . self::AJAX_ACTION, [ $this, 'ajax_dismiss_amp_notice' ] );
 		add_action( 'admin_notices', [ $this, 'render_notice' ] );
@@ -75,16 +73,20 @@ final class PageCacheFlushNeededNotice implements Service, Registerable {
 	 */
 	public function ajax_dismiss_amp_notice() {
 
-		$notice = filter_input( INPUT_POST, 'notice', FILTER_SANITIZE_STRING );
+		check_ajax_referer( self::AJAX_ACTION, 'nonce' );
 
-		if ( empty( $notice ) || sanitize_key( $notice ) !== $notice ) {
+		$notice = isset( $_POST['notice'] ) ? sanitize_key( $_POST['notice'] ) : '';
+
+		if ( empty( $notice ) ) {
 			wp_die( 0 );
+			return;
 		}
 
 		$notices = get_option( self::OPTION_NAME, [] );
 
 		if ( ! in_array( $notice, $notices, true ) ) {
 			wp_die( 0 );
+			return;
 		}
 
 		$notices = array_diff( $notices, [ $notice ] );
@@ -112,6 +114,8 @@ final class PageCacheFlushNeededNotice implements Service, Registerable {
 			return;
 		}
 
+		$nonce = wp_create_nonce( self::AJAX_ACTION );
+
 		?>
 		<div class="amp-plugin-notice notice notice-error is-dismissible" id="<?php echo esc_attr( self::NOTICE_ID ); ?>">
 			<div class="notice-dismiss"></div>
@@ -127,6 +131,7 @@ final class PageCacheFlushNeededNotice implements Service, Registerable {
 					$.post( ajaxurl, {
 						notice: <?php echo wp_json_encode( self::NOTICE_ID ); ?>,
 						action: <?php echo wp_json_encode( self::AJAX_ACTION ); ?>,
+						nonce: <?php echo wp_json_encode( $nonce ); ?>,
 					} ).done( function ( response ) {
 						if ( '1' === response ) {
 							element.remove();

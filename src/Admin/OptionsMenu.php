@@ -246,6 +246,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'THEME_SUPPORT_ARGS'          => AMP_Theme_Support::get_theme_support_args(),
 			'THEME_SUPPORTS_READER_MODE'  => AMP_Theme_Support::supports_reader_mode(),
 			'UPDATES_NONCE'               => wp_create_nonce( 'updates' ),
+			'PAGE_CACHE_NOTICE_NONCE'     => wp_create_nonce( PageCacheFlushNeededNotice::AJAX_ACTION ),
 			'SITE_HAS_CACHE_ENABLE'       => ( defined( 'WP_CACHE' ) && true === WP_CACHE ),
 			'SHOW_PAGE_CACHE_NOTICE'      => $show_page_cache_flush_notice,
 		];

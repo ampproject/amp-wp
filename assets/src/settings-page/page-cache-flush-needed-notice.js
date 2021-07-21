@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import {
 	SITE_HAS_CACHE_ENABLE,
+	PAGE_CACHE_NOTICE_NONCE,
 } from 'amp-settings';
 
 /**
@@ -29,6 +30,7 @@ export function PageCacheFlushNeededNotice() {
 			const body = new global.FormData();
 			body.append( 'action', 'dismiss-amp-notice' );
 			body.append( 'notice', noticeID );
+			body.append( 'nonce', PAGE_CACHE_NOTICE_NONCE );
 
 			const response = await global.fetch( global.ajaxurl, {
 				body,
