@@ -172,11 +172,7 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 
-			{
-				shouldShowPageCacheFlushNotice && (
-					<PageCacheFlushNeededNotice />
-				)
-			}
+			{ shouldShowPageCacheFlushNotice ? <PageCacheFlushNeededNotice /> : '' }
 
 			<Welcome />
 			<form onSubmit={ ( event ) => {
