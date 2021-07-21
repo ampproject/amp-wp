@@ -7,7 +7,7 @@
 
 namespace AmpProject\AmpWP;
 
-// if uninstall.php is not called by WordPress, Then die.
+// If uninstall.php is not called by WordPress, then die.
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	die;
 }
@@ -29,7 +29,7 @@ function delete_options() {
  *
  * @return void
  */
-function delete_transient() {
+function delete_transients() {
 
 	if ( wp_using_ext_object_cache() ) {
 		return;
@@ -38,13 +38,13 @@ function delete_transient() {
 	global $wpdb;
 
 	$transient_groups = [
-		'amp-parsed-stylesheet-v',
-		'amp_img_',
+		'amp-parsed-stylesheet-v%',
+		'amp_img_%',
 		'amp_new_validation_error_urls_count',
 		'amp_error_index_counts',
 		'amp_plugin_activation_validation_errors',
 		'amp_themes_wporg',
-		'amp_lock_',
+		'amp_lock_%',
 	];
 
 	$where_clause = [];
@@ -52,8 +52,8 @@ function delete_transient() {
 	foreach ( $transient_groups as $transient_group ) {
 		$where_clause[] = $wpdb->prepare(
 			' option_name LIKE %s OR option_name LIKE %s ',
-			"_transient_$transient_group%",
-			"_transient_timeout_$transient_group%"
+			"_transient_$transient_group",
+			"_transient_timeout_$transient_group"
 		);
 	}
 
@@ -97,7 +97,7 @@ function delete_posts() {
 		 */
 		$result = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT ID FROM $wpdb->posts WHERE post_type='amp_validated_url' LIMIT %d OFFSET %d;",
+				"SELECT ID FROM $wpdb->posts WHERE post_type = 'amp_validated_url' LIMIT %d OFFSET %d;",
 				$per_page,
 				$offset
 			),
@@ -145,7 +145,7 @@ function delete_terms() {
 		 */
 		$result = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy=%s LIMIT %d OFFSET %d;",
+				"SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s LIMIT %d OFFSET %d;",
 				$taxonomy,
 				$per_page,
 				$offset
@@ -169,6 +169,6 @@ function delete_terms() {
 }
 
 delete_options();
-delete_transient();
 delete_posts();
 delete_terms();
+delete_transients();
