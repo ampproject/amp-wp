@@ -20,6 +20,7 @@
     "sabberworm/php-css-parser": "dev-master#bfdd976"
   },
   "require-dev": {
+    "ampproject/php-css-parser-install-plugin": "*",
     "automattic/vipwpcs": "^2.2",
     "civicrm/composer-downloads-plugin": "^3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
@@ -88,6 +89,12 @@
       "docs/includes/register-wp-cli-commands.php"
     ]
   },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "./php-css-parser-install-composer-plugin"
+    }
+  ],
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
