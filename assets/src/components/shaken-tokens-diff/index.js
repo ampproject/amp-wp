@@ -73,7 +73,7 @@ export default function ShakenTokensDiff( {
 			insCount: _insCount,
 			delCount: _delCount,
 		};
-	}, [ tokens ] );
+	}, [ isStyleAttribute, tokens ] );
 
 	return (
 		<>
