@@ -123,7 +123,7 @@ export default function StylesheetsTableRow( {
 							<dd>
 								<ShakenTokensDiff
 									tokens={ shakenTokens }
-									isStyleAttribute={ origin === 'style_attribute' }
+									origin={ origin }
 								/>
 							</dd>
 						</dl>

@@ -13,7 +13,7 @@ import Selector from './selector';
 export default function Declaration( {
 	token,
 	indentation = 0,
-	isStyleAttribute,
+	origin,
 } ) {
 	const [ isKept, selectors, declaration ] = token;
 
@@ -47,7 +47,7 @@ export default function Declaration( {
 					<Selector
 						selector={ selector }
 						isLast={ index === selectorsList.length - 1 }
-						isStyleAttribute={ isStyleAttribute }
+						origin={ origin }
 					/>
 				</DiffLine>
 			) ) }
@@ -64,5 +64,5 @@ export default function Declaration( {
 Declaration.propTypes = {
 	token: PropTypes.array,
 	indentation: PropTypes.number,
-	isStyleAttribute: PropTypes.bool,
+	origin: PropTypes.string,
 };

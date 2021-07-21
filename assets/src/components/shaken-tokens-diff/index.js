@@ -17,8 +17,8 @@ import { FormToggle } from '@wordpress/components';
 import Declaration from './declaration';
 
 export default function ShakenTokensDiff( {
+	origin,
 	tokens,
-	isStyleAttribute,
 } ) {
 	const [ showRemovedStyles, setShowRemovedStyles ] = useState( false );
 
@@ -63,7 +63,7 @@ export default function ShakenTokensDiff( {
 					key={ index }
 					token={ token }
 					indentation={ indentation }
-					isStyleAttribute={ isStyleAttribute }
+					origin={ origin }
 				/>,
 			];
 		}, [] );
@@ -73,7 +73,7 @@ export default function ShakenTokensDiff( {
 			insCount: _insCount,
 			delCount: _delCount,
 		};
-	}, [ isStyleAttribute, tokens ] );
+	}, [ origin, tokens ] );
 
 	return (
 		<>
@@ -112,6 +112,6 @@ export default function ShakenTokensDiff( {
 	);
 }
 ShakenTokensDiff.propTypes = {
+	origin: PropTypes.string,
 	tokens: PropTypes.array,
-	isStyleAttribute: PropTypes.bool,
 };

@@ -8,11 +8,13 @@ import PropTypes from 'prop-types';
  */
 import { __ } from '@wordpress/i18n';
 
-export default function Selector( { selector, isLast, isStyleAttribute } ) {
+export default function Selector( { selector, isLast, origin } ) {
 	let specificityBumper = null;
 	let ampWpSelector = null;
 
+	const isStyleAttribute = origin === 'style_attribute';
 	const specificityBumperMatch = selector.match( /(:root|html)(:not\(#_\))+/ );
+
 	if ( specificityBumperMatch ) {
 		specificityBumper = (
 			<abbr
@@ -54,5 +56,5 @@ export default function Selector( { selector, isLast, isStyleAttribute } ) {
 Selector.propTypes = {
 	selector: PropTypes.string,
 	isLast: PropTypes.bool,
-	isStyleAttribute: PropTypes.bool,
+	origin: PropTypes.string,
 };

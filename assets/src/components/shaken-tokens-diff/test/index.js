@@ -153,7 +153,7 @@ describe( 'ShakenTokensDiff', () => {
 
 			act( () => {
 				render(
-					<Declaration isStyleAttribute={ false } token={ token } />,
+					<Declaration origin="link_element" token={ token } />,
 					container,
 				);
 			} );
@@ -166,7 +166,7 @@ describe( 'ShakenTokensDiff', () => {
 
 			act( () => {
 				render(
-					<Declaration isStyleAttribute={ true } token={ token } />,
+					<Declaration origin="style_attribute" token={ token } />,
 					container,
 				);
 			} );
