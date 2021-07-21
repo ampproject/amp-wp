@@ -65,6 +65,12 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::register()
 	 */
 	public function test_register() {
+
+		global $current_screen;
+
+		// Mock is_admin().
+		set_current_screen( 'edit-post' );
+
 		$this->instance->register();
 		$this->assertEquals( 10, has_filter( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
 		$this->assertEquals( 10, has_filter( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
@@ -72,6 +78,8 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_print_styles-site-health.php', [ $this->instance, 'add_styles' ] ) );
 		$this->assertEquals( 10, has_action( 'template_redirect', [ $this->instance, 'render_random_string_page' ] ) );
+
+		$current_screen = null;
 	}
 
 	/**

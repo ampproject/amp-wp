@@ -76,11 +76,15 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 * Adds the filters.
 	 */
 	public function register() {
-		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
-		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
-		add_filter( 'site_status_test_result', [ $this, 'modify_test_result' ] );
-		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
-		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
+
+		if ( is_admin() ) {
+			add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
+			add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
+			add_filter( 'site_status_test_result', [ $this, 'modify_test_result' ] );
+			add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
+			add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
+		}
+
 		add_action( 'template_redirect', [ $this, 'render_random_string_page' ] );
 	}
 
@@ -229,6 +233,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 				$response_list[ $i - 1 ] === $response_list[ $i ]
 			) {
 				$has_page_cache = true;
+				break;
 			}
 		}
 
