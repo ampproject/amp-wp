@@ -24,7 +24,7 @@ use Composer\Script\ScriptEvents;
 use Composer\Semver\Constraint\Constraint;
 
 /**
- * This Composer plugin patches the`sabberworm/php-css-parser` package so that it autoloads the correct namespace.
+ * This Composer plugin patches the `sabberworm/php-css-parser` package so that it autoloads the correct namespace.
  */
 class Plugin implements PluginInterface, EventSubscriberInterface {
 
