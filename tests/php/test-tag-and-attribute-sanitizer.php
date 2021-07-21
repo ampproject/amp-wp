@@ -3172,6 +3172,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-tiktok'                                   => [
 				'
+				  <amp-tiktok width="500" height="500" data-src="6943753342808034566"></amp-tiktok>
+				  <amp-tiktok
+				    width="700"
+				    height="800"
+				    data-src="https://www.tiktok.com/@scout2015/video/6943753342808034566">
+				  </amp-tiktok>
 				  <amp-tiktok width="500" height="800">
 				    <blockquote
 				      placeholder
