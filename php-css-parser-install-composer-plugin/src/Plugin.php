@@ -152,7 +152,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
 			return;
 		}
 
-		$root_package = $package->getAliasOf();
+		$root_package = $package instanceof CompleteAliasPackage ? $package->getAliasOf() : $package;
 
 		$root_package->setRequires(
 			[
