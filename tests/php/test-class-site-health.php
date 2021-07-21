@@ -546,7 +546,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 */
 	public function test_is_site_has_page_cache_without_page_cache() {
 
-		/**
+		/*
 		 * Mock the http request.
 		 */
 		$callback_wp_remote = static function () {
