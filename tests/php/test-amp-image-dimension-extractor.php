@@ -194,7 +194,8 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 
 		$full_image       = wp_get_attachment_image_src( $attachment_id, 'full' );
 		$thumbnail_image  = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
-		$external_image   = 'https://via.placeholder.com/1500/000.png/FF0';
+		$external_image   = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-1024x668.jpg';
+		$external_image_1 = 'https://via.placeholder.com/1500/000.png/FF0';
 		$external_image_2 = 'https://via.placeholder.com/1000/000.png/FF0';
 
 		$expected = [
@@ -206,7 +207,11 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 				'width'  => $thumbnail_image[1],
 				'height' => $thumbnail_image[2],
 			],
-			$external_image     => [],
+			$external_image     => [
+				'width'  => 1024,
+				'height' => 668,
+			],
+			$external_image_1   => [],
 			$external_image_2   => [
 				'width'  => 1000,
 				'height' => 1000,
@@ -217,6 +222,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			$full_image[0]      => [],
 			$thumbnail_image[0] => [],
 			$external_image     => [],
+			$external_image_1   => [],
 			$external_image_2   => [
 				'width'  => 1000,
 				'height' => 1000,
