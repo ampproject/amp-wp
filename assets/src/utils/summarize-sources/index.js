@@ -35,10 +35,52 @@ export default function summarizeSources( sources ) {
 		return acc;
 	}, {} );
 
-	// Remove core if there is a plugin or theme.
-	if ( summarizedSources?.core && ( summarizedSources?.theme || summarizedSources?.plugin ) ) {
-		delete summarizedSources.core;
+	const {
+		plugin,
+		'mu-plugin': muPlugin,
+		theme,
+		core,
+		embed,
+		blocks,
+		hook,
+	} = summarizedSources;
+
+	// Return only plugins and themes if they are present.
+	if ( plugin || muPlugin || theme ) {
+		const result = {};
+
+		if ( plugin ) {
+			result.plugin = plugin;
+		}
+		if ( muPlugin ) {
+			result.muPlugin = muPlugin;
+		}
+		if ( theme && ! embed ) {
+			result.theme = theme;
+		}
+
+		return result;
 	}
 
-	return summarizedSources;
+	// Return core if there are no plugins or themes.
+	if ( core ) {
+		return { core };
+	}
+
+	// Return embed if there is no plugin, theme or core.
+	if ( embed ) {
+		return { embed };
+	}
+
+	// Return block if there is no plugin, theme, core or embed.
+	if ( blocks ) {
+		return { blocks };
+	}
+
+	// Return hook if there is no plugin, theme, core, embed or blocks.
+	if ( hook ) {
+		return { hook };
+	}
+
+	return {};
 }

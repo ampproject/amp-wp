@@ -9,7 +9,35 @@ describe( 'summarizeSources', () => {
 		expect( result ).toBeNull();
 	} );
 
-	it( 'returns correct sources summary', () => {
+	it( 'returns plugin and theme, and skips everything else', () => {
+		const result = summarizeSources( [
+			{
+				hook: 'wp_head',
+				type: 'plugin',
+				name: 'foo',
+			},
+			{
+				type: 'theme',
+				name: 'bar',
+			},
+			{
+				type: 'mu-plugin',
+				name: 'baz',
+			},
+			{
+				hook: 'init',
+				type: 'plugin',
+				block_name: 'foobar',
+			},
+		] );
+		expect( result ).toStrictEqual( {
+			plugin: [ 'foo' ],
+			muPlugin: [ 'baz' ],
+			theme: [ 'bar' ],
+		} );
+	} );
+
+	it( 'does not return theme if embed is present', () => {
 		const result = summarizeSources( [
 			{
 				hook: 'wp_head',
@@ -34,27 +62,7 @@ describe( 'summarizeSources', () => {
 			},
 		] );
 		expect( result ).toStrictEqual( {
-			hook: 'init',
 			plugin: [ 'foo', 'baz' ],
-			theme: [ 'bar' ],
-			blocks: [ 'foobar' ],
-			embed: true,
-		} );
-	} );
-
-	it( 'does not return core if there is a plugin or theme', () => {
-		const result = summarizeSources( [
-			{
-				type: 'plugin',
-				name: 'foo',
-			},
-			{
-				type: 'core',
-				name: 'bar',
-			},
-		] );
-		expect( result ).toStrictEqual( {
-			plugin: [ 'foo' ],
 		} );
 	} );
 
@@ -64,9 +72,55 @@ describe( 'summarizeSources', () => {
 				type: 'core',
 				name: 'baz',
 			},
+			{
+				embed: 'bazbar',
+			},
+			{
+				type: 'core',
+				name: 'bar',
+			},
 		] );
 		expect( result ).toStrictEqual( {
-			core: [ 'baz' ],
+			core: [ 'baz', 'bar' ],
+		} );
+	} );
+
+	it( 'returns embed if there is no plugin, theme or core', () => {
+		const result = summarizeSources( [
+			{
+				embed: true,
+			},
+			{
+				block_name: 'foobar',
+			},
+		] );
+		expect( result ).toStrictEqual( {
+			embed: true,
+		} );
+	} );
+
+	it( 'returns blocks if there is no plugin, theme, core or embed', () => {
+		const result = summarizeSources( [
+			{
+				block_name: 'foobar',
+			},
+			{
+				block_name: 'bazbar',
+			},
+		] );
+		expect( result ).toStrictEqual( {
+			blocks: [ 'foobar', 'bazbar' ],
+		} );
+	} );
+
+	it( 'returns hook if there is no plugin, theme, core, embed or blocks', () => {
+		const result = summarizeSources( [
+			{
+				hook: 'baz',
+			},
+		] );
+		expect( result ).toStrictEqual( {
+			hook: 'baz',
 		} );
 	} );
 
@@ -99,7 +153,7 @@ describe( 'summarizeSources', () => {
 		] );
 		expect( result ).toStrictEqual( {
 			plugin: [ 'foo' ],
-			'mu-plugin': [ 'bar' ],
+			muPlugin: [ 'bar' ],
 			theme: [ 'baz' ],
 		} );
 	} );
