@@ -29,6 +29,7 @@ export default function StylesheetsTable( { stylesheets, stats } ) {
 						orignalTagAbbr={ stylesheet.original_tag_abbr }
 						priority={ stylesheet.priority }
 						shakenTokens={ stylesheet.shaken_tokens }
+						sources={ stylesheet.sources }
 						totalFinalSize={ totalFinalSize }
 					/>
 				) ) }
@@ -45,6 +46,7 @@ StylesheetsTable.propTypes = {
 		original_tag_abbr: PropTypes.string,
 		priority: PropTypes.number,
 		shaken_tokens: PropTypes.array,
+		sources: PropTypes.array,
 	} ) ),
 	stats: PropTypes.shape( {
 		included: PropTypes.shape( {

@@ -16,6 +16,7 @@ import { Button } from '@wordpress/components';
 import FormattedMemoryValue from '../../../components/formatted-memory-value';
 import { ValidationStatusIcon } from '../../../components/icon';
 import ShakenTokensDiff from '../../../components/shaken-tokens-diff';
+import SourcesSummary from '../../../components/sources-summary';
 
 export default function StylesheetsTableRow( {
 	finalSize,
@@ -29,6 +30,7 @@ export default function StylesheetsTableRow( {
 	orignalTagAbbr,
 	priority,
 	shakenTokens,
+	sources,
 	totalFinalSize,
 } ) {
 	const [ expanded, setExpanded ] = useState( false );
@@ -103,7 +105,9 @@ export default function StylesheetsTableRow( {
 							</code>
 						) }
 				</td>
-				<td className="column-sources_with_invalid_output" />
+				<td className="column-sources_with_invalid_output">
+					<SourcesSummary sources={ sources } />
+				</td>
 			</tr>
 			{ expanded && (
 				<tr className={ `stylesheet-details ${ index % 2 ? 'even' : 'odd' }` }>
@@ -145,5 +149,6 @@ StylesheetsTableRow.propTypes = {
 	orignalTagAbbr: PropTypes.string,
 	priority: PropTypes.number,
 	shakenTokens: PropTypes.array,
+	sources: PropTypes.array,
 	totalFinalSize: PropTypes.number,
 };
