@@ -187,7 +187,6 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 
 	/**
 	 * @covers \AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem
-	 * @covers \AMP_Image_Dimension_Extractor::get_attachment_id_from_path
 	 */
 	public function test_extract_by_filename_or_filesystem() {
 

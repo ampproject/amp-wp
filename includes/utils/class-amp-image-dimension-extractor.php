@@ -152,47 +152,6 @@ class AMP_Image_Dimension_Extractor {
 	}
 
 	/**
-	 * To get attachment ID from attached path.
-	 *
-	 * @param string $path Attached path.
-	 *
-	 * @return int Positive number on success, Otherwise 0.
-	 */
-	private static function get_attachment_id_from_path( $path ) {
-
-		if ( empty( $path ) ) {
-			return 0;
-		}
-
-		$path = wp_parse_url( $path, PHP_URL_PATH );
-
-		if ( empty( $path ) ) {
-			return 0;
-		}
-
-		global $wpdb;
-
-		$cache_key     = md5( $path );
-		$cache_group   = 'amp_attachment_id_from_path';
-		$attachment_id = wp_cache_get( $cache_key, $cache_group );
-
-		if ( empty( $attachment_id ) ) {
-			$attachment_id = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-				$wpdb->prepare(
-					"SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_wp_attached_file' AND meta_value=%s ORDER BY post_id ASC;",
-					$path
-				)
-			);
-
-			$attachment_id = ( ! empty( $attachment_id ) && is_array( $attachment_id ) ) ? array_pop( $attachment_id ) : 0;
-
-			wp_cache_set( $cache_key, $attachment_id, $cache_group, 3 * HOUR_IN_SECONDS );
-		}
-
-		return (int) $attachment_id;
-	}
-
-	/**
 	 * Extract dimensions from filename if dimension exists or from file system.
 	 *
 	 * @param array $dimensions Image urls mapped to dimensions.
@@ -206,7 +165,7 @@ class AMP_Image_Dimension_Extractor {
 		}
 
 		$upload_dir      = wp_get_upload_dir();
-		$base_upload_uri = strtolower( trim( $upload_dir['baseurl'] ) );
+		$base_upload_uri = trim( $upload_dir['baseurl'] );
 
 		foreach ( $dimensions as $url => $value ) {
 
@@ -215,26 +174,42 @@ class AMP_Image_Dimension_Extractor {
 				continue;
 			}
 
+			// Get image dimension from file name.
+			$basename                   = basename( $url );
+			$filename_without_extension = explode( '.', $basename );
+			$extension                  = array_pop( $filename_without_extension );
+			$filename_without_extension = implode( '.', $filename_without_extension );
+
+			$regex = '/-(?<width>\d+)x(?<height>\d+)(?:\.' . $extension . ')$/m';
+			preg_match( $regex, $basename, $possible_dimension );
+
+			if ( ! empty( $possible_dimension['width'] ) && ! empty( $possible_dimension['height'] ) ) {
+				$dimensions[ $url ] = [
+					'width'  => (int) $possible_dimension['width'],
+					'height' => (int) $possible_dimension['height'],
+				];
+				continue;
+			}
+
 			// Check if it's internal media or not. If it's not then bail out.
-			if ( false === strpos( strtolower( trim( $url ) ), $base_upload_uri ) ) {
+			if ( 0 !== strpos( trim( $url ), $base_upload_uri ) ) {
 				continue;
 			}
 
 			// Get media path.
 			$attached_path = ltrim( str_replace( $base_upload_uri, '', $url ), '/' );
 
-			// Try to get attachment id from media path.
-			$attachment_id      = static::get_attachment_id_from_path( $attached_path );
-			$attachment_id      = ( ! empty( $attachment_id ) && 0 < (int) $attachment_id ) ? (int) $attachment_id : 0;
-			$possible_dimension = [];
+			$imagesize      = [];
+			$url_hash       = md5( $url );
+			$transient_name = sprintf( 'amp_img_%s', $url_hash );
 
-			// If attachment is exist fetch size from attachment metadata.
-			if ( ! empty( $attachment_id ) ) {
-				$possible_dimension = wp_get_attachment_metadata( $attachment_id );
+			if ( wp_using_ext_object_cache() ) {
+				$imagesize = get_transient( $transient_name );
+				$imagesize = ( ! empty( $imagesize ) && is_array( $imagesize ) ) ? $imagesize : [];
 			}
 
-			// If attachment is exist and dimension not available in metadata then try to fetch from file system.
-			if ( ! empty( $attachment_id ) && ( empty( $possible_dimension ) || ! is_array( $possible_dimension ) ) ) {
+			if ( empty( $imagesize ) || ! is_array( $imagesize ) ) {
+				// Get image dimension from file system.
 				$image_file = sprintf( '%s/%s', trim( $upload_dir['basedir'] ), $attached_path );
 
 				if ( function_exists( 'wp_getimagesize' ) ) {
@@ -244,28 +219,14 @@ class AMP_Image_Dimension_Extractor {
 				}
 
 				if ( ! empty( $imagesize ) && is_array( $imagesize ) ) {
-					$possible_dimension = [
-						'width'  => (int) $imagesize[0],
-						'height' => (int) $imagesize[1],
-					];
+					set_transient( $transient_name, $imagesize );
 				}
 			}
 
-			// If not exists then whether file contain dimension or not.
-			if ( empty( $attachment_id ) ) {
-				$basename                   = basename( $attached_path );
-				$filename_without_extension = explode( '.', $basename );
-				$extension                  = array_pop( $filename_without_extension );
-				$filename_without_extension = implode( '.', $filename_without_extension );
-
-				$regex = '/-(?<width>\d+)x(?<height>\d+)(?:\.' . $extension . ')$/m';
-				preg_match( $regex, $attached_path, $possible_dimension );
-			}
-
-			if ( ! empty( $possible_dimension['width'] ) && ! empty( $possible_dimension['height'] ) ) {
+			if ( ! empty( $imagesize ) && is_array( $imagesize ) ) {
 				$dimensions[ $url ] = [
-					'width'  => (int) $possible_dimension['width'],
-					'height' => (int) $possible_dimension['height'],
+					'width'  => (int) $imagesize[0],
+					'height' => (int) $imagesize[1],
 				];
 			}
 		}
