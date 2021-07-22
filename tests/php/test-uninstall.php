@@ -12,10 +12,15 @@
 class Test_Uninstall extends WP_UnitTestCase {
 
 	/**
-	 * @covers ::delete_options
-	 * @covers ::delete_transient
-	 * @covers ::delete_posts
-	 * @covers ::delete_terms
+	 * @covers \AmpProject\AmpWP\delete_options
+	 * @covers \AmpProject\AmpWP\delete_user_metadata
+	 * @covers \AmpProject\AmpWP\delete_posts
+	 * @covers \AmpProject\AmpWP\delete_terms
+	 * @covers \AmpProject\AmpWP\delete_transients
+	 * @covers \AmpProject\AmpWP\remove_plugin_data
+	 * @covers \AmpProject\AmpWP\uninstall
+	 *
+	 * @file   uninstall.php
 	 */
 	public function test_uninstall_php() {
 
@@ -29,6 +34,13 @@ class Test_Uninstall extends WP_UnitTestCase {
 		$blog_name = 'Sample Blog Name';
 		update_option( 'blogname', $blog_name );
 		update_option( 'amp-options', 'Yes' );
+
+		$users = $this->factory()->user->create_many( 2, [ 'role' => 'administrator' ] );
+
+		foreach ( $users as $user ) {
+			update_user_meta( $user, 'amp_dev_tools_enabled', 'Yes' );
+			update_user_meta( $user, 'additional_user_meta', 'Yes' );
+		}
 
 		$amp_validated_post = $this->factory()->post->create_and_get(
 			[
@@ -95,6 +107,11 @@ class Test_Uninstall extends WP_UnitTestCase {
 		}
 
 		$this->assertEquals( 'AMP Sample value', get_transient( 'amp_sample_group' ) );
+
+		foreach ( $users as $user ) {
+			$this->assertEmpty( get_user_meta( $user, 'amp_dev_tools_enabled', true ) );
+			$this->assertEquals( 'Yes', get_user_meta( $user, 'additional_user_meta', true ) );
+		}
 
 		/**
 		 * Restore values

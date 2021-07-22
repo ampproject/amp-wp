@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+namespace AmpProject\AmpWP;
+
 // If uninstall.php is not called by WordPress, then die.
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	die;
@@ -12,7 +14,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 require_once AMP__DIR__ . '/includes/uninstall-functions.php';
 
-if ( is_multisite() ) {
+if ( is_multisite() && ! wp_is_large_network() ) {
 	$site_ids = get_sites(
 		[
 			'fields'                 => 'ids',
@@ -25,9 +27,9 @@ if ( is_multisite() ) {
 
 	foreach ( $site_ids as $site_id ) {
 		switch_to_blog( $site_id );
-		AmpProject\AmpWP\remove_plugin_data();
+		remove_plugin_data();
 	}
 	restore_current_blog();
 } else {
-	AmpProject\AmpWP\remove_plugin_data();
+	remove_plugin_data();
 }
