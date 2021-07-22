@@ -19,8 +19,6 @@ class Test_Uninstall extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\delete_transients
 	 * @covers \AmpProject\AmpWP\remove_plugin_data
 	 * @covers \AmpProject\AmpWP\uninstall
-	 *
-	 * @file   uninstall.php
 	 */
 	public function test_uninstall_php() {
 
