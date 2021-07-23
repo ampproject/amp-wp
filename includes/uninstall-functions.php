@@ -138,12 +138,14 @@ function delete_transients() {
 	global $wpdb;
 
 	$transient_groups = [
+		'AmpProject\AmpWP\DevTools\BlockSourcesamp_block_sources',
 		'amp-parsed-stylesheet-v%',
 		'amp_error_index_counts',
 		'amp_img_%',
 		'amp_lock_%',
 		'amp_new_validation_error_urls_count',
 		'amp_plugin_activation_validation_errors',
+		'amp_remote_request_%',
 		'amp_themes_wporg',
 	];
 
