@@ -11,6 +11,19 @@
  */
 class Test_Uninstall extends WP_UnitTestCase {
 
+	/** @var bool */
+	private $was_using_ext_object_cache;
+
+	public function setUp() {
+		parent::setUp();
+		$this->was_using_ext_object_cache = wp_using_ext_object_cache();
+	}
+
+	public function tearDown() {
+		parent::tearDown();
+		wp_using_ext_object_cache( $this->was_using_ext_object_cache );
+	}
+
 	/**
 	 * @covers \AmpProject\AmpWP\delete_options
 	 * @covers \AmpProject\AmpWP\delete_user_metadata
@@ -21,14 +34,9 @@ class Test_Uninstall extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\uninstall
 	 */
 	public function test_uninstall_php() {
-
-		$original_value = wp_using_ext_object_cache();
-
 		wp_using_ext_object_cache( false );
 
-		/**
-		 * Create dummy data.
-		 */
+		// Create dummy data.
 		$blog_name = 'Sample Blog Name';
 		update_option( 'blogname', $blog_name );
 		update_option( 'amp-options', 'Yes' );
@@ -42,7 +50,7 @@ class Test_Uninstall extends WP_UnitTestCase {
 
 		$amp_validated_post = $this->factory()->post->create_and_get(
 			[
-				'post_type' => \AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			]
 		);
 
@@ -65,13 +73,13 @@ class Test_Uninstall extends WP_UnitTestCase {
 		);
 
 		$transient_groups_to_remove = [
-			'amp-parsed-stylesheet-v',
-			'amp_img_',
+			'amp-parsed-stylesheet-v...',
+			'amp_img_...',
 			'amp_new_validation_error_urls_count',
 			'amp_error_index_counts',
 			'amp_plugin_activation_validation_errors',
 			'amp_themes_wporg',
-			'amp_lock_',
+			'amp_lock_...',
 		];
 
 		foreach ( $transient_groups_to_remove as $transient_group ) {
@@ -80,14 +88,12 @@ class Test_Uninstall extends WP_UnitTestCase {
 
 		set_transient( 'amp_sample_group', 'AMP Sample value', 10000 );
 
-		/**
-		 * Mock uninstall const.
-		 */
+		// Mock uninstall const.
 		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 			define( 'WP_UNINSTALL_PLUGIN', 'Yes' );
 		}
 
-		require_once AMP__DIR__ . '/uninstall.php';
+		require AMP__DIR__ . '/uninstall.php';
 
 		$this->flush_cache();
 
@@ -110,10 +116,5 @@ class Test_Uninstall extends WP_UnitTestCase {
 			$this->assertEmpty( get_user_meta( $user, 'amp_dev_tools_enabled', true ) );
 			$this->assertEquals( 'Yes', get_user_meta( $user, 'additional_user_meta', true ) );
 		}
-
-		/**
-		 * Restore values
-		 */
-		wp_using_ext_object_cache( $original_value );
 	}
 }
