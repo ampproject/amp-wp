@@ -12,7 +12,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	die;
 }
 
-require_once AMP__DIR__ . '/includes/uninstall-functions.php';
+require_once dirname( __FILE__ ) . '/includes/uninstall-functions.php';
 
 if ( is_multisite() && ! wp_is_large_network() ) {
 	$site_ids = get_sites(
