@@ -6756,7 +6756,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'data-src' => array(
 						'mandatory' => true,
-						'value_regex' => '\\d',
+						'value_regex' => '(https:\\/\\/www\\.tiktok\\.com\\/.*)?\\d+.*',
 					),
 					'media' => array(),
 					'noloading' => array(
