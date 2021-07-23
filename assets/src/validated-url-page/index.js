@@ -14,7 +14,7 @@ import {
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { render, useContext } from '@wordpress/element';
+import { render } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -22,7 +22,7 @@ import { render, useContext } from '@wordpress/element';
 import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
 import { ErrorScreen } from '../components/error-screen';
-import { ValidatedUrl, ValidatedUrlProvider } from '../components/validated-url-provider';
+import { ValidatedUrlProvider } from '../components/validated-url-provider';
 import Stylesheets from './stylesheets';
 
 let errorHandler;
@@ -56,26 +56,6 @@ Providers.propTypes = {
 	children: PropTypes.any,
 };
 
-/**
- * Validated URL page application root.
- */
-function Root() {
-	const {
-		fetchingValidatedUrl,
-		stylesheetStats,
-		validatedUrl,
-	} = useContext( ValidatedUrl );
-
-	return (
-		<Stylesheets
-			environment={ validatedUrl.environment }
-			fetching={ fetchingValidatedUrl }
-			stats={ stylesheetStats }
-			stylesheets={ validatedUrl.stylesheets }
-		/>
-	);
-}
-
 domReady( () => {
 	const root = document.getElementById( APP_ROOT_ID );
 
@@ -94,7 +74,7 @@ domReady( () => {
 
 	render(
 		<Providers>
-			<Root appRoot={ root } />
+			<Stylesheets appRoot={ root } />
 		</Providers>,
 		root,
 	);

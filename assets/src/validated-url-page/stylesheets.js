@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import {
 	HAS_REQUIRED_PHP_CSS_PARSER,
 	RECHECK_URL,
@@ -11,7 +10,7 @@ import {
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { RawHTML } from '@wordpress/element';
+import { RawHTML, useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -23,25 +22,24 @@ import {
 	NOTICE_TYPE_INFO,
 	NOTICE_TYPE_WARNING,
 } from '../components/amp-notice';
+import { ValidatedUrl } from '../components/validated-url-provider';
 import StylesheetsSummary from './components/stylesheets-summary';
 import StylesheetsTable from './components/stylesheets-table';
 
 /**
  * Stylesheets validation data.
- *
- * @param {Object} props Component props.
- * @param {Object} props.environment Validated environment.
- * @param {boolean} props.fetching Flag indicating if stylesheets data is being fetched.
- * @param {Object} props.stats Stylesheets stats object.
- * @param {Object|Array} props.stylesheets Array of stylesheets details or an object containing errors.
  */
-export default function Stylesheets( {
-	environment,
-	fetching,
-	stats,
-	stylesheets,
-} ) {
-	if ( fetching !== false ) {
+export default function Stylesheets() {
+	const {
+		fetchingValidatedUrl,
+		stylesheetStats,
+		validatedUrl: {
+			environment,
+			stylesheets,
+		},
+	} = useContext( ValidatedUrl );
+
+	if ( fetchingValidatedUrl !== false ) {
 		return <Loading />;
 	}
 
@@ -59,7 +57,7 @@ export default function Stylesheets( {
 		);
 	}
 
-	if ( stylesheets?.errors?.amp_validated_url_stylesheets_missing || stylesheets?.length === 0 || ! stats ) {
+	if ( stylesheets?.errors?.amp_validated_url_stylesheets_missing || stylesheets?.length === 0 || ! stylesheetStats ) {
 		return (
 			<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 				{ __( 'Unable to retrieve stylesheets data for this URL.', 'amp' ) }
@@ -74,23 +72,12 @@ export default function Stylesheets( {
 					{ __( 'AMP CSS processing is limited because a conflicting version of PHP-CSS-Parser has been loaded by another plugin or theme. Tree shaking is not available.', 'amp' ) }
 				</AMPNotice>
 			) }
-			<StylesheetsSummary stats={ stats } />
+			<StylesheetsSummary stats={ stylesheetStats } />
 			<StylesheetsTable
 				environment={ environment }
-				stats={ stats }
+				stats={ stylesheetStats }
 				stylesheets={ stylesheets }
 			/>
 		</>
 	);
 }
-Stylesheets.propTypes = {
-	environment: PropTypes.object,
-	fetching: PropTypes.bool,
-	stats: PropTypes.object,
-	stylesheets: PropTypes.oneOfType( [
-		PropTypes.arrayOf( PropTypes.object ),
-		PropTypes.shape( {
-			errors: PropTypes.object,
-		} ),
-	] ),
-};
