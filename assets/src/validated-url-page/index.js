@@ -22,7 +22,7 @@ import { render } from '@wordpress/element';
 import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
 import { ErrorScreen } from '../components/error-screen';
-import { ValidatedUrlProvider } from '../components/validated-url-provider';
+import { ValidatedUrlContextProvider } from '../components/validated-url-context-provider';
 import Stylesheets from './stylesheets';
 
 let errorHandler;
@@ -39,7 +39,7 @@ function Providers( { children } ) {
 	return (
 		<ErrorContextProvider>
 			<ErrorBoundary>
-				<ValidatedUrlProvider
+				<ValidatedUrlContextProvider
 					cssBudgetBytes={ Number( CSS_BUDGET_BYTES ) }
 					cssBudgetWarningPercentage={ Number( CSS_BUDGET_WARNING_PERCENTAGE ) }
 					hasErrorBoundary={ true }
@@ -47,7 +47,7 @@ function Providers( { children } ) {
 					validatedUrlsRestPath={ VALIDATED_URLS_REST_PATH }
 				>
 					{ children }
-				</ValidatedUrlProvider>
+				</ValidatedUrlContextProvider>
 			</ErrorBoundary>
 		</ErrorContextProvider>
 	);

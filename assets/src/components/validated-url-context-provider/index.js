@@ -35,7 +35,7 @@ export const ValidatedUrl = createContext();
  * @param {number} props.postId Validated URL post ID.
  * @param {string} props.validatedUrlsRestPath REST endpoint to retrieve validated URL data.
  */
-export function ValidatedUrlProvider( {
+export function ValidatedUrlContextProvider( {
 	children,
 	cssBudgetBytes,
 	cssBudgetWarningPercentage,
@@ -126,8 +126,7 @@ export function ValidatedUrlProvider( {
 		</ValidatedUrl.Provider>
 	);
 }
-
-ValidatedUrlProvider.propTypes = {
+ValidatedUrlContextProvider.propTypes = {
 	children: PropTypes.any,
 	cssBudgetBytes: PropTypes.number,
 	cssBudgetWarningPercentage: PropTypes.number,

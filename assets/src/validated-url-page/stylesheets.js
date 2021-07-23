@@ -22,7 +22,7 @@ import {
 	NOTICE_TYPE_INFO,
 	NOTICE_TYPE_WARNING,
 } from '../components/amp-notice';
-import { ValidatedUrl } from '../components/validated-url-provider';
+import { ValidatedUrl } from '../components/validated-url-context-provider';
 import StylesheetsSummary from './components/stylesheets-summary';
 import StylesheetsTable from './components/stylesheets-table';
 
