@@ -20,9 +20,13 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { ErrorContext } from '../error-context-provider';
 import { useAsyncError } from '../../utils/use-async-error';
-import { calculateStylesheetStats } from '../../validated-url-page/helpers';
+import calculateStylesheetStats from './calculate-stylesheet-stats';
 
 export const ValidatedUrl = createContext();
+
+export const STYLESHEETS_BUDGET_STATUS_VALID = 'valid';
+export const STYLESHEETS_BUDGET_STATUS_WARNING = 'warning';
+export const STYLESHEETS_BUDGET_STATUS_EXCEEDED = 'exceeded';
 
 /**
  * Validated URL data context provider.

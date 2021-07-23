@@ -21,10 +21,10 @@ import {
 	NOTICE_TYPE_ERROR,
 } from '../../../components/amp-notice';
 import {
+	STYLESHEETS_BUDGET_STATUS_EXCEEDED,
 	STYLESHEETS_BUDGET_STATUS_VALID,
 	STYLESHEETS_BUDGET_STATUS_WARNING,
-	STYLESHEETS_BUDGET_STATUS_EXCEEDED,
-} from '../../helpers';
+} from '../../../components/validated-url-context-provider';
 
 /**
  * Render stylesheets summary table.
@@ -137,9 +137,9 @@ StylesheetsSummary.propTypes = {
 			actualPercentage: PropTypes.number,
 			budgetBytes: PropTypes.number,
 			status: PropTypes.oneOf( [
+				STYLESHEETS_BUDGET_STATUS_EXCEEDED,
 				STYLESHEETS_BUDGET_STATUS_VALID,
 				STYLESHEETS_BUDGET_STATUS_WARNING,
-				STYLESHEETS_BUDGET_STATUS_EXCEEDED,
 			] ),
 		} ),
 	} ),

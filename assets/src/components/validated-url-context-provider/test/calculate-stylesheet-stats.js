@@ -1,11 +1,11 @@
 /**
  * Internal dependencies
  */
+import calculateStylesheetStats from '../calculate-stylesheet-stats';
 import {
-	calculateStylesheetStats,
+	STYLESHEETS_BUDGET_STATUS_EXCEEDED,
 	STYLESHEETS_BUDGET_STATUS_VALID,
 	STYLESHEETS_BUDGET_STATUS_WARNING,
-	STYLESHEETS_BUDGET_STATUS_EXCEEDED,
 } from '..';
 
 describe( 'calculateStylesheetStats', () => {

@@ -1,6 +1,11 @@
-export const STYLESHEETS_BUDGET_STATUS_VALID = 'valid';
-export const STYLESHEETS_BUDGET_STATUS_WARNING = 'warning';
-export const STYLESHEETS_BUDGET_STATUS_EXCEEDED = 'exceeded';
+/**
+ * Internal dependencies
+ */
+import {
+	STYLESHEETS_BUDGET_STATUS_EXCEEDED,
+	STYLESHEETS_BUDGET_STATUS_VALID,
+	STYLESHEETS_BUDGET_STATUS_WARNING,
+} from './index';
 
 /**
  * Calculate stylesheets stats.
@@ -13,7 +18,7 @@ export const STYLESHEETS_BUDGET_STATUS_EXCEEDED = 'exceeded';
  * @param {number} budgetWarningPercentage CSS budget warning level percentage.
  * @return {Object|null} Stylesheets sizes data or null.
  */
-export function calculateStylesheetStats( stylesheets, budgetBytes, budgetWarningPercentage ) {
+export default function calculateStylesheetStats( stylesheets, budgetBytes, budgetWarningPercentage ) {
 	if ( ! stylesheets ) {
 		return null;
 	}
