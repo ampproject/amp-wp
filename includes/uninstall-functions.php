@@ -41,12 +41,12 @@ function delete_posts() {
 
 	global $wpdb;
 
-	$current_page = 1;
+	$current_page = 0;
 	$per_page     = 1000;
 	$post_type    = 'amp_validated_url';
 
 	do {
-		$offset = $per_page * ( $current_page - 1 );
+		$offset = $per_page * $current_page;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
 		$post_ids = $wpdb->get_col(
@@ -80,12 +80,12 @@ function delete_terms() {
 
 	global $wpdb;
 
-	$current_page = 1;
+	$current_page = 0;
 	$per_page     = 1000;
 	$taxonomy     = 'amp_validation_error';
 
 	do {
-		$offset = $per_page * ( $current_page - 1 );
+		$offset = $per_page * $current_page;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
 		$term_ids = $wpdb->get_col(
