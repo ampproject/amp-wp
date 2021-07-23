@@ -25,13 +25,12 @@ class Test_Uninstall extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers \AmpProject\AmpWP\delete_options
-	 * @covers \AmpProject\AmpWP\delete_user_metadata
-	 * @covers \AmpProject\AmpWP\delete_posts
-	 * @covers \AmpProject\AmpWP\delete_terms
-	 * @covers \AmpProject\AmpWP\delete_transients
-	 * @covers \AmpProject\AmpWP\remove_plugin_data
-	 * @covers \AmpProject\AmpWP\uninstall
+	 * @covers \AmpProject\AmpWP\delete_options()
+	 * @covers \AmpProject\AmpWP\delete_user_metadata()
+	 * @covers \AmpProject\AmpWP\delete_posts()
+	 * @covers \AmpProject\AmpWP\delete_terms()
+	 * @covers \AmpProject\AmpWP\delete_transients()
+	 * @covers \AmpProject\AmpWP\remove_plugin_data()
 	 */
 	public function test_uninstall_php() {
 		wp_using_ext_object_cache( false );
