@@ -43,38 +43,30 @@ function delete_posts() {
 
 	$current_page = 1;
 	$per_page     = 1000;
+	$post_type    = 'amp_validated_url';
 
 	do {
 		$offset = $per_page * ( $current_page - 1 );
 
-		/**
-		 * phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-		 * phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-		 *
-		 * We don't need to cache result.
-		 * Since we are going to delete those records.
-		 */
-		$result = $wpdb->get_results(
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
+		$post_ids = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT ID FROM $wpdb->posts WHERE post_type = 'amp_validated_url' LIMIT %d OFFSET %d;",
+				"SELECT ID FROM $wpdb->posts WHERE post_type = %s LIMIT %d OFFSET %d;",
+				$post_type,
 				$per_page,
 				$offset
-			),
-			ARRAY_A
+			)
 		);
-		// phpcs:enable
 
-		if ( empty( $result ) || ! is_array( $result ) ) {
+		if ( empty( $post_ids ) || ! is_array( $post_ids ) ) {
 			break;
 		}
-
-		$post_ids = wp_list_pluck( $result, 'ID' );
 
 		foreach ( $post_ids as $post_id ) {
 			wp_delete_post( $post_id );
 		}
 
-		$current_page ++;
+		$current_page++;
 	} while ( ! empty( $result ) );
 }
 
@@ -90,41 +82,30 @@ function delete_terms() {
 
 	$current_page = 1;
 	$per_page     = 1000;
-
-	$taxonomy = 'amp_validation_error';
+	$taxonomy     = 'amp_validation_error';
 
 	do {
 		$offset = $per_page * ( $current_page - 1 );
 
-		/**
-		 * phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-		 * phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-		 *
-		 * We don't need to cache result.
-		 * Since we are going to delete those records.
-		 */
-		$result = $wpdb->get_results(
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
+		$term_ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s LIMIT %d OFFSET %d;",
 				$taxonomy,
 				$per_page,
 				$offset
-			),
-			ARRAY_A
+			)
 		);
-		// phpcs:enable
 
-		if ( empty( $result ) || ! is_array( $result ) ) {
+		if ( empty( $term_ids ) || ! is_array( $term_ids ) ) {
 			break;
 		}
-
-		$term_ids = wp_list_pluck( $result, 'term_id' );
 
 		foreach ( $term_ids as $term_id ) {
 			wp_delete_term( $term_id, $taxonomy );
 		}
 
-		$current_page ++;
+		$current_page++;
 	} while ( ! empty( $result ) );
 }
 
@@ -136,6 +117,8 @@ function delete_terms() {
  */
 function delete_transients() {
 
+	// Transients are not stored in the options table if an external object cache is used,
+	// in which case they cannot be queried for deletion.
 	if ( wp_using_ext_object_cache() ) {
 		return;
 	}
@@ -144,44 +127,44 @@ function delete_transients() {
 
 	$transient_groups = [
 		'amp-parsed-stylesheet-v%',
-		'amp_img_%',
-		'amp_new_validation_error_urls_count',
 		'amp_error_index_counts',
+		'amp_img_%',
+		'amp_lock_%',
+		'amp_new_validation_error_urls_count',
 		'amp_plugin_activation_validation_errors',
 		'amp_themes_wporg',
-		'amp_lock_%',
 	];
 
 	$where_clause = [];
 
 	foreach ( $transient_groups as $transient_group ) {
-		$where_clause[] = $wpdb->prepare(
-			' option_name LIKE %s OR option_name LIKE %s ',
-			"_transient_$transient_group",
-			"_transient_timeout_$transient_group"
-		);
+		if ( false !== strpos( $transient_group, '%' ) ) {
+			$where_clause[] = $wpdb->prepare(
+				' option_name LIKE %s OR option_name LIKE %s ',
+				"_transient_$transient_group",
+				"_transient_timeout_$transient_group"
+			);
+		} else {
+			$where_clause[] = $wpdb->prepare(
+				' option_name = %s OR option_name = %s ',
+				"_transient_$transient_group",
+				"_transient_timeout_$transient_group"
+			);
+		}
 	}
 
-	$where_clause = implode( ' OR ', $where_clause );
-
-	$query = "DELETE FROM $wpdb->options WHERE $where_clause";
-
-	/**
-	 * phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-	 * phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-	 * phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-	 *
-	 * We don't need to cache result.
-	 * Since we are going to delete those records.
-	 */
-	$wpdb->query( $query );
-	// phpcs:enable
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
+	$wpdb->query(
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- See use of prepare in foreach loop above.
+		"DELETE FROM $wpdb->options WHERE " . implode( ' OR ', $where_clause )
+	);
 }
 
 /**
  * Remove plugin data.
  *
  * @return void
+ * @internal
  */
 function remove_plugin_data() {
 
