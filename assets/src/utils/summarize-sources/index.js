@@ -2,7 +2,7 @@
  * Summarize sources.
  *
  * @param {Array} sources Sources.
- * @return {Object} Summarized (de-duped) sources.
+ * @return {Object|null} Summarized (de-duped) sources.
  */
 export default function summarizeSources( sources ) {
 	if ( ! sources || ! Array.isArray( sources ) || sources.length === 0 ) {
@@ -82,5 +82,5 @@ export default function summarizeSources( sources ) {
 		return { hook };
 	}
 
-	return {};
+	return null;
 }

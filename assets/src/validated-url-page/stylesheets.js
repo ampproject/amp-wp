@@ -30,11 +30,13 @@ import StylesheetsTable from './components/stylesheets-table';
  * Stylesheets validation data.
  *
  * @param {Object} props Component props.
+ * @param {Object} props.environment Validated environment.
  * @param {boolean} props.fetching Flag indicating if stylesheets data is being fetched.
  * @param {Object} props.stats Stylesheets stats object.
  * @param {Object|Array} props.stylesheets Array of stylesheets details or an object containing errors.
  */
 export default function Stylesheets( {
+	environment,
 	fetching,
 	stats,
 	stylesheets,
@@ -73,11 +75,16 @@ export default function Stylesheets( {
 				</AMPNotice>
 			) }
 			<StylesheetsSummary stats={ stats } />
-			<StylesheetsTable stats={ stats } stylesheets={ stylesheets } />
+			<StylesheetsTable
+				environment={ environment }
+				stats={ stats }
+				stylesheets={ stylesheets }
+			/>
 		</>
 	);
 }
 Stylesheets.propTypes = {
+	environment: PropTypes.object,
 	fetching: PropTypes.bool,
 	stats: PropTypes.object,
 	stylesheets: PropTypes.oneOfType( [

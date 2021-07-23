@@ -135,6 +135,15 @@ final class ValidatedUrlData {
 	}
 
 	/**
+	 * Get validated environment information.
+	 *
+	 * @return array
+	 */
+	public function get_environment() {
+		return get_post_meta( $this->get_id(), AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY, true );
+	}
+
+	/**
 	 * Format stylesheet original tag abbreviation.
 	 *
 	 * @param string $origin Original element.

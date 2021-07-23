@@ -9,9 +9,17 @@ import PropTypes from 'prop-types';
 import summarizeSources from '../../utils/summarize-sources';
 import SourceLabel from '../source-label';
 
-export default function SourcesSummary( { sources } ) {
+export default function SourcesSummary( { sources, validatedTheme } ) {
 	if ( ! sources || ! Array.isArray( sources ) || sources.length === 0 ) {
 		return null;
+	}
+
+	const summarizedSources = summarizeSources( sources );
+
+	if ( ! summarizedSources && validatedTheme ) {
+		return (
+			<SourceLabel source={ validatedTheme } isTheme={ true } />
+		);
 	}
 
 	const {
@@ -22,7 +30,7 @@ export default function SourcesSummary( { sources } ) {
 		embed,
 		blocks,
 		hook,
-	} = summarizeSources( sources );
+	} = summarizedSources;
 
 	return (
 		<>
@@ -54,4 +62,5 @@ SourcesSummary.propTypes = {
 			block_name: PropTypes.string,
 		} ),
 	).isRequired,
+	validatedTheme: PropTypes.string,
 };

@@ -32,6 +32,7 @@ export default function StylesheetsTableRow( {
 	shakenTokens,
 	sources,
 	totalFinalSize,
+	validatedTheme,
 } ) {
 	const [ expanded, setExpanded ] = useState( false );
 	const toggle = () => setExpanded( ( value ) => ! value );
@@ -106,7 +107,10 @@ export default function StylesheetsTableRow( {
 						) }
 				</td>
 				<td className="column-sources_with_invalid_output">
-					<SourcesSummary sources={ sources } />
+					<SourcesSummary
+						sources={ sources }
+						validatedTheme={ validatedTheme }
+					/>
 				</td>
 			</tr>
 			{ expanded && (
@@ -151,4 +155,5 @@ StylesheetsTableRow.propTypes = {
 	shakenTokens: PropTypes.array,
 	sources: PropTypes.array,
 	totalFinalSize: PropTypes.number,
+	validatedTheme: PropTypes.string,
 };

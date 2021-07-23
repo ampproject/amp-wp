@@ -68,6 +68,7 @@ function Root() {
 
 	return (
 		<Stylesheets
+			environment={ validatedUrl.environment }
 			fetching={ fetchingValidatedUrl }
 			stats={ stylesheetStats }
 			stylesheets={ validatedUrl.stylesheets }

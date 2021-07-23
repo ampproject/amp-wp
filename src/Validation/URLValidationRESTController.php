@@ -343,6 +343,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			'date'        => $validated_url_data->get_date(),
 			'author'      => $validated_url_data->get_author(),
 			'stylesheets' => $validated_url_data->get_stylesheets(),
+			'environment' => $validated_url_data->get_environment(),
 		];
 
 		return rest_ensure_response( $this->filter_response_by_context( $data, $request['context'] ) );

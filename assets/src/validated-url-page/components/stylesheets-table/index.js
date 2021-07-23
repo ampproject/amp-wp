@@ -9,8 +9,13 @@ import PropTypes from 'prop-types';
 import StylesheetsTableHead from './head';
 import StylesheetsTableRow from './row';
 
-export default function StylesheetsTable( { stylesheets, stats } ) {
+export default function StylesheetsTable( {
+	environment,
+	stylesheets,
+	stats,
+} ) {
 	const totalFinalSize = stats.included.finalSize + stats.excluded.finalSize;
+	const validatedTheme = environment?.theme ? Object.keys( environment.theme )[ 0 ] : '';
 
 	return (
 		<table className="amp-stylesheet-list wp-list-table widefat fixed striped">
@@ -31,6 +36,7 @@ export default function StylesheetsTable( { stylesheets, stats } ) {
 						shakenTokens={ stylesheet.shaken_tokens }
 						sources={ stylesheet.sources }
 						totalFinalSize={ totalFinalSize }
+						validatedTheme={ validatedTheme }
 					/>
 				) ) }
 			</tbody>
@@ -38,6 +44,9 @@ export default function StylesheetsTable( { stylesheets, stats } ) {
 	);
 }
 StylesheetsTable.propTypes = {
+	environment: PropTypes.shape( {
+		theme: PropTypes.object,
+	} ),
 	stylesheets: PropTypes.arrayOf( PropTypes.shape( {
 		final_size: PropTypes.number,
 		hash: PropTypes.string,
