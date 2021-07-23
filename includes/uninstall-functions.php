@@ -14,10 +14,22 @@ namespace AmpProject\AmpWP;
  * @internal
  */
 function delete_options() {
+	$options = get_option( 'amp-options' );
 
 	delete_option( 'amp-options' );
 	delete_option( 'amp_css_transient_monitor_time_series' );
 	delete_option( 'amp_customize_setting_modified_timestamps' );
+
+	$theme_mod_name = 'amp_customize_setting_modified_timestamps';
+	remove_theme_mod( $theme_mod_name );
+	if ( ! empty( $options['reader_theme'] ) && 'legacy' !== $options['reader_theme'] ) {
+		$reader_theme_mods_option_name = sprintf( 'theme_mods_%s', $options['reader_theme'] );
+		$reader_theme_mods             = get_option( $reader_theme_mods_option_name );
+		if ( is_array( $reader_theme_mods ) && isset( $reader_theme_mods[ $theme_mod_name ] ) ) {
+			unset( $reader_theme_mods[ $theme_mod_name ] );
+			update_option( $reader_theme_mods_option_name, $reader_theme_mods );
+		}
+	}
 }
 
 /**

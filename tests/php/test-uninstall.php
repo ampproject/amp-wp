@@ -38,7 +38,10 @@ class Test_Uninstall extends WP_UnitTestCase {
 		// Create dummy data.
 		$blog_name = 'Sample Blog Name';
 		update_option( 'blogname', $blog_name );
-		update_option( 'amp-options', 'Yes' );
+		update_option(
+			'amp-options',
+			[ 'reader_theme' => 'foo' ]
+		);
 
 		$users = $this->factory()->user->create_many( 2, [ 'role' => 'administrator' ] );
 
@@ -68,6 +71,19 @@ class Test_Uninstall extends WP_UnitTestCase {
 		$post_tag_term = $this->factory()->term->create_and_get(
 			[
 				'taxonomy' => 'post_tag',
+			]
+		);
+
+		$theme_mod_name = 'amp_customize_setting_modified_timestamps';
+		set_theme_mod( 'color', 'blue' );
+		set_theme_mod( $theme_mod_name, [ 'color' => time() ] );
+		update_option(
+			'theme_mods_foo',
+			[
+				'color'         => 'red',
+				$theme_mod_name => [
+					'color' => time(),
+				],
 			]
 		);
 
@@ -104,6 +120,12 @@ class Test_Uninstall extends WP_UnitTestCase {
 		$this->assertTrue( is_a( get_term( $post_tag_term->term_id ), 'WP_Term' ) );
 
 		$this->assertEquals( $blog_name, get_option( 'blogname', false ) );
+
+		$this->assertEquals( 'blue', get_theme_mod( 'color' ) );
+		$this->assertFalse( get_theme_mod( $theme_mod_name ) );
+		$foo_theme_mods = get_option( 'theme_mods_foo' );
+		$this->assertEquals( 'red', $foo_theme_mods['color'] );
+		$this->assertArrayNotHasKey( $theme_mod_name, $foo_theme_mods );
 
 		foreach ( $transient_groups_to_remove as $transient_group ) {
 			$this->assertEmpty( get_transient( $transient_group ) );
