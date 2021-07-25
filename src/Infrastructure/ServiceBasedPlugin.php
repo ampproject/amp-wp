@@ -187,9 +187,22 @@ abstract class ServiceBasedPlugin implements Plugin {
 			$services = $this->validate_services( $filtered_services, $services );
 		}
 
-		foreach ( $services as $id => $class ) {
-			$id    = $this->maybe_resolve( $id );
-			$class = $this->maybe_resolve( $class );
+		while ( null !== key( $services ) ) {
+			$id    = $this->maybe_resolve( key($services) );
+			$class = $this->maybe_resolve( current( $services ) );
+
+			// Delay registering the service until all requirements are met.
+			if (
+				is_a( $class, HasRequirements::class, true )
+				&&
+				! $this->requirements_are_met( $class )
+			) {
+				// Move to the end of the array.
+				unset( $services[ key( $services ) ] );
+				$services += [ key( $services ) => current( $services ) ];
+
+				continue;
+			}
 
 			// Allow the services to delay their registration.
 			if ( is_a( $class, Delayed::class, true ) ) {
@@ -198,6 +211,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 				if ( did_action( $registration_action ) ) {
 					$this->register_service( $id, $class );
 
+					next( $services );
 					continue;
 				}
 
@@ -208,11 +222,32 @@ abstract class ServiceBasedPlugin implements Plugin {
 					}
 				);
 
+				next( $services );
 				continue;
 			}
 
 			$this->register_service( $id, $class );
+
+			next( $services );
 		}
+	}
+
+	/**
+	 * @param HasRequirements $class
+	 *
+	 * @return bool
+	 */
+	protected function requirements_are_met( $class ) {
+		$requirements = $class::get_requirements();
+
+		// TODO: bail if it requires itself.
+		foreach ( $requirements as $requirement ) {
+			if ( ! $this->get_container()->has( $requirement ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
