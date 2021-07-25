@@ -188,7 +188,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 		}
 
 		while ( null !== key( $services ) ) {
-			$id    = $this->maybe_resolve( key($services) );
+			$id    = $this->maybe_resolve( key( $services ) );
 			$class = $this->maybe_resolve( current( $services ) );
 
 			// Delay registering the service until all requirements are met.
@@ -197,9 +197,15 @@ abstract class ServiceBasedPlugin implements Plugin {
 				&&
 				! $this->requirements_are_met( $class )
 			) {
-				// Move to the end of the array.
+				/*
+				 * Move the service to the end of the array.
+				 *
+				 * Note: Unsetting the key advances the internal array pointer to the next array item, so
+				 * the current array item will have to be temporarily stored so that it can be re-added later.
+				 */
+				$delayed_service = [ key( $services ) => current( $services ) ];
 				unset( $services[ key( $services ) ] );
-				$services += [ key( $services ) => current( $services ) ];
+				$services[ key( $delayed_service ) ] = current( $delayed_service );
 
 				continue;
 			}
@@ -210,17 +216,14 @@ abstract class ServiceBasedPlugin implements Plugin {
 
 				if ( did_action( $registration_action ) ) {
 					$this->register_service( $id, $class );
-
-					next( $services );
-					continue;
+				} else {
+					\add_action(
+						$class::get_registration_action(),
+						function () use ( $id, $class ) {
+							$this->register_service( $id, $class );
+						}
+					);
 				}
-
-				\add_action(
-					$class::get_registration_action(),
-					function () use ( $id, $class ) {
-						$this->register_service( $id, $class );
-					}
-				);
 
 				next( $services );
 				continue;
@@ -233,9 +236,9 @@ abstract class ServiceBasedPlugin implements Plugin {
 	}
 
 	/**
-	 * @param HasRequirements $class
+	 * @param HasRequirements $class Service with dependency requirements.
 	 *
-	 * @return bool
+	 * @return bool Whether the requirements for the service has been met.
 	 */
 	protected function requirements_are_met( $class ) {
 		$requirements = $class::get_requirements();
