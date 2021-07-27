@@ -135,7 +135,7 @@ class SupportData {
 
 		// Send data to server.
 		$response = wp_remote_post(
-			sprintf( '%s/api/v1/amp-wp/', $endpoint ),
+			sprintf( '%s/api/v1/support/', $endpoint ),
 			[
 				// We need long timeout here, in case the data being sent is large or the network connection is slow.
 				'timeout'  => 3000, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
