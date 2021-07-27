@@ -11,6 +11,7 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\PairedBrowsing;
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -52,12 +53,18 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		$this->assertSame( Services::get( 'dependency_support' )->has_support(), PairedBrowsing::is_needed() );
 	}
 
+	/** @covers ::get_requirements() */
+	public function test_get_requirements() {
+		$this->assertSame( [ 'dependency_support' ], PairedBrowsing::get_requirements() );
+	}
+
 	/** @covers ::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( PairedBrowsing::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 		$this->assertInstanceOf( Conditional::class, $this->instance );
+		$this->assertInstanceOf( HasRequirements::class, $this->instance );
 	}
 
 	/** @covers ::register() */

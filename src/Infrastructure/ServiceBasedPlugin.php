@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Infrastructure;
 
+use AmpProject\AmpWP\Exception\InvalidRequirement;
 use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer\LazilyInstantiatedService;
 use WP_CLI;
@@ -195,7 +196,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 			if (
 				is_a( $class, HasRequirements::class, true )
 				&&
-				! $this->requirements_are_met( $class )
+				! $this->requirements_are_met( $class, array_keys( $services ) )
 			) {
 				/*
 				 * Move the service to the end of the array.
@@ -236,15 +237,24 @@ abstract class ServiceBasedPlugin implements Plugin {
 	}
 
 	/**
-	 * @param HasRequirements $class Service with dependency requirements.
+	 * Determine if the requirements for a service to be registered are met.
+	 *
+	 * @param HasRequirements $class       Service with requirements.
+	 * @param array<string>   $service_ids List of service IDs to be registered.
+	 *
+	 * @throws InvalidService If the required service is not recognized.
 	 *
 	 * @return bool Whether the requirements for the service has been met.
 	 */
-	protected function requirements_are_met( $class ) {
+	protected function requirements_are_met( $class, $service_ids ) {
 		$requirements = $class::get_requirements();
 
-		// TODO: bail if it requires itself.
 		foreach ( $requirements as $requirement ) {
+			// Bail if it requires a service that is not recognized.
+			if ( ! in_array( $requirement, $service_ids, true ) ) {
+				throw InvalidService::from_service_id( $requirement );
+			}
+
 			if ( ! $this->get_container()->has( $requirement ) ) {
 				return false;
 			}
