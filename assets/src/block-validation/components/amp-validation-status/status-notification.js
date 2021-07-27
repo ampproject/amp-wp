@@ -90,16 +90,19 @@ export default function AMPValidationStatusNotification() {
 						keptMarkupValidationErrorCount,
 					)
 				}
-				action={ reviewLink && supportLink && (
+				action={ reviewLink && (
 					<>
 						<ExternalLink href={ reviewLink }>
 							{ __( 'View technical details', 'amp' ) }
 						</ExternalLink>
 						<br />
-						<br />
-						<ExternalLink href={ supportLink }>
-							{ __( 'Get Support', 'amp' ) }
-						</ExternalLink>
+						{
+							supportLink && (
+								<ExternalLink href={ supportLink }>
+									{ __( 'Get Support', 'amp' ) }
+								</ExternalLink>
+							)
+						}
 					</>
 				) }
 			/>
@@ -155,16 +158,19 @@ export default function AMPValidationStatusNotification() {
 					validationErrorCount,
 				)
 			}
-			action={ reviewLink && supportLink && (
+			action={ reviewLink && (
 				<>
 					<ExternalLink href={ reviewLink }>
 						{ __( 'View technical details', 'amp' ) }
 					</ExternalLink>
 					<br />
-					<br />
-					<ExternalLink href={ supportLink }>
-						{ __( 'Get Support', 'amp' ) }
-					</ExternalLink>
+					{
+						supportLink && (
+							<ExternalLink href={ supportLink }>
+								{ __( 'Get Support', 'amp' ) }
+							</ExternalLink>
+						)
+					}
 				</>
 			) }
 		/>;
