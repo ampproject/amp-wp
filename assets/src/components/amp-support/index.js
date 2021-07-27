@@ -21,16 +21,6 @@ import ClipboardButton from '../clipboard-button';
 
 export class AMPSupport extends Component {
 	/**
-	 * Prop Types.
-	 */
-	static propTypes = {
-		action: PropTypes.string.isRequired,
-		nonce: PropTypes.string.isRequired,
-		args: PropTypes.any,
-		data: PropTypes.object.isRequired,
-	}
-
-	/**
 	 * Construct method.
 	 */
 	constructor() {
@@ -405,10 +395,7 @@ export class AMPSupport extends Component {
 					}
 				}
 
-				/**
-				 * @type {{ok: boolean}}
-				 */
-				let response = await global.fetch( wpAjaxUrl, {
+				const response = await global.fetch( wpAjaxUrl, {
 					method: 'POST',
 					body,
 				} );
@@ -420,11 +407,11 @@ export class AMPSupport extends Component {
 					throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
 				}
 
-				response = await response.json();
+				const responseBody = await response.json();
 
-				if ( undefined !== response.success && undefined !== response.data ) {
+				if ( undefined !== responseBody.success && undefined !== responseBody.data ) {
 					this.setState( {
-						uuid: response.data.uuid,
+						uuid: responseBody.data.uuid,
 					} );
 				} else {
 					throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
@@ -435,3 +422,17 @@ export class AMPSupport extends Component {
 		} )();
 	}
 }
+
+AMPSupport.propTypes = {
+	action: PropTypes.string.isRequired,
+	nonce: PropTypes.string.isRequired,
+	args: PropTypes.any,
+	data: PropTypes.shape( {
+		error_sources: PropTypes.array.isRequired,
+		errors: PropTypes.array.isRequired,
+		plugins: PropTypes.array,
+		site_info: PropTypes.object,
+		themes: PropTypes.array,
+		urls: PropTypes.array,
+	} ),
+};
