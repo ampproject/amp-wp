@@ -7,13 +7,13 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Button, ExternalLink } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { ListItem } from '../list-item';
 import { Selectable } from '../selectable';
 import { AMPNotice } from '../amp-notice';
@@ -47,6 +47,14 @@ export class AMPSupport extends Component {
 					<h2 className="amp-support__heading">
 						{ __( 'AMP Support', 'amp' ) }
 					</h2>
+					{ /* dangerouslySetInnerHTML reason: Injection of links. */ }
+					<p dangerouslySetInnerHTML={
+						{ __html: sprintf(
+							/* translators: %s is the URL to create a new support topic */
+							__( 'In order to best assist you, please submit the following information to our private database. Once you have done so, copy the the resulting support ID and mention it in a <a href="%s" rel="noreferrer" target="_blank">support forum topic</a>. You do not have to submit data to get support, but our team will be able to help you more effectively if you do so.', 'amp' ),
+							'https://wordpress.org/support/plugin/amp/#new-topic-0',
+						) }
+					} />
 					<div className="amp-support__body">
 
 						{ this._renderSiteInfo() }
@@ -107,9 +115,16 @@ export class AMPSupport extends Component {
 						>
 							{ __( 'Send data', 'amp' ) }
 						</Button>
-						{ this.state.uuid ? this._renderUUID() : '' }
+						{
+							this.state.uuid && (
+								<ExternalLink href="https://wordpress.org/support/plugin/amp/#new-topic-0">
+									{ __( 'Create support topic', 'amp' ) }
+								</ExternalLink>
+							)
+						}
 						{ this.state.error ? this._renderError() : '' }
 					</div>
+					{ this.state.uuid ? this._renderUUID() : '' }
 				</Selectable>
 			</div>
 		);
