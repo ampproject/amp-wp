@@ -12,8 +12,7 @@ class DummyServiceWithRequirements implements Service, HasRequirements {
 	 *
 	 * @return array<string> List of required services.
 	 */
-	public static function get_requirements()
-	{
+	public static function get_requirements() {
 		return [ 'service_a' ];
 	}
 }
