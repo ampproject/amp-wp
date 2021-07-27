@@ -12,6 +12,17 @@ import { act } from 'react-dom/test-utils';
  * Internal dependencies
  */
 import SourceLabel from '..';
+import {
+	SOURCE_TYPE_BLOCK,
+	SOURCE_TYPE_CORE,
+	SOURCE_TYPE_EMBED,
+	SOURCE_TYPE_HOOK,
+	SOURCE_TYPE_HOOK_THE_CONTENT,
+	SOURCE_TYPE_HOOK_THE_EXCERPT,
+	SOURCE_TYPE_MU_PLUGIN,
+	SOURCE_TYPE_PLUGIN,
+	SOURCE_TYPE_THEME,
+} from '../../../utils/summarize-sources';
 
 let container;
 
@@ -29,7 +40,7 @@ describe( 'SourceLabel', () => {
 	it( 'renders nothing if no source type is provided', () => {
 		act( () => {
 			render(
-				<SourceLabel source={ [ 'a' ] } />,
+				<SourceLabel sources={ [ 'a' ] } />,
 				container,
 			);
 		} );
@@ -40,7 +51,7 @@ describe( 'SourceLabel', () => {
 	it( 'renders a single source', () => {
 		act( () => {
 			render(
-				<SourceLabel isPlugin={ true } source="foo" />,
+				<SourceLabel type={ SOURCE_TYPE_PLUGIN } sources={ [ 'foo' ] } />,
 				container,
 			);
 		} );
@@ -53,7 +64,7 @@ describe( 'SourceLabel', () => {
 	it( 'renders multiple sources', () => {
 		act( () => {
 			render(
-				<SourceLabel isPlugin={ true } source={ [ 'foo', 'bar', 'baz' ] } />,
+				<SourceLabel type={ SOURCE_TYPE_PLUGIN } sources={ [ 'foo', 'bar', 'baz' ] } />,
 				container,
 			);
 		} );
@@ -72,9 +83,9 @@ describe( 'SourceLabel', () => {
 		act( () => {
 			render(
 				<SourceLabel
-					isBlock={ true }
+					type={ SOURCE_TYPE_BLOCK }
 					isCodeOutput={ true }
-					source="foo/bar"
+					sources={ [ 'foo/bar' ] }
 				/>,
 				container,
 			);
@@ -89,87 +100,87 @@ describe( 'SourceLabel', () => {
 		[
 			'Some Plugin',
 			{
-				isPlugin: true,
-				source: [ 'Some Plugin' ],
+				type: SOURCE_TYPE_PLUGIN,
+				sources: [ 'Some Plugin' ],
 			},
 			'.dashicons-admin-plugins',
 		],
 		[
 			'Plugins',
 			{
-				isPlugin: true,
-				source: [ 'a', 'b' ],
+				type: SOURCE_TYPE_PLUGIN,
+				sources: [ 'a', 'b' ],
 			},
 			'.dashicons-admin-plugins',
 		],
 		[
 			'Must-Use Plugins',
 			{
-				isMuPlugin: true,
-				source: [ 'a', 'b' ],
+				type: SOURCE_TYPE_MU_PLUGIN,
+				sources: [ 'a', 'b' ],
 			},
 			'.dashicons-admin-plugins',
 		],
 		[
 			'Some Theme',
 			{
-				isTheme: true,
-				source: 'Some Theme',
+				type: SOURCE_TYPE_THEME,
+				sources: [ 'Some Theme' ],
 			},
 			'.dashicons-admin-appearance',
 		],
 		[
 			'wp-includes',
 			{
-				isCore: true,
-				source: 'wp-includes',
+				type: SOURCE_TYPE_CORE,
+				sources: [ 'wp-includes' ],
 			},
 			'.dashicons-wordpress-alt',
 		],
 		[
 			'Other',
 			{
-				isCore: true,
-				source: [ 'a', 'b' ],
+				type: SOURCE_TYPE_CORE,
+				sources: [ 'a', 'b' ],
 			},
 			'.dashicons-wordpress-alt',
 		],
 		[
 			'Embed',
 			{
-				isEmbed: true,
+				type: SOURCE_TYPE_EMBED,
 			},
 			'.dashicons-wordpress-alt',
 		],
 		[
 			'Content',
 			{
-				isHook: true,
-				source: 'the_content',
+				type: SOURCE_TYPE_HOOK,
+				sources: [ SOURCE_TYPE_HOOK_THE_CONTENT ],
 			},
 			'.dashicons-edit',
 		],
 		[
 			'Excerpt',
 			{
-				isHook: true,
-				source: 'the_excerpt',
+				type: SOURCE_TYPE_HOOK,
+				sources: [ SOURCE_TYPE_HOOK_THE_EXCERPT ],
 			},
 			'.dashicons-edit',
 		],
 		[
 			'Hook: foo_bar',
 			{
-				isHook: true,
-				source: 'foo_bar',
+				type: SOURCE_TYPE_HOOK,
+				sources: [ 'foo_bar' ],
 			},
 			'.dashicons-wordpress-alt',
 		],
 		[
 			'Some Block',
 			{
-				isBlock: true,
-				source: 'Some Block',
+				type: SOURCE_TYPE_BLOCK,
+				sources: [ 'Some Block' ],
 			},
 			'.dashicons-edit',
 		],

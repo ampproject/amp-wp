@@ -6,7 +6,9 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import summarizeSources from '../../utils/summarize-sources';
+import summarizeSources, {
+	SOURCE_TYPE_THEME,
+} from '../../utils/summarize-sources';
 import SourceLabel from '../source-label';
 
 export default function SourcesSummary( { sources, validatedTheme } ) {
@@ -18,31 +20,17 @@ export default function SourcesSummary( { sources, validatedTheme } ) {
 
 	if ( ! summarizedSources && validatedTheme ) {
 		return (
-			<SourceLabel source={ validatedTheme } isTheme={ true } />
+			<SourceLabel sources={ validatedTheme } type={ SOURCE_TYPE_THEME } />
 		);
 	}
 
-	const {
-		plugin,
-		muPlugin,
-		theme,
-		core,
-		embed,
-		blocks,
-		hook,
-	} = summarizedSources;
-
-	return (
-		<>
-			{ plugin && <SourceLabel source={ plugin } isPlugin={ true } /> }
-			{ muPlugin && <SourceLabel source={ muPlugin } isMuPlugin={ true } /> }
-			{ theme && <SourceLabel source={ theme } isTheme={ true } /> }
-			{ core && <SourceLabel source={ core } isCore={ true } /> }
-			{ embed && <SourceLabel source={ embed } isEmbed={ true } /> }
-			{ blocks && <SourceLabel source={ blocks } isBlock={ true } /> }
-			{ hook && <SourceLabel source={ hook } isHook={ true } /> }
-		</>
-	);
+	return Object.keys( summarizedSources ).map( ( type ) => (
+		<SourceLabel
+			key={ type }
+			type={ type }
+			sources={ summarizedSources[ type ] }
+		/>
+	) );
 }
 SourcesSummary.propTypes = {
 	sources: PropTypes.arrayOf(

@@ -1,7 +1,15 @@
 /**
  * Internal dependencies
  */
-import summarizeSources from '..';
+import summarizeSources, {
+	SOURCE_TYPE_PLUGIN,
+	SOURCE_TYPE_MU_PLUGIN,
+	SOURCE_TYPE_THEME,
+	SOURCE_TYPE_CORE,
+	SOURCE_TYPE_EMBED,
+	SOURCE_TYPE_BLOCK,
+	SOURCE_TYPE_HOOK,
+} from '..';
 
 describe( 'summarizeSources', () => {
 	it( 'renders null if no sources array is provided', () => {
@@ -31,9 +39,9 @@ describe( 'summarizeSources', () => {
 			},
 		] );
 		expect( result ).toStrictEqual( {
-			plugin: [ 'foo' ],
-			muPlugin: [ 'baz' ],
-			theme: [ 'bar' ],
+			[ SOURCE_TYPE_PLUGIN ]: [ 'foo' ],
+			[ SOURCE_TYPE_MU_PLUGIN ]: [ 'baz' ],
+			[ SOURCE_TYPE_THEME ]: [ 'bar' ],
 		} );
 	} );
 
@@ -62,7 +70,7 @@ describe( 'summarizeSources', () => {
 			},
 		] );
 		expect( result ).toStrictEqual( {
-			plugin: [ 'foo', 'baz' ],
+			[ SOURCE_TYPE_PLUGIN ]: [ 'foo', 'baz' ],
 		} );
 	} );
 
@@ -81,7 +89,7 @@ describe( 'summarizeSources', () => {
 			},
 		] );
 		expect( result ).toStrictEqual( {
-			core: [ 'baz', 'bar' ],
+			[ SOURCE_TYPE_CORE ]: [ 'baz', 'bar' ],
 		} );
 	} );
 
@@ -95,7 +103,7 @@ describe( 'summarizeSources', () => {
 			},
 		] );
 		expect( result ).toStrictEqual( {
-			embed: true,
+			[ SOURCE_TYPE_EMBED ]: true,
 		} );
 	} );
 
@@ -109,7 +117,7 @@ describe( 'summarizeSources', () => {
 			},
 		] );
 		expect( result ).toStrictEqual( {
-			blocks: [ 'foobar', 'bazbar' ],
+			[ SOURCE_TYPE_BLOCK ]: [ 'foobar', 'bazbar' ],
 		} );
 	} );
 
@@ -120,7 +128,7 @@ describe( 'summarizeSources', () => {
 			},
 		] );
 		expect( result ).toStrictEqual( {
-			hook: 'baz',
+			[ SOURCE_TYPE_HOOK ]: 'baz',
 		} );
 	} );
 
@@ -152,9 +160,9 @@ describe( 'summarizeSources', () => {
 			},
 		] );
 		expect( result ).toStrictEqual( {
-			plugin: [ 'foo' ],
-			muPlugin: [ 'bar' ],
-			theme: [ 'baz' ],
+			[ SOURCE_TYPE_PLUGIN ]: [ 'foo' ],
+			[ SOURCE_TYPE_MU_PLUGIN ]: [ 'bar' ],
+			[ SOURCE_TYPE_THEME ]: [ 'baz' ],
 		} );
 	} );
 } );

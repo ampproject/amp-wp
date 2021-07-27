@@ -1,19 +1,29 @@
+export const SOURCE_TYPE_PLUGIN = 'plugin';
+export const SOURCE_TYPE_MU_PLUGIN = 'mu-plugin';
+export const SOURCE_TYPE_THEME = 'theme';
+export const SOURCE_TYPE_CORE = 'core';
+export const SOURCE_TYPE_EMBED = 'embed';
+export const SOURCE_TYPE_BLOCK = 'blocks';
+export const SOURCE_TYPE_HOOK = 'hook';
+export const SOURCE_TYPE_HOOK_THE_CONTENT = 'the_content';
+export const SOURCE_TYPE_HOOK_THE_EXCERPT = 'the_excerpt';
+
 /**
  * Summarize sources.
  *
- * @param {Array} sources Sources.
+ * @param {Array} raw Raw sources.
  * @return {Object|null} Summarized (de-duped) sources.
  */
-export default function summarizeSources( sources ) {
-	if ( ! sources || ! Array.isArray( sources ) || sources.length === 0 ) {
+export default function summarizeSources( raw ) {
+	if ( ! raw || ! Array.isArray( raw ) || raw.length === 0 ) {
 		return null;
 	}
 
-	const summarizedSources = sources.reduce( ( acc, source ) => {
+	const sources = raw.reduce( ( acc, source ) => {
 		const { hook, type, name, embed, block_name: blockName } = source;
 
 		if ( hook ) {
-			acc.hook = hook;
+			acc[ SOURCE_TYPE_HOOK ] = hook;
 		}
 
 		if ( type && name && ! acc[ type ]?.includes( name ) ) {
@@ -22,12 +32,12 @@ export default function summarizeSources( sources ) {
 				name,
 			];
 		} else if ( embed ) {
-			acc.embed = true;
+			acc[ SOURCE_TYPE_EMBED ] = true;
 		}
 
 		if ( blockName ) {
-			acc.blocks = [
-				...acc.blocks ?? [],
+			acc[ SOURCE_TYPE_BLOCK ] = [
+				...acc[ SOURCE_TYPE_BLOCK ] ?? [],
 				blockName,
 			];
 		}
@@ -35,51 +45,53 @@ export default function summarizeSources( sources ) {
 		return acc;
 	}, {} );
 
-	const {
-		plugin,
-		'mu-plugin': muPlugin,
-		theme,
-		core,
-		embed,
-		blocks,
-		hook,
-	} = summarizedSources;
-
 	// Return only plugins and themes if they are present.
-	if ( plugin || muPlugin || theme ) {
+	if (
+		sources[ SOURCE_TYPE_PLUGIN ] ||
+		sources[ SOURCE_TYPE_MU_PLUGIN ] ||
+		sources[ SOURCE_TYPE_THEME ]
+	) {
 		const result = {};
 
-		if ( plugin ) {
-			result.plugin = plugin;
+		if ( sources[ SOURCE_TYPE_PLUGIN ] ) {
+			result[ SOURCE_TYPE_PLUGIN ] = sources[ SOURCE_TYPE_PLUGIN ];
 		}
-		if ( muPlugin ) {
-			result.muPlugin = muPlugin;
+		if ( sources[ SOURCE_TYPE_MU_PLUGIN ] ) {
+			result[ SOURCE_TYPE_MU_PLUGIN ] = sources[ SOURCE_TYPE_MU_PLUGIN ];
 		}
-		if ( theme && ! embed ) {
-			result.theme = theme;
+		if ( sources[ SOURCE_TYPE_THEME ] && ! sources[ SOURCE_TYPE_EMBED ] ) {
+			result[ SOURCE_TYPE_THEME ] = sources[ SOURCE_TYPE_THEME ];
 		}
 
 		return result;
 	}
 
 	// Return core if there are no plugins or themes.
-	if ( core ) {
-		return { core };
+	if ( sources[ SOURCE_TYPE_CORE ] ) {
+		return {
+			[ SOURCE_TYPE_CORE ]: sources[ SOURCE_TYPE_CORE ],
+		};
 	}
 
 	// Return embed if there is no plugin, theme or core.
-	if ( embed ) {
-		return { embed };
+	if ( sources[ SOURCE_TYPE_EMBED ] ) {
+		return {
+			[ SOURCE_TYPE_EMBED ]: sources[ SOURCE_TYPE_EMBED ],
+		};
 	}
 
 	// Return block if there is no plugin, theme, core or embed.
-	if ( blocks ) {
-		return { blocks };
+	if ( sources[ SOURCE_TYPE_BLOCK ] ) {
+		return {
+			[ SOURCE_TYPE_BLOCK ]: sources[ SOURCE_TYPE_BLOCK ],
+		};
 	}
 
 	// Return hook if there is no plugin, theme, core, embed or blocks.
-	if ( hook ) {
-		return { hook };
+	if ( sources[ SOURCE_TYPE_HOOK ] ) {
+		return {
+			[ SOURCE_TYPE_HOOK ]: sources[ SOURCE_TYPE_HOOK ],
+		};
 	}
 
 	return null;

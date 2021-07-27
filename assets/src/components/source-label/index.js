@@ -9,60 +9,73 @@ import PropTypes from 'prop-types';
 import { __, sprintf } from '@wordpress/i18n';
 import { Dashicon } from '@wordpress/components';
 
-export default function SourceLabel( {
-	source,
-	isCodeOutput,
-	isPlugin,
-	isMuPlugin,
-	isTheme,
-	isCore,
-	isEmbed,
-	isHook,
-	isBlock,
-} ) {
-	const sources = Array.isArray( source ) ? source : [ source ];
+/**
+ * Internal dependencies
+ */
+import {
+	SOURCE_TYPE_PLUGIN,
+	SOURCE_TYPE_MU_PLUGIN,
+	SOURCE_TYPE_THEME,
+	SOURCE_TYPE_CORE,
+	SOURCE_TYPE_EMBED,
+	SOURCE_TYPE_BLOCK,
+	SOURCE_TYPE_HOOK,
+	SOURCE_TYPE_HOOK_THE_CONTENT,
+	SOURCE_TYPE_HOOK_THE_EXCERPT,
+} from '../../utils/summarize-sources';
 
+export default function SourceLabel( {
+	sources,
+	type,
+	isCodeOutput,
+} ) {
 	let icon;
 	let title;
 	let singleTitle = sources?.[ 0 ];
 
-	if ( isPlugin ) {
-		icon = 'admin-plugins';
-		title = __( 'Plugins', 'amp' );
-	} else if ( isMuPlugin ) {
-		icon = 'admin-plugins';
-		title = __( 'Must-Use Plugins', 'amp' );
-	} else if ( isTheme ) {
-		icon = 'admin-appearance';
-	} else if ( isCore ) {
-		icon = 'wordpress-alt';
-		title = __( 'Other', 'amp' );
-	} else if ( isEmbed ) {
-		icon = 'wordpress-alt';
-		title = __( 'Embed', 'amp' );
-	} else if ( isHook ) {
-		switch ( sources[ 0 ] ) {
-			case 'the_content':
-				icon = 'edit';
-				singleTitle = __( 'Content', 'amp' );
-				break;
-			case 'the_excerpt':
-				icon = 'edit';
-				singleTitle = __( 'Excerpt', 'amp' );
-				break;
-			default:
-				icon = 'wordpress-alt';
-				singleTitle = sprintf(
-					// translators: placeholder is the hook name.
-					__( 'Hook: %s', 'amp' ), sources[ 0 ],
-				);
-		}
-	} else if ( isBlock ) {
-		icon = 'edit';
-	}
-
-	if ( ! icon ) {
-		return null;
+	switch ( type ) {
+		case SOURCE_TYPE_PLUGIN:
+			icon = 'admin-plugins';
+			title = __( 'Plugins', 'amp' );
+			break;
+		case SOURCE_TYPE_MU_PLUGIN:
+			icon = 'admin-plugins';
+			title = __( 'Must-Use Plugins', 'amp' );
+			break;
+		case SOURCE_TYPE_THEME:
+			icon = 'admin-appearance';
+			break;
+		case SOURCE_TYPE_CORE:
+			icon = 'wordpress-alt';
+			title = __( 'Other', 'amp' );
+			break;
+		case SOURCE_TYPE_EMBED:
+			icon = 'wordpress-alt';
+			title = __( 'Embed', 'amp' );
+			break;
+		case SOURCE_TYPE_HOOK:
+			switch ( sources[ 0 ] ) {
+				case SOURCE_TYPE_HOOK_THE_CONTENT:
+					icon = 'edit';
+					singleTitle = __( 'Content', 'amp' );
+					break;
+				case SOURCE_TYPE_HOOK_THE_EXCERPT:
+					icon = 'edit';
+					singleTitle = __( 'Excerpt', 'amp' );
+					break;
+				default:
+					icon = 'wordpress-alt';
+					singleTitle = sprintf(
+						// translators: placeholder is the hook name.
+						__( 'Hook: %s', 'amp' ), sources[ 0 ],
+					);
+			}
+			break;
+		case SOURCE_TYPE_BLOCK:
+			icon = 'edit';
+			break;
+		default:
+			return null;
 	}
 
 	if ( ! sources || sources.length === 1 ) {
@@ -100,13 +113,15 @@ export default function SourceLabel( {
 	);
 }
 SourceLabel.propTypes = {
-	source: PropTypes.oneOfType( [ PropTypes.string, PropTypes.array ] ),
 	isCodeOutput: PropTypes.bool,
-	isPlugin: PropTypes.bool,
-	isMuPlugin: PropTypes.bool,
-	isTheme: PropTypes.bool,
-	isCore: PropTypes.bool,
-	isEmbed: PropTypes.bool,
-	isHook: PropTypes.bool,
-	isBlock: PropTypes.bool,
+	sources: PropTypes.array,
+	type: PropTypes.oneOf( [
+		SOURCE_TYPE_PLUGIN,
+		SOURCE_TYPE_MU_PLUGIN,
+		SOURCE_TYPE_THEME,
+		SOURCE_TYPE_CORE,
+		SOURCE_TYPE_EMBED,
+		SOURCE_TYPE_BLOCK,
+		SOURCE_TYPE_HOOK,
+	] ),
 };
