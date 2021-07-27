@@ -54,6 +54,22 @@ export default function AMPValidationStatusNotification() {
 		);
 	}
 
+	const sidebarNotificationAction = reviewLink && (
+		<>
+			<ExternalLink href={ reviewLink }>
+				{ __( 'View technical details', 'amp' ) }
+			</ExternalLink>
+			<br />
+			{
+				supportLink && (
+					<ExternalLink href={ supportLink }>
+						{ __( 'Get Support', 'amp' ) }
+					</ExternalLink>
+				)
+			}
+		</>
+	);
+
 	if ( fetchingErrorsRequestErrorMessage ) {
 		return (
 			<SidebarNotification
@@ -90,21 +106,7 @@ export default function AMPValidationStatusNotification() {
 						keptMarkupValidationErrorCount,
 					)
 				}
-				action={ reviewLink && (
-					<>
-						<ExternalLink href={ reviewLink }>
-							{ __( 'View technical details', 'amp' ) }
-						</ExternalLink>
-						<br />
-						{
-							supportLink && (
-								<ExternalLink href={ supportLink }>
-									{ __( 'Get Support', 'amp' ) }
-								</ExternalLink>
-							)
-						}
-					</>
-				) }
+				action={ sidebarNotificationAction }
 			/>
 		);
 	}
@@ -126,18 +128,7 @@ export default function AMPValidationStatusNotification() {
 						unreviewedValidationErrorCount,
 					)
 				}
-				action={ reviewLink && supportLink && (
-					<>
-						<ExternalLink href={ reviewLink }>
-							{ __( 'View technical details', 'amp' ) }
-						</ExternalLink>
-						<br />
-						<br />
-						<ExternalLink href={ supportLink }>
-							{ __( 'Get Support', 'amp' ) }
-						</ExternalLink>
-					</>
-				) }
+				action={ sidebarNotificationAction }
 			/>
 		);
 	}
@@ -158,21 +149,7 @@ export default function AMPValidationStatusNotification() {
 					validationErrorCount,
 				)
 			}
-			action={ reviewLink && (
-				<>
-					<ExternalLink href={ reviewLink }>
-						{ __( 'View technical details', 'amp' ) }
-					</ExternalLink>
-					<br />
-					{
-						supportLink && (
-							<ExternalLink href={ supportLink }>
-								{ __( 'Get Support', 'amp' ) }
-							</ExternalLink>
-						)
-					}
-				</>
-			) }
+			action={ sidebarNotificationAction }
 		/>;
 	}
 
