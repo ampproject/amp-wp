@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import summarizeSources, {
+import {
 	SOURCE_TYPE_PLUGIN,
 	SOURCE_TYPE_MU_PLUGIN,
 	SOURCE_TYPE_THEME,
@@ -9,6 +9,7 @@ import summarizeSources, {
 	SOURCE_TYPE_EMBED,
 	SOURCE_TYPE_BLOCK,
 	SOURCE_TYPE_HOOK,
+	summarizeSources,
 } from '..';
 
 describe( 'summarizeSources', () => {

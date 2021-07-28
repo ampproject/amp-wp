@@ -16,6 +16,7 @@ import { Button } from '@wordpress/components';
 import FormattedMemoryValue from '../../../components/formatted-memory-value';
 import { ValidationStatusIcon } from '../../../components/icon';
 import ShakenTokensDiff from '../../../components/shaken-tokens-diff';
+import SourcesStack from '../../../components/sources-stack';
 import SourcesSummary from '../../../components/sources-summary';
 
 export default function StylesheetsTableRow( {
@@ -124,6 +125,12 @@ export default function StylesheetsTableRow( {
 								<code className="stylesheet-origin-markup">
 									{ orignalTag }
 								</code>
+							</dd>
+							<dt>
+								{ __( 'Sources', 'amp' ) }
+							</dt>
+							<dd>
+								<SourcesStack sources={ sources } />
 							</dd>
 							<dt>
 								{ __( 'CSS Code', 'amp' ) }

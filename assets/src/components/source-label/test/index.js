@@ -22,7 +22,7 @@ import {
 	SOURCE_TYPE_MU_PLUGIN,
 	SOURCE_TYPE_PLUGIN,
 	SOURCE_TYPE_THEME,
-} from '../../../utils/summarize-sources';
+} from '../../../utils/sources';
 
 let container;
 
@@ -138,7 +138,7 @@ describe( 'SourceLabel', () => {
 			'.dashicons-wordpress-alt',
 		],
 		[
-			'Other',
+			'Core',
 			{
 				type: SOURCE_TYPE_CORE,
 				sources: [ 'a', 'b' ],

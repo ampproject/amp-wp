@@ -6,9 +6,10 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import summarizeSources, {
+import {
 	SOURCE_TYPE_THEME,
-} from '../../utils/summarize-sources';
+	summarizeSources,
+} from '../../utils/sources';
 import SourceLabel from '../source-label';
 
 export default function SourcesSummary( { sources, validatedTheme } ) {

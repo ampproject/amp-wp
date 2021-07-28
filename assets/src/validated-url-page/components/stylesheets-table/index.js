@@ -18,7 +18,7 @@ export default function StylesheetsTable( {
 	const validatedTheme = environment?.theme ? Object.keys( environment.theme )[ 0 ] : '';
 
 	return (
-		<table className="amp-stylesheet-list wp-list-table widefat fixed striped">
+		<table className="amp-stylesheet-list amp-stylesheet-table wp-list-table widefat fixed striped">
 			<StylesheetsTableHead />
 			<tbody>
 				{ stylesheets.map( ( stylesheet, index ) => (

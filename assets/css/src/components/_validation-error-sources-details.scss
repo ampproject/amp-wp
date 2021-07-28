@@ -1,0 +1,17 @@
+.validation-error-sources-details {
+	border-collapse: collapse;
+	width: 100%;
+
+	td,
+	th {
+		vertical-align: top;
+		padding: 2px 4px;
+	}
+
+	th {
+		font-weight: 600;
+		text-align: right;
+		width: 30%;
+		min-width: 120px;
+	}
+}

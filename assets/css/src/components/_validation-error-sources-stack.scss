@@ -1,0 +1,17 @@
+.validation-error-sources-stack {
+
+	li {
+		padding: 0.75em 0;
+		margin: 0;
+		max-width: 400px;
+
+		&::marker {
+			content: "#" counter(list-item);
+			font-weight: 600;
+		}
+	}
+
+	li + li {
+		border-top: solid 1px #ddd;
+	}
+}

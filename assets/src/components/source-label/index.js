@@ -22,7 +22,7 @@ import {
 	SOURCE_TYPE_HOOK,
 	SOURCE_TYPE_HOOK_THE_CONTENT,
 	SOURCE_TYPE_HOOK_THE_EXCERPT,
-} from '../../utils/summarize-sources';
+} from '../../utils/sources';
 
 export default function SourceLabel( {
 	sources,
@@ -44,10 +44,11 @@ export default function SourceLabel( {
 			break;
 		case SOURCE_TYPE_THEME:
 			icon = 'admin-appearance';
+			title = singleTitle ?? __( 'Theme', 'amp' );
 			break;
 		case SOURCE_TYPE_CORE:
 			icon = 'wordpress-alt';
-			title = __( 'Other', 'amp' );
+			title = __( 'Core', 'amp' );
 			break;
 		case SOURCE_TYPE_EMBED:
 			icon = 'wordpress-alt';
