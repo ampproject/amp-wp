@@ -7,13 +7,14 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useMemo, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { FormToggle } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
+import { Loading } from '../loading';
 import Declaration from './declaration';
 
 export default function ShakenTokensDiff( {
@@ -21,10 +22,13 @@ export default function ShakenTokensDiff( {
 	tokens,
 } ) {
 	const [ showRemovedStyles, setShowRemovedStyles ] = useState( false );
+	const [ tokensTree, setTokensTree ] = useState();
+	const [ insCount, setInsCount ] = useState( 0 );
+	const [ delCount, setDelCount ] = useState( 0 );
 
-	const { tokensTree, insCount, delCount } = useMemo( () => {
+	useEffect( () => {
 		if ( ! tokens || ! Array.isArray( tokens ) || tokens.length === 0 ) {
-			return {};
+			return;
 		}
 
 		let _insCount = 0;
@@ -68,12 +72,14 @@ export default function ShakenTokensDiff( {
 			];
 		}, [] );
 
-		return {
-			tokensTree: _tokensTree,
-			insCount: _insCount,
-			delCount: _delCount,
-		};
+		setTokensTree( _tokensTree );
+		setInsCount( _insCount );
+		setDelCount( _delCount );
 	}, [ origin, tokens ] );
+
+	if ( ! tokensTree ) {
+		return <Loading />;
+	}
 
 	return (
 		<>
