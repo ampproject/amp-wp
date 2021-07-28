@@ -32,6 +32,16 @@ class PairedUrlTest extends DependencyInjectedTestCase {
 		);
 
 		$this->assertEquals(
+			'/foo/?test=one+two+three',
+			$this->instance->remove_query_var( "/foo/?test=one+two+three&{$slug}=1" )
+		);
+
+		$this->assertEquals(
+			'/foo/?test=one%20two%20three',
+			$this->instance->remove_query_var( "/foo/?test=one%20two%20three&{$slug}=1" )
+		);
+
+		$this->assertEquals(
 			'/foo/',
 			$this->instance->remove_query_var( "/foo/?{$slug}=1" )
 		);
