@@ -240,7 +240,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 	 * Determine if the requirements for a service to be registered are met.
 	 *
 	 * @param HasRequirements $class       Service with requirements.
-	 * @param array<string>   $service_ids List of service IDs to be registered.
+	 * @param string[]        $service_ids List of service IDs to be registered.
 	 *
 	 * @throws InvalidService If the required service is not recognized.
 	 *

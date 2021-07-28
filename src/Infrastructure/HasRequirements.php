@@ -21,7 +21,7 @@ interface HasRequirements {
 	/**
 	 * Get the list of service IDs required for this service to be registered.
 	 *
-	 * @return array<string> List of required services.
+	 * @return string[] List of required services.
 	 */
 	public static function get_requirements();
 }
