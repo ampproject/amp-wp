@@ -4,6 +4,11 @@
 import PropTypes from 'prop-types';
 
 /**
+ * WordPress dependencies
+ */
+import { useMemo } from '@wordpress/element';
+
+/**
  * Internal dependencies
  */
 import {
@@ -13,16 +18,22 @@ import {
 import SourceLabel from '../source-label';
 
 export default function SourcesSummary( { sources, validatedTheme } ) {
-	if ( ! sources || ! Array.isArray( sources ) || sources.length === 0 ) {
-		return null;
-	}
+	const summarizedSources = useMemo( () => {
+		if ( ! sources || ! Array.isArray( sources ) || sources.length === 0 ) {
+			return null;
+		}
 
-	const summarizedSources = summarizeSources( sources );
+		return summarizeSources( sources );
+	}, [ sources ] );
 
 	if ( ! summarizedSources && validatedTheme ) {
 		return (
 			<SourceLabel sources={ validatedTheme } type={ SOURCE_TYPE_THEME } />
 		);
+	}
+
+	if ( ! summarizedSources ) {
+		return null;
 	}
 
 	return Object.keys( summarizedSources ).map( ( type ) => (
