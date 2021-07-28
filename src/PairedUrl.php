@@ -24,33 +24,7 @@ final class PairedUrl implements Service {
 	 * @return string URL.
 	 */
 	public function remove_query_var( $url ) {
-		if ( ! preg_match( ':^(?P<path>.*)\?(?P<query_string>.*?)(?P<fragment>#.*)?$:', $url, $matches ) ) {
-			return $url;
-		}
-
-		$qs_pairs = explode( '&', $matches['query_string'] );
-		$slug     = amp_get_slug();
-
-		$filtered_qs_pairs = array_filter(
-			$qs_pairs,
-			static function ( $pair ) use ( $slug ) {
-				return ! ( $pair === $slug || 0 === strpos( $pair, $slug . '=' ) );
-			}
-		);
-
-		if ( $filtered_qs_pairs === $qs_pairs ) {
-			return $url;
-		}
-
-		$resulting_url = $matches['path'];
-		if ( ! empty( $filtered_qs_pairs ) ) {
-			$resulting_url .= '?' . implode( '&', $filtered_qs_pairs );
-		}
-		if ( ! empty( $matches['fragment'] ) ) {
-			$resulting_url .= $matches['fragment'];
-		}
-
-		return $resulting_url;
+		return remove_query_arg( amp_get_slug(), $url );
 	}
 
 	/**
