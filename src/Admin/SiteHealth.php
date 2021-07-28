@@ -158,8 +158,39 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	public function persistent_object_cache() {
 		$is_using_object_cache = wp_using_ext_object_cache();
 
+		$description = '<p>' . __( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ) . '</p>';
+
 		if ( empty( $is_using_object_cache ) ) {
 			$available_cache = $this->check_available_cache();
+
+			/* translators: plugin recommendation markup */
+			$plugin_placeholder = _x( 'We recommend to use %s plugin.', 'plugin recommendation markup', 'amp' );
+
+			if ( true === $available_cache['redis'] ) {
+
+				$plugin_recommendation = sprintf(
+					$plugin_placeholder,
+					'<a href="https://wordpress.org/plugins/redis-cache/" target="_blank">Redis Object Cache</a>'
+				);
+
+				$description .= '<p>' . __( 'During the test, We found that the site has Redis cache is available.', 'amp' ) . '&nbsp;' . $plugin_recommendation . '</p>';
+			} elseif ( true === $available_cache['memcached'] ) {
+
+				$plugin_recommendation = sprintf(
+					$plugin_placeholder,
+					'<a href="https://wordpress.org/plugins/w3-total-cache/" target="_blank">W3 Total Cache</a>'
+				);
+
+				$description .= '<p>' . __( 'During the test, We found that the site has Memcache cache is available.', 'amp' ) . '&nbsp;' . $plugin_recommendation . '</p>';
+			} elseif ( true === $available_cache['apcu'] ) {
+
+				$plugin_recommendation = sprintf(
+					$plugin_placeholder,
+					'<a href="https://wordpress.org/plugins/w3-total-cache/" target="_blank">W3 Total Cache</a>'
+				);
+
+				$description .= '<p>' . __( 'During the test, We found that the site has Opcache cache is available.', 'amp' ) . '&nbsp;' . $plugin_recommendation . '</p>';
+			}
 		}
 
 		return [
@@ -167,7 +198,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 				'label' => $this->get_badge_label(),
 				'color' => $is_using_object_cache ? 'green' : 'orange',
 			],
-			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ),
+			'description' => wp_kses_post( $description ),
 			'actions'     => $this->get_persistent_object_cache_learn_more_action(),
 			'test'        => 'amp_persistent_object_cache',
 			'status'      => $is_using_object_cache ? 'good' : 'recommended',
