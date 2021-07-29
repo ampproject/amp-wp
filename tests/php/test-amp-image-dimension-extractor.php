@@ -185,60 +185,106 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $user_agent );
 	}
 
-	/**
-	 * @covers \AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem
-	 */
-	public function test_extract_by_filename_or_filesystem() {
+	public function get_data_for_test_extract_by_filename_or_filesystem() {
 
 		$attachment_id = $this->factory()->attachment->create_upload_object( __DIR__ . '/data/images/wordpress-logo.png' );
 
-		$full_image       = wp_get_attachment_image_src( $attachment_id, 'full' );
-		$thumbnail_image  = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
-		$external_image   = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-1024x668.jpg';
-		$external_image_1 = 'https://via.placeholder.com/1500/000.png/FF0';
-		$external_image_2 = 'https://via.placeholder.com/1000/000.png/FF0';
+		$full_image                       = wp_get_attachment_image_src( $attachment_id, 'full' );
+		$thumbnail_image                  = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
+		$external_image                   = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-1024x668.jpg';
+		$external_image_1                 = 'https://via.placeholder.com/1500/000.png/FF0';
+		$external_image_2                 = 'https://via.placeholder.com/1000/000.png/FF0';
+		$image_with_query_string          = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-512x768.jpg?crop=1';
+		$internal_image_with_query_string = $full_image[0] . '?crop=1&resize=1';
 
-		$expected = [
-			$full_image[0]      => [
-				'width'  => $full_image[1],
-				'height' => $full_image[2],
+		return [
+			$full_image[0]                    => [
+				'input'    => [],
+				'expected' => [
+					'width'  => $full_image[1],
+					'height' => $full_image[2],
+				],
 			],
-			$thumbnail_image[0] => [
-				'width'  => $thumbnail_image[1],
-				'height' => $thumbnail_image[2],
+			$thumbnail_image[0]               => [
+				'input'    => [],
+				'expected' => [
+					'width'  => $thumbnail_image[1],
+					'height' => $thumbnail_image[2],
+				],
 			],
-			$external_image     => [
-				'width'  => 1024,
-				'height' => 668,
+			$external_image                   => [
+				'input'    => [],
+				'expected' => [
+					'width'  => 1024,
+					'height' => 668,
+				],
 			],
-			$external_image_1   => [],
-			$external_image_2   => [
-				'width'  => 1000,
-				'height' => 1000,
+			$external_image_1                 => [
+				'input'    => [],
+				'expected' => [],
+			],
+			$external_image_2                 => [
+				'input'    => [
+					'width'  => 1000,
+					'height' => 1000,
+				],
+				'expected' => [
+					'width'  => 1000,
+					'height' => 1000,
+				],
+			],
+			$image_with_query_string          => [
+				'input'    => [],
+				'expected' => [
+					'width'  => 512,
+					'height' => 768,
+				],
+			],
+			$internal_image_with_query_string => [
+				'input'    => [],
+				'expected' => [
+					'width'  => $full_image[1],
+					'height' => $full_image[2],
+				],
 			],
 		];
+	}
 
-		$input = [
-			$full_image[0]      => [],
-			$thumbnail_image[0] => [],
-			$external_image     => [],
-			$external_image_1   => [],
-			$external_image_2   => [
-				'width'  => 1000,
-				'height' => 1000,
-			],
-		];
+	/**
+	 * @covers \AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem()
+	 */
+	public function test_extract_by_filename_or_filesystem() {
+
+		$data = $this->get_data_for_test_extract_by_filename_or_filesystem();
+
+		$input    = wp_list_pluck( $data, 'input' );
+		$expected = wp_list_pluck( $data, 'expected' );
 
 		$this->assertEmpty( AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem( [] ) );
 
 		$output = AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem( $input );
 		$this->assertEquals( $expected, $output );
 
-		// Check after removing attachment metadata, To check fallback to filesystem.
+	}
 
-		wp_update_attachment_metadata( $attachment_id, [] );
+	/**
+	 * @covers \AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem()
+	 */
+	public function test_extract_by_filename_or_filesystem_with_object_cache() {
+
+		wp_using_ext_object_cache( true );
+
+
+
+		$data = $this->get_data_for_test_extract_by_filename_or_filesystem();
+
+		$input    = wp_list_pluck( $data, 'input' );
+		$expected = wp_list_pluck( $data, 'expected' );
+
+		$this->assertEmpty( AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem( [] ) );
 
 		$output = AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem( $input );
 		$this->assertEquals( $expected, $output );
+
 	}
 }

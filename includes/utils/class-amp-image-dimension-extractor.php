@@ -174,16 +174,13 @@ class AMP_Image_Dimension_Extractor {
 				continue;
 			}
 
+			$path = wp_parse_url( $url, PHP_URL_PATH );
+			if ( empty( $path ) ) {
+				continue;
+			}
+
 			// Get image dimension from file name.
-			$basename                   = basename( $url );
-			$filename_without_extension = explode( '.', $basename );
-			$extension                  = array_pop( $filename_without_extension );
-			$filename_without_extension = implode( '.', $filename_without_extension );
-
-			$regex = '/-(?<width>\d+)x(?<height>\d+)(?:\.' . $extension . ')$/m';
-			preg_match( $regex, $basename, $possible_dimension );
-
-			if ( ! empty( $possible_dimension['width'] ) && ! empty( $possible_dimension['height'] ) ) {
+			if ( preg_match( '/-(?<width>\d+)x(?<height>\d+)\.\w+$/', $path, $possible_dimension ) ) {
 				$dimensions[ $url ] = [
 					'width'  => (int) $possible_dimension['width'],
 					'height' => (int) $possible_dimension['height'],
@@ -192,18 +189,21 @@ class AMP_Image_Dimension_Extractor {
 			}
 
 			// Check if it's internal media or not. If it's not then bail out.
-			if ( 0 !== strpos( trim( $url ), $base_upload_uri ) ) {
+			// If URL is not valid then bail out.
+			if ( 0 !== strpos( $url, $base_upload_uri ) || 0 !== validate_file( $url ) ) {
 				continue;
 			}
 
 			// Get media path.
-			$attached_path = ltrim( str_replace( $base_upload_uri, '', $url ), '/' );
+			$attached_path = substr( $url, strlen( $base_upload_uri ) );
+			$attached_path = wp_parse_url( $attached_path, PHP_URL_PATH );
 
-			$imagesize      = [];
-			$url_hash       = md5( $url );
-			$transient_name = sprintf( 'amp_img_%s', $url_hash );
+			$imagesize             = [];
+			$is_using_object_cache = wp_using_ext_object_cache();
 
-			if ( wp_using_ext_object_cache() ) {
+			list( $transient_name ) = array_values( self::get_cached_dimensions_transient_name( $url ) );
+
+			if ( $is_using_object_cache ) {
 				$imagesize = get_transient( $transient_name );
 				$imagesize = ( ! empty( $imagesize ) && is_array( $imagesize ) ) ? $imagesize : [];
 			}
@@ -214,11 +214,11 @@ class AMP_Image_Dimension_Extractor {
 
 				if ( function_exists( 'wp_getimagesize' ) ) {
 					$imagesize = wp_getimagesize( $image_file );
-				} else {
-					$imagesize = getimagesize( $image_file );
+				} elseif ( function_exists( 'getimagesize' ) ) {
+					$imagesize = @getimagesize( $image_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 				}
 
-				if ( ! empty( $imagesize ) && is_array( $imagesize ) ) {
+				if ( $is_using_object_cache && ! empty( $imagesize ) && is_array( $imagesize ) ) {
 					set_transient( $transient_name, $imagesize );
 				}
 			}
@@ -232,6 +232,25 @@ class AMP_Image_Dimension_Extractor {
 		}
 
 		return $dimensions;
+	}
+
+	/**
+	 * To get transient name for URL dimensions.
+	 *
+	 * @param string $url Image URL.
+	 *
+	 * @return array Transient name and lock name.
+	 */
+	public static function get_cached_dimensions_transient_name( $url ) {
+		$response = [];
+
+		if ( ! empty( $url ) ) {
+			$url_hash                        = md5( $url );
+			$response['transient_name']      = sprintf( 'amp_img_%s', $url_hash );
+			$response['transient_lock_name'] = sprintf( 'amp_lock_%s', $url_hash );
+		}
+
+		return $response;
 	}
 
 	/**
@@ -278,8 +297,8 @@ class AMP_Image_Dimension_Extractor {
 				continue;
 			}
 
-			$url_hash          = md5( $url );
-			$transient_name    = sprintf( 'amp_img_%s', $url_hash );
+			list( $transient_name, $transient_lock_name ) = array_values( self::get_cached_dimensions_transient_name( $url ) );
+
 			$cached_dimensions = get_transient( $transient_name );
 
 			// If we're able to retrieve the dimensions from a transient, set them and move on.
@@ -296,8 +315,6 @@ class AMP_Image_Dimension_Extractor {
 				$dimensions[ $url ] = false;
 				continue;
 			}
-
-			$transient_lock_name = sprintf( 'amp_lock_%s', $url_hash );
 
 			// If somebody is already trying to extract dimensions for this transient right now, move on.
 			if ( false !== get_transient( $transient_lock_name ) ) {
