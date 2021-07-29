@@ -1,31 +1,31 @@
 <?php
 /**
- * Tests for Support.
+ * Tests for SupportLink.
  *
  * @package AmpProject\AmpWP\Tests
  */
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
-use AmpProject\AmpWP\Admin\Support;
+use AmpProject\AmpWP\Admin\SupportLink;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
 /**
- * Tests for SupportMenu.
+ * Tests for Support Link.
  *
  * @group support-admin
- * @coversDefaultClass \AmpProject\AmpWP\Admin\Support
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\SupportLink
  */
-class SupportTest extends WP_UnitTestCase {
+class SupportLinkTest extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 
 	/**
-	 * Instance of OptionsMenu
+	 * Instance of SupportLink
 	 *
-	 * @var Support
+	 * @var SupportLink
 	 */
 	public $instance;
 
@@ -38,7 +38,7 @@ class SupportTest extends WP_UnitTestCase {
 
 		parent::setUp();
 
-		$this->instance = new Support();
+		$this->instance = new SupportLink();
 	}
 
 	/**
@@ -178,7 +178,7 @@ class SupportTest extends WP_UnitTestCase {
 					admin_url( 'admin.php' )
 				)
 			),
-			esc_html__( 'Contact support', 'amp' )
+			esc_html__( 'Get support', 'amp' )
 		);
 
 		$this->assertContains( $should_have, $output );

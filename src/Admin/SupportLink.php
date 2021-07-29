@@ -1,21 +1,26 @@
 <?php
 /**
- * Class SupportMenu
+ * Service Link class that adds support links throughout the plugin's UI.
  *
  * @package Ampproject\Ampwp
  */
 
 namespace AmpProject\AmpWP\Admin;
 
+use WP_Admin_Bar;
+use WP_Post;
+use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\QueryVar;
 
 /**
- * SupportMenu class.
+ * Service that adds support links throughout the plugin's UI.
+ *
+ * @internal
  */
-class Support implements Service, Conditional, Registerable {
+class SupportLink implements Service, Conditional, Registerable {
 
 	/**
 	 * Check whether the conditional object is currently needed.
@@ -29,27 +34,21 @@ class Support implements Service, Conditional, Registerable {
 
 	/**
 	 * Adds hooks.
+	 *
+	 * @return void
 	 */
 	public function register() {
 
-		/**
-		 * Add support link to Admin Bar.
-		 */
+		// Add support link to Admin Bar.
 		add_action( 'admin_bar_menu', [ $this, 'admin_bar_menu' ], 105 );
 
-		/**
-		 * Add support link to meta box.
-		 */
+		// Add support link to meta box.
 		add_filter( 'amp_validated_url_status_actions', [ $this, 'amp_validated_url_status_actions' ], 10, 2 );
 
-		/**
-		 * Add support link to Post row actions.
-		 */
+		// Add support link to Post row actions.
 		add_filter( 'post_row_actions', [ $this, 'post_row_actions' ], PHP_INT_MAX, 2 );
 
-		/**
-		 * Plugin row Support link.
-		 */
+		// Plugin row Support link.
 		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
 
 	}
@@ -57,7 +56,7 @@ class Support implements Service, Conditional, Registerable {
 	/**
 	 * Add Diagnostic link to Admin Bar.
 	 *
-	 * @param \WP_Admin_Bar $wp_admin_bar WP_Admin_Bar object.
+	 * @param WP_Admin_Bar $wp_admin_bar WP_Admin_Bar object.
 	 *
 	 * @return void
 	 */
@@ -76,12 +75,12 @@ class Support implements Service, Conditional, Registerable {
 			amp_get_current_url()
 		);
 
-		$post = \AMP_Validated_URL_Post_Type::get_invalid_url_post( $current_url );
+		$post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $current_url );
 
 		$wp_admin_bar->add_node(
 			[
 				'parent' => 'amp',
-				'title'  => __( 'Support', 'amp' ),
+				'title'  => __( 'Get support', 'amp' ),
 				'id'     => 'amp-support',
 				'href'   => esc_url(
 					add_query_arg(
@@ -108,7 +107,7 @@ class Support implements Service, Conditional, Registerable {
 
 		if ( empty( $post ) ||
 			! is_a( $post, 'WP_Post' ) ||
-			! \AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === $post->post_type
+			! AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === $post->post_type
 		) {
 			return $actions;
 		}
@@ -131,7 +130,7 @@ class Support implements Service, Conditional, Registerable {
 	 * Add support link to Post row actions.
 	 *
 	 * @param string[] $actions Array of actions.
-	 * @param \WP_Post $post    Referenced WP_Post object.
+	 * @param WP_Post  $post    Referenced WP_Post object.
 	 *
 	 * @return string[] Array of actions
 	 */
@@ -139,7 +138,7 @@ class Support implements Service, Conditional, Registerable {
 
 		if ( empty( $post ) ||
 			! is_a( $post, 'WP_Post' )
-			|| \AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $post->post_type
+			|| AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $post->post_type
 		) {
 			return $actions;
 		}
@@ -169,7 +168,7 @@ class Support implements Service, Conditional, Registerable {
 	 */
 	public function plugin_row_meta( $plugin_meta, $plugin_file ) {
 
-		if ( 'amp/amp.php' === $plugin_file || 'amp-wp/amp.php' === $plugin_file ) {
+		if ( 'amp/amp.php' === $plugin_file ) {
 			$plugin_meta[] = sprintf(
 				'<a href="%s">%s</a>',
 				esc_url(
@@ -178,7 +177,7 @@ class Support implements Service, Conditional, Registerable {
 						admin_url( 'admin.php' )
 					)
 				),
-				esc_html__( 'Contact support', 'amp' )
+				esc_html__( 'Get support', 'amp' )
 			);
 		}
 
