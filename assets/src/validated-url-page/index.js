@@ -22,6 +22,7 @@ import { render } from '@wordpress/element';
 import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
 import { ErrorScreen } from '../components/error-screen';
+import { PluginsContextProvider } from '../components/plugins-context-provider';
 import { ValidatedUrlContextProvider } from '../components/validated-url-context-provider';
 import Stylesheets from './stylesheets';
 
@@ -39,15 +40,17 @@ function Providers( { children } ) {
 	return (
 		<ErrorContextProvider>
 			<ErrorBoundary>
-				<ValidatedUrlContextProvider
-					cssBudgetBytes={ Number( CSS_BUDGET_BYTES ) }
-					cssBudgetWarningPercentage={ Number( CSS_BUDGET_WARNING_PERCENTAGE ) }
-					hasErrorBoundary={ true }
-					postId={ Number( POST_ID ) }
-					validatedUrlsRestPath={ VALIDATED_URLS_REST_PATH }
-				>
-					{ children }
-				</ValidatedUrlContextProvider>
+				<PluginsContextProvider hasErrorBoundary={ true }>
+					<ValidatedUrlContextProvider
+						cssBudgetBytes={ Number( CSS_BUDGET_BYTES ) }
+						cssBudgetWarningPercentage={ Number( CSS_BUDGET_WARNING_PERCENTAGE ) }
+						hasErrorBoundary={ true }
+						postId={ Number( POST_ID ) }
+						validatedUrlsRestPath={ VALIDATED_URLS_REST_PATH }
+					>
+						{ children }
+					</ValidatedUrlContextProvider>
+				</PluginsContextProvider>
 			</ErrorBoundary>
 		</ErrorContextProvider>
 	);

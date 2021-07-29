@@ -2071,7 +2071,13 @@ class AMP_Validated_URL_Post_Type {
 		);
 
 		// Preload Validated URL data.
-		Services::get( 'admin.rest_preloader' )->add_preloaded_path( '/amp/v1/validated-urls/' . $post->ID );
+		$preload_paths = [
+			'/wp/v2/plugins',
+			'/amp/v1/validated-urls/' . $post->ID,
+		];
+		foreach ( $preload_paths as $path ) {
+			Services::get( 'admin.rest_preloader' )->add_preloaded_path( $path );
+		}
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( self::EDIT_POST_SCRIPT_HANDLE, 'amp' );

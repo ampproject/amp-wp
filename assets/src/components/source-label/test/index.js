@@ -23,8 +23,15 @@ import {
 	SOURCE_TYPE_PLUGIN,
 	SOURCE_TYPE_THEME,
 } from '../../../utils/sources';
+import usePluginsData from '../../plugins-context-provider/use-plugins-data';
 
 let container;
+
+jest.mock( '../../plugins-context-provider/use-plugins-data', () => jest.fn() );
+
+usePluginsData.mockImplementation( () => ( {
+	getPluginNameBySlug: ( slug ) => slug,
+} ) );
 
 describe( 'SourceLabel', () => {
 	beforeEach( () => {

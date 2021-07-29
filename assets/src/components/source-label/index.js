@@ -23,24 +23,29 @@ import {
 	SOURCE_TYPE_HOOK_THE_CONTENT,
 	SOURCE_TYPE_HOOK_THE_EXCERPT,
 } from '../../utils/sources';
+import usePluginsData from '../plugins-context-provider/use-plugins-data';
 
 export default function SourceLabel( {
 	sources,
 	type,
 	isCodeOutput,
 } ) {
+	const { getPluginNameBySlug } = usePluginsData();
+
 	let icon;
 	let title;
-	let singleTitle = sources?.[ 0 ];
+	let singleTitle;
 
 	switch ( type ) {
 		case SOURCE_TYPE_PLUGIN:
 			icon = 'admin-plugins';
 			title = __( 'Plugins', 'amp' );
+			sources = sources.map( ( slug ) => getPluginNameBySlug( slug ) );
 			break;
 		case SOURCE_TYPE_MU_PLUGIN:
 			icon = 'admin-plugins';
 			title = __( 'Must-Use Plugins', 'amp' );
+			sources = sources.map( ( slug ) => getPluginNameBySlug( slug ) );
 			break;
 		case SOURCE_TYPE_THEME:
 			icon = 'admin-appearance';
@@ -85,9 +90,9 @@ export default function SourceLabel( {
 				<Dashicon icon={ icon } />
 				{ isCodeOutput ? (
 					<code>
-						{ singleTitle ?? title }
+						{ singleTitle ?? sources?.[ 0 ] ?? title }
 					</code>
-				) : singleTitle ?? title }
+				) : singleTitle ?? sources?.[ 0 ] ?? title }
 			</strong>
 		);
 	}
