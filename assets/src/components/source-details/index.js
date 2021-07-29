@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
+import './style.scss';
 import SourceDetailTitle from './title';
 import SourceDetailValue from './value';
 
@@ -18,7 +19,7 @@ export default function SourceDetails( { source } ) {
 	const keys = Object.keys( source ).filter( ( key ) => ! omitKeys.includes( key ) );
 
 	return (
-		<table className="validation-error-sources-details">
+		<table className="validation-error-source-details">
 			<tbody>
 				{ keys.map( ( key ) => (
 					<tr key={ key }>

@@ -1,4 +1,4 @@
-.amp-stylesheet-list {
+.amp-stylesheet-table {
 	margin: 1em 0;
 
 	th {
@@ -29,6 +29,7 @@
 
 	.column-stylesheet_expand {
 		width: 12px;
+		padding: 0;
 	}
 
 	.column-priority {
@@ -40,22 +41,6 @@
 		width: 5%;
 		white-space: nowrap;
 		text-align: center;
-	}
-
-	.column-source {
-		width: 25%;
-	}
-
-	.toggle-stylesheet-details {
-		border: none;
-		background: none;
-		cursor: pointer;
-		height: 22px;
-		position: relative;
-	}
-
-	.toggle-stylesheet-details::after {
-		display: block;
 	}
 
 	.stylesheet-origin-markup {

@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
+import './style.scss';
 import SourceDetails from '../source-details';
 
 export default function SourcesStack( { sources } ) {

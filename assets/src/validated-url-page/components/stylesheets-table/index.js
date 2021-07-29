@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
+import './style.scss';
 import StylesheetsTableHead from './head';
 import StylesheetsTableRow from './row';
 
@@ -18,7 +19,7 @@ export default function StylesheetsTable( {
 	const validatedTheme = environment?.theme ? Object.keys( environment.theme )[ 0 ] : '';
 
 	return (
-		<table className="amp-stylesheet-list amp-stylesheet-table wp-list-table widefat fixed striped">
+		<table className="amp-stylesheet-table wp-list-table widefat fixed striped">
 			<StylesheetsTableHead />
 			<tbody>
 				{ stylesheets.map( ( stylesheet, index ) => (

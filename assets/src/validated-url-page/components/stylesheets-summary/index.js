@@ -11,6 +11,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import './style.scss';
 import { numberFormat } from '../../../utils/number-format';
 import FormattedMemoryValue from '../../../components/formatted-memory-value';
 import { ValidationStatusIcon } from '../../../components/icon';
