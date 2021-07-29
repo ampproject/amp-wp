@@ -84,7 +84,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'cli.validation_command'             => Cli\ValidationCommand::class,
 		'css_transient_cache.ajax_handler'   => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'        => BackgroundTask\MonitorCssTransientCaching::class,
-		'dependency_support'                 => DependencySupport::class, // Needs to be registered first as other services depend on it.
+		'dependency_support'                 => DependencySupport::class,
 		'dev_tools.block_sources'            => DevTools\BlockSources::class,
 		'dev_tools.callback_reflection'      => DevTools\CallbackReflection::class,
 		'dev_tools.error_page'               => DevTools\ErrorPage::class,
