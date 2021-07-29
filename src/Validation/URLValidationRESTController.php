@@ -62,8 +62,8 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	/**
 	 * Constructor.
 	 *
-	 * @param URLValidationProvider    $url_validation_provider     URLValidationProvider instance.
-	 * @param UserAccess               $dev_tools_user_access       UserAccess instance.
+	 * @param URLValidationProvider $url_validation_provider URLValidationProvider instance.
+	 * @param UserAccess            $dev_tools_user_access   UserAccess instance.
 	 */
 	public function __construct( URLValidationProvider $url_validation_provider, UserAccess $dev_tools_user_access ) {
 		$this->namespace               = 'amp/v1';

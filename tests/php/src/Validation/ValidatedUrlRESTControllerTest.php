@@ -92,48 +92,42 @@ class ValidatedUrlRESTControllerTest extends WP_UnitTestCase {
 	/** @return array */
 	public function get_data_for_test_get_item() {
 		return [
-			'not_int' => [
+			'not_int'              => [
 				'foo',
 				null,
 				'administrator',
 				'rest_no_route',
 			],
-
-			'too_small' => [
+			'too_small'            => [
 				- 1,
 				null,
 				'administrator',
 				'rest_no_route',
 			],
-
-			'empty_post' => [
+			'empty_post'           => [
 				0,
 				null,
 				'administrator',
 				'rest_invalid_param',
 			],
-
-			'revision_id' => [
+			'revision_id'          => [
 				'{{id}}',
 				'revision',
 				'administrator',
 				'rest_invalid_param',
 			],
-
-			'post_id' => [
+			'post_id'              => [
 				'{{id}}',
 				'post',
 				'administrator',
 				'rest_invalid_param',
 			],
-
-			'as_author' => [
+			'as_author'            => [
 				'{{id}}',
 				\AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 				'author',
 				'amp_rest_no_dev_tools',
 			],
-
 			'amp_validated_url_id' => [
 				'{{id}}',
 				\AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
