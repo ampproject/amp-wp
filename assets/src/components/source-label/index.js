@@ -24,6 +24,7 @@ import {
 	SOURCE_TYPE_HOOK_THE_EXCERPT,
 } from '../../utils/sources';
 import usePluginsData from '../plugins-context-provider/use-plugins-data';
+import useThemesData from '../themes-context-provider/use-themes-data';
 
 export default function SourceLabel( {
 	sources,
@@ -31,6 +32,7 @@ export default function SourceLabel( {
 	isCodeOutput,
 } ) {
 	const { getPluginNameBySlug } = usePluginsData();
+	const { getThemeNameBySlug } = useThemesData();
 
 	let icon;
 	let title;
@@ -49,7 +51,7 @@ export default function SourceLabel( {
 			break;
 		case SOURCE_TYPE_THEME:
 			icon = 'admin-appearance';
-			title = singleTitle ?? __( 'Theme', 'amp' );
+			sources = sources.map( ( slug ) => getThemeNameBySlug( slug ) ?? __( 'Theme', 'amp' ) );
 			break;
 		case SOURCE_TYPE_CORE:
 			icon = 'wordpress-alt';

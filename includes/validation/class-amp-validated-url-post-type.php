@@ -2073,6 +2073,7 @@ class AMP_Validated_URL_Post_Type {
 		// Preload Validated URL data.
 		$preload_paths = [
 			'/wp/v2/plugins',
+			'/wp/v2/themes',
 			'/amp/v1/validated-urls/' . $post->ID,
 		];
 		foreach ( $preload_paths as $path ) {

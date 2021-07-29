@@ -24,13 +24,18 @@ import {
 	SOURCE_TYPE_THEME,
 } from '../../../utils/sources';
 import usePluginsData from '../../plugins-context-provider/use-plugins-data';
+import useThemesData from '../../themes-context-provider/use-themes-data';
 
 let container;
 
 jest.mock( '../../plugins-context-provider/use-plugins-data', () => jest.fn() );
+jest.mock( '../../themes-context-provider/use-themes-data', () => jest.fn() );
 
 usePluginsData.mockImplementation( () => ( {
 	getPluginNameBySlug: ( slug ) => slug,
+} ) );
+useThemesData.mockImplementation( () => ( {
+	getThemeNameBySlug: ( slug ) => slug,
 } ) );
 
 describe( 'SourceLabel', () => {

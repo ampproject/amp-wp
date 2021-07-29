@@ -23,6 +23,7 @@ import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
 import { ErrorScreen } from '../components/error-screen';
 import { PluginsContextProvider } from '../components/plugins-context-provider';
+import { ThemesContextProvider } from '../components/themes-context-provider';
 import { ValidatedUrlContextProvider } from '../components/validated-url-context-provider';
 import Stylesheets from './stylesheets';
 
@@ -41,15 +42,17 @@ function Providers( { children } ) {
 		<ErrorContextProvider>
 			<ErrorBoundary>
 				<PluginsContextProvider hasErrorBoundary={ true }>
-					<ValidatedUrlContextProvider
-						cssBudgetBytes={ Number( CSS_BUDGET_BYTES ) }
-						cssBudgetWarningPercentage={ Number( CSS_BUDGET_WARNING_PERCENTAGE ) }
-						hasErrorBoundary={ true }
-						postId={ Number( POST_ID ) }
-						validatedUrlsRestPath={ VALIDATED_URLS_REST_PATH }
-					>
-						{ children }
-					</ValidatedUrlContextProvider>
+					<ThemesContextProvider hasErrorBoundary={ true }>
+						<ValidatedUrlContextProvider
+							cssBudgetBytes={ Number( CSS_BUDGET_BYTES ) }
+							cssBudgetWarningPercentage={ Number( CSS_BUDGET_WARNING_PERCENTAGE ) }
+							hasErrorBoundary={ true }
+							postId={ Number( POST_ID ) }
+							validatedUrlsRestPath={ VALIDATED_URLS_REST_PATH }
+						>
+							{ children }
+						</ValidatedUrlContextProvider>
+					</ThemesContextProvider>
 				</PluginsContextProvider>
 			</ErrorBoundary>
 		</ErrorContextProvider>
