@@ -74,7 +74,7 @@ class ValidatedUrlRESTControllerTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->controller->register();
 
-		$this->assertContains( '/amp/v1/validated-urls', array_keys( rest_get_server()->get_routes() ) );
+		$this->assertContains( '/amp/v1/validated-urls/(?P<id>[\d]+)', array_keys( rest_get_server()->get_routes() ) );
 	}
 
 	/** @covers ::get_item_permissions_check() */
