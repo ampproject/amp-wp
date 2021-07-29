@@ -2070,6 +2070,9 @@ class AMP_Validated_URL_Post_Type {
 			'before'
 		);
 
+		// Preload Validated URL data.
+		Services::get( 'admin.rest_preloader' )->add_preloaded_path( '/amp/v1/validated-urls/' . $post->ID );
+
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( self::EDIT_POST_SCRIPT_HANDLE, 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {

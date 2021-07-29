@@ -75,6 +75,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.paired_browsing'              => Admin\PairedBrowsing::class,
 		'admin.plugin_row_meta'              => Admin\PluginRowMeta::class,
 		'admin.polyfills'                    => Admin\Polyfills::class,
+		'admin.rest_preloader'               => Admin\RESTPreloader::class,
 		'admin.validation_counts'            => Admin\ValidationCounts::class,
 		'amp_slug_customization_watcher'     => AmpSlugCustomizationWatcher::class,
 		'background_task_deactivator'        => BackgroundTaskDeactivator::class,
