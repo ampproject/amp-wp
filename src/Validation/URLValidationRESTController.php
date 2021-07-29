@@ -44,13 +44,6 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	private $dev_tools_user_access;
 
 	/**
-	 * ValidatedUrlDataProvider instance.
-	 *
-	 * @var ValidatedUrlDataProvider
-	 */
-	private $validated_url_data_provider;
-
-	/**
 	 * Response schema.
 	 *
 	 * @var array
@@ -71,13 +64,11 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	 *
 	 * @param URLValidationProvider    $url_validation_provider     URLValidationProvider instance.
 	 * @param UserAccess               $dev_tools_user_access       UserAccess instance.
-	 * @param ValidatedUrlDataProvider $validated_url_data_provider ValidatedUrlDataProvider instance.
 	 */
-	public function __construct( URLValidationProvider $url_validation_provider, UserAccess $dev_tools_user_access, ValidatedUrlDataProvider $validated_url_data_provider ) {
-		$this->namespace                   = 'amp/v1';
-		$this->url_validation_provider     = $url_validation_provider;
-		$this->dev_tools_user_access       = $dev_tools_user_access;
-		$this->validated_url_data_provider = $validated_url_data_provider;
+	public function __construct( URLValidationProvider $url_validation_provider, UserAccess $dev_tools_user_access ) {
+		$this->namespace               = 'amp/v1';
+		$this->url_validation_provider = $url_validation_provider;
+		$this->dev_tools_user_access   = $dev_tools_user_access;
 	}
 
 	/**
@@ -112,31 +103,6 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
 		);
-
-		register_rest_route(
-			$this->namespace,
-			'/validated-urls/(?P<id>[\d]+)',
-			[
-				'args'   => [
-					'id' => [
-						'description'       => __( 'Post ID for the AMP validated URL post.', 'amp' ),
-						'required'          => true,
-						'type'              => 'integer',
-						'minimum'           => 1,
-						'validate_callback' => [ $this, 'validate_amp_validated_url_post_id_param' ],
-					],
-				],
-				[
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::READABLE ),
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_validated_url' ],
-					'permission_callback' => [ $this, 'get_item_permissions_check' ],
-				],
-				'schema' => [ $this, 'get_public_item_schema' ],
-			]
-		);
-
-		// @todo Additional endpoint to validate a URL (from a URL rather than a post ID).
 	}
 
 	/**
@@ -172,38 +138,6 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 				[ 'status' => 403 ]
 			);
 		}
-		return true;
-	}
-
-	/**
-	 * Validate AMP validated URL post ID param.
-	 *
-	 * @param string|int      $id      Post ID.
-	 * @param WP_REST_Request $request REST request.
-	 * @param string          $param   Param name ('id').
-	 * @return true|WP_Error True on valid, WP_Error otherwise.
-	 */
-	public function validate_amp_validated_url_post_id_param( $id, $request, $param ) {
-		// First enforce the schema to ensure $id is an integer greater than 0.
-		$validity = rest_validate_request_arg( $id, $request, $param );
-		if ( is_wp_error( $validity ) ) {
-			return $validity;
-		}
-
-		// Make sure the post exists and is of correct post type.
-		$post = get_post( (int) $id );
-		if (
-			! $post instanceof WP_Post
-			||
-			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== get_post_type( $post )
-		) {
-			return new WP_Error(
-				'rest_amp_validated_url_post_invalid_id',
-				__( 'Invalid post ID.', 'default' ),
-				[ 'status' => 404 ]
-			);
-		}
-
 		return true;
 	}
 
@@ -245,8 +179,6 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 
 	/**
 	 * Validate preview nonce.
-	 *
-	 * @see _show_post_preview()
 	 *
 	 * @param string $preview_nonce Preview nonce.
 	 * @param int    $post_id       Post ID.
@@ -318,33 +250,6 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 				'title'   => AMP_Validation_Error_Taxonomy::get_error_title_from_code( $result['data'] ),
 			];
 		}
-
-		return rest_ensure_response( $this->filter_response_by_context( $data, $request['context'] ) );
-	}
-
-	/**
-	 * Returns validation information about a URL.
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 *
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
-	 */
-	public function get_validated_url( $request ) {
-		$post_id            = (int) $request['id'];
-		$validated_url_data = $this->validated_url_data_provider->for_id( $post_id );
-
-		if ( is_wp_error( $validated_url_data ) ) {
-			return $validated_url_data;
-		}
-
-		$data = [
-			'id'          => $validated_url_data->get_id(),
-			'url'         => $validated_url_data->get_url(),
-			'date'        => $validated_url_data->get_date(),
-			'author'      => $validated_url_data->get_author(),
-			'stylesheets' => $validated_url_data->get_stylesheets(),
-			'environment' => $validated_url_data->get_environment(),
-		];
 
 		return rest_ensure_response( $this->filter_response_by_context( $data, $request['context'] ) );
 	}

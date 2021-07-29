@@ -113,6 +113,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'site_health_integration'            => Admin\SiteHealth::class,
 		'url_validation_cron'                => URLValidationCron::class,
 		'url_validation_rest_controller'     => Validation\URLValidationRESTController::class,
+		'validated_url_rest_controller'      => Validation\ValidatedUrlRESTController::class,
 		'validated_url_stylesheet_gc'        => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
 	];
 
