@@ -272,9 +272,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	 */
 	public function test_extract_by_filename_or_filesystem_with_object_cache() {
 
-		wp_using_ext_object_cache( true );
-
-
+		$object_cache_flag = wp_using_ext_object_cache( true );
 
 		$data = $this->get_data_for_test_extract_by_filename_or_filesystem();
 
@@ -286,5 +284,6 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		$output = AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem( $input );
 		$this->assertEquals( $expected, $output );
 
+		wp_using_ext_object_cache( $object_cache_flag );
 	}
 }
