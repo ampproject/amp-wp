@@ -13,6 +13,7 @@ use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Services;
 use WP_Error;
 use WP_Post;
+use WP_Theme;
 
 /**
  * ValidatedUrlData class.
