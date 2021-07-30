@@ -552,3 +552,12 @@ li.error-kept {
 	font-weight: bold;
 	margin: 0;
 }
+
+.amp-other-settings .developer-tools h4 {
+	margin-bottom: 0;
+}
+
+.amp-other-settings .developer-tools p {
+	font-size: 0.875rem;
+}
+
