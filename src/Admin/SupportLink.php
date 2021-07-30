@@ -80,7 +80,7 @@ class SupportLink implements Service, Conditional, Registerable {
 		$wp_admin_bar->add_node(
 			[
 				'parent' => 'amp',
-				'title'  => __( 'Get support', 'amp' ),
+				'title'  => esc_html__( 'Get support', 'amp' ),
 				'id'     => 'amp-support',
 				'href'   => esc_url(
 					add_query_arg(

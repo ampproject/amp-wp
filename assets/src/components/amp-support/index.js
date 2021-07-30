@@ -233,20 +233,22 @@ export class AMPSupport extends Component {
 			return null;
 		}
 
+		const plugins = Object.values( data.plugins );
+
 		return (
 			<details open={ false }>
 				<summary>
 					{ __( 'Plugins', 'amp' ) }
 					{
 						( () => {
-							return ` (${ data.plugins.length || 0 })`;
+							return ` (${ plugins.length || 0 })`;
 						} )()
 					}
 				</summary>
 				<div className="detail-body">
 					<ListItem
 						className="list-items--list-style-disc"
-						items={ data.plugins.map( ( item ) => {
+						items={ plugins.map( ( item ) => {
 							return { value: `${ item.name } ${ item.version ? '(' + item.version + ')' : '' }` };
 						} ) }
 					/>

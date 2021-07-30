@@ -7,10 +7,10 @@
 
 namespace AmpProject\AmpWP\Support;
 
+use WP_CLI;
+use function WP_CLI\Utils\get_flag_value;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Infrastructure\CliCommand;
-use AmpProject\AmpWP\Validation\ScannableURLProvider;
-use AmpProject\AmpWP\Validation\URLScanningContext;
 
 /**
  * Class SupportService
@@ -25,7 +25,7 @@ class SupportService implements Service, CliCommand {
 	 */
 	public static function get_command_name() {
 
-		return 'amp';
+		return 'amp support';
 	}
 
 	/**
@@ -91,23 +91,23 @@ class SupportService implements Service, CliCommand {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp amp send-diagnostic
+	 *     wp amp support send-diagnostic
 	 *
 	 * @subcommand send-diagnostic
 	 *
 	 * @param array $args       Positional args.
 	 * @param array $assoc_args Associative args.
 	 */
-	public function cli_command( /** @noinspection PhpUnusedParameterInspection */ $args, $assoc_args ) {
+	public function send_diagnostic( /** @noinspection PhpUnusedParameterInspection */ $args, $assoc_args ) {
 
-		$is_print     = filter_var( \WP_CLI\Utils\get_flag_value( $assoc_args, 'print', false ), FILTER_SANITIZE_STRING );
-		$is_synthetic = filter_var( \WP_CLI\Utils\get_flag_value( $assoc_args, 'is-synthetic', false ), FILTER_SANITIZE_STRING );
-		$endpoint     = filter_var( \WP_CLI\Utils\get_flag_value( $assoc_args, 'endpoint', '' ), FILTER_SANITIZE_STRING );
+		$is_print     = filter_var( get_flag_value( $assoc_args, 'print', false ), FILTER_SANITIZE_STRING );
+		$is_synthetic = filter_var( get_flag_value( $assoc_args, 'is-synthetic', false ), FILTER_SANITIZE_STRING );
+		$endpoint     = filter_var( get_flag_value( $assoc_args, 'endpoint', '' ), FILTER_SANITIZE_STRING );
 		$endpoint     = untrailingslashit( $endpoint );
 
-		$urls     = filter_var( \WP_CLI\Utils\get_flag_value( $assoc_args, 'urls', false ), FILTER_SANITIZE_STRING );
-		$post_ids = filter_var( \WP_CLI\Utils\get_flag_value( $assoc_args, 'post_ids', false ), FILTER_SANITIZE_STRING );
-		$term_ids = filter_var( \WP_CLI\Utils\get_flag_value( $assoc_args, 'term_ids', false ), FILTER_SANITIZE_STRING );
+		$urls     = filter_var( get_flag_value( $assoc_args, 'urls', false ), FILTER_SANITIZE_STRING );
+		$post_ids = filter_var( get_flag_value( $assoc_args, 'post_ids', false ), FILTER_SANITIZE_STRING );
+		$term_ids = filter_var( get_flag_value( $assoc_args, 'term_ids', false ), FILTER_SANITIZE_STRING );
 
 		$args = [
 			'urls'         => ( ! empty( $urls ) ) ? explode( ',', $urls ) : [],
@@ -135,9 +135,11 @@ class SupportService implements Service, CliCommand {
 
 			if ( is_wp_error( $response ) ) {
 				$error_message = $response->get_error_message();
-				\WP_CLI::warning( "Something went wrong: $error_message" );
-			} else {
-				\WP_CLI::success( $response );
+				WP_CLI::warning( "Something went wrong: $error_message" );
+			} elseif ( empty( $response['status'] ) || 'ok' !== $response['status'] ) {
+				WP_CLI::warning( 'Failed to send diagnostic data.' );
+			} elseif ( ! empty( $response['status'] ) && 'ok' === $response['status'] ) {
+				WP_CLI::success( 'UUID : ' . $response['data']['uuid'] );
 			}
 		}
 

@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Support;
 
+use WP_Error;
 use AmpProject\AmpWP\QueryVar;
 
 /**
@@ -125,7 +126,7 @@ class SupportData {
 	/**
 	 * To send support data to insight server.
 	 *
-	 * @return array|\WP_Error \WP_Error on fail, Otherwise server response.
+	 * @return array|WP_Error WP_Error on fail, Otherwise server response.
 	 */
 	public function send_data() {
 

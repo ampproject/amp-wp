@@ -17,7 +17,7 @@ use AmpProject\AmpWP\Services;
  *
  * @internal
  */
-class SupportMenu implements Conditional, Service, Registerable {
+class SupportScreen implements Conditional, Service, Registerable {
 
 	/**
 	 * Handle for JS file.
@@ -66,19 +66,7 @@ class SupportMenu implements Conditional, Service, Registerable {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-
-		if ( ! is_admin() ) {
-			return false;
-		}
-
-		/**
-		 * Filter whether to enable the AMP settings.
-		 *
-		 * @param bool $enable Whether to enable the AMP settings. Default true.
-		 *
-		 * @since 0.5
-		 */
-		return (bool) apply_filters( 'amp_support_menu_is_enabled', true );
+		return is_admin();
 	}
 
 	/**
@@ -184,15 +172,20 @@ class SupportMenu implements Conditional, Service, Registerable {
 		$support_service = Services::get( 'support' );
 		$data            = $support_service->get_data( $args );
 
-		wp_localize_script(
+		wp_add_inline_script(
 			self::ASSET_HANDLE,
-			'ampSupportData',
-			[
-				'action' => self::AJAX_ACTION,
-				'nonce'  => wp_create_nonce( self::AJAX_ACTION ),
-				'args'   => $args,
-				'data'   => $data,
-			]
+			sprintf(
+				'var ampSupportData = %s;',
+				wp_json_encode(
+					[
+						'action' => self::AJAX_ACTION,
+						'nonce'  => wp_create_nonce( self::AJAX_ACTION ),
+						'args'   => $args,
+						'data'   => $data,
+					]
+				)
+			),
+			'before'
 		);
 	}
 
