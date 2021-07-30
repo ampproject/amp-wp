@@ -6,8 +6,6 @@
  */
 
 use AmpProject\Dom\Document;
-use AmpProject\Tag;
-use AmpProject\Attribute;
 
 /**
  * Class AMP_Twitter_Embed_Handler
