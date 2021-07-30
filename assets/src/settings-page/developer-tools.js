@@ -16,7 +16,7 @@ export function DeveloperTools() {
 		<section className="developer-tools">
 			<DevToolsToggle />
 			<p>
-			{ __( 'Only enabled for your user account. This is not a sitewide setting.', 'amp' ) }
+				{ __( 'Only enabled for your user account. This is not a sitewide setting.', 'amp' ) }
 			</p>
 		</section>
 	);
