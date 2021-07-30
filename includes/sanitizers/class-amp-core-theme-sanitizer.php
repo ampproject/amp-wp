@@ -8,7 +8,6 @@
 
 use AmpProject\Amp;
 use AmpProject\Attribute;
-use AmpProject\Dom\Document;
 use AmpProject\Role;
 
 /**

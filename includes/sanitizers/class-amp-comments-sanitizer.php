@@ -6,7 +6,6 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Comments_Sanitizer

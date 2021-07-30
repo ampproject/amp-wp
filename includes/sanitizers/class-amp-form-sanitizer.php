@@ -7,7 +7,6 @@
  */
 
 use AmpProject\DevMode;
-use AmpProject\Dom\Document;
 use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
 
 /**
