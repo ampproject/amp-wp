@@ -34,6 +34,10 @@
 		align-items: center;
 	}
 
+	.amp-notice--info {
+		margin-top: 1rem;
+	}
+
 	.components-clipboard-button {
 		box-shadow: none;
 		text-decoration: none;
@@ -60,6 +64,7 @@
 	.detail-body {
 		font-size: .8rem;
 		margin: .5rem 1.5rem 1.5rem;
+		overflow-x: auto;
 	}
 
 	.external-link {

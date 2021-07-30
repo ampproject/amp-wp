@@ -7,29 +7,19 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Button, ExternalLink } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { ListItem } from '../list-item';
 import { Selectable } from '../selectable';
 import { AMPNotice } from '../amp-notice';
 import ClipboardButton from '../clipboard-button';
 
 export class AMPSupport extends Component {
-	/**
-	 * Prop Types.
-	 */
-	static propTypes = {
-		action: PropTypes.string.isRequired,
-		nonce: PropTypes.string.isRequired,
-		args: PropTypes.any,
-		data: PropTypes.object.isRequired,
-	}
-
 	/**
 	 * Construct method.
 	 */
@@ -57,6 +47,14 @@ export class AMPSupport extends Component {
 					<h2 className="amp-support__heading">
 						{ __( 'AMP Support', 'amp' ) }
 					</h2>
+					{ /* dangerouslySetInnerHTML reason: Injection of links. */ }
+					<p dangerouslySetInnerHTML={
+						{ __html: sprintf(
+							/* translators: %s is the URL to create a new support topic */
+							__( 'In order to best assist you, please submit the following information to our private database. Once you have done so, copy the the resulting support ID and mention it in a <a href="%s" rel="noreferrer" target="_blank">support forum topic</a>. You do not have to submit data to get support, but our team will be able to help you more effectively if you do so.', 'amp' ),
+							'https://wordpress.org/support/plugin/amp/#new-topic-0',
+						) }
+					} />
 					<div className="amp-support__body">
 
 						{ this._renderSiteInfo() }
@@ -117,9 +115,16 @@ export class AMPSupport extends Component {
 						>
 							{ __( 'Send data', 'amp' ) }
 						</Button>
-						{ this.state.uuid ? this._renderUUID() : '' }
+						{
+							this.state.uuid && (
+								<ExternalLink href="https://wordpress.org/support/plugin/amp/#new-topic-0">
+									{ __( 'Create support topic', 'amp' ) }
+								</ExternalLink>
+							)
+						}
 						{ this.state.error ? this._renderError() : '' }
 					</div>
+					{ this.state.uuid ? this._renderUUID() : '' }
 				</Selectable>
 			</div>
 		);
@@ -233,22 +238,20 @@ export class AMPSupport extends Component {
 			return null;
 		}
 
-		const plugins = Object.values( data.plugins );
-
 		return (
 			<details open={ false }>
 				<summary>
 					{ __( 'Plugins', 'amp' ) }
 					{
 						( () => {
-							return ` (${ plugins.length || 0 })`;
+							return ` (${ data.plugins.length || 0 })`;
 						} )()
 					}
 				</summary>
 				<div className="detail-body">
 					<ListItem
 						className="list-items--list-style-disc"
-						items={ plugins.map( ( item ) => {
+						items={ data.plugins.map( ( item ) => {
 							return { value: `${ item.name } ${ item.version ? '(' + item.version + ')' : '' }` };
 						} ) }
 					/>
@@ -407,10 +410,7 @@ export class AMPSupport extends Component {
 					}
 				}
 
-				/**
-				 * @type {{ok: boolean}}
-				 */
-				let response = await global.fetch( wpAjaxUrl, {
+				const response = await global.fetch( wpAjaxUrl, {
 					method: 'POST',
 					body,
 				} );
@@ -422,11 +422,11 @@ export class AMPSupport extends Component {
 					throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
 				}
 
-				response = await response.json();
+				const responseBody = await response.json();
 
-				if ( undefined !== response.success && undefined !== response.data ) {
+				if ( undefined !== responseBody.success && undefined !== responseBody.data ) {
 					this.setState( {
-						uuid: response.data.uuid,
+						uuid: responseBody.data.uuid,
 					} );
 				} else {
 					throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
@@ -437,3 +437,17 @@ export class AMPSupport extends Component {
 		} )();
 	}
 }
+
+AMPSupport.propTypes = {
+	action: PropTypes.string.isRequired,
+	nonce: PropTypes.string.isRequired,
+	args: PropTypes.any,
+	data: PropTypes.shape( {
+		error_sources: PropTypes.array.isRequired,
+		errors: PropTypes.array.isRequired,
+		plugins: PropTypes.array,
+		site_info: PropTypes.object,
+		themes: PropTypes.array,
+		urls: PropTypes.array,
+	} ),
+};
