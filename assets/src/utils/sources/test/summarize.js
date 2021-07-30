@@ -166,4 +166,42 @@ describe( 'summarizeSources', () => {
 			[ SOURCE_TYPE_THEME ]: [ 'baz' ],
 		} );
 	} );
+
+	it( 'returns Gutenberg if there is no other plugin', () => {
+		const result = summarizeSources( [
+			{
+				type: 'plugin',
+				name: 'gutenberg',
+			},
+			{
+				type: 'theme',
+				name: 'baz',
+			},
+		] );
+		expect( result ).toStrictEqual( {
+			[ SOURCE_TYPE_PLUGIN ]: [ 'gutenberg' ],
+			[ SOURCE_TYPE_THEME ]: [ 'baz' ],
+		} );
+	} );
+
+	it( 'does not return Gutenberg if there is another plugin', () => {
+		const result = summarizeSources( [
+			{
+				type: 'plugin',
+				name: 'foo',
+			},
+			{
+				type: 'plugin',
+				name: 'gutenberg',
+			},
+			{
+				type: 'theme',
+				name: 'baz',
+			},
+		] );
+		expect( result ).toStrictEqual( {
+			[ SOURCE_TYPE_PLUGIN ]: [ 'foo' ],
+			[ SOURCE_TYPE_THEME ]: [ 'baz' ],
+		} );
+	} );
 } );

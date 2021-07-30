@@ -58,6 +58,11 @@ export default function summarizeSources( raw ) {
 
 		if ( sources[ SOURCE_TYPE_PLUGIN ] ) {
 			result[ SOURCE_TYPE_PLUGIN ] = sources[ SOURCE_TYPE_PLUGIN ];
+
+			// Skip including Gutenberg in the summary if there is another plugin, since Gutenberg is like core.
+			if ( result[ SOURCE_TYPE_PLUGIN ].length > 1 && result[ SOURCE_TYPE_PLUGIN ].includes( 'gutenberg' ) ) {
+				result[ SOURCE_TYPE_PLUGIN ] = result[ SOURCE_TYPE_PLUGIN ].filter( ( plugin ) => plugin !== 'gutenberg' );
+			}
 		}
 		if ( sources[ SOURCE_TYPE_MU_PLUGIN ] ) {
 			result[ SOURCE_TYPE_MU_PLUGIN ] = sources[ SOURCE_TYPE_MU_PLUGIN ];
