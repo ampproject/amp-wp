@@ -7,7 +7,7 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
-use AmpProject\Dom\Document;
+use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
@@ -219,7 +219,7 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 		$validating_sanitizer->sanitize();
 
 		// Normalize the contents of the templates.
-		foreach ( $dom->xpath->query( Document::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $dom->body ) as $template ) {
+		foreach ( $dom->xpath->query( MustacheScriptTemplates::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $dom->body ) as $template ) {
 			while ( $template->firstChild ) {
 				$template->removeChild( $template->firstChild );
 			}
