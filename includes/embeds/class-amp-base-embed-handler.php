@@ -7,6 +7,9 @@
  * @package  AMP
  */
 
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\Tag;
 
 /**
@@ -199,5 +202,36 @@ abstract class AMP_Base_Embed_Handler {
 				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 			}
 		}
+	}
+
+	/**
+	 * Create overflow button element.
+	 *
+	 * @param Document $dom  Document.
+	 * @param string   $text Button text (optional).
+	 * @return Element Button element.
+	 */
+	protected function create_overflow_button_element( Document $dom, $text = null ) {
+		if ( ! $text ) {
+			$text = __( 'See more', 'amp' );
+		}
+		$overflow = $dom->createElement( Tag::BUTTON );
+		$overflow->setAttributeNode( $dom->createAttribute( 'overflow' ) );
+		$overflow->setAttribute( Attribute::TYPE, 'button' );
+		$overflow->textContent = $text;
+		return $overflow;
+	}
+
+	/**
+	 * Create overflow button markup.
+	 *
+	 * @param string $text Button text (optional).
+	 * @return string Button markup.
+	 */
+	protected function create_overflow_button_markup( $text = null ) {
+		if ( ! $text ) {
+			$text = __( 'See more', 'amp' );
+		}
+		return sprintf( '<button overflow type="button">%s</button>', esc_html( $text ) );
 	}
 }

@@ -6,6 +6,8 @@
  */
 
 use AmpProject\Dom\Document;
+use AmpProject\Tag;
+use AmpProject\Attribute;
 
 /**
  * Class AMP_Twitter_Embed_Handler
@@ -103,7 +105,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$this->did_convert_elements = true;
 
-		return AMP_HTML_Utils::build_tag( $this->amp_tag, $attributes );
+		return AMP_HTML_Utils::build_tag( $this->amp_tag, $attributes, $this->create_overflow_button_markup() );
 	}
 
 	/**
@@ -178,6 +180,8 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			$this->amp_tag,
 			$attributes
 		);
+
+		$new_node->appendChild( $this->create_overflow_button_element( $dom ) );
 
 		/**
 		 * Placeholder element to append to the new node.
