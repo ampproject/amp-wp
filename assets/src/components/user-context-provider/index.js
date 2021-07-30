@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { useAsyncError } from '../../utils/use-async-error';
-import { Options } from '../../components/options-context-provider';
+import { Options } from '../options-context-provider';
 
 export const User = createContext();
 
