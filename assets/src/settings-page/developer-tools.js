@@ -14,13 +14,10 @@ import { DevToolsToggle } from '../components/dev-tools-toggle';
 export function DeveloperTools() {
 	return (
 		<section className="developer-tools">
-			<h4>
-				{ __( 'Dev Tools', 'amp' ) }
-			</h4>
-			<p>
-				{ __( 'This will only be enabled for your user account. This is not a sitewide setting.', 'amp' ) }
-			</p>
 			<DevToolsToggle />
+			<p>
+			{ __( 'Only enabled for your user account. This is not a sitewide setting.', 'amp' ) }
+			</p>
 		</section>
 	);
 }

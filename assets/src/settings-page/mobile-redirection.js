@@ -25,9 +25,6 @@ export function MobileRedirection() {
 
 	return (
 		<section className="mobile-redirection">
-			<h4>
-				{ __( 'Redirects', 'amp' ) }
-			</h4>
 			<RedirectToggle />
 		</section>
 	);
