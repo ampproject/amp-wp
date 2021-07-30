@@ -37,11 +37,11 @@ import { ErrorScreen } from '../components/error-screen';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
-import { MobileRedirection } from './mobile-redirection';
 import { SettingsFooter } from './settings-footer';
 import { PluginSuppression } from './plugin-suppression';
 import { Analytics } from './analytics';
 import { PairedUrlStructure } from './paired-url-structure';
+import { MobileRedirection } from './mobile-redirection';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -173,7 +173,6 @@ function Root( { appRoot } ) {
 				<h2 id="advanced-settings">
 					{ __( 'Advanced Settings', 'amp' ) }
 				</h2>
-				<MobileRedirection id="mobile-redirection" />
 				<AMPDrawer
 
 					heading={ (
@@ -213,6 +212,19 @@ function Root( { appRoot } ) {
 					<Analytics />
 				</AMPDrawer>
 				<PairedUrlStructure focusedSection={ focusedSection } />
+				<AMPDrawer
+					className="amp-other-settings"
+					heading={ (
+						<h3>
+							{ __( 'Other', 'amp' ) }
+						</h3>
+					) }
+					hiddenTitle={ __( 'Other', 'amp' ) }
+					id="other-settings"
+					initialOpen={ 'other-settings' === focusedSection }
+				>
+					<MobileRedirection />
+				</AMPDrawer>
 				<SettingsFooter />
 			</form>
 			<UnsavedChangesWarning excludeUserContext={ true } appRoot={ appRoot } />
