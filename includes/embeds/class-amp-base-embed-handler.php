@@ -216,7 +216,7 @@ abstract class AMP_Base_Embed_Handler {
 			$text = __( 'See more', 'amp' );
 		}
 		$overflow = $dom->createElement( Tag::BUTTON );
-		$overflow->setAttributeNode( $dom->createAttribute( 'overflow' ) );
+		$overflow->setAttributeNode( $dom->createAttribute( Attribute::OVERFLOW ) );
 		$overflow->setAttribute( Attribute::TYPE, 'button' );
 		$overflow->textContent = $text;
 		return $overflow;
