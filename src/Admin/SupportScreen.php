@@ -76,8 +76,6 @@ class SupportScreen implements Conditional, Service, Registerable {
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		add_action( 'admin_menu', [ $this, 'add_menu_items' ], 9 );
-		add_action( 'wp_ajax_' . self::AJAX_ACTION, [ $this, 'ajax_callback' ] );
-
 	}
 
 	/**
@@ -178,51 +176,15 @@ class SupportScreen implements Conditional, Service, Registerable {
 				'var ampSupportData = %s;',
 				wp_json_encode(
 					[
-						'action' => self::AJAX_ACTION,
-						'nonce'  => wp_create_nonce( self::AJAX_ACTION ),
-						'args'   => $args,
-						'data'   => $data,
+						'restEndpoint' => get_rest_url( null, 'amp/v1/send-diagnostic' ),
+						'nonce'        => wp_create_nonce( 'wp_rest' ),
+						'args'         => $args,
+						'data'         => $data,
 					]
 				)
 			),
 			'before'
 		);
-	}
-
-	/**
-	 * Ajax callback.
-	 *
-	 * @return void
-	 */
-	public function ajax_callback() {
-
-		check_ajax_referer( self::AJAX_ACTION, 'nonce' );
-
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( 'Unauthorized.', 401 );
-
-			return;
-		}
-
-		$request_args = filter_input( INPUT_POST, 'args', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
-		$request_args = ( ! empty( $request_args ) ) ? $request_args : [];
-
-		$support_response = Services::get( 'support' )::send_data( $request_args );
-
-		if ( ! empty( $support_response ) && is_wp_error( $support_response ) ) {
-			wp_send_json_error( $support_response->get_error_message(), 500 );
-
-			return;
-		}
-
-		if ( 'ok' === $support_response['status'] && ! empty( $support_response['data']['uuid'] ) ) {
-			wp_send_json_success( $support_response['data'] );
-
-			return;
-		}
-
-		wp_send_json_error( 'Fail to send data.', 500 );
-
 	}
 
 	/**

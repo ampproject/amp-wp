@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Infrastructure\CliCommand;
  * Class SupportService
  * Service class for support.
  */
-class SupportService implements Service, CliCommand {
+class SupportCliCommand implements Service, CliCommand {
 
 	/**
 	 * Get the name under which to register the CLI command.

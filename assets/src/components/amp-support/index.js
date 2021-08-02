@@ -238,20 +238,22 @@ export class AMPSupport extends Component {
 			return null;
 		}
 
+		const plugins = Object.values( data.plugins );
+
 		return (
 			<details open={ false }>
 				<summary>
 					{ __( 'Plugins', 'amp' ) }
 					{
 						( () => {
-							return ` (${ data.plugins.length || 0 })`;
+							return ` (${ plugins.length || 0 })`;
 						} )()
 					}
 				</summary>
 				<div className="detail-body">
 					<ListItem
 						className="list-items--list-style-disc"
-						items={ data.plugins.map( ( item ) => {
+						items={ plugins.map( ( item ) => {
 							return { value: `${ item.name } ${ item.version ? '(' + item.version + ')' : '' }` };
 						} ) }
 					/>
@@ -384,8 +386,6 @@ export class AMPSupport extends Component {
 	 * @param {Object} event Event Object.
 	 */
 	submitData = ( event ) => {
-		const { ajaxurl: wpAjaxUrl } = global;
-
 		const element = event.target;
 		const previousText = element.textContent;
 		element.disabled = true;
@@ -399,7 +399,6 @@ export class AMPSupport extends Component {
 
 			try {
 				const body = new global.FormData();
-				body.append( 'action', this.props.action );
 				body.append( '_wpnonce', this.props.nonce );
 
 				for ( const key in this.props.args ) {
@@ -410,7 +409,7 @@ export class AMPSupport extends Component {
 					}
 				}
 
-				const response = await global.fetch( wpAjaxUrl, {
+				const response = await global.fetch( this.props.restEndpoint, {
 					method: 'POST',
 					body,
 				} );
@@ -439,7 +438,7 @@ export class AMPSupport extends Component {
 }
 
 AMPSupport.propTypes = {
-	action: PropTypes.string.isRequired,
+	restEndpoint: PropTypes.string.isRequired,
 	nonce: PropTypes.string.isRequired,
 	args: PropTypes.any,
 	data: PropTypes.shape( {

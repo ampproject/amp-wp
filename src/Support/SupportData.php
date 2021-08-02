@@ -305,7 +305,7 @@ class SupportData {
 		$plugin_info    = array_map( __CLASS__ . '::normalize_plugin_info', $active_plugins );
 		$plugin_info    = array_filter( $plugin_info );
 
-		return $plugin_info;
+		return array_values( $plugin_info );
 	}
 
 	/**
@@ -321,7 +321,7 @@ class SupportData {
 		$response = array_map( __CLASS__ . '::normalize_theme_info', $themes );
 		$response = array_filter( $response );
 
-		return $response;
+		return array_values( $response );
 	}
 
 	/**
@@ -376,6 +376,9 @@ class SupportData {
 		if ( ! file_exists( $absolute_plugin_file ) ) {
 			return [];
 		}
+
+		require_once ABSPATH . '/wp-admin/includes/plugin.php';
+
 		$plugin_data = get_plugin_data( $absolute_plugin_file );
 
 		$slug = explode( '/', $plugin_file );

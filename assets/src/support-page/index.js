@@ -20,7 +20,7 @@ import { ErrorBoundary } from '../components/error-boundary';
 
 domReady( () => {
 	const root = document.getElementById( 'amp-support-root' );
-	const { args, data, action, nonce } = ampSupportData;
+	const { restEndpoint, args, data, nonce } = ampSupportData;
 
 	const errorHandler = ( event ) => {
 		// Handle only own errors.
@@ -35,7 +35,12 @@ domReady( () => {
 		render( (
 			<ErrorContextProvider>
 				<ErrorBoundary>
-					<AMPSupport args={ args } data={ data } action={ action } nonce={ nonce } />
+					<AMPSupport
+						restEndpoint={ restEndpoint }
+						args={ args }
+						data={ data }
+						nonce={ nonce }
+					/>
 				</ErrorBoundary>
 			</ErrorContextProvider>
 		), root );
