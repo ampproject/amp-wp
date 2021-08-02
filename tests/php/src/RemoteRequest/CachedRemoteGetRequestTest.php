@@ -4,6 +4,7 @@ namespace AmpProject\AmpWP\Tests\RemoteRequest;
 
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\CachedResponse;
+use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\RemoteRequest\RemoteGetRequestResponse;
 use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
 use DateTimeImmutable;
@@ -82,8 +83,28 @@ class CachedRemoteGetRequestTest extends WP_UnitTestCase {
 		$headers     = [ 'content-type' => 'text/css' ];
 		$status_code = 200;
 
-		$remote_request         = new StubbedRemoteGetRequest( [ $url => $body ] );
-		$cached_remote_request  = new CachedRemoteGetRequest( $remote_request );
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $r, $_url ) use ( $url, $body, $headers, $status_code ) {
+				if ( $_url !== $url ) {
+					return $pre;
+				}
+
+				return [
+					'body'     => $body,
+					'headers'  => $headers,
+					'response' => [
+						'code'    => $status_code,
+						'message' => 'OK',
+					],
+				];
+			},
+			10,
+			3 
+		);
+
+
+		$cached_remote_request  = new CachedRemoteGetRequest( new WpHttpRemoteGetRequest() );
 		$cached_remote_response = $cached_remote_request->get( $url );
 
 		$this->assertInstanceOf( RemoteGetRequestResponse::class, $cached_remote_response );
