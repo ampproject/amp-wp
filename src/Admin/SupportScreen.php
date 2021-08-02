@@ -27,13 +27,6 @@ class SupportScreen implements Conditional, Service, Registerable {
 	const ASSET_HANDLE = 'amp-support';
 
 	/**
-	 * AJAX action name to use.
-	 *
-	 * @var string
-	 */
-	const AJAX_ACTION = 'amp_send_support_request';
-
-	/**
 	 * The parent menu slug.
 	 *
 	 * @var string

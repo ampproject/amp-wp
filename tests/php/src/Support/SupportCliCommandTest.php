@@ -8,21 +8,21 @@
 namespace AmpProject\AmpWP\Support\Tests;
 
 use AmpProject\AmpWP\Support\SupportData;
-use AmpProject\AmpWP\Support\SupportService;
+use AmpProject\AmpWP\Support\SupportCliCommand;
 use WP_UnitTestCase;
 
 /**
- * Tests for SupportServiceTest.
+ * Tests for SupportCliCommandTest.
  *
  * @group support-admin
- * @coversDefaultClass \AmpProject\AmpWP\Support\SupportService
+ * @coversDefaultClass \AmpProject\AmpWP\Support\SupportCliCommand
  */
-class SupportServiceTest extends WP_UnitTestCase {
+class SupportCliCommandTest extends WP_UnitTestCase {
 
 	/**
 	 * Instance of OptionsMenu
 	 *
-	 * @var SupportService
+	 * @var SupportCliCommand
 	 */
 	public $instance;
 
@@ -35,7 +35,7 @@ class SupportServiceTest extends WP_UnitTestCase {
 
 		parent::setUp();
 
-		$this->instance = new SupportService();
+		$this->instance = new SupportCliCommand();
 	}
 
 	/**
@@ -105,7 +105,7 @@ class SupportServiceTest extends WP_UnitTestCase {
 	 */
 	public function test_get_command_name() {
 
-		$this->assertEquals( 'amp', SupportService::get_command_name() );
+		$this->assertEquals( 'amp support', SupportCliCommand::get_command_name() );
 	}
 
 	/**
@@ -133,7 +133,7 @@ class SupportServiceTest extends WP_UnitTestCase {
 		};
 		add_filter( 'pre_http_request', $callback_wp_remote, 10, 2 );
 
-		$this->instance->send_data( [] );
+		SupportCliCommand::send_data( [] );
 
 		$expected_data_keys = [
 			'site_url',
@@ -158,7 +158,7 @@ class SupportServiceTest extends WP_UnitTestCase {
 	 */
 	public function test_get_data() {
 
-		$output = $this->instance->get_data( [] );
+		$output = SupportCliCommand::get_data( [] );
 
 		$expected_data_keys = [
 			'site_url',
@@ -178,14 +178,14 @@ class SupportServiceTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers ::cli_command
+	 * @covers ::send_diagnostic
 	 */
-	public function test_cli_command() {
+	public function test_send_diagnostic() {
 
 		$amp_validated_url = $this->create_validated_url();
 
 		ob_start();
-		$this->instance->cli_command(
+		$this->instance->send_diagnostic(
 			[],
 			[
 				'print' => 'json-pretty',

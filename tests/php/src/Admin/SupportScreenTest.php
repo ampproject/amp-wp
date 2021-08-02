@@ -11,7 +11,7 @@ use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
-use AmpProject\AmpWP\Admin\SupportMenu;
+use AmpProject\AmpWP\Admin\SupportScreen;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
@@ -21,16 +21,16 @@ use WP_UnitTestCase;
  * Tests for SupportMenu.
  *
  * @group support-menu
- * @coversDefaultClass \AmpProject\AmpWP\Admin\SupportMenu
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\SupportScreen
  */
-class SupportMenuTest extends WP_UnitTestCase {
+class SupportScreenTest extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of SupportMenu
 	 *
-	 * @var SupportMenu
+	 * @var SupportScreen
 	 */
 	public $instance;
 
@@ -44,13 +44,13 @@ class SupportMenuTest extends WP_UnitTestCase {
 		parent::setUp();
 
 		$option_menu    = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError() );
-		$this->instance = new SupportMenu( $option_menu, new GoogleFonts() );
+		$this->instance = new SupportScreen( $option_menu, new GoogleFonts() );
 	}
 
 	/** @covers ::__construct() */
 	public function test__construct() {
 
-		$this->assertInstanceOf( SupportMenu::class, $this->instance );
+		$this->assertInstanceOf( SupportScreen::class, $this->instance );
 	}
 
 	/**
@@ -59,7 +59,7 @@ class SupportMenuTest extends WP_UnitTestCase {
 	public function test_is_needed() {
 
 		// Without mocking.
-		$this->assertFalse( SupportMenu::is_needed() );
+		$this->assertFalse( SupportScreen::is_needed() );
 
 		// Mock the is_admin()
 		set_current_screen( $this->instance->screen_handle() );
@@ -67,7 +67,7 @@ class SupportMenuTest extends WP_UnitTestCase {
 
 		add_filter( 'amp_support_menu_is_enabled', '__return_true', 999 );
 
-		$this->assertTrue( SupportMenu::is_needed() );
+		$this->assertTrue( SupportScreen::is_needed() );
 
 		// Reset data.
 		unset( $GLOBALS['current_screen'] );
@@ -85,7 +85,7 @@ class SupportMenuTest extends WP_UnitTestCase {
 		$this->assertEquals(
 			10,
 			has_action(
-				'wp_ajax_' . SupportMenu::AJAX_ACTION,
+				'wp_ajax_' . SupportScreen::AJAX_ACTION,
 				[ $this->instance, 'ajax_callback' ]
 			)
 		);
@@ -151,13 +151,13 @@ class SupportMenuTest extends WP_UnitTestCase {
 
 		$this->instance->enqueue_assets( '' );
 
-		$this->assertArrayNotHasKey( SupportMenu::ASSET_HANDLE, $wp_scripts->registered );
-		$this->assertArrayNotHasKey( SupportMenu::ASSET_HANDLE, $wp_styles->registered );
+		$this->assertArrayNotHasKey( SupportScreen::ASSET_HANDLE, $wp_scripts->registered );
+		$this->assertArrayNotHasKey( SupportScreen::ASSET_HANDLE, $wp_styles->registered );
 
 		$this->instance->enqueue_assets( $this->instance->screen_handle() );
 
-		$this->assertArrayHasKey( SupportMenu::ASSET_HANDLE, $wp_scripts->registered );
-		$this->assertArrayHasKey( SupportMenu::ASSET_HANDLE, $wp_styles->registered );
+		$this->assertArrayHasKey( SupportScreen::ASSET_HANDLE, $wp_scripts->registered );
+		$this->assertArrayHasKey( SupportScreen::ASSET_HANDLE, $wp_styles->registered );
 
 	}
 
