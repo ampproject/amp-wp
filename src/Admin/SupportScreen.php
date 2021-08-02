@@ -160,8 +160,7 @@ class SupportScreen implements Conditional, Service, Registerable {
 			];
 		}
 
-		$support_service = Services::get( 'support' );
-		$data            = $support_service->get_data( $args );
+		$data = Services::get( 'support' )::get_data( $args );
 
 		wp_add_inline_script(
 			self::ASSET_HANDLE,

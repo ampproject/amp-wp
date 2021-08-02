@@ -12,21 +12,13 @@ import './style.scss';
 export function ListItem( { className = '', heading, items } ) {
 	return (
 		<ul className={ classnames( 'list-items', className ) }>
-			{
-				( () => {
-					if ( heading ) {
-						return (
-							<li className="list-items__item">
-								<h4 className="list-items__heading">
-									{ heading }
-								</h4>
-							</li>
-						);
-					}
-
-					return null;
-				} )()
-			}
+			{ heading && (
+				<li className="list-items__item">
+					<h4 className="list-items__heading">
+						{ heading }
+					</h4>
+				</li>
+			) }
 			{ items.map( ( item, index ) => {
 				return (
 					<li key={ index } className="list-items__item">
