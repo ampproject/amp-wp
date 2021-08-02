@@ -12,8 +12,7 @@ class DummyServiceWithDelay implements Service, Delayed {
 	 *
 	 * @return string Registration action to use.
 	 */
-	public static function get_registration_action()
-	{
+	public static function get_registration_action() {
 		return 'some_action';
 	}
 }

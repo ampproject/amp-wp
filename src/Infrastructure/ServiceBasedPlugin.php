@@ -232,9 +232,9 @@ abstract class ServiceBasedPlugin implements Plugin {
 	 *
 	 * This also hooks up another check in the future to the registration action(s) of its requirements.
 	 *
-	 * @param string   $id        Service ID of the service with requirements.
-	 * @param string   $class     Service FQCN of the service with requirements.
-	 * @param string[] &$services List of services to be registered.
+	 * @param string   $id       Service ID of the service with requirements.
+	 * @param string   $class    Service FQCN of the service with requirements.
+	 * @param string[] $services List of services to be registered.
 	 *
 	 * @throws InvalidService If the required service is not recognized.
 	 *
@@ -305,8 +305,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 	 *
 	 * @return string[] List of missing requirements as a $service_id => $service_class mapping.
 	 */
-	protected function collect_missing_requirements( $class, $services )
-	{
+	protected function collect_missing_requirements( $class, $services ) {
 		$requirements = $class::get_requirements();
 
 		$missing = [];

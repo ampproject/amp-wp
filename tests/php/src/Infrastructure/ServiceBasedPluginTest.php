@@ -191,16 +191,16 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 	public function test_it_handles_delays_for_requirements() {
 		$container = new SimpleServiceContainer();
 		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
-		                  ->enableOriginalConstructor()
-		                  ->setConstructorArgs( [ true, null, $container ] )
-		                  ->setMethodsExcept(
-			                  [
-				                  'register',
-				                  'register_services',
-				                  'get_service_classes',
-			                  ]
-		                  )
-		                  ->getMock();
+			->enableOriginalConstructor()
+			->setConstructorArgs( [ true, null, $container ] )
+			->setMethodsExcept(
+				[
+					'register',
+					'register_services',
+					'get_service_classes',
+				]
+			)
+			->getMock();
 
 		$service_callback = static function ( $services ) {
 			array_unshift(
@@ -237,16 +237,16 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 	public function test_it_throws_an_exception_if_unrecognized_service_is_required() {
 		$container = new SimpleServiceContainer();
 		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
-		                  ->enableOriginalConstructor()
-		                  ->setConstructorArgs( [ true, null, $container ] )
-		                  ->setMethodsExcept(
-			                  [
-				                  'register',
-				                  'register_services',
-				                  'get_service_classes',
-			                  ]
-		                  )
-		                  ->getMock();
+			->enableOriginalConstructor()
+			->setConstructorArgs( [ true, null, $container ] )
+			->setMethodsExcept(
+				[
+					'register',
+					'register_services',
+					'get_service_classes',
+				]
+			)
+			->getMock();
 
 		$service_callback = static function () {
 			return [ 'service_with_requirements' => DummyServiceWithRequirements::class ];
