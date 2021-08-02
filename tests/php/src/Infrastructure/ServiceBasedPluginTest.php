@@ -168,11 +168,10 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 			->getMock();
 
 		$service_callback = static function ( $services ) {
-			array_unshift(
+			return array_merge(
 				$services,
 				[ 'service_with_requirements' => DummyServiceWithRequirements::class ]
 			);
-			return $services;
 		};
 
 		add_filter( 'services', $service_callback );
@@ -184,7 +183,7 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 		$this->assertInstanceof( DummyService::class, $container->get( 'service_a' ) );
 		$this->assertTrue( $container->has( 'service_b' ) );
 		$this->assertInstanceof( DummyService::class, $container->get( 'service_b' ) );
-		$this->assertTrue( $container->has( 'filtered_service' ) );
+		$this->assertTrue( $container->has( 'service_with_requirements' ) );
 		$this->assertInstanceof( DummyServiceWithRequirements::class, $container->get( 'service_with_requirements' ) );
 	}
 
@@ -203,14 +202,13 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 			->getMock();
 
 		$service_callback = static function ( $services ) {
-			array_unshift(
+			return array_merge(
 				$services,
 				[
 					'service_a'                 => DummyServiceWithDelay::class,
 					'service_with_requirements' => DummyServiceWithRequirements::class,
 				]
 			);
-			return $services;
 		};
 
 		add_filter( 'services', $service_callback );
