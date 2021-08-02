@@ -270,7 +270,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 
 				\add_action(
 					$action,
-					function () use ( $id, $class, $missing_requirements, $services ) {
+					function () use ( $id, $class, $services ) {
 						if ( ! $this->requirements_are_met( $id, $class, $services ) ) {
 							return;
 						}
