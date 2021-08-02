@@ -221,7 +221,7 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 
 		$plugin->register();
 
-		$this->assertEquals( 1, count( $container ) );
+		$this->assertEquals( 2, count( $container ) );
 		$this->assertFalse( $container->has( 'service_a' ) );
 		$this->assertTrue( $container->has( 'service_b' ) );
 		$this->assertFalse( $container->has( 'service_with_requirements' ) );
@@ -231,7 +231,7 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 
 		$this->assertEquals( 4, count( $container ) );
 		$this->assertTrue( $container->has( 'service_a' ) );
-		$this->assertInstanceof( DummyService::class, $container->get( 'service_a' ) );
+		$this->assertInstanceof( DummyServiceWithDelay::class, $container->get( 'service_a' ) );
 		$this->assertTrue( $container->has( 'service_b' ) );
 		$this->assertInstanceof( DummyService::class, $container->get( 'service_b' ) );
 		$this->assertTrue( $container->has( 'service_with_requirements' ) );
