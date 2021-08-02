@@ -24,8 +24,8 @@ class CachedRemoteGetRequestTest extends WP_UnitTestCase {
 	/** @covers ::get() */
 	public function test_get_with_serialized_cached_response() {
 		$url         = 'https://example.com/foo.css';
-		$body        = '';
-		$headers     = [];
+		$body        = 'body {color:red}';
+		$headers     = [ 'content-type' => 'text/css' ];
 		$status_code = 418;
 		$expiry      = new DateTimeImmutable( '+ ' . DAY_IN_SECONDS . ' seconds' );
 
@@ -51,8 +51,8 @@ class CachedRemoteGetRequestTest extends WP_UnitTestCase {
 	/** @covers ::get() */
 	public function test_get_with_unserialized_cached_response() {
 		$url         = 'https://example.com/foo.css';
-		$body        = '';
-		$headers     = [];
+		$body        = 'body {color:red}';
+		$headers     = [ 'content-type' => 'text/css' ];
 		$status_code = 418;
 		$expiry      = new DateTimeImmutable( '+ ' . DAY_IN_SECONDS . ' seconds' );
 
@@ -78,8 +78,8 @@ class CachedRemoteGetRequestTest extends WP_UnitTestCase {
 	/** @covers ::get() */
 	public function test_get_without_cached_response() {
 		$url         = 'https://example.com/foo.css';
-		$body        = '';
-		$headers     = [];
+		$body        = 'body {color:red}';
+		$headers     = [ 'content-type' => 'text/css' ];
 		$status_code = 200;
 
 		$remote_request         = new StubbedRemoteGetRequest( [ $url => $body ] );
