@@ -160,8 +160,11 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 			->setConstructorArgs( [ true, null, $container ] )
 			->setMethodsExcept(
 				[
+					'collect_missing_requirements',
 					'register',
 					'register_services',
+					'requirements_are_met',
+					'get_container',
 					'get_service_classes',
 				]
 			)
@@ -194,8 +197,11 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 			->setConstructorArgs( [ true, null, $container ] )
 			->setMethodsExcept(
 				[
+					'collect_missing_requirements',
 					'register',
 					'register_services',
+					'requirements_are_met',
+					'get_container',
 					'get_service_classes',
 				]
 			)
