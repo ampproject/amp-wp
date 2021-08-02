@@ -214,7 +214,7 @@ class SupportMenu implements Conditional, Service, Registerable {
 		$request_args = filter_input( INPUT_POST, 'args', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
 		$request_args = ( ! empty( $request_args ) ) ? $request_args : [];
 
-		$support_response = Services::get( 'support' )->send_data( $request_args );
+		$support_response = Services::get( 'support' )::send_data( $request_args );
 
 		if ( ! empty( $support_response ) && is_wp_error( $support_response ) ) {
 			wp_send_json_error( $support_response->get_error_message(), 500 );

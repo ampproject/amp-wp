@@ -35,7 +35,7 @@ class SupportService implements Service, CliCommand {
 	 *
 	 * @return array|\WP_Error Response from insight server.
 	 */
-	public function send_data( $args = [] ) {
+	public static function send_data( $args = [] ) {
 
 		$support = new SupportData( $args );
 
@@ -49,7 +49,7 @@ class SupportService implements Service, CliCommand {
 	 *
 	 * @return array Support data.
 	 */
-	public function get_data( $args = [] ) {
+	public static function get_data( $args = [] ) {
 
 		$support = new SupportData( $args );
 
