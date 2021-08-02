@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ListItem matches snapshots 1`] = `
+exports[`ListItems matches snapshots 1`] = `
 <ul
   className="list-items"
 >
@@ -25,7 +25,7 @@ exports[`ListItem matches snapshots 1`] = `
 </ul>
 `;
 
-exports[`ListItem matches snapshots 2`] = `
+exports[`ListItems matches snapshots 2`] = `
 <ul
   className="list-items"
 >
@@ -60,7 +60,7 @@ exports[`ListItem matches snapshots 2`] = `
 </ul>
 `;
 
-exports[`ListItem matches snapshots 3`] = `
+exports[`ListItems matches snapshots 3`] = `
 <ul
   className="list-items"
 >

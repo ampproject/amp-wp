@@ -9,7 +9,7 @@ import classnames from 'classnames';
  */
 import './style.scss';
 
-export function ListItem( { className = '', heading, items } ) {
+export function ListItems( { className = '', heading, items } ) {
 	return (
 		<ul className={ classnames( 'list-items', className ) }>
 			{ heading && (
@@ -22,34 +22,16 @@ export function ListItem( { className = '', heading, items } ) {
 			{ items.map( ( item, index ) => {
 				return (
 					<li key={ index } className="list-items__item">
-						{
-							( () => {
-								if ( item.label ) {
-									return (
-										<strong className="list-items__item-key">
-											{ item.label }
-										</strong>
-									);
-								}
-
-								return null;
-							} )()
-						}
-						{
-							( () => {
-								let markup = '-';
-
-								if ( item.value ) {
-									markup = (
-										<span className="list-items__item-value">
-											{ 'function' === typeof item.value ? item.value() : item.value }
-										</span>
-									);
-								}
-
-								return markup;
-							} )()
-						}
+						{ item.label && (
+							<strong className="list-items__item-key">
+								{ item.label }
+							</strong>
+						) }
+						{ item.value ? (
+							<span className="list-items__item-value">
+								{ item.value }
+							</span>
+						) : '-' }
 					</li>
 				);
 			} ) }
@@ -57,7 +39,7 @@ export function ListItem( { className = '', heading, items } ) {
 	);
 }
 
-ListItem.propTypes = {
+ListItems.propTypes = {
 	className: PropTypes.string,
 	heading: PropTypes.string,
 	items: PropTypes.arrayOf( PropTypes.shape( {
@@ -65,7 +47,7 @@ ListItem.propTypes = {
 		value: PropTypes.oneOfType( [
 			PropTypes.string,
 			PropTypes.number,
-			PropTypes.func,
+			PropTypes.node,
 		] ).isRequired,
 	} ) ).isRequired,
 };

@@ -14,7 +14,7 @@ import { Button, ExternalLink } from '@wordpress/components';
  */
 import './style.scss';
 import { __, sprintf } from '@wordpress/i18n';
-import { ListItem } from '../list-item';
+import { ListItems } from '../list-items';
 import { Selectable } from '../selectable';
 import { AMPNotice } from '../amp-notice';
 import ClipboardButton from '../clipboard-button';
@@ -151,7 +151,7 @@ export class AMPSupport extends Component {
 					{ __( 'Site Information', 'amp' ) }
 				</summary>
 				<div className="detail-body">
-					<ListItem
+					<ListItems
 						heading={ __( 'Site Information', 'amp' ) }
 						items={ [
 							{ label: 'Site URL', value: siteInfo?.site_url },
@@ -161,7 +161,7 @@ export class AMPSupport extends Component {
 							{ label: 'WordPress version', value: siteInfo?.wp_version },
 							{ label: 'WordPress language', value: siteInfo?.wp_language },
 						] } />
-					<ListItem
+					<ListItems
 						heading={ __( 'Site Health', 'amp' ) }
 						items={ [
 							{ label: 'Https status', value: siteInfo?.wp_https_status ? 'Yes' : 'No' },
@@ -169,7 +169,7 @@ export class AMPSupport extends Component {
 							{ label: 'Libxml version', value: siteInfo?.libxml_version },
 							{ label: 'Is defined curl multi', value: siteInfo?.is_defined_curl_multi ? 'Yes' : 'No' },
 						] } />
-					<ListItem
+					<ListItems
 						heading={ __( 'AMP Information', 'amp' ) }
 						items={ [
 							{ label: 'AMP mode', value: siteInfo?.amp_mode },
@@ -214,7 +214,7 @@ export class AMPSupport extends Component {
 					{ __( 'Theme', 'amp' ) }
 				</summary>
 				<div className="detail-body">
-					<ListItem
+					<ListItems
 						className="list-items--list-style-disc"
 						items={ data.themes.map( ( item ) => {
 							return { value: `${ item.name } ${ item.version ? '(' + item.version + ')' : '' }` };
@@ -251,7 +251,7 @@ export class AMPSupport extends Component {
 					}
 				</summary>
 				<div className="detail-body">
-					<ListItem
+					<ListItems
 						className="list-items--list-style-disc"
 						items={ plugins.map( ( item ) => {
 							return { value: `${ item.name } ${ item.version ? '(' + item.version + ')' : '' }` };
@@ -288,17 +288,15 @@ export class AMPSupport extends Component {
 					}
 				</summary>
 				<div className="detail-body">
-					<ListItem
+					<ListItems
 						className="list-items--list-style-disc"
 						items={ urls.map( ( url ) => {
 							return {
-								value: () => {
-									return (
-										<a href={ url } title={ url } target="_blank" rel="noreferrer">
-											{ url }
-										</a>
-									);
-								},
+								value: (
+									<a href={ url } title={ url } target="_blank" rel="noreferrer">
+										{ url }
+									</a>
+								),
 							};
 						} ) }
 					/>

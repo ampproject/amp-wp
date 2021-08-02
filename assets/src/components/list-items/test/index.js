@@ -6,13 +6,13 @@ import { create } from 'react-test-renderer';
 /**
  * Internal dependencies
  */
-import { ListItem } from '..';
+import { ListItems } from '..';
 
-describe( 'ListItem', () => {
+describe( 'ListItems', () => {
 	it( 'matches snapshots', () => {
 		// Normal listing.
 		let wrapper = create(
-			<ListItem
+			<ListItems
 				items={
 					[
 						{ value: 'Item 1' },
@@ -26,7 +26,7 @@ describe( 'ListItem', () => {
 
 		// Listing with keys.
 		wrapper = create(
-			<ListItem
+			<ListItems
 				items={
 					[
 						{ label: 'Label 1', value: 'Item 1' },
@@ -40,7 +40,7 @@ describe( 'ListItem', () => {
 
 		// Listing with hading.
 		wrapper = create(
-			<ListItem
+			<ListItems
 				heading="List heading"
 				items={
 					[
