@@ -35,7 +35,7 @@ class SupportCliCommandTest extends WP_UnitTestCase {
 
 		parent::setUp();
 
-		$this->instance = new SupportCliCommand();
+		$this->instance = new SupportCliCommand( new SupportData() );
 	}
 
 	/**
@@ -106,75 +106,6 @@ class SupportCliCommandTest extends WP_UnitTestCase {
 	public function test_get_command_name() {
 
 		$this->assertEquals( 'amp support', SupportCliCommand::get_command_name() );
-	}
-
-	/**
-	 * @covers ::send_data
-	 */
-	public function test_send_data() {
-
-		// Mock http request.
-		$support_data = [];
-
-		$callback_wp_remote = static function ( $preempt, $parsed_args ) use ( &$support_data ) {
-
-			$support_data = $parsed_args['body'];
-
-			return [
-				'body' => wp_json_encode(
-					[
-						'status' => 'ok',
-						'data'   => [
-							'uuid' => 'ampwp-563e5de8-3129-55fb-af71-a6fbd9ef5026',
-						],
-					]
-				),
-			];
-		};
-		add_filter( 'pre_http_request', $callback_wp_remote, 10, 2 );
-
-		SupportCliCommand::send_data( [] );
-
-		$expected_data_keys = [
-			'site_url',
-			'site_info',
-			'plugins',
-			'themes',
-			'errors',
-			'error_sources',
-			'urls',
-			'error_log',
-		];
-
-		foreach ( $expected_data_keys as $key ) {
-			$this->assertArrayHasKey( $key, $support_data );
-		}
-
-		remove_filter( 'pre_http_request', $callback_wp_remote );
-	}
-
-	/**
-	 * @covers ::get_data
-	 */
-	public function test_get_data() {
-
-		$output = SupportCliCommand::get_data( [] );
-
-		$expected_data_keys = [
-			'site_url',
-			'site_info',
-			'plugins',
-			'themes',
-			'errors',
-			'error_sources',
-			'urls',
-			'error_log',
-		];
-
-		foreach ( $expected_data_keys as $key ) {
-			$this->assertArrayHasKey( $key, $output );
-		}
-
 	}
 
 	/**

@@ -34,6 +34,23 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 	public $namespace = 'amp/v1';
 
 	/**
+	 * SupportData instance.
+	 *
+	 * @var SupportData
+	 */
+	public $support_data;
+
+	/**
+	 * Class constructor.
+	 *
+	 * @param SupportData $support_data An instance of the SupportData service.
+	 */
+	public function __construct( SupportData $support_data ) {
+
+		$this->support_data = $support_data;
+	}
+
+	/**
 	 * Get the action to use for registering the service.
 	 *
 	 * @return string Registration action to use.
@@ -81,10 +98,13 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 	 */
 	public function callback( WP_REST_Request $request ) {
 
-		$request_args     = $request->get_param( 'args' );
-		$request_args     = ( ! empty( $request_args ) && is_array( $request_args ) ) ? $request_args : [];
-		$support_response = Services::get( 'support' )::send_data( $request_args );
-		$response         = new \WP_Error(
+		$request_args = $request->get_param( 'args' );
+		$request_args = ( ! empty( $request_args ) && is_array( $request_args ) ) ? $request_args : [];
+
+		$this->support_data->set_args( $request_args );
+		$support_response = $this->support_data->send_data();
+
+		$response = new \WP_Error(
 			'fail_to_send_data',
 			'Failed to send support request. Please try again after some time',
 			[ 'status' => 500 ]

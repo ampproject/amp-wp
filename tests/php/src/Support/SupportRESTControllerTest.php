@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Support\Tests;
 
 use AmpProject\AmpWP\Support\SupportCliCommand;
+use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Support\SupportRESTController;
 use \WP_UnitTestCase;
 
@@ -34,7 +35,7 @@ class SupportRESTControllerTest extends WP_UnitTestCase {
 
 		parent::setUp();
 
-		$this->instance = new SupportRESTController();
+		$this->instance = new SupportRESTController( new SupportData() );
 	}
 
 	/**

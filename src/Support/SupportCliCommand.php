@@ -17,6 +17,24 @@ use AmpProject\AmpWP\Infrastructure\CliCommand;
  */
 class SupportCliCommand implements Service, CliCommand {
 
+
+	/**
+	 * SupportData instance.
+	 *
+	 * @var SupportData
+	 */
+	public $support_data;
+
+	/**
+	 * Class constructor.
+	 *
+	 * @param SupportData $support_data An instance of the SupportData service.
+	 */
+	public function __construct( SupportData $support_data ) {
+
+		$this->support_data = $support_data;
+	}
+
 	/**
 	 * Get the name under which to register the CLI command.
 	 *
@@ -25,34 +43,6 @@ class SupportCliCommand implements Service, CliCommand {
 	public static function get_command_name() {
 
 		return 'amp support';
-	}
-
-	/**
-	 * To send support data.
-	 *
-	 * @param array $args Support data argument.
-	 *
-	 * @return array|\WP_Error Response from insight server.
-	 */
-	public static function send_data( $args = [] ) {
-
-		$support = new SupportData( $args );
-
-		return $support->send_data();
-	}
-
-	/**
-	 * To get support data.
-	 *
-	 * @param array $args Support data argument.
-	 *
-	 * @return array Support data.
-	 */
-	public static function get_data( $args = [] ) {
-
-		$support = new SupportData( $args );
-
-		return $support->get_data();
 	}
 
 	/**
@@ -116,8 +106,8 @@ class SupportCliCommand implements Service, CliCommand {
 			'is_synthetic' => $is_synthetic,
 		];
 
-		$support = new SupportData( $args );
-		$data    = $support->get_data();
+		$this->support_data->set_args( $args );
+		$data = $this->support_data->get_data();
 
 		if ( $is_print ) {
 
@@ -130,7 +120,7 @@ class SupportCliCommand implements Service, CliCommand {
 			}
 		} else {
 
-			$response = $support->send_data();
+			$response = $this->support_data->send_data();
 
 			if ( is_wp_error( $response ) ) {
 				$error_message = $response->get_error_message();

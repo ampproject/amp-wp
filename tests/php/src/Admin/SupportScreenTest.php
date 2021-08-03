@@ -14,6 +14,7 @@ use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\Admin\SupportScreen;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
+use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
@@ -44,7 +45,7 @@ class SupportScreenTest extends WP_UnitTestCase {
 		parent::setUp();
 
 		$option_menu    = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError() );
-		$this->instance = new SupportScreen( $option_menu, new GoogleFonts() );
+		$this->instance = new SupportScreen( $option_menu, new GoogleFonts(), new SupportData() );
 	}
 
 	/** @covers ::__construct() */
@@ -82,13 +83,6 @@ class SupportScreenTest extends WP_UnitTestCase {
 
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->instance, 'enqueue_assets' ] ) );
 		$this->assertEquals( 9, has_action( 'admin_menu', [ $this->instance, 'add_menu_items' ] ) );
-		$this->assertEquals(
-			10,
-			has_action(
-				'wp_ajax_' . SupportScreen::AJAX_ACTION,
-				[ $this->instance, 'ajax_callback' ]
-			)
-		);
 
 	}
 
