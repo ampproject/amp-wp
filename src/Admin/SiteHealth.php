@@ -12,7 +12,6 @@ use AMP_Theme_Support;
 use AMP_Post_Type_Support;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -27,7 +26,7 @@ use AmpProject\AmpWP\QueryVar;
  * @since 1.5.0
  * @internal
  */
-final class SiteHealth implements Service, Registerable, Delayed, Conditional {
+final class SiteHealth implements Service, Registerable, Delayed {
 
 	/**
 	 * Service that monitors and controls the CSS transient caching.
@@ -42,15 +41,6 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 * @var AmpSlugCustomizationWatcher
 	 */
 	private $amp_slug_customization_watcher;
-
-	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return ( ! wp_doing_ajax() );
-	}
 
 	/**
 	 * Get the action to use for registering the service.
@@ -85,6 +75,10 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 			add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
 		}
 
+		if ( wp_doing_ajax() ) {
+			add_action( 'wp_ajax_health-check-site-status', [ $this, 'ajax_site_status' ], 11 );
+		}
+
 		add_action( 'template_redirect', [ $this, 'render_random_string_page' ] );
 	}
 
@@ -98,6 +92,32 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	}
 
 	/**
+	 * Ajax handler for async site status check.
+	 *
+	 * @return void
+	 */
+	public function ajax_site_status() {
+
+		check_ajax_referer( 'health-check-site-status' );
+
+		if ( ! current_user_can( 'view_site_health_checks' ) ) {
+			wp_send_json_error();
+		}
+
+		$feature  = ( ! empty( $_POST['feature'] ) ) ? sanitize_key( $_POST['feature'] ) : '';
+		$function = sprintf(
+			'json_test_%s',
+			$feature
+		);
+
+		if ( ! method_exists( $this, $function ) || ! is_callable( [ $this, $function ] ) ) {
+			return;
+		}
+
+		call_user_func( [ $this, $function ] );
+	}
+
+	/**
 	 * Adds Site Health tests related to this plugin.
 	 *
 	 * @param array $tests The Site Health tests.
@@ -107,11 +127,6 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 		$tests['direct']['amp_persistent_object_cache'] = [
 			'label' => esc_html__( 'Persistent object cache', 'amp' ),
 			'test'  => [ $this, 'persistent_object_cache' ],
-		];
-
-		$tests['direct']['amp_page_cache'] = [
-			'label' => esc_html__( 'Page cache', 'amp' ),
-			'test'  => [ $this, 'page_cache' ],
 		];
 
 		if ( ! amp_is_canonical() && QueryVar::AMP !== amp_get_slug() ) {
@@ -139,6 +154,11 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 		$tests['direct']['amp_xdebug_extension']      = [
 			'label' => esc_html__( 'Xdebug extension', 'amp' ),
 			'test'  => [ $this, 'xdebug_extension' ],
+		];
+
+		$tests['async']['amp_page_cache'] = [
+			'label' => esc_html__( 'Page cache', 'amp' ),
+			'test'  => 'amp_page_cache',
 		];
 
 		return $tests;
@@ -196,13 +216,23 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 				'label' => $this->get_badge_label(),
 				'color' => $is_using_page_cache ? 'green' : 'orange',
 			],
-			'description' => esc_html__( 'The AMP plugin performs at its best when page object cache is enabled.', 'amp' ),
+			'description' => esc_html__( 'The AMP plugin performs at its best when page caching is enabled.', 'amp' ),
 			'test'        => 'amp_page_cache',
 			'status'      => $is_using_page_cache ? 'good' : 'recommended',
 			'label'       => $is_using_page_cache
 				? esc_html__( 'Page caching is enabled', 'amp' )
 				: esc_html__( 'Page caching is not enabled', 'amp' ),
 		];
+	}
+
+	/**
+	 * Callback for async site status test for page cache.
+	 *
+	 * @return void
+	 */
+	public function json_test_amp_page_cache() {
+
+		wp_send_json_success( $this->page_cache() );
 	}
 
 	/**
@@ -215,10 +245,9 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 		$request_url    = home_url( '?amp_page_cache=1' );
 		$has_page_cache = false;
 		$response_list  = [];
-		$request_args   = [];
 
 		for ( $i = 1; $i <= 3; $i++ ) {
-			$response = wp_remote_get( $request_url, $request_args );
+			$response = wp_remote_get( $request_url );
 			if ( ! empty( $response ) && ! is_wp_error( $response ) ) {
 				$response = wp_remote_retrieve_body( $response );
 			} else {

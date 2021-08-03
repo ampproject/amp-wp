@@ -91,7 +91,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$tests = $this->instance->add_tests( [] );
 		$this->assertArrayHasKey( 'direct', $tests );
 		$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
-		$this->assertArrayHasKey( 'amp_page_cache', $tests['direct'] );
+		$this->assertArrayHasKey( 'amp_page_cache', $tests['async'] );
 		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
 		$this->assertArrayNotHasKey( 'amp_icu_version', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_xdebug_extension', $tests['direct'] );
