@@ -12,14 +12,22 @@
  */
 class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 
-	/**
-	 * Set up.
-	 */
+	/** @var bool */
+	private $using_ext_object_cache;
+
 	public function setUp() {
 		parent::setUp();
 
 		// We don't want to actually download the images; just testing the extract method.
 		add_action( 'amp_extract_image_dimensions_batch_callbacks_registered', [ $this, 'disable_downloads' ] );
+
+		$this->using_ext_object_cache = wp_using_ext_object_cache();
+	}
+
+	public function tearDown() {
+		parent::tearDown();
+
+		wp_using_ext_object_cache( $this->using_ext_object_cache );
 	}
 
 	/**
@@ -185,7 +193,21 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $user_agent );
 	}
 
+	/** @return array */
 	public function get_data_for_test_extract_by_filename_or_filesystem() {
+		return [
+			'without_ext_object_cache' => [ false ],
+			'with_ext_object_cache'    => [ true ],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_for_test_extract_by_filename_or_filesystem
+	 *
+	 * @covers \AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem()
+	 */
+	public function test_extract_by_filename_or_filesystem( $using_ext_object_cache ) {
+		wp_using_ext_object_cache( $using_ext_object_cache );
 
 		$attachment_id = $this->factory()->attachment->create_upload_object( __DIR__ . '/data/images/wordpress-logo.png' );
 
@@ -197,7 +219,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		$image_with_query_string          = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-512x768.jpg?crop=1';
 		$internal_image_with_query_string = $full_image[0] . '?crop=1&resize=1';
 
-		return [
+		$data = [
 			$full_image[0]                    => [
 				'input'    => [],
 				'expected' => [
@@ -248,14 +270,6 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 				],
 			],
 		];
-	}
-
-	/**
-	 * @covers \AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem()
-	 */
-	public function test_extract_by_filename_or_filesystem() {
-
-		$data = $this->get_data_for_test_extract_by_filename_or_filesystem();
 
 		$input    = wp_list_pluck( $data, 'input' );
 		$expected = wp_list_pluck( $data, 'expected' );
@@ -264,26 +278,5 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 
 		$output = AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem( $input );
 		$this->assertEquals( $expected, $output );
-
-	}
-
-	/**
-	 * @covers \AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem()
-	 */
-	public function test_extract_by_filename_or_filesystem_with_object_cache() {
-
-		$object_cache_flag = wp_using_ext_object_cache( true );
-
-		$data = $this->get_data_for_test_extract_by_filename_or_filesystem();
-
-		$input    = wp_list_pluck( $data, 'input' );
-		$expected = wp_list_pluck( $data, 'expected' );
-
-		$this->assertEmpty( AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem( [] ) );
-
-		$output = AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem( $input );
-		$this->assertEquals( $expected, $output );
-
-		wp_using_ext_object_cache( $object_cache_flag );
 	}
 }
