@@ -18,6 +18,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
+use Exception;
 
 /**
  * Class SiteHealth
@@ -263,7 +264,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 
 			$response = $redis->ping();
 
-		} catch ( \Exception $exception ) {
+		} catch ( Exception $exception ) {
 			$response = false;
 		}
 
@@ -285,15 +286,19 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 		$host             = '127.0.0.1';
 		$port             = 11211;
 
-		if ( class_exists( 'Memcache' ) ) {
-			$memcache         = new \Memcache();
-			$memcache_object  = $memcache->pconnect( $host, $port );
-			$has_object_cache = ( false !== $memcache_object );
-		} elseif ( class_exists( 'Memcached' ) ) {
-			$memcached = new \Memcached();
-			$memcached->addServer( $host, $port );
-			$memcached->add( 'amp_memcached_test', 'testing_value' );
-			$has_object_cache = ( 'testing_value' === $memcached->get( 'amp_memcached_test' ) );
+		try {
+			if ( class_exists( 'Memcache' ) ) {
+				$memcache         = new \Memcache();
+				$memcache_object  = $memcache->pconnect( $host, $port );
+				$has_object_cache = ( false !== $memcache_object );
+			} elseif ( class_exists( 'Memcached' ) ) {
+				$memcached = new \Memcached();
+				$memcached->addServer( $host, $port );
+				$memcached->add( 'amp_memcached_test', 'testing_value' );
+				$has_object_cache = ( 'testing_value' === $memcached->get( 'amp_memcached_test' ) );
+			}
+		} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// If there is an error then consider memcache is not available.
 		}
 
 		return $has_object_cache;
