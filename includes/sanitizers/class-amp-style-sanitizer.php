@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\Amp;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
@@ -527,7 +528,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
-		foreach ( $this->dom->xpath->query( '//*/@' . Document::AMP_BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
+		foreach ( $this->dom->xpath->query( '//*/@' . Amp::BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
 			if ( preg_match_all( '/([\'"])([^\1]*?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
 				$classes = array_merge(
 					$classes,
