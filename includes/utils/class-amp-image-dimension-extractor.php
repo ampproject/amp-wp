@@ -155,7 +155,6 @@ class AMP_Image_Dimension_Extractor {
 	 * Extract dimensions from filename if dimension exists or from file system.
 	 *
 	 * @param array $dimensions Image urls mapped to dimensions.
-	 *
 	 * @return array Dimensions mapped to image urls, or false if they could not be retrieved
 	 */
 	public static function extract_by_filename_or_filesystem( $dimensions ) {
@@ -203,7 +202,7 @@ class AMP_Image_Dimension_Extractor {
 			$using_ext_object_cache = wp_using_ext_object_cache();
 			$image_size             = [];
 
-			list( $transient_name ) = array_values( self::get_cached_dimensions_transient_name( $url ) );
+			list( $transient_name ) = self::get_transient_names( $url );
 
 			// When using an external object cache, try to first see if dimensions have already been obtained. This is
 			// not done for a non-external object cache (i.e. when wp_options is used for transients) because then
@@ -238,22 +237,20 @@ class AMP_Image_Dimension_Extractor {
 	}
 
 	/**
-	 * To get transient name for URL dimensions.
+	 * Get transient names.
 	 *
 	 * @param string $url Image URL.
-	 *
-	 * @return array Transient name and lock name.
+	 * @return array {
+	 *     @type string $0 Transient name for storing dimensions.
+	 *     @type string $1 Transient name for image fetching lock.
+	 * }
 	 */
-	public static function get_cached_dimensions_transient_name( $url ) {
-		$response = [];
-
-		if ( ! empty( $url ) ) {
-			$url_hash                        = md5( $url );
-			$response['transient_name']      = sprintf( 'amp_img_%s', $url_hash );
-			$response['transient_lock_name'] = sprintf( 'amp_lock_%s', $url_hash );
-		}
-
-		return $response;
+	private static function get_transient_names( $url ) {
+		$url_hash = md5( $url );
+		return [
+			sprintf( 'amp_img_%s', $url_hash ),
+			sprintf( 'amp_lock_%s', $url_hash ),
+		];
 	}
 
 	/**
@@ -296,11 +293,11 @@ class AMP_Image_Dimension_Extractor {
 		foreach ( $dimensions as $url => $value ) {
 
 			// Check whether some other callback attached to the filter already provided dimensions for this image.
-			if ( is_array( $value ) ) {
+			if ( is_array( $value ) || empty( $url ) ) {
 				continue;
 			}
 
-			list( $transient_name, $transient_lock_name ) = array_values( self::get_cached_dimensions_transient_name( $url ) );
+			list( $transient_name, $transient_lock_name ) = self::get_transient_names( $url );
 
 			$cached_dimensions = get_transient( $transient_name );
 
