@@ -27,6 +27,13 @@ use WP_Error;
 class SupportRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
 	/**
+	 * Namespace for REST API endpoint.
+	 *
+	 * @var string $namespace
+	 */
+	public $namespace = 'amp/v1';
+
+	/**
 	 * Get the action to use for registering the service.
 	 *
 	 * @return string Registration action to use.
@@ -34,14 +41,6 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 	public static function get_registration_action() {
 
 		return 'rest_api_init';
-	}
-
-	/**
-	 * Construct method.
-	 */
-	public function __construct() {
-
-		$this->namespace = 'amp/v1';
 	}
 
 	/**
