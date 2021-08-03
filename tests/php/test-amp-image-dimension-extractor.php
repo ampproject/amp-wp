@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+
 /**
  * Tests for AMP_Image_Dimension_Extractor.
  *
  * @covers AMP_Image_Dimension_Extractor
  */
 class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
+
+	use PrivateAccess;
 
 	/** @var bool */
 	private $using_ext_object_cache;
@@ -211,9 +215,12 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 
 		$attachment_id = $this->factory()->attachment->create_upload_object( __DIR__ . '/data/images/wordpress-logo.png' );
 
-		$full_image                       = wp_get_attachment_image_src( $attachment_id, 'full' );
-		$thumbnail_image                  = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
-		$external_image                   = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-1024x668.jpg';
+		$full_image = wp_get_attachment_image_src( $attachment_id, 'full' );
+		$this->assertNotRegExp( '/-\d+x\d+\.\w+/', $full_image[0], 'Expected no dimensions in filename.' );
+		$thumbnail_image = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
+		$this->assertRegExp( '/-\d+x\d+\.\w+/', $thumbnail_image[0], 'Expected dimensions in file name. ' );
+
+		$external_image_with_dims_in_url  = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-1024x668.jpg';
 		$external_image_1                 = 'https://via.placeholder.com/1500/000.png/FF0';
 		$external_image_2                 = 'https://via.placeholder.com/1000/000.png/FF0';
 		$image_with_query_string          = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-512x768.jpg?crop=1';
@@ -226,6 +233,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 					'width'  => $full_image[1],
 					'height' => $full_image[2],
 				],
+				'stored'   => $using_ext_object_cache,
 			],
 			$thumbnail_image[0]               => [
 				'input'    => [],
@@ -233,17 +241,20 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 					'width'  => $thumbnail_image[1],
 					'height' => $thumbnail_image[2],
 				],
+				'stored'   => false, // Never stored because dimensions are in the URL.
 			],
-			$external_image                   => [
+			$external_image_with_dims_in_url  => [
 				'input'    => [],
 				'expected' => [
 					'width'  => 1024,
 					'height' => 668,
 				],
+				'stored'   => false, // Never stored because dimensions are in the URL.
 			],
 			$external_image_1                 => [
 				'input'    => [],
-				'expected' => [],
+				'expected' => [], // Nothing since we're only calling extract_by_filename_or_filesystem and not extract_by_downloading_images.
+				'stored'   => false,
 			],
 			$external_image_2                 => [
 				'input'    => [
@@ -254,6 +265,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 					'width'  => 1000,
 					'height' => 1000,
 				],
+				'stored'   => false, // Because dimensions already provided in input.
 			],
 			$image_with_query_string          => [
 				'input'    => [],
@@ -261,6 +273,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 					'width'  => 512,
 					'height' => 768,
 				],
+				'stored'   => false, // Never stored because dimensions are in the URL.
 			],
 			$internal_image_with_query_string => [
 				'input'    => [],
@@ -268,15 +281,30 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 					'width'  => $full_image[1],
 					'height' => $full_image[2],
 				],
+				'stored'   => $using_ext_object_cache,
 			],
 		];
 
 		$input    = wp_list_pluck( $data, 'input' );
 		$expected = wp_list_pluck( $data, 'expected' );
+		$stored   = wp_list_pluck( $data, 'stored' );
 
 		$this->assertEmpty( AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem( [] ) );
 
 		$output = AMP_Image_Dimension_Extractor::extract_by_filename_or_filesystem( $input );
 		$this->assertEquals( $expected, $output );
+
+		foreach ( $stored as $url => $expected_transient ) {
+			list( $transient_name ) = $this->call_private_static_method(
+				AMP_Image_Dimension_Extractor::class,
+				'get_transient_names',
+				[ $url ]
+			);
+			if ( $expected_transient ) {
+				$this->assertInternalType( 'array', get_transient( $transient_name ), "Expected transient to be stored for $url." );
+			} else {
+				$this->assertFalse( get_transient( $transient_name ), "Expected no transient to be stored for $url." );
+			}
+		}
 	}
 }
