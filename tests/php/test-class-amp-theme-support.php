@@ -1354,7 +1354,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::finish_init();
 
 		// These should all get removed, unless used.
-		$required_usage_grandfathered = [
+		$required_usage_exempted = [
 			'amp-anim',
 			'amp-ad',
 			'amp-mustache',
@@ -1362,6 +1362,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'amp-youtube',
 			'amp-form',
 			'amp-live-list',
+		];
+
+		$conditionally_allowed_usage = [
+			'amp-carousel',
 		];
 
 		// These also should get removed, unless used.
@@ -1384,7 +1388,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<html>
 			<head></head>
 			<body>
-				<?php wp_print_scripts( array_merge( $required_usage_grandfathered, $required_usage_error, $required_usage_none ) ); ?>
+				<amp-img src="https://example.com/cat.jpg" width="100" height="100" lightbox></amp-img>
+				<amp-img src="https://example.com/dog.jpg" width="100" height="100" lightbox></amp-img>
+				<amp-img src="https://example.com/bird.jpg" width="100" height="100" lightbox></amp-img>
+
+				<?php wp_print_scripts( array_merge( $required_usage_exempted, $conditionally_allowed_usage, $required_usage_error, $required_usage_none ) ); ?>
 				<?php wp_footer(); ?>
 			</body>
 		</html>
@@ -1403,7 +1411,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$expected_script_srcs = [
 			wp_scripts()->registered['amp-runtime']->src,
 		];
-		foreach ( $required_usage_none as $handle ) {
+		foreach ( array_merge( $required_usage_none, $conditionally_allowed_usage ) as $handle ) {
 			$expected_script_srcs[] = wp_scripts()->registered[ $handle ]->src;
 		}
 
