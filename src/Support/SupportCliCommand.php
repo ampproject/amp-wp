@@ -1,6 +1,6 @@
 <?php
 /**
- * Service class for support.
+ * CLI command for support request.
  *
  * @package AmpProject\AmpWP
  */
@@ -13,7 +13,6 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Infrastructure\CliCommand;
 
 /**
- * Class SupportService
  * Service class for support.
  */
 class SupportCliCommand implements Service, CliCommand {

@@ -9,9 +9,8 @@ namespace AmpProject\AmpWP\Support\Tests;
 
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Support\SupportData;
-use AmpProject\AmpWP\Support\SupportService;
-use PhpParser\Node\Expr\Array_;
 use WP_UnitTestCase;
+use AMP_Validated_URL_Post_Type;
 
 /**
  * Tests for SupportData.
@@ -52,7 +51,7 @@ class SupportDataTest extends WP_UnitTestCase {
 		$amp_validated_post = $this->factory()->post->create_and_get(
 			[
 				'post_title' => home_url( 'sample-page-for-amp-validation' ),
-				'post_type'  => \AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			]
 		);
 

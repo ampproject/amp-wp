@@ -1,6 +1,6 @@
 <?php
 /**
- * Class SupportMenu
+ * To add support page under AMP menu page in WordPress admin.
  *
  * @package Ampproject\Ampwp
  */
@@ -13,7 +13,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Services;
 
 /**
- * SupportMenu class.
+ * SupportScreen class to add support page under AMP menu page in WordPress admin.
  *
  * @internal
  */
