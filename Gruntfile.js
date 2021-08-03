@@ -13,6 +13,7 @@ module.exports = function( grunt ) {
 		'php-css-parser-install-composer-plugin',
 		'src',
 		'templates',
+		'uninstall.php',
 		'vendor',
 	];
 
