@@ -165,7 +165,8 @@ class AMP_Image_Dimension_Extractor {
 		}
 
 		$upload_dir      = wp_get_upload_dir();
-		$base_upload_uri = trim( $upload_dir['baseurl'] );
+		$base_upload_uri = trailingslashit( $upload_dir['baseurl'] );
+		$base_upload_dir = trailingslashit( $upload_dir['basedir'] );
 
 		foreach ( $dimensions as $url => $value ) {
 
@@ -174,59 +175,61 @@ class AMP_Image_Dimension_Extractor {
 				continue;
 			}
 
-			$path = wp_parse_url( $url, PHP_URL_PATH );
-			if ( empty( $path ) ) {
-				continue;
-			}
+			$url_without_query_fragment = strtok( $url, '?#' );
 
-			// Get image dimension from file name.
-			if ( preg_match( '/-(?<width>\d+)x(?<height>\d+)\.\w+$/', $path, $possible_dimension ) ) {
+			// Try getting image dimension from the file name.
+			if ( preg_match( '/-(?<width>[1-9][0-9]*)x(?<height>[1-9][0-9]*)\.\w+$/', $url_without_query_fragment, $matches ) ) {
 				$dimensions[ $url ] = [
-					'width'  => (int) $possible_dimension['width'],
-					'height' => (int) $possible_dimension['height'],
+					'width'  => (int) $matches['width'],
+					'height' => (int) $matches['height'],
 				];
 				continue;
 			}
 
-			// Check if it's internal media or not. If it's not then bail out.
-			// If URL is not valid then bail out.
-			if ( 0 !== strpos( $url, $base_upload_uri ) || 0 !== validate_file( $url ) ) {
+			// Verify that the URL is for an uploaded file.
+			if ( 0 !== strpos( $url_without_query_fragment, $base_upload_uri ) ) {
+				continue;
+			}
+			$upload_relative_path = substr( $url_without_query_fragment, strlen( $base_upload_uri ) );
+
+			// Bail if the URL contains relative paths.
+			if ( 0 !== validate_file( $upload_relative_path ) ) {
 				continue;
 			}
 
-			// Get media path.
-			$attached_path = substr( $url, strlen( $base_upload_uri ) );
-			$attached_path = wp_parse_url( $attached_path, PHP_URL_PATH );
+			// Get image dimension from file system.
+			$image_file = $base_upload_dir . $upload_relative_path;
 
-			$imagesize             = [];
-			$is_using_object_cache = wp_using_ext_object_cache();
+			$using_ext_object_cache = wp_using_ext_object_cache();
+			$image_size             = [];
 
 			list( $transient_name ) = array_values( self::get_cached_dimensions_transient_name( $url ) );
 
-			if ( $is_using_object_cache ) {
-				$imagesize = get_transient( $transient_name );
-				$imagesize = ( ! empty( $imagesize ) && is_array( $imagesize ) ) ? $imagesize : [];
+			// When using an external object cache, try to first see if dimensions have already been obtained. This is
+			// not done for a non-external object cache (i.e. when wp_options is used for transients) because then
+			// we are not storing the dimensions in a transient, because it is more performant to read the dimensions
+			// from the filesystem--both in terms of time and storage--than to store dimensions in wp_options.
+			if ( $using_ext_object_cache ) {
+				$image_size = get_transient( $transient_name );
+				$image_size = ( ! empty( $image_size ) && is_array( $image_size ) ) ? $image_size : [];
 			}
 
-			if ( empty( $imagesize ) || ! is_array( $imagesize ) ) {
-				// Get image dimension from file system.
-				$image_file = sprintf( '%s/%s', trim( $upload_dir['basedir'] ), $attached_path );
-
+			if ( ( empty( $image_size ) || ! is_array( $image_size ) ) && file_exists( $image_file ) ) {
 				if ( function_exists( 'wp_getimagesize' ) ) {
-					$imagesize = wp_getimagesize( $image_file );
+					$image_size = wp_getimagesize( $image_file );
 				} elseif ( function_exists( 'getimagesize' ) ) {
-					$imagesize = @getimagesize( $image_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+					$image_size = @getimagesize( $image_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 				}
 
-				if ( $is_using_object_cache && ! empty( $imagesize ) && is_array( $imagesize ) ) {
-					set_transient( $transient_name, $imagesize );
+				if ( $using_ext_object_cache && ! empty( $image_size ) && is_array( $image_size ) ) {
+					set_transient( $transient_name, $image_size );
 				}
 			}
 
-			if ( ! empty( $imagesize ) && is_array( $imagesize ) ) {
+			if ( ! empty( $image_size ) && is_array( $image_size ) ) {
 				$dimensions[ $url ] = [
-					'width'  => (int) $imagesize[0],
-					'height' => (int) $imagesize[1],
+					'width'  => (int) $image_size[0],
+					'height' => (int) $image_size[1],
 				];
 			}
 		}
@@ -344,7 +347,7 @@ class AMP_Image_Dimension_Extractor {
 		$client = new \FasterImage\FasterImage();
 
 		/**
-		 * Filters the user agent for onbtaining the image dimensions.
+		 * Filters the user agent for obtaining the image dimensions.
 		 *
 		 * @param string $user_agent User agent.
 		 */
