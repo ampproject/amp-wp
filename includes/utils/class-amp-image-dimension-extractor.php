@@ -163,6 +163,14 @@ class AMP_Image_Dimension_Extractor {
 			return [];
 		}
 
+		$using_ext_object_cache = wp_using_ext_object_cache();
+		$ext_types              = wp_get_ext_types();
+		if ( empty( $ext_types['image'] ) ) {
+			return $dimensions;
+		}
+		$image_ext_types = $ext_types['image'];
+		unset( $ext_types );
+
 		$upload_dir      = wp_get_upload_dir();
 		$base_upload_uri = trailingslashit( $upload_dir['baseurl'] );
 		$base_upload_dir = trailingslashit( $upload_dir['basedir'] );
@@ -176,8 +184,18 @@ class AMP_Image_Dimension_Extractor {
 
 			$url_without_query_fragment = strtok( $url, '?#' );
 
-			// Try getting image dimension from the file name.
-			if ( preg_match( '/-(?<width>[1-9][0-9]*)x(?<height>[1-9][0-9]*)\.\w+$/', $url_without_query_fragment, $matches ) ) {
+			// Parse info out of the URL, including the file extension and (optionally) the dimensions.
+			if ( ! preg_match( '/(?:-(?<width>[1-9][0-9]*)x(?<height>[1-9][0-9]*))?\.(?<ext>\w+)$/', $url_without_query_fragment, $matches ) ) {
+				continue;
+			}
+
+			// Skip images don't have recognized extensions.
+			if ( ! in_array( $matches['ext'], $image_ext_types ) ) {
+				continue;
+			}
+
+			// Use image dimension from the file name.
+			if ( ! empty( $matches['width'] ) && ! empty( $matches['height'] ) ) {
 				$dimensions[ $url ] = [
 					'width'  => (int) $matches['width'],
 					'height' => (int) $matches['height'],
@@ -199,8 +217,7 @@ class AMP_Image_Dimension_Extractor {
 			// Get image dimension from file system.
 			$image_file = $base_upload_dir . $upload_relative_path;
 
-			$using_ext_object_cache = wp_using_ext_object_cache();
-			$image_size             = [];
+			$image_size = [];
 
 			list( $transient_name ) = self::get_transient_names( $url );
 

@@ -225,6 +225,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		$external_image_2                 = 'https://via.placeholder.com/1000/000.png/FF0';
 		$image_with_query_string          = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-512x768.jpg?crop=1';
 		$internal_image_with_query_string = $full_image[0] . '?crop=1&resize=1';
+		$audio_file                       = 'https://example.com/music.mp3';
 
 		$data = [
 			$full_image[0]                    => [
@@ -282,6 +283,11 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 					'height' => $full_image[2],
 				],
 				'stored'   => $using_ext_object_cache,
+			],
+			$audio_file                       => [
+				'input'    => [],
+				'expected' => [],
+				'stored'   => false,
 			],
 		];
 
