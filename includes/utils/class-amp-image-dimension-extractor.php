@@ -190,7 +190,7 @@ class AMP_Image_Dimension_Extractor {
 			}
 
 			// Skip images don't have recognized extensions.
-			if ( ! in_array( $matches['ext'], $image_ext_types ) ) {
+			if ( ! in_array( strtolower( $matches['ext'] ), $image_ext_types, true ) ) {
 				continue;
 			}
 
