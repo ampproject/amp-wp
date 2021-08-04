@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP\Infrastructure;
 
-use AmpProject\AmpWP\Exception\InvalidRequirement;
 use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer\LazilyInstantiatedService;
 use WP_CLI;
