@@ -262,7 +262,9 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_auto_accepted( $error = null ) {
 
-		if ( $error && amp_is_canonical() ) {
+		if ( amp_is_bento_enabled() ) {
+			$accepted = false;
+		} elseif ( $error && amp_is_canonical() ) {
 			// Excessive CSS on AMP-first sites must not be removed by default since removing CSS can severely break a site.
 			$accepted = AMP_Style_Sanitizer::STYLESHEET_TOO_LONG !== $error['code'];
 		} else {
