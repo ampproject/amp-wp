@@ -224,6 +224,8 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		$external_image_1                 = 'https://via.placeholder.com/1500/000.png/FF0';
 		$external_image_2                 = 'https://via.placeholder.com/1000/000.png/FF0';
 		$image_with_query_string          = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-512x768.jpg?crop=1';
+		$image_with_fragment              = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-512x768.jpg#interesting';
+		$image_with_query_string_and_frag = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-512x768.jpg?crop=1#interesting';
 		$internal_image_with_query_string = $full_image[0] . '?crop=1&resize=1';
 		$audio_file                       = 'https://example.com/music.mp3';
 
@@ -269,6 +271,22 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 				'stored'   => false, // Because dimensions already provided in input.
 			],
 			$image_with_query_string          => [
+				'input'    => [],
+				'expected' => [
+					'width'  => 512,
+					'height' => 768,
+				],
+				'stored'   => false, // Never stored because dimensions are in the URL.
+			],
+			$image_with_fragment              => [
+				'input'    => [],
+				'expected' => [
+					'width'  => 512,
+					'height' => 768,
+				],
+				'stored'   => false, // Never stored because dimensions are in the URL.
+			],
+			$image_with_query_string_and_frag => [
 				'input'    => [],
 				'expected' => [
 					'width'  => 512,
