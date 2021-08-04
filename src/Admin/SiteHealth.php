@@ -79,7 +79,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			add_action( 'wp_ajax_health-check-site-status', [ $this, 'ajax_site_status' ], 11 );
 		}
 
-		add_action( 'template_redirect', [ $this, 'render_random_string_page' ] );
+		$this->maybe_send_random_number();
 	}
 
 	/**
@@ -211,17 +211,29 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		$is_using_page_cache = $this->is_site_has_page_cache();
 
+		$badge_color = 'red';
+		$status      = 'critical';
+		$label       = __( 'Page caching is not enabled', 'amp' );
+
+		if ( true === $is_using_page_cache['server_caching'] && false === $is_using_page_cache['client_caching'] ) {
+			$badge_color = 'orange';
+			$status      = 'recommended';
+			$label       = __( 'Page caching is enabled. But client caching headers are missing.', 'amp' );
+		} elseif ( true === $is_using_page_cache['server_caching'] && true === $is_using_page_cache['client_caching'] ) {
+			$badge_color = 'green';
+			$status      = 'good';
+			$label       = __( 'Page caching is enabled', 'amp' );
+		}
+
 		return [
 			'badge'       => [
 				'label' => $this->get_badge_label(),
-				'color' => $is_using_page_cache ? 'green' : 'orange',
+				'color' => $badge_color,
 			],
 			'description' => esc_html__( 'The AMP plugin performs at its best when page caching is enabled.', 'amp' ),
 			'test'        => 'amp_page_cache',
-			'status'      => $is_using_page_cache ? 'good' : 'recommended',
-			'label'       => $is_using_page_cache
-				? esc_html__( 'Page caching is enabled', 'amp' )
-				: esc_html__( 'Page caching is not enabled', 'amp' ),
+			'status'      => $status,
+			'label'       => esc_html( $label ),
 		];
 	}
 
@@ -238,30 +250,58 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	/**
 	 * Check if site has page cache enable or not.
 	 *
-	 * @return bool True if site has page cache. Otherwise False.
+	 * @return array array(
+	 *                  server_caching: True if site has page cache. Otherwise False.
+	 *                  client_caching: True if site has page cache and passed appropriate header.
+	 *               )
 	 */
 	private function is_site_has_page_cache() {
 
-		$request_url    = home_url( '?amp_page_cache=1' );
-		$has_page_cache = false;
+		$has_page_cache = [
+			'server_caching' => false,
+			'client_caching' => false,
+		];
 		$response_list  = [];
+		$request_args   = [
+			'headers' => [
+				'X-AMP-Request-Random-Number' => true,
+				'Cache-Control'               => 'max-age=' . ( YEAR_IN_SECONDS + MONTH_IN_SECONDS ),
+			],
+		];
 
 		for ( $i = 1; $i <= 3; $i++ ) {
-			$response = wp_remote_get( $request_url );
-			if ( ! empty( $response ) && ! is_wp_error( $response ) ) {
-				$response = wp_remote_retrieve_body( $response );
-			} else {
-				$response = false;
+			$http_response        = wp_remote_get( home_url(), $request_args );
+			$http_response_header = wp_remote_retrieve_headers( $http_response );
+			$http_response_header = ( ! empty( $http_response_header ) ) ? $http_response_header->getAll() : [];
+
+			$response = false;
+
+			// If any of header tag exist. and x-amp-random-number doesn't consider page cache exists.
+			if (
+				! empty( $http_response_header['cache-control'] ) ||
+				! empty( $http_response_header['expires'] ) ||
+				! empty( $http_response_header['last-modified'] ) ||
+				! empty( $http_response_header['etag'] )
+			) {
+				$has_page_cache['client_caching'] = true;
 			}
 
+			if ( ! empty( $http_response_header['x-amp-random-number'] ) ) {
+				$response = $http_response_header['x-amp-random-number'];
+			} elseif ( empty( $http_response_header['x-amp-random-number'] ) ) {
+				// If age tag have positive number then consider page cache exists.
+				if ( ! empty( $http_response_header['age'] ) && 0 < intval( $http_response_header['age'] ) ) {
+					$response = true;
+				}
+			}
 			$response_list[ $i ] = $response;
 
-			if ( false === $has_page_cache &&
+			if ( false === $has_page_cache['server_caching'] &&
 				! empty( $response_list[ $i - 1 ] ) &&
 				! empty( $response_list[ $i ] ) &&
 				$response_list[ $i - 1 ] === $response_list[ $i ]
 			) {
-				$has_page_cache = true;
+				$has_page_cache['server_caching'] = true;
 				break;
 			}
 		}
@@ -270,16 +310,14 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
-	 * To render random string on the page.
+	 * Send render random in header if requested.
 	 *
 	 * @return void
 	 */
-	public function render_random_string_page() {
+	public function maybe_send_random_number() {
 
-		$query_var = filter_input( INPUT_GET, 'amp_page_cache', FILTER_SANITIZE_STRING );
-
-		if ( ! empty( $query_var ) ) {
-			die( esc_html( wp_rand( 1000, 10000 ) ) );
+		if ( isset( $_SERVER['HTTP_X_AMP_REQUEST_RANDOM_NUMBER'] ) ) {
+			header( 'X-AMP-Random-Number: ' . wp_rand( 1000, 10000 ) );
 		}
 	}
 
