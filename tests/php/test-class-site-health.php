@@ -87,6 +87,56 @@ class Test_Site_Health extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::ajax_site_status
+	 */
+	public function test_ajax_site_status() {
+
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		add_filter( 'wp_doing_ajax', '__return_true' );
+
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
+
+		/*
+		 * Test 1: With invalid callback.
+		 */
+		$_POST['feature'] = 'temp';
+
+		ob_start();
+		$this->instance->ajax_site_status();
+		$response = ob_get_clean();
+
+		$this->assertEmpty( $response );
+
+		/*
+		 * Test 2: With invalid callback.
+		 */
+		$_POST['feature'] = 'amp_page_cache';
+
+		$callback = static function () {
+			return '__return_false';
+		};
+		add_filter( 'wp_die_ajax_handler', $callback );
+
+		ob_start();
+		$this->instance->ajax_site_status();
+		$response = ob_get_clean();
+
+		$this->assertContains( '"label":"AMP"', $response );
+
+		$this->assertNull( $response );
+
+		remove_filter( 'wp_die_ajax_handler', $callback );
+
+		/*
+		 * phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		 * phpcs:ignore WordPress.Security.NonceVerification.Missing
+		 */
+		unset( $_POST['feature'], $_REQUEST['_wpnonce'] ); // phpcs:ignore
+		remove_filter( 'wp_doing_ajax', '__return_true' );
+
+	}
+
+	/**
 	 * Test add_tests.
 	 *
 	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_tests()
