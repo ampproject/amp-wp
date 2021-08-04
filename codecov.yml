@@ -1,10 +1,5 @@
 # See documentation at https://docs.codecov.io/docs/codecovyml-reference
 
-codecov:
-  notify:
-    # Wait for Jest & PHPUnit $ Behat reports before notifying
-    after_n_builds: 3
-
 coverage:
   status:
     # Patch-level coverage (how well is the PR tested)

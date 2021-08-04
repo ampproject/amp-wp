@@ -187,32 +187,142 @@ abstract class ServiceBasedPlugin implements Plugin {
 			$services = $this->validate_services( $filtered_services, $services );
 		}
 
-		foreach ( $services as $id => $class ) {
-			$id    = $this->maybe_resolve( $id );
-			$class = $this->maybe_resolve( $class );
+		while ( null !== key( $services ) ) {
+			$id    = $this->maybe_resolve( key( $services ) );
+			$class = $this->maybe_resolve( current( $services ) );
+
+			// Delay registering the service until all requirements are met.
+			if (
+				is_a( $class, HasRequirements::class, true )
+				&&
+				! $this->requirements_are_met( $id, $class, $services )
+			) {
+				next( $services );
+				continue;
+			}
 
 			// Allow the services to delay their registration.
 			if ( is_a( $class, Delayed::class, true ) ) {
 				$registration_action = $class::get_registration_action();
 
-				if ( did_action( $registration_action ) ) {
+				if ( \did_action( $registration_action ) ) {
 					$this->register_service( $id, $class );
-
-					continue;
+				} else {
+					\add_action(
+						$registration_action,
+						function () use ( $id, $class ) {
+							$this->register_service( $id, $class );
+						}
+					);
 				}
 
-				\add_action(
-					$class::get_registration_action(),
-					function () use ( $id, $class ) {
-						$this->register_service( $id, $class );
-					}
-				);
-
+				next( $services );
 				continue;
 			}
 
 			$this->register_service( $id, $class );
+
+			next( $services );
 		}
+	}
+
+	/**
+	 * Determine if the requirements for a service to be registered are met.
+	 *
+	 * This also hooks up another check in the future to the registration action(s) of its requirements.
+	 *
+	 * @param string   $id       Service ID of the service with requirements.
+	 * @param string   $class    Service FQCN of the service with requirements.
+	 * @param string[] $services List of services to be registered.
+	 *
+	 * @throws InvalidService If the required service is not recognized.
+	 *
+	 * @return bool Whether the requirements for the service has been met.
+	 */
+	protected function requirements_are_met( $id, $class, &$services ) {
+		$missing_requirements = $this->collect_missing_requirements( $class, $services );
+
+		if ( empty( $missing_requirements ) ) {
+			return true;
+		}
+
+		foreach ( $missing_requirements as $missing_requirement ) {
+			if ( is_a( $missing_requirement, Delayed::class, true ) ) {
+				$action = $missing_requirement::get_registration_action();
+
+				if ( \did_action( $action ) ) {
+					continue;
+				}
+
+				/*
+				 * The current service depends on another service that is Delayed and hasn't been registered yet
+				 * and for which the registration action has not yet passed.
+				 *
+				 * Therefore, we postpone the registration of the current service up until the requirement's
+				 * action has passed.
+				 *
+				 * We don't register the service right away, though, we will first check whether at that point,
+				 * the requirements have been met.
+				 *
+				 * Note that badly configured requirements can lead to services that will never register at all.
+				 */
+
+				\add_action(
+					$action,
+					function () use ( $id, $class, $services ) {
+						if ( ! $this->requirements_are_met( $id, $class, $services ) ) {
+							return;
+						}
+
+						$this->register_service( $id, $class );
+					},
+					PHP_INT_MAX
+				);
+
+				return false;
+			}
+		}
+
+		/*
+		 * The registration actions from all of the requirements were already processed. This means that the missing
+		 * requirement(s) are about to be registered, they just weren't encountered yet while traversing the services
+		 * map. Therefore, we skip registration for now and move this particular service to the end of the service map.
+		 */
+		unset( $services[ $id ] );
+		$services[ $id ] = $class;
+
+		return false;
+	}
+
+	/**
+	 * Collect the list of missing requirements for a service which has requirements.
+	 *
+	 * @param string   $class Service FQCN of the service with requirements.
+	 * @param string[] $services List of services to register.
+	 *
+	 * @throws InvalidService If the required service is not recognized.
+	 *
+	 * @return string[] List of missing requirements as a $service_id => $service_class mapping.
+	 */
+	protected function collect_missing_requirements( $class, $services ) {
+		$requirements = $class::get_requirements();
+
+		$missing = [];
+
+		foreach ( $requirements as $requirement ) {
+			// Bail if it requires a service that is not recognized.
+			if ( ! array_key_exists( $requirement, $services ) ) {
+				throw InvalidService::from_service_id( $requirement );
+			}
+
+			if ( $this->get_container()->has( $requirement ) ) {
+				continue;
+			}
+
+			$missing[ $requirement ] = $services[ $requirement ];
+		}
+
+		return $missing;
 	}
 
 	/**
