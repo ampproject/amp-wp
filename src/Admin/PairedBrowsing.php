@@ -12,6 +12,7 @@ use AMP_Theme_Support;
 use AMP_Validation_Manager;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -29,7 +30,7 @@ use AmpProject\AmpWP\DevTools\UserAccess;
  * @since 2.1
  * @internal
  */
-final class PairedBrowsing implements Service, Registerable, Conditional {
+final class PairedBrowsing implements Service, Registerable, Conditional, HasRequirements {
 
 	/**
 	 * Query var for requests to open the app.
@@ -71,6 +72,17 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 				)
 			)
 		);
+	}
+
+	/**
+	 * Get the list of service IDs required for this service to be registered.
+	 *
+	 * @return string[] List of required services.
+	 */
+	public static function get_requirements() {
+		return [
+			'dependency_support',
+		];
 	}
 
 	/**

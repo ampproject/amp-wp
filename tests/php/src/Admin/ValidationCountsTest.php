@@ -14,6 +14,7 @@ use AmpProject\AmpWP\Admin\ValidationCounts;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -51,6 +52,7 @@ class ValidationCountsTest extends WP_UnitTestCase {
 		$this->assertInstanceOf( Conditional::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
+		$this->assertInstanceOf( HasRequirements::class, $this->instance );
 	}
 
 	/**
@@ -60,6 +62,14 @@ class ValidationCountsTest extends WP_UnitTestCase {
 	 */
 	public function test_get_registration_action() {
 		self::assertEquals( 'admin_enqueue_scripts', ValidationCounts::get_registration_action() );
+	}
+
+	/** @covers ::get_requirements() */
+	public function test_get_requirements() {
+		$this->assertSame(
+			[ 'dependency_support', 'dev_tools.user_access' ],
+			ValidationCounts::get_requirements()
+		);
 	}
 
 	/**
