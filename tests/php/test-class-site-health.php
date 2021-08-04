@@ -71,14 +71,18 @@ class Test_Site_Health extends WP_UnitTestCase {
 		// Mock is_admin().
 		set_current_screen( 'edit-post' );
 
+		// Mock ajax request.
+		add_filter( 'wp_doing_ajax', '__return_true' );
+
 		$this->instance->register();
 		$this->assertEquals( 10, has_filter( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
 		$this->assertEquals( 10, has_filter( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
 		$this->assertEquals( 10, has_filter( 'site_status_test_result', [ $this->instance, 'modify_test_result' ] ) );
 		$this->assertEquals( 10, has_filter( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_print_styles-site-health.php', [ $this->instance, 'add_styles' ] ) );
-		$this->assertEquals( 10, has_action( 'template_redirect', [ $this->instance, 'render_random_string_page' ] ) );
+		$this->assertEquals( 11, has_action( 'wp_ajax_health-check-site-status', [ $this->instance, 'ajax_site_status' ] ) );
 
+		add_filter( 'wp_doing_ajax', '__return_false' );
 		$current_screen = null;
 	}
 
@@ -542,43 +546,167 @@ class Test_Site_Health extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::is_site_has_page_cache()
+	 * Data provider for $this->test_page_cache()
+	 *
+	 * @return array[]
 	 */
-	public function test_is_site_has_page_cache_without_page_cache() {
+	public function get_page_cache_data() {
+
+		return [
+			'no-cache'              => [
+				'request_headers' => [],
+				'expected'        => [
+					'badge'       => [
+						'label' => 'AMP',
+						'color' => 'red',
+					],
+					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
+					'test'        => 'amp_page_cache',
+					'status'      => 'critical',
+					'label'       => 'Page caching is not enabled.',
+				],
+			],
+			'server-cache'          => [
+				'request_headers' => [
+					'x-amp-random-number' => '1345',
+				],
+				'expected'        => [
+					'badge'       => [
+						'label' => 'AMP',
+						'color' => 'orange',
+					],
+					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
+					'test'        => 'amp_page_cache',
+					'status'      => 'recommended',
+					'label'       => 'Page caching is enabled. But client caching headers are missing.',
+				],
+			],
+			'server-cache-with-age' => [
+				'request_headers' => [
+					'age' => '1345',
+				],
+				'expected'        => [
+					'badge'       => [
+						'label' => 'AMP',
+						'color' => 'orange',
+					],
+					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
+					'test'        => 'amp_page_cache',
+					'status'      => 'recommended',
+					'label'       => 'Page caching is enabled. But client caching headers are missing.',
+				],
+			],
+			'full-cache'            => [
+				'request_headers' => [
+					'x-amp-random-number' => '1345',
+					'expires'             => 'Wed, 11 Jan 1984 12:00:00 GMT',
+				],
+				'expected'        => [
+					'badge'       => [
+						'label' => 'AMP',
+						'color' => 'green',
+					],
+					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
+					'test'        => 'amp_page_cache',
+					'status'      => 'good',
+					'label'       => 'Page caching is enabled',
+				],
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_page_cache_data
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::page_cache
+	 */
+	public function test_page_cache( $request_headers, $expected ) {
 
 		/*
 		 * Mock the http request.
 		 */
-		$callback_wp_remote = static function () {
+		$callback_wp_remote = static function () use ( $request_headers ) {
 
 			return [
-				'body' => wp_rand( 1000, 10000 ),
+				'headers' => $request_headers,
 			];
 		};
 		add_filter( 'pre_http_request', $callback_wp_remote );
 
-		$this->assertFalse( $this->call_private_method( $this->instance, 'is_site_has_page_cache' ) );
+		$this->assertEquals(
+			$expected,
+			$this->instance->page_cache()
+		);
 
 		remove_filter( 'pre_http_request', $callback_wp_remote );
 	}
 
 	/**
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::is_site_has_page_cache()
+	 * Data provider for $this->test_is_site_has_page_cache()
+	 *
+	 * @return array[]
 	 */
-	public function test_is_site_has_page_cache_with_page_cache() {
+	public function get_site_has_page_cache_data() {
 
-		/**
+		return [
+			'no-cache'              => [
+				'request_headers' => [],
+				'expected'        => [
+					'server_caching' => false,
+					'client_caching' => false,
+				],
+			],
+			'server-cache'          => [
+				'request_headers' => [
+					'x-amp-random-number' => '1345',
+				],
+				'expected'        => [
+					'server_caching' => true,
+					'client_caching' => false,
+				],
+			],
+			'server-cache-with-age' => [
+				'request_headers' => [
+					'age' => '1345',
+				],
+				'expected'        => [
+					'server_caching' => true,
+					'client_caching' => false,
+				],
+			],
+			'full-cache'            => [
+				'request_headers' => [
+					'x-amp-random-number' => '1345',
+					'expires'             => 'Wed, 11 Jan 1984 12:00:00 GMT',
+				],
+				'expected'        => [
+					'server_caching' => true,
+					'client_caching' => true,
+				],
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_site_has_page_cache_data
+	 * @covers       \AmpProject\AmpWP\Admin\SiteHealth::is_site_has_page_cache()
+	 */
+	public function test_is_site_has_page_cache( $request_headers, $expected ) {
+
+		/*
 		 * Mock the http request.
 		 */
-		$callback_wp_remote = static function () {
+		$callback_wp_remote = static function () use ( $request_headers ) {
 
 			return [
-				'body' => '1345',
+				'headers' => $request_headers,
 			];
 		};
 		add_filter( 'pre_http_request', $callback_wp_remote );
 
-		$this->assertTrue( $this->call_private_method( $this->instance, 'is_site_has_page_cache' ) );
+		$this->assertEquals(
+			$expected,
+			$this->call_private_method( $this->instance, 'is_site_has_page_cache' )
+		);
 
 		remove_filter( 'pre_http_request', $callback_wp_remote );
 	}

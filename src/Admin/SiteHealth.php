@@ -213,7 +213,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		$badge_color = 'red';
 		$status      = 'critical';
-		$label       = __( 'Page caching is not enabled', 'amp' );
+		$label       = __( 'Page caching is not enabled.', 'amp' );
 
 		if ( true === $is_using_page_cache['server_caching'] && false === $is_using_page_cache['client_caching'] ) {
 			$badge_color = 'orange';
@@ -272,7 +272,8 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		for ( $i = 1; $i <= 3; $i++ ) {
 			$http_response        = wp_remote_get( home_url(), $request_args );
 			$http_response_header = wp_remote_retrieve_headers( $http_response );
-			$http_response_header = ( ! empty( $http_response_header ) ) ? $http_response_header->getAll() : [];
+			$http_response_header = ( ! empty( $http_response_header ) ) ? $http_response_header : [];
+			$http_response_header = ( is_array( $http_response_header ) ) ? $http_response_header : $http_response_header->getAll();
 
 			$response = false;
 
