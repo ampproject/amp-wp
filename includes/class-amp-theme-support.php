@@ -1503,6 +1503,16 @@ class AMP_Theme_Support {
 			array_keys( $amp_scripts ),
 			array_merge( $script_handles, [ Amp::RUNTIME ] )
 		);
+
+		// Allow the amp-carousel script as a special case to be on the page when there is no <amp-carousel> since the
+		// amp-lightbox-gallery component will lazy-load the amp-carousel script when a lightbox is opened, and since
+		// amp-carousel v0.1 is still the 'latest' version, this can mean that fixes needed with the 0.2 version won't
+		// be present on the page. Adding the amp-carousel v0.2 script is a stated workaround suggested in an AMP core
+		// issue: <https://github.com/ampproject/amphtml/issues/35402#issuecomment-887837815>.
+		if ( in_array( 'amp-lightbox-gallery', $script_handles, true ) ) {
+			$superfluous_script_handles = array_diff( $superfluous_script_handles, [ 'amp-carousel' ] );
+		}
+
 		foreach ( $superfluous_script_handles as $superfluous_script_handle ) {
 			if ( ! empty( $extension_specs[ $superfluous_script_handle ]['requires_usage'] ) ) {
 				unset( $amp_scripts[ $superfluous_script_handle ] );

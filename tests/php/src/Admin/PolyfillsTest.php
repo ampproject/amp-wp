@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AmpProject\AmpWP\Admin\Polyfills;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Scripts;
@@ -49,6 +50,12 @@ class PolyfillsTest extends WP_UnitTestCase {
 		$this->assertInstanceOf( Delayed::class, $this->instance );
 		$this->assertInstanceOf( Conditional::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
+		$this->assertInstanceOf( HasRequirements::class, $this->instance );
+	}
+
+	/** @covers ::get_requirements() */
+	public function test_get_requirements() {
+		$this->assertSame( [ 'dependency_support' ], Polyfills::get_requirements() );
 	}
 
 	/**

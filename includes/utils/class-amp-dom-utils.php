@@ -20,16 +20,6 @@ use AmpProject\Tag;
 class AMP_DOM_Utils {
 
 	/**
-	 * Attribute prefix for AMP-bind data attributes.
-	 *
-	 * @since 1.2.1
-	 * @deprecated Use AmpProject\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
-	 * @internal
-	 * @var string
-	 */
-	const AMP_BIND_DATA_ATTR_PREFIX = Document::AMP_BIND_DATA_ATTR_PREFIX;
-
-	/**
 	 * Regular expression pattern to match events and actions within an 'on' attribute.
 	 *
 	 * @since 1.4.0
@@ -91,69 +81,6 @@ class AMP_DOM_Utils {
 	public static function is_valid_head_node( DOMNode $node ) {
 		_deprecated_function( __METHOD__, '1.5.0', 'AmpProject\Dom\Document->isValidHeadNode()' );
 		return Document::fromNode( $node )->isValidHeadNode( $node );
-	}
-
-	/**
-	 * Get attribute prefix for converted amp-bind attributes.
-	 *
-	 * This contains a random string to prevent HTML content containing this data- attribute
-	 * originally from being mutated to contain an amp-bind attribute when attributes are restored.
-	 *
-	 * @since 0.7
-	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
-	 * @see \AMP_DOM_Utils::restore_amp_bind_attributes()
-	 * @codeCoverageIgnore
-	 * @deprecated Use AmpProject\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
-	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
-	 *
-	 * @return string HTML5 data-* attribute name prefix for AMP binding attributes.
-	 */
-	public static function get_amp_bind_placeholder_prefix() {
-		_deprecated_function( __METHOD__, '1.2.1' );
-		return Document::AMP_BIND_DATA_ATTR_PREFIX;
-	}
-
-	/**
-	 * Replace AMP binding attributes with something that libxml can parse (as HTML5 data-* attributes).
-	 *
-	 * This is necessary because attributes in square brackets are not understood in PHP and
-	 * get dropped with an error raised:
-	 * > Warning: DOMDocument::loadHTML(): error parsing attribute name
-	 * This is a reciprocal function of AMP_DOM_Utils::restore_amp_bind_attributes().
-	 *
-	 * @since 0.7
-	 * @codeCoverageIgnore
-	 * @deprecated This is handled automatically via AmpProject\Dom\Document.
-	 * @internal
-	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
-	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
-	 *
-	 * @param string $html HTML containing amp-bind attributes.
-	 * @return string HTML with AMP binding attributes replaced with HTML5 data-* attributes.
-	 */
-	public static function convert_amp_bind_attributes( $html ) {
-		_deprecated_function( __METHOD__, '1.5.0' );
-		return $html;
-	}
-
-	/**
-	 * Convert AMP bind-attributes back to their original syntax.
-	 *
-	 * This is a reciprocal function of AMP_DOM_Utils::convert_amp_bind_attributes().
-	 *
-	 * @since 0.7
-	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
-	 * @codeCoverageIgnore
-	 * @deprecated This is handled automatically via AmpProject\Dom\Document.
-	 * @internal
-	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
-	 *
-	 * @param string $html HTML with amp-bind attributes converted.
-	 * @return string HTML with amp-bind attributes restored.
-	 */
-	public static function restore_amp_bind_attributes( $html ) {
-		_deprecated_function( __METHOD__, '1.2.1' );
-		return $html;
 	}
 
 	/**
