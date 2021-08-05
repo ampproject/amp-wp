@@ -88,7 +88,7 @@ export function Welcome() {
 								</a>
 							</>
 						) }
-						{ '.' }
+						{ _x( '.', 'End of sentence.', 'amp' ) }
 					</p>
 				</div>
 			</div>
