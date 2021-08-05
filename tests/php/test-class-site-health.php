@@ -123,8 +123,6 @@ class Test_Site_Health extends WP_UnitTestCase {
 
 		$this->assertContains( '"label":"AMP"', $response );
 
-		$this->assertNull( $response );
-
 		remove_filter( 'wp_die_ajax_handler', $callback );
 
 		/*
