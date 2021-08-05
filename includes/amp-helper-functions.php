@@ -999,6 +999,8 @@ function amp_register_default_styles( WP_Styles $styles ) {
 	);
 	$styles->add_data( 'amp-icons', 'rtl', 'replace' );
 
+	// These are registered exclusively for used for non-AMP pages that manually enqueue them. They aren't needed on
+	// AMP pages due to the runtime style being present and because the styles are inlined in the scripts already.
 	if ( amp_is_bento_enabled() ) {
 		foreach ( AMP_Allowed_Tags_Generated::get_extension_specs() as $extension_name => $extension_spec ) {
 			if ( empty( $extension_spec['bento']['has_css'] ) ) {

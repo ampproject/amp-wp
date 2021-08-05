@@ -1566,32 +1566,13 @@ class AMP_Theme_Support {
 		}
 		$links[ Attribute::REL_PRELOAD ] = array_merge( $prioritized_preloads, $links[ Attribute::REL_PRELOAD ] );
 
-		// Add stylesheets for Bento components.
-		if ( amp_is_bento_enabled() ) {
-			foreach ( array_keys( $amp_scripts ) as $amp_script ) {
-				if ( ! wp_style_is( $amp_script, 'registered' ) ) {
-					continue;
-				}
-				$links[ Attribute::REL_STYLESHEET ][] = AMP_DOM_Utils::create_node(
-					$dom,
-					Tag::LINK,
-					[
-						Attribute::REL    => Attribute::REL_STYLESHEET,
-						Attribute::TYPE   => 'text/css',
-						Attribute::HREF   => wp_styles()->registered[ $amp_script ]->src,
-						'data-ampdevmode' => '',
-					]
-				);
-			}
-		}
-
 		/*
 		 * "4. Use preconnect to speedup the connection to other origin where the full resource URL is not known ahead of time,
 		 * for example, when using Google Fonts."
 		 *
 		 * Note that \AMP_Style_Sanitizer::process_link_element() will ensure preconnect links for Google Fonts are present.
 		 */
-		$link_relations = [ Attribute::REL_PRECONNECT, Attribute::REL_DNS_PREFETCH, Attribute::REL_PRELOAD, Attribute::REL_PRERENDER, Attribute::REL_PREFETCH, Attribute::REL_STYLESHEET ];
+		$link_relations = [ Attribute::REL_PRECONNECT, Attribute::REL_DNS_PREFETCH, Attribute::REL_PRELOAD, Attribute::REL_PRERENDER, Attribute::REL_PREFETCH ];
 		foreach ( $link_relations as $rel ) {
 			if ( ! isset( $links[ $rel ] ) ) {
 				continue;
