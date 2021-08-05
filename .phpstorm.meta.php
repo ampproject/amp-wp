@@ -14,7 +14,6 @@ namespace PHPSTORM_META {
 			'admin.options_menu'                 => \AmpProject\AmpWP\Admin\OptionsMenu::class,
 			'admin.support_screen'               => \AmpProject\AmpWP\Admin\SupportScreen::class,
 			'admin.support'                      => \AmpProject\AmpWP\Admin\SupportLink::class,
-			'admin.polyfills'                    => \AmpProject\AmpWP\Admin\Polyfills::class,
 			'admin.paired_browsing'              => \AmpProject\AmpWP\Admin\PairedBrowsing::class,
 			'admin.plugin_row_meta'              => \AmpProject\AmpWP\Admin\PluginRowMeta::class,
 			'admin.polyfills'                    => \AmpProject\AmpWP\Admin\Polyfills::class,

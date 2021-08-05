@@ -42,41 +42,86 @@ function _renderSiteInfo( data ) {
 				<ListItems
 					heading={ __( 'Site Information', 'amp' ) }
 					items={ [
-						{ label: 'Site URL', value: siteInfo?.site_url },
-						{ label: 'Site title', value: siteInfo?.site_title },
-						{ label: 'PHP version', value: siteInfo?.php_version },
-						{ label: 'MySQL version', value: siteInfo?.mysql_version },
-						{ label: 'WordPress version', value: siteInfo?.wp_version },
-						{ label: 'WordPress language', value: siteInfo?.wp_language },
+						{
+							label: __( 'Site URL', 'amp' ),
+							value: siteInfo?.site_url,
+						},
+						{
+							label: __( 'Site title', 'amp' ),
+							value: siteInfo?.site_title,
+						},
+						{
+							label: __( 'PHP version', 'amp' ),
+							value: siteInfo?.php_version,
+						},
+						{
+							label: __( 'MySQL version', 'amp' ),
+							value: siteInfo?.mysql_version,
+						},
+						{
+							label: __( 'WordPress version', 'amp' ),
+							value: siteInfo?.wp_version,
+						},
+						{
+							label: __( 'WordPress language', 'amp' ),
+							value: siteInfo?.wp_language,
+						},
 					] } />
 				<ListItems
 					heading={ __( 'Site Health', 'amp' ) }
 					items={ [
-						{ label: 'Https status', value: siteInfo?.wp_https_status ? 'Yes' : 'No' },
-						{ label: 'Object cache status', value: siteInfo?.object_cache_status ? 'Yes' : 'No' },
-						{ label: 'Libxml version', value: siteInfo?.libxml_version },
-						{ label: 'Is defined curl multi', value: siteInfo?.is_defined_curl_multi ? 'Yes' : 'No' },
+						{
+							label: __( 'Https status', 'amp' ),
+							value: siteInfo?.wp_https_status ? 'Yes' : 'No',
+						},
+						{
+							label: __( 'Object cache status', 'amp' ),
+							value: siteInfo?.object_cache_status ? 'Yes' : 'No',
+						},
+						{
+							label: __( 'Libxml version', 'amp' ),
+							value: siteInfo?.libxml_version,
+						},
+						{
+							label: __( 'Is defined curl multi', 'amp' ),
+							value: siteInfo?.is_defined_curl_multi ? 'Yes' : 'No',
+						},
 					] } />
 				<ListItems
 					heading={ __( 'AMP Information', 'amp' ) }
 					items={ [
-						{ label: 'AMP mode', value: siteInfo?.amp_mode },
-						{ label: 'AMP version', value: siteInfo?.amp_version },
-						{ label: 'AMP plugin configured', value: siteInfo?.amp_plugin_configured ? 'Yes' : 'No' },
 						{
-							label: 'AMP all templates supported',
+							label: __( 'AMP mode', 'amp' ),
+							value: siteInfo?.amp_mode,
+						},
+						{
+							label: __( 'AMP version', 'amp' ),
+							value: siteInfo?.amp_version,
+						},
+						{
+							label: __( 'AMP plugin configured', 'amp' ),
+							value: siteInfo?.amp_plugin_configured ? 'Yes' : 'No',
+						},
+						{
+							label: __( 'AMP all templates supported', 'amp' ),
 							value: siteInfo?.amp_all_templates_supported ? 'Yes' : 'No',
 						},
 						{
-							label: 'AMP supported post types',
+							label: __( 'AMP supported post types', 'amp' ),
 							value: siteInfo?.amp_supported_post_types ? siteInfo.amp_supported_post_types.join( ', ' ) : '',
 						},
 						{
-							label: 'AMP supported templates',
+							label: __( 'AMP supported templates', 'amp' ),
 							value: siteInfo?.amp_supported_templates ? siteInfo.amp_supported_templates.join( ', ' ) : '',
 						},
-						{ label: 'AMP mobile redirect', value: siteInfo?.amp_mobile_redirect ? 'Yes' : 'No' },
-						{ label: 'AMP reader theme', value: siteInfo?.amp_reader_theme },
+						{
+							label: __( 'AMP mobile redirect', 'amp' ),
+							value: siteInfo?.amp_mobile_redirect ? 'Yes' : 'No',
+						},
+						{
+							label: __( 'AMP reader theme', 'amp' ),
+							value: siteInfo?.amp_reader_theme,
+						},
 					] } />
 			</div>
 		</details>

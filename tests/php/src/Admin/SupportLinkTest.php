@@ -11,6 +11,10 @@ use AmpProject\AmpWP\Admin\SupportLink;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
+use AMP_Options_Manager;
+use AMP_Validation_Manager;
+use AMP_Theme_Support;
+use AMP_Validated_URL_Post_Type;
 
 /**
  * Tests for Support Link.
@@ -84,7 +88,7 @@ class SupportLinkTest extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		// Set AMP mode.
-		\AMP_Options_Manager::update_option( Option::THEME_SUPPORT, \AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 		$admin_bar = new \WP_Admin_Bar();
@@ -92,7 +96,7 @@ class SupportLinkTest extends WP_UnitTestCase {
 		$this->go_to( home_url( '/' ) );
 
 		// AMP-first mode.
-		\AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$this->instance->admin_bar_menu( $admin_bar );
 
 		$node = $admin_bar->get_node( 'amp-support' );
@@ -108,7 +112,7 @@ class SupportLinkTest extends WP_UnitTestCase {
 
 		$post = $this->factory()->post->create_and_get(
 			[
-				'post_type' => \AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			]
 		);
 
@@ -141,7 +145,7 @@ class SupportLinkTest extends WP_UnitTestCase {
 		// Test 2: With "amp_validated_url" post type.
 		$post = $this->factory()->post->create_and_get(
 			[
-				'post_type' => \AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			]
 		);
 

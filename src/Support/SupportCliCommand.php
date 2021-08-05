@@ -167,12 +167,12 @@ class SupportCliCommand implements Service, CliCommand {
 			$summary['Synthetic Data'] = 'Yes';
 		}
 
-		\WP_CLI::log( sprintf( PHP_EOL . "%'=100s", '' ) );
-		\WP_CLI::log( 'Summary of AMP data' );
-		\WP_CLI::log( sprintf( "%'=100s", '' ) );
+		WP_CLI::log( sprintf( PHP_EOL . "%'=100s", '' ) );
+		WP_CLI::log( 'Summary of AMP data' );
+		WP_CLI::log( sprintf( "%'=100s", '' ) );
 		foreach ( $summary as $key => $value ) {
-			\WP_CLI::log( sprintf( '%-25s : %s', $key, $value ) );
+			WP_CLI::log( sprintf( '%-25s : %s', $key, $value ) );
 		}
-		\WP_CLI::log( sprintf( "%'=100s" . PHP_EOL, '' ) );
+		WP_CLI::log( sprintf( "%'=100s" . PHP_EOL, '' ) );
 	}
 }

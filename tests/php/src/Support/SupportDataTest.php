@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Support\Tests;
 
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Support\SupportData;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use WP_UnitTestCase;
 use AMP_Validated_URL_Post_Type;
 
@@ -19,6 +20,8 @@ use AMP_Validated_URL_Post_Type;
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportData
  */
 class SupportDataTest extends WP_UnitTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Instance of OptionsMenu
@@ -37,6 +40,26 @@ class SupportDataTest extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->instance = new SupportData( [] );
+	}
+
+	/**
+	 * @covers ::set_args
+	 */
+	public function test_set_args() {
+
+		$this->instance->set_args( [ 'post_ids' => [ 1, 2, 3 ] ] );
+
+		$this->assertEquals(
+			[ 'post_ids' => [ 1, 2, 3 ] ],
+			$this->get_private_property( $this->instance, 'args' )
+		);
+
+		$this->instance->set_args( [] );
+
+		$this->assertEquals(
+			[],
+			$this->get_private_property( $this->instance, 'args' )
+		);
 	}
 
 	/**
