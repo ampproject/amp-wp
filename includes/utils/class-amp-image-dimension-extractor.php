@@ -140,7 +140,7 @@ class AMP_Image_Dimension_Extractor {
 	private static function register_callbacks() {
 		self::$callbacks_registered = true;
 
-		add_filter( 'amp_extract_image_dimensions_batch', [ __CLASS__, 'extract_by_filename_or_filesystem' ] );
+		add_filter( 'amp_extract_image_dimensions_batch', [ __CLASS__, 'extract_by_filename_or_filesystem' ], 100 );
 		add_filter( 'amp_extract_image_dimensions_batch', [ __CLASS__, 'extract_by_downloading_images' ], 999, 1 );
 
 		/**
