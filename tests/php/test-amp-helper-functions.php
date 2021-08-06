@@ -1467,6 +1467,21 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * Test amp_is_using_native_img().
+	 *
+	 * @covers ::amp_is_using_native_img()
+	 */
+	public function test_amp_is_using_native_img() {
+		$this->assertFalse( amp_is_using_native_img(), 'Expected to be disabled by default for now.' );
+
+		add_filter( 'amp_using_native_img', '__return_true' );
+		$this->assertTrue( amp_is_using_native_img() );
+
+		add_filter( 'amp_using_native_img', '__return_false', 20 );
+		$this->assertFalse( amp_is_using_native_img() );
+	}
+
+	/**
 	 * Test deprecated $post param for amp_get_content_embed_handlers().
 	 *
 	 * @covers ::amp_get_content_embed_handlers()
