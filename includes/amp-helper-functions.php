@@ -1330,6 +1330,28 @@ function amp_is_dev_mode() {
 }
 
 /**
+ * Determine whether native `img` should be used instead of converting to `amp-img`.
+ *
+ * @since 2.2
+ *
+ * @return bool Whether to use `img`.
+ */
+function amp_is_using_native_img() {
+	/**
+	 * Filters whether to use the native `img` element rather than convert to `amp-img`.
+	 *
+	 * This filter is a feature flag to opt-in to discontinue using `amp-img` (and `amp-anim`) which will be deprecated
+	 * in AMP in the near future. Once this lands in AMP, this filter will switch to defaulting to true instead of false.
+	 *
+	 * @since 2.2
+	 * @link https://github.com/ampproject/amphtml/issues/30442
+	 *
+	 * @param bool $use_native Whether to use `img`.
+	 */
+	return (bool) apply_filters( 'amp_using_native_img', false );
+}
+
+/**
  * Get content sanitizers.
  *
  * @since 0.7
@@ -1373,6 +1395,8 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 	);
 
+	$using_native_img = amp_is_using_native_img();
+
 	$sanitizers = [
 		'AMP_Embed_Sanitizer'             => [
 			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
@@ -1383,10 +1407,12 @@ function amp_get_content_sanitizers( $post = null ) {
 			'theme_features' => [
 				'force_svg_support' => [], // Always replace 'no-svg' class with 'svg' if it exists.
 			],
+			'use_native_img' => $using_native_img,
 		],
 		'AMP_Srcset_Sanitizer'            => [],
 		'AMP_Img_Sanitizer'               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
+			'use_native_img'     => $using_native_img,
 		],
 		'AMP_Form_Sanitizer'              => [],
 		'AMP_Comments_Sanitizer'          => [
