@@ -77,24 +77,6 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @dataProvider get_data_for_using_native_img
-	 * @covers::add_twentyseventeen_image_styles()
-	 * @param bool $use_native_img Use native img.
-	 */
-	public function test_add_twentyseventeen_image_styles( $use_native_img ) {
-		wp_enqueue_style( get_template() . '-style', get_stylesheet_uri(), [], '0.1' );
-		AMP_Core_Theme_Sanitizer::add_twentyseventeen_image_styles( compact( 'use_native_img' ) );
-		wp_enqueue_scripts();
-		$output = get_echo( 'wp_print_styles' );
-		$needle = '.single-featured-image-header amp-img';
-		if ( $use_native_img ) {
-			$this->assertStringNotContains( $needle, $output );
-		} else {
-			$this->assertStringContains( $needle, $output );
-		}
-	}
-
-	/**
 	 * Data for testing the conversion of a CSS selector to a XPath.
 	 *
 	 * @return array

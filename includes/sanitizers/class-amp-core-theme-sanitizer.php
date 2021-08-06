@@ -190,7 +190,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					],
 					'force_fixed_background_support'      => [],
 					'add_twentyseventeen_masthead_styles' => [],
-					'add_twentyseventeen_image_styles'    => $args,
 					'add_twentyseventeen_sticky_nav_menu' => [],
 					'add_has_header_video_body_class'     => [],
 					'add_nav_menu_styles'                 => [
@@ -971,44 +970,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						transform: translateY( -<?php echo (int) AMP_Core_Theme_Sanitizer::get_twentyseventeen_navigation_outer_height(); ?>px );
 						display: block;
 					}
-				}
-				</style>
-				<?php
-				$styles = str_replace( [ '<style>', '</style>' ], '', ob_get_clean() );
-				wp_add_inline_style( get_template() . '-style', $styles );
-			},
-			11
-		);
-	}
-
-	/**
-	 * Override the featured image header styling in style.css.
-	 * Used only for Twenty Seventeen.
-	 *
-	 * @since 1.0
-	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L2100
-	 *
-	 * @param array $args Args.
-	 */
-	public static function add_twentyseventeen_image_styles( $args = [] ) {
-		if ( ! empty( $args['use_native_img'] ) ) {
-			return;
-		}
-
-		add_action(
-			'wp_enqueue_scripts',
-			static function() {
-				ob_start();
-				?>
-				<style>
-				/* Override the display: block in twentyseventeen/style.css, as <amp-img> is usually inline-block. */
-				.single-featured-image-header amp-img {
-					display: inline-block;
-				}
-
-				/* Because the <amp-img> is inline-block, its container needs this rule to center it. */
-				.single-featured-image-header {
-					text-align: center;
 				}
 				</style>
 				<?php
