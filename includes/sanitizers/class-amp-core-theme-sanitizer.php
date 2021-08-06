@@ -807,7 +807,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Add required styles for featured image header and image blocks in Twenty Twenty.
+	 * Add required styles for featured image header in Twenty Twenty.
 	 *
 	 * @param array $args Args.
 	 */
@@ -816,6 +816,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		// @todo This was introduced in <https://github.com/ampproject/amp-wp/commit/e1c7462> but it doesn't seem to have any effect.
 		add_action(
 			'wp_enqueue_scripts',
 			static function() {
@@ -824,10 +825,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				<style>
 				.featured-media amp-img {
 					position: static;
-				}
-
-				.wp-block-image img {
-					display: block;
 				}
 				</style>
 				<?php
