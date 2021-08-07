@@ -1430,6 +1430,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		],
 		'AMP_Gallery_Block_Sanitizer'     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
+			'use_native_img'    => $using_native_img,
 		],
 		'AMP_Block_Sanitizer'             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
 		'AMP_Script_Sanitizer'            => [],
