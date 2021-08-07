@@ -2094,7 +2094,7 @@ class AMP_Theme_Support {
 
 		// Prevent serving an AMP-marked page when it is not in dev mode and we know it is going to be invalid.
 		// @todo This should be removed when native <img> is allowed in AMP. See <https://github.com/ampproject/amphtml/issues/30442>.
-		if ( amp_is_using_native_img() && ! amp_is_dev_mode() ) {
+		if ( amp_is_using_native_img() && ! is_user_logged_in() ) {
 			$dom->documentElement->removeAttribute( Attribute::AMP );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
