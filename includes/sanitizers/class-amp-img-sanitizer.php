@@ -213,15 +213,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				case 'data-amp-layout':
-					if ( ! $this->args['use_native_img'] ) {
-						$out['layout'] = $value;
-					}
+					$out['layout'] = $value;
 					break;
 
 				case 'data-amp-noloading':
-					if ( ! $this->args['use_native_img'] ) {
-						$out['noloading'] = $value;
-					}
+					$out['noloading'] = $value;
 					break;
 
 				// Skip directly copying new web platform attributes from img to amp-img which are largely handled by AMP already.
@@ -331,40 +327,34 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMElement $node The img element to adjust and replace.
 	 */
-	private function adjust_and_replace_node( $node ) {
-
-		$amp_data       = $this->args['use_native_img'] ? [] : $this->get_data_amp_attributes( $node );
-		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-		if ( ! $this->args['use_native_img'] ) {
-			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
-			$old_attributes = $this->maybe_add_lightbox_attributes( $old_attributes, $node );
-		}
-
-		$new_attributes = $this->filter_attributes( $old_attributes );
-		$layout         = isset( $amp_data[ Attribute::LAYOUT ] ) ? $amp_data[ Attribute::LAYOUT ] : false;
-		if ( ! $this->args['use_native_img'] ) {
-			$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
-		}
-
-		$this->add_or_append_attribute( $new_attributes, Attribute::CLASS_, 'amp-wp-enforced-sizes' );
-
-		// If using native <img> elements.
+	private function adjust_and_replace_node( DOMElement $node ) {
 		if ( $this->args['use_native_img'] ) {
-			unset(
-				$new_attributes['layout'],
-				$new_attributes['noloading']
-			);
-			$new_attributes[ DevMode::DEV_MODE_ATTRIBUTE ] = ''; // @todo Remove once https://github.com/ampproject/amphtml/issues/30442 lands.
-			$new_attributes[ Attribute::DECODING ]         = 'async';
-			if ( ! isset( $new_attributes[ Attribute::LOADING ] ) ) {
-				$new_attributes[ Attribute::LOADING ] = 'lazy';
+			$attributes = $this->maybe_add_lightbox_attributes( [], $node );
+
+			// Set decoding=async by default. See <https://core.trac.wordpress.org/ticket/53232>.
+			if ( ! $node->hasAttribute( Attribute::DECODING ) ) {
+				$attributes[ Attribute::DECODING ] = 'async';
 			}
-			foreach ( $new_attributes as $attribute_name => $attribute_value ) {
-				$node->setAttribute( $attribute_name, $attribute_value );
+
+			// @todo Remove once https://github.com/ampproject/amphtml/issues/30442 lands.
+			$attributes[ DevMode::DEV_MODE_ATTRIBUTE ] = '';
+
+			foreach ( $attributes as $name => $value ) {
+				$node->setAttribute( $name, $value );
 			}
 			return;
 		}
 
+		$amp_data       = $this->get_data_amp_attributes( $node );
+		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+		$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
+		$old_attributes = $this->maybe_add_lightbox_attributes( $old_attributes, $node );
+
+		$new_attributes = $this->filter_attributes( $old_attributes );
+		$layout         = isset( $amp_data[ Attribute::LAYOUT ] ) ? $amp_data[ Attribute::LAYOUT ] : false;
+		$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
+
+		$this->add_or_append_attribute( $new_attributes, Attribute::CLASS_, 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes[ Attribute::LAYOUT ] ) && ! empty( $new_attributes[ Attribute::HEIGHT ] ) && ! empty( $new_attributes[ Attribute::WIDTH ] ) ) {
 			// Use responsive images when a theme supports wide and full-bleed images.
 			if (
