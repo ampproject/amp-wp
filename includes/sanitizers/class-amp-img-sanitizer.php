@@ -329,7 +329,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function adjust_and_replace_node( DOMElement $node ) {
 		if ( $this->args['use_native_img'] ) {
-			$attributes = $this->maybe_add_lightbox_attributes( [], $node );
+			$attributes = $this->maybe_add_lightbox_attributes( [], $node ); // @todo AMP doesn't support lightbox on <img> yet.
 
 			// Set decoding=async by default. See <https://core.trac.wordpress.org/ticket/53232>.
 			if ( ! $node->hasAttribute( Attribute::DECODING ) ) {
@@ -338,6 +338,13 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 			// @todo Remove once https://github.com/ampproject/amphtml/issues/30442 lands.
 			$attributes[ DevMode::DEV_MODE_ATTRIBUTE ] = '';
+
+			// @todo This class should really only be added if we actually have to provide dimensions.
+			$attributes[ Attribute::CLASS_ ] = (string) $node->getAttribute( Attribute::CLASS_ );
+			if ( ! empty( $attributes[ Attribute::CLASS_ ] ) ) {
+				$attributes[ Attribute::CLASS_ ] .= ' ';
+			}
+			$attributes[ Attribute::CLASS_ ] .= 'amp-wp-enforced-sizes';
 
 			foreach ( $attributes as $name => $value ) {
 				$node->setAttribute( $name, $value );
