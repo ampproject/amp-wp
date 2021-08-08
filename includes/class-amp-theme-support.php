@@ -2092,9 +2092,9 @@ class AMP_Theme_Support {
 			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );
 		}
 
-		// Prevent serving an AMP-marked page when using native img since not yet AMP-valid to avoid search engines from flagging.
-		// @todo This should be removed when native <img> is allowed in AMP. See <https://github.com/ampproject/amphtml/issues/30442>.
-		if ( amp_is_using_native_img() && ! is_user_logged_in() ) {
+		// Prevent serving a page in Dev Mode as being marked as AMP when the user is not logged-in to avoid it from
+		// being flagged as invalid by Google Search Console.
+		if ( amp_is_dev_mode() && ! is_user_logged_in() ) {
 			$dom->documentElement->removeAttribute( Attribute::AMP );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
