@@ -9,14 +9,11 @@ use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /**
  * Class AMP_Link_Sanitizer_Test
  */
 class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
-
-	use AssertContainsCompatibility;
 
 	/**
 	 * Data for test_amp_to_amp_navigation.
@@ -195,9 +192,9 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			}
 
 			if ( $paired && $link_data['expected_amp'] ) {
-				$this->assertStringContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
+				$this->assertStringContainsString( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
 			} elseif ( ! $paired || ! $link_data['expected_amp'] ) {
-				$this->assertStringNotContains( '?' . amp_get_slug() . '=1', $element->getAttribute( 'href' ), "ID: $id" );
+				$this->assertStringNotContainsString( '?' . amp_get_slug() . '=1', $element->getAttribute( 'href' ), "ID: $id" );
 			}
 		}
 

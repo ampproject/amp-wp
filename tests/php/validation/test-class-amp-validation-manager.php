@@ -12,7 +12,6 @@ use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
@@ -26,7 +25,6 @@ use AmpProject\Dom\Document;
  */
 class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility;
 	use HandleValidation;
 	use PrivateAccess;
 	use WithoutBlockPreRendering {
@@ -207,7 +205,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$output = $get_output();
 		$this->assertJson( $output );
-		$this->assertStringContains( 'AMP_NOT_REQUESTED', $output );
+		$this->assertStringContainsString( 'AMP_NOT_REQUESTED', $output );
 
 		// Verify correct response if AMP not available.
 		AMP_Validation_Manager::$is_validate_request = true;
@@ -225,7 +223,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->go_to( amp_get_permalink( $post_id ) );
 		$output = $get_output();
 		$this->assertJson( $output );
-		$this->assertStringContains( 'AMP_NOT_AVAILABLE', $output );
+		$this->assertStringContainsString( 'AMP_NOT_AVAILABLE', $output );
 	}
 
 	/**
@@ -383,7 +381,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
 		$this->assertIsObject( $node );
-		$this->assertStringContains( 'action=amp_validate', $node->href );
+		$this->assertStringContainsString( 'action=amp_validate', $node->href );
 		$view_item = $admin_bar->get_node( 'amp-view' );
 		$this->assertIsObject( $view_item );
 		$this->assertEqualSets( [ QueryVar::NOAMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
@@ -1367,24 +1365,24 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_function_callback );
 		$output = ob_get_clean();
-		$this->assertStringContains( '<div class="notice notice-error">', $output );
-		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContainsString( '<div class="notice notice-error">', $output );
+		$this->assertStringContainsString( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_argument );
 		$output = ob_get_clean();
-		$this->assertStringContains( '<div></div>', $output );
-		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContainsString( '<div></div>', $output );
+		$this->assertStringContainsString( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_one_argument, $notice );
 		$output = ob_get_clean();
-		$this->assertStringContains( $notice, $output );
-		$this->assertStringContains( sprintf( '<div class="notice notice-warning"><p>%s</p></div>', $notice ), $output );
-		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContainsString( $notice, $output );
+		$this->assertStringContainsString( sprintf( '<div class="notice notice-warning"><p>%s</p></div>', $notice ), $output );
+		$this->assertStringContainsString( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_two_arguments, $notice, get_the_ID() );
@@ -1392,30 +1390,30 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Theme_Support::start_output_buffering();
 		self::output_message( $notice, get_the_ID() );
 		$expected_output = ob_get_clean();
-		$this->assertStringContains( $expected_output, $output );
-		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContainsString( $expected_output, $output );
+		$this->assertStringContainsString( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		// This action's callback doesn't output any HTML tags, so no HTML should be present.
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_tag_output );
 		$output = ob_get_clean();
-		$this->assertStringNotContains( '<!--amp-source-stack ', $output );
-		$this->assertStringNotContains( '<!--/amp-source-stack ', $output );
+		$this->assertStringNotContainsString( '<!--amp-source-stack ', $output );
+		$this->assertStringNotContainsString( '<!--/amp-source-stack ', $output );
 
 		// This action's callback comes from core.
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_core_output );
 		$output = ob_get_clean();
-		$this->assertStringContains( '<!--amp-source-stack {"type":"core","name":"wp-includes"', $output );
-		$this->assertStringContains( '<!--/amp-source-stack {"type":"core","name":"wp-includes"', $output );
+		$this->assertStringContainsString( '<!--amp-source-stack {"type":"core","name":"wp-includes"', $output );
+		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"core","name":"wp-includes"', $output );
 
 		// This action's callback doesn't echo any markup, so it shouldn't be wrapped in comments.
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_output );
 		$output = ob_get_clean();
-		$this->assertStringNotContains( '<!--amp-source-stack ', $output );
-		$this->assertStringNotContains( '<!--/amp-source-stack ', $output );
+		$this->assertStringNotContainsString( '<!--amp-source-stack ', $output );
+		$this->assertStringNotContainsString( '<!--/amp-source-stack ', $output );
 
 		$handle_inner_action = null;
 		$handle_outer_action = null;
@@ -1773,9 +1771,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$output = ob_get_clean();
 
 		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
-		$this->assertStringContains( $test_string, $output );
-		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
-		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
+		$this->assertStringContainsString( $test_string, $output );
+		$this->assertStringContainsString( '<!--amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
+		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
 
 		$action_callback = [
 			'function'      => [ $this, 'get_string' ],
@@ -1815,11 +1813,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::$hook_source_stack[] = $latest_source;
 
 		$wrapped_content = AMP_Validation_Manager::wrap_buffer_with_source_comments( $initial_content );
-		$this->assertStringContains( $initial_content, $wrapped_content );
-		$this->assertStringContains( '<!--amp-source-stack', $wrapped_content );
-		$this->assertStringContains( '<!--/amp-source-stack', $wrapped_content );
-		$this->assertStringContains( wp_json_encode( $latest_source ), $wrapped_content );
-		$this->assertStringNotContains( wp_json_encode( $earliest_source ), $wrapped_content );
+		$this->assertStringContainsString( $initial_content, $wrapped_content );
+		$this->assertStringContainsString( '<!--amp-source-stack', $wrapped_content );
+		$this->assertStringContainsString( '<!--/amp-source-stack', $wrapped_content );
+		$this->assertStringContainsString( wp_json_encode( $latest_source ), $wrapped_content );
+		$this->assertStringNotContainsString( wp_json_encode( $earliest_source ), $wrapped_content );
 	}
 
 	/**
@@ -1912,7 +1910,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
 
-		$this->assertStringNotContains( 'amp-source-stack', $dom->saveHTML() );
+		$this->assertStringNotContainsString( 'amp-source-stack', $dom->saveHTML() );
 		$this->assertEquals( '{"foo":"bar <b>foo<\/b>"}', $dom->getElementById( 'first' )->textContent );
 		$this->assertEquals( 'body { color: blue; }body { color: red; }body { color: white; }', $dom->getElementById( 'second' )->textContent );
 		$this->assertEquals( '/* start custom scripts! */document.write("hello!")/* end custom scripts! */', $dom->getElementById( 'third' )->textContent );
@@ -1986,7 +1984,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		wp_update_term( $term1_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ] );
 		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertEquals( '(1 issue: unreviewed)', $get_small_text_content( $validity_link_element ) );
-		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
+		$this->assertStringContainsString( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
 		// Test 1 reviewed removed term.
@@ -1999,7 +1997,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertEquals( '(1 issue: reviewed)', $get_small_text_content( $validity_link_element ) );
-		$this->assertStringContains( 'amp-icon amp-valid', $status_icon_element->getAttribute( 'class' ) );
+		$this->assertStringContainsString( 'amp-icon amp-valid', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
 		// Test 1 unreviewed kept term in Standard Mode.
@@ -2014,7 +2012,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertEquals( '(1 issue: unreviewed, kept)', $get_small_text_content( $validity_link_element ) );
-		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
+		$this->assertStringContainsString( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
 		// Test 1 reviewed kept term in Standard Mode.
@@ -2029,7 +2027,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertEquals( '(1 issue: kept)', $get_small_text_content( $validity_link_element ) );
-		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
+		$this->assertStringContainsString( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
 		// Test 1 unreviewed kept term in Transitional Mode.
@@ -2045,7 +2043,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertEquals( '(1 issue: unreviewed, kept)', $get_small_text_content( $validity_link_element ) );
-		$this->assertStringContains( 'amp-icon amp-invalid', $status_icon_element->getAttribute( 'class' ) );
+		$this->assertStringContainsString( 'amp-icon amp-invalid', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
 		// Test 1 reviewed kept term in Transitional Mode.
@@ -2061,7 +2059,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertEquals( '(1 issue: kept)', $get_small_text_content( $validity_link_element ) );
-		$this->assertStringContains( 'amp-icon amp-invalid', $status_icon_element->getAttribute( 'class' ) );
+		$this->assertStringContainsString( 'amp-icon amp-invalid', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
 		// Test 2 issues: one reviewed removed and one unreviewed removed.
@@ -2082,7 +2080,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertEquals( '(2 issues: 1 unreviewed)', $get_small_text_content( $validity_link_element ) );
-		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
+		$this->assertStringContainsString( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
 		// Test 2 issues: two reviewed removed.
@@ -2103,7 +2101,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertEquals( '(2 issues: all reviewed)', $get_small_text_content( $validity_link_element ) );
-		$this->assertStringContains( 'amp-icon amp-valid', $status_icon_element->getAttribute( 'class' ) );
+		$this->assertStringContainsString( 'amp-icon amp-valid', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 	}
 
@@ -2262,7 +2260,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 		$stylesheets = [ [ 'CSS!' ] ];
 		$filter        = function( $pre, $r, $url ) use ( $validation_errors, $php_error, $queried_object, $stylesheets, $after_matter ) {
-			$this->assertStringContains( AMP_Validation_Manager::VALIDATE_QUERY_VAR . '=', $url );
+			$this->assertStringContainsString( AMP_Validation_Manager::VALIDATE_QUERY_VAR . '=', $url );
 
 			$validation = [
 				'results'         => [],
@@ -2331,7 +2329,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$encoded_messages = AMP_Validation_Manager::serialize_validation_error_messages( $messages );
 		$this->assertTrue( is_string( $encoded_messages ) );
-		$this->assertStringContains( ':', $encoded_messages );
+		$this->assertStringContainsString( ':', $encoded_messages );
 
 		$decoded_messages = AMP_Validation_Manager::unserialize_validation_error_messages( $encoded_messages );
 		$this->assertTrue( is_array( $decoded_messages ) );
@@ -2381,10 +2379,10 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			]
 		);
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_plugin_notice' ] );
-		$this->assertStringContains( 'Warning: The following plugin may be incompatible with AMP', $output );
-		$this->assertStringContains( 'Foo Bar', $output );
-		$this->assertStringContains( 'More details', $output );
-		$this->assertStringContains( admin_url( 'edit.php' ), $output );
+		$this->assertStringContainsString( 'Warning: The following plugin may be incompatible with AMP', $output );
+		$this->assertStringContainsString( 'Foo Bar', $output );
+		$this->assertStringContainsString( 'More details', $output );
+		$this->assertStringContainsString( admin_url( 'edit.php' ), $output );
 
 		if ( $cache_plugins_backup ) {
 			wp_cache_set( 'plugins', $cache_plugins_backup, 'plugins' );
@@ -2438,12 +2436,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			'wp-url',
 		];
 
-		$this->assertStringContains( 'js/amp-block-validation.js', $script->src );
+		$this->assertStringContainsString( 'js/amp-block-validation.js', $script->src );
 		$this->assertEqualSets( $expected_dependencies, $script->deps );
 		$this->assertStringContainsString( $slug, wp_scripts()->queue );
 
 		$style = wp_styles()->registered[ $slug ];
-		$this->assertStringContains( 'css/amp-block-validation.css', $style->src );
+		$this->assertStringContainsString( 'css/amp-block-validation.css', $style->src );
 		$this->assertEquals( AMP__VERSION, $style->ver );
 		$this->assertStringContainsString( $slug, wp_styles()->queue );
 	}

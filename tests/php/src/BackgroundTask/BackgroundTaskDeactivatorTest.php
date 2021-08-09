@@ -9,7 +9,6 @@ use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\Infrastructure\Deactivateable;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use WP_UnitTestCase;
 
@@ -17,7 +16,7 @@ use WP_UnitTestCase;
  * @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator
  */
 final class BackgroundTaskDeactivatorTest extends WP_UnitTestCase {
-	use AssertContainsCompatibility, PrivateAccess;
+	use PrivateAccess;
 
 	/**
 	 * BackgroundTaskDeactivator instance.

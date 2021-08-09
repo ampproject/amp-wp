@@ -11,14 +11,13 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeSupportFeatures;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWp\Tests\Helpers\PrivateAccess;
 
 /** @coversDefaultClass \AmpProject\AmpWP\ReaderThemeSupportFeatures */
 final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility, LoadsCoreThemes, PrivateAccess;
+	use LoadsCoreThemes, PrivateAccess;
 
 	const TEST_GRADIENT_PRESETS = [
 		[
@@ -376,13 +375,13 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 
 		$output = get_echo( [ $this->instance, 'print_theme_support_styles' ] );
 
-		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-color-palette">', $output );
-		$this->assertStringContains( '.has-white-background-color { background-color: #FFFFFF; color: #000; }', $output );
-		$this->assertStringContains( '.has-black-color { color: #000000; }', $output );
-		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
-		$this->assertStringContains( ':root .is-gigantic-text, :root .has-gigantic-font-size { font-size: 144px; }', $output );
-		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-gradient-presets">', $output );
-		$this->assertStringContains( '.has-yellow-to-purple-gradient-background { background: linear-gradient(160deg, #EEEADD 0%, #D1D1E4 100%); }', $output );
+		$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-color-palette">', $output );
+		$this->assertStringContainsString( '.has-white-background-color { background-color: #FFFFFF; color: #000; }', $output );
+		$this->assertStringContainsString( '.has-black-color { color: #000000; }', $output );
+		$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
+		$this->assertStringContainsString( ':root .is-gigantic-text, :root .has-gigantic-font-size { font-size: 144px; }', $output );
+		$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-gradient-presets">', $output );
+		$this->assertStringContainsString( '.has-yellow-to-purple-gradient-background { background: linear-gradient(160deg, #EEEADD 0%, #D1D1E4 100%); }', $output );
 	}
 
 	/** @return array */

@@ -5,7 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
@@ -17,7 +16,6 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
  */
 class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
-	use AssertContainsCompatibility;
 	use PrivateAccess;
 	use LoadsCoreThemes;
 
@@ -52,9 +50,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 		$needle = 'height="80"';
 		if ( $native_img_used ) {
-			$this->assertStringNotContains( $needle, $logo );
+			$this->assertStringNotContainsString( $needle, $logo );
 		} else {
-			$this->assertStringContains( $needle, $logo );
+			$this->assertStringContainsString( $needle, $logo );
 		}
 	}
 
@@ -70,9 +68,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$output = get_echo( 'wp_print_styles' );
 		$needle = '.featured-media amp-img';
 		if ( $native_img_used ) {
-			$this->assertStringNotContains( $needle, $output );
+			$this->assertStringNotContainsString( $needle, $output );
 		} else {
-			$this->assertStringContains( $needle, $output );
+			$this->assertStringContainsString( $needle, $output );
 		}
 	}
 
@@ -428,9 +426,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$needle = '.site-logo amp-img { width: 3.000000rem; } @media (min-width: 700px) { .site-logo amp-img { width: 4.500000rem; } }';
 
 		if ( $native_img_used ) {
-			$this->assertStringNotContains( $needle, $logo );
+			$this->assertStringNotContainsString( $needle, $logo );
 		} else {
-			$this->assertStringContains( $needle, $logo );
+			$this->assertStringContainsString( $needle, $logo );
 		}
 	}
 
@@ -538,8 +536,8 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference:not(._) body',
 		];
 		foreach ( $replacements as $search => $replacement ) {
-			$this->assertStringNotContains( "$search {", $after );
-			$this->assertStringContains( "$replacement {", $after );
+			$this->assertStringNotContainsString( "$search {", $after );
+			$this->assertStringContainsString( "$replacement {", $after );
 		}
 	}
 
@@ -563,8 +561,8 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 		$after = implode( '', wp_styles()->registered[ $style_handle ]->extra['after'] );
 		$this->assertNotEmpty( $after );
-		$this->assertStringContains( '@media only screen and (max-width: 481px)', $after );
-		$this->assertStringContains( 'button[overflow]:hover', $after );
+		$this->assertStringContainsString( '@media only screen and (max-width: 481px)', $after );
+		$this->assertStringContainsString( 'button[overflow]:hover', $after );
 		$this->assertStringEndsWith( '/*first*/', $after );
 	}
 
@@ -611,9 +609,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 			if ( false !== strpos( $href, '#' ) ) {
 				$this->assertTrue( $link->hasAttribute( 'on' ) );
 				if ( false !== strpos( $href, '#colophon' ) ) {
-					$this->assertStringContains( 'colophon.scrollTo', $link->getAttribute( 'on' ) );
+					$this->assertStringContainsString( 'colophon.scrollTo', $link->getAttribute( 'on' ) );
 				} else {
-					$this->assertStringNotContains( 'colophon.scrollTo', $link->getAttribute( 'on' ) );
+					$this->assertStringNotContainsString( 'colophon.scrollTo', $link->getAttribute( 'on' ) );
 				}
 			} else {
 				$this->assertFalse( $link->hasAttribute( 'on' ) );
