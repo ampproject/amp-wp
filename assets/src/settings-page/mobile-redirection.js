@@ -17,7 +17,7 @@ import { Options } from '../components/options-context-provider';
 /**
  * Mobile redirection section of the settings page.
  *
- * @param {Object} props Component props.
+ * @param {Object} props    Component props.
  * @param {string} props.id Unique HTML ID.
  */
 export function MobileRedirection( { id } ) {

@@ -121,7 +121,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * Custom Logo will update their UI to show the image. Older controls like the Background Image will not however.
 	 *
 	 * @param {wp.customize.UploadControl} control
-	 * @param {Function} control.extended
+	 * @param {Function}                   control.extended
 	 */
 	function populateUploadControl( control ) {
 		const value = control.setting();
@@ -280,8 +280,8 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	/**
 	 * Import settings for a control.
 	 *
-	 * @param {wp.customize.Control} control Control.
-	 * @param {Function} control.extended Control.
+	 * @param {wp.customize.Control} control          Control.
+	 * @param {Function}             control.extended Control.
 	 */
 	function importControlSettings( control ) {
 		// Ensure all background settings are shown by ensuring custom preset is selected.
@@ -514,9 +514,9 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	/**
 	 * Rewrite Ajax requests to inject AMP query var.
 	 *
-	 * @param {Object} options Options.
+	 * @param {Object} options      Options.
 	 * @param {string} options.type Type.
-	 * @param {string} options.url URL.
+	 * @param {string} options.url  URL.
 	 * @return {void}
 	 */
 	component.injectAmpIntoAjaxRequests = function injectAmpIntoAjaxRequests( options ) {

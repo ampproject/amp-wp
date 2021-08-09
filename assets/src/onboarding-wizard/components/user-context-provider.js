@@ -20,10 +20,10 @@ export const User = createContext();
 /**
  * Context provider user data.
  *
- * @param {Object} props Component props.
- * @param {?any} props.children Component children.
+ * @param {Object} props                          Component props.
+ * @param {?any}   props.children                 Component children.
  * @param {string} props.userOptionDeveloperTools The key of the option to use from the settings endpoint.
- * @param {string} props.userRestPath REST endpoint to retrieve options.
+ * @param {string} props.userRestPath             REST endpoint to retrieve options.
  */
 export function UserContextProvider( { children, userOptionDeveloperTools, userRestPath } ) {
 	const { originalOptions, fetchingOptions } = useContext( Options );

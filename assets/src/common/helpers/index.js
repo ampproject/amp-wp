@@ -166,7 +166,7 @@ export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
  *
  * This is not an arrow function so that it can be called with enforceFileType.call( this, foo, bar ).
  *
- * @param {Object} attachment The selected attachment.
+ * @param {Object} attachment     The selected attachment.
  * @param {Object} SelectionError The error to display.
  */
 export const enforceFileType = function( attachment, SelectionError ) {
@@ -197,12 +197,12 @@ export const enforceFileType = function( attachment, SelectionError ) {
 /**
  * Sets the featured image, on selecting it in the Media Library.
  *
- * @param {Object} args Arguments.
- * @param {string} args.url Image URL.
- * @param {number} args.id Attachment ID.
- * @param {number} args.width Image width.
- * @param {number} args.height Image height.
- * @param {Function} args.onSelect A function in the MediaUpload component called on selecting the image.
+ * @param {Object}   args               Arguments.
+ * @param {string}   args.url           Image URL.
+ * @param {number}   args.id            Attachment ID.
+ * @param {number}   args.width         Image width.
+ * @param {number}   args.height        Image height.
+ * @param {Function} args.onSelect      A function in the MediaUpload component called on selecting the image.
  * @param {Function} args.dispatchImage A function to dispatch the change in image to the store.
  */
 export const setImageFromURL = ( { url, id, width, height, onSelect, dispatchImage } ) => {

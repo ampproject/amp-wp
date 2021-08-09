@@ -14,8 +14,8 @@ export const SiteScan = createContext();
 /**
  * Context provider for site scanning.
  *
- * @param {Object} props Component props.
- * @param {?any} props.children Component children.
+ * @param {Object} props          Component props.
+ * @param {?any}   props.children Component children.
  */
 export function SiteScanContextProvider( { children } ) {
 	const [ themeIssues, setThemeIssues ] = useState( null );

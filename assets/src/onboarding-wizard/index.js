@@ -47,8 +47,8 @@ let errorHandler;
 /**
  * Context providers for the application.
  *
- * @param {Object} props Component props.
- * @param {any} props.children Component children.
+ * @param {Object} props          Component props.
+ * @param {any}    props.children Component children.
  */
 export function Providers( { children } ) {
 	global.removeEventListener( 'error', errorHandler );
