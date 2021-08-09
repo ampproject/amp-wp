@@ -19,9 +19,10 @@ use AmpProject\AmpWP\Infrastructure\Service;
  */
 abstract class CronBasedBackgroundTask implements Service, Registerable {
 
-	const DEFAULT_INTERVAL_HOURLY      = 'hourly';
-	const DEFAULT_INTERVAL_TWICE_DAILY = 'twicedaily';
-	const DEFAULT_INTERVAL_DAILY       = 'daily';
+	const DEFAULT_INTERVAL_HOURLY            = 'hourly';
+	const DEFAULT_INTERVAL_TWICE_DAILY       = 'twicedaily';
+	const DEFAULT_INTERVAL_DAILY             = 'daily';
+	const DEFAULT_INTERVAL_EVERY_TEN_MINUTES = 'every_ten_minutes';
 
 	/**
 	 * BackgroundTaskDeactivator instance.
@@ -46,6 +47,7 @@ abstract class CronBasedBackgroundTask implements Service, Registerable {
 	 */
 	public function register() {
 		$this->background_task_deactivator->add_event( $this->get_event_name() );
+		add_filter( 'cron_schedules', [ $this, 'add_cron_schedules' ] ); // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected
 	}
 
 	/**
@@ -72,4 +74,23 @@ abstract class CronBasedBackgroundTask implements Service, Registerable {
 	 * @param mixed[] ...$args Args to pass to the process callback.
 	 */
 	abstract public function process( ...$args );
+
+	/**
+	 * Add new interval for cron schedules.
+	 *
+	 * @param array $cron_schedules List of cron schedules.
+	 *
+	 * @return array List of cron schedules.
+	 */
+	public function add_cron_schedules( $cron_schedules ) {
+
+		$cron_schedules = ( ! empty( $cron_schedules ) && is_array( $cron_schedules ) ) ? $cron_schedules : [];
+
+		$cron_schedules[ self::DEFAULT_INTERVAL_EVERY_TEN_MINUTES ] = [
+			'interval' => ( MINUTE_IN_SECONDS * 10 ),
+			'display'  => esc_html__( 'Every 10 minutes', 'amp' ),
+		];
+
+		return $cron_schedules;
+	}
 }

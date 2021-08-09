@@ -19,32 +19,33 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
  *
  * @internal
  */
-final class URLValidationCron extends RecurringBackgroundTask {
+final class URLValidationQueueCron extends RecurringBackgroundTask {
 
 	/**
-	 * URLValidationProvider instance.
+	 * ScannableURLProvider instance.
 	 *
-	 * @var URLValidationProvider
+	 * @var ScannableURLProvider
 	 */
-	private $url_validation_provider;
+	private $scannable_url_provider;
 
 	/**
 	 * The cron action name.
 	 *
 	 * @var string
 	 */
-	const BACKGROUND_TASK_NAME = 'amp_validate_urls';
+	const BACKGROUND_TASK_NAME = 'amp_validate_url_queue';
 
 	/**
 	 * Class constructor.
 	 *
 	 * @param BackgroundTaskDeactivator $background_task_deactivator Service that deactivates background events.
-	 * @param URLValidationProvider     $url_validation_provider     URLValidationProvider instance.
+	 * @param ScannableURLProvider      $scannable_url_provider      ScannableURLProvider instance.
 	 */
-	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, URLValidationProvider $url_validation_provider ) {
+	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, ScannableURLProvider $scannable_url_provider ) {
+
 		parent::__construct( $background_task_deactivator );
 
-		$this->url_validation_provider = $url_validation_provider;
+		$this->scannable_url_provider = $scannable_url_provider;
 	}
 
 	/**
@@ -53,31 +54,18 @@ final class URLValidationCron extends RecurringBackgroundTask {
 	 * @param mixed[] ...$args Unused callback arguments.
 	 */
 	public function process( ...$args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		$urls                 = $this->scannable_url_provider->get_urls();
 		$validation_queue_key = 'amp_url_validation_queue';
 		$validation_queue     = get_option( $validation_queue_key, [] );
 
-		if ( empty( $validation_queue ) || ! is_array( $validation_queue ) ) {
-			return [];
-		}
+		foreach ( $urls as $url ) {
 
-		$limit = 5;
-		$count = 1;
-
-		foreach ( $validation_queue as $hash => $url ) {
 			if ( empty( $url['url'] ) || empty( $url['type'] ) ) {
 				continue;
 			}
 
-			$response = $this->url_validation_provider->get_url_validation( $url['url'], $url['type'] );
-			if ( empty( $response ) || is_wp_error( $response ) ) {
-				continue;
-			}
-
-			unset( $validation_queue[ $hash ] );
-			$count ++;
-			if ( $limit < $count ) {
-				break;
-			}
+			$url_hash                      = md5( trim( $url['url'] ) );
+			$validation_queue[ $url_hash ] = $url;
 		}
 
 		update_option( $validation_queue_key, $validation_queue );
@@ -102,6 +90,6 @@ final class URLValidationCron extends RecurringBackgroundTask {
 	 * @return string An existing interval name.
 	 */
 	protected function get_interval() {
-		return self::DEFAULT_INTERVAL_EVERY_TEN_MINUTES;
+		return self::DEFAULT_INTERVAL_DAILY;
 	}
 }
