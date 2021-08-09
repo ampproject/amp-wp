@@ -591,7 +591,7 @@ final class MobileRedirection implements Service, Registerable {
 			</a>
 		</div>
 
-		<?php if ( amp_is_dev_mode() && ( ! is_customize_preview() || AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) ) : ?>
+		<?php if ( amp_is_dev_mode() && is_user_logged_in() && ( ! is_customize_preview() || AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) ) : ?>
 			<?php
 			// Note that the switcher link is disabled in Reader mode because there is a separate toggle to switch versions.
 			$exports = [

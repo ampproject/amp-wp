@@ -136,7 +136,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional, HasReq
 	 * Initialize frontend.
 	 */
 	public function init_frontend() {
-		if ( ! amp_is_available() || ! amp_is_dev_mode() ) {
+		if ( ! amp_is_available() || ! amp_is_dev_mode() || ! is_user_logged_in() ) {
 			return;
 		}
 
