@@ -87,7 +87,7 @@
     "postcss-loader": "4.3.0",
     "postcss-nested": "5.0.1",
     "postcss-preset-env": "6.7.0",
-    "react-test-renderer": "16.14.0",
+    "react-test-renderer": "17.0.2",
     "rtlcss-webpack-plugin": "4.0.6",
     "svgo": "2.3.1",
     "webpackbar": "4.0.0"
