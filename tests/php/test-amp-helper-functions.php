@@ -2142,7 +2142,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$wp_rewrite->init();
 
 		$permalink = get_permalink( self::factory()->post->create() );
-		$this->assertNotContains( '?', $permalink );
+		$this->assertStringNotContainsString( '?', $permalink );
 
 		$paired_routing = $this->injector->make( \AmpProject\AmpWP\PairedRouting::class );
 
@@ -2169,7 +2169,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	public function test_amp_has_paired_endpoint_passed( $paired_url_structure, $suffix, $is_amp ) {
 		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $paired_url_structure );
 		$permalink = home_url( '/foo/' );
-		$this->assertNotContains( '?', $permalink );
+		$this->assertStringNotContainsString( '?', $permalink );
 		$url = $permalink . $suffix;
 		$this->assertEquals( $is_amp, amp_has_paired_endpoint( $url ) );
 	}

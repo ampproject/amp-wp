@@ -66,7 +66,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertTrue( $amp_post_type->show_ui );
 		$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
 		$this->assertTrue( $amp_post_type->show_in_admin_bar );
-		$this->assertNotContains( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
+		$this->assertStringNotContainsString( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
 		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'update_validated_url_menu_item' ] ) );
 
 		// Make sure that add_admin_hooks() gets called.

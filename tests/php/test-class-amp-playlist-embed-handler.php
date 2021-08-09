@@ -101,8 +101,8 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		global $post;
 		$playlist_shortcode = 'amp-playlist-shortcode';
 		$this->instance->register_embed();
-		$this->assertNotContains( 'wp-mediaelement', wp_styles()->queue );
-		$this->assertNotContains( $playlist_shortcode, wp_styles()->queue );
+		$this->assertStringNotContainsString( 'wp-mediaelement', wp_styles()->queue );
+		$this->assertStringNotContainsString( $playlist_shortcode, wp_styles()->queue );
 
 		$post               = self::factory()->post->create_and_get();
 		$post->post_content = '[playlist ids="5,3"]';
