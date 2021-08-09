@@ -108,7 +108,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$post->post_content = '[playlist ids="5,3"]';
 		$this->instance->enqueue_styles();
 		$style = wp_styles()->registered[ $playlist_shortcode ];
-		$this->assertContains( $playlist_shortcode, wp_styles()->queue );
+		$this->assertStringContainsString( $playlist_shortcode, wp_styles()->queue );
 		$this->assertEquals( [ 'wp-mediaelement' ], $style->deps );
 		$this->assertEquals( $playlist_shortcode, $style->handle );
 		$this->assertEquals( amp_get_asset_url( 'css/amp-playlist-shortcode.css' ), $style->src );

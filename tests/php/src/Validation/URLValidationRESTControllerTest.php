@@ -66,7 +66,7 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->controller->register();
 
-		$this->assertContains( '/amp/v1/validate-post-url', array_keys( rest_get_server()->get_routes() ) );
+		$this->assertStringContainsString( '/amp/v1/validate-post-url', array_keys( rest_get_server()->get_routes() ) );
 	}
 
 	/** @covers ::create_item_permissions_check() */

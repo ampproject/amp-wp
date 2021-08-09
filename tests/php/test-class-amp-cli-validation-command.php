@@ -78,6 +78,6 @@ class Test_AMP_CLI_Validation_Command extends WP_UnitTestCase {
 
 		// All of the terms created above should be present in $validated_urls.
 		$this->assertEmpty( array_diff( $expected_validated_urls, $actual_validated_urls ) );
-		$this->assertContains( home_url( '/' ), $this->get_validated_urls() );
+		$this->assertStringContainsString( home_url( '/' ), $this->get_validated_urls() );
 	}
 }

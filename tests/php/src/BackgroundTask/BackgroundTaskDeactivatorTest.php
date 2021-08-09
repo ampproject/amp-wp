@@ -127,7 +127,7 @@ final class BackgroundTaskDeactivatorTest extends WP_UnitTestCase {
 		$new_actions = $this->test_instance->add_warning_sign_to_network_deactivate_action( $actions );
 
 		$this->assertTrue( wp_style_is( 'amp-icons' ) );
-		$this->assertContains( '<span style="vertical-align: middle">', $new_actions['deactivate'] );
+		$this->assertStringContainsString( '<span style="vertical-align: middle">', $new_actions['deactivate'] );
 
 		remove_filter( 'wp_is_large_network', '__return_true' );
 	}

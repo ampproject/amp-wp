@@ -106,7 +106,7 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 		$output = get_echo( 'amp_post_template_add_block_styles' );
 		$this->assertTrue( current_theme_supports( 'wp-block-styles' ) );
 		if ( function_exists( 'wp_common_block_scripts_and_styles' ) ) {
-			$this->assertContains( 'wp-block-library-css', $output );
+			$this->assertStringContainsString( 'wp-block-library-css', $output );
 			$this->assertSame( 1, did_action( 'enqueue_block_assets' ) );
 		}
 	}

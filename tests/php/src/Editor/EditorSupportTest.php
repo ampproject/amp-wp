@@ -93,7 +93,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		if ( $this->instance->editor_supports_amp_block_editor_features() ) {
 			$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
 		} else {
-			$this->assertContains(
+			$this->assertStringContainsString(
 				'AMP functionality is not available',
 				wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
 			);

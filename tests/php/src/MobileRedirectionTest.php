@@ -441,7 +441,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 	/** @covers ::get_mobile_user_agents() */
 	public function test_get_mobile_user_agents() {
-		$this->assertContains( 'Mobile', $this->instance->get_mobile_user_agents() );
+		$this->assertStringContainsString( 'Mobile', $this->instance->get_mobile_user_agents() );
 		$this->assertNotContains( 'Watch', $this->instance->get_mobile_user_agents() );
 		add_filter(
 			'amp_mobile_user_agents',
@@ -449,7 +449,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 				return array_merge( $user_agents, [ 'Watch' ] );
 			}
 		);
-		$this->assertContains( 'Watch', $this->instance->get_mobile_user_agents() );
+		$this->assertStringContainsString( 'Watch', $this->instance->get_mobile_user_agents() );
 	}
 
 	/** @covers ::is_redirection_disabled_via_query_param() */

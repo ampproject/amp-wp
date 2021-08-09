@@ -102,7 +102,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		$themes = ( new ReaderThemes() )->get_themes();
 
 		$available_theme_slugs = wp_list_pluck( $themes, 'slug' );
-		$this->assertContains( 'child-of-core', $available_theme_slugs );
+		$this->assertStringContainsString( 'child-of-core', $available_theme_slugs );
 		$this->assertNotContains( 'custom', $available_theme_slugs );
 		$this->assertNotContains( 'with-legacy', $available_theme_slugs );
 	}

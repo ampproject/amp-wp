@@ -271,7 +271,7 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		add_theme_support( 'widgets-block-editor' );
 
 		$this->assertNotEmpty( wp_get_sidebars_widgets() );
-		$this->assertContains( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
+		$this->assertStringContainsString( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
 		$this->assertTrue( current_theme_supports( 'widgets-block-editor' ) );
 
 		$this->instance->disable_widgets();

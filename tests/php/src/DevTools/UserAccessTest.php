@@ -176,7 +176,7 @@ class UserAccessTest extends WP_UnitTestCase {
 
 		ob_start();
 		$this->dev_tools_user_access->print_personal_options( $admin_user );
-		$this->assertContains( 'checkbox', ob_get_clean() );
+		$this->assertStringContainsString( 'checkbox', ob_get_clean() );
 	}
 
 	/**

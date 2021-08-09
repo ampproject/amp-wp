@@ -241,7 +241,7 @@ final class ServerTimingTest extends DependencyInjectedTestCase {
 
 		$server_timing->send();
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Server-Timing',
 				'value'       => 'event-10;desc="Event N°10";dur="12345.7"',
@@ -272,7 +272,7 @@ final class ServerTimingTest extends DependencyInjectedTestCase {
 
 		do_action( 'amp_server_timing_send' );
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Server-Timing',
 				'value'       => 'event-11;desc="Event N°11";dur="3.1"',
@@ -354,7 +354,7 @@ final class ServerTimingTest extends DependencyInjectedTestCase {
 
 		$server_timing->send();
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Server-Timing',
 				'value'       => 'main-event;desc="Main Event";dur="1.2"',
@@ -382,7 +382,7 @@ final class ServerTimingTest extends DependencyInjectedTestCase {
 
 		$server_timing->send();
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Server-Timing',
 				'value'       => 'main-event;desc="Main Event";dur="1.2",verbose-event;desc="Verbose Event";dur="3.4"',
