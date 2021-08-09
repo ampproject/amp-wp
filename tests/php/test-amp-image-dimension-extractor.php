@@ -325,7 +325,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 				[ $url ]
 			);
 			if ( $expected_transient ) {
-				$this->assertInternalType( 'array', get_transient( $transient_name ), "Expected transient to be stored for $url." );
+				$this->assertIsArray( get_transient( $transient_name ), "Expected transient to be stored for $url." );
 			} else {
 				$this->assertFalse( get_transient( $transient_name ), "Expected no transient to be stored for $url." );
 			}

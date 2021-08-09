@@ -87,7 +87,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$query_vars = AMP_Service_Worker::add_query_var( [ 'foo' ] );
 		$this->assertSame( 'foo', $query_vars[0] );
 		$this->assertCount( 2, $query_vars );
-		$this->assertInternalType( 'string', $query_vars[1] );
+		$this->assertIsString( $query_vars[1] );
 	}
 
 	/**

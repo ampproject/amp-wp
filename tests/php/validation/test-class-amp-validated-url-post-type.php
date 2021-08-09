@@ -640,7 +640,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		wp_cache_set( 'plugins', [ '' => $plugins ], 'plugins' );
 
 		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
-		$this->assertInternalType( 'int', $invalid_url_post_id );
+		$this->assertIsInt( $invalid_url_post_id );
 		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_post_staleness( $invalid_url_post_id ) );
 
 		// Test deactivating plugin and activating another.
@@ -1178,7 +1178,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		);
 
 		$r = AMP_Validated_URL_Post_Type::recheck_post( $invalid_url_post_id );
-		$this->assertInternalType( 'array', $r );
+		$this->assertIsArray( $r );
 		$this->assertCount( 2, $r );
 		$this->assertEquals( 'bar', $r[0]['error']['code'] );
 		$this->assertEquals( 'baz', $r[1]['error']['code'] );
@@ -1893,7 +1893,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 		$actions = apply_filters( 'post_row_actions', $initial_actions, $post );
 
-		$this->assertInternalType( 'array', $actions );
+		$this->assertIsArray( $actions );
 		$this->assertArrayHasKey( 'edit', $actions );
 		$this->assertArrayHasKey( 'view', $actions );
 		$this->assertArrayHasKey( 'delete', $actions );

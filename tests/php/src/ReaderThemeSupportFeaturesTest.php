@@ -184,7 +184,7 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		if ( null === $primary_theme_support ) {
 			$this->assertNull( $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
 		} else {
-			$this->assertInternalType( 'array', $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
+			$this->assertIsArray( $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
 			foreach ( $theme_supports as $feature => $supports ) {
 				$this->assertArrayHasKey( $feature, $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
 				$this->assertEquals(
@@ -236,7 +236,7 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->assertFalse( wp_next_scheduled( ReaderThemeSupportFeatures::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT ) );
 
 		$primary_theme_support = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
-		$this->assertInternalType( 'array', $primary_theme_support );
+		$this->assertIsArray( $primary_theme_support );
 		$this->assertEqualSets( array_keys( self::TEST_ALL_THEME_SUPPORTS ), array_keys( $primary_theme_support ) );
 	}
 

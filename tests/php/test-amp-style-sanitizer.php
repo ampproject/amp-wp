@@ -2341,7 +2341,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->assertInstanceOf( 'WP_Error', $actual );
 			$this->assertEquals( $error_code, $actual->get_error_code() );
 		} else {
-			$this->assertInternalType( 'string', $actual );
+			$this->assertIsString( $actual );
 			$this->assertEquals( $expected, $actual );
 		}
 	}
