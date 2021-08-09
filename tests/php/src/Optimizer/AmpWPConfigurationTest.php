@@ -33,7 +33,7 @@ final class AmpWPConfigurationTest extends WP_UnitTestCase {
 		$configuration = new AmpWPConfiguration();
 		$transformers  = $configuration->get( AmpWPConfiguration::KEY_TRANSFORMERS );
 
-		$this->assertNotContains( ServerSideRendering::class, $transformers );
+		$this->assertStringNotContainsString( ServerSideRendering::class, $transformers );
 
 		remove_filter( 'amp_enable_ssr', '__return_false' );
 	}

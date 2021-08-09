@@ -147,7 +147,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		);
 
 		// Comments.
-		$this->assertNotContains(
+		$this->assertStringNotContainsString(
 			wp_scripts()->registered['amp-live-list']->src,
 			$urls
 		);
@@ -163,7 +163,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		);
 
 		// Analytics.
-		$this->assertNotContains(
+		$this->assertStringNotContainsString(
 			wp_scripts()->registered['amp-analytics']->src,
 			$urls
 		);

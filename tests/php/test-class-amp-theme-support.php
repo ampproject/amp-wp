@@ -1025,7 +1025,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$body_classes = get_body_class();
 		$this->assertStringContainsString( 'customize-support', $body_classes );
-		$this->assertNotContains( 'no-customize-support', $body_classes );
+		$this->assertStringNotContainsString( 'no-customize-support', $body_classes );
 	}
 
 	/**

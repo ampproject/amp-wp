@@ -55,7 +55,7 @@ class PluginActivationNoticeTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'class="amp-plugin-notice', get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
 
 		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
-		$this->assertNotContains( 'class="amp-plugin-notice', get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
+		$this->assertStringNotContainsString( 'class="amp-plugin-notice', get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
 	}
 
 	/**
