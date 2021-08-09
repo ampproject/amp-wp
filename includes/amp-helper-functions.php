@@ -876,14 +876,7 @@ function amp_add_generator_metadata() {
 /**
  * Determine whether Bento is enabled.
  *
- * @todo Should this rather be the sandboxing level? Maybe not yet. Bento mode means:
- *
- * 1. Nothing is sanitized by default.
- * 2. Bento versions of components are used.
- * 3. <img> is not converted to <amp-img>
- * 4. Stylesheets are not processed.
- *
- * @since 2.1.3
+ * @since 2.2
  * @internal
  *
  * @return bool
@@ -892,7 +885,7 @@ function amp_is_bento_enabled() {
 	/**
 	 * Filters whether Bento is enabled.
 	 *
-	 * @since 2.1.3
+	 * @since 2.2
 	 * @internal
 	 *
 	 * @param bool $enabled Enabled.
