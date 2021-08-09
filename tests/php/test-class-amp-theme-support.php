@@ -440,7 +440,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test no query available.
 		$wp_query     = null;
 		$availability = AMP_Theme_Support::get_template_availability();
-		$this->assertInternalType( 'array', $availability );
+		$this->assertIsArray( $availability );
 		$this->assertEquals( [ 'no_query_available' ], $availability['errors'] );
 		$this->assertFalse( $availability['supported'] );
 		$this->assertNull( $availability['template'] );

@@ -93,7 +93,7 @@ final class PluginRegistryTest extends TestCase {
 		}
 
 		$plugins = $this->call_private_method( $plugin_registry, 'get_mu_plugins_data' );
-		$this->assertInternalType( 'array', $plugins );
+		$this->assertIsArray( $plugins );
 		foreach ( $plugins as $plugin_data ) {
 			$this->assertEqualSets(
 				$expected_keys,

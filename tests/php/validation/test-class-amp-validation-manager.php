@@ -382,12 +382,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $node );
+		$this->assertIsObject( $node );
 		$this->assertStringContains( 'action=amp_validate', $node->href );
 		$view_item = $admin_bar->get_node( 'amp-view' );
-		$this->assertInternalType( 'object', $view_item );
+		$this->assertIsObject( $view_item );
 		$this->assertEqualSets( [ QueryVar::NOAMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
-		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
+		$this->assertIsObject( $admin_bar->get_node( 'amp-validity' ) );
 
 		// Admin bar item available in paired mode.
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
@@ -395,7 +395,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $node );
+		$this->assertIsObject( $node );
 
 		/*
 		 * Admin bar item available in transitional mode.
@@ -405,20 +405,20 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $node );
+		$this->assertIsObject( $node );
 
 		// Admin bar item available in paired mode.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$root_node = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $root_node );
+		$this->assertIsObject( $root_node );
 		$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $root_node->href ) ) );
 
 		$view_item = $admin_bar->get_node( 'amp-view' );
-		$this->assertInternalType( 'object', $view_item );
+		$this->assertIsObject( $view_item );
 		$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
-		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
+		$this->assertIsObject( $admin_bar->get_node( 'amp-validity' ) );
 
 		// Lastly, confirm that the settings item is added if the user is an admin.
 		wp_set_current_user( 0 );
@@ -730,7 +730,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertCount( 4, $comments );
 
 		$sources = AMP_Validation_Manager::locate_sources( $dom->getElementById( 'test' ) );
-		$this->assertInternalType( 'array', $sources );
+		$this->assertIsArray( $sources );
 		$this->assertCount( 2, $sources );
 
 		$this->assertEquals( $source1, $sources[0] );
@@ -1265,12 +1265,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$search_widget_id = 'search-2';
 		$this->assertArrayHasKey( $search_widget_id, $wp_registered_widgets );
-		$this->assertInternalType( 'array', $wp_registered_widgets[ $search_widget_id ]['callback'] );
+		$this->assertIsArray( $wp_registered_widgets[ $search_widget_id ]['callback'] );
 		$this->assertInstanceOf( 'WP_Widget_Search', $wp_registered_widgets[ $search_widget_id ]['callback'][0] );
 		$this->assertSame( 'display_callback', $wp_registered_widgets[ $search_widget_id ]['callback'][1] );
 		$archives_widget_id = 'archives-2';
 		$this->assertArrayHasKey( $archives_widget_id, $wp_registered_widgets );
-		$this->assertInternalType( 'array', $wp_registered_widgets[ $archives_widget_id ]['callback'] );
+		$this->assertIsArray( $wp_registered_widgets[ $archives_widget_id ]['callback'] );
 
 		AMP_Validation_Manager::wrap_widget_callbacks();
 		$this->assertInstanceOf( 'AMP_Validation_Callback_Wrapper', $wp_registered_widgets[ $search_widget_id ]['callback'] );
@@ -1829,7 +1829,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 */
 	public function test_get_amp_validate_nonce() {
 		$nonce = AMP_Validation_Manager::get_amp_validate_nonce();
-		$this->assertInternalType( 'string', $nonce );
+		$this->assertIsString( $nonce );
 		$this->assertEquals( 32, strlen( $nonce ) );
 	}
 
@@ -2286,7 +2286,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		add_filter( 'pre_http_request', $filter, 10, 3 );
 		$r = AMP_Validation_Manager::validate_url( $validated_url );
-		$this->assertInternalType( 'array', $r );
+		$this->assertIsArray( $r );
 		$this->assertEquals( $validation_errors, wp_list_pluck( $r['results'], 'error' ) );
 		$this->assertEquals( $validated_url, $r['url'] );
 		$this->assertEquals( $stylesheets, $r['stylesheets'] );
@@ -2295,7 +2295,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		// Now try the same, but store the results.
 		$r = AMP_Validation_Manager::validate_url_and_store( $validated_url );
-		$this->assertInternalType( 'array', $r );
+		$this->assertIsArray( $r );
 		$this->assertEquals( $validation_errors, wp_list_pluck( $r['results'], 'error' ) );
 		$this->assertEquals( $validated_url, $r['url'] );
 		$this->assertEquals( $stylesheets, $r['stylesheets'] );

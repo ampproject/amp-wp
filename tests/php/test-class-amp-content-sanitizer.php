@@ -41,7 +41,7 @@ class Test_AMP_Content_Sanitizer extends WP_UnitTestCase {
 			$sanitize_results['stylesheets']
 		);
 		$this->assertEmpty( $sanitize_results['styles'] );
-		$this->assertInternalType( 'array', $sanitize_results['sanitizers'] );
+		$this->assertIsArray( $sanitize_results['sanitizers'] );
 		$this->assertEqualSets( array_keys( $sanitizers ), array_keys( $sanitize_results['sanitizers'] ) );
 		$this->assertEquals( 1, $document->getElementsByTagName( 'amp-video' )->length );
 		foreach ( array_keys( $sanitizers ) as $sanitizer_class ) {

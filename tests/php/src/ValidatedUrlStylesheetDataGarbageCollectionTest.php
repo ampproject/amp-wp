@@ -31,7 +31,7 @@ class ValidatedUrlStylesheetDataGarbageCollectionTest extends WP_UnitTestCase {
 		$timestamp = wp_next_scheduled( ValidatedUrlStylesheetDataGarbageCollection::EVENT_NAME );
 
 		$this->assertNotFalse( $timestamp );
-		$this->assertInternalType( 'int', $timestamp );
+		$this->assertIsInt( $timestamp );
 		$this->assertGreaterThan( 0, $timestamp );
 	}
 

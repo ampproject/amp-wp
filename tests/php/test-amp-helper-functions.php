@@ -1139,7 +1139,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 */
 	public function test_amp_get_boilerplate_stylesheets() {
 		$stylesheets = amp_get_boilerplate_stylesheets();
-		$this->assertInternalType( 'array', $stylesheets );
+		$this->assertIsArray( $stylesheets );
 		$this->assertCount( 2, $stylesheets );
 		$this->assertStringContains( 'body{-webkit-animation:-amp-start', $stylesheets[0] );
 		$this->assertStringContains( 'body{-webkit-animation:none', $stylesheets[1] );
@@ -2010,7 +2010,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		amp_add_admin_bar_view_link( $admin_bar );
 		wp_admin_bar_customize_menu( $admin_bar );
 		$item = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $item );
+		$this->assertIsObject( $item );
 		$this->assertEquals( esc_url( amp_get_permalink( $post_id ) ), $item->href );
 		$item = $admin_bar->get_node( 'customize' );
 		$this->assertStringNotContains( amp_get_slug() . '=', $item->href );
@@ -2022,7 +2022,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$admin_bar = new WP_Admin_Bar();
 		amp_add_admin_bar_view_link( $admin_bar );
 		$item = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $item );
+		$this->assertIsObject( $item );
 		$this->assertEquals( esc_url( get_permalink( $post_id ) ), $item->href );
 		unset( $wp_query->query_vars[ amp_get_slug() ] );
 		$this->assertFalse( amp_is_request() );
@@ -2045,10 +2045,10 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			wp_admin_bar_customize_menu( $admin_bar );
 			amp_add_admin_bar_view_link( $admin_bar );
 			$item = $admin_bar->get_node( 'amp' );
-			$this->assertInternalType( 'object', $item );
+			$this->assertIsObject( $item );
 			$this->assertEquals( esc_url( get_permalink( $post_id ) ), $item->href );
 			$item = $admin_bar->get_node( 'customize' );
-			$this->assertInternalType( 'object', $item );
+			$this->assertIsObject( $item );
 			$this->assertStringNotContains( amp_get_slug() . '=', $item->href );
 			$this->assertStringContains( 'autofocus', $item->href );
 		}
@@ -2061,7 +2061,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		wp_admin_bar_customize_menu( $admin_bar );
 		amp_add_admin_bar_view_link( $admin_bar );
 		$item = $admin_bar->get_node( 'customize' );
-		$this->assertInternalType( 'object', $item );
+		$this->assertIsObject( $item );
 		$this->assertStringContains( amp_get_slug() . '=', $item->href );
 		$this->assertStringNotContains( 'autofocus', $item->href );
 	}
