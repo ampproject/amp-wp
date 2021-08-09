@@ -4,7 +4,6 @@ namespace AmpProject\AmpWP\Tests\Validation;
 
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
@@ -14,6 +13,7 @@ use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLScanningContext;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
+use AmpProject\AmpWP\Validation\URLValidationQueueCron;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationCron */
 final class URLValidationCronTest extends TestCase {
@@ -33,7 +33,7 @@ final class URLValidationCronTest extends TestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->test_instance = new URLValidationCron( new BackgroundTaskDeactivator(), new ScannableURLProvider( new URLScanningContext( 20 ) ), new URLValidationProvider() );
+		$this->test_instance = new URLValidationCron( new BackgroundTaskDeactivator(), new URLValidationProvider() );
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 
@@ -46,22 +46,11 @@ final class URLValidationCronTest extends TestCase {
 		$this->assertInstanceof( URLValidationCron::class, $this->test_instance );
 		$this->assertInstanceof( Service::class, $this->test_instance );
 		$this->assertInstanceof( Registerable::class, $this->test_instance );
-		$this->assertInstanceof( Conditional::class, $this->test_instance );
 
 		$this->test_instance->register();
 
 		$this->assertEquals( 10, has_action( 'admin_init', [ $this->test_instance, 'schedule_event' ] ) );
 		$this->assertEquals( 10, has_action( URLValidationCron::BACKGROUND_TASK_NAME, [ $this->test_instance, 'process' ] ) );
-	}
-
-	/** @covers ::is_needed() */
-	public function test_is_needed() {
-		$this->assertFalse( URLValidationCron::is_needed() );
-
-		add_filter( 'amp_temp_validation_cron_tasks_enabled', '__return_true' );
-		$this->assertTrue( URLValidationCron::is_needed() );
-
-		remove_filter( 'amp_temp_validation_cron_tasks_enabled', '__return_true' );
 	}
 
 	/** @covers ::schedule_event() */
@@ -102,15 +91,31 @@ final class URLValidationCronTest extends TestCase {
 	 * Test validate_urls.
 	 *
 	 * @covers ::process()
-	 * @covers ::get_sleep_time()
 	 */
 	public function test_validate_urls() {
+
 		$this->factory()->post->create_many( 5 );
 
 		add_filter( 'amp_url_validation_sleep_time', '__return_false' );
 
+		$url_validation_queue_instance = new URLValidationQueueCron( new BackgroundTaskDeactivator(), new ScannableURLProvider( new URLScanningContext( 20 ) ) );
+		$url_validation_queue_instance->process();
+
+		$validation_queue_key = 'amp_url_validation_queue';
+		$validation_queue     = get_option( $validation_queue_key, [] );
+
+		$this->assertCount( 10, $validation_queue );
+
 		$this->test_instance->process();
+		$validation_queue = get_option( $validation_queue_key, [] );
+
+		$this->assertCount( 5, $this->get_validated_urls() );
+		$this->assertCount( 5, $validation_queue );
+
+		$this->test_instance->process();
+		$validation_queue = get_option( $validation_queue_key, [] );
 		$this->assertCount( 10, $this->get_validated_urls() );
+		$this->assertCount( 0, $validation_queue );
 	}
 
 	/** @covers ::get_event_name() */
@@ -124,7 +129,7 @@ final class URLValidationCronTest extends TestCase {
 	/** @covers ::get_interval() */
 	public function test_get_interval() {
 		$this->assertEquals(
-			URLValidationCron::DEFAULT_INTERVAL_DAILY,
+			URLValidationCron::DEFAULT_INTERVAL_EVERY_TEN_MINUTES,
 			$this->call_private_method( $this->test_instance, 'get_interval' )
 		);
 	}
