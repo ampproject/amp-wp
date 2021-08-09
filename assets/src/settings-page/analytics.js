@@ -69,12 +69,12 @@ const vendorConfigs = {
 /**
  * Component for a single analytics entry.
  *
- * @param {Object} props Component props.
- * @param {number} props.entryIndex Index for the entry.
- * @param {Function} props.onChange Callback to run when data changes.
- * @param {Function} props.onDelete Callback to run when the entry is to be deleted.
- * @param {string} props.type The entry type.
- * @param {string} props.config The config JSON string.
+ * @param {Object}   props            Component props.
+ * @param {number}   props.entryIndex Index for the entry.
+ * @param {Function} props.onChange   Callback to run when data changes.
+ * @param {Function} props.onDelete   Callback to run when the entry is to be deleted.
+ * @param {string}   props.type       The entry type.
+ * @param {string}   props.config     The config JSON string.
  */
 function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '{}' } ) {
 	/**

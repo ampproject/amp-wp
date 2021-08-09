@@ -22,15 +22,15 @@ export const HANDLE_TYPE_RIGHT = 'right';
 /**
  * Wrapper for the core PanelBody component with styles applied.
  *
- * @param {Object} props Component props.
- * @param {any} props.children PanelBody content.
- * @param {string} props.className Extra CSS classes for the wrapper component.
- * @param {any} props.heading Content for the drawer heading.
- * @param {string} props.id A unique ID for the component.
+ * @param {Object}  props             Component props.
+ * @param {any}     props.children    PanelBody content.
+ * @param {string}  props.className   Extra CSS classes for the wrapper component.
+ * @param {any}     props.heading     Content for the drawer heading.
+ * @param {string}  props.id          A unique ID for the component.
  * @param {boolean} props.initialOpen Whether the drawer should be initially open.
- * @param {boolean} props.selected Whether to apply the selectable components selected CSS class.
- * @param {string} props.hiddenTitle A title to go with the button that expands the drawer.
- * @param {string} props.handleType Display style for the drawer handle. Either 'full-width' or 'right'.
+ * @param {boolean} props.selected    Whether to apply the selectable components selected CSS class.
+ * @param {string}  props.hiddenTitle A title to go with the button that expands the drawer.
+ * @param {string}  props.handleType  Display style for the drawer handle. Either 'full-width' or 'right'.
  */
 export function AMPDrawer( { children = null, className, heading, handleType = HANDLE_TYPE_FULL_WIDTH, id, initialOpen = false, selected = false, hiddenTitle } ) {
 	const [ opened, setOpened ] = useState( initialOpen );

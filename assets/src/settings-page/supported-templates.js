@@ -34,7 +34,7 @@ function hasFrontPageTemplate( supportableTemplates ) {
 /**
  * A checkbox for a supportable post type.
  *
- * @param {Object} props Component props.
+ * @param {Object} props                Component props.
  * @param {Object} props.postTypeObject A post type object.
  */
 function PostTypeCheckbox( { postTypeObject } ) {
@@ -145,8 +145,8 @@ function getInclusiveDescendantTemplatesIds( supportableTemplate ) {
 /**
  * List of checkboxes corresponding to supportable templates.
  *
- * @param {Object} props Component props.
- * @param {Array} props.supportableTemplates Array of supportableTemplate objects.
+ * @param {Object} props                      Component props.
+ * @param {Array}  props.supportableTemplates Array of supportableTemplate objects.
  */
 export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 	const { editedOptions, updateOptions } = useContext( Options );

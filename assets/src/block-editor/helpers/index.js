@@ -316,10 +316,10 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 /**
  * Set width and height in case of image block.
  *
- * @param {Object} props Props.
+ * @param {Object}   props               Props.
  * @param {Function} props.setAttributes Callback to set attributes.
- * @param {Object} props.attributes Attributes.
- * @param {string} layout Layout.
+ * @param {Object}   props.attributes    Attributes.
+ * @param {string}   layout              Layout.
  */
 export const setImageBlockLayoutAttributes = ( props, layout ) => {
 	const { attributes, setAttributes } = props;
