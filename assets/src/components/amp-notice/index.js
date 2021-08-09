@@ -69,11 +69,11 @@ function getNoticeIcon( type ) {
 /**
  * A warning, info, or success notice similar to those used in WP core.
  *
- * @param {Object} props Component props.
- * @param {string} props.children Notice content, not including the icon.
+ * @param {Object} props           Component props.
+ * @param {string} props.children  Notice content, not including the icon.
  * @param {string} props.className Optional extra class names.
- * @param {string} props.size The notice size.
- * @param {string} props.type The notice type.
+ * @param {string} props.size      The notice size.
+ * @param {string} props.type      The notice type.
  */
 export function AMPNotice( { children, className, size = NOTICE_SIZE_LARGE, type = NOTICE_TYPE_INFO, ...props } ) {
 	const noticeIcon = getNoticeIcon( type );

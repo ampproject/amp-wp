@@ -24,13 +24,13 @@ export const ReaderThemes = createContext();
 /**
  * Context provider for options retrieval and updating.
  *
- * @param {Object} props Component props.
- * @param {string} props.currentTheme The theme currently active on the site.
- * @param {string} props.wpAjaxUrl WP AJAX URL.
- * @param {?any} props.children Component children.
- * @param {string} props.readerThemesRestPath REST endpoint to fetch reader themes.
- * @param {string} props.updatesNonce Nonce for the AJAX request to install a theme.
- * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
+ * @param {Object}  props                          Component props.
+ * @param {string}  props.currentTheme             The theme currently active on the site.
+ * @param {string}  props.wpAjaxUrl                WP AJAX URL.
+ * @param {?any}    props.children                 Component children.
+ * @param {string}  props.readerThemesRestPath     REST endpoint to fetch reader themes.
+ * @param {string}  props.updatesNonce             Nonce for the AJAX request to install a theme.
+ * @param {boolean} props.hasErrorBoundary         Whether the component is wrapped in an error boundary.
  * @param {boolean} props.hideCurrentlyActiveTheme Whether the currently active theme should be hidden in the UI.
  */
 export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, hideCurrentlyActiveTheme = false, readerThemesRestPath, updatesNonce, hasErrorBoundary = false } ) {

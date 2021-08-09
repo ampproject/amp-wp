@@ -97,7 +97,7 @@ function getReaderNotice( selected ) {
 /**
  * Template modes section of the settings page.
  *
- * @param {Object} props Component props.
+ * @param {Object}  props                   Component props.
  * @param {boolean} props.focusReaderThemes Whether the reader themes drawer should be opened and focused.
  */
 export function TemplateModes( { focusReaderThemes } ) {
