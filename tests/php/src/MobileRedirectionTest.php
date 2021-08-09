@@ -618,6 +618,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 			}
 		);
 
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		ob_start();
 		$this->instance->add_mobile_version_switcher_link();

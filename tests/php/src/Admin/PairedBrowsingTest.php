@@ -131,6 +131,7 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 	 * @covers ::init_app()
 	 */
 	public function test_init_frontend_app() {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$post = self::factory()->post->create_and_get();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->go_to( add_query_arg( PairedBrowsing::APP_QUERY_VAR, '1', get_permalink( $post ) ) );
@@ -153,6 +154,7 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 	 * @covers ::init_client()
 	 */
 	public function test_init_frontend_client() {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$post = self::factory()->post->create_and_get();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 
