@@ -13,7 +13,6 @@ use AmpProject\AmpWP\PairedUrlStructure\LegacyReaderUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\LegacyTransitionalUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\PathSuffixUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\QueryVarUrlStructure;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Tests\Fixture\DummyPairedUrlStructure;
@@ -24,7 +23,6 @@ use Exception;
 /** @coversDefaultClass \AmpProject\AmpWP\PairedRouting */
 class PairedRoutingTest extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/** @var PairedRouting */
@@ -705,7 +703,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEmpty( get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
 
 		set_current_screen( 'options-permalink' );
-		$this->assertStringContains( 'notice-info', get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
+		$this->assertStringContainsString( 'notice-info', get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
 	}
 
 	/** @covers ::is_using_permalinks() */

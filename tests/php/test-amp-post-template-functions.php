@@ -5,14 +5,10 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
-
 /**
  * Class Test_AMP_Post_Template_Functions
  */
 class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
-
-	use AssertContainsCompatibility;
 
 	public function setUp() {
 		parent::setUp();
@@ -54,8 +50,8 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 			}
 		);
 
-		$this->assertStringContains( wp_get_document_title(), $output );
-		$this->assertStringContains( '<title>', $output );
+		$this->assertStringContainsString( wp_get_document_title(), $output );
+		$this->assertStringContainsString( '<title>', $output );
 	}
 
 	/** @covers ::amp_post_template_add_canonical() */
@@ -68,8 +64,8 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 				amp_post_template_add_canonical( $template );
 			}
 		);
-		$this->assertStringContains( '<link rel="canonical"', $output );
-		$this->assertStringContains( wp_get_canonical_url(), $output );
+		$this->assertStringContainsString( '<link rel="canonical"', $output );
+		$this->assertStringContainsString( wp_get_canonical_url(), $output );
 	}
 
 	/** @covers ::amp_post_template_add_fonts() */
@@ -98,7 +94,7 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 				amp_post_template_add_fonts( $template );
 			}
 		);
-		$this->assertStringContains( 'Roboto', $output );
+		$this->assertStringContainsString( 'Roboto', $output );
 	}
 
 	/** @covers ::amp_post_template_add_block_styles() */
@@ -114,7 +110,7 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 	/** @covers ::amp_post_template_add_default_styles() */
 	public function test_amp_post_template_add_default_styles() {
 		$output = get_echo( 'amp_post_template_add_default_styles' );
-		$this->assertStringContains( 'amp-default', $output );
+		$this->assertStringContainsString( 'amp-default', $output );
 	}
 
 	/** @covers ::amp_post_template_add_styles() */
@@ -141,8 +137,8 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 			}
 		);
 
-		$this->assertStringContains( 'body{color:red', $output );
-		$this->assertStringContains( 'body{color:blue', $output );
+		$this->assertStringContainsString( 'body{color:red', $output );
+		$this->assertStringContainsString( 'body{color:blue', $output );
 	}
 
 	/** @covers ::amp_add_custom_analytics() */
@@ -209,6 +205,6 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 		);
 
 		$output = get_echo( 'amp_post_template_add_analytics_data' );
-		$this->assertStringContains( '<amp-analytics', $output );
+		$this->assertStringContainsString( '<amp-analytics', $output );
 	}
 }

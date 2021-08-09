@@ -4,11 +4,9 @@ namespace AmpProject\AmpWP\Tests\DevTools;
 
 use AmpProject\AmpWP\DevTools\ErrorPage;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use RuntimeException;
 
 final class ErrorPageTest extends DependencyInjectedTestCase {
-	use AssertContainsCompatibility;
 
 	public function test_error_page_output() {
 		// Set up temporary capture of error log to test error log output.
@@ -36,17 +34,17 @@ final class ErrorPageTest extends DependencyInjectedTestCase {
 		ini_set( 'error_log', $backup ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 
 		// Test HTML output.
-		$this->assertStringContains( '<title>Error Page Title</title>', $output );
-		$this->assertStringContains( '<h1>Error Page Title</h1>', $output );
-		$this->assertStringContains( '<p>Error Page Message</p>', $output );
-		$this->assertStringContains( '<strong>FAILURE</strong> (42) [<em>RuntimeException</em>]', $output );
-		$this->assertStringContains( '<!DOCTYPE html>', $output );
-		$this->assertStringContains( '<meta name="viewport"', $output );
-		$this->assertStringContains( '<body id="error-page">', $output );
-		$this->assertStringContains( '<style type="text/css">', $output );
-		$this->assertStringContains( 'If you get stuck', $output );
-		$this->assertStringContains( 'button button-large', $output );
-		$this->assertStringContains( 'https://back.example.com', $output );
-		$this->assertStringContains( 'Go Back', $output );
+		$this->assertStringContainsString( '<title>Error Page Title</title>', $output );
+		$this->assertStringContainsString( '<h1>Error Page Title</h1>', $output );
+		$this->assertStringContainsString( '<p>Error Page Message</p>', $output );
+		$this->assertStringContainsString( '<strong>FAILURE</strong> (42) [<em>RuntimeException</em>]', $output );
+		$this->assertStringContainsString( '<!DOCTYPE html>', $output );
+		$this->assertStringContainsString( '<meta name="viewport"', $output );
+		$this->assertStringContainsString( '<body id="error-page">', $output );
+		$this->assertStringContainsString( '<style type="text/css">', $output );
+		$this->assertStringContainsString( 'If you get stuck', $output );
+		$this->assertStringContainsString( 'button button-large', $output );
+		$this->assertStringContainsString( 'https://back.example.com', $output );
+		$this->assertStringContainsString( 'Go Back', $output );
 	}
 }

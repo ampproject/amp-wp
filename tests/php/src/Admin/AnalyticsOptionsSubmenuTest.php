@@ -14,7 +14,6 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
 /**
@@ -24,8 +23,6 @@ use WP_UnitTestCase;
  * @coversDefaultClass \AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu
  */
 class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
-
-	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of OptionsMenu class.

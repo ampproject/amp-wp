@@ -6,7 +6,6 @@
  */
 
 use AmpProject\AmpWP\Dom\Options;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 
 /**
@@ -15,8 +14,6 @@ use AmpProject\Dom\Document;
  * @covers AMP_Script_Sanitizer
  */
 class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
-
-	use AssertContainsCompatibility;
 
 	/**
 	 * Data for testing noscript handling.
@@ -115,8 +112,8 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 		$content = $dom->saveHTML( $dom->documentElement );
 
 		$this->assertMatchesRegularExpression( '/<!-- Google Tag Manager -->\s*<!-- End Google Tag Manager -->/', $content );
-		$this->assertStringContains( '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>', $content );
-		$this->assertStringContains( 'Has script? <!--noscript-->Nope!<!--/noscript-->', $content );
-		$this->assertStringContains( '<!--noscript--><amp-iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="400" layout="fixed-height" width="auto" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" data-amp-original-style="display:none;visibility:hidden" class="amp-wp-b3bfe1b"><span placeholder="" class="amp-wp-iframe-placeholder"></span><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="0" width="0"></iframe></noscript></amp-iframe><!--/noscript-->', $content );
+		$this->assertStringContainsString( '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>', $content );
+		$this->assertStringContainsString( 'Has script? <!--noscript-->Nope!<!--/noscript-->', $content );
+		$this->assertStringContainsString( '<!--noscript--><amp-iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="400" layout="fixed-height" width="auto" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" data-amp-original-style="display:none;visibility:hidden" class="amp-wp-b3bfe1b"><span placeholder="" class="amp-wp-iframe-placeholder"></span><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="0" width="0"></iframe></noscript></amp-iframe><!--/noscript-->', $content );
 	}
 }

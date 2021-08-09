@@ -8,12 +8,10 @@ use AmpProject\AmpWP\Instrumentation\EventWithDuration;
 use AmpProject\AmpWP\Instrumentation\ServerTiming;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 final class ServerTimingTest extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -220,7 +218,7 @@ final class ServerTimingTest extends DependencyInjectedTestCase {
 		$event  = $events['event-9'];
 		$event->set_duration( 3.14 );
 
-		$this->assertStringContains( 'event-9;desc="Event N°9";prop-9="val-9";prop-10="val-10";dur="3.1"', $server_timing->get_header_string() );
+		$this->assertStringContainsString( 'event-9;desc="Event N°9";prop-9="val-9";prop-10="val-10";dur="3.1"', $server_timing->get_header_string() );
 	}
 
 	/**

@@ -13,7 +13,6 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_UnitTestCase;
@@ -29,7 +28,7 @@ use WP_Error;
  */
 class ReaderThemesTest extends WP_UnitTestCase {
 
-	use AssertContainsCompatibility, ThemesApiRequestMocking, LoadsCoreThemes;
+	use ThemesApiRequestMocking, LoadsCoreThemes;
 
 	/**
 	 * Test instance.
@@ -186,8 +185,8 @@ class ReaderThemesTest extends WP_UnitTestCase {
 			$error->get_error_message()
 		);
 		if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
-			$this->assertStringContains( 'Test message', $error->get_error_message() );
-			$this->assertStringContains( 'amp_test_error', $error->get_error_message() );
+			$this->assertStringContainsString( 'Test message', $error->get_error_message() );
+			$this->assertStringContainsString( 'amp_test_error', $error->get_error_message() );
 		}
 	}
 

@@ -11,7 +11,6 @@ use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
@@ -22,7 +21,7 @@ use WP_UnitTestCase;
  * @coversDefaultClass \AmpProject\AmpWP\Validation\SavePostValidationEvent
  */
 final class SavePostValidationEventTest extends WP_UnitTestCase {
-	use AssertContainsCompatibility, ValidationRequestMocking, PrivateAccess;
+	use ValidationRequestMocking, PrivateAccess;
 
 	/**
 	 * SavePostValidationEvent instance.
