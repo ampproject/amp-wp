@@ -916,6 +916,8 @@ class AMP_Theme_Support {
 			}
 		);
 
+		// Enable Bento experiment per <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
+		// @todo Remove this once Bento no longer requires an experiment to opt-in.
 		if ( amp_is_bento_enabled() ) {
 			add_action(
 				'wp_head',
@@ -2145,7 +2147,7 @@ class AMP_Theme_Support {
 		add_filter(
 			'amp_enable_ssr',
 			static function () use ( $args ) {
-				// SSR currently does not work with Bento.
+				// SSR currently does not work reliably with Bento. See <https://github.com/ampproject/amphtml/issues/35485>.
 				if ( amp_is_bento_enabled() ) {
 					return false;
 				}

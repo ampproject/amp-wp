@@ -874,19 +874,25 @@ function amp_add_generator_metadata() {
 }
 
 /**
- * Determine whether Bento is enabled.
+ * Determine whether the use of Bento components is enabled.
+ *
+ * When Bento is enabled, newer experimental versions of AMP components are used which incorporate the next generation
+ * of the component framework.
  *
  * @since 2.2
- * @internal
+ * @link https://blog.amp.dev/2021/01/28/bento/
  *
- * @return bool
+ * @return bool Whether Bento components are enabled.
  */
 function amp_is_bento_enabled() {
 	/**
-	 * Filters whether Bento is enabled.
+	 * Filters whether the use of Bento components is enabled.
+	 *
+	 * When Bento is enabled, newer experimental versions of AMP components are used which incorporate the next generation
+	 * of the component framework.
 	 *
 	 * @since 2.2
-	 * @internal
+	 * @link https://blog.amp.dev/2021/01/28/bento/
 	 *
 	 * @param bool $enabled Enabled.
 	 */
@@ -1376,6 +1382,7 @@ function amp_is_dev_mode() {
 			is_customize_preview()
 			||
 			// Force dev mode for Bento since it currently requires the Bento experiment opt-in script.
+			// @todo Remove this once Bento no longer requires an experiment to opt-in. See <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
 			amp_is_bento_enabled()
 		)
 	);
