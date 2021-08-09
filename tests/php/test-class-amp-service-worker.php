@@ -157,7 +157,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 				'comments_live_list' => true,
 			]
 		);
-		$this->assertContains(
+		$this->assertStringContainsString(
 			wp_scripts()->registered['amp-live-list']->src,
 			AMP_Service_Worker::get_precached_script_cdn_urls()
 		);
@@ -178,7 +178,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 				];
 			}
 		);
-		$this->assertContains(
+		$this->assertStringContainsString(
 			wp_scripts()->registered['amp-analytics']->src,
 			AMP_Service_Worker::get_precached_script_cdn_urls()
 		);

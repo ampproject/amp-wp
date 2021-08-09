@@ -20,7 +20,7 @@ final class AmpWPConfigurationTest extends WP_UnitTestCase {
 		$configuration = new AmpWPConfiguration();
 		$transformers  = $configuration->get( AmpWPConfiguration::KEY_TRANSFORMERS );
 
-		$this->assertContains( ServerSideRendering::class, $transformers );
+		$this->assertStringContainsString( ServerSideRendering::class, $transformers );
 	}
 
 	/**

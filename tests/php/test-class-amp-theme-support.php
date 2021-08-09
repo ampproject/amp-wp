@@ -1024,7 +1024,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertRegExp( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+example-admin-bar\.js' ] ) . '/', $output );
 
 		$body_classes = get_body_class();
-		$this->assertContains( 'customize-support', $body_classes );
+		$this->assertStringContainsString( 'customize-support', $body_classes );
 		$this->assertNotContains( 'no-customize-support', $body_classes );
 	}
 
@@ -2258,7 +2258,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$style_slug = 'amp-default';
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
-		$this->assertContains( $style_slug, wp_styles()->queue );
+		$this->assertStringContainsString( $style_slug, wp_styles()->queue );
 	}
 
 	/**

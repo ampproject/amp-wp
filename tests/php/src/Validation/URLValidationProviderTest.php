@@ -40,7 +40,7 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 	public function test_get_url_validation() {
 		$single_post_permalink = get_permalink( self::factory()->post->create() );
 		$this->url_validation_provider->get_url_validation( $single_post_permalink, 'post' );
-		$this->assertContains( $single_post_permalink, $this->get_validated_urls() );
+		$this->assertStringContainsString( $single_post_permalink, $this->get_validated_urls() );
 
 		$number_of_posts = 30;
 		$post_permalinks = [];

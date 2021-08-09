@@ -58,7 +58,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		AMP_Validated_URL_Post_Type::register();
 		$amp_post_type = get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 
-		$this->assertContains( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_types() );
+		$this->assertStringContainsString( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_types() );
 		$this->assertEquals( [], get_all_post_type_supports( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, $amp_post_type->name );
 		$this->assertEquals( 'AMP Validated URLs', $amp_post_type->label );
@@ -72,7 +72,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// Make sure that add_admin_hooks() gets called.
 		set_current_screen( 'index.php' );
 		AMP_Validated_URL_Post_Type::register();
-		$this->assertContains( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
+		$this->assertStringContainsString( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
 
 		$post = self::factory()->post->create( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
 		$this->assertTrue( user_can( wp_get_current_user()->ID, 'edit_post', $post ) );
@@ -112,11 +112,11 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( '', apply_filters( 'post_date_column_status', 'publish', $post ) );
 		$this->assertEquals( 'publish', apply_filters( 'post_date_column_status', 'publish', self::factory()->post->create_and_get() ) );
 
-		$this->assertContains( 'amp_actioned', wp_removable_query_args() );
-		$this->assertContains( 'amp_taxonomy_terms_updated', wp_removable_query_args() );
-		$this->assertContains( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
-		$this->assertContains( 'amp_urls_tested', wp_removable_query_args() );
-		$this->assertContains( 'amp_validate_error', wp_removable_query_args() );
+		$this->assertStringContainsString( 'amp_actioned', wp_removable_query_args() );
+		$this->assertStringContainsString( 'amp_taxonomy_terms_updated', wp_removable_query_args() );
+		$this->assertStringContainsString( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
+		$this->assertStringContainsString( 'amp_urls_tested', wp_removable_query_args() );
+		$this->assertStringContainsString( 'amp_validate_error', wp_removable_query_args() );
 	}
 
 	/**

@@ -89,7 +89,7 @@ class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
 		$this->options_menu_instance->add_menu_items();
 		$this->instance->add_submenu_link();
 
-		$this->assertContains( 'Analytics', wp_list_pluck( $submenu[ $this->options_menu_instance->get_menu_slug() ], 0 ) );
+		$this->assertStringContainsString( 'Analytics', wp_list_pluck( $submenu[ $this->options_menu_instance->get_menu_slug() ], 0 ) );
 
 		$submenu = $original_submenu;
 	}

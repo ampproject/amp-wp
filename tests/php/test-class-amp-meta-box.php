@@ -183,7 +183,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		 * Values are now loaded using wp_inline_script()
 		 */
 		$before = implode( '', $block_script->extra['before'] );
-		$this->assertContains( 'ampBlockEditor', $before );
+		$this->assertStringContainsString( 'ampBlockEditor', $before );
 		$expected_localized_values = [
 			'ampUrl',
 			'ampPreviewLink',
@@ -195,7 +195,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		];
 
 		foreach ( $expected_localized_values as $localized_value ) {
-			$this->assertContains( $localized_value, $before );
+			$this->assertStringContainsString( $localized_value, $before );
 		}
 		unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
 	}
