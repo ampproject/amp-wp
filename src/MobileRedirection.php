@@ -268,7 +268,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return bool True if mobile redirection should be done, false otherwise.
 	 */
 	public function is_using_client_side_redirection() {
-		if ( is_customize_preview() || amp_is_dev_mode() ) {
+		if ( is_customize_preview() || ( amp_is_dev_mode() && is_user_logged_in() ) ) {
 			return true;
 		}
 
