@@ -431,6 +431,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$this->assertTrue( $this->instance->is_using_client_side_redirection() );
 		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
+		wp_set_current_user( 0 );
 
 		$this->assertFalse( $this->instance->is_using_client_side_redirection() );
 		global $wp_customize;
