@@ -154,11 +154,20 @@ final class PairedBrowsing implements Service, Registerable {
 	 * Initialize frontend.
 	 */
 	public function init_frontend() {
+		$is_requesting_app = isset( $_GET[ self::APP_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
 		if ( ! amp_is_available() || ! $this->is_available() ) {
+			if ( $is_requesting_app ) {
+				wp_die(
+					esc_html__( 'Paired browsing is only available when AMP dev mode is enabled (e.g. when logged-in and admin bar is showing).', 'amp' ),
+					esc_html__( 'AMP Paired Browsing Unavailable', 'amp' ),
+					[ 'response' => 403 ]
+				);
+			}
 			return;
 		}
 
-		if ( isset( $_GET[ self::APP_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $is_requesting_app ) {
 			$this->init_app();
 		} else {
 			$this->init_client();
@@ -309,14 +318,6 @@ final class PairedBrowsing implements Service, Registerable {
 	 * @return string Custom template if in paired browsing mode, else the supplied template.
 	 */
 	public function filter_template_include_for_app() {
-		if ( ! amp_is_dev_mode() ) {
-			// @todo This appears to be dead code.
-			wp_die(
-				esc_html__( 'Paired browsing is only available when AMP dev mode is enabled (e.g. when logged-in and admin bar is showing).', 'amp' ),
-				esc_html__( 'AMP Paired Browsing Unavailable', 'amp' ),
-				[ 'response' => 403 ]
-			);
-		}
 
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );

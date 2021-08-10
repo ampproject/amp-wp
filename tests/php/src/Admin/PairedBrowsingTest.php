@@ -122,6 +122,14 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		$this->assertTrue( amp_is_available() );
 	}
 
+	/** @covers ::init_frontend() */
+	public function test_frontend_when_requesting_app_and_not_available() {
+		add_filter( 'amp_dev_mode_enabled', '__return_false' );
+		$this->go_to( add_query_arg( PairedBrowsing::APP_QUERY_VAR, '1', home_url() ) );
+		$this->setExpectedException( WPDieException::class, 'Paired browsing is only available when AMP dev mode is enabled (e.g. when logged-in and admin bar is showing).' );
+		$this->instance->init_frontend();
+	}
+
 	/**
 	 * @covers ::init_frontend()
 	 * @covers ::init_app()
@@ -219,6 +227,8 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 				return false;
 			}
 		);
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 
 		// Test that redirection is not needed.
 		$this->go_to( $this->instance->get_paired_browsing_url( home_url( '/' ) ) );
@@ -229,13 +239,6 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		$this->go_to( add_query_arg( QueryVar::NOAMP, $this->instance->get_paired_browsing_url( home_url( '/' ) ) ) );
 		$this->instance->ensure_app_location();
 		$this->assertTrue( $redirected );
-	}
-
-	/** @covers ::filter_template_include_for_app() */
-	public function test_filter_template_include_for_app_when_no_dev_mode() {
-		add_filter( 'amp_dev_mode_enabled', '__return_false' );
-		$this->setExpectedException( WPDieException::class, 'Paired browsing is only available when AMP dev mode is enabled (e.g. when logged-in and admin bar is showing).' );
-		$this->instance->filter_template_include_for_app();
 	}
 
 	/** @covers ::filter_template_include_for_app() */
