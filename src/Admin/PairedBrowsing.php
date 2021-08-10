@@ -12,6 +12,7 @@ use AMP_Theme_Support;
 use AMP_Validation_Manager;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -30,7 +31,7 @@ use AmpProject\AmpWP\DevTools\UserAccess;
  * @since 2.1
  * @internal
  */
-final class PairedBrowsing implements Service, Registerable, Conditional, HasRequirements {
+final class PairedBrowsing implements Service, Registerable, Conditional, Delayed, HasRequirements {
 
 	/**
 	 * Query var for requests to open the app.
@@ -54,6 +55,18 @@ final class PairedBrowsing implements Service, Registerable, Conditional, HasReq
 	public $paired_routing;
 
 	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * This action needs to run late enough in the frontend and the backend for the user to be logged-in and for
+	 * AMP dev mode to be opted-in to.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		return 'wp_loaded';
+	}
+
+	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
@@ -71,6 +84,10 @@ final class PairedBrowsing implements Service, Registerable, Conditional, HasReq
 					get_stylesheet() === AMP_Options_Manager::get_option( Option::READER_THEME )
 				)
 			)
+			&&
+			amp_is_dev_mode()
+			&&
+			is_user_logged_in()
 		);
 	}
 
@@ -136,7 +153,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional, HasReq
 	 * Initialize frontend.
 	 */
 	public function init_frontend() {
-		if ( ! amp_is_available() || ! amp_is_dev_mode() || ! is_user_logged_in() ) {
+		if ( ! amp_is_available() ) {
 			return;
 		}
 
@@ -291,13 +308,6 @@ final class PairedBrowsing implements Service, Registerable, Conditional, HasReq
 	 * @return string Custom template if in paired browsing mode, else the supplied template.
 	 */
 	public function filter_template_include_for_app() {
-		if ( ! amp_is_dev_mode() ) {
-			wp_die(
-				esc_html__( 'Paired browsing is only available when AMP dev mode is enabled (e.g. when logged-in and admin bar is showing).', 'amp' ),
-				esc_html__( 'AMP Paired Browsing Unavailable', 'amp' ),
-				[ 'response' => 403 ]
-			);
-		}
 
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
