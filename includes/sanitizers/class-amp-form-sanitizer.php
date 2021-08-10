@@ -8,6 +8,7 @@
 
 use AmpProject\DevMode;
 use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
+use AmpProject\Dom\Element;
 
 /**
  * Class AMP_Form_Sanitizer
@@ -50,7 +51,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement || DevMode::hasExemptionForNode( $node ) ) {
+			if ( ! $node instanceof Element || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -94,18 +95,26 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			/*
-			 * The target "indicates where to display the form response after submitting the form.
-			 * The value must be _blank or _top". The _self and _parent values are treated
-			 * as synonymous with _top, and anything else is treated like _blank.
-			 */
-			$target = $node->getAttribute( 'target' );
-			if ( '_top' !== $target ) {
-				if ( ! $target || in_array( $target, [ '_self', '_parent' ], true ) ) {
-					$node->setAttribute( 'target', '_top' );
-				} elseif ( '_blank' !== $target ) {
-					$node->setAttribute( 'target', '_blank' );
-				}
+			$this->normalize_target_attribute( $node );
+		}
+	}
+
+	/**
+	 * Normalize form target attribute.
+	 *
+	 * The target "indicates where to display the form response after submitting the form.
+	 * The value must be _blank or _top". The _self and _parent values are treated
+	 * as synonymous with _top, and anything else is treated like _blank.
+	 *
+	 * @param Element $form_element Form element.
+	 */
+	protected function normalize_target_attribute( Element $form_element ) {
+		$target = $form_element->getAttribute( 'target' );
+		if ( '_top' !== $target ) {
+			if ( ! $target || in_array( $target, [ '_self', '_parent' ], true ) ) {
+				$form_element->setAttribute( 'target', '_top' );
+			} elseif ( '_blank' !== $target ) {
+				$form_element->setAttribute( 'target', '_blank' );
 			}
 		}
 	}
