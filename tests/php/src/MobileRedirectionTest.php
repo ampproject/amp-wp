@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\MobileRedirection;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
@@ -627,6 +628,10 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	 * @param bool   $is_paired_browsing Is paired browsing.
 	 */
 	public function test_add_mobile_version_switcher( $template_mode, $is_amp, $is_customizer, $is_paired_browsing ) {
+		if ( $is_paired_browsing && ! Services::get( 'dependency_support' )->has_support() ) {
+			$this->markTestSkipped( 'Paired browsing is not available in the current environment.' );
+		}
+
 		$post_id = self::factory()->post->create();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $template_mode );
 

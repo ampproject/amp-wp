@@ -54,7 +54,7 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		add_filter( 'amp_dev_mode_enabled', '__return_false' );
 		$this->assertFalse( PairedBrowsing::is_needed() );
 		remove_filter( 'amp_dev_mode_enabled', '__return_false' );
-		$this->assertTrue( PairedBrowsing::is_needed() );
+		$this->assertSame( Services::get( 'dependency_support' )->has_support(), PairedBrowsing::is_needed() );
 
 		// Case where Reader theme is set to be the same as the active theme.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
