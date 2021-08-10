@@ -10,8 +10,6 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\PairedBrowsing;
-use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -33,29 +31,25 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 
 	public function setUp() {
 		parent::setUp();
+
 		$this->instance = $this->injector->make( PairedBrowsing::class );
 	}
 
-	/** @covers ::is_needed() */
-	public function test_is_needed() {
+	/** @covers ::should_register() */
+	public function test_should_register() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->assertFalse( PairedBrowsing::is_needed() );
+		$this->assertFalse( $this->instance->should_register() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		$this->assertFalse( PairedBrowsing::is_needed() );
+		$this->assertFalse( $this->instance->should_register() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->assertSame( Services::get( 'dependency_support' )->has_support(), PairedBrowsing::is_needed() );
+		$this->assertSame( Services::get( 'dependency_support' )->has_support(), $this->instance->should_register() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, get_stylesheet() );
 
-		$this->assertSame( Services::get( 'dependency_support' )->has_support(), PairedBrowsing::is_needed() );
-	}
-
-	/** @covers ::get_requirements() */
-	public function test_get_requirements() {
-		$this->assertSame( [ 'dependency_support' ], PairedBrowsing::get_requirements() );
+		$this->assertSame( Services::get( 'dependency_support' )->has_support(), $this->instance->should_register() );
 	}
 
 	/** @covers ::__construct() */
@@ -63,12 +57,14 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		$this->assertInstanceOf( PairedBrowsing::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
-		$this->assertInstanceOf( Conditional::class, $this->instance );
-		$this->assertInstanceOf( HasRequirements::class, $this->instance );
 	}
 
 	/** @covers ::register() */
 	public function test_register() {
+		if ( ! Services::get( 'dependency_support' )->has_support() ) {
+			$this->markTestSkipped();
+		}
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->instance->register();
 		$this->assertEquals( PHP_INT_MAX, has_action( 'wp', [ $this->instance, 'init_frontend' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_dev_mode_element_xpaths', [ $this->instance, 'filter_dev_mode_element_xpaths' ] ) );
@@ -138,6 +134,7 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 
 		add_filter( 'amp_skip_post', '__return_false' );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		$this->instance->register();
 		$this->instance->init_frontend();
 
 		// Check that init_app() was called.
@@ -162,6 +159,7 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$this->go_to( $this->instance->paired_routing->add_endpoint( get_permalink( $post ) ) );
 		$this->assertTrue( amp_is_request() );
+		$this->instance->register();
 		$this->instance->init_frontend();
 
 		// Check that init_client() was called.

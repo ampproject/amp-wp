@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
+use AmpProject\AmpWP\Admin\PairedBrowsing;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Attribute;
@@ -49,12 +50,21 @@ final class MobileRedirection implements Service, Registerable {
 	private $paired_routing;
 
 	/**
+	 * PairedBrowsing instance.
+	 *
+	 * @var PairedBrowsing
+	 */
+	private $paired_browsing;
+
+	/**
 	 * MobileRedirection constructor.
 	 *
-	 * @param PairedRouting $paired_routing Paired Routing.
+	 * @param PairedRouting  $paired_routing  Paired Routing.
+	 * @param PairedBrowsing $paired_browsing Paired Browsing.
 	 */
-	public function __construct( PairedRouting $paired_routing ) {
-		$this->paired_routing = $paired_routing;
+	public function __construct( PairedRouting $paired_routing, PairedBrowsing $paired_browsing ) {
+		$this->paired_routing  = $paired_routing;
+		$this->paired_browsing = $paired_browsing;
 	}
 
 	/**
@@ -268,7 +278,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return bool True if mobile redirection should be done, false otherwise.
 	 */
 	public function is_using_client_side_redirection() {
-		if ( is_customize_preview() || ( amp_is_dev_mode() && is_user_logged_in() ) ) {
+		if ( is_customize_preview() || $this->paired_browsing->is_available() ) {
 			return true;
 		}
 
@@ -591,7 +601,14 @@ final class MobileRedirection implements Service, Registerable {
 			</a>
 		</div>
 
-		<?php if ( amp_is_dev_mode() && is_user_logged_in() && ( ! is_customize_preview() || AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) ) : ?>
+		<?php
+		$is_reader_customizer = (
+			is_customize_preview()
+			&&
+			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+		);
+		?>
+		<?php if ( $this->paired_browsing->is_available() || $is_reader_customizer ) : ?>
 			<?php
 			// Note that the switcher link is disabled in Reader mode because there is a separate toggle to switch versions.
 			$exports = [

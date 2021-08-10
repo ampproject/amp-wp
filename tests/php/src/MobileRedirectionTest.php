@@ -2,6 +2,7 @@
 
 namespace AmpProject\AmpWP\Tests;
 
+use AmpProject\AmpWP\Admin\PairedBrowsing;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -26,10 +27,14 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	/** @var PairedRouting */
 	private $paired_routing;
 
+	/** @var PairedBrowsing */
+	private $paired_browsing;
+
 	public function setUp() {
 		parent::setUp();
-		$this->paired_routing = $this->injector->make( PairedRouting::class );
-		$this->instance       = new MobileRedirection( $this->paired_routing );
+		$this->paired_routing  = $this->injector->make( PairedRouting::class );
+		$this->paired_browsing = $this->injector->make( PairedBrowsing::class );
+		$this->instance        = new MobileRedirection( $this->paired_routing, $this->paired_browsing );
 	}
 
 	public function tearDown() {
@@ -422,6 +427,8 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 	/** @covers ::is_using_client_side_redirection() */
 	public function test_is_using_client_side_redirection() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->paired_browsing->register();
 		$this->assertTrue( $this->instance->is_using_client_side_redirection() );
 
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
@@ -601,6 +608,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	 */
 	public function test_add_mobile_version_switcher( $is_amp, $link_rel ) {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->paired_browsing->register();
 		$this->go_to( '/' );
 		if ( $is_amp ) {
 			set_query_var( QueryVar::AMP, '1' );

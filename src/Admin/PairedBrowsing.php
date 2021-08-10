@@ -11,14 +11,12 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Validation_Manager;
 use AMP_Validated_URL_Post_Type;
-use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\HasRequirements;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Services;
 use AmpProject\DevMode;
 use WP_Post;
 use WP_Admin_Bar;
@@ -30,7 +28,7 @@ use AmpProject\AmpWP\DevTools\UserAccess;
  * @since 2.1
  * @internal
  */
-final class PairedBrowsing implements Service, Registerable, Conditional, HasRequirements {
+final class PairedBrowsing implements Service, Registerable {
 
 	/**
 	 * Query var for requests to open the app.
@@ -54,13 +52,27 @@ final class PairedBrowsing implements Service, Registerable, Conditional, HasReq
 	public $paired_routing;
 
 	/**
-	 * Check whether the conditional object is currently needed.
+	 * Dependency Support.
 	 *
-	 * @return bool Whether the conditional object is needed.
+	 * @var DependencySupport
 	 */
-	public static function is_needed() {
+	public $dependency_support;
+
+	/**
+	 * Whether registered.
+	 *
+	 * @var bool
+	 */
+	private $registered = false;
+
+	/**
+	 * Check whether the service's functionality should be registered.
+	 *
+	 * @return bool Whether to register.
+	 */
+	public function should_register() {
 		return (
-			Services::get( 'dependency_support' )->has_support()
+			$this->dependency_support->has_support()
 			&&
 			(
 				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
@@ -75,23 +87,14 @@ final class PairedBrowsing implements Service, Registerable, Conditional, HasReq
 	}
 
 	/**
-	 * Get the list of service IDs required for this service to be registered.
-	 *
-	 * @return string[] List of required services.
-	 */
-	public static function get_requirements() {
-		return [
-			'dependency_support',
-		];
-	}
-
-	/**
 	 * PairedBrowsing constructor.
 	 *
-	 * @param UserAccess    $dev_tools_user_access DevTools User Access.
-	 * @param PairedRouting $paired_routing    Paired Routing.
+	 * @param DependencySupport $dependency_support    Dependency Support.
+	 * @param UserAccess        $dev_tools_user_access DevTools User Access.
+	 * @param PairedRouting     $paired_routing        Paired Routing.
 	 */
-	public function __construct( UserAccess $dev_tools_user_access, PairedRouting $paired_routing ) {
+	public function __construct( DependencySupport $dependency_support, UserAccess $dev_tools_user_access, PairedRouting $paired_routing ) {
+		$this->dependency_support    = $dependency_support;
 		$this->dev_tools_user_access = $dev_tools_user_access;
 		$this->paired_routing        = $paired_routing;
 	}
@@ -100,9 +103,24 @@ final class PairedBrowsing implements Service, Registerable, Conditional, HasReq
 	 * Adds the filters.
 	 */
 	public function register() {
+		if ( ! $this->should_register() ) {
+			return;
+		}
 		add_action( 'wp', [ $this, 'init_frontend' ], PHP_INT_MAX );
 		add_filter( 'amp_dev_mode_element_xpaths', [ $this, 'filter_dev_mode_element_xpaths' ] );
 		add_filter( 'amp_validated_url_status_actions', [ $this, 'filter_validated_url_status_actions' ], 10, 2 );
+		$this->registered = true;
+	}
+
+	/**
+	 * Determine whether paired browsing is available.
+	 *
+	 * Paired browsing is only available if the service was registered, dev mode is enabled, and the user is logged-in.
+	 *
+	 * @return bool Whether paired browsing is available.
+	 */
+	public function is_available() {
+		return $this->registered && amp_is_dev_mode() && is_user_logged_in();
 	}
 
 	/**
@@ -136,7 +154,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional, HasReq
 	 * Initialize frontend.
 	 */
 	public function init_frontend() {
-		if ( ! amp_is_available() || ! amp_is_dev_mode() || ! is_user_logged_in() ) {
+		if ( ! amp_is_available() || ! $this->is_available() ) {
 			return;
 		}
 

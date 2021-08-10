@@ -191,6 +191,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	protected function get_shared_instances() {
 		return [
+			Admin\PairedBrowsing::class,
 			AmpSlugCustomizationWatcher::class,
 			PluginRegistry::class,
 			Instrumentation\StopWatch::class,
