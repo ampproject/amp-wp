@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use AmpProject\DevMode;
 use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
@@ -192,18 +193,36 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 					'add_dev_mode' => true,
 				],
 			],
+			'form_with_post_action_converted' => [
+				'<form method="post" action="http://example.com"></form>',
+				'<form method="post" action-xhr="//example.com?_wp_amp_action_xhr_converted=1" target="_top">' . $form_templates . '</form>',
+				[
+					'allow_post_forms' => true,
+				],
+				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD ],
+			],
+			'form_with_post_action_kept' => [
+				'<form method="post" action="http://example.com"></form>',
+				'<form method="post" action="http://example.com" data-ampdevmode></form>',
+				[
+					'allow_post_forms' => true,
+					'keep_post_forms'  => true,
+				],
+				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD ],
+			],
 		];
 	}
 
 	/**
 	 * Test html conversion.
 	 *
-	 * @param string      $source   The source HTML.
-	 * @param string|null $expected The expected HTML after conversion. Null means same as $source.
-	 * @param array       $args     Args.
+	 * @param string      $source          The source HTML.
+	 * @param string|null $expected        The expected HTML after conversion. Null means same as $source.
+	 * @param array       $args            Args.
+	 * @param array       $expected_errors Expected errors.
 	 * @dataProvider get_data
 	 */
-	public function test_converter( $source, $expected = null, $args = [] ) {
+	public function test_converter( $source, $expected = null, $args = [], $expected_errors = [] ) {
 		if ( is_null( $expected ) ) {
 			$expected = $source;
 		}
@@ -212,7 +231,17 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		}
 
-		$sanitizer = new AMP_Form_Sanitizer( $dom );
+		$actual_errors = [];
+
+		$args['validation_error_callback'] = static function( $error ) use ( &$actual_errors, $args ) {
+			$actual_errors[] = $error;
+			if ( AMP_Form_Sanitizer::FORM_HAS_POST_METHOD === $error['code'] && ! empty( $args['keep_post_forms'] ) ) {
+				return false;
+			}
+			return true;
+		};
+
+		$sanitizer = new AMP_Form_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
 		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
@@ -227,6 +256,14 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 		}
 
 		$this->assertEqualMarkup( AMP_DOM_Utils::get_content_from_dom( $dom ), $expected );
+		if ( ! empty( $args['allow_post_forms'] ) ) {
+			if ( ! empty( $args['keep_post_forms'] ) ) {
+				$this->assertTrue( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
+			} else {
+				$this->assertFalse( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
+			}
+		}
+		$this->assertEquals( wp_list_pluck( $actual_errors, 'code' ), $expected_errors );
 	}
 
 	/**

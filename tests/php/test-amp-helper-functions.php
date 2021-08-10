@@ -1482,6 +1482,21 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * Test amp_is_allowing_post_forms().
+	 *
+	 * @covers ::amp_is_allowing_post_forms()
+	 */
+	public function test_amp_is_allowing_post_forms() {
+		$this->assertFalse( amp_is_allowing_post_forms(), 'Expected to be disabled by default for now.' );
+
+		add_filter( 'amp_allowing_native_post_forms', '__return_true' );
+		$this->assertTrue( amp_is_allowing_post_forms() );
+
+		add_filter( 'amp_allowing_native_post_forms', '__return_false', 20 );
+		$this->assertFalse( amp_is_allowing_post_forms() );
+	}
+
+	/**
 	 * Test deprecated $post param for amp_get_content_embed_handlers().
 	 *
 	 * @covers ::amp_get_content_embed_handlers()

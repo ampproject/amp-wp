@@ -1424,7 +1424,6 @@ class AMP_Theme_Support {
 		}
 
 		// Ensure rel=canonical link.
-		$rel_canonical = null;
 		if ( empty( $links['canonical'] ) ) {
 			$rel_canonical = AMP_DOM_Utils::create_node(
 				$dom,
@@ -1512,6 +1511,20 @@ class AMP_Theme_Support {
 		// issue: <https://github.com/ampproject/amphtml/issues/35402#issuecomment-887837815>.
 		if ( in_array( 'amp-lightbox-gallery', $script_handles, true ) ) {
 			$superfluous_script_handles = array_diff( $superfluous_script_handles, [ 'amp-carousel' ] );
+		}
+
+		// When opting-in to POST forms, omit the amp-form component entirely since it blocks submission.
+		if ( amp_is_allowing_post_forms() ) {
+			foreach ( AMP_Validation_Manager::$validation_results as $validation_result ) {
+				if (
+					! $validation_result['sanitized']
+					&&
+					AMP_Form_Sanitizer::FORM_HAS_POST_METHOD === $validation_result['error']['code']
+				) {
+					$superfluous_script_handles[] = Extension::FORM;
+					break;
+				}
+			}
 		}
 
 		foreach ( $superfluous_script_handles as $superfluous_script_handle ) {
