@@ -310,6 +310,7 @@ final class PairedBrowsing implements Service, Registerable {
 	 */
 	public function filter_template_include_for_app() {
 		if ( ! amp_is_dev_mode() ) {
+			// @todo This appears to be dead code.
 			wp_die(
 				esc_html__( 'Paired browsing is only available when AMP dev mode is enabled (e.g. when logged-in and admin bar is showing).', 'amp' ),
 				esc_html__( 'AMP Paired Browsing Unavailable', 'amp' ),

@@ -602,25 +602,31 @@ final class MobileRedirection implements Service, Registerable {
 		</div>
 
 		<?php
-		$is_reader_customizer = (
+		// Note that the switcher link is disabled in Reader mode because there is a separate toggle to switch versions,
+		// and because there are controls which are AMP-specific which don't apply when switching between versions.
+		$is_amp_reader_customizer = (
 			is_customize_preview()
 			&&
 			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 		);
-		?>
-		<?php if ( $this->paired_browsing->is_available() || $is_reader_customizer ) : ?>
-			<?php
-			// Note that the switcher link is disabled in Reader mode because there is a separate toggle to switch versions.
+
+		$is_possibly_paired_browsing = (
+			$this->paired_browsing->is_available()
+			&&
+			! is_customize_preview()
+		);
+
+		if ( $is_amp_reader_customizer || $is_possibly_paired_browsing ) :
 			$exports = [
-				'containerId'          => $container_id,
-				'isCustomizePreview'   => is_customize_preview(),
-				'notApplicableMessage' => __( 'This link is not applicable in this context. It remains here for preview purposes only.', 'amp' ),
+				'containerId'              => $container_id,
+				'isReaderCustomizePreview' => $is_amp_reader_customizer,
+				'notApplicableMessage'     => __( 'This link is not applicable in this context. It remains here for preview purposes only.', 'amp' ),
 			];
 			?>
 			<script data-ampdevmode>
-			(function( { containerId, isCustomizePreview, notApplicableMessage } ) {
+			(function( { containerId, isReaderCustomizePreview, notApplicableMessage } ) {
 				addEventListener( 'DOMContentLoaded', () => {
-					if ( isCustomizePreview || [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
+					if ( isReaderCustomizePreview || [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
 						const link = document.querySelector( `#${containerId} a[href]` );
 						link.style.cursor = 'not-allowed';
 						link.addEventListener( 'click', ( event ) => {
