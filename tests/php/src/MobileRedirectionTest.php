@@ -436,6 +436,10 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 	/** @covers ::is_using_client_side_redirection() */
 	public function test_is_using_client_side_redirection_paired_browsing_active() {
+		if ( ! Services::get( 'dependency_support' )->has_support() ) {
+			$this->markTestSkipped( 'Paired browsing is not available in the current environment.' );
+		}
+
 		$this->assertTrue( $this->instance->is_using_client_side_redirection() );
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
 		$this->assertFalse( $this->instance->is_using_client_side_redirection() );
