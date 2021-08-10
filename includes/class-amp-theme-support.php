@@ -14,6 +14,7 @@ use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
+use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Optimizer;
@@ -2094,7 +2095,7 @@ class AMP_Theme_Support {
 
 		// Prevent serving a page in Dev Mode as being marked as AMP when the user is not logged-in to avoid it from
 		// being flagged as invalid by Google Search Console.
-		if ( amp_is_dev_mode() && ! is_user_logged_in() ) {
+		if ( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) && ! is_user_logged_in() ) {
 			$dom->documentElement->removeAttribute( Attribute::AMP );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );

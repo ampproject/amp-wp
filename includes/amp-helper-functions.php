@@ -1325,9 +1325,6 @@ function amp_is_dev_mode() {
 			( is_admin_bar_showing() && is_user_logged_in() )
 			||
 			is_customize_preview()
-			||
-			// Force dev mode when using native images since it prevents raising validation errors on img elements.
-			amp_is_using_native_img()
 		)
 	);
 }
