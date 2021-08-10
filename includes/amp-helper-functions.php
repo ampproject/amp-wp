@@ -1326,7 +1326,7 @@ function amp_is_dev_mode() {
 			||
 			is_customize_preview()
 			||
-			// Force dev mode when using native images since it's currently used as the mechanism to prevent removal.
+			// Force dev mode when using native images since it prevents raising validation errors on img elements.
 			amp_is_using_native_img()
 		)
 	);
