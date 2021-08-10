@@ -60,18 +60,35 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Comments_Sanitizer::sanitize()
 	 */
-	public function test_sanitize_allowed_action() {
-		$instance = new AMP_Comments_Sanitizer( $this->dom );
+	public function test_sanitize_allowed_action_xhr() {
+		$form_sanitizer     = new AMP_Form_Sanitizer( $this->dom );
+		$comments_sanitizer = new AMP_Comments_Sanitizer( $this->dom );
 
 		// Use an allowed action.
 		$form = $this->create_form( '/wp-comments-post.php' );
-		$instance->sanitize();
+		$form_sanitizer->sanitize();
+		$comments_sanitizer->sanitize();
+
 		$on = $form->getAttribute( 'on' );
 		$this->assertStringContains( 'submit:AMP.setState(', $on );
 		$this->assertStringContains( 'submit-error:AMP.setState(', $on );
 		foreach ( $this->get_form_element_names() as $name ) {
 			$this->assertStringContains( $name, $on );
 		}
+	}
+
+	/**
+	 * Test AMP_Comments_Sanitizer::sanitize() when a comments form has not been converted into an amp-form.
+	 *
+	 * @covers AMP_Comments_Sanitizer::sanitize()
+	 */
+	public function test_sanitize_native_post_form() {
+		$comments_sanitizer = new AMP_Comments_Sanitizer( $this->dom );
+
+		// Use an allowed action.
+		$form = $this->create_form( '/wp-comments-post.php' );
+		$comments_sanitizer->sanitize();
+		$this->assertFalse( $form->hasAttribute( 'on' ) );
 	}
 
 	/**
@@ -177,6 +194,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		$form = $this->dom->createElement( 'form' );
 		$this->dom->appendChild( $form );
 		$form->setAttribute( 'action', $action_value );
+		$form->setAttribute( 'method', 'post' );
 
 		foreach ( $this->get_form_element_names() as $name ) {
 			$element = $this->dom->createElement( 'input' );
