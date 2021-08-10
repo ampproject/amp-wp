@@ -1514,17 +1514,8 @@ class AMP_Theme_Support {
 		}
 
 		// When opting-in to POST forms, omit the amp-form component entirely since it blocks submission.
-		if ( amp_is_allowing_post_forms() ) {
-			foreach ( AMP_Validation_Manager::$validation_results as $validation_result ) {
-				if (
-					! $validation_result['sanitized']
-					&&
-					AMP_Form_Sanitizer::FORM_HAS_POST_METHOD === $validation_result['error']['code']
-				) {
-					$superfluous_script_handles[] = Extension::FORM;
-					break;
-				}
-			}
+		if ( amp_is_allowing_post_forms() && $dom->xpath->query( '//form[ @method = "post" and @action ]' )->length > 0 ) {
+			$superfluous_script_handles[] = Extension::FORM;
 		}
 
 		foreach ( $superfluous_script_handles as $superfluous_script_handle ) {
