@@ -513,7 +513,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		ob_start();
 		$this->instance->add_mobile_redirect_script();
 		$output = ob_get_clean();
-		$this->assertRegExp( '#<script\b[^>]*? data-cfasync="false"[^>]*>#', $output );
+		$this->assertMatchesRegularExpression( '#<script\b[^>]*? data-cfasync="false"[^>]*>#', $output );
 		$this->assertStringContains( 'noampQueryVarName', $output );
 	}
 

@@ -403,7 +403,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		if ( $native_img_used ) {
 			$this->assertNotRegExp( $regex, $output );
 		} else {
-			$this->assertRegExp( $regex, $output );
+			$this->assertMatchesRegularExpression( $regex, $output );
 		}
 	}
 

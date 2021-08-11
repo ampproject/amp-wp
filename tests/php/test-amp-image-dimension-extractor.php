@@ -218,7 +218,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		$full_image = wp_get_attachment_image_src( $attachment_id, 'full' );
 		$this->assertNotRegExp( '/-\d+x\d+\.\w+/', $full_image[0], 'Expected no dimensions in filename.' );
 		$thumbnail_image = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
-		$this->assertRegExp( '/-\d+x\d+\.\w+/', $thumbnail_image[0], 'Expected dimensions in file name. ' );
+		$this->assertMatchesRegularExpression( '/-\d+x\d+\.\w+/', $thumbnail_image[0], 'Expected dimensions in file name. ' );
 
 		$external_image_with_dims_in_url  = 'https://example.com/wp-content/uploads/2021/04/American_bison_k5680-1-1024x668.jpg';
 		$external_image_1                 = 'https://via.placeholder.com/1500/000.png/FF0';

@@ -1020,8 +1020,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'example-admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$this->assertStringContains( 'html { margin-top: 64px !important; }', $output );
-		$this->assertRegExp( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+admin-bar\.js' ] ) . '/', $output );
-		$this->assertRegExp( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+example-admin-bar\.js' ] ) . '/', $output );
+		$this->assertMatchesRegularExpression( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+admin-bar\.js' ] ) . '/', $output );
+		$this->assertMatchesRegularExpression( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+example-admin-bar\.js' ] ) . '/', $output );
 
 		$body_classes = get_body_class();
 		$this->assertStringContainsString( 'customize-support', $body_classes );
@@ -1751,7 +1751,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 
 		// Make sure trailing content after </html> gets moved.
-		$this->assertRegExp( '#<!--comment-after-html-->\s*<div id="after-html"></div>\s*<!--comment-end-html-->\s*</body>\s*</html>\s*$#s', $sanitized_html );
+		$this->assertMatchesRegularExpression( '#<!--comment-after-html-->\s*<div id="after-html"></div>\s*<!--comment-end-html-->\s*</body>\s*</html>\s*$#s', $sanitized_html );
 
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
@@ -2116,7 +2116,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$output = AMP_Theme_Support::finish_output_buffering( $this->get_original_html() );
 
 		// Verify that error log was properly populated.
-		$this->assertRegExp(
+		$this->assertMatchesRegularExpression(
 			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- FAILURE \(42\) \[RuntimeException\].*/',
 			stream_get_contents( $capture )
 		);
@@ -2159,7 +2159,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$output = AMP_Theme_Support::finish_output_buffering( $this->get_original_html() );
 
 		// Verify that error log was properly populated.
-		$this->assertRegExp(
+		$this->assertMatchesRegularExpression(
 			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- (Undefined class constant \'DOES_NOT_EXIST\'|Undefined constant AMP_Theme_Support::DOES_NOT_EXIST) \(0\) \[Error\].*/',
 			stream_get_contents( $capture )
 		);
