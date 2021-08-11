@@ -1837,7 +1837,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		?>
 		<html amp>
 			<body>
-				<form action="https://example.com/" method="post">
+				<form action="https://example.com/" method="Post">
 					<button type="submit">Submit!</button>
 				</form>
 			</body>
@@ -1855,7 +1855,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 		$form = $dom->getElementsByTagName( 'form' )->item( 0 );
 		$this->assertInstanceOf( Element::class, $form );
-		$this->assertEquals( 'post', $form->getAttribute( Attribute::METHOD ) );
+		$this->assertEquals( 'post', strtolower( $form->getAttribute( Attribute::METHOD ) ) );
 		$this->assertEquals( $converted, $form->hasAttribute( Attribute::ACTION_XHR ) );
 		$this->assertEquals( ! $converted, $form->hasAttribute( Attribute::ACTION ) );
 		$this->assertEquals( ! $converted, $form->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
