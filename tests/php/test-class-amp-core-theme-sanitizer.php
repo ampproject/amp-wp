@@ -350,7 +350,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		ob_start();
 		wp_print_styles();
 		$output = ob_get_clean();
-		$this->assertRegExp( '/amp-img.+display.+block/s', $output );
+		$this->assertMatchesRegularExpression( '/amp-img.+display.+block/s', $output );
 	}
 
 	/**

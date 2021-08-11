@@ -27,7 +27,7 @@ final class ErrorPageTest extends DependencyInjectedTestCase {
 			->render();
 
 		// Verify that error log was properly populated.
-		$this->assertRegExp(
+		$this->assertMatchesRegularExpression(
 			'/^\[[^\]]*\] Error Page Message - FAILURE \(42\) \[RuntimeException\].*/',
 			stream_get_contents( $capture )
 		);

@@ -1849,7 +1849,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			function( $preempt, $request, $url ) use ( $href, &$request_count, $content_type, $response_body ) {
-				$this->assertRegExp( '#^https?://#', $url );
+				$this->assertMatchesRegularExpression( '#^https?://#', $url );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
 					$request_count++;
 					$preempt = [
@@ -1923,7 +1923,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			function( $preempt, $request, $url ) use ( $href, &$request_count, $response_body, $headers, $status_code ) {
-				$this->assertRegExp( '#^https?://#', $url );
+				$this->assertMatchesRegularExpression( '#^https?://#', $url );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
 					$request_count++;
 					$preempt = [
@@ -2065,7 +2065,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			function( $preempt, $request, $url ) use ( $style_url, $http_response, &$request_count ) {
-				$this->assertRegExp( '#^https?://#', $url );
+				$this->assertMatchesRegularExpression( '#^https?://#', $url );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $style_url, 'https' ) ) {
 					$request_count++;
 					$preempt = [
@@ -2533,7 +2533,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						preg_quote( '.wp-core-ui .button', '/' ),
 						preg_quote( 'div::after{content:"After login"}', '/' ),
 					];
-					$test->assertRegExp(
+					$test->assertMatchesRegularExpression(
 						'/.*' . implode( '.*', $expected_order ) . '/s',
 						$stylesheet
 					);
@@ -2637,7 +2637,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					return null;
 				},
 				static function ( WP_UnitTestCase $test, $stylesheet ) {
-					$test->assertRegExp(
+					$test->assertMatchesRegularExpression(
 						'/.*' . preg_quote( '.wp-core-ui .button', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons"}', '/' ) . '/s',
 						$stylesheet
 					);
@@ -2655,7 +2655,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					return null;
 				},
 				static function ( WP_UnitTestCase $test, $stylesheet ) {
-					$test->assertRegExp(
+					$test->assertMatchesRegularExpression(
 						'/.*' . preg_quote( '.wp-core-ui .button', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons2"}', '/' ) . '/s',
 						$stylesheet
 					);
@@ -2676,7 +2676,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					return null;
 				},
 				static function ( WP_UnitTestCase $test, $stylesheet ) {
-					$test->assertRegExp(
+					$test->assertMatchesRegularExpression(
 						'/.*' . preg_quote( 'div::before{content:"HELLO NESTED"}', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons2"}', '/' ) . '/s',
 						$stylesheet
 					);

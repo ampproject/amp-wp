@@ -1304,7 +1304,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			),
 			$output
 		);
-		$this->assertRegExp(
+		$this->assertMatchesRegularExpression(
 			'#</li><!--/amp-source-stack {.*$#s',
 			$output
 		);
