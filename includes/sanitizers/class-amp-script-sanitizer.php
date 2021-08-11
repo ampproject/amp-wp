@@ -6,7 +6,10 @@
  * @package AMP
  */
 
+use AmpProject\Attribute;
 use AmpProject\DevMode;
+use AmpProject\Tag;
+use AmpProject\Dom\Element;
 
 /**
  * Class AMP_Script_Sanitizer
@@ -17,7 +20,46 @@ use AmpProject\DevMode;
 class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Sanitize noscript elements.
+	 * Error code for custom inline JS script tag.
+	 *
+	 * @var string
+	 */
+	const CUSTOM_INLINE_SCRIPT = 'CUSTOM_INLINE_SCRIPT';
+
+	/**
+	 * Error code for custom external JS script tag.
+	 *
+	 * @var string
+	 */
+	const CUSTOM_EXTERNAL_SCRIPT = 'CUSTOM_EXTERNAL_SCRIPT';
+
+	/**
+	 * Error code for JS event handler attribute.
+	 *
+	 * @var string
+	 */
+	const CUSTOM_EVENT_HANDLER_ATTR = 'CUSTOM_EVENT_HANDLER_ATTR';
+
+	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = [
+		'sanitize_js_scripts' => false,
+	];
+
+	/**
+	 * Array of flags used to control sanitization.
+	 *
+	 * @var array {
+	 *      @type bool $sanitize_js_scripts Whether to sanitize JS scripts (and not defer for final sanitizer).
+	 * }
+	 */
+	protected $args;
+
+	/**
+	 * Sanitize script and noscript elements.
 	 *
 	 * Eventually this should also handle script elements, if there is a known AMP equivalent.
 	 * If nothing is done with script elements, the validating sanitizer will deal with them ultimately.
@@ -28,13 +70,24 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 */
 	public function sanitize() {
-		$noscripts = $this->dom->getElementsByTagName( 'noscript' );
+		$this->unwrap_noscript_elements();
+
+		if ( ! empty( $this->args['sanitize_js_scripts'] ) ) {
+			$this->sanitize_js_script_elements();
+		}
+	}
+
+	/**
+	 * Unwrap noscript elements so their contents become the AMP version by default.
+	 */
+	protected function unwrap_noscript_elements() {
+		$noscripts = $this->dom->getElementsByTagName( Tag::NOSCRIPT );
 
 		for ( $i = $noscripts->length - 1; $i >= 0; $i-- ) {
 			$noscript = $noscripts->item( $i );
 
 			// Skip AMP boilerplate.
-			if ( $noscript->firstChild instanceof DOMElement && $noscript->firstChild->hasAttribute( 'amp-boilerplate' ) ) {
+			if ( $noscript->firstChild instanceof Element && $noscript->firstChild->hasAttribute( 'amp-boilerplate' ) ) {
 				continue;
 			}
 
@@ -68,5 +121,55 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 
 			$this->did_convert_elements = true;
 		}
+	}
+
+	/**
+	 * Sanitize JavaScript script elements.
+	 *
+	 * This runs explicitly in the script sanitizer before the final validating sanitizer (tag-and-attribute) so that
+	 * the style sanitizer will be able to know whether there are custom scripts in the page, and thus whether tree
+	 * shaking can be performed.
+	 */
+	protected function sanitize_js_script_elements() {
+		$scripts = $this->dom->xpath->query( '//script[ not( @type ) or not( contains( @type, "json" ) ) ]' );
+
+		/** @var Element $script */
+		foreach ( $scripts as $script ) {
+			if ( DevMode::hasExemptionForNode( $script ) ) {
+				continue;
+			}
+
+			if ( $script->hasAttribute( Attribute::SRC ) ) {
+				// Skip external AMP CDN scripts.
+				if ( 0 === strpos( $script->getAttribute( Attribute::SRC ), 'https://cdn.ampproject.org/' ) ) {
+					continue;
+				}
+
+				$removed = $this->remove_invalid_child(
+					$script,
+					[ 'code' => self::CUSTOM_EXTERNAL_SCRIPT ]
+				);
+				if ( ! $removed ) {
+					$script->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+					$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+				}
+			} else {
+				// Skip inline scripts used by AMP.
+				if ( $script->hasAttribute( Attribute::AMP_ONERROR ) ) {
+					continue;
+				}
+
+				$removed = $this->remove_invalid_child(
+					$script,
+					[ 'code' => self::CUSTOM_INLINE_SCRIPT ]
+				);
+				if ( ! $removed ) {
+					$script->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+					$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+				}
+			}
+		}
+
+		// @todo Also need to check for inline script attributes.
 	}
 }
