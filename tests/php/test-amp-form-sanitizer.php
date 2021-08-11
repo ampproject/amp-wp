@@ -206,9 +206,20 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 				'<form method="post" action="http://example.com" data-ampdevmode></form>',
 				[
 					'allow_native_post_forms' => true,
-					'keep_post_forms'  => true,
+					'keep_post_forms'         => true,
+					'expected_dev_mode'       => true,
 				],
 				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR ],
+			],
+			'form_with_post_action-xhr_ok' => [
+				'<form method="post" action-xhr="http://example.com"></form>',
+				'<form method="post" action-xhr="//example.com" target="_top"></form>',
+				[
+					'allow_native_post_forms' => true,
+					'keep_post_forms'         => true,
+					'expected_dev_mode'       => false,
+				],
+				[],
 			],
 		];
 	}
@@ -256,12 +267,8 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 		}
 
 		$this->assertEqualMarkup( AMP_DOM_Utils::get_content_from_dom( $dom ), $expected );
-		if ( ! empty( $args['allow_native_post_forms'] ) ) {
-			if ( ! empty( $args['keep_post_forms'] ) ) {
-				$this->assertTrue( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
-			} else {
-				$this->assertFalse( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
-			}
+		if ( isset( $args['expected_dev_mode'] ) ) {
+			$this->assertEquals( $args['expected_dev_mode'], $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
 		}
 		$this->assertEquals( wp_list_pluck( $actual_errors, 'code' ), $expected_errors );
 	}

@@ -113,7 +113,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				// conversion will be performed. Otherwise, if the status is 'kept' then the POST form will be retained
 				// in the page by marking it with AMP dev mode, and the amp-form extension will be omitted from being
 				// added to the page.
-				if ( $this->args['allow_native_post_forms'] ) {
+				if ( ! $xhr_action && $this->args['allow_native_post_forms'] ) {
 					$validation_error = [
 						'code' => self::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR,
 					];
