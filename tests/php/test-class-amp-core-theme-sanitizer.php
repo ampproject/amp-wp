@@ -39,19 +39,19 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * @dataProvider get_data_for_using_native_img
 	 * @covers::add_twentyseventeen_attachment_image_attributes()
-	 * @param bool $use_native_img Use native img.
+	 * @param bool $native_img_used Use native img.
 	 */
-	public function test_add_twentyseventeen_attachment_image_attributes( $use_native_img ) {
+	public function test_add_twentyseventeen_attachment_image_attributes( $native_img_used ) {
 		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', 0 );
 		set_theme_mod( 'custom_logo', $attachment_id );
 
-		AMP_Core_Theme_Sanitizer::add_twentyseventeen_attachment_image_attributes( compact( 'use_native_img' ) );
+		AMP_Core_Theme_Sanitizer::add_twentyseventeen_attachment_image_attributes( compact( 'native_img_used' ) );
 		$logo = get_custom_logo();
 
 		$this->assertFalse( has_custom_header() );
 
 		$needle = 'height="80"';
-		if ( $use_native_img ) {
+		if ( $native_img_used ) {
 			$this->assertStringNotContains( $needle, $logo );
 		} else {
 			$this->assertStringContains( $needle, $logo );
@@ -61,15 +61,15 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * @dataProvider get_data_for_using_native_img
 	 * @covers::add_twentytwenty_masthead_styles()
-	 * @param bool $use_native_img Use native img.
+	 * @param bool $native_img_used Use native img.
 	 */
-	public function test_add_twentytwenty_masthead_styles( $use_native_img ) {
+	public function test_add_twentytwenty_masthead_styles( $native_img_used ) {
 		wp_enqueue_style( get_template() . '-style', get_stylesheet_uri(), [], '0.1' );
-		AMP_Core_Theme_Sanitizer::add_twentytwenty_masthead_styles( compact( 'use_native_img' ) );
+		AMP_Core_Theme_Sanitizer::add_twentytwenty_masthead_styles( compact( 'native_img_used' ) );
 		wp_enqueue_scripts();
 		$output = get_echo( 'wp_print_styles' );
 		$needle = '.featured-media amp-img';
-		if ( $use_native_img ) {
+		if ( $native_img_used ) {
 			$this->assertStringNotContains( $needle, $output );
 		} else {
 			$this->assertStringContains( $needle, $output );
@@ -393,14 +393,14 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_data_for_using_native_img
 	 * @covers ::add_img_display_block_fix()
-	 * @param bool $use_native_img Use native img.
+	 * @param bool $native_img_used Use native img.
 	 */
-	public function test_add_img_display_block_fix( $use_native_img ) {
+	public function test_add_img_display_block_fix( $native_img_used ) {
 		remove_all_actions( 'wp_print_styles' );
-		AMP_Core_Theme_Sanitizer::add_img_display_block_fix( compact( 'use_native_img' ) );
+		AMP_Core_Theme_Sanitizer::add_img_display_block_fix( compact( 'native_img_used' ) );
 		$output = get_echo( 'wp_print_styles' );
 		$regex  = '/amp-img.+display.+block/s';
-		if ( $use_native_img ) {
+		if ( $native_img_used ) {
 			$this->assertNotRegExp( $regex, $output );
 		} else {
 			$this->assertRegExp( $regex, $output );
@@ -412,9 +412,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_data_for_using_native_img
 	 * @covers ::add_twentytwenty_custom_logo_fix()
-	 * @param bool $use_native_img Use native img.
+	 * @param bool $native_img_used Use native img.
 	 */
-	public function test_add_twentytwenty_custom_logo_fix( $use_native_img ) {
+	public function test_add_twentytwenty_custom_logo_fix( $native_img_used ) {
 		add_filter(
 			'get_custom_logo',
 			static function () {
@@ -422,12 +422,12 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 			}
 		);
 
-		AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix( compact( 'use_native_img' ) );
+		AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix( compact( 'native_img_used' ) );
 		$logo = get_custom_logo();
 
 		$needle = '.site-logo amp-img { width: 3.000000rem; } @media (min-width: 700px) { .site-logo amp-img { width: 4.500000rem; } }';
 
-		if ( $use_native_img ) {
+		if ( $native_img_used ) {
 			$this->assertStringNotContains( $needle, $logo );
 		} else {
 			$this->assertStringContains( $needle, $logo );

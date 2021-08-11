@@ -29,7 +29,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string $stylesheet     Stylesheet slug.
 	 *      @type string $template       Template slug.
 	 *      @type array  $theme_features List of theme features that need to be applied. Features are method names,
-	 *      @type bool   $use_native_img Whether to use native img.
+	 *      @type bool   $native_img_used Whether to use native img.
 	 * }
 	 */
 	protected $args;
@@ -568,7 +568,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $args Args.
 	 */
 	public static function add_twentyseventeen_attachment_image_attributes( $args = [] ) {
-		if ( ! empty( $args['use_native_img'] ) ) {
+		if ( ! empty( $args['native_img_used'] ) ) {
 			return;
 		}
 
@@ -811,7 +811,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $args Args.
 	 */
 	public static function add_twentytwenty_masthead_styles( $args = [] ) {
-		if ( ! empty( $args['use_native_img'] ) ) {
+		if ( ! empty( $args['native_img_used'] ) ) {
 			return;
 		}
 
@@ -847,7 +847,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $args Args.
 	 */
 	public static function add_twentytwenty_custom_logo_fix( $args = [] ) {
-		if ( ! empty( $args['use_native_img'] ) ) {
+		if ( ! empty( $args['native_img_used'] ) ) {
 			return;
 		}
 
@@ -905,7 +905,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $args Args.
 	 */
 	public static function add_img_display_block_fix( $args = [] ) {
-		if ( ! empty( $args['use_native_img'] ) ) {
+		if ( ! empty( $args['native_img_used'] ) ) {
 			return;
 		}
 

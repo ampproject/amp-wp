@@ -1336,7 +1336,7 @@ function amp_is_dev_mode() {
  *
  * @return bool Whether to use `img`.
  */
-function amp_is_using_native_img() {
+function amp_is_native_img_used() {
 	/**
 	 * Filters whether to use the native `img` element rather than convert to `amp-img`.
 	 *
@@ -1348,7 +1348,7 @@ function amp_is_using_native_img() {
 	 *
 	 * @param bool $use_native Whether to use `img`.
 	 */
-	return (bool) apply_filters( 'amp_using_native_img', false );
+	return (bool) apply_filters( 'amp_native_img_used', false );
 }
 
 /**
@@ -1359,7 +1359,7 @@ function amp_is_using_native_img() {
  *
  * @return bool Whether to allow native `POST` forms.
  */
-function amp_is_allowing_native_post_forms() {
+function amp_is_native_post_form_allowed() {
 	/**
 	 * Filters whether to allow native `POST` forms without conversion to use the `action-xhr` attribute and use the amp-form component.
 	 *
@@ -1368,7 +1368,7 @@ function amp_is_allowing_native_post_forms() {
 	 *
 	 * @param bool $use_native Whether to allow native `POST` forms.
 	 */
-	return (bool) apply_filters( 'amp_allowing_native_post_forms', false );
+	return (bool) apply_filters( 'amp_native_post_form_allowed', false );
 }
 
 /**
@@ -1415,28 +1415,28 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 	);
 
-	$use_native_img          = amp_is_using_native_img();
-	$allow_native_post_forms = amp_is_allowing_native_post_forms();
+	$native_img_used           = amp_is_native_img_used();
+	$native_post_forms_allowed = amp_is_native_post_form_allowed();
 
 	$sanitizers = [
 		'AMP_Embed_Sanitizer'             => [
 			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
 		],
 		'AMP_Core_Theme_Sanitizer'        => [
-			'template'       => get_template(),
-			'stylesheet'     => get_stylesheet(),
-			'theme_features' => [
+			'template'        => get_template(),
+			'stylesheet'      => get_stylesheet(),
+			'theme_features'  => [
 				'force_svg_support' => [], // Always replace 'no-svg' class with 'svg' if it exists.
 			],
-			'use_native_img' => $use_native_img,
+			'native_img_used' => $native_img_used,
 		],
 		'AMP_Srcset_Sanitizer'            => [],
 		'AMP_Img_Sanitizer'               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
-			'use_native_img'     => $use_native_img,
+			'native_img_used'    => $native_img_used,
 		],
 		'AMP_Form_Sanitizer'              => [
-			'allow_native_post_forms' => $allow_native_post_forms,
+			'native_post_forms_allowed' => $native_post_forms_allowed,
 		],
 		'AMP_Comments_Sanitizer'          => [
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
@@ -1453,7 +1453,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		],
 		'AMP_Gallery_Block_Sanitizer'     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
-			'use_native_img'    => $use_native_img,
+			'native_img_used'   => $native_img_used,
 		],
 		'AMP_Block_Sanitizer'             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
 		'AMP_Script_Sanitizer'            => [],

@@ -1830,7 +1830,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 
 		wp();
-		add_filter( 'amp_allowing_native_post_forms', '__return_true' );
+		add_filter( 'amp_native_post_form_allowed', '__return_true' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 		ob_start();

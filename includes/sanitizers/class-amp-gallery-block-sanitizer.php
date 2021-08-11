@@ -43,7 +43,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array {
 	 *      @type int  $content_max_width Max width of content.
 	 *      @type bool $carousel_required Whether carousels are required. This is used when amp theme support is not present, for back-compat.
-	 *      @type bool $use_native_img    Whether native img is being used.
+	 *      @type bool $native_img_used   Whether native img is being used.
 	 * }
 	 */
 	protected $args;
@@ -100,7 +100,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$img_elements = $this->dom->xpath->query(
-				empty( $this->args['use_native_img'] ) ? './/amp-img | .//amp-anim' : './/img',
+				empty( $this->args['native_img_used'] ) ? './/amp-img | .//amp-anim' : './/img',
 				$node
 			);
 
