@@ -37,6 +37,46 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @dataProvider get_data_for_using_native_img
+	 * @covers::add_twentyseventeen_attachment_image_attributes()
+	 * @param bool $use_native_img Use native img.
+	 */
+	public function test_add_twentyseventeen_attachment_image_attributes( $use_native_img ) {
+		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', 0 );
+		set_theme_mod( 'custom_logo', $attachment_id );
+
+		AMP_Core_Theme_Sanitizer::add_twentyseventeen_attachment_image_attributes( compact( 'use_native_img' ) );
+		$logo = get_custom_logo();
+
+		$this->assertFalse( has_custom_header() );
+
+		$needle = 'height="80"';
+		if ( $use_native_img ) {
+			$this->assertStringNotContains( $needle, $logo );
+		} else {
+			$this->assertStringContains( $needle, $logo );
+		}
+	}
+
+	/**
+	 * @dataProvider get_data_for_using_native_img
+	 * @covers::add_twentytwenty_masthead_styles()
+	 * @param bool $use_native_img Use native img.
+	 */
+	public function test_add_twentytwenty_masthead_styles( $use_native_img ) {
+		wp_enqueue_style( get_template() . '-style', get_stylesheet_uri(), [], '0.1' );
+		AMP_Core_Theme_Sanitizer::add_twentytwenty_masthead_styles( compact( 'use_native_img' ) );
+		wp_enqueue_scripts();
+		$output = get_echo( 'wp_print_styles' );
+		$needle = '.featured-media amp-img';
+		if ( $use_native_img ) {
+			$this->assertStringNotContains( $needle, $output );
+		} else {
+			$this->assertStringContains( $needle, $output );
+		}
+	}
+
+	/**
 	 * Data for testing the conversion of a CSS selector to a XPath.
 	 *
 	 * @return array
@@ -340,25 +380,41 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $actual );
 	}
 
+	/** @return array */
+	public function get_data_for_using_native_img() {
+		return [
+			'using_native_img'     => [ true ],
+			'not_using_native_img' => [ false ],
+		];
+	}
+
 	/**
 	 * Tests add_img_display_block_fix.
 	 *
+	 * @dataProvider get_data_for_using_native_img
 	 * @covers ::add_img_display_block_fix()
+	 * @param bool $use_native_img Use native img.
 	 */
-	public function test_add_img_display_block_fix() {
-		AMP_Core_Theme_Sanitizer::add_img_display_block_fix();
-		ob_start();
-		wp_print_styles();
-		$output = ob_get_clean();
-		$this->assertRegExp( '/amp-img.+display.+block/s', $output );
+	public function test_add_img_display_block_fix( $use_native_img ) {
+		remove_all_actions( 'wp_print_styles' );
+		AMP_Core_Theme_Sanitizer::add_img_display_block_fix( compact( 'use_native_img' ) );
+		$output = get_echo( 'wp_print_styles' );
+		$regex  = '/amp-img.+display.+block/s';
+		if ( $use_native_img ) {
+			$this->assertNotRegExp( $regex, $output );
+		} else {
+			$this->assertRegExp( $regex, $output );
+		}
 	}
 
 	/**
 	 * Tests add_twentytwenty_custom_logo_fix.
 	 *
+	 * @dataProvider get_data_for_using_native_img
 	 * @covers ::add_twentytwenty_custom_logo_fix()
+	 * @param bool $use_native_img Use native img.
 	 */
-	public function test_add_twentytwenty_custom_logo_fix() {
+	public function test_add_twentytwenty_custom_logo_fix( $use_native_img ) {
 		add_filter(
 			'get_custom_logo',
 			static function () {
@@ -366,12 +422,16 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 			}
 		);
 
-		AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix();
+		AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix( compact( 'use_native_img' ) );
 		$logo = get_custom_logo();
 
 		$needle = '.site-logo amp-img { width: 3.000000rem; } @media (min-width: 700px) { .site-logo amp-img { width: 4.500000rem; } }';
 
-		$this->assertStringContains( $needle, $logo );
+		if ( $use_native_img ) {
+			$this->assertStringNotContains( $needle, $logo );
+		} else {
+			$this->assertStringContains( $needle, $logo );
+		}
 	}
 
 	/**

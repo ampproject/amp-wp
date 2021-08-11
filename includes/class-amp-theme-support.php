@@ -14,6 +14,7 @@ use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
+use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Optimizer;
@@ -2090,6 +2091,14 @@ class AMP_Theme_Support {
 
 			wp_safe_redirect( $non_amp_url, 302 ); // phpcs:ignore WordPressVIPMinimum.Security.ExitAfterRedirect.NoExit -- This is in an output buffer callback handler.
 			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );
+		}
+
+		// Prevent serving a page in Dev Mode as being marked as AMP when the user is not logged-in to avoid it from
+		// being flagged as invalid by Google Search Console.
+		if ( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) && ! is_user_logged_in() ) {
+			$dom->documentElement->removeAttribute( Attribute::AMP );
+			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
+			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
 		}
 
 		$response = $dom->saveHTML();

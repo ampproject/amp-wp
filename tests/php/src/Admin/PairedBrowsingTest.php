@@ -11,6 +11,7 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\PairedBrowsing;
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -20,7 +21,6 @@ use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\DevMode;
-use WPDieException;
 use WP_Admin_Bar;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Admin\PairedBrowsing */
@@ -44,12 +44,21 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertFalse( PairedBrowsing::is_needed() );
 
+		$admin_user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_user_id );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->assertSame( Services::get( 'dependency_support' )->has_support(), PairedBrowsing::is_needed() );
+		wp_set_current_user( 0 );
+		$this->assertFalse( PairedBrowsing::is_needed() );
+		wp_set_current_user( $admin_user_id );
+		add_filter( 'amp_dev_mode_enabled', '__return_false' );
+		$this->assertFalse( PairedBrowsing::is_needed() );
+		remove_filter( 'amp_dev_mode_enabled', '__return_false' );
+		$this->assertSame( Services::get( 'dependency_support' )->has_support(), PairedBrowsing::is_needed() );
 
+		// Case where Reader theme is set to be the same as the active theme.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, get_stylesheet() );
-
 		$this->assertSame( Services::get( 'dependency_support' )->has_support(), PairedBrowsing::is_needed() );
 	}
 
@@ -58,12 +67,18 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		$this->assertSame( [ 'dependency_support' ], PairedBrowsing::get_requirements() );
 	}
 
+	/** @covers ::get_registration_action() */
+	public function test_get_registration_action() {
+		$this->assertSame( 'wp_loaded', PairedBrowsing::get_registration_action() );
+	}
+
 	/** @covers ::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( PairedBrowsing::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 		$this->assertInstanceOf( Conditional::class, $this->instance );
+		$this->assertInstanceOf( Delayed::class, $this->instance );
 		$this->assertInstanceOf( HasRequirements::class, $this->instance );
 	}
 
@@ -104,26 +119,10 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 
 		// Check first short-circuit condition.
 		add_filter( 'amp_skip_post', '__return_true' );
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$this->assertFalse( amp_is_available() );
-		$this->assertTrue( amp_is_dev_mode() );
 		$this->instance->init_frontend();
 		$assert_short_circuited();
 		remove_all_filters( 'amp_skip_post' );
-		remove_all_filters( 'amp_dev_mode_enabled' );
-
-		// Check second short-circuit condition.
-		add_filter( 'amp_skip_post', '__return_false' );
-		add_filter( 'amp_dev_mode_enabled', '__return_false' );
-		$this->assertTrue( amp_is_available() );
-		$this->assertFalse( amp_is_dev_mode() );
-		$this->instance->init_frontend();
-		$assert_short_circuited();
-		remove_all_filters( 'amp_skip_post' );
-		remove_all_filters( 'amp_dev_mode_enabled' );
-
-		// Check condition for
-		$this->assertTrue( amp_is_available() );
 	}
 
 	/**
@@ -131,12 +130,12 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 	 * @covers ::init_app()
 	 */
 	public function test_init_frontend_app() {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$post = self::factory()->post->create_and_get();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->go_to( add_query_arg( PairedBrowsing::APP_QUERY_VAR, '1', get_permalink( $post ) ) );
 
 		add_filter( 'amp_skip_post', '__return_false' );
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$this->instance->init_frontend();
 
 		// Check that init_app() was called.
@@ -153,11 +152,11 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 	 * @covers ::init_client()
 	 */
 	public function test_init_frontend_client() {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$post = self::factory()->post->create_and_get();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 
 		add_filter( 'amp_skip_post', '__return_false' );
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$this->go_to( $this->instance->paired_routing->add_endpoint( get_permalink( $post ) ) );
 		$this->assertTrue( amp_is_request() );
 		$this->instance->init_frontend();
@@ -232,15 +231,7 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 	}
 
 	/** @covers ::filter_template_include_for_app() */
-	public function test_filter_template_include_for_app_when_no_dev_mode() {
-		add_filter( 'amp_dev_mode_enabled', '__return_false' );
-		$this->setExpectedException( WPDieException::class, 'Paired browsing is only available when AMP dev mode is enabled (e.g. when logged-in and admin bar is showing).' );
-		$this->instance->filter_template_include_for_app();
-	}
-
-	/** @covers ::filter_template_include_for_app() */
 	public function test_filter_template_include_for_app_when_allowed() {
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$this->assertEquals( 0, did_action( 'amp_register_polyfills' ) );
 
 		$include_path = $this->instance->filter_template_include_for_app();

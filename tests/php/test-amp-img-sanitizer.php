@@ -57,6 +57,22 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
+			'simple_native_image'                      => [
+				'<img src="https://placehold.it/300x300" width="300" height="300" class="align-center">',
+				'<img src="https://placehold.it/300x300" width="300" height="300" class="align-center amp-wp-enforced-sizes" decoding="async" data-ampdevmode="">',
+				[
+					'use_native_img' => true,
+				],
+			],
+
+			'native_image_with_no_dims_and_loading'    => [
+				'<img src="https://placehold.it/150x300" loading="lazy" decoding="sync">',
+				'<img src="https://placehold.it/150x300" loading="lazy" decoding="sync" width="150" height="300" class="amp-wp-enforced-sizes" data-ampdevmode="">',
+				[
+					'use_native_img' => true,
+				],
+			],
+
 			'image_with_new_platform_attributes'       => [
 				'<img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy">',
 				'<amp-img src="https://placehold.it/150x300" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy"></noscript></amp-img>',
@@ -439,8 +455,11 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Img_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
-		$sanitizer->sanitize();
+		// Skip validation if using native img since not yet valid and data-ampdevmode present.
+		if ( empty( $args['use_native_img'] ) ) {
+			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
+			$sanitizer->sanitize();
+		}
 
 		$this->assertEqualSets( $error_codes, $expected_error_codes );
 
