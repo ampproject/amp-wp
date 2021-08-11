@@ -14,7 +14,10 @@ use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
+use AmpProject\Attribute;
+use AmpProject\DevMode;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use org\bovigo\vfs;
 
 /**
@@ -1794,6 +1797,68 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertStringContains( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
 		$this->assertStringContains( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
 		$this->assertStringContains( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
+	}
+
+	/** @return array */
+	public function get_data_for_allowing_native_post_forms() {
+		return [
+			'keep_post_forms'    => [ false ],
+			'convert_post_forms' => [ true ],
+		];
+	}
+
+	/**
+	 * Test prepare_response when allowing post forms.
+	 *
+	 * @dataProvider get_data_for_allowing_native_post_forms
+	 * @covers AMP_Theme_Support::prepare_response()
+	 * @param bool $converted Whether the POST form should be converted to amp-form.
+	 */
+	public function test_prepare_response_when_allowing_native_post_forms( $converted ) {
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
+
+		add_filter(
+			'amp_validation_error_default_sanitized',
+			static function ( $sanitized, $error ) use ( $converted ) {
+				if ( AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR === $error['code'] ) {
+					$sanitized = $converted;
+				}
+				return $sanitized;
+			},
+			10,
+			2
+		);
+
+		wp();
+		add_filter( 'amp_native_post_form_allowed', '__return_true' );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+		ob_start();
+		?>
+		<html amp>
+			<body>
+				<form action="https://example.com/" method="Post">
+					<button type="submit">Submit!</button>
+				</form>
+			</body>
+		</html>
+		<?php
+		$html = AMP_Theme_Support::prepare_response( ob_get_clean() );
+
+		$dom = Document::fromHtml( $html );
+
+		$this->assertEquals( $converted, $dom->documentElement->hasAttribute( Attribute::AMP ) );
+		$this->assertEquals( ! $converted, $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
+		$this->assertEquals(
+			$converted,
+			$dom->xpath->query( '//script[ @custom-element = "amp-form" ]' )->length > 0
+		);
+		$form = $dom->getElementsByTagName( 'form' )->item( 0 );
+		$this->assertInstanceOf( Element::class, $form );
+		$this->assertEquals( 'post', strtolower( $form->getAttribute( Attribute::METHOD ) ) );
+		$this->assertEquals( $converted, $form->hasAttribute( Attribute::ACTION_XHR ) );
+		$this->assertEquals( ! $converted, $form->hasAttribute( Attribute::ACTION ) );
+		$this->assertEquals( ! $converted, $form->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
 	}
 
 	/**
