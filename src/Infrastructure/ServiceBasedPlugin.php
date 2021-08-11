@@ -197,7 +197,6 @@ abstract class ServiceBasedPlugin implements Plugin {
 				&&
 				! $this->requirements_are_met( $id, $class, $services )
 			) {
-				next( $services );
 				continue;
 			}
 
