@@ -1352,21 +1352,21 @@ function amp_is_using_native_img() {
 }
 
 /**
- * Determine whether to allow `POST` forms rather than converting to use `action-xhr` and use the amp-form component.
+ * Determine whether to allow native `POST` forms without conversion to use the `action-xhr` attribute and use the amp-form component.
  *
  * @since 2.2
  * @link https://github.com/ampproject/amphtml/issues/27638
  *
- * @return bool Whether to allow `POST` forms.
+ * @return bool Whether to allow native `POST` forms.
  */
-function amp_is_allowing_post_forms() {
+function amp_is_allowing_native_post_forms() {
 	/**
-	 * Filters whether to allow `POST` forms rather than converting to use `action-xhr` and use the amp-form component.
+	 * Filters whether to allow native `POST` forms without conversion to use the `action-xhr` attribute and use the amp-form component.
 	 *
 	 * @since 2.2
 	 * @link https://github.com/ampproject/amphtml/issues/27638
 	 *
-	 * @param bool $use_native Whether to allow `POST` forms.
+	 * @param bool $use_native Whether to allow native `POST` forms.
 	 */
 	return (bool) apply_filters( 'amp_allowing_native_post_forms', false );
 }
@@ -1415,8 +1415,8 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 	);
 
-	$use_native_img   = amp_is_using_native_img();
-	$allow_post_forms = amp_is_allowing_post_forms();
+	$use_native_img          = amp_is_using_native_img();
+	$allow_native_post_forms = amp_is_allowing_native_post_forms();
 
 	$sanitizers = [
 		'AMP_Embed_Sanitizer'             => [
@@ -1436,7 +1436,7 @@ function amp_get_content_sanitizers( $post = null ) {
 			'use_native_img'     => $use_native_img,
 		],
 		'AMP_Form_Sanitizer'              => [
-			'allow_post_forms' => $allow_post_forms,
+			'allow_native_post_forms' => $allow_native_post_forms,
 		],
 		'AMP_Comments_Sanitizer'          => [
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),

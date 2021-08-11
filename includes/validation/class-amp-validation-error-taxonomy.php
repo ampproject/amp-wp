@@ -3341,11 +3341,12 @@ class AMP_Validation_Error_Taxonomy {
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
-			case AMP_Form_Sanitizer::FORM_HAS_POST_METHOD:
+			case AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR:
 				return sprintf(
-					/* translators: %s is 'POST' */
-					esc_html__( 'Form has %s method.', 'amp' ),
-					'<code>POST</code>'
+					/* translators: %1$s is 'POST', %2$s is 'action-xhr' */
+					esc_html__( 'Form has %1$s method without %2$s attribute. (Mark as kept to prevent conversion to AMP.)', 'amp' ),
+					'<code>POST</code>',
+					'<code>action-xhr</code>'
 				);
 
 			default:

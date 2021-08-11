@@ -21,9 +21,11 @@ use AmpProject\Dom\Element;
 class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Validation error code when opting-in to native POST forms and one is encountered.
+	 * Validation error code emitted when native POST forms are opted-into and one is encountered.
+	 *
+	 * @var string
 	 */
-	const FORM_HAS_POST_METHOD = 'FORM_HAS_POST_METHOD';
+	const FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR = 'FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR';
 
 	/**
 	 * Placeholder for default args, to be set in child classes.
@@ -31,14 +33,14 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'allow_post_forms' => false,
+		'allow_native_post_forms' => false,
 	];
 
 	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
-	 *      @type bool $allow_post_forms When true, a user can decide via validation error status to convert to an XHR form.
+	 *      @type bool $allow_native_post_forms When true, a user can decide via validation error status to convert to an XHR form.
 	 * }
 	 */
 	protected $args;
@@ -111,9 +113,9 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				// conversion will be performed. Otherwise, if the status is 'kept' then the POST form will be retained
 				// in the page by marking it with AMP dev mode, and the amp-form extension will be omitted from being
 				// added to the page.
-				if ( $this->args['allow_post_forms'] ) {
+				if ( $this->args['allow_native_post_forms'] ) {
 					$validation_error = [
-						'code' => self::FORM_HAS_POST_METHOD,
+						'code' => self::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR,
 					];
 					if ( ! $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) ) ) {
 						$node->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );

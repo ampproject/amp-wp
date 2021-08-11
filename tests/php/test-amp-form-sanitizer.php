@@ -197,18 +197,18 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 				'<form method="post" action="http://example.com"></form>',
 				'<form method="post" action-xhr="//example.com?_wp_amp_action_xhr_converted=1" target="_top">' . $form_templates . '</form>',
 				[
-					'allow_post_forms' => true,
+					'allow_native_post_forms' => true,
 				],
-				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD ],
+				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR ],
 			],
 			'form_with_post_action_kept' => [
 				'<form method="post" action="http://example.com"></form>',
 				'<form method="post" action="http://example.com" data-ampdevmode></form>',
 				[
-					'allow_post_forms' => true,
+					'allow_native_post_forms' => true,
 					'keep_post_forms'  => true,
 				],
-				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD ],
+				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR ],
 			],
 		];
 	}
@@ -235,7 +235,7 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 
 		$args['validation_error_callback'] = static function( $error ) use ( &$actual_errors, $args ) {
 			$actual_errors[] = $error;
-			if ( AMP_Form_Sanitizer::FORM_HAS_POST_METHOD === $error['code'] && ! empty( $args['keep_post_forms'] ) ) {
+			if ( AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR === $error['code'] && ! empty( $args['keep_post_forms'] ) ) {
 				return false;
 			}
 			return true;
@@ -256,7 +256,7 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 		}
 
 		$this->assertEqualMarkup( AMP_DOM_Utils::get_content_from_dom( $dom ), $expected );
-		if ( ! empty( $args['allow_post_forms'] ) ) {
+		if ( ! empty( $args['allow_native_post_forms'] ) ) {
 			if ( ! empty( $args['keep_post_forms'] ) ) {
 				$this->assertTrue( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
 			} else {

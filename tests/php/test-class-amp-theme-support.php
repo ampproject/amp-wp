@@ -1800,7 +1800,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/** @return array */
-	public function get_data_for_allowing_post_forms() {
+	public function get_data_for_allowing_native_post_forms() {
 		return [
 			'keep_post_forms'    => [ false ],
 			'convert_post_forms' => [ true ],
@@ -1810,17 +1810,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	/**
 	 * Test prepare_response when allowing post forms.
 	 *
-	 * @dataProvider get_data_for_allowing_post_forms
+	 * @dataProvider get_data_for_allowing_native_post_forms
 	 * @covers AMP_Theme_Support::prepare_response()
 	 * @param bool $converted Whether the POST form should be converted to amp-form.
 	 */
-	public function test_prepare_response_when_allowing_post_forms( $converted ) {
+	public function test_prepare_response_when_allowing_native_post_forms( $converted ) {
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 
 		add_filter(
 			'amp_validation_error_default_sanitized',
 			static function ( $sanitized, $error ) use ( $converted ) {
-				if ( AMP_Form_Sanitizer::FORM_HAS_POST_METHOD === $error['code'] ) {
+				if ( AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR === $error['code'] ) {
 					$sanitized = $converted;
 				}
 				return $sanitized;
