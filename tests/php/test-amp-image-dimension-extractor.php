@@ -216,7 +216,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		$attachment_id = $this->factory()->attachment->create_upload_object( __DIR__ . '/data/images/wordpress-logo.png' );
 
 		$full_image = wp_get_attachment_image_src( $attachment_id, 'full' );
-		$this->assertNotRegExp( '/-\d+x\d+\.\w+/', $full_image[0], 'Expected no dimensions in filename.' );
+		$this->assertDoesNotMatchRegularExpression( '/-\d+x\d+\.\w+/', $full_image[0], 'Expected no dimensions in filename.' );
 		$thumbnail_image = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
 		$this->assertMatchesRegularExpression( '/-\d+x\d+\.\w+/', $thumbnail_image[0], 'Expected dimensions in file name. ' );
 

@@ -189,7 +189,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			$this->assertInstanceOf( 'DOMElement', $element, "ID: $id" );
 			$rel = (string) $element->getAttribute( 'rel' );
 			if ( empty( $link_data['expected_rel'] ) ) {
-				$this->assertNotRegExp( '/(^|\s)amphtml(\s|$)/', $rel, "ID: $id" );
+				$this->assertDoesNotMatchRegularExpression( '/(^|\s)amphtml(\s|$)/', $rel, "ID: $id" );
 			} else {
 				$this->assertEquals( $link_data['expected_rel'], $element->getAttribute( 'rel' ), "ID: $id" );
 			}

@@ -401,7 +401,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$output = get_echo( 'wp_print_styles' );
 		$regex  = '/amp-img.+display.+block/s';
 		if ( $native_img_used ) {
-			$this->assertNotRegExp( $regex, $output );
+			$this->assertDoesNotMatchRegularExpression( $regex, $output );
 		} else {
 			$this->assertMatchesRegularExpression( $regex, $output );
 		}
