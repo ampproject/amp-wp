@@ -604,9 +604,9 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		ob_start();
 		$this->instance->add_mobile_version_switcher_link();
 		$output = ob_get_clean();
-		$this->assertStringContains( 'rel="' . $link_rel . '"', $output );
-		$this->assertStringContains( 'amp-mobile-version-switcher', $output );
-		$this->assertStringNotContains( '<script data-ampdevmode>', $output );
+		$this->assertStringContainsString( 'rel="' . $link_rel . '"', $output );
+		$this->assertStringContainsString( 'amp-mobile-version-switcher', $output );
+		$this->assertStringNotContainsString( '<script data-ampdevmode>', $output );
 
 		add_filter(
 			'amp_mobile_version_switcher_link_text',
