@@ -6,13 +6,14 @@
  */
 
 use AmpProject\AmpWP\Option;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Class Test_AMP_Customizer_Design_Settings
  *
  * @covers AMP_Customizer_Design_Settings
  */
-class Test_AMP_Customizer_Design_Settings extends WP_UnitTestCase {
+class Test_AMP_Customizer_Design_Settings extends TestCase {
 
 	public static function setUpBeforeClass() {
 		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
@@ -64,7 +65,7 @@ class Test_AMP_Customizer_Design_Settings extends WP_UnitTestCase {
 		AMP_Customizer_Design_Settings::register_customizer_ui( $wp_customize );
 
 		$section_ids = array_keys( $wp_customize->sections() );
-		$this->assertContains( 'amp_design', $section_ids );
+		$this->assertStringContainsString( 'amp_design', $section_ids );
 
 		$control_ids          = array_keys( $wp_customize->controls() );
 		$expected_control_ids = [

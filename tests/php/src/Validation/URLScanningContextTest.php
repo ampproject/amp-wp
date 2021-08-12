@@ -4,10 +4,10 @@ namespace AmpProject\AmpWP\Tests\Validation;
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Validation\URLScanningContext;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLScanningContext */
-final class URLScanningContextTest extends WP_UnitTestCase {
+final class URLScanningContextTest extends TestCase {
 	use PrivateAccess;
 
 	/**

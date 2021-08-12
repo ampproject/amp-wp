@@ -1,7 +1,8 @@
 <?php
 
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Playbuzz_Sanitizer_Test extends TestCase {
 
 	/**
 	 * Data for converter test.

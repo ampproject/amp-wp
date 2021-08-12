@@ -13,10 +13,9 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 use Closure;
 use WP_Error;
 
@@ -27,9 +26,9 @@ use WP_Error;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\ReaderThemes
  */
-class ReaderThemesTest extends WP_UnitTestCase {
+class ReaderThemesTest extends TestCase {
 
-	use AssertContainsCompatibility, ThemesApiRequestMocking, LoadsCoreThemes;
+	use ThemesApiRequestMocking, LoadsCoreThemes;
 
 	/**
 	 * Test instance.
@@ -102,9 +101,9 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		$themes = ( new ReaderThemes() )->get_themes();
 
 		$available_theme_slugs = wp_list_pluck( $themes, 'slug' );
-		$this->assertContains( 'child-of-core', $available_theme_slugs );
-		$this->assertNotContains( 'custom', $available_theme_slugs );
-		$this->assertNotContains( 'with-legacy', $available_theme_slugs );
+		$this->assertStringContainsString( 'child-of-core', $available_theme_slugs );
+		$this->assertStringNotContainsString( 'custom', $available_theme_slugs );
+		$this->assertStringNotContainsString( 'with-legacy', $available_theme_slugs );
 	}
 
 	/**
@@ -186,8 +185,8 @@ class ReaderThemesTest extends WP_UnitTestCase {
 			$error->get_error_message()
 		);
 		if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
-			$this->assertStringContains( 'Test message', $error->get_error_message() );
-			$this->assertStringContains( 'amp_test_error', $error->get_error_message() );
+			$this->assertStringContainsString( 'Test message', $error->get_error_message() );
+			$this->assertStringContainsString( 'amp_test_error', $error->get_error_message() );
 		}
 	}
 

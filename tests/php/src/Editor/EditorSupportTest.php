@@ -6,13 +6,10 @@ use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Editor\EditorSupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Editor\EditorSupport */
-final class EditorSupportTest extends WP_UnitTestCase {
-
-	use AssertContainsCompatibility;
+final class EditorSupportTest extends TestCase {
 
 	/** @var EditorSupport */
 	private $instance;
@@ -93,7 +90,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		if ( $this->instance->editor_supports_amp_block_editor_features() ) {
 			$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
 		} else {
-			$this->assertContains(
+			$this->assertStringContainsString(
 				'AMP functionality is not available',
 				wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
 			);
@@ -162,7 +159,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 		$this->instance->maybe_show_notice();
 		$inline_script = wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false );
-		$this->assertStringContains( 'AMP functionality is not available', $inline_script );
+		$this->assertStringContainsString( 'AMP functionality is not available', $inline_script );
 		unset( $GLOBALS['current_screen'] );
 		unset( $GLOBALS['wp_scripts'] );
 	}
