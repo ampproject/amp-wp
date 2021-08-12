@@ -2015,7 +2015,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				],
 				'expected_styles' => [ 'body{color:#fff}' ],
 				'expected_errors' => [],
-				'cached_data'    => new CachedResponse(
+				'expected_cached_response'    => new CachedResponse(
 					'body { color: #fff }',
 					[
 						'cache-control' => 'max-age=1441',
@@ -2036,7 +2036,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				],
 				'expected_styles' => [],
 				'expected_errors' => [ AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR ],
-				'cached_data'    => new CachedResponse(
+				'expected_cached_response'    => new CachedResponse(
 					FailedToGetFromRemoteUrl::withHttpStatus( 'https://www.example.com/not-found/styles.css', 404 )->getMessage(),
 					[],
 					404,
