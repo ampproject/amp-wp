@@ -16,11 +16,12 @@ use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Test AMP_Style_Sanitizer.
  */
-class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Style_Sanitizer_Test extends TestCase {
 
 	use MarkupComparison;
 	use PrivateAccess;

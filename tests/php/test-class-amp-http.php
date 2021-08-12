@@ -7,13 +7,14 @@
  */
 
 use AmpProject\AmpWP\Option;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AMP_HTTP.
  *
  * @covers AMP_HTTP
  */
-class Test_AMP_HTTP extends WP_UnitTestCase {
+class Test_AMP_HTTP extends TestCase {
 
 
 	/**

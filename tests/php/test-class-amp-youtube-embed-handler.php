@@ -8,13 +8,14 @@
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AMP_YouTube_Embed_Handler.
  *
  * @covers AMP_YouTube_Embed_Handler
  */
-class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
+class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 	use PrivateAccess;
 	use WithoutBlockPreRendering {

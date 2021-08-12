@@ -11,7 +11,7 @@ use AmpProject\Optimizer\TransformationEngine;
 use \AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
-use PHPUnit\Framework\TestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Optimizer\OptimizerService */
 final class OptimizerServiceTest extends TestCase {

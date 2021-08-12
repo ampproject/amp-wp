@@ -13,7 +13,7 @@ use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\URLValidationRESTController;
 use WP_REST_Controller;
 use WP_REST_Request;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for URLValidationRESTController.
@@ -22,7 +22,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationRESTController
  */
-class URLValidationRESTControllerTest extends WP_UnitTestCase {
+class URLValidationRESTControllerTest extends TestCase {
 	use ValidationRequestMocking;
 
 	/**

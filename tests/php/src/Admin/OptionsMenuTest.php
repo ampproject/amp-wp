@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for OptionsMenu.
@@ -24,7 +24,7 @@ use WP_UnitTestCase;
  * @group options-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\OptionsMenu
  */
-class OptionsMenuTest extends WP_UnitTestCase {
+class OptionsMenuTest extends TestCase {
 
 	/**
 	 * Instance of OptionsMenu

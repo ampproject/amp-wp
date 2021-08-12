@@ -1,6 +1,7 @@
 <?php
 
 use AmpProject\AmpWP\Tests\Helpers\StubSanitizer;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AMP_Content_Sanitizer class.
@@ -13,7 +14,7 @@ use AmpProject\AmpWP\Tests\Helpers\StubSanitizer;
  *
  * @covers AMP_Content_Sanitizer
  */
-class Test_AMP_Content_Sanitizer extends WP_UnitTestCase {
+class Test_AMP_Content_Sanitizer extends TestCase {
 
 	/**
 	 * Test sanitize_document.

@@ -9,13 +9,14 @@ use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AMP_Post_Meta_Box.
  *
  * @coversDefaultClass AMP_Post_Meta_Box
  */
-class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
+class Test_AMP_Post_Meta_Box extends TestCase {
 
 	use AssertRestApiField;
 

@@ -6,7 +6,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Tests\Helpers\MockPluginEnvironment;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use PHPUnit\Framework\TestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\PluginRegistry */
 final class PluginRegistryTest extends TestCase {
@@ -124,19 +124,5 @@ final class PluginRegistryTest extends TestCase {
 		);
 
 		$this->assertNull( $plugin_registry->get_plugin_from_slug( 'nobody' ) );
-	}
-
-	/**
-	 * Asserts that the contents of two un-keyed, single arrays are equal, without accounting for the order of elements.
-	 *
-	 * @see \WP_UnitTestCase_Base::assertEqualSets()
-	 *
-	 * @param array $expected Expected array.
-	 * @param array $actual   Array to check.
-	 */
-	public function assertEqualSets( $expected, $actual ) {
-		sort( $expected );
-		sort( $actual );
-		$this->assertEquals( $expected, $actual );
 	}
 }

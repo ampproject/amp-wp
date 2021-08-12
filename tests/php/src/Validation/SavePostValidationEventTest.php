@@ -15,12 +15,12 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * @coversDefaultClass \AmpProject\AmpWP\Validation\SavePostValidationEvent
  */
-final class SavePostValidationEventTest extends WP_UnitTestCase {
+final class SavePostValidationEventTest extends TestCase {
 	use ValidationRequestMocking, PrivateAccess;
 
 	/**

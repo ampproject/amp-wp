@@ -15,13 +15,14 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
 use org\bovigo\vfs;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for Theme Support.
  *
  * @covers AMP_Theme_Support
  */
-class Test_AMP_Theme_Support extends WP_UnitTestCase {
+class Test_AMP_Theme_Support extends TestCase {
 
 	use PrivateAccess;
 	use LoadsCoreThemes;

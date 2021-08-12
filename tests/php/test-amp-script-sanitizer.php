@@ -7,13 +7,14 @@
 
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\Dom\Document;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Test AMP_Script_Sanitizer.
  *
  * @covers AMP_Script_Sanitizer
  */
-class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Script_Sanitizer_Test extends TestCase {
 
 	/**
 	 * Data for testing noscript handling.

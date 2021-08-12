@@ -11,11 +11,12 @@ use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Test Site_Health.
  */
-class Test_Site_Health extends WP_UnitTestCase {
+class Test_Site_Health extends TestCase {
 
 	use PrivateAccess;
 

@@ -5,10 +5,12 @@
  * @package AMP
  */
 
+use Yoast\WPTestUtils\WPIntegration\TestCase;
+
 /**
  * Class AMP_Block_Sanitizer_Test
  */
-class AMP_Block_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Block_Sanitizer_Test extends TestCase {
 
 	/**
 	 * Get data.

@@ -8,6 +8,7 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AMP_Reader_Theme_REST_Controller.
@@ -16,7 +17,7 @@ use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
  *
  * @coversDefaultClass AMP_Reader_Theme_REST_Controller
  */
-class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
+class Test_Reader_Theme_REST_Controller extends TestCase {
 	use ThemesApiRequestMocking;
 
 	/**

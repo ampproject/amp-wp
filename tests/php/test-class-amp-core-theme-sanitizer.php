@@ -8,13 +8,14 @@
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Class AMP_Core_Theme_Sanitizer_Test
  *
  * @coversDefaultClass AMP_Core_Theme_Sanitizer
  */
-class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 
 	use PrivateAccess;
 	use LoadsCoreThemes;

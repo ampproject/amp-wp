@@ -6,13 +6,14 @@
  */
 
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for the WpHttpRemoteGetRequest class.
  *
  * @coversDefaultClass \AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest
  */
-class Test_WP_Http_Remote_Get_Request extends \WP_UnitTestCase {
+class Test_WP_Http_Remote_Get_Request extends TestCase {
 
 	/**
 	 * Provide the data to test the processing of headers.

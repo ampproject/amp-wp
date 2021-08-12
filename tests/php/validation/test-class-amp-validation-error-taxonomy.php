@@ -9,13 +9,14 @@ use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AMP_Validation_Error_Taxonomy class.
  *
  * @covers AMP_Validation_Error_Taxonomy
  */
-class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
+class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 
 	use HandleValidation;
 

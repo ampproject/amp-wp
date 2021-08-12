@@ -5,10 +5,10 @@ namespace AmpProject\AmpWP\Tests;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\AmpSlugCustomizationWatcher */
-final class AmpSlugCustomizationWatcherTest extends WP_UnitTestCase {
+final class AmpSlugCustomizationWatcherTest extends TestCase {
 
 	/** @var AmpSlugCustomizationWatcher */
 	private $instance;
