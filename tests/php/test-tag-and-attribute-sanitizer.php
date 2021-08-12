@@ -803,7 +803,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 
 			'base_carousel'                                => [
 				'
-					<amp-base-carousel width="4" height="3" auto-advance="true" controls="auto" layout="responsive" heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)" visible-count="(min-width: 600px) 4, 3" advance-count="(min-width: 600px) 4, 3">
+					<amp-base-carousel width="4" height="3" auto-advance="true" controls="auto" layout="responsive" heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)" visible-count="(min-width: 600px) 4, 3" advance-count="(min-width: 600px) 4, 3" loop>
 						<div lightbox-thumbnail-id="food">first slide</div>
 						<div lightbox-exclude>second slide</div>
 					</amp-base-carousel>
