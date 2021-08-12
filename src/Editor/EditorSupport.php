@@ -91,6 +91,6 @@ final class EditorSupport implements Registerable, Service {
 	 * @return bool
 	 */
 	public function editor_supports_amp_block_editor_features() {
-		return $this->dependency_support->has_support();
+		return $this->dependency_support->has_support() && use_block_editor_for_post( get_post() );
 	}
 }

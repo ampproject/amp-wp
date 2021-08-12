@@ -33,16 +33,43 @@ final class EditorSupportTest extends TestCase {
 		$this->assertEquals( 99, has_action( 'admin_enqueue_scripts', [ $this->instance, 'maybe_show_notice' ] ) );
 	}
 
-	public function test_editor_supports_amp_block_editor_features() {
+	/**
+	 * Test data for test_editor_supports_amp_block_editor_features().
+	 *
+	 * @return array
+	 */
+	public function get_data_for_test_editor_supports_amp_block_editor_features() {
+		return [
+			'uses_block_editor'    => [ true ],
+			'not_use_block_editor' => [ false ],
+		];
+	}
+
+	/**
+	 * @covers ::editor_supports_amp_block_editor_features()
+	 * @dataProvider get_data_for_test_editor_supports_amp_block_editor_features()
+	 *
+	 * @param bool $post_uses_block_editor Whether post can be edited in the block editor.
+	 */
+	public function test_editor_supports_amp_block_editor_features( $post_uses_block_editor ) {
+		$GLOBALS['post'] = self::factory()->post->create();
+
+		add_filter(
+			'use_block_editor_for_post',
+			static function () use ( $post_uses_block_editor ) {
+				return $post_uses_block_editor;
+			} 
+		);
+
 		if (
 			defined( 'GUTENBERG_VERSION' )
 			&&
 			version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
 		) {
-			$this->assertTrue( $this->instance->editor_supports_amp_block_editor_features() );
+			$this->assertSame( $post_uses_block_editor, $this->instance->editor_supports_amp_block_editor_features() );
 		} else {
 			if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' ) ) {
-				$this->assertTrue( $this->instance->editor_supports_amp_block_editor_features() );
+				$this->assertSame( $post_uses_block_editor, $this->instance->editor_supports_amp_block_editor_features() );
 			} else {
 				$this->assertFalse( $this->instance->editor_supports_amp_block_editor_features() );
 			}
