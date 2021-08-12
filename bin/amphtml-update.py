@@ -551,7 +551,6 @@ def ParseRules(repo_directory, out_dir):
 			# Now convert requires_versions back into a list of extensions rather than an extension/versions mapping.
 			tag['tag_spec']['requires_extension'] = sorted( tag['tag_spec']['requires_extension'].keys() )
 
-
 	return allowed_tags, attr_lists, descendant_lists, reference_points, versions
 
 

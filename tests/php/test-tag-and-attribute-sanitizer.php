@@ -192,6 +192,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[ 'amp-facebook-comments' ],
 			],
 
+			'amp-facebook-comments_bento'                  => [
+				'<amp-facebook-comments width="486" height="657" data-href="http://example.com/baz" layout="responsive" data-numposts="5"></amp-facebook-comments>',
+				null, // No change.
+				[ 'amp-facebook' ],
+				[],
+				[ 'prefer_bento' => true ],
+			],
+
 			'amp-facebook-comments_missing_required_attribute' => [
 				'<amp-facebook-comments width="486" height="657" layout="responsive" data-numposts="5"></amp-facebook-comments>',
 				'',
@@ -208,6 +216,28 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				'<amp-facebook-like width="90" height="20" data-href="http://example.com/baz" layout="fixed" data-layout="button_count"></amp-facebook-like>',
 				null, // No change.
 				[ 'amp-facebook-like' ],
+			],
+
+			'amp-facebook-like_bento'                      => [
+				'<amp-facebook-like width="90" height="20" data-href="http://example.com/baz" layout="fixed" data-layout="button_count"></amp-facebook-like>',
+				null, // No change.
+				[ 'amp-facebook' ],
+				[],
+				[ 'prefer_bento' => true ],
+			],
+
+			'amp-facebook-page'                            => [
+				'<amp-facebook-page width="340" height="130" layout="responsive" data-href="https://www.facebook.com/imdb/"></amp-facebook-page>',
+				null, // No change.
+				[ 'amp-facebook-page' ],
+			],
+
+			'amp-facebook-page_bento'                      => [
+				'<amp-facebook-page width="340" height="130" layout="responsive" data-href="https://www.facebook.com/imdb/"></amp-facebook-page>',
+				null, // No change.
+				[ 'amp-facebook' ],
+				[],
+				[ 'prefer_bento' => true ],
 			],
 
 			'amp-facebook-like_missing_required_attribute' => [
@@ -3696,20 +3726,24 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 	 * @param string     $expected         The markup to expect.
 	 * @param array      $expected_scripts The AMP component script names that are obtained through sanitization.
 	 * @param array|null $expected_errors  Expected validation errors, either codes or validation error subsets.
+	 * @param array      $sanitizer_args   Sanitizer args.
 	 */
-	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = [] ) {
+	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = [], $sanitizer_args = [] ) {
 		$expected      = isset( $expected ) ? $expected : $source;
 		$dom           = Document::fromHtml( $source, Options::DEFAULTS );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
-			[
-				'use_document_element'      => true,
-				'validation_error_callback' => static function( $error ) use ( &$actual_errors ) {
-					$actual_errors[] = $error;
-					return true;
-				},
-			]
+			array_merge(
+				[
+					'use_document_element'      => true,
+					'validation_error_callback' => static function( $error ) use ( &$actual_errors ) {
+						$actual_errors[] = $error;
+						return true;
+					},
+				],
+				$sanitizer_args
+			)
 		);
 		$sanitizer->sanitize();
 		$content = $dom->saveHTML( $dom->documentElement );
