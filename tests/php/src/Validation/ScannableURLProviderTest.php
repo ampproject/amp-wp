@@ -11,10 +11,10 @@ use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLScanningContext;
 use WP_Query;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\ScannableURLProvider */
-final class ScannableURLProviderTest extends WP_UnitTestCase {
+final class ScannableURLProviderTest extends TestCase {
 	use PrivateAccess, ValidationRequestMocking;
 
 	/**

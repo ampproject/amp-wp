@@ -6,13 +6,14 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Class AMP_Img_Sanitizer_Test
  *
  * @covers AMP_Img_Sanitizer
  */
-class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Img_Sanitizer_Test extends TestCase {
 
 	use PrivateAccess;
 

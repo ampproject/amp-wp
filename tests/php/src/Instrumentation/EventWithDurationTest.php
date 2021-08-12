@@ -3,7 +3,7 @@
 namespace AmpProject\AmpWP\Tests\Instrumentation;
 
 use AmpProject\AmpWP\Instrumentation\EventWithDuration;
-use PHPUnit\Framework\TestCase;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 final class EventWithDurationTest extends TestCase {
 

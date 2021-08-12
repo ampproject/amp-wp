@@ -7,13 +7,14 @@
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Dom\Document;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AMP_Comments_Sanitizer class.
  *
  * @since 0.7
  */
-class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
+class Test_AMP_Comments_Sanitizer extends TestCase {
 
 	use PrivateAccess;
 

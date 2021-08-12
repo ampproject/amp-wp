@@ -6,10 +6,10 @@ use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Editor\EditorSupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Editor\EditorSupport */
-final class EditorSupportTest extends WP_UnitTestCase {
+final class EditorSupportTest extends TestCase {
 
 	/** @var EditorSupport */
 	private $instance;

@@ -15,7 +15,7 @@ use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 use Closure;
 use WP_Error;
 
@@ -26,7 +26,7 @@ use WP_Error;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\ReaderThemes
  */
-class ReaderThemesTest extends WP_UnitTestCase {
+class ReaderThemesTest extends TestCase {
 
 	use ThemesApiRequestMocking, LoadsCoreThemes;
 

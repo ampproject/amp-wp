@@ -14,7 +14,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AnalyticsOptionsSubmenu.
@@ -22,7 +22,7 @@ use WP_UnitTestCase;
  * @group options-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu
  */
-class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
+class AnalyticsOptionsSubmenuTest extends TestCase {
 
 	/**
 	 * Instance of OptionsMenu class.

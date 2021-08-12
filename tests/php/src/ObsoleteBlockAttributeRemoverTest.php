@@ -6,11 +6,11 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\ObsoleteBlockAttributeRemover;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 use WP_REST_Response;
 
 /** @coversDefaultClass \AmpProject\AmpWP\ObsoleteBlockAttributeRemover */
-final class ObsoleteBlockAttributeRemoverTest extends WP_UnitTestCase {
+final class ObsoleteBlockAttributeRemoverTest extends TestCase {
 
 	/** @var ObsoleteBlockAttributeRemover */
 	private $instance;

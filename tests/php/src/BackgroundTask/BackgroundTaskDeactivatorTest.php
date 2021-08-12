@@ -10,12 +10,12 @@ use AmpProject\AmpWP\Infrastructure\Deactivateable;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator
  */
-final class BackgroundTaskDeactivatorTest extends WP_UnitTestCase {
+final class BackgroundTaskDeactivatorTest extends TestCase {
 	use PrivateAccess;
 
 	/**

@@ -9,10 +9,10 @@ use AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages */
-final class DetermineHeroImagesTest extends WP_UnitTestCase {
+final class DetermineHeroImagesTest extends TestCase {
 
 	use ErrorComparison;
 	use MarkupComparison;

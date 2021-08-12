@@ -2,6 +2,7 @@
 
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\Dom\Document;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Class AMP_DOM_Utils_Test
@@ -12,7 +13,7 @@ use AmpProject\Dom\Document;
  * @method void assertTrue( bool $expectsTrue, string $errorMessage=null )
  * @method void assertFalse( bool $expectsFalse, string $errorMessage=null )
  */
-class AMP_DOM_Utils_Test extends WP_UnitTestCase {
+class AMP_DOM_Utils_Test extends TestCase {
 
 	/**
 	 * Test UTF-8 content.

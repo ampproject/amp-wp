@@ -12,7 +12,7 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use WP_Error;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for UserAccess class.
@@ -23,7 +23,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\DevTools\UserAccess
  */
-class UserAccessTest extends WP_UnitTestCase {
+class UserAccessTest extends TestCase {
 
 	/**
 	 * Test instance.

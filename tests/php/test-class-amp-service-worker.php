@@ -7,13 +7,14 @@
  */
 
 use AmpProject\AmpWP\Option;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AMP_Service_Worker.
  *
  * @covers AMP_Service_Worker
  */
-class Test_AMP_Service_Worker extends WP_UnitTestCase {
+class Test_AMP_Service_Worker extends TestCase {
 
 	/**
 	 * Set up.

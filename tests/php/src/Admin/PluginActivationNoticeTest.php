@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AmpProject\AmpWP\Admin\PluginActivationNotice;
 use AmpProject\AmpWP\Option;
 use AMP_Options_Manager;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for PluginActivationNotice class.
@@ -21,7 +21,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\PluginActivationNotice
  */
-class PluginActivationNoticeTest extends WP_UnitTestCase {
+class PluginActivationNoticeTest extends TestCase {
 
 	/**
 	 * Test instance.

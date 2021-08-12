@@ -5,12 +5,14 @@
  * @package AMP
  */
 
+use Yoast\WPTestUtils\WPIntegration\TestCase;
+
 /**
  * Test AMP_Dev_Mode_Sanitizer.
  *
  * @covers AMP_Dev_Mode_Sanitizer
  */
-class AMP_Dev_Mode_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Dev_Mode_Sanitizer_Test extends TestCase {
 
 	/**
 	 * Test sanitize method.

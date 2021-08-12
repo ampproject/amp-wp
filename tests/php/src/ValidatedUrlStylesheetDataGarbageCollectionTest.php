@@ -10,10 +10,10 @@ namespace AmpProject\AmpWP\Tests;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection */
-class ValidatedUrlStylesheetDataGarbageCollectionTest extends WP_UnitTestCase {
+class ValidatedUrlStylesheetDataGarbageCollectionTest extends TestCase {
 
 	/**
 	 * Test whether an event is actually scheduled when the garbage collection is registered.

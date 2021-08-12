@@ -5,10 +5,12 @@
  * @package AMP
  */
 
+use Yoast\WPTestUtils\WPIntegration\TestCase;
+
 /**
  * Class Test_AMP_Post_Template_Functions
  */
-class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
+class Test_AMP_Post_Template_Functions extends TestCase {
 
 	public function setUp() {
 		parent::setUp();

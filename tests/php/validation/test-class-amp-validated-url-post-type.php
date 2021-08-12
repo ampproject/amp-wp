@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 // phpcs:disable WordPress.Variables.GlobalVariables.OverrideProhibited
 
@@ -19,7 +20,7 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
  *
  * @covers AMP_Validated_URL_Post_Type
  */
-class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
+class Test_AMP_Validated_URL_Post_Type extends TestCase {
 
 	use HandleValidation;
 	use PrivateAccess;

@@ -6,11 +6,12 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests the accessibility sanitizer class.
  */
-class AMP_Accessibility_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Accessibility_Sanitizer_Test extends TestCase {
 
 	use MarkupComparison;
 

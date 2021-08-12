@@ -1,8 +1,9 @@
 <?php
 
 use AmpProject\AmpWP\Option;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class AMP_Render_Post_Test extends WP_UnitTestCase {
+class AMP_Render_Post_Test extends TestCase {
 
 	/**
 	 * @expectedDeprecated amp_render_post

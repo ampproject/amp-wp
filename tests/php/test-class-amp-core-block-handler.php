@@ -8,6 +8,7 @@
 
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AMP_Core_Block_Handler.
@@ -15,7 +16,7 @@ use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
  * @package AMP
  * @coversDefaultClass AMP_Core_Block_Handler
  */
-class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
+class Test_AMP_Core_Block_Handler extends TestCase {
 
 	use MarkupComparison;
 	use WithoutBlockPreRendering {

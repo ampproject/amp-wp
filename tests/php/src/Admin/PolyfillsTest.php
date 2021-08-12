@@ -15,7 +15,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Scripts;
 use WP_Styles;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for Polyfills class.
@@ -24,7 +24,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\Polyfills
  */
-class PolyfillsTest extends WP_UnitTestCase {
+class PolyfillsTest extends TestCase {
 
 	/**
 	 * Test instance.

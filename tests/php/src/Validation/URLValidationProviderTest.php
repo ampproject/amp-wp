@@ -4,10 +4,10 @@ namespace AmpProject\AmpWP\Tests\Validation;
 
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationProvider */
-final class URLValidationProviderTest extends WP_UnitTestCase {
+final class URLValidationProviderTest extends TestCase {
 	use ValidationRequestMocking;
 
 	/**

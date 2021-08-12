@@ -6,13 +6,14 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AMP_Image_Dimension_Extractor.
  *
  * @covers AMP_Image_Dimension_Extractor
  */
-class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
+class AMP_Image_Dimension_Extractor_Extract_Test extends TestCase {
 
 	use PrivateAccess;
 
