@@ -273,12 +273,10 @@ final class DetermineHeroImagesTest extends TestCase {
 	/**
 	 * Test the transform() method.
 	 *
-	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::transform()
-	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::add_data_hero_candidate_attribute()
-	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_custom_header()
-	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_custom_logo()
-	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_initial_content_image_block()
-	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_initial_content_cover_block()
+	 * @covers       ::transform()
+	 * @covers       ::add_data_hero_candidate_attribute()
+	 * @covers       ::get_header_images()
+	 * @covers       ::get_initial_content_image()
 	 * @dataProvider data_transform()
 	 *
 	 * @param string                  $source          String of source HTML.
