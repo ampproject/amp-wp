@@ -915,6 +915,23 @@ class AMP_Theme_Support {
 				wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
 			}
 		);
+
+		// Enable Bento experiment per <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
+		// @todo Remove this once Bento no longer requires an experiment to opt-in.
+		if ( amp_is_bento_enabled() ) {
+			add_action(
+				'wp_head',
+				static function () {
+					?>
+					<script data-ampdevmode>
+						(self.AMP = self.AMP || []).push(function (AMP) {
+							AMP.toggleExperiment('bento', true);
+						});
+					</script>
+					<?php
+				}
+			);
+		}
 	}
 
 	/**
@@ -2130,6 +2147,13 @@ class AMP_Theme_Support {
 		add_filter(
 			'amp_enable_ssr',
 			static function () use ( $args ) {
+				// @codeCoverageIgnoreStart
+				// SSR currently does not work reliably with Bento. See <https://github.com/ampproject/amphtml/issues/35485>.
+				if ( amp_is_bento_enabled() ) {
+					return false;
+				}
+				// @codeCoverageIgnoreEnd
+
 				return array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
 					? $args[ ConfigurationArgument::ENABLE_SSR ]
 					: true;

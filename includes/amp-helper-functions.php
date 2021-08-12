@@ -874,6 +874,32 @@ function amp_add_generator_metadata() {
 }
 
 /**
+ * Determine whether the use of Bento components is enabled.
+ *
+ * When Bento is enabled, newer experimental versions of AMP components are used which incorporate the next generation
+ * of the component framework.
+ *
+ * @since 2.2
+ * @link https://blog.amp.dev/2021/01/28/bento/
+ *
+ * @return bool Whether Bento components are enabled.
+ */
+function amp_is_bento_enabled() {
+	/**
+	 * Filters whether the use of Bento components is enabled.
+	 *
+	 * When Bento is enabled, newer experimental versions of AMP components are used which incorporate the next generation
+	 * of the component framework.
+	 *
+	 * @since 2.2
+	 * @link https://blog.amp.dev/2021/01/28/bento/
+	 *
+	 * @param bool $enabled Enabled.
+	 */
+	return apply_filters( 'amp_bento_enabled', false );
+}
+
+/**
  * Register default scripts for AMP components.
  *
  * @internal
@@ -924,17 +950,24 @@ function amp_register_default_scripts( $wp_scripts ) {
 		$extension_specs['amp-carousel']['latest'] = '0.2';
 	}
 
+	$bento_enabled = amp_is_bento_enabled();
 	foreach ( $extension_specs as $extension_name => $extension_spec ) {
+		if ( $bento_enabled && ! empty( $extension_spec['bento'] ) ) {
+			$version = $extension_spec['bento']['version'];
+		} else {
+			$version = $extension_spec['latest'];
+		}
+
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
 			$extension_name,
-			$extension_spec['latest']
+			$version
 		);
 
 		$wp_scripts->add(
 			$extension_name,
 			$src,
-			[ 'amp-runtime' ],
+			[ 'amp-runtime' ], // @todo Eventually this will not be present for Bento.
 			null
 		);
 	}
@@ -964,6 +997,28 @@ function amp_register_default_styles( WP_Styles $styles ) {
 		AMP__VERSION
 	);
 	$styles->add_data( 'amp-icons', 'rtl', 'replace' );
+
+	// These are registered exclusively for non-AMP pages that manually enqueue them. They aren't needed on
+	// AMP pages due to the runtime style being present and because the styles are inlined in the scripts already.
+	if ( amp_is_bento_enabled() ) {
+		foreach ( AMP_Allowed_Tags_Generated::get_extension_specs() as $extension_name => $extension_spec ) {
+			if ( empty( $extension_spec['bento']['has_css'] ) ) {
+				continue;
+			}
+
+			$src = sprintf(
+				'https://cdn.ampproject.org/v0/%s-%s.css',
+				$extension_name,
+				$extension_spec['bento']['version']
+			);
+			$styles->add(
+				$extension_name,
+				$src,
+				[],
+				null
+			);
+		}
+	}
 }
 
 /**
@@ -1325,6 +1380,10 @@ function amp_is_dev_mode() {
 			( is_admin_bar_showing() && is_user_logged_in() )
 			||
 			is_customize_preview()
+			||
+			// Force dev mode for Bento since it currently requires the Bento experiment opt-in script.
+			// @todo Remove this once Bento no longer requires an experiment to opt-in. See <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
+			amp_is_bento_enabled()
 		)
 	);
 }

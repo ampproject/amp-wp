@@ -1758,11 +1758,7 @@ class Test_AMP_Theme_Support extends TestCase {
 	/**
 	 * Test prepare_response when dev mode is forced.
 	 *
-	 * @global WP_Widget_Factory $wp_widget_factory
-	 * @global WP_Scripts $wp_scripts
 	 * @covers AMP_Theme_Support::prepare_response()
-	 * @covers AMP_Theme_Support::ensure_required_markup()
-	 * @covers ::amp_render_scripts()
 	 */
 	public function test_prepare_response_in_forced_dev_mode() {
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -1777,6 +1773,21 @@ class Test_AMP_Theme_Support extends TestCase {
 		wp_set_current_user( 0 );
 		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
 		$this->assertStringNotContainsString( '<html amp', $html );
+	}
+
+	/**
+	 * Test prepare_response when Bento is enabled.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_in_bento() {
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
+
+		add_filter( 'amp_bento_enabled', '__return_true' );
+		wp();
+
+		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
+		$this->assertStringContainsString( 'AMP.toggleExperiment(\'bento\', true);', $html );
 	}
 
 	/**
