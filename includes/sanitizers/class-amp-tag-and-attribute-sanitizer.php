@@ -179,6 +179,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			'amp_allowed_tags'                => AMP_Allowed_Tags_Generated::get_allowed_tags(),
 			'amp_globally_allowed_attributes' => AMP_Allowed_Tags_Generated::get_allowed_attributes(),
 			'amp_layout_allowed_attributes'   => AMP_Allowed_Tags_Generated::get_layout_attributes(),
+			'prefer_bento'                    => false,
 		];
 
 		parent::__construct( $dom, $args );
@@ -430,6 +431,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$validation_errors          = [];
 		$rule_spec_list             = $this->allowed_tags[ $node->nodeName ];
 		foreach ( $rule_spec_list as $id => $rule_spec ) {
+			// When there are multiple versions of a rule spec, with one specifically for Bento and another for
+			// non-Bento make sure that only the preferred version is considered. Otherwise, the wrong requires_extension
+			// constraint may be applied.
+			if (
+				isset( $rule_spec['tag_spec']['bento'] )
+				&&
+				$this->args['prefer_bento'] !== $rule_spec['tag_spec']['bento']
+			) {
+				continue;
+			}
+
 			$validity = $this->validate_tag_spec_for_node( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] );
 			if ( true === $validity ) {
 				$rule_spec_list_to_validate[ $id ] = $this->get_rule_spec_list_to_validate( $node, $rule_spec );
