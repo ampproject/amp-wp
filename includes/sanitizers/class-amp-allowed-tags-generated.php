@@ -1629,6 +1629,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'requires_extension' => array(
 						'amp-base-carousel',
 					),
@@ -1718,6 +1719,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'reference_points' => array(
 						'AMP-BASE-CAROUSEL lightbox [child]' => array(
 							'mandatory' => false,
@@ -1729,8 +1731,8 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'requires_extension' => array(
-						'amp-lightbox-gallery',
 						'amp-base-carousel',
+						'amp-lightbox-gallery',
 					),
 					'spec_name' => 'AMP-BASE-CAROUSEL [lightbox]',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-base-carousel/',
@@ -2402,6 +2404,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'mandatory_oneof' => array(
 						'end-date',
 						'timeleft-ms',
@@ -2454,6 +2457,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'mandatory_oneof' => array(
 						'datetime',
 						'timestamp-ms',
@@ -3134,6 +3138,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => false,
 					'requires_extension' => array(
 						'amp-facebook-comments',
 					),
@@ -3162,6 +3167,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'requires_extension' => array(
 						'amp-facebook',
 					),
@@ -3200,6 +3206,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => false,
 					'requires_extension' => array(
 						'amp-facebook-like',
 					),
@@ -3235,6 +3242,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'requires_extension' => array(
 						'amp-facebook',
 					),
@@ -3273,6 +3281,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => false,
 					'requires_extension' => array(
 						'amp-facebook-page',
 					),
@@ -3308,6 +3317,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'requires_extension' => array(
 						'amp-facebook',
 					),
@@ -3918,6 +3928,7 @@ class AMP_Allowed_Tags_Generated {
 							5,
 						),
 					),
+					'bento' => true,
 					'requires_extension' => array(
 						'amp-inline-gallery',
 					),
@@ -3947,6 +3958,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'mandatory_ancestor' => 'amp-inline-gallery',
 					'requires_extension' => array(
 						'amp-inline-gallery',
@@ -3973,6 +3985,7 @@ class AMP_Allowed_Tags_Generated {
 							1,
 						),
 					),
+					'bento' => true,
 					'mandatory_ancestor' => 'amp-inline-gallery',
 					'requires_extension' => array(
 						'amp-inline-gallery',
@@ -4023,6 +4036,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'mandatory_ancestor' => 'amp-inline-gallery',
 					'requires_extension' => array(
 						'amp-inline-gallery',
@@ -5475,6 +5489,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'mandatory_anyof' => array(
 						'data-amp-bind-src',
 						'src',
@@ -7061,6 +7076,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'requires_extension' => array(
 						'amp-stream-gallery',
 					),
@@ -7164,6 +7180,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => true,
 					'requires_extension' => array(
 						'amp-timeago',
 					),
@@ -11689,8 +11706,8 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-autocomplete',
 					'requires_extension' => array(
-						'amp-form',
 						'amp-autocomplete',
+						'amp-form',
 					),
 					'spec_name' => 'amp-autocomplete > input',
 				),
@@ -15313,7 +15330,6 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
-					'spec_name' => 'amp-ad extension script',
 				),
 			),
 			array(
@@ -16303,7 +16319,6 @@ class AMP_Allowed_Tags_Generated {
 							'1.0',
 						),
 					),
-					'spec_name' => 'amp-facebook 1.0',
 				),
 			),
 			array(

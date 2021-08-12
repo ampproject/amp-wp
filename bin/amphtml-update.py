@@ -456,30 +456,30 @@ def ParseRules(repo_directory, out_dir):
 			tag['tag_spec']['requires_extension'] = requires_extension_versions
 
 	extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.extensions.json' ) ) )
-	extension_versions = dict()
+	extensions_versions = dict()
 	for extension in extensions:
-		if extension['name'] not in extension_versions:
-			extension_versions[ extension['name'] ] = {
+		if extension['name'] not in extensions_versions:
+			extensions_versions[ extension['name'] ] = {
 				'versions': [],
 				'latest': None,
 			}
 
 		if type(extension['version']) == list:
-			extension_versions[ extension['name'] ]['versions'].extend( extension['version'] )
+			extensions_versions[ extension['name'] ]['versions'].extend( extension['version'] )
 		else:
-			extension_versions[ extension['name'] ]['versions'].append( extension['version'] )
-		if extension_versions[ extension['name'] ]['latest'] is not None and extension_versions[ extension['name'] ]['latest'] != extension['latestVersion']:
+			extensions_versions[ extension['name'] ]['versions'].append( extension['version'] )
+		if extensions_versions[ extension['name'] ]['latest'] is not None and extensions_versions[ extension['name'] ]['latest'] != extension['latestVersion']:
 			logging.info('Warning: latestVersion mismatch for ' + extension['name'])
-		extension_versions[ extension['name'] ]['latest'] = extension['latestVersion']
+		extensions_versions[ extension['name'] ]['latest'] = extension['latestVersion']
 		if 'options' in extension and 'wrapper' in extension['options'] and extension['options']['wrapper'] == 'bento':
-			extension_versions[ extension['name'] ]['bento'] = {
+			extensions_versions[ extension['name'] ]['bento'] = {
 				'version': extension['version'],
 				'has_css': extension['options'].get( 'hasCss', False ),
 			}
 
 	# Merge extension scripts (e.g. Bento and non-Bento) into one script per extension.
 	for extension_name in sorted(extension_scripts):
-		if extension_name not in extension_versions:
+		if extension_name not in extensions_versions:
 			raise Exception( 'There is a script for an unknown extension: ' + extension_name );
 
 		extension_script_list = extension_scripts[extension_name]
@@ -489,28 +489,63 @@ def ParseRules(repo_directory, out_dir):
 		if 'latest' in validator_versions:
 			validator_versions.remove('latest')
 
-		bundle_versions = set( extension_versions[extension_name]['versions'] )
+		bundle_versions = set( extensions_versions[extension_name]['versions'] )
 		if not validator_versions.issubset( bundle_versions ):
 			logging.info( 'Validator versions are not a subset of bundle versions: ' + extension_name )
 
-		if 'bento' in extension_versions[extension_name] and extension_versions[extension_name]['bento']['version'] not in validator_versions:
-			logging.info( 'Skipping bento for ' + extension_name + ' since version ' + extension_versions[extension_name]['bento']['version'] + ' is not yet valid' )
-			del extension_versions[extension_name]['bento']
+		if 'bento' in extensions_versions[extension_name] and extensions_versions[extension_name]['bento']['version'] not in validator_versions:
+			logging.info( 'Skipping bento for ' + extension_name + ' since version ' + extensions_versions[extension_name]['bento']['version'] + ' is not yet valid' )
+			del extensions_versions[extension_name]['bento']
 
 		validator_versions = sorted( validator_versions, key=lambda version: map(int, version.split('.') ) )
 		extension_script_list[0]['tag_spec']['extension_spec']['version'] = validator_versions
 
-		if 'bento' in extension_versions[extension_name] and extension_versions[extension_name]['bento']['version'] in validator_versions:
-			extension_script_list[0]['tag_spec']['extension_spec']['bento'] = extension_versions[extension_name]['bento']
+		if 'bento' in extensions_versions[extension_name] and extensions_versions[extension_name]['bento']['version'] in validator_versions:
+			extension_script_list[0]['tag_spec']['extension_spec']['bento'] = extensions_versions[extension_name]['bento']
 
-		extension_script_list[0]['tag_spec']['extension_spec']['latest'] = extension_versions[extension_name]['latest']
+		extension_script_list[0]['tag_spec']['extension_spec']['latest'] = extensions_versions[extension_name]['latest']
 
 		extension_script_list[0]['tag_spec']['extension_spec'].pop('version_name', None)
+
+		# Remove the spec name since we've potentially merged multiple scripts, thus it does not refer to one.
 		extension_script_list[0]['tag_spec'].pop('spec_name', None)
 
 		script_tags.append(extension_script_list[0])
 
 	allowed_tags['script'] = script_tags
+
+	# Now that Bento information is in hand, re-decorate specs with require_extension to indicate which
+	for tag_name, tags in allowed_tags.items():
+		has_bento = False
+
+		for tag in tags:
+			if 'requires_extension' not in tag['tag_spec']:
+				continue
+
+			# Determine the Bento availability of all the required extensions.
+			tag_extensions_with_bento = {}
+			for extension, extension_versions in tag['tag_spec']['requires_extension'].items():
+				if extension in extensions_versions and 'bento' in extensions_versions[extension] and extensions_versions[extension]['bento']['version'] in extension_versions:
+					tag_extensions_with_bento[ extension ] = True
+				else:
+					tag_extensions_with_bento[ extension ] = False
+
+			# Mark that this tag is for Bento since all its required extensions have Bento available.
+			if len( tag_extensions_with_bento ) > 0 and False not in tag_extensions_with_bento.values():
+				has_bento = True
+				tag['tag_spec']['bento'] = True
+
+		# Now that the ones with Bento have been identified, indicate the others as not having Bento.
+		for tag in tags:
+			if 'requires_extension' not in tag['tag_spec']:
+				continue
+
+			if has_bento and 'bento' not in tag['tag_spec']:
+				tag['tag_spec']['bento'] = False
+
+			# Now convert requires_versions back into a list of extensions rather than an extension/versions mapping.
+			tag['tag_spec']['requires_extension'] = sorted( tag['tag_spec']['requires_extension'].keys() )
+
 
 	return allowed_tags, attr_lists, descendant_lists, reference_points, versions
 
