@@ -260,6 +260,7 @@ class AMP_Allowed_Tags_Generated {
 			'amp-list',
 			'amp-live-list',
 			'amp-pixel',
+			'amp-render',
 			'amp-state',
 			'amp-story-360',
 			'amp-story-auto-analytics',
@@ -441,6 +442,7 @@ class AMP_Allowed_Tags_Generated {
 			'amp-powr-player',
 			'amp-reach-player',
 			'amp-reddit',
+			'amp-render',
 			'amp-riddle-quiz',
 			'amp-soundcloud',
 			'amp-springboard-player',
@@ -550,6 +552,7 @@ class AMP_Allowed_Tags_Generated {
 			'table',
 			'tbody',
 			'td',
+			'template',
 			'text',
 			'textpath',
 			'tfoot',
@@ -1584,7 +1587,7 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '([^,]+\\s+(true|false),\\s*)*(true|false)',
 					),
 					'loop' => array(
-						'value_regex' => '([^,]+\\s+(true|false),\\s*)*(true|false)',
+						'value_regex' => '([^,]+\\s+(true|false),\\s*)*(true|false|^$)',
 					),
 					'media' => array(),
 					'mixed-length' => array(
@@ -1673,7 +1676,7 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 					),
 					'loop' => array(
-						'value_regex' => '([^,]+\\s+(true|false),\\s*)*(true|false)',
+						'value_regex' => '([^,]+\\s+(true|false),\\s*)*(true|false|^$)',
 					),
 					'media' => array(),
 					'mixed-length' => array(
@@ -1726,8 +1729,8 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'requires_extension' => array(
-						'amp-lightbox-gallery',
 						'amp-base-carousel',
+						'amp-lightbox-gallery',
 					),
 					'spec_name' => 'AMP-BASE-CAROUSEL [lightbox]',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-base-carousel/',
@@ -3131,9 +3134,40 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => false,
 					'requires_extension' => array(
 						'amp-facebook-comments',
 					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'data-href' => array(
+						'mandatory' => true,
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'bento' => true,
+					'requires_extension' => array(
+						'amp-facebook',
+					),
+					'spec_name' => 'amp-facebook-comments 1.0',
 				),
 			),
 		),
@@ -3168,9 +3202,47 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => false,
 					'requires_extension' => array(
 						'amp-facebook-like',
 					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'data-href' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'http',
+								'https',
+							),
+						),
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'bento' => true,
+					'requires_extension' => array(
+						'amp-facebook',
+					),
+					'spec_name' => 'amp-facebook-like 1.0',
 				),
 			),
 		),
@@ -3205,9 +3277,47 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'bento' => false,
 					'requires_extension' => array(
 						'amp-facebook-page',
 					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'data-href' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'http',
+								'https',
+							),
+						),
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'bento' => true,
+					'requires_extension' => array(
+						'amp-facebook',
+					),
+					'spec_name' => 'amp-facebook-page 1.0',
 				),
 			),
 		),
@@ -3897,6 +4007,7 @@ class AMP_Allowed_Tags_Generated {
 						'value' => array(
 							'true',
 							'false',
+							'',
 						),
 					),
 					'media' => array(),
@@ -6911,7 +7022,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'loop' => array(
-						'value_regex' => '([^,]+\\s+(true|false),\\s*)*(true|false)',
+						'value_regex' => '([^,]+\\s+(true|false),\\s*)*(true|false|^$)',
 					),
 					'max-item-width' => array(
 						'value_regex' => '([^,]+\\s+(\\d+),\\s*)*(\\d+)',
@@ -11082,14 +11193,7 @@ class AMP_Allowed_Tags_Generated {
 		),
 		'html' => array(
 			array(
-				'attr_spec_list' => array(
-					'data-amp-autocomplete-opt-in' => array(
-						'disallowed_value_regex' => 'false',
-						'value' => array(
-							'false',
-						),
-					),
-				),
+				'attr_spec_list' => array(),
 				'tag_spec' => array(
 					'mandatory' => true,
 					'mandatory_parent' => '!doctype',
@@ -11591,8 +11695,8 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-autocomplete',
 					'requires_extension' => array(
-						'amp-form',
 						'amp-autocomplete',
+						'amp-form',
 					),
 					'spec_name' => 'amp-autocomplete > input',
 				),
@@ -15215,7 +15319,6 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
-					'spec_name' => 'amp-ad extension script',
 				),
 			),
 			array(
@@ -15710,11 +15813,16 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'bento' => array(
+							'has_css' => true,
+							'version' => '1.0',
+						),
 						'latest' => '0.1',
 						'name' => 'amp-brightcove',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
+							'1.0',
 						),
 					),
 				),
@@ -16188,11 +16296,16 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'bento' => array(
+							'has_css' => true,
+							'version' => '1.0',
+						),
 						'latest' => '0.1',
 						'name' => 'amp-facebook',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
+							'1.0',
 						),
 					),
 				),
