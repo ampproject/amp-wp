@@ -387,14 +387,73 @@ def ParseRules(repo_directory, out_dir):
 
 					descendant_lists[_list.name].append( val.lower() )
 
-	# Separate extension scripts from non-extension scripts
+	# Separate extension scripts from non-extension scripts and gather the versions
 	extension_scripts = defaultdict(list)
+	extension_specs_by_satisfies = dict()
 	script_tags = []
 	for script_tag in allowed_tags['script']:
 		if 'extension_spec' in script_tag['tag_spec']:
-			extension_scripts[script_tag['tag_spec']['extension_spec']['name']].append(script_tag)
+			extension = script_tag['tag_spec']['extension_spec']['name']
+			extension_scripts[extension].append(script_tag)
+			if 'satisfies' in script_tag['tag_spec']:
+				satisfies = script_tag['tag_spec']['satisfies']
+			else:
+				satisfies = extension
+			if satisfies in extension_specs_by_satisfies:
+				raise Exception( 'Duplicate extension script that satisfies %s.' % satisfies )
+
+			extension_specs_by_satisfies[satisfies] = script_tag['tag_spec']['extension_spec']
+
+			# These component lack an explicit requirement on a specific extension script:
+			# - amp-selector
+			# - amp-accordion
+			# - amp-soundcloud
+			# - amp-brightcove
+			# - amp-video
+			# - amp-video-iframe
+			# - amp-vimeo
+			# - amp-twitter
+			# - amp-instagram
+			# - amp-lightbox
+			# - amp-facebook
+			# - amp-youtube
+			# - amp-social-share
+			# - amp-fit-text
+			# So use the one with the latest version as a fallback.
+			if 'latest' in script_tag['tag_spec']['extension_spec']['version']:
+				extension_specs_by_satisfies[extension] = script_tag['tag_spec']['extension_spec']
 		else:
 			script_tags.append(script_tag)
+
+	# Amend the allowed_tags to supply the required versions for each component.
+	for tag_name, tags in allowed_tags.items():
+		for tag in tags:
+			tag['tag_spec'].pop('satisfies', None) # We don't need it anymore.
+			requires = tag['tag_spec'].pop('requires', [])
+
+			if 'requires_extension' not in tag['tag_spec']:
+				continue
+
+			requires_extension_versions = {}
+			for required_extension in tag['tag_spec']['requires_extension']:
+				required_versions = []
+				for require in requires:
+					if require in extension_specs_by_satisfies:
+						if required_extension != extension_specs_by_satisfies[require]['name']:
+							raise Exception('Expected satisfied to be for the %s extension' % required_extension)
+						required_versions = extension_specs_by_satisfies[require]['version']
+						break
+				if len( required_versions ) == 0:
+					if required_extension in extension_specs_by_satisfies:
+						if required_extension != extension_specs_by_satisfies[required_extension]['name']:
+							raise Exception('Expected satisfied to be for the %s extension' % required_extension)
+						required_versions = extension_specs_by_satisfies[required_extension]['version']
+
+				if len( required_versions ) == 0:
+					raise Exception('Unable to obtain any versions for %s' % required_extension)
+
+				requires_extension_versions[required_extension] = filter( lambda ver: ver != 'latest', required_versions )
+			tag['tag_spec']['requires_extension'] = requires_extension_versions
 
 	extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.extensions.json' ) ) )
 	extension_versions = dict()
@@ -446,8 +505,9 @@ def ParseRules(repo_directory, out_dir):
 
 		extension_script_list[0]['tag_spec']['extension_spec']['latest'] = extension_versions[extension_name]['latest']
 
-		if 'version_name' in extension_script_list[0]['tag_spec']['extension_spec']:
-			del extension_script_list[0]['tag_spec']['extension_spec']['version_name']
+		extension_script_list[0]['tag_spec']['extension_spec'].pop('version_name', None)
+		extension_script_list[0]['tag_spec'].pop('spec_name', None)
+
 		script_tags.append(extension_script_list[0])
 
 	allowed_tags['script'] = script_tags
@@ -553,6 +613,9 @@ def GetTagRules(tag_spec):
 		for requires_extension in tag_spec.requires_extension:
 			requires_extension_list.add(requires_extension)
 
+	if hasattr(tag_spec, 'requires') and len( tag_spec.requires ) != 0:
+		tag_rules['requires'] = [ requires for requires in tag_spec.requires ]
+
 	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
 		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
 			matches = re.search( r'(amp-\S+) extension( \.js)? script', also_requires_tag_warning )
@@ -649,6 +712,11 @@ def GetTagRules(tag_spec):
 
 	if tag_spec.HasField('spec_name'):
 		tag_rules['spec_name'] = UnicodeEscape(tag_spec.spec_name)
+
+	if hasattr(tag_spec, 'satisfies') and len( tag_spec.satisfies ) > 0:
+		if len( tag_spec.satisfies ) > 1:
+			raise Exception('More than expected was satisfied')
+		tag_rules['satisfies'] = tag_spec.satisfies[0]
 
 	if tag_spec.HasField('spec_url'):
 		tag_rules['spec_url'] = UnicodeEscape(tag_spec.spec_url)
