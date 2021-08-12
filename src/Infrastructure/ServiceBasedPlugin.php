@@ -278,6 +278,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 					PHP_INT_MAX
 				);
 
+				next( $services );
 				return false;
 			}
 		}
@@ -286,6 +287,8 @@ abstract class ServiceBasedPlugin implements Plugin {
 		 * The registration actions from all of the requirements were already processed. This means that the missing
 		 * requirement(s) are about to be registered, they just weren't encountered yet while traversing the services
 		 * map. Therefore, we skip registration for now and move this particular service to the end of the service map.
+		 *
+		 * Note: Moving the service to the end of the service map advances the internal array pointer to the next service.
 		 */
 		unset( $services[ $id ] );
 		$services[ $id ] = $class;
