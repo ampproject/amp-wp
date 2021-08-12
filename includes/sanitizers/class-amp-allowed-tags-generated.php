@@ -1629,7 +1629,6 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
-					'bento' => true,
 					'requires_extension' => array(
 						'amp-base-carousel',
 					),
@@ -1719,7 +1718,6 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
-					'bento' => true,
 					'reference_points' => array(
 						'AMP-BASE-CAROUSEL lightbox [child]' => array(
 							'mandatory' => false,
@@ -2404,7 +2402,6 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
-					'bento' => true,
 					'mandatory_oneof' => array(
 						'end-date',
 						'timeleft-ms',
@@ -2457,7 +2454,6 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
-					'bento' => true,
 					'mandatory_oneof' => array(
 						'datetime',
 						'timestamp-ms',
@@ -3928,7 +3924,6 @@ class AMP_Allowed_Tags_Generated {
 							5,
 						),
 					),
-					'bento' => true,
 					'requires_extension' => array(
 						'amp-inline-gallery',
 					),
@@ -3958,7 +3953,6 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
-					'bento' => true,
 					'mandatory_ancestor' => 'amp-inline-gallery',
 					'requires_extension' => array(
 						'amp-inline-gallery',
@@ -3985,7 +3979,6 @@ class AMP_Allowed_Tags_Generated {
 							1,
 						),
 					),
-					'bento' => true,
 					'mandatory_ancestor' => 'amp-inline-gallery',
 					'requires_extension' => array(
 						'amp-inline-gallery',
@@ -4036,7 +4029,6 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
-					'bento' => true,
 					'mandatory_ancestor' => 'amp-inline-gallery',
 					'requires_extension' => array(
 						'amp-inline-gallery',
@@ -5489,7 +5481,6 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
-					'bento' => true,
 					'mandatory_anyof' => array(
 						'data-amp-bind-src',
 						'src',
@@ -7076,7 +7067,6 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
-					'bento' => true,
 					'requires_extension' => array(
 						'amp-stream-gallery',
 					),
@@ -7180,7 +7170,6 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
-					'bento' => true,
 					'requires_extension' => array(
 						'amp-timeago',
 					),

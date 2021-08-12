@@ -186,7 +186,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[ 'amp-ad' ],
 			],
 
-			'amp-facebook-comments'                        => [
+			'amp-facebook-comments_pass'                   => [
 				'<amp-facebook-comments width="486" height="657" data-href="http://example.com/baz" layout="responsive" data-numposts="5"></amp-facebook-comments>',
 				null, // No change.
 				[ 'amp-facebook-comments' ],

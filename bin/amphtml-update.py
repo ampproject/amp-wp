@@ -516,8 +516,7 @@ def ParseRules(repo_directory, out_dir):
 
 	# Now that Bento information is in hand, re-decorate specs with require_extension to indicate which
 	for tag_name, tags in allowed_tags.items():
-		has_bento = False
-
+		tags_bento_status = []
 		for tag in tags:
 			if 'requires_extension' not in tag['tag_spec']:
 				continue
@@ -532,15 +531,21 @@ def ParseRules(repo_directory, out_dir):
 
 			# Mark that this tag is for Bento since all its required extensions have Bento available.
 			if len( tag_extensions_with_bento ) > 0 and False not in tag_extensions_with_bento.values():
-				has_bento = True
+				tags_bento_status.append( True )
 				tag['tag_spec']['bento'] = True
+			else:
+				tags_bento_status.append( False )
 
-		# Now that the ones with Bento have been identified, indicate the others as not having Bento.
+		# Now that the ones with Bento have been identified, add flags to tag specs when there are different versions specifically for Bento:
 		for tag in tags:
 			if 'requires_extension' not in tag['tag_spec']:
 				continue
 
-			if has_bento and 'bento' not in tag['tag_spec']:
+			if False not in tags_bento_status:
+				# Clear the Bento flag if _all_ of the components are for Bento.
+				tag['tag_spec'].pop( 'bento', None )
+			elif True in tags_bento_status and 'bento' not in tag['tag_spec']:
+				# Otherwise, if _some_ of the components were exclusively for Bento, flag the others as being _not_ for Bento specifically.
 				tag['tag_spec']['bento'] = False
 
 			# Now convert requires_versions back into a list of extensions rather than an extension/versions mapping.
