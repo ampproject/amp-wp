@@ -16,7 +16,6 @@ use Yoast\WPTestUtils\WPIntegration\TestCase;
  */
 class Test_AMP_HTTP extends TestCase {
 
-
 	/**
 	 * Set up before class.
 	 */
