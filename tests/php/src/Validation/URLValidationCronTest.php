@@ -13,10 +13,10 @@ use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLScanningContext;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationCron */
-final class URLValidationCronTest extends WP_UnitTestCase {
+final class URLValidationCronTest extends TestCase {
 	use ValidationRequestMocking, PrivateAccess;
 
 	/**

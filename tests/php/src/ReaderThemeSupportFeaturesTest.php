@@ -11,14 +11,13 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeSupportFeatures;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWp\Tests\Helpers\PrivateAccess;
 
 /** @coversDefaultClass \AmpProject\AmpWP\ReaderThemeSupportFeatures */
 final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility, LoadsCoreThemes, PrivateAccess;
+	use LoadsCoreThemes, PrivateAccess;
 
 	const TEST_GRADIENT_PRESETS = [
 		[
@@ -184,7 +183,7 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		if ( null === $primary_theme_support ) {
 			$this->assertNull( $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
 		} else {
-			$this->assertInternalType( 'array', $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
+			$this->assertIsArray( $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
 			foreach ( $theme_supports as $feature => $supports ) {
 				$this->assertArrayHasKey( $feature, $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
 				$this->assertEquals(
@@ -236,7 +235,7 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->assertFalse( wp_next_scheduled( ReaderThemeSupportFeatures::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT ) );
 
 		$primary_theme_support = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
-		$this->assertInternalType( 'array', $primary_theme_support );
+		$this->assertIsArray( $primary_theme_support );
 		$this->assertEqualSets( array_keys( self::TEST_ALL_THEME_SUPPORTS ), array_keys( $primary_theme_support ) );
 	}
 
@@ -376,13 +375,13 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 
 		$output = get_echo( [ $this->instance, 'print_theme_support_styles' ] );
 
-		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-color-palette">', $output );
-		$this->assertStringContains( '.has-white-background-color { background-color: #FFFFFF; color: #000; }', $output );
-		$this->assertStringContains( '.has-black-color { color: #000000; }', $output );
-		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
-		$this->assertStringContains( ':root .is-gigantic-text, :root .has-gigantic-font-size { font-size: 144px; }', $output );
-		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-gradient-presets">', $output );
-		$this->assertStringContains( '.has-yellow-to-purple-gradient-background { background: linear-gradient(160deg, #EEEADD 0%, #D1D1E4 100%); }', $output );
+		$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-color-palette">', $output );
+		$this->assertStringContainsString( '.has-white-background-color { background-color: #FFFFFF; color: #000; }', $output );
+		$this->assertStringContainsString( '.has-black-color { color: #000000; }', $output );
+		$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
+		$this->assertStringContainsString( ':root .is-gigantic-text, :root .has-gigantic-font-size { font-size: 144px; }', $output );
+		$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-gradient-presets">', $output );
+		$this->assertStringContainsString( '.has-yellow-to-purple-gradient-background { background: linear-gradient(160deg, #EEEADD 0%, #D1D1E4 100%); }', $output );
 	}
 
 	/** @return array */

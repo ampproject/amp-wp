@@ -8,11 +8,12 @@
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Class Test_AMP_Admin_Includes_Functions
  */
-class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
+class Test_AMP_Admin_Includes_Functions extends TestCase {
 
 	use LoadsCoreThemes;
 
@@ -125,7 +126,7 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
 					Option::READER_THEME  => ReaderThemes::DEFAULT_READER_THEME,
 				],
-				function () {
+				'assert'  => function () {
 					$this->assertTrue( amp_is_legacy() );
 					$this->assertEquals( 'customize.php?amp_preview=1&autofocus[panel]=amp_panel', amp_get_customizer_url() );
 
@@ -152,7 +153,7 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 						Option::READER_THEME  => $theme->get_stylesheet(),
 					];
 				},
-				function () {
+				'assert'  => function () {
 					$this->assertFalse( amp_is_legacy() );
 					$this->assertEquals( 'customize.php?amp_preview=1&amp=1', amp_get_customizer_url() );
 				},
@@ -161,7 +162,7 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 				'options' => [
 					Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 				],
-				function () {
+				'assert'  => function () {
 					$this->assertEquals( '', amp_get_customizer_url() );
 				},
 			],

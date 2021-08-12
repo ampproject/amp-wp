@@ -10,9 +10,9 @@ use AmpProject\AmpWP\Tests\Fixture\DummyService;
 use AmpProject\AmpWP\Tests\Fixture\DummyServiceBasedPlugin;
 use AmpProject\AmpWP\Tests\Fixture\DummyServiceWithDelay;
 use AmpProject\AmpWP\Tests\Fixture\DummyServiceWithRequirements;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-final class ServiceBasedPluginTest extends WP_UnitTestCase {
+final class ServiceBasedPluginTest extends TestCase {
 
 	public function test_it_can_be_instantiated() {
 		$plugin = $this->createMock( ServiceBasedPlugin::class );

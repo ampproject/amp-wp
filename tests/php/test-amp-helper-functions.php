@@ -7,7 +7,6 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
@@ -18,7 +17,6 @@ use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
  */
 class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility;
 	use HandleValidation;
 	use LoadsCoreThemes;
 
@@ -506,12 +504,12 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 		add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 		$url = amp_get_permalink( $published_post );
-		$this->assertStringContains( 'current_filter=amp_pre_get_permalink', $url );
-		$this->assertStringContains( 'url=0', $url );
+		$this->assertStringContainsString( 'current_filter=amp_pre_get_permalink', $url );
+		$this->assertStringContainsString( 'url=0', $url );
 
 		remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10 );
 		$url = amp_get_permalink( $published_post );
-		$this->assertStringContains( 'current_filter=amp_get_permalink', $url );
+		$this->assertStringContainsString( 'current_filter=amp_get_permalink', $url );
 		remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ] );
 		remove_filter( 'amp_get_permalink', [ $this, 'return_example_url' ] );
 
@@ -593,12 +591,12 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 		add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 		$url = amp_get_permalink( $published_post );
-		$this->assertStringContains( 'current_filter=amp_pre_get_permalink', $url );
-		$this->assertStringContains( 'url=0', $url );
+		$this->assertStringContainsString( 'current_filter=amp_pre_get_permalink', $url );
+		$this->assertStringContainsString( 'url=0', $url );
 
 		remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10 );
 		$url = amp_get_permalink( $published_post );
-		$this->assertStringContains( 'current_filter=amp_get_permalink', $url );
+		$this->assertStringContainsString( 'current_filter=amp_get_permalink', $url );
 		remove_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10 );
 
 		// Now check with theme support added (in transitional mode).
@@ -870,7 +868,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 				$canonical_url
 			);
 			$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
-			$this->assertStringContains( '<!--', $get_amp_html_link() );
+			$this->assertStringContainsString( '<!--', $get_amp_html_link() );
 
 			// Allow the URL when the errors are forcibly sanitized.
 			add_filter( 'amp_validation_error_sanitized', '__return_true' );
@@ -1129,7 +1127,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	public function test_amp_get_boilerplate_code() {
 		$boilerplate_code = amp_get_boilerplate_code();
 		$this->assertStringStartsWith( '<style amp-boilerplate>', $boilerplate_code );
-		$this->assertStringContains( '<noscript><style amp-boilerplate>', $boilerplate_code );
+		$this->assertStringContainsString( '<noscript><style amp-boilerplate>', $boilerplate_code );
 	}
 
 	/**
@@ -1139,10 +1137,10 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 */
 	public function test_amp_get_boilerplate_stylesheets() {
 		$stylesheets = amp_get_boilerplate_stylesheets();
-		$this->assertInternalType( 'array', $stylesheets );
+		$this->assertIsArray( $stylesheets );
 		$this->assertCount( 2, $stylesheets );
-		$this->assertStringContains( 'body{-webkit-animation:-amp-start', $stylesheets[0] );
-		$this->assertStringContains( 'body{-webkit-animation:none', $stylesheets[1] );
+		$this->assertStringContainsString( 'body{-webkit-animation:-amp-start', $stylesheets[0] );
+		$this->assertStringContainsString( 'body{-webkit-animation:none', $stylesheets[1] );
 	}
 
 	/**
@@ -1162,37 +1160,37 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$output = $get_generator_tag();
-		$this->assertStringContains( 'mode=reader', $output );
-		$this->assertStringContains( 'theme=legacy', $output );
-		$this->assertStringContains( 'v' . AMP__VERSION, $output );
+		$this->assertStringContainsString( 'mode=reader', $output );
+		$this->assertStringContainsString( 'theme=legacy', $output );
+		$this->assertStringContainsString( 'v' . AMP__VERSION, $output );
 
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
 		$output = $get_generator_tag();
-		$this->assertStringContains( 'mode=reader', $output );
-		$this->assertStringContains( 'theme=twentynineteen', $output );
-		$this->assertStringContains( 'v' . AMP__VERSION, $output );
+		$this->assertStringContainsString( 'mode=reader', $output );
+		$this->assertStringContainsString( 'theme=twentynineteen', $output );
+		$this->assertStringContainsString( 'v' . AMP__VERSION, $output );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$output = $get_generator_tag();
-		$this->assertStringContains( 'mode=transitional', $output );
-		$this->assertStringNotContains( 'theme=', $output );
-		$this->assertStringContains( 'v' . AMP__VERSION, $output );
+		$this->assertStringContainsString( 'mode=transitional', $output );
+		$this->assertStringNotContainsString( 'theme=', $output );
+		$this->assertStringContainsString( 'v' . AMP__VERSION, $output );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$output = $get_generator_tag();
-		$this->assertStringContains( 'mode=standard', $output );
-		$this->assertStringNotContains( 'theme=', $output );
-		$this->assertStringContains( 'v' . AMP__VERSION, $output );
+		$this->assertStringContainsString( 'mode=standard', $output );
+		$this->assertStringNotContainsString( 'theme=', $output );
+		$this->assertStringContainsString( 'v' . AMP__VERSION, $output );
 
 		$output = $get_generator_tag();
-		$this->assertStringContains( 'mode=standard', $output );
-		$this->assertStringNotContains( 'theme=', $output );
+		$this->assertStringContainsString( 'mode=standard', $output );
+		$this->assertStringNotContainsString( 'theme=', $output );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		switch_theme( 'twentynineteen' );
 		$output = $get_generator_tag();
-		$this->assertStringContains( 'mode=transitional', $output );
-		$this->assertStringNotContains( 'theme=', $output );
+		$this->assertStringContainsString( 'mode=transitional', $output );
+		$this->assertStringNotContainsString( 'theme=', $output );
 	}
 
 	/**
@@ -1232,9 +1230,9 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 		$output = get_echo( 'wp_print_scripts' );
 
-		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-0.1.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-latest.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-0.1.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-latest.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		// Try rendering via amp_render_scripts() instead of amp_render_scripts(), which is how component scripts get added normally.
 		$output = amp_render_scripts(
@@ -1244,14 +1242,14 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 				'amp-accordion' => true,
 			]
 		);
-		$this->assertStringNotContains( 'amp-mathml', $output, 'The amp-mathml component was already printed above.' );
-		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-2.0.js\' async custom-element="amp-carousel"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-accordion-0.1.js\' async custom-element="amp-accordion"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringNotContainsString( 'amp-mathml', $output, 'The amp-mathml component was already printed above.' );
+		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-2.0.js\' async custom-element="amp-carousel"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-accordion-0.1.js\' async custom-element="amp-accordion"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		// Try some experimental component to ensure expected script attributes are added.
 		wp_register_script( 'amp-foo', 'https://cdn.ampproject.org/v0/amp-foo-0.1.js', [ 'amp-runtime' ], null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter, WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		$output = get_echo( 'wp_print_scripts', [ 'amp-foo' ] );
-		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-foo-0.1.js\' async custom-element="amp-foo"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContainsString( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-foo-0.1.js\' async custom-element="amp-foo"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 
 	/** @covers ::amp_register_default_scripts() */
@@ -2010,11 +2008,11 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		amp_add_admin_bar_view_link( $admin_bar );
 		wp_admin_bar_customize_menu( $admin_bar );
 		$item = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $item );
+		$this->assertIsObject( $item );
 		$this->assertEquals( esc_url( amp_get_permalink( $post_id ) ), $item->href );
 		$item = $admin_bar->get_node( 'customize' );
-		$this->assertStringNotContains( amp_get_slug() . '=', $item->href );
-		$this->assertStringNotContains( 'autofocus', $item->href );
+		$this->assertStringNotContainsString( amp_get_slug() . '=', $item->href );
+		$this->assertStringNotContainsString( 'autofocus', $item->href );
 
 		// Confirm that link is added to non-AMP version.
 		set_query_var( amp_get_slug(), '1' );
@@ -2022,7 +2020,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$admin_bar = new WP_Admin_Bar();
 		amp_add_admin_bar_view_link( $admin_bar );
 		$item = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $item );
+		$this->assertIsObject( $item );
 		$this->assertEquals( esc_url( get_permalink( $post_id ) ), $item->href );
 		unset( $wp_query->query_vars[ amp_get_slug() ] );
 		$this->assertFalse( amp_is_request() );
@@ -2045,12 +2043,12 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			wp_admin_bar_customize_menu( $admin_bar );
 			amp_add_admin_bar_view_link( $admin_bar );
 			$item = $admin_bar->get_node( 'amp' );
-			$this->assertInternalType( 'object', $item );
+			$this->assertIsObject( $item );
 			$this->assertEquals( esc_url( get_permalink( $post_id ) ), $item->href );
 			$item = $admin_bar->get_node( 'customize' );
-			$this->assertInternalType( 'object', $item );
-			$this->assertStringNotContains( amp_get_slug() . '=', $item->href );
-			$this->assertStringContains( 'autofocus', $item->href );
+			$this->assertIsObject( $item );
+			$this->assertStringNotContainsString( amp_get_slug() . '=', $item->href );
+			$this->assertStringContainsString( 'autofocus', $item->href );
 		}
 
 		// Confirm Customize link with a Reader theme points to the right place.
@@ -2061,9 +2059,9 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		wp_admin_bar_customize_menu( $admin_bar );
 		amp_add_admin_bar_view_link( $admin_bar );
 		$item = $admin_bar->get_node( 'customize' );
-		$this->assertInternalType( 'object', $item );
-		$this->assertStringContains( amp_get_slug() . '=', $item->href );
-		$this->assertStringNotContains( 'autofocus', $item->href );
+		$this->assertIsObject( $item );
+		$this->assertStringContainsString( amp_get_slug() . '=', $item->href );
+		$this->assertStringNotContainsString( 'autofocus', $item->href );
 	}
 
 	/**
@@ -2142,7 +2140,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$wp_rewrite->init();
 
 		$permalink = get_permalink( self::factory()->post->create() );
-		$this->assertNotContains( '?', $permalink );
+		$this->assertStringNotContainsString( '?', $permalink );
 
 		$paired_routing = $this->injector->make( \AmpProject\AmpWP\PairedRouting::class );
 
@@ -2169,7 +2167,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	public function test_amp_has_paired_endpoint_passed( $paired_url_structure, $suffix, $is_amp ) {
 		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $paired_url_structure );
 		$permalink = home_url( '/foo/' );
-		$this->assertNotContains( '?', $permalink );
+		$this->assertStringNotContainsString( '?', $permalink );
 		$url = $permalink . $suffix;
 		$this->assertEquals( $is_amp, amp_has_paired_endpoint( $url ) );
 	}

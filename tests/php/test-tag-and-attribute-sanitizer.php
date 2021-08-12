@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 // phpcs:disable WordPress.WP.EnqueuedResources
 
@@ -16,7 +17,7 @@ use AmpProject\Dom\Document;
  *
  * @covers AMP_Tag_And_Attribute_Sanitizer
  */
-class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 
 	use MarkupComparison;
 

@@ -6,11 +6,12 @@
  */
 
 use AmpProject\AmpWP\Option;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for amp.php.
  */
-class Test_AMP extends WP_UnitTestCase {
+class Test_AMP extends TestCase {
 
 	/**
 	 * Set up.

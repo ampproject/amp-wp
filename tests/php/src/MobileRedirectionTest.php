@@ -9,7 +9,6 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\MobileRedirection;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use WP_Customize_Manager;
@@ -17,8 +16,6 @@ use AMP_HTTP;
 
 /** @coversDefaultClass \AmpProject\AmpWP\MobileRedirection */
 final class MobileRedirectionTest extends DependencyInjectedTestCase {
-
-	use AssertContainsCompatibility;
 
 	/** @var MobileRedirection */
 	private $instance;
@@ -441,15 +438,15 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 	/** @covers ::get_mobile_user_agents() */
 	public function test_get_mobile_user_agents() {
-		$this->assertContains( 'Mobile', $this->instance->get_mobile_user_agents() );
-		$this->assertNotContains( 'Watch', $this->instance->get_mobile_user_agents() );
+		$this->assertStringContainsString( 'Mobile', $this->instance->get_mobile_user_agents() );
+		$this->assertStringNotContainsString( 'Watch', $this->instance->get_mobile_user_agents() );
 		add_filter(
 			'amp_mobile_user_agents',
 			function ( $user_agents ) {
 				return array_merge( $user_agents, [ 'Watch' ] );
 			}
 		);
-		$this->assertContains( 'Watch', $this->instance->get_mobile_user_agents() );
+		$this->assertStringContainsString( 'Watch', $this->instance->get_mobile_user_agents() );
 	}
 
 	/** @covers ::is_redirection_disabled_via_query_param() */
@@ -485,8 +482,8 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		ob_start();
 		$this->instance->add_mobile_redirect_script();
 		$output = ob_get_clean();
-		$this->assertStringContains( '<script type="text/javascript">', $output );
-		$this->assertStringContains( 'noampQueryVarName', $output );
+		$this->assertStringContainsString( '<script type="text/javascript">', $output );
+		$this->assertStringContainsString( 'noampQueryVarName', $output );
 
 		add_filter(
 			'wp_inline_script_attributes',
@@ -502,8 +499,8 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		ob_start();
 		$this->instance->add_mobile_redirect_script();
 		$output = ob_get_clean();
-		$this->assertRegExp( '#<script\b[^>]*? data-cfasync="false"[^>]*>#', $output );
-		$this->assertStringContains( 'noampQueryVarName', $output );
+		$this->assertMatchesRegularExpression( '#<script\b[^>]*? data-cfasync="false"[^>]*>#', $output );
+		$this->assertStringContainsString( 'noampQueryVarName', $output );
 	}
 
 	/** @covers ::filter_comment_post_redirect() */
@@ -519,7 +516,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 		$filtered_comment_link = $this->instance->filter_comment_post_redirect( $comment_link );
 		$this->assertNotEquals( $comment_link, $filtered_comment_link );
-		$this->assertStringContains( QueryVar::AMP . '=1', $filtered_comment_link );
+		$this->assertStringContainsString( QueryVar::AMP . '=1', $filtered_comment_link );
 
 		$external_url = 'https://external.example.com/';
 		$this->assertEquals( $external_url, $this->instance->filter_comment_post_redirect( $external_url ) );
@@ -551,8 +548,8 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		$this->instance->add_mobile_version_switcher_styles();
 		$output = ob_get_clean();
 		$this->assertStringStartsWith( '<style>', $output );
-		$this->assertStringContains( '#amp-mobile-version-switcher', $output );
-		$this->assertStringNotContains( 'body.lock-scrolling > #amp-mobile-version-switcher', $output );
+		$this->assertStringContainsString( '#amp-mobile-version-switcher', $output );
+		$this->assertStringNotContainsString( 'body.lock-scrolling > #amp-mobile-version-switcher', $output );
 
 		add_filter(
 			'template',
@@ -563,7 +560,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		ob_start();
 		$this->instance->add_mobile_version_switcher_styles();
 		$output = ob_get_clean();
-		$this->assertStringContains( 'body.lock-scrolling > #amp-mobile-version-switcher', $output );
+		$this->assertStringContainsString( 'body.lock-scrolling > #amp-mobile-version-switcher', $output );
 
 		add_filter( 'amp_mobile_version_switcher_styles_used', '__return_false' );
 		ob_start();
@@ -607,9 +604,9 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		ob_start();
 		$this->instance->add_mobile_version_switcher_link();
 		$output = ob_get_clean();
-		$this->assertStringContains( 'rel="' . $link_rel . '"', $output );
-		$this->assertStringContains( 'amp-mobile-version-switcher', $output );
-		$this->assertStringNotContains( '<script data-ampdevmode>', $output );
+		$this->assertStringContainsString( 'rel="' . $link_rel . '"', $output );
+		$this->assertStringContainsString( 'amp-mobile-version-switcher', $output );
+		$this->assertStringNotContainsString( '<script data-ampdevmode>', $output );
 
 		add_filter(
 			'amp_mobile_version_switcher_link_text',
@@ -622,8 +619,8 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		ob_start();
 		$this->instance->add_mobile_version_switcher_link();
 		$output = ob_get_clean();
-		$this->assertStringContains( amp_is_request() ? '(non-AMP version)' : '(AMP version)', $output );
-		$this->assertStringContains( '<script data-ampdevmode>', $output );
-		$this->assertStringContains( 'notApplicableMessage', $output );
+		$this->assertStringContainsString( amp_is_request() ? '(non-AMP version)' : '(AMP version)', $output );
+		$this->assertStringContainsString( '<script data-ampdevmode>', $output );
+		$this->assertStringContainsString( 'notApplicableMessage', $output );
 	}
 }

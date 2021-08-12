@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
@@ -17,7 +18,7 @@ use AmpProject\Dom\Document;
  * @group amp-comments
  * @group amp-form
  */
-class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Form_Sanitizer_Test extends TestCase {
 
 	use MarkupComparison;
 

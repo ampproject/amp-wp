@@ -18,15 +18,12 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\DevMode;
 use WPDieException;
 use WP_Admin_Bar;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Admin\PairedBrowsing */
 class PairedBrowsingTest extends DependencyInjectedTestCase {
-
-	use AssertContainsCompatibility;
 
 	/** @var PairedBrowsing */
 	private $instance;
@@ -167,10 +164,10 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 1, did_action( 'amp_register_polyfills' ) );
 		$this->assertTrue( wp_script_is( 'amp-paired-browsing-client' ) );
 		$printed_scripts = get_echo( 'wp_print_scripts' );
-		$this->assertStringContains( DevMode::DEV_MODE_ATTRIBUTE, $printed_scripts );
-		$this->assertStringContains( 'ampPairedBrowsingClientData', $printed_scripts );
-		$this->assertStringContains( 'isAmpDocument', $printed_scripts );
-		$this->assertStringContains( 'amp-paired-browsing-client.js', $printed_scripts );
+		$this->assertStringContainsString( DevMode::DEV_MODE_ATTRIBUTE, $printed_scripts );
+		$this->assertStringContainsString( 'ampPairedBrowsingClientData', $printed_scripts );
+		$this->assertStringContainsString( 'isAmpDocument', $printed_scripts );
+		$this->assertStringContainsString( 'amp-paired-browsing-client.js', $printed_scripts );
 
 		// Check that init_app() was not called.
 		$this->assertFalse( has_action( 'template_redirect', [ $this->instance, 'ensure_app_location' ] ) );
@@ -201,8 +198,8 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		$post_id = self::factory()->post->create();
 		$this->go_to( amp_get_permalink( $post_id ) );
 
-		$this->assertStringContains( PairedBrowsing::APP_QUERY_VAR . '=1', $this->instance->get_paired_browsing_url() );
-		$this->assertStringNotContains( amp_get_slug() . '=1', $this->instance->get_paired_browsing_url() );
+		$this->assertStringContainsString( PairedBrowsing::APP_QUERY_VAR . '=1', $this->instance->get_paired_browsing_url() );
+		$this->assertStringNotContainsString( amp_get_slug() . '=1', $this->instance->get_paired_browsing_url() );
 		$this->assertEquals(
 			$this->instance->get_paired_browsing_url(),
 			$this->instance->get_paired_browsing_url( amp_get_current_url() )
@@ -252,9 +249,9 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 		load_template( $include_path );
 		$template = ob_get_clean();
 
-		$this->assertStringContains( 'amp-paired-browsing-app.css', $template );
-		$this->assertStringContains( 'amp-paired-browsing-app.js', $template );
-		$this->assertStringContains( 'ampPairedBrowsingAppData', $template );
-		$this->assertStringContains( 'ampPairedBrowsingQueryVar', $template );
+		$this->assertStringContainsString( 'amp-paired-browsing-app.css', $template );
+		$this->assertStringContainsString( 'amp-paired-browsing-app.js', $template );
+		$this->assertStringContainsString( 'ampPairedBrowsingAppData', $template );
+		$this->assertStringContainsString( 'ampPairedBrowsingQueryVar', $template );
 	}
 }

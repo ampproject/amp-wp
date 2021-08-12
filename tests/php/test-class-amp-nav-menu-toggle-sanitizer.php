@@ -7,13 +7,14 @@
 
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\Dom\Document;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for AMP_Nav_Menu_Toggle_Sanitizer.
  *
  * @covers AMP_Nav_Menu_Toggle_Sanitizer
  */
-class Test_AMP_Nav_Menu_Toggle_Sanitizer extends WP_UnitTestCase {
+class Test_AMP_Nav_Menu_Toggle_Sanitizer extends TestCase {
 
 	/**
 	 * Data for converter test.

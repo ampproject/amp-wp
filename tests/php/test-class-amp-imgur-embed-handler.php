@@ -6,11 +6,12 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Class AMP_Imgur_Embed_Handler_Test
  */
-class AMP_Imgur_Embed_Handler_Test extends WP_UnitTestCase {
+class AMP_Imgur_Embed_Handler_Test extends TestCase {
 
 	use WithoutBlockPreRendering {
 		setUp as public prevent_block_pre_render;
