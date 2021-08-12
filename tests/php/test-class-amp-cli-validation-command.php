@@ -16,7 +16,7 @@ use Yoast\WPTestUtils\WPIntegration\TestCase;
  *
  * @since 1.0
  *
- * @coversDefaultClass ValidationCommand
+ * @coversDefaultClass \AmpProject\AmpWP\Cli\ValidationCommand
  */
 class Test_AMP_CLI_Validation_Command extends TestCase {
 
