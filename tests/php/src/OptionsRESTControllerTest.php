@@ -98,7 +98,7 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 		$this->assertEquals( [], $data['suppressed_plugins'] );
 		$this->assertArraySubset( [ 'post', 'page', 'attachment' ], wp_list_pluck( $data['supportable_post_types'], 'name' ) );
 		$this->assertEquals( [ 'post', 'page' ], $data['supported_post_types'] );
-		$this->assertContains( 'is_singular', wp_list_pluck( $data['supportable_templates'], 'id' ) );
+		$this->assertStringContainsString( 'is_singular', wp_list_pluck( $data['supportable_templates'], 'id' ) );
 		$this->assertEquals( [ 'is_singular' ], $data['supported_templates'] );
 	}
 
@@ -153,6 +153,6 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 	public function test_get_item_schema() {
 		$schema = $this->controller->get_item_schema();
 
-		$this->assertContains( 'theme_support', array_keys( $schema['properties'] ) );
+		$this->assertStringContainsString( 'theme_support', array_keys( $schema['properties'] ) );
 	}
 }

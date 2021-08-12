@@ -5,13 +5,15 @@
  * @package AMP
  */
 
+use Yoast\WPTestUtils\WPIntegration\TestCase;
+
 /**
  * Tests for AMP_Admin_Pointers class.
  *
  * @covers AMP_Admin_Pointers
  * @since 1.0
  */
-class Test_AMP_Admin_Pointers extends WP_UnitTestCase {
+class Test_AMP_Admin_Pointers extends TestCase {
 
 	/**
 	 * The meta key of the dismissed pointers.

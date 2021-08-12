@@ -7,13 +7,14 @@
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Test AMP_Facebook_Embed_Handler_Test
  *
  * @covers AMP_Facebook_Embed_Handler
  */
-class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
+class AMP_Facebook_Embed_Handler_Test extends TestCase {
 
 	use MarkupComparison;
 	use WithoutBlockPreRendering {

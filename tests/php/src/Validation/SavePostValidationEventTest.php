@@ -11,18 +11,17 @@ use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * @coversDefaultClass \AmpProject\AmpWP\Validation\SavePostValidationEvent
  */
-final class SavePostValidationEventTest extends WP_UnitTestCase {
-	use AssertContainsCompatibility, ValidationRequestMocking, PrivateAccess;
+final class SavePostValidationEventTest extends TestCase {
+	use ValidationRequestMocking, PrivateAccess;
 
 	/**
 	 * SavePostValidationEvent instance.

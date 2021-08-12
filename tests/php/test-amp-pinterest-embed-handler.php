@@ -1,8 +1,9 @@
 <?php
 
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class AMP_Pinterest_Embed_Handler_Test extends WP_UnitTestCase {
+class AMP_Pinterest_Embed_Handler_Test extends TestCase {
 
 	use WithoutBlockPreRendering;
 

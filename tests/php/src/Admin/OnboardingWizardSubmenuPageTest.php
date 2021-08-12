@@ -13,7 +13,6 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AMP_Options_Manager;
 
 /**
@@ -26,8 +25,6 @@ use AMP_Options_Manager;
  * @coversDefaultClass \AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage
  */
 class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
-
-	use AssertContainsCompatibility;
 
 	/**
 	 * Test instance.
@@ -103,7 +100,7 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 
 		$this->onboarding_wizard_submenu_page->render();
 
-		$this->assertStringContains( '<div class="amp" id="amp-onboarding-wizard">', ob_get_clean() );
+		$this->assertStringContainsString( '<div class="amp" id="amp-onboarding-wizard">', ob_get_clean() );
 	}
 
 	/**

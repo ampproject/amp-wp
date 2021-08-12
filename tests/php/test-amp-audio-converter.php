@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
@@ -14,7 +15,7 @@ use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
  *
  * @covers AMP_Audio_Sanitizer
  */
-class AMP_Audio_Converter_Test extends WP_UnitTestCase {
+class AMP_Audio_Converter_Test extends TestCase {
 
 	use MarkupComparison;
 

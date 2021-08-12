@@ -6,9 +6,9 @@ use AmpProject\AmpWP\AmpWpPlugin;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Tests\Fixture\DummyService;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-final class AmpWpPluginTest extends WP_UnitTestCase {
+final class AmpWpPluginTest extends TestCase {
 
 	public function test_it_has_filtering_disabled_by_default() {
 		$plugin = new AmpWpPlugin();
