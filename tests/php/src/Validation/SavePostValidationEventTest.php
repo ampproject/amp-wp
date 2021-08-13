@@ -13,9 +13,9 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
+use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * @coversDefaultClass \AmpProject\AmpWP\Validation\SavePostValidationEvent

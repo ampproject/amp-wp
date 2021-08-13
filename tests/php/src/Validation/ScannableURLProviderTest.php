@@ -8,10 +8,10 @@ use AMP_Post_Meta_Box;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
+use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLScanningContext;
 use WP_Query;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\ScannableURLProvider */
 final class ScannableURLProviderTest extends TestCase {

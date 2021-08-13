@@ -9,8 +9,8 @@ namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\PluginActivationNotice;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\TestCase;
 use AMP_Options_Manager;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for PluginActivationNotice class.

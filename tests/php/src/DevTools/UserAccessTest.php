@@ -11,8 +11,8 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\TestCase;
 use WP_Error;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for UserAccess class.

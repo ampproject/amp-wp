@@ -6,7 +6,7 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Test AMP_Layout_Sanitizer_Test

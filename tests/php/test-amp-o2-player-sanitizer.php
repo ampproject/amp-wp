@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Test AMP_O2_Player_Sanitizer

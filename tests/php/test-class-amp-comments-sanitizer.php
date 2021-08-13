@@ -7,7 +7,7 @@
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Dom\Document;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Comments_Sanitizer class.

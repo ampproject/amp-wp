@@ -8,7 +8,7 @@
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Dom\ElementList;
 use AmpProject\AmpWP\Component\CaptionedSlide;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP carousel and slide classes.

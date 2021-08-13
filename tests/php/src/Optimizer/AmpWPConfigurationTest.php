@@ -7,7 +7,7 @@ use AmpProject\Optimizer\Configuration\OptimizeHeroImagesConfiguration;
 use AmpProject\Optimizer\Transformer\OptimizeHeroImages;
 use AmpProject\Optimizer\Transformer\ServerSideRendering;
 use AmpProject\Optimizer\TransformerConfiguration;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Optimizer\AmpWPConfiguration */
 final class AmpWPConfigurationTest extends TestCase {

@@ -8,7 +8,7 @@
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class Test_AMP_Admin_Includes_Functions

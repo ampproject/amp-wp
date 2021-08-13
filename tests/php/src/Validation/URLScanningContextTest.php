@@ -3,8 +3,8 @@
 namespace AmpProject\AmpWP\Tests\Validation;
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Validation\URLScanningContext;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLScanningContext */
 final class URLScanningContextTest extends TestCase {

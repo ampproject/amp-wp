@@ -9,7 +9,7 @@ use AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages */
 final class DetermineHeroImagesTest extends TestCase {

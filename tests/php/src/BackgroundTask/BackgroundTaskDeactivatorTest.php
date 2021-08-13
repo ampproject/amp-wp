@@ -10,7 +10,7 @@ use AmpProject\AmpWP\Infrastructure\Deactivateable;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator
