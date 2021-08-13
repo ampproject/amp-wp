@@ -19,7 +19,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for ValidationCounts class.

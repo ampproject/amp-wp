@@ -7,7 +7,7 @@
 
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\Dom\Document;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Nav_Menu_Toggle_Sanitizer.

@@ -9,8 +9,8 @@ use AMP_Options_Manager;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\TestCase;
 use DateTime;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching */
 class MonitorCssTransientCachingTest extends TestCase {

@@ -10,7 +10,7 @@ use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
 use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\ErrorCollection;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Test Site_Health.

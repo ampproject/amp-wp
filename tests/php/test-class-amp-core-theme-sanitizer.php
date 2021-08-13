@@ -8,7 +8,7 @@
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_Core_Theme_Sanitizer_Test

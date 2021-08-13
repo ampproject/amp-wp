@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Test AMP_Dev_Mode_Sanitizer.

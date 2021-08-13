@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Tests\Helpers\MockPluginEnvironment;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for the BlockSources class.

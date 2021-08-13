@@ -7,7 +7,6 @@ use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 abstract class DependencyInjectedTestCase extends TestCase {
 

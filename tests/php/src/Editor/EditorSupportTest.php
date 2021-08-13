@@ -6,7 +6,7 @@ use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Editor\EditorSupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Editor\EditorSupport */
 final class EditorSupportTest extends TestCase {

@@ -6,7 +6,7 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class Test_AMP_Nav_Menu_Dropdown_Sanitizer

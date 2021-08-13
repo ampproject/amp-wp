@@ -14,7 +14,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AnalyticsOptionsSubmenu.
