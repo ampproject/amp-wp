@@ -106,17 +106,10 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			wp_send_json_error();
 		}
 
-		$feature  = ( ! empty( $_POST['feature'] ) ) ? sanitize_key( $_POST['feature'] ) : '';
-		$function = sprintf(
-			'json_test_%s',
-			$feature
-		);
-
-		if ( ! method_exists( $this, $function ) || ! is_callable( [ $this, $function ] ) ) {
-			return;
+		$feature = ( ! empty( $_POST['feature'] ) ) ? sanitize_key( $_POST['feature'] ) : '';
+		if ( 'amp_page_cache' === $feature ) {
+			wp_send_json_success( $this->page_cache() );
 		}
-
-		call_user_func( [ $this, $function ] );
 	}
 
 	/**
@@ -237,16 +230,6 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			'status'      => $status,
 			'label'       => esc_html( $label ),
 		];
-	}
-
-	/**
-	 * Callback for async site status test for page cache.
-	 *
-	 * @return void
-	 */
-	public function json_test_amp_page_cache() {
-
-		wp_send_json_success( $this->page_cache() );
 	}
 
 	/**
