@@ -4,7 +4,6 @@ namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Service;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\DependencySupport */
 class DependencySupportTest extends TestCase {

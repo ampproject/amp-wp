@@ -1,7 +1,7 @@
 <?php
 
 use AmpProject\AmpWP\Option;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 class AMP_Render_Post_Test extends TestCase {
 

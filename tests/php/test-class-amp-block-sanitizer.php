@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_Block_Sanitizer_Test

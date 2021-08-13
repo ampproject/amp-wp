@@ -6,7 +6,6 @@ use AmpProject\AmpWP\AmpWpPlugin;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Tests\Fixture\DummyService;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 final class AmpWpPluginTest extends TestCase {
 

@@ -10,7 +10,6 @@ namespace AmpProject\AmpWP\Tests;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection */
 class ValidatedUrlStylesheetDataGarbageCollectionTest extends TestCase {

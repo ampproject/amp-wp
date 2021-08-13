@@ -5,7 +5,6 @@ namespace AmpProject\AmpWP\Tests;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\AmpSlugCustomizationWatcher */
 final class AmpSlugCustomizationWatcherTest extends TestCase {
