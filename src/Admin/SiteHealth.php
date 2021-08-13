@@ -79,7 +79,9 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			add_action( 'wp_ajax_health-check-site-status', [ $this, 'ajax_site_status' ], 11 );
 		}
 
-		$this->maybe_send_random_number();
+		if ( ! wp_doing_ajax() ) {
+			$this->maybe_send_random_number();
+		}
 	}
 
 	/**
@@ -218,11 +220,11 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		if ( true === $is_using_page_cache['server_caching'] && false === $is_using_page_cache['client_caching'] ) {
 			$badge_color = 'orange';
 			$status      = 'recommended';
-			$label       = __( 'Page caching is enabled. But client caching headers are missing.', 'amp' );
+			$label       = __( 'Page caching is enabled, but client caching headers are missing.', 'amp' );
 		} elseif ( true === $is_using_page_cache['server_caching'] && true === $is_using_page_cache['client_caching'] ) {
 			$badge_color = 'green';
 			$status      = 'good';
-			$label       = __( 'Page caching is enabled', 'amp' );
+			$label       = __( 'Page caching is enabled.', 'amp' );
 		}
 
 		return [
