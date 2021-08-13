@@ -11,7 +11,7 @@ use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 // phpcs:disable WordPress.Variables.GlobalVariables.OverrideProhibited
 

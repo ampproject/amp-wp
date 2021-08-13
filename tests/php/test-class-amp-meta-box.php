@@ -9,7 +9,7 @@ use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Post_Meta_Box.

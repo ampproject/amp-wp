@@ -4,7 +4,7 @@
 // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends TestCase {
 

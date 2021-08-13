@@ -6,7 +6,7 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_Gallery_Block_Sanitizer_Test

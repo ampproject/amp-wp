@@ -1,6 +1,6 @@
 <?php
 
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 class AMP_Playbuzz_Sanitizer_Test extends TestCase {
 

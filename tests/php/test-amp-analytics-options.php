@@ -2,7 +2,7 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\Dom\Document;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 class AMP_Analytics_Options_Test extends TestCase {
 

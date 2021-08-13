@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class Test_AMP_Post_Template_Functions

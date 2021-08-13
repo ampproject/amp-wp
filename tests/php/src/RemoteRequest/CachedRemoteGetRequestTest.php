@@ -7,8 +7,8 @@ use AmpProject\AmpWP\RemoteRequest\CachedResponse;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\RemoteRequest\RemoteGetRequestResponse;
 use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
+use AmpProject\AmpWP\Tests\TestCase;
 use DateTimeImmutable;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest */
 class CachedRemoteGetRequestTest extends TestCase {

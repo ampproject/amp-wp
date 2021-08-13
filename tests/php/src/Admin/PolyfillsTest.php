@@ -13,9 +13,9 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\TestCase;
 use WP_Scripts;
 use WP_Styles;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for Polyfills class.

@@ -9,11 +9,11 @@ namespace AmpProject\AmpWP\Tests\Validation;
 
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
+use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\URLValidationRESTController;
 use WP_REST_Controller;
 use WP_REST_Request;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
  * Tests for URLValidationRESTController.
