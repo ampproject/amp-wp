@@ -6,7 +6,7 @@
  */
 
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for the WpHttpRemoteGetRequest class.

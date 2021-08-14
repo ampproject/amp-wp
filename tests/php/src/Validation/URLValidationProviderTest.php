@@ -3,8 +3,8 @@
 namespace AmpProject\AmpWP\Tests\Validation;
 
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
+use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationProvider */
 final class URLValidationProviderTest extends TestCase {

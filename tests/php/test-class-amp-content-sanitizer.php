@@ -1,7 +1,7 @@
 <?php
 
 use AmpProject\AmpWP\Tests\Helpers\StubSanitizer;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Content_Sanitizer class.

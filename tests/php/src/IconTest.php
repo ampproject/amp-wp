@@ -3,7 +3,6 @@
 namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\Icon;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Icon */
 final class IconTest extends TestCase {

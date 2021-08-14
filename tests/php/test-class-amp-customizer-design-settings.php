@@ -6,7 +6,7 @@
  */
 
 use AmpProject\AmpWP\Option;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class Test_AMP_Customizer_Design_Settings

@@ -1520,7 +1520,10 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Meta_Sanitizer'              => [],
 		'AMP_Layout_Sanitizer'            => [],
 		'AMP_Accessibility_Sanitizer'     => [],
-		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+		// Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+		'AMP_Tag_And_Attribute_Sanitizer' => [
+			'prefer_bento' => amp_is_bento_enabled(),
+		],
 	];
 
 	if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {

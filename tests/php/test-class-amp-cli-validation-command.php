@@ -9,7 +9,7 @@ use AmpProject\AmpWP\Cli\ValidationCommand;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for Test_AMP_CLI_Validation_Command class.

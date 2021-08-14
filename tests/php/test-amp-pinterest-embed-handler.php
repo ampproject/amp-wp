@@ -1,7 +1,7 @@
 <?php
 
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 class AMP_Pinterest_Embed_Handler_Test extends TestCase {
 

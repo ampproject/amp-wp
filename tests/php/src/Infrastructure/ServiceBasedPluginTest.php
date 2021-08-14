@@ -10,7 +10,7 @@ use AmpProject\AmpWP\Tests\Fixture\DummyService;
 use AmpProject\AmpWP\Tests\Fixture\DummyServiceBasedPlugin;
 use AmpProject\AmpWP\Tests\Fixture\DummyServiceWithDelay;
 use AmpProject\AmpWP\Tests\Fixture\DummyServiceWithRequirements;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 final class ServiceBasedPluginTest extends TestCase {
 
