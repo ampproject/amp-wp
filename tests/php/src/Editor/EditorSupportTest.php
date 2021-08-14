@@ -20,6 +20,8 @@ final class EditorSupportTest extends TestCase {
 		parent::setUp();
 
 		$this->instance = new EditorSupport( new DependencySupport() );
+
+		unset( $GLOBALS['current_screen'], $GLOBALS['wp_scripts'] );
 	}
 
 	public function test_it_can_be_initialized() {
