@@ -131,6 +131,7 @@ final class EditorSupportTest extends TestCase {
 		$this->assertFalse( $this->instance->supports_current_screen() );
 
 		gutenberg_register_packages_scripts();
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$this->instance->maybe_show_notice();
 		$inline_script = wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false );
