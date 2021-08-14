@@ -2,16 +2,17 @@
 
 namespace AmpProject\AmpWP\Tests\Editor;
 
-use AMP_Options_Manager;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Editor\EditorSupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\WithBlockEditorSupport;
 use AmpProject\AmpWP\Tests\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Editor\EditorSupport */
 final class EditorSupportTest extends TestCase {
+
+	use WithBlockEditorSupport;
 
 	/** @var EditorSupport */
 	private $instance;
@@ -134,31 +135,5 @@ final class EditorSupportTest extends TestCase {
 		$this->instance->maybe_show_notice();
 		$inline_script = wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false );
 		$this->assertStringContainsString( 'AMP functionality is not available', $inline_script );
-	}
-
-	/**
-	 * Setup test environment to ensure the correct result for ::supports_current_screen().
-	 *
-	 * @param bool   $post_type_uses_block_editor Whether the post type uses the block editor.
-	 * @param bool   $post_type_supports_amp      Whether the post type supports AMP.
-	 * @param string $post_type                   Post type ID.
-	 */
-	private function setup_environment( $post_type_uses_block_editor, $post_type_supports_amp, $post_type = 'foo' ) {
-		if ( $post_type_uses_block_editor ) {
-			set_current_screen( 'post.php' );
-			get_current_screen()->is_block_editor = $post_type_uses_block_editor;
-		}
-
-		if ( $post_type_supports_amp ) {
-			register_post_type( $post_type, [ 'public' => true ] );
-			$GLOBALS['post'] = self::factory()->post->create( [ 'post_type' => $post_type ] );
-			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-
-			$supported_post_types = array_merge(
-				AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ),
-				[ $post_type ]
-			);
-			AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
-		}
 	}
 }
