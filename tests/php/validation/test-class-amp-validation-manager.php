@@ -2403,7 +2403,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			$this->markTestSkipped( 'Block editor is too old.' );
 		}
 
-		$this->setup_environment( true, true );
 		AMP_Validation_Manager::enqueue_block_validation();
 
 		$slug = 'amp-block-validation';
@@ -2416,6 +2415,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::enqueue_block_validation();
 		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
 
+		$this->setup_environment( true, true );
 		$service->set_user_enabled( wp_get_current_user()->ID, true );
 		AMP_Validation_Manager::enqueue_block_validation();
 		$this->assertTrue( wp_script_is( $slug, 'enqueued' ) );
