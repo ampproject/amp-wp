@@ -1,0 +1,124 @@
+name: 🐛 Bug report
+description: Create a report to help us improve.
+labels:
+  - Bug
+
+body:
+  - type: textarea
+    attributes:
+      label: Bug Description
+      description: Please describe clearly and concisely what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behaviour
+      description: Please describe clearly and concisely what the expected behaviour should be.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: >
+        Please provide detailed steps on how to reproduce the bug. Provide a URL where the issue can be seen on the
+        frontend when possible, otherwise go to “View source” in the browser and copy all to paste in a
+        [Gist](https://gist.github.com/) and share it.
+
+  - type: input
+    attributes:
+      label: PHP Version
+      description: Specify which PHP version the bug occurs on.
+      placeholder: e.g. 8.1
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Plugin Version
+      description: Specify which plugin version the bug occurs on.
+      placeholder: e.g. 2.1.4
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: AMP plugin template mode
+      description: Specify which template mode the bug occurs on.
+      options:
+        - Standard
+        - Transitional
+        - Reader
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: WordPress Version
+      description: If applicable, specify which WordPress version the bug occurs on.
+      placeholder: e.g. 5.8
+
+  - type: textarea
+    attributes:
+      label: Site Health
+      description: >
+        If you would like to, please provide your Site Health information. You can also submit it privately via our
+        [AMP Plugin Escalations form](https://docs.google.com/forms/d/1JTQmphDlk9YgHpDoFRbHXpkDqv8-QmzTT7MDR4AstyQ).
+
+  - type: input
+    attributes:
+      label: Gutenberg Version
+      description: If applicable, specify which Gutenberg version the bug occurs on.
+      placeholder: e.g. 11.2.1
+
+  - type: input
+    attributes:
+      label: OS(s) Affected
+      description: If applicable, specify which operating system(s) are affected.
+      placeholder: e.g. Windows, Android
+
+  - type: input
+    attributes:
+      label: Browser(s) Affected
+      description: If applicable, specify which browser(s) are affected.
+      placeholder: e.g. Chrome, Firefox
+
+  - type: input
+    attributes:
+      label: Device(s) Affected
+      description: If applicable, specify which device(s) are affected.
+      placeholder: e.g. iPhone 12, Pixel 5
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        _**Do not alter anything below. The following fields will be managed by moderators only.**_
+
+  - type: textarea
+    attributes:
+      label: Acceptance Criteria
+      description: One or more bullet points for acceptance criteria.
+
+  - type: textarea
+    attributes:
+      label: Implementation Brief
+      description: >
+        One or more bullet points for how to technically resolve the issue. For significant Implementation Design,
+        it is ok use a Google document **accessible by anyone**.
+
+  - type: textarea
+    attributes:
+      label: QA Testing Instructions
+      description: One or more bullet points to describe how to test the implementation in QA.
+
+  - type: textarea
+    attributes:
+      label: Demo
+      description: A video or screenshots demoing the implementation.
+
+  - type: textarea
+    attributes:
+      label: Changelog Entry
+      description: One sentence summarizing the PR, to be used in the changelog.
