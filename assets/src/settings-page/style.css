@@ -531,10 +531,6 @@ li.error-kept {
 }
 
 /* Other Settings */
-.amp-other-settings .amp-drawer__panel-body-inner {
-	padding-top: 0;
-}
-
 .amp-other-settings section + section {
 	margin-top: 2rem;
 }
