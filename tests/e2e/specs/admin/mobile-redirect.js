@@ -6,33 +6,37 @@ const { visitAdminPage } = require( '@wordpress/e2e-test-utils/build/visit-admin
 /**
  * Internal dependencies
  */
-const { completeWizard, cleanUpSettings } = require( '../../utils/onboarding-wizard-utils' );
+const { cleanUpSettings, scrollToElement } = require( '../../utils/onboarding-wizard-utils' );
 
-const panelToggleSelector = '#other-settings .components-panel__body-toggle';
-const toggleSelector = '.mobile-redirection .amp-setting-toggle input[type="checkbox"]';
+const panelSelector = '#other-settings .components-panel__body-toggle';
+const toggleSelector = '#other-settings .mobile-redirection .amp-setting-toggle input[type="checkbox"]';
 
 describe( 'Mobile redirect settings', () => {
-	afterEach( async () => {
+	it( 'persists the mobile redirect setting value', async () => {
+		// Disable mobile redirection by calling the `cleanUpSettings` function.
 		await cleanUpSettings();
-	} );
-
-	it( 'persists the mobile redirect setting on', async () => {
-		await completeWizard( { mode: 'reader', mobileRedirect: true } );
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await page.waitForSelector( panelToggleSelector );
-		await expect( page ).toClick( panelToggleSelector );
+		// Confirm the mobile redirection is disabled.
+		await page.waitForSelector( panelSelector );
+		await scrollToElement( { selector: panelSelector, click: true } );
+		await page.waitForSelector( toggleSelector );
+		await expect( page ).toMatchElement( `${ toggleSelector }:not(:checked)` );
+
+		// Disable the setting and save.
+		await page.waitForSelector( toggleSelector );
+		await scrollToElement( { selector: toggleSelector, click: true } );
+		await expect( page ).toMatchElement( `${ toggleSelector }:checked` );
+		await scrollToElement( { selector: '.amp-settings-nav button[type="submit"]', click: true } );
+
+		// Refresh the page once the settings have been saved.
+		await page.waitForTimeout( 1000 );
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		// Confirm the mobile redirection setting has been persisted.
+		await page.waitForSelector( panelSelector );
+		await scrollToElement( { selector: panelSelector, click: true } );
 		await page.waitForSelector( toggleSelector );
 		await expect( page ).toMatchElement( `${ toggleSelector }:checked` );
-	} );
-
-	it( 'persists the mobile redirect setting off', async () => {
-		await completeWizard( { mode: 'reader', mobileRedirect: false } );
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		await page.waitForSelector( panelToggleSelector );
-		await expect( page ).toClick( panelToggleSelector );
-		await page.waitForSelector( toggleSelector );
-		await expect( page ).not.toMatchElement( `${ toggleSelector }:checked` );
 	} );
 } );

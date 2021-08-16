@@ -81,16 +81,16 @@ export async function moveToSummaryScreen( { technical = true, mode, readerTheme
 	await page.waitForSelector( '.summary' );
 }
 
-export async function moveToDoneScreen( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
-	await moveToSummaryScreen( { technical, mode, readerTheme, mobileRedirect } );
+export async function moveToDoneScreen( { technical = true, mode, readerTheme = 'legacy' } ) {
+	await moveToSummaryScreen( { technical, mode, readerTheme } );
 
 	await clickNextButton();
 	await page.waitForTimeout( 1000 );
 	await page.waitForSelector( '.done__preview-container' );
 }
 
-export async function completeWizard( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
-	await moveToDoneScreen( { technical, mode, readerTheme, mobileRedirect } );
+export async function completeWizard( { technical = true, mode, readerTheme = 'legacy' } ) {
+	await moveToDoneScreen( { technical, mode, readerTheme } );
 	if ( 'reader' === mode ) {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 	} else {
