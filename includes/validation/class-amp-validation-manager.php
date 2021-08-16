@@ -2178,7 +2178,7 @@ class AMP_Validation_Manager {
 		$editor_support = Services::get( 'editor.editor_support' );
 
 		// Block validation script uses features only available beginning with WP 5.6.
-		if ( ! $editor_support->supports_current_screen() ) {
+		if ( ! $editor_support->is_current_screen_supported_block_editor_for_amp_enabled_post_type() ) {
 			return; // @codeCoverageIgnore
 		}
 

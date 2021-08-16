@@ -53,7 +53,7 @@ final class EditorSupportTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::supports_current_screen()
+	 * @covers ::is_current_screen_supported_block_editor_for_amp_enabled_post_type()
 	 * @dataProvider get_data_for_test_supports_current_screen()
 	 *
 	 * @param bool $post_type_uses_block_editor Whether post type can be edited in the block editor.
@@ -68,12 +68,12 @@ final class EditorSupportTest extends TestCase {
 			&&
 			version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
 		) {
-			$this->assertSame( $expected_result, $this->instance->supports_current_screen() );
+			$this->assertSame( $expected_result, $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
 		} else {
 			if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' ) ) {
-				$this->assertSame( $expected_result, $this->instance->supports_current_screen() );
+				$this->assertSame( $expected_result, $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
 			} else {
-				$this->assertFalse( $this->instance->supports_current_screen() );
+				$this->assertFalse( $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
 			}
 		}
 	}
@@ -101,7 +101,7 @@ final class EditorSupportTest extends TestCase {
 		$this->setup_environment( true, true );
 
 		$this->instance->maybe_show_notice();
-		if ( $this->instance->supports_current_screen() ) {
+		if ( $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() ) {
 			$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
 		} else {
 			$this->assertStringContainsString(
@@ -128,7 +128,7 @@ final class EditorSupportTest extends TestCase {
 		}
 
 		$this->setup_environment( true, true );
-		$this->assertFalse( $this->instance->supports_current_screen() );
+		$this->assertFalse( $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
 
 		gutenberg_register_packages_scripts();
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );

@@ -44,7 +44,7 @@ final class EditorSupport implements Registerable, Service {
 	 * Shows a notice in the editor if the Gutenberg or WP version prevents plugin features from working.
 	 */
 	public function maybe_show_notice() {
-		if ( $this->supports_current_screen() ) {
+		if ( $this->is_current_screen_supported_block_editor_for_amp_enabled_post_type() ) {
 			return;
 		}
 
@@ -71,7 +71,7 @@ final class EditorSupport implements Registerable, Service {
 	 *
 	 * @return bool
 	 */
-	public function supports_current_screen() {
+	public function is_current_screen_supported_block_editor_for_amp_enabled_post_type() {
 		$screen = get_current_screen();
 		return $this->dependency_support->has_support()
 			&&
