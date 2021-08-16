@@ -39,6 +39,27 @@ describe( 'DevToolsToggle', () => {
 		expect( wrapper.toJSON() ).toMatchSnapshot();
 	} );
 
+	it( 'renders a loading spinner when a user data is fetched', () => {
+		act( () => {
+			render(
+				<UserContextProvider fetchingUser={ true }>
+					<DevToolsToggle />
+				</UserContextProvider>,
+				container,
+			);
+		} );
+		expect( container.querySelector( '.amp-spinner-container' ) ).not.toBeNull();
+	} );
+
+	it( 'matches snapshot for the loading state', () => {
+		const wrapper = create(
+			<UserContextProvider fetchingUser={ true }>
+				<DevToolsToggle />
+			</UserContextProvider>,
+		);
+		expect( wrapper.toJSON() ).toMatchSnapshot();
+	} );
+
 	it( 'can be toggled', () => {
 		act( () => {
 			render(
