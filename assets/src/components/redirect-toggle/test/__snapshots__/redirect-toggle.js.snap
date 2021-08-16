@@ -5,10 +5,10 @@ exports[`RedirectToggle matches snapshot 1`] = `
   className="amp-setting-toggle "
 >
   <div
-    className="components-base-control components-toggle-control css-wdf2ti-Wrapper e1puf3u0"
+    className="components-base-control components-toggle-control css-wdf2ti-Wrapper e1puf3u3"
   >
     <div
-      className="components-base-control__field css-11vcxb9-StyledField e1puf3u1"
+      className="components-base-control__field css-igk9ll-StyledField e1puf3u2"
     >
       <span
         className="components-form-toggle is-checked"
