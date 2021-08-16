@@ -46,6 +46,7 @@ body:
     attributes:
       label: AMP plugin template mode
       description: Specify which template mode the bug occurs on.
+      multiple: true
       options:
         - Standard
         - Transitional
