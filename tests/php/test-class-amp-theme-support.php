@@ -35,7 +35,7 @@ class Test_AMP_Theme_Support extends TestCase {
 	 *
 	 * @var string
 	 */
-	const TESTED_CLASS = 'AMP_Theme_Support';
+	const TESTED_CLASS = AMP_Theme_Support::class;
 
 	/**
 	 * Set up before class.
@@ -240,7 +240,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( amp_is_request() );
 		AMP_Theme_Support::finish_init();
-		$this->assertEquals( 10, has_filter( 'index_template_hierarchy', [ 'AMP_Theme_Support', 'filter_amp_template_hierarchy' ] ), 'Expected add_amp_template_filters to have been called since template_dir is not empty' );
+		$this->assertEquals( 10, has_filter( 'index_template_hierarchy', [ AMP_Theme_Support::class, 'filter_amp_template_hierarchy' ] ), 'Expected add_amp_template_filters to have been called since template_dir is not empty' );
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ), 'Expected add_hooks to have been called' );
 		$this->assertTrue( current_theme_supports( 'amp' ) );
 
@@ -362,7 +362,7 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * @covers AMP_Theme_Support::add_amp_template_filters()
 	 */
 	public function test_add_amp_template_filters() {
-		$template_types = $this->get_private_property( 'AMP_Theme_Support', 'template_types' );
+		$template_types = $this->get_private_property( AMP_Theme_Support::class, 'template_types' );
 
 		AMP_Theme_Support::add_amp_template_filters();
 
@@ -762,7 +762,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$this->assertFalse( has_action( 'wp_head', 'print_emoji_detection_script' ) );
 		$this->assertFalse( has_action( 'wp_print_styles', 'print_emoji_styles' ) );
-		$this->assertEquals( 10, has_action( 'wp_print_styles', [ 'AMP_Theme_Support', 'print_emoji_styles' ] ) );
+		$this->assertEquals( 10, has_action( 'wp_print_styles', [ AMP_Theme_Support::class, 'print_emoji_styles' ] ) );
 		$this->assertEquals( 10, has_filter( 'the_title', 'wp_staticize_emoji' ) );
 		$this->assertEquals( 10, has_filter( 'the_excerpt', 'wp_staticize_emoji' ) );
 		$this->assertEquals( 10, has_filter( 'the_content', 'wp_staticize_emoji' ) );
@@ -797,7 +797,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$content_width  = 1234;
 		$embed_handlers = AMP_Theme_Support::register_content_embed_handlers();
 		foreach ( $embed_handlers as $embed_handler ) {
-			$this->assertTrue( is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) );
+			$this->assertTrue( is_subclass_of( $embed_handler, AMP_Base_Embed_Handler::class ) );
 			$property = $this->get_private_property( $embed_handler, 'args' );
 			$this->assertEquals( $content_width, $property['content_max_width'] );
 		}
@@ -1006,8 +1006,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertEquals( 10, has_action( 'wp_head', $callback ) );
 
 		AMP_Theme_Support::init_admin_bar();
-		$this->assertEquals( 10, has_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_style_loader_tag' ] ) );
-		$this->assertEquals( 10, has_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_script_loader_tag' ] ) );
+		$this->assertEquals( 10, has_filter( 'style_loader_tag', [ AMP_Theme_Support::class, 'filter_admin_bar_style_loader_tag' ] ) );
+		$this->assertEquals( 10, has_filter( 'script_loader_tag', [ AMP_Theme_Support::class, 'filter_admin_bar_script_loader_tag' ] ) );
 		$this->assertFalse( has_action( 'wp_head', $callback ) );
 		ob_start();
 		wp_print_styles();
@@ -1146,7 +1146,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( '/' );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-		add_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_style_loader_tag' ], 10, 2 );
+		add_filter( 'style_loader_tag', [ AMP_Theme_Support::class, 'filter_admin_bar_style_loader_tag' ], 10, 2 );
 		$setup_callback();
 		ob_start();
 		echo '<html><head>';
@@ -1224,7 +1224,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( '/' );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-		add_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_script_loader_tag' ], 10, 2 );
+		add_filter( 'script_loader_tag', [ AMP_Theme_Support::class, 'filter_admin_bar_script_loader_tag' ], 10, 2 );
 		$setup_callback();
 		ob_start();
 		echo '<html><head>';
@@ -2198,7 +2198,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		add_filter(
 			'amp_content_sanitizers',
 			static function( $sanitizers ) {
-				$sanitizers['AMP_Theme_Support_Sanitizer_Counter'] = [];
+				$sanitizers[ AMP_Theme_Support_Sanitizer_Counter::class ] = [];
 				return $sanitizers;
 			}
 		);

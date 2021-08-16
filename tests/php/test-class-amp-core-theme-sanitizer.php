@@ -342,7 +342,7 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	 */
 	public function get_modals() {
 		$dom         = new Document();
-		$modal_roles = $this->get_private_property( 'AMP_Core_Theme_Sanitizer', 'modal_roles' );
+		$modal_roles = $this->get_private_property( AMP_Core_Theme_Sanitizer::class, 'modal_roles' );
 
 		$a = array_map(
 			static function ( $rule ) use ( $dom ) {

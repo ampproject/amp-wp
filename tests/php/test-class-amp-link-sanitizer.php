@@ -315,9 +315,9 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		add_filter( 'amp_to_amp_linking_enabled', $filter );
 		$sanitizers = amp_get_content_sanitizers();
 		if ( $expected ) {
-			$this->assertArrayHasKey( 'AMP_Link_Sanitizer', $sanitizers );
+			$this->assertArrayHasKey( AMP_Link_Sanitizer::class, $sanitizers );
 		} else {
-			$this->assertArrayNotHasKey( 'AMP_Link_Sanitizer', $sanitizers );
+			$this->assertArrayNotHasKey( AMP_Link_Sanitizer::class, $sanitizers );
 		}
 	}
 }

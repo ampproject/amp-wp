@@ -381,10 +381,10 @@ class Test_AMP_HTTP extends TestCase {
 		$_SERVER['REQUEST_METHOD']                        = 'POST';
 		AMP_HTTP::purge_amp_query_vars();
 		AMP_HTTP::handle_xhr_request();
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', [ 'AMP_HTTP', 'intercept_post_request_redirect' ] ) );
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_post_redirect', [ 'AMP_HTTP', 'filter_comment_post_redirect' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', [ AMP_HTTP::class, 'intercept_post_request_redirect' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_post_redirect', [ AMP_HTTP::class, 'filter_comment_post_redirect' ] ) );
 		$this->assertEquals(
-			[ 'AMP_HTTP', 'handle_wp_die' ],
+			[ AMP_HTTP::class, 'handle_wp_die' ],
 			apply_filters( 'wp_die_handler', '__return_true' )
 		);
 	}

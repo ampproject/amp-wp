@@ -1699,8 +1699,8 @@ class AMP_Validation_Manager {
 			$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
 		}
 
-		if ( isset( $sanitizers['AMP_Style_Sanitizer'] ) ) {
-			$sanitizers['AMP_Style_Sanitizer']['should_locate_sources'] = self::$is_validate_request;
+		if ( isset( $sanitizers[ AMP_Style_Sanitizer::class ] ) ) {
+			$sanitizers[ AMP_Style_Sanitizer::class ]['should_locate_sources'] = self::$is_validate_request;
 
 			$css_validation_errors = [];
 			foreach ( self::$validation_error_status_overrides as $slug => $status ) {
@@ -1722,7 +1722,7 @@ class AMP_Validation_Manager {
 				}
 			}
 			if ( ! empty( $css_validation_errors ) ) {
-				$sanitizers['AMP_Style_Sanitizer']['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
+				$sanitizers[ AMP_Style_Sanitizer::class ]['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
 			}
 		}
 

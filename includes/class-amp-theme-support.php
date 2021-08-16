@@ -351,7 +351,7 @@ class AMP_Theme_Support {
 		self::$sanitizer_classes = amp_get_content_sanitizers();
 		self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
 		self::$embed_handlers    = self::register_content_embed_handlers();
-		self::$sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = self::$embed_handlers;
+		self::$sanitizer_classes[ AMP_Embed_Sanitizer::class ]['embed_handlers'] = self::$embed_handlers;
 
 		foreach ( self::$sanitizer_classes as $sanitizer_class => $args ) {
 			if ( method_exists( $sanitizer_class, 'add_buffering_hooks' ) ) {
@@ -994,10 +994,10 @@ class AMP_Theme_Support {
 					__METHOD__,
 					esc_html(
 						sprintf(
-							/* translators: 1: embed handler. 2: AMP_Embed_Handler */
+							/* translators: 1: embed handler. 2: AMP_Base_Embed_Handler */
 							__( 'Embed Handler (%1$s) must extend `%2$s`', 'amp' ),
 							esc_html( $embed_handler_class ),
-							'AMP_Embed_Handler'
+							AMP_Base_Embed_Handler::class
 						)
 					),
 					'0.1'

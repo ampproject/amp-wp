@@ -43,8 +43,8 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 		amp_init_customizer();
 		$this->assertTrue( amp_is_legacy() );
-		$this->assertEquals( 500, has_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ] ) );
-		$this->assertEquals( 10, has_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] ) );
+		$this->assertEquals( 500, has_action( 'customize_register', [ AMP_Template_Customizer::class, 'init' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_init', [ AMP_Customizer_Design_Settings::class, 'init' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', 'amp_add_customizer_link' ) );
 	}
 
