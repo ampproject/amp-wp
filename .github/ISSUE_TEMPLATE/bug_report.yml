@@ -32,7 +32,7 @@ body:
       description: Specify which PHP version the bug occurs on.
       placeholder: e.g. 8.1
     validations:
-      required: true
+      required: false
 
   - type: input
     attributes:
