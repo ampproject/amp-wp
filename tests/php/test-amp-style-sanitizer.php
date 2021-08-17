@@ -924,24 +924,9 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	}
 
 	/**
-	 * Test that tree shaking and CSS limits are disabled when in the Customizer Preview.
+	 * Test that tree shaking and CSS limits are disabled when requested.
 	 */
-	public function test_tree_shaking_disabled_in_customizer_preview() {
-		$active_theme = 'twentynineteen';
-		$reader_theme = 'twentytwenty';
-		if ( ! wp_get_theme( $active_theme )->exists() || ! wp_get_theme( $reader_theme )->exists() ) {
-			$this->markTestSkipped();
-		}
-		switch_theme( $active_theme );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme );
-
-		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
-		global $wp_customize;
-		$wp_customize = new WP_Customize_Manager();
-		$wp_customize->start_previewing_theme();
-		$this->assertTrue( is_customize_preview() );
-
+	public function test_tree_shaking_disabled() {
 		$dom = Document::fromHtml(
 			sprintf(
 				'
@@ -973,6 +958,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 		$args = [
 			'use_document_element' => true,
+			'skip_tree_shaking'    => true,
 		];
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );

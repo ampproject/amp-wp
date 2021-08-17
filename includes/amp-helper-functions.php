@@ -1516,7 +1516,9 @@ function amp_get_content_sanitizers( $post = null ) {
 		],
 		AMP_Block_Sanitizer::class             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
 		AMP_Script_Sanitizer::class            => [],
-		AMP_Style_Sanitizer::class             => [],
+		AMP_Style_Sanitizer::class             => [
+			'skip_tree_shaking' => is_customize_preview(),
+		],
 		AMP_Meta_Sanitizer::class              => [],
 		AMP_Layout_Sanitizer::class            => [],
 		AMP_Accessibility_Sanitizer::class     => [],
