@@ -1330,7 +1330,7 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		$this->assertFalse( wp_script_is( 'autosave', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'amp-validated-url-post-edit-screen', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'amp-validated-url-page', 'enqueued' ) );
-		$this->assertStringContains( 'var ampSettings', get_echo( 'wp_print_scripts' ) );
+		$this->assertStringContainsString( 'var ampSettings', get_echo( 'wp_print_scripts' ) );
 		$pagenow = null;
 		$post    = null;
 	}
@@ -1487,7 +1487,7 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		$validated_url_post = self::factory()->post->create_and_get( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
 		$output             = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_stylesheets_meta_box' ], [ $validated_url_post ] );
 
-		$this->assertStringContains( '<div id="amp-validated-url-root"></div>', $output );
+		$this->assertStringContainsString( '<div id="amp-validated-url-root"></div>', $output );
 	}
 
 	/**
