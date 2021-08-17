@@ -1533,7 +1533,11 @@ class AMP_Theme_Support {
 		}
 
 		// When opting-in to POST forms, omit the amp-form component entirely since it blocks submission.
-		if ( amp_is_native_post_form_allowed() && $dom->xpath->query( '//form[ @action and @method and translate( @method, "POST", "post" ) = "post" ]' )->length > 0 ) {
+		if (
+			in_array( Extension::FORM, $script_handles, true )
+			&&
+			$dom->xpath->query( '//form[ @action and @method and translate( @method, "POST", "post" ) = "post" ]' )->length > 0
+		) {
 			$superfluous_script_handles[] = Extension::FORM;
 		}
 
