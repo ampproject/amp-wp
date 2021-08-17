@@ -86,11 +86,13 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 						<script>document.write("Hey.")</script>
 						<script type="application/json">{"data":1}</script>
 						<script type="application/ld+json">{"data":2}</script>
+						<amp-state id="test"><script type="application/json">{"data":3}</script></amp-state>
 					</body></html>
 				',
 				'
 					<html><head><meta charset="utf-8"></head><body>
 					<script type="application/ld+json">{"data":2}</script>
+					<amp-state id="test"><script type="application/json">{"data":3}</script></amp-state>
 					</body></html>
 				',
 				[
@@ -98,7 +100,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				],
 				[
 					AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT,
-					AMP_Script_Sanitizer::CUSTOM_JSON_SCRIPT,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				],
 			],
 			'external_scripts_removed'     => [

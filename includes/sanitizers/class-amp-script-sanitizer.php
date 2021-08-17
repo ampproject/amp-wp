@@ -27,13 +27,6 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	const CUSTOM_INLINE_SCRIPT = 'CUSTOM_INLINE_SCRIPT';
 
 	/**
-	 * Error code for custom inline JSON script tag.
-	 *
-	 * @var string
-	 */
-	const CUSTOM_JSON_SCRIPT = 'CUSTOM_JSON_SCRIPT';
-
-	/**
 	 * Error code for custom external JS script tag.
 	 *
 	 * @var string
@@ -68,7 +61,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
-	 *      @type bool $sanitize_scripts Whether to sanitize scripts (and not defer for final sanitizer).
+	 *      @type bool $sanitize_scripts Whether to sanitize JS scripts (and not defer for final sanitizer).
 	 *      @type bool $unwrap_noscripts Whether to unwrap noscript elements.
 	 * }
 	 */
@@ -163,7 +156,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 2.2
 	 */
 	protected function sanitize_script_elements() {
-		$scripts = $this->dom->xpath->query( '//script[ not( @type ) or @type != "application/ld+json" ]' );
+		$scripts = $this->dom->xpath->query( '//script[ not( @type ) or not( contains( @type, "json" ) ) ]' );
 
 		/** @var Element $script */
 		foreach ( $scripts as $script ) {
@@ -192,15 +185,9 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
-				if ( $script->hasAttribute( Attribute::TYPE ) && false !== strpos( $script->getAttribute( Attribute::TYPE ), 'json' ) ) {
-					$code = self::CUSTOM_JSON_SCRIPT;
-				} else {
-					$code = self::CUSTOM_INLINE_SCRIPT;
-				}
-
 				$removed = $this->remove_invalid_child(
 					$script,
-					[ 'code' => $code ]
+					[ 'code' => self::CUSTOM_INLINE_SCRIPT ]
 				);
 				if ( ! $removed ) {
 					$script->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
