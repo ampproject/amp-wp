@@ -54,6 +54,7 @@ namespace PHPSTORM_META {
 			'site_health_integration'            => \AmpProject\AmpWP\Admin\SiteHealth::class,
 			'url_validation_cron'                => \AmpProject\AmpWP\Validation\URLValidationCron::class,
 			'url_validation_rest_controller'     => \AmpProject\AmpWP\Validation\URLValidationRESTController::class,
+			'validated_url_rest_controller'      => \AmpProject\AmpWP\Validation\ValidatedUrlRESTController::class,
 			'validated_url_stylesheet_gc'        => \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
 		] )
 	);
