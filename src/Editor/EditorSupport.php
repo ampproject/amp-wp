@@ -44,7 +44,11 @@ final class EditorSupport implements Registerable, Service {
 	 * Shows a notice in the editor if the Gutenberg or WP version prevents plugin features from working.
 	 */
 	public function maybe_show_notice() {
-		if ( $this->is_current_screen_supported_block_editor_for_amp_enabled_post_type() ) {
+		if ( $this->dependency_support->has_support() ) {
+			return;
+		}
+
+		if ( ! $this->is_current_screen_supported_block_editor_for_amp_enabled_post_type() ) {
 			return;
 		}
 
@@ -66,19 +70,18 @@ final class EditorSupport implements Registerable, Service {
 	}
 
 	/**
-	 * Returns whether the current environment is supported by the plugin
-	 * and the current screen is using the block editor.
+	 * Returns whether the current screen is using the block editor and the post being edited supports AMP.
 	 *
 	 * @return bool
 	 */
 	public function is_current_screen_supported_block_editor_for_amp_enabled_post_type() {
 		$screen = get_current_screen();
-		return $this->dependency_support->has_support()
-			&&
+		return (
 			$screen
 			&&
 			! empty( $screen->is_block_editor )
 			&&
-			in_array( get_post_type(), AMP_Post_Type_Support::get_supported_post_types(), true );
+			in_array( get_post_type(), AMP_Post_Type_Support::get_supported_post_types(), true )
+		);
 	}
 }
