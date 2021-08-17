@@ -8,8 +8,9 @@
 
 use AmpProject\Attribute;
 use AmpProject\DevMode;
-use AmpProject\Tag;
 use AmpProject\Dom\Element;
+use AmpProject\Extension;
+use AmpProject\Tag;
 
 /**
  * Class AMP_Script_Sanitizer
@@ -202,11 +203,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				//@*[
 					substring(name(), 1, 2) = "on"
 					and
-					substring(name(), 1, 3) != "on-"
-					and
 					name() != "on"
-					and
-					name() != "once"
 				]
 			'
 		);
@@ -214,7 +211,21 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $event_handler_attributes as $event_handler_attribute ) {
 			/** @var Element $element */
 			$element = $event_handler_attribute->parentNode;
-			if ( DevMode::hasExemptionForNode( $element ) ) {
+			if (
+				DevMode::hasExemptionForNode( $element )
+				||
+				(
+					Extension::POSITION_OBSERVER === $element->tagName
+					&&
+					Attribute::ONCE === $event_handler_attribute->nodeName
+				)
+				||
+				(
+					Extension::FONT === $element->tagName
+					&&
+					substr( $event_handler_attribute->nodeName, 0, 3 ) === 'on-'
+				)
+			) {
 				continue;
 			}
 
