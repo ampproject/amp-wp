@@ -64,18 +64,18 @@ final class EditorSupportTest extends TestCase {
 		$this->setup_environment( $post_type_uses_block_editor, $post_type_supports_amp );
 
 		if (
-			defined( 'GUTENBERG_VERSION' )
-			&&
-			version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
+			(
+				defined( 'GUTENBERG_VERSION' )
+				&&
+				version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
+			)
+			||
+			version_compare( get_bloginfo( 'version' ), '5.0', '>=' )
 		) {
 			$this->assertSame( $expected_result, $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
 		} else {
-			if ( version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) ) {
-				$this->assertSame( $expected_result, $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
-			} else {
-				// WP < 5.0 doesn't include the block editor, so it should not be supported.
-				$this->assertFalse( $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
-			}
+			// WP < 5.0 doesn't include the block editor, but Gutenberg would be installed, so it should be supported.
+			$this->assertTrue( $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
 		}
 	}
 
@@ -129,7 +129,8 @@ final class EditorSupportTest extends TestCase {
 		}
 
 		$this->setup_environment( true, true );
-		$this->assertFalse( $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
+		// WP < 5.0 doesn't include the block editor, but Gutenberg would be installed, so it should be supported.
+		$this->assertTrue( $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
 
 		gutenberg_register_packages_scripts();
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
