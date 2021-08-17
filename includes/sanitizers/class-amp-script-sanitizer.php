@@ -85,6 +85,13 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	protected $style_sanitizer;
 
 	/**
+	 * Image sanitizer.
+	 *
+	 * @var AMP_Img_Sanitizer
+	 */
+	protected $img_sanitizer;
+
+	/**
 	 * Init.
 	 *
 	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
@@ -98,6 +105,14 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			$sanitizers[ AMP_Style_Sanitizer::class ] instanceof AMP_Style_Sanitizer
 		) {
 			$this->style_sanitizer = $sanitizers[ AMP_Style_Sanitizer::class ];
+		}
+
+		if (
+			array_key_exists( AMP_Img_Sanitizer::class, $sanitizers )
+			&&
+			$sanitizers[ AMP_Img_Sanitizer::class ] instanceof AMP_Img_Sanitizer
+		) {
+			$this->img_sanitizer = $sanitizers[ AMP_Img_Sanitizer::class ];
 		}
 	}
 
@@ -122,9 +137,14 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		// associated style rules.
 		// @todo There should be an attribute on script tags that opt-in to keeping tree shaking and/or to indicate what class names need to be included.
 		// @todo Depending on the size of the underlying stylesheets, this may need to retain the use of external styles to prevent inlining excessive CSS. This may involve writing minified CSS to disk, or skipping style processing altogether if no selector conversions are needed.
-		if ( $this->kept_script_count > 0 && $this->style_sanitizer instanceof AMP_Base_Sanitizer ) {
-			// @todo In addition to skipping tree shaking in the style sanitizer, sometimes this should also disable certain conversions (e.g. native_img for AMP_Img_Sanitizer).
-			$this->style_sanitizer->update_args( [ 'skip_tree_shaking' => true ] );
+		if ( $this->kept_script_count > 0 ) {
+			if ( $this->style_sanitizer ) {
+				$this->style_sanitizer->update_args( [ 'skip_tree_shaking' => true ] );
+			}
+			if ( $this->img_sanitizer ) {
+				$this->img_sanitizer->update_args( [ 'native_img_used' => true ] );
+			}
+			// @todo In addition to skipping tree shaking and using native images, other conversions should perhaps be disabled to prevent breaking custom scripts.
 		}
 	}
 

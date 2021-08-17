@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\Dom\Document;
+use AmpProject\Extension;
 use AmpProject\Tag;
 
 /**
@@ -277,7 +278,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 	}
 
 	/** @return array */
-	public function get_data_to_test_tree_shaking_disabled_when_custom_scripts_retained() {
+	public function get_data_to_test_cascading_sanitizer_argument_changes_with_custom_scripts() {
 		return [
 			'custom_scripts_removed' => [ true ],
 			'custom_scripts_kept'    => [ false ],
@@ -285,13 +286,13 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 	}
 
 	/**
-	 * @dataProvider get_data_to_test_tree_shaking_disabled_when_custom_scripts_retained
+	 * @dataProvider get_data_to_test_cascading_sanitizer_argument_changes_with_custom_scripts
 	 *
 	 * @covers AMP_Script_Sanitizer::init()
 	 *
 	 * @param bool $remove_custom_scripts Remove custom scripts.
 	 */
-	public function test_tree_shaking_disabled_when_custom_scripts_retained( $remove_custom_scripts ) {
+	public function test_cascading_sanitizer_argument_changes_with_custom_scripts( $remove_custom_scripts ) {
 		$dom = Document::fromHtml(
 			'
 			<html>
@@ -299,6 +300,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					<style>body { background: red; } body.loaded { background: green; }</style>
 				</head>
 				<body>
+					<img src="https://example.com/logo.png" width="300" height="100" alt="Logo">
 					<script>document.addEventListener("DOMContentLoaded", () => document.body.classList.add("loaded"))</script>
 				</body>
 			</html>
@@ -316,13 +318,17 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					},
 				]
 			),
+			AMP_Img_Sanitizer::class    => new AMP_Img_Sanitizer(
+				$dom,
+				[
+					'native_img_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+				]
+			),
 			AMP_Style_Sanitizer::class  => new AMP_Style_Sanitizer(
 				$dom,
 				[
 					'use_document_element' => true,
-
-					// This should get overridden by AMP_Script_Sanitizer when there is a kept script.
-					'skip_tree_shaking'    => false,
+					'skip_tree_shaking'    => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
 		];
@@ -336,11 +342,17 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$sanitizer->sanitize();
 		}
 
-		$script_count = $dom->getElementsByTagName( Tag::SCRIPT )->length;
-		$this->assertEquals( $remove_custom_scripts ? 0 : 1, $script_count );
+		$this->assertEquals(
+			$remove_custom_scripts ? 0 : 1,
+			$dom->getElementsByTagName( Tag::SCRIPT )->length
+		);
+		$this->assertEquals(
+			$remove_custom_scripts ? 1 : 0,
+			$dom->getElementsByTagName( Extension::IMG )->length,
+			'Expected <img> to be converted to <amp-img> when custom scripts are removed.'
+		);
 
 		$style = $dom->getElementsByTagName( Tag::STYLE )->item( 0 );
-
 		if ( $remove_custom_scripts ) {
 			$this->assertStringStartsWith( "body{background:red}\n", $style->textContent );
 		} else {
