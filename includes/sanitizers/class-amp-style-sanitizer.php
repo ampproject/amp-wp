@@ -346,6 +346,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $remote_request;
 
 	/**
+	 * All current sanitizers.
+	 *
+	 * @see AMP_Style_Sanitizer::init()
+	 * @var AMP_Base_Sanitizer[]
+	 */
+	private $sanitizers = [];
+
+	/**
 	 * Get error codes that can be raised during parsing of CSS.
 	 *
 	 * This is used to determine which validation errors should be taken into account
@@ -850,7 +858,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function init( $sanitizers ) {
 		parent::init( $sanitizers );
 
-		foreach ( $sanitizers as $sanitizer ) {
+		$this->sanitizers = $sanitizers;
+	}
+
+	/**
+	 * Sanitize CSS styles within the HTML contained in this instance's Dom\Document.
+	 *
+	 * @since 0.4
+	 */
+	public function sanitize() {
+		// Capture the selector conversion mappings from the other sanitizers.
+		foreach ( $this->sanitizers as $sanitizer ) {
 			foreach ( $sanitizer->get_selector_conversion_mapping() as $html_selectors => $amp_selectors ) {
 				if ( ! isset( $this->selector_mappings[ $html_selectors ] ) ) {
 					$this->selector_mappings[ $html_selectors ] = $amp_selectors;
@@ -867,14 +885,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				);
 			}
 		}
-	}
 
-	/**
-	 * Sanitize CSS styles within the HTML contained in this instance's Dom\Document.
-	 *
-	 * @since 0.4
-	 */
-	public function sanitize() {
 		$elements = [];
 
 		$this->focus_class_name_selector_pattern = (
