@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
 use AmpProject\Tag;
 use AmpProject\Dom\Document;
+use AmpProject\Exception\MaxCssByteCountExceeded;
 
 /**
  * Class AMP_Validation_Manager
@@ -1682,8 +1683,12 @@ class AMP_Validation_Manager {
 		$text .= ' ' . implode( ', ', $items );
 
 		$validate_link->appendChild( $dom->createTextNode( ' ' ) );
-		$small = $dom->createElement( 'small' );
-		$small->setAttribute( 'style', 'font-size: smaller' );
+		$small = $dom->createElement( Tag::SMALL );
+		try {
+			$small->setAttribute( Attribute::STYLE, 'font-size: smaller' );
+		} catch ( MaxCssByteCountExceeded $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Making the font size smaller is just a nice-to-have.
+		}
 		$small->appendChild( $dom->createTextNode( sprintf( '(%s)', $text ) ) );
 		$validate_link->appendChild( $small );
 	}
