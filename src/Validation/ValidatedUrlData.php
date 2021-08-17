@@ -223,7 +223,7 @@ final class ValidatedUrlData {
 		}
 
 		foreach ( $sources as $key => $source ) {
-			if ( 'sources' === $source['type'] ) {
+			if ( isset( $source['type'] ) && 'sources' === $source['type'] ) {
 				return $this->format_sources( $source );
 			}
 
