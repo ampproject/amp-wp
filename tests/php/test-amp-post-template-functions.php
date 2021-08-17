@@ -34,7 +34,7 @@ class Test_AMP_Post_Template_Functions extends TestCase {
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_post_template_add_default_styles' ) );
 		$this->assertSame( 99, has_action( 'amp_post_template_css', 'amp_post_template_add_styles' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' ) );
-		$this->assertSame( 10, has_action( 'admin_bar_init', [ 'AMP_Theme_Support', 'init_admin_bar' ] ) );
+		$this->assertSame( 10, has_action( 'admin_bar_init', [ AMP_Theme_Support::class, 'init_admin_bar' ] ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_footer', 'wp_admin_bar_render' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'wp_print_head_scripts' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_footer', 'wp_print_footer_scripts' ) );

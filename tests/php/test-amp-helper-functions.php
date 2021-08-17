@@ -202,7 +202,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		do_action( 'after_setup_theme' );
 		do_action( 'init' );
 		$this->assertEquals( 1, did_action( 'amp_init' ) );
-		$this->assertEquals( 10, has_filter( 'allowed_redirect_hosts', [ 'AMP_HTTP', 'filter_allowed_redirect_hosts' ] ) );
+		$this->assertEquals( 10, has_filter( 'allowed_redirect_hosts', [ AMP_HTTP::class, 'filter_allowed_redirect_hosts' ] ) );
 		$this->assertEquals( 0, did_action( 'amp_plugin_update' ) );
 		$this->assertEqualSets(
 			[ 'post', 'page' ],
@@ -1636,7 +1636,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->last_filter_call = null;
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$handlers = amp_get_content_embed_handlers();
-		$this->assertArrayHasKey( 'AMP_SoundCloud_Embed_Handler', $handlers );
+		$this->assertArrayHasKey( AMP_SoundCloud_Embed_Handler::class, $handlers );
 		$this->assertEquals( 'amp_content_embed_handlers', $this->last_filter_call['current_filter'] );
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );
 		$this->assertNull( $this->last_filter_call['args'][1] );
@@ -1644,7 +1644,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->last_filter_call = null;
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$handlers = amp_get_content_embed_handlers( $post );
-		$this->assertArrayHasKey( 'AMP_SoundCloud_Embed_Handler', $handlers );
+		$this->assertArrayHasKey( AMP_SoundCloud_Embed_Handler::class, $handlers );
 		$this->assertEquals( 'amp_content_embed_handlers', $this->last_filter_call['current_filter'] );
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );
 		$this->assertEquals( $post, $this->last_filter_call['args'][1] );
@@ -1733,19 +1733,19 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->last_filter_call = null;
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$handlers = amp_get_content_sanitizers();
-		$this->assertArrayHasKey( 'AMP_Style_Sanitizer', $handlers );
-		unset( $handlers['AMP_Style_Sanitizer']['allow_transient_caching'] ); // Remove item added after filter applied.
+		$this->assertArrayHasKey( AMP_Style_Sanitizer::class, $handlers );
+		unset( $handlers[ AMP_Style_Sanitizer::class ]['allow_transient_caching'] ); // Remove item added after filter applied.
 		$this->assertEquals( 'amp_content_sanitizers', $this->last_filter_call['current_filter'] );
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );
 		$handler_classes = array_keys( $handlers );
 		$this->assertNull( $this->last_filter_call['args'][1] );
-		$this->assertEquals( 'AMP_Tag_And_Attribute_Sanitizer', end( $handler_classes ) );
+		$this->assertEquals( AMP_Tag_And_Attribute_Sanitizer::class, end( $handler_classes ) );
 
 		$this->last_filter_call = null;
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$handlers = amp_get_content_sanitizers( $post );
-		unset( $handlers['AMP_Style_Sanitizer']['allow_transient_caching'] ); // Remove item added after filter applied.
-		$this->assertArrayHasKey( 'AMP_Style_Sanitizer', $handlers );
+		unset( $handlers[ AMP_Style_Sanitizer::class ]['allow_transient_caching'] ); // Remove item added after filter applied.
+		$this->assertArrayHasKey( AMP_Style_Sanitizer::class, $handlers );
 		$this->assertEquals( 'amp_content_sanitizers', $this->last_filter_call['current_filter'] );
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );
 		$this->assertEquals( $post, $this->last_filter_call['args'][1] );
@@ -1760,10 +1760,10 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		);
 		$ordered_sanitizers = array_keys( amp_get_content_sanitizers() );
 		$this->assertEquals( 'Even_After_Validating_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 5 ] );
-		$this->assertEquals( 'AMP_Layout_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 4 ] );
-		$this->assertEquals( 'AMP_Style_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 3 ] );
-		$this->assertEquals( 'AMP_Meta_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 2 ] );
-		$this->assertEquals( 'AMP_Tag_And_Attribute_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 1 ] );
+		$this->assertEquals( AMP_Layout_Sanitizer::class, $ordered_sanitizers[ count( $ordered_sanitizers ) - 4 ] );
+		$this->assertEquals( AMP_Style_Sanitizer::class, $ordered_sanitizers[ count( $ordered_sanitizers ) - 3 ] );
+		$this->assertEquals( AMP_Meta_Sanitizer::class, $ordered_sanitizers[ count( $ordered_sanitizers ) - 2 ] );
+		$this->assertEquals( AMP_Tag_And_Attribute_Sanitizer::class, $ordered_sanitizers[ count( $ordered_sanitizers ) - 1 ] );
 	}
 
 	/**
@@ -1783,18 +1783,18 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		// Check that AMP_Dev_Mode_Sanitizer is not registered if not in dev mode.
 		$sanitizers = amp_get_content_sanitizers();
 		$this->assertFalse( amp_is_dev_mode() );
-		$this->assertArrayNotHasKey( 'AMP_Dev_Mode_Sanitizer', $sanitizers );
+		$this->assertArrayNotHasKey( AMP_Dev_Mode_Sanitizer::class, $sanitizers );
 
 		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, but not with admin bar showing yet.
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$sanitizers = amp_get_content_sanitizers();
 		$this->assertFalse( is_admin_bar_showing() );
 		$this->assertTrue( amp_is_dev_mode() );
-		$this->assertArrayHasKey( 'AMP_Dev_Mode_Sanitizer', $sanitizers );
-		$this->assertEquals( 'AMP_Dev_Mode_Sanitizer', current( array_keys( $sanitizers ) ) );
+		$this->assertArrayHasKey( AMP_Dev_Mode_Sanitizer::class, $sanitizers );
+		$this->assertEquals( AMP_Dev_Mode_Sanitizer::class, current( array_keys( $sanitizers ) ) );
 		$this->assertEquals(
 			compact( 'element_xpaths' ),
-			$sanitizers['AMP_Dev_Mode_Sanitizer']
+			$sanitizers[ AMP_Dev_Mode_Sanitizer::class ]
 		);
 		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
 
@@ -1804,7 +1804,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$sanitizers = amp_get_content_sanitizers();
 		$this->assertTrue( is_admin_bar_showing() );
 		$this->assertTrue( amp_is_dev_mode() );
-		$this->assertArrayHasKey( 'AMP_Dev_Mode_Sanitizer', $sanitizers );
+		$this->assertArrayHasKey( AMP_Dev_Mode_Sanitizer::class, $sanitizers );
 		$this->assertEqualSets(
 			array_merge(
 				$element_xpaths,
@@ -1814,7 +1814,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 					'//style[ @id = "admin-bar-inline-css" ]',
 				]
 			),
-			$sanitizers['AMP_Dev_Mode_Sanitizer']['element_xpaths']
+			$sanitizers[ AMP_Dev_Mode_Sanitizer::class ]['element_xpaths']
 		);
 	}
 
@@ -1836,7 +1836,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 * @covers ::amp_get_content_sanitizers()
 	 */
 	public function test_amp_get_content_sanitizers_amp_to_amp() {
-		$link_sanitizer_class_name = 'AMP_Link_Sanitizer';
+		$link_sanitizer_class_name = AMP_Link_Sanitizer::class;
 
 		// If AMP-to-AMP linking isn't enabled, this sanitizer shouldn't be present.
 		add_filter( 'amp_to_amp_linking_enabled', '__return_false' );

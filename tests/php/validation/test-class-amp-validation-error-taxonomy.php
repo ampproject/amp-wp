@@ -25,7 +25,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 *
 	 * @var string
 	 */
-	const TESTED_CLASS = 'AMP_Validation_Error_Taxonomy';
+	const TESTED_CLASS = AMP_Validation_Error_Taxonomy::class;
 
 	/**
 	 * Resets the state after each test method.
@@ -755,11 +755,11 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		// When passing the wrong $taxonomy argument, this should not render anything.
-		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_link_to_invalid_urls_screen' ], [ 'category' ] );
+		$output = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_link_to_invalid_urls_screen' ], [ 'category' ] );
 		$this->assertEmpty( $output );
 
 		// When passing the correct taxonomy, this should render the link.
-		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_link_to_invalid_urls_screen' ], [ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] );
+		$output = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_link_to_invalid_urls_screen' ], [ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] );
 		$this->assertStringContainsString( 'View Validated URLs', $output );
 		$this->assertStringContainsString(
 			add_query_arg(
@@ -781,7 +781,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		set_current_screen( 'post.php' );
 
 		// When this is not on the correct screen, this should not render anything.
-		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_error_status_filter' ] );
+		$output = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_error_status_filter' ] );
 		$this->assertEmpty( $output );
 
 		set_current_screen( 'edit.php' );
@@ -805,7 +805,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		}
 
 		// When there are 10 accepted errors, the <option> element for it should end with (10).
-		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_error_status_filter' ] );
+		$output = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_error_status_filter' ] );
 		$this->assertStringContainsString(
 			sprintf(
 				'With unreviewed errors <span class="count">(%d)</span>',
@@ -846,7 +846,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		}
 
 		// The strings below should be present.
-		$markup = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_error_type_filter' ] );
+		$markup = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_error_type_filter' ] );
 
 		$expected_to_contain = [
 			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR,
@@ -877,7 +877,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 */
 	public function test_render_clear_empty_button() {
 
-		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_clear_empty_button' ] );
+		$output = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_clear_empty_button' ] );
 		$this->assertEmpty( $output );
 
 		ob_start();
@@ -919,7 +919,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		set_current_screen( 'edit.php' );
 
 		// Test that the method exits when the first conditional isn't true.
-		$message = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ] );
+		$message = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'add_admin_notices' ] );
 		$this->assertEmpty( $message );
 
 		// Test the first conditional, where the error is accepted.
@@ -927,18 +927,18 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$count                      = 5;
 		$_GET['amp_actioned_count'] = $count;
 		$current_screen->taxonomy   = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
-		$message                    = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ] );
+		$message                    = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'add_admin_notices' ] );
 		$this->assertEquals( '', $message );
 
 		// Test the second conditional, where the error is rejected.
 		$_GET['amp_actioned'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
-		$message              = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ] );
+		$message              = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'add_admin_notices' ] );
 		$this->assertEquals( '', $message );
 
 		// Test the second conditional, where the error is rejected.
 		$_GET['amp_actioned']       = 'delete';
 		$_GET['amp_actioned_count'] = 1;
-		$message                    = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ] );
+		$message                    = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'add_admin_notices' ] );
 		$this->assertEquals(
 			'<div class="notice notice-success is-dismissible"><p>Deleted 1 instance of validation errors.</p></div>',
 			$message

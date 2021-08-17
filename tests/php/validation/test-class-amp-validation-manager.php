@@ -36,7 +36,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 *
 	 * @var string
 	 */
-	const TESTED_CLASS = 'AMP_Validation_Manager';
+	const TESTED_CLASS = AMP_Validation_Manager::class;
 
 	/**
 	 * An instance of DOMElement to test.
@@ -176,7 +176,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	public function test_maybe_fail_validate_request() {
 		$post_id = self::factory()->post->create();
 
-		remove_filter( 'wp', [ 'AMP_Validation_Manager', 'maybe_fail_validate_request' ] );
+		remove_filter( 'wp', [ AMP_Validation_Manager::class, 'maybe_fail_validate_request' ] );
 		add_filter( 'wp_doing_ajax', '__return_true' );
 		add_filter(
 			'wp_die_ajax_handler',
@@ -1089,7 +1089,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		$callback();
-		$this->set_private_property( 'AMP_Theme_Support', 'is_output_buffering', true );
+		$this->set_private_property( AMP_Theme_Support::class, 'is_output_buffering', true );
 		$this->go_to( home_url() );
 
 		ob_start();
@@ -1271,8 +1271,8 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertIsArray( $wp_registered_widgets[ $archives_widget_id ]['callback'] );
 
 		AMP_Validation_Manager::wrap_widget_callbacks();
-		$this->assertInstanceOf( 'AMP_Validation_Callback_Wrapper', $wp_registered_widgets[ $search_widget_id ]['callback'] );
-		$this->assertInstanceOf( 'AMP_Validation_Callback_Wrapper', $wp_registered_widgets[ $archives_widget_id ]['callback'] );
+		$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $wp_registered_widgets[ $search_widget_id ]['callback'] );
+		$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $wp_registered_widgets[ $archives_widget_id ]['callback'] );
 		$this->assertInstanceOf( 'WP_Widget', $wp_registered_widgets[ $search_widget_id ]['callback'][0] );
 		$this->assertInstanceOf( 'WP_Widget', $wp_registered_widgets[ $archives_widget_id ]['callback'][0] );
 		$this->assertSame( 'display_callback', $wp_registered_widgets[ $search_widget_id ]['callback'][1] );
@@ -1458,7 +1458,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers AMP_Validation_Manager::has_parameters_passed_by_reference()
 	 */
 	public function test_has_parameters_passed_by_reference() {
-		$tested_method = new ReflectionMethod( 'AMP_Validation_Manager', 'has_parameters_passed_by_reference' );
+		$tested_method = new ReflectionMethod( AMP_Validation_Manager::class, 'has_parameters_passed_by_reference' );
 		$tested_method->setAccessible( true );
 		$reflection_by_value          = new ReflectionFunction( 'get_bloginfo' );
 		$reflection_by_ref_first_arg  = new ReflectionFunction( 'wp_handle_upload' );
@@ -2114,9 +2114,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		global $post;
 		$post       = self::factory()->post->create_and_get();
 		$sanitizers = [
-			'AMP_Img_Sanitizer'      => [],
-			'AMP_Form_Sanitizer'     => [],
-			'AMP_Comments_Sanitizer' => [],
+			AMP_Img_Sanitizer::class      => [],
+			AMP_Form_Sanitizer::class     => [],
+			AMP_Comments_Sanitizer::class => [],
 		];
 
 		$expected_callback   = self::TESTED_CLASS . '::add_validation_error';
@@ -2347,7 +2347,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 */
 	public function test_print_plugin_notice() {
 		global $pagenow;
-		$output = get_echo( [ 'AMP_Validation_Manager', 'print_plugin_notice' ] );
+		$output = get_echo( [ AMP_Validation_Manager::class, 'print_plugin_notice' ] );
 		$this->assertEmpty( $output );
 		$pagenow          = 'plugins.php';
 		$_GET['activate'] = 'true';
@@ -2378,7 +2378,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				],
 			]
 		);
-		$output = get_echo( [ 'AMP_Validation_Manager', 'print_plugin_notice' ] );
+		$output = get_echo( [ AMP_Validation_Manager::class, 'print_plugin_notice' ] );
 		$this->assertStringContainsString( 'Warning: The following plugin may be incompatible with AMP', $output );
 		$this->assertStringContainsString( 'Foo Bar', $output );
 		$this->assertStringContainsString( 'More details', $output );

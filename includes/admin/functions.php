@@ -16,11 +16,11 @@ use AmpProject\AmpWP\QueryVar;
 function amp_init_customizer() {
 
 	// Fire up the AMP Customizer.
-	add_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ], 500 );
+	add_action( 'customize_register', [ AMP_Template_Customizer::class, 'init' ], 500 );
 
 	if ( amp_is_legacy() ) {
 		// Add some basic design settings + controls to the Customizer.
-		add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
+		add_action( 'amp_init', [ AMP_Customizer_Design_Settings::class, 'init' ] );
 	}
 
 	// Add a link to the AMP Customizer in Reader mode.
