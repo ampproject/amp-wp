@@ -210,6 +210,22 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// @todo Also need to check for inline script attributes.
+		$event_handler_attributes = $this->dom->xpath->query( '//*[ not( @data-ampdevmode ) ]/@*[ substring(name(), 1, 2) = "on" ]' );
+		foreach ( $event_handler_attributes as $event_handler_attribute ) {
+			/** @var DOMAttr $event_handler_attribute */
+			/** @var Element $element */
+			$element = $event_handler_attribute->parentNode;
+
+			$removed = $this->remove_invalid_attribute(
+				$element,
+				$event_handler_attribute,
+				[ 'code' => self::CUSTOM_EVENT_HANDLER_ATTR ]
+			);
+			if ( ! $removed ) {
+				$element->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+				$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+				$this->kept_script_count++;
+			}
+		}
 	}
 }
