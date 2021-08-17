@@ -27,6 +27,13 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	const CUSTOM_INLINE_SCRIPT = 'CUSTOM_INLINE_SCRIPT';
 
 	/**
+	 * Error code for custom inline JSON script tag.
+	 *
+	 * @var string
+	 */
+	const CUSTOM_JSON_SCRIPT = 'CUSTOM_JSON_SCRIPT';
+
+	/**
 	 * Error code for custom external JS script tag.
 	 *
 	 * @var string
@@ -41,11 +48,19 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	const CUSTOM_EVENT_HANDLER_ATTR = 'CUSTOM_EVENT_HANDLER_ATTR';
 
 	/**
+	 * Attribute which if present on a `noscript` element will prevent it from being unwrapped.
+	 *
+	 * @var string
+	 */
+	const NO_UNWRAP_ATTR = 'data-amp-no-unwrap';
+
+	/**
 	 * Default args.
 	 *
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
+		'unwrap_noscripts'    => true,
 		'sanitize_js_scripts' => false,
 	];
 
@@ -54,9 +69,19 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array {
 	 *      @type bool $sanitize_js_scripts Whether to sanitize JS scripts (and not defer for final sanitizer).
+	 *      @type bool $unwrap_noscripts    Whether to unwrap noscript elements.
 	 * }
 	 */
 	protected $args;
+
+	/**
+	 * Number of scripts which were kept.
+	 *
+	 * This is used to determine whether noscript elements should be unwrapped.
+	 *
+	 * @var int
+	 */
+	protected $kept_script_count = 0;
 
 	/**
 	 * Sanitize script and noscript elements.
@@ -70,10 +95,15 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 */
 	public function sanitize() {
-		$this->unwrap_noscript_elements();
-
 		if ( ! empty( $this->args['sanitize_js_scripts'] ) ) {
 			$this->sanitize_js_script_elements();
+		}
+
+		// If custom scripts were kept (after sanitize_js_script_elements ran) it's important that noscripts not be
+		// unwrapped or else this could result in the JS and no-JS fallback experiences both being present on the page.
+		// So unwrapping is only done no custom scripts were retained (and the sanitizer arg opts-in to unwrap).
+		if ( 0 === $this->kept_script_count && ! empty( $this->args['unwrap_noscripts'] ) ) {
+			$this->unwrap_noscript_elements();
 		}
 	}
 
@@ -84,10 +114,16 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		$noscripts = $this->dom->getElementsByTagName( Tag::NOSCRIPT );
 
 		for ( $i = $noscripts->length - 1; $i >= 0; $i-- ) {
+			/** @var Element $noscript */
 			$noscript = $noscripts->item( $i );
 
 			// Skip AMP boilerplate.
-			if ( $noscript->firstChild instanceof Element && $noscript->firstChild->hasAttribute( 'amp-boilerplate' ) ) {
+			if ( $noscript->firstChild instanceof Element && $noscript->firstChild->hasAttribute( Attribute::AMP_BOILERPLATE ) ) {
+				continue;
+			}
+
+			// Skip unwrapping <noscript> elements that have an opt-out data attribute present.
+			if ( $noscript->hasAttribute( self::NO_UNWRAP_ATTR ) ) {
 				continue;
 			}
 
@@ -99,7 +135,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$is_inside_head_el = ( $noscript->parentNode && 'head' === $noscript->parentNode->nodeName );
+			$is_inside_head_el = ( $noscript->parentNode && Tag::HEAD === $noscript->parentNode->nodeName );
 			$must_move_to_body = false;
 
 			$fragment = $this->dom->createDocumentFragment();
@@ -131,7 +167,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * shaking can be performed.
 	 */
 	protected function sanitize_js_script_elements() {
-		$scripts = $this->dom->xpath->query( '//script[ not( @type ) or not( contains( @type, "json" ) ) ]' );
+		$scripts = $this->dom->xpath->query( '//script[ not( @type ) or @type != "application/ld+json" ]' );
 
 		/** @var Element $script */
 		foreach ( $scripts as $script ) {
@@ -152,6 +188,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! $removed ) {
 					$script->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
 					$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+					$this->kept_script_count++;
 				}
 			} else {
 				// Skip inline scripts used by AMP.
@@ -159,13 +196,20 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
+				if ( $script->hasAttribute( Attribute::TYPE ) && false !== strpos( $script->getAttribute( Attribute::TYPE ), 'json' ) ) {
+					$code = self::CUSTOM_JSON_SCRIPT;
+				} else {
+					$code = self::CUSTOM_INLINE_SCRIPT;
+				}
+
 				$removed = $this->remove_invalid_child(
 					$script,
-					[ 'code' => self::CUSTOM_INLINE_SCRIPT ]
+					[ 'code' => $code ]
 				);
 				if ( ! $removed ) {
 					$script->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
 					$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+					$this->kept_script_count++;
 				}
 			}
 		}

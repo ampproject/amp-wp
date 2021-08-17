@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 
 /**
  * Test AMP_Script_Sanitizer.
@@ -16,32 +17,111 @@ use AmpProject\AmpWP\Tests\TestCase;
  */
 class AMP_Script_Sanitizer_Test extends TestCase {
 
+	use MarkupComparison;
+
 	/**
 	 * Data for testing noscript handling.
 	 *
 	 * @return array
 	 */
-	public function get_noscript_data() {
+	public function get_sanitizer_data() {
 		return [
-			'document_write'      => [
-				'<html><head></head><body>Has script? <script>document.write("Yep!")</script><noscript>Nope!</noscript></body></html>',
+			'document_write'           => [
+				'<html><head><meta charset="utf-8"></head><body>Has script? <script>document.write("Yep!")</script><noscript>Nope!</noscript></body></html>',
 				'<html><head><meta charset="utf-8"></head><body>Has script? <!--noscript-->Nope!<!--/noscript--></body></html>',
 			],
-			'nested_elements'     => [
-				'<html><head></head><body><noscript>before <em><strong>middle</strong> end</em></noscript></body></html>',
+			'nested_elements'          => [
+				'<html><head><meta charset="utf-8"></head><body><noscript>before <em><strong>middle</strong> end</em></noscript></body></html>',
 				'<html><head><meta charset="utf-8"></head><body><!--noscript-->before <em><strong>middle</strong> end</em><!--/noscript--></body></html>',
 			],
-			'head_noscript_style' => [
-				'<html><head><noscript><style>body{color:red}</style></noscript></head><body></body></html>',
+			'head_noscript_style'      => [
+				'<html><head><meta charset="utf-8"><noscript><style>body{color:red}</style></noscript></head><body></body></html>',
 				'<html><head><meta charset="utf-8"><!--noscript--><style>body{color:red}</style><!--/noscript--></head><body></body></html>',
 			],
-			'head_noscript_span'  => [
-				'<html><head><noscript><span>No script</span></noscript></head><body></body></html>',
+			'head_noscript_span'       => [
+				'<html><head><meta charset="utf-8"><noscript><span>No script</span></noscript></head><body></body></html>',
 				'<html><head><meta charset="utf-8"></head><body><!--noscript--><span>No script</span><!--/noscript--></body></html>',
 			],
-			'test_with_dev_mode'  => [
+			'test_with_dev_mode'       => [
 				'<html data-ampdevmode=""><head><meta charset="utf-8"></head><body><noscript data-ampdevmode="">hey</noscript></body></html>',
 				null,
+			],
+			'noscript_no_unwrap_attr'  => [
+				'<html><head><meta charset="utf-8"></head><body><noscript data-amp-no-unwrap><span>No script</span></noscript></body></html>',
+				null,
+			],
+			'noscript_no_unwrap_arg'   => [
+				'<html><head><meta charset="utf-8"></head><body><noscript><span>No script</span></noscript></body></html>',
+				null,
+				[
+					'unwrap_noscripts' => false,
+				],
+			],
+			'script_kept_no_unwrap'    => [
+				'
+					<html><head><meta charset="utf-8"></head><body>
+						<script>document.write("Hey.")</script>
+						<noscript data-amp-no-unwrap><span>No script</span></noscript>
+					</body></html>',
+				'
+					<html data-ampdevmode=""><head><meta charset="utf-8"></head><body>
+						<script data-ampdevmode="">document.write("Hey.")</script>
+						<noscript data-amp-no-unwrap><span>No script</span></noscript>
+					</body></html>
+				',
+				[
+					'sanitize_js_scripts'       => true,
+					'unwrap_noscripts'          => true, // This will be ignored because of the kept script.
+					'validation_error_callback' => '__return_false',
+				],
+				[
+					AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT,
+				],
+			],
+			'inline_scripts_removed'   => [
+				'
+					<html><head><meta charset="utf-8"></head><body>
+						<script>document.write("Hey.")</script>
+						<script type="application/json">{"data":1}</script>
+						<script type="application/ld+json">{"data":2}</script>
+					</body></html>
+				',
+				'
+					<html><head><meta charset="utf-8"></head><body>
+					<script type="application/ld+json">{"data":2}</script>
+					</body></html>
+				',
+				[
+					'sanitize_js_scripts' => true,
+				],
+				[
+					AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT,
+					AMP_Script_Sanitizer::CUSTOM_JSON_SCRIPT,
+				],
+			],
+			'external_scripts_removed' => [
+				'
+					<html>
+					<head><meta charset="utf-8"></head>
+					<body>
+						<script src="https://example.com/1"></script>
+						<script type="text/javascript" src="https://example.com/2"></script>
+						<script type="module" src="https://example.com/3"></script>
+					</body></html>
+				',
+				'
+					<html>
+					<head><meta charset="utf-8"></head>
+					<body></body></html>
+				',
+				[
+					'sanitize_js_scripts' => true,
+				],
+				[
+					AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT,
+					AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT,
+					AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT,
+				],
 			],
 		];
 	}
@@ -49,23 +129,41 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 	/**
 	 * Test that noscript elements get replaced with their children.
 	 *
-	 * @dataProvider get_noscript_data
-	 * @param string $source   Source.
-	 * @param string $expected Expected.
+	 * @dataProvider get_sanitizer_data
+	 * @param string $source        Source.
+	 * @param string $expected      Expected.
+	 * @param array $sanitizer_args Sanitizer args.
 	 * @covers AMP_Script_Sanitizer::sanitize()
 	 */
-	public function test_noscript_promotion( $source, $expected = null ) {
+	public function test_sanitize( $source, $expected = null, $sanitizer_args = [], $expected_error_codes = [] ) {
 		if ( null === $expected ) {
 			$expected = $source;
 		}
 		$dom = Document::fromHtml( $source, Options::DEFAULTS );
-		$this->assertSame( 1, $dom->getElementsByTagName( 'noscript' )->length );
-		$sanitizer = new AMP_Script_Sanitizer( $dom );
+		$this->assertSame( substr_count( $source, '<noscript' ), $dom->getElementsByTagName( 'noscript' )->length );
+
+		$validation_error_callback_arg = isset( $sanitizer_args['validation_error_callback'] ) ? $sanitizer_args['validation_error_callback'] : null;
+
+		$actual_error_codes = [];
+
+		$sanitizer_args['validation_error_callback'] = static function ( $error ) use ( &$actual_error_codes, $validation_error_callback_arg ) {
+			$actual_error_codes[] = $error['code'];
+
+			if ( $validation_error_callback_arg ) {
+				return $validation_error_callback_arg();
+			} else {
+				return true;
+			}
+		};
+
+		$sanitizer = new AMP_Script_Sanitizer( $dom, $sanitizer_args );
 		$sanitizer->sanitize();
 		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$validating_sanitizer->sanitize();
 		$content = $dom->saveHTML( $dom->documentElement );
-		$this->assertEquals( $expected, $content );
+		$this->assertSimilarMarkup( $expected, $content );
+
+		$this->assertSame( $expected_error_codes, $actual_error_codes );
 	}
 
 	/**
