@@ -117,6 +117,17 @@ describe( 'Icons', () => {
 		expect( container.querySelector( '.amp-status-icon--broken' ) ).not.toBeNull();
 	} );
 
+	it( 'renders no ValidationStatusIcon if the type flag is not set', () => {
+		act( () => {
+			render(
+				<ValidationStatusIcon />,
+				container,
+			);
+		} );
+
+		expect( container.children ).toHaveLength( 0 );
+	} );
+
 	it( 'renders the valid ValidationStatusIcon', () => {
 		act( () => {
 			render(

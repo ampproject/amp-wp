@@ -48,10 +48,11 @@ export default function FormattedMemoryValue( { value, unit } ) {
 					</abbr>
 				</>
 			) }
+			{ ! memoryUnit && unit && ` ${ unit }` }
 		</>
 	);
 }
 FormattedMemoryValue.propTypes = {
 	value: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ).isRequired,
-	unit: PropTypes.oneOf( [ 'b', 'B', 'kb', 'kB', 'KB' ] ),
+	unit: PropTypes.string,
 };

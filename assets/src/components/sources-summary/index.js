@@ -28,7 +28,7 @@ export default function SourcesSummary( { sources, validatedTheme } ) {
 
 	if ( ! summarizedSources && validatedTheme ) {
 		return (
-			<SourceLabel sources={ validatedTheme } type={ SOURCE_TYPE_THEME } />
+			<SourceLabel sources={ [ validatedTheme ] } type={ SOURCE_TYPE_THEME } />
 		);
 	}
 
@@ -61,6 +61,6 @@ SourcesSummary.propTypes = {
 			embed: PropTypes.string,
 			block_name: PropTypes.string,
 		} ),
-	).isRequired,
+	),
 	validatedTheme: PropTypes.string,
 };

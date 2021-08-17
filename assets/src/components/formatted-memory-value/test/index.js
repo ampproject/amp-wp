@@ -48,6 +48,17 @@ describe( 'FormattedMemoryValue', () => {
 		expect( container.textContent ).toBe( '234' );
 	} );
 
+	it( 'prints correct output for unknown units', () => {
+		act( () => {
+			render(
+				<FormattedMemoryValue value="234" unit="FooBar" />,
+				container,
+			);
+		} );
+
+		expect( container.textContent ).toBe( '234 FooBar' );
+	} );
+
 	it( 'prints correct value and unit', () => {
 		act( () => {
 			render(

@@ -18,6 +18,11 @@ describe( 'summarizeSources', () => {
 		expect( result ).toBeNull();
 	} );
 
+	it( 'renders null if empty or incorrect sources are provided', () => {
+		const result = summarizeSources( [ {}, { foo: 'bar' } ] );
+		expect( result ).toBeNull();
+	} );
+
 	it( 'returns plugin and theme, and skips everything else', () => {
 		const result = summarizeSources( [
 			{
