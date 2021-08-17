@@ -1478,6 +1478,11 @@ function amp_get_content_sanitizers( $post = null ) {
 	$native_post_forms_allowed = amp_is_native_post_form_allowed();
 
 	$sanitizers = [
+		// The AMP_Script_Sanitizer runs first because based on whether it allows custom scripts
+		// to be kept, it may impact impact the behavior of other sanitizers. For example, if custom
+		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
+		// performed.
+		AMP_Script_Sanitizer::class            => [],
 		AMP_Embed_Sanitizer::class             => [
 			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
 		],
@@ -1515,7 +1520,6 @@ function amp_get_content_sanitizers( $post = null ) {
 			'native_img_used'   => $native_img_used,
 		],
 		AMP_Block_Sanitizer::class             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
-		AMP_Script_Sanitizer::class            => [],
 		AMP_Style_Sanitizer::class             => [
 			'skip_tree_shaking' => is_customize_preview(),
 		],
