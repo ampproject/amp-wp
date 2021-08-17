@@ -27,7 +27,7 @@ import usePluginsData from '../plugins-context-provider/use-plugins-data';
 import useThemesData from '../themes-context-provider/use-themes-data';
 
 export default function SourceLabel( {
-	sources,
+	sources = [],
 	type,
 	isCodeOutput,
 } ) {
@@ -86,7 +86,7 @@ export default function SourceLabel( {
 			return null;
 	}
 
-	if ( ! sources || sources.length === 1 ) {
+	if ( ! sources || sources.length <= 1 ) {
 		return (
 			<strong className="source">
 				<Dashicon icon={ icon } />

@@ -21,7 +21,7 @@ export default function SourceDetailValue( { slug, source } ) {
 		case 'sources':
 			return <SourcesStack sources={ source.sources } />;
 		case 'type':
-			return <SourceLabel type={ source.type } />;
+			return <SourceLabel type={ source.type } sources={ [ source?.name ] } />;
 		case 'name':
 		case 'shortcode':
 		case 'handle':
