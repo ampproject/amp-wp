@@ -63,20 +63,9 @@ final class EditorSupportTest extends TestCase {
 	public function test_supports_current_screen( $post_type_uses_block_editor, $post_type_supports_amp, $expected_result ) {
 		$this->setup_environment( $post_type_uses_block_editor, $post_type_supports_amp );
 
-		if (
-			(
-				defined( 'GUTENBERG_VERSION' )
-				&&
-				version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
-			)
-			||
-			version_compare( get_bloginfo( 'version' ), '5.0', '>=' )
-		) {
-			$this->assertSame( $expected_result, $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
-		} else {
-			// WP < 5.0 doesn't include the block editor, but Gutenberg would be installed, so it should be supported.
-			$this->assertTrue( $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
-		}
+		// Note: Without Gutenberg being installed on WP 4.9, the expected result would be `false`
+		// when `$post_type_uses_block_editor` and `$post_type_supports_amp` are `true`.
+		$this->assertSame( $expected_result, $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
 	}
 
 	/** @covers ::maybe_show_notice() */
