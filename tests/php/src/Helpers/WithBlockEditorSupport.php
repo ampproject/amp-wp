@@ -26,7 +26,8 @@ trait WithBlockEditorSupport {
 	public function setup_environment( $post_type_uses_block_editor, $post_type_supports_amp, $post_type = 'foo' ) {
 		if ( $post_type_uses_block_editor ) {
 			set_current_screen( 'post.php' );
-			get_current_screen()->is_block_editor = $post_type_uses_block_editor;
+			add_filter( 'replace_editor', '__return_false' );
+			add_filter( 'use_block_editor_for_post', '__return_true' );
 		}
 
 		if ( $post_type_supports_amp ) {
