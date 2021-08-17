@@ -197,11 +197,26 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$event_handler_attributes = $this->dom->xpath->query( '//*[ not( @data-ampdevmode ) ]/@*[ substring(name(), 1, 2) = "on" and name() != "on" ]' );
+		$event_handler_attributes = $this->dom->xpath->query(
+			'
+				//@*[
+					substring(name(), 1, 2) = "on"
+					and
+					substring(name(), 1, 3) != "on-"
+					and
+					name() != "on"
+					and
+					name() != "once"
+				]
+			'
+		);
+		/** @var DOMAttr $event_handler_attribute */
 		foreach ( $event_handler_attributes as $event_handler_attribute ) {
-			/** @var DOMAttr $event_handler_attribute */
 			/** @var Element $element */
 			$element = $event_handler_attribute->parentNode;
+			if ( DevMode::hasExemptionForNode( $element ) ) {
+				continue;
+			}
 
 			$removed = $this->remove_invalid_attribute(
 				$element,

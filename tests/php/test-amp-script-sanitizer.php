@@ -26,40 +26,40 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 	 */
 	public function get_sanitizer_data() {
 		return [
-			'document_write'               => [
+			'document_write'                => [
 				'<html><head><meta charset="utf-8"></head><body>Has script? <script>document.write("Yep!")</script><noscript>Nope!</noscript></body></html>',
 				'<html><head><meta charset="utf-8"></head><body>Has script? <!--noscript-->Nope!<!--/noscript--></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
-			'nested_elements'              => [
+			'nested_elements'               => [
 				'<html><head><meta charset="utf-8"></head><body><noscript>before <em><strong>middle</strong> end</em></noscript></body></html>',
 				'<html><head><meta charset="utf-8"></head><body><!--noscript-->before <em><strong>middle</strong> end</em><!--/noscript--></body></html>',
 			],
-			'head_noscript_style'          => [
+			'head_noscript_style'           => [
 				'<html><head><meta charset="utf-8"><noscript><style>body{color:red}</style></noscript></head><body></body></html>',
 				'<html><head><meta charset="utf-8"><!--noscript--><style>body{color:red}</style><!--/noscript--></head><body></body></html>',
 			],
-			'head_noscript_span'           => [
+			'head_noscript_span'            => [
 				'<html><head><meta charset="utf-8"><noscript><span>No script</span></noscript></head><body></body></html>',
 				'<html><head><meta charset="utf-8"></head><body><!--noscript--><span>No script</span><!--/noscript--></body></html>',
 			],
-			'test_with_dev_mode'           => [
+			'test_with_dev_mode'            => [
 				'<html data-ampdevmode=""><head><meta charset="utf-8"></head><body><noscript data-ampdevmode="">hey</noscript></body></html>',
 				null,
 			],
-			'noscript_no_unwrap_attr'      => [
+			'noscript_no_unwrap_attr'       => [
 				'<html><head><meta charset="utf-8"></head><body><noscript data-amp-no-unwrap><span>No script</span></noscript></body></html>',
 				null,
 			],
-			'noscript_no_unwrap_arg'       => [
+			'noscript_no_unwrap_arg'        => [
 				'<html><head><meta charset="utf-8"></head><body><noscript><span>No script</span></noscript></body></html>',
 				null,
 				[
 					'unwrap_noscripts' => false,
 				],
 			],
-			'script_kept_no_unwrap'        => [
+			'script_kept_no_unwrap'         => [
 				'
 					<html><head><meta charset="utf-8"></head><body>
 						<script>document.write("Hey.")</script>
@@ -80,7 +80,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT,
 				],
 			],
-			'inline_scripts_removed'       => [
+			'inline_scripts_removed'        => [
 				'
 					<html><head><meta charset="utf-8"></head><body>
 						<script>document.write("Hey.")</script>
@@ -103,7 +103,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				],
 			],
-			'external_scripts_removed'     => [
+			'external_scripts_removed'      => [
 				'
 					<html>
 					<head><meta charset="utf-8"></head>
@@ -127,7 +127,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT,
 				],
 			],
-			'external_amp_script_kept'     => [
+			'external_amp_script_kept'      => [
 				'
 					<html>
 					<head>
@@ -142,7 +142,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				],
 				[],
 			],
-			'amp_onerror_script_kept'      => [
+			'amp_onerror_script_kept'       => [
 				'
 					<html>
 					<head>
@@ -157,7 +157,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				],
 				[],
 			],
-			'inline_event_handler_removed' => [
+			'inline_event_handler_removed'  => [
 				'
 					<html><head><meta charset="utf-8"></head>
 					<body onload="alert(\'Hey there.\')">
@@ -181,7 +181,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					AMP_Script_Sanitizer::CUSTOM_EVENT_HANDLER_ATTR,
 				],
 			],
-			'inline_event_handler_kept'    => [
+			'inline_event_handler_kept'     => [
 				'
 					<html><head><meta charset="utf-8"></head>
 					<body onload="alert(\'Hey there.\')">
@@ -205,6 +205,32 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				[
 					AMP_Script_Sanitizer::CUSTOM_EVENT_HANDLER_ATTR,
 				],
+			],
+			'event_handler_lookalikes_kept' => [
+				'
+					<html><head><meta charset="utf-8"></head>
+					<body>
+						<noscript>I should get unwrapped.</noscript>
+						<div id="warning-message">Warning...</div>
+						<button on="tap:warning-message.hide">Cool, thanks!</button>
+						<amp-position-observer intersection-ratios="0.5" on="enter:clockAnim.start;exit:clockAnim.pause" layout="nodisplay" once></amp-position-observer>
+						<amp-font layout="nodisplay" font-family="My Font" timeout="3000" on-error-remove-class="my-font-loading" on-error-add-class="my-font-missing"></amp-font>
+					</body></html>
+				',
+				'
+					<html><head><meta charset="utf-8"></head>
+					<body>
+						<!--noscript-->I should get unwrapped.<!--/noscript-->
+						<div id="warning-message">Warning...</div>
+						<button on="tap:warning-message.hide">Cool, thanks!</button>
+						<amp-position-observer intersection-ratios="0.5" on="enter:clockAnim.start;exit:clockAnim.pause" layout="nodisplay" once></amp-position-observer>
+						<amp-font layout="nodisplay" font-family="My Font" timeout="3000" on-error-remove-class="my-font-loading" on-error-add-class="my-font-missing"></amp-font>
+					</body></html>
+				',
+				[
+					'sanitize_scripts' => true,
+				],
+				[],
 			],
 		];
 	}
