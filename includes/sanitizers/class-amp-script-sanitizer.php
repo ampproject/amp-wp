@@ -120,6 +120,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 
 		// When there are kept custom scripts, skip tree shaking since it's likely JS will toggle classes that have
 		// associated style rules.
+		// @todo There should be an attribute on script tags that opt-in to keeping tree shaking and/or to indicate what class names need to be included.
 		if ( $this->kept_script_count > 0 && $this->style_sanitizer instanceof AMP_Base_Sanitizer ) {
 			$this->style_sanitizer->update_args( [ 'skip_tree_shaking' => true ] );
 		}
