@@ -301,6 +301,9 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				</head>
 				<body>
 					<img src="https://example.com/logo.png" width="300" height="100" alt="Logo">
+					<form action="https://example.com/subscribe/" method="post">
+						<input type="email" name="email">
+					</form>
 					<script>document.addEventListener("DOMContentLoaded", () => document.body.classList.add("loaded"))</script>
 				</body>
 			</html>
@@ -322,6 +325,15 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				$dom,
 				[
 					'native_img_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+				]
+			),
+			AMP_Form_Sanitizer::class   => new AMP_Form_Sanitizer(
+				$dom,
+				[
+					'native_post_forms_allowed' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+					'validation_error_callback' => function () use ( $remove_custom_scripts ) {
+						return $remove_custom_scripts;
+					},
 				]
 			),
 			AMP_Style_Sanitizer::class  => new AMP_Style_Sanitizer(
@@ -349,8 +361,14 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 		$this->assertEquals(
 			$remove_custom_scripts ? 1 : 0,
 			$dom->getElementsByTagName( Extension::IMG )->length,
-			'Expected <img> to be converted to <amp-img> when custom scripts are removed.'
+			'Expected IMG to be converted to AMP-IMG when custom scripts are removed.'
 		);
+
+		if ( $remove_custom_scripts ) {
+			$this->assertEquals( 1, $dom->xpath->query( '//form[ @method = "post" and @action-xhr ]' )->length );
+		} else {
+			$this->assertEquals( 1, $dom->xpath->query( '//form[ @method = "post" and @action ]' )->length );
+		}
 
 		$style = $dom->getElementsByTagName( Tag::STYLE )->item( 0 );
 		if ( $remove_custom_scripts ) {

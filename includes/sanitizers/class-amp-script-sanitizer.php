@@ -92,6 +92,13 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	protected $img_sanitizer;
 
 	/**
+	 * Form sanitizer.
+	 *
+	 * @var AMP_Form_Sanitizer
+	 */
+	protected $form_sanitizer;
+
+	/**
 	 * Init.
 	 *
 	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
@@ -113,6 +120,14 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			$sanitizers[ AMP_Img_Sanitizer::class ] instanceof AMP_Img_Sanitizer
 		) {
 			$this->img_sanitizer = $sanitizers[ AMP_Img_Sanitizer::class ];
+		}
+
+		if (
+			array_key_exists( AMP_Form_Sanitizer::class, $sanitizers )
+			&&
+			$sanitizers[ AMP_Form_Sanitizer::class ] instanceof AMP_Form_Sanitizer
+		) {
+			$this->form_sanitizer = $sanitizers[ AMP_Form_Sanitizer::class ];
 		}
 	}
 
@@ -144,7 +159,9 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $this->img_sanitizer ) {
 				$this->img_sanitizer->update_args( [ 'native_img_used' => true ] );
 			}
-			// @todo In addition to skipping tree shaking and using native images, other conversions should perhaps be disabled to prevent breaking custom scripts.
+			if ( $this->form_sanitizer ) {
+				$this->form_sanitizer->update_args( [ 'native_post_forms_allowed' => true ] );
+			}
 		}
 	}
 
