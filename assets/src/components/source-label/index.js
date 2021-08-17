@@ -51,7 +51,7 @@ export default function SourceLabel( {
 			break;
 		case SOURCE_TYPE_THEME:
 			icon = 'admin-appearance';
-			sources = sources.map( ( slug ) => getThemeNameBySlug( slug ) ?? __( 'Theme', 'amp' ) );
+			sources = sources.map( ( slug ) => getThemeNameBySlug( slug ) );
 			break;
 		case SOURCE_TYPE_CORE:
 			icon = 'wordpress-alt';

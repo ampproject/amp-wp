@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { useContext, useEffect, useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -26,7 +27,12 @@ export default function usePluginsData() {
 		}, {} ) );
 	}, [ fetchingPlugins, plugins ] );
 
-	const getPluginNameBySlug = ( slug ) => nameBySlug[ slug ] ?? slug;
+	const getPluginNameBySlug = ( slug ) => nameBySlug[ slug ] ??
+		sprintf(
+			/* translators: Plugin slug. */
+			__( 'Plugin: %s', 'amp' ),
+			slug,
+		);
 
 	return {
 		getPluginNameBySlug,

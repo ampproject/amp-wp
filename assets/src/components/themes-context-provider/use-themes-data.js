@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { useContext, useEffect, useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -23,7 +24,12 @@ export default function useThemesData() {
 		} ), {} ) );
 	}, [ fetchingThemes, themes ] );
 
-	const getThemeNameBySlug = ( slug ) => nameBySlug[ slug ] ?? slug;
+	const getThemeNameBySlug = ( slug ) => nameBySlug[ slug ] ??
+		sprintf(
+			/* translators: Theme slug. */
+			__( 'Theme: %s', 'amp' ),
+			slug,
+		);
 
 	return {
 		getThemeNameBySlug,
