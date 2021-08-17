@@ -210,7 +210,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$event_handler_attributes = $this->dom->xpath->query( '//*[ not( @data-ampdevmode ) ]/@*[ substring(name(), 1, 2) = "on" ]' );
+		$event_handler_attributes = $this->dom->xpath->query( '//*[ not( @data-ampdevmode ) ]/@*[ substring(name(), 1, 2) = "on" and name() != "on" ]' );
 		foreach ( $event_handler_attributes as $event_handler_attribute ) {
 			/** @var DOMAttr $event_handler_attribute */
 			/** @var Element $element */

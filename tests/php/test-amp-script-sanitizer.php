@@ -158,11 +158,19 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			'inline_event_handler_removed' => [
 				'
 					<html><head><meta charset="utf-8"></head>
-					<body onload="alert(\'Hey there.\')"><noscript>I should get unwrapped.</noscript></body></html>
+					<body onload="alert(\'Hey there.\')">
+						<noscript>I should get unwrapped.</noscript>
+						<div id="warning-message">Warning...</div>
+						<button on="tap:warning-message.hide">Cool, thanks!</button>
+					</body></html>
 				',
 				'
 					<html><head><meta charset="utf-8"></head>
-					<body><!--noscript-->I should get unwrapped.<!--/noscript--></body></html>
+					<body>
+						<!--noscript-->I should get unwrapped.<!--/noscript-->
+						<div id="warning-message">Warning...</div>
+						<button on="tap:warning-message.hide">Cool, thanks!</button>
+					</body></html>
 				',
 				[
 					'sanitize_scripts' => true,
@@ -174,11 +182,19 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			'inline_event_handler_kept'    => [
 				'
 					<html><head><meta charset="utf-8"></head>
-					<body onload="alert(\'Hey there.\')"><noscript>I should not get unwrapped.</noscript></body></html>
+					<body onload="alert(\'Hey there.\')">
+						<noscript>I should not get unwrapped.</noscript>
+						<div id="warning-message">Warning...</div>
+						<button on="tap:warning-message.hide">Cool, thanks!</button>
+					</body></html>
 				',
 				'
 					<html data-ampdevmode><head><meta charset="utf-8"></head>
-					<body data-ampdevmode onload="alert(\'Hey there.\')"><noscript>I should not get unwrapped.</noscript></body></html>
+					<body data-ampdevmode onload="alert(\'Hey there.\')">
+						<noscript>I should not get unwrapped.</noscript>
+						<div id="warning-message">Warning...</div>
+						<button on="tap:warning-message.hide">Cool, thanks!</button>
+					</body></html>
 				',
 				[
 					'sanitize_scripts'          => true,
