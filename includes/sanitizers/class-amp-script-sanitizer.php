@@ -60,16 +60,16 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'unwrap_noscripts'    => true,
-		'sanitize_js_scripts' => false,
+		'unwrap_noscripts' => true,
+		'sanitize_scripts' => false,
 	];
 
 	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
-	 *      @type bool $sanitize_js_scripts Whether to sanitize JS scripts (and not defer for final sanitizer).
-	 *      @type bool $unwrap_noscripts    Whether to unwrap noscript elements.
+	 *      @type bool $sanitize_scripts Whether to sanitize scripts (and not defer for final sanitizer).
+	 *      @type bool $unwrap_noscripts Whether to unwrap noscript elements.
 	 * }
 	 */
 	protected $args;
@@ -86,17 +86,11 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Sanitize script and noscript elements.
 	 *
-	 * Eventually this should also handle script elements, if there is a known AMP equivalent.
-	 * If nothing is done with script elements, the validating sanitizer will deal with them ultimately.
-	 *
-	 * @todo Eventually this try to automatically convert script tags to AMP when they are recognized. See <https://github.com/ampproject/amp-wp/issues/1032>.
-	 * @todo When a script has an adjacent noscript, consider removing the script here to prevent validation error later. See <https://github.com/ampproject/amp-wp/issues/1213>.
-	 *
 	 * @since 1.0
 	 */
 	public function sanitize() {
-		if ( ! empty( $this->args['sanitize_js_scripts'] ) ) {
-			$this->sanitize_js_script_elements();
+		if ( ! empty( $this->args['sanitize_scripts'] ) ) {
+			$this->sanitize_script_elements();
 		}
 
 		// If custom scripts were kept (after sanitize_js_script_elements ran) it's important that noscripts not be
@@ -165,8 +159,10 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * This runs explicitly in the script sanitizer before the final validating sanitizer (tag-and-attribute) so that
 	 * the style sanitizer will be able to know whether there are custom scripts in the page, and thus whether tree
 	 * shaking can be performed.
+	 *
+	 * @since 2.2
 	 */
-	protected function sanitize_js_script_elements() {
+	protected function sanitize_script_elements() {
 		$scripts = $this->dom->xpath->query( '//script[ not( @type ) or @type != "application/ld+json" ]' );
 
 		/** @var Element $script */
