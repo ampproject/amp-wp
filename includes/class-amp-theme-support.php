@@ -18,6 +18,8 @@ use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Optimizer;
+use AmpProject\Optimizer\Configuration\TransformedIdentifierConfiguration;
+use AmpProject\Optimizer\Transformer\TransformedIdentifier;
 use AmpProject\RequestDestination;
 use AmpProject\Tag;
 use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
@@ -2075,6 +2077,9 @@ class AMP_Theme_Support {
 			do_action( 'amp_server_timing_start', 'amp_optimizer' );
 
 			$errors = new Optimizer\ErrorCollection();
+
+			// @todo The dev mode attribute is being overloaded here. We should use something else.
+			$args['skip_css_max_byte_count_enforcement'] = $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE );
 			self::get_optimizer( $args )->optimizeDom( $dom, $errors );
 
 			if ( count( $errors ) > 0 ) {
@@ -2164,9 +2169,12 @@ class AMP_Theme_Support {
 		// Supply the Schema.org metadata, previously obtained just before output buffering began, to the AmpSchemaOrgMetadataConfiguration.
 		add_filter(
 			'amp_optimizer_config',
-			function ( $config ) {
+			function ( $config ) use ( $args ) {
 				if ( is_array( self::$metadata ) ) {
 					$config[ AmpSchemaOrgMetadata::class ][ AmpSchemaOrgMetadataConfiguration::METADATA ] = self::$metadata;
+				}
+				if ( ! empty( $args['skip_css_max_byte_count_enforcement'] ) ) {
+					$config[ TransformedIdentifier::class ][ TransformedIdentifierConfiguration::ENFORCED_CSS_MAX_BYTE_COUNT ] = false;
 				}
 				return $config;
 			},
