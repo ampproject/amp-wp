@@ -78,6 +78,30 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	protected $kept_script_count = 0;
 
 	/**
+	 * Style sanitizer.
+	 *
+	 * @var AMP_Style_Sanitizer
+	 */
+	protected $style_sanitizer;
+
+	/**
+	 * Init.
+	 *
+	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
+	 */
+	public function init( $sanitizers ) {
+		parent::init( $sanitizers );
+
+		if (
+			array_key_exists( AMP_Style_Sanitizer::class, $sanitizers )
+			&&
+			$sanitizers[ AMP_Style_Sanitizer::class ] instanceof AMP_Style_Sanitizer
+		) {
+			$this->style_sanitizer = $sanitizers[ AMP_Style_Sanitizer::class ];
+		}
+	}
+
+	/**
 	 * Sanitize script and noscript elements.
 	 *
 	 * @since 1.0
@@ -92,6 +116,12 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		// So unwrapping is only done no custom scripts were retained (and the sanitizer arg opts-in to unwrap).
 		if ( 0 === $this->kept_script_count && ! empty( $this->args['unwrap_noscripts'] ) ) {
 			$this->unwrap_noscript_elements();
+		}
+
+		// When there are kept custom scripts, skip tree shaking since it's likely JS will toggle classes that have
+		// associated style rules.
+		if ( $this->kept_script_count > 0 && $this->style_sanitizer instanceof AMP_Base_Sanitizer ) {
+			$this->style_sanitizer->update_args( [ 'skip_tree_shaking' => true ] );
 		}
 	}
 

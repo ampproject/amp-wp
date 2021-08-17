@@ -6,9 +6,10 @@
  */
 
 use AmpProject\AmpWP\Dom\Options;
-use AmpProject\Dom\Document;
-use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\Dom\Document;
+use AmpProject\Tag;
 
 /**
  * Test AMP_Script_Sanitizer.
@@ -273,6 +274,78 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 		$this->assertSimilarMarkup( $expected, $content );
 
 		$this->assertSame( $expected_error_codes, $actual_error_codes );
+	}
+
+	/** @return array */
+	public function get_data_to_test_tree_shaking_disabled_when_custom_scripts_retained() {
+		return [
+			'custom_scripts_removed' => [ true ],
+			'custom_scripts_kept'    => [ false ],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_tree_shaking_disabled_when_custom_scripts_retained
+	 *
+	 * @covers AMP_Script_Sanitizer::init()
+	 *
+	 * @param bool $remove_custom_scripts Remove custom scripts.
+	 */
+	public function test_tree_shaking_disabled_when_custom_scripts_retained( $remove_custom_scripts ) {
+		$dom = Document::fromHtml(
+			'
+			<html>
+				<head>
+					<style>body { background: red; } body.loaded { background: green; }</style>
+				</head>
+				<body>
+					<script>document.addEventListener("DOMContentLoaded", () => document.body.classList.add("loaded"))</script>
+				</body>
+			</html>
+			',
+			Options::DEFAULTS
+		);
+
+		$sanitizers = [
+			AMP_Script_Sanitizer::class => new AMP_Script_Sanitizer(
+				$dom,
+				[
+					'sanitize_scripts'          => true,
+					'validation_error_callback' => function () use ( $remove_custom_scripts ) {
+						return $remove_custom_scripts;
+					},
+				]
+			),
+			AMP_Style_Sanitizer::class  => new AMP_Style_Sanitizer(
+				$dom,
+				[
+					'use_document_element' => true,
+
+					// This should get overridden by AMP_Script_Sanitizer when there is a kept script.
+					'skip_tree_shaking'    => false,
+				]
+			),
+		];
+
+		/** @var AMP_Base_Sanitizer $sanitizer */
+		foreach ( $sanitizers as $sanitizer ) {
+			$sanitizer->init( $sanitizers );
+		}
+
+		foreach ( $sanitizers as $sanitizer ) {
+			$sanitizer->sanitize();
+		}
+
+		$script_count = $dom->getElementsByTagName( Tag::SCRIPT )->length;
+		$this->assertEquals( $remove_custom_scripts ? 0 : 1, $script_count );
+
+		$style = $dom->getElementsByTagName( Tag::STYLE )->item( 0 );
+
+		if ( $remove_custom_scripts ) {
+			$this->assertStringStartsWith( "body{background:red}\n", $style->textContent );
+		} else {
+			$this->assertStringStartsWith( "body{background:red}body.loaded{background:green}\n", $style->textContent );
+		}
 	}
 
 	/**
