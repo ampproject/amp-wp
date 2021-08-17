@@ -3349,6 +3349,19 @@ class AMP_Validation_Error_Taxonomy {
 					'<code>action-xhr</code>'
 				);
 
+			case AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT:
+				return esc_html__( 'Custom external script encountered', 'amp' );
+
+			case AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT:
+				return esc_html__( 'Custom inline script encountered', 'amp' );
+
+			case AMP_Script_Sanitizer::CUSTOM_EVENT_HANDLER_ATTR:
+				return sprintf(
+					/* translators: %1$s is attribute name */
+					esc_html__( 'Event handler attribute %s encountered', 'amp' ),
+					'<code>' . $validation_error['node_name'] . '</code>'
+				);
+
 			default:
 				/* translators: %s error code */
 				return sprintf( esc_html__( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );
