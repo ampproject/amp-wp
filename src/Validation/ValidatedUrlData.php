@@ -38,7 +38,7 @@ final class ValidatedUrlData {
 	private $stylesheets = null;
 
 	/**
-	 * ValidatedUrlDataProvider constructor.
+	 * ValidatedUrlData constructor.
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -73,7 +73,7 @@ final class ValidatedUrlData {
 	}
 
 	/**
-	 * Get the date that the URL was validated.
+	 * Get the date that the URL was validated on.
 	 *
 	 * @return string|null
 	 */
