@@ -76,7 +76,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof Element || DevMode::hasExemptionForNode( $node ) ) {
+			if ( ! $node instanceof Element || DevMode::hasExemptionForNode( $node ) ) { // @todo The dev mode exception is causing problems! If the script sanitizer encounters onsubmit and it is allowed, the data-ampdevmode attribute causes the form sanitizer to skip processing. We need to stop overloading data-ampdevmode to instead make it more fine-grained, for example add data-amp-exempted-attrs="onsubmit".
 				continue;
 			}
 
