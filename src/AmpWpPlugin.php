@@ -107,6 +107,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'reader_theme_support_features'      => ReaderThemeSupportFeatures::class,
 		'rest.options_controller'            => OptionsRESTController::class,
 		'rest.validation_counts_controller'  => Validation\ValidationCountsRestController::class,
+		'sandboxing_levels'                  => SandboxingLevels::class,
 		'save_post_validation_event'         => SavePostValidationEvent::class,
 		'server_timing'                      => Instrumentation\ServerTiming::class,
 		'site_health_integration'            => Admin\SiteHealth::class,
