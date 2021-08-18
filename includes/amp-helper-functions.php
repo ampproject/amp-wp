@@ -1479,7 +1479,7 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	$sanitizers = [
 		// The AMP_Script_Sanitizer runs first because based on whether it allows custom scripts
-		// to be kept, it may impact impact the behavior of other sanitizers. For example, if custom
+		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
 		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
 		// performed.
 		AMP_Script_Sanitizer::class            => [],

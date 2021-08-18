@@ -141,9 +141,9 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			$this->sanitize_script_elements();
 		}
 
-		// If custom scripts were kept (after sanitize_js_script_elements ran) it's important that noscripts not be
+		// If custom scripts were kept (after sanitize_script_elements() ran) it's important that noscripts not be
 		// unwrapped or else this could result in the JS and no-JS fallback experiences both being present on the page.
-		// So unwrapping is only done no custom scripts were retained (and the sanitizer arg opts-in to unwrap).
+		// So unwrapping is only done when no custom scripts were retained (and the sanitizer arg opts-in to unwrap).
 		if ( 0 === $this->kept_script_count && ! empty( $this->args['unwrap_noscripts'] ) ) {
 			$this->unwrap_noscript_elements();
 		}
