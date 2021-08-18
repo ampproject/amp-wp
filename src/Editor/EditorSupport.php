@@ -48,7 +48,7 @@ final class EditorSupport implements Registerable, Service {
 			return;
 		}
 
-		if ( ! $this->is_current_screen_supported_block_editor_for_amp_enabled_post_type() ) {
+		if ( ! $this->is_current_screen_block_editor_for_amp_enabled_post_type() ) {
 			return;
 		}
 
@@ -74,7 +74,7 @@ final class EditorSupport implements Registerable, Service {
 	 *
 	 * @return bool
 	 */
-	public function is_current_screen_supported_block_editor_for_amp_enabled_post_type() {
+	public function is_current_screen_block_editor_for_amp_enabled_post_type() {
 		$screen = get_current_screen();
 		return (
 			$screen

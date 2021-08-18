@@ -53,7 +53,7 @@ final class EditorSupportTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::is_current_screen_supported_block_editor_for_amp_enabled_post_type()
+	 * @covers ::is_current_screen_block_editor_for_amp_enabled_post_type()
 	 * @dataProvider get_data_for_test_supports_current_screen()
 	 *
 	 * @param bool $post_type_uses_block_editor Whether post type can be edited in the block editor.
@@ -65,7 +65,7 @@ final class EditorSupportTest extends TestCase {
 
 		// Note: Without Gutenberg being installed on WP 4.9, the expected result would be `false`
 		// when `$post_type_uses_block_editor` and `$post_type_supports_amp` are `true`.
-		$this->assertSame( $expected_result, $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
+		$this->assertSame( $expected_result, $this->instance->is_current_screen_block_editor_for_amp_enabled_post_type() );
 	}
 
 	/** @covers ::maybe_show_notice() */
@@ -91,7 +91,7 @@ final class EditorSupportTest extends TestCase {
 		$this->setup_environment( true, true );
 
 		$this->instance->maybe_show_notice();
-		if ( $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() ) {
+		if ( $this->instance->is_current_screen_block_editor_for_amp_enabled_post_type() ) {
 			$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
 		} else {
 			$this->assertStringContainsString(
@@ -119,7 +119,7 @@ final class EditorSupportTest extends TestCase {
 
 		$this->setup_environment( true, true );
 		// WP < 5.0 doesn't include the block editor, but Gutenberg would be installed, so it should be supported.
-		$this->assertTrue( $this->instance->is_current_screen_supported_block_editor_for_amp_enabled_post_type() );
+		$this->assertTrue( $this->instance->is_current_screen_block_editor_for_amp_enabled_post_type() );
 
 		gutenberg_register_packages_scripts();
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
