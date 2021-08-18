@@ -26,13 +26,14 @@ export const TemplateModeOverride = createContext();
  */
 export function TemplateModeOverrideContextProvider( { children } ) {
 	const { editedOptions, originalOptions, updateOptions, readerModeWasOverridden, setReaderModeWasOverridden } = useContext( Options );
-	const { activePageIndex, currentPage: { slug: currentPageSlug }, setActivePageIndex } = useContext( Navigation );
+	const { activePageIndex, currentPage } = useContext( Navigation );
 	const { selectedTheme, currentTheme } = useContext( ReaderThemes );
 	const { developerToolsOption, fetchingUser, originalDeveloperToolsOption } = useContext( User );
 	const [ respondedToDeveloperToolsOptionChange, setRespondedToDeveloperToolsOptionChange ] = useState( false );
 	const [ mostRecentlySelectedThemeSupport, setMostRecentlySelectedThemeSupport ] = useState( null );
 	const [ technicalQuestionChangedAtLeastOnce, setTechnicalQuestionChangedAtLeastOnce ] = useState( false );
 
+	const { slug: currentPageSlug } = currentPage || {};
 	const { theme_support: themeSupport } = editedOptions || {};
 	const { theme_support: originalThemeSupport } = originalOptions || {};
 
@@ -60,11 +61,10 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 	 * Override with transitional if the user has selected reader mode and their currently active theme is the same as the selected reader theme.
 	 */
 	useEffect( () => {
-		if ( 'summary' === currentPageSlug && 'reader' === themeSupport && selectedTheme.name === currentTheme.name ) {
+		if ( 'review' === currentPageSlug && 'reader' === themeSupport && selectedTheme.name === currentTheme.name ) {
 			if ( ! readerModeWasOverridden ) {
 				updateOptions( { theme_support: 'transitional' } );
 				setReaderModeWasOverridden( true );
-				setActivePageIndex( activePageIndex - 1 );
 			} else {
 				setReaderModeWasOverridden( false );
 			}
@@ -78,7 +78,6 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 		readerModeWasOverridden,
 		updateOptions,
 		setReaderModeWasOverridden,
-		setActivePageIndex,
 	] );
 
 	/**
