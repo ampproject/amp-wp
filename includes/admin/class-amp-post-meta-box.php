@@ -146,8 +146,8 @@ class AMP_Post_Meta_Box {
 		$validate = (
 			isset( $screen->base ) &&
 			'post' === $screen->base &&
-			( ! isset( $screen->is_block_editor ) || ! $screen->is_block_editor ) &&
-			in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true )
+			empty( $screen->is_block_editor ) &&
+			in_array( $post->post_type, AMP_Post_Type_Support::get_supported_post_types(), true )
 		);
 
 		if ( ! $validate ) {
@@ -344,7 +344,7 @@ class AMP_Post_Meta_Box {
 		$verify = (
 			isset( $post->ID )
 			&&
-			in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true )
+			in_array( $post->post_type, AMP_Post_Type_Support::get_supported_post_types(), true )
 			&&
 			current_user_can( 'edit_post', $post->ID )
 		);
