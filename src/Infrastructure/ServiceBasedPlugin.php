@@ -200,26 +200,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 				continue;
 			}
 
-			// Allow the services to delay their registration.
-			if ( is_a( $class, Delayed::class, true ) ) {
-				$registration_action = $class::get_registration_action();
-
-				if ( \did_action( $registration_action ) ) {
-					$this->register_service( $id, $class );
-				} else {
-					\add_action(
-						$registration_action,
-						function () use ( $id, $class ) {
-							$this->register_service( $id, $class );
-						}
-					);
-				}
-
-				next( $services );
-				continue;
-			}
-
-			$this->register_service( $id, $class );
+			$this->schedule_potential_service_registration( $id, $class );
 
 			next( $services );
 		}
@@ -273,7 +254,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 							return;
 						}
 
-						$this->register_service( $id, $class );
+						$this->schedule_potential_service_registration($id, $class );
 					},
 					PHP_INT_MAX
 				);
@@ -389,12 +370,44 @@ abstract class ServiceBasedPlugin implements Plugin {
 	}
 
 	/**
-	 * Register a single service.
+	 * Schedule the potential registration of a single service.
+	 *
+	 * This takes into account whether the service registration needs to be delayed or not.
 	 *
 	 * @param string $id ID of the service to register.
 	 * @param string $class Class of the service to register.
 	 */
-	protected function register_service( $id, $class ) {
+	protected function schedule_potential_service_registration( $id, $class ) {
+		if ( is_a( $class, Delayed::class, true ) ) {
+			$registration_action = $class::get_registration_action();
+
+			if (\did_action($registration_action)) {
+				$this->maybe_register_service($id, $class);
+			} else {
+				\add_action(
+					$registration_action,
+					function () use ($id, $class) {
+						$this->maybe_register_service($id, $class);
+					}
+				);
+			}
+		} else {
+			$this->maybe_register_service($id, $class);
+		}
+	}
+
+	/**
+	 * Register a single service, provided its conditions are met.
+	 *
+	 * @param string $id ID of the service to register.
+	 * @param string $class Class of the service to register.
+	 */
+	protected function maybe_register_service( $id, $class ) {
+		// Ensure we don't register the same service more than once.
+		if ( $this->service_container->has( $id ) ) {
+			return;
+		}
+
 		// Only instantiate services that are actually needed.
 		if ( is_a( $class, Conditional::class, true )
 			&& ! $class::is_needed() ) {
