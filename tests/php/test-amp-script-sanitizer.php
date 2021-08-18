@@ -129,6 +129,49 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT,
 				],
 			],
+			'external_scripts_kept'         => [
+				'
+					<html>
+					<head><meta charset="utf-8"></head>
+					<body>
+						<script src="https://example.com/1"></script>
+						<script type="text/javascript" src="https://example.com/2"></script>
+						<script type="module" src="https://example.com/3"></script>
+					</body></html>
+				',
+				'
+					<html data-ampdevmode>
+					<head><meta charset="utf-8"></head>
+					<body>
+						<script src="https://example.com/1" data-ampdevmode></script>
+						<script type="text/javascript" src="https://example.com/2" data-ampdevmode></script>
+						<script type="module" src="https://example.com/3" data-ampdevmode></script>
+					</body></html>
+				',
+				[
+					'sanitize_scripts'          => true,
+					'validation_error_callback' => '__return_false',
+				],
+				[
+					AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT,
+					AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT,
+					AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT,
+				],
+			],
+			'external_devmode_script_kept'  => [
+				'
+					<html data-ampdevmode>
+					<head><meta charset="utf-8"></head>
+					<body>
+						<script data-ampdevmode src="https://example.com/1"></script>
+					</body></html>
+				',
+				null,
+				[
+					'sanitize_scripts' => true,
+				],
+				[],
+			],
 			'external_amp_script_kept'      => [
 				'
 					<html>
