@@ -136,21 +136,24 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 
 		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_SANDBOXING_LEVEL );
 
+		// Allow native POST forms, but they won't be converted by default.
+		add_filter( 'amp_native_post_form_allowed', '__return_true' );
+
+		// Opt-in to the new script sanitization logic in the script sanitizer.
+		add_filter(
+			'amp_content_sanitizers',
+			static function ( $sanitizers ) {
+				$sanitizers[ AMP_Script_Sanitizer::class ]['sanitize_scripts'] = true;
+				return $sanitizers;
+			}
+		);
+
 		if ( 1 === $sandboxing_level ) {
+			// Keep all invalid AMP markup by default.
 			add_filter( 'amp_validation_error_default_sanitized', '__return_false' );
 		}
 
 		if ( $sandboxing_level < 3 ) {
-			add_filter( 'amp_native_post_form_allowed', '__return_true' );
-
-			add_filter(
-				'amp_content_sanitizers',
-				static function ( $sanitizers ) {
-					$sanitizers[ AMP_Script_Sanitizer::class ]['sanitize_scripts'] = true;
-					return $sanitizers;
-				}
-			);
-
 			// Prevent conversion of POST forms to use action-xhr by default.
 			add_filter(
 				'amp_validation_error_default_sanitized',
