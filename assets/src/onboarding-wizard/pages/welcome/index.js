@@ -47,7 +47,7 @@ export function Welcome() {
 					</svg>
 				</div>
 				<h1>
-					{ __( 'Welcome to the Official AMP Plugin for WordPress', 'amp' ) }
+					{ __( 'AMP for WordPress', 'amp' ) }
 				</h1>
 			</div>
 			<div className="welcome__body">
@@ -72,9 +72,11 @@ export function Welcome() {
 							{ __( 'AMP and WordPress', 'amp' ) }
 						</h4>
 						<p>
-							{ __( 'AMP is a web framework designed to make it easier to build user-first sites, which are beautiful, fast, engaging, secure, and accessible.', 'amp' ) }
+							{ __( 'AMP provides support for building beautiful, fast, engaging, secure, and accessible sites, and the AMP plugin makes it easy for you to take advantage of AMP on WordPress.', 'amp' ) }
 							{ ' ' }
-							{ __( 'The Official AMP plugin for WordPress enables you to incorporate AMP into your site.', 'amp' ) }
+							<a href="https://amp-wp.org/" target="_blank" rel="noreferrer noopener">
+								{ __( 'Learn more.', 'amp' ) }
+							</a>
 						</p>
 					</div>
 
@@ -107,7 +109,7 @@ export function Welcome() {
 							{ __( 'Configure your site with AMP', 'amp' ) }
 						</h4>
 						<p>
-							{ __( 'There are different ways in which you can incorporate AMP content into your site, depending on its configuration (e.g. which theme and/or plugins you are using), your technical expertise and the level of resources you may have for addressing AMP compatibility issues as your site evolves.', 'amp' ) }
+							{ __( 'Regardless of technical expertise, the onboarding flow guides you through the configuration of the plugin in a few easy steps.', 'amp' ) }
 						</p>
 					</div>
 
@@ -132,10 +134,10 @@ export function Welcome() {
 					</div>
 					<div className="welcome__section-description">
 						<h4>
-							{ __( 'Onboarding flow', 'amp' ) }
+							{ __( 'Site review', 'amp' ) }
 						</h4>
 						<p>
-							{ __( 'This onboarding flow will guide you through the plugin configuration and getting started with AMP on your site.', 'amp' ) }
+							{ __( 'At the end of the onboarding flow, the AMP plugin is fully set up and configured, and your site is ready to serve great experiences to your users.', 'amp' ) }
 						</p>
 					</div>
 
