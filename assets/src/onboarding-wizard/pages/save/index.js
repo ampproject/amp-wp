@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useContext, useEffect } from '@wordpress/element';
-import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -12,31 +11,14 @@ import { User } from '../../../components/user-context-provider';
 import { Phone } from '../../../components/phone';
 import './style.css';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
-import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO } from '../../../components/amp-notice';
+import {
+	AMPNotice,
+	NOTICE_SIZE_LARGE,
+	NOTICE_TYPE_SUCCESS,
+	NOTICE_TYPE_INFO,
+} from '../../../components/amp-notice';
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../../components/options-context-provider';
-import { Done } from '../../../components/svg/done';
-
-/**
- * Provides the description for the done screen.
- *
- * @param {string} mode The selected mode.
- * @return {string} The text.
- */
-function getDescription( mode ) {
-	switch ( mode ) {
-		case 'standard':
-			return __( 'Your site is ready to serve AMP pages to your users! In Standard mode (AMP-first) all canonical URLs are AMP by default. You can still opt out of AMP for specific content types and templates from the AMP settings screen. Depending on the theme and plugins you are using, development work may be required to maintain your site’s AMP compatibility.', 'amp' );
-
-		case 'transitional':
-			return __( 'Your site is ready to serve AMP pages to your users! In Transitional mode both the AMP and non-AMP versions of your site will be served using your currently active theme. With further development work to address AMP-compatibility issues in your themes and plugins, your site can be made fully AMP-first.', 'amp' );
-
-		case 'reader':
-			return __( 'Your site is ready to serve AMP pages to your users! In Reader mode the AMP version of your site will be served using the Reader theme you have selected (shown to the right), while pages for the non-AMP version of your site will be served using your primary theme. As a last step, make sure you tailor the Reader theme as needed using the Customizer.', 'amp' );
-		default:
-			return '';
-	}
-}
 
 /**
  * UI for a saving state.
@@ -76,28 +58,14 @@ function Preview() {
 	} = useContext( Options );
 
 	return (
-		<>
-			<Phone>
-				<iframe
-					className="done__preview-iframe"
-					src={ previewPermalink }
-					title={ __( 'Site preview', 'amp' ) }
-					name="amp-wizard-completion-preview"
-				/>
-			</Phone>
-			<div className="done__link-buttons">
-
-				<Button
-					isPrimary
-					href={ previewPermalink }
-					target="_blank"
-					rel="noreferrer"
-				>
-					{ __( 'Browse AMP', 'amp' ) }
-				</Button>
-
-			</div>
-		</>
+		<Phone>
+			<iframe
+				className="done__preview-iframe"
+				src={ previewPermalink }
+				title={ __( 'Site preview', 'amp' ) }
+				name="amp-wizard-completion-preview"
+			/>
+		</Phone>
 	);
 }
 
@@ -108,6 +76,7 @@ export function Save() {
 	const {
 		didSaveOptions,
 		editedOptions: { theme_support: themeSupport, reader_theme: readerTheme },
+		readerModeWasOverridden,
 		saveOptions,
 		savingOptions,
 	} = useContext( Options );
@@ -149,28 +118,62 @@ export function Save() {
 		return <Saving />;
 	}
 
-	let heading = __( 'Congratulations!', 'amp' );
-	if ( 'standard' === themeSupport ) {
-		heading = __( 'Your site is ready', 'amp' );
-	}
-
 	return (
 		<div className="done">
-			<div className="done__text">
-				<Done />
-				<h1>
-					{ heading }
-				</h1>
-				{
-					'reader' === themeSupport && downloadedTheme === readerTheme && (
-						<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_SUCCESS }>
-							{ __( 'Your Reader theme was automatically installed', 'amp' ) }
+			<div className="done__content">
+				<div className="done__text">
+					<h1>
+						{ __( 'Your site is live!', 'amp' ) }
+					</h1>
+					{
+						'reader' === themeSupport && downloadedTheme === readerTheme && (
+							<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_SUCCESS }>
+								{ __( 'Your Reader theme was automatically installed', 'amp' ) }
+							</AMPNotice>
+						)
+					}
+					{ readerModeWasOverridden && (
+						<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
+							{ __( 'Because you selected a Reader theme that is the same as your site\'s active theme, your site has automatically been switched to Transitional template mode.', 'amp' ) }
 						</AMPNotice>
-					)
-				}
-				<p>
-					{ getDescription( themeSupport ) }
-				</p>
+					) }
+					{ 'standard' === themeSupport && (
+						<p>
+							{ __( 'Your site is ready to bring great experiences to your users! In Standard mode there is a single version of your site, the AMP version. Browse your site by navigating through the links below and ensure the functionality and look-and-feel of your site work as expected.', 'amp' ) }
+						</p>
+					) }
+					{ 'transitional' === themeSupport && (
+						<p>
+							{ __( 'Your site is ready to bring great experiences to your users! In Transitional mode both the AMP and non-AMP versions of your site will be served using your currently active theme. Toggle the “AMP version” switch you can browse throughout your site and ensure both versions of your site meet your expectations.', 'amp' ) }
+						</p>
+					) }
+					{ 'reader' === themeSupport && (
+						<>
+							<p>
+								{ __( 'Your site is ready to bring great experiences to your users! In Reader mode the AMP version of your site will be served using the Reader theme you have selected, while pages for the non-AMP version of your site will be served using your primary theme.', 'amp' ) }
+							</p>
+							<p>
+								{ __( 'Toggle the “AMP version” switch you can browse throughout your site and ensure both versions of your site meet your expectations. As a last step, make sure you tailor the Reader theme as needed using the Customizer.', 'amp' ) }
+							</p>
+						</>
+					) }
+				</div>
+				<div className="done__text">
+					<h2>
+						{ __( 'Needing extra help?', 'amp' ) }
+					</h2>
+					<ul className="done__list">
+						<li>
+							{ __( 'Reach out in the support forums', 'amp' ) }
+						</li>
+						<li>
+							{ __( 'Try a different template mode in settings', 'amp' ) }
+						</li>
+						<li>
+							{ __( 'Learn more about how AMP works', 'amp' ) }
+						</li>
+					</ul>
+				</div>
 			</div>
 			<div className="done__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (

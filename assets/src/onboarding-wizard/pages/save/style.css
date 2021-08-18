@@ -7,30 +7,23 @@
 	}
 }
 
-.done__text {
-	width: 100%;
+.done__content {
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-between;
 	padding-bottom: 30px;
+	width: 100%;
 
 	@media screen and (min-width: 1280px) {
 		padding-right: 30px;
 	}
 }
 
-.done__text h1 {
-	text-align: center;
+.done__list {
+	font-size: var(--amp-settings-font-size);
+	list-style: disc;
+	padding-left: 30px;
 }
-
-.done__text .svg-done {
-	display: block;
-	width: 150px;
-	height: auto;
-	margin: 0 auto;
-}
-
-.done__link-buttons a:not(:last-child) {
-	margin-right: 15px;
-}
-
 
 .done__preview-container {
 	text-align: center;
@@ -62,11 +55,6 @@
 	@media screen and (max-width: 600px) {
 		width: 300px;
 	}
-}
-
-.done__preview-container .components-button {
-	margin-top: 0.5rem;
-	margin-bottom: 0.75rem;
 }
 
 .saving {

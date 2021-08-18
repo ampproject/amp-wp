@@ -69,7 +69,7 @@ describe( 'Stepper item modifications', () => {
 		await clickMode( 'reader' );
 
 		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
-		expect( itemCount ).toBe( 6 );
+		expect( itemCount ).toBe( 5 );
 
 		await expect( page ).toMatchElement( '.amp-stepper__item-title', { text: 'Theme Selection' } );
 	} );
@@ -78,7 +78,7 @@ describe( 'Stepper item modifications', () => {
 		await clickMode( 'transitional' );
 
 		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
-		expect( itemCount ).toBe( 5 );
+		expect( itemCount ).toBe( 4 );
 
 		await expect( page ).not.toMatchElement( '.amp-stepper__item-title', { text: 'Theme Selection' } );
 	} );
