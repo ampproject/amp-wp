@@ -78,7 +78,7 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 
 	await clickNextButton();
 
-	await page.waitForSelector( '.done' );
+	await page.waitForSelector( '.review' );
 }
 
 export async function completeWizard( { technical = true, mode, readerTheme = 'legacy' } ) {

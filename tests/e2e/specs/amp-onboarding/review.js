@@ -4,12 +4,12 @@
  */
 import { testCloseButton, cleanUpSettings, moveToDoneScreen } from '../../utils/onboarding-wizard-utils';
 
-describe( 'Done', () => {
+describe( 'Review', () => {
 	afterEach( async () => {
 		await cleanUpSettings();
 	} );
 
-	it( 'renders standard mode done screen', async () => {
+	it( 'renders standard mode review screen', async () => {
 		await moveToDoneScreen( { mode: 'standard' } );
 
 		testCloseButton( { exists: false } );
@@ -19,7 +19,7 @@ describe( 'Done', () => {
 		await expect( page ).toMatchElement( '.phone iframe' );
 	} );
 
-	it( 'renders transitional mode done screen', async () => {
+	it( 'renders transitional mode review screen', async () => {
 		await moveToDoneScreen( { mode: 'transitional' } );
 
 		testCloseButton( { exists: false } );
@@ -29,7 +29,7 @@ describe( 'Done', () => {
 		await expect( page ).toMatchElement( '.phone iframe' );
 	} );
 
-	it( 'renders reader mode done screen', async () => {
+	it( 'renders reader mode review screen', async () => {
 		await moveToDoneScreen( { mode: 'reader' } );
 
 		testCloseButton( { exists: true } );

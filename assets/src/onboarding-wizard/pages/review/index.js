@@ -60,7 +60,7 @@ function Preview() {
 	return (
 		<Phone>
 			<iframe
-				className="done__preview-iframe"
+				className="review__preview-iframe"
 				src={ previewPermalink }
 				title={ __( 'Site preview', 'amp' ) }
 				name="amp-wizard-completion-preview"
@@ -72,7 +72,7 @@ function Preview() {
 /**
  * Final screen, where data is saved.
  */
-export function Save() {
+export function Review() {
 	const {
 		didSaveOptions,
 		editedOptions: { theme_support: themeSupport, reader_theme: readerTheme },
@@ -119,9 +119,9 @@ export function Save() {
 	}
 
 	return (
-		<div className="done">
-			<div className="done__content">
-				<div className="done__text">
+		<div className="review">
+			<div className="review__content">
+				<div className="review__text">
 					<h1>
 						{ __( 'Your site is live!', 'amp' ) }
 					</h1>
@@ -158,11 +158,11 @@ export function Save() {
 						</>
 					) }
 				</div>
-				<div className="done__text">
+				<div className="review__text">
 					<h2>
 						{ __( 'Needing extra help?', 'amp' ) }
 					</h2>
-					<ul className="done__list">
+					<ul className="review__list">
 						<li>
 							{ __( 'Reach out in the support forums', 'amp' ) }
 						</li>
@@ -175,7 +175,7 @@ export function Save() {
 					</ul>
 				</div>
 			</div>
-			<div className="done__preview-container">
+			<div className="review__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (
 					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 						{ __( 'There was an error downloading your Reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }

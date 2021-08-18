@@ -1,4 +1,4 @@
-.done {
+.review {
 	display: flex;
 	flex-wrap: wrap;
 
@@ -7,7 +7,7 @@
 	}
 }
 
-.done__content {
+.review__content {
 	display: flex;
 	flex-flow: column nowrap;
 	justify-content: space-between;
@@ -19,13 +19,13 @@
 	}
 }
 
-.done__list {
+.review__list {
 	font-size: var(--amp-settings-font-size);
 	list-style: disc;
 	padding-left: 30px;
 }
 
-.done__preview-container {
+.review__preview-container {
 	text-align: center;
 
 	@media screen and (max-width: 1279px) {
@@ -34,21 +34,21 @@
 	}
 }
 
-.done__preview-container .amp-notice {
+.review__preview-container .amp-notice {
 	margin-bottom: 1.5rem;
 }
 
-.done__preview-container .phone {
+.review__preview-container .phone {
 	height: auto;
 	padding-bottom: 2rem;
 }
 
-.done__preview-container .phone::before {
+.review__preview-container .phone::before {
 	height: 9px;
 	width: 80px;
 }
 
-.done__preview-iframe {
+.review__preview-iframe {
 	height: 610px;
 	width: 400px;
 
