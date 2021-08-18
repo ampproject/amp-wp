@@ -74,7 +74,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					</body></html>
 				',
 				[
-					'sanitize_scripts'          => true,
+					'sanitize_js_scripts'       => true,
 					'unwrap_noscripts'          => true, // This will be ignored because of the kept script.
 					'validation_error_callback' => '__return_false',
 				],
@@ -98,7 +98,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					</body></html>
 				',
 				[
-					'sanitize_scripts' => true,
+					'sanitize_js_scripts' => true,
 				],
 				[
 					AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT,
@@ -121,7 +121,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					<body></body></html>
 				',
 				[
-					'sanitize_scripts' => true,
+					'sanitize_js_scripts' => true,
 				],
 				[
 					AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT,
@@ -149,7 +149,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					</body></html>
 				',
 				[
-					'sanitize_scripts'          => true,
+					'sanitize_js_scripts'       => true,
 					'validation_error_callback' => '__return_false',
 				],
 				[
@@ -168,7 +168,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				',
 				null,
 				[
-					'sanitize_scripts' => true,
+					'sanitize_js_scripts' => true,
 				],
 				[],
 			],
@@ -183,7 +183,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				',
 				null,
 				[
-					'sanitize_scripts' => true,
+					'sanitize_js_scripts' => true,
 				],
 				[],
 			],
@@ -198,7 +198,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				',
 				null,
 				[
-					'sanitize_scripts' => true,
+					'sanitize_js_scripts' => true,
 				],
 				[],
 			],
@@ -220,7 +220,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					</body></html>
 				',
 				[
-					'sanitize_scripts' => true,
+					'sanitize_js_scripts' => true,
 				],
 				[
 					AMP_Script_Sanitizer::CUSTOM_EVENT_HANDLER_ATTR,
@@ -244,7 +244,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					</body></html>
 				',
 				[
-					'sanitize_scripts'          => true,
+					'sanitize_js_scripts'       => true,
 					'validation_error_callback' => '__return_false',
 				],
 				[
@@ -273,7 +273,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					</body></html>
 				',
 				[
-					'sanitize_scripts' => true,
+					'sanitize_js_scripts' => true,
 				],
 				[],
 			],
@@ -358,7 +358,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			AMP_Script_Sanitizer::class => new AMP_Script_Sanitizer(
 				$dom,
 				[
-					'sanitize_scripts'          => true,
+					'sanitize_js_scripts'       => true,
 					'validation_error_callback' => function () use ( $remove_custom_scripts ) {
 						return $remove_custom_scripts;
 					},

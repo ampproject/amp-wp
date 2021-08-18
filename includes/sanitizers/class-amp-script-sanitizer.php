@@ -54,16 +54,16 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'unwrap_noscripts' => true,
-		'sanitize_scripts' => false,
+		'unwrap_noscripts'    => true,
+		'sanitize_js_scripts' => false,
 	];
 
 	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
-	 *      @type bool $sanitize_scripts Whether to sanitize JS scripts (and not defer for final sanitizer).
-	 *      @type bool $unwrap_noscripts Whether to unwrap noscript elements.
+	 *      @type bool $sanitize_js_scripts Whether to sanitize JS scripts (and not defer for final sanitizer).
+	 *      @type bool $unwrap_noscripts    Whether to unwrap noscript elements.
 	 * }
 	 */
 	protected $args;
@@ -137,7 +137,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 */
 	public function sanitize() {
-		if ( ! empty( $this->args['sanitize_scripts'] ) ) {
+		if ( ! empty( $this->args['sanitize_js_scripts'] ) ) {
 			$this->sanitize_js_script_elements();
 		}
 
