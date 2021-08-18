@@ -53,6 +53,11 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 	 * @return bool
 	 */
 	public static function is_needed() {
+		// @todo This is a hack to prevent the service from running in the unit tests.
+		if ( defined( 'TESTS_PLUGIN_DIR' ) ) {
+			return false;
+		}
+
 		/**
 		 * Filters whether experimental sandboxing is enabled.
 		 *
