@@ -274,7 +274,7 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 	}
 
 	const EnhancedBlockEdit = function( props ) {
-		const { attributes: { ampLayout }, name } = props;
+		const { attributes: { ampLayout }, name, isSelected } = props;
 
 		let inspectorControls;
 
@@ -284,6 +284,14 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 			inspectorControls = setUpImageInspectorControls( props );
 		} else if ( MEDIA_BLOCKS.includes( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
 			inspectorControls = setUpInspectorControls( props );
+		}
+
+		if ( 'core/video' === name && isSelected ) {
+			const { attributes: { autoplay } } = props;
+
+			if ( true === autoplay ) {
+				props.attributes.muted = true;
+			}
 		}
 
 		// Return just inspector controls in case of 'nodisplay'.
@@ -302,8 +310,11 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 	};
 
 	EnhancedBlockEdit.propTypes = {
+		isSelected: PropTypes.bool,
 		attributes: PropTypes.shape( {
 			text: PropTypes.string,
+			autoplay: PropTypes.bool,
+			muted: PropTypes.bool,
 			ampLayout: PropTypes.string,
 		} ),
 		setAttributes: PropTypes.func.isRequired,
