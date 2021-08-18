@@ -26,7 +26,7 @@ export const TemplateModeOverride = createContext();
  */
 export function TemplateModeOverrideContextProvider( { children } ) {
 	const { editedOptions, originalOptions, updateOptions, readerModeWasOverridden, setReaderModeWasOverridden } = useContext( Options );
-	const { activePageIndex, currentPage } = useContext( Navigation );
+	const { currentPage } = useContext( Navigation );
 	const { selectedTheme, currentTheme } = useContext( ReaderThemes );
 	const { developerToolsOption, fetchingUser, originalDeveloperToolsOption } = useContext( User );
 	const [ respondedToDeveloperToolsOptionChange, setRespondedToDeveloperToolsOptionChange ] = useState( false );
@@ -70,7 +70,6 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 			}
 		}
 	}, [
-		activePageIndex,
 		selectedTheme.name,
 		currentTheme.name,
 		themeSupport,
@@ -118,7 +117,7 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 	] );
 
 	return (
-		<TemplateModeOverride.Provider value={ { readerModeWasOverridden, technicalQuestionChangedAtLeastOnce } }>
+		<TemplateModeOverride.Provider value={ { technicalQuestionChangedAtLeastOnce } }>
 			{ children }
 		</TemplateModeOverride.Provider>
 	);
