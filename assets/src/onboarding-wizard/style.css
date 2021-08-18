@@ -84,7 +84,7 @@ body {
  * Sidebar.
  */
 .amp-onboarding-wizard-plugin-name {
-	color: var(--amp-settings-color-black);
+	color: var(--amp-settings-color-muted);
 	font-size: 16px;
 	line-height: 1.5;
 	padding: 0.5rem 0 0;
@@ -166,6 +166,7 @@ body {
 }
 
 .amp-stepper__item-title {
+	color: var(--amp-settings-color-muted);
 	display: none;
 	margin-left: 18px;
 
