@@ -12,7 +12,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { User } from '../../components/user-context-provider';
+import { User } from '../user-context-provider';
 import { Options } from '../options-context-provider';
 
 /**

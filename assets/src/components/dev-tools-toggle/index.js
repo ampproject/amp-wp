@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { AMPSettingToggle } from '../amp-setting-toggle';
-import { User } from '../../components/user-context-provider';
+import { User } from '../user-context-provider';
 import { Loading } from '../loading';
 
 export function DevToolsToggle() {
@@ -25,7 +25,7 @@ export function DevToolsToggle() {
 	return (
 		<AMPSettingToggle
 			checked={ true === developerToolsOption }
-			title={ __( 'Enable Dev Tools', 'amp' ) }
+			title={ __( 'Enable Developer Tools', 'amp' ) }
 			onChange={ () => {
 				setDeveloperToolsOption( ! developerToolsOption );
 			} }
