@@ -238,7 +238,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 		 */
 		$redis_server = [
 			'host'           => isset( $_SERVER['CACHE_HOST'] ) ? sanitize_text_field( $_SERVER['CACHE_HOST'] ) : '127.0.0.1',
-			'port'           => isset( $_SERVER['CACHE_PORT'] ) ? intval( $_SERVER['CACHE_PORT'] ) : 6379,
+			'port'           => isset( $_SERVER['CACHE_PORT'] ) ? (int) $_SERVER['CACHE_PORT'] : 6379,
 			'auth'           => isset( $_SERVER['CACHE_PASSWORD'] ) ? sanitize_text_field( $_SERVER['CACHE_PASSWORD'] ) : null,
 			'database'       => isset( $_SERVER['CACHE_DB'] ) ? $_SERVER['CACHE_DB'] : 0, // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			'timeout'        => 1, // Time in seconds.
