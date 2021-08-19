@@ -35,7 +35,7 @@ exports[`DevToolsToggle matches snapshot 1`] = `
           className="amp-setting-toggle__label-text"
         >
           <h3>
-            Enable Dev Tools
+            Enable Developer Tools
           </h3>
         </div>
       </label>
