@@ -284,16 +284,11 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 			$this->assertStringContainsString( $no_support_notice, $output );
 		}
 
-		// Post type no longer supports AMP, so no status input.
+		// Post type no longer supports AMP, so no status input (and no mention of AMP at all).
 		$supported_post_types = array_diff( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ), [ 'post' ] );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
-			$this->assertStringContainsString( 'This post type is not', $output );
-			$this->assertStringNotContainsString( $checkbox_enabled, $output );
-		} else {
-			$this->assertStringContainsString( $no_support_notice, $output );
-		}
+		$this->assertEmpty( $output );
 		$supported_post_types[] = 'post';
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 

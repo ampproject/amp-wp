@@ -14,6 +14,7 @@ use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\WithBlockEditorSupport;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 use AmpProject\Dom\Document;
 
@@ -27,6 +28,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 	use HandleValidation;
 	use PrivateAccess;
+	use WithBlockEditorSupport;
 	use WithoutBlockPreRendering {
 		setUp as public prevent_block_pre_render;
 	}
@@ -2401,10 +2403,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			$this->markTestSkipped( 'Block editor is too old.' );
 		}
 
-		global $post;
-		$post = self::factory()->post->create_and_get();
-		$slug = 'amp-block-validation';
 		AMP_Validation_Manager::enqueue_block_validation();
+
+		$slug = 'amp-block-validation';
 		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
 
 		// Ensure not displayed when dev tools is disabled.
@@ -2414,6 +2415,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::enqueue_block_validation();
 		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
 
+		$this->setup_environment( true, true );
 		$service->set_user_enabled( wp_get_current_user()->ID, true );
 		AMP_Validation_Manager::enqueue_block_validation();
 		$this->assertTrue( wp_script_is( $slug, 'enqueued' ) );
