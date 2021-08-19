@@ -2175,11 +2175,16 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$editor_support = Services::get( 'editor.editor_support' );
-
 		// Block validation script uses features only available beginning with WP 5.6.
-		if ( ! $editor_support->editor_supports_amp_block_editor_features() ) {
+		$dependency_support = Services::get( 'dependency_support' );
+		if ( ! $dependency_support->has_support() ) {
 			return; // @codeCoverageIgnore
+		}
+
+		// Only enqueue scripts on the block editor for AMP-enabled posts.
+		$editor_support = Services::get( 'editor.editor_support' );
+		if ( ! $editor_support->is_current_screen_block_editor_for_amp_enabled_post_type() ) {
+			return;
 		}
 
 		$slug = 'amp-block-validation';
