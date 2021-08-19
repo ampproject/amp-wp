@@ -76,6 +76,7 @@ export function Review() {
 	const {
 		didSaveOptions,
 		editedOptions: { theme_support: themeSupport, reader_theme: readerTheme },
+		hasOptionsChanges,
 		readerModeWasOverridden,
 		saveOptions,
 		savingOptions,
@@ -114,7 +115,7 @@ export function Review() {
 		}
 	}, [ didSaveDeveloperToolsOption, savingDeveloperToolsOption, saveDeveloperToolsOption ] );
 
-	if ( savingOptions || savingDeveloperToolsOption || downloadingTheme ) {
+	if ( savingOptions || savingDeveloperToolsOption || downloadingTheme || hasOptionsChanges ) {
 		return <Saving />;
 	}
 
