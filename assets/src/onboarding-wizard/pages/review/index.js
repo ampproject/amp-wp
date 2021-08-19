@@ -9,7 +9,7 @@ import { useContext, useEffect } from '@wordpress/element';
  */
 import { User } from '../../../components/user-context-provider';
 import { Phone } from '../../../components/phone';
-import './style.css';
+import './style.scss';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import {
 	AMPNotice,
@@ -121,60 +121,40 @@ export function Review() {
 
 	return (
 		<div className="review">
-			<div className="review__content">
-				<div className="review__text">
-					<h1>
-						{ __( 'Your site is live!', 'amp' ) }
-					</h1>
-					{
-						'reader' === themeSupport && downloadedTheme === readerTheme && (
-							<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_SUCCESS }>
-								{ __( 'Your Reader theme was automatically installed', 'amp' ) }
-							</AMPNotice>
-						)
-					}
-					{ readerModeWasOverridden && (
-						<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
-							{ __( 'Because you selected a Reader theme that is the same as your site\'s active theme, your site has automatically been switched to Transitional template mode.', 'amp' ) }
-						</AMPNotice>
-					) }
-					{ 'standard' === themeSupport && (
+			<div className="review__content review__content--primary">
+				<h1>
+					{ __( 'Your site is live!', 'amp' ) }
+				</h1>
+				{ 'reader' === themeSupport && downloadedTheme === readerTheme && (
+					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_SUCCESS }>
+						{ __( 'Your Reader theme was automatically installed', 'amp' ) }
+					</AMPNotice>
+				) }
+				{ readerModeWasOverridden && (
+					<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
+						{ __( 'Because you selected a Reader theme that is the same as your site\'s active theme, your site has automatically been switched to Transitional template mode.', 'amp' ) }
+					</AMPNotice>
+				) }
+				{ 'standard' === themeSupport && (
+					<p>
+						{ __( 'Your site is ready to bring great experiences to your users! In Standard mode there is a single version of your site, the AMP version. Browse your site by navigating through the links below and ensure the functionality and look-and-feel of your site work as expected.', 'amp' ) }
+					</p>
+				) }
+				{ 'transitional' === themeSupport && (
+					<p>
+						{ __( 'Your site is ready to bring great experiences to your users! In Transitional mode both the AMP and non-AMP versions of your site will be served using your currently active theme. Toggle the “AMP version” switch you can browse throughout your site and ensure both versions of your site meet your expectations.', 'amp' ) }
+					</p>
+				) }
+				{ 'reader' === themeSupport && (
+					<>
 						<p>
-							{ __( 'Your site is ready to bring great experiences to your users! In Standard mode there is a single version of your site, the AMP version. Browse your site by navigating through the links below and ensure the functionality and look-and-feel of your site work as expected.', 'amp' ) }
+							{ __( 'Your site is ready to bring great experiences to your users! In Reader mode the AMP version of your site will be served using the Reader theme you have selected, while pages for the non-AMP version of your site will be served using your primary theme.', 'amp' ) }
 						</p>
-					) }
-					{ 'transitional' === themeSupport && (
 						<p>
-							{ __( 'Your site is ready to bring great experiences to your users! In Transitional mode both the AMP and non-AMP versions of your site will be served using your currently active theme. Toggle the “AMP version” switch you can browse throughout your site and ensure both versions of your site meet your expectations.', 'amp' ) }
+							{ __( 'Toggle the “AMP version” switch you can browse throughout your site and ensure both versions of your site meet your expectations. As a last step, make sure you tailor the Reader theme as needed using the Customizer.', 'amp' ) }
 						</p>
-					) }
-					{ 'reader' === themeSupport && (
-						<>
-							<p>
-								{ __( 'Your site is ready to bring great experiences to your users! In Reader mode the AMP version of your site will be served using the Reader theme you have selected, while pages for the non-AMP version of your site will be served using your primary theme.', 'amp' ) }
-							</p>
-							<p>
-								{ __( 'Toggle the “AMP version” switch you can browse throughout your site and ensure both versions of your site meet your expectations. As a last step, make sure you tailor the Reader theme as needed using the Customizer.', 'amp' ) }
-							</p>
-						</>
-					) }
-				</div>
-				<div className="review__text">
-					<h2>
-						{ __( 'Needing extra help?', 'amp' ) }
-					</h2>
-					<ul className="review__list">
-						<li>
-							{ __( 'Reach out in the support forums', 'amp' ) }
-						</li>
-						<li>
-							{ __( 'Try a different template mode in settings', 'amp' ) }
-						</li>
-						<li>
-							{ __( 'Learn more about how AMP works', 'amp' ) }
-						</li>
-					</ul>
-				</div>
+					</>
+				) }
 			</div>
 			<div className="review__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (
@@ -183,7 +163,22 @@ export function Review() {
 					</AMPNotice>
 				) }
 				<Preview />
-
+			</div>
+			<div className="review__content review__content--secondary">
+				<h2>
+					{ __( 'Needing extra help?', 'amp' ) }
+				</h2>
+				<ul className="review__list">
+					<li>
+						{ __( 'Reach out in the support forums', 'amp' ) }
+					</li>
+					<li>
+						{ __( 'Try a different template mode in settings', 'amp' ) }
+					</li>
+					<li>
+						{ __( 'Learn more about how AMP works', 'amp' ) }
+					</li>
+				</ul>
 			</div>
 		</div>
 	);
