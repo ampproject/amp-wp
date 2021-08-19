@@ -227,7 +227,21 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 2.2
 	 */
 	protected function sanitize_js_script_elements() {
-		$scripts = $this->dom->xpath->query( '//script[ not( @type ) or not( contains( @type, "json" ) ) ]' );
+		// Note that this is looking for type attributes that contain "script" as a normalization of the variations
+		// of javascript, ecmascript, jscript, and livescript. This could also end up matching MIME types such as
+		// application/postscript or text/vbscript, but such scripts are either unlikely to be the source of a script
+		// tag or else they would be extremely rare (and would be invalid AMP anyway).
+		// See <https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#textjavascript>.
+		$scripts = $this->dom->xpath->query(
+			'
+				//script[
+					not( @type )
+					or
+					@type = "module"
+					or
+					contains( @type, "script" )
+				]'
+		);
 
 		/** @var Element $script */
 		foreach ( $scripts as $script ) {

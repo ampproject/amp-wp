@@ -85,22 +85,42 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			'inline_scripts_removed'        => [
 				'
 					<html><head><meta charset="utf-8"></head><body>
-						<script>document.write("Hey.")</script>
+						<script>document.write("Hey")</script>
+						<script type="text/javascript">document.write("Hey")</script>
+						<script type="text/ecmascript">document.write("Hey")</script>
+						<script type="application/javascript">document.write("Hey")</script>
+						<script type="application/ecmascript">document.write("Hey")</script>
+						<script type="module">document.write("Hey")</script>
 						<script type="application/json">{"data":1}</script>
 						<script type="application/ld+json">{"data":2}</script>
 						<amp-state id="test"><script type="application/json">{"data":3}</script></amp-state>
+						<amp-script width="200" height="100" script="hello-world"><button>Hello amp-script!</button></amp-script>
+						<script id="hello-world" type="text/plain" target="amp-script">
+							/* This is perfectly fine! */
+						</script>
+						<script type="text/plain" template="amp-mustache">Hello {{world}}!</script>
 					</body></html>
 				',
 				'
 					<html><head><meta charset="utf-8"></head><body>
-					<script type="application/ld+json">{"data":2}</script>
-					<amp-state id="test"><script type="application/json">{"data":3}</script></amp-state>
+						<script type="application/ld+json">{"data":2}</script>
+						<amp-state id="test"><script type="application/json">{"data":3}</script></amp-state>
+						<amp-script width="200" height="100" script="hello-world"><button>Hello amp-script!</button></amp-script>
+						<script id="hello-world" type="text/plain" target="amp-script">
+							/* This is perfectly fine! */
+						</script>
+						<script type="text/plain" template="amp-mustache">Hello {{world}}!</script>
 					</body></html>
 				',
 				[
 					'sanitize_js_scripts' => true,
 				],
 				[
+					AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT,
+					AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT,
+					AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT,
+					AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT,
+					AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT,
 					AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT,
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				],
