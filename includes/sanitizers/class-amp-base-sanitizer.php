@@ -141,6 +141,17 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Update args.
+	 *
+	 * Merges the supplied args with the existing args.
+	 *
+	 * @param array $args Args.
+	 */
+	public function update_args( $args ) {
+		$this->args = array_merge( $this->args, $args );
+	}
+
+	/**
 	 * Run logic before any sanitizers are run.
 	 *
 	 * After the sanitizers are instantiated but before calling sanitize on each of them, this

@@ -153,6 +153,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'focus_within_classes'      => [ 'focus' ],
 		'low_priority_plugins'      => [ 'query-monitor' ],
 		'allow_transient_caching'   => true,
+		'skip_tree_shaking'         => false,
 	];
 
 	/**
@@ -345,12 +346,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $remote_request;
 
 	/**
-	 * Cached call to is_customize_preview()
+	 * All current sanitizers.
 	 *
-	 * @see is_customize_preview()
-	 * @var bool
+	 * @see AMP_Style_Sanitizer::init()
+	 * @var AMP_Base_Sanitizer[]
 	 */
-	private $is_customize_preview;
+	private $sanitizers = [];
 
 	/**
 	 * Get error codes that can be raised during parsing of CSS.
@@ -857,7 +858,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function init( $sanitizers ) {
 		parent::init( $sanitizers );
 
-		foreach ( $sanitizers as $sanitizer ) {
+		$this->sanitizers = $sanitizers;
+	}
+
+	/**
+	 * Sanitize CSS styles within the HTML contained in this instance's Dom\Document.
+	 *
+	 * @since 0.4
+	 */
+	public function sanitize() {
+		// Capture the selector conversion mappings from the other sanitizers.
+		foreach ( $this->sanitizers as $sanitizer ) {
 			foreach ( $sanitizer->get_selector_conversion_mapping() as $html_selectors => $amp_selectors ) {
 				if ( ! isset( $this->selector_mappings[ $html_selectors ] ) ) {
 					$this->selector_mappings[ $html_selectors ] = $amp_selectors;
@@ -874,15 +885,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				);
 			}
 		}
-	}
-
-	/**
-	 * Sanitize CSS styles within the HTML contained in this instance's Dom\Document.
-	 *
-	 * @since 0.4
-	 */
-	public function sanitize() {
-		$this->is_customize_preview = is_customize_preview();
 
 		$elements = [];
 
@@ -3320,7 +3322,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$used_selector_count = 0;
 				$selectors           = [];
 				foreach ( $selectors_parsed as $selector => $parsed_selector ) {
-					$should_include = $this->is_customize_preview || (
+					$should_include = $this->args['skip_tree_shaking'] || (
 						// If all class names are used in the doc.
 						(
 							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
@@ -3490,7 +3492,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Report validation error if size is now too big.
-			if ( ! $this->is_customize_preview && $current_concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes ) {
+			if ( ! $this->args['skip_tree_shaking'] && $current_concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes ) {
 				$validation_error = [
 					'code'      => self::STYLESHEET_TOO_LONG,
 					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,

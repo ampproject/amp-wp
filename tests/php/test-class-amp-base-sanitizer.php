@@ -6,15 +6,17 @@
  */
 
 use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\StubSanitizer;
 use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Test AMP_Base_Sanitizer_Test
  *
- * @covers AMP_Base_Sanitizer
+ * @coversDefaultClass \AMP_Base_Sanitizer
  */
 class AMP_Base_Sanitizer_Test extends TestCase {
+	use PrivateAccess;
 
 	/**
 	 * Set up.
@@ -191,6 +193,44 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 		];
 	}
 
+	/** @covers ::get_selector_conversion_mapping() */
+	public function test_get_selector_conversion_mapping() {
+		$sanitizer = new StubSanitizer( new Document() );
+		$this->assertEquals( [], $sanitizer->get_selector_conversion_mapping() );
+	}
+
+	/** @covers ::update_args() */
+	public function test_update_args() {
+		$sanitizer = new StubSanitizer(
+			new Document(),
+			[
+				'foo' => 1,
+				'bar' => 2,
+			]
+		);
+		$this->assertEquals(
+			[
+				'foo' => 1,
+				'bar' => 2,
+			],
+			$this->get_private_property( $sanitizer, 'args' )
+		);
+		$sanitizer->update_args(
+			[
+				'foo' => 'one',
+				'baz' => 'three',
+			]
+		);
+		$this->assertEquals(
+			[
+				'foo' => 'one',
+				'bar' => 2,
+				'baz' => 'three',
+			],
+			$this->get_private_property( $sanitizer, 'args' )
+		);
+	}
+
 	/**
 	 * Test AMP_Base_Sanitizer::set_layout().
 	 *
@@ -198,7 +238,7 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	 * @param array $source_attributes   Source Attrs.
 	 * @param array $expected_attributes Expected Attrs.
 	 * @param array $args                Args.
-	 * @covers AMP_Base_Sanitizer::set_layout()
+	 * @covers ::set_layout()
 	 */
 	public function test_set_layout( $source_attributes, $expected_attributes, $args = [] ) {
 		$sanitizer           = new StubSanitizer( new Document(), $args );
@@ -274,7 +314,7 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	 * @param array $expected_value Expected Attrs.
 	 * @param array $args           Args.
 	 * @dataProvider get_sanitize_dimension_data
-	 * @covers AMP_Base_Sanitizer::sanitize_dimension()
+	 * @covers ::sanitize_dimension()
 	 */
 	public function test_sanitize_dimension( $source_params, $expected_value, $args = [] ) {
 		$sanitizer                 = new StubSanitizer( new Document(), $args );
@@ -288,9 +328,9 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	/**
 	 * Tests remove_invalid_child.
 	 *
-	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
-	 * @covers AMP_Base_Sanitizer::should_sanitize_validation_error()
-	 * @covers AMP_Base_Sanitizer::prepare_validation_error()
+	 * @covers ::remove_invalid_child()
+	 * @covers ::should_sanitize_validation_error()
+	 * @covers ::prepare_validation_error()
 	 */
 	public function test_remove_invalid_child() {
 		$parent_tag_name = 'div';
@@ -361,9 +401,9 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	/**
 	 * Tests remove_invalid_child with script text normalization.
 	 *
-	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
-	 * @covers AMP_Base_Sanitizer::should_sanitize_validation_error()
-	 * @covers AMP_Base_Sanitizer::prepare_validation_error()
+	 * @covers ::remove_invalid_child()
+	 * @covers ::should_sanitize_validation_error()
+	 * @covers ::prepare_validation_error()
 	 */
 	public function test_remove_invalid_child_with_script_text_normalization() {
 		$dom        = new Document( '1.0', 'utf-8' );
@@ -448,8 +488,8 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	/**
 	 * Tests remove_invalid_child.
 	 *
-	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
-	 * @covers AMP_Base_Sanitizer::is_exempt_from_validation()
+	 * @covers ::remove_invalid_child()
+	 * @covers ::is_exempt_from_validation()
 	 */
 	public function test_remove_invalid_child_dev_mode() {
 		$id   = 'target';
@@ -484,9 +524,9 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	/**
 	 * Tests remove_invalid_child and should_sanitize_validation_error.
 	 *
-	 * @covers AMP_Base_Sanitizer::remove_invalid_attribute()
-	 * @covers AMP_Base_Sanitizer::should_sanitize_validation_error()
-	 * @covers AMP_Base_Sanitizer::prepare_validation_error()
+	 * @covers ::remove_invalid_attribute()
+	 * @covers ::should_sanitize_validation_error()
+	 * @covers ::prepare_validation_error()
 	 */
 	public function test_remove_invalid_attribute() {
 		$that = $this;
@@ -557,8 +597,8 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	/**
 	 * Tests remove_invalid_attribute in dev mode.
 	 *
-	 * @covers AMP_Base_Sanitizer::remove_invalid_attribute()
-	 * @covers AMP_Base_Sanitizer::is_exempt_from_validation()
+	 * @covers ::remove_invalid_attribute()
+	 * @covers ::is_exempt_from_validation()
 	 */
 	public function test_remove_invalid_attribute_dev_mode() {
 		$id   = 'target';
@@ -594,7 +634,7 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	/**
 	 * Tests get_data_amp_attributes.
 	 *
-	 * @covers AMP_Base_Sanitizer::get_data_amp_attributes()
+	 * @covers ::get_data_amp_attributes()
 	 */
 	public function test_get_data_amp_attributes() {
 		$tag          = 'figure';
@@ -619,7 +659,7 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	/**
 	 * Tests set_data_amp_attributes.
 	 *
-	 * @covers AMP_Base_Sanitizer::filter_data_amp_attributes()
+	 * @covers ::filter_data_amp_attributes()
 	 */
 	public function test_filter_data_amp_attributes() {
 		$amp_data   = [
@@ -642,7 +682,7 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	/**
 	 * Tests set_attachment_layout_attributes.
 	 *
-	 * @covers AMP_Base_Sanitizer::filter_attachment_layout_attributes()
+	 * @covers ::filter_attachment_layout_attributes()
 	 */
 	public function test_filter_attachment_layout_attributes() {
 		$sanitizer    = new StubSanitizer( new Document(), [] );
