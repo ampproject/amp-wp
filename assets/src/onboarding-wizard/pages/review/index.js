@@ -13,6 +13,8 @@ import { PREVIEW_URLS } from 'amp-settings'; // From WP inline script.
  * Internal dependencies
  */
 import './style.scss';
+import { User } from '../../components/user-context-provider';
+import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import {
 	AMPNotice,
 	NOTICE_SIZE_LARGE,
@@ -24,6 +26,7 @@ import { Options } from '../../../components/options-context-provider';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import { User } from '../../../components/user-context-provider';
 import { Phone } from '../../../components/phone';
+import { Preview } from './preview';
 import { PreviewPageSelector } from './preview-page-selector';
 import { PreviewModeSelector } from './preview-mode-selector';
 import { Saving } from './saving';
@@ -135,14 +138,7 @@ export function Review() {
 						selectedMode={ previewMode }
 					/>
 				) }
-				<Phone>
-					<iframe
-						className="review__preview-iframe"
-						src={ PREVIEW_URLS[ previewPageType ][ previewMode === 'amp' ? 'amp_url' : 'url' ] }
-						title={ __( 'Site preview', 'amp' ) }
-						name="amp-wizard-completion-preview"
-					/>
-				</Phone>
+				<Preview url={ PREVIEW_URLS[ previewPageType ][ previewMode === 'amp' ? 'amp_url' : 'url' ] } />
 			</div>
 			<div className="review__content review__content--secondary">
 				<h2>
