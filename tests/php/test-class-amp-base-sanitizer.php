@@ -13,7 +13,7 @@ use AmpProject\AmpWP\Tests\TestCase;
 /**
  * Test AMP_Base_Sanitizer_Test
  *
- * @coversDefaultClass AMP_Base_Sanitizer
+ * @coversDefaultClass \AMP_Base_Sanitizer
  */
 class AMP_Base_Sanitizer_Test extends TestCase {
 	use PrivateAccess;
