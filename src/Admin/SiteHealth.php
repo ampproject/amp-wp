@@ -165,13 +165,17 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 			$available_cache = $this->check_available_cache();
 
 			/* translators: plugin recommendation markup */
-			$plugin_placeholder = _x( 'We recommend to use %s plugin.', 'plugin recommendation markup', 'amp' );
+			$plugin_placeholder = _x(
+				'Please find out available plugin from %s directory. <a href="https://amp-wp.org/documentation/getting-started/amp-site-setup/persistent-object-caching/#i-need-help-setting-up-my-persistent-object-cache">Learn more.</a>',
+				'plugin recommendation markup',
+				'amp'
+			);
 
 			if ( true === $available_cache['redis'] ) {
 
 				$plugin_recommendation = sprintf(
 					$plugin_placeholder,
-					'<a href="https://wordpress.org/plugins/redis-cache/" target="_blank">Redis Object Cache</a>'
+					'<a href="https://wordpress.org/plugins/search/redis+object+cache/" target="_blank">wordpress.org</a>'
 				);
 
 				$description .= '<p>' . __( 'During the test, We found that the site has Redis cache is available.', 'amp' ) . '&nbsp;' . $plugin_recommendation . '</p>';
@@ -179,7 +183,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 
 				$plugin_recommendation = sprintf(
 					$plugin_placeholder,
-					'<a href="https://wordpress.org/plugins/w3-total-cache/" target="_blank">W3 Total Cache</a>'
+					'<a href="https://wordpress.org/plugins/search/memcached+object+cache/" target="_blank">wordpress.org</a>'
 				);
 
 				$description .= '<p>' . __( 'During the test, We found that the site has Memcache cache is available.', 'amp' ) . '&nbsp;' . $plugin_recommendation . '</p>';
@@ -187,7 +191,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 
 				$plugin_recommendation = sprintf(
 					$plugin_placeholder,
-					'<a href="https://wordpress.org/plugins/w3-total-cache/" target="_blank">W3 Total Cache</a>'
+					'<a href="https://wordpress.org/plugins/search/apcu+object+cache/" target="_blank">wordpress.org</a>'
 				);
 
 				$description .= '<p>' . __( 'During the test, We found that the site has Opcache cache is available.', 'amp' ) . '&nbsp;' . $plugin_recommendation . '</p>';
@@ -311,7 +315,11 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 */
 	public function is_site_has_apcu() {
 
-		return extension_loaded( 'apcu' );
+		return (
+			extension_loaded( 'apcu' ) ||
+			function_exists( 'apc_store' ) ||
+			function_exists( 'apcu_store' )
+		);
 	}
 
 	/**
