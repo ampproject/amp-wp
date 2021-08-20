@@ -14,8 +14,6 @@ use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\TestCase;
-use WP_Scripts;
-use WP_Styles;
 
 /**
  * Tests for Polyfills class.
@@ -34,14 +32,30 @@ class PolyfillsTest extends TestCase {
 	private $instance;
 
 	/**
-	 * Setup.
+	 * Set up.
 	 *
 	 * @inheritdoc
 	 */
 	public function setUp() {
 		parent::setUp();
 
+		global $wp_scripts, $wp_styles;
+		$wp_scripts = null;
+		$wp_styles  = null;
+
 		$this->instance = new Polyfills();
+	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		global $wp_scripts, $wp_styles;
+		$wp_scripts = null;
+		$wp_styles  = null;
 	}
 
 	public function test__construct() {
@@ -66,8 +80,6 @@ class PolyfillsTest extends TestCase {
 	 * @covers ::register_shimmed_styles
 	 */
 	public function test_registration() {
-		global $wp_scripts, $wp_styles;
-
 		if ( function_exists( 'is_gutenberg_page' ) ) {
 			$this->assertFalse( is_gutenberg_page() );
 		}
@@ -78,19 +90,16 @@ class PolyfillsTest extends TestCase {
 
 		$this->instance->register();
 
-		$wp_scripts = new WP_Scripts();
-		$wp_styles  = new WP_Styles();
-
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
 
 		// These should pass in WP < 5.6.
 		$this->assertTrue( wp_script_is( 'lodash', 'registered' ) );
-		$this->assertStringContainsString( '_.noConflict();', $wp_scripts->print_inline_script( 'lodash', 'after', false ) );
+		$this->assertStringContainsString( '_.noConflict();', wp_scripts()->print_inline_script( 'lodash', 'after', false ) );
 
 		$this->assertTrue( wp_script_is( 'wp-api-fetch', 'registered' ) );
-		$this->assertStringContainsString( 'createRootURLMiddleware', $wp_scripts->print_inline_script( 'wp-api-fetch', 'after', false ) );
-		$this->assertStringContainsString( 'createNonceMiddleware', $wp_scripts->print_inline_script( 'wp-api-fetch', 'after', false ) );
+		$this->assertStringContainsString( 'createRootURLMiddleware', wp_scripts()->print_inline_script( 'wp-api-fetch', 'after', false ) );
+		$this->assertStringContainsString( 'createNonceMiddleware', wp_scripts()->print_inline_script( 'wp-api-fetch', 'after', false ) );
 
 		$this->assertTrue( wp_script_is( 'wp-hooks', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'wp-i18n', 'registered' ) );
@@ -99,7 +108,5 @@ class PolyfillsTest extends TestCase {
 		$this->assertTrue( wp_script_is( 'wp-url', 'registered' ) );
 
 		$this->assertTrue( wp_style_is( 'wp-components', 'registered' ) );
-
-		unset( $wp_scripts, $wp_styles );
 	}
 }
