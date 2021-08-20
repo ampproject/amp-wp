@@ -90,9 +90,6 @@ class PolyfillsTest extends TestCase {
 
 		$this->instance->register();
 
-		/** This action is documented in includes/class-amp-theme-support.php */
-		do_action( 'amp_register_polyfills' );
-
 		// These should pass in WP < 5.6.
 		$this->assertTrue( wp_script_is( 'lodash', 'registered' ) );
 		$this->assertStringContainsString( '_.noConflict();', wp_scripts()->print_inline_script( 'lodash', 'after', false ) );
