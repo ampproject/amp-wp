@@ -71,6 +71,10 @@ class PolyfillsTest extends TestCase {
 		if ( function_exists( 'is_gutenberg_page' ) ) {
 			$this->assertFalse( is_gutenberg_page() );
 		}
+		if ( function_exists( 'get_current_screen' ) ) {
+			$screen = get_current_screen();
+			$this->assertTrue( empty( $screen->is_block_editor ) );
+		}
 
 		$this->instance->register();
 
