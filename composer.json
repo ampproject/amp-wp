@@ -14,7 +14,7 @@
     "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
-    "ampproject/amp-toolbox": "dev-add/enforced-css-max-byte-count-transformed-identifier-config#718d9dad",
+    "ampproject/amp-toolbox": "dev-main#b4eb9db",
     "cweagans/composer-patches": "~1.0",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "dev-master#bfdd976"
