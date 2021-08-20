@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RadioGroup matches the snapshot 1`] = `
+<form
+  className="radio-group radio-group--stacked"
+>
+  <label
+    className="radio-group__label"
+    htmlFor="radio-group-0-a"
+  >
+    <div
+      className="radio-group__input"
+    >
+      <input
+        checked={false}
+        id="radio-group-0-a"
+        onChange={[Function]}
+        type="radio"
+      />
+    </div>
+    <h3
+      className="radio-group__title"
+    >
+      Foo
+    </h3>
+  </label>
+  <label
+    className="radio-group__label"
+    htmlFor="radio-group-0-b"
+  >
+    <div
+      className="radio-group__input"
+    >
+      <input
+        checked={false}
+        id="radio-group-0-b"
+        onChange={[Function]}
+        type="radio"
+      />
+    </div>
+    <h3
+      className="radio-group__title"
+    >
+      Bar
+    </h3>
+  </label>
+</form>
+`;

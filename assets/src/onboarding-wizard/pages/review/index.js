@@ -13,8 +13,6 @@ import { PREVIEW_URLS } from 'amp-settings'; // From WP inline script.
  * Internal dependencies
  */
 import './style.scss';
-import { User } from '../../components/user-context-provider';
-import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import {
 	AMPNotice,
 	NOTICE_SIZE_LARGE,
@@ -26,10 +24,39 @@ import { Options } from '../../../components/options-context-provider';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import { User } from '../../../components/user-context-provider';
 import { Phone } from '../../../components/phone';
+import { RadioGroup } from '../../../components/radio-group/radio-group';
+import { Selectable } from '../../../components/selectable';
 import { Preview } from './preview';
-import { PreviewPageSelector } from './preview-page-selector';
-import { PreviewModeSelector } from './preview-mode-selector';
 import { Saving } from './saving';
+
+/**
+ * Gets the title for the preview page selector.
+ *
+ * @param {string} page The page type.
+ */
+function getPreviewPageTitle( page ) {
+	switch ( page ) {
+		case 'home':
+			return __( 'Homepage', 'amp' );
+
+		case 'author':
+			return __( 'Author page', 'amp' );
+
+		case 'date':
+			return __( 'Archive page', 'amp' );
+
+		case 'search':
+			return __( 'Search results', 'amp' );
+
+		default:
+			return `${ page.charAt( 0 ).toUpperCase() }${ page.slice( 1 ) }`;
+	}
+}
+
+const previewPageOptions = Object.keys( PREVIEW_URLS ).map( ( page ) => ( {
+	value: page,
+	title: getPreviewPageTitle( page ),
+} ) );
 
 /**
  * Final screen, where data is saved.
@@ -119,11 +146,13 @@ export function Review() {
 						</p>
 					</>
 				) }
-				<PreviewPageSelector
-					pages={ Object.keys( PREVIEW_URLS ) }
-					selectedPage={ previewPageType }
-					onChange={ setPreviewPageType }
-				/>
+				<Selectable>
+					<RadioGroup
+						options={ previewPageOptions }
+						selected={ previewPageType }
+						onChange={ setPreviewPageType }
+					/>
+				</Selectable>
 			</div>
 			<div className="review__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (
@@ -132,10 +161,20 @@ export function Review() {
 					</AMPNotice>
 				) }
 				{ 'transitional' === themeSupport && (
-					<PreviewModeSelector
-						modes={ [ 'amp', 'non-amp' ] }
+					<RadioGroup
+						options={ [
+							{
+								value: 'amp',
+								title: __( 'AMP', 'amp' ),
+							},
+							{
+								value: 'non-amp',
+								title: __( 'Non-AMP', 'amp' ),
+							},
+						] }
+						selected={ previewMode }
 						onChange={ setPreviewMode }
-						selectedMode={ previewMode }
+						isHorizontal={ true }
 					/>
 				) }
 				<Preview url={ PREVIEW_URLS[ previewPageType ][ previewMode === 'amp' ? 'amp_url' : 'url' ] } />
