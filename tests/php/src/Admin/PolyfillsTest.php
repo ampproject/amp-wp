@@ -67,6 +67,11 @@ class PolyfillsTest extends TestCase {
 	 */
 	public function test_registration() {
 		global $wp_scripts, $wp_styles;
+
+		if ( function_exists( 'is_gutenberg_page' ) ) {
+			$this->assertFalse( is_gutenberg_page() );
+		}
+
 		$this->instance->register();
 
 		$wp_scripts = new WP_Scripts();
