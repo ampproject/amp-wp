@@ -9,7 +9,6 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeLoader;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use WP_Customize_Manager;
 use WP_Customize_Panel;
@@ -18,7 +17,7 @@ use WP_Theme;
 /** @coversDefaultClass \AmpProject\AmpWP\ReaderThemeLoader */
 final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility, LoadsCoreThemes;
+	use LoadsCoreThemes;
 
 	/** @var ReaderThemeLoader */
 	private $instance;
@@ -159,15 +158,15 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		$this->instance->register(); // This adds a `wp_prepare_themes_for_js` filter.
 		$themes = wp_prepare_themes_for_js();
 		$this->assertEquals( $active_theme_slug, $themes[0]['id'] );
-		$this->assertStringNotContains( 'AMP', $themes[0]['description'] );
+		$this->assertStringNotContainsString( 'AMP', $themes[0]['description'] );
 		$this->assertArrayHasKey( 'delete', $themes[0]['actions'], 'The delete key is expected even though the theme is active because the delete option is hidden via the JS template.' );
-		$this->assertStringNotContains( amp_get_slug() . '=', $themes[0]['actions']['customize'] );
+		$this->assertStringNotContainsString( amp_get_slug() . '=', $themes[0]['actions']['customize'] );
 		$this->assertArrayNotHasKey( 'ampActiveReaderTheme', $themes[0] );
 		$this->assertArrayNotHasKey( 'ampReaderThemeNotice', $themes[0] );
 
 		$this->assertEquals( $reader_theme_slug, $themes[1]['id'] );
 		$this->assertArrayNotHasKey( 'delete', $themes[1]['actions'] );
-		$this->assertStringContains( amp_get_slug() . '=', $themes[1]['actions']['customize'] );
+		$this->assertStringContainsString( amp_get_slug() . '=', $themes[1]['actions']['customize'] );
 		$this->assertArrayHasKey( 'ampActiveReaderTheme', $themes[1] );
 		$this->assertArrayHasKey( 'ampReaderThemeNotice', $themes[1] );
 	}
@@ -184,7 +183,7 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
 
 		$output = get_echo( [ $this->instance, 'inject_theme_single_template_modifications' ] );
-		$this->assertStringContains( '<script>', $output );
+		$this->assertStringContainsString( '<script>', $output );
 	}
 
 	/** @covers ::get_reader_theme() */
@@ -271,14 +270,14 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		add_theme_support( 'widgets-block-editor' );
 
 		$this->assertNotEmpty( wp_get_sidebars_widgets() );
-		$this->assertContains( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
+		$this->assertStringContainsString( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
 		$this->assertTrue( current_theme_supports( 'widgets-block-editor' ) );
 
 		$this->instance->disable_widgets();
 
 		$this->assertTrue( has_filter( 'sidebars_widgets' ) );
 		$this->assertEquals( [], wp_get_sidebars_widgets() );
-		$this->assertNotContains( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
+		$this->assertStringNotContainsString( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
 		$this->assertFalse( current_theme_supports( 'widgets-block-editor' ) );
 	}
 

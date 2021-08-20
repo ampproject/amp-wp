@@ -13,12 +13,12 @@ import { __ } from '@wordpress/i18n';
 /**
  * Navigation dot.
  *
- * @param {Object} props Component props.
- * @param {boolean} props.isHighlighted Whether the current item is highlighted.
- * @param {string} props.id An HTML ID.
- * @param {string} props.label Button label.
- * @param {string} props.namespace CSS namespace.
- * @param {Function} props.onClick Click callback.
+ * @param {Object}   props               Component props.
+ * @param {boolean}  props.isHighlighted Whether the current item is highlighted.
+ * @param {string}   props.id            An HTML ID.
+ * @param {string}   props.label         Button label.
+ * @param {string}   props.namespace     CSS namespace.
+ * @param {Function} props.onClick       Click callback.
  */
 function Dot( { id, isHighlighted, label, namespace, onClick } ) {
 	return (
@@ -56,15 +56,15 @@ Dot.propTypes = {
 /**
  * Dot navigation component.
  *
- * @param {Object} props Component props.
- * @param {Element} props.currentPage The current item.
- * @param {HTMLCollection} props.items Items in the carousel.
- * @param {string} props.namespace CSS namespace.
- * @param {Function} props.setCurrentPage Sets an item as the current item.
- * @param {number} props.centeredItemIndex Index of the item centered in the view.
- * @param {boolean} props.showDots Whether to show the dot navigation.
- * @param {boolean} props.prevButtonDisabled Whether the prev button is disabled.
- * @param {boolean} props.nextButtonDisabled Whether the next button is disabled.
+ * @param {Object}         props                    Component props.
+ * @param {Element}        props.currentPage        The current item.
+ * @param {HTMLCollection} props.items              Items in the carousel.
+ * @param {string}         props.namespace          CSS namespace.
+ * @param {Function}       props.setCurrentPage     Sets an item as the current item.
+ * @param {number}         props.centeredItemIndex  Index of the item centered in the view.
+ * @param {boolean}        props.showDots           Whether to show the dot navigation.
+ * @param {boolean}        props.prevButtonDisabled Whether the prev button is disabled.
+ * @param {boolean}        props.nextButtonDisabled Whether the next button is disabled.
  */
 export function CarouselNav( {
 	currentPage,

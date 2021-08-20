@@ -34,15 +34,18 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 		foreach ( $this->dom->getElementsByTagName( 'form' ) as $comment_form ) {
+			// Skip processing comment forms which have opted-out of conversion to amp-form.
+			// Note that AMP_Form_Sanitizer runs before AMP_Comments_Sanitizer according to amp_get_content_sanitizers().
+			if ( $comment_form->hasAttribute( 'action' ) ) {
+				continue;
+			}
+
 			/**
 			 * Comment form.
 			 *
 			 * @var DOMElement $comment_form
 			 */
-			$action = $comment_form->getAttribute( 'action-xhr' );
-			if ( ! $action ) {
-				$action = $comment_form->getAttribute( 'action' );
-			}
+			$action      = $comment_form->getAttribute( 'action-xhr' );
 			$action_path = wp_parse_url( $action, PHP_URL_PATH );
 			if ( 'wp-comments-post.php' === basename( $action_path ) ) {
 				$this->process_comment_form( $comment_form );

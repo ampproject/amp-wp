@@ -5,11 +5,13 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\TestCase;
+
 /**
  * @runInSeparateProcess
  * @group uninstall
  */
-class Test_Uninstall extends WP_UnitTestCase {
+class Test_Uninstall extends TestCase {
 
 	/** @var bool */
 	private $was_using_ext_object_cache;

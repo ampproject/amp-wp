@@ -7,16 +7,14 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_HTTP.
  *
  * @covers AMP_HTTP
  */
-class Test_AMP_HTTP extends WP_UnitTestCase {
-
-	use AssertContainsCompatibility;
+class Test_AMP_HTTP extends TestCase {
 
 	/**
 	 * Set up before class.
@@ -44,7 +42,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 */
 	public function test_send_header_no_args() {
 		AMP_HTTP::send_header( 'Foo', 'Bar' );
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Foo',
 				'value'       => 'Bar',
@@ -68,7 +66,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 				'replace' => false,
 			]
 		);
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Foo',
 				'value'       => 'Bar',
@@ -92,7 +90,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 				'status_code' => 400,
 			]
 		);
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Foo',
 				'value'       => 'Bar',
@@ -163,8 +161,8 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		foreach ( $all_query_vars as $key => $value ) {
 			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertStringContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertStringContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringContainsString( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringContainsString( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 
 		AMP_HTTP::$purged_amp_query_vars = [];
@@ -174,14 +172,14 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		foreach ( $bad_query_vars as $key => $value ) {
 			$this->assertArrayNotHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayNotHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertStringNotContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertStringNotContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringNotContainsString( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringNotContainsString( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		foreach ( $ok_query_vars as $key => $value ) {
 			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertStringContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertStringContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringContainsString( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringContainsString( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		// phpcs:enable WordPress.CSRF.NonceVerification.NoNonceVerification
 	}
@@ -383,10 +381,10 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		$_SERVER['REQUEST_METHOD']                        = 'POST';
 		AMP_HTTP::purge_amp_query_vars();
 		AMP_HTTP::handle_xhr_request();
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', [ 'AMP_HTTP', 'intercept_post_request_redirect' ] ) );
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_post_redirect', [ 'AMP_HTTP', 'filter_comment_post_redirect' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', [ AMP_HTTP::class, 'intercept_post_request_redirect' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_post_redirect', [ AMP_HTTP::class, 'filter_comment_post_redirect' ] ) );
 		$this->assertEquals(
-			[ 'AMP_HTTP', 'handle_wp_die' ],
+			[ AMP_HTTP::class, 'handle_wp_die' ],
 			apply_filters( 'wp_die_handler', '__return_true' )
 		);
 	}
@@ -421,7 +419,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( $url );
 		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'AMP-Redirect-To',
 				'value'       => $url,
@@ -430,7 +428,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			],
 			AMP_HTTP::$headers_sent
 		);
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Access-Control-Expose-Headers',
 				'value'       => 'AMP-Redirect-To',
@@ -446,7 +444,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		$url = home_url( '/', 'http' );
 		AMP_HTTP::intercept_post_request_redirect( $url );
 		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'AMP-Redirect-To',
 				'value'       => preg_replace( '#^\w+:#', '', $url ),
@@ -455,7 +453,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			],
 			AMP_HTTP::$headers_sent
 		);
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Access-Control-Expose-Headers',
 				'value'       => 'AMP-Redirect-To',
@@ -470,7 +468,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( '/new-location/' );
 		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'AMP-Redirect-To',
 				'value'       => set_url_scheme( home_url( '/new-location/' ), 'https' ),
@@ -486,7 +484,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		$url = home_url( '/new-location/' );
 		AMP_HTTP::intercept_post_request_redirect( substr( $url, strpos( $url, ':' ) + 1 ) );
 		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'AMP-Redirect-To',
 				'value'       => set_url_scheme( home_url( '/new-location/' ), 'https' ),
@@ -501,7 +499,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( '' );
 		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'AMP-Redirect-To',
 				'value'       => set_url_scheme( home_url(), 'https' ),

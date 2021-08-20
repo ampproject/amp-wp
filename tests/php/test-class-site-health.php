@@ -10,15 +10,14 @@ use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Test Site_Health.
  */
-class Test_Site_Health extends WP_UnitTestCase {
+class Test_Site_Health extends TestCase {
 
-	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -337,7 +336,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$actual = $this->instance->xdebug_extension();
 		$this->assertEquals( 'amp_xdebug_extension', $actual['test'] );
 
-		$this->assertStringContains(
+		$this->assertStringContainsString(
 			esc_html( 'The Xdebug extension can cause some of the AMP plugin&#8217;s processes to time out depending on your system resources and configuration. It should not be enabled on a live site (production environment).' ),
 			$actual['description']
 		);

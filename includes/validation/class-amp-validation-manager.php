@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
 use AmpProject\Tag;
 use AmpProject\Dom\Document;
+use AmpProject\Exception\MaxCssByteCountExceeded;
 
 /**
  * Class AMP_Validation_Manager
@@ -1682,8 +1683,12 @@ class AMP_Validation_Manager {
 		$text .= ' ' . implode( ', ', $items );
 
 		$validate_link->appendChild( $dom->createTextNode( ' ' ) );
-		$small = $dom->createElement( 'small' );
-		$small->setAttribute( 'style', 'font-size: smaller' );
+		$small = $dom->createElement( Tag::SMALL );
+		try {
+			$small->setAttribute( Attribute::STYLE, 'font-size: smaller' );
+		} catch ( MaxCssByteCountExceeded $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Making the font size smaller is just a nice-to-have.
+		}
 		$small->appendChild( $dom->createTextNode( sprintf( '(%s)', $text ) ) );
 		$validate_link->appendChild( $small );
 	}
@@ -1699,8 +1704,8 @@ class AMP_Validation_Manager {
 			$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
 		}
 
-		if ( isset( $sanitizers['AMP_Style_Sanitizer'] ) ) {
-			$sanitizers['AMP_Style_Sanitizer']['should_locate_sources'] = self::$is_validate_request;
+		if ( isset( $sanitizers[ AMP_Style_Sanitizer::class ] ) ) {
+			$sanitizers[ AMP_Style_Sanitizer::class ]['should_locate_sources'] = self::$is_validate_request;
 
 			$css_validation_errors = [];
 			foreach ( self::$validation_error_status_overrides as $slug => $status ) {
@@ -1722,7 +1727,7 @@ class AMP_Validation_Manager {
 				}
 			}
 			if ( ! empty( $css_validation_errors ) ) {
-				$sanitizers['AMP_Style_Sanitizer']['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
+				$sanitizers[ AMP_Style_Sanitizer::class ]['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
 			}
 		}
 
@@ -2175,11 +2180,16 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$editor_support = Services::get( 'editor.editor_support' );
-
 		// Block validation script uses features only available beginning with WP 5.6.
-		if ( ! $editor_support->editor_supports_amp_block_editor_features() ) {
+		$dependency_support = Services::get( 'dependency_support' );
+		if ( ! $dependency_support->has_support() ) {
 			return; // @codeCoverageIgnore
+		}
+
+		// Only enqueue scripts on the block editor for AMP-enabled posts.
+		$editor_support = Services::get( 'editor.editor_support' );
+		if ( ! $editor_support->is_current_screen_block_editor_for_amp_enabled_post_type() ) {
+			return;
 		}
 
 		$slug = 'amp-block-validation';

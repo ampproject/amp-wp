@@ -113,7 +113,9 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 		}
 
-		$attributes['width']  = $this->args['width'];
+		if ( ! empty( $this->args['width'] ) ) {
+			$attributes['width'] = $this->args['width'];
+		}
 		$attributes['height'] = $this->args['height'];
 		if ( empty( $attributes['width'] ) || 'auto' === $attributes['width'] ) {
 			$attributes['layout'] = 'fixed-height';
@@ -180,12 +182,17 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			return;
 		}
 
-		$attributes = [
-			'width'        => 'auto',
-			'height'       => $this->DEFAULT_HEIGHT,
-			'layout'       => 'fixed-height',
-			'data-tweetid' => $tweet_id,
-		];
+		$attributes = [];
+		if ( ! empty( $this->args['width'] ) ) {
+			$attributes['width'] = $this->args['width'];
+		}
+		$attributes['height'] = $this->args['height'];
+		if ( empty( $attributes['width'] ) || 'auto' === $attributes['width'] ) {
+			$attributes['layout'] = 'fixed-height';
+		} else {
+			$attributes['layout'] = 'responsive';
+		}
+		$attributes['data-tweetid'] = $tweet_id;
 
 		if ( $node->hasAttributes() ) {
 			foreach ( $node->attributes as $attr ) {

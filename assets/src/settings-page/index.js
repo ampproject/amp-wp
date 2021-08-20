@@ -50,8 +50,8 @@ let errorHandler;
 /**
  * Context providers for the settings page.
  *
- * @param {Object} props Component props.
- * @param {any} props.children Context consumers.
+ * @param {Object} props          Component props.
+ * @param {any}    props.children Context consumers.
  */
 function Providers( { children } ) {
 	global.removeEventListener( 'error', errorHandler );
@@ -111,7 +111,7 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 /**
  * Settings page application root.
  *
- * @param {Object} props
+ * @param {Object}  props
  * @param {Element} props.appRoot App root.
  */
 function Root( { appRoot } ) {

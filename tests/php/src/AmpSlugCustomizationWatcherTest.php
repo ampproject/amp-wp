@@ -5,13 +5,9 @@ namespace AmpProject\AmpWP\Tests;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
-use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\AmpSlugCustomizationWatcher */
-final class AmpSlugCustomizationWatcherTest extends WP_UnitTestCase {
-
-	use AssertContainsCompatibility;
+final class AmpSlugCustomizationWatcherTest extends TestCase {
 
 	/** @var AmpSlugCustomizationWatcher */
 	private $instance;

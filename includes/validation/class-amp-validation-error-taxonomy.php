@@ -3341,6 +3341,31 @@ class AMP_Validation_Error_Taxonomy {
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
+			case AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR:
+				return sprintf(
+					/* translators: %1$s is 'POST', %2$s is 'action-xhr' */
+					esc_html__( 'Form has %1$s method without %2$s attribute. (Mark as kept to prevent conversion to AMP.)', 'amp' ),
+					'<code>POST</code>',
+					'<code>action-xhr</code>'
+				);
+
+			case AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT:
+				return sprintf(
+					/* translators: %s is script basename */
+					esc_html__( 'Custom external script %s encountered', 'amp' ),
+					'<code>' . basename( strtok( $validation_error['node_attributes']['src'], '?#' ) ) . '</code>'
+				);
+
+			case AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT:
+				return esc_html__( 'Custom inline script encountered', 'amp' );
+
+			case AMP_Script_Sanitizer::CUSTOM_EVENT_HANDLER_ATTR:
+				return sprintf(
+					/* translators: %s is attribute name */
+					esc_html__( 'Event handler attribute %s encountered', 'amp' ),
+					'<code>' . $validation_error['node_name'] . '</code>'
+				);
+
 			default:
 				/* translators: %s error code */
 				return sprintf( esc_html__( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );

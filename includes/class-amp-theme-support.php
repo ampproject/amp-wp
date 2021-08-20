@@ -14,9 +14,12 @@ use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
+use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Optimizer;
+use AmpProject\Optimizer\Configuration\TransformedIdentifierConfiguration;
+use AmpProject\Optimizer\Transformer\TransformedIdentifier;
 use AmpProject\RequestDestination;
 use AmpProject\Tag;
 use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
@@ -350,7 +353,7 @@ class AMP_Theme_Support {
 		self::$sanitizer_classes = amp_get_content_sanitizers();
 		self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
 		self::$embed_handlers    = self::register_content_embed_handlers();
-		self::$sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = self::$embed_handlers;
+		self::$sanitizer_classes[ AMP_Embed_Sanitizer::class ]['embed_handlers'] = self::$embed_handlers;
 
 		foreach ( self::$sanitizer_classes as $sanitizer_class => $args ) {
 			if ( method_exists( $sanitizer_class, 'add_buffering_hooks' ) ) {
@@ -914,6 +917,23 @@ class AMP_Theme_Support {
 				wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
 			}
 		);
+
+		// Enable Bento experiment per <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
+		// @todo Remove this once Bento no longer requires an experiment to opt-in.
+		if ( amp_is_bento_enabled() ) {
+			add_action(
+				'wp_head',
+				static function () {
+					?>
+					<script data-ampdevmode>
+						(self.AMP = self.AMP || []).push(function (AMP) {
+							AMP.toggleExperiment('bento', true);
+						});
+					</script>
+					<?php
+				}
+			);
+		}
 	}
 
 	/**
@@ -976,10 +996,10 @@ class AMP_Theme_Support {
 					__METHOD__,
 					esc_html(
 						sprintf(
-							/* translators: 1: embed handler. 2: AMP_Embed_Handler */
+							/* translators: 1: embed handler. 2: AMP_Base_Embed_Handler */
 							__( 'Embed Handler (%1$s) must extend `%2$s`', 'amp' ),
 							esc_html( $embed_handler_class ),
-							'AMP_Embed_Handler'
+							AMP_Base_Embed_Handler::class
 						)
 					),
 					'0.1'
@@ -1423,7 +1443,6 @@ class AMP_Theme_Support {
 		}
 
 		// Ensure rel=canonical link.
-		$rel_canonical = null;
 		if ( empty( $links['canonical'] ) ) {
 			$rel_canonical = AMP_DOM_Utils::create_node(
 				$dom,
@@ -1503,6 +1522,25 @@ class AMP_Theme_Support {
 			array_keys( $amp_scripts ),
 			array_merge( $script_handles, [ Amp::RUNTIME ] )
 		);
+
+		// Allow the amp-carousel script as a special case to be on the page when there is no <amp-carousel> since the
+		// amp-lightbox-gallery component will lazy-load the amp-carousel script when a lightbox is opened, and since
+		// amp-carousel v0.1 is still the 'latest' version, this can mean that fixes needed with the 0.2 version won't
+		// be present on the page. Adding the amp-carousel v0.2 script is a stated workaround suggested in an AMP core
+		// issue: <https://github.com/ampproject/amphtml/issues/35402#issuecomment-887837815>.
+		if ( in_array( 'amp-lightbox-gallery', $script_handles, true ) ) {
+			$superfluous_script_handles = array_diff( $superfluous_script_handles, [ 'amp-carousel' ] );
+		}
+
+		// When opting-in to POST forms, omit the amp-form component entirely since it blocks submission.
+		if (
+			in_array( Extension::FORM, $script_handles, true )
+			&&
+			$dom->xpath->query( '//form[ @action and @method and translate( @method, "POST", "post" ) = "post" ]' )->length > 0
+		) {
+			$superfluous_script_handles[] = Extension::FORM;
+		}
+
 		foreach ( $superfluous_script_handles as $superfluous_script_handle ) {
 			if ( ! empty( $extension_specs[ $superfluous_script_handle ]['requires_usage'] ) ) {
 				unset( $amp_scripts[ $superfluous_script_handle ] );
@@ -2043,6 +2081,9 @@ class AMP_Theme_Support {
 			do_action( 'amp_server_timing_start', 'amp_optimizer' );
 
 			$errors = new Optimizer\ErrorCollection();
+
+			// @todo The dev mode attribute is being overloaded here. We should use something else.
+			$args['skip_css_max_byte_count_enforcement'] = $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE );
 			self::get_optimizer( $args )->optimizeDom( $dom, $errors );
 
 			if ( count( $errors ) > 0 ) {
@@ -2082,6 +2123,14 @@ class AMP_Theme_Support {
 			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );
 		}
 
+		// Prevent serving a page in Dev Mode as being marked as AMP when the user is not logged-in to avoid it from
+		// being flagged as invalid by Google Search Console.
+		if ( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) && ! is_user_logged_in() ) {
+			$dom->documentElement->removeAttribute( Attribute::AMP );
+			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
+			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
+		}
+
 		$response = $dom->saveHTML();
 
 		/**
@@ -2107,6 +2156,13 @@ class AMP_Theme_Support {
 		add_filter(
 			'amp_enable_ssr',
 			static function () use ( $args ) {
+				// @codeCoverageIgnoreStart
+				// SSR currently does not work reliably with Bento. See <https://github.com/ampproject/amphtml/issues/35485>.
+				if ( amp_is_bento_enabled() ) {
+					return false;
+				}
+				// @codeCoverageIgnoreEnd
+
 				return array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
 					? $args[ ConfigurationArgument::ENABLE_SSR ]
 					: true;
@@ -2117,9 +2173,12 @@ class AMP_Theme_Support {
 		// Supply the Schema.org metadata, previously obtained just before output buffering began, to the AmpSchemaOrgMetadataConfiguration.
 		add_filter(
 			'amp_optimizer_config',
-			function ( $config ) {
+			function ( $config ) use ( $args ) {
 				if ( is_array( self::$metadata ) ) {
 					$config[ AmpSchemaOrgMetadata::class ][ AmpSchemaOrgMetadataConfiguration::METADATA ] = self::$metadata;
+				}
+				if ( ! empty( $args['skip_css_max_byte_count_enforcement'] ) ) {
+					$config[ TransformedIdentifier::class ][ TransformedIdentifierConfiguration::ENFORCED_CSS_MAX_BYTE_COUNT ] = false;
 				}
 				return $config;
 			},

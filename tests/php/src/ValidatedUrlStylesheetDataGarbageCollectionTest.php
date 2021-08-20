@@ -10,10 +10,9 @@ namespace AmpProject\AmpWP\Tests;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection;
-use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection */
-class ValidatedUrlStylesheetDataGarbageCollectionTest extends WP_UnitTestCase {
+class ValidatedUrlStylesheetDataGarbageCollectionTest extends TestCase {
 
 	/**
 	 * Test whether an event is actually scheduled when the garbage collection is registered.
@@ -31,7 +30,7 @@ class ValidatedUrlStylesheetDataGarbageCollectionTest extends WP_UnitTestCase {
 		$timestamp = wp_next_scheduled( ValidatedUrlStylesheetDataGarbageCollection::EVENT_NAME );
 
 		$this->assertNotFalse( $timestamp );
-		$this->assertInternalType( 'int', $timestamp );
+		$this->assertIsInt( $timestamp );
 		$this->assertGreaterThan( 0, $timestamp );
 	}
 

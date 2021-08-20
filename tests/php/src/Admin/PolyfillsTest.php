@@ -10,11 +10,12 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AmpProject\AmpWP\Admin\Polyfills;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\TestCase;
 use WP_Scripts;
 use WP_Styles;
-use WP_UnitTestCase;
 
 /**
  * Tests for Polyfills class.
@@ -23,7 +24,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\Polyfills
  */
-class PolyfillsTest extends WP_UnitTestCase {
+class PolyfillsTest extends TestCase {
 
 	/**
 	 * Test instance.
@@ -49,6 +50,12 @@ class PolyfillsTest extends WP_UnitTestCase {
 		$this->assertInstanceOf( Delayed::class, $this->instance );
 		$this->assertInstanceOf( Conditional::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
+		$this->assertInstanceOf( HasRequirements::class, $this->instance );
+	}
+
+	/** @covers ::get_requirements() */
+	public function test_get_requirements() {
+		$this->assertSame( [ 'dependency_support' ], Polyfills::get_requirements() );
 	}
 
 	/**
@@ -70,11 +77,11 @@ class PolyfillsTest extends WP_UnitTestCase {
 
 		// These should pass in WP < 5.6.
 		$this->assertTrue( wp_script_is( 'lodash', 'registered' ) );
-		$this->assertContains( '_.noConflict();', $wp_scripts->print_inline_script( 'lodash', 'after', false ) );
+		$this->assertStringContainsString( '_.noConflict();', $wp_scripts->print_inline_script( 'lodash', 'after', false ) );
 
 		$this->assertTrue( wp_script_is( 'wp-api-fetch', 'registered' ) );
-		$this->assertContains( 'createRootURLMiddleware', $wp_scripts->print_inline_script( 'wp-api-fetch', 'after', false ) );
-		$this->assertContains( 'createNonceMiddleware', $wp_scripts->print_inline_script( 'wp-api-fetch', 'after', false ) );
+		$this->assertStringContainsString( 'createRootURLMiddleware', $wp_scripts->print_inline_script( 'wp-api-fetch', 'after', false ) );
+		$this->assertStringContainsString( 'createNonceMiddleware', $wp_scripts->print_inline_script( 'wp-api-fetch', 'after', false ) );
 
 		$this->assertTrue( wp_script_is( 'wp-hooks', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'wp-i18n', 'registered' ) );

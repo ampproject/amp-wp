@@ -8,12 +8,10 @@ use AmpProject\AmpWP\Instrumentation\EventWithDuration;
 use AmpProject\AmpWP\Instrumentation\ServerTiming;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 final class ServerTimingTest extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -220,7 +218,7 @@ final class ServerTimingTest extends DependencyInjectedTestCase {
 		$event  = $events['event-9'];
 		$event->set_duration( 3.14 );
 
-		$this->assertStringContains( 'event-9;desc="Event N°9";prop-9="val-9";prop-10="val-10";dur="3.1"', $server_timing->get_header_string() );
+		$this->assertStringContainsString( 'event-9;desc="Event N°9";prop-9="val-9";prop-10="val-10";dur="3.1"', $server_timing->get_header_string() );
 	}
 
 	/**
@@ -241,7 +239,7 @@ final class ServerTimingTest extends DependencyInjectedTestCase {
 
 		$server_timing->send();
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Server-Timing',
 				'value'       => 'event-10;desc="Event N°10";dur="12345.7"',
@@ -272,7 +270,7 @@ final class ServerTimingTest extends DependencyInjectedTestCase {
 
 		do_action( 'amp_server_timing_send' );
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Server-Timing',
 				'value'       => 'event-11;desc="Event N°11";dur="3.1"',
@@ -350,11 +348,11 @@ final class ServerTimingTest extends DependencyInjectedTestCase {
 		$events     = $this->get_private_property( $server_timing, 'events' );
 		$main_event = $events['main-event'];
 		$main_event->set_duration( 1.2 );
-		$this->assertNotContains( 'verbose-event', $events );
+		$this->assertStringNotContainsString( 'verbose-event', $events );
 
 		$server_timing->send();
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Server-Timing',
 				'value'       => 'main-event;desc="Main Event";dur="1.2"',
@@ -382,7 +380,7 @@ final class ServerTimingTest extends DependencyInjectedTestCase {
 
 		$server_timing->send();
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			[
 				'name'        => 'Server-Timing',
 				'value'       => 'main-event;desc="Main Event";dur="1.2",verbose-event;desc="Verbose Event";dur="3.4"',
