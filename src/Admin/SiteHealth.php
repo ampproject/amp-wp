@@ -274,9 +274,9 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 			if ( ! empty( $http_response_header['x-amp-random-number'] ) ) {
 				$response = $http_response_header['x-amp-random-number'];
-			} elseif ( empty( $http_response_header['x-amp-random-number'] ) ) {
+			} else {
 				// If age tag have positive number then consider page cache exists.
-				if ( ! empty( $http_response_header['age'] ) && 0 < intval( $http_response_header['age'] ) ) {
+				if ( ! empty( $http_response_header['age'] ) && 0 < (int) $http_response_header['age'] ) {
 					$response = true;
 				}
 			}
