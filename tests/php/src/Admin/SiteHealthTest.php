@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
+use AMP_Options_Manager;
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\AmpWpPluginFactory;
@@ -522,7 +523,7 @@ class SiteHealthTest extends TestCase {
 			$this->instance->add_extensions( [] )
 		);
 
-		// Test that the the `intl` extension is added only when site URL is an IDN.
+		// Test that the `intl` extension is added only when site URL is an IDN.
 		add_filter( 'site_url', [ self::class, 'get_idn' ], 10, 4 );
 
 		$extensions = $this->instance->add_extensions( [] );
