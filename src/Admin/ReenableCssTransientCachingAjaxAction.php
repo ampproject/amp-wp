@@ -62,8 +62,8 @@ final class ReenableCssTransientCachingAjaxAction implements Service, Registerab
 
 		$script = <<< 'JS_SCRIPT'
 ;( function () {
-	window.addEventListener( 'DOMContentLoaded', ( event ) => {
-		var selector = SELECTOR;
+	var selector = SELECTOR;
+	setTimeout( function () {
 		( document.querySelectorAll( selector ) || [] )
 			.forEach( ( element ) => {
 				element.addEventListener( 'click', function ( event ) {
@@ -84,7 +84,7 @@ final class ReenableCssTransientCachingAjaxAction implements Service, Registerab
 						} );
 				} );
 			} );
-	} );
+	}, 1000 );
 } )();
 JS_SCRIPT;
 
