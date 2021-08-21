@@ -1,9 +1,11 @@
 <?php
 /**
- * Test Site_Health.
+ * Test SiteHealthTest.
  *
- * @package AmpProject\AmpWP
+ * @package AmpProject\AmpWP\Tests
  */
+
+namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
@@ -14,9 +16,11 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
 
 /**
- * Test Site_Health.
+ * Test SiteHealthTest.
+ *
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\SiteHealth
  */
-class Test_Site_Health extends TestCase {
+class SiteHealthTest extends TestCase {
 
 	use PrivateAccess;
 
@@ -61,7 +65,7 @@ class Test_Site_Health extends TestCase {
 	/**
 	 * Test init.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::register()
+	 * @covers ::register()
 	 */
 	public function test_register() {
 		$this->instance->register();
@@ -69,13 +73,18 @@ class Test_Site_Health extends TestCase {
 		$this->assertEquals( 10, has_filter( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
 		$this->assertEquals( 10, has_filter( 'site_status_test_result', [ $this->instance, 'modify_test_result' ] ) );
 		$this->assertEquals( 10, has_filter( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_print_styles-site-health.php', [ $this->instance, 'add_styles' ] ) );
+
+		if ( ! defined( 'HEALTH_CHECK_PLUGIN_VERSION' ) ) {
+			$this->assertEquals( 10, has_action( 'admin_print_styles-site-health.php', [ $this->instance, 'add_styles' ] ) );
+		} else {
+			$this->assertEquals( 10, has_action( 'admin_print_styles-tools_page_health-check', [ $this->instance, 'add_styles' ] ) );
+		}
 	}
 
 	/**
 	 * Test add_tests.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_tests()
+	 * @covers ::add_tests()
 	 */
 	public function test_add_tests() {
 		$tests = $this->instance->add_tests( [] );
@@ -102,7 +111,7 @@ class Test_Site_Health extends TestCase {
 	/**
 	 * Test persistent_object_cache.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::persistent_object_cache()
+	 * @covers ::persistent_object_cache()
 	 */
 	public function test_persistent_object_cache() {
 		$data = [
@@ -144,7 +153,7 @@ class Test_Site_Health extends TestCase {
 	/**
 	 * Test slug_definition_timing.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::slug_definition_timing()
+	 * @covers ::slug_definition_timing()
 	 */
 	public function test_slug_definition_timing() {
 		$data = [
@@ -197,7 +206,7 @@ class Test_Site_Health extends TestCase {
 	/**
 	 * Test curl_multi_functions.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::curl_multi_functions()
+	 * @covers ::curl_multi_functions()
 	 */
 	public function test_curl_multi_functions() {
 		$this->assertArraySubset(
@@ -211,7 +220,7 @@ class Test_Site_Health extends TestCase {
 	/**
 	 * Test icu_version.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::icu_version()
+	 * @covers ::icu_version()
 	 */
 	public function test_icu_version() {
 		$this->assertArraySubset(
@@ -225,7 +234,7 @@ class Test_Site_Health extends TestCase {
 	/**
 	 * Test css_transient_caching.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::css_transient_caching()
+	 * @covers ::css_transient_caching()
 	 */
 	public function test_css_transient_caching() {
 		$data = [
@@ -268,7 +277,7 @@ class Test_Site_Health extends TestCase {
 	/**
 	 * Test xdebug_extension.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::xdebug_extension()
+	 * @covers ::xdebug_extension()
 	 */
 	public function test_xdebug_extension() {
 		$actual = $this->instance->xdebug_extension();
@@ -283,7 +292,7 @@ class Test_Site_Health extends TestCase {
 	/**
 	 * Test add_debug_information.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_debug_information()
+	 * @covers ::add_debug_information()
 	 */
 	public function test_add_debug_information() {
 		$debug_info = $this->instance->add_debug_information( [] );
@@ -343,7 +352,7 @@ class Test_Site_Health extends TestCase {
 	 *
 	 * @dataProvider get_test_result
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::modify_test_result()
+	 * @covers ::modify_test_result()
 	 *
 	 * @param array $test_data Data from Site Health test.
 	 * @param array $expected  Expected modified test result.
@@ -414,7 +423,7 @@ class Test_Site_Health extends TestCase {
 	 * Test add_debug_information.
 	 *
 	 * @dataProvider get_supported_templates_data
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::get_supported_templates()
+	 * @covers ::get_supported_templates()
 	 *
 	 * @param array  $supported_content_types The supported content types, like 'post'.
 	 * @param array  $supported_templates     The supported templates, like 'is_author'.
@@ -475,7 +484,7 @@ class Test_Site_Health extends TestCase {
 	 * Test get_serve_all_templates.
 	 *
 	 * @dataProvider get_serve_all_templates_data
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::get_serve_all_templates()
+	 * @covers ::get_serve_all_templates()
 	 *
 	 * @param string $theme_support          The template mode, like 'standard'.
 	 * @param bool   $do_serve_all_templates Whether the option to serve all templates is true.
@@ -491,7 +500,7 @@ class Test_Site_Health extends TestCase {
 	/**
 	 * Test add_extensions.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_extensions()
+	 * @covers ::add_extensions()
 	 */
 	public function test_add_extensions() {
 		$this->assertEquals(
