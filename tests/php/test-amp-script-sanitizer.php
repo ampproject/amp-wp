@@ -67,12 +67,16 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 						<script>document.write("Hey.")</script>
 						<noscript data-amp-no-unwrap><span>No script</span></noscript>
 					</body></html>',
-				'
-					<html data-ampdevmode=""><head><meta charset="utf-8"></head><body>
-						<script data-ampdevmode="">document.write("Hey.")</script>
+				sprintf(
+					'
+					<html %s><head><meta charset="utf-8"></head><body>
+						<script %s>document.write("Hey.")</script>
 						<noscript data-amp-no-unwrap><span>No script</span></noscript>
 					</body></html>
-				',
+					',
+					AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE,
+					AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE
+				),
 				[
 					'sanitize_js_scripts'       => true,
 					'unwrap_noscripts'          => true, // This will be ignored because of the kept script.
@@ -159,15 +163,19 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 						<script type="module" src="https://example.com/3"></script>
 					</body></html>
 				',
-				'
-					<html data-ampdevmode>
-					<head><meta charset="utf-8"></head>
-					<body>
-						<script src="https://example.com/1" data-ampdevmode></script>
-						<script type="text/javascript" src="https://example.com/2" data-ampdevmode></script>
-						<script type="module" src="https://example.com/3" data-ampdevmode></script>
-					</body></html>
-				',
+				sprintf(
+					'
+						<html %1$s>
+						<head><meta charset="utf-8"></head>
+						<body>
+							<script src="https://example.com/1" %2$s></script>
+							<script type="text/javascript" src="https://example.com/2" %2$s></script>
+							<script type="module" src="https://example.com/3" %2$s></script>
+						</body></html>
+					',
+					AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE,
+					AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE
+				),
 				[
 					'sanitize_js_scripts'       => true,
 					'validation_error_callback' => '__return_false',
@@ -255,14 +263,18 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 						<button on="tap:warning-message.hide">Cool, thanks!</button>
 					</body></html>
 				',
-				'
-					<html data-ampdevmode><head><meta charset="utf-8"></head>
-					<body data-ampdevmode onload="alert(\'Hey there.\')">
-						<noscript>I should not get unwrapped.</noscript>
-						<div id="warning-message">Warning...</div>
-						<button on="tap:warning-message.hide">Cool, thanks!</button>
-					</body></html>
-				',
+				sprintf(
+					'
+						<html %s><head><meta charset="utf-8"></head>
+						<body %s="onload" onload="alert(\'Hey there.\')">
+							<noscript>I should not get unwrapped.</noscript>
+							<div id="warning-message">Warning...</div>
+							<button on="tap:warning-message.hide">Cool, thanks!</button>
+						</body></html>
+					',
+					AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE,
+					AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE
+				),
 				[
 					'sanitize_js_scripts'       => true,
 					'validation_error_callback' => '__return_false',

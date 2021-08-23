@@ -260,8 +260,12 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 					[ 'code' => self::CUSTOM_EXTERNAL_SCRIPT ]
 				);
 				if ( ! $removed ) {
-					$script->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
-					$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+					$script->setAttributeNode(
+						$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
+					);
+					$this->dom->documentElement->setAttributeNode(
+						$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+					);
 					$this->kept_script_count++;
 				}
 			} else {
@@ -275,8 +279,12 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 					[ 'code' => self::CUSTOM_INLINE_SCRIPT ]
 				);
 				if ( ! $removed ) {
-					$script->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
-					$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+					$script->setAttributeNode(
+						$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
+					);
+					$this->dom->documentElement->setAttributeNode(
+						$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+					);
 					$this->kept_script_count++;
 				}
 			}
@@ -319,8 +327,16 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				[ 'code' => self::CUSTOM_EVENT_HANDLER_ATTR ]
 			);
 			if ( ! $removed ) {
-				$element->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
-				$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+				$attr_value = $element->getAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE );
+				if ( $attr_value ) {
+					$attr_value .= ' ' . $event_handler_attribute->nodeName;
+				} else {
+					$attr_value = $event_handler_attribute->nodeName;
+				}
+				$element->setAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE, $attr_value );
+				$this->dom->documentElement->setAttributeNode(
+					$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+				);
 				$this->kept_script_count++;
 			}
 		}

@@ -204,11 +204,11 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 			],
 			'form_with_post_action_kept' => [
 				'<form method="post" action="http://example.com"></form>',
-				'<form method="post" action="http://example.com" data-ampdevmode></form>',
+				sprintf( '<form method="post" action="http://example.com" %s></form>', AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
 				[
 					'native_post_forms_allowed' => true,
 					'keep_post_forms'           => true,
-					'expected_dev_mode'         => true,
+					'expected_non_valid_doc'    => true,
 				],
 				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR ],
 			],
@@ -218,7 +218,7 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 				[
 					'native_post_forms_allowed' => true,
 					'keep_post_forms'           => true,
-					'expected_dev_mode'         => false,
+					'expected_non_valid_doc'    => false,
 				],
 				[],
 			],
@@ -268,8 +268,8 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 		}
 
 		$this->assertEqualMarkup( AMP_DOM_Utils::get_content_from_dom( $dom ), $expected );
-		if ( isset( $args['expected_dev_mode'] ) ) {
-			$this->assertEquals( $args['expected_dev_mode'], $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
+		if ( isset( $args['expected_non_valid_doc'] ) ) {
+			$this->assertEquals( $args['expected_non_valid_doc'], $dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE ) );
 		}
 		$this->assertEquals( wp_list_pluck( $actual_errors, 'code' ), $expected_errors );
 	}

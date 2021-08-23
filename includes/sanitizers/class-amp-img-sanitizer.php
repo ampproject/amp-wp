@@ -335,13 +335,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				$attributes[ Attribute::DECODING ] = 'async';
 			}
 
-			// Opt-in to dev mode to prevent raising validation errors for an intentionally invalid <img>.
-			// It doesn't make sense to raise a validation error to allow the user to decide whether to convert from
-			// <img> to <amp-img> since the native_img_used arg is the opt-in to not do any such conversion.
-			// @todo Remove once https://github.com/ampproject/amphtml/issues/30442 lands.
-			$attributes[ DevMode::DEV_MODE_ATTRIBUTE ] = '';
-			$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
-
 			// @todo This class should really only be added if we actually have to provide dimensions.
 			$attributes[ Attribute::CLASS_ ] = (string) $node->getAttribute( Attribute::CLASS_ );
 			if ( ! empty( $attributes[ Attribute::CLASS_ ] ) ) {
@@ -352,6 +345,18 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $attributes as $name => $value ) {
 				$node->setAttribute( $name, $value );
 			}
+
+			// Opt-in to dev mode to prevent raising validation errors for an intentionally invalid <img>.
+			// It doesn't make sense to raise a validation error to allow the user to decide whether to convert from
+			// <img> to <amp-img> since the native_img_used arg is the opt-in to not do any such conversion.
+			// @todo Remove once https://github.com/ampproject/amphtml/issues/30442 lands.
+			$node->setAttributeNode(
+				$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
+			);
+			$this->dom->documentElement->setAttributeNode(
+				$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+			);
+
 			return;
 		}
 
