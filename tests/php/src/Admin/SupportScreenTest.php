@@ -15,7 +15,6 @@ use AmpProject\AmpWP\Admin\SupportScreen;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
 use AmpProject\AmpWP\Support\SupportData;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
 /**
@@ -25,8 +24,6 @@ use WP_UnitTestCase;
  * @coversDefaultClass \AmpProject\AmpWP\Admin\SupportScreen
  */
 class SupportScreenTest extends WP_UnitTestCase {
-
-	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of SupportMenu

@@ -9,7 +9,6 @@ namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\SupportLink;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 use AMP_Options_Manager;
 use AMP_Validation_Manager;
@@ -23,8 +22,6 @@ use AMP_Validated_URL_Post_Type;
  * @coversDefaultClass \AmpProject\AmpWP\Admin\SupportLink
  */
 class SupportLinkTest extends WP_UnitTestCase {
-
-	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of SupportLink
