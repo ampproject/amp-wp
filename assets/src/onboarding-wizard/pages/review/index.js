@@ -1,13 +1,13 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect, useState } from '@wordpress/element';
 
 /**
  * External dependencies
  */
-import { PREVIEW_URLS } from 'amp-settings'; // From WP inline script.
+import { PREVIEW_URLS, SETTINGS_LINK } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -188,18 +188,33 @@ export function Review() {
 			<div className="review__content review__content--secondary">
 				<h2 className="review__icon-title">
 					<IconLaptopToggles />
-					{ __( 'Needing extra help?', 'amp' ) }
+					{ __( 'Need help?', 'amp' ) }
 				</h2>
 				<ul className="review__list">
-					<li>
-						{ __( 'Reach out in the support forums', 'amp' ) }
-					</li>
-					<li>
-						{ __( 'Try a different template mode in settings', 'amp' ) }
-					</li>
-					<li>
-						{ __( 'Learn more about how AMP works', 'amp' ) }
-					</li>
+					{ /* dangerouslySetInnerHTML reason: Injection of a link. */ }
+					<li dangerouslySetInnerHTML={ {
+						__html: sprintf(
+							/* translators: placeholder is a link to support forum. */
+							__( 'Reach out in the <a href="%s" target="_blank" rel="noreferrer noopener">support forums</a>', 'amp' ),
+							'https://wordpress.org/support/plugin/amp/#new-topic-0',
+						),
+					} } />
+					{ /* dangerouslySetInnerHTML reason: Injection of a link. */ }
+					<li dangerouslySetInnerHTML={ {
+						__html: sprintf(
+							/* translators: placeholder is a link to the settings page. */
+							__( 'Try a different template mode <a href="%s" target="_blank" rel="noreferrer noopener">in settings</a>', 'amp' ),
+							SETTINGS_LINK,
+						),
+					} } />
+					{ /* dangerouslySetInnerHTML reason: Injection of a link. */ }
+					<li dangerouslySetInnerHTML={ {
+						__html: sprintf(
+							/* translators: placeholder is a link to the AMP for WP site. */
+							__( '<a href="%s" target="_blank" rel="noreferrer noopener">Learn more</a> about how AMP works', 'amp' ),
+							'https://amp-wp.org/documentation/how-the-plugin-works/',
+						),
+					} } />
 				</ul>
 			</div>
 		</div>

@@ -4,7 +4,7 @@ module.exports = {
 	CURRENT_THEME: {
 		name: 'Twenty Twenty',
 	},
-	FINISH_LINK: 'http://site.test/wp-admin/?page=amp-options',
+	SETTINGS_LINK: 'http://site.test/wp-admin/?page=amp-options',
 	OPTIONS_REST_PATH: 'http://site.test/wp-json/amp/v1/options',
 	READER_THEMES_REST_PATH: 'http://site.test/wp-json/amp/v1/reader-themes',
 	UPDATES_NONCE: '',

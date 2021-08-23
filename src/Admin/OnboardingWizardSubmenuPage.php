@@ -247,7 +247,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
 			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
-			'FINISH_LINK'                        => $amp_settings_link,
+			'SETTINGS_LINK'                      => $amp_settings_link,
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
 			'PREVIEW_URLS'                       => $this->get_preview_urls(),
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
