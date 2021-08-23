@@ -26,7 +26,7 @@ import { useWindowWidth } from '../../../utils/use-window-width';
 /**
  * Renders a link to leave the onboarding wizard.
  *
- * @param {Object} props Component props.
+ * @param {Object} props           Component props.
  * @param {string} props.closeLink The link URL.
  */
 export function CloseLink( { closeLink } ) {
@@ -52,8 +52,8 @@ CloseLink.propTypes = {
 /**
  * Navigation component.
  *
- * @param {Object} props Component props.
- * @param {string} props.closeLink Link to return to previous user location.
+ * @param {Object} props            Component props.
+ * @param {string} props.closeLink  Link to return to previous user location.
  * @param {string} props.finishLink Link to exit the application.
  */
 export function Nav( { closeLink, finishLink } ) {

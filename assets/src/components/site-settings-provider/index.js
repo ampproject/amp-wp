@@ -20,8 +20,8 @@ export const SiteSettings = createContext();
 /**
  * Site settings context provider.
  *
- * @param {Object} props Component props.
- * @param {any} props.children Component children.
+ * @param {Object}  props                  Component props.
+ * @param {any}     props.children         Component children.
  * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
  */
 export function SiteSettingsProvider( { children, hasErrorBoundary = false } ) {

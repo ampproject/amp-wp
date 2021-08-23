@@ -19,10 +19,10 @@ import { validateFeaturedImage } from '../helpers';
 /**
  * Conditionally adds a notice to the pre-publish panel for the featured image.
  *
- * @param {Object} props Component props.
- * @param {Object} props.featuredMedia Media object.
- * @param {Array} props.dimensions Required image dimensions.
- * @param {boolean} props.required Whether selecting a featured image is required.
+ * @param {Object}  props               Component props.
+ * @param {Object}  props.featuredMedia Media object.
+ * @param {Array}   props.dimensions    Required image dimensions.
+ * @param {boolean} props.required      Whether selecting a featured image is required.
  * @return {Function} Either a plain pre-publish panel, or the panel with a featured image notice.
  */
 const PrePublishPanel = ( { featuredMedia, dimensions, required } ) => {

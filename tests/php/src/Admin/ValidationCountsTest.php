@@ -19,14 +19,14 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for ValidationCounts class.
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\ValidationCounts
  */
-class ValidationCountsTest extends WP_UnitTestCase {
+class ValidationCountsTest extends TestCase {
 
 	/**
 	 * Test instance.

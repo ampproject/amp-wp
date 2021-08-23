@@ -16,8 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for OptionsMenu.
@@ -25,9 +24,7 @@ use WP_UnitTestCase;
  * @group options-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\OptionsMenu
  */
-class OptionsMenuTest extends WP_UnitTestCase {
-
-	use AssertContainsCompatibility;
+class OptionsMenuTest extends TestCase {
 
 	/**
 	 * Instance of OptionsMenu
@@ -124,6 +121,6 @@ class OptionsMenuTest extends WP_UnitTestCase {
 
 		ob_start();
 		$this->instance->render_screen();
-		$this->assertStringContains( '<div class="wrap">', ob_get_clean() );
+		$this->assertStringContainsString( '<div class="wrap">', ob_get_clean() );
 	}
 }

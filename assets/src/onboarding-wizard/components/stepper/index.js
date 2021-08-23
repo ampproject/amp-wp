@@ -16,9 +16,9 @@ import { Check } from '../../../components/svg/check';
 /**
  * List bullet for a stepper item.
  *
- * @param {Object} props Component props.
+ * @param {Object} props                 Component props.
  * @param {number} props.activePageIndex The index of the currently visible screen.
- * @param {number} props.index The index of the item being rendered.
+ * @param {number} props.index           The index of the item being rendered.
  */
 export function StepperBullet( { activePageIndex, index } ) {
 	const isCheckMark = activePageIndex > index;
@@ -55,9 +55,9 @@ StepperBullet.propTypes = {
 /**
  * Stepper component.
  *
- * @param {Object} props Component props.
+ * @param {Object} props                 Component props.
  * @param {number} props.activePageIndex The index of the currently visible screen.
- * @param {Array} props.pages Page objects.
+ * @param {Array}  props.pages           Page objects.
  */
 export function Stepper( { activePageIndex, pages } ) {
 	const instanceId = useInstanceId( Stepper );

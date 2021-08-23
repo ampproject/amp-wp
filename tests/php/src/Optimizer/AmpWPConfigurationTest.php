@@ -7,10 +7,10 @@ use AmpProject\Optimizer\Configuration\OptimizeHeroImagesConfiguration;
 use AmpProject\Optimizer\Transformer\OptimizeHeroImages;
 use AmpProject\Optimizer\Transformer\ServerSideRendering;
 use AmpProject\Optimizer\TransformerConfiguration;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Optimizer\AmpWPConfiguration */
-final class AmpWPConfigurationTest extends WP_UnitTestCase {
+final class AmpWPConfigurationTest extends TestCase {
 
 	/**
 	 * @covers \AmpProject\AmpWP\Optimizer\AmpWPConfiguration::apply_filters()
@@ -20,7 +20,7 @@ final class AmpWPConfigurationTest extends WP_UnitTestCase {
 		$configuration = new AmpWPConfiguration();
 		$transformers  = $configuration->get( AmpWPConfiguration::KEY_TRANSFORMERS );
 
-		$this->assertContains( ServerSideRendering::class, $transformers );
+		$this->assertStringContainsString( ServerSideRendering::class, $transformers );
 	}
 
 	/**
@@ -33,7 +33,7 @@ final class AmpWPConfigurationTest extends WP_UnitTestCase {
 		$configuration = new AmpWPConfiguration();
 		$transformers  = $configuration->get( AmpWPConfiguration::KEY_TRANSFORMERS );
 
-		$this->assertNotContains( ServerSideRendering::class, $transformers );
+		$this->assertStringNotContainsString( ServerSideRendering::class, $transformers );
 
 		remove_filter( 'amp_enable_ssr', '__return_false' );
 	}

@@ -9,11 +9,11 @@ namespace AmpProject\AmpWP\Tests\Validation;
 
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
+use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\URLValidationRESTController;
 use WP_REST_Controller;
 use WP_REST_Request;
-use WP_UnitTestCase;
 
 /**
  * Tests for URLValidationRESTController.
@@ -22,7 +22,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationRESTController
  */
-class URLValidationRESTControllerTest extends WP_UnitTestCase {
+class URLValidationRESTControllerTest extends TestCase {
 	use ValidationRequestMocking;
 
 	/**
@@ -66,7 +66,7 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->controller->register();
 
-		$this->assertContains( '/amp/v1/validate-post-url', array_keys( rest_get_server()->get_routes() ) );
+		$this->assertStringContainsString( '/amp/v1/validate-post-url', array_keys( rest_get_server()->get_routes() ) );
 	}
 
 	/** @covers ::create_item_permissions_check() */

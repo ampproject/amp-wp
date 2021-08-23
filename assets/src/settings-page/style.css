@@ -74,21 +74,12 @@ html {
 	}
 }
 
-.amp .settings-welcome__button.is-primary {
-	box-shadow: none;
-	margin-right: 1rem;
-}
-
 .settings-welcome__body h2 {
 	margin-bottom: 1rem;
 }
 
 .settings-welcome__body p {
 	margin: 0;
-}
-
-.settings-welcome__body .components-button {
-	margin-top: 1rem;
 }
 
 /* Supported templates section. */

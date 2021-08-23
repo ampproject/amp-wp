@@ -6,18 +6,18 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Options_Manager.
  *
  * @covers AMP_Options_Manager
  */
-class Test_AMP_Options_Manager extends WP_UnitTestCase {
+class Test_AMP_Options_Manager extends TestCase {
 
-	use AssertContainsCompatibility, LoadsCoreThemes;
+	use LoadsCoreThemes;
 
 	/**
 	 * Whether the external object cache was enabled.
@@ -689,7 +689,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
 
 		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
-		$this->assertStringContains( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
+		$this->assertStringContainsString( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
 
 		$_SERVER['HTTPS'] = 'on';
 		$set_https_url    = static function ( $url ) {
@@ -718,10 +718,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
 
 		set_current_screen( 'themes' );
-		$this->assertStringContains( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
+		$this->assertStringContainsString( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
 
 		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
-		$this->assertStringContains( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
+		$this->assertStringContainsString( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
 
 		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
