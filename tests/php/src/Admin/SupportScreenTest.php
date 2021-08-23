@@ -15,7 +15,7 @@ use AmpProject\AmpWP\Admin\SupportScreen;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
 use AmpProject\AmpWP\Support\SupportData;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for SupportMenu.
@@ -23,7 +23,7 @@ use WP_UnitTestCase;
  * @group support-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\SupportScreen
  */
-class SupportScreenTest extends WP_UnitTestCase {
+class SupportScreenTest extends TestCase {
 
 	/**
 	 * Instance of SupportMenu
