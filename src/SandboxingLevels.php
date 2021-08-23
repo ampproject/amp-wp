@@ -148,7 +148,7 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 		add_filter(
 			'amp_content_sanitizers',
 			static function ( $sanitizers ) {
-				$sanitizers[ AMP_Script_Sanitizer::class ]['sanitize_scripts'] = true;
+				$sanitizers[ AMP_Script_Sanitizer::class ]['sanitize_js_scripts'] = true;
 				return $sanitizers;
 			}
 		);
