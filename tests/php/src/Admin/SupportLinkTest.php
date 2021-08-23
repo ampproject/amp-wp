@@ -99,7 +99,7 @@ class SupportLinkTest extends WP_UnitTestCase {
 		$node = $admin_bar->get_node( 'amp-support' );
 
 		$this->assertInstanceOf( 'stdClass', $node );
-		$this->assertStringContains( 'page=amp-support', $node->href );
+		$this->assertStringContainsString( 'page=amp-support', $node->href );
 	}
 
 	/**
@@ -115,12 +115,12 @@ class SupportLinkTest extends WP_UnitTestCase {
 
 		$actions = $this->instance->amp_validated_url_status_actions( [], $post );
 
-		$this->assertStringContains(
+		$this->assertStringContainsString(
 			'page=amp-support',
 			$actions['amp-support']
 		);
 
-		$this->assertStringContains(
+		$this->assertStringContainsString(
 			"post_id=$post->ID",
 			$actions['amp-support']
 		);
@@ -148,12 +148,12 @@ class SupportLinkTest extends WP_UnitTestCase {
 
 		$actions = $this->instance->post_row_actions( [], $post );
 
-		$this->assertStringContains(
+		$this->assertStringContainsString(
 			'page=amp-support',
 			$actions['amp-support']
 		);
 
-		$this->assertStringContains(
+		$this->assertStringContainsString(
 			"post_id=$post->ID",
 			$actions['amp-support']
 		);

@@ -161,6 +161,6 @@ class SupportScreenTest extends WP_UnitTestCase {
 		$this->instance->render_screen();
 		$content = ob_get_clean();
 
-		$this->assertStringContains( '<div id="amp-support-root"></div>', $content );
+		$this->assertStringContainsString( '<div id="amp-support-root"></div>', $content );
 	}
 }
