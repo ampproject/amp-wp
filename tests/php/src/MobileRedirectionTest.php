@@ -692,7 +692,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$this->assertTrue( call_user_func( [ $service_class, 'is_needed' ] ) );
 
-		$this->call_private_method( $this->plugin, 'register_service', [ $service_id, $service_classes[ $service_id ] ] );
+		$this->call_private_method( $this->plugin, 'maybe_register_service', [ $service_id, $service_classes[ $service_id ] ] );
 		$this->assertTrue( $this->container->has( $service_id ) );
 	}
 
