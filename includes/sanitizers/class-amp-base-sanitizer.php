@@ -480,6 +480,19 @@ abstract class AMP_Base_Sanitizer {
 			return false;
 		}
 
+		// Prevent removing a tag which was exempted from validation.
+		if (
+			$node instanceof DOMElement
+			&&
+			$node->hasAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
+			&&
+			$node->ownerDocument
+			&&
+			$node->ownerDocument->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+		) {
+			return false;
+		}
+
 		// Prevent double-reporting nodes that are rejected for sanitization.
 		if ( isset( $this->nodes_to_keep[ $node->nodeName ] ) && in_array( $node, $this->nodes_to_keep[ $node->nodeName ], true ) ) {
 			return false;
@@ -526,6 +539,23 @@ abstract class AMP_Base_Sanitizer {
 
 		// Catch edge condition (no known possible way to reach).
 		if ( ! ( $node instanceof DOMAttr ) || $element !== $node->parentNode ) {
+			return false;
+		}
+
+		// Prevent removing an attribute which was exempted from validation.
+		if (
+			$element->hasAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE )
+			&&
+			$element->ownerDocument
+			&&
+			$element->ownerDocument->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+			&&
+			in_array(
+				$node->nodeName,
+				preg_split( '/\s+/', $element->getAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) ),
+				true
+			)
+		) {
 			return false;
 		}
 

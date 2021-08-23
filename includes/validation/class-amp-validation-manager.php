@@ -69,6 +69,31 @@ class AMP_Validation_Manager {
 	const PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY = 'amp_plugin_activation_validation_errors';
 
 	/**
+	 * HTML attribute to indicate a document is not intending AMP validation.
+	 *
+	 * @var string
+	 */
+	const AMP_NON_VALID_DOC_ATTRIBUTE = 'data-amp-non-valid-doc';
+
+	/**
+	 * HTML attribute to indicate an tag/element is exempted from AMP validation.
+	 *
+	 * @todo Consider 'exempt' instead of 'unvalidated'.
+	 *
+	 * @var string
+	 */
+	const AMP_UNVALIDATED_TAG_ATTRIBUTE = 'data-amp-unvalidated-tag';
+
+	/**
+	 * HTML attribute to indicate one or more attributes are exempted from AMP validation.
+	 *
+	 * @todo Consider 'exempt' instead of 'unvalidated'.
+	 *
+	 * @var string
+	 */
+	const AMP_UNVALIDATED_ATTRS_ATTRIBUTE = 'data-amp-unvalidated-attrs';
+
+	/**
 	 * The errors encountered when validating.
 	 *
 	 * @var array[] {

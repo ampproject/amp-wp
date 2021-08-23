@@ -76,7 +76,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof Element || DevMode::hasExemptionForNode( $node ) ) { // @todo The dev mode exception is causing problems! If the script sanitizer encounters onsubmit and it is allowed, the data-ampdevmode attribute causes the form sanitizer to skip processing. We need to stop overloading data-ampdevmode to instead make it more fine-grained, for example add data-amp-exempted-attrs="onsubmit".
+			if ( ! $node instanceof Element || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -118,8 +118,16 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 						'code' => self::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR,
 					];
 					if ( ! $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) ) ) {
-						$node->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
-						$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+						// Opt-in to dev mode to prevent raising validation errors for an intentionally invalid <img>.
+						// It doesn't make sense to raise a validation error to allow the user to decide whether to convert from
+						// <img> to <amp-img> since the native_img_used arg is the opt-in to not do any such conversion.
+						// @todo Remove once https://github.com/ampproject/amphtml/issues/30442 lands.
+						$node->setAttributeNode(
+							$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
+						);
+						$this->dom->documentElement->setAttributeNode(
+							$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+						);
 						continue;
 					}
 				}

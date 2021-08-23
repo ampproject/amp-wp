@@ -2082,8 +2082,11 @@ class AMP_Theme_Support {
 
 			$errors = new Optimizer\ErrorCollection();
 
-			// @todo The dev mode attribute is being overloaded here. We should use something else.
-			$args['skip_css_max_byte_count_enforcement'] = $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE );
+			$args['skip_css_max_byte_count_enforcement'] = (
+				$dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+				||
+				DevMode::isActiveForDocument( $dom )
+			);
 			self::get_optimizer( $args )->optimizeDom( $dom, $errors );
 
 			if ( count( $errors ) > 0 ) {
@@ -2125,7 +2128,11 @@ class AMP_Theme_Support {
 
 		// Prevent serving a page in Dev Mode as being marked as AMP when the user is not logged-in to avoid it from
 		// being flagged as invalid by Google Search Console.
-		if ( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) && ! is_user_logged_in() ) {
+		if (
+			$dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+			||
+			( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) && ! is_user_logged_in() )
+		) {
 			$dom->documentElement->removeAttribute( Attribute::AMP );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );

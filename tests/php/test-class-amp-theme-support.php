@@ -1855,7 +1855,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$dom = Document::fromHtml( $html );
 
 		$this->assertEquals( $converted, $dom->documentElement->hasAttribute( Attribute::AMP ) );
-		$this->assertEquals( ! $converted, $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
+		$this->assertEquals( ! $converted, $dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE ) );
 		$this->assertEquals(
 			$converted,
 			$dom->xpath->query( '//script[ @custom-element = "amp-form" ]' )->length > 0
@@ -1865,7 +1865,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertEquals( 'post', strtolower( $form->getAttribute( Attribute::METHOD ) ) );
 		$this->assertEquals( $converted, $form->hasAttribute( Attribute::ACTION_XHR ) );
 		$this->assertEquals( ! $converted, $form->hasAttribute( Attribute::ACTION ) );
-		$this->assertEquals( ! $converted, $form->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
+		$this->assertEquals( ! $converted, $form->hasAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
 	}
 
 	/**
