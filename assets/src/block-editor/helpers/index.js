@@ -13,6 +13,7 @@ import { SelectControl, ToggleControl, Notice, PanelBody } from '@wordpress/comp
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
 import { cloneElement, isValidElement } from '@wordpress/element';
+import styled from '@emotion/styled';
 
 /**
  * Internal dependencies
@@ -274,7 +275,7 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 	}
 
 	const EnhancedBlockEdit = function( props ) {
-		const { attributes: { ampLayout }, name, isSelected } = props;
+		const { attributes: { ampLayout }, name } = props;
 
 		let inspectorControls;
 
@@ -284,14 +285,6 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 			inspectorControls = setUpImageInspectorControls( props );
 		} else if ( MEDIA_BLOCKS.includes( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
 			inspectorControls = setUpInspectorControls( props );
-		}
-
-		if ( 'core/video' === name && isSelected ) {
-			const { attributes: { autoplay } } = props;
-
-			if ( true === autoplay ) {
-				props.attributes.muted = true;
-			}
 		}
 
 		// Return just inspector controls in case of 'nodisplay'.
@@ -366,14 +359,37 @@ export const setImageBlockLayoutAttributes = ( props, layout ) => {
  * @return {ReactElement} Inspector Controls.
  */
 export const setUpInspectorControls = ( props ) => {
-	const { isSelected } = props;
+	const { isSelected, name } = props;
 
 	if ( ! isSelected ) {
 		return null;
 	}
 
+	let ampVideoAutoplayNotice;
+
+	if ( 'core/video' === name ) {
+		const { attributes: { autoplay, muted } } = props;
+
+		if ( true === autoplay && false === muted ) {
+			const AmpVideoAutoplayNotice = styled.p`
+				font-size: 12px;
+				font-style: normal;
+				color: #757575;
+				padding: 0 16px 16px;
+				margin: 0;
+			`;
+
+			ampVideoAutoplayNotice = (
+				<AmpVideoAutoplayNotice>
+					{ __( 'Autoplay will mute the video player by default in AMP mode.', 'amp' ) }
+				</AmpVideoAutoplayNotice>
+			);
+		}
+	}
+
 	return (
 		<InspectorControls>
+			{ ampVideoAutoplayNotice }
 			<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
 				<AmpLayoutControl { ...props } />
 				<AmpNoloadingToggle { ...props } />
