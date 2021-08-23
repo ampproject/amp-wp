@@ -37,7 +37,7 @@ export function RadioGroup( { options = [], onChange, selected, isHorizontal } )
 				<label
 					key={ value }
 					className={ classnames( 'radio-group__label', {
-						'radio-group__label--selected': isHorizontal,
+						'radio-group__label--selected': selected === value,
 					} ) }
 					htmlFor={ `${ htmlIdPrefix }-${ value }` }
 				>
