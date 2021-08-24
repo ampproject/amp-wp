@@ -94,8 +94,12 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		// Handle case where script is wrapped in paragraph by wpautop.
 		if ( $next_element_sibling instanceof Element && Tag::P === $next_element_sibling->nodeName ) {
-			$children = $next_element_sibling->getElementsByTagName( '*' );
-			if ( 1 === $children->length && Tag::SCRIPT === $children->item( 0 )->nodeName && false !== strpos( $children->item( 0 )->getAttribute( Attribute::SRC ), $script_src ) ) {
+			$script = $next_element_sibling->getElementsByTagName( Tag::SCRIPT )->item( 0 );
+			if (
+				$script instanceof Element
+				&&
+				false !== strpos( $script->getAttribute( Attribute::SRC ), $script_src )
+			) {
 				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 				return;
 			}
