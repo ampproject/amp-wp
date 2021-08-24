@@ -13,7 +13,6 @@ import { SelectControl, ToggleControl, Notice, PanelBody } from '@wordpress/comp
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
 import { cloneElement, isValidElement } from '@wordpress/element';
-import styled from '@emotion/styled';
 
 /**
  * Internal dependencies
@@ -283,7 +282,9 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 			inspectorControls = setUpGalleryInspectorControls( props );
 		} else if ( 'core/image' === name ) {
 			inspectorControls = setUpImageInspectorControls( props );
-		} else if ( MEDIA_BLOCKS.includes( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
+		} else if ( 'core/video' === name ) {
+			inspectorControls = setUpVideoInspectorControls( props );
+		} else if ( 0 === name.indexOf( 'core-embed/' ) ) {
 			inspectorControls = setUpInspectorControls( props );
 		}
 
@@ -306,8 +307,6 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 		isSelected: PropTypes.bool,
 		attributes: PropTypes.shape( {
 			text: PropTypes.string,
-			autoplay: PropTypes.bool,
-			muted: PropTypes.bool,
 			ampLayout: PropTypes.string,
 		} ),
 		setAttributes: PropTypes.func.isRequired,
@@ -353,43 +352,52 @@ export const setImageBlockLayoutAttributes = ( props, layout ) => {
 };
 
 /**
+ * Show notice if video player have autoplay enabled and mute is disabled.
+ *
+ * @param {Object} props Props.
+ * @return {ReactElement} Inspector Controls.
+ */
+export const setUpVideoInspectorControls = ( props ) => {
+	const { isSelected, attributes: { autoplay, muted } } = props;
+
+	if ( ! isSelected ) {
+		return null;
+	}
+
+	return (
+		<InspectorControls>
+			{ ( true === autoplay && false === muted ) && (
+				<PanelBody className="amp-video-autoplay-notice">
+					{ __( 'Autoplay will mute the video player by default in AMP mode.', 'amp' ) }
+				</PanelBody>
+			) }
+			<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
+				<AmpLayoutControl { ...props } />
+				<AmpNoloadingToggle { ...props } />
+			</PanelBody>
+		</InspectorControls>
+	);
+};
+
+setUpVideoInspectorControls.propTypes = {
+	isSelected: PropTypes.bool,
+};
+
+/**
  * Default setup for inspector controls.
  *
  * @param {Object} props Props.
  * @return {ReactElement} Inspector Controls.
  */
 export const setUpInspectorControls = ( props ) => {
-	const { isSelected, name } = props;
+	const { isSelected } = props;
 
 	if ( ! isSelected ) {
 		return null;
 	}
 
-	let ampVideoAutoplayNotice;
-
-	if ( 'core/video' === name ) {
-		const { attributes: { autoplay, muted } } = props;
-
-		if ( true === autoplay && false === muted ) {
-			const AmpVideoAutoplayNotice = styled.p`
-				font-size: 12px;
-				font-style: normal;
-				color: #757575;
-				padding: 0 16px 16px;
-				margin: 0;
-			`;
-
-			ampVideoAutoplayNotice = (
-				<AmpVideoAutoplayNotice>
-					{ __( 'Autoplay will mute the video player by default in AMP mode.', 'amp' ) }
-				</AmpVideoAutoplayNotice>
-			);
-		}
-	}
-
 	return (
 		<InspectorControls>
-			{ ampVideoAutoplayNotice }
 			<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
 				<AmpLayoutControl { ...props } />
 				<AmpNoloadingToggle { ...props } />

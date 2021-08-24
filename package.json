@@ -23,7 +23,6 @@
     "npm": ">= 7"
   },
   "dependencies": {
-    "@emotion/styled": "11.3.0",
     "@wordpress/api-fetch": "5.2.1",
     "@wordpress/autop": "3.2.1",
     "@wordpress/components": "15.0.0",
