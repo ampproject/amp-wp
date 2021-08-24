@@ -34,25 +34,11 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//blockquote[ contains( @class, "tiktok-embed" ) ]' );
+		$nodes = $dom->xpath->query( '//blockquote[ contains( @class, "tiktok-embed" ) and not( parent::amp-tiktok ) ]' );
 
 		foreach ( $nodes as $node ) {
-			if ( ! $this->is_raw_embed( $node ) ) {
-				continue;
-			}
-
 			$this->make_embed_amp_compatible( $node );
 		}
-	}
-
-	/**
-	 * Determine if the node has already been sanitized.
-	 *
-	 * @param DOMElement $node The DOMNode.
-	 * @return bool Whether the node is a raw embed.
-	 */
-	protected function is_raw_embed( DOMElement $node ) {
-		return ! $node->firstChild || ( $node->firstChild && 'amp-embedly-card' !== $node->firstChild->nodeName );
 	}
 
 	/**
