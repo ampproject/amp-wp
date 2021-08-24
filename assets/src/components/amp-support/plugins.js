@@ -46,6 +46,6 @@ export function Plugins( { data: plugins } ) {
 }
 
 Plugins.propTypes = {
-	data: PropTypes.object,
+	data: PropTypes.array.isRequired,
 };
 

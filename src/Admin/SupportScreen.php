@@ -176,7 +176,7 @@ class SupportScreen implements Conditional, Service, Registerable {
 		wp_add_inline_script(
 			self::ASSET_HANDLE,
 			sprintf(
-				'var ampSupportData = %s;',
+				'var ampSupport = %s;',
 				wp_json_encode(
 					[
 						'restEndpoint' => get_rest_url( null, 'amp/v1/send-diagnostic' ),

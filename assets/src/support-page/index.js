@@ -1,10 +1,18 @@
-/* global ampSupportData */
-
 /**
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
 import { render } from '@wordpress/element';
+
+/**
+ * External dependencies
+ */
+import {
+	restEndpoint,
+	args,
+	data,
+	nonce,
+} from 'amp-support'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -20,8 +28,6 @@ import { ErrorBoundary } from '../components/error-boundary';
 
 domReady( () => {
 	const root = document.getElementById( 'amp-support-root' );
-	const { restEndpoint, args, data, nonce } = ampSupportData;
-
 	const errorHandler = ( event ) => {
 		// Handle only own errors.
 		if ( event.filename && /amp-support(\.min)?\.js/.test( event.filename ) ) {

@@ -43,5 +43,5 @@ export function Theme( { data: themes } ) {
 }
 
 Theme.propTypes = {
-	data: PropTypes.object,
+	data: PropTypes.array.isRequired,
 };

@@ -40,6 +40,6 @@ export function Errors( { data: errors } ) {
 }
 
 Errors.propTypes = {
-	data: PropTypes.object,
+	data: PropTypes.array.isRequired,
 };
 

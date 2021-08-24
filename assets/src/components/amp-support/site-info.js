@@ -121,5 +121,5 @@ export function SiteInfo( { data: siteInfo } ) {
 }
 
 SiteInfo.propTypes = {
-	data: PropTypes.object,
+	data: PropTypes.object.isRequired,
 };

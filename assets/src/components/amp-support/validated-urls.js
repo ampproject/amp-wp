@@ -52,6 +52,6 @@ export function ValidatedUrls( { data: validatedUrls } ) {
 }
 
 ValidatedUrls.propTypes = {
-	data: PropTypes.object,
+	data: PropTypes.array.isRequired,
 };
 

@@ -40,6 +40,6 @@ export function ErrorSources( { data: errorSources } ) {
 }
 
 ErrorSources.propTypes = {
-	data: PropTypes.object,
+	data: PropTypes.array.isRequired,
 };
 
