@@ -48,16 +48,9 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 	/**
 	 * Whether service is needed.
 	 *
-	 * This is experimental.
-	 *
 	 * @return bool
 	 */
 	public static function is_needed() {
-		// @todo This is a hack to prevent the service from running in the unit tests.
-		if ( defined( 'TESTS_PLUGIN_DIR' ) ) {
-			return false;
-		}
-
 		/**
 		 * Filters whether experimental sandboxing is enabled.
 		 *
@@ -66,7 +59,7 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 		 *
 		 * @param bool $enabled Sandboxing enabled.
 		 */
-		return (bool) apply_filters( 'amp_experimental_sandboxing_enabled', defined( 'WP_DEBUG' ) && WP_DEBUG );
+		return (bool) apply_filters( 'amp_experimental_sandboxing_enabled', false );
 	}
 
 	/**
