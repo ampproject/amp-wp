@@ -10,14 +10,15 @@ namespace AmpProject\AmpWP\Support\Tests;
 use AmpProject\AmpWP\Support\SupportCliCommand;
 use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Support\SupportRESTController;
-use \WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
+use WP_Error;
 
 /**
  * Test cases for SupportRESTController
  *
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportRESTController
  */
-class SupportRESTControllerTest extends WP_UnitTestCase {
+class SupportRESTControllerTest extends TestCase {
 
 	/**
 	 * Instance of OptionsMenu
@@ -77,26 +78,26 @@ class SupportRESTControllerTest extends WP_UnitTestCase {
 
 		return [
 			'fail'    => [
-				'request'  => [
+				'request_response' => [
 					'status' => 'fail',
 					'data'   => [
 						'message' => 'Fail to generate UUID',
 					],
 				],
-				'expected' => new \WP_Error(
+				'expected'         => new \WP_Error(
 					'fail_to_send_data',
 					'Failed to send support request. Please try again after some time',
 					[ 'status' => 500 ]
 				),
 			],
 			'success' => [
-				'request'  => [
+				'request_response' => [
 					'status' => 'ok',
 					'data'   => [
 						'uuid' => 'ampwp-563e5de8-3129-55fb-af71-a6fbd9ef5026',
 					],
 				],
-				'expected' => [
+				'expected'         => [
 					'success' => true,
 					'data'    => [
 						'uuid' => 'ampwp-563e5de8-3129-55fb-af71-a6fbd9ef5026',
@@ -108,6 +109,9 @@ class SupportRESTControllerTest extends WP_UnitTestCase {
 
 	/**
 	 * @dataProvider callback_data_provider
+	 *
+	 * @param array          $request_response Value to mock for response for API.
+	 * @param array|WP_Error $expected         Expected AJAX response.
 	 *
 	 * @covers ::callback
 	 */
@@ -128,8 +132,8 @@ class SupportRESTControllerTest extends WP_UnitTestCase {
 	/**
 	 * To perform test on $this->ajax_callback().
 	 *
-	 * @param array  $request_response Value to mock for response for API.
-	 * @param string $expected         Expected AJAX response.
+	 * @param array          $request_response Value to mock for response for API.
+	 * @param array|WP_Error $expected         Expected AJAX response.
 	 *
 	 * @return void
 	 */
