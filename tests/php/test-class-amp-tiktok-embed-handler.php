@@ -82,18 +82,13 @@ class Test_AMP_TikTok_Embed_Handler extends TestCase {
 				'https://www.tiktok.com/@scout2015/video/6718335390845095173' . PHP_EOL,
 
 				'
-					<amp-embedly-card layout="responsive" height="700" width="340" data-card-controls="0" data-url="https://www.tiktok.com/@scout2015/video/6718335390845095173">
-						<section placeholder="">
-							<a target="_blank" title="@scout2015" href="https://www.tiktok.com/@scout2015">@scout2015</a>
-							<p>Scramble up ur name &amp; I’ll try to guess it😍❤️ <a title="foryoupage" target="_blank" href="https://www.tiktok.com/tag/foryoupage">#foryoupage</a>
-								<a title="PetsOfTikTok" target="_blank" href="https://www.tiktok.com/tag/PetsOfTikTok">#petsoftiktok</a>
-								<a title="aesthetic" target="_blank" href="https://www.tiktok.com/tag/aesthetic">#aesthetic</a>
-							</p>
-							<p>
-								<a target="_blank" title="♬ original sound - tiff" href="https://www.tiktok.com/music/original-sound-6689804660171082501">♬ original sound – tiff</a>
-							</p>
-						</section>
-					</amp-embedly-card>
+					<amp-tiktok layout="responsive" height="575" width="325" data-src="https://www.tiktok.com/@scout2015/video/6718335390845095173">
+						<blockquote class="tiktok-embed" cite="https://www.tiktok.com/@scout2015/video/6718335390845095173" data-video-id="6718335390845095173" placeholder>
+							<section> <a target="_blank" title="@scout2015" href="https://www.tiktok.com/@scout2015">@scout2015</a>
+							<p>Scramble up ur name &amp; I’ll try to guess it😍❤️ <a title="foryoupage" target="_blank" href="https://www.tiktok.com/tag/foryoupage">#foryoupage</a> <a title="PetsOfTikTok" target="_blank" href="https://www.tiktok.com/tag/PetsOfTikTok">#petsoftiktok</a> <a title="aesthetic" target="_blank" href="https://www.tiktok.com/tag/aesthetic">#aesthetic</a></p>
+							<p> <a target="_blank" title="♬ original sound - tiff" href="https://www.tiktok.com/music/original-sound-6689804660171082501">♬ original sound – tiff</a> </p></section>
+						</blockquote>
+					</amp-tiktok>
 				',
 			],
 
@@ -102,13 +97,15 @@ class Test_AMP_TikTok_Embed_Handler extends TestCase {
 					<blockquote class="tiktok-embed" cite="https://www.tiktok.com/@countingprimes/video/6988237085899574533" data-video-id="6988237085899574533" style="max-width: 605px;min-width: 325px;" > <section> <a target="_blank" title="@countingprimes" href="https://www.tiktok.com/@countingprimes">@countingprimes</a> <p>You can now embed TikTok\'s in AMP</p> <a target="_blank" title="♬ original sound - countingprimes" href="https://www.tiktok.com/music/original-sound-6988236987325057798">♬ original sound - countingprimes</a> </section> </blockquote> <script async src="https://www.tiktok.com/embed.js"></script>
 				',
 				'
-					<amp-embedly-card layout="responsive" height="700" width="340" data-card-controls="0" data-url="https://www.tiktok.com/@countingprimes/video/6988237085899574533">
-						<section placeholder="">
-							<a target="_blank" title="@countingprimes" href="https://www.tiktok.com/@countingprimes">@countingprimes</a>
-							<p>You can now embed TikTok’s in AMP</p>
-							<p> <a target="_blank" title="♬ original sound - countingprimes" href="https://www.tiktok.com/music/original-sound-6988236987325057798">♬ original sound – countingprimes</a> </p>
-						</section>
-					</amp-embedly-card>
+					<amp-tiktok layout="responsive" height="575" width="325" data-src="https://www.tiktok.com/@countingprimes/video/6988237085899574533">
+						<blockquote class="tiktok-embed" cite="https://www.tiktok.com/@countingprimes/video/6988237085899574533" data-video-id="6988237085899574533" placeholder>
+							<section>
+								<a target="_blank" title="@countingprimes" href="https://www.tiktok.com/@countingprimes">@countingprimes</a>
+								<p>You can now embed TikTok’s in AMP</p>
+								<p> <a target="_blank" title="♬ original sound - countingprimes" href="https://www.tiktok.com/music/original-sound-6988236987325057798">♬ original sound – countingprimes</a> </p>
+							</section>
+						</blockquote>
+					</amp-tiktok>
 				',
 			],
 

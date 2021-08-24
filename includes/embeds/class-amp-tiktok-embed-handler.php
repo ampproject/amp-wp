@@ -5,7 +5,12 @@
  * @package AMP
  */
 
+use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
+use AmpProject\Extension;
+use AmpProject\Layout;
+use AmpProject\Tag;
 
 /**
  * Class AMP_TikTok_Embed_Handler
@@ -34,7 +39,7 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//blockquote[ contains( @class, "tiktok-embed" ) and not( parent::amp-tiktok ) ]' );
+		$nodes = $dom->xpath->query( '//blockquote[ @cite and @data-video-id and contains( @class, "tiktok-embed" ) and not( parent::amp-tiktok ) ]' );
 
 		foreach ( $nodes as $node ) {
 			$this->make_embed_amp_compatible( $node );
@@ -44,71 +49,53 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Make TikTok embed AMP compatible.
 	 *
-	 * @param DOMElement $blockquote_node The <blockquote> node to make AMP compatible.
+	 * @param Element $blockquote The <blockquote> node to make AMP compatible.
 	 */
-	protected function make_embed_amp_compatible( DOMElement $blockquote_node ) {
-		$dom       = $blockquote_node->ownerDocument;
-		$video_url = $blockquote_node->getAttribute( 'cite' );
+	protected function make_embed_amp_compatible( Element $blockquote ) {
+		$dom       = $blockquote->ownerDocument;
+		$video_url = $blockquote->getAttribute( Attribute::CITE );
 
-		// If there is no video ID, stop here as its needed for the `data-url` parameter.
+		// If there is no video ID, stop here as its needed for the `data-src` parameter.
 		if ( empty( $video_url ) ) {
 			return;
 		}
 
-		$this->remove_embed_script( $blockquote_node );
+		$this->remove_embed_script( $blockquote );
 
-		$amp_node = AMP_DOM_Utils::create_node(
+		$amp_tiktok = AMP_DOM_Utils::create_node(
 			Document::fromNode( $dom ),
-			'amp-embedly-card',
+			Extension::TIKTOK,
 			[
-				'layout'             => 'responsive',
-				'height'             => 700,
-				'width'              => 340,
-				'data-card-controls' => 0,
-				'data-url'           => $video_url,
+				Attribute::LAYOUT   => Layout::RESPONSIVE,
+				Attribute::HEIGHT   => 575,
+				Attribute::WIDTH    => 325,
+				Attribute::DATA_SRC => $video_url,
 			]
 		);
 
-		// Find existing <section> node to use as the placeholder.
-		foreach ( iterator_to_array( $blockquote_node->childNodes ) as $child ) {
-			if ( ! ( $child instanceof DOMElement ) ) {
-				continue;
-			}
-
-			// Append the placeholder if it was found.
-			if ( 'section' === $child->nodeName ) {
-				/**
-				 * Placeholder to append to the AMP component.
-				 *
-				 * @var DOMElement $placeholder_node
-				 */
-				$placeholder_node = $blockquote_node->removeChild( $child );
-				$placeholder_node->setAttribute( 'placeholder', '' );
-				$amp_node->appendChild( $placeholder_node );
-				break;
-			}
-		}
-
-		$blockquote_node->parentNode->replaceChild( $amp_node, $blockquote_node );
+		$blockquote->parentNode->replaceChild( $amp_tiktok, $blockquote );
+		$amp_tiktok->appendChild( $blockquote );
+		$blockquote->setAttributeNode( $dom->createAttribute( Attribute::PLACEHOLDER ) );
+		$blockquote->removeAttribute( Attribute::STYLE );
 	}
 
 	/**
 	 * Remove the TikTok embed script if it exists.
 	 *
-	 * @param DOMElement $node The DOMNode to make AMP compatible.
+	 * @param Element $blockquote The blockquote element being made AMP-compatible.
 	 */
-	protected function remove_embed_script( DOMElement $node ) {
-		$next_element_sibling = $node->nextSibling;
-		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
+	protected function remove_embed_script( Element $blockquote ) {
+		$next_element_sibling = $blockquote->nextSibling;
+		while ( $next_element_sibling && ! ( $next_element_sibling instanceof Element ) ) {
 			$next_element_sibling = $next_element_sibling->nextSibling;
 		}
 
 		$script_src = 'tiktok.com/embed.js';
 
 		// Handle case where script is wrapped in paragraph by wpautop.
-		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
+		if ( $next_element_sibling instanceof Element && Tag::P === $next_element_sibling->nodeName ) {
 			$children = $next_element_sibling->getElementsByTagName( '*' );
-			if ( 1 === $children->length && 'script' === $children->item( 0 )->nodeName && false !== strpos( $children->item( 0 )->getAttribute( 'src' ), $script_src ) ) {
+			if ( 1 === $children->length && Tag::SCRIPT === $children->item( 0 )->nodeName && false !== strpos( $children->item( 0 )->getAttribute( Attribute::SRC ), $script_src ) ) {
 				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 				return;
 			}
@@ -116,11 +103,11 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		// Handle case where script is immediately following.
 		$is_embed_script = (
-			$next_element_sibling instanceof DOMElement
+			$next_element_sibling instanceof Element
 			&&
-			'script' === strtolower( $next_element_sibling->nodeName )
+			Tag::SCRIPT === strtolower( $next_element_sibling->nodeName )
 			&&
-			false !== strpos( $next_element_sibling->getAttribute( 'src' ), $script_src )
+			false !== strpos( $next_element_sibling->getAttribute( Attribute::SRC ), $script_src )
 		);
 		if ( $is_embed_script ) {
 			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
