@@ -10,6 +10,22 @@ import classnames from 'classnames';
 import './style.scss';
 
 export function ListItems( { className = '', heading, items } ) {
+	const slugify = ( value ) => {
+		if ( 'string' !== typeof value ) {
+			return value;
+		}
+
+		return value
+			.toString()
+			.trim()
+			.toLowerCase()
+			.replace( /\s+/g, '-' )
+			.replace( /[^\w\-]+/g, '-' )
+			.replace( /\-\-+/g, '-' )
+			.replace( /^-+/, '-' )
+			.replace( /-+$/, '-' );
+	};
+
 	return (
 		<ul className={ classnames( 'list-items', className ) }>
 			{ heading && (
@@ -20,8 +36,10 @@ export function ListItems( { className = '', heading, items } ) {
 				</li>
 			) }
 			{ items.map( ( item, index ) => {
+				const key = item.label ? slugify( item.label ) + `-${ index }` : index.toString();
+
 				return (
-					<li key={ index } className="list-items__item">
+					<li key={ key } className="list-items__item">
 						{ item.label && (
 							<strong className="list-items__item-key">
 								{ item.label }
