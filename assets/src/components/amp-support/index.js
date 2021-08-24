@@ -34,11 +34,6 @@ import { UUID } from './uuid';
  * @param {Function} setState Event Object.
  */
 function submitData( event, props, setState ) {
-	const element = event.target;
-	const previousText = element.textContent;
-	element.disabled = true;
-	element.textContent = __( 'Sending…', 'amp' );
-
 	/**
 	 * Ajax callback.
 	 */
@@ -46,6 +41,7 @@ function submitData( event, props, setState ) {
 		setState( {
 			uuid: null,
 			error: null,
+			sending: true,
 		} );
 
 		try {
@@ -61,16 +57,13 @@ function submitData( event, props, setState ) {
 				},
 			);
 
-			element.disabled = false;
-			element.textContent = previousText;
-
 			if ( undefined !== response.success && undefined !== response.data ) {
-				setState( { uuid: response.data.uuid } );
+				setState( { uuid: response.data.uuid, sending: false } );
 			} else {
 				throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
 			}
 		} catch ( exception ) {
-			setState( { error: exception.message() } );
+			setState( { error: exception.message(), sending: false } );
 		}
 	} )();
 }
@@ -86,6 +79,7 @@ export function AMPSupport( props ) {
 	const { data } = props;
 
 	const [ state, _setState ] = useState( {
+		sending: false,
 		uuid: null,
 		error: null,
 		hasCopied: false,
@@ -130,13 +124,15 @@ export function AMPSupport( props ) {
 				</div>
 				<div className="amp-support__footer">
 					<Button
-						disabled={ Boolean( state.uuid ) }
+						disabled={ Boolean( state.uuid || state.sending ) }
 						className="components-button--send-button is-primary"
 						onClick={ ( event ) => {
 							submitData( event, props, setState );
 						} }
 					>
-						{ __( 'Send data', 'amp' ) }
+						{ state.uuid && __( 'Sent', 'amp' ) }
+						{ state.sending && __( 'Sending…', 'amp' ) }
+						{ ( ! state.uuid && ! state.sending ) && __( 'Send data', 'amp' ) }
 					</Button>
 					{
 						state.uuid && (
