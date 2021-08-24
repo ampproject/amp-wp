@@ -27,48 +27,6 @@ import { RawData } from './raw-data';
 import { UUID } from './uuid';
 
 /**
- * Event callback for send button.
- *
- * @param {Object}   event    Event Object.
- * @param {Object}   props    Component props.
- * @param {Function} setState Event Object.
- */
-function submitData( event, props, setState ) {
-	/**
-	 * Ajax callback.
-	 */
-	( async () => {
-		setState( {
-			uuid: null,
-			error: null,
-			sending: true,
-		} );
-
-		try {
-			apiFetch.use( apiFetch.createNonceMiddleware( props.nonce ) );
-
-			const response = await apiFetch(
-				{
-					path: props.restEndpoint,
-					method: 'POST',
-					data: {
-						args: props.args,
-					},
-				},
-			);
-
-			if ( undefined !== response.success && undefined !== response.data ) {
-				setState( { uuid: response.data.uuid, sending: false } );
-			} else {
-				throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
-			}
-		} catch ( exception ) {
-			setState( { error: exception.message(), sending: false } );
-		}
-	} )();
-}
-
-/**
  * AMP Support component.
  *
  * @class
@@ -87,6 +45,41 @@ export function AMPSupport( props ) {
 
 	const setState = ( newState ) => {
 		_setState( { ...state, ...newState } );
+	};
+
+	/**
+	 * Event callback for send button.
+	 */
+	const submitData = () => {
+		( async () => {
+			setState( {
+				uuid: null,
+				error: null,
+				sending: true,
+			} );
+
+			try {
+				apiFetch.use( apiFetch.createNonceMiddleware( props.nonce ) );
+
+				const response = await apiFetch(
+					{
+						path: props.restEndpoint,
+						method: 'POST',
+						data: {
+							args: props.args,
+						},
+					},
+				);
+
+				if ( undefined !== response.success && undefined !== response.data ) {
+					setState( { uuid: response.data.uuid, sending: false } );
+				} else {
+					throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
+				}
+			} catch ( exception ) {
+				setState( { error: exception.message(), sending: false } );
+			}
+		} )();
 	};
 
 	return (
@@ -126,9 +119,7 @@ export function AMPSupport( props ) {
 					<Button
 						disabled={ Boolean( state.uuid || state.sending ) }
 						className="components-button--send-button is-primary"
-						onClick={ ( event ) => {
-							submitData( event, props, setState );
-						} }
+						onClick={ submitData }
 					>
 						{ state.uuid && __( 'Sent', 'amp' ) }
 						{ state.sending && __( 'Sending…', 'amp' ) }
@@ -154,11 +145,9 @@ export function AMPSupport( props ) {
 }
 
 AMPSupport.propTypes = {
-	/* eslint-disable react/no-unused-prop-types */
 	restEndpoint: PropTypes.string.isRequired,
 	nonce: PropTypes.string.isRequired,
 	args: PropTypes.any,
-	/* eslint-enable react/no-unused-prop-types */
 	data: PropTypes.shape( {
 		error_sources: PropTypes.array.isRequired,
 		errors: PropTypes.array.isRequired,
