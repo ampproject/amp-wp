@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { useState } from '@wordpress/element';
 import { Button, ExternalLink } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -48,33 +49,23 @@ function submitData( event, props, setState ) {
 		} );
 
 		try {
-			const body = new global.FormData();
-			body.append( '_wpnonce', props.nonce );
+			apiFetch.use( apiFetch.createNonceMiddleware( props.nonce ) );
 
-			for ( const key in props.args ) {
-				if ( props.args[ key ] ) {
-					props.args[ key ].map( ( value ) => {
-						return body.append( `args[${ key }][]`, value );
-					} );
-				}
-			}
-
-			const response = await global.fetch( props.restEndpoint, {
-				method: 'POST',
-				body,
-			} );
+			const response = await apiFetch(
+				{
+					path: props.restEndpoint,
+					method: 'POST',
+					data: {
+						args: props.args,
+					},
+				},
+			);
 
 			element.disabled = false;
 			element.textContent = previousText;
 
-			if ( ! response.ok ) {
-				throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
-			}
-
-			const responseBody = await response.json();
-
-			if ( undefined !== responseBody.success && undefined !== responseBody.data ) {
-				setState( { uuid: responseBody.data.uuid } );
+			if ( undefined !== response.success && undefined !== response.data ) {
+				setState( { uuid: response.data.uuid } );
 			} else {
 				throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
 			}
