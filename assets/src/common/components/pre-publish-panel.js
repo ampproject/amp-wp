@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Notice } from '@wordpress/components';
+import { PostFeaturedImage } from '@wordpress/editor';
 import { PluginPrePublishPanel } from '@wordpress/edit-post';
 import { withSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -37,18 +38,22 @@ const PrePublishPanel = ( { featuredMedia, dimensions, required } ) => {
 			title={ __( 'Featured Image', 'amp' ) }
 			initialOpen="true"
 		>
-			<Notice
-				status={ required ? 'warning' : 'notice' }
-				isDismissible={ false }
-			>
-				{ errors.map( ( errorMessage, index ) => {
-					return (
-						<p key={ `error-${ index }` }>
-							{ errorMessage }
-						</p>
-					);
-				} ) }
-			</Notice>
+			<PostFeaturedImage
+				noticeUI={
+					<Notice
+						status={ required ? 'warning' : 'notice' }
+						isDismissible={ false }
+					>
+						{ errors.map( ( errorMessage, index ) => {
+							return (
+								<p key={ `error-${ index }` }>
+									{ errorMessage }
+								</p>
+							);
+						} ) }
+					</Notice>
+				}
+			/>
 		</PluginPrePublishPanel>
 	);
 };
