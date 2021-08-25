@@ -1478,14 +1478,19 @@ function amp_get_content_sanitizers( $post = null ) {
 	$native_post_forms_allowed = amp_is_native_post_form_allowed();
 
 	$sanitizers = [
-		// The AMP_Script_Sanitizer runs first because based on whether it allows custom scripts
+		// Embed sanitization must come first because it strips out custom scripts associated with embeds.
+		AMP_Embed_Sanitizer::class             => [
+			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
+		],
+		AMP_O2_Player_Sanitizer::class         => [],
+		AMP_Playbuzz_Sanitizer::class          => [],
+
+		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
 		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
 		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
 		// performed.
 		AMP_Script_Sanitizer::class            => [],
-		AMP_Embed_Sanitizer::class             => [
-			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
-		],
+
 		AMP_Core_Theme_Sanitizer::class        => [
 			'template'        => get_template(),
 			'stylesheet'      => get_stylesheet(),
@@ -1506,9 +1511,7 @@ function amp_get_content_sanitizers( $post = null ) {
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
 		],
 		AMP_Video_Sanitizer::class             => [],
-		AMP_O2_Player_Sanitizer::class         => [],
 		AMP_Audio_Sanitizer::class             => [],
-		AMP_Playbuzz_Sanitizer::class          => [],
 		AMP_Object_Sanitizer::class            => [],
 		AMP_Iframe_Sanitizer::class            => [
 			'add_placeholder'    => true,
@@ -1626,8 +1629,27 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers[ AMP_Style_Sanitizer::class ]['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 
-	// Force layout, style, meta, and validating sanitizers to be at the end.
-	foreach ( [ AMP_Layout_Sanitizer::class, AMP_Style_Sanitizer::class, AMP_Meta_Sanitizer::class, AMP_Tag_And_Attribute_Sanitizer::class ] as $class_name ) {
+	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
+	$expected_final_sanitizer_order = [
+		AMP_Script_Sanitizer::class, // Must come before AMP_Img_Sanitizer, AMP_Form_Sanitizer, and AMP_Style_Sanitizer.
+		AMP_Core_Theme_Sanitizer::class,
+		AMP_Srcset_Sanitizer::class,
+		AMP_Img_Sanitizer::class,
+		AMP_Form_Sanitizer::class,
+		AMP_Comments_Sanitizer::class,
+		AMP_Video_Sanitizer::class,
+		AMP_Audio_Sanitizer::class,
+		AMP_Object_Sanitizer::class,
+		AMP_Iframe_Sanitizer::class,
+		AMP_Gallery_Block_Sanitizer::class,
+		AMP_Block_Sanitizer::class,
+		AMP_Accessibility_Sanitizer::class,
+		AMP_Layout_Sanitizer::class,
+		AMP_Style_Sanitizer::class,
+		AMP_Meta_Sanitizer::class,
+		AMP_Tag_And_Attribute_Sanitizer::class,
+	];
+	foreach ( $expected_final_sanitizer_order as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];
 			unset( $sanitizers[ $class_name ] );
