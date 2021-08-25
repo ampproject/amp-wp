@@ -10,28 +10,8 @@ import classnames from 'classnames';
 import './style.scss';
 
 export function ListItems( { className = '', isDisc = false, heading, items } ) {
-	const slugify = ( value ) => {
-		if ( 'string' !== typeof value ) {
-			return value;
-		}
-
-		return value
-			.toString()
-			.trim()
-			.toLowerCase()
-			.replace( /\s+/g, '-' )
-			.replace( /[^\w\-]+/g, '-' )
-			.replace( /\-\-+/g, '-' )
-			.replace( /^-+/, '-' )
-			.replace( /-+$/, '-' );
-	};
-
-	if ( isDisc ) {
-		className = classnames( 'list-items--list-style-disc', className );
-	}
-
 	return (
-		<ul className={ classnames( 'list-items', className ) }>
+		<ul className={ classnames( 'list-items', className, { 'list-items--list-style-disc': isDisc } ) }>
 			{ heading && (
 				<li className="list-items__item">
 					<h4 className="list-items__heading">
@@ -40,10 +20,8 @@ export function ListItems( { className = '', isDisc = false, heading, items } ) 
 				</li>
 			) }
 			{ items.map( ( item, index ) => {
-				const key = item.label ? slugify( item.label ) + `-${ index }` : index.toString();
-
 				return (
-					<li key={ key } className="list-items__item">
+					<li key={ index } className="list-items__item">
 						{ item.label && (
 							<strong className="list-items__item-key">
 								{ item.label }

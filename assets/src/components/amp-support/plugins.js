@@ -16,16 +16,16 @@ import { ListItems } from '../list-items';
 /**
  * To render plugins information on site support page.
  *
- * @param {Object} props      Component props.
- * @param {Object} props.data Plugins data.
+ * @param {Object} props         Component props.
+ * @param {Array}  props.plugins Plugins data.
  * @return {JSX.Element|null} HTML markup for plugins data.
  */
-export function Plugins( { data: plugins } ) {
+export function Plugins( { plugins } ) {
 	if ( ! Array.isArray( plugins ) ) {
 		return null;
 	}
 
-	const items = Object.values( plugins ).map( ( item ) => {
+	const items = plugins.map( ( item ) => {
 		return { value: `${ item.name } ${ item.version ? '(' + item.version + ')' : '' }` };
 	} );
 
@@ -51,6 +51,6 @@ export function Plugins( { data: plugins } ) {
 }
 
 Plugins.propTypes = {
-	data: PropTypes.array.isRequired,
+	plugins: PropTypes.array.isRequired,
 };
 

@@ -16,11 +16,11 @@ import { ListItems } from '../list-items';
 /**
  * Render site information.
  *
- * @param {Object} props      Site info data.
- * @param {Object} props.data Site information data.
+ * @param {Object} props          Site info data.
+ * @param {Object} props.siteInfo Site information data.
  * @return {JSX.Element} Site information markup.
  */
-export function SiteInfo( { data: siteInfo } ) {
+export function SiteInfo( { siteInfo } ) {
 	if ( 'object' !== typeof siteInfo ) {
 		return null;
 	}
@@ -121,5 +121,5 @@ export function SiteInfo( { data: siteInfo } ) {
 }
 
 SiteInfo.propTypes = {
-	data: PropTypes.object.isRequired,
+	siteInfo: PropTypes.object.isRequired,
 };

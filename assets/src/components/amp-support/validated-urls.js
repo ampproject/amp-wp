@@ -16,11 +16,11 @@ import { ListItems } from '../list-items';
 /**
  * To render validated urls information on site support page.
  *
- * @param {Object} props      Component props.
- * @param {Object} props.data Error data.
+ * @param {Object} props               Component props.
+ * @param {Array}  props.validatedUrls Error data.
  * @return {JSX.Element|null} HTML markup for validated urls data.
  */
-export function ValidatedUrls( { data: validatedUrls } ) {
+export function ValidatedUrls( { validatedUrls } ) {
 	if ( ! Array.isArray( validatedUrls ) ) {
 		return null;
 	}
@@ -58,6 +58,6 @@ export function ValidatedUrls( { data: validatedUrls } ) {
 }
 
 ValidatedUrls.propTypes = {
-	data: PropTypes.array.isRequired,
+	validatedUrls: PropTypes.array.isRequired,
 };
 

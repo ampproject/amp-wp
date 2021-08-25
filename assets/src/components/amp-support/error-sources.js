@@ -16,11 +16,11 @@ import { Details } from './details';
 /**
  * To render error source information on site support page.
  *
- * @param {Object} props      Component props.
- * @param {Object} props.data Error data.
+ * @param {Object} props              Component props.
+ * @param {Array}  props.errorSources Error data.
  * @return {JSX.Element|null} HTML markup for error source data.
  */
-export function ErrorSources( { data: errorSources } ) {
+export function ErrorSources( { errorSources } ) {
 	if ( ! Array.isArray( errorSources ) ) {
 		return null;
 	}
@@ -38,6 +38,6 @@ export function ErrorSources( { data: errorSources } ) {
 }
 
 ErrorSources.propTypes = {
-	data: PropTypes.array.isRequired,
+	errorSources: PropTypes.array.isRequired,
 };
 

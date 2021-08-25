@@ -19,7 +19,7 @@ import { Selectable } from '../selectable';
 import { AMPNotice } from '../amp-notice';
 import ClipboardButton from '../clipboard-button';
 import { SiteInfo } from './site-info';
-import { Theme } from './theme';
+import { Themes } from './themes';
 import { Plugins } from './plugins';
 import { Errors } from './errors';
 import { ErrorSources } from './error-sources';
@@ -68,7 +68,7 @@ export function AMPSupport( props ) {
 					},
 				);
 
-				if ( undefined !== response.success && undefined !== response.data ) {
+				if ( undefined !== response.success && undefined !== response?.data?.uuid ) {
 					setUuid( response.data.uuid );
 				} else {
 					setSubmitSupportRequest( false );
@@ -100,24 +100,24 @@ export function AMPSupport( props ) {
 				} />
 				<div className="amp-support__body">
 
-					{ data.site_info && <SiteInfo data={ data.site_info } /> }
+					{ data.site_info && <SiteInfo siteInfo={ data.site_info } /> }
 
-					{ data.themes && <Theme data={ data.themes } /> }
+					{ data.themes && <Themes themes={ data.themes } /> }
 
-					{ data.plugins && <Plugins data={ data.plugins } /> }
+					{ data.plugins && <Plugins plugins={ data.plugins } /> }
 
-					{ data.errors && <Errors data={ data.errors } /> }
+					{ data.errors && <Errors errors={ data.errors } /> }
 
-					{ data.error_sources && <ErrorSources data={ data.error_sources } /> }
+					{ data.error_sources && <ErrorSources errorSources={ data.error_sources } /> }
 
-					{ data.urls && <ValidatedUrls data={ data.urls } /> }
+					{ data.urls && <ValidatedUrls validatedUrls={ data.urls } /> }
 
 					{ data && <RawData data={ data } /> }
 
 				</div>
 				<div className="amp-support__footer">
 					<Button
-						disabled={ Boolean( uuid || sending ) }
+						disabled={ Boolean( uuid ) || sending }
 						className="components-button--send-button is-primary"
 						onClick={ () => {
 							setSubmitSupportRequest( true );

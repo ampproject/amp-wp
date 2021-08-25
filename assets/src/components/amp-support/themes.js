@@ -16,11 +16,11 @@ import { ListItems } from '../list-items';
 /**
  * To render theme information on site support page.
  *
- * @param {Object} props      Component props.
- * @param {Object} props.data Theme data.
+ * @param {Object} props        Component props.
+ * @param {Array}  props.themes Theme data.
  * @return {JSX.Element|null} HTML markup for theme data.
  */
-export function Theme( { data: themes } ) {
+export function Themes( { themes } ) {
 	if ( ! Array.isArray( themes ) ) {
 		return null;
 	}
@@ -32,7 +32,7 @@ export function Theme( { data: themes } ) {
 	return (
 		<details open={ false }>
 			<summary>
-				{ __( 'Theme', 'amp' ) }
+				{ __( 'Themes', 'amp' ) }
 			</summary>
 			<div className="detail-body">
 				<ListItems
@@ -44,6 +44,6 @@ export function Theme( { data: themes } ) {
 	);
 }
 
-Theme.propTypes = {
-	data: PropTypes.array.isRequired,
+Themes.propTypes = {
+	themes: PropTypes.array.isRequired,
 };
