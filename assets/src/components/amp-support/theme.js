@@ -36,7 +36,7 @@ export function Theme( { data: themes } ) {
 			</summary>
 			<div className="detail-body">
 				<ListItems
-					disc={ true }
+					isDisc={ true }
 					items={ items }
 				/>
 			</div>

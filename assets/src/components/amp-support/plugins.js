@@ -42,7 +42,7 @@ export function Plugins( { data: plugins } ) {
 			</summary>
 			<div className="detail-body">
 				<ListItems
-					disc={ true }
+					isDisc={ true }
 					items={ items }
 				/>
 			</div>

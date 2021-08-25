@@ -49,7 +49,7 @@ export function ValidatedUrls( { data: validatedUrls } ) {
 			</summary>
 			<div className="detail-body">
 				<ListItems
-					disc={ true }
+					isDisc={ true }
 					items={ items }
 				/>
 			</div>
