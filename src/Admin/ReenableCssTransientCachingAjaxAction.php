@@ -78,16 +78,16 @@ final class ReenableCssTransientCachingAjaxAction implements Service, Registerab
 						if ( element.classList.contains( 'disabled' ) ) {
 							return;
 						}
+						element.classList.add( 'disabled' );
 						wp.ajax.post( action, postArgs )
 							.done( () => {
 								element.classList.remove( 'ajax-failure' );
 								element.classList.add( 'ajax-success' );
-								element.classList.add( 'disabled' );
 							} )
-							.fail( function () {
+							.fail( () => {
 								element.classList.remove( 'ajax-success' );
 								element.classList.add( 'ajax-failure' );
-								element.classList.add( 'disabled' );
+								element.classList.remove( 'disabled' );
 							} );
 					} );
 				} );
