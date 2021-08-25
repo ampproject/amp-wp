@@ -9,7 +9,7 @@ import classnames from 'classnames';
  */
 import './style.scss';
 
-export function ListItems( { className = '', heading, items } ) {
+export function ListItems( { className = '', disc = false, heading, items } ) {
 	const slugify = ( value ) => {
 		if ( 'string' !== typeof value ) {
 			return value;
@@ -25,6 +25,10 @@ export function ListItems( { className = '', heading, items } ) {
 			.replace( /^-+/, '-' )
 			.replace( /-+$/, '-' );
 	};
+
+	if ( disc ) {
+		className = classnames( 'list-items--list-style-disc', className );
+	}
 
 	return (
 		<ul className={ classnames( 'list-items', className ) }>
@@ -60,6 +64,7 @@ export function ListItems( { className = '', heading, items } ) {
 ListItems.propTypes = {
 	className: PropTypes.string,
 	heading: PropTypes.string,
+	disc: PropTypes.bool,
 	items: PropTypes.arrayOf( PropTypes.shape( {
 		label: PropTypes.string,
 		value: PropTypes.oneOfType( [

@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -21,30 +21,36 @@ import { ListItems } from '../list-items';
  * @return {JSX.Element|null} HTML markup for validated urls data.
  */
 export function ValidatedUrls( { data: validatedUrls } ) {
-	if ( 'object' !== typeof validatedUrls ) {
+	if ( ! Array.isArray( validatedUrls ) ) {
 		return null;
 	}
 
 	const urls = validatedUrls.map( ( item ) => item.url ? item.url : null );
+	const items = urls.map( ( url ) => {
+		return {
+			value: (
+				<a href={ url } title={ url } target="_blank" rel="noreferrer">
+					{ url }
+				</a>
+			),
+		};
+	} );
 
 	return (
 		<details open={ false }>
 			<summary>
-				{ __( 'Validated URLs', 'amp' ) }
-				{ ` (${ validatedUrls.length || 0 })` }
+				{
+					sprintf(
+						/* translators: Placeholder is the number of validated URLs. */
+						__( 'Validated URLs (%d)', 'amp' ),
+						validatedUrls.length,
+					)
+				}
 			</summary>
 			<div className="detail-body">
 				<ListItems
-					className="list-items--list-style-disc"
-					items={ urls.map( ( url ) => {
-						return {
-							value: (
-								<a href={ url } title={ url } target="_blank" rel="noreferrer">
-									{ url }
-								</a>
-							),
-						};
-					} ) }
+					disc={ true }
+					items={ items }
 				/>
 			</div>
 		</details>

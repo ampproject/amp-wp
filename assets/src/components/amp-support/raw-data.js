@@ -29,6 +29,6 @@ export function RawData( { data } ) {
 }
 
 RawData.propTypes = {
-	data: PropTypes.object,
+	data: PropTypes.object.isRequired,
 };
 

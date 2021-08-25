@@ -6,7 +6,12 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { Details } from './details';
 
 /**
  * To render error source information on site support page.
@@ -16,26 +21,19 @@ import { __ } from '@wordpress/i18n';
  * @return {JSX.Element|null} HTML markup for error source data.
  */
 export function ErrorSources( { data: errorSources } ) {
-	if ( 'object' !== typeof errorSources ) {
+	if ( ! Array.isArray( errorSources ) ) {
 		return null;
 	}
 
 	return (
-		<details open={ false }>
-			<summary>
-				{ __( 'Error Sources', 'amp' ) }
-				{ ` (${ errorSources.length || 0 })` }
-			</summary>
-			<div className="detail-body">
-				<p>
-					<i>
-						<small>
-							{ __( 'Please check "Raw Data" for all error source information.', 'amp' ) }
-						</small>
-					</i>
-				</p>
-			</div>
-		</details>
+		<Details
+			title={ sprintf(
+				/* translators: Placeholder is the number of error sources */
+				__( 'Error Sources (%d)', 'amp' ),
+				errorSources.length,
+			) }
+			description={ __( 'Please check "Raw Data" for all error source information.', 'amp' ) }
+		/>
 	);
 }
 

@@ -21,9 +21,13 @@ import { ListItems } from '../list-items';
  * @return {JSX.Element|null} HTML markup for theme data.
  */
 export function Theme( { data: themes } ) {
-	if ( 'object' !== typeof themes ) {
+	if ( ! Array.isArray( themes ) ) {
 		return null;
 	}
+
+	const items = themes.map( ( item ) => {
+		return { value: `${ item.name } ${ item.version ? '(' + item.version + ')' : '' }` };
+	} );
 
 	return (
 		<details open={ false }>
@@ -32,10 +36,8 @@ export function Theme( { data: themes } ) {
 			</summary>
 			<div className="detail-body">
 				<ListItems
-					className="list-items--list-style-disc"
-					items={ themes.map( ( item ) => {
-						return { value: `${ item.name } ${ item.version ? '(' + item.version + ')' : '' }` };
-					} ) }
+					disc={ true }
+					items={ items }
 				/>
 			</div>
 		</details>

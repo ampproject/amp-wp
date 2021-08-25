@@ -9,14 +9,15 @@ import PropTypes from 'prop-types';
 import { useState } from '@wordpress/element';
 import { Button, ExternalLink } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { __, sprintf } from '@wordpress/i18n';
 import { Selectable } from '../selectable';
 import { AMPNotice } from '../amp-notice';
+import ClipboardButton from '../clipboard-button';
 import { SiteInfo } from './site-info';
 import { Theme } from './theme';
 import { Plugins } from './plugins';
@@ -24,7 +25,6 @@ import { Errors } from './errors';
 import { ErrorSources } from './error-sources';
 import { ValidatedUrls } from './validated-urls';
 import { RawData } from './raw-data';
-import { UUID } from './uuid';
 
 /**
  * AMP Support component.
@@ -36,27 +36,19 @@ import { UUID } from './uuid';
 export function AMPSupport( props ) {
 	const { data } = props;
 
-	const [ state, _setState ] = useState( {
-		sending: false,
-		uuid: null,
-		error: null,
-		hasCopied: false,
-	} );
-
-	const setState = ( newState ) => {
-		_setState( { ...state, ...newState } );
-	};
+	const [ sending, setSending ] = useState( false );
+	const [ uuid, setUuid ] = useState( null );
+	const [ error, setError ] = useState( null );
+	const [ hasCopied, setHasCopied ] = useState( false );
 
 	/**
 	 * Event callback for send button.
 	 */
 	const submitData = () => {
 		( async () => {
-			setState( {
-				uuid: null,
-				error: null,
-				sending: true,
-			} );
+			setSending( true );
+			setUuid( null );
+			setError( null );
 
 			try {
 				apiFetch.use( apiFetch.createNonceMiddleware( props.nonce ) );
@@ -72,12 +64,14 @@ export function AMPSupport( props ) {
 				);
 
 				if ( undefined !== response.success && undefined !== response.data ) {
-					setState( { uuid: response.data.uuid, sending: false } );
+					setUuid( response.data.uuid );
 				} else {
 					throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
 				}
 			} catch ( exception ) {
-				setState( { error: exception.message(), sending: false } );
+				setError( exception.message );
+			} finally {
+				setSending( false );
 			}
 		} )();
 	};
@@ -117,28 +111,43 @@ export function AMPSupport( props ) {
 				</div>
 				<div className="amp-support__footer">
 					<Button
-						disabled={ Boolean( state.uuid || state.sending ) }
+						disabled={ Boolean( uuid || sending ) }
 						className="components-button--send-button is-primary"
 						onClick={ submitData }
 					>
-						{ state.uuid && __( 'Sent', 'amp' ) }
-						{ state.sending && __( 'Sending…', 'amp' ) }
-						{ ( ! state.uuid && ! state.sending ) && __( 'Send data', 'amp' ) }
+						{ uuid && __( 'Sent', 'amp' ) }
+						{ sending && __( 'Sending…', 'amp' ) }
+						{ ( ! uuid && ! sending ) && __( 'Send data', 'amp' ) }
 					</Button>
 					{
-						state.uuid && (
+						uuid && (
 							<ExternalLink href="https://wordpress.org/support/plugin/amp/#new-topic-0">
 								{ __( 'Create support topic', 'amp' ) }
 							</ExternalLink>
 						)
 					}
-					{ state.error && (
+					{ error && (
 						<AMPNotice type="error" size="small">
-							{ state.error }
+							{ error }
 						</AMPNotice>
 					) }
 				</div>
-				{ state.uuid && <UUID state={ state } setState={ setState } /> }
+				{ uuid && (
+					<AMPNotice type="info" size="small">
+						{ __( 'Support UUID: ', 'amp' ) }
+						<code>
+							{ uuid }
+						</code>
+						<ClipboardButton
+							isSmall={ true }
+							text={ uuid }
+							onCopy={ () => setHasCopied( true ) }
+							onFinishCopy={ () => setHasCopied( false ) }
+						>
+							{ hasCopied ? __( 'Copied!', 'amp' ) : __( 'Copy UUID', 'amp' ) }
+						</ClipboardButton>
+					</AMPNotice>
+				) }
 			</Selectable>
 		</div>
 	);
