@@ -39,7 +39,9 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//blockquote[ @cite and @data-video-id and contains( @class, "tiktok-embed" ) and not( parent::amp-tiktok ) ]' );
+		$nodes = $dom->xpath->query(
+			sprintf( '//blockquote[ @cite and @data-video-id and contains( @class, "tiktok-embed" ) and not( parent::%s ) ]', Extension::TIKTOK )
+		);
 
 		foreach ( $nodes as $node ) {
 			$this->make_embed_amp_compatible( $node );
