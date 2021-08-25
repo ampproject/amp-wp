@@ -917,23 +917,6 @@ class AMP_Theme_Support {
 				wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
 			}
 		);
-
-		// Enable Bento experiment per <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
-		// @todo Remove this once Bento no longer requires an experiment to opt-in.
-		if ( amp_is_bento_enabled() ) {
-			add_action(
-				'wp_head',
-				static function () {
-					?>
-					<script data-ampdevmode>
-						(self.AMP = self.AMP || []).push(function (AMP) {
-							AMP.toggleExperiment('bento', true);
-						});
-					</script>
-					<?php
-				}
-			);
-		}
 	}
 
 	/**
@@ -1544,6 +1527,45 @@ class AMP_Theme_Support {
 		foreach ( $superfluous_script_handles as $superfluous_script_handle ) {
 			if ( ! empty( $extension_specs[ $superfluous_script_handle ]['requires_usage'] ) ) {
 				unset( $amp_scripts[ $superfluous_script_handle ] );
+			}
+		}
+
+		// Make sure that Bento versions are used when required, either by explicitly requesting Bento or when the document is non-valid AMP.
+		$is_non_valid_doc = $dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE );
+		if ( $is_non_valid_doc || amp_is_bento_enabled() ) {
+			$bento_extension_count = 0;
+
+			// Override all required scripts with the available Bento versions.
+			foreach ( $amp_scripts as $extension_name => $script_element ) {
+				if ( ! empty( $extension_specs[ $extension_name ]['bento']['version'] ) ) {
+					$script_element->setAttribute(
+						Attribute::SRC,
+						sprintf(
+							'https://cdn.ampproject.org/v0/%s-%s.js',
+							$extension_name,
+							$extension_specs[ $extension_name ]['bento']['version']
+						)
+					);
+					$bento_extension_count++;
+				}
+			}
+
+			// Enable Bento experiment per <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
+			// @todo Remove this once Bento no longer requires an experiment to opt-in.
+			if ( $bento_extension_count > 0 ) {
+				$bento_experiment_script = $dom->createElement( Tag::SCRIPT );
+				$bento_experiment_script->appendChild(
+					$dom->createTextNode( '(self.AMP = self.AMP || []).push(function (AMP) { AMP.toggleExperiment("bento", true); });' )
+				);
+
+				if ( $is_non_valid_doc ) {
+					$bento_experiment_script->setAttributeNode( $dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
+				} else {
+					$dom->documentElement->setAttributeNode( $dom->createAttribute( Attribute::DATA_AMPDEVMODE ) );
+					$bento_experiment_script->setAttributeNode( $dom->createAttribute( Attribute::DATA_AMPDEVMODE ) );
+				}
+
+				$dom->head->appendChild( $bento_experiment_script );
 			}
 		}
 
