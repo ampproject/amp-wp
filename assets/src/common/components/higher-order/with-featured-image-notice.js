@@ -40,7 +40,7 @@ export default createHigherOrderComponent(
 			return (
 				<>
 					<Notice
-						status="notice"
+						status="warning"
 						isDismissible={ false }
 					>
 						{ errors.map( ( errorMessage, index ) => {
