@@ -82,9 +82,25 @@ class ReenableCssTransientCachingAjaxActionTest extends TestCase {
 		$this->assertEmpty( wp_scripts()->get_data( 'wp-util', 'after' ) );
 	}
 
-	/** @covers ::register_ajax_script */
-	public function test_register_ajax_script_yes_hook() {
-		$this->instance->register_ajax_script( defined( 'HEALTH_CHECK_PLUGIN_VERSION' ) ? 'tools_page_health-check' : 'site-health.php' );
+	/** @return array */
+	public function get_data_to_test_register_ajax_script_yes_hook() {
+		return [
+			'without_site_health_plugin' => [
+				'hook_suffix' => 'site-health.php',
+			],
+			'with_site_health_plugin'    => [
+				'hook_suffix' => 'tools_page_health-check',
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_register_ajax_script_yes_hook
+	 * @covers ::register_ajax_script
+	 * @param string $hook_suffix
+	 */
+	public function test_register_ajax_script_yes_hook( $hook_suffix ) {
+		$this->instance->register_ajax_script( $hook_suffix );
 		$this->assertTrue( wp_script_is( 'jquery', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'wp-util', 'enqueued' ) );
 		$after = wp_scripts()->get_data( 'wp-util', 'after' );

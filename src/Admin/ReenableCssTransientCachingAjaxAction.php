@@ -56,8 +56,7 @@ final class ReenableCssTransientCachingAjaxAction implements Service, Registerab
 	 * @param string $hook_suffix Hook suffix to identify from what admin page the call is coming from.
 	 */
 	public function register_ajax_script( $hook_suffix ) {
-		$supported_hook_suffix = defined( 'HEALTH_CHECK_PLUGIN_VERSION' ) ? 'tools_page_health-check' : 'site-health.php';
-		if ( $supported_hook_suffix !== $hook_suffix ) {
+		if ( 'tools_page_health-check' !== $hook_suffix && 'site-health.php' !== $hook_suffix ) {
 			return;
 		}
 

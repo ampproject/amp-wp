@@ -81,8 +81,8 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 		add_filter( 'site_status_test_result', [ $this, 'modify_test_result' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
 
-		$hook_suffix = defined( 'HEALTH_CHECK_PLUGIN_VERSION' ) ? 'tools_page_health-check' : 'site-health.php';
-		add_action( "admin_print_styles-{$hook_suffix}", [ $this, 'add_styles' ] );
+		add_action( 'admin_print_styles-tools_page_health-check', [ $this, 'add_styles' ] );
+		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
 	}
 
 	/**
