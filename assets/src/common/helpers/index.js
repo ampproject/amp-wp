@@ -89,7 +89,7 @@ export const validateFeaturedImage = ( media, dimensions, required ) => {
 
 	if ( ! [ 'image/png', 'image/gif', 'image/jpeg', 'image/webp', 'image/svg+xml' ].includes( media.mime_type ) ) {
 		errors.push(
-			/* translators: 1: JPEG, 2: PNG. 3: GIF, 4: WebP, 5: SVG */
+			/* translators: List of image formats */
 			sprintf( __( 'The featured image must be of either %1$s, %2$s, %3$s, %4$s, or %5$s format.', 'amp' ), 'JPEG', 'PNG', 'GIF', 'WebP', 'SVG' ),
 		);
 	}
