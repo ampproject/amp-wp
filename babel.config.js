@@ -17,9 +17,13 @@ module.exports = function( api ) {
 					svgo: {
 						plugins: [
 							{
-								name: 'cleanupIDs',
+								name: 'preset-default',
 								params: {
-									minify: false, // Prevent duplicate SVG IDs from minification.
+									overrides: {
+										cleanupIDs: {
+											minify: false, // Prevent duplicate SVG IDs from minification.
+										},
+									},
 								},
 							},
 						],
@@ -39,9 +43,13 @@ module.exports = function( api ) {
 							svgo: {
 								plugins: [
 									{
-										name: 'cleanupIDs',
+										name: 'preset-default',
 										params: {
-											minify: false, // Prevent duplicate SVG IDs from minification.
+											overrides: {
+												cleanupIDs: {
+													minify: false, // Prevent duplicate SVG IDs from minification.
+												},
+											},
 										},
 									},
 								],
