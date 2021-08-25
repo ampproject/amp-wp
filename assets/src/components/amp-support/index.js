@@ -30,7 +30,7 @@ import { Details } from './details';
  *
  * @class
  * @param {Object} props Props for component.
- * @return {JSX.Element} Makrup for AMP support component
+ * @return {JSX.Element} Markup for AMP support component
  */
 export function AMPSupport( props ) {
 	const { data, restEndpoint, args } = props;
