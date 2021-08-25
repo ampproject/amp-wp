@@ -99,6 +99,13 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	protected $form_sanitizer;
 
 	/**
+	 * Tag-and-attribute sanitizer.
+	 *
+	 * @var AMP_Tag_And_Attribute_Sanitizer
+	 */
+	protected $tag_and_attribute_sanitizer;
+
+	/**
 	 * Init.
 	 *
 	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
@@ -128,6 +135,14 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			$sanitizers[ AMP_Form_Sanitizer::class ] instanceof AMP_Form_Sanitizer
 		) {
 			$this->form_sanitizer = $sanitizers[ AMP_Form_Sanitizer::class ];
+		}
+
+		if (
+			array_key_exists( AMP_Tag_And_Attribute_Sanitizer::class, $sanitizers )
+			&&
+			$sanitizers[ AMP_Tag_And_Attribute_Sanitizer::class ] instanceof AMP_Tag_And_Attribute_Sanitizer
+		) {
+			$this->tag_and_attribute_sanitizer = $sanitizers[ AMP_Tag_And_Attribute_Sanitizer::class ];
 		}
 	}
 
@@ -161,6 +176,9 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			if ( $this->form_sanitizer ) {
 				$this->form_sanitizer->update_args( [ 'native_post_forms_allowed' => true ] );
+			}
+			if ( $this->tag_and_attribute_sanitizer ) {
+				$this->tag_and_attribute_sanitizer->update_args( [ 'prefer_bento' => true ] );
 			}
 		}
 	}
