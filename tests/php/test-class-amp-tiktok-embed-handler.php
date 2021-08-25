@@ -73,12 +73,12 @@ class Test_AMP_TikTok_Embed_Handler extends TestCase {
 	 */
 	public function get_conversion_data() {
 		return [
-			'no_embed'               => [
+			'no_embed'                          => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			],
 
-			'url_simple'             => [
+			'url_simple'                        => [
 				'https://www.tiktok.com/@scout2015/video/6718335390845095173' . PHP_EOL,
 
 				'
@@ -92,7 +92,7 @@ class Test_AMP_TikTok_Embed_Handler extends TestCase {
 				',
 			],
 
-			'amp-tiktok-embed-code'  => [
+			'tiktok-embed-code-with-wpautop'    => [
 				'
 					<blockquote class="tiktok-embed" cite="https://www.tiktok.com/@countingprimes/video/6988237085899574533" data-video-id="6988237085899574533" style="max-width: 605px;min-width: 325px;" > <section> <a target="_blank" title="@countingprimes" href="https://www.tiktok.com/@countingprimes">@countingprimes</a> <p>You can now embed TikTok\'s in AMP</p> <a target="_blank" title="♬ original sound - countingprimes" href="https://www.tiktok.com/music/original-sound-6988236987325057798">♬ original sound - countingprimes</a> </section> </blockquote> <script async src="https://www.tiktok.com/embed.js"></script>
 				',
@@ -109,7 +109,26 @@ class Test_AMP_TikTok_Embed_Handler extends TestCase {
 				',
 			],
 
-			'amp-tiktok-passthrough' => [
+			'tiktok-embed-code-without-wpautop' => [
+				'
+					<!-- wp:html -->
+					<blockquote class="tiktok-embed" cite="https://www.tiktok.com/@countingprimes/video/6988237085899574533" data-video-id="6988237085899574533" style="max-width: 605px;min-width: 325px;" > <section> <a target="_blank" title="@countingprimes" href="https://www.tiktok.com/@countingprimes">@countingprimes</a> <p>You can now embed TikTok\'s in AMP</p> <a target="_blank" title="♬ original sound - countingprimes" href="https://www.tiktok.com/music/original-sound-6988236987325057798">♬ original sound - countingprimes</a> </section> </blockquote> <script async src="https://www.tiktok.com/embed.js"></script>
+					<!-- /wp:html -->
+				',
+				'
+					<amp-tiktok layout="responsive" height="575" width="325" data-src="https://www.tiktok.com/@countingprimes/video/6988237085899574533">
+						<blockquote class="tiktok-embed" cite="https://www.tiktok.com/@countingprimes/video/6988237085899574533" data-video-id="6988237085899574533" placeholder>
+							<section>
+								<a target="_blank" title="@countingprimes" href="https://www.tiktok.com/@countingprimes">@countingprimes</a>
+								<p>You can now embed TikTok’s in AMP</p>
+								<a target="_blank" title="♬ original sound - countingprimes" href="https://www.tiktok.com/music/original-sound-6988236987325057798">♬ original sound – countingprimes</a>
+							</section>
+						</blockquote>
+					</amp-tiktok>
+				',
+			],
+
+			'amp-tiktok-passthrough'            => [
 				'
 				<!-- wp:html -->
 				<amp-tiktok width="300" height="800" layout="intrinsic">
