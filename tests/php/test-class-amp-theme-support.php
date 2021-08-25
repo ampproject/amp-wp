@@ -1784,7 +1784,23 @@ class Test_AMP_Theme_Support extends TestCase {
 		wp();
 
 		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
-		$this->assertStringContainsString( 'AMP.toggleExperiment(\'bento\', true);', $html );
+		$this->assertStringContainsString( 'AMP.toggleExperiment("bento", true);', $html );
+		$this->assertStringContainsString( 'amp-facebook-1.0', $html ); // As opposed to amp-facebook-page-0.1, since Bento is enabled.
+	}
+
+	/**
+	 * Test prepare_response when Bento is not enabled.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_without_bento() {
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
+
+		wp();
+
+		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
+		$this->assertStringNotContainsString( 'AMP.toggleExperiment("bento", true);', $html );
+		$this->assertStringContainsString( 'amp-facebook-page-0.1', $html ); // As opposed to amp-facebook-page-1.0, since Bento is not enabled.
 	}
 
 	/**
@@ -1801,7 +1817,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
-		$this->assertStringContainsString( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
+		$this->assertStringContainsString( '<html data-amp-non-valid-doc>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
 		$this->assertStringContainsString( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
 		$this->assertStringContainsString( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
 	}
@@ -1990,6 +2006,7 @@ class Test_AMP_Theme_Support extends TestCase {
 				data-aax_size="300x250"
 				data-aax_pubname="test123"
 				data-aax_src="302"></amp-ad>
+		<amp-facebook-page width="340" height="130" layout="responsive" data-href="https://www.facebook.com/imdb/"></amp-facebook-page>
 
 		<?php wp_footer(); ?>
 
