@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { Button, ExternalLink } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
@@ -34,31 +34,36 @@ import { RawData } from './raw-data';
  * @return {JSX.Element} Makrup for AMP support component
  */
 export function AMPSupport( props ) {
-	const { data } = props;
+	const { data, restEndpoint, args, nonce } = props;
 
 	const [ sending, setSending ] = useState( false );
 	const [ uuid, setUuid ] = useState( null );
 	const [ error, setError ] = useState( null );
 	const [ hasCopied, setHasCopied ] = useState( false );
+	const [ submitSupportRequest, setSubmitSupportRequest ] = useState( false );
 
 	/**
 	 * Event callback for send button.
 	 */
-	const submitData = () => {
+	useEffect( () => {
 		( async () => {
+			if ( false === submitSupportRequest ) {
+				return;
+			}
+
 			setSending( true );
 			setUuid( null );
 			setError( null );
 
 			try {
-				apiFetch.use( apiFetch.createNonceMiddleware( props.nonce ) );
+				apiFetch.use( apiFetch.createNonceMiddleware( nonce ) );
 
 				const response = await apiFetch(
 					{
-						path: props.restEndpoint,
+						path: restEndpoint,
 						method: 'POST',
 						data: {
-							args: props.args,
+							args,
 						},
 					},
 				);
@@ -66,6 +71,7 @@ export function AMPSupport( props ) {
 				if ( undefined !== response.success && undefined !== response.data ) {
 					setUuid( response.data.uuid );
 				} else {
+					setSubmitSupportRequest( false );
 					throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
 				}
 			} catch ( exception ) {
@@ -74,7 +80,7 @@ export function AMPSupport( props ) {
 				setSending( false );
 			}
 		} )();
-	};
+	}, [ submitSupportRequest, restEndpoint, args, nonce ] );
 
 	return (
 		<div className="amp-support">
@@ -113,7 +119,9 @@ export function AMPSupport( props ) {
 					<Button
 						disabled={ Boolean( uuid || sending ) }
 						className="components-button--send-button is-primary"
-						onClick={ submitData }
+						onClick={ () => {
+							setSubmitSupportRequest( true );
+						} }
 					>
 						{ uuid && __( 'Sent', 'amp' ) }
 						{ sending && __( 'Sending…', 'amp' ) }
