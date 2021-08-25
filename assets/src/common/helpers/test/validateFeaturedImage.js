@@ -20,7 +20,7 @@ describe( 'validateFeaturedImage', () => {
 			{ width: 10, height: 10 },
 			false,
 		);
-		expect( isValid ).toStrictEqual( [ 'The featured image must be in .jpg, .png, or .gif format.' ] );
+		expect( isValid ).toStrictEqual( [ 'The featured image must be of either JPEG, PNG, GIF, WebP, or SVG format.' ] );
 	} );
 
 	it( 'returns an error if the featured image is too small', () => {
