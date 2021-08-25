@@ -21,10 +21,9 @@ import ClipboardButton from '../clipboard-button';
 import { SiteInfo } from './site-info';
 import { Themes } from './themes';
 import { Plugins } from './plugins';
-import { Errors } from './errors';
-import { ErrorSources } from './error-sources';
 import { ValidatedUrls } from './validated-urls';
 import { RawData } from './raw-data';
+import { Details } from './details';
 
 /**
  * AMP Support component.
@@ -104,9 +103,27 @@ export function AMPSupport( props ) {
 
 					{ data.plugins && <Plugins plugins={ data.plugins } /> }
 
-					{ data.errors && <Errors errors={ data.errors } /> }
+					{ data.errors && Array.isArray( data.errors ) && (
+						<Details
+							title={ sprintf(
+								/* translators: Placeholder is the number of errors */
+								__( 'Errors (%d)', 'amp' ),
+								data.errors.length,
+							) }
+							description={ __( 'Please check "Raw Data" for all error information.', 'amp' ) }
+						/>
+					) }
 
-					{ data.error_sources && <ErrorSources errorSources={ data.error_sources } /> }
+					{ data.error_sources && Array.isArray( data.error_sources ) && (
+						<Details
+							title={ sprintf(
+								/* translators: Placeholder is the number of error sources */
+								__( 'Error Sources (%d)', 'amp' ),
+								data.error_sources.length,
+							) }
+							description={ __( 'Please check "Raw Data" for all error source information.', 'amp' ) }
+						/>
+					) }
 
 					{ data.urls && <ValidatedUrls validatedUrls={ data.urls } /> }
 
