@@ -180,7 +180,6 @@ class SupportScreen implements Conditional, Service, Registerable {
 				wp_json_encode(
 					[
 						'restEndpoint' => get_rest_url( null, 'amp/v1/send-diagnostic' ),
-						'nonce'        => wp_create_nonce( 'wp_rest' ),
 						'args'         => $args,
 						'data'         => $data,
 					]

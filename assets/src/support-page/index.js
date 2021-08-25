@@ -11,7 +11,6 @@ import {
 	restEndpoint,
 	args,
 	data,
-	nonce,
 } from 'amp-support'; // From WP inline script.
 
 /**
@@ -45,7 +44,6 @@ domReady( () => {
 						restEndpoint={ restEndpoint }
 						args={ args }
 						data={ data }
-						nonce={ nonce }
 					/>
 				</ErrorBoundary>
 			</ErrorContextProvider>

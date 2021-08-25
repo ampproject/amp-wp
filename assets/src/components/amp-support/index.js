@@ -34,7 +34,7 @@ import { RawData } from './raw-data';
  * @return {JSX.Element} Makrup for AMP support component
  */
 export function AMPSupport( props ) {
-	const { data, restEndpoint, args, nonce } = props;
+	const { data, restEndpoint, args } = props;
 
 	const [ sending, setSending ] = useState( false );
 	const [ uuid, setUuid ] = useState( null );
@@ -56,11 +56,9 @@ export function AMPSupport( props ) {
 			setError( null );
 
 			try {
-				apiFetch.use( apiFetch.createNonceMiddleware( nonce ) );
-
 				const response = await apiFetch(
 					{
-						path: restEndpoint,
+						url: restEndpoint,
 						method: 'POST',
 						data: {
 							args,
@@ -80,7 +78,7 @@ export function AMPSupport( props ) {
 				setSending( false );
 			}
 		} )();
-	}, [ submitSupportRequest, restEndpoint, args, nonce ] );
+	}, [ submitSupportRequest, restEndpoint, args ] );
 
 	return (
 		<div className="amp-support">
@@ -163,7 +161,6 @@ export function AMPSupport( props ) {
 
 AMPSupport.propTypes = {
 	restEndpoint: PropTypes.string.isRequired,
-	nonce: PropTypes.string.isRequired,
 	args: PropTypes.any,
 	data: PropTypes.shape( {
 		error_sources: PropTypes.array.isRequired,

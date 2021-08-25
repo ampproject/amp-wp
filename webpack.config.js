@@ -337,10 +337,16 @@ const settingsPage = {
 const supportPage = {
 	...sharedConfig,
 	entry: {
+		'wp-api-fetch': './assets/src/polyfills/api-fetch.js',
 		'amp-support': './assets/src/support-page',
 	},
 	externals: {
 		'amp-support': 'ampSupport',
+	},
+	resolve: {
+		alias: {
+			'@wordpress/api-fetch__non-shim': require.resolve( '@wordpress/api-fetch' ),
+		},
 	},
 	plugins: [
 		...sharedConfig.plugins.filter(
@@ -352,6 +358,7 @@ const supportPage = {
 			requestToHandle: ( handle ) => {
 				switch ( handle ) {
 					case 'lodash':
+					case '@wordpress/api-fetch':
 						return defaultRequestToHandle( handle );
 
 					default:
@@ -361,6 +368,7 @@ const supportPage = {
 			requestToExternal: ( external ) => {
 				switch ( external ) {
 					case 'lodash':
+					case '@wordpress/api-fetch':
 						return defaultRequestToExternal( external );
 
 					default:
