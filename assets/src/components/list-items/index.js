@@ -27,9 +27,14 @@ export function ListItems( { className = '', isDisc = false, heading, items } ) 
 								{ item.label }
 							</strong>
 						) }
-						{ item.value ? (
+						{ ( item.value || item.url ) ? (
 							<span className="list-items__item-value">
-								{ item.value }
+								{ item.value && item.value }
+								{ item.url && (
+									<a href={ item.url } title={ item.url } target="_blank" rel="noreferrer">
+										{ item.url }
+									</a>
+								) }
 							</span>
 						) : '-' }
 					</li>
@@ -49,6 +54,7 @@ ListItems.propTypes = {
 			PropTypes.string,
 			PropTypes.number,
 			PropTypes.node,
-		] ).isRequired,
+		] ),
+		url: PropTypes.string,
 	} ) ).isRequired,
 };

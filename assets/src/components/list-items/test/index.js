@@ -52,5 +52,20 @@ describe( 'ListItems', () => {
 		);
 
 		expect( wrapper.toJSON() ).toMatchSnapshot();
+
+		// Listing with url.
+		wrapper = create(
+			<ListItems
+				heading="URL listing"
+				items={
+					[
+						{ label: 'Label 1', url: 'https://example.com/' },
+						{ label: 'Label 2', url: 'https://example.com/sample-page/' },
+					]
+				}
+			/>,
+		);
+
+		expect( wrapper.toJSON() ).toMatchSnapshot();
 	} );
 } );

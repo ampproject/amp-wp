@@ -103,3 +103,61 @@ exports[`ListItems matches snapshots 3`] = `
   </li>
 </ul>
 `;
+
+exports[`ListItems matches snapshots 4`] = `
+<ul
+  className="list-items"
+>
+  <li
+    className="list-items__item"
+  >
+    <h4
+      className="list-items__heading"
+    >
+      URL listing
+    </h4>
+  </li>
+  <li
+    className="list-items__item"
+  >
+    <strong
+      className="list-items__item-key"
+    >
+      Label 1
+    </strong>
+    <span
+      className="list-items__item-value"
+    >
+      <a
+        href="https://example.com/"
+        rel="noreferrer"
+        target="_blank"
+        title="https://example.com/"
+      >
+        https://example.com/
+      </a>
+    </span>
+  </li>
+  <li
+    className="list-items__item"
+  >
+    <strong
+      className="list-items__item-key"
+    >
+      Label 2
+    </strong>
+    <span
+      className="list-items__item-value"
+    >
+      <a
+        href="https://example.com/sample-page/"
+        rel="noreferrer"
+        target="_blank"
+        title="https://example.com/sample-page/"
+      >
+        https://example.com/sample-page/
+      </a>
+    </span>
+  </li>
+</ul>
+`;

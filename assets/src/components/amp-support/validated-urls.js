@@ -28,11 +28,7 @@ export function ValidatedUrls( { validatedUrls } ) {
 	const urls = validatedUrls.map( ( item ) => item.url ? item.url : null );
 	const items = urls.map( ( url ) => {
 		return {
-			value: (
-				<a href={ url } title={ url } target="_blank" rel="noreferrer">
-					{ url }
-				</a>
-			),
+			url,
 		};
 	} );
 
