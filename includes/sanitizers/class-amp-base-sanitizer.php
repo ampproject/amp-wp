@@ -508,6 +508,15 @@ abstract class AMP_Base_Sanitizer {
 			$node->parentNode->removeChild( $node );
 		} else {
 			$this->nodes_to_keep[ $node->nodeName ][] = $node;
+
+			if ( $node instanceof DOMElement ) {
+				$node->setAttributeNode(
+					$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
+				);
+				$this->dom->documentElement->setAttributeNode(
+					$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+				);
+			}
 		}
 		return $should_remove;
 	}
@@ -568,6 +577,17 @@ abstract class AMP_Base_Sanitizer {
 			} else {
 				$element->removeAttributeNode( $node );
 			}
+		} else {
+			$attr_value = $element->getAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE );
+			if ( $attr_value ) {
+				$attr_value .= ' ' . $node->nodeName;
+			} else {
+				$attr_value = $node->nodeName;
+			}
+			$element->setAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE, $attr_value );
+			$this->dom->documentElement->setAttributeNode(
+				$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+			);
 		}
 
 		return $should_remove;
