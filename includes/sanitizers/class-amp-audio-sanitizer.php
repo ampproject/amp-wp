@@ -32,6 +32,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $DEFAULT_ARGS = [
 		'add_noscript_fallback' => true,
+		'native_audio_used'     => false,
 	];
 
 	/**
@@ -40,6 +41,9 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
+		if ( $this->args['native_audio_used'] ) {
+			return [];
+		}
 		return [
 			'audio' => [ 'amp-audio' ],
 		];
@@ -57,15 +61,27 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		if ( $this->args['add_noscript_fallback'] ) {
+		if ( $this->args['add_noscript_fallback'] && ! $this->args['native_audio_used'] ) {
 			$this->initialize_noscript_allowed_attributes( self::$tag );
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			/** @var DOMElement $node */
 			$node = $nodes->item( $i );
 
 			// Skip element if already inside of an AMP element as a noscript fallback, or it has a dev mode exemption.
 			if ( $this->is_inside_amp_noscript( $node ) || DevMode::hasExemptionForNode( $node ) ) {
+				continue;
+			}
+
+			// If native audio is being used, just mark it as unvalidated.
+			if ( $this->args['native_audio_used'] ) {
+				$node->setAttributeNode(
+					$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
+				);
+				$this->dom->documentElement->setAttributeNode(
+					$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+				);
 				continue;
 			}
 
