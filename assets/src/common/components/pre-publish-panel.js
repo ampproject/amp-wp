@@ -28,32 +28,27 @@ import { validateFeaturedImage } from '../helpers';
  */
 const PrePublishPanel = ( { featuredMedia, dimensions, required } ) => {
 	const errors = validateFeaturedImage( featuredMedia, dimensions, required );
-
-	if ( ! errors ) {
-		return null;
-	}
+	const noticeUI = errors ? (
+		<Notice
+			status={ required ? 'warning' : 'notice' }
+			isDismissible={ false }
+		>
+			{ errors.map( ( errorMessage, index ) => {
+				return (
+					<p key={ `error-${ index }` }>
+						{ errorMessage }
+					</p>
+				);
+			} ) }
+		</Notice>
+	) : null;
 
 	return (
 		<PluginPrePublishPanel
 			title={ __( 'Featured Image', 'amp' ) }
 			initialOpen="true"
 		>
-			<PostFeaturedImage
-				noticeUI={
-					<Notice
-						status={ required ? 'warning' : 'notice' }
-						isDismissible={ false }
-					>
-						{ errors.map( ( errorMessage, index ) => {
-							return (
-								<p key={ `error-${ index }` }>
-									{ errorMessage }
-								</p>
-							);
-						} ) }
-					</Notice>
-				}
-			/>
+			<PostFeaturedImage noticeUI={ noticeUI } />
 		</PluginPrePublishPanel>
 	);
 };
