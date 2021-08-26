@@ -134,7 +134,7 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 
 		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_SANDBOXING_LEVEL );
 
-		// Allow native POST forms, but they won't be converted by default.
+		// Allow native POST forms, but they won't be converted by default (unless on level 3, per below).
 		add_filter( 'amp_native_post_form_allowed', '__return_true' );
 
 		// Opt-in to the new script sanitization logic in the script sanitizer.
