@@ -43,9 +43,9 @@ export function RadioGroup( { options = [], onChange, selected } ) {
 							onChange={ () => onChange( value ) }
 						/>
 					</div>
-					<h3 className="radio-group__title">
+					<p className="radio-group__title">
 						{ title }
-					</h3>
+					</p>
 				</label>
 			) ) }
 		</form>
