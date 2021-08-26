@@ -37,6 +37,7 @@ import { AMPDrawer } from '../components/amp-drawer';
 import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
 import { ErrorScreen } from '../components/error-screen';
 import { User, UserContextProvider } from '../components/user-context-provider';
+import { IconLaptopSearch } from '../components/svg/icon-laptop-search';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
@@ -44,6 +45,7 @@ import { SettingsFooter } from './settings-footer';
 import { PluginSuppression } from './plugin-suppression';
 import { Analytics } from './analytics';
 import { PairedUrlStructure } from './paired-url-structure';
+import { Review } from './review';
 import { MobileRedirection } from './mobile-redirection';
 import { DeveloperTools } from './developer-tools';
 
@@ -190,13 +192,27 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 			<Welcome />
+			<AMPDrawer
+				heading={ (
+					<>
+						<IconLaptopSearch />
+						<h3>
+							{ __( 'Review', 'amp' ) }
+						</h3>
+					</>
+				) }
+				hiddenTitle={ __( 'Review', 'amp' ) }
+				id="review"
+				initialOpen={ true }
+			>
+				<Review />
+			</AMPDrawer>
 			<form onSubmit={ onSubmit }>
 				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />
 				<h2 id="advanced-settings">
 					{ __( 'Advanced Settings', 'amp' ) }
 				</h2>
 				<AMPDrawer
-
 					heading={ (
 						<h3>
 							{ __( 'Supported Templates', 'amp' ) }

@@ -357,6 +357,7 @@ li.error-kept {
 	}
 }
 
+#review .amp-drawer__panel-body-inner,
 #plugin-suppression .amp-drawer__panel-body-inner,
 .amp-analytics .amp-drawer__panel-body-inner,
 #paired-url-structure .amp-drawer__panel-body-inner,
@@ -368,6 +369,7 @@ li.error-kept {
 	}
 }
 
+#review .amp-drawer__panel-body-inner > p,
 #plugin-suppression .amp-drawer__panel-body-inner > p,
 #paired-url-structure .amp-drawer__panel-body-inner > p,
 .amp-analytics .amp-drawer__panel-body-inner p,
@@ -530,6 +532,48 @@ li.error-kept {
 	width: 24px;
 }
 
+/* Review. */
+#review {
+	margin-bottom: 2.5rem;
+}
+
+#review .amp-drawer__heading svg {
+	fill: transparent;
+	width: 55px;
+}
+
+.amp .settings-review__heading {
+	align-items: center;
+	display: flex;
+	flex-flow: row nowrap;
+	font-size: 1rem;
+	line-height: 1.25;
+	margin-top: 2rem;
+}
+
+.settings-review__heading svg {
+	flex: 0 0 auto;
+	height: auto;
+	margin-right: 25px;
+	width: 40px;
+}
+
+.settings-review__list {
+	font-size: var(--amp-settings-font-size);
+	list-style: disc;
+	padding-left: 30px;
+}
+
+.settings-review__list a {
+	color: var(--amp-settings-color-black);
+	transition: color 80ms ease;
+}
+
+.settings-review__list a:hover,
+.settings-review__list a:focus {
+	color: var(--amp-settings-color-brand);
+}
+
 /* Other Settings */
 .amp-other-settings section + section {
 	margin-top: 2rem;
@@ -556,4 +600,3 @@ li.error-kept {
 .amp-other-settings .developer-tools p {
 	font-size: 0.875rem;
 }
-

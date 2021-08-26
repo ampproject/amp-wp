@@ -1,6 +1,6 @@
 export function IconLaptopSearch( props ) {
 	return (
-		<svg width="42" height="29" fill="none" xmlns="http://www.w3.org/2000/svg" { ...props }>
+		<svg viewBox="0 0 42 29" fill="none" xmlns="http://www.w3.org/2000/svg" { ...props }>
 			<g clipPath="url(#clip0)">
 				<path d="M9.102 6.577l-.017 3.95a1.89 1.89 0 001.882 1.897l15.76.066a1.89 1.89 0 001.898-1.882l.016-3.95a1.89 1.89 0 00-1.882-1.897L11 4.694a1.89 1.89 0 00-1.897 1.883z" stroke="#005AF0" strokeWidth="2.08" strokeLinecap="round" strokeLinejoin="round" />
 				<path d="M13.14 9.2a1.15 1.15 0 100-2.3 1.15 1.15 0 000 2.3zM9.13 18.03a1.15 1.15 0 100-2.3 1.15 1.15 0 000 2.3z" fill="#005AF0" />
