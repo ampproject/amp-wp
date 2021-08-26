@@ -72,6 +72,14 @@ class AMP_Video_Converter_Test extends TestCase {
 				sprintf( '<amp-video src="%1$s" width="560" height="320" layout="responsive"><a href="%1$s" fallback="">%1$s</a><noscript><video src="%1$s"></video></noscript></amp-video>', '{{video_url}}' ),
 			],
 
+			'local_video_without_dimensions_and_native' => [
+				sprintf( '<video src="%s"></video>', '{{video_url}}' ),
+				sprintf( '<video src="%s" width="560" height="320" %s></video>', '{{video_url}}', AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				[
+					'native_video_used' => true,
+				],
+			],
+
 			'local_video_without_dimensions_and_with_data_layout' => [
 				sprintf( '<video src="%s" data-amp-layout="fixed"></video>', '{{video_url}}' ),
 				sprintf( '<amp-video src="%1$s" layout="fixed" width="560" height="320"><a href="%1$s" fallback="">%1$s</a><noscript><video src="%1$s"></video></noscript></amp-video>', '{{video_url}}' ),
@@ -300,6 +308,11 @@ class AMP_Video_Converter_Test extends TestCase {
 
 		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$validating_sanitizer->sanitize();
+
+		$this->assertSame(
+			! empty( $args['native_video_used'] ),
+			$dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+		);
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 

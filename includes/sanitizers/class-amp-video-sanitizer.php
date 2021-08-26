@@ -35,6 +35,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $DEFAULT_ARGS = [
 		'add_noscript_fallback' => true,
+		'native_video_used'     => false,
 	];
 
 	/**
@@ -43,6 +44,9 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
+		if ( $this->args['native_video_used'] ) {
+			return [];
+		}
 		return [
 			'video' => [ 'amp-video', 'amp-youtube' ],
 		];
@@ -61,7 +65,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		if ( $this->args['add_noscript_fallback'] ) {
+		if ( $this->args['add_noscript_fallback'] && ! $this->args['native_video_used'] ) {
 			$this->initialize_noscript_allowed_attributes( self::$tag );
 
 			// Omit muted from noscript > video since it causes deprecation warnings in validator.
@@ -95,13 +99,6 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			/**
-			 * Original node.
-			 *
-			 * @var DOMElement $old_node
-			 */
-			$old_node = $node->cloneNode( false );
-
 			// Gather all child nodes and supply empty video dimensions from sources.
 			$fallback    = null;
 			$child_nodes = [];
@@ -126,8 +123,25 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				$child_nodes[] = $child_node;
 			}
 
+			// At this point, if we're using native <video>, then we just supply the gathered dimensions if we have them
+			// and then move along.
+			if ( $this->args['native_video_used'] ) {
+				foreach ( [ Attribute::WIDTH, Attribute::HEIGHT ] as $attr_name ) {
+					if ( ! $node->hasAttribute( $attr_name ) && isset( $new_attributes[ $attr_name ] ) ) {
+						$node->setAttribute( $attr_name, $new_attributes[ $attr_name ] );
+					}
+				}
+				$node->setAttributeNode(
+					$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
+				);
+				$this->dom->documentElement->setAttributeNode(
+					$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+				);
+				continue;
+			}
+
 			/*
-			 * Add fallback for audio shortcode which is not present by default since wp_mediaelement_fallback()
+			 * Add fallback for video shortcode which is not present by default since wp_mediaelement_fallback()
 			 * is not called when wp_audio_shortcode_library is filtered from mediaelement to amp.
 			 */
 			if ( ! $fallback && ! empty( $sources ) ) {
@@ -149,6 +163,13 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				$new_attributes['layout'] = 'responsive';
 			}
 			$new_attributes = $this->set_layout( $new_attributes );
+
+			/**
+			 * Original node.
+			 *
+			 * @var DOMElement $old_node
+			 */
+			$old_node = $node->cloneNode( false );
 
 			// @todo Make sure poster and artwork attributes are HTTPS.
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
