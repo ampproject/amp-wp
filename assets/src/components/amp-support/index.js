@@ -46,7 +46,7 @@ export function AMPSupport( props ) {
 	 */
 	useEffect( () => {
 		( async () => {
-			if ( false === submitSupportRequest || sending ) {
+			if ( ! submitSupportRequest || uuid || sending ) {
 				return;
 			}
 
@@ -77,7 +77,7 @@ export function AMPSupport( props ) {
 				setSending( false );
 			}
 		} )();
-	}, [ submitSupportRequest, sending, restEndpoint, args ] );
+	}, [ submitSupportRequest, uuid, sending, restEndpoint, args ] );
 
 	return (
 		<div className="amp-support">
