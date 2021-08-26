@@ -197,9 +197,11 @@ class SupportScreen implements Conditional, Service, Registerable {
 	public function render_screen() {
 
 		?>
-		<div id="amp-support" class="wrap">
-			<div class="amp amp-support">
-				<div id="amp-support-root"></div>
+		<div class="wrap">
+			<div id="amp-support">
+				<div class="amp amp-support">
+					<div id="amp-support-root"></div>
+				</div>
 			</div>
 		</div>
 		<?php

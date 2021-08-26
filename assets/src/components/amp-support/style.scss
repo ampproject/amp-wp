@@ -27,6 +27,11 @@
 	display: flex;
 }
 
+.amp-support .amp-support__footer .components-external-link {
+	display: flex;
+	align-items: center;
+}
+
 .amp-support .components-button--send-button {
 	margin-right: 1rem;
 }

@@ -12,7 +12,7 @@ import { __ } from '@wordpress/i18n';
  * Render raw data on site support page.
  *
  * @param {Object} props      Component props.
- * @param {Object} props.data Error data.
+ * @param {Object} props.data AMP Support data.
  * @return {JSX.Element|null} HTML markup for raw data.
  */
 export function RawData( { data } ) {

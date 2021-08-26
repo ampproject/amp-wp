@@ -25,12 +25,9 @@ export function ValidatedUrls( { validatedUrls } ) {
 		return null;
 	}
 
-	const urls = validatedUrls.map( ( item ) => item.url ? item.url : null );
-	const items = urls.map( ( url ) => {
-		return {
-			url,
-		};
-	} );
+	const items = validatedUrls.map( ( item ) => ( {
+		url: item.url ?? null,
+	} ) );
 
 	return (
 		<details open={ false }>

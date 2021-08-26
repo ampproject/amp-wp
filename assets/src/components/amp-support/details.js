@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  * @param {Object}  props             Component props.
  * @param {boolean} props.open        Flag to whether open summary or not.
  * @param {string}  props.title       Title of details.
- * @param {string}  props.description Description message..
+ * @param {string}  props.description Description message.
  * @return {JSX.Element|null} HTML markup.
  */
 export function Details( { open = false, title, description } ) {

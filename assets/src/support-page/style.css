@@ -20,16 +20,5 @@ html {
 
 #amp-support {
 	max-width: 1060px;
-	margin: 0 auto 6rem;
-}
-
-#amp-support > h1 {
-	font-family: var(--font-poppins);
-	font-size: 1.682rem;
-	font-weight: 600;
-	margin-bottom: 0.55rem;
-}
-
-#amp-support .not-has-dependency-support {
-	margin-bottom: 2.5rem;
+	margin: auto;
 }
