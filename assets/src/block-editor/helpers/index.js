@@ -366,7 +366,7 @@ export const setUpVideoInspectorControls = ( props ) => {
 
 	return (
 		<InspectorControls>
-			{ ( true === autoplay && false === muted ) && (
+			{ ( true === autoplay && true !== muted ) && (
 				<PanelBody className="amp-video-autoplay-notice">
 					{ __( 'Autoplay will mute the video player by default in AMP mode.', 'amp' ) }
 				</PanelBody>
