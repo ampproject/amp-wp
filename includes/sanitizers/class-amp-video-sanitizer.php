@@ -315,7 +315,11 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( isset( $out['autoplay'] ) ) {
+		/*
+		 * The amp-video will forcibly be muted whenever it is set to autoplay.
+		 * So omit the `muted` attribute if it exists.
+		 */
+		if ( isset( $out['autoplay'], $out['muted'] ) ) {
 			unset( $out['muted'] );
 		}
 

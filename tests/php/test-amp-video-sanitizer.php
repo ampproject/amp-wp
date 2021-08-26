@@ -62,6 +62,11 @@ class AMP_Video_Converter_Test extends TestCase {
 				'<amp-video src="https://example.com/file.mp4" class="amp-wp-unknown-size" height="400" layout="fixed-height" width="auto"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			],
 
+			'video_with_autoplay' => [
+				'<video src="https://example.com/file.mp4" autoplay="true" muted="muted"></video>',
+				'<amp-video src="https://example.com/file.mp4" autoplay height="400" layout="fixed-height" width="auto"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4" autoplay="true"></video></noscript></amp-video>',
+			],
+
 			'local_video_without_dimensions' => [
 				sprintf( '<video src="%s"></video>', '{{video_url}}' ),
 				sprintf( '<amp-video src="%1$s" width="560" height="320" layout="responsive"><a href="%1$s" fallback="">%1$s</a><noscript><video src="%1$s"></video></noscript></amp-video>', '{{video_url}}' ),
