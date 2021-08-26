@@ -1803,23 +1803,49 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertStringContainsString( 'amp-facebook-page-0.1', $html ); // As opposed to amp-facebook-page-1.0, since Bento is not enabled.
 	}
 
+	/** @return array */
+	public function get_data_to_test_prepare_response_standard_mode_non_amp() {
+		return [
+			'without_amp_live_list' => [ false ],
+			'with_amp_live_list'    => [ true ],
+		];
+	}
+
 	/**
 	 * Test prepare_response for standard mode when some validation errors aren't auto-sanitized.
 	 *
+	 * @dataProvider get_data_to_test_prepare_response_standard_mode_non_amp
 	 * @covers AMP_Theme_Support::prepare_response()
+	 * @param bool $with_amp_live_list
 	 */
-	public function test_prepare_response_standard_mode_non_amp() {
+	public function test_prepare_response_standard_mode_non_amp( $with_amp_live_list ) {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		add_filter( 'amp_dev_mode_enabled', '__return_false' );
 		wp();
 		$original_html = $this->get_original_html();
+		if ( $with_amp_live_list ) {
+			$amp_live_list = '
+				<amp-live-list id="live-list-2" data-poll-interval="20000" data-max-items-per-page="10">
+					<div update class="slide" on="tap:live-list-2.update">new updates on live list 2</div>
+					<div items>
+						<div id="live-list-2-item-2" data-sort-time="1464281932879">world</div>
+						<div id="live-list-2-item-1" data-sort-time="1464281932878">hello</div>
+					</div>
+				</amp-live-list>
+			';
+			$original_html = preg_replace( '#<body.*?>#', '$0' . $amp_live_list, $original_html );
+		}
 		add_filter( 'amp_validation_error_sanitized', '__return_false' ); // For testing purpose only. This should not normally be done.
 
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
 		$this->assertStringContainsString( '<html data-amp-non-valid-doc>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
 		$this->assertStringContainsString( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
-		$this->assertStringContainsString( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
+		if ( $with_amp_live_list ) {
+			$this->assertStringContainsString( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
+		} else {
+			$this->assertStringNotContainsString( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
+		}
 	}
 
 	/** @return array */
