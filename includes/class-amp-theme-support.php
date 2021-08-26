@@ -2163,6 +2163,18 @@ class AMP_Theme_Support {
 			$dom->documentElement->removeAttribute( Attribute::AMP );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
+
+			/*
+			 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
+			 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
+			 */
+			if ( array_key_exists( Extension::LIVE_LIST, $amp_scripts ) ) {
+				$script = $dom->createElement( Tag::SCRIPT );
+				$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
+				$script->setAttributeNode( $dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
+				$script->setAttributeNode( $dom->createAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
+				$dom->head->appendChild( $script );
+			}
 		}
 
 		$response = $dom->saveHTML();
