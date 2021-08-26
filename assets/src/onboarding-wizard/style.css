@@ -48,6 +48,17 @@ body {
 	-webkit-font-smoothing: antialiased;
 }
 
+.amp-onboarding-wizard p a,
+.amp-onboarding-wizard li > a {
+	color: var(--amp-settings-color-black);
+	transition: color 80ms ease;
+}
+
+.amp-onboarding-wizard p a:hover,
+.amp-onboarding-wizard li > a:hover {
+	color: var(--amp-settings-color-brand);
+}
+
 /**
  * Main app panel.
  */

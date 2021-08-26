@@ -137,7 +137,7 @@ export function Welcome() {
 							{ __( 'Site review', 'amp' ) }
 						</h4>
 						<p>
-							{ __( 'At the end of the onboarding flow, the AMP plugin is fully set up and configured, and your site is ready to serve great experiences to your users.', 'amp' ) }
+							{ __( 'At the end of the onboarding flow the AMP plugin is fully configured, and your site is ready to start serving great experiences to your users.', 'amp' ) }
 						</p>
 					</div>
 

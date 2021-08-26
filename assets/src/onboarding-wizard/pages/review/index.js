@@ -134,21 +134,21 @@ export function Review() {
 				) }
 				{ 'standard' === themeSupport && (
 					<p>
-						{ __( 'Your site is ready to bring great experiences to your users! In Standard mode there is a single version of your site, the AMP version. Browse your site by navigating through the links below and ensure the functionality and look-and-feel of your site work as expected.', 'amp' ) }
+						{ __( 'Your site is ready to bring great experiences to your users! In Standard mode there is a single, AMP, version of your site. Browse your site by navigating through the links below and ensure the functionality and look-and-feel are as expected.', 'amp' ) }
 					</p>
 				) }
 				{ 'transitional' === themeSupport && (
 					<p>
-						{ __( 'Your site is ready to bring great experiences to your users! In Transitional mode both the AMP and non-AMP versions of your site will be served using your currently active theme. Toggle the “AMP version” switch you can browse throughout your site and ensure both versions of your site meet your expectations.', 'amp' ) }
+						{ __( 'Your site is ready to bring great experiences to your users! In Transitional mode the AMP and non-AMP versions of your site are served using your currently active theme. Switch between “AMP” and “non-AMP” to browse your site and ensure both versions meet your expectations.', 'amp' ) }
 					</p>
 				) }
 				{ 'reader' === themeSupport && (
 					<>
 						<p>
-							{ __( 'Your site is ready to bring great experiences to your users! In Reader mode the AMP version of your site will be served using the Reader theme you have selected, while pages for the non-AMP version of your site will be served using your primary theme.', 'amp' ) }
+							{ __( 'You’re ready to bring great experiences to your users! In Reader mode the AMP version is served using the Reader theme you have selected, while pages for non-AMP version of your site will be served using your primary theme.', 'amp' ) }
 						</p>
 						<p>
-							{ __( 'Toggle the “AMP version” switch you can browse throughout your site and ensure both versions of your site meet your expectations. As a last step, make sure you tailor the Reader theme as needed using the Customizer.', 'amp' ) }
+							{ __( 'Toggle “AMP” and “Non-AMP” to browse your site and ensure both versions meet your expectations. As a last step, make sure you tailor the Reader theme as needed using the Customizer.', 'amp' ) }
 						</p>
 					</>
 				) }
@@ -210,8 +210,8 @@ export function Review() {
 					{ /* dangerouslySetInnerHTML reason: Injection of a link. */ }
 					<li dangerouslySetInnerHTML={ {
 						__html: sprintf(
-							/* translators: placeholder is a link to the AMP for WP site. */
-							__( '<a href="%s" target="_blank" rel="noreferrer noopener">Learn more</a> about how AMP works', 'amp' ),
+							/* translators: placeholder is a link to the plugin site. */
+							__( '<a href="%s" target="_blank" rel="noreferrer noopener">Learn more</a> how the PX plugin works', 'amp' ),
 							'https://amp-wp.org/documentation/how-the-plugin-works/',
 						),
 					} } />

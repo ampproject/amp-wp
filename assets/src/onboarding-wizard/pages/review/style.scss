@@ -60,14 +60,6 @@
 	font-size: var(--amp-settings-font-size);
 	list-style: disc;
 	padding-left: 30px;
-
-	a {
-
-		&:hover,
-		&:focus {
-			text-decoration: none;
-		}
-	}
 }
 
 // Preview container.
