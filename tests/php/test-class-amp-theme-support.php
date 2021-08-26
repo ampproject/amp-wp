@@ -2272,40 +2272,6 @@ class Test_AMP_Theme_Support extends TestCase {
 	}
 
 	/**
-	 * Test AMP_Theme_Support::include_layout_in_wp_kses_allowed_html().
-	 *
-	 * @see AMP_Theme_Support::include_layout_in_wp_kses_allowed_html()
-	 */
-	public function test_include_layout_in_wp_kses_allowed_html() {
-		$attribute             = 'data-amp-layout';
-		$image_no_dimensions   = [
-			'img' => [
-				$attribute => true,
-			],
-		];
-		$image_with_dimensions = array_merge(
-			$image_no_dimensions,
-			[
-				'height' => '100',
-				'width'  => '100',
-			]
-		);
-
-		$this->assertEquals( [], AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( [] ) );
-		$this->assertEquals( $image_no_dimensions, AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( $image_no_dimensions ) );
-
-		$context = AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( $image_with_dimensions );
-		$this->assertTrue( $context['img'][ $attribute ] );
-
-		$context = AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( $image_with_dimensions );
-		$this->assertTrue( $context['img'][ $attribute ] );
-
-		add_filter( 'wp_kses_allowed_html', 'AMP_Theme_Support::include_layout_in_wp_kses_allowed_html', 10, 2 );
-		$image = '<img data-amp-layout="fill">';
-		$this->assertEquals( $image, wp_kses_post( $image ) );
-	}
-
-	/**
 	 * Test AMP_Theme_Support::amend_header_image_with_video_header().
 	 *
 	 * @see AMP_Theme_Support::amend_header_image_with_video_header()
