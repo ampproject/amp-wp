@@ -28,6 +28,7 @@ import { RadioGroup } from '../../../components/radio-group/radio-group';
 import { Selectable } from '../../../components/selectable';
 import { IconLaptopToggles } from '../../../components/svg/icon-laptop-toggles';
 import { IconLaptopSearch } from '../../../components/svg/icon-laptop-search';
+import { AMPSettingToggle } from '../../../components/amp-setting-toggle';
 import { Preview } from './preview';
 import { Saving } from './saving';
 
@@ -75,7 +76,7 @@ export function Review() {
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
-	const [ previewMode, setPreviewMode ] = useState( themeSupport === 'standard' ? 'non-amp' : 'amp' );
+	const [ isPreviewingAMP, setIsPreviewingAMP ] = useState( themeSupport !== 'standard' );
 	const [ previewPageType, setPreviewPageType ] = useState( PREVIEW_URLS[ Object.keys( PREVIEW_URLS )[ 0 ] ].type );
 
 	/**
@@ -167,23 +168,14 @@ export function Review() {
 					</AMPNotice>
 				) }
 				{ 'transitional' === themeSupport && (
-					<RadioGroup
-						options={ [
-							{
-								value: 'amp',
-								title: __( 'AMP', 'amp' ),
-							},
-							{
-								value: 'non-amp',
-								title: __( 'Non-AMP', 'amp' ),
-							},
-						] }
-						selected={ previewMode }
-						onChange={ setPreviewMode }
-						isHorizontal={ true }
+					<AMPSettingToggle
+						text={ __( 'AMP', 'amp' ) }
+						checked={ isPreviewingAMP }
+						onChange={ () => setIsPreviewingAMP( ( mode ) => ! mode ) }
+						compact={ true }
 					/>
 				) }
-				<Preview url={ PREVIEW_URLS[ previewPageType ][ previewMode === 'amp' ? 'amp_url' : 'url' ] } />
+				<Preview url={ PREVIEW_URLS[ previewPageType ][ isPreviewingAMP ? 'amp_url' : 'url' ] } />
 			</div>
 			<div className="review__content review__content--secondary">
 				<h2 className="review__icon-title">

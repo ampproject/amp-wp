@@ -21,18 +21,12 @@ import './style.scss';
  * @param {Array}    props.options      List of option values and titles.
  * @param {Function} props.onChange     Change handler.
  * @param {string}   props.selected     Currently selected option.
- * @param {boolean}  props.isHorizontal Flag indicating that the options should not be stacked.
  */
-export function RadioGroup( { options = [], onChange, selected, isHorizontal } ) {
+export function RadioGroup( { options = [], onChange, selected } ) {
 	const htmlIdPrefix = `radio-group-${ useInstanceId( RadioGroup ) }`;
 
 	return (
-		<form
-			className={ classnames( 'radio-group', {
-				'radio-group--stacked': ! isHorizontal,
-				'radio-group--horizontal': isHorizontal,
-			} ) }
-		>
+		<form className="radio-group">
 			{ options.map( ( { value, title } ) => (
 				<label
 					key={ value }
@@ -67,5 +61,4 @@ RadioGroup.propTypes = {
 	),
 	onChange: PropTypes.func,
 	selected: PropTypes.string,
-	isHorizontal: PropTypes.bool,
 };
