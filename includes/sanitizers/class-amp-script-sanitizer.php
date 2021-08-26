@@ -92,6 +92,20 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	protected $img_sanitizer;
 
 	/**
+	 * Video sanitizer.
+	 *
+	 * @var AMP_Video_Sanitizer
+	 */
+	protected $video_sanitizer;
+
+	/**
+	 * Audio sanitizer.
+	 *
+	 * @var AMP_Audio_Sanitizer
+	 */
+	protected $audio_sanitizer;
+
+	/**
 	 * Form sanitizer.
 	 *
 	 * @var AMP_Form_Sanitizer
@@ -127,6 +141,22 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			$sanitizers[ AMP_Img_Sanitizer::class ] instanceof AMP_Img_Sanitizer
 		) {
 			$this->img_sanitizer = $sanitizers[ AMP_Img_Sanitizer::class ];
+		}
+
+		if (
+			array_key_exists( AMP_Video_Sanitizer::class, $sanitizers )
+			&&
+			$sanitizers[ AMP_Video_Sanitizer::class ] instanceof AMP_Video_Sanitizer
+		) {
+			$this->video_sanitizer = $sanitizers[ AMP_Video_Sanitizer::class ];
+		}
+
+		if (
+			array_key_exists( AMP_Audio_Sanitizer::class, $sanitizers )
+			&&
+			$sanitizers[ AMP_Audio_Sanitizer::class ] instanceof AMP_Audio_Sanitizer
+		) {
+			$this->audio_sanitizer = $sanitizers[ AMP_Audio_Sanitizer::class ];
 		}
 
 		if (
@@ -173,6 +203,12 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			if ( $this->img_sanitizer ) {
 				$this->img_sanitizer->update_args( [ 'native_img_used' => true ] );
+			}
+			if ( $this->video_sanitizer ) {
+				$this->video_sanitizer->update_args( [ 'native_video_used' => true ] );
+			}
+			if ( $this->audio_sanitizer ) {
+				$this->audio_sanitizer->update_args( [ 'native_audio_used' => true ] );
 			}
 			if ( $this->form_sanitizer ) {
 				$this->form_sanitizer->update_args( [ 'native_post_forms_allowed' => true ] );
