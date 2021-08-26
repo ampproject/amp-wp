@@ -54,7 +54,6 @@ describe( 'RadioGroup', () => {
 		} );
 
 		expect( container.querySelector( 'form' ) ).not.toBeNull();
-		expect( container.querySelector( 'form' ).className ).toContain( '--stacked' );
 		expect( container.querySelectorAll( 'input[type="radio"]' ) ).toHaveLength( 2 );
 		expect( container.querySelector( 'input[type="radio"]:checked' ) ).toBeNull();
 		expect( container.querySelector( 'form' ).textContent ).toBe( 'FooBar' );
@@ -70,17 +69,6 @@ describe( 'RadioGroup', () => {
 
 		const forAttribute = container.querySelector( 'label:first-child' ).getAttribute( 'for' );
 		expect( container.querySelector( 'label:first-child input' ).getAttribute( 'id' ) ).toBe( forAttribute );
-	} );
-
-	it( 'renders a horizontal group', () => {
-		act( () => {
-			render(
-				<RadioGroup options={ options } isHorizontal={ true } />,
-				container,
-			);
-		} );
-
-		expect( container.querySelector( 'form' ).className ).toContain( '--horizontal' );
 	} );
 
 	it( 'renders an initially selected option', () => {

@@ -2,7 +2,7 @@
 
 exports[`RadioGroup matches the snapshot 1`] = `
 <form
-  className="radio-group radio-group--stacked"
+  className="radio-group"
 >
   <label
     className="radio-group__label"
@@ -18,11 +18,11 @@ exports[`RadioGroup matches the snapshot 1`] = `
         type="radio"
       />
     </div>
-    <h3
+    <p
       className="radio-group__title"
     >
       Foo
-    </h3>
+    </p>
   </label>
   <label
     className="radio-group__label"
@@ -38,11 +38,11 @@ exports[`RadioGroup matches the snapshot 1`] = `
         type="radio"
       />
     </div>
-    <h3
+    <p
       className="radio-group__title"
     >
       Bar
-    </h3>
+    </p>
   </label>
 </form>
 `;
