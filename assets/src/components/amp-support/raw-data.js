@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 
 /**
- * To render raw data on site support page.
+ * Render raw data on site support page.
  *
  * @param {Object} props      Component props.
  * @param {Object} props.data Error data.

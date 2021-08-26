@@ -16,7 +16,7 @@ import { ListItems } from '../list-items';
 /**
  * Render site information.
  *
- * @param {Object} props          Site info data.
+ * @param {Object} props          Component props.
  * @param {Object} props.siteInfo Site information data.
  * @return {JSX.Element} Site information markup.
  */

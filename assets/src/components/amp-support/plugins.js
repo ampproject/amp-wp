@@ -14,7 +14,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { ListItems } from '../list-items';
 
 /**
- * To render plugins information on site support page.
+ * Render plugins information on site support page.
  *
  * @param {Object} props         Component props.
  * @param {Array}  props.plugins Plugins data.

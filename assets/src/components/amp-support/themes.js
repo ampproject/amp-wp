@@ -14,7 +14,7 @@ import { __ } from '@wordpress/i18n';
 import { ListItems } from '../list-items';
 
 /**
- * To render theme information on site support page.
+ * Render theme information on site support page.
  *
  * @param {Object} props        Component props.
  * @param {Array}  props.themes Theme data.

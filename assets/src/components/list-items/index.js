@@ -29,9 +29,9 @@ export function ListItems( { className = '', isDisc = false, heading, items } ) 
 						) }
 						{ ( item.value || item.url ) ? (
 							<span className="list-items__item-value">
-								{ item.value && item.value }
+								{ item.value }
 								{ item.url && (
-									<a href={ item.url } title={ item.url } target="_blank" rel="noreferrer">
+									<a href={ item.url } title={ item.url } target="_blank" rel="noreferrer noopener">
 										{ item.url }
 									</a>
 								) }

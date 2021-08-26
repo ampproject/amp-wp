@@ -16,7 +16,7 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import './style.scss';
 import { Selectable } from '../selectable';
-import { AMPNotice } from '../amp-notice';
+import { AMPNotice, NOTICE_SIZE_SMALL, NOTICE_TYPE_ERROR, NOTICE_TYPE_INFO } from '../amp-notice';
 import ClipboardButton from '../clipboard-button';
 import { SiteInfo } from './site-info';
 import { Themes } from './themes';
@@ -28,7 +28,6 @@ import { Details } from './details';
 /**
  * AMP Support component.
  *
- * @class
  * @param {Object} props Props for component.
  * @return {JSX.Element} Markup for AMP support component
  */
@@ -133,7 +132,8 @@ export function AMPSupport( props ) {
 				<div className="amp-support__footer">
 					<Button
 						disabled={ Boolean( uuid ) || sending }
-						className="components-button--send-button is-primary"
+						className="components-button--send-button"
+						isPrimary={ true }
 						onClick={ () => {
 							setSubmitSupportRequest( true );
 						} }
@@ -150,13 +150,18 @@ export function AMPSupport( props ) {
 						)
 					}
 					{ error && (
-						<AMPNotice type="error" size="small">
+						<AMPNotice
+							type={ NOTICE_TYPE_ERROR }
+							size={ NOTICE_SIZE_SMALL }>
 							{ error }
 						</AMPNotice>
 					) }
 				</div>
 				{ uuid && (
-					<AMPNotice type="info" size="small">
+					<AMPNotice
+						type={ NOTICE_TYPE_INFO }
+						size={ NOTICE_SIZE_SMALL }
+					>
 						{ __( 'Support UUID: ', 'amp' ) }
 						<code>
 							{ uuid }

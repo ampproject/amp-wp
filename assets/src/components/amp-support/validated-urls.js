@@ -14,10 +14,10 @@ import { __, sprintf } from '@wordpress/i18n';
 import { ListItems } from '../list-items';
 
 /**
- * To render validated urls information on site support page.
+ * Render validated urls information on site support page.
  *
  * @param {Object} props               Component props.
- * @param {Array}  props.validatedUrls Error data.
+ * @param {Array}  props.validatedUrls List of validated URLs.
  * @return {JSX.Element|null} HTML markup for validated urls data.
  */
 export function ValidatedUrls( { validatedUrls } ) {
