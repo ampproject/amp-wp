@@ -167,7 +167,7 @@ export function Review() {
 						{ __( 'There was an error downloading your Reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
 					</AMPNotice>
 				) }
-				{ 'transitional' === themeSupport && (
+				{ 'standard' !== themeSupport && (
 					<AMPSettingToggle
 						text={ __( 'AMP', 'amp' ) }
 						checked={ isPreviewingAMP }

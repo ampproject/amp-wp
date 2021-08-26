@@ -13,7 +13,7 @@ async function testCommonReviewStepElements() {
 	await expect( '.review__list li' ).countToBe( 3 );
 	await expect( page ).toMatchElement( '.review__list li', { text: /support forums/i } );
 	await expect( page ).toMatchElement( '.review__list li', { text: /different template mode/i } );
-	await expect( page ).toMatchElement( '.review__list li', { text: /how AMP works/i } );
+	await expect( page ).toMatchElement( '.review__list li', { text: /how the PX plugin works/i } );
 
 	await expect( page ).toMatchElement( '.review__preview-iframe' );
 
@@ -39,7 +39,7 @@ describe( 'Review', () => {
 		await testCommonReviewStepElements();
 
 		await expect( page ).toMatchElement( 'p', { text: /standard mode/i } );
-		await expect( '.review__preview-container input[type="radio"]' ).countToBe( 0 );
+		await expect( '.review__preview-container input[type="checkbox"]' ).countToBe( 0 );
 	} );
 
 	it( 'renders transitional mode site review screen', async () => {
@@ -50,20 +50,16 @@ describe( 'Review', () => {
 		await testCommonReviewStepElements();
 
 		await expect( page ).toMatchElement( 'p', { text: /transitional mode/i } );
-		await expect( '.review__preview-container input[type="radio"]' ).countToBe( 2 );
-
-		const originalMode = await page.$eval( '.review__preview-container input[type="radio"]:checked', ( e ) => e.closest( 'label' ).textContent );
-		await expect( originalMode ).toBe( 'AMP' );
+		await expect( '.review__preview-container input[type="checkbox"]:checked' ).countToBe( 1 );
 
 		await page.waitForSelector( '.review__preview-iframe' );
 		const originalIframeSrc = await page.$eval( '.review__preview-iframe', ( e ) => e.getAttribute( 'src' ) );
-		await expect( page ).toClick( '.review__preview-container input[type="radio"]:not(:checked)' );
+		await expect( page ).toClick( '.review__preview-container input[type="checkbox"]' );
 		await page.waitForSelector( '.review__preview-iframe' );
 		const updatedIframeSrc = await page.$eval( '.review__preview-iframe', ( e ) => e.getAttribute( 'src' ) );
 		expect( updatedIframeSrc ).not.toBe( originalIframeSrc );
 
-		const updatedMode = await page.$eval( '.review__preview-container input[type="radio"]:checked', ( e ) => e.closest( 'label' ).textContent );
-		await expect( updatedMode ).toBe( 'Non-AMP' );
+		await expect( '.review__preview-container input[type="checkbox"]:not(:checked)' ).countToBe( 1 );
 	} );
 
 	it( 'renders reader mode site review screen', async () => {
@@ -75,6 +71,6 @@ describe( 'Review', () => {
 
 		await expect( page ).toMatchElement( 'p', { text: /reader mode/i } );
 		await expect( page ).toMatchElement( '.review__preview-iframe' );
-		await expect( '.review__preview-container input[type="radio"]' ).countToBe( 0 );
+		await expect( '.review__preview-container input[type="checkbox"]' ).countToBe( 1 );
 	} );
 } );
