@@ -372,10 +372,18 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			'
 			<html>
 				<head>
-					<style>body { background: red; } body.loaded { background: green; }</style>
+					<style>
+					body { background: red; }
+					body.loaded { background: green; }
+					img { outline: solid 1px red; }
+					audio { outline: solid 1px green; }
+					video { outline: solid 1px blue; }
+					</style>
 				</head>
 				<body>
 					<img src="https://example.com/logo.png" width="300" height="100" alt="Logo">
+					<audio src="https://example.com/music.mp3" width="300" height="100"></audio>
+					<video src="https://example.com/movie.mp4" width="640" height="480"></video>
 					<form action="https://example.com/subscribe/" method="post">
 						<input type="email" name="email">
 					</form>
@@ -400,6 +408,18 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				$dom,
 				[
 					'native_img_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+				]
+			),
+			AMP_Video_Sanitizer::class  => new AMP_Video_Sanitizer(
+				$dom,
+				[
+					'native_video_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+				]
+			),
+			AMP_Audio_Sanitizer::class  => new AMP_Audio_Sanitizer(
+				$dom,
+				[
+					'native_audio_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
 			AMP_Form_Sanitizer::class   => new AMP_Form_Sanitizer(
@@ -429,15 +449,33 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$sanitizer->sanitize();
 		}
 
+		$css_custom = $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 )->textContent;
+
 		$this->assertEquals(
 			$remove_custom_scripts ? 0 : 1,
 			$dom->getElementsByTagName( Tag::SCRIPT )->length
 		);
+
 		$this->assertEquals(
 			$remove_custom_scripts ? 1 : 0,
 			$dom->getElementsByTagName( Extension::IMG )->length,
 			'Expected IMG to be converted to AMP-IMG when custom scripts are removed.'
 		);
+		$this->assertStringContainsString( $remove_custom_scripts ? '}amp-img{' : '}img{', $css_custom );
+
+		$this->assertEquals(
+			$remove_custom_scripts ? 1 : 0,
+			$dom->getElementsByTagName( Extension::VIDEO )->length,
+			'Expected VIDEO to be converted to AMP-VIDEO when custom scripts are removed.'
+		);
+		$this->assertStringContainsString( $remove_custom_scripts ? '}amp-video{' : '}video{', $css_custom );
+
+		$this->assertEquals(
+			$remove_custom_scripts ? 1 : 0,
+			$dom->getElementsByTagName( Extension::AUDIO )->length,
+			'Expected AUDIO to be converted to AMP-AUDIO when custom scripts are removed.'
+		);
+		$this->assertStringContainsString( $remove_custom_scripts ? '}amp-audio{' : '}audio{', $css_custom );
 
 		if ( $remove_custom_scripts ) {
 			$this->assertEquals( 1, $dom->xpath->query( '//form[ @method = "post" and @action-xhr ]' )->length );
@@ -447,9 +485,9 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 
 		$style = $dom->getElementsByTagName( Tag::STYLE )->item( 0 );
 		if ( $remove_custom_scripts ) {
-			$this->assertStringStartsWith( "body{background:red}\n", $style->textContent );
+			$this->assertStringNotContainsString( 'body.loaded{background:green}', $style->textContent );
 		} else {
-			$this->assertStringStartsWith( "body{background:red}body.loaded{background:green}\n", $style->textContent );
+			$this->assertStringContainsString( 'body.loaded{background:green}', $style->textContent );
 		}
 	}
 
