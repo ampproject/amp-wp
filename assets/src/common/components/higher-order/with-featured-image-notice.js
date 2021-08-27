@@ -9,11 +9,11 @@ import { isFunction } from 'lodash';
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Notice } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { validateFeaturedImage, getMinimumFeaturedImageDimensions } from '../../helpers';
 
 /**
