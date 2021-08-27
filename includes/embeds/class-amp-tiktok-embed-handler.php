@@ -8,7 +8,6 @@
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
-use AmpProject\Extension;
 use AmpProject\Layout;
 use AmpProject\Tag;
 
@@ -40,7 +39,7 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
 		$nodes = $dom->xpath->query(
-			sprintf( '//blockquote[ @cite and @data-video-id and contains( @class, "tiktok-embed" ) and not( parent::%s ) ]', Extension::TIKTOK )
+			sprintf( '//blockquote[ @cite and @data-video-id and contains( @class, "tiktok-embed" ) and not( parent::%s ) ]', 'amp-tiktok' )
 		);
 
 		foreach ( $nodes as $node ) {
@@ -66,7 +65,7 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$amp_tiktok = AMP_DOM_Utils::create_node(
 			Document::fromNode( $dom ),
-			Extension::TIKTOK,
+			'amp-tiktok',
 			[
 				Attribute::LAYOUT   => Layout::RESPONSIVE,
 				Attribute::HEIGHT   => 575,
