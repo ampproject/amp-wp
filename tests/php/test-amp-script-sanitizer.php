@@ -386,6 +386,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					<audio src="https://example.com/music.mp3" width="300" height="100"></audio>
 					<video src="https://example.com/movie.mp4" width="640" height="480"></video>
 					<iframe src="https://example.com/" width="100%" height="400"></iframe>
+					<amp-facebook-page width="340" height="130" layout="responsive" data-href="https://www.facebook.com/imdb/"></amp-facebook-page>
 					<form action="https://example.com/subscribe/" method="post">
 						<input type="email" name="email">
 					</form>
@@ -397,7 +398,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 		);
 
 		$sanitizers = [
-			AMP_Script_Sanitizer::class => new AMP_Script_Sanitizer(
+			AMP_Script_Sanitizer::class            => new AMP_Script_Sanitizer(
 				$dom,
 				[
 					'sanitize_js_scripts'       => true,
@@ -406,31 +407,31 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					},
 				]
 			),
-			AMP_Img_Sanitizer::class    => new AMP_Img_Sanitizer(
+			AMP_Img_Sanitizer::class               => new AMP_Img_Sanitizer(
 				$dom,
 				[
 					'native_img_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
-			AMP_Video_Sanitizer::class  => new AMP_Video_Sanitizer(
+			AMP_Video_Sanitizer::class             => new AMP_Video_Sanitizer(
 				$dom,
 				[
 					'native_video_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
-			AMP_Audio_Sanitizer::class  => new AMP_Audio_Sanitizer(
+			AMP_Audio_Sanitizer::class             => new AMP_Audio_Sanitizer(
 				$dom,
 				[
 					'native_audio_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
-			AMP_Iframe_Sanitizer::class => new AMP_Iframe_Sanitizer(
+			AMP_Iframe_Sanitizer::class            => new AMP_Iframe_Sanitizer(
 				$dom,
 				[
 					'native_iframe_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
-			AMP_Form_Sanitizer::class   => new AMP_Form_Sanitizer(
+			AMP_Form_Sanitizer::class              => new AMP_Form_Sanitizer(
 				$dom,
 				[
 					'native_post_forms_allowed' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
@@ -439,11 +440,18 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					},
 				]
 			),
-			AMP_Style_Sanitizer::class  => new AMP_Style_Sanitizer(
+			AMP_Style_Sanitizer::class             => new AMP_Style_Sanitizer(
 				$dom,
 				[
 					'use_document_element' => true,
 					'skip_tree_shaking'    => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+				]
+			),
+			AMP_Tag_And_Attribute_Sanitizer::class => new AMP_Tag_And_Attribute_Sanitizer(
+				$dom,
+				[
+					'use_document_element' => true,
+					'prefer_bento'         => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
 		];
@@ -503,6 +511,16 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$this->assertStringNotContainsString( 'body.loaded{background:green}', $style->textContent );
 		} else {
 			$this->assertStringContainsString( 'body.loaded{background:green}', $style->textContent );
+		}
+
+		// Verify that prefer_bento got set.
+		$scripts = $sanitizers[ AMP_Tag_And_Attribute_Sanitizer::class ]->get_scripts();
+		if ( $remove_custom_scripts ) {
+			$this->assertArrayHasKey( Extension::FACEBOOK_PAGE, $scripts );
+			$this->assertArrayNotHasKey( Extension::FACEBOOK, $scripts );
+		} else {
+			$this->assertArrayNotHasKey( Extension::FACEBOOK_PAGE, $scripts );
+			$this->assertArrayHasKey( Extension::FACEBOOK, $scripts );
 		}
 	}
 
