@@ -6,9 +6,12 @@ import { PluginPrePublishPanel } from '@wordpress/edit-post';
 import { __ } from '@wordpress/i18n';
 
 /**
- * Adds a notice to the pre-publish panel for the featured image.
+ * Adds a pre-publish panel containing the featured image selection component.
  *
- * @return {Function} Either a plain pre-publish panel, or the panel with a featured image notice.
+ * Note: The `PostFeaturedImage` component would have already been filtered to include
+ * any notices for the featured image so there is no need to recreate them here.
+ *
+ * @return {Function} A pre-publish panel containing the featured image selection component.
  */
 const PrePublishPanel = () => {
 	return (
