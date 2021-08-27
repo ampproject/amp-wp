@@ -378,12 +378,14 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					img { outline: solid 1px red; }
 					audio { outline: solid 1px green; }
 					video { outline: solid 1px blue; }
+					iframe { outline: solid 1px black; }
 					</style>
 				</head>
 				<body>
 					<img src="https://example.com/logo.png" width="300" height="100" alt="Logo">
 					<audio src="https://example.com/music.mp3" width="300" height="100"></audio>
 					<video src="https://example.com/movie.mp4" width="640" height="480"></video>
+					<iframe src="https://example.com/" width="100%" height="400"></iframe>
 					<form action="https://example.com/subscribe/" method="post">
 						<input type="email" name="email">
 					</form>
@@ -420,6 +422,12 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				$dom,
 				[
 					'native_audio_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+				]
+			),
+			AMP_Iframe_Sanitizer::class => new AMP_Iframe_Sanitizer(
+				$dom,
+				[
+					'native_iframe_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
 			AMP_Form_Sanitizer::class   => new AMP_Form_Sanitizer(
@@ -476,6 +484,13 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			'Expected AUDIO to be converted to AMP-AUDIO when custom scripts are removed.'
 		);
 		$this->assertStringContainsString( $remove_custom_scripts ? '}amp-audio{' : '}audio{', $css_custom );
+
+		$this->assertEquals(
+			$remove_custom_scripts ? 1 : 0,
+			$dom->getElementsByTagName( Extension::IFRAME )->length,
+			'Expected IFRAME to be converted to AMP-IFRAME when custom scripts are removed.'
+		);
+		$this->assertStringContainsString( $remove_custom_scripts ? '}amp-iframe{' : '}iframe{', $css_custom );
 
 		if ( $remove_custom_scripts ) {
 			$this->assertEquals( 1, $dom->xpath->query( '//form[ @method = "post" and @action-xhr ]' )->length );

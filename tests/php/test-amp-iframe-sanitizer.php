@@ -47,6 +47,14 @@ class AMP_Iframe_Converter_Test extends TestCase {
 				],
 			],
 
+			'simple_native_iframe'                             => [
+				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
+				sprintf( '<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen %s></iframe>', AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				[
+					'native_iframe_used' => true,
+				],
+			],
+
 			'simple_iframe_without_noscript_or_placeholder' => [
 				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="FALSE" allowfullscreen></iframe>',
 				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic"></amp-iframe>',
@@ -615,6 +623,11 @@ class AMP_Iframe_Converter_Test extends TestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEqualMarkup( $expected, $content );
+
+		$this->assertSame(
+			! empty( $args['native_iframe_used'] ),
+			$dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+		);
 	}
 
 	/**
