@@ -1158,6 +1158,13 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			return get_echo( 'amp_add_generator_metadata' );
 		};
 
+		$callback = static function ( $content ) {
+			return $content . '; filtered';
+		};
+		add_filter( 'amp_meta_generator', $callback );
+		$this->assertStringContainsString( '; filtered"', $get_generator_tag() );
+		remove_filter( 'amp_meta_generator', $callback );
+
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$output = $get_generator_tag();
 		$this->assertStringContainsString( 'mode=reader', $output );
