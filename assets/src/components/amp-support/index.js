@@ -102,7 +102,7 @@ export function AMPSupport( props ) {
 
 					{ data.plugins && <Plugins plugins={ data.plugins } /> }
 
-					{ data.errors && Array.isArray( data.errors ) && (
+					{ data?.errors?.length > 0 && (
 						<Details
 							title={ sprintf(
 								/* translators: Placeholder is the number of errors */
@@ -113,7 +113,7 @@ export function AMPSupport( props ) {
 						/>
 					) }
 
-					{ data.error_sources && Array.isArray( data.error_sources ) && (
+					{ data?.error_sources?.length > 0 && (
 						<Details
 							title={ sprintf(
 								/* translators: Placeholder is the number of error sources */
@@ -124,7 +124,7 @@ export function AMPSupport( props ) {
 						/>
 					) }
 
-					{ data.urls && <ValidatedUrls validatedUrls={ data.urls } /> }
+					{ data?.urls?.length > 0 && <ValidatedUrls validatedUrls={ data.urls } /> }
 
 					{ data && <RawData data={ data } /> }
 
