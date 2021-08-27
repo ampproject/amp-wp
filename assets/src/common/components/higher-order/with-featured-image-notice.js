@@ -55,10 +55,9 @@ export default createHigherOrderComponent(
 
 		const withFeaturedImageNotice = ( props ) => {
 			const { media } = props;
-			const mediaIsRequired = false;
 			let noticeUI;
 
-			if ( ! media && ! mediaIsRequired ) {
+			if ( ! media ) {
 				const message = __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' );
 				noticeUI = createNoticeUI( [ message ], 'notice' );
 			} else {
