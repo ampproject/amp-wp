@@ -132,6 +132,8 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 			return;
 		}
 
+		add_filter( 'amp_meta_generator', [ $this, 'filter_amp_meta_generator' ] );
+
 		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_SANDBOXING_LEVEL );
 
 		// Allow native POST forms, but they won't be converted by default (unless on level 3, per below).
@@ -174,5 +176,16 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 				return $error;
 			}
 		);
+	}
+
+	/**
+	 * Append the sandboxing level to the AMP meta generator tag.
+	 *
+	 * @param string $content Meta generator content.
+	 * @return string Amended content.
+	 */
+	public function filter_amp_meta_generator( $content ) {
+		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_SANDBOXING_LEVEL );
+		return $content . sprintf( '; sandboxing-level=%d', $sandboxing_level );
 	}
 }

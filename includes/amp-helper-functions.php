@@ -870,6 +870,16 @@ function amp_add_generator_metadata() {
 		$content .= sprintf( '; theme=%s', $reader_theme );
 	}
 
+	/**
+	 * Filters content for the AMP meta generator tag.
+	 *
+	 * @since 2.2
+	 * @internal
+	 *
+	 * @param string $content Content.
+	 */
+	$content = apply_filters( 'amp_meta_generator', $content );
+
 	printf( '<meta name="generator" content="%s">', esc_attr( $content ) );
 }
 
@@ -1627,7 +1637,7 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
-		AMP_Script_Sanitizer::class, // Must come before AMP_Img_Sanitizer, AMP_Form_Sanitizer, and AMP_Style_Sanitizer.
+		AMP_Script_Sanitizer::class, // Must come before sanitizers for image, video, audio, form, and style.
 		AMP_Core_Theme_Sanitizer::class,
 		AMP_Srcset_Sanitizer::class,
 		AMP_Img_Sanitizer::class,
