@@ -24,6 +24,4 @@ const PrePublishPanel = () => {
 	);
 };
 
-PrePublishPanel.propTypes = {};
-
 export default PrePublishPanel;
