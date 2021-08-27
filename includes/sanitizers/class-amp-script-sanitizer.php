@@ -78,53 +78,11 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	protected $kept_script_count = 0;
 
 	/**
-	 * Style sanitizer.
+	 * Sanitizers.
 	 *
-	 * @var AMP_Style_Sanitizer
+	 * @var AMP_Base_Sanitizer[]
 	 */
-	protected $style_sanitizer;
-
-	/**
-	 * Image sanitizer.
-	 *
-	 * @var AMP_Img_Sanitizer
-	 */
-	protected $img_sanitizer;
-
-	/**
-	 * Video sanitizer.
-	 *
-	 * @var AMP_Video_Sanitizer
-	 */
-	protected $video_sanitizer;
-
-	/**
-	 * Audio sanitizer.
-	 *
-	 * @var AMP_Audio_Sanitizer
-	 */
-	protected $audio_sanitizer;
-
-	/**
-	 * Iframe sanitizer.
-	 *
-	 * @var AMP_Iframe_Sanitizer
-	 */
-	protected $iframe_sanitizer;
-
-	/**
-	 * Form sanitizer.
-	 *
-	 * @var AMP_Form_Sanitizer
-	 */
-	protected $form_sanitizer;
-
-	/**
-	 * Tag-and-attribute sanitizer.
-	 *
-	 * @var AMP_Tag_And_Attribute_Sanitizer
-	 */
-	protected $tag_and_attribute_sanitizer;
+	protected $sanitizers = [];
 
 	/**
 	 * Init.
@@ -134,60 +92,8 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	public function init( $sanitizers ) {
 		parent::init( $sanitizers );
 
-		if (
-			array_key_exists( AMP_Style_Sanitizer::class, $sanitizers )
-			&&
-			$sanitizers[ AMP_Style_Sanitizer::class ] instanceof AMP_Style_Sanitizer
-		) {
-			$this->style_sanitizer = $sanitizers[ AMP_Style_Sanitizer::class ];
-		}
-
-		if (
-			array_key_exists( AMP_Img_Sanitizer::class, $sanitizers )
-			&&
-			$sanitizers[ AMP_Img_Sanitizer::class ] instanceof AMP_Img_Sanitizer
-		) {
-			$this->img_sanitizer = $sanitizers[ AMP_Img_Sanitizer::class ];
-		}
-
-		if (
-			array_key_exists( AMP_Video_Sanitizer::class, $sanitizers )
-			&&
-			$sanitizers[ AMP_Video_Sanitizer::class ] instanceof AMP_Video_Sanitizer
-		) {
-			$this->video_sanitizer = $sanitizers[ AMP_Video_Sanitizer::class ];
-		}
-
-		if (
-			array_key_exists( AMP_Audio_Sanitizer::class, $sanitizers )
-			&&
-			$sanitizers[ AMP_Audio_Sanitizer::class ] instanceof AMP_Audio_Sanitizer
-		) {
-			$this->audio_sanitizer = $sanitizers[ AMP_Audio_Sanitizer::class ];
-		}
-
-		if (
-			array_key_exists( AMP_Iframe_Sanitizer::class, $sanitizers )
-			&&
-			$sanitizers[ AMP_Iframe_Sanitizer::class ] instanceof AMP_Iframe_Sanitizer
-		) {
-			$this->iframe_sanitizer = $sanitizers[ AMP_Iframe_Sanitizer::class ];
-		}
-
-		if (
-			array_key_exists( AMP_Form_Sanitizer::class, $sanitizers )
-			&&
-			$sanitizers[ AMP_Form_Sanitizer::class ] instanceof AMP_Form_Sanitizer
-		) {
-			$this->form_sanitizer = $sanitizers[ AMP_Form_Sanitizer::class ];
-		}
-
-		if (
-			array_key_exists( AMP_Tag_And_Attribute_Sanitizer::class, $sanitizers )
-			&&
-			$sanitizers[ AMP_Tag_And_Attribute_Sanitizer::class ] instanceof AMP_Tag_And_Attribute_Sanitizer
-		) {
-			$this->tag_and_attribute_sanitizer = $sanitizers[ AMP_Tag_And_Attribute_Sanitizer::class ];
+		foreach ( $sanitizers as $sanitizer ) {
+			$this->sanitizers[ get_class( $sanitizer ) ] = $sanitizer;
 		}
 	}
 
@@ -213,26 +119,19 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		// @todo There should be an attribute on script tags that opt-in to keeping tree shaking and/or to indicate what class names need to be included.
 		// @todo Depending on the size of the underlying stylesheets, this may need to retain the use of external styles to prevent inlining excessive CSS. This may involve writing minified CSS to disk, or skipping style processing altogether if no selector conversions are needed.
 		if ( $this->kept_script_count > 0 ) {
-			if ( $this->style_sanitizer ) {
-				$this->style_sanitizer->update_args( [ 'skip_tree_shaking' => true ] );
-			}
-			if ( $this->img_sanitizer ) {
-				$this->img_sanitizer->update_args( [ 'native_img_used' => true ] );
-			}
-			if ( $this->video_sanitizer ) {
-				$this->video_sanitizer->update_args( [ 'native_video_used' => true ] );
-			}
-			if ( $this->audio_sanitizer ) {
-				$this->audio_sanitizer->update_args( [ 'native_audio_used' => true ] );
-			}
-			if ( $this->iframe_sanitizer ) {
-				$this->iframe_sanitizer->update_args( [ 'native_iframe_used' => true ] );
-			}
-			if ( $this->form_sanitizer ) {
-				$this->form_sanitizer->update_args( [ 'native_post_forms_allowed' => true ] );
-			}
-			if ( $this->tag_and_attribute_sanitizer ) {
-				$this->tag_and_attribute_sanitizer->update_args( [ 'prefer_bento' => true ] );
+			$sanitizer_arg_updates = [
+				AMP_Style_Sanitizer::class             => [ 'skip_tree_shaking' => true ],
+				AMP_Img_Sanitizer::class               => [ 'native_img_used' => true ],
+				AMP_Video_Sanitizer::class             => [ 'native_video_used' => true ],
+				AMP_Audio_Sanitizer::class             => [ 'native_audio_used' => true ],
+				AMP_Iframe_Sanitizer::class            => [ 'native_iframe_used' => true ],
+				AMP_Form_Sanitizer::class              => [ 'native_post_forms_allowed' => true ],
+				AMP_Tag_And_Attribute_Sanitizer::class => [ 'prefer_bento' => true ],
+			];
+			foreach ( $sanitizer_arg_updates as $sanitizer_class => $sanitizer_args ) {
+				if ( array_key_exists( $sanitizer_class, $this->sanitizers ) ) {
+					$this->sanitizers[ $sanitizer_class ]->update_args( $sanitizer_args );
+				}
 			}
 		}
 	}
