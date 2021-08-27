@@ -106,6 +106,13 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	protected $audio_sanitizer;
 
 	/**
+	 * Iframe sanitizer.
+	 *
+	 * @var AMP_Iframe_Sanitizer
+	 */
+	protected $iframe_sanitizer;
+
+	/**
 	 * Form sanitizer.
 	 *
 	 * @var AMP_Form_Sanitizer
@@ -160,6 +167,14 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if (
+			array_key_exists( AMP_Iframe_Sanitizer::class, $sanitizers )
+			&&
+			$sanitizers[ AMP_Iframe_Sanitizer::class ] instanceof AMP_Iframe_Sanitizer
+		) {
+			$this->iframe_sanitizer = $sanitizers[ AMP_Iframe_Sanitizer::class ];
+		}
+
+		if (
 			array_key_exists( AMP_Form_Sanitizer::class, $sanitizers )
 			&&
 			$sanitizers[ AMP_Form_Sanitizer::class ] instanceof AMP_Form_Sanitizer
@@ -209,6 +224,9 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			if ( $this->audio_sanitizer ) {
 				$this->audio_sanitizer->update_args( [ 'native_audio_used' => true ] );
+			}
+			if ( $this->iframe_sanitizer ) {
+				$this->iframe_sanitizer->update_args( [ 'native_iframe_used' => true ] );
 			}
 			if ( $this->form_sanitizer ) {
 				$this->form_sanitizer->update_args( [ 'native_post_forms_allowed' => true ] );
