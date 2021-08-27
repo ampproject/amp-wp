@@ -139,24 +139,7 @@ exports[`TemplateModeOption matches snapshot 1`] = `
           </svg>
         </span>
         <span
-          className="components-visually-hidden css-1mm2cvy-View em57xhy0"
-          data-wp-c16t={true}
-          data-wp-component="VisuallyHidden"
-          style={
-            Object {
-              "WebkitClipPath": "inset( 50% )",
-              "border": 0,
-              "clip": "rect(1px, 1px, 1px, 1px)",
-              "clipPath": "inset( 50% )",
-              "height": "1px",
-              "margin": "-1px",
-              "overflow": "hidden",
-              "padding": 0,
-              "position": "absolute",
-              "width": "1px",
-              "wordWrap": "normal",
-            }
-          }
+          className="components-visually-hidden"
         >
           Standard
         </span>
@@ -404,24 +387,7 @@ exports[`TemplateModeOption matches snapshot 2`] = `
           </svg>
         </span>
         <span
-          className="components-visually-hidden css-1mm2cvy-View em57xhy0"
-          data-wp-c16t={true}
-          data-wp-component="VisuallyHidden"
-          style={
-            Object {
-              "WebkitClipPath": "inset( 50% )",
-              "border": 0,
-              "clip": "rect(1px, 1px, 1px, 1px)",
-              "clipPath": "inset( 50% )",
-              "height": "1px",
-              "margin": "-1px",
-              "overflow": "hidden",
-              "padding": 0,
-              "position": "absolute",
-              "width": "1px",
-              "wordWrap": "normal",
-            }
-          }
+          className="components-visually-hidden"
         >
           Reader
         </span>
@@ -701,24 +667,7 @@ exports[`TemplateModeOption matches snapshot 3`] = `
           </svg>
         </span>
         <span
-          className="components-visually-hidden css-1mm2cvy-View em57xhy0"
-          data-wp-c16t={true}
-          data-wp-component="VisuallyHidden"
-          style={
-            Object {
-              "WebkitClipPath": "inset( 50% )",
-              "border": 0,
-              "clip": "rect(1px, 1px, 1px, 1px)",
-              "clipPath": "inset( 50% )",
-              "height": "1px",
-              "margin": "-1px",
-              "overflow": "hidden",
-              "padding": 0,
-              "position": "absolute",
-              "width": "1px",
-              "wordWrap": "normal",
-            }
-          }
+          className="components-visually-hidden"
         >
           Reader
         </span>
