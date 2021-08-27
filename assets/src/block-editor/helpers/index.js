@@ -11,8 +11,8 @@ import { isFunction, isObject, isString } from 'lodash';
 import { __, sprintf } from '@wordpress/i18n';
 import { SelectControl, ToggleControl, Notice, PanelBody } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
-import { select } from '@wordpress/data';
-import { cloneElement, isValidElement } from '@wordpress/element';
+import { select, useSelect } from '@wordpress/data';
+import { cloneElement, isValidElement, useLayoutEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -274,7 +274,7 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 	}
 
 	const EnhancedBlockEdit = function( props ) {
-		const { attributes: { ampLayout }, name } = props;
+		const { isSelected, attributes: { ampLayout }, name } = props;
 
 		let inspectorControls;
 
@@ -283,7 +283,7 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 		} else if ( 'core/image' === name ) {
 			inspectorControls = setUpImageInspectorControls( props );
 		} else if ( 'core/video' === name ) {
-			inspectorControls = setUpVideoInspectorControls( props );
+			inspectorControls = isSelected ? VideoInspectorControls( props ) : null;
 		} else if ( 0 === name.indexOf( 'core-embed/' ) ) {
 			inspectorControls = setUpInspectorControls( props );
 		}
@@ -354,23 +354,68 @@ export const setImageBlockLayoutAttributes = ( props, layout ) => {
 /**
  * Show notice if video player have autoplay enabled and mute is disabled.
  *
- * @param {Object} props Props.
+ * @param {Object}  props                     Props.
+ * @param {boolean} props.isSelected          Flag indicating if the block selected.
+ * @param {Object}  props.attributes          Block attributes.
+ * @param {boolean} props.attributes.autoplay Flag indicating if the video has autoplay turned on.
+ * @param {boolean} props.attributes.muted    Flag indicating if the video is muted.
  * @return {ReactElement} Inspector Controls.
  */
-export const setUpVideoInspectorControls = ( props ) => {
-	const { isSelected, attributes: { autoplay, muted } } = props;
+export const VideoInspectorControls = ( props ) => {
+	const { attributes: { autoplay, muted } } = props;
 
-	if ( ! isSelected ) {
-		return null;
-	}
+	const message = useRef( null );
+	const blockTypeDescription = useSelect( ( _select ) => _select( 'core/blocks' ).getBlockType( 'core/video' )?.description, [] );
+
+	/**
+	 * Since we are mutating the DOM, it's not the regular `useEffect` hook.
+	 */
+	useLayoutEffect( () => {
+		const showMessage = true === autoplay && true !== muted;
+
+		if ( showMessage && ! message.current ) {
+			/**
+			 * When switching over from another block selection, the message is
+			 * tried to be added before the sidebar content changes. This delay
+			 * prevents this issue.
+			 */
+			setTimeout( () => {
+				/**
+				 * Since there is no actual ID or block type designator exposed
+				 * in the block editor's sidebar DOM, we need to use to a hack.
+				 * In order to determine the video settings DOM container we are
+				 * first searching for a block type description. Once we have it
+				 * we traverse through the DOM tree to finally find out the
+				 * "Muted" toggle container.
+				 */
+				const blockInspector = [ ...document.querySelectorAll( '.edit-post-sidebar .block-editor-block-card__description' ) ]
+					?.find( ( description ) => description.textContent === blockTypeDescription )?.closest( '.block-editor-block-inspector' );
+
+				if ( ! blockInspector ) {
+					return;
+				}
+
+				const mutedToggleContainerIndex = 3;
+				const mutedToggleContainer = blockInspector.querySelector( '.editor-video-poster-control' )?.parentElement.children[ mutedToggleContainerIndex ];
+
+				if ( ! mutedToggleContainer ) {
+					return;
+				}
+
+				message.current = document.createElement( 'p' );
+				message.current.classList.add( 'amp-video-autoplay-notice' );
+				message.current.textContent = __( 'Autoplay will mute the video player by default in AMP mode.', 'amp' );
+
+				mutedToggleContainer.append( message.current );
+			}, 1 );
+		} else if ( ! showMessage && message.current ) {
+			message.current.remove();
+			message.current = null;
+		}
+	}, [ autoplay, blockTypeDescription, muted ] );
 
 	return (
 		<InspectorControls>
-			{ ( true === autoplay && true !== muted ) && (
-				<PanelBody className="amp-video-autoplay-notice">
-					{ __( 'Autoplay will mute the video player by default in AMP mode.', 'amp' ) }
-				</PanelBody>
-			) }
 			<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
 				<AmpLayoutControl { ...props } />
 				<AmpNoloadingToggle { ...props } />
@@ -379,8 +424,12 @@ export const setUpVideoInspectorControls = ( props ) => {
 	);
 };
 
-setUpVideoInspectorControls.propTypes = {
+VideoInspectorControls.propTypes = {
 	isSelected: PropTypes.bool,
+	attributes: PropTypes.shape( {
+		autoplay: PropTypes.bool,
+		muted: PropTypes.bool,
+	} ),
 };
 
 /**
