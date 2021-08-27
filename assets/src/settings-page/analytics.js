@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { __, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect, useRef } from '@wordpress/element';
 import { Icon, plus, trash } from '@wordpress/icons';
-import { Button, TextControl, PanelRow, BaseControl } from '@wordpress/components';
+import { Button, TextControl, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -264,9 +264,9 @@ export function Analytics() {
 					} );
 				} }
 			>
-				<span className="screen-reader-text">
+				<VisuallyHidden as="span">
 					{ __( 'Add entry', 'amp' ) }
-				</span>
+				</VisuallyHidden>
 				<Icon icon={ plus } />
 			</Button>
 		</div>
