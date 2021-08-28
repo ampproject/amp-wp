@@ -142,8 +142,13 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 		// Opt-in to the new script sanitization logic in the script sanitizer.
 		add_filter(
 			'amp_content_sanitizers',
-			static function ( $sanitizers ) {
+			static function ( $sanitizers ) use ( $sandboxing_level ) {
 				$sanitizers[ AMP_Script_Sanitizer::class ]['sanitize_js_scripts'] = true;
+
+				// @todo This:
+				// if ( $sandboxing_level < 3 ) {
+				// $sanitizers[ AMP_Script_Sanitizer::class ]['allow_comment_reply_js'] = true;
+				// }
 				return $sanitizers;
 			}
 		);
