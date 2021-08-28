@@ -263,7 +263,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			$comment_reply_link->setAttribute(
 				Attribute::ON,
 				sprintf(
-					'tap:AMP.setState(%s)',
+					'tap:AMP.setState(%s),comment.focus',
 					wp_json_encode( $comment_reply_state, JSON_UNESCAPED_UNICODE )
 				)
 			);
