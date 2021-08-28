@@ -15,6 +15,7 @@ use AmpProject\Tag;
  *
  * Strips and corrects attributes in forms.
  *
+ * @todo When comment-reply is on the page, this should be skipped.
  * @internal
  */
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
@@ -117,20 +118,12 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		$form_state = [
 			'values'     => [],
 			'submitting' => false,
-			'replyTo'    => '', // @todo This should rather be just replyToText.
+			'replyTo'    => '',
 		];
 
 		$comment_parent_id = null;
 		if ( ! empty( $form_fields['comment_parent'] ) ) {
 			$comment_parent_id = (int) $form_fields['comment_parent'][0]->getAttribute( Attribute::VALUE );
-
-			// @todo Obtain replyTo?
-			if ( $comment_id ) {
-//				$reply_comment = get_comment( $comment_id );
-//				if ( $reply_comment ) {
-//					$form_state['replyToName'] = $reply_comment->comment_author;
-//				}
-			}
 		}
 
 		$amp_bind_attr_format = Amp::BIND_DATA_ATTR_PREFIX . '%s';
@@ -198,7 +191,6 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		];
 		$comment_form->setAttribute( Attribute::ON, implode( ';', $on ) );
 
-		// @todo DO the filter_comment_form_defaults.
 		$reply_heading_element   = $this->dom->getElementById( 'reply-title' );
 		$reply_heading_text_node = null;
 		$reply_link_to_parent    = null;
@@ -220,15 +212,12 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				$reply_heading_text_span->nextSibling
 			);
 
-			// @todo Consider replytocom. $comment_parent_id
+			// Note: if the replytocom query parameter was set, then the existing value will already be a replyTo value.
+			// Nevertheless, the link will have the replytocom arg removed, so clicking on the link will cause
+			// navigation to a page that has the nameless heading text.
 			$text_binding = sprintf(
 				'%1$s.replyTo ? %1$s.replyTo : %2$s',
 				$state_id,
-//				str_replace(
-//					'%s',
-//					sprintf( '" + %s.replyToName + "', $state_id ),
-//					wp_json_encode( $default_args['title_reply_to'], JSON_UNESCAPED_UNICODE )
-//				),
 				wp_json_encode( $reply_heading_text_node->nodeValue, JSON_UNESCAPED_UNICODE )
 			);
 
@@ -295,17 +284,6 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				sprintf( '%s.values.comment_parent == "0"', $state_id )
 			);
 		}
-
-
-//		$reply_heading_text_node =
-//		if ( $reply_heading_element ) {
-//
-//
-//			var replyHeadingElement  = getElementById( config.commentReplyTitleId );
-//			var replyHeadingTextNode = replyHeadingElement && replyHeadingElement.firstChild;
-//			var replyLinkToParent    = replyHeadingTextNode && replyHeadingTextNode.nextSibling;
-//
-//		}
 	}
 
 	/**

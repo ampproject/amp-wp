@@ -779,9 +779,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		$this->assertEquals( $priority, has_action( 'template_redirect', [ self::TESTED_CLASS, 'start_output_buffering' ] ) );
 
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_form_defaults', [ self::TESTED_CLASS, 'filter_comment_form_defaults' ] ) );
-		$this->assertEquals( 10, has_filter( 'comment_reply_link', [ self::TESTED_CLASS, 'filter_comment_reply_link' ] ) );
-		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', [ self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ] ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', [ self::TESTED_CLASS, 'amend_header_image_with_video_header' ] ) );
 	}
@@ -881,6 +878,7 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * Test get_comment_form_state_id.
 	 *
 	 * @covers AMP_Theme_Support::get_comment_form_state_id()
+	 * @expectedDeprecated AMP_Theme_Support::get_comment_form_state_id
 	 */
 	public function test_get_comment_form_state_id() {
 		$post_id = 54;
@@ -893,6 +891,8 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * Test filter_comment_form_defaults.
 	 *
 	 * @covers AMP_Theme_Support::filter_comment_form_defaults()
+	 * @expectedDeprecated AMP_Theme_Support::filter_comment_form_defaults
+	 * @expectedDeprecated AMP_Theme_Support::get_comment_form_state_id
 	 */
 	public function test_filter_comment_form_defaults() {
 		global $post;
@@ -914,6 +914,8 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * Test filter_comment_reply_link.
 	 *
 	 * @covers AMP_Theme_Support::filter_comment_reply_link()
+	 * @expectedDeprecated AMP_Theme_Support::filter_comment_reply_link
+	 * @expectedDeprecated AMP_Theme_Support::get_comment_form_state_id
 	 */
 	public function test_filter_comment_reply_link() {
 		global $post;
@@ -949,6 +951,8 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * Test filter_cancel_comment_reply_link.
 	 *
 	 * @covers AMP_Theme_Support::filter_cancel_comment_reply_link()
+	 * @expectedDeprecated AMP_Theme_Support::filter_cancel_comment_reply_link
+	 * @expectedDeprecated AMP_Theme_Support::get_comment_form_state_id
 	 */
 	public function test_filter_cancel_comment_reply_link() {
 		global $post;
