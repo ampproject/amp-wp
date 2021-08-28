@@ -247,9 +247,11 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			/** @var DOMElement $comment_reply_link */
 
 			$comment_reply_state = [
-				'replyTo' => $comment_reply_link->getAttribute( 'data-replyto' ),
-				'values'  => [
-					'comment_parent' => $comment_reply_link->getAttribute( 'data-commentid' ),
+				$state_id => [
+					'replyTo' => $comment_reply_link->getAttribute( 'data-replyto' ),
+					'values'  => [
+						'comment_parent' => $comment_reply_link->getAttribute( 'data-commentid' ),
+					],
 				],
 			];
 
@@ -261,8 +263,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			$comment_reply_link->setAttribute(
 				Attribute::ON,
 				sprintf(
-					'tap:AMP.setState({%s:%s})',
-					wp_json_encode( $state_id ),
+					'tap:AMP.setState(%s)',
 					wp_json_encode( $comment_reply_state, JSON_UNESCAPED_UNICODE )
 				)
 			);
