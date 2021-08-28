@@ -898,14 +898,9 @@ class AMP_Theme_Support {
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		add_action( 'template_redirect', [ __CLASS__, 'start_output_buffering' ], $priority );
 
-		// Commenting hooks.
-		// @todo When custom scripts appear on the page, this logic should be skipped. To do so, this would require moving the logic to the AMP_Comments_Sanitizer.
-//		add_filter( 'comment_form_defaults', [ __CLASS__, 'filter_comment_form_defaults' ], PHP_INT_MAX );
-//		add_filter( 'comment_reply_link', [ __CLASS__, 'filter_comment_reply_link' ], 10, 4 );
-//		add_filter( 'cancel_comment_reply_link', [ __CLASS__, 'filter_cancel_comment_reply_link' ], 10, 3 );
-//		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'include_layout_in_wp_kses_allowed_html' ], 10 );
 		add_filter( 'get_header_image_tag', [ __CLASS__, 'amend_header_image_with_video_header' ], PHP_INT_MAX );
+		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ); // @todo The AMP_Comments_Sanitizer should add data-ampdevmode since user would be logged-in.
 		add_action(
 			'wp_print_footer_scripts',
 			static function() {
@@ -913,12 +908,6 @@ class AMP_Theme_Support {
 			},
 			0
 		);
-//		add_action(
-//			'wp_enqueue_scripts',
-//			static function() {
-//				wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
-//			}
-//		);
 	}
 
 	/**
@@ -1058,11 +1047,13 @@ class AMP_Theme_Support {
 	 * Get the ID for the amp-state.
 	 *
 	 * @since 0.7
+	 * @deprecated Logic moved to AMP_Comments_Sanitizer.
 	 *
 	 * @param int $post_id Post ID.
 	 * @return string ID for amp-state.
 	 */
 	public static function get_comment_form_state_id( $post_id ) {
+		_deprecated_function( __METHOD__, '2.2' );
 		return sprintf( 'commentform_post_%d', $post_id );
 	}
 
@@ -1071,12 +1062,13 @@ class AMP_Theme_Support {
 	 *
 	 * @since 0.7
 	 * @see comment_form()
-	 * @todo When custom scripts appear on the page, this logic should be skipped. To do so, this would require moving the logic to the AMP_Comments_Sanitizer.
+	 * @deprecated Logic moved to AMP_Comments_Sanitizer.
 	 *
 	 * @param array $default_args Comment form arg defaults.
 	 * @return array Filtered comment form args.
 	 */
 	public static function filter_comment_form_defaults( $default_args ) {
+		_deprecated_function( __METHOD__, '2.2' );
 
 		// Obtain the actual args provided to the comment_form() function since it is not available in the filter.
 		$args      = [];
@@ -1123,7 +1115,7 @@ class AMP_Theme_Support {
 	 *
 	 * @since 0.7
 	 * @see get_comment_reply_link()
-	 * @todo When custom scripts appear on the page, this logic should be skipped. To do so, this would require moving the logic to the AMP_Comments_Sanitizer.
+	 * @deprecated Logic moved to AMP_Comments_Sanitizer.
 	 *
 	 * @param string     $link    The HTML markup for the comment reply link.
 	 * @param array      $args    An array of arguments overriding the defaults.
@@ -1131,6 +1123,7 @@ class AMP_Theme_Support {
 	 * @return string Comment reply link.
 	 */
 	public static function filter_comment_reply_link( $link, $args, $comment ) {
+		_deprecated_function( __METHOD__, '2.2' );
 
 		// Continue to show default link to wp-login when user is not logged-in.
 		if ( get_option( 'comment_registration' ) && ! is_user_logged_in() ) {
@@ -1163,7 +1156,7 @@ class AMP_Theme_Support {
 	 *
 	 * @since 0.7
 	 * @see get_cancel_comment_reply_link()
-	 * @todo When custom scripts appear on the page, this logic should be skipped. To do so, this would require moving the logic to the AMP_Comments_Sanitizer.
+	 * @deprecated Logic moved to AMP_Comments_Sanitizer.
 	 *
 	 * @param string $formatted_link The HTML-formatted cancel comment reply link.
 	 * @param string $link           Cancel comment reply link URL.
@@ -1171,6 +1164,8 @@ class AMP_Theme_Support {
 	 * @return string Cancel reply link.
 	 */
 	public static function filter_cancel_comment_reply_link( $formatted_link, $link, $text ) {
+		_deprecated_function( __METHOD__, '2.2' );
+
 		if ( empty( $text ) ) {
 			$text = __( 'Click here to cancel reply.', 'default' );
 		}
