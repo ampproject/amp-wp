@@ -54,8 +54,10 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'unwrap_noscripts'    => true,
-		'sanitize_js_scripts' => false,
+		'unwrap_noscripts'       => true,
+		'sanitize_js_scripts'    => false,
+		'allow_comment_reply_js' => false, // @todo Support this.
+		// @todo Have a callback which indicates whether scripts are bento-friendly. The comment-reply is one such script which is allowed in moderate.
 	];
 
 	/**
@@ -104,6 +106,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 		if ( ! empty( $this->args['sanitize_js_scripts'] ) ) {
+			// @todo This should automatically add defer to script#comment-reply-js if no other scripts had it as a dependency.
 			$this->sanitize_js_script_elements();
 		}
 
@@ -118,8 +121,10 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		// associated style rules.
 		// @todo There should be an attribute on script tags that opt-in to keeping tree shaking and/or to indicate what class names need to be included.
 		// @todo Depending on the size of the underlying stylesheets, this may need to retain the use of external styles to prevent inlining excessive CSS. This may involve writing minified CSS to disk, or skipping style processing altogether if no selector conversions are needed.
+		// @todo Prevent inclusion of comment-reply.js alone from causing this.
 		if ( $this->kept_script_count > 0 ) {
 			$sanitizer_arg_updates = [
+				// @todo If comment-reply.js was on the page (likely best detected via wp_script_is('comment-reply', 'done')), then AMP_Comment_Sanitizer should know.
 				AMP_Style_Sanitizer::class             => [ 'skip_tree_shaking' => true ],
 				AMP_Img_Sanitizer::class               => [ 'native_img_used' => true ],
 				AMP_Video_Sanitizer::class             => [ 'native_video_used' => true ],
