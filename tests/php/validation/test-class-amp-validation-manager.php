@@ -2318,6 +2318,41 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * Test for validate_url() for a URL on another site.
+	 *
+	 * @covers AMP_Validation_Manager::validate_url()
+	 */
+	public function test_validate_url_on_another_site() {
+		$r = AMP_Validation_Manager::validate_url( 'https://another-site.example.com/' );
+		$this->assertInstanceOf( WP_Error::class, $r );
+		$this->assertEquals( 'http_request_failed', $r->get_error_code() );
+		$this->assertStringStartsWith( 'Unable to validate a URL on another site. Attempted to validate: https://another-site.example.com/', $r->get_error_message() );
+	}
+
+	/**
+	 * Test for validate_url() for a URL that redirects to another site.
+	 *
+	 * @covers AMP_Validation_Manager::validate_url()
+	 */
+	public function test_validate_url_for_redirect_to_another_site() {
+		$filter = static function() {
+			return [
+				'response' => [
+					'code' => 301,
+				],
+				'headers'  => [
+					'Location' => 'https://redirected-site.example.com/',
+				],
+			];
+		};
+		add_filter( 'pre_http_request', $filter );
+		$r = AMP_Validation_Manager::validate_url( home_url() );
+		$this->assertInstanceOf( WP_Error::class, $r );
+		$this->assertEquals( 'http_request_failed', $r->get_error_code() );
+		$this->assertStringStartsWith( 'Unable to validate a URL on another site. Attempted to validate: https://redirected-site.example.com/', $r->get_error_message() );
+	}
+
+	/**
 	 * @covers AMP_Validation_Manager::serialize_validation_error_messages()
 	 * @covers AMP_Validation_Manager::unserialize_validation_error_messages()
 	 */
