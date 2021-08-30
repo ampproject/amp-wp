@@ -404,7 +404,7 @@ export const VideoInspectorControls = ( props ) => {
 
 				message.current = document.createElement( 'p' );
 				message.current.classList.add( 'amp-video-autoplay-notice' );
-				message.current.textContent = __( 'Autoplay will mute the video player by default in AMP mode.', 'amp' );
+				message.current.textContent = __( 'Autoplay will cause the video to be muted in many browsers to prevent a poor user experience. It will be muted in AMP for this reason as well.', 'amp' );
 
 				mutedToggleContainer.append( message.current );
 			}, 1 );

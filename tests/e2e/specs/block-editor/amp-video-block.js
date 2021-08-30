@@ -18,7 +18,7 @@ import {
 
 const sampleVideo = 'sample-video.mp4';
 const autoplayNotice = 'Autoplay may cause usability issues for some users.';
-const mutedNotice = 'Autoplay will mute the video player by default in AMP mode.';
+const mutedNotice = 'Autoplay will cause the video to be muted in many browsers to prevent a poor user experience. It will be muted in AMP for this reason as well.';
 
 /**
  * Tests the notices for the featured image.
