@@ -515,6 +515,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	public function test_add_validation_error_sourcing() {
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
+		$this->assertEquals( 9, has_action( 'register_block_type_args', [ self::TESTED_CLASS, 'wrap_block_callbacks' ] ) );
 		$this->assertEquals( 10, has_action( 'all', [ self::TESTED_CLASS, 'wrap_hook_callbacks' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
@@ -1452,6 +1453,26 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			),
 			$output
 		);
+	}
+
+	/**
+	 * @covers ::wrap_block_callbacks
+	 */
+	public function test_wrap_hook_callbacks() {
+
+		$args = [
+			'render_callback' => static function () {
+
+				return '<span>Render callback</span>';
+			},
+		];
+
+		$output = AMP_Validation_Manager::wrap_block_callbacks( $args );
+
+		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $output['render_callback'] );
+		$callback = $this->get_private_property( $output['render_callback'], 'callback' );
+		$this->assertEquals( 'the_content', $callback['source']['hook'] );
+		$this->assertEquals( 9, $callback['source']['priority'] );
 	}
 
 	/**

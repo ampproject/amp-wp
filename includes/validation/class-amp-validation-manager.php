@@ -1120,14 +1120,10 @@ class AMP_Validation_Manager {
 
 		if ( 1 === $passed_by_ref ) {
 			$args['render_callback'] = static function ( &$first, ...$other_args ) use ( $wrapped_callback ) {
-
 				return $wrapped_callback->invoke_with_first_ref_arg( $first, ...$other_args );
 			};
 		} else {
-			$args['render_callback'] = static function ( ...$args ) use ( $wrapped_callback ) {
-
-				return $wrapped_callback( ...$args );
-			};
+			$args['render_callback'] = $wrapped_callback;
 		}
 
 		return $args;
