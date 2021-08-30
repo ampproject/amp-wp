@@ -1100,8 +1100,14 @@ class AMP_Validation_Manager {
 			return $args;
 		}
 
+		/*
+		 * Keep hook and priority hardcoded. Since, All blocks are rendered in `do_blocks()`
+		 * which is hooked in 'the_content' at a priority of 9.
+		 */
+		$source['hook']     = 'the_content';
+		$source['priority'] = 9;
+
 		$original_function = $args['render_callback'];
-		$source['hook']    = 'the_content';
 		$accepted_args     = $reflection->getParameters();
 		$accepted_args     = ( ! empty( $accepted_args ) && is_array( $accepted_args ) ) ? count( $accepted_args ) : 0;
 
