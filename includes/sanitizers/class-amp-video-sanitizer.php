@@ -63,6 +63,9 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( $this->args['add_noscript_fallback'] ) {
 			$this->initialize_noscript_allowed_attributes( self::$tag );
+
+			// Omit muted from noscript > video since it causes deprecation warnings in validator.
+			unset( $this->noscript_fallback_allowed_attributes['muted'] );
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
@@ -310,6 +313,14 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				default:
 					$out[ $name ] = $value;
 			}
+		}
+
+		/*
+		 * The amp-video will forcibly be muted whenever it is set to autoplay.
+		 * So omit the `muted` attribute if it exists.
+		 */
+		if ( isset( $out['autoplay'], $out['muted'] ) ) {
+			unset( $out['muted'] );
 		}
 
 		return $out;
