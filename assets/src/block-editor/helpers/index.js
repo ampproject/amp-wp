@@ -284,7 +284,7 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 			inspectorControls = setUpImageInspectorControls( props );
 		} else if ( 'core/video' === name ) {
 			inspectorControls = isSelected ? VideoInspectorControls( props ) : null;
-		} else if ( 0 === name.indexOf( 'core-embed/' ) ) {
+		} else if ( MEDIA_BLOCKS.includes( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
 			inspectorControls = setUpInspectorControls( props );
 		}
 
