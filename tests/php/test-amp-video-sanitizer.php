@@ -63,8 +63,8 @@ class AMP_Video_Converter_Test extends TestCase {
 			],
 
 			'video_with_autoplay' => [
-				'<video src="https://example.com/file.mp4" autoplay="true" muted="muted"></video>',
-				'<amp-video src="https://example.com/file.mp4" autoplay height="400" layout="fixed-height" width="auto"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4" autoplay="true"></video></noscript></amp-video>',
+				'<video src="https://example.com/file.mp4" autoplay muted width="160" height="80"></video>',
+				'<amp-video src="https://example.com/file.mp4" autoplay width="160" height="80" layout="responsive"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4" autoplay width="160" height="80"></video></noscript></amp-video>',
 			],
 
 			'local_video_without_dimensions' => [
