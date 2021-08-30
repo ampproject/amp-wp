@@ -526,6 +526,7 @@ class AMP_Validation_Manager {
 	public static function add_validation_error_sourcing() {
 		add_action( 'wp', [ __CLASS__, 'wrap_widget_callbacks' ] );
 
+		add_filter( 'register_block_type_args', [ __CLASS__, 'wrap_block_callbacks' ], 9 );
 		add_action( 'all', [ __CLASS__, 'wrap_hook_callbacks' ] );
 		$wrapped_filters = [ 'the_content', 'the_excerpt' ];
 		foreach ( $wrapped_filters as $wrapped_filter ) {
@@ -1059,6 +1060,71 @@ class AMP_Validation_Manager {
 
 			$registered_widget['callback'] = self::wrapped_callback( $callback );
 		}
+	}
+
+	/**
+	 * Wrap callbacks for registered blocks to keep track of queued assets and the source for anything printed for validation.
+	 *
+	 * @param array $args Array of arguments for registering a block type.
+	 *
+	 * @return array Array of arguments for registering a block type.
+	 */
+	public static function wrap_block_callbacks( $args ) {
+
+		if ( ! is_callable( $args['render_callback'] ) ) {
+			return $args;
+		}
+
+		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
+		$source              = $callback_reflection->get_source( $args['render_callback'] );
+
+		if ( ! $source ) {
+			return $args;
+		}
+
+		// Skip considering ourselves.
+		if ( 'AMP_Validation_Manager::add_block_source_comments' === $source['function'] ) {
+			return $args;
+		}
+
+		/**
+		 * Reflection.
+		 *
+		 * @var ReflectionFunction|ReflectionMethod $reflection
+		 */
+		$reflection = $source['reflection'];
+		unset( $source['reflection'] ); // Omit from stored source.
+
+		$passed_by_ref = self::has_parameters_passed_by_reference( $reflection );
+		if ( $passed_by_ref > 1 ) {
+			return $args;
+		}
+
+		$original_function = $args['render_callback'];
+		$source['hook']    = 'the_content';
+		$accepted_args     = $reflection->getParameters();
+		$accepted_args     = ( ! empty( $accepted_args ) && is_array( $accepted_args ) ) ? count( $accepted_args ) : 0;
+
+		$wrapped_callback = self::wrapped_callback(
+			array_merge(
+				[ 'function' => $original_function ],
+				compact( 'source', 'accepted_args' )
+			)
+		);
+
+		if ( 1 === $passed_by_ref ) {
+			$args['render_callback'] = static function ( &$first, ...$other_args ) use ( $wrapped_callback ) {
+
+				return $wrapped_callback->invoke_with_first_ref_arg( $first, ...$other_args );
+			};
+		} else {
+			$args['render_callback'] = static function ( ...$args ) use ( $wrapped_callback ) {
+
+				return $wrapped_callback( ...$args );
+			};
+		}
+
+		return $args;
 	}
 
 	/**
