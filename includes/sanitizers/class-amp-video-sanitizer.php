@@ -136,7 +136,6 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			if ( empty( $new_attributes['width'] ) && empty( $new_attributes['height'] ) ) {
-				$new_attributes[ Attribute::OBJECT_FIT ] = 'contain';
 				$new_attributes[ Attribute::CLASS_ ] = isset( $new_attributes[ Attribute::CLASS_ ] )
 					? $new_attributes[ Attribute::CLASS_ ] . ' amp-wp-unknown-size'
 					: 'amp-wp-unknown-size';
