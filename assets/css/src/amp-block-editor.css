@@ -45,10 +45,7 @@
 	margin-bottom: 1em;
 }
 
-.components-panel__body.amp-video-autoplay-notice {
+.amp-video-autoplay-notice {
 	font-size: 12px;
-	font-style: normal;
 	color: #757575;
-	border-top: none;
-	padding-top: 0;
 }
