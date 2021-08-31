@@ -84,7 +84,7 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 			Document::fromNode( $dom ),
 			Extension::TIKTOK,
 			[
-				Attribute::LAYOUT   => 'fixed-height',
+				Attribute::LAYOUT   => Layout::FIXED_HEIGHT,
 				Attribute::HEIGHT   => $height,
 				Attribute::WIDTH    => 'auto',
 				Attribute::DATA_SRC => $video_url,
