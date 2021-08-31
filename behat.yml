@@ -1,7 +1,0 @@
-default:
-  suites:
-    default:
-      contexts:
-        - AmpProject\AmpWP\Tests\Behat\FeatureContext
-      paths:
-        - tests/features
