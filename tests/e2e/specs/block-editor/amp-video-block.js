@@ -53,6 +53,20 @@ describe( 'Video Block Muted Notice', () => {
 		await expect( await autoplayContainer.evaluate( ( node ) => node.textContent ) ).toMatch( autoplayNotice );
 		await expect( await mutedContainer.evaluate( ( node ) => node.textContent ) ).toMatch( mutedNotice );
 
+		// Close and reopen the panel to confirm the notice is still there.
+		await clickButton( 'Video settings' );
+		await page.waitForXPath( '//button[@aria-expanded="false"][contains(text(), "Video settings")]' );
+		await clickButton( 'Video settings' );
+		await page.waitForXPath( '//button[@aria-expanded="true"][contains(text(), "Video settings")]' );
+
+		[ autoplayContainer, autoplayInput ] = await getBlockEditorSidebarToggle( 'Autoplay' );
+		[ mutedContainer, mutedInput ] = await getBlockEditorSidebarToggle( 'Muted' );
+
+		await expect( await autoplayInput.evaluate( ( node ) => node.checked ) ).toBe( true );
+		await expect( await mutedInput.evaluate( ( node ) => node.checked ) ).toBe( false );
+		await expect( await autoplayContainer.evaluate( ( node ) => node.textContent ) ).toMatch( autoplayNotice );
+		await expect( await mutedContainer.evaluate( ( node ) => node.textContent ) ).toMatch( mutedNotice );
+
 		// Insert new block so that the sidebar content changes.
 		await insertBlock( 'Code' );
 		await page.waitForSelector( '.wp-block-code' );
