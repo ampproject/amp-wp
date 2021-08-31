@@ -177,7 +177,7 @@ BlockType.propTypes = {
  *
  * @param {Object}   props               Component props.
  * @param {Object}   props.blockType     Block type details.
- * @param {boolean}  props.isExternal      Flag indicating if the error comes from outside of post content.
+ * @param {boolean}  props.isExternal    Flag indicating if the error comes from outside of post content.
  * @param {boolean}  props.removed       Flag indicating if the block has been removed.
  * @param {string}   props.clientId      Block client ID
  * @param {number}   props.status        Number indicating the error status.
