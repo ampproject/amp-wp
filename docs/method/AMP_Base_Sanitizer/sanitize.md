@@ -8,7 +8,7 @@ Sanitize the HTML contained in the DOMDocument received by the constructor
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:156](/includes/sanitizers/class-amp-base-sanitizer.php#L156)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:167](/includes/sanitizers/class-amp-base-sanitizer.php#L167)
 
 <details>
 <summary>Show Code</summary>

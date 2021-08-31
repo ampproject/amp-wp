@@ -13,7 +13,7 @@ Add one or more HTML element attributes to a node&#039;s DOMElement.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:274](/includes/utils/class-amp-dom-utils.php#L274-L287)
+:link: [includes/utils/class-amp-dom-utils.php:201](/includes/utils/class-amp-dom-utils.php#L201-L214)
 
 <details>
 <summary>Show Code</summary>

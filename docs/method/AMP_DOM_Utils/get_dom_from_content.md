@@ -17,7 +17,7 @@ Return a valid Dom\Document representing arbitrary HTML content passed as a para
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:171](/includes/utils/class-amp-dom-utils.php#L171-L188)
+:link: [includes/utils/class-amp-dom-utils.php:98](/includes/utils/class-amp-dom-utils.php#L98-L115)
 
 <details>
 <summary>Show Code</summary>
