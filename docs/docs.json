@@ -85,12 +85,12 @@
             },
             {
                 "name": "",
-                "line": 245,
+                "line": 249,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 371,
+                "line": 375,
                 "type": "Include"
             }
         ],
@@ -98,8 +98,8 @@
         "hooks": [
             {
                 "name": "amp_featured_image_minimum_height",
-                "line": 315,
-                "end_line": 315,
+                "line": 319,
+                "end_line": 319,
                 "type": "filter",
                 "arguments": [
                     "$default_height"
@@ -125,8 +125,8 @@
             },
             {
                 "name": "amp_featured_image_minimum_width",
-                "line": 325,
-                "end_line": 325,
+                "line": 329,
+                "end_line": 329,
                 "type": "filter",
                 "arguments": [
                     "$default_width"
@@ -2855,8 +2855,8 @@
             },
             "9": {
                 "name": "amp_enable_optimizer",
-                "line": 2025,
-                "end_line": 2025,
+                "line": 2035,
+                "end_line": 2035,
                 "type": "filter",
                 "arguments": [
                     "$enable_optimizer"
@@ -7940,7 +7940,7 @@
         "includes": [
             {
                 "name": "",
-                "line": 2188,
+                "line": 2216,
                 "type": "Require"
             }
         ],
@@ -8276,7 +8276,7 @@
             }
         ]
     },
-    "170": {
+    "171": {
         "file": {
             "description": "Class MobileRedirection.",
             "long_description": "",
@@ -8428,7 +8428,7 @@
             }
         }
     },
-    "172": {
+    "173": {
         "file": {
             "description": "Class AmpWPConfiguration.",
             "long_description": "",
@@ -8499,7 +8499,7 @@
             }
         ]
     },
-    "180": {
+    "181": {
         "file": {
             "description": "Class PairedRouting.",
             "long_description": "",
@@ -8539,7 +8539,7 @@
             }
         ]
     },
-    "181": {
+    "182": {
         "file": {
             "description": "Class PairedUrl.",
             "long_description": "",
@@ -9006,7 +9006,7 @@
         ],
         "hooks": []
     },
-    "182": {
+    "183": {
         "file": {
             "description": "Class LegacyReaderUrlStructure.",
             "long_description": "",
@@ -9105,7 +9105,7 @@
             }
         ]
     },
-    "186": {
+    "187": {
         "file": {
             "description": "Abstract class PairedUrlStructure.",
             "long_description": "",
@@ -9332,7 +9332,7 @@
         ],
         "hooks": []
     },
-    "198": {
+    "199": {
         "file": {
             "description": "Provides settings to be used in site scanning.",
             "long_description": "",
@@ -9380,7 +9380,7 @@
             }
         ]
     },
-    "199": {
+    "200": {
         "file": {
             "description": "WP cron process to validate URLs in the background.",
             "long_description": "",
