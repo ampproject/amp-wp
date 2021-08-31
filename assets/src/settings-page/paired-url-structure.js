@@ -24,7 +24,7 @@ import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../components/am
 /**
  * Paired URL examples.
  *
- * @param {Object} props Component props.
+ * @param {Object} props            Component props.
  * @param {?Array} props.pairedUrls Paired URLs.
  */
 const PairedUrlExamples = ( { pairedUrls } ) => {
@@ -285,7 +285,7 @@ SlugConflictsNotice.propTypes = {
 /**
  * Component rendering the paired URL structure.
  *
- * @param {Object} props Component props.
+ * @param {Object} props                Component props.
  * @param {string} props.focusedSection Focused section.
  */
 export function PairedUrlStructure( { focusedSection } ) {

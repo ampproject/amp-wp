@@ -108,7 +108,7 @@ wp plugin activate amp --quiet
 
 # Install & activate Gutenberg plugin.
 echo -e $(status_message "Installing and activating Gutenberg plugin...")
-wp plugin install gutenberg --activate --force --quiet --version=11.0.0
+wp plugin install gutenberg --activate --force --quiet
 
 # Set pretty permalinks.
 echo -e $(status_message "Setting permalink structure...")
