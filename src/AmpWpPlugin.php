@@ -82,6 +82,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.user_rest_endpoint_extension' => Admin\UserRESTEndpointExtension::class,
 		'admin.validation_counts'            => Admin\ValidationCounts::class,
 		'admin.plugin_install_tab'           => Admin\PluginInstallTab::class,
+		'admin.theme_install_tab'            => Admin\ThemeInstallTab::class,
 		'amp_slug_customization_watcher'     => AmpSlugCustomizationWatcher::class,
 		'background_task_deactivator'        => BackgroundTaskDeactivator::class,
 		'cli.command_namespace'              => Cli\CommandNamespaceRegistration::class,
