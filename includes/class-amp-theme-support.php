@@ -900,7 +900,6 @@ class AMP_Theme_Support {
 
 		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'include_layout_in_wp_kses_allowed_html' ], 10 );
 		add_filter( 'get_header_image_tag', [ __CLASS__, 'amend_header_image_with_video_header' ], PHP_INT_MAX );
-		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ); // @todo The AMP_Comments_Sanitizer should add data-ampdevmode since user would be logged-in, or else the this script should be allowed whenever comment-reply is also allowed.
 		add_action(
 			'wp_print_footer_scripts',
 			static function() {

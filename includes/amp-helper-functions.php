@@ -1595,6 +1595,11 @@ function amp_get_content_sanitizers( $post = null ) {
 		 */
 		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
 
+		// Prevent removal of script output by wp_comment_form_unfiltered_html_nonce().
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			$dev_mode_xpaths[] = '//script[ preceding-sibling::input[ @name = "_wp_unfiltered_html_comment_disabled" ] and contains( text(), "_wp_unfiltered_html_comment_disabled" ) ]';
+		}
+
 		if ( is_admin_bar_showing() ) {
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';
