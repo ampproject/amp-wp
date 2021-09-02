@@ -123,11 +123,23 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 
 		$sanitizer_arg_updates = [];
 
-		// When there are kept custom scripts, skip tree shaking since it's likely JS will toggle classes that have associated style rules.
+		// When there are kept custom scripts, turn off conversion to AMP components since scripts may be attempting to
+		// query for them directly, and skip tree shaking since it's likely JS will toggle classes that have associated
+		// style rules.
 		// @todo There should be an attribute on script tags that opt-in to keeping tree shaking and/or to indicate what class names need to be included.
 		// @todo Depending on the size of the underlying stylesheets, this may need to retain the use of external styles to prevent inlining excessive CSS. This may involve writing minified CSS to disk, or skipping style processing altogether if no selector conversions are needed.
 		if ( $this->kept_script_count > 0 ) {
-			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['skip_tree_shaking'] = true;
+			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['skip_tree_shaking']     = true;
+			$sanitizer_arg_updates[ AMP_Form_Sanitizer::class ]['native_post_forms_used'] = true;
+			$sanitizer_arg_updates[ AMP_Video_Sanitizer::class ]['native_video_used']     = true;
+			$sanitizer_arg_updates[ AMP_Audio_Sanitizer::class ]['native_audio_used']     = true;
+			$sanitizer_arg_updates[ AMP_Iframe_Sanitizer::class ]['native_iframe_used']   = true;
+
+			// Once amp-img is deprecated, these won't be needed and an <img> won't prevent strict sandboxing level for valid AMP.
+			// Note that AMP_Core_Theme_Sanitizer would have already run, so we can't update it here. Nevertheless,
+			// the native_img_used flag was already enabled by the SandboxingLevels service.
+			$sanitizer_arg_updates[ AMP_Gallery_Block_Sanitizer::class ]['native_img_used'] = true;
+			$sanitizer_arg_updates[ AMP_Img_Sanitizer::class ]['native_img_used']           = true;
 		}
 
 		// When custom scripts are on the page, use Bento AMP components whenever possible and turn off some CSS
@@ -135,11 +147,6 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $this->px_verified_kept_node_count > 0 || $this->kept_script_count > 0 ) {
 			$sanitizer_arg_updates[ AMP_Tag_And_Attribute_Sanitizer::class ]['prefer_bento']       = true;
 			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['transform_important_qualifiers'] = false;
-			$sanitizer_arg_updates[ AMP_Img_Sanitizer::class ]['native_img_used']                  = true;
-			$sanitizer_arg_updates[ AMP_Video_Sanitizer::class ]['native_video_used']              = true;
-			$sanitizer_arg_updates[ AMP_Audio_Sanitizer::class ]['native_audio_used']              = true;
-			$sanitizer_arg_updates[ AMP_Iframe_Sanitizer::class ]['native_iframe_used']            = true;
-			$sanitizer_arg_updates[ AMP_Form_Sanitizer::class ]['native_post_forms_allowed']       = true;
 		}
 
 		foreach ( $sanitizer_arg_updates as $sanitizer_class => $sanitizer_args ) {

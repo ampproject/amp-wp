@@ -434,7 +434,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			AMP_Form_Sanitizer::class              => new AMP_Form_Sanitizer(
 				$dom,
 				[
-					'native_post_forms_allowed' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+					'native_post_forms_used'    => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 					'validation_error_callback' => function () use ( $remove_custom_scripts ) {
 						return $remove_custom_scripts;
 					},

@@ -21,11 +21,11 @@ use AmpProject\Dom\Element;
 class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Validation error code emitted when native POST forms are opted-into and one is encountered.
+	 * Validation error code emitted when there is a POST form with action-xhr but only native POST forms are used.
 	 *
 	 * @var string
 	 */
-	const FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR = 'FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR';
+	const POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED = 'POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED';
 
 	/**
 	 * Placeholder for default args, to be set in child classes.
@@ -33,14 +33,14 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'native_post_forms_allowed' => false,
+		'native_post_forms_used' => false,
 	];
 
 	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
-	 *      @type bool $native_post_forms_allowed When true, a user can decide via validation error status to convert to an XHR form.
+	 *      @type bool $native_post_forms_used When true, the amp-form extension will be omitted and any form[method=post][action] elements will not be converted into [action-xhr].
 	 * }
 	 */
 	protected $args;
@@ -108,28 +108,27 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					$node->setAttribute( 'action', $action_url );
 				}
 			} elseif ( 'post' === $method ) {
-				// If native POST forms are allowed, raise an error that gives the user the option to convert to an
-				// AMP-valid form with action-xhr. If the status of the validation error is 'removed', then the
-				// conversion will be performed. Otherwise, if the status is 'kept' then the POST form will be retained
-				// in the page by marking it with AMP dev mode, and the amp-form extension will be omitted from being
-				// added to the page.
-				if ( ! $xhr_action && $this->args['native_post_forms_allowed'] ) {
-					$validation_error = [
-						'code' => self::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR,
-					];
-					if ( ! $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) ) ) {
-						// Opt-in to dev mode to prevent raising validation errors for an intentionally invalid <img>.
-						// It doesn't make sense to raise a validation error to allow the user to decide whether to convert from
-						// <img> to <amp-img> since the native_img_used arg is the opt-in to not do any such conversion.
-						// @todo Remove once https://github.com/ampproject/amphtml/issues/30442 lands.
-						$node->setAttributeNode(
-							$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
-						);
-						$this->dom->documentElement->setAttributeNode(
-							$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+				// If native post forms are used, then mark any POST forms as being unvalidated for AMP. Note that it is
+				// an all or nothing proposition with forms, where there cannot be some POST forms with [action] and
+				// others with [action-xhr]. The former is incompatible with the amp-form extension but the latter
+				// fundamentally depends on it. So it's one or the other.
+				if ( $this->args['native_post_forms_used'] ) {
+					if ( $xhr_action ) {
+						// @todo Consider rewriting action-xhr to action? Or include a shim which implements the amp-form functionality?
+						$this->remove_invalid_child(
+							$node,
+							[ 'code' => self::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED ]
 						);
 						continue;
 					}
+
+					$node->setAttributeNode(
+						$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
+					);
+					$this->dom->documentElement->setAttributeNode(
+						$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+					);
+					continue;
 				}
 
 				$node->removeAttribute( 'action' );

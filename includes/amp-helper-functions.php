@@ -1417,26 +1417,6 @@ function amp_is_native_img_used() {
 }
 
 /**
- * Determine whether to allow native `POST` forms without conversion to use the `action-xhr` attribute and use the amp-form component.
- *
- * @since 2.2
- * @link https://github.com/ampproject/amphtml/issues/27638
- *
- * @return bool Whether to allow native `POST` forms.
- */
-function amp_is_native_post_form_allowed() {
-	/**
-	 * Filters whether to allow native `POST` forms without conversion to use the `action-xhr` attribute and use the amp-form component.
-	 *
-	 * @since 2.2
-	 * @link https://github.com/ampproject/amphtml/issues/27638
-	 *
-	 * @param bool $use_native Whether to allow native `POST` forms.
-	 */
-	return (bool) apply_filters( 'amp_native_post_form_allowed', false );
-}
-
-/**
  * Get content sanitizers.
  *
  * @since 0.7
@@ -1480,8 +1460,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 	);
 
-	$native_img_used           = amp_is_native_img_used();
-	$native_post_forms_allowed = amp_is_native_post_form_allowed();
+	$native_img_used = amp_is_native_img_used();
 
 	$sanitizers = [
 		// Embed sanitization must come first because it strips out custom scripts associated with embeds.
@@ -1516,9 +1495,7 @@ function amp_get_content_sanitizers( $post = null ) {
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 			'native_img_used'    => $native_img_used,
 		],
-		AMP_Form_Sanitizer::class              => [
-			'native_post_forms_allowed' => $native_post_forms_allowed,
-		],
+		AMP_Form_Sanitizer::class              => [],
 		AMP_Video_Sanitizer::class             => [],
 		AMP_Audio_Sanitizer::class             => [],
 		AMP_Object_Sanitizer::class            => [],
@@ -1641,7 +1618,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
-		AMP_Comments_Sanitizer::class, // Must come before AMP_Script_Sanitizer since it either removes comment-rely.js or marks it as PX-verified.
+		AMP_Comments_Sanitizer::class, // Must come before AMP_Script_Sanitizer since it either removes comment-rely.js or marks it as PX-verified. Also must come before the AMP_Form_Sanitizer.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for image, video, audio, form, and style.
 		AMP_Srcset_Sanitizer::class,
 		AMP_Img_Sanitizer::class,

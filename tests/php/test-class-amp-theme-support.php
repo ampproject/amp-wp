@@ -1870,19 +1870,14 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 
 		add_filter(
-			'amp_validation_error_default_sanitized',
-			static function ( $sanitized, $error ) use ( $converted ) {
-				if ( AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR === $error['code'] ) {
-					$sanitized = $converted;
-				}
-				return $sanitized;
-			},
-			10,
-			2
+			'amp_content_sanitizers',
+			static function ( $sanitizers ) use ( $converted ) {
+				$sanitizers[ AMP_Form_Sanitizer::class ]['native_post_forms_used'] = ! $converted;
+				return $sanitizers;
+			}
 		);
 
 		wp();
-		add_filter( 'amp_native_post_form_allowed', '__return_true' );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 		ob_start();
