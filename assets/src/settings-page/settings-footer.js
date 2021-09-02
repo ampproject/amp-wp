@@ -24,7 +24,7 @@ import { ErrorContext } from '../components/error-context-provider';
 /**
  * Renders an error notice.
  *
- * @param {Object} props Component props.
+ * @param {Object} props              Component props.
  * @param {string} props.errorMessage Error message text.
  */
 function ErrorNotice( { errorMessage } ) {

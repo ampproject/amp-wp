@@ -14,7 +14,7 @@ export const User = createContext();
  * MOCK.
  *
  * @param {Object} props
- * @param {any} props.children
+ * @param {any}    props.children
  */
 export function UserContextProvider( { children } ) {
 	return (

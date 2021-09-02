@@ -1,24 +1,28 @@
 <?php
 /**
- * Test Site_Health.
+ * Test SiteHealthTest.
  *
- * @package AmpProject\AmpWP
+ * @package AmpProject\AmpWP\Tests
  */
 
+namespace AmpProject\AmpWP\Tests\Admin;
+
+use AMP_Options_Manager;
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
- * Test Site_Health.
+ * Test SiteHealthTest.
+ *
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\SiteHealth
  */
-class Test_Site_Health extends WP_UnitTestCase {
+class SiteHealthTest extends TestCase {
 
-	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -62,7 +66,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test init.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::register()
+	 * @covers ::register()
 	 */
 	public function test_register() {
 		$this->instance->register();
@@ -70,13 +74,15 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
 		$this->assertEquals( 10, has_filter( 'site_status_test_result', [ $this->instance, 'modify_test_result' ] ) );
 		$this->assertEquals( 10, has_filter( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
+
 		$this->assertEquals( 10, has_action( 'admin_print_styles-site-health.php', [ $this->instance, 'add_styles' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_print_styles-tools_page_health-check', [ $this->instance, 'add_styles' ] ) );
 	}
 
 	/**
 	 * Test add_tests.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_tests()
+	 * @covers ::add_tests()
 	 */
 	public function test_add_tests() {
 		$tests = $this->instance->add_tests( [] );
@@ -103,7 +109,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test persistent_object_cache.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::persistent_object_cache()
+	 * @covers ::persistent_object_cache()
 	 */
 	public function test_persistent_object_cache() {
 		$data = [
@@ -145,7 +151,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test slug_definition_timing.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::slug_definition_timing()
+	 * @covers ::slug_definition_timing()
 	 */
 	public function test_slug_definition_timing() {
 		$data = [
@@ -198,7 +204,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test curl_multi_functions.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::curl_multi_functions()
+	 * @covers ::curl_multi_functions()
 	 */
 	public function test_curl_multi_functions() {
 		$this->assertArraySubset(
@@ -212,7 +218,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test icu_version.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::icu_version()
+	 * @covers ::icu_version()
 	 */
 	public function test_icu_version() {
 		$this->assertArraySubset(
@@ -226,7 +232,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test css_transient_caching.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::css_transient_caching()
+	 * @covers ::css_transient_caching()
 	 */
 	public function test_css_transient_caching() {
 		$data = [
@@ -269,13 +275,13 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test xdebug_extension.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::xdebug_extension()
+	 * @covers ::xdebug_extension()
 	 */
 	public function test_xdebug_extension() {
 		$actual = $this->instance->xdebug_extension();
 		$this->assertEquals( 'amp_xdebug_extension', $actual['test'] );
 
-		$this->assertStringContains(
+		$this->assertStringContainsString(
 			esc_html( 'The Xdebug extension can cause some of the AMP plugin&#8217;s processes to time out depending on your system resources and configuration. It should not be enabled on a live site (production environment).' ),
 			$actual['description']
 		);
@@ -284,7 +290,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test add_debug_information.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_debug_information()
+	 * @covers ::add_debug_information()
 	 */
 	public function test_add_debug_information() {
 		$debug_info = $this->instance->add_debug_information( [] );
@@ -344,7 +350,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_test_result
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::modify_test_result()
+	 * @covers ::modify_test_result()
 	 *
 	 * @param array $test_data Data from Site Health test.
 	 * @param array $expected  Expected modified test result.
@@ -415,7 +421,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * Test add_debug_information.
 	 *
 	 * @dataProvider get_supported_templates_data
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::get_supported_templates()
+	 * @covers ::get_supported_templates()
 	 *
 	 * @param array  $supported_content_types The supported content types, like 'post'.
 	 * @param array  $supported_templates     The supported templates, like 'is_author'.
@@ -476,7 +482,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * Test get_serve_all_templates.
 	 *
 	 * @dataProvider get_serve_all_templates_data
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::get_serve_all_templates()
+	 * @covers ::get_serve_all_templates()
 	 *
 	 * @param string $theme_support          The template mode, like 'standard'.
 	 * @param bool   $do_serve_all_templates Whether the option to serve all templates is true.
@@ -492,7 +498,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test add_extensions.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_extensions()
+	 * @covers ::add_extensions()
 	 */
 	public function test_add_extensions() {
 		$this->assertEquals(
@@ -514,7 +520,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 			$this->instance->add_extensions( [] )
 		);
 
-		// Test that the the `intl` extension is added only when site URL is an IDN.
+		// Test that the `intl` extension is added only when site URL is an IDN.
 		add_filter( 'site_url', [ self::class, 'get_idn' ], 10, 4 );
 
 		$extensions = $this->instance->add_extensions( [] );

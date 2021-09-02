@@ -6,13 +6,14 @@
  */
 
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for the WpHttpRemoteGetRequest class.
  *
  * @coversDefaultClass \AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest
  */
-class Test_WP_Http_Remote_Get_Request extends \WP_UnitTestCase {
+class Test_WP_Http_Remote_Get_Request extends TestCase {
 
 	/**
 	 * Provide the data to test the processing of headers.
@@ -48,7 +49,7 @@ class Test_WP_Http_Remote_Get_Request extends \WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			function( $preempt, $request, $url ) use ( $href, $headers ) {
-				$this->assertRegExp( '#^https?://#', $url );
+				$this->assertMatchesRegularExpression( '#^https?://#', $url );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
 					$preempt = [
 						'response' => [

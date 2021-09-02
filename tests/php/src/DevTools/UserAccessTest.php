@@ -11,8 +11,8 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\TestCase;
 use WP_Error;
-use WP_UnitTestCase;
 
 /**
  * Tests for UserAccess class.
@@ -23,7 +23,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\DevTools\UserAccess
  */
-class UserAccessTest extends WP_UnitTestCase {
+class UserAccessTest extends TestCase {
 
 	/**
 	 * Test instance.
@@ -176,7 +176,7 @@ class UserAccessTest extends WP_UnitTestCase {
 
 		ob_start();
 		$this->dev_tools_user_access->print_personal_options( $admin_user );
-		$this->assertContains( 'checkbox', ob_get_clean() );
+		$this->assertStringContainsString( 'checkbox', ob_get_clean() );
 	}
 
 	/**

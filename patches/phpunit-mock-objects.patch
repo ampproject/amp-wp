@@ -1,0 +1,29 @@
+diff --git a/src/Framework/MockObject/Generator.php b/src/Framework/MockObject/Generator.php
+index bfb899d..4f44e8d 100644
+--- a/src/Framework/MockObject/Generator.php
++++ b/src/Framework/MockObject/Generator.php
+@@ -1193,13 +1193,13 @@ private function getMethodParameters(ReflectionMethod $method, $forCall = false)
+                     }
+
+                     $typeDeclaration = (string) $parameter->getType() . ' ';
+-                } elseif ($parameter->isArray()) {
++                } elseif (PHP_VERSION_ID >= 70000 ? $parameter->getType() === 'array' : $parameter->isArray()) {
+                     $typeDeclaration = 'array ';
+-                } elseif ($parameter->isCallable()) {
++                } elseif (PHP_VERSION_ID >= 70000 ? $parameter->getType() === 'callable' : $parameter->isCallable()) {
+                     $typeDeclaration = 'callable ';
+                 } else {
+                     try {
+-                        $class = $parameter->getClass();
++                        $class = PHP_VERSION_ID >= 70000 ? $parameter->getType() : $parameter->getClass();
+                     } catch (ReflectionException $e) {
+                         throw new PHPUnit_Framework_MockObject_RuntimeException(
+                             sprintf(
+@@ -1214,7 +1214,7 @@ private function getMethodParameters(ReflectionMethod $method, $forCall = false)
+                     }
+
+                     if ($class !== null) {
+-                        $typeDeclaration = $class->getName() . ' ';
++                        $typeDeclaration = (PHP_VERSION_ID >= 70000 ? $class : $class->getName()) . ' ';
+                     }
+                 }

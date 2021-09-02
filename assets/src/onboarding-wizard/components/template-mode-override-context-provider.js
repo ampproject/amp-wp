@@ -21,8 +21,8 @@ export const TemplateModeOverride = createContext();
 /**
  * Responds to user selections with overrides to the template mode setting.
  *
- * @param {Object} props Component props.
- * @param {any} props.children Children to consume the context.
+ * @param {Object} props          Component props.
+ * @param {any}    props.children Children to consume the context.
  */
 export function TemplateModeOverrideContextProvider( { children } ) {
 	const { editedOptions, originalOptions, updateOptions, readerModeWasOverridden, setReaderModeWasOverridden } = useContext( Options );

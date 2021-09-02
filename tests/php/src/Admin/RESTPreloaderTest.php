@@ -8,7 +8,7 @@
 namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\RESTPreloader;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for RESTPreloader class.
@@ -17,7 +17,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\RESTPreloader
  */
-class RESTPreloaderTest extends WP_UnitTestCase {
+class RESTPreloaderTest extends TestCase {
 
 	/**
 	 * Test instance.

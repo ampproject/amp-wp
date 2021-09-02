@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { __, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect, useRef } from '@wordpress/element';
 import { Icon, plus, trash } from '@wordpress/icons';
-import { Button, TextControl, PanelRow, BaseControl } from '@wordpress/components';
+import { Button, TextControl, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -69,12 +69,12 @@ const vendorConfigs = {
 /**
  * Component for a single analytics entry.
  *
- * @param {Object} props Component props.
- * @param {number} props.entryIndex Index for the entry.
- * @param {Function} props.onChange Callback to run when data changes.
- * @param {Function} props.onDelete Callback to run when the entry is to be deleted.
- * @param {string} props.type The entry type.
- * @param {string} props.config The config JSON string.
+ * @param {Object}   props            Component props.
+ * @param {number}   props.entryIndex Index for the entry.
+ * @param {Function} props.onChange   Callback to run when data changes.
+ * @param {Function} props.onDelete   Callback to run when the entry is to be deleted.
+ * @param {string}   props.type       The entry type.
+ * @param {string}   props.config     The config JSON string.
  */
 function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '{}' } ) {
 	/**
@@ -264,9 +264,9 @@ export function Analytics() {
 					} );
 				} }
 			>
-				<span className="screen-reader-text">
+				<VisuallyHidden as="span">
 					{ __( 'Add entry', 'amp' ) }
-				</span>
+				</VisuallyHidden>
 				<Icon icon={ plus } />
 			</Button>
 		</div>

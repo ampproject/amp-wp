@@ -10,8 +10,10 @@ module.exports = function( grunt ) {
 		'assets',
 		'back-compat',
 		'includes',
+		'php-css-parser-install-composer-plugin',
 		'src',
 		'templates',
+		'uninstall.php',
 		'vendor',
 	];
 
@@ -20,10 +22,11 @@ module.exports = function( grunt ) {
 		/.*\/src\/.*/,
 	];
 
-	// These will be removed from the vendor directory after installing but prior to creating a ZIP.
+	// These will be removed from the build directory after installing but prior to creating a ZIP.
 	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
-	const productionVendorExcludedFilePatterns = [
+	const productionInstallExcludedFilePatterns = [
 		'composer.*',
+		'php-css-parser-install-composer-plugin/*',
 		'vendor/*/*/.editorconfig',
 		'vendor/*/*/.git',
 		'vendor/*/*/.github',
@@ -84,7 +87,7 @@ module.exports = function( grunt ) {
 					'cd build',
 					'composer install --no-dev -o',
 					'composer remove cweagans/composer-patches --update-no-dev -o',
-					'rm -rf ' + productionVendorExcludedFilePatterns.join( ' ' ),
+					'rm -rf ' + productionInstallExcludedFilePatterns.join( ' ' ),
 				].join( ' && ' ),
 			},
 			create_build_zip: {

@@ -102,18 +102,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
-
-      - name: Get npm cache directory
-        id: npm-cache
-        run: echo "::set-output name=dir::$(npm config get cache)"
-
-      - name: Configure npm cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
+          cache: npm
 
       - name: Configure git user
         run: |
@@ -176,6 +165,6 @@ jobs:
           gh pr merge --auto --merge "$PR_URL"
         env:
           VERSION: ${{ needs.check-gutenberg-release.outputs.latest-version }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GUTENBERG_PACKAGES_UPDATE_TOKEN }}
           BASE_BRANCH: ${{ steps.branches.outputs.base }}
           HEAD_BRANCH: ${{ steps.branches.outputs.head }}

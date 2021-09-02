@@ -115,7 +115,7 @@ function amp_init() {
 	 */
 	do_action( 'amp_init' );
 
-	add_filter( 'allowed_redirect_hosts', [ 'AMP_HTTP', 'filter_allowed_redirect_hosts' ] );
+	add_filter( 'allowed_redirect_hosts', [ AMP_HTTP::class, 'filter_allowed_redirect_hosts' ] );
 	AMP_HTTP::purge_amp_query_vars();
 	AMP_HTTP::send_cors_headers();
 	AMP_HTTP::handle_xhr_request();
@@ -874,6 +874,32 @@ function amp_add_generator_metadata() {
 }
 
 /**
+ * Determine whether the use of Bento components is enabled.
+ *
+ * When Bento is enabled, newer experimental versions of AMP components are used which incorporate the next generation
+ * of the component framework.
+ *
+ * @since 2.2
+ * @link https://blog.amp.dev/2021/01/28/bento/
+ *
+ * @return bool Whether Bento components are enabled.
+ */
+function amp_is_bento_enabled() {
+	/**
+	 * Filters whether the use of Bento components is enabled.
+	 *
+	 * When Bento is enabled, newer experimental versions of AMP components are used which incorporate the next generation
+	 * of the component framework.
+	 *
+	 * @since 2.2
+	 * @link https://blog.amp.dev/2021/01/28/bento/
+	 *
+	 * @param bool $enabled Enabled.
+	 */
+	return apply_filters( 'amp_bento_enabled', false );
+}
+
+/**
  * Register default scripts for AMP components.
  *
  * @internal
@@ -924,17 +950,24 @@ function amp_register_default_scripts( $wp_scripts ) {
 		$extension_specs['amp-carousel']['latest'] = '0.2';
 	}
 
+	$bento_enabled = amp_is_bento_enabled();
 	foreach ( $extension_specs as $extension_name => $extension_spec ) {
+		if ( $bento_enabled && ! empty( $extension_spec['bento'] ) ) {
+			$version = $extension_spec['bento']['version'];
+		} else {
+			$version = $extension_spec['latest'];
+		}
+
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
 			$extension_name,
-			$extension_spec['latest']
+			$version
 		);
 
 		$wp_scripts->add(
 			$extension_name,
 			$src,
-			[ 'amp-runtime' ],
+			[ 'amp-runtime' ], // @todo Eventually this will not be present for Bento.
 			null
 		);
 	}
@@ -964,6 +997,28 @@ function amp_register_default_styles( WP_Styles $styles ) {
 		AMP__VERSION
 	);
 	$styles->add_data( 'amp-icons', 'rtl', 'replace' );
+
+	// These are registered exclusively for non-AMP pages that manually enqueue them. They aren't needed on
+	// AMP pages due to the runtime style being present and because the styles are inlined in the scripts already.
+	if ( amp_is_bento_enabled() ) {
+		foreach ( AMP_Allowed_Tags_Generated::get_extension_specs() as $extension_name => $extension_spec ) {
+			if ( empty( $extension_spec['bento']['has_css'] ) ) {
+				continue;
+			}
+
+			$src = sprintf(
+				'https://cdn.ampproject.org/v0/%s-%s.css',
+				$extension_name,
+				$extension_spec['bento']['version']
+			);
+			$styles->add(
+				$extension_name,
+				$src,
+				[],
+				null
+			);
+		}
+	}
 }
 
 /**
@@ -1267,27 +1322,27 @@ function amp_get_content_embed_handlers( $post = null ) {
 	return apply_filters(
 		'amp_content_embed_handlers',
 		[
-			'AMP_Core_Block_Handler'         => [],
-			'AMP_Twitter_Embed_Handler'      => [],
-			'AMP_YouTube_Embed_Handler'      => [],
-			'AMP_Crowdsignal_Embed_Handler'  => [],
-			'AMP_DailyMotion_Embed_Handler'  => [],
-			'AMP_Vimeo_Embed_Handler'        => [],
-			'AMP_SoundCloud_Embed_Handler'   => [],
-			'AMP_Instagram_Embed_Handler'    => [],
-			'AMP_Issuu_Embed_Handler'        => [],
-			'AMP_Meetup_Embed_Handler'       => [],
-			'AMP_Facebook_Embed_Handler'     => [],
-			'AMP_Pinterest_Embed_Handler'    => [],
-			'AMP_Playlist_Embed_Handler'     => [],
-			'AMP_Reddit_Embed_Handler'       => [],
-			'AMP_TikTok_Embed_Handler'       => [],
-			'AMP_Tumblr_Embed_Handler'       => [],
-			'AMP_Gallery_Embed_Handler'      => [],
-			'AMP_Gfycat_Embed_Handler'       => [],
-			'AMP_Imgur_Embed_Handler'        => [],
-			'AMP_Scribd_Embed_Handler'       => [],
-			'AMP_WordPress_TV_Embed_Handler' => [],
+			AMP_Core_Block_Handler::class         => [],
+			AMP_Twitter_Embed_Handler::class      => [],
+			AMP_YouTube_Embed_Handler::class      => [],
+			AMP_Crowdsignal_Embed_Handler::class  => [],
+			AMP_DailyMotion_Embed_Handler::class  => [],
+			AMP_Vimeo_Embed_Handler::class        => [],
+			AMP_SoundCloud_Embed_Handler::class   => [],
+			AMP_Instagram_Embed_Handler::class    => [],
+			AMP_Issuu_Embed_Handler::class        => [],
+			AMP_Meetup_Embed_Handler::class       => [],
+			AMP_Facebook_Embed_Handler::class     => [],
+			AMP_Pinterest_Embed_Handler::class    => [],
+			AMP_Playlist_Embed_Handler::class     => [],
+			AMP_Reddit_Embed_Handler::class       => [],
+			AMP_TikTok_Embed_Handler::class       => [],
+			AMP_Tumblr_Embed_Handler::class       => [],
+			AMP_Gallery_Embed_Handler::class      => [],
+			AMP_Gfycat_Embed_Handler::class       => [],
+			AMP_Imgur_Embed_Handler::class        => [],
+			AMP_Scribd_Embed_Handler::class       => [],
+			AMP_WordPress_TV_Embed_Handler::class => [],
 		],
 		$post
 	);
@@ -1325,8 +1380,54 @@ function amp_is_dev_mode() {
 			( is_admin_bar_showing() && is_user_logged_in() )
 			||
 			is_customize_preview()
+			||
+			// Force dev mode for Bento since it currently requires the Bento experiment opt-in script.
+			// @todo Remove this once Bento no longer requires an experiment to opt-in. See <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
+			amp_is_bento_enabled()
 		)
 	);
+}
+
+/**
+ * Determine whether native `img` should be used instead of converting to `amp-img`.
+ *
+ * @since 2.2
+ *
+ * @return bool Whether to use `img`.
+ */
+function amp_is_native_img_used() {
+	/**
+	 * Filters whether to use the native `img` element rather than convert to `amp-img`.
+	 *
+	 * This filter is a feature flag to opt-in to discontinue using `amp-img` (and `amp-anim`) which will be deprecated
+	 * in AMP in the near future. Once this lands in AMP, this filter will switch to defaulting to true instead of false.
+	 *
+	 * @since 2.2
+	 * @link https://github.com/ampproject/amphtml/issues/30442
+	 *
+	 * @param bool $use_native Whether to use `img`.
+	 */
+	return (bool) apply_filters( 'amp_native_img_used', false );
+}
+
+/**
+ * Determine whether to allow native `POST` forms without conversion to use the `action-xhr` attribute and use the amp-form component.
+ *
+ * @since 2.2
+ * @link https://github.com/ampproject/amphtml/issues/27638
+ *
+ * @return bool Whether to allow native `POST` forms.
+ */
+function amp_is_native_post_form_allowed() {
+	/**
+	 * Filters whether to allow native `POST` forms without conversion to use the `action-xhr` attribute and use the amp-form component.
+	 *
+	 * @since 2.2
+	 * @link https://github.com/ampproject/amphtml/issues/27638
+	 *
+	 * @param bool $use_native Whether to allow native `POST` forms.
+	 */
+	return (bool) apply_filters( 'amp_native_post_form_allowed', false );
 }
 
 /**
@@ -1373,53 +1474,70 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 	);
 
+	$native_img_used           = amp_is_native_img_used();
+	$native_post_forms_allowed = amp_is_native_post_form_allowed();
+
 	$sanitizers = [
-		'AMP_Embed_Sanitizer'             => [
+		// The AMP_Script_Sanitizer runs first because based on whether it allows custom scripts
+		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
+		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
+		// performed.
+		AMP_Script_Sanitizer::class            => [],
+		AMP_Embed_Sanitizer::class             => [
 			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
 		],
-		'AMP_Core_Theme_Sanitizer'        => [
-			'template'       => get_template(),
-			'stylesheet'     => get_stylesheet(),
-			'theme_features' => [
+		AMP_Core_Theme_Sanitizer::class        => [
+			'template'        => get_template(),
+			'stylesheet'      => get_stylesheet(),
+			'theme_features'  => [
 				'force_svg_support' => [], // Always replace 'no-svg' class with 'svg' if it exists.
 			],
+			'native_img_used' => $native_img_used,
 		],
-		'AMP_Srcset_Sanitizer'            => [],
-		'AMP_Img_Sanitizer'               => [
+		AMP_Srcset_Sanitizer::class            => [],
+		AMP_Img_Sanitizer::class               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
+			'native_img_used'    => $native_img_used,
 		],
-		'AMP_Form_Sanitizer'              => [],
-		'AMP_Comments_Sanitizer'          => [
+		AMP_Form_Sanitizer::class              => [
+			'native_post_forms_allowed' => $native_post_forms_allowed,
+		],
+		AMP_Comments_Sanitizer::class          => [
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
 		],
-		'AMP_Video_Sanitizer'             => [],
-		'AMP_O2_Player_Sanitizer'         => [],
-		'AMP_Audio_Sanitizer'             => [],
-		'AMP_Playbuzz_Sanitizer'          => [],
-		'AMP_Object_Sanitizer'            => [],
-		'AMP_Iframe_Sanitizer'            => [
+		AMP_Video_Sanitizer::class             => [],
+		AMP_O2_Player_Sanitizer::class         => [],
+		AMP_Audio_Sanitizer::class             => [],
+		AMP_Playbuzz_Sanitizer::class          => [],
+		AMP_Object_Sanitizer::class            => [],
+		AMP_Iframe_Sanitizer::class            => [
 			'add_placeholder'    => true,
 			'current_origin'     => $current_origin,
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
-		'AMP_Gallery_Block_Sanitizer'     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+		AMP_Gallery_Block_Sanitizer::class     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
+			'native_img_used'   => $native_img_used,
 		],
-		'AMP_Block_Sanitizer'             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
-		'AMP_Script_Sanitizer'            => [],
-		'AMP_Style_Sanitizer'             => [],
-		'AMP_Meta_Sanitizer'              => [],
-		'AMP_Layout_Sanitizer'            => [],
-		'AMP_Accessibility_Sanitizer'     => [],
-		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+		AMP_Block_Sanitizer::class             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
+		AMP_Style_Sanitizer::class             => [
+			'skip_tree_shaking' => is_customize_preview(),
+		],
+		AMP_Meta_Sanitizer::class              => [],
+		AMP_Layout_Sanitizer::class            => [],
+		AMP_Accessibility_Sanitizer::class     => [],
+		// Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+		AMP_Tag_And_Attribute_Sanitizer::class => [
+			'prefer_bento' => amp_is_bento_enabled(),
+		],
 	];
 
 	if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
-		$sanitizers['AMP_Nav_Menu_Toggle_Sanitizer'] = $theme_support_args['nav_menu_toggle'];
+		$sanitizers[ AMP_Nav_Menu_Toggle_Sanitizer::class ] = $theme_support_args['nav_menu_toggle'];
 	}
 
 	if ( ! empty( $theme_support_args['nav_menu_dropdown'] ) ) {
-		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
+		$sanitizers[ AMP_Nav_Menu_Dropdown_Sanitizer::class ] = $theme_support_args['nav_menu_dropdown'];
 	}
 
 	if ( $amp_to_amp_linking_enabled && AMP_Theme_Support::STANDARD_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
@@ -1438,7 +1556,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		 */
 		$excluded_urls = apply_filters( 'amp_to_amp_excluded_urls', [] );
 
-		$sanitizers['AMP_Link_Sanitizer'] = array_merge(
+		$sanitizers[ AMP_Link_Sanitizer::class ] = array_merge(
 			[ 'paired' => ! amp_is_canonical() ],
 			compact( 'excluded_urls' )
 		);
@@ -1489,7 +1607,7 @@ function amp_get_content_sanitizers( $post = null ) {
 
 		$sanitizers = array_merge(
 			[
-				'AMP_Dev_Mode_Sanitizer' => [
+				AMP_Dev_Mode_Sanitizer::class => [
 					'element_xpaths' => $dev_mode_xpaths,
 				],
 			],
@@ -1506,10 +1624,10 @@ function amp_get_content_sanitizers( $post = null ) {
 	 * @since 1.5.0
 	 * @param bool $transient_caching_allowed Transient caching allowed.
 	 */
-	$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
+	$sanitizers[ AMP_Style_Sanitizer::class ]['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 
 	// Force layout, style, meta, and validating sanitizers to be at the end.
-	foreach ( [ 'AMP_Layout_Sanitizer', 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
+	foreach ( [ AMP_Layout_Sanitizer::class, AMP_Style_Sanitizer::class, AMP_Meta_Sanitizer::class, AMP_Tag_And_Attribute_Sanitizer::class ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];
 			unset( $sanitizers[ $class_name ] );

@@ -27,12 +27,12 @@ export const NON_TECHNICAL = 'nonTechnical';
 /**
  * Returns the degree to which each mode is recommended for the current site and user.
  *
- * @param {Object} args
+ * @param {Object}  args
  * @param {boolean} args.currentThemeIsAmongReaderThemes Whether the currently active theme is in the reader themes list.
- * @param {boolean} args.userIsTechnical Whether the user answered yes to the technical question.
- * @param {boolean} args.hasPluginIssues Whether the site scan found plugin issues.
- * @param {boolean} args.hasThemeIssues Whether the site scan found theme issues.
- * @param {boolean} args.hasScanResults Whether there are available scan results.
+ * @param {boolean} args.userIsTechnical                 Whether the user answered yes to the technical question.
+ * @param {boolean} args.hasPluginIssues                 Whether the site scan found plugin issues.
+ * @param {boolean} args.hasThemeIssues                  Whether the site scan found theme issues.
+ * @param {boolean} args.hasScanResults                  Whether there are available scan results.
  */
 export function getRecommendationLevels( { currentThemeIsAmongReaderThemes, userIsTechnical, hasPluginIssues, hasThemeIssues, hasScanResults = true } ) {
 	// Handle case where scanning has failed or did not run.
@@ -105,11 +105,11 @@ export function getRecommendationLevels( { currentThemeIsAmongReaderThemes, user
 /**
  * Provides details on copy and UI for the template modes screen.
  *
- * @param {Array} args Function args.
- * @param {string} section The section for which to provide text.
- * @param {string} mode The mode to generate text for.
+ * @param {Array}  args                Function args.
+ * @param {string} section             The section for which to provide text.
+ * @param {string} mode                The mode to generate text for.
  * @param {string} recommendationLevel String representing whether the mode is not recommended, recommended, or most recommended.
- * @param {string} technicalLevel String representing whether the user is technical.
+ * @param {string} technicalLevel      String representing whether the user is technical.
  */
 export function getSelectionText( ...args ) {
 	const match = ( ...test ) => isShallowEqual( test, args );
@@ -184,7 +184,7 @@ export function getSelectionText( ...args ) {
  * Gets all the selection text for the ScreenUI component.
  *
  * @param {Object} recommendationLevels Result of getRecommendationLevels.
- * @param {string} technicalLevel A technical level.
+ * @param {string} technicalLevel       A technical level.
  */
 export function getAllSelectionText( recommendationLevels, technicalLevel ) {
 	return {

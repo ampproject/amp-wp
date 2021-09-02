@@ -6,18 +6,17 @@
  * @since 0.7
  */
 
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_YouTube_Embed_Handler.
  *
  * @covers AMP_YouTube_Embed_Handler
  */
-class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
+class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
-	use AssertContainsCompatibility;
 	use PrivateAccess;
 	use WithoutBlockPreRendering {
 		setUp as public prevent_block_pre_render;
@@ -116,8 +115,8 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 		];
 
 		$youtube_shortcode = $this->handler->video_override( '', $attr_youtube );
-		$this->assertStringContains( '<amp-youtube', $youtube_shortcode );
-		$this->assertStringContains( $youtube_id, $youtube_shortcode );
+		$this->assertStringContainsString( '<amp-youtube', $youtube_shortcode );
+		$this->assertStringContainsString( $youtube_id, $youtube_shortcode );
 
 		$vimeo_id        = '64086087';
 		$vimeo_src       = 'https://vimeo.com/' . $vimeo_id;

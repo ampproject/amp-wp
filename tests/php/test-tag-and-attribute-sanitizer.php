@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\TestCase;
 
 // phpcs:disable WordPress.WP.EnqueuedResources
 
@@ -16,7 +17,7 @@ use AmpProject\Dom\Document;
  *
  * @covers AMP_Tag_And_Attribute_Sanitizer
  */
-class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 
 	use MarkupComparison;
 
@@ -191,6 +192,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-facebook-comments' ],
 			],
 
+			'amp-facebook-comments_bento'                  => [
+				'<amp-facebook-comments width="486" height="657" data-href="http://example.com/baz" layout="responsive" data-numposts="5"></amp-facebook-comments>',
+				null, // No change.
+				[ 'amp-facebook' ],
+				[],
+				[ 'prefer_bento' => true ],
+			],
+
 			'amp-facebook-comments_missing_required_attribute' => [
 				'<amp-facebook-comments width="486" height="657" layout="responsive" data-numposts="5"></amp-facebook-comments>',
 				'',
@@ -207,6 +216,28 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-facebook-like width="90" height="20" data-href="http://example.com/baz" layout="fixed" data-layout="button_count"></amp-facebook-like>',
 				null, // No change.
 				[ 'amp-facebook-like' ],
+			],
+
+			'amp-facebook-like_bento'                      => [
+				'<amp-facebook-like width="90" height="20" data-href="http://example.com/baz" layout="fixed" data-layout="button_count"></amp-facebook-like>',
+				null, // No change.
+				[ 'amp-facebook' ],
+				[],
+				[ 'prefer_bento' => true ],
+			],
+
+			'amp-facebook-page'                            => [
+				'<amp-facebook-page width="340" height="130" layout="responsive" data-href="https://www.facebook.com/imdb/"></amp-facebook-page>',
+				null, // No change.
+				[ 'amp-facebook-page' ],
+			],
+
+			'amp-facebook-page_bento'                      => [
+				'<amp-facebook-page width="340" height="130" layout="responsive" data-href="https://www.facebook.com/imdb/"></amp-facebook-page>',
+				null, // No change.
+				[ 'amp-facebook' ],
+				[],
+				[ 'prefer_bento' => true ],
 			],
 
 			'amp-facebook-like_missing_required_attribute' => [
@@ -673,18 +704,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-story-player' ],
 			],
 
-			'amp_google_assistant_assistjs'                => [
-				// Note: the first line is commented out because it is broken in AMP currently.
-				'
-					<!--<amp-google-assistant-assistjs-config layout="nodisplay"><script type="application/json">{"devMode": true, "projectId": "aog-assistjs-demos"}</script></amp-google-assistant-assistjs-config>-->
-					<amp-google-assistant-voice-button layout="responsive" width="150" height="40"></amp-google-assistant-voice-button>
-					<amp-google-assistant-voice-bar layout="responsive" width="150" height="40"></amp-google-assistant-voice-bar>
-					<amp-google-assistant-inline-suggestion-bar layout="responsive" width="150" height="40"></amp-google-assistant-inline-suggestion-bar>
-				',
-				null,
-				[ 'amp-google-assistant-assistjs' ],
-			],
-
 			'reference-points-bad'                         => [
 				'<div lightbox-thumbnail-id update items pagination separator option selected disabled>BAD REFERENCE POINTS</div>',
 				'<div>BAD REFERENCE POINTS</div>',
@@ -784,7 +803,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'base_carousel'                                => [
 				'
-					<amp-base-carousel width="4" height="3" auto-advance="true" controls="auto" layout="responsive" heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)" visible-count="(min-width: 600px) 4, 3" advance-count="(min-width: 600px) 4, 3">
+					<amp-base-carousel width="4" height="3" auto-advance="true" controls="auto" layout="responsive" heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)" visible-count="(min-width: 600px) 4, 3" advance-count="(min-width: 600px) 4, 3" loop>
 						<div lightbox-thumbnail-id="food">first slide</div>
 						<div lightbox-exclude>second slide</div>
 					</amp-base-carousel>
@@ -3181,6 +3200,57 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				[ 'amp-stream-gallery' ],
 			],
+
+			'amp-tiktok'                                   => [
+				'
+				  <amp-tiktok width="500" height="500" data-src="6943753342808034566"></amp-tiktok>
+				  <amp-tiktok
+				    width="700"
+				    height="800"
+				    data-src="https://www.tiktok.com/@scout2015/video/6943753342808034566">
+				  </amp-tiktok>
+				  <amp-tiktok width="500" height="800">
+				    <blockquote
+				      placeholder
+				      class="tiktok-embed"
+				      cite="https://www.tiktok.com/@countingprimes/video/6948210747285441798"
+				      data-video-id="6948210747285441798"
+				      style="max-width: 605px; min-width: 325px">
+				      <section>
+				        <a
+				          target="_blank"
+				          title="@countingprimes"
+				          href="https://www.tiktok.com/@countingprimes">@countingprimes</a>
+				        <p>
+				          VIM is great.... right up until you start typing the commands into every
+				          single text editor you see. I’d like to apologize for all my unneeded
+				          “:wq”’s
+				        </p>
+				        <a
+				          target="_blank"
+				          title="♬ original sound - countingprimes"
+				          href="https://www.tiktok.com/music/original-sound-6948210588145175302">♬ original sound - countingprimes</a>
+				      </section>
+				    </blockquote>
+				  </amp-tiktok>
+				',
+				null,
+				[ 'amp-tiktok' ],
+			],
+
+			'amp-wordpress-embed'                          => [
+				'
+				<amp-wordpress-embed
+				  data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
+				  layout="fixed"
+				  height="400"
+				  width="600">
+				  <button overflow>Load more</button>
+				</amp-wordpress-embed>
+				',
+				null,
+				[ 'amp-wordpress-embed' ],
+			],
 		];
 	}
 
@@ -3656,20 +3726,24 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param string     $expected         The markup to expect.
 	 * @param array      $expected_scripts The AMP component script names that are obtained through sanitization.
 	 * @param array|null $expected_errors  Expected validation errors, either codes or validation error subsets.
+	 * @param array      $sanitizer_args   Sanitizer args.
 	 */
-	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = [] ) {
+	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = [], $sanitizer_args = [] ) {
 		$expected      = isset( $expected ) ? $expected : $source;
 		$dom           = Document::fromHtml( $source, Options::DEFAULTS );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
-			[
-				'use_document_element'      => true,
-				'validation_error_callback' => static function( $error ) use ( &$actual_errors ) {
-					$actual_errors[] = $error;
-					return true;
-				},
-			]
+			array_merge(
+				[
+					'use_document_element'      => true,
+					'validation_error_callback' => static function( $error ) use ( &$actual_errors ) {
+						$actual_errors[] = $error;
+						return true;
+					},
+				],
+				$sanitizer_args
+			)
 		);
 		$sanitizer->sanitize();
 		$content = $dom->saveHTML( $dom->documentElement );

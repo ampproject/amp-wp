@@ -7,8 +7,8 @@
  */
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Reader_Theme_REST_Controller.
@@ -17,8 +17,8 @@ use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
  *
  * @coversDefaultClass AMP_Reader_Theme_REST_Controller
  */
-class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
-	use AssertContainsCompatibility, ThemesApiRequestMocking;
+class Test_Reader_Theme_REST_Controller extends TestCase {
+	use ThemesApiRequestMocking;
 
 	/**
 	 * Test instance.
@@ -48,8 +48,8 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	public function test_register_routes() {
 		$this->controller->register_routes();
 
-		$this->assertContains( 'amp/v1', rest_get_server()->get_namespaces() );
-		$this->assertContains( '/amp/v1/reader-themes', array_keys( rest_get_server()->get_routes( 'amp/v1' ) ) );
+		$this->assertStringContainsString( 'amp/v1', rest_get_server()->get_namespaces() );
+		$this->assertStringContainsString( '/amp/v1/reader-themes', array_keys( rest_get_server()->get_routes( 'amp/v1' ) ) );
 	}
 
 	/**
@@ -76,7 +76,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 		];
 
 		foreach ( $expected_reader_themes as $expected_reader_theme ) {
-			$this->assertContains( $expected_reader_theme, $actual_reader_themes );
+			$this->assertStringContainsString( $expected_reader_theme, $actual_reader_themes );
 		}
 
 		$filter = static function() {
@@ -164,8 +164,8 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 		$this->assertStringStartsWith( 'The request for reader themes from WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.', $headers['X-AMP-Theme-API-Error'] );
 
 		if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
-			$this->assertStringContains( 'Test message', $headers['X-AMP-Theme-API-Error'] );
-			$this->assertStringContains( 'amp_test_error', $headers['X-AMP-Theme-API-Error'] );
+			$this->assertStringContainsString( 'Test message', $headers['X-AMP-Theme-API-Error'] );
+			$this->assertStringContainsString( 'amp_test_error', $headers['X-AMP-Theme-API-Error'] );
 		}
 	}
 }
