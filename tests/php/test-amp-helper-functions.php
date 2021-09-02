@@ -1770,6 +1770,10 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			array_search( 'Even_After_Validating_Sanitizer', $ordered_sanitizers, true ),
 			array_search( AMP_Script_Sanitizer::class, $ordered_sanitizers, true )
 		);
+		$this->assertGreaterThan(
+			array_search( AMP_Core_Theme_Sanitizer::class, $ordered_sanitizers, true ),
+			array_search( AMP_Script_Sanitizer::class, $ordered_sanitizers, true )
+		);
 		$this->assertEquals( AMP_Layout_Sanitizer::class, $ordered_sanitizers[ count( $ordered_sanitizers ) - 4 ] );
 		$this->assertEquals( AMP_Style_Sanitizer::class, $ordered_sanitizers[ count( $ordered_sanitizers ) - 3 ] );
 		$this->assertEquals( AMP_Meta_Sanitizer::class, $ordered_sanitizers[ count( $ordered_sanitizers ) - 2 ] );

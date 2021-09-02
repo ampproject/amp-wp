@@ -1491,12 +1491,6 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_O2_Player_Sanitizer::class         => [],
 		AMP_Playbuzz_Sanitizer::class          => [],
 
-		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
-		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
-		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
-		// performed.
-		AMP_Script_Sanitizer::class            => [],
-
 		AMP_Core_Theme_Sanitizer::class        => [
 			'template'        => get_template(),
 			'stylesheet'      => get_stylesheet(),
@@ -1505,6 +1499,13 @@ function amp_get_content_sanitizers( $post = null ) {
 			],
 			'native_img_used' => $native_img_used,
 		],
+
+		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
+		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
+		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
+		// performed.
+		AMP_Script_Sanitizer::class            => [],
+
 		AMP_Srcset_Sanitizer::class            => [],
 		AMP_Img_Sanitizer::class               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
@@ -1642,8 +1643,8 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
+		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for image, video, audio, form, and style.
-		AMP_Core_Theme_Sanitizer::class,
 		AMP_Srcset_Sanitizer::class,
 		AMP_Img_Sanitizer::class,
 		AMP_Form_Sanitizer::class,
