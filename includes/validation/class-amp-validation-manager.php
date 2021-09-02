@@ -85,6 +85,16 @@ class AMP_Validation_Manager {
 	const AMP_UNVALIDATED_TAG_ATTRIBUTE = 'data-amp-unvalidated-tag';
 
 	/**
+	 * HTML attribute to indicate an tag/element has been verified for PX.
+	 *
+	 * The difference here with `data-amp-unvalidated-tag` is that the PX-verified means that the tag will work
+	 * properly Bento components and CSS tree shaking.
+	 *
+	 * @var string
+	 */
+	const PX_VERIFIED_TAG_ATTRIBUTE = 'data-px-verified-tag';
+
+	/**
 	 * HTML attribute to indicate one or more attributes are exempted from AMP validation.
 	 *
 	 * @todo Consider 'exempt' instead of 'unvalidated'.
@@ -92,6 +102,13 @@ class AMP_Validation_Manager {
 	 * @var string
 	 */
 	const AMP_UNVALIDATED_ATTRS_ATTRIBUTE = 'data-amp-unvalidated-attrs';
+
+	/**
+	 * HTML attribute to indicate one or more attributes have been verified for PX from AMP validation.
+	 *
+	 * @var string
+	 */
+	const PX_VERIFIED_ATTRS_ATTRIBUTE = 'data-px-verified-attrs';
 
 	/**
 	 * The errors encountered when validating.

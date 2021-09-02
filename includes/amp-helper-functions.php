@@ -1598,11 +1598,6 @@ function amp_get_content_sanitizers( $post = null ) {
 		 */
 		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
 
-		// Prevent removal of script output by wp_comment_form_unfiltered_html_nonce().
-		if ( current_user_can( 'unfiltered_html' ) ) {
-			$dev_mode_xpaths[] = AMP_Comments_Sanitizer::UNFILTERED_HTML_COMMENT_SCRIPT_XPATH;
-		}
-
 		if ( is_admin_bar_showing() ) {
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';
@@ -1646,7 +1641,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
-		AMP_Comments_Sanitizer::class, // Must come before AMP_Script_Sanitizer since it removes comment-rely.js.
+		AMP_Comments_Sanitizer::class, // Must come before AMP_Script_Sanitizer since it either removes comment-rely.js or marks it as PX-verified.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for image, video, audio, form, and style.
 		AMP_Srcset_Sanitizer::class,
 		AMP_Img_Sanitizer::class,

@@ -506,6 +506,15 @@ abstract class AMP_Base_Sanitizer {
 			return false;
 		}
 
+		// Prevent removing a tag which was verified for PX.
+		if (
+			$node instanceof DOMElement
+			&&
+			$node->hasAttribute( AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE )
+		) {
+			return false;
+		}
+
 		// Prevent double-reporting nodes that are rejected for sanitization.
 		if ( isset( $this->nodes_to_keep[ $node->nodeName ] ) && in_array( $node, $this->nodes_to_keep[ $node->nodeName ], true ) ) {
 			return false;
@@ -575,6 +584,19 @@ abstract class AMP_Base_Sanitizer {
 			in_array(
 				$node->nodeName,
 				preg_split( '/\s+/', $element->getAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) ),
+				true
+			)
+		) {
+			return false;
+		}
+
+		// Prevent removing an attribute which was verified for PX.
+		if (
+			$element->hasAttribute( AMP_Validation_Manager::PX_VERIFIED_ATTRS_ATTRIBUTE )
+			&&
+			in_array(
+				$node->nodeName,
+				preg_split( '/\s+/', $element->getAttribute( AMP_Validation_Manager::PX_VERIFIED_ATTRS_ATTRIBUTE ) ),
 				true
 			)
 		) {

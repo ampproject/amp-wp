@@ -10,6 +10,7 @@ use AmpProject\Attribute;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
 use AmpProject\Tag;
+use AmpProject\DevMode;
 
 /**
  * Class AMP_Comments_Sanitizer
@@ -46,40 +47,6 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		'thread_comments'          => false, // By default maps to thread_comments option.
 		'allow_commenting_scripts' => false, // @todo Change this to allow_native_comments which also adds px-verified to comment form instead of validation error.
 	];
-
-	/**
-	 * Init.
-	 *
-	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
-	 */
-	public function init( $sanitizers ) {
-		parent::init( $sanitizers );
-
-		// When initializing with comment scripting allowed, let the script sanitizer know that the commenting scripts
-		// have are PX-verified so that they won't get removed nor reported as validation errors.
-		// @todo Or rather should this be accomplished via the amp_validation_error_default_sanitized filter?
-		if (
-			! empty( $this->args['allow_commenting_scripts'] )
-			&&
-			isset( $sanitizers[ AMP_Script_Sanitizer::class ] )
-			&&
-			$sanitizers[ AMP_Script_Sanitizer::class ] instanceof AMP_Script_Sanitizer
-		) {
-			$script_sanitizer = $sanitizers[ AMP_Script_Sanitizer::class ];
-
-			// @todo Why go the trouble of this? Add attributes below instead.
-			// @todo Add data-ampdevmode attribute to UNFILTERED_HTML_COMMENT_SCRIPT_XPATH here.
-			$script_args = $script_sanitizer->get_args();
-			if ( $this->args['thread_comments'] && wp_script_is( 'comment-reply', 'done' ) ) {
-				$script_args['px_verified_node_xpaths'][] = '//script[ @id = "comment-reply-js" ]';
-			}
-			if ( current_user_can( 'unfiltered_html' ) ) {
-				$script_args['px_verified_node_xpaths'][] = self::UNFILTERED_HTML_COMMENT_SCRIPT_XPATH;
-			}
-
-			$script_sanitizer->update_args( $script_args );
-		}
-	}
 
 	/**
 	 * Pre-process the comment form and comment list for AMP.
@@ -135,14 +102,35 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		// If comment-reply is on the page, then prevent adding amp-bind implementation as well.
+		// Flag the unfiltered_html comment script as being in AMP Dev Mode at the tag level since it is only ever in
+		// the page when the user is logged-in which is when Dev Mode will be enabled anyway.
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			$unfiltered_html_comment_script = $this->dom->xpath->query( self::UNFILTERED_HTML_COMMENT_SCRIPT_XPATH )->item( 0 );
+			if ( $unfiltered_html_comment_script instanceof Element ) {
+				$unfiltered_html_comment_script->setAttributeNode( $this->dom->createAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
+
+				// Also indicate that that this element is PX-verified so that if by chance AMP Dev Mode is disabled,
+				// it will not be considered a custom script that will require turning off CSS tree shaking, etc.
+				if ( $this->args['allow_commenting_scripts'] ) {
+					$unfiltered_html_comment_script->setAttributeNode(
+						$this->dom->createAttribute( AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE )
+					);
+				}
+			}
+		}
+
+		// If comment-reply is on the page and commenting scripts are allowed, mark it as being PX-verified and improve
+		// performance with defer. Then short-circuit since the amp-bind implementation won't be needed.
 		$comment_reply_script = $this->dom->getElementById( 'comment-reply-js' );
 		if ( $comment_reply_script instanceof Element && $this->args['allow_commenting_scripts'] ) {
 
-			// @todo This should add data-px-verified-tag attribute!
+			// Prevent the script from being sanitized by the script sanitizer and prevent it from triggering the loose sandboxing level.
+			$comment_reply_script->setAttributeNode(
+				$this->dom->createAttribute( AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE )
+			);
+
 			// Improve performance by deferring comment-reply.
 			$comment_reply_script->setAttributeNode( $this->dom->createAttribute( 'defer' ) );
-
 			return;
 		}
 
