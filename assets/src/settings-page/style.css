@@ -561,6 +561,7 @@ li.error-kept {
 .settings-site-review__list {
 	font-size: var(--amp-settings-font-size);
 	list-style: disc;
+	margin-bottom: 2rem;
 	padding-left: 30px;
 }
 
@@ -572,6 +573,18 @@ li.error-kept {
 .settings-site-review__list a:hover,
 .settings-site-review__list a:focus {
 	color: var(--amp-settings-color-brand);
+}
+
+.settings-site-review__actions {
+	align-items: center;
+	display: flex;
+	flex-flow: row nowrap;
+}
+
+.settings-site-review__actions .components-button.is-primary {
+	height: 40px;
+	padding-left: 2.25rem;
+	padding-right: 2.25rem;
 }
 
 /* Other Settings */

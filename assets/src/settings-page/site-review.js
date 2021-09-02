@@ -1,17 +1,33 @@
 /**
+ * External dependencies
+ */
+import { HOME_URL } from 'amp-settings';
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { IconLaptopToggles } from '../components/svg/icon-laptop-toggles';
+import { Options } from '../components/options-context-provider';
 
 /**
  * Review component on the settings screen.
  */
 export function SiteReview() {
+	const { originalOptions } = useContext( Options );
+	const {
+		paired_url_examples: pairedUrlExamples,
+		paired_url_structure: pairedUrlStructure,
+		theme_support: themeSupport,
+	} = originalOptions;
+	const previewPermalink = 'standard' === themeSupport ? HOME_URL : pairedUrlExamples[ pairedUrlStructure ][ 0 ];
+
 	return (
 		<div className="settings-site-review">
 			<p>
@@ -47,6 +63,11 @@ export function SiteReview() {
 					),
 				} } />
 			</ul>
+			<div className="settings-site-review__actions">
+				<Button href={ previewPermalink } isPrimary={ true }>
+					{ __( 'Browse Site', 'amp' ) }
+				</Button>
+			</div>
 		</div>
 	);
 }

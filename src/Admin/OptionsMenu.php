@@ -232,6 +232,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
 			'HAS_DEPENDENCY_SUPPORT'             => $this->dependency_support->has_support(),
+			'HOME_URL'                           => home_url( '/' ),
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
 			'IS_CORE_THEME'                      => in_array(
