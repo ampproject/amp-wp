@@ -197,9 +197,7 @@ function Root( { appRoot } ) {
 				heading={ (
 					<>
 						<IconLaptopSearch />
-						<h3>
-							{ __( 'Review', 'amp' ) }
-						</h3>
+						{ __( 'Review', 'amp' ) }
 					</>
 				) }
 				hiddenTitle={ __( 'Review', 'amp' ) }

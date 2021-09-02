@@ -537,6 +537,10 @@ li.error-kept {
 	margin-bottom: 2.5rem;
 }
 
+#site-review .amp-drawer__heading {
+	font-size: 1.2rem;
+}
+
 #site-review .amp-drawer__heading svg {
 	fill: transparent;
 	width: 55px;
