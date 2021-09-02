@@ -45,13 +45,11 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = [
 		'comment_live_list'        => false, // @todo See <https://github.com/ampproject/amp-wp/issues/4624>.
 		'thread_comments'          => false, // By default maps to thread_comments option.
-		'allow_commenting_scripts' => false, // @todo Change this to allow_native_comments which also adds px-verified to comment form instead of validation error.
+		'allow_commenting_scripts' => false,
 	];
 
 	/**
 	 * Pre-process the comment form and comment list for AMP.
-	 *
-	 * @todo Fix https://github.com/ampproject/amp-wp/issues/6231
 	 *
 	 * @since 0.7
 	 */
