@@ -153,6 +153,12 @@ describe( 'AMP Settings Screen Review section', () => {
 		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /how the PX plugin works/i } );
 	} );
 
+	it( 'can be dismissed', async () => {
+		await expect( page ).toMatchElement( 'button', { text: 'Dismiss' } );
+		await expect( page ).toClick( 'button', { text: 'Dismiss' } );
+		await expect( page ).not.toMatchElement( 'h2', { text: 'Review' } );
+	} );
+
 	it( 'button redirects to an AMP page in transitional mode', async () => {
 		await clickMode( 'transitional' );
 

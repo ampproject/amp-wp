@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import PropTypes from 'prop-types';
 import { HOME_URL } from 'amp-settings';
 
 /**
@@ -18,8 +19,11 @@ import { Options } from '../components/options-context-provider';
 
 /**
  * Review component on the settings screen.
+ *
+ * @param {Object}   props         Component props.
+ * @param {Function} props.dismiss Dismiss handler.
  */
-export function SiteReview() {
+export function SiteReview( { dismiss } ) {
 	const { originalOptions } = useContext( Options );
 	const {
 		paired_url_examples: pairedUrlExamples,
@@ -67,7 +71,14 @@ export function SiteReview() {
 				<Button href={ previewPermalink } isPrimary={ true }>
 					{ __( 'Browse Site', 'amp' ) }
 				</Button>
+				<Button onClick={ dismiss } isLink={ true }>
+					{ __( 'Dismiss', 'amp' ) }
+				</Button>
 			</div>
 		</div>
 	);
 }
+
+SiteReview.propTypes = {
+	dismiss: PropTypes.func,
+};

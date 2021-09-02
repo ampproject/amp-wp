@@ -585,7 +585,7 @@ li.error-kept {
 	flex-flow: row nowrap;
 }
 
-.settings-site-review__actions .components-button.is-primary {
+.amp .settings-site-review__actions .components-button {
 	height: 40px;
 	padding-left: 2.25rem;
 	padding-right: 2.25rem;

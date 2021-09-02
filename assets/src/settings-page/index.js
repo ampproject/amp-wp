@@ -129,6 +129,7 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
  */
 function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
+	const [ showSiteReview, setShowSiteReview ] = useState( true );
 
 	const { hasOptionsChanges, fetchingOptions, saveOptions } = useContext( Options );
 	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption } = useContext( User );
@@ -193,19 +194,25 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 			<Welcome />
-			<AMPDrawer
-				heading={ (
-					<>
-						<IconLaptopSearch />
-						{ __( 'Review', 'amp' ) }
-					</>
-				) }
-				hiddenTitle={ __( 'Review', 'amp' ) }
-				id="site-review"
-				initialOpen={ true }
-			>
-				<SiteReview />
-			</AMPDrawer>
+			{ showSiteReview && (
+				<AMPDrawer
+					heading={ (
+						<>
+							<IconLaptopSearch />
+							{ __( 'Review', 'amp' ) }
+						</>
+					) }
+					hiddenTitle={ __( 'Review', 'amp' ) }
+					id="site-review"
+					initialOpen={ true }
+				>
+					<SiteReview
+						dismiss={ () => {
+							setShowSiteReview( false );
+						} }
+					/>
+				</AMPDrawer>
+			) }
 			<form onSubmit={ onSubmit }>
 				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />
 				<h2 id="advanced-settings">
