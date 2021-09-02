@@ -3993,6 +3993,54 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 					],
 				],
 			],
+
+			'custom_elements-removed'  => [
+				'<foo-bar><bar-baz><span>Hello!</span></bar-baz></foo-bar>',
+				'<span>Hello!</span>',
+				[
+					[
+						'node_name'       => 'bar-baz',
+						'parent_name'     => 'foo-bar',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
+					],
+					[
+						'node_name'       => 'foo-bar',
+						'parent_name'     => 'body',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
+					],
+				],
+				true,
+			],
+
+			'custom_elements-kept'  => [
+				'<foo-bar><bar-baz><span>Hello!</span></bar-baz></foo-bar>',
+				'<foo-bar><bar-baz><span>Hello!</span></bar-baz></foo-bar>',
+				[
+					[
+						'node_name'       => 'bar-baz',
+						'parent_name'     => 'foo-bar',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
+					],
+					[
+						'node_name'       => 'foo-bar',
+						'parent_name'     => 'body',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
+					],
+				],
+				false,
+			],
 		];
 	}
 
@@ -4005,20 +4053,20 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 	 * @param string  $source_content   Source DOM content.
 	 * @param string  $expected_content Expected content after sanitization.
 	 * @param array[] $expected_errors  Expected errors.
+	 * @param bool    $sanitize         Whether the invalid markup should be sanitized.
 	 */
-	public function test_replace_node_with_children_validation_errors( $source_content, $expected_content, $expected_errors ) {
+	public function test_replace_node_with_children_validation_errors( $source_content, $expected_content, $expected_errors, $sanitize = true ) {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source_content );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
 			[
-				'validation_error_callback' => function( $error, $context ) use ( &$expected_errors ) {
+				'validation_error_callback' => function( $error, $context ) use ( &$expected_errors, $sanitize ) {
 					$expected = array_shift( $expected_errors );
 					$tag      = $expected['node_name'];
 					$this->assertEquals( $expected, $error );
 					$this->assertInstanceOf( 'DOMElement', $context['node'] );
 					$this->assertEquals( $tag, $context['node']->tagName );
-					$this->assertEquals( $tag, $context['node']->nodeName );
-					return true;
+					return $sanitize;
 				},
 			]
 		);
