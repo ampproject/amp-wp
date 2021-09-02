@@ -2588,11 +2588,23 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 
+		// Prevent double-reporting nodes that are rejected for sanitization.
+		if ( isset( $this->should_not_replace_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_replace_nodes[ $node->nodeName ], true ) ) {
+			return false;
+		}
+
 		// If node has no children or no parent, just remove the node.
 		if ( ! $node->hasChildNodes() || ! $node->parentNode ) {
 			if ( $this->remove_node( $node ) ) {
 				return true;
 			}
+		}
+
+		// Replace node with fragment.
+		$should_replace = $this->should_sanitize_validation_error( [], compact( 'node' ) );
+		if ( ! $should_replace ) {
+			$this->should_not_replace_nodes[ $node->nodeName ][] = $node;
+			return false;
 		}
 
 		/*
@@ -2609,17 +2621,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$child = $node->firstChild;
 		}
 
-		// Prevent double-reporting nodes that are rejected for sanitization.
-		if ( isset( $this->should_not_replace_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_replace_nodes[ $node->nodeName ], true ) ) {
-			return false;
-		}
-
-		// Replace node with fragment.
-		$should_replace = $this->should_sanitize_validation_error( [], compact( 'node' ) );
-		if ( ! $should_replace ) {
-			$this->should_not_replace_nodes[ $node->nodeName ][] = $node;
-			return false;
-		}
 		$node->parentNode->replaceChild( $fragment, $node );
 		return true;
 
