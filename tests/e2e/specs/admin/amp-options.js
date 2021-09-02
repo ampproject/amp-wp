@@ -136,3 +136,47 @@ describe( 'Saving', () => {
 	} );
 } );
 
+describe( 'AMP Settings Screen Review section', () => {
+	beforeEach( async () => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+	} );
+
+	afterEach( async () => {
+		await cleanUpSettings();
+	} );
+
+	it( 'is present on the page', async () => {
+		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
+		await expect( page ).toMatchElement( 'h3', { text: 'Need help?' } );
+		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /support forums/i } );
+		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /different template mode/i } );
+		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /how the PX plugin works/i } );
+	} );
+
+	it( 'button redirects to an AMP page in transitional mode', async () => {
+		await clickMode( 'transitional' );
+
+		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
+		await page.waitForNavigation();
+
+		await expect( page ).toMatchElement( 'html[amp]' );
+	} );
+
+	it( 'button redirects to an AMP page in reader mode', async () => {
+		await clickMode( 'reader' );
+
+		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
+		await page.waitForNavigation();
+
+		await expect( page ).toMatchElement( 'html[amp]' );
+	} );
+
+	it( 'button redirects to an AMP page in standard mode', async () => {
+		await clickMode( 'standard' );
+
+		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
+		await page.waitForNavigation();
+
+		await expect( page ).toMatchElement( 'html[amp]' );
+	} );
+} );
