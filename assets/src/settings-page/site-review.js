@@ -11,17 +11,17 @@ import { IconLaptopToggles } from '../components/svg/icon-laptop-toggles';
 /**
  * Review component on the settings screen.
  */
-export function Review() {
+export function SiteReview() {
 	return (
-		<div className="settings-review">
+		<div className="settings-site-review">
 			<p>
 				{ __( 'Your site is ready to bring great experiences to your users! In Standard mode there is a single AMP version of your site. Browse your site and ensure the functionality and look-and-feel are as expected.', 'amp' ) }
 			</p>
-			<h3 className="settings-review__heading">
+			<h3 className="settings-site-review__heading">
 				<IconLaptopToggles />
 				{ __( 'Need help?', 'amp' ) }
 			</h3>
-			<ul className="settings-review__list">
+			<ul className="settings-site-review__list">
 				{ /* dangerouslySetInnerHTML reason: Injection of a link. */ }
 				<li dangerouslySetInnerHTML={ {
 					__html: sprintf(
@@ -34,7 +34,7 @@ export function Review() {
 				<li dangerouslySetInnerHTML={ {
 					__html: sprintf(
 						/* translators: placeholder is the template mode section anchor. */
-						__( 'Try a different setting in the <a href="%s">template mode section</a>', 'amp' ),
+						__( 'Try a different <a href="%s">template mode</a>', 'amp' ),
 						'#template-modes',
 					),
 				} } />

@@ -42,6 +42,7 @@ import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { SettingsFooter } from './settings-footer';
+import { SiteReview } from './site-review';
 import { PluginSuppression } from './plugin-suppression';
 import { Analytics } from './analytics';
 import { PairedUrlStructure } from './paired-url-structure';
@@ -202,10 +203,10 @@ function Root( { appRoot } ) {
 					</>
 				) }
 				hiddenTitle={ __( 'Review', 'amp' ) }
-				id="review"
+				id="site-review"
 				initialOpen={ true }
 			>
-				<Review />
+				<SiteReview />
 			</AMPDrawer>
 			<form onSubmit={ onSubmit }>
 				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />
