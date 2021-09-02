@@ -4018,7 +4018,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				true,
 			],
 
-			'custom_elements-kept'  => [
+			'custom_elements-kept'     => [
 				'<foo-bar><bar-baz><span>Hello!</span></bar-baz></foo-bar>',
 				'<foo-bar><bar-baz><span>Hello!</span></bar-baz></foo-bar>',
 				[

@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
 use AmpProject\AmpWP\Tests\TestCase;
@@ -196,10 +197,9 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 			],
 			'native_form_with_post_action' => [
 				'<form method="post" action="http://example.com"></form>',
-				sprintf( '<form method="post" action="http://example.com" %s></form>', AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				sprintf( '<form method="post" action="http://example.com" %s></form>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
 				[
 					'native_post_forms_used' => true,
-					'expected_non_valid_doc' => true,
 				],
 				[],
 			],
@@ -208,7 +208,6 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 				'',
 				[
 					'native_post_forms_used' => true,
-					'expected_non_valid_doc' => false,
 				],
 				[ AMP_Form_Sanitizer::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED ],
 			],
@@ -254,9 +253,6 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 		}
 
 		$this->assertEqualMarkup( AMP_DOM_Utils::get_content_from_dom( $dom ), $expected );
-		if ( isset( $args['expected_non_valid_doc'] ) ) {
-			$this->assertEquals( $args['expected_non_valid_doc'], $dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE ) );
-		}
 		$this->assertEquals( wp_list_pluck( $actual_errors, 'code' ), $expected_errors );
 	}
 

@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Tag;
@@ -69,13 +70,12 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					</body></html>',
 				sprintf(
 					'
-					<html %s><head><meta charset="utf-8"></head><body>
+					<html><head><meta charset="utf-8"></head><body>
 						<script %s>document.write("Hey.")</script>
 						<noscript data-amp-no-unwrap><span>No script</span></noscript>
 					</body></html>
 					',
-					AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE,
-					AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE
+					ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE
 				),
 				[
 					'sanitize_js_scripts'       => true,
@@ -165,16 +165,15 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				',
 				sprintf(
 					'
-						<html %1$s>
+						<html>
 						<head><meta charset="utf-8"></head>
 						<body>
-							<script src="https://example.com/1" %2$s></script>
-							<script type="text/javascript" src="https://example.com/2" %2$s></script>
-							<script type="module" src="https://example.com/3" %2$s></script>
+							<script src="https://example.com/1" %1$s></script>
+							<script type="text/javascript" src="https://example.com/2" %1$s></script>
+							<script type="module" src="https://example.com/3" %1$s></script>
 						</body></html>
 					',
-					AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE,
-					AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE
+					ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE
 				),
 				[
 					'sanitize_js_scripts'       => true,
@@ -265,15 +264,14 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				',
 				sprintf(
 					'
-						<html %s><head><meta charset="utf-8"></head>
+						<html><head><meta charset="utf-8"></head>
 						<body %s="onload" onload="alert(\'Hey there.\')">
 							<noscript>I should not get unwrapped.</noscript>
 							<div id="warning-message">Warning...</div>
 							<button on="tap:warning-message.hide">Cool, thanks!</button>
 						</body></html>
 					',
-					AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE,
-					AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE
+					ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE
 				),
 				[
 					'sanitize_js_scripts'       => true,

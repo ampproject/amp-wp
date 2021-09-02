@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
@@ -49,7 +50,7 @@ class AMP_Audio_Converter_Test extends TestCase {
 
 			'simple_native_audio' => [
 				'<audio src="https://example.com/audio/file.ogg" data-foo="bar"></audio>',
-				sprintf( '<audio src="https://example.com/audio/file.ogg" data-foo="bar" %s></audio>', AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				sprintf( '<audio src="https://example.com/audio/file.ogg" data-foo="bar" %s></audio>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
 				[
 					'native_audio_used' => true,
 				],
@@ -265,11 +266,6 @@ class AMP_Audio_Converter_Test extends TestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEqualMarkup( $expected, $content );
-
-		$this->assertSame(
-			! empty( $args['native_audio_used'] ),
-			$dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-		);
 	}
 
 	/**

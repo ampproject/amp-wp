@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 
@@ -138,6 +139,21 @@ abstract class AMP_Base_Sanitizer {
 	 */
 	public function get_selector_conversion_mapping() {
 		return [];
+	}
+
+	/**
+	 * Get arg.
+	 *
+	 * @since 2.2
+	 *
+	 * @param string $key Arg key.
+	 * @return mixed Args.
+	 */
+	public function get_arg( $key ) {
+		if ( array_key_exists( $key, $this->args ) ) {
+			return $this->args[ $key ];
+		}
+		return null;
 	}
 
 	/**
@@ -493,29 +509,12 @@ abstract class AMP_Base_Sanitizer {
 			return false;
 		}
 
-		// Prevent removing a tag which was exempted from validation.
-		if (
-			$node instanceof DOMElement
-			&&
-			$node->hasAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
-			&&
-			$node->ownerDocument
-			&&
-			$node->ownerDocument->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-		) {
-			return false;
-		}
-
-		// Prevent removing a tag which was verified for PX.
-		if (
-			$node instanceof DOMElement
-			&&
-			$node->hasAttribute( AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE )
-		) {
+		if ( ValidationExemption::is_amp_unvalidated_for_node( $node ) || ValidationExemption::is_px_verified_for_node( $node ) ) {
 			return false;
 		}
 
 		// Prevent double-reporting nodes that are rejected for sanitization.
+		// @todo This would be obsolete with the marking of attributes as being AMP-unvalidated.
 		if ( isset( $this->nodes_to_keep[ $node->nodeName ] ) && in_array( $node, $this->nodes_to_keep[ $node->nodeName ], true ) ) {
 			return false;
 		}
@@ -531,14 +530,7 @@ abstract class AMP_Base_Sanitizer {
 		} else {
 			$this->nodes_to_keep[ $node->nodeName ][] = $node;
 
-			if ( $node instanceof DOMElement ) {
-				$node->setAttributeNode(
-					$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
-				);
-				$this->dom->documentElement->setAttributeNode(
-					$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-				);
-			}
+			ValidationExemption::mark_node_as_amp_unvalidated( $node );
 		}
 		return $should_remove;
 	}
@@ -573,33 +565,7 @@ abstract class AMP_Base_Sanitizer {
 			return false;
 		}
 
-		// Prevent removing an attribute which was exempted from validation.
-		if (
-			$element->hasAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE )
-			&&
-			$element->ownerDocument
-			&&
-			$element->ownerDocument->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-			&&
-			in_array(
-				$node->nodeName,
-				preg_split( '/\s+/', $element->getAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) ),
-				true
-			)
-		) {
-			return false;
-		}
-
-		// Prevent removing an attribute which was verified for PX.
-		if (
-			$element->hasAttribute( AMP_Validation_Manager::PX_VERIFIED_ATTRS_ATTRIBUTE )
-			&&
-			in_array(
-				$node->nodeName,
-				preg_split( '/\s+/', $element->getAttribute( AMP_Validation_Manager::PX_VERIFIED_ATTRS_ATTRIBUTE ) ),
-				true
-			)
-		) {
+		if ( ValidationExemption::is_amp_unvalidated_for_node( $node ) || ValidationExemption::is_px_verified_for_node( $node ) ) {
 			return false;
 		}
 
@@ -613,16 +579,7 @@ abstract class AMP_Base_Sanitizer {
 				$element->removeAttributeNode( $node );
 			}
 		} else {
-			$attr_value = $element->getAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE );
-			if ( $attr_value ) {
-				$attr_value .= ' ' . $node->nodeName;
-			} else {
-				$attr_value = $node->nodeName;
-			}
-			$element->setAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE, $attr_value );
-			$this->dom->documentElement->setAttributeNode(
-				$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-			);
+			ValidationExemption::mark_node_as_amp_unvalidated( $node );
 		}
 
 		return $should_remove;

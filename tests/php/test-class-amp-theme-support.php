@@ -13,6 +13,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
@@ -1842,7 +1843,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
-		$this->assertStringContainsString( '<html data-amp-non-valid-doc>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
+		$this->assertStringContainsString( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
 		$this->assertStringContainsString( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
 		if ( $with_amp_live_list ) {
 			$this->assertStringContainsString( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
@@ -1895,7 +1896,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		$dom = Document::fromHtml( $html );
 
 		$this->assertEquals( $converted, $dom->documentElement->hasAttribute( Attribute::AMP ) );
-		$this->assertEquals( ! $converted, $dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE ) );
 		$this->assertEquals(
 			$converted,
 			$dom->xpath->query( '//script[ @custom-element = "amp-form" ]' )->length > 0
@@ -1905,7 +1905,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertEquals( 'post', strtolower( $form->getAttribute( Attribute::METHOD ) ) );
 		$this->assertEquals( $converted, $form->hasAttribute( Attribute::ACTION_XHR ) );
 		$this->assertEquals( ! $converted, $form->hasAttribute( Attribute::ACTION ) );
-		$this->assertEquals( ! $converted, $form->hasAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
+		$this->assertEquals( ! $converted, $form->hasAttribute( ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
 	}
 
 	/**

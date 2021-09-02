@@ -13,6 +13,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
@@ -1392,10 +1393,11 @@ class AMP_Theme_Support {
 	 * @link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/
 	 * @todo All of this might be better placed inside of a sanitizer.
 	 *
-	 * @param Document $dom            Document.
-	 * @param string[] $script_handles AMP script handles for components identified during output buffering.
+	 * @param Document             $dom            Document.
+	 * @param string[]             $script_handles AMP script handles for components identified during output buffering.
+	 * @param AMP_Base_Sanitizer[] $sanitizers     Sanitizers.
 	 */
-	public static function ensure_required_markup( Document $dom, $script_handles = [] ) {
+	public static function ensure_required_markup( Document $dom, $script_handles = [], $sanitizers = [] ) {
 		// Gather all links.
 		$links = [
 			Attribute::REL_PRECONNECT => [
@@ -1530,8 +1532,12 @@ class AMP_Theme_Support {
 		}
 
 		// Make sure that Bento versions are used when required, either by explicitly requesting Bento or when the document is non-valid AMP.
-		$is_non_valid_doc = $dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE );
-		if ( $is_non_valid_doc || amp_is_bento_enabled() ) {
+		$is_using_bento = (
+			array_key_exists( AMP_Tag_And_Attribute_Sanitizer::class, $sanitizers )
+			&&
+			$sanitizers[ AMP_Tag_And_Attribute_Sanitizer::class ]->get_arg( 'prefer_bento' )
+		);
+		if ( $is_using_bento ) {
 			$bento_extension_count = 0;
 
 			// Override all required scripts with the available Bento versions.
@@ -1557,10 +1563,8 @@ class AMP_Theme_Support {
 					$dom->createTextNode( '(self.AMP = self.AMP || []).push(function (AMP) { AMP.toggleExperiment("bento", true); });' )
 				);
 
-				if ( $is_non_valid_doc ) {
-					$bento_experiment_script->setAttributeNode( $dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
-				} else {
-					$dom->documentElement->setAttributeNode( $dom->createAttribute( Attribute::DATA_AMPDEVMODE ) );
+				ValidationExemption::mark_node_as_amp_unvalidated( $bento_experiment_script );
+				if ( DevMode::isActiveForDocument( $dom ) ) {
 					$bento_experiment_script->setAttributeNode( $dom->createAttribute( Attribute::DATA_AMPDEVMODE ) );
 				}
 
@@ -2068,7 +2072,13 @@ class AMP_Theme_Support {
 			}
 		}
 
-		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
+		self::ensure_required_markup( $dom, array_keys( $amp_scripts ), $sanitization_results['sanitizers'] );
+
+		$is_valid_amp = ! (
+			ValidationExemption::is_document_with_amp_unvalidated_nodes( $dom )
+			||
+			ValidationExemption::is_document_with_px_verified_nodes( $dom )
+		);
 
 		$enable_optimizer = array_key_exists( ConfigurationArgument::ENABLE_OPTIMIZER, $args )
 			? $args[ ConfigurationArgument::ENABLE_OPTIMIZER ]
@@ -2104,7 +2114,7 @@ class AMP_Theme_Support {
 			$errors = new Optimizer\ErrorCollection();
 
 			$args['skip_css_max_byte_count_enforcement'] = (
-				$dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+				! $is_valid_amp
 				||
 				DevMode::isActiveForDocument( $dom )
 			);
@@ -2147,15 +2157,11 @@ class AMP_Theme_Support {
 			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );
 		}
 
-		// Prevent serving a page in Dev Mode as being marked as AMP when the user is not logged-in to avoid it from
-		// being flagged as invalid by Google Search Console.
+		// Prevent serving a page as AMP if it is explicitly not valid as otherwise Google Search Console will complain.
 		if (
-			$dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+			! $is_valid_amp
 			||
 			( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) && ! is_user_logged_in() )
-			||
-			// @todo It would be preferable if we didn't have to do this query since we've already encountered an attribute.
-			$dom->xpath->query( sprintf( '//*/@%s | //*/@%s', AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE, AMP_Validation_Manager::PX_VERIFIED_ATTRS_ATTRIBUTE ) )->length > 0
 		) {
 			$dom->documentElement->removeAttribute( Attribute::AMP );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
@@ -2168,7 +2174,7 @@ class AMP_Theme_Support {
 			if ( array_key_exists( Extension::LIVE_LIST, $amp_scripts ) ) {
 				$script = $dom->createElement( Tag::SCRIPT );
 				$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
-				$script->setAttributeNode( $dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
+				ValidationExemption::mark_node_as_amp_unvalidated( $script );
 				$script->setAttributeNode( $dom->createAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
 				$dom->head->appendChild( $script );
 			}

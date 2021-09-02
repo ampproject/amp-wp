@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
@@ -110,9 +111,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				// Also indicate that that this element is PX-verified so that if by chance AMP Dev Mode is disabled,
 				// it will not be considered a custom script that will require turning off CSS tree shaking, etc.
 				if ( $this->args['allow_commenting_scripts'] ) {
-					$unfiltered_html_comment_script->setAttributeNode(
-						$this->dom->createAttribute( AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE )
-					);
+					ValidationExemption::mark_node_as_px_verified( $unfiltered_html_comment_script );
 				}
 			}
 		}
@@ -123,9 +122,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $comment_reply_script instanceof Element && $this->args['allow_commenting_scripts'] ) {
 
 			// Prevent the script from being sanitized by the script sanitizer and prevent it from triggering the loose sandboxing level.
-			$comment_reply_script->setAttributeNode(
-				$this->dom->createAttribute( AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE )
-			);
+			ValidationExemption::mark_node_as_px_verified( $comment_reply_script );
 
 			// Improve performance by deferring comment-reply.
 			$comment_reply_script->setAttributeNode( $this->dom->createAttribute( 'defer' ) );

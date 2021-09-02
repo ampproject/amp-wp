@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
 use AmpProject\DevMode;
 
@@ -131,12 +132,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 						$node->setAttribute( $attr_name, $new_attributes[ $attr_name ] );
 					}
 				}
-				$node->setAttributeNode(
-					$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
-				);
-				$this->dom->documentElement->setAttributeNode(
-					$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-				);
+				ValidationExemption::mark_node_as_amp_unvalidated( $node );
 				continue;
 			}
 

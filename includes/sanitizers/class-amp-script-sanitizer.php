@@ -6,6 +6,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Element;
@@ -236,11 +237,11 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 
 		/** @var Element $script */
 		foreach ( $scripts as $script ) {
-			if ( DevMode::hasExemptionForNode( $script ) ) {
+			if ( DevMode::hasExemptionForNode( $script ) ) { // @todo Should this also skip when AMP-unvalidated?
 				continue;
 			}
 
-			if ( $script->hasAttribute( AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE ) ) {
+			if ( ValidationExemption::is_px_verified_for_node( $script ) ) {
 				$this->px_verified_kept_node_count++;
 				// @todo Consider forcing any PX-verified script to have async/defer if not module. For inline scripts, hack via data: URL?
 				continue;
@@ -307,15 +308,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Since the attribute has been PX-verified, move along.
-			if (
-				$element->hasAttribute( AMP_Validation_Manager::PX_VERIFIED_ATTRS_ATTRIBUTE )
-				&&
-				in_array(
-					$event_handler_attribute->nodeName,
-					preg_split( '/\s+/', $element->getAttribute( AMP_Validation_Manager::PX_VERIFIED_ATTRS_ATTRIBUTE ) ),
-					true
-				)
-			) {
+			if ( ValidationExemption::is_px_verified_for_node( $event_handler_attribute ) ) {
 				$this->px_verified_kept_node_count++;
 				continue;
 			}

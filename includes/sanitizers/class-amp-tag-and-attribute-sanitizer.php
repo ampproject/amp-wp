@@ -8,6 +8,7 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
 use AmpProject\CssLength;
 use AmpProject\DevMode;
@@ -2566,25 +2567,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 
-		// Prevent removing a tag which was exempted from validation.
-		if (
-			$node instanceof DOMElement
-			&&
-			$node->hasAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
-			&&
-			$node->ownerDocument
-			&&
-			$node->ownerDocument->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-		) {
-			return false;
-		}
-
-		// Prevent removing a tag which was verified for PX.
-		if (
-			$node instanceof DOMElement
-			&&
-			$node->hasAttribute( AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE )
-		) {
+		if ( ValidationExemption::is_px_verified_for_node( $node ) || ValidationExemption::is_amp_unvalidated_for_node( $node ) ) {
 			return false;
 		}
 

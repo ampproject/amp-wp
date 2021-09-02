@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
@@ -74,7 +75,7 @@ class AMP_Video_Converter_Test extends TestCase {
 
 			'local_video_without_dimensions_and_native' => [
 				sprintf( '<video src="%s"></video>', '{{video_url}}' ),
-				sprintf( '<video src="%s" width="560" height="320" %s></video>', '{{video_url}}', AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				sprintf( '<video src="%s" width="560" height="320" %s></video>', '{{video_url}}', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
 				[
 					'native_video_used' => true,
 				],
@@ -308,11 +309,6 @@ class AMP_Video_Converter_Test extends TestCase {
 
 		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$validating_sanitizer->sanitize();
-
-		$this->assertSame(
-			! empty( $args['native_video_used'] ),
-			$dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-		);
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 

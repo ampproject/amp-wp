@@ -9,6 +9,7 @@ use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
 use AmpProject\Tag;
 use AmpProject\Dom\Document;
@@ -67,48 +68,6 @@ class AMP_Validation_Manager {
 	 * @var string
 	 */
 	const PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY = 'amp_plugin_activation_validation_errors';
-
-	/**
-	 * HTML attribute to indicate a document is not intending AMP validation.
-	 *
-	 * @var string
-	 */
-	const AMP_NON_VALID_DOC_ATTRIBUTE = 'data-amp-non-valid-doc';
-
-	/**
-	 * HTML attribute to indicate an tag/element is exempted from AMP validation.
-	 *
-	 * @todo Consider 'exempt' instead of 'unvalidated'.
-	 *
-	 * @var string
-	 */
-	const AMP_UNVALIDATED_TAG_ATTRIBUTE = 'data-amp-unvalidated-tag';
-
-	/**
-	 * HTML attribute to indicate an tag/element has been verified for PX.
-	 *
-	 * The difference here with `data-amp-unvalidated-tag` is that the PX-verified means that the tag will work
-	 * properly Bento components and CSS tree shaking.
-	 *
-	 * @var string
-	 */
-	const PX_VERIFIED_TAG_ATTRIBUTE = 'data-px-verified-tag';
-
-	/**
-	 * HTML attribute to indicate one or more attributes are exempted from AMP validation.
-	 *
-	 * @todo Consider 'exempt' instead of 'unvalidated'.
-	 *
-	 * @var string
-	 */
-	const AMP_UNVALIDATED_ATTRS_ATTRIBUTE = 'data-amp-unvalidated-attrs';
-
-	/**
-	 * HTML attribute to indicate one or more attributes have been verified for PX from AMP validation.
-	 *
-	 * @var string
-	 */
-	const PX_VERIFIED_ATTRS_ATTRIBUTE = 'data-px-verified-attrs';
 
 	/**
 	 * The errors encountered when validating.
@@ -1598,7 +1557,6 @@ class AMP_Validation_Manager {
 		 * mode. Such users should be able to see kept invalid markup on the AMP page even though it is invalid.
 		 */
 		if ( amp_is_canonical() ) {
-			$dom->documentElement->setAttributeNode( $dom->createAttribute( self::AMP_NON_VALID_DOC_ATTRIBUTE ) );
 			return true;
 		}
 

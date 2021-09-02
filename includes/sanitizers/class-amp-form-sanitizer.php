@@ -6,6 +6,7 @@
  * @since 0.7
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
 use AmpProject\Dom\Element;
@@ -122,12 +123,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 						continue;
 					}
 
-					$node->setAttributeNode(
-						$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
-					);
-					$this->dom->documentElement->setAttributeNode(
-						$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-					);
+					ValidationExemption::mark_node_as_amp_unvalidated( $node );
 					continue;
 				}
 

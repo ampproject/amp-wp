@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Layout;
@@ -350,12 +351,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			// It doesn't make sense to raise a validation error to allow the user to decide whether to convert from
 			// <img> to <amp-img> since the native_img_used arg is the opt-in to not do any such conversion.
 			// @todo Remove once https://github.com/ampproject/amphtml/issues/30442 lands.
-			$node->setAttributeNode(
-				$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
-			);
-			$this->dom->documentElement->setAttributeNode(
-				$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-			);
+			ValidationExemption::mark_node_as_amp_unvalidated( $node );
 
 			return;
 		}

@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
 use AmpProject\Attribute;
 use AmpProject\Layout;
@@ -130,12 +131,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 			// If using native <iframe> instead of converting to <amp-iframe>, just mark the element as being unvalidated.
 			if ( $this->args['native_iframe_used'] ) {
-				$node->setAttributeNode(
-					$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
-				);
-				$this->dom->documentElement->setAttributeNode(
-					$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-				);
+				ValidationExemption::mark_node_as_amp_unvalidated( $node );
 				continue;
 			}
 
