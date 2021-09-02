@@ -901,6 +901,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 * in document order. DOMNode::compareDocumentPosition() is not yet implemented.
 		 */
 
+		// @todo Also consider skipping the processing of link and style elements that have data-px-verified-tag.
 		$dev_mode_predicate = '';
 		if ( DevMode::isActiveForDocument( $this->dom ) ) {
 			$dev_mode_predicate = sprintf( ' and not ( @%s )', AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );

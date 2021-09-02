@@ -54,9 +54,8 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'unwrap_noscripts'        => true,
-		'sanitize_js_scripts'     => false,
-		'px_verified_node_xpaths' => [],
+		'unwrap_noscripts'    => true,
+		'sanitize_js_scripts' => false,
 	];
 
 	/**
@@ -118,15 +117,14 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		// If custom scripts were kept (after sanitize_js_script_elements() ran) it's important that noscripts not be
 		// unwrapped or else this could result in the JS and no-JS fallback experiences both being present on the page.
 		// So unwrapping is only done when no custom scripts were retained (and the sanitizer arg opts-in to unwrap).
-		if ( 0 === $this->kept_script_count && ! empty( $this->args['unwrap_noscripts'] ) ) {
-			// @todo Also only do this if px_verified_kept_node_count is 0?
+		if ( 0 === $this->kept_script_count && 0 === $this->px_verified_kept_node_count && ! empty( $this->args['unwrap_noscripts'] ) ) {
 			$this->unwrap_noscript_elements();
 		}
 
 		$sanitizer_arg_updates = [];
 
 		// When there are kept custom scripts, skip tree shaking since it's likely JS will toggle classes that have associated style rules.
-		// @todo There should be an attribute on script tags that opt-in to keeping tree shaking and/or to indicate what class names need to be included. (Update: This is in part implemented by px_verified_node_xpaths.)
+		// @todo There should be an attribute on script tags that opt-in to keeping tree shaking and/or to indicate what class names need to be included.
 		// @todo Depending on the size of the underlying stylesheets, this may need to retain the use of external styles to prevent inlining excessive CSS. This may involve writing minified CSS to disk, or skipping style processing altogether if no selector conversions are needed.
 		if ( $this->kept_script_count > 0 ) {
 			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['skip_tree_shaking'] = true;
@@ -229,29 +227,13 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				]'
 		);
 
-		$px_verified_nodes = [];
-		if ( ! empty( $this->args['px_verified_node_xpaths'] ) ) {
-			foreach ( $this->args['px_verified_node_xpaths'] as $script_xpath ) {
-				$xpath_query = $this->dom->xpath->query( $script_xpath );
-				foreach ( $xpath_query as $px_verified_node ) {
-					$px_verified_nodes[] = $px_verified_node;
-				}
-			}
-		}
-
 		/** @var Element $script */
 		foreach ( $scripts as $script ) {
 			if ( DevMode::hasExemptionForNode( $script ) ) {
 				continue;
 			}
 
-			if ( in_array( $script, $px_verified_nodes, true ) ) {
-				$script->setAttributeNode(
-					$this->dom->createAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
-				);
-				$this->dom->documentElement->setAttributeNode(
-					$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-				);
+			if ( $script->hasAttribute( AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE ) ) {
 				$this->px_verified_kept_node_count++;
 				// @todo Consider forcing any PX-verified script to have async/defer if not module. For inline scripts, hack via data: URL?
 				continue;
@@ -317,21 +299,16 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			// Since the attribute has been PX-verified, mark it as an unvalidated attribute and move along.
-			if ( in_array( $event_handler_attribute, $px_verified_nodes, true ) ) {
-				$attr_value = $element->getAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE );
-				if ( $attr_value ) {
-					$attr_value .= ' ' . $event_handler_attribute->nodeName;
-				} else {
-					$attr_value = $event_handler_attribute->nodeName;
-				}
-				$element->setAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_ATTRS_ATTRIBUTE, $attr_value );
-				$this->dom->documentElement->setAttributeNode(
-					$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-				);
-				$this->dom->documentElement->setAttributeNode(
-					$this->dom->createAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
-				);
+			// Since the attribute has been PX-verified, move along.
+			if (
+				$element->hasAttribute( AMP_Validation_Manager::PX_VERIFIED_ATTRS_ATTRIBUTE )
+				&&
+				in_array(
+					$event_handler_attribute->nodeName,
+					preg_split( '/\s+/', $element->getAttribute( AMP_Validation_Manager::PX_VERIFIED_ATTRS_ATTRIBUTE ) ),
+					true
+				)
+			) {
 				$this->px_verified_kept_node_count++;
 				continue;
 			}
