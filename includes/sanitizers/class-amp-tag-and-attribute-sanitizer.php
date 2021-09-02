@@ -10,6 +10,7 @@
 use AmpProject\Amp;
 use AmpProject\Attribute;
 use AmpProject\CssLength;
+use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Layout;
 use AmpProject\Extension;
@@ -420,7 +421,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// If it's not an allowed tag, replace the node with it's children.
 			$this->replace_node_with_children( $node );
 
-			// Return early since this node no longer exists.
+			// Return early since we don't know anything about this node to validate it.
 			return null;
 		}
 
@@ -2558,14 +2559,40 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see https://github.com/ampproject/amp-wp/issues/1100
 	 *
 	 * @param DOMElement $node Node.
+	 * @return bool Whether replacement was done.
 	 */
 	private function replace_node_with_children( DOMElement $node ) {
+		if ( DevMode::isExemptFromValidation( $node ) ) {
+			return false;
+		}
+
+		// Prevent removing a tag which was exempted from validation.
+		if (
+			$node instanceof DOMElement
+			&&
+			$node->hasAttribute( AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE )
+			&&
+			$node->ownerDocument
+			&&
+			$node->ownerDocument->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
+		) {
+			return false;
+		}
+
+		// Prevent removing a tag which was verified for PX.
+		if (
+			$node instanceof DOMElement
+			&&
+			$node->hasAttribute( AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE )
+		) {
+			return false;
+		}
 
 		// If node has no children or no parent, just remove the node.
 		if ( ! $node->hasChildNodes() || ! $node->parentNode ) {
-			$this->remove_node( $node );
-
-			return;
+			if ( $this->remove_node( $node ) ) {
+				return true;
+			}
 		}
 
 		/*
@@ -2584,16 +2611,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Prevent double-reporting nodes that are rejected for sanitization.
 		if ( isset( $this->should_not_replace_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_replace_nodes[ $node->nodeName ], true ) ) {
-			return;
+			return false;
 		}
 
 		// Replace node with fragment.
 		$should_replace = $this->should_sanitize_validation_error( [], compact( 'node' ) );
-		if ( $should_replace ) {
-			$node->parentNode->replaceChild( $fragment, $node );
-		} else {
+		if ( ! $should_replace ) {
 			$this->should_not_replace_nodes[ $node->nodeName ][] = $node;
+			return false;
 		}
+		$node->parentNode->replaceChild( $fragment, $node );
+		return true;
+
 	}
 
 	/**
@@ -2605,6 +2634,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.5
 	 *
 	 * @param DOMElement $node Node.
+	 * @return bool Whether removal was done.
 	 */
 	private function remove_node( DOMElement $node ) {
 		/**
@@ -2614,7 +2644,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$parent = $node->parentNode;
 		if ( $node && $parent ) {
-			$this->remove_invalid_child( $node );
+			if ( ! $this->remove_invalid_child( $node ) ) {
+				return false;
+			}
 		}
 
 		// @todo Does this parent removal even make sense anymore? Perhaps limit to <p> only.
@@ -2625,6 +2657,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$parent->removeChild( $node );
 			}
 		}
+
+		return true;
 	}
 
 	/**
