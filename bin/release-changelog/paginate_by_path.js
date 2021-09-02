@@ -8,10 +8,10 @@ const _ = require( 'lodash' );
  *
  * Adapted from https://github.com/release-drafter/release-drafter/blob/8cf80318bad9d4877359714d6b5699662cc2597f/lib/pagination.js.
  *
- * @param {Function} queryFn - function used to query the GraphQL API
- * @param {string} query - GraphQL query, must include `nodes` and `pageInfo` fields for the field that will be paginated
- * @param {Object} variables
- * @param {string[]} paginatePath - path to field to paginate
+ * @param {Function} queryFn      Function used to query the GraphQL API.
+ * @param {string}   query        GraphQL query, must include `nodes` and `pageInfo` fields for the field that will be paginated.
+ * @param {Object}   variables    GraphQL Query variables.
+ * @param {string[]} paginatePath Path to field to paginate.
  */
 async function paginateByPath( queryFn, query, variables, paginatePath ) {
 	const nodesPath = [ ...paginatePath, 'nodes' ];
