@@ -17,14 +17,14 @@ async function main() {
 		// Get tag name from plugin main PHP file.
 		const pluginFile = fs.readFileSync(path.resolve(process.cwd(), 'amp.php')).toString();
 		const matches = /\*\s+Version:\s+(\d+(\.\d+)+-\w+)/.exec(pluginFile);
-		const tagName = matches?.[1];
+		const tagName = matches && matches[1] ? matches[1] : null;
 
-		if (! tagName) {
-			throw new Error( 'Unable to parse Version from plugin bootstrap PHP file.' );
+		if (!tagName) {
+			throw new Error('Unable to parse Version from plugin bootstrap PHP file.');
 		}
 
-		if (! tagName.startsWith(milestone)) {
-			throw new Error( "Milestone mismatch with PHP plugin bootstrap version." );
+		if (!tagName.startsWith(milestone)) {
+			throw new Error('Milestone mismatch with PHP plugin bootstrap version.');
 		}
 
 		// Get target branch.
