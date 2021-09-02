@@ -7,13 +7,16 @@
 
 namespace AmpProject\AmpWP;
 
-use AMP_Options_Manager;
-use AmpProject\AmpWP\Infrastructure\Registerable;
-use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\Service;
-use AMP_Form_Sanitizer;
 use AMP_Comments_Sanitizer;
+use AMP_Core_Theme_Sanitizer;
+use AMP_Form_Sanitizer;
+use AMP_Gallery_Block_Sanitizer;
+use AMP_Img_Sanitizer;
+use AMP_Options_Manager;
 use AMP_Script_Sanitizer;
+use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
  * Experimental service to facilitate flexible AMP.
@@ -137,9 +140,6 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 
 		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_SANDBOXING_LEVEL );
 
-		// Allow native POST forms, but they won't be converted by default (unless on level 3, per below).
-		add_filter( 'amp_native_post_form_allowed', '__return_true' );
-
 		// Opt-in to the new script sanitization logic in the script sanitizer.
 		add_filter(
 			'amp_content_sanitizers',
@@ -147,7 +147,13 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 				$sanitizers[ AMP_Script_Sanitizer::class ]['sanitize_js_scripts'] = true;
 
 				if ( $sandboxing_level < 3 ) {
+					$sanitizers[ AMP_Form_Sanitizer::class ]['native_post_forms_used']       = true;
 					$sanitizers[ AMP_Comments_Sanitizer::class ]['allow_commenting_scripts'] = true;
+
+					// Once amp-img is deprecated, these won't be needed and an <img> won't prevent strict sandboxing level for valid AMP.
+					$sanitizers[ AMP_Img_Sanitizer::class ]['native_img_used']           = true;
+					$sanitizers[ AMP_Core_Theme_Sanitizer::class ]['native_img_used']    = true;
+					$sanitizers[ AMP_Gallery_Block_Sanitizer::class ]['native_img_used'] = true;
 				}
 				return $sanitizers;
 			}
@@ -156,21 +162,6 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 		if ( 1 === $sandboxing_level ) {
 			// Keep all invalid AMP markup by default.
 			add_filter( 'amp_validation_error_default_sanitized', '__return_false' );
-		}
-
-		if ( $sandboxing_level < 3 ) {
-			// Prevent conversion of POST forms to use action-xhr by default.
-			add_filter(
-				'amp_validation_error_default_sanitized',
-				static function ( $sanitized, $error ) {
-					if ( isset( $error['code'] ) && AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR === $error['code'] ) {
-						$sanitized = false;
-					}
-					return $sanitized;
-				},
-				20,
-				2
-			);
 		}
 
 		// To facilitate testing, vary the errors by the sandboxing level.

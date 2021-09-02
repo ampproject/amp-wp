@@ -194,33 +194,23 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 					'add_dev_mode' => true,
 				],
 			],
-			'form_with_post_action_converted' => [
-				'<form method="post" action="http://example.com"></form>',
-				'<form method="post" action-xhr="//example.com?_wp_amp_action_xhr_converted=1" target="_top">' . $form_templates . '</form>',
-				[
-					'native_post_forms_allowed' => true,
-				],
-				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR ],
-			],
-			'form_with_post_action_kept' => [
+			'native_form_with_post_action' => [
 				'<form method="post" action="http://example.com"></form>',
 				sprintf( '<form method="post" action="http://example.com" %s></form>', AMP_Validation_Manager::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
 				[
-					'native_post_forms_allowed' => true,
-					'keep_post_forms'           => true,
-					'expected_non_valid_doc'    => true,
-				],
-				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR ],
-			],
-			'form_with_post_action-xhr_ok' => [
-				'<form method="post" action-xhr="http://example.com"></form>',
-				'<form method="post" action-xhr="//example.com" target="_top"></form>',
-				[
-					'native_post_forms_allowed' => true,
-					'keep_post_forms'           => true,
-					'expected_non_valid_doc'    => false,
+					'native_post_forms_used' => true,
+					'expected_non_valid_doc' => true,
 				],
 				[],
+			],
+			'native_form_with_post_action-xhr' => [
+				'<form method="post" action-xhr="http://example.com"></form>',
+				'',
+				[
+					'native_post_forms_used' => true,
+					'expected_non_valid_doc' => false,
+				],
+				[ AMP_Form_Sanitizer::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED ],
 			],
 		];
 	}
@@ -243,13 +233,9 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		}
 
-		$actual_errors = [];
-
-		$args['validation_error_callback'] = static function( $error ) use ( &$actual_errors, $args ) {
+		$actual_errors                     = [];
+		$args['validation_error_callback'] = static function( $error ) use ( &$actual_errors ) {
 			$actual_errors[] = $error;
-			if ( AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR === $error['code'] && ! empty( $args['keep_post_forms'] ) ) {
-				return false;
-			}
 			return true;
 		};
 
