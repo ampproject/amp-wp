@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AMP_Form_Sanitizer;
+use AMP_Comments_Sanitizer;
 use AMP_Script_Sanitizer;
 
 /**
@@ -145,10 +146,9 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 			static function ( $sanitizers ) use ( $sandboxing_level ) {
 				$sanitizers[ AMP_Script_Sanitizer::class ]['sanitize_js_scripts'] = true;
 
-				// @todo This:
-				// if ( $sandboxing_level < 3 ) {
-				// $sanitizers[ AMP_Script_Sanitizer::class ]['allow_comment_reply_js'] = true;
-				// }
+				if ( $sandboxing_level < 3 ) {
+					$sanitizers[ AMP_Comments_Sanitizer::class ]['allow_commenting_scripts'] = true;
+				}
 				return $sanitizers;
 			}
 		);

@@ -7,6 +7,7 @@
 
 use AmpProject\Amp;
 use AmpProject\Attribute;
+use AmpProject\Dom\Element;
 use AmpProject\Extension;
 use AmpProject\Tag;
 
@@ -15,10 +16,23 @@ use AmpProject\Tag;
  *
  * Strips and corrects attributes in forms.
  *
- * @todo When comment-reply is on the page, this should be skipped.
  * @internal
  */
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
+
+	/**
+	 * XPath expression for script output to allow users with unfiltered_html to use that capability in top-level window.
+	 *
+	 * @see wp_comment_form_unfiltered_html_nonce()
+	 * @var string
+	 */
+	const UNFILTERED_HTML_COMMENT_SCRIPT_XPATH = '
+		//script[
+			preceding-sibling::input[ @name = "_wp_unfiltered_html_comment_disabled" ]
+			and
+			contains( text(), "_wp_unfiltered_html_comment_disabled" )
+		]
+	';
 
 	/**
 	 * Default args.
@@ -29,8 +43,43 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $DEFAULT_ARGS = [
 		'comment_live_list'        => false, // @todo See <https://github.com/ampproject/amp-wp/issues/4624>.
-		'comment_reply_js_printed' => false,
+		'thread_comments'          => false, // By default maps to thread_comments option.
+		'allow_commenting_scripts' => false, // @todo Change this to allow_native_comments which also adds px-verified to comment form instead of validation error.
 	];
+
+	/**
+	 * Init.
+	 *
+	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
+	 */
+	public function init( $sanitizers ) {
+		parent::init( $sanitizers );
+
+		// When initializing with comment scripting allowed, let the script sanitizer know that the commenting scripts
+		// have are PX-verified so that they won't get removed nor reported as validation errors.
+		// @todo Or rather should this be accomplished via the amp_validation_error_default_sanitized filter?
+		if (
+			! empty( $this->args['allow_commenting_scripts'] )
+			&&
+			isset( $sanitizers[ AMP_Script_Sanitizer::class ] )
+			&&
+			$sanitizers[ AMP_Script_Sanitizer::class ] instanceof AMP_Script_Sanitizer
+		) {
+			$script_sanitizer = $sanitizers[ AMP_Script_Sanitizer::class ];
+
+			// @todo Why go the trouble of this? Add attributes below instead.
+			// @todo Add data-ampdevmode attribute to UNFILTERED_HTML_COMMENT_SCRIPT_XPATH here.
+			$script_args = $script_sanitizer->get_args();
+			if ( $this->args['thread_comments'] && wp_script_is( 'comment-reply', 'done' ) ) {
+				$script_args['px_verified_node_xpaths'][] = '//script[ @id = "comment-reply-js" ]';
+			}
+			if ( current_user_can( 'unfiltered_html' ) ) {
+				$script_args['px_verified_node_xpaths'][] = self::UNFILTERED_HTML_COMMENT_SCRIPT_XPATH;
+			}
+
+			$script_sanitizer->update_args( $script_args );
+		}
+	}
 
 	/**
 	 * Pre-process the comment form and comment list for AMP.
@@ -40,20 +89,11 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.7
 	 */
 	public function sanitize() {
-		// @todo Check if the comment-reply script was printed.
-		// @todo Add defer to comment-reply if the script _is_ on the page (and there were no dependencies).
-
 		foreach ( $this->dom->getElementsByTagName( Tag::FORM ) as $comment_form ) {
-			// Skip processing comment forms which have opted-out of conversion to amp-form.
-			// Note that AMP_Form_Sanitizer runs before AMP_Comments_Sanitizer according to amp_get_content_sanitizers().
-//			if ( $comment_form->hasAttribute( 'action' ) ) {
-//				continue;
-//			}
-
 			$action = $comment_form->getAttribute( Attribute::ACTION_XHR );
-//			if ( ! $action ) {
-//				$action = $comment_form->getAttribute( Attribute::ACTION );
-//			}
+			if ( ! $action ) {
+				$action = $comment_form->getAttribute( Attribute::ACTION );
+			}
 			$action_path = wp_parse_url( $action, PHP_URL_PATH );
 			if ( $action_path && 'wp-comments-post.php' === basename( $action_path ) ) {
 				$this->process_comment_form( $comment_form );
@@ -70,127 +110,87 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Get the ID for the amp-state.
-	 *
-	 * @param int $post_id Post ID.
-	 * @return string ID for amp-state.
-	 */
-	protected function get_comment_form_state_id( $post_id ) {
-		return sprintf( 'commentform_post_%d', $post_id );
-	}
-
-	/**
-	 * Comment form.
+	 * Process comment form.
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMElement $comment_form Comment form.
+	 * @param Element $comment_form Comment form.
 	 */
-	protected function process_comment_form( $comment_form ) {
-		$form_fields = [];
-		foreach ( $comment_form->getElementsByTagName( Tag::INPUT ) as $element ) {
-			/** @var DOMElement $element */
-			$name = $element->getAttribute( Attribute::NAME );
-			if ( $name ) {
-				$form_fields[ $name ][] = $element;
-			}
-		}
+	protected function process_comment_form( Element $comment_form ) {
+		$this->ampify_threaded_comments( $comment_form );
+	}
 
-		foreach ( $comment_form->getElementsByTagName( Tag::TEXTAREA ) as $element ) {
-			/** @var DOMElement $element */
-			$name = $element->getAttribute( Attribute::NAME );
-			if ( $name ) {
-				$form_fields[ $name ][] = $element;
-			}
-		}
-
-		/**
-		 * Named input elements.
-		 *
-		 * @var DOMElement[][] $form_fields
-		 */
-		if ( empty( $form_fields['comment_post_ID'] ) ) {
+	/**
+	 * Ampify threaded comments by utilizing amp-bind to implement comment reply functionality.
+	 *
+	 * The logic here is only needed if:
+	 * 1. Threaded comments is enabled, and
+	 * 2. The comment-reply script was not added to the page.
+	 *
+	 * @param Element $comment_form Comment form.
+	 */
+	protected function ampify_threaded_comments( Element $comment_form ) {
+		// Do nothing if comment threading is not enabled.
+		if ( ! $this->args['thread_comments'] ) {
 			return;
 		}
-		$post_id  = (int) $form_fields['comment_post_ID'][0]->getAttribute( Attribute::VALUE );
-		$state_id = $this->get_comment_form_state_id( $post_id );
 
-		$form_state = [
-			'values'     => [],
-			'submitting' => false,
-			'replyTo'    => '',
-		];
+		// If comment-reply is on the page, then prevent adding amp-bind implementation as well.
+		$comment_reply_script = $this->dom->getElementById( 'comment-reply-js' );
+		if ( $comment_reply_script instanceof Element && $this->args['allow_commenting_scripts'] ) {
 
-		$comment_parent_id = null;
-		if ( ! empty( $form_fields['comment_parent'] ) ) {
-			$comment_parent_id = (int) $form_fields['comment_parent'][0]->getAttribute( Attribute::VALUE );
+			// @todo This should add data-px-verified-tag attribute!
+			// Improve performance by deferring comment-reply.
+			$comment_reply_script->setAttributeNode( $this->dom->createAttribute( 'defer' ) );
+
+			return;
 		}
 
-		$amp_bind_attr_format = Amp::BIND_DATA_ATTR_PREFIX . '%s';
-		foreach ( $form_fields as $name => $form_field ) {
-			foreach ( $form_field as $element ) {
+		// Remove comment-reply.js since it will be implemented using amp-bind below.
+		if ( $comment_reply_script instanceof Element ) {
+			$comment_reply_script->parentNode->removeChild( $comment_reply_script );
+		}
 
-				// @todo Radio and checkbox inputs are not supported yet.
-				if ( in_array( strtolower( $element->getAttribute( Attribute::TYPE ) ), [ 'checkbox', 'radio' ], true ) ) {
-					continue;
-				}
+		// Create reply state.
+		$amp_state = $this->dom->createElement( Extension::STATE );
+		$comment_form->insertBefore( $amp_state, $comment_form->firstChild );
+		$state_id = 'ampCommentThreading';
+		$amp_state->setAttribute( Attribute::ID, $state_id );
+		$state = [
+			'replyTo'       => '',
+			'commentParent' => '0', // @todo What if page accessed with replytocom? Then this should be $comment_parent_id below.
+		];
 
-				$element->setAttribute( sprintf( $amp_bind_attr_format, Attribute::DISABLED ), "$state_id.submitting" );
+		$comment_parent_id    = 0;
+		$comment_parent_input = $this->dom->getElementById( 'comment_parent' );
+		if ( $comment_parent_input instanceof Element ) {
+			$comment_parent_id = (int) $comment_parent_input->getAttribute( Attribute::VALUE );
 
-				if ( Tag::TEXTAREA === strtolower( $element->nodeName ) ) {
-					$form_state['values'][ $name ] = $element->textContent;
-					$element->setAttribute( sprintf( $amp_bind_attr_format, 'text' ), "$state_id.values.$name" );
-				} else {
-					$form_state['values'][ $name ] = $element->hasAttribute( Attribute::VALUE ) ? $element->getAttribute( Attribute::VALUE ) : '';
-					$element->setAttribute( sprintf( $amp_bind_attr_format, Attribute::VALUE ), "$state_id.values.$name" );
-				}
-
-				// Update the state in response to changing the input.
-				$element->setAttribute(
-					Attribute::ON,
-					sprintf(
-						'change:AMP.setState( { %s: { values: { %s: event.value } } } )',
-						$state_id,
-						wp_json_encode( $name )
-					)
-				);
-			}
+			$comment_parent_input->setAttribute(
+				Amp::BIND_DATA_ATTR_PREFIX . 'value',
+				sprintf( '%s.commentParent', $state_id )
+			);
 		}
 
 		// Add amp-state to the document.
-		$amp_state = $this->dom->createElement( Extension::STATE );
-		$amp_state->setAttribute( Attribute::ID, $state_id );
 		$script = $this->dom->createElement( Tag::SCRIPT );
 		$script->setAttribute( Attribute::TYPE, 'application/json' );
-		$comment_form->insertBefore( $amp_state, $comment_form->firstChild );
+		$script->appendChild( $this->dom->createTextNode( wp_json_encode( $state, JSON_UNESCAPED_UNICODE ) ) );
+		$amp_state->appendChild( $script );
 
-		// Update state when submitting form.
-		$form_reset_state = $form_state;
-		unset(
-			$form_reset_state['values']['author'],
-			$form_reset_state['values']['email'],
-			$form_reset_state['values']['url']
-		);
-		$on = [
-			// Disable the form when submitting.
+
+		// Reset state when submitting form.
+		$comment_form->addAmpAction(
+			'submit-success',
 			sprintf(
-				'submit:AMP.setState( { %s: { submitting: true } } )',
-				wp_json_encode( $state_id )
-			),
-			// Re-enable the form fields when the submission fails.
-			sprintf(
-				'submit-error:AMP.setState( { %s: { submitting: false } } )',
-				wp_json_encode( $state_id )
-			),
-			// Reset the form to its initial state (with enabled form fields), except for the author, email, and url.
-			sprintf(
-				'submit-success:AMP.setState( { %s: %s } )',
+				'%s.clear,AMP.setState({%s: %s})',
+				$this->dom->getElementId( $comment_form ),
 				$state_id,
-				wp_json_encode( $form_reset_state, JSON_UNESCAPED_UNICODE )
-			),
-		];
-		$comment_form->setAttribute( Attribute::ON, implode( ';', $on ) );
+				wp_json_encode( $state )
+			)
+		);
 
+		// Prepare the comment form for replies. The logic here corresponds to what is found in comment-reply.js.
 		$reply_heading_element   = $this->dom->getElementById( 'reply-title' );
 		$reply_heading_text_node = null;
 		$reply_link_to_parent    = null;
@@ -227,20 +227,15 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			);
 		}
 
-		// Populate amp-state.
-		$amp_state->appendChild( $script );
-		$script->appendChild( $this->dom->createTextNode( wp_json_encode( $form_state, JSON_UNESCAPED_UNICODE ) ) );
-
+		// Update comment reply links to set the reply state.
 		$comment_reply_links = $this->dom->xpath->query( '//a[ @data-commentid and @data-postid and @data-replyto and @data-respondelement and contains( @class, "comment-reply-link" ) ]' );
 		foreach ( $comment_reply_links as $comment_reply_link ) {
-			/** @var DOMElement $comment_reply_link */
+			/** @var Element $comment_reply_link */
 
 			$comment_reply_state = [
 				$state_id => [
-					'replyTo' => $comment_reply_link->getAttribute( 'data-replyto' ),
-					'values'  => [
-						'comment_parent' => $comment_reply_link->getAttribute( 'data-commentid' ),
-					],
+					'replyTo'       => $comment_reply_link->getAttribute( 'data-replyto' ),
+					'commentParent' => $comment_reply_link->getAttribute( 'data-commentid' ),
 				],
 			];
 
@@ -249,39 +244,32 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				'#' . $comment_reply_link->getAttribute( 'data-respondelement' )
 			);
 
-			$comment_reply_link->setAttribute(
-				Attribute::ON,
+			$comment_reply_link->addAmpAction(
+				'tap',
 				sprintf(
-					'tap:AMP.setState(%s),comment.focus',
+					'AMP.setState(%s),comment.focus',
 					wp_json_encode( $comment_reply_state, JSON_UNESCAPED_UNICODE )
 				)
 			);
 		}
 
 		$cancel_comment_reply_link = $this->dom->getElementById( 'cancel-comment-reply-link' );
-		if ( $cancel_comment_reply_link instanceof DOMElement ) {
-			$cancel_comment_reply_link->removeAttribute( Attribute::STYLE );
+		if ( $cancel_comment_reply_link instanceof Element ) {
 
+			// Use hidden attribute to hide/show cancel reply link when commentParent is zero.
+			$cancel_comment_reply_link->removeAttribute( Attribute::STYLE );
 			if ( ! $comment_parent_id ) {
 				$cancel_comment_reply_link->setAttributeNode( $this->dom->createAttribute( Attribute::HIDDEN ) );
 			}
-
-			$tap_state = [
-				$state_id => [
-					'replyTo' => '',
-					'values'  => [
-						'comment_parent' => '0',
-					],
-				],
-			];
-			$cancel_comment_reply_link->setAttribute(
-				Attribute::ON,
-				sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state, JSON_UNESCAPED_UNICODE ) )
-			);
-
 			$cancel_comment_reply_link->setAttribute(
 				Amp::BIND_DATA_ATTR_PREFIX . Attribute::HIDDEN,
-				sprintf( '%s.values.comment_parent == "0"', $state_id )
+				sprintf( '%s.commentParent == "0"', $state_id )
+			);
+
+			// Reset state when clicking cancel.
+			$cancel_comment_reply_link->addAmpAction(
+				'tap',
+				sprintf( 'AMP.setState({%s: %s})', $state_id, wp_json_encode( $state, JSON_UNESCAPED_UNICODE ) )
 			);
 		}
 	}

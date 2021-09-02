@@ -60,20 +60,22 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	 * @covers AMP_Comments_Sanitizer::sanitize()
 	 */
 	public function test_sanitize_allowed_action_xhr() {
+		update_option( 'thread_comments', '1' );
 		$form_sanitizer     = new AMP_Form_Sanitizer( $this->dom );
-		$comments_sanitizer = new AMP_Comments_Sanitizer( $this->dom );
+		$comments_sanitizer = new AMP_Comments_Sanitizer(
+			$this->dom,
+			[ 'thread_comments' => '1' ]
+		);
 
 		// Use an allowed action.
 		$form = $this->create_form( '/wp-comments-post.php' );
 		$form_sanitizer->sanitize();
 		$comments_sanitizer->sanitize();
 
-		$on = $form->getAttribute( 'on' );
-		$this->assertStringContainsString( 'submit:AMP.setState(', $on );
-		$this->assertStringContainsString( 'submit-error:AMP.setState(', $on );
-		foreach ( $this->get_form_element_names() as $name ) {
-			$this->assertStringContainsString( $name, $on );
-		}
+		$this->assertEquals(
+			'submit-success:i-amp-0.clear,AMP.setState({ampCommentThreading: {"replyTo":"","commentParent":"0"}})',
+			$form->getAttribute( 'on' )
+		);
 	}
 
 	/**
@@ -96,7 +98,8 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	 * @covers AMP_Comments_Sanitizer::process_comment_form()
 	 */
 	public function test_process_comment_form() {
-		$instance = new AMP_Comments_Sanitizer( $this->dom );
+		update_option( 'thread_comments', '1' );
+		$instance = new AMP_Comments_Sanitizer( $this->dom, [ 'thread_comments' => true ] );
 
 		$form = $this->create_form( '/wp-comments-post.php' );
 		$this->call_private_method( $instance, 'process_comment_form', [ $form ] );
@@ -104,26 +107,16 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 		$on        = $form->getAttribute( 'on' );
 		$amp_state = $this->dom->getElementsByTagName( 'amp-state' )->item( 0 );
 
-		$this->assertStringContainsString( 'submit:AMP.setState(', $on );
-		$this->assertStringContainsString( 'submit-error:AMP.setState(', $on );
-		$this->assertStringContainsString( 'submit-success:AMP.setState(', $on );
-		$this->assertStringContainsString( strval( $GLOBALS['post']->ID ), $on );
+		$this->assertEquals(
+			$on,
+			'submit-success:i-amp-0.clear,AMP.setState({ampCommentThreading: {"replyTo":"","commentParent":"0"}})'
+		);
 		$this->assertEquals( 'script', $amp_state->firstChild->nodeName );
 
-		foreach ( $this->get_form_element_names() as $name ) {
-			$this->assertStringContainsString( $name, $on );
-			$this->assertStringContainsString( $name, $amp_state->nodeValue );
-		}
-		foreach ( $form->getElementsByTagName( 'input' ) as $input ) {
-			/**
-			 * Input.
-			 *
-			 * @var DOMElement $input
-			 */
-			$on = $input->getAttribute( 'on' );
-			$this->assertStringContainsString( 'change:AMP.setState(', $on );
-			$this->assertStringContainsString( strval( $GLOBALS['post']->ID ), $on );
-		}
+		$this->assertEquals(
+			'{"replyTo":"","commentParent":"0"}',
+			$amp_state->nodeValue
+		);
 	}
 
 	/**

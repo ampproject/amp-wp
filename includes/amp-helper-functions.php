@@ -1500,6 +1500,11 @@ function amp_get_content_sanitizers( $post = null ) {
 			'native_img_used' => $native_img_used,
 		],
 
+		AMP_Comments_Sanitizer::class          => [
+			'thread_comments'    => (bool) get_option( 'thread_comments' ),
+			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
+		],
+
 		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
 		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
 		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
@@ -1513,9 +1518,6 @@ function amp_get_content_sanitizers( $post = null ) {
 		],
 		AMP_Form_Sanitizer::class              => [
 			'native_post_forms_allowed' => $native_post_forms_allowed,
-		],
-		AMP_Comments_Sanitizer::class          => [
-			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
 		],
 		AMP_Video_Sanitizer::class             => [],
 		AMP_Audio_Sanitizer::class             => [],
@@ -1598,7 +1600,7 @@ function amp_get_content_sanitizers( $post = null ) {
 
 		// Prevent removal of script output by wp_comment_form_unfiltered_html_nonce().
 		if ( current_user_can( 'unfiltered_html' ) ) {
-			$dev_mode_xpaths[] = '//script[ preceding-sibling::input[ @name = "_wp_unfiltered_html_comment_disabled" ] and contains( text(), "_wp_unfiltered_html_comment_disabled" ) ]';
+			$dev_mode_xpaths[] = AMP_Comments_Sanitizer::UNFILTERED_HTML_COMMENT_SCRIPT_XPATH;
 		}
 
 		if ( is_admin_bar_showing() ) {
@@ -1644,11 +1646,11 @@ function amp_get_content_sanitizers( $post = null ) {
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
+		AMP_Comments_Sanitizer::class, // Must come before AMP_Script_Sanitizer since it removes comment-rely.js.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for image, video, audio, form, and style.
 		AMP_Srcset_Sanitizer::class,
 		AMP_Img_Sanitizer::class,
 		AMP_Form_Sanitizer::class,
-		AMP_Comments_Sanitizer::class,
 		AMP_Video_Sanitizer::class,
 		AMP_Audio_Sanitizer::class,
 		AMP_Object_Sanitizer::class,
