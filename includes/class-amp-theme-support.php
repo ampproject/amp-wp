@@ -2153,6 +2153,9 @@ class AMP_Theme_Support {
 			$dom->documentElement->hasAttribute( AMP_Validation_Manager::AMP_NON_VALID_DOC_ATTRIBUTE )
 			||
 			( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) && ! is_user_logged_in() )
+			||
+			// @todo It would be preferable if we didn't have to do this query since we've already encountered an attribute.
+			$dom->xpath->query( sprintf( '//*/@%s | //*/@%s', AMP_Validation_Manager::PX_VERIFIED_TAG_ATTRIBUTE, AMP_Validation_Manager::PX_VERIFIED_ATTRS_ATTRIBUTE ) )->length > 0
 		) {
 			$dom->documentElement->removeAttribute( Attribute::AMP );
 			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
