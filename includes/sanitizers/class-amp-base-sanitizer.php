@@ -141,9 +141,22 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get args.
+	 *
+	 * @since 2.2
+	 *
+	 * @return array Args.
+	 */
+	public function get_args() {
+		return $this->args;
+	}
+
+	/**
 	 * Update args.
 	 *
 	 * Merges the supplied args with the existing args.
+	 *
+	 * @since 2.2
 	 *
 	 * @param array $args Args.
 	 */
