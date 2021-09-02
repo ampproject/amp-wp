@@ -43,7 +43,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'comment_live_list'        => false, // @todo See <https://github.com/ampproject/amp-wp/issues/4624>.
+		'comments_live_list'       => false,
 		'thread_comments'          => false, // By default maps to thread_comments option.
 		'allow_commenting_scripts' => false,
 	];
@@ -65,7 +65,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! empty( $this->args['comments_live_list'] ) ) {
+		if ( $this->args['comments_live_list'] ) {
 			$comments = $this->dom->xpath->query( '//amp-live-list/*[ @items ]/*[ starts-with( @id, "comment-" ) ]' );
 
 			foreach ( $comments as $comment ) {
