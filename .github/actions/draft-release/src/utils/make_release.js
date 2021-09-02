@@ -34,8 +34,12 @@ const makeRelease = async (tagName, body, commitish) => {
 			prerelease: false,
 			target_commitish: commitish
 		});
-		core.info(`Created ${tagName} release`);
+		core.info(`Successfully drafted a release for ${tagName}`);
 	} else {
+		if (release.draft !== true) {
+			throw new Error(`The ${tagName} release is not a draft. Aborting...`)
+		}
+
 		releaseResponse = await octokit.rest.repos.updateRelease({
 			owner,
 			repo,
@@ -44,7 +48,7 @@ const makeRelease = async (tagName, body, commitish) => {
 			name: tagName,
 			body
 		});
-		core.info(`Updated ${tagName} release`);
+		core.info(`Successfully updated the ${tagName} draft release`);
 	}
 
 	return releaseResponse;
