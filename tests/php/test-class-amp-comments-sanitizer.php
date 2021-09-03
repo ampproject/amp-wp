@@ -139,6 +139,10 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	 * @covers ::ampify_threaded_comments()
 	 */
 	public function test_ampify_threaded_comments_with_threading_and_allow_commenting_scripts() {
+		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
+			$this->markTestSkipped( 'Skipping because the script ID attribute was added in WP 5.2.' );
+		}
+
 		update_option( 'thread_comments', '1' );
 		setup_postdata( get_the_ID() );
 		$dom       = $this->get_document_with_comments( get_the_ID() );
@@ -173,6 +177,10 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	 * @covers ::ampify_threaded_comments()
 	 */
 	public function test_ampify_threaded_comments_with_threading_and_disallowed_commenting_scripts() {
+		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
+			$this->markTestSkipped( 'Skipping because the script ID attribute was added in WP 5.2.' );
+		}
+
 		update_option( 'thread_comments', '1' );
 		setup_postdata( get_the_ID() );
 		$dom       = $this->get_document_with_comments( get_the_ID() );

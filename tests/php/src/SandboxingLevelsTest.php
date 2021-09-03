@@ -114,11 +114,7 @@ class SandboxingLevelsTest extends DependencyInjectedTestCase {
 		);
 	}
 
-	/**
-	 * @covers ::has_endpoint()
-	 * @dataProvider get_data_to_test_add_hooks
-	 *
-	 */
+	/** @covers ::add_hooks() */
 	public function test_add_hooks_not_standard_mode( $level ) {
 		AMP_Options_Manager::update_options(
 			[
