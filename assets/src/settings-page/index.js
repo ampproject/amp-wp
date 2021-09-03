@@ -9,6 +9,7 @@ import {
 	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+	USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE,
 	USERS_RESOURCE_REST_PATH,
 } from 'amp-settings';
 
@@ -74,6 +75,7 @@ function Providers( { children } ) {
 						<UserContextProvider
 							onlyFetchIfPluginIsConfigured={ false }
 							userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
+							userFieldReviewPanelIsDismissed={ USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE }
 							usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 						>
 							<ReaderThemesContextProvider
@@ -128,10 +130,14 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
  */
 function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
-	const [ showSiteReview, setShowSiteReview ] = useState( true );
 
 	const { hasOptionsChanges, fetchingOptions, saveOptions } = useContext( Options );
-	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption } = useContext( User );
+	const {
+		hasDeveloperToolsOptionChange,
+		isReviewPanelDismissed,
+		saveDeveloperToolsOption,
+		saveIsReviewPanelDismissed,
+	} = useContext( User );
 	const { templateModeWasOverridden } = useContext( ReaderThemes );
 
 	/**
@@ -193,7 +199,7 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 			<Welcome />
-			{ showSiteReview && (
+			{ ! isReviewPanelDismissed && (
 				<AMPDrawer
 					heading={ (
 						<>
@@ -207,7 +213,7 @@ function Root( { appRoot } ) {
 				>
 					<SiteReview
 						dismiss={ () => {
-							setShowSiteReview( false );
+							saveIsReviewPanelDismissed( true );
 						} }
 					/>
 				</AMPDrawer>

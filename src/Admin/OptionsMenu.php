@@ -49,7 +49,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 *
 	 * @var string
 	 */
-	const USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE = '';
+	const USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE = 'amp_review_panel_is_dismissed';
 
 	/**
 	 * GoogleFonts instance.
@@ -84,7 +84,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		if ( ! is_admin() ) {
+		if ( ! is_admin() && ! wp_is_json_request() ) {
 			return false;
 		}
 
@@ -236,19 +236,19 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
 		$js_data = [
-			'AMP_QUERY_VAR'                      => amp_get_slug(),
-			'CURRENT_THEME'                      => [
+			'AMP_QUERY_VAR'                                          => amp_get_slug(),
+			'CURRENT_THEME'                                          => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
 				'is_reader_theme' => $is_reader_theme,
 				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
-			'HAS_DEPENDENCY_SUPPORT'             => $this->dependency_support->has_support(),
-			'HOME_URL'                           => home_url( '/' ),
-			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
-			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
-			'IS_CORE_THEME'                      => in_array(
+			'HAS_DEPENDENCY_SUPPORT'                                 => $this->dependency_support->has_support(),
+			'HOME_URL'                                               => home_url( '/' ),
+			'OPTIONS_REST_PATH'                                      => '/amp/v1/options',
+			'READER_THEMES_REST_PATH'                                => '/amp/v1/reader-themes',
+			'IS_CORE_THEME'                                          => in_array(
 				get_stylesheet(),
 				AMP_Core_Theme_Sanitizer::get_supported_themes(),
 				true
@@ -259,6 +259,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+			'USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE' => self::USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
 		];
 
@@ -330,7 +331,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	public function register_rest_field() {
 		register_rest_field(
 			'user',
-			'amp_review_panel_is_dismissed',
+			self::USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE,
 			[
 				'get_callback'    => [ $this, 'rest_get_review_panel_is_dismissed' ],
 				'update_callback' => [ $this, 'rest_update_review_panel_is_dismissed' ],
@@ -343,24 +344,24 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	}
 
 	/**
-	 * Provides the user's dev tools enabled setting.
+	 * Provides the dismissed state of the "Review" panel for the user.
 	 *
 	 * @param array $user Array of user data prepared for REST.
-	 * @return null|boolean Whether tools are enabled for the user, or null if the option has not been set.
+	 * @return null|boolean Whether the panel is dismissed, or null if the option has not been set.
 	 */
 	public function rest_get_review_panel_is_dismissed( $user ) {
 		return $this->is_review_panel_dismissed( $user['id'] );
 	}
 
 	/**
-	 * Updates a user's dev tools enabled setting.
+	 * Updates a user's setting indicating if the "Review" panel is dismissed for the current template mode.
 	 *
-	 * @param bool    $dismissed New setting for whether dev tools are enabled for the user.
-	 * @param WP_User $user      The WP user to update.
+	 * @param bool    $is_dismissed A flag indicating if a panel should be dismissed for the current template mode.
+	 * @param WP_User $user         The WP user to update.
 	 *
 	 * @return bool|WP_Error The result of update_user_meta, or WP_Error if the current user lacks permission.
 	 */
-	public function rest_update_review_panel_is_dismissed( bool $dismissed, WP_User $user ) {
+	public function rest_update_review_panel_is_dismissed( bool $is_dismissed, WP_User $user ) {
 		if ( ! current_user_can( 'edit_user', $user->ID ) ) {
 			return new WP_Error(
 				'amp_rest_cannot_edit_user',
@@ -369,11 +370,11 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			);
 		}
 
-		return $this->set_is_review_panel_dismissed( $user->ID, $dismissed );
+		return $this->set_is_review_panel_dismissed( $user->ID, $is_dismissed );
 	}
 
 	/**
-	 * Determine whether developer tools are enabled for the a user and whether they can access them.
+	 * Determine whether the "Review" panel should be dismissed for the current template mode.
 	 *
 	 * @param null|WP_User|int $user User. Defaults to the current user.
 	 * @return bool Whether developer tools are enabled for the user.
@@ -395,26 +396,26 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	}
 
 	/**
-	 * Set user enabled.
+	 * Set "Review" panel dismissed setting.
 	 *
-	 * @param int|WP_User $user      User.
-	 * @param bool        $dismissed Whether enabled.
+	 * @param int|WP_User $user         User.
+	 * @param bool        $id_dismissed Whether the panel is dismissed.
 	 *
 	 * @return bool Whether update was successful.
 	 */
-	public function set_is_review_panel_dismissed( $user, bool $dismissed ) {
+	public function set_is_review_panel_dismissed( $user, bool $id_dismissed ) {
 		if ( $user instanceof WP_User ) {
 			$user = $user->ID;
 		}
 
-		if ( false === $dismissed ) {
+		if ( false === $id_dismissed ) {
 			return delete_user_meta( (int) $user, self::USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE );
 		}
 
 		return (bool) update_user_meta(
 			(int) $user,
 			self::USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE,
-			wp_json_encode( AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) )
+			AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 		);
 	}
 }
