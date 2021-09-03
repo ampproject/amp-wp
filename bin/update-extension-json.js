@@ -59,7 +59,7 @@ class UpdateExtensionJson {
 					// eslint-disable-next-line no-await-in-loop
 					const plugin = await this.preparePlugin( item );
 					if ( plugin ) {
-						this.plugins.push( item );
+						this.plugins.push( plugin );
 					}
 				} else if ( ecosystemTerm === themeTerm ) {
 					// eslint-disable-next-line no-await-in-loop
@@ -250,7 +250,7 @@ class UpdateExtensionJson {
 			requires: '',
 			tested: '',
 			requires_php: '',
-			rating: '',
+			rating: 0,
 			ratings: {
 				1: 0,
 				2: 0,
@@ -258,11 +258,11 @@ class UpdateExtensionJson {
 				4: 0,
 				5: 0,
 			},
-			num_ratings: '',
-			support_threads: '',
-			support_threads_resolved: '',
-			active_installs: '',
-			downloaded: '',
+			num_ratings: 0,
+			support_threads: 0,
+			support_threads_resolved: 0,
+			active_installs: 0,
+			downloaded: 0,
 			last_updated: '',
 			added: '',
 			homepage: item?.meta?.ampps_ecosystem_url,
