@@ -62,7 +62,8 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$action_path = wp_parse_url( $action, PHP_URL_PATH );
 			if ( $action_path && 'wp-comments-post.php' === basename( $action_path ) ) {
-				$this->process_comment_form( $comment_form );
+				$this->handle_unfiltered_html_comment_script();
+				$this->ampify_threaded_comments( $comment_form );
 			}
 		}
 
@@ -76,14 +77,26 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Process comment form.
+	 * Handle the unfiltered_html comment script.
 	 *
-	 * @since 0.7
-	 *
-	 * @param Element $comment_form Comment form.
+	 * @since 2.2
 	 */
-	protected function process_comment_form( Element $comment_form ) {
-		$this->ampify_threaded_comments( $comment_form );
+	protected function handle_unfiltered_html_comment_script() {
+
+		// Flag the unfiltered_html comment script as being in AMP Dev Mode at the tag level since it is only ever in
+		// the page when the user is logged-in which is when Dev Mode will be enabled anyway.
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			$unfiltered_html_comment_script = $this->dom->xpath->query( self::UNFILTERED_HTML_COMMENT_SCRIPT_XPATH )->item( 0 );
+			if ( $unfiltered_html_comment_script instanceof Element ) {
+				$unfiltered_html_comment_script->setAttributeNode( $this->dom->createAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
+
+				// Also indicate that that this element is PX-verified so that if by chance AMP Dev Mode is disabled,
+				// it will not be considered a custom script that will require turning off CSS tree shaking, etc.
+				if ( $this->args['allow_commenting_scripts'] ) {
+					ValidationExemption::mark_node_as_px_verified( $unfiltered_html_comment_script );
+				}
+			}
+		}
 	}
 
 	/**
@@ -99,21 +112,6 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		// Do nothing if comment threading is not enabled.
 		if ( ! $this->args['thread_comments'] ) {
 			return;
-		}
-
-		// Flag the unfiltered_html comment script as being in AMP Dev Mode at the tag level since it is only ever in
-		// the page when the user is logged-in which is when Dev Mode will be enabled anyway.
-		if ( current_user_can( 'unfiltered_html' ) ) {
-			$unfiltered_html_comment_script = $this->dom->xpath->query( self::UNFILTERED_HTML_COMMENT_SCRIPT_XPATH )->item( 0 );
-			if ( $unfiltered_html_comment_script instanceof Element ) {
-				$unfiltered_html_comment_script->setAttributeNode( $this->dom->createAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
-
-				// Also indicate that that this element is PX-verified so that if by chance AMP Dev Mode is disabled,
-				// it will not be considered a custom script that will require turning off CSS tree shaking, etc.
-				if ( $this->args['allow_commenting_scripts'] ) {
-					ValidationExemption::mark_node_as_px_verified( $unfiltered_html_comment_script );
-				}
-			}
 		}
 
 		// If comment-reply is on the page and commenting scripts are allowed, mark it as being PX-verified and improve
@@ -161,7 +159,6 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		$script->appendChild( $this->dom->createTextNode( wp_json_encode( $state, JSON_UNESCAPED_UNICODE ) ) );
 		$amp_state->appendChild( $script );
 
-
 		// Reset state when submitting form.
 		$comment_form->addAmpAction(
 			'submit-success',
@@ -175,15 +172,13 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Prepare the comment form for replies. The logic here corresponds to what is found in comment-reply.js.
 		$reply_heading_element   = $this->dom->getElementById( 'reply-title' );
-		$reply_heading_text_node = null;
-		$reply_link_to_parent    = null;
+		$reply_heading_text_node = null; // The text node for the heading.
 		if ( $reply_heading_element && $reply_heading_element->firstChild instanceof DOMText ) {
 			$reply_heading_text_node = $reply_heading_element->firstChild;
 		}
-		if ( $reply_heading_text_node && $reply_heading_text_node->nextSibling instanceof DOMElement ) {
-			$reply_link_to_parent = $reply_heading_text_node->nextSibling;
-		}
-		if ( $reply_heading_text_node && $reply_link_to_parent ) {
+
+		// Add the text binding to the heading text, which necessitates wrapping in a span.
+		if ( $reply_heading_text_node ) {
 			$reply_heading_text_span = $this->dom->createElement( Tag::SPAN );
 			$reply_heading_element->replaceChild( $reply_heading_text_span, $reply_heading_text_node );
 			$reply_heading_text_span->appendChild( $reply_heading_text_node );
@@ -262,7 +257,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 1.1
 	 *
-	 * @param DOMElement $comment_element Comment element.
+	 * @param Element $comment_element Comment element.
 	 */
 	protected function add_amp_live_list_comment_attributes( $comment_element ) {
 		$comment_id = (int) str_replace( 'comment-', '', $comment_element->getAttribute( 'id' ) );
