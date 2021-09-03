@@ -13,6 +13,7 @@ use AmpProject\Attribute;
 use AmpProject\CssLength;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\Layout;
 use AmpProject\Extension;
 use AmpProject\Tag;
@@ -2576,18 +2577,23 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 
-		// If node has no children or no parent, just remove the node.
-		if ( ! $node->hasChildNodes() || ! $node->parentNode ) {
-			if ( $this->remove_node( $node ) ) {
-				return true;
-			}
-		}
-
 		// Replace node with fragment.
 		$should_replace = $this->should_sanitize_validation_error( [], compact( 'node' ) );
 		if ( ! $should_replace ) {
+			// @todo This should instead mark the element as being kept.
+
 			$this->should_not_replace_nodes[ $node->nodeName ][] = $node;
 			return false;
+		}
+
+		// If node has no children or no parent, just remove the node.
+		if ( ! $node->hasChildNodes() ) {
+			$parent = $node->parentNode;
+			if ( $parent instanceof Element ) {
+				$parent->removeChild( $node );
+				$this->remove_ancestors_until_not_empty( $parent );
+			}
+			return true;
 		}
 
 		/*
@@ -2633,7 +2639,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// @todo Does this parent removal even make sense anymore? Perhaps limit to <p> only.
+		if ( $parent instanceof Element ) {
+			$this->remove_ancestors_until_not_empty( $parent );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Remove ancestor elements until one has attributes or has child nodes.
+	 *
+	 * @todo Does this parent removal even make sense anymore? Perhaps limit to <p> only.
+	 * @param Element $parent
+	 */
+	private function remove_ancestors_until_not_empty( Element $parent ) {
 		while ( $parent && ! $parent->hasChildNodes() && ! $parent->hasAttributes() && $this->root_element !== $parent ) {
 			$node   = $parent;
 			$parent = $parent->parentNode;
@@ -2641,8 +2660,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$parent->removeChild( $node );
 			}
 		}
-
-		return true;
 	}
 
 	/**

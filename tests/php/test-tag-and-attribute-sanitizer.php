@@ -9,6 +9,8 @@ use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\DevMode;
 
 // phpcs:disable WordPress.WP.EnqueuedResources
 
@@ -3835,7 +3837,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 	 */
 	public function get_data_for_replace_node_with_children_validation_errors() {
 		return [
-			'amp_image'                => [
+			'amp_image'                       => [
 				'<amp-image src="/none.jpg" width="100" height="100" alt="None"></amp-image>',
 				'',
 				[
@@ -3855,7 +3857,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				],
 			],
 
-			'invalid_parent_element'   => [
+			'invalid_parent_element'          => [
 				'<baz class="baz-invalid"><p>Invalid baz parent element.</p></baz>',
 				'<p>Invalid baz parent element.</p>',
 				[
@@ -3870,7 +3872,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				],
 			],
 
-			'invalid_a_tag'            => [
+			'invalid_a_tag'                   => [
 				'<amp-story-grid-layer class="a-invalid"><a>Invalid a tag.</a></amp-story-grid-layer>',
 				'',
 				[
@@ -3887,7 +3889,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				],
 			],
 
-			'invalid_foo_tag'          => [
+			'invalid_foo_tag'                 => [
 				'<foo class="foo-invalid">Invalid foo tag.</foo>',
 				'Invalid foo tag.',
 				[
@@ -3902,7 +3904,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				],
 			],
 
-			'invalid_barbaz_tag'       => [
+			'invalid_barbaz_tag'              => [
 				'<bazbar><span>Is an invalid "bazbar" tag.</span></bazbar>',
 				'<span>Is an invalid "bazbar" tag.</span>',
 				[
@@ -3917,7 +3919,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				],
 			],
 
-			'nested_valid_and_invalid' => [
+			'nested_valid_and_invalid'        => [
 				'
 					<div class="parent">
 						<p>Nesting valid and invalid elements.</p>
@@ -3951,7 +3953,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				],
 			],
 
-			'bad_lili'                 => [
+			'bad_lili'                        => [
 				'
 					<ul>
 						<li>hello</li>
@@ -3971,7 +3973,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				],
 			],
 
-			'invalid_nested_elements'  => [
+			'invalid_nested_elements'         => [
 				'<divs><foo>Invalid <span>nested elements</span></foo></divs>',
 				'Invalid <span>nested elements</span>',
 				[
@@ -3994,7 +3996,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				],
 			],
 
-			'custom_elements-removed'  => [
+			'custom_elements-removed'         => [
 				'<foo-bar><bar-baz><span>Hello!</span></bar-baz></foo-bar>',
 				'<span>Hello!</span>',
 				[
@@ -4018,7 +4020,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				true,
 			],
 
-			'custom_elements-kept'     => [
+			'custom_elements-kept'            => [
 				'<foo-bar><bar-baz><span>Hello!</span></bar-baz></foo-bar>',
 				'<foo-bar><bar-baz><span>Hello!</span></bar-baz></foo-bar>',
 				[
@@ -4041,6 +4043,68 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				],
 				false,
 			],
+
+			'custom_element-removed-empty'    => [
+				'<foo-bar></foo-bar>',
+				'',
+				[
+					[
+						'node_name'       => 'foo-bar',
+						'parent_name'     => 'body',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
+					],
+				],
+				true, // Sanitize.
+			],
+
+			'custom_elements-kept-repeated'   => [
+				'<foo-bar><span>Hello!</span></foo-bar><foo-bar><span>Hello!</span></foo-bar>',
+				'<foo-bar><span>Hello!</span></foo-bar><foo-bar><span>Hello!</span></foo-bar>',
+				[
+					[
+						'node_name'       => 'foo-bar',
+						'parent_name'     => 'body',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
+					],
+					[
+						'node_name'       => 'foo-bar',
+						'parent_name'     => 'body',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
+					],
+				],
+				false, // Sanitize.
+			],
+
+			'custom_elements-devmode'         => [
+				sprintf( '<foo-bar %1$s><bar-baz %1$s><span>Hello!</span></bar-baz></foo-bar>', DevMode::DEV_MODE_ATTRIBUTE ),
+				sprintf( '<foo-bar %1$s><bar-baz %1$s><span>Hello!</span></bar-baz></foo-bar>', DevMode::DEV_MODE_ATTRIBUTE ),
+				[],
+				true, // Sanitize.
+				true, // Dev Mode.
+			],
+
+			'custom_elements-amp-unvalidated' => [
+				sprintf( '<foo-bar %1$s><bar-baz %1$s><span>Hello!</span></bar-baz></foo-bar>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				sprintf( '<foo-bar %1$s><bar-baz %1$s><span>Hello!</span></bar-baz></foo-bar>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				[],
+				true, // Sanitize.
+			],
+
+			'custom_elements-px-verified'     => [
+				sprintf( '<foo-bar %1$s><bar-baz %1$s><span>Hello!</span></bar-baz></foo-bar>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				sprintf( '<foo-bar %1$s><bar-baz %1$s><span>Hello!</span></bar-baz></foo-bar>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				[],
+				true, // Sanitize.
+			],
 		];
 	}
 
@@ -4055,14 +4119,20 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 	 * @param array[] $expected_errors  Expected errors.
 	 * @param bool    $sanitize         Whether the invalid markup should be sanitized.
 	 */
-	public function test_replace_node_with_children_validation_errors( $source_content, $expected_content, $expected_errors, $sanitize = true ) {
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source_content );
+	public function test_replace_node_with_children_validation_errors( $source_content, $expected_content, $expected_errors, $sanitize = true, $dev_mode = false ) {
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source_content );
+
+		if ( $dev_mode ) {
+			$dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+		}
+
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
 			[
 				'validation_error_callback' => function( $error, $context ) use ( &$expected_errors, $sanitize ) {
 					$expected = array_shift( $expected_errors );
-					$tag      = $expected['node_name'];
+					$this->assertIsArray( $expected );
+					$tag = $expected['node_name'];
 					$this->assertEquals( $expected, $error );
 					$this->assertInstanceOf( 'DOMElement', $context['node'] );
 					$this->assertEquals( $tag, $context['node']->tagName );
