@@ -22,7 +22,7 @@ export const User = createContext();
  *
  * @param {Object}  props                           Component props.
  * @param {?any}    props.children                  Component children.
- * @param {boolean} props.allowConfiguredPluginOnly Provide only if the plugin has been configured (Onboarding Wizard complete).
+ * @param {boolean} props.allowConfiguredPluginOnly Provided only for functionality that requires the plugin to be configured.
  * @param {string}  props.userOptionDeveloperTools  The key of the option to use from the settings endpoint.
  * @param {string}  props.userRestPath              REST endpoint to retrieve options.
  */
