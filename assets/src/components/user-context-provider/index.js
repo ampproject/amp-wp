@@ -20,22 +20,28 @@ export const User = createContext();
 /**
  * Context provider user data.
  *
- * @param {Object}  props                               Component props.
- * @param {?any}    props.children                      Component children.
- * @param {boolean} props.onlyFetchIfPluginIsConfigured Flag indicating whether the users data should be fetched only if the plugin is fully configured (i.e. the Onboarding Wizard has been completed).
- * @param {string}  props.userFieldReviewPanelIsDismissed The key of the option to use from the settings endpoint.
- * @param {string}  props.userOptionDeveloperTools      The key of the option to use from the settings endpoint.
- * @param {string}  props.usersResourceRestPath         The REST path for interacting with the `users` resources.
+ * @param {Object}  props                                              Component props.
+ * @param {?any}    props.children                                     Component children.
+ * @param {boolean} props.onlyFetchIfPluginIsConfigured                Flag indicating whether the users data should be fetched only if the plugin is fully configured (i.e. the Onboarding Wizard has been completed).
+ * @param {string}  props.userFieldReviewPanelDismissedForTemplateMode The key of the option to use from the settings endpoint.
+ * @param {string}  props.userOptionDeveloperTools                     The key of the option to use from the settings endpoint.
+ * @param {string}  props.usersResourceRestPath                        The REST path for interacting with the `users` resources.
  */
-export function UserContextProvider( { children, onlyFetchIfPluginIsConfigured = true, userFieldReviewPanelIsDismissed, userOptionDeveloperTools, usersResourceRestPath } ) {
+export function UserContextProvider( {
+	children,
+	onlyFetchIfPluginIsConfigured = true,
+	userFieldReviewPanelDismissedForTemplateMode,
+	userOptionDeveloperTools,
+	usersResourceRestPath,
+} ) {
 	const { originalOptions, fetchingOptions } = useContext( Options );
 	const { plugin_configured: pluginConfigured } = originalOptions;
 	const [ fetchingUser, setFetchingUser ] = useState( false );
 	const [ developerToolsOption, setDeveloperToolsOption ] = useState( null );
-	const [ isReviewPanelDismissed, setIsReviewPanelDismissed ] = useState( null );
+	const [ reviewPanelDismissedForTemplateMode, setReviewPanelDismissedForTemplateMode ] = useState( null );
 	const [ originalDeveloperToolsOption, setOriginalDeveloperToolsOption ] = useState( null );
 	const [ savingDeveloperToolsOption, setSavingDeveloperToolsOption ] = useState( false );
-	const [ savingIsReviewPanelDismissed, setSavingIsReviewPanelDismissed ] = useState( false );
+	const [ savingReviewPanelDismissedForTemplateMode, setSavingReviewPanelDismissedForTemplateMode ] = useState( false );
 	const [ didSaveDeveloperToolsOption, setDidSaveDeveloperToolsOption ] = useState( false );
 	const { setAsyncError } = useAsyncError();
 
@@ -85,7 +91,7 @@ export function UserContextProvider( { children, onlyFetchIfPluginIsConfigured =
 
 				setOriginalDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
 				setDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
-				setIsReviewPanelDismissed( fetchedUser[ userFieldReviewPanelIsDismissed ] );
+				setReviewPanelDismissedForTemplateMode( fetchedUser[ userFieldReviewPanelDismissedForTemplateMode ] );
 			} catch ( e ) {
 				setAsyncError( e );
 				return;
@@ -93,10 +99,10 @@ export function UserContextProvider( { children, onlyFetchIfPluginIsConfigured =
 
 			setFetchingUser( false );
 		} )();
-	}, [ onlyFetchIfPluginIsConfigured, fetchingOptions, fetchingUser, originalDeveloperToolsOption, pluginConfigured, setAsyncError, userFieldReviewPanelIsDismissed, userOptionDeveloperTools, usersResourceRestPath ] );
+	}, [ onlyFetchIfPluginIsConfigured, fetchingOptions, fetchingUser, originalDeveloperToolsOption, pluginConfigured, setAsyncError, userFieldReviewPanelDismissedForTemplateMode, userOptionDeveloperTools, usersResourceRestPath ] );
 
 	/**
-	 * Sends the option back to the REST endpoint to be saved.
+	 * Sends the dev tools option back to the REST endpoint to be saved.
 	 */
 	const saveDeveloperToolsOption = useCallback( async () => {
 		if ( ! hasDeveloperToolsOptionChange ) {
@@ -130,23 +136,24 @@ export function UserContextProvider( { children, onlyFetchIfPluginIsConfigured =
 	}, [ hasDeveloperToolsOptionChange, developerToolsOption, setAsyncError, userOptionDeveloperTools, usersResourceRestPath ] );
 
 	/**
-	 * Sends the option back to the REST endpoint to be saved.
+	 * Sends the template mode for which the "Review" panel is dismissed back to
+	 * the REST endpoint to be saved.
 	 */
-	const saveIsReviewPanelDismissed = useCallback( async ( isDismissed ) => {
-		setIsReviewPanelDismissed( isDismissed );
-
-		if ( savingIsReviewPanelDismissed ) {
+	const saveReviewPanelDismissedForTemplateMode = useCallback( async ( templateMode ) => {
+		if ( savingReviewPanelDismissedForTemplateMode ) {
 			return;
 		}
 
-		setSavingIsReviewPanelDismissed( true );
+		// Update the local state immediately.
+		setReviewPanelDismissedForTemplateMode( templateMode );
+		setSavingReviewPanelDismissedForTemplateMode( true );
 
 		try {
 			await apiFetch( {
 				method: 'post',
 				path: `${ usersResourceRestPath }/me`,
 				data: {
-					[ userFieldReviewPanelIsDismissed ]: isDismissed,
+					[ userFieldReviewPanelDismissedForTemplateMode ]: templateMode,
 				},
 			} );
 
@@ -158,8 +165,8 @@ export function UserContextProvider( { children, onlyFetchIfPluginIsConfigured =
 			return;
 		}
 
-		setSavingIsReviewPanelDismissed( false );
-	}, [ savingIsReviewPanelDismissed, setAsyncError, userFieldReviewPanelIsDismissed, usersResourceRestPath ] );
+		setSavingReviewPanelDismissedForTemplateMode( false );
+	}, [ savingReviewPanelDismissedForTemplateMode, setAsyncError, userFieldReviewPanelDismissedForTemplateMode, usersResourceRestPath ] );
 
 	return (
 		<User.Provider
@@ -169,12 +176,13 @@ export function UserContextProvider( { children, onlyFetchIfPluginIsConfigured =
 					fetchingUser,
 					didSaveDeveloperToolsOption,
 					hasDeveloperToolsOptionChange,
-					isReviewPanelDismissed,
+					reviewPanelDismissedForTemplateMode,
 					originalDeveloperToolsOption,
 					saveDeveloperToolsOption,
 					savingDeveloperToolsOption,
 					setDeveloperToolsOption,
-					saveIsReviewPanelDismissed,
+					saveReviewPanelDismissedForTemplateMode,
+					savingReviewPanelDismissedForTemplateMode,
 				}
 			}
 		>
@@ -186,7 +194,7 @@ export function UserContextProvider( { children, onlyFetchIfPluginIsConfigured =
 UserContextProvider.propTypes = {
 	children: PropTypes.any,
 	onlyFetchIfPluginIsConfigured: PropTypes.bool,
-	userFieldReviewPanelIsDismissed: PropTypes.string.isRequired,
+	userFieldReviewPanelDismissedForTemplateMode: PropTypes.string.isRequired,
 	userOptionDeveloperTools: PropTypes.string.isRequired,
 	usersResourceRestPath: PropTypes.string.isRequired,
 };

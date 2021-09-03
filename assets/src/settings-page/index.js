@@ -9,7 +9,7 @@ import {
 	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-	USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE,
+	USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 	USERS_RESOURCE_REST_PATH,
 } from 'amp-settings';
 
@@ -38,7 +38,6 @@ import { AMPDrawer } from '../components/amp-drawer';
 import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
 import { ErrorScreen } from '../components/error-screen';
 import { User, UserContextProvider } from '../components/user-context-provider';
-import { IconLaptopSearch } from '../components/svg/icon-laptop-search';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
@@ -75,7 +74,7 @@ function Providers( { children } ) {
 						<UserContextProvider
 							onlyFetchIfPluginIsConfigured={ false }
 							userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
-							userFieldReviewPanelIsDismissed={ USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE }
+							userFieldReviewPanelDismissedForTemplateMode={ USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE }
 							usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 						>
 							<ReaderThemesContextProvider
@@ -132,12 +131,7 @@ function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
 
 	const { hasOptionsChanges, fetchingOptions, saveOptions } = useContext( Options );
-	const {
-		hasDeveloperToolsOptionChange,
-		isReviewPanelDismissed,
-		saveDeveloperToolsOption,
-		saveIsReviewPanelDismissed,
-	} = useContext( User );
+	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption } = useContext( User );
 	const { templateModeWasOverridden } = useContext( ReaderThemes );
 
 	/**
@@ -199,25 +193,7 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 			<Welcome />
-			{ ! isReviewPanelDismissed && (
-				<AMPDrawer
-					heading={ (
-						<>
-							<IconLaptopSearch />
-							{ __( 'Review', 'amp' ) }
-						</>
-					) }
-					hiddenTitle={ __( 'Review', 'amp' ) }
-					id="site-review"
-					initialOpen={ true }
-				>
-					<SiteReview
-						dismiss={ () => {
-							saveIsReviewPanelDismissed( true );
-						} }
-					/>
-				</AMPDrawer>
-			) }
+			<SiteReview />
 			<form onSubmit={ onSubmit }>
 				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />
 				<h2 id="advanced-settings">
