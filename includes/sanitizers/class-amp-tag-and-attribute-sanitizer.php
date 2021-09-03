@@ -2559,6 +2559,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.3.3
 	 * @since 1.0 Fix silently removing unrecognized elements.
 	 * @see https://github.com/ampproject/amp-wp/issues/1100
+	 * @see AMP_Base_Sanitizer::remove_invalid_child()
 	 *
 	 * @param DOMElement $node Node.
 	 * @return bool Whether replacement was done.
@@ -2572,17 +2573,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 
-		// Prevent double-reporting nodes that are rejected for sanitization.
-		if ( isset( $this->should_not_replace_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_replace_nodes[ $node->nodeName ], true ) ) {
-			return false;
-		}
-
 		// Replace node with fragment.
 		$should_replace = $this->should_sanitize_validation_error( [], compact( 'node' ) );
 		if ( ! $should_replace ) {
-			// @todo This should instead mark the element as being kept.
-
-			$this->should_not_replace_nodes[ $node->nodeName ][] = $node;
+			ValidationExemption::mark_node_as_amp_unvalidated( $node );
 			return false;
 		}
 
@@ -2650,7 +2644,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Remove ancestor elements until one has attributes or has child nodes.
 	 *
 	 * @todo Does this parent removal even make sense anymore? Perhaps limit to <p> only.
-	 * @param Element $parent
+	 * @param Element $parent Parent.
 	 */
 	private function remove_ancestors_until_not_empty( Element $parent ) {
 		while ( $parent && ! $parent->hasChildNodes() && ! $parent->hasAttributes() && $this->root_element !== $parent ) {

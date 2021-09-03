@@ -82,13 +82,6 @@ abstract class AMP_Base_Sanitizer {
 	protected $root_element;
 
 	/**
-	 * Keep track of nodes that should not be removed to prevent duplicated validation errors since sanitization is rejected.
-	 *
-	 * @var array
-	 */
-	private $nodes_to_keep = [];
-
-	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.2
@@ -513,12 +506,6 @@ abstract class AMP_Base_Sanitizer {
 			return false;
 		}
 
-		// Prevent double-reporting nodes that are rejected for sanitization.
-		// @todo This would be obsolete with the marking of attributes as being AMP-unvalidated.
-		if ( isset( $this->nodes_to_keep[ $node->nodeName ] ) && in_array( $node, $this->nodes_to_keep[ $node->nodeName ], true ) ) {
-			return false;
-		}
-
 		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 		if ( $should_remove ) {
 			if ( null === $node->parentNode ) {
@@ -528,8 +515,6 @@ abstract class AMP_Base_Sanitizer {
 
 			$node->parentNode->removeChild( $node );
 		} else {
-			$this->nodes_to_keep[ $node->nodeName ][] = $node;
-
 			ValidationExemption::mark_node_as_amp_unvalidated( $node );
 		}
 		return $should_remove;

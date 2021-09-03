@@ -4022,7 +4022,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 
 			'custom_elements-kept'            => [
 				'<foo-bar><bar-baz><span>Hello!</span></bar-baz></foo-bar>',
-				'<foo-bar><bar-baz><span>Hello!</span></bar-baz></foo-bar>',
+				sprintf( '<foo-bar %1$s><bar-baz %1$s><span>Hello!</span></bar-baz></foo-bar>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
 				[
 					[
 						'node_name'       => 'bar-baz',
@@ -4062,7 +4062,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 
 			'custom_elements-kept-repeated'   => [
 				'<foo-bar><span>Hello!</span></foo-bar><foo-bar><span>Hello!</span></foo-bar>',
-				'<foo-bar><span>Hello!</span></foo-bar><foo-bar><span>Hello!</span></foo-bar>',
+				sprintf( '<foo-bar %1$s><span>Hello!</span></foo-bar><foo-bar %1$s><span>Hello!</span></foo-bar>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
 				[
 					[
 						'node_name'       => 'foo-bar',
