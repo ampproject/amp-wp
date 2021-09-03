@@ -13,6 +13,8 @@ use AmpProject\AmpWP\Tests\TestCase;
  * Tests for AMP_Comments_Sanitizer class.
  *
  * @since 0.7
+ *
+ * @coversDefaultClass \AMP_Comments_Sanitizer
  */
 class Test_AMP_Comments_Sanitizer extends TestCase {
 
@@ -39,7 +41,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	/**
 	 * Test AMP_Comments_Sanitizer::sanitize.
 	 *
-	 * @covers AMP_Comments_Sanitizer::sanitize()
+	 * @covers ::sanitize()
 	 */
 	public function test_sanitize_incorrect_action() {
 		$instance = new AMP_Comments_Sanitizer( $this->dom );
@@ -57,7 +59,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	/**
 	 * Test AMP_Comments_Sanitizer::sanitize.
 	 *
-	 * @covers AMP_Comments_Sanitizer::sanitize()
+	 * @covers ::sanitize()
 	 */
 	public function test_sanitize_allowed_action_xhr() {
 		update_option( 'thread_comments', '1' );
@@ -81,7 +83,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	/**
 	 * Test AMP_Comments_Sanitizer::sanitize() when a comments form has not been converted into an amp-form.
 	 *
-	 * @covers AMP_Comments_Sanitizer::sanitize()
+	 * @covers ::sanitize()
 	 */
 	public function test_sanitize_native_post_form() {
 		$comments_sanitizer = new AMP_Comments_Sanitizer( $this->dom );
@@ -95,7 +97,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	/**
 	 * Test AMP_Comments_Sanitizer::process_comment_form.
 	 *
-	 * @covers AMP_Comments_Sanitizer::process_comment_form()
+	 * @covers ::process_comment_form()
 	 */
 	public function test_process_comment_form() {
 		update_option( 'thread_comments', '1' );
@@ -122,7 +124,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	/**
 	 * Test AMP_Comments_Sanitizer::add_amp_live_list_comment_attributes.
 	 *
-	 * @covers AMP_Comments_Sanitizer::add_amp_live_list_comment_attributes()
+	 * @covers ::add_amp_live_list_comment_attributes()
 	 */
 	public function test_add_amp_live_list_comment_attributes() {
 		$instance = new AMP_Comments_Sanitizer(

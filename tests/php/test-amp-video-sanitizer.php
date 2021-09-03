@@ -8,13 +8,14 @@
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Dom\Document;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
 /**
  * Class AMP_Video_Converter_Test
  *
- * @covers AMP_Video_Sanitizer
+ * @coversDefaultClass \AMP_Video_Sanitizer
  */
 class AMP_Video_Converter_Test extends TestCase {
 
@@ -28,6 +29,29 @@ class AMP_Video_Converter_Test extends TestCase {
 			$this->remove_added_uploads();
 		}
 		parent::tearDown();
+	}
+
+	/** @covers ::get_selector_conversion_mapping() */
+	public function test_get_selector_conversion_mapping() {
+		$dom = Document::fromHtmlFragment( '<p>Hello world</p>' );
+
+		$with_defaults = new AMP_Video_Sanitizer( $dom );
+		$this->assertEquals(
+			[ 'video' => [ 'amp-video', 'amp-youtube' ] ],
+			$with_defaults->get_selector_conversion_mapping()
+		);
+
+		$with_false_native_used = new AMP_Video_Sanitizer( $dom, [ 'native_video_used' => false ] );
+		$this->assertEquals(
+			[ 'video' => [ 'amp-video', 'amp-youtube' ] ],
+			$with_false_native_used->get_selector_conversion_mapping()
+		);
+
+		$with_true_native_used = new AMP_Video_Sanitizer( $dom, [ 'native_video_used' => true ] );
+		$this->assertEquals(
+			[],
+			$with_true_native_used->get_selector_conversion_mapping()
+		);
 	}
 
 	/**
@@ -280,6 +304,7 @@ class AMP_Video_Converter_Test extends TestCase {
 	 * Test converter.
 	 *
 	 * @dataProvider get_data
+	 * @covers ::sanitize()
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
@@ -317,6 +342,8 @@ class AMP_Video_Converter_Test extends TestCase {
 
 	/**
 	 * Test that HTTPS is enforced.
+	 *
+	 * @covers ::sanitize()
 	 */
 	public function test__https_required() {
 		$source   = '<video width="300" height="300" src="http://example.com/video.mp4"></video>';
@@ -340,6 +367,9 @@ class AMP_Video_Converter_Test extends TestCase {
 
 	/**
 	 * Test that scripts don't picked up as expected.
+	 *
+	 * @covers ::sanitize()
+	 * @covers ::get_scripts()
 	 */
 	public function test_get_scripts__didnt_convert() {
 		$source   = '<p>Hello World</p>';
@@ -361,6 +391,9 @@ class AMP_Video_Converter_Test extends TestCase {
 
 	/**
 	 * Test that scripts get picked up.
+	 *
+	 * @covers ::sanitize()
+	 * @covers ::get_scripts()
 	 */
 	public function test_get_scripts__did_convert() {
 		$source   = '<video width="300" height="300" src="https://example.com/video.mp4"></video>';

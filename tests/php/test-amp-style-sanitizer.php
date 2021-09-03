@@ -1206,6 +1206,38 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'.wp-block-pullquote:not(.is-style-solid-color)[style*="border-color"] { border: 2px solid; }',
 				'.wp-block-pullquote:not(.is-style-solid-color)[data-amp-original-style*="border-color"]{border:2px solid}',
 			],
+			'converted_elements_used' => [
+				'
+					<video width="100" height="200" src="https://example.com/video.mp4"></video>
+					<audio width="100" height="200" src="https://example.com/audio.mp3"></audio>
+					<img width="100" height="200" src="https://example.com/img.jpg">
+					<iframe width="100" height="200" src="https://example.com/page.html"></iframe>
+				',
+				'audio { color:red; } video { color:blue; } img { color:green; } iframe { color:yellow; }',
+				'amp-audio{color:red}amp-video{color:blue}amp-img{color:green}amp-iframe{color:yellow}',
+				[
+					AMP_Img_Sanitizer::class    => [ 'native_img_used' => false ],
+					AMP_Audio_Sanitizer::class  => [ 'native_audio_used' => false ],
+					AMP_Video_Sanitizer::class  => [ 'native_video_used' => false ],
+					AMP_Iframe_Sanitizer::class => [ 'native_iframe_used' => false ],
+				],
+			],
+			'native_elements_used' => [
+				'
+					<video width="100" height="200" src="https://example.com/video.mp4"></video>
+					<audio width="100" height="200" src="https://example.com/audio.mp3"></audio>
+					<img width="100" height="200" src="https://example.com/img.jpg">
+					<iframe width="100" height="200" src="https://example.com/page.html"></iframe>
+				',
+				'audio { color:red; } video { color:blue; } img { color:green; } iframe { color:yellow; }',
+				'audio{color:red}video{color:blue}img{color:green}iframe{color:yellow}',
+				[
+					AMP_Img_Sanitizer::class    => [ 'native_img_used' => true ],
+					AMP_Audio_Sanitizer::class  => [ 'native_audio_used' => true ],
+					AMP_Video_Sanitizer::class  => [ 'native_video_used' => true ],
+					AMP_Iframe_Sanitizer::class => [ 'native_iframe_used' => true ],
+				],
+			],
 		];
 	}
 
@@ -1219,12 +1251,19 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * @param string $input  Input stylesheet.
 	 * @param string $output Output stylesheet.
 	 */
-	public function test_amp_selector_conversion( $markup, $input, $output ) {
+	public function test_amp_selector_conversion( $markup, $input, $output, $sanitizers_args = [] ) {
 		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body>$markup</body></html>";
 		$dom  = Document::fromHtml( $html, Options::DEFAULTS );
 
 		$sanitizer_classes = amp_get_content_sanitizers();
-		$sanitized         = AMP_Content_Sanitizer::sanitize_document(
+		foreach ( $sanitizers_args as $sanitizer_class => $sanitizer_args ) {
+			$sanitizer_classes[ $sanitizer_class ] = array_merge(
+				$sanitizer_classes[ $sanitizer_class ],
+				$sanitizer_args
+			);
+		}
+
+		$sanitized = AMP_Content_Sanitizer::sanitize_document(
 			$dom,
 			$sanitizer_classes,
 			[

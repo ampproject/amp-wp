@@ -8,17 +8,41 @@
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Dom\Document;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
 /**
  * Class AMP_Audio_Converter_Test
  *
- * @covers AMP_Audio_Sanitizer
+ * @coversDefaultClass \AMP_Audio_Sanitizer
  */
 class AMP_Audio_Converter_Test extends TestCase {
 
 	use MarkupComparison;
+
+	/** @covers ::get_selector_conversion_mapping() */
+	public function test_get_selector_conversion_mapping() {
+		$dom = Document::fromHtmlFragment( '<p>Hello world</p>' );
+
+		$with_defaults = new AMP_Audio_Sanitizer( $dom );
+		$this->assertEquals(
+			[ 'audio' => [ 'amp-audio' ] ],
+			$with_defaults->get_selector_conversion_mapping()
+		);
+
+		$with_false_native_used = new AMP_Audio_Sanitizer( $dom, [ 'native_audio_used' => false ] );
+		$this->assertEquals(
+			[ 'audio' => [ 'amp-audio' ] ],
+			$with_false_native_used->get_selector_conversion_mapping()
+		);
+
+		$with_true_native_used = new AMP_Audio_Sanitizer( $dom, [ 'native_audio_used' => true ] );
+		$this->assertEquals(
+			[],
+			$with_true_native_used->get_selector_conversion_mapping()
+		);
+	}
 
 	/**
 	 * Get data.
@@ -242,6 +266,8 @@ class AMP_Audio_Converter_Test extends TestCase {
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
 	 * @param array  $args     Args for sanitizer.
+	 *
+	 * @covers ::sanitize()
 	 */
 	public function test_converter( $source, $expected = null, $args = [] ) {
 		if ( null === $expected ) {
@@ -270,6 +296,8 @@ class AMP_Audio_Converter_Test extends TestCase {
 
 	/**
 	 * Test that HTTPS is enforced.
+	 *
+	 * @covers ::sanitize()
 	 */
 	public function test__https_required() {
 		$source   = '<audio src="http://example.com/audio/file.ogg"></audio>';
@@ -290,6 +318,9 @@ class AMP_Audio_Converter_Test extends TestCase {
 
 	/**
 	 * Test that scripts don't get picked up.
+	 *
+	 * @covers ::sanitize()
+	 * @covers ::get_scripts()
 	 */
 	public function test_get_scripts__didnt_convert() {
 		$source   = '<p>Hello World</p>';
@@ -311,6 +342,9 @@ class AMP_Audio_Converter_Test extends TestCase {
 
 	/**
 	 * Test that scripts get picked up.
+	 *
+	 * @covers ::sanitize()
+	 * @covers ::get_scripts()
 	 */
 	public function test_get_scripts__did_convert() {
 		$source   = '<audio src="https://example.com/audio/file.ogg"></audio>';
