@@ -16,7 +16,9 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
-
+use AmpProject\AmpWP\Option;
+use WP_Error;
+use WP_User;
 /**
  * OptionsMenu class.
  *
@@ -39,6 +41,15 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @var string
 	 */
 	const ICON_BASE64_SVG = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjIiIGhlaWdodD0iNjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTQxLjYyODg2NjcgMjguMTYxNDMzM2wtMTMuMDA0NSAyMS42NDIxMzM0aC0yLjM1NmwyLjMyOTEzMzMtMTQuMTAxOS03LjIxMzcuMDA5M3MtLjA2ODIuMDAyMDY2Ni0uMTAwMjMzMy4wMDIwNjY2Yy0uNjQ5OTY2NyAwLTEuMTc1OTMzNC0uNTI1OTY2Ni0xLjE3NTkzMzQtMS4xNzU5MzMzIDAtLjI3OS4yNTkzNjY3LS43NTEyMzMzLjI1OTM2NjctLjc1MTIzMzNsMTIuOTYyMTMzMy0yMS42MTYzTDM1LjcyNDQgMTIuMTc5OWwtMi4zODgwMzMzIDE0LjEyMzYgNy4yNTA5LS4wMDkzcy4wNzc1LS4wMDEwMzMzLjExNDctLjAwMTAzMzNjLjY0OTk2NjYgMCAxLjE3NTkzMzMuNTI1OTY2NiAxLjE3NTkzMzMgMS4xNzU5MzMzIDAgLjI2MzUtLjEwMzMzMzMuNDk0OTY2Ny0uMjUwMDY2Ny42OTEzbC4wMDEwMzM0LjAwMTAzMzN6TTMxIDBDMTMuODc4NyAwIDAgMTMuODc5NzMzMyAwIDMxYzAgMTcuMTIxMyAxMy44Nzg3IDMxIDMxIDMxIDE3LjEyMDI2NjcgMCAzMS0xMy44Nzg3IDMxLTMxQzYyIDEzLjg3OTczMzMgNDguMTIwMjY2NyAwIDMxIDB6IiBmaWxsPSIjYTBhNWFhIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=';
+
+	/**
+	 * Handle for JS file.
+	 *
+	 * @since 2.2
+	 *
+	 * @var string
+	 */
+	const USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE = '';
 
 	/**
 	 * GoogleFonts instance.
@@ -112,6 +123,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$plugin_file = preg_replace( '#.+/(?=.+?/.+?)#', '', AMP__FILE__ );
 		add_filter( "plugin_action_links_{$plugin_file}", [ $this, 'add_plugin_action_links' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+
+		add_action( 'rest_api_init', [ $this, 'register_rest_field' ] );
 	}
 
 	/**
@@ -309,5 +322,99 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		foreach ( $paths as $path ) {
 			$this->rest_preloader->add_preloaded_path( $path );
 		}
+	}
+
+	/**
+	 * Register REST field for storing Review panel state.
+	 */
+	public function register_rest_field() {
+		register_rest_field(
+			'user',
+			'amp_review_panel_is_dismissed',
+			[
+				'get_callback'    => [ $this, 'rest_get_review_panel_is_dismissed' ],
+				'update_callback' => [ $this, 'rest_update_review_panel_is_dismissed' ],
+				'schema'          => [
+					'description' => __( 'Whether the Review panel on Settings screen was dismissed by a user', 'amp' ),
+					'type'        => 'boolean',
+				],
+			]
+		);
+	}
+
+	/**
+	 * Provides the user's dev tools enabled setting.
+	 *
+	 * @param array $user Array of user data prepared for REST.
+	 * @return null|boolean Whether tools are enabled for the user, or null if the option has not been set.
+	 */
+	public function rest_get_review_panel_is_dismissed( $user ) {
+		return $this->is_review_panel_dismissed( $user['id'] );
+	}
+
+	/**
+	 * Updates a user's dev tools enabled setting.
+	 *
+	 * @param bool    $dismissed New setting for whether dev tools are enabled for the user.
+	 * @param WP_User $user      The WP user to update.
+	 *
+	 * @return bool|WP_Error The result of update_user_meta, or WP_Error if the current user lacks permission.
+	 */
+	public function rest_update_review_panel_is_dismissed( bool $dismissed, WP_User $user ) {
+		if ( ! current_user_can( 'edit_user', $user->ID ) ) {
+			return new WP_Error(
+				'amp_rest_cannot_edit_user',
+				__( 'Sorry, the current user is not allowed to make this change.', 'amp' ),
+				[ 'status' => rest_authorization_required_code() ]
+			);
+		}
+
+		return $this->set_is_review_panel_dismissed( $user->ID, $dismissed );
+	}
+
+	/**
+	 * Determine whether developer tools are enabled for the a user and whether they can access them.
+	 *
+	 * @param null|WP_User|int $user User. Defaults to the current user.
+	 * @return bool Whether developer tools are enabled for the user.
+	 */
+	public function is_review_panel_dismissed( $user = null ) {
+		if ( null === $user ) {
+			$user = wp_get_current_user();
+		} elseif ( ! $user instanceof WP_User ) {
+			$user = new WP_User( $user );
+		}
+
+		$is_dismissed_for_template_mode = $user->get( self::USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE );
+
+		if ( empty( $is_dismissed_for_template_mode ) ) {
+			return false;
+		}
+
+		return $is_dismissed_for_template_mode === AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+	}
+
+	/**
+	 * Set user enabled.
+	 *
+	 * @param int|WP_User $user      User.
+	 * @param bool        $dismissed Whether enabled.
+	 *
+	 * @return bool Whether update was successful.
+	 */
+	public function set_is_review_panel_dismissed( $user, bool $dismissed ) {
+		if ( $user instanceof WP_User ) {
+			$user = $user->ID;
+		}
+
+		if ( false === $dismissed ) {
+			return delete_user_meta( (int) $user, self::USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE );
+		}
+
+		return (bool) update_user_meta(
+			(int) $user,
+			self::USER_FIELD_REVIEW_PANEL_IS_DISMISSED_FOR_TEMPLATE_MODE,
+			wp_json_encode( AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) )
+		);
 	}
 }
