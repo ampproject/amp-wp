@@ -94,8 +94,10 @@ final class ValidationExemption {
 
 		if ( $node instanceof Element ) {
 			if ( ! $node->hasAttribute( self::PX_VERIFIED_TAG_ATTRIBUTE ) ) {
-				$dom = self::get_document( $node );
-				$node->setAttributeNode( $dom->createAttribute( self::PX_VERIFIED_TAG_ATTRIBUTE ) );
+				if ( ! $node->ownerDocument ) {
+					return false; // @codeCoverageIgnore
+				}
+				$node->setAttributeNode( $node->ownerDocument->createAttribute( self::PX_VERIFIED_TAG_ATTRIBUTE ) );
 			}
 			return true;
 		}
@@ -103,7 +105,7 @@ final class ValidationExemption {
 		if ( $node instanceof DOMAttr ) {
 			$element = $node->parentNode;
 			if ( ! $element instanceof Element ) {
-				return false;
+				return false; // @codeCoverageIgnore
 			}
 
 			$attr_value = $element->getAttribute( self::PX_VERIFIED_ATTRS_ATTRIBUTE );
@@ -130,8 +132,10 @@ final class ValidationExemption {
 
 		if ( $node instanceof Element ) {
 			if ( ! $node->hasAttribute( self::AMP_UNVALIDATED_TAG_ATTRIBUTE ) ) {
-				$dom = self::get_document( $node );
-				$node->setAttributeNode( $dom->createAttribute( self::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
+				if ( ! $node->ownerDocument ) {
+					return false; // @codeCoverageIgnore
+				}
+				$node->setAttributeNode( $node->ownerDocument->createAttribute( self::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
 			}
 			return true;
 		}
@@ -139,7 +143,7 @@ final class ValidationExemption {
 		if ( $node instanceof DOMAttr ) {
 			$element = $node->parentNode;
 			if ( ! $element instanceof Element ) {
-				return false;
+				return false; // @codeCoverageIgnore
 			}
 
 			$attr_value = $element->getAttribute( self::AMP_UNVALIDATED_ATTRS_ATTRIBUTE );
@@ -239,20 +243,5 @@ final class ValidationExemption {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Get the document from the specified node.
-	 *
-	 * @param DOMNode $node The Node from which the document should be retrieved.
-	 * @return Document
-	 */
-	private static function get_document( DOMNode $node ) {
-		$document = $node->ownerDocument;
-		if ( ! $document instanceof Document ) {
-			$document = Document::fromNode( $node );
-		}
-
-		return $document;
 	}
 }
