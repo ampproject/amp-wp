@@ -37,6 +37,7 @@
     "@wordpress/icons": "5.0.2",
     "@wordpress/is-shallow-equal": "4.2.0",
     "@wordpress/url": "3.2.2",
+    "axios": "0.21.1",
     "classnames": "2.3.1",
     "clipboard": "2.0.8",
     "prop-types": "15.7.2",
@@ -74,6 +75,7 @@
     "eslint-plugin-jsdoc": "36.1.0",
     "eslint-plugin-react": "7.26.0",
     "eslint-plugin-react-hooks": "4.2.0",
+    "fs": "0.0.1-security",
     "grunt": "1.4.1",
     "grunt-contrib-clean": "2.0.0",
     "grunt-contrib-copy": "1.0.0",
@@ -92,12 +94,15 @@
     "react-test-renderer": "17.0.2",
     "rtlcss-webpack-plugin": "4.0.6",
     "svgo": "2.7.0",
-    "webpackbar": "5.0.0-3"
+    "underscore": "1.13.1",
+    "webpackbar": "5.0.0-3",
+    "wporg-api-client": "1.0.1"
   },
   "scripts": {
     "build:dev": "cross-env NODE_ENV=development npm-run-all 'build:!(dev|prod)'",
     "build:prod": "cross-env NODE_ENV=production npm-run-all 'build:!(dev|prod)'",
     "build:prepare": "grunt clean",
+    "build:json": "node ./bin/update-extension-json.js",
     "build:js": "wp-scripts build",
     "build:run": "grunt build",
     "build:zip": "grunt create-build-zip",
