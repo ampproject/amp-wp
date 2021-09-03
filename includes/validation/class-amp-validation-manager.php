@@ -1547,8 +1547,8 @@ class AMP_Validation_Manager {
 		}
 
 		/*
-		 * In AMP-first, mark document as being non-valid AMP so that the amp attribute will be omitted in order to
-		 * prevent GSC from complaining about a validation error already surfaced inside of WordPress.
+		 * In AMP-first, documents with invalid AMP markup can still be served. The amp attribute will be omitted in
+		 * order to prevent GSC from complaining about a validation error already surfaced inside of WordPress.
 		 * This is intended to not serve dirty AMP, but rather a non-AMP document (intentionally not valid AMP) that
 		 * contains the AMP runtime and AMP components.
 		 *
