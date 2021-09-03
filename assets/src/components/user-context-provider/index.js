@@ -20,13 +20,15 @@ export const User = createContext();
 /**
  * Context provider user data.
  *
- * @param {Object} props                          Component props.
- * @param {?any}   props.children                 Component children.
- * @param {string} props.userOptionDeveloperTools The key of the option to use from the settings endpoint.
- * @param {string} props.userRestPath             REST endpoint to retrieve options.
+ * @param {Object}  props                           Component props.
+ * @param {?any}    props.children                  Component children.
+ * @param {boolean} props.allowConfiguredPluginOnly Provide only if the plugin has been configured (Onboarding Wizard complete).
+ * @param {string}  props.userOptionDeveloperTools  The key of the option to use from the settings endpoint.
+ * @param {string}  props.userRestPath              REST endpoint to retrieve options.
  */
-export function UserContextProvider( { children, userOptionDeveloperTools, userRestPath } ) {
+export function UserContextProvider( { children, allowConfiguredPluginOnly = false, userOptionDeveloperTools, userRestPath } ) {
 	const { originalOptions, fetchingOptions } = useContext( Options );
+	const { plugin_configured: pluginConfigured } = originalOptions;
 	const [ fetchingUser, setFetchingUser ] = useState( false );
 	const [ developerToolsOption, setDeveloperToolsOption ] = useState( null );
 	const [ originalDeveloperToolsOption, setOriginalDeveloperToolsOption ] = useState( null );
@@ -52,7 +54,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 			return;
 		}
 
-		if ( ! originalOptions.plugin_configured ) {
+		if ( ! pluginConfigured && allowConfiguredPluginOnly ) {
 			setOriginalDeveloperToolsOption( null );
 			setDeveloperToolsOption( null );
 			return;
@@ -84,7 +86,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 			setFetchingUser( false );
 		} )();
-	}, [ fetchingOptions, fetchingUser, originalDeveloperToolsOption, originalOptions.plugin_configured, setAsyncError, userOptionDeveloperTools, userRestPath ] );
+	}, [ allowConfiguredPluginOnly, fetchingOptions, fetchingUser, originalDeveloperToolsOption, pluginConfigured, setAsyncError, userOptionDeveloperTools, userRestPath ] );
 
 	/**
 	 * Sends the option back to the REST endpoint to be saved.
@@ -136,6 +138,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 UserContextProvider.propTypes = {
 	children: PropTypes.any,
+	allowConfiguredPluginOnly: PropTypes.bool,
 	userOptionDeveloperTools: PropTypes.string.isRequired,
 	userRestPath: PropTypes.string.isRequired,
 };

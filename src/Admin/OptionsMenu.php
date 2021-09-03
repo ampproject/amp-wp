@@ -302,6 +302,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'/amp/v1/options',
 			'/amp/v1/reader-themes',
 			'/wp/v2/settings',
+			'/wp/v2/users/me',
 		];
 
 		foreach ( $paths as $path ) {
