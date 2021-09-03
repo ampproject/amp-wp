@@ -421,7 +421,6 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 		$dom       = Document::fromHtml( sprintf( '<div id="el" %s></div>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ) );
 		$el        = $dom->getElementById( 'el' );
 		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
-		$sanitizer->remove_invalid_child( $el );
 		$this->assertFalse( $sanitizer->remove_invalid_child( $el ) );
 		$this->assertInstanceOf( Element::class, $el->parentNode );
 
@@ -429,7 +428,6 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 		$dom       = Document::fromHtml( sprintf( '<div id="el" %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
 		$el        = $dom->getElementById( 'el' );
 		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
-		$sanitizer->remove_invalid_child( $el );
 		$this->assertFalse( $sanitizer->remove_invalid_child( $el ) );
 		$this->assertInstanceOf( Element::class, $el->parentNode );
 
@@ -681,6 +679,46 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$this->assertTrue( $sanitizer->remove_invalid_attribute( $element, $attr ) );
 		$this->assertFalse( $element->hasAttribute( $attr ) );
+	}
+
+	/** @covers ::remove_invalid_attribute() */
+	public function test_remove_invalid_attribute_with_validation_exemptions() {
+		// When no exemption attributes are present, the attribute gets removed.
+		$dom       = Document::fromHtml( '<div id="el"></div>' );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertTrue( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertFalse( $el->getAttributeNode( 'id' ) );
+
+		// When PX-verified attribute is present, the attribute does not get removed.
+		$dom       = Document::fromHtml( sprintf( '<div id="el" %s="id"></div>', ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertFalse( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertInstanceOf( DOMAttr::class, $el->getAttributeNode( 'id' ) );
+
+		// When AMP-unvalidated attribute is present, the attribute does not get removed.
+		$dom       = Document::fromHtml( sprintf( '<div id="el" %s="id"></div>', ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertFalse( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertInstanceOf( DOMAttr::class, $el->getAttributeNode( 'id' ) );
+
+		// Ensure that attribute is marked as being AMP-unvalidated if validation callback prevents removal.
+		$dom       = Document::fromHtml( '<div id="el"></div>' );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass(
+			AMP_Base_Sanitizer::class,
+			[
+				$dom,
+				[
+					'validation_error_callback' => '__return_false',
+				],
+			]
+		);
+		$this->assertFalse( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertInstanceOf( DOMAttr::class, $el->getAttributeNode( 'id' ) );
+		$this->assertEquals( 'id', $el->getAttribute( ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) );
 	}
 
 	/**
