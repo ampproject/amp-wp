@@ -26,7 +26,7 @@ describe( 'Other settings', () => {
 	it( 'persists the mobile redirect setting value', async () => {
 		const toggleSelector = '#other-settings .mobile-redirection .amp-setting-toggle input[type="checkbox"]';
 
-		// Confirm the mobile redirection is initially disabled.
+		// Confirm the mobile redirection is initially enabled.
 		await page.waitForSelector( toggleSelector );
 		await expect( page ).toMatchElement( `${ toggleSelector }:checked` );
 
