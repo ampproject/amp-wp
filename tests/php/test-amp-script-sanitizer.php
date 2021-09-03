@@ -353,8 +353,9 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 	/** @return array */
 	public function get_data_to_test_cascading_sanitizer_argument_changes_with_custom_scripts() {
 		return [
-			'custom_scripts_removed' => [ true ],
-			'custom_scripts_kept'    => [ false ],
+			'custom_scripts_removed'         => [ 3 ],
+			'custom_scripts_px_verified'     => [ 2 ],
+			'custom_scripts_amp_unvalidated' => [ 1 ],
 		];
 	}
 
@@ -363,35 +364,54 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 	 *
 	 * @covers AMP_Script_Sanitizer::init()
 	 *
-	 * @param bool $remove_custom_scripts Remove custom scripts.
+	 * @param int $level Level.
 	 */
-	public function test_cascading_sanitizer_argument_changes_with_custom_scripts( $remove_custom_scripts ) {
+	public function test_cascading_sanitizer_argument_changes_with_custom_scripts( $level ) {
+		switch ( $level ) {
+			case 3:
+				$tag_exemption_attribute  = '';
+				$attr_exemption_attribute = '';
+				break;
+			case 2:
+				$tag_exemption_attribute  = ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE;
+				$attr_exemption_attribute = ValidationExemption::PX_VERIFIED_ATTRS_ATTRIBUTE . '="onload"';
+				break;
+			case 1:
+				$tag_exemption_attribute  = ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE;
+				$attr_exemption_attribute = ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE . '="onload"';
+				break;
+		}
+
 		$dom = Document::fromHtml(
-			'
-			<html>
-				<head>
-					<style>
-					body { background: red; }
-					body.loaded { background: green; }
-					img { outline: solid 1px red; }
-					audio { outline: solid 1px green; }
-					video { outline: solid 1px blue; }
-					iframe { outline: solid 1px black; }
-					</style>
-				</head>
-				<body>
-					<img src="https://example.com/logo.png" width="300" height="100" alt="Logo">
-					<audio src="https://example.com/music.mp3" width="300" height="100"></audio>
-					<video src="https://example.com/movie.mp4" width="640" height="480"></video>
-					<iframe src="https://example.com/" width="100%" height="400"></iframe>
-					<amp-facebook-page width="340" height="130" layout="responsive" data-href="https://www.facebook.com/imdb/"></amp-facebook-page>
-					<form action="https://example.com/subscribe/" method="post">
-						<input type="email" name="email">
-					</form>
-					<script>document.addEventListener("DOMContentLoaded", () => document.body.classList.add("loaded"))</script>
-				</body>
-			</html>
-			',
+			sprintf(
+				'
+				<html>
+					<head>
+						<style>
+						body { background: red; }
+						body.loaded { background: green; }
+						img { outline: solid 1px red; }
+						audio { outline: solid 1px green !important; }
+						video { outline: solid 1px blue; }
+						iframe { outline: solid 1px black; }
+						</style>
+					</head>
+					<body onload="doSomething()" %s>
+						<img src="https://example.com/logo.png" width="300" height="100" alt="Logo">
+						<audio src="https://example.com/music.mp3" width="300" height="100"></audio>
+						<video src="https://example.com/movie.mp4" width="640" height="480"></video>
+						<iframe src="https://example.com/" width="100" height="400"></iframe>
+						<amp-facebook-page width="340" height="130" layout="responsive" data-href="https://www.facebook.com/imdb/"></amp-facebook-page>
+						<form action="https://example.com/subscribe/" method="post">
+							<input type="email" name="email">
+						</form>
+						<script %s>document.addEventListener("DOMContentLoaded", () => document.body.classList.add("loaded"))</script>
+					</body>
+				</html>
+				',
+				$attr_exemption_attribute,
+				$tag_exemption_attribute
+			),
 			Options::DEFAULTS
 		);
 
@@ -399,10 +419,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			AMP_Script_Sanitizer::class            => new AMP_Script_Sanitizer(
 				$dom,
 				[
-					'sanitize_js_scripts'       => true,
-					'validation_error_callback' => function () use ( $remove_custom_scripts ) {
-						return $remove_custom_scripts;
-					},
+					'sanitize_js_scripts' => true,
 				]
 			),
 			AMP_Img_Sanitizer::class               => new AMP_Img_Sanitizer(
@@ -432,10 +449,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			AMP_Form_Sanitizer::class              => new AMP_Form_Sanitizer(
 				$dom,
 				[
-					'native_post_forms_used'    => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
-					'validation_error_callback' => function () use ( $remove_custom_scripts ) {
-						return $remove_custom_scripts;
-					},
+					'native_post_forms_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
 			AMP_Style_Sanitizer::class             => new AMP_Style_Sanitizer(
@@ -466,46 +480,66 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 		$css_custom = $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 )->textContent;
 
 		$this->assertEquals(
-			$remove_custom_scripts ? 0 : 1,
+			3 === $level ? 0 : 1,
 			$dom->getElementsByTagName( Tag::SCRIPT )->length
 		);
 
 		$this->assertEquals(
-			$remove_custom_scripts ? 1 : 0,
+			1 !== $level ? 1 : 0,
 			$dom->getElementsByTagName( Extension::IMG )->length,
 			'Expected IMG to be converted to AMP-IMG when custom scripts are removed.'
 		);
-		$this->assertStringContainsString( $remove_custom_scripts ? '}amp-img{' : '}img{', $css_custom );
+		$this->assertStringContainsString(
+			1 !== $level ? '}amp-img{' : '}img{',
+			$css_custom
+		);
 
 		$this->assertEquals(
-			$remove_custom_scripts ? 1 : 0,
+			1 !== $level ? 1 : 0,
 			$dom->getElementsByTagName( Extension::VIDEO )->length,
 			'Expected VIDEO to be converted to AMP-VIDEO when custom scripts are removed.'
 		);
-		$this->assertStringContainsString( $remove_custom_scripts ? '}amp-video{' : '}video{', $css_custom );
+		$this->assertStringContainsString(
+			1 !== $level ? '}amp-video{' : '}video{',
+			$css_custom
+		);
 
 		$this->assertEquals(
-			$remove_custom_scripts ? 1 : 0,
+			1 !== $level ? 1 : 0,
 			$dom->getElementsByTagName( Extension::AUDIO )->length,
 			'Expected AUDIO to be converted to AMP-AUDIO when custom scripts are removed.'
 		);
-		$this->assertStringContainsString( $remove_custom_scripts ? '}amp-audio{' : '}audio{', $css_custom );
+
+		switch ( $level ) {
+			case 1:
+				$this->assertStringContainsString( '}audio{outline:solid 1px green !important}', $css_custom );
+				break;
+			case 2:
+				$this->assertStringContainsString( '}amp-audio{', $css_custom );
+				break;
+			case 3:
+				$this->assertStringContainsString( ':not(#_) amp-audio{', $css_custom );
+				break;
+		}
 
 		$this->assertEquals(
-			$remove_custom_scripts ? 1 : 0,
+			1 !== $level ? 1 : 0,
 			$dom->getElementsByTagName( Extension::IFRAME )->length,
 			'Expected IFRAME to be converted to AMP-IFRAME when custom scripts are removed.'
 		);
-		$this->assertStringContainsString( $remove_custom_scripts ? '}amp-iframe{' : '}iframe{', $css_custom );
+		$this->assertStringContainsString(
+			1 !== $level ? '}amp-iframe{' : '}iframe{',
+			$css_custom
+		);
 
-		if ( $remove_custom_scripts ) {
+		if ( 1 !== $level ) {
 			$this->assertEquals( 1, $dom->xpath->query( '//form[ @method = "post" and @action-xhr ]' )->length );
 		} else {
 			$this->assertEquals( 1, $dom->xpath->query( '//form[ @method = "post" and @action ]' )->length );
 		}
 
 		$style = $dom->getElementsByTagName( Tag::STYLE )->item( 0 );
-		if ( $remove_custom_scripts ) {
+		if ( 1 !== $level ) {
 			$this->assertStringNotContainsString( 'body.loaded{background:green}', $style->textContent );
 		} else {
 			$this->assertStringContainsString( 'body.loaded{background:green}', $style->textContent );
@@ -513,7 +547,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 
 		// Verify that prefer_bento got set.
 		$scripts = $sanitizers[ AMP_Tag_And_Attribute_Sanitizer::class ]->get_scripts();
-		if ( $remove_custom_scripts ) {
+		if ( 3 === $level ) {
 			$this->assertArrayHasKey( Extension::FACEBOOK_PAGE, $scripts );
 			$this->assertArrayNotHasKey( Extension::FACEBOOK, $scripts );
 		} else {
