@@ -115,11 +115,11 @@ class SandboxingLevelsTest extends DependencyInjectedTestCase {
 	}
 
 	/** @covers ::add_hooks() */
-	public function test_add_hooks_not_standard_mode( $level ) {
+	public function test_add_hooks_not_standard_mode() {
 		AMP_Options_Manager::update_options(
 			[
 				Option::THEME_SUPPORT                     => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
-				SandboxingLevels::OPTION_SANDBOXING_LEVEL => $level,
+				SandboxingLevels::OPTION_SANDBOXING_LEVEL => 2,
 			]
 		);
 		$this->instance->add_hooks();
