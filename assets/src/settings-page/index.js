@@ -46,7 +46,6 @@ import { SiteReview } from './site-review';
 import { PluginSuppression } from './plugin-suppression';
 import { Analytics } from './analytics';
 import { PairedUrlStructure } from './paired-url-structure';
-import { Review } from './review';
 import { MobileRedirection } from './mobile-redirection';
 import { DeveloperTools } from './developer-tools';
 
