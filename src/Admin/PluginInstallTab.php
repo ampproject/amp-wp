@@ -39,6 +39,8 @@ class PluginInstallTab implements Conditional, Service, Registerable {
 		add_filter( 'install_plugins_tabs', [ $this, 'add_tab' ] );
 		add_filter( 'install_plugins_table_api_args_amp', [ $this, 'amp_tab_args' ] );
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 10, 3 );
+
+		add_action( 'install_plugins_amp', [ $this, 'install_plugin_amp' ] );
 	}
 
 	/**
@@ -77,10 +79,35 @@ class PluginInstallTab implements Conditional, Service, Registerable {
 	 * @param string     $action   API Action.
 	 * @param array      $args     Args for plugin list.
 	 *
-	 * @return array List of AMP compatible plugins.
+	 * @return \stdClass|array List of AMP compatible plugins.
 	 */
 	public function plugins_api( $response, $action, $args ) {
 
+		$args = (array) $args;
+		if ( ! isset( $args['amp'] ) ) {
+			return $response;
+		}
+
+		$plugin_json = AMP__DIR__ . '/data/plugins.json';
+		$json_data   = file_get_contents( $plugin_json );
+
+		$response          = new \stdClass();
+		$response->plugins = json_decode( $json_data, true );
+		$response->info    = [
+			'page'    => 1,
+			'pages'   => 1,
+			'results' => count( $response->plugins ),
+		];
+
 		return $response;
+	}
+
+	/**
+	 * Content for AMP tab in plugin install screen.
+	 *
+	 * @return void
+	 */
+	public function install_plugin_amp() {
+		display_plugins_table();
 	}
 }
