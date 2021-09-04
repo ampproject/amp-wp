@@ -91,12 +91,12 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 				'comments_form_has_action_xhr'    => true,
 				'expect_ampify_comment_threading' => true,
 			],
-			'conditionally_yes' => [
+			'conditionally_no'  => [
 				'ampify_comment_threading'        => 'conditionally',
 				'comments_form_has_action_xhr'    => false,
 				'expect_ampify_comment_threading' => false,
 			],
-			'conditionally_no'  => [
+			'conditionally_yes' => [
 				'ampify_comment_threading'        => 'conditionally',
 				'comments_form_has_action_xhr'    => true,
 				'expect_ampify_comment_threading' => true,

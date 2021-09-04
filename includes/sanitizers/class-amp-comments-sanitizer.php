@@ -98,19 +98,14 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			$comment_reply_script = null;
 		}
 
-		if ( $comment_reply_script instanceof Element && 'never' === $this->args['ampify_comment_threading'] ) {
-			$this->prepare_native_comment_reply( $comment_reply_script );
+		if ( 'never' === $this->args['ampify_comment_threading'] ) {
+			if ( $comment_reply_script instanceof Element ) {
+				$this->prepare_native_comment_reply( $comment_reply_script );
+			}
 			return;
 		}
 
 		if ( $comment_reply_script instanceof Element ) {
-			// If the script was kept in the script sanitizer, then we're not going to remove it and we're not going
-			// to use the amp-bind implementation. So abort.
-			// @todo This case does not seem to ever be encountered.
-			if ( ValidationExemption::is_px_verified_for_node( $comment_reply_script ) ) {
-				return;
-			}
-
 			if (
 				'always' === $this->args['ampify_comment_threading']
 				||
@@ -123,6 +118,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				// Remove the script and then proceed with the amp-bind implementation below.
 				$comment_reply_script->parentNode->removeChild( $comment_reply_script );
 			} else {
+				// This is the conditionally-no case.
 				$this->prepare_native_comment_reply( $comment_reply_script );
 
 				// Do not proceed with the AMP-bind implementation for threaded comments since the comment-reply script was included.
