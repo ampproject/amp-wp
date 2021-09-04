@@ -10,7 +10,9 @@ use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\Extension;
+use AmpProject\Attribute;
 use AmpProject\Tag;
 
 /**
@@ -376,10 +378,9 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				$tag_exemption_attribute  = ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE;
 				$attr_exemption_attribute = ValidationExemption::PX_VERIFIED_ATTRS_ATTRIBUTE . '="onload"';
 				break;
-			case 1:
+			default:
 				$tag_exemption_attribute  = ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE;
 				$attr_exemption_attribute = ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE . '="onload"';
-				break;
 		}
 
 		$dom = Document::fromHtml(
@@ -422,6 +423,12 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 					'sanitize_js_scripts' => true,
 				]
 			),
+			AMP_Form_Sanitizer::class              => new AMP_Form_Sanitizer(
+				$dom,
+				[
+					'native_post_forms_allowed' => 'never', // Overridden by AMP_Script_Sanitizer when there is a kept script.
+				]
+			),
 			AMP_Img_Sanitizer::class               => new AMP_Img_Sanitizer(
 				$dom,
 				[
@@ -444,12 +451,6 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				$dom,
 				[
 					'native_iframe_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
-				]
-			),
-			AMP_Form_Sanitizer::class              => new AMP_Form_Sanitizer(
-				$dom,
-				[
-					'native_post_forms_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
 			AMP_Style_Sanitizer::class             => new AMP_Style_Sanitizer(
@@ -532,11 +533,10 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$css_custom
 		);
 
-		if ( 1 !== $level ) {
-			$this->assertEquals( 1, $dom->xpath->query( '//form[ @method = "post" and @action-xhr ]' )->length );
-		} else {
-			$this->assertEquals( 1, $dom->xpath->query( '//form[ @method = "post" and @action ]' )->length );
-		}
+		$post_form = $dom->xpath->query( '//form[ @method = "post" ]' )->item( 0 );
+		$this->assertInstanceOf( Element::class, $post_form );
+		$this->assertEquals( 3 === $level, $post_form->hasAttribute( Attribute::ACTION_XHR ) );
+		$this->assertEquals( 3 !== $level, $post_form->hasAttribute( Attribute::ACTION ) );
 
 		$style = $dom->getElementsByTagName( Tag::STYLE )->item( 0 );
 		if ( 1 !== $level ) {
