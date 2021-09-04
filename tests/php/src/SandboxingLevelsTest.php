@@ -13,9 +13,6 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AMP_Script_Sanitizer;
 use AMP_Form_Sanitizer;
 use AMP_Comments_Sanitizer;
-use AMP_Img_Sanitizer;
-use AMP_Core_Theme_Sanitizer;
-use AMP_Gallery_Block_Sanitizer;
 
 /** @coversDefaultClass \AmpProject\AmpWP\SandboxingLevels */
 class SandboxingLevelsTest extends DependencyInjectedTestCase {
@@ -128,29 +125,34 @@ class SandboxingLevelsTest extends DependencyInjectedTestCase {
 
 	/** @return array */
 	public function get_data_to_test_add_hooks() {
-		$sanitizer_args_all_levels    = [
-			AMP_Script_Sanitizer::class => [ 'sanitize_js_scripts' => true ],
-		];
-		$sanitizer_args_under_level_3 = [
-			AMP_Form_Sanitizer::class          => [ 'native_post_forms_used' => true ],
-			AMP_Comments_Sanitizer::class      => [ 'allow_commenting_scripts' => true ],
-			AMP_Img_Sanitizer::class           => [ 'native_img_used' => true ],
-			AMP_Core_Theme_Sanitizer::class    => [ 'native_img_used' => true ],
-			AMP_Gallery_Block_Sanitizer::class => [ 'native_img_used' => true ],
-		];
-
 		return [
 			'level_1' => [
 				'level'                   => 1,
-				'expected_sanitizer_args' => array_merge( $sanitizer_args_all_levels, $sanitizer_args_under_level_3 ),
+				'expected_sanitizer_args' => [
+					AMP_Script_Sanitizer::class   => [
+						'sanitize_js_scripts'   => true,
+						'comment_reply_allowed' => 'conditionally',
+					],
+					AMP_Form_Sanitizer::class     => [ 'native_post_forms_allowed' => 'conditionally' ],
+					AMP_Comments_Sanitizer::class => [ 'ampify_comment_threading' => 'conditionally' ],
+				],
 			],
 			'level_2' => [
 				'level'                   => 2,
-				'expected_sanitizer_args' => array_merge( $sanitizer_args_all_levels, $sanitizer_args_under_level_3 ),
+				'expected_sanitizer_args' => [
+					AMP_Script_Sanitizer::class   => [
+						'sanitize_js_scripts'   => true,
+						'comment_reply_allowed' => 'conditionally',
+					],
+					AMP_Form_Sanitizer::class     => [ 'native_post_forms_allowed' => 'conditionally' ],
+					AMP_Comments_Sanitizer::class => [ 'ampify_comment_threading' => 'conditionally' ],
+				],
 			],
 			'level_3' => [
 				'level'                   => 3,
-				'expected_sanitizer_args' => $sanitizer_args_all_levels,
+				'expected_sanitizer_args' => [
+					AMP_Script_Sanitizer::class => [ 'sanitize_js_scripts' => true ],
+				],
 			],
 		];
 	}

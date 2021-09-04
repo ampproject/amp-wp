@@ -8,10 +8,7 @@
 namespace AmpProject\AmpWP;
 
 use AMP_Comments_Sanitizer;
-use AMP_Core_Theme_Sanitizer;
 use AMP_Form_Sanitizer;
-use AMP_Gallery_Block_Sanitizer;
-use AMP_Img_Sanitizer;
 use AMP_Options_Manager;
 use AMP_Script_Sanitizer;
 use AmpProject\AmpWP\Infrastructure\Conditional;

@@ -15,7 +15,6 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
-use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use org\bovigo\vfs;
@@ -1890,7 +1889,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		add_filter(
 			'amp_content_sanitizers',
 			static function ( $sanitizers ) use ( $converted ) {
-				$sanitizers[ AMP_Form_Sanitizer::class ]['native_post_forms_used'] = ! $converted;
+				$sanitizers[ AMP_Form_Sanitizer::class ]['native_post_forms_allowed'] = $converted ? 'never' : 'always';
 				return $sanitizers;
 			}
 		);
