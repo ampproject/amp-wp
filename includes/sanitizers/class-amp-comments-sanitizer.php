@@ -11,7 +11,6 @@ use AmpProject\Attribute;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
 use AmpProject\Tag;
-use AmpProject\DevMode;
 
 /**
  * Class AMP_Comments_Sanitizer
@@ -40,12 +39,16 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Init.
 	 *
-	 * @param AMP_Base_Sanitizer[] $sanitizers
+	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
 	 */
 	public function init( $sanitizers ) {
 		parent::init( $sanitizers );
 
-		if ( array_key_exists( AMP_Style_Sanitizer::class, $sanitizers ) ) {
+		if (
+			array_key_exists( AMP_Style_Sanitizer::class, $sanitizers )
+			&&
+			$sanitizers[ AMP_Style_Sanitizer::class ] instanceof AMP_Style_Sanitizer
+		) {
 			$this->style_sanitizer = $sanitizers[ AMP_Style_Sanitizer::class ];
 		}
 	}
@@ -92,6 +95,12 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 		$comment_reply_script = $this->dom->getElementById( 'comment-reply-js' );
 		if ( $comment_reply_script instanceof Element && $comment_reply_script->parentNode ) {
+			// If the script was kept in the script sanitizer, then we're not going to remove it and we're not going
+			// to use the amp-bind implementation. So abort.
+			if ( ValidationExemption::is_px_verified_for_node( $comment_reply_script ) ) {
+				return;
+			}
+
 			if (
 				'always' === $this->args['ampify_comment_threading']
 				||

@@ -87,20 +87,6 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	protected $px_verified_kept_node_count = 0;
 
 	/**
-	 * The comment-reply.js script.
-	 *
-	 * @var Element
-	 */
-	protected $comment_reply_script;
-
-	/**
-	 * Whether the comment reply script retained.
-	 *
-	 * @var bool
-	 */
-	protected $retained_comment_reply_script = false;
-
-	/**
 	 * Sanitizers.
 	 *
 	 * @var AMP_Base_Sanitizer[]
@@ -251,6 +237,8 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				]'
 		);
 
+		$comment_reply_script = null;
+
 		/** @var Element $script */
 		foreach ( $scripts as $script ) {
 			if ( DevMode::hasExemptionForNode( $script ) ) { // @todo Should this also skip when AMP-unvalidated?
@@ -271,7 +259,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Defer consideration of commenting scripts until we've seen what other scripts are kept on the page.
 				if ( $script->getAttribute( Attribute::ID ) === 'comment-reply-js' ) {
-					$this->comment_reply_script = $script;
+					$comment_reply_script = $script;
 					continue;
 				}
 
@@ -359,28 +347,15 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// Handle the comment-reply script, removing it if it's not allowed or it is conditionally allowed,
-		// or mark it as PX-verified and retain it in the page.
-		if ( $this->comment_reply_script ) {
-			if (
-				'never' === $this->args['comment_reply_allowed']
-				||
-				(
-					'conditionally' === $this->args['comment_reply_allowed']
-					&&
-					( 0 === $this->px_verified_kept_node_count && 0 === $this->kept_script_count )
-				)
-			) {
-				// Do not remove the script here. The comments sanitizer will conditionally remove it it later.
-				// $this->comment_reply_script->parentNode->removeChild( $this->comment_reply_script );
-			} else {
-				$this->retained_comment_reply_script = true;
-
-				// Prevent the comment-reply script from being removed later.
-				ValidationExemption::mark_node_as_px_verified( $this->comment_reply_script );
-
-				// Improve performance by deferring comment-reply.
-				$this->comment_reply_script->setAttributeNode( $this->dom->createAttribute( 'defer' ) );
+		// Handle the comment-reply script, removing it if it's not never allowed, marking it as PX-verified if it is
+		// always allowed, or leaving it alone if it is 'conditionally' allowed since it will be dealt with later
+		// in the AMP_Comments_Sanitizer.
+		if ( $comment_reply_script ) {
+			if ( 'never' === $this->args['comment_reply_allowed'] ) {
+				$comment_reply_script->parentNode->removeChild( $comment_reply_script );
+			} elseif ( 'always' === $this->args['comment_reply_allowed'] ) {
+				// Prevent the comment-reply script from being removed later in the comments sanitizer.
+				ValidationExemption::mark_node_as_px_verified( $comment_reply_script );
 			}
 		}
 	}
