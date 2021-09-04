@@ -89,14 +89,24 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param Element $comment_form Comment form.
 	 */
 	protected function ampify_threaded_comments( Element $comment_form ) {
-		if ( ! get_option( 'thread_comments' ) || 'never' === $this->args['ampify_comment_threading'] ) {
+		if ( ! get_option( 'thread_comments' ) ) {
 			return;
 		}
 
 		$comment_reply_script = $this->dom->getElementById( 'comment-reply-js' );
-		if ( $comment_reply_script instanceof Element && $comment_reply_script->parentNode ) {
+		if ( ! $comment_reply_script->parentNode ) {
+			$comment_reply_script = null;
+		}
+
+		if ( $comment_reply_script instanceof Element && 'never' === $this->args['ampify_comment_threading'] ) {
+			$this->prepare_native_comment_reply( $comment_reply_script );
+			return;
+		}
+
+		if ( $comment_reply_script instanceof Element ) {
 			// If the script was kept in the script sanitizer, then we're not going to remove it and we're not going
 			// to use the amp-bind implementation. So abort.
+			// @todo This case does not seem to ever be encountered.
 			if ( ValidationExemption::is_px_verified_for_node( $comment_reply_script ) ) {
 				return;
 			}
@@ -113,15 +123,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				// Remove the script and then proceed with the amp-bind implementation below.
 				$comment_reply_script->parentNode->removeChild( $comment_reply_script );
 			} else {
-
-				// Mark the comment-reply script as being PX-verified, which was not done in the script sanitizer because
-				// we had to wait until after the form sanitizer ran to find out if we could conditionally serve valid AMP.
-				ValidationExemption::mark_node_as_px_verified( $comment_reply_script );
-
-				// Make sure that that inline styles are not transformed or else they will break comment-reply styling.
-				if ( $this->style_sanitizer ) {
-					$this->style_sanitizer->update_args( [ 'transform_important_qualifiers' => false ] );
-				}
+				$this->prepare_native_comment_reply( $comment_reply_script );
 
 				// Do not proceed with the AMP-bind implementation for threaded comments since the comment-reply script was included.
 				return;
@@ -246,6 +248,23 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				'tap',
 				sprintf( 'AMP.setState({%s: %s})', $state_id, wp_json_encode( $state, JSON_UNESCAPED_UNICODE ) )
 			);
+		}
+	}
+
+	/**
+	 * Prepare for native comment-reply functionality.
+	 *
+	 * @param Element $comment_reply_script Comment reply script.
+	 */
+	protected function prepare_native_comment_reply( Element $comment_reply_script ) {
+		// Mark the comment-reply script as being PX-verified, which was not done in the script sanitizer because
+		// we had to wait until after the form sanitizer ran to find out if we could conditionally serve valid AMP.
+		ValidationExemption::mark_node_as_px_verified( $comment_reply_script );
+		$comment_reply_script->setAttributeNode( $this->dom->createAttribute( 'defer' ) );
+
+		// Make sure that that inline styles are not transformed or else they will break comment-reply styling.
+		if ( $this->style_sanitizer ) {
+			$this->style_sanitizer->update_args( [ 'transform_important_qualifiers' => false ] );
 		}
 	}
 

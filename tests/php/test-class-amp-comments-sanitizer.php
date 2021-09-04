@@ -7,7 +7,6 @@
 
 use AmpProject\Amp;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use AmpProject\AmpWP\Tests\TestCase;
@@ -55,65 +54,9 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 			'<form action="https://example.com/" method="post"></form>'
 		);
 		update_option( 'thread_comments', '1' );
-		$sanitizer = new AMP_Comments_Sanitizer( $dom, [ 'thread_comments' => get_option( 'thread_comments' ) ] );
+		$sanitizer = new AMP_Comments_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$this->assertFalse( $dom->getElementsByTagName( Tag::FORM )->item( 0 )->hasAttribute( Attribute::ON ) );
-	}
-
-	/**
-	 * @covers ::sanitize()
-	 * @covers ::handle_unfiltered_html_comment_script()
-	 */
-	public function test_handle_unfiltered_html_comment_script_for_unauthenticated_user() {
-		setup_postdata( get_the_ID() );
-		$dom       = $this->get_document_with_comments( get_the_ID() );
-		$sanitizer = new AMP_Comments_Sanitizer( $dom );
-		$this->assertNull( $dom->getElementById( '_wp_unfiltered_html_comment_disabled' ) );
-		$sanitizer->sanitize();
-	}
-
-	/**
-	 * @covers ::sanitize()
-	 * @covers ::handle_unfiltered_html_comment_script()
-	 */
-	public function test_handle_unfiltered_html_comment_script_for_authenticated_user() {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		if ( ! current_user_can( 'unfiltered_html' ) ) {
-			$this->markTestSkipped( 'Unable to test when user cannot unfiltered_html.' );
-		}
-
-		setup_postdata( get_the_ID() );
-		$dom       = $this->get_document_with_comments( get_the_ID() );
-		$sanitizer = new AMP_Comments_Sanitizer( $dom );
-
-		$script = $dom->xpath->query( AMP_Comments_Sanitizer::UNFILTERED_HTML_COMMENT_SCRIPT_XPATH )->item( 0 );
-		$this->assertInstanceOf( Element::class, $script );
-		$this->assertFalse( $script->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
-		$sanitizer->sanitize();
-		$this->assertTrue( $script->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
-		$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
-	}
-
-	/**
-	 * @covers ::sanitize()
-	 * @covers ::handle_unfiltered_html_comment_script()
-	 */
-	public function test_handle_unfiltered_html_comment_script_for_authenticated_user_and_commenting_scripts_allowed() {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		if ( ! current_user_can( 'unfiltered_html' ) ) {
-			$this->markTestSkipped( 'Unable to test when user cannot unfiltered_html.' );
-		}
-
-		setup_postdata( get_the_ID() );
-		$dom       = $this->get_document_with_comments( get_the_ID() );
-		$sanitizer = new AMP_Comments_Sanitizer( $dom, [ 'allow_commenting_scripts' => true ] );
-
-		$script = $dom->xpath->query( AMP_Comments_Sanitizer::UNFILTERED_HTML_COMMENT_SCRIPT_XPATH )->item( 0 );
-		$this->assertInstanceOf( Element::class, $script );
-		$this->assertFalse( $script->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
-		$sanitizer->sanitize();
-		$this->assertTrue( $script->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
-		$this->assertTrue( ValidationExemption::is_px_verified_for_node( $script ) );
 	}
 
 	/**
@@ -123,8 +66,9 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	public function test_ampify_threaded_comments_without_threading() {
 		update_option( 'thread_comments', '' );
 		setup_postdata( get_the_ID() );
-		$dom       = $this->get_document_with_comments( get_the_ID() );
-		$sanitizer = new AMP_Comments_Sanitizer( $dom, [ 'thread_comments' => get_option( 'thread_comments' ) ] );
+		$dom = $this->get_document_with_comments( get_the_ID() );
+		$this->assertNull( $dom->getElementById( 'comment-reply-js' ) );
+		$sanitizer = new AMP_Comments_Sanitizer( $dom );
 
 		$sanitizer->sanitize();
 		$commentform = $dom->getElementById( 'commentform' );
@@ -134,122 +78,150 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 		$this->assertNull( $dom->getElementById( 'comment-reply-js' ) );
 	}
 
-	/**
-	 * @covers ::sanitize()
-	 * @covers ::ampify_threaded_comments()
-	 */
-	public function test_ampify_threaded_comments_with_threading_and_allow_commenting_scripts() {
-		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
-			$this->markTestSkipped( 'Skipping because the script ID attribute was added in WP 5.2.' );
-		}
-
-		update_option( 'thread_comments', '1' );
-		setup_postdata( get_the_ID() );
-		$dom       = $this->get_document_with_comments( get_the_ID() );
-		$sanitizer = new AMP_Comments_Sanitizer(
-			$dom,
-			[
-				'thread_comments'          => get_option( 'thread_comments' ),
-				'allow_commenting_scripts' => true,
-			]
-		);
-
-		$commentform = $dom->getElementById( 'commentform' );
-		$this->assertInstanceOf( Element::class, $commentform );
-
-		$script = $dom->getElementById( 'comment-reply-js' );
-		$this->assertInstanceOf( Element::class, $script );
-		$this->assertInstanceOf( Element::class, $script->parentNode );
-		$this->assertFalse( $script->hasAttribute( 'defer' ) );
-		$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
-		$sanitizer->sanitize();
-
-		$this->assertFalse( $commentform->hasAttribute( Attribute::ON ) );
-		$this->assertInstanceOf( Element::class, $script );
-		$this->assertInstanceOf( Element::class, $script->parentNode );
-		$this->assertTrue( ValidationExemption::is_px_verified_for_node( $script ) );
-		$this->assertTrue( $script->hasAttribute( 'defer' ) );
-		$this->assertNull( $dom->getElementById( 'ampCommentThreading' ) );
+	/** @return array */
+	public function get_data_to_test_ampify_threaded_comments_always_and_conditionally() {
+		return [
+			'never'             => [
+				'ampify_comment_threading'        => 'never',
+				'comments_form_has_action_xhr'    => false,
+				'expect_ampify_comment_threading' => false,
+			],
+			'always'            => [
+				'ampify_comment_threading'        => 'always',
+				'comments_form_has_action_xhr'    => true,
+				'expect_ampify_comment_threading' => true,
+			],
+			'conditionally_yes' => [
+				'ampify_comment_threading'        => 'conditionally',
+				'comments_form_has_action_xhr'    => false,
+				'expect_ampify_comment_threading' => false,
+			],
+			'conditionally_no'  => [
+				'ampify_comment_threading'        => 'conditionally',
+				'comments_form_has_action_xhr'    => true,
+				'expect_ampify_comment_threading' => true,
+			],
+		];
 	}
 
 	/**
+	 * @dataProvider get_data_to_test_ampify_threaded_comments_always_and_conditionally
+	 *
 	 * @covers ::sanitize()
 	 * @covers ::ampify_threaded_comments()
 	 */
-	public function test_ampify_threaded_comments_with_threading_and_disallowed_commenting_scripts() {
+	public function test_ampify_threaded_comments( $ampify_comment_threading, $comments_form_has_action_xhr, $expect_ampify_comment_threading ) {
 		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
 			$this->markTestSkipped( 'Skipping because the script ID attribute was added in WP 5.2.' );
 		}
 
 		update_option( 'thread_comments', '1' );
 		setup_postdata( get_the_ID() );
-		$dom       = $this->get_document_with_comments( get_the_ID() );
-		$sanitizer = new AMP_Comments_Sanitizer(
-			$dom,
-			[
-				'thread_comments'          => get_option( 'thread_comments' ),
-				'allow_commenting_scripts' => false,
-			]
-		);
+		$dom = $this->get_document_with_comments( get_the_ID() );
 
 		$comment_form = $dom->getElementById( 'commentform' );
 		$this->assertInstanceOf( Element::class, $comment_form );
-		$this->assertFalse( $comment_form->hasAttribute( Attribute::ON ) );
 
+		if ( $comments_form_has_action_xhr ) {
+			$comment_form->setAttribute(
+				Attribute::ACTION_XHR,
+				$comment_form->getAttribute( Attribute::ACTION )
+			);
+			$comment_form->removeAttribute( Attribute::ACTION );
+		}
+
+		$comments_sanitizer = new AMP_Comments_Sanitizer(
+			$dom,
+			[
+				'ampify_comment_threading' => $ampify_comment_threading,
+			]
+		);
+		$style_sanitizer    = new AMP_Style_Sanitizer( $dom );
+
+		/** @var AMP_Base_Sanitizer[] $sanitizers */
+		$sanitizers = [
+			AMP_Comments_Sanitizer::class => $comments_sanitizer,
+			AMP_Style_Sanitizer::class    => $style_sanitizer,
+		];
+
+		// Ensure initial state.
+		$this->assertFalse( $comment_form->hasAttribute( Attribute::ON ) );
 		$script = $dom->getElementById( 'comment-reply-js' );
 		$this->assertInstanceOf( Element::class, $script );
 		$this->assertInstanceOf( Element::class, $script->parentNode );
-		$sanitizer->sanitize();
-		$this->assertNull( $script->parentNode );
+		$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
 
-		$json_script = $dom->xpath->query( '//amp-state[ @id = "ampCommentThreading" ]/script[ @type = "application/json" ]' )->item( 0 );
-		$this->assertInstanceOf( Element::class, $json_script );
-		$this->assertEquals(
-			[
-				'replyTo'       => '',
-				'commentParent' => '0',
-			],
-			json_decode( $json_script->textContent, true )
-		);
-
-		$comment_parent_input = $dom->getElementById( 'comment_parent' );
-		$this->assertInstanceOf( Element::class, $comment_parent_input );
-		$this->assertEquals( '0', $comment_parent_input->getAttribute( Attribute::VALUE ) );
-		$this->assertEquals(
-			'ampCommentThreading.commentParent',
-			$comment_parent_input->getAttribute( Amp::BIND_DATA_ATTR_PREFIX . 'value' )
-		);
-
-		$this->assertEquals(
-			$comment_form->getAttribute( Attribute::ON ),
-			'submit-success:commentform.clear,AMP.setState({ampCommentThreading: {"replyTo":"","commentParent":"0"}})'
-		);
-
-		$reply_heading_element = $dom->getElementById( 'reply-title' );
-		$this->assertInstanceOf( Element::class, $reply_heading_element );
-		$span = $reply_heading_element->firstChild;
-		$this->assertInstanceOf( Element::class, $span );
-		$this->assertTrue( $span->hasAttribute( Amp::BIND_DATA_ATTR_PREFIX . 'text' ) );
-
-		$comment_reply_links = $dom->xpath->query( '//a[ @data-commentid and @data-postid and @data-replyto and @data-respondelement and contains( @class, "comment-reply-link" ) ]' );
-		$this->assertGreaterThan( 0, $comment_reply_links->length );
-		foreach ( $comment_reply_links as $comment_reply_link ) {
-			/** @var Element $comment_reply_link */
-			$this->assertStringStartsWith( '#', $comment_reply_link->getAttribute( Attribute::HREF ) );
-			$this->assertStringContainsString( 'comment.focus', $comment_reply_link->getAttribute( Attribute::ON ) );
-			$this->assertStringContainsString( 'AMP.setState', $comment_reply_link->getAttribute( Attribute::ON ) );
+		// Sanitize.
+		foreach ( $sanitizers as $sanitizer ) {
+			$sanitizer->init( $sanitizers );
 		}
+		$comments_sanitizer->sanitize();
 
-		$cancel_comment_reply_link = $dom->getElementById( 'cancel-comment-reply-link' );
-		$this->assertInstanceOf( Element::class, $cancel_comment_reply_link );
+		if ( ! $expect_ampify_comment_threading ) {
+			$this->assertEquals(
+				$comments_form_has_action_xhr,
+				$comment_form->hasAttribute( Attribute::ON )
+			);
+			$this->assertInstanceOf( Element::class, $script->parentNode );
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $script ) );
+			$this->assertTrue( $script->hasAttribute( 'defer' ) );
+			$this->assertNull( $dom->getElementById( 'ampCommentThreading' ) );
 
-		$this->assertFalse( $cancel_comment_reply_link->hasAttribute( Attribute::STYLE ) );
-		$this->assertTrue( $cancel_comment_reply_link->hasAttribute( Attribute::HIDDEN ) );
-		$this->assertTrue( $cancel_comment_reply_link->hasAttribute( Amp::BIND_DATA_ATTR_PREFIX . Attribute::HIDDEN ) );
-		$this->assertStringContainsString(
-			'tap:AMP.setState',
-			$cancel_comment_reply_link->getAttribute( Attribute::ON )
-		);
+			$this->assertFalse( $style_sanitizer->get_arg( 'transform_important_qualifiers' ) );
+		} else {
+			$this->assertNull( $script->parentNode );
+
+			$json_script = $dom->xpath->query( '//amp-state[ @id = "ampCommentThreading" ]/script[ @type = "application/json" ]' )->item( 0 );
+			$this->assertInstanceOf( Element::class, $json_script );
+			$this->assertEquals(
+				[
+					'replyTo'       => '',
+					'commentParent' => '0',
+				],
+				json_decode( $json_script->textContent, true )
+			);
+
+			$comment_parent_input = $dom->getElementById( 'comment_parent' );
+			$this->assertInstanceOf( Element::class, $comment_parent_input );
+			$this->assertEquals( '0', $comment_parent_input->getAttribute( Attribute::VALUE ) );
+			$this->assertEquals(
+				'ampCommentThreading.commentParent',
+				$comment_parent_input->getAttribute( Amp::BIND_DATA_ATTR_PREFIX . 'value' )
+			);
+
+			$this->assertEquals(
+				$comment_form->getAttribute( Attribute::ON ),
+				'submit-success:commentform.clear,AMP.setState({ampCommentThreading: {"replyTo":"","commentParent":"0"}})'
+			);
+
+			$reply_heading_element = $dom->getElementById( 'reply-title' );
+			$this->assertInstanceOf( Element::class, $reply_heading_element );
+			$span = $reply_heading_element->firstChild;
+			$this->assertInstanceOf( Element::class, $span );
+			$this->assertTrue( $span->hasAttribute( Amp::BIND_DATA_ATTR_PREFIX . 'text' ) );
+
+			$comment_reply_links = $dom->xpath->query( '//a[ @data-commentid and @data-postid and @data-replyto and @data-respondelement and contains( @class, "comment-reply-link" ) ]' );
+			$this->assertGreaterThan( 0, $comment_reply_links->length );
+			foreach ( $comment_reply_links as $comment_reply_link ) {
+				/** @var Element $comment_reply_link */
+				$this->assertStringStartsWith( '#', $comment_reply_link->getAttribute( Attribute::HREF ) );
+				$this->assertStringContainsString( 'comment.focus', $comment_reply_link->getAttribute( Attribute::ON ) );
+				$this->assertStringContainsString( 'AMP.setState', $comment_reply_link->getAttribute( Attribute::ON ) );
+			}
+
+			$cancel_comment_reply_link = $dom->getElementById( 'cancel-comment-reply-link' );
+			$this->assertInstanceOf( Element::class, $cancel_comment_reply_link );
+
+			$this->assertFalse( $cancel_comment_reply_link->hasAttribute( Attribute::STYLE ) );
+			$this->assertTrue( $cancel_comment_reply_link->hasAttribute( Attribute::HIDDEN ) );
+			$this->assertTrue( $cancel_comment_reply_link->hasAttribute( Amp::BIND_DATA_ATTR_PREFIX . Attribute::HIDDEN ) );
+			$this->assertStringContainsString(
+				'tap:AMP.setState',
+				$cancel_comment_reply_link->getAttribute( Attribute::ON )
+			);
+
+			$this->assertTrue( $style_sanitizer->get_arg( 'transform_important_qualifiers' ) );
+		}
 	}
 
 	/**
