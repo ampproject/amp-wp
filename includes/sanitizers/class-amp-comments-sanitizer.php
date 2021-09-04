@@ -22,19 +22,8 @@ use AmpProject\DevMode;
  */
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
-	/**
-	 * XPath expression for script output to allow users with unfiltered_html to use that capability in top-level window.
-	 *
-	 * @see wp_comment_form_unfiltered_html_nonce()
-	 * @var string
-	 */
-	const UNFILTERED_HTML_COMMENT_SCRIPT_XPATH = '
-		//script[
-			preceding-sibling::input[ @name = "_wp_unfiltered_html_comment_disabled" ]
-			and
-			contains( text(), "_wp_unfiltered_html_comment_disabled" )
-		]
-	';
+	/** @var AMP_Style_Sanitizer */
+	private $style_sanitizer;
 
 	/**
 	 * Default args.
@@ -45,9 +34,21 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $DEFAULT_ARGS = [
 		'comments_live_list'       => false,
-		'thread_comments'          => false, // By default maps to thread_comments option.
-		'allow_commenting_scripts' => false,
+		'ampify_comment_threading' => 'always', // Can be 'always', 'never', 'conditionally' (if the comment form was converted to action-xhr).
 	];
+
+	/**
+	 * Init.
+	 *
+	 * @param AMP_Base_Sanitizer[] $sanitizers
+	 */
+	public function init( $sanitizers ) {
+		parent::init( $sanitizers );
+
+		if ( array_key_exists( AMP_Style_Sanitizer::class, $sanitizers ) ) {
+			$this->style_sanitizer = $sanitizers[ AMP_Style_Sanitizer::class ];
+		}
+	}
 
 	/**
 	 * Pre-process the comment form and comment list for AMP.
@@ -62,7 +63,6 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$action_path = wp_parse_url( $action, PHP_URL_PATH );
 			if ( $action_path && 'wp-comments-post.php' === basename( $action_path ) ) {
-				$this->handle_unfiltered_html_comment_script();
 				$this->ampify_threaded_comments( $comment_form );
 			}
 		}
@@ -77,29 +77,6 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Handle the unfiltered_html comment script.
-	 *
-	 * @since 2.2
-	 */
-	protected function handle_unfiltered_html_comment_script() {
-
-		// Flag the unfiltered_html comment script as being in AMP Dev Mode at the tag level since it is only ever in
-		// the page when the user is logged-in which is when Dev Mode will be enabled anyway.
-		if ( current_user_can( 'unfiltered_html' ) ) {
-			$unfiltered_html_comment_script = $this->dom->xpath->query( self::UNFILTERED_HTML_COMMENT_SCRIPT_XPATH )->item( 0 );
-			if ( $unfiltered_html_comment_script instanceof Element ) {
-				$unfiltered_html_comment_script->setAttributeNode( $this->dom->createAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
-
-				// Also indicate that that this element is PX-verified so that if by chance AMP Dev Mode is disabled,
-				// it will not be considered a custom script that will require turning off CSS tree shaking, etc.
-				if ( $this->args['allow_commenting_scripts'] ) {
-					ValidationExemption::mark_node_as_px_verified( $unfiltered_html_comment_script );
-				}
-			}
-		}
-	}
-
-	/**
 	 * Ampify threaded comments by utilizing amp-bind to implement comment reply functionality.
 	 *
 	 * The logic here is only needed if:
@@ -109,27 +86,37 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param Element $comment_form Comment form.
 	 */
 	protected function ampify_threaded_comments( Element $comment_form ) {
-		// Do nothing if comment threading is not enabled.
-		if ( ! $this->args['thread_comments'] ) {
+		if ( ! get_option( 'thread_comments' ) || 'never' === $this->args['ampify_comment_threading'] ) {
 			return;
 		}
 
-		// If comment-reply is on the page and commenting scripts are allowed, mark it as being PX-verified and improve
-		// performance with defer. Then short-circuit since the amp-bind implementation won't be needed.
 		$comment_reply_script = $this->dom->getElementById( 'comment-reply-js' );
-		if ( $comment_reply_script instanceof Element && $this->args['allow_commenting_scripts'] ) {
+		if ( $comment_reply_script instanceof Element && $comment_reply_script->parentNode ) {
+			if (
+				'always' === $this->args['ampify_comment_threading']
+				||
+				(
+					'conditionally' === $this->args['ampify_comment_threading']
+					&&
+					$comment_form->hasAttribute( Attribute::ACTION_XHR )
+				)
+			) {
+				// Remove the script and then proceed with the amp-bind implementation below.
+				$comment_reply_script->parentNode->removeChild( $comment_reply_script );
+			} else {
 
-			// Prevent the script from being sanitized by the script sanitizer and prevent it from triggering the loose sandboxing level.
-			ValidationExemption::mark_node_as_px_verified( $comment_reply_script );
+				// Mark the comment-reply script as being PX-verified, which was not done in the script sanitizer because
+				// we had to wait until after the form sanitizer ran to find out if we could conditionally serve valid AMP.
+				ValidationExemption::mark_node_as_px_verified( $comment_reply_script );
 
-			// Improve performance by deferring comment-reply.
-			$comment_reply_script->setAttributeNode( $this->dom->createAttribute( 'defer' ) );
-			return;
-		}
+				// Make sure that that inline styles are not transformed or else they will break comment-reply styling.
+				if ( $this->style_sanitizer ) {
+					$this->style_sanitizer->update_args( [ 'transform_important_qualifiers' => false ] );
+				}
 
-		// Remove comment-reply.js since it will be implemented using amp-bind below.
-		if ( $comment_reply_script instanceof Element ) {
-			$comment_reply_script->parentNode->removeChild( $comment_reply_script );
+				// Do not proceed with the AMP-bind implementation for threaded comments since the comment-reply script was included.
+				return;
+			}
 		}
 
 		// Create reply state.
@@ -159,6 +146,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		$script->appendChild( $this->dom->createTextNode( wp_json_encode( $state, JSON_UNESCAPED_UNICODE ) ) );
 		$amp_state->appendChild( $script );
 
+		// @todo This should also remove the novalidate attribute from the form.
 		// Reset state when submitting form.
 		$comment_form->addAmpAction(
 			'submit-success',

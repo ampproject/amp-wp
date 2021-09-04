@@ -146,14 +146,10 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 			static function ( $sanitizers ) use ( $sandboxing_level ) {
 				$sanitizers[ AMP_Script_Sanitizer::class ]['sanitize_js_scripts'] = true;
 
-				if ( $sandboxing_level < 3 ) {
-					$sanitizers[ AMP_Form_Sanitizer::class ]['native_post_forms_used']       = true;
-					$sanitizers[ AMP_Comments_Sanitizer::class ]['allow_commenting_scripts'] = true;
-
-					// Once amp-img is deprecated, these won't be needed and an <img> won't prevent strict sandboxing level for valid AMP.
-					$sanitizers[ AMP_Img_Sanitizer::class ]['native_img_used']           = true;
-					$sanitizers[ AMP_Core_Theme_Sanitizer::class ]['native_img_used']    = true;
-					$sanitizers[ AMP_Gallery_Block_Sanitizer::class ]['native_img_used'] = true;
+				if ( $sandboxing_level < 3 ) { // <3 === ❤️
+					$sanitizers[ AMP_Script_Sanitizer::class ]['comment_reply_allowed']      = 'conditionally';
+					$sanitizers[ AMP_Form_Sanitizer::class ]['native_post_forms_allowed']    = 'conditionally';
+					$sanitizers[ AMP_Comments_Sanitizer::class ]['ampify_comment_threading'] = 'conditionally';
 				}
 				return $sanitizers;
 			}

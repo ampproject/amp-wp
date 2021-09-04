@@ -2074,7 +2074,7 @@ class AMP_Theme_Support {
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ), $sanitization_results['sanitizers'] );
 
-		$has_validation_exceptions = (
+		$has_validation_exemptions = (
 			ValidationExemption::is_document_with_amp_unvalidated_nodes( $dom )
 			||
 			ValidationExemption::is_document_with_px_verified_nodes( $dom )
@@ -2114,7 +2114,7 @@ class AMP_Theme_Support {
 			$errors = new Optimizer\ErrorCollection();
 
 			$args['skip_css_max_byte_count_enforcement'] = (
-				$has_validation_exceptions
+				$has_validation_exemptions
 				||
 				DevMode::isActiveForDocument( $dom )
 			);
@@ -2159,7 +2159,7 @@ class AMP_Theme_Support {
 
 		// Prevent serving a page as AMP if it is explicitly not valid as otherwise Google Search Console will complain.
 		if (
-			$has_validation_exceptions
+			$has_validation_exemptions
 			||
 			( $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) && ! is_user_logged_in() )
 		) {

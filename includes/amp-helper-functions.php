@@ -1480,7 +1480,6 @@ function amp_get_content_sanitizers( $post = null ) {
 		],
 
 		AMP_Comments_Sanitizer::class          => [
-			'thread_comments'    => (bool) get_option( 'thread_comments' ),
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
 		],
 
@@ -1618,11 +1617,11 @@ function amp_get_content_sanitizers( $post = null ) {
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
-		AMP_Comments_Sanitizer::class, // Must come before AMP_Script_Sanitizer since it either removes comment-rely.js or marks it as PX-verified. Also must come before the AMP_Form_Sanitizer.
-		AMP_Script_Sanitizer::class, // Must come before sanitizers for image, video, audio, form, and style.
+		AMP_Script_Sanitizer::class, // Must come before sanitizers for images, videos, audios, comments, forms, and styles.
+		AMP_Form_Sanitizer::class, // Must come before comments sanitizer.
+		AMP_Comments_Sanitizer::class, // Also must come after the form sanitizer.
 		AMP_Srcset_Sanitizer::class,
 		AMP_Img_Sanitizer::class,
-		AMP_Form_Sanitizer::class,
 		AMP_Video_Sanitizer::class,
 		AMP_Audio_Sanitizer::class,
 		AMP_Object_Sanitizer::class,
