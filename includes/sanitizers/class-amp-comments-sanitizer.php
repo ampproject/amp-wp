@@ -94,7 +94,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$comment_reply_script = $this->dom->getElementById( 'comment-reply-js' );
-		if ( ! $comment_reply_script->parentNode ) {
+		if ( $comment_reply_script instanceof Element && ! $comment_reply_script->parentNode ) {
 			$comment_reply_script = null;
 		}
 
