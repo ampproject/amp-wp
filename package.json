@@ -29,6 +29,7 @@
     "@wordpress/compose": "5.0.1",
     "@wordpress/date": "4.2.1",
     "@wordpress/dom-ready": "3.2.1",
+    "@wordpress/editor": "11.0.1",
     "@wordpress/element": "4.0.0",
     "@wordpress/escape-html": "2.2.1",
     "@wordpress/html-entities": "3.2.1",

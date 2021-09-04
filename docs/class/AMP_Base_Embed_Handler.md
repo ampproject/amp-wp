@@ -12,9 +12,11 @@ Class AMP_Base_Embed_Handler
 * [`get_child_elements`](../method/AMP_Base_Embed_Handler/get_child_elements.md) - Get all child elements of the specified element.
 * [`unwrap_p_element`](../method/AMP_Base_Embed_Handler/unwrap_p_element.md) - Replace an element&#039;s parent with itself if the parent is a &lt;p&gt; tag which has no attributes and has no other children.
 * [`maybe_remove_script_sibling`](../method/AMP_Base_Embed_Handler/maybe_remove_script_sibling.md) - Removes the node&#039;s nearest `&lt;script&gt;` sibling with a `src` attribute containing the base `src` URL provided.
+* [`create_overflow_button_element`](../method/AMP_Base_Embed_Handler/create_overflow_button_element.md) - Create overflow button element.
+* [`create_overflow_button_markup`](../method/AMP_Base_Embed_Handler/create_overflow_button_markup.md) - Create overflow button markup.
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:17](/includes/embeds/class-amp-base-embed-handler.php#L17-L203)
+:link: [includes/embeds/class-amp-base-embed-handler.php:20](/includes/embeds/class-amp-base-embed-handler.php#L20-L237)
 
 <details>
 <summary>Show Code</summary>
@@ -205,6 +207,37 @@ abstract class AMP_Base_Embed_Handler {
 				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 			}
 		}
+	}
+
+	/**
+	 * Create overflow button element.
+	 *
+	 * @param Document $dom  Document.
+	 * @param string   $text Button text (optional).
+	 * @return Element Button element.
+	 */
+	protected function create_overflow_button_element( Document $dom, $text = null ) {
+		if ( ! $text ) {
+			$text = __( 'See more', 'amp' );
+		}
+		$overflow = $dom->createElement( Tag::BUTTON );
+		$overflow->setAttributeNode( $dom->createAttribute( Attribute::OVERFLOW ) );
+		$overflow->setAttribute( Attribute::TYPE, 'button' );
+		$overflow->textContent = $text;
+		return $overflow;
+	}
+
+	/**
+	 * Create overflow button markup.
+	 *
+	 * @param string $text Button text (optional).
+	 * @return string Button markup.
+	 */
+	protected function create_overflow_button_markup( $text = null ) {
+		if ( ! $text ) {
+			$text = __( 'See more', 'amp' );
+		}
+		return sprintf( '<button overflow type="button">%s</button>', esc_html( $text ) );
 	}
 }
 ```

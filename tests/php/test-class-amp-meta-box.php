@@ -166,6 +166,7 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 				'wp-compose',
 				'wp-data',
 				'wp-edit-post',
+				'wp-editor',
 				'wp-element',
 				'wp-hooks',
 				'wp-i18n',

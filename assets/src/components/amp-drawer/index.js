@@ -7,7 +7,7 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { PanelBody } from '@wordpress/components';
+import { PanelBody, VisuallyHidden } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 
 /**
@@ -101,9 +101,9 @@ export function AMPDrawer( { children = null, className, heading, handleType = H
 			{ 'resetting' !== resetStatus && (
 				<PanelBody
 					title={ handleType === HANDLE_TYPE_RIGHT ? (
-						<span className="components-visually-hidden">
+						<VisuallyHidden as="span">
 							{ hiddenTitle }
-						</span>
+						</VisuallyHidden>
 					) : (
 						<div className="amp-drawer__heading">
 							{ heading }
