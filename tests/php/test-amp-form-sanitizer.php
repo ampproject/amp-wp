@@ -187,6 +187,9 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 			'form_with_pathless_url' => [
 				'<form method="post" action="//example.com"></form>',
 				'<form method="post" action-xhr="//example.com?_wp_amp_action_xhr_converted=1" target="_top">' . $form_templates . '</form>',
+				[
+					'native_post_forms_allowed' => 'never', // This is the default.
+				],
 			],
 			'test_with_dev_mode' => [
 				'<form data-ampdevmode="" action="javascript:"></form>',
@@ -199,7 +202,7 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 				'<form method="post" action="http://example.com"></form>',
 				sprintf( '<form method="post" action="http://example.com" %s></form>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
 				[
-					'native_post_forms_used' => true,
+					'native_post_forms_allowed' => 'always',
 				],
 				[],
 			],
@@ -207,9 +210,32 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 				'<form method="post" action-xhr="http://example.com"></form>',
 				'',
 				[
-					'native_post_forms_used' => true,
+					'native_post_forms_allowed' => 'always',
 				],
 				[ AMP_Form_Sanitizer::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED ],
+			],
+			'comment_form_conditionally_not_native' => [
+				sprintf( '<form id="commentform" method="post" action="%s"></form>', site_url( '/wp-comments-post.php', 'https' ) ),
+				sprintf( '<form id="commentform" method="post" action-xhr="%s" target="_top">%s</form>', site_url( '/wp-comments-post.php?_wp_amp_action_xhr_converted=1', 'https' ), $form_templates ),
+				[
+					'native_post_forms_allowed' => 'conditionally',
+				],
+				[],
+			],
+			'comment_form_conditionally_yes_native' => [
+				sprintf( '<form action="/" method="post"></form><form id="commentform" method="post" action="%s"></form>', site_url( '/wp-comments-post.php', 'https' ) ),
+				sprintf(
+					'
+						<form action="/" method="post" %1$s></form>
+						<form id="commentform" method="post" action="%2$s" %1$s></form>
+					',
+					ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE,
+					site_url( '/wp-comments-post.php', 'https' )
+				),
+				[
+					'native_post_forms_allowed' => 'conditionally',
+				],
+				[],
 			],
 		];
 	}
@@ -252,7 +278,7 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 			$template->appendChild( $dom->createTextNode( '...' ) );
 		}
 
-		$this->assertEqualMarkup( AMP_DOM_Utils::get_content_from_dom( $dom ), $expected );
+		$this->assertSimilarMarkup( $expected, AMP_DOM_Utils::get_content_from_dom( $dom ) );
 		$this->assertEquals( wp_list_pluck( $actual_errors, 'code' ), $expected_errors );
 	}
 

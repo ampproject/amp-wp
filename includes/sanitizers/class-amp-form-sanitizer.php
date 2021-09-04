@@ -84,10 +84,9 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				$form_element->setAttribute( Attribute::METHOD, $method );
 			}
 
-			$this->normalize_target_attribute( $form_element );
-
 			if ( 'get' === $method ) {
 				$this->normalize_action_attribute( $form_element );
+				$this->normalize_target_attribute( $form_element );
 			} elseif ( 'post' === $method ) {
 				$post_form_elements[] = $form_element;
 			}
@@ -107,6 +106,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			)
 		) {
 			foreach ( $post_form_elements as $post_form_element ) {
+				$this->normalize_target_attribute( $post_form_element );
 				$this->convert_post_form_to_action_xhr( $post_form_element );
 			}
 		} else {
