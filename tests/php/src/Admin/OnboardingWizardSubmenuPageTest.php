@@ -167,4 +167,46 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 			$this->onboarding_wizard_submenu_page->get_close_link()
 		);
 	}
+
+	/**
+	 * Tests OnboardingWizardSubmenuPage::get_preview_urls()
+	 *
+	 * @covers ::get_preview_urls()
+	 */
+	public function test_get_preview_urls() {
+		$scannable_urls = [
+			[
+				'type' => 'home',
+				'url'  => 'https://example.com',
+			],
+			[
+				'type' => 'page',
+				'url'  => 'https://example.com/sample-page',
+			],
+			[
+				'type' => 'search',
+				'url'  => 'https://example.com/?s=foobar',
+			],
+		];
+
+		$expected_urls = [
+			'home'   => [
+				'url'     => 'https://example.com',
+				'amp_url' => amp_add_paired_endpoint( 'https://example.com' ),
+			],
+			'page'   => [
+				'url'     => 'https://example.com/sample-page',
+				'amp_url' => amp_add_paired_endpoint( 'https://example.com/sample-page' ),
+			],
+			'search' => [
+				'url'     => 'https://example.com/?s=foobar',
+				'amp_url' => amp_add_paired_endpoint( 'https://example.com/?s=foobar' ),
+			],
+		];
+
+		$this->assertEquals(
+			$expected_urls,
+			$this->onboarding_wizard_submenu_page->get_preview_urls( $scannable_urls ),
+		);
+	}
 }

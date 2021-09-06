@@ -77,7 +77,7 @@ export function Review() {
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
 	const [ isPreviewingAMP, setIsPreviewingAMP ] = useState( themeSupport !== 'standard' );
-	const [ previewPageType, setPreviewPageType ] = useState( PREVIEW_URLS[ Object.keys( PREVIEW_URLS )[ 0 ] ].type );
+	const [ previewPageType, setPreviewPageType ] = useState( Object.keys( PREVIEW_URLS )[ 0 ] );
 
 	/**
 	 * Allow the finish button to be enabled.

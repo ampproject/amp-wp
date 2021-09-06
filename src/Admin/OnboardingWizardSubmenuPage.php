@@ -249,7 +249,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
 			'SETTINGS_LINK'                      => $amp_settings_link,
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
-			'PREVIEW_URLS'                       => $this->get_preview_urls(),
+			'PREVIEW_URLS'                       => $this->get_preview_urls( $this->scannable_url_provider->get_urls() ),
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
@@ -314,17 +314,22 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	}
 
 	/**
-	 * Get a list of preview URLs.
+	 * Add AMP URLs to the list of scannable URLs.
+	 *
+	 * @since 2.2
+	 *
+	 * @param array $scannable_urls Array of scannable URLs.
 	 *
 	 * @return array Preview URLs.
 	 */
-	protected function get_preview_urls() {
-		$preview_urls   = [];
-		$scannable_urls = $this->scannable_url_provider->get_urls();
+	public function get_preview_urls( $scannable_urls ) {
+		$preview_urls = [];
 
 		foreach ( $scannable_urls as $scannable_url ) {
-			$preview_urls[ $scannable_url['type'] ]            = $scannable_url;
-			$preview_urls[ $scannable_url['type'] ]['amp_url'] = amp_add_paired_endpoint( $scannable_url['url'] );
+			$preview_urls[ $scannable_url['type'] ] = [
+				'url'     => $scannable_url['url'],
+				'amp_url' => amp_add_paired_endpoint( $scannable_url['url'] ),
+			];
 		}
 
 		return $preview_urls;
