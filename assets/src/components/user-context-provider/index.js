@@ -91,7 +91,10 @@ export function UserContextProvider( {
 
 				setOriginalDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
 				setDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
-				setReviewPanelDismissedForTemplateMode( fetchedUser[ userFieldReviewPanelDismissedForTemplateMode ] );
+
+				if ( userFieldReviewPanelDismissedForTemplateMode ) {
+					setReviewPanelDismissedForTemplateMode( fetchedUser[ userFieldReviewPanelDismissedForTemplateMode ] );
+				}
 			} catch ( e ) {
 				setAsyncError( e );
 				return;
@@ -140,7 +143,7 @@ export function UserContextProvider( {
 	 * the REST endpoint to be saved.
 	 */
 	const saveReviewPanelDismissedForTemplateMode = useCallback( async ( templateMode ) => {
-		if ( savingReviewPanelDismissedForTemplateMode ) {
+		if ( savingReviewPanelDismissedForTemplateMode || ! userFieldReviewPanelDismissedForTemplateMode ) {
 			return;
 		}
 
@@ -194,7 +197,7 @@ export function UserContextProvider( {
 UserContextProvider.propTypes = {
 	children: PropTypes.any,
 	onlyFetchIfPluginIsConfigured: PropTypes.bool,
-	userFieldReviewPanelDismissedForTemplateMode: PropTypes.string.isRequired,
+	userFieldReviewPanelDismissedForTemplateMode: PropTypes.string,
 	userOptionDeveloperTools: PropTypes.string.isRequired,
 	usersResourceRestPath: PropTypes.string.isRequired,
 };
