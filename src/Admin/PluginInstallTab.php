@@ -114,7 +114,7 @@ class PluginInstallTab implements Conditional, Delayed, Service, Registerable {
 
 		return array_merge(
 			[
-				'px_enhancing' => esc_html__( 'PX Enhancing', 'amp' ),
+				'px_enhancing' => '<span class="amp-logo-icon"></span> ' . esc_html__( 'PX Enhancing', 'amp' ),
 			],
 			$tabs
 		);
