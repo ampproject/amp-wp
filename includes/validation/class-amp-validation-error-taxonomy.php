@@ -128,7 +128,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * This is also used in WP_List_Table, like for the 'Bulk Actions' option.
 	 * When this is present, this ensures that this isn't filtered.
 	 *
-	 * @var int
+	 * @var int|string
 	 */
 	const NO_FILTER_VALUE = '';
 

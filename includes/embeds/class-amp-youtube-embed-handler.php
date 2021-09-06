@@ -28,7 +28,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Ratio for calculating the default height from the content width.
 	 *
-	 * @param float
+	 * @var float
 	 */
 	const RATIO = 0.5625;
 

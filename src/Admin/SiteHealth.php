@@ -220,106 +220,14 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 */
 	public function check_available_cache() {
 		return [
-			'redis'     => $this->is_site_has_redis(),
-			'memcached' => $this->is_site_has_memcached(),
-			'apcu'      => $this->is_site_has_apcu(),
+			'redis'     => class_exists( 'Redis' ),
+			'memcached' => ( class_exists( 'Memcache' ) || class_exists( 'Memcached' ) ),
+			'apcu'      => (
+				extension_loaded( 'apcu' ) ||
+				function_exists( 'apc_store' ) ||
+				function_exists( 'apcu_store' )
+			),
 		];
-	}
-
-	/**
-	 * Check if site has redis cache mechanism.
-	 *
-	 * @return bool True if redis cache is available otherwise False.
-	 */
-	public function is_site_has_redis() {
-
-		if ( ! class_exists( 'Redis' ) ) {
-			return false;
-		}
-
-		/*
-		 * Try to connect redis server.
-		 */
-		$redis_server = [
-			'host'           => isset( $_SERVER['CACHE_HOST'] ) ? sanitize_text_field( $_SERVER['CACHE_HOST'] ) : '127.0.0.1',
-			'port'           => isset( $_SERVER['CACHE_PORT'] ) ? (int) $_SERVER['CACHE_PORT'] : 6379,
-			'auth'           => isset( $_SERVER['CACHE_PASSWORD'] ) ? sanitize_text_field( $_SERVER['CACHE_PASSWORD'] ) : null,
-			'database'       => isset( $_SERVER['CACHE_DB'] ) ? $_SERVER['CACHE_DB'] : 0, // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			'timeout'        => 1, // Time in seconds.
-			'retry_interval' => 100,
-		];
-
-		// Unix socket connection.
-		if ( file_exists( $redis_server['host'] ) && 'socket' === filetype( $redis_server['host'] ) ) {
-			// Port must be null or socket won't connect.
-			$redis_server['port'] = null;
-		}
-
-		try {
-			$redis = new \Redis();
-
-			$redis->connect(
-				$redis_server['host'],
-				$redis_server['port'],
-				$redis_server['timeout'],
-				null,
-				$redis_server['retry_interval']
-			);
-
-			$response = $redis->ping();
-
-		} catch ( Exception $exception ) {
-			$response = false;
-		}
-
-		return ( ! empty( $response ) );
-	}
-
-	/**
-	 * Check if site has memcache cache mechanism.
-	 *
-	 * @return bool True if memcache cache is available otherwise False.
-	 */
-	public function is_site_has_memcached() {
-
-		if ( ! ( class_exists( 'Memcache' ) || class_exists( 'Memcached' ) ) ) {
-			return false;
-		}
-
-		$has_object_cache = false;
-		$host             = '127.0.0.1';
-		$port             = 11211;
-
-		try {
-			if ( class_exists( 'Memcache' ) ) {
-				$memcache         = new \Memcache();
-				$memcache_object  = $memcache->pconnect( $host, $port );
-				$has_object_cache = ( false !== $memcache_object );
-			} elseif ( class_exists( 'Memcached' ) ) {
-				$memcached = new \Memcached();
-				$memcached->addServer( $host, $port );
-				$memcached->add( 'amp_memcached_test', 'testing_value' );
-				$has_object_cache = ( 'testing_value' === $memcached->get( 'amp_memcached_test' ) );
-			}
-		} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			// If there is an error then consider memcache is not available.
-		}
-
-		return $has_object_cache;
-	}
-
-	/**
-	 * Check if site has apcu cache mechanism.
-	 *
-	 * @return bool True if apcu cache is available otherwise False.
-	 */
-	public function is_site_has_apcu() {
-
-		return (
-			extension_loaded( 'apcu' ) ||
-			function_exists( 'apc_store' ) ||
-			function_exists( 'apcu_store' )
-		);
 	}
 
 	/**
