@@ -136,7 +136,7 @@ describe( 'Saving', () => {
 	} );
 } );
 
-describe( 'AMP Settings Screen Review section', () => {
+describe( 'AMP settings screen Review panel', () => {
 	beforeEach( async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 	} );
@@ -144,6 +144,12 @@ describe( 'AMP Settings Screen Review section', () => {
 	afterEach( async () => {
 		await cleanUpSettings();
 	} );
+
+	async function clickBrowseSiteInTemplateMode( mode ) {
+		await clickMode( mode );
+		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
+		await page.waitForNavigation();
+	}
 
 	it( 'is present on the page', async () => {
 		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
@@ -153,36 +159,43 @@ describe( 'AMP Settings Screen Review section', () => {
 		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /how the PX plugin works/i } );
 	} );
 
-	it( 'can be dismissed', async () => {
-		await expect( page ).toMatchElement( 'button', { text: 'Dismiss' } );
-		await expect( page ).toClick( 'button', { text: 'Dismiss' } );
-		await expect( page ).not.toMatchElement( 'h2', { text: 'Review' } );
-	} );
-
 	it( 'button redirects to an AMP page in transitional mode', async () => {
-		await clickMode( 'transitional' );
+		await clickBrowseSiteInTemplateMode( 'transitional' );
 
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
-
+		await page.waitForSelector( 'html[amp]' );
 		await expect( page ).toMatchElement( 'html[amp]' );
 	} );
 
 	it( 'button redirects to an AMP page in reader mode', async () => {
-		await clickMode( 'reader' );
+		await clickBrowseSiteInTemplateMode( 'reader' );
 
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
-
+		await page.waitForSelector( 'html[amp]' );
 		await expect( page ).toMatchElement( 'html[amp]' );
 	} );
 
 	it( 'button redirects to an AMP page in standard mode', async () => {
+		await clickBrowseSiteInTemplateMode( 'standard' );
+
+		await page.waitForSelector( 'html[amp]' );
+		await expect( page ).toMatchElement( 'html[amp]' );
+	} );
+
+	it( 'can be dismissed and shows up again only after a template mode change', async () => {
+		await clickMode( 'transitional' );
+
+		await expect( page ).toMatchElement( 'button', { text: 'Dismiss' } );
+		await expect( page ).toClick( 'button', { text: 'Dismiss' } );
+		await expect( page ).not.toMatchElement( 'h2', { text: 'Review' } );
+
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
+
 		await clickMode( 'standard' );
 
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
+		await expect( page ).toClick( 'button', { text: 'Save' } );
+		await page.waitForSelector( '.amp-save-success-notice' );
+		await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
 
-		await expect( page ).toMatchElement( 'html[amp]' );
+		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
 	} );
 } );
