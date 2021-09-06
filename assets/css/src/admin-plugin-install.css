@@ -1,0 +1,17 @@
+.plugin-card-px-message {
+	text-align: center;
+	padding: 7px 20px;
+	clear: both;
+	background-color: #e7e7e7;
+	border-top: 2px solid #dcdcde;
+	color: #3c434a;
+}
+
+.amp-logo-icon {
+	background-image: url("../images/amp-logo-icon.svg");
+	background-color: transparent;
+	background-size: 20px 20px;
+	height: 20px;
+	width: 20px;
+	display: inline-block;
+}
