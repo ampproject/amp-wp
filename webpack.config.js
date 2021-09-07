@@ -129,12 +129,14 @@ const admin = {
 	...sharedConfig,
 	externals: {
 		'amp-themes': 'ampThemes',
+		'amp-plugins': 'ampPlugins',
 	},
 	entry: {
 		'amp-validation-tooltips': './assets/src/admin/amp-validation-tooltips.js',
 		'amp-paired-browsing-app': './assets/src/admin/paired-browsing/app.js',
 		'amp-paired-browsing-client': './assets/src/admin/paired-browsing/client.js',
 		'amp-theme-install': './assets/src/admin/amp-theme-install.js',
+		'amp-plugin-install': './assets/src/admin/amp-plugin-install.js',
 	},
 	plugins: [
 		...sharedConfig.plugins,
