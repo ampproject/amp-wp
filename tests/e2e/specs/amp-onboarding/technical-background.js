@@ -7,9 +7,9 @@ describe( 'Technical background', () => {
 	it( 'main components exist', async () => {
 		await moveToTechnicalScreen();
 
-		await testTitle( { text: 'Are you technical?' } );
+		await testTitle( { text: 'Technical background' } );
 
-		await expect( page ).toMatchElement( 'p', { text: /^In order to/ } );
+		await expect( page ).toMatchElement( 'p', { text: /^To recommend/ } );
 
 		testNextButton( { text: 'Next', disabled: true } );
 		testPreviousButton( { text: 'Previous' } );
@@ -27,10 +27,10 @@ describe( 'Technical background', () => {
 		await page.waitForSelector( '#technical-background-enable' );
 
 		await expect( page ).toClick( '#technical-background-enable' );
-		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Developer or technically savvy' } );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Developer or Technically Savvy' } );
 
-		await expect( page ).toClick( 'label', { text: /Non-technically savvy/ } );
-		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Non-technically savvy or wanting a simpler setup' } );
+		await expect( page ).toClick( 'label', { text: /Non-technical/ } );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Non-technical or Wanting a simpler setup' } );
 
 		testNextButton( { text: 'Next', disabled: false } );
 	} );

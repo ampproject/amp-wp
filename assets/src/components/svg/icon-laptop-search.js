@@ -1,7 +1,14 @@
+/**
+ * WordPress dependencies
+ */
+import { useInstanceId } from '@wordpress/compose';
+
 export function IconLaptopSearch( props ) {
+	const clipPathId = `clip-icon-laptop-search-${ useInstanceId( IconLaptopSearch ) }`;
+
 	return (
 		<svg viewBox="0 0 42 29" fill="none" xmlns="http://www.w3.org/2000/svg" { ...props }>
-			<g clipPath="url(#clip0)">
+			<g clipPath={ `url(#${ clipPathId })` }>
 				<path d="M9.102 6.577l-.017 3.95a1.89 1.89 0 001.882 1.897l15.76.066a1.89 1.89 0 001.898-1.882l.016-3.95a1.89 1.89 0 00-1.882-1.897L11 4.694a1.89 1.89 0 00-1.897 1.883z" stroke="#005AF0" strokeWidth="2.08" strokeLinecap="round" strokeLinejoin="round" />
 				<path d="M13.14 9.2a1.15 1.15 0 100-2.3 1.15 1.15 0 000 2.3zM9.13 18.03a1.15 1.15 0 100-2.3 1.15 1.15 0 000 2.3z" fill="#005AF0" />
 				<path d="M12.24 16.88h4.63M19.83 16.88h1.79M14.46 12.22l7.98-4.97 4.36 5.22" stroke="#005AF0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -12,7 +19,7 @@ export function IconLaptopSearch( props ) {
 				<path d="M32.11 15.98a2.999 2.999 0 01-2.93 3.8" stroke="#005AF0" strokeWidth="2.08" strokeLinecap="round" strokeLinejoin="round" />
 			</g>
 			<defs>
-				<clipPath id="clip0">
+				<clipPath id={ clipPathId }>
 					<path fill="#fff" d="M0 0h41.21v28.96H0z" />
 				</clipPath>
 			</defs>

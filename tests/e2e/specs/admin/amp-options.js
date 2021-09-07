@@ -121,7 +121,7 @@ describe( 'Saving', () => {
 		await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
 
 		// Toggle transitional mode.
-		await expect( page ).toClick( '#template-mode-transitional' );
+		await clickMode( 'transitional' );
 
 		// Button should be enabled.
 		await expect( page ).toMatchElement( 'button:not([disabled])', { text: 'Save' } );
@@ -129,7 +129,7 @@ describe( 'Saving', () => {
 		await testSave();
 
 		// Success notice should disappear on additional change.
-		await expect( page ).toClick( '#template-mode-standard' );
+		await clickMode( 'standard' );
 		await expect( page ).not.toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
 
 		await testSave();
