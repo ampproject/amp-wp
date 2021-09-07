@@ -26,11 +26,18 @@ export default wpThemeView.extend( {
 		if ( this.isAMPTheme( data.slug ) ) {
 			const messageElement = document.createElement( 'div' );
 			const iconElement = document.createElement( 'span' );
+			const tooltipElement = document.createElement( 'span' );
 
 			messageElement.classList.add( 'extension-card-px-message' );
 			iconElement.classList.add( 'amp-logo-icon' );
+			tooltipElement.classList.add( 'tooltiptext' );
+
+			tooltipElement.append(
+				__( 'This theme follow best practice and is known to work well with AMP plugin.', 'amp' ),
+			);
 
 			messageElement.append( iconElement );
+			messageElement.append( tooltipElement );
 			messageElement.append( ' ' );
 			messageElement.append( __( 'Page Experience Enhancing', 'amp' ) );
 

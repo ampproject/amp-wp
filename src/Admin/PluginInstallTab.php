@@ -606,6 +606,11 @@ class PluginInstallTab implements Conditional, Delayed, Service, Registerable {
 				</div>
 				<div class="extension-card-px-message">
 					<span class="amp-logo-icon">&nbsp;</span>
+					<span class="tooltiptext">
+						<?php
+						esc_html_e( 'This plugin follow best practice and is known to work well with AMP plugin.', 'amp' );
+						?>
+					</span>
 					<?php
 					esc_html_e( 'Page Experience Enhancing', 'amp' );
 					?>

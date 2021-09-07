@@ -5,6 +5,8 @@
 	background-color: #e7e7e7;
 	border-top: 2px solid #dcdcde;
 	color: #3c434a;
+	position: relative;
+
 }
 
 .amp-logo-icon {
@@ -21,4 +23,33 @@
 	float: none;
 	display: inline-block;
 	vertical-align: top;
+}
+
+.extension-card-px-message .tooltiptext {
+	visibility: hidden;
+	width: 60%;
+	background-color: rgba(0, 0, 0, 0.8);
+	color: #fff;
+	text-align: center;
+	border-radius: 6px;
+	padding: 5px;
+	position: absolute;
+	z-index: 1;
+	bottom: 100%;
+	left: 20%;
+}
+
+.tooltiptext::after {
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	margin-left: -7px;
+	border-width: 7px;
+	border-style: solid;
+	border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+}
+
+.extension-card-px-message:hover .tooltiptext {
+	visibility: visible;
 }
