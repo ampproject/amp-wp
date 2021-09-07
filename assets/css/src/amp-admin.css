@@ -1,4 +1,4 @@
-.plugin-card-px-message {
+.extension-card-px-message {
 	text-align: center;
 	padding: 7px 20px;
 	clear: both;
@@ -15,4 +15,10 @@
 	width: 20px;
 	display: inline-block;
 	vertical-align: bottom;
+}
+
+.theme-browser .theme {
+	float: none;
+	display: inline-block;
+	vertical-align: top;
 }

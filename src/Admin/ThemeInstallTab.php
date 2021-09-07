@@ -23,7 +23,7 @@ class ThemeInstallTab implements Service, Registerable {
 	 *
 	 * @var string
 	 */
-	const ASSETS_HANDLE = 'amp-theme-install';
+	const ASSET_HANDLE = 'amp-theme-install';
 
 	/**
 	 * @var array List AMP plugins.
@@ -79,24 +79,46 @@ class ThemeInstallTab implements Service, Registerable {
 	 */
 	public function enqueue_scripts() {
 
-		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSETS_HANDLE . '.asset.php';
+		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
 		wp_enqueue_script(
-			self::ASSETS_HANDLE,
-			amp_get_asset_url( 'js/' . self::ASSETS_HANDLE . '.js' ),
+			self::ASSET_HANDLE,
+			amp_get_asset_url( 'js/' . self::ASSET_HANDLE . '.js' ),
 			$dependencies,
 			$version,
 			true
 		);
 
 		wp_enqueue_style(
-			'amp-admin-plugin-install',
-			amp_get_asset_url( 'css/admin-plugin-install.css' ),
-			[ 'amp-icons' ],
+			'amp-admin',
+			amp_get_asset_url( 'css/amp-admin.css' ),
+			[],
 			AMP__VERSION
+		);
+
+		$none_wporg = [];
+
+		foreach ( $this->themes as $theme ) {
+			if ( true !== $theme['wporg'] ) {
+				$none_wporg[] = $theme['slug'];
+			}
+		}
+
+		$js_data = [
+			'AMP_THEMES'        => wp_list_pluck( $this->themes, 'slug' ),
+			'NONE_WPORG_THEMES' => $none_wporg,
+		];
+
+		wp_add_inline_script(
+			self::ASSET_HANDLE,
+			sprintf(
+				'var ampThemes = %s;',
+				wp_json_encode( $js_data )
+			),
+			'before'
 		);
 	}
 

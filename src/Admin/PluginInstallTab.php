@@ -95,9 +95,9 @@ class PluginInstallTab implements Conditional, Delayed, Service, Registerable {
 	public function enqueue_scripts() {
 
 		wp_enqueue_style(
-			'amp-admin-plugin-install',
-			amp_get_asset_url( 'css/admin-plugin-install.css' ),
-			[ 'amp-icons' ],
+			'amp-admin',
+			amp_get_asset_url( 'css/amp-admin.css' ),
+			[],
 			AMP__VERSION
 		);
 
@@ -604,7 +604,7 @@ class PluginInstallTab implements Conditional, Delayed, Service, Registerable {
 						?>
 					</div>
 				</div>
-				<div class="plugin-card-px-message">
+				<div class="extension-card-px-message">
 					<span class="amp-logo-icon">&nbsp;</span>
 					<?php
 					esc_html_e( 'Page Experience Enhancing', 'amp' );

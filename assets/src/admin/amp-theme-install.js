@@ -4,6 +4,11 @@
 import domReady from '@wordpress/dom-ready';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import ampViewTheme from './theme-install/view/theme';
+
 const ampThemeInstall = {
 
 	/**
@@ -11,6 +16,7 @@ const ampThemeInstall = {
 	 */
 	init() {
 		this.addTab();
+		this.overrideViews();
 	},
 
 	/**
@@ -32,6 +38,14 @@ const ampThemeInstall = {
 
 		document.querySelector( '.filter-links' ).prepend( listItem );
 	},
+
+	/**
+	 * Override theme view.
+	 */
+	overrideViews() {
+		wp.themes.view.Theme = ampViewTheme;
+	},
+
 };
 
 domReady( () => {

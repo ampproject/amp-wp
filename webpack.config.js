@@ -127,6 +127,9 @@ const classicEditor = {
 
 const admin = {
 	...sharedConfig,
+	externals: {
+		'amp-themes': 'ampThemes',
+	},
 	entry: {
 		'amp-validation-tooltips': './assets/src/admin/amp-validation-tooltips.js',
 		'amp-paired-browsing-app': './assets/src/admin/paired-browsing/app.js',
