@@ -135,7 +135,7 @@ class UpdateExtensionJson {
 			theme = await this.fetchThemeFromWporg( item.slug );
 		}
 
-		// Plugin data for amp-wp.org
+		// Theme data for amp-wp.org
 		if ( null === matches || null === theme ) {
 			theme = await this.prepareThemeData( item );
 		}
@@ -181,7 +181,7 @@ class UpdateExtensionJson {
 		attachment = attachment.data;
 
 		return {
-			name: item.name,
+			name: item.title.rendered,
 			slug: item.slug,
 			version: '',
 			preview_url: item?.meta?.ampps_ecosystem_url,
@@ -197,7 +197,7 @@ class UpdateExtensionJson {
 			rating: 0,
 			num_ratings: 0,
 			homepage: item?.meta?.ampps_ecosystem_url,
-			description: item.content.rendere,
+			description: item.content.rendered,
 			requires: '',
 			requires_php: '',
 			wporg: false,
