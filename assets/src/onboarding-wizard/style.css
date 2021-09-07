@@ -89,6 +89,10 @@ body {
 
 .amp-onboarding-wizard-panel h1 {
 	line-height: 1.1;
+
+	@media screen and (min-width: 783px) {
+		margin-top: 0;
+	}
 }
 
 /**

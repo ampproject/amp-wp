@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.css';
+import { IconLaptopSearch } from '../../../components/svg/icon-laptop-search';
 
 /**
  * Welcome screen.
@@ -72,7 +73,7 @@ export function Welcome() {
 							{ __( 'AMP and WordPress', 'amp' ) }
 						</h4>
 						<p>
-							{ __( 'AMP provides support for building beautiful, fast, engaging, secure, and accessible sites, and the AMP plugin makes it easy for you to take advantage of AMP on WordPress.', 'amp' ) }
+							{ __( 'AMP provides support for building beautiful, fast, engaging, secure, and accessible sites, and the AMP plugin makes it easy to take advantage of AMP on WordPress.', 'amp' ) }
 							{ ' ' }
 							<a href="https://amp-wp.org/" target="_blank" rel="noreferrer noopener">
 								{ __( 'Learn more.', 'amp' ) }
@@ -109,7 +110,7 @@ export function Welcome() {
 							{ __( 'Configure your site with AMP', 'amp' ) }
 						</h4>
 						<p>
-							{ __( 'Regardless of technical expertise, the onboarding flow guides you through the configuration of the plugin in a few easy steps.', 'amp' ) }
+							{ __( 'Regardless of technical expertise, the onboarding flow guides you through configuring the plugin in a few easy steps.', 'amp' ) }
 						</p>
 					</div>
 
@@ -117,27 +118,14 @@ export function Welcome() {
 
 				<div className={ 'welcome__section' }>
 					<div className="welcome__section-icon">
-						<svg width="41" height="41" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<g clipPath="url(#clip-welcome-4)">
-								<path d="M20.1356 37.9038C19.5937 37.9038 19.0518 37.6326 18.6 37.2719L3.33683 21.6476C-0.908174 17.2219 -0.908174 10.3582 3.33683 5.93257C7.4912 1.68757 14.3556 1.68757 18.6 5.75194C18.6906 5.84257 18.6906 5.84257 18.7806 5.93257L20.1356 7.37757L21.4906 5.93257C25.555 1.68757 32.4187 1.59757 36.6637 5.66132C36.7543 5.75194 36.8443 5.84194 36.935 5.93257C40.4575 9.54507 41.18 15.0544 38.6512 19.3894C38.38 19.8413 37.8381 19.9313 37.3868 19.6601C36.9356 19.3888 36.845 18.8469 37.0256 18.4857C39.1031 14.8732 38.6512 10.2669 35.5806 7.19632C32.1487 3.67382 26.4587 3.58382 22.9362 7.01569C22.8456 7.10632 22.7556 7.10632 22.665 7.19632L20.0456 9.81569L17.4262 7.19632C14.0843 3.67382 8.30433 3.58382 4.78183 7.01569C4.69183 7.10632 4.69183 7.19632 4.6012 7.19632C0.988701 10.8994 0.988701 16.6794 4.6012 20.3826L19.8643 36.0069C19.955 36.0976 20.2256 36.0976 20.3162 36.0069L20.5875 35.7357C20.9487 35.3744 21.4906 35.3744 21.8518 35.7357C22.2131 36.0969 22.2131 36.6388 21.8518 37.0001L21.4906 37.3613C21.2193 37.7226 20.6775 37.9032 20.1356 37.9032V37.9038Z" fill="#005AF0" />
-								<path d="M29.1668 37.4481C23.6574 37.4481 19.2318 33.0225 19.2318 27.5131C19.2318 22.0037 23.6574 17.5781 29.1668 17.5781C34.6762 17.5781 39.1018 22.0037 39.1018 27.5131C39.1018 33.0225 34.6762 37.4481 29.1668 37.4481ZM29.1668 19.385C24.6512 19.385 21.0387 22.9975 21.0387 27.5137C21.0387 32.03 24.6512 35.6419 29.1668 35.6419C33.6824 35.6419 37.2949 32.0294 37.2949 27.5137C37.2949 22.9981 33.6824 19.3856 29.1668 19.3856V19.385Z" fill="#005AF0" />
-								<path d="M32.7799 27.5167C32.5087 27.5167 32.3281 27.4261 32.1481 27.2455L29.1674 24.2648L26.1868 27.2455C25.8256 27.6067 25.2837 27.6067 24.9224 27.2455C24.5612 26.8842 24.5612 26.3423 24.9224 25.9811L28.5349 22.3686C28.8962 22.0073 29.4381 22.0073 29.7993 22.3686L33.4118 25.9811C33.7731 26.3423 33.7731 26.8842 33.4118 27.2455C33.2312 27.4261 33.0506 27.5167 32.7799 27.5167Z" fill="#005AF0" />
-								<path d="M29.1668 32.9344C28.6249 32.9344 28.2637 32.5731 28.2637 32.0312V23.9031C28.2637 23.3612 28.6249 23 29.1668 23C29.7087 23 30.0699 23.3612 30.0699 23.9031V32.0312C30.0699 32.5731 29.7087 32.9344 29.1668 32.9344Z" fill="#005AF0" />
-							</g>
-							<defs>
-								<clipPath id="clip-welcome-4">
-									<rect width="40" height="40" fill="white" transform="translate(0.153076 0.289062)" />
-								</clipPath>
-							</defs>
-						</svg>
-
+						<IconLaptopSearch width="42" />
 					</div>
 					<div className="welcome__section-description">
 						<h4>
 							{ __( 'Site review', 'amp' ) }
 						</h4>
 						<p>
-							{ __( 'At the end of the onboarding flow the AMP plugin is fully configured, and your site is ready to start serving great experiences to your users.', 'amp' ) }
+							{ __( 'At the end of onboarding the AMP plugin is fully configured, and your site is ready to start serving great experiences to your users.', 'amp' ) }
 						</p>
 					</div>
 
