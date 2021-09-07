@@ -23,7 +23,6 @@ import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../../components/options-context-provider';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import { User } from '../../../components/user-context-provider';
-import { Phone } from '../../../components/phone';
 import { RadioGroup } from '../../../components/radio-group/radio-group';
 import { Selectable } from '../../../components/selectable';
 import { IconLaptopToggles } from '../../../components/svg/icon-laptop-toggles';
@@ -64,7 +63,7 @@ const previewPageOptions = Object.keys( PREVIEW_URLS ).map( ( page ) => ( {
 /**
  * Final screen, where data is saved.
  */
-export function Review() {
+export function Done() {
 	const {
 		didSaveOptions,
 		editedOptions: { theme_support: themeSupport, reader_theme: readerTheme },
@@ -114,12 +113,12 @@ export function Review() {
 	}
 
 	return (
-		<div className="review">
-			<h1 className="review__heading">
-				{ __( 'Your site is live!', 'amp' ) }
+		<div className="done">
+			<h1 className="done__heading">
+				{ __( 'Done', 'amp' ) }
 			</h1>
-			<div className="review__content review__content--primary">
-				<h2 className="review__icon-title">
+			<div className="done__content done__content--primary">
+				<h2 className="done__icon-title">
 					<IconLaptopSearch />
 					{ __( 'Review', 'amp' ) }
 				</h2>
@@ -133,27 +132,35 @@ export function Review() {
 						{ __( 'Because you selected a Reader theme that is the same as your site\'s active theme, your site has automatically been switched to Transitional template mode.', 'amp' ) }
 					</AMPNotice>
 				) }
+				<p>
+					{ __( 'Your site is ready to bring great experiences to your users!', 'amp' ) }
+				</p>
 				{ 'standard' === themeSupport && (
 					<p>
-						{ __( 'Your site is ready to bring great experiences to your users! In Standard mode there is a single, AMP, version of your site. Browse your site by navigating through the links below and ensure the functionality and look-and-feel are as expected.', 'amp' ) }
+						{ __( 'In Standard mode there is a single AMP version of your site. Browse your site below to ensure it meets your expectations.', 'amp' ) }
 					</p>
 				) }
 				{ 'transitional' === themeSupport && (
-					<p>
-						{ __( 'Your site is ready to bring great experiences to your users! In Transitional mode the AMP and non-AMP versions of your site are served using your currently active theme. Switch between “AMP” and “non-AMP” to browse your site and ensure both versions meet your expectations.', 'amp' ) }
-					</p>
+					<>
+						<p>
+							{ __( 'In Transitional mode AMP and non-AMP versions of your site are served using your currently active theme.', 'amp' ) }
+						</p>
+						<p>
+							{ __( 'Browse your site below to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
+						</p>
+					</>
 				) }
 				{ 'reader' === themeSupport && (
 					<>
 						<p>
-							{ __( 'You’re ready to bring great experiences to your users! In Reader mode the AMP version is served using the Reader theme you have selected, while pages for non-AMP version of your site will be served using your primary theme.', 'amp' ) }
+							{ __( 'In Reader mode AMP is served using your selected Reader theme, and pages for your non-AMP site are served using your primary theme. Browse your site below to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
 						</p>
 						<p>
-							{ __( 'Toggle “AMP” and “Non-AMP” to browse your site and ensure both versions meet your expectations. As a last step, make sure you tailor the Reader theme as needed using the Customizer.', 'amp' ) }
+							{ __( 'As a last step, use the Customizer to tailor the Reader theme as needed.', 'amp' ) }
 						</p>
 					</>
 				) }
-				<Selectable className="review__links-container">
+				<Selectable className="done__links-container">
 					<RadioGroup
 						options={ previewPageOptions }
 						selected={ previewPageType }
@@ -161,7 +168,7 @@ export function Review() {
 					/>
 				</Selectable>
 			</div>
-			<div className="review__preview-container">
+			<div className="done__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (
 					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 						{ __( 'There was an error downloading your Reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
@@ -177,12 +184,12 @@ export function Review() {
 				) }
 				<Preview url={ PREVIEW_URLS[ previewPageType ][ isPreviewingAMP ? 'amp_url' : 'url' ] } />
 			</div>
-			<div className="review__content review__content--secondary">
-				<h2 className="review__icon-title">
+			<div className="done__content done__content--secondary">
+				<h2 className="done__icon-title">
 					<IconLaptopToggles />
 					{ __( 'Need help?', 'amp' ) }
 				</h2>
-				<ul className="review__list">
+				<ul className="done__list">
 					{ /* dangerouslySetInnerHTML reason: Injection of a link. */ }
 					<li dangerouslySetInnerHTML={ {
 						__html: sprintf(

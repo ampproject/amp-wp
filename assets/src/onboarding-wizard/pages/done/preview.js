@@ -48,7 +48,7 @@ export function Preview( { url } ) {
 	return (
 		<Phone isLoading={ isLoading }>
 			<iframe
-				className="review__preview-iframe"
+				className="done__preview-iframe"
 				src={ url }
 				ref={ iframeRef }
 				title={ __( 'Site preview', 'amp' ) }

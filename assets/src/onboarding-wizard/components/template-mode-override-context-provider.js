@@ -61,7 +61,7 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 	 * Override with transitional if the user has selected reader mode and their currently active theme is the same as the selected reader theme.
 	 */
 	useEffect( () => {
-		if ( 'review' === currentPageSlug && 'reader' === themeSupport && selectedTheme.name === currentTheme.name ) {
+		if ( 'done' === currentPageSlug && 'reader' === themeSupport && selectedTheme.name === currentTheme.name ) {
 			if ( ! readerModeWasOverridden ) {
 				updateOptions( { theme_support: 'transitional' } );
 				setReaderModeWasOverridden( true );

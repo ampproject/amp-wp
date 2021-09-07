@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 import { TechnicalBackground } from './technical-background';
 import { TemplateMode } from './template-mode';
 import { ChooseReaderTheme } from './choose-reader-theme';
-import { Review } from './review';
+import { Done } from './done';
 import { Welcome } from './welcome';
 
 /**
@@ -39,9 +39,9 @@ export const PAGES = [
 		PageComponent: ChooseReaderTheme,
 	},
 	{
-		slug: 'review',
-		title: __( 'Review', 'amp' ),
-		PageComponent: Review,
+		slug: 'done',
+		title: __( 'Done', 'amp' ),
+		PageComponent: Done,
 		showTitle: false,
 	},
 ];
