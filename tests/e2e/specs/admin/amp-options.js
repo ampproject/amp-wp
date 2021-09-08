@@ -196,6 +196,7 @@ describe( 'AMP settings screen Review panel', () => {
 		await page.waitForSelector( '.amp-save-success-notice' );
 		await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
 
+		await page.waitForSelector( '.settings-site-review' );
 		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
 	} );
 } );
