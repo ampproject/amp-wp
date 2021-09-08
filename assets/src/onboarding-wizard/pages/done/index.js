@@ -2,12 +2,12 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect } from '@wordpress/element';
 
 /**
  * External dependencies
  */
-import { PREVIEW_URLS, SETTINGS_LINK } from 'amp-settings'; // From WP inline script.
+import { SETTINGS_LINK } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -23,42 +23,13 @@ import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../../components/options-context-provider';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import { User } from '../../../components/user-context-provider';
-import { RadioGroup } from '../../../components/radio-group/radio-group';
-import { Selectable } from '../../../components/selectable';
 import { IconLaptopToggles } from '../../../components/svg/icon-laptop-toggles';
 import { IconLaptopSearch } from '../../../components/svg/icon-laptop-search';
 import { AMPSettingToggle } from '../../../components/amp-setting-toggle';
+import { NavMenu } from '../../../components/nav-menu';
 import { Preview } from './preview';
 import { Saving } from './saving';
-
-/**
- * Gets the title for the preview page selector.
- *
- * @param {string} page The page type.
- */
-function getPreviewPageTitle( page ) {
-	switch ( page ) {
-		case 'home':
-			return __( 'Homepage', 'amp' );
-
-		case 'author':
-			return __( 'Author page', 'amp' );
-
-		case 'date':
-			return __( 'Archive page', 'amp' );
-
-		case 'search':
-			return __( 'Search results', 'amp' );
-
-		default:
-			return `${ page.charAt( 0 ).toUpperCase() }${ page.slice( 1 ) }`;
-	}
-}
-
-const previewPageOptions = Object.keys( PREVIEW_URLS ).map( ( page ) => ( {
-	value: page,
-	title: getPreviewPageTitle( page ),
-} ) );
+import { usePreview } from './use-preview';
 
 /**
  * Final screen, where data is saved.
@@ -75,8 +46,7 @@ export function Done() {
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
-	const [ isPreviewingAMP, setIsPreviewingAMP ] = useState( themeSupport !== 'standard' );
-	const [ previewPageType, setPreviewPageType ] = useState( Object.keys( PREVIEW_URLS )[ 0 ] );
+	const { previewLinks, setActivePreviewLink, previewUrl, isPreviewingAMP, toggleIsPreviewingAMP } = usePreview();
 
 	/**
 	 * Allow the finish button to be enabled.
@@ -160,13 +130,15 @@ export function Done() {
 						</p>
 					</>
 				) }
-				<Selectable className="done__links-container">
-					<RadioGroup
-						options={ previewPageOptions }
-						selected={ previewPageType }
-						onChange={ setPreviewPageType }
+				<div className="done__links-container">
+					<NavMenu
+						links={ previewLinks }
+						onClick={ ( e, link ) => {
+							e.preventDefault();
+							setActivePreviewLink( link );
+						} }
 					/>
-				</Selectable>
+				</div>
 			</div>
 			<div className="done__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (
@@ -178,11 +150,11 @@ export function Done() {
 					<AMPSettingToggle
 						text={ __( 'AMP', 'amp' ) }
 						checked={ isPreviewingAMP }
-						onChange={ () => setIsPreviewingAMP( ( mode ) => ! mode ) }
+						onChange={ toggleIsPreviewingAMP }
 						compact={ true }
 					/>
 				) }
-				<Preview url={ PREVIEW_URLS[ previewPageType ][ isPreviewingAMP ? 'amp_url' : 'url' ] } />
+				<Preview url={ previewUrl } />
 			</div>
 			<div className="done__content done__content--secondary">
 				<h2 className="done__icon-title">

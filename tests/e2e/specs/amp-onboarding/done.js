@@ -17,12 +17,14 @@ async function testCommonDoneStepElements() {
 
 	await expect( page ).toMatchElement( '.done__preview-iframe' );
 
-	const optionsCount = await page.$$eval( '.done__links-container input[type="radio"]', ( e ) => e.length );
-	await expect( optionsCount ).not.toBe( 0 );
+	await expect( '.done__links-container a' ).not.countToBe( 0 );
 
 	const originalIframeSrc = await page.$eval( '.done__preview-iframe', ( e ) => e.getAttribute( 'src' ) );
-	await expect( page ).toClick( '.done__links-container input[type="radio"]:not(:checked)' );
+
+	await expect( page ).toClick( '.done__links-container a:not([class*="--active"])' );
+
 	const updatedIframeSrc = await page.$eval( '.done__preview-iframe', ( e ) => e.getAttribute( 'src' ) );
+
 	expect( updatedIframeSrc ).not.toBe( originalIframeSrc );
 }
 
@@ -54,9 +56,12 @@ describe( 'Done', () => {
 
 		await page.waitForSelector( '.done__preview-iframe' );
 		const originalIframeSrc = await page.$eval( '.done__preview-iframe', ( e ) => e.getAttribute( 'src' ) );
+
 		await expect( page ).toClick( '.done__preview-container input[type="checkbox"]' );
+
 		await page.waitForSelector( '.done__preview-iframe' );
 		const updatedIframeSrc = await page.$eval( '.done__preview-iframe', ( e ) => e.getAttribute( 'src' ) );
+
 		expect( updatedIframeSrc ).not.toBe( originalIframeSrc );
 
 		await expect( '.done__preview-container input[type="checkbox"]:not(:checked)' ).countToBe( 1 );
@@ -71,6 +76,7 @@ describe( 'Done', () => {
 
 		await expect( page ).toMatchElement( 'p', { text: /Reader mode/i } );
 		await expect( page ).toMatchElement( '.done__preview-iframe' );
+
 		await expect( '.done__preview-container input[type="checkbox"]' ).countToBe( 1 );
 	} );
 } );
