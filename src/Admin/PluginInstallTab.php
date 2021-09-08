@@ -51,17 +51,7 @@ class PluginInstallTab implements Conditional, Delayed, Service, Registerable {
 	 */
 	public static function is_needed() {
 
-		if ( wp_doing_ajax() || ! is_admin() ) {
-			return false;
-		}
-
-		$screen = get_current_screen();
-
-		if ( ! $screen instanceof \WP_Screen || 'plugin-install' !== $screen->id ) {
-			return false;
-		}
-
-		return true;
+		return ( ! wp_doing_ajax() && is_admin() );
 	}
 
 	/**
@@ -84,14 +74,19 @@ class PluginInstallTab implements Conditional, Delayed, Service, Registerable {
 	public function register() {
 
 		$this->set_plugins();
+		$screen = get_current_screen();
+
+		if ( $screen instanceof \WP_Screen && in_array( $screen->id, [ 'plugins', 'plugin-install' ], true ) ) {
+			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+		}
 
 		add_filter( 'install_plugins_tabs', [ $this, 'add_tab' ] );
 		add_filter( 'install_plugins_table_api_args_px_enhancing', [ $this, 'tab_args' ] );
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 10, 3 );
 		add_filter( 'plugin_install_action_links', [ $this, 'action_links' ], 10, 2 );
+		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 3 );
 
 		add_action( 'install_plugins_px_enhancing', 'display_plugins_table' );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 	}
 
 	/**
@@ -228,5 +223,26 @@ class PluginInstallTab implements Conditional, Delayed, Service, Registerable {
 		}
 
 		return $actions;
+	}
+
+	/**
+	 * Add plugin metadata for AMP compatibility in plugin listing page.
+	 *
+	 * @param string[] $plugin_meta An array of the plugin's metadata, including
+	 *                              the version, author, author URI, and plugin URI.
+	 * @param string   $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @param array    $plugin_data An array of plugin data.
+	 *
+	 * @return string[] An array of the plugin's metadata
+	 */
+	public function plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data ) {
+
+		$amp_plugins = wp_list_pluck( $this->plugins, 'slug' );
+
+		if ( ! empty( $plugin_data['slug'] ) && in_array( $plugin_data['slug'], $amp_plugins, true ) ) {
+			$plugin_meta[] = '<span><span class="amp-logo-icon small"></span>&nbsp;Page Experience Enhancing</span>';
+		}
+
+		return $plugin_meta;
 	}
 }
