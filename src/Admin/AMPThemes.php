@@ -141,6 +141,8 @@ class AMPThemes implements Service, Registerable {
 		$response         = new \stdClass();
 		$response->themes = [];
 
+		$args['per_page'] = ( ! empty( $args['per_page'] ) ) ? $args['per_page'] : 36;
+
 		$page         = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
 		$theme_chunks = array_chunk( (array) $this->themes, $args['per_page'] );
 		$themes       = ( ! empty( $theme_chunks[ $page - 1 ] ) && is_array( $theme_chunks[ $page - 1 ] ) ) ? $theme_chunks[ $page - 1 ] : [];
@@ -149,6 +151,8 @@ class AMPThemes implements Service, Registerable {
 			foreach ( $themes as $i => $theme ) {
 				$response->themes[ $i ] = (object) $theme;
 			}
+		} else {
+			$response->themes = $themes;
 		}
 
 		$response->info = [

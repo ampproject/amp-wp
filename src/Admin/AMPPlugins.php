@@ -179,9 +179,9 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	/**
 	 * Filter the response of API call to wordpress.org for plugin data.
 	 *
-	 * @param bool|array $response List of AMP compatible plugins.
-	 * @param string     $action   API Action.
-	 * @param array      $args     Args for plugin list.
+	 * @param bool|array|stdClass $response List of AMP compatible plugins.
+	 * @param string              $action   API Action.
+	 * @param array               $args     Args for plugin list.
 	 *
 	 * @return stdClass|array List of AMP compatible plugins.
 	 */
