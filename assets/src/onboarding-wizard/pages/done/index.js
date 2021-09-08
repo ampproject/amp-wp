@@ -27,6 +27,7 @@ import { IconLaptopToggles } from '../../../components/svg/icon-laptop-toggles';
 import { IconLaptopSearch } from '../../../components/svg/icon-laptop-search';
 import { AMPSettingToggle } from '../../../components/amp-setting-toggle';
 import { NavMenu } from '../../../components/nav-menu';
+import { READER, STANDARD, TRANSITIONAL } from '../../../common/constants';
 import { Preview } from './preview';
 import { Saving } from './saving';
 import { usePreview } from './use-preview';
@@ -92,7 +93,7 @@ export function Done() {
 					<IconLaptopSearch />
 					{ __( 'Review', 'amp' ) }
 				</h2>
-				{ 'reader' === themeSupport && downloadedTheme === readerTheme && (
+				{ READER === themeSupport && downloadedTheme === readerTheme && (
 					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_SUCCESS }>
 						{ __( 'Your Reader theme was automatically installed', 'amp' ) }
 					</AMPNotice>
@@ -105,12 +106,12 @@ export function Done() {
 				<p>
 					{ __( 'Your site is ready to bring great experiences to your users!', 'amp' ) }
 				</p>
-				{ 'standard' === themeSupport && (
+				{ STANDARD === themeSupport && (
 					<p>
 						{ __( 'In Standard mode there is a single AMP version of your site. Browse your site below to ensure it meets your expectations.', 'amp' ) }
 					</p>
 				) }
-				{ 'transitional' === themeSupport && (
+				{ TRANSITIONAL === themeSupport && (
 					<>
 						<p>
 							{ __( 'In Transitional mode AMP and non-AMP versions of your site are served using your currently active theme.', 'amp' ) }
@@ -120,7 +121,7 @@ export function Done() {
 						</p>
 					</>
 				) }
-				{ 'reader' === themeSupport && (
+				{ READER === themeSupport && (
 					<>
 						<p>
 							{ __( 'In Reader mode AMP is served using your selected Reader theme, and pages for your non-AMP site are served using your primary theme. Browse your site below to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
@@ -141,12 +142,12 @@ export function Done() {
 				</div>
 			</div>
 			<div className="done__preview-container">
-				{ 'reader' === themeSupport && downloadingThemeError && (
+				{ READER === themeSupport && downloadingThemeError && (
 					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 						{ __( 'There was an error downloading your Reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
 					</AMPNotice>
 				) }
-				{ 'standard' !== themeSupport && (
+				{ STANDARD !== themeSupport && (
 					<AMPSettingToggle
 						text={ __( 'AMP', 'amp' ) }
 						checked={ isPreviewingAMP }

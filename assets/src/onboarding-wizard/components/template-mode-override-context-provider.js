@@ -14,6 +14,7 @@ import { createContext, useState, useEffect, useContext } from '@wordpress/eleme
 import { Options } from '../../components/options-context-provider';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { User } from '../../components/user-context-provider';
+import { READER } from '../../common/constants';
 import { Navigation } from './navigation-context-provider';
 
 export const TemplateModeOverride = createContext();
@@ -61,7 +62,7 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 	 * Override with transitional if the user has selected reader mode and their currently active theme is the same as the selected reader theme.
 	 */
 	useEffect( () => {
-		if ( 'done' === currentPageSlug && 'reader' === themeSupport && selectedTheme.name === currentTheme.name ) {
+		if ( 'done' === currentPageSlug && READER === themeSupport && selectedTheme.name === currentTheme.name ) {
 			if ( ! readerModeWasOverridden ) {
 				updateOptions( { theme_support: 'transitional' } );
 				setReaderModeWasOverridden( true );

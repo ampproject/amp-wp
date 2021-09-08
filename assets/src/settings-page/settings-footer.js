@@ -21,6 +21,7 @@ import { Options } from '../components/options-context-provider';
 import { ReaderThemes } from '../components/reader-themes-context-provider';
 import { ErrorContext } from '../components/error-context-provider';
 import { User } from '../components/user-context-provider';
+import { READER } from '../common/constants';
 
 /**
  * Renders an error notice.
@@ -60,7 +61,7 @@ export function SettingsFooter() {
 
 	const hasChanges = hasOptionsChanges || hasDeveloperToolsOptionChange;
 	const isBusy = savingOptions || downloadingTheme || savingDeveloperToolsOption;
-	const disabled = ! hasChanges || isBusy || ! themeSupport || ( 'reader' === themeSupport && ! readerTheme );
+	const disabled = ! hasChanges || isBusy || ! themeSupport || ( READER === themeSupport && ! readerTheme );
 
 	return (
 		<section className="amp-settings-nav">

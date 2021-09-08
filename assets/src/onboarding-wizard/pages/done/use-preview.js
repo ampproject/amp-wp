@@ -13,6 +13,7 @@ import { PREVIEW_URLS } from 'amp-settings'; // From WP inline script.
  * Internal dependencies
  */
 import { Options } from '../../../components/options-context-provider';
+import { STANDARD } from '../../../common/constants';
 
 /**
  * Gets the title for the preview page selector.
@@ -47,7 +48,7 @@ const links = Object.keys( PREVIEW_URLS ).map( ( type ) => ( {
 
 export function usePreview() {
 	const { editedOptions: { theme_support: themeSupport } } = useContext( Options );
-	const [ isPreviewingAMP, setIsPreviewingAMP ] = useState( themeSupport !== 'standard' );
+	const [ isPreviewingAMP, setIsPreviewingAMP ] = useState( themeSupport !== STANDARD );
 	const [ previewedPageType, setPreviewedPageType ] = useState( links[ 0 ].type );
 
 	const toggleIsPreviewingAMP = () => setIsPreviewingAMP( ( mode ) => ! mode );
