@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * @since 2.2
  * @internal
  */
-class ThemeInstallTab implements Service, Registerable {
+class AMPThemes implements Service, Registerable {
 
 	/**
 	 * Assets handle.
