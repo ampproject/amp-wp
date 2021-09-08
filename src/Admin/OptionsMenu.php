@@ -350,7 +350,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @return string Whether the panel is dismissed, or null if the option has not been set.
 	 */
 	public function rest_get_review_panel_dismissed_for_template_mode( $user ) {
-		return get_user_meta( $user['id'] , self::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, true );
+		return get_user_meta( $user['id'], self::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, true );
 	}
 
 	/**
@@ -361,7 +361,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 *
 	 * @return bool|WP_Error The result of update_user_meta, or WP_Error if the current user lacks permission.
 	 */
-	public function rest_update_review_panel_dismissed_for_template_mode( string $template_mode, WP_User $user ) {
+	public function rest_update_review_panel_dismissed_for_template_mode( $template_mode, $user ) {
 		if ( ! current_user_can( 'edit_user', $user->ID ) ) {
 			return new WP_Error(
 				'amp_rest_cannot_edit_user',

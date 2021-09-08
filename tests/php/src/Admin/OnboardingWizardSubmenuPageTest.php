@@ -206,7 +206,7 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 
 		$this->assertEquals(
 			$expected_urls,
-			$this->onboarding_wizard_submenu_page->get_preview_urls( $scannable_urls ),
+			$this->onboarding_wizard_submenu_page->get_preview_urls( $scannable_urls )
 		);
 	}
 }
