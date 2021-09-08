@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { AMP_PLUGINS } from 'amp-plugins'; // From WP inline script.
+import { AMP_PLUGINS, NONE_WPORG_PLUGINS } from 'amp-plugins'; // From WP inline script.
 import jQuery from 'jquery';
 
 const ampPluginInstall = {
@@ -17,6 +17,7 @@ const ampPluginInstall = {
 	 */
 	init() {
 		this.addAmpMessage();
+		this.removeAdditionalInfo();
 	},
 
 	/**
@@ -50,6 +51,20 @@ const ampPluginInstall = {
 			messageElement.append( __( 'Page Experience Enhancing', 'amp' ) );
 
 			jQuery( pluginCardElement ).append( messageElement );
+		}
+	},
+
+	removeAdditionalInfo() {
+		// eslint-disable-next-line guard-for-in
+		for ( const index in NONE_WPORG_PLUGINS ) {
+			const pluginSlug = NONE_WPORG_PLUGINS[ index ];
+			const pluginCardElement = document.querySelector( `.plugin-card.plugin-card-${ pluginSlug }` );
+
+			if ( ! pluginCardElement ) {
+				continue;
+			}
+
+			jQuery( '.plugin-card-bottom', pluginCardElement ).remove();
 		}
 	},
 };

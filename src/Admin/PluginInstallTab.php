@@ -116,8 +116,17 @@ class PluginInstallTab implements Conditional, Delayed, Service, Registerable {
 			AMP__VERSION
 		);
 
+		$none_wporg = [];
+
+		foreach ( $this->plugins as $plugin ) {
+			if ( true !== $plugin['wporg'] ) {
+				$none_wporg[] = $plugin['slug'];
+			}
+		}
+
 		$js_data = [
-			'AMP_PLUGINS' => wp_list_pluck( $this->plugins, 'slug' ),
+			'AMP_PLUGINS'        => wp_list_pluck( $this->plugins, 'slug' ),
+			'NONE_WPORG_PLUGINS' => $none_wporg,
 		];
 
 		wp_add_inline_script(
