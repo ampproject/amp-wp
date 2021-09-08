@@ -18,6 +18,7 @@ import { AMPDrawer } from '../components/amp-drawer';
 import { IconLaptopSearch } from '../components/svg/icon-laptop-search';
 import { Options } from '../components/options-context-provider';
 import { User } from '../components/user-context-provider';
+import { READER, STANDARD, TRANSITIONAL } from '../common/constants';
 
 /**
  * Review component on the settings screen.
@@ -39,7 +40,7 @@ export function SiteReview() {
 		return null;
 	}
 
-	const previewPermalink = 'standard' === themeSupport ? HOME_URL : pairedUrlExamples[ pairedUrlStructure ][ 0 ];
+	const previewPermalink = STANDARD === themeSupport ? HOME_URL : pairedUrlExamples[ pairedUrlStructure ][ 0 ];
 
 	return (
 		<AMPDrawer
@@ -55,8 +56,28 @@ export function SiteReview() {
 		>
 			<div className="settings-site-review">
 				<p>
-					{ __( 'Your site is ready to bring great experiences to your users! In Standard mode there is a single AMP version of your site. Browse your site and ensure the functionality and look-and-feel are as expected.', 'amp' ) }
+					{ __( 'Your site is ready to bring great experiences to your users!', 'amp' ) }
 				</p>
+				{ STANDARD === themeSupport && (
+					<p>
+						{ __( 'In Standard mode there is a single AMP version of your site. Browse your site below to ensure it meets your expectations.', 'amp' ) }
+					</p>
+				) }
+				{ TRANSITIONAL === themeSupport && (
+					<>
+						<p>
+							{ __( 'In Transitional mode AMP and non-AMP versions of your site are served using your currently active theme.', 'amp' ) }
+						</p>
+						<p>
+							{ __( 'Browse your site below to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
+						</p>
+					</>
+				) }
+				{ READER === themeSupport && (
+					<p>
+						{ __( 'In Reader mode AMP is served using your selected Reader theme, and pages for your non-AMP site are served using your primary theme. Browse your site below to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
+					</p>
+				) }
 				<h3 className="settings-site-review__heading">
 					<IconLaptopToggles />
 					{ __( 'Need help?', 'amp' ) }
