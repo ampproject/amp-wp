@@ -45,7 +45,7 @@ export function SiteReview() {
 		<AMPDrawer
 			heading={ (
 				<>
-					<IconLaptopSearch />
+					<IconLaptopSearch width={ 55 } />
 					{ __( 'Review', 'amp' ) }
 				</>
 			) }

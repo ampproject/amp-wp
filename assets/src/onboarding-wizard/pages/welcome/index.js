@@ -118,7 +118,7 @@ export function Welcome() {
 
 				<div className={ 'welcome__section' }>
 					<div className="welcome__section-icon">
-						<IconLaptopSearch width="42" />
+						<IconLaptopSearch />
 					</div>
 					<div className="welcome__section-description">
 						<h4>
