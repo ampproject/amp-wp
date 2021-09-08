@@ -22,8 +22,13 @@ export default wpThemeView.extend( {
 		wpThemeView.prototype.render.apply( this, args );
 
 		const data = this.model.toJSON();
+		let slug = data?.slug;
 
-		if ( this.isAMPTheme( data.slug ) ) {
+		if ( ! slug ) {
+			slug = data?.id;
+		}
+
+		if ( slug && this.isAMPTheme( slug ) ) {
 			const messageElement = document.createElement( 'div' );
 			const iconElement = document.createElement( 'span' );
 			const tooltipElement = document.createElement( 'span' );
@@ -44,7 +49,7 @@ export default wpThemeView.extend( {
 			this.$el.append( messageElement );
 		}
 
-		if ( ! this.isWPORGTheme( data.slug ) ) {
+		if ( slug && ! this.isWPORGTheme( slug ) ) {
 			const siteLinkButton = document.createElement( 'a' );
 			siteLinkButton.classList.add( 'button' );
 			siteLinkButton.classList.add( 'button-primary' );

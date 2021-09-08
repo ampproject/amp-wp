@@ -23,6 +23,11 @@ const ampThemeInstall = {
 	 * Add new tab for PX Enhanced theme in theme install page.
 	 */
 	addTab() {
+		const filterLinks = document.querySelector( '.filter-links' );
+		if ( ! filterLinks ) {
+			return;
+		}
+
 		const listItem = document.createElement( 'li' );
 		const anchorElement = document.createElement( 'a' );
 		const spanElement = document.createElement( 'span' );
@@ -36,7 +41,7 @@ const ampThemeInstall = {
 
 		listItem.appendChild( anchorElement );
 
-		document.querySelector( '.filter-links' ).prepend( listItem );
+		filterLinks.prepend( listItem );
 	},
 
 	/**

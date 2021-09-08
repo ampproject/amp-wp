@@ -67,7 +67,7 @@ class ThemeInstallTab implements Service, Registerable {
 
 		$screen = get_current_screen();
 
-		if ( $screen instanceof \WP_Screen && 'theme-install' === $screen->id ) {
+		if ( $screen instanceof \WP_Screen && in_array( $screen->id, [ 'themes', 'theme-install' ], true ) ) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		}
 	}
