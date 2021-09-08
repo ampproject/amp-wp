@@ -62,7 +62,7 @@ class UserRESTEndpointExtension implements Service, Registerable {
 	 * @return string|WP_Error Template mode fir which the panel is dismissed, empty string if the option has not been set, or WP_Error if the current user lacks permission.
 	 */
 	public function get_review_panel_dismissed_for_template_mode( $user ) {
-		if ( $user['id'] !== wp_get_current_user()->ID ) {
+		if ( wp_get_current_user()->ID !== $user['id'] ) {
 			return new WP_Error(
 				'amp_rest_cannot_get_other_user',
 				__( 'Sorry, the current user is not allowed to get this data about other user.', 'amp' ),
@@ -90,7 +90,7 @@ class UserRESTEndpointExtension implements Service, Registerable {
 			);
 		}
 
-		if ( $user->ID !== wp_get_current_user()->ID ) {
+		if ( wp_get_current_user()->ID !== $user->ID ) {
 			return new WP_Error(
 				'amp_rest_cannot_edit_other_user',
 				__( 'Sorry, the user is not allowed to make this change for other user.', 'amp' ),
