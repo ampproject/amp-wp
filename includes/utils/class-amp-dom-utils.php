@@ -158,7 +158,7 @@ class AMP_DOM_Utils {
 	 * @param string   $tag        A valid HTML element tag for the element to be added.
 	 * @param string[] $attributes One of more valid attributes for the new node.
 	 *
-	 * @return DOMElement|false The DOMElement for the given $tag, or false on failure
+	 * @return Element|false The DOMElement for the given $tag, or false on failure
 	 */
 	public static function create_node( Document $dom, $tag, $attributes ) {
 		$node = $dom->createElement( $tag );
