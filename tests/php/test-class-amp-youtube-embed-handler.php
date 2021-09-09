@@ -13,7 +13,7 @@ use AmpProject\AmpWP\Tests\TestCase;
 /**
  * Tests for AMP_YouTube_Embed_Handler.
  *
- * @covers AMP_YouTube_Embed_Handler
+ * @coversDefaultClass \AMP_YouTube_Embed_Handler
  */
 class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
@@ -35,7 +35,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	/**
 	 * An instance of this embed handler.
 	 *
-	 * @var AMP_YouTube_Embed_Handler.
+	 * @var AMP_YouTube_Embed_Handler
 	 */
 	public $handler;
 
@@ -138,7 +138,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	/**
 	 * @dataProvider sanitize_raw_embeds_data_provider
 	 *
-	 * @covers       AMP_YouTube_Embed_Handler::sanitize_raw_embeds
+	 * @covers ::sanitize_raw_embeds
 	 */
 	public function test_sanitize_raw_embeds( $source, $expected ) {
 
@@ -159,7 +159,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	/**
 	 * Test video_override().
 	 *
-	 * @covers AMP_YouTube_Embed_Handler::video_override()
+	 * @covers ::video_override()
 	 */
 	public function test_video_override() {
 		remove_all_filters( 'wp_video_shortcode_override' );
@@ -378,7 +378,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	 * Tests get_video_id_from_url.
 	 *
 	 * @dataProvider get_video_id_data
-	 * @covers AMP_YouTube_Embed_Handler::get_video_id_from_url()
+	 * @covers ::get_video_id_from_url()
 	 *
 	 * @param string       $url      The URL to test.
 	 * @param string|false $expected The expected result.
@@ -422,7 +422,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	 * Tests get_start_time_from_url.
 	 *
 	 * @dataProvider get_start_time_data
-	 * @covers       AMP_YouTube_Embed_Handler::get_start_time_from_url
+	 * @covers ::get_start_time_from_url
 	 *
 	 * @param string       $url      The URL to test.
 	 * @param string|false $expected The expected result.
