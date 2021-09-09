@@ -1457,7 +1457,7 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Gets all of the possible error types.
 	 *
-	 * @return array Error types.
+	 * @return string[] Error types.
 	 */
 	public static function get_error_types() {
 		return [ self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ];
