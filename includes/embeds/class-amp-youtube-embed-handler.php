@@ -258,10 +258,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function prepare_attributes( $url, $video_id = '' ) {
 
-		if ( empty( $url ) ) {
-			return [];
-		}
-
 		$attributes = [
 			Attribute::LAYOUT => Layout::RESPONSIVE,
 			Attribute::WIDTH  => $this->args['width'],
@@ -468,10 +464,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return int Start time in seconds.
 	 */
 	private function get_start_time_from_url( $url ) {
-
-		if ( empty( $url ) ) {
-			return 0;
-		}
 
 		$start_time = 0;
 		$parsed_url = wp_parse_url( $url );
