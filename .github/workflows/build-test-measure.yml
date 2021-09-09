@@ -214,6 +214,7 @@ jobs:
           # phpstan requires PHP 7.1+.
           php-version: 7.4
           extensions: dom, iconv, json, libxml, zip
+          tools: phpstan
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -232,8 +233,8 @@ jobs:
 
       - name: Static Analysis (PHPStan)
         run: |
-          vendor/bin/phpstan --version
-          vendor/bin/phpstan analyse
+          phpstan --version
+          phpstan analyse
 
 #-----------------------------------------------------------------------------------------------------------------------
 
