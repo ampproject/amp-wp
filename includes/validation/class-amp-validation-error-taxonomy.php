@@ -128,7 +128,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * This is also used in WP_List_Table, like for the 'Bulk Actions' option.
 	 * When this is present, this ensures that this isn't filtered.
 	 *
-	 * @var int|string
+	 * @var string
 	 */
 	const NO_FILTER_VALUE = '';
 
@@ -1095,7 +1095,7 @@ class AMP_Validation_Error_Taxonomy {
 			&&
 			in_array(
 				$_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ], // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				array_merge( self::get_error_types(), [ (string) self::NO_FILTER_VALUE ] ),
+				array_merge( self::get_error_types(), [ self::NO_FILTER_VALUE ] ),
 				true
 			)
 		) {
