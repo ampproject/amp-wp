@@ -101,7 +101,21 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	}
 
 	/**
-	 * data provider for $this->test_sanitize_raw_embeds()
+	 * @covers ::register_embed()
+	 * @covers ::unregister_embed()
+	 */
+	public function test_register_and_unregister_embed() {
+		$embed = new AMP_YouTube_Embed_Handler();
+		$embed->register_embed();
+		$this->assertEquals( 10, has_filter( 'embed_oembed_html', [ $embed, 'filter_embed_oembed_html' ] ) );
+		$this->assertEquals( 10, has_filter( 'wp_video_shortcode_override', [ $embed, 'video_override' ] ) );
+		$embed->unregister_embed();
+		$this->assertFalse( has_filter( 'embed_oembed_html', [ $embed, 'filter_embed_oembed_html' ] ) );
+		$this->assertFalse( has_filter( 'wp_video_shortcode_override', [ $embed, 'video_override' ] ) );
+	}
+
+	/**
+	 * Data provider for $this->test_sanitize_raw_embeds()
 	 *
 	 * @return string[][]
 	 */
@@ -114,7 +128,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 			],
 			'youtube-start'          => [
 				'source'   => '<iframe src="https://www.youtube.com/embed/q4xKvHANqjk?controls=0&amp;autoplay=1&amp;loop=1&amp;modestbranding=1&amp;start=84" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="560" height="315" frameborder="0"></iframe>',
-				'expected' => '<amp-youtube layout="responsive" width="560" height="315" data-videoid="q4xKvHANqjk" data-param-start="84" data-param-controls="0" autoplay="1" loop="1" data-param-modestbranding="1" title="YouTube video player"><a placeholder="" href="https://www.youtube.com/watch?v=q4xKvHANqjk"><img src="https://i.ytimg.com/vi/q4xKvHANqjk/hqdefault.jpg" layout="fill" object-fit="cover" alt="YouTube video player"></a></amp-youtube>',
+				'expected' => '<amp-youtube layout="responsive" width="560" height="315" data-videoid="q4xKvHANqjk" data-param-start="84" data-param-controls="0" autoplay="1" loop="1" data-param-modestbranding="1" title="YouTube video player"><a placeholder="" href="https://www.youtube.com/watch?v=q4xKvHANqjk#t=84"><img src="https://i.ytimg.com/vi/q4xKvHANqjk/hqdefault.jpg" layout="fill" object-fit="cover" alt="YouTube video player"></a></amp-youtube>',
 			],
 			'with_http'              => [
 				'source'   => '<iframe src="http://www.youtube.com/embed/q4xKvHANqjk?controls=0&amp;autoplay=1&amp;loop=1&amp;modestbranding=1" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="560" height="315" frameborder="0"></iframe>',
@@ -144,7 +158,8 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	 *
 	 * @covers ::sanitize_raw_embeds()
 	 * @covers ::get_amp_component()
-	 * @covers ::get_placeholder_component()
+	 * @covers ::get_placeholder_element()
+	 * @covers ::prepare_attributes()
 	 */
 	public function test_sanitize_raw_embeds( $source, $expected ) {
 
@@ -275,8 +290,10 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 	/**
 	 * @dataProvider get_conversion_data
+	 * @covers ::register_embed()
 	 * @covers ::filter_embed_oembed_html()
 	 * @covers ::render()
+	 * @covers ::get_placeholder_markup()
 	 */
 	public function test__conversion( $source, $expected, $fallback_for_expected = null ) {
 		$this->handler->register_embed();
@@ -465,6 +482,8 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 	/**
 	 * @dataProvider get_scripts_data
+	 * @covers ::register_embed()
+	 * @covers ::get_scripts()
 	 */
 	public function test__get_scripts( $source, $expected ) {
 		$this->handler->register_embed();

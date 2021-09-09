@@ -100,6 +100,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
+		remove_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10 );
 	}
 
 	/**
@@ -216,7 +217,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		);
 
 		if ( ! empty( $amp_node ) && $amp_node instanceof Element ) {
-			$placeholder = $this->get_placeholder_component( $amp_node, $attributes );
+			$placeholder = $this->get_placeholder_element( $amp_node, $attributes );
 
 			if ( $placeholder ) {
 				$amp_node->appendChild( $placeholder );
@@ -282,14 +283,14 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Placeholder component for AMP YouTube component in the DOM.
+	 * Placeholder element for AMP YouTube component in the DOM.
 	 *
 	 * @param Element $amp_component AMP component element.
 	 * @param array   $attributes    YouTube attributes.
 	 *
 	 * @return Element|false DOMElement on success otherwise false.
 	 */
-	private function get_placeholder_component( Element $amp_component, $attributes ) {
+	private function get_placeholder_element( Element $amp_component, $attributes ) {
 
 		if ( empty( $attributes[ Attribute::DATA_VIDEOID ] ) ) {
 			return false;
@@ -315,8 +316,8 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		);
 
 		$video_url = esc_url_raw( sprintf( 'https://www.youtube.com/watch?v=%s', $video_id ) );
-		if ( array_key_exists( 'start', $attributes ) ) {
-			$video_url .= '#t=' . $attributes['start'];
+		if ( array_key_exists( 'data-param-start', $attributes ) ) {
+			$video_url .= '#t=' . $attributes['data-param-start'];
 		}
 
 		$placeholder = AMP_DOM_Utils::create_node(
