@@ -110,15 +110,19 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 		return [
 			'youtube-embed'          => [
 				'source'   => '<iframe src="https://www.youtube.com/embed/q4xKvHANqjk?controls=0&amp;autoplay=1&amp;loop=1&amp;modestbranding=1" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="560" height="315" frameborder="0"></iframe>',
-				'expected' => '<amp-youtube layout="responsive" width="560" height="315" data-videoid="q4xKvHANqjk" data-param-controls="0" autoplay="1" loop="1" data-param-modestbranding="1" title="YouTube video player"><a placeholder="" href="https://www.youtube.com/embed/q4xKvHANqjk?controls=0&amp;autoplay=1&amp;loop=1&amp;modestbranding=1"><img src="https://i.ytimg.com/vi/q4xKvHANqjk/hqdefault.jpg" layout="fill" object-fit="cover" alt="YouTube video player"></a></amp-youtube>',
+				'expected' => '<amp-youtube layout="responsive" width="560" height="315" data-videoid="q4xKvHANqjk" data-param-controls="0" autoplay="1" loop="1" data-param-modestbranding="1" title="YouTube video player"><a placeholder="" href="https://www.youtube.com/watch?v=q4xKvHANqjk"><img src="https://i.ytimg.com/vi/q4xKvHANqjk/hqdefault.jpg" layout="fill" object-fit="cover" alt="YouTube video player"></a></amp-youtube>',
+			],
+			'youtube-start'          => [
+				'source'   => '<iframe src="https://www.youtube.com/embed/q4xKvHANqjk?controls=0&amp;autoplay=1&amp;loop=1&amp;modestbranding=1&amp;start=84" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="560" height="315" frameborder="0"></iframe>',
+				'expected' => '<amp-youtube layout="responsive" width="560" height="315" data-videoid="q4xKvHANqjk" data-param-start="84" data-param-controls="0" autoplay="1" loop="1" data-param-modestbranding="1" title="YouTube video player"><a placeholder="" href="https://www.youtube.com/watch?v=q4xKvHANqjk"><img src="https://i.ytimg.com/vi/q4xKvHANqjk/hqdefault.jpg" layout="fill" object-fit="cover" alt="YouTube video player"></a></amp-youtube>',
 			],
 			'with_http'              => [
 				'source'   => '<iframe src="http://www.youtube.com/embed/q4xKvHANqjk?controls=0&amp;autoplay=1&amp;loop=1&amp;modestbranding=1" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="560" height="315" frameborder="0"></iframe>',
-				'expected' => '<amp-youtube layout="responsive" width="560" height="315" data-videoid="q4xKvHANqjk" data-param-controls="0" autoplay="1" loop="1" data-param-modestbranding="1" title="YouTube video player"><a placeholder="" href="http://www.youtube.com/embed/q4xKvHANqjk?controls=0&amp;autoplay=1&amp;loop=1&amp;modestbranding=1"><img src="https://i.ytimg.com/vi/q4xKvHANqjk/hqdefault.jpg" layout="fill" object-fit="cover" alt="YouTube video player"></a></amp-youtube>',
+				'expected' => '<amp-youtube layout="responsive" width="560" height="315" data-videoid="q4xKvHANqjk" data-param-controls="0" autoplay="1" loop="1" data-param-modestbranding="1" title="YouTube video player"><a placeholder="" href="https://www.youtube.com/watch?v=q4xKvHANqjk"><img src="https://i.ytimg.com/vi/q4xKvHANqjk/hqdefault.jpg" layout="fill" object-fit="cover" alt="YouTube video player"></a></amp-youtube>',
 			],
 			'short-url'              => [
 				'source'   => '<iframe src="https://youtu.be/kfVsfOSbJY0?controls=0&amp;autoplay=1&amp;loop=1&amp;modestbranding=1" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="560" height="315" frameborder="0"></iframe>',
-				'expected' => '<amp-youtube layout="responsive" width="560" height="315" data-videoid="kfVsfOSbJY0" data-param-controls="0" autoplay="1" loop="1" data-param-modestbranding="1" title="YouTube video player"><a placeholder="" href="https://youtu.be/kfVsfOSbJY0?controls=0&amp;autoplay=1&amp;loop=1&amp;modestbranding=1"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="YouTube video player"></a></amp-youtube>',
+				'expected' => '<amp-youtube layout="responsive" width="560" height="315" data-videoid="kfVsfOSbJY0" data-param-controls="0" autoplay="1" loop="1" data-param-modestbranding="1" title="YouTube video player"><a placeholder="" href="https://www.youtube.com/watch?v=kfVsfOSbJY0"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="YouTube video player"></a></amp-youtube>',
 			],
 			'live_streaming_channel' => [
 				'source'   => '<iframe src="https://www.youtube.com/embed/live_stream?channel=UCkaNo2FUEWips2z4BkOHl6Q" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="560" height="315" frameborder="0"></iframe>',
@@ -138,7 +142,9 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	/**
 	 * @dataProvider sanitize_raw_embeds_data_provider
 	 *
-	 * @covers ::sanitize_raw_embeds
+	 * @covers ::sanitize_raw_embeds()
+	 * @covers ::get_amp_component()
+	 * @covers ::get_placeholder_component()
 	 */
 	public function test_sanitize_raw_embeds( $source, $expected ) {
 
@@ -159,7 +165,10 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	/**
 	 * Test video_override().
 	 *
+	 * @covers ::register_embed()
 	 * @covers ::video_override()
+	 * @covers ::render()
+	 * @covers ::get_placeholder_markup()
 	 */
 	public function test_video_override() {
 		remove_all_filters( 'wp_video_shortcode_override' );
@@ -194,6 +203,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 		remove_all_filters( 'wp_video_shortcode_override' );
 	}
 
+	/** @return array */
 	public function get_conversion_data() {
 		return [
 			'no_embed'                         => [
@@ -265,6 +275,8 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 	/**
 	 * @dataProvider get_conversion_data
+	 * @covers ::filter_embed_oembed_html()
+	 * @covers ::render()
 	 */
 	public function test__conversion( $source, $expected, $fallback_for_expected = null ) {
 		$this->handler->register_embed();
@@ -422,7 +434,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	 * Tests get_start_time_from_url.
 	 *
 	 * @dataProvider get_start_time_data
-	 * @covers ::get_start_time_from_url
+	 * @covers ::get_start_time_from_url()
 	 *
 	 * @param string       $url      The URL to test.
 	 * @param string|false $expected The expected result.
@@ -437,6 +449,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 		);
 	}
 
+	/** @return array */
 	public function get_scripts_data() {
 		return [
 			'not_converted' => [

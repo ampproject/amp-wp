@@ -216,7 +216,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		);
 
 		if ( ! empty( $amp_node ) && $amp_node instanceof Element ) {
-			$placeholder = $this->get_placeholder_component( $amp_node, $attributes, $url );
+			$placeholder = $this->get_placeholder_component( $amp_node, $attributes );
 
 			if ( $placeholder ) {
 				$amp_node->appendChild( $placeholder );
@@ -286,11 +286,10 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @param Element $amp_component AMP component element.
 	 * @param array   $attributes    YouTube attributes.
-	 * @param string  $url           YouTube URL.
 	 *
 	 * @return Element|false DOMElement on success otherwise false.
 	 */
-	private function get_placeholder_component( Element $amp_component, $attributes, $url ) {
+	private function get_placeholder_component( Element $amp_component, $attributes ) {
 
 		if ( empty( $attributes[ Attribute::DATA_VIDEOID ] ) ) {
 			return false;
@@ -315,12 +314,17 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			$img_attributes
 		);
 
+		$video_url = esc_url_raw( sprintf( 'https://www.youtube.com/watch?v=%s', $video_id ) );
+		if ( array_key_exists( 'start', $attributes ) ) {
+			$video_url .= '#t=' . $attributes['start'];
+		}
+
 		$placeholder = AMP_DOM_Utils::create_node(
 			$dom,
 			Tag::A,
 			[
 				Attribute::PLACEHOLDER => '',
-				Attribute::HREF        => esc_url_raw( $url ),
+				Attribute::HREF        => $video_url,
 			]
 		);
 
