@@ -146,7 +146,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 		}
 
-		$placeholder = $this->get_placeholder_markup( $url, $attributes );
+		$placeholder = $this->get_placeholder_markup( $url, $video_id, $attributes );
 
 		return AMP_HTML_Utils::build_tag( Extension::YOUTUBE, $attributes, $placeholder );
 	}
@@ -183,7 +183,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 				$node->parentNode->replaceChild( $amp_youtube_component, $node );
 			}
 		}
-
 	}
 
 	/**
@@ -216,12 +215,10 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			$attributes
 		);
 
-		if ( ! empty( $amp_node ) && $amp_node instanceof Element ) {
-			$placeholder = $this->get_placeholder_element( $amp_node, $attributes );
-
-			if ( $placeholder ) {
-				$amp_node->appendChild( $placeholder );
-			}
+		if ( $video_id && $amp_node instanceof Element ) {
+			$amp_node->appendChild(
+				$this->get_placeholder_element( $amp_node, $video_id, $attributes )
+			);
 		}
 
 		return $amp_node;
@@ -286,18 +283,13 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Placeholder element for AMP YouTube component in the DOM.
 	 *
 	 * @param Element $amp_component AMP component element.
+	 * @param string  $video_id      Video ID.
 	 * @param array   $attributes    YouTube attributes.
 	 *
-	 * @return Element|false DOMElement on success otherwise false.
+	 * @return Element Placeholder.
 	 */
-	private function get_placeholder_element( Element $amp_component, $attributes ) {
-
-		if ( empty( $attributes[ Attribute::DATA_VIDEOID ] ) ) {
-			return false;
-		}
-
-		$video_id = $attributes[ Attribute::DATA_VIDEOID ];
-		$dom      = Document::fromNode( $amp_component );
+	private function get_placeholder_element( Element $amp_component, $video_id, $attributes ) {
+		$dom = Document::fromNode( $amp_component );
 
 		$img_attributes = [
 			Attribute::SRC        => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $video_id ) ),
@@ -338,18 +330,15 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * To get placeholder for AMP component as constructed HTML string.
 	 *
 	 * @param string $url        YouTube URL.
+	 * @param string $video_id   Video ID.
 	 * @param array  $attributes YouTube attributes.
 	 *
 	 * @return string HTML string.
 	 */
-	private function get_placeholder_markup( $url, $attributes ) {
-
-		if ( empty( $attributes[ Attribute::DATA_VIDEOID ] ) ) {
-			return '';
-		}
+	private function get_placeholder_markup( $url, $video_id, $attributes ) {
 
 		$img_attributes = [
-			Attribute::SRC        => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $attributes[ Attribute::DATA_VIDEOID ] ) ),
+			Attribute::SRC        => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $video_id ) ),
 			Attribute::LAYOUT     => Layout::FILL,
 			Attribute::OBJECT_FIT => 'cover',
 		];
