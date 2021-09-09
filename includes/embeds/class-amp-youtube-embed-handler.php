@@ -353,7 +353,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			$img_attributes[ Attribute::ALT ] = $attributes[ Attribute::TITLE ];
 		}
 
-		$img = AMP_HTML_Utils::build_tag( Tag::IMG, $img_attributes );
+		$img = '<img ' . AMP_HTML_Utils::build_attributes_string( $img_attributes ) . '>';
 
 		return AMP_HTML_Utils::build_tag(
 			Tag::A,
