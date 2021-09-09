@@ -145,19 +145,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 		}
 
-		if ( empty( $attributes[ Attribute::DATA_VIDEOID ] ) ) {
-
-			return AMP_HTML_Utils::build_tag(
-				Tag::A,
-				[
-					Attribute::HREF   => esc_url_raw( $url ),
-					Attribute::CLASS_ => 'amp-wp-embed-fallback',
-				],
-				esc_url( $url )
-			);
-		}
-
-		$placeholder = $this->get_placeholder( $url, $attributes );
+		$placeholder = $this->get_placeholder_markup( $url, $attributes );
 
 		return AMP_HTML_Utils::build_tag( Extension::YOUTUBE, $attributes, $placeholder );
 	}
@@ -349,7 +337,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @return string HTML string.
 	 */
-	private function get_placeholder( $url, $attributes ) {
+	private function get_placeholder_markup( $url, $attributes ) {
 
 		if ( empty( $attributes[ Attribute::DATA_VIDEOID ] ) ) {
 			return '';
@@ -504,12 +492,13 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			return $html;
 		}
 
-		$video_id = $this->get_video_id_from_url( $attr[ Attribute::SRC ] );
+		$src      = $attr[ Attribute::SRC ];
+		$video_id = $this->get_video_id_from_url( $src );
 
 		if ( ! $video_id ) {
 			return $html;
 		}
 
-		return $this->render( $html, $attr[ Attribute::SRC ], $video_id );
+		return $this->render( $html, $src, $video_id );
 	}
 }
