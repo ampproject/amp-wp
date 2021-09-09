@@ -228,7 +228,7 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run:
+        run: |
           if [ -e vendor/bin/phpstan ]; then rm vendor/bin/phpstan; fi
           composer install
 
