@@ -19,6 +19,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Default width.
 	 *
+	 * @phpstan-ignore-next-line
 	 * @var int|string
 	 */
 	protected $DEFAULT_WIDTH = 'auto';
