@@ -128,6 +128,10 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 				'source'   => '<iframe src="https://mysite.com/blog/youtube-iz-da-best" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="560" height="315" frameborder="0"></iframe>',
 				'expected' => '<iframe src="https://mysite.com/blog/youtube-iz-da-best" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="560" height="315" frameborder="0"></iframe>',
 			],
+			'youtube-unknown'        => [
+				'source'   => '<iframe src="https://www.youtube.com/feed/library" title="YouTube Library" width="560" height="315"></iframe>',
+				'expected' => '<iframe src="https://www.youtube.com/feed/library" title="YouTube Library" width="560" height="315"></iframe>',
+			],
 		];
 	}
 

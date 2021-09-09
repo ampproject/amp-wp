@@ -218,17 +218,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		if ( empty( $attributes[ Attribute::DATA_VIDEOID ] ) && empty( $attributes[ Attribute::DATA_LIVE_CHANNELID ] ) ) {
-			$link_node = AMP_DOM_Utils::create_node(
-				$dom,
-				Tag::A,
-				[
-					Attribute::HREF   => esc_url_raw( $url ),
-					Attribute::CLASS_ => 'amp-wp-embed-fallback',
-				]
-			);
-			$link_node->appendChild( $dom->createTextNode( $url ) );
-
-			return $link_node;
+			return false;
 		}
 
 		$amp_node = AMP_DOM_Utils::create_node(
