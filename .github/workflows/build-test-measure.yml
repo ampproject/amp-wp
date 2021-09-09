@@ -231,7 +231,9 @@ jobs:
         run: composer install
 
       - name: Static Analysis (PHPStan)
-        run: vendor/bin/phpstan analyse
+        run: |
+          vendor/bin/phpstan --version
+          vendor/bin/phpstan analyse
 
 #-----------------------------------------------------------------------------------------------------------------------
 
