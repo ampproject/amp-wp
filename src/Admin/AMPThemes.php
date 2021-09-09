@@ -26,20 +26,20 @@ class AMPThemes implements Service, Registerable {
 	const ASSET_HANDLE = 'amp-theme-install';
 
 	/**
-	 * @var array List AMP plugins.
+	 * @var array List of AMP themes.
 	 */
-	protected $themes = [];
+	public static $themes = [];
 
 	/**
 	 * Fetch AMP themes data.
 	 *
 	 * @return void
 	 */
-	protected function set_themes() {
+	public static function set_themes() {
 
 		$file_path    = AMP__DIR__ . '/data/themes.json';
 		$json_data    = file_get_contents( $file_path );
-		$this->themes = json_decode( $json_data, true );
+		self::$themes = json_decode( $json_data, true );
 	}
 
 	/**
@@ -49,7 +49,7 @@ class AMPThemes implements Service, Registerable {
 	 */
 	public function register() {
 
-		$this->set_themes();
+		self::set_themes();
 
 		add_filter( 'themes_api', [ $this, 'themes_api' ], 10, 3 );
 
@@ -101,14 +101,14 @@ class AMPThemes implements Service, Registerable {
 
 		$none_wporg = [];
 
-		foreach ( $this->themes as $theme ) {
+		foreach ( self::$themes as $theme ) {
 			if ( true !== $theme['wporg'] ) {
 				$none_wporg[] = $theme['slug'];
 			}
 		}
 
 		$js_data = [
-			'AMP_THEMES'        => wp_list_pluck( $this->themes, 'slug' ),
+			'AMP_THEMES'        => wp_list_pluck( self::$themes, 'slug' ),
 			'NONE_WPORG_THEMES' => $none_wporg,
 		];
 
@@ -144,7 +144,7 @@ class AMPThemes implements Service, Registerable {
 		$args['per_page'] = ( ! empty( $args['per_page'] ) ) ? $args['per_page'] : 36;
 
 		$page         = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
-		$theme_chunks = array_chunk( (array) $this->themes, $args['per_page'] );
+		$theme_chunks = array_chunk( (array) self::$themes, $args['per_page'] );
 		$themes       = ( ! empty( $theme_chunks[ $page - 1 ] ) && is_array( $theme_chunks[ $page - 1 ] ) ) ? $theme_chunks[ $page - 1 ] : [];
 
 		if ( 'query_themes' === $action ) {
@@ -158,7 +158,7 @@ class AMPThemes implements Service, Registerable {
 		$response->info = [
 			'page'    => $page,
 			'pages'   => count( $theme_chunks ),
-			'results' => count( (array) $this->themes ),
+			'results' => count( (array) self::$themes ),
 		];
 
 		return $response;

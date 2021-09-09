@@ -30,9 +30,9 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	const ASSET_HANDLE = 'amp-plugin-install';
 
 	/**
-	 * @var array List AMP plugins.
+	 * @var array List of AMP plugins.
 	 */
-	protected $plugins = [];
+	public static $plugins = [];
 
 	/**
 	 * Get the action to use for registering the service.
@@ -59,11 +59,11 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	 *
 	 * @return void
 	 */
-	protected function set_plugins() {
+	public static function set_plugins() {
 
 		$plugin_json   = AMP__DIR__ . '/data/plugins.json';
 		$json_data     = file_get_contents( $plugin_json );
-		$this->plugins = json_decode( $json_data, true );
+		self::$plugins = json_decode( $json_data, true );
 	}
 
 	/**
@@ -118,14 +118,14 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 
 		$none_wporg = [];
 
-		foreach ( $this->plugins as $plugin ) {
+		foreach ( self::$plugins as $plugin ) {
 			if ( true !== $plugin['wporg'] ) {
 				$none_wporg[] = $plugin['slug'];
 			}
 		}
 
 		$js_data = [
-			'AMP_PLUGINS'        => wp_list_pluck( $this->plugins, 'slug' ),
+			'AMP_PLUGINS'        => wp_list_pluck( self::$plugins, 'slug' ),
 			'NONE_WPORG_PLUGINS' => $none_wporg,
 		];
 
@@ -164,7 +164,7 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	public function tab_args() {
 
 		$per_page   = 36;
-		$total_page = ceil( count( $this->plugins ) / $per_page );
+		$total_page = ceil( count( self::$plugins ) / $per_page );
 		$pagenum    = isset( $_REQUEST['paged'] ) ? absint( $_REQUEST['paged'] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$pagenum    = ( $pagenum > $total_page ) ? $total_page : $pagenum;
 		$page       = max( 1, $pagenum );
@@ -192,9 +192,9 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 			return $response;
 		}
 
-		$total_page    = ceil( count( $this->plugins ) / $args['per_page'] );
+		$total_page    = ceil( count( self::$plugins ) / $args['per_page'] );
 		$page          = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
-		$plugin_chunks = array_chunk( (array) $this->plugins, $args['per_page'] );
+		$plugin_chunks = array_chunk( (array) self::$plugins, $args['per_page'] );
 		$plugins       = ( ! empty( $plugin_chunks[ $page - 1 ] ) && is_array( $plugin_chunks[ $page - 1 ] ) ) ? $plugin_chunks[ $page - 1 ] : [];
 
 		$response          = new stdClass();
@@ -202,7 +202,7 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 		$response->info    = [
 			'page'    => $page,
 			'pages'   => $total_page,
-			'results' => count( $this->plugins ),
+			'results' => count( self::$plugins ),
 		];
 
 		return $response;
@@ -246,7 +246,7 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	 */
 	public function plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data ) {
 
-		$amp_plugins = wp_list_pluck( $this->plugins, 'slug' );
+		$amp_plugins = wp_list_pluck( self::$plugins, 'slug' );
 
 		if ( ! empty( $plugin_data['slug'] ) && in_array( $plugin_data['slug'], $amp_plugins, true ) ) {
 			$plugin_meta[] = '<span><span class="amp-logo-icon small"></span>&nbsp;Page Experience Enhancing</span>';

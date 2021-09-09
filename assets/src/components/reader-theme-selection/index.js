@@ -22,7 +22,7 @@ import { ThemesAPIError } from '../themes-api-error';
  * Component for selecting a reader theme.
  */
 export function ReaderThemeSelection() {
-	const { availableThemes, fetchingThemes, unavailableThemes } = useContext( ReaderThemes );
+	const { availableThemes, fetchingThemes, unavailableThemes, ampThemes } = useContext( ReaderThemes );
 
 	if ( fetchingThemes ) {
 		return <Loading />;
@@ -43,6 +43,7 @@ export function ReaderThemeSelection() {
 							<ThemeCard
 								key={ `theme-card-${ theme.slug }` }
 								screenshotUrl={ theme.screenshot_url }
+								isPXEnhanced={ ampThemes.includes( theme.slug ) }
 								{ ...theme }
 							/>
 						) ) }
@@ -63,6 +64,7 @@ export function ReaderThemeSelection() {
 									key={ `theme-card-${ theme.slug }` }
 									screenshotUrl={ theme.screenshot_url }
 									disabled={ true }
+									isPXEnhanced={ ampThemes.includes( theme.slug ) }
 									{ ...theme }
 								/>
 							) ) }

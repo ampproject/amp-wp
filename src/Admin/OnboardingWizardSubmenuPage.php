@@ -226,6 +226,8 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 
 		$amp_settings_link = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
 
+		AMPThemes::set_themes();
+
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
@@ -254,6 +256,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
+			'AMP_THEMES'                         => wp_list_pluck( AMPThemes::$themes, 'slug' ),
 		];
 
 		wp_add_inline_script(
