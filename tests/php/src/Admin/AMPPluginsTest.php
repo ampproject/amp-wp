@@ -56,13 +56,8 @@ class AMPPluginsTest extends TestCase {
 		// Test 1: None admin request.
 		$this->assertFalse( AMPPlugins::is_needed() );
 
-		// Test 2: Ajax request.
-		add_filter( 'wp_doing_ajax', '__return_true' );
-		$this->assertFalse( AMPPlugins::is_needed() );
-
-		// Test 3: None ajax and admin request.
+		// Test 2: Admin request.
 		set_current_screen( 'index.php' );
-		add_filter( 'wp_doing_ajax', '__return_false' );
 		$this->assertTrue( AMPPlugins::is_needed() );
 
 		set_current_screen( 'front' );

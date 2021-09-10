@@ -51,7 +51,7 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	 */
 	public static function is_needed() {
 
-		return ( ! wp_doing_ajax() && is_admin() );
+		return is_admin();
 	}
 
 	/**
