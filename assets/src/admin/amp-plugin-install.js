@@ -1,3 +1,4 @@
+/* global _ */
 /**
  * WordPress dependencies
  */
@@ -18,6 +19,22 @@ const ampPluginInstall = {
 	init() {
 		this.addAmpMessage();
 		this.removeAdditionalInfo();
+		this.addAMPMessageInSearchResult();
+	},
+
+	/**
+	 * Add AMP compatible message in AMP compatible plugin card after search result comes in.
+	 */
+	addAMPMessageInSearchResult() {
+		const pluginInstallSearch = jQuery( '.plugin-install-php .wp-filter-search' );
+
+		pluginInstallSearch.on( 'keyup input', _.debounce( () => {
+			if ( 'undefined' !== typeof wp.updates.searchRequest ) {
+				wp.updates.searchRequest.done( () => {
+					this.addAmpMessage();
+				} );
+			}
+		}, 1500 ) );
 	},
 
 	/**
