@@ -192,7 +192,7 @@ class OptionsMenuTest extends TestCase {
 			$this->assertStringContainsString( wp_json_encode( '/amp/v1/options' ), $wp_api_fetch_after );
 			$this->assertStringContainsString( wp_json_encode( '/amp/v1/reader-themes' ), $wp_api_fetch_after );
 			$this->assertStringContainsString( wp_json_encode( '/wp/v2/settings' ), $wp_api_fetch_after );
-			$this->assertStringContainsString( wp_json_encode( '/wp/v2/users' ), $wp_api_fetch_after );
+			$this->assertStringContainsString( wp_json_encode( '/wp/v2/users/me' ), $wp_api_fetch_after );
 		}
 	}
 
