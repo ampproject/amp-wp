@@ -7,7 +7,7 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { Button } from '@wordpress/components';
+import { Button, VisuallyHidden } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -33,13 +33,13 @@ function Dot( { id, isHighlighted, label, namespace, onClick } ) {
 			onClick={ onClick }
 			aria-label={ label }
 		>
-			<span className="components-visually-hidden">
+			<VisuallyHidden as="span">
 				{ label }
-			</span>
+			</VisuallyHidden>
 			{ isHighlighted && (
-				<span className="components-visually-hidden">
+				<VisuallyHidden as="span">
 					{ __( '(Selected item)', 'amp' ) }
-				</span>
+				</VisuallyHidden>
 			) }
 			<span className={ `${ namespace }__nav-dot` } />
 		</Button>
@@ -88,9 +88,9 @@ export function CarouselNav( {
 				className={ `${ namespace }__prev` }
 				aria-label={ __( 'Previous', 'amp' ) }
 			>
-				<span className="components-visually-hidden">
+				<VisuallyHidden as="span">
 					{ __( 'Previous', 'amp' ) }
-				</span>
+				</VisuallyHidden>
 				<svg width="12" height="11" viewBox="0 0 12 11" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M5.47729 1.19531L1.18289 5.48906L5.47729 9.78347" stroke="#FAFAFC" strokeWidth="2" strokeLinejoin="round" />
 					<path d="M1.15854 5.48828L10.281 5.48828" stroke="#FAFAFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -132,9 +132,9 @@ export function CarouselNav( {
 				className={ `${ namespace }__next` }
 				aria-label={ __( 'Next', 'amp' ) }
 			>
-				<span className="components-visually-hidden">
+				<VisuallyHidden as="span">
 					{ __( 'Next', 'amp' ) }
-				</span>
+				</VisuallyHidden>
 				<svg width="12" height="11" viewBox="0 0 12 11" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M5.95255 1.19531L10.247 5.48906L5.95255 9.78347" stroke="#FAFAFC" strokeWidth="2" strokeLinejoin="round" />
 					<path d="M10.2712 5.48828L1.14868 5.48828" stroke="#FAFAFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
