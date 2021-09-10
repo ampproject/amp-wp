@@ -29,6 +29,20 @@ use AmpProject\AmpWP\QueryVar;
 final class SiteHealth implements Service, Registerable, Delayed {
 
 	/**
+	 * REST API namespace.
+	 *
+	 * @var string
+	 */
+	const REST_API_NAMESPACE = 'amp/v1';
+
+	/**
+	 * REST API endpoint for page caching test.
+	 *
+	 * @var string
+	 */
+	const REST_API_PAGE_CACHING_ENDPOINT = '/test/page-caching';
+
+	/**
 	 * Service that monitors and controls the CSS transient caching.
 	 *
 	 * @var MonitorCssTransientCaching
@@ -68,16 +82,13 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	public function register() {
 
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
+		add_action( 'rest_api_init', [ $this, 'register_async_test_endpoints' ] );
 		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
 		add_filter( 'site_status_test_result', [ $this, 'modify_test_result' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
 
 		add_action( 'admin_print_styles-tools_page_health-check', [ $this, 'add_styles' ] );
 		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
-
-		if ( wp_doing_ajax() ) {
-			add_action( 'wp_ajax_health-check-site-status', [ $this, 'ajax_site_status' ], 11 );
-		}
 
 		if ( ! wp_doing_ajax() ) {
 			$this->maybe_send_random_number();
@@ -94,22 +105,24 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
-	 * Ajax handler for async site status check.
+	 * Register async test endpoints.
 	 *
-	 * @return void
+	 * This is only done in WP 5.6+.
 	 */
-	public function ajax_site_status() {
-
-		check_ajax_referer( 'health-check-site-status' );
-
-		if ( ! current_user_can( 'view_site_health_checks' ) ) {
-			wp_send_json_error();
-		}
-
-		$feature = ( ! empty( $_POST['feature'] ) ) ? sanitize_key( $_POST['feature'] ) : '';
-		if ( 'amp_page_cache' === $feature ) {
-			wp_send_json_success( $this->page_cache() );
-		}
+	public function register_async_test_endpoints() {
+		register_rest_route(
+			self::REST_API_NAMESPACE,
+			self::REST_API_PAGE_CACHING_ENDPOINT,
+			[
+				[
+					'methods'             => 'GET',
+					'callback'            => [ $this, 'page_cache' ],
+					'permission_callback' => static function() {
+						return current_user_can( 'view_site_health_checks' );
+					},
+				],
+			]
+		);
 	}
 
 	/**
@@ -151,10 +164,36 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			'test'  => [ $this, 'xdebug_extension' ],
 		];
 
-		$tests['async']['amp_page_cache'] = [
-			'label' => esc_html__( 'Page cache', 'amp' ),
-			'test'  => 'amp_page_cache',
-		];
+		// Only add the async test if on WP 5.6+ and *not* on version of Health Check plugin which doesn't support REST async tests.
+		$supports_async = version_compare( get_bloginfo( 'version' ), '5.6', '>=' );
+		if ( $supports_async && defined( 'HEALTH_CHECK_PLUGIN_VERSION' ) ) {
+			$core_async_tests = [
+				'dotorg_communication',
+				'background_updates',
+				'loopback_requests',
+				'https_status',
+				'authorization_header',
+			];
+			foreach ( $core_async_tests as $core_async_test ) {
+				if (
+					isset( $tests['async'][ $core_async_test ] )
+					&&
+					! isset( $tests['async'][ $core_async_test ]['has_rest'] )
+				) {
+					$supports_async = false;
+					break;
+				}
+			}
+		}
+
+		if ( $supports_async ) {
+			$tests['async']['amp_page_cache'] = [
+				'label'             => esc_html__( 'Page cache', 'amp' ),
+				'test'              => rest_url( self::REST_API_NAMESPACE . self::REST_API_PAGE_CACHING_ENDPOINT ),
+				'has_rest'          => true,
+				'async_direct_test' => [ $this, 'page_cache' ],
+			];
+		}
 
 		return $tests;
 	}

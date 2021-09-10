@@ -60,6 +60,8 @@ class SiteHealthTest extends TestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 
 		$this->was_wp_using_ext_object_cache = wp_using_ext_object_cache();
+
+		$GLOBALS['wp_rest_server'] = null;
 	}
 
 	/**
@@ -70,6 +72,7 @@ class SiteHealthTest extends TestCase {
 	public function tearDown() {
 		parent::tearDown();
 		wp_using_ext_object_cache( $this->was_wp_using_ext_object_cache );
+		$GLOBALS['wp_rest_server'] = null;
 	}
 
 	/**
@@ -79,74 +82,56 @@ class SiteHealthTest extends TestCase {
 	 */
 	public function test_register() {
 
-		global $current_screen;
-
-		// Mock is_admin().
-		set_current_screen( 'edit-post' );
-
 		// Mock ajax request.
 		add_filter( 'wp_doing_ajax', '__return_true' );
 
 		$this->instance->register();
 		$this->assertEquals( 10, has_filter( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', [ $this->instance, 'register_async_test_endpoints' ] ) );
 		$this->assertEquals( 10, has_filter( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
 		$this->assertEquals( 10, has_filter( 'site_status_test_result', [ $this->instance, 'modify_test_result' ] ) );
 		$this->assertEquals( 10, has_filter( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
 
 		$this->assertEquals( 10, has_action( 'admin_print_styles-site-health.php', [ $this->instance, 'add_styles' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_print_styles-tools_page_health-check', [ $this->instance, 'add_styles' ] ) );
-		$this->assertEquals( 11, has_action( 'wp_ajax_health-check-site-status', [ $this->instance, 'ajax_site_status' ] ) );
-
-		add_filter( 'wp_doing_ajax', '__return_false' );
-		$current_screen = null;
 	}
 
 	/**
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::ajax_site_status
+	 * @covers ::register_async_test_endpoints()
 	 */
-	public function test_ajax_site_status() {
+	public function test_register_async_test_endpoints() {
+		$GLOBALS['wp_rest_server'] = null;
+		remove_all_actions( 'rest_api_init' );
+
+		$this->instance->register();
+		$server = rest_get_server();
+
+		$routes = $server->get_routes( SiteHealth::REST_API_NAMESPACE );
+
+		$endpoint = '/' . SiteHealth::REST_API_NAMESPACE . SiteHealth::REST_API_PAGE_CACHING_ENDPOINT;
+		$this->assertArrayHasKey( $endpoint, $routes );
+		$this->assertCount( 1, $routes[ $endpoint ] );
+		$route = $routes[ $endpoint ][0];
+
+		$this->assertEquals(
+			[ 'GET' => true ],
+			$route['methods']
+		);
+
+		$this->assertEquals(
+			[ $this->instance, 'page_cache' ],
+			$route['callback']
+		);
+
+		$this->assertIsCallable( $route['permission_callback'] );
+
+		$this->assertFalse( call_user_func( $route['permission_callback'] ) );
+
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'author' ] ) );
+		$this->assertFalse( call_user_func( $route['permission_callback'] ) );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		add_filter( 'wp_doing_ajax', '__return_true' );
-
-		$_REQUEST['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
-
-		/*
-		 * Test 1: With invalid callback.
-		 */
-		$_POST['feature'] = 'temp';
-
-		ob_start();
-		$this->instance->ajax_site_status();
-		$response = ob_get_clean();
-
-		$this->assertEmpty( $response );
-
-		/*
-		 * Test 2: With invalid callback.
-		 */
-		$_POST['feature'] = 'amp_page_cache';
-
-		$callback = static function () {
-			return '__return_false';
-		};
-		add_filter( 'wp_die_ajax_handler', $callback );
-
-		ob_start();
-		$this->instance->ajax_site_status();
-		$response = ob_get_clean();
-
-		$this->assertContains( '"label":"AMP"', $response );
-
-		remove_filter( 'wp_die_ajax_handler', $callback );
-
-		/*
-		 * phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		 * phpcs:ignore WordPress.Security.NonceVerification.Missing
-		 */
-		unset( $_POST['feature'], $_REQUEST['_wpnonce'] ); // phpcs:ignore
-		remove_filter( 'wp_doing_ajax', '__return_true' );
-
+		$this->assertTrue( call_user_func( $route['permission_callback'] ) );
 	}
 
 	/**
@@ -723,7 +708,7 @@ class SiteHealthTest extends TestCase {
 
 	/**
 	 * @dataProvider get_page_cache_data
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::page_cache
+	 * @covers ::page_cache()
 	 */
 	public function test_page_cache( $request_headers, $expected ) {
 
@@ -794,7 +779,7 @@ class SiteHealthTest extends TestCase {
 
 	/**
 	 * @dataProvider get_data_to_test_get_page_caching_status
-	 * @covers       \AmpProject\AmpWP\Admin\SiteHealth::get_page_caching_status()
+	 * @covers       ::get_page_caching_status()
 	 */
 	public function test_get_page_caching_status( $request_headers, $expected ) {
 
