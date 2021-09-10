@@ -18,7 +18,6 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use Exception;
 
 /**
  * Class SiteHealth
@@ -161,40 +160,50 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 
 		$description = '<p>' . __( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ) . '</p>';
 
-		if ( empty( $is_using_object_cache ) ) {
-			$available_cache = $this->check_available_cache();
+		if ( ! $is_using_object_cache ) {
+			$services = $this->get_persistent_object_cache_availability();
 
-			/* translators: plugin recommendation markup */
-			$plugin_placeholder = _x(
-				'Please find out available plugin from %s directory. <a href="https://amp-wp.org/documentation/getting-started/amp-site-setup/persistent-object-caching/#i-need-help-setting-up-my-persistent-object-cache">Learn more.</a>',
-				'plugin recommendation markup',
-				'amp'
+			$available_services = array_filter(
+				$services,
+				static function ( $service ) {
+					return $service['available'];
+				}
 			);
 
-			if ( true === $available_cache['redis'] ) {
+			if ( count( $available_services ) > 0 ) {
+				$description .= '<p>';
 
-				$plugin_recommendation = sprintf(
-					$plugin_placeholder,
-					'<a href="https://wordpress.org/plugins/search/redis+object+cache/" target="_blank">wordpress.org</a>'
+				$description .= _n(
+					'During the test, we found the following object caching service on your server:',
+					'During the test, we found the following object caching services on your server:',
+					count( $available_services ),
+					'amp'
 				);
 
-				$description .= '<p>' . __( 'During the test, We found that the site has Redis cache is available.', 'amp' ) . '&nbsp;' . $plugin_recommendation . '</p>';
-			} elseif ( true === $available_cache['memcached'] ) {
-
-				$plugin_recommendation = sprintf(
-					$plugin_placeholder,
-					'<a href="https://wordpress.org/plugins/search/memcached+object+cache/" target="_blank">wordpress.org</a>'
+				$description .= ' ' . implode(
+					', ',
+					array_map(
+						static function ( $available_service ) {
+							return sprintf(
+								'<a href="%s" target="_blank" rel="noopener">%s</a>',
+								esc_url( $available_service['directory_url'] ),
+								esc_html( $available_service['name'] )
+							);
+						},
+						$available_services
+					)
 				);
 
-				$description .= '<p>' . __( 'During the test, We found that the site has Memcache cache is available.', 'amp' ) . '&nbsp;' . $plugin_recommendation . '</p>';
-			} elseif ( true === $available_cache['apcu'] ) {
-
-				$plugin_recommendation = sprintf(
-					$plugin_placeholder,
-					'<a href="https://wordpress.org/plugins/search/apcu+object+cache/" target="_blank">wordpress.org</a>'
+				$description .= ' ' . _n(
+					'(link goes to WordPress.org directory)',
+					'(links go to WordPress.org directory)',
+					count( $available_services ),
+					'amp'
 				);
 
-				$description .= '<p>' . __( 'During the test, We found that the site has Opcache cache is available.', 'amp' ) . '&nbsp;' . $plugin_recommendation . '</p>';
+				$description .= _x( '.', 'End of sentence.', 'amp' );
+
+				$description .= '</p>';
 			}
 		}
 
@@ -218,15 +227,27 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 *
 	 * @return array
 	 */
-	public function check_available_cache() {
+	public function get_persistent_object_cache_availability() {
 		return [
-			'redis'     => class_exists( 'Redis' ),
-			'memcached' => ( class_exists( 'Memcache' ) || class_exists( 'Memcached' ) ),
-			'apcu'      => (
-				extension_loaded( 'apcu' ) ||
-				function_exists( 'apc_store' ) ||
-				function_exists( 'apcu_store' )
-			),
+			'redis'     => [
+				'available'     => class_exists( 'Redis' ),
+				'name'          => _x( 'Redis', 'persistent object cache service', 'amp' ),
+				'directory_url' => __( 'https://wordpress.org/plugins/search/redis+object+cache/', 'amp' ),
+			],
+			'memcached' => [
+				'available'     => ( class_exists( 'Memcache' ) || class_exists( 'Memcached' ) ),
+				'name'          => _x( 'Memcached', 'persistent object cache service', 'amp' ),
+				'directory_url' => __( 'https://wordpress.org/plugins/search/memcached+object+cache/', 'amp' ),
+			],
+			'apcu'      => [
+				'available'     => (
+					extension_loaded( 'apcu' ) ||
+					function_exists( 'apc_store' ) ||
+					function_exists( 'apcu_store' )
+				),
+				'name'          => _x( 'APCu', 'persistent object cache service', 'amp' ),
+				'directory_url' => __( 'https://wordpress.org/plugins/search/apcu+object+cache/', 'amp' ),
+			],
 		];
 	}
 

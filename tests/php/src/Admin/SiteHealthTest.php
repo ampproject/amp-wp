@@ -110,7 +110,7 @@ class SiteHealthTest extends TestCase {
 	 * Test persistent_object_cache.
 	 *
 	 * @covers ::persistent_object_cache()
-	 * @covers ::check_available_cache()
+	 * @covers ::get_persistent_object_cache_availability()
 	 */
 	public function test_persistent_object_cache() {
 		$data = [
