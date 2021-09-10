@@ -170,12 +170,12 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 				}
 			);
 
+			$description .= '<p>';
 			if ( count( $available_services ) > 0 ) {
-				$description .= '<p>';
 
 				$description .= _n(
-					'During the test, we found the following object caching service on your server:',
-					'During the test, we found the following object caching services on your server:',
+					'During the test, we found the following object caching service may be available on your server:',
+					'During the test, we found the following object caching services may be available on your server:',
 					count( $available_services ),
 					'amp'
 				);
@@ -185,8 +185,8 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 					array_map(
 						static function ( $available_service ) {
 							return sprintf(
-								'<a href="%s" target="_blank" rel="noopener">%s</a>',
-								esc_url( $available_service['directory_url'] ),
+								'<a href="%s">%s</a>',
+								esc_url( $available_service['url'] ),
 								esc_html( $available_service['name'] )
 							);
 						},
@@ -195,16 +195,17 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 				);
 
 				$description .= ' ' . _n(
-					'(link goes to WordPress.org directory)',
-					'(links go to WordPress.org directory)',
+					'(link goes to Add Plugins screen).',
+					'(links go to Add Plugins screen).',
 					count( $available_services ),
 					'amp'
 				);
 
-				$description .= _x( '.', 'End of sentence.', 'amp' );
-
-				$description .= '</p>';
+				$description .= ' ';
 			}
+
+			$description .= __( 'Please check with your host for what persistent caching services are available.', 'amp' );
+			$description .= '</p>';
 		}
 
 		return [
@@ -230,23 +231,23 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	public function get_persistent_object_cache_availability() {
 		return [
 			'redis'     => [
-				'available'     => class_exists( 'Redis' ),
-				'name'          => _x( 'Redis', 'persistent object cache service', 'amp' ),
-				'directory_url' => __( 'https://wordpress.org/plugins/search/redis+object+cache/', 'amp' ),
+				'available' => class_exists( 'Redis' ),
+				'name'      => _x( 'Redis', 'persistent object cache service', 'amp' ),
+				'url'       => admin_url( 'plugin-install.php?s=redis%20object%20cache&tab=search&type=term' ),
 			],
 			'memcached' => [
-				'available'     => ( class_exists( 'Memcache' ) || class_exists( 'Memcached' ) ),
-				'name'          => _x( 'Memcached', 'persistent object cache service', 'amp' ),
-				'directory_url' => __( 'https://wordpress.org/plugins/search/memcached+object+cache/', 'amp' ),
+				'available' => ( class_exists( 'Memcache' ) || class_exists( 'Memcached' ) ),
+				'name'      => _x( 'Memcached', 'persistent object cache service', 'amp' ),
+				'url'       => admin_url( 'plugin-install.php?s=memcached%20object%20cache&tab=search&type=term' ),
 			],
 			'apcu'      => [
-				'available'     => (
+				'available' => (
 					extension_loaded( 'apcu' ) ||
 					function_exists( 'apc_store' ) ||
 					function_exists( 'apcu_store' )
 				),
-				'name'          => _x( 'APCu', 'persistent object cache service', 'amp' ),
-				'directory_url' => __( 'https://wordpress.org/plugins/search/apcu+object+cache/', 'amp' ),
+				'name'      => _x( 'APCu', 'persistent object cache service', 'amp' ),
+				'url'       => admin_url( 'plugin-install.php?s=apcu%20object%20cache&tab=search&type=term' ),
 			],
 		];
 	}
