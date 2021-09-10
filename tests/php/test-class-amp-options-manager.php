@@ -114,7 +114,7 @@ class Test_AMP_Options_Manager extends TestCase {
 				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 				Option::SUPPRESSED_PLUGINS      => [],
 				Option::VERSION                 => AMP__VERSION,
-				Option::MOBILE_REDIRECT         => false,
+				Option::MOBILE_REDIRECT         => true,
 				Option::READER_THEME            => 'legacy',
 				Option::PLUGIN_CONFIGURED       => false,
 				Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
