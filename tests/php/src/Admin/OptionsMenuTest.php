@@ -170,6 +170,8 @@ class OptionsMenuTest extends TestCase {
 	/** @covers ::enqueue_assets() */
 	public function test_enqueue_assets_right_hook_suffix() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		set_current_screen( $this->instance->screen_handle() );
+
 		$this->assertFalse( wp_script_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
 		$this->assertFalse( wp_style_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
 
