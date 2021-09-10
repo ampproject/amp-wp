@@ -118,6 +118,9 @@ class SiteHealthTest extends TestCase {
 		];
 
 		$GLOBALS['_wp_using_ext_object_cache'] = false;
+
+		$output = $this->instance->persistent_object_cache();
+
 		$this->assertArraySubset(
 			array_merge(
 				$data,
@@ -129,8 +132,10 @@ class SiteHealthTest extends TestCase {
 					],
 				]
 			),
-			$this->instance->persistent_object_cache()
+			$output
 		);
+
+		$this->assertContains( 'Please check with your host for what persistent caching services are available.', $output['description'] );
 
 		$GLOBALS['_wp_using_ext_object_cache'] = true;
 		$this->assertArraySubset(
