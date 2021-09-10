@@ -26,6 +26,13 @@ class SiteHealthTest extends TestCase {
 	use PrivateAccess;
 
 	/**
+	 * Whether external object cache is being used.
+	 *
+	 * @var bool
+	 */
+	private $was_wp_using_ext_object_cache;
+
+	/**
 	 * The tested instance.
 	 *
 	 * @var SiteHealth
@@ -51,6 +58,8 @@ class SiteHealthTest extends TestCase {
 			remove_post_type_support( $post_type, 'amp' );
 		}
 		delete_option( AMP_Options_Manager::OPTION_NAME );
+
+		$this->was_wp_using_ext_object_cache = wp_using_ext_object_cache();
 	}
 
 	/**
@@ -59,8 +68,8 @@ class SiteHealthTest extends TestCase {
 	 * @inheritDoc
 	 */
 	public function tearDown() {
-		unset( $GLOBALS['_wp_using_ext_object_cache'] );
 		parent::tearDown();
+		wp_using_ext_object_cache( $this->was_wp_using_ext_object_cache );
 	}
 
 	/**
@@ -107,16 +116,19 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
-	 * Test persistent_object_cache.
+	 * Test get_persistent_object_cache_availability.
 	 *
 	 * @covers ::persistent_object_cache()
+	 * @covers ::get_persistent_object_cache_availability()
 	 */
-	public function test_persistent_object_cache() {
+	public function test_get_persistent_object_cache_availability() {
 		$data = [
 			'test' => 'amp_persistent_object_cache',
 		];
 
-		$GLOBALS['_wp_using_ext_object_cache'] = false;
+		wp_using_ext_object_cache( false );
+		$output = $this->instance->persistent_object_cache();
+
 		$this->assertArraySubset(
 			array_merge(
 				$data,
@@ -128,10 +140,13 @@ class SiteHealthTest extends TestCase {
 					],
 				]
 			),
-			$this->instance->persistent_object_cache()
+			$output
 		);
 
-		$GLOBALS['_wp_using_ext_object_cache'] = true;
+		$this->assertStringContainsString( 'Please check with your host for what persistent caching services are available.', $output['description'] );
+
+		wp_using_ext_object_cache( true );
+		$output = $this->instance->persistent_object_cache();
 		$this->assertArraySubset(
 			array_merge(
 				$data,
@@ -144,8 +159,29 @@ class SiteHealthTest extends TestCase {
 					],
 				]
 			),
-			$this->instance->persistent_object_cache()
+			$output
 		);
+		$this->assertStringNotContainsString( 'Please check with your host for what persistent caching services are available.', $output['description'] );
+	}
+
+	/**
+	 * @covers ::get_persistent_object_cache_availability()
+	 */
+	public function test_persistent_object_cache_with_suggestions() {
+
+		$output = $this->instance->get_persistent_object_cache_availability();
+
+		$this->assertArrayHasKey( 'redis', $output );
+		$this->assertIsBool( $output['redis']['available'] );
+		$this->assertEquals( 'Redis', $output['redis']['name'] );
+
+		$this->assertArrayHasKey( 'memcached', $output );
+		$this->assertIsBool( $output['memcached']['available'] );
+		$this->assertEquals( 'Memcached', $output['memcached']['name'] );
+
+		$this->assertArrayHasKey( 'apcu', $output );
+		$this->assertIsBool( $output['apcu']['available'] );
+		$this->assertEquals( 'APCu', $output['apcu']['name'] );
 	}
 
 	/**
@@ -235,6 +271,7 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::css_transient_caching()
 	 */
 	public function test_css_transient_caching() {
+		wp_using_ext_object_cache( false );
 		$data = [
 			'test' => 'amp_css_transient_caching',
 		];
@@ -265,6 +302,21 @@ class SiteHealthTest extends TestCase {
 					'badge'  => [
 						'label' => 'AMP',
 						'color' => 'orange',
+					],
+				]
+			),
+			$this->instance->css_transient_caching()
+		);
+
+		wp_using_ext_object_cache( true );
+		$this->assertArraySubset(
+			array_merge(
+				$data,
+				[
+					'status' => 'good',
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'blue',
 					],
 				]
 			),
