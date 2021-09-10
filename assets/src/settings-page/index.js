@@ -9,7 +9,7 @@ import {
 	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-	USER_REST_PATH,
+	USERS_RESOURCE_REST_PATH,
 } from 'amp-settings';
 
 /**
@@ -71,7 +71,7 @@ function Providers( { children } ) {
 					>
 						<UserContextProvider
 							userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
-							userRestPath={ USER_REST_PATH }
+							usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 						>
 							<ReaderThemesContextProvider
 								currentTheme={ CURRENT_THEME }

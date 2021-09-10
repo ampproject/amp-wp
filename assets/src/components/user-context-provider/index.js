@@ -24,9 +24,9 @@ export const User = createContext();
  * @param {?any}    props.children                  Component children.
  * @param {boolean} props.allowConfiguredPluginOnly Provided only for functionality that requires the plugin to be configured.
  * @param {string}  props.userOptionDeveloperTools  The key of the option to use from the settings endpoint.
- * @param {string}  props.userRestPath              REST endpoint to retrieve options.
+ * @param {string}  props.usersResourceRestPath     The REST path for interacting with the `users` resources.
  */
-export function UserContextProvider( { children, allowConfiguredPluginOnly = false, userOptionDeveloperTools, userRestPath } ) {
+export function UserContextProvider( { children, allowConfiguredPluginOnly = false, userOptionDeveloperTools, usersResourceRestPath } ) {
 	const { originalOptions, fetchingOptions } = useContext( Options );
 	const { plugin_configured: pluginConfigured } = originalOptions;
 	const [ fetchingUser, setFetchingUser ] = useState( false );
@@ -60,7 +60,7 @@ export function UserContextProvider( { children, allowConfiguredPluginOnly = fal
 			return;
 		}
 
-		if ( ! userRestPath || fetchingUser || null !== originalDeveloperToolsOption ) {
+		if ( ! usersResourceRestPath || fetchingUser || null !== originalDeveloperToolsOption ) {
 			return;
 		}
 
@@ -71,7 +71,9 @@ export function UserContextProvider( { children, allowConfiguredPluginOnly = fal
 			setFetchingUser( true );
 
 			try {
-				const fetchedUser = await apiFetch( { path: userRestPath } );
+				const fetchedUser = await apiFetch( {
+					path: `${ usersResourceRestPath }/me`,
+				} );
 
 				if ( true === hasUnmounted.current ) {
 					return;
@@ -86,7 +88,7 @@ export function UserContextProvider( { children, allowConfiguredPluginOnly = fal
 
 			setFetchingUser( false );
 		} )();
-	}, [ allowConfiguredPluginOnly, fetchingOptions, fetchingUser, originalDeveloperToolsOption, pluginConfigured, setAsyncError, userOptionDeveloperTools, userRestPath ] );
+	}, [ allowConfiguredPluginOnly, fetchingOptions, fetchingUser, originalDeveloperToolsOption, pluginConfigured, setAsyncError, userOptionDeveloperTools, usersResourceRestPath ] );
 
 	/**
 	 * Sends the option back to the REST endpoint to be saved.
@@ -99,7 +101,13 @@ export function UserContextProvider( { children, allowConfiguredPluginOnly = fal
 		setSavingDeveloperToolsOption( true );
 
 		try {
-			const fetchedUser = await apiFetch( { method: 'post', path: userRestPath, data: { [ userOptionDeveloperTools ]: developerToolsOption } } );
+			const fetchedUser = await apiFetch( {
+				method: 'post',
+				path: `${ usersResourceRestPath }/me`,
+				data: {
+					[ userOptionDeveloperTools ]: developerToolsOption,
+				},
+			} );
 
 			if ( true === hasUnmounted.current ) {
 				return;
@@ -114,7 +122,7 @@ export function UserContextProvider( { children, allowConfiguredPluginOnly = fal
 
 		setDidSaveDeveloperToolsOption( true );
 		setSavingDeveloperToolsOption( false );
-	}, [ hasDeveloperToolsOptionChange, developerToolsOption, setAsyncError, userOptionDeveloperTools, userRestPath ] );
+	}, [ hasDeveloperToolsOptionChange, developerToolsOption, setAsyncError, userOptionDeveloperTools, usersResourceRestPath ] );
 
 	return (
 		<User.Provider
@@ -140,5 +148,5 @@ UserContextProvider.propTypes = {
 	children: PropTypes.any,
 	allowConfiguredPluginOnly: PropTypes.bool,
 	userOptionDeveloperTools: PropTypes.string.isRequired,
-	userRestPath: PropTypes.string.isRequired,
+	usersResourceRestPath: PropTypes.string.isRequired,
 };

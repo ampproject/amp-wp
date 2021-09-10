@@ -245,7 +245,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-			'USER_REST_PATH'                     => '/wp/v2/users/me',
+			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
 		];
 
 		wp_add_inline_script(

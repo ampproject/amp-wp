@@ -185,14 +185,14 @@ class OptionsMenuTest extends TestCase {
 		$script_before = implode( "\n", wp_scripts()->get_data( OptionsMenu::ASSET_HANDLE, 'before' ) );
 		$this->assertStringContainsString( 'var ampSettings', $script_before );
 		$this->assertStringContainsString( 'USER_FIELD_DEVELOPER_TOOLS_ENABLED', $script_before );
-		$this->assertStringContainsString( 'USER_REST_PATH', $script_before );
+		$this->assertStringContainsString( 'USERS_RESOURCE_REST_PATH', $script_before );
 
 		$wp_api_fetch_after = implode( "\n", wp_scripts()->get_data( 'wp-api-fetch', 'after' ) );
 		if ( function_exists( 'rest_preload_api_request' ) ) {
 			$this->assertStringContainsString( wp_json_encode( '/amp/v1/options' ), $wp_api_fetch_after );
 			$this->assertStringContainsString( wp_json_encode( '/amp/v1/reader-themes' ), $wp_api_fetch_after );
 			$this->assertStringContainsString( wp_json_encode( '/wp/v2/settings' ), $wp_api_fetch_after );
-			$this->assertStringContainsString( wp_json_encode( '/wp/v2/users/me' ), $wp_api_fetch_after );
+			$this->assertStringContainsString( wp_json_encode( '/wp/v2/users' ), $wp_api_fetch_after );
 		}
 	}
 
