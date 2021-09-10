@@ -747,11 +747,11 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
-	 * Data provider for $this->test_is_site_has_page_cache()
+	 * Data provider for $this->test_get_page_caching_status()
 	 *
 	 * @return array[]
 	 */
-	public function get_site_has_page_cache_data() {
+	public function get_data_to_test_get_page_caching_status() {
 
 		return [
 			'no-cache'              => [
@@ -793,10 +793,10 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
-	 * @dataProvider get_site_has_page_cache_data
-	 * @covers       \AmpProject\AmpWP\Admin\SiteHealth::is_site_has_page_cache()
+	 * @dataProvider get_data_to_test_get_page_caching_status
+	 * @covers       \AmpProject\AmpWP\Admin\SiteHealth::get_page_caching_status()
 	 */
-	public function test_is_site_has_page_cache( $request_headers, $expected ) {
+	public function test_get_page_caching_status( $request_headers, $expected ) {
 
 		/*
 		 * Mock the http request.
@@ -811,7 +811,7 @@ class SiteHealthTest extends TestCase {
 
 		$this->assertEquals(
 			$expected,
-			$this->call_private_method( $this->instance, 'is_site_has_page_cache' )
+			$this->call_private_method( $this->instance, 'get_page_caching_status' )
 		);
 
 		remove_filter( 'pre_http_request', $callback_wp_remote );

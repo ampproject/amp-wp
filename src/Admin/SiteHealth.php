@@ -256,17 +256,18 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 */
 	public function page_cache() {
 
-		$is_using_page_cache = $this->is_site_has_page_cache();
+		// @todo Consider storing this in an option which we can use elsewhere.
+		$caching_status = $this->get_page_caching_status();
 
 		$badge_color = 'red';
 		$status      = 'critical';
 		$label       = __( 'Page caching is not enabled.', 'amp' );
 
-		if ( true === $is_using_page_cache['server_caching'] && false === $is_using_page_cache['client_caching'] ) {
+		if ( $caching_status['server_caching'] && ! $caching_status['client_caching'] ) {
 			$badge_color = 'orange';
 			$status      = 'recommended';
 			$label       = __( 'Page caching is enabled, but client caching headers are missing.', 'amp' );
-		} elseif ( true === $is_using_page_cache['server_caching'] && true === $is_using_page_cache['client_caching'] ) {
+		} elseif ( $caching_status['server_caching'] && $caching_status['client_caching'] ) {
 			$badge_color = 'green';
 			$status      = 'good';
 			$label       = __( 'Page caching is enabled.', 'amp' );
@@ -287,12 +288,12 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	/**
 	 * Check if site has page cache enable or not.
 	 *
-	 * @return array array(
-	 *                  server_caching: True if site has page cache. Otherwise False.
-	 *                  client_caching: True if site has page cache and passed appropriate header.
-	 *               )
+	 * @return array {
+	 *     @type bool $server_caching True if site has page cache. Otherwise False.
+	 *     @type bool $client_caching True if site has page cache and passed appropriate header.
+	 * }
 	 */
-	private function is_site_has_page_cache() {
+	private function get_page_caching_status() {
 
 		$has_page_cache = [
 			'server_caching' => false,
@@ -334,7 +335,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			}
 			$response_list[ $i ] = $response;
 
-			if ( false === $has_page_cache['server_caching'] &&
+			if ( ! $has_page_cache['server_caching'] &&
 				! empty( $response_list[ $i - 1 ] ) &&
 				! empty( $response_list[ $i ] ) &&
 				$response_list[ $i - 1 ] === $response_list[ $i ]
