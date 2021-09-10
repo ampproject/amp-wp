@@ -150,6 +150,26 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
+	 * @covers ::get_persistent_object_cache_availability()
+	 */
+	public function test_persistent_object_cache_with_suggestions() {
+
+		$output = $this->instance->get_persistent_object_cache_availability();
+
+		$this->assertArrayHasKey( 'redis', $output );
+		$this->assertIsBool( $output['redis']['available'] );
+		$this->assertEquals( 'Redis', $output['redis']['name'] );
+
+		$this->assertArrayHasKey( 'memcached', $output );
+		$this->assertIsBool( $output['memcached']['available'] );
+		$this->assertEquals( 'Memcached', $output['memcached']['name'] );
+
+		$this->assertArrayHasKey( 'apcu', $output );
+		$this->assertIsBool( $output['apcu']['available'] );
+		$this->assertEquals( 'APCu', $output['apcu']['name'] );
+	}
+
+	/**
 	 * Test slug_definition_timing.
 	 *
 	 * @covers ::slug_definition_timing()
