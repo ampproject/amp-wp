@@ -259,8 +259,8 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		// @todo Consider storing this in an option which we can use elsewhere.
 		$caching_status = $this->get_page_caching_status();
 
-		$badge_color = 'red';
-		$status      = 'critical';
+		$badge_color = 'orange';
+		$status      = 'recommended';
 		$label       = __( 'Page caching is not enabled.', 'amp' );
 
 		if ( $caching_status['server_caching'] && ! $caching_status['client_caching'] ) {

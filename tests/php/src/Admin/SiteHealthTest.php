@@ -664,11 +664,11 @@ class SiteHealthTest extends TestCase {
 				'expected'        => [
 					'badge'       => [
 						'label' => 'AMP',
-						'color' => 'red',
+						'color' => 'orange',
 					],
 					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
 					'test'        => 'amp_page_cache',
-					'status'      => 'critical',
+					'status'      => 'recommended',
 					'label'       => 'Page caching is not enabled.',
 				],
 			],
