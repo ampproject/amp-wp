@@ -654,7 +654,7 @@ class SiteHealthTest extends TestCase {
 					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
 					'test'        => 'amp_page_cache',
 					'status'      => 'recommended',
-					'label'       => 'Page caching is not enabled.',
+					'label'       => 'Page caching is not detected',
 				],
 			],
 			'server-cache'          => [
@@ -669,7 +669,7 @@ class SiteHealthTest extends TestCase {
 					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
 					'test'        => 'amp_page_cache',
 					'status'      => 'recommended',
-					'label'       => 'Page caching is enabled, but client caching headers are missing.',
+					'label'       => 'Page caching is detected but client caching headers are missing',
 				],
 			],
 			'server-cache-with-age' => [
@@ -684,7 +684,7 @@ class SiteHealthTest extends TestCase {
 					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
 					'test'        => 'amp_page_cache',
 					'status'      => 'recommended',
-					'label'       => 'Page caching is enabled, but client caching headers are missing.',
+					'label'       => 'Page caching is detected but client caching headers are missing',
 				],
 			],
 			'full-cache'            => [
@@ -700,7 +700,7 @@ class SiteHealthTest extends TestCase {
 					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
 					'test'        => 'amp_page_cache',
 					'status'      => 'good',
-					'label'       => 'Page caching is enabled.',
+					'label'       => 'Page caching is detected',
 				],
 			],
 		];

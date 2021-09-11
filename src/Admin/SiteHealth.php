@@ -188,7 +188,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		if ( $supports_async ) {
 			$tests['async']['amp_page_cache'] = [
-				'label'             => esc_html__( 'Page cache', 'amp' ),
+				'label'             => esc_html__( 'Page caching', 'amp' ),
 				'test'              => rest_url( self::REST_API_NAMESPACE . self::REST_API_PAGE_CACHING_ENDPOINT ),
 				'has_rest'          => true,
 				'async_direct_test' => [ $this, 'page_cache' ],
@@ -298,16 +298,16 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		$badge_color = 'orange';
 		$status      = 'recommended';
-		$label       = __( 'Page caching is not enabled.', 'amp' );
+		$label       = __( 'Page caching is not detected', 'amp' );
 
 		if ( $caching_status['server_caching'] && ! $caching_status['client_caching'] ) {
 			$badge_color = 'orange';
 			$status      = 'recommended';
-			$label       = __( 'Page caching is enabled, but client caching headers are missing.', 'amp' );
+			$label       = __( 'Page caching is detected but client caching headers are missing', 'amp' );
 		} elseif ( $caching_status['server_caching'] && $caching_status['client_caching'] ) {
 			$badge_color = 'green';
 			$status      = 'good';
-			$label       = __( 'Page caching is enabled.', 'amp' );
+			$label       = __( 'Page caching is detected', 'amp' );
 		}
 
 		return [
