@@ -1,4 +1,5 @@
-.amp-stylesheet-list {
+.amp-stylesheet-table {
+	margin: 1em 0;
 
 	th {
 		overflow-wrap: normal;
@@ -28,6 +29,7 @@
 
 	.column-stylesheet_expand {
 		width: 12px;
+		padding: 0;
 	}
 
 	.column-priority {
@@ -39,26 +41,6 @@
 		width: 5%;
 		white-space: nowrap;
 		text-align: center;
-	}
-
-	.column-percentage {
-		text-align: center;
-	}
-
-	.column-source {
-		width: 25%;
-	}
-
-	.toggle-stylesheet-details {
-		border: none;
-		background: none;
-		cursor: pointer;
-		height: 22px;
-		position: relative;
-	}
-
-	.toggle-stylesheet-details::after {
-		display: block;
 	}
 
 	.stylesheet-origin-markup {
@@ -76,6 +58,10 @@
 		dl.detailed {
 			margin-bottom: 0;
 			padding-bottom: 0;
+		}
+
+		.components-form-toggle {
+			margin-right: 0.5em;
 		}
 	}
 

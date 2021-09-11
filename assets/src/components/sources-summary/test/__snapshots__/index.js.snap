@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SourcesSummary renders a list of sources 1`] = `"<strong class=\\"source\\"><span class=\\"dashicon dashicons dashicons-admin-plugins\\"></span>Plugin: foo</strong><strong class=\\"source\\"><span class=\\"dashicon dashicons dashicons-admin-appearance\\"></span>Theme: bar</strong>"`;
+
+exports[`SourcesSummary renders validated theme name if no sources are provided 1`] = `"<strong class=\\"source\\"><span class=\\"dashicon dashicons dashicons-admin-appearance\\"></span>Theme: foo</strong>"`;

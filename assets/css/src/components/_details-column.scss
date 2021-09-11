@@ -29,8 +29,7 @@
 	}
 }
 
-.details-attributes__summary,
-.toggle-stylesheet-details {
+.details-attributes__summary {
 
 	&::after {
 		background-image: url("../images/down-triangle.svg");
@@ -46,7 +45,6 @@
 }
 
 tr.expanded .details-attributes__summary,
-tr.expanded .toggle-stylesheet-details,
 details[open] > .details-attributes__summary {
 
 	&::after {

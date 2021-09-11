@@ -15,6 +15,7 @@ namespace PHPSTORM_META {
 			'admin.paired_browsing'              => \AmpProject\AmpWP\Admin\PairedBrowsing::class,
 			'admin.plugin_row_meta'              => \AmpProject\AmpWP\Admin\PluginRowMeta::class,
 			'admin.polyfills'                    => \AmpProject\AmpWP\Admin\Polyfills::class,
+			'admin.rest_preloader'               => \AmpProject\AmpWP\Admin\RESTPreloader::class,
 			'admin.validation_counts'            => \AmpProject\AmpWP\Admin\ValidationCounts::class,
 			'amp_slug_customization_watcher'     => \AmpProject\AmpWP\AmpSlugCustomizationWatcher::class,
 			'background_task_deactivator'        => \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator::class,
@@ -53,6 +54,7 @@ namespace PHPSTORM_META {
 			'site_health_integration'            => \AmpProject\AmpWP\Admin\SiteHealth::class,
 			'url_validation_cron'                => \AmpProject\AmpWP\Validation\URLValidationCron::class,
 			'url_validation_rest_controller'     => \AmpProject\AmpWP\Validation\URLValidationRESTController::class,
+			'validated_url_rest_controller'      => \AmpProject\AmpWP\Validation\ValidatedUrlRESTController::class,
 			'validated_url_stylesheet_gc'        => \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
 		] )
 	);

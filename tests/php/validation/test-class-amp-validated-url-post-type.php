@@ -1320,14 +1320,19 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		AMP_Validated_URL_Post_Type::enqueue_edit_post_screen_scripts();
 		$this->assertTrue( wp_script_is( 'autosave', 'enqueued' ) );
 		$this->assertFalse( wp_script_is( 'amp-validated-url-post-edit-screen', 'enqueued' ) );
+		$this->assertFalse( wp_script_is( 'amp-validated-url-page', 'enqueued' ) );
 
-		global $pagenow;
+		global $pagenow, $post;
 		$pagenow = 'post.php';
+		$post    = self::factory()->post->create();
 		set_current_screen( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 		AMP_Validated_URL_Post_Type::enqueue_edit_post_screen_scripts();
 		$this->assertFalse( wp_script_is( 'autosave', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'amp-validated-url-post-edit-screen', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'amp-validated-url-page', 'enqueued' ) );
+		$this->assertStringContainsString( 'var ampSettings', get_echo( 'wp_print_scripts' ) );
 		$pagenow = null;
+		$post    = null;
 	}
 
 	/**
@@ -1468,6 +1473,21 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		$this->assertStringContainsString( 'Forget', $output );
 		$this->assertStringContainsString( esc_url( get_delete_post_link( $post_storing_error->ID, '', true ) ), $output );
 		$this->assertStringContainsString( 'misc-pub-section', $output );
+	}
+
+	/**
+	 * Test for print_stylesheets_meta_box()
+	 *
+	 * @covers \AMP_Validated_URL_Post_Type::print_stylesheets_meta_box()
+	 */
+	public function test_print_stylesheets_meta_box() {
+		AMP_Validation_Manager::init();
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		$validated_url_post = self::factory()->post->create_and_get( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
+		$output             = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_stylesheets_meta_box' ], [ $validated_url_post ] );
+
+		$this->assertStringContainsString( '<div id="amp-validated-url-root"></div>', $output );
 	}
 
 	/**

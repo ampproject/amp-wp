@@ -11,7 +11,7 @@ import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { MoreMenuIcon, ToolbarIcon, StatusIcon } from '../index';
+import { MoreMenuIcon, ToolbarIcon, StatusIcon, ValidationStatusIcon } from '../index';
 
 let container;
 
@@ -115,5 +115,60 @@ describe( 'Icons', () => {
 		} );
 
 		expect( container.querySelector( '.amp-status-icon--broken' ) ).not.toBeNull();
+	} );
+
+	it( 'renders no ValidationStatusIcon if the type flag is not set', () => {
+		act( () => {
+			render(
+				<ValidationStatusIcon />,
+				container,
+			);
+		} );
+
+		expect( container.children ).toHaveLength( 0 );
+	} );
+
+	it( 'renders the valid ValidationStatusIcon', () => {
+		act( () => {
+			render(
+				<ValidationStatusIcon isValid={ true } />,
+				container,
+			);
+		} );
+
+		expect( container.querySelector( '.amp-validation-status-icon--valid' ) ).not.toBeNull();
+	} );
+
+	it( 'renders the warning ValidationStatusIcon', () => {
+		act( () => {
+			render(
+				<ValidationStatusIcon isWarning={ true } />,
+				container,
+			);
+		} );
+
+		expect( container.querySelector( '.amp-validation-status-icon--warning' ) ).not.toBeNull();
+	} );
+
+	it( 'renders the error ValidationStatusIcon', () => {
+		act( () => {
+			render(
+				<ValidationStatusIcon isError={ true } />,
+				container,
+			);
+		} );
+
+		expect( container.querySelector( '.amp-validation-status-icon--error' ) ).not.toBeNull();
+	} );
+
+	it( 'renders the boxed ValidationStatusIcon', () => {
+		act( () => {
+			render(
+				<ValidationStatusIcon isValid={ true } isBoxed={ true } />,
+				container,
+			);
+		} );
+
+		expect( container.querySelector( '.amp-validation-status-icon--boxed' ) ).not.toBeNull();
 	} );
 } );

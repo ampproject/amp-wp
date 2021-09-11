@@ -75,6 +75,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.paired_browsing'              => Admin\PairedBrowsing::class,
 		'admin.plugin_row_meta'              => Admin\PluginRowMeta::class,
 		'admin.polyfills'                    => Admin\Polyfills::class,
+		'admin.rest_preloader'               => Admin\RESTPreloader::class,
 		'admin.validation_counts'            => Admin\ValidationCounts::class,
 		'amp_slug_customization_watcher'     => AmpSlugCustomizationWatcher::class,
 		'background_task_deactivator'        => BackgroundTaskDeactivator::class,
@@ -112,6 +113,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'site_health_integration'            => Admin\SiteHealth::class,
 		'url_validation_cron'                => URLValidationCron::class,
 		'url_validation_rest_controller'     => Validation\URLValidationRESTController::class,
+		'validated_url_rest_controller'      => Validation\ValidatedUrlRESTController::class,
 		'validated_url_stylesheet_gc'        => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
 	];
 

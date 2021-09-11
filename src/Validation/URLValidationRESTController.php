@@ -63,7 +63,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	 * Constructor.
 	 *
 	 * @param URLValidationProvider $url_validation_provider URLValidationProvider instance.
-	 * @param UserAccess            $dev_tools_user_access UserAccess instance.
+	 * @param UserAccess            $dev_tools_user_access   UserAccess instance.
 	 */
 	public function __construct( URLValidationProvider $url_validation_provider, UserAccess $dev_tools_user_access ) {
 		$this->namespace               = 'amp/v1';
@@ -103,8 +103,6 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
 		);
-
-		// @todo Additional endpoint to validate a URL (from a URL rather than a post ID).
 	}
 
 	/**
@@ -162,9 +160,25 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	}
 
 	/**
-	 * Validate preview nonce.
+	 * Checks whether the current user can view results of a URL AMP validation.
 	 *
-	 * @see _show_post_preview()
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has permission; WP_Error object otherwise.
+	 */
+	public function get_item_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		if ( ! $this->dev_tools_user_access->is_user_enabled() ) {
+			return new WP_Error(
+				'amp_rest_no_dev_tools',
+				__( 'Sorry, you do not have access to dev tools for the AMP plugin for WordPress.', 'amp' ),
+				[ 'status' => rest_authorization_required_code() ]
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate preview nonce.
 	 *
 	 * @param string $preview_nonce Preview nonce.
 	 * @param int    $post_id       Post ID.
