@@ -647,14 +647,13 @@ class SiteHealthTest extends TestCase {
 			'no-cache'              => [
 				'request_headers' => [],
 				'expected'        => [
-					'badge'       => [
+					'badge'  => [
 						'label' => 'AMP',
 						'color' => 'orange',
 					],
-					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
-					'test'        => 'amp_page_cache',
-					'status'      => 'recommended',
-					'label'       => 'Page caching is not detected',
+					'test'   => 'amp_page_cache',
+					'status' => 'recommended',
+					'label'  => 'Page caching is not detected',
 				],
 			],
 			'server-cache'          => [
@@ -662,14 +661,13 @@ class SiteHealthTest extends TestCase {
 					'x-amp-random-number' => '1345',
 				],
 				'expected'        => [
-					'badge'       => [
+					'badge'  => [
 						'label' => 'AMP',
 						'color' => 'orange',
 					],
-					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
-					'test'        => 'amp_page_cache',
-					'status'      => 'recommended',
-					'label'       => 'Page caching is detected but client caching headers are missing',
+					'test'   => 'amp_page_cache',
+					'status' => 'recommended',
+					'label'  => 'Page caching is detected but client caching headers are missing',
 				],
 			],
 			'server-cache-with-age' => [
@@ -677,14 +675,13 @@ class SiteHealthTest extends TestCase {
 					'age' => '1345',
 				],
 				'expected'        => [
-					'badge'       => [
+					'badge'  => [
 						'label' => 'AMP',
 						'color' => 'orange',
 					],
-					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
-					'test'        => 'amp_page_cache',
-					'status'      => 'recommended',
-					'label'       => 'Page caching is detected but client caching headers are missing',
+					'test'   => 'amp_page_cache',
+					'status' => 'recommended',
+					'label'  => 'Page caching is detected but client caching headers are missing',
 				],
 			],
 			'full-cache'            => [
@@ -693,14 +690,13 @@ class SiteHealthTest extends TestCase {
 					'expires'             => 'Wed, 11 Jan 1984 12:00:00 GMT',
 				],
 				'expected'        => [
-					'badge'       => [
+					'badge'  => [
 						'label' => 'AMP',
 						'color' => 'green',
 					],
-					'description' => 'The AMP plugin performs at its best when page caching is enabled.',
-					'test'        => 'amp_page_cache',
-					'status'      => 'good',
-					'label'       => 'Page caching is detected',
+					'test'   => 'amp_page_cache',
+					'status' => 'good',
+					'label'  => 'Page caching is detected',
 				],
 			],
 		];
@@ -723,9 +719,15 @@ class SiteHealthTest extends TestCase {
 		};
 		add_filter( 'pre_http_request', $callback_wp_remote );
 
+		$actual = $this->instance->page_cache();
+		$this->assertArrayHasKey( 'description', $actual );
+		$this->assertArrayHasKey( 'actions', $actual );
+		unset( $actual['description'] );
+		unset( $actual['actions'] );
+
 		$this->assertEquals(
 			$expected,
-			$this->instance->page_cache()
+			$actual
 		);
 
 		remove_filter( 'pre_http_request', $callback_wp_remote );

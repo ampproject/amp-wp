@@ -213,7 +213,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	private function get_persistent_object_cache_learn_more_action() {
 		return sprintf(
 			'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-			esc_url( 'https://make.wordpress.org/hosting/handbook/handbook/performance/#object-cache' ),
+			esc_url( 'https://amp-wp.org/documentation/getting-started/amp-site-setup/persistent-object-caching/' ),
 			esc_html__( 'Learn more about persistent object caching', 'amp' ),
 			/* translators: The accessibility text. */
 			esc_html__( '(opens in a new tab)', 'amp' )
@@ -228,7 +228,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	public function persistent_object_cache() {
 		$is_using_object_cache = wp_using_ext_object_cache();
 
-		$description = '<p>' . __( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ) . '</p>';
+		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ) . '</p>';
 
 		if ( ! $is_using_object_cache ) {
 			$services = $this->get_persistent_object_cache_availability();
@@ -307,6 +307,8 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		$status      = 'recommended';
 		$label       = __( 'Page caching is not detected', 'amp' );
 
+		$description = esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' );
+
 		if ( $caching_status['server_caching'] && ! $caching_status['client_caching'] ) {
 			$badge_color = 'orange';
 			$status      = 'recommended';
@@ -322,10 +324,17 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				'label' => $this->get_badge_label(),
 				'color' => $badge_color,
 			],
-			'description' => esc_html__( 'The AMP plugin performs at its best when page caching is enabled.', 'amp' ),
+			'description' => $description,
 			'test'        => self::TEST_PAGE_CACHING,
 			'status'      => $status,
 			'label'       => esc_html( $label ),
+			'actions'     => sprintf(
+				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+				esc_url( 'https://amp-wp.org/documentation/getting-started/amp-site-setup/page-caching-with-amp-and-wordpress/' ),
+				esc_html__( 'Learn more about page caching', 'amp' ),
+				/* translators: The accessibility text. */
+				esc_html__( '(opens in a new tab)', 'amp' )
+			),
 		];
 	}
 
