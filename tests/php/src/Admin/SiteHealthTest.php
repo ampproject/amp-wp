@@ -15,6 +15,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
+use WP_REST_Server;
 
 /**
  * Test SiteHealthTest.
@@ -31,6 +32,9 @@ class SiteHealthTest extends TestCase {
 	 * @var bool
 	 */
 	private $was_wp_using_ext_object_cache;
+
+	/** @var WP_REST_Server */
+	private $original_wp_rest_server;
 
 	/**
 	 * The tested instance.
@@ -61,7 +65,8 @@ class SiteHealthTest extends TestCase {
 
 		$this->was_wp_using_ext_object_cache = wp_using_ext_object_cache();
 
-		$GLOBALS['wp_rest_server'] = null;
+		$this->original_wp_rest_server = $GLOBALS['wp_rest_server'];
+		$GLOBALS['wp_rest_server']     = null;
 	}
 
 	/**
@@ -72,7 +77,7 @@ class SiteHealthTest extends TestCase {
 	public function tearDown() {
 		parent::tearDown();
 		wp_using_ext_object_cache( $this->was_wp_using_ext_object_cache );
-		$GLOBALS['wp_rest_server'] = null;
+		$GLOBALS['wp_rest_server'] = $this->original_wp_rest_server;
 	}
 
 	/**
@@ -143,7 +148,13 @@ class SiteHealthTest extends TestCase {
 		$tests = $this->instance->add_tests( [] );
 		$this->assertArrayHasKey( 'direct', $tests );
 		$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
-		$this->assertArrayHasKey( 'amp_page_cache', $tests['async'] );
+
+		if ( version_compare( get_bloginfo( 'version' ), '5.6', '>=' ) ) {
+			$this->assertArrayHasKey( 'amp_page_cache', $tests['async'] );
+		} else {
+			$this->assertArrayNotHasKey( 'amp_page_cache', $tests['async'] );
+		}
+
 		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
 		$this->assertArrayNotHasKey( 'amp_icu_version', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_xdebug_extension', $tests['direct'] );
