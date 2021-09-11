@@ -108,7 +108,7 @@ class SiteHealthTest extends TestCase {
 
 		$routes = $server->get_routes( SiteHealth::REST_API_NAMESPACE );
 
-		$endpoint = '/' . SiteHealth::REST_API_NAMESPACE . SiteHealth::REST_API_PAGE_CACHING_ENDPOINT;
+		$endpoint = '/' . SiteHealth::REST_API_NAMESPACE . SiteHealth::REST_API_PAGE_CACHE_ENDPOINT;
 		$this->assertArrayHasKey( $endpoint, $routes );
 		$this->assertCount( 1, $routes[ $endpoint ] );
 		$route = $routes[ $endpoint ][0];
@@ -732,11 +732,11 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
-	 * Data provider for $this->test_get_page_caching_status()
+	 * Data provider for $this->test_get_page_cache_status()
 	 *
 	 * @return array[]
 	 */
-	public function get_data_to_test_get_page_caching_status() {
+	public function get_data_to_test_get_page_cache_status() {
 
 		return [
 			'no-cache'              => [
@@ -778,10 +778,10 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
-	 * @dataProvider get_data_to_test_get_page_caching_status
-	 * @covers       ::get_page_caching_status()
+	 * @dataProvider get_data_to_test_get_page_cache_status
+	 * @covers       ::get_page_cache_status()
 	 */
-	public function test_get_page_caching_status( $request_headers, $expected ) {
+	public function test_get_page_cache_status( $request_headers, $expected ) {
 
 		/*
 		 * Mock the http request.
@@ -796,7 +796,7 @@ class SiteHealthTest extends TestCase {
 
 		$this->assertEquals(
 			$expected,
-			$this->call_private_method( $this->instance, 'get_page_caching_status' )
+			$this->call_private_method( $this->instance, 'get_page_cache_status' )
 		);
 
 		remove_filter( 'pre_http_request', $callback_wp_remote );

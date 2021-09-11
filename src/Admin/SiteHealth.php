@@ -36,11 +36,18 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	const REST_API_NAMESPACE = 'amp/v1';
 
 	/**
-	 * REST API endpoint for page caching test.
+	 * REST API endpoint for page cache test.
 	 *
 	 * @var string
 	 */
-	const REST_API_PAGE_CACHING_ENDPOINT = '/test/page-caching';
+	const REST_API_PAGE_CACHE_ENDPOINT = '/test/page-cache';
+
+	/**
+	 * Test slug for testing page caching.
+	 *
+	 * @var string
+	 */
+	const TEST_PAGE_CACHING = 'amp_page_cache';
 
 	/**
 	 * Service that monitors and controls the CSS transient caching.
@@ -112,7 +119,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	public function register_async_test_endpoints() {
 		register_rest_route(
 			self::REST_API_NAMESPACE,
-			self::REST_API_PAGE_CACHING_ENDPOINT,
+			self::REST_API_PAGE_CACHE_ENDPOINT,
 			[
 				[
 					'methods'             => 'GET',
@@ -187,9 +194,9 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		}
 
 		if ( $supports_async ) {
-			$tests['async']['amp_page_cache'] = [
+			$tests['async'][ self::TEST_PAGE_CACHING ] = [
 				'label'             => esc_html__( 'Page caching', 'amp' ),
-				'test'              => rest_url( self::REST_API_NAMESPACE . self::REST_API_PAGE_CACHING_ENDPOINT ),
+				'test'              => rest_url( self::REST_API_NAMESPACE . self::REST_API_PAGE_CACHE_ENDPOINT ),
 				'has_rest'          => true,
 				'async_direct_test' => [ $this, 'page_cache' ],
 			];
@@ -287,14 +294,14 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
-	 * Get the test result data for whether there is page cache or not.
+	 * Get the test result data for whether there is page caching or not.
 	 *
 	 * @return array
 	 */
 	public function page_cache() {
 
 		// @todo Consider storing this in an option which we can use elsewhere.
-		$caching_status = $this->get_page_caching_status();
+		$caching_status = $this->get_page_cache_status();
 
 		$badge_color = 'orange';
 		$status      = 'recommended';
@@ -316,7 +323,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				'color' => $badge_color,
 			],
 			'description' => esc_html__( 'The AMP plugin performs at its best when page caching is enabled.', 'amp' ),
-			'test'        => 'amp_page_cache',
+			'test'        => self::TEST_PAGE_CACHING,
 			'status'      => $status,
 			'label'       => esc_html( $label ),
 		];
@@ -330,7 +337,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 *     @type bool $client_caching True if site has page cache and passed appropriate header.
 	 * }
 	 */
-	private function get_page_caching_status() {
+	private function get_page_cache_status() {
 
 		$has_page_cache = [
 			'server_caching' => false,
