@@ -199,22 +199,26 @@ class Test_AMP_HTTP extends TestCase {
 				return 'https://example.com';
 			}
 		);
+
+		$has_icu = defined( 'INTL_IDNA_VARIANT_2003' ) || defined( 'INTL_IDNA_VARIANT_UTS46' );
+
 		add_filter(
 			'site_url',
-			static function () {
-				return 'https://example.org';
+			static function () use ( $has_icu ) {
+				return $has_icu ? 'https://xn--938h.example.org' : 'https://smile.example.org';
 			}
 		);
 
-		$hosts = AMP_HTTP::get_amp_cache_hosts();
-
 		$expected = [
 			'cdn.ampproject.org',
-			'example-org.cdn.ampproject.org',
-			'example-org.bing-amp.com',
 			'example-com.cdn.ampproject.org',
 			'example-com.bing-amp.com',
+			$has_icu ? '🙂-example-org.cdn.ampproject.org' : 'smile-example-org.cdn.ampproject.org',
+			$has_icu ? '🙂-example-org.bing-amp.com' : 'smile-example-org.bing-amp.com',
 		];
+
+		$hosts = AMP_HTTP::get_amp_cache_hosts();
+
 		$this->assertEqualSets( $expected, $hosts );
 
 		$extra_allowed_redirect_hosts = [
