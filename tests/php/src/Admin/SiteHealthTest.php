@@ -135,8 +135,13 @@ class SiteHealthTest extends TestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'author' ] ) );
 		$this->assertFalse( call_user_func( $route['permission_callback'] ) );
 
+		// Prior to WordPress 5.2, the view_site_health_checks cap didn't exist because Site Health didn't exist.
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		$this->assertTrue( call_user_func( $route['permission_callback'] ) );
+		if ( version_compare( get_bloginfo( 'version' ), '5.2', '>=' ) ) {
+			$this->assertTrue( call_user_func( $route['permission_callback'] ) );
+		} else {
+			$this->assertFalse( call_user_func( $route['permission_callback'] ) );
+		}
 	}
 
 	/**
