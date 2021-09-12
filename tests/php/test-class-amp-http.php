@@ -184,38 +184,63 @@ class Test_AMP_HTTP extends TestCase {
 		// phpcs:enable WordPress.CSRF.NonceVerification.NoNonceVerification
 	}
 
+	/** @return array */
+	public function get_data_to_test_get_amp_cache_hosts() {
+		return [
+			'without_idn' => [
+				'has_idn'  => false,
+				'home_url' => 'https://example.com',
+				'site_url' => 'https://smile.example.org',
+				'expected' => [
+					'cdn.ampproject.org',
+					'example-com.cdn.ampproject.org',
+					'example-com.bing-amp.com',
+					'smile-example-org.cdn.ampproject.org',
+					'smile-example-org.bing-amp.com',
+				],
+			],
+			'with_idn'    => [
+				'has_idn'  => true,
+				'home_url' => 'https://example.com',
+				'site_url' => 'https://xn--938h.example.org',
+				'expected' => [
+					'cdn.ampproject.org',
+					'example-com.cdn.ampproject.org',
+					'example-com.bing-amp.com',
+					'🙂-example-org.cdn.ampproject.org',
+					'🙂-example-org.bing-amp.com',
+				],
+			],
+		];
+	}
+
 	/**
 	 * Test get_amp_cache_hosts().
+	 *
+	 * @dataProvider get_data_to_test_get_amp_cache_hosts
 	 *
 	 * @covers AMP_HTTP::get_amp_cache_hosts()
 	 * @covers AMP_HTTP::filter_allowed_redirect_hosts()
 	 */
-	public function test_get_amp_cache_hosts() {
+	public function test_get_amp_cache_hosts( $has_idn, $home_url, $site_url, $expected ) {
+		if ( $has_idn && ! ( defined( 'INTL_IDNA_VARIANT_2003' ) || defined( 'INTL_IDNA_VARIANT_UTS46' ) ) ) {
+			$this->markTestSkipped( 'Skipped because INTL not available.' );
+		}
 
 		// Note that filters are used instead of updating option because of WP_HOME and WP_SITEURL constants.
 		add_filter(
 			'home_url',
-			static function () {
-				return 'https://example.com';
+			static function () use ( $home_url ) {
+				return $home_url;
 			}
 		);
-
-		$has_icu = defined( 'INTL_IDNA_VARIANT_2003' ) || defined( 'INTL_IDNA_VARIANT_UTS46' );
 
 		add_filter(
 			'site_url',
-			static function () use ( $has_icu ) {
-				return $has_icu ? 'https://xn--938h.example.org' : 'https://smile.example.org';
+			static function () use ( $site_url ) {
+				return $site_url;
 			}
 		);
-
-		$expected = [
-			'cdn.ampproject.org',
-			'example-com.cdn.ampproject.org',
-			'example-com.bing-amp.com',
-			$has_icu ? '🙂-example-org.cdn.ampproject.org' : 'smile-example-org.cdn.ampproject.org',
-			$has_icu ? '🙂-example-org.bing-amp.com' : 'smile-example-org.bing-amp.com',
-		];
 
 		$hosts = AMP_HTTP::get_amp_cache_hosts();
 
