@@ -242,7 +242,7 @@ class AMP_HTTP {
 
 				// The third parameter is set explicitly to prevent issues with newer PHP versions compiled with an old ICU version.
 				if ( $intl_idna_variant ) {
-					$domain = idn_to_utf8( $domain, IDNA_DEFAULT, $intl_idna_variant ); // @codeCoverageIgnore
+					$domain = idn_to_utf8( $domain, IDNA_DEFAULT, $intl_idna_variant );
 				}
 			}
 			$subdomain = str_replace( [ '-', '.' ], [ '--', '-' ], $domain );
