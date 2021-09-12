@@ -151,7 +151,7 @@ class SiteHealthTest extends TestCase {
 
 		if ( version_compare( get_bloginfo( 'version' ), '5.6', '>=' ) ) {
 			$this->assertArrayHasKey( 'amp_page_cache', $tests['async'] );
-		} else {
+		} elseif ( array_key_exists( 'async', $tests ) ) {
 			$this->assertArrayNotHasKey( 'amp_page_cache', $tests['async'] );
 		}
 
