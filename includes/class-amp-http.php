@@ -238,10 +238,10 @@ class AMP_HTTP {
 				$intl_idna_variant = defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : false;
 
 				// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
-				$intl_idna_variant = ( empty( $intl_idna_variant ) && defined( 'INTL_IDNA_VARIANT_2003' ) ) ? INTL_IDNA_VARIANT_2003 : false;
+				$intl_idna_variant = ( ! $intl_idna_variant && defined( 'INTL_IDNA_VARIANT_2003' ) ) ? INTL_IDNA_VARIANT_2003 : false;
 
 				// The third parameter is set explicitly to prevent issues with newer PHP versions compiled with an old ICU version.
-				if ( ! empty( $intl_idna_variant ) ) {
+				if ( $intl_idna_variant ) {
 					$domain = idn_to_utf8( $domain, IDNA_DEFAULT, $intl_idna_variant ); // @codeCoverageIgnore
 				}
 			}
