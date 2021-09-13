@@ -62,7 +62,7 @@ class SupportLink implements Service, Conditional, Registerable {
 	 */
 	public function admin_bar_menu( WP_Admin_Bar $wp_admin_bar ) {
 
-		if ( array_key_exists( 'amp', $wp_admin_bar->get_nodes() ) ) {
+		if ( ! $wp_admin_bar->get_node( 'amp' ) ) {
 			return;
 		}
 
