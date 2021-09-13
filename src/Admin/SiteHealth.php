@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
+use WP_REST_Server;
 
 /**
  * Class SiteHealth
