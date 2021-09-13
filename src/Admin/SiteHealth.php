@@ -122,7 +122,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			self::REST_API_PAGE_CACHE_ENDPOINT,
 			[
 				[
-					'methods'             => 'GET',
+					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'page_cache' ],
 					'permission_callback' => static function() {
 						return current_user_can( 'view_site_health_checks' );
