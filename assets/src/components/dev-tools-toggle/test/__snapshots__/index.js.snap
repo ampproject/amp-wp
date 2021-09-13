@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RedirectToggle matches snapshot 1`] = `
+exports[`DevToolsToggle matches snapshot 1`] = `
 <div
   className="amp-setting-toggle "
 >
@@ -11,10 +11,10 @@ exports[`RedirectToggle matches snapshot 1`] = `
       className="components-base-control__field css-igk9ll-StyledField e1puf3u2"
     >
       <span
-        className="components-form-toggle is-checked"
+        className="components-form-toggle"
       >
         <input
-          checked={true}
+          checked={false}
           className="components-form-toggle__input"
           id="inspector-toggle-control-0"
           onChange={[Function]}
@@ -35,11 +35,21 @@ exports[`RedirectToggle matches snapshot 1`] = `
           className="amp-setting-toggle__label-text"
         >
           <h3>
-            Redirect mobile visitors to AMP
+            Enable Developer Tools
           </h3>
         </div>
       </label>
     </div>
   </div>
+</div>
+`;
+
+exports[`DevToolsToggle matches snapshot for the loading state 1`] = `
+<div
+  className="amp-spinner-container"
+>
+  <span
+    className="components-spinner css-pz2hpy-StyledSpinner e1s472tg0"
+  />
 </div>
 `;

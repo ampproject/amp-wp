@@ -90,36 +90,42 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 	/** @covers ::register() */
 	public function test_register_not_enabled() {
+		remove_all_filters( 'amp_to_amp_linking_enabled' );
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, false );
-		$this->instance->register();
-		$this->assertSame( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
-		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
-		$this->assert_hooks_not_added();
+		$instance = new MobileRedirection( $this->paired_routing );
+		$instance->register();
+		$this->assertSame( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $instance, 'sanitize_options' ] ) );
+		$this->assert_hooks_not_added( $instance );
 	}
 
 	/** @covers ::register() */
 	public function test_register_enabled_but_standard_mode() {
+		remove_all_filters( 'amp_to_amp_linking_enabled' );
 		AMP_Options_Manager::update_options(
 			[
 				Option::MOBILE_REDIRECT => true,
 				Option::THEME_SUPPORT   => AMP_Theme_Support::STANDARD_MODE_SLUG,
 			]
 		);
-		$this->instance->register();
-		$this->assertSame( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
-		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
-		$this->assert_hooks_not_added();
+		$instance = new MobileRedirection( $this->paired_routing );
+		$instance->register();
+		$this->assertSame( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $instance, 'sanitize_options' ] ) );
+		$this->assert_hooks_not_added( $instance );
 	}
 
 	/**
 	 * Assert the service hooks were not added.
+	 *
+	 * @param MobileRedirection $instance
 	 */
-	private function assert_hooks_not_added() {
-		$this->assertFalse( has_action( 'template_redirect', [ $this->instance, 'redirect' ] ) );
+	private function assert_hooks_not_added( MobileRedirection $instance ) {
+		$this->assertFalse( has_action( 'template_redirect', [ $instance, 'redirect' ] ) );
 		$this->assertFalse( has_filter( 'amp_to_amp_linking_enabled', '__return_true' ) );
-		$this->assertFalse( has_filter( 'comment_post_redirect', [ $this->instance, 'filter_comment_post_redirect' ] ) );
-		$this->assertFalse( has_filter( 'get_comments_link', [ $this->instance, 'add_noamp_mobile_query_var' ] ) );
-		$this->assertFalse( has_filter( 'respond_link', [ $this->instance, 'add_noamp_mobile_query_var' ] ) );
+		$this->assertFalse( has_filter( 'comment_post_redirect', [ $instance, 'filter_comment_post_redirect' ] ) );
+		$this->assertFalse( has_filter( 'get_comments_link', [ $instance, 'add_noamp_mobile_query_var' ] ) );
+		$this->assertFalse( has_filter( 'respond_link', [ $instance, 'add_noamp_mobile_query_var' ] ) );
 	}
 
 	/** @covers ::filter_default_options() */
@@ -128,7 +134,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		$this->assertEquals(
 			[
 				'foo'                   => 'bar',
-				Option::MOBILE_REDIRECT => false,
+				Option::MOBILE_REDIRECT => true,
 			],
 			$this->instance->filter_default_options( [ 'foo' => 'bar' ] )
 		);

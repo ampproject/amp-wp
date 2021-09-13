@@ -17,7 +17,7 @@ import {
 	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-	USER_REST_PATH,
+	USERS_RESOURCE_REST_PATH,
 } from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
 
@@ -33,10 +33,10 @@ import { ReaderThemesContextProvider } from '../components/reader-themes-context
 import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
 import { ErrorScreen } from '../components/error-screen';
+import { UserContextProvider } from '../components/user-context-provider';
 import { PAGES } from './pages';
 import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
-import { UserContextProvider } from './components/user-context-provider';
 import { SiteScanContextProvider } from './components/site-scan-context-provider';
 import { TemplateModeOverrideContextProvider } from './components/template-mode-override-context-provider';
 
@@ -68,7 +68,7 @@ export function Providers( { children } ) {
 				>
 					<UserContextProvider
 						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
-						userRestPath={ USER_REST_PATH }
+						usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 					>
 						<NavigationContextProvider pages={ PAGES }>
 							<ReaderThemesContextProvider

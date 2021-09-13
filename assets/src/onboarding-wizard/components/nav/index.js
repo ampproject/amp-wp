@@ -18,7 +18,7 @@ import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-settings'; // From WP inline
 import { Navigation } from '../navigation-context-provider';
 import './style.css';
 import { Options } from '../../../components/options-context-provider';
-import { User } from '../user-context-provider';
+import { User } from '../../../components/user-context-provider';
 import { READER } from '../../../common/constants';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import { useWindowWidth } from '../../../utils/use-window-width';
