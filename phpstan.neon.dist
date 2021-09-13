@@ -41,3 +41,5 @@ parameters:
 	earlyTerminatingMethodCalls:
 		\WP_CLI:
 			- WP_CLI::error
+	dynamicConstantNames:
+		- INTL_IDNA_VARIANT_2003

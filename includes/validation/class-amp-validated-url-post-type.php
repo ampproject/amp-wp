@@ -2009,8 +2009,8 @@ class AMP_Validated_URL_Post_Type {
 
 		// @todo This is likely dead code.
 		$current_screen = get_current_screen();
-		if ( $current_screen && 'post' === $current_screen->base && self::POST_TYPE_SLUG === $current_screen->post_type ) {
-			$post = get_post();
+		$post           = get_post();
+		if ( $post && $current_screen && 'post' === $current_screen->base && self::POST_TYPE_SLUG === $current_screen->post_type ) {
 			$data = [
 				'amp_enabled' => self::is_amp_enabled_on_post( $post ),
 			];
@@ -3124,13 +3124,9 @@ class AMP_Validated_URL_Post_Type {
 	 *
 	 * @param WP_Post $post Post object to check.
 	 *
-	 * @return bool|void
+	 * @return bool Whether enabled.
 	 */
-	public static function is_amp_enabled_on_post( $post ) {
-		if ( empty( $post ) ) {
-			return;
-		}
-
+	public static function is_amp_enabled_on_post( WP_Post $post ) {
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
 		$counts            = self::count_invalid_url_validation_errors( $validation_errors );
 		return 0 === ( $counts['new_rejected'] + $counts['ack_rejected'] );
