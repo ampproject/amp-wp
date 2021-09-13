@@ -45,7 +45,7 @@ class SupportCliCommandTest extends WP_UnitTestCase {
 	 */
 	public function create_validated_url() {
 
-		$plugin_info = SupportData::normalize_plugin_info( 'hello.php' );
+		$plugin_info = SupportData::normalize_plugin_info( 'amp/amp.php' );
 
 		$post = $this->factory()->post->create_and_get(
 			[

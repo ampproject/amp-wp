@@ -232,13 +232,21 @@ class SupportDataTest extends WP_UnitTestCase {
 		$original_active_plugins = ( ! empty( $original_active_plugins ) && is_array( $original_active_plugins ) ) ? $original_active_plugins : [];
 
 		// Mock the data
-		update_option( 'active_plugins', [ 'hello.php' ] );
+		update_option( 'active_plugins', [ 'amp/amp.php' ] );
 
-		$plugin_info          = $this->instance->get_plugin_info();
-		$expected_plugin_info = SupportData::normalize_plugin_info( 'hello.php' );
+		$plugin_info = $this->instance->get_plugin_info();
+		$this->assertTrue( count( $plugin_info ) >= 1 );
+		$plugin_info = array_filter(
+			$plugin_info,
+			static function ( $plugin ) {
+				return 'amp' === $plugin['slug'];
+			}
+		);
 
-		$this->assertEquals( 'Hello Dolly', $plugin_info[0]['name'] );
-		$this->assertEquals( 'hello.php', $plugin_info[0]['slug'] );
+		$expected_plugin_info = SupportData::normalize_plugin_info( 'amp/amp.php' );
+
+		$this->assertEquals( 'AMP', $plugin_info[0]['name'] );
+		$this->assertEquals( 'amp', $plugin_info[0]['slug'] );
 
 		$plugin_keys = [
 			'name',
@@ -356,7 +364,7 @@ class SupportDataTest extends WP_UnitTestCase {
 	 */
 	public function normalize_error_source_data_provider() {
 
-		$plugin_info = SupportData::normalize_plugin_info( 'hello.php' );
+		$plugin_info = SupportData::normalize_plugin_info( 'amp/amp.php' );
 
 		$themes     = wp_get_themes();
 		$theme_info = array_pop( $themes );
@@ -459,7 +467,7 @@ class SupportDataTest extends WP_UnitTestCase {
 	 */
 	public function create_validated_url() {
 
-		$plugin_info = SupportData::normalize_plugin_info( 'hello.php' );
+		$plugin_info = SupportData::normalize_plugin_info( 'amp/amp.php' );
 
 		$post = $this->factory()->post->create_and_get(
 			[
