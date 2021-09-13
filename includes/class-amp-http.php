@@ -227,6 +227,14 @@ class AMP_HTTP {
 			]
 		);
 
+		if ( defined( 'INTL_IDNA_VARIANT_UTS46' ) ) {
+			$intl_idna_variant = INTL_IDNA_VARIANT_UTS46;
+		} elseif ( defined( 'INTL_IDNA_VARIANT_2003' ) ) {
+			$intl_idna_variant = INTL_IDNA_VARIANT_2003; // phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
+		} else {
+			$intl_idna_variant = 0;
+		}
+
 		/*
 		 * From AMP docs:
 		 * "When possible, the Google AMP Cache will create a subdomain for each AMP document's domain by first converting it
@@ -234,16 +242,9 @@ class AMP_HTTP {
 		 * - (dash). For example, pub.com will map to pub-com.cdn.ampproject.org."
 		 */
 		foreach ( $domains as $domain ) {
-			if ( function_exists( 'idn_to_utf8' ) ) {
-				$intl_idna_variant = defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : false;
-
-				// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
-				$intl_idna_variant = ( empty( $intl_idna_variant ) && defined( 'INTL_IDNA_VARIANT_2003' ) ) ? INTL_IDNA_VARIANT_2003 : false;
-
+			if ( function_exists( 'idn_to_utf8' ) && $intl_idna_variant ) {
 				// The third parameter is set explicitly to prevent issues with newer PHP versions compiled with an old ICU version.
-				if ( ! empty( $intl_idna_variant ) ) {
-					$domain = idn_to_utf8( $domain, IDNA_DEFAULT, $intl_idna_variant ); // @codeCoverageIgnore
-				}
+				$domain = idn_to_utf8( $domain, IDNA_DEFAULT, $intl_idna_variant );
 			}
 			$subdomain = str_replace( [ '-', '.' ], [ '--', '-' ], $domain );
 
