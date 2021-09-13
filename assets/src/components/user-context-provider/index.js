@@ -20,13 +20,13 @@ export const User = createContext();
 /**
  * Context provider user data.
  *
- * @param {Object}  props                           Component props.
- * @param {?any}    props.children                  Component children.
- * @param {boolean} props.allowConfiguredPluginOnly Provided only for functionality that requires the plugin to be configured.
- * @param {string}  props.userOptionDeveloperTools  The key of the option to use from the settings endpoint.
- * @param {string}  props.usersResourceRestPath     The REST path for interacting with the `users` resources.
+ * @param {Object}  props                               Component props.
+ * @param {?any}    props.children                      Component children.
+ * @param {boolean} props.onlyFetchIfPluginIsConfigured Flag indicating whether the users data should be fetched only if the plugin is fully configured (i.e. the Onboarding Wizard has been completed).
+ * @param {string}  props.userOptionDeveloperTools      The key of the option to use from the settings endpoint.
+ * @param {string}  props.usersResourceRestPath         The REST path for interacting with the `users` resources.
  */
-export function UserContextProvider( { children, allowConfiguredPluginOnly = false, userOptionDeveloperTools, usersResourceRestPath } ) {
+export function UserContextProvider( { children, onlyFetchIfPluginIsConfigured = true, userOptionDeveloperTools, usersResourceRestPath } ) {
 	const { originalOptions, fetchingOptions } = useContext( Options );
 	const { plugin_configured: pluginConfigured } = originalOptions;
 	const [ fetchingUser, setFetchingUser ] = useState( false );
@@ -46,6 +46,7 @@ export function UserContextProvider( { children, allowConfiguredPluginOnly = fal
 		() => null !== developerToolsOption && developerToolsOption !== originalDeveloperToolsOption,
 		[ developerToolsOption, originalDeveloperToolsOption ],
 	);
+
 	/**
 	 * Fetch user options on mount.
 	 */
@@ -54,7 +55,7 @@ export function UserContextProvider( { children, allowConfiguredPluginOnly = fal
 			return;
 		}
 
-		if ( ! pluginConfigured && allowConfiguredPluginOnly ) {
+		if ( ! pluginConfigured && onlyFetchIfPluginIsConfigured ) {
 			setOriginalDeveloperToolsOption( null );
 			setDeveloperToolsOption( null );
 			return;
@@ -88,7 +89,7 @@ export function UserContextProvider( { children, allowConfiguredPluginOnly = fal
 
 			setFetchingUser( false );
 		} )();
-	}, [ allowConfiguredPluginOnly, fetchingOptions, fetchingUser, originalDeveloperToolsOption, pluginConfigured, setAsyncError, userOptionDeveloperTools, usersResourceRestPath ] );
+	}, [ onlyFetchIfPluginIsConfigured, fetchingOptions, fetchingUser, originalDeveloperToolsOption, pluginConfigured, setAsyncError, userOptionDeveloperTools, usersResourceRestPath ] );
 
 	/**
 	 * Sends the option back to the REST endpoint to be saved.
@@ -146,7 +147,7 @@ export function UserContextProvider( { children, allowConfiguredPluginOnly = fal
 
 UserContextProvider.propTypes = {
 	children: PropTypes.any,
-	allowConfiguredPluginOnly: PropTypes.bool,
+	onlyFetchIfPluginIsConfigured: PropTypes.bool,
 	userOptionDeveloperTools: PropTypes.string.isRequired,
 	usersResourceRestPath: PropTypes.string.isRequired,
 };

@@ -67,7 +67,6 @@ export function Providers( { children } ) {
 					populateDefaultValues={ false }
 				>
 					<UserContextProvider
-						allowConfiguredPluginOnly={ true }
 						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
 						usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 					>

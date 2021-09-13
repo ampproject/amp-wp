@@ -70,6 +70,7 @@ function Providers( { children } ) {
 						populateDefaultValues={ true }
 					>
 						<UserContextProvider
+							onlyFetchIfPluginIsConfigured={ false }
 							userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
 							usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 						>
