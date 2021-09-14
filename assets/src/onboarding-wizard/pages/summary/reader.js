@@ -18,7 +18,6 @@ import { AMPInfo } from '../../../components/amp-info';
 import { IconDesktop } from '../../../components/svg/icon-desktop';
 import { IconMobile } from '../../../components/svg/icon-mobile';
 import { Options } from '../../../components/options-context-provider';
-import { RedirectToggle } from '../../../components/redirect-toggle';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import DesktopIcon from '../../../components/svg/desktop-icon.svg';
 import MobileIcon from '../../../components/svg/mobile-icon.svg';
@@ -48,8 +47,6 @@ export function Reader( { currentTheme } ) {
 				title={ __( 'Reader', 'amp' ) }
 				text={ __( 'In Reader mode your site will have a non-AMP and an AMP version, and each version will use its own theme. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ) }
 			/>
-
-			<RedirectToggle />
 
 			<div className="reader-summary__screens grid grid-2-1">
 				<div>

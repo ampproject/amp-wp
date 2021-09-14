@@ -88,7 +88,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return array Defaults.
 	 */
 	public function filter_default_options( $defaults ) {
-		$defaults[ Option::MOBILE_REDIRECT ] = false;
+		$defaults[ Option::MOBILE_REDIRECT ] = true;
 		return $defaults;
 	}
 

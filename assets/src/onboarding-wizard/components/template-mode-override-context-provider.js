@@ -13,8 +13,8 @@ import { createContext, useState, useEffect, useContext } from '@wordpress/eleme
  */
 import { Options } from '../../components/options-context-provider';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
+import { User } from '../../components/user-context-provider';
 import { Navigation } from './navigation-context-provider';
-import { User } from './user-context-provider';
 
 export const TemplateModeOverride = createContext();
 

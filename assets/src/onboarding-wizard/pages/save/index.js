@@ -8,7 +8,7 @@ import { Button } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { User } from '../../components/user-context-provider';
+import { User } from '../../../components/user-context-provider';
 import { Phone } from '../../../components/phone';
 import './style.css';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';

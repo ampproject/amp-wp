@@ -21,7 +21,9 @@ abstract class AMP_Base_Embed_Handler {
 	/**
 	 * Default width.
 	 *
-	 * @var int
+	 * In some cases, this may be the string 'auto' when a fixed-height layout is used.
+	 *
+	 * @var int|string
 	 */
 	protected $DEFAULT_WIDTH = 600;
 

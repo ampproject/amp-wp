@@ -158,18 +158,97 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	public function persistent_object_cache() {
 		$is_using_object_cache = wp_using_ext_object_cache();
 
+		$description = '<p>' . __( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ) . '</p>';
+
+		if ( ! $is_using_object_cache ) {
+			$services = $this->get_persistent_object_cache_availability();
+
+			$available_services = array_filter(
+				$services,
+				static function ( $service ) {
+					return $service['available'];
+				}
+			);
+
+			$description .= '<p>';
+			if ( count( $available_services ) > 0 ) {
+
+				$description .= _n(
+					'During the test, we found the following object caching service may be available on your server:',
+					'During the test, we found the following object caching services may be available on your server:',
+					count( $available_services ),
+					'amp'
+				);
+
+				$description .= ' ' . implode(
+					', ',
+					array_map(
+						static function ( $available_service ) {
+							return sprintf(
+								'<a href="%s">%s</a>',
+								esc_url( $available_service['url'] ),
+								esc_html( $available_service['name'] )
+							);
+						},
+						$available_services
+					)
+				);
+
+				$description .= ' ' . _n(
+					'(link goes to Add Plugins screen).',
+					'(links go to Add Plugins screen).',
+					count( $available_services ),
+					'amp'
+				);
+
+				$description .= ' ';
+			}
+
+			$description .= __( 'Please check with your host for what persistent caching services are available.', 'amp' );
+			$description .= '</p>';
+		}
+
 		return [
 			'badge'       => [
 				'label' => $this->get_badge_label(),
 				'color' => $is_using_object_cache ? 'green' : 'orange',
 			],
-			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ),
+			'description' => wp_kses_post( $description ),
 			'actions'     => $this->get_persistent_object_cache_learn_more_action(),
 			'test'        => 'amp_persistent_object_cache',
 			'status'      => $is_using_object_cache ? 'good' : 'recommended',
 			'label'       => $is_using_object_cache
 				? esc_html__( 'Persistent object caching is enabled', 'amp' )
 				: esc_html__( 'Persistent object caching is not enabled', 'amp' ),
+		];
+	}
+
+	/**
+	 * Return list of available object cache mechanism.
+	 *
+	 * @return array
+	 */
+	public function get_persistent_object_cache_availability() {
+		return [
+			'redis'     => [
+				'available' => class_exists( 'Redis' ),
+				'name'      => _x( 'Redis', 'persistent object cache service', 'amp' ),
+				'url'       => admin_url( 'plugin-install.php?s=redis%20object%20cache&tab=search&type=term' ),
+			],
+			'memcached' => [
+				'available' => ( class_exists( 'Memcache' ) || class_exists( 'Memcached' ) ),
+				'name'      => _x( 'Memcached', 'persistent object cache service', 'amp' ),
+				'url'       => admin_url( 'plugin-install.php?s=memcached%20object%20cache&tab=search&type=term' ),
+			],
+			'apcu'      => [
+				'available' => (
+					extension_loaded( 'apcu' ) ||
+					function_exists( 'apc_store' ) ||
+					function_exists( 'apcu_store' )
+				),
+				'name'      => _x( 'APCu', 'persistent object cache service', 'amp' ),
+				'url'       => admin_url( 'plugin-install.php?s=apcu%20object%20cache&tab=search&type=term' ),
+			],
 		];
 	}
 
