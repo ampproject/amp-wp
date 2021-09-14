@@ -17,19 +17,14 @@ Then have fun sanitizing your AMP posts!
 import glob
 import logging
 import os
-import platform
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
 import collections
 import json
 import google
-from collections import defaultdict
 import imp
-import re
-import urllib
 
 seen_spec_names = set()
 
@@ -388,7 +383,7 @@ def ParseRules(repo_directory, out_dir):
 					descendant_lists[_list.name].append( val.lower() )
 
 	# Separate extension scripts from non-extension scripts and gather the versions
-	extension_scripts = defaultdict(list)
+	extension_scripts = collections.defaultdict(list)
 	extension_specs_by_satisfies = dict()
 	script_tags = []
 	for script_tag in allowed_tags['script']:
@@ -682,7 +677,6 @@ def GetTagRules(tag_spec):
 		tag_rules['disallowed_ancestor'] = disallowed_ancestor_list
 
 	if tag_spec.html_format:
-		html_format_list = []
 		has_amp_format = False
 		for html_format in tag_spec.html_format:
 			if 1 == html_format:
@@ -767,7 +761,7 @@ def GetTagRules(tag_spec):
 		tag_rules['unique_warning'] = tag_spec.unique_warning
 
 	if tag_spec.HasField('child_tags'):
-		child_tags = defaultdict( lambda: [] )
+		child_tags = collections.defaultdict( lambda: [] )
 		for field in tag_spec.child_tags.ListFields():
 			if isinstance(field[1], (int)):
 				child_tags[ field[0].name ] = field[1]
