@@ -351,7 +351,7 @@ export const setImageBlockLayoutAttributes = ( props, layout ) => {
  * Default setup for inspector controls.
  *
  * @param {Object} props Props.
- * @return {ReactElement} Inspector Controls.
+ * @return {JSX.Element} Inspector Controls.
  */
 export const setUpInspectorControls = ( props ) => {
 	const { isSelected } = props;
@@ -379,7 +379,7 @@ setUpInspectorControls.propTypes = {
  *
  * @deprecated As of v2.1. Blocks with the `ampLayout` attribute will still be able to use the control.
  * @param {Object} props Props.
- * @return {ReactElement} Element.
+ * @return {JSX.Element} Element.
  */
 export const AmpLayoutControl = ( props ) => {
 	const { name, attributes: { ampLayout }, setAttributes } = props;
@@ -437,7 +437,7 @@ AmpLayoutControl.propTypes = {
  *
  * @deprecated As of v2.1. Blocks with the `ampNoLoading` attribute will still be able to use the control.
  * @param {Object} props Props.
- * @return {ReactElement} Element.
+ * @return {JSX.Element} Element.
  */
 export const AmpNoloadingToggle = ( props ) => {
 	const { attributes: { ampNoLoading }, setAttributes } = props;
@@ -483,7 +483,7 @@ AmpNoloadingToggle.propTypes = {
  * Get AMP Lightbox toggle control.
  *
  * @param {Object} props Props.
- * @return {ReactElement} Element.
+ * @return {JSX.Element} Element.
  */
 const AmpLightboxToggle = ( props ) => {
 	const { attributes: { ampLightbox, linkTo, ampLayout }, setAttributes } = props;
