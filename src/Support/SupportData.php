@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Support;
 
 use WP_Error;
+use WP_Theme;
 use AmpProject\AmpWP\QueryVar;
 
 /**
@@ -427,27 +428,12 @@ class SupportData {
 	 *
 	 * @since 2.2
 	 *
-	 * @param \WP_Theme $theme_object Theme object.
+	 * @param WP_Theme $theme_object Theme object.
 	 *
 	 * @return array Normalize theme information.
 	 */
-	public static function normalize_theme_info( $theme_object ) {
-
-		if ( empty( $theme_object ) || ! is_a( $theme_object, 'WP_Theme' ) ) {
-			return [];
-		}
-
-		$active_theme      = wp_get_theme();
-		$active_theme_slug = '';
-		$parent_theme      = '';
-
-		if ( ! empty( $active_theme ) && is_a( $active_theme, 'WP_Theme' ) ) {
-			$active_theme_slug = $active_theme->get_stylesheet();
-		}
-
-		if ( ! empty( $theme_object->parent() ) && ! is_a( $theme_object->parent(), 'WP_Theme' ) ) {
-			$parent_theme = $theme_object->parent()->get_stylesheet();
-		}
+	public static function normalize_theme_info( WP_Theme $theme_object ) {
+		$active_theme = wp_get_theme();
 
 		$tags = $theme_object->get( 'Tags' );
 		$tags = ( ! empty( $tags ) && is_array( $tags ) ) ? $tags : [];
@@ -464,8 +450,8 @@ class SupportData {
 			'theme_url'    => $theme_object->get( 'ThemeURI' ),
 			'author'       => $theme_object->get( 'Author' ),
 			'author_url'   => $theme_object->get( 'AuthorURI' ),
-			'is_active'    => ( $theme_object->get_stylesheet() === $active_theme_slug ),
-			'parent_theme' => $parent_theme,
+			'is_active'    => ( $theme_object->get_stylesheet() === $active_theme->get_stylesheet() ),
+			'parent_theme' => $active_theme->get_template(),
 		];
 
 		return $theme_data;
@@ -545,7 +531,7 @@ class SupportData {
 			$theme_list = array_merge( [ wp_get_theme() ], wp_get_themes() );
 
 			foreach ( $theme_list as $theme ) {
-				if ( ! empty( $theme ) && is_a( $theme, 'WP_Theme' ) ) {
+				if ( ! $theme->errors() ) {
 					$theme_versions[ $theme->get_stylesheet() ] = $theme->get( 'Version' );
 				}
 			}

@@ -60,12 +60,9 @@ class SupportLink implements Service, Conditional, Registerable {
 	 *
 	 * @return void
 	 */
-	public function admin_bar_menu( $wp_admin_bar ) {
+	public function admin_bar_menu( WP_Admin_Bar $wp_admin_bar ) {
 
-		if ( empty( $wp_admin_bar ) ||
-			! is_a( $wp_admin_bar, 'WP_Admin_Bar' ) ||
-			! array_key_exists( 'amp', $wp_admin_bar->get_nodes() )
-		) {
+		if ( ! $wp_admin_bar->get_node( 'amp' ) ) {
 			return;
 		}
 
@@ -86,7 +83,7 @@ class SupportLink implements Service, Conditional, Registerable {
 					add_query_arg(
 						[
 							'page'    => 'amp-support',
-							'post_id' => ( ! empty( $post ) && is_a( $post, 'WP_Post' ) ) ? $post->ID : 0,
+							'post_id' => $post ? $post->ID : 0,
 						],
 						admin_url( 'admin.php' )
 					)
@@ -99,16 +96,13 @@ class SupportLink implements Service, Conditional, Registerable {
 	 * Add support link to meta box.
 	 *
 	 * @param string[] $actions Array of actions.
-	 * @param \WP_Post $post    Referenced WP_Post object.
+	 * @param WP_Post  $post    Referenced WP_Post object.
 	 *
 	 * @return string[] $actions Array of actions.
 	 */
-	public function amp_validated_url_status_actions( $actions, $post ) {
+	public function amp_validated_url_status_actions( $actions, WP_Post $post ) {
 
-		if ( empty( $post ) ||
-			! is_a( $post, 'WP_Post' ) ||
-			! AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === $post->post_type
-		) {
+		if ( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $post->post_type ) {
 			return $actions;
 		}
 
@@ -134,12 +128,9 @@ class SupportLink implements Service, Conditional, Registerable {
 	 *
 	 * @return string[] Array of actions
 	 */
-	public function post_row_actions( $actions, $post ) {
+	public function post_row_actions( $actions, WP_Post $post ) {
 
-		if ( empty( $post ) ||
-			! is_a( $post, 'WP_Post' )
-			|| AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $post->post_type
-		) {
+		if ( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $post->post_type ) {
 			return $actions;
 		}
 
