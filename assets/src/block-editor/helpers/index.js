@@ -2,7 +2,6 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { ReactElement } from 'react';
 import { isFunction, isObject, isString } from 'lodash';
 
 /**
@@ -221,8 +220,8 @@ export const removeAmpFitTextFromBlocks = ( settings, name ) => {
  * removed and the deprecation of the block and proceed without error.
  *
  * @see removeAmpFitTextFromBlocks
- * @param {ReactElement} element Block save result.
- * @return {ReactElement} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
+ * @param {JSX.Element} element Block save result.
+ * @return {JSX.Element} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
  */
 export const removeClassFromAmpFitTextBlocks = ( element ) => {
 	if ( isValidElement( element ) && 'amp-fit-text' === element.type && undefined !== element.props.className ) {
