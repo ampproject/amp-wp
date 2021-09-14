@@ -947,7 +947,7 @@ def Phpize(data, indent=0):
 
 	# Clean up formatting.
 	# TODO: Just use PHPCBF for this.
-	php_exported = re.sub( r'^ +', lambda match: ( len(match.group(0))/2 ) * '\t', php_exported, flags=re.MULTILINE )
+	php_exported = re.sub( r'^ +', lambda match: ( round(len(match.group(0))/2) ) * '\t', php_exported, flags=re.MULTILINE )
 	php_exported = php_exported.replace( 'array (', 'array(' )
 	php_exported = re.sub( r' => \n\s+', ' => ', php_exported, flags=re.MULTILINE )
 	php_exported = re.sub( r'^(\s+)\d+ =>\s*', r'\1', php_exported, flags=re.MULTILINE )
