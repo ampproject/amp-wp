@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DevToolsToggle matches snapshot 1`] = `
+<div
+  className="amp-setting-toggle "
+>
+  <div
+    className="components-base-control components-toggle-control css-wdf2ti-Wrapper e1puf3u3"
+  >
+    <div
+      className="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+    >
+      <span
+        className="components-form-toggle"
+      >
+        <input
+          checked={false}
+          className="components-form-toggle__input"
+          id="inspector-toggle-control-0"
+          onChange={[Function]}
+          type="checkbox"
+        />
+        <span
+          className="components-form-toggle__track"
+        />
+        <span
+          className="components-form-toggle__thumb"
+        />
+      </span>
+      <label
+        className="components-toggle-control__label"
+        htmlFor="inspector-toggle-control-0"
+      >
+        <div
+          className="amp-setting-toggle__label-text"
+        >
+          <h3>
+            Enable Developer Tools
+          </h3>
+        </div>
+      </label>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`DevToolsToggle matches snapshot for the loading state 1`] = `
+<div
+  className="amp-spinner-container"
+>
+  <span
+    className="components-spinner css-pz2hpy-StyledSpinner e1s472tg0"
+  />
+</div>
+`;

@@ -311,7 +311,7 @@ class AMP_Validated_URL_Post_Type {
 		add_action( 'admin_notices', [ __CLASS__, 'print_admin_notice' ] );
 		add_action( 'admin_action_' . self::VALIDATE_ACTION, [ __CLASS__, 'handle_validate_request' ] );
 		add_action( 'post_action_' . self::UPDATE_POST_TERM_STATUS_ACTION, [ __CLASS__, 'handle_validation_error_status_update' ] );
-		add_filter( 'post_row_actions', [ __CLASS__, 'filter_post_row_actions' ], PHP_INT_MAX, 2 );
+		add_filter( 'post_row_actions', [ __CLASS__, 'filter_post_row_actions' ], PHP_INT_MAX - 1, 2 );
 		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), [ __CLASS__, 'filter_table_views' ] );
 		add_filter( 'bulk_post_updated_messages', [ __CLASS__, 'filter_bulk_post_updated_messages' ], 10, 2 );
 		add_filter( 'admin_title', [ __CLASS__, 'filter_admin_title' ] );
@@ -685,13 +685,13 @@ class AMP_Validated_URL_Post_Type {
 		$slug = md5( $url );
 
 		$post = get_page_by_path( $slug, OBJECT, self::POST_TYPE_SLUG );
-		if ( $post ) {
+		if ( $post instanceof WP_Post ) {
 			return $post;
 		}
 
 		if ( $options['include_trashed'] ) {
 			$post = get_page_by_path( $slug . '__trashed', OBJECT, self::POST_TYPE_SLUG );
-			if ( $post ) {
+			if ( $post instanceof WP_Post ) {
 				return $post;
 			}
 		}
@@ -2090,7 +2090,7 @@ class AMP_Validated_URL_Post_Type {
 	 * @param WP_Post $post The post for which to output the box.
 	 * @return void
 	 */
-	public static function print_status_meta_box( $post ) {
+	public static function print_status_meta_box( WP_Post $post ) {
 		?>
 		<style>
 			#amp_validation_status .inside {
@@ -2225,6 +2225,7 @@ class AMP_Validated_URL_Post_Type {
 						 * @internal
 						 *
 						 * @param string[] $actions Action links.
+						 * @param WP_Post  $post    Validated URL post.
 						 */
 						$actions = apply_filters( 'amp_validated_url_status_actions', $actions, $post );
 

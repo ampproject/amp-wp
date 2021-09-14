@@ -15,7 +15,6 @@ describe( 'Summary', () => {
 
 		await expect( page ).toMatchElement( 'h2', { text: 'Standard' } );
 		await expect( page ).not.toMatchElement( '.phone img' );
-		await expect( page ).not.toMatchElement( '.components-form-toggle' );
 
 		sharedTests();
 	} );
@@ -25,7 +24,6 @@ describe( 'Summary', () => {
 
 		await expect( page ).toMatchElement( 'h2', { text: 'Transitional' } );
 		await expect( page ).not.toMatchElement( '.phone img' );
-		await expect( page ).toMatchElement( '.components-form-toggle.is-checked' );
 
 		sharedTests();
 	} );
@@ -35,7 +33,6 @@ describe( 'Summary', () => {
 
 		await expect( page ).toMatchElement( 'h2', { text: 'Reader' } );
 		await expect( page ).toMatchElement( '.phone img' );
-		await expect( page ).toMatchElement( '.components-form-toggle.is-checked' );
 
 		sharedTests();
 	} );
