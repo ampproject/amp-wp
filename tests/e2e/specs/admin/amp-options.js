@@ -152,6 +152,7 @@ describe( 'AMP settings screen Review panel', () => {
 	}
 
 	it( 'is present on the page', async () => {
+		await page.waitForSelector( '.settings-site-review' );
 		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
 		await expect( page ).toMatchElement( 'h3', { text: 'Need help?' } );
 		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /support forums/i } );
@@ -188,6 +189,8 @@ describe( 'AMP settings screen Review panel', () => {
 		await expect( page ).not.toMatchElement( 'h2', { text: 'Review' } );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await page.waitForSelector( '.settings-site-review' );
 		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
 
 		await clickMode( 'standard' );
