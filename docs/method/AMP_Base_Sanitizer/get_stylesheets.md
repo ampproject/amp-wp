@@ -12,7 +12,7 @@ Get stylesheets.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:194](/includes/sanitizers/class-amp-base-sanitizer.php#L194-L204)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:205](/includes/sanitizers/class-amp-base-sanitizer.php#L205-L215)
 
 <details>
 <summary>Show Code</summary>

@@ -4,7 +4,7 @@
 apply_filters( 'amp_extract_image_dimensions_get_user_agent', $user_agent );
 ```
 
-Filters the user agent for onbtaining the image dimensions.
+Filters the user agent for obtaining the image dimensions.
 
 ### Arguments
 
@@ -12,7 +12,7 @@ Filters the user agent for onbtaining the image dimensions.
 
 ### Source
 
-:link: [includes/utils/class-amp-image-dimension-extractor.php:250](/includes/utils/class-amp-image-dimension-extractor.php#L250)
+:link: [includes/utils/class-amp-image-dimension-extractor.php:368](/includes/utils/class-amp-image-dimension-extractor.php#L368)
 
 <details>
 <summary>Show Code</summary>
