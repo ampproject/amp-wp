@@ -2,7 +2,6 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -16,7 +15,7 @@ import { __ } from '@wordpress/i18n';
  * @param {Object} props      Component props.
  * @param {string} props.name Block's name.
  * @param {string} props.url  URL.
- * @return {ReactElement} Placeholder.
+ * @return {JSX.Element} Placeholder.
  */
 const MediaPlaceholder = ( { name, url } ) => {
 	return (

@@ -65,24 +65,19 @@ export const getMinimumFeaturedImageDimensions = () => {
 /**
  * Validates the an image based on requirements.
  *
- * @param {Object}  media                      A media object.
- * @param {string}  media.mime_type            The media item's mime type.
- * @param {Object}  media.media_details        A media details object with width and height values.
- * @param {number}  media.media_details.width  Media width in pixels.
- * @param {number}  media.media_details.height Media height in pixels.
- * @param {Object}  dimensions                 An object with minimum required width and height values.
- * @param {number}  dimensions.width           Minimum required width value.
- * @param {number}  dimensions.height          Minimum required height value.
- * @param {boolean} required                   Whether the image is required or not.
+ * @param {Object|null} media                      A media object.
+ * @param {string}      media.mime_type            The media item's mime type.
+ * @param {Object}      media.media_details        A media details object with width and height values.
+ * @param {number}      media.media_details.width  Media width in pixels.
+ * @param {number}      media.media_details.height Media height in pixels.
+ * @param {Object}      dimensions                 An object with minimum required width and height values.
+ * @param {number}      dimensions.width           Minimum required width value.
+ * @param {number}      dimensions.height          Minimum required height value.
  * @return {string[]|null} Validation errors, or null if there were no errors.
  */
-export const validateFeaturedImage = ( media, dimensions, required ) => {
+export const validateFeaturedImage = ( media, dimensions ) => {
 	if ( ! media ) {
-		if ( required ) {
-			return [ __( 'Selecting a featured image is required.', 'amp' ) ];
-		}
-
-		return [ __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) ];
+		return [ __( 'Selecting a featured image is required.', 'amp' ) ];
 	}
 
 	const errors = [];

@@ -7,6 +7,7 @@ Class AMP_Base_Sanitizer
 * [`__construct`](../method/AMP_Base_Sanitizer/__construct.md) - AMP_Base_Sanitizer constructor.
 * [`add_buffering_hooks`](../method/AMP_Base_Sanitizer/add_buffering_hooks.md) - Add filters to manipulate output during output buffering before the DOM is constructed.
 * [`get_selector_conversion_mapping`](../method/AMP_Base_Sanitizer/get_selector_conversion_mapping.md) - Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+* [`update_args`](../method/AMP_Base_Sanitizer/update_args.md) - Update args.
 * [`init`](../method/AMP_Base_Sanitizer/init.md) - Run logic before any sanitizers are run.
 * [`sanitize`](../method/AMP_Base_Sanitizer/sanitize.md) - Sanitize the HTML contained in the DOMDocument received by the constructor
 * [`get_scripts`](../method/AMP_Base_Sanitizer/get_scripts.md) - Return array of values that would be valid as an HTML `script` element.
@@ -33,7 +34,7 @@ Class AMP_Base_Sanitizer
 * [`get_validate_response_data`](../method/AMP_Base_Sanitizer/get_validate_response_data.md) - Get data that is returned in validate responses.
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:16](/includes/sanitizers/class-amp-base-sanitizer.php#L16-L823)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:16](/includes/sanitizers/class-amp-base-sanitizer.php#L16-L834)
 
 <details>
 <summary>Show Code</summary>
@@ -164,6 +165,17 @@ abstract class AMP_Base_Sanitizer {
 	 */
 	public function get_selector_conversion_mapping() {
 		return [];
+	}
+
+	/**
+	 * Update args.
+	 *
+	 * Merges the supplied args with the existing args.
+	 *
+	 * @param array $args Args.
+	 */
+	public function update_args( $args ) {
+		$this->args = array_merge( $this->args, $args );
 	}
 
 	/**

@@ -17,6 +17,8 @@ use AmpProject\AmpWP\Optimizer\HeroCandidateFiltering;
 use AmpProject\AmpWP\Optimizer\OptimizerService;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
+use AmpProject\AmpWP\Support\SupportCliCommand;
+use AmpProject\AmpWP\Support\SupportRESTController;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
@@ -74,6 +76,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.options_menu'                 => Admin\OptionsMenu::class,
 		'admin.paired_browsing'              => Admin\PairedBrowsing::class,
 		'admin.plugin_row_meta'              => Admin\PluginRowMeta::class,
+		'admin.support_screen'               => Admin\SupportScreen::class,
+		'admin.support'                      => Admin\SupportLink::class,
 		'admin.polyfills'                    => Admin\Polyfills::class,
 		'admin.validation_counts'            => Admin\ValidationCounts::class,
 		'amp_slug_customization_watcher'     => AmpSlugCustomizationWatcher::class,
@@ -110,6 +114,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'save_post_validation_event'         => SavePostValidationEvent::class,
 		'server_timing'                      => Instrumentation\ServerTiming::class,
 		'site_health_integration'            => Admin\SiteHealth::class,
+		'support'                            => SupportCliCommand::class,
+		'support_rest_controller'            => SupportRESTController::class,
 		'url_validation_cron'                => URLValidationCron::class,
 		'url_validation_rest_controller'     => Validation\URLValidationRESTController::class,
 		'validated_url_stylesheet_gc'        => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,

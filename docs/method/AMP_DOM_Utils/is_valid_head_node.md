@@ -18,7 +18,7 @@ Determine whether a node can be in the head.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:91](/includes/utils/class-amp-dom-utils.php#L91-L94)
+:link: [includes/utils/class-amp-dom-utils.php:81](/includes/utils/class-amp-dom-utils.php#L81-L84)
 
 <details>
 <summary>Show Code</summary>

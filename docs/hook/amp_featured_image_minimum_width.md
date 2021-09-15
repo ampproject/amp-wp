@@ -12,7 +12,7 @@ Filters the minimum width required for a featured image.
 
 ### Source
 
-:link: [includes/admin/class-amp-post-meta-box.php:325](/includes/admin/class-amp-post-meta-box.php#L325)
+:link: [includes/admin/class-amp-post-meta-box.php:329](/includes/admin/class-amp-post-meta-box.php#L329)
 
 <details>
 <summary>Show Code</summary>

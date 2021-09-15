@@ -356,7 +356,7 @@ export function PluginSuppression() {
 					</tr>
 				</thead>
 				<tbody>
-					{ Object.keys( suppressiblePlugins || {} ).map( ( pluginKey ) => (
+					{ Object.keys( suppressiblePlugins ).map( ( pluginKey ) => (
 						<PluginRow
 							key={ `plugin-row-${ pluginKey }` }
 							pluginDetails={ suppressiblePlugins[ pluginKey ] }

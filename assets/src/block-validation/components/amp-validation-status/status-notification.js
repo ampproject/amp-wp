@@ -27,6 +27,7 @@ export default function AMPValidationStatusNotification() {
 		isEditedPostNew,
 		keptMarkupValidationErrorCount,
 		reviewLink,
+		supportLink,
 		unreviewedValidationErrorCount,
 		validationErrorCount,
 	} = useSelect( ( select ) => ( {
@@ -35,6 +36,7 @@ export default function AMPValidationStatusNotification() {
 		isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
 		keptMarkupValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getKeptMarkupValidationErrors().length,
 		reviewLink: select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(),
+		supportLink: select( BLOCK_VALIDATION_STORE_KEY ).getSupportLink(),
 		unreviewedValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors().length,
 		validationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors().length,
 	} ), [] );
@@ -51,6 +53,22 @@ export default function AMPValidationStatusNotification() {
 			/>
 		);
 	}
+
+	const sidebarNotificationAction = reviewLink && (
+		<>
+			<ExternalLink href={ reviewLink }>
+				{ __( 'View technical details', 'amp' ) }
+			</ExternalLink>
+			<br />
+			{
+				supportLink && (
+					<ExternalLink href={ supportLink }>
+						{ __( 'Get Support', 'amp' ) }
+					</ExternalLink>
+				)
+			}
+		</>
+	);
 
 	if ( fetchingErrorsRequestErrorMessage ) {
 		return (
@@ -88,11 +106,7 @@ export default function AMPValidationStatusNotification() {
 						keptMarkupValidationErrorCount,
 					)
 				}
-				action={ reviewLink && (
-					<ExternalLink href={ reviewLink }>
-						{ __( 'View technical details', 'amp' ) }
-					</ExternalLink>
-				) }
+				action={ sidebarNotificationAction }
 			/>
 		);
 	}
@@ -114,11 +128,7 @@ export default function AMPValidationStatusNotification() {
 						unreviewedValidationErrorCount,
 					)
 				}
-				action={ reviewLink && (
-					<ExternalLink href={ reviewLink }>
-						{ __( 'View technical details', 'amp' ) }
-					</ExternalLink>
-				) }
+				action={ sidebarNotificationAction }
 			/>
 		);
 	}
@@ -139,11 +149,7 @@ export default function AMPValidationStatusNotification() {
 					validationErrorCount,
 				)
 			}
-			action={ reviewLink && (
-				<ExternalLink href={ reviewLink }>
-					{ __( 'View technical details', 'amp' ) }
-				</ExternalLink>
-			) }
+			action={ sidebarNotificationAction }
 		/>;
 	}
 

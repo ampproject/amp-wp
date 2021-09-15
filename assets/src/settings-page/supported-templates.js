@@ -231,7 +231,7 @@ export function SupportedTemplatesFieldset() {
 		reader_theme: readerTheme,
 	} = editedOptions || {};
 
-	if ( ( 'reader' === themeSupport && 'legacy' === readerTheme ) || ! supportableTemplates ) {
+	if ( ( 'reader' === themeSupport && 'legacy' === readerTheme ) || ! supportableTemplates?.length ) {
 		return null;
 	}
 
@@ -256,14 +256,7 @@ export function SupportedTemplatesFieldset() {
 						} }
 					/>
 
-					{ supportableTemplates
-						? <SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
-						: (
-							<p>
-								{ __( 'Your site does not provide any templates to support.', 'amp' ) }
-							</p>
-						)
-					}
+					<SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
 				</>
 			) : null }
 		</fieldset>
