@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { TechnicalBackground } from './technical-background';
+import { SiteScan } from './site-scan';
 import { TemplateMode } from './template-mode';
 import { ChooseReaderTheme } from './choose-reader-theme';
 import { Done } from './done';
@@ -27,6 +28,11 @@ export const PAGES = [
 		title: __( 'Technical Background', 'amp' ),
 		PageComponent: TechnicalBackground,
 		showTitle: false,
+	},
+	{
+		slug: 'site-scan',
+		title: __( 'Site Scan', 'amp' ),
+		PageComponent: SiteScan,
 	},
 	{
 		slug: 'template-modes',

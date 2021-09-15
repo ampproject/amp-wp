@@ -1,0 +1,14 @@
+.site-scan__header {
+	align-items: center;
+	border-bottom: 1px solid var(--amp-settings-color-border);
+	display: flex;
+	flex-flow: row nowrap;
+	padding-bottom: 1rem;
+	padding-top: 0.5rem;
+}
+
+.site-scan__heading {
+	font-size: 16px;
+	font-weight: 700;
+	margin-left: 2rem;
+}
