@@ -4,6 +4,7 @@
  * @todo Make the naming of these variables more semantic.
  */
 :root {
+	--amp-brand: #2459e7;
 	--amp-settings-color-black: #212121;
 	--amp-settings-color-dark-gray: #333;
 	--amp-settings-color-brand: #2459e7;
