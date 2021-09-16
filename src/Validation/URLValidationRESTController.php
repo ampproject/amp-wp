@@ -104,7 +104,27 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			]
 		);
 
-		// @todo Additional endpoint to validate a URL (from a URL rather than a post ID).
+		register_rest_route(
+			$this->namespace,
+			'/validate-url',
+			[
+				'args'   => [
+					'url'            => [
+						'description'       => __( 'URL for the page to validate.', 'amp' ),
+						'required'          => true,
+						'type'              => 'string',
+						'validate_callback' => [ $this, 'validate_url_param' ],
+					],
+				],
+				[
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'validate_url' ],
+					'permission_callback' => [ $this, 'create_item_permissions_check' ],
+				],
+				'schema' => [ $this, 'get_public_item_schema' ],
+			]
+		);
 	}
 
 	/**
@@ -140,6 +160,32 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 				[ 'status' => 403 ]
 			);
 		}
+		return true;
+	}
+
+	/**
+	 * Validate URL param.
+	 *
+	 * @param string          $url     URL param value.
+	 * @param WP_REST_Request $request REST request.
+	 * @param string          $param   Param name ('url').
+	 * @return true|WP_Error True on valid, WP_Error otherwise.
+	 */
+	public function validate_url_param( $url, $request, $param ) {
+		// First enforce the schema to ensure $url is a string.
+		$validity = rest_validate_request_arg( $url, $request, $param );
+		if ( is_wp_error( $validity ) ) {
+			return $validity;
+		}
+
+		if ( esc_url_raw( $url ) !== $url || ! wp_http_validate_url( $url ) ) {
+			return new WP_Error(
+				'rest_invalid_url',
+				__( 'Invalid URL.', 'amp' ),
+				[ 'status' => 404 ]
+			);
+		}
+
 		return true;
 	}
 
@@ -207,16 +253,45 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			);
 		}
 
-		$validity = $this->url_validation_provider->get_url_validation( $url, get_post_type( $post_id ) );
+		$post_type = get_post_type( $post_id );
+		$data      = $this->get_validation_data( $url, $post_type );
+
+		return rest_ensure_response( $this->filter_response_by_context( $data, $request['context'] ) );
+	}
+
+	/**
+	 * Validate page by URL.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function validate_url( $request ) {
+		$data = $this->get_validation_data( $request['url'] );
+
+		return rest_ensure_response( $this->filter_response_by_context( $data, $request['context'] ) );
+	}
+
+	/**
+	 * Get validation data for a URL.
+	 *
+	 * @param string      $url       URL for which the validation data should be retrieved.
+	 * @param bool|string $post_type (optional) Type of post that is served at the `$url`.
+	 *
+	 * @return array|WP_Error
+	 */
+	protected function get_validation_data( $url, $post_type = false ) {
+		$validity = $this->url_validation_provider->get_url_validation( $url, $post_type );
+
 		if ( is_wp_error( $validity ) ) {
 			return $validity;
 		}
 
-		$data = [
-			'results'      => [],
-			'review_link'  => get_edit_post_link( $validity['post_id'], 'raw' ),
-			'support_link' => admin_url( 'admin.php?page=amp-support&post_id=' . $validity['post_id'] ),
-		];
+		$data['results'] = [];
+
+		if ( ! empty( $post_id ) ) {
+			$data['review_link']  = get_edit_post_link( $validity['post_id'], 'raw' );
+			$data['support_link'] = admin_url( 'admin.php?page=amp-support&post_id=' . $validity['post_id'] );
+		}
 
 		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validity['post_id'] ) as $result ) {
 
@@ -238,7 +313,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			];
 		}
 
-		return rest_ensure_response( $this->filter_response_by_context( $data, $request['context'] ) );
+		return $data;
 	}
 
 	/**

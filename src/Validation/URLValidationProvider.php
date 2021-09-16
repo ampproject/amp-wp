@@ -109,7 +109,10 @@ final class URLValidationProvider implements Service {
 			return $validity;
 		}
 
-		$this->update_state_from_validity( $validity, $type );
+		if ( ! empty( $type ) ) {
+			$this->update_state_from_validity( $validity, $type );
+		}
+
 		return $validity;
 	}
 
