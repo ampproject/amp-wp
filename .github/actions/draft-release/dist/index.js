@@ -2147,6 +2147,7 @@ const Endpoints = {
     listWebhookDeliveries: ["GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries"],
     listWebhooks: ["GET /repos/{owner}/{repo}/hooks"],
     merge: ["POST /repos/{owner}/{repo}/merges"],
+    mergeUpstream: ["POST /repos/{owner}/{repo}/merge-upstream"],
     pingWebhook: ["POST /repos/{owner}/{repo}/hooks/{hook_id}/pings"],
     redeliverWebhookDelivery: ["POST /repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}/attempts"],
     removeAppAccessRestrictions: ["DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps", {}, {
@@ -2306,7 +2307,7 @@ const Endpoints = {
   }
 };
 
-const VERSION = "5.9.0";
+const VERSION = "5.10.4";
 
 function endpointsToMethods(octokit, endpointsMap) {
   const newMethods = {};
@@ -4462,7 +4463,7 @@ module.exports.Collection = Hook.Collection
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const VERSION = "2.16.0";
+const VERSION = "2.16.3";
 
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
@@ -5458,10 +5459,10 @@ const _ = __webpack_require__( 682 );
  *
  * Adapted from https://github.com/release-drafter/release-drafter/blob/8cf80318bad9d4877359714d6b5699662cc2597f/lib/pagination.js.
  *
- * @param {Function} queryFn - function used to query the GraphQL API
- * @param {string} query - GraphQL query, must include `nodes` and `pageInfo` fields for the field that will be paginated
- * @param {Object} variables
- * @param {string[]} paginatePath - path to field to paginate
+ * @param {Function} queryFn      Function used to query the GraphQL API.
+ * @param {string}   query        GraphQL query, must include `nodes` and `pageInfo` fields for the field that will be paginated.
+ * @param {Object}   variables    GraphQL Query variables.
+ * @param {string[]} paginatePath Path to field to paginate.
  */
 async function paginateByPath( queryFn, query, variables, paginatePath ) {
 	const nodesPath = [ ...paginatePath, 'nodes' ];
@@ -11803,12 +11804,12 @@ async function main() {
 		const matches = /\*\s+Version:\s+(\d+(\.\d+)+-\w+)/.exec(pluginFile);
 		const tagName = matches && matches[1] ? matches[1] : null;
 
-		if (! tagName) {
-			throw new Error( 'Unable to parse Version from plugin bootstrap PHP file.' );
+		if (!tagName) {
+			throw new Error('Unable to parse Version from plugin bootstrap PHP file.');
 		}
 
-		if (! tagName.startsWith(milestone)) {
-			throw new Error( "Milestone mismatch with PHP plugin bootstrap version." );
+		if (!tagName.startsWith(milestone)) {
+			throw new Error('Milestone mismatch with PHP plugin bootstrap version.');
 		}
 
 		// Get target branch.
