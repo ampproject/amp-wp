@@ -247,6 +247,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
 			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
+			'SCANNABLE_URLS_REST_PATH'           => '/amp/v1/scannable-urls',
 			'SETTINGS_LINK'                      => $amp_settings_link,
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
 			'PREVIEW_URLS'                       => $this->get_preview_urls( $this->scannable_url_provider->get_urls() ),
@@ -288,6 +289,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		$paths = [
 			'/amp/v1/options',
 			'/amp/v1/reader-themes',
+			'/amp/v1/scannable-urls',
 			'/wp/v2/settings',
 			'/wp/v2/users/me',
 		];

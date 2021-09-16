@@ -15,6 +15,7 @@ import {
 	SETTINGS_LINK,
 	OPTIONS_REST_PATH,
 	READER_THEMES_REST_PATH,
+	SCANNABLE_URLS_REST_PATH,
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 	USERS_RESOURCE_REST_PATH,
@@ -79,7 +80,9 @@ export function Providers( { children } ) {
 								updatesNonce={ UPDATES_NONCE }
 							>
 								<TemplateModeOverrideContextProvider>
-									<SiteScanContextProvider>
+									<SiteScanContextProvider
+										scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
+									>
 										{ children }
 									</SiteScanContextProvider>
 								</TemplateModeOverrideContextProvider>
