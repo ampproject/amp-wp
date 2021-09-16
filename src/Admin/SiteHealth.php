@@ -357,7 +357,6 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		$request_args   = [
 			'headers' => [
 				'X-AMP-Request-Random-Number' => true,
-				'Cache-Control'               => 'max-age=' . ( YEAR_IN_SECONDS + MONTH_IN_SECONDS ),
 			],
 		];
 
