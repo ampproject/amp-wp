@@ -902,7 +902,6 @@ class AMP_Theme_Support {
 		add_filter( 'comment_reply_link', [ __CLASS__, 'filter_comment_reply_link' ], 10, 4 );
 		add_filter( 'cancel_comment_reply_link', [ __CLASS__, 'filter_cancel_comment_reply_link' ], 10, 3 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
-		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'include_layout_in_wp_kses_allowed_html' ], 10 );
 		add_filter( 'get_header_image_tag', [ __CLASS__, 'amend_header_image_with_video_header' ], PHP_INT_MAX );
 		add_action(
 			'wp_print_footer_scripts',
@@ -2179,22 +2178,6 @@ class AMP_Theme_Support {
 		);
 
 		return Services::get( 'injector' )->make( OptimizerService::class );
-	}
-
-	/**
-	 * Adds 'data-amp-layout' to the allowed <img> attributes for wp_kses().
-	 *
-	 * @since 0.7
-	 *
-	 * @param array $context Allowed tags and their allowed attributes.
-	 * @return array $context Filtered allowed tags and attributes.
-	 */
-	public static function include_layout_in_wp_kses_allowed_html( $context ) {
-		if ( ! empty( $context[ Tag::IMG ][ Attribute::WIDTH ] ) && ! empty( $context[ Tag::IMG ][ Attribute::HEIGHT ] ) ) {
-			$context[ Tag::IMG ]['data-amp-layout'] = true;
-		}
-
-		return $context;
 	}
 
 	/**
