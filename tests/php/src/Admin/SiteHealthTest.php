@@ -65,7 +65,7 @@ class SiteHealthTest extends TestCase {
 
 		$this->was_wp_using_ext_object_cache = wp_using_ext_object_cache();
 
-		$this->original_wp_rest_server = $GLOBALS['wp_rest_server'];
+		$this->original_wp_rest_server = isset( $GLOBALS['wp_rest_server'] ) ? $GLOBALS['wp_rest_server'] : null;
 		$GLOBALS['wp_rest_server']     = null;
 	}
 
@@ -661,8 +661,10 @@ class SiteHealthTest extends TestCase {
 
 		return [
 			'no-cache'              => [
-				'request_headers' => [],
-				'expected'        => [
+				'response_headers' => [
+					// @todo Try: cache-control: no-cache
+				],
+				'expected'         => [
 					'badge'  => [
 						'label' => 'AMP',
 						'color' => 'orange',
@@ -671,12 +673,11 @@ class SiteHealthTest extends TestCase {
 					'status' => 'recommended',
 					'label'  => 'Page caching is not detected',
 				],
+				'replay_responses' => false,
 			],
 			'server-cache'          => [
-				'request_headers' => [
-					'x-amp-random-number' => '1345',
-				],
-				'expected'        => [
+				'response_headers' => [],
+				'expected'         => [
 					'badge'  => [
 						'label' => 'AMP',
 						'color' => 'orange',
@@ -685,12 +686,13 @@ class SiteHealthTest extends TestCase {
 					'status' => 'recommended',
 					'label'  => 'Page caching is detected but client caching headers are missing',
 				],
+				'replay_responses' => true,
 			],
 			'server-cache-with-age' => [
-				'request_headers' => [
+				'response_headers' => [
 					'age' => '1345',
 				],
-				'expected'        => [
+				'expected'         => [
 					'badge'  => [
 						'label' => 'AMP',
 						'color' => 'orange',
@@ -699,13 +701,13 @@ class SiteHealthTest extends TestCase {
 					'status' => 'recommended',
 					'label'  => 'Page caching is detected but client caching headers are missing',
 				],
+				'replay_responses' => false,
 			],
 			'full-cache'            => [
-				'request_headers' => [
-					'x-amp-random-number' => '1345',
-					'expires'             => 'Wed, 11 Jan 1984 12:00:00 GMT',
+				'response_headers' => [
+					'expires' => 'Wed, 11 Jan 1984 12:00:00 GMT',
 				],
-				'expected'        => [
+				'expected'         => [
 					'badge'  => [
 						'label' => 'AMP',
 						'color' => 'green',
@@ -714,6 +716,7 @@ class SiteHealthTest extends TestCase {
 					'status' => 'good',
 					'label'  => 'Page caching is detected',
 				],
+				'replay_responses' => true,
 			],
 		];
 	}
@@ -721,19 +724,41 @@ class SiteHealthTest extends TestCase {
 	/**
 	 * @dataProvider get_page_cache_data
 	 * @covers ::page_cache()
+	 * @covers ::get_page_cache_status()
 	 */
-	public function test_page_cache( $request_headers, $expected ) {
+	public function test_page_cache( $response_headers, $expected, $replay_responses ) {
 
-		/*
-		 * Mock the http request.
-		 */
-		$callback_wp_remote = static function () use ( $request_headers ) {
+		$first_random_number = null;
 
-			return [
-				'headers' => $request_headers,
-			];
-		};
-		add_filter( 'pre_http_request', $callback_wp_remote );
+		add_filter(
+			'pre_http_request',
+			function ( $r, $parsed_args ) use ( $response_headers, $replay_responses, &$first_random_number ) {
+				$header_name = strtolower( SiteHealth::PAGE_CACHING_CHALLENGE_HEADER );
+				$this->assertArrayHasKey(
+					$header_name,
+					$parsed_args['headers']
+				);
+
+				if ( $replay_responses && $first_random_number ) {
+					$random_number = $first_random_number;
+				} else {
+					// See \AmpProject\AmpWP\Admin\SiteHealth::send_page_cache_challenge_response_header
+					list( $nonce, $random_number ) = explode( ';', $parsed_args['headers'][ $header_name ] );
+					$this->assertSame(
+						$this->instance->get_page_caching_challenge_nonce(),
+						$nonce
+					);
+					$first_random_number = $random_number;
+				}
+				$response_headers[ $header_name ] = $random_number;
+
+				return [
+					'headers' => $response_headers,
+				];
+			},
+			10,
+			2
+		);
 
 		$actual = $this->instance->page_cache();
 		$this->assertArrayHasKey( 'description', $actual );
@@ -745,79 +770,6 @@ class SiteHealthTest extends TestCase {
 			$expected,
 			$actual
 		);
-
-		remove_filter( 'pre_http_request', $callback_wp_remote );
-	}
-
-	/**
-	 * Data provider for $this->test_get_page_cache_status()
-	 *
-	 * @return array[]
-	 */
-	public function get_data_to_test_get_page_cache_status() {
-
-		return [
-			'no-cache'              => [
-				'request_headers' => [],
-				'expected'        => [
-					'server_caching' => false,
-					'client_caching' => false,
-				],
-			],
-			'server-cache'          => [
-				'request_headers' => [
-					'x-amp-random-number' => '1345',
-				],
-				'expected'        => [
-					'server_caching' => true,
-					'client_caching' => false,
-				],
-			],
-			'server-cache-with-age' => [
-				'request_headers' => [
-					'age' => '1345',
-				],
-				'expected'        => [
-					'server_caching' => true,
-					'client_caching' => false,
-				],
-			],
-			'full-cache'            => [
-				'request_headers' => [
-					'x-amp-random-number' => '1345',
-					'expires'             => 'Wed, 11 Jan 1984 12:00:00 GMT',
-				],
-				'expected'        => [
-					'server_caching' => true,
-					'client_caching' => true,
-				],
-			],
-		];
-	}
-
-	/**
-	 * @dataProvider get_data_to_test_get_page_cache_status
-	 * @covers       ::get_page_cache_status()
-	 */
-	public function test_get_page_cache_status( $request_headers, $expected ) {
-
-		/*
-		 * Mock the http request.
-		 */
-		$callback_wp_remote = static function () use ( $request_headers ) {
-
-			return [
-				'headers' => $request_headers,
-			];
-		};
-		add_filter( 'pre_http_request', $callback_wp_remote );
-
-		$this->assertEquals(
-			$expected,
-			$this->call_private_method( $this->instance, 'get_page_cache_status' )
-		);
-
-		remove_filter( 'pre_http_request', $callback_wp_remote );
 	}
 
 	/**

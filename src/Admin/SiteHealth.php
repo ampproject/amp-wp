@@ -51,6 +51,13 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	const TEST_PAGE_CACHING = 'amp_page_cache';
 
 	/**
+	 * HTTP request header to challenge whether page caching is enabled.
+	 *
+	 * @var string
+	 */
+	const PAGE_CACHING_CHALLENGE_HEADER = 'X-AMP-Page-Caching-Challenge';
+
+	/**
 	 * Service that monitors and controls the CSS transient caching.
 	 *
 	 * @var MonitorCssTransientCaching
@@ -98,9 +105,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		add_action( 'admin_print_styles-tools_page_health-check', [ $this, 'add_styles' ] );
 		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
 
-		if ( ! wp_doing_ajax() ) {
-			$this->maybe_send_random_number();
-		}
+		add_action( 'send_headers', [ $this, 'send_page_cache_challenge_response_header' ] );
 	}
 
 	/**
@@ -340,6 +345,15 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
+	 * Get nonce for page caching challenge.
+	 *
+	 * @return string Nonce.
+	 */
+	public function get_page_caching_challenge_nonce() {
+		return wp_hash( self::TEST_PAGE_CACHING . wp_nonce_tick(), 'nonce' );
+	}
+
+	/**
 	 * Check if site has page cache enable or not.
 	 *
 	 * @return array {
@@ -354,13 +368,15 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			'client_caching' => false,
 		];
 		$response_list  = [];
-		$request_args   = [
-			'headers' => [
-				'X-AMP-Request-Random-Number' => true,
-			],
-		];
 
-		for ( $i = 1; $i <= 3; $i++ ) {
+		for ( $i = 1; $i <= 2; $i++ ) {
+			$random_number = (string) wp_rand();
+			$request_args  = [
+				'headers' => [
+					strtolower( self::PAGE_CACHING_CHALLENGE_HEADER ) => $this->get_page_caching_challenge_nonce() . ';' . $random_number,
+				],
+			];
+
 			$http_response        = wp_remote_get( home_url(), $request_args );
 			$http_response_header = wp_remote_retrieve_headers( $http_response );
 			$http_response_header = ( ! empty( $http_response_header ) ) ? $http_response_header : [];
@@ -378,12 +394,13 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				$has_page_cache['client_caching'] = true;
 			}
 
-			if ( ! empty( $http_response_header['x-amp-random-number'] ) ) {
-				$response = $http_response_header['x-amp-random-number'];
+			// If age tag have positive number then consider page cache exists due to proxy.
+			if ( ! empty( $http_response_header['age'] ) && 0 < (int) $http_response_header['age'] ) {
+				$response = true;
 			} else {
-				// If age tag have positive number then consider page cache exists.
-				if ( ! empty( $http_response_header['age'] ) && 0 < (int) $http_response_header['age'] ) {
-					$response = true;
+				$challenge_response_header = strtolower( self::PAGE_CACHING_CHALLENGE_HEADER );
+				if ( ! empty( $http_response_header[ $challenge_response_header ] ) ) {
+					$response = $http_response_header[ $challenge_response_header ];
 				}
 			}
 			$response_list[ $i ] = $response;
@@ -402,15 +419,31 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
-	 * Send render random in header if requested.
+	 * Send back nonce-hashed challenge number if requesting page caching challenge.
 	 *
 	 * @return void
 	 */
-	public function maybe_send_random_number() {
+	public function send_page_cache_challenge_response_header() {
+		$key = 'HTTP_' . str_replace( '-', '_', strtoupper( self::PAGE_CACHING_CHALLENGE_HEADER ) );
 
-		if ( isset( $_SERVER['HTTP_X_AMP_REQUEST_RANDOM_NUMBER'] ) ) {
-			header( 'X-AMP-Random-Number: ' . wp_rand( 1000, 10000 ) );
+		if ( ! isset( $_SERVER[ $key ] ) ) {
+			return;
 		}
+
+		$value = explode( ';', sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) ) );
+		if ( count( $value ) !== 2 ) {
+			return;
+		}
+		list( $nonce, $random_number ) = $value;
+		if ( ! rest_is_integer( $random_number ) ) {
+			return;
+		}
+
+		if ( ! hash_equals( $nonce, $this->get_page_caching_challenge_nonce() ) ) {
+			return;
+		}
+
+		header( self::PAGE_CACHING_CHALLENGE_HEADER . ': ' . $random_number );
 	}
 
 	/**
