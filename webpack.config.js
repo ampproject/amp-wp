@@ -4,7 +4,7 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
+const CssMinimizerPlugin = require( 'css-minimizer-webpack-plugin' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const WebpackBar = require( 'webpackbar' );
 
@@ -70,7 +70,7 @@ const sharedConfig = {
 				style: false,
 			},
 		},
-		minimizer: defaultConfig.optimization.minimizer.concat( [ new OptimizeCSSAssetsPlugin( { } ) ] ),
+		minimizer: defaultConfig.optimization.minimizer.concat( [ new CssMinimizerPlugin() ] ),
 	},
 };
 
