@@ -661,110 +661,69 @@ class SiteHealthTest extends TestCase {
 	public function get_page_cache_data() {
 
 		return [
-			'basic-auth-fail'                => [
-				'response_headers' => [],
-				'expected'         => [
-					'badge'  => [
-						'label' => 'AMP',
-						'color' => 'orange',
-					],
-					'test'   => 'amp_page_cache',
-					'status' => 'recommended',
-					'label'  => 'Page caching is not detected',
+			'basic-auth-fail'                        => [
+				'responses'  => [
+					'unauthorized',
 				],
-				'conditions'       => [
-					'basic_auth_fail' => true,
-				],
+				'expected'   => 'http_401',
+				'basic_auth' => false,
 			],
-			'no-cache'                       => [
-				'response_headers' => [],
-				'expected'         => [
-					'badge'  => [
-						'label' => 'AMP',
-						'color' => 'orange',
-					],
-					'test'   => 'amp_page_cache',
-					'status' => 'recommended',
-					'label'  => 'Page caching is not detected',
-				],
-				'conditions'       => [],
+			'no-cache-control'                       => [
+				'responses' => array_fill( 0, 3, [] ),
+				'expected'  => false,
 			],
-			'server-cache'                   => [
-				'response_headers' => [
-					'cache-control' => 'no-cache',
-				],
-				'expected'         => [
-					'badge'  => [
-						'label' => 'AMP',
-						'color' => 'orange',
-					],
-					'test'   => 'amp_page_cache',
-					'status' => 'recommended',
-					'label'  => 'Page caching is not detected',
-				],
-				'conditions'       => [],
+			'no-cache'                               => [
+				'responses' => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
+				'expected'  => false,
 			],
-			'server-cache-with-age'          => [
-				'response_headers' => [
-					'age' => '1345',
-				],
-				'expected'         => [
-					'badge'  => [
-						'label' => 'AMP',
-						'color' => 'green',
-					],
-					'test'   => 'amp_page_cache',
-					'status' => 'good',
-					'label'  => 'Page caching is detected',
-				],
-				'conditions'       => [],
+			'age'                                    => [
+				'responses' => array_fill(
+					0,
+					3,
+					[ 'age' => '1345' ]
+				),
+				'expected'  => true,
 			],
-			'full-cache-with-max-age'        => [
-				'response_headers' => [
-					'cache-control' => 'public; max-age=600',
-				],
-				'expected'         => [
-					'badge'  => [
-						'label' => 'AMP',
-						'color' => 'green',
-					],
-					'test'   => 'amp_page_cache',
-					'status' => 'good',
-					'label'  => 'Page caching is detected',
-				],
-				'conditions'       => [],
+			'cache-control-max-age'                  => [
+				'responses' => array_fill(
+					0,
+					3,
+					[ 'cache-control' => 'public; max-age=600' ]
+				),
+				'expected'  => true,
 			],
-			'full-cache-with-future-expires' => [
-				'response_headers' => [
-					'expires' => gmdate( 'r', time() + MINUTE_IN_SECONDS * 10 ),
+			'cache-control-max-age-after-2-requests' => [
+				'responses' => [
+					[],
+					[],
+					[ 'cache-control' => 'public; max-age=600' ],
 				],
-				'expected'         => [
-					'badge'  => [
-						'label' => 'AMP',
-						'color' => 'green',
-					],
-					'test'   => 'amp_page_cache',
-					'status' => 'good',
-					'label'  => 'Page caching is detected',
-				],
-				'conditions'       => [],
+				'expected'  => true,
 			],
-			'full-cache-with-basic-auth'     => [
-				'response_headers' => [
-					'cache-control' => 'public; max-age=600',
-				],
-				'expected'         => [
-					'badge'  => [
-						'label' => 'AMP',
-						'color' => 'green',
-					],
-					'test'   => 'amp_page_cache',
-					'status' => 'good',
-					'label'  => 'Page caching is detected',
-				],
-				'conditions'       => [
-					'basic_auth_pass' => true,
-				],
+			'cache-control-with-future-expires'      => [
+				'responses' => array_fill(
+					0,
+					3,
+					[ 'expires' => gmdate( 'r', time() + MINUTE_IN_SECONDS * 10 ) ]
+				),
+				'expected'  => true,
+			],
+			'cache-control-with-past-expires'        => [
+				'responses' => array_fill(
+					0,
+					3,
+					[ 'expires' => gmdate( 'r', time() - MINUTE_IN_SECONDS * 10 ) ]
+				),
+				'expected'  => false,
+			],
+			'cache-control-with-basic-auth'          => [
+				'responses'  => array_fill(
+					0,
+					3,
+					[ 'cache-control' => 'public; max-age=600' ]
+				),
+				'expected'   => true,
+				'basic_auth' => true,
 			],
 		];
 	}
@@ -774,17 +733,41 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::page_cache()
 	 * @covers ::get_page_cache_status()
 	 */
-	public function test_page_cache( $response_headers, $expected, $conditions ) {
+	public function test_page_cache( $responses, $expected, $basic_auth = null ) {
 
-		if ( ! empty( $conditions['basic_auth_pass'] ) ) {
+		if ( true === $expected ) {
+			$expected_props = [
+				'badge'  => [
+					'label' => 'AMP',
+					'color' => 'green',
+				],
+				'test'   => 'amp_page_cache',
+				'status' => 'good',
+				'label'  => 'Page caching is detected',
+			];
+		} else {
+			$expected_props = [
+				'badge'  => [
+					'label' => 'AMP',
+					'color' => 'orange',
+				],
+				'test'   => 'amp_page_cache',
+				'status' => 'recommended',
+				'label'  => 'Page caching is not detected',
+			];
+		}
+
+		if ( null !== $basic_auth ) {
 			$_SERVER['PHP_AUTH_USER'] = 'admin';
 			$_SERVER['PHP_AUTH_PW']   = 'password';
 		}
 
 		add_filter(
 			'pre_http_request',
-			function ( $r, $parsed_args ) use ( $response_headers, $conditions, &$first_random_number ) {
-				if ( ! empty( $conditions['basic_auth_fail'] ) ) {
+			function ( $r, $parsed_args ) use ( &$responses, $basic_auth ) {
+				$expected_response = array_shift( $responses );
+
+				if ( 'unauthorized' === $expected_response ) {
 					return [
 						'response' => [
 							'code'    => 401,
@@ -792,15 +775,18 @@ class SiteHealthTest extends TestCase {
 						],
 					];
 				}
-				if ( ! empty( $conditions['basic_auth_pass'] ) ) {
+
+				if ( null !== $basic_auth ) {
 					$this->assertArrayHasKey(
 						'Authorization',
 						$parsed_args['headers']
 					);
 				}
 
+				$this->assertIsArray( $expected_response );
+
 				return [
-					'headers'  => $response_headers,
+					'headers'  => $expected_response,
 					'response' => [
 						'code'    => 200,
 						'message' => 'OK',
@@ -815,17 +801,9 @@ class SiteHealthTest extends TestCase {
 		$this->assertArrayHasKey( 'description', $actual );
 		$this->assertArrayHasKey( 'actions', $actual );
 
-		if ( ! empty( $conditions['basic_auth_fail'] ) ) {
-			$this->assertStringContainsString( 'Unauthorized', $actual['description'] );
-		} else {
-			$this->assertStringNotContainsString( 'Unauthorized', $actual['description'] );
-		}
-		unset( $actual['description'] );
-		unset( $actual['actions'] );
-
 		$this->assertEquals(
-			$expected,
-			$actual
+			$expected_props,
+			wp_array_slice_assoc( $actual, array_keys( $expected_props ) )
 		);
 	}
 
