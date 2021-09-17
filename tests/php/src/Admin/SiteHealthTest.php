@@ -87,10 +87,6 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::register()
 	 */
 	public function test_register() {
-
-		// Mock ajax request.
-		add_filter( 'wp_doing_ajax', '__return_true' );
-
 		$this->instance->register();
 		$this->assertEquals( 10, has_filter( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
 		$this->assertEquals( 10, has_action( 'rest_api_init', [ $this->instance, 'register_async_test_endpoints' ] ) );
