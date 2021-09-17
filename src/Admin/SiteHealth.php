@@ -322,6 +322,9 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' ) . '</p>';
 
+		/* translators: 1 is Cache-Control, 2 is Expires, and 3 is Age */
+		$description .= '<p>' . sprintf( __( 'Page caching is detected by making repeated requests to the homepage and by looking for %1$s, %2$s, and/or %3$s HTTP response headers.', 'amp' ), '<code>Cache-Control: max-age=…</code>', '<code>Expires</code>', '<code>Age</code>' );
+
 		if ( is_wp_error( $has_page_caching ) ) {
 			$error_info = sprintf(
 				/* translators: 1 is error message, 2 is error code */

@@ -662,68 +662,68 @@ class SiteHealthTest extends TestCase {
 
 		return [
 			'basic-auth-fail'                        => [
-				'responses'  => [
+				'responses'       => [
 					'unauthorized',
 				],
-				'expected'   => 'http_401',
-				'basic_auth' => false,
+				'has_page_cache'  => 'http_401',
+				'good_basic_auth' => false,
 			],
 			'no-cache-control'                       => [
-				'responses' => array_fill( 0, 3, [] ),
-				'expected'  => false,
+				'responses'      => array_fill( 0, 3, [] ),
+				'has_page_cache' => false,
 			],
 			'no-cache'                               => [
-				'responses' => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
-				'expected'  => false,
+				'responses'      => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
+				'has_page_cache' => false,
 			],
 			'age'                                    => [
-				'responses' => array_fill(
+				'responses'      => array_fill(
 					0,
 					3,
 					[ 'age' => '1345' ]
 				),
-				'expected'  => true,
+				'has_page_cache' => true,
 			],
 			'cache-control-max-age'                  => [
-				'responses' => array_fill(
+				'responses'      => array_fill(
 					0,
 					3,
 					[ 'cache-control' => 'public; max-age=600' ]
 				),
-				'expected'  => true,
+				'has_page_cache' => true,
 			],
 			'cache-control-max-age-after-2-requests' => [
-				'responses' => [
+				'responses'      => [
 					[],
 					[],
 					[ 'cache-control' => 'public; max-age=600' ],
 				],
-				'expected'  => true,
+				'has_page_cache' => true,
 			],
 			'cache-control-with-future-expires'      => [
-				'responses' => array_fill(
+				'responses'      => array_fill(
 					0,
 					3,
 					[ 'expires' => gmdate( 'r', time() + MINUTE_IN_SECONDS * 10 ) ]
 				),
-				'expected'  => true,
+				'has_page_cache' => true,
 			],
 			'cache-control-with-past-expires'        => [
-				'responses' => array_fill(
+				'responses'      => array_fill(
 					0,
 					3,
 					[ 'expires' => gmdate( 'r', time() - MINUTE_IN_SECONDS * 10 ) ]
 				),
-				'expected'  => false,
+				'has_page_cache' => false,
 			],
 			'cache-control-with-basic-auth'          => [
-				'responses'  => array_fill(
+				'responses'       => array_fill(
 					0,
 					3,
 					[ 'cache-control' => 'public; max-age=600' ]
 				),
-				'expected'   => true,
-				'basic_auth' => true,
+				'has_page_cache'  => true,
+				'good_basic_auth' => true,
 			],
 		];
 	}
@@ -733,9 +733,9 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::page_cache()
 	 * @covers ::get_page_cache_status()
 	 */
-	public function test_page_cache( $responses, $expected, $basic_auth = null ) {
+	public function test_page_cache( $responses, $has_page_cache, $good_basic_auth = null ) {
 
-		if ( true === $expected ) {
+		if ( true === $has_page_cache ) {
 			$expected_props = [
 				'badge'  => [
 					'label' => 'AMP',
@@ -757,17 +757,20 @@ class SiteHealthTest extends TestCase {
 			];
 		}
 
-		if ( null !== $basic_auth ) {
+		if ( null !== $good_basic_auth ) {
 			$_SERVER['PHP_AUTH_USER'] = 'admin';
 			$_SERVER['PHP_AUTH_PW']   = 'password';
 		}
 
+		$is_unauthorized = false;
+
 		add_filter(
 			'pre_http_request',
-			function ( $r, $parsed_args ) use ( &$responses, $basic_auth ) {
+			function ( $r, $parsed_args ) use ( &$responses, &$is_unauthorized, $good_basic_auth ) {
 				$expected_response = array_shift( $responses );
 
 				if ( 'unauthorized' === $expected_response ) {
+					$is_unauthorized = true;
 					return [
 						'response' => [
 							'code'    => 401,
@@ -776,7 +779,7 @@ class SiteHealthTest extends TestCase {
 					];
 				}
 
-				if ( null !== $basic_auth ) {
+				if ( null !== $good_basic_auth ) {
 					$this->assertArrayHasKey(
 						'Authorization',
 						$parsed_args['headers']
@@ -800,6 +803,11 @@ class SiteHealthTest extends TestCase {
 		$actual = $this->instance->page_cache();
 		$this->assertArrayHasKey( 'description', $actual );
 		$this->assertArrayHasKey( 'actions', $actual );
+		if ( $is_unauthorized ) {
+			$this->assertStringContainsString( 'Unauthorized', $actual['description'] );
+		} else {
+			$this->assertStringNotContainsString( 'Unauthorized', $actual['description'] );
+		}
 
 		$this->assertEquals(
 			$expected_props,
