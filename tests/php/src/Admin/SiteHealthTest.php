@@ -662,7 +662,7 @@ class SiteHealthTest extends TestCase {
 	public function get_page_cache_data() {
 
 		return [
-			'basic-auth-fail'            => [
+			'basic-auth-fail'                => [
 				'response_headers' => [],
 				'expected'         => [
 					'badge'  => [
@@ -677,7 +677,7 @@ class SiteHealthTest extends TestCase {
 					'basic_auth_fail' => true,
 				],
 			],
-			'no-cache'                   => [
+			'no-cache'                       => [
 				'response_headers' => [],
 				'expected'         => [
 					'badge'  => [
@@ -692,7 +692,7 @@ class SiteHealthTest extends TestCase {
 					'replay_random_numbers' => false,
 				],
 			],
-			'server-cache'               => [
+			'server-cache'                   => [
 				'response_headers' => [
 					'cache-control' => 'no-cache',
 				],
@@ -709,7 +709,7 @@ class SiteHealthTest extends TestCase {
 					'replay_random_numbers' => true,
 				],
 			],
-			'server-cache-with-age'      => [
+			'server-cache-with-age'          => [
 				'response_headers' => [
 					'age' => '1345',
 				],
@@ -726,7 +726,7 @@ class SiteHealthTest extends TestCase {
 					'replay_random_numbers' => false,
 				],
 			],
-			'full-cache-with-max-age'    => [
+			'full-cache-with-max-age'        => [
 				'response_headers' => [
 					'cache-control' => 'public; max-age=600',
 				],
@@ -743,9 +743,9 @@ class SiteHealthTest extends TestCase {
 					'replay_random_numbers' => true,
 				],
 			],
-			'full-cache'                 => [
+			'full-cache-with-future-expires' => [
 				'response_headers' => [
-					'expires' => 'Wed, 11 Jan 1984 12:00:00 GMT',
+					'expires' => gmdate( 'r', time() + MINUTE_IN_SECONDS * 10 ),
 				],
 				'expected'         => [
 					'badge'  => [
@@ -760,9 +760,9 @@ class SiteHealthTest extends TestCase {
 					'replay_random_numbers' => true,
 				],
 			],
-			'full-cache-with-basic-auth' => [
+			'full-cache-with-basic-auth'     => [
 				'response_headers' => [
-					'expires' => 'Wed, 11 Jan 1984 12:00:00 GMT',
+					'cache-control' => 'public; max-age=600',
 				],
 				'expected'         => [
 					'badge'  => [

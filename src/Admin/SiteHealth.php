@@ -436,7 +436,11 @@ final class SiteHealth implements Service, Registerable, Delayed {
 					&&
 					preg_match( '/max-age=[1-9]/', $http_response_header['cache-control'] )
 				) ||
-				! empty( $http_response_header['expires'] ) ||
+				(
+					! empty( $http_response_header['expires'] )
+					&&
+					strtotime( $http_response_header['expires'] ) > time()
+				) ||
 				! empty( $http_response_header['last-modified'] ) ||
 				! empty( $http_response_header['etag'] )
 			) {
@@ -447,6 +451,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			if ( ! empty( $http_response_header['age'] ) && 0 < (int) $http_response_header['age'] ) {
 				$response = true;
 			} else {
+				// @todo What if the header is missing? What should this signify?
 				$challenge_response_header = strtolower( self::PAGE_CACHING_CHALLENGE_HEADER );
 				if ( ! empty( $http_response_header[ $challenge_response_header ] ) ) {
 					$response = $http_response_header[ $challenge_response_header ];
