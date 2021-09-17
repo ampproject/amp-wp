@@ -79,6 +79,7 @@ class SiteHealthTest extends TestCase {
 		wp_using_ext_object_cache( $this->was_wp_using_ext_object_cache );
 		$GLOBALS['wp_rest_server'] = $this->original_wp_rest_server;
 		unset( $_SERVER[ $this->get_page_caching_challenge_request_header_server_key() ] );
+		unset( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
 	}
 
 	/**
@@ -661,6 +662,21 @@ class SiteHealthTest extends TestCase {
 	public function get_page_cache_data() {
 
 		return [
+			'basic-auth-fail'         => [
+				'response_headers' => [],
+				'expected'         => [
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'orange',
+					],
+					'test'   => 'amp_page_cache',
+					'status' => 'recommended',
+					'label'  => 'Page caching is not detected',
+				],
+				'conditions'       => [
+					'basic_auth_fail' => true,
+				],
+			],
 			'no-cache'              => [
 				'response_headers' => [
 					// @todo Try: cache-control: no-cache
@@ -727,6 +743,24 @@ class SiteHealthTest extends TestCase {
 					'replay_random_numbers' => true,
 				],
 			],
+			'full-cache-with-basic-auth'            => [
+				'response_headers' => [
+					'expires' => 'Wed, 11 Jan 1984 12:00:00 GMT',
+				],
+				'expected'         => [
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'green',
+					],
+					'test'   => 'amp_page_cache',
+					'status' => 'good',
+					'label'  => 'Page caching is detected',
+				],
+				'conditions'       => [
+					'replay_random_numbers' => true,
+					'basic_auth_pass'       => true,
+				],
+			],
 		];
 	}
 
@@ -741,9 +775,29 @@ class SiteHealthTest extends TestCase {
 
 		$first_random_number = null;
 
+		if ( ! empty( $conditions['basic_auth_pass'] ) ) {
+			$_SERVER['PHP_AUTH_USER'] = 'admin';
+			$_SERVER['PHP_AUTH_PW']   = 'password';
+		}
+
 		add_filter(
 			'pre_http_request',
 			function ( $r, $parsed_args ) use ( $response_headers, $conditions, &$first_random_number ) {
+				if ( ! empty( $conditions['basic_auth_fail'] ) ) {
+					return [
+						'response' => [
+							'code'    => 401,
+							'message' => 'Unauthorized',
+						],
+					];
+				}
+				if ( ! empty( $conditions['basic_auth_pass'] ) ) {
+					$this->assertArrayHasKey(
+						'Authorization',
+						$parsed_args['headers']
+					);
+				}
+
 				$header_name = strtolower( SiteHealth::PAGE_CACHING_CHALLENGE_HEADER );
 				$this->assertArrayHasKey(
 					$header_name,
@@ -775,7 +829,11 @@ class SiteHealthTest extends TestCase {
 				$response_headers[ $header_name ] = $random_number;
 
 				return [
-					'headers' => $response_headers,
+					'headers'  => $response_headers,
+					'response' => [
+						'code'    => 200,
+						'message' => 'OK',
+					],
 				];
 			},
 			10,
@@ -785,6 +843,12 @@ class SiteHealthTest extends TestCase {
 		$actual = $this->instance->page_cache();
 		$this->assertArrayHasKey( 'description', $actual );
 		$this->assertArrayHasKey( 'actions', $actual );
+
+		if ( ! empty( $conditions['basic_auth_fail'] ) ) {
+			$this->assertStringContainsString( 'Unauthorized', $actual['description'] );
+		} else {
+			$this->assertStringNotContainsString( 'Unauthorized', $actual['description'] );
+		}
 		unset( $actual['description'] );
 		unset( $actual['actions'] );
 

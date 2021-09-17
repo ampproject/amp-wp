@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
+use WP_Error;
 use WP_REST_Server;
 
 /**
@@ -328,9 +329,18 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		$status      = 'recommended';
 		$label       = __( 'Page caching is not detected', 'amp' );
 
-		$description = esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' );
+		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' ) . '</p>';
 
-		if ( $caching_status['server_caching'] && ! $caching_status['client_caching'] ) {
+		if ( is_wp_error( $caching_status ) ) {
+			$error_info = sprintf(
+				/* translators: 1 is error message, 2 is error code */
+				__( 'Unable to detect page caching due to possible loopback request problem. Error: %1$s (Code: %2$s)', 'amp' ),
+				$caching_status->get_error_message(),
+				$caching_status->get_error_code()
+			);
+
+			$description = "<p>$error_info</p>" . $description;
+		} elseif ( $caching_status['server_caching'] && ! $caching_status['client_caching'] ) {
 			$badge_color = 'orange';
 			$status      = 'recommended';
 			$label       = __( 'Page caching is detected but client caching headers are missing', 'amp' );
@@ -345,7 +355,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				'label' => $this->get_badge_label(),
 				'color' => $badge_color,
 			],
-			'description' => $description,
+			'description' => wp_kses_post( $description ),
 			'test'        => self::TEST_PAGE_CACHING,
 			'status'      => $status,
 			'label'       => esc_html( $label ),
@@ -371,7 +381,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	/**
 	 * Check if site has page cache enable or not.
 	 *
-	 * @return array {
+	 * @return array|WP_Error {
 	 *     @type bool $server_caching True if site has page cache. Otherwise False.
 	 *     @type bool $client_caching True if site has page cache and passed appropriate header.
 	 * }
@@ -384,15 +394,35 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		];
 		$response_list  = [];
 
+		/** This filter is documented in wp-includes/class-wp-http-streams.php */
+		$sslverify = apply_filters( 'https_local_ssl_verify', false );
+
 		for ( $i = 1; $i <= 2; $i++ ) {
 			$random_number = (string) wp_rand();
-			$request_args  = [
-				'headers' => [
-					strtolower( self::PAGE_CACHING_CHALLENGE_HEADER ) => $this->get_page_caching_challenge_nonce() . ';' . $random_number,
-				],
+
+			$headers = [
+				strtolower( self::PAGE_CACHING_CHALLENGE_HEADER ) => $this->get_page_caching_challenge_nonce() . ';' . $random_number,
 			];
 
-			$http_response        = wp_remote_get( home_url(), $request_args );
+			// Include basic auth in loopback requests. Note that this will only pass along basic auth when user is
+			// initiating the test. If a site requires basic auth, the test will fail when it runs in WP Cron as part of
+			// wp_site_health_scheduled_check. This logic is copied from WP_Site_Health::can_perform_loopback() in core.
+			if ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) { // phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.BasicAuthentication
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPressVIPMinimum.Variables.ServerVariables.BasicAuthentication
+				$headers['Authorization'] = 'Basic ' . base64_encode( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) . ':' . wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
+			}
+
+			$http_response = wp_remote_get( home_url(), compact( 'sslverify', 'headers' ) );
+			if ( is_wp_error( $http_response ) ) {
+				return $http_response;
+			}
+			if ( wp_remote_retrieve_response_code( $http_response ) !== 200 ) {
+				return new WP_Error(
+					'http_' . wp_remote_retrieve_response_code( $http_response ),
+					wp_remote_retrieve_response_message( $http_response )
+				);
+			}
+
 			$http_response_header = wp_remote_retrieve_headers( $http_response );
 			$http_response_header = ( ! empty( $http_response_header ) ) ? $http_response_header : [];
 			$http_response_header = ( is_array( $http_response_header ) ) ? $http_response_header : $http_response_header->getAll();
