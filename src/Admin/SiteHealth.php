@@ -38,6 +38,13 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	const REST_API_NAMESPACE = 'amp/v1';
 
 	/**
+	 * Constant to store the results of the latest check for page caching.
+	 *
+	 * @var string
+	 */
+	const HAS_PAGE_CACHING_TRANSIENT_KEY = 'amp_has_page_caching';
+
+	/**
 	 * REST API endpoint for page cache test.
 	 *
 	 * @var string
@@ -240,10 +247,15 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 */
 	public function persistent_object_cache() {
 		$is_using_object_cache = wp_using_ext_object_cache();
+		$has_page_caching      = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
 
-		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ) . '</p>';
+		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Persistent object caching is used to more effectively store image dimensions and parsed CSS using a caching backend rather than using the options table in the database.', 'amp' ) . '</p>';
 
 		if ( ! $is_using_object_cache ) {
+			if ( $has_page_caching ) {
+				$description .= '<p>' . esc_html__( 'Since page caching was detected, the need for persistent object caching is lessened. However, it still remains a best practice.', 'amp' ) . '</p>';
+			}
+
 			$services = $this->get_persistent_object_cache_availability();
 
 			$available_services = array_filter(
@@ -291,18 +303,30 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			$description .= '</p>';
 		}
 
+		if ( $is_using_object_cache ) {
+			$status = 'good';
+			$color  = 'green';
+			$label  = __( 'Persistent object caching is enabled', 'amp' );
+		} elseif ( $has_page_caching ) {
+			$status = 'good';
+			$color  = 'blue';
+			$label  = __( 'Persistent object caching is not enabled, but page caching was detected', 'amp' );
+		} else {
+			$status = 'recommended';
+			$color  = 'orange';
+			$label  = __( 'Persistent object caching is not enabled', 'amp' );
+		}
+
 		return [
 			'badge'       => [
 				'label' => $this->get_badge_label(),
-				'color' => $is_using_object_cache ? 'green' : 'orange',
+				'color' => $color,
 			],
 			'description' => wp_kses_post( $description ),
 			'actions'     => $this->get_persistent_object_cache_learn_more_action(),
 			'test'        => 'amp_persistent_object_cache',
-			'status'      => $is_using_object_cache ? 'good' : 'recommended',
-			'label'       => $is_using_object_cache
-				? esc_html__( 'Persistent object caching is enabled', 'amp' )
-				: esc_html__( 'Persistent object caching is not enabled', 'amp' ),
+			'status'      => $status,
+			'label'       => $label,
 		];
 	}
 
@@ -312,9 +336,9 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return array
 	 */
 	public function page_cache() {
-
-		// @todo Consider storing this in an option which we can use elsewhere.
 		$has_page_caching = $this->has_page_caching();
+
+		set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, true === $has_page_caching, MONTH_IN_SECONDS );
 
 		$badge_color = 'orange';
 		$status      = 'recommended';
@@ -323,7 +347,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' ) . '</p>';
 
 		/* translators: 1 is Cache-Control, 2 is Expires, and 3 is Age */
-		$description .= '<p>' . sprintf( __( 'Page caching is detected by making repeated requests to the homepage and by looking for %1$s, %2$s, and/or %3$s HTTP response headers.', 'amp' ), '<code>Cache-Control: max-age=…</code>', '<code>Expires</code>', '<code>Age</code>' );
+		$description .= '<p>' . sprintf( __( 'Page caching is detected by making three requests to the homepage and looking for %1$s, %2$s, and/or %3$s HTTP response headers.', 'amp' ), '<code>Cache-Control: max-age=…</code>', '<code>Expires</code>', '<code>Age</code>' );
 
 		if ( is_wp_error( $has_page_caching ) ) {
 			$error_info = sprintf(

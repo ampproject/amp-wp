@@ -207,6 +207,23 @@ class SiteHealthTest extends TestCase {
 			$output
 		);
 
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, true );
+		$output = $this->instance->persistent_object_cache();
+
+		$this->assertArraySubset(
+			array_merge(
+				$data,
+				[
+					'status' => 'good',
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'blue',
+					],
+				]
+			),
+			$output
+		);
+
 		$this->assertStringContainsString( 'Please check with your host for what persistent caching services are available.', $output['description'] );
 
 		wp_using_ext_object_cache( true );
