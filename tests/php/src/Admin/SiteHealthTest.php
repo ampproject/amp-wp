@@ -193,7 +193,7 @@ class SiteHealthTest extends TestCase {
 		wp_using_ext_object_cache( false );
 		$output = $this->instance->persistent_object_cache();
 
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -210,7 +210,7 @@ class SiteHealthTest extends TestCase {
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, true );
 		$output = $this->instance->persistent_object_cache();
 
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -228,7 +228,7 @@ class SiteHealthTest extends TestCase {
 
 		wp_using_ext_object_cache( true );
 		$output = $this->instance->persistent_object_cache();
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -280,7 +280,7 @@ class SiteHealthTest extends TestCase {
 		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_late', false );
 		$this->assertFalse( $amp_slug_customization_watcher->did_customize_late() );
 
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -302,7 +302,7 @@ class SiteHealthTest extends TestCase {
 		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_late', true );
 		$this->assertTrue( $amp_slug_customization_watcher->did_customize_late() );
 
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -324,7 +324,7 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::curl_multi_functions()
 	 */
 	public function test_curl_multi_functions() {
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			[
 				'test' => 'amp_curl_multi_functions',
 			],
@@ -338,7 +338,7 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::icu_version()
 	 */
 	public function test_icu_version() {
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			[
 				'test' => 'amp_icu_version',
 			],
@@ -359,7 +359,7 @@ class SiteHealthTest extends TestCase {
 
 		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -375,7 +375,7 @@ class SiteHealthTest extends TestCase {
 
 		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
 
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -390,7 +390,7 @@ class SiteHealthTest extends TestCase {
 		);
 
 		wp_using_ext_object_cache( true );
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -848,5 +848,18 @@ class SiteHealthTest extends TestCase {
 	 */
 	public static function get_lite_query_var() {
 		return 'lite';
+	}
+
+	/**
+	 * Assert that the expected is a subset of the actual superset.
+	 *
+	 * @param array $expected Subset.
+	 * @param array $actual   Superset.
+	 */
+	public function assertAssocArraySubset( $expected, $actual ) {
+		$this->assertEquals(
+			$expected,
+			wp_array_slice_assoc( $actual, array_keys( $expected ) )
+		);
 	}
 }
