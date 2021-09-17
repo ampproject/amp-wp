@@ -662,7 +662,7 @@ class SiteHealthTest extends TestCase {
 	public function get_page_cache_data() {
 
 		return [
-			'basic-auth-fail'         => [
+			'basic-auth-fail'            => [
 				'response_headers' => [],
 				'expected'         => [
 					'badge'  => [
@@ -677,10 +677,8 @@ class SiteHealthTest extends TestCase {
 					'basic_auth_fail' => true,
 				],
 			],
-			'no-cache'              => [
-				'response_headers' => [
-					// @todo Try: cache-control: no-cache
-				],
+			'no-cache'                   => [
+				'response_headers' => [],
 				'expected'         => [
 					'badge'  => [
 						'label' => 'AMP',
@@ -694,8 +692,10 @@ class SiteHealthTest extends TestCase {
 					'replay_random_numbers' => false,
 				],
 			],
-			'server-cache'          => [
-				'response_headers' => [],
+			'server-cache'               => [
+				'response_headers' => [
+					'cache-control' => 'no-cache',
+				],
 				'expected'         => [
 					'badge'  => [
 						'label' => 'AMP',
@@ -709,7 +709,7 @@ class SiteHealthTest extends TestCase {
 					'replay_random_numbers' => true,
 				],
 			],
-			'server-cache-with-age' => [
+			'server-cache-with-age'      => [
 				'response_headers' => [
 					'age' => '1345',
 				],
@@ -726,7 +726,24 @@ class SiteHealthTest extends TestCase {
 					'replay_random_numbers' => false,
 				],
 			],
-			'full-cache'            => [
+			'full-cache-with-max-age'    => [
+				'response_headers' => [
+					'cache-control' => 'public; max-age=600',
+				],
+				'expected'         => [
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'green',
+					],
+					'test'   => 'amp_page_cache',
+					'status' => 'good',
+					'label'  => 'Page caching is detected',
+				],
+				'conditions'       => [
+					'replay_random_numbers' => true,
+				],
+			],
+			'full-cache'                 => [
 				'response_headers' => [
 					'expires' => 'Wed, 11 Jan 1984 12:00:00 GMT',
 				],
@@ -743,7 +760,7 @@ class SiteHealthTest extends TestCase {
 					'replay_random_numbers' => true,
 				],
 			],
-			'full-cache-with-basic-auth'            => [
+			'full-cache-with-basic-auth' => [
 				'response_headers' => [
 					'expires' => 'Wed, 11 Jan 1984 12:00:00 GMT',
 				],

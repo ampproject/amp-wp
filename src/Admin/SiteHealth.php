@@ -431,7 +431,11 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 			// If any of header tag exist. and x-amp-random-number doesn't consider page cache exists.
 			if (
-				! empty( $http_response_header['cache-control'] ) ||
+				(
+					! empty( $http_response_header['cache-control'] )
+					&&
+					preg_match( '/max-age=[1-9]/', $http_response_header['cache-control'] )
+				) ||
 				! empty( $http_response_header['expires'] ) ||
 				! empty( $http_response_header['last-modified'] ) ||
 				! empty( $http_response_header['etag'] )
