@@ -1012,6 +1012,11 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	public function add_styles() {
 		echo '
 			<style>
+				.health-check-accordion-panel > p:first-child {
+					/* Note this is essentially a core fix. */
+					margin-top: 0;
+				}
+
 				.wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
 				.wp-core-ui .button.reenable-css-transient-caching ~ .success-text,
 				.wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon,
