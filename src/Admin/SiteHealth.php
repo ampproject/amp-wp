@@ -98,8 +98,6 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		add_action( 'admin_print_styles-tools_page_health-check', [ $this, 'add_styles' ] );
 		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
-
-		add_filter( 'wp_headers', [ $this, 'send_page_cache_challenge_response_header' ] );
 	}
 
 	/**
