@@ -105,7 +105,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		add_action( 'admin_print_styles-tools_page_health-check', [ $this, 'add_styles' ] );
 		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
 
-		add_action( 'send_headers', [ $this, 'send_page_cache_challenge_response_header' ] );
+		add_filter( 'wp_headers', [ $this, 'send_page_cache_challenge_response_header' ] );
 	}
 
 	/**
@@ -419,31 +419,34 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
-	 * Send back nonce-hashed challenge number if requesting page caching challenge.
+	 * Filter response headers headers to send back the random number from the nonce-verified request header.
 	 *
-	 * @return void
+	 * @param array $headers Headers.
+	 * @return array Headers.
 	 */
-	public function send_page_cache_challenge_response_header() {
+	public function send_page_cache_challenge_response_header( $headers ) {
 		$key = 'HTTP_' . str_replace( '-', '_', strtoupper( self::PAGE_CACHING_CHALLENGE_HEADER ) );
 
 		if ( ! isset( $_SERVER[ $key ] ) ) {
-			return;
+			return $headers;
 		}
 
 		$value = explode( ';', sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) ) );
 		if ( count( $value ) !== 2 ) {
-			return;
+			return $headers;
 		}
 		list( $nonce, $random_number ) = $value;
 		if ( ! rest_is_integer( $random_number ) ) {
-			return;
+			return $headers;
 		}
 
 		if ( ! hash_equals( $nonce, $this->get_page_caching_challenge_nonce() ) ) {
-			return;
+			return $headers;
 		}
 
-		header( self::PAGE_CACHING_CHALLENGE_HEADER . ': ' . $random_number );
+		$headers[ self::PAGE_CACHING_CHALLENGE_HEADER ] = $random_number;
+
+		return $headers;
 	}
 
 	/**

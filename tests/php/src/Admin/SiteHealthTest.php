@@ -78,6 +78,7 @@ class SiteHealthTest extends TestCase {
 		parent::tearDown();
 		wp_using_ext_object_cache( $this->was_wp_using_ext_object_cache );
 		$GLOBALS['wp_rest_server'] = $this->original_wp_rest_server;
+		unset( $_SERVER[ $this->get_page_caching_challenge_request_header_server_key() ] );
 	}
 
 	/**
@@ -673,7 +674,9 @@ class SiteHealthTest extends TestCase {
 					'status' => 'recommended',
 					'label'  => 'Page caching is not detected',
 				],
-				'replay_responses' => false,
+				'conditions'       => [
+					'replay_random_numbers' => false,
+				],
 			],
 			'server-cache'          => [
 				'response_headers' => [],
@@ -686,7 +689,9 @@ class SiteHealthTest extends TestCase {
 					'status' => 'recommended',
 					'label'  => 'Page caching is detected but client caching headers are missing',
 				],
-				'replay_responses' => true,
+				'conditions'       => [
+					'replay_random_numbers' => true,
+				],
 			],
 			'server-cache-with-age' => [
 				'response_headers' => [
@@ -701,7 +706,9 @@ class SiteHealthTest extends TestCase {
 					'status' => 'recommended',
 					'label'  => 'Page caching is detected but client caching headers are missing',
 				],
-				'replay_responses' => false,
+				'conditions'       => [
+					'replay_random_numbers' => false,
+				],
 			],
 			'full-cache'            => [
 				'response_headers' => [
@@ -716,7 +723,9 @@ class SiteHealthTest extends TestCase {
 					'status' => 'good',
 					'label'  => 'Page caching is detected',
 				],
-				'replay_responses' => true,
+				'conditions'       => [
+					'replay_random_numbers' => true,
+				],
 			],
 		];
 	}
@@ -725,30 +734,43 @@ class SiteHealthTest extends TestCase {
 	 * @dataProvider get_page_cache_data
 	 * @covers ::page_cache()
 	 * @covers ::get_page_cache_status()
+	 * @covers ::send_page_cache_challenge_response_header()
+	 * @covers ::get_page_caching_challenge_nonce()
 	 */
-	public function test_page_cache( $response_headers, $expected, $replay_responses ) {
+	public function test_page_cache( $response_headers, $expected, $conditions ) {
 
 		$first_random_number = null;
 
 		add_filter(
 			'pre_http_request',
-			function ( $r, $parsed_args ) use ( $response_headers, $replay_responses, &$first_random_number ) {
+			function ( $r, $parsed_args ) use ( $response_headers, $conditions, &$first_random_number ) {
 				$header_name = strtolower( SiteHealth::PAGE_CACHING_CHALLENGE_HEADER );
 				$this->assertArrayHasKey(
 					$header_name,
 					$parsed_args['headers']
 				);
+				$_SERVER[ $this->get_page_caching_challenge_request_header_server_key() ] = $parsed_args['headers'][ $header_name ];
 
-				if ( $replay_responses && $first_random_number ) {
+				if ( ! empty( $conditions['replay_random_numbers'] ) && $first_random_number ) {
 					$random_number = $first_random_number;
 				} else {
+					$headers = $this->instance->send_page_cache_challenge_response_header( [] );
+
+					$this->assertArrayHasKey(
+						SiteHealth::PAGE_CACHING_CHALLENGE_HEADER,
+						$headers
+					);
+
+					$random_number = $headers[ SiteHealth::PAGE_CACHING_CHALLENGE_HEADER ];
+
 					// See \AmpProject\AmpWP\Admin\SiteHealth::send_page_cache_challenge_response_header
-					list( $nonce, $random_number ) = explode( ';', $parsed_args['headers'][ $header_name ] );
+					list( $nonce, $requested_random_number ) = explode( ';', $parsed_args['headers'][ $header_name ] );
 					$this->assertSame(
 						$this->instance->get_page_caching_challenge_nonce(),
 						$nonce
 					);
-					$first_random_number = $random_number;
+					$this->assertSame( $requested_random_number, $random_number );
+					$first_random_number = $requested_random_number;
 				}
 				$response_headers[ $header_name ] = $random_number;
 
@@ -772,6 +794,61 @@ class SiteHealthTest extends TestCase {
 		);
 	}
 
+	/** @covers ::get_page_caching_challenge_nonce() */
+	public function test_get_page_caching_challenge_nonce() {
+		$nonce1 = $this->instance->get_page_caching_challenge_nonce();
+		$nonce2 = $this->instance->get_page_caching_challenge_nonce();
+		$this->assertIsString( $nonce1 );
+		$this->assertSame( $nonce1, $nonce2 );
+	}
+
+	/** @covers ::send_page_cache_challenge_response_header() */
+	public function test_send_page_cache_challenge_response_header() {
+		$initial_headers = [ 'Foo' => 'Bar' ];
+
+		// No request header set.
+		$this->assertSame(
+			$initial_headers,
+			$this->instance->send_page_cache_challenge_response_header( $initial_headers )
+		);
+
+		// Wrong format.
+		$_SERVER[ $this->get_page_caching_challenge_request_header_server_key() ] = 'bad';
+		$this->assertSame(
+			$initial_headers,
+			$this->instance->send_page_cache_challenge_response_header( $initial_headers )
+		);
+		$_SERVER[ $this->get_page_caching_challenge_request_header_server_key() ] = 'bad;123245;123123';
+		$this->assertSame(
+			$initial_headers,
+			$this->instance->send_page_cache_challenge_response_header( $initial_headers )
+		);
+		$_SERVER[ $this->get_page_caching_challenge_request_header_server_key() ] = 'bad;asdasd';
+		$this->assertSame(
+			$initial_headers,
+			$this->instance->send_page_cache_challenge_response_header( $initial_headers )
+		);
+
+		// Bad nonce.
+		$_SERVER[ $this->get_page_caching_challenge_request_header_server_key() ] = 'bad;12345';
+		$this->assertSame(
+			$initial_headers,
+			$this->instance->send_page_cache_challenge_response_header( $initial_headers )
+		);
+
+		// Good nonce.
+		$nonce         = $this->instance->get_page_caching_challenge_nonce();
+		$random_number = '12345';
+		$_SERVER[ $this->get_page_caching_challenge_request_header_server_key() ] = "{$nonce};$random_number";
+		$this->assertSame(
+			array_merge(
+				$initial_headers,
+				[ SiteHealth::PAGE_CACHING_CHALLENGE_HEADER => $random_number ]
+			),
+			$this->instance->send_page_cache_challenge_response_header( $initial_headers )
+		);
+	}
+
 	/**
 	 * Get an IDN for testing purposes.
 	 *
@@ -788,5 +865,10 @@ class SiteHealthTest extends TestCase {
 	 */
 	public static function get_lite_query_var() {
 		return 'lite';
+	}
+
+	/** @return string */
+	private function get_page_caching_challenge_request_header_server_key() {
+		return 'HTTP_' . str_replace( '-', '_', strtoupper( SiteHealth::PAGE_CACHING_CHALLENGE_HEADER ) );
 	}
 }
