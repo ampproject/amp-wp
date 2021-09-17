@@ -180,6 +180,7 @@ class SiteHealthTest extends TestCase {
 	 *
 	 * @covers ::persistent_object_cache()
 	 * @covers ::get_persistent_object_cache_availability()
+	 * @covers ::get_persistent_object_cache_learn_more_action()
 	 */
 	public function test_get_persistent_object_cache_availability() {
 		$data = [
@@ -188,7 +189,6 @@ class SiteHealthTest extends TestCase {
 
 		wp_using_ext_object_cache( false );
 		$output = $this->instance->persistent_object_cache();
-
 		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
@@ -202,10 +202,12 @@ class SiteHealthTest extends TestCase {
 			),
 			$output
 		);
+		$this->assertStringContainsString( 'Please check with your host for what persistent caching services are available.', $output['description'] );
+		$this->assertStringNotContainsString( 'Since page caching was detected', $output['description'] );
+		$this->assertStringContainsString( '/persistent-object-caching/', $output['actions'] );
 
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, true );
 		$output = $this->instance->persistent_object_cache();
-
 		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
@@ -219,8 +221,9 @@ class SiteHealthTest extends TestCase {
 			),
 			$output
 		);
-
 		$this->assertStringContainsString( 'Please check with your host for what persistent caching services are available.', $output['description'] );
+		$this->assertStringContainsString( 'Since page caching was detected', $output['description'] );
+		$this->assertStringContainsString( '/persistent-object-caching/', $output['actions'] );
 
 		wp_using_ext_object_cache( true );
 		$output = $this->instance->persistent_object_cache();
@@ -239,6 +242,8 @@ class SiteHealthTest extends TestCase {
 			$output
 		);
 		$this->assertStringNotContainsString( 'Please check with your host for what persistent caching services are available.', $output['description'] );
+		$this->assertStringNotContainsString( 'Since page caching was detected', $output['description'] );
+		$this->assertStringContainsString( '/persistent-object-caching/', $output['actions'] );
 	}
 
 	/**
