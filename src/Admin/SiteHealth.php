@@ -109,6 +109,43 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
+	 * Detect whether async tests can be used.
+	 *
+	 * Returns true if on WP 5.6+ and *not* on version of Health Check plugin which doesn't support REST async tests.
+	 *
+	 * @param array $tests Tests.
+	 * @return bool
+	 */
+	private function supports_async_rest_tests( $tests ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.6', '<' ) ) {
+			return false;
+		}
+
+		if ( defined( 'HEALTH_CHECK_PLUGIN_VERSION' ) ) {
+			$core_async_tests = [
+				'dotorg_communication',
+				'background_updates',
+				'loopback_requests',
+				'https_status',
+				'authorization_header',
+			];
+			foreach ( $core_async_tests as $core_async_test ) {
+				if (
+					array_key_exists( 'async', $tests )
+					&&
+					isset( $tests['async'][ $core_async_test ] )
+					&&
+					! isset( $tests['async'][ $core_async_test ]['has_rest'] )
+				) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get badge label.
 	 *
 	 * @return string AMP.
@@ -177,29 +214,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			'test'  => [ $this, 'xdebug_extension' ],
 		];
 
-		// Only add the async test if on WP 5.6+ and *not* on version of Health Check plugin which doesn't support REST async tests.
-		$supports_async = version_compare( get_bloginfo( 'version' ), '5.6', '>=' );
-		if ( $supports_async && defined( 'HEALTH_CHECK_PLUGIN_VERSION' ) ) {
-			$core_async_tests = [
-				'dotorg_communication',
-				'background_updates',
-				'loopback_requests',
-				'https_status',
-				'authorization_header',
-			];
-			foreach ( $core_async_tests as $core_async_test ) {
-				if (
-					isset( $tests['async'][ $core_async_test ] )
-					&&
-					! isset( $tests['async'][ $core_async_test ]['has_rest'] )
-				) {
-					$supports_async = false;
-					break;
-				}
-			}
-		}
-
-		if ( $supports_async ) {
+		if ( $this->supports_async_rest_tests( $tests ) ) {
 			$tests['async'][ self::TEST_PAGE_CACHING ] = [
 				'label'             => esc_html__( 'Page caching', 'amp' ),
 				'test'              => rest_url( self::REST_API_NAMESPACE . self::REST_API_PAGE_CACHE_ENDPOINT ),
@@ -436,7 +451,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			return $headers;
 		}
 		list( $nonce, $random_number ) = $value;
-		if ( ! rest_is_integer( $random_number ) ) {
+		if ( ! is_numeric( $random_number ) ) {
 			return $headers;
 		}
 
