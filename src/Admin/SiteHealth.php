@@ -52,13 +52,6 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	const TEST_PAGE_CACHING = 'amp_page_cache';
 
 	/**
-	 * HTTP request header to challenge whether page caching is enabled.
-	 *
-	 * @var string
-	 */
-	const PAGE_CACHING_CHALLENGE_HEADER = 'X-AMP-Page-Caching-Challenge';
-
-	/**
 	 * Service that monitors and controls the CSS transient caching.
 	 *
 	 * @var MonitorCssTransientCaching
@@ -323,7 +316,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	public function page_cache() {
 
 		// @todo Consider storing this in an option which we can use elsewhere.
-		$caching_status = $this->get_page_cache_status();
+		$has_page_caching = $this->has_page_caching();
 
 		$badge_color = 'orange';
 		$status      = 'recommended';
@@ -331,20 +324,16 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' ) . '</p>';
 
-		if ( is_wp_error( $caching_status ) ) {
+		if ( is_wp_error( $has_page_caching ) ) {
 			$error_info = sprintf(
 				/* translators: 1 is error message, 2 is error code */
 				__( 'Unable to detect page caching due to possible loopback request problem. Error: %1$s (Code: %2$s)', 'amp' ),
-				$caching_status->get_error_message(),
-				$caching_status->get_error_code()
+				$has_page_caching->get_error_message(),
+				$has_page_caching->get_error_code()
 			);
 
 			$description = "<p>$error_info</p>" . $description;
-		} elseif ( $caching_status['server_caching'] && ! $caching_status['client_caching'] ) {
-			$badge_color = 'orange';
-			$status      = 'recommended';
-			$label       = __( 'Page caching is detected but client caching headers are missing', 'amp' );
-		} elseif ( $caching_status['server_caching'] && $caching_status['client_caching'] ) {
+		} elseif ( true === $has_page_caching ) {
 			$badge_color = 'green';
 			$status      = 'good';
 			$label       = __( 'Page caching is detected', 'amp' );
@@ -370,48 +359,25 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
-	 * Get nonce for page caching challenge.
-	 *
-	 * @return string Nonce.
-	 */
-	public function get_page_caching_challenge_nonce() {
-		return wp_hash( self::TEST_PAGE_CACHING . wp_nonce_tick(), 'nonce' );
-	}
-
-	/**
 	 * Check if site has page cache enable or not.
 	 *
-	 * @return array|WP_Error {
-	 *     @type bool $server_caching True if site has page cache. Otherwise False.
-	 *     @type bool $client_caching True if site has page cache and passed appropriate header.
-	 * }
+	 * @return bool|WP_Error Whether page caching was detected, or else error information.
 	 */
-	private function get_page_cache_status() {
-
-		$has_page_cache = [
-			'server_caching' => false,
-			'client_caching' => false,
-		];
-		$response_list  = [];
-
+	private function has_page_caching() {
 		/** This filter is documented in wp-includes/class-wp-http-streams.php */
 		$sslverify = apply_filters( 'https_local_ssl_verify', false );
 
-		for ( $i = 1; $i <= 2; $i++ ) {
-			$random_number = (string) wp_rand();
+		$headers = [];
 
-			$headers = [
-				strtolower( self::PAGE_CACHING_CHALLENGE_HEADER ) => $this->get_page_caching_challenge_nonce() . ';' . $random_number,
-			];
+		// Include basic auth in loopback requests. Note that this will only pass along basic auth when user is
+		// initiating the test. If a site requires basic auth, the test will fail when it runs in WP Cron as part of
+		// wp_site_health_scheduled_check. This logic is copied from WP_Site_Health::can_perform_loopback() in core.
+		if ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) { // phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.BasicAuthentication
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPressVIPMinimum.Variables.ServerVariables.BasicAuthentication
+			$headers['Authorization'] = 'Basic ' . base64_encode( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) . ':' . wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
+		}
 
-			// Include basic auth in loopback requests. Note that this will only pass along basic auth when user is
-			// initiating the test. If a site requires basic auth, the test will fail when it runs in WP Cron as part of
-			// wp_site_health_scheduled_check. This logic is copied from WP_Site_Health::can_perform_loopback() in core.
-			if ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) { // phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.BasicAuthentication
-				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPressVIPMinimum.Variables.ServerVariables.BasicAuthentication
-				$headers['Authorization'] = 'Basic ' . base64_encode( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) . ':' . wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
-			}
-
+		for ( $i = 1; $i <= 3; $i++ ) {
 			$http_response = wp_remote_get( home_url(), compact( 'sslverify', 'headers' ) );
 			if ( is_wp_error( $http_response ) ) {
 				return $http_response;
@@ -423,84 +389,24 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				);
 			}
 
-			$http_response_header = wp_remote_retrieve_headers( $http_response );
-			$http_response_header = ( ! empty( $http_response_header ) ) ? $http_response_header : [];
-			$http_response_header = ( is_array( $http_response_header ) ) ? $http_response_header : $http_response_header->getAll();
-
-			$response = false;
-
-			// If any of header tag exist. and x-amp-random-number doesn't consider page cache exists.
-			if (
-				(
-					! empty( $http_response_header['cache-control'] )
-					&&
-					preg_match( '/max-age=[1-9]/', $http_response_header['cache-control'] )
-				) ||
-				(
-					! empty( $http_response_header['expires'] )
-					&&
-					strtotime( $http_response_header['expires'] ) > time()
-				) ||
-				! empty( $http_response_header['last-modified'] ) ||
-				! empty( $http_response_header['etag'] )
-			) {
-				$has_page_cache['client_caching'] = true;
+			$cache_control_header = wp_remote_retrieve_header( $http_response, 'cache-control' );
+			if ( preg_match( '/max-age=[1-9]/', $cache_control_header ) ) {
+				return true;
 			}
 
-			// If age tag have positive number then consider page cache exists due to proxy.
-			if ( ! empty( $http_response_header['age'] ) && 0 < (int) $http_response_header['age'] ) {
-				$response = true;
-			} else {
-				// @todo What if the header is missing? What should this signify?
-				$challenge_response_header = strtolower( self::PAGE_CACHING_CHALLENGE_HEADER );
-				if ( ! empty( $http_response_header[ $challenge_response_header ] ) ) {
-					$response = $http_response_header[ $challenge_response_header ];
-				}
+			$expires_header = wp_remote_retrieve_header( $http_response, 'expires' );
+			if ( $expires_header && strtotime( $expires_header ) > time() ) {
+				return true;
 			}
-			$response_list[ $i ] = $response;
 
-			if ( ! $has_page_cache['server_caching'] &&
-				! empty( $response_list[ $i - 1 ] ) &&
-				! empty( $response_list[ $i ] ) &&
-				$response_list[ $i - 1 ] === $response_list[ $i ]
-			) {
-				$has_page_cache['server_caching'] = true;
-				break;
+			// Detect page cache implemented via proxy (e.g. Varnish).
+			$age_header = wp_remote_retrieve_header( $http_response, 'age' );
+			if ( (int) $age_header > 0 ) {
+				return true;
 			}
 		}
 
-		return $has_page_cache;
-	}
-
-	/**
-	 * Filter response headers headers to send back the random number from the nonce-verified request header.
-	 *
-	 * @param array $headers Headers.
-	 * @return array Headers.
-	 */
-	public function send_page_cache_challenge_response_header( $headers ) {
-		$key = 'HTTP_' . str_replace( '-', '_', strtoupper( self::PAGE_CACHING_CHALLENGE_HEADER ) );
-
-		if ( ! isset( $_SERVER[ $key ] ) ) {
-			return $headers;
-		}
-
-		$value = explode( ';', sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) ) );
-		if ( count( $value ) !== 2 ) {
-			return $headers;
-		}
-		list( $nonce, $random_number ) = $value;
-		if ( ! is_numeric( $random_number ) ) {
-			return $headers;
-		}
-
-		if ( ! hash_equals( $nonce, $this->get_page_caching_challenge_nonce() ) ) {
-			return $headers;
-		}
-
-		$headers[ self::PAGE_CACHING_CHALLENGE_HEADER ] = $random_number;
-
-		return $headers;
+		return false;
 	}
 
 	/**
