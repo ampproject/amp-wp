@@ -351,7 +351,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		if ( is_wp_error( $has_page_caching ) ) {
 			$error_info = sprintf(
 				/* translators: 1 is error message, 2 is error code */
-				__( 'Unable to detect page caching due to possible loopback request problem. Error: %1$s (Code: %2$s)', 'amp' ),
+				__( 'Unable to detect page caching due to possible loopback request problem. Please verify that the loopback request test is passing. Error: %1$s (Code: %2$s)', 'amp' ),
 				$has_page_caching->get_error_message(),
 				$has_page_caching->get_error_code()
 			);
