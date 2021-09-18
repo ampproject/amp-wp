@@ -2008,6 +2008,38 @@ class AMP_Theme_Support {
 				$data['php_fatal_error'] = $last_error;
 			}
 			$data = array_merge( $data, AMP_Validation_Manager::get_validate_response_data( $sanitization_results ) );
+
+			if ( isset( $_GET['amp_store'] ) ) {
+				$validation_errors = wp_list_pluck( $data['results'], 'error' );
+				unset( $data['results'] );
+
+				$validated_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
+					$validation_errors,
+					amp_get_current_url(),
+					$data
+				);
+				if ( is_wp_error( $validated_url_post_id ) ) {
+					status_header( 500 );
+
+					$result = [];
+					foreach ( $validated_url_post_id->errors as $code => $messages ) {
+						foreach ( $messages as $message ) {
+							$result[] = [
+								'code'    => $code,
+								'message' => $message,
+							];
+						}
+					}
+					return wp_json_encode( $result );
+				} else {
+					status_header( 201 );
+					$data['validated_url_post'] = [
+						'id'        => $validated_url_post_id,
+						'edit_link' => get_edit_post_link( $validated_url_post_id, 'raw' )
+					];
+				}
+			}
+
 			return wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		}
 
