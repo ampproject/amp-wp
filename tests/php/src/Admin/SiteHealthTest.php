@@ -15,6 +15,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
+use WP_REST_Server;
 
 /**
  * Test SiteHealthTest.
@@ -31,6 +32,9 @@ class SiteHealthTest extends TestCase {
 	 * @var bool
 	 */
 	private $was_wp_using_ext_object_cache;
+
+	/** @var WP_REST_Server */
+	private $original_wp_rest_server;
 
 	/**
 	 * The tested instance.
@@ -60,6 +64,9 @@ class SiteHealthTest extends TestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 
 		$this->was_wp_using_ext_object_cache = wp_using_ext_object_cache();
+
+		$this->original_wp_rest_server = isset( $GLOBALS['wp_rest_server'] ) ? $GLOBALS['wp_rest_server'] : null;
+		$GLOBALS['wp_rest_server']     = null;
 	}
 
 	/**
@@ -70,6 +77,8 @@ class SiteHealthTest extends TestCase {
 	public function tearDown() {
 		parent::tearDown();
 		wp_using_ext_object_cache( $this->was_wp_using_ext_object_cache );
+		$GLOBALS['wp_rest_server'] = $this->original_wp_rest_server;
+		unset( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
 	}
 
 	/**
@@ -80,12 +89,56 @@ class SiteHealthTest extends TestCase {
 	public function test_register() {
 		$this->instance->register();
 		$this->assertEquals( 10, has_filter( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', [ $this->instance, 'register_async_test_endpoints' ] ) );
 		$this->assertEquals( 10, has_filter( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
 		$this->assertEquals( 10, has_filter( 'site_status_test_result', [ $this->instance, 'modify_test_result' ] ) );
 		$this->assertEquals( 10, has_filter( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
 
 		$this->assertEquals( 10, has_action( 'admin_print_styles-site-health.php', [ $this->instance, 'add_styles' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_print_styles-tools_page_health-check', [ $this->instance, 'add_styles' ] ) );
+	}
+
+	/**
+	 * @covers ::register_async_test_endpoints()
+	 */
+	public function test_register_async_test_endpoints() {
+		$GLOBALS['wp_rest_server'] = null;
+		remove_all_actions( 'rest_api_init' );
+
+		$this->instance->register();
+		$server = rest_get_server();
+
+		$routes = $server->get_routes( SiteHealth::REST_API_NAMESPACE );
+
+		$endpoint = '/' . SiteHealth::REST_API_NAMESPACE . SiteHealth::REST_API_PAGE_CACHE_ENDPOINT;
+		$this->assertArrayHasKey( $endpoint, $routes );
+		$this->assertCount( 1, $routes[ $endpoint ] );
+		$route = $routes[ $endpoint ][0];
+
+		$this->assertEquals(
+			[ 'GET' => true ],
+			$route['methods']
+		);
+
+		$this->assertEquals(
+			[ $this->instance, 'page_cache' ],
+			$route['callback']
+		);
+
+		$this->assertIsCallable( $route['permission_callback'] );
+
+		$this->assertFalse( call_user_func( $route['permission_callback'] ) );
+
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'author' ] ) );
+		$this->assertFalse( call_user_func( $route['permission_callback'] ) );
+
+		// Prior to WordPress 5.2, the view_site_health_checks cap didn't exist because Site Health didn't exist.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		if ( version_compare( get_bloginfo( 'version' ), '5.2', '>=' ) ) {
+			$this->assertTrue( call_user_func( $route['permission_callback'] ) );
+		} else {
+			$this->assertFalse( call_user_func( $route['permission_callback'] ) );
+		}
 	}
 
 	/**
@@ -97,6 +150,13 @@ class SiteHealthTest extends TestCase {
 		$tests = $this->instance->add_tests( [] );
 		$this->assertArrayHasKey( 'direct', $tests );
 		$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
+
+		if ( version_compare( get_bloginfo( 'version' ), '5.6', '>=' ) ) {
+			$this->assertArrayHasKey( 'amp_page_cache', $tests['async'] );
+		} elseif ( array_key_exists( 'async', $tests ) ) {
+			$this->assertArrayNotHasKey( 'amp_page_cache', $tests['async'] );
+		}
+
 		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
 		$this->assertArrayNotHasKey( 'amp_icu_version', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_xdebug_extension', $tests['direct'] );
@@ -120,6 +180,7 @@ class SiteHealthTest extends TestCase {
 	 *
 	 * @covers ::persistent_object_cache()
 	 * @covers ::get_persistent_object_cache_availability()
+	 * @covers ::get_persistent_object_cache_learn_more_action()
 	 */
 	public function test_get_persistent_object_cache_availability() {
 		$data = [
@@ -128,8 +189,7 @@ class SiteHealthTest extends TestCase {
 
 		wp_using_ext_object_cache( false );
 		$output = $this->instance->persistent_object_cache();
-
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -142,12 +202,32 @@ class SiteHealthTest extends TestCase {
 			),
 			$output
 		);
-
 		$this->assertStringContainsString( 'Please check with your host for what persistent caching services are available.', $output['description'] );
+		$this->assertStringNotContainsString( 'Since page caching was detected', $output['description'] );
+		$this->assertStringContainsString( '/persistent-object-caching/', $output['actions'] );
+
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, true );
+		$output = $this->instance->persistent_object_cache();
+		$this->assertAssocArraySubset(
+			array_merge(
+				$data,
+				[
+					'status' => 'good',
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'blue',
+					],
+				]
+			),
+			$output
+		);
+		$this->assertStringContainsString( 'Please check with your host for what persistent caching services are available.', $output['description'] );
+		$this->assertStringContainsString( 'Since page caching was detected', $output['description'] );
+		$this->assertStringContainsString( '/persistent-object-caching/', $output['actions'] );
 
 		wp_using_ext_object_cache( true );
 		$output = $this->instance->persistent_object_cache();
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -162,6 +242,8 @@ class SiteHealthTest extends TestCase {
 			$output
 		);
 		$this->assertStringNotContainsString( 'Please check with your host for what persistent caching services are available.', $output['description'] );
+		$this->assertStringNotContainsString( 'Since page caching was detected', $output['description'] );
+		$this->assertStringContainsString( '/persistent-object-caching/', $output['actions'] );
 	}
 
 	/**
@@ -199,7 +281,7 @@ class SiteHealthTest extends TestCase {
 		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_late', false );
 		$this->assertFalse( $amp_slug_customization_watcher->did_customize_late() );
 
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -221,7 +303,7 @@ class SiteHealthTest extends TestCase {
 		$this->set_private_property( $amp_slug_customization_watcher, 'is_customized_late', true );
 		$this->assertTrue( $amp_slug_customization_watcher->did_customize_late() );
 
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -243,7 +325,7 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::curl_multi_functions()
 	 */
 	public function test_curl_multi_functions() {
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			[
 				'test' => 'amp_curl_multi_functions',
 			],
@@ -257,7 +339,7 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::icu_version()
 	 */
 	public function test_icu_version() {
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			[
 				'test' => 'amp_icu_version',
 			],
@@ -278,7 +360,7 @@ class SiteHealthTest extends TestCase {
 
 		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -294,7 +376,7 @@ class SiteHealthTest extends TestCase {
 
 		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
 
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -309,7 +391,7 @@ class SiteHealthTest extends TestCase {
 		);
 
 		wp_using_ext_object_cache( true );
-		$this->assertArraySubset(
+		$this->assertAssocArraySubset(
 			array_merge(
 				$data,
 				[
@@ -590,6 +672,168 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
+	 * Data provider for $this->test_page_cache()
+	 *
+	 * @return array[]
+	 */
+	public function get_page_cache_data() {
+
+		return [
+			'basic-auth-fail'                        => [
+				'responses'       => [
+					'unauthorized',
+				],
+				'has_page_cache'  => 'http_401',
+				'good_basic_auth' => false,
+			],
+			'no-cache-control'                       => [
+				'responses'      => array_fill( 0, 3, [] ),
+				'has_page_cache' => false,
+			],
+			'no-cache'                               => [
+				'responses'      => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
+				'has_page_cache' => false,
+			],
+			'age'                                    => [
+				'responses'      => array_fill(
+					0,
+					3,
+					[ 'age' => '1345' ]
+				),
+				'has_page_cache' => true,
+			],
+			'cache-control-max-age'                  => [
+				'responses'      => array_fill(
+					0,
+					3,
+					[ 'cache-control' => 'public; max-age=600' ]
+				),
+				'has_page_cache' => true,
+			],
+			'cache-control-max-age-after-2-requests' => [
+				'responses'      => [
+					[],
+					[],
+					[ 'cache-control' => 'public; max-age=600' ],
+				],
+				'has_page_cache' => true,
+			],
+			'cache-control-with-future-expires'      => [
+				'responses'      => array_fill(
+					0,
+					3,
+					[ 'expires' => gmdate( 'r', time() + MINUTE_IN_SECONDS * 10 ) ]
+				),
+				'has_page_cache' => true,
+			],
+			'cache-control-with-past-expires'        => [
+				'responses'      => array_fill(
+					0,
+					3,
+					[ 'expires' => gmdate( 'r', time() - MINUTE_IN_SECONDS * 10 ) ]
+				),
+				'has_page_cache' => false,
+			],
+			'cache-control-with-basic-auth'          => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'cache-control' => 'public; max-age=600' ]
+				),
+				'has_page_cache'  => true,
+				'good_basic_auth' => true,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_page_cache_data
+	 * @covers ::page_cache()
+	 * @covers ::get_page_cache_status()
+	 */
+	public function test_page_cache( $responses, $has_page_cache, $good_basic_auth = null ) {
+
+		if ( true === $has_page_cache ) {
+			$expected_props = [
+				'badge'  => [
+					'label' => 'AMP',
+					'color' => 'green',
+				],
+				'test'   => 'amp_page_cache',
+				'status' => 'good',
+				'label'  => 'Page caching is detected',
+			];
+		} else {
+			$expected_props = [
+				'badge'  => [
+					'label' => 'AMP',
+					'color' => 'orange',
+				],
+				'test'   => 'amp_page_cache',
+				'status' => 'recommended',
+				'label'  => 'Page caching is not detected',
+			];
+		}
+
+		if ( null !== $good_basic_auth ) {
+			$_SERVER['PHP_AUTH_USER'] = 'admin';
+			$_SERVER['PHP_AUTH_PW']   = 'password';
+		}
+
+		$is_unauthorized = false;
+
+		add_filter(
+			'pre_http_request',
+			function ( $r, $parsed_args ) use ( &$responses, &$is_unauthorized, $good_basic_auth ) {
+				$expected_response = array_shift( $responses );
+
+				if ( 'unauthorized' === $expected_response ) {
+					$is_unauthorized = true;
+					return [
+						'response' => [
+							'code'    => 401,
+							'message' => 'Unauthorized',
+						],
+					];
+				}
+
+				if ( null !== $good_basic_auth ) {
+					$this->assertArrayHasKey(
+						'Authorization',
+						$parsed_args['headers']
+					);
+				}
+
+				$this->assertIsArray( $expected_response );
+
+				return [
+					'headers'  => $expected_response,
+					'response' => [
+						'code'    => 200,
+						'message' => 'OK',
+					],
+				];
+			},
+			10,
+			2
+		);
+
+		$actual = $this->instance->page_cache();
+		$this->assertArrayHasKey( 'description', $actual );
+		$this->assertArrayHasKey( 'actions', $actual );
+		if ( $is_unauthorized ) {
+			$this->assertStringContainsString( 'Unauthorized', $actual['description'] );
+		} else {
+			$this->assertStringNotContainsString( 'Unauthorized', $actual['description'] );
+		}
+
+		$this->assertEquals(
+			$expected_props,
+			wp_array_slice_assoc( $actual, array_keys( $expected_props ) )
+		);
+	}
+
+	/**
 	 * Get an IDN for testing purposes.
 	 *
 	 * @return string
@@ -605,5 +849,18 @@ class SiteHealthTest extends TestCase {
 	 */
 	public static function get_lite_query_var() {
 		return 'lite';
+	}
+
+	/**
+	 * Assert that the expected is a subset of the actual superset.
+	 *
+	 * @param array $expected Subset.
+	 * @param array $actual   Superset.
+	 */
+	public function assertAssocArraySubset( $expected, $actual ) {
+		$this->assertEquals(
+			$expected,
+			wp_array_slice_assoc( $actual, array_keys( $expected ) )
+		);
 	}
 }
