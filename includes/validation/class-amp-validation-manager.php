@@ -1087,44 +1087,20 @@ class AMP_Validation_Manager {
 			return $args;
 		}
 
-		/**
-		 * Reflection.
-		 *
-		 * @var ReflectionFunction|ReflectionMethod $reflection
-		 */
-		$reflection = $source['reflection'];
 		unset( $source['reflection'] ); // Omit from stored source.
 
-		$passed_by_ref = self::has_parameters_passed_by_reference( $reflection );
-		if ( $passed_by_ref > 1 ) {
-			return $args;
-		}
-
-		/*
-		 * Keep hook and priority hardcoded. Since, All blocks are rendered in `do_blocks()`
-		 * which is hooked in 'the_content' at a priority of 9.
-		 */
-		$source['hook']     = 'the_content';
-		$source['priority'] = 9;
-
 		$original_function = $args['render_callback'];
-		$accepted_args     = $reflection->getParameters();
-		$accepted_args     = ( ! empty( $accepted_args ) && is_array( $accepted_args ) ) ? count( $accepted_args ) : 0;
 
+		// @todo Problem: Gutenberg wraps render_callbacks with closures via gutenberg_inject_default_block_context().
 		$wrapped_callback = self::wrapped_callback(
-			array_merge(
-				[ 'function' => $original_function ],
-				compact( 'source', 'accepted_args' )
-			)
+			[
+				'function'      => $original_function,
+				'source'        => $source,
+				'accepted_args' => 3, // The three args passed to render_callback are $attributes, $content, and $block.
+			]
 		);
 
-		if ( 1 === $passed_by_ref ) {
-			$args['render_callback'] = static function ( &$first, ...$other_args ) use ( $wrapped_callback ) {
-				return $wrapped_callback->invoke_with_first_ref_arg( $first, ...$other_args );
-			};
-		} else {
-			$args['render_callback'] = $wrapped_callback;
-		}
+		$args['render_callback'] = $wrapped_callback;
 
 		return $args;
 	}
