@@ -526,7 +526,8 @@ class AMP_Validation_Manager {
 	public static function add_validation_error_sourcing() {
 		add_action( 'wp', [ __CLASS__, 'wrap_widget_callbacks' ] );
 
-		add_filter( 'register_block_type_args', [ __CLASS__, 'wrap_block_callbacks' ], 9 );
+		$int_min = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+		add_filter( 'register_block_type_args', [ __CLASS__, 'wrap_block_callbacks' ], $int_min );
 		add_action( 'all', [ __CLASS__, 'wrap_hook_callbacks' ] );
 		$wrapped_filters = [ 'the_content', 'the_excerpt' ];
 		foreach ( $wrapped_filters as $wrapped_filter ) {

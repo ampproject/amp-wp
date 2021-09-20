@@ -515,7 +515,10 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	public function test_add_validation_error_sourcing() {
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
-		$this->assertEquals( 9, has_action( 'register_block_type_args', [ self::TESTED_CLASS, 'wrap_block_callbacks' ] ) );
+		$this->assertEquals(
+			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+			has_action( 'register_block_type_args', [ self::TESTED_CLASS, 'wrap_block_callbacks' ] )
+		);
 		$this->assertEquals( 10, has_action( 'all', [ self::TESTED_CLASS, 'wrap_hook_callbacks' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
