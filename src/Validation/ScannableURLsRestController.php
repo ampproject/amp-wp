@@ -86,11 +86,13 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 		return rest_ensure_response(
 			array_map(
 				static function ( $entry ) use ( $nonce ) {
-					$entry['validate_url'] = add_query_arg(
-						[
-							AMP_Validation_Manager::VALIDATE_QUERY_VAR => $nonce,
-						],
-						$entry['url']
+					$entry['validate_url'] = amp_add_paired_endpoint(
+						add_query_arg(
+							[
+								AMP_Validation_Manager::VALIDATE_QUERY_VAR => $nonce,
+							],
+							$entry['url']
+						)
 					);
 
 					return $entry;
