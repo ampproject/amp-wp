@@ -1459,9 +1459,22 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * @covers ::wrap_block_callbacks
+	 * @covers ::wrap_block_callbacks()
+	 * @covers AMP_Validation_Callback_Wrapper::get_callback_function()
 	 */
-	public function test_wrap_hook_callbacks() {
+	public function test_wrap_block_callbacks() {
+
+		$with_no_render_callback = [ 'foo' => 'bar' ];
+		$this->assertSame(
+			$with_no_render_callback,
+			AMP_Validation_Manager::wrap_block_callbacks( $with_no_render_callback )
+		);
+
+		$with_non_existent_render_callback = [ 'render_callback' => 'this_does_not_exist' ];
+		$this->assertSame(
+			$with_non_existent_render_callback,
+			AMP_Validation_Manager::wrap_block_callbacks( $with_non_existent_render_callback )
+		);
 
 		$original_render_callback = static function () {
 			return '<span>Render callback</span>';
@@ -1765,7 +1778,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$value = 'Some Value';
 		apply_filters( 'foo', $value );
 		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $filter_callback );
-		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
+			$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $wrapped_callback );
 		AMP_Theme_Support::start_output_buffering();
 		$filtered_value = $wrapped_callback( $value );
 		$output = ob_get_clean();
@@ -1794,12 +1807,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		do_action( 'bar' ); // So that output buffering will be done.
 		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $action_callback );
-		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
+		$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $wrapped_callback );
 		AMP_Theme_Support::start_output_buffering();
 		$wrapped_callback();
 		$output = ob_get_clean();
 
-		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
+		$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $wrapped_callback );
 		$this->assertStringContainsString( $test_string, $output );
 		$this->assertStringContainsString( '<!--amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
 		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
@@ -1815,11 +1828,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 
 		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $action_callback );
-		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
+		$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $wrapped_callback );
 		AMP_Theme_Support::start_output_buffering();
 		$result = $wrapped_callback();
 		$output = ob_get_clean();
-		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
+		$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $wrapped_callback );
 		$this->assertEquals( '', $output );
 		$this->assertEquals( $this->get_string(), $result );
 		unset( $GLOBALS['post'] );

@@ -1078,7 +1078,7 @@ class AMP_Validation_Manager {
 	 */
 	public static function wrap_block_callbacks( $args ) {
 
-		if ( ! is_callable( $args['render_callback'] ) ) {
+		if ( ! isset( $args['render_callback'] ) || ! is_callable( $args['render_callback'] ) ) {
 			return $args;
 		}
 
@@ -1086,11 +1086,6 @@ class AMP_Validation_Manager {
 		$source              = $callback_reflection->get_source( $args['render_callback'] );
 
 		if ( ! $source ) {
-			return $args;
-		}
-
-		// Skip considering ourselves.
-		if ( 'AMP_Validation_Manager::add_block_source_comments' === $source['function'] ) {
 			return $args;
 		}
 
