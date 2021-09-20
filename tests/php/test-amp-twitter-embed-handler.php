@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Tests\TestCase;
 class AMP_Twitter_Embed_Handler_Test extends TestCase {
 
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/**

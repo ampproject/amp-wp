@@ -30,7 +30,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	use PrivateAccess;
 	use WithBlockEditorSupport;
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/**

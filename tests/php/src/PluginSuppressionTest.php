@@ -26,7 +26,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	use PrivateAccess;
 	use ThemesApiRequestMocking;
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	private $attempted_validate_request_urls = [];

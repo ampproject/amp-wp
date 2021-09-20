@@ -20,7 +20,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 	use MarkupComparison;
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/**

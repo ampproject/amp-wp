@@ -18,7 +18,7 @@ use AmpProject\AmpWP\Tests\TestCase;
 class Test_AMP_WordPress_TV_Embed_Handler extends TestCase {
 
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/**

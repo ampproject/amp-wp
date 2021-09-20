@@ -18,7 +18,7 @@ class AMP_Facebook_Embed_Handler_Test extends TestCase {
 
 	use MarkupComparison;
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/**
