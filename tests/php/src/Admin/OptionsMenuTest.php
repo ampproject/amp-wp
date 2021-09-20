@@ -49,8 +49,8 @@ class OptionsMenuTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;
 	}

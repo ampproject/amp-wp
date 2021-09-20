@@ -35,8 +35,8 @@ class MonitorCssTransientCachingTest extends TestCase {
 	/**
 	 * Tear down the tests by clearing the list of scheduled events.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 		_set_cron_array( [] );
 		wp_using_ext_object_cache( $this->was_wp_using_ext_object_cache );
 	}

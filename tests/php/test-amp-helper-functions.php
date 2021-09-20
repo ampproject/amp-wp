@@ -48,7 +48,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Validation_Manager::$is_validate_request = false;
 		global $wp_scripts, $pagenow, $show_admin_bar, $current_screen;
@@ -78,7 +78,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			$this->remove_added_uploads();
 		}
 
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

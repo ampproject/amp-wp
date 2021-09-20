@@ -88,8 +88,8 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 		$this->attempted_validate_request_urls = [];
 
 		$GLOBALS['wp_settings_fields']     = [];

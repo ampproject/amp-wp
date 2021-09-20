@@ -74,8 +74,8 @@ class SiteHealthTest extends TestCase {
 	 *
 	 * @inheritDoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 		wp_using_ext_object_cache( $this->was_wp_using_ext_object_cache );
 		$GLOBALS['wp_rest_server'] = $this->original_wp_rest_server;
 		unset( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );

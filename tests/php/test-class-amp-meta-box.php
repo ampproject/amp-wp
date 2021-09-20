@@ -45,11 +45,11 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		global $wp_scripts, $wp_styles;
 		$wp_scripts = null;
 		$wp_styles  = null;
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

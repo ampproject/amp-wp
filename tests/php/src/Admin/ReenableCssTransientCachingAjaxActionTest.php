@@ -49,8 +49,8 @@ class ReenableCssTransientCachingAjaxActionTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 
 		global $wp_scripts;
 		$wp_scripts = null;

@@ -33,8 +33,8 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		$this->instance       = new MobileRedirection( $this->paired_routing );
 	}
 
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 		$_COOKIE = [];
 		unset( $GLOBALS['wp_customize'] );
 		AMP_HTTP::$purged_amp_query_vars = [];

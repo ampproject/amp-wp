@@ -55,7 +55,7 @@ class Test_AMP_Playlist_Embed_Handler extends TestCase {
 	 *
 	 * @global WP_Styles $wp_styles
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		global $wp_styles;
 		$wp_styles = null;
 

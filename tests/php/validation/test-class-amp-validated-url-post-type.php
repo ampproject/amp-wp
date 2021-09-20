@@ -34,8 +34,8 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 
 		global $current_screen;
 		$current_screen = null;

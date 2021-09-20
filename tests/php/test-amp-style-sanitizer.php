@@ -43,8 +43,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 		global $wp_styles, $wp_scripts, $wp_customize;
 		$wp_styles    = null;
 		$wp_scripts   = null;

@@ -30,9 +30,9 @@ class AMP_Tumblr_Embed_Handler_Test extends TestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_request' ] );
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

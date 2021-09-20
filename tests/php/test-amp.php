@@ -24,8 +24,8 @@ class Test_AMP extends TestCase {
 	/**
 	 * Tear down and clean up.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 	}
 

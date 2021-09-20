@@ -29,8 +29,8 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends TestCase {
 		$this->using_ext_object_cache = wp_using_ext_object_cache();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 
 		wp_using_ext_object_cache( $this->using_ext_object_cache );
 	}

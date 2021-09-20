@@ -37,8 +37,8 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 
 		if ( did_action( 'add_attachment' ) ) {
 			$this->remove_added_uploads();

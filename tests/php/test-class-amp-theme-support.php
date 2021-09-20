@@ -71,7 +71,7 @@ class Test_AMP_Theme_Support extends TestCase {
 	 *
 	 * @global WP_Scripts $wp_scripts
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		global $wp_scripts, $wp_styles, $wp_admin_bar;
 		$wp_scripts   = null;
 		$wp_styles    = null;
@@ -79,7 +79,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$this->set_private_property( AMP_Theme_Support::class, 'metadata', null );
 
-		parent::tearDown();
+		parent::tear_down();
 		unset( $GLOBALS['show_admin_bar'] );
 		AMP_Validation_Manager::$is_validate_request = false;
 		AMP_Validation_Manager::reset_validation_results();

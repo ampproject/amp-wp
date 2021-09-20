@@ -33,9 +33,9 @@ class Test_AMP_TikTok_Embed_Handler extends TestCase {
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_request' ] );
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

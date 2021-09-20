@@ -49,8 +49,8 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 		register_theme_directory( $theme_root );
 	}
 
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 		$this->restore_theme_directories();
 	}
 

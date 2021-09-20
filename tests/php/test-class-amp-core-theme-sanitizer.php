@@ -26,8 +26,8 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;

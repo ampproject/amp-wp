@@ -57,8 +57,8 @@ abstract class DependencyInjectedTestCase extends TestCase {
 	/**
 	 * Clean up again after each test run.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 
 		$this->set_private_property( Services::class, 'plugin', null );
 		$this->set_private_property( Services::class, 'container', null );

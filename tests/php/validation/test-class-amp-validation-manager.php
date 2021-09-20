@@ -133,7 +133,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets;
 		$GLOBALS['wp_widget_factory']     = $this->original_wp_widget_factory;
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
@@ -144,7 +144,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::$hook_source_stack   = [];
 		AMP_Validation_Manager::$validation_results  = [];
 		AMP_Validation_Manager::reset_validation_results();
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

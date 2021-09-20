@@ -34,9 +34,9 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->instance = $this->injector->make( PairedRouting::class );
 	}
 
-	public function tearDown() {
+	public function tear_down() {
 		unset( $_SERVER['REQUEST_URI'] );
-		parent::tearDown();
+		parent::tear_down();
 		unregister_taxonomy( amp_get_slug() );
 		unregister_post_type( amp_get_slug() );
 	}

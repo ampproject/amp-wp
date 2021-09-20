@@ -39,11 +39,11 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		if ( did_action( 'add_attachment' ) ) {
 			$this->remove_added_uploads();
 		}
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**
