@@ -60,7 +60,9 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_items' ],
 					'args'                => [],
-					'permission_callback' => '__return_true',
+					'permission_callback' => static function () {
+						return current_user_can( \AMP_Validation_Manager::VALIDATE_CAPABILITY ); 
+					},
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
@@ -74,7 +76,20 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return rest_ensure_response( $this->scannable_url_provider->get_urls() );
+		$nonce = AMP_Validation_Manager::get_amp_validate_nonce();
+		return rest_ensure_response(
+			array_map(
+				static function ( $entry ) use ( $nonce ) {
+					$entry['validate_url'] = add_query_arg(
+						[
+							AMP_Validation_Manager::VALIDATE_QUERY_VAR => $nonce,
+						],
+						$entry['validate_url']
+					);
+				},
+				$this->scannable_url_provider->get_urls()
+			)
+		);
 	}
 
 	/**
