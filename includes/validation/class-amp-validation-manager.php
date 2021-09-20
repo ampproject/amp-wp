@@ -1016,8 +1016,9 @@ class AMP_Validation_Manager {
 		}
 		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $source['block_name'] );
 		if ( $block_type && $block_type->is_dynamic() ) {
-
 			$render_callback = $block_type->render_callback;
+
+			// Access the underlying callback which was wrapped by ::wrap_block_callbacks() below.
 			while ( $render_callback instanceof AMP_Validation_Callback_Wrapper ) {
 				$render_callback = $render_callback->get_callback_function();
 			}
@@ -1042,31 +1043,6 @@ class AMP_Validation_Manager {
 			}
 		}
 		return $replaced;
-	}
-
-	/**
-	 * Wrap callbacks for registered widgets to keep track of queued assets and the source for anything printed for validation.
-	 *
-	 * @return void
-	 * @global array $wp_registered_widgets
-	 */
-	public static function wrap_widget_callbacks() {
-		global $wp_registered_widgets;
-		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
-		foreach ( $wp_registered_widgets as $widget_id => &$registered_widget ) {
-			$source = $callback_reflection->get_source( $registered_widget['callback'] );
-			if ( ! $source ) {
-				continue;
-			}
-			$source['widget_id'] = $widget_id;
-			unset( $source['reflection'] ); // Omit from stored source.
-
-			$function      = $registered_widget['callback'];
-			$accepted_args = 2; // For the $instance and $args arguments.
-			$callback      = compact( 'function', 'accepted_args', 'source' );
-
-			$registered_widget['callback'] = self::wrapped_callback( $callback );
-		}
 	}
 
 	/**
@@ -1105,6 +1081,31 @@ class AMP_Validation_Manager {
 		$args['render_callback'] = $wrapped_callback;
 
 		return $args;
+	}
+
+	/**
+	 * Wrap callbacks for registered widgets to keep track of queued assets and the source for anything printed for validation.
+	 *
+	 * @return void
+	 * @global array $wp_registered_widgets
+	 */
+	public static function wrap_widget_callbacks() {
+		global $wp_registered_widgets;
+		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
+		foreach ( $wp_registered_widgets as $widget_id => &$registered_widget ) {
+			$source = $callback_reflection->get_source( $registered_widget['callback'] );
+			if ( ! $source ) {
+				continue;
+			}
+			$source['widget_id'] = $widget_id;
+			unset( $source['reflection'] ); // Omit from stored source.
+
+			$function      = $registered_widget['callback'];
+			$accepted_args = 2; // For the $instance and $args arguments.
+			$callback      = compact( 'function', 'accepted_args', 'source' );
+
+			$registered_widget['callback'] = self::wrapped_callback( $callback );
+		}
 	}
 
 	/**
