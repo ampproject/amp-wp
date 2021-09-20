@@ -150,6 +150,16 @@ class AMP_Validation_Manager {
 	public static $hook_source_stack = [];
 
 	/**
+	 * Original render_callbacks for blocks at the time of wrapping.
+	 *
+	 * Keys are block names, values are the render_callback callables.
+	 *
+	 * @see AMP_Validation_Manager::wrap_block_callbacks()
+	 * @var array<string, callable>
+	 */
+	protected static $original_block_render_callbacks = [];
+
+	/**
 	 * Whether a validate request is being performed.
 	 *
 	 * When responding to a request to validate a URL, instead of an HTML document being returned, a JSON document is
@@ -1025,6 +1035,20 @@ class AMP_Validation_Manager {
 
 			$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
 			$callback_source     = $callback_reflection->get_source( $render_callback );
+
+			// Handle special case to undo the wrapping that Gutenberg does in gutenberg_inject_default_block_context().
+			if (
+				$callback_source
+				&&
+				'plugin' === $callback_source['type']
+				&&
+				'gutenberg' === $callback_source['name']
+				&&
+				array_key_exists( $source['block_name'], self::$original_block_render_callbacks )
+			) {
+				$callback_source = $callback_reflection->get_source( self::$original_block_render_callbacks[ $source['block_name'] ] );
+			}
+
 			if ( $callback_source ) {
 				$source = array_merge(
 					$source,
@@ -1066,8 +1090,11 @@ class AMP_Validation_Manager {
 		}
 
 		unset( $source['reflection'] ); // Omit from stored source.
-
 		$original_function = $args['render_callback'];
+
+		if ( isset( $args['name'] ) ) {
+			self::$original_block_render_callbacks[ $args['name'] ] = $original_function;
+		}
 
 		// @todo Problem: Gutenberg wraps render_callbacks with closures via gutenberg_inject_default_block_context().
 		$wrapped_callback = self::wrapped_callback(
