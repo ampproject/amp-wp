@@ -1464,13 +1464,18 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 */
 	public function test_wrap_block_callbacks() {
 
-		$with_no_render_callback = [ 'foo' => 'bar' ];
+		$with_no_render_callback = [
+			'name' => 'test/no_render_callback',
+		];
 		$this->assertSame(
 			$with_no_render_callback,
 			AMP_Validation_Manager::wrap_block_callbacks( $with_no_render_callback )
 		);
 
-		$with_non_existent_render_callback = [ 'render_callback' => 'this_does_not_exist' ];
+		$with_non_existent_render_callback = [
+			'name'            => 'test/non_existent_render_callback',
+			'render_callback' => 'this_does_not_exist',
+		];
 		$this->assertSame(
 			$with_non_existent_render_callback,
 			AMP_Validation_Manager::wrap_block_callbacks( $with_non_existent_render_callback )
@@ -1479,13 +1484,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$original_render_callback = static function () {
 			return '<span>Render callback</span>';
 		};
-
-		$args = [
+		$with_unwrapped_render_callback = [
+			'name'            => 'test/with_unwrapped_render_callback',
 			'render_callback' => $original_render_callback,
 		];
-
-		$output = AMP_Validation_Manager::wrap_block_callbacks( $args );
-
+		$output = AMP_Validation_Manager::wrap_block_callbacks( $with_unwrapped_render_callback );
 		$render_callback = $output['render_callback'];
 		$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $render_callback );
 		$this->assertSame(

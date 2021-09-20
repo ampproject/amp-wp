@@ -696,11 +696,12 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function reset_validation_results() {
-		self::$validation_results      = [];
-		self::$enqueued_style_sources  = [];
-		self::$enqueued_script_sources = [];
-		self::$extra_script_sources    = [];
-		self::$extra_style_sources     = [];
+		self::$validation_results              = [];
+		self::$enqueued_style_sources          = [];
+		self::$enqueued_script_sources         = [];
+		self::$extra_script_sources            = [];
+		self::$extra_style_sources             = [];
+		self::$original_block_render_callbacks = [];
 	}
 
 	/**
@@ -1096,16 +1097,13 @@ class AMP_Validation_Manager {
 			self::$original_block_render_callbacks[ $args['name'] ] = $original_function;
 		}
 
-		// @todo Problem: Gutenberg wraps render_callbacks with closures via gutenberg_inject_default_block_context().
-		$wrapped_callback = self::wrapped_callback(
+		$args['render_callback'] = self::wrapped_callback(
 			[
 				'function'      => $original_function,
 				'source'        => $source,
 				'accepted_args' => 3, // The three args passed to render_callback are $attributes, $content, and $block.
 			]
 		);
-
-		$args['render_callback'] = $wrapped_callback;
 
 		return $args;
 	}
