@@ -30,8 +30,8 @@ class ValidationCountsRestControllerTest extends DependencyInjectedTestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->controller = $this->injector->make( ValidationCountsRestController::class );
 	}

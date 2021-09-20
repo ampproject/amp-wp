@@ -32,8 +32,8 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 	 */
 	private $callback_reflection;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 

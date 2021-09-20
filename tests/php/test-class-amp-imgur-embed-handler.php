@@ -20,7 +20,7 @@ class AMP_Imgur_Embed_Handler_Test extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function set_up() {
 		$this->prevent_block_pre_render();
 
 		// Mock the HTTP request.

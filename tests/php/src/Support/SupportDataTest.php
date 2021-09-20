@@ -35,9 +35,9 @@ class SupportDataTest extends WP_UnitTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
+	public function set_up() {
 
-		parent::setUp();
+		parent::set_up();
 
 		$this->instance = new SupportData( [] );
 	}

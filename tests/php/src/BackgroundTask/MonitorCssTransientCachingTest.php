@@ -25,8 +25,8 @@ class MonitorCssTransientCachingTest extends TestCase {
 	/**
 	 * Set up the tests by clearing the list of scheduled events.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		_set_cron_array( [] );
 		$this->was_wp_using_ext_object_cache = wp_using_ext_object_cache();
 		wp_using_ext_object_cache( false );

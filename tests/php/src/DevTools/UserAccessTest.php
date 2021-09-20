@@ -32,8 +32,8 @@ class UserAccessTest extends TestCase {
 	 */
 	private $dev_tools_user_access;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->dev_tools_user_access = new UserAccess();
 	}

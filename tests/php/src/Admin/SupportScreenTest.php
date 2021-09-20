@@ -37,9 +37,9 @@ class SupportScreenTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
+	public function set_up() {
 
-		parent::setUp();
+		parent::set_up();
 
 		$option_menu    = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError() );
 		$this->instance = new SupportScreen( $option_menu, new GoogleFonts(), new SupportData() );

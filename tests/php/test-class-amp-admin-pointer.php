@@ -34,8 +34,8 @@ class Test_AMP_Admin_Pointers extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = new AMP_Admin_Pointers();
 	}
 

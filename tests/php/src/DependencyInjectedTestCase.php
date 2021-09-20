@@ -36,8 +36,8 @@ abstract class DependencyInjectedTestCase extends TestCase {
 	/**
 	 * Set up the service architecture before each test run.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		// We're intentionally avoiding the AmpWpPluginFactory here as it uses a
 		// static instance, because its whole point is to allow reuse across consumers.

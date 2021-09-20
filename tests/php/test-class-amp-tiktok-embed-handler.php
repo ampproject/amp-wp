@@ -23,7 +23,7 @@ class Test_AMP_TikTok_Embed_Handler extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function set_up() {
 		$this->prevent_block_pre_render();
 
 		// Mock the HTTP request.

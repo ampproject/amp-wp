@@ -32,9 +32,9 @@ class SupportRESTControllerTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
+	public function set_up() {
 
-		parent::setUp();
+		parent::set_up();
 
 		$this->instance = new SupportRESTController( new SupportData() );
 	}

@@ -22,8 +22,8 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 	/** @var ReaderThemeLoader */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = $this->injector->make( ReaderThemeLoader::class );
 
 		$this->register_core_themes();

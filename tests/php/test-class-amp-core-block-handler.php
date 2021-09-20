@@ -26,7 +26,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function set_up() {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestIncomplete( 'Files needed for testing missing.' );
 		}

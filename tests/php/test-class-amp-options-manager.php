@@ -29,8 +29,8 @@ class Test_AMP_Options_Manager extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->was_wp_using_ext_object_cache = $GLOBALS['_wp_using_ext_object_cache'];
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		remove_theme_support( 'amp' );

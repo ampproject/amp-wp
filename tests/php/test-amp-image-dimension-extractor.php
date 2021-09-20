@@ -20,8 +20,8 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends TestCase {
 	/** @var bool */
 	private $using_ext_object_cache;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		// We don't want to actually download the images; just testing the extract method.
 		add_action( 'amp_extract_image_dimensions_batch_callbacks_registered', [ $this, 'disable_downloads' ] );

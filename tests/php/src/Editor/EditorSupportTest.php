@@ -17,8 +17,8 @@ final class EditorSupportTest extends TestCase {
 	/** @var EditorSupport */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->instance = new EditorSupport( new DependencySupport() );
 

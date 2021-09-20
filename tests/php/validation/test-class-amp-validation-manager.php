@@ -109,7 +109,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @inheritdoc
 	 * @global $wp_registered_widgets
 	 */
-	public function setUp() {
+	public function set_up() {
 		unset( $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
 		$this->prevent_block_pre_render();
 

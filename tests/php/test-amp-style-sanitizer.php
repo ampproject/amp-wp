@@ -30,8 +30,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		global $wp_styles, $wp_scripts;
 		$wp_styles  = null;
 		$wp_scripts = null;

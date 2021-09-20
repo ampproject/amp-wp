@@ -14,7 +14,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends TestCase {
 	protected $globally_allowed_attrs;
 	protected $layout_allowed_attrs;
 
-	public function setUp() {
+	public function set_up() {
 		$this->allowed_tags           = AMP_Allowed_Tags_Generated::get_allowed_tags();
 		$this->globally_allowed_attrs = AMP_Allowed_Tags_Generated::get_allowed_attributes();
 		$this->layout_allowed_attrs   = AMP_Allowed_Tags_Generated::get_layout_attributes();

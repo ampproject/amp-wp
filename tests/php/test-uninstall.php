@@ -16,8 +16,8 @@ class Test_Uninstall extends TestCase {
 	/** @var bool */
 	private $was_using_ext_object_cache;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->was_using_ext_object_cache = wp_using_ext_object_cache();
 	}
 

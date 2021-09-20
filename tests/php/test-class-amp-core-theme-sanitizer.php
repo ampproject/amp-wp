@@ -20,8 +20,8 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	use PrivateAccess;
 	use LoadsCoreThemes;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 	}

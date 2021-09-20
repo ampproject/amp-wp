@@ -21,8 +21,8 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = $this->injector->make( HeroCandidateFiltering::class );
 	}
 

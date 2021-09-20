@@ -17,8 +17,8 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 
 	use LoadsCoreThemes;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		remove_all_actions( 'amp_init' );
 		remove_all_actions( 'admin_menu' );
 		remove_all_actions( 'customize_register' );

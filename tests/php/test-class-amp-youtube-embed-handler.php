@@ -42,7 +42,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	/**
 	 * Set up each test.
 	 */
-	public function setUp() {
+	public function set_up() {
 		$this->prevent_block_pre_render();
 
 		$this->handler = new AMP_YouTube_Embed_Handler();

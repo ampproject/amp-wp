@@ -17,8 +17,8 @@ trait WithoutBlockPreRendering {
 	/**
 	 * Set up.
 	 */
-	public function setUp() { //phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-		parent::setUp();
+	public function set_up() { //phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
+		parent::set_up();
 
 		add_filter(
 			'render_block_data',

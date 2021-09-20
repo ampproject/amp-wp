@@ -32,8 +32,8 @@ class Test_Reader_Theme_REST_Controller extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		delete_transient( 'amp_themes_wporg' );
 		do_action( 'rest_api_init' );

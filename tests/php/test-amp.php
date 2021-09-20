@@ -16,8 +16,8 @@ class Test_AMP extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		remove_theme_support( 'amp' );
 	}
 

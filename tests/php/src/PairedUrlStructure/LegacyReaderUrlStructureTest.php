@@ -14,8 +14,8 @@ class LegacyReaderUrlStructureTest extends DependencyInjectedTestCase {
 	/** @var LegacyReaderUrlStructure */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' ); // Needed for user_trailingslashit().
 		$this->instance = $this->injector->make( LegacyReaderUrlStructure::class );
 	}

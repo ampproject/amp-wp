@@ -30,8 +30,8 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$GLOBALS['post'] = self::factory()->post->create_and_get();
 		$this->dom       = new Document();
 	}

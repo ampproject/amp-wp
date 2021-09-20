@@ -29,8 +29,8 @@ final class ScannableURLProviderTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [], false ) );
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}

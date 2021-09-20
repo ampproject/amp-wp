@@ -27,8 +27,8 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		return parent::setUpBeforeClass();
 	}
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 	}

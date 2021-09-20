@@ -42,8 +42,8 @@ class URLValidationRESTControllerTest extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		do_action( 'rest_api_init' );
 		$this->user_access = new UserAccess();

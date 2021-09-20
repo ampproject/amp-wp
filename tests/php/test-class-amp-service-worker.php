@@ -19,8 +19,8 @@ class Test_AMP_Service_Worker extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		unset( $GLOBALS['current_screen'] );
 		if ( ! function_exists( 'wp_service_workers' ) ) {
 			$this->markTestSkipped( 'PWA plugin not active.' );

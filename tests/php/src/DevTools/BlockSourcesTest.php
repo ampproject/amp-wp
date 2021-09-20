@@ -41,8 +41,8 @@ class BlockSourcesTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->instance = $this->get_new_instance();
 	}

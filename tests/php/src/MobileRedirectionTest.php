@@ -27,8 +27,8 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	/** @var PairedRouting */
 	private $paired_routing;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->paired_routing = $this->injector->make( PairedRouting::class );
 		$this->instance       = new MobileRedirection( $this->paired_routing );
 	}

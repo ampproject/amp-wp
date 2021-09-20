@@ -29,7 +29,7 @@ class AMP_Scribd_Embed_Handler_Test extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function set_up() {
 		$this->prevent_block_pre_render();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );

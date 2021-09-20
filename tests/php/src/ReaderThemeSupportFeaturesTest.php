@@ -83,8 +83,8 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 	/** @var ReaderThemeSupportFeatures */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = $this->injector->make( ReaderThemeSupportFeatures::class );
 
 		$this->register_core_themes();

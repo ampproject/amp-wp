@@ -21,8 +21,8 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		AMP_Validation_Manager::reset_validation_results();
 	}
 

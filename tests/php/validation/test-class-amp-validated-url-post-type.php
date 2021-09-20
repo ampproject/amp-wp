@@ -28,8 +28,8 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 
 	const TESTED_CLASS = AMP_Validated_URL_Post_Type::class;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 	}

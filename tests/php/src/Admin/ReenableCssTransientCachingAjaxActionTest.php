@@ -35,8 +35,8 @@ class ReenableCssTransientCachingAjaxActionTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		global $wp_scripts;
 		$wp_scripts = null;

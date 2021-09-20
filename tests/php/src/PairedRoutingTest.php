@@ -28,8 +28,8 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	/** @var PairedRouting */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		unset( $_SERVER['HTTPS'] );
 		$this->instance = $this->injector->make( PairedRouting::class );
 	}

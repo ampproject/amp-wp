@@ -28,8 +28,8 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 		AMP_Options_Manager::update_options( self::$original_amp_options );
 	}
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 	}

@@ -48,8 +48,8 @@ class SiteHealthTest extends TestCase {
 	 *
 	 * @inheritDoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$injector = AmpWpPluginFactory::create()
 			->get_container()
