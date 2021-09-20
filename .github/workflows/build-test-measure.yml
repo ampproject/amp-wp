@@ -388,35 +388,25 @@ jobs:
           - php: '8.0'
             wp: 'trunk'
             experimental: true
-            coverage: false
-            install-pwa-plugin: true
 
           - php: '8.0'
             wp: 'latest'
             external-http: true
-            coverage: false
-            install-pwa-plugin: true
 
-          - php: '7.4'
+          - php: '8.0'
             wp: 'latest'
-            install-pwa-plugin: true
             coverage: true
 
           - php: '7.0'
             wp: '5.1'
-            coverage: false
-            install-pwa-plugin: true
 
           - php: '5.6'
             wp: '5.0'
-            coverage: false
-            install-pwa-plugin: true
 
           - php: '5.6'
             wp: '4.9'
             external-http: true
             install-pwa-plugin: false
-            coverage: false
 
     steps:
       - name: Checkout
