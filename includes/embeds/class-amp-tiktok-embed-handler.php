@@ -64,13 +64,29 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$this->remove_embed_script( $blockquote );
 
+		// Initial height of video (most of them anyway).
+		$height = 575;
+
+		// Add the height of the metadata card with the CTA, username, and audio source.
+		$height += 118;
+
+		// Estimate the lines of text in the paragraph description (150-character limit).
+		$p = $blockquote->getElementsByTagName( Tag::P )->item( 0 );
+		if ( $p instanceof Element ) {
+			$height += 8; // Top margin.
+
+			// Add height for the lines of text, where there are approx. 39 chars fit on
+			// a line, and a line's height is 18px.
+			$height += ceil( strlen( trim( $p->textContent ) ) / 39 ) * 18;
+		}
+
 		$amp_tiktok = AMP_DOM_Utils::create_node(
 			Document::fromNode( $dom ),
 			Extension::TIKTOK,
 			[
-				Attribute::LAYOUT   => Layout::RESPONSIVE,
-				Attribute::HEIGHT   => 575,
-				Attribute::WIDTH    => 325,
+				Attribute::LAYOUT   => Layout::FIXED_HEIGHT,
+				Attribute::HEIGHT   => $height,
+				Attribute::WIDTH    => 'auto',
 				Attribute::DATA_SRC => $video_url,
 			]
 		);

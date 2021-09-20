@@ -94,7 +94,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			panelDescription.append( originalParagraph );
 		}
 
-		const ampDescription = $( '<p>' + component.data.l10n.rootPanelDescription + '</p>' ); // Contents have been sanitized with wp_kses_post().
+		const ampDescription = $( '<p>' + component.data.l10n.rootPanelDescription + '</p>' ); // lgtm[js/html-constructed-from-input], Contents have been sanitized with wp_kses_post().
 		panelDescription.append( ampDescription );
 	};
 

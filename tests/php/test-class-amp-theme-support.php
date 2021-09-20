@@ -1667,7 +1667,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$sanitized_html = $call_prepare_response();
 
 		$this->assertStringNotContainsString( 'handle=', $sanitized_html );
-		$this->assertEquals( 2, substr_count( $sanitized_html, '<!-- wp_print_scripts -->' ) );
+		$this->assertEquals( 2, did_action( 'wp_print_scripts' ) );
 
 		$ordered_contains = [
 			'<html amp=""',
@@ -1748,9 +1748,6 @@ class Test_AMP_Theme_Support extends TestCase {
 			],
 			$removed_nodes
 		);
-
-		// Make sure trailing content after </html> gets moved.
-		$this->assertMatchesRegularExpression( '#<!--comment-after-html-->\s*<div id="after-html"></div>\s*<!--comment-end-html-->\s*</body>\s*</html>\s*$#s', $sanitized_html );
 
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
@@ -1932,12 +1929,6 @@ class Test_AMP_Theme_Support extends TestCase {
 			static function() {
 				wp_enqueue_script( 'amp-list' );
 				wp_enqueue_style( 'my-font', 'https://fonts.googleapis.com/css?family=Tangerine', [], null ); // phpcs:ignore
-			}
-		);
-		add_action(
-			'wp_print_scripts',
-			static function() {
-				echo '<!-- wp_print_scripts -->';
 			}
 		);
 
@@ -2269,40 +2260,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
 		$this->assertStringContainsString( $style_slug, wp_styles()->queue );
-	}
-
-	/**
-	 * Test AMP_Theme_Support::include_layout_in_wp_kses_allowed_html().
-	 *
-	 * @see AMP_Theme_Support::include_layout_in_wp_kses_allowed_html()
-	 */
-	public function test_include_layout_in_wp_kses_allowed_html() {
-		$attribute             = 'data-amp-layout';
-		$image_no_dimensions   = [
-			'img' => [
-				$attribute => true,
-			],
-		];
-		$image_with_dimensions = array_merge(
-			$image_no_dimensions,
-			[
-				'height' => '100',
-				'width'  => '100',
-			]
-		);
-
-		$this->assertEquals( [], AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( [] ) );
-		$this->assertEquals( $image_no_dimensions, AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( $image_no_dimensions ) );
-
-		$context = AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( $image_with_dimensions );
-		$this->assertTrue( $context['img'][ $attribute ] );
-
-		$context = AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( $image_with_dimensions );
-		$this->assertTrue( $context['img'][ $attribute ] );
-
-		add_filter( 'wp_kses_allowed_html', 'AMP_Theme_Support::include_layout_in_wp_kses_allowed_html', 10, 2 );
-		$image = '<img data-amp-layout="fill">';
-		$this->assertEquals( $image, wp_kses_post( $image ) );
 	}
 
 	/**

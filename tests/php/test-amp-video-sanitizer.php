@@ -59,7 +59,12 @@ class AMP_Video_Converter_Test extends TestCase {
 
 			'video_without_dimensions' => [
 				'<video src="https://example.com/file.mp4"></video>',
-				'<amp-video src="https://example.com/file.mp4" height="400" layout="fixed-height" width="auto"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<amp-video src="https://example.com/file.mp4" class="amp-wp-unknown-size" height="400" layout="fixed-height" width="auto"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+			],
+
+			'video_with_autoplay' => [
+				'<video src="https://example.com/file.mp4" autoplay muted width="160" height="80"></video>',
+				'<amp-video src="https://example.com/file.mp4" autoplay width="160" height="80" layout="responsive"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4" autoplay width="160" height="80"></video></noscript></amp-video>',
 			],
 
 			'local_video_without_dimensions' => [
@@ -78,23 +83,23 @@ class AMP_Video_Converter_Test extends TestCase {
 			],
 
 			'layout_fill_video_without_dimensions' => [
-				'<video src="https://example.com/file.mp4" layout="fill"></video>',
-				'<amp-video src="https://example.com/file.mp4" layout="fill"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<video src="https://example.com/file.mp4" layout="fill" class="some-file"></video>',
+				'<amp-video src="https://example.com/file.mp4" layout="fill" class="some-file amp-wp-unknown-size"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			],
 
 			'data_layout_fill_video_without_dimensions' => [
 				'<video src="https://example.com/file.mp4" data-amp-layout="fill"></video>',
-				'<amp-video src="https://example.com/file.mp4" layout="fill"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<amp-video src="https://example.com/file.mp4" layout="fill" class="amp-wp-unknown-size"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			],
 
 			'layout_nodisplay_video_without_dimensions' => [
 				'<video src="https://example.com/file.mp4" layout="nodisplay"></video>',
-				'<amp-video src="https://example.com/file.mp4" layout="nodisplay"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<amp-video src="https://example.com/file.mp4" layout="nodisplay" class="amp-wp-unknown-size"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			],
 
 			'layout_fixed_video_without_dimensions' => [
 				'<video src="https://example.com/file.mp4" layout="nodisplay"></video>',
-				'<amp-video src="https://example.com/file.mp4" layout="nodisplay"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<amp-video src="https://example.com/file.mp4" layout="nodisplay" class="amp-wp-unknown-size"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			],
 
 			'autoplay_attribute' => [
@@ -109,12 +114,12 @@ class AMP_Video_Converter_Test extends TestCase {
 
 			'video_with_allowlisted_attributes__enabled' => [
 				'<video width="300" height="300" src="https://example.com/video.mp4" controls loop="true" muted="muted"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" controls="" loop="" muted="" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" controls loop="true" muted="muted"></video></noscript></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" controls="" loop="" muted="" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" controls loop="true"></video></noscript></amp-video>',
 			],
 
 			'video_with_allowlisted_attributes__disabled' => [
 				'<video width="300" height="300" src="https://example.com/video.mp4" controls="false" loop="false" muted="false"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" controls="false" loop="false" muted="false"></video></noscript></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" controls="false" loop="false"></video></noscript></amp-video>',
 			],
 
 			'video_with_custom_attribute' => [

@@ -12,12 +12,13 @@ use AMP_Theme_Support;
 use AMP_Post_Type_Support;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
+use WP_Error;
+use WP_REST_Server;
 
 /**
  * Class SiteHealth
@@ -27,7 +28,35 @@ use AmpProject\AmpWP\QueryVar;
  * @since 1.5.0
  * @internal
  */
-final class SiteHealth implements Service, Registerable, Delayed, Conditional {
+final class SiteHealth implements Service, Registerable, Delayed {
+
+	/**
+	 * REST API namespace.
+	 *
+	 * @var string
+	 */
+	const REST_API_NAMESPACE = 'amp/v1';
+
+	/**
+	 * Constant to store the results of the latest check for page caching.
+	 *
+	 * @var string
+	 */
+	const HAS_PAGE_CACHING_TRANSIENT_KEY = 'amp_has_page_caching';
+
+	/**
+	 * REST API endpoint for page cache test.
+	 *
+	 * @var string
+	 */
+	const REST_API_PAGE_CACHE_ENDPOINT = '/test/page-cache';
+
+	/**
+	 * Test slug for testing page caching.
+	 *
+	 * @var string
+	 */
+	const TEST_PAGE_CACHING = 'amp_page_cache';
 
 	/**
 	 * Service that monitors and controls the CSS transient caching.
@@ -42,15 +71,6 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 * @var AmpSlugCustomizationWatcher
 	 */
 	private $amp_slug_customization_watcher;
-
-	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return is_admin() && ! wp_doing_ajax();
-	}
 
 	/**
 	 * Get the action to use for registering the service.
@@ -77,6 +97,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 */
 	public function register() {
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
+		add_action( 'rest_api_init', [ $this, 'register_async_test_endpoints' ] );
 		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
 		add_filter( 'site_status_test_result', [ $this, 'modify_test_result' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
@@ -86,12 +107,70 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	}
 
 	/**
+	 * Detect whether async tests can be used.
+	 *
+	 * Returns true if on WP 5.6+ and *not* on version of Health Check plugin which doesn't support REST async tests.
+	 *
+	 * @param array $tests Tests.
+	 * @return bool
+	 */
+	private function supports_async_rest_tests( $tests ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.6', '<' ) ) {
+			return false;
+		}
+
+		if ( defined( 'HEALTH_CHECK_PLUGIN_VERSION' ) ) {
+			$core_async_tests = [
+				'dotorg_communication',
+				'background_updates',
+				'loopback_requests',
+				'https_status',
+				'authorization_header',
+			];
+			foreach ( $core_async_tests as $core_async_test ) {
+				if (
+					array_key_exists( 'async', $tests )
+					&&
+					isset( $tests['async'][ $core_async_test ] )
+					&&
+					! isset( $tests['async'][ $core_async_test ]['has_rest'] )
+				) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get badge label.
 	 *
 	 * @return string AMP.
 	 */
 	private function get_badge_label() {
 		return esc_html__( 'AMP', 'amp' );
+	}
+
+	/**
+	 * Register async test endpoints.
+	 *
+	 * This is only done in WP 5.6+.
+	 */
+	public function register_async_test_endpoints() {
+		register_rest_route(
+			self::REST_API_NAMESPACE,
+			self::REST_API_PAGE_CACHE_ENDPOINT,
+			[
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'page_cache' ],
+					'permission_callback' => static function() {
+						return current_user_can( 'view_site_health_checks' );
+					},
+				],
+			]
+		);
 	}
 
 	/**
@@ -105,6 +184,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 			'label' => esc_html__( 'Persistent object cache', 'amp' ),
 			'test'  => [ $this, 'persistent_object_cache' ],
 		];
+
 		if ( ! amp_is_canonical() && QueryVar::AMP !== amp_get_slug() ) {
 			$tests['direct']['amp_slug_definition_timing'] = [
 				'label' => esc_html__( 'AMP slug (query var) definition timing', 'amp' ),
@@ -132,6 +212,15 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 			'test'  => [ $this, 'xdebug_extension' ],
 		];
 
+		if ( $this->supports_async_rest_tests( $tests ) ) {
+			$tests['async'][ self::TEST_PAGE_CACHING ] = [
+				'label'             => esc_html__( 'Page caching', 'amp' ),
+				'test'              => rest_url( self::REST_API_NAMESPACE . self::REST_API_PAGE_CACHE_ENDPOINT ),
+				'has_rest'          => true,
+				'async_direct_test' => [ $this, 'page_cache' ],
+			];
+		}
+
 		return $tests;
 	}
 
@@ -143,7 +232,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	private function get_persistent_object_cache_learn_more_action() {
 		return sprintf(
 			'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-			esc_url( 'https://make.wordpress.org/hosting/handbook/handbook/performance/#object-cache' ),
+			esc_url( 'https://amp-wp.org/documentation/getting-started/amp-site-setup/persistent-object-caching/' ),
 			esc_html__( 'Learn more about persistent object caching', 'amp' ),
 			/* translators: The accessibility text. */
 			esc_html__( '(opens in a new tab)', 'amp' )
@@ -157,19 +246,219 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 */
 	public function persistent_object_cache() {
 		$is_using_object_cache = wp_using_ext_object_cache();
+		$has_page_caching      = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
+
+		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Persistent object caching is used to more effectively store image dimensions and parsed CSS using a caching backend rather than using the options table in the database.', 'amp' ) . '</p>';
+
+		if ( ! $is_using_object_cache ) {
+			if ( $has_page_caching ) {
+				$description .= '<p>' . esc_html__( 'Since page caching was detected, the need for persistent object caching is lessened. However, it still remains a best practice.', 'amp' ) . '</p>';
+			}
+
+			$services = $this->get_persistent_object_cache_availability();
+
+			$available_services = array_filter(
+				$services,
+				static function ( $service ) {
+					return $service['available'];
+				}
+			);
+
+			$description .= '<p>';
+			if ( count( $available_services ) > 0 ) {
+
+				$description .= _n(
+					'During the test, we found the following object caching service may be available on your server:',
+					'During the test, we found the following object caching services may be available on your server:',
+					count( $available_services ),
+					'amp'
+				);
+
+				$description .= ' ' . implode(
+					', ',
+					array_map(
+						static function ( $available_service ) {
+							return sprintf(
+								'<a href="%s">%s</a>',
+								esc_url( $available_service['url'] ),
+								esc_html( $available_service['name'] )
+							);
+						},
+						$available_services
+					)
+				);
+
+				$description .= ' ' . _n(
+					'(link goes to Add Plugins screen).',
+					'(links go to Add Plugins screen).',
+					count( $available_services ),
+					'amp'
+				);
+
+				$description .= ' ';
+			}
+
+			$description .= __( 'Please check with your host for what persistent caching services are available.', 'amp' );
+			$description .= '</p>';
+		}
+
+		if ( $is_using_object_cache ) {
+			$status = 'good';
+			$color  = 'green';
+			$label  = __( 'Persistent object caching is enabled', 'amp' );
+		} elseif ( $has_page_caching ) {
+			$status = 'good';
+			$color  = 'blue';
+			$label  = __( 'Persistent object caching is not enabled, but page caching was detected', 'amp' );
+		} else {
+			$status = 'recommended';
+			$color  = 'orange';
+			$label  = __( 'Persistent object caching is not enabled', 'amp' );
+		}
 
 		return [
 			'badge'       => [
 				'label' => $this->get_badge_label(),
-				'color' => $is_using_object_cache ? 'green' : 'orange',
+				'color' => $color,
 			],
-			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ),
+			'description' => wp_kses_post( $description ),
 			'actions'     => $this->get_persistent_object_cache_learn_more_action(),
 			'test'        => 'amp_persistent_object_cache',
-			'status'      => $is_using_object_cache ? 'good' : 'recommended',
-			'label'       => $is_using_object_cache
-				? esc_html__( 'Persistent object caching is enabled', 'amp' )
-				: esc_html__( 'Persistent object caching is not enabled', 'amp' ),
+			'status'      => $status,
+			'label'       => $label,
+		];
+	}
+
+	/**
+	 * Get the test result data for whether there is page caching or not.
+	 *
+	 * @return array
+	 */
+	public function page_cache() {
+		$has_page_caching = $this->has_page_caching();
+
+		set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, true === $has_page_caching, MONTH_IN_SECONDS );
+
+		$badge_color = 'orange';
+		$status      = 'recommended';
+		$label       = __( 'Page caching is not detected', 'amp' );
+
+		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' ) . '</p>';
+
+		/* translators: 1 is Cache-Control, 2 is Expires, and 3 is Age */
+		$description .= '<p>' . sprintf( __( 'Page caching is detected by making three requests to the homepage and looking for %1$s, %2$s, or %3$s HTTP response headers.', 'amp' ), '<code>Cache-Control: max-age=…</code>', '<code>Expires</code>', '<code>Age</code>' );
+
+		if ( is_wp_error( $has_page_caching ) ) {
+			$error_info = sprintf(
+				/* translators: 1 is error message, 2 is error code */
+				__( 'Unable to detect page caching due to possible loopback request problem. Please verify that the loopback request test is passing. Error: %1$s (Code: %2$s)', 'amp' ),
+				$has_page_caching->get_error_message(),
+				$has_page_caching->get_error_code()
+			);
+
+			$description = "<p>$error_info</p>" . $description;
+		} elseif ( true === $has_page_caching ) {
+			$badge_color = 'green';
+			$status      = 'good';
+			$label       = __( 'Page caching is detected', 'amp' );
+		}
+
+		return [
+			'badge'       => [
+				'label' => $this->get_badge_label(),
+				'color' => $badge_color,
+			],
+			'description' => wp_kses_post( $description ),
+			'test'        => self::TEST_PAGE_CACHING,
+			'status'      => $status,
+			'label'       => esc_html( $label ),
+			'actions'     => sprintf(
+				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+				esc_url( 'https://amp-wp.org/documentation/getting-started/amp-site-setup/page-caching-with-amp-and-wordpress/' ),
+				esc_html__( 'Learn more about page caching', 'amp' ),
+				/* translators: The accessibility text. */
+				esc_html__( '(opens in a new tab)', 'amp' )
+			),
+		];
+	}
+
+	/**
+	 * Check if site has page cache enable or not.
+	 *
+	 * @return bool|WP_Error Whether page caching was detected, or else error information.
+	 */
+	private function has_page_caching() {
+		/** This filter is documented in wp-includes/class-wp-http-streams.php */
+		$sslverify = apply_filters( 'https_local_ssl_verify', false );
+
+		$headers = [];
+
+		// Include basic auth in loopback requests. Note that this will only pass along basic auth when user is
+		// initiating the test. If a site requires basic auth, the test will fail when it runs in WP Cron as part of
+		// wp_site_health_scheduled_check. This logic is copied from WP_Site_Health::can_perform_loopback() in core.
+		if ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) { // phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.BasicAuthentication
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPressVIPMinimum.Variables.ServerVariables.BasicAuthentication
+			$headers['Authorization'] = 'Basic ' . base64_encode( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) . ':' . wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
+		}
+
+		for ( $i = 1; $i <= 3; $i++ ) {
+			$http_response = wp_remote_get( home_url(), compact( 'sslverify', 'headers' ) );
+			if ( is_wp_error( $http_response ) ) {
+				return $http_response;
+			}
+			if ( wp_remote_retrieve_response_code( $http_response ) !== 200 ) {
+				return new WP_Error(
+					'http_' . wp_remote_retrieve_response_code( $http_response ),
+					wp_remote_retrieve_response_message( $http_response )
+				);
+			}
+
+			$cache_control_header = wp_remote_retrieve_header( $http_response, 'cache-control' );
+			if ( preg_match( '/max-age=[1-9]/', $cache_control_header ) ) {
+				return true;
+			}
+
+			$expires_header = wp_remote_retrieve_header( $http_response, 'expires' );
+			if ( $expires_header && strtotime( $expires_header ) > time() ) {
+				return true;
+			}
+
+			// Detect page cache implemented via proxy (e.g. Varnish).
+			$age_header = wp_remote_retrieve_header( $http_response, 'age' );
+			if ( (int) $age_header > 0 ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Return list of available object cache mechanism.
+	 *
+	 * @return array
+	 */
+	public function get_persistent_object_cache_availability() {
+		return [
+			'redis'     => [
+				'available' => class_exists( 'Redis' ),
+				'name'      => _x( 'Redis', 'persistent object cache service', 'amp' ),
+				'url'       => admin_url( 'plugin-install.php?s=redis%20object%20cache&tab=search&type=term' ),
+			],
+			'memcached' => [
+				'available' => ( class_exists( 'Memcache' ) || class_exists( 'Memcached' ) ),
+				'name'      => _x( 'Memcached', 'persistent object cache service', 'amp' ),
+				'url'       => admin_url( 'plugin-install.php?s=memcached%20object%20cache&tab=search&type=term' ),
+			],
+			'apcu'      => [
+				'available' => (
+					extension_loaded( 'apcu' ) ||
+					function_exists( 'apc_store' ) ||
+					function_exists( 'apcu_store' )
+				),
+				'name'      => _x( 'APCu', 'persistent object cache service', 'amp' ),
+				'url'       => admin_url( 'plugin-install.php?s=apcu%20object%20cache&tab=search&type=term' ),
+			],
 		];
 	}
 
@@ -692,6 +981,11 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	public function add_styles() {
 		echo '
 			<style>
+				.health-check-accordion-panel > p:first-child {
+					/* Note this is essentially a core fix. */
+					margin-top: 0;
+				}
+
 				.wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
 				.wp-core-ui .button.reenable-css-transient-caching ~ .success-text,
 				.wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon,

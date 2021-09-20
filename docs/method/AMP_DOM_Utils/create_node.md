@@ -18,7 +18,7 @@ Create a new node w/attributes (a DOMElement) and add to the passed Dom\Document
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:236](/includes/utils/class-amp-dom-utils.php#L236-L241)
+:link: [includes/utils/class-amp-dom-utils.php:163](/includes/utils/class-amp-dom-utils.php#L163-L168)
 
 <details>
 <summary>Show Code</summary>

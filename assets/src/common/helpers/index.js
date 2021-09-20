@@ -65,32 +65,27 @@ export const getMinimumFeaturedImageDimensions = () => {
 /**
  * Validates the an image based on requirements.
  *
- * @param {Object}  media                      A media object.
- * @param {string}  media.mime_type            The media item's mime type.
- * @param {Object}  media.media_details        A media details object with width and height values.
- * @param {number}  media.media_details.width  Media width in pixels.
- * @param {number}  media.media_details.height Media height in pixels.
- * @param {Object}  dimensions                 An object with minimum required width and height values.
- * @param {number}  dimensions.width           Minimum required width value.
- * @param {number}  dimensions.height          Minimum required height value.
- * @param {boolean} required                   Whether the image is required or not.
+ * @param {Object|null} media                      A media object.
+ * @param {string}      media.mime_type            The media item's mime type.
+ * @param {Object}      media.media_details        A media details object with width and height values.
+ * @param {number}      media.media_details.width  Media width in pixels.
+ * @param {number}      media.media_details.height Media height in pixels.
+ * @param {Object}      dimensions                 An object with minimum required width and height values.
+ * @param {number}      dimensions.width           Minimum required width value.
+ * @param {number}      dimensions.height          Minimum required height value.
  * @return {string[]|null} Validation errors, or null if there were no errors.
  */
-export const validateFeaturedImage = ( media, dimensions, required ) => {
+export const validateFeaturedImage = ( media, dimensions ) => {
 	if ( ! media ) {
-		if ( required ) {
-			return [ __( 'Selecting a featured image is required.', 'amp' ) ];
-		}
-
-		return [ __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) ];
+		return [ __( 'Selecting a featured image is required.', 'amp' ) ];
 	}
 
 	const errors = [];
 
-	if ( ! [ 'image/png', 'image/gif', 'image/jpeg' ].includes( media.mime_type ) ) {
+	if ( ! [ 'image/png', 'image/gif', 'image/jpeg', 'image/webp', 'image/svg+xml' ].includes( media.mime_type ) ) {
 		errors.push(
-			/* translators: 1: .jpg, 2: .png. 3: .gif */
-			sprintf( __( 'The featured image must be in %1$s, %2$s, or %3$s format.', 'amp' ), '.jpg', '.png', '.gif' ),
+			/* translators: List of image formats */
+			sprintf( __( 'The featured image must be of either %1$s, %2$s, %3$s, %4$s, or %5$s format.', 'amp' ), 'JPEG', 'PNG', 'GIF', 'WebP', 'SVG' ),
 		);
 	}
 

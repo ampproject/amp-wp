@@ -8,13 +8,15 @@ import {
 	OPTIONS_REST_PATH,
 	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
+	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+	USERS_RESOURCE_REST_PATH,
 } from 'amp-settings';
 
 /**
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { render, useContext, useState, useEffect } from '@wordpress/element';
+import { render, useContext, useState, useEffect, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -34,14 +36,16 @@ import { ErrorContextProvider } from '../components/error-context-provider';
 import { AMPDrawer } from '../components/amp-drawer';
 import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
 import { ErrorScreen } from '../components/error-screen';
+import { User, UserContextProvider } from '../components/user-context-provider';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
-import { MobileRedirection } from './mobile-redirection';
 import { SettingsFooter } from './settings-footer';
 import { PluginSuppression } from './plugin-suppression';
 import { Analytics } from './analytics';
 import { PairedUrlStructure } from './paired-url-structure';
+import { MobileRedirection } from './mobile-redirection';
+import { DeveloperTools } from './developer-tools';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -65,16 +69,22 @@ function Providers( { children } ) {
 						optionsRestPath={ OPTIONS_REST_PATH }
 						populateDefaultValues={ true }
 					>
-						<ReaderThemesContextProvider
-							currentTheme={ CURRENT_THEME }
-							readerThemesRestPath={ READER_THEMES_REST_PATH }
-							hasErrorBoundary={ true }
-							hideCurrentlyActiveTheme={ true }
-							updatesNonce={ UPDATES_NONCE }
-							wpAjaxUrl={ wpAjaxUrl }
+						<UserContextProvider
+							onlyFetchIfPluginIsConfigured={ false }
+							userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
+							usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 						>
-							{ children }
-						</ReaderThemesContextProvider>
+							<ReaderThemesContextProvider
+								currentTheme={ CURRENT_THEME }
+								readerThemesRestPath={ READER_THEMES_REST_PATH }
+								hasErrorBoundary={ true }
+								hideCurrentlyActiveTheme={ true }
+								updatesNonce={ UPDATES_NONCE }
+								wpAjaxUrl={ wpAjaxUrl }
+							>
+								{ children }
+							</ReaderThemesContextProvider>
+						</UserContextProvider>
 					</OptionsContextProvider>
 				</SiteSettingsProvider>
 			</ErrorBoundary>
@@ -117,8 +127,23 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
 
-	const { fetchingOptions, saveOptions } = useContext( Options );
+	const { hasOptionsChanges, fetchingOptions, saveOptions } = useContext( Options );
+	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption } = useContext( User );
 	const { templateModeWasOverridden } = useContext( ReaderThemes );
+
+	/**
+	 * Handle the form submit event.
+	 */
+	const onSubmit = useCallback( ( event ) => {
+		event.preventDefault();
+
+		if ( hasOptionsChanges ) {
+			saveOptions();
+		}
+		if ( hasDeveloperToolsOptionChange ) {
+			saveDeveloperToolsOption();
+		}
+	}, [ hasDeveloperToolsOptionChange, hasOptionsChanges, saveDeveloperToolsOption, saveOptions ] );
 
 	/**
 	 * Scroll to the focused element on load or when it changes.
@@ -165,15 +190,11 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 			<Welcome />
-			<form onSubmit={ ( event ) => {
-				event.preventDefault();
-				saveOptions();
-			} }>
+			<form onSubmit={ onSubmit }>
 				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />
 				<h2 id="advanced-settings">
 					{ __( 'Advanced Settings', 'amp' ) }
 				</h2>
-				<MobileRedirection id="mobile-redirection" />
 				<AMPDrawer
 
 					heading={ (
@@ -213,6 +234,20 @@ function Root( { appRoot } ) {
 					<Analytics />
 				</AMPDrawer>
 				<PairedUrlStructure focusedSection={ focusedSection } />
+				<AMPDrawer
+					className="amp-other-settings"
+					heading={ (
+						<h3>
+							{ __( 'Other', 'amp' ) }
+						</h3>
+					) }
+					hiddenTitle={ __( 'Other', 'amp' ) }
+					id="other-settings"
+					initialOpen={ 'other-settings' === focusedSection }
+				>
+					<MobileRedirection />
+					<DeveloperTools />
+				</AMPDrawer>
 				<SettingsFooter />
 			</form>
 			<UnsavedChangesWarning excludeUserContext={ true } appRoot={ appRoot } />

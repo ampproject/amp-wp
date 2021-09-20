@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "86f5d58d49f586b8025e1a0eb9d9eaaf",
+    "content-hash": "50e0c2a44a8197e60dd12e8a321345ab",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "dev-main",
+            "version": "0.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "b4eb9db"
+                "reference": "24d3c4255df71fc01a524e48ee578b356ec0d8e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/b4eb9db",
-                "reference": "b4eb9db",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/24d3c4255df71fc01a524e48ee578b356ec0d8e6",
+                "reference": "24d3c4255df71fc01a524e48ee578b356ec0d8e6",
                 "shasum": ""
             },
             "require": {
@@ -44,9 +44,9 @@
             "suggest": {
                 "ext-json": "Provides native implementation of json_encode()/json_decode().",
                 "ext-mbstring": "Used by Dom\\Document to convert encoding to UTF-8 if needed.",
+                "mck89/peast": "Needed to minify the AMP script.",
                 "nette/php-generator": "Needed to generate the validator spec PHP classes and interfaces."
             },
-            "default-branch": true,
             "bin": [
                 "bin/amp"
             ],
@@ -72,9 +72,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/main"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.7.0"
             },
-            "time": "2021-08-20T05:28:17+00:00"
+            "time": "2021-08-26T09:18:54+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -6344,7 +6344,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "ampproject/amp-toolbox": 20,
         "sabberworm/php-css-parser": 20,
         "roave/security-advisories": 20
     },

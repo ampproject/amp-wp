@@ -122,15 +122,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
-	 *      @type string[] $dynamic_element_selectors  Selectors for elements (or their ancestors) which contain dynamic content; selectors containing these will not be filtered.
-	 *      @type bool     $use_document_element       Whether the root of the document should be used rather than the body.
-	 *      @type bool     $require_https_src          Require HTTPS URLs.
-	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
-	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
-	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
-	 *      @type string[] $focus_within_classes       Class names in selectors that should be replaced with :focus-within pseudo classes.
-	 *      @type string[] $low_priority_plugins       Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
-	 *      @type bool     $allow_transient_caching    Whether to allow caching parsed CSS in transients. This may need to be disabled when there is highly-variable CSS content.
+	 *      @type string[] $dynamic_element_selectors      Selectors for elements (or their ancestors) which contain dynamic content; selectors containing these will not be filtered.
+	 *      @type bool     $use_document_element           Whether the root of the document should be used rather than the body.
+	 *      @type bool     $require_https_src              Require HTTPS URLs.
+	 *      @type callable $validation_error_callback      Function to call when a validation error is encountered.
+	 *      @type bool     $should_locate_sources          Whether to locate the sources when reporting validation errors.
+	 *      @type string   $parsed_cache_variant           Additional value by which to vary parsed cache.
+	 *      @type string[] $focus_within_classes           Class names in selectors that should be replaced with :focus-within pseudo classes.
+	 *      @type string[] $low_priority_plugins           Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
+	 *      @type bool     $allow_transient_caching        Whether to allow caching parsed CSS in transients. This may need to be disabled when there is highly-variable CSS content.
+	 *      @type bool     $transform_important_qualifiers Whether !important rules should be transformed. This also necessarily transform inline style attributes.
 	 * }
 	 */
 	protected $args;
@@ -141,19 +142,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'dynamic_element_selectors' => [
+		'dynamic_element_selectors'      => [
 			'amp-list',
 			'amp-live-list',
 			'[submit-error]',
 			'[submit-success]',
 			'amp-script',
 		],
-		'should_locate_sources'     => false,
-		'parsed_cache_variant'      => null,
-		'focus_within_classes'      => [ 'focus' ],
-		'low_priority_plugins'      => [ 'query-monitor' ],
-		'allow_transient_caching'   => true,
-		'skip_tree_shaking'         => false,
+		'should_locate_sources'          => false,
+		'parsed_cache_variant'           => null,
+		'focus_within_classes'           => [ 'focus' ],
+		'low_priority_plugins'           => [ 'query-monitor' ],
+		'allow_transient_caching'        => true,
+		'skip_tree_shaking'              => false,
+		'transform_important_qualifiers' => true,
 	];
 
 	/**
@@ -955,12 +957,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$elements = [];
-		foreach ( $this->dom->xpath->query( "//*[ @style $dev_mode_predicate ]" ) as $element ) {
-			$elements[] = $element;
-		}
-		foreach ( $elements as $element ) {
-			$this->collect_inline_styles( $element );
+		if ( $this->args['transform_important_qualifiers'] ) {
+			$elements = [];
+			foreach ( $this->dom->xpath->query( "//*[ @style $dev_mode_predicate ]" ) as $element ) {
+				$elements[] = $element;
+			}
+			foreach ( $elements as $element ) {
+				$this->collect_inline_styles( $element );
+			}
 		}
 
 		$this->finalize_styles();
@@ -1570,11 +1574,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
 				$options,
-				[ 'property_allowlist', 'property_denylist', 'stylesheet_url', 'allowed_at_rules' ]
+				[
+					'property_allowlist',
+					'property_denylist',
+					'stylesheet_url',
+					'allowed_at_rules',
+				]
 			),
 			wp_array_slice_assoc(
 				$this->args,
-				[ 'should_locate_sources', 'parsed_cache_variant', 'dynamic_element_selectors' ]
+				[
+					'should_locate_sources',
+					'parsed_cache_variant',
+					'dynamic_element_selectors',
+					'transform_important_qualifiers',
+				]
 			),
 			[
 				'language'          => get_bloginfo( 'language' ), // Used to tree-shake html[lang] selectors.
@@ -2382,10 +2396,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->process_font_face_at_rule( $ruleset, $options );
 		}
 
-		$results = array_merge(
-			$results,
-			$this->transform_important_qualifiers( $ruleset, $css_list, $options )
-		);
+		if ( $this->args['transform_important_qualifiers'] ) {
+			$results = array_merge(
+				$results,
+				$this->transform_important_qualifiers( $ruleset, $css_list, $options )
+			);
+		}
 
 		// Remove the ruleset if it is now empty.
 		if ( 0 === count( $ruleset->getRules() ) ) {
@@ -2605,10 +2621,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
-				$results = array_merge(
-					$results,
-					$this->transform_important_qualifiers( $rules, $css_list, $options )
-				);
+				if ( $this->args['transform_important_qualifiers'] ) {
+					$results = array_merge(
+						$results,
+						$this->transform_important_qualifiers( $rules, $css_list, $options )
+					);
+				}
 
 				$properties = $rules->getRules();
 				foreach ( $properties as $property ) {
@@ -3203,15 +3221,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Replace the somewhat-meta [style] attribute selectors with attribute selector using the data attribute the original styles are copied into.
-			$selector = preg_replace(
-				'/(?<=\[)style(?=([*$~]?=.*?)?])/is',
-				self::ORIGINAL_STYLE_ATTRIBUTE_NAME,
-				$selector,
-				-1,
-				$count
-			);
-			if ( $count > 0 ) {
-				$has_changed_selectors = true;
+			if ( $this->args['transform_important_qualifiers'] ) {
+				$selector = preg_replace(
+					'/(?<=\[)style(?=([*$~]?=.*?)?])/is',
+					self::ORIGINAL_STYLE_ATTRIBUTE_NAME,
+					$selector,
+					- 1,
+					$count
+				);
+				if ( $count > 0 ) {
+					$has_changed_selectors = true;
+				}
 			}
 
 			/*

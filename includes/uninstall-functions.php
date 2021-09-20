@@ -141,6 +141,7 @@ function delete_transients() {
 		'AmpProject\AmpWP\DevTools\BlockSourcesamp_block_sources',
 		'amp-parsed-stylesheet-v%',
 		'amp_error_index_counts',
+		'amp_has_page_caching',
 		'amp_img_%',
 		'amp_lock_%',
 		'amp_new_validation_error_urls_count',

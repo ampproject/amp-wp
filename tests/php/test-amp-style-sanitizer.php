@@ -975,6 +975,80 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$this->assertGreaterThan( 75000, strlen( implode( '', $actual_stylesheets ) ) );
 	}
 
+	/** @return array */
+	public function get_data_to_test_transform_important_qualifiers_arg() {
+		return [
+			'transform' => [
+				true,
+				[
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo{color:red}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo[data-amp-original-style*="blue"]{outline:solid 2px green}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-9605c4d{background:blue}',
+				],
+				null,
+			],
+			'no_transform' => [
+				false,
+				[
+					'.foo{color:red !important}',
+					'.foo[style*="blue"]{outline:solid 2px green !important}',
+				],
+				'background: blue !important',
+			],
+		];
+	}
+
+	/**
+	 * Test that transformation of !important qualifiers (and processing of style attributes) can be turned off.
+	 *
+	 * @dataProvider get_data_to_test_transform_important_qualifiers_arg
+	 * @param bool        $transform_important_qualifiers Sanitizer args.
+	 * @param array       $expected_stylesheets           Expected stylesheets.
+	 * @param string|null $expected_style_attr            Inline style attribute value, or null if not expected.
+	 */
+	public function test_transform_important_qualifiers_arg( $transform_important_qualifiers, $expected_stylesheets, $expected_style_attr ) {
+		$dom = Document::fromHtml(
+			'
+			<html>
+				<head>
+					<style>
+					.foo { color: red !important; }
+					</style>
+					<style>
+					.foo[style*="blue"] { outline: solid 2px green !important; }
+					</style>
+				</head>
+				<body>
+					<div class="foo" style="background: blue !important"></div>
+				</body>
+			</html>
+			',
+			Options::DEFAULTS
+		);
+
+		$args = [
+			'use_document_element' => true,
+		];
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, array_merge( $args, compact( 'transform_important_qualifiers' ) ) );
+		$sanitizer->sanitize();
+
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
+		$validating_sanitizer->sanitize();
+
+		$this->assertEquals(
+			$expected_stylesheets,
+			array_values( array_filter( $sanitizer->get_stylesheets() ) )
+		);
+
+		$style_attr = $dom->xpath->query( '//*/@style' )->item( 0 );
+		if ( $style_attr instanceof DOMAttr ) {
+			$style_attr = $style_attr->nodeValue;
+		}
+
+		$this->assertEquals( $expected_style_attr, $style_attr );
+	}
+
 	/**
 	 * Data for testing AMP selector conversion.
 	 *
