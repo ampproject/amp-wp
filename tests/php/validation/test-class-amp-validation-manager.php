@@ -1460,19 +1460,22 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 */
 	public function test_wrap_hook_callbacks() {
 
-		$args = [
-			'render_callback' => static function () {
+		$original_render_callback = static function () {
+			return '<span>Render callback</span>';
+		};
 
-				return '<span>Render callback</span>';
-			},
+		$args = [
+			'render_callback' => $original_render_callback,
 		];
 
 		$output = AMP_Validation_Manager::wrap_block_callbacks( $args );
 
-		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $output['render_callback'] );
-		$callback = $this->get_private_property( $output['render_callback'], 'callback' );
-		$this->assertEquals( 'the_content', $callback['source']['hook'] );
-		$this->assertEquals( 9, $callback['source']['priority'] );
+		$render_callback = $output['render_callback'];
+		$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $render_callback );
+		$this->assertSame(
+			$original_render_callback,
+			$render_callback->get_callback_function()
+		);
 	}
 
 	/**

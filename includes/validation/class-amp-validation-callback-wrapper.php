@@ -36,6 +36,15 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	}
 
 	/**
+	 * Get callback function.
+	 *
+	 * @return callable
+	 */
+	public function get_callback_function() {
+		return $this->callback['function'];
+	}
+
+	/**
 	 * Prepare for invocation.
 	 *
 	 * @since 1.5
