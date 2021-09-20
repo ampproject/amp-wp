@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { createContext, useEffect, useRef, useState } from '@wordpress/element';
-import { getQueryArg } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -17,6 +16,12 @@ import { useAsyncError } from '../../utils/use-async-error';
 
 export const SiteScan = createContext();
 
+const SITE_SCAN_STATE_INITIALIZING = 'SITE_SCAN_STATE_INITIALIZING';
+const SITE_SCAN_STATE_READY = 'SITE_SCAN_STATE_READY';
+const SITE_SCAN_STATE_IDLE = 'SITE_SCAN_STATE_IDLE';
+const SITE_SCAN_STATE_IN_PROGRESS = 'SITE_SCAN_STATE_IN_PROGRESS';
+const SITE_SCAN_STATE_COMPLETE = 'SITE_SCAN_STATE_COMPLETE';
+
 /**
  * Context provider for site scanning.
  *
@@ -28,10 +33,12 @@ export function SiteScanContextProvider( {
 	children,
 	scannableUrlsRestPath,
 } ) {
-	const [ themeIssues, setThemeIssues ] = useState( null );
-	const [ pluginIssues, setPluginIssues ] = useState( null );
-	const [ scanningSite, setScanningSite ] = useState( true );
+	const [ themeIssues, setThemeIssues ] = useState( [] );
+	const [ pluginIssues, setPluginIssues ] = useState( [] );
+	const [ siteScanState, setSiteScanState ] = useState( SITE_SCAN_STATE_INITIALIZING );
+	const [ currentlyScannedUrlIndex, setCurrentlyScannedUrlIndex ] = useState( 0 );
 	const [ fetchingScannableUrls, setFetchingScannableUrls ] = useState( false );
+	const [ fetchedScannableUrls, setFetchedScannableUrls ] = useState( false );
 	const [ scannableUrls, setScannableUrls ] = useState( [] );
 	const { setAsyncError } = useAsyncError();
 
@@ -42,7 +49,7 @@ export function SiteScanContextProvider( {
 	}, [] );
 
 	useEffect( () => {
-		if ( fetchingScannableUrls || scannableUrls.length > 0 ) {
+		if ( fetchingScannableUrls || fetchedScannableUrls ) {
 			return;
 		}
 
@@ -53,7 +60,7 @@ export function SiteScanContextProvider( {
 			setFetchingScannableUrls( true );
 
 			try {
-				const fetchedScannableUrls = await apiFetch( {
+				const response = await apiFetch( {
 					path: scannableUrlsRestPath,
 				} );
 
@@ -61,7 +68,9 @@ export function SiteScanContextProvider( {
 					return;
 				}
 
-				setScannableUrls( fetchedScannableUrls );
+				setScannableUrls( response );
+				setSiteScanState( SITE_SCAN_STATE_READY );
+				setFetchedScannableUrls( true );
 			} catch ( e ) {
 				setAsyncError( e );
 				return;
@@ -69,41 +78,59 @@ export function SiteScanContextProvider( {
 
 			setFetchingScannableUrls( false );
 		} )();
-	}, [ fetchingScannableUrls, scannableUrlsRestPath, scannableUrls.length, setAsyncError ] );
+	}, [ fetchedScannableUrls, fetchingScannableUrls, scannableUrlsRestPath, setAsyncError ] );
 
 	/**
-	 * @todo Note: The following effects will be updated for version 2.1 when site scan is implemented in the wizard. For now,
-	 * we will keep themeIssues and pluginIssues set to null, emulating an unsuccessful site scan. The wizard will then make
-	 * a mode recommendation based only on how the user has answered the technical question.
+	 * Scan site URLs sequentially.
 	 */
 	useEffect( () => {
-		if ( ! scanningSite && ! themeIssues ) {
-			setThemeIssues( getQueryArg( global.location.href, 'amp-theme-issues' ) ? [ 'Theme issue 1' ] : null ); // URL param is for testing.
+		if ( siteScanState !== SITE_SCAN_STATE_IDLE ) {
+			return;
 		}
-	}, [ scanningSite, themeIssues ] );
 
-	// See note above.
-	useEffect( () => {
-		if ( ! scanningSite && ! pluginIssues ) {
-			setPluginIssues( getQueryArg( global.location.href, 'amp-plugin-issues' ) ? [ 'Plugin issue 1' ] : null ); // URL param is for testing.
-		}
-	}, [ scanningSite, pluginIssues ] );
+		/**
+		 * Validates the next URL in the queue.
+		 */
+		( async () => {
+			setSiteScanState( SITE_SCAN_STATE_IN_PROGRESS );
 
-	// See note above.
-	useEffect( () => {
-		if ( true === scanningSite ) {
-			setScanningSite( false );
-		}
-	}, [ scanningSite ] );
+			try {
+				const { validate_url: validateUrl } = scannableUrls[ currentlyScannedUrlIndex ];
+				const validationResults = await apiFetch( { url: validateUrl } );
+
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				setPluginIssues( ( issues ) => [ ...issues, validationResults ] );
+			} catch ( e ) {
+				setAsyncError( e );
+				return;
+			}
+
+			/**
+			 * Finish the scan if there are no more URLs to validate.
+			 */
+			if ( currentlyScannedUrlIndex === scannableUrls.length - 1 ) {
+				setSiteScanState( SITE_SCAN_STATE_COMPLETE );
+			} else {
+				setCurrentlyScannedUrlIndex( ( index ) => index + 1 );
+				setSiteScanState( SITE_SCAN_STATE_IDLE );
+			}
+		} )();
+	}, [ currentlyScannedUrlIndex, scannableUrls, setAsyncError, siteScanState ] );
 
 	return (
 		<SiteScan.Provider
 			value={
 				{
+					canScanSite: siteScanState === SITE_SCAN_STATE_READY,
+					currentlyScannedUrlIndex,
 					fetchingScannableUrls,
 					pluginIssues,
-					scanningSite,
 					scannableUrls,
+					siteScanComplete: siteScanState === SITE_SCAN_STATE_COMPLETE,
+					startSiteScan: () => setSiteScanState( SITE_SCAN_STATE_IDLE ),
 					themeIssues,
 				}
 			}
