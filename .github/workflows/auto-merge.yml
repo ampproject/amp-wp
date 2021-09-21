@@ -7,6 +7,12 @@ on:
   pull_request_target:
     types: [opened, reopened, synchronize]
 
+# Cancel previous workflow run groups that have not completed.
+concurrency:
+  # Group workflow runs by workflow name and branch name of pull request.
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   automerge-dependencies:
     name: Automerge dependencies

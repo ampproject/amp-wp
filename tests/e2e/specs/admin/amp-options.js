@@ -113,7 +113,6 @@ describe( 'Saving', () => {
 	it( 'allows saving', async () => {
 		const testSave = async () => {
 			await expect( page ).toClick( 'button', { text: 'Save' } );
-			await expect( page ).toMatchElement( 'button[disabled].is-busy', { text: 'Saving' } );
 			await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
 			await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
 		};
@@ -121,7 +120,7 @@ describe( 'Saving', () => {
 		// Save button exists.
 		await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
 
-		// Toggle transistional mode.
+		// Toggle transitional mode.
 		await expect( page ).toClick( '#template-mode-transitional' );
 
 		// Button should be enabled.
