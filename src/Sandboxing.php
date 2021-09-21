@@ -1,6 +1,6 @@
 <?php
 /**
- * Class SandboxingLevels.
+ * Class Sandboxing.
  *
  * @package AmpProject\AmpWP
  */
@@ -22,7 +22,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * @since 2.2
  * @internal
  */
-final class SandboxingLevels implements Service, Registerable, Conditional {
+final class Sandboxing implements Service, Registerable, Conditional {
 
 	/**
 	 * Option key for sandboxing level.

@@ -138,7 +138,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Once amp-img is deprecated, these won't be needed and an <img> won't prevent strict sandboxing level for valid AMP.
 			// Note that AMP_Core_Theme_Sanitizer would have already run, so we can't update it here. Nevertheless,
-			// the native_img_used flag was already enabled by the SandboxingLevels service.
+			// the native_img_used flag was already enabled by the Sandboxing service.
 			// @todo We should consider doing this when there are PX-verified scripts as well.
 			$sanitizer_arg_updates[ AMP_Gallery_Block_Sanitizer::class ]['native_img_used'] = true;
 			$sanitizer_arg_updates[ AMP_Img_Sanitizer::class ]['native_img_used']           = true;
