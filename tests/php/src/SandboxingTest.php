@@ -65,13 +65,13 @@ class SandboxingTest extends DependencyInjectedTestCase {
 
 		$filtered = $this->instance->filter_rest_options_schema( $existing );
 		$this->assertArrayHasKey( 'foo', $filtered );
-		$this->assertArrayHasKey( Sandboxing::OPTION_SANDBOXING_LEVEL, $filtered );
+		$this->assertArrayHasKey( Sandboxing::OPTION_LEVEL, $filtered );
 	}
 
 	/** @covers ::filter_default_options() */
 	public function test_filter_default_options() {
 		$this->assertEquals(
-			[ Sandboxing::OPTION_SANDBOXING_LEVEL => Sandboxing::DEFAULT_SANDBOXING_LEVEL ],
+			[ Sandboxing::OPTION_LEVEL => Sandboxing::DEFAULT_LEVEL ],
 			$this->instance->filter_default_options( [] )
 		);
 	}
@@ -79,34 +79,34 @@ class SandboxingTest extends DependencyInjectedTestCase {
 	/** @covers ::sanitize_options() */
 	public function test_sanitize_options() {
 		$this->assertEquals(
-			[ Sandboxing::OPTION_SANDBOXING_LEVEL => 2 ],
+			[ Sandboxing::OPTION_LEVEL => 2 ],
 			$this->instance->sanitize_options(
-				[ Sandboxing::OPTION_SANDBOXING_LEVEL => 2 ],
-				[ Sandboxing::OPTION_SANDBOXING_LEVEL => 'bad' ]
+				[ Sandboxing::OPTION_LEVEL => 2 ],
+				[ Sandboxing::OPTION_LEVEL => 'bad' ]
 			)
 		);
 
 		$this->assertEquals(
-			[ Sandboxing::OPTION_SANDBOXING_LEVEL => 3 ],
+			[ Sandboxing::OPTION_LEVEL => 3 ],
 			$this->instance->sanitize_options(
-				[ Sandboxing::OPTION_SANDBOXING_LEVEL => 2 ],
-				[ Sandboxing::OPTION_SANDBOXING_LEVEL => 3 ]
+				[ Sandboxing::OPTION_LEVEL => 2 ],
+				[ Sandboxing::OPTION_LEVEL => 3 ]
 			)
 		);
 
 		$this->assertEquals(
-			[ Sandboxing::OPTION_SANDBOXING_LEVEL => 1 ],
+			[ Sandboxing::OPTION_LEVEL => 1 ],
 			$this->instance->sanitize_options(
-				[ Sandboxing::OPTION_SANDBOXING_LEVEL => 1 ],
-				[ Sandboxing::OPTION_SANDBOXING_LEVEL => 0 ]
+				[ Sandboxing::OPTION_LEVEL => 1 ],
+				[ Sandboxing::OPTION_LEVEL => 0 ]
 			)
 		);
 
 		$this->assertEquals(
-			[ Sandboxing::OPTION_SANDBOXING_LEVEL => 1 ],
+			[ Sandboxing::OPTION_LEVEL => 1 ],
 			$this->instance->sanitize_options(
-				[ Sandboxing::OPTION_SANDBOXING_LEVEL => 1 ],
-				[ Sandboxing::OPTION_SANDBOXING_LEVEL => 4 ]
+				[ Sandboxing::OPTION_LEVEL => 1 ],
+				[ Sandboxing::OPTION_LEVEL => 4 ]
 			)
 		);
 	}
@@ -115,8 +115,8 @@ class SandboxingTest extends DependencyInjectedTestCase {
 	public function test_add_hooks_not_standard_mode() {
 		AMP_Options_Manager::update_options(
 			[
-				Option::THEME_SUPPORT               => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
-				Sandboxing::OPTION_SANDBOXING_LEVEL => 2,
+				Option::THEME_SUPPORT    => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				Sandboxing::OPTION_LEVEL => 2,
 			]
 		);
 		$this->instance->add_hooks();
@@ -165,8 +165,8 @@ class SandboxingTest extends DependencyInjectedTestCase {
 	public function test_add_hooks( $level, $expected_sanitizer_args ) {
 		AMP_Options_Manager::update_options(
 			[
-				Option::THEME_SUPPORT               => AMP_Theme_Support::STANDARD_MODE_SLUG,
-				Sandboxing::OPTION_SANDBOXING_LEVEL => $level,
+				Option::THEME_SUPPORT    => AMP_Theme_Support::STANDARD_MODE_SLUG,
+				Sandboxing::OPTION_LEVEL => $level,
 			]
 		);
 		$this->instance->add_hooks();
@@ -193,13 +193,13 @@ class SandboxingTest extends DependencyInjectedTestCase {
 
 	/** @covers ::filter_amp_meta_generator() */
 	public function test_filter_amp_meta_generator() {
-		AMP_Options_Manager::update_option( Sandboxing::OPTION_SANDBOXING_LEVEL, 2 );
+		AMP_Options_Manager::update_option( Sandboxing::OPTION_LEVEL, 2 );
 		$this->assertEquals(
 			'PX Plugin 4.0; sandboxing-level=2',
 			$this->instance->filter_amp_meta_generator( 'PX Plugin 4.0' )
 		);
 
-		AMP_Options_Manager::update_option( Sandboxing::OPTION_SANDBOXING_LEVEL, 1 );
+		AMP_Options_Manager::update_option( Sandboxing::OPTION_LEVEL, 1 );
 		$this->assertEquals(
 			'PX Plugin 4.0; sandboxing-level=1',
 			$this->instance->filter_amp_meta_generator( 'PX Plugin 4.0' )

@@ -30,21 +30,23 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	 * @todo Move this to the Options interface once no longer experimental.
 	 * @var string
 	 */
-	const OPTION_SANDBOXING_LEVEL = 'sandboxing_level';
+	const OPTION_LEVEL = 'sandboxing_level';
 
 	/**
 	 * Sandboxing levels.
 	 *
 	 * @var int[]
 	 */
-	const SANDBOXING_LEVELS = [ 1, 2, 3 ];
+	const LEVELS = [ 1, 2, 3 ];
 
 	/**
 	 * Default sandboxing level.
 	 *
+	 * Note: This will eventually move to level 1 as the default.
+	 *
 	 * @var int
 	 */
-	const DEFAULT_SANDBOXING_LEVEL = 3;
+	const DEFAULT_LEVEL = 3;
 
 	/**
 	 * Whether service is needed.
@@ -87,10 +89,10 @@ final class Sandboxing implements Service, Registerable, Conditional {
 		return array_merge(
 			$schema,
 			[
-				self::OPTION_SANDBOXING_LEVEL => [
+				self::OPTION_LEVEL => [
 					'type'    => 'int',
-					'enum'    => self::SANDBOXING_LEVELS,
-					'default' => self::DEFAULT_SANDBOXING_LEVEL,
+					'enum'    => self::LEVELS,
+					'default' => self::DEFAULT_LEVEL,
 				],
 			]
 		);
@@ -103,7 +105,7 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	 * @return array Defaults.
 	 */
 	public function filter_default_options( $defaults ) {
-		$defaults[ self::OPTION_SANDBOXING_LEVEL ] = self::DEFAULT_SANDBOXING_LEVEL;
+		$defaults[ self::OPTION_LEVEL ] = self::DEFAULT_LEVEL;
 		return $defaults;
 	}
 
@@ -116,11 +118,11 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	 */
 	public function sanitize_options( $options, $new_options ) {
 		if (
-			isset( $new_options[ self::OPTION_SANDBOXING_LEVEL ] )
+			isset( $new_options[ self::OPTION_LEVEL ] )
 			&&
-			in_array( $new_options[ self::OPTION_SANDBOXING_LEVEL ], self::SANDBOXING_LEVELS, true )
+			in_array( $new_options[ self::OPTION_LEVEL ], self::LEVELS, true )
 		) {
-			$options[ self::OPTION_SANDBOXING_LEVEL ] = $new_options[ self::OPTION_SANDBOXING_LEVEL ];
+			$options[ self::OPTION_LEVEL ] = $new_options[ self::OPTION_LEVEL ];
 		}
 		return $options;
 	}
@@ -138,7 +140,7 @@ final class Sandboxing implements Service, Registerable, Conditional {
 
 		add_filter( 'amp_meta_generator', [ $this, 'filter_amp_meta_generator' ] );
 
-		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_SANDBOXING_LEVEL );
+		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_LEVEL );
 
 		// Opt-in to the new script sanitization logic in the script sanitizer.
 		add_filter(
@@ -177,7 +179,7 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	 * @return string Amended content.
 	 */
 	public function filter_amp_meta_generator( $content ) {
-		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_SANDBOXING_LEVEL );
+		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_LEVEL );
 		return $content . sprintf( '; sandboxing-level=%d', $sandboxing_level );
 	}
 }
