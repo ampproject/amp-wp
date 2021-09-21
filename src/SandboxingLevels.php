@@ -55,6 +55,9 @@ final class SandboxingLevels implements Service, Registerable, Conditional {
 		/**
 		 * Filters whether experimental sandboxing is enabled.
 		 *
+		 * Note: This filter will be removed and the service as a whole will no longer be Conditional once the feature
+		 * is no longer experimental.
+		 *
 		 * @internal
 		 * @since 2.2
 		 *
