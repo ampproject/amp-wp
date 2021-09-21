@@ -20,7 +20,8 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 
 	private static $original_amp_options;
 
-	public static function setUpBeforeClass() {
+	public static function set_up_before_class() {
+		parent::set_up_before_class();
 		self::$original_amp_options = AMP_Options_Manager::get_options();
 	}
 

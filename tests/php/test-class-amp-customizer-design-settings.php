@@ -15,9 +15,9 @@ use AmpProject\AmpWP\Tests\TestCase;
  */
 class Test_AMP_Customizer_Design_Settings extends TestCase {
 
-	public static function setUpBeforeClass() {
+	public static function set_up_before_class() {
 		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
-		return parent::setUpBeforeClass();
+		parent::set_up_before_class();
 	}
 
 	/**
