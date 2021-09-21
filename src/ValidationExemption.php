@@ -100,9 +100,7 @@ final class ValidationExemption {
 				$node->setAttributeNode( $node->ownerDocument->createAttribute( self::PX_VERIFIED_TAG_ATTRIBUTE ) );
 			}
 			return true;
-		}
-
-		if ( $node instanceof DOMAttr ) {
+		} elseif ( $node instanceof DOMAttr ) {
 			$element = $node->parentNode;
 			if ( ! $element instanceof Element ) {
 				return false; // @codeCoverageIgnore
@@ -138,9 +136,7 @@ final class ValidationExemption {
 				$node->setAttributeNode( $node->ownerDocument->createAttribute( self::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
 			}
 			return true;
-		}
-
-		if ( $node instanceof DOMAttr ) {
+		} elseif ( $node instanceof DOMAttr ) {
 			$element = $node->parentNode;
 			if ( ! $element instanceof Element ) {
 				return false; // @codeCoverageIgnore
@@ -172,7 +168,7 @@ final class ValidationExemption {
 
 		// Prevent removing a tag which was exempted from validation.
 		if (
-			$node instanceof \DOMElement
+			$node instanceof Element
 			&&
 			$node->hasAttribute( self::AMP_UNVALIDATED_TAG_ATTRIBUTE )
 		) {
