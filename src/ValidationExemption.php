@@ -62,25 +62,11 @@ final class ValidationExemption {
 	 * @return bool Whether node marked as being PX-verified.
 	 */
 	public static function is_px_verified_for_node( DOMNode $node ) {
-
-		// Check element.
-		if (
-			$node instanceof Element
-			&&
-			$node->hasAttribute( self::PX_VERIFIED_TAG_ATTRIBUTE )
-		) {
-			return true;
+		if ( $node instanceof Element ) {
+			return $node->hasAttribute( self::PX_VERIFIED_TAG_ATTRIBUTE );
+		} elseif ( $node instanceof DOMAttr ) {
+			return self::check_for_attribute_token_list_membership( $node, self::PX_VERIFIED_ATTRS_ATTRIBUTE );
 		}
-
-		// Check attribute.
-		if (
-			$node instanceof DOMAttr
-			&&
-			self::check_for_attribute_token_list_membership( $node, self::PX_VERIFIED_ATTRS_ATTRIBUTE )
-		) {
-			return true;
-		}
-
 		return false;
 	}
 
@@ -165,25 +151,11 @@ final class ValidationExemption {
 	 * @return bool Whether node marked as being AMP-unvalidated.
 	 */
 	public static function is_amp_unvalidated_for_node( DOMNode $node ) {
-
-		// Prevent removing a tag which was exempted from validation.
-		if (
-			$node instanceof Element
-			&&
-			$node->hasAttribute( self::AMP_UNVALIDATED_TAG_ATTRIBUTE )
-		) {
-			return true;
+		if ( $node instanceof Element ) {
+			return $node->hasAttribute( self::AMP_UNVALIDATED_TAG_ATTRIBUTE );
+		} elseif ( $node instanceof DOMAttr ) {
+			return self::check_for_attribute_token_list_membership( $node, self::AMP_UNVALIDATED_ATTRS_ATTRIBUTE );
 		}
-
-		// Check attribute.
-		if (
-			$node instanceof DOMAttr
-			&&
-			self::check_for_attribute_token_list_membership( $node, self::AMP_UNVALIDATED_ATTRS_ATTRIBUTE )
-		) {
-			return true;
-		}
-
 		return false;
 	}
 
