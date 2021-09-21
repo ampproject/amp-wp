@@ -99,7 +99,7 @@ class AMP_Video_Converter_Test extends TestCase {
 
 			'local_video_without_dimensions_and_native' => [
 				sprintf( '<video src="%s"></video>', '{{video_url}}' ),
-				sprintf( '<video src="%s" width="560" height="320" %s></video>', '{{video_url}}', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				sprintf( '<video src="%s" width="560" height="320" %s></video>', '{{video_url}}', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
 				[
 					'native_video_used' => true,
 				],

@@ -347,11 +347,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				$node->setAttribute( $name, $value );
 			}
 
-			// Opt-in to dev mode to prevent raising validation errors for an intentionally invalid <img>.
+			// Mark element as PX-verified to prevent raising validation errors for an intentionally invalid <img>.
 			// It doesn't make sense to raise a validation error to allow the user to decide whether to convert from
 			// <img> to <amp-img> since the native_img_used arg is the opt-in to not do any such conversion.
 			// @todo Remove once https://github.com/ampproject/amphtml/issues/30442 lands.
-			ValidationExemption::mark_node_as_amp_unvalidated( $node );
+			ValidationExemption::mark_node_as_px_verified( $node );
 
 			return;
 		}

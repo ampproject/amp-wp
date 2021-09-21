@@ -131,7 +131,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 			// If using native <iframe> instead of converting to <amp-iframe>, just mark the element as being unvalidated.
 			if ( $this->args['native_iframe_used'] ) {
-				ValidationExemption::mark_node_as_amp_unvalidated( $node );
+				ValidationExemption::mark_node_as_px_verified( $node );
 				continue;
 			}
 

@@ -74,7 +74,7 @@ class AMP_Iframe_Converter_Test extends TestCase {
 
 			'simple_native_iframe'                             => [
 				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
-				sprintf( '<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen %s></iframe>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				sprintf( '<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen %s></iframe>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
 				[
 					'native_iframe_used' => true,
 				],

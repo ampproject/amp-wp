@@ -8,7 +8,6 @@
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\DevMode;
 use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
 use AmpProject\AmpWP\Tests\TestCase;
 
@@ -200,7 +199,7 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 			],
 			'native_form_with_post_action' => [
 				'<form method="post" action="http://example.com"></form>',
-				sprintf( '<form method="post" action="http://example.com" %s></form>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				sprintf( '<form method="post" action="http://example.com" %s></form>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
 				[
 					'native_post_forms_allowed' => 'always',
 				],
@@ -229,7 +228,7 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 						<form action="/" method="post" %1$s></form>
 						<form id="commentform" method="post" action="%2$s" %1$s></form>
 					',
-					ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE,
+					ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE,
 					site_url( '/wp-comments-post.php', 'https' )
 				),
 				[

@@ -85,7 +85,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 			'simple_native_image'                      => [
 				'<img src="https://placehold.it/300x300" width="300" height="300" class="align-center">',
-				sprintf( '<img src="https://placehold.it/300x300" width="300" height="300" class="align-center amp-wp-enforced-sizes" decoding="async" %s>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				sprintf( '<img src="https://placehold.it/300x300" width="300" height="300" class="align-center amp-wp-enforced-sizes" decoding="async" %s>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
 				[
 					'native_img_used' => true,
 				],
@@ -93,7 +93,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 			'native_image_with_no_dims_and_loading'    => [
 				'<img src="https://placehold.it/150x300" loading="lazy" decoding="sync">',
-				sprintf( '<img src="https://placehold.it/150x300" loading="lazy" decoding="sync" width="150" height="300" class="amp-wp-enforced-sizes" %s>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				sprintf( '<img src="https://placehold.it/150x300" loading="lazy" decoding="sync" width="150" height="300" class="amp-wp-enforced-sizes" %s>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
 				[
 					'native_img_used' => true,
 				],

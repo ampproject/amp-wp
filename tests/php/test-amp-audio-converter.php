@@ -74,7 +74,7 @@ class AMP_Audio_Converter_Test extends TestCase {
 
 			'simple_native_audio' => [
 				'<audio src="https://example.com/audio/file.ogg" data-foo="bar"></audio>',
-				sprintf( '<audio src="https://example.com/audio/file.ogg" data-foo="bar" %s></audio>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				sprintf( '<audio src="https://example.com/audio/file.ogg" data-foo="bar" %s></audio>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
 				[
 					'native_audio_used' => true,
 				],

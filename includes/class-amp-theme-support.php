@@ -1562,7 +1562,7 @@ class AMP_Theme_Support {
 					$dom->createTextNode( '(self.AMP = self.AMP || []).push(function (AMP) { AMP.toggleExperiment("bento", true); });' )
 				);
 
-				ValidationExemption::mark_node_as_amp_unvalidated( $bento_experiment_script );
+				ValidationExemption::mark_node_as_px_verified( $bento_experiment_script );
 				if ( DevMode::isActiveForDocument( $dom ) ) {
 					$bento_experiment_script->setAttributeNode( $dom->createAttribute( Attribute::DATA_AMPDEVMODE ) );
 				}
@@ -2173,7 +2173,7 @@ class AMP_Theme_Support {
 			if ( array_key_exists( Extension::LIVE_LIST, $amp_scripts ) ) {
 				$script = $dom->createElement( Tag::SCRIPT );
 				$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
-				ValidationExemption::mark_node_as_amp_unvalidated( $script );
+				ValidationExemption::mark_node_as_px_verified( $script );
 				$script->setAttributeNode( $dom->createAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
 				$dom->head->appendChild( $script );
 			}

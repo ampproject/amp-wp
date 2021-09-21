@@ -77,7 +77,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 
 			// If native audio is being used, just mark it as unvalidated.
 			if ( $this->args['native_audio_used'] ) {
-				ValidationExemption::mark_node_as_amp_unvalidated( $node );
+				ValidationExemption::mark_node_as_px_verified( $node );
 				continue;
 			}
 

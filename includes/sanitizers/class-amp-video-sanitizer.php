@@ -132,7 +132,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 						$node->setAttribute( $attr_name, $new_attributes[ $attr_name ] );
 					}
 				}
-				ValidationExemption::mark_node_as_amp_unvalidated( $node );
+				ValidationExemption::mark_node_as_px_verified( $node );
 				continue;
 			}
 

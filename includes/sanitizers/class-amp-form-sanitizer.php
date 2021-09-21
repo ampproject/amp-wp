@@ -155,7 +155,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				[ 'code' => self::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED ]
 			);
 		} else {
-			ValidationExemption::mark_node_as_amp_unvalidated( $post_form_element );
+			ValidationExemption::mark_node_as_px_verified( $post_form_element );
 		}
 	}
 
