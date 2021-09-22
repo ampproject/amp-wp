@@ -39,13 +39,16 @@ export function SiteScanInProgress() {
 					: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
 				} />
 				<p>
-					{ sprintf(
-						// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.
-						__( 'Scanning %1$d/%2$d URLs: Checking %3$s…', 'amp' ),
-						currentlyScannedUrlIndex + 1,
-						scannableUrls.length,
-						scannableUrls[ currentlyScannedUrlIndex ]?.type,
-					) }
+					{ siteScanComplete
+						? __( 'Scan complete', 'amp' )
+						: sprintf(
+							// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.
+							__( 'Scanning %1$d/%2$d URLs: Checking %3$s…', 'amp' ),
+							currentlyScannedUrlIndex + 1,
+							scannableUrls.length,
+							scannableUrls[ currentlyScannedUrlIndex ]?.type,
+						)
+					}
 				</p>
 			</Selectable>
 		</div>

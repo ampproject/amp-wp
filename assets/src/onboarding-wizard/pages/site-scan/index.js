@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useContext, useEffect } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -22,6 +22,7 @@ export function SiteScan() {
 		startSiteScan,
 		siteScanComplete,
 	} = useContext( SiteScanContext );
+	const [ canShowScanSummary, setCanShowScanSummary ] = useState( false );
 
 	/**
 	 * Start site scan.
@@ -33,6 +34,24 @@ export function SiteScan() {
 	}, [ canScanSite, startSiteScan ] );
 
 	/**
+	 * Show scan summary with a delay so that the progress bar has a chance to
+	 * complete.
+	 */
+	useEffect( () => {
+		let delay;
+
+		if ( siteScanComplete ) {
+			delay = setTimeout( () => setCanShowScanSummary( true ), 500 );
+		}
+
+		return () => {
+			if ( delay ) {
+				clearTimeout( delay );
+			}
+		};
+	}, [ siteScanComplete ] );
+
+	/**
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
@@ -41,7 +60,7 @@ export function SiteScan() {
 		}
 	}, [ setCanGoForward, siteScanComplete ] );
 
-	if ( siteScanComplete ) {
+	if ( canShowScanSummary ) {
 		return <SiteScanComplete />;
 	}
 

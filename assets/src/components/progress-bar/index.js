@@ -16,6 +16,7 @@ import './style.scss';
 export function ProgressBar( { value } ) {
 	const style = {
 		transform: `translateX(${ Math.max( value, 3 ) - 100 }%)`,
+		transitionDuration: `${ value < 100 ? 800 : 200 }ms`,
 	};
 
 	return (
