@@ -150,6 +150,16 @@ class AMP_Validation_Manager {
 	public static $hook_source_stack = [];
 
 	/**
+	 * Original render_callbacks for blocks at the time of wrapping.
+	 *
+	 * Keys are block names, values are the render_callback callables.
+	 *
+	 * @see AMP_Validation_Manager::wrap_block_callbacks()
+	 * @var array<string, callable>
+	 */
+	protected static $original_block_render_callbacks = [];
+
+	/**
 	 * Whether a validate request is being performed.
 	 *
 	 * When responding to a request to validate a URL, instead of an HTML document being returned, a JSON document is
@@ -526,6 +536,8 @@ class AMP_Validation_Manager {
 	public static function add_validation_error_sourcing() {
 		add_action( 'wp', [ __CLASS__, 'wrap_widget_callbacks' ] );
 
+		$int_min = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+		add_filter( 'register_block_type_args', [ __CLASS__, 'wrap_block_callbacks' ], $int_min );
 		add_action( 'all', [ __CLASS__, 'wrap_hook_callbacks' ] );
 		$wrapped_filters = [ 'the_content', 'the_excerpt' ];
 		foreach ( $wrapped_filters as $wrapped_filter ) {
@@ -684,11 +696,12 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function reset_validation_results() {
-		self::$validation_results      = [];
-		self::$enqueued_style_sources  = [];
-		self::$enqueued_script_sources = [];
-		self::$extra_script_sources    = [];
-		self::$extra_style_sources     = [];
+		self::$validation_results              = [];
+		self::$enqueued_style_sources          = [];
+		self::$enqueued_script_sources         = [];
+		self::$extra_script_sources            = [];
+		self::$extra_style_sources             = [];
+		self::$original_block_render_callbacks = [];
 	}
 
 	/**
@@ -1014,8 +1027,29 @@ class AMP_Validation_Manager {
 		}
 		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $source['block_name'] );
 		if ( $block_type && $block_type->is_dynamic() ) {
+			$render_callback = $block_type->render_callback;
+
+			// Access the underlying callback which was wrapped by ::wrap_block_callbacks() below.
+			while ( $render_callback instanceof AMP_Validation_Callback_Wrapper ) {
+				$render_callback = $render_callback->get_callback_function();
+			}
+
 			$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
-			$callback_source     = $callback_reflection->get_source( $block_type->render_callback );
+			$callback_source     = $callback_reflection->get_source( $render_callback );
+
+			// Handle special case to undo the wrapping that Gutenberg does in gutenberg_inject_default_block_context().
+			if (
+				$callback_source
+				&&
+				'plugin' === $callback_source['type']
+				&&
+				'gutenberg' === $callback_source['name']
+				&&
+				array_key_exists( $source['block_name'], self::$original_block_render_callbacks )
+			) {
+				$callback_source = $callback_reflection->get_source( self::$original_block_render_callbacks[ $source['block_name'] ] );
+			}
+
 			if ( $callback_source ) {
 				$source = array_merge(
 					$source,
@@ -1034,6 +1068,44 @@ class AMP_Validation_Manager {
 			}
 		}
 		return $replaced;
+	}
+
+	/**
+	 * Wrap callbacks for registered blocks to keep track of queued assets and the source for anything printed for validation.
+	 *
+	 * @param array $args Array of arguments for registering a block type.
+	 *
+	 * @return array Array of arguments for registering a block type.
+	 */
+	public static function wrap_block_callbacks( $args ) {
+
+		if ( ! isset( $args['render_callback'] ) || ! is_callable( $args['render_callback'] ) ) {
+			return $args;
+		}
+
+		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
+		$source              = $callback_reflection->get_source( $args['render_callback'] );
+
+		if ( ! $source ) {
+			return $args;
+		}
+
+		unset( $source['reflection'] ); // Omit from stored source.
+		$original_function = $args['render_callback'];
+
+		if ( isset( $args['name'] ) ) {
+			self::$original_block_render_callbacks[ $args['name'] ] = $original_function;
+		}
+
+		$args['render_callback'] = self::wrapped_callback(
+			[
+				'function'      => $original_function,
+				'source'        => $source,
+				'accepted_args' => 3, // The three args passed to render_callback are $attributes, $content, and $block.
+			]
+		);
+
+		return $args;
 	}
 
 	/**
