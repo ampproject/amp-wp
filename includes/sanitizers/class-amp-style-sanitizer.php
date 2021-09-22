@@ -1588,7 +1588,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed         = null;
 		$cache_key      = null;
 		$cached         = true;
-		$cache_group    = 'amp-parsed-stylesheet-v36'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group    = 'amp-parsed-stylesheet-v37'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 		$use_transients = $this->should_use_transient_caching();
 
 		// @todo If ValidationExemption::is_px_verified_for_node( $this->current_node ) then keep !important.
