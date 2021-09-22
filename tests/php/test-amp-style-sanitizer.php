@@ -14,9 +14,11 @@ use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
 
 /**
  * Test AMP_Style_Sanitizer.
@@ -977,38 +979,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 	/** @return array */
 	public function get_data_to_test_transform_important_qualifiers_arg() {
-		return [
-			'transform' => [
-				true,
-				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo{color:red}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo[data-amp-original-style*="blue"]{outline:solid 2px green}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-9605c4d{background:blue}',
-				],
-				null,
-			],
-			'no_transform' => [
-				false,
-				[
-					'.foo{color:red !important}',
-					'.foo[style*="blue"]{outline:solid 2px green !important}',
-				],
-				'background: blue !important',
-			],
-		];
-	}
-
-	/**
-	 * Test that transformation of !important qualifiers (and processing of style attributes) can be turned off.
-	 *
-	 * @dataProvider get_data_to_test_transform_important_qualifiers_arg
-	 * @param bool        $transform_important_qualifiers Sanitizer args.
-	 * @param array       $expected_stylesheets           Expected stylesheets.
-	 * @param string|null $expected_style_attr            Inline style attribute value, or null if not expected.
-	 */
-	public function test_transform_important_qualifiers_arg( $transform_important_qualifiers, $expected_stylesheets, $expected_style_attr ) {
-		$dom = Document::fromHtml(
-			'
+		$html = '
 			<html>
 				<head>
 					<style>
@@ -1017,17 +988,89 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					<style>
 					.foo[style*="blue"] { outline: solid 2px green !important; }
 					</style>
+					<style>
+					.i-amphtml-illegal { color: black; }
+					</style>
 				</head>
 				<body>
 					<div class="foo" style="background: blue !important"></div>
+					<div class="bar" style="background: red"></div>
+					<div class="baz i-amphtml-illegal"></div>
 				</body>
 			</html>
-			',
-			Options::DEFAULTS
-		);
+		';
+
+		return [
+			'transform' => [
+				true, // transform_important_qualifiers
+				true, // should_sanitize
+				$html,
+				[
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo{color:red}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo[data-amp-original-style*="blue"]{outline:solid 2px green}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-9605c4d{background:blue}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-32bb249{background:red}',
+				],
+				'<style amp-custom>',
+				'
+					<div class="foo amp-wp-9605c4d" data-amp-original-style="background: blue !important"></div>
+					<div class="bar amp-wp-32bb249" data-amp-original-style="background: red"></div>
+					<div class="baz"></div>
+				',
+			],
+			'no_transform' => [
+				false, // transform_important_qualifiers
+				true, // should_sanitize
+				$html,
+				[
+					'.foo{color:red !important}',
+					'.foo[style*="blue"]{outline:solid 2px green !important}',
+				],
+				'<style amp-custom ' . ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE . '>',
+				'
+					<div class="foo" style="background: blue !important" data-px-verified-attrs="style"></div>
+					<div class="bar" style="background: red"></div>
+					<div class="baz"></div>
+				',
+			],
+			'no_transform_no_sanitize' => [
+				false, // transform_important_qualifiers
+				false, // should_sanitize
+				$html,
+				[
+					'.foo{color:red !important}',
+					'.foo[style*="blue"]{outline:solid 2px green !important}',
+					'.i-amphtml-illegal{color:black}',
+				],
+				'<style amp-custom ' . ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE . '>',
+				'
+					<div class="foo" style="background: blue !important" data-px-verified-attrs="style"></div>
+					<div class="bar" style="background: red"></div>
+					<div class="baz i-amphtml-illegal" ' . ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE . '="class"></div>
+				',
+			],
+		];
+	}
+
+	/**
+	 * Test that transformation of !important qualifiers (and processing of style attributes) can be turned off.
+	 *
+	 * @dataProvider get_data_to_test_transform_important_qualifiers_arg
+	 * @param bool   $transform_important_qualifiers Sanitizer args.
+	 * @param bool   $should_sanitize                Whether invalid markup should be sanitized.
+	 * @param string $html_input                     HTML input document.
+	 * @param array  $expected_stylesheets           Expected stylesheets.
+	 * @param string $expected_custom_css_start_tag  Custom CSS start style tag.
+	 * @param string $expected_body_markup           Expected body markup.
+	 */
+	public function test_transform_important_qualifiers_arg( $transform_important_qualifiers, $should_sanitize, $html_input, $expected_stylesheets, $expected_custom_css_start_tag, $expected_body_markup ) {
+		$dom = Document::fromHtml( $html_input, Options::DEFAULTS );
 
 		$args = [
-			'use_document_element' => true,
+			'use_document_element'      => true,
+			'validation_error_callback' => static function () use ( $should_sanitize ) {
+				return $should_sanitize;
+			},
 		];
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom, array_merge( $args, compact( 'transform_important_qualifiers' ) ) );
@@ -1041,12 +1084,20 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			array_values( array_filter( $sanitizer->get_stylesheets() ) )
 		);
 
-		$style_attr = $dom->xpath->query( '//*/@style' )->item( 0 );
-		if ( $style_attr instanceof DOMAttr ) {
-			$style_attr = $style_attr->nodeValue;
-		}
+		$amp_custom_style = $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+		$this->assertInstanceOf( Element::class, $amp_custom_style );
 
-		$this->assertEquals( $expected_style_attr, $style_attr );
+		$this->assertEqualMarkup(
+			$expected_custom_css_start_tag,
+			preg_replace( '/(?<=>).+/s', '', $dom->saveHTML( $amp_custom_style ) )
+		);
+
+		$body_markup = trim( preg_replace( ':</?body[>]*>:', '', $dom->saveHTML( $dom->body ) ) );
+
+		$this->assertEqualMarkup(
+			$expected_body_markup,
+			$body_markup
+		);
 	}
 
 	/**
