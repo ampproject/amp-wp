@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { useAsyncError } from '../../utils/use-async-error';
+import { getSiteIssues } from './get-site-issues';
 
 export const SiteScan = createContext();
 
@@ -102,7 +103,12 @@ export function SiteScanContextProvider( {
 					return;
 				}
 
-				setPluginIssues( ( issues ) => [ ...issues, validationResults ] );
+				if ( validationResults.results.length > 0 ) {
+					const siteIssues = getSiteIssues( validationResults.results );
+
+					setPluginIssues( ( issues ) => [ ...new Set( [ ...issues, ...siteIssues.pluginIssues ] ) ] );
+					setThemeIssues( ( issues ) => [ ...new Set( [ ...issues, ...siteIssues.themeIssues ] ) ] );
+				}
 			} catch ( e ) {
 				setAsyncError( e );
 				return;
