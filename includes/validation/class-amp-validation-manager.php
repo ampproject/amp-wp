@@ -30,6 +30,13 @@ class AMP_Validation_Manager {
 	const VALIDATE_QUERY_VAR = 'amp_validate';
 
 	/**
+	 * Query param that indicates a validation request should store the results.
+	 *
+	 * @var string
+	 */
+	const STORE_QUERY_VAR = 'amp_store';
+
+	/**
 	 * Meta capability for validation.
 	 *
 	 * Note that this is mapped to 'manage_options' by default via `AMP_Validation_Manager::map_meta_cap()`. Using a

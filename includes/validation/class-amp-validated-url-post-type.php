@@ -765,7 +765,7 @@ class AMP_Validated_URL_Post_Type {
 		// Query args to be removed from validated URLs.
 		$removable_query_vars = array_merge(
 			wp_removable_query_args(),
-			[ 'preview_id', 'preview_nonce', 'preview', QueryVar::NOAMP, AMP_Validation_Manager::VALIDATE_QUERY_VAR, 'amp_store' ]
+			[ 'preview_id', 'preview_nonce', 'preview', QueryVar::NOAMP, AMP_Validation_Manager::VALIDATE_QUERY_VAR, AMP_Validation_Manager::STORE_QUERY_VAR ]
 		);
 
 		// Normalize query args, removing all that are not recognized or which are removable.

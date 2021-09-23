@@ -2009,7 +2009,7 @@ class AMP_Theme_Support {
 			}
 			$data = array_merge( $data, AMP_Validation_Manager::get_validate_response_data( $sanitization_results ) );
 
-			if ( isset( $_GET['amp_store'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( isset( $_GET[ AMP_Validation_Manager::STORE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$validation_errors = wp_list_pluck( $data['results'], 'error' );
 				unset( $data['results'] );
 
