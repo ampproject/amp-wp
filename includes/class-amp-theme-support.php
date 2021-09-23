@@ -2040,7 +2040,7 @@ class AMP_Theme_Support {
 				}
 			}
 
-			return wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+			return wp_json_encode( $data, JSON_UNESCAPED_SLASHES );
 		}
 
 		/**
