@@ -13,6 +13,7 @@ import { SiteScan } from '../../../components/site-scan-context-provider';
 import { IconLandscapeHillsCogs } from '../../../components/svg/landscape-hills-cogs';
 import { IconWebsitePaintBrush } from '../../../components/svg/website-paint-brush';
 import { IconLaptopPlug } from '../../../components/svg/laptop-plug';
+import { SourcesList } from './sources-list';
 
 /**
  * Screen with site scan summary.
@@ -51,11 +52,7 @@ export function SiteScanComplete() {
 						</p>
 					</div>
 					<div className="site-scan__content">
-						{ themeIssues.map( ( issue ) => (
-							<div key={ issue }>
-								{ issue }
-							</div>
-						) ) }
+						<SourcesList issues={ themeIssues } />
 					</div>
 				</Selectable>
 			) }
@@ -74,11 +71,7 @@ export function SiteScanComplete() {
 						</p>
 					</div>
 					<div className="site-scan__content">
-						{ pluginIssues.map( ( issue ) => (
-							<div key={ issue }>
-								{ issue }
-							</div>
-						) ) }
+						<SourcesList issues={ pluginIssues } />
 					</div>
 				</Selectable>
 			) }

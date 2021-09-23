@@ -54,3 +54,39 @@
 	}
 }
 
+.site-scan__sources {
+	border: 2px solid var(--amp-settings-color-border);
+}
+.site-scan__source {
+	align-items: center;
+	display: flex;
+	flex-flow: row nowrap;
+	font-size: 14px;
+	margin: 0;
+	padding: 1rem;
+
+	&:nth-child(even) {
+		background-color: var(--amp-settings-color-background-light);
+	}
+
+	& + & {
+		border-top: 2px solid var(--amp-settings-color-border);
+	}
+}
+
+.site-scan__source-name {
+	font-weight: 700;
+}
+
+.site-scan__source-author::before {
+	border-left: 1px solid;
+	content: "";
+	display: inline-block;
+	height: 1em;
+	margin: 0 0.5em;
+	vertical-align: middle;
+}
+
+.site-scan__source-version {
+	margin-left: auto;
+}
