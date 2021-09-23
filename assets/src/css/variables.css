@@ -4,14 +4,15 @@
  * @todo Make the naming of these variables more semantic.
  */
 :root {
+	--gray: #6c7781;
+	--light-gray: #c4c4c4;
+	--very-light-gray: #fafafc;
 	--amp-brand: #2459e7;
 	--amp-settings-color-black: #212121;
 	--amp-settings-color-dark-gray: #333;
 	--amp-settings-color-brand: #2459e7;
 	--amp-settings-color-muted: #48525c;
-	--gray: #6c7781;
 	--amp-settings-color-border: #e8e8e8;
-	--very-light-gray: #fafafc;
 	--amp-settings-color-background: #fff;
 	--amp-settings-color-warning: #ff9f00;
 	--font-noto: "Noto Sans", sans-serif;
