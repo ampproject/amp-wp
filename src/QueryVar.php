@@ -65,6 +65,19 @@ interface QueryVar {
 	const NOAMP_AVAILABLE = 'available';
 
 	/**
+	 * Whether AMP should be forcibly be made available for the given request.
+	 *
+	 * This causes the supportable templates to be disregarded as well as whether AMP is disabled for a given post.
+	 *
+	 * This is only honored during validation requests or if the user has validation capability.
+	 *
+	 * @see \AMP_Validation_Manager::is_validate_request()
+	 * @see \AMP_Validation_Manager::has_cap()
+	 * @var string
+	 */
+	const AMP_AVAILABLE_OVERRIDE = 'amp_available_override';
+
+	/**
 	 * Value for the query var that allows switching to verbose server-timing output.
 	 *
 	 * @var string

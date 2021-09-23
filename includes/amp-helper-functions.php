@@ -465,6 +465,15 @@ function amp_is_available() {
 		return false;
 	}
 
+	// Allow query parameter to force AMP to be available, depending on whether it's a validation request or the user can do validation.
+	if (
+		isset( $_GET[ QueryVar::AMP_AVAILABLE_OVERRIDE ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		&&
+		( AMP_Validation_Manager::is_validate_request() || AMP_Validation_Manager::has_cap() )
+	) {
+		return true;
+	}
+
 	// Ensure that all templates can be accessed in AMP when a Reader theme is selected.
 	$has_reader_theme = (
 		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
