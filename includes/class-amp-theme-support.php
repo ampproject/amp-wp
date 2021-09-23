@@ -2009,7 +2009,7 @@ class AMP_Theme_Support {
 			}
 			$data = array_merge( $data, AMP_Validation_Manager::get_validate_response_data( $sanitization_results ) );
 
-			if ( isset( $_GET['amp_store'] ) ) {
+			if ( isset( $_GET['amp_store'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$validation_errors = wp_list_pluck( $data['results'], 'error' );
 				unset( $data['results'] );
 
@@ -2035,7 +2035,7 @@ class AMP_Theme_Support {
 					status_header( 201 );
 					$data['validated_url_post'] = [
 						'id'        => $validated_url_post_id,
-						'edit_link' => get_edit_post_link( $validated_url_post_id, 'raw' )
+						'edit_link' => get_edit_post_link( $validated_url_post_id, 'raw' ),
 					];
 				}
 			}
