@@ -393,7 +393,9 @@ jobs:
             wp: 'latest'
             external-http: true
 
-          - php: '8.0'
+          # PHP 8.0 cannot be used as yet due to the earliest compatible PHPUnit (v9) being unable to run due to the
+          # WP test suite enforcing PHPUnit 7 or earlier.
+          - php: '7.4'
             wp: 'latest'
             coverage: true
 
