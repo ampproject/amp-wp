@@ -159,7 +159,7 @@ class AMP_Validation_Manager {
 	 *
 	 * @var bool
 	 */
-	public static $is_validate_request = false;
+	protected static $is_validate_request = false;
 
 	/**
 	 * Overrides for validation errors.
@@ -468,7 +468,7 @@ class AMP_Validation_Manager {
 	 * @since 2.1
 	 */
 	public static function maybe_fail_validate_request() {
-		if ( ! self::$is_validate_request || amp_is_request() ) {
+		if ( ! self::is_validate_request() || amp_is_request() ) {
 			return;
 		}
 
@@ -480,6 +480,20 @@ class AMP_Validation_Manager {
 			$message = __( 'The requested URL is not an AMP page.', 'amp' );
 		}
 		wp_send_json( compact( 'code', 'message' ), 400 );
+	}
+
+	/**
+	 * Whether a validate request is being performed.
+	 *
+	 * When responding to a request to validate a URL, instead of an HTML document being returned, a JSON document is
+	 * returned with any errors that were encountered during validation.
+	 *
+	 * @see AMP_Validation_Manager::get_validate_response_data()
+	 *
+	 * @return bool
+	 */
+	public static function is_validate_request() {
+		return self::$is_validate_request;
 	}
 
 	/**
@@ -613,7 +627,7 @@ class AMP_Validation_Manager {
 			$node = $data['node'];
 		}
 
-		if ( self::$is_validate_request ) {
+		if ( self::is_validate_request() ) {
 			if ( ! empty( $error['sources'] ) ) {
 				$sources = $error['sources'];
 			} elseif ( $node ) {
@@ -1705,7 +1719,7 @@ class AMP_Validation_Manager {
 		}
 
 		if ( isset( $sanitizers[ AMP_Style_Sanitizer::class ] ) ) {
-			$sanitizers[ AMP_Style_Sanitizer::class ]['should_locate_sources'] = self::$is_validate_request;
+			$sanitizers[ AMP_Style_Sanitizer::class ]['should_locate_sources'] = self::is_validate_request();
 
 			$css_validation_errors = [];
 			foreach ( self::$validation_error_status_overrides as $slug => $status ) {

@@ -81,7 +81,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		parent::tearDown();
 		unset( $GLOBALS['show_admin_bar'] );
-		AMP_Validation_Manager::$is_validate_request = false;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 		AMP_Validation_Manager::reset_validation_results();
 		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
 		remove_theme_support( 'custom-header' );
@@ -1890,7 +1890,7 @@ class Test_AMP_Theme_Support extends TestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response_for_validating_invalid_amp_page() {
-		AMP_Validation_Manager::$is_validate_request = true;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 
 		$response = AMP_Theme_Support::prepare_response( '' );
 		$this->assertJson( $response );

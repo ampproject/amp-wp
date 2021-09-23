@@ -1882,7 +1882,7 @@ class AMP_Theme_Support {
 			}
 			$did_redirect = $status_code >= 300 && $status_code < 400 && $sent_location_header;
 
-			if ( AMP_Validation_Manager::$is_validate_request && ! $did_redirect ) {
+			if ( AMP_Validation_Manager::is_validate_request() && ! $did_redirect ) {
 				if ( ! headers_sent() ) {
 					status_header( 400 );
 					header( 'Content-Type: application/json; charset=utf-8' );
@@ -1941,7 +1941,7 @@ class AMP_Theme_Support {
 
 		$dom = Document::fromHtml( $response, Options::DEFAULTS );
 
-		if ( AMP_Validation_Manager::$is_validate_request ) {
+		if ( AMP_Validation_Manager::is_validate_request() ) {
 			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
 		}
 
@@ -1997,7 +1997,7 @@ class AMP_Theme_Support {
 		do_action( 'amp_server_timing_stop', 'amp_sanitizer' );
 
 		// Respond early with results if performing a validate request.
-		if ( AMP_Validation_Manager::$is_validate_request ) {
+		if ( AMP_Validation_Manager::is_validate_request() ) {
 			status_header( 200 );
 			header( 'Content-Type: application/json; charset=utf-8' );
 			$data = [

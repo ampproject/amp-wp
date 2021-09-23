@@ -140,7 +140,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::$validation_error_status_overrides = [];
 		$_REQUEST = [];
 		unset( $GLOBALS['current_screen'] );
-		AMP_Validation_Manager::$is_validate_request = false;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 		AMP_Validation_Manager::$hook_source_stack   = [];
 		AMP_Validation_Manager::$validation_results  = [];
 		AMP_Validation_Manager::reset_validation_results();
@@ -194,11 +194,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		};
 
 		// Verify there is no output if it is not a validation request.
-		AMP_Validation_Manager::$is_validate_request = false;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 		$this->assertEmpty( $get_output() );
 
 		// Verify there is no output if it is an AMP request.
-		AMP_Validation_Manager::$is_validate_request = true;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertEmpty( $get_output() );
@@ -210,7 +210,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( 'AMP_NOT_REQUESTED', $output );
 
 		// Verify correct response if AMP not available.
-		AMP_Validation_Manager::$is_validate_request = true;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		add_filter(
@@ -228,6 +228,15 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( 'AMP_NOT_AVAILABLE', $output );
 	}
 
+	/** @covers AMP_Validation_Manager::is_validate_request() */
+	public function test_is_validate_request() {
+		$this->assertFalse( AMP_Validation_Manager::is_validate_request() );
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
+		$this->assertTrue( AMP_Validation_Manager::is_validate_request() );
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
+		$this->assertFalse( AMP_Validation_Manager::is_validate_request() );
+	}
+
 	/**
 	 * Test init_validate_request without error.
 	 *
@@ -236,12 +245,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	public function test_init_validate_request_without_error() {
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
 		AMP_Validation_Manager::init_validate_request();
-		$this->assertFalse( AMP_Validation_Manager::$is_validate_request );
+		$this->assertFalse( AMP_Validation_Manager::is_validate_request() );
 
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = wp_slash( AMP_Validation_Manager::get_amp_validate_nonce() ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->assertTrue( AMP_Validation_Manager::should_validate_response() );
 		AMP_Validation_Manager::init_validate_request();
-		$this->assertTrue( AMP_Validation_Manager::$is_validate_request );
+		$this->assertTrue( AMP_Validation_Manager::is_validate_request() );
 	}
 
 	/**
@@ -613,7 +622,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers AMP_Validation_Manager::add_validation_error()
 	 */
 	public function test_add_validation_error_track_removed() {
-		AMP_Validation_Manager::$is_validate_request = true;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 		$this->assertEmpty( AMP_Validation_Manager::$validation_results );
 
 		$that = $this;
