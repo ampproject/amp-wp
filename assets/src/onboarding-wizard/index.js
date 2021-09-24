@@ -37,6 +37,7 @@ import { ErrorScreen } from '../components/error-screen';
 import { SiteScanContextProvider } from '../components/site-scan-context-provider';
 import { UserContextProvider } from '../components/user-context-provider';
 import { PluginsContextProvider } from '../components/plugins-context-provider';
+import { ThemesContextProvider } from '../components/themes-context-provider';
 import { PAGES } from './pages';
 import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
@@ -74,21 +75,23 @@ export function Providers( { children } ) {
 					>
 						<NavigationContextProvider pages={ PAGES }>
 							<PluginsContextProvider hasErrorBoundary={ true }>
-								<ReaderThemesContextProvider
-									currentTheme={ CURRENT_THEME }
-									hasErrorBoundary={ true }
-									wpAjaxUrl={ wpAjaxUrl }
-									readerThemesRestPath={ READER_THEMES_REST_PATH }
-									updatesNonce={ UPDATES_NONCE }
-								>
-									<TemplateModeOverrideContextProvider>
-										<SiteScanContextProvider
-											scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
-										>
-											{ children }
-										</SiteScanContextProvider>
-									</TemplateModeOverrideContextProvider>
-								</ReaderThemesContextProvider>
+								<ThemesContextProvider hasErrorBoundary={ true }>
+									<ReaderThemesContextProvider
+										currentTheme={ CURRENT_THEME }
+										hasErrorBoundary={ true }
+										wpAjaxUrl={ wpAjaxUrl }
+										readerThemesRestPath={ READER_THEMES_REST_PATH }
+										updatesNonce={ UPDATES_NONCE }
+									>
+										<TemplateModeOverrideContextProvider>
+											<SiteScanContextProvider
+												scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
+											>
+												{ children }
+											</SiteScanContextProvider>
+										</TemplateModeOverrideContextProvider>
+									</ReaderThemesContextProvider>
+								</ThemesContextProvider>
 							</PluginsContextProvider>
 						</NavigationContextProvider>
 					</UserContextProvider>
