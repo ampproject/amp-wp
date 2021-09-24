@@ -43,6 +43,13 @@ describe( 'getSiteIssues', () => {
 			{
 				error: {
 					sources: [
+						{ type: 'plugin', name: 'foo-bar.php' },
+					],
+				},
+			},
+			{
+				error: {
+					sources: [
 						{ type: 'theme', name: 'twentytwenty' },
 						{ type: 'core', name: 'wp-includes' },
 					],
@@ -67,7 +74,7 @@ describe( 'getSiteIssues', () => {
 
 		const issues = getSiteIssues( validationResult );
 
-		expect( issues.pluginIssues ).toStrictEqual( expect.arrayContaining( [ 'gutenberg', 'jetpack' ] ) );
+		expect( issues.pluginIssues ).toStrictEqual( expect.arrayContaining( [ 'gutenberg', 'jetpack', 'foo-bar' ] ) );
 		expect( issues.themeIssues ).toStrictEqual( expect.arrayContaining( [ 'twentytwenty' ] ) );
 	} );
 } );

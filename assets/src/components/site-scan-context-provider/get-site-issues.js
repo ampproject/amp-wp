@@ -17,7 +17,7 @@ export function getSiteIssues( validationResults = [] ) {
 
 		for ( const source of error.sources ) {
 			if ( source.type === 'plugin' && source.name !== 'amp' ) {
-				pluginIssues.add( source.name );
+				pluginIssues.add( source.name.match( /(.*?)(?:\.php)?$/ )[ 1 ] );
 			} else if ( source.type === 'theme' ) {
 				themeIssues.add( source.name );
 			}
