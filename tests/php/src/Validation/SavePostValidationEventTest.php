@@ -124,7 +124,7 @@ final class SavePostValidationEventTest extends TestCase {
 
 		$event_was_scheduled = false;
 		$filter_cb           = static function ( $event ) use ( &$event_was_scheduled ) {
-			if ( $event->hook === SavePostValidationEvent::BACKGROUND_TASK_NAME ) {
+			if ( SavePostValidationEvent::BACKGROUND_TASK_NAME === $event->hook ) {
 				$event_was_scheduled = true;
 			}
 			return $event;
