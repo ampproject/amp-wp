@@ -34,7 +34,7 @@ export function PluginsContextProvider( {
 	children,
 	hasErrorBoundary = false,
 } ) {
-	const [ plugins, setPlugins ] = useState();
+	const [ plugins, setPlugins ] = useState( [] );
 	const [ fetchingPlugins, setFetchingPlugins ] = useState( null );
 
 	const { error, setError } = useContext( ErrorContext );
@@ -53,7 +53,7 @@ export function PluginsContextProvider( {
 	 * Fetches validated URL data.
 	 */
 	useEffect( () => {
-		if ( error || plugins || fetchingPlugins ) {
+		if ( error || plugins.length > 0 || fetchingPlugins ) {
 			return;
 		}
 

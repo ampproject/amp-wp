@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
@@ -22,16 +27,7 @@ import { SourcesList } from './sources-list';
  * Screen with site scan summary.
  */
 export function SiteScanComplete() {
-	const {
-		pluginIssues,
-		themeIssues,
-	} = useContext( SiteScan );
-
-	const themesData = useNormalizedThemesData();
-	const themesWithIssues = themeIssues?.map( ( slug ) => themesData?.[ slug ] ?? { name: slug } ) || [];
-
-	const pluginsData = useNormalizedPluginsData();
-	const pluginsWithIssues = pluginIssues?.map( ( slug ) => pluginsData?.[ slug ] ?? { name: slug } ) || [];
+	const { pluginIssues, themeIssues } = useContext( SiteScan );
 
 	return (
 		<div className="site-scan">
@@ -61,9 +57,7 @@ export function SiteScanComplete() {
 						</p>
 					</div>
 					<div className="site-scan__content">
-						{ themesWithIssues.length === 0
-							? <Loading />
-							: <SourcesList sources={ themesWithIssues } /> }
+						<ThemesWithIssues issues={ themeIssues } />
 					</div>
 				</Selectable>
 			) }
@@ -82,12 +76,52 @@ export function SiteScanComplete() {
 						</p>
 					</div>
 					<div className="site-scan__content">
-						{ pluginsWithIssues.length === 0
-							? <Loading />
-							: <SourcesList sources={ pluginsWithIssues } /> }
+						<PluginsWithIssues issues={ pluginIssues } />
 					</div>
 				</Selectable>
 			) }
 		</div>
 	);
 }
+
+/**
+ * Render a list of themes that cause issues.
+ *
+ * @param {Object} props        Component props.
+ * @param {Array}  props.issues List of theme issues.
+ */
+function ThemesWithIssues( { issues = [] } ) {
+	const themesData = useNormalizedThemesData();
+	const themesWithIssues = issues?.map( ( slug ) => themesData?.[ slug ] ?? { name: slug } ) || [];
+
+	if ( themesWithIssues.length === 0 ) {
+		return <Loading />;
+	}
+
+	return <SourcesList sources={ themesWithIssues } />;
+}
+
+ThemesWithIssues.propTypes = {
+	issues: PropTypes.array.isRequired,
+};
+
+/**
+ * Render a list of plugins that cause issues.
+ *
+ * @param {Object} props        Component props.
+ * @param {Array}  props.issues List of plugins issues.
+ */
+function PluginsWithIssues( { issues = [] } ) {
+	const pluginsData = useNormalizedPluginsData();
+	const pluginsWithIssues = issues?.map( ( slug ) => pluginsData?.[ slug ] ?? { name: slug } ) || [];
+
+	if ( pluginsWithIssues.length === 0 ) {
+		return <Loading />;
+	}
+
+	return <SourcesList sources={ pluginsWithIssues } />;
+}
+
+PluginsWithIssues.propTypes = {
+	issues: PropTypes.array.isRequired,
+};

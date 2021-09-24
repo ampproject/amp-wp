@@ -34,7 +34,7 @@ export function ThemesContextProvider( {
 	children,
 	hasErrorBoundary = false,
 } ) {
-	const [ themes, setThemes ] = useState();
+	const [ themes, setThemes ] = useState( [] );
 	const [ fetchingThemes, setFetchingThemes ] = useState( null );
 
 	const { error, setError } = useContext( ErrorContext );
@@ -53,7 +53,7 @@ export function ThemesContextProvider( {
 	 * Fetches validated URL data.
 	 */
 	useEffect( () => {
-		if ( error || themes || fetchingThemes ) {
+		if ( error || themes.length > 0 || fetchingThemes ) {
 			return;
 		}
 
