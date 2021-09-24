@@ -10,6 +10,7 @@ define( 'TESTS_PLUGIN_DIR', dirname( dirname( __DIR__ ) ) );
 require_once TESTS_PLUGIN_DIR . '/vendor/yoast/wp-test-utils/src/WPIntegration/bootstrap-functions.php';
 
 $_tests_dir = Yoast\WPTestUtils\WPIntegration\get_path_to_wp_test_dir();
+var_dump($_tests_dir);
 
 // Give access to tests_add_filter() function.
 require_once $_tests_dir . 'includes/functions.php';
