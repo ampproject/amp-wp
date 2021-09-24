@@ -9,7 +9,7 @@ namespace AmpProject\AmpWP\Support\Tests;
 
 use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Support\SupportCliCommand;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for SupportCliCommandTest.
@@ -17,7 +17,7 @@ use WP_UnitTestCase;
  * @group support-admin
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportCliCommand
  */
-class SupportCliCommandTest extends WP_UnitTestCase {
+class SupportCliCommandTest extends TestCase {
 
 	/**
 	 * Instance of OptionsMenu
