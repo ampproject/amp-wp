@@ -11,34 +11,38 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Sources list component.
  *
- * @param {Object} props        Component props.
- * @param {Array}  props.issues List of sources causing issues.
+ * @param {Object} props         Component props.
+ * @param {Array}  props.sources Sources data.
  */
-export function SourcesList( { issues } ) {
+export function SourcesList( { sources } ) {
 	return (
 		<ul className="site-scan__sources">
-			{ issues.map( ( slug ) => (
+			{ sources.map( ( { name, author, version } ) => (
 				<li
-					key={ slug }
+					key={ name }
 					className="site-scan__source"
 				>
 					<span className="site-scan__source-name">
-						{ slug }
+						{ name }
 					</span>
-					<span className="site-scan__source-author">
-						{ sprintf(
-							// translators: %s is an author name.
-							__( 'by %s', 'amp' ),
-							'Foo Bar',
-						) }
-					</span>
-					<span className="site-scan__source-version">
-						{ sprintf(
-							// translators: %s is a version number.
-							__( 'Version %s', 'amp' ),
-							'1.0',
-						) }
-					</span>
+					{ author && (
+						<span className="site-scan__source-author">
+							{ sprintf(
+								// translators: %s is an author name.
+								__( 'by %s', 'amp' ),
+								author,
+							) }
+						</span>
+					) }
+					{ version && (
+						<span className="site-scan__source-version">
+							{ sprintf(
+								// translators: %s is a version number.
+								__( 'Version %s', 'amp' ),
+								version,
+							) }
+						</span>
+					) }
 				</li>
 			) ) }
 		</ul>
@@ -46,5 +50,5 @@ export function SourcesList( { issues } ) {
 }
 
 SourcesList.propTypes = {
-	issues: PropTypes.array.isRequired,
+	sources: PropTypes.array.isRequired,
 };

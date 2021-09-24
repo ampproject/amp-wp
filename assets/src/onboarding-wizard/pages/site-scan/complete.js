@@ -13,6 +13,8 @@ import { SiteScan } from '../../../components/site-scan-context-provider';
 import { IconLandscapeHillsCogs } from '../../../components/svg/landscape-hills-cogs';
 import { IconWebsitePaintBrush } from '../../../components/svg/website-paint-brush';
 import { IconLaptopPlug } from '../../../components/svg/laptop-plug';
+import { useNormalizedPluginsData } from '../../../components/plugins-context-provider/use-normalized-plugins-data';
+import { Loading } from '../../../components/loading';
 import { SourcesList } from './sources-list';
 
 /**
@@ -23,6 +25,9 @@ export function SiteScanComplete() {
 		pluginIssues,
 		themeIssues,
 	} = useContext( SiteScan );
+
+	const pluginsData = useNormalizedPluginsData();
+	const pluginsWithIssues = pluginIssues.map( ( slug ) => pluginsData?.[ slug ] ?? { name: slug } );
 
 	return (
 		<div className="site-scan">
@@ -51,9 +56,7 @@ export function SiteScanComplete() {
 							</VisuallyHidden>
 						</p>
 					</div>
-					<div className="site-scan__content">
-						<SourcesList issues={ themeIssues } />
-					</div>
+					<div className="site-scan__content" />
 				</Selectable>
 			) }
 			{ pluginIssues.length > 0 && (
@@ -71,7 +74,9 @@ export function SiteScanComplete() {
 						</p>
 					</div>
 					<div className="site-scan__content">
-						<SourcesList issues={ pluginIssues } />
+						{ pluginsWithIssues.length === 0
+							? <Loading />
+							: <SourcesList sources={ pluginsWithIssues } /> }
 					</div>
 				</Selectable>
 			) }
