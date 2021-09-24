@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect, useLayoutEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -18,6 +18,7 @@ import { SiteScanInProgress } from './in-progress';
 export function SiteScan() {
 	const { setCanGoForward } = useContext( Navigation );
 	const {
+		cancelSiteScan,
 		canScanSite,
 		startSiteScan,
 		siteScanComplete,
@@ -25,13 +26,20 @@ export function SiteScan() {
 	const [ canShowScanSummary, setCanShowScanSummary ] = useState( false );
 
 	/**
+	 * Cancel scan on component unmount.
+	 */
+	useEffect( () => () => cancelSiteScan(), [ cancelSiteScan ] );
+
+	/**
 	 * Start site scan.
 	 */
-	useEffect( () => {
+	useLayoutEffect( () => {
 		if ( canScanSite ) {
 			startSiteScan();
+		} else if ( siteScanComplete ) {
+			setCanShowScanSummary( true );
 		}
-	}, [ canScanSite, startSiteScan ] );
+	}, [ canScanSite, siteScanComplete, startSiteScan ] );
 
 	/**
 	 * Show scan summary with a delay so that the progress bar has a chance to
@@ -40,7 +48,7 @@ export function SiteScan() {
 	useEffect( () => {
 		let delay;
 
-		if ( siteScanComplete ) {
+		if ( siteScanComplete && ! canShowScanSummary ) {
 			delay = setTimeout( () => setCanShowScanSummary( true ), 500 );
 		}
 
@@ -49,7 +57,7 @@ export function SiteScan() {
 				clearTimeout( delay );
 			}
 		};
-	}, [ siteScanComplete ] );
+	}, [ canShowScanSummary, siteScanComplete ] );
 
 	/**
 	 * Allow moving forward.

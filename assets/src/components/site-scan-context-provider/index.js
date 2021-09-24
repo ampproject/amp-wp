@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useEffect, useRef, useState } from '@wordpress/element';
+import { createContext, useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -37,7 +37,7 @@ export function SiteScanContextProvider( {
 	const [ themeIssues, setThemeIssues ] = useState( [] );
 	const [ pluginIssues, setPluginIssues ] = useState( [] );
 	const [ siteScanState, setSiteScanState ] = useState( SITE_SCAN_STATE_INITIALIZING );
-	const [ currentlyScannedUrlIndex, setCurrentlyScannedUrlIndex ] = useState( 0 );
+	const [ currentlyScannedUrlIndex, setCurrentlyScannedUrlIndex ] = useState( 5 );
 	const [ fetchingScannableUrls, setFetchingScannableUrls ] = useState( false );
 	const [ fetchedScannableUrls, setFetchedScannableUrls ] = useState( false );
 	const [ scannableUrls, setScannableUrls ] = useState( [] );
@@ -49,14 +49,23 @@ export function SiteScanContextProvider( {
 		hasUnmounted.current = true;
 	}, [] );
 
+	/**
+	 * Allows cancelling a scan that is in progress.
+	 */
+	const hasCanceled = useRef( false );
+	const cancelSiteScan = useCallback( () => {
+		setCurrentlyScannedUrlIndex( 0 );
+		hasCanceled.current = true;
+	}, [] );
+
+	/**
+	 * Fetch scannable URLs from the REST endpoint.
+	 */
 	useEffect( () => {
 		if ( fetchingScannableUrls || fetchedScannableUrls ) {
 			return;
 		}
 
-		/**
-		 * Fetches scannable URLs from the REST endpoint.
-		 */
 		( async () => {
 			setFetchingScannableUrls( true );
 
@@ -103,6 +112,15 @@ export function SiteScanContextProvider( {
 					return;
 				}
 
+				if ( true === hasCanceled.current ) {
+					hasCanceled.current = false;
+					setSiteScanState( SITE_SCAN_STATE_READY );
+					setThemeIssues( [] );
+					setPluginIssues( [] );
+
+					return;
+				}
+
 				if ( validationResults.results.length > 0 ) {
 					const siteIssues = getSiteIssues( validationResults.results );
 
@@ -130,6 +148,7 @@ export function SiteScanContextProvider( {
 		<SiteScan.Provider
 			value={
 				{
+					cancelSiteScan,
 					canScanSite: siteScanState === SITE_SCAN_STATE_READY,
 					currentlyScannedUrlIndex,
 					fetchingScannableUrls,
