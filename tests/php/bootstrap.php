@@ -3,20 +3,14 @@
  * PHPUnit bootstrap file.
  */
 
-define( 'TESTS_PLUGIN_DIR', dirname( dirname( __DIR__ ) ) );
+use Yoast\WPTestUtils\WPIntegration;
 
-// Detect where to load the WordPress tests environment from.
-if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
-	$_test_root = getenv( 'WP_TESTS_DIR' );
-} elseif ( false !== getenv( 'WP_DEVELOP_DIR' ) ) {
-	$_test_root = getenv( 'WP_DEVELOP_DIR' ) . '/tests/phpunit';
-} elseif ( file_exists( '/tmp/wordpress-tests/includes/bootstrap.php' ) ) {
-	$_test_root = '/tmp/wordpress-tests';
-} else {
-	$_test_root = dirname( dirname( dirname( dirname( TESTS_PLUGIN_DIR ) ) ) ) . '/tests/phpunit';
-}
+require_once dirname( __DIR__, 2 ) . '/vendor/yoast/wp-test-utils/src/WPIntegration/bootstrap-functions.php';
 
-require $_test_root . '/includes/functions.php';
+$_tests_dir = Yoast\WPTestUtils\WPIntegration\get_path_to_wp_test_dir();
+
+// Give access to tests_add_filter() function.
+require_once $_tests_dir . 'includes/functions.php';
 
 // Force plugins defined in a constant (supplied by phpunit.xml) to be active at runtime.
 function amp_filter_active_plugins_for_phpunit( $active_plugins ) {
@@ -53,5 +47,7 @@ require_once WP_CLI_ROOT . '/php/utils.php';
 $logger = new WP_CLI\Loggers\Regular( true );
 WP_CLI::set_logger( $logger );
 
-// Start up the WP testing environment.
-require $_test_root . '/includes/bootstrap.php';
+/*
+ * Load WordPress, which will load the Composer autoload file, and load the MockObject autoloader after that.
+ */
+WPIntegration\bootstrap_it();

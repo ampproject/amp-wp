@@ -96,6 +96,10 @@
     {
       "type": "path",
       "url": "./php-css-parser-install-composer-plugin"
+    },
+    {
+      "type": "git",
+      "url": "https://github.com/Yoast/wp-test-utils"
     }
   ],
   "minimum-stability": "dev",
