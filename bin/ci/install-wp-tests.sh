@@ -16,7 +16,7 @@ SKIP_DB_CREATE=${6-true}
 
 TMPDIR=${TMPDIR-/tmp}
 TMPDIR=$(echo "$TMPDIR" | sed -e "s/\/$//")
-WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests}
+WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress}
 
 download() {
