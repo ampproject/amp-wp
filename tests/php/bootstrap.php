@@ -5,9 +5,11 @@
 
 use Yoast\WPTestUtils\WPIntegration;
 
+require_once TESTS_PLUGIN_DIR . '/vendor/yoast/wp-test-utils/src/WPIntegration/bootstrap-functions.php';
+
 define( 'TESTS_PLUGIN_DIR', dirname( dirname( __DIR__ ) ) );
 
-$_tests_dir = WPIntegration\get_path_to_wp_test_dir();
+$_tests_dir = Yoast\WPTestUtils\WPIntegration\get_path_to_wp_test_dir();
 require_once $_tests_dir . 'includes/functions.php';
 
 // Force plugins defined in a constant (supplied by phpunit.xml) to be active at runtime.
