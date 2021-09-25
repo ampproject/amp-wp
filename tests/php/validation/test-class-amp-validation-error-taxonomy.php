@@ -31,14 +31,15 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 * Resets the state after each test method.
 	 */
 	public function tear_down() {
-		parent::tear_down();
-
 		$_REQUEST = [];
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		remove_theme_support( 'amp' );
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 		remove_all_filters( 'amp_validation_error_sanitized' );
 		remove_all_filters( 'terms_clauses' );
 		AMP_Validation_Manager::$validation_error_status_overrides = [];
+
+		parent::tear_down();
 	}
 
 	/**
