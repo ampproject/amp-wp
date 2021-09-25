@@ -1,0 +1,47 @@
+name: ✨ Feature request
+description: Suggest an idea for this project.
+labels:
+  - Enhancement
+
+body:
+  - type: textarea
+    attributes:
+      label: Feature Description
+      description: >
+        Please describe clear and concisely which problem the feature would solve or which publisher needs
+        it would address.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        _**Do not alter anything below. The following fields will be managed by moderators only.**_
+
+  - type: textarea
+    attributes:
+      label: Acceptance Criteria
+      description: One or more bullet points for acceptance criteria.
+
+  - type: textarea
+    attributes:
+      label: Implementation Brief
+      description: >
+        One or more bullet points for how to technically resolve the issue. For significant Implementation Design,
+        it is ok use a Google document **accessible by anyone**.
+
+  - type: textarea
+    attributes:
+      label: QA Testing Instructions
+      description: One or more bullet points to describe how to test the implementation in QA.
+
+  - type: textarea
+    attributes:
+      label: Demo
+      description: A video or screenshots demoing the implementation.
+
+  - type: textarea
+    attributes:
+      label: Changelog Entry
+      description: One sentence summarizing the PR, to be used in the changelog.

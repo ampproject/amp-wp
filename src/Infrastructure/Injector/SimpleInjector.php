@@ -324,7 +324,9 @@ final class SimpleInjector implements Injector {
 
 			$type = $parameter->getType();
 
-			if ( null === $type || $type->isBuiltin() ) {
+			if ( null === $type ||
+				( is_a( $type, 'ReflectionType' ) && method_exists( $type, 'isBuiltin' ) && $type->isBuiltin() )
+			) {
 				return $this->resolve_argument_by_name(
 					$class,
 					$parameter,
