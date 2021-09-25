@@ -42,16 +42,6 @@ abstract class PairedUrlStructure {
 	}
 
 	/**
-	 * Determine if the URL would need an endpoint.
-	 *
-	 * @param string $url URL (or REQUEST_URI).
-	 * @return bool URL with AMP stripped.
-	 */
-	public function needs_endpoint( $url ) {
-		return true;
-	}
-
-	/**
 	 * Turn a given URL into a paired AMP URL.
 	 *
 	 * @param string $url URL (or REQUEST_URI).

@@ -201,7 +201,6 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			in_array( Attribute::REL_NOAMPHTML, $rel, true )
 			||
 			in_array( strtok( $url, '#' ), $this->args['excluded_urls'], true )
-			// @todo || ! \AmpProject\AmpWP\Services::get( 'paired_routing' )->needs_endpoint( $url )
 		);
 
 		/**

@@ -216,138 +216,116 @@ class AMP_Validation_Manager {
 			}
 		);
 
-		// Allow query parameter to force a response to be served with Standard mode (AMP-first). This query parameter
-		// is only honored when doing a validation request or when the user is able to do validation. This is used as
-		// part of Site Scanning in order to determine if the primary theme is suitable for serving AMP.
-		// There's two concerns: (1) serving AMP on canonical non-paired URL, and (2) using primary theme templates
-		// instead of Reader theme.
-		if ( self::is_validate_request() || self::has_cap() ) {
-			// cf. amp_to_amp_linking_element_excluded
-
-
-			add_filter(
-				'amp_url_needs_paired_endpoint',
-				function ( $needs_endpoint, $url ) {
-					$query_string = wp_parse_url( $url, PHP_URL_QUERY );
-					$query_vars   = [];
-					if ( $query_string ) {
-						wp_parse_str( $query_string, $query_vars );
-					}
-					if ( array_key_exists( QueryVar::AMP_FIRST, $query_vars ) ) {
-						$needs_endpoint = false;
-					}
-					return $needs_endpoint;
-				},
-				10,
-				2
-			);
-
-			// When an AMP-first request is made, use Standard mode.
-			if ( isset( $_GET[ QueryVar::AMP_FIRST ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				add_filter(
-					'option_' . AMP_Options_Manager::OPTION_NAME,
-					static function ( $options ) {
-						$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
-						return $options;
-					}
-				);
-			}
-
-//			wp_die( esc_html__( 'Please log-in to preview AMP for this URL.', 'amp' ) );
-		}
-//
-//		if ( isset( $_GET[ QueryVar::AMP_FIRST ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-//			if ( ! ( self::is_validate_request() || self::has_cap() ) ) {
-//				wp_die( esc_html__( 'Please log-in to preview AMP for this URL.', 'amp' ) );
-//			}
-//
-//			add_filter(
-//				'amp_url_needs_paired_endpoint',
-//				function ( $url ) {
-//					return false === strpos( $url, 'amp_first' );
-//				}
-//			);
-//
-//			add_filter(
-//				'option_' . AMP_Options_Manager::OPTION_NAME,
-//				static function ( $options ) {
-//					$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
-//					return $options;
-//				}
-//			);
-//		}
-
 		add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
 		add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
 		add_action( 'wp', [ __CLASS__, 'maybe_fail_validate_request' ] );
 		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
+
+		// Allow query parameter to force a response to be served with Standard mode (AMP-first). This query parameter
+		// is only honored when doing a validation request or when the user is able to do validation. This is used as
+		// part of Site Scanning in order to determine if the primary theme is suitable for serving AMP.
+		if ( ! amp_is_canonical() ) {
+			add_filter(
+				'option_' . AMP_Options_Manager::OPTION_NAME,
+				static function ( $options ) {
+					if ( self::is_amp_first_override_request() ) {
+						$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+					}
+					return $options;
+				}
+			);
+		}
 	}
 
-
-
 	/**
-	 * Determine whether the request is AMP-first.
+	 * Determine whether the request includes the AMP-first override.
 	 *
+	 * The logic in here is admittedly a mess. It was first worked out in the context of the Web Stories plugin to
+	 * force a single web story to be served without any paired endpoint when a site is running the AMP plugin in
+	 * a paired template mode (Transitional or Reader).
+	 *
+	 * @since 2.2
 	 * @see \Google\Web_Stories\Integrations\AMP::get_request_post_type()
+	 * @link https://github.com/google/web-stories-wp/pull/3621
 	 *
-	 * @todo We need to help Web Stories eliminate the need for get_request_post_type(). What can we do to facilitate that?
-	 *
-	 * @return string|null
+	 * @return bool Whether
 	 */
-	protected function is_request_amp_first() {
-		if ( amp_is_canonical() ) {
+	private static function is_amp_first_override_request() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+
+		// Frontend.
+		if (
+			isset( $_GET[ QueryVar::AMP_FIRST ] )
+			&&
+			( self::is_validate_request() || self::has_cap() )
+		) {
 			return true;
 		}
 
-
-
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-
-
-		if ( did_action( 'wp' ) && is_singular() ) {
-			$post_type = get_post_type( get_queried_object_id() );
-			return $post_type ?: null;
+		// If not in the admin or the user doesn't have the validate capability, then abort.
+		if ( ! is_admin() || ! self::has_cap() ) {
+			return false;
 		}
 
+		// Admin request for validation.
 		if (
-			is_admin()
+			isset( $_GET['action'] )
 			&&
-			isset( $_GET['action'], $_GET['post'] )
+			self::VALIDATE_QUERY_VAR === $_GET['action']
 			&&
-			'amp_validate' === $_GET['action']
-			&&
-			get_post_type( (int) $_GET['post'] ) === self::AMP_VALIDATED_URL_POST_TYPE
+			(
+				// First admin request to validate a URL.
+				(
+					isset( $_GET['url'] )
+					&&
+					self::is_amp_first_override_url( esc_url_raw( $_GET['url'] ) )
+				)
+				||
+				// Subsequent admin request to validate a URL.
+				(
+					isset( $_GET['post'] )
+					&&
+					get_post_type( (int) $_GET['post'] ) === AMP_Validated_URL_Post_Type::POST_TYPE_SLUG
+					&&
+					self::is_amp_first_override_url( get_post( (int) $_GET['post'] )->post_title )
+				)
+			)
 		) {
-			return $this->get_validated_url_post_type( (int) $_GET['post'] );
+			return true;
 		}
 
-		$current_screen = $this->get_current_screen();
-
-		if ( $current_screen instanceof WP_Screen ) {
-			$current_post = get_post();
-
-			if ( self::AMP_VALIDATED_URL_POST_TYPE === $current_screen->post_type && $current_post instanceof WP_Post && $current_post->post_type === $current_screen->post_type ) {
-				$validated_url_post_type = $this->get_validated_url_post_type( $current_post->ID );
-				if ( $validated_url_post_type ) {
-					return $validated_url_post_type;
-				}
-			}
-
-			if ( $current_screen->post_type ) {
-				return $current_screen->post_type;
-			}
-
-			return null;
+		// Admin screen for validated URL screen and Validated URLs post list table (where this may only return true
+		// selectively based on the current post in the loop).
+		$current_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if (
+			$current_screen instanceof WP_Screen
+			&&
+			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === $current_screen->post_type
+			&&
+			self::is_amp_first_override_url( get_post()->post_title )
+		) {
+			return true;
 		}
 
-		if ( isset( $_SERVER['REQUEST_URI'] ) && false !== strpos( (string) wp_unslash( $_SERVER['REQUEST_URI'] ), '/web-stories/v1/web-story/' ) ) {
-			return Story_Post_Type::POST_TYPE_SLUG;
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		return false;
+	}
+
+	/**
+	 * Determine whether the URL includes the AMP-first override query var.
+	 *
+	 * @since 2.2
+	 *
+	 * @param string $url URL.
+	 * @return bool Whether the URL has the AMP-first override.
+	 */
+	private static function is_amp_first_override_url( $url ) {
+		$query_string = wp_parse_url( $url, PHP_URL_QUERY );
+		$query_vars   = [];
+		if ( $query_string ) {
+			wp_parse_str( $query_string, $query_vars );
 		}
-
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		return null;
+		return array_key_exists( QueryVar::AMP_FIRST, $query_vars );
 	}
 
 	/**
@@ -1943,13 +1921,8 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function validate_url( $url ) {
-		$query_string = wp_parse_url( $url, PHP_URL_QUERY );
 		if ( ! amp_is_canonical() && ! amp_has_paired_endpoint( $url ) ) {
 			$url = amp_add_paired_endpoint( $url );
-		}
-
-		if ( false !== strpos(  $query_string, 'amp_first' ) ) {
-			$url = amp_remove_paired_endpoint( $url );
 		}
 
 		$added_query_vars = [

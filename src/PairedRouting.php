@@ -916,44 +916,12 @@ final class PairedRouting implements Service, Registerable {
 	}
 
 	/**
-	 * Determine if a given URL needs to be paired to serve AMP (in other words, if the URL is not AMP-first).
-	 *
-	 * @since 2.2
-	 *
-	 * @param string $url URL to examine. If empty, will use the current URL.
-	 * @return bool True if URL needs paired endpoint to serve AMP. False if the URL is AMP-first (canonical).
-	 */
-	public function needs_endpoint( $url = '' ) {
-		if ( ! $url ) {
-			$url = amp_get_current_url();
-		}
-
-		if ( $this->has_endpoint( $url ) ) {
-			$url = $this->remove_endpoint( $url );
-		}
-
-		/**
-		 * Filters whether the given URL has a paired endpoint to access the AMP version.
-		 *
-		 * @since 2.2
-		 *
-		 * @param bool   $needs_paired Needs paired.
-		 * @param string $url          URL.
-		 */
-		return (bool) apply_filters( 'amp_url_needs_paired_endpoint', ! amp_is_canonical(), $url );
-	}
-
-	/**
 	 * Turn a given URL into a paired AMP URL.
 	 *
 	 * @param string $url URL.
 	 * @return string AMP URL.
 	 */
 	public function add_endpoint( $url ) {
-		if ( ! $this->needs_endpoint( $url ) ) {
-			return $url;
-		}
-
 		return $this->get_paired_url_structure()->add_endpoint( $url );
 	}
 
