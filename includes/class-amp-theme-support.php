@@ -327,10 +327,11 @@ class AMP_Theme_Support {
 			return;
 		}
 
-		if ( amp_is_legacy() ) {
+		if ( amp_is_legacy() && amp_needs_paired_endpoint() ) {
 			// Make sure there is no confusion when serving the legacy Reader template that the normal theme hooks should not be used.
 			remove_theme_support( self::SLUG );
 
+			// @todo This doesn't work with Web Stories.
 			add_filter(
 				'template_include',
 				static function() {

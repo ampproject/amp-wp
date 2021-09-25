@@ -309,8 +309,20 @@ function amp_force_query_var_value( $query_vars ) {
  * @see AMP_Theme_Support::read_theme_support()
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
  */
-function amp_is_canonical() {
+function amp_is_canonical( $url = '' ) {
 	return AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+
+	if ( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		return true;
+	}
+
+	if ( ! $url ) {
+		$url = amp_get_current_url();
+	}
+
+	// Services::get( 'paired_routing' )
+
+	return false;
 }
 
 /**
@@ -769,7 +781,12 @@ function amp_is_request() {
 		amp_is_canonical()
 		||
 		amp_has_paired_endpoint()
+		||
+		! Services::get( 'paired_routing' )->needs_endpoint()
 	);
+
+	error_log( json_encode( Services::get( 'paired_routing' )->needs_endpoint(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+
 
 	// If AMP is not available, then it's definitely not an AMP endpoint.
 	if ( ! amp_is_available() ) {
@@ -2032,6 +2049,28 @@ function amp_has_paired_endpoint( $url = '' ) {
 			$reason = __( 'Function cannot be called before services are registered.', 'amp' );
 		}
 		_doing_it_wrong( __FUNCTION__, esc_html( $reason ) . ' ' . esc_html( $e->getMessage() ), '2.1.1' );
+		return false;
+	}
+}
+
+/**
+ * Determine if a given URL needs to be paired to serve AMP (in other words, if the URL is not AMP-first).
+ *
+ * @since 2.2
+ *
+ * @param string $url URL to examine. If empty, will use the current URL.
+ * @return bool True if URL needs paired endpoint to serve AMP. False if the URL is AMP-first (canonical).
+ */
+function amp_needs_paired_endpoint( $url = '' ) {
+	try {
+		return Services::get( 'paired_routing' )->needs_endpoint( $url );
+	} catch ( InvalidService $e ) {
+		if ( ! amp_is_enabled() ) {
+			$reason = __( 'Function called while AMP is disabled via `amp_is_enabled` filter.', 'amp' );
+		} else {
+			$reason = __( 'Function cannot be called before services are registered.', 'amp' );
+		}
+		_doing_it_wrong( __FUNCTION__, esc_html( $reason ) . ' ' . esc_html( $e->getMessage() ), '2.2' );
 		return false;
 	}
 }
