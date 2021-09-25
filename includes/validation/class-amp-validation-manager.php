@@ -1633,6 +1633,61 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Send validate response.
+	 *
+	 * @param array      $sanitization_results Sanitization results.
+	 * @param int        $status_code          Status code.
+	 * @param array|null $last_error           Last error.
+	 *
+	 * @return string JSON.
+	 */
+	public static function send_validate_response( $sanitization_results, $status_code, $last_error ) {
+		status_header( 200 );
+		header( 'Content-Type: application/json; charset=utf-8' );
+		$data = [
+			'http_status_code' => $status_code,
+			'php_fatal_error'  => false,
+		];
+		if ( $last_error && in_array( $last_error['type'], [ E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_PARSE ], true ) ) {
+			$data['php_fatal_error'] = $last_error;
+		}
+		$data = array_merge( $data, self::get_validate_response_data( $sanitization_results ) );
+
+		if ( isset( $_GET[ self::STORE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$validation_errors = wp_list_pluck( $data['results'], 'error' );
+			unset( $data['results'] );
+
+			$validated_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
+				$validation_errors,
+				amp_get_current_url(),
+				$data
+			);
+			if ( is_wp_error( $validated_url_post_id ) ) {
+				status_header( 500 );
+
+				$result = [];
+				foreach ( $validated_url_post_id->errors as $code => $messages ) {
+					foreach ( $messages as $message ) {
+						$result[] = [
+							'code'    => $code,
+							'message' => $message,
+						];
+					}
+				}
+				return wp_json_encode( $result );
+			} else {
+				status_header( 201 );
+				$data['validated_url_post'] = [
+					'id'        => $validated_url_post_id,
+					'edit_link' => get_edit_post_link( $validated_url_post_id, 'raw' ),
+				];
+			}
+		}
+
+		return wp_json_encode( $data, JSON_UNESCAPED_SLASHES );
+	}
+
+	/**
 	 * Finalize validation.
 	 *
 	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()
