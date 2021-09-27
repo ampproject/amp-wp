@@ -10,7 +10,6 @@ import { ReaderThemes } from '../../../components/reader-themes-context-provider
 import { SiteScan } from '../../../components/site-scan-context-provider';
 import { User } from '../../../components/user-context-provider';
 import { Options } from '../../../components/options-context-provider';
-import { Loading } from '../../../components/loading';
 import { TemplateModeOverride } from '../../components/template-mode-override-context-provider';
 import { ScreenUI } from './screen-ui';
 
@@ -21,7 +20,7 @@ export function TemplateMode() {
 	const { setCanGoForward } = useContext( Navigation );
 	const { editedOptions, originalOptions, updateOptions } = useContext( Options );
 	const { developerToolsOption } = useContext( User );
-	const { pluginIssues, themeIssues, scanningSite } = useContext( SiteScan );
+	const { pluginIssues, themeIssues } = useContext( SiteScan );
 	const { currentTheme } = useContext( ReaderThemes );
 	const { technicalQuestionChangedAtLeastOnce } = useContext( TemplateModeOverride );
 
@@ -31,14 +30,10 @@ export function TemplateMode() {
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
-		if ( false === scanningSite && undefined !== themeSupport ) {
+		if ( undefined !== themeSupport ) {
 			setCanGoForward( true );
 		}
-	}, [ setCanGoForward, scanningSite, themeSupport ] );
-
-	if ( scanningSite ) {
-		return <Loading />;
-	}
+	}, [ setCanGoForward, themeSupport ] );
 
 	// The actual display component should avoid using global context directly. This will facilitate developing and testing the UI using different options.
 	return (
