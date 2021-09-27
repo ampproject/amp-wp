@@ -114,20 +114,20 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 			'type'       => 'object',
 			'properties' => [
 				'url'          => [
-					'description' => __( 'Page URL.' ),
+					'description' => __( 'Page URL.', 'amp' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'readonly'    => true,
 					'context'     => [ 'view' ],
 				],
 				'type'         => [
-					'description' => __( 'Page type.' ),
+					'description' => __( 'Page type.', 'amp' ),
 					'type'        => 'string',
 					'readonly'    => true,
 					'context'     => [ 'view' ],
 				],
 				'validate_url' => [
-					'description' => __( 'URL for accessing validation data for a given page.' ),
+					'description' => __( 'URL for accessing validation data for a given page.', 'amp' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'readonly'    => true,
