@@ -1970,6 +1970,108 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertEquals( '/* start custom scripts! */document.write("hello!")/* end custom scripts! */', $dom->getElementById( 'third' )->textContent );
 	}
 
+	public function get_data_to_test_send_validate_response() {
+		return [
+			'ok_no_error_no_store' => [
+				'status_code' => 200,
+				'last_error'  => null,
+				'store'       => false,
+				'save_error'  => false,
+			],
+			'fatal_error_store'    => [
+				'status_code' => 500,
+				'last_error'  => [
+					'type'    => E_ERROR,
+					'message' => 'Something bad happened.',
+					'file'    => __FILE__,
+					'line'    => __LINE__,
+				],
+				'store'       => true,
+				'save_error'  => false,
+			],
+			'warning_store'        => [
+				'status_code' => 200,
+				'last_error'  => [
+					'type'    => E_WARNING,
+					'message' => 'Something kinda bad happened.',
+					'file'    => __FILE__,
+					'line'    => __LINE__,
+				],
+				'store'       => true,
+				'save_error'  => false,
+			],
+			'store_failure'        => [
+				'status_code' => 200,
+				'last_error'  => null,
+				'store'       => true,
+				'save_error'  => true,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_send_validate_response
+	 * @covers \AMP_Validation_Manager::send_validate_response()
+	 */
+	public function test_send_validate_response( $status_code, $last_error, $store, $save_error ) {
+		$source_html          = '<html amp><head><style>body{color:red}</style></head><body><amp-layout layout="bad"></amp-layout></body></html>';
+		$sanitizer_classes    = amp_get_content_sanitizers();
+		$sanitizer_classes    = AMP_Validation_Manager::filter_sanitizer_args( $sanitizer_classes );
+		$sanitization_results = AMP_Content_Sanitizer::sanitize_document(
+			AMP_DOM_Utils::get_dom_from_content( $source_html ),
+			$sanitizer_classes,
+			[]
+		);
+
+		if ( $save_error ) {
+			add_filter( 'wp_insert_post_empty_content', '__return_true' );
+		}
+
+		$response = AMP_Validation_Manager::send_validate_response( $sanitization_results, $status_code, $last_error, $store );
+		$this->assertJson( $response );
+		$data = json_decode( $response, true );
+
+		if ( $save_error ) {
+			$this->assertSame(
+				[
+					'code'    => 'empty_content',
+					'message' => 'Content, title, and excerpt are empty.',
+				],
+				$data
+			);
+			return;
+		}
+
+		$this->assertArrayHasKey( 'http_status_code', $data );
+		$this->assertArrayHasKey( 'php_fatal_error', $data );
+		$this->assertArrayHasKey( 'queried_object', $data );
+		$this->assertArrayHasKey( 'url', $data );
+		$this->assertArrayHasKey( 'stylesheets', $data );
+		$this->assertArrayHasKey( 'results', $data );
+
+		$this->assertEquals( $status_code, $data['http_status_code'] );
+		if ( $last_error && in_array( $last_error['type'], [ E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_PARSE ], true ) ) {
+			$this->assertIsArray( $data['php_fatal_error'] );
+			$this->assertEquals( $last_error, $data['php_fatal_error'] );
+		} else {
+			$this->assertFalse( $data['php_fatal_error'] );
+		}
+
+		$this->assertCount( 1, $data['results'] );
+		$this->assertEquals( 'SPECIFIED_LAYOUT_INVALID', $data['results'][0]['error']['code'] );
+
+		$this->assertCount( 1, $data['stylesheets'] );
+
+		if ( $store ) {
+			$this->assertArrayHasKey( 'validated_url_post', $data );
+			$this->assertArrayHasKey( 'id', $data['validated_url_post'] );
+			$this->assertArrayHasKey( 'edit_link', $data['validated_url_post'] );
+			$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_type( $data['validated_url_post']['id'] ) );
+		} else {
+			$this->assertArrayNotHasKey( 'validated_url_post', $data );
+		}
+	}
+
 	/**
 	 * Test finalize_validation.
 	 *

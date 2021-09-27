@@ -1707,15 +1707,20 @@ class AMP_Validation_Manager {
 	/**
 	 * Send validate response.
 	 *
+	 * @since 2.2
+	 * @see AMP_Theme_Support::prepare_response()
+	 *
 	 * @param array      $sanitization_results Sanitization results.
 	 * @param int        $status_code          Status code.
 	 * @param array|null $last_error           Last error.
-	 *
+	 * @param bool       $store                Whether to store the results.
 	 * @return string JSON.
 	 */
-	public static function send_validate_response( $sanitization_results, $status_code, $last_error ) {
+	public static function send_validate_response( $sanitization_results, $status_code, $last_error, $store ) {
 		status_header( 200 );
-		header( 'Content-Type: application/json; charset=utf-8' );
+		if ( ! headers_sent() ) {
+			header( 'Content-Type: application/json; charset=utf-8' );
+		}
 		$data = [
 			'http_status_code' => $status_code,
 			'php_fatal_error'  => false,
@@ -1725,9 +1730,11 @@ class AMP_Validation_Manager {
 		}
 		$data = array_merge( $data, self::get_validate_response_data( $sanitization_results ) );
 
-		if ( isset( $_GET[ self::STORE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $store ) {
 			$validation_errors = wp_list_pluck( $data['results'], 'error' );
-			unset( $data['results'] );
+
+			$args = $data;
+			unset( $args['results'] );
 
 			$validated_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
 				$validation_errors,
@@ -1736,17 +1743,12 @@ class AMP_Validation_Manager {
 			);
 			if ( is_wp_error( $validated_url_post_id ) ) {
 				status_header( 500 );
-
-				$result = [];
-				foreach ( $validated_url_post_id->errors as $code => $messages ) {
-					foreach ( $messages as $message ) {
-						$result[] = [
-							'code'    => $code,
-							'message' => $message,
-						];
-					}
-				}
-				return wp_json_encode( $result );
+				return wp_json_encode(
+					[
+						'code'    => $validated_url_post_id->get_error_code(),
+						'message' => $validated_url_post_id->get_error_message(),
+					]
+				);
 			} else {
 				status_header( 201 );
 				$data['validated_url_post'] = [

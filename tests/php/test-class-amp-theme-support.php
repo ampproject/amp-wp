@@ -1885,16 +1885,68 @@ class Test_AMP_Theme_Support extends TestCase {
 	}
 
 	/**
-	 * Test prepare_response when validating an invalid AMP page.
+	 * Test prepare_response when validating a non-AMP page.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
-	public function test_prepare_response_for_validating_invalid_amp_page() {
+	public function test_prepare_response_for_validating_non_amp_page() {
 		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 
 		$response = AMP_Theme_Support::prepare_response( '' );
 		$this->assertJson( $response );
 		$this->assertStringContainsString( 'RENDERED_PAGE_NOT_AMP', $response );
+	}
+
+	/** @return array */
+	public function get_data_to_test_prepare_response_for_validating_amp_page() {
+		return [
+			'no-store' => [
+				false,
+			],
+			'store'    => [
+				true,
+			],
+		];
+	}
+
+	/**
+	 * Test prepare_response when validating an AMP page.
+	 *
+	 * @dataProvider get_data_to_test_prepare_response_for_validating_amp_page
+	 * @covers AMP_Theme_Support::prepare_response()
+	 * @covers AMP_Validation_Manager::send_validate_response()
+	 *
+	 * @param bool $store Whether to store results.
+	 */
+	public function test_prepare_response_for_validating_amp_page( $store ) {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
+		$this->go_to( '/' );
+
+		if ( $store ) {
+			$_GET[ AMP_Validation_Manager::STORE_QUERY_VAR ] = '';
+		}
+		$response = AMP_Theme_Support::prepare_response( '<html amp><head></head><body><amp-layout layout="bad"></amp-layout></body></html>' );
+		$this->assertJson( $response );
+		$data = json_decode( $response, true );
+		$this->assertArrayHasKey( 'http_status_code', $data );
+		$this->assertArrayHasKey( 'php_fatal_error', $data );
+		$this->assertArrayHasKey( 'queried_object', $data );
+		$this->assertArrayHasKey( 'url', $data );
+		$this->assertArrayHasKey( 'stylesheets', $data );
+		$this->assertArrayHasKey( 'results', $data );
+		$this->assertCount( 1, $data['results'] );
+		$this->assertEquals( 'SPECIFIED_LAYOUT_INVALID', $data['results'][0]['error']['code'] );
+
+		if ( $store ) {
+			$this->assertArrayHasKey( 'validated_url_post', $data );
+			$this->assertArrayHasKey( 'id', $data['validated_url_post'] );
+			$this->assertArrayHasKey( 'edit_link', $data['validated_url_post'] );
+			$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_type( $data['validated_url_post']['id'] ) );
+		} else {
+			$this->assertArrayNotHasKey( 'validated_url_post', $data );
+		}
 	}
 
 	/**

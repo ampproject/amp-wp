@@ -1998,7 +1998,12 @@ class AMP_Theme_Support {
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::is_validate_request() ) {
-			return AMP_Validation_Manager::send_validate_response( $sanitization_results, $status_code, $last_error );
+			return AMP_Validation_Manager::send_validate_response(
+				$sanitization_results,
+				$status_code,
+				$last_error,
+				isset( $_GET[ AMP_Validation_Manager::STORE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			);
 		}
 
 		/**
