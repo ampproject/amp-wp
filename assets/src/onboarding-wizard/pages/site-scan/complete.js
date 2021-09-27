@@ -28,6 +28,8 @@ import { SourcesList } from './sources-list';
  */
 export function SiteScanComplete() {
 	const { pluginIssues, themeIssues } = useContext( SiteScan );
+	const hasThemeIssues = themeIssues.length > 0;
+	const hasPluginIssues = pluginIssues.length > 0;
 
 	return (
 		<div className="site-scan">
@@ -39,10 +41,13 @@ export function SiteScanComplete() {
 					</h2>
 				</div>
 				<p>
-					{ __( 'Site scan found issues on your site. Proceed to the next step to follow recommendations for choosing a template mode.', 'amp' ) }
+					{ hasThemeIssues || hasPluginIssues
+						? __( 'Site scan found issues on your site. Proceed to the next step to follow recommendations for choosing a template mode.', 'amp' )
+						: __( 'Site scan found no issues on your site. Proceed to the next step to follow recommendations for choosing a template mode.', 'amp' )
+					}
 				</p>
 			</Selectable>
-			{ themeIssues.length > 0 && (
+			{ hasThemeIssues && (
 				<Selectable className="site-scan__section site-scan__section--compact">
 					<div className="site-scan__header">
 						<IconWebsitePaintBrush />
@@ -61,7 +66,7 @@ export function SiteScanComplete() {
 					</div>
 				</Selectable>
 			) }
-			{ pluginIssues.length > 0 && (
+			{ hasPluginIssues && (
 				<Selectable className="site-scan__section site-scan__section--compact">
 					<div className="site-scan__header">
 						<IconLaptopPlug />
