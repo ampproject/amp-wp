@@ -237,14 +237,22 @@ class AMP_Validation_Manager {
 		if ( ! amp_is_canonical() ) {
 			add_filter(
 				'option_' . AMP_Options_Manager::OPTION_NAME,
-				static function ( $options ) {
-					if ( self::is_amp_first_override_request() ) {
-						$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
-					}
-					return $options;
-				}
+				[ __CLASS__, 'filter_options_for_standard_mode_when_amp_first_override' ]
 			);
 		}
+	}
+
+	/**
+	 * Filter AMP options to set Standard template mode if it is an AMP-override request.
+	 *
+	 * @param array $options Options.
+	 * @return array Filtered options.
+	 */
+	public static function filter_options_for_standard_mode_when_amp_first_override( $options ) {
+		if ( self::is_amp_first_override_request() ) {
+			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+		}
+		return $options;
 	}
 
 	/**
