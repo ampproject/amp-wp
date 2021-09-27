@@ -49,6 +49,10 @@ export function SiteScanContextProvider( {
 		hasUnmounted.current = true;
 	}, [] );
 
+	const startSiteScan = useCallback( () => {
+		setSiteScanState( SITE_SCAN_STATE_IDLE );
+	}, [] );
+
 	/**
 	 * Allows cancelling a scan that is in progress.
 	 */
@@ -146,19 +150,16 @@ export function SiteScanContextProvider( {
 
 	return (
 		<SiteScan.Provider
-			value={
-				{
-					cancelSiteScan,
-					canScanSite: siteScanState === SITE_SCAN_STATE_READY,
-					currentlyScannedUrlIndex,
-					fetchingScannableUrls,
-					pluginIssues,
-					scannableUrls,
-					siteScanComplete: siteScanState === SITE_SCAN_STATE_COMPLETE,
-					startSiteScan: () => setSiteScanState( SITE_SCAN_STATE_IDLE ),
-					themeIssues,
-				}
-			}
+			value={ {
+				canScanSite: siteScanState === SITE_SCAN_STATE_READY,
+				cancelSiteScan,
+				currentlyScannedUrlIndex,
+				pluginIssues,
+				scannableUrls,
+				siteScanComplete: siteScanState === SITE_SCAN_STATE_COMPLETE,
+				startSiteScan,
+				themeIssues,
+			} }
 		>
 			{ children }
 		</SiteScan.Provider>
