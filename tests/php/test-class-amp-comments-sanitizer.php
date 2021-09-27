@@ -5,18 +5,17 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Comments_Sanitizer class.
  *
  * @since 0.7
  */
-class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
+class Test_AMP_Comments_Sanitizer extends TestCase {
 
-	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -48,10 +47,10 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		$form = $this->create_form( 'incorrect-action.php' );
 		$instance->sanitize();
 		$on = $form->getAttribute( 'on' );
-		$this->assertStringNotContains( 'submit:AMP.setState(', $on );
-		$this->assertStringNotContains( 'submit-error:AMP.setState(', $on );
+		$this->assertStringNotContainsString( 'submit:AMP.setState(', $on );
+		$this->assertStringNotContainsString( 'submit-error:AMP.setState(', $on );
 		foreach ( $this->get_form_element_names() as $name ) {
-			$this->assertStringNotContains( $name, $on );
+			$this->assertStringNotContainsString( $name, $on );
 		}
 	}
 
@@ -60,18 +59,35 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Comments_Sanitizer::sanitize()
 	 */
-	public function test_sanitize_allowed_action() {
-		$instance = new AMP_Comments_Sanitizer( $this->dom );
+	public function test_sanitize_allowed_action_xhr() {
+		$form_sanitizer     = new AMP_Form_Sanitizer( $this->dom );
+		$comments_sanitizer = new AMP_Comments_Sanitizer( $this->dom );
 
 		// Use an allowed action.
 		$form = $this->create_form( '/wp-comments-post.php' );
-		$instance->sanitize();
+		$form_sanitizer->sanitize();
+		$comments_sanitizer->sanitize();
+
 		$on = $form->getAttribute( 'on' );
-		$this->assertStringContains( 'submit:AMP.setState(', $on );
-		$this->assertStringContains( 'submit-error:AMP.setState(', $on );
+		$this->assertStringContainsString( 'submit:AMP.setState(', $on );
+		$this->assertStringContainsString( 'submit-error:AMP.setState(', $on );
 		foreach ( $this->get_form_element_names() as $name ) {
-			$this->assertStringContains( $name, $on );
+			$this->assertStringContainsString( $name, $on );
 		}
+	}
+
+	/**
+	 * Test AMP_Comments_Sanitizer::sanitize() when a comments form has not been converted into an amp-form.
+	 *
+	 * @covers AMP_Comments_Sanitizer::sanitize()
+	 */
+	public function test_sanitize_native_post_form() {
+		$comments_sanitizer = new AMP_Comments_Sanitizer( $this->dom );
+
+		// Use an allowed action.
+		$form = $this->create_form( '/wp-comments-post.php' );
+		$comments_sanitizer->sanitize();
+		$this->assertFalse( $form->hasAttribute( 'on' ) );
 	}
 
 	/**
@@ -88,15 +104,15 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		$on        = $form->getAttribute( 'on' );
 		$amp_state = $this->dom->getElementsByTagName( 'amp-state' )->item( 0 );
 
-		$this->assertStringContains( 'submit:AMP.setState(', $on );
-		$this->assertStringContains( 'submit-error:AMP.setState(', $on );
-		$this->assertStringContains( 'submit-success:AMP.setState(', $on );
-		$this->assertStringContains( strval( $GLOBALS['post']->ID ), $on );
+		$this->assertStringContainsString( 'submit:AMP.setState(', $on );
+		$this->assertStringContainsString( 'submit-error:AMP.setState(', $on );
+		$this->assertStringContainsString( 'submit-success:AMP.setState(', $on );
+		$this->assertStringContainsString( strval( $GLOBALS['post']->ID ), $on );
 		$this->assertEquals( 'script', $amp_state->firstChild->nodeName );
 
 		foreach ( $this->get_form_element_names() as $name ) {
-			$this->assertStringContains( $name, $on );
-			$this->assertStringContains( $name, $amp_state->nodeValue );
+			$this->assertStringContainsString( $name, $on );
+			$this->assertStringContainsString( $name, $amp_state->nodeValue );
 		}
 		foreach ( $form->getElementsByTagName( 'input' ) as $input ) {
 			/**
@@ -105,8 +121,8 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 			 * @var DOMElement $input
 			 */
 			$on = $input->getAttribute( 'on' );
-			$this->assertStringContains( 'change:AMP.setState(', $on );
-			$this->assertStringContains( strval( $GLOBALS['post']->ID ), $on );
+			$this->assertStringContainsString( 'change:AMP.setState(', $on );
+			$this->assertStringContainsString( strval( $GLOBALS['post']->ID ), $on );
 		}
 	}
 
@@ -177,6 +193,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		$form = $this->dom->createElement( 'form' );
 		$this->dom->appendChild( $form );
 		$form->setAttribute( 'action', $action_value );
+		$form->setAttribute( 'method', 'post' );
 
 		foreach ( $this->get_form_element_names() as $name ) {
 			$element = $this->dom->createElement( 'input' );

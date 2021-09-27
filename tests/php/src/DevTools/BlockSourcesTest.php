@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Tests\Helpers\MockPluginEnvironment;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for the BlockSources class.
@@ -25,7 +25,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\DevTools\BlockSources
  */
-class BlockSourcesTest extends WP_UnitTestCase {
+class BlockSourcesTest extends TestCase {
 
 	use PrivateAccess;
 

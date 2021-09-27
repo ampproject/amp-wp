@@ -7,6 +7,13 @@ on:
     # Once a day (https://crontab.guru/once-a-day)
     - cron: '0 0 * * *'
 
+# Cancel previous workflow run groups that have not completed.
+concurrency:
+  # Group workflow runs by workflow name, along with the head branch ref of the pull request
+  # or otherwise the branch or tag ref.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-gutenberg-release:
     name: Check for a new Gutenberg release
@@ -102,18 +109,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
-
-      - name: Get npm cache directory
-        id: npm-cache
-        run: echo "::set-output name=dir::$(npm config get cache)"
-
-      - name: Configure npm cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
+          cache: npm
 
       - name: Configure git user
         run: |
@@ -176,6 +172,6 @@ jobs:
           gh pr merge --auto --merge "$PR_URL"
         env:
           VERSION: ${{ needs.check-gutenberg-release.outputs.latest-version }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GUTENBERG_PACKAGES_UPDATE_TOKEN }}
           BASE_BRANCH: ${{ steps.branches.outputs.base }}
           HEAD_BRANCH: ${{ steps.branches.outputs.head }}

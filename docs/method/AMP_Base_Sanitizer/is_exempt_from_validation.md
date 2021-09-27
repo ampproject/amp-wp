@@ -18,7 +18,7 @@ Check whether a certain node should be exempt from validation.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:450](/includes/sanitizers/class-amp-base-sanitizer.php#L450-L453)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:461](/includes/sanitizers/class-amp-base-sanitizer.php#L461-L464)
 
 <details>
 <summary>Show Code</summary>

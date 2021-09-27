@@ -13,7 +13,7 @@ exports[`StepperBullet matches snaphnot when neither index nor active index are 
   >
     <mask
       height="12"
-      id="mask0"
+      id="mask-1"
       mask-type="alpha"
       maskUnits="userSpaceOnUse"
       width="16"
@@ -26,7 +26,7 @@ exports[`StepperBullet matches snaphnot when neither index nor active index are 
       />
     </mask>
     <g
-      mask="url(#mask0)"
+      mask="url(#mask-1)"
     >
       <rect
         fill="white"
@@ -60,7 +60,7 @@ exports[`StepperBullet matches snapshot when index is 0 and active index is some
   >
     <mask
       height="12"
-      id="mask0"
+      id="mask-0"
       mask-type="alpha"
       maskUnits="userSpaceOnUse"
       width="16"
@@ -73,7 +73,7 @@ exports[`StepperBullet matches snapshot when index is 0 and active index is some
       />
     </mask>
     <g
-      mask="url(#mask0)"
+      mask="url(#mask-0)"
     >
       <rect
         fill="white"

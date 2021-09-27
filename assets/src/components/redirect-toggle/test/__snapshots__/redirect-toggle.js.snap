@@ -2,47 +2,43 @@
 
 exports[`RedirectToggle matches snapshot 1`] = `
 <div
-  className="selectable selectable--bottom"
+  className="amp-setting-toggle "
 >
   <div
-    className="amp-setting-toggle "
+    className="components-base-control components-toggle-control css-wdf2ti-Wrapper e1puf3u3"
   >
     <div
-      className="components-base-control components-toggle-control css-wdf2ti-Wrapper e1puf3u0"
+      className="components-base-control__field css-igk9ll-StyledField e1puf3u2"
     >
-      <div
-        className="components-base-control__field css-11vcxb9-StyledField e1puf3u1"
+      <span
+        className="components-form-toggle is-checked"
       >
+        <input
+          checked={true}
+          className="components-form-toggle__input"
+          id="inspector-toggle-control-0"
+          onChange={[Function]}
+          type="checkbox"
+        />
         <span
-          className="components-form-toggle is-checked"
+          className="components-form-toggle__track"
+        />
+        <span
+          className="components-form-toggle__thumb"
+        />
+      </span>
+      <label
+        className="components-toggle-control__label"
+        htmlFor="inspector-toggle-control-0"
+      >
+        <div
+          className="amp-setting-toggle__label-text"
         >
-          <input
-            checked={true}
-            className="components-form-toggle__input"
-            id="inspector-toggle-control-0"
-            onChange={[Function]}
-            type="checkbox"
-          />
-          <span
-            className="components-form-toggle__track"
-          />
-          <span
-            className="components-form-toggle__thumb"
-          />
-        </span>
-        <label
-          className="components-toggle-control__label"
-          htmlFor="inspector-toggle-control-0"
-        >
-          <div
-            className="amp-setting-toggle__label-text"
-          >
-            <h3>
-              Redirect mobile visitors to AMP
-            </h3>
-          </div>
-        </label>
-      </div>
+          <h3>
+            Redirect mobile visitors to AMP
+          </h3>
+        </div>
+      </label>
     </div>
   </div>
 </div>

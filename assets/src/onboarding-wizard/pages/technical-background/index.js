@@ -8,7 +8,7 @@ import { useContext, useEffect, useCallback } from '@wordpress/element';
  * Internal dependencies
  */
 import { Navigation } from '../../components/navigation-context-provider';
-import { User } from '../../components/user-context-provider';
+import { User } from '../../../components/user-context-provider';
 import { User1, User2 } from '../../../components/svg/user-icons';
 import { Selectable } from '../../../components/selectable';
 import './style.css';

@@ -14,7 +14,7 @@ Each array item should have a key that corresponds to a template conditional fun
 
 ### Source
 
-:link: [includes/class-amp-theme-support.php:794](/includes/class-amp-theme-support.php#L794)
+:link: [includes/class-amp-theme-support.php:797](/includes/class-amp-theme-support.php#L797)
 
 <details>
 <summary>Show Code</summary>

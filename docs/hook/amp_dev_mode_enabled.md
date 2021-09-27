@@ -14,7 +14,7 @@ When enabled, the data-ampdevmode attribute will be added to the document elemen
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1319](/includes/amp-helper-functions.php#L1319-L1329)
+:link: [includes/amp-helper-functions.php:1374](/includes/amp-helper-functions.php#L1374-L1388)
 
 <details>
 <summary>Show Code</summary>
@@ -29,6 +29,10 @@ return apply_filters(
 		( is_admin_bar_showing() && is_user_logged_in() )
 		||
 		is_customize_preview()
+		||
+		// Force dev mode for Bento since it currently requires the Bento experiment opt-in script.
+		// @todo Remove this once Bento no longer requires an experiment to opt-in. See <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
+		amp_is_bento_enabled()
 	)
 );
 ```

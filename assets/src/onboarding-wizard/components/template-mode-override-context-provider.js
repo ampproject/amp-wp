@@ -13,16 +13,16 @@ import { createContext, useState, useEffect, useContext } from '@wordpress/eleme
  */
 import { Options } from '../../components/options-context-provider';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
+import { User } from '../../components/user-context-provider';
 import { Navigation } from './navigation-context-provider';
-import { User } from './user-context-provider';
 
 export const TemplateModeOverride = createContext();
 
 /**
  * Responds to user selections with overrides to the template mode setting.
  *
- * @param {Object} props Component props.
- * @param {any} props.children Children to consume the context.
+ * @param {Object} props          Component props.
+ * @param {any}    props.children Children to consume the context.
  */
 export function TemplateModeOverrideContextProvider( { children } ) {
 	const { editedOptions, originalOptions, updateOptions, readerModeWasOverridden, setReaderModeWasOverridden } = useContext( Options );

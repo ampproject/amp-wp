@@ -16,7 +16,7 @@ import './style.css';
  * If the count is not a number or is `0`, the element that contains the count is instead removed (as it would be no longer relevant).
  *
  * @param {HTMLElement} itemEl Menu item element.
- * @param {number} count Count to set.
+ * @param {number}      count  Count to set.
  */
 function updateMenuItem( itemEl, count ) {
 	if ( isNaN( count ) || count === 0 ) {
@@ -29,9 +29,9 @@ function updateMenuItem( itemEl, count ) {
 /**
  * Updates the 'Validated URLs' and 'Error Index' menu items with their respective unreviewed count.
  *
- * @param {Object} counts Counts for menu items.
+ * @param {Object} counts                Counts for menu items.
  * @param {number} counts.validated_urls Unreviewed validated URLs count.
- * @param {number} counts.errors Unreviewed validation errors count.
+ * @param {number} counts.errors         Unreviewed validation errors count.
  */
 function updateMenuItemCounts( counts ) {
 	const { validated_urls: newValidatedUrlCount, errors: newErrorCount } = counts;

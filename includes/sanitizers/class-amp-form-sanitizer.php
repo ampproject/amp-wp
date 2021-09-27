@@ -7,7 +7,8 @@
  */
 
 use AmpProject\DevMode;
-use AmpProject\Dom\Document;
+use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
+use AmpProject\Dom\Element;
 
 /**
  * Class AMP_Form_Sanitizer
@@ -18,6 +19,31 @@ use AmpProject\Dom\Document;
  * @internal
  */
 class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
+
+	/**
+	 * Validation error code emitted when native POST forms are opted-into and one is encountered.
+	 *
+	 * @var string
+	 */
+	const FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR = 'FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR';
+
+	/**
+	 * Placeholder for default args, to be set in child classes.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = [
+		'native_post_forms_allowed' => false,
+	];
+
+	/**
+	 * Array of flags used to control sanitization.
+	 *
+	 * @var array {
+	 *      @type bool $native_post_forms_allowed When true, a user can decide via validation error status to convert to an XHR form.
+	 * }
+	 */
+	protected $args;
 
 	/**
 	 * Tag.
@@ -50,7 +76,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement || DevMode::hasExemptionForNode( $node ) ) {
+			if ( ! $node instanceof Element || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -82,6 +108,22 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					$node->setAttribute( 'action', $action_url );
 				}
 			} elseif ( 'post' === $method ) {
+				// If native POST forms are allowed, raise an error that gives the user the option to convert to an
+				// AMP-valid form with action-xhr. If the status of the validation error is 'removed', then the
+				// conversion will be performed. Otherwise, if the status is 'kept' then the POST form will be retained
+				// in the page by marking it with AMP dev mode, and the amp-form extension will be omitted from being
+				// added to the page.
+				if ( ! $xhr_action && $this->args['native_post_forms_allowed'] ) {
+					$validation_error = [
+						'code' => self::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR,
+					];
+					if ( ! $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) ) ) {
+						$node->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+						$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
+						continue;
+					}
+				}
+
 				$node->removeAttribute( 'action' );
 				if ( ! $xhr_action ) {
 					// Record that action was converted to action-xhr.
@@ -94,18 +136,26 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			/*
-			 * The target "indicates where to display the form response after submitting the form.
-			 * The value must be _blank or _top". The _self and _parent values are treated
-			 * as synonymous with _top, and anything else is treated like _blank.
-			 */
-			$target = $node->getAttribute( 'target' );
-			if ( '_top' !== $target ) {
-				if ( ! $target || in_array( $target, [ '_self', '_parent' ], true ) ) {
-					$node->setAttribute( 'target', '_top' );
-				} elseif ( '_blank' !== $target ) {
-					$node->setAttribute( 'target', '_blank' );
-				}
+			$this->normalize_target_attribute( $node );
+		}
+	}
+
+	/**
+	 * Normalize form target attribute.
+	 *
+	 * The target "indicates where to display the form response after submitting the form.
+	 * The value must be _blank or _top". The _self and _parent values are treated
+	 * as synonymous with _top, and anything else is treated like _blank.
+	 *
+	 * @param Element $form_element Form element.
+	 */
+	protected function normalize_target_attribute( Element $form_element ) {
+		$target = $form_element->getAttribute( 'target' );
+		if ( '_top' !== $target ) {
+			if ( ! $target || in_array( $target, [ '_self', '_parent' ], true ) ) {
+				$form_element->setAttribute( 'target', '_top' );
+			} elseif ( '_blank' !== $target ) {
+				$form_element->setAttribute( 'target', '_blank' );
 			}
 		}
 	}
@@ -204,7 +254,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			'submitting'     => null,
 		];
 
-		$templates = $this->dom->xpath->query( Document::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $form );
+		$templates = $this->dom->xpath->query( MustacheScriptTemplates::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $form );
 		foreach ( $templates as $template ) {
 			$parent = $template->parentNode;
 			if ( $parent instanceof DOMElement ) {

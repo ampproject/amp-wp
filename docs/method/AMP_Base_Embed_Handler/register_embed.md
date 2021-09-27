@@ -8,7 +8,7 @@ Registers embed.
 
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:49](/includes/embeds/class-amp-base-embed-handler.php#L49)
+:link: [includes/embeds/class-amp-base-embed-handler.php:52](/includes/embeds/class-amp-base-embed-handler.php#L52)
 
 <details>
 <summary>Show Code</summary>
