@@ -37,7 +37,7 @@ export function SiteScanContextProvider( {
 	const [ themeIssues, setThemeIssues ] = useState( [] );
 	const [ pluginIssues, setPluginIssues ] = useState( [] );
 	const [ siteScanState, setSiteScanState ] = useState( SITE_SCAN_STATE_INITIALIZING );
-	const [ currentlyScannedUrlIndex, setCurrentlyScannedUrlIndex ] = useState( 5 );
+	const [ currentlyScannedUrlIndex, setCurrentlyScannedUrlIndex ] = useState( 0 );
 	const [ fetchingScannableUrls, setFetchingScannableUrls ] = useState( false );
 	const [ fetchedScannableUrls, setFetchedScannableUrls ] = useState( false );
 	const [ scannableUrls, setScannableUrls ] = useState( [] );
