@@ -9,6 +9,7 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
+use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -224,7 +225,11 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		$theme           = wp_get_theme();
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
-		$amp_settings_link = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
+		$amp_settings_link       = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
+		$amp_validated_urls_link = admin_url( add_query_arg(
+			[ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ],
+			'edit.php'
+		) );
 
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
@@ -255,6 +260,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
+			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
 		];
 
 		wp_add_inline_script(

@@ -2,13 +2,14 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { VALIDATED_URLS_LINK } from 'amp-settings'; // From WP inline script.
 
 /**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { useContext } from '@wordpress/element';
-import { VisuallyHidden } from '@wordpress/components';
+import { ExternalLink, VisuallyHidden } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -63,6 +64,11 @@ export function SiteScanComplete() {
 					</div>
 					<div className="site-scan__content">
 						<ThemesWithIssues issues={ themeIssues } />
+						<p className="site-scan__cta">
+							<ExternalLink href={ VALIDATED_URLS_LINK }>
+								{ __( 'AMP Validated URLs page', 'amp' ) }
+							</ExternalLink>
+						</p>
 					</div>
 				</Selectable>
 			) }
@@ -82,6 +88,11 @@ export function SiteScanComplete() {
 					</div>
 					<div className="site-scan__content">
 						<PluginsWithIssues issues={ pluginIssues } />
+						<p className="site-scan__cta">
+							<ExternalLink href={ VALIDATED_URLS_LINK }>
+								{ __( 'AMP Validated URLs page', 'amp' ) }
+							</ExternalLink>
+						</p>
 					</div>
 				</Selectable>
 			) }

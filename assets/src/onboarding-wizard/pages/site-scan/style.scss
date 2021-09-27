@@ -91,3 +91,12 @@
 .site-scan__source-version {
 	margin-left: auto;
 }
+
+.site-scan__cta.site-scan__cta {
+	font-size: 14px;
+	margin-bottom: 0;
+
+	.components-external-link__icon {
+		fill: var(--amp-settings-color-brand);
+	}
+}
