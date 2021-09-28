@@ -38,6 +38,8 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	 * Set up.
 	 */
 	public function set_up() {
+		parent::set_up();
+
 		$this->prevent_block_pre_render();
 		$this->add_reader_themes_request_filter();
 
