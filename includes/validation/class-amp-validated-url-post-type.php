@@ -2340,7 +2340,11 @@ class AMP_Validated_URL_Post_Type {
 				$included_final_size    += $stylesheets[ $i ]['final_size'];
 				$included_original_size += $stylesheets[ $i ]['original_size'];
 
-				if ( $included_final_size >= $style_custom_cdata_spec['max_bytes'] ) {
+				if (
+					$included_final_size >= $style_custom_cdata_spec['max_bytes']
+					&&
+					$stylesheets[ $i ]['final_size'] > 0
+				) {
 					$stylesheets[ $i ]['status'] = $excessive_status;
 				} else {
 					$stylesheets[ $i ]['status'] = $included_status;

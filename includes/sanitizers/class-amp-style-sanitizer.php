@@ -3534,8 +3534,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Skip stylesheets that were completely tree-shaken and mark as included.
+			if ( 0 === $this->pending_stylesheets[ $i ]['final_size'] ) {
+				$this->pending_stylesheets[ $i ]['included'] = true;
+				continue;
+			}
+
 			// Report validation error if size is now too big.
-			if ( ! $this->args['skip_tree_shaking'] && $current_concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes ) {
+			if (
+				! $this->args['skip_tree_shaking']
+				&&
+				$current_concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes
+			) {
 				$validation_error = [
 					'code'      => self::STYLESHEET_TOO_LONG,
 					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
