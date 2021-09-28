@@ -13,7 +13,7 @@ async function testCommonDoneStepElements() {
 	await expect( '.done__list li' ).countToBe( 3 );
 	await expect( page ).toMatchElement( '.done__list li', { text: /support forums/i } );
 	await expect( page ).toMatchElement( '.done__list li', { text: /different template mode/i } );
-	await expect( page ).toMatchElement( '.done__list li', { text: /how the PX plugin works/i } );
+	await expect( page ).toMatchElement( '.done__list li', { text: /how the AMP plugin works/i } );
 
 	await expect( page ).toMatchElement( '.done__preview-iframe' );
 

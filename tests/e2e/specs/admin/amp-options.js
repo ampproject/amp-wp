@@ -157,7 +157,7 @@ describe( 'AMP settings screen Review panel', () => {
 		await expect( page ).toMatchElement( 'h3', { text: 'Need help?' } );
 		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /support forums/i } );
 		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /different template mode/i } );
-		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /how the PX plugin works/i } );
+		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /how the AMP plugin works/i } );
 	} );
 
 	it( 'button redirects to an AMP page in transitional mode', async () => {
