@@ -57,7 +57,12 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 				'update_callback' => [ $this, 'update_review_panel_dismissed_for_template_mode' ],
 				'schema'          => [
 					'description' => __( 'For which template mode the Review panel on the Settings screen was dismissed by a user', 'amp' ),
-					'type'        => [ 'string', 'bool' ],
+					'type'        => 'string',
+					'enum'        => [
+						AMP_Theme_Support::READER_MODE_SLUG,
+						AMP_Theme_Support::STANDARD_MODE_SLUG,
+						AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+					],
 				],
 			]
 		);
@@ -104,24 +109,6 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 				'amp_rest_cannot_edit_other_user',
 				__( 'Sorry, the user is not allowed to make this change for other user.', 'amp' ),
 				[ 'status' => rest_authorization_required_code() ]
-			);
-		}
-
-		if ( empty( $template_mode ) ) {
-			return delete_user_meta( $user->ID, self::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE );
-		}
-
-		$allowed_template_modes = [
-			AMP_Theme_Support::READER_MODE_SLUG,
-			AMP_Theme_Support::STANDARD_MODE_SLUG,
-			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
-		];
-
-		if ( ! in_array( $template_mode, $allowed_template_modes, true ) ) {
-			return new WP_Error(
-				'amp_rest_incorrect_template_mode',
-				__( 'Sorry, the template mode is incorrect.', 'amp' ),
-				[ 'status' => 400 ]
 			);
 		}
 
