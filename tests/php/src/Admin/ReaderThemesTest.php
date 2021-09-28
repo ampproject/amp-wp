@@ -59,9 +59,8 @@ class ReaderThemesTest extends TestCase {
 	}
 
 	public function tear_down() {
-		parent::tear_down();
-
 		$this->restore_theme_directories();
+		parent::tear_down();
 	}
 
 	/**

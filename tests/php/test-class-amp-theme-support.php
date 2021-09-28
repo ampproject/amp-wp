@@ -79,7 +79,6 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$this->set_private_property( AMP_Theme_Support::class, 'metadata', null );
 
-		parent::tear_down();
 		unset( $GLOBALS['show_admin_bar'] );
 		AMP_Validation_Manager::$is_validate_request = false;
 		AMP_Validation_Manager::reset_validation_results();
@@ -99,6 +98,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		unregister_post_type( 'book' );
 		unregister_post_type( 'announcement' );
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**

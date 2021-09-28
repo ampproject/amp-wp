@@ -27,14 +27,14 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 	}
 
 	public function tear_down() {
-		parent::tear_down();
-
 		$this->restore_theme_directories();
 
 		unset(
 			$GLOBALS['submenu'],
 			$GLOBALS['menu']
 		);
+
+		parent::tear_down();
 	}
 
 	/** @covers ::amp_init_customizer() */

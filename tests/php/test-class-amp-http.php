@@ -30,9 +30,9 @@ class Test_AMP_HTTP extends TestCase {
 	 * @global WP_Scripts $wp_scripts
 	 */
 	public function tear_down() {
-		parent::tear_down();
 		AMP_HTTP::$headers_sent          = [];
 		AMP_HTTP::$purged_amp_query_vars = [];
+		parent::tear_down();
 	}
 
 	/**

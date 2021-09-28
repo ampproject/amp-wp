@@ -43,7 +43,6 @@ class Test_AMP_Options_Manager extends TestCase {
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
 	public function tear_down() {
-		parent::tear_down();
 		$GLOBALS['_wp_using_ext_object_cache'] = $this->was_wp_using_ext_object_cache;
 		unregister_post_type( 'foo' );
 		unregister_post_type( 'book' );
@@ -57,6 +56,8 @@ class Test_AMP_Options_Manager extends TestCase {
 
 		$this->restore_theme_directories();
 		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query']; // This is missing in core.
+
+		parent::tear_down();
 	}
 
 	/**

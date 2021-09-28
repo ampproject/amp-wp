@@ -61,9 +61,9 @@ class BlockSourcesTest extends TestCase {
 	 * @inheritdoc
 	 */
 	public function tear_down() {
-		parent::tear_down();
-
 		$this->instance->clear_block_sources_cache();
+
+		parent::tear_down();
 	}
 
 	/** @covers ::is_needed() */

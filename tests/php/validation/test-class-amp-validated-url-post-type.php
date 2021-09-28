@@ -35,12 +35,12 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 	}
 
 	public function tear_down() {
-		parent::tear_down();
-
 		global $current_screen;
 		$current_screen = null;
 
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**

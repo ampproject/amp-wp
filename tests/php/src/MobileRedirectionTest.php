@@ -34,11 +34,11 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	}
 
 	public function tear_down() {
-		parent::tear_down();
 		$_COOKIE = [];
 		unset( $GLOBALS['wp_customize'] );
 		AMP_HTTP::$purged_amp_query_vars = [];
 		$GLOBALS['wp_the_query']         = $GLOBALS['wp_query']; // This is missing in core.
+		parent::tear_down();
 	}
 
 	public function test__construct() {

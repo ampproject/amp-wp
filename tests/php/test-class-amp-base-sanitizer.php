@@ -30,9 +30,9 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	 * Tear down.
 	 */
 	public function tear_down() {
-		parent::tear_down();
 		AMP_Validation_Manager::reset_validation_results();
 		AMP_Validation_Manager::$is_validate_request = false;
+		parent::tear_down();
 	}
 
 	/**

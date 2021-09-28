@@ -34,10 +34,11 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 	}
 
 	public function tear_down() {
-		parent::tear_down();
 		unset( $GLOBALS['wp_customize'], $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
 
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**

@@ -44,13 +44,14 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Tear down.
 	 */
 	public function tear_down() {
-		parent::tear_down();
 		global $wp_styles, $wp_scripts, $wp_customize;
 		$wp_styles    = null;
 		$wp_scripts   = null;
 		$wp_customize = null;
 
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**

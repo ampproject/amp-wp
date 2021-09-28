@@ -22,8 +22,8 @@ class Test_Uninstall extends TestCase {
 	}
 
 	public function tear_down() {
-		parent::tear_down();
 		wp_using_ext_object_cache( $this->was_using_ext_object_cache );
+		parent::tear_down();
 	}
 
 	/**

@@ -52,10 +52,10 @@ class PolyfillsTest extends TestCase {
 	 * @inheritdoc
 	 */
 	public function tear_down() {
-		parent::tear_down();
 		global $wp_scripts, $wp_styles;
 		$wp_scripts = null;
 		$wp_styles  = null;
+		parent::tear_down();
 	}
 
 	public function test__construct() {

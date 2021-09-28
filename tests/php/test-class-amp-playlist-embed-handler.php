@@ -60,6 +60,8 @@ class Test_AMP_Playlist_Embed_Handler extends TestCase {
 		$wp_styles = null;
 
 		AMP_Playlist_Embed_Handler::$playlist_id = 0;
+
+		parent::tear_down();
 	}
 
 	/**

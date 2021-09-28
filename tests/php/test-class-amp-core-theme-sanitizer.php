@@ -27,12 +27,12 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	}
 
 	public function tear_down() {
-		parent::tear_down();
-
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;
 
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**

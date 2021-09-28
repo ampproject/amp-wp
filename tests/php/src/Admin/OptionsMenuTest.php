@@ -50,9 +50,9 @@ class OptionsMenuTest extends TestCase {
 	 * @inheritdoc
 	 */
 	public function tear_down() {
-		parent::tear_down();
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;
+		parent::tear_down();
 	}
 
 	/** @covers ::is_needed() */
