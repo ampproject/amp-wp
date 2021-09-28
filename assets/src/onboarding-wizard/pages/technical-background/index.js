@@ -49,7 +49,7 @@ export function TechnicalBackground() {
 		<div className="technical-background">
 			<div className="technical-background__header">
 				<h1>
-					{ __( 'Technical background', 'amp' ) }
+					{ __( 'Technical Background', 'amp' ) }
 				</h1>
 				<p>
 					{ __( 'To recommend the best AMP experience we’d like to know if you’re a more technical user, or less technical.', 'amp' ) }
@@ -71,10 +71,10 @@ export function TechnicalBackground() {
 						<User1 />
 						<div className="technical-background-option__description">
 							<h2>
-								{ __( 'Developer or Technically Savvy', 'amp' ) }
+								{ __( 'Developer or technically savvy', 'amp' ) }
 							</h2>
 							<p>
-								{ __( 'I can do WordPress development such as making changes to themes and plugins; I can build full WordPress sites out of plugins and themes and can address configuration issues and understand.', 'amp' ) }
+								{ __( 'I can do WordPress development by modifying themes and plugins. I am familiar with PHP, JavaScript, HTML, and CSS.', 'amp' ) }
 							</p>
 						</div>
 					</label>
@@ -95,7 +95,7 @@ export function TechnicalBackground() {
 						<User2 />
 						<div className="technical-background-option__description">
 							<h2>
-								{ __( 'Non-technical or Wanting a simpler setup', 'amp' ) }
+								{ __( 'Non-technical or wanting a simpler setup', 'amp' ) }
 							</h2>
 							<p>
 								{ __( 'I am not responsible for configuring and fixing issues on my site. I am a site owner and/or content creator who wants to take advantage of AMP performance.', 'amp' ) }

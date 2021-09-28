@@ -108,7 +108,7 @@ export function Done() {
 				</p>
 				{ STANDARD === themeSupport && (
 					<p>
-						{ __( 'In Standard mode there is a single AMP version of your site. Browse your site below to ensure it meets your expectations.', 'amp' ) }
+						{ __( 'In Standard mode there is a single AMP version of your site. Browse your site here to ensure it meets your expectations.', 'amp' ) }
 					</p>
 				) }
 				{ TRANSITIONAL === themeSupport && (
@@ -117,14 +117,14 @@ export function Done() {
 							{ __( 'In Transitional mode AMP and non-AMP versions of your site are served using your currently active theme.', 'amp' ) }
 						</p>
 						<p>
-							{ __( 'Browse your site below to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
+							{ __( 'Browse your site here to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
 						</p>
 					</>
 				) }
 				{ READER === themeSupport && (
 					<>
 						<p>
-							{ __( 'In Reader mode AMP is served using your selected Reader theme, and pages for your non-AMP site are served using your primary theme. Browse your site below to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
+							{ __( 'In Reader mode AMP is served using your selected Reader theme, and pages for your non-AMP site are served using your primary theme. Browse your site here to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
 						</p>
 						<p>
 							{ __( 'As a last step, use the Customizer to tailor the Reader theme as needed.', 'amp' ) }
@@ -183,7 +183,7 @@ export function Done() {
 					<li dangerouslySetInnerHTML={ {
 						__html: sprintf(
 							/* translators: placeholder is a link to the plugin site. */
-							__( '<a href="%s" target="_blank" rel="noreferrer noopener">Learn more</a> how the PX plugin works', 'amp' ),
+							__( '<a href="%s" target="_blank" rel="noreferrer noopener">Learn more</a> how the AMP plugin works', 'amp' ),
 							'https://amp-wp.org/documentation/how-the-plugin-works/',
 						),
 					} } />

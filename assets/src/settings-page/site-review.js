@@ -103,7 +103,7 @@ export function SiteReview() {
 					<li dangerouslySetInnerHTML={ {
 						__html: sprintf(
 							/* translators: placeholder is a link to the plugin site. */
-							__( '<a href="%s" target="_blank" rel="noreferrer noopener">Learn more</a> how the PX plugin works', 'amp' ),
+							__( '<a href="%s" target="_blank" rel="noreferrer noopener">Learn more</a> how the AMP plugin works', 'amp' ),
 							'https://amp-wp.org/documentation/how-the-plugin-works/',
 						),
 					} } />
