@@ -85,7 +85,7 @@ export function SettingsFooter() {
 							{
 								shouldShowPageCacheFlushNotice ? (
 									<>
-										{ __( 'Mode saved. Please flush page cache.', 'amp' ) }
+										{ __( 'Mode saved. Please flush page cache. ', 'amp' ) }
 										<a
 											href="https://amp-wp.org/documentation/getting-started/amp-site-setup/page-caching-with-amp-and-wordpress/#what-page-caching-plugins-should-i-use"
 											target="_blank"
