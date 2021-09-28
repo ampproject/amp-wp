@@ -76,6 +76,8 @@ class UserRESTEndpointExtensionTest extends TestCase {
 		$this->assertWPError( $this->user_rest_endpoint_extension->update_review_panel_dismissed_for_template_mode( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, $editor_user ) );
 
 		$this->assertEquals( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, get_user_meta( $admin_user->ID, UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, true ) );
+		$this->assertTrue( $this->user_rest_endpoint_extension->update_review_panel_dismissed_for_template_mode( null, $admin_user ) );
+		$this->assertEmpty( get_user_meta( $admin_user->ID, UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, true ) );
 
 		$this->assertWPError( $this->user_rest_endpoint_extension->update_review_panel_dismissed_for_template_mode( 'foobar', $editor_user ) );
 	}

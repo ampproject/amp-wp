@@ -59,6 +59,7 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 					'description' => __( 'For which template mode the Review panel on the Settings screen was dismissed by a user', 'amp' ),
 					'type'        => 'string',
 					'enum'        => [
+						null,
 						AMP_Theme_Support::READER_MODE_SLUG,
 						AMP_Theme_Support::STANDARD_MODE_SLUG,
 						AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
@@ -110,6 +111,10 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 				__( 'Sorry, the user is not allowed to make this change for other user.', 'amp' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
+		}
+
+		if ( empty( $template_mode ) ) {
+			return delete_user_meta( $user->ID, self::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE );
 		}
 
 		return (bool) update_user_meta( $user->ID, self::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, $template_mode );
