@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Error;
 use WP_User;
+
 /**
  * UserRESTEndpointExtension class.
  *
@@ -22,8 +23,6 @@ class UserRESTEndpointExtension implements Service, Registerable {
 
 	/**
 	 * User meta key that stores a template mode for which the "Review" panel was dismissed.
-	 *
-	 * @since 2.2
 	 *
 	 * @var string
 	 */
