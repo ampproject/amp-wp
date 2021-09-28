@@ -383,6 +383,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				$attr_exemption_attribute = ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE . '="onload"';
 		}
 
+		// @todo In level 1, deny-listed CSS properties like -moz-binding and behavior should be allowed. Nevertheless, these are very rare now (since they are obsolete).
 		$dom = Document::fromHtml(
 			sprintf(
 				'
@@ -395,6 +396,9 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 						audio { outline: solid 1px green !important; }
 						video { outline: solid 1px blue; }
 						iframe { outline: solid 1px black; }
+						</style>
+						<style>
+						body:after{content:' . str_repeat( 'a', 75000 ) . '}
 						</style>
 					</head>
 					<body onload="doSomething()" %s>
@@ -458,6 +462,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				[
 					'use_document_element' => true,
 					'skip_tree_shaking'    => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+					'allow_excessive_css'  => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
 			AMP_Tag_And_Attribute_Sanitizer::class => new AMP_Tag_And_Attribute_Sanitizer(
@@ -478,7 +483,13 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$sanitizer->sanitize();
 		}
 
-		$css_custom = $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 )->textContent;
+		$css_custom_style = $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+		$css_custom_text  = $css_custom_style->textContent;
+
+		$this->assertEquals(
+			3 !== $level,
+			ValidationExemption::is_px_verified_for_node( $css_custom_style )
+		);
 
 		$this->assertEquals(
 			3 === $level ? 0 : 1,
@@ -492,7 +503,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 		);
 		$this->assertStringContainsString(
 			1 !== $level ? '}amp-img{' : '}img{',
-			$css_custom
+			$css_custom_text
 		);
 
 		$this->assertEquals(
@@ -502,7 +513,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 		);
 		$this->assertStringContainsString(
 			1 !== $level ? '}amp-video{' : '}video{',
-			$css_custom
+			$css_custom_text
 		);
 
 		$this->assertEquals(
@@ -513,13 +524,13 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 
 		switch ( $level ) {
 			case 1:
-				$this->assertStringContainsString( '}audio{outline:solid 1px green !important}', $css_custom );
+				$this->assertStringContainsString( '}audio{outline:solid 1px green !important}', $css_custom_text );
 				break;
 			case 2:
-				$this->assertStringContainsString( '}amp-audio{', $css_custom );
+				$this->assertStringContainsString( '}amp-audio{', $css_custom_text );
 				break;
 			case 3:
-				$this->assertStringContainsString( ':not(#_) amp-audio{', $css_custom );
+				$this->assertStringContainsString( ':not(#_) amp-audio{', $css_custom_text );
 				break;
 		}
 
@@ -530,7 +541,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 		);
 		$this->assertStringContainsString(
 			1 !== $level ? '}amp-iframe{' : '}iframe{',
-			$css_custom
+			$css_custom_text
 		);
 
 		$post_form = $dom->xpath->query( '//form[ @method = "post" ]' )->item( 0 );
@@ -538,11 +549,15 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 		$this->assertEquals( 3 === $level, $post_form->hasAttribute( Attribute::ACTION_XHR ) );
 		$this->assertEquals( 3 !== $level, $post_form->hasAttribute( Attribute::ACTION ) );
 
-		$style = $dom->getElementsByTagName( Tag::STYLE )->item( 0 );
-		if ( 1 !== $level ) {
-			$this->assertStringNotContainsString( 'body.loaded{background:green}', $style->textContent );
+		if ( 1 === $level ) {
+			$this->assertStringContainsString( 'body.loaded{background:green}', $css_custom_text );
 		} else {
-			$this->assertStringContainsString( 'body.loaded{background:green}', $style->textContent );
+			$this->assertStringNotContainsString( 'body.loaded{background:green}', $css_custom_text );
+		}
+		if ( 3 === $level ) {
+			$this->assertStringNotContainsString( 'body:after{', $css_custom_text );
+		} else {
+			$this->assertStringContainsString( 'body:after{', $css_custom_text );
 		}
 
 		// Verify that prefer_bento got set.

@@ -11,6 +11,7 @@ use AMP_Comments_Sanitizer;
 use AMP_Form_Sanitizer;
 use AMP_Options_Manager;
 use AMP_Script_Sanitizer;
+use AMP_Style_Sanitizer;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -152,6 +153,7 @@ final class Sandboxing implements Service, Registerable, Conditional {
 					$sanitizers[ AMP_Script_Sanitizer::class ]['comment_reply_allowed']      = 'conditionally';
 					$sanitizers[ AMP_Form_Sanitizer::class ]['native_post_forms_allowed']    = 'conditionally';
 					$sanitizers[ AMP_Comments_Sanitizer::class ]['ampify_comment_threading'] = 'conditionally';
+					$sanitizers[ AMP_Style_Sanitizer::class ]['allow_excessive_css']         = true;
 				}
 				return $sanitizers;
 			}

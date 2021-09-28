@@ -8,8 +8,8 @@
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Sandboxing;
 use AmpProject\AmpWP\Services;
-use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
 use AmpProject\Tag;
 use AmpProject\Dom\Document;
@@ -264,7 +264,13 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_auto_accepted( $error = null ) {
 
-		if ( $error && amp_is_canonical() ) {
+		if (
+			$error
+			&&
+			amp_is_canonical()
+			&&
+			! Sandboxing::is_needed() // @todo Remove this once Sandboxing no longer experimental.
+		) {
 			// Excessive CSS on AMP-first sites must not be removed by default since removing CSS can severely break a site.
 			$accepted = AMP_Style_Sanitizer::STYLESHEET_TOO_LONG !== $error['code'];
 		} else {

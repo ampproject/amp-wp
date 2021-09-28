@@ -133,6 +133,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string[] $focus_within_classes           Class names in selectors that should be replaced with :focus-within pseudo classes.
 	 *      @type string[] $low_priority_plugins           Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
 	 *      @type bool     $allow_transient_caching        Whether to allow caching parsed CSS in transients. This may need to be disabled when there is highly-variable CSS content.
+	 *      @type bool     $skip_tree_shaking              Whether tree shaking should be skipped.
+	 *      @type bool     $allow_excessive_css            Whether to allow CSS to exceed the allowed max bytes (without raising validation errors).
 	 *      @type bool     $transform_important_qualifiers Whether !important rules should be transformed. This also necessarily transform inline style attributes.
 	 * }
 	 */
@@ -157,6 +159,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'low_priority_plugins'           => [ 'query-monitor' ],
 		'allow_transient_caching'        => true,
 		'skip_tree_shaking'              => false,
+		'allow_excessive_css'            => false,
 		'transform_important_qualifiers' => true,
 	];
 
@@ -2912,6 +2915,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'import_front_matter' => '', // Extra @import statements that are prepended when fetch fails and validation error is rejected.
 				'important_count'     => 0,
 				'kept_error_count'    => 0,
+				'is_excessive_size'   => false,
 			],
 			self::STYLE_AMP_KEYFRAMES_GROUP_INDEX => [
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-keyframes.css */",
@@ -2920,6 +2924,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'import_front_matter' => '',
 				'important_count'     => 0,
 				'kept_error_count'    => 0,
+				'is_excessive_size'   => false,
 			],
 		];
 
@@ -2932,8 +2937,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part; // @todo Not currently relayed in stylesheet data.
 					unset( $this->pending_stylesheets[ $i ]['tokens'][ $j ] );
 				}
-				$stylesheet_groups[ $pending_stylesheet['group'] ]['important_count']  += $pending_stylesheet['important_count'];
-				$stylesheet_groups[ $pending_stylesheet['group'] ]['kept_error_count'] += $pending_stylesheet['kept_error_count'];
 			}
 
 			if ( ! empty( $pending_stylesheet['imported_font_urls'] ) ) {
@@ -2943,7 +2946,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Process the pending stylesheets.
 		foreach ( array_keys( $stylesheet_groups ) as $group ) {
-			$stylesheet_groups[ $group ]['included_count'] = $this->finalize_stylesheet_group( $group, $stylesheet_groups[ $group ] );
+			$stylesheet_groups[ $group ] = array_merge(
+				$stylesheet_groups[ $group ],
+				$this->finalize_stylesheet_group( $group, $stylesheet_groups[ $group ] )
+			);
 		}
 
 		// If we're not working with the document element (e.g. for Customizer rendered partials) then there is nothing left to do.
@@ -2967,10 +2973,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
 
-			// When there are !important qualifiers, mark the custom style as PX-verified.
+			// When there is are kept errors, then mark the element as being AMP-unvalidated. Note that excessive CSS
+			// is not a validation error that is arisen when parsing a stylesheet (as that is emitted when finalizing
+			// a stylesheet group). Otherwise, there are !important qualifiers or the amount of CSS is greater than
+			// the maximum allowed by AMP, mark the custom style as PX-verified.
 			if ( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['kept_error_count'] > 0 ) {
 				ValidationExemption::mark_node_as_amp_unvalidated( $this->amp_custom_style_element );
-			} elseif ( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['important_count'] > 0 ) {
+			} elseif (
+				$stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['important_count'] > 0
+				||
+				$stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['is_excessive_size']
+			) {
 				ValidationExemption::mark_node_as_px_verified( $this->amp_custom_style_element );
 			}
 
@@ -3398,11 +3411,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param int   $group        Group name (either self::STYLE_AMP_CUSTOM_GROUP_INDEX or self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ).
 	 * @param array $group_config Group config.
-	 * @return int Number of included stylesheets in group.
+	 * @return array {
+	 *     Finalized group info.
+	 *
+	 *     @type int  $included_count    Number of included stylesheets in group.
+	 *     @type bool $is_excessive_size Whether the total is greater than the max bytes allowed.
+	 *     @type int  $important_count   Number of !important qualifiers.
+	 *     @type int  $kept_error_count  Number of validation errors whose markup was kept.
+	 * }
 	 */
 	private function finalize_stylesheet_group( $group, $group_config ) {
-		$included_count = 0;
-		$max_bytes      = $group_config['cdata_spec']['max_bytes'] - strlen( $group_config['source_map_comment'] );
+		$max_bytes         = $group_config['cdata_spec']['max_bytes'] - strlen( $group_config['source_map_comment'] );
+		$included_count    = 0;
+		$is_excessive_size = false;
+		$concatenated_size = 0;
+		$important_count   = 0;
+		$kept_error_count  = 0;
 
 		$previously_seen_stylesheet_index = [];
 		foreach ( $this->pending_stylesheets as $pending_stylesheet_index => &$pending_stylesheet ) {
@@ -3581,7 +3605,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		);
 
-		$current_concatenated_size = 0;
 		foreach ( $pending_stylesheet_indices as $i ) {
 			if ( $group !== $this->pending_stylesheets[ $i ]['group'] ) {
 				continue;
@@ -3592,8 +3615,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			$is_stylesheet_excessive = $concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes;
+
 			// Report validation error if size is now too big.
-			if ( ! $this->args['skip_tree_shaking'] && $current_concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes ) {
+			if ( ! $this->args['allow_excessive_css'] && $is_stylesheet_excessive ) {
 				$validation_error = [
 					'code'      => self::STYLESHEET_TOO_LONG,
 					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
@@ -3615,11 +3640,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! isset( $this->pending_stylesheets[ $i ]['included'] ) ) {
 				$this->pending_stylesheets[ $i ]['included'] = true;
 				$included_count++;
-				$current_concatenated_size += $this->pending_stylesheets[ $i ]['final_size'];
+				$concatenated_size += $this->pending_stylesheets[ $i ]['final_size'];
+
+				if ( $is_stylesheet_excessive ) {
+					$is_excessive_size = true;
+				}
+
+				// Note: the following two may be incorrect because the !important property or erroneous rule may have
+				// actually been tree-shaken and thus is no longer in the document.
+				$important_count  += $this->pending_stylesheets[ $i ]['important_count'];
+				$kept_error_count += $this->pending_stylesheets[ $i ]['kept_error_count'];
 			}
 		}
 
-		return $included_count;
+		return compact( 'included_count', 'is_excessive_size', 'important_count', 'kept_error_count' );
 	}
 
 	/**

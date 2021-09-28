@@ -147,6 +147,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $this->px_verified_kept_node_count > 0 || $this->kept_script_count > 0 ) {
 			$sanitizer_arg_updates[ AMP_Tag_And_Attribute_Sanitizer::class ]['prefer_bento']       = true;
 			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['transform_important_qualifiers'] = false;
+			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['allow_excessive_css']            = true;
 			$sanitizer_arg_updates[ AMP_Form_Sanitizer::class ]['native_post_forms_allowed']       = 'always';
 		}
 

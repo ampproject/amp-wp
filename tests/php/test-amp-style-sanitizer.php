@@ -961,6 +961,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$args = [
 			'use_document_element' => true,
 			'skip_tree_shaking'    => true,
+			'allow_excessive_css'  => true,
 		];
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
@@ -975,6 +976,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$this->assertStringStartsWith( '.selective-refresh-container{', $actual_stylesheets[0] );
 		$this->assertStringStartsWith( '.my-partial{', $actual_stylesheets[1] );
 		$this->assertGreaterThan( 75000, strlen( implode( '', $actual_stylesheets ) ) );
+
+		ValidationExemption::is_px_verified_for_node( $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 ) );
 	}
 
 	/** @return array */
