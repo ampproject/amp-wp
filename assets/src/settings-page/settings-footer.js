@@ -2,6 +2,9 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import {
+	SITE_HAS_CACHE_ENABLE,
+} from 'amp-settings';
 
 /**
  * WordPress dependencies
@@ -83,7 +86,7 @@ export function SettingsFooter() {
 					>
 						<p>
 							{
-								shouldShowPageCacheFlushNotice ? (
+								SITE_HAS_CACHE_ENABLE && shouldShowPageCacheFlushNotice ? (
 									<>
 										{ __( 'Mode saved. Please flush page cache. ', 'amp' ) }
 										<a
