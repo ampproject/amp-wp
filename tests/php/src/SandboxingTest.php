@@ -158,9 +158,8 @@ class SandboxingTest extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * @covers ::has_endpoint()
+	 * @covers ::add_hooks()
 	 * @dataProvider get_data_to_test_add_hooks
-	 *
 	 */
 	public function test_add_hooks( $level, $expected_sanitizer_args ) {
 		AMP_Options_Manager::update_options(
