@@ -38,22 +38,22 @@ class UserRESTEndpointExtensionTest extends TestCase {
 	/**
 	 * Tests UserRESTEndpointExtension::register
 	 *
-	 * @covers ::register
+	 * @covers ::get_registration_action
 	 */
-	public function test_register() {
-		$this->user_rest_endpoint_extension->register();
-		$this->assertEquals( 10, has_action( 'rest_api_init', [ $this->user_rest_endpoint_extension, 'register_rest_field' ] ) );
+	public function test_get_registration_action() {
+		$this->assertEquals( 'rest_api_init', UserRESTEndpointExtension::get_registration_action() );
 	}
 
 	/**
 	 * Tests UserRESTEndpointExtension::register_rest_field
 	 *
+	 * @covers ::register
 	 * @covers ::register_rest_field
 	 */
 	public function test_register_rest_field() {
 		global $wp_rest_additional_fields;
 
-		$this->user_rest_endpoint_extension->register_rest_field();
+		$this->user_rest_endpoint_extension->register();
 
 		$this->assertArrayHasKey( 'amp_review_panel_dismissed_for_template_mode', $wp_rest_additional_fields['user'] );
 	}

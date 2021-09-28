@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AMP_Theme_Support;
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Error;
@@ -19,7 +20,7 @@ use WP_User;
  * @since 2.2
  * @internal
  */
-class UserRESTEndpointExtension implements Service, Registerable {
+class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 
 	/**
 	 * User meta key that stores a template mode for which the "Review" panel was dismissed.
@@ -29,10 +30,19 @@ class UserRESTEndpointExtension implements Service, Registerable {
 	const USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE = 'amp_review_panel_dismissed_for_template_mode';
 
 	/**
+	 * Get registration action.
+	 *
+	 * @return string
+	 */
+	public static function get_registration_action() {
+		return 'rest_api_init';
+	}
+
+	/**
 	 * Adds hooks.
 	 */
 	public function register() {
-		add_action( 'rest_api_init', [ $this, 'register_rest_field' ] );
+		$this->register_rest_field();
 	}
 
 	/**
