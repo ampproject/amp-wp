@@ -51,7 +51,7 @@ ErrorNotice.propTypes = {
  * The bottom section of the settings page.
  */
 export function SettingsFooter() {
-	const { didSaveOptions, editedOptions, hasOptionsChanges, savingOptions } = useContext( Options );
+	const { didSaveOptions, editedOptions, hasOptionsChanges, savingOptions, modifiedOptions } = useContext( Options );
 	const { downloadingTheme } = useContext( ReaderThemes );
 	const { error } = useContext( ErrorContext );
 	const { didSaveDeveloperToolsOption, hasDeveloperToolsOptionChange, savingDeveloperToolsOption } = useContext( User );
@@ -61,6 +61,10 @@ export function SettingsFooter() {
 	const hasChanges = hasOptionsChanges || hasDeveloperToolsOptionChange;
 	const isBusy = savingOptions || downloadingTheme || savingDeveloperToolsOption;
 	const disabled = ! hasChanges || isBusy || ! themeSupport || ( 'reader' === themeSupport && ! readerTheme );
+
+	const shouldShowPageCacheFlushNotice = (
+		( 'object' === typeof modifiedOptions && ( modifiedOptions.theme_support || modifiedOptions.reader_theme ) )
+	);
 
 	return (
 		<section className="amp-settings-nav">
@@ -78,7 +82,20 @@ export function SettingsFooter() {
 						type={ NOTICE_TYPE_SUCCESS }
 					>
 						<p>
-							{ __( 'Saved', 'amp' ) }
+							{
+								shouldShowPageCacheFlushNotice ? (
+									<>
+										{ __( 'Mode saved. Please flush page cache.', 'amp' ) }
+										<a
+											href="https://amp-wp.org/documentation/getting-started/amp-site-setup/page-caching-with-amp-and-wordpress/#what-page-caching-plugins-should-i-use"
+											target="_blank"
+											rel="noreferrer"
+										>
+											{ __( 'Learn More', 'amp' ) }
+										</a>
+									</>
+								) : __( 'Saved', 'amp' )
+							}
 						</p>
 					</AMPNotice>
 				) }

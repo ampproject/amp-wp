@@ -16,6 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
+use AmpProject\AmpWP\Services;
 
 /**
  * OptionsMenu class.
@@ -225,6 +226,11 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$notices                      = get_option( PageCacheFlushNeededNotice::OPTION_NAME, [] );
 		$show_page_cache_flush_notice = ( in_array( PageCacheFlushNeededNotice::NOTICE_ID, $notices, true ) );
 
+		$site_has_cache_enable = (
+			( defined( 'WP_CACHE' ) && true === WP_CACHE ) ||
+			Services::get( 'site_health_integration' )->has_page_caching()
+		);
+
 		$js_data = [
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
 			'CURRENT_THEME'                      => [
@@ -250,7 +256,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
 			'PAGE_CACHE_NOTICE_NONCE'            => wp_create_nonce( PageCacheFlushNeededNotice::AJAX_ACTION ),
-			'SITE_HAS_CACHE_ENABLE'              => ( defined( 'WP_CACHE' ) && true === WP_CACHE ),
+			'SITE_HAS_CACHE_ENABLE'              => $site_has_cache_enable,
 			'SHOW_PAGE_CACHE_NOTICE'             => $show_page_cache_flush_notice,
 		];
 

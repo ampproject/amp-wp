@@ -387,7 +387,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 *
 	 * @return bool|WP_Error Whether page caching was detected, or else error information.
 	 */
-	private function has_page_caching() {
+	public function has_page_caching() {
 		/** This filter is documented in wp-includes/class-wp-http-streams.php */
 		$sslverify = apply_filters( 'https_local_ssl_verify', false );
 

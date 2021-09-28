@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Services;
 
 /**
  * Class AMP_Options_Manager
@@ -422,7 +423,10 @@ class AMP_Options_Manager {
 	 * @return void
 	 */
 	private static function maybe_trigger_page_cache_flush_needed_action() {
-		if ( defined( 'WP_CACHE' ) && true === WP_CACHE ) {
+
+		if ( ( defined( 'WP_CACHE' ) && true === WP_CACHE ) ||
+			Services::get( 'site_health_integration' )->has_page_caching()
+		) {
 			do_action( 'amp_page_cache_flush_needed' );
 		}
 	}
