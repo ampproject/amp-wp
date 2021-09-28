@@ -178,17 +178,17 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 			[
 				'type'  => 'home',
 				'url'   => 'https://example.com',
-				'label' => 'Homepage'
+				'label' => 'Homepage',
 			],
 			[
 				'type'  => 'page',
 				'url'   => 'https://example.com/sample-page',
-				'label' => 'Page'
+				'label' => 'Page',
 			],
 			[
 				'type'  => 'search',
 				'url'   => 'https://example.com/?s=foobar',
-				'label' => 'Search Results Page'
+				'label' => 'Search Results Page',
 			],
 		];
 
@@ -197,19 +197,19 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 				'type'    => 'home',
 				'url'     => 'https://example.com',
 				'amp_url' => amp_add_paired_endpoint( 'https://example.com' ),
-				'label'   => 'Homepage'
+				'label'   => 'Homepage',
 			],
 			[
 				'type'    => 'page',
 				'url'     => 'https://example.com/sample-page',
 				'amp_url' => amp_add_paired_endpoint( 'https://example.com/sample-page' ),
-				'label'   => 'Page'
+				'label'   => 'Page',
 			],
 			[
 				'type'    => 'search',
 				'url'     => 'https://example.com/?s=foobar',
 				'amp_url' => amp_add_paired_endpoint( 'https://example.com/?s=foobar' ),
-				'label'   => 'Search Results Page'
+				'label'   => 'Search Results Page',
 			],
 		];
 
