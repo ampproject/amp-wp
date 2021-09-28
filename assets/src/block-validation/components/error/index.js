@@ -27,7 +27,7 @@ import { ErrorContent } from './error-content';
 /**
  * Component rendering an individual error. Parent component is a <ul>.
  *
- * @param {Object} args Component props.
+ * @param {Object} args          Component props.
  * @param {string} args.clientId
  * @param {number} args.error
  * @param {number} args.status

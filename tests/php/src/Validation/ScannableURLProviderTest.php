@@ -6,17 +6,16 @@ use AmpProject\AmpWP\Option;
 use AMP_Options_Manager;
 use AMP_Post_Meta_Box;
 use AMP_Theme_Support;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
+use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLScanningContext;
 use WP_Query;
-use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\ScannableURLProvider */
-final class ScannableURLProviderTest extends WP_UnitTestCase {
-	use PrivateAccess, AssertContainsCompatibility, ValidationRequestMocking;
+final class ScannableURLProviderTest extends TestCase {
+	use PrivateAccess, ValidationRequestMocking;
 
 	/**
 	 * Validation URL provider instance to use.
@@ -380,7 +379,7 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 		$year = gmdate( 'Y' );
 
 		// Normally, this should return the date page, unless the user has opted out of that template.
-		$this->assertStringContains( $year, $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
+		$this->assertStringContainsString( $year, $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
 
 		// If $include_conditionals is set and does not have is_date, this should not return a URL.
 		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [ 'is_search' ], false ) );
@@ -389,6 +388,6 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 		// If $include_conditionals has is_date, this should return a URL.
 		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [ 'is_date' ], false ) );
 		$parsed_page_url              = wp_parse_url( $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
-		$this->assertStringContains( $year, $parsed_page_url['query'] );
+		$this->assertStringContainsString( $year, $parsed_page_url['query'] );
 	}
 }

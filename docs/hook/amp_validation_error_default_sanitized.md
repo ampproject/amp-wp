@@ -15,7 +15,7 @@ This only applies to validation errors that have not been encountered before. To
 
 ### Source
 
-:link: [includes/validation/class-amp-validation-manager.php:284](/includes/validation/class-amp-validation-manager.php#L284)
+:link: [includes/validation/class-amp-validation-manager.php:285](/includes/validation/class-amp-validation-manager.php#L285)
 
 <details>
 <summary>Show Code</summary>

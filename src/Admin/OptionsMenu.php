@@ -11,6 +11,7 @@ use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\DependencySupport;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -225,30 +226,32 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$show_page_cache_flush_notice = ( in_array( PageCacheFlushNeededNotice::NOTICE_ID, $notices, true ) );
 
 		$js_data = [
-			'AMP_QUERY_VAR'               => amp_get_slug(),
-			'CURRENT_THEME'               => [
+			'AMP_QUERY_VAR'                      => amp_get_slug(),
+			'CURRENT_THEME'                      => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
 				'is_reader_theme' => $is_reader_theme,
 				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
-			'HAS_DEPENDENCY_SUPPORT'      => $this->dependency_support->has_support(),
-			'OPTIONS_REST_PATH'           => '/amp/v1/options',
-			'READER_THEMES_REST_PATH'     => '/amp/v1/reader-themes',
-			'IS_CORE_THEME'               => in_array(
+			'HAS_DEPENDENCY_SUPPORT'             => $this->dependency_support->has_support(),
+			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
+			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
+			'IS_CORE_THEME'                      => in_array(
 				get_stylesheet(),
 				AMP_Core_Theme_Sanitizer::get_supported_themes(),
 				true
 			),
-			'LEGACY_THEME_SLUG'           => ReaderThemes::DEFAULT_READER_THEME,
-			'USING_FALLBACK_READER_THEME' => $this->reader_themes->using_fallback_theme(),
-			'THEME_SUPPORT_ARGS'          => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_SUPPORTS_READER_MODE'  => AMP_Theme_Support::supports_reader_mode(),
-			'UPDATES_NONCE'               => wp_create_nonce( 'updates' ),
-			'PAGE_CACHE_NOTICE_NONCE'     => wp_create_nonce( PageCacheFlushNeededNotice::AJAX_ACTION ),
-			'SITE_HAS_CACHE_ENABLE'       => ( defined( 'WP_CACHE' ) && true === WP_CACHE ),
-			'SHOW_PAGE_CACHE_NOTICE'      => $show_page_cache_flush_notice,
+			'LEGACY_THEME_SLUG'                  => ReaderThemes::DEFAULT_READER_THEME,
+			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
+			'THEME_SUPPORT_ARGS'                 => AMP_Theme_Support::get_theme_support_args(),
+			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
+			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
+			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
+			'PAGE_CACHE_NOTICE_NONCE'            => wp_create_nonce( PageCacheFlushNeededNotice::AJAX_ACTION ),
+			'SITE_HAS_CACHE_ENABLE'              => ( defined( 'WP_CACHE' ) && true === WP_CACHE ),
+			'SHOW_PAGE_CACHE_NOTICE'             => $show_page_cache_flush_notice,
 		];
 
 		wp_add_inline_script(
@@ -305,6 +308,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'/amp/v1/options',
 			'/amp/v1/reader-themes',
 			'/wp/v2/settings',
+			'/wp/v2/users/me',
 		];
 
 		foreach ( $paths as $path ) {

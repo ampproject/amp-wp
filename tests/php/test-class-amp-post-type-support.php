@@ -7,13 +7,14 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for Post Type Support.
  *
  * @covers AMP_Post_Type_Support
  */
-class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
+class Test_AMP_Post_Type_Support extends TestCase {
 
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.

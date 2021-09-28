@@ -6,8 +6,8 @@
  * @since 1.4
  */
 
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_WordPress_TV_Embed_Handler.
@@ -15,9 +15,8 @@ use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
  * @package AMP
  * @covers AMP_WordPress_TV_Embed_Handler
  */
-class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
+class Test_AMP_WordPress_TV_Embed_Handler extends TestCase {
 
-	use AssertContainsCompatibility;
 	use WithoutBlockPreRendering {
 		setUp as public prevent_block_pre_render;
 	}
@@ -81,9 +80,9 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 
 		$handler->register_embed();
 		$rendered = apply_filters( 'the_content', $wordpress_tv_block );
-		$this->assertStringContains( '<iframe', $rendered );
-		$this->assertStringContains( 'video.wordpress.com/embed', $rendered );
-		$this->assertStringNotContains( '<script', $rendered );
+		$this->assertStringContainsString( '<iframe', $rendered );
+		$this->assertStringContainsString( 'video.wordpress.com/embed', $rendered );
+		$this->assertStringNotContainsString( '<script', $rendered );
 	}
 
 	/**

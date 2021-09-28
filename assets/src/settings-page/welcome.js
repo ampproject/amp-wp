@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { useContext } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -76,19 +76,20 @@ export function Welcome() {
 					</h2>
 					<p>
 						{ __( 'The AMP configuration wizard helps you choose the best configuration settings for your site.', 'amp' ) }
+						{ ' ' }
+						<a href={ onboardingWizardLink } >
+							{ pluginConfigured ? __( 'Reopen Wizard', 'amp' ) : __( 'Open Wizard', 'amp' ) }
+						</a>
+						{ customizerLink && templateModeWasOverridden === false && (
+							<>
+								{ ` ${ _x( 'or', 'e.g. do this or that', 'amp' ) } ` }
+								<a href={ customizerLink } >
+									{ __( 'Customize Reader Theme', 'amp' ) }
+								</a>
+							</>
+						) }
+						{ _x( '.', 'End of sentence.', 'amp' ) }
 					</p>
-
-					<a className="components-button is-primary settings-welcome__button" href={ onboardingWizardLink } >
-						{ pluginConfigured ? __( 'Reopen Wizard', 'amp' ) : __( 'Open Wizard', 'amp' ) }
-					</a>
-
-					{
-						customizerLink && templateModeWasOverridden === false && (
-							<a className="components-button is-secondary" href={ customizerLink } rel="noreferrer">
-								{ __( 'Customize Reader Theme', 'amp' ) }
-							</a>
-						)
-					}
 				</div>
 			</div>
 		</div>

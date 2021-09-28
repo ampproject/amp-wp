@@ -88,7 +88,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return array Defaults.
 	 */
 	public function filter_default_options( $defaults ) {
-		$defaults[ Option::MOBILE_REDIRECT ] = false;
+		$defaults[ Option::MOBILE_REDIRECT ] = true;
 		return $defaults;
 	}
 
@@ -268,7 +268,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return bool True if mobile redirection should be done, false otherwise.
 	 */
 	public function is_using_client_side_redirection() {
-		if ( is_customize_preview() || amp_is_dev_mode() ) {
+		if ( is_customize_preview() || Services::has( 'admin.paired_browsing' ) ) {
 			return true;
 		}
 
@@ -591,19 +591,32 @@ final class MobileRedirection implements Service, Registerable {
 			</a>
 		</div>
 
-		<?php if ( amp_is_dev_mode() && ( ! is_customize_preview() || AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) ) : ?>
-			<?php
-			// Note that the switcher link is disabled in Reader mode because there is a separate toggle to switch versions.
+		<?php
+		// Note that the switcher link is disabled in Reader mode because there is a separate toggle to switch versions,
+		// and because there are controls which are AMP-specific which don't apply when switching between versions.
+		$is_amp_reader_customizer = (
+			is_customize_preview()
+			&&
+			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+		);
+
+		$is_possibly_paired_browsing = (
+			Services::has( 'admin.paired_browsing' )
+			&&
+			! is_customize_preview()
+		);
+
+		if ( $is_amp_reader_customizer || $is_possibly_paired_browsing ) :
 			$exports = [
-				'containerId'          => $container_id,
-				'isCustomizePreview'   => is_customize_preview(),
-				'notApplicableMessage' => __( 'This link is not applicable in this context. It remains here for preview purposes only.', 'amp' ),
+				'containerId'              => $container_id,
+				'isReaderCustomizePreview' => $is_amp_reader_customizer,
+				'notApplicableMessage'     => __( 'This link is not applicable in this context. It remains here for preview purposes only.', 'amp' ),
 			];
 			?>
 			<script data-ampdevmode>
-			(function( { containerId, isCustomizePreview, notApplicableMessage } ) {
+			(function( { containerId, isReaderCustomizePreview, notApplicableMessage } ) {
 				addEventListener( 'DOMContentLoaded', () => {
-					if ( isCustomizePreview || [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
+					if ( isReaderCustomizePreview || [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
 						const link = document.querySelector( `#${containerId} a[href]` );
 						link.style.cursor = 'not-allowed';
 						link.addEventListener( 'click', ( event ) => {

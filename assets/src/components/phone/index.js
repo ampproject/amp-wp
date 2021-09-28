@@ -11,8 +11,8 @@ import './style.css';
 /**
  * Component resembling a phone with a screen.
  *
- * @param {Object} props Component props.
- * @param {any} props.children The elements to display in the screen.
+ * @param {Object} props          Component props.
+ * @param {any}    props.children The elements to display in the screen.
  */
 export function Phone( { children } ) {
 	return (

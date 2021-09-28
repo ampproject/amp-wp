@@ -9,13 +9,14 @@ use AmpProject\AmpWP\Component\Carousel;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Dom\ElementList;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for Carousel class.
  *
  * @covers \AmpProject\AmpWP\Component\Carousel
  */
-class Test_Carousel extends WP_UnitTestCase {
+class Test_Carousel extends TestCase {
 
 	use PrivateAccess;
 

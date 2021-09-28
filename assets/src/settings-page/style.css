@@ -74,21 +74,12 @@ html {
 	}
 }
 
-.amp .settings-welcome__button.is-primary {
-	box-shadow: none;
-	margin-right: 1rem;
-}
-
 .settings-welcome__body h2 {
 	margin-bottom: 1rem;
 }
 
 .settings-welcome__body p {
 	margin: 0;
-}
-
-.settings-welcome__body .components-button {
-	margin-top: 1rem;
 }
 
 /* Supported templates section. */
@@ -109,7 +100,6 @@ html {
 	font-size: 14px;
 }
 
-.mobile-redirection,
 .plugin-suppression {
 	margin-bottom: 1rem;
 }
@@ -369,7 +359,8 @@ li.error-kept {
 
 #plugin-suppression .amp-drawer__panel-body-inner,
 .amp-analytics .amp-drawer__panel-body-inner,
-#paired-url-structure .amp-drawer__panel-body-inner {
+#paired-url-structure .amp-drawer__panel-body-inner,
+.amp-other-settings .amp-drawer__panel-body-inner {
 	padding: 1.5rem 1.5rem 3rem;
 
 	@media (min-width: 783px) {
@@ -542,3 +533,31 @@ li.error-kept {
 .notice p {
 	font-size: 13px;
 }
+
+/* Other Settings */
+.amp-other-settings section + section {
+	margin-top: 2rem;
+}
+
+.amp-other-settings h4 {
+	font-size: 1rem;
+}
+
+.amp .amp-other-settings .amp-setting-toggle .components-form-toggle {
+	margin-right: 1rem;
+}
+
+.amp-other-settings .amp-setting-toggle .amp-setting-toggle__label-text > h3 {
+	font-size: 0.875rem;
+	font-weight: bold;
+	margin: 0;
+}
+
+.amp-other-settings .developer-tools h4 {
+	margin-bottom: 0;
+}
+
+.amp-other-settings .developer-tools p {
+	font-size: 0.875rem;
+}
+

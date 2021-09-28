@@ -77,7 +77,7 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 
 		do_action( 'trigger_action_to_execute' );
 
-		$this->assertInternalType( 'array', $source, 'Expected the action to be triggered.' );
+		$this->assertIsArray( $source, 'Expected the action to be triggered.' );
 
 		$this->assertArrayHasKey( 'type', $source );
 		$this->assertArrayHasKey( 'name', $source );

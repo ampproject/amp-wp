@@ -29,12 +29,12 @@ function waitASecond() {
 /**
  * Context provider for options retrieval and updating.
  *
- * @param {Object} props Component props.
- * @param {?any} props.children Component children.
- * @param {string} props.optionsRestPath REST endpoint to retrieve options.
+ * @param {Object}  props                       Component props.
+ * @param {?any}    props.children              Component children.
+ * @param {string}  props.optionsRestPath       REST endpoint to retrieve options.
  * @param {boolean} props.populateDefaultValues Whether default values should be populated.
- * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
- * @param {boolean} props.delaySave Whether to delay updating state when saving data.
+ * @param {boolean} props.hasErrorBoundary      Whether the component is wrapped in an error boundary.
+ * @param {boolean} props.delaySave             Whether to delay updating state when saving data.
  */
 export function OptionsContextProvider( { children, optionsRestPath, populateDefaultValues, hasErrorBoundary = false, delaySave = false } ) {
 	const [ updates, setUpdates ] = useState( {} );

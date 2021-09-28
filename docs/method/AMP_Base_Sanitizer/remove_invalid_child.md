@@ -19,7 +19,7 @@ Also, calls the mutation callback for it. This tracks all the nodes that were re
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:467](/includes/sanitizers/class-amp-base-sanitizer.php#L467-L489)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:478](/includes/sanitizers/class-amp-base-sanitizer.php#L478-L500)
 
 <details>
 <summary>Show Code</summary>

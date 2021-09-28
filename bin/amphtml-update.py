@@ -17,19 +17,14 @@ Then have fun sanitizing your AMP posts!
 import glob
 import logging
 import os
-import platform
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
 import collections
 import json
 import google
-from collections import defaultdict
 import imp
-import re
-import urllib
 
 seen_spec_names = set()
 
@@ -387,40 +382,99 @@ def ParseRules(repo_directory, out_dir):
 
 					descendant_lists[_list.name].append( val.lower() )
 
-	# Separate extension scripts from non-extension scripts
-	extension_scripts = defaultdict(list)
+	# Separate extension scripts from non-extension scripts and gather the versions
+	extension_scripts = collections.defaultdict(list)
+	extension_specs_by_satisfies = dict()
 	script_tags = []
 	for script_tag in allowed_tags['script']:
 		if 'extension_spec' in script_tag['tag_spec']:
-			extension_scripts[script_tag['tag_spec']['extension_spec']['name']].append(script_tag)
+			extension = script_tag['tag_spec']['extension_spec']['name']
+			extension_scripts[extension].append(script_tag)
+			if 'satisfies' in script_tag['tag_spec']:
+				satisfies = script_tag['tag_spec']['satisfies']
+			else:
+				satisfies = extension
+			if satisfies in extension_specs_by_satisfies:
+				raise Exception( 'Duplicate extension script that satisfies %s.' % satisfies )
+
+			extension_specs_by_satisfies[satisfies] = script_tag['tag_spec']['extension_spec']
+
+			# These component lack an explicit requirement on a specific extension script:
+			# - amp-selector
+			# - amp-accordion
+			# - amp-soundcloud
+			# - amp-brightcove
+			# - amp-video
+			# - amp-video-iframe
+			# - amp-vimeo
+			# - amp-twitter
+			# - amp-instagram
+			# - amp-lightbox
+			# - amp-facebook
+			# - amp-youtube
+			# - amp-social-share
+			# - amp-fit-text
+			# So use the one with the latest version as a fallback.
+			if 'latest' in script_tag['tag_spec']['extension_spec']['version']:
+				extension_specs_by_satisfies[extension] = script_tag['tag_spec']['extension_spec']
 		else:
 			script_tags.append(script_tag)
 
+	# Amend the allowed_tags to supply the required versions for each component.
+	for tag_name, tags in allowed_tags.items():
+		for tag in tags:
+			tag['tag_spec'].pop('satisfies', None) # We don't need it anymore.
+			requires = tag['tag_spec'].pop('requires', [])
+
+			if 'requires_extension' not in tag['tag_spec']:
+				continue
+
+			requires_extension_versions = {}
+			for required_extension in tag['tag_spec']['requires_extension']:
+				required_versions = []
+				for require in requires:
+					if require in extension_specs_by_satisfies:
+						if required_extension != extension_specs_by_satisfies[require]['name']:
+							raise Exception('Expected satisfied to be for the %s extension' % required_extension)
+						required_versions = extension_specs_by_satisfies[require]['version']
+						break
+				if len( required_versions ) == 0:
+					if required_extension in extension_specs_by_satisfies:
+						if required_extension != extension_specs_by_satisfies[required_extension]['name']:
+							raise Exception('Expected satisfied to be for the %s extension' % required_extension)
+						required_versions = extension_specs_by_satisfies[required_extension]['version']
+
+				if len( required_versions ) == 0:
+					raise Exception('Unable to obtain any versions for %s' % required_extension)
+
+				requires_extension_versions[required_extension] = filter( lambda ver: ver != 'latest', required_versions )
+			tag['tag_spec']['requires_extension'] = requires_extension_versions
+
 	extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.extensions.json' ) ) )
-	extension_versions = dict()
+	extensions_versions = dict()
 	for extension in extensions:
-		if extension['name'] not in extension_versions:
-			extension_versions[ extension['name'] ] = {
+		if extension['name'] not in extensions_versions:
+			extensions_versions[ extension['name'] ] = {
 				'versions': [],
 				'latest': None,
 			}
 
 		if type(extension['version']) == list:
-			extension_versions[ extension['name'] ]['versions'].extend( extension['version'] )
+			extensions_versions[ extension['name'] ]['versions'].extend( extension['version'] )
 		else:
-			extension_versions[ extension['name'] ]['versions'].append( extension['version'] )
-		if extension_versions[ extension['name'] ]['latest'] is not None and extension_versions[ extension['name'] ]['latest'] != extension['latestVersion']:
+			extensions_versions[ extension['name'] ]['versions'].append( extension['version'] )
+		if extensions_versions[ extension['name'] ]['latest'] is not None and extensions_versions[ extension['name'] ]['latest'] != extension['latestVersion']:
 			logging.info('Warning: latestVersion mismatch for ' + extension['name'])
-		extension_versions[ extension['name'] ]['latest'] = extension['latestVersion']
+		extensions_versions[ extension['name'] ]['latest'] = extension['latestVersion']
 		if 'options' in extension and 'wrapper' in extension['options'] and extension['options']['wrapper'] == 'bento':
-			extension_versions[ extension['name'] ]['bento'] = {
+			extensions_versions[ extension['name'] ]['bento'] = {
 				'version': extension['version'],
 				'has_css': extension['options'].get( 'hasCss', False ),
 			}
 
 	# Merge extension scripts (e.g. Bento and non-Bento) into one script per extension.
 	for extension_name in sorted(extension_scripts):
-		if extension_name not in extension_versions:
+		if extension_name not in extensions_versions:
 			raise Exception( 'There is a script for an unknown extension: ' + extension_name );
 
 		extension_script_list = extension_scripts[extension_name]
@@ -430,27 +484,67 @@ def ParseRules(repo_directory, out_dir):
 		if 'latest' in validator_versions:
 			validator_versions.remove('latest')
 
-		bundle_versions = set( extension_versions[extension_name]['versions'] )
+		bundle_versions = set( extensions_versions[extension_name]['versions'] )
 		if not validator_versions.issubset( bundle_versions ):
 			logging.info( 'Validator versions are not a subset of bundle versions: ' + extension_name )
 
-		if 'bento' in extension_versions[extension_name] and extension_versions[extension_name]['bento']['version'] not in validator_versions:
-			logging.info( 'Skipping bento for ' + extension_name + ' since version ' + extension_versions[extension_name]['bento']['version'] + ' is not yet valid' )
-			del extension_versions[extension_name]['bento']
+		if 'bento' in extensions_versions[extension_name] and extensions_versions[extension_name]['bento']['version'] not in validator_versions:
+			logging.info( 'Skipping bento for ' + extension_name + ' since version ' + extensions_versions[extension_name]['bento']['version'] + ' is not yet valid' )
+			del extensions_versions[extension_name]['bento']
 
 		validator_versions = sorted( validator_versions, key=lambda version: map(int, version.split('.') ) )
 		extension_script_list[0]['tag_spec']['extension_spec']['version'] = validator_versions
 
-		if 'bento' in extension_versions[extension_name] and extension_versions[extension_name]['bento']['version'] in validator_versions:
-			extension_script_list[0]['tag_spec']['extension_spec']['bento'] = extension_versions[extension_name]['bento']
+		if 'bento' in extensions_versions[extension_name] and extensions_versions[extension_name]['bento']['version'] in validator_versions:
+			extension_script_list[0]['tag_spec']['extension_spec']['bento'] = extensions_versions[extension_name]['bento']
 
-		extension_script_list[0]['tag_spec']['extension_spec']['latest'] = extension_versions[extension_name]['latest']
+		extension_script_list[0]['tag_spec']['extension_spec']['latest'] = extensions_versions[extension_name]['latest']
 
-		if 'version_name' in extension_script_list[0]['tag_spec']['extension_spec']:
-			del extension_script_list[0]['tag_spec']['extension_spec']['version_name']
+		extension_script_list[0]['tag_spec']['extension_spec'].pop('version_name', None)
+
+		# Remove the spec name since we've potentially merged multiple scripts, thus it does not refer to one.
+		extension_script_list[0]['tag_spec'].pop('spec_name', None)
+
 		script_tags.append(extension_script_list[0])
 
 	allowed_tags['script'] = script_tags
+
+	# Now that Bento information is in hand, re-decorate specs with require_extension to indicate which
+	for tag_name, tags in allowed_tags.items():
+		tags_bento_status = []
+		for tag in tags:
+			if 'requires_extension' not in tag['tag_spec']:
+				continue
+
+			# Determine the Bento availability of all the required extensions.
+			tag_extensions_with_bento = {}
+			for extension, extension_versions in tag['tag_spec']['requires_extension'].items():
+				if extension in extensions_versions and 'bento' in extensions_versions[extension] and extensions_versions[extension]['bento']['version'] in extension_versions:
+					tag_extensions_with_bento[ extension ] = True
+				else:
+					tag_extensions_with_bento[ extension ] = False
+
+			# Mark that this tag is for Bento since all its required extensions have Bento available.
+			if len( tag_extensions_with_bento ) > 0 and False not in tag_extensions_with_bento.values():
+				tags_bento_status.append( True )
+				tag['tag_spec']['bento'] = True
+			else:
+				tags_bento_status.append( False )
+
+		# Now that the ones with Bento have been identified, add flags to tag specs when there are different versions specifically for Bento:
+		for tag in tags:
+			if 'requires_extension' not in tag['tag_spec']:
+				continue
+
+			if False not in tags_bento_status:
+				# Clear the Bento flag if _all_ of the components are for Bento.
+				tag['tag_spec'].pop( 'bento', None )
+			elif True in tags_bento_status and 'bento' not in tag['tag_spec']:
+				# Otherwise, if _some_ of the components were exclusively for Bento, flag the others as being _not_ for Bento specifically.
+				tag['tag_spec']['bento'] = False
+
+			# Now convert requires_versions back into a list of extensions rather than an extension/versions mapping.
+			tag['tag_spec']['requires_extension'] = sorted( tag['tag_spec']['requires_extension'].keys() )
 
 	return allowed_tags, attr_lists, descendant_lists, reference_points, versions
 
@@ -553,6 +647,9 @@ def GetTagRules(tag_spec):
 		for requires_extension in tag_spec.requires_extension:
 			requires_extension_list.add(requires_extension)
 
+	if hasattr(tag_spec, 'requires') and len( tag_spec.requires ) != 0:
+		tag_rules['requires'] = [ requires for requires in tag_spec.requires ]
+
 	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
 		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
 			matches = re.search( r'(amp-\S+) extension( \.js)? script', also_requires_tag_warning )
@@ -580,7 +677,6 @@ def GetTagRules(tag_spec):
 		tag_rules['disallowed_ancestor'] = disallowed_ancestor_list
 
 	if tag_spec.html_format:
-		html_format_list = []
 		has_amp_format = False
 		for html_format in tag_spec.html_format:
 			if 1 == html_format:
@@ -650,6 +746,11 @@ def GetTagRules(tag_spec):
 	if tag_spec.HasField('spec_name'):
 		tag_rules['spec_name'] = UnicodeEscape(tag_spec.spec_name)
 
+	if hasattr(tag_spec, 'satisfies') and len( tag_spec.satisfies ) > 0:
+		if len( tag_spec.satisfies ) > 1:
+			raise Exception('More than expected was satisfied')
+		tag_rules['satisfies'] = tag_spec.satisfies[0]
+
 	if tag_spec.HasField('spec_url'):
 		tag_rules['spec_url'] = UnicodeEscape(tag_spec.spec_url)
 
@@ -660,7 +761,7 @@ def GetTagRules(tag_spec):
 		tag_rules['unique_warning'] = tag_spec.unique_warning
 
 	if tag_spec.HasField('child_tags'):
-		child_tags = defaultdict( lambda: [] )
+		child_tags = collections.defaultdict( lambda: [] )
 		for field in tag_spec.child_tags.ListFields():
 			if isinstance(field[1], (int)):
 				child_tags[ field[0].name ] = field[1]
@@ -846,7 +947,7 @@ def Phpize(data, indent=0):
 
 	# Clean up formatting.
 	# TODO: Just use PHPCBF for this.
-	php_exported = re.sub( r'^ +', lambda match: ( len(match.group(0))/2 ) * '\t', php_exported, flags=re.MULTILINE )
+	php_exported = re.sub( r'^ +', lambda match: int( round(len(match.group(0))/2) ) * '\t', php_exported, flags=re.MULTILINE )
 	php_exported = php_exported.replace( 'array (', 'array(' )
 	php_exported = re.sub( r' => \n\s+', ' => ', php_exported, flags=re.MULTILINE )
 	php_exported = re.sub( r'^(\s+)\d+ =>\s*', r'\1', php_exported, flags=re.MULTILINE )

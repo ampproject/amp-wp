@@ -13,6 +13,7 @@ module.exports = function( grunt ) {
 		'php-css-parser-install-composer-plugin',
 		'src',
 		'templates',
+		'uninstall.php',
 		'vendor',
 	];
 
@@ -25,7 +26,7 @@ module.exports = function( grunt ) {
 	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
 	const productionInstallExcludedFilePatterns = [
 		'composer.*',
-		'php-css-parser-install-composer-plugin/*',
+		'php-css-parser-install-composer-plugin',
 		'vendor/*/*/.editorconfig',
 		'vendor/*/*/.git',
 		'vendor/*/*/.github',
