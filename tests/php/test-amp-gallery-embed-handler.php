@@ -26,8 +26,8 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 	}
 
 	public static function tear_down_after_class() {
-		parent::tear_down_after_class();
 		AMP_Options_Manager::update_options( self::$original_amp_options );
+		parent::tear_down_after_class();
 	}
 
 	public function set_up() {

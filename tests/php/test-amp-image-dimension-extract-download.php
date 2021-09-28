@@ -40,8 +40,8 @@ class AMP_Image_Dimension_Extract_Download_Test extends TestCase {
 	 * Tear down after class, stopping PHP server.
 	 */
 	public static function tear_down_after_class() {
-		parent::tear_down_after_class();
 		self::stop_server();
+		parent::tear_down_after_class();
 	}
 
 	/**
