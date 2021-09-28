@@ -14,7 +14,9 @@ use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Behat\Hook\Scope\BeforeFeatureScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Gherkin\Node\FeatureNode;
+use Behat\Gherkin\Node\TableNode;
 use Behat\Gherkin\Node\ScenarioInterface;
+use phpDocumentor\Reflection\Exception;
 use WP_CLI\Process;
 use WP_CLI\Tests\Context\FeatureContext as WP_CLI_FeatureContext;
 use WP_CLI\Utils;
@@ -143,6 +145,7 @@ final class FeatureContext extends WP_CLI_FeatureContext {
 	 * @return Process Process to execute.
 	 */
 	public function proc_with_env( $command, $env = [] ) {
+
 		$env = array_merge(
 			self::get_process_env_variables(),
 			$env
@@ -228,5 +231,24 @@ final class FeatureContext extends WP_CLI_FeatureContext {
 		}
 
 		return $env;
+	}
+
+	/**
+	 * @Then /^STDOUT should contain following STRINGS:$/
+	 */
+	public function then_stdout_should_contain_following_strings( TableNode $expected ) {
+
+		$output          = $this->result->stdout;
+		$missing_strings = [];
+
+		foreach ( $expected->getRows() as $row ) {
+
+			if ( ! empty( $row[0] ) && false === strpos( $output, $row[0] ) ) {
+				$missing_strings[] = $row;
+			}
+		}
+		if ( ! empty( $missing_strings ) ) {
+			throw new Exception( $output );
+		}
 	}
 }

@@ -565,6 +565,5 @@ class SupportDataTest extends WP_UnitTestCase {
 		$home_url      = untrailingslashit( $home_url );
 
 		$this->assertEquals( $home_url, SupportData::get_home_url() );
-
 	}
 }
