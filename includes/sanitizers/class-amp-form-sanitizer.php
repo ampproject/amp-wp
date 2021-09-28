@@ -186,9 +186,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string Normalized action URL.
 	 */
 	protected function normalize_action_attribute( Element $form_element ) {
-		$action_url = $this->make_http_url_schemeless(
-			$this->get_action_url( $form_element->getAttribute( Attribute::ACTION ) )
-		);
+		$action_url = $this->get_action_url( $form_element->getAttribute( Attribute::ACTION ) );
 		$form_element->setAttribute( Attribute::ACTION, $action_url );
 		return $action_url;
 	}
@@ -205,21 +203,6 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			&&
 			'wp-comments-post.php' === basename( wp_parse_url( $form_element->getAttribute( Attribute::ACTION ), PHP_URL_PATH ) )
 		);
-	}
-
-	/**
-	 * Make HTTP URLs protocol-less, since HTTPS is required for forms.
-	 *
-	 * @todo If in loose sandboxing, we may want to allow non-HTTPS.
-	 *
-	 * @param string $url URL.
-	 * @return string URL without scheme if it was HTTP.
-	 */
-	protected function make_http_url_schemeless( $url ) {
-		if ( 'http://' === strtolower( substr( $url, 0, 7 ) ) ) {
-			$url = substr( $url, 5 );
-		}
-		return $url;
 	}
 
 	/**
