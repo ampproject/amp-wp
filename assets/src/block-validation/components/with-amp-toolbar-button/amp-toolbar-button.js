@@ -20,9 +20,9 @@ import { useAMPDocumentToggle } from '../../hooks/use-amp-document-toggle';
 /**
  * AMP button displaying in the block toolbar.
  *
- * @param {Object} props          Component props.
+ * @param {Object} props Component props.
  * @param {string} props.clientId Block Client ID.
- * @param {number} props.count    The number of errors associated with the block.
+ * @param {number} props.count The number of errors associated with the block.
  */
 export function AMPToolbarButton( { clientId, count } ) {
 	const { openGeneralSidebar } = useDispatch( 'core/edit-post' );

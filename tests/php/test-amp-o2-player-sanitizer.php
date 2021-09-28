@@ -5,14 +5,12 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\TestCase;
-
 /**
  * Test AMP_O2_Player_Sanitizer
  *
  * @covers AMP_O2_Player_Sanitizer
  */
-class AMP_O2_Player_Sanitizer_Test extends TestCase {
+class AMP_O2_Player_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
 	 * Data for converter test.

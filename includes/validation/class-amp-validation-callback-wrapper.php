@@ -36,15 +36,6 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	}
 
 	/**
-	 * Get callback function.
-	 *
-	 * @return callable
-	 */
-	public function get_callback_function() {
-		return $this->callback['function'];
-	}
-
-	/**
 	 * Prepare for invocation.
 	 *
 	 * @since 1.5
@@ -97,7 +88,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 		// Wrap the markup output of (action) hooks in source comments.
 		AMP_Validation_Manager::$hook_source_stack[] = $this->callback['source'];
 		if ( ! $is_filter && AMP_Validation_Manager::can_output_buffer() ) {
-			$has_buffer_started = ob_start( [ AMP_Validation_Manager::class, 'wrap_buffer_with_source_comments' ] );
+			$has_buffer_started = ob_start( [ 'AMP_Validation_Manager', 'wrap_buffer_with_source_comments' ] );
 		} else {
 			$has_buffer_started = false;
 		}

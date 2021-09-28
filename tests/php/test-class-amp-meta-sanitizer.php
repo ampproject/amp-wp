@@ -8,12 +8,11 @@
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Meta_Sanitizer.
  */
-class Test_AMP_Meta_Sanitizer extends TestCase {
+class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 
 	use MarkupComparison;
 

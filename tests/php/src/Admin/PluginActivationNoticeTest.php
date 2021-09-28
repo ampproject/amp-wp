@@ -9,8 +9,8 @@ namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\PluginActivationNotice;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\TestCase;
 use AMP_Options_Manager;
+use WP_UnitTestCase;
 
 /**
  * Tests for PluginActivationNotice class.
@@ -21,7 +21,7 @@ use AMP_Options_Manager;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\PluginActivationNotice
  */
-class PluginActivationNoticeTest extends TestCase {
+class PluginActivationNoticeTest extends WP_UnitTestCase {
 
 	/**
 	 * Test instance.
@@ -52,10 +52,10 @@ class PluginActivationNoticeTest extends TestCase {
 	 */
 	public function test_user_sees_notice() {
 		set_current_screen( 'plugins' );
-		$this->assertStringContainsString( 'class="amp-plugin-notice', get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
+		$this->assertContains( 'class="amp-plugin-notice', get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
 
 		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
-		$this->assertStringNotContainsString( 'class="amp-plugin-notice', get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
+		$this->assertNotContains( 'class="amp-plugin-notice', get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
 	}
 
 	/**

@@ -14,7 +14,8 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use WP_UnitTestCase;
 
 /**
  * Tests for AnalyticsOptionsSubmenu.
@@ -22,7 +23,9 @@ use AmpProject\AmpWP\Tests\TestCase;
  * @group options-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu
  */
-class AnalyticsOptionsSubmenuTest extends TestCase {
+class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of OptionsMenu class.
@@ -86,7 +89,7 @@ class AnalyticsOptionsSubmenuTest extends TestCase {
 		$this->options_menu_instance->add_menu_items();
 		$this->instance->add_submenu_link();
 
-		$this->assertStringContainsString( 'Analytics', wp_list_pluck( $submenu[ $this->options_menu_instance->get_menu_slug() ], 0 ) );
+		$this->assertContains( 'Analytics', wp_list_pluck( $submenu[ $this->options_menu_instance->get_menu_slug() ], 0 ) );
 
 		$submenu = $original_submenu;
 	}

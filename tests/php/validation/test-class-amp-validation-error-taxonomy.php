@@ -8,16 +8,17 @@
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Validation_Error_Taxonomy class.
  *
  * @covers AMP_Validation_Error_Taxonomy
  */
-class Test_AMP_Validation_Error_Taxonomy extends TestCase {
+class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use HandleValidation;
 
 	/**
@@ -25,7 +26,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 *
 	 * @var string
 	 */
-	const TESTED_CLASS = AMP_Validation_Error_Taxonomy::class;
+	const TESTED_CLASS = 'AMP_Validation_Error_Taxonomy';
 
 	/**
 	 * Resets the state after each test method.
@@ -477,20 +478,20 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$error_status = 1;
 		$wp_query->set( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR, $error_status );
 		$filtered_where = AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status( $initial_where, $wp_query );
-		$this->assertStringContainsString( 'SELECT 1', $filtered_where );
-		$this->assertStringContainsString( 'INNER JOIN', $filtered_where );
-		$this->assertStringContainsString( $wpdb->term_relationships, $filtered_where );
-		$this->assertStringContainsString( $wpdb->term_taxonomy, $filtered_where );
-		$this->assertStringContainsString( strval( $error_status ), $filtered_where );
+		$this->assertStringContains( 'SELECT 1', $filtered_where );
+		$this->assertStringContains( 'INNER JOIN', $filtered_where );
+		$this->assertStringContains( $wpdb->term_relationships, $filtered_where );
+		$this->assertStringContains( $wpdb->term_taxonomy, $filtered_where );
+		$this->assertStringContains( strval( $error_status ), $filtered_where );
 
 		// Now that there is a query var for error type, that should also appear in the filtered WHERE clause.
 		$error_type         = AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE;
 		$escaped_error_type = 'js\\\\_error';
 		$wp_query->set( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR, $error_type );
 		$filtered_where = AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status( $initial_where, $wp_query );
-		$this->assertStringContainsString( 'SELECT 1', $filtered_where );
-		$this->assertStringContainsString( strval( $error_status ), $filtered_where );
-		$this->assertStringContainsString( $escaped_error_type, $filtered_where );
+		$this->assertStringContains( 'SELECT 1', $filtered_where );
+		$this->assertStringContains( strval( $error_status ), $filtered_where );
+		$this->assertStringContains( $escaped_error_type, $filtered_where );
 	}
 
 	/**
@@ -703,8 +704,8 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 
 		// Assert that the filter works as expected.
 		$filtered_clauses = apply_filters( $tested_filter, $initial_clauses, $taxonomies );
-		$this->assertStringContainsString( $initial_where, $filtered_clauses['where'] );
-		$this->assertStringContainsString( 'AND tt.description LIKE', $filtered_clauses['where'] );
+		$this->assertStringContains( $initial_where, $filtered_clauses['where'] );
+		$this->assertStringContains( 'AND tt.description LIKE', $filtered_clauses['where'] );
 
 		// If $taxonomies does not have the AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, the filter should return the clauses unchanged.
 		$taxonomies = [ 'post_tag' ];
@@ -743,7 +744,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		);
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
-		$this->assertStringContainsString( 'Unreviewed errors <span class="count">(2)</span>', ob_get_clean() );
+		$this->assertStringContains( 'Unreviewed errors <span class="count">(2)</span>', ob_get_clean() );
 	}
 
 	/**
@@ -755,13 +756,13 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		// When passing the wrong $taxonomy argument, this should not render anything.
-		$output = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_link_to_invalid_urls_screen' ], [ 'category' ] );
+		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_link_to_invalid_urls_screen' ], [ 'category' ] );
 		$this->assertEmpty( $output );
 
 		// When passing the correct taxonomy, this should render the link.
-		$output = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_link_to_invalid_urls_screen' ], [ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] );
-		$this->assertStringContainsString( 'View Validated URLs', $output );
-		$this->assertStringContainsString(
+		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_link_to_invalid_urls_screen' ], [ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] );
+		$this->assertStringContains( 'View Validated URLs', $output );
+		$this->assertStringContains(
 			add_query_arg(
 				'post_type',
 				AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
@@ -781,7 +782,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		set_current_screen( 'post.php' );
 
 		// When this is not on the correct screen, this should not render anything.
-		$output = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_error_status_filter' ] );
+		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_error_status_filter' ] );
 		$this->assertEmpty( $output );
 
 		set_current_screen( 'edit.php' );
@@ -805,8 +806,8 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		}
 
 		// When there are 10 accepted errors, the <option> element for it should end with (10).
-		$output = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_error_status_filter' ] );
-		$this->assertStringContainsString(
+		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_error_status_filter' ] );
+		$this->assertStringContains(
 			sprintf(
 				'With unreviewed errors <span class="count">(%d)</span>',
 				$number_of_errors
@@ -846,7 +847,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		}
 
 		// The strings below should be present.
-		$markup = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_error_type_filter' ] );
+		$markup = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_error_type_filter' ] );
 
 		$expected_to_contain = [
 			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR,
@@ -857,17 +858,17 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		];
 
 		foreach ( $expected_to_contain as $expected ) {
-			$this->assertStringContainsString( $expected, $markup );
+			$this->assertStringContains( $expected, $markup );
 		}
 
 		// On the edit-tags.php page, the <option> text should not have 'With', like 'With JS Errors'.
-		$this->assertStringNotContainsString( 'With', $markup );
+		$this->assertStringNotContains( 'With', $markup );
 
 		// On the edit.php page (Errors by URL), the <option> text should have 'With', like 'With JS Errors'.
 		set_current_screen( 'edit.php' );
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_error_type_filter();
-		$this->assertStringContainsString( 'With', ob_get_clean() );
+		$this->assertStringContains( 'With', ob_get_clean() );
 	}
 
 	/**
@@ -877,7 +878,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 */
 	public function test_render_clear_empty_button() {
 
-		$output = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'render_clear_empty_button' ] );
+		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_clear_empty_button' ] );
 		$this->assertEmpty( $output );
 
 		ob_start();
@@ -885,7 +886,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		wp_delete_post( $post_id, true );
 		AMP_Validation_Error_Taxonomy::render_clear_empty_button();
 		$output = ob_get_clean();
-		$this->assertStringContainsString( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, $output );
+		$this->assertStringContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, $output );
 	}
 
 	/**
@@ -905,8 +906,8 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 
 		// The conditional should be true, so test the preg_replace() call for $clauses['where'].
 		$clauses = AMP_Validation_Error_Taxonomy::filter_terms_clauses_for_description_search( $clauses, [ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ], $args );
-		$this->assertStringContainsString( '(tt.description LIKE ', $clauses['where'] );
-		$this->assertStringContainsString( $wpdb->esc_like( $args['search'] ), $clauses['where'] );
+		$this->assertStringContains( '(tt.description LIKE ', $clauses['where'] );
+		$this->assertStringContains( $wpdb->esc_like( $args['search'] ), $clauses['where'] );
 	}
 
 	/**
@@ -919,7 +920,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		set_current_screen( 'edit.php' );
 
 		// Test that the method exits when the first conditional isn't true.
-		$message = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'add_admin_notices' ] );
+		$message = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ] );
 		$this->assertEmpty( $message );
 
 		// Test the first conditional, where the error is accepted.
@@ -927,18 +928,18 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$count                      = 5;
 		$_GET['amp_actioned_count'] = $count;
 		$current_screen->taxonomy   = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
-		$message                    = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'add_admin_notices' ] );
+		$message                    = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ] );
 		$this->assertEquals( '', $message );
 
 		// Test the second conditional, where the error is rejected.
 		$_GET['amp_actioned'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
-		$message              = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'add_admin_notices' ] );
+		$message              = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ] );
 		$this->assertEquals( '', $message );
 
 		// Test the second conditional, where the error is rejected.
 		$_GET['amp_actioned']       = 'delete';
 		$_GET['amp_actioned_count'] = 1;
-		$message                    = get_echo( [ AMP_Validation_Error_Taxonomy::class, 'add_admin_notices' ] );
+		$message                    = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ] );
 		$this->assertEquals(
 			'<div class="notice notice-success is-dismissible"><p>Deleted 1 instance of validation errors.</p></div>',
 			$message
@@ -991,7 +992,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$pagenow = 'post.php';
 		$actions = AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, get_term( $term_this_taxonomy ) );
 		$this->assertTrue( array_key_exists( 'copy', $actions ) );
-		$this->assertStringContainsString( 'Copy to clipboard', $actions['copy'] );
+		$this->assertStringContains( 'Copy to clipboard', $actions['copy'] );
 
 	}
 
@@ -1223,28 +1224,28 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		// Test the 'status' block in the switch for the error taxonomy page.
 		$GLOBALS['pagenow'] = 'edit-tags.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertStringContainsString( 'amp-invalid', $filtered_content );
-		$this->assertStringContainsString( 'Kept', $filtered_content );
+		$this->assertStringContains( 'amp-invalid', $filtered_content );
+		$this->assertStringContains( 'Kept', $filtered_content );
 
 		// Test the 'status' block switch for the single error page.
 		$GLOBALS['pagenow'] = 'post.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertStringContainsString( sprintf( '<select class="amp-validation-error-status" name="%s[term-', AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ), $filtered_content );
+		$this->assertStringContains( sprintf( '<select class="amp-validation-error-status" name="%s[term-', AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ), $filtered_content );
 
 		// Test the 'created_date_gmt' block in the switch.
 		$date = current_time( 'mysql', true );
 		update_term_meta( $term_id, 'created_date_gmt', $date );
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'created_date_gmt', $term_id );
-		$this->assertStringContainsString( '<time datetime=', $filtered_content );
-		$this->assertStringContainsString( '<abbr title=', $filtered_content );
+		$this->assertStringContains( '<time datetime=', $filtered_content );
+		$this->assertStringContains( '<abbr title=', $filtered_content );
 
 		// Test the 'details' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'details', $term_id );
-		$this->assertStringContainsString( '<details class="details-attributes"><summary class="details-attributes__summary"', $filtered_content );
+		$this->assertStringContains( '<details class="details-attributes"><summary class="details-attributes__summary"', $filtered_content );
 
 		// Test the 'error_type' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error_type', $term_id );
-		$this->assertStringContainsString( 'CSS', $filtered_content );
+		$this->assertStringContains( 'CSS', $filtered_content );
 	}
 
 	/**
@@ -1308,7 +1309,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error_code', $term_id );
 
 		$this->assertStringStartsWith( $initial_content . '<button type="button" aria-label="Toggle error details"', $filtered_content );
-		$this->assertStringContainsString( $expected_error_message, $filtered_content );
+		$this->assertStringContains( $expected_error_message, $filtered_content );
 	}
 
 	/**
@@ -1350,7 +1351,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$validation_error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG;
 		$term                     = self::factory()->term->create_and_get( [ 'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] );
 		$html                     = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $term );
-		$this->assertStringContainsString( '<dl class="detailed">', $html );
+		$this->assertStringContains( '<dl class="detailed">', $html );
 	}
 
 	/**
@@ -1425,7 +1426,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 			$e = $exception;
 		}
 
-		$this->assertStringContainsString( 'Cannot modify header information', $e->getMessage() );
+		$this->assertStringContains( 'Cannot modify header information', $e->getMessage() );
 		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS );
 
 		// When the action is to 'reject' the error, this should not update the status of the error to 'rejected'.
@@ -1436,7 +1437,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 			$e = $exception;
 		}
 
-		$this->assertStringContainsString( 'Cannot modify header information', $e->getMessage() );
+		$this->assertStringContains( 'Cannot modify header information', $e->getMessage() );
 		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS );
 
 		// When the action is to 'delete' the error, this should delete the error.
@@ -1447,7 +1448,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 			$e = $exception;
 		}
 
-		$this->assertStringContainsString( 'Cannot modify header information', $e->getMessage() );
+		$this->assertStringContains( 'Cannot modify header information', $e->getMessage() );
 		$this->assertEquals( null, get_term( $error_term->term_id ) );
 	}
 

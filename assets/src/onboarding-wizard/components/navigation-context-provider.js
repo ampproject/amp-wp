@@ -18,9 +18,9 @@ export const Navigation = createContext();
 /**
  * Context provider for navigating between and keeping track of pages in the app.
  *
- * @param {Object} props          Component props.
- * @param {?any}   props.children Component children.
- * @param {Array}  props.pages    Pages in the app.
+ * @param {Object} props Component props.
+ * @param {?any} props.children Component children.
+ * @param {Array} props.pages Pages in the app.
  */
 export function NavigationContextProvider( { children, pages } ) {
 	const [ activePageIndex, setActivePageIndex ] = useState( 0 );

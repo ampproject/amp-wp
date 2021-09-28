@@ -5,7 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\Attribute;
 use AmpProject\DevMode;
 
 /**
@@ -63,9 +62,6 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( $this->args['add_noscript_fallback'] ) {
 			$this->initialize_noscript_allowed_attributes( self::$tag );
-
-			// Omit muted from noscript > video since it causes deprecation warnings in validator.
-			unset( $this->noscript_fallback_allowed_attributes['muted'] );
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
@@ -136,12 +132,6 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				$fallback->setAttribute( 'fallback', '' );
 				$fallback->appendChild( $this->dom->createTextNode( $sources[0] ) );
 				$child_nodes[] = $fallback;
-			}
-
-			if ( empty( $new_attributes['width'] ) && empty( $new_attributes['height'] ) ) {
-				$new_attributes[ Attribute::CLASS_ ] = isset( $new_attributes[ Attribute::CLASS_ ] )
-					? $new_attributes[ Attribute::CLASS_ ] . ' amp-wp-unknown-size'
-					: 'amp-wp-unknown-size';
 			}
 
 			$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
@@ -313,14 +303,6 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				default:
 					$out[ $name ] = $value;
 			}
-		}
-
-		/*
-		 * The amp-video will forcibly be muted whenever it is set to autoplay.
-		 * So omit the `muted` attribute if it exists.
-		 */
-		if ( isset( $out['autoplay'], $out['muted'] ) ) {
-			unset( $out['muted'] );
 		}
 
 		return $out;

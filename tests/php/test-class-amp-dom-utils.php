@@ -1,8 +1,8 @@
 <?php
 
 use AmpProject\AmpWP\Dom\Options;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_DOM_Utils_Test
@@ -13,7 +13,9 @@ use AmpProject\AmpWP\Tests\TestCase;
  * @method void assertTrue( bool $expectsTrue, string $errorMessage=null )
  * @method void assertFalse( bool $expectsFalse, string $errorMessage=null )
  */
-class AMP_DOM_Utils_Test extends TestCase {
+class AMP_DOM_Utils_Test extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Test UTF-8 content.
@@ -257,10 +259,10 @@ class AMP_DOM_Utils_Test extends TestCase {
 
 		$serialized_html = $dom->saveHTML( $dom->documentElement );
 
-		$this->assertStringContainsString( '<a href="{{href}}" title="Hello {{name}}">', $serialized_html );
-		$this->assertStringContainsString( '<img src="{{src}}">', $serialized_html );
-		$this->assertStringContainsString( '<blockquote cite="{{cite}}">', $serialized_html );
-		$this->assertStringContainsString( '"block_attrs":{"layout":"column-1"}}', $serialized_html );
+		$this->assertStringContains( '<a href="{{href}}" title="Hello {{name}}">', $serialized_html );
+		$this->assertStringContains( '<img src="{{src}}">', $serialized_html );
+		$this->assertStringContains( '<blockquote cite="{{cite}}">', $serialized_html );
+		$this->assertStringContains( '"block_attrs":{"layout":"column-1"}}', $serialized_html );
 	}
 
 	/**

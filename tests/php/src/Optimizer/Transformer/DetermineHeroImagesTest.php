@@ -9,10 +9,10 @@ use AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
-use AmpProject\AmpWP\Tests\TestCase;
+use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages */
-final class DetermineHeroImagesTest extends TestCase {
+final class DetermineHeroImagesTest extends WP_UnitTestCase {
 
 	use ErrorComparison;
 	use MarkupComparison;
@@ -273,10 +273,12 @@ final class DetermineHeroImagesTest extends TestCase {
 	/**
 	 * Test the transform() method.
 	 *
-	 * @covers       ::transform()
-	 * @covers       ::add_data_hero_candidate_attribute()
-	 * @covers       ::get_header_images()
-	 * @covers       ::get_initial_content_image()
+	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::transform()
+	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::add_data_hero_candidate_attribute()
+	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_custom_header()
+	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_custom_logo()
+	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_initial_content_image_block()
+	 * @covers       \AmpProject\AmpWP\Optimizer\Transformer\DetermineHeroImages::get_initial_content_cover_block()
 	 * @dataProvider data_transform()
 	 *
 	 * @param string                  $source          String of source HTML.

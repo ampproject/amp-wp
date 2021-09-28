@@ -9,36 +9,11 @@ import { isFunction } from 'lodash';
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Notice } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { validateFeaturedImage, getMinimumFeaturedImageDimensions } from '../../helpers';
-
-/**
- * Create notice UI for featured image component.
- *
- * @param {string[]} messages Notices.
- * @param {string}   status   Status type of notice.
- * @return {JSX.Element} Notice component.
- */
-const createNoticeUI = ( messages, status ) => {
-	return (
-		<Notice
-			status={ status }
-			isDismissible={ false }
-		>
-			{ messages.map( ( message, index ) => {
-				return (
-					<p key={ `message-${ index }` }>
-						{ message }
-					</p>
-				);
-			} ) }
-		</Notice>
-	);
-};
 
 /**
  * Higher-order component that is used for filtering the PostFeaturedImage component.
@@ -55,18 +30,29 @@ export default createHigherOrderComponent(
 
 		const withFeaturedImageNotice = ( props ) => {
 			const { media } = props;
-			let noticeUI;
 
-			if ( ! media ) {
-				const message = __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' );
-				noticeUI = createNoticeUI( [ message ], 'notice' );
-			} else {
-				const errorMessages = validateFeaturedImage( media, getMinimumFeaturedImageDimensions() );
-				noticeUI = errorMessages ? createNoticeUI( errorMessages, 'warning' ) : null;
+			const errors = validateFeaturedImage( media, getMinimumFeaturedImageDimensions(), false );
+
+			if ( ! errors ) {
+				return <PostFeaturedImage { ...props } />;
 			}
 
 			return (
-				<PostFeaturedImage { ...props } noticeUI={ noticeUI } />
+				<>
+					<Notice
+						status="notice"
+						isDismissible={ false }
+					>
+						{ errors.map( ( errorMessage, index ) => {
+							return (
+								<p key={ `error-${ index }` }>
+									{ errorMessage }
+								</p>
+							);
+						} ) }
+					</Notice>
+					<PostFeaturedImage { ...props } />
+				</>
 			);
 		};
 

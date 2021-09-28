@@ -17,7 +17,7 @@ const OPEN_CLASS = 'is-open';
  * table column via backend code.
  *
  * @param {string} containerSelector Selector for elements that will have the button added.
- * @param {string} ariaLabel         Screen reader label for the button.
+ * @param {string} ariaLabel Screen reader label for the button.
  * @return {Array} Array of added buttons.
  */
 function addToggleButtons( containerSelector, ariaLabel ) {

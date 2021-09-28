@@ -9,7 +9,6 @@
 /**
  * Class AMP_Editor_Blocks
  *
- * @todo Remove this when AMP-specific blocks are removed. They have been deprecated as of <https://github.com/ampproject/amp-wp/issues/4556>.
  * @internal
  */
 class AMP_Editor_Blocks {
@@ -66,7 +65,7 @@ class AMP_Editor_Blocks {
 	/**
 	 * Allowlist elements and attributes used for AMP.
 	 *
-	 * This prevents AMP markup from being deleted when the user doesn't have the `unfiltered_html` capability.
+	 * This prevents AMP markup from being deleted in
 	 *
 	 * @param array  $tags    Array of allowed post tags.
 	 * @param string $context Context.
@@ -76,6 +75,18 @@ class AMP_Editor_Blocks {
 		if ( 'post' !== $context ) {
 			return $tags;
 		}
+
+		foreach ( $tags as &$tag ) {
+			if ( ! is_array( $tag ) ) {
+				continue;
+			}
+			$tag['data-amp-layout']              = true;
+			$tag['data-amp-noloading']           = true;
+			$tag['data-amp-lightbox']            = true;
+			$tag['data-close-button-aria-label'] = true;
+		}
+
+		unset( $tag );
 
 		foreach ( self::AMP_BLOCKS as $amp_block ) {
 			if ( ! isset( $tags[ $amp_block ] ) ) {

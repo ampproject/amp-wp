@@ -6,12 +6,11 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_Gallery_Block_Sanitizer_Test
  */
-class AMP_Gallery_Block_Sanitizer_Test extends TestCase {
+class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 
 	use PrivateAccess;
 

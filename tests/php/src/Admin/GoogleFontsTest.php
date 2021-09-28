@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Tests\TestCase;
+use WP_UnitTestCase;
 
 /**
  * Tests for GoogleFonts class.
@@ -19,7 +19,7 @@ use AmpProject\AmpWP\Tests\TestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\GoogleFonts
  */
-class GoogleFontsTest extends TestCase {
+class GoogleFontsTest extends WP_UnitTestCase {
 
 	/**
 	 * Test instance.

@@ -65,27 +65,32 @@ export const getMinimumFeaturedImageDimensions = () => {
 /**
  * Validates the an image based on requirements.
  *
- * @param {Object|null} media                      A media object.
- * @param {string}      media.mime_type            The media item's mime type.
- * @param {Object}      media.media_details        A media details object with width and height values.
- * @param {number}      media.media_details.width  Media width in pixels.
- * @param {number}      media.media_details.height Media height in pixels.
- * @param {Object}      dimensions                 An object with minimum required width and height values.
- * @param {number}      dimensions.width           Minimum required width value.
- * @param {number}      dimensions.height          Minimum required height value.
+ * @param {Object}  media                      A media object.
+ * @param {string}  media.mime_type            The media item's mime type.
+ * @param {Object}  media.media_details        A media details object with width and height values.
+ * @param {number}  media.media_details.width  Media width in pixels.
+ * @param {number}  media.media_details.height Media height in pixels.
+ * @param {Object}  dimensions                 An object with minimum required width and height values.
+ * @param {number}  dimensions.width           Minimum required width value.
+ * @param {number}  dimensions.height          Minimum required height value.
+ * @param {boolean} required                   Whether the image is required or not.
  * @return {string[]|null} Validation errors, or null if there were no errors.
  */
-export const validateFeaturedImage = ( media, dimensions ) => {
+export const validateFeaturedImage = ( media, dimensions, required ) => {
 	if ( ! media ) {
-		return [ __( 'Selecting a featured image is required.', 'amp' ) ];
+		if ( required ) {
+			return [ __( 'Selecting a featured image is required.', 'amp' ) ];
+		}
+
+		return [ __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) ];
 	}
 
 	const errors = [];
 
-	if ( ! [ 'image/png', 'image/gif', 'image/jpeg', 'image/webp', 'image/svg+xml' ].includes( media.mime_type ) ) {
+	if ( ! [ 'image/png', 'image/gif', 'image/jpeg' ].includes( media.mime_type ) ) {
 		errors.push(
-			/* translators: List of image formats */
-			sprintf( __( 'The featured image must be of either %1$s, %2$s, %3$s, %4$s, or %5$s format.', 'amp' ), 'JPEG', 'PNG', 'GIF', 'WebP', 'SVG' ),
+			/* translators: 1: .jpg, 2: .png. 3: .gif */
+			sprintf( __( 'The featured image must be in %1$s, %2$s, or %3$s format.', 'amp' ), '.jpg', '.png', '.gif' ),
 		);
 	}
 
@@ -161,7 +166,7 @@ export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
  *
  * This is not an arrow function so that it can be called with enforceFileType.call( this, foo, bar ).
  *
- * @param {Object} attachment     The selected attachment.
+ * @param {Object} attachment The selected attachment.
  * @param {Object} SelectionError The error to display.
  */
 export const enforceFileType = function( attachment, SelectionError ) {
@@ -192,12 +197,12 @@ export const enforceFileType = function( attachment, SelectionError ) {
 /**
  * Sets the featured image, on selecting it in the Media Library.
  *
- * @param {Object}   args               Arguments.
- * @param {string}   args.url           Image URL.
- * @param {number}   args.id            Attachment ID.
- * @param {number}   args.width         Image width.
- * @param {number}   args.height        Image height.
- * @param {Function} args.onSelect      A function in the MediaUpload component called on selecting the image.
+ * @param {Object} args Arguments.
+ * @param {string} args.url Image URL.
+ * @param {number} args.id Attachment ID.
+ * @param {number} args.width Image width.
+ * @param {number} args.height Image height.
+ * @param {Function} args.onSelect A function in the MediaUpload component called on selecting the image.
  * @param {Function} args.dispatchImage A function to dispatch the change in image to the store.
  */
 export const setImageFromURL = ( { url, id, width, height, onSelect, dispatchImage } ) => {

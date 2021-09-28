@@ -5,12 +5,10 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\TestCase;
-
 /**
  * Class AMP_Block_Sanitizer_Test
  */
-class AMP_Block_Sanitizer_Test extends TestCase {
+class AMP_Block_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
 	 * Get data.

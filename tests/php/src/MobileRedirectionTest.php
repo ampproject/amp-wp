@@ -9,17 +9,16 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\MobileRedirection;
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
-use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use WP_Customize_Manager;
 use AMP_HTTP;
 
 /** @coversDefaultClass \AmpProject\AmpWP\MobileRedirection */
 final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
-	use PrivateAccess;
+	use AssertContainsCompatibility;
 
 	/** @var MobileRedirection */
 	private $instance;
@@ -90,42 +89,36 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 	/** @covers ::register() */
 	public function test_register_not_enabled() {
-		remove_all_filters( 'amp_to_amp_linking_enabled' );
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, false );
-		$instance = new MobileRedirection( $this->paired_routing );
-		$instance->register();
-		$this->assertSame( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
-		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $instance, 'sanitize_options' ] ) );
-		$this->assert_hooks_not_added( $instance );
+		$this->instance->register();
+		$this->assertSame( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
+		$this->assert_hooks_not_added();
 	}
 
 	/** @covers ::register() */
 	public function test_register_enabled_but_standard_mode() {
-		remove_all_filters( 'amp_to_amp_linking_enabled' );
 		AMP_Options_Manager::update_options(
 			[
 				Option::MOBILE_REDIRECT => true,
 				Option::THEME_SUPPORT   => AMP_Theme_Support::STANDARD_MODE_SLUG,
 			]
 		);
-		$instance = new MobileRedirection( $this->paired_routing );
-		$instance->register();
-		$this->assertSame( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
-		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $instance, 'sanitize_options' ] ) );
-		$this->assert_hooks_not_added( $instance );
+		$this->instance->register();
+		$this->assertSame( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
+		$this->assert_hooks_not_added();
 	}
 
 	/**
 	 * Assert the service hooks were not added.
-	 *
-	 * @param MobileRedirection $instance
 	 */
-	private function assert_hooks_not_added( MobileRedirection $instance ) {
-		$this->assertFalse( has_action( 'template_redirect', [ $instance, 'redirect' ] ) );
+	private function assert_hooks_not_added() {
+		$this->assertFalse( has_action( 'template_redirect', [ $this->instance, 'redirect' ] ) );
 		$this->assertFalse( has_filter( 'amp_to_amp_linking_enabled', '__return_true' ) );
-		$this->assertFalse( has_filter( 'comment_post_redirect', [ $instance, 'filter_comment_post_redirect' ] ) );
-		$this->assertFalse( has_filter( 'get_comments_link', [ $instance, 'add_noamp_mobile_query_var' ] ) );
-		$this->assertFalse( has_filter( 'respond_link', [ $instance, 'add_noamp_mobile_query_var' ] ) );
+		$this->assertFalse( has_filter( 'comment_post_redirect', [ $this->instance, 'filter_comment_post_redirect' ] ) );
+		$this->assertFalse( has_filter( 'get_comments_link', [ $this->instance, 'add_noamp_mobile_query_var' ] ) );
+		$this->assertFalse( has_filter( 'respond_link', [ $this->instance, 'add_noamp_mobile_query_var' ] ) );
 	}
 
 	/** @covers ::filter_default_options() */
@@ -134,7 +127,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		$this->assertEquals(
 			[
 				'foo'                   => 'bar',
-				Option::MOBILE_REDIRECT => true,
+				Option::MOBILE_REDIRECT => false,
 			],
 			$this->instance->filter_default_options( [ 'foo' => 'bar' ] )
 		);
@@ -428,44 +421,35 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	}
 
 	/** @covers ::is_using_client_side_redirection() */
-	public function test_is_using_client_side_redirection_in_customizer_preview() {
+	public function test_is_using_client_side_redirection() {
 		$this->assertTrue( $this->instance->is_using_client_side_redirection() );
 
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
 		$this->assertFalse( $this->instance->is_using_client_side_redirection() );
 
-		$this->assertFalse( $this->instance->is_using_client_side_redirection() );
-		$this->init_customizer_preview();
-		$this->assertTrue( $this->instance->is_using_client_side_redirection(), 'Expected client-side redirection to be enforced because in Customizer preview.' );
-	}
-
-	/** @covers ::is_using_client_side_redirection() */
-	public function test_is_using_client_side_redirection_paired_browsing_active() {
-		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			$this->markTestSkipped( 'Paired browsing is not available in the current environment.' );
-		}
-
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$this->assertTrue( $this->instance->is_using_client_side_redirection() );
-		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
+		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
+
 		$this->assertFalse( $this->instance->is_using_client_side_redirection() );
-
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->register_paired_browsing_service();
-
-		$this->assertTrue( $this->instance->is_using_client_side_redirection(), 'Expected client-side redirection to be enforced because (possibly) in paired browsing.' );
+		global $wp_customize;
+		require_once ABSPATH . 'wp-includes/class-wp-customize-manager.php';
+		$wp_customize = new WP_Customize_Manager();
+		$wp_customize->start_previewing_theme();
+		$this->assertTrue( $this->instance->is_using_client_side_redirection() );
 	}
 
 	/** @covers ::get_mobile_user_agents() */
 	public function test_get_mobile_user_agents() {
-		$this->assertStringContainsString( 'Mobile', $this->instance->get_mobile_user_agents() );
-		$this->assertStringNotContainsString( 'Watch', $this->instance->get_mobile_user_agents() );
+		$this->assertContains( 'Mobile', $this->instance->get_mobile_user_agents() );
+		$this->assertNotContains( 'Watch', $this->instance->get_mobile_user_agents() );
 		add_filter(
 			'amp_mobile_user_agents',
 			function ( $user_agents ) {
 				return array_merge( $user_agents, [ 'Watch' ] );
 			}
 		);
-		$this->assertStringContainsString( 'Watch', $this->instance->get_mobile_user_agents() );
+		$this->assertContains( 'Watch', $this->instance->get_mobile_user_agents() );
 	}
 
 	/** @covers ::is_redirection_disabled_via_query_param() */
@@ -501,8 +485,8 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		ob_start();
 		$this->instance->add_mobile_redirect_script();
 		$output = ob_get_clean();
-		$this->assertStringContainsString( '<script type="text/javascript">', $output );
-		$this->assertStringContainsString( 'noampQueryVarName', $output );
+		$this->assertStringContains( '<script type="text/javascript">', $output );
+		$this->assertStringContains( 'noampQueryVarName', $output );
 
 		add_filter(
 			'wp_inline_script_attributes',
@@ -518,8 +502,8 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		ob_start();
 		$this->instance->add_mobile_redirect_script();
 		$output = ob_get_clean();
-		$this->assertMatchesRegularExpression( '#<script\b[^>]*? data-cfasync="false"[^>]*>#', $output );
-		$this->assertStringContainsString( 'noampQueryVarName', $output );
+		$this->assertRegExp( '#<script\b[^>]*? data-cfasync="false"[^>]*>#', $output );
+		$this->assertStringContains( 'noampQueryVarName', $output );
 	}
 
 	/** @covers ::filter_comment_post_redirect() */
@@ -535,7 +519,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 		$filtered_comment_link = $this->instance->filter_comment_post_redirect( $comment_link );
 		$this->assertNotEquals( $comment_link, $filtered_comment_link );
-		$this->assertStringContainsString( QueryVar::AMP . '=1', $filtered_comment_link );
+		$this->assertStringContains( QueryVar::AMP . '=1', $filtered_comment_link );
 
 		$external_url = 'https://external.example.com/';
 		$this->assertEquals( $external_url, $this->instance->filter_comment_post_redirect( $external_url ) );
@@ -567,8 +551,8 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		$this->instance->add_mobile_version_switcher_styles();
 		$output = ob_get_clean();
 		$this->assertStringStartsWith( '<style>', $output );
-		$this->assertStringContainsString( '#amp-mobile-version-switcher', $output );
-		$this->assertStringNotContainsString( 'body.lock-scrolling > #amp-mobile-version-switcher', $output );
+		$this->assertStringContains( '#amp-mobile-version-switcher', $output );
+		$this->assertStringNotContains( 'body.lock-scrolling > #amp-mobile-version-switcher', $output );
 
 		add_filter(
 			'template',
@@ -579,7 +563,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		ob_start();
 		$this->instance->add_mobile_version_switcher_styles();
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'body.lock-scrolling > #amp-mobile-version-switcher', $output );
+		$this->assertStringContains( 'body.lock-scrolling > #amp-mobile-version-switcher', $output );
 
 		add_filter( 'amp_mobile_version_switcher_styles_used', '__return_false' );
 		ob_start();
@@ -594,67 +578,38 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	 * @return array
 	 */
 	public function get_test_data_for_add_mobile_version_switcher() {
-		$data = [];
-		foreach ( [ AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ] as $template_mode ) {
-			foreach ( [ true, false ] as $is_amp ) {
-				foreach ( [ true, false ] as $is_customizer ) {
-					foreach ( [ true, false ] as $is_paired_browsing ) {
-						// Skip ths condition for Reader mode since Paired Browsing not relevant.
-						if ( AMP_Theme_Support::READER_MODE_SLUG === $template_mode ) {
-							continue;
-						}
-
-						$slug = implode(
-							'_',
-							[
-								$template_mode,
-								$is_amp ? 'amp' : 'noamp',
-								$is_customizer ? 'with_customize' : 'without_customize',
-								$is_paired_browsing ? 'with_pairedbrowsing' : 'without_pairedbrowsing',
-							]
-						);
-
-						$data[ $slug ] = [
-							$template_mode,
-							$is_amp,
-							$is_customizer,
-							$is_paired_browsing,
-						];
-					}
-				}
-			}
-		}
-		return $data;
+		return [
+			'amp'    => [
+				true,
+				'noamphtml nofollow',
+			],
+			'nonamp' => [
+				false,
+				'amphtml',
+			],
+		];
 	}
 
 	/**
 	 * @dataProvider get_test_data_for_add_mobile_version_switcher
 	 * @covers ::add_mobile_version_switcher_link()
 	 *
-	 * @param string $template_mode      Template mode.
-	 * @param bool   $is_amp             Is AMP.
-	 * @param bool   $is_customizer      Is Customizer preview.
-	 * @param bool   $is_paired_browsing Is paired browsing.
+	 * @param bool   $is_amp   Is AMP.
+	 * @param string $link_rel Expected link relations.
 	 */
-	public function test_add_mobile_version_switcher( $template_mode, $is_amp, $is_customizer, $is_paired_browsing ) {
-		if ( $is_paired_browsing && ! Services::get( 'dependency_support' )->has_support() ) {
-			$this->markTestSkipped( 'Paired browsing is not available in the current environment.' );
+	public function test_add_mobile_version_switcher( $is_amp, $link_rel ) {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->go_to( '/' );
+		if ( $is_amp ) {
+			set_query_var( QueryVar::AMP, '1' );
 		}
-
-		$post_id = self::factory()->post->create();
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $template_mode );
-
-		$url = $is_amp ? amp_get_permalink( $post_id ) : get_permalink( $post_id );
-
-		$link_rel = $is_amp ? 'noamphtml nofollow' : 'amphtml';
-
-		if ( $is_paired_browsing ) {
-			$this->register_paired_browsing_service();
-		}
-		if ( $is_customizer ) {
-			$this->init_customizer_preview();
-			$this->assertTrue( is_customize_preview() );
-		}
+		$this->assertEquals( $is_amp, amp_is_request() );
+		ob_start();
+		$this->instance->add_mobile_version_switcher_link();
+		$output = ob_get_clean();
+		$this->assertStringContains( 'rel="' . $link_rel . '"', $output );
+		$this->assertStringContains( 'amp-mobile-version-switcher', $output );
+		$this->assertStringNotContains( '<script data-ampdevmode>', $output );
 
 		add_filter(
 			'amp_mobile_version_switcher_link_text',
@@ -663,52 +618,12 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 			}
 		);
 
-		$this->go_to( $url );
-		$this->assertEquals( $is_amp, amp_is_request() );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		ob_start();
 		$this->instance->add_mobile_version_switcher_link();
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'rel="' . $link_rel . '"', $output );
-		$this->assertStringContainsString( 'amp-mobile-version-switcher', $output );
-
-		if ( $is_customizer ? AMP_Theme_Support::READER_MODE_SLUG === $template_mode : $is_paired_browsing ) {
-			$this->assertStringContainsString( '<script data-ampdevmode>', $output );
-		} else {
-			$this->assertStringNotContainsString( '<script data-ampdevmode>', $output );
-		}
-	}
-
-	/**
-	 * Register paired browsing service.
-	 *
-	 * @see PairedBrowsing::is_needed()
-	 */
-	private function register_paired_browsing_service() {
-		$service_classes = $this->call_private_method( $this->plugin, 'get_service_classes' );
-		$service_id      = 'admin.paired_browsing';
-		$service_class   = $service_classes[ $service_id ];
-
-		// Make sure the service is not registered yet.
-		$this->assertFalse( $this->container->has( $service_id ) );
-		$this->assertFalse( call_user_func( [ $service_class, 'is_needed' ] ) );
-
-		// Enable conditions to allow the PairedBrowsing service to be registered.
-		do_action( 'wp_loaded' );
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-		$this->assertTrue( call_user_func( [ $service_class, 'is_needed' ] ) );
-
-		$this->call_private_method( $this->plugin, 'maybe_register_service', [ $service_id, $service_classes[ $service_id ] ] );
-		$this->assertTrue( $this->container->has( $service_id ) );
-	}
-
-	/**
-	 * Initialize Customizer preview.
-	 */
-	private function init_customizer_preview() {
-		global $wp_customize;
-		require_once ABSPATH . 'wp-includes/class-wp-customize-manager.php';
-		$wp_customize = new WP_Customize_Manager();
-		$wp_customize->start_previewing_theme();
+		$this->assertStringContains( amp_is_request() ? '(non-AMP version)' : '(AMP version)', $output );
+		$this->assertStringContains( '<script data-ampdevmode>', $output );
+		$this->assertStringContains( 'notApplicableMessage', $output );
 	}
 }

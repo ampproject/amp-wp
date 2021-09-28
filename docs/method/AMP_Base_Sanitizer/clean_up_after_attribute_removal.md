@@ -13,7 +13,7 @@ Cleans up artifacts after the removal of an attribute node.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:680](/includes/sanitizers/class-amp-base-sanitizer.php#L680-L695)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:669](/includes/sanitizers/class-amp-base-sanitizer.php#L669-L684)
 
 <details>
 <summary>Show Code</summary>

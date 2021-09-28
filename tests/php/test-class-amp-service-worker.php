@@ -7,14 +7,16 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /**
  * Tests for AMP_Service_Worker.
  *
  * @covers AMP_Service_Worker
  */
-class Test_AMP_Service_Worker extends TestCase {
+class Test_AMP_Service_Worker extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Set up.
@@ -85,7 +87,7 @@ class Test_AMP_Service_Worker extends TestCase {
 		$query_vars = AMP_Service_Worker::add_query_var( [ 'foo' ] );
 		$this->assertSame( 'foo', $query_vars[0] );
 		$this->assertCount( 2, $query_vars );
-		$this->assertIsString( $query_vars[1] );
+		$this->assertInternalType( 'string', $query_vars[1] );
 	}
 
 	/**
@@ -145,7 +147,7 @@ class Test_AMP_Service_Worker extends TestCase {
 		);
 
 		// Comments.
-		$this->assertStringNotContainsString(
+		$this->assertNotContains(
 			wp_scripts()->registered['amp-live-list']->src,
 			$urls
 		);
@@ -155,13 +157,13 @@ class Test_AMP_Service_Worker extends TestCase {
 				'comments_live_list' => true,
 			]
 		);
-		$this->assertStringContainsString(
+		$this->assertContains(
 			wp_scripts()->registered['amp-live-list']->src,
 			AMP_Service_Worker::get_precached_script_cdn_urls()
 		);
 
 		// Analytics.
-		$this->assertStringNotContainsString(
+		$this->assertNotContains(
 			wp_scripts()->registered['amp-analytics']->src,
 			$urls
 		);
@@ -176,7 +178,7 @@ class Test_AMP_Service_Worker extends TestCase {
 				];
 			}
 		);
-		$this->assertStringContainsString(
+		$this->assertContains(
 			wp_scripts()->registered['amp-analytics']->src,
 			AMP_Service_Worker::get_precached_script_cdn_urls()
 		);
@@ -215,7 +217,7 @@ class Test_AMP_Service_Worker extends TestCase {
 	public function test_install_service_worker() {
 		$output = get_echo( [ 'AMP_Service_Worker', 'install_service_worker' ] );
 
-		$this->assertStringContainsString( '<amp-install-serviceworker', $output );
+		$this->assertStringContains( '<amp-install-serviceworker', $output );
 	}
 
 	/**
@@ -247,7 +249,7 @@ class Test_AMP_Service_Worker extends TestCase {
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 'exited', $exception->getMessage() );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( '<script>navigator.serviceWorker.register', $output );
+		$this->assertStringContains( '<script>navigator.serviceWorker.register', $output );
 
 		// Go back home to clean up 🤷!
 		$this->go_to( home_url() );

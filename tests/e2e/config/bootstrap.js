@@ -189,10 +189,6 @@ async function runAxeTestsForBlockEditor() {
 			'link-name',
 			'listitem',
 			'region',
-			// Disabled due to this rule being erroneously recorded as a violation after
-			// downgrading package-lock.json to v1 (see https://github.com/ampproject/amp-wp/pull/6618).
-			// This can be reverted once node v16 becomes LTS.
-			'nested-interactive',
 		],
 		exclude: [
 			// Ignores elements created by metaboxes.

@@ -9,12 +9,11 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_Gallery_Embed_Handler_Test
  */
-class AMP_Gallery_Embed_Handler_Test extends TestCase {
+class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 
 	use WithoutBlockPreRendering, LoadsCoreThemes;
 

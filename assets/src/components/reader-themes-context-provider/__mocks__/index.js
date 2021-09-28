@@ -13,8 +13,8 @@ export const ReaderThemes = createContext();
 /**
  * MOCK.
  *
- * @param {Object}  props
- * @param {any}     props.children         Component children.
+ * @param {Object} props
+ * @param {any} props.children Component children.
  * @param {boolean} props.downloadingTheme Whether downloading a theme or not.
  */
 export function ReaderThemesContextProvider( { children, downloadingTheme = false } ) {

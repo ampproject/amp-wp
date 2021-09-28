@@ -20,14 +20,14 @@ import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelection
 /**
  * The interface for the mode selection screen. Avoids using context for easier testing.
  *
- * @param {Object}  props                                 Component props.
+ * @param {Object} props Component props.
  * @param {boolean} props.currentThemeIsAmongReaderThemes Whether the currently active theme is in the list of reader themes.
- * @param {boolean} props.developerToolsOption            Whether the user has enabled developer tools.
- * @param {boolean} props.firstTimeInWizard               Whether the wizard is running for the first time.
- * @param {boolean} props.technicalQuestionChanged        Whether the user changed their technical question from the previous option.
- * @param {Array}   props.pluginIssues                    The plugin issues found in the site scan.
- * @param {string}  props.savedCurrentMode                The current selected mode saved in the database.
- * @param {Array}   props.themeIssues                     The theme issues found in the site scan.
+ * @param {boolean} props.developerToolsOption Whether the user has enabled developer tools.
+ * @param {boolean} props.firstTimeInWizard Whether the wizard is running for the first time.
+ * @param {boolean} props.technicalQuestionChanged Whether the user changed their technical question from the previous option.
+ * @param {Array} props.pluginIssues The plugin issues found in the site scan.
+ * @param {string} props.savedCurrentMode The current selected mode saved in the database.
+ * @param {Array} props.themeIssues The theme issues found in the site scan.
  */
 export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOption, firstTimeInWizard, technicalQuestionChanged, pluginIssues, savedCurrentMode, themeIssues } ) {
 	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );

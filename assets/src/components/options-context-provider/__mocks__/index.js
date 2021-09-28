@@ -18,7 +18,7 @@ export const Options = createContext();
  * MOCK.
  *
  * @param {Object} props
- * @param {any}    props.children     Component children.
+ * @param {any} props.children Component children.
  * @param {string} props.themeSupport Default theme support mode in the mock provider.
  */
 export function OptionsContextProvider( { children, themeSupport = READER } ) {

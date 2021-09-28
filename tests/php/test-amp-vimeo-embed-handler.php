@@ -6,14 +6,13 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_Vimeo_Embed_Handler_Test
  *
  * @covers AMP_Vimeo_Embed_Handler
  */
-class AMP_Vimeo_Embed_Handler_Test extends TestCase {
+class AMP_Vimeo_Embed_Handler_Test extends WP_UnitTestCase {
 
 	use WithoutBlockPreRendering;
 

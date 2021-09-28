@@ -13,6 +13,7 @@ use AmpProject\AmpWP\PairedUrlStructure\LegacyReaderUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\LegacyTransitionalUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\PathSuffixUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\QueryVarUrlStructure;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Tests\Fixture\DummyPairedUrlStructure;
@@ -23,6 +24,7 @@ use Exception;
 /** @coversDefaultClass \AmpProject\AmpWP\PairedRouting */
 class PairedRoutingTest extends DependencyInjectedTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/** @var PairedRouting */
@@ -703,7 +705,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEmpty( get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
 
 		set_current_screen( 'options-permalink' );
-		$this->assertStringContainsString( 'notice-info', get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
+		$this->assertStringContains( 'notice-info', get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
 	}
 
 	/** @covers ::is_using_permalinks() */
@@ -1075,28 +1077,6 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 			$this->instance->add_endpoint( $home_url ),
 			$this->instance->maybe_add_paired_endpoint( $home_url )
 		);
-	}
-
-	/** @covers ::redirect_extraneous_paired_endpoint() */
-	public function test_redirect_extraneous_paired_endpoint_canonical_when_non_amp_query_var_present() {
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
-
-		$current_url = get_permalink( self::factory()->post->create() ) . '?test=one+two%20three';
-		$this->go_to( $current_url );
-
-		$this->assertTrue( amp_is_canonical() );
-
-		$redirected_url = null;
-		add_filter(
-			'wp_redirect',
-			static function ( $redirect_url ) use ( &$redirected_url ) {
-				$redirected_url = $redirect_url;
-				return null;
-			}
-		);
-		$this->instance->redirect_extraneous_paired_endpoint();
-		$this->assertNull( $redirected_url, "Expected to remain at <$current_url> but hot redirected to <$redirected_url>." );
 	}
 
 	/** @covers ::redirect_extraneous_paired_endpoint() */

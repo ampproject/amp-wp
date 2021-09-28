@@ -19,11 +19,11 @@ import './style.css';
 /**
  * Screen that shows when an error has broken the application.
  *
- * @param {Object} props                 Component props.
- * @param {Object} props.error           Error object containing a message string.
+ * @param {Object} props Component props.
+ * @param {Object} props.error Error object containing a message string.
  * @param {string} props.finishLinkLabel Label of a link to return to the admin.
- * @param {string} props.finishLinkUrl   Url of a link to return to the admin.
- * @param {string} props.title           Custom message title.
+ * @param {string} props.finishLinkUrl Url of a link to return to the admin.
+ * @param {string} props.title Custom message title.
  */
 export function ErrorScreen( { error, finishLinkLabel, finishLinkUrl, title } ) {
 	const [ hasCopied, setHasCopied ] = useState( false );

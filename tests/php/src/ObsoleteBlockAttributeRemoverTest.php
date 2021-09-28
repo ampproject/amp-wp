@@ -6,10 +6,14 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\ObsoleteBlockAttributeRemover;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use WP_UnitTestCase;
 use WP_REST_Response;
 
 /** @coversDefaultClass \AmpProject\AmpWP\ObsoleteBlockAttributeRemover */
-final class ObsoleteBlockAttributeRemoverTest extends TestCase {
+final class ObsoleteBlockAttributeRemoverTest extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/** @var ObsoleteBlockAttributeRemover */
 	private $instance;
@@ -132,8 +136,8 @@ final class ObsoleteBlockAttributeRemoverTest extends TestCase {
 		$present_count = 0;
 		foreach ( self::PROP_ATTRIBUTE_MAPPING as $prop => $attribute ) {
 			if ( isset( $parsed_block['attrs'][ $prop ] ) ) {
-				$this->assertStringContainsString( "$attribute=", $response->data['content']['raw'] );
-				$this->assertStringNotContainsString( "$attribute=", $filtered_response->data['content']['raw'] );
+				$this->assertStringContains( "$attribute=", $response->data['content']['raw'] );
+				$this->assertStringNotContains( "$attribute=", $filtered_response->data['content']['raw'] );
 				$present_count++;
 			}
 		}

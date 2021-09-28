@@ -17,22 +17,6 @@ use AmpProject\Dom\Document;
 class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
-	 * Default width.
-	 *
-	 * @var int|string
-	 */
-	protected $DEFAULT_WIDTH = 'auto';
-
-	/**
-	 * Default height.
-	 *
-	 * This is the minimum height for a tweet, with just a single line of text.
-	 *
-	 * @var int
-	 */
-	protected $DEFAULT_HEIGHT = 197;
-
-	/**
 	 * URL pattern for a Tweet URL.
 	 *
 	 * @since 0.2
@@ -113,19 +97,13 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 		}
 
-		if ( ! empty( $this->args['width'] ) ) {
-			$attributes['width'] = $this->args['width'];
-		}
+		$attributes['layout'] = 'responsive';
+		$attributes['width']  = $this->args['width'];
 		$attributes['height'] = $this->args['height'];
-		if ( empty( $attributes['width'] ) || 'auto' === $attributes['width'] ) {
-			$attributes['layout'] = 'fixed-height';
-		} else {
-			$attributes['layout'] = 'responsive';
-		}
 
 		$this->did_convert_elements = true;
 
-		return AMP_HTML_Utils::build_tag( $this->amp_tag, $attributes, $this->create_overflow_button_markup() );
+		return AMP_HTML_Utils::build_tag( $this->amp_tag, $attributes );
 	}
 
 	/**
@@ -182,17 +160,12 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			return;
 		}
 
-		$attributes = [];
-		if ( ! empty( $this->args['width'] ) ) {
-			$attributes['width'] = $this->args['width'];
-		}
-		$attributes['height'] = $this->args['height'];
-		if ( empty( $attributes['width'] ) || 'auto' === $attributes['width'] ) {
-			$attributes['layout'] = 'fixed-height';
-		} else {
-			$attributes['layout'] = 'responsive';
-		}
-		$attributes['data-tweetid'] = $tweet_id;
+		$attributes = [
+			'width'        => $this->DEFAULT_WIDTH,
+			'height'       => $this->DEFAULT_HEIGHT,
+			'layout'       => 'responsive',
+			'data-tweetid' => $tweet_id,
+		];
 
 		if ( $node->hasAttributes() ) {
 			foreach ( $node->attributes as $attr ) {
@@ -205,8 +178,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			$this->amp_tag,
 			$attributes
 		);
-
-		$new_node->appendChild( $this->create_overflow_button_element( $dom ) );
 
 		/**
 		 * Placeholder element to append to the new node.

@@ -3,7 +3,7 @@
 namespace AmpProject\AmpWP\Tests\Instrumentation;
 
 use AmpProject\AmpWP\Instrumentation\StopWatchEvent;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
+use PHPUnit\Framework\TestCase;
 
 final class StopWatchEventTest extends TestCase {
 

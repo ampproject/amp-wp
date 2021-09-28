@@ -1,8 +1,7 @@
 <?php
 
-use AmpProject\AmpWP\Tests\TestCase;
 
-class AMP_Playbuzz_Sanitizer_Test extends TestCase {
+class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
 	 * Data for converter test.

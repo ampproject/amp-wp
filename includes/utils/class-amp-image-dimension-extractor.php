@@ -140,7 +140,6 @@ class AMP_Image_Dimension_Extractor {
 	private static function register_callbacks() {
 		self::$callbacks_registered = true;
 
-		add_filter( 'amp_extract_image_dimensions_batch', [ __CLASS__, 'extract_by_filename_or_filesystem' ], 100 );
 		add_filter( 'amp_extract_image_dimensions_batch', [ __CLASS__, 'extract_by_downloading_images' ], 999, 1 );
 
 		/**
@@ -149,125 +148,6 @@ class AMP_Image_Dimension_Extractor {
 		 * @since 0.5.1
 		 */
 		do_action( 'amp_extract_image_dimensions_batch_callbacks_registered' );
-	}
-
-	/**
-	 * Extract dimensions from filename if dimension exists or from file system.
-	 *
-	 * @param array $dimensions Image urls mapped to dimensions.
-	 * @return array Dimensions mapped to image urls, or false if they could not be retrieved
-	 */
-	public static function extract_by_filename_or_filesystem( $dimensions ) {
-
-		if ( empty( $dimensions ) || ! is_array( $dimensions ) ) {
-			return [];
-		}
-
-		$using_ext_object_cache = wp_using_ext_object_cache();
-		$ext_types              = wp_get_ext_types();
-		if ( empty( $ext_types['image'] ) ) {
-			return $dimensions;
-		}
-		$image_ext_types = $ext_types['image'];
-		unset( $ext_types );
-
-		$upload_dir      = wp_get_upload_dir();
-		$base_upload_uri = trailingslashit( $upload_dir['baseurl'] );
-		$base_upload_dir = trailingslashit( $upload_dir['basedir'] );
-
-		foreach ( $dimensions as $url => $value ) {
-
-			// Check whether some other callback attached to the filter already provided dimensions for this image.
-			if ( ! empty( $value ) && is_array( $value ) ) {
-				continue;
-			}
-
-			$url_without_query_fragment = strtok( $url, '?#' );
-
-			// Parse info out of the URL, including the file extension and (optionally) the dimensions.
-			if ( ! preg_match( '/(?:-(?<width>[1-9][0-9]*)x(?<height>[1-9][0-9]*))?\.(?<ext>\w+)$/', $url_without_query_fragment, $matches ) ) {
-				continue;
-			}
-
-			// Skip images don't have recognized extensions.
-			if ( ! in_array( strtolower( $matches['ext'] ), $image_ext_types, true ) ) {
-				continue;
-			}
-
-			// Use image dimension from the file name.
-			if ( ! empty( $matches['width'] ) && ! empty( $matches['height'] ) ) {
-				$dimensions[ $url ] = [
-					'width'  => (int) $matches['width'],
-					'height' => (int) $matches['height'],
-				];
-				continue;
-			}
-
-			// Verify that the URL is for an uploaded file.
-			if ( 0 !== strpos( $url_without_query_fragment, $base_upload_uri ) ) {
-				continue;
-			}
-			$upload_relative_path = substr( $url_without_query_fragment, strlen( $base_upload_uri ) );
-
-			// Bail if the URL contains relative paths.
-			if ( 0 !== validate_file( $upload_relative_path ) ) {
-				continue;
-			}
-
-			// Get image dimension from file system.
-			$image_file = $base_upload_dir . $upload_relative_path;
-
-			$image_size = [];
-
-			list( $transient_name ) = self::get_transient_names( $url );
-
-			// When using an external object cache, try to first see if dimensions have already been obtained. This is
-			// not done for a non-external object cache (i.e. when wp_options is used for transients) because then
-			// we are not storing the dimensions in a transient, because it is more performant to read the dimensions
-			// from the filesystem--both in terms of time and storage--than to store dimensions in wp_options.
-			if ( $using_ext_object_cache ) {
-				$image_size = get_transient( $transient_name );
-				$image_size = ( ! empty( $image_size ) && is_array( $image_size ) ) ? $image_size : [];
-			}
-
-			if ( ( empty( $image_size ) || ! is_array( $image_size ) ) && file_exists( $image_file ) ) {
-				if ( function_exists( 'wp_getimagesize' ) ) {
-					$image_size = wp_getimagesize( $image_file );
-				} elseif ( function_exists( 'getimagesize' ) ) {
-					$image_size = @getimagesize( $image_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
-				}
-
-				if ( $using_ext_object_cache && ! empty( $image_size ) && is_array( $image_size ) ) {
-					set_transient( $transient_name, $image_size );
-				}
-			}
-
-			if ( ! empty( $image_size ) && is_array( $image_size ) ) {
-				$dimensions[ $url ] = [
-					'width'  => (int) $image_size[0],
-					'height' => (int) $image_size[1],
-				];
-			}
-		}
-
-		return $dimensions;
-	}
-
-	/**
-	 * Get transient names.
-	 *
-	 * @param string $url Image URL.
-	 * @return array {
-	 *     @type string $0 Transient name for storing dimensions.
-	 *     @type string $1 Transient name for image fetching lock.
-	 * }
-	 */
-	private static function get_transient_names( $url ) {
-		$url_hash = md5( $url );
-		return [
-			sprintf( 'amp_img_%s', $url_hash ),
-			sprintf( 'amp_lock_%s', $url_hash ),
-		];
 	}
 
 	/**
@@ -310,12 +190,12 @@ class AMP_Image_Dimension_Extractor {
 		foreach ( $dimensions as $url => $value ) {
 
 			// Check whether some other callback attached to the filter already provided dimensions for this image.
-			if ( is_array( $value ) || empty( $url ) ) {
+			if ( is_array( $value ) ) {
 				continue;
 			}
 
-			list( $transient_name, $transient_lock_name ) = self::get_transient_names( $url );
-
+			$url_hash          = md5( $url );
+			$transient_name    = sprintf( 'amp_img_%s', $url_hash );
 			$cached_dimensions = get_transient( $transient_name );
 
 			// If we're able to retrieve the dimensions from a transient, set them and move on.
@@ -332,6 +212,8 @@ class AMP_Image_Dimension_Extractor {
 				$dimensions[ $url ] = false;
 				continue;
 			}
+
+			$transient_lock_name = sprintf( 'amp_lock_%s', $url_hash );
 
 			// If somebody is already trying to extract dimensions for this transient right now, move on.
 			if ( false !== get_transient( $transient_lock_name ) ) {
@@ -361,7 +243,7 @@ class AMP_Image_Dimension_Extractor {
 		$client = new \FasterImage\FasterImage();
 
 		/**
-		 * Filters the user agent for obtaining the image dimensions.
+		 * Filters the user agent for onbtaining the image dimensions.
 		 *
 		 * @param string $user_agent User agent.
 		 */

@@ -6,13 +6,13 @@ use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Editor\EditorSupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Tests\Helpers\WithBlockEditorSupport;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Editor\EditorSupport */
-final class EditorSupportTest extends TestCase {
+final class EditorSupportTest extends WP_UnitTestCase {
 
-	use WithBlockEditorSupport;
+	use AssertContainsCompatibility;
 
 	/** @var EditorSupport */
 	private $instance;
@@ -21,8 +21,6 @@ final class EditorSupportTest extends TestCase {
 		parent::setUp();
 
 		$this->instance = new EditorSupport( new DependencySupport() );
-
-		unset( $GLOBALS['current_screen'], $GLOBALS['wp_scripts'] );
 	}
 
 	public function test_it_can_be_initialized() {
@@ -38,34 +36,20 @@ final class EditorSupportTest extends TestCase {
 		$this->assertEquals( 99, has_action( 'admin_enqueue_scripts', [ $this->instance, 'maybe_show_notice' ] ) );
 	}
 
-	/**
-	 * Test data for test_supports_current_screen().
-	 *
-	 * @return array
-	 */
-	public function get_data_for_test_supports_current_screen() {
-		return [
-			'supports post type and amp'         => [ true, true, true ],
-			'supports only post type'            => [ true, false, false ],
-			'supports only amp'                  => [ false, true, false ],
-			'does not support post type nor amp' => [ false, false, false ],
-		];
-	}
-
-	/**
-	 * @covers ::is_current_screen_block_editor_for_amp_enabled_post_type()
-	 * @dataProvider get_data_for_test_supports_current_screen()
-	 *
-	 * @param bool $post_type_uses_block_editor Whether post type can be edited in the block editor.
-	 * @param bool $post_type_supports_amp      Whether post type supports AMP.
-	 * @param bool $expected_result             Expected result for test assertions.
-	 */
-	public function test_supports_current_screen( $post_type_uses_block_editor, $post_type_supports_amp, $expected_result ) {
-		$this->setup_environment( $post_type_uses_block_editor, $post_type_supports_amp );
-
-		// Note: Without Gutenberg being installed on WP 4.9, the expected result would be `false`
-		// when `$post_type_uses_block_editor` and `$post_type_supports_amp` are `true`.
-		$this->assertSame( $expected_result, $this->instance->is_current_screen_block_editor_for_amp_enabled_post_type() );
+	public function test_editor_supports_amp_block_editor_features() {
+		if (
+			defined( 'GUTENBERG_VERSION' )
+			&&
+			version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '>=' )
+		) {
+			$this->assertTrue( $this->instance->editor_supports_amp_block_editor_features() );
+		} else {
+			if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' ) ) {
+				$this->assertTrue( $this->instance->editor_supports_amp_block_editor_features() );
+			} else {
+				$this->assertFalse( $this->instance->editor_supports_amp_block_editor_features() );
+			}
+		}
 	}
 
 	/** @covers ::maybe_show_notice() */
@@ -76,56 +60,110 @@ final class EditorSupportTest extends TestCase {
 
 	/** @covers ::maybe_show_notice() */
 	public function test_dont_show_notice_for_unsupported_post_type() {
-		$this->setup_environment( true, false );
+		global $post;
+
+		set_current_screen( 'post.php' );
+		register_post_type( 'my-post-type' );
+		$post = $this->factory()->post->create( [ 'post_type' => 'my-post-type' ] );
+		setup_postdata( get_post( $post ) );
+
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$this->instance->maybe_show_notice();
 		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+		unset( $GLOBALS['current_screen'] );
+		unset( $GLOBALS['wp_scripts'] );
 	}
 
 	/** @covers ::maybe_show_notice() */
 	public function test_show_notice_for_supported_post_type() {
+		global $post;
+
 		if ( version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '<' ) ) {
 			$this->markTestSkipped();
 		}
 
-		$this->setup_environment( true, true );
+		set_current_screen( 'post.php' );
+		$post = $this->factory()->post->create();
+		setup_postdata( get_post( $post ) );
+
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$this->instance->maybe_show_notice();
-		if ( $this->instance->is_current_screen_block_editor_for_amp_enabled_post_type() ) {
+		if ( $this->instance->editor_supports_amp_block_editor_features() ) {
 			$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
 		} else {
-			$this->assertStringContainsString(
+			$this->assertContains(
 				'AMP functionality is not available',
 				wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
 			);
 		}
+		unset( $GLOBALS['current_screen'] );
+		unset( $GLOBALS['wp_scripts'] );
 	}
 
 	/** @covers ::maybe_show_notice() */
 	public function test_maybe_show_notice_for_unsupported_user() {
-		$this->setup_environment( true, true );
-		wp_set_current_user( self::factory()->user->create() );
+		global $post;
+
+		set_current_screen( 'post.php' );
+		$post = $this->factory()->post->create();
+		setup_postdata( get_post( $post ) );
 
 		$this->instance->maybe_show_notice();
 
 		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+		unset( $GLOBALS['current_screen'] );
+		unset( $GLOBALS['wp_scripts'] );
+	}
+
+	/** @covers ::maybe_show_notice() */
+	public function test_maybe_show_notice_with_cpt_supporting_gutenberg_but_not_amp() {
+		global $post;
+
+		if ( ! $this->instance->editor_supports_amp_block_editor_features() ) {
+			$this->markTestSkipped();
+		}
+
+		register_post_type(
+			'my-gb-post-type',
+			[
+				'public'       => true,
+				'show_in_rest' => true,
+				'supports'     => [ 'editor' ],
+			]
+		);
+
+		set_current_screen( 'post.php' );
+		$post = $this->factory()->post->create( [ 'post_type' => 'my-gb-post-type' ] );
+		setup_postdata( get_post( $post ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		$this->instance->maybe_show_notice();
+		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+		unset( $GLOBALS['current_screen'] );
+		unset( $GLOBALS['wp_scripts'] );
 	}
 
 	/** @covers ::maybe_show_notice() */
 	public function test_maybe_show_notice_for_gutenberg_4_9() {
+		global $post;
 		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '4.9.0', '>' ) ) {
 			$this->markTestSkipped( 'Test only applicable to Gutenberg v4.9.0 and older.' );
 		}
 
-		$this->setup_environment( true, true );
-		// WP < 5.0 doesn't include the block editor, but Gutenberg would be installed, so it should be supported.
-		$this->assertTrue( $this->instance->is_current_screen_block_editor_for_amp_enabled_post_type() );
+		$this->assertFalse( $this->instance->editor_supports_amp_block_editor_features() );
 
 		gutenberg_register_packages_scripts();
+		set_current_screen( 'post.php' );
+		$post = $this->factory()->post->create();
+		setup_postdata( get_post( $post ) );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$this->instance->maybe_show_notice();
 		$inline_script = wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false );
-		$this->assertStringContainsString( 'AMP functionality is not available', $inline_script );
+		$this->assertStringContains( 'AMP functionality is not available', $inline_script );
+		unset( $GLOBALS['current_screen'] );
+		unset( $GLOBALS['wp_scripts'] );
 	}
 }

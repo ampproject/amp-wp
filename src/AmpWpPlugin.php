@@ -17,8 +17,6 @@ use AmpProject\AmpWP\Optimizer\HeroCandidateFiltering;
 use AmpProject\AmpWP\Optimizer\OptimizerService;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
-use AmpProject\AmpWP\Support\SupportCliCommand;
-use AmpProject\AmpWP\Support\SupportRESTController;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
@@ -69,26 +67,23 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @var string[]
 	 */
 	const SERVICES = [
+		'dependency_support'                 => DependencySupport::class, // Needs to be registered first as other services depend on it.
 		'admin.analytics_menu'               => Admin\AnalyticsOptionsSubmenu::class,
 		'admin.google_fonts'                 => Admin\GoogleFonts::class,
 		'admin.onboarding_menu'              => Admin\OnboardingWizardSubmenu::class,
 		'admin.onboarding_wizard'            => Admin\OnboardingWizardSubmenuPage::class,
 		'admin.options_menu'                 => Admin\OptionsMenu::class,
-		'admin.paired_browsing'              => Admin\PairedBrowsing::class,
-		'admin.plugin_row_meta'              => Admin\PluginRowMeta::class,
-		'admin.support_screen'               => Admin\SupportScreen::class,
-		'admin.support'                      => Admin\SupportLink::class,
 		'admin.polyfills'                    => Admin\Polyfills::class,
+		'admin.paired_browsing'              => Admin\PairedBrowsing::class,
 		'admin.validation_counts'            => Admin\ValidationCounts::class,
+		'admin.plugin_row_meta'              => Admin\PluginRowMeta::class,
 		'amp_slug_customization_watcher'     => AmpSlugCustomizationWatcher::class,
-		'background_task_deactivator'        => BackgroundTaskDeactivator::class,
 		'cli.command_namespace'              => Cli\CommandNamespaceRegistration::class,
 		'cli.optimizer_command'              => Cli\OptimizerCommand::class,
 		'cli.transformer_command'            => Cli\TransformerCommand::class,
 		'cli.validation_command'             => Cli\ValidationCommand::class,
 		'css_transient_cache.ajax_handler'   => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'        => BackgroundTask\MonitorCssTransientCaching::class,
-		'dependency_support'                 => DependencySupport::class,
 		'dev_tools.block_sources'            => DevTools\BlockSources::class,
 		'dev_tools.callback_reflection'      => DevTools\CallbackReflection::class,
 		'dev_tools.error_page'               => DevTools\ErrorPage::class,
@@ -97,13 +92,10 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'dev_tools.user_access'              => DevTools\UserAccess::class,
 		'editor.editor_support'              => Editor\EditorSupport::class,
 		'extra_theme_and_plugin_headers'     => ExtraThemeAndPluginHeaders::class,
-		'loading_error'                      => LoadingError::class,
 		'mobile_redirection'                 => MobileRedirection::class,
 		'obsolete_block_attribute_remover'   => ObsoleteBlockAttributeRemover::class,
 		'optimizer'                          => OptimizerService::class,
 		'optimizer.hero_candidate_filtering' => HeroCandidateFiltering::class,
-		'paired_routing'                     => PairedRouting::class,
-		'paired_url'                         => PairedUrl::class,
 		'page_cache_flush_needed_notice'     => Admin\PageCacheFlushNeededNotice::class,
 		'plugin_activation_notice'           => Admin\PluginActivationNotice::class,
 		'plugin_registry'                    => PluginRegistry::class,
@@ -112,14 +104,16 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'reader_theme_support_features'      => ReaderThemeSupportFeatures::class,
 		'rest.options_controller'            => OptionsRESTController::class,
 		'rest.validation_counts_controller'  => Validation\ValidationCountsRestController::class,
-		'save_post_validation_event'         => SavePostValidationEvent::class,
 		'server_timing'                      => Instrumentation\ServerTiming::class,
 		'site_health_integration'            => Admin\SiteHealth::class,
-		'support'                            => SupportCliCommand::class,
-		'support_rest_controller'            => SupportRESTController::class,
-		'url_validation_cron'                => URLValidationCron::class,
-		'url_validation_rest_controller'     => Validation\URLValidationRESTController::class,
 		'validated_url_stylesheet_gc'        => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+		'url_validation_rest_controller'     => Validation\URLValidationRESTController::class,
+		'url_validation_cron'                => URLValidationCron::class,
+		'save_post_validation_event'         => SavePostValidationEvent::class,
+		'background_task_deactivator'        => BackgroundTaskDeactivator::class,
+		'paired_routing'                     => PairedRouting::class,
+		'paired_url'                         => PairedUrl::class,
+		'loading_error'                      => LoadingError::class,
 	];
 
 	/**

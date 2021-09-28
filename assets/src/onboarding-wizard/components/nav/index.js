@@ -18,7 +18,7 @@ import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-settings'; // From WP inline
 import { Navigation } from '../navigation-context-provider';
 import './style.css';
 import { Options } from '../../../components/options-context-provider';
-import { User } from '../../../components/user-context-provider';
+import { User } from '../user-context-provider';
 import { READER } from '../../../common/constants';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import { useWindowWidth } from '../../../utils/use-window-width';
@@ -26,7 +26,7 @@ import { useWindowWidth } from '../../../utils/use-window-width';
 /**
  * Renders a link to leave the onboarding wizard.
  *
- * @param {Object} props           Component props.
+ * @param {Object} props Component props.
  * @param {string} props.closeLink The link URL.
  */
 export function CloseLink( { closeLink } ) {
@@ -52,8 +52,8 @@ CloseLink.propTypes = {
 /**
  * Navigation component.
  *
- * @param {Object} props            Component props.
- * @param {string} props.closeLink  Link to return to previous user location.
+ * @param {Object} props Component props.
+ * @param {string} props.closeLink Link to return to previous user location.
  * @param {string} props.finishLink Link to exit the application.
  */
 export function Nav( { closeLink, finishLink } ) {

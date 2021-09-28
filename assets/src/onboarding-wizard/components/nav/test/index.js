@@ -15,14 +15,14 @@ import { render } from '@wordpress/element';
  */
 import { Nav } from '..';
 import { NavigationContextProvider } from '../../navigation-context-provider';
-import { UserContextProvider } from '../../../../components/user-context-provider';
+import { UserContextProvider } from '../../user-context-provider';
 import { OptionsContextProvider } from '../../../../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../../../../components/reader-themes-context-provider';
 import { STANDARD, READER } from '../../../../common/constants';
 
 jest.mock( '../../../../components/options-context-provider' );
 jest.mock( '../../../../components/reader-themes-context-provider' );
-jest.mock( '../../../../components/user-context-provider' );
+jest.mock( '../../user-context-provider' );
 
 let container;
 

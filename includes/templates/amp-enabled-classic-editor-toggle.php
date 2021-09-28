@@ -29,7 +29,7 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 	<?php if ( ! Services::get( 'dependency_support' )->has_support_from_core() ) : ?>
 		<div class="notice notice-info notice-alt inline">
 			<p>
-				<?php esc_html_e( 'Your version of WordPress is too old to manage whether AMP is enabled. Please upgrade.', 'amp' ); ?>
+				<?php esc_html_e( 'Your version of WordPress is too old manage whether AMP is enabled. Please upgrade.', 'amp' ); ?>
 			</p>
 		</div>
 	<?php else : ?>

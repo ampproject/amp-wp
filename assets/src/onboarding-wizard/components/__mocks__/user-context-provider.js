@@ -13,16 +13,14 @@ export const User = createContext();
 /**
  * MOCK.
  *
- * @param {Object}  props
- * @param {any}     props.children
- * @param {boolean} props.fetchingUser
+ * @param {Object} props
+ * @param {any} props.children
  */
-export function UserContextProvider( { children, fetchingUser } ) {
+export function UserContextProvider( { children } ) {
 	return (
 		<User.Provider value={
 			{
 				savingDeveloperToolsOption: false,
-				fetchingUser,
 			}
 		}>
 			{ children }
@@ -31,5 +29,4 @@ export function UserContextProvider( { children, fetchingUser } ) {
 }
 UserContextProvider.propTypes = {
 	children: PropTypes.any,
-	fetchingUser: PropTypes.bool,
 };

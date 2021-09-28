@@ -91,7 +91,7 @@ const onBeforeUnload = ( event ) => {
  * If this does not exist yet, it creates the element.
  *
  * @param {number} numberErrorsDisplaying - The number of errors displaying.
- * @param {number} totalErrors            - The total number of errors, displaying or not.
+ * @param {number} totalErrors - The total number of errors, displaying or not.
  */
 const updateShowingErrorsRow = ( numberErrorsDisplaying, totalErrors ) => {
 	const showAllButton = document.getElementById( showAllId );

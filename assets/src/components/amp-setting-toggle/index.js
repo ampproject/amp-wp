@@ -17,12 +17,12 @@ import './style.css';
 /**
  * Styled toggle control.
  *
- * @param {Object}        props          Component props.
- * @param {boolean}       props.checked  Whether the toggle is on.
- * @param {boolean}       props.disabled Whether the toggle is disabled.
- * @param {Function}      props.onChange Change handler.
- * @param {string}        props.text     Toggle text.
- * @param {Object|string} props.title    Toggle title.
+ * @param {Object} props Component props.
+ * @param {boolean} props.checked Whether the toggle is on.
+ * @param {boolean} props.disabled Whether the toggle is disabled.
+ * @param {Function} props.onChange Change handler.
+ * @param {string} props.text Toggle text.
+ * @param {Object|string} props.title Toggle title.
  */
 export function AMPSettingToggle( { checked, disabled = false, onChange, text, title } ) {
 	return (

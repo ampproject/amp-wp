@@ -6,8 +6,8 @@
  * @since 1.0
  */
 
-use AmpProject\Amp;
 use AmpProject\Attribute;
+use AmpProject\Dom\Document;
 use AmpProject\Role;
 
 /**
@@ -29,7 +29,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string $stylesheet     Stylesheet slug.
 	 *      @type string $template       Template slug.
 	 *      @type array  $theme_features List of theme features that need to be applied. Features are method names,
-	 *      @type bool   $native_img_used Whether to use native img.
 	 * }
 	 */
 	protected $args;
@@ -77,10 +76,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.5.0 Converted `theme_features` variable into `get_theme_config` function.
 	 *
 	 * @param string $theme_slug Theme slug.
-	 * @param array  $args       Sanitizer args.
 	 * @return array|null Array comprising of the theme config if its slug is found, null if it is not.
 	 */
-	protected static function get_theme_features_config( $theme_slug, $args = [] ) {
+	protected static function get_theme_features_config( $theme_slug ) {
 		switch ( $theme_slug ) {
 			case 'twentytwentyone':
 				$config = [
@@ -137,9 +135,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_twentytwenty_modals'          => [],
 					'add_twentytwenty_toggles'         => [],
 					'add_nav_menu_styles'              => [],
-					'add_twentytwenty_masthead_styles' => $args,
-					'add_img_display_block_fix'        => $args,
-					'add_twentytwenty_custom_logo_fix' => $args,
+					'add_twentytwenty_masthead_styles' => [],
+					'add_img_display_block_fix'        => [],
+					'add_twentytwenty_custom_logo_fix' => [],
 					'add_twentytwenty_current_page_awareness' => [],
 				];
 
@@ -190,6 +188,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					],
 					'force_fixed_background_support'      => [],
 					'add_twentyseventeen_masthead_styles' => [],
+					'add_twentyseventeen_image_styles'    => [],
 					'add_twentyseventeen_sticky_nav_menu' => [],
 					'add_has_header_video_body_class'     => [],
 					'add_nav_menu_styles'                 => [
@@ -200,7 +199,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'//header[@id = "masthead"]//a[ contains( @class, "menu-scroll-down" ) ]',
 					],
 					'set_twentyseventeen_quotes_icon'     => [],
-					'add_twentyseventeen_attachment_image_attributes' => $args,
+					'add_twentyseventeen_attachment_image_attributes' => [],
 				];
 
 			// Twenty Sixteen.
@@ -490,7 +489,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$theme_candidates = wp_array_slice_assoc( $args, [ 'stylesheet', 'template' ] );
 		foreach ( $theme_candidates as $theme_candidate ) {
 			if ( in_array( $theme_candidate, self::$supported_themes, true ) ) {
-				$theme_features = self::get_theme_features_config( $theme_candidate, $args );
+				$theme_features = self::get_theme_features_config( $theme_candidate );
 				break;
 			}
 		}
@@ -564,14 +563,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 1.0
 	 * @link https://github.com/WordPress/wordpress-develop/blob/ddc8f803c6e99118998191fd2ea24124feb53659/src/wp-content/themes/twentyseventeen/functions.php#L545:L554
-	 *
-	 * @param array $args Args.
 	 */
-	public static function add_twentyseventeen_attachment_image_attributes( $args = [] ) {
-		if ( ! empty( $args['native_img_used'] ) ) {
-			return;
-		}
-
+	public static function add_twentyseventeen_attachment_image_attributes() {
 		/*
 		 * The max-height of the `.custom-logo-link img` is defined as being 80px, unless
 		 * there is header media in which case it is 200px. Issues related to vertically-squashed
@@ -806,16 +799,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Add required styles for featured image header in Twenty Twenty.
-	 *
-	 * @param array $args Args.
+	 * Add required styles for featured image header and image blocks in Twenty Twenty.
 	 */
-	public static function add_twentytwenty_masthead_styles( $args = [] ) {
-		if ( ! empty( $args['native_img_used'] ) ) {
-			return;
-		}
-
-		// @todo This was introduced in <https://github.com/ampproject/amp-wp/commit/e1c7462> but it doesn't seem to have any effect.
+	public static function add_twentytwenty_masthead_styles() {
 		add_action(
 			'wp_enqueue_scripts',
 			static function() {
@@ -824,6 +810,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				<style>
 				.featured-media amp-img {
 					position: static;
+				}
+
+				.wp-block-image img {
+					display: block;
 				}
 				</style>
 				<?php
@@ -843,14 +833,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.5
 	 * @link https://github.com/ampproject/amp-wp/issues/4418
 	 * @link https://codepen.io/westonruter/pen/rNVqadv
-	 *
-	 * @param array $args Args.
 	 */
-	public static function add_twentytwenty_custom_logo_fix( $args = [] ) {
-		if ( ! empty( $args['native_img_used'] ) ) {
-			return;
-		}
-
+	public static function add_twentytwenty_custom_logo_fix() {
 		$method = __METHOD__;
 		add_filter(
 			'get_custom_logo',
@@ -901,14 +885,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 1.5
 	 * @link https://github.com/ampproject/amp-wp/issues/4419
-	 *
-	 * @param array $args Args.
 	 */
-	public static function add_img_display_block_fix( $args = [] ) {
-		if ( ! empty( $args['native_img_used'] ) ) {
-			return;
-		}
-
+	public static function add_img_display_block_fix() {
 		$method = __METHOD__;
 		// Note that wp_add_inline_style() is not used because this stylesheet needs to be added _before_ style.css so
 		// that any subsequent style rules for images will continue to override.
@@ -970,6 +948,38 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						transform: translateY( -<?php echo (int) AMP_Core_Theme_Sanitizer::get_twentyseventeen_navigation_outer_height(); ?>px );
 						display: block;
 					}
+				}
+				</style>
+				<?php
+				$styles = str_replace( [ '<style>', '</style>' ], '', ob_get_clean() );
+				wp_add_inline_style( get_template() . '-style', $styles );
+			},
+			11
+		);
+	}
+
+	/**
+	 * Override the featured image header styling in style.css.
+	 * Used only for Twenty Seventeen.
+	 *
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L2100
+	 */
+	public static function add_twentyseventeen_image_styles() {
+		add_action(
+			'wp_enqueue_scripts',
+			static function() {
+				ob_start();
+				?>
+				<style>
+				/* Override the display: block in twentyseventeen/style.css, as <amp-img> is usually inline-block. */
+				.single-featured-image-header amp-img {
+					display: inline-block;
+				}
+
+				/* Because the <amp-img> is inline-block, its container needs this rule to center it. */
+				.single-featured-image-header {
+					text-align: center;
 				}
 				</style>
 				<?php
@@ -1334,7 +1344,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						padding-top: 0; /* Override responsive hack which is handled by AMP layout. */
 						overflow: visible;
 					}
-					.featured-content .post-thumbnail .wp-post-image {
+					.featured-content .post-thumbnail amp-img {
 						position: static;
 						left: auto;
 						top: auto;
@@ -1410,7 +1420,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							font-size: 32px;
 							line-height: 46px;
 						}
-						.featured-content .post-thumbnail .wp-post-image {
+						.featured-content .post-thumbnail amp-img {
 							object-fit: cover;
 							object-position: top;
 						}
@@ -1420,7 +1430,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 								float: none;
 								margin: 0;
 							}
-							.featured-content .post-thumbnail .wp-post-image {
+							.featured-content .post-thumbnail amp-img {
 								height: 55.49132947vw;
 							}
 							.slider-control-paging li {
@@ -1489,12 +1499,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$amp_carousel_desktop_id = 'twentyFourteenSliderDesktop';
 		$amp_carousel_mobile_id  = 'twentyFourteenSliderMobile';
 		$amp_carousel_attributes = [
-			'layout'                             => 'responsive',
-			'on'                                 => "slideChange:AMP.setState( { $selected_slide_state_id: event.index } )",
-			'width'                              => '100',
-			'type'                               => 'slides',
-			'loop'                               => '',
-			Amp::BIND_DATA_ATTR_PREFIX . 'slide' => $selected_slide_state_id,
+			'layout'                                      => 'responsive',
+			'on'                                          => "slideChange:AMP.setState( { $selected_slide_state_id: event.index } )",
+			'width'                                       => '100',
+			'type'                                        => 'slides',
+			'loop'                                        => '',
+			Document::AMP_BIND_DATA_ATTR_PREFIX . 'slide' => $selected_slide_state_id,
 		];
 		$amp_carousel_desktop    = AMP_DOM_Utils::create_node(
 			$this->dom,
@@ -1542,7 +1552,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$li->setAttribute( 'selected', '' );
 				$a->setAttribute( 'class', 'slider-active' );
 			}
-			$a->setAttribute( Amp::BIND_DATA_ATTR_PREFIX . 'class', "$selected_slide_state_id == $i ? 'slider-active' : ''" );
+			$a->setAttribute( Document::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$selected_slide_state_id == $i ? 'slider-active' : ''" );
 			$a->setAttribute( Attribute::ROLE, Role::BUTTON );
 			$a->setAttribute( Attribute::ON, "tap:AMP.setState( { $selected_slide_state_id: $i } )" );
 			$li->setAttribute( 'option', (string) $i );
@@ -1597,9 +1607,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Set visibility and aria-expanded based of the link based on whether the search bar is expanded.
 		$search_toggle_link->setAttribute( 'aria-expanded', wp_json_encode( $hidden ) );
-		$search_toggle_link->setAttribute( Amp::BIND_DATA_ATTR_PREFIX . 'aria-expanded', "$hidden_state_id ? 'false' : 'true'" );
-		$search_toggle_div->setAttribute( Amp::BIND_DATA_ATTR_PREFIX . 'class', "$hidden_state_id ? 'search-toggle' : 'search-toggle active'" );
-		$search_container->setAttribute( Amp::BIND_DATA_ATTR_PREFIX . 'class', "$hidden_state_id ? 'search-box-wrapper hide' : 'search-box-wrapper'" );
+		$search_toggle_link->setAttribute( Document::AMP_BIND_DATA_ATTR_PREFIX . 'aria-expanded', "$hidden_state_id ? 'false' : 'true'" );
+		$search_toggle_div->setAttribute( Document::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$hidden_state_id ? 'search-toggle' : 'search-toggle active'" );
+		$search_container->setAttribute( Document::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$hidden_state_id ? 'search-box-wrapper hide' : 'search-box-wrapper'" );
 	}
 
 	/**

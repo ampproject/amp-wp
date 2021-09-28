@@ -11,7 +11,7 @@ use AmpProject\AmpWP\Admin\OnboardingWizardSubmenu;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Tests\TestCase;
+use WP_UnitTestCase;
 
 /**
  * Tests for OnboardingWizardSubmenu  class.
@@ -22,7 +22,7 @@ use AmpProject\AmpWP\Tests\TestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\OnboardingWizardSubmenu
  */
-class OnboardingWizardSubmenuTest  extends TestCase {
+class OnboardingWizardSubmenuTest  extends WP_UnitTestCase {
 
 	/**
 	 * Test instance.

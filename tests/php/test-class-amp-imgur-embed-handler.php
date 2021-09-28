@@ -6,12 +6,11 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_Imgur_Embed_Handler_Test
  */
-class AMP_Imgur_Embed_Handler_Test extends TestCase {
+class AMP_Imgur_Embed_Handler_Test extends WP_UnitTestCase {
 
 	use WithoutBlockPreRendering {
 		setUp as public prevent_block_pre_render;

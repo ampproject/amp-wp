@@ -14,6 +14,7 @@ import { __ } from '@wordpress/i18n';
 import { useContext } from '@wordpress/element';
 import { Transitional as TransitionalIllustration } from '../../../components/svg/transitional';
 import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../../../components/amp-notice';
+import { RedirectToggle } from '../../../components/redirect-toggle';
 import { Options } from '../../../components/options-context-provider';
 import { SummaryHeader } from './summary-header';
 import { DesktopScreenshot } from './desktop-screenshot';
@@ -41,6 +42,9 @@ export function Transitional( { currentTheme } ) {
 			/>
 
 			<DesktopScreenshot { ...currentTheme } />
+
+			<RedirectToggle />
+
 		</>
 	);
 }

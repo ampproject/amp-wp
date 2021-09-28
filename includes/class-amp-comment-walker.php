@@ -8,7 +8,7 @@
  */
 
 /* translators: 1: AMP_Comment_Walker. 2: AMP_Comments_Sanitizer. */
-_deprecated_file( __FILE__, '1.1', null, esc_html( sprintf( __( '%1$s functionality has been moved to %2$s.', 'amp' ), AMP_Comment_Walker::class, AMP_Comments_Sanitizer::class ) ) );
+_deprecated_file( __FILE__, '1.1', null, sprintf( esc_html__( '%1$s functionality has been moved to %2$s.', 'amp' ), 'AMP_Comment_Walker', 'AMP_Comments_Sanitizer' ) );
 
 /**
  * Class AMP_Comment_Walker

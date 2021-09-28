@@ -3,9 +3,13 @@
 namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\Icon;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use PHPUnit\Framework\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Icon */
 final class IconTest extends TestCase {
+
+	use AssertContainsCompatibility;
 
 	/** @return array */
 	public function get_icon_types() {
@@ -45,7 +49,7 @@ final class IconTest extends TestCase {
 		$html = $icon->to_html();
 		$this->assertStringStartsWith( '<span ', $html );
 		$this->assertStringEndsWith( '</span>', $html );
-		$this->assertStringContainsString( "class=\"amp-icon amp-{$type}\"", $html );
+		$this->assertStringContains( "class=\"amp-icon amp-{$type}\"", $html );
 
 		$html = $icon->to_html(
 			[
@@ -54,9 +58,9 @@ final class IconTest extends TestCase {
 				'onmouseover' => 'alert("BAD")',
 			]
 		);
-		$this->assertStringContainsString( "class=\"&quot; onclick=&quot;alert(\&quot;evil\&quot;)&quot;&gt;end amp-icon amp-{$type}\"", $html );
-		$this->assertStringContainsString( 'id="amp-admin-bar-item"', $html );
-		$this->assertStringNotContainsString( 'onmouseover', $html );
+		$this->assertStringContains( "class=\"&quot; onclick=&quot;alert(\&quot;evil\&quot;)&quot;&gt;end amp-icon amp-{$type}\"", $html );
+		$this->assertStringContains( 'id="amp-admin-bar-item"', $html );
+		$this->assertStringNotContains( 'onmouseover', $html );
 		$this->assertStringEndsWith( '</span>', $html );
 	}
 }

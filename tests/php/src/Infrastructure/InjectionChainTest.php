@@ -3,7 +3,7 @@
 namespace AmpProject\AmpWP\Tests\Infrastructure;
 
 use AmpProject\AmpWP\Infrastructure\Injector\InjectionChain;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
+use PHPUnit\Framework\TestCase;
 
 final class InjectionChainTest extends TestCase {
 

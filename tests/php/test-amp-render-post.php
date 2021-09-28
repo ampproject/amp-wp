@@ -1,9 +1,11 @@
 <?php
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
-class AMP_Render_Post_Test extends TestCase {
+class AMP_Render_Post_Test extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * @expectedDeprecated amp_render_post
@@ -27,7 +29,7 @@ class AMP_Render_Post_Test extends TestCase {
 
 		$output = get_echo( 'amp_render_post', [ $post_id ] );
 
-		$this->assertStringContainsString( '<html amp', $output, 'Response does not include html tag with amp attribute.' );
+		$this->assertStringContains( '<html amp', $output, 'Response does not include html tag with amp attribute.' );
 		$this->assertEquals( 1, did_action( 'pre_amp_render_post', 'pre_amp_render_post action fire either did not fire or fired too many times.' ) );
 	}
 
@@ -61,7 +63,7 @@ class AMP_Render_Post_Test extends TestCase {
 		$this->was_amp_endpoint = false;
 
 		$output = get_echo( 'amp_render_post', [ $post_id ] );
-		$this->assertStringContainsString( '<html amp', $output );
+		$this->assertStringContains( '<html amp', $output );
 
 		$after_amp_is_request = amp_is_request();
 

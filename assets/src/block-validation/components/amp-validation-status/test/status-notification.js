@@ -33,7 +33,6 @@ describe( 'AMPValidationStatusNotification', () => {
 			isFetchingErrors: false,
 			keptMarkupValidationErrorCount: 0,
 			reviewLink: 'http://example.com',
-			supportLink: 'http://example.com/support',
 			unreviewedValidationErrorCount: 0,
 			validationErrorCount: 0,
 			...overrides,

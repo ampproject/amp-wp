@@ -14,7 +14,7 @@ Get HTML body as DOMElement from Dom\Document received by the constructor.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:224](/includes/sanitizers/class-amp-base-sanitizer.php#L224-L227)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:213](/includes/sanitizers/class-amp-base-sanitizer.php#L213-L216)
 
 <details>
 <summary>Show Code</summary>

@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\ReaderThemeLoader;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
@@ -19,6 +20,7 @@ use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
  */
 class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 	use LoadsCoreThemes;
 
@@ -242,7 +244,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_action( 'customize_controls_print_footer_scripts', [ $instance, 'add_dark_mode_toggler_button_notice' ] ) );
 
 		$output = get_echo( [ $instance, 'add_dark_mode_toggler_button_notice' ] );
-		$this->assertStringContainsString( 'wp.customize.control', $output );
+		$this->assertStringContains( 'wp.customize.control', $output );
 	}
 
 	/**
@@ -341,9 +343,9 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$instance->add_customizer_scripts();
 
 		$this->assertTrue( wp_script_is( 'amp-customize-controls', 'enqueued' ) );
-		$this->assertStringContainsString( 'amp-customize-controls.js', wp_scripts()->registered['amp-customize-controls']->src );
+		$this->assertStringContains( 'amp-customize-controls.js', wp_scripts()->registered['amp-customize-controls']->src );
 		$this->assertTrue( wp_style_is( 'amp-customizer', 'enqueued' ) );
-		$this->assertStringContainsString( 'amp-customizer.css', wp_styles()->registered['amp-customizer']->src );
+		$this->assertStringContains( 'amp-customizer.css', wp_styles()->registered['amp-customizer']->src );
 		$this->assertEquals( 0, did_action( 'amp_customizer_enqueue_scripts' ) );
 	}
 
@@ -560,7 +562,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 	/** @covers AMP_Template_Customizer::render_setting_import_section_template() */
 	public function test_render_setting_import_section_template() {
 		$instance = AMP_Template_Customizer::init( $this->get_customize_manager() );
-		$this->assertStringContainsString(
+		$this->assertStringContains(
 			'<script type="text/html" id="tmpl-customize-section-amp_active_theme_settings_import">',
 			get_echo( [ $instance, 'render_setting_import_section_template' ] )
 		);
@@ -572,9 +574,9 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$instance->add_legacy_customizer_scripts();
 
 		$this->assertTrue( wp_script_is( 'amp-customize-controls', 'enqueued' ) );
-		$this->assertStringContainsString( 'amp-customize-controls-legacy.js', wp_scripts()->registered['amp-customize-controls']->src );
+		$this->assertStringContains( 'amp-customize-controls-legacy.js', wp_scripts()->registered['amp-customize-controls']->src );
 		$this->assertTrue( wp_style_is( 'amp-customizer', 'enqueued' ) );
-		$this->assertStringContainsString( 'amp-customizer-legacy.css', wp_styles()->registered['amp-customizer']->src );
+		$this->assertStringContains( 'amp-customizer-legacy.css', wp_styles()->registered['amp-customizer']->src );
 		$this->assertEquals( 1, did_action( 'amp_customizer_enqueue_scripts' ) );
 	}
 
@@ -589,7 +591,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$instance->enqueue_legacy_preview_scripts();
 
 		$this->assertTrue( wp_script_is( 'amp-customize-preview', 'enqueued' ) );
-		$this->assertStringContainsString( 'amp-customize-preview-legacy.js', wp_scripts()->registered['amp-customize-preview']->src );
+		$this->assertStringContains( 'amp-customize-preview-legacy.js', wp_scripts()->registered['amp-customize-preview']->src );
 
 		$this->assertTrue( wp_script_is( 'amp-customize-preview', 'enqueued' ) );
 	}
@@ -598,7 +600,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 	public function test_add_legacy_customize_preview_styles() {
 		$instance = AMP_Template_Customizer::init( $this->get_customize_manager() );
 		$output   = get_echo( [ $instance, 'add_legacy_customize_preview_styles' ] );
-		$this->assertStringContainsString( '.screen-reader-text', $output );
+		$this->assertStringContains( '.screen-reader-text', $output );
 	}
 
 	/** @covers AMP_Template_Customizer::add_legacy_preview_scripts() */
@@ -616,6 +618,6 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 	public function test_print_legacy_controls_templates() {
 		$instance = AMP_Template_Customizer::init( $this->get_customize_manager() );
 		$output   = get_echo( [ $instance, 'print_legacy_controls_templates' ] );
-		$this->assertStringContainsString( '<script type="text/html" id="tmpl-customize-amp-enabled-toggle">', $output );
+		$this->assertStringContains( '<script type="text/html" id="tmpl-customize-amp-enabled-toggle">', $output );
 	}
 }

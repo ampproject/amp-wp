@@ -63,7 +63,7 @@ $alignwide_max = $content_max_width > 0 ? $content_max_width * 2 : 1920
 	width: 100%;
 }
 
-@media (min-width: 792px) {
+@media (min-width: calc(840px - 48px)) {
 	.alignwide {
 		width: calc(100vw - 48px);
 		max-width: calc(100vw - 48px);
@@ -72,7 +72,7 @@ $alignwide_max = $content_max_width > 0 ? $content_max_width * 2 : 1920
 	}
 }
 
-@media (min-width: <?php echo sprintf( '%dpx', $alignwide_max ); ?>) {
+@media (min-width: calc(<?php echo sprintf( '%dpx', $alignwide_max ); ?>)) {
 	.alignwide {
 		width: calc(<?php echo sprintf( '%dpx', $alignwide_max ); ?> - 48px);
 		max-width: calc(<?php echo sprintf( '%dpx', $alignwide_max ); ?> - 48px);

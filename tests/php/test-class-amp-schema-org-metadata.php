@@ -10,14 +10,13 @@ use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
 use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\ErrorCollection;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Test Site_Health.
  *
  * @coversDefaultClass \AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata
  */
-class AmpSchemaOrgMetadataTest extends TestCase {
+class AmpSchemaOrgMetadataTest extends WP_UnitTestCase {
 
 	/**
 	 * Data provider for test_transform.

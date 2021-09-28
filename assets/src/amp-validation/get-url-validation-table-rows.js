@@ -1,7 +1,7 @@
 /**
  * Gets the table rows on a single URL validation screen.
  *
- * @param {Object}  options
+ * @param {Object} options
  * @param {boolean} options.checkedOnly Whether to return only checked rows.
  */
 export function getURLValidationTableRows( options = {} ) {

@@ -16,8 +16,8 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Tests\TestCase;
-use AMP_Options_Manager;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use WP_UnitTestCase;
 
 /**
  * Tests for OptionsMenu.
@@ -25,7 +25,9 @@ use AMP_Options_Manager;
  * @group options-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\OptionsMenu
  */
-class OptionsMenuTest extends TestCase {
+class OptionsMenuTest extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of OptionsMenu
@@ -35,37 +37,13 @@ class OptionsMenuTest extends TestCase {
 	public $instance;
 
 	/**
-	 * Set up.
+	 * Setup.
 	 *
 	 * @inheritdoc
 	 */
 	public function setUp() {
 		parent::setUp();
 		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError() );
-	}
-
-	/**
-	 * Tear down.
-	 *
-	 * @inheritdoc
-	 */
-	public function tearDown() {
-		parent::tearDown();
-		$GLOBALS['wp_scripts'] = null;
-		$GLOBALS['wp_styles']  = null;
-	}
-
-	/** @covers ::is_needed() */
-	public function test_is_needed() {
-		$this->assertFalse( is_admin() );
-		set_current_screen( 'index.php' );
-		$this->assertTrue( OptionsMenu::is_needed() );
-
-		add_filter( 'amp_options_menu_is_enabled', '__return_false' );
-		$this->assertFalse( OptionsMenu::is_needed() );
-
-		add_filter( 'amp_options_menu_is_enabled', '__return_true', 20 );
-		$this->assertTrue( OptionsMenu::is_needed() );
 	}
 
 	/** @covers ::__construct() */
@@ -89,7 +67,6 @@ class OptionsMenuTest extends TestCase {
 	 * Test add_hooks.
 	 *
 	 * @see OptionsMenu::add_hooks()
-	 * @cogers ::register()
 	 */
 	public function test_register() {
 		$this->instance->register();
@@ -98,26 +75,6 @@ class OptionsMenuTest extends TestCase {
 		$this->assertEquals( 10, has_filter( 'plugin_action_links_amp/amp.php', [ $this->instance, 'add_plugin_action_links' ] ) );
 
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->instance, 'enqueue_assets' ] ) );
-	}
-
-	/** @covers ::add_plugin_action_links() */
-	public function test_add_plugin_action_links() {
-		$links = [
-			'example' => '<a href="https://example.com">example!</a>',
-		];
-
-		$filtered_links = $this->instance->add_plugin_action_links( $links );
-
-		$this->assertArrayHasKey( 'example', $filtered_links );
-		$this->assertArrayHasKey( 'settings', $filtered_links );
-	}
-
-	/** @covers ::get_menu_slug() */
-	public function test_get_menu_slug() {
-		$this->assertSame(
-			AMP_Options_Manager::OPTION_NAME,
-			$this->instance->get_menu_slug()
-		);
 	}
 
 	/**
@@ -151,51 +108,6 @@ class OptionsMenuTest extends TestCase {
 		$_parent_pages = $original_parent_pages;
 	}
 
-	/** @covers ::screen_handle() */
-	public function test_screen_handle() {
-		$this->assertSame(
-			'toplevel_page_' . $this->instance->get_menu_slug(),
-			$this->instance->screen_handle()
-		);
-	}
-
-	/** @covers ::enqueue_assets() */
-	public function test_enqueue_assets_wrong_hook_suffix() {
-		$this->instance->enqueue_assets( 'nope' );
-		$this->assertEquals( 0, did_action( 'amp_register_polyfills' ) );
-		$this->assertFalse( wp_script_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
-		$this->assertFalse( wp_style_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
-	}
-
-	/** @covers ::enqueue_assets() */
-	public function test_enqueue_assets_right_hook_suffix() {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		set_current_screen( $this->instance->screen_handle() );
-
-		$this->assertFalse( wp_script_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
-		$this->assertFalse( wp_style_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
-
-		add_action( 'admin_enqueue_scripts', [ $this->instance, 'enqueue_assets' ] );
-		do_action( 'admin_enqueue_scripts', $this->instance->screen_handle() );
-		$this->assertEquals( 1, did_action( 'amp_register_polyfills' ) );
-
-		$this->assertTrue( wp_script_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
-		$this->assertTrue( wp_style_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
-
-		$script_before = implode( "\n", wp_scripts()->get_data( OptionsMenu::ASSET_HANDLE, 'before' ) );
-		$this->assertStringContainsString( 'var ampSettings', $script_before );
-		$this->assertStringContainsString( 'USER_FIELD_DEVELOPER_TOOLS_ENABLED', $script_before );
-		$this->assertStringContainsString( 'USERS_RESOURCE_REST_PATH', $script_before );
-
-		$wp_api_fetch_after = implode( "\n", wp_scripts()->get_data( 'wp-api-fetch', 'after' ) );
-		if ( function_exists( 'rest_preload_api_request' ) ) {
-			$this->assertStringContainsString( wp_json_encode( '/amp/v1/options' ), $wp_api_fetch_after );
-			$this->assertStringContainsString( wp_json_encode( '/amp/v1/reader-themes' ), $wp_api_fetch_after );
-			$this->assertStringContainsString( wp_json_encode( '/wp/v2/settings' ), $wp_api_fetch_after );
-			$this->assertStringContainsString( wp_json_encode( '/wp/v2/users/me' ), $wp_api_fetch_after );
-		}
-	}
-
 	/**
 	 * Test render_screen for admin users.
 	 *
@@ -212,6 +124,6 @@ class OptionsMenuTest extends TestCase {
 
 		ob_start();
 		$this->instance->render_screen();
-		$this->assertStringContainsString( '<div class="wrap">', ob_get_clean() );
+		$this->assertStringContains( '<div class="wrap">', ob_get_clean() );
 	}
 }

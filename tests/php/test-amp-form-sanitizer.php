@@ -7,9 +7,7 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
-use AmpProject\DevMode;
-use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\Dom\Document;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
@@ -19,7 +17,7 @@ use AmpProject\AmpWP\Tests\TestCase;
  * @group amp-comments
  * @group amp-form
  */
-class AMP_Form_Sanitizer_Test extends TestCase {
+class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 
 	use MarkupComparison;
 
@@ -194,47 +192,18 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 					'add_dev_mode' => true,
 				],
 			],
-			'form_with_post_action_converted' => [
-				'<form method="post" action="http://example.com"></form>',
-				'<form method="post" action-xhr="//example.com?_wp_amp_action_xhr_converted=1" target="_top">' . $form_templates . '</form>',
-				[
-					'native_post_forms_allowed' => true,
-				],
-				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR ],
-			],
-			'form_with_post_action_kept' => [
-				'<form method="post" action="http://example.com"></form>',
-				'<form method="post" action="http://example.com" data-ampdevmode></form>',
-				[
-					'native_post_forms_allowed' => true,
-					'keep_post_forms'           => true,
-					'expected_dev_mode'         => true,
-				],
-				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR ],
-			],
-			'form_with_post_action-xhr_ok' => [
-				'<form method="post" action-xhr="http://example.com"></form>',
-				'<form method="post" action-xhr="//example.com" target="_top"></form>',
-				[
-					'native_post_forms_allowed' => true,
-					'keep_post_forms'           => true,
-					'expected_dev_mode'         => false,
-				],
-				[],
-			],
 		];
 	}
 
 	/**
 	 * Test html conversion.
 	 *
-	 * @param string      $source          The source HTML.
-	 * @param string|null $expected        The expected HTML after conversion. Null means same as $source.
-	 * @param array       $args            Args.
-	 * @param array       $expected_errors Expected errors.
+	 * @param string      $source   The source HTML.
+	 * @param string|null $expected The expected HTML after conversion. Null means same as $source.
+	 * @param array       $args     Args.
 	 * @dataProvider get_data
 	 */
-	public function test_converter( $source, $expected = null, $args = [], $expected_errors = [] ) {
+	public function test_converter( $source, $expected = null, $args = [] ) {
 		if ( is_null( $expected ) ) {
 			$expected = $source;
 		}
@@ -243,24 +212,14 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		}
 
-		$actual_errors = [];
-
-		$args['validation_error_callback'] = static function( $error ) use ( &$actual_errors, $args ) {
-			$actual_errors[] = $error;
-			if ( AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR === $error['code'] && ! empty( $args['keep_post_forms'] ) ) {
-				return false;
-			}
-			return true;
-		};
-
-		$sanitizer = new AMP_Form_Sanitizer( $dom, $args );
+		$sanitizer = new AMP_Form_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
 		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$validating_sanitizer->sanitize();
 
 		// Normalize the contents of the templates.
-		foreach ( $dom->xpath->query( MustacheScriptTemplates::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $dom->body ) as $template ) {
+		foreach ( $dom->xpath->query( Document::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $dom->body ) as $template ) {
 			while ( $template->firstChild ) {
 				$template->removeChild( $template->firstChild );
 			}
@@ -268,10 +227,6 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 		}
 
 		$this->assertEqualMarkup( AMP_DOM_Utils::get_content_from_dom( $dom ), $expected );
-		if ( isset( $args['expected_dev_mode'] ) ) {
-			$this->assertEquals( $args['expected_dev_mode'], $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
-		}
-		$this->assertEquals( wp_list_pluck( $actual_errors, 'code' ), $expected_errors );
 	}
 
 	/**

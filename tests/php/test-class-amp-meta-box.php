@@ -8,17 +8,18 @@
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Post_Meta_Box.
  *
  * @coversDefaultClass AMP_Post_Meta_Box
  */
-class Test_AMP_Post_Meta_Box extends TestCase {
+class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 	use AssertRestApiField;
+	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of AMP_Post_Meta_Box
@@ -166,7 +167,6 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 				'wp-compose',
 				'wp-data',
 				'wp-edit-post',
-				'wp-editor',
 				'wp-element',
 				'wp-hooks',
 				'wp-i18n',
@@ -183,7 +183,7 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 		 * Values are now loaded using wp_inline_script()
 		 */
 		$before = implode( '', $block_script->extra['before'] );
-		$this->assertStringContainsString( 'ampBlockEditor', $before );
+		$this->assertContains( 'ampBlockEditor', $before );
 		$expected_localized_values = [
 			'ampUrl',
 			'ampPreviewLink',
@@ -195,7 +195,7 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 		];
 
 		foreach ( $expected_localized_values as $localized_value ) {
-			$this->assertStringContainsString( $localized_value, $before );
+			$this->assertContains( $localized_value, $before );
 		}
 		unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
 	}
@@ -268,28 +268,33 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 		// This is not in AMP 'canonical mode' but rather reader or transitional mode.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertStringContainsString( $amp_status_markup, $output );
+		$this->assertStringContains( $amp_status_markup, $output );
 		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
-			$this->assertStringContainsString( $checkbox_enabled, $output );
+			$this->assertStringContains( $checkbox_enabled, $output );
 		} else {
-			$this->assertStringContainsString( $no_support_notice, $output );
+			$this->assertStringContains( $no_support_notice, $output );
 		}
 
 		// This is in AMP-first mode with a template that can be rendered.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertStringContainsString( $amp_status_markup, $output );
+		$this->assertStringContains( $amp_status_markup, $output );
 		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
-			$this->assertStringContainsString( $checkbox_enabled, $output );
+			$this->assertStringContains( $checkbox_enabled, $output );
 		} else {
-			$this->assertStringContainsString( $no_support_notice, $output );
+			$this->assertStringContains( $no_support_notice, $output );
 		}
 
-		// Post type no longer supports AMP, so no status input (and no mention of AMP at all).
+		// Post type no longer supports AMP, so no status input.
 		$supported_post_types = array_diff( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ), [ 'post' ] );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertEmpty( $output );
+		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
+			$this->assertStringContains( 'This post type is not', $output );
+			$this->assertStringNotContains( $checkbox_enabled, $output );
+		} else {
+			$this->assertStringContains( $no_support_notice, $output );
+		}
 		$supported_post_types[] = 'post';
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 
@@ -298,10 +303,10 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
 		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
-			$this->assertStringContainsString( 'There are no supported templates.', wp_strip_all_tags( $output ) );
-			$this->assertStringNotContainsString( $checkbox_enabled, $output );
+			$this->assertStringContains( 'There are no supported templates.', wp_strip_all_tags( $output ) );
+			$this->assertStringNotContains( $checkbox_enabled, $output );
 		} else {
-			$this->assertStringContainsString( $no_support_notice, $output );
+			$this->assertStringContains( $no_support_notice, $output );
 		}
 
 		// User doesn't have the capability to display the metabox.
@@ -369,12 +374,12 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 	/** @covers ::get_error_messages() */
 	public function test_get_error_messages() {
 		$messages = $this->instance->get_error_messages( [ 'template_unsupported' ] );
-		$this->assertStringContainsString( 'There are no', $messages[0] );
-		$this->assertStringContainsString( 'page=amp-options', $messages[0] );
+		$this->assertStringContains( 'There are no', $messages[0] );
+		$this->assertStringContains( 'page=amp-options', $messages[0] );
 
 		$messages = $this->instance->get_error_messages( [ 'post-type-support' ] );
-		$this->assertStringContainsString( 'This post type is not', $messages[0] );
-		$this->assertStringContainsString( 'page=amp-options', $messages[0] );
+		$this->assertStringContains( 'This post type is not', $messages[0] );
+		$this->assertStringContains( 'page=amp-options', $messages[0] );
 
 		$this->assertEquals(
 			[

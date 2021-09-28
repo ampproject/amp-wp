@@ -16,6 +16,7 @@ class PairedUrlTest extends DependencyInjectedTestCase {
 		$this->instance = $this->injector->make( PairedUrl::class );
 	}
 
+	/** @covers ::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( PairedUrl::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );

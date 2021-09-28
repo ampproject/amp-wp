@@ -34,7 +34,7 @@ function hasFrontPageTemplate( supportableTemplates ) {
 /**
  * A checkbox for a supportable post type.
  *
- * @param {Object} props                Component props.
+ * @param {Object} props Component props.
  * @param {Object} props.postTypeObject A post type object.
  */
 function PostTypeCheckbox( { postTypeObject } ) {
@@ -145,8 +145,8 @@ function getInclusiveDescendantTemplatesIds( supportableTemplate ) {
 /**
  * List of checkboxes corresponding to supportable templates.
  *
- * @param {Object} props                      Component props.
- * @param {Array}  props.supportableTemplates Array of supportableTemplate objects.
+ * @param {Object} props Component props.
+ * @param {Array} props.supportableTemplates Array of supportableTemplate objects.
  */
 export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
@@ -231,7 +231,7 @@ export function SupportedTemplatesFieldset() {
 		reader_theme: readerTheme,
 	} = editedOptions || {};
 
-	if ( ( 'reader' === themeSupport && 'legacy' === readerTheme ) || ! supportableTemplates?.length ) {
+	if ( ( 'reader' === themeSupport && 'legacy' === readerTheme ) || ! supportableTemplates ) {
 		return null;
 	}
 
@@ -256,7 +256,14 @@ export function SupportedTemplatesFieldset() {
 						} }
 					/>
 
-					<SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
+					{ supportableTemplates
+						? <SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
+						: (
+							<p>
+								{ __( 'Your site does not provide any templates to support.', 'amp' ) }
+							</p>
+						)
+					}
 				</>
 			) : null }
 		</fieldset>

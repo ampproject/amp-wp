@@ -24,10 +24,10 @@ import AMPDelete from '../../../../images/amp-delete.svg';
 import { getErrorSourceTitle } from './get-error-source-title';
 
 /**
- * @param {Object}   props
- * @param {string}   props.clientId      Error client ID.
- * @param {string}   props.blockTypeName Block type name.
- * @param {Object[]} props.sources       List of source objects from the PHP backtrace.
+ * @param {Object} props
+ * @param {string} props.clientId Error client ID.
+ * @param {string} props.blockTypeName Block type name.
+ * @param {Object[]} props.sources List of source objects from the PHP backtrace.
  */
 function ErrorSource( { clientId, blockTypeName, sources } ) {
 	let source;
@@ -145,7 +145,7 @@ MarkupStatus.propTypes = {
 
 /**
  * @param {Object} props
- * @param {Object} props.blockTypeIcon  Block type icon.
+ * @param {Object} props.blockTypeIcon Block type icon.
  * @param {string} props.blockTypeTitle Title of the block type.
  */
 function BlockType( { blockTypeIcon, blockTypeTitle } ) {
@@ -175,13 +175,13 @@ BlockType.propTypes = {
 /**
  * Content inside an error panel.
  *
- * @param {Object}   props               Component props.
- * @param {Object}   props.blockType     Block type details.
- * @param {boolean}  props.isExternal    Flag indicating if the error comes from outside of post content.
- * @param {boolean}  props.removed       Flag indicating if the block has been removed.
- * @param {string}   props.clientId      Block client ID
- * @param {number}   props.status        Number indicating the error status.
- * @param {Object}   props.error         Error details.
+ * @param {Object} props Component props.
+ * @param {Object} props.blockType Block type details.
+ * @param {boolean} props.isExternal Flag indicating if the error comes from outside of post content.
+ * @param {boolean} props.removed Flag indicating if the block has been removed.
+ * @param {string} props.clientId Block client ID
+ * @param {number} props.status Number indicating the error status.
+ * @param {Object} props.error Error details.
  * @param {Object[]} props.error.sources Sources from the PHP backtrace for the error.
  */
 export function ErrorContent( {

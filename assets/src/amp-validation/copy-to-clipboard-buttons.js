@@ -16,7 +16,7 @@ import { getURLValidationTableRows } from './get-url-validation-table-rows';
 /**
  * Success handler, called when data is copied to the clipboard.
  *
- * @param {Object}      event
+ * @param {Object} event
  * @param {HTMLElement} event.trigger The element triggering the event.
  */
 function onSuccess( { trigger } ) {

@@ -6,14 +6,13 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_Srcset_Sanitizer_Test
  *
  * @coversDefaultClass AMP_Srcset_Sanitizer
  */
-class AMP_Srcset_Sanitizer_Test extends TestCase {
+class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
 
 	use MarkupComparison;
 

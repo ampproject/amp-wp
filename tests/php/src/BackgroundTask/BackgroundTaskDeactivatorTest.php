@@ -9,14 +9,15 @@ use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\Infrastructure\Deactivateable;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AmpProject\AmpWP\Tests\TestCase;
+use WP_UnitTestCase;
 
 /**
  * @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator
  */
-final class BackgroundTaskDeactivatorTest extends TestCase {
-	use PrivateAccess;
+final class BackgroundTaskDeactivatorTest extends WP_UnitTestCase {
+	use AssertContainsCompatibility, PrivateAccess;
 
 	/**
 	 * BackgroundTaskDeactivator instance.
@@ -126,7 +127,7 @@ final class BackgroundTaskDeactivatorTest extends TestCase {
 		$new_actions = $this->test_instance->add_warning_sign_to_network_deactivate_action( $actions );
 
 		$this->assertTrue( wp_style_is( 'amp-icons' ) );
-		$this->assertStringContainsString( '<span style="vertical-align: middle">', $new_actions['deactivate'] );
+		$this->assertContains( '<span style="vertical-align: middle">', $new_actions['deactivate'] );
 
 		remove_filter( 'wp_is_large_network', '__return_true' );
 	}

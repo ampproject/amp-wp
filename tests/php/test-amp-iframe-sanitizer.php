@@ -6,7 +6,6 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
-use AmpProject\AmpWP\Tests\TestCase;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
@@ -15,7 +14,7 @@ use AmpProject\AmpWP\Tests\TestCase;
  *
  * @covers AMP_Iframe_Sanitizer
  */
-class AMP_Iframe_Converter_Test extends TestCase {
+class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 	use MarkupComparison;
 

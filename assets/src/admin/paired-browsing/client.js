@@ -67,7 +67,7 @@ function receiveMessage( event ) {
 		case 'init':
 			if ( ! initialized ) {
 				initialized = true;
-				receiveInit();
+				receiveInit( event.data );
 			}
 			break;
 		case 'scroll':

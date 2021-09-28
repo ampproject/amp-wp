@@ -111,7 +111,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 		$cached_response = get_transient( $cache_key );
 		$headers         = [];
 
-		if ( is_string( $cached_response ) ) {
+		if ( false !== $cached_response ) {
 			if ( PHP_MAJOR_VERSION >= 7 ) {
 				$cached_response = unserialize( $cached_response, [ CachedResponse::class, DateTimeImmutable::class ] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize,PHPCompatibility.FunctionUse.NewFunctionParameters.unserialize_optionsFound
 			} else {

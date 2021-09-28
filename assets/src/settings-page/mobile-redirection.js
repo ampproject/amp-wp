@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { useContext } from '@wordpress/element';
@@ -11,8 +16,11 @@ import { Options } from '../components/options-context-provider';
 
 /**
  * Mobile redirection section of the settings page.
+ *
+ * @param {Object} props Component props.
+ * @param {string} props.id Unique HTML ID.
  */
-export function MobileRedirection() {
+export function MobileRedirection( { id } ) {
 	const { editedOptions } = useContext( Options );
 
 	const { theme_support: themeSupport } = editedOptions || {};
@@ -23,8 +31,11 @@ export function MobileRedirection() {
 	}
 
 	return (
-		<section className="mobile-redirection">
-			<RedirectToggle />
+		<section className="mobile-redirection" id={ id }>
+			<RedirectToggle direction="left" />
 		</section>
 	);
 }
+MobileRedirection.propTypes = {
+	id: PropTypes.string.isRequired,
+};

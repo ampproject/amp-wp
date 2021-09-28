@@ -1,10 +1,12 @@
 <?php
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
-use AmpProject\AmpWP\Tests\TestCase;
 
-class AMP_Analytics_Options_Test extends TestCase {
+class AMP_Analytics_Options_Test extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Set up.
@@ -265,7 +267,7 @@ class AMP_Analytics_Options_Test extends TestCase {
 		$this->assertEquals( 1, $trigger_count );
 
 		$this->assertStringStartsWith( '<amp-analytics', $output );
-		$this->assertStringContainsString( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
+		$this->assertStringContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
 
 		remove_action(
 			'amp_print_analytics',
@@ -284,7 +286,7 @@ class AMP_Analytics_Options_Test extends TestCase {
 
 		$output = get_echo( 'amp_print_analytics', [ $analytics ] );
 
-		$this->assertStringContainsString( 'data-include="_till_responded"', $output );
+		$this->assertStringContains( 'data-include="_till_responded"', $output );
 	}
 
 	/**
@@ -306,6 +308,6 @@ class AMP_Analytics_Options_Test extends TestCase {
 		);
 		$output = get_echo( 'amp_print_analytics', [ '' ] );
 		$this->assertStringStartsWith( '<amp-analytics', $output );
-		$this->assertStringContainsString( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
+		$this->assertStringContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
 	}
 }

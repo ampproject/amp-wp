@@ -5,7 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\Amp;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
@@ -122,16 +121,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
-	 *      @type string[] $dynamic_element_selectors      Selectors for elements (or their ancestors) which contain dynamic content; selectors containing these will not be filtered.
-	 *      @type bool     $use_document_element           Whether the root of the document should be used rather than the body.
-	 *      @type bool     $require_https_src              Require HTTPS URLs.
-	 *      @type callable $validation_error_callback      Function to call when a validation error is encountered.
-	 *      @type bool     $should_locate_sources          Whether to locate the sources when reporting validation errors.
-	 *      @type string   $parsed_cache_variant           Additional value by which to vary parsed cache.
-	 *      @type string[] $focus_within_classes           Class names in selectors that should be replaced with :focus-within pseudo classes.
-	 *      @type string[] $low_priority_plugins           Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
-	 *      @type bool     $allow_transient_caching        Whether to allow caching parsed CSS in transients. This may need to be disabled when there is highly-variable CSS content.
-	 *      @type bool     $transform_important_qualifiers Whether !important rules should be transformed. This also necessarily transform inline style attributes.
+	 *      @type string[] $dynamic_element_selectors  Selectors for elements (or their ancestors) which contain dynamic content; selectors containing these will not be filtered.
+	 *      @type bool     $use_document_element       Whether the root of the document should be used rather than the body.
+	 *      @type bool     $require_https_src          Require HTTPS URLs.
+	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
+	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
+	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
+	 *      @type string[] $focus_within_classes       Class names in selectors that should be replaced with :focus-within pseudo classes.
+	 *      @type string[] $low_priority_plugins       Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
+	 *      @type bool     $allow_transient_caching    Whether to allow caching parsed CSS in transients. This may need to be disabled when there is highly-variable CSS content.
 	 * }
 	 */
 	protected $args;
@@ -142,20 +140,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'dynamic_element_selectors'      => [
+		'dynamic_element_selectors' => [
 			'amp-list',
 			'amp-live-list',
 			'[submit-error]',
 			'[submit-success]',
 			'amp-script',
 		],
-		'should_locate_sources'          => false,
-		'parsed_cache_variant'           => null,
-		'focus_within_classes'           => [ 'focus' ],
-		'low_priority_plugins'           => [ 'query-monitor' ],
-		'allow_transient_caching'        => true,
-		'skip_tree_shaking'              => false,
-		'transform_important_qualifiers' => true,
+		'should_locate_sources'     => false,
+		'parsed_cache_variant'      => null,
+		'focus_within_classes'      => [ 'focus' ],
+		'low_priority_plugins'      => [ 'query-monitor' ],
+		'allow_transient_caching'   => true,
 	];
 
 	/**
@@ -348,12 +344,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $remote_request;
 
 	/**
-	 * All current sanitizers.
+	 * Cached call to is_customize_preview()
 	 *
-	 * @see AMP_Style_Sanitizer::init()
-	 * @var AMP_Base_Sanitizer[]
+	 * @see is_customize_preview()
+	 * @var bool
 	 */
-	private $sanitizers = [];
+	private $is_customize_preview;
 
 	/**
 	 * Get error codes that can be raised during parsing of CSS.
@@ -531,7 +527,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
-		foreach ( $this->dom->xpath->query( '//*/@' . Amp::BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
+		foreach ( $this->dom->xpath->query( '//*/@' . Document::AMP_BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
 			if ( preg_match_all( '/([\'"])([^\1]*?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
 				$classes = array_merge(
 					$classes,
@@ -860,17 +856,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function init( $sanitizers ) {
 		parent::init( $sanitizers );
 
-		$this->sanitizers = $sanitizers;
-	}
-
-	/**
-	 * Sanitize CSS styles within the HTML contained in this instance's Dom\Document.
-	 *
-	 * @since 0.4
-	 */
-	public function sanitize() {
-		// Capture the selector conversion mappings from the other sanitizers.
-		foreach ( $this->sanitizers as $sanitizer ) {
+		foreach ( $sanitizers as $sanitizer ) {
 			foreach ( $sanitizer->get_selector_conversion_mapping() as $html_selectors => $amp_selectors ) {
 				if ( ! isset( $this->selector_mappings[ $html_selectors ] ) ) {
 					$this->selector_mappings[ $html_selectors ] = $amp_selectors;
@@ -887,6 +873,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				);
 			}
 		}
+	}
+
+	/**
+	 * Sanitize CSS styles within the HTML contained in this instance's Dom\Document.
+	 *
+	 * @since 0.4
+	 */
+	public function sanitize() {
+		$this->is_customize_preview = is_customize_preview();
 
 		$elements = [];
 
@@ -957,14 +952,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( $this->args['transform_important_qualifiers'] ) {
-			$elements = [];
-			foreach ( $this->dom->xpath->query( "//*[ @style $dev_mode_predicate ]" ) as $element ) {
-				$elements[] = $element;
-			}
-			foreach ( $elements as $element ) {
-				$this->collect_inline_styles( $element );
-			}
+		$elements = [];
+		foreach ( $this->dom->xpath->query( "//*[ @style $dev_mode_predicate ]" ) as $element ) {
+			$elements[] = $element;
+		}
+		foreach ( $elements as $element ) {
+			$this->collect_inline_styles( $element );
 		}
 
 		$this->finalize_styles();
@@ -1574,25 +1567,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
 				$options,
-				[
-					'property_allowlist',
-					'property_denylist',
-					'stylesheet_url',
-					'allowed_at_rules',
-				]
+				[ 'property_allowlist', 'property_denylist', 'stylesheet_url', 'allowed_at_rules' ]
 			),
 			wp_array_slice_assoc(
 				$this->args,
-				[
-					'should_locate_sources',
-					'parsed_cache_variant',
-					'dynamic_element_selectors',
-					'transform_important_qualifiers',
-				]
+				[ 'should_locate_sources', 'parsed_cache_variant', 'dynamic_element_selectors' ]
 			),
 			[
-				'language'          => get_bloginfo( 'language' ), // Used to tree-shake html[lang] selectors.
-				'selector_mappings' => $this->selector_mappings,
+				'language' => get_bloginfo( 'language' ), // Used to tree-shake html[lang] selectors.
 			]
 		);
 
@@ -2396,12 +2378,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->process_font_face_at_rule( $ruleset, $options );
 		}
 
-		if ( $this->args['transform_important_qualifiers'] ) {
-			$results = array_merge(
-				$results,
-				$this->transform_important_qualifiers( $ruleset, $css_list, $options )
-			);
-		}
+		$results = array_merge(
+			$results,
+			$this->transform_important_qualifiers( $ruleset, $css_list, $options )
+		);
 
 		// Remove the ruleset if it is now empty.
 		if ( 0 === count( $ruleset->getRules() ) ) {
@@ -2621,12 +2601,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
-				if ( $this->args['transform_important_qualifiers'] ) {
-					$results = array_merge(
-						$results,
-						$this->transform_important_qualifiers( $rules, $css_list, $options )
-					);
-				}
+				$results = array_merge(
+					$results,
+					$this->transform_important_qualifiers( $rules, $css_list, $options )
+				);
 
 				$properties = $rules->getRules();
 				foreach ( $properties as $property ) {
@@ -3221,17 +3199,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Replace the somewhat-meta [style] attribute selectors with attribute selector using the data attribute the original styles are copied into.
-			if ( $this->args['transform_important_qualifiers'] ) {
-				$selector = preg_replace(
-					'/(?<=\[)style(?=([*$~]?=.*?)?])/is',
-					self::ORIGINAL_STYLE_ATTRIBUTE_NAME,
-					$selector,
-					- 1,
-					$count
-				);
-				if ( $count > 0 ) {
-					$has_changed_selectors = true;
-				}
+			$selector = preg_replace(
+				'/(?<=\[)style(?=([*$~]?=.*?)?])/is',
+				self::ORIGINAL_STYLE_ATTRIBUTE_NAME,
+				$selector,
+				-1,
+				$count
+			);
+			if ( $count > 0 ) {
+				$has_changed_selectors = true;
 			}
 
 			/*
@@ -3342,7 +3318,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$used_selector_count = 0;
 				$selectors           = [];
 				foreach ( $selectors_parsed as $selector => $parsed_selector ) {
-					$should_include = $this->args['skip_tree_shaking'] || (
+					$should_include = $this->is_customize_preview || (
 						// If all class names are used in the doc.
 						(
 							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
@@ -3512,7 +3488,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Report validation error if size is now too big.
-			if ( ! $this->args['skip_tree_shaking'] && $current_concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes ) {
+			if ( ! $this->is_customize_preview && $current_concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes ) {
 				$validation_error = [
 					'code'      => self::STYLESHEET_TOO_LONG,
 					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,

@@ -11,7 +11,7 @@ import { DEFAULT_MOBILE_BREAKPOINT } from '../common/constants';
 /**
  * Hook providing the current window width as state.
  *
- * @param {Object} args                  Hook arguments.
+ * @param {Object} args Hook arguments.
  * @param {number} args.mobileBreakpoint The mobile breakpoint in pixels.
  */
 export function useWindowWidth( args = {} ) {

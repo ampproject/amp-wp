@@ -4,9 +4,10 @@ namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Service;
+use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\DependencySupport */
-class DependencySupportTest extends TestCase {
+class DependencySupportTest extends WP_UnitTestCase {
 
 	/** @var DependencySupport */
 	private $instance;

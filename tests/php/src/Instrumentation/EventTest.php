@@ -5,7 +5,7 @@ namespace AmpProject\AmpWP\Tests\Instrumentation;
 use AmpProject\AmpWP\Exception\InvalidEventProperties;
 use AmpProject\AmpWP\Instrumentation\Event;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
+use PHPUnit\Framework\TestCase;
 use stdClass;
 
 final class EventTest extends TestCase {

@@ -6,14 +6,13 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for Tumblr embeds.
  *
  * @coversDefaultClass \AMP_Tumblr_Embed_Handler
  */
-class AMP_Tumblr_Embed_Handler_Test extends TestCase {
+class AMP_Tumblr_Embed_Handler_Test extends WP_UnitTestCase {
 
 	use MarkupComparison;
 

@@ -8,7 +8,6 @@
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Dom\ElementList;
 use AmpProject\AmpWP\Component\CaptionedSlide;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP carousel and slide classes.
@@ -16,7 +15,7 @@ use AmpProject\AmpWP\Tests\TestCase;
  * @covers AmpProject\AmpWP\Dom\ElementList
  * @covers AmpProject\AmpWP\Component\CaptionedSlide
  */
-class Test_DOM_Element_List extends TestCase {
+class Test_DOM_Element_List extends \WP_UnitTestCase {
 
 	/**
 	 * Gets the data to test adding images.

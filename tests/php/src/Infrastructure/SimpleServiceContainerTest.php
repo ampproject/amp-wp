@@ -5,7 +5,7 @@ namespace AmpProject\AmpWP\Tests\Infrastructure;
 use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer\SimpleServiceContainer;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
+use PHPUnit\Framework\TestCase;
 
 final class SimpleServiceContainerTest extends TestCase {
 

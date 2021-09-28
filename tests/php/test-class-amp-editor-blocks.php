@@ -6,14 +6,13 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Editor_Blocks class.
  *
  * @covers AMP_Editor_Blocks
  */
-class Test_AMP_Editor_Blocks extends TestCase {
+class Test_AMP_Editor_Blocks extends WP_UnitTestCase {
 
 	/**
 	 * The tested instance.

@@ -5,7 +5,7 @@ namespace AmpProject\AmpWP\Tests\Infrastructure;
 use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer\LazilyInstantiatedService;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
+use PHPUnit\Framework\TestCase;
 use stdClass;
 
 final class LazilyInstantiatedServiceTest extends TestCase {

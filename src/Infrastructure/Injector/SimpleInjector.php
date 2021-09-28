@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Instantiator;
 use Exception;
 use ReflectionClass;
+use ReflectionNamedType;
 use ReflectionParameter;
 
 /**

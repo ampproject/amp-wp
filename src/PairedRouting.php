@@ -1134,15 +1134,15 @@ final class PairedRouting implements Service, Registerable {
 		$requested_url = amp_get_current_url();
 		$redirect_url  = null;
 
-		$has_path_suffix = $this->paired_url->has_path_suffix( $requested_url );
-		$has_query_var   = $this->paired_url->has_query_var( $requested_url );
+		$endpoint_suffix_removed = $this->paired_url->remove_path_suffix( $requested_url );
+		$query_var_removed       = $this->paired_url->remove_query_var( $requested_url );
 		if ( amp_is_canonical() ) {
-			if ( is_404() && $has_path_suffix ) {
+			if ( is_404() && $endpoint_suffix_removed !== $requested_url ) {
 				// Always redirect to strip off /amp/ in the case of a 404.
-				$redirect_url = $this->paired_url->remove_path_suffix( $requested_url );
-			} elseif ( $has_query_var ) {
+				$redirect_url = $endpoint_suffix_removed;
+			} elseif ( $query_var_removed !== $requested_url ) {
 				// Strip extraneous query var from AMP-first sites.
-				$redirect_url = $this->paired_url->remove_query_var( $requested_url );
+				$redirect_url = $query_var_removed;
 			}
 		} else {
 			// Calling wp_old_slug_redirect() here is to account for a site that does not have AMP enabled for the 404 template.
@@ -1154,12 +1154,12 @@ final class PairedRouting implements Service, Registerable {
 			// old_slug_redirect_url which ensures that the AMP endpoint will persist the slug redirect.
 			wp_old_slug_redirect(); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_old_slug_redirect_wp_old_slug_redirect
 
-			if ( is_404() && $has_path_suffix ) {
+			if ( is_404() && $endpoint_suffix_removed !== $requested_url ) {
 				// To account for switching the paired URL structure from `/amp/` to `?amp=1`, add the query var if in Paired
 				// AMP mode. Note this is not necessary to do when sites have switched from a query var to an endpoint suffix
 				// because the query var will always be recognized whereas the reverse is not always true.
 				// This also prevents an infinite URL space under /amp/ endpoint.
-				$redirect_url = $this->add_endpoint( $this->paired_url->remove_path_suffix( $requested_url ) );
+				$redirect_url = $this->add_endpoint( $endpoint_suffix_removed );
 			} elseif ( $this->has_endpoint() && ! amp_is_available() ) {
 				// Redirect to non-AMP URL if AMP is not available.
 				$redirect_url = $this->remove_endpoint( $requested_url );

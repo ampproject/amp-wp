@@ -43,7 +43,6 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array {
 	 *      @type int  $content_max_width Max width of content.
 	 *      @type bool $carousel_required Whether carousels are required. This is used when amp theme support is not present, for back-compat.
-	 *      @type bool $native_img_used   Whether native img is being used.
 	 * }
 	 */
 	protected $args;
@@ -55,7 +54,6 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $DEFAULT_ARGS = [
 		'carousel_required' => false,
-		'native_img'        => false,
 	];
 
 	/**
@@ -99,10 +97,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				$gallery_node->setAttribute( 'data-amp-carousel', 'true' );
 			}
 
-			$img_elements = $this->dom->xpath->query(
-				empty( $this->args['native_img_used'] ) ? './/amp-img | .//amp-anim' : './/img',
-				$node
-			);
+			$img_elements = $node->getElementsByTagName( 'amp-img' );
 
 			$this->process_gallery_embed( $is_amp_carousel, $is_amp_lightbox, $node, $img_elements );
 		}

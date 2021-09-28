@@ -22,8 +22,8 @@ function createURLWithHash( WPPath, query = '', hash = '' ) {
  * Visits admin page with hash option; if user is not logged in then it logging in it first, then visits admin page.
  *
  * @param {string} adminPath String to be serialized as pathname.
- * @param {string} query     String to be serialized as query portion of URL.
- * @param {string} hash      URL hash.
+ * @param {string} query String to be serialized as query portion of URL.
+ * @param {string} hash URL hash.
  */
 export async function visitAdminPageWithHash( adminPath, query, hash = '' ) {
 	await page.goto( createURLWithHash( join( 'wp-admin', adminPath ), query, hash ) );

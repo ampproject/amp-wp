@@ -8,12 +8,11 @@
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class Test_AMP_Admin_Includes_Functions
  */
-class Test_AMP_Admin_Includes_Functions extends TestCase {
+class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 
 	use LoadsCoreThemes;
 
@@ -43,8 +42,8 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 		amp_init_customizer();
 		$this->assertTrue( amp_is_legacy() );
-		$this->assertEquals( 500, has_action( 'customize_register', [ AMP_Template_Customizer::class, 'init' ] ) );
-		$this->assertEquals( 10, has_action( 'amp_init', [ AMP_Customizer_Design_Settings::class, 'init' ] ) );
+		$this->assertEquals( 500, has_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', 'amp_add_customizer_link' ) );
 	}
 
@@ -126,7 +125,7 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
 					Option::READER_THEME  => ReaderThemes::DEFAULT_READER_THEME,
 				],
-				'assert'  => function () {
+				function () {
 					$this->assertTrue( amp_is_legacy() );
 					$this->assertEquals( 'customize.php?amp_preview=1&autofocus[panel]=amp_panel', amp_get_customizer_url() );
 
@@ -153,7 +152,7 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 						Option::READER_THEME  => $theme->get_stylesheet(),
 					];
 				},
-				'assert'  => function () {
+				function () {
 					$this->assertFalse( amp_is_legacy() );
 					$this->assertEquals( 'customize.php?amp_preview=1&amp=1', amp_get_customizer_url() );
 				},
@@ -162,7 +161,7 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 				'options' => [
 					Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 				],
-				'assert'  => function () {
+				function () {
 					$this->assertEquals( '', amp_get_customizer_url() );
 				},
 			],

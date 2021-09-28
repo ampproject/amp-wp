@@ -242,7 +242,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
+			'USER_REST_PATH'                     => '/wp/v2/users/me',
 		];
 
 		wp_add_inline_script(

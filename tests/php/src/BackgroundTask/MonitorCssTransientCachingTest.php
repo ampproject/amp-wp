@@ -9,11 +9,11 @@ use AMP_Options_Manager;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\TestCase;
 use DateTime;
+use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching */
-class MonitorCssTransientCachingTest extends TestCase {
+class MonitorCssTransientCachingTest extends WP_UnitTestCase {
 
 	/**
 	 * Whether external object cache is being used.
@@ -57,7 +57,7 @@ class MonitorCssTransientCachingTest extends TestCase {
 		$timestamp = wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME );
 
 		$this->assertNotFalse( $timestamp );
-		$this->assertIsInt( $timestamp );
+		$this->assertInternalType( 'int', $timestamp );
 		$this->assertGreaterThan( 0, $timestamp );
 	}
 

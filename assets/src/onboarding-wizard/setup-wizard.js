@@ -23,8 +23,8 @@ import { Navigation } from './components/navigation-context-provider';
 /**
  * Side effect wrapper for page component.
  *
- * @param {Object} props          Component props.
- * @param {?any}   props.children Component children.
+ * @param {Object} props Component props.
+ * @param {?any} props.children Component children.
  */
 function PageComponentSideEffects( { children } ) {
 	useEffect( () => {
@@ -38,10 +38,10 @@ function PageComponentSideEffects( { children } ) {
 /**
  * Setup wizard root component.
  *
- * @param {Object}  props            Component props.
- * @param {string}  props.closeLink  Link to return to previous user location.
- * @param {string}  props.finishLink Exit link.
- * @param {Element} props.appRoot    App root element.
+ * @param {Object} props Component props.
+ * @param {string} props.closeLink Link to return to previous user location.
+ * @param {string} props.finishLink Exit link.
+ * @param {Element} props.appRoot App root element.
  */
 export function SetupWizard( { closeLink, finishLink, appRoot } ) {
 	const { isMobile } = useWindowWidth();

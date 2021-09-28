@@ -7,14 +7,13 @@
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Test AMP_Facebook_Embed_Handler_Test
  *
  * @covers AMP_Facebook_Embed_Handler
  */
-class AMP_Facebook_Embed_Handler_Test extends TestCase {
+class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 
 	use MarkupComparison;
 	use WithoutBlockPreRendering {
@@ -72,8 +71,6 @@ class AMP_Facebook_Embed_Handler_Test extends TestCase {
 	 * @return array
 	 */
 	public function get_raw_embed_dataset() {
-		$overflow_button = '<button overflow type="button">See more</button>';
-
 		return [
 			'no_embed_blockquote'           => [
 				'<p>Hello world.</p>',
@@ -87,27 +84,27 @@ class AMP_Facebook_Embed_Handler_Test extends TestCase {
 
 			'simple_url_https'              => [
 				'https://www.facebook.com/zuck/posts/10102593740125791' . PHP_EOL,
-				'<amp-facebook data-href="https://www.facebook.com/zuck/posts/10102593740125791" layout="responsive" width="600" height="400">' . $overflow_button . '</amp-facebook>' . PHP_EOL,
+				'<amp-facebook data-href="https://www.facebook.com/zuck/posts/10102593740125791" layout="responsive" width="600" height="400"></amp-facebook>' . PHP_EOL,
 			],
 
 			'notes_url'                     => [
 				'https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/' . PHP_EOL,
-				'<amp-facebook data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" layout="responsive" width="600" height="400">' . $overflow_button . '</amp-facebook>' . PHP_EOL,
+				'<amp-facebook data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" layout="responsive" width="600" height="400"></amp-facebook>' . PHP_EOL,
 			],
 
 			'photo_url'                     => [
 				'https://www.facebook.com/photo.php?fbid=10102533316889441&set=a.529237706231.2034669.4&type=3&theater' . PHP_EOL,
-				'<amp-facebook data-href="https://www.facebook.com/photo.php?fbid=10102533316889441&amp;set=a.529237706231.2034669.4&amp;type=3&amp;theater" layout="responsive" width="600" height="400">' . $overflow_button . '</amp-facebook>' . PHP_EOL,
+				'<amp-facebook data-href="https://www.facebook.com/photo.php?fbid=10102533316889441&amp;set=a.529237706231.2034669.4&amp;type=3&amp;theater" layout="responsive" width="600" height="400"></amp-facebook>' . PHP_EOL,
 			],
 
 			'video_url'                     => [
 				'https://www.facebook.com/zuck/videos/10102509264909801/' . PHP_EOL,
-				'<amp-facebook data-href="https://www.facebook.com/zuck/videos/10102509264909801/" layout="responsive" width="600" height="400">' . $overflow_button . '</amp-facebook>' . PHP_EOL,
+				'<amp-facebook data-href="https://www.facebook.com/zuck/videos/10102509264909801/" layout="responsive" width="600" height="400"></amp-facebook>' . PHP_EOL,
 			],
 
 			'post_embed'                    => [
 				'<div class="fb-post" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/"></div>',
-				'<amp-facebook width="600" height="400" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post" layout="responsive">' . $overflow_button . '</amp-facebook>',
+				'<amp-facebook width="600" height="400" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post" layout="responsive"></amp-facebook>',
 			],
 
 			'post_with_fallbacks'           => [
@@ -118,7 +115,6 @@ class AMP_Facebook_Embed_Handler_Test extends TestCase {
 				',
 				'
 					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/20531316728/posts/10154009990506729/"  data-show-text="true" data-embed-as="post" layout="responsive">
-						' . $overflow_button . '
 						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore" fallback=""><!--blockquote_contents--></blockquote>
 					</amp-facebook>
 				',
@@ -126,7 +122,7 @@ class AMP_Facebook_Embed_Handler_Test extends TestCase {
 
 			'video_embed'                   => [
 				'<div class="fb-video" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false"></div>',
-				'<amp-facebook width="600" height="400" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false" data-embed-as="video" layout="responsive">' . $overflow_button . '</amp-facebook>',
+				'<amp-facebook width="600" height="400" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false" data-embed-as="video" layout="responsive"></amp-facebook>',
 			],
 
 			'page_embed'                    => [
@@ -139,7 +135,6 @@ class AMP_Facebook_Embed_Handler_Test extends TestCase {
 				',
 				'
 					<amp-facebook-page width="340" height="432" data-href="https://www.facebook.com/xwp.co/" data-hide-cover="true" data-show-facepile="true" data-show-posts="false" layout="responsive">
-						' . $overflow_button . '
 						<div class="fb-xfbml-parse-ignore" fallback="">
 							<blockquote cite="https://www.facebook.com/xwp.co/"><!--blockquote_contents--></blockquote>
 						</div>
@@ -151,7 +146,9 @@ class AMP_Facebook_Embed_Handler_Test extends TestCase {
 				'
 					<div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-width="400" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
 				',
-				'<amp-facebook-like width="400" height="400" data-href="https://developers.facebook.com/docs/plugins/" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="true" layout="responsive">' . $overflow_button . '</amp-facebook-like>
+				'
+					<amp-facebook-like width="400" height="400" data-href="https://developers.facebook.com/docs/plugins/" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="true" layout="responsive">
+					</amp-facebook-like>
 				',
 			],
 
@@ -159,28 +156,28 @@ class AMP_Facebook_Embed_Handler_Test extends TestCase {
 				'
 					<div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></div>
 				',
-				'<amp-facebook-comments width="600" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5" layout="responsive">' . $overflow_button . '</amp-facebook-comments>',
+				'<amp-facebook-comments width="600" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5" layout="responsive"></amp-facebook-comments>',
 			],
 
 			'comments_full_width'           => [
 				'
 					<div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-width="100%" data-numposts="5"></div>
 				',
-				'<amp-facebook-comments width="auto" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5" layout="fixed-height">' . $overflow_button . '</amp-facebook-comments>',
+				'<amp-facebook-comments width="auto" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5" layout="fixed-height"></amp-facebook-comments>',
 			],
 
 			'comments_full_width_2'         => [
 				'
 					<div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-height="123" data-width="100%" data-numposts="5"></div>
 				',
-				'<amp-facebook-comments width="auto" height="123" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5" layout="fixed-height">' . $overflow_button . '</amp-facebook-comments>',
+				'<amp-facebook-comments width="auto" height="123" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5" layout="fixed-height"></amp-facebook-comments>',
 			],
 
 			'comment_embed'                 => [
 				'
 					<div class="fb-comment-embed" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-width="500"></div>
 				',
-				'<amp-facebook width="500" height="400" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-embed-as="comment" layout="responsive">' . $overflow_button . '</amp-facebook>',
+				'<amp-facebook width="500" height="400" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-embed-as="comment" layout="responsive"></amp-facebook>',
 			],
 
 			'remove_fb_root'                => [

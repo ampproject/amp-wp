@@ -5,16 +5,19 @@ namespace AmpProject\AmpWP\Tests\Optimizer;
 use AmpProject\AmpWP\AmpWpPlugin;
 use AmpProject\AmpWP\Optimizer\OptimizerService;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\TransformationEngine;
 use \AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
-use AmpProject\AmpWP\Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Optimizer\OptimizerService */
 final class OptimizerServiceTest extends TestCase {
+
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	const HERO_IMAGE_MARKUP = '<amp-img data-hero src="https://example.com/image.jpg" width="500" height="500"></amp-img>';
@@ -37,7 +40,7 @@ final class OptimizerServiceTest extends TestCase {
 
 		$html_errors = new ErrorCollection();
 		$output      = $optimizer_service->optimizeHtml( $html, $html_errors );
-		$this->assertStringContainsString( 'transformed="self;v=1"', $output );
+		$this->assertStringContains( 'transformed="self;v=1"', $output );
 		$this->assertTrue( $html_errors->has( 'TooManyHeroImages' ) );
 	}
 

@@ -115,8 +115,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 				'layout'         => 'responsive',
 				'width'          => $this->args['width'],
 				'height'         => $this->args['height'],
-			],
-			$this->create_overflow_button_markup()
+			]
 		);
 	}
 
@@ -189,7 +188,6 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, $node_args );
-			$new_node->appendChild( $this->create_overflow_button_element( $dom ) );
 		} else {
 			$new_node = AMP_DOM_Utils::create_node(
 				$dom,

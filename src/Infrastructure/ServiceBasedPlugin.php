@@ -187,125 +187,32 @@ abstract class ServiceBasedPlugin implements Plugin {
 			$services = $this->validate_services( $filtered_services, $services );
 		}
 
-		while ( null !== key( $services ) ) {
-			$id    = $this->maybe_resolve( key( $services ) );
-			$class = $this->maybe_resolve( current( $services ) );
+		foreach ( $services as $id => $class ) {
+			$id    = $this->maybe_resolve( $id );
+			$class = $this->maybe_resolve( $class );
 
-			// Delay registering the service until all requirements are met.
-			if (
-				is_a( $class, HasRequirements::class, true )
-				&&
-				! $this->requirements_are_met( $id, $class, $services )
-			) {
-				continue;
-			}
+			// Allow the services to delay their registration.
+			if ( is_a( $class, Delayed::class, true ) ) {
+				$registration_action = $class::get_registration_action();
 
-			$this->schedule_potential_service_registration( $id, $class );
+				if ( did_action( $registration_action ) ) {
+					$this->register_service( $id, $class );
 
-			next( $services );
-		}
-	}
-
-	/**
-	 * Determine if the requirements for a service to be registered are met.
-	 *
-	 * This also hooks up another check in the future to the registration action(s) of its requirements.
-	 *
-	 * @param string   $id       Service ID of the service with requirements.
-	 * @param string   $class    Service FQCN of the service with requirements.
-	 * @param string[] $services List of services to be registered.
-	 *
-	 * @throws InvalidService If the required service is not recognized.
-	 *
-	 * @return bool Whether the requirements for the service has been met.
-	 */
-	protected function requirements_are_met( $id, $class, &$services ) {
-		$missing_requirements = $this->collect_missing_requirements( $class, $services );
-
-		if ( empty( $missing_requirements ) ) {
-			return true;
-		}
-
-		foreach ( $missing_requirements as $missing_requirement ) {
-			if ( is_a( $missing_requirement, Delayed::class, true ) ) {
-				$action = $missing_requirement::get_registration_action();
-
-				if ( \did_action( $action ) ) {
 					continue;
 				}
 
-				/*
-				 * The current service depends on another service that is Delayed and hasn't been registered yet
-				 * and for which the registration action has not yet passed.
-				 *
-				 * Therefore, we postpone the registration of the current service up until the requirement's
-				 * action has passed.
-				 *
-				 * We don't register the service right away, though, we will first check whether at that point,
-				 * the requirements have been met.
-				 *
-				 * Note that badly configured requirements can lead to services that will never register at all.
-				 */
-
 				\add_action(
-					$action,
-					function () use ( $id, $class, $services ) {
-						if ( ! $this->requirements_are_met( $id, $class, $services ) ) {
-							return;
-						}
-
-						$this->schedule_potential_service_registration( $id, $class );
-					},
-					PHP_INT_MAX
+					$class::get_registration_action(),
+					function () use ( $id, $class ) {
+						$this->register_service( $id, $class );
+					}
 				);
 
-				next( $services );
-				return false;
-			}
-		}
-
-		/*
-		 * The registration actions from all of the requirements were already processed. This means that the missing
-		 * requirement(s) are about to be registered, they just weren't encountered yet while traversing the services
-		 * map. Therefore, we skip registration for now and move this particular service to the end of the service map.
-		 *
-		 * Note: Moving the service to the end of the service map advances the internal array pointer to the next service.
-		 */
-		unset( $services[ $id ] );
-		$services[ $id ] = $class;
-
-		return false;
-	}
-
-	/**
-	 * Collect the list of missing requirements for a service which has requirements.
-	 *
-	 * @param string   $class Service FQCN of the service with requirements.
-	 * @param string[] $services List of services to register.
-	 *
-	 * @throws InvalidService If the required service is not recognized.
-	 *
-	 * @return string[] List of missing requirements as a $service_id => $service_class mapping.
-	 */
-	protected function collect_missing_requirements( $class, $services ) {
-		$requirements = $class::get_requirements();
-
-		$missing = [];
-
-		foreach ( $requirements as $requirement ) {
-			// Bail if it requires a service that is not recognized.
-			if ( ! array_key_exists( $requirement, $services ) ) {
-				throw InvalidService::from_service_id( $requirement );
-			}
-
-			if ( $this->get_container()->has( $requirement ) ) {
 				continue;
 			}
 
-			$missing[ $requirement ] = $services[ $requirement ];
+			$this->register_service( $id, $class );
 		}
-
-		return $missing;
 	}
 
 	/**
@@ -370,44 +277,12 @@ abstract class ServiceBasedPlugin implements Plugin {
 	}
 
 	/**
-	 * Schedule the potential registration of a single service.
-	 *
-	 * This takes into account whether the service registration needs to be delayed or not.
+	 * Register a single service.
 	 *
 	 * @param string $id ID of the service to register.
 	 * @param string $class Class of the service to register.
 	 */
-	protected function schedule_potential_service_registration( $id, $class ) {
-		if ( is_a( $class, Delayed::class, true ) ) {
-			$registration_action = $class::get_registration_action();
-
-			if ( \did_action( $registration_action ) ) {
-				$this->maybe_register_service( $id, $class );
-			} else {
-				\add_action(
-					$registration_action,
-					function () use ( $id, $class ) {
-						$this->maybe_register_service( $id, $class );
-					}
-				);
-			}
-		} else {
-			$this->maybe_register_service( $id, $class );
-		}
-	}
-
-	/**
-	 * Register a single service, provided its conditions are met.
-	 *
-	 * @param string $id ID of the service to register.
-	 * @param string $class Class of the service to register.
-	 */
-	protected function maybe_register_service( $id, $class ) {
-		// Ensure we don't register the same service more than once.
-		if ( $this->service_container->has( $id ) ) {
-			return;
-		}
-
+	protected function register_service( $id, $class ) {
 		// Only instantiate services that are actually needed.
 		if ( is_a( $class, Conditional::class, true )
 			&& ! $class::is_needed() ) {

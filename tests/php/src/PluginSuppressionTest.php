@@ -8,6 +8,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\PluginSuppression;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\MockPluginEnvironment;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
@@ -24,6 +25,7 @@ use WP_Block_Type_Registry;
 final class PluginSuppressionTest extends DependencyInjectedTestCase {
 
 	use PrivateAccess;
+	use AssertContainsCompatibility;
 	use ThemesApiRequestMocking;
 	use WithoutBlockPreRendering {
 		setUp as public prevent_block_pre_render;
@@ -564,11 +566,11 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			$this->assertArrayHasKey( 'bad', $shortcode_tags );
 
 			$content = do_shortcode( '[bad] [audio src="https://example.com/audio.mp3"]' );
-			$this->assertStringContainsString( 'audio.mp3', $content );
+			$this->assertStringContains( 'audio.mp3', $content );
 			if ( $suppressed ) {
-				$this->assertStringNotContainsString( 'Bad shortcode!', $content );
+				$this->assertStringNotContains( 'Bad shortcode!', $content );
 			} else {
-				$this->assertStringContainsString( 'Bad shortcode!', $content );
+				$this->assertStringContains( 'Bad shortcode!', $content );
 			}
 			$checked++;
 		}
@@ -590,13 +592,13 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			}
 			$rendered_sidebar = ob_get_clean();
 
-			$this->assertStringContainsString( 'searchform', $rendered_sidebar, 'Expected search widget to be present.' );
+			$this->assertStringContains( 'searchform', $rendered_sidebar, 'Expected search widget to be present.' );
 			if ( $suppressed ) {
-				$this->assertStringNotContainsString( 'Bad Multi Widget', $rendered_sidebar );
-				$this->assertStringNotContainsString( 'Bad Single Widget', $rendered_sidebar );
+				$this->assertStringNotContains( 'Bad Multi Widget', $rendered_sidebar );
+				$this->assertStringNotContains( 'Bad Single Widget', $rendered_sidebar );
 			} else {
-				$this->assertStringContainsString( 'Bad Multi Widget', $rendered_sidebar );
-				$this->assertStringContainsString( 'Bad Single Widget', $rendered_sidebar );
+				$this->assertStringContains( 'Bad Multi Widget', $rendered_sidebar );
+				$this->assertStringContains( 'Bad Single Widget', $rendered_sidebar );
 			}
 			$checked++;
 		}
@@ -606,11 +608,11 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 
 			// Check filter.
 			$content = apply_filters( 'the_content', 'This is "content".' );
-			$this->assertStringContainsString( '<p>This is &#8220;content&#8221;.</p>', $content, 'Expected default filters to apply.' );
+			$this->assertStringContains( '<p>This is &#8220;content&#8221;.</p>', $content, 'Expected default filters to apply.' );
 			if ( $suppressed ) {
-				$this->assertStringNotContainsString( 'Bad filter!', $content );
+				$this->assertStringNotContains( 'Bad filter!', $content );
 			} else {
-				$this->assertStringContainsString( 'Bad filter!', $content );
+				$this->assertStringContains( 'Bad filter!', $content );
 			}
 
 			// Check action.
@@ -618,9 +620,9 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			wp_footer();
 			$footer = ob_get_clean();
 			if ( $suppressed ) {
-				$this->assertStringNotContainsString( 'Bad action!', $footer );
+				$this->assertStringNotContains( 'Bad action!', $footer );
 			} else {
-				$this->assertStringContainsString( 'Bad action!', $footer );
+				$this->assertStringContains( 'Bad action!', $footer );
 			}
 
 			$checked++;
@@ -629,11 +631,11 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		// Check bad-block.
 		if ( in_array( 'bad-block.php', $plugin_slugs, true ) ) {
 			$blocks = do_blocks( '<!-- wp:latest-posts /--><!-- wp:bad/bad-block /-->' );
-			$this->assertStringContainsString( 'wp-block-latest-posts', $blocks, 'Expected Latest Posts block to always be present.' );
+			$this->assertStringContains( 'wp-block-latest-posts', $blocks, 'Expected Latest Posts block to always be present.' );
 			if ( $suppressed ) {
-				$this->assertStringNotContainsString( 'Bad dynamic block!', $blocks );
+				$this->assertStringNotContains( 'Bad dynamic block!', $blocks );
 			} else {
-				$this->assertStringContainsString( 'Bad dynamic block!', $blocks );
+				$this->assertStringContains( 'Bad dynamic block!', $blocks );
 			}
 			$checked++;
 		}

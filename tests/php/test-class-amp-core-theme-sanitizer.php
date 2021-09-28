@@ -5,18 +5,19 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_Core_Theme_Sanitizer_Test
  *
  * @coversDefaultClass AMP_Core_Theme_Sanitizer
  */
-class AMP_Core_Theme_Sanitizer_Test extends TestCase {
+class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 	use LoadsCoreThemes;
 
@@ -33,46 +34,6 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$GLOBALS['wp_styles']  = null;
 
 		$this->restore_theme_directories();
-	}
-
-	/**
-	 * @dataProvider get_data_for_using_native_img
-	 * @covers::add_twentyseventeen_attachment_image_attributes()
-	 * @param bool $native_img_used Use native img.
-	 */
-	public function test_add_twentyseventeen_attachment_image_attributes( $native_img_used ) {
-		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', 0 );
-		set_theme_mod( 'custom_logo', $attachment_id );
-
-		AMP_Core_Theme_Sanitizer::add_twentyseventeen_attachment_image_attributes( compact( 'native_img_used' ) );
-		$logo = get_custom_logo();
-
-		$this->assertFalse( has_custom_header() );
-
-		$needle = 'height="80"';
-		if ( $native_img_used ) {
-			$this->assertStringNotContainsString( $needle, $logo );
-		} else {
-			$this->assertStringContainsString( $needle, $logo );
-		}
-	}
-
-	/**
-	 * @dataProvider get_data_for_using_native_img
-	 * @covers::add_twentytwenty_masthead_styles()
-	 * @param bool $native_img_used Use native img.
-	 */
-	public function test_add_twentytwenty_masthead_styles( $native_img_used ) {
-		wp_enqueue_style( get_template() . '-style', get_stylesheet_uri(), [], '0.1' );
-		AMP_Core_Theme_Sanitizer::add_twentytwenty_masthead_styles( compact( 'native_img_used' ) );
-		wp_enqueue_scripts();
-		$output = get_echo( 'wp_print_styles' );
-		$needle = '.featured-media amp-img';
-		if ( $native_img_used ) {
-			$this->assertStringNotContainsString( $needle, $output );
-		} else {
-			$this->assertStringContainsString( $needle, $output );
-		}
 	}
 
 	/**
@@ -342,7 +303,7 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	 */
 	public function get_modals() {
 		$dom         = new Document();
-		$modal_roles = $this->get_private_property( AMP_Core_Theme_Sanitizer::class, 'modal_roles' );
+		$modal_roles = $this->get_private_property( 'AMP_Core_Theme_Sanitizer', 'modal_roles' );
 
 		$a = array_map(
 			static function ( $rule ) use ( $dom ) {
@@ -379,41 +340,25 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$this->assertEquals( $expected, $actual );
 	}
 
-	/** @return array */
-	public function get_data_for_using_native_img() {
-		return [
-			'using_native_img'     => [ true ],
-			'not_using_native_img' => [ false ],
-		];
-	}
-
 	/**
 	 * Tests add_img_display_block_fix.
 	 *
-	 * @dataProvider get_data_for_using_native_img
 	 * @covers ::add_img_display_block_fix()
-	 * @param bool $native_img_used Use native img.
 	 */
-	public function test_add_img_display_block_fix( $native_img_used ) {
-		remove_all_actions( 'wp_print_styles' );
-		AMP_Core_Theme_Sanitizer::add_img_display_block_fix( compact( 'native_img_used' ) );
-		$output = get_echo( 'wp_print_styles' );
-		$regex  = '/amp-img.+display.+block/s';
-		if ( $native_img_used ) {
-			$this->assertDoesNotMatchRegularExpression( $regex, $output );
-		} else {
-			$this->assertMatchesRegularExpression( $regex, $output );
-		}
+	public function test_add_img_display_block_fix() {
+		AMP_Core_Theme_Sanitizer::add_img_display_block_fix();
+		ob_start();
+		wp_print_styles();
+		$output = ob_get_clean();
+		$this->assertRegExp( '/amp-img.+display.+block/s', $output );
 	}
 
 	/**
 	 * Tests add_twentytwenty_custom_logo_fix.
 	 *
-	 * @dataProvider get_data_for_using_native_img
 	 * @covers ::add_twentytwenty_custom_logo_fix()
-	 * @param bool $native_img_used Use native img.
 	 */
-	public function test_add_twentytwenty_custom_logo_fix( $native_img_used ) {
+	public function test_add_twentytwenty_custom_logo_fix() {
 		add_filter(
 			'get_custom_logo',
 			static function () {
@@ -421,16 +366,12 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 			}
 		);
 
-		AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix( compact( 'native_img_used' ) );
+		AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix();
 		$logo = get_custom_logo();
 
 		$needle = '.site-logo amp-img { width: 3.000000rem; } @media (min-width: 700px) { .site-logo amp-img { width: 4.500000rem; } }';
 
-		if ( $native_img_used ) {
-			$this->assertStringNotContainsString( $needle, $logo );
-		} else {
-			$this->assertStringContainsString( $needle, $logo );
-		}
+		$this->assertStringContains( $needle, $logo );
 	}
 
 	/**
@@ -537,8 +478,8 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference:not(._) body',
 		];
 		foreach ( $replacements as $search => $replacement ) {
-			$this->assertStringNotContainsString( "$search {", $after );
-			$this->assertStringContainsString( "$replacement {", $after );
+			$this->assertStringNotContains( "$search {", $after );
+			$this->assertStringContains( "$replacement {", $after );
 		}
 	}
 
@@ -562,8 +503,8 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 
 		$after = implode( '', wp_styles()->registered[ $style_handle ]->extra['after'] );
 		$this->assertNotEmpty( $after );
-		$this->assertStringContainsString( '@media only screen and (max-width: 481px)', $after );
-		$this->assertStringContainsString( 'button[overflow]:hover', $after );
+		$this->assertStringContains( '@media only screen and (max-width: 481px)', $after );
+		$this->assertStringContains( 'button[overflow]:hover', $after );
 		$this->assertStringEndsWith( '/*first*/', $after );
 	}
 
@@ -610,9 +551,9 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 			if ( false !== strpos( $href, '#' ) ) {
 				$this->assertTrue( $link->hasAttribute( 'on' ) );
 				if ( false !== strpos( $href, '#colophon' ) ) {
-					$this->assertStringContainsString( 'colophon.scrollTo', $link->getAttribute( 'on' ) );
+					$this->assertStringContains( 'colophon.scrollTo', $link->getAttribute( 'on' ) );
 				} else {
-					$this->assertStringNotContainsString( 'colophon.scrollTo', $link->getAttribute( 'on' ) );
+					$this->assertStringNotContains( 'colophon.scrollTo', $link->getAttribute( 'on' ) );
 				}
 			} else {
 				$this->assertFalse( $link->hasAttribute( 'on' ) );

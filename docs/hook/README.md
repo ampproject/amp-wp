@@ -17,7 +17,6 @@
 ### Filters
 
 * [`amp_analytics_entries`](amp_analytics_entries.md) - Add amp-analytics tags.
-* [`amp_bento_enabled`](amp_bento_enabled.md) - Filters whether the use of Bento components is enabled.
 * [`amp_comment_posted_message`](amp_comment_posted_message.md) - Filters the message when comment submitted success message when
 * [`amp_content_embed_handlers`](amp_content_embed_handlers.md) - Filters the content embed handlers.
 * [`amp_content_max_width`](amp_content_max_width.md) - Filters the content max width for Reader templates.
@@ -34,7 +33,7 @@
 * [`amp_enable_optimizer`](amp_enable_optimizer.md) - Filter whether the generated HTML output should be run through the AMP Optimizer or not.
 * [`amp_enable_ssr`](amp_enable_ssr.md) - Filter whether the AMP Optimizer should use server-side rendering or not.
 * [`amp_extract_image_dimensions_batch`](amp_extract_image_dimensions_batch.md) - Filters the dimensions extracted from image URLs.
-* [`amp_extract_image_dimensions_get_user_agent`](amp_extract_image_dimensions_get_user_agent.md) - Filters the user agent for obtaining the image dimensions.
+* [`amp_extract_image_dimensions_get_user_agent`](amp_extract_image_dimensions_get_user_agent.md) - Filters the user agent for onbtaining the image dimensions.
 * [`amp_featured_image_minimum_height`](amp_featured_image_minimum_height.md) - Filters the minimum height required for a featured image.
 * [`amp_featured_image_minimum_width`](amp_featured_image_minimum_width.md) - Filters the minimum width required for a featured image.
 * ~~[`amp_frontend_show_canonical`](amp_frontend_show_canonical.md) - Filters whether to show the amphtml link on the frontend.~~
@@ -44,8 +43,6 @@
 * [`amp_mobile_user_agents`](amp_mobile_user_agents.md) - Filters the list of user agents used to determine if the user agent from the current request is a mobile one.
 * [`amp_mobile_version_switcher_link_text`](amp_mobile_version_switcher_link_text.md) - Filters the text to be used in the mobile switcher link.
 * [`amp_mobile_version_switcher_styles_used`](amp_mobile_version_switcher_styles_used.md) - Filters whether the default mobile version switcher styles are printed.
-* [`amp_native_img_used`](amp_native_img_used.md) - Filters whether to use the native `img` element rather than convert to `amp-img`.
-* [`amp_native_post_form_allowed`](amp_native_post_form_allowed.md) - Filters whether to allow native `POST` forms without conversion to use the `action-xhr` attribute and use the amp-form component.
 * [`amp_normalized_dimension_extractor_image_url`](amp_normalized_dimension_extractor_image_url.md) - Apply filters on the normalized image URL for dimension extraction.
 * [`amp_optimizer_config`](amp_optimizer_config.md) - Filter the configuration to be used for the AMP Optimizer.
 * [`amp_options_menu_is_enabled`](amp_options_menu_is_enabled.md) - Filter whether to enable the AMP settings.

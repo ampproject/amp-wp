@@ -4,9 +4,12 @@ namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\LoadingError;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /** @coversDefaultClass \AmpProject\AmpWP\LoadingError */
 class LoadingErrorTest extends DependencyInjectedTestCase {
+
+	use AssertContainsCompatibility;
 
 	/** @var LoadingError */
 	private $instance;
@@ -24,9 +27,9 @@ class LoadingErrorTest extends DependencyInjectedTestCase {
 	/** @covers ::render() */
 	public function test_render() {
 		$output = get_echo( [ $this->instance, 'render' ] );
-		$this->assertStringContainsString( '<span class="amp-loading-spinner">', $output );
-		$this->assertStringContainsString( '<div id="amp-loading-failure"', $output );
-		$this->assertStringContainsString( '<p class="amp-loading-failure-script">', $output );
-		$this->assertStringContainsString( '<p class="amp-loading-failure-noscript">', $output );
+		$this->assertStringContains( '<span class="amp-loading-spinner">', $output );
+		$this->assertStringContains( '<div id="amp-loading-failure"', $output );
+		$this->assertStringContains( '<p class="amp-loading-failure-script">', $output );
+		$this->assertStringContains( '<p class="amp-loading-failure-noscript">', $output );
 	}
 }

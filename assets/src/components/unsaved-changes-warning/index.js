@@ -12,15 +12,15 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { User } from '../user-context-provider';
+import { User } from '../../onboarding-wizard/components/user-context-provider';
 import { Options } from '../options-context-provider';
 
 /**
  * If there are unsaved changes in the wizard, warns the user before exiting the page.
  *
- * @param {Object}  props                    Component props.
+ * @param {Object} props Component props.
  * @param {boolean} props.excludeUserContext Whether to exclude listening to user context.
- * @param {Element} props.appRoot            React app root.
+ * @param {Element} props.appRoot React app root.
  * @return {null} Renders nothing.
  */
 export function UnsavedChangesWarning( { excludeUserContext = false, appRoot } ) {
@@ -57,7 +57,7 @@ UnsavedChangesWarning.propTypes = {
 /**
  * Sends user context back up to the parent component.
  *
- * @param {Object}   props
+ * @param {Object} props
  * @param {Function} props.setUserState Sets updated user state.
  */
 function WithUserContext( { setUserState } ) {

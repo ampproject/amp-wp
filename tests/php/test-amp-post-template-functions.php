@@ -5,12 +5,14 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /**
  * Class Test_AMP_Post_Template_Functions
  */
-class Test_AMP_Post_Template_Functions extends TestCase {
+class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	public function setUp() {
 		parent::setUp();
@@ -34,7 +36,7 @@ class Test_AMP_Post_Template_Functions extends TestCase {
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_post_template_add_default_styles' ) );
 		$this->assertSame( 99, has_action( 'amp_post_template_css', 'amp_post_template_add_styles' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' ) );
-		$this->assertSame( 10, has_action( 'admin_bar_init', [ AMP_Theme_Support::class, 'init_admin_bar' ] ) );
+		$this->assertSame( 10, has_action( 'admin_bar_init', [ 'AMP_Theme_Support', 'init_admin_bar' ] ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_footer', 'wp_admin_bar_render' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'wp_print_head_scripts' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_footer', 'wp_print_footer_scripts' ) );
@@ -52,8 +54,8 @@ class Test_AMP_Post_Template_Functions extends TestCase {
 			}
 		);
 
-		$this->assertStringContainsString( wp_get_document_title(), $output );
-		$this->assertStringContainsString( '<title>', $output );
+		$this->assertStringContains( wp_get_document_title(), $output );
+		$this->assertStringContains( '<title>', $output );
 	}
 
 	/** @covers ::amp_post_template_add_canonical() */
@@ -66,8 +68,8 @@ class Test_AMP_Post_Template_Functions extends TestCase {
 				amp_post_template_add_canonical( $template );
 			}
 		);
-		$this->assertStringContainsString( '<link rel="canonical"', $output );
-		$this->assertStringContainsString( wp_get_canonical_url(), $output );
+		$this->assertStringContains( '<link rel="canonical"', $output );
+		$this->assertStringContains( wp_get_canonical_url(), $output );
 	}
 
 	/** @covers ::amp_post_template_add_fonts() */
@@ -96,7 +98,7 @@ class Test_AMP_Post_Template_Functions extends TestCase {
 				amp_post_template_add_fonts( $template );
 			}
 		);
-		$this->assertStringContainsString( 'Roboto', $output );
+		$this->assertStringContains( 'Roboto', $output );
 	}
 
 	/** @covers ::amp_post_template_add_block_styles() */
@@ -104,7 +106,7 @@ class Test_AMP_Post_Template_Functions extends TestCase {
 		$output = get_echo( 'amp_post_template_add_block_styles' );
 		$this->assertTrue( current_theme_supports( 'wp-block-styles' ) );
 		if ( function_exists( 'wp_common_block_scripts_and_styles' ) ) {
-			$this->assertStringContainsString( 'wp-block-library-css', $output );
+			$this->assertContains( 'wp-block-library-css', $output );
 			$this->assertSame( 1, did_action( 'enqueue_block_assets' ) );
 		}
 	}
@@ -112,7 +114,7 @@ class Test_AMP_Post_Template_Functions extends TestCase {
 	/** @covers ::amp_post_template_add_default_styles() */
 	public function test_amp_post_template_add_default_styles() {
 		$output = get_echo( 'amp_post_template_add_default_styles' );
-		$this->assertStringContainsString( 'amp-default', $output );
+		$this->assertStringContains( 'amp-default', $output );
 	}
 
 	/** @covers ::amp_post_template_add_styles() */
@@ -139,8 +141,8 @@ class Test_AMP_Post_Template_Functions extends TestCase {
 			}
 		);
 
-		$this->assertStringContainsString( 'body{color:red', $output );
-		$this->assertStringContainsString( 'body{color:blue', $output );
+		$this->assertStringContains( 'body{color:red', $output );
+		$this->assertStringContains( 'body{color:blue', $output );
 	}
 
 	/** @covers ::amp_add_custom_analytics() */
@@ -207,6 +209,6 @@ class Test_AMP_Post_Template_Functions extends TestCase {
 		);
 
 		$output = get_echo( 'amp_post_template_add_analytics_data' );
-		$this->assertStringContainsString( '<amp-analytics', $output );
+		$this->assertStringContains( '<amp-analytics', $output );
 	}
 }

@@ -21,11 +21,11 @@ export const DEFAULT_MOBILE_BREAKPOINT = 783;
 /**
  * Renders a scrollable carousel with a button navigation.
  *
- * @param {Object} props                      Component props.
- * @param {number} props.gutterWidth          Amount of space between items in pixels.
- * @param {Array}  props.items                Items in the carousel.
- * @param {number} props.mobileBreakpoint     Breakpoint below which to render the mobile version.
- * @param {string} props.namespace            CSS namespace.
+ * @param {Object} props Component props.
+ * @param {number} props.gutterWidth Amount of space between items in pixels.
+ * @param {Array}  props.items Items in the carousel.
+ * @param {number} props.mobileBreakpoint Breakpoint below which to render the mobile version.
+ * @param {string} props.namespace CSS namespace.
  * @param {number} props.highlightedItemIndex Index of an item receiving special visual treatment.
  */
 export function Carousel( {
@@ -165,10 +165,10 @@ Carousel.propTypes = {
  * Styles for the carousel component, rendered as a string in JSX to facilitate dynamic rules.
  *
  * @todo Installing a styled components library would provide better tooling for this.
- * @param {Object} props             Component props.
+ * @param {Object} props Component props.
  * @param {number} props.gutterWidth The amount of space between items.
- * @param {number} props.itemWidth   The width of items.
- * @param {string} props.namespace   CSS property namespace.
+ * @param {number} props.itemWidth The width of items.
+ * @param {string} props.namespace CSS property namespace.
  */
 function Style( { gutterWidth, itemWidth, namespace } ) {
 	return (

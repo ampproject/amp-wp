@@ -5,14 +5,12 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\TestCase;
-
 /**
  * Class AMP_Object_Sanitizer_Test
  *
  * @coversDefaultClass \AMP_Object_Sanitizer
  */
-class AMP_Object_Sanitizer_Test extends TestCase {
+class AMP_Object_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
 	 * Data for converter test.

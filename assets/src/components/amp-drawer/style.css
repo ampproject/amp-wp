@@ -116,10 +116,6 @@
 	border-bottom-width: 0;
 }
 
-.amp .amp-drawer__panel-body .components-panel__body-toggle {
-	padding: 0;
-}
-
 .amp-drawer__panel-body-inner {
 	border-top: 1px solid var(--amp-settings-color-border);
 }

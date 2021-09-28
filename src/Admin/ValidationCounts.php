@@ -9,7 +9,6 @@ namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
-use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Services;
@@ -21,7 +20,7 @@ use AmpProject\AmpWP\Services;
  * @since 2.1
  * @internal
  */
-final class ValidationCounts implements Service, Registerable, Conditional, Delayed, HasRequirements {
+final class ValidationCounts implements Service, Registerable, Conditional, Delayed {
 
 	/**
 	 * Assets handle.
@@ -37,18 +36,6 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 	 */
 	public static function get_registration_action() {
 		return 'admin_enqueue_scripts';
-	}
-
-	/**
-	 * Get the list of service IDs required for this service to be registered.
-	 *
-	 * @return string[] List of required services.
-	 */
-	public static function get_requirements() {
-		return [
-			'dependency_support',
-			'dev_tools.user_access',
-		];
 	}
 
 	/**

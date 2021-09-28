@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+const { extendDefaultPlugins } = require( 'svgo' );
+
+/**
  * WordPress dependencies
  */
 const defaultConfig = require( '@wordpress/babel-preset-default' );
@@ -15,18 +20,14 @@ module.exports = function( api ) {
 				'inline-react-svg',
 				{
 					svgo: {
-						plugins: [
+						plugins: extendDefaultPlugins( [
 							{
-								name: 'preset-default',
+								name: 'cleanupIDs',
 								params: {
-									overrides: {
-										cleanupIDs: {
-											minify: false, // Prevent duplicate SVG IDs from minification.
-										},
-									},
+									minify: false, // Prevent duplicate SVG IDs from minification.
 								},
 							},
-						],
+						] ),
 					},
 				},
 			],
@@ -41,18 +42,14 @@ module.exports = function( api ) {
 						'inline-react-svg',
 						{
 							svgo: {
-								plugins: [
+								plugins: extendDefaultPlugins( [
 									{
-										name: 'preset-default',
+										name: 'cleanupIDs',
 										params: {
-											overrides: {
-												cleanupIDs: {
-													minify: false, // Prevent duplicate SVG IDs from minification.
-												},
-											},
+											minify: false, // Prevent duplicate SVG IDs from minification.
 										},
 									},
-								],
+								] ),
 							},
 						},
 					],

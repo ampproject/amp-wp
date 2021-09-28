@@ -12,7 +12,7 @@ Constructor.
 
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:64](/includes/embeds/class-amp-base-embed-handler.php#L64-L72)
+:link: [includes/embeds/class-amp-base-embed-handler.php:61](/includes/embeds/class-amp-base-embed-handler.php#L61-L69)
 
 <details>
 <summary>Show Code</summary>

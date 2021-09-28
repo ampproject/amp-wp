@@ -1,8 +1,6 @@
 ## Methods
 
 * [`AMP_Base_Embed_Handler::__construct()`](AMP_Base_Embed_Handler/__construct.md) - Constructor.
-* [`AMP_Base_Embed_Handler::create_overflow_button_element()`](AMP_Base_Embed_Handler/create_overflow_button_element.md) - Create overflow button element.
-* [`AMP_Base_Embed_Handler::create_overflow_button_markup()`](AMP_Base_Embed_Handler/create_overflow_button_markup.md) - Create overflow button markup.
 * [`AMP_Base_Embed_Handler::get_child_elements()`](AMP_Base_Embed_Handler/get_child_elements.md) - Get all child elements of the specified element.
 * [`AMP_Base_Embed_Handler::get_scripts()`](AMP_Base_Embed_Handler/get_scripts.md) - Get mapping of AMP component names to AMP script URLs.
 * [`AMP_Base_Embed_Handler::match_element_attributes()`](AMP_Base_Embed_Handler/match_element_attributes.md) - Get regex pattern for matching HTML attributes from a given tag name.
@@ -37,11 +35,11 @@
 * [`AMP_Base_Sanitizer::sanitize_dimension()`](AMP_Base_Sanitizer/sanitize_dimension.md) - Sanitizes a CSS dimension specifier while being sensitive to dimension context.
 * [`AMP_Base_Sanitizer::set_layout()`](AMP_Base_Sanitizer/set_layout.md) - Sets the layout, and possibly the &#039;height&#039; and &#039;width&#039; attributes.
 * [`AMP_Base_Sanitizer::should_sanitize_validation_error()`](AMP_Base_Sanitizer/should_sanitize_validation_error.md) - Check whether or not sanitization should occur in response to validation error.
-* [`AMP_Base_Sanitizer::update_args()`](AMP_Base_Sanitizer/update_args.md) - Update args.
 * [`AMP_DOM_Utils::add_amp_action()`](AMP_DOM_Utils/add_amp_action.md) - Register an AMP action to an event on a given element.
 * [`AMP_DOM_Utils::add_attributes_to_node()`](AMP_DOM_Utils/add_attributes_to_node.md) - Add one or more HTML element attributes to a node&#039;s DOMElement.
 * [`AMP_DOM_Utils::copy_attributes()`](AMP_DOM_Utils/copy_attributes.md) - Copy one or more attributes from one element to the other.
 * [`AMP_DOM_Utils::create_node()`](AMP_DOM_Utils/create_node.md) - Create a new node w/attributes (a DOMElement) and add to the passed Dom\Document.
+* ~~[`AMP_DOM_Utils::get_amp_bind_placeholder_prefix()`](AMP_DOM_Utils/get_amp_bind_placeholder_prefix.md) - Get attribute prefix for converted amp-bind attributes.~~
 * [`AMP_DOM_Utils::get_content_from_dom()`](AMP_DOM_Utils/get_content_from_dom.md) - Return valid HTML *body* content extracted from the Dom\Document passed as a parameter.
 * ~~[`AMP_DOM_Utils::get_content_from_dom_node()`](AMP_DOM_Utils/get_content_from_dom_node.md) - Return valid HTML content extracted from the DOMNode passed as a parameter.~~
 * ~~[`AMP_DOM_Utils::get_dom()`](AMP_DOM_Utils/get_dom.md) - Return a valid Dom\Document representing HTML document passed as a parameter.~~

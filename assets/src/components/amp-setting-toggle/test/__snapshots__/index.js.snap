@@ -5,10 +5,10 @@ exports[`AMPSettingToggle matches snapshots 1`] = `
   className="amp-setting-toggle "
 >
   <div
-    className="components-base-control components-toggle-control css-wdf2ti-Wrapper e1puf3u3"
+    className="components-base-control components-toggle-control css-wdf2ti-Wrapper e1puf3u0"
   >
     <div
-      className="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+      className="components-base-control__field css-11vcxb9-StyledField e1puf3u1"
     >
       <span
         className="components-form-toggle is-checked"
@@ -52,10 +52,10 @@ exports[`AMPSettingToggle matches snapshots 2`] = `
   className="amp-setting-toggle "
 >
   <div
-    className="components-base-control components-toggle-control css-wdf2ti-Wrapper e1puf3u3"
+    className="components-base-control components-toggle-control css-wdf2ti-Wrapper e1puf3u0"
   >
     <div
-      className="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+      className="components-base-control__field css-11vcxb9-StyledField e1puf3u1"
     >
       <span
         className="components-form-toggle"

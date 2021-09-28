@@ -26,7 +26,7 @@ function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
 	add_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' );
 
-	add_action( 'admin_bar_init', [ AMP_Theme_Support::class, 'init_admin_bar' ] );
+	add_action( 'admin_bar_init', [ 'AMP_Theme_Support', 'init_admin_bar' ] );
 	add_action( 'amp_post_template_footer', 'wp_admin_bar_render' );
 
 	// Printing scripts here is done primarily for the benefit of the admin bar. Note that wp_enqueue_scripts() is not called.

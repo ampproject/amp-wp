@@ -5,14 +5,12 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\TestCase;
-
 /**
  * Tests for AMP_Image_Dimension_Extractor.
  *
  * @covers AMP_Image_Dimension_Extractor
  */
-class AMP_Image_Dimension_Extract_Download_Test extends TestCase {
+class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 
 	/**
 	 * Path to non-existing PNG file.

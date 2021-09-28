@@ -99,7 +99,7 @@ class AMP_Content_Sanitizer {
 							/* translators: 1: sanitizer class. 2: AMP_Base_Sanitizer */
 							__( 'Sanitizer (%1$s) must extend `%2$s`', 'amp' ),
 							esc_html( $sanitizer_class ),
-							AMP_Base_Sanitizer::class
+							'AMP_Base_Sanitizer'
 						)
 					),
 					'0.1'

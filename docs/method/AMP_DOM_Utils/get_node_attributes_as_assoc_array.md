@@ -16,7 +16,7 @@ Extract a DOMElement node&#039;s HTML element attributes and return as an array.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:180](/includes/utils/class-amp-dom-utils.php#L180-L191)
+:link: [includes/utils/class-amp-dom-utils.php:253](/includes/utils/class-amp-dom-utils.php#L253-L264)
 
 <details>
 <summary>Show Code</summary>

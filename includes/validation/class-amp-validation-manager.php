@@ -12,7 +12,6 @@ use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
 use AmpProject\Tag;
 use AmpProject\Dom\Document;
-use AmpProject\Exception\MaxCssByteCountExceeded;
 
 /**
  * Class AMP_Validation_Manager
@@ -148,16 +147,6 @@ class AMP_Validation_Manager {
 	 * @var array[]
 	 */
 	public static $hook_source_stack = [];
-
-	/**
-	 * Original render_callbacks for blocks at the time of wrapping.
-	 *
-	 * Keys are block names, values are the render_callback callables.
-	 *
-	 * @see AMP_Validation_Manager::wrap_block_callbacks()
-	 * @var array<string, callable>
-	 */
-	protected static $original_block_render_callbacks = [];
 
 	/**
 	 * Whether a validate request is being performed.
@@ -536,8 +525,6 @@ class AMP_Validation_Manager {
 	public static function add_validation_error_sourcing() {
 		add_action( 'wp', [ __CLASS__, 'wrap_widget_callbacks' ] );
 
-		$int_min = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
-		add_filter( 'register_block_type_args', [ __CLASS__, 'wrap_block_callbacks' ], $int_min );
 		add_action( 'all', [ __CLASS__, 'wrap_hook_callbacks' ] );
 		$wrapped_filters = [ 'the_content', 'the_excerpt' ];
 		foreach ( $wrapped_filters as $wrapped_filter ) {
@@ -696,12 +683,11 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function reset_validation_results() {
-		self::$validation_results              = [];
-		self::$enqueued_style_sources          = [];
-		self::$enqueued_script_sources         = [];
-		self::$extra_script_sources            = [];
-		self::$extra_style_sources             = [];
-		self::$original_block_render_callbacks = [];
+		self::$validation_results      = [];
+		self::$enqueued_style_sources  = [];
+		self::$enqueued_script_sources = [];
+		self::$extra_script_sources    = [];
+		self::$extra_style_sources     = [];
 	}
 
 	/**
@@ -1027,29 +1013,8 @@ class AMP_Validation_Manager {
 		}
 		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $source['block_name'] );
 		if ( $block_type && $block_type->is_dynamic() ) {
-			$render_callback = $block_type->render_callback;
-
-			// Access the underlying callback which was wrapped by ::wrap_block_callbacks() below.
-			while ( $render_callback instanceof AMP_Validation_Callback_Wrapper ) {
-				$render_callback = $render_callback->get_callback_function();
-			}
-
 			$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
-			$callback_source     = $callback_reflection->get_source( $render_callback );
-
-			// Handle special case to undo the wrapping that Gutenberg does in gutenberg_inject_default_block_context().
-			if (
-				$callback_source
-				&&
-				'plugin' === $callback_source['type']
-				&&
-				'gutenberg' === $callback_source['name']
-				&&
-				array_key_exists( $source['block_name'], self::$original_block_render_callbacks )
-			) {
-				$callback_source = $callback_reflection->get_source( self::$original_block_render_callbacks[ $source['block_name'] ] );
-			}
-
+			$callback_source     = $callback_reflection->get_source( $block_type->render_callback );
 			if ( $callback_source ) {
 				$source = array_merge(
 					$source,
@@ -1068,44 +1033,6 @@ class AMP_Validation_Manager {
 			}
 		}
 		return $replaced;
-	}
-
-	/**
-	 * Wrap callbacks for registered blocks to keep track of queued assets and the source for anything printed for validation.
-	 *
-	 * @param array $args Array of arguments for registering a block type.
-	 *
-	 * @return array Array of arguments for registering a block type.
-	 */
-	public static function wrap_block_callbacks( $args ) {
-
-		if ( ! isset( $args['render_callback'] ) || ! is_callable( $args['render_callback'] ) ) {
-			return $args;
-		}
-
-		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
-		$source              = $callback_reflection->get_source( $args['render_callback'] );
-
-		if ( ! $source ) {
-			return $args;
-		}
-
-		unset( $source['reflection'] ); // Omit from stored source.
-		$original_function = $args['render_callback'];
-
-		if ( isset( $args['name'] ) ) {
-			self::$original_block_render_callbacks[ $args['name'] ] = $original_function;
-		}
-
-		$args['render_callback'] = self::wrapped_callback(
-			[
-				'function'      => $original_function,
-				'source'        => $source,
-				'accepted_args' => 3, // The three args passed to render_callback are $attributes, $content, and $block.
-			]
-		);
-
-		return $args;
 	}
 
 	/**
@@ -1755,12 +1682,8 @@ class AMP_Validation_Manager {
 		$text .= ' ' . implode( ', ', $items );
 
 		$validate_link->appendChild( $dom->createTextNode( ' ' ) );
-		$small = $dom->createElement( Tag::SMALL );
-		try {
-			$small->setAttribute( Attribute::STYLE, 'font-size: smaller' );
-		} catch ( MaxCssByteCountExceeded $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			// Making the font size smaller is just a nice-to-have.
-		}
+		$small = $dom->createElement( 'small' );
+		$small->setAttribute( 'style', 'font-size: smaller' );
 		$small->appendChild( $dom->createTextNode( sprintf( '(%s)', $text ) ) );
 		$validate_link->appendChild( $small );
 	}
@@ -1776,8 +1699,8 @@ class AMP_Validation_Manager {
 			$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
 		}
 
-		if ( isset( $sanitizers[ AMP_Style_Sanitizer::class ] ) ) {
-			$sanitizers[ AMP_Style_Sanitizer::class ]['should_locate_sources'] = self::$is_validate_request;
+		if ( isset( $sanitizers['AMP_Style_Sanitizer'] ) ) {
+			$sanitizers['AMP_Style_Sanitizer']['should_locate_sources'] = self::$is_validate_request;
 
 			$css_validation_errors = [];
 			foreach ( self::$validation_error_status_overrides as $slug => $status ) {
@@ -1799,7 +1722,7 @@ class AMP_Validation_Manager {
 				}
 			}
 			if ( ! empty( $css_validation_errors ) ) {
-				$sanitizers[ AMP_Style_Sanitizer::class ]['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
+				$sanitizers['AMP_Style_Sanitizer']['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
 			}
 		}
 
@@ -1830,24 +1753,6 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Validate a URL to be validated.
-	 *
-	 * @param string $url URL.
-	 * @return string|WP_Error Validated URL or else error.
-	 */
-	private static function validate_validation_url( $url ) {
-		$validated_url = wp_validate_redirect( $url );
-		if ( ! $validated_url ) {
-			return new WP_Error(
-				'http_request_failed',
-				/* translators: %s is the URL being redirected to. */
-				sprintf( __( 'Unable to validate a URL on another site. Attempted to validate: %s', 'amp' ), $url )
-			);
-		}
-		return $validated_url;
-	}
-
-	/**
 	 * Validates a given URL.
 	 *
 	 * The validation errors will be stored in the validation status custom post type,
@@ -1873,13 +1778,7 @@ class AMP_Validation_Manager {
 			self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
 			self::CACHE_BUST_QUERY_VAR => wp_rand(),
 		];
-
-		// Ensure the URL to be validated is on the site.
-		$validation_url = self::validate_validation_url( $url );
-		if ( is_wp_error( $validation_url ) ) {
-			return $validation_url;
-		}
-		$validation_url = add_query_arg( $added_query_vars, $validation_url );
+		$validation_url   = add_query_arg( $added_query_vars, $url );
 
 		$r = null;
 
@@ -1919,12 +1818,13 @@ class AMP_Validation_Manager {
 				$location_header = preg_replace( '#(^https?://[^/]+)/.*#', '$1', home_url( '/' ) ) . $location_header;
 			}
 
-			// Prevent following a redirect to another site, which won't work for validation anyway.
-			$validation_url = self::validate_validation_url( $location_header );
-			if ( is_wp_error( $validation_url ) ) {
-				return $validation_url;
+			// Block redirecting to a different host.
+			$location_header = wp_validate_redirect( $location_header );
+			if ( ! $location_header ) {
+				break;
 			}
-			$validation_url = add_query_arg( $added_query_vars, $validation_url );
+
+			$validation_url = add_query_arg( $added_query_vars, $location_header );
 		}
 
 		if ( is_wp_error( $r ) ) {
@@ -2275,16 +2175,11 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		// Block validation script uses features only available beginning with WP 5.6.
-		$dependency_support = Services::get( 'dependency_support' );
-		if ( ! $dependency_support->has_support() ) {
-			return; // @codeCoverageIgnore
-		}
-
-		// Only enqueue scripts on the block editor for AMP-enabled posts.
 		$editor_support = Services::get( 'editor.editor_support' );
-		if ( ! $editor_support->is_current_screen_block_editor_for_amp_enabled_post_type() ) {
-			return;
+
+		// Block validation script uses features only available beginning with WP 5.6.
+		if ( ! $editor_support->editor_supports_amp_block_editor_features() ) {
+			return; // @codeCoverageIgnore
 		}
 
 		$slug = 'amp-block-validation';

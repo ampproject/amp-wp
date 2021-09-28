@@ -6,12 +6,11 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for amp.php.
  */
-class Test_AMP extends TestCase {
+class Test_AMP extends WP_UnitTestCase {
 
 	/**
 	 * Set up.

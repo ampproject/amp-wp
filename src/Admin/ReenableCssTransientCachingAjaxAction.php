@@ -56,46 +56,53 @@ final class ReenableCssTransientCachingAjaxAction implements Service, Registerab
 	 * @param string $hook_suffix Hook suffix to identify from what admin page the call is coming from.
 	 */
 	public function register_ajax_script( $hook_suffix ) {
-		if ( 'tools_page_health-check' !== $hook_suffix && 'site-health.php' !== $hook_suffix ) {
+		if ( 'site-health.php' !== $hook_suffix ) {
 			return;
 		}
 
-		$exports = [
-			'selector' => self::SELECTOR,
-			'action'   => self::AJAX_ACTION,
-			'postArgs' => [ 'nonce' => wp_create_nonce( self::AJAX_ACTION ) ],
-		];
-
-		ob_start();
-		?>
-		<script>
-			(( $, { selector, action, postArgs } ) => {
-				document.addEventListener( 'DOMContentLoaded', () => {
-					$( '.health-check-body' ).on( 'click', selector, ( event ) => {
-						event.preventDefault();
-						const element = event.target;
-						if ( element.classList.contains( 'disabled' ) ) {
-							return;
-						}
-						element.classList.add( 'disabled' );
-						wp.ajax.post( action, postArgs )
-							.done( () => {
-								element.classList.remove( 'ajax-failure' );
-								element.classList.add( 'ajax-success' );
-							} )
-							.fail( () => {
-								element.classList.remove( 'ajax-success' );
-								element.classList.add( 'ajax-failure' );
-								element.classList.remove( 'disabled' );
-							} );
-					} );
+		$script = <<< 'JS_SCRIPT'
+;( function () {
+	window.addEventListener( 'DOMContentLoaded', ( event ) => {
+		var selector = SELECTOR;
+		( document.querySelectorAll( selector ) || [] )
+			.forEach( ( element ) => {
+				element.addEventListener( 'click', function ( event ) {
+					event.preventDefault();
+					if ( element.classList.contains( 'disabled' ) ) {
+						return;
+					}
+					wp.ajax.post( ACTION, ARGUMENTS )
+						.done( function () {
+							element.classList.remove( 'ajax-failure' );
+							element.classList.add( 'ajax-success' )
+							element.classList.add( 'disabled' )
+						} )
+						.fail( function () {
+							element.classList.remove( 'ajax-success' );
+							element.classList.add( 'ajax-failure' )
+							element.classList.add( 'disabled' )
+						} );
 				} );
-			})( jQuery, <?php echo wp_json_encode( $exports ); ?> );
-		</script>
-		<?php
-		$script = str_replace( [ '<script>', '</script>' ], '', ob_get_clean() );
+			} );
+	} );
+} )();
+JS_SCRIPT;
 
-		wp_enqueue_script( 'jquery' );
+		$replacements = array_map(
+			'wp_json_encode',
+			[
+				'SELECTOR'  => self::SELECTOR,
+				'ACTION'    => self::AJAX_ACTION,
+				'ARGUMENTS' => [ 'nonce' => wp_create_nonce( self::AJAX_ACTION ) ],
+			]
+		);
+
+		$script = str_replace(
+			array_keys( $replacements ),
+			array_values( $replacements ),
+			$script
+		);
+
 		wp_enqueue_script( 'wp-util' );
 		wp_add_inline_script( 'wp-util', $script );
 	}

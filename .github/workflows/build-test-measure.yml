@@ -10,13 +10,6 @@ on:
     # Run workflow whenever a PR is opened, updated (synchronized), or marked ready for review.
     types: [opened, synchronize, ready_for_review]
 
-# Cancel previous workflow run groups that have not completed.
-concurrency:
-  # Group workflow runs by workflow name, along with the head branch ref of the pull request
-  # or otherwise the branch or tag ref.
-  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   pre-run:
     name: 'Pre run'
@@ -97,7 +90,18 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
-          cache: npm
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Install Node dependencies
         run: npm ci
@@ -126,7 +130,18 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
-          cache: npm
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Install Node dependencies
         run: npm ci
@@ -221,7 +236,6 @@ jobs:
           # phpstan requires PHP 7.1+.
           php-version: 7.4
           extensions: dom, iconv, json, libxml, zip
-          tools: phpstan
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -239,9 +253,7 @@ jobs:
         run: composer install
 
       - name: Static Analysis (PHPStan)
-        run: |
-          phpstan --version
-          phpstan analyse
+        run: vendor/bin/phpstan analyse
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -263,7 +275,18 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
-          cache: npm
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Setup Jest cache
         uses: actions/cache@v2
@@ -280,7 +303,7 @@ jobs:
         run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
 
       - name: Upload code coverage report
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v2.0.1
         with:
           file: build/logs/lcov.info
           flags: javascript
@@ -311,7 +334,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
-          cache: npm
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -324,6 +346,18 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Install Node dependencies
         run: npm ci
@@ -443,7 +477,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
-          cache: npm
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -459,6 +492,18 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Install Node dependencies
         run: npm ci
@@ -508,7 +553,7 @@ jobs:
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v2.0.1
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php,unit
@@ -596,7 +641,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
-          cache: npm
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -612,6 +656,18 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Install Node dependencies
         run: npm ci
@@ -658,7 +714,7 @@ jobs:
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v2.0.1
         with:
           files: ${{ env.COVERAGE_FILES }}
           flags: php,feature
@@ -700,7 +756,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
-          cache: npm
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -719,6 +774,19 @@ jobs:
         # Scripts are not ignored as they are needed to apply patches for the
         # `sabberworm/php-css-parser` dependency.
         run: composer install --prefer-dist --optimize-autoloader
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Install Node dependencies
         run: npm ci

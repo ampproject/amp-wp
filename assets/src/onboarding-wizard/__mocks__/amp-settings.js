@@ -9,5 +9,5 @@ module.exports = {
 	READER_THEMES_REST_PATH: 'http://site.test/wp-json/amp/v1/reader-themes',
 	UPDATES_NONCE: '',
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED: 'developer_tools',
-	USERS_RESOURCE_REST_PATH: 'http://site.test/wp-json/wp/v2/users',
+	USER_REST_PATH: 'http://site.test/wp-json/wp/v2/users/me',
 };

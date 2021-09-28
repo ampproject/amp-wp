@@ -128,7 +128,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * This is also used in WP_List_Table, like for the 'Bulk Actions' option.
 	 * When this is present, this ensures that this isn't filtered.
 	 *
-	 * @var string
+	 * @var int
 	 */
 	const NO_FILTER_VALUE = '';
 
@@ -1095,7 +1095,7 @@ class AMP_Validation_Error_Taxonomy {
 			&&
 			in_array(
 				$_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ], // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				array_merge( self::get_error_types(), [ self::NO_FILTER_VALUE ] ),
+				array_merge( self::get_error_types(), [ (string) self::NO_FILTER_VALUE ] ),
 				true
 			)
 		) {
@@ -1457,7 +1457,7 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Gets all of the possible error types.
 	 *
-	 * @return string[] Error types.
+	 * @return array Error types.
 	 */
 	public static function get_error_types() {
 		return [ self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ];
@@ -3339,31 +3339,6 @@ class AMP_Validation_Error_Taxonomy {
 					esc_html__( 'The specified layout %1$s is not supported by tag %2$s.', 'amp' ),
 					'<code>' . esc_html( $validation_error['layout'] ) . '</code>',
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
-				);
-
-			case AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR:
-				return sprintf(
-					/* translators: %1$s is 'POST', %2$s is 'action-xhr' */
-					esc_html__( 'Form has %1$s method without %2$s attribute. (Mark as kept to prevent conversion to AMP.)', 'amp' ),
-					'<code>POST</code>',
-					'<code>action-xhr</code>'
-				);
-
-			case AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT:
-				return sprintf(
-					/* translators: %s is script basename */
-					esc_html__( 'Custom external script %s encountered', 'amp' ),
-					'<code>' . basename( strtok( $validation_error['node_attributes']['src'], '?#' ) ) . '</code>'
-				);
-
-			case AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT:
-				return esc_html__( 'Custom inline script encountered', 'amp' );
-
-			case AMP_Script_Sanitizer::CUSTOM_EVENT_HANDLER_ATTR:
-				return sprintf(
-					/* translators: %s is attribute name */
-					esc_html__( 'Event handler attribute %s encountered', 'amp' ),
-					'<code>' . $validation_error['node_name'] . '</code>'
 				);
 
 			default:

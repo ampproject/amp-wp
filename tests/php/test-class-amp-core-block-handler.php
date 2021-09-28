@@ -6,9 +6,9 @@
  * @since 1.0
  */
 
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Core_Block_Handler.
@@ -16,9 +16,10 @@ use AmpProject\AmpWP\Tests\TestCase;
  * @package AMP
  * @coversDefaultClass AMP_Core_Block_Handler
  */
-class Test_AMP_Core_Block_Handler extends TestCase {
+class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 	use MarkupComparison;
+	use AssertContainsCompatibility;
 	use WithoutBlockPreRendering {
 		setUp as public prevent_block_pre_render;
 	}
@@ -83,26 +84,26 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 		$handler->register_embed();
 		$rendered = do_blocks( $categories_block );
-		$this->assertStringContainsString( '<select', $rendered );
-		$this->assertStringNotContainsString( 'onchange', $rendered );
-		$this->assertStringContainsString( 'on="change', $rendered );
+		$this->assertStringContains( '<select', $rendered );
+		$this->assertStringNotContains( 'onchange', $rendered );
+		$this->assertStringContains( 'on="change', $rendered );
 		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
 			$rendered = do_blocks( $archives_block );
-			$this->assertStringContainsString( '<select', $rendered );
-			$this->assertStringNotContainsString( 'onchange', $rendered );
-			$this->assertStringContainsString( 'on="change', $rendered );
+			$this->assertStringContains( '<select', $rendered );
+			$this->assertStringNotContains( 'onchange', $rendered );
+			$this->assertStringContains( 'on="change', $rendered );
 		}
 
 		$handler->unregister_embed();
 		$rendered = do_blocks( $categories_block );
-		$this->assertStringContainsString( '<select', $rendered );
-		$this->assertStringContainsString( 'onchange', $rendered );
-		$this->assertStringNotContainsString( 'on="change', $rendered );
+		$this->assertStringContains( '<select', $rendered );
+		$this->assertStringContains( 'onchange', $rendered );
+		$this->assertStringNotContains( 'on="change', $rendered );
 		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
 			$rendered = do_blocks( $archives_block );
-			$this->assertStringContainsString( '<select', $rendered );
-			$this->assertStringContainsString( 'onchange', $rendered );
-			$this->assertStringNotContainsString( 'on="change', $rendered );
+			$this->assertStringContains( '<select', $rendered );
+			$this->assertStringContains( 'onchange', $rendered );
+			$this->assertStringNotContains( 'on="change', $rendered );
 		}
 	}
 
@@ -152,7 +153,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
-		$this->assertStringContainsString( '<video width="560" height="320" ', $content );
+		$this->assertStringContains( '<video width="560" height="320" ', $content );
 	}
 
 	/**
@@ -175,7 +176,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
-		$this->assertStringContainsString( '<video controls src="https://example.com/foo.mp4">', $content );
+		$this->assertStringContains( '<video controls src="https://example.com/foo.mp4">', $content );
 	}
 
 	/**
@@ -214,7 +215,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			$this->assertFalse( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
 		}
 
-		$this->assertStringContainsString( '<style id="amp-wp-file-block">', $content );
+		$this->assertStringContains( '<style id="amp-wp-file-block">', $content );
 	}
 
 	/**
@@ -238,7 +239,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 		$this->assertFalse( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
 
-		$this->assertStringNotContainsString( '<style id="amp-wp-file-block">', $content );
+		$this->assertStringNotContains( '<style id="amp-wp-file-block">', $content );
 	}
 
 	/**
@@ -262,7 +263,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 		$this->assertFalse( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
 
-		$this->assertStringNotContainsString( '<style id="amp-wp-file-block">', $content );
+		$this->assertStringNotContains( '<style id="amp-wp-file-block">', $content );
 	}
 
 	/**

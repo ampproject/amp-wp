@@ -21,12 +21,12 @@ import { BLOCK_VALIDATION_STORE_KEY } from '../store';
 /**
  * Attempts to associate a validation error with a block current in the editor.
  *
- * @param {Object}   args
- * @param {Object}   args.validationError Validation error object.
- * @param {Object}   args.source          A single validation error source.
- * @param {number}   args.currentPostId   The ID of the current post.
- * @param {string[]} args.blockOrder      Block client IDs in order.
- * @param {Function} args.getBlock        Store selector to get a block in the current editor by client ID.
+ * @param {Object} args
+ * @param {Object} args.validationError Validation error object.
+ * @param {Object} args.source A single validation error source.
+ * @param {number} args.currentPostId The ID of the current post.
+ * @param {string[]} args.blockOrder Block client IDs in order.
+ * @param {Function} args.getBlock Store selector to get a block in the current editor by client ID.
  */
 export function maybeAddClientIdToValidationError( { validationError, source, currentPostId, blockOrder, getBlock } ) {
 	if ( ! source.block_name || undefined === source.block_content_index ) {
@@ -75,7 +75,6 @@ export function useValidationErrorStateUpdates() {
 		setIsFetchingErrors,
 		setFetchingErrorsRequestErrorMessage,
 		setReviewLink,
-		setSupportLink,
 		setValidationErrors,
 	} = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
@@ -182,7 +181,6 @@ export function useValidationErrorStateUpdates() {
 			.then( ( newValidation ) => {
 				setValidationErrors( newValidation.results );
 				setReviewLink( newValidation.review_link );
-				setSupportLink( newValidation.support_link );
 			} )
 			.catch( ( error ) => {
 				setFetchingErrorsRequestErrorMessage( error?.message || __( 'Whoops! Something went wrong.', 'amp' ) );
@@ -190,7 +188,7 @@ export function useValidationErrorStateUpdates() {
 			.finally( () => {
 				setIsFetchingErrors( false );
 			} );
-	}, [ currentPostId, getClientIdsWithDescendants, hasRequestedPreview, isSavingPost, previewLink, setFetchingErrorsRequestErrorMessage, setIsFetchingErrors, setReviewLink, setSupportLink, setValidationErrors, shouldValidate ] );
+	}, [ currentPostId, getClientIdsWithDescendants, hasRequestedPreview, isSavingPost, previewLink, setFetchingErrorsRequestErrorMessage, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
 
 	/**
 	 * Runs an equality check when validation errors are received before running
