@@ -33,7 +33,7 @@ export function NavMenu( { links = [], onClick } ) {
 							href={ link.url }
 							onClick={ ( event ) => onClick( event, link ) }
 						>
-							{ link.text }
+							{ link.label }
 						</a>
 					</li>
 				) ) }
@@ -46,7 +46,7 @@ NavMenu.propTypes = {
 	links: PropTypes.arrayOf(
 		PropTypes.shape( {
 			url: PropTypes.string,
-			text: PropTypes.string,
+			label: PropTypes.string,
 			isActive: PropTypes.bool,
 		} ),
 	),

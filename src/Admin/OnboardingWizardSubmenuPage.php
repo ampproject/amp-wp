@@ -323,15 +323,10 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	 * @return array Preview URLs.
 	 */
 	public function get_preview_urls( $scannable_urls ) {
-		$preview_urls = [];
-
-		foreach ( $scannable_urls as $scannable_url ) {
-			$preview_urls[ $scannable_url['type'] ] = [
-				'url'     => $scannable_url['url'],
-				'amp_url' => amp_add_paired_endpoint( $scannable_url['url'] ),
-			];
+		foreach ( $scannable_urls as &$scannable_url ) {
+			$scannable_url['amp_url'] = amp_add_paired_endpoint( $scannable_url['url'] );
 		}
 
-		return $preview_urls;
+		return $scannable_urls;
 	}
 }
