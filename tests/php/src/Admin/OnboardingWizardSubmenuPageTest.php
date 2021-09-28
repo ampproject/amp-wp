@@ -176,31 +176,40 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 	public function test_get_preview_urls() {
 		$scannable_urls = [
 			[
-				'type' => 'home',
-				'url'  => 'https://example.com',
+				'type'  => 'home',
+				'url'   => 'https://example.com',
+				'label' => 'Homepage'
 			],
 			[
-				'type' => 'page',
-				'url'  => 'https://example.com/sample-page',
+				'type'  => 'page',
+				'url'   => 'https://example.com/sample-page',
+				'label' => 'Page'
 			],
 			[
-				'type' => 'search',
-				'url'  => 'https://example.com/?s=foobar',
+				'type'  => 'search',
+				'url'   => 'https://example.com/?s=foobar',
+				'label' => 'Search Results Page'
 			],
 		];
 
 		$expected_urls = [
-			'home'   => [
+			[
+				'type'    => 'home',
 				'url'     => 'https://example.com',
 				'amp_url' => amp_add_paired_endpoint( 'https://example.com' ),
+				'label'   => 'Homepage'
 			],
-			'page'   => [
+			[
+				'type'    => 'page',
 				'url'     => 'https://example.com/sample-page',
 				'amp_url' => amp_add_paired_endpoint( 'https://example.com/sample-page' ),
+				'label'   => 'Page'
 			],
-			'search' => [
+			[
+				'type'    => 'search',
 				'url'     => 'https://example.com/?s=foobar',
 				'amp_url' => amp_add_paired_endpoint( 'https://example.com/?s=foobar' ),
+				'label'   => 'Search Results Page'
 			],
 		];
 
