@@ -101,9 +101,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	public function init( $sanitizers ) {
 		parent::init( $sanitizers );
 
-		foreach ( $sanitizers as $sanitizer ) {
-			$this->sanitizers[ get_class( $sanitizer ) ] = $sanitizer;
-		}
+		$this->sanitizers = $sanitizers;
 	}
 
 	/**
