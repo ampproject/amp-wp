@@ -255,7 +255,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
-			'PAGE_CACHE_NOTICE_NONCE'            => wp_create_nonce( PageCacheFlushNeededNotice::AJAX_ACTION ),
 			'SITE_HAS_CACHE_ENABLE'              => $site_has_cache_enable,
 			'SHOW_PAGE_CACHE_NOTICE'             => $show_page_cache_flush_notice,
 		];
