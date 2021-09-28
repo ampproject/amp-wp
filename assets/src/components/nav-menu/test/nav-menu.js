@@ -20,12 +20,12 @@ let container;
 const links = [
 	{
 		url: 'https://example.com/foo',
-		text: 'Foo',
+		label: 'Foo',
 		isActive: false,
 	},
 	{
 		url: 'https://example.com/bar',
-		text: 'Bar',
+		label: 'Bar',
 		isActive: true,
 	},
 ];
