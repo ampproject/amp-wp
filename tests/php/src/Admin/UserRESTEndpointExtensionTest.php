@@ -143,5 +143,12 @@ class UserRESTEndpointExtensionTest extends TestCase {
 		$data = $response->get_data();
 		$this->assertArrayHasKey( UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, $data );
 		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, $data[ UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE ] );
+
+		// Verify the editor user cannot access another user.
+		$editor_user = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
+		wp_set_current_user( $editor_user->ID );
+		$request  = new WP_REST_Request( 'GET', "/wp/v2/users/{$admin_user->ID}" );
+		$response = $server->dispatch( $request );
+		$this->assertEquals( 403, $response->get_status() );
 	}
 }
