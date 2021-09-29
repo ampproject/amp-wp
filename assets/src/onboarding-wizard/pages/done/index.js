@@ -52,14 +52,11 @@ export function Done() {
 	/**
 	 * Allow the finish button to be enabled.
 	 */
-	useEffect(
-		() => {
-			if ( ! canGoForward ) {
-				setCanGoForward( true );
-			}
-		},
-		[ setCanGoForward, canGoForward ],
-	);
+	useEffect( () => {
+		if ( ! canGoForward ) {
+			setCanGoForward( true );
+		}
+	}, [ setCanGoForward, canGoForward ] );
 
 	/**
 	 * Triggers saving of options on arrival to this screen.
