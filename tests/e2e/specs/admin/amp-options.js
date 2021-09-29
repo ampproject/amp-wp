@@ -182,16 +182,18 @@ describe( 'AMP settings screen Review panel', () => {
 	} );
 
 	it( 'can be dismissed and shows up again only after a template mode change', async () => {
-		await clickMode( 'transitional' );
-
+		await page.waitForSelector( '.settings-site-review' );
 		await expect( page ).toMatchElement( 'button', { text: 'Dismiss' } );
 		await expect( page ).toClick( 'button', { text: 'Dismiss' } );
-		await expect( page ).not.toMatchElement( 'h2', { text: 'Review' } );
 
+		// Give the Review panel some time disappear.
+		await page.waitForTimeout( 100 );
+		await expect( page ).not.toMatchElement( '.settings-site-review' );
+
+		// There should be no Review panel after page reload.
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		await page.waitForSelector( '.settings-site-review' );
-		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
+		await page.waitForSelector( '#amp-settings-root' );
+		await expect( page ).not.toMatchElement( '.settings-site-review' );
 
 		await clickMode( 'standard' );
 
