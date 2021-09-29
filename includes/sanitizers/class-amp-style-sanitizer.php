@@ -148,6 +148,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'[submit-error]',
 			'[submit-success]',
 			'amp-script',
+			'amp-story-captions',
 		],
 		'should_locate_sources'          => false,
 		'parsed_cache_variant'           => null,
