@@ -2,7 +2,8 @@
 /**
  * Class UserRESTEndpointExtension
  *
- * @package Ampproject\Ampwp
+ * @package AmpProject\AmpWP
+ * @since 2.2
  */
 
 namespace AmpProject\AmpWP\Admin;
@@ -11,11 +12,10 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use WP_Error;
 use WP_User;
 
 /**
- * UserRESTEndpointExtension class.
+ * Service which registers additional REST API fields for the user endpoint.
  *
  * @since 2.2
  * @internal
@@ -39,7 +39,7 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 	}
 
 	/**
-	 * Adds hooks.
+	 * Register.
 	 */
 	public function register() {
 		$this->register_rest_field();
