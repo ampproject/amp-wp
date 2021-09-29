@@ -86,7 +86,7 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 	 * @param string  $template_mode Template mode or empty string.
 	 * @param WP_User $user          The WP user to update.
 	 *
-	 * @return bool|WP_Error The result of update_user_meta, or WP_Error if the current user lacks permission.
+	 * @return bool The result of updating or deleting the user meta.
 	 */
 	public function update_review_panel_dismissed_for_template_mode( $template_mode, WP_User $user ) {
 		if ( empty( $template_mode ) ) {
