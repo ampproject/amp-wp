@@ -56,7 +56,7 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 				'get_callback'    => [ $this, 'get_review_panel_dismissed_for_template_mode' ],
 				'update_callback' => [ $this, 'update_review_panel_dismissed_for_template_mode' ],
 				'schema'          => [
-					'description' => __( 'For which template mode the Review panel on the Settings screen was dismissed by a user', 'amp' ),
+					'description' => __( 'The template mode for which the Review panel on the Settings screen was dismissed by a user.', 'amp' ),
 					'type'        => 'string',
 					'enum'        => [
 						'',
@@ -74,17 +74,9 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 	 *
 	 * @param array $user Array of user data prepared for REST.
 	 *
-	 * @return string|WP_Error Template mode for which the panel is dismissed, empty string if the option has not been set, or WP_Error if the current user lacks permission.
+	 * @return string|null Template mode for which the panel is dismissed, empty string if the option has not been set.
 	 */
 	public function get_review_panel_dismissed_for_template_mode( $user ) {
-		if ( wp_get_current_user()->ID !== $user['id'] ) {
-			return new WP_Error(
-				'amp_rest_cannot_get_other_user',
-				__( 'Sorry, the current user is not allowed to get this data about other user.', 'amp' ),
-				[ 'status' => rest_authorization_required_code() ]
-			);
-		}
-
 		return get_user_meta( $user['id'], self::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, true );
 	}
 
@@ -96,19 +88,11 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 	 *
 	 * @return bool|WP_Error The result of update_user_meta, or WP_Error if the current user lacks permission.
 	 */
-	public function update_review_panel_dismissed_for_template_mode( $template_mode, $user ) {
+	public function update_review_panel_dismissed_for_template_mode( $template_mode, WP_User $user ) {
 		if ( ! current_user_can( 'edit_user', $user->ID ) ) {
 			return new WP_Error(
 				'amp_rest_cannot_edit_user',
 				__( 'Sorry, the current user is not allowed to make this change.', 'amp' ),
-				[ 'status' => rest_authorization_required_code() ]
-			);
-		}
-
-		if ( wp_get_current_user()->ID !== $user->ID ) {
-			return new WP_Error(
-				'amp_rest_cannot_edit_other_user',
-				__( 'Sorry, the user is not allowed to make this change for other user.', 'amp' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}

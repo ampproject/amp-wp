@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\UserRESTEndpointExtension;
 use AmpProject\AmpWP\Tests\TestCase;
+use WP_REST_Request;
 
 /**
  * Tests for UserRESTEndpointExtension class.
@@ -64,22 +65,46 @@ class UserRESTEndpointExtensionTest extends TestCase {
 	 * @covers ::update_review_panel_dismissed_for_template_mode
 	 */
 	public function test_update_review_panel_dismissed_for_template_mode() {
+		$server = rest_get_server();
+		$this->user_rest_endpoint_extension->register_rest_field();
+
 		$admin_user  = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
 		$editor_user = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
 
+		$this->assertSame( '', $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $admin_user->ID ] ) );
+		$this->assertSame( '', $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $editor_user->ID ] ) );
+
+		// Test that an editor can edit their own field.
 		wp_set_current_user( $editor_user->ID );
-		$this->assertTrue( $this->user_rest_endpoint_extension->update_review_panel_dismissed_for_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG, $editor_user ) );
-		$this->assertWPError( $this->user_rest_endpoint_extension->update_review_panel_dismissed_for_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG, $admin_user ) );
+		$request = new WP_REST_Request( 'PUT', "/wp/v2/users/{$editor_user->ID}" );
+		$request->set_body_params( [ UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE => AMP_Theme_Support::STANDARD_MODE_SLUG ] );
+		$response = $server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $editor_user->ID ] ) );
 
+		// Test that an editor cannot edit another user's field.
+		wp_set_current_user( $editor_user->ID );
+		$request = new WP_REST_Request( 'PUT', "/wp/v2/users/{$admin_user->ID}" );
+		$request->set_body_params( [ UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE => AMP_Theme_Support::STANDARD_MODE_SLUG ] );
+		$response = $server->dispatch( $request );
+		$this->assertEquals( 403, $response->get_status() );
+		$this->assertSame( '', $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $admin_user->ID ] ) );
+
+		// Test that admin user can edit another user's field.
 		wp_set_current_user( $admin_user->ID );
-		$this->assertTrue( $this->user_rest_endpoint_extension->update_review_panel_dismissed_for_template_mode( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, $admin_user ) );
-		$this->assertWPError( $this->user_rest_endpoint_extension->update_review_panel_dismissed_for_template_mode( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, $editor_user ) );
+		$request = new WP_REST_Request( 'PUT', "/wp/v2/users/{$editor_user->ID}" );
+		$request->set_body_params( [ UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ] );
+		$response = $server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $editor_user->ID ] ) );
 
-		$this->assertEquals( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, get_user_meta( $admin_user->ID, UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, true ) );
-		$this->assertTrue( $this->user_rest_endpoint_extension->update_review_panel_dismissed_for_template_mode( '', $admin_user ) );
-		$this->assertEmpty( get_user_meta( $admin_user->ID, UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, true ) );
-
-		$this->assertWPError( $this->user_rest_endpoint_extension->update_review_panel_dismissed_for_template_mode( 'foobar', $editor_user ) );
+		// Test that admin user can edit their own field (to clear it out).
+		wp_set_current_user( $admin_user->ID );
+		$request = new WP_REST_Request( 'PUT', "/wp/v2/users/{$admin_user->ID}" );
+		$request->set_body_params( [ UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE => '' ] );
+		$response = $server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( '', $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $admin_user->ID ] ) );
 	}
 
 	/**
@@ -88,19 +113,27 @@ class UserRESTEndpointExtensionTest extends TestCase {
 	 * @covers ::get_review_panel_dismissed_for_template_mode
 	 */
 	public function test_get_review_panel_dismissed_for_template_mode() {
-		$admin_user  = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
-		$editor_user = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
+		$server = rest_get_server();
+		$this->user_rest_endpoint_extension->register_rest_field();
 
-		wp_set_current_user( $editor_user->ID );
-		$this->assertEmpty( $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $editor_user->ID ] ) );
-		$this->user_rest_endpoint_extension->update_review_panel_dismissed_for_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG, $editor_user );
-		$this->assertEquals( AMP_Theme_Support::STANDARD_MODE_SLUG, $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $editor_user->ID ] ) );
-		$this->assertWPError( $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $admin_user->ID ] ) );
-
+		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
 		wp_set_current_user( $admin_user->ID );
-		$this->assertEmpty( $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $admin_user->ID ] ) );
+
+		// Check initial value.
+		$request  = new WP_REST_Request( 'GET', "/wp/v2/users/{$admin_user->ID}" );
+		$response = $server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, $data );
+		$this->assertSame( '', $data[ UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE ] );
+
+		// Check updated value.
 		$this->user_rest_endpoint_extension->update_review_panel_dismissed_for_template_mode( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, $admin_user );
-		$this->assertEquals( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $admin_user->ID ] ) );
-		$this->assertWPError( $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $editor_user->ID ] ) );
+		$request  = new WP_REST_Request( 'GET', "/wp/v2/users/{$admin_user->ID}" );
+		$response = $server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, $data );
+		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, $data[ UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE ] );
 	}
 }
