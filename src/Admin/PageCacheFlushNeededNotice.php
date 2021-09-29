@@ -79,14 +79,12 @@ final class PageCacheFlushNeededNotice implements Service, Registerable {
 
 		if ( empty( $notice ) ) {
 			wp_die( 0 );
-			return;
 		}
 
 		$notices = get_option( self::OPTION_NAME, [] );
 
 		if ( ! in_array( $notice, $notices, true ) ) {
 			wp_die( 0 );
-			return;
 		}
 
 		$notices = array_diff( $notices, [ $notice ] );

@@ -8,14 +8,16 @@
 namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\PageCacheFlushNeededNotice;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
+use Exception;
+use WPDieException;
 
 /**
  * Class PageCacheFlushNeededNoticeTest
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\PageCacheFlushNeededNotice
  */
-class PageCacheFlushNeededNoticeTest extends WP_UnitTestCase {
+class PageCacheFlushNeededNoticeTest extends TestCase {
 
 	/**
 	 * Instance of PageCacheFlushNeededNotice
@@ -79,9 +81,17 @@ class PageCacheFlushNeededNoticeTest extends WP_UnitTestCase {
 	 */
 	public function test_ajax_dismiss_amp_notice() {
 
+		/**
+		 * Flush previous data.
+		 * phpcs:disable WordPress.Security.NonceVerification.Missing
+		 * phpcs:disable WordPress.Security.NonceVerification.Recommended
+		 */
+		unset( $_POST['notice'], $_REQUEST['nonce'] );
+		// phpcs:enable
+
 		$callback_wp_die_ajax = static function () {
 			return static function ( $message ) {
-				echo $message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				throw new WPDieException( $message );
 			};
 		};
 
@@ -94,10 +104,17 @@ class PageCacheFlushNeededNoticeTest extends WP_UnitTestCase {
 		 * Test 1: Without any data.
 		 */
 		ob_start();
-		$this->instance->ajax_dismiss_amp_notice();
-		$response = ob_get_clean();
+		$exception = null;
+		try {
+			$this->instance->ajax_dismiss_amp_notice();
+		} catch ( Exception $ex ) {
+			$exception = $ex;
+		}
+		$output        = ob_get_clean();
+		$actual_output = $output . $exception->getMessage();
 
-		$this->assertEquals( '0', $response );
+		$this->assertInstanceOf( WPDieException::class, $exception );
+		$this->assertEquals( '0', $actual_output );
 
 
 		/**
@@ -106,10 +123,16 @@ class PageCacheFlushNeededNoticeTest extends WP_UnitTestCase {
 		$_POST['notice'] = PageCacheFlushNeededNotice::NOTICE_ID;
 
 		ob_start();
-		$this->instance->ajax_dismiss_amp_notice();
-		$response = ob_get_clean();
+		$exception = null;
+		try {
+			$this->instance->ajax_dismiss_amp_notice();
+		} catch ( Exception $ex ) {
+			$exception = $ex;
+		}
+		$output        = ob_get_clean();
+		$actual_output = $output . $exception->getMessage();
 
-		$this->assertEquals( '0', $response );
+		$this->assertEquals( '0', $actual_output );
 
 		/**
 		 * Test 3: With data, And valid option.
@@ -120,10 +143,16 @@ class PageCacheFlushNeededNoticeTest extends WP_UnitTestCase {
 		);
 
 		ob_start();
-		$this->instance->ajax_dismiss_amp_notice();
-		$response = ob_get_clean();
+		$exception = null;
+		try {
+			$this->instance->ajax_dismiss_amp_notice();
+		} catch ( Exception $ex ) {
+			$exception = $ex;
+		}
+		$output        = ob_get_clean();
+		$actual_output = $output . $exception->getMessage();
 
-		$this->assertEquals( '1', $response );
+		$this->assertEquals( '1', $actual_output );
 
 		// Restore data and filters.
 		remove_filter( 'wp_doing_ajax', '__return_true' );
@@ -143,6 +172,9 @@ class PageCacheFlushNeededNoticeTest extends WP_UnitTestCase {
 	 * @covers ::render_notice
 	 */
 	public function test_render_notice() {
+
+		// Flush previous data.
+		delete_option( PageCacheFlushNeededNotice::OPTION_NAME );
 
 		/**
 		 * Test 1: Without option data data.
