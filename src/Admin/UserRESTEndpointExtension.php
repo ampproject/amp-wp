@@ -89,14 +89,6 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 	 * @return bool|WP_Error The result of update_user_meta, or WP_Error if the current user lacks permission.
 	 */
 	public function update_review_panel_dismissed_for_template_mode( $template_mode, WP_User $user ) {
-		if ( ! current_user_can( 'edit_user', $user->ID ) ) {
-			return new WP_Error(
-				'amp_rest_cannot_edit_user',
-				__( 'Sorry, the current user is not allowed to make this change.', 'amp' ),
-				[ 'status' => rest_authorization_required_code() ]
-			);
-		}
-
 		if ( empty( $template_mode ) ) {
 			return delete_user_meta( $user->ID, self::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE );
 		}
