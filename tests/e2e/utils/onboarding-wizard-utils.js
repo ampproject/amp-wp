@@ -126,7 +126,7 @@ export async function cleanUpSettings() {
 		await Promise.all( [
 			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: {
 				amp_dev_tools_enabled: true,
-				amp_review_panel_dismissed_for_template_mode: null,
+				amp_review_panel_dismissed_for_template_mode: '',
 			} } ),
 			wp.apiFetch( { path: '/amp/v1/options', method: 'POST', data: {
 				mobile_redirect: false,

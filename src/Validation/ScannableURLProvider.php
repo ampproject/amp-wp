@@ -74,7 +74,7 @@ final class ScannableURLProvider {
 					$urls[]           = [
 						'url'   => get_permalink( $post_ids[0] ),
 						'type'  => $post_type,
-						'label' => empty( $post_type_object->labels->name ) ? $post_type : $post_type_object->labels->name,
+						'label' => $post_type_object->labels->singular_name ?: $post_type,
 					];
 				}
 			}
@@ -87,7 +87,7 @@ final class ScannableURLProvider {
 					$urls[]          = [
 						'url'   => $link,
 						'type'  => $taxonomy,
-						'label' => empty( $taxonomy_object->labels->name ) ? $taxonomy : $taxonomy_object->labels->name,
+						'label' => $taxonomy_object->labels->singular_name ?: $taxonomy,
 					];
 				}
 			}
@@ -116,7 +116,7 @@ final class ScannableURLProvider {
 			$urls[] = [
 				'url'   => $url,
 				'type'  => 'search',
-				'label' => __( 'Search Results Page', 'amp' ),
+				'label' => __( 'Search Results', 'amp' ),
 			];
 		}
 

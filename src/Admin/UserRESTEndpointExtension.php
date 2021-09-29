@@ -59,7 +59,7 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 					'description' => __( 'For which template mode the Review panel on the Settings screen was dismissed by a user', 'amp' ),
 					'type'        => 'string',
 					'enum'        => [
-						null,
+						'',
 						AMP_Theme_Support::READER_MODE_SLUG,
 						AMP_Theme_Support::STANDARD_MODE_SLUG,
 						AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
@@ -74,7 +74,7 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 	 *
 	 * @param array $user Array of user data prepared for REST.
 	 *
-	 * @return string|WP_Error Template mode fir which the panel is dismissed, empty string if the option has not been set, or WP_Error if the current user lacks permission.
+	 * @return string|WP_Error Template mode for which the panel is dismissed, empty string if the option has not been set, or WP_Error if the current user lacks permission.
 	 */
 	public function get_review_panel_dismissed_for_template_mode( $user ) {
 		if ( wp_get_current_user()->ID !== $user['id'] ) {
@@ -91,7 +91,7 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 	/**
 	 * Updates a user's setting determining for which template mode the "Review" panel was dismissed.
 	 *
-	 * @param string  $template_mode Template mode.
+	 * @param string  $template_mode Template mode or empty string.
 	 * @param WP_User $user          The WP user to update.
 	 *
 	 * @return bool|WP_Error The result of update_user_meta, or WP_Error if the current user lacks permission.

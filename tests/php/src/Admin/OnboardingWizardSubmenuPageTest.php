@@ -188,7 +188,7 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 			[
 				'type'  => 'search',
 				'url'   => 'https://example.com/?s=foobar',
-				'label' => 'Search Results Page',
+				'label' => 'Search Results',
 			],
 		];
 
@@ -209,7 +209,7 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 				'type'    => 'search',
 				'url'     => 'https://example.com/?s=foobar',
 				'amp_url' => amp_add_paired_endpoint( 'https://example.com/?s=foobar' ),
-				'label'   => 'Search Results Page',
+				'label'   => 'Search Results',
 			],
 		];
 
