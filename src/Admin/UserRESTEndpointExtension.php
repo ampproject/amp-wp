@@ -74,7 +74,7 @@ class UserRESTEndpointExtension implements Service, Registerable, Delayed {
 	 *
 	 * @param array $user Array of user data prepared for REST.
 	 *
-	 * @return string|null Template mode for which the panel is dismissed, empty string if the option has not been set.
+	 * @return string Template mode for which the panel is dismissed, empty string if the option has not been set.
 	 */
 	public function get_review_panel_dismissed_for_template_mode( $user ) {
 		return get_user_meta( $user['id'], self::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, true );
