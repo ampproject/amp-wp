@@ -105,6 +105,14 @@ class UserRESTEndpointExtensionTest extends TestCase {
 		$response = $server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertSame( '', $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $admin_user->ID ] ) );
+
+		// Test that a user user cannot update the value to be bogus.
+		wp_set_current_user( $admin_user->ID );
+		$request = new WP_REST_Request( 'PUT', "/wp/v2/users/{$admin_user->ID}" );
+		$request->set_body_params( [ UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE => 'BOGUS' ] );
+		$response = $server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertSame( '', $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $admin_user->ID ] ) );
 	}
 
 	/**
