@@ -23,7 +23,7 @@ export const Navigation = createContext();
  * @param {Array}  props.pages    Pages in the app.
  */
 export function NavigationContextProvider( { children, pages } ) {
-	const [ activePageIndex, setActivePageIndex ] = useState( 0 );
+	const [ currentPage, setCurrentPage ] = useState( pages[ 0 ] );
 	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 2.1.
 	const { editedOptions } = useContext( Options );
 
@@ -37,7 +37,7 @@ export function NavigationContextProvider( { children, pages } ) {
 		return pages.filter( ( page ) => 'theme-selection' !== page.slug );
 	}, [ pages, themeSupport ] );
 
-	const currentPage = adaptedPages[ activePageIndex ];
+	const activePageIndex = adaptedPages.findIndex( ( adaptedPage ) => adaptedPage.slug === currentPage.slug );
 
 	const isLastPage = activePageIndex === adaptedPages.length - 1;
 
@@ -45,7 +45,7 @@ export function NavigationContextProvider( { children, pages } ) {
 	 * Navigates back to the previous page.
 	 */
 	const moveBack = () => {
-		setActivePageIndex( activePageIndex - 1 );
+		setCurrentPage( adaptedPages[ activePageIndex - 1 ] );
 		setCanGoForward( true );
 	};
 
@@ -57,7 +57,7 @@ export function NavigationContextProvider( { children, pages } ) {
 			return;
 		}
 
-		setActivePageIndex( activePageIndex + 1 );
+		setCurrentPage( adaptedPages[ activePageIndex + 1 ] );
 		setCanGoForward( false ); // Each page is responsible for setting this to true.
 	};
 
@@ -72,7 +72,6 @@ export function NavigationContextProvider( { children, pages } ) {
 					moveBack,
 					moveForward,
 					pages: adaptedPages,
-					setActivePageIndex,
 					setCanGoForward,
 				}
 			}

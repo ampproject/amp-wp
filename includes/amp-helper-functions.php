@@ -202,7 +202,7 @@ function amp_init() {
 					/** @type {HTMLStyleElement} */
 					const style = document.createElement( 'style' );
 					style.setAttribute( 'type', 'text/css' );
-					style.appendChild( document.createTextNode( 'html { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
+					style.appendChild( document.createTextNode( 'html:not(#_) { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
 					document.head.appendChild( style );
 
 					document.addEventListener( 'DOMContentLoaded', function() {

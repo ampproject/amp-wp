@@ -5,7 +5,9 @@
  */
 :root {
 	--amp-settings-color-black: #212121;
+	--amp-settings-color-dark-gray: #333;
 	--amp-settings-color-brand: #2459e7;
+	--amp-settings-color-muted: #48525c;
 	--gray: #6c7781;
 	--amp-settings-color-border: #e8e8e8;
 	--very-light-gray: #fafafc;
@@ -16,4 +18,5 @@
 	--color-valid: #46b450;
 	--amp-settings-color-danger: #dc3232;
 	--color-gray-medium: rgba(0, 0, 0, 0.54);
+	--amp-settings-font-size: 16px;
 }

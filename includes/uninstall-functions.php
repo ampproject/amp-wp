@@ -39,8 +39,13 @@ function delete_options() {
  * @internal
  */
 function delete_user_metadata() {
-
-	delete_metadata( 'user', 0, 'amp_dev_tools_enabled', '', true );
+	$keys = [
+		'amp_dev_tools_enabled',
+		'amp_review_panel_dismissed_for_template_mode',
+	];
+	foreach ( $keys as $key ) {
+		delete_metadata( 'user', 0, $key, '', true );
+	}
 }
 
 /**
