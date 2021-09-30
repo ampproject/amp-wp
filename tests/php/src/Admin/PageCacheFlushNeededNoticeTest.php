@@ -89,6 +89,8 @@ class PageCacheFlushNeededNoticeTest extends TestCase {
 		unset( $_POST['notice'], $_REQUEST['nonce'] );
 		// phpcs:enable
 
+		delete_option( PageCacheFlushNeededNotice::OPTION_NAME );
+
 		$callback_wp_die_ajax = static function () {
 			return static function ( $message ) {
 				throw new WPDieException( $message );
