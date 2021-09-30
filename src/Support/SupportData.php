@@ -7,6 +7,10 @@
 
 namespace AmpProject\AmpWP\Support;
 
+use AMP_Options_Manager;
+use AMP_Validated_URL_Post_Type;
+use LimitIterator;
+use SplFileObject;
 use WP_Error;
 use WP_Theme;
 use AmpProject\AmpWP\QueryVar;
@@ -303,20 +307,26 @@ class SupportData {
 			];
 		}
 
-		$file        = file( $error_log_path );
-		$max_lines   = max( 0, count( $file ) - 200 );
-		$file_length = count( $file );
-		$contents    = [];
+		try {
+			$file = new SplFileObject( $error_log_path );
+			$file->seek(PHP_INT_MAX);
+			$last_line = $file->key();
 
-		for ( $i = $max_lines; $i < $file_length; $i ++ ) {
-			if ( ! empty( $file[ $i ] ) ) {
-				$contents[] = sanitize_text_field( $file[ $i ] );
-			}
+			$offset          = max( 0,  $last_line - 200 );
+			$lines_iterator  = new LimitIterator( $file, $offset, $last_line );
+			$lines           = array_map( 'sanitize_text_field', iterator_to_array( $lines_iterator ) );
+			$contents        = implode( "\n", $lines );
+
+			// Remove file handle from memory.
+			unset( $file );
+		} catch ( \Exception $e ) {
+			// Set contents to empty string if there was an error reading the error log file.
+			$contents = '';
 		}
 
 		return [
 			'log_errors' => ini_get( 'log_errors' ),
-			'contents'   => implode( "\n", $contents ),
+			'contents'   => $contents,
 		];
 	}
 
