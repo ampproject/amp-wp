@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NavMenu matches the snapshot 1`] = `
+<nav
+  className="nav-menu selectable selectable--left"
+>
+  <ul
+    className="nav-menu__list"
+  >
+    <li
+      className="nav-menu__item"
+    >
+      <a
+        className="nav-menu__link"
+        href="https://example.com/foo"
+        onClick={[Function]}
+      >
+        Foo
+      </a>
+    </li>
+    <li
+      className="nav-menu__item"
+    >
+      <a
+        className="nav-menu__link nav-menu__link--active"
+        href="https://example.com/bar"
+        onClick={[Function]}
+      >
+        Bar
+      </a>
+    </li>
+  </ul>
+</nav>
+`;

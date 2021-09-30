@@ -15,6 +15,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Options } from '../components/options-context-provider';
 import { AMPDrawer } from '../components/amp-drawer';
 import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../components/amp-notice';
+import { STANDARD } from '../common/constants';
 
 /**
  * @typedef {{name: string, slug: string, type: string}} Source
@@ -295,7 +296,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 	const { theme_support: themeSupport } = editedOptions || {};
 
 	// Don't show if the mode is standard or the themeSupport is not yet set.
-	if ( ! themeSupport || 'standard' === themeSupport ) {
+	if ( ! themeSupport || STANDARD === themeSupport ) {
 		return null;
 	}
 
