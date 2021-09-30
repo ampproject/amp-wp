@@ -368,8 +368,8 @@ class SupportData {
 	 */
 	public static function normalize_plugin_info( $plugin_file ) {
 
-		$absolute_plugin_file = WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $plugin_file;
-		if ( ! file_exists( $absolute_plugin_file ) ) {
+		$absolute_plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+		if (  0 !== validate_file( $absolute_plugin_file ) || ! file_exists( $absolute_plugin_file ) ) {
 			return [];
 		}
 
