@@ -109,6 +109,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	 *
 	 * @covers ::sanitize()
 	 * @covers ::ampify_threaded_comments()
+	 * @covers ::prepare_native_comment_reply()
 	 */
 	public function test_ampify_threaded_comments( $ampify_comment_threading, $comments_form_has_action_xhr, $expect_ampify_comment_threading ) {
 		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
