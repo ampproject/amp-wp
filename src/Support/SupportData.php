@@ -221,14 +221,20 @@ class SupportData {
 			$loopback_status = ( ! empty( $loopback_status->status ) ) ? $loopback_status->status : '';
 		}
 
-		$site_info = [
+		if ( version_compare( get_bloginfo( 'version' ), '5.7', '>=' ) ) {
+			$https_status = wp_is_https_supported();
+		} else {
+			$https_status = is_ssl();
+		}
+
+		return [
 			'site_url'                    => static::get_home_url(),
 			'site_title'                  => get_bloginfo( 'site_title' ),
 			'php_version'                 => phpversion(),
 			'mysql_version'               => $wpdb->get_var( 'SELECT VERSION();' ), // phpcs:ignore
 			'wp_version'                  => get_bloginfo( 'version' ),
 			'wp_language'                 => get_bloginfo( 'language' ),
-			'wp_https_status'             => is_ssl() ? true : false,
+			'wp_https_status'             => $https_status,
 			'wp_multisite'                => $wp_type,
 			'wp_active_theme'             => $active_theme,
 			'object_cache_status'         => wp_using_ext_object_cache(),
