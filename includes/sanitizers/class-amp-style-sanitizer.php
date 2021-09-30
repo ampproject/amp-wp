@@ -2681,31 +2681,31 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$validation_results = [];
 		$important_count    = 0;
 
-		if ( ! empty( $options['property_allowlist'] ) ) {
-			foreach ( $css_list->getContents() as $rules ) {
-				if ( ! ( $rules instanceof DeclarationBlock ) ) {
-					$error     = [
-						'code'      => self::CSS_SYNTAX_INVALID_DECLARATION,
-						'item'      => get_class( $rules ),
-						'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-						'spec_name' => $options['spec_name'],
-					];
-					$sanitized = $this->should_sanitize_validation_error( $error );
-					if ( $sanitized ) {
-						$css_list->remove( $rules );
-					}
-					$validation_results[] = compact( 'error', 'sanitized' );
-					continue;
+		foreach ( $css_list->getContents() as $rules ) {
+			if ( ! ( $rules instanceof DeclarationBlock ) ) {
+				$error     = [
+					'code'      => self::CSS_SYNTAX_INVALID_DECLARATION,
+					'item'      => get_class( $rules ),
+					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'spec_name' => $options['spec_name'],
+				];
+				$sanitized = $this->should_sanitize_validation_error( $error );
+				if ( $sanitized ) {
+					$css_list->remove( $rules );
 				}
+				$validation_results[] = compact( 'error', 'sanitized' );
+				continue;
+			}
 
-				$transformed = $this->transform_important_qualifiers( $rules, $css_list, $options );
+			$transformed = $this->transform_important_qualifiers( $rules, $css_list, $options );
 
-				$validation_results = array_merge(
-					$validation_results,
-					$transformed['validation_results']
-				);
-				$important_count   += $transformed['important_count'];
+			$validation_results = array_merge(
+				$validation_results,
+				$transformed['validation_results']
+			);
+			$important_count   += $transformed['important_count'];
 
+			if ( ! empty( $options['property_allowlist'] ) ) {
 				$properties = $rules->getRules();
 				foreach ( $properties as $property ) {
 					$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );

@@ -1003,6 +1003,27 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			</html>
 		';
 
+		$html_important_keyframes = '
+			<html>
+				<head>
+					<style>
+					body {
+						animation-name: foo;
+					}
+					@keyframes foo {
+						from {
+							opacity: 0 !important;
+						}
+						to {
+							opacity: 100 !important;
+						}
+					}
+					</style>
+				</head>
+				<body></body>
+			</html>
+		';
+
 		return [
 			'transform' => [
 				true, // transform_important_qualifiers
@@ -1020,6 +1041,10 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					<div class="bar amp-wp-32bb249" data-amp-original-style="background: red"></div>
 					<div class="baz"></div>
 				',
+				[
+					AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR,
+					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
+				],
 			],
 			'no_transform' => [
 				false, // transform_important_qualifiers
@@ -1035,6 +1060,10 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					<div class="bar" style="background: red"></div>
 					<div class="baz"></div>
 				',
+				[
+					AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR,
+					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
+				],
 			],
 			'no_transform_no_sanitize' => [
 				false, // transform_important_qualifiers
@@ -1051,6 +1080,46 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					<div class="bar" style="background: red"></div>
 					<div class="baz i-amphtml-illegal" ' . ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE . '="class"></div>
 				',
+				[
+					AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR,
+					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
+				],
+			],
+			'transform_keyframes_and_sanitize' => [
+				true, // transform_important_qualifiers
+				true, // should_sanitize
+				$html_important_keyframes,
+				[
+					'body{animation-name:foo}@keyframes foo{from{opacity:0}to{opacity:100}}',
+				],
+				'<style amp-custom>',
+				'',
+				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT ],
+			],
+			'transform_keyframes_and_no_sanitize' => [
+				true, // transform_important_qualifiers
+				false, // should_sanitize
+				$html_important_keyframes,
+				[
+					'body{animation-name:foo}@keyframes foo{from{opacity:0 !important}to{opacity:100 !important}}',
+				],
+				sprintf( '<style amp-custom %s>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				'',
+				[
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT,
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT,
+				],
+			],
+			'transform_keyframes_not_and_no_sanitize' => [
+				false, // transform_important_qualifiers
+				false, // should_sanitize
+				$html_important_keyframes,
+				[
+					'body{animation-name:foo}@keyframes foo{from{opacity:0 !important}to{opacity:100 !important}}',
+				],
+				sprintf( '<style amp-custom %s>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'',
+				[],
 			],
 		];
 	}
@@ -1059,19 +1128,23 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Test that transformation of !important qualifiers (and processing of style attributes) can be turned off.
 	 *
 	 * @dataProvider get_data_to_test_transform_important_qualifiers_arg
-	 * @param bool   $transform_important_qualifiers Sanitizer args.
-	 * @param bool   $should_sanitize                Whether invalid markup should be sanitized.
-	 * @param string $html_input                     HTML input document.
-	 * @param array  $expected_stylesheets           Expected stylesheets.
-	 * @param string $expected_custom_css_start_tag  Custom CSS start style tag.
-	 * @param string $expected_body_markup           Expected body markup.
+	 * @param bool    $transform_important_qualifiers Sanitizer args.
+	 * @param bool    $should_sanitize                Whether invalid markup should be sanitized.
+	 * @param string  $html_input                     HTML input document.
+	 * @param array   $expected_stylesheets           Expected stylesheets.
+	 * @param string  $expected_custom_css_start_tag  Custom CSS start style tag.
+	 * @param string  $expected_body_markup           Expected body markup.
+	 * @param string[] $expected_error_codes          Expected validation error codes.
 	 */
-	public function test_transform_important_qualifiers_arg( $transform_important_qualifiers, $should_sanitize, $html_input, $expected_stylesheets, $expected_custom_css_start_tag, $expected_body_markup ) {
+	public function test_transform_important_qualifiers_arg( $transform_important_qualifiers, $should_sanitize, $html_input, $expected_stylesheets, $expected_custom_css_start_tag, $expected_body_markup, $expected_error_codes ) {
 		$dom = Document::fromHtml( $html_input, Options::DEFAULTS );
+
+		$actual_error_codes = [];
 
 		$args = [
 			'use_document_element'      => true,
-			'validation_error_callback' => static function () use ( $should_sanitize ) {
+			'validation_error_callback' => static function ( $validation_error ) use ( $should_sanitize, &$actual_error_codes ) {
+				$actual_error_codes[] = $validation_error['code'];
 				return $should_sanitize;
 			},
 		];
@@ -1101,6 +1174,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			$expected_body_markup,
 			$body_markup
 		);
+
+		$this->assertEquals( $expected_error_codes, $actual_error_codes );
 	}
 
 	/**
