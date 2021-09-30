@@ -23,6 +23,8 @@ use WP_Error;
  * REST API support to send AMP support data.
  *
  * @package AmpProject\AmpWP\Support
+ * @internal
+ * @since 2.2
  */
 class SupportRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 

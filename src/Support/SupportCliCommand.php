@@ -15,6 +15,9 @@ use AmpProject\AmpWP\Infrastructure\CliCommand;
 
 /**
  * Service class for support.
+ *
+ * @internal
+ * @since 2.2
  */
 class SupportCliCommand implements Service, CliCommand {
 

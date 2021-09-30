@@ -14,6 +14,9 @@ use AmpProject\AmpWP\QueryVar;
 /**
  * Class SupportData
  * To prepare and send support data to insights server.
+ *
+ * @internal
+ * @since 2.2
  */
 class SupportData {
 
