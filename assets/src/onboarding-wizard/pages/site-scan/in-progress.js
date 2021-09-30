@@ -13,40 +13,6 @@ import { IconLandscapeHillsCogs } from '../../../components/svg/landscape-hills-
 import { ProgressBar } from '../../../components/progress-bar';
 
 /**
- * Gets the currently checked page type label.
- *
- * @param {string} type The page type slug.
- */
-function getPageTypeLabel( type ) {
-	switch ( type ) {
-		case 'home':
-			return __( 'Checking homepage', 'amp' );
-
-		case 'post':
-			return __( 'Checking sample post', 'amp' );
-
-		case 'page':
-			return __( 'Checking sample page', 'amp' );
-
-		case 'author':
-			return __( 'Checking author archive', 'amp' );
-
-		case 'date':
-			return __( 'Checking date archive', 'amp' );
-
-		case 'search':
-			return __( 'Checking search results page', 'amp' );
-
-		default:
-			return sprintf(
-				// translators: %s is a page type label.
-				__( 'Checking %s', 'amp' ),
-				type,
-			);
-	}
-}
-
-/**
  * Screen for visualizing a site scan progress state.
  */
 export function SiteScanInProgress() {
@@ -77,10 +43,10 @@ export function SiteScanInProgress() {
 						? __( 'Scan complete', 'amp' )
 						: sprintf(
 							// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.
-							__( 'Scanning %1$d/%2$d URLs: %3$s…', 'amp' ),
+							__( 'Scanning %1$d/%2$d URLs: Checking %3$s…', 'amp' ),
 							currentlyScannedUrlIndex + 1,
 							scannableUrls.length,
-							getPageTypeLabel( scannableUrls[ currentlyScannedUrlIndex ]?.type ),
+							scannableUrls[ currentlyScannedUrlIndex ]?.label,
 						)
 					}
 				</p>
