@@ -65,6 +65,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	/** @var LoadingError */
 	private $loading_error;
 
+	/** @var SiteHealth */
+	private $site_health;
+
 	/** @var DependencySupport */
 	private $dependency_support;
 
@@ -95,13 +98,15 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @param RESTPreloader     $rest_preloader An instance of the RESTPreloader class.
 	 * @param DependencySupport $dependency_support An instance of the DependencySupport class.
 	 * @param LoadingError      $loading_error An instance of the LoadingError class.
+	 * @param SiteHealth        $site_health An instance of the SiteHealth class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support, LoadingError $loading_error ) {
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support, LoadingError $loading_error, SiteHealth $site_health ) {
 		$this->google_fonts       = $google_fonts;
 		$this->reader_themes      = $reader_themes;
 		$this->rest_preloader     = $rest_preloader;
 		$this->dependency_support = $dependency_support;
 		$this->loading_error      = $loading_error;
+		$this->site_health        = $site_health;
 	}
 
 	/**
@@ -223,14 +228,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$theme           = wp_get_theme();
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
-		$notices                      = get_option( PageCacheFlushNeededNotice::OPTION_NAME, [] );
-		$show_page_cache_flush_notice = ( in_array( PageCacheFlushNeededNotice::NOTICE_ID, $notices, true ) );
-
-		$site_has_cache_enable = (
-			( defined( 'WP_CACHE' ) && true === WP_CACHE ) ||
-			Services::get( 'site_health_integration' )->has_page_caching()
-		);
-
 		$js_data = [
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
 			'CURRENT_THEME'                      => [
@@ -255,8 +252,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
-			'SITE_HAS_CACHE_ENABLE'              => $site_has_cache_enable,
-			'SHOW_PAGE_CACHE_NOTICE'             => $show_page_cache_flush_notice,
+			'HAS_PAGE_CACHING'                   => $this->site_health->has_page_caching( true ),
 		];
 
 		wp_add_inline_script(

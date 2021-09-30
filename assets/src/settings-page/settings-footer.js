@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import {
-	SITE_HAS_CACHE_ENABLE,
+	HAS_PAGE_CACHING,
 } from 'amp-settings';
 
 /**
@@ -66,7 +66,7 @@ export function SettingsFooter() {
 	const disabled = ! hasChanges || isBusy || ! themeSupport || ( 'reader' === themeSupport && ! readerTheme );
 
 	const shouldShowPageCacheFlushNotice = (
-		( 'object' === typeof modifiedOptions && ( modifiedOptions.theme_support || modifiedOptions.reader_theme ) )
+		( ( modifiedOptions?.theme_support || modifiedOptions?.reader_theme ) )
 	);
 
 	return (
@@ -86,13 +86,13 @@ export function SettingsFooter() {
 					>
 						<p>
 							{
-								SITE_HAS_CACHE_ENABLE && shouldShowPageCacheFlushNotice ? (
+								HAS_PAGE_CACHING && shouldShowPageCacheFlushNotice ? (
 									<>
-										{ __( 'Mode saved. Please flush page cache. ', 'amp' ) }
+										{ __( 'Saved. Consider flushing page cache.', 'amp' ) + ' ' }
 										<a
 											href="https://amp-wp.org/documentation/getting-started/amp-site-setup/page-caching-with-amp-and-wordpress/#what-page-caching-plugins-should-i-use"
 											target="_blank"
-											rel="noreferrer"
+											rel="noreferrer noopener"
 										>
 											{ __( 'Learn More', 'amp' ) }
 										</a>
