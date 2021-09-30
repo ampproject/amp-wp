@@ -447,6 +447,11 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 *
 	 * @covers ::sanitize()
 	 * @covers ::adjust_and_replace_node()
+	 * @covers ::filter_attributes()
+	 * @covers ::determine_dimensions()
+	 * @covers ::adjust_and_replace_nodes_in_array_map()
+	 * @covers ::maybe_add_lightbox_attributes()
+	 * @covers ::is_gif_url()
 	 * @covers AMP_Noscript_Fallback::initialize_noscript_allowed_attributes()
 	 * @covers AMP_Noscript_Fallback::is_inside_amp_noscript()
 	 * @covers AMP_Noscript_Fallback::append_old_node_noscript()
