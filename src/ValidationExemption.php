@@ -15,6 +15,8 @@ use DOMNode;
 /**
  * Helper functionality to deal with validation exemptions.
  *
+ * @todo This could be made into a Service that contains a collection of nodes which were PX-verified or AMP-unvalidated. In this way, there would be no need to add attributes to DOM nodes, and non-element/attribute nodes could be marked, and it would be faster to see if there are any such exempted nodes.
+ *
  * @package AmpProject\AmpWP
  * @since 2.2
  * @internal
@@ -170,16 +172,15 @@ final class ValidationExemption {
 	private static function check_for_attribute_token_list_membership( DOMAttr $attr, $token_list_attr_name ) {
 		$element = $attr->parentNode;
 		if ( ! $element instanceof Element ) {
+			return false; // @codeCoverageIgnore
+		}
+		if ( ! $element->hasAttribute( $token_list_attr_name ) ) {
 			return false;
 		}
-		return (
-			$element->hasAttribute( $token_list_attr_name )
-			&&
-			in_array(
-				$attr->nodeName,
-				preg_split( '/\s+/', $element->getAttribute( $token_list_attr_name ) ),
-				true
-			)
+		return in_array(
+			$attr->nodeName,
+			preg_split( '/\s+/', $element->getAttribute( $token_list_attr_name ) ),
+			true
 		);
 	}
 
