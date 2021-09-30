@@ -2461,12 +2461,19 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<style amp-keyframes="">@keyframes spin{to{transform:rotate(1turn)}}</style>',
 				[],
 			],
+
+			'keyframes_with_non_declaration_block' => [
+				'<style amp-keyframes>@keyframes bad { from { opacity:0 } to { opacity:1 } @media { body { color:red; } } }</style>',
+				'<style amp-keyframes="">@keyframes bad{from{opacity:0}to{opacity:1}}</style>',
+				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_DECLARATION ],
+			],
 		];
 	}
 
 	/**
 	 * Test amp-keyframe styles.
 	 *
+	 * @covers AMP_Style_Sanitizer::process_css_keyframes()
 	 * @dataProvider get_keyframe_data
 	 * @param string $source   Markup to process.
 	 * @param string $expected The markup to expect.
