@@ -456,13 +456,11 @@ class SupportData {
 
 		$error_data['text'] = ( ! empty( $error_data['text'] ) ) ? trim( $error_data['text'] ) : '';
 
-		$error_data = wp_json_encode( $error_data );
-		$error_data = static::remove_domain( $error_data );
-		$error_data = json_decode( $error_data, true );
+		foreach ( $error_data as $key => $value ) {
+			$error_data[ $key ] = self::remove_domain( $value );
+		}
 
-		ksort( $error_data );
-
-		/**
+		/*
 		 * Generate new slug after removing site specific data.
 		 */
 		$error_data['error_slug'] = static::generate_hash( $error_data );
