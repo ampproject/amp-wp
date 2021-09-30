@@ -151,6 +151,10 @@ class SupportData {
 
 		if ( ! is_wp_error( $response ) ) {
 			$response = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			if ( JSON_ERROR_NONE !== json_last_error() ) {
+				return new WP_Error( 'malformed_json_amp_insight_endpoint', 'Failed to parse response body from AMP insights endpoint' );
+			}
 		}
 
 		return $response;
