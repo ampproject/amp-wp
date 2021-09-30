@@ -579,17 +579,17 @@ class SupportData {
 		$amp_error_posts  = $wpdb->get_results( $wpdb->prepare( $query, $query_data ) );
 		$amp_invalid_urls = [];
 
-		/**
-		 * Error Information
+		/*
+		 * Error Information.
 		 */
 		$error_list = [];
 
-		/**
+		/*
 		 * Error Source information.
 		 */
 		$error_source_list = [];
 
-		/**
+		/*
 		 * Post loop.
 		 */
 		foreach ( $amp_error_posts as $amp_error_post ) {
@@ -599,7 +599,7 @@ class SupportData {
 			}
 
 			// Empty array for post staleness means post is NOT stale.
-			if ( ! empty( \AMP_Validated_URL_Post_Type::get_post_staleness( $amp_error_post->ID ) ) ) {
+			if ( ! empty( AMP_Validated_URL_Post_Type::get_post_staleness( $amp_error_post->ID ) ) ) {
 				continue;
 			}
 
@@ -610,7 +610,7 @@ class SupportData {
 				continue;
 			}
 
-			/**
+			/*
 			 * Error loop.
 			 */
 			foreach ( $post_errors_raw as $post_error ) {
@@ -625,21 +625,21 @@ class SupportData {
 				unset( $error_data['sources'] );
 				$error_data = static::normalize_error( $error_data );
 
-				/**
+				/*
 				 * Store error data in all error list.
 				 */
 				if ( ! empty( $error_data ) && is_array( $error_data ) ) {
 					$error_list[ $error_data['error_slug'] ] = $error_data;
 				}
 
-				/**
+				/*
 				 * Source loop.
 				 */
 				foreach ( $error_sources as $index => $source ) {
 					$source['error_slug']    = $error_data['error_slug'];
 					$error_sources[ $index ] = static::normalize_error_source( $source );
 
-					/**
+					/*
 					 * Store error source in all error_source list.
 					 */
 					if ( ! empty( $error_sources[ $index ] ) && is_array( $error_sources[ $index ] ) ) {
@@ -673,10 +673,16 @@ class SupportData {
 
 			switch ( $object_type ) {
 				case 'post':
-					$object_subtype = get_post( $amp_queried_object['id'] )->post_type;
+					$post = get_post( $amp_queried_object['id'] );
+					if ( $post ) {
+						$object_subtype = $post->post_type;
+					}
 					break;
 				case 'term':
-					$object_subtype = get_term( $amp_queried_object['id'] )->taxonomy;
+					$term = get_term( $amp_queried_object['id'] );
+					if ( $term ) {
+						$object_subtype = $term->taxonomy;
+					}
 					break;
 				case 'user':
 					break;
