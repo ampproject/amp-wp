@@ -295,10 +295,10 @@ class SupportDataTest extends TestCase {
 						'src' => '/wp-includes/js/jquery/jquery.js?ver=__normalized__',
 						'id'  => 'jquery-core-js',
 					],
-					'node_type'       => 1,
+					'node_type'       => '1',
 					'text'            => '',
 					'type'            => 'js_error',
-					'error_slug'      => 'dc023279738b7ab0fd76fd6a6e004320039cba2f2eee04b30a5f3843262c2d0b',
+					'error_slug'      => 'e1c3ce6e50e88503f6805e6264003f698a1b24bb657c9885bf9a26e3780b0765',
 				],
 			],
 		];

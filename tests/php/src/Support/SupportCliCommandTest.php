@@ -94,10 +94,11 @@ class SupportCliCommandTest extends TestCase {
 	 */
 	public function test_send_diagnostic() {
 
-		$amp_validated_url = $this->create_validated_url();
+		$support_cli_command = new SupportCliCommand();
+		$amp_validated_url   = $this->create_validated_url();
 
 		ob_start();
-		$this->instance->send_diagnostic(
+		$support_cli_command->send_diagnostic(
 			[],
 			[
 				'print' => 'json-pretty',
