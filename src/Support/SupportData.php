@@ -143,7 +143,7 @@ class SupportData {
 			sprintf( '%s/api/v1/support/', $endpoint ),
 			[
 				// We need long timeout here, in case the data being sent is large or the network connection is slow.
-				'timeout'  => 3000, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+				'timeout'  => 300, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 				'body'     => $data,
 				'compress' => true,
 			]
