@@ -51,11 +51,13 @@ export function SiteScanResults( {
 				{ sources.length === 0
 					? <Loading />
 					: <SourcesList sources={ sources } /> }
-				<p className="site-scan__cta">
-					<ExternalLink href={ validatedUrlsLink }>
-						{ __( 'AMP Validated URLs page', 'amp' ) }
-					</ExternalLink>
-				</p>
+				{ validatedUrlsLink && (
+					<p className="site-scan__cta">
+						<ExternalLink href={ validatedUrlsLink }>
+							{ __( 'AMP Validated URLs page', 'amp' ) }
+						</ExternalLink>
+					</p>
+				) }
 			</div>
 		</Selectable>
 	);

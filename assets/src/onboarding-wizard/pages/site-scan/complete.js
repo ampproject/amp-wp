@@ -7,13 +7,14 @@ import { VALIDATED_URLS_LINK } from 'amp-settings'; // From WP inline script.
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext } from '@wordpress/element';
+import { useContext, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { Selectable } from '../../../components/selectable';
 import { SiteScan } from '../../../components/site-scan-context-provider';
+import { User } from '../../../components/user-context-provider';
 import { IconLandscapeHillsCogs } from '../../../components/svg/landscape-hills-cogs';
 import {
 	PluginsWithIssues,
@@ -27,6 +28,9 @@ export function SiteScanComplete() {
 	const { pluginIssues, themeIssues } = useContext( SiteScan );
 	const hasThemeIssues = themeIssues.length > 0;
 	const hasPluginIssues = pluginIssues.length > 0;
+
+	const { developerToolsOption } = useContext( User );
+	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
 
 	return (
 		<div className="site-scan">
@@ -47,13 +51,13 @@ export function SiteScanComplete() {
 			{ hasThemeIssues && (
 				<ThemesWithIssues
 					issues={ themeIssues }
-					validatedUrlsLink={ VALIDATED_URLS_LINK }
+					validatedUrlsLink={ userIsTechnical ? VALIDATED_URLS_LINK : null }
 				/>
 			) }
 			{ hasPluginIssues && (
 				<PluginsWithIssues
 					issues={ pluginIssues }
-					validatedUrlsLink={ VALIDATED_URLS_LINK }
+					validatedUrlsLink={ userIsTechnical ? VALIDATED_URLS_LINK : null }
 				/>
 			) }
 		</div>
