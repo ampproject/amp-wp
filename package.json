@@ -70,9 +70,9 @@
     "eslint": "7.32.0",
     "eslint-plugin-eslint-comments": "3.2.0",
     "eslint-plugin-import": "2.24.2",
-    "eslint-plugin-jest": "24.4.3",
+    "eslint-plugin-jest": "24.5.0",
     "eslint-plugin-jsdoc": "36.1.0",
-    "eslint-plugin-react": "7.25.2",
+    "eslint-plugin-react": "7.26.0",
     "eslint-plugin-react-hooks": "4.2.0",
     "grunt": "1.4.1",
     "grunt-contrib-clean": "2.0.0",
@@ -91,7 +91,7 @@
     "postcss-preset-env": "6.7.0",
     "react-test-renderer": "17.0.2",
     "rtlcss-webpack-plugin": "4.0.6",
-    "svgo": "2.6.1",
+    "svgo": "2.7.0",
     "webpackbar": "5.0.0-3"
   },
   "scripts": {
