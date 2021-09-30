@@ -175,6 +175,10 @@ class PageCacheFlushNeededNoticeTest extends TestCase {
 	 */
 	public function test_render_notice() {
 
+		global $current_screen;
+
+		$current_screen = null;
+
 		// Flush previous data.
 		delete_option( PageCacheFlushNeededNotice::OPTION_NAME );
 
@@ -204,7 +208,6 @@ class PageCacheFlushNeededNoticeTest extends TestCase {
 		/**
 		 * Test 3: With option data But on AMP setting screen.
 		 */
-		global $current_screen;
 		set_current_screen( 'toplevel_page_amp-options' );
 
 		ob_start();
