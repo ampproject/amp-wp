@@ -5,12 +5,11 @@
  * @package AmpProject\AmpWP\Support\Tests
  */
 
-namespace AmpProject\AmpWP\Support\Tests;
+namespace AmpProject\AmpWP\Tests\Support;
 
-use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 use AMP_Validated_URL_Post_Type;
 
 /**
@@ -19,7 +18,7 @@ use AMP_Validated_URL_Post_Type;
  * @group support-admin
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportData
  */
-class SupportDataTest extends WP_UnitTestCase {
+class SupportDataTest extends TestCase {
 
 	use PrivateAccess;
 
@@ -40,26 +39,6 @@ class SupportDataTest extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->instance = new SupportData( [] );
-	}
-
-	/**
-	 * @covers ::set_args
-	 */
-	public function test_set_args() {
-
-		$this->instance->set_args( [ 'post_ids' => [ 1, 2, 3 ] ] );
-
-		$this->assertEquals(
-			[ 'post_ids' => [ 1, 2, 3 ] ],
-			$this->get_private_property( $this->instance, 'args' )
-		);
-
-		$this->instance->set_args( [] );
-
-		$this->assertEquals(
-			[],
-			$this->get_private_property( $this->instance, 'args' )
-		);
 	}
 
 	/**

@@ -59,23 +59,9 @@ class SupportData {
 	 * @param array $args Arguments for AMP Send data.
 	 */
 	public function __construct( $args = [] ) {
-		$this->set_args( $args );
-	}
-
-	/**
-	 * To set argument for the class.
-	 *
-	 * @param array $args New arguments for instance.
-	 *
-	 * @return void
-	 */
-	public function set_args( $args = [] ) {
-
 		$this->args = ( ! empty( $args ) && is_array( $args ) ) ? $args : [];
 
 		$this->parse_args();
-
-		$this->data = [];
 	}
 
 	/**

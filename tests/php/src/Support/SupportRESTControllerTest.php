@@ -5,10 +5,9 @@
  * @package AmpProject\AmpWP\Support\Tests
  */
 
-namespace AmpProject\AmpWP\Support\Tests;
+namespace AmpProject\AmpWP\Tests\Support;
 
 use AmpProject\AmpWP\Support\SupportCliCommand;
-use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Support\SupportRESTController;
 use AmpProject\AmpWP\Tests\TestCase;
 use WP_Error;
@@ -36,7 +35,7 @@ class SupportRESTControllerTest extends TestCase {
 
 		parent::setUp();
 
-		$this->instance = new SupportRESTController( new SupportData() );
+		$this->instance = new SupportRESTController();
 	}
 
 	/**

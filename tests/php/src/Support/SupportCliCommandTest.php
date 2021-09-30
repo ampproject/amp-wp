@@ -5,11 +5,11 @@
  * @package AmpProject\AmpWP\Support\Tests
  */
 
-namespace AmpProject\AmpWP\Support\Tests;
+namespace AmpProject\AmpWP\Tests\Support;
 
 use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Support\SupportCliCommand;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for SupportCliCommandTest.
@@ -17,26 +17,7 @@ use WP_UnitTestCase;
  * @group support-admin
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportCliCommand
  */
-class SupportCliCommandTest extends WP_UnitTestCase {
-
-	/**
-	 * Instance of OptionsMenu
-	 *
-	 * @var SupportCliCommand
-	 */
-	public $instance;
-
-	/**
-	 * Setup.
-	 *
-	 * @inheritdoc
-	 */
-	public function setUp() {
-
-		parent::setUp();
-
-		$this->instance = new SupportCliCommand( new SupportData() );
-	}
+class SupportCliCommandTest extends TestCase {
 
 	/**
 	 * Create validated URL.

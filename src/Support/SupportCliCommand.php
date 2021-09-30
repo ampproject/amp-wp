@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Support;
 
+use AmpProject\AmpWP\Services;
 use WP_CLI;
 use function WP_CLI\Utils\get_flag_value;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -16,24 +17,6 @@ use AmpProject\AmpWP\Infrastructure\CliCommand;
  * Service class for support.
  */
 class SupportCliCommand implements Service, CliCommand {
-
-
-	/**
-	 * SupportData instance.
-	 *
-	 * @var SupportData
-	 */
-	public $support_data;
-
-	/**
-	 * Class constructor.
-	 *
-	 * @param SupportData $support_data An instance of the SupportData service.
-	 */
-	public function __construct( SupportData $support_data ) {
-
-		$this->support_data = $support_data;
-	}
 
 	/**
 	 * Get the name under which to register the CLI command.
@@ -98,7 +81,7 @@ class SupportCliCommand implements Service, CliCommand {
 		$post_ids = filter_var( get_flag_value( $assoc_args, 'post_ids', false ), FILTER_SANITIZE_STRING );
 		$term_ids = filter_var( get_flag_value( $assoc_args, 'term_ids', false ), FILTER_SANITIZE_STRING );
 
-		$args = [
+		$data_args = [
 			'urls'         => ( ! empty( $urls ) ) ? explode( ',', $urls ) : [],
 			'post_ids'     => ( ! empty( $post_ids ) ) ? explode( ',', $post_ids ) : [],
 			'term_ids'     => ( ! empty( $term_ids ) ) ? explode( ',', $term_ids ) : [],
@@ -106,8 +89,8 @@ class SupportCliCommand implements Service, CliCommand {
 			'is_synthetic' => $is_synthetic,
 		];
 
-		$this->support_data->set_args( $args );
-		$data = $this->support_data->get_data();
+		$support_data = Services::get_injector()->make( SupportData::class, $data_args );
+		$data = $support_data->get_data();
 
 		if ( $is_print ) {
 
@@ -120,19 +103,19 @@ class SupportCliCommand implements Service, CliCommand {
 			}
 		} else {
 
-			$response = $this->support_data->send_data();
+			$response = $support_data->send_data();
 
 			if ( is_wp_error( $response ) ) {
 				$error_message = $response->get_error_message();
 				WP_CLI::warning( "Something went wrong: $error_message" );
 			} elseif ( empty( $response['status'] ) || 'ok' !== $response['status'] ) {
 				WP_CLI::warning( 'Failed to send diagnostic data.' );
-			} elseif ( ! empty( $response['status'] ) && 'ok' === $response['status'] ) {
+			} elseif ( isset( $response['data']['uuid'] ) ) {
 				WP_CLI::success( 'UUID : ' . $response['data']['uuid'] );
 			}
 		}
 
-		/**
+		/*
 		 * Summary of data.
 		 */
 		$url_error_relationship = [];
