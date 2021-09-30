@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP\Tests\Support;
 
-use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Support\SupportCliCommand;
 use AmpProject\AmpWP\Tests\TestCase;
 

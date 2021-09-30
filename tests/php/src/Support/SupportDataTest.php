@@ -65,7 +65,9 @@ class SupportDataTest extends TestCase {
 		];
 
 		$expected = array_map(
-			SupportData::class . '::normalize_url_for_storage',
+			static function ( $url ) {
+				return AMP_Validated_URL_Post_Type::normalize_url_for_storage( $url );
+			},
 			[
 				get_permalink( $url_post_id ),
 				get_term_link( $term_id ),
@@ -77,7 +79,6 @@ class SupportDataTest extends TestCase {
 		$instance = new SupportData( $input );
 
 		$this->assertEquals( $expected, $instance->urls );
-
 	}
 
 	/**
@@ -141,28 +142,6 @@ class SupportDataTest extends TestCase {
 
 		$this->assertArrayHasKey( 'log_errors', $output );
 		$this->assertArrayHasKey( 'contents', $output );
-
-	}
-
-	/**
-	 * @covers ::normalize_url_for_storage
-	 */
-	public function test_normalize_url_for_storage() {
-
-		$url_not_normalized = add_query_arg(
-			[
-				QueryVar::NOAMP => '',
-				'preview_id'    => 123,
-			],
-			'http://google.com/#anchor'
-		);
-
-		$this->assertSame(
-			'https://google.com/',
-			SupportData::normalize_url_for_storage(
-				$url_not_normalized
-			)
-		);
 	}
 
 	/**

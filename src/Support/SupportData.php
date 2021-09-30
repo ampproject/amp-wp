@@ -121,9 +121,10 @@ class SupportData {
 			}
 		}
 
-		$this->urls = array_map( __CLASS__ . '::normalize_url_for_storage', $this->urls );
+		$this->urls = array_map( static function ( $url ) {
+			return AMP_Validated_URL_Post_Type::normalize_url_for_storage( $url );
+		}, $this->urls );
 		$this->urls = array_values( array_unique( $this->urls ) );
-
 	}
 
 	/**
@@ -184,55 +185,6 @@ class SupportData {
 		$this->data = $request_data;
 
 		return $request_data;
-	}
-
-	/**
-	 * Normalize a URL for storage.
-	 *
-	 * The AMP query param is removed to facilitate switching between standard and transitional.
-	 * The URL scheme is also normalized to HTTPS to help with transition from HTTP to HTTPS.
-	 *
-	 * @since 2.2
-	 *
-	 * @reference AMP_Validated_URL_Post_Type::normalize_url_for_storage
-	 *
-	 * @param string $url URL.
-	 *
-	 * @return string Normalized URL.
-	 */
-	public static function normalize_url_for_storage( $url ) {
-
-		// Only ever store the canonical version.
-		if ( ! amp_is_canonical() ) {
-			$url = amp_remove_paired_endpoint( $url );
-		}
-
-		// Remove fragment identifier in the rare case it could be provided. It is irrelevant for validation.
-		$url = strtok( $url, '#' );
-
-		// Query args to be removed from validated URLs.
-		$removable_query_vars = array_merge(
-			wp_removable_query_args(),
-			[ 'preview_id', 'preview_nonce', 'preview', QueryVar::NOAMP ]
-		);
-
-		// Normalize query args, removing all that are not recognized or which are removable.
-		$url_parts = explode( '?', $url, 2 );
-		if ( 2 === count( $url_parts ) ) {
-			$args = wp_parse_args( $url_parts[1] );
-			foreach ( $removable_query_vars as $removable_query_arg ) {
-				unset( $args[ $removable_query_arg ] );
-			}
-			$url = $url_parts[0];
-			if ( ! empty( $args ) ) {
-				$url = $url_parts[0] . '?' . build_query( $args );
-			}
-		}
-
-		// Normalize the scheme as HTTPS.
-		$url = set_url_scheme( $url, 'https' );
-
-		return $url;
 	}
 
 	/**
