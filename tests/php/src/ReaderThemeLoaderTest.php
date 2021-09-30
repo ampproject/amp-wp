@@ -214,6 +214,7 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
 			$this->markTestSkipped();
 		}
+		wp_reset_query();
 		switch_theme( $active_theme_slug );
 		remove_all_filters( 'sidebars_widgets' );
 
