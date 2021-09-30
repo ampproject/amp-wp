@@ -76,6 +76,12 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				],
 			],
 
+			'span_empty_style' => [
+				'<span style=" ">This is default.</span>',
+				'<span>This is default.</span>',
+				[],
+			],
+
 			'span_one_style_bad_format' => [
 				'<span style="color  :   #00ff00">This is green.</span>',
 				'<span data-amp-original-style="color  :   #00ff00" class="amp-wp-0837823">This is green.</span>',
@@ -716,10 +722,11 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					<style> .amp-referrer-www-google-com { color: red; } </style>
 					<style> .amp-active { color: green } </style>
 					<style> .amp-carousel-slide { outline: solid 1px red; } </style>
-					<style> .amp-date-picker-selecting { outline: solid 2px red; } </style>
+					<style> .amp-date-picker-selecting { outline: solid 2px red; } .CalendarDay { color:black; } </style>
 					<style> .amp-form-submit-success { color: green; } </style>
 					<style> .amp-access-laterpay-container { color: purple} </style>
 					<style> .amp-image-lightbox-caption { color: brown} </style>
+					<style> .user-valid, .user-invalid { outline: solid 1px red; } </style>
 					<style> .amp-live-list-item-new { color: lime} #my-live-list [data-tombstone] { display: block; }</style>
 					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} #sidebar1[open] { outline: solid 1px red; }</style>
 					<style> .amp-sticky-ad-close-button { color: aliceblue} </style>
@@ -755,10 +762,11 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					'.amp-referrer-www-google-com{color:red}',
 					'.amp-active{color:green}',
 					'.amp-carousel-slide{outline:solid 1px red}',
-					'.amp-date-picker-selecting{outline:solid 2px red}',
+					'.amp-date-picker-selecting{outline:solid 2px red}.CalendarDay{color:black}',
 					'.amp-form-submit-success{color:green}',
 					'.amp-access-laterpay-container{color:purple}',
 					'.amp-image-lightbox-caption{color:brown}',
+					'.user-valid,.user-invalid{outline:solid 1px red}',
 					'.amp-live-list-item-new{color:lime}#my-live-list [data-tombstone]{display:block}',
 					'.amp-sidebar-toolbar-target-hidden{color:lavender}#sidebar1[open]{outline:solid 1px red}',
 					'.amp-sticky-ad-close-button{color:aliceblue}',
@@ -856,6 +864,9 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 	/**
 	 * Test style elements and link elements.
+	 *
+	 * @covers AMP_Style_Sanitizer::get_stylesheet_from_url()
+	 * @covers AMP_Style_Sanitizer::fetch_external_stylesheet()
 	 *
 	 * @dataProvider get_link_and_style_test_data
 	 * @param string $source               Source.
@@ -2975,6 +2986,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * @dataProvider get_import_test_data
 	 * @covers AMP_Style_Sanitizer::splice_imported_stylesheet()
 	 * @covers AMP_Style_Sanitizer::process_css_list()
+	 * @covers AMP_Style_Sanitizer::replace_inside_css_list()
 	 *
 	 * @param array|string $stylesheet_urls             Stylesheet URLs.
 	 * @param string       $style_element               HTML markup for the stylesheet URL.
@@ -3167,6 +3179,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Get prioritization test data.
 	 *
 	 * @todo Refactor to use custom theme or existing theme instead of requiring Twenty Ten.
+	 *
+	 * @covers AMP_Style_Sanitizer::remove_admin_bar_if_css_excluded()
 	 *
 	 * @return array
 	 */

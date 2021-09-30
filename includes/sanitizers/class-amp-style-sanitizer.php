@@ -2862,6 +2862,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$value = trim( $attr_node->nodeValue );
 		if ( empty( $value ) ) {
+			$element->removeAttribute( 'style' );
 			return;
 		}
 
