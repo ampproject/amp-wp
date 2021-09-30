@@ -926,6 +926,56 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	}
 
 	/**
+	 * Add test coverage for the property_allowlist condition in process_css_declaration_block which is not currently reachable given the spec.
+	 *
+	 * @covers AMP_Style_Sanitizer::process_css_declaration_block()
+	 */
+	public function test_allowlisted_properties_in_declaration_block() {
+		$dom = Document::fromHtml(
+			'
+			<html>
+				<head>
+					<style>body { unrecognized: "property"; color: black; }</style>
+				</head>
+				<body></body>
+			</html>
+			',
+			Options::DEFAULTS
+		);
+
+		$actual_error_codes = [];
+
+		$sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			[
+				'use_document_element' => true,
+				'validation_error_callback' => static function( $error ) use ( &$actual_error_codes ) {
+					$actual_error_codes[] = $error['code'];
+					return true;
+				},
+			]
+		);
+
+		$spec                              = $this->get_private_property( $sanitizer, 'style_custom_cdata_spec' );
+		$spec['css_spec']['declaration'][] = 'color';
+		$this->set_private_property( $sanitizer, 'style_custom_cdata_spec', $spec );
+
+		$sanitizer->sanitize();
+
+		$this->assertEquals(
+			[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY ],
+			$actual_error_codes
+		);
+
+		$this->assertEquals(
+			[
+				'body{color:black}',
+			],
+			$sanitizer->get_stylesheets()
+		);
+	}
+
+	/**
 	 * Test that tree shaking and CSS limits are disabled when requested.
 	 */
 	public function test_tree_shaking_disabled() {
@@ -2917,6 +2967,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 *
 	 * @dataProvider get_import_test_data
 	 * @covers AMP_Style_Sanitizer::splice_imported_stylesheet()
+	 * @covers AMP_Style_Sanitizer::process_css_list()
 	 *
 	 * @param array|string $stylesheet_urls             Stylesheet URLs.
 	 * @param string       $style_element               HTML markup for the stylesheet URL.
@@ -2992,6 +3043,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 *
 	 * @expectedIncorrectUsage wp_enqueue_style
 	 * @covers AMP_Style_Sanitizer::splice_imported_stylesheet()
+	 * @covers AMP_Style_Sanitizer::process_css_list()
 	 */
 	public function test_css_import_font() {
 		$stylesheet_url = 'http://fonts.googleapis.com/css?family=Merriweather:300|PT+Serif:400i|Open+Sans:800|Zilla+Slab:300,400,500|Montserrat:800|Muli:400&subset=cyrillic-ext,latin-ext,cyrillic,greek,greek-ext,vietnamese';

@@ -1873,6 +1873,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$important_count    = 0;
 		$css_document       = null;
 
+		// Note that there is no known case where an exception can be thrown here since PHP-CSS-Parser is using lenient parsing.
 		try {
 			// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
 			$stylesheet_string = $this->remove_spaces_from_url_values( $stylesheet_string );
