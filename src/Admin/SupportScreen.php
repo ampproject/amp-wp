@@ -153,7 +153,7 @@ class SupportScreen implements Conditional, Service, Registerable {
 		$args    = [];
 		$post_id = filter_input( INPUT_GET, 'post_id', FILTER_SANITIZE_NUMBER_INT );
 
-		if ( ! empty( $post_id ) && 0 < (int) $post_id) {
+		if ( ! empty( $post_id ) && 0 < (int) $post_id ) {
 			$args = [
 				'amp_validated_post_ids' => [
 					$post_id,
@@ -162,7 +162,7 @@ class SupportScreen implements Conditional, Service, Registerable {
 		}
 
 		$support_data = Services::get_injector()->make( SupportData::class, $args );
-		$data = $support_data->get_data();
+		$data         = $support_data->get_data();
 
 		wp_add_inline_script(
 			self::ASSET_HANDLE,
