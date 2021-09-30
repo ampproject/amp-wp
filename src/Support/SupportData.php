@@ -281,7 +281,13 @@ class SupportData {
 		}
 
 		$active_plugins = array_values( array_unique( $active_plugins ) );
-		$plugin_info    = array_map( __CLASS__ . '::normalize_plugin_info', $active_plugins );
+
+		$plugin_info = array_map(
+			static function ( $plugin ) {
+				return self::normalize_plugin_info( $plugin );
+			},
+			$active_plugins
+		);
 		$plugin_info    = array_filter( $plugin_info );
 
 		return array_values( $plugin_info );
@@ -297,7 +303,12 @@ class SupportData {
 	public function get_theme_info() {
 
 		$themes   = [ wp_get_theme() ];
-		$response = array_map( __CLASS__ . '::normalize_theme_info', $themes );
+		$response = array_map(
+			static function ( $theme ) {
+				return self::normalize_theme_info( $theme );
+			},
+			$themes
+		);
 		$response = array_filter( $response );
 
 		return array_values( $response );
@@ -409,7 +420,7 @@ class SupportData {
 		$tags = $theme_object->get( 'Tags' );
 		$tags = ( ! empty( $tags ) && is_array( $tags ) ) ? $tags : [];
 
-		$theme_data = [
+		return [
 			'name'         => $theme_object->get( 'Name' ),
 			'slug'         => $theme_object->get_stylesheet(),
 			'version'      => $theme_object->get( 'Version' ),
@@ -424,8 +435,6 @@ class SupportData {
 			'is_active'    => ( $theme_object->get_stylesheet() === $active_theme->get_stylesheet() ),
 			'parent_theme' => $active_theme->get_template(),
 		];
-
-		return $theme_data;
 	}
 
 	/**
@@ -484,13 +493,7 @@ class SupportData {
 		 */
 		if ( empty( $plugin_versions ) || ! is_array( $plugin_versions ) ) {
 
-			$plugin_list = get_plugins();
-			$plugin_list = array_keys( $plugin_list );
-			$plugin_list = array_values( array_unique( $plugin_list ) );
-			$plugin_list = array_map( __CLASS__ . '::normalize_plugin_info', $plugin_list );
-
-			foreach ( $plugin_list as $plugin ) {
-				$plugin_versions[ $plugin['slug'] ] = $plugin['version'];
+				$plugin_versions[ $slug ] = isset( $plugin_data['Version'] ) ? $plugin_data['Version'] : '';
 			}
 		}
 
