@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { moveToReaderThemesScreen, moveToTemplateModeScreen, moveToSummaryScreen } from '../../utils/onboarding-wizard-utils';
+import { moveToReaderThemesScreen, moveToTemplateModeScreen, moveToDoneScreen } from '../../utils/onboarding-wizard-utils';
 
 /**
  * When a site has a Reader theme already set as the active theme (e.g. Twenty Twenty), when the user expresses they
@@ -23,19 +23,22 @@ describe( 'Current active theme is reader theme and user is nontechnical', () =>
 		await expect( '.amp-notice--success' ).countToBe( 2 ); // Reader and transitional.
 	} );
 
-	it( 'includes active them in reader theme list', async () => {
+	it( 'includes active theme in reader theme list', async () => {
 		await moveToReaderThemesScreen( { technical: false } );
 
 		await expect( page ).toMatchElement( '[for="theme-card__twentytwenty"]' );
 	} );
 
 	it( 'switches to transitional mode and shows a notice if the user chooses the active theme', async () => {
-		await moveToSummaryScreen( { technical: false, readerTheme: 'twentytwenty', mode: 'reader' } );
+		await moveToDoneScreen( { technical: false, readerTheme: 'twentytwenty', mode: 'reader' } );
 
 		const stepperItemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
-		expect( stepperItemCount ).toBe( 5 );
+		expect( stepperItemCount ).toBe( 4 );
 
-		await expect( page ).toMatchElement( 'h2', { text: 'Transitional' } );
+		// Wait for the settings to get saved.
+		await page.waitForTimeout( 1000 );
+
+		await expect( page ).toMatchElement( 'p', { text: /transitional mode/i } );
 		await expect( page ).toMatchElement( '.amp-notice--info', { text: /switched to Transitional/i } );
 	} );
 } );

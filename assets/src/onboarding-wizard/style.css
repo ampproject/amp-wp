@@ -48,6 +48,17 @@ body {
 	-webkit-font-smoothing: antialiased;
 }
 
+.amp-onboarding-wizard p a,
+.amp-onboarding-wizard li > a {
+	color: var(--amp-settings-color-black);
+	transition: color 80ms ease;
+}
+
+.amp-onboarding-wizard p a:hover,
+.amp-onboarding-wizard li > a:hover {
+	color: var(--amp-settings-color-brand);
+}
+
 /**
  * Main app panel.
  */
@@ -78,13 +89,17 @@ body {
 
 .amp-onboarding-wizard-panel h1 {
 	line-height: 1.1;
+
+	@media screen and (min-width: 783px) {
+		margin-top: 0;
+	}
 }
 
 /**
  * Sidebar.
  */
 .amp-onboarding-wizard-plugin-name {
-	color: var(--amp-settings-color-black);
+	color: var(--amp-settings-color-muted);
 	font-size: 16px;
 	line-height: 1.5;
 	padding: 0.5rem 0 0;
@@ -166,6 +181,7 @@ body {
 }
 
 .amp-stepper__item-title {
+	color: var(--amp-settings-color-muted);
 	display: none;
 	margin-left: 18px;
 

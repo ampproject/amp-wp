@@ -66,8 +66,8 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 				details={ sectionText.standard.details }
 				detailsUrl="https://amp-wp.org/documentation/getting-started/standard/"
 				initialOpen={ true }
-				mode="standard"
-				previouslySelected={ savedCurrentMode === 'standard' && technicalQuestionChanged && ! firstTimeInWizard }
+				mode={ STANDARD }
+				previouslySelected={ savedCurrentMode === STANDARD && technicalQuestionChanged && ! firstTimeInWizard }
 			>
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ STANDARD ] ) }>
 					{ sectionText.standard.compatibility }
@@ -78,8 +78,8 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 				details={ sectionText.transitional.details }
 				detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/"
 				initialOpen={ true }
-				mode="transitional"
-				previouslySelected={ savedCurrentMode === 'transitional' && technicalQuestionChanged && ! firstTimeInWizard }
+				mode={ TRANSITIONAL }
+				previouslySelected={ savedCurrentMode === TRANSITIONAL && technicalQuestionChanged && ! firstTimeInWizard }
 			>
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ TRANSITIONAL ] ) }>
 					{ sectionText.transitional.compatibility }
@@ -90,8 +90,8 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 				details={ sectionText.reader.details }
 				detailsUrl="https://amp-wp.org/documentation/getting-started/reader/"
 				initialOpen={ true }
-				mode="reader"
-				previouslySelected={ savedCurrentMode === 'reader' && technicalQuestionChanged && ! firstTimeInWizard }
+				mode={ READER }
+				previouslySelected={ savedCurrentMode === READER && technicalQuestionChanged && ! firstTimeInWizard }
 			>
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ READER ] ) }>
 					{ sectionText.reader.compatibility }

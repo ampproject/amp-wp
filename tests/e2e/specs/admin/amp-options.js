@@ -121,7 +121,7 @@ describe( 'Saving', () => {
 		await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
 
 		// Toggle transitional mode.
-		await expect( page ).toClick( '#template-mode-transitional' );
+		await clickMode( 'transitional' );
 
 		// Button should be enabled.
 		await expect( page ).toMatchElement( 'button:not([disabled])', { text: 'Save' } );
@@ -129,10 +129,79 @@ describe( 'Saving', () => {
 		await testSave();
 
 		// Success notice should disappear on additional change.
-		await expect( page ).toClick( '#template-mode-standard' );
+		await clickMode( 'standard' );
 		await expect( page ).not.toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
 
 		await testSave();
 	} );
 } );
 
+describe( 'AMP settings screen Review panel', () => {
+	beforeEach( async () => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+	} );
+
+	afterEach( async () => {
+		await cleanUpSettings();
+	} );
+
+	async function clickBrowseSiteInTemplateMode( mode ) {
+		await clickMode( mode );
+		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
+		await page.waitForNavigation();
+	}
+
+	it( 'is present on the page', async () => {
+		await page.waitForSelector( '.settings-site-review' );
+		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
+		await expect( page ).toMatchElement( 'h3', { text: 'Need help?' } );
+		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /support forums/i } );
+		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /different template mode/i } );
+		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /how the AMP plugin works/i } );
+	} );
+
+	it( 'button redirects to an AMP page in transitional mode', async () => {
+		await clickBrowseSiteInTemplateMode( 'transitional' );
+
+		await page.waitForSelector( 'html[amp]' );
+		await expect( page ).toMatchElement( 'html[amp]' );
+	} );
+
+	it( 'button redirects to an AMP page in reader mode', async () => {
+		await clickBrowseSiteInTemplateMode( 'reader' );
+
+		await page.waitForSelector( 'html[amp]' );
+		await expect( page ).toMatchElement( 'html[amp]' );
+	} );
+
+	it( 'button redirects to an AMP page in standard mode', async () => {
+		await clickBrowseSiteInTemplateMode( 'standard' );
+
+		await page.waitForSelector( 'html[amp]' );
+		await expect( page ).toMatchElement( 'html[amp]' );
+	} );
+
+	it( 'can be dismissed and shows up again only after a template mode change', async () => {
+		await page.waitForSelector( '.settings-site-review' );
+		await expect( page ).toMatchElement( 'button', { text: 'Dismiss' } );
+		await expect( page ).toClick( 'button', { text: 'Dismiss' } );
+
+		// Give the Review panel some time disappear.
+		await page.waitForTimeout( 100 );
+		await expect( page ).not.toMatchElement( '.settings-site-review' );
+
+		// There should be no Review panel after page reload.
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+		await page.waitForSelector( '#amp-settings-root' );
+		await expect( page ).not.toMatchElement( '.settings-site-review' );
+
+		await clickMode( 'standard' );
+
+		await expect( page ).toClick( 'button', { text: 'Save' } );
+		await page.waitForSelector( '.amp-save-success-notice' );
+		await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
+
+		await page.waitForSelector( '.settings-site-review' );
+		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
+	} );
+} );

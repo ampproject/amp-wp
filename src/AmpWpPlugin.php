@@ -79,6 +79,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.support_screen'               => Admin\SupportScreen::class,
 		'admin.support'                      => Admin\SupportLink::class,
 		'admin.polyfills'                    => Admin\Polyfills::class,
+		'admin.user_rest_endpoint_extension' => Admin\UserRESTEndpointExtension::class,
 		'admin.validation_counts'            => Admin\ValidationCounts::class,
 		'amp_slug_customization_watcher'     => AmpSlugCustomizationWatcher::class,
 		'background_task_deactivator'        => BackgroundTaskDeactivator::class,

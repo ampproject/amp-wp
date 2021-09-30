@@ -167,4 +167,55 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 			$this->onboarding_wizard_submenu_page->get_close_link()
 		);
 	}
+
+	/**
+	 * Tests OnboardingWizardSubmenuPage::get_preview_urls()
+	 *
+	 * @covers ::get_preview_urls()
+	 */
+	public function test_get_preview_urls() {
+		$scannable_urls = [
+			[
+				'type'  => 'home',
+				'url'   => 'https://example.com',
+				'label' => 'Homepage',
+			],
+			[
+				'type'  => 'page',
+				'url'   => 'https://example.com/sample-page',
+				'label' => 'Page',
+			],
+			[
+				'type'  => 'search',
+				'url'   => 'https://example.com/?s=foobar',
+				'label' => 'Search Results',
+			],
+		];
+
+		$expected_urls = [
+			[
+				'type'    => 'home',
+				'url'     => 'https://example.com',
+				'amp_url' => amp_add_paired_endpoint( 'https://example.com' ),
+				'label'   => 'Homepage',
+			],
+			[
+				'type'    => 'page',
+				'url'     => 'https://example.com/sample-page',
+				'amp_url' => amp_add_paired_endpoint( 'https://example.com/sample-page' ),
+				'label'   => 'Page',
+			],
+			[
+				'type'    => 'search',
+				'url'     => 'https://example.com/?s=foobar',
+				'amp_url' => amp_add_paired_endpoint( 'https://example.com/?s=foobar' ),
+				'label'   => 'Search Results',
+			],
+		];
+
+		$this->assertEquals(
+			$expected_urls,
+			$this->onboarding_wizard_submenu_page->get_preview_urls( $scannable_urls )
+		);
+	}
 }

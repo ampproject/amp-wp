@@ -12,7 +12,7 @@ import {
 	APP_ROOT_ID,
 	CLOSE_LINK,
 	CURRENT_THEME,
-	FINISH_LINK,
+	SETTINGS_LINK,
 	OPTIONS_REST_PATH,
 	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
@@ -57,7 +57,7 @@ export function Providers( { children } ) {
 		<ErrorContextProvider>
 			<ErrorBoundary
 				exitLinkLabel={ __( 'Return to AMP settings.', 'amp' ) }
-				exitLinkUrl={ FINISH_LINK }
+				exitLinkUrl={ SETTINGS_LINK }
 				title={ __( 'The setup wizard has experienced an error.', 'amp' ) }
 			>
 				<OptionsContextProvider
@@ -114,7 +114,7 @@ domReady( () => {
 
 	render(
 		<Providers>
-			<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } appRoot={ root } />
+			<SetupWizard closeLink={ CLOSE_LINK } finishLink={ SETTINGS_LINK } appRoot={ root } />
 		</Providers>,
 		root,
 	);

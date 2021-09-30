@@ -51,8 +51,9 @@ final class ScannableURLProvider {
 		 */
 		if ( 'posts' === get_option( 'show_on_front' ) && $this->is_template_supported( 'is_home' ) ) {
 			$urls[] = [
-				'url'  => home_url( '/' ),
-				'type' => 'home',
+				'url'   => home_url( '/' ),
+				'type'  => 'home',
+				'label' => __( 'Homepage', 'amp' ),
 			];
 		}
 
@@ -69,9 +70,11 @@ final class ScannableURLProvider {
 			foreach ( $public_post_types as $post_type ) {
 				$post_ids = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type, $i, 1 ) );
 				if ( ! empty( $post_ids[0] ) ) {
-					$urls[] = [
-						'url'  => get_permalink( $post_ids[0] ),
-						'type' => $post_type,
+					$post_type_object = get_post_type_object( $post_type );
+					$urls[]           = [
+						'url'   => get_permalink( $post_ids[0] ),
+						'type'  => $post_type,
+						'label' => $post_type_object->labels->singular_name ?: $post_type,
 					];
 				}
 			}
@@ -80,9 +83,11 @@ final class ScannableURLProvider {
 				$taxonomy_links = $this->get_taxonomy_links( $taxonomy, $i, 1 );
 				$link           = reset( $taxonomy_links );
 				if ( ! empty( $link ) ) {
-					$urls[] = [
-						'url'  => $link,
-						'type' => $taxonomy,
+					$taxonomy_object = get_taxonomy( $taxonomy );
+					$urls[]          = [
+						'url'   => $link,
+						'type'  => $taxonomy,
+						'label' => $taxonomy_object->labels->singular_name ?: $taxonomy,
 					];
 				}
 			}
@@ -90,8 +95,9 @@ final class ScannableURLProvider {
 			$author_page_urls = $this->get_author_page_urls( $i, 1 );
 			if ( ! empty( $author_page_urls[0] ) ) {
 				$urls[] = [
-					'url'  => $author_page_urls[0],
-					'type' => 'author',
+					'url'   => $author_page_urls[0],
+					'type'  => 'author',
+					'label' => __( 'Author Archive', 'amp' ),
 				];
 			}
 		}
@@ -100,15 +106,17 @@ final class ScannableURLProvider {
 		$url = $this->get_date_page();
 		if ( $url ) {
 			$urls[] = [
-				'url'  => $url,
-				'type' => 'date',
+				'url'   => $url,
+				'type'  => 'date',
+				'label' => __( 'Date Archive', 'amp' ),
 			];
 		}
 		$url = $this->get_search_page();
 		if ( $url ) {
 			$urls[] = [
-				'url'  => $url,
-				'type' => 'search',
+				'url'   => $url,
+				'type'  => 'search',
+				'label' => __( 'Search Results', 'amp' ),
 			];
 		}
 

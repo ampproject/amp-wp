@@ -9,6 +9,7 @@ import {
 	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+	USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 	USERS_RESOURCE_REST_PATH,
 } from 'amp-settings';
 
@@ -41,6 +42,7 @@ import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { SettingsFooter } from './settings-footer';
+import { SiteReview } from './site-review';
 import { PluginSuppression } from './plugin-suppression';
 import { Analytics } from './analytics';
 import { PairedUrlStructure } from './paired-url-structure';
@@ -72,6 +74,7 @@ function Providers( { children } ) {
 						<UserContextProvider
 							onlyFetchIfPluginIsConfigured={ false }
 							userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
+							userFieldReviewPanelDismissedForTemplateMode={ USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE }
 							usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 						>
 							<ReaderThemesContextProvider
@@ -190,13 +193,13 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 			<Welcome />
+			<SiteReview />
 			<form onSubmit={ onSubmit }>
 				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />
 				<h2 id="advanced-settings">
 					{ __( 'Advanced Settings', 'amp' ) }
 				</h2>
 				<AMPDrawer
-
 					heading={ (
 						<h3>
 							{ __( 'Supported Templates', 'amp' ) }

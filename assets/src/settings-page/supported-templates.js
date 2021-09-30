@@ -15,6 +15,7 @@ import { CheckboxControl } from '@wordpress/components';
  */
 import { SupportedTemplatesToggle } from '../components/supported-templates-toggle';
 import { Options } from '../components/options-context-provider';
+import { READER } from '../common/constants';
 
 /**
  * Determine whether the supportable templates include the static front page.
@@ -231,7 +232,7 @@ export function SupportedTemplatesFieldset() {
 		reader_theme: readerTheme,
 	} = editedOptions || {};
 
-	if ( ( 'reader' === themeSupport && 'legacy' === readerTheme ) || ! supportableTemplates?.length ) {
+	if ( ( READER === themeSupport && 'legacy' === readerTheme ) || ! supportableTemplates?.length ) {
 		return null;
 	}
 
