@@ -15,6 +15,7 @@ use AMP_Validated_URL_Post_Type;
 use LimitIterator;
 use SplFileObject;
 use WP_Error;
+use WP_Site_Health;
 use WP_Theme;
 
 /**
@@ -208,18 +209,27 @@ class SupportData {
 
 		global $wpdb;
 
-		$wp_type = is_multisite() ? ( defined( 'SUBDOMAIN_INSTALL' ) && SUBDOMAIN_INSTALL ) ? 'subdomain' : 'subdir' : 'single';
+		$wp_type = 'single';
+		if ( is_multisite() ) {
+			$wp_type = defined( 'SUBDOMAIN_INSTALL' ) && SUBDOMAIN_INSTALL ? 'subdomain' : 'subdir';
+		}
 
 		$active_theme = wp_get_theme();
 		$active_theme = static::normalize_theme_info( $active_theme );
 
-		$amp_settings = \AMP_Options_Manager::get_options();
+		$amp_settings = AMP_Options_Manager::get_options();
 		$amp_settings = ( ! empty( $amp_settings ) && is_array( $amp_settings ) ) ? $amp_settings : [];
 
 		$loopback_status = '';
 
-		if ( class_exists( 'Health_Check_Loopback' ) ) {
-			$loopback_status = \Health_Check_Loopback::can_perform_loopback();
+		if ( method_exists( WP_Site_Health::class, 'can_perform_loopback' ) ) {
+			if ( method_exists( WP_Site_Health::class, 'get_instance' ) ) {
+				$wp_site_health = WP_Site_Health::get_instance();
+			} else {
+				$wp_site_health = new WP_Site_Health();
+			}
+
+			$loopback_status = $wp_site_health->can_perform_loopback();
 			$loopback_status = ( ! empty( $loopback_status->status ) ) ? $loopback_status->status : '';
 		}
 
@@ -232,8 +242,8 @@ class SupportData {
 		return [
 			'site_url'                    => static::get_home_url(),
 			'site_title'                  => get_bloginfo( 'site_title' ),
-			'php_version'                 => phpversion(),
-			'mysql_version'               => $wpdb->get_var( 'SELECT VERSION();' ), // phpcs:ignore
+			'php_version'                 => PHP_VERSION,
+			'mysql_version'               => $wpdb->db_version(), // phpcs:ignore
 			'wp_version'                  => get_bloginfo( 'version' ),
 			'wp_language'                 => get_bloginfo( 'language' ),
 			'wp_https_status'             => $https_status,
@@ -245,15 +255,13 @@ class SupportData {
 			'loopback_requests'           => $loopback_status,
 			'amp_mode'                    => ( ! empty( $amp_settings['theme_support'] ) ) ? $amp_settings['theme_support'] : '',
 			'amp_version'                 => ( ! empty( $amp_settings['version'] ) ) ? $amp_settings['version'] : '',
-			'amp_plugin_configured'       => ( ! empty( $amp_settings['plugin_configured'] ) ) ? true : false,
-			'amp_all_templates_supported' => ( ! empty( $amp_settings['all_templates_supported'] ) ) ? true : false,
+			'amp_plugin_configured'       => ! empty($amp_settings['plugin_configured'] ),
+			'amp_all_templates_supported' => ! empty($amp_settings['all_templates_supported'] ),
 			'amp_supported_post_types'    => ( ! empty( $amp_settings['supported_post_types'] ) && is_array( $amp_settings['supported_post_types'] ) ) ? $amp_settings['supported_post_types'] : [],
 			'amp_supported_templates'     => ( ! empty( $amp_settings['supported_templates'] ) && is_array( $amp_settings['supported_templates'] ) ) ? $amp_settings['supported_templates'] : [],
-			'amp_mobile_redirect'         => ( ! empty( $amp_settings['mobile_redirect'] ) ) ? true : false,
+			'amp_mobile_redirect'         => ! empty($amp_settings['mobile_redirect'] ),
 			'amp_reader_theme'            => ( ! empty( $amp_settings['reader_theme'] ) ) ? $amp_settings['reader_theme'] : '',
 		];
-
-		return $site_info;
 	}
 
 	/**
