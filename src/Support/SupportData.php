@@ -128,9 +128,12 @@ class SupportData {
 			}
 		}
 
-		$this->urls = array_map( static function ( $url ) {
-			return AMP_Validated_URL_Post_Type::normalize_url_for_storage( $url );
-		}, $this->urls );
+		$this->urls = array_map(
+			static function ( $url ) {
+				return AMP_Validated_URL_Post_Type::normalize_url_for_storage( $url );
+			},
+			$this->urls 
+		);
 		$this->urls = array_values( array_unique( $this->urls ) );
 	}
 
@@ -255,11 +258,11 @@ class SupportData {
 			'loopback_requests'           => $loopback_status,
 			'amp_mode'                    => ( ! empty( $amp_settings['theme_support'] ) ) ? $amp_settings['theme_support'] : '',
 			'amp_version'                 => ( ! empty( $amp_settings['version'] ) ) ? $amp_settings['version'] : '',
-			'amp_plugin_configured'       => ! empty($amp_settings['plugin_configured'] ),
-			'amp_all_templates_supported' => ! empty($amp_settings['all_templates_supported'] ),
+			'amp_plugin_configured'       => ! empty( $amp_settings['plugin_configured'] ),
+			'amp_all_templates_supported' => ! empty( $amp_settings['all_templates_supported'] ),
 			'amp_supported_post_types'    => ( ! empty( $amp_settings['supported_post_types'] ) && is_array( $amp_settings['supported_post_types'] ) ) ? $amp_settings['supported_post_types'] : [],
 			'amp_supported_templates'     => ( ! empty( $amp_settings['supported_templates'] ) && is_array( $amp_settings['supported_templates'] ) ) ? $amp_settings['supported_templates'] : [],
-			'amp_mobile_redirect'         => ! empty($amp_settings['mobile_redirect'] ),
+			'amp_mobile_redirect'         => ! empty( $amp_settings['mobile_redirect'] ),
 			'amp_reader_theme'            => ( ! empty( $amp_settings['reader_theme'] ) ) ? $amp_settings['reader_theme'] : '',
 		];
 	}
@@ -288,7 +291,7 @@ class SupportData {
 			},
 			$active_plugins
 		);
-		$plugin_info    = array_filter( $plugin_info );
+		$plugin_info = array_filter( $plugin_info );
 
 		return array_values( $plugin_info );
 	}
@@ -336,13 +339,13 @@ class SupportData {
 
 		try {
 			$file = new SplFileObject( $error_log_path );
-			$file->seek(PHP_INT_MAX);
+			$file->seek( PHP_INT_MAX );
 			$last_line = $file->key();
 
-			$offset          = max( 0,  $last_line - 200 );
-			$lines_iterator  = new LimitIterator( $file, $offset, $last_line );
-			$lines           = array_map( 'sanitize_text_field', iterator_to_array( $lines_iterator ) );
-			$contents        = implode( "\n", $lines );
+			$offset         = max( 0, $last_line - 200 );
+			$lines_iterator = new LimitIterator( $file, $offset, $last_line );
+			$lines          = array_map( 'sanitize_text_field', iterator_to_array( $lines_iterator ) );
+			$contents       = implode( "\n", $lines );
 
 			// Remove file handle from memory.
 			unset( $file );
@@ -369,7 +372,7 @@ class SupportData {
 	public static function normalize_plugin_info( $plugin_file ) {
 
 		$absolute_plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
-		if (  0 !== validate_file( $absolute_plugin_file ) || ! file_exists( $absolute_plugin_file ) ) {
+		if ( 0 !== validate_file( $absolute_plugin_file ) || ! file_exists( $absolute_plugin_file ) ) {
 			return [];
 		}
 

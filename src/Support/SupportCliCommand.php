@@ -93,7 +93,7 @@ class SupportCliCommand implements Service, CliCommand {
 		];
 
 		$support_data = Services::get_injector()->make( SupportData::class, $data_args );
-		$data = $support_data->get_data();
+		$data         = $support_data->get_data();
 
 		if ( $is_print ) {
 

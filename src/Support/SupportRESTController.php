@@ -86,7 +86,7 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 		$request_args = $request->get_param( 'args' );
 		$request_args = ( ! empty( $request_args ) && is_array( $request_args ) ) ? $request_args : [];
 
-		$support_data = Services::get_injector()->make( SupportData::class, $request_args );
+		$support_data     = Services::get_injector()->make( SupportData::class, $request_args );
 		$support_response = $support_data->send_data();
 
 		$response = new WP_Error(
