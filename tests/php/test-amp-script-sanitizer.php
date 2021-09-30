@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
@@ -569,6 +570,106 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$this->assertArrayNotHasKey( Extension::FACEBOOK_PAGE, $scripts );
 			$this->assertArrayHasKey( Extension::FACEBOOK, $scripts );
 		}
+	}
+
+	/** @return array */
+	public function get_comment_reply_allowed_values() {
+		$values = [
+			'always',
+			'conditionally',
+			'never',
+		];
+
+		$data = [];
+		foreach ( $values as $value ) {
+			$data[ $value ] = [ 'comment_reply_allowed' => $value ];
+		}
+		return $data;
+	}
+
+	/**
+	 * @dataProvider get_comment_reply_allowed_values
+	 * @param string $comment_reply_allowed
+	 * @covers ::sanitize_js_script_elements()
+	 */
+	public function test_sanitize_js_script_elements_for_comment_reply( $comment_reply_allowed ) {
+		$dom = Document::fromHtml(
+			'
+			<html>
+				<head></head>
+				<body>
+					<script id="comment-reply-js" src="https://example.com/comment-reply.js"></script>
+				</body>
+			</html>
+			',
+			Options::DEFAULTS
+		);
+
+		$sanitizer = new AMP_Script_Sanitizer(
+			$dom,
+			[
+				'sanitize_js_scripts'   => true,
+				'comment_reply_allowed' => $comment_reply_allowed,
+			]
+		);
+
+		$script = $dom->getElementById( 'comment-reply-js' );
+		$this->assertInstanceOf( Element::class, $script );
+		$sanitizer->sanitize();
+
+		if ( 'always' === $comment_reply_allowed ) {
+			$this->assertInstanceOf( Element::class, $script->parentNode );
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $script ) );
+		} elseif ( 'never' === $comment_reply_allowed ) {
+			$this->assertNull( $script->parentNode );
+			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
+		} else {
+			$this->assertInstanceOf( Element::class, $script->parentNode );
+			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
+		}
+	}
+
+	/**
+	 * @see wp_comment_form_unfiltered_html_nonce()
+	 * @covers ::sanitize_js_script_elements()
+	 */
+	public function test_sanitize_js_script_elements_for_wp_unfiltered_html_comment_script() {
+		add_filter(
+			'map_meta_cap',
+			static function ( $caps, $cap ) {
+				if ( 'unfiltered_html' === $cap ) {
+					$caps = [ 'exist' ];
+				}
+				return $caps;
+			},
+			10,
+			2
+		);
+		$this->assertTrue( current_user_can( 'unfiltered_html' ) );
+
+		$dom = Document::fromHtml(
+			'
+			<html data-ampdevmode>
+				<head></head>
+				<body>' . get_echo( 'wp_comment_form_unfiltered_html_nonce' ) . '</body>
+			</html>
+			',
+			Options::DEFAULTS
+		);
+
+		$sanitizer = new AMP_Script_Sanitizer(
+			$dom,
+			[
+				'sanitize_js_scripts' => true,
+			]
+		);
+
+		$sanitizer->sanitize();
+
+		$script = $dom->getElementsByTagName( Tag::SCRIPT )->item( 0 );
+		$this->assertInstanceOf( Element::class, $script );
+		$this->assertStringContainsString( '_wp_unfiltered_html_comment_disabled', $script->textContent );
+		$this->assertTrue( DevMode::hasExemptionForNode( $script ) );
 	}
 
 	/**

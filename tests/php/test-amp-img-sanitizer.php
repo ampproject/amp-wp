@@ -446,6 +446,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * Test converter.
 	 *
 	 * @covers ::sanitize()
+	 * @covers ::adjust_and_replace_node()
 	 * @covers AMP_Noscript_Fallback::initialize_noscript_allowed_attributes()
 	 * @covers AMP_Noscript_Fallback::is_inside_amp_noscript()
 	 * @covers AMP_Noscript_Fallback::append_old_node_noscript()
