@@ -39,9 +39,9 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	}
 
 	public function tearDown() {
-		parent::tearDown();
-
 		$GLOBALS['wp_scripts'] = null;
+
+		parent::tearDown();
 	}
 
 	/**
