@@ -627,6 +627,10 @@ class AMP_Iframe_Converter_Test extends TestCase {
 	 *
 	 * @dataProvider get_data
 	 * @covers ::sanitize()
+	 * @covers ::normalize_attributes()
+	 * @covers ::get_origin_from_url()
+	 * @covers ::build_placeholder()
+	 * @covers ::sanitize_boolean_digit()
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.

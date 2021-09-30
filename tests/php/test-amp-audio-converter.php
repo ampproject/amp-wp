@@ -268,6 +268,7 @@ class AMP_Audio_Converter_Test extends TestCase {
 	 * @param array  $args     Args for sanitizer.
 	 *
 	 * @covers ::sanitize()
+	 * @covers ::filter_attributes()
 	 */
 	public function test_converter( $source, $expected = null, $args = [] ) {
 		if ( null === $expected ) {

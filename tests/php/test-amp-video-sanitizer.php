@@ -305,6 +305,8 @@ class AMP_Video_Converter_Test extends TestCase {
 	 *
 	 * @dataProvider get_data
 	 * @covers ::sanitize()
+	 * @covers ::filter_video_dimensions()
+	 * @covers ::filter_attributes()
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
