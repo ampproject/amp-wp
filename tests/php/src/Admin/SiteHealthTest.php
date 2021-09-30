@@ -188,6 +188,7 @@ class SiteHealthTest extends TestCase {
 		];
 
 		wp_using_ext_object_cache( false );
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no' );
 		$output = $this->instance->persistent_object_cache();
 		$this->assertAssocArraySubset(
 			array_merge(
@@ -206,7 +207,7 @@ class SiteHealthTest extends TestCase {
 		$this->assertStringNotContainsString( 'Since page caching was detected', $output['description'] );
 		$this->assertStringContainsString( '/persistent-object-caching/', $output['actions'] );
 
-		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, true );
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'yes' );
 		$output = $this->instance->persistent_object_cache();
 		$this->assertAssocArraySubset(
 			array_merge(

@@ -389,14 +389,12 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 */
 	public function has_page_caching( $use_previous_result = false ) {
 
-		$wp_cache = ( defined( 'WP_CACHE' ) && true === WP_CACHE );
-
 		if ( $use_previous_result ) {
 			$has_page_caching = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
 			if ( is_wp_error( $has_page_caching ) ) {
 				return $has_page_caching; 
 			} elseif ( $has_page_caching ) {
-				return ( $wp_cache || 'yes' === $has_page_caching );
+				return ( 'yes' === $has_page_caching );
 			}
 		}
 
@@ -407,7 +405,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $has_page_caching ? 'yes' : 'no', MONTH_IN_SECONDS );
 		}
 
-		return ( $wp_cache || $has_page_caching );
+		return $has_page_caching;
 	}
 
 	/**
