@@ -486,39 +486,23 @@ class SupportData {
 		static $plugin_versions = [];
 		static $theme_versions  = [];
 
-		/**
-		 * All plugin info
-		 */
+		// All plugin info.
 		if ( empty( $plugin_versions ) || ! is_array( $plugin_versions ) ) {
+			// Plugin data is cached and so can be fetched in one go.
+			foreach ( get_plugins() as $plugin_file => $plugin_data ) {
+				$slug = explode( '/', $plugin_file );
+				$slug = $slug[0];
 
 				$plugin_versions[ $slug ] = isset( $plugin_data['Version'] ) ? $plugin_data['Version'] : '';
 			}
 		}
 
-		/**
-		 * All theme info.
-		 */
-		if ( empty( $theme_versions ) || ! is_array( $theme_versions ) ) {
-
-			$theme_list = array_merge( [ wp_get_theme() ], wp_get_themes() );
-
-			foreach ( $theme_list as $theme ) {
-				if ( ! $theme->errors() ) {
-					$theme_versions[ $theme->get_stylesheet() ] = $theme->get( 'Version' );
-				}
-			}
-		}
-
-		/**
-		 * Normalize error source.
-		 */
+		// Normalize error source.
 
 		$allowed_types  = [ 'plugin', 'theme' ];
 		$source['type'] = ( ! empty( $source['type'] ) ) ? strtolower( trim( $source['type'] ) ) : '';
 
-		/**
-		 * Do not include wp-core sources.
-		 */
+		// Do not include wp-core sources.
 		if ( empty( $source['type'] ) || ! in_array( $source['type'], $allowed_types, true ) ) {
 			return [];
 		}
@@ -526,6 +510,13 @@ class SupportData {
 		if ( 'plugin' === $source['type'] ) {
 			$source['version'] = $plugin_versions[ $source['name'] ];
 		} elseif ( 'theme' === $source['type'] ) {
+			if ( ! array_key_exists( $source['name'], $theme_versions ) ) {
+				$theme = wp_get_theme( $source['name'] );
+				if ( ! $theme->errors() ) {
+					$theme_versions[ $source['name'] ] = $theme->get( 'Version' );
+				}
+			}
+
 			$source['version'] = $theme_versions[ $source['name'] ];
 		}
 
@@ -539,8 +530,6 @@ class SupportData {
 
 		// Update source information. Add error_slug and source_slug.
 		$source['error_source_slug'] = $error_source_slug;
-
-		ksort( $source );
 
 		return $source;
 	}
