@@ -421,6 +421,7 @@ jobs:
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           ini-values: pcov.directory=.
+          tools: phpunit:9
 
       - name: Shutdown default MySQL service
         run: sudo service mysql stop
@@ -489,21 +490,21 @@ jobs:
 
       - name: Run tests
         if: ${{ matrix.coverage == false }}
-        run: vendor/bin/phpunit
+        run: phpunit
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true }}
-        run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+        run: phpunit --coverage-clover build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run external HTTP tests
         if: ${{ matrix.external-http == true }}
-        run: vendor/bin/phpunit --testsuite external-http
+        run: phpunit --testsuite external-http
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
