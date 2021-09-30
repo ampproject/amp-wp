@@ -421,7 +421,6 @@ jobs:
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           ini-values: pcov.directory=.
-          tools: phpunit:9
 
       - name: Shutdown default MySQL service
         run: sudo service mysql stop
@@ -455,7 +454,10 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+        run: |
+          # Remove the composer.lock to always install install the latest PHPUnit.
+          rm composer.lock
+          composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
       - name: Install Node dependencies
         run: npm ci
@@ -490,21 +492,21 @@ jobs:
 
       - name: Run tests
         if: ${{ matrix.coverage == false }}
-        run: phpunit
+        run: vendor/bin/phpunit
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true }}
-        run: phpunit --coverage-clover build/logs/clover.xml
+        run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run external HTTP tests
         if: ${{ matrix.external-http == true }}
-        run: phpunit --testsuite external-http
+        run: vendor/bin/phpunit --testsuite external-http
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
