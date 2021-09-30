@@ -7,13 +7,15 @@
 
 namespace AmpProject\AmpWP\Support;
 
+use AMP_Allowed_Tags_Generated;
 use AMP_Options_Manager;
+use AMP_Rule_Spec;
+use AMP_Style_Sanitizer;
 use AMP_Validated_URL_Post_Type;
 use LimitIterator;
 use SplFileObject;
 use WP_Error;
 use WP_Theme;
-use AmpProject\AmpWP\QueryVar;
 
 /**
  * Class SupportData
@@ -685,7 +687,7 @@ class SupportData {
 			// Stylesheet info.
 			$stylesheet_info       = static::get_stylesheet_info( $amp_error_post->ID );
 			$css_budget_percentage = ( ! empty( $stylesheet_info['css_budget_percentage'] ) ) ? $stylesheet_info['css_budget_percentage'] : 0;
-			$css_budget_percentage = intval( $css_budget_percentage );
+			$css_budget_percentage = (int) $css_budget_percentage;
 
 			if ( empty( $post_errors ) && $css_budget_percentage < 100 ) {
 				continue;
@@ -724,7 +726,7 @@ class SupportData {
 	 */
 	public static function get_stylesheet_info( $post_id ) {
 
-		$stylesheets = get_post_meta( $post_id, \AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true );
+		$stylesheets = get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true );
 
 		if ( empty( $stylesheets ) ) {
 			return [];
@@ -733,9 +735,9 @@ class SupportData {
 		$stylesheets             = json_decode( $stylesheets, true );
 		$style_custom_cdata_spec = null;
 
-		foreach ( \AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
-			if ( isset( $spec_rule[ \AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && \AMP_Style_Sanitizer::STYLE_AMP_CUSTOM_SPEC_NAME === $spec_rule[ \AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
-				$style_custom_cdata_spec = $spec_rule[ \AMP_Rule_Spec::CDATA ];
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && AMP_Style_Sanitizer::STYLE_AMP_CUSTOM_SPEC_NAME === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$style_custom_cdata_spec = $spec_rule[ AMP_Rule_Spec::CDATA ];
 			}
 		}
 
@@ -785,14 +787,13 @@ class SupportData {
 		}
 
 		$percentage_budget_used = ( ( $included_final_size + $excluded_final_size ) / $style_custom_cdata_spec['max_bytes'] ) * 100;
-		$response               = [
-			'css_size_before'       => intval( $included_original_size + $excluded_original_size ),
-			'css_size_after'        => intval( $included_final_size + $excluded_final_size ),
-			'css_size_excluded'     => intval( $excluded_stylesheets ),
+
+		return [
+			'css_size_before'       => $included_original_size + $excluded_original_size,
+			'css_size_after'        => $included_final_size + $excluded_final_size,
+			'css_size_excluded'     => $excluded_stylesheets,
 			'css_budget_percentage' => round( $percentage_budget_used, 1 ),
 		];
-
-		return $response;
 
 	}
 
@@ -840,9 +841,7 @@ class SupportData {
 		 */
 		$regex = "/http[s]?:\\\\{0,5}\/\\\\{0,5}\/$home_url/mU";
 
-		$content = preg_replace( $regex, '', $content );
-
-		return $content;
+		return preg_replace( $regex, '', $content );
 	}
 
 	/**
@@ -870,8 +869,6 @@ class SupportData {
 		}
 
 		$object = trim( $object );
-		$hash   = hash( 'sha256', $object );
-
-		return $hash;
+		return hash( 'sha256', $object );
 	}
 }
