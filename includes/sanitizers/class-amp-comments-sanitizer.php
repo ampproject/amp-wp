@@ -93,11 +93,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$comment_reply_script = $this->dom->getElementById( 'comment-reply-js' );
-		if ( $comment_reply_script instanceof Element && ! $comment_reply_script->parentNode ) {
-			$comment_reply_script = null;
-		}
-
+		$comment_reply_script = $this->dom->xpath->query( '//script[ @id = "comment-reply-js" ]' )->item( 0 );
 		if ( 'never' === $this->args['ampify_comment_threading'] ) {
 			if ( $comment_reply_script instanceof Element ) {
 				$this->prepare_native_comment_reply( $comment_reply_script );
