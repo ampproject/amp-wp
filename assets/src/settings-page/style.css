@@ -367,6 +367,7 @@ li.error-kept {
 	}
 }
 
+#site-scan .amp-drawer__panel-body-inner,
 #site-review .amp-drawer__panel-body-inner,
 #plugin-suppression .amp-drawer__panel-body-inner,
 .amp-analytics .amp-drawer__panel-body-inner,
@@ -379,6 +380,7 @@ li.error-kept {
 	}
 }
 
+#site-scan .amp-drawer__panel-body-inner > p,
 #site-review .amp-drawer__panel-body-inner > p,
 #plugin-suppression .amp-drawer__panel-body-inner > p,
 #paired-url-structure .amp-drawer__panel-body-inner > p,
@@ -540,6 +542,32 @@ li.error-kept {
 	margin-left: 0;
 	height: 24px;
 	width: 24px;
+}
+
+/* Site Scan. */
+#site-scan {
+	margin-bottom: 2.5rem;
+}
+
+#site-scan .amp-drawer__heading {
+	font-size: 1.2rem;
+}
+
+#site-scan .amp-drawer__heading svg {
+	fill: transparent;
+	width: 55px;
+}
+
+.settings-site-scan__footer {
+	align-items: center;
+	display: flex;
+	flex-flow: row nowrap;
+}
+
+.amp .settings-site-scan__footer .components-button {
+	height: 40px;
+	padding-left: 2.25rem;
+	padding-right: 2.25rem;
 }
 
 /* Review. */

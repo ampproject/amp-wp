@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Admin;
 use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
+use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
@@ -227,6 +228,13 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$theme           = wp_get_theme();
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
+		$amp_validated_urls_link = admin_url(
+			add_query_arg(
+				[ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ],
+				'edit.php'
+			)
+		);
+
 		$js_data = [
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
 			'CURRENT_THEME'                      => [
@@ -240,6 +248,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'HOME_URL'                           => home_url( '/' ),
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
+			'SCANNABLE_URLS_REST_PATH'           => '/amp/v1/scannable-urls',
 			'IS_CORE_THEME'                      => in_array(
 				get_stylesheet(),
 				AMP_Core_Theme_Sanitizer::get_supported_themes(),
@@ -253,6 +262,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE' => UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
+			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
 			'HAS_PAGE_CACHING'                   => $this->site_health->has_page_caching( true ),
 		];
 
@@ -309,6 +319,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$paths = [
 			'/amp/v1/options',
 			'/amp/v1/reader-themes',
+			'/amp/v1/scannable-urls',
 			'/wp/v2/settings',
 			'/wp/v2/users/me',
 		];
