@@ -370,6 +370,34 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 	 * @param int $level Level.
 	 */
 	public function test_cascading_sanitizer_argument_changes_with_custom_scripts( $level ) {
+
+		add_filter(
+			'pre_http_request',
+			static function( $preempt, $request, $url ) {
+				$r = [
+					'response' => [
+						'code'    => 200,
+						'message' => 'OK',
+					],
+					'headers'  => [ 'content-type' => 'text/css' ],
+				];
+				if ( 'https://example.com/head.css' === $url ) {
+					$preempt = array_merge(
+						$r,
+						[ 'body' => 'head{background-color:white}' ]
+					);
+				} elseif ( 'https://example.com/body.css' === $url ) {
+					$preempt = array_merge(
+						$r,
+						[ 'body' => 'body{background-color:black}' ]
+					);
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
 		switch ( $level ) {
 			case 3:
 				$tag_exemption_attribute  = '';
@@ -391,6 +419,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				<html>
 					<head>
 						<style>
+						/*comment*/
 						body { background: red; }
 						body.loaded { background: green; }
 						img { outline: solid 1px red; }
@@ -398,9 +427,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 						video { outline: solid 1px blue; }
 						iframe { outline: solid 1px black; }
 						</style>
-						<style>
-						body:after{content:' . str_repeat( 'a', 75000 ) . '}
-						</style>
+						<link rel="stylesheet" type="text/css" href="https://example.com/head.css">
 					</head>
 					<body onload="doSomething()" %s>
 						<img src="https://example.com/logo.png" width="300" height="100" alt="Logo">
@@ -411,7 +438,12 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 						<form action="https://example.com/subscribe/" method="post">
 							<input type="email" name="email">
 						</form>
+						<div id="blueviolet" style="color:blueviolet !important;">Blue Violet</div>
 						<script %s>document.addEventListener("DOMContentLoaded", () => document.body.classList.add("loaded"))</script>
+						<link rel="stylesheet" href="https://example.com/body.css">
+						<style>
+						body:after{content:' . str_repeat( 'a', 75000 ) . '}
+						</style>
 					</body>
 				</html>
 				',
@@ -461,9 +493,8 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			AMP_Style_Sanitizer::class             => new AMP_Style_Sanitizer(
 				$dom,
 				[
-					'use_document_element' => true,
-					'skip_tree_shaking'    => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
-					'allow_excessive_css'  => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+					'use_document_element'     => true,
+					'disable_style_processing' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
 			AMP_Tag_And_Attribute_Sanitizer::class => new AMP_Tag_And_Attribute_Sanitizer(
@@ -484,37 +515,69 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$sanitizer->sanitize();
 		}
 
-		$css_custom_style = $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 );
-		$css_custom_text  = $css_custom_style->textContent;
+		$style_element_query = $dom->xpath->query( '//style' );
+		$link_element_query  = $dom->xpath->query( '//link[ @rel = "stylesheet" ]' );
+		$first_style         = $style_element_query->item( 0 );
+		$this->assertEquals( $level > 1, $first_style->hasAttribute( Attribute::AMP_CUSTOM ) );
+		$this->assertEquals( 1 === $level ? 2 : 1, $style_element_query->length, 'Expected styles to be concatenated into one style.' );
+		$this->assertEquals( 1 === $level ? 2 : 0, $link_element_query->length, 'Expected external stylesheets to be left as-is in Level 1 only.' );
 
-		$this->assertEquals(
-			3 !== $level,
-			ValidationExemption::is_px_verified_for_node( $css_custom_style )
+		$css_text = join(
+			'',
+			array_map(
+				function ( Element $element ) {
+					return $element->textContent;
+				},
+				iterator_to_array( $style_element_query )
+			)
 		);
+
+		foreach ( $style_element_query as $style_element ) {
+			$this->assertEquals(
+				3 !== $level,
+				ValidationExemption::is_px_verified_for_node( $style_element )
+			);
+		}
+		foreach ( $link_element_query as $link_element ) {
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $link_element ) );
+		}
 
 		$this->assertEquals(
 			3 === $level ? 0 : 1,
 			$dom->getElementsByTagName( Tag::SCRIPT )->length
 		);
 
+		if ( 1 === $level ) {
+			$this->assertStringContainsString( '/*comment*/', $css_text );
+		} else {
+			$this->assertStringNotContainsString( '/*comment*/', $css_text );
+		}
+		if ( $level > 1 ) {
+			$this->assertStringContainsString( 'head{background-color:white}', $css_text );
+			$this->assertStringContainsString( 'body{background-color:black}', $css_text );
+		} else {
+			$this->assertStringNotContainsString( 'head{background-color:white}', $css_text );
+			$this->assertStringNotContainsString( 'body{background-color:black}', $css_text );
+		}
+
 		$this->assertEquals(
-			1 !== $level ? 1 : 0,
+			1 === $level ? 0 : 1,
 			$dom->getElementsByTagName( Extension::IMG )->length,
 			'Expected IMG to be converted to AMP-IMG when custom scripts are removed.'
 		);
-		$this->assertStringContainsString(
-			1 !== $level ? '}amp-img{' : '}img{',
-			$css_custom_text
+		$this->assertRegExp(
+			1 === $level ? '/}\s*img\s*{/' : '/}amp-img{/',
+			$css_text
 		);
 
 		$this->assertEquals(
-			1 !== $level ? 1 : 0,
+			1 === $level ? 0 : 1,
 			$dom->getElementsByTagName( Extension::VIDEO )->length,
 			'Expected VIDEO to be converted to AMP-VIDEO when custom scripts are removed.'
 		);
-		$this->assertStringContainsString(
-			1 !== $level ? '}amp-video{' : '}video{',
-			$css_custom_text
+		$this->assertRegExp(
+			1 === $level ? '/}\s*video\s*{/' : '/}amp-video{/',
+			$css_text
 		);
 
 		$this->assertEquals(
@@ -525,24 +588,33 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 
 		switch ( $level ) {
 			case 1:
-				$this->assertStringContainsString( '}audio{outline:solid 1px green !important}', $css_custom_text );
+				$this->assertRegExp( '/}\s*audio\s*{\s*outline:\s*solid 1px green !important/', $css_text );
 				break;
 			case 2:
-				$this->assertStringContainsString( '}amp-audio{', $css_custom_text );
+				$this->assertStringContainsString( '}amp-audio{', $css_text );
 				break;
 			case 3:
-				$this->assertStringContainsString( ':not(#_) amp-audio{', $css_custom_text );
+				$this->assertStringContainsString( ':not(#_) amp-audio{', $css_text );
 				break;
 		}
 
+		$blueviolet_div = $dom->getElementById( 'blueviolet' );
+		if ( $level < 3 ) {
+			$this->assertSame( 'color:blueviolet !important;', $blueviolet_div->getAttribute( 'style' ), 'Expected style attribute to be left as-is in level under 3.' );
+			$this->assertStringNotContainsString( 'blueviolet', $css_text, 'Expected blueviolet not to be concatenated under level 3.' );
+		} else {
+			$this->assertFalse( $blueviolet_div->hasAttribute( 'style' ), 'Expected no style attribute in level 3.' );
+			$this->assertStringContainsString( 'blueviolet', $css_text, 'Expected ' );
+		}
+
 		$this->assertEquals(
-			1 !== $level ? 1 : 0,
+			1 === $level ? 0 : 1,
 			$dom->getElementsByTagName( Extension::IFRAME )->length,
 			'Expected IFRAME to be converted to AMP-IFRAME when custom scripts are removed.'
 		);
-		$this->assertStringContainsString(
-			1 !== $level ? '}amp-iframe{' : '}iframe{',
-			$css_custom_text
+		$this->assertRegExp(
+			1 === $level ? '/}\s*iframe\s*{/' : '/}amp-iframe{/',
+			$css_text
 		);
 
 		$post_form = $dom->xpath->query( '//form[ @method = "post" ]' )->item( 0 );
@@ -551,14 +623,14 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 		$this->assertEquals( 3 !== $level, $post_form->hasAttribute( Attribute::ACTION ) );
 
 		if ( 1 === $level ) {
-			$this->assertStringContainsString( 'body.loaded{background:green}', $css_custom_text );
+			$this->assertStringContainsString( 'body.loaded', $css_text );
 		} else {
-			$this->assertStringNotContainsString( 'body.loaded{background:green}', $css_custom_text );
+			$this->assertStringNotContainsString( 'body.loaded', $css_text );
 		}
 		if ( 3 === $level ) {
-			$this->assertStringNotContainsString( 'body:after{', $css_custom_text );
+			$this->assertStringNotContainsString( 'body:after{', $css_text );
 		} else {
-			$this->assertStringContainsString( 'body:after{', $css_custom_text );
+			$this->assertStringContainsString( 'body:after{', $css_text );
 		}
 
 		// Verify that prefer_bento got set.

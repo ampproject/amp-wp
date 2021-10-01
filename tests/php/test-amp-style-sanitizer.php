@@ -3652,4 +3652,69 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$content = $dom->saveHTML( $dom->documentElement );
 		$this->assertEquals( $expected, $content );
 	}
+
+	/**
+	 * Test that stylesheet processing can be disabled (for level 1 sandboxing).
+	 *
+	 * @covers AMP_Style_Sanitizer::sanitize()
+	 */
+	public function test_disable_style_processing() {
+		$dom = Document::fromHtml(
+			'
+				<html>
+					<head>
+						<style>
+						/*comment*/
+						body { background: red; }
+						body.loaded { background: green; }
+						audio { outline: solid 1px green !important; }
+						</style>
+						<link rel="stylesheet" type="text/css" href="https://example.com/head.css">
+						<link rel="canonical" href="https://example.com/">
+					</head>
+					<body onload="doSomething()" %s>
+						<div id="blueviolet" style="color:blueviolet !important;">Blue Violet</div>
+						<link rel="stylesheet" href="https://example.com/body1.css">
+						<link rel="stylesheet" type="text/css" href="https://example.com/body2.css">
+						<style>
+						body:after{content:' . str_repeat( 'a', 75000 ) . '}
+						</style>
+					</body>
+				</html>
+			',
+			Options::DEFAULTS
+		);
+
+		$sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			[
+				'use_document_element'     => true,
+				'disable_style_processing' => true,
+			]
+		);
+		$sanitizer->sanitize();
+		$this->assertCount( 0, $sanitizer->get_stylesheets() );
+
+		$style_query = $dom->xpath->query( '//style' );
+		$this->assertEquals( 2, $style_query->length );
+		foreach ( $style_query as $style_element ) {
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $style_element ) );
+		}
+		$this->assertStringContainsString( '/*comment*/', $style_query->item( 0 )->textContent );
+		$this->assertStringContainsString( 'body.loaded', $style_query->item( 0 )->textContent );
+		$this->assertStringContainsString( 'audio { outline: solid 1px green !important; }', $style_query->item( 0 )->textContent );
+
+		$link_query = $dom->xpath->query( '//link[ @rel = "stylesheet" ]' );
+		$this->assertEquals( 3, $link_query->length );
+		foreach ( $link_query as $link_element ) {
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $link_element ) );
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $link_element->getAttributeNode( 'rel' ) ) );
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $link_element->getAttributeNode( 'href' ) ) );
+		}
+		$this->assertFalse( ValidationExemption::is_px_verified_for_node( $dom->xpath->query( '//link[ @rel = "canonical" ]' )->item( 0 ) ) );
+
+		$style_attribute = $dom->getElementById( 'blueviolet' )->getAttributeNode( 'style' );
+		$this->assertTrue( ValidationExemption::is_px_verified_for_node( $style_attribute ) );
+		$this->assertEquals( 'color:blueviolet !important;', $style_attribute->nodeValue );
+	}
 }

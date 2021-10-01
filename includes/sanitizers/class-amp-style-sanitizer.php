@@ -11,9 +11,11 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Tag;
 use AmpProject\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
@@ -124,6 +126,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
+	 *      @type bool     $disable_style_processing       Whether arbitrary styles should be allowed. When enabled, external stylesheet links, style elements, and style attributes will all be unprocessed and marked as PX-verified.
 	 *      @type string[] $dynamic_element_selectors      Selectors for elements (or their ancestors) which contain dynamic content; selectors containing these will not be filtered.
 	 *      @type bool     $use_document_element           Whether the root of the document should be used rather than the body.
 	 *      @type bool     $require_https_src              Require HTTPS URLs.
@@ -146,6 +149,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
+		'disable_style_processing'       => false,
 		'dynamic_element_selectors'      => [
 			'amp-list',
 			'amp-live-list',
@@ -877,6 +881,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.4
 	 */
 	public function sanitize() {
+
+		// When style processing is disabled, simply mark all the CSS elements/attributes as PX-verified.
+		if ( $this->args['disable_style_processing'] ) {
+			foreach ( $this->dom->xpath->query( '//link[ @rel = "stylesheet" and @href ] | //style | //*/@style' ) as $node ) {
+				ValidationExemption::mark_node_as_px_verified( $node );
+
+				// Since stylesheet links are allowed in the HEAD if they are for fonts, mark the href specifically as being the exempted attribute.
+				if ( $node instanceof Element && Tag::LINK === $node->tagName ) {
+					ValidationExemption::mark_node_as_px_verified( $node->getAttributeNode( Attribute::HREF ) );
+					ValidationExemption::mark_node_as_px_verified( $node->getAttributeNode( Attribute::REL ) );
+				}
+			}
+			return;
+		}
+
 		// Capture the selector conversion mappings from the other sanitizers.
 		foreach ( $this->sanitizers as $sanitizer ) {
 			foreach ( $sanitizer->get_selector_conversion_mapping() as $html_selectors => $amp_selectors ) {

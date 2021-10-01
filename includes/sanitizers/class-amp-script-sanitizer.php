@@ -129,10 +129,10 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		// @todo There should be an attribute on script tags that opt-in to keeping tree shaking and/or to indicate what class names need to be included.
 		// @todo Depending on the size of the underlying stylesheets, this may need to retain the use of external styles to prevent inlining excessive CSS. This may involve writing minified CSS to disk, or skipping style processing altogether if no selector conversions are needed.
 		if ( $this->kept_script_count > 0 ) {
-			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['skip_tree_shaking']   = true;
-			$sanitizer_arg_updates[ AMP_Video_Sanitizer::class ]['native_video_used']   = true;
-			$sanitizer_arg_updates[ AMP_Audio_Sanitizer::class ]['native_audio_used']   = true;
-			$sanitizer_arg_updates[ AMP_Iframe_Sanitizer::class ]['native_iframe_used'] = true;
+			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['disable_style_processing'] = true;
+			$sanitizer_arg_updates[ AMP_Video_Sanitizer::class ]['native_video_used']        = true;
+			$sanitizer_arg_updates[ AMP_Audio_Sanitizer::class ]['native_audio_used']        = true;
+			$sanitizer_arg_updates[ AMP_Iframe_Sanitizer::class ]['native_iframe_used']      = true;
 
 			// Once amp-img is deprecated, these won't be needed and an <img> won't prevent strict sandboxing level for valid AMP.
 			// Note that AMP_Core_Theme_Sanitizer would have already run, so we can't update it here. Nevertheless,
