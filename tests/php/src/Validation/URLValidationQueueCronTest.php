@@ -93,7 +93,7 @@ final class URLValidationQueueCronTest extends WP_UnitTestCase {
 	public function test_get_interval() {
 
 		$this->assertEquals(
-			URLValidationQueueCron::DEFAULT_INTERVAL_DAILY,
+			URLValidationQueueCron::DEFAULT_INTERVAL_WEEKLY,
 			$this->call_private_method( $this->test_instance, 'get_interval' )
 		);
 	}

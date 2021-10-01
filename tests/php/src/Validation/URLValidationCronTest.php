@@ -101,21 +101,27 @@ final class URLValidationCronTest extends TestCase {
 		$url_validation_queue_instance = new URLValidationQueueCron( new BackgroundTaskDeactivator(), new ScannableURLProvider( new URLScanningContext( 20 ) ) );
 		$url_validation_queue_instance->process();
 
-		$validation_queue_key = 'amp_url_validation_queue';
-		$validation_queue     = get_option( $validation_queue_key, [] );
+		$validation_queue = get_option( URLValidationQueueCron::OPTION_KEY, [] );
 
 		$this->assertCount( 10, $validation_queue );
 
 		$this->test_instance->process();
-		$validation_queue = get_option( $validation_queue_key, [] );
+		$validation_queue = get_option( URLValidationQueueCron::OPTION_KEY, [] );
 
-		$this->assertCount( 5, $this->get_validated_urls() );
-		$this->assertCount( 5, $validation_queue );
+		$this->assertCount( 1, $this->get_validated_urls() );
+		$this->assertCount( 9, $validation_queue );
+
 
 		$this->test_instance->process();
-		$validation_queue = get_option( $validation_queue_key, [] );
-		$this->assertCount( 10, $this->get_validated_urls() );
-		$this->assertCount( 0, $validation_queue );
+		$validation_queue = get_option( URLValidationQueueCron::OPTION_KEY, [] );
+
+		$this->assertCount( 2, $this->get_validated_urls() );
+		$this->assertCount( 8, $validation_queue );
+
+		$this->test_instance->process();
+		$validation_queue = get_option( URLValidationQueueCron::OPTION_KEY, [] );
+		$this->assertCount( 3, $this->get_validated_urls() );
+		$this->assertCount( 7, $validation_queue );
 	}
 
 	/** @covers ::get_event_name() */
@@ -129,7 +135,7 @@ final class URLValidationCronTest extends TestCase {
 	/** @covers ::get_interval() */
 	public function test_get_interval() {
 		$this->assertEquals(
-			URLValidationCron::DEFAULT_INTERVAL_EVERY_TEN_MINUTES,
+			URLValidationCron::DEFAULT_INTERVAL_HOURLY,
 			$this->call_private_method( $this->test_instance, 'get_interval' )
 		);
 	}

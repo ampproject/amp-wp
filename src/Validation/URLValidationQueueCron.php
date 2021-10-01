@@ -15,7 +15,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 /**
  * URLValidationCron class.
  *
- * @since 2.1
+ * @since 2.2
  *
  * @internal
  */
@@ -36,6 +36,13 @@ final class URLValidationQueueCron extends RecurringBackgroundTask {
 	const BACKGROUND_TASK_NAME = 'amp_validate_url_queue';
 
 	/**
+	 * Option key to store queue for URL validation.
+	 *
+	 * @var string
+	 */
+	const OPTION_KEY = 'amp_url_validation_queue';
+
+	/**
 	 * Class constructor.
 	 *
 	 * @param BackgroundTaskDeactivator $background_task_deactivator Service that deactivates background events.
@@ -54,21 +61,16 @@ final class URLValidationQueueCron extends RecurringBackgroundTask {
 	 * @param mixed[] ...$args Unused callback arguments.
 	 */
 	public function process( ...$args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$urls                 = $this->scannable_url_provider->get_urls();
-		$validation_queue_key = 'amp_url_validation_queue';
-		$validation_queue     = get_option( $validation_queue_key, [] );
+		$urls             = $this->scannable_url_provider->get_urls();
+		$validation_queue = get_option( self::OPTION_KEY, [] );
 
 		foreach ( $urls as $url ) {
-
-			if ( empty( $url['url'] ) || empty( $url['type'] ) ) {
-				continue;
+			if ( ! in_array( $url, $validation_queue, true ) ) {
+				$validation_queue[] = $url;
 			}
-
-			$url_hash                      = md5( trim( $url['url'] ) );
-			$validation_queue[ $url_hash ] = $url;
 		}
 
-		update_option( $validation_queue_key, $validation_queue );
+		update_option( self::OPTION_KEY, $validation_queue );
 	}
 
 	/**
@@ -90,6 +92,6 @@ final class URLValidationQueueCron extends RecurringBackgroundTask {
 	 * @return string An existing interval name.
 	 */
 	protected function get_interval() {
-		return self::DEFAULT_INTERVAL_DAILY;
+		return self::DEFAULT_INTERVAL_WEEKLY;
 	}
 }

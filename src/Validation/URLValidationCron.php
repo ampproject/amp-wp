@@ -15,7 +15,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 /**
  * URLValidationCron class.
  *
- * @since 2.1
+ * @since 2.2
  *
  * @internal
  */
@@ -53,34 +53,18 @@ final class URLValidationCron extends RecurringBackgroundTask {
 	 * @param mixed[] ...$args Unused callback arguments.
 	 */
 	public function process( ...$args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$validation_queue_key = 'amp_url_validation_queue';
-		$validation_queue     = get_option( $validation_queue_key, [] );
+		$validation_queue = get_option( URLValidationQueueCron::OPTION_KEY, [] );
 
 		if ( empty( $validation_queue ) || ! is_array( $validation_queue ) ) {
 			return [];
 		}
 
-		$limit = 5;
-		$count = 1;
-
-		foreach ( $validation_queue as $hash => $url ) {
-			if ( empty( $url['url'] ) || empty( $url['type'] ) ) {
-				continue;
-			}
-
-			$response = $this->url_validation_provider->get_url_validation( $url['url'], $url['type'] );
-			if ( empty( $response ) || is_wp_error( $response ) ) {
-				continue;
-			}
-
-			unset( $validation_queue[ $hash ] );
-			$count ++;
-			if ( $limit < $count ) {
-				break;
-			}
+		$entry = array_shift( $validation_queue );
+		if ( isset( $entry['url'], $entry['type'] ) ) {
+			$this->url_validation_provider->get_url_validation( $entry['url'], $entry['type'] );
 		}
 
-		update_option( $validation_queue_key, $validation_queue );
+		update_option( URLValidationQueueCron::OPTION_KEY, $validation_queue );
 	}
 
 	/**
@@ -102,6 +86,6 @@ final class URLValidationCron extends RecurringBackgroundTask {
 	 * @return string An existing interval name.
 	 */
 	protected function get_interval() {
-		return self::DEFAULT_INTERVAL_EVERY_TEN_MINUTES;
+		return self::DEFAULT_INTERVAL_HOURLY;
 	}
 }
