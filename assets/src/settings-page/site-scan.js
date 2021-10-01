@@ -14,7 +14,7 @@ import { Button } from '@wordpress/components';
  * Internal dependencies
  */
 import { AMPDrawer } from '../components/amp-drawer';
-import { IconLandscapeHillsCogs } from '../components/svg/landscape-hills-cogs';
+import { IconLandscapeHillsCogsAlt } from '../components/svg/landscape-hills-cogs-alt';
 import { ProgressBar } from '../components/progress-bar';
 import { PluginsWithIssues, ThemesWithIssues } from '../components/site-scan-results';
 import { SiteScan as SiteScanContext } from '../components/site-scan-context-provider';
@@ -68,7 +68,7 @@ export function SiteScan() {
 		<AMPDrawer
 			heading={ (
 				<>
-					<IconLandscapeHillsCogs width={ 55 } />
+					<IconLandscapeHillsCogsAlt />
 					{ __( 'Site Scan', 'amp' ) }
 				</>
 			) }
