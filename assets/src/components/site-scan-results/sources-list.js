@@ -16,17 +16,17 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 export function SourcesList( { sources } ) {
 	return (
-		<ul className="site-scan__sources">
+		<ul className="site-scan-results__sources">
 			{ sources.map( ( { name, author, version } ) => (
 				<li
 					key={ name }
-					className="site-scan__source"
+					className="site-scan-results__source"
 				>
-					<span className="site-scan__source-name">
+					<span className="site-scan-results__source-name">
 						{ name }
 					</span>
 					{ author && (
-						<span className="site-scan__source-author">
+						<span className="site-scan-results__source-author">
 							{ sprintf(
 								// translators: %s is an author name.
 								__( 'by %s', 'amp' ),
@@ -35,7 +35,7 @@ export function SourcesList( { sources } ) {
 						</span>
 					) }
 					{ version && (
-						<span className="site-scan__source-version">
+						<span className="site-scan-results__source-version">
 							{ sprintf(
 								// translators: %s is a version number.
 								__( 'Version %s', 'amp' ),

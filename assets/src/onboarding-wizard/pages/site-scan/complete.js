@@ -50,12 +50,14 @@ export function SiteScanComplete() {
 			</Selectable>
 			{ hasThemeIssues && (
 				<ThemesWithIssues
+					className="site-scan__section"
 					issues={ themeIssues }
 					validatedUrlsLink={ userIsTechnical ? VALIDATED_URLS_LINK : null }
 				/>
 			) }
 			{ hasPluginIssues && (
 				<PluginsWithIssues
+					className="site-scan__section"
 					issues={ pluginIssues }
 					validatedUrlsLink={ userIsTechnical ? VALIDATED_URLS_LINK : null }
 				/>

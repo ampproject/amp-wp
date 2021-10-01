@@ -22,7 +22,7 @@ import { SiteScanResults } from './index';
  * @param {Array}  props.issues            List of plugins issues.
  * @param {Array}  props.validatedUrlsLink URL to the Validated URLs page.
  */
-export function PluginsWithIssues( { issues = [], validatedUrlsLink } ) {
+export function PluginsWithIssues( { issues = [], validatedUrlsLink, ...props } ) {
 	const pluginsData = useNormalizedPluginsData();
 	const sources = issues?.map( ( slug ) => pluginsData?.[ slug ] ?? { name: slug } ) || [];
 
@@ -33,6 +33,7 @@ export function PluginsWithIssues( { issues = [], validatedUrlsLink } ) {
 			count={ issues.length }
 			sources={ sources }
 			validatedUrlsLink={ validatedUrlsLink }
+			{ ...props }
 		/>
 	);
 }

@@ -22,7 +22,7 @@ import { SiteScanResults } from './index';
  * @param {Array}  props.issues            List of theme issues.
  * @param {Array}  props.validatedUrlsLink URL to the Validated URLs page.
  */
-export function ThemesWithIssues( { issues = [], validatedUrlsLink } ) {
+export function ThemesWithIssues( { issues = [], validatedUrlsLink, ...props } ) {
 	const themesData = useNormalizedThemesData();
 	const sources = issues?.map( ( slug ) => themesData?.[ slug ] ?? { name: slug } ) || [];
 
@@ -33,6 +33,7 @@ export function ThemesWithIssues( { issues = [], validatedUrlsLink } ) {
 			count={ issues.length }
 			sources={ sources }
 			validatedUrlsLink={ validatedUrlsLink }
+			{ ...props }
 		/>
 	);
 }
