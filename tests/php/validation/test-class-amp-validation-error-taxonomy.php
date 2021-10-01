@@ -1526,6 +1526,34 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	}
 
 	/**
+	 * @covers \AMP_Validation_Error_Taxonomy::get_error_title_from_code()
+	 */
+	public function test_get_error_title_from_code() {
+		$this->assertIsString( AMP_Validation_Error_Taxonomy::get_error_title_from_code( [ 'code' => AMP_Form_Sanitizer::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED ] ) );
+		$this->assertIsString(
+			AMP_Validation_Error_Taxonomy::get_error_title_from_code(
+				[
+					'code'            => AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT,
+					'node_attributes' => [
+						'src' => 'https://example.com/foo.js',
+					],
+				]
+			)
+		);
+		$this->assertIsString( AMP_Validation_Error_Taxonomy::get_error_title_from_code( [ 'code' => AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT ] ) );
+		$this->assertIsString(
+			AMP_Validation_Error_Taxonomy::get_error_title_from_code(
+				[
+					'code'      => AMP_Script_Sanitizer::CUSTOM_EVENT_HANDLER_ATTR,
+					'node_name' => 'onclick',
+				]
+			)
+		);
+
+		$this->assertIsString( AMP_Validation_Error_Taxonomy::get_error_title_from_code( [ 'code' => 'TOTALLY_UNKNOWN' ] ) );
+	}
+
+	/**
 	 * Gets a mock validation error for testing.
 	 *
 	 * @return array $error Mock validation error.
