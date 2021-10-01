@@ -867,6 +867,10 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 *
 	 * @covers AMP_Style_Sanitizer::get_stylesheet_from_url()
 	 * @covers AMP_Style_Sanitizer::fetch_external_stylesheet()
+	 * @covers AMP_Style_Sanitizer::has_used_tag_names()
+	 * @covers AMP_Style_Sanitizer::has_used_class_name()
+	 * @covers AMP_Style_Sanitizer::has_used_attributes()
+	 * @covers AMP_Style_Sanitizer::is_class_allowed_in_amp_date_picker()
 	 *
 	 * @dataProvider get_link_and_style_test_data
 	 * @param string $source               Source.
@@ -2056,6 +2060,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Test handling of stylesheets with relative background-image URLs.
 	 *
 	 * @covers AMP_Style_Sanitizer::real_path_urls()
+	 * @covers AMP_Style_Sanitizer::unrelativize_path()
+	 * @covers AMP_Style_Sanitizer::reconstruct_url()
 	 */
 	public function test_relative_background_url_handling() {
 		$html = '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="' . esc_url( admin_url( 'css/common.css' ) ) . '"></head><body><span class="spinner"></span></body></html>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
@@ -2125,6 +2131,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 *
 	 * @dataProvider get_http_stylesheets
 	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 * @covers AMP_Style_Sanitizer::fetch_external_stylesheet()
 	 *
 	 * @param string $href                 Request URL.
 	 * @param string $content_type         Content type.
@@ -2197,6 +2204,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Test cache-control support when retrieving external stylesheets.
 	 *
 	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 * @covers AMP_Style_Sanitizer::fetch_external_stylesheet()
 	 */
 	public function test_external_stylesheet_cache_control() {
 		$request_count = 0;
@@ -2984,6 +2992,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Test CSS imports.
 	 *
 	 * @dataProvider get_import_test_data
+	 * @covers AMP_Style_Sanitizer::fetch_external_stylesheet()
 	 * @covers AMP_Style_Sanitizer::splice_imported_stylesheet()
 	 * @covers AMP_Style_Sanitizer::process_css_list()
 	 * @covers AMP_Style_Sanitizer::replace_inside_css_list()
