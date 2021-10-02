@@ -79,33 +79,11 @@ final class ValidationExemption {
 	 * @return bool Whether successful.
 	 */
 	public static function mark_node_as_px_verified( DOMNode $node ) {
-
-		if ( $node instanceof Element ) {
-			if ( ! $node->hasAttribute( self::PX_VERIFIED_TAG_ATTRIBUTE ) ) {
-				if ( ! $node->ownerDocument ) {
-					return false; // @codeCoverageIgnore
-				}
-				$node->setAttributeNode( $node->ownerDocument->createAttribute( self::PX_VERIFIED_TAG_ATTRIBUTE ) );
-			}
-			return true;
-		} elseif ( $node instanceof DOMAttr ) {
-			$element = $node->parentNode;
-			if ( ! $element instanceof Element ) {
-				return false; // @codeCoverageIgnore
-			}
-
-			$attr_value = $element->getAttribute( self::PX_VERIFIED_ATTRS_ATTRIBUTE );
-			if ( $attr_value ) {
-				$attr_value .= ' ' . $node->nodeName;
-			} else {
-				$attr_value = $node->nodeName;
-			}
-
-			$element->setAttribute( self::PX_VERIFIED_ATTRS_ATTRIBUTE, $attr_value );
-			return true;
-		}
-
-		return false;
+		return self::mark_node_with_exemption_attribute(
+			$node,
+			self::PX_VERIFIED_TAG_ATTRIBUTE,
+			self::PX_VERIFIED_ATTRS_ATTRIBUTE
+		);
 	}
 
 	/**
@@ -115,13 +93,28 @@ final class ValidationExemption {
 	 * @return bool Whether successful.
 	 */
 	public static function mark_node_as_amp_unvalidated( DOMNode $node ) {
+		return self::mark_node_with_exemption_attribute(
+			$node,
+			self::AMP_UNVALIDATED_TAG_ATTRIBUTE,
+			self::AMP_UNVALIDATED_ATTRS_ATTRIBUTE
+		);
+	}
 
+	/**
+	 * Mark node with exemption attribute.
+	 *
+	 * @param DOMNode $node                 Node.
+	 * @param string  $tag_attribute_name   Tag attribute name.
+	 * @param string  $attrs_attribute_name Attributes attribute name.
+	 * @return bool
+	 */
+	private static function mark_node_with_exemption_attribute( DOMNode $node, $tag_attribute_name, $attrs_attribute_name ) {
 		if ( $node instanceof Element ) {
-			if ( ! $node->hasAttribute( self::AMP_UNVALIDATED_TAG_ATTRIBUTE ) ) {
+			if ( ! $node->hasAttribute( $tag_attribute_name ) ) {
 				if ( ! $node->ownerDocument ) {
 					return false; // @codeCoverageIgnore
 				}
-				$node->setAttributeNode( $node->ownerDocument->createAttribute( self::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
+				$node->setAttributeNode( $node->ownerDocument->createAttribute( $tag_attribute_name ) );
 			}
 			return true;
 		} elseif ( $node instanceof DOMAttr ) {
@@ -130,14 +123,14 @@ final class ValidationExemption {
 				return false; // @codeCoverageIgnore
 			}
 
-			$attr_value = $element->getAttribute( self::AMP_UNVALIDATED_ATTRS_ATTRIBUTE );
+			$attr_value = $element->getAttribute( $attrs_attribute_name );
 			if ( $attr_value ) {
 				$attr_value .= ' ' . $node->nodeName;
 			} else {
 				$attr_value = $node->nodeName;
 			}
 
-			$element->setAttribute( self::AMP_UNVALIDATED_ATTRS_ATTRIBUTE, $attr_value );
+			$element->setAttribute( $attrs_attribute_name, $attr_value );
 			return true;
 		}
 
@@ -191,12 +184,7 @@ final class ValidationExemption {
 	 * @return bool Whether the document is in dev mode.
 	 */
 	public static function is_document_with_amp_unvalidated_nodes( Document $document ) {
-		foreach ( [ self::AMP_UNVALIDATED_TAG_ATTRIBUTE, self::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ] as $attr_name ) {
-			if ( $document->xpath->query( "//*/@{$attr_name}" )->length > 0 ) {
-				return true;
-			}
-		}
-		return false;
+		return self::is_document_containing_attributes( $document, [ self::AMP_UNVALIDATED_TAG_ATTRIBUTE, self::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ] );
 	}
 
 	/**
@@ -206,11 +194,30 @@ final class ValidationExemption {
 	 * @return bool Whether the document is in dev mode.
 	 */
 	public static function is_document_with_px_verified_nodes( Document $document ) {
-		foreach ( [ self::PX_VERIFIED_TAG_ATTRIBUTE, self::PX_VERIFIED_ATTRS_ATTRIBUTE ] as $attr_name ) {
-			if ( $document->xpath->query( "//*/@{$attr_name}" )->length > 0 ) {
-				return true;
-			}
-		}
-		return false;
+		return self::is_document_containing_attributes( $document, [ self::PX_VERIFIED_TAG_ATTRIBUTE, self::PX_VERIFIED_ATTRS_ATTRIBUTE ] );
+	}
+
+	/**
+	 * Check whether a document contains the given attribute names.
+	 *
+	 * @param Document $document        Document.
+	 * @param string[] $attribute_names Attribute names.
+	 * @return bool Whether attributes exist in the document.
+	 */
+	private static function is_document_containing_attributes( Document $document, $attribute_names ) {
+		return $document->xpath->query(
+			sprintf(
+				'//*[%s]',
+				join(
+					' or ',
+					array_map(
+						static function ( $attr_name ) {
+							return "@{$attr_name}";
+						},
+						$attribute_names
+					)
+				)
+			)
+		)->length > 0;
 	}
 }

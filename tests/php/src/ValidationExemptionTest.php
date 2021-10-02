@@ -39,6 +39,7 @@ final class ValidationExemptionTest extends TestCase {
 	 * @covers ::is_px_verified_for_node()
 	 * @covers ::mark_node_as_px_verified()
 	 * @covers ::is_document_with_px_verified_nodes()
+	 * @covers ::is_document_containing_attributes()
 	 * @covers ::check_for_attribute_token_list_membership()
 	 */
 	public function test_px_verified_node( $xpath, $input, $expected ) {
@@ -67,6 +68,7 @@ final class ValidationExemptionTest extends TestCase {
 	 * @covers ::is_px_verified_for_node()
 	 * @covers ::mark_node_as_px_verified()
 	 * @covers ::is_document_with_px_verified_nodes()
+	 * @covers ::is_document_containing_attributes()
 	 */
 	public function test_px_verified_node_for_non_element_nor_attribute() {
 		$dom = Document::fromHtml( '<html><body><?greeting hello ?></body></html>' );
@@ -82,7 +84,10 @@ final class ValidationExemptionTest extends TestCase {
 		$this->assertFalse( ValidationExemption::is_document_with_px_verified_nodes( $dom ) );
 	}
 
-	/** @covers ::mark_node_as_px_verified() */
+	/**
+	 * @covers ::mark_node_as_px_verified()
+	 * @covers ::mark_node_with_exemption_attribute()
+	 */
 	public function test_mark_node_as_px_verified_for_bad_nodes() {
 		$dom          = Document::fromHtml( '' );
 		$comment_node = $dom->createComment( 'test' );
@@ -116,6 +121,7 @@ final class ValidationExemptionTest extends TestCase {
 	 * @covers ::is_amp_unvalidated_for_node()
 	 * @covers ::mark_node_as_amp_unvalidated()
 	 * @covers ::is_document_with_amp_unvalidated_nodes()
+	 * @covers ::is_document_containing_attributes()
 	 * @covers ::check_for_attribute_token_list_membership()
 	 */
 	public function test_amp_unvalidated_node( $xpath, $input, $expected ) {
@@ -144,6 +150,7 @@ final class ValidationExemptionTest extends TestCase {
 	 * @covers ::is_amp_unvalidated_for_node()
 	 * @covers ::mark_node_as_amp_unvalidated()
 	 * @covers ::is_document_with_amp_unvalidated_nodes()
+	 * @covers ::is_document_containing_attributes()
 	 */
 	public function test_amp_unvalidated_node_for_non_element_nor_attribute() {
 		$dom = Document::fromHtml( '<html><body><?greeting hello ?></body></html>' );
@@ -159,7 +166,10 @@ final class ValidationExemptionTest extends TestCase {
 		$this->assertFalse( ValidationExemption::is_document_with_amp_unvalidated_nodes( $dom ) );
 	}
 
-	/** @covers ::mark_node_as_amp_unvalidated() */
+	/**
+	 * @covers ::mark_node_as_amp_unvalidated()
+	 * @covers ::mark_node_with_exemption_attribute()
+	 */
 	public function test_mark_node_as_amp_unvalidated_for_bad_nodes() {
 		$dom          = Document::fromHtml( '' );
 		$comment_node = $dom->createComment( 'test' );
