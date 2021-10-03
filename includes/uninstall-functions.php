@@ -188,9 +188,13 @@ function delete_transients() {
  */
 function remove_plugin_data() {
 
-	delete_options();
-	delete_user_metadata();
-	delete_posts();
-	delete_terms();
-	delete_transients();
+	$keep_amp_data = \AMP_Options_Manager::get_option( Option::KEEP_AMP_DATA );
+
+	if ( true !== $keep_amp_data ) {
+		delete_options();
+		delete_user_metadata();
+		delete_posts();
+		delete_terms();
+		delete_transients();
+	}
 }

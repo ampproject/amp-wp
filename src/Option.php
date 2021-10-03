@@ -160,6 +160,13 @@ interface Option {
 	const PLUGIN_CONFIGURED = 'plugin_configured';
 
 	/**
+	 * The key of the option storing whether the to delete AMP data upon uninstalling of plugin or not.
+	 *
+	 * @var string
+	 */
+	const KEEP_AMP_DATA = 'keep_amp_data';
+
+	/**
 	 * Cached slug when it is defined late.
 	 *
 	 * @var string

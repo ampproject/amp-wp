@@ -48,6 +48,7 @@ import { Analytics } from './analytics';
 import { PairedUrlStructure } from './paired-url-structure';
 import { MobileRedirection } from './mobile-redirection';
 import { DeveloperTools } from './developer-tools';
+import { DataRemoval } from './data-removal';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -250,6 +251,7 @@ function Root( { appRoot } ) {
 				>
 					<MobileRedirection />
 					<DeveloperTools />
+					<DataRemoval />
 				</AMPDrawer>
 				<SettingsFooter />
 			</form>

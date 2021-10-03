@@ -37,6 +37,7 @@ class AMP_Options_Manager {
 		Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
 		Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 		Option::PLUGIN_CONFIGURED       => false,
+		Option::KEEP_AMP_DATA           => false,
 	];
 
 	/**
@@ -318,6 +319,10 @@ class AMP_Options_Manager {
 		// Validate wizard completion.
 		if ( isset( $new_options[ Option::PLUGIN_CONFIGURED ] ) ) {
 			$options[ Option::PLUGIN_CONFIGURED ] = (bool) $new_options[ OPTION::PLUGIN_CONFIGURED ];
+		}
+
+		if ( isset( $new_options[ Option::KEEP_AMP_DATA ] ) ) {
+			$options[ Option::KEEP_AMP_DATA ] = (bool) $new_options[ OPTION::KEEP_AMP_DATA ];
 		}
 
 		// Validate analytics.
