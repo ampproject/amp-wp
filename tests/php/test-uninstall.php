@@ -110,11 +110,23 @@ class Test_Uninstall extends TestCase {
 			define( 'WP_UNINSTALL_PLUGIN', 'Yes' );
 		}
 
+		// Test 1: With option to keep AMP data ON.
+		AMP_Options_Manager::update_option( \AmpProject\AmpWP\Option::KEEP_AMP_DATA, true );
+
 		require AMP__DIR__ . '/uninstall.php';
 
 		$this->flush_cache();
 
-		$this->assertEmpty( get_option( 'amp-option', false ) );
+		$this->assertNotEmpty( get_option( AMP_Options_Manager::OPTION_NAME, false ) );
+
+		// Test 2: With option to keep AMP data OFF.
+		AMP_Options_Manager::update_option( \AmpProject\AmpWP\Option::KEEP_AMP_DATA, false );
+
+		require AMP__DIR__ . '/uninstall.php';
+
+		$this->flush_cache();
+
+		$this->assertEmpty( get_option( AMP_Options_Manager::OPTION_NAME, false ) );
 		$this->assertEmpty( get_post( $amp_validated_post->ID ) );
 		$this->assertEmpty( get_term( $amp_error_term->term_id ) );
 

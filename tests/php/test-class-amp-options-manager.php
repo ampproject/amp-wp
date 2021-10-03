@@ -119,6 +119,7 @@ class Test_AMP_Options_Manager extends TestCase {
 				Option::PLUGIN_CONFIGURED       => false,
 				Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 				Option::LATE_DEFINED_SLUG       => null,
+				Option::KEEP_AMP_DATA           => false,
 			],
 			AMP_Options_Manager::get_options()
 		);
@@ -264,9 +265,11 @@ class Test_AMP_Options_Manager extends TestCase {
 			[
 				Option::VERSION           => AMP__VERSION,
 				Option::PLUGIN_CONFIGURED => false,
+				Option::KEEP_AMP_DATA     => false,
 			]
 		);
 		$this->assertFalse( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::KEEP_AMP_DATA ) );
 
 		// Ensure plugin_configured is false when explicitly set as such in the DB.
 		update_option(
@@ -274,9 +277,11 @@ class Test_AMP_Options_Manager extends TestCase {
 			[
 				Option::VERSION           => AMP__VERSION,
 				Option::PLUGIN_CONFIGURED => true,
+				Option::KEEP_AMP_DATA     => true,
 			]
 		);
 		$this->assertTrue( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+		$this->assertTrue( AMP_Options_Manager::get_option( Option::KEEP_AMP_DATA ) );
 	}
 
 	/** @return array */
