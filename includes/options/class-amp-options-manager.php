@@ -7,7 +7,6 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Services;
 
 /**
  * Class AMP_Options_Manager
@@ -383,15 +382,7 @@ class AMP_Options_Manager {
 
 		$amp_options[ $option ] = $value;
 
-		$flag = update_option( self::OPTION_NAME, $amp_options, false );
-
-		if ( $flag &&
-			( 'theme_support' === $option || 'reader_theme' === $option )
-		) {
-			self::maybe_trigger_page_cache_flush_needed_action();
-		}
-
-		return $flag;
+		return update_option( self::OPTION_NAME, $amp_options, false );
 	}
 
 	/**
@@ -406,29 +397,7 @@ class AMP_Options_Manager {
 			$options
 		);
 
-		$flag = update_option( self::OPTION_NAME, $amp_options, false );
-
-		if ( $flag &&
-			( isset( $options['theme_support'] ) || isset( $options['reader_theme'] ) )
-		) {
-			self::maybe_trigger_page_cache_flush_needed_action();
-		}
-
-		return $flag;
-	}
-
-	/**
-	 * Trigger page cache flush needed action.
-	 *
-	 * @return void
-	 */
-	private static function maybe_trigger_page_cache_flush_needed_action() {
-
-		if ( ( defined( 'WP_CACHE' ) && true === WP_CACHE ) ||
-			Services::get( 'site_health_integration' )->has_page_caching()
-		) {
-			do_action( 'amp_page_cache_flush_needed' );
-		}
+		return update_option( self::OPTION_NAME, $amp_options, false );
 	}
 
 	/**
