@@ -25,6 +25,7 @@ use AmpProject\RequestDestination;
 use AmpProject\Tag;
 use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
 use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration;
+use AmpProject\AmpWP\Sandboxing;
 
 /**
  * Class AMP_Theme_Support
@@ -2073,11 +2074,8 @@ class AMP_Theme_Support {
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ), $sanitization_results['sanitizers'] );
 
-		$has_validation_exemptions = (
-			ValidationExemption::is_document_with_amp_unvalidated_nodes( $dom )
-			||
-			ValidationExemption::is_document_with_px_verified_nodes( $dom )
-		);
+		$effective_sandboxing_level = Sandboxing::get_effective_level( $dom );
+		$has_validation_exemptions  = 3 !== $effective_sandboxing_level;
 
 		$enable_optimizer = array_key_exists( ConfigurationArgument::ENABLE_OPTIMIZER, $args )
 			? $args[ ConfigurationArgument::ENABLE_OPTIMIZER ]
@@ -2177,6 +2175,10 @@ class AMP_Theme_Support {
 				$script->setAttributeNode( $dom->createAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
 				$dom->head->appendChild( $script );
 			}
+		}
+
+		if ( Sandboxing::is_needed() ) {
+			Services::get( 'sandboxing' )->finalize_document( $dom, $effective_sandboxing_level );
 		}
 
 		$response = $dom->saveHTML();

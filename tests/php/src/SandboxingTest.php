@@ -13,6 +13,10 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AMP_Script_Sanitizer;
 use AMP_Form_Sanitizer;
 use AMP_Comments_Sanitizer;
+use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Sandboxing */
 class SandboxingTest extends DependencyInjectedTestCase {
@@ -169,7 +173,6 @@ class SandboxingTest extends DependencyInjectedTestCase {
 			]
 		);
 		$this->instance->add_hooks();
-		$this->assertEquals( 10, has_filter( 'amp_meta_generator', [ $this->instance, 'filter_amp_meta_generator' ] ) );
 
 		$sanitizers = amp_get_content_sanitizers();
 		foreach ( $expected_sanitizer_args as $sanitizer_class => $expected_args ) {
@@ -190,18 +193,61 @@ class SandboxingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( $level, $error['sandboxing_level'] );
 	}
 
-	/** @covers ::filter_amp_meta_generator() */
-	public function test_filter_amp_meta_generator() {
-		AMP_Options_Manager::update_option( Sandboxing::OPTION_LEVEL, 2 );
-		$this->assertEquals(
-			'PX Plugin 4.0; sandboxing-level=2',
-			$this->instance->filter_amp_meta_generator( 'PX Plugin 4.0' )
+	/** @return array */
+	public function get_data_to_test_finalize_document() {
+		return [
+			'level_3_to_3'        => [
+				'min_level'      => 3,
+				'body'           => '<div></div>',
+				'expected_level' => 3,
+			],
+			'level_1_to_2'        => [
+				'min_level'      => 1,
+				'body'           => sprintf( '<div %s></div>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'expected_level' => 2,
+			],
+			'level_1_to_1'        => [
+				'min_level'      => 1,
+				'body'           => sprintf( '<div %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				'expected_level' => 1,
+			],
+			'level_1_to_1_with_2' => [
+				'min_level'      => 1,
+				'body'           => sprintf( '<div %s></div><div %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE, ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'expected_level' => 1,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_finalize_document
+	 * @covers ::get_effective_level()
+	 * @covers ::finalize_document()
+	 */
+	public function test_finalize_document_and_get_effective_level( $min_level, $body, $expected_level ) {
+		AMP_Options_Manager::update_option( Sandboxing::OPTION_LEVEL, $min_level );
+
+		$dom = Document::fromHtml(
+			sprintf(
+				'
+				<html>
+					<head>
+						<meta name="generator" content="AMP Plugin v2.1; foo=bar">
+					</head>
+					<body>%s</body>
+				</html>
+				',
+				$body
+			)
 		);
 
-		AMP_Options_Manager::update_option( Sandboxing::OPTION_LEVEL, 1 );
-		$this->assertEquals(
-			'PX Plugin 4.0; sandboxing-level=1',
-			$this->instance->filter_amp_meta_generator( 'PX Plugin 4.0' )
-		);
+		$actual_effective_level = $this->instance->get_effective_level( $dom );
+		$this->assertEquals( $expected_level, $actual_effective_level );
+
+		$this->instance->finalize_document( $dom, $actual_effective_level );
+
+		$meta = $dom->xpath->query( '//meta[ @name = "generator" ]' )->item( 0 );
+		$this->assertInstanceOf( Element::class, $meta );
+		$this->assertStringEndsWith( "foo=bar; sandboxing-level={$min_level}:{$expected_level}", $meta->getAttribute( Attribute::CONTENT ) );
 	}
 }

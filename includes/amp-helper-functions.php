@@ -870,16 +870,6 @@ function amp_add_generator_metadata() {
 		$content .= sprintf( '; theme=%s', $reader_theme );
 	}
 
-	/**
-	 * Filters content for the AMP meta generator tag.
-	 *
-	 * @since 2.2
-	 * @internal
-	 *
-	 * @param string $content Content.
-	 */
-	$content = apply_filters( 'amp_meta_generator', $content );
-
 	printf( '<meta name="generator" content="%s">', esc_attr( $content ) );
 }
 

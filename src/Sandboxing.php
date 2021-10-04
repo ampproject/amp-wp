@@ -15,6 +15,11 @@ use AMP_Style_Sanitizer;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
+use AmpProject\Attribute;
+use AmpProject\Tag;
+use DOMAttr;
 
 /**
  * Experimental service to facilitate flexible AMP.
@@ -139,8 +144,6 @@ final class Sandboxing implements Service, Registerable, Conditional {
 			return;
 		}
 
-		add_filter( 'amp_meta_generator', [ $this, 'filter_amp_meta_generator' ] );
-
 		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_LEVEL );
 
 		// Opt-in to the new script sanitization logic in the script sanitizer.
@@ -169,19 +172,70 @@ final class Sandboxing implements Service, Registerable, Conditional {
 			'amp_validation_error',
 			static function ( $error ) use ( $sandboxing_level ) {
 				$error['sandboxing_level'] = $sandboxing_level;
+
 				return $error;
 			}
 		);
 	}
 
 	/**
-	 * Append the sandboxing level to the AMP meta generator tag.
+	 * Get the effective sandboxing level.
 	 *
-	 * @param string $content Meta generator content.
-	 * @return string Amended content.
+	 * Even though a site may be configured with a given sandboxing level (e.g. level 1) to allow custom scripts, if no such
+	 * markup is on the page to necessitate the loose level, then the effective level will be actually higher.
+	 *
+	 * @param Document $dom Document.
+	 * @return int Effective sandboxing level.
 	 */
-	public function filter_amp_meta_generator( $content ) {
-		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_LEVEL );
-		return $content . sprintf( '; sandboxing-level=%d', $sandboxing_level );
+	public static function get_effective_level( Document $dom ) {
+		if ( ValidationExemption::is_document_with_amp_unvalidated_nodes( $dom ) ) {
+			return 1;
+		} elseif ( ValidationExemption::is_document_with_px_verified_nodes( $dom ) ) {
+			return 2;
+		} else {
+			return 3;
+		}
+	}
+
+	/**
+	 * Finalize document.
+	 *
+	 * @param Document $dom Document.
+	 * @param int|null $effective_sandboxing_level Effective sandboxing level.
+	 */
+	public function finalize_document( Document $dom, $effective_sandboxing_level ) {
+		$actual_sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_LEVEL );
+
+		$meta_generator = $dom->xpath->query( '/html/head/meta[ @name = "generator" and starts-with( @content, "AMP Plugin" ) ]/@content' )->item( 0 );
+		if ( $meta_generator instanceof DOMAttr ) {
+			$meta_generator->nodeValue .= "; sandboxing-level={$actual_sandboxing_level}:{$effective_sandboxing_level}";
+		}
+
+		$amp_admin_bar_menu_item = $dom->xpath->query( '//div[ @id = "wpadminbar" ]//li[ @id = "wp-admin-bar-amp" ]/a' )->item( 0 );
+		if ( $amp_admin_bar_menu_item instanceof Element ) {
+			$span = $dom->createElement( Tag::SPAN );
+			$span->setAttribute(
+				Attribute::TITLE,
+				sprintf(
+					/* translators: %d is the effective sandboxing level */
+					__( 'Effective sandboxing level: %d', 'amp' ),
+					$effective_sandboxing_level
+				)
+			);
+			switch ( $effective_sandboxing_level ) {
+				case 1:
+					$text = '1️⃣';
+					break;
+				case 2:
+					$text = '2️⃣';
+					break;
+				default:
+					$text = '3️⃣';
+					break;
+			}
+			$span->textContent = $text;
+			$amp_admin_bar_menu_item->appendChild( $dom->createTextNode( ' ' ) );
+			$amp_admin_bar_menu_item->appendChild( $span );
+		}
 	}
 }
