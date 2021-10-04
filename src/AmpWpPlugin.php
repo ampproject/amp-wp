@@ -105,7 +105,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'optimizer.hero_candidate_filtering' => HeroCandidateFiltering::class,
 		'paired_routing'                     => PairedRouting::class,
 		'paired_url'                         => PairedUrl::class,
-		'page_cache_flush_needed_notice'     => Admin\PageCacheFlushNeededNotice::class,
 		'plugin_activation_notice'           => Admin\PluginActivationNotice::class,
 		'plugin_registry'                    => PluginRegistry::class,
 		'plugin_suppression'                 => PluginSuppression::class,
