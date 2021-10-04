@@ -98,6 +98,9 @@ function amp_bootstrap_plugin() {
 	add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
 
 	add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hooked before priority 10 on 'plugins_loaded' to properly unhook core panels.
+
+	// @Todo Eliminate this once https://core.trac.wordpress.org/ticket/20578 has finally landed.
+	add_filter( 'all_plugins', 'amp_modify_plugin_description' );
 }
 
 /**
@@ -217,6 +220,22 @@ function amp_init() {
 			<?php
 		}
 	);
+}
+
+/**
+ * When AMP plugin is active remove instruction of plugin data removal steps.
+ *
+ * @param array $meta An array of plugins to display in the list table.
+ *
+ * @return array An array of plugins to display in the list table.
+ */
+function amp_modify_plugin_description( $meta ) {
+
+	if ( isset( $meta['amp/amp.php']['Description'] ) ) {
+		$meta['amp/amp.php']['Description'] = preg_replace( ':\s*<em class=\"amp-deletion-notice\">.+?</em>:', '', $meta['amp/amp.php']['Description'] );
+	}
+
+	return $meta;
 }
 
 /**
