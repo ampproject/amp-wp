@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "description": "Drafts a release based on the specified milestone",
+  "main": "dist/index.js",
+  "scripts": {
+    "lint": "eslint 'src/**.js' --fix",
+    "build": "ncc build src/index.js",
+    "precommit": "npm run build && git add dist/"
+  },
   "author": "AMP Project Contributors",
   "license": "GPL-2.0-or-later",
-  "keywords": [],
-  "homepage": "",
-  "repository": "",
-  "bugs": "",
-  "main": "dist/index.js",
   "dependencies": {
     "@actions/core": "^1.2.7",
     "@actions/github": "^5.0.0",
@@ -25,10 +26,5 @@
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-prettier": "^2.7.0",
     "prettier": "^1.16.4"
-  },
-  "scripts": {
-    "lint": "eslint 'src/**.js' --fix",
-    "build": "ncc build src/index.js",
-    "precommit": "npm run build && git add dist/"
   }
 }
