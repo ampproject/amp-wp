@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Option;
 
 /**
  * @runInSeparateProcess
@@ -111,7 +112,7 @@ class Test_Uninstall extends TestCase {
 		}
 
 		// Test 1: With option to keep AMP data ON.
-		AMP_Options_Manager::update_option( \AmpProject\AmpWP\Option::KEEP_AMP_DATA, true );
+		AMP_Options_Manager::update_option( Option::DELETE_DATA_AT_UNINSTALL, false );
 
 		require AMP__DIR__ . '/uninstall.php';
 
@@ -120,7 +121,7 @@ class Test_Uninstall extends TestCase {
 		$this->assertNotEmpty( get_option( AMP_Options_Manager::OPTION_NAME, false ) );
 
 		// Test 2: With option to keep AMP data OFF.
-		AMP_Options_Manager::update_option( \AmpProject\AmpWP\Option::KEEP_AMP_DATA, false );
+		AMP_Options_Manager::update_option( Option::DELETE_DATA_AT_UNINSTALL, true );
 
 		require AMP__DIR__ . '/uninstall.php';
 

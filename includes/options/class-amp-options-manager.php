@@ -28,16 +28,16 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = [
-		Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
-		Option::SUPPORTED_POST_TYPES    => [ 'post', 'page' ],
-		Option::ANALYTICS               => [],
-		Option::ALL_TEMPLATES_SUPPORTED => true,
-		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
-		Option::VERSION                 => AMP__VERSION,
-		Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
-		Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
-		Option::PLUGIN_CONFIGURED       => false,
-		Option::KEEP_AMP_DATA           => false,
+		Option::THEME_SUPPORT            => AMP_Theme_Support::READER_MODE_SLUG,
+		Option::SUPPORTED_POST_TYPES     => [ 'post', 'page' ],
+		Option::ANALYTICS                => [],
+		Option::ALL_TEMPLATES_SUPPORTED  => true,
+		Option::SUPPORTED_TEMPLATES      => [ 'is_singular' ],
+		Option::VERSION                  => AMP__VERSION,
+		Option::READER_THEME             => ReaderThemes::DEFAULT_READER_THEME,
+		Option::PAIRED_URL_STRUCTURE     => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+		Option::PLUGIN_CONFIGURED        => false,
+		Option::DELETE_DATA_AT_UNINSTALL => true,
 	];
 
 	/**
@@ -321,8 +321,8 @@ class AMP_Options_Manager {
 			$options[ Option::PLUGIN_CONFIGURED ] = (bool) $new_options[ OPTION::PLUGIN_CONFIGURED ];
 		}
 
-		if ( isset( $new_options[ Option::KEEP_AMP_DATA ] ) ) {
-			$options[ Option::KEEP_AMP_DATA ] = (bool) $new_options[ OPTION::KEEP_AMP_DATA ];
+		if ( isset( $new_options[ Option::DELETE_DATA_AT_UNINSTALL ] ) ) {
+			$options[ Option::DELETE_DATA_AT_UNINSTALL ] = (bool) $new_options[ OPTION::DELETE_DATA_AT_UNINSTALL ];
 		}
 
 		// Validate analytics.

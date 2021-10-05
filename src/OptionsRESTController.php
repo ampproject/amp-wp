@@ -280,7 +280,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 				'type'       => 'object',
 				'properties' => [
 					// Note: The sanitize_callback from AMP_Options_Manager::register_settings() is applying to this option.
-					Option::THEME_SUPPORT           => [
+					Option::THEME_SUPPORT            => [
 						'type' => 'string',
 						'enum' => [
 							AMP_Theme_Support::READER_MODE_SLUG,
@@ -288,7 +288,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 							AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 						],
 					],
-					Option::READER_THEME            => [
+					Option::READER_THEME             => [
 						'type'        => 'string',
 						'arg_options' => [
 							'validate_callback' => function ( $value ) {
@@ -297,61 +297,61 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 							},
 						],
 					],
-					Option::MOBILE_REDIRECT         => [
+					Option::MOBILE_REDIRECT          => [
 						'type'    => 'boolean',
 						'default' => false,
 					],
-					self::PREVIEW_PERMALINK         => [
+					self::PREVIEW_PERMALINK          => [
 						'type'     => 'string',
 						'readonly' => true,
 						'format'   => 'url',
 					],
-					Option::PLUGIN_CONFIGURED       => [
+					Option::PLUGIN_CONFIGURED        => [
 						'type'    => 'boolean',
 						'default' => false,
 					],
-					Option::ALL_TEMPLATES_SUPPORTED => [
+					Option::ALL_TEMPLATES_SUPPORTED  => [
 						'type' => 'boolean',
 					],
-					Option::SUPPRESSED_PLUGINS      => [
+					Option::SUPPRESSED_PLUGINS       => [
 						'type' => 'object',
 					],
-					self::SUPPRESSIBLE_PLUGINS      => [
+					self::SUPPRESSIBLE_PLUGINS       => [
 						'type'     => 'object',
 						'readonly' => true,
 					],
-					Option::SUPPORTED_TEMPLATES     => [
+					Option::SUPPORTED_TEMPLATES      => [
 						'type'  => 'array',
 						'items' => [
 							'type' => 'string',
 						],
 					],
-					Option::SUPPORTED_POST_TYPES    => [
+					Option::SUPPORTED_POST_TYPES     => [
 						'type'  => 'array',
 						'items' => [
 							'type' => 'string',
 						],
 					],
-					Option::ANALYTICS               => [
+					Option::ANALYTICS                => [
 						'type' => 'object',
 					],
-					Option::KEEP_AMP_DATA           => [
+					Option::DELETE_DATA_AT_UNINSTALL => [
 						'type'    => 'boolean',
-						'default' => false,
+						'default' => true,
 					],
-					self::SUPPORTABLE_POST_TYPES    => [
+					self::SUPPORTABLE_POST_TYPES     => [
 						'type'     => 'array',
 						'readonly' => true,
 					],
-					self::SUPPORTABLE_TEMPLATES     => [
+					self::SUPPORTABLE_TEMPLATES      => [
 						'type'     => 'array',
 						'readonly' => true,
 					],
-					self::ONBOARDING_WIZARD_LINK    => [
+					self::ONBOARDING_WIZARD_LINK     => [
 						'type'     => 'url',
 						'readonly' => true,
 					],
-					self::CUSTOMIZER_LINK           => [
+					self::CUSTOMIZER_LINK            => [
 						'type'     => 'url',
 						'readonly' => true,
 					],
