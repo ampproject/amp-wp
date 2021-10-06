@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP\Support\Tests;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 use AMP_Validated_URL_Post_Type;
 
 /**
@@ -19,7 +19,7 @@ use AMP_Validated_URL_Post_Type;
  * @group support-admin
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportData
  */
-class SupportDataTest extends WP_UnitTestCase {
+class SupportDataTest extends TestCase {
 
 	use PrivateAccess;
 
@@ -40,26 +40,6 @@ class SupportDataTest extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->instance = new SupportData( [] );
-	}
-
-	/**
-	 * @covers ::set_args
-	 */
-	public function test_set_args() {
-
-		$this->instance->set_args( [ 'post_ids' => [ 1, 2, 3 ] ] );
-
-		$this->assertEquals(
-			[ 'post_ids' => [ 1, 2, 3 ] ],
-			$this->get_private_property( $this->instance, 'args' )
-		);
-
-		$this->instance->set_args( [] );
-
-		$this->assertEquals(
-			[],
-			$this->get_private_property( $this->instance, 'args' )
-		);
 	}
 
 	/**
@@ -108,23 +88,23 @@ class SupportDataTest extends WP_UnitTestCase {
 	public function test_send_data() {
 
 		// Mock http request.
-		$support_data = [];
+		$support_data      = [];
+		$expected_response = [
+			'status' => 'ok',
+			'data'   => [
+				'uuid' => 'ampwp-563e5de8-3129-55fb-af71-a6fbd9ef5026',
+			],
+		];
 
-		$callback_wp_remote = static function ( $preempt, $parsed_args ) use ( &$support_data ) {
+		$callback_wp_remote = static function ( $preempt, $parsed_args ) use ( &$support_data, $expected_response ) {
 
 			$support_data = $parsed_args['body'];
 
 			return [
-				'body' => wp_json_encode(
-					[
-						'status' => 'ok',
-						'data'   => [
-							'uuid' => 'ampwp-563e5de8-3129-55fb-af71-a6fbd9ef5026',
-						],
-					]
-				),
+				'body' => wp_json_encode( $expected_response ),
 			];
 		};
+
 		add_filter( 'pre_http_request', $callback_wp_remote, 10, 2 );
 
 		$instance = new SupportData( [] );
@@ -151,6 +131,28 @@ class SupportDataTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers ::send_data
+	 */
+	public function test_send_data_with_error() {
+		$callback_wp_remote = static function ( $preempt, $parsed_args ) use ( &$support_data ) {
+
+			$support_data = $parsed_args['body'];
+
+			return [
+				'body' => 'some invalid string',
+			];
+		};
+		add_filter( 'pre_http_request', $callback_wp_remote, 10, 2 );
+
+		$instance = new SupportData( [] );
+		$response = $instance->send_data();
+
+		$this->assertInstanceOf( 'WP_Error', $response );
+
+		remove_filter( 'pre_http_request', $callback_wp_remote );
+	}
+
+	/**
 	 * Test get_error_log method.
 	 *
 	 * @covers ::get_error_log
@@ -163,27 +165,6 @@ class SupportDataTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'log_errors', $output );
 		$this->assertArrayHasKey( 'contents', $output );
 
-	}
-
-	/**
-	 * @covers ::normalize_url_for_storage
-	 */
-	public function test_normalize_url_for_storage() {
-
-		$url_not_normalized = add_query_arg(
-			[
-				QueryVar::NOAMP => '',
-				'preview_id'    => 123,
-			],
-			'http://google.com/#anchor'
-		);
-
-		$this->assertSame(
-			'https://google.com/',
-			SupportData::normalize_url_for_storage(
-				$url_not_normalized
-			)
-		);
 	}
 
 	/**

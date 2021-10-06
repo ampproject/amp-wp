@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Support\SupportData;
@@ -41,26 +42,26 @@ class SupportScreen implements Conditional, Service, Registerable {
 	private $google_fonts;
 
 	/**
-	 * SupportData instance.
+	 * Injector.
 	 *
-	 * @var SupportData
+	 * @var Injector
 	 */
-	private $support_data;
+	private $injector;
 
 	/**
 	 * Class constructor.
 	 *
 	 * @param OptionsMenu $options_menu An instance of the class handling the parent menu.
 	 * @param GoogleFonts $google_fonts An instance of the GoogleFonts service.
-	 * @param SupportData $support_data An instance of the SupportData service.
+	 * @param Injector    $injector     Injector instance to configure.
 	 */
-	public function __construct( OptionsMenu $options_menu, GoogleFonts $google_fonts, SupportData $support_data ) {
+	public function __construct( OptionsMenu $options_menu, GoogleFonts $google_fonts, Injector $injector ) {
 
 		$this->parent_menu_slug = $options_menu->get_menu_slug();
 
 		$this->google_fonts = $google_fonts;
 
-		$this->support_data = $support_data;
+		$this->injector = $injector;
 	}
 
 	/**
@@ -160,7 +161,7 @@ class SupportScreen implements Conditional, Service, Registerable {
 		);
 
 		$args    = [];
-		$post_id = filter_input( INPUT_GET, 'post_id', FILTER_SANITIZE_NUMBER_INT );
+		$post_id = isset( $_GET['post_id'] ) ? (int) $_GET['post_id'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( ! empty( $post_id ) && 0 < intval( $post_id ) ) {
 			$args = [
@@ -170,8 +171,8 @@ class SupportScreen implements Conditional, Service, Registerable {
 			];
 		}
 
-		$this->support_data->set_args( $args );
-		$data = $this->support_data->get_data();
+		$support_data = $this->injector->make( SupportData::class, [ $args ] );
+		$data         = $support_data->get_data();
 
 		wp_add_inline_script(
 			self::ASSET_HANDLE,

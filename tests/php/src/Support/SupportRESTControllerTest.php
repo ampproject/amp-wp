@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Support\Tests;
 use AmpProject\AmpWP\Support\SupportCliCommand;
 use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Support\SupportRESTController;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\TestCase;
 use WP_Error;
 
@@ -18,12 +19,12 @@ use WP_Error;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportRESTController
  */
-class SupportRESTControllerTest extends TestCase {
+class SupportRESTControllerTest extends DependencyInjectedTestCase {
 
 	/**
 	 * Instance of OptionsMenu
 	 *
-	 * @var SupportCliCommand
+	 * @var SupportRESTController
 	 */
 	public $instance;
 
@@ -36,7 +37,7 @@ class SupportRESTControllerTest extends TestCase {
 
 		parent::setUp();
 
-		$this->instance = new SupportRESTController( new SupportData() );
+		$this->instance = $this->injector->make( SupportRESTController::class );
 	}
 
 	/**

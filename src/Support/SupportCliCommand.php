@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Support;
 
+use AmpProject\AmpWP\Infrastructure\Injector;
 use WP_CLI;
 use function WP_CLI\Utils\get_flag_value;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -14,25 +15,27 @@ use AmpProject\AmpWP\Infrastructure\CliCommand;
 
 /**
  * Service class for support.
+ *
+ * @since 2.2
+ * @internal
  */
 class SupportCliCommand implements Service, CliCommand {
 
-
 	/**
-	 * SupportData instance.
+	 * Injector.
 	 *
-	 * @var SupportData
+	 * @var Injector
 	 */
-	public $support_data;
+	private $injector;
 
 	/**
 	 * Class constructor.
 	 *
-	 * @param SupportData $support_data An instance of the SupportData service.
+	 * @param Injector $injector Injector instance to configure.
 	 */
-	public function __construct( SupportData $support_data ) {
+	public function __construct( Injector $injector ) {
 
-		$this->support_data = $support_data;
+		$this->injector = $injector;
 	}
 
 	/**
@@ -106,8 +109,8 @@ class SupportCliCommand implements Service, CliCommand {
 			'is_synthetic' => $is_synthetic,
 		];
 
-		$this->support_data->set_args( $args );
-		$data = $this->support_data->get_data();
+		$support_data = $this->injector->make( SupportData::class, [ $args ] );
+		$data         = $support_data->get_data();
 
 		if ( $is_print ) {
 
@@ -120,7 +123,7 @@ class SupportCliCommand implements Service, CliCommand {
 			}
 		} else {
 
-			$response = $this->support_data->send_data();
+			$response = $support_data->send_data();
 
 			if ( is_wp_error( $response ) ) {
 				$error_message = $response->get_error_message();

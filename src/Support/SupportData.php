@@ -9,11 +9,15 @@ namespace AmpProject\AmpWP\Support;
 
 use WP_Error;
 use WP_Theme;
-use AmpProject\AmpWP\QueryVar;
+use AMP_Options_Manager;
+use AMP_Validated_URL_Post_Type;
+use WP_Site_Health;
 
 /**
  * Class SupportData
  * To prepare and send support data to insights server.
+ *
+ * @internal
  */
 class SupportData {
 
@@ -59,18 +63,6 @@ class SupportData {
 	 * @param array $args Arguments for AMP Send data.
 	 */
 	public function __construct( $args = [] ) {
-		$this->set_args( $args );
-	}
-
-	/**
-	 * To set argument for the class.
-	 *
-	 * @param array $args New arguments for instance.
-	 *
-	 * @return void
-	 */
-	public function set_args( $args = [] ) {
-
 		$this->args = ( ! empty( $args ) && is_array( $args ) ) ? $args : [];
 
 		$this->parse_args();
@@ -132,7 +124,7 @@ class SupportData {
 			}
 		}
 
-		$this->urls = array_map( __CLASS__ . '::normalize_url_for_storage', $this->urls );
+		$this->urls = array_map( AMP_Validated_URL_Post_Type::class . '::normalize_url_for_storage', $this->urls );
 		$this->urls = array_values( array_unique( $this->urls ) );
 
 	}
@@ -153,14 +145,24 @@ class SupportData {
 			sprintf( '%s/api/v1/support/', $endpoint ),
 			[
 				// We need long timeout here, in case the data being sent is large or the network connection is slow.
-				'timeout'  => 3000, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+				'timeout'  => 30, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 				'body'     => $data,
 				'compress' => true,
 			]
 		);
 
 		if ( ! is_wp_error( $response ) ) {
-			$response = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			$response_body   = wp_remote_retrieve_body( $response );
+			$response        = json_decode( $response_body, true );
+			$json_last_error = json_last_error();
+
+			if ( JSON_ERROR_NONE !== $json_last_error ) {
+				return new WP_Error(
+					$json_last_error,
+					json_last_error_msg()
+				);
+			}
 		}
 
 		return $response;
@@ -198,55 +200,6 @@ class SupportData {
 	}
 
 	/**
-	 * Normalize a URL for storage.
-	 *
-	 * The AMP query param is removed to facilitate switching between standard and transitional.
-	 * The URL scheme is also normalized to HTTPS to help with transition from HTTP to HTTPS.
-	 *
-	 * @since 2.2
-	 *
-	 * @reference AMP_Validated_URL_Post_Type::normalize_url_for_storage
-	 *
-	 * @param string $url URL.
-	 *
-	 * @return string Normalized URL.
-	 */
-	public static function normalize_url_for_storage( $url ) {
-
-		// Only ever store the canonical version.
-		if ( ! amp_is_canonical() ) {
-			$url = amp_remove_paired_endpoint( $url );
-		}
-
-		// Remove fragment identifier in the rare case it could be provided. It is irrelevant for validation.
-		$url = strtok( $url, '#' );
-
-		// Query args to be removed from validated URLs.
-		$removable_query_vars = array_merge(
-			wp_removable_query_args(),
-			[ 'preview_id', 'preview_nonce', 'preview', QueryVar::NOAMP ]
-		);
-
-		// Normalize query args, removing all that are not recognized or which are removable.
-		$url_parts = explode( '?', $url, 2 );
-		if ( 2 === count( $url_parts ) ) {
-			$args = wp_parse_args( $url_parts[1] );
-			foreach ( $removable_query_vars as $removable_query_arg ) {
-				unset( $args[ $removable_query_arg ] );
-			}
-			$url = $url_parts[0];
-			if ( ! empty( $args ) ) {
-				$url = $url_parts[0] . '?' . build_query( $args );
-			}
-		}
-
-		// Normalize the scheme as HTTPS.
-		$url = set_url_scheme( $url, 'https' );
-
-		return $url;
-	}
-
-	/**
 	 * To get site info.
 	 *
 	 * @since 2.2
@@ -257,29 +210,38 @@ class SupportData {
 
 		global $wpdb;
 
-		$wp_type = is_multisite() ? ( defined( 'SUBDOMAIN_INSTALL' ) && SUBDOMAIN_INSTALL ) ? 'subdomain' : 'subdir' : 'single';
+		$wp_type = 'single';
+
+		if ( is_multisite() && ( defined( 'SUBDOMAIN_INSTALL' ) && SUBDOMAIN_INSTALL ) ) {
+			$wp_type = 'subdomain';
+		} elseif ( is_multisite() ) {
+			$wp_type = 'subdir';
+		}
 
 		$active_theme = wp_get_theme();
 		$active_theme = static::normalize_theme_info( $active_theme );
 
-		$amp_settings = \AMP_Options_Manager::get_options();
+		$amp_settings = AMP_Options_Manager::get_options();
 		$amp_settings = ( ! empty( $amp_settings ) && is_array( $amp_settings ) ) ? $amp_settings : [];
 
-		$loopback_status = '';
+		$site_health     = new WP_Site_Health();
+		$loopback_status = $site_health->can_perform_loopback();
+		$loopback_status = ( ! empty( $loopback_status->status ) ) ? $loopback_status->status : '';
 
-		if ( class_exists( 'Health_Check_Loopback' ) ) {
-			$loopback_status = \Health_Check_Loopback::can_perform_loopback();
-			$loopback_status = ( ! empty( $loopback_status->status ) ) ? $loopback_status->status : '';
+		if ( function_exists( 'wp_is_https_supported' ) ) {
+			$is_ssl = wp_is_https_supported();
+		} else {
+			$is_ssl = is_ssl();
 		}
 
 		$site_info = [
 			'site_url'                    => static::get_home_url(),
 			'site_title'                  => get_bloginfo( 'site_title' ),
 			'php_version'                 => phpversion(),
-			'mysql_version'               => $wpdb->get_var( 'SELECT VERSION();' ), // phpcs:ignore
+			'mysql_version'               => $wpdb->db_version(),
 			'wp_version'                  => get_bloginfo( 'version' ),
 			'wp_language'                 => get_bloginfo( 'language' ),
-			'wp_https_status'             => is_ssl() ? true : false,
+			'wp_https_status'             => $is_ssl,
 			'wp_multisite'                => $wp_type,
 			'wp_active_theme'             => $active_theme,
 			'object_cache_status'         => wp_using_ext_object_cache(),
@@ -386,8 +348,8 @@ class SupportData {
 	 */
 	public static function normalize_plugin_info( $plugin_file ) {
 
-		$absolute_plugin_file = WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $plugin_file;
-		if ( ! file_exists( $absolute_plugin_file ) ) {
+		$absolute_plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+		if ( 0 !== validate_file( $absolute_plugin_file ) || ! file_exists( $absolute_plugin_file ) ) {
 			return [];
 		}
 
@@ -638,7 +600,7 @@ class SupportData {
 			}
 
 			// Empty array for post staleness means post is NOT stale.
-			if ( ! empty( \AMP_Validated_URL_Post_Type::get_post_staleness( $amp_error_post->ID ) ) ) {
+			if ( ! empty( AMP_Validated_URL_Post_Type::get_post_staleness( $amp_error_post->ID ) ) ) {
 				continue;
 			}
 
@@ -763,7 +725,7 @@ class SupportData {
 	 */
 	public static function get_stylesheet_info( $post_id ) {
 
-		$stylesheets = get_post_meta( $post_id, \AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true );
+		$stylesheets = get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true );
 
 		if ( empty( $stylesheets ) ) {
 			return [];
