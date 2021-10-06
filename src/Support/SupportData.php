@@ -9,6 +9,8 @@ namespace AmpProject\AmpWP\Support;
 
 use WP_Error;
 use WP_Theme;
+use WP_Post;
+use WP_Term;
 use AMP_Options_Manager;
 use AMP_Validated_URL_Post_Type;
 use WP_Site_Health;
@@ -18,6 +20,7 @@ use WP_Site_Health;
  * To prepare and send support data to insights server.
  *
  * @internal
+ * @since 2.2
  */
 class SupportData {
 
@@ -438,11 +441,7 @@ class SupportData {
 
 		$error_data['text'] = ( ! empty( $error_data['text'] ) ) ? trim( $error_data['text'] ) : '';
 
-		$error_data = wp_json_encode( $error_data );
 		$error_data = static::remove_domain( $error_data );
-		$error_data = json_decode( $error_data, true );
-
-		ksort( $error_data );
 
 		/**
 		 * Generate new slug after removing site specific data.
@@ -478,7 +477,12 @@ class SupportData {
 			$plugin_list = get_plugins();
 			$plugin_list = array_keys( $plugin_list );
 			$plugin_list = array_values( array_unique( $plugin_list ) );
-			$plugin_list = array_map( __CLASS__ . '::normalize_plugin_info', $plugin_list );
+			$plugin_list = array_map(
+				static function ( $plugin ) {
+					return self::normalize_plugin_info( $plugin );
+				},
+				$plugin_list
+			);
 
 			foreach ( $plugin_list as $plugin ) {
 				$plugin_versions[ $plugin['slug'] ] = $plugin['version'];
@@ -543,20 +547,21 @@ class SupportData {
 	 * @return array List amp validated URLs.
 	 */
 	public function get_amp_urls() {
-
-		global $wpdb;
-
-		$query = "SELECT ID, post_title, post_content FROM {$wpdb->posts} WHERE `post_type`='amp_validated_url'";
+		$query_args = [
+			'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+			'posts_per_page' => 100,
+		];
 
 		if ( ! empty( $this->urls ) && is_array( $this->urls ) ) {
-			$placeholder = implode( ', ', array_fill( 0, count( $this->urls ), '%s' ) );
-			$query      .= ' AND post_title IN ( ' . $placeholder . ' ) ';
-			$query_data  = $this->urls;
+
+			$query_args['post_name__in'] = array_map(
+				static function ( $url ) {
+					return md5( $url );
+				},
+				$this->urls
+			);
 
 		} else {
-
-			$query     .= ' LIMIT %d, %d';
-			$query_data = [ 0, 100 ];
 
 			/**
 			 * If argument provided and we don't have URL data.
@@ -575,9 +580,8 @@ class SupportData {
 			}
 		}
 
-		// This query needs to be uncached and it is prepared, yet there's false positive in PHPCS because of using variable instead of string in prepare.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
-		$amp_error_posts  = $wpdb->get_results( $wpdb->prepare( $query, $query_data ) );
+		$query            = new \WP_Query( $query_args );
+		$amp_error_posts  = $query->get_posts();
 		$amp_invalid_urls = [];
 
 		/**
@@ -674,10 +678,12 @@ class SupportData {
 
 			switch ( $object_type ) {
 				case 'post':
-					$object_subtype = get_post( $amp_queried_object['id'] )->post_type;
+					$post_object    = get_post( $amp_queried_object['id'] );
+					$object_subtype = ( ! empty( $post_object ) && $post_object instanceof WP_Post ) ? $post_object->post_type : '';
 					break;
 				case 'term':
-					$object_subtype = get_term( $amp_queried_object['id'] )->taxonomy;
+					$term_object    = get_term( $amp_queried_object['id'] );
+					$object_subtype = ( ! empty( $term_object ) && $term_object instanceof WP_Term ) ? $term_object->taxonomy : '';
 					break;
 				case 'user':
 					break;
@@ -823,14 +829,16 @@ class SupportData {
 	 *
 	 * @since 2.2
 	 *
-	 * @param string $content Content from home_url need to remove.
+	 * @param string|array $content Content from home_url need to remove.
 	 *
-	 * @return string Content after removing home_url.
+	 * @return string|array Content after removing home_url.
 	 */
 	public static function remove_domain( $content ) {
 
 		if ( empty( $content ) ) {
 			return '';
+		} elseif ( is_numeric( $content ) ) {
+			return $content;
 		}
 
 		$home_url = static::get_home_url();
@@ -841,9 +849,20 @@ class SupportData {
 		 */
 		$regex = "/http[s]?:\\\\{0,5}\/\\\\{0,5}\/$home_url/mU";
 
-		$content = preg_replace( $regex, '', $content );
+		if ( is_string( $content ) ) {
+			return preg_replace( $regex, '', $content );
+		}
 
-		return $content;
+		if ( is_object( $content ) ) {
+			$content = (array) $content;
+		}
+
+		return array_map(
+			static function ( $item ) {
+				return self::remove_domain( $item );
+			},
+			$content
+		);
 	}
 
 	/**

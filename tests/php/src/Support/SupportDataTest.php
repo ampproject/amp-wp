@@ -66,7 +66,7 @@ class SupportDataTest extends TestCase {
 		];
 
 		$expected = array_map(
-			SupportData::class . '::normalize_url_for_storage',
+			AMP_Validated_URL_Post_Type::class . '::normalize_url_for_storage',
 			[
 				get_permalink( $url_post_id ),
 				get_term_link( $term_id ),

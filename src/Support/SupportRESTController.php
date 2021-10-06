@@ -107,7 +107,7 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 		$support_data     = $this->injector->make( SupportData::class, [ $request_args ] );
 		$support_response = $support_data->send_data();
 
-		$response = new \WP_Error(
+		$response = new WP_Error(
 			'fail_to_send_data',
 			'Failed to send support request. Please try again after some time',
 			[ 'status' => 500 ]
