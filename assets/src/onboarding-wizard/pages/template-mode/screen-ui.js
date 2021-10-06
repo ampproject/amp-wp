@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { useMemo } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * External dependencies
@@ -12,10 +13,57 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_ERROR, NOTICE_SIZE_LARGE } from '../../../components/amp-notice';
+import {
+	AMPNotice,
+	NOTICE_TYPE_SUCCESS,
+	NOTICE_SIZE_SMALL,
+} from '../../../components/amp-notice';
 import { TemplateModeOption } from '../../../components/template-mode-option';
 import { READER, STANDARD, TRANSITIONAL } from '../../../common/constants';
-import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelectionText, TECHNICAL, NON_TECHNICAL } from './get-selection-details';
+import {
+	RECOMMENDED,
+	NOT_RECOMMENDED,
+	getRecommendationLevels,
+} from './get-selection-details';
+
+/**
+ * Small notice indicating a mode is recommended.
+ */
+function RecommendedNotice() {
+	return (
+		<AMPNotice size={ NOTICE_SIZE_SMALL } type={ NOTICE_TYPE_SUCCESS }>
+			{ __( 'Recommended', 'amp' ) }
+		</AMPNotice>
+	);
+}
+
+/**
+ * Determine if a template mode option should be initially open.
+ *
+ * @param {string} mode                 Template mode to check.
+ * @param {Array}  recommendationLevels Recommendation levels.
+ * @param {string} savedCurrentMode     Currently saved template mode.
+ */
+function isInitiallyOpen( mode, recommendationLevels, savedCurrentMode ) {
+	if ( savedCurrentMode === mode ) {
+		return true;
+	}
+
+	switch ( recommendationLevels[ mode ].level ) {
+		case RECOMMENDED:
+			return true;
+
+		case NOT_RECOMMENDED:
+			return false;
+
+		/**
+		 * For NEUTRAL, the option should be initially open if no other mode is
+		 * RECOMMENDED.
+		 */
+		default:
+			return ! Boolean( Object.values( recommendationLevels ).find( ( item ) => item.level === RECOMMENDED ) );
+	}
+}
 
 /**
  * The interface for the mode selection screen. Avoids using context for easier testing.
@@ -42,61 +90,31 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 		},
 	), [ currentThemeIsAmongReaderThemes, themeIssues, pluginIssues, userIsTechnical ] );
 
-	const sectionText = useMemo(
-		() => getAllSelectionText( recommendationLevels, userIsTechnical ? TECHNICAL : NON_TECHNICAL ),
-		[ recommendationLevels, userIsTechnical ],
-	);
-
-	const getRecommendationLevelType = ( recommended ) => {
-		switch ( recommended ) {
-			case MOST_RECOMMENDED:
-				return NOTICE_TYPE_SUCCESS;
-
-			case RECOMMENDED:
-				return NOTICE_TYPE_INFO;
-
-			default:
-				return NOTICE_TYPE_ERROR;
-		}
-	};
-
 	return (
 		<form>
 			<TemplateModeOption
-				details={ sectionText.reader.details }
-				detailsUrl="https://amp-wp.org/documentation/getting-started/reader/"
-				initialOpen={ true }
+				details={ recommendationLevels[ READER ].details }
+				initialOpen={ isInitiallyOpen( READER, recommendationLevels, savedCurrentMode ) }
 				mode={ READER }
 				previouslySelected={ savedCurrentMode === READER && technicalQuestionChanged && ! firstTimeInWizard }
-			>
-				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ READER ] ) }>
-					{ sectionText.reader.compatibility }
-				</AMPNotice>
-			</TemplateModeOption>
+				labelExtra={ recommendationLevels[ READER ].level === RECOMMENDED ? <RecommendedNotice /> : null }
+			/>
 
 			<TemplateModeOption
-				details={ sectionText.transitional.details }
-				detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/"
-				initialOpen={ true }
+				details={ recommendationLevels[ TRANSITIONAL ].details }
+				initialOpen={ isInitiallyOpen( TRANSITIONAL, recommendationLevels, savedCurrentMode ) }
 				mode={ TRANSITIONAL }
 				previouslySelected={ savedCurrentMode === TRANSITIONAL && technicalQuestionChanged && ! firstTimeInWizard }
-			>
-				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ TRANSITIONAL ] ) }>
-					{ sectionText.transitional.compatibility }
-				</AMPNotice>
-			</TemplateModeOption>
+				labelExtra={ recommendationLevels[ TRANSITIONAL ].level === RECOMMENDED ? <RecommendedNotice /> : null }
+			/>
 
 			<TemplateModeOption
-				details={ sectionText.standard.details }
-				detailsUrl="https://amp-wp.org/documentation/getting-started/standard/"
-				initialOpen={ true }
+				details={ recommendationLevels[ STANDARD ].details }
+				initialOpen={ isInitiallyOpen( STANDARD, recommendationLevels, savedCurrentMode ) }
 				mode={ STANDARD }
 				previouslySelected={ savedCurrentMode === STANDARD && technicalQuestionChanged && ! firstTimeInWizard }
-			>
-				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ STANDARD ] ) }>
-					{ sectionText.standard.compatibility }
-				</AMPNotice>
-			</TemplateModeOption>
+				labelExtra={ recommendationLevels[ STANDARD ].level === RECOMMENDED ? <RecommendedNotice /> : null }
+			/>
 		</form>
 	);
 }
