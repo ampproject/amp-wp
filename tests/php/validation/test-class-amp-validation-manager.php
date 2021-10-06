@@ -2225,7 +2225,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			add_filter( 'wp_insert_post_empty_content', '__return_true' );
 		}
 
-		$response = AMP_Validation_Manager::send_validate_response( $sanitization_results, $status_code, $last_error, $store );
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = [
+			AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE => $store,
+		];
+
+		$response = AMP_Validation_Manager::send_validate_response( $sanitization_results, $status_code, $last_error, AMP_Validation_Manager::get_validate_request_args() );
 		$this->assertJson( $response );
 		$data = json_decode( $response, true );
 
@@ -2614,7 +2618,10 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 		$stylesheets = [ [ 'CSS!' ] ];
 		$filter        = function( $pre, $r, $url ) use ( $validation_errors, $php_error, $queried_object, $stylesheets, $after_matter ) {
-			$this->assertStringContainsString( AMP_Validation_Manager::VALIDATE_QUERY_VAR . '=', $url );
+			$url_query_vars = [];
+			parse_str( wp_parse_url( $url, PHP_URL_QUERY ), $url_query_vars );
+			$this->assertArrayHasKey( AMP_Validation_Manager::VALIDATE_QUERY_VAR, $url_query_vars );
+			$this->assertIsArray( $url_query_vars[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] );
 
 			$validation = [
 				'results'         => [],

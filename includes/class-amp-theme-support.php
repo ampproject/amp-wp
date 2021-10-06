@@ -2002,7 +2002,7 @@ class AMP_Theme_Support {
 				$sanitization_results,
 				$status_code,
 				$last_error,
-				isset( $_GET[ AMP_Validation_Manager::STORE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				AMP_Validation_Manager::get_validate_request_args()
 			);
 		}
 

@@ -1921,12 +1921,15 @@ class Test_AMP_Theme_Support extends TestCase {
 	public function test_prepare_response_for_validating_amp_page( $store ) {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 		$this->go_to( '/' );
 
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = [
+			AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+		];
 		if ( $store ) {
-			$_GET[ AMP_Validation_Manager::STORE_QUERY_VAR ] = '';
+			$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ][ AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE ] = 'true';
 		}
+		AMP_Validation_Manager::init_validate_request();
 		$response = AMP_Theme_Support::prepare_response( '<html amp><head></head><body><amp-layout layout="bad"></amp-layout></body></html>' );
 		$this->assertJson( $response );
 		$data = json_decode( $response, true );
