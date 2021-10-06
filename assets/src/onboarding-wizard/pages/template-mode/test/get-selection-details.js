@@ -1,14 +1,14 @@
 /**
  * Internal dependencies
  */
-import { getRecommendationLevels } from '../get-selection-details';
+import { getSelectionDetails } from '../get-selection-details';
 
-describe( 'getRecommendationLevels', () => {
+describe( 'getSelectionDetails', () => {
 	it( 'throws no errors', () => {
 		[ true, false ].forEach( ( hasPluginIssues ) => {
 			[ true, false ].forEach( ( hasThemeIssues ) => {
 				[ true, false ].forEach( ( userIsTechnical ) => {
-					const cb = () => getRecommendationLevels( { hasPluginIssues, hasThemeIssues, userIsTechnical } );
+					const cb = () => getSelectionDetails( { hasPluginIssues, hasThemeIssues, userIsTechnical } );
 					expect( cb ).not.toThrow();
 				} );
 			} );

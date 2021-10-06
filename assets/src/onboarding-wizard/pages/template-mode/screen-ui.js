@@ -23,7 +23,7 @@ import { READER, STANDARD, TRANSITIONAL } from '../../../common/constants';
 import {
 	RECOMMENDED,
 	NOT_RECOMMENDED,
-	getRecommendationLevels,
+	getSelectionDetails,
 } from './get-selection-details';
 
 /**
@@ -40,16 +40,16 @@ function RecommendedNotice() {
 /**
  * Determine if a template mode option should be initially open.
  *
- * @param {string} mode                 Template mode to check.
- * @param {Array}  recommendationLevels Recommendation levels.
- * @param {string} savedCurrentMode     Currently saved template mode.
+ * @param {string} mode             Template mode to check.
+ * @param {Array}  selectionDetails Selection details.
+ * @param {string} savedCurrentMode Currently saved template mode.
  */
-function isInitiallyOpen( mode, recommendationLevels, savedCurrentMode ) {
+function isInitiallyOpen( mode, selectionDetails, savedCurrentMode ) {
 	if ( savedCurrentMode === mode ) {
 		return true;
 	}
 
-	switch ( recommendationLevels[ mode ].level ) {
+	switch ( selectionDetails[ mode ].recommendationLevel ) {
 		case RECOMMENDED:
 			return true;
 
@@ -61,7 +61,7 @@ function isInitiallyOpen( mode, recommendationLevels, savedCurrentMode ) {
 		 * RECOMMENDED.
 		 */
 		default:
-			return ! Boolean( Object.values( recommendationLevels ).find( ( item ) => item.level === RECOMMENDED ) );
+			return ! Boolean( Object.values( selectionDetails ).find( ( item ) => item.recommendationLevel === RECOMMENDED ) );
 	}
 }
 
@@ -80,7 +80,7 @@ function isInitiallyOpen( mode, recommendationLevels, savedCurrentMode ) {
 export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOption, firstTimeInWizard, technicalQuestionChanged, pluginIssues, savedCurrentMode, themeIssues } ) {
 	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
 
-	const recommendationLevels = useMemo( () => getRecommendationLevels(
+	const selectionDetails = useMemo( () => getSelectionDetails(
 		{
 			currentThemeIsAmongReaderThemes,
 			userIsTechnical,
@@ -93,27 +93,27 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 	return (
 		<form>
 			<TemplateModeOption
-				details={ recommendationLevels[ READER ].details }
-				initialOpen={ isInitiallyOpen( READER, recommendationLevels, savedCurrentMode ) }
+				details={ selectionDetails[ READER ].details }
+				initialOpen={ isInitiallyOpen( READER, selectionDetails, savedCurrentMode ) }
 				mode={ READER }
 				previouslySelected={ savedCurrentMode === READER && technicalQuestionChanged && ! firstTimeInWizard }
-				labelExtra={ recommendationLevels[ READER ].level === RECOMMENDED ? <RecommendedNotice /> : null }
+				labelExtra={ selectionDetails[ READER ].recommendationLevel === RECOMMENDED ? <RecommendedNotice /> : null }
 			/>
 
 			<TemplateModeOption
-				details={ recommendationLevels[ TRANSITIONAL ].details }
-				initialOpen={ isInitiallyOpen( TRANSITIONAL, recommendationLevels, savedCurrentMode ) }
+				details={ selectionDetails[ TRANSITIONAL ].details }
+				initialOpen={ isInitiallyOpen( TRANSITIONAL, selectionDetails, savedCurrentMode ) }
 				mode={ TRANSITIONAL }
 				previouslySelected={ savedCurrentMode === TRANSITIONAL && technicalQuestionChanged && ! firstTimeInWizard }
-				labelExtra={ recommendationLevels[ TRANSITIONAL ].level === RECOMMENDED ? <RecommendedNotice /> : null }
+				labelExtra={ selectionDetails[ TRANSITIONAL ].recommendationLevel === RECOMMENDED ? <RecommendedNotice /> : null }
 			/>
 
 			<TemplateModeOption
-				details={ recommendationLevels[ STANDARD ].details }
-				initialOpen={ isInitiallyOpen( STANDARD, recommendationLevels, savedCurrentMode ) }
+				details={ selectionDetails[ STANDARD ].details }
+				initialOpen={ isInitiallyOpen( STANDARD, selectionDetails, savedCurrentMode ) }
 				mode={ STANDARD }
 				previouslySelected={ savedCurrentMode === STANDARD && technicalQuestionChanged && ! firstTimeInWizard }
-				labelExtra={ recommendationLevels[ STANDARD ].level === RECOMMENDED ? <RecommendedNotice /> : null }
+				labelExtra={ selectionDetails[ STANDARD ].recommendationLevel === RECOMMENDED ? <RecommendedNotice /> : null }
 			/>
 		</form>
 	);
