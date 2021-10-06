@@ -63,14 +63,14 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 	return (
 		<form>
 			<TemplateModeOption
-				details={ sectionText.standard.details }
-				detailsUrl="https://amp-wp.org/documentation/getting-started/standard/"
+				details={ sectionText.reader.details }
+				detailsUrl="https://amp-wp.org/documentation/getting-started/reader/"
 				initialOpen={ true }
-				mode={ STANDARD }
-				previouslySelected={ savedCurrentMode === STANDARD && technicalQuestionChanged && ! firstTimeInWizard }
+				mode={ READER }
+				previouslySelected={ savedCurrentMode === READER && technicalQuestionChanged && ! firstTimeInWizard }
 			>
-				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ STANDARD ] ) }>
-					{ sectionText.standard.compatibility }
+				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ READER ] ) }>
+					{ sectionText.reader.compatibility }
 				</AMPNotice>
 			</TemplateModeOption>
 
@@ -87,14 +87,14 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 			</TemplateModeOption>
 
 			<TemplateModeOption
-				details={ sectionText.reader.details }
-				detailsUrl="https://amp-wp.org/documentation/getting-started/reader/"
+				details={ sectionText.standard.details }
+				detailsUrl="https://amp-wp.org/documentation/getting-started/standard/"
 				initialOpen={ true }
-				mode={ READER }
-				previouslySelected={ savedCurrentMode === READER && technicalQuestionChanged && ! firstTimeInWizard }
+				mode={ STANDARD }
+				previouslySelected={ savedCurrentMode === STANDARD && technicalQuestionChanged && ! firstTimeInWizard }
 			>
-				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ READER ] ) }>
-					{ sectionText.reader.compatibility }
+				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ STANDARD ] ) }>
+					{ sectionText.standard.compatibility }
 				</AMPNotice>
 			</TemplateModeOption>
 		</form>
