@@ -2,9 +2,12 @@
  * WordPress dependencies
  */
 import { useEffect, useContext } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
+import './style.scss';
 import { Navigation } from '../../components/navigation-context-provider';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import { SiteScan } from '../../../components/site-scan-context-provider';
@@ -37,18 +40,34 @@ export function TemplateMode() {
 
 	// The actual display component should avoid using global context directly. This will facilitate developing and testing the UI using different options.
 	return (
-		<ScreenUI
-			currentMode={ themeSupport }
-			currentThemeIsAmongReaderThemes={ currentTheme.is_reader_theme }
-			developerToolsOption={ developerToolsOption }
-			firstTimeInWizard={ false === originalOptions.plugin_configured }
-			pluginIssues={ pluginIssues }
-			savedCurrentMode={ originalOptions.theme_support }
-			setCurrentMode={ ( mode ) => {
-				updateOptions( { theme_support: mode } );
-			} }
-			technicalQuestionChanged={ technicalQuestionChangedAtLeastOnce }
-			themeIssues={ themeIssues }
-		/>
+		<div className="template-modes">
+			<div className="template-modes__header">
+				<h1>
+					{ __( 'Template Modes', 'amp' ) }
+				</h1>
+				{ /* dangerouslySetInnerHTML reason: Injection of links. */ }
+				<p dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						/* translators: placeholders are links to amp-wp.org website. */
+						__( 'Based on site scan results the AMP plugin provides the following choices. Learn more about the <a href="%1$s" target="_blank" rel="noreferrer noopener">AMP experience with different modes</a> and availability of <a href="%2$s" target="_blank" rel="noreferrer noopener">AMP components in the ecosystem</a>.', 'amp' ),
+						'https://amp-wp.org/documentation/getting-started/template-modes/',
+						'https://amp-wp.org/ecosystem/',
+					),
+				} } />
+			</div>
+			<ScreenUI
+				currentMode={ themeSupport }
+				currentThemeIsAmongReaderThemes={ currentTheme.is_reader_theme }
+				developerToolsOption={ developerToolsOption }
+				firstTimeInWizard={ false === originalOptions.plugin_configured }
+				pluginIssues={ pluginIssues }
+				savedCurrentMode={ originalOptions.theme_support }
+				setCurrentMode={ ( mode ) => {
+					updateOptions( { theme_support: mode } );
+				} }
+				technicalQuestionChanged={ technicalQuestionChangedAtLeastOnce }
+				themeIssues={ themeIssues }
+			/>
+		</div>
 	);
 }

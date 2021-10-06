@@ -38,6 +38,7 @@ export const PAGES = [
 		slug: 'template-modes',
 		title: __( 'Template Modes', 'amp' ),
 		PageComponent: TemplateMode,
+		showTitle: false,
 	},
 	{
 		slug: 'theme-selection',
