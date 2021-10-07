@@ -323,20 +323,25 @@ class SupportData {
 			];
 		}
 
-		$file        = file( $error_log_path );
-		$max_lines   = max( 0, count( $file ) - 200 );
-		$file_length = count( $file );
-		$contents    = [];
+		$no_of_lines = 200;
 
-		for ( $i = $max_lines; $i < $file_length; $i ++ ) {
-			if ( ! empty( $file[ $i ] ) ) {
-				$contents[] = sanitize_text_field( $file[ $i ] );
+		$file  = fopen( $error_log_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen
+		$lines = [];
+
+		while ( ! feof( $file ) ) {
+			$line = fgets( $file );
+			array_push( $lines, $line );
+			$line_count = count( $lines );
+			if ( $line_count > $no_of_lines ) {
+				array_shift( $lines );
 			}
 		}
 
+		fclose( $file );
+
 		return [
 			'log_errors' => ini_get( 'log_errors' ),
-			'contents'   => implode( "\n", $contents ),
+			'contents'   => implode( "\n", $lines ),
 		];
 	}
 
