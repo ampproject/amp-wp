@@ -67,7 +67,7 @@ export async function selectReaderTheme( theme = 'legacy' ) {
 	await page.$eval( selector, ( el ) => el.click() );
 }
 
-export async function moveToSummaryScreen( { technical = true, mode, readerTheme = 'legacy' } ) {
+export async function moveToDoneScreen( { technical = true, mode, readerTheme = 'legacy' } ) {
 	if ( mode === 'reader' ) {
 		await moveToReaderThemesScreen( { technical } );
 		await selectReaderTheme( readerTheme );
@@ -78,15 +78,7 @@ export async function moveToSummaryScreen( { technical = true, mode, readerTheme
 
 	await clickNextButton();
 
-	await page.waitForSelector( '.summary' );
-}
-
-export async function moveToDoneScreen( { technical = true, mode, readerTheme = 'legacy' } ) {
-	await moveToSummaryScreen( { technical, mode, readerTheme } );
-
-	await clickNextButton();
-	await page.waitForTimeout( 1000 );
-	await page.waitForSelector( '.done__preview-container' );
+	await page.waitForSelector( '.done' );
 }
 
 export async function completeWizard( { technical = true, mode, readerTheme = 'legacy' } ) {
@@ -132,7 +124,10 @@ export async function cleanUpSettings() {
 	await page.waitForSelector( '.amp-settings-nav' );
 	await page.evaluate( async () => {
 		await Promise.all( [
-			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: { amp_dev_tools_enabled: true } } ),
+			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: {
+				amp_dev_tools_enabled: true,
+				amp_review_panel_dismissed_for_template_mode: '',
+			} } ),
 			wp.apiFetch( { path: '/amp/v1/options', method: 'POST', data: {
 				mobile_redirect: false,
 				reader_theme: 'legacy',

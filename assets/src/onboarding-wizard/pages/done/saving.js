@@ -2,46 +2,11 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect } from '@wordpress/element';
-import { Button } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { User } from '../../../components/user-context-provider';
-import { Phone } from '../../../components/phone';
-import './style.css';
-import { ReaderThemes } from '../../../components/reader-themes-context-provider';
-import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO } from '../../../components/amp-notice';
-import { Navigation } from '../../components/navigation-context-provider';
-import { Options } from '../../../components/options-context-provider';
-import { Done } from '../../../components/svg/done';
-
-/**
- * Provides the description for the done screen.
- *
- * @param {string} mode The selected mode.
- * @return {string} The text.
- */
-function getDescription( mode ) {
-	switch ( mode ) {
-		case 'standard':
-			return __( 'Your site is ready to serve AMP pages to your users! In Standard mode (AMP-first) all canonical URLs are AMP by default. You can still opt out of AMP for specific content types and templates from the AMP settings screen. Depending on the theme and plugins you are using, development work may be required to maintain your site’s AMP compatibility.', 'amp' );
-
-		case 'transitional':
-			return __( 'Your site is ready to serve AMP pages to your users! In Transitional mode both the AMP and non-AMP versions of your site will be served using your currently active theme. With further development work to address AMP-compatibility issues in your themes and plugins, your site can be made fully AMP-first.', 'amp' );
-
-		case 'reader':
-			return __( 'Your site is ready to serve AMP pages to your users! In Reader mode the AMP version of your site will be served using the Reader theme you have selected (shown to the right), while pages for the non-AMP version of your site will be served using your primary theme. As a last step, make sure you tailor the Reader theme as needed using the Customizer.', 'amp' );
-		default:
-			return '';
-	}
-}
 
 /**
  * UI for a saving state.
  */
-function Saving() {
+export function Saving() {
 	return (
 		<div className="saving">
 			<svg width="285" height="138" viewBox="0 0 285 138" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -66,121 +31,6 @@ function Saving() {
 			<h1>
 				{ __( 'Saving your settings …', 'amp' ) }
 			</h1>
-		</div>
-	);
-}
-
-function Preview() {
-	const {
-		originalOptions: { preview_permalink: previewPermalink },
-	} = useContext( Options );
-
-	return (
-		<>
-			<Phone>
-				<iframe
-					className="done__preview-iframe"
-					src={ previewPermalink }
-					title={ __( 'Site preview', 'amp' ) }
-					name="amp-wizard-completion-preview"
-				/>
-			</Phone>
-			<div className="done__link-buttons">
-
-				<Button
-					isPrimary
-					href={ previewPermalink }
-					target="_blank"
-					rel="noreferrer"
-				>
-					{ __( 'Browse AMP', 'amp' ) }
-				</Button>
-
-			</div>
-		</>
-	);
-}
-
-/**
- * Final screen, where data is saved.
- */
-export function Save() {
-	const {
-		didSaveOptions,
-		editedOptions: { theme_support: themeSupport, reader_theme: readerTheme },
-		saveOptions,
-		savingOptions,
-	} = useContext( Options );
-	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
-	const { canGoForward, setCanGoForward } = useContext( Navigation );
-	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
-
-	/**
-	 * Allow the finish button to be enabled.
-	 */
-	useEffect(
-		() => {
-			if ( ! canGoForward ) {
-				setCanGoForward( true );
-			}
-		},
-		[ setCanGoForward, canGoForward ],
-	);
-
-	/**
-	 * Triggers saving of options on arrival to this screen.
-	 */
-	useEffect( () => {
-		if ( ! didSaveOptions && ! savingOptions ) {
-			saveOptions();
-		}
-	}, [ didSaveOptions, saveOptions, savingOptions ] );
-
-	/**
-	 * Triggers saving of user options on arrival of this screen.
-	 */
-	useEffect( () => {
-		if ( ! didSaveDeveloperToolsOption && ! savingDeveloperToolsOption ) {
-			saveDeveloperToolsOption();
-		}
-	}, [ didSaveDeveloperToolsOption, savingDeveloperToolsOption, saveDeveloperToolsOption ] );
-
-	if ( savingOptions || savingDeveloperToolsOption || downloadingTheme ) {
-		return <Saving />;
-	}
-
-	let heading = __( 'Congratulations!', 'amp' );
-	if ( 'standard' === themeSupport ) {
-		heading = __( 'Your site is ready', 'amp' );
-	}
-
-	return (
-		<div className="done">
-			<div className="done__text">
-				<Done />
-				<h1>
-					{ heading }
-				</h1>
-				{
-					'reader' === themeSupport && downloadedTheme === readerTheme && (
-						<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_SUCCESS }>
-							{ __( 'Your Reader theme was automatically installed', 'amp' ) }
-						</AMPNotice>
-					)
-				}
-				<p>
-					{ getDescription( themeSupport ) }
-				</p>
-			</div>
-			<div className="done__preview-container">
-				{ 'reader' === themeSupport && downloadingThemeError && (
-					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
-						{ __( 'There was an error downloading your Reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
-					</AMPNotice>
-				) }
-				<Preview />
-
-			</div>
 		</div>
 	);
 }

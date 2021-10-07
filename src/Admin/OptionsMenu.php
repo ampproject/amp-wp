@@ -232,6 +232,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
 			'HAS_DEPENDENCY_SUPPORT'             => $this->dependency_support->has_support(),
+			'HOME_URL'                           => home_url( '/' ),
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
 			'IS_CORE_THEME'                      => in_array(
@@ -245,6 +246,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+			'USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE' => UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
 		];
 

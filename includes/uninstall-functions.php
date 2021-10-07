@@ -39,8 +39,13 @@ function delete_options() {
  * @internal
  */
 function delete_user_metadata() {
-
-	delete_metadata( 'user', 0, 'amp_dev_tools_enabled', '', true );
+	$keys = [
+		'amp_dev_tools_enabled',
+		'amp_review_panel_dismissed_for_template_mode',
+	];
+	foreach ( $keys as $key ) {
+		delete_metadata( 'user', 0, $key, '', true );
+	}
 }
 
 /**
@@ -170,7 +175,7 @@ function delete_transients() {
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
 	$wpdb->query(
-	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- See use of prepare in foreach loop above.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- See use of prepare in foreach loop above.
 		"DELETE FROM $wpdb->options WHERE " . implode( ' OR ', $where_clause )
 	);
 }
@@ -182,10 +187,17 @@ function delete_transients() {
  * @internal
  */
 function remove_plugin_data() {
+	$options = get_option( 'amp-options' );
 
-	delete_options();
-	delete_user_metadata();
-	delete_posts();
-	delete_terms();
-	delete_transients();
+	if (
+		is_array( $options ) && array_key_exists( 'delete_data_at_uninstall', $options )
+			? $options['delete_data_at_uninstall']
+			: true
+	) {
+		delete_options();
+		delete_user_metadata();
+		delete_posts();
+		delete_terms();
+		delete_transients();
+	}
 }

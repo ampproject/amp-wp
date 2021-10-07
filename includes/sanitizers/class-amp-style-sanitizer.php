@@ -148,6 +148,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'[submit-error]',
 			'[submit-success]',
 			'amp-script',
+			'amp-story-captions',
 		],
 		'should_locate_sources'          => false,
 		'parsed_cache_variant'           => null,
@@ -1034,7 +1035,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return preg_replace( '/^https?:/', '', $url );
 		};
 
-		if ( $node instanceof DOMElement && 'link' === $node->nodeName ) {
+		if ( $node instanceof DOMElement && 'link' === $node->tagName ) {
 			$element_id      = (string) $node->getAttribute( 'id' );
 			$schemeless_href = $remove_url_scheme( $node->getAttribute( 'href' ) );
 
@@ -1098,13 +1099,35 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 'print' === $node->getAttribute( 'media' ) ) {
 				$priority += $print_priority_base;
 			}
-		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName && $node->hasAttribute( 'id' ) ) {
-			$id                  = $node->getAttribute( 'id' );
-			$is_theme_inline_css = preg_match( '/^(?<handle>.+)-inline-css$/', $id, $matches ) && wp_style_is( $matches['handle'], 'registered' );
-			if ( $is_theme_inline_css && 0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_template_directory_uri() ) ) {
+		} elseif ( $node instanceof DOMElement && 'style' === $node->tagName && $node->hasAttribute( 'id' ) ) {
+			$id         = $node->getAttribute( 'id' );
+			$dependency = null;
+			if ( preg_match( '/^(?<handle>.+)-inline-css$/', $id, $matches ) ) {
+				$dependency = wp_styles()->query( $matches['handle'], 'registered' );
+			}
+
+			if (
+				$dependency
+				&&
+				(
+					0 === strpos( $dependency->src, get_template_directory_uri() )
+					||
+					// Add special case for core theme sanitizer which sets the src of the theme stylesheet to false
+					// in order to attach the amended stylesheet contents as an inline style for AMP-compatibility.
+					// See AMP_Core_Theme_Sanitizer::amend_twentytwentyone_styles() and
+					// AMP_Core_Theme_Sanitizer::amend_twentytwentyone_dark_mode_styles().
+					'twenty-twenty-one-style' === $dependency->handle
+				)
+			) {
 				// Parent theme inline style.
 				$priority = 2;
-			} elseif ( $is_theme_inline_css && get_stylesheet() !== get_template() && 0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_stylesheet_directory_uri() ) ) {
+			} elseif (
+				$dependency
+				&&
+				get_stylesheet() !== get_template()
+				&&
+				0 === strpos( $dependency->src, get_stylesheet_directory_uri() )
+			) {
 				// Child theme inline style.
 				$priority = 12;
 			} elseif ( 'admin-bar-inline-css' === $id ) {

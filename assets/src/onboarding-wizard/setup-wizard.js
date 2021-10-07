@@ -71,7 +71,7 @@ export function SetupWizard( { closeLink, finishLink, appRoot } ) {
 							</h1>
 						</div>
 						<div className="amp-onboarding-wizard-plugin-name">
-							{ __( 'Official WordPress Plugin', 'amp' ) }
+							{ __( 'Official AMP Plugin for WordPress', 'amp' ) }
 						</div>
 					</div>
 					<Stepper
