@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Manager;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -252,6 +253,8 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
+			'VALIDATE_NONCE'                     => AMP_Validation_Manager::get_amp_validate_nonce(),
+			'VALIDATE_QUERY_VAR'                 => AMP_Validation_Manager::VALIDATE_QUERY_VAR,
 			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
 		];
 

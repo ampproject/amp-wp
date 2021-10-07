@@ -8,7 +8,6 @@
 
 namespace AmpProject\AmpWP\Validation;
 
-use AMP_Validation_Manager;
 use WP_Error;
 use WP_REST_Controller;
 use AmpProject\AmpWP\Infrastructure\Delayed;
@@ -73,26 +72,18 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 	/**
 	 * Retrieves a list of scannable URLs.
 	 *
-	 * Each item contains a page `type` (e.g. 'home' or 'search') and a
-	 * `validate_url` prop for accessing validation data for a given URL.
+	 * Besides the page URL, each item contains a page `type` (e.g. 'home' or
+	 * 'search') and a URL to a corresponding AMP page (`amp_url`).
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$nonce = AMP_Validation_Manager::get_amp_validate_nonce();
-
 		return rest_ensure_response(
 			array_map(
-				static function ( $entry ) use ( $nonce ) {
-					$entry['amp_url']      = amp_add_paired_endpoint( $entry['url'] );
-					$entry['validate_url'] = add_query_arg(
-						[
-							AMP_Validation_Manager::VALIDATE_QUERY_VAR => $nonce,
-						],
-						$entry['amp_url']
-					);
+				static function ( $entry ) {
+					$entry['amp_url'] = amp_add_paired_endpoint( $entry['url'] );
 
 					return $entry;
 				},
@@ -112,30 +103,23 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 			'title'      => 'amp-wp-' . $this->rest_base,
 			'type'       => 'object',
 			'properties' => [
-				'url'          => [
+				'url'     => [
 					'description' => __( 'Page URL.', 'amp' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'readonly'    => true,
 					'context'     => [ 'view' ],
 				],
-				'amp_url'      => [
+				'amp_url' => [
 					'description' => __( 'AMP URL.', 'amp' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'readonly'    => true,
 					'context'     => [ 'view' ],
 				],
-				'type'         => [
+				'type'    => [
 					'description' => __( 'Page type.', 'amp' ),
 					'type'        => 'string',
-					'readonly'    => true,
-					'context'     => [ 'view' ],
-				],
-				'validate_url' => [
-					'description' => __( 'URL for accessing validation data for a given page.', 'amp' ),
-					'type'        => 'string',
-					'format'      => 'uri',
 					'readonly'    => true,
 					'context'     => [ 'view' ],
 				],

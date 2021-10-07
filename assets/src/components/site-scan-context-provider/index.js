@@ -3,6 +3,7 @@
  */
 import { createContext, useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
@@ -29,10 +30,14 @@ const SITE_SCAN_STATE_COMPLETE = 'SITE_SCAN_STATE_COMPLETE';
  * @param {Object} props                       Component props.
  * @param {?any}   props.children              Component children.
  * @param {string} props.scannableUrlsRestPath The REST path for interacting with the scannable URL resources.
+ * @param {string} props.validateNonce         The AMP validate nonce.
+ * @param {string} props.validateQueryVar      The AMP validate query variable name.
  */
 export function SiteScanContextProvider( {
 	children,
 	scannableUrlsRestPath,
+	validateNonce,
+	validateQueryVar,
 } ) {
 	const [ themeIssues, setThemeIssues ] = useState( [] );
 	const [ pluginIssues, setPluginIssues ] = useState( [] );
@@ -98,6 +103,10 @@ export function SiteScanContextProvider( {
 	 * Scan site URLs sequentially.
 	 */
 	useEffect( () => {
+		if ( ! validateQueryVar || ! validateNonce ) {
+			return;
+		}
+
 		if ( siteScanState !== SITE_SCAN_STATE_IDLE ) {
 			return;
 		}
@@ -109,8 +118,17 @@ export function SiteScanContextProvider( {
 			setSiteScanState( SITE_SCAN_STATE_IN_PROGRESS );
 
 			try {
-				const { validate_url: validateUrl } = scannableUrls[ currentlyScannedUrlIndex ];
-				const validationResults = await apiFetch( { url: validateUrl } );
+				const { url } = scannableUrls[ currentlyScannedUrlIndex ];
+				const validationResults = await apiFetch( {
+					url: addQueryArgs( url, {
+						'amp-first': true,
+						[ validateQueryVar ]: {
+							nonce: validateNonce,
+							omit_stylesheets: true,
+							cache: true,
+						},
+					} ),
+				} );
 
 				if ( true === hasUnmounted.current ) {
 					return;
@@ -146,7 +164,7 @@ export function SiteScanContextProvider( {
 				setSiteScanState( SITE_SCAN_STATE_IDLE );
 			}
 		} )();
-	}, [ currentlyScannedUrlIndex, scannableUrls, setAsyncError, siteScanState ] );
+	}, [ currentlyScannedUrlIndex, scannableUrls, setAsyncError, siteScanState, validateNonce, validateQueryVar ] );
 
 	return (
 		<SiteScan.Provider
@@ -169,4 +187,6 @@ export function SiteScanContextProvider( {
 SiteScanContextProvider.propTypes = {
 	children: PropTypes.any,
 	scannableUrlsRestPath: PropTypes.string,
+	validateNonce: PropTypes.string,
+	validateQueryVar: PropTypes.string,
 };
