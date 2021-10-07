@@ -1813,6 +1813,8 @@ class AMP_Validation_Manager {
 
 		$args = self::get_validate_request_args();
 
+		$data['revalidated'] = true;
+
 		if ( $args[ self::VALIDATE_QUERY_VAR_CACHE ] ) {
 			$validation_errors = wp_list_pluck( $data['results'], 'error' );
 
@@ -1834,7 +1836,6 @@ class AMP_Validation_Manager {
 				$data['validated_url_post'] = [
 					'id'        => $validated_url_post_id,
 					'edit_link' => get_edit_post_link( $validated_url_post_id, 'raw' ),
-					'staleness' => AMP_Validated_URL_Post_Type::get_post_staleness( $validated_url_post_id ),
 				];
 			}
 		}
@@ -1882,10 +1883,10 @@ class AMP_Validation_Manager {
 			'results'            => [],
 			'queried_object'     => null,
 			'url'                => null,
+			'revalidated'        => false, // Since cached was used.
 			'validated_url_post' => [
 				'id'        => $post->ID,
 				'edit_link' => get_edit_post_link( $post->ID, 'raw' ),
-				'staleness' => $staleness,
 			],
 		];
 
