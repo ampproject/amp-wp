@@ -14,7 +14,6 @@ use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\Admin\SupportScreen;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Tests\TestCase;
 
 /**

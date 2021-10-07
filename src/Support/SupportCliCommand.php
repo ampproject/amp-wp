@@ -70,6 +70,8 @@ class SupportCliCommand implements Service, CliCommand {
 	 *
 	 * @subcommand send-diagnostic
 	 *
+	 * @codeCoverageIgnore
+	 *
 	 * @param array $args       Positional args.
 	 * @param array $assoc_args Associative args.
 	 */
