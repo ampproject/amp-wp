@@ -15,7 +15,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 /**
  * URLValidationCron class.
  *
- * @since 2.2
+ * @since 2.1
  *
  * @internal
  */

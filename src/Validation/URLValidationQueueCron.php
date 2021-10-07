@@ -3,7 +3,7 @@
  * WP cron process to validate URLs in the background.
  *
  * @package AMP
- * @since   2.1
+ * @since   2.2
  */
 
 namespace AmpProject\AmpWP\Validation;
@@ -13,7 +13,7 @@ use AmpProject\AmpWP\BackgroundTask\RecurringBackgroundTask;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 
 /**
- * URLValidationCron class.
+ * URLValidationQueueCron class.
  *
  * @since 2.2
  *
