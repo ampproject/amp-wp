@@ -2294,12 +2294,147 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		}
 	}
 
+	/** @return array */
+	public function get_data_to_test_maybe_send_cached_validate_response() {
+		return [
+			'no_validate_request'                       => [
+				'cached'   => null,
+				'stale'    => null,
+				'args'     => [],
+				'expected' => false,
+			],
+			'not_asking_for_cached'                     => [
+				'cached'   => false,
+				'stale'    => false,
+				'args'     => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+				],
+				'expected' => false,
+			],
+			'asking_for_fresh_cache_without_one_stored' => [
+				'cached'   => false,
+				'stale'    => false,
+				'args'     => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHED_IF_FRESH => true,
+				],
+				'expected' => false,
+			],
+			'asking_for_fresh_cache_but_stale_stored'   => [
+				'cached'   => true,
+				'stale'    => true,
+				'args'     => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHED_IF_FRESH => true,
+				],
+				'expected' => false,
+			],
+			'asking_for_fresh_cache_and_fresh_stored'   => [
+				'cached'   => true,
+				'stale'    => false,
+				'args'     => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHED_IF_FRESH => true,
+				],
+				'expected' => true,
+			],
+			'asking_for_fresh_cache_and_fresh_stored_sans_styles' => [
+				'cached'   => true,
+				'stale'    => false,
+				'args'     => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHED_IF_FRESH => true,
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS => true,
+				],
+				'expected' => true,
+			],
+		];
+	}
+
 	/**
+	 * @dataProvider get_data_to_test_maybe_send_cached_validate_response
 	 * @covers \AMP_Validation_Manager::maybe_send_cached_validate_response()
 	 * @covers \AMP_Validation_Manager::get_validate_request_args()
 	 */
-	public function test_maybe_send_cached_validate_response() {
-		$this->markTestIncomplete();
+	public function test_maybe_send_cached_validate_response( $cached, $stale, $args, $expected ) {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$post_id = self::factory()->post->create();
+		$url     = get_permalink( $post_id );
+		$this->go_to( $url );
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = $args;
+		AMP_Validation_Manager::init_validate_request();
+
+		$validated_url_post_id = null;
+		if ( $cached ) {
+			$source_html          = '<html amp><head><style>body{color:red}</style></head><body><amp-layout layout="bad"></amp-layout></body></html>';
+			$sanitizer_classes    = amp_get_content_sanitizers();
+			$sanitizer_classes    = AMP_Validation_Manager::filter_sanitizer_args( $sanitizer_classes );
+			$sanitization_results = AMP_Content_Sanitizer::sanitize_document(
+				AMP_DOM_Utils::get_dom_from_content( $source_html ),
+				$sanitizer_classes,
+				[]
+			);
+			$data = AMP_Validation_Manager::get_validate_response_data( $sanitization_results );
+
+			$validation_errors = wp_list_pluck( $data['results'], 'error' );
+
+			$validated_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
+				$validation_errors,
+				$url,
+				$data
+			);
+			$this->assertIsInt( $validated_url_post_id );
+
+			if ( $stale ) {
+				$validated_environment = get_post_meta( $validated_url_post_id, AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY, true );
+
+				$validated_environment['plugins']['foo'] = '1.0';
+				update_post_meta( $validated_url_post_id, AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY, $validated_environment );
+			}
+		}
+
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter(
+			'wp_die_ajax_handler',
+			function () {
+				return function () {};
+			}
+		);
+
+		$response = get_echo( [ AMP_Validation_Manager::class, 'maybe_send_cached_validate_response' ] );
+
+		if ( ! $expected ) {
+			$this->assertEmpty( $response );
+			return;
+		}
+
+		$data = json_decode( $response, true );
+		$this->assertEquals( JSON_ERROR_NONE, json_last_error() );
+		$this->assertIsArray( $data );
+
+		$this->assertArrayHasKey( 'http_status_code', $data );
+		$this->assertArrayHasKey( 'php_fatal_error', $data );
+		$this->assertArrayHasKey( 'queried_object', $data );
+		$this->assertArrayHasKey( 'url', $data );
+		$this->assertEquals( $url, $data['url'] );
+		if ( ! empty( $args[ AMP_Validation_Manager::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS ] ) ) {
+			$this->assertArrayNotHasKey( 'stylesheets', $data );
+		} else {
+			$this->assertArrayHasKey( 'stylesheets', $data );
+			$this->assertCount( 1, $data['stylesheets'] );
+		}
+
+		$this->assertArrayHasKey( 'results', $data );
+		$this->assertFalse( $data['php_fatal_error'] );
+
+		$this->assertCount( 1, $data['results'] );
+		$this->assertEquals( 'SPECIFIED_LAYOUT_INVALID', $data['results'][0]['error']['code'] );
+
+		$this->assertArrayHasKey( 'validated_url_post', $data );
+		$this->assertArrayHasKey( 'id', $data['validated_url_post'] );
+		$this->assertEquals( $validated_url_post_id, $data['validated_url_post']['id'] );
+		$this->assertArrayHasKey( 'edit_link', $data['validated_url_post'] );
+		$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_type( $data['validated_url_post']['id'] ) );
 	}
 
 	/**
