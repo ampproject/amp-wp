@@ -168,6 +168,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertEquals( 101, has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 
 		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'maybe_fail_validate_request' ] ) );
+		$this->assertEquals( 20, has_action( 'wp', [ self::TESTED_CLASS, 'maybe_send_cached_validate_response' ] ) );
 		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'override_validation_error_statuses' ] ) );
 
 		$this->assertEquals(
@@ -2087,6 +2088,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * Test should_validate_response.
 	 *
 	 * @covers AMP_Validation_Manager::should_validate_response()
+	 * @covers AMP_Validation_Manager::get_validate_request_args()
 	 */
 	public function test_should_validate_response() {
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
@@ -2168,6 +2170,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertEquals( '/* start custom scripts! */document.write("hello!")/* end custom scripts! */', $dom->getElementById( 'third' )->textContent );
 	}
 
+	/** @return array */
 	public function get_data_to_test_send_validate_response() {
 		return [
 			'ok_no_error_no_store' => [
@@ -2210,6 +2213,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	/**
 	 * @dataProvider get_data_to_test_send_validate_response
 	 * @covers \AMP_Validation_Manager::send_validate_response()
+	 * @covers \AMP_Validation_Manager::get_validate_request_args()
 	 */
 	public function test_send_validate_response( $status_code, $last_error, $store, $save_error ) {
 		$source_html          = '<html amp><head><style>body{color:red}</style></head><body><amp-layout layout="bad"></amp-layout></body></html>';
@@ -2229,7 +2233,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE => $store,
 		];
 
-		$response = AMP_Validation_Manager::send_validate_response( $sanitization_results, $status_code, $last_error, AMP_Validation_Manager::get_validate_request_args() );
+		$response = AMP_Validation_Manager::send_validate_response( $sanitization_results, $status_code, $last_error );
 		$this->assertJson( $response );
 		$data = json_decode( $response, true );
 
@@ -2272,6 +2276,14 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		} else {
 			$this->assertArrayNotHasKey( 'validated_url_post', $data );
 		}
+	}
+
+	/**
+	 * @covers \AMP_Validation_Manager::maybe_send_cached_validate_response()
+	 * @covers \AMP_Validation_Manager::get_validate_request_args()
+	 */
+	public function test_maybe_send_cached_validate_response() {
+		$this->markTestIncomplete();
 	}
 
 	/**

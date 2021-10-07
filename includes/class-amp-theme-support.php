@@ -2001,8 +2001,7 @@ class AMP_Theme_Support {
 			return AMP_Validation_Manager::send_validate_response(
 				$sanitization_results,
 				$status_code,
-				$last_error,
-				AMP_Validation_Manager::get_validate_request_args()
+				$last_error
 			);
 		}
 
