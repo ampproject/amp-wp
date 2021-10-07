@@ -2173,10 +2173,19 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	/** @return array */
 	public function get_data_to_test_send_validate_response() {
 		return [
+			'ok_no_error_store'    => [
+				'status_code' => 200,
+				'last_error'  => null,
+				'args'        => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE            => true,
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS => true,
+				],
+				'save_error'  => false,
+			],
 			'ok_no_error_no_store' => [
 				'status_code' => 200,
 				'last_error'  => null,
-				'store'       => false,
+				'args'        => [],
 				'save_error'  => false,
 			],
 			'fatal_error_store'    => [
@@ -2187,7 +2196,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'file'    => __FILE__,
 					'line'    => __LINE__,
 				],
-				'store'       => true,
+				'args'        => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE => true,
+				],
 				'save_error'  => false,
 			],
 			'warning_store'        => [
@@ -2198,13 +2209,17 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'file'    => __FILE__,
 					'line'    => __LINE__,
 				],
-				'store'       => true,
+				'args'        => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE => true,
+				],
 				'save_error'  => false,
 			],
 			'store_failure'        => [
 				'status_code' => 200,
 				'last_error'  => null,
-				'store'       => true,
+				'args'        => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE => true,
+				],
 				'save_error'  => true,
 			],
 		];
@@ -2215,7 +2230,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers \AMP_Validation_Manager::send_validate_response()
 	 * @covers \AMP_Validation_Manager::get_validate_request_args()
 	 */
-	public function test_send_validate_response( $status_code, $last_error, $store, $save_error ) {
+	public function test_send_validate_response( $status_code, $last_error, $args, $save_error ) {
 		$source_html          = '<html amp><head><style>body{color:red}</style></head><body><amp-layout layout="bad"></amp-layout></body></html>';
 		$sanitizer_classes    = amp_get_content_sanitizers();
 		$sanitizer_classes    = AMP_Validation_Manager::filter_sanitizer_args( $sanitizer_classes );
@@ -2229,9 +2244,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			add_filter( 'wp_insert_post_empty_content', '__return_true' );
 		}
 
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = [
-			AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE => $store,
-		];
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = $args;
 
 		$response = AMP_Validation_Manager::send_validate_response( $sanitization_results, $status_code, $last_error );
 		$this->assertJson( $response );
@@ -2252,7 +2265,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertArrayHasKey( 'php_fatal_error', $data );
 		$this->assertArrayHasKey( 'queried_object', $data );
 		$this->assertArrayHasKey( 'url', $data );
-		$this->assertArrayHasKey( 'stylesheets', $data );
+		if ( ! empty( $args[ AMP_Validation_Manager::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS ] ) ) {
+			$this->assertArrayNotHasKey( 'stylesheets', $data );
+		} else {
+			$this->assertArrayHasKey( 'stylesheets', $data );
+			$this->assertCount( 1, $data['stylesheets'] );
+		}
 		$this->assertArrayHasKey( 'results', $data );
 
 		$this->assertEquals( $status_code, $data['http_status_code'] );
@@ -2266,9 +2284,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertCount( 1, $data['results'] );
 		$this->assertEquals( 'SPECIFIED_LAYOUT_INVALID', $data['results'][0]['error']['code'] );
 
-		$this->assertCount( 1, $data['stylesheets'] );
-
-		if ( $store ) {
+		if ( ! empty( $args[ AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE ] ) ) {
 			$this->assertArrayHasKey( 'validated_url_post', $data );
 			$this->assertArrayHasKey( 'id', $data['validated_url_post'] );
 			$this->assertArrayHasKey( 'edit_link', $data['validated_url_post'] );

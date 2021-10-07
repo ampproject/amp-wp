@@ -681,9 +681,7 @@ class AMP_Validation_Manager {
 			$unsanitized_values = [
 				self::VALIDATE_QUERY_VAR_NONCE => $unsanitized_values,
 			];
-		}
-
-		if ( ! is_array( $unsanitized_values ) ) {
+		} elseif ( ! is_array( $unsanitized_values ) ) {
 			return $defaults;
 		}
 
