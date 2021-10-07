@@ -2408,14 +2408,15 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			return;
 		}
 
+		$this->assertJson( $response );
 		$data = json_decode( $response, true );
-		$this->assertEquals( JSON_ERROR_NONE, json_last_error() );
 		$this->assertIsArray( $data );
 
 		$this->assertArrayHasKey( 'http_status_code', $data );
 		$this->assertArrayHasKey( 'php_fatal_error', $data );
 		$this->assertArrayHasKey( 'queried_object', $data );
 		$this->assertArrayHasKey( 'url', $data );
+		$this->assertFalse( $data['revalidated'] );
 		$this->assertEquals( $url, $data['url'] );
 		if ( ! empty( $args[ AMP_Validation_Manager::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS ] ) ) {
 			$this->assertArrayNotHasKey( 'stylesheets', $data );
