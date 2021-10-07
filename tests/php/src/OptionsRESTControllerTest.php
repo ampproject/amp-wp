@@ -71,6 +71,7 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 				'mobile_redirect',
 				'plugin_configured',
 				'all_templates_supported',
+				'delete_data_at_uninstall',
 				'suppressed_plugins',
 				'supported_templates',
 				'supported_post_types',
