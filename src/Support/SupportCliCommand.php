@@ -7,7 +7,7 @@
 
 namespace AmpProject\AmpWP\Support;
 
-use AmpProject\AmpWP\Infrastructure\Injector;
+use AmpProject\AmpWP\Services;
 use WP_CLI;
 use function WP_CLI\Utils\get_flag_value;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -20,23 +20,6 @@ use AmpProject\AmpWP\Infrastructure\CliCommand;
  * @internal
  */
 class SupportCliCommand implements Service, CliCommand {
-
-	/**
-	 * Injector.
-	 *
-	 * @var Injector
-	 */
-	private $injector;
-
-	/**
-	 * Class constructor.
-	 *
-	 * @param Injector $injector Injector instance to configure.
-	 */
-	public function __construct( Injector $injector ) {
-
-		$this->injector = $injector;
-	}
 
 	/**
 	 * Get the name under which to register the CLI command.
@@ -109,7 +92,7 @@ class SupportCliCommand implements Service, CliCommand {
 			'is_synthetic' => $is_synthetic,
 		];
 
-		$support_data = $this->injector->make( SupportData::class, [ $args ] );
+		$support_data = Services::get_injector()->make( SupportData::class, [ 'args' => $args ] );
 		$data         = $support_data->get_data();
 
 		if ( $is_print ) {

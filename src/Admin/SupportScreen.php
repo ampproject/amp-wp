@@ -8,9 +8,9 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Support\SupportData;
 
 /**
@@ -42,26 +42,17 @@ class SupportScreen implements Conditional, Service, Registerable {
 	private $google_fonts;
 
 	/**
-	 * Injector.
-	 *
-	 * @var Injector
-	 */
-	private $injector;
-
-	/**
 	 * Class constructor.
 	 *
 	 * @param OptionsMenu $options_menu An instance of the class handling the parent menu.
 	 * @param GoogleFonts $google_fonts An instance of the GoogleFonts service.
-	 * @param Injector    $injector     Injector instance to configure.
 	 */
-	public function __construct( OptionsMenu $options_menu, GoogleFonts $google_fonts, Injector $injector ) {
+	public function __construct( OptionsMenu $options_menu, GoogleFonts $google_fonts ) {
 
 		$this->parent_menu_slug = $options_menu->get_menu_slug();
 
 		$this->google_fonts = $google_fonts;
 
-		$this->injector = $injector;
 	}
 
 	/**
@@ -171,7 +162,7 @@ class SupportScreen implements Conditional, Service, Registerable {
 			];
 		}
 
-		$support_data = $this->injector->make( SupportData::class, [ $args ] );
+		$support_data = Services::get_injector()->make( SupportData::class, [ 'args' => $args ] );
 		$data         = $support_data->get_data();
 
 		wp_add_inline_script(
