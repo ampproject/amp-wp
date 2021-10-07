@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP\Support\Tests;
 
-use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
@@ -66,7 +65,9 @@ class SupportDataTest extends TestCase {
 		];
 
 		$expected = array_map(
-			AMP_Validated_URL_Post_Type::class . '::normalize_url_for_storage',
+			static function ( $url ) {
+				return AMP_Validated_URL_Post_Type::normalize_url_for_storage( $url );
+			},
 			[
 				get_permalink( $url_post_id ),
 				get_term_link( $term_id ),

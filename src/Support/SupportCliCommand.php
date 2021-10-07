@@ -115,12 +115,12 @@ class SupportCliCommand implements Service, CliCommand {
 				WP_CLI::warning( "Something went wrong: $error_message" );
 			} elseif ( empty( $response['status'] ) || 'ok' !== $response['status'] ) {
 				WP_CLI::warning( 'Failed to send diagnostic data.' );
-			} elseif ( ! empty( $response['status'] ) && 'ok' === $response['status'] ) {
+			} elseif ( isset( $response['data']['uuid'] ) ) {
 				WP_CLI::success( 'UUID : ' . $response['data']['uuid'] );
 			}
 		}
 
-		/**
+		/*
 		 * Summary of data.
 		 */
 		$url_error_relationship = [];

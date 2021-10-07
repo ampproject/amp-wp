@@ -13,7 +13,6 @@ use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\QueryVar;
 
 /**
  * Service that adds support links throughout the plugin's UI.
@@ -66,13 +65,7 @@ class SupportLink implements Service, Conditional, Registerable {
 			return;
 		}
 
-		// Get the AMP Validated URL post ID.
-		$current_url = remove_query_arg(
-			array_merge( wp_removable_query_args(), [ QueryVar::NOAMP ] ),
-			amp_get_current_url()
-		);
-
-		$post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $current_url );
+		$post = AMP_Validated_URL_Post_Type::get_invalid_url_post( amp_get_current_url() );
 
 		$wp_admin_bar->add_node(
 			[
