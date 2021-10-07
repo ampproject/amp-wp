@@ -227,9 +227,13 @@ class SupportData {
 		$amp_settings = AMP_Options_Manager::get_options();
 		$amp_settings = ( ! empty( $amp_settings ) && is_array( $amp_settings ) ) ? $amp_settings : [];
 
-		$site_health     = new WP_Site_Health();
-		$loopback_status = $site_health->can_perform_loopback();
-		$loopback_status = ( ! empty( $loopback_status->status ) ) ? $loopback_status->status : '';
+		$loopback_status = '';
+
+		if ( class_exists( 'WP_Site_Health' ) ) {
+			$site_health     = new WP_Site_Health();
+			$loopback_status = $site_health->can_perform_loopback();
+			$loopback_status = ( ! empty( $loopback_status->status ) ) ? $loopback_status->status : '';
+		}
 
 		if ( function_exists( 'wp_is_https_supported' ) ) {
 			$is_ssl = wp_is_https_supported();
