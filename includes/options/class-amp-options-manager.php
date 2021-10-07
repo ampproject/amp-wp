@@ -386,7 +386,6 @@ class AMP_Options_Manager {
 		$amp_options = self::get_options();
 
 		$amp_options[ $option ] = $value;
-
 		return update_option( self::OPTION_NAME, $amp_options, false );
 	}
 

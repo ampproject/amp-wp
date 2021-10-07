@@ -193,7 +193,6 @@ function Root( { appRoot } ) {
 					{ __( 'You are using an old version of WordPress. Please upgrade to access all of the features of the AMP plugin.', 'amp' ) }
 				</AMPNotice>
 			) }
-
 			<Welcome />
 			<SiteReview />
 			<form onSubmit={ onSubmit }>

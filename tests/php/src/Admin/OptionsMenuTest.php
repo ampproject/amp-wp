@@ -12,12 +12,12 @@ use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\Admin\SiteHealth;
-use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\TestCase;
 use AMP_Options_Manager;
 
@@ -44,8 +44,7 @@ class OptionsMenuTest extends TestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$injector    = AmpWpPluginFactory::create()->get_container()->get( 'injector' );
-		$site_health = $injector->make( SiteHealth::class );
+		$site_health = Services::get_injector()->make( SiteHealth::class );
 
 		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError(), $site_health );
 	}

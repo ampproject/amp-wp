@@ -13,9 +13,9 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\Admin\SupportScreen;
-use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Tests\TestCase;
 
@@ -43,8 +43,7 @@ class SupportScreenTest extends TestCase {
 
 		parent::setUp();
 
-		$injector    = AmpWpPluginFactory::create()->get_container()->get( 'injector' );
-		$site_health = $injector->make( SiteHealth::class );
+		$site_health = Services::get_injector()->make( SiteHealth::class );
 
 		$option_menu    = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError(), $site_health );
 		$this->instance = new SupportScreen( $option_menu, new GoogleFonts(), new SupportData() );
