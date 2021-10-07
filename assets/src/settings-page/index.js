@@ -48,6 +48,7 @@ import { Analytics } from './analytics';
 import { PairedUrlStructure } from './paired-url-structure';
 import { MobileRedirection } from './mobile-redirection';
 import { DeveloperTools } from './developer-tools';
+import { DeleteDataAtUninstall } from './delete-data-at-uninstall';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -251,6 +252,7 @@ function Root( { appRoot } ) {
 				>
 					<MobileRedirection />
 					<DeveloperTools />
+					<DeleteDataAtUninstall />
 				</AMPDrawer>
 				<SettingsFooter />
 			</form>

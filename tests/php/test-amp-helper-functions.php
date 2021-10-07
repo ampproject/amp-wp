@@ -127,6 +127,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
 		$this->assertEquals( 10, has_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous' ) );
+		$this->assertEquals( 10, has_filter( 'all_plugins', 'amp_modify_plugin_description' ) );
 	}
 
 	/** @covers ::amp_bootstrap_plugin() */
@@ -2415,6 +2416,26 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertStringNotContainsString( '?', $permalink );
 		$url = $permalink . $suffix;
 		$this->assertEquals( $is_amp, amp_has_paired_endpoint( $url ) );
+	}
+
+	/**
+	 * @covers ::amp_modify_plugin_description()
+	 */
+	public function test_amp_modify_plugin_description() {
+		$input = [
+			'amp/amp.php' => [
+				'Description' => 'An easier path to great Page Experience for everyone. Powered by AMP. <em class="amp-deletion-notice"><strong>Deletion Note:</strong> To delete all plugin data with uninstallation, first activate the plugin, <strong>Go to Settings screen > Scroll to “Other” section in Advanced settings > Enable “Delete plugin data upon uninstall” toggle</strong> (if you haven\'t done so already).</em>',
+			],
+			'foo/foo.php' => [
+				'Description' => 'This is not about foo[d]!',
+			],
+		];
+
+		$expected = $input;
+
+		$expected['amp/amp.php']['Description'] = 'An easier path to great Page Experience for everyone. Powered by AMP.';
+
+		$this->assertEquals( $expected, amp_modify_plugin_description( $input ) );
 	}
 
 	/**

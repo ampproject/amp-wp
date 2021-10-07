@@ -614,10 +614,6 @@ li.error-kept {
 	margin: 0;
 }
 
-.amp-other-settings .developer-tools h4 {
-	margin-bottom: 0;
-}
-
-.amp-other-settings .developer-tools p {
+.amp-other-settings p {
 	font-size: 0.875rem;
 }
