@@ -8,11 +8,13 @@
 
 namespace AmpProject\AmpWP\Validation;
 
-use WP_Error;
-use WP_REST_Controller;
+use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use WP_Error;
+use WP_Post;
+use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -84,6 +86,23 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 			array_map(
 				static function ( $entry ) {
 					$entry['amp_url'] = amp_add_paired_endpoint( $entry['url'] );
+
+					$validated_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $entry['url'] );
+					if ( $validated_url_post instanceof WP_Post ) {
+						$entry['validation_errors'] = [];
+
+						$data = json_decode( $validated_url_post->post_content, true );
+						if ( is_array( $data ) ) {
+							$entry['validation_errors'] = wp_list_pluck( $data, 'data' );
+						}
+
+						$entry['validated_url_post'] = [
+							'id'        => $validated_url_post->ID,
+							'edit_link' => get_edit_post_link( $validated_url_post->ID, 'raw' ),
+						];
+
+						$entry['stale'] = ( count( AMP_Validated_URL_Post_Type::get_post_staleness( $validated_url_post ) ) > 0 );
+					}
 
 					return $entry;
 				},
