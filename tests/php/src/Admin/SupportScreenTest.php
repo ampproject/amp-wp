@@ -42,7 +42,7 @@ class SupportScreenTest extends TestCase {
 		parent::setUp();
 
 		$option_menu    = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError() );
-		$this->instance = new SupportScreen( $option_menu, new GoogleFonts(), new SupportData() );
+		$this->instance = new SupportScreen( $option_menu, new GoogleFonts() );
 	}
 
 	/** @covers ::__construct() */

@@ -16,11 +16,11 @@ use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Gherkin\Node\FeatureNode;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Gherkin\Node\ScenarioInterface;
-use phpDocumentor\Reflection\Exception;
 use WP_CLI\Process;
 use WP_CLI\Tests\Context\FeatureContext as WP_CLI_FeatureContext;
 use WP_CLI\Utils;
 use RuntimeException;
+use Exception;
 
 use function WP_CLI\Tests\Context\wp_cli_behat_env_debug;
 
