@@ -10,7 +10,6 @@ namespace AmpProject\AmpWP\Validation;
 
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\RecurringBackgroundTask;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 
 /**
  * URLValidationQueueCron class.
