@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { createContext, useCallback, useEffect, useReducer, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 
@@ -18,11 +18,92 @@ import { getSiteIssues } from './get-site-issues';
 
 export const SiteScan = createContext();
 
-const SITE_SCAN_STATE_INITIALIZING = 'SITE_SCAN_STATE_INITIALIZING';
-const SITE_SCAN_STATE_READY = 'SITE_SCAN_STATE_READY';
-const SITE_SCAN_STATE_IDLE = 'SITE_SCAN_STATE_IDLE';
-const SITE_SCAN_STATE_IN_PROGRESS = 'SITE_SCAN_STATE_IN_PROGRESS';
-const SITE_SCAN_STATE_COMPLETE = 'SITE_SCAN_STATE_COMPLETE';
+const ACTION_SCANNABLE_URLS_REQUEST = 'ACTION_SCANNABLE_URLS_REQUEST';
+const ACTION_SCANNABLE_URLS_FETCH = 'ACTION_SCANNABLE_URLS_FETCH';
+const ACTION_SCANNABLE_URLS_RECEIVE = 'ACTION_SCANNABLE_URLS_RECEIVE';
+const ACTION_START_SITE_SCAN = 'ACTION_START_SITE_SCAN';
+const ACTION_SCAN_IN_PROGRESS = 'ACTION_SCAN_IN_PROGRESS';
+const ACTION_SCAN_RECEIVE_ISSUES = 'ACTION_SCAN_RECEIVE_ISSUES';
+const ACTION_SCAN_NEXT_URL = 'ACTION_SCAN_NEXT_URL';
+const ACTION_SCAN_CANCEL = 'ACTION_SCAN_CANCEL';
+
+const STATUS_REQUEST_SCANNABLE_URLS = 'STATUS_REQUEST_SCANNABLE_URLS';
+const STATUS_FETCHING_SCANNABLE_URLS = 'STATUS_FETCHING_SCANNABLE_URLS';
+const STATUS_READY = 'STATUS_READY';
+const STATUS_IDLE = 'STATUS_IDLE';
+const STATUS_IN_PROGRESS = 'STATUS_IN_PROGRESS';
+const STATUS_COMPLETE = 'STATUS_COMPLETE';
+
+function siteScanReducer( state, action ) {
+	switch ( action.type ) {
+		case ACTION_SCANNABLE_URLS_REQUEST: {
+			return {
+				...state,
+				status: STATUS_REQUEST_SCANNABLE_URLS,
+			};
+		}
+		case ACTION_SCANNABLE_URLS_FETCH: {
+			return {
+				...state,
+				status: STATUS_FETCHING_SCANNABLE_URLS,
+			};
+		}
+		case ACTION_SCANNABLE_URLS_RECEIVE: {
+			return {
+				...state,
+				status: STATUS_READY,
+				scannableUrls: action.scannableUrls,
+			};
+		}
+		case ACTION_START_SITE_SCAN: {
+			return {
+				...state,
+				status: STATUS_IDLE,
+				themeIssues: [],
+				pluginIssues: [],
+				currentlyScannedUrlIndex: initialState.currentlyScannedUrlIndex,
+			};
+		}
+		case ACTION_SCAN_IN_PROGRESS: {
+			return {
+				...state,
+				status: STATUS_IN_PROGRESS,
+			};
+		}
+		case ACTION_SCAN_RECEIVE_ISSUES: {
+			return {
+				...state,
+				pluginIssues: [ ...new Set( [ ...state.pluginIssues, ...action.pluginIssues ] ) ],
+				themeIssues: [ ...new Set( [ ...state.themeIssues, ...action.themeIssues ] ) ],
+			};
+		}
+		case ACTION_SCAN_NEXT_URL: {
+			const hasNextUrl = state.currentlyScannedUrlIndex < state.scannableUrls.length - 1;
+			return {
+				...state,
+				status: hasNextUrl ? STATUS_IDLE : STATUS_COMPLETE,
+				currentlyScannedUrlIndex: hasNextUrl ? state.currentlyScannedUrlIndex + 1 : state.currentlyScannedUrlIndex,
+			};
+		}
+		case ACTION_SCAN_CANCEL: {
+			return {
+				...state,
+				status: STATUS_READY,
+			};
+		}
+		default: {
+			throw new Error( `Unhandled action type: ${ action.type }` );
+		}
+	}
+}
+
+const initialState = {
+	themeIssues: [],
+	pluginIssues: [],
+	status: '',
+	scannableUrls: [],
+	currentlyScannedUrlIndex: 0,
+};
 
 /**
  * Context provider for site scanning.
@@ -39,31 +120,48 @@ export function SiteScanContextProvider( {
 	validateNonce,
 	validateQueryVar,
 } ) {
-	const [ themeIssues, setThemeIssues ] = useState( [] );
-	const [ pluginIssues, setPluginIssues ] = useState( [] );
-	const [ siteScanState, setSiteScanState ] = useState( SITE_SCAN_STATE_INITIALIZING );
-	const [ currentlyScannedUrlIndex, setCurrentlyScannedUrlIndex ] = useState( 0 );
-	const [ fetchingScannableUrls, setFetchingScannableUrls ] = useState( false );
-	const [ fetchedScannableUrls, setFetchedScannableUrls ] = useState( false );
-	const [ scannableUrls, setScannableUrls ] = useState( [] );
 	const { setAsyncError } = useAsyncError();
+	const [ state, dispatch ] = useReducer( siteScanReducer, initialState );
+	const {
+		currentlyScannedUrlIndex,
+		pluginIssues,
+		scannableUrls,
+		status,
+		themeIssues,
+	} = state;
 
-	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
+	useEffect( () => {
+		if ( status ) {
+			return;
+		}
+
+		if ( ! validateQueryVar || ! validateNonce ) {
+			throw new Error( 'Invalid site scan configuration' );
+		}
+
+		dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
+	}, [ status, validateNonce, validateQueryVar ] );
+
+	/**
+	 * This component sets state inside async functions. Use this ref to prevent
+	 * state updates after unmount.
+	 */
 	const hasUnmounted = useRef( false );
 	useEffect( () => () => {
 		hasUnmounted.current = true;
 	}, [] );
 
 	const startSiteScan = useCallback( () => {
-		setSiteScanState( SITE_SCAN_STATE_IDLE );
-	}, [] );
+		if ( status === STATUS_READY ) {
+			dispatch( { type: ACTION_START_SITE_SCAN } );
+		}
+	}, [ status ] );
 
 	/**
 	 * Allows cancelling a scan that is in progress.
 	 */
 	const hasCanceled = useRef( false );
 	const cancelSiteScan = useCallback( () => {
-		setCurrentlyScannedUrlIndex( 0 );
 		hasCanceled.current = true;
 	}, [] );
 
@@ -71,12 +169,12 @@ export function SiteScanContextProvider( {
 	 * Fetch scannable URLs from the REST endpoint.
 	 */
 	useEffect( () => {
-		if ( fetchingScannableUrls || fetchedScannableUrls ) {
+		if ( status !== STATUS_REQUEST_SCANNABLE_URLS ) {
 			return;
 		}
 
 		( async () => {
-			setFetchingScannableUrls( true );
+			dispatch( { type: ACTION_SCANNABLE_URLS_FETCH } );
 
 			try {
 				const response = await apiFetch( {
@@ -87,27 +185,21 @@ export function SiteScanContextProvider( {
 					return;
 				}
 
-				setScannableUrls( response );
-				setSiteScanState( SITE_SCAN_STATE_READY );
-				setFetchedScannableUrls( true );
+				dispatch( {
+					type: ACTION_SCANNABLE_URLS_RECEIVE,
+					scannableUrls: response,
+				} );
 			} catch ( e ) {
 				setAsyncError( e );
-				return;
 			}
-
-			setFetchingScannableUrls( false );
 		} )();
-	}, [ fetchedScannableUrls, fetchingScannableUrls, scannableUrlsRestPath, setAsyncError ] );
+	}, [ scannableUrlsRestPath, setAsyncError, status ] );
 
 	/**
 	 * Scan site URLs sequentially.
 	 */
 	useEffect( () => {
-		if ( ! validateQueryVar || ! validateNonce ) {
-			return;
-		}
-
-		if ( siteScanState !== SITE_SCAN_STATE_IDLE ) {
+		if ( status !== STATUS_IDLE ) {
 			return;
 		}
 
@@ -115,7 +207,7 @@ export function SiteScanContextProvider( {
 		 * Validates the next URL in the queue.
 		 */
 		( async () => {
-			setSiteScanState( SITE_SCAN_STATE_IN_PROGRESS );
+			dispatch( { type: ACTION_SCAN_IN_PROGRESS } );
 
 			try {
 				const { url } = scannableUrls[ currentlyScannedUrlIndex ];
@@ -125,7 +217,6 @@ export function SiteScanContextProvider( {
 						[ validateQueryVar ]: {
 							nonce: validateNonce,
 							omit_stylesheets: true,
-							cache: true,
 						},
 					} ),
 				} );
@@ -136,9 +227,7 @@ export function SiteScanContextProvider( {
 
 				if ( true === hasCanceled.current ) {
 					hasCanceled.current = false;
-					setSiteScanState( SITE_SCAN_STATE_READY );
-					setThemeIssues( [] );
-					setPluginIssues( [] );
+					dispatch( { type: ACTION_SCAN_CANCEL } );
 
 					return;
 				}
@@ -146,35 +235,31 @@ export function SiteScanContextProvider( {
 				if ( validationResults.results.length > 0 ) {
 					const siteIssues = getSiteIssues( validationResults.results );
 
-					setPluginIssues( ( issues ) => [ ...new Set( [ ...issues, ...siteIssues.pluginIssues ] ) ] );
-					setThemeIssues( ( issues ) => [ ...new Set( [ ...issues, ...siteIssues.themeIssues ] ) ] );
+					dispatch( {
+						type: ACTION_SCAN_RECEIVE_ISSUES,
+						themeIssues: siteIssues.themeIssues,
+						pluginIssues: siteIssues.pluginIssues,
+					} );
 				}
+
+				dispatch( { type: ACTION_SCAN_NEXT_URL } );
 			} catch ( e ) {
 				setAsyncError( e );
-				return;
-			}
-
-			/**
-			 * Finish the scan if there are no more URLs to validate.
-			 */
-			if ( currentlyScannedUrlIndex === scannableUrls.length - 1 ) {
-				setSiteScanState( SITE_SCAN_STATE_COMPLETE );
-			} else {
-				setCurrentlyScannedUrlIndex( ( index ) => index + 1 );
-				setSiteScanState( SITE_SCAN_STATE_IDLE );
 			}
 		} )();
-	}, [ currentlyScannedUrlIndex, scannableUrls, setAsyncError, siteScanState, validateNonce, validateQueryVar ] );
+	}, [ currentlyScannedUrlIndex, scannableUrls, setAsyncError, status, validateNonce, validateQueryVar ] );
 
 	return (
 		<SiteScan.Provider
 			value={ {
-				canScanSite: siteScanState === SITE_SCAN_STATE_READY,
 				cancelSiteScan,
 				currentlyScannedUrlIndex,
+				isBusy: [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ),
+				isComplete: status === STATUS_COMPLETE,
+				isInitializing: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
+				isReady: status === STATUS_READY,
 				pluginIssues,
 				scannableUrls,
-				siteScanComplete: siteScanState === SITE_SCAN_STATE_COMPLETE,
 				startSiteScan,
 				themeIssues,
 			} }

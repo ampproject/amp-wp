@@ -2,13 +2,14 @@
  * External dependencies
  */
 import { VALIDATED_URLS_LINK } from 'amp-settings'; // From WP inline script.
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useEffect, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
+import { useContext, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -18,19 +19,24 @@ import { IconLandscapeHillsCogsAlt } from '../components/svg/landscape-hills-cog
 import { ProgressBar } from '../components/progress-bar';
 import { PluginsWithIssues, ThemesWithIssues } from '../components/site-scan-results';
 import { SiteScan as SiteScanContext } from '../components/site-scan-context-provider';
+import { Loading } from '../components/loading';
 
 /**
  * Site Scan component on the settings screen.
  */
 export function SiteScan() {
 	const {
+		isInitializing,
+		isReady,
+		isBusy,
+		isComplete,
 		cancelSiteScan,
-		canScanSite,
+		currentlyScannedUrlIndex,
+		pluginIssues,
+		scannableUrls,
 		startSiteScan,
-		siteScanComplete,
+		themeIssues,
 	} = useContext( SiteScanContext );
-	const [ requestSiteRescan, setRequestSiteRescan ] = useState( false );
-	const [ showScanSummary, setShowScanSummary ] = useState( false );
 
 	/**
 	 * Cancel scan on component unmount.
@@ -38,32 +44,102 @@ export function SiteScan() {
 	useEffect( () => () => cancelSiteScan(), [ cancelSiteScan ] );
 
 	/**
-	 * Start site scan.
-	 */
-	useEffect( () => {
-		if ( canScanSite && requestSiteRescan ) {
-			startSiteScan();
-		}
-	}, [ canScanSite, requestSiteRescan, startSiteScan ] );
-
-	/**
 	 * Show scan summary with a delay so that the progress bar has a chance to
 	 * complete.
 	 */
-	useEffect( () => {
-		let delay;
+	const [ showSummary, setShowSummary ] = useState( true );
 
-		if ( siteScanComplete && ! showScanSummary ) {
-			delay = setTimeout( () => setShowScanSummary( true ), 500 );
+	useEffect( () => {
+		let timeout;
+
+		if ( ( isReady || isComplete ) && ! showSummary ) {
+			timeout = setTimeout( () => setShowSummary( true ), 500 );
 		}
 
 		return () => {
-			if ( delay ) {
-				clearTimeout( delay );
+			if ( timeout ) {
+				clearTimeout( timeout );
 			}
 		};
-	}, [ showScanSummary, siteScanComplete ] );
+	}, [ isComplete, isReady, showSummary ] );
 
+	useEffect( () => {
+		if ( showSummary && isBusy ) {
+			setShowSummary( false );
+		}
+	}, [ isBusy, showSummary ] );
+
+	if ( isInitializing ) {
+		return (
+			<SiteScanDrawer>
+				<Loading />
+			</SiteScanDrawer>
+		);
+	}
+
+	if ( showSummary ) {
+		return (
+			<SiteScanDrawer>
+				<div className="settings-site-scan">
+					{ themeIssues.length > 0 && (
+						<ThemesWithIssues
+							issues={ themeIssues }
+							validatedUrlsLink={ VALIDATED_URLS_LINK }
+						/>
+					) }
+					{ pluginIssues.length > 0 && (
+						<PluginsWithIssues
+							issues={ pluginIssues }
+							validatedUrlsLink={ VALIDATED_URLS_LINK }
+						/>
+					) }
+				</div>
+				<div className="settings-site-scan__footer">
+					<Button
+						onClick={ startSiteScan }
+						isPrimary={ true }
+					>
+						{ __( 'Rescan Site', 'amp' ) }
+					</Button>
+				</div>
+			</SiteScanDrawer>
+		);
+	}
+
+	return (
+		<SiteScanDrawer>
+			<div className="settings-site-scan">
+				<p>
+					{ __( 'Site scan is checking if there are AMP compatibility issues with your active theme and plugins. We’ll then recommend how to use the AMP plugin.', 'amp' ) }
+				</p>
+				<ProgressBar value={ isComplete
+					? 100
+					: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
+				} />
+				<p>
+					{ isComplete
+						? __( 'Scan complete', 'amp' )
+						: sprintf(
+							// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.
+							__( 'Scanning %1$d/%2$d URLs: Checking %3$s…', 'amp' ),
+							currentlyScannedUrlIndex + 1,
+							scannableUrls.length,
+							scannableUrls[ currentlyScannedUrlIndex ]?.label,
+						)
+					}
+				</p>
+			</div>
+		</SiteScanDrawer>
+	);
+}
+
+/**
+ * Site Scan drawer (settings panel).
+ *
+ * @param {Object} props          Component props.
+ * @param {any}    props.children Component children.
+ */
+function SiteScanDrawer( { children } ) {
 	return (
 		<AMPDrawer
 			heading={ (
@@ -76,80 +152,10 @@ export function SiteScan() {
 			id="site-scan"
 			initialOpen={ true }
 		>
-			{ ( showScanSummary || ! requestSiteRescan )
-				? <SiteScanSummary />
-				: <SiteScanInProgress /> }
-			{ ! requestSiteRescan && (
-				<div className="settings-site-scan__footer">
-					<Button
-						onClick={ () => setRequestSiteRescan( true ) }
-						isPrimary={ true }
-					>
-						{ __( 'Rescan Site', 'amp' ) }
-					</Button>
-				</div>
-			) }
+			{ children }
 		</AMPDrawer>
 	);
 }
-
-/**
- * Scan in progress screen.
- */
-function SiteScanInProgress() {
-	const {
-		currentlyScannedUrlIndex,
-		scannableUrls,
-		siteScanComplete,
-	} = useContext( SiteScanContext );
-
-	return (
-		<div className="settings-site-scan">
-			<p>
-				{ __( 'Site scan is checking if there are AMP compatibility issues with your active theme and plugins. We’ll then recommend how to use the AMP plugin.', 'amp' ) }
-			</p>
-			<ProgressBar value={ siteScanComplete
-				? 100
-				: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
-			} />
-			<p>
-				{ siteScanComplete
-					? __( 'Scan complete', 'amp' )
-					: sprintf(
-						// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.
-						__( 'Scanning %1$d/%2$d URLs: Checking %3$s…', 'amp' ),
-						currentlyScannedUrlIndex + 1,
-						scannableUrls.length,
-						scannableUrls[ currentlyScannedUrlIndex ]?.label,
-					)
-				}
-			</p>
-		</div>
-	);
-}
-
-/**
- * Scan summary screen.
- */
-function SiteScanSummary() {
-	const { pluginIssues, themeIssues } = useContext( SiteScanContext );
-	const hasThemeIssues = themeIssues.length > 0;
-	const hasPluginIssues = pluginIssues.length > 0;
-
-	return (
-		<div className="settings-site-scan">
-			{ hasThemeIssues && (
-				<ThemesWithIssues
-					issues={ themeIssues }
-					validatedUrlsLink={ VALIDATED_URLS_LINK }
-				/>
-			) }
-			{ hasPluginIssues && (
-				<PluginsWithIssues
-					issues={ pluginIssues }
-					validatedUrlsLink={ VALIDATED_URLS_LINK }
-				/>
-			) }
-		</div>
-	);
-}
+SiteScanDrawer.propTypes = {
+	children: PropTypes.any,
+};
