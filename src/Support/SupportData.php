@@ -838,7 +838,7 @@ class SupportData {
 	 *
 	 * @since 2.2
 	 *
-	 * @param string|array $content Content from home_url need to remove.
+	 * @param string|array|object $content Content from home_url need to remove.
 	 *
 	 * @return string|array Content after removing home_url.
 	 */
