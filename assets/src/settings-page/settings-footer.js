@@ -66,9 +66,7 @@ export function SettingsFooter() {
 	const isBusy = savingOptions || downloadingTheme || savingDeveloperToolsOption;
 	const disabled = ! hasChanges || isBusy || ! themeSupport || ( READER === themeSupport && ! readerTheme );
 
-	const shouldShowPageCacheFlushNotice = (
-		( ( modifiedOptions?.theme_support || modifiedOptions?.reader_theme ) )
-	);
+	const shouldShowPageCacheFlushNotice = ( modifiedOptions?.theme_support || modifiedOptions?.reader_theme );
 
 	return (
 		<section className="amp-settings-nav">
@@ -91,7 +89,7 @@ export function SettingsFooter() {
 									<>
 										{ __( 'Saved. Consider flushing page cache.', 'amp' ) + ' ' }
 										<a
-											href="https://amp-wp.org/documentation/getting-started/amp-site-setup/page-caching-with-amp-and-wordpress/#what-page-caching-plugins-should-i-use"
+											href="https://amp-wp.org/documentation/getting-started/amp-site-setup/page-caching-with-amp-and-wordpress/"
 											target="_blank"
 											rel="noreferrer noopener"
 										>

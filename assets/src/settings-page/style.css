@@ -301,9 +301,19 @@ li.error-kept {
 .amp .amp-save-success-notice.amp-notice,
 .amp-error-notice .amp-notice {
 	bottom: 3rem;
+	margin-left: 0.5rem;
 	padding-left: 1.5rem;
-	padding-right: 3rem;
+	padding-right: .5rem;
 	z-index: 99;
+}
+
+@media (min-width: 576px) {
+
+	.amp .amp-save-success-notice.amp-notice,
+	.amp-error-notice .amp-notice {
+		margin-left: 0;
+		padding-right: 3rem;
+	}
 }
 
 .amp-settings-nav .components-button.is-primary {
@@ -530,10 +540,6 @@ li.error-kept {
 	margin-left: 0;
 	height: 24px;
 	width: 24px;
-}
-
-.notice p {
-	font-size: 13px;
 }
 
 /* Review. */

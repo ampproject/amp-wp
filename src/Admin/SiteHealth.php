@@ -385,7 +385,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 *
 	 * @param bool $use_previous_result Whether to use previous result or not.
 	 *
-	 * @return bool|mixed|WP_Error
+	 * @return bool|WP_Error Boolean if the site has page caching or not, or else a WP_Error if unable to determine.
 	 */
 	public function has_page_caching( $use_previous_result = false ) {
 
@@ -400,7 +400,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		$has_page_caching = $this->check_for_page_caching();
 		if ( is_wp_error( $has_page_caching ) ) {
-			set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $has_page_caching, HOUR_IN_SECONDS );
+			set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $has_page_caching, DAY_IN_SECONDS );
 		} else {
 			set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $has_page_caching ? 'yes' : 'no', MONTH_IN_SECONDS );
 		}
