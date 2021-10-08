@@ -16,6 +16,7 @@ use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
 use WP_REST_Server;
+use WP_Error;
 
 /**
  * Test SiteHealthTest.
@@ -750,7 +751,7 @@ class SiteHealthTest extends TestCase {
 	/**
 	 * @dataProvider get_page_cache_data
 	 * @covers ::page_cache()
-	 * @covers ::get_page_cache_status()
+	 * @covers ::check_for_page_caching()
 	 */
 	public function test_page_cache( $responses, $has_page_cache, $good_basic_auth = null ) {
 
@@ -832,6 +833,69 @@ class SiteHealthTest extends TestCase {
 			$expected_props,
 			wp_array_slice_assoc( $actual, array_keys( $expected_props ) )
 		);
+	}
+
+	/**
+	 * @covers ::has_page_caching()
+	 * @covers ::check_for_page_caching()
+	 */
+	public function test_has_page_caching() {
+		$callback = static function () {
+			return [
+				'headers'  => [
+					'age' => '1234',
+				],
+				'response' => [
+					'code'    => 200,
+					'message' => 'OK',
+				],
+			];
+		};
+
+		add_filter( 'pre_http_request', $callback );
+
+		// Test 1: If cached result is exists but fresh result requested.
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
+
+		$this->assertFalse( $this->instance->has_page_caching( true ) );
+
+		$this->assertTrue( $this->instance->has_page_caching() );
+
+		// Test 2: cached result without any error.
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'yes', DAY_IN_SECONDS );
+
+		$this->assertTrue( $this->instance->has_page_caching( true ) );
+
+		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
+		remove_filter( 'pre_http_request', $callback );
+	}
+
+	/**
+	 * @covers ::has_page_caching()
+	 */
+	public function test_has_page_caching_with_error() {
+		$error_object = new WP_Error( 'error_code', 'Error message.' );
+
+		$callback = static function () use ( $error_object ) {
+			return $error_object;
+		};
+
+		add_filter( 'pre_http_request', $callback );
+
+		// Test 1: Without cache result
+		$this->assertEquals(
+			$error_object,
+			$this->instance->has_page_caching()
+		);
+
+		// Test 2: Cached result with WP_Error.
+		$this->assertEquals(
+			$error_object,
+			$this->instance->has_page_caching( true )
+		);
+
+		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
+		remove_filter( 'pre_http_request', $callback );
 	}
 
 	/**
