@@ -873,21 +873,37 @@ class SiteHealthTest extends TestCase {
 
 	/**
 	 * @covers ::has_page_caching()
+	 * @covers ::check_for_page_caching()
 	 */
 	public function test_has_page_caching_with_error() {
 		$error_object = new WP_Error( 'error_code', 'Error message.' );
 
-		$callback = static function () use ( $error_object ) {
+		$return_error = static function () use ( $error_object ) {
 			return $error_object;
 		};
 
-		add_filter( 'pre_http_request', $callback );
+		$return_cached_response = static function () {
+			return [
+				'headers'  => [
+					'cache-control' => 'public; max-age=600',
+				],
+				'response' => [
+					'code'    => 200,
+					'message' => 'OK',
+				],
+			];
+		};
 
-		// Test 1: Assert for fresh result. (Even cached result is exist.)
+		add_filter( 'pre_http_request', $return_error );
+
+		// Test 1: Assert for fresh result (which is then cached).
 		$this->assertEquals(
 			$error_object,
 			$this->instance->has_page_caching()
 		);
+
+		remove_filter( 'pre_http_request', $return_error );
+		add_filter( 'pre_http_request', $return_cached_response );
 
 		// Test 2: Test for cached result.
 		$this->assertEquals(
@@ -895,8 +911,20 @@ class SiteHealthTest extends TestCase {
 			$this->instance->has_page_caching( true )
 		);
 
-		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
-		remove_filter( 'pre_http_request', $callback );
+		// Test 3: Test for non-cached result again now that no error is returned.
+		$this->assertSame(
+			true,
+			$this->instance->has_page_caching( false )
+		);
+
+		remove_filter( 'pre_http_request', $return_cached_response );
+		add_filter( 'pre_http_request', $return_error );
+
+		// Test 4: Test for non-cached result again now that no error is returned.
+		$this->assertSame(
+			true,
+			$this->instance->has_page_caching( true )
+		);
 	}
 
 	/**
