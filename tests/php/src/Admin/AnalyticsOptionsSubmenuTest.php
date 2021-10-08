@@ -15,8 +15,7 @@ use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Services;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /**
  * Tests for AnalyticsOptionsSubmenu.
@@ -24,7 +23,7 @@ use AmpProject\AmpWP\Tests\TestCase;
  * @group options-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu
  */
-class AnalyticsOptionsSubmenuTest extends TestCase {
+class AnalyticsOptionsSubmenuTest extends DependencyInjectedTestCase {
 
 	/**
 	 * Instance of OptionsMenu class.
@@ -48,7 +47,7 @@ class AnalyticsOptionsSubmenuTest extends TestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$site_health = Services::get_injector()->make( SiteHealth::class );
+		$site_health = $this->injector->make( SiteHealth::class );
 
 		$this->options_menu_instance = new OptionsMenu(
 			new GoogleFonts(),

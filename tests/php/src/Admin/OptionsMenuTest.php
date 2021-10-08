@@ -17,8 +17,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Services;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AMP_Options_Manager;
 
 /**
@@ -27,7 +26,7 @@ use AMP_Options_Manager;
  * @group options-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\OptionsMenu
  */
-class OptionsMenuTest extends TestCase {
+class OptionsMenuTest extends DependencyInjectedTestCase {
 
 	/**
 	 * Instance of OptionsMenu
@@ -44,7 +43,7 @@ class OptionsMenuTest extends TestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$site_health = Services::get_injector()->make( SiteHealth::class );
+		$site_health = $this->injector->make( SiteHealth::class );
 
 		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError(), $site_health );
 	}

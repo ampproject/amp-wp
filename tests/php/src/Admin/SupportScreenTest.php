@@ -15,9 +15,8 @@ use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\Admin\SupportScreen;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Support\SupportData;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /**
  * Tests for SupportMenu.
@@ -25,7 +24,7 @@ use AmpProject\AmpWP\Tests\TestCase;
  * @group support-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\SupportScreen
  */
-class SupportScreenTest extends TestCase {
+class SupportScreenTest extends DependencyInjectedTestCase {
 
 	/**
 	 * Instance of SupportMenu
@@ -43,7 +42,7 @@ class SupportScreenTest extends TestCase {
 
 		parent::setUp();
 
-		$site_health = Services::get_injector()->make( SiteHealth::class );
+		$site_health = $this->injector->make( SiteHealth::class );
 
 		$option_menu    = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError(), $site_health );
 		$this->instance = new SupportScreen( $option_menu, new GoogleFonts(), new SupportData() );
