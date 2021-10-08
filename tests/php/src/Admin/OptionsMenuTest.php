@@ -11,12 +11,13 @@ use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
+use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AMP_Options_Manager;
 
 /**
@@ -25,7 +26,7 @@ use AMP_Options_Manager;
  * @group options-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\OptionsMenu
  */
-class OptionsMenuTest extends TestCase {
+class OptionsMenuTest extends DependencyInjectedTestCase {
 
 	/**
 	 * Instance of OptionsMenu
@@ -41,7 +42,10 @@ class OptionsMenuTest extends TestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError() );
+
+		$site_health = $this->injector->make( SiteHealth::class );
+
+		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError(), $site_health );
 	}
 
 	/**
