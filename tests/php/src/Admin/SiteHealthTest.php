@@ -854,20 +854,21 @@ class SiteHealthTest extends TestCase {
 
 		add_filter( 'pre_http_request', $callback );
 
-		// Test 1: If cached result is exists but fresh result requested.
+		// Test 1: Assert for fresh result. (Even cached result is exist.)
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
 
 		$this->assertFalse( $this->instance->has_page_caching( true ) );
 
 		$this->assertTrue( $this->instance->has_page_caching() );
 
-		// Test 2: cached result without any error.
+		remove_filter( 'pre_http_request', $callback );
+
+		// Test 2: Test for cached result.
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'yes', DAY_IN_SECONDS );
 
 		$this->assertTrue( $this->instance->has_page_caching( true ) );
 
 		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
-		remove_filter( 'pre_http_request', $callback );
 	}
 
 	/**
@@ -882,13 +883,13 @@ class SiteHealthTest extends TestCase {
 
 		add_filter( 'pre_http_request', $callback );
 
-		// Test 1: Without cache result
+		// Test 1: Assert for fresh result. (Even cached result is exist.)
 		$this->assertEquals(
 			$error_object,
 			$this->instance->has_page_caching()
 		);
 
-		// Test 2: Cached result with WP_Error.
+		// Test 2: Test for cached result.
 		$this->assertEquals(
 			$error_object,
 			$this->instance->has_page_caching( true )
