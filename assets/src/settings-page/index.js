@@ -96,6 +96,7 @@ function Providers( { children } ) {
 								<PluginsContextProvider hasErrorBoundary={ true }>
 									<ThemesContextProvider hasErrorBoundary={ true }>
 										<SiteScanContextProvider
+											fetchCachedValidationErrors={ true }
 											scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 											validateNonce={ VALIDATE_NONCE }
 											validateQueryVar={ VALIDATE_QUERY_VAR }

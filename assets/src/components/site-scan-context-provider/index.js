@@ -49,10 +49,23 @@ function siteScanReducer( state, action ) {
 			};
 		}
 		case ACTION_SCANNABLE_URLS_RECEIVE: {
+			if ( ! action?.scannableUrls?.length || action.scannableUrls.length === 0 ) {
+				return {
+					...state,
+					status: STATUS_COMPLETE,
+				};
+			}
+
+			const validationErrors = action.scannableUrls.reduce( ( acc, data ) => [ ...acc, ...data?.validation_errors ?? [] ], [] );
+			const siteIssues = getSiteIssues( validationErrors );
+
 			return {
 				...state,
 				status: STATUS_READY,
 				scannableUrls: action.scannableUrls,
+				stale: Boolean( action.scannableUrls.find( ( error ) => error?.stale === true ) ),
+				pluginIssues: [ ...new Set( [ ...state.pluginIssues, ...siteIssues.pluginIssues ] ) ],
+				themeIssues: [ ...new Set( [ ...state.themeIssues, ...siteIssues.themeIssues ] ) ],
 			};
 		}
 		case ACTION_START_SITE_SCAN: {
@@ -71,10 +84,16 @@ function siteScanReducer( state, action ) {
 			};
 		}
 		case ACTION_SCAN_RECEIVE_ISSUES: {
+			if ( ! action?.validationResults?.length || action.validationResults.length === 0 ) {
+				return state;
+			}
+
+			const siteIssues = getSiteIssues( action.validationResults );
+
 			return {
 				...state,
-				pluginIssues: [ ...new Set( [ ...state.pluginIssues, ...action.pluginIssues ] ) ],
-				themeIssues: [ ...new Set( [ ...state.themeIssues, ...action.themeIssues ] ) ],
+				pluginIssues: [ ...new Set( [ ...state.pluginIssues, ...siteIssues.pluginIssues ] ) ],
+				themeIssues: [ ...new Set( [ ...state.themeIssues, ...siteIssues.themeIssues ] ) ],
 			};
 		}
 		case ACTION_SCAN_NEXT_URL: {
@@ -102,20 +121,23 @@ const initialState = {
 	pluginIssues: [],
 	status: '',
 	scannableUrls: [],
+	stale: false,
 	currentlyScannedUrlIndex: 0,
 };
 
 /**
  * Context provider for site scanning.
  *
- * @param {Object} props                       Component props.
- * @param {?any}   props.children              Component children.
- * @param {string} props.scannableUrlsRestPath The REST path for interacting with the scannable URL resources.
- * @param {string} props.validateNonce         The AMP validate nonce.
- * @param {string} props.validateQueryVar      The AMP validate query variable name.
+ * @param {Object}  props                             Component props.
+ * @param {?any}    props.children                    Component children.
+ * @param {boolean} props.fetchCachedValidationErrors Whether to fetch cached validation errors on mount.
+ * @param {string}  props.scannableUrlsRestPath       The REST path for interacting with the scannable URL resources.
+ * @param {string}  props.validateNonce               The AMP validate nonce.
+ * @param {string}  props.validateQueryVar            The AMP validate query variable name.
  */
 export function SiteScanContextProvider( {
 	children,
+	fetchCachedValidationErrors = false,
 	scannableUrlsRestPath,
 	validateNonce,
 	validateQueryVar,
@@ -126,6 +148,7 @@ export function SiteScanContextProvider( {
 		currentlyScannedUrlIndex,
 		pluginIssues,
 		scannableUrls,
+		stale,
 		status,
 		themeIssues,
 	} = state;
@@ -177,8 +200,11 @@ export function SiteScanContextProvider( {
 			dispatch( { type: ACTION_SCANNABLE_URLS_FETCH } );
 
 			try {
+				const fields = [ 'url', 'amp_url', 'type', 'label' ];
 				const response = await apiFetch( {
-					path: scannableUrlsRestPath,
+					path: addQueryArgs( scannableUrlsRestPath, {
+						_fields: fetchCachedValidationErrors ? [ ...fields, 'validation_errors', 'stale' ] : fields,
+					} ),
 				} );
 
 				if ( true === hasUnmounted.current ) {
@@ -193,7 +219,7 @@ export function SiteScanContextProvider( {
 				setAsyncError( e );
 			}
 		} )();
-	}, [ scannableUrlsRestPath, setAsyncError, status ] );
+	}, [ fetchCachedValidationErrors, scannableUrlsRestPath, setAsyncError, status ] );
 
 	/**
 	 * Scan site URLs sequentially.
@@ -232,15 +258,10 @@ export function SiteScanContextProvider( {
 					return;
 				}
 
-				if ( validationResults.results.length > 0 ) {
-					const siteIssues = getSiteIssues( validationResults.results );
-
-					dispatch( {
-						type: ACTION_SCAN_RECEIVE_ISSUES,
-						themeIssues: siteIssues.themeIssues,
-						pluginIssues: siteIssues.pluginIssues,
-					} );
-				}
+				dispatch( {
+					type: ACTION_SCAN_RECEIVE_ISSUES,
+					validationResults: validationResults.results,
+				} );
 
 				dispatch( { type: ACTION_SCAN_NEXT_URL } );
 			} catch ( e ) {
@@ -258,6 +279,7 @@ export function SiteScanContextProvider( {
 				isComplete: status === STATUS_COMPLETE,
 				isInitializing: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
 				isReady: status === STATUS_READY,
+				stale,
 				pluginIssues,
 				scannableUrls,
 				startSiteScan,
@@ -271,6 +293,7 @@ export function SiteScanContextProvider( {
 
 SiteScanContextProvider.propTypes = {
 	children: PropTypes.any,
+	fetchCachedValidationErrors: PropTypes.bool,
 	scannableUrlsRestPath: PropTypes.string,
 	validateNonce: PropTypes.string,
 	validateQueryVar: PropTypes.string,

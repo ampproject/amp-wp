@@ -9,13 +9,13 @@ export function getSiteIssues( validationResults = [] ) {
 	const themeIssues = new Set();
 
 	for ( const result of validationResults ) {
-		const { error } = result;
+		const sources = result?.error?.sources ?? result?.sources;
 
-		if ( ! error?.sources ) {
+		if ( ! sources ) {
 			continue;
 		}
 
-		for ( const source of error.sources ) {
+		for ( const source of sources ) {
 			if ( source.type === 'plugin' && source.name !== 'amp' ) {
 				pluginIssues.add( source.name.match( /(.*?)(?:\.php)?$/ )[ 1 ] );
 			} else if ( source.type === 'theme' ) {

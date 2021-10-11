@@ -322,7 +322,11 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$paths = [
 			'/amp/v1/options',
 			'/amp/v1/reader-themes',
-			'/amp/v1/scannable-urls',
+			add_query_arg(
+				'_fields',
+				[ 'url', 'amp_url', 'type', 'label', 'validation_errors', 'stale' ],
+				'/amp/v1/scannable-urls'
+			),
 			'/wp/v2/settings',
 			'/wp/v2/users/me',
 		];
