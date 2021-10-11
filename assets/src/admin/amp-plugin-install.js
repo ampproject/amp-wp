@@ -71,6 +71,9 @@ const ampPluginInstall = {
 		}
 	},
 
+	/**
+	 * Remove the additional info from plugin card if plugin is none wporg plugin.
+	 */
 	removeAdditionalInfo() {
 		// eslint-disable-next-line guard-for-in
 		for ( const index in NONE_WPORG_PLUGINS ) {
