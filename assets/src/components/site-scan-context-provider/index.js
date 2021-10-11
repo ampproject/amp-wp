@@ -137,6 +137,7 @@ const initialState = {
  * @param {string}  props.scannableUrlsRestPath       The REST path for interacting with the scannable URL resources.
  * @param {string}  props.validateNonce               The AMP validate nonce.
  * @param {string}  props.validateQueryVar            The AMP validate query variable name.
+ * @param {boolean} props.ampFirst                    Whether scanning should be done with Standard mode being forced.
  */
 export function SiteScanContextProvider( {
 	children,
@@ -144,6 +145,7 @@ export function SiteScanContextProvider( {
 	scannableUrlsRestPath,
 	validateNonce,
 	validateQueryVar,
+	ampFirst = false,
 } ) {
 	const { setAsyncError } = useAsyncError();
 	const [ state, dispatch ] = useReducer( siteScanReducer, initialState );
@@ -244,15 +246,18 @@ export function SiteScanContextProvider( {
 
 			try {
 				const { url } = scannableUrls[ currentlyScannedUrlIndex ];
+				const args = {
+					[ validateQueryVar ]: {
+						nonce: validateNonce,
+						omit_stylesheets: true,
+						cache,
+					},
+				};
+				if ( ampFirst ) {
+					args[ 'amp-first' ] = true;
+				}
 				const validationResults = await apiFetch( {
-					url: addQueryArgs( url, {
-						'amp-first': true,
-						[ validateQueryVar ]: {
-							nonce: validateNonce,
-							omit_stylesheets: true,
-							cache,
-						},
-					} ),
+					url: addQueryArgs( url, args ),
 				} );
 
 				if ( true === hasUnmounted.current ) {
@@ -276,7 +281,7 @@ export function SiteScanContextProvider( {
 				setAsyncError( e );
 			}
 		} )();
-	}, [ cache, currentlyScannedUrlIndex, scannableUrls, setAsyncError, status, validateNonce, validateQueryVar ] );
+	}, [ cache, currentlyScannedUrlIndex, scannableUrls, setAsyncError, status, validateNonce, validateQueryVar, ampFirst ] );
 
 	return (
 		<SiteScan.Provider
@@ -305,4 +310,5 @@ SiteScanContextProvider.propTypes = {
 	scannableUrlsRestPath: PropTypes.string,
 	validateNonce: PropTypes.string,
 	validateQueryVar: PropTypes.string,
+	ampFirst: PropTypes.bool,
 };

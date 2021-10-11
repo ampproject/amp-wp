@@ -100,6 +100,7 @@ function Providers( { children } ) {
 											scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 											validateNonce={ VALIDATE_NONCE }
 											validateQueryVar={ VALIDATE_QUERY_VAR }
+											ampFirst={ false }
 										>
 											{ children }
 										</SiteScanContextProvider>
