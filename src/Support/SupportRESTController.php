@@ -8,9 +8,9 @@
 namespace AmpProject\AmpWP\Support;
 
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Services;
 use WP_REST_Server;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -34,6 +34,23 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 	 * @var string $namespace
 	 */
 	public $namespace = 'amp/v1';
+
+	/**
+	 * Injector.
+	 *
+	 * @var Injector
+	 */
+	private $injector;
+
+	/**
+	 * Class constructor.
+	 *
+	 * @param Injector $injector Injector.
+	 */
+	public function __construct( Injector $injector ) {
+
+		$this->injector = $injector;
+	}
 
 	/**
 	 * Get the action to use for registering the service.
@@ -86,7 +103,7 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 		$request_args = $request->get_param( 'args' );
 		$request_args = ( ! empty( $request_args ) && is_array( $request_args ) ) ? $request_args : [];
 
-		$support_data     = Services::get_injector()->make( SupportData::class, [ 'args' => $request_args ] );
+		$support_data     = $this->injector->make( SupportData::class, [ 'args' => $request_args ] );
 		$support_response = $support_data->send_data();
 
 		$response = new WP_Error(

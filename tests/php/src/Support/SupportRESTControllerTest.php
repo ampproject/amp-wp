@@ -7,12 +7,10 @@
 
 namespace AmpProject\AmpWP\Support\Tests;
 
-use AmpProject\AmpWP\Support\SupportCliCommand;
-use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Support\SupportRESTController;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Tests\TestCase;
 use WP_Error;
+use WP_REST_Request;
 
 /**
  * Test cases for SupportRESTController
@@ -149,7 +147,7 @@ class SupportRESTControllerTest extends DependencyInjectedTestCase {
 
 		add_filter( 'pre_http_request', $callback_wp_remote );
 
-		$request  = new \WP_REST_Request( 'POST', $this->instance->namespace . '/send-diagnostic', [] );
+		$request  = new WP_REST_Request( 'POST', $this->instance->namespace . '/send-diagnostic', [] );
 		$response = $this->instance->callback( $request );
 
 		if ( ! is_wp_error( $response ) ) {

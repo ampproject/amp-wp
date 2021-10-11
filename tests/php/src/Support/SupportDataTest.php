@@ -8,8 +8,8 @@
 namespace AmpProject\AmpWP\Support\Tests;
 
 use AmpProject\AmpWP\Support\SupportData;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AmpProject\AmpWP\Tests\TestCase;
 use AMP_Validated_URL_Post_Type;
 use stdClass;
 
@@ -19,7 +19,7 @@ use stdClass;
  * @group support-admin
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportData
  */
-class SupportDataTest extends TestCase {
+class SupportDataTest extends DependencyInjectedTestCase {
 
 	use PrivateAccess;
 
@@ -39,7 +39,7 @@ class SupportDataTest extends TestCase {
 
 		parent::setUp();
 
-		$this->instance = new SupportData( [] );
+		$this->instance = $this->injector->make( SupportData::class );
 	}
 
 	/**

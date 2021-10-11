@@ -7,14 +7,7 @@
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
-use AmpProject\AmpWP\Admin\GoogleFonts;
-use AmpProject\AmpWP\Admin\OptionsMenu;
-use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\Admin\RESTPreloader;
-use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\Admin\SupportScreen;
-use AmpProject\AmpWP\DependencySupport;
-use AmpProject\AmpWP\LoadingError;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /**
@@ -41,10 +34,8 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 
 		parent::setUp();
 
-		$site_health = $this->injector->make( SiteHealth::class );
+		$this->instance = $this->injector->make( SupportScreen::class );
 
-		$option_menu    = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError(), $site_health );
-		$this->instance = new SupportScreen( $option_menu, new GoogleFonts() );
 	}
 
 	/** @covers ::__construct() */

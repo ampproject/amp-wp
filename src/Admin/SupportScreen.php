@@ -8,15 +8,16 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Support\SupportData;
 
 /**
  * SupportScreen class to add support page under AMP menu page in WordPress admin.
  *
  * @internal
+ * @since 2.2
  */
 class SupportScreen implements Conditional, Service, Registerable {
 
@@ -26,6 +27,13 @@ class SupportScreen implements Conditional, Service, Registerable {
 	 * @var string
 	 */
 	const ASSET_HANDLE = 'amp-support';
+
+	/**
+	 * Injector.
+	 *
+	 * @var Injector
+	 */
+	private $injector;
 
 	/**
 	 * The parent menu slug.
@@ -44,10 +52,13 @@ class SupportScreen implements Conditional, Service, Registerable {
 	/**
 	 * Class constructor.
 	 *
+	 * @param Injector    $injector     Injector.
 	 * @param OptionsMenu $options_menu An instance of the class handling the parent menu.
 	 * @param GoogleFonts $google_fonts An instance of the GoogleFonts service.
 	 */
-	public function __construct( OptionsMenu $options_menu, GoogleFonts $google_fonts ) {
+	public function __construct( Injector $injector, OptionsMenu $options_menu, GoogleFonts $google_fonts ) {
+
+		$this->injector = $injector;
 
 		$this->parent_menu_slug = $options_menu->get_menu_slug();
 
@@ -162,7 +173,7 @@ class SupportScreen implements Conditional, Service, Registerable {
 			];
 		}
 
-		$support_data = Services::get_injector()->make( SupportData::class, [ 'args' => $args ] );
+		$support_data = $this->injector->make( SupportData::class, [ 'args' => $args ] );
 		$data         = $support_data->get_data();
 
 		wp_add_inline_script(
