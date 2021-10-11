@@ -72,6 +72,8 @@ function siteScanReducer( state, action ) {
 			return {
 				...state,
 				status: STATUS_IDLE,
+				stale: false,
+				cache: action.cache,
 				themeIssues: [],
 				pluginIssues: [],
 				currentlyScannedUrlIndex: initialState.currentlyScannedUrlIndex,
@@ -122,6 +124,7 @@ const initialState = {
 	status: '',
 	scannableUrls: [],
 	stale: false,
+	cache: false,
 	currentlyScannedUrlIndex: 0,
 };
 
@@ -145,6 +148,7 @@ export function SiteScanContextProvider( {
 	const { setAsyncError } = useAsyncError();
 	const [ state, dispatch ] = useReducer( siteScanReducer, initialState );
 	const {
+		cache,
 		currentlyScannedUrlIndex,
 		pluginIssues,
 		scannableUrls,
@@ -174,9 +178,12 @@ export function SiteScanContextProvider( {
 		hasUnmounted.current = true;
 	}, [] );
 
-	const startSiteScan = useCallback( () => {
+	const startSiteScan = useCallback( ( args = {} ) => {
 		if ( status === STATUS_READY ) {
-			dispatch( { type: ACTION_START_SITE_SCAN } );
+			dispatch( {
+				type: ACTION_START_SITE_SCAN,
+				cache: args?.cache,
+			} );
 		}
 	}, [ status ] );
 
@@ -243,6 +250,7 @@ export function SiteScanContextProvider( {
 						[ validateQueryVar ]: {
 							nonce: validateNonce,
 							omit_stylesheets: true,
+							cache,
 						},
 					} ),
 				} );

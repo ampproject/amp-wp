@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { VALIDATED_URLS_LINK } from 'amp-settings'; // From WP inline script.
+import { HOME_URL, VALIDATED_URLS_LINK } from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
 
 /**
@@ -14,12 +14,21 @@ import { useContext, useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { STANDARD } from '../common/constants';
 import { AMPDrawer } from '../components/amp-drawer';
 import { IconLandscapeHillsCogsAlt } from '../components/svg/landscape-hills-cogs-alt';
 import { ProgressBar } from '../components/progress-bar';
 import { PluginsWithIssues, ThemesWithIssues } from '../components/site-scan-results';
+import { Options } from '../components/options-context-provider';
 import { SiteScan as SiteScanContext } from '../components/site-scan-context-provider';
 import { Loading } from '../components/loading';
+import {
+	AMPNotice,
+	NOTICE_SIZE_LARGE,
+	NOTICE_SIZE_SMALL,
+	NOTICE_TYPE_INFO,
+	NOTICE_TYPE_PLAIN,
+} from '../components/amp-notice';
 
 /**
  * Site Scan component on the settings screen.
@@ -34,9 +43,16 @@ export function SiteScan() {
 		currentlyScannedUrlIndex,
 		pluginIssues,
 		scannableUrls,
+		stale,
 		startSiteScan,
 		themeIssues,
 	} = useContext( SiteScanContext );
+	const { originalOptions } = useContext( Options );
+	const {
+		paired_url_examples: pairedUrlExamples,
+		paired_url_structure: pairedUrlStructure,
+		theme_support: themeSupport,
+	} = originalOptions;
 
 	/**
 	 * Cancel scan on component unmount.
@@ -71,43 +87,88 @@ export function SiteScan() {
 
 	if ( isInitializing ) {
 		return (
-			<SiteScanDrawer>
+			<SiteScanDrawer initialOpen={ true }>
 				<Loading />
 			</SiteScanDrawer>
 		);
 	}
 
+	const hasSiteIssues = themeIssues.length > 0 || pluginIssues.length > 0;
+	const previewPermalink = STANDARD === themeSupport ? HOME_URL : pairedUrlExamples[ pairedUrlStructure ][ 0 ];
+
 	if ( showSummary ) {
 		return (
-			<SiteScanDrawer>
+			<SiteScanDrawer
+				initialOpen={ stale || isComplete }
+				labelExtra={ stale ? (
+					<AMPNotice type={ NOTICE_TYPE_PLAIN } size={ NOTICE_SIZE_SMALL }>
+						{ __( 'Stale results', 'amp' ) }
+					</AMPNotice>
+				) : null }
+			>
 				<div className="settings-site-scan">
+					{ ! isComplete && (
+						<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
+							<p>
+								{ stale
+									? __( 'Stale results. Rescan your site to ensure everything is working properly.', 'amp' )
+									: __( 'No changes since your last scan. Browse your site to ensure everything is working as expected.', 'amp' )
+								}
+							</p>
+						</AMPNotice>
+					) }
+					{ isComplete && ! hasSiteIssues && (
+						<p
+							dangerouslySetInnerHTML={ {
+								__html: sprintf(
+									// translators: placeholders stand for internal links.
+									__( 'Because of issues we’ve uncovered, you’ll want to switch your template mode. Please see <a href="%1$s">template mode recommendations</a> below. Because of plugin issues, you may also want to <a href="%2$s">review and suppress plugins</a>.', 'amp' ),
+									'#template-modes',
+									'#plugin-suppression',
+								),
+							} }
+						/>
+					) }
+					{ isComplete && hasSiteIssues && (
+						<p>
+							{ __( 'Site scan found no issues on your site.', 'amp' ) }
+						</p>
+					) }
 					{ themeIssues.length > 0 && (
 						<ThemesWithIssues
 							issues={ themeIssues }
-							validatedUrlsLink={ VALIDATED_URLS_LINK }
+							validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
 						/>
 					) }
 					{ pluginIssues.length > 0 && (
 						<PluginsWithIssues
 							issues={ pluginIssues }
-							validatedUrlsLink={ VALIDATED_URLS_LINK }
+							validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
 						/>
 					) }
-				</div>
-				<div className="settings-site-scan__footer">
-					<Button
-						onClick={ startSiteScan }
-						isPrimary={ true }
-					>
-						{ __( 'Rescan Site', 'amp' ) }
-					</Button>
+					<div className="settings-site-scan__footer">
+						{ isComplete
+							? (
+								<Button href={ previewPermalink } isPrimary={ true }>
+									{ __( 'Browse Site', 'amp' ) }
+								</Button>
+							)
+							: (
+								<Button
+									onClick={ () => startSiteScan( { cache: true } ) }
+									isPrimary={ true }
+								>
+									{ __( 'Rescan Site', 'amp' ) }
+								</Button>
+							) }
+					</div>
 				</div>
 			</SiteScanDrawer>
 		);
 	}
 
 	return (
-		<SiteScanDrawer>
+		<SiteScanDrawer initialOpen={ true }>
 			<div className="settings-site-scan">
 				<p>
 					{ __( 'Site scan is checking if there are AMP compatibility issues with your active theme and plugins. We’ll then recommend how to use the AMP plugin.', 'amp' ) }
@@ -139,7 +200,7 @@ export function SiteScan() {
  * @param {Object} props          Component props.
  * @param {any}    props.children Component children.
  */
-function SiteScanDrawer( { children } ) {
+function SiteScanDrawer( { children, ...props } ) {
 	return (
 		<AMPDrawer
 			heading={ (
@@ -150,7 +211,7 @@ function SiteScanDrawer( { children } ) {
 			) }
 			hiddenTitle={ __( 'Site Scan', 'amp' ) }
 			id="site-scan"
-			initialOpen={ true }
+			{ ...props }
 		>
 			{ children }
 		</AMPDrawer>

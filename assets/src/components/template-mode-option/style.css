@@ -111,6 +111,12 @@
 	right: 0;
 }
 
+.template-mode-option .components-panel__body-title {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
 .template-mode-option .components-panel__body-title:hover {
 	background: rgba(0, 0, 0, 0);
 }

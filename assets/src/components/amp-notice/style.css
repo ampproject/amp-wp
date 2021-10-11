@@ -34,7 +34,8 @@
 	background-color: #effbff;
 }
 
-.amp-notice--info svg {
+.amp-notice--info svg,
+.amp-notice--plain svg {
 	color: var(--amp-settings-color-brand);
 }
 
