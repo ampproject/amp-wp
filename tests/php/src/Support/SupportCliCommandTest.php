@@ -19,7 +19,7 @@ use AmpProject\AmpWP\Tests\TestCase;
 class SupportCliCommandTest extends TestCase {
 
 	/**
-	 * @covers ::get_command_name
+	 * @covers ::get_command_name()
 	 */
 	public function test_get_command_name() {
 

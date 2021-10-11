@@ -41,7 +41,7 @@ class SupportRESTControllerTest extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * @covers ::get_registration_action
+	 * @covers ::get_registration_action()
 	 */
 	public function test_get_registration_action() {
 
@@ -52,7 +52,7 @@ class SupportRESTControllerTest extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * @covers ::permission_callback
+	 * @covers ::permission_callback()
 	 */
 	public function test_permission_callback() {
 
@@ -114,7 +114,7 @@ class SupportRESTControllerTest extends DependencyInjectedTestCase {
 	 * @param array          $request_response Value to mock for response for API.
 	 * @param array|WP_Error $expected         Expected AJAX response.
 	 *
-	 * @covers ::callback
+	 * @covers ::callback()
 	 */
 	public function test_callback( $request_response, $expected ) {
 

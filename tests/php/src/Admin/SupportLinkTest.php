@@ -43,7 +43,31 @@ class SupportLinkTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::register
+	 * @covers ::get_registration_action()
+	 */
+	public function test_get_registration_action() {
+		$this->assertEquals(
+			'admin_init',
+			SupportLink::get_registration_action()
+		);
+	}
+
+	/**
+	 * @covers ::is_needed()
+	 */
+	public function test_is_needed() {
+
+		// Test 1: Test for users that don't have permission.
+		$this->assertFalse( SupportLink::is_needed() );
+
+		// Test 2: Test with admin user.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		$this->assertTrue( SupportLink::is_needed() );
+	}
+
+	/**
+	 * @covers ::register()
 	 */
 	public function test_register() {
 
@@ -77,7 +101,7 @@ class SupportLinkTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::admin_bar_menu
+	 * @covers ::admin_bar_menu()
 	 */
 	public function test_admin_bar_menu() {
 
@@ -103,7 +127,7 @@ class SupportLinkTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::amp_validated_url_status_actions
+	 * @covers ::amp_validated_url_status_actions()
 	 */
 	public function test_amp_validated_url_status_actions() {
 
@@ -129,7 +153,7 @@ class SupportLinkTest extends TestCase {
 	/**
 	 * Test post_row_actions method.
 	 *
-	 * @covers ::post_row_actions
+	 * @covers ::post_row_actions()
 	 */
 	public function test_post_row_actions() {
 
@@ -160,7 +184,7 @@ class SupportLinkTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::plugin_row_meta
+	 * @covers ::plugin_row_meta()
 	 */
 	public function test_plugin_row_meta() {
 

@@ -145,7 +145,6 @@ final class FeatureContext extends WP_CLI_FeatureContext {
 	 * @return Process Process to execute.
 	 */
 	public function proc_with_env( $command, $env = [] ) {
-
 		$env = array_merge(
 			self::get_process_env_variables(),
 			$env

@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Admin;
 
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use WP_Admin_Bar;
 use WP_Post;
 use AMP_Validated_URL_Post_Type;
@@ -19,7 +20,16 @@ use AmpProject\AmpWP\Infrastructure\Service;
  *
  * @internal
  */
-class SupportLink implements Service, Conditional, Registerable {
+class SupportLink implements Service, Delayed, Conditional, Registerable {
+
+	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		return 'admin_init';
+	}
 
 	/**
 	 * Check whether the conditional object is currently needed.

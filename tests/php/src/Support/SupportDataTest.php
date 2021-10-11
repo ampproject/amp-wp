@@ -43,8 +43,8 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::__construct
-	 * @covers ::parse_args
+	 * @covers ::__construct()
+	 * @covers ::parse_args()
 	 */
 	public function test_parse_args() {
 
@@ -187,8 +187,8 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::send_data
-	 * @covers ::get_data
+	 * @covers ::send_data()
+	 * @covers ::get_data()
 	 */
 	public function test_send_data() {
 
@@ -238,8 +238,8 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::get_data
-	 * @covers ::get_amp_urls
+	 * @covers ::get_data()
+	 * @covers ::get_amp_urls()
 	 */
 	public function test_get_data_with_specific_url() {
 
@@ -265,7 +265,7 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::send_data
+	 * @covers ::send_data()
 	 */
 	public function test_send_data_with_error() {
 		$callback_wp_remote = static function ( $preempt, $parsed_args ) use ( &$support_data ) {
@@ -289,7 +289,7 @@ class SupportDataTest extends TestCase {
 	/**
 	 * Test get_error_log method.
 	 *
-	 * @covers ::get_error_log
+	 * @covers ::get_error_log()
 	 */
 	public function test_get_error_log() {
 
@@ -302,7 +302,7 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::get_site_info
+	 * @covers ::get_site_info()
 	 */
 	public function test_get_site_info() {
 
@@ -338,8 +338,8 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::get_plugin_info
-	 * @covers ::normalize_plugin_info
+	 * @covers ::get_plugin_info()
+	 * @covers ::normalize_plugin_info()
 	 */
 	public function test_get_plugin_info() {
 
@@ -387,8 +387,8 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::get_theme_info
-	 * @covers ::normalize_theme_info
+	 * @covers ::get_theme_info()
+	 * @covers ::normalize_theme_info()
 	 */
 	public function test_get_theme_info() {
 
@@ -463,9 +463,9 @@ class SupportDataTest extends TestCase {
 
 	/**
 	 * @dataProvider normalize_error_data_provider
-	 * @covers ::normalize_error
-	 * @covers ::remove_domain
-	 * @covers ::generate_hash
+	 * @covers ::normalize_error()
+	 * @covers ::remove_domain()
+	 * @covers ::generate_hash()
 	 */
 	public function test_normalize_error( $input, $expected ) {
 
@@ -567,8 +567,8 @@ class SupportDataTest extends TestCase {
 
 	/**
 	 * @dataProvider normalize_error_source_data_provider
-	 * @covers ::normalize_error_source
-	 * @covers ::generate_hash
+	 * @covers ::normalize_error_source()
+	 * @covers ::generate_hash()
 	 */
 	public function test_normalize_error_source( $input, $expected ) {
 
@@ -578,8 +578,8 @@ class SupportDataTest extends TestCase {
 	/**
 	 * Test get_amp_urls method.
 	 *
-	 * @covers ::get_amp_urls
-	 * @covers ::get_stylesheet_info
+	 * @covers ::get_amp_urls()
+	 * @covers ::get_stylesheet_info()
 	 */
 	public function test_get_amp_urls() {
 
@@ -607,7 +607,7 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::get_home_url
+	 * @covers ::get_home_url()
 	 */
 	public function test_get_home_url() {
 
@@ -621,7 +621,7 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::remove_domain
+	 * @covers ::remove_domain()
 	 */
 	public function test_remove_domain() {
 
@@ -659,7 +659,7 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::generate_hash
+	 * @covers ::generate_hash()
 	 */
 	public function test_generate_hash() {
 
