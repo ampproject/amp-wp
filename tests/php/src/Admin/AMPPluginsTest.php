@@ -41,7 +41,7 @@ class AMPPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::get_registration_action
+	 * @covers ::get_registration_action()
 	 */
 	public function test_get_registration_action() {
 
@@ -49,7 +49,7 @@ class AMPPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::is_needed
+	 * @covers ::is_needed()
 	 */
 	public function test_is_needed() {
 
@@ -64,7 +64,7 @@ class AMPPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::register
+	 * @covers ::register()
 	 */
 	public function test_register() {
 
@@ -109,7 +109,7 @@ class AMPPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::enqueue_scripts
+	 * @covers ::enqueue_scripts()
 	 */
 	public function test_enqueue_scripts() {
 		$this->instance->enqueue_scripts();
@@ -118,7 +118,7 @@ class AMPPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::add_tab
+	 * @covers ::add_tab()
 	 */
 	public function test_add_tab() {
 
@@ -129,7 +129,7 @@ class AMPPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::tab_args
+	 * @covers ::tab_args()
 	 */
 	public function test_tab_args() {
 
@@ -141,7 +141,7 @@ class AMPPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::plugins_api
+	 * @covers ::plugins_api()
 	 */
 	public function test_plugins_api() {
 		$this->instance->register();
@@ -167,7 +167,7 @@ class AMPPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::action_links
+	 * @covers ::action_links()
 	 */
 	public function test_action_links() {
 
@@ -200,6 +200,9 @@ class AMPPluginsTest extends TestCase {
 		);
 	}
 
+	/**
+	 * @covers ::plugin_row_meta()
+	 */
 	public function test_plugin_row_meta() {
 
 		$this->instance->register();

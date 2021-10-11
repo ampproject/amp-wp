@@ -40,7 +40,7 @@ class AMPThemesTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::register
+	 * @covers ::register()
 	 */
 	public function test_register() {
 
@@ -55,7 +55,7 @@ class AMPThemesTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::register_hooks
+	 * @covers ::register_hooks()
 	 */
 	public function test_register_hooks() {
 
@@ -66,7 +66,7 @@ class AMPThemesTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::enqueue_scripts
+	 * @covers ::enqueue_scripts()
 	 */
 	public function test_enqueue_scripts() {
 		$this->instance->enqueue_scripts();
@@ -75,7 +75,7 @@ class AMPThemesTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::themes_api
+	 * @covers ::themes_api()
 	 */
 	public function test_themes_api() {
 		$this->instance->register();

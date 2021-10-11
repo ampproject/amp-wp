@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use WP_Filesystem_Base;
 
 /**
  * Add new tab (AMP) in theme install screen in WordPress admin.
@@ -31,15 +32,44 @@ class AMPThemes implements Service, Registerable {
 	public static $themes = [];
 
 	/**
+	 * To initialize file system.
+	 *
+	 * @return void
+	 */
+	public static function init_file_system() {
+		global $wp_filesystem;
+
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+
+		if ( ! $wp_filesystem instanceof WP_Filesystem_Base ) {
+			$creds = request_filesystem_credentials( site_url() );
+			wp_filesystem( $creds );
+		}
+	}
+
+	/**
 	 * Fetch AMP themes data.
 	 *
 	 * @return void
 	 */
 	public static function set_themes() {
+		global $wp_filesystem;
 
-		$file_path    = AMP__DIR__ . '/data/themes.json';
-		$json_data    = file_get_contents( $file_path );
-		self::$themes = json_decode( $json_data, true );
+		self::init_file_system();
+
+		$file_path = AMP__DIR__ . '/data/themes.json';
+
+		if ( ! file_exists( $file_path ) ) {
+			return;
+		}
+
+		$json_data       = $wp_filesystem->get_contents( $file_path );
+		self::$themes    = json_decode( $json_data, true );
+		$json_last_error = json_last_error();
+
+		if ( JSON_ERROR_NONE !== $json_last_error ) {
+			self::$themes = [];
+		}
 	}
 
 	/**

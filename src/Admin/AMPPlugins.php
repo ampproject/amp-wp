@@ -61,9 +61,23 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	 */
 	public static function set_plugins() {
 
-		$plugin_json   = AMP__DIR__ . '/data/plugins.json';
-		$json_data     = file_get_contents( $plugin_json );
-		self::$plugins = json_decode( $json_data, true );
+		global $wp_filesystem;
+
+		AMPThemes::init_file_system();
+
+		$plugin_json = AMP__DIR__ . '/data/plugins.json';
+
+		if ( ! file_exists( $plugin_json ) ) {
+			return;
+		}
+
+		$json_data       = $wp_filesystem->get_contents( $plugin_json );
+		self::$plugins   = json_decode( $json_data, true );
+		$json_last_error = json_last_error();
+
+		if ( JSON_ERROR_NONE !== $json_last_error ) {
+			self::$plugins = [];
+		}
 	}
 
 	/**
