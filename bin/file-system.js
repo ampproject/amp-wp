@@ -19,34 +19,6 @@ class FileSystem {
 	}
 
 	/**
-	 * TO check if path is physically exists or not.
-	 *
-	 * @param {string} path Path to check.
-	 * @return {boolean} True if path exists otherwise False.
-	 */
-	static isExists( path ) {
-		if ( _.isEmpty( path ) || ! _.isString( path ) ) {
-			return false;
-		}
-
-		return fs.existsSync( path );
-	}
-
-	/**
-	 * To check if given path is file path or not.
-	 *
-	 * @param {string} path Path to check.
-	 * @return {boolean} True if given path is file path, Otherwise False.
-	 */
-	static isFilePath( path ) {
-		if ( _.isEmpty( path ) || ! _.isString( path ) ) {
-			return false;
-		}
-
-		return ( path !== this.assureDirectoryPath( path ) );
-	}
-
-	/**
 	 * Assure that given path is directory path.
 	 * If file path is provided then it will return parent directory of given path.
 	 *
@@ -88,20 +60,6 @@ class FileSystem {
 	}
 
 	/**
-	 * To get content of give file.
-	 *
-	 * @param {string} filePath File Absolute file path.
-	 * @return {boolean|Buffer} File content.
-	 */
-	static readFile( filePath ) {
-		if ( _.isEmpty( filePath ) || ! _.isString( filePath ) || ! this.isExists( filePath ) ) {
-			return false;
-		}
-
-		return fs.readFileSync( filePath );
-	}
-
-	/**
 	 * Write content to file.
 	 *
 	 * @param {string} filePath File path.
@@ -118,32 +76,6 @@ class FileSystem {
 
 		return new Promise( ( done ) => {
 			fs.writeFile( filePath, content, ( error ) => {
-				if ( error ) {
-					done( false );
-				} else {
-					done( true );
-				}
-			} );
-		} );
-	}
-
-	/**
-	 * To delete file.
-	 *
-	 * @param {string} filePath File path that need to delete.
-	 * @return {Promise<boolean>|boolean} True on success otherwise false.
-	 */
-	static deleteFile( filePath ) {
-		if ( _.isEmpty( filePath ) || ! _.isString( filePath ) ) {
-			return false;
-		}
-
-		if ( ! this.isExists( filePath ) ) {
-			return true;
-		}
-
-		return new Promise( ( done ) => {
-			fs.unlink( filePath, ( error ) => {
 				if ( error ) {
 					done( false );
 				} else {
