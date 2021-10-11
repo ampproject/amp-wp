@@ -276,7 +276,7 @@ export function SiteScanContextProvider( {
 				setAsyncError( e );
 			}
 		} )();
-	}, [ currentlyScannedUrlIndex, scannableUrls, setAsyncError, status, validateNonce, validateQueryVar ] );
+	}, [ cache, currentlyScannedUrlIndex, scannableUrls, setAsyncError, status, validateNonce, validateQueryVar ] );
 
 	return (
 		<SiteScan.Provider
