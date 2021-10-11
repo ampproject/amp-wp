@@ -59,7 +59,7 @@ const ampPluginInstall = {
 			tooltipElement.classList.add( 'tooltiptext' );
 
 			tooltipElement.append(
-				__( 'This theme follow best practice and is known to work well with AMP plugin.', 'amp' ),
+				__( 'This plugin follow best practice and is known to work well with AMP plugin.', 'amp' ),
 			);
 
 			messageElement.append( iconElement );

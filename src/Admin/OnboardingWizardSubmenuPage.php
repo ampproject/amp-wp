@@ -210,6 +210,13 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		);
 
 		wp_enqueue_style(
+			'amp-admin',
+			amp_get_asset_url( 'css/amp-admin.css' ),
+			[],
+			AMP__VERSION
+		);
+
+		wp_enqueue_style(
 			self::ASSET_HANDLE,
 			amp_get_asset_url( 'css/amp-onboarding-wizard.css' ),
 			[
