@@ -38,17 +38,12 @@ import {
 export function SiteScan() {
 	const {
 		cancelSiteScan,
-		currentlyScannedUrlIndex,
-		isBusy,
 		isCancelled,
 		isComplete,
 		isInitializing,
 		isReady,
-		pluginIssues,
-		scannableUrls,
 		stale,
 		startSiteScan,
-		themeIssues,
 	} = useContext( SiteScanContext );
 	const { originalOptions } = useContext( Options );
 	const {
@@ -56,180 +51,72 @@ export function SiteScan() {
 		paired_url_structure: pairedUrlStructure,
 		theme_support: themeSupport,
 	} = originalOptions;
+	const previewPermalink = STANDARD === themeSupport ? HOME_URL : pairedUrlExamples[ pairedUrlStructure ][ 0 ];
 
 	/**
-	 * Cancel scan on component unmount.
+	 * Cancel scan when component unmounts.
 	 */
 	useEffect( () => () => cancelSiteScan(), [ cancelSiteScan ] );
 
 	/**
-	 * Show scan summary with a delay so that the progress bar has a chance to
-	 * complete.
+	 * Delay the `isComplete` state so that the progress bar stays at 100% for a
+	 * brief moment.
 	 */
-	const [ showSummary, setShowSummary ] = useState( true );
+	const [ isDelayedComplete, setIsDelayedComplete ] = useState( isComplete );
 
 	useEffect( () => {
-		let timeout;
+		let cleanup = () => {};
 
-		if ( ( isReady || isComplete ) && ! showSummary ) {
-			timeout = setTimeout( () => setShowSummary( true ), 500 );
+		if ( isComplete && ! isDelayedComplete ) {
+			cleanup = setTimeout( () => setIsDelayedComplete( true ), 500 );
+		} else if ( ! isComplete && isDelayedComplete ) {
+			setIsDelayedComplete( false );
 		}
 
-		return () => {
-			if ( timeout ) {
-				clearTimeout( timeout );
-			}
-		};
-	}, [ isComplete, isReady, showSummary ] );
+		return cleanup;
+	}, [ isComplete, isDelayedComplete ] );
 
-	useEffect( () => {
-		if ( showSummary && isBusy ) {
-			setShowSummary( false );
-		}
-	}, [ isBusy, showSummary ] );
+	/**
+	 * Determine footer content.
+	 */
+	let footerContent = null;
 
-	if ( isInitializing ) {
-		return (
-			<SiteScanDrawer initialOpen={ true }>
-				<Loading />
-			</SiteScanDrawer>
+	if ( isCancelled || ( stale && ( isReady || isDelayedComplete ) ) ) {
+		footerContent = (
+			<Button
+				onClick={ () => startSiteScan( { cache: true } ) }
+				isPrimary={ true }
+			>
+				{ __( 'Rescan Site', 'amp' ) }
+			</Button>
+		);
+	} else if ( ! stale && isDelayedComplete ) {
+		footerContent = (
+			<Button href={ previewPermalink } isPrimary={ true }>
+				{ __( 'Browse Site', 'amp' ) }
+			</Button>
 		);
 	}
 
-	if ( isCancelled ) {
-		return (
-			<SiteScanDrawer
-				initialOpen={ true }
-				footerContent={ (
-					<Button
-						onClick={ () => startSiteScan( { cache: true } ) }
-						isPrimary={ true }
-					>
-						{ __( 'Rescan Site', 'amp' ) }
-					</Button>
-				) }
-			>
+	return (
+		<SiteScanDrawer
+			initialOpen={ ! isReady || ( isReady && stale ) }
+			labelExtra={ stale && ( isReady || isDelayedComplete ) ? (
+				<AMPNotice type={ NOTICE_TYPE_PLAIN } size={ NOTICE_SIZE_SMALL }>
+					{ __( 'Stale results', 'amp' ) }
+				</AMPNotice>
+			) : null }
+			footerContent={ footerContent }
+		>
+			{ isInitializing && <Loading /> }
+			{ isCancelled && (
 				<AMPNotice type={ NOTICE_TYPE_ERROR } size={ NOTICE_SIZE_LARGE }>
 					<p>
 						{ __( 'Site scan has been cancelled. Try again.', 'amp' ) }
 					</p>
 				</AMPNotice>
-			</SiteScanDrawer>
-		);
-	}
-
-	if ( showSummary ) {
-		const hasSiteIssues = themeIssues.length > 0 || pluginIssues.length > 0;
-		const previewPermalink = STANDARD === themeSupport ? HOME_URL : pairedUrlExamples[ pairedUrlStructure ][ 0 ];
-		const footerContent = isComplete && ! stale
-			? (
-				<Button href={ previewPermalink } isPrimary={ true }>
-					{ __( 'Browse Site', 'amp' ) }
-				</Button>
-			)
-			: (
-				<Button
-					onClick={ () => startSiteScan( { cache: true } ) }
-					isPrimary={ true }
-				>
-					{ __( 'Rescan Site', 'amp' ) }
-				</Button>
-			);
-
-		const getMessage = () => {
-			if ( isReady ) {
-				return (
-					<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
-						<p>
-							{ stale
-								? __( 'Stale results. Rescan your site to ensure everything is working properly.', 'amp' )
-								: __( 'No changes since your last scan. Browse your site to ensure everything is working as expected.', 'amp' )
-							}
-						</p>
-					</AMPNotice>
-				);
-			}
-
-			return (
-				<>
-					{ stale && (
-						<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
-							<p>
-								{ __( 'Stale results. Rescan your site to ensure everything is working properly.', 'amp' ) }
-							</p>
-						</AMPNotice>
-					) }
-					{ hasSiteIssues && (
-						<p
-							dangerouslySetInnerHTML={ {
-								__html: sprintf(
-									// translators: placeholders stand for page anchors.
-									__( 'Because of issues we’ve uncovered, you’ll want to switch your template mode. Please see <a href="%1$s">template mode recommendations</a> below. Because of plugin issues, you may also want to <a href="%2$s">review and suppress plugins</a>.', 'amp' ),
-									'#template-modes',
-									'#plugin-suppression',
-								),
-							} }
-						/>
-					) }
-					{ ! hasSiteIssues && ! stale && (
-						<AMPNotice type={ NOTICE_TYPE_SUCCESS } size={ NOTICE_SIZE_LARGE }>
-							<p>
-								{ __( 'Site scan found no issues on your site.', 'amp' ) }
-							</p>
-						</AMPNotice>
-					) }
-				</>
-			);
-		};
-
-		return (
-			<SiteScanDrawer
-				initialOpen={ stale || isComplete }
-				labelExtra={ stale ? (
-					<AMPNotice type={ NOTICE_TYPE_PLAIN } size={ NOTICE_SIZE_SMALL }>
-						{ __( 'Stale results', 'amp' ) }
-					</AMPNotice>
-				) : null }
-				footerContent={ footerContent }
-			>
-				{ getMessage() }
-				{ themeIssues.length > 0 && (
-					<ThemesWithIssues
-						issues={ themeIssues }
-						validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
-					/>
-				) }
-				{ pluginIssues.length > 0 && (
-					<PluginsWithIssues
-						issues={ pluginIssues }
-						validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
-					/>
-				) }
-			</SiteScanDrawer>
-		);
-	}
-
-	return (
-		<SiteScanDrawer initialOpen={ true }>
-			<p>
-				{ __( 'Site scan is checking if there are AMP compatibility issues with your active theme and plugins. We’ll then recommend how to use the AMP plugin.', 'amp' ) }
-			</p>
-			<ProgressBar value={ isComplete
-				? 100
-				: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
-			} />
-			<p>
-				{ isComplete
-					? __( 'Scan complete', 'amp' )
-					: sprintf(
-						// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.
-						__( 'Scanning %1$d/%2$d URLs: Checking %3$s…', 'amp' ),
-						currentlyScannedUrlIndex + 1,
-						scannableUrls.length,
-						scannableUrls[ currentlyScannedUrlIndex ]?.label,
-					)
-				}
-			</p>
+			) }
+			{ ( isReady || isDelayedComplete ) ? <SiteScanSummary /> : <SiteScanInProgress /> }
 		</SiteScanDrawer>
 	);
 }
@@ -269,3 +156,107 @@ SiteScanDrawer.propTypes = {
 	children: PropTypes.any,
 	footerContent: PropTypes.node,
 };
+
+/**
+ * Site Scan - in progress state.
+ */
+function SiteScanInProgress() {
+	const {
+		currentlyScannedUrlIndex,
+		isComplete,
+		scannableUrls,
+	} = useContext( SiteScanContext );
+
+	return (
+		<>
+			<p>
+				{ __( 'Site scan is checking if there are AMP compatibility issues with your active theme and plugins. We’ll then recommend how to use the AMP plugin.', 'amp' ) }
+			</p>
+			<ProgressBar value={ isComplete
+				? 100
+				: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
+			} />
+			<p>
+				{ isComplete
+					? __( 'Scan complete', 'amp' )
+					: sprintf(
+						// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.
+						__( 'Scanning %1$d/%2$d URLs: Checking %3$s…', 'amp' ),
+						currentlyScannedUrlIndex + 1,
+						scannableUrls.length,
+						scannableUrls[ currentlyScannedUrlIndex ]?.label,
+					)
+				}
+			</p>
+		</>
+	);
+}
+
+/**
+ * Site Scan - summary state.
+ */
+function SiteScanSummary() {
+	const {
+		isReady,
+		pluginIssues,
+		stale,
+		themeIssues,
+	} = useContext( SiteScanContext );
+	const hasSiteIssues = themeIssues.length > 0 || pluginIssues.length > 0;
+
+	return (
+		<>
+			{ isReady ? (
+				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
+					<p>
+						{ stale
+							? __( 'Stale results. Rescan your site to ensure everything is working properly.', 'amp' )
+							: __( 'No changes since your last scan. Browse your site to ensure everything is working as expected.', 'amp' )
+						}
+					</p>
+				</AMPNotice>
+			) : (
+				<>
+					{ stale && (
+						<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
+							<p>
+								{ __( 'Stale results. Rescan your site to ensure everything is working properly.', 'amp' ) }
+							</p>
+						</AMPNotice>
+					) }
+					{ hasSiteIssues && (
+						<p
+							dangerouslySetInnerHTML={ {
+								__html: sprintf(
+									// translators: placeholders stand for page anchors.
+									__( 'Because of issues we’ve uncovered, you’ll want to switch your template mode. Please see <a href="%1$s">template mode recommendations</a> below. Because of plugin issues, you may also want to <a href="%2$s">review and suppress plugins</a>.', 'amp' ),
+									'#template-modes',
+									'#plugin-suppression',
+								),
+							} }
+						/>
+					) }
+					{ ! hasSiteIssues && ! stale && (
+						<AMPNotice type={ NOTICE_TYPE_SUCCESS } size={ NOTICE_SIZE_LARGE }>
+							<p>
+								{ __( 'Site scan found no issues on your site.', 'amp' ) }
+							</p>
+						</AMPNotice>
+					) }
+				</>
+			) }
+			{ themeIssues.length > 0 && (
+				<ThemesWithIssues
+					issues={ themeIssues }
+					validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
+				/>
+			) }
+			{ pluginIssues.length > 0 && (
+				<PluginsWithIssues
+					issues={ pluginIssues }
+					validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
+				/>
+			) }
+		</>
+	);
+}
