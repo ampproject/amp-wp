@@ -132,20 +132,20 @@ const initialState = {
  * Context provider for site scanning.
  *
  * @param {Object}  props                             Component props.
+ * @param {boolean} props.ampFirst                    Whether scanning should be done with Standard mode being forced.
  * @param {?any}    props.children                    Component children.
  * @param {boolean} props.fetchCachedValidationErrors Whether to fetch cached validation errors on mount.
  * @param {string}  props.scannableUrlsRestPath       The REST path for interacting with the scannable URL resources.
  * @param {string}  props.validateNonce               The AMP validate nonce.
  * @param {string}  props.validateQueryVar            The AMP validate query variable name.
- * @param {boolean} props.ampFirst                    Whether scanning should be done with Standard mode being forced.
  */
 export function SiteScanContextProvider( {
+	ampFirst = false,
 	children,
 	fetchCachedValidationErrors = false,
 	scannableUrlsRestPath,
 	validateNonce,
 	validateQueryVar,
-	ampFirst = false,
 } ) {
 	const { setAsyncError } = useAsyncError();
 	const [ state, dispatch ] = useReducer( siteScanReducer, initialState );
@@ -247,15 +247,13 @@ export function SiteScanContextProvider( {
 			try {
 				const { url } = scannableUrls[ currentlyScannedUrlIndex ];
 				const args = {
+					'amp-first': ampFirst || undefined,
 					[ validateQueryVar ]: {
+						cache: cache || undefined,
 						nonce: validateNonce,
 						omit_stylesheets: true,
-						cache,
 					},
 				};
-				if ( ampFirst ) {
-					args[ 'amp-first' ] = true;
-				}
 				const validationResults = await apiFetch( {
 					url: addQueryArgs( url, args ),
 				} );
@@ -278,10 +276,15 @@ export function SiteScanContextProvider( {
 
 				dispatch( { type: ACTION_SCAN_NEXT_URL } );
 			} catch ( e ) {
-				setAsyncError( e );
+				const ignoredErrorCodes = [ 'AMP_NOT_REQUESTED', 'AMP_NOT_AVAILABLE' ];
+				if ( ! e.code || ! ignoredErrorCodes.includes( e.code ) ) {
+					setAsyncError( e );
+				}
 			}
+
+			dispatch( { type: ACTION_SCAN_NEXT_URL } );
 		} )();
-	}, [ cache, currentlyScannedUrlIndex, scannableUrls, setAsyncError, status, validateNonce, validateQueryVar, ampFirst ] );
+	}, [ ampFirst, cache, currentlyScannedUrlIndex, scannableUrls, setAsyncError, status, validateNonce, validateQueryVar ] );
 
 	return (
 		<SiteScan.Provider
@@ -305,10 +308,10 @@ export function SiteScanContextProvider( {
 }
 
 SiteScanContextProvider.propTypes = {
+	ampFirst: PropTypes.bool,
 	children: PropTypes.any,
 	fetchCachedValidationErrors: PropTypes.bool,
 	scannableUrlsRestPath: PropTypes.string,
 	validateNonce: PropTypes.string,
 	validateQueryVar: PropTypes.string,
-	ampFirst: PropTypes.bool,
 };
