@@ -48,7 +48,6 @@ final class URLValidationQueueCron extends RecurringBackgroundTask {
 	 * @param ScannableURLProvider      $scannable_url_provider      ScannableURLProvider instance.
 	 */
 	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, ScannableURLProvider $scannable_url_provider ) {
-
 		parent::__construct( $background_task_deactivator );
 
 		$this->scannable_url_provider = $scannable_url_provider;
@@ -60,12 +59,15 @@ final class URLValidationQueueCron extends RecurringBackgroundTask {
 	 * @param mixed[] ...$args Unused callback arguments.
 	 */
 	public function process( ...$args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$urls             = $this->scannable_url_provider->get_urls();
 		$validation_queue = get_option( self::OPTION_KEY, [] );
+		if ( ! is_array( $validation_queue ) ) {
+			$validation_queue = [];
+		}
 
-		foreach ( $urls as $url ) {
-			if ( ! in_array( $url, $validation_queue, true ) ) {
-				$validation_queue[] = $url;
+		$entries = $this->scannable_url_provider->get_urls();
+		foreach ( $entries as $entry ) {
+			if ( ! in_array( $entry['url'], $validation_queue, true ) ) {
+				$validation_queue[] = $entry['url'];
 			}
 		}
 

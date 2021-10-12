@@ -8,43 +8,27 @@
 
 namespace AmpProject\AmpWP\Validation;
 
-use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\RecurringBackgroundTask;
+use AMP_Validation_Manager;
 
 /**
  * URLValidationCron class.
  *
  * @since 2.1
  *
+ * @todo This should be renamed something to make it distinct from URLValidationQueueCron.
  * @internal
  */
 final class URLValidationCron extends RecurringBackgroundTask {
 
 	/**
-	 * URLValidationProvider instance.
-	 *
-	 * @var URLValidationProvider
-	 */
-	private $url_validation_provider;
-
-	/**
 	 * The cron action name.
+	 *
+	 * @todo Rename this to amp_validate_dequeued_url or something.
 	 *
 	 * @var string
 	 */
 	const BACKGROUND_TASK_NAME = 'amp_validate_urls';
-
-	/**
-	 * Class constructor.
-	 *
-	 * @param BackgroundTaskDeactivator $background_task_deactivator Service that deactivates background events.
-	 * @param URLValidationProvider     $url_validation_provider     URLValidationProvider instance.
-	 */
-	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, URLValidationProvider $url_validation_provider ) {
-		parent::__construct( $background_task_deactivator );
-
-		$this->url_validation_provider = $url_validation_provider;
-	}
 
 	/**
 	 * Callback for the cron action.
@@ -58,9 +42,9 @@ final class URLValidationCron extends RecurringBackgroundTask {
 			return;
 		}
 
-		$entry = array_shift( $validation_queue );
-		if ( isset( $entry['url'], $entry['type'] ) ) {
-			$this->url_validation_provider->get_url_validation( $entry['url'], $entry['type'] );
+		$url = array_shift( $validation_queue );
+		if ( is_string( $url ) ) {
+			AMP_Validation_Manager::validate_url_and_store( $url );
 		}
 
 		update_option( URLValidationQueueCron::OPTION_KEY, $validation_queue );
