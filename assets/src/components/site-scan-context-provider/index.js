@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useCallback, useContext, useEffect, useReducer, useRef, useState } from '@wordpress/element';
+import { createContext, useCallback, useContext, useEffect, useReducer, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { usePrevious } from '@wordpress/compose';
 import { addQueryArgs } from '@wordpress/url';
