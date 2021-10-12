@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Admin\AMPPlugins;
 use AmpProject\AmpWP\Tests\TestCase;
 use stdClass;
@@ -17,6 +18,8 @@ use stdClass;
  * @coversDefaultClass \AmpProject\AmpWP\Admin\AMPPlugins
  */
 class AMPPluginsTest extends TestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Instance of AMPPlugins
@@ -278,6 +281,16 @@ class AMPPluginsTest extends TestCase {
 		$output = $this->instance->plugin_row_meta( $plugin_meta, '', [ 'slug' => 'example' ] );
 		$this->assertEquals( $plugin_meta, $output );
 
+		$this->set_private_property(
+			$this->instance,
+			'plugins',
+			[
+				[
+					'name' => 'akismet',
+					'slug' => 'akismet',
+				],
+			]
+		);
 		// Test 2: None AMP plugin.
 		$output = $this->instance->plugin_row_meta( $plugin_meta, '', [ 'slug' => 'akismet' ] );
 
@@ -286,5 +299,6 @@ class AMPPluginsTest extends TestCase {
 			$output
 		);
 
+		$this->set_private_property( $this->instance, 'plugins', [] );
 	}
 }
