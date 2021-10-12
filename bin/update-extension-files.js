@@ -122,7 +122,7 @@ class UpdateExtensionFiles {
 					output += `\n${ tabs }'${ key }' => ${ value ? 'true' : 'false' },`;
 					break;
 				case 'string':
-					value = value.toString().replace( /'/gm, `\\'` );
+					value = value.toString().replace( /'/gm, `"` );
 					output += `\n${ tabs }'${ key }' => '${ value }',`;
 					break;
 				case 'bigint':
