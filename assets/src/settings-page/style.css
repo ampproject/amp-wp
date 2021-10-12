@@ -568,7 +568,6 @@ li.error-kept {
 .settings-site-scan__footer {
 	align-items: center;
 	display: flex;
-	justify-content: flex-end;
 	flex-flow: row nowrap;
 }
 

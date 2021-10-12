@@ -28,6 +28,7 @@ import {
 	NOTICE_SIZE_SMALL,
 	NOTICE_TYPE_INFO,
 	NOTICE_TYPE_PLAIN,
+	NOTICE_TYPE_SUCCESS,
 } from '../components/amp-notice';
 
 /**
@@ -130,9 +131,11 @@ export function SiteScan() {
 						/>
 					) }
 					{ isComplete && ! hasSiteIssues && (
-						<p>
-							{ __( 'Site scan found no issues on your site.', 'amp' ) }
-						</p>
+						<AMPNotice type={ NOTICE_TYPE_SUCCESS } size={ NOTICE_SIZE_LARGE }>
+							<p>
+								{ __( 'Site scan found no issues on your site.', 'amp' ) }
+							</p>
+						</AMPNotice>
 					) }
 					{ themeIssues.length > 0 && (
 						<ThemesWithIssues
