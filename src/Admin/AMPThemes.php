@@ -49,9 +49,53 @@ class AMPThemes implements Service, Registerable {
 			}
 
 			$this->themes = ( ! empty( $this->themes ) && is_array( $this->themes ) ) ? $this->themes : [];
+			$this->themes = array_map(
+				static function ( $theme ) {
+
+					return self::normalize_theme_data( $theme );
+				},
+				$this->themes
+			);
 		}
 
 		return $this->themes;
+	}
+
+	/**
+	 * Normalize theme data.
+	 *
+	 * @param array $theme Theme data.
+	 *
+	 * @return array Normalized theme data.
+	 */
+	public static function normalize_theme_data( $theme = [] ) {
+
+		$default = [
+			'name'           => '',
+			'slug'           => '',
+			'version'        => '',
+			'preview_url'    => '',
+			'author'         => [
+				'user_nicename' => '',
+				'profile'       => '',
+				'avatar'        => '',
+				'display_name'  => '',
+				'author'        => '',
+				'author_url'    => '',
+			],
+			'screenshot_url' => '',
+			'rating'         => 0,
+			'num_ratings'    => 0,
+			'homepage'       => '',
+			'description'    => '',
+			'requires'       => '',
+			'requires_php'   => '',
+		];
+
+		$theme['author'] = ( ! empty( $theme['author'] ) && is_array( $theme['author'] ) ) ? $theme['author'] : [];
+		$theme['author'] = wp_parse_args( $theme['author'], $default['author'] );
+
+		return wp_parse_args( $theme, $default );
 	}
 
 	/**

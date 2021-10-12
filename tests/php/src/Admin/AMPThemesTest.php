@@ -41,6 +41,46 @@ class AMPThemesTest extends TestCase {
 	}
 
 	/**
+	 * @covers ::normalize_theme_data()
+	 */
+	public function test_normalize_theme_data() {
+
+		$input = [
+			'name'   => 'sample theme',
+			'author' => [
+				'user_nicename' => 'author_nicename',
+			],
+		];
+
+		$expected = [
+			'name'           => 'sample theme',
+			'slug'           => '',
+			'version'        => '',
+			'preview_url'    => '',
+			'author'         => [
+				'user_nicename' => 'author_nicename',
+				'profile'       => '',
+				'avatar'        => '',
+				'display_name'  => '',
+				'author'        => '',
+				'author_url'    => '',
+			],
+			'screenshot_url' => '',
+			'rating'         => 0,
+			'num_ratings'    => 0,
+			'homepage'       => '',
+			'description'    => '',
+			'requires'       => '',
+			'requires_php'   => '',
+		];
+
+		$this->assertEquals(
+			$expected,
+			AMPThemes::normalize_theme_data( $input )
+		);
+	}
+
+	/**
 	 * @covers ::register()
 	 */
 	public function test_register() {

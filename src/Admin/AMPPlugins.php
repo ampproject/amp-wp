@@ -72,9 +72,71 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 			}
 
 			$this->plugins = ( ! empty( $this->plugins ) && is_array( $this->plugins ) ) ? $this->plugins : [];
+			$this->plugins = array_map(
+				static function ( $plugin ) {
+					return self::normalize_plugin_data( $plugin );
+				},
+				$this->plugins
+			);
 		}
 
 		return $this->plugins;
+	}
+
+	/**
+	 * Normalize plugin data.
+	 *
+	 * @param array $plugin Plugin data.
+	 *
+	 * @return array Normalized plugin data.
+	 */
+	public static function normalize_plugin_data( $plugin = [] ) {
+
+		$default = [
+			'name'                     => '',
+			'slug'                     => '',
+			'version'                  => '',
+			'author'                   => '',
+			'author_profile'           => '',
+			'requires'                 => '',
+			'tested'                   => '',
+			'requires_php'             => '',
+			'rating'                   => 0,
+			'ratings'                  => [
+				1 => 0,
+				2 => 0,
+				3 => 0,
+				4 => 0,
+				5 => 0,
+			],
+			'num_ratings'              => 0,
+			'support_threads'          => 0,
+			'support_threads_resolved' => 0,
+			'active_installs'          => 0,
+			'downloaded'               => 0,
+			'last_updated'             => '',
+			'added'                    => '',
+			'homepage'                 => '',
+			'short_description'        => '',
+			'description'              => '',
+			'download_link'            => '',
+			'tags'                     => [],
+			'donate_link'              => '',
+			'icons'                    => [
+				'1x'  => '',
+				'2x'  => '',
+				'svg' => '',
+			],
+			'wporg'                    => false,
+		];
+
+		$plugin['ratings'] = ( ! empty( $plugin['ratings'] ) && is_array( $plugin['ratings'] ) ) ? $plugin['ratings'] : [];
+		$plugin['ratings'] = $plugin['ratings'] + $default['ratings'];
+
+		$plugin['icons'] = ( ! empty( $plugin['icons'] ) && is_array( $plugin['icons'] ) ) ? $plugin['icons'] : [];
+		$plugin['icons'] = wp_parse_args( $plugin['icons'], $default['icons'] );
+
+		return wp_parse_args( $plugin, $default );
 	}
 
 	/**

@@ -42,6 +42,67 @@ class AMPPluginsTest extends TestCase {
 	}
 
 	/**
+	 * @covers ::normalize_plugin_data()
+	 */
+	public function test_normalize_plugin_data() {
+
+		$input = [
+			'name'    => 'Plugin Name',
+			'slug'    => 'plugin-name',
+			'ratings' => [
+				'1' => 10,
+				2   => 45,
+			],
+			'icons'   => [
+				'1x' => 'http://sample.test/plugin-icon.png',
+			],
+		];
+
+		$expected = [
+			'name'                     => 'Plugin Name',
+			'slug'                     => 'plugin-name',
+			'version'                  => '',
+			'author'                   => '',
+			'author_profile'           => '',
+			'requires'                 => '',
+			'tested'                   => '',
+			'requires_php'             => '',
+			'rating'                   => 0,
+			'ratings'                  => [
+				1 => 10,
+				2 => 45,
+				3 => 0,
+				4 => 0,
+				5 => 0,
+			],
+			'num_ratings'              => 0,
+			'support_threads'          => 0,
+			'support_threads_resolved' => 0,
+			'active_installs'          => 0,
+			'downloaded'               => 0,
+			'last_updated'             => '',
+			'added'                    => '',
+			'homepage'                 => '',
+			'short_description'        => '',
+			'description'              => '',
+			'download_link'            => '',
+			'tags'                     => [],
+			'donate_link'              => '',
+			'icons'                    => [
+				'1x'  => 'http://sample.test/plugin-icon.png',
+				'2x'  => '',
+				'svg' => '',
+			],
+			'wporg'                    => false,
+		];
+
+		$this->assertEquals(
+			$expected,
+			AMPPlugins::normalize_plugin_data( $input )
+		);
+	}
+
+	/**
 	 * @covers ::get_registration_action()
 	 */
 	public function test_get_registration_action() {
