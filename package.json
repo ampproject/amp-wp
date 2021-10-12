@@ -71,7 +71,7 @@
     "eslint-plugin-eslint-comments": "3.2.0",
     "eslint-plugin-import": "2.24.2",
     "eslint-plugin-jest": "24.5.0",
-    "eslint-plugin-jsdoc": "36.1.0",
+    "eslint-plugin-jsdoc": "36.1.1",
     "eslint-plugin-react": "7.26.1",
     "eslint-plugin-react-hooks": "4.2.0",
     "grunt": "1.4.1",
