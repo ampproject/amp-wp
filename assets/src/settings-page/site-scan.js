@@ -89,7 +89,7 @@ export function SiteScan() {
 
 	return (
 		<SiteScanDrawer
-			initialOpen={ ! isReady || ( isReady && stale ) }
+			initialOpen={ ! isReady || stale }
 			labelExtra={ stale && ( isReady || isDelayedCompleted ) ? (
 				<AMPNotice type={ NOTICE_TYPE_PLAIN } size={ NOTICE_SIZE_SMALL }>
 					{ __( 'Stale results', 'amp' ) }
