@@ -34,26 +34,20 @@ class AMPThemes implements Service, Registerable {
 	protected $themes = false;
 
 	/**
-	 * Fetch AMP themes data.
+	 * Get list of AMP themes.
 	 *
-	 * @return array
+	 * @return array List of AMP themes.
 	 */
 	public function get_themes() {
 
 		if ( ! is_array( $this->themes ) ) {
-			$file_path = AMP__DIR__ . '/data/themes.json';
+			$file_path = AMP__DIR__ . '/includes/amp-themes.php';
 
-			if ( ! file_exists( $file_path ) ) {
-				return [];
+			if ( file_exists( $file_path ) ) {
+				$this->themes = include $file_path;
 			}
 
-			$json_data       = file_get_contents( $file_path );
-			$this->themes    = json_decode( $json_data, true );
-			$json_last_error = json_last_error();
-
-			if ( JSON_ERROR_NONE !== $json_last_error ) {
-				$this->themes = [];
-			}
+			$this->themes = ( ! empty( $this->themes ) && is_array( $this->themes ) ) ? $this->themes : [];
 		}
 
 		return $this->themes;

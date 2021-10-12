@@ -58,26 +58,20 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	}
 
 	/**
-	 * Fetch AMP plugin data.
+	 * Get list of AMP plugins.
 	 *
-	 * @return array
+	 * @return array List of AMP plugins.
 	 */
 	public function get_plugins() {
 
 		if ( ! is_array( $this->plugins ) ) {
-			$file_path = AMP__DIR__ . '/data/plugins.json';
+			$file_path = AMP__DIR__ . '/includes/amp-plugins.php';
 
-			if ( ! file_exists( $file_path ) ) {
-				return [];
+			if ( file_exists( $file_path ) ) {
+				$this->plugins = include $file_path;
 			}
 
-			$json_data       = file_get_contents( $file_path );
-			$this->plugins   = json_decode( $json_data, true );
-			$json_last_error = json_last_error();
-
-			if ( JSON_ERROR_NONE !== $json_last_error ) {
-				$this->plugins = [];
-			}
+			$this->plugins = ( ! empty( $this->plugins ) && is_array( $this->plugins ) ) ? $this->plugins : [];
 		}
 
 		return $this->plugins;

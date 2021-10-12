@@ -12,6 +12,8 @@ assets/js/*.asset.php
 assets/js/*.map
 built
 /amphtml
+includes/amp-plugins.php
+includes/amp-themes.php
 .env
 .idea/
 /phpcs.xml

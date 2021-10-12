@@ -81,12 +81,61 @@ class UpdateExtensionJson {
 	 */
 	async storeData() {
 		if ( this.plugins ) {
-			await filesystem.writeFile( 'data/plugins.json', JSON.stringify( this.plugins ) );
+			let output = this.convertToPhpArray( this.plugins );
+			output = `<?php\nreturn ${ output };`;
+			await filesystem.writeFile( 'includes/amp-plugins.php', output );
 		}
 
 		if ( this.themes ) {
-			await filesystem.writeFile( 'data/themes.json', JSON.stringify( this.themes ) );
+			let output = this.convertToPhpArray( this.themes );
+			output = `<?php\nreturn ${ output };`;
+			await filesystem.writeFile( 'includes/amp-themes.php', output );
 		}
+	}
+
+	/**
+	 * Convert JS object into PHP array variable.
+	 *
+	 * @param {Object} object An object that needs to convert into a PHP array.
+	 * @param {number} depth  Depth of iteration.
+	 * @return {string|null} PHP array in string.
+	 */
+	convertToPhpArray( object, depth = 1 ) {
+		if ( 'object' !== typeof object ) {
+			return null;
+		}
+
+		const tabs = '\t'.repeat( depth );
+		let output = '[';
+
+		// eslint-disable-next-line guard-for-in
+		for ( const key in object ) {
+			let value = object[ key ];
+
+			switch ( typeof value ) {
+				case 'object':
+					let childObjectOutput = this.convertToPhpArray( value, ( depth + 1 ) );
+					childObjectOutput = childObjectOutput ? childObjectOutput : '[]';
+					output += `\n${ tabs }'${ key }' => ${ childObjectOutput },`;
+					break;
+				case 'boolean':
+					output += `\n${ tabs }'${ key }' => ${ value ? 'true' : 'false' },`;
+					break;
+				case 'string':
+					value = value.toString().replace( /'/gm, `\\'` );
+					output += `\n${ tabs }'${ key }' => '${ value }',`;
+					break;
+				case 'bigint':
+				case 'number':
+					output += `\n${ tabs }'${ key }' => ${ value },`;
+					break;
+				default:
+					output += `\n${ tabs }'${ key }' => '',`;
+					break;
+			}
+		}
+		output += '\n' + '\t'.repeat( depth - 1 ) + ']';
+		return output;
 	}
 
 	/**
