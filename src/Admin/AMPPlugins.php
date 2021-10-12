@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use stdClass;
+use WP_Screen;
 use function get_current_screen;
 
 /**
@@ -61,17 +62,13 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	 */
 	public static function set_plugins() {
 
-		global $wp_filesystem;
-
-		AMPThemes::init_file_system();
-
 		$plugin_json = AMP__DIR__ . '/data/plugins.json';
 
 		if ( ! file_exists( $plugin_json ) ) {
 			return;
 		}
 
-		$json_data       = $wp_filesystem->get_contents( $plugin_json );
+		$json_data       = file_get_contents( $plugin_json );
 		self::$plugins   = json_decode( $json_data, true );
 		$json_last_error = json_last_error();
 
@@ -90,7 +87,7 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 		$this->set_plugins();
 		$screen = get_current_screen();
 
-		if ( $screen instanceof \WP_Screen && in_array( $screen->id, [ 'plugins', 'plugin-install' ], true ) ) {
+		if ( $screen instanceof WP_Screen && in_array( $screen->id, [ 'plugins', 'plugin-install' ], true ) ) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		}
 
@@ -237,9 +234,12 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 
 			if ( ! empty( $plugin['homepage'] ) ) {
 				$actions[] = sprintf(
-					'<a href="%s" target="_blank" aria-label="Site link for %s">%s</a>',
+					'<a href="%s" target="_blank" aria-label="%s">%s</a>',
 					esc_url( $plugin['homepage'] ),
-					esc_html( $plugin['name'] ),
+					esc_attr(
+						/* translators: %s: Plugin name */
+						sprintf( __( 'Site link of %s', 'amp' ), $plugin['name'] )
+					),
 					esc_html__( 'Visit site', 'amp' )
 				);
 			}
@@ -263,7 +263,10 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 		$amp_plugins = wp_list_pluck( self::$plugins, 'slug' );
 
 		if ( ! empty( $plugin_data['slug'] ) && in_array( $plugin_data['slug'], $amp_plugins, true ) ) {
-			$plugin_meta[] = '<span><span class="amp-logo-icon small"></span>&nbsp;Page Experience Enhancing</span>';
+			$plugin_meta[] = sprintf(
+				'<span><span class="amp-logo-icon small"></span>&nbsp;%s</span>',
+				esc_html__( 'AMP Compatible', 'amp' )
+			);
 		}
 
 		return $plugin_meta;
