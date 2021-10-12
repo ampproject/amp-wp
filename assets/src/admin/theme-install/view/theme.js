@@ -75,13 +75,13 @@ export default wpThemeView.extend( {
 
 			const themeActions = element.querySelector( '.theme-actions' );
 			if ( themeActions ) {
-				themeActions.innerHTML = '';
+				themeActions.innerText = '';
 				themeActions.appendChild( siteLinkButton );
 			}
 
 			const moreDetail = element.querySelector( '.more-details' );
 			if ( moreDetail ) {
-				moreDetail.innerHTML = __( 'Visit site', 'amp' );
+				moreDetail.innerText = __( 'Visit site', 'amp' );
 			}
 		}
 	},
