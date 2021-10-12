@@ -1,25 +1,20 @@
 <?php
 /**
  * Test cases for URLValidationQueueCron
- *
- *
  */
 
 namespace AmpProject\AmpWP\Tests\Validation;
 
-use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Validation\ScannableURLProvider;
-use AmpProject\AmpWP\Validation\URLScanningContext;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Validation\URLValidationQueueCron;
-use WP_UnitTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationQueueCron */
-final class URLValidationQueueCronTest extends WP_UnitTestCase {
+final class URLValidationQueueCronTest extends DependencyInjectedTestCase {
 
 	use ValidationRequestMocking, PrivateAccess;
 
@@ -38,7 +33,7 @@ final class URLValidationQueueCronTest extends WP_UnitTestCase {
 	public function setUp() {
 
 		parent::setUp();
-		$this->test_instance = new URLValidationQueueCron( new BackgroundTaskDeactivator(), new ScannableURLProvider( new URLScanningContext( 20 ) ) );
+		$this->test_instance = $this->injector->make( URLValidationQueueCron::class );
 
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
@@ -71,9 +66,12 @@ final class URLValidationQueueCronTest extends WP_UnitTestCase {
 		$this->factory()->post->create_many( 5 );
 		$this->test_instance->process();
 
-		$validation_queue_key = 'amp_url_validation_queue';
-		$validation_queue     = get_option( $validation_queue_key, [] );
-		$this->assertCount( 10, $validation_queue );
+		$validation_queue = get_option( URLValidationQueueCron::OPTION_KEY, [] );
+		$this->assertIsArray( $validation_queue );
+		$this->assertCount( 6, $validation_queue );
+		foreach ( $validation_queue as $url ) {
+			$this->assertStringStartsWith( home_url( '/' ), $url );
+		}
 	}
 
 	/**

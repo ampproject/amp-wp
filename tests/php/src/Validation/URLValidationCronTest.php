@@ -6,17 +6,16 @@ use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
-use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLScanningContext;
 use AmpProject\AmpWP\Validation\URLValidationCron;
-use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\URLValidationQueueCron;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationCron */
-final class URLValidationCronTest extends TestCase {
+final class URLValidationCronTest extends DependencyInjectedTestCase {
 	use ValidationRequestMocking, PrivateAccess;
 
 	/**
@@ -33,7 +32,7 @@ final class URLValidationCronTest extends TestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->test_instance = new URLValidationCron( new BackgroundTaskDeactivator(), new URLValidationProvider() );
+		$this->test_instance = $this->injector->make( URLValidationCron::class );
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 
