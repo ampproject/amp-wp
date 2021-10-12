@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useCallback, useEffect, useReducer, useRef } from '@wordpress/element';
+import { createContext, useCallback, useContext, useEffect, useReducer, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 
@@ -14,6 +14,8 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { useAsyncError } from '../../utils/use-async-error';
+import { Options } from '../options-context-provider';
+import { STANDARD } from '../../common/constants';
 import { getSiteIssues } from './get-site-issues';
 
 export const SiteScan = createContext();
@@ -147,6 +149,7 @@ export function SiteScanContextProvider( {
 	validateNonce,
 	validateQueryVar,
 } ) {
+	const { originalOptions } = useContext( Options );
 	const { setAsyncError } = useAsyncError();
 	const [ state, dispatch ] = useReducer( siteScanReducer, initialState );
 	const {
@@ -245,7 +248,8 @@ export function SiteScanContextProvider( {
 			dispatch( { type: ACTION_SCAN_IN_PROGRESS } );
 
 			try {
-				const { url } = scannableUrls[ currentlyScannedUrlIndex ];
+				const urlType = ampFirst || originalOptions?.theme_support === STANDARD ? 'url' : 'amp_url';
+				const url = scannableUrls[ currentlyScannedUrlIndex ][ urlType ];
 				const args = {
 					'amp-first': ampFirst || undefined,
 					[ validateQueryVar ]: {
@@ -284,7 +288,7 @@ export function SiteScanContextProvider( {
 
 			dispatch( { type: ACTION_SCAN_NEXT_URL } );
 		} )();
-	}, [ ampFirst, cache, currentlyScannedUrlIndex, scannableUrls, setAsyncError, status, validateNonce, validateQueryVar ] );
+	}, [ ampFirst, cache, currentlyScannedUrlIndex, originalOptions?.theme_support, scannableUrls, setAsyncError, status, validateNonce, validateQueryVar ] );
 
 	return (
 		<SiteScan.Provider
