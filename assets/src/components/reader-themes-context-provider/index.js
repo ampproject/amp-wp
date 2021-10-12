@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG, AMP_THEMES } from 'amp-settings';
+import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
 
 /**
  * Internal dependencies
@@ -310,7 +310,6 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 					themes: filteredThemes,
 					themesAPIError,
 					unavailableThemes,
-					ampThemes: AMP_THEMES,
 				}
 			}
 		>

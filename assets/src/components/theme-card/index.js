@@ -19,7 +19,6 @@ import MobileIcon from '../svg/mobile-icon.svg';
 import { Options } from '../options-context-provider';
 import { Selectable } from '../selectable';
 import { Phone } from '../phone';
-import { PXEnhancingMessage } from '../px-enhancing-message';
 
 /**
  * A selectable card showing a theme in a list of themes.
@@ -33,9 +32,8 @@ import { PXEnhancingMessage } from '../px-enhancing-message';
  * @param {boolean} props.disabled      Whether the theme is not automatically installable in the current environment.
  * @param {Object}  props.style         Style object to pass to the Selectable component.
  * @param {string}  props.ElementName   Name for the wrapper element.
- * @param {boolean} props.isPXEnhanced  Is themes is AMP compatible or not.
  */
-export function ThemeCard( { description, ElementName = 'li', homepage, screenshotUrl, slug, name, disabled, style, isPXEnhanced } ) {
+export function ThemeCard( { description, ElementName = 'li', homepage, screenshotUrl, slug, name, disabled, style } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
 	const { reader_theme: readerTheme } = editedOptions;
 
@@ -102,10 +100,6 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 					</p>
 				)
 			}
-			{ isPXEnhanced && (
-				<PXEnhancingMessage />
-			) }
-
 		</Selectable>
 	);
 }
@@ -119,5 +113,4 @@ ThemeCard.propTypes = {
 	name: PropTypes.string,
 	disabled: PropTypes.bool,
 	style: PropTypes.object,
-	isPXEnhanced: PropTypes.bool,
 };
