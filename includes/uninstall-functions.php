@@ -19,7 +19,7 @@ function delete_options() {
 	delete_option( 'amp-options' );
 	delete_option( 'amp_css_transient_monitor_time_series' );
 	delete_option( 'amp_customize_setting_modified_timestamps' );
-	delete_option( 'amp_url_validation_queue' );
+	delete_option( 'amp_url_validation_queue' ); // See Validation\URLValidationCron::OPTION_KEY.
 
 	$theme_mod_name = 'amp_customize_setting_modified_timestamps';
 	remove_theme_mod( $theme_mod_name );

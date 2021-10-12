@@ -12,7 +12,6 @@ use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLScanningContext;
 use AmpProject\AmpWP\Validation\URLValidationCron;
-use AmpProject\AmpWP\Validation\URLValidationQueueCron;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationCron */
 final class URLValidationCronTest extends DependencyInjectedTestCase {
@@ -25,6 +24,9 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 	 */
 	private $test_instance;
 
+	/** @var int */
+	private $request_count = 0;
+
 	/**
 	 * Setup.
 	 *
@@ -33,7 +35,13 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->test_instance = $this->injector->make( URLValidationCron::class );
-		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
+		add_filter(
+			'pre_http_request',
+			function () {
+				$this->request_count++;
+				return $this->get_validate_response();
+			}
+		);
 	}
 
 	/**
@@ -90,37 +98,48 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 	 * Test validate_urls.
 	 *
 	 * @covers ::process()
+	 * @covers ::dequeue()
 	 */
 	public function test_validate_urls() {
+		/** @var ScannableURLProvider $scannable_url_provider */
+		$scannable_url_provider = $this->get_private_property( $this->test_instance, 'scannable_url_provider' );
 
-		$this->factory()->post->create_many( 5 );
+		$initial_urls      = wp_list_pluck( $scannable_url_provider->get_urls(), 'url' );
+		$initial_url_count = count( $initial_urls );
+		$this->assertGreaterThan( 0, $initial_url_count );
 
-		add_filter( 'amp_url_validation_sleep_time', '__return_false' );
+		delete_option( URLValidationCron::OPTION_KEY );
 
-		$url_validation_queue_instance = new URLValidationQueueCron( new BackgroundTaskDeactivator(), new ScannableURLProvider( new URLScanningContext( 20 ) ) );
-		$url_validation_queue_instance->process();
+		// Verify that processing will enqueue URLs (if none are queued) and process one.
+		for ( $i = 1; $i <= $initial_url_count; $i++ ) {
+			$this->test_instance->process();
+			$this->assertEquals( $i, $this->request_count );
+			$data = get_option( URLValidationCron::OPTION_KEY );
+			$this->assertArrayHasKey( 'urls', $data );
+			$this->assertArrayHasKey( 'timestamp', $data );
+			$this->assertLessThanOrEqual( time(), $data['timestamp'] );
+			$this->assertEquals(
+				array_slice( $initial_urls, $i ),
+				$data['urls']
+			);
+		}
 
-		$validation_queue = get_option( URLValidationQueueCron::OPTION_KEY, [] );
-
-		$this->assertCount( 10, $validation_queue );
-
+		// Ensure no URLs are queued or processed if timestamp is less than a week.
+		$data = get_option( URLValidationCron::OPTION_KEY );
+		$this->assertCount( 0, $data['urls'] );
+		$before_request_count = $this->request_count;
 		$this->test_instance->process();
-		$validation_queue = get_option( URLValidationQueueCron::OPTION_KEY, [] );
+		$this->assertEquals( $before_request_count, $this->request_count );
+		$data = get_option( URLValidationCron::OPTION_KEY );
+		$this->assertCount( 0, $data['urls'] );
 
-		$this->assertCount( 1, $this->get_validated_urls() );
-		$this->assertCount( 9, $validation_queue );
-
-
+		// Now test that after a week has transpired, the next set of URLs are re-queued and one is processed.
+		$data['timestamp'] = time() - WEEK_IN_SECONDS - MINUTE_IN_SECONDS;
+		update_option( URLValidationCron::OPTION_KEY, $data );
 		$this->test_instance->process();
-		$validation_queue = get_option( URLValidationQueueCron::OPTION_KEY, [] );
-
-		$this->assertCount( 2, $this->get_validated_urls() );
-		$this->assertCount( 8, $validation_queue );
-
-		$this->test_instance->process();
-		$validation_queue = get_option( URLValidationQueueCron::OPTION_KEY, [] );
-		$this->assertCount( 3, $this->get_validated_urls() );
-		$this->assertCount( 7, $validation_queue );
+		$this->assertEquals( $before_request_count + 1, $this->request_count );
+		$data = get_option( URLValidationCron::OPTION_KEY );
+		$this->assertCount( $initial_url_count - 1, $data['urls'] );
 	}
 
 	/** @covers ::get_event_name() */
