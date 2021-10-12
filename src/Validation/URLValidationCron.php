@@ -55,7 +55,7 @@ final class URLValidationCron extends RecurringBackgroundTask {
 		$validation_queue = get_option( URLValidationQueueCron::OPTION_KEY, [] );
 
 		if ( empty( $validation_queue ) || ! is_array( $validation_queue ) ) {
-			return [];
+			return;
 		}
 
 		$entry = array_shift( $validation_queue );
