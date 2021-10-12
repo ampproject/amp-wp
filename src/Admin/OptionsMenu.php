@@ -64,6 +64,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	/** @var LoadingError */
 	private $loading_error;
 
+	/** @var SiteHealth */
+	private $site_health;
+
 	/** @var DependencySupport */
 	private $dependency_support;
 
@@ -94,13 +97,15 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @param RESTPreloader     $rest_preloader An instance of the RESTPreloader class.
 	 * @param DependencySupport $dependency_support An instance of the DependencySupport class.
 	 * @param LoadingError      $loading_error An instance of the LoadingError class.
+	 * @param SiteHealth        $site_health An instance of the SiteHealth class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support, LoadingError $loading_error ) {
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support, LoadingError $loading_error, SiteHealth $site_health ) {
 		$this->google_fonts       = $google_fonts;
 		$this->reader_themes      = $reader_themes;
 		$this->rest_preloader     = $rest_preloader;
 		$this->dependency_support = $dependency_support;
 		$this->loading_error      = $loading_error;
+		$this->site_health        = $site_health;
 	}
 
 	/**
@@ -248,6 +253,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE' => UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
+			'HAS_PAGE_CACHING'                   => $this->site_health->has_page_caching( true ),
 		];
 
 		wp_add_inline_script(
