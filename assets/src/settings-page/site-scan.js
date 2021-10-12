@@ -117,7 +117,7 @@ export function SiteScan() {
 							</p>
 						</AMPNotice>
 					) }
-					{ isComplete && ! hasSiteIssues && (
+					{ isComplete && hasSiteIssues && (
 						<p
 							dangerouslySetInnerHTML={ {
 								__html: sprintf(
@@ -129,7 +129,7 @@ export function SiteScan() {
 							} }
 						/>
 					) }
-					{ isComplete && hasSiteIssues && (
+					{ isComplete && ! hasSiteIssues && (
 						<p>
 							{ __( 'Site scan found no issues on your site.', 'amp' ) }
 						</p>
