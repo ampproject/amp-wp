@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\AMPThemes;
 use AmpProject\AmpWP\Tests\TestCase;
+use stdClass;
 
 /**
  * Tests for AMPThemes.
@@ -79,7 +80,7 @@ class AMPThemesTest extends TestCase {
 	 */
 	public function test_themes_api() {
 		$this->instance->register();
-		$response = new \stdClass();
+		$response = new stdClass();
 
 		// Test 1: Normal request.
 		$response = $this->instance->themes_api( $response, 'query_themes', [ 'per_page' => 36 ] );

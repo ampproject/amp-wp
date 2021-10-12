@@ -22,7 +22,7 @@ const ampPluginInstall = {
 	},
 
 	/**
-	 * Add AMP compatible message in AMP compatible plugin card after search result comes in.
+	 * Add message for AMP Compatibility in AMP-compatible plugins card after search result comes in.
 	 */
 	addAMPMessageInSearchResult() {
 		const pluginInstallSearch = document.querySelector( '.plugin-install-php .wp-filter-search' );
@@ -42,7 +42,7 @@ const ampPluginInstall = {
 	},
 
 	/**
-	 * Add AMP compatible message in AMP compatible plugin card.
+	 * Add message for AMP Compatibility in AMP-compatible plugins card.
 	 */
 	addAmpMessage() {
 		// eslint-disable-next-line guard-for-in

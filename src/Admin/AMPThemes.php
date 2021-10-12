@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use WP_Screen;
 use stdClass;
 
 /**
@@ -76,7 +77,7 @@ class AMPThemes implements Service, Registerable {
 
 		$screen = get_current_screen();
 
-		if ( $screen instanceof \WP_Screen && in_array( $screen->id, [ 'themes', 'theme-install' ], true ) ) {
+		if ( $screen instanceof WP_Screen && in_array( $screen->id, [ 'themes', 'theme-install' ], true ) ) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		}
 	}
