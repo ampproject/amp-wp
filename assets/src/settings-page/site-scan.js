@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { useContext, useEffect } from '@wordpress/element';
+import { useCallback, useContext, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -66,26 +66,55 @@ export function SiteScan() {
 	const isDelayedCompleted = useDelayedFlag( isCompleted );
 
 	/**
-	 * Determine footer content.
+	 * Get footer content.
 	 */
-	let footerContent = null;
+	const getFooterContent = useCallback( () => {
+		if ( isCancelled || ( stale && ( isReady || isDelayedCompleted ) ) ) {
+			return (
+				<Button
+					onClick={ () => startSiteScan( { cache: true } ) }
+					isPrimary={ true }
+				>
+					{ __( 'Rescan Site', 'amp' ) }
+				</Button>
+			);
+		}
 
-	if ( isCancelled || ( stale && ( isReady || isDelayedCompleted ) ) ) {
-		footerContent = (
-			<Button
-				onClick={ () => startSiteScan( { cache: true } ) }
-				isPrimary={ true }
-			>
-				{ __( 'Rescan Site', 'amp' ) }
-			</Button>
-		);
-	} else if ( ! stale && isDelayedCompleted ) {
-		footerContent = (
-			<Button href={ previewPermalink } isPrimary={ true }>
-				{ __( 'Browse Site', 'amp' ) }
-			</Button>
-		);
-	}
+		if ( ! stale && isDelayedCompleted ) {
+			return (
+				<Button href={ previewPermalink } isPrimary={ true }>
+					{ __( 'Browse Site', 'amp' ) }
+				</Button>
+			);
+		}
+
+		return null;
+	}, [ isCancelled, isDelayedCompleted, isReady, previewPermalink, stale, startSiteScan ] );
+
+	/**
+	 * Get main content.
+	 */
+	const getContent = useCallback( () => {
+		if ( isInitializing ) {
+			return <Loading />;
+		}
+
+		if ( isCancelled ) {
+			return (
+				<AMPNotice type={ NOTICE_TYPE_ERROR } size={ NOTICE_SIZE_LARGE }>
+					<p>
+						{ __( 'Site scan has been cancelled. Try again.', 'amp' ) }
+					</p>
+				</AMPNotice>
+			);
+		}
+
+		if ( isReady || isDelayedCompleted ) {
+			return <SiteScanSummary />;
+		}
+
+		return <SiteScanInProgress />;
+	}, [ isCancelled, isDelayedCompleted, isInitializing, isReady ] );
 
 	return (
 		<SiteScanDrawer
@@ -95,17 +124,9 @@ export function SiteScan() {
 					{ __( 'Stale results', 'amp' ) }
 				</AMPNotice>
 			) : null }
-			footerContent={ footerContent }
+			footerContent={ getFooterContent() }
 		>
-			{ isInitializing && <Loading /> }
-			{ isCancelled && (
-				<AMPNotice type={ NOTICE_TYPE_ERROR } size={ NOTICE_SIZE_LARGE }>
-					<p>
-						{ __( 'Site scan has been cancelled. Try again.', 'amp' ) }
-					</p>
-				</AMPNotice>
-			) }
-			{ ( isReady || isDelayedCompleted ) ? <SiteScanSummary /> : <SiteScanInProgress /> }
+			{ getContent() }
 		</SiteScanDrawer>
 	);
 }
