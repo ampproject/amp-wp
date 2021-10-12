@@ -20,7 +20,6 @@ import {
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 	USERS_RESOURCE_REST_PATH,
 	VALIDATE_NONCE,
-	VALIDATE_QUERY_VAR,
 } from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
 
@@ -87,10 +86,9 @@ export function Providers( { children } ) {
 									>
 										<TemplateModeOverrideContextProvider>
 											<SiteScanContextProvider
+												ampFirst={ true }
 												scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 												validateNonce={ VALIDATE_NONCE }
-												validateQueryVar={ VALIDATE_QUERY_VAR }
-												ampFirst={ true }
 											>
 												{ children }
 											</SiteScanContextProvider>

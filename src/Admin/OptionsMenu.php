@@ -264,7 +264,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE' => UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
 			'VALIDATE_NONCE'                     => AMP_Validation_Manager::get_amp_validate_nonce(),
-			'VALIDATE_QUERY_VAR'                 => AMP_Validation_Manager::VALIDATE_QUERY_VAR,
 			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
 			'HAS_PAGE_CACHING'                   => $this->site_health->has_page_caching( true ),
 		];

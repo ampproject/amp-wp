@@ -13,7 +13,6 @@ import {
 	USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 	USERS_RESOURCE_REST_PATH,
 	VALIDATE_NONCE,
-	VALIDATE_QUERY_VAR,
 } from 'amp-settings';
 
 /**
@@ -96,11 +95,10 @@ function Providers( { children } ) {
 								<PluginsContextProvider hasErrorBoundary={ true }>
 									<ThemesContextProvider hasErrorBoundary={ true }>
 										<SiteScanContextProvider
+											ampFirst={ false }
 											fetchCachedValidationErrors={ true }
 											scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 											validateNonce={ VALIDATE_NONCE }
-											validateQueryVar={ VALIDATE_QUERY_VAR }
-											ampFirst={ false }
 										>
 											{ children }
 										</SiteScanContextProvider>

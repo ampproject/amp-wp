@@ -139,7 +139,6 @@ const initialState = {
  * @param {boolean} props.fetchCachedValidationErrors Whether to fetch cached validation errors on mount.
  * @param {string}  props.scannableUrlsRestPath       The REST path for interacting with the scannable URL resources.
  * @param {string}  props.validateNonce               The AMP validate nonce.
- * @param {string}  props.validateQueryVar            The AMP validate query variable name.
  */
 export function SiteScanContextProvider( {
 	ampFirst = false,
@@ -147,7 +146,6 @@ export function SiteScanContextProvider( {
 	fetchCachedValidationErrors = false,
 	scannableUrlsRestPath,
 	validateNonce,
-	validateQueryVar,
 } ) {
 	const { originalOptions } = useContext( Options );
 	const { setAsyncError } = useAsyncError();
@@ -162,17 +160,20 @@ export function SiteScanContextProvider( {
 		themeIssues,
 	} = state;
 
+	/**
+	 * Preflight check.
+	 */
 	useEffect( () => {
 		if ( status ) {
 			return;
 		}
 
-		if ( ! validateQueryVar || ! validateNonce ) {
+		if ( ! validateNonce ) {
 			throw new Error( 'Invalid site scan configuration' );
 		}
 
 		dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
-	}, [ status, validateNonce, validateQueryVar ] );
+	}, [ status, validateNonce ] );
 
 	/**
 	 * This component sets state inside async functions. Use this ref to prevent
@@ -252,7 +253,7 @@ export function SiteScanContextProvider( {
 				const url = scannableUrls[ currentlyScannedUrlIndex ][ urlType ];
 				const args = {
 					'amp-first': ampFirst || undefined,
-					[ validateQueryVar ]: {
+					amp_validate: {
 						cache: cache || undefined,
 						nonce: validateNonce,
 						omit_stylesheets: true,
@@ -288,7 +289,7 @@ export function SiteScanContextProvider( {
 
 			dispatch( { type: ACTION_SCAN_NEXT_URL } );
 		} )();
-	}, [ ampFirst, cache, currentlyScannedUrlIndex, originalOptions?.theme_support, scannableUrls, setAsyncError, status, validateNonce, validateQueryVar ] );
+	}, [ ampFirst, cache, currentlyScannedUrlIndex, originalOptions?.theme_support, scannableUrls, setAsyncError, status, validateNonce ] );
 
 	return (
 		<SiteScan.Provider
@@ -317,5 +318,4 @@ SiteScanContextProvider.propTypes = {
 	fetchCachedValidationErrors: PropTypes.bool,
 	scannableUrlsRestPath: PropTypes.string,
 	validateNonce: PropTypes.string,
-	validateQueryVar: PropTypes.string,
 };
