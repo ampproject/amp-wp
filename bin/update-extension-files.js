@@ -162,6 +162,8 @@ class UpdateExtensionFiles {
 			plugin = await this.preparePluginData( item );
 		}
 
+		delete plugin.description;
+
 		return plugin;
 	}
 
