@@ -81,8 +81,7 @@ export default wpThemeView.extend( {
 
 			const moreDetail = element.querySelector( '.more-details' );
 			if ( moreDetail ) {
-				moreDetail.innerHTML = '';
-				moreDetail.append( __( 'Visit site', 'amp' ) );
+				moreDetail.innerHTML = __( 'Visit site', 'amp' );
 			}
 		}
 	},

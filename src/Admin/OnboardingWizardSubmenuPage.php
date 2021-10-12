@@ -210,13 +210,6 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		);
 
 		wp_enqueue_style(
-			'amp-admin',
-			amp_get_asset_url( 'css/amp-admin.css' ),
-			[],
-			AMP__VERSION
-		);
-
-		wp_enqueue_style(
 			self::ASSET_HANDLE,
 			amp_get_asset_url( 'css/amp-onboarding-wizard.css' ),
 			[
@@ -232,8 +225,6 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
 		$amp_settings_link = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
-
-		AMPThemes::set_themes();
 
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
@@ -263,7 +254,6 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
-			'AMP_THEMES'                         => wp_list_pluck( AMPThemes::$themes, 'slug' ),
 		];
 
 		wp_add_inline_script(
