@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -31,6 +31,7 @@ import {
 	NOTICE_TYPE_PLAIN,
 	NOTICE_TYPE_SUCCESS,
 } from '../components/amp-notice';
+import useDelayedFlag from '../utils/use-delayed-flag';
 
 /**
  * Site Scan component on the settings screen.
@@ -39,7 +40,7 @@ export function SiteScan() {
 	const {
 		cancelSiteScan,
 		isCancelled,
-		isComplete,
+		isCompleted,
 		isInitializing,
 		isReady,
 		stale,
@@ -59,29 +60,17 @@ export function SiteScan() {
 	useEffect( () => () => cancelSiteScan(), [ cancelSiteScan ] );
 
 	/**
-	 * Delay the `isComplete` state so that the progress bar stays at 100% for a
+	 * Delay the `isCompleted` flag so that the progress bar stays at 100% for a
 	 * brief moment.
 	 */
-	const [ isDelayedComplete, setIsDelayedComplete ] = useState( isComplete );
-
-	useEffect( () => {
-		let cleanup = () => {};
-
-		if ( isComplete && ! isDelayedComplete ) {
-			cleanup = setTimeout( () => setIsDelayedComplete( true ), 500 );
-		} else if ( ! isComplete && isDelayedComplete ) {
-			setIsDelayedComplete( false );
-		}
-
-		return cleanup;
-	}, [ isComplete, isDelayedComplete ] );
+	const isDelayedCompleted = useDelayedFlag( isCompleted );
 
 	/**
 	 * Determine footer content.
 	 */
 	let footerContent = null;
 
-	if ( isCancelled || ( stale && ( isReady || isDelayedComplete ) ) ) {
+	if ( isCancelled || ( stale && ( isReady || isDelayedCompleted ) ) ) {
 		footerContent = (
 			<Button
 				onClick={ () => startSiteScan( { cache: true } ) }
@@ -90,7 +79,7 @@ export function SiteScan() {
 				{ __( 'Rescan Site', 'amp' ) }
 			</Button>
 		);
-	} else if ( ! stale && isDelayedComplete ) {
+	} else if ( ! stale && isDelayedCompleted ) {
 		footerContent = (
 			<Button href={ previewPermalink } isPrimary={ true }>
 				{ __( 'Browse Site', 'amp' ) }
@@ -101,7 +90,7 @@ export function SiteScan() {
 	return (
 		<SiteScanDrawer
 			initialOpen={ ! isReady || ( isReady && stale ) }
-			labelExtra={ stale && ( isReady || isDelayedComplete ) ? (
+			labelExtra={ stale && ( isReady || isDelayedCompleted ) ? (
 				<AMPNotice type={ NOTICE_TYPE_PLAIN } size={ NOTICE_SIZE_SMALL }>
 					{ __( 'Stale results', 'amp' ) }
 				</AMPNotice>
@@ -116,7 +105,7 @@ export function SiteScan() {
 					</p>
 				</AMPNotice>
 			) }
-			{ ( isReady || isDelayedComplete ) ? <SiteScanSummary /> : <SiteScanInProgress /> }
+			{ ( isReady || isDelayedCompleted ) ? <SiteScanSummary /> : <SiteScanInProgress /> }
 		</SiteScanDrawer>
 	);
 }
@@ -163,7 +152,7 @@ SiteScanDrawer.propTypes = {
 function SiteScanInProgress() {
 	const {
 		currentlyScannedUrlIndex,
-		isComplete,
+		isCompleted,
 		scannableUrls,
 	} = useContext( SiteScanContext );
 
@@ -172,12 +161,12 @@ function SiteScanInProgress() {
 			<p>
 				{ __( 'Site scan is checking if there are AMP compatibility issues with your active theme and plugins. We’ll then recommend how to use the AMP plugin.', 'amp' ) }
 			</p>
-			<ProgressBar value={ isComplete
+			<ProgressBar value={ isCompleted
 				? 100
 				: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
 			} />
 			<p>
-				{ isComplete
+				{ isCompleted
 					? __( 'Scan complete', 'amp' )
 					: sprintf(
 						// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.

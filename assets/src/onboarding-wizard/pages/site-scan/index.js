@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useContext, useEffect, useMemo, useState } from '@wordpress/element';
+import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -22,6 +22,7 @@ import { Selectable } from '../../../components/selectable';
 import { IconLandscapeHillsCogs } from '../../../components/svg/landscape-hills-cogs';
 import { ProgressBar } from '../../../components/progress-bar';
 import { PluginsWithIssues, ThemesWithIssues } from '../../../components/site-scan-results';
+import useDelayedFlag from '../../../utils/use-delayed-flag';
 
 /**
  * Screen for visualizing a site scan.
@@ -29,11 +30,12 @@ import { PluginsWithIssues, ThemesWithIssues } from '../../../components/site-sc
 export function SiteScan() {
 	const { setCanGoForward } = useContext( Navigation );
 	const {
-		isInitializing,
-		isReady,
-		isComplete,
 		cancelSiteScan,
 		currentlyScannedUrlIndex,
+		isCancelled,
+		isCompleted,
+		isInitializing,
+		isReady,
 		pluginIssues,
 		scannableUrls,
 		startSiteScan,
@@ -47,39 +49,25 @@ export function SiteScan() {
 	useEffect( () => () => cancelSiteScan(), [ cancelSiteScan ] );
 
 	useEffect( () => {
-		if ( isReady ) {
+		if ( isReady || isCancelled ) {
 			startSiteScan();
 		}
-	}, [ isReady, startSiteScan ] );
+	}, [ isCancelled, isReady, startSiteScan ] );
 
 	/**
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
-		if ( isComplete ) {
+		if ( isCompleted ) {
 			setCanGoForward( true );
 		}
-	}, [ isComplete, setCanGoForward ] );
+	}, [ isCompleted, setCanGoForward ] );
 
 	/**
-	 * Show scan summary with a delay so that the progress bar has a chance to
-	 * complete.
+	 * Delay the `isCompleted` flag so that the progress bar stays at 100% for a
+	 * brief moment.
 	 */
-	const [ showSummary, setShowSummary ] = useState( isComplete );
-
-	useEffect( () => {
-		let timeout;
-
-		if ( isComplete && ! showSummary ) {
-			timeout = setTimeout( () => setShowSummary( true ), 500 );
-		}
-
-		return () => {
-			if ( timeout ) {
-				clearTimeout( timeout );
-			}
-		};
-	}, [ showSummary, isComplete ] );
+	const isDelayedCompleted = useDelayedFlag( isCompleted );
 
 	if ( isInitializing ) {
 		return (
@@ -90,7 +78,7 @@ export function SiteScan() {
 		);
 	}
 
-	if ( showSummary ) {
+	if ( isDelayedCompleted ) {
 		return (
 			<SiteScanPanel
 				title={ __( 'Scan complete', 'amp' ) }
@@ -129,12 +117,12 @@ export function SiteScan() {
 					<p>
 						{ __( 'Site scan is checking if there are AMP compatibility issues with your active theme and plugins. We’ll then recommend how to use the AMP plugin.', 'amp' ) }
 					</p>
-					<ProgressBar value={ isComplete
+					<ProgressBar value={ isCompleted
 						? 100
 						: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
 					} />
 					<p>
-						{ isComplete
+						{ isCompleted
 							? __( 'Scan complete', 'amp' )
 							: sprintf(
 								// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.
