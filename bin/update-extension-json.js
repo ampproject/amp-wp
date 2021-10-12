@@ -36,7 +36,7 @@ class UpdateExtensionJson {
 
 		const queryParams = {
 			ecosystem_types: [ themeTerm, pluginTerm ],
-			per_page: 20,
+			per_page: 100,
 			page: 1,
 		};
 
@@ -153,7 +153,7 @@ class UpdateExtensionJson {
 		const filters = {
 			search: slug,
 			page: 1,
-			per_page: 20,
+			per_page: 100,
 		};
 
 		const response = await getThemesList( filters );
@@ -214,7 +214,7 @@ class UpdateExtensionJson {
 		const filters = {
 			search: slug,
 			page: 1,
-			per_page: 20,
+			per_page: 100,
 		};
 
 		const response = await getPluginsList( filters );
