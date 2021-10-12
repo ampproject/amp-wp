@@ -9,7 +9,6 @@ namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use WP_Filesystem_Base;
 use stdClass;
 
 /**
@@ -28,30 +27,36 @@ class AMPThemes implements Service, Registerable {
 	const ASSET_HANDLE = 'amp-theme-install';
 
 	/**
-	 * @var array List of AMP themes.
+	 * List of AMP themes.
+	 *
+	 * @var array|bool
 	 */
-	public static $themes = [];
+	protected $themes = false;
 
 	/**
 	 * Fetch AMP themes data.
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public static function set_themes() {
+	public function get_themes() {
 
-		$file_path = AMP__DIR__ . '/data/themes.json';
+		if ( ! is_array( $this->themes ) ) {
+			$file_path = AMP__DIR__ . '/data/themes.json';
 
-		if ( ! file_exists( $file_path ) ) {
-			return;
+			if ( ! file_exists( $file_path ) ) {
+				return [];
+			}
+
+			$json_data       = file_get_contents( $file_path );
+			$this->themes    = json_decode( $json_data, true );
+			$json_last_error = json_last_error();
+
+			if ( JSON_ERROR_NONE !== $json_last_error ) {
+				$this->themes = [];
+			}
 		}
 
-		$json_data       = file_get_contents( $file_path );
-		self::$themes    = json_decode( $json_data, true );
-		$json_last_error = json_last_error();
-
-		if ( JSON_ERROR_NONE !== $json_last_error ) {
-			self::$themes = [];
-		}
+		return $this->themes;
 	}
 
 	/**
@@ -60,8 +65,6 @@ class AMPThemes implements Service, Registerable {
 	 * @return void
 	 */
 	public function register() {
-
-		self::set_themes();
 
 		add_filter( 'themes_api', [ $this, 'themes_api' ], 10, 3 );
 
@@ -113,14 +116,14 @@ class AMPThemes implements Service, Registerable {
 
 		$none_wporg = [];
 
-		foreach ( self::$themes as $theme ) {
+		foreach ( $this->get_themes() as $theme ) {
 			if ( true !== $theme['wporg'] ) {
 				$none_wporg[] = $theme['slug'];
 			}
 		}
 
 		$js_data = [
-			'AMP_THEMES'        => wp_list_pluck( self::$themes, 'slug' ),
+			'AMP_THEMES'        => wp_list_pluck( $this->get_themes(), 'slug' ),
 			'NONE_WPORG_THEMES' => $none_wporg,
 		];
 
@@ -156,7 +159,7 @@ class AMPThemes implements Service, Registerable {
 		$args['per_page'] = ( ! empty( $args['per_page'] ) ) ? $args['per_page'] : 36;
 
 		$page         = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
-		$theme_chunks = array_chunk( (array) self::$themes, $args['per_page'] );
+		$theme_chunks = array_chunk( (array) $this->get_themes(), $args['per_page'] );
 		$themes       = ( ! empty( $theme_chunks[ $page - 1 ] ) && is_array( $theme_chunks[ $page - 1 ] ) ) ? $theme_chunks[ $page - 1 ] : [];
 
 		if ( 'query_themes' === $action ) {
@@ -170,7 +173,7 @@ class AMPThemes implements Service, Registerable {
 		$response->info = [
 			'page'    => $page,
 			'pages'   => count( $theme_chunks ),
-			'results' => count( (array) self::$themes ),
+			'results' => count( (array) $this->get_themes() ),
 		];
 
 		return $response;

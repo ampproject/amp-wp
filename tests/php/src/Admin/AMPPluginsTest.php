@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\AMPPlugins;
 use AmpProject\AmpWP\Tests\TestCase;
+use stdClass;
 
 /**
  * Tests for AMPPlugins.
@@ -145,7 +146,7 @@ class AMPPluginsTest extends TestCase {
 	 */
 	public function test_plugins_api() {
 		$this->instance->register();
-		$response = new \stdClass();
+		$response = new stdClass();
 
 		// Test 1: Normal request.
 		$response = $this->instance->plugins_api( $response, 'query_themes', [ 'per_page' => 36 ] );
@@ -191,7 +192,7 @@ class AMPPluginsTest extends TestCase {
 		$this->assertIsArray( $output );
 		$this->assertEquals(
 			sprintf(
-				'<a href="%s" target="_blank" aria-label="Site link for %s">%s</a>',
+				'<a href="%s" target="_blank" aria-label="Site link of %s">%s</a>',
 				esc_url( $plugin_data['homepage'] ),
 				esc_html( $plugin_data['name'] ),
 				esc_html__( 'Visit site', 'amp' )
@@ -220,7 +221,7 @@ class AMPPluginsTest extends TestCase {
 		$output = $this->instance->plugin_row_meta( $plugin_meta, '', [ 'slug' => 'akismet' ] );
 
 		$this->assertContains(
-			'<span><span class="amp-logo-icon small"></span>&nbsp;Page Experience Enhancing</span>',
+			'<span><span class="amp-logo-icon small"></span>&nbsp;AMP Compatible</span>',
 			$output
 		);
 

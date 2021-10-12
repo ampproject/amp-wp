@@ -31,9 +31,11 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	const ASSET_HANDLE = 'amp-plugin-install';
 
 	/**
-	 * @var array List of AMP plugins.
+	 * List of AMP plugins.
+	 *
+	 * @var array|bool
 	 */
-	public static $plugins = [];
+	protected $plugins = false;
 
 	/**
 	 * Get the action to use for registering the service.
@@ -58,23 +60,27 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	/**
 	 * Fetch AMP plugin data.
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public static function set_plugins() {
+	public function get_plugins() {
 
-		$plugin_json = AMP__DIR__ . '/data/plugins.json';
+		if ( ! is_array( $this->plugins ) ) {
+			$file_path = AMP__DIR__ . '/data/plugins.json';
 
-		if ( ! file_exists( $plugin_json ) ) {
-			return;
+			if ( ! file_exists( $file_path ) ) {
+				return [];
+			}
+
+			$json_data       = file_get_contents( $file_path );
+			$this->plugins   = json_decode( $json_data, true );
+			$json_last_error = json_last_error();
+
+			if ( JSON_ERROR_NONE !== $json_last_error ) {
+				$this->plugins = [];
+			}
 		}
 
-		$json_data       = file_get_contents( $plugin_json );
-		self::$plugins   = json_decode( $json_data, true );
-		$json_last_error = json_last_error();
-
-		if ( JSON_ERROR_NONE !== $json_last_error ) {
-			self::$plugins = [];
-		}
+		return $this->plugins;
 	}
 
 	/**
@@ -84,7 +90,6 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	 */
 	public function register() {
 
-		$this->set_plugins();
 		$screen = get_current_screen();
 
 		if ( $screen instanceof WP_Screen && in_array( $screen->id, [ 'plugins', 'plugin-install' ], true ) ) {
@@ -129,14 +134,14 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 
 		$none_wporg = [];
 
-		foreach ( self::$plugins as $plugin ) {
+		foreach ( $this->get_plugins() as $plugin ) {
 			if ( true !== $plugin['wporg'] ) {
 				$none_wporg[] = $plugin['slug'];
 			}
 		}
 
 		$js_data = [
-			'AMP_PLUGINS'        => wp_list_pluck( self::$plugins, 'slug' ),
+			'AMP_PLUGINS'        => wp_list_pluck( $this->get_plugins(), 'slug' ),
 			'NONE_WPORG_PLUGINS' => $none_wporg,
 		];
 
@@ -175,7 +180,7 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	public function tab_args() {
 
 		$per_page   = 36;
-		$total_page = ceil( count( self::$plugins ) / $per_page );
+		$total_page = ceil( count( $this->get_plugins() ) / $per_page );
 		$pagenum    = isset( $_REQUEST['paged'] ) ? absint( $_REQUEST['paged'] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$pagenum    = ( $pagenum > $total_page ) ? $total_page : $pagenum;
 		$page       = max( 1, $pagenum );
@@ -203,9 +208,9 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 			return $response;
 		}
 
-		$total_page    = ceil( count( self::$plugins ) / $args['per_page'] );
+		$total_page    = ceil( count( $this->get_plugins() ) / $args['per_page'] );
 		$page          = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
-		$plugin_chunks = array_chunk( (array) self::$plugins, $args['per_page'] );
+		$plugin_chunks = array_chunk( (array) $this->get_plugins(), $args['per_page'] );
 		$plugins       = ( ! empty( $plugin_chunks[ $page - 1 ] ) && is_array( $plugin_chunks[ $page - 1 ] ) ) ? $plugin_chunks[ $page - 1 ] : [];
 
 		$response          = new stdClass();
@@ -213,7 +218,7 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 		$response->info    = [
 			'page'    => $page,
 			'pages'   => $total_page,
-			'results' => count( self::$plugins ),
+			'results' => count( $this->get_plugins() ),
 		];
 
 		return $response;
@@ -260,7 +265,7 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	 */
 	public function plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data ) {
 
-		$amp_plugins = wp_list_pluck( self::$plugins, 'slug' );
+		$amp_plugins = wp_list_pluck( $this->get_plugins(), 'slug' );
 
 		if ( ! empty( $plugin_data['slug'] ) && in_array( $plugin_data['slug'], $amp_plugins, true ) ) {
 			$plugin_meta[] = sprintf(
