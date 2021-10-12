@@ -9,7 +9,7 @@ const axios = require( 'axios' );
  */
 const filesystem = require( './file-system' );
 
-class UpdateExtensionJson {
+class UpdateExtensionFiles {
 	/**
 	 * Construct method.
 	 */
@@ -294,4 +294,4 @@ class UpdateExtensionJson {
 }
 
 // eslint-disable-next-line no-new
-new UpdateExtensionJson();
+new UpdateExtensionFiles();
