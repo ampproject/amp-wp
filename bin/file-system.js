@@ -6,7 +6,7 @@
  * External dependencies
  */
 const fs = require( 'fs' );
-const _ = require( 'underscore' );
+const _ = require( 'lodash' );
 
 class FileSystem {
 	/**

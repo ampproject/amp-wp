@@ -7,7 +7,6 @@ import { __, sprintf } from '@wordpress/i18n';
  * External dependencies
  */
 import { AMP_THEMES, NONE_WPORG_THEMES } from 'amp-themes'; // From WP inline script.
-import jQuery from 'jquery';
 
 const wpThemeView = wp.themes.view.Theme;
 
@@ -20,6 +19,12 @@ export default wpThemeView.extend( {
 	 */
 	render( ...args ) {
 		wpThemeView.prototype.render.apply( this, args );
+
+		if ( 0 >= this.$el?.length || ! this.$el[ 0 ] ) {
+			return;
+		}
+
+		const element = this.$el[ 0 ];
 
 		const data = this.model.toJSON();
 		let slug = data?.slug;
@@ -44,9 +49,9 @@ export default wpThemeView.extend( {
 			messageElement.append( iconElement );
 			messageElement.append( tooltipElement );
 			messageElement.append( ' ' );
-			messageElement.append( __( 'Page Experience Enhancing', 'amp' ) );
+			messageElement.append( __( 'AMP Compatible', 'amp' ) );
 
-			this.$el.append( messageElement );
+			element.appendChild( messageElement );
 		}
 
 		if ( slug && ! this.isWPORGTheme( slug ) ) {
@@ -68,12 +73,17 @@ export default wpThemeView.extend( {
 				data.name,
 			) );
 
-			const themeActions = jQuery( '.theme-actions', this.$el );
-			themeActions.html( '' );
-			themeActions.append( siteLinkButton );
+			const themeActions = element.querySelector( '.theme-actions' );
+			if ( themeActions ) {
+				themeActions.innerHTML = '';
+				themeActions.appendChild( siteLinkButton );
+			}
 
-			const moreDetail = jQuery( '.more-details', this.$el );
-			moreDetail.text( __( 'Visit site', 'amp' ) );
+			const moreDetail = element.querySelector( '.more-details' );
+			if ( moreDetail ) {
+				moreDetail.innerHTML = '';
+				moreDetail.append( __( 'Visit site', 'amp' ) );
+			}
 		}
 	},
 

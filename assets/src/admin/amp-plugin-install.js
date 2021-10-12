@@ -1,4 +1,3 @@
-/* global _ */
 /**
  * WordPress dependencies
  */
@@ -9,7 +8,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { AMP_PLUGINS, NONE_WPORG_PLUGINS } from 'amp-plugins'; // From WP inline script.
-import jQuery from 'jquery';
+import { debounce } from 'lodash';
 
 const ampPluginInstall = {
 
@@ -26,15 +25,20 @@ const ampPluginInstall = {
 	 * Add AMP compatible message in AMP compatible plugin card after search result comes in.
 	 */
 	addAMPMessageInSearchResult() {
-		const pluginInstallSearch = jQuery( '.plugin-install-php .wp-filter-search' );
+		const pluginInstallSearch = document.querySelector( '.plugin-install-php .wp-filter-search' );
 
-		pluginInstallSearch.on( 'keyup input', _.debounce( () => {
-			if ( 'undefined' !== typeof wp.updates.searchRequest ) {
-				wp.updates.searchRequest.done( () => {
-					this.addAmpMessage();
-				} );
-			}
-		}, 1500 ) );
+		if ( pluginInstallSearch ) {
+			const callback = debounce( () => {
+				if ( 'undefined' !== typeof wp.updates.searchRequest ) {
+					wp.updates.searchRequest.done( () => {
+						this.addAmpMessage();
+					} );
+				}
+			}, 1500 );
+
+			pluginInstallSearch.addEventListener( 'keyup', callback );
+			pluginInstallSearch.addEventListener( 'input', callback );
+		}
 	},
 
 	/**
@@ -42,8 +46,7 @@ const ampPluginInstall = {
 	 */
 	addAmpMessage() {
 		// eslint-disable-next-line guard-for-in
-		for ( const index in AMP_PLUGINS ) {
-			const pluginSlug = AMP_PLUGINS[ index ];
+		for ( const pluginSlug of AMP_PLUGINS ) {
 			const pluginCardElement = document.querySelector( `.plugin-card.plugin-card-${ pluginSlug }` );
 
 			if ( ! pluginCardElement ) {
@@ -65,9 +68,9 @@ const ampPluginInstall = {
 			messageElement.append( iconElement );
 			messageElement.append( tooltipElement );
 			messageElement.append( ' ' );
-			messageElement.append( __( 'Page Experience Enhancing', 'amp' ) );
+			messageElement.append( __( 'AMP Compatible', 'amp' ) );
 
-			jQuery( pluginCardElement ).append( messageElement );
+			pluginCardElement.appendChild( messageElement );
 		}
 	},
 
@@ -76,15 +79,17 @@ const ampPluginInstall = {
 	 */
 	removeAdditionalInfo() {
 		// eslint-disable-next-line guard-for-in
-		for ( const index in NONE_WPORG_PLUGINS ) {
-			const pluginSlug = NONE_WPORG_PLUGINS[ index ];
+		for ( const pluginSlug of NONE_WPORG_PLUGINS ) {
 			const pluginCardElement = document.querySelector( `.plugin-card.plugin-card-${ pluginSlug }` );
 
 			if ( ! pluginCardElement ) {
 				continue;
 			}
 
-			jQuery( '.plugin-card-bottom', pluginCardElement ).remove();
+			const pluginCardBottom = pluginCardElement.querySelector( '.plugin-card-bottom' );
+			if ( pluginCardBottom ) {
+				pluginCardBottom.remove();
+			}
 		}
 	},
 };

@@ -16,7 +16,7 @@ export function PXEnhancingMessage() {
 			<span className="tooltiptext">
 				{ __( 'This theme follow best practice and is known to work well with AMP plugin.', 'amp' ) }
 			</span>
-			{ __( 'Page Experience Enhancing', 'amp' ) }
+			{ __( 'AMP Compatible', 'amp' ) }
 		</div>
 	);
 }
