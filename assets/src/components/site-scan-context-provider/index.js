@@ -168,6 +168,7 @@ const initialState = {
  * @param {boolean} props.ampFirst                    Whether scanning should be done with Standard mode being forced.
  * @param {?any}    props.children                    Component children.
  * @param {boolean} props.fetchCachedValidationErrors Whether to fetch cached validation errors on mount.
+ * @param {string}  props.homeUrl                     Site home URL.
  * @param {string}  props.scannableUrlsRestPath       The REST path for interacting with the scannable URL resources.
  * @param {string}  props.validateNonce               The AMP validate nonce.
  */
@@ -175,6 +176,7 @@ export function SiteScanContextProvider( {
 	ampFirst = false,
 	children,
 	fetchCachedValidationErrors = false,
+	homeUrl,
 	scannableUrlsRestPath,
 	validateNonce,
 } ) {
@@ -187,9 +189,10 @@ export function SiteScanContextProvider( {
 		scannableUrls,
 		status,
 	} = state;
+	const urlType = ampFirst || themeSupport === STANDARD ? 'url' : 'amp_url';
 
 	/**
-	 * Memoize plugin and theme issues.
+	 * Memoize properties.
 	 */
 	const { pluginIssues, themeIssues, stale } = useMemo( () => {
 		const validationErrors = scannableUrls.reduce( ( acc, scannableUrl ) => [ ...acc, ...scannableUrl?.validation_errors ?? [] ], [] );
@@ -201,6 +204,10 @@ export function SiteScanContextProvider( {
 			stale: Boolean( scannableUrls.find( ( scannableUrl ) => scannableUrl?.stale === true ) ),
 		};
 	}, [ scannableUrls ] );
+
+	const previewPermalink = useMemo( () => {
+		return scannableUrls.find( ( { type } ) => type === 'home' )?.[ urlType ] || homeUrl;
+	}, [ homeUrl, scannableUrls, urlType ] );
 
 	/**
 	 * Preflight check.
@@ -293,7 +300,6 @@ export function SiteScanContextProvider( {
 			dispatch( { type: ACTION_SCAN_VALIDATE_URL } );
 
 			try {
-				const urlType = ampFirst || themeSupport === STANDARD ? 'url' : 'amp_url';
 				const url = scannableUrls[ currentlyScannedUrlIndex ][ urlType ];
 				const args = {
 					'amp-first': ampFirst || undefined,
@@ -348,6 +354,7 @@ export function SiteScanContextProvider( {
 				isInitializing: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
 				isReady: status === STATUS_READY,
 				pluginIssues,
+				previewPermalink,
 				scannableUrls,
 				stale,
 				startSiteScan,
@@ -363,6 +370,7 @@ SiteScanContextProvider.propTypes = {
 	ampFirst: PropTypes.bool,
 	children: PropTypes.any,
 	fetchCachedValidationErrors: PropTypes.bool,
+	homeUrl: PropTypes.string,
 	scannableUrlsRestPath: PropTypes.string,
 	validateNonce: PropTypes.string,
 };

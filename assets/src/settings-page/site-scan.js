@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { HOME_URL, VALIDATED_URLS_LINK } from 'amp-settings'; // From WP inline script.
+import { VALIDATED_URLS_LINK } from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
 
 /**
@@ -14,12 +14,10 @@ import { useCallback, useContext, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { STANDARD } from '../common/constants';
 import { AMPDrawer } from '../components/amp-drawer';
 import { IconLandscapeHillsCogsAlt } from '../components/svg/landscape-hills-cogs-alt';
 import { ProgressBar } from '../components/progress-bar';
 import { PluginsWithIssues, ThemesWithIssues } from '../components/site-scan-results';
-import { Options } from '../components/options-context-provider';
 import { SiteScan as SiteScanContext } from '../components/site-scan-context-provider';
 import { Loading } from '../components/loading';
 import {
@@ -46,14 +44,8 @@ export function SiteScan() {
 		isReady,
 		stale,
 		startSiteScan,
+		previewPermalink,
 	} = useContext( SiteScanContext );
-	const { originalOptions } = useContext( Options );
-	const {
-		paired_url_examples: pairedUrlExamples,
-		paired_url_structure: pairedUrlStructure,
-		theme_support: themeSupport,
-	} = originalOptions;
-	const previewPermalink = STANDARD === themeSupport ? HOME_URL : pairedUrlExamples[ pairedUrlStructure ][ 0 ];
 
 	/**
 	 * Cancel scan when component unmounts.

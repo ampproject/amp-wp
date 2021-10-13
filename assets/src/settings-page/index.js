@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import {
 	CURRENT_THEME,
 	HAS_DEPENDENCY_SUPPORT,
+	HOME_URL,
 	OPTIONS_REST_PATH,
 	READER_THEMES_REST_PATH,
 	SCANNABLE_URLS_REST_PATH,
@@ -97,6 +98,7 @@ function Providers( { children } ) {
 										<SiteScanContextProvider
 											ampFirst={ false }
 											fetchCachedValidationErrors={ true }
+											homeUrl={ HOME_URL }
 											scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 											validateNonce={ VALIDATE_NONCE }
 										>
