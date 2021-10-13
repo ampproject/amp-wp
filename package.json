@@ -37,6 +37,7 @@
     "@wordpress/icons": "5.0.2",
     "@wordpress/is-shallow-equal": "4.2.0",
     "@wordpress/url": "3.2.2",
+    "child_process": "1.0.2",
     "classnames": "2.3.1",
     "clipboard": "2.0.8",
     "prop-types": "15.7.2",

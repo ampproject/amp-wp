@@ -1,13 +1,10 @@
 /**
  * External dependencies
  */
+const { exec } = require( 'child_process' );
+const fs = require( 'fs' );
 const { getPluginsList, getThemesList } = require( 'wporg-api-client' );
 const axios = require( 'axios' );
-
-/**
- * Internal dependencies
- */
-const filesystem = require( './file-system' );
 
 class UpdateExtensionFiles {
 	/**
@@ -81,61 +78,59 @@ class UpdateExtensionFiles {
 	 */
 	async storeData() {
 		if ( this.plugins ) {
-			let output = this.convertToPhpArray( this.plugins );
+			let output = await this.convertToPhpArray( this.plugins );
 			output = `<?php\nreturn ${ output };`;
-			await filesystem.writeFile( 'includes/amp-plugins.php', output );
+			fs.writeFileSync( 'includes/amp-plugins.php', output );
 		}
 
 		if ( this.themes ) {
-			let output = this.convertToPhpArray( this.themes );
+			let output = await this.convertToPhpArray( this.themes );
 			output = `<?php\nreturn ${ output };`;
-			await filesystem.writeFile( 'includes/amp-themes.php', output );
+			fs.writeFileSync( 'includes/amp-themes.php', output );
 		}
+	}
+
+	/**
+	 * Execute given command in shell and return the output.
+	 *
+	 * @param {string} command Shell command.
+	 * @return {Promise<object>} Output or error from shell command.
+	 */
+	executeCommand( command ) {
+		return new Promise( ( done, failed ) => {
+			exec( command, ( error, stdout, stderr ) => {
+				if ( error ) {
+					error.stdout = stdout;
+					error.stderr = stderr;
+					failed( error );
+					return;
+				}
+				done( { stdout, stderr } );
+			} );
+		} );
 	}
 
 	/**
 	 * Convert JS object into PHP array variable.
 	 *
 	 * @param {Object} object An object that needs to convert into a PHP array.
-	 * @param {number} depth  Depth of iteration.
 	 * @return {string|null} PHP array in string.
 	 */
-	convertToPhpArray( object, depth = 1 ) {
+	async convertToPhpArray( object ) {
 		if ( 'object' !== typeof object ) {
 			return null;
 		}
 
-		const tabs = '\t'.repeat( depth );
-		let output = '[';
+		const tempFilePath = '/tmp/amp.json';
+		const json = JSON.stringify( object );
+		const command = `php -r 'var_export( json_decode( file_get_contents( "${ tempFilePath }" ), true ) );'`;
 
-		// eslint-disable-next-line guard-for-in
-		for ( const key in object ) {
-			let value = object[ key ];
+		fs.writeFileSync( tempFilePath, json );
+		const output = await this.executeCommand( command );
 
-			switch ( typeof value ) {
-				case 'object':
-					let childObjectOutput = this.convertToPhpArray( value, ( depth + 1 ) );
-					childObjectOutput = childObjectOutput ? childObjectOutput : '[]';
-					output += `\n${ tabs }'${ key }' => ${ childObjectOutput },`;
-					break;
-				case 'boolean':
-					output += `\n${ tabs }'${ key }' => ${ value ? 'true' : 'false' },`;
-					break;
-				case 'string':
-					value = value.toString().replace( /'/gm, `"` );
-					output += `\n${ tabs }'${ key }' => '${ value }',`;
-					break;
-				case 'bigint':
-				case 'number':
-					output += `\n${ tabs }'${ key }' => ${ value },`;
-					break;
-				default:
-					output += `\n${ tabs }'${ key }' => '',`;
-					break;
-			}
-		}
-		output += '\n' + '\t'.repeat( depth - 1 ) + ']';
-		return output;
+		fs.unlinkSync( tempFilePath );
+
+		return ( output.stdout ) ? output.stdout : 'array()';
 	}
 
 	/**
