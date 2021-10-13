@@ -201,6 +201,10 @@ function Root( { appRoot } ) {
 		};
 	}, [ fetchingOptions ] );
 
+	const focusSiteScanSection = useCallback( () => {
+		setFocusedSection( 'site-scan' );
+	}, [] );
+
 	if ( false !== fetchingOptions || null === templateModeWasOverridden ) {
 		return <Loading />;
 	}
@@ -213,7 +217,7 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 			<Welcome />
-			<SiteScan />
+			<SiteScan onSiteScan={ focusSiteScanSection } />
 			<SiteReview />
 			<form onSubmit={ onSubmit }>
 				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />

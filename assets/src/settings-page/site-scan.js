@@ -33,8 +33,11 @@ import useDelayedFlag from '../utils/use-delayed-flag';
 
 /**
  * Site Scan component on the settings screen.
+ *
+ * @param {Object}   props            Component props.
+ * @param {Function} props.onSiteScan On scan callback.
  */
-export function SiteScan() {
+export function SiteScan( { onSiteScan } ) {
 	const {
 		cancelSiteScan,
 		isCancelled,
@@ -65,7 +68,12 @@ export function SiteScan() {
 		if ( isCancelled || isFailed || ( stale && ( isReady || isDelayedCompleted ) ) ) {
 			return (
 				<Button
-					onClick={ () => startSiteScan( { cache: true } ) }
+					onClick={ () => {
+						if ( onSiteScan ) {
+							onSiteScan();
+						}
+						startSiteScan( { cache: true } );
+					} }
 					isPrimary={ true }
 				>
 					{ __( 'Rescan Site', 'amp' ) }
@@ -82,7 +90,7 @@ export function SiteScan() {
 		}
 
 		return null;
-	}, [ isCancelled, isDelayedCompleted, isFailed, isReady, previewPermalink, stale, startSiteScan ] );
+	}, [ isCancelled, isDelayedCompleted, isFailed, isReady, onSiteScan, previewPermalink, stale, startSiteScan ] );
 
 	/**
 	 * Get main content.
@@ -133,6 +141,9 @@ export function SiteScan() {
 		</SiteScanDrawer>
 	);
 }
+SiteScan.propTypes = {
+	onSiteScan: PropTypes.func,
+};
 
 /**
  * Site Scan drawer (settings panel).
