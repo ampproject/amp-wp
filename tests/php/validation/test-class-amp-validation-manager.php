@@ -2381,7 +2381,8 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$filter = static function() {
 			return [
 				'response' => [
-					'code' => 301,
+					'code'    => 301,
+					'message' => '',
 				],
 				'headers'  => [
 					'Location' => 'https://redirected-site.example.com/',

@@ -246,7 +246,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 */
 	public function persistent_object_cache() {
 		$is_using_object_cache = wp_using_ext_object_cache();
-		$has_page_caching      = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
+		$has_page_caching      = $this->has_page_caching( true );
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Persistent object caching is used to more effectively store image dimensions and parsed CSS using a caching backend rather than using the options table in the database.', 'amp' ) . '</p>';
 
@@ -337,8 +337,6 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	public function page_cache() {
 		$has_page_caching = $this->has_page_caching();
 
-		set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, true === $has_page_caching, MONTH_IN_SECONDS );
-
 		$badge_color = 'orange';
 		$status      = 'recommended';
 		$label       = __( 'Page caching is not detected', 'amp' );
@@ -383,11 +381,39 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
+	 * Get page caching result from cache.
+	 *
+	 * @param bool $use_previous_result Whether to use previous result or not.
+	 *
+	 * @return bool|WP_Error Boolean if the site has page caching or not, or else a WP_Error if unable to determine.
+	 */
+	public function has_page_caching( $use_previous_result = false ) {
+
+		if ( $use_previous_result ) {
+			$has_page_caching = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
+			if ( is_wp_error( $has_page_caching ) ) {
+				return $has_page_caching; 
+			} elseif ( $has_page_caching ) {
+				return ( 'yes' === $has_page_caching );
+			}
+		}
+
+		$has_page_caching = $this->check_for_page_caching();
+		if ( is_wp_error( $has_page_caching ) ) {
+			set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $has_page_caching, DAY_IN_SECONDS );
+		} else {
+			set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $has_page_caching ? 'yes' : 'no', MONTH_IN_SECONDS );
+		}
+
+		return $has_page_caching;
+	}
+
+	/**
 	 * Check if site has page cache enable or not.
 	 *
 	 * @return bool|WP_Error Whether page caching was detected, or else error information.
 	 */
-	private function has_page_caching() {
+	private function check_for_page_caching() {
 		/** This filter is documented in wp-includes/class-wp-http-streams.php */
 		$sslverify = apply_filters( 'https_local_ssl_verify', false );
 
