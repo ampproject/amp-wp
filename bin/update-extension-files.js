@@ -202,7 +202,7 @@ class UpdateExtensionFiles {
 			per_page: 100,
 		};
 
-		const response = await getThemesList( filters );
+		const response = await this.getThemesList( filters );
 		const items = response?.data?.themes;
 
 		for ( const index in items ) {
@@ -213,6 +213,29 @@ class UpdateExtensionFiles {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Wrapper function to get theme list.
+	 * On fail it will try upto five time to get data.
+	 *
+	 * @param {Object} filter List of filters.
+	 * @return {Promise<object>} Response from wp.org API.
+	 */
+	async getThemesList( filter ) {
+		let error = false;
+
+		for ( let attempts = 0; attempts < 5; attempts++ ) {
+			try {
+				// eslint-disable-next-line no-await-in-loop
+				const responseData = await getThemesList( filter );
+				return responseData.data;
+			} catch ( exception ) {
+				error = exception;
+			}
+		}
+
+		throw error;
 	}
 
 	/**
@@ -250,7 +273,7 @@ class UpdateExtensionFiles {
 			per_page: 100,
 		};
 
-		const response = await getPluginsList( filters );
+		const response = await this.getPluginsList( filters );
 		const items = response?.data?.plugins;
 
 		for ( const index in items ) {
@@ -261,6 +284,29 @@ class UpdateExtensionFiles {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Wrapper function to get plugin list.
+	 * On fail it will try upto five time to get data.
+	 *
+	 * @param {Object} filter List of filters.
+	 * @return {Promise<object|*>} Response from wp.org API.
+	 */
+	async getPluginsList( filter ) {
+		let error = false;
+
+		for ( let attempts = 0; attempts < 5; attempts++ ) {
+			try {
+				// eslint-disable-next-line no-await-in-loop
+				const responseData = await getPluginsList( filter );
+				return responseData;
+			} catch ( exception ) {
+				error = exception;
+			}
+		}
+
+		throw error;
 	}
 
 	/**
