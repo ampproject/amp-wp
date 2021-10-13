@@ -372,7 +372,5 @@ class AMPPluginsTest extends TestCase {
 			'<span><span class="amp-logo-icon small"></span>&nbsp;AMP Compatible</span>',
 			$output
 		);
-
-		$this->set_private_property( $this->instance, 'plugins', [] );
 	}
 }
