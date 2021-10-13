@@ -41,9 +41,13 @@ abstract class RecurringBackgroundTask extends CronBasedBackgroundTask {
 
 		$scheduled_event = wp_get_scheduled_event( $event_name, $args );
 
+		// Unschedule any existing event which had a differing recurrence.
 		if ( $scheduled_event && $scheduled_event->schedule !== $recurrence ) {
-			wp_schedule_event( $scheduled_event->timestamp, $recurrence, $event_name, $args );
-		} elseif ( ! $scheduled_event ) {
+			wp_unschedule_event( $scheduled_event->timestamp, $event_name, $args );
+			$scheduled_event = null;
+		}
+
+		if ( ! $scheduled_event ) {
 			wp_schedule_event( time(), $recurrence, $event_name, $args );
 		}
 	}
