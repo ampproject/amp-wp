@@ -287,11 +287,10 @@ export function SiteScanContextProvider( {
 						cache: cache || undefined,
 						nonce: validateNonce,
 						omit_stylesheets: true,
+						cache_bust: Math.random(),
 					},
 				};
-				const validationResults = await apiFetch( {
-					url: addQueryArgs( url, args ),
-				} );
+				const validationResults = await fetch( addQueryArgs( url, args ) );
 
 				if ( true === hasUnmounted.current ) {
 					return;
