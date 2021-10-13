@@ -34,6 +34,7 @@ export function SiteScan() {
 		currentlyScannedUrlIndex,
 		isCancelled,
 		isCompleted,
+		isFailed,
 		isInitializing,
 		isReady,
 		pluginIssues,
@@ -58,10 +59,10 @@ export function SiteScan() {
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
-		if ( isCompleted ) {
+		if ( isCompleted || isFailed ) {
 			setCanGoForward( true );
 		}
-	}, [ isCompleted, setCanGoForward ] );
+	}, [ isCompleted, isFailed, setCanGoForward ] );
 
 	/**
 	 * Delay the `isCompleted` flag so that the progress bar stays at 100% for a
@@ -74,6 +75,24 @@ export function SiteScan() {
 			<SiteScanPanel
 				title={ __( 'Please wait a minute…', 'amp' ) }
 				headerContent={ <Loading /> }
+			/>
+		);
+	}
+
+	if ( isFailed ) {
+		return (
+			<SiteScanPanel
+				title={ __( 'Scan failed', 'amp' ) }
+				headerContent={ (
+					<>
+						<p>
+							{ __( 'Site scan was unsuccessful.', 'amp' ) }
+						</p>
+						<p>
+							{ __( 'You can trigger the site scan again on the AMP Settings page after completing the Wizard.', 'amp' ) }
+						</p>
+					</>
+				) }
 			/>
 		);
 	}

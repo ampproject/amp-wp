@@ -41,6 +41,7 @@ export function SiteScan() {
 		cancelSiteScan,
 		isCancelled,
 		isCompleted,
+		isFailed,
 		isInitializing,
 		isReady,
 		stale,
@@ -69,7 +70,7 @@ export function SiteScan() {
 	 * Get footer content.
 	 */
 	const getFooterContent = useCallback( () => {
-		if ( isCancelled || ( stale && ( isReady || isDelayedCompleted ) ) ) {
+		if ( isCancelled || isFailed || ( stale && ( isReady || isDelayedCompleted ) ) ) {
 			return (
 				<Button
 					onClick={ () => startSiteScan( { cache: true } ) }
@@ -89,7 +90,7 @@ export function SiteScan() {
 		}
 
 		return null;
-	}, [ isCancelled, isDelayedCompleted, isReady, previewPermalink, stale, startSiteScan ] );
+	}, [ isCancelled, isDelayedCompleted, isFailed, isReady, previewPermalink, stale, startSiteScan ] );
 
 	/**
 	 * Get main content.
@@ -97,6 +98,16 @@ export function SiteScan() {
 	const getContent = useCallback( () => {
 		if ( isInitializing ) {
 			return <Loading />;
+		}
+
+		if ( isFailed ) {
+			return (
+				<AMPNotice type={ NOTICE_TYPE_ERROR } size={ NOTICE_SIZE_LARGE }>
+					<p>
+						{ __( 'Site scan failed. Try again.', 'amp' ) }
+					</p>
+				</AMPNotice>
+			);
 		}
 
 		if ( isCancelled ) {
@@ -114,7 +125,7 @@ export function SiteScan() {
 		}
 
 		return <SiteScanInProgress />;
-	}, [ isCancelled, isDelayedCompleted, isInitializing, isReady ] );
+	}, [ isCancelled, isDelayedCompleted, isFailed, isInitializing, isReady ] );
 
 	return (
 		<SiteScanDrawer
