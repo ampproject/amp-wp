@@ -7,6 +7,8 @@
 
 namespace AmpProject\AmpWP\BackgroundTask;
 
+use function wp_get_scheduled_event;
+
 /**
  * Abstract base class for using cron to execute a background task that runs on a schedule.
  *
