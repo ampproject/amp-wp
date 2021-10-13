@@ -289,7 +289,11 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		$paths = [
 			'/amp/v1/options',
 			'/amp/v1/reader-themes',
-			'/amp/v1/scannable-urls',
+			add_query_arg(
+				'_fields',
+				[ 'url', 'amp_url', 'type', 'label' ],
+				'/amp/v1/scannable-urls'
+			),
 			'/wp/v2/plugins',
 			'/wp/v2/settings',
 			'/wp/v2/themes',
