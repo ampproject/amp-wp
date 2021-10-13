@@ -349,7 +349,7 @@ export function SiteScanContextProvider( {
 
 			dispatch( { type: ACTION_SCAN_NEXT_URL } );
 		} )();
-	}, [ ampFirst, cache, currentlyScannedUrlIndex, scannableUrls, setAsyncError, status, themeSupport, validateNonce ] );
+	}, [ ampFirst, cache, currentlyScannedUrlIndex, scannableUrls, setAsyncError, status, urlType, validateNonce ] );
 
 	return (
 		<SiteScan.Provider
