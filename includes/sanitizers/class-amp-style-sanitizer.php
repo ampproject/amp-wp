@@ -3017,9 +3017,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
 
-			// When there is are kept errors, then mark the element as being AMP-unvalidated. Note that excessive CSS
+			// When there are kept errors, then mark the element as being AMP-unvalidated. Note that excessive CSS
 			// is not a validation error that is arisen when parsing a stylesheet (as that is emitted when finalizing
-			// a stylesheet group). Otherwise, there are !important qualifiers or the amount of CSS is greater than
+			// a stylesheet group). Otherwise, if there are !important qualifiers or the amount of CSS is greater than
 			// the maximum allowed by AMP, mark the custom style as PX-verified.
 			if ( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['kept_error_count'] > 0 ) {
 				ValidationExemption::mark_node_as_amp_unvalidated( $this->amp_custom_style_element );
