@@ -26,6 +26,13 @@ class AMPThemesTest extends TestCase {
 	public $instance;
 
 	/**
+	 * Flag for AMP-compatible themes file initially exists or not.
+	 *
+	 * @var bool
+	 */
+	protected $is_file_exists = false;
+
+	/**
 	 * Setup.
 	 *
 	 * @inheritdoc
@@ -38,6 +45,69 @@ class AMPThemesTest extends TestCase {
 		$wp_styles  = null;
 
 		$this->instance = new AMPThemes();
+
+		$file_path            = TESTS_PLUGIN_DIR . '/includes/amp-themes.php';
+		$this->is_file_exists = file_exists( $file_path );
+
+		if ( ! $this->is_file_exists ) {
+			$data = [
+				[
+					'name' => 'Astra',
+					'slug' => 'astra',
+				],
+			];
+
+			$file_content = "<?php\nreturn " . var_export( $data, true ) . ';'; // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+			file_put_contents( $file_path, $file_content );
+		}
+	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tearDown() {
+
+		parent::tearDown();
+
+		if ( ! $this->is_file_exists ) {
+			$this->unlink( TESTS_PLUGIN_DIR . '/includes/amp-themes.php' );
+		}
+	}
+
+	/**
+	 * @covers ::get_themes
+	 */
+	public function test_get_themes() {
+		$themes = $this->instance->get_themes();
+
+		$this->assertEquals(
+			[
+				[
+					'name'           => 'Astra',
+					'slug'           => 'astra',
+					'version'        => '',
+					'preview_url'    => '',
+					'author'         => [
+						'user_nicename' => '',
+						'profile'       => '',
+						'avatar'        => '',
+						'display_name'  => '',
+						'author'        => '',
+						'author_url'    => '',
+					],
+					'screenshot_url' => '',
+					'rating'         => 0,
+					'num_ratings'    => 0,
+					'homepage'       => '',
+					'description'    => '',
+					'requires'       => '',
+					'requires_php'   => '',
+				],
+			],
+			$themes
+		);
 	}
 
 	/**

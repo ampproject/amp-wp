@@ -156,7 +156,7 @@ class AMPThemes implements Service, Registerable {
 		$none_wporg = [];
 
 		foreach ( $this->get_themes() as $theme ) {
-			if ( true !== $theme['wporg'] ) {
+			if ( ! isset( $theme['wporg'] ) || true !== $theme['wporg'] ) {
 				$none_wporg[] = $theme['slug'];
 			}
 		}

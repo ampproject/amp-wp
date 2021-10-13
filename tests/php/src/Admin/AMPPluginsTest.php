@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
-use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Admin\AMPPlugins;
 use AmpProject\AmpWP\Tests\TestCase;
 use stdClass;
@@ -19,14 +18,19 @@ use stdClass;
  */
 class AMPPluginsTest extends TestCase {
 
-	use PrivateAccess;
-
 	/**
 	 * Instance of AMPPlugins
 	 *
 	 * @var AMPPlugins
 	 */
 	public $instance;
+
+	/**
+	 * Flag for AMP-compatible plugins file initially exists or not.
+	 *
+	 * @var bool
+	 */
+	protected $is_file_exists = false;
 
 	/**
 	 * Setup.
@@ -42,6 +46,86 @@ class AMPPluginsTest extends TestCase {
 		$wp_styles  = null;
 
 		$this->instance = new AMPPlugins();
+
+		$file_path            = TESTS_PLUGIN_DIR . '/includes/amp-plugins.php';
+		$this->is_file_exists = file_exists( $file_path );
+
+		if ( ! $this->is_file_exists ) {
+			$data = [
+				[
+					'name' => 'Akismet',
+					'slug' => 'akismet',
+				],
+			];
+
+			$file_content = "<?php\nreturn " . var_export( $data, true ) . ';'; // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+			file_put_contents( $file_path, $file_content );
+		}
+	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tearDown() {
+
+		parent::tearDown();
+
+		if ( ! $this->is_file_exists ) {
+			$this->unlink( TESTS_PLUGIN_DIR . '/includes/amp-plugins.php' );
+		}
+	}
+
+	/**
+	 * @covers ::get_plugins()
+	 */
+	public function test_get_plugins() {
+
+		$plugins = $this->instance->get_plugins();
+
+		$this->assertEquals(
+			[
+				[
+					'name'                     => 'Akismet',
+					'slug'                     => 'akismet',
+					'version'                  => '',
+					'author'                   => '',
+					'author_profile'           => '',
+					'requires'                 => '',
+					'tested'                   => '',
+					'requires_php'             => '',
+					'rating'                   => 0,
+					'ratings'                  => [
+						1 => 0,
+						2 => 0,
+						3 => 0,
+						4 => 0,
+						5 => 0,
+					],
+					'num_ratings'              => 0,
+					'support_threads'          => 0,
+					'support_threads_resolved' => 0,
+					'active_installs'          => 0,
+					'downloaded'               => 0,
+					'last_updated'             => '',
+					'added'                    => '',
+					'homepage'                 => '',
+					'short_description'        => '',
+					'description'              => '',
+					'download_link'            => '',
+					'tags'                     => [],
+					'donate_link'              => '',
+					'icons'                    => [
+						'1x'  => '',
+						'2x'  => '',
+						'svg' => '',
+					],
+					'wporg'                    => false,
+				],
+			],
+			$plugins
+		);
 	}
 
 	/**
@@ -281,16 +365,6 @@ class AMPPluginsTest extends TestCase {
 		$output = $this->instance->plugin_row_meta( $plugin_meta, '', [ 'slug' => 'example' ] );
 		$this->assertEquals( $plugin_meta, $output );
 
-		$this->set_private_property(
-			$this->instance,
-			'plugins',
-			[
-				[
-					'name' => 'akismet',
-					'slug' => 'akismet',
-				],
-			]
-		);
 		// Test 2: None AMP plugin.
 		$output = $this->instance->plugin_row_meta( $plugin_meta, '', [ 'slug' => 'akismet' ] );
 
