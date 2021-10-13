@@ -77,13 +77,22 @@ class AMPThemesTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::get_themes
+	 * @covers ::get_themes()
 	 */
 	public function test_get_themes() {
 		$themes = $this->instance->get_themes();
 
-		$this->assertEquals(
-			[
+		if ( $this->is_file_exists ) {
+			$expected_themes = include TESTS_PLUGIN_DIR . '/includes/amp-themes.php';
+
+			$expected = array_map(
+				static function ( $theme ) {
+					return AMPThemes::normalize_theme_data( $theme );
+				},
+				$expected_themes
+			);
+		} else {
+			$expected = [
 				[
 					'name'           => 'Astra',
 					'slug'           => 'astra',
@@ -105,9 +114,10 @@ class AMPThemesTest extends TestCase {
 					'requires'       => '',
 					'requires_php'   => '',
 				],
-			],
-			$themes
-		);
+			];
+		}
+
+		$this->assertEquals( $expected, $themes );
 	}
 
 	/**

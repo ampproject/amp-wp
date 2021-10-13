@@ -84,8 +84,18 @@ class AMPPluginsTest extends TestCase {
 
 		$plugins = $this->instance->get_plugins();
 
-		$this->assertEquals(
-			[
+		if ( $this->is_file_exists ) {
+			$expected_plugins = include TESTS_PLUGIN_DIR . '/includes/amp-plugins.php';
+
+			$expected = array_map(
+				static function ( $theme ) {
+
+					return AMPPlugins::normalize_plugin_data( $theme );
+				},
+				$expected_plugins
+			);
+		} else {
+			$expected = [
 				[
 					'name'                     => 'Akismet',
 					'slug'                     => 'akismet',
@@ -123,9 +133,10 @@ class AMPPluginsTest extends TestCase {
 					],
 					'wporg'                    => false,
 				],
-			],
-			$plugins
-		);
+			];
+		}
+
+		$this->assertEquals( $expected, $plugins );
 	}
 
 	/**
