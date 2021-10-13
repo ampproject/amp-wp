@@ -11,64 +11,48 @@ describe( 'getSiteIssues', () => {
 	it( 'returns plugin and theme issues', () => {
 		const validationResult = [
 			{
-				error: {
-					sources: [
-						{ type: 'core', name: 'wp-includes' },
-						{ type: 'plugin', name: 'amp' },
-					],
-				},
+				sources: [
+					{ type: 'core', name: 'wp-includes' },
+					{ type: 'plugin', name: 'amp' },
+				],
 			},
 			{
-				error: {
-					sources: [
-						{ type: 'plugin', name: 'gutenberg' },
-					],
-				},
+				sources: [
+					{ type: 'plugin', name: 'gutenberg' },
+				],
 			},
 			{
-				error: {
-					sources: [
-						{ type: 'core', name: 'wp-includes' },
-						{ type: 'plugin', name: 'jetpack' },
-					],
-				},
+				sources: [
+					{ type: 'core', name: 'wp-includes' },
+					{ type: 'plugin', name: 'jetpack' },
+				],
 			},
 			{
-				error: {
-					sources: [
-						{ type: 'plugin', name: 'jetpack' },
-					],
-				},
+				sources: [
+					{ type: 'plugin', name: 'jetpack' },
+				],
 			},
 			{
-				error: {
-					sources: [
-						{ type: 'plugin', name: 'foo-bar.php' },
-					],
-				},
+				sources: [
+					{ type: 'plugin', name: 'foo-bar.php' },
+				],
 			},
 			{
-				error: {
-					sources: [
-						{ type: 'theme', name: 'twentytwenty' },
-						{ type: 'core', name: 'wp-includes' },
-					],
-				},
+				sources: [
+					{ type: 'theme', name: 'twentytwenty' },
+					{ type: 'core', name: 'wp-includes' },
+				],
 			},
 			{
-				error: {
-					sources: [
-						{ type: 'core', name: 'wp-includes' },
-					],
-				},
+				sources: [
+					{ type: 'core', name: 'wp-includes' },
+				],
 			},
 			{
-				error: {
-					sources: [
-						{ type: 'theme', name: 'twentytwenty' },
-						{ type: 'core', name: 'wp-includes' },
-					],
-				},
+				sources: [
+					{ type: 'theme', name: 'twentytwenty' },
+					{ type: 'core', name: 'wp-includes' },
+				],
 			},
 		];
 
