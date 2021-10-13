@@ -195,6 +195,15 @@ export function SiteScanContextProvider( {
 	 * Memoize properties.
 	 */
 	const { pluginIssues, themeIssues, stale } = useMemo( () => {
+		// Skip if the scan is in progress.
+		if ( ! [ STATUS_READY, STATUS_COMPLETED ].includes( status ) ) {
+			return {
+				pluginIssues: [],
+				themeIssues: [],
+				stale: undefined,
+			};
+		}
+
 		const validationErrors = scannableUrls.reduce( ( acc, scannableUrl ) => [ ...acc, ...scannableUrl?.validation_errors ?? [] ], [] );
 		const siteIssues = getSiteIssues( validationErrors );
 
@@ -203,7 +212,7 @@ export function SiteScanContextProvider( {
 			themeIssues: siteIssues.themeIssues,
 			stale: Boolean( scannableUrls.find( ( scannableUrl ) => scannableUrl?.stale === true ) ),
 		};
-	}, [ scannableUrls ] );
+	}, [ scannableUrls, status ] );
 
 	const previewPermalink = useMemo( () => {
 		return scannableUrls.find( ( { type } ) => type === 'home' )?.[ urlType ] || homeUrl;
