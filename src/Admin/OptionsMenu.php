@@ -326,7 +326,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				[ 'url', 'amp_url', 'type', 'label', 'validation_errors', 'stale' ],
 				'/amp/v1/scannable-urls'
 			),
+			'/wp/v2/plugins',
 			'/wp/v2/settings',
+			'/wp/v2/themes',
 			'/wp/v2/users/me',
 		];
 
