@@ -127,7 +127,7 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 
 		$this->assertEquals( 1, $count_events( $event_name ) );
 		$this->assertNotEquals( $old_time, $event->timestamp, 'Expected old event to no longer be scheduled at the old time.' );
-		$this->assertGreaterThanOrEqual( time(), $event->timestamp );
+		$this->assertLessThanOrEqual( time(), $event->timestamp );
 		$this->assertEquals( $interval, $event->schedule, 'Expected event to have the new interval.' );
 	}
 
