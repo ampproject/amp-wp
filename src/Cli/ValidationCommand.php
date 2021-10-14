@@ -43,6 +43,7 @@ final class ValidationCommand implements Service, CliCommand {
 	 * For example, by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
 	 * But with this flag, validation will ignore these options.
 	 *
+	 * @since 2.2 This is no longer used.
 	 * @var string
 	 */
 	const FLAG_NAME_FORCE_VALIDATION = 'force';
@@ -121,7 +122,7 @@ final class ValidationCommand implements Service, CliCommand {
 	 * : Only validates a URL if one of the conditionals is true.
 	 *
 	 * [--force]
-	 * : Force validation of URLs even if their associated templates or object types do not have AMP enabled.
+	 * : (Obsolete) Force validation of URLs even if their associated templates or object types do not have AMP enabled.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -138,6 +139,10 @@ final class ValidationCommand implements Service, CliCommand {
 		$url_validation_provider = $this->get_validation_provider();
 		$urls                    = $scannable_url_provider->get_urls();
 
+		if ( Utils\get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false ) ) {
+			WP_CLI::warning( sprintf( 'The --%s argument is obsolete.', self::FLAG_NAME_FORCE_VALIDATION ) );
+		}
+
 		$number_urls_to_crawl = count( $urls );
 		if ( ! $number_urls_to_crawl ) {
 			if ( ! empty( Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] ) ) ) {
@@ -148,12 +153,7 @@ final class ValidationCommand implements Service, CliCommand {
 					)
 				);
 			} else {
-				WP_CLI::error(
-					sprintf(
-						'All of your templates might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.',
-						self::FLAG_NAME_FORCE_VALIDATION
-					)
-				);
+				WP_CLI::error( 'All of your templates might be unchecked in AMP Settings > Supported Templates.' );
 			}
 		}
 
@@ -222,22 +222,12 @@ final class ValidationCommand implements Service, CliCommand {
 			return $this->scannable_url_provider;
 		}
 
-		$include_conditionals      = Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
-		$force_crawl_urls          = Utils\get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
-		$limit_type_validate_count = Utils\get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
-
-		/*
-		 * Handle the argument and flag passed to the command: --include and --force.
-		 * If the self::INCLUDE_ARGUMENT is present, force crawling of URLs.
-		 * The WP-CLI command should indicate which templates are crawled, not the /wp-admin options.
-		 */
-		if ( ! empty( $include_conditionals ) ) {
-			if ( is_string( $include_conditionals ) ) {
-				$include_conditionals = explode( ',', $include_conditionals );
-			}
-
-			$force_crawl_urls = true;
+		$include_conditionals = Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
+		if ( is_string( $include_conditionals ) ) {
+			$include_conditionals = explode( ',', $include_conditionals );
 		}
+
+		$limit_type_validate_count = Utils\get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
 
 		// Handle special case for Legacy Reader mode.
 		if (
@@ -271,8 +261,7 @@ final class ValidationCommand implements Service, CliCommand {
 		$this->scannable_url_provider = new ScannableURLProvider(
 			new URLScanningContext(
 				$limit_type_validate_count,
-				$include_conditionals,
-				$force_crawl_urls
+				$include_conditionals
 			)
 		);
 

@@ -144,9 +144,6 @@ final class ScannableURLProvider {
 		if ( ! empty( $include_conditionals ) ) {
 			return in_array( $template, $include_conditionals, true );
 		}
-		if ( $this->context->get_include_unsupported() ) {
-			return true;
-		}
 
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 
@@ -167,10 +164,6 @@ final class ScannableURLProvider {
 	private function get_posts_that_support_amp( $ids ) {
 		if ( ! $this->is_template_supported( 'is_singular' ) ) {
 			return [];
-		}
-
-		if ( $this->context->get_include_unsupported() ) {
-			return $ids;
 		}
 
 		return array_values(

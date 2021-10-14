@@ -25,13 +25,6 @@ final class URLScanningContext {
 	const DEFAULT_LIMIT_PER_TYPE = 1;
 
 	/**
-	 * Whether to include URLs that don't support AMP.
-	 *
-	 * @var bool
-	 */
-	private $include_unsupported;
-
-	/**
 	 * An allowlist of conditionals to use for querying URLs.
 	 *
 	 * Usually, this class will query all of the templates that don't have AMP disabled. This allows inclusion based on only these conditionals.
@@ -54,16 +47,13 @@ final class URLScanningContext {
 	 *
 	 * @param int   $limit_per_type       The maximum number of URLs to validate for each type.
 	 * @param array $include_conditionals An allowlist of conditionals to use for validation.
-	 * @param bool  $include_unsupported  Whether to include URLs that don't support AMP.
 	 */
 	public function __construct(
 		$limit_per_type = self::DEFAULT_LIMIT_PER_TYPE,
-		$include_conditionals = [],
-		$include_unsupported = false
+		$include_conditionals = []
 	) {
 		$this->limit_per_type       = $limit_per_type;
 		$this->include_conditionals = $include_conditionals;
-		$this->include_unsupported  = $include_unsupported;
 	}
 
 	/**
@@ -90,14 +80,5 @@ final class URLScanningContext {
 	 */
 	public function get_include_conditionals() {
 		return $this->include_conditionals;
-	}
-
-	/**
-	 * Provides the include_unsupported setting.
-	 *
-	 * @return bool
-	 */
-	public function get_include_unsupported() {
-		return $this->include_unsupported;
 	}
 }
