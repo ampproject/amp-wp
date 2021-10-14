@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Sandboxing;
 use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
 use AmpProject\Tag;
@@ -273,7 +274,13 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_auto_accepted( $error = null ) {
 
-		if ( $error && amp_is_canonical() ) {
+		if (
+			$error
+			&&
+			amp_is_canonical()
+			&&
+			! Sandboxing::is_needed() // @todo Remove this once Sandboxing no longer experimental.
+		) {
 			// Excessive CSS on AMP-first sites must not be removed by default since removing CSS can severely break a site.
 			$accepted = AMP_Style_Sanitizer::STYLESHEET_TOO_LONG !== $error['code'];
 		} else {
@@ -1618,26 +1625,16 @@ class AMP_Validation_Manager {
 		}
 
 		/*
-		 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
-		 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
-		 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
+		 * In AMP-first, documents with invalid AMP markup can still be served. The amp attribute will be omitted in
+		 * order to prevent GSC from complaining about a validation error already surfaced inside of WordPress.
+		 * This is intended to not serve dirty AMP, but rather a non-AMP document (intentionally not valid AMP) that
+		 * contains the AMP runtime and AMP components.
 		 *
 		 * Otherwise, if in Paired AMP then redirect to the non-AMP version if the current user isn't an user who
 		 * can manage validation error statuses (access developer tools) and change the AMP options for the template
 		 * mode. Such users should be able to see kept invalid markup on the AMP page even though it is invalid.
 		 */
 		if ( amp_is_canonical() ) {
-			$dom->documentElement->removeAttribute( Attribute::AMP );
-			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
-			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
-
-			/*
-			 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
-			 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
-			 */
-			$script = $dom->createElement( Tag::SCRIPT );
-			$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
-			$dom->head->appendChild( $script );
 			return true;
 		}
 
