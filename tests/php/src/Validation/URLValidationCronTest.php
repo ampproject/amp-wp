@@ -58,7 +58,7 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_action( URLValidationCron::BACKGROUND_TASK_NAME, [ $this->test_instance, 'process' ] ) );
 	}
 
-	/** @covers ::schedule_event() */
+	/** @covers RecurringBackgroundTask::schedule_event() */
 	public function test_schedule_event_with_no_user() {
 		$event_name = $this->call_private_method( $this->test_instance, 'get_event_name' );
 
@@ -68,7 +68,7 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$this->assertFalse( wp_next_scheduled( $event_name ) );
 	}
 
-	/** @covers ::schedule_event() */
+	/** @covers RecurringBackgroundTask::schedule_event() */
 	public function test_schedule_event_with_user_without_permission() {
 		$event_name = $this->call_private_method( $this->test_instance, 'get_event_name' );
 
@@ -81,7 +81,7 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$this->assertTrue( is_numeric( wp_next_scheduled( $event_name ) ) );
 	}
 
-	/** @covers ::schedule_event() */
+	/** @covers RecurringBackgroundTask::schedule_event() */
 	public function test_schedule_event_with_user_with_permission() {
 		$event_name = $this->call_private_method( $this->test_instance, 'get_event_name' );
 
@@ -90,6 +90,45 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$this->test_instance->schedule_event();
 
 		$this->assertNotFalse( wp_next_scheduled( $event_name ) );
+	}
+
+	/** @covers RecurringBackgroundTask::schedule_event() */
+	public function test_schedule_event_with_different_recurrence() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$event_name   = $this->call_private_method( $this->test_instance, 'get_event_name' );
+		$args         = [];
+		$old_interval = 'weekly';
+		$interval     = $this->call_private_method( $this->test_instance, 'get_interval' );
+
+		$this->assertFalse( wp_next_scheduled( $event_name, $args ) );
+
+		$count_events = static function ( $hook ) {
+			$count = 0;
+			foreach ( _get_cron_array() as $cron ) {
+				if ( isset( $cron[ $hook ] ) ) {
+					$count += count( $cron[ $hook ] );
+				}
+			}
+			return $count;
+		};
+		$this->assertEquals( 0, $count_events( $event_name ) );
+
+		// First schedule with an old interval.
+		$this->assertNotEquals( $old_interval, $interval );
+		$old_time = time() - HOUR_IN_SECONDS;
+		wp_schedule_event( $old_time, $old_interval, $event_name, $args );
+		$this->assertEquals( $old_time, wp_next_scheduled( $event_name, $args ) );
+		$this->assertEquals( 1, $count_events( $event_name ) );
+
+		// Now try scheduling with the new interval.
+		$this->test_instance->schedule_event();
+		$event = $this->test_instance->get_scheduled_event( $event_name, $args );
+		$this->assertIsObject( $event );
+
+		$this->assertEquals( 1, $count_events( $event_name ) );
+		$this->assertNotEquals( $old_time, $event->timestamp, 'Expected old event to no longer be scheduled at the old time.' );
+		$this->assertGreaterThanOrEqual( time(), $event->timestamp );
+		$this->assertEquals( $interval, $event->schedule, 'Expected event to have the new interval.' );
 	}
 
 	/**
