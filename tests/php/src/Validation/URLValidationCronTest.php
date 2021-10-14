@@ -116,7 +116,10 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		// First schedule with an old interval.
 		$this->assertNotEquals( $old_interval, $interval );
 		$old_time = time() + HOUR_IN_SECONDS;
-		$this->assertTrue( wp_schedule_event( $old_time, $old_interval, $event_name, $args ) );
+		$success  = wp_schedule_event( $old_time, $old_interval, $event_name, $args );
+		if ( version_compare( get_bloginfo( 'version' ), '5.1', '>=' ) ) {
+			$this->assertTrue( $success );
+		}
 		$this->assertEquals( $old_time, wp_next_scheduled( $event_name, $args ) );
 		$this->assertEquals( 1, $count_events( $event_name ) );
 
