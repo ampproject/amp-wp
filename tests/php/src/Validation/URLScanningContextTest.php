@@ -68,7 +68,7 @@ final class URLScanningContextTest extends TestCase {
 	 * @covers ::get_include_conditionals()
 	 */
 	public function test_getters() {
-		$this->test_instance = new URLScanningContext( 99, [ 'is_date', 'is_search' ], true );
+		$this->test_instance = new URLScanningContext( 99, [ 'is_date', 'is_search' ] );
 
 		$this->assertEquals( 99, $this->test_instance->get_limit_per_type() );
 		$this->assertEquals(
