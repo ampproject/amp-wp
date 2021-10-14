@@ -3,7 +3,7 @@
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { usePrevious } from '@wordpress/compose';
+import isShallowEqual from '@wordpress/is-shallow-equal';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
@@ -21,6 +21,23 @@ import { getSiteIssues } from './get-site-issues';
 
 export const SiteScan = createContext();
 
+/**
+ * Array containing option keys that - when changed on the client side  - should
+ * make the scan results stale.
+ *
+ * @type {string[]}
+ */
+const OPTIONS_INVALIDATING_SITE_SCAN = [
+	'all_templates_supported',
+	'supported_post_types',
+	'supported_templates',
+	'suppressed_plugins',
+	'theme_support',
+];
+
+/**
+ * Site Scan Actions.
+ */
 const ACTION_SCANNABLE_URLS_REQUEST = 'ACTION_SCANNABLE_URLS_REQUEST';
 const ACTION_SCANNABLE_URLS_FETCH = 'ACTION_SCANNABLE_URLS_FETCH';
 const ACTION_SCANNABLE_URLS_RECEIVE = 'ACTION_SCANNABLE_URLS_RECEIVE';
@@ -28,9 +45,11 @@ const ACTION_SCAN_INITIALIZE = 'ACTION_SCAN_INITIALIZE';
 const ACTION_SCAN_VALIDATE_URL = 'ACTION_SCAN_VALIDATE_URL';
 const ACTION_SCAN_RECEIVE_VALIDATION_ERRORS = 'ACTION_SCAN_RECEIVE_VALIDATION_ERRORS';
 const ACTION_SCAN_NEXT_URL = 'ACTION_SCAN_NEXT_URL';
-const ACTION_SCAN_INVALIDATE = 'ACTION_SCAN_INVALIDATE';
 const ACTION_SCAN_CANCEL = 'ACTION_SCAN_CANCEL';
 
+/**
+ * Site Scan Statuses.
+ */
 const STATUS_REQUEST_SCANNABLE_URLS = 'STATUS_REQUEST_SCANNABLE_URLS';
 const STATUS_FETCHING_SCANNABLE_URLS = 'STATUS_FETCHING_SCANNABLE_URLS';
 const STATUS_READY = 'STATUS_READY';
@@ -40,6 +59,26 @@ const STATUS_COMPLETED = 'STATUS_COMPLETED';
 const STATUS_FAILED = 'STATUS_FAILED';
 const STATUS_CANCELLED = 'STATUS_CANCELLED';
 
+/**
+ * Initial Site Scan state.
+ *
+ * @type {Object}
+ */
+const INITIAL_STATE = {
+	cache: false,
+	currentlyScannedUrlIndex: 0,
+	frozenModifiedOptions: {},
+	scannableUrls: [],
+	status: '',
+};
+
+/**
+ * Site Scan Reducer.
+ *
+ * @param {Object} state  Current state.
+ * @param {Object} action Action to call.
+ * @return {Object} New state.
+ */
 function siteScanReducer( state, action ) {
 	switch ( action.type ) {
 		case ACTION_SCANNABLE_URLS_REQUEST: {
@@ -77,7 +116,8 @@ function siteScanReducer( state, action ) {
 				...state,
 				status: STATUS_IDLE,
 				cache: action.cache,
-				currentlyScannedUrlIndex: initialState.currentlyScannedUrlIndex,
+				currentlyScannedUrlIndex: INITIAL_STATE.currentlyScannedUrlIndex,
+				frozenModifiedOptions: action.modifiedOptions,
 			};
 		}
 		case ACTION_SCAN_VALIDATE_URL: {
@@ -123,20 +163,6 @@ function siteScanReducer( state, action ) {
 				status: hasFailed ? STATUS_FAILED : STATUS_COMPLETED,
 			};
 		}
-		case ACTION_SCAN_INVALIDATE: {
-			if ( ! [ STATUS_READY, STATUS_COMPLETED, STATUS_FAILED ].includes( state.status ) ) {
-				return state;
-			}
-
-			return {
-				...state,
-				scannableUrls: state.scannableUrls.map( ( scannableUrl ) => ( {
-					...scannableUrl,
-					stale: true,
-					revalidated: false,
-				} ) ),
-			};
-		}
 		case ACTION_SCAN_CANCEL: {
 			if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( state.status ) ) {
 				return state;
@@ -145,7 +171,7 @@ function siteScanReducer( state, action ) {
 			return {
 				...state,
 				status: STATUS_CANCELLED,
-				currentlyScannedUrlIndex: initialState.currentlyScannedUrlIndex,
+				currentlyScannedUrlIndex: INITIAL_STATE.currentlyScannedUrlIndex,
 			};
 		}
 		default: {
@@ -153,13 +179,6 @@ function siteScanReducer( state, action ) {
 		}
 	}
 }
-
-const initialState = {
-	cache: false,
-	currentlyScannedUrlIndex: 0,
-	scannableUrls: [],
-	status: '',
-};
 
 /**
  * Context provider for site scanning.
@@ -180,12 +199,18 @@ export function SiteScanContextProvider( {
 	scannableUrlsRestPath,
 	validateNonce,
 } ) {
-	const { originalOptions: { theme_support: themeSupport } } = useContext( Options );
+	const {
+		modifiedOptions,
+		originalOptions: {
+			theme_support: themeSupport,
+		},
+	} = useContext( Options );
 	const { setAsyncError } = useAsyncError();
-	const [ state, dispatch ] = useReducer( siteScanReducer, initialState );
+	const [ state, dispatch ] = useReducer( siteScanReducer, INITIAL_STATE );
 	const {
 		cache,
 		currentlyScannedUrlIndex,
+		frozenModifiedOptions,
 		scannableUrls,
 		status,
 	} = state;
@@ -194,13 +219,13 @@ export function SiteScanContextProvider( {
 	/**
 	 * Memoize properties.
 	 */
-	const { pluginIssues, themeIssues, stale } = useMemo( () => {
+	const { pluginIssues, themeIssues, hasStaleResults } = useMemo( () => {
 		// Skip if the scan is in progress.
 		if ( ! [ STATUS_READY, STATUS_COMPLETED ].includes( status ) ) {
 			return {
 				pluginIssues: [],
 				themeIssues: [],
-				stale: undefined,
+				hasStaleResults: false,
 			};
 		}
 
@@ -210,9 +235,22 @@ export function SiteScanContextProvider( {
 		return {
 			pluginIssues: siteIssues.pluginIssues,
 			themeIssues: siteIssues.themeIssues,
-			stale: Boolean( scannableUrls.find( ( scannableUrl ) => scannableUrl?.stale === true ) ),
+			hasStaleResults: Boolean( scannableUrls.find( ( scannableUrl ) => scannableUrl?.stale === true ) ),
 		};
 	}, [ scannableUrls, status ] );
+
+	const hasModifiedOptions = useMemo( () => {
+		return Boolean(
+			Object
+				.keys( modifiedOptions )
+				.find( ( key ) =>
+					OPTIONS_INVALIDATING_SITE_SCAN.includes( key ) &&
+					! isShallowEqual( modifiedOptions[ key ], frozenModifiedOptions[ key ] ),
+				),
+		);
+	}, [ frozenModifiedOptions, modifiedOptions ] );
+
+	const stale = hasModifiedOptions || hasStaleResults;
 
 	const previewPermalink = useMemo( () => {
 		return scannableUrls.find( ( { type } ) => type === 'home' )?.[ urlType ] || homeUrl;
@@ -246,23 +284,22 @@ export function SiteScanContextProvider( {
 		dispatch( {
 			type: ACTION_SCAN_INITIALIZE,
 			cache: args?.cache,
+			modifiedOptions,
 		} );
-	}, [] );
+	}, [ modifiedOptions ] );
 
 	const cancelSiteScan = useCallback( () => {
 		dispatch( { type: ACTION_SCAN_CANCEL } );
 	}, [] );
 
 	/**
-	 * Cancel scan and invalidate current results whenever theme mode changes.
+	 * Cancel scan and invalidate current results whenever options change.
 	 */
-	const previousThemeSupport = usePrevious( themeSupport );
 	useEffect( () => {
-		if ( previousThemeSupport && previousThemeSupport !== themeSupport ) {
+		if ( stale && [ STATUS_IN_PROGRESS, STATUS_IDLE ].includes( status ) ) {
 			dispatch( { type: ACTION_SCAN_CANCEL } );
-			dispatch( { type: ACTION_SCAN_INVALIDATE } );
 		}
-	}, [ previousThemeSupport, themeSupport ] );
+	}, [ stale, status ] );
 
 	/**
 	 * Fetch scannable URLs from the REST endpoint.
@@ -343,8 +380,11 @@ export function SiteScanContextProvider( {
 					} );
 				}
 			} catch ( e ) {
-				// Note that this doesn't catch failed HTTP responses.
-				setAsyncError( e );
+				dispatch( {
+					type: ACTION_SCAN_RECEIVE_VALIDATION_ERRORS,
+					scannedUrlIndex: currentlyScannedUrlIndex,
+					error: true,
+				} );
 			}
 
 			dispatch( { type: ACTION_SCAN_NEXT_URL } );

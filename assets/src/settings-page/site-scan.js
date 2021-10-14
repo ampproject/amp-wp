@@ -231,7 +231,10 @@ function SiteScanSummary() {
 	return (
 		<>
 			{ isReady ? (
-				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
+				<AMPNotice
+					type={ stale ? NOTICE_TYPE_INFO : NOTICE_TYPE_SUCCESS }
+					size={ NOTICE_SIZE_LARGE }
+				>
 					<p>
 						{ stale
 							? __( 'Stale results. Rescan your site to ensure everything is working properly.', 'amp' )
