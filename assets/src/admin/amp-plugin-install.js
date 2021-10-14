@@ -45,7 +45,6 @@ const ampPluginInstall = {
 	 * Add message for AMP Compatibility in AMP-compatible plugins card.
 	 */
 	addAmpMessage() {
-		// eslint-disable-next-line guard-for-in
 		for ( const pluginSlug of AMP_PLUGINS ) {
 			const pluginCardElement = document.querySelector( `.plugin-card.plugin-card-${ pluginSlug }` );
 
@@ -78,7 +77,6 @@ const ampPluginInstall = {
 	 * Remove the additional info from plugin card if plugin is none wporg plugin.
 	 */
 	removeAdditionalInfo() {
-		// eslint-disable-next-line guard-for-in
 		for ( const pluginSlug of NONE_WPORG_PLUGINS ) {
 			const pluginCardElement = document.querySelector( `.plugin-card.plugin-card-${ pluginSlug }` );
 
