@@ -62,15 +62,7 @@ final class URLScanningContext {
 	 * @return int
 	 */
 	public function get_limit_per_type() {
-		/**
-		 * Filters the number of URLs per content type to check during each run of the validation cron task.
-		 *
-		 * @since 2.1.0
-		 * @param int $url_validation_number_per_type The number of URLs. Defaults to 1. Filtering to -1 will result in all being returned.
-		 */
-		$url_validation_limit_per_type = (int) apply_filters( 'amp_url_validation_limit_per_type', $this->limit_per_type );
-
-		return max( $url_validation_limit_per_type, -1 );
+		return $this->limit_per_type;
 	}
 
 	/**
