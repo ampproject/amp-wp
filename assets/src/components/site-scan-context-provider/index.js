@@ -124,7 +124,7 @@ function siteScanReducer( state, action ) {
 			};
 		}
 		case ACTION_SCAN_INVALIDATE: {
-			if ( ! [ STATUS_COMPLETED, STATUS_FAILED ].includes( state.status ) ) {
+			if ( ! [ STATUS_READY, STATUS_COMPLETED, STATUS_FAILED ].includes( state.status ) ) {
 				return state;
 			}
 
