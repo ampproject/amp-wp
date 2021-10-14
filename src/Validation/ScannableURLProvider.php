@@ -68,11 +68,18 @@ final class ScannableURLProvider {
 		for ( $i = $offset; $i < $limit_per_type + $offset; $i++ ) {
 			// Include all public, published posts.
 			foreach ( $public_post_types as $post_type ) {
-				$post_ids = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type, $i, 1 ) );
-				if ( ! empty( $post_ids[0] ) ) {
+				// Note that we get 100 posts because it may be that some of them have AMP disabled. It is more
+				// efficient to do it this way than to try to do a meta query that looks for posts that have the
+				// amp_status meta equal to 'enabled' or else for posts that lack the meta key altogether. In the latter
+				// case, the absence of the meta may not mean AMP is enabled since the default-enabled state can be
+				// overridden with the `amp_post_status_default_enabled` filter. So in this case, we grab 100 post IDs
+				// and then just use the first one.
+				$post_ids = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type, $i, 100 ) );
+				$post_id  = reset( $post_ids );
+				if ( $post_id ) {
 					$post_type_object = get_post_type_object( $post_type );
 					$urls[]           = [
-						'url'   => get_permalink( $post_ids[0] ),
+						'url'   => get_permalink( $post_id ),
 						'type'  => $post_type,
 						'label' => $post_type_object->labels->singular_name ?: $post_type,
 					];
@@ -82,7 +89,7 @@ final class ScannableURLProvider {
 			foreach ( $amp_enabled_taxonomies as $taxonomy ) {
 				$taxonomy_links = $this->get_taxonomy_links( $taxonomy, $i, 1 );
 				$link           = reset( $taxonomy_links );
-				if ( ! empty( $link ) ) {
+				if ( $link ) {
 					$taxonomy_object = get_taxonomy( $taxonomy );
 					$urls[]          = [
 						'url'   => $link,
@@ -93,9 +100,10 @@ final class ScannableURLProvider {
 			}
 
 			$author_page_urls = $this->get_author_page_urls( $i, 1 );
-			if ( ! empty( $author_page_urls[0] ) ) {
+			$author_page_url  = reset( $author_page_urls );
+			if ( $author_page_url ) {
 				$urls[] = [
-					'url'   => $author_page_urls[0],
+					'url'   => $author_page_url,
 					'type'  => 'author',
 					'label' => __( 'Author Archive', 'amp' ),
 				];
@@ -165,14 +173,18 @@ final class ScannableURLProvider {
 			return $ids;
 		}
 
-		return array_filter(
-			$ids,
-			'amp_is_post_supported'
+		return array_values(
+			array_filter(
+				$ids,
+				'amp_is_post_supported'
+			)
 		);
 	}
 
 	/**
 	 * Gets the IDs of public, published posts.
+	 *
+	 * @see \amp_admin_get_preview_permalink()
 	 *
 	 * @param string   $post_type The post type.
 	 * @param int|null $offset The offset of the query (optional).
