@@ -33,7 +33,7 @@ describe( 'Current active theme is reader theme and user is nontechnical', () =>
 		await moveToDoneScreen( { technical: false, readerTheme: 'twentytwenty', mode: 'reader' } );
 
 		const stepperItemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
-		expect( stepperItemCount ).toBe( 4 );
+		expect( stepperItemCount ).toBe( 5 );
 
 		// Wait for the settings to get saved.
 		await page.waitForTimeout( 1000 );

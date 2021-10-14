@@ -10,7 +10,7 @@ describe( 'Reader themes', () => {
 
 	it( 'shows the correct active stepper item', async () => {
 		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
-		expect( itemCount ).toBe( 5 );
+		expect( itemCount ).toBe( 6 );
 
 		await expect( page ).toMatchElement( '.amp-stepper__item--active', { text: 'Theme Selection' } );
 	} );
