@@ -28,7 +28,7 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 	 * @return string Registration action to use.
 	 */
 	public static function get_registration_action() {
-		return 'admin_init';
+		return 'wp_loaded';
 	}
 
 	/**
@@ -51,15 +51,16 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 		// Add support link to Admin Bar.
 		add_action( 'admin_bar_menu', [ $this, 'admin_bar_menu' ], 105 );
 
-		// Add support link to meta box.
-		add_filter( 'amp_validated_url_status_actions', [ $this, 'amp_validated_url_status_actions' ], 10, 2 );
+		if ( is_admin() ) {
+			// Add support link to meta box.
+			add_filter( 'amp_validated_url_status_actions', [ $this, 'amp_validated_url_status_actions' ], 10, 2 );
 
-		// Add support link to Post row actions.
-		add_filter( 'post_row_actions', [ $this, 'post_row_actions' ], PHP_INT_MAX, 2 );
+			// Add support link to Post row actions.
+			add_filter( 'post_row_actions', [ $this, 'post_row_actions' ], PHP_INT_MAX, 2 );
 
-		// Plugin row Support link.
-		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
-
+			// Plugin row Support link.
+			add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
+		}
 	}
 
 	/**

@@ -127,7 +127,12 @@ class SupportData {
 			}
 		}
 
-		$this->urls = array_map( AMP_Validated_URL_Post_Type::class . '::normalize_url_for_storage', $this->urls );
+		$this->urls = array_map(
+			static function ( $url ) {
+				return AMP_Validated_URL_Post_Type::normalize_url_for_storage( $url );
+			},
+			$this->urls
+		);
 		$this->urls = array_values( array_unique( $this->urls ) );
 
 	}
@@ -162,7 +167,7 @@ class SupportData {
 
 			if ( JSON_ERROR_NONE !== $json_last_error ) {
 				return new WP_Error(
-					$json_last_error,
+					'malformed_json_amp_insight_endpoint',
 					json_last_error_msg()
 				);
 			}
@@ -230,7 +235,7 @@ class SupportData {
 		$loopback_status = '';
 
 		if ( class_exists( 'WP_Site_Health' ) ) {
-			$site_health     = new WP_Site_Health();
+			$site_health     = method_exists( 'WP_Site_Health', 'get_instance' ) ? WP_Site_Health::get_instance() : new WP_Site_Health();
 			$loopback_status = $site_health->can_perform_loopback();
 			$loopback_status = ( ! empty( $loopback_status->status ) ) ? $loopback_status->status : '';
 		}
@@ -329,19 +334,22 @@ class SupportData {
 
 		$no_of_lines = 200;
 
-		$file  = fopen( $error_log_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+		$file  = @fopen( $error_log_path, 'r' );
 		$lines = [];
 
-		while ( ! feof( $file ) ) {
-			$line = fgets( $file );
-			array_push( $lines, $line );
-			$line_count = count( $lines );
-			if ( $line_count > $no_of_lines ) {
-				array_shift( $lines );
+		if ( is_resource( $file ) ) {
+			while ( ! feof( $file ) ) {
+				$line       = fgets( $file );
+				$lines[]    = $line;
+				$line_count = count( $lines );
+				if ( $line_count > $no_of_lines ) {
+					array_shift( $lines );
+				}
 			}
-		}
 
-		fclose( $file );
+			fclose( $file );
+		}
 
 		return [
 			'log_errors' => ini_get( 'log_errors' ),

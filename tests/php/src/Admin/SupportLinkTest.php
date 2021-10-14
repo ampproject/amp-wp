@@ -47,7 +47,7 @@ class SupportLinkTest extends TestCase {
 	 */
 	public function test_get_registration_action() {
 		$this->assertEquals(
-			'admin_init',
+			'wp_loaded',
 			SupportLink::get_registration_action()
 		);
 	}
@@ -70,6 +70,8 @@ class SupportLinkTest extends TestCase {
 	 * @covers ::register()
 	 */
 	public function test_register() {
+
+		set_current_screen( 'index.php' );
 
 		$this->instance->register();
 
@@ -98,6 +100,8 @@ class SupportLinkTest extends TestCase {
 		);
 
 		$this->assertEquals( 10, has_filter( 'plugin_row_meta', [ $this->instance, 'plugin_row_meta' ] ) );
+
+		set_current_screen( 'front' );
 	}
 
 	/**
