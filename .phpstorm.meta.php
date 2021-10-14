@@ -51,6 +51,7 @@ namespace PHPSTORM_META {
 			'reader_theme_support_features'      => \AmpProject\AmpWP\ReaderThemeSupportFeatures::class,
 			'rest.options_controller'            => \AmpProject\AmpWP\OptionsRESTController::class,
 			'rest.validation_counts_controller'  => \AmpProject\AmpWP\Validation\ValidationCountsRestController::class,
+			'sandboxing'                         => \AmpProject\AmpWP\Sandboxing::class,
 			'save_post_validation_event'         => \AmpProject\AmpWP\Validation\SavePostValidationEvent::class,
 			'server_timing'                      => \AmpProject\AmpWP\Instrumentation\ServerTiming::class,
 			'site_health_integration'            => \AmpProject\AmpWP\Admin\SiteHealth::class,

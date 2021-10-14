@@ -5,10 +5,12 @@
  * @package AMP
  */
 
-use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\StubSanitizer;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 
 /**
  * Test AMP_Base_Sanitizer_Test
@@ -199,7 +201,11 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 		$this->assertEquals( [], $sanitizer->get_selector_conversion_mapping() );
 	}
 
-	/** @covers ::update_args() */
+	/**
+	 * @covers ::update_args()
+	 * @covers ::get_args()
+	 * @covers ::get_arg()
+	 */
 	public function test_update_args() {
 		$sanitizer = new StubSanitizer(
 			new Document(),
@@ -213,22 +219,26 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 				'foo' => 1,
 				'bar' => 2,
 			],
-			$this->get_private_property( $sanitizer, 'args' )
+			$sanitizer->get_args()
 		);
+		$this->assertNull( $sanitizer->get_arg( 'none' ) );
+		$this->assertEquals( 1, $sanitizer->get_arg( 'foo' ) );
 		$sanitizer->update_args(
 			[
 				'foo' => 'one',
 				'baz' => 'three',
 			]
 		);
+		$this->assertEquals( 'one', $sanitizer->get_arg( 'foo' ) );
 		$this->assertEquals(
 			[
 				'foo' => 'one',
 				'bar' => 2,
 				'baz' => 'three',
 			],
-			$this->get_private_property( $sanitizer, 'args' )
+			$sanitizer->get_args()
 		);
+		$this->assertEquals( 'three', $sanitizer->get_arg( 'baz' ) );
 	}
 
 	/**
@@ -396,6 +406,46 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 		$sanitizer->remove_invalid_child( $child, [ 'foo' => 'bar' ] );
 		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
 		AMP_Validation_Manager::$validation_results = null;
+	}
+
+	/** @covers ::remove_invalid_child() */
+	public function test_remove_invalid_child_with_validation_exemptions() {
+		// When no exemption attributes are present, the element gets removed.
+		$dom       = Document::fromHtml( '<div id="el"></div>' );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertTrue( $sanitizer->remove_invalid_child( $el ) );
+		$this->assertNull( $el->parentNode );
+
+		// When PX-verified attribute is present, the element does not get removed.
+		$dom       = Document::fromHtml( sprintf( '<div id="el" %s></div>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ) );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertFalse( $sanitizer->remove_invalid_child( $el ) );
+		$this->assertInstanceOf( Element::class, $el->parentNode );
+
+		// When AMP-unvalidated attribute is present, the element does not get removed.
+		$dom       = Document::fromHtml( sprintf( '<div id="el" %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertFalse( $sanitizer->remove_invalid_child( $el ) );
+		$this->assertInstanceOf( Element::class, $el->parentNode );
+
+		// Ensure that element is marked as being AMP-unvalidated if validation callback prevents removal.
+		$dom       = Document::fromHtml( '<div id="el"></div>' );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass(
+			AMP_Base_Sanitizer::class,
+			[
+				$dom,
+				[
+					'validation_error_callback' => '__return_false',
+				],
+			]
+		);
+		$this->assertFalse( $sanitizer->remove_invalid_child( $el ) );
+		$this->assertInstanceOf( Element::class, $el->parentNode );
+		$this->assertTrue( $el->hasAttribute( ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
 	}
 
 	/**
@@ -629,6 +679,46 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$this->assertTrue( $sanitizer->remove_invalid_attribute( $element, $attr ) );
 		$this->assertFalse( $element->hasAttribute( $attr ) );
+	}
+
+	/** @covers ::remove_invalid_attribute() */
+	public function test_remove_invalid_attribute_with_validation_exemptions() {
+		// When no exemption attributes are present, the attribute gets removed.
+		$dom       = Document::fromHtml( '<div id="el"></div>' );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertTrue( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertFalse( $el->getAttributeNode( 'id' ) );
+
+		// When PX-verified attribute is present, the attribute does not get removed.
+		$dom       = Document::fromHtml( sprintf( '<div id="el" %s="id"></div>', ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertFalse( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertInstanceOf( DOMAttr::class, $el->getAttributeNode( 'id' ) );
+
+		// When AMP-unvalidated attribute is present, the attribute does not get removed.
+		$dom       = Document::fromHtml( sprintf( '<div id="el" %s="id"></div>', ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertFalse( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertInstanceOf( DOMAttr::class, $el->getAttributeNode( 'id' ) );
+
+		// Ensure that attribute is marked as being AMP-unvalidated if validation callback prevents removal.
+		$dom       = Document::fromHtml( '<div id="el"></div>' );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass(
+			AMP_Base_Sanitizer::class,
+			[
+				$dom,
+				[
+					'validation_error_callback' => '__return_false',
+				],
+			]
+		);
+		$this->assertFalse( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertInstanceOf( DOMAttr::class, $el->getAttributeNode( 'id' ) );
+		$this->assertEquals( 'id', $el->getAttribute( ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) );
 	}
 
 	/**

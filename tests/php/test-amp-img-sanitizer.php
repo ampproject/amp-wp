@@ -7,11 +7,13 @@
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Img_Sanitizer_Test
  *
- * @covers AMP_Img_Sanitizer
+ * @coversDefaultClass \AMP_Img_Sanitizer
  */
 class AMP_Img_Sanitizer_Test extends TestCase {
 
@@ -38,6 +40,29 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		);
 	}
 
+	/** @covers ::get_selector_conversion_mapping() */
+	public function test_get_selector_conversion_mapping() {
+		$dom = Document::fromHtmlFragment( '<p>Hello world</p>' );
+
+		$with_defaults = new AMP_Img_Sanitizer( $dom );
+		$this->assertEquals(
+			[ 'img' => [ 'amp-img', 'amp-anim' ] ],
+			$with_defaults->get_selector_conversion_mapping()
+		);
+
+		$with_false_native_used = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
+		$this->assertEquals(
+			[ 'img' => [ 'amp-img', 'amp-anim' ] ],
+			$with_false_native_used->get_selector_conversion_mapping()
+		);
+
+		$with_true_native_used = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => true ] );
+		$this->assertEquals(
+			[],
+			$with_true_native_used->get_selector_conversion_mapping()
+		);
+	}
+
 	/**
 	 * Data for test_converter.
 	 *
@@ -60,7 +85,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 			'simple_native_image'                      => [
 				'<img src="https://placehold.it/300x300" width="300" height="300" class="align-center">',
-				'<img src="https://placehold.it/300x300" width="300" height="300" class="align-center amp-wp-enforced-sizes" decoding="async" data-ampdevmode="">',
+				sprintf( '<img src="https://placehold.it/300x300" width="300" height="300" class="align-center amp-wp-enforced-sizes" decoding="async" %s>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
 				[
 					'native_img_used' => true,
 				],
@@ -68,7 +93,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 			'native_image_with_no_dims_and_loading'    => [
 				'<img src="https://placehold.it/150x300" loading="lazy" decoding="sync">',
-				'<img src="https://placehold.it/150x300" loading="lazy" decoding="sync" width="150" height="300" class="amp-wp-enforced-sizes" data-ampdevmode="">',
+				sprintf( '<img src="https://placehold.it/150x300" loading="lazy" decoding="sync" width="150" height="300" class="amp-wp-enforced-sizes" %s>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
 				[
 					'native_img_used' => true,
 				],
@@ -420,7 +445,13 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	/**
 	 * Test converter.
 	 *
-	 * @covers AMP_Img_Sanitizer::sanitize()
+	 * @covers ::sanitize()
+	 * @covers ::adjust_and_replace_node()
+	 * @covers ::filter_attributes()
+	 * @covers ::determine_dimensions()
+	 * @covers ::adjust_and_replace_nodes_in_array_map()
+	 * @covers ::maybe_add_lightbox_attributes()
+	 * @covers ::is_gif_url()
 	 * @covers AMP_Noscript_Fallback::initialize_noscript_allowed_attributes()
 	 * @covers AMP_Noscript_Fallback::is_inside_amp_noscript()
 	 * @covers AMP_Noscript_Fallback::append_old_node_noscript()
@@ -471,7 +502,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	/**
 	 * Test that amp-anim does not get included for a PNG.
 	 *
-	 * @covers AMP_Img_Sanitizer::sanitize()
+	 * @covers ::sanitize()
 	 */
 	public function test_no_gif_no_image_scripts() {
 		$source   = '<img src="https://placehold.it/350x150.png" width="350" height="150" alt="Placeholder!" />';
@@ -494,7 +525,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	/**
 	 * Test that amp-anim does get included for a GIF.
 	 *
-	 * @covers AMP_Img_Sanitizer::sanitize()
+	 * @covers ::sanitize()
 	 */
 	public function test_no_gif_image_scripts() {
 		$source   = '<img src="https://placehold.it/350x150.gif" width="350" height="150" alt="Placeholder!" />';
@@ -519,7 +550,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 *
 	 * This should have the <a> stripped, as it interferes with the lightbox.
 	 *
-	 * @covers AMP_Img_Sanitizer::sanitize()
+	 * @covers ::sanitize()
 	 */
 	public function test_image_block_link_to_media_file_with_lightbox() {
 		$source   = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
@@ -540,7 +571,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 *
 	 * This should have the <a> stripped, as it interferes with the lightbox.
 	 *
-	 * @covers AMP_Img_Sanitizer::sanitize()
+	 * @covers ::sanitize()
 	 */
 	public function test_image_block_link_to_media_file_and_alignment_with_lightbox() {
 		$source   = sprintf( '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure></div>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
@@ -587,7 +618,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * Test does_node_have_block_class.
 	 *
 	 * @dataProvider get_data_for_node_block_class_test
-	 * @covers \AMP_Img_Sanitizer::does_node_have_block_class()
+	 * @covers ::does_node_have_block_class()
 	 *
 	 * @param string $source The source markup to test.
 	 * @param string $expected The expected return of the tested function, using the source markup.

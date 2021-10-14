@@ -7,7 +7,7 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
-use AmpProject\DevMode;
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
 use AmpProject\AmpWP\Tests\TestCase;
 
@@ -186,6 +186,9 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 			'form_with_pathless_url' => [
 				'<form method="post" action="//example.com"></form>',
 				'<form method="post" action-xhr="//example.com?_wp_amp_action_xhr_converted=1" target="_top">' . $form_templates . '</form>',
+				[
+					'native_post_forms_allowed' => 'never', // This is the default.
+				],
 			],
 			'test_with_dev_mode' => [
 				'<form data-ampdevmode="" action="javascript:"></form>',
@@ -194,31 +197,42 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 					'add_dev_mode' => true,
 				],
 			],
-			'form_with_post_action_converted' => [
+			'native_form_with_post_action' => [
 				'<form method="post" action="http://example.com"></form>',
-				'<form method="post" action-xhr="//example.com?_wp_amp_action_xhr_converted=1" target="_top">' . $form_templates . '</form>',
+				sprintf( '<form method="post" action="http://example.com" %s></form>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
 				[
-					'native_post_forms_allowed' => true,
+					'native_post_forms_allowed' => 'always',
 				],
-				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR ],
+				[],
 			],
-			'form_with_post_action_kept' => [
-				'<form method="post" action="http://example.com"></form>',
-				'<form method="post" action="http://example.com" data-ampdevmode></form>',
-				[
-					'native_post_forms_allowed' => true,
-					'keep_post_forms'           => true,
-					'expected_dev_mode'         => true,
-				],
-				[ AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR ],
-			],
-			'form_with_post_action-xhr_ok' => [
+			'native_form_with_post_action-xhr' => [
 				'<form method="post" action-xhr="http://example.com"></form>',
-				'<form method="post" action-xhr="//example.com" target="_top"></form>',
+				'',
 				[
-					'native_post_forms_allowed' => true,
-					'keep_post_forms'           => true,
-					'expected_dev_mode'         => false,
+					'native_post_forms_allowed' => 'always',
+				],
+				[ AMP_Form_Sanitizer::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED ],
+			],
+			'comment_form_conditionally_not_native' => [
+				sprintf( '<form id="commentform" method="post" action="%s"></form>', site_url( '/wp-comments-post.php', 'https' ) ),
+				sprintf( '<form id="commentform" method="post" action-xhr="%s" target="_top">%s</form>', site_url( '/wp-comments-post.php?_wp_amp_action_xhr_converted=1', 'https' ), $form_templates ),
+				[
+					'native_post_forms_allowed' => 'conditionally',
+				],
+				[],
+			],
+			'comment_form_conditionally_yes_native' => [
+				sprintf( '<form action="/" method="post"></form><form id="commentform" method="post" action="%s"></form>', site_url( '/wp-comments-post.php', 'https' ) ),
+				sprintf(
+					'
+						<form action="/" method="post" %1$s></form>
+						<form id="commentform" method="post" action="%2$s" %1$s></form>
+					',
+					ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE,
+					site_url( '/wp-comments-post.php', 'https' )
+				),
+				[
+					'native_post_forms_allowed' => 'conditionally',
 				],
 				[],
 			],
@@ -243,13 +257,9 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		}
 
-		$actual_errors = [];
-
-		$args['validation_error_callback'] = static function( $error ) use ( &$actual_errors, $args ) {
+		$actual_errors                     = [];
+		$args['validation_error_callback'] = static function( $error ) use ( &$actual_errors ) {
 			$actual_errors[] = $error;
-			if ( AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR === $error['code'] && ! empty( $args['keep_post_forms'] ) ) {
-				return false;
-			}
 			return true;
 		};
 
@@ -267,10 +277,7 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 			$template->appendChild( $dom->createTextNode( '...' ) );
 		}
 
-		$this->assertEqualMarkup( AMP_DOM_Utils::get_content_from_dom( $dom ), $expected );
-		if ( isset( $args['expected_dev_mode'] ) ) {
-			$this->assertEquals( $args['expected_dev_mode'], $dom->documentElement->hasAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
-		}
+		$this->assertSimilarMarkup( $expected, AMP_DOM_Utils::get_content_from_dom( $dom ) );
 		$this->assertEquals( wp_list_pluck( $actual_errors, 'code' ), $expected_errors );
 	}
 

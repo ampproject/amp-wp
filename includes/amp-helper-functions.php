@@ -1405,10 +1405,6 @@ function amp_is_dev_mode() {
 			( is_admin_bar_showing() && is_user_logged_in() )
 			||
 			is_customize_preview()
-			||
-			// Force dev mode for Bento since it currently requires the Bento experiment opt-in script.
-			// @todo Remove this once Bento no longer requires an experiment to opt-in. See <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
-			amp_is_bento_enabled()
 		)
 	);
 }
@@ -1433,26 +1429,6 @@ function amp_is_native_img_used() {
 	 * @param bool $use_native Whether to use `img`.
 	 */
 	return (bool) apply_filters( 'amp_native_img_used', false );
-}
-
-/**
- * Determine whether to allow native `POST` forms without conversion to use the `action-xhr` attribute and use the amp-form component.
- *
- * @since 2.2
- * @link https://github.com/ampproject/amphtml/issues/27638
- *
- * @return bool Whether to allow native `POST` forms.
- */
-function amp_is_native_post_form_allowed() {
-	/**
-	 * Filters whether to allow native `POST` forms without conversion to use the `action-xhr` attribute and use the amp-form component.
-	 *
-	 * @since 2.2
-	 * @link https://github.com/ampproject/amphtml/issues/27638
-	 *
-	 * @param bool $use_native Whether to allow native `POST` forms.
-	 */
-	return (bool) apply_filters( 'amp_native_post_form_allowed', false );
 }
 
 /**
@@ -1499,18 +1475,16 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 	);
 
-	$native_img_used           = amp_is_native_img_used();
-	$native_post_forms_allowed = amp_is_native_post_form_allowed();
+	$native_img_used = amp_is_native_img_used();
 
 	$sanitizers = [
-		// The AMP_Script_Sanitizer runs first because based on whether it allows custom scripts
-		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
-		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
-		// performed.
-		AMP_Script_Sanitizer::class            => [],
+		// Embed sanitization must come first because it strips out custom scripts associated with embeds.
 		AMP_Embed_Sanitizer::class             => [
 			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
 		],
+		AMP_O2_Player_Sanitizer::class         => [],
+		AMP_Playbuzz_Sanitizer::class          => [],
+
 		AMP_Core_Theme_Sanitizer::class        => [
 			'template'        => get_template(),
 			'stylesheet'      => get_stylesheet(),
@@ -1519,21 +1493,25 @@ function amp_get_content_sanitizers( $post = null ) {
 			],
 			'native_img_used' => $native_img_used,
 		],
+
+		AMP_Comments_Sanitizer::class          => [
+			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
+		],
+
+		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
+		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
+		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
+		// performed.
+		AMP_Script_Sanitizer::class            => [],
+
 		AMP_Srcset_Sanitizer::class            => [],
 		AMP_Img_Sanitizer::class               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 			'native_img_used'    => $native_img_used,
 		],
-		AMP_Form_Sanitizer::class              => [
-			'native_post_forms_allowed' => $native_post_forms_allowed,
-		],
-		AMP_Comments_Sanitizer::class          => [
-			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
-		],
+		AMP_Form_Sanitizer::class              => [],
 		AMP_Video_Sanitizer::class             => [],
-		AMP_O2_Player_Sanitizer::class         => [],
 		AMP_Audio_Sanitizer::class             => [],
-		AMP_Playbuzz_Sanitizer::class          => [],
 		AMP_Object_Sanitizer::class            => [],
 		AMP_Iframe_Sanitizer::class            => [
 			'add_placeholder'    => true,
@@ -1651,8 +1629,27 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers[ AMP_Style_Sanitizer::class ]['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 
-	// Force layout, style, meta, and validating sanitizers to be at the end.
-	foreach ( [ AMP_Layout_Sanitizer::class, AMP_Style_Sanitizer::class, AMP_Meta_Sanitizer::class, AMP_Tag_And_Attribute_Sanitizer::class ] as $class_name ) {
+	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
+	$expected_final_sanitizer_order = [
+		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
+		AMP_Script_Sanitizer::class, // Must come before sanitizers for images, videos, audios, comments, forms, and styles.
+		AMP_Form_Sanitizer::class, // Must come before comments sanitizer.
+		AMP_Comments_Sanitizer::class, // Also must come after the form sanitizer.
+		AMP_Srcset_Sanitizer::class,
+		AMP_Img_Sanitizer::class,
+		AMP_Video_Sanitizer::class,
+		AMP_Audio_Sanitizer::class,
+		AMP_Object_Sanitizer::class,
+		AMP_Iframe_Sanitizer::class,
+		AMP_Gallery_Block_Sanitizer::class,
+		AMP_Block_Sanitizer::class,
+		AMP_Accessibility_Sanitizer::class,
+		AMP_Layout_Sanitizer::class,
+		AMP_Style_Sanitizer::class,
+		AMP_Meta_Sanitizer::class,
+		AMP_Tag_And_Attribute_Sanitizer::class,
+	];
+	foreach ( $expected_final_sanitizer_order as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];
 			unset( $sanitizers[ $class_name ] );
