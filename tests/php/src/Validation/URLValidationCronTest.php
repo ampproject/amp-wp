@@ -58,7 +58,7 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_action( URLValidationCron::BACKGROUND_TASK_NAME, [ $this->test_instance, 'process' ] ) );
 	}
 
-	/** @covers RecurringBackgroundTask::schedule_event() */
+	/** @covers ::schedule_event() */
 	public function test_schedule_event_with_no_user() {
 		$event_name = $this->call_private_method( $this->test_instance, 'get_event_name' );
 
@@ -68,7 +68,7 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$this->assertFalse( wp_next_scheduled( $event_name ) );
 	}
 
-	/** @covers RecurringBackgroundTask::schedule_event() */
+	/** @covers ::schedule_event() */
 	public function test_schedule_event_with_user_without_permission() {
 		$event_name = $this->call_private_method( $this->test_instance, 'get_event_name' );
 
@@ -81,7 +81,7 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$this->assertTrue( is_numeric( wp_next_scheduled( $event_name ) ) );
 	}
 
-	/** @covers RecurringBackgroundTask::schedule_event() */
+	/** @covers ::schedule_event() */
 	public function test_schedule_event_with_user_with_permission() {
 		$event_name = $this->call_private_method( $this->test_instance, 'get_event_name' );
 
@@ -92,7 +92,7 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$this->assertNotFalse( wp_next_scheduled( $event_name ) );
 	}
 
-	/** @covers RecurringBackgroundTask::schedule_event() */
+	/** @covers ::schedule_event() */
 	public function test_schedule_event_with_different_recurrence() {
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$event_name   = $this->call_private_method( $this->test_instance, 'get_event_name' );

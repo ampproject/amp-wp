@@ -19,7 +19,7 @@ use AmpProject\Tag;
 /**
  * Test AMP_Script_Sanitizer.
  *
- * @covers AMP_Script_Sanitizer
+ * @coversDefaultClass AMP_Script_Sanitizer
  */
 class AMP_Script_Sanitizer_Test extends TestCase {
 
@@ -320,7 +320,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 	 * @param string $source        Source.
 	 * @param string $expected      Expected.
 	 * @param array $sanitizer_args Sanitizer args.
-	 * @covers AMP_Script_Sanitizer::sanitize()
+	 * @covers ::sanitize()
 	 */
 	public function test_sanitize( $source, $expected = null, $sanitizer_args = [], $expected_error_codes = [] ) {
 		if ( null === $expected ) {
@@ -365,7 +365,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 	/**
 	 * @dataProvider get_data_to_test_cascading_sanitizer_argument_changes_with_custom_scripts
 	 *
-	 * @covers AMP_Script_Sanitizer::init()
+	 * @covers ::init()
 	 *
 	 * @param int $level Level.
 	 */
