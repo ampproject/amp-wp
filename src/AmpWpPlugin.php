@@ -20,8 +20,10 @@ use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\AmpWP\Support\SupportCliCommand;
 use AmpProject\AmpWP\Support\SupportRESTController;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
+use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
+use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\Optimizer;
 
 use AmpProject\RemoteGetRequest;
@@ -121,6 +123,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'url_validation_cron'                => URLValidationCron::class,
 		'url_validation_rest_controller'     => Validation\URLValidationRESTController::class,
 		'validated_url_stylesheet_gc'        => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+		'validation.scannable_url_provider'  => ScannableURLProvider::class,
+		'validation.url_validation_provider' => URLValidationProvider::class,
 	];
 
 	/**

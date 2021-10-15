@@ -8,8 +8,12 @@
 
 namespace AmpProject\AmpWP\Validation;
 
+use AmpProject\AmpWP\Infrastructure\Service;
 use AMP_Theme_Support;
 use WP_Query;
+use AMP_Options_Manager;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Admin\ReaderThemes;
 
 /**
  * ScannableURLProvider class.
@@ -17,33 +21,130 @@ use WP_Query;
  * @since 2.1
  * @internal
  */
-final class ScannableURLProvider {
+final class ScannableURLProvider implements Service {
 
 	/**
-	 * Instance of URLScanningContext.
+	 * AMP Settings (options).
 	 *
-	 * @var URLScanningContext
+	 * @see ScannableURLProvider::get_options()
+	 * @var null|array
 	 */
-	private $context;
+	private $options = null;
 
 	/**
-	 * Class constructor.
+	 * Overrides to AMP Settings.
 	 *
-	 * @param URLScanningContext $context Instance of URLScanningContext.
+	 * @var array
 	 */
-	public function __construct( URLScanningContext $context ) {
-		$this->context = $context;
+	private $option_overrides = [];
+
+	/**
+	 * Template conditionals to restrict results to.
+	 *
+	 * @var string[]
+	 */
+	private $include_conditionals = [];
+
+	/**
+	 * Limit for the number of URLs to obtain for each template type.
+	 *
+	 * @var int
+	 */
+	private $limit_per_type;
+
+	/**
+	 * Supportable templates.
+	 *
+	 * @see ScannableURLProvider::get_supportable_templates()
+	 * @var null|array
+	 */
+	private $supportable_templates = null;
+
+	/**
+	 * @param array    $option_overrides     Overrides to AMP settings.
+	 * @param string[] $include_conditionals Template conditionals to restrict results to.
+	 * @param int      $limit_per_type       Limit of URLs to obtain per type.
+	 */
+	public function __construct( $option_overrides = [], $include_conditionals = [], $limit_per_type = 1 ) {
+		$this->option_overrides     = $option_overrides;
+		$this->include_conditionals = $include_conditionals;
+		$this->limit_per_type       = $limit_per_type;
 	}
 
 	/**
-	 * Provides the array of URLs to check.
+	 * Get options with overrides merged on top.
 	 *
-	 * Each URL is an array with two elements, with the URL at index 0 and the type at index 1.
+	 * @return array
+	 */
+	private function get_options() {
+		if ( null === $this->options ) {
+			$this->options = array_merge(
+				AMP_Options_Manager::get_options(),
+				$this->option_overrides
+			);
+		}
+		return $this->options;
+	}
+
+	/**
+	 * Get supportable templates.
 	 *
-	 * @param int|null $offset Optional. The number of URLs to offset by, where applicable. Defaults to 0.
+	 * If the current options are for legacy Reader mode, then the templates not supported by it are disabled.
+	 *
+	 * @see AMP_Theme_Support::get_supportable_templates()
+	 *
+	 * @return array
+	 */
+	private function get_supportable_templates() {
+		if ( null === $this->supportable_templates ) {
+			$options = $this->get_options();
+
+			$this->supportable_templates = AMP_Theme_Support::get_supportable_templates( $options );
+
+			if (
+				AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
+				&&
+				ReaderThemes::DEFAULT_READER_THEME === $options[ Option::READER_THEME ]
+			) {
+				$allowed_templates = [
+					'is_singular',
+				];
+				if ( 'page' === get_option( 'show_on_front' ) ) {
+					$allowed_templates[] = 'is_home';
+					$allowed_templates[] = 'is_front_page';
+				}
+				foreach ( array_diff( array_keys( $this->supportable_templates ), $allowed_templates ) as $template ) {
+					$this->supportable_templates[ $template ]['supported'] = false;
+				}
+			}
+		}
+		return $this->supportable_templates;
+	}
+
+	/**
+	 * Set include conditionals.
+	 *
+	 * @param string[] $include_conditionals Include conditionals.
+	 */
+	public function set_include_conditionals( $include_conditionals ) {
+		$this->include_conditionals = $include_conditionals;
+	}
+
+	/**
+	 * Set limit per type.
+	 *
+	 * @param int $limit_per_type Limit per type.
+	 */
+	public function set_limit_per_type( $limit_per_type ) {
+		$this->limit_per_type = $limit_per_type;
+	}
+
+	/**
+	 * Get the array of URLs to check.
+	 *
 	 * @return array Array of URLs and types.
 	 */
-	public function get_urls( $offset = 0 ) {
+	public function get_urls() {
 		$urls = [];
 
 		/*
@@ -52,37 +153,33 @@ final class ScannableURLProvider {
 		if ( 'posts' === get_option( 'show_on_front' ) && $this->is_template_supported( 'is_home' ) ) {
 			$urls[] = [
 				'url'   => home_url( '/' ),
-				'type'  => 'home',
+				'type'  => 'is_home',
 				'label' => __( 'Homepage', 'amp' ),
 			];
 		}
 
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( [ 'public' => true ] ),
-			[ $this, 'does_taxonomy_support_amp' ]
+			function ( $taxonomy ) {
+				return $this->does_taxonomy_support_amp( $taxonomy );
+			}
 		);
 		$public_post_types      = get_post_types( [ 'public' => true ] );
-		$limit_per_type         = $this->context->get_limit_per_type();
 
 		// Include one URL of each template/content type, then another URL of each type on the next iteration.
-		for ( $i = $offset; $i < $limit_per_type + $offset; $i++ ) {
-			// Include all public, published posts.
-			foreach ( $public_post_types as $post_type ) {
-				// Note that we get 100 posts because it may be that some of them have AMP disabled. It is more
-				// efficient to do it this way than to try to do a meta query that looks for posts that have the
-				// amp_status meta equal to 'enabled' or else for posts that lack the meta key altogether. In the latter
-				// case, the absence of the meta may not mean AMP is enabled since the default-enabled state can be
-				// overridden with the `amp_post_status_default_enabled` filter. So in this case, we grab 100 post IDs
-				// and then just use the first one.
-				$post_ids = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type, $i, 100 ) );
-				$post_id  = reset( $post_ids );
-				if ( $post_id ) {
-					$post_type_object = get_post_type_object( $post_type );
-					$urls[]           = [
-						'url'   => get_permalink( $post_id ),
-						'type'  => $post_type,
-						'label' => $post_type_object->labels->singular_name ?: $post_type,
-					];
+		for ( $i = 0; $i < $this->limit_per_type; $i++ ) {
+			if ( $this->is_template_supported( 'is_singular' ) ) {
+				foreach ( $public_post_types as $post_type ) {
+					$post_ids = $this->get_posts_by_type( $post_type, $i );
+					$post_id  = reset( $post_ids );
+					if ( $post_id ) {
+						$post_type_object = get_post_type_object( $post_type );
+						$urls[]           = [
+							'url'   => get_permalink( $post_id ),
+							'type'  => sprintf( 'is_singular[%s]', $post_type ),
+							'label' => $post_type_object->labels->singular_name ?: $post_type,
+						];
+					}
 				}
 			}
 
@@ -93,7 +190,7 @@ final class ScannableURLProvider {
 					$taxonomy_object = get_taxonomy( $taxonomy );
 					$urls[]          = [
 						'url'   => $link,
-						'type'  => $taxonomy,
+						'type'  => sprintf( 'is_tax[%s]', $taxonomy ),
 						'label' => $taxonomy_object->labels->singular_name ?: $taxonomy,
 					];
 				}
@@ -104,7 +201,7 @@ final class ScannableURLProvider {
 			if ( $author_page_url ) {
 				$urls[] = [
 					'url'   => $author_page_url,
-					'type'  => 'author',
+					'type'  => 'is_author',
 					'label' => __( 'Author Archive', 'amp' ),
 				];
 			}
@@ -115,7 +212,7 @@ final class ScannableURLProvider {
 		if ( $url ) {
 			$urls[] = [
 				'url'   => $url,
-				'type'  => 'date',
+				'type'  => 'is_date',
 				'label' => __( 'Date Archive', 'amp' ),
 			];
 		}
@@ -123,7 +220,7 @@ final class ScannableURLProvider {
 		if ( $url ) {
 			$urls[] = [
 				'url'   => $url,
-				'type'  => 'search',
+				'type'  => 'is_search',
 				'label' => __( 'Search Results', 'amp' ),
 			];
 		}
@@ -138,14 +235,17 @@ final class ScannableURLProvider {
 	 * @return bool Whether the template is supported.
 	 */
 	private function is_template_supported( $template ) {
-		$include_conditionals = $this->context->get_include_conditionals();
 
 		// If we received an allowlist of conditionals, this template conditional must be present in it.
-		if ( ! empty( $include_conditionals ) ) {
-			return in_array( $template, $include_conditionals, true );
+		if (
+			count( $this->include_conditionals ) > 0
+			&&
+			! in_array( $template, $this->include_conditionals, true )
+		) {
+			return false;
 		}
 
-		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
+		$supportable_templates = $this->get_supportable_templates();
 
 		// Check whether this taxonomy's template is supported, including in the 'AMP Settings' > 'Supported Templates' UI.
 		return ! empty( $supportable_templates[ $template ]['supported'] );
@@ -162,32 +262,35 @@ final class ScannableURLProvider {
 	 * @return array The post IDs that support AMP, or an empty array.
 	 */
 	private function get_posts_that_support_amp( $ids ) {
-		if ( ! $this->is_template_supported( 'is_singular' ) ) {
-			return [];
-		}
-
 		return array_values(
 			array_filter(
 				$ids,
-				'amp_is_post_supported'
+				static function ( $id ) {
+					return amp_is_post_supported( $id );
+				}
 			)
 		);
 	}
 
 	/**
-	 * Gets the IDs of public, published posts.
+	 * Gets the IDs of published posts that support AMP.
 	 *
 	 * @see \amp_admin_get_preview_permalink()
 	 *
 	 * @param string   $post_type The post type.
 	 * @param int|null $offset The offset of the query (optional).
-	 * @param int|null $number The number of posts to query for (optional).
 	 * @return int[]   $post_ids The post IDs in an array.
 	 */
-	private function get_posts_by_type( $post_type, $offset = null, $number = null ) {
+	private function get_posts_by_type( $post_type, $offset = null ) {
+		// Note that we get 100 posts because it may be that some of them have AMP disabled. It is more
+		// efficient to do it this way than to try to do a meta query that looks for posts that have the
+		// amp_status meta equal to 'enabled' or else for posts that lack the meta key altogether. In the latter
+		// case, the absence of the meta may not mean AMP is enabled since the default-enabled state can be
+		// overridden with the `amp_post_status_default_enabled` filter. So in this case, we grab 100 post IDs
+		// and then just use the first one.
 		$args = [
 			'post_type'      => $post_type,
-			'posts_per_page' => is_int( $number ) ? $number : $this->context->get_limit_per_type(),
+			'posts_per_page' => 100,
 			'post_status'    => 'publish',
 			'orderby'        => 'ID',
 			'order'          => 'DESC',
@@ -203,7 +306,7 @@ final class ScannableURLProvider {
 		}
 		$query = new WP_Query( $args );
 
-		return $query->posts;
+		return $this->get_posts_that_support_amp( $query->posts );
 	}
 
 	/**
@@ -212,17 +315,16 @@ final class ScannableURLProvider {
 	 * Accepts an $offset parameter, for the query of authors.
 	 * 0 is the first author in the query, and 1 is the second.
 	 *
-	 * @param int|string $offset The offset for the URL to query for, should be an int if passing an argument.
-	 * @param int|string $number The total number to query for, should be an int if passing an argument.
+	 * @param int $offset The offset for the URL to query for, should be an int if passing an argument.
+	 * @param int $number The total number to query for, should be an int if passing an argument.
 	 * @return string[] The author page URLs, or an empty array.
 	 */
-	private function get_author_page_urls( $offset = '', $number = '' ) {
+	private function get_author_page_urls( $offset, $number ) {
 		$author_page_urls = [];
 		if ( ! $this->is_template_supported( 'is_author' ) ) {
 			return $author_page_urls;
 		}
 
-		$number = ! empty( $number ) ? $number : $this->context->get_limit_per_type();
 		foreach ( get_users( compact( 'offset', 'number' ) ) as $author ) {
 			$author_page_urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
 		}
@@ -253,6 +355,7 @@ final class ScannableURLProvider {
 			return null;
 		}
 
+		// @todo This should use get_year_link() and it should use the year of the most recent-published post.
 		return add_query_arg( 'year', gmdate( 'Y' ), home_url( '/' ) );
 	}
 
@@ -275,18 +378,16 @@ final class ScannableURLProvider {
 	 * Gets the front-end links for taxonomy terms.
 	 * For example, https://example.org/?cat=2
 	 *
-	 * @param string     $taxonomy The name of the taxonomy, like 'category' or 'post_tag'.
-	 * @param int|string $offset The number at which to offset the query (optional).
-	 * @param int        $number The maximum amount of links to get (optional).
+	 * @param string $taxonomy The name of the taxonomy, like 'category' or 'post_tag'.
+	 * @param int    $offset The number at which to offset the query (optional).
+	 * @param int    $number The maximum amount of links to get (optional).
 	 * @return string[]  The term links, as an array of strings.
 	 */
-	private function get_taxonomy_links( $taxonomy, $offset = '', $number = null ) {
-		if ( is_null( $number ) ) {
-			$number = $this->context->get_limit_per_type();
-		}
-
+	private function get_taxonomy_links( $taxonomy, $offset, $number ) {
 		return array_map(
-			'get_term_link',
+			static function ( $term ) {
+				return get_term_link( $term );
+			},
 			get_terms(
 				array_merge(
 					compact( 'taxonomy', 'offset', 'number' ),
