@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Validation;
 
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\RecurringBackgroundTask;
+use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Manager;
 
 /**
@@ -77,13 +78,23 @@ final class URLValidationCron extends RecurringBackgroundTask {
 		if ( ! is_array( $data ) ) {
 			$data = [];
 		}
+
 		$data = array_merge(
 			[
-				'timestamp' => 0,
 				'urls'      => [],
+				'timestamp' => 0,
+				'env'       => [],
 			],
 			$data
 		);
+
+		$current_env = AMP_Validated_URL_Post_Type::get_validated_environment();
+
+		// When the validated environment changes, make sure the URLs and timestamp are reset so that new URLs are obtained.
+		if ( $data['timestamp'] && $data['env'] !== $current_env ) {
+			$data['urls']      = [];
+			$data['timestamp'] = 0;
+		}
 
 		// If there are no URLs queued, then obtain a new set.
 		if ( empty( $data['urls'] ) ) {
@@ -93,7 +104,6 @@ final class URLValidationCron extends RecurringBackgroundTask {
 				return null;
 			}
 
-			// @todo The URLs should be contextual based on the selected template mode, in particular only singular URLs should be included if using legacy Reader mode.
 			$data['urls']      = wp_list_pluck( $this->scannable_url_provider->get_urls(), 'url' );
 			$data['timestamp'] = time();
 		}
@@ -101,6 +111,7 @@ final class URLValidationCron extends RecurringBackgroundTask {
 		// If there is not a queued URL, then enqueue a new set of URLs.
 		$url = array_shift( $data['urls'] );
 
+		$data['env'] = $current_env;
 		update_option( self::OPTION_KEY, $data );
 
 		return $url ?: null;

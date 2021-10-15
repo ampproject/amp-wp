@@ -2,6 +2,8 @@
 
 namespace AmpProject\AmpWP\Tests\Validation;
 
+use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -142,6 +144,8 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 	 * @covers ::dequeue()
 	 */
 	public function test_process_and_dequeue() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+
 		/** @var ScannableURLProvider $scannable_url_provider */
 		$scannable_url_provider = $this->get_private_property( $this->test_instance, 'scannable_url_provider' );
 
@@ -181,6 +185,11 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$this->test_instance->process();
 		$this->assertEquals( $before_request_count + 1, $this->request_count );
 		$data = get_option( URLValidationCron::OPTION_KEY );
+		$this->assertCount( $initial_url_count - 1, $data['urls'] );
+
+		// Now test once the validated environment has changed, that the URLs are re-queued.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->test_instance->process();
 		$this->assertCount( $initial_url_count - 1, $data['urls'] );
 	}
 
