@@ -159,6 +159,11 @@ final class ScannableURLProviderTest extends TestCase {
 		$second_author_url = get_author_posts_url( $second_author->ID, $second_author->user_nicename );
 
 		$actual_urls = $this->call_private_method( $this->scannable_url_provider, 'get_author_page_urls', [ 0, 1 ] );
+		$this->assertCount( 0, $actual_urls );
+
+		self::factory()->post->create( [ 'post_author' => $first_author->ID ] );
+		self::factory()->post->create( [ 'post_author' => $second_author->ID ] );
+		$actual_urls = $this->call_private_method( $this->scannable_url_provider, 'get_author_page_urls', [ 0, 1 ] );
 
 		// Passing 0 as the offset argument should get the first author.
 		$this->assertEquals( [ $first_author_url ], $actual_urls );
