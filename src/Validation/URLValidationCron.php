@@ -108,7 +108,6 @@ final class URLValidationCron extends RecurringBackgroundTask {
 			$data['timestamp'] = time();
 		}
 
-		// If there is not a queued URL, then enqueue a new set of URLs.
 		$url = array_shift( $data['urls'] );
 
 		$data['env'] = $current_env;

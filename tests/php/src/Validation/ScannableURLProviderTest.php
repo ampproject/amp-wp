@@ -367,13 +367,19 @@ final class ScannableURLProviderTest extends TestCase {
 	 * @covers ::get_date_page()
 	 */
 	public function test_get_date_page() {
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+
+		$post = self::factory()->post->create();
+
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->scannable_url_provider = new ScannableURLProvider( [], [], 20 );
 
-		$year = gmdate( 'Y' );
+		$year = get_the_date( 'Y', $post );
 
 		// Normally, this should return the date page, unless the user has opted out of that template.
-		$this->assertStringContainsString( $year, $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
+		$url = $this->call_private_method( $this->scannable_url_provider, 'get_date_page' );
+		$this->assertIsString( $url );
+		$this->assertStringContainsString( get_year_link( $year ), $url );
 
 		// If $include_conditionals is set and does not have is_date, this should not return a URL.
 		$this->scannable_url_provider = new ScannableURLProvider( [], [ 'is_search' ], 20 );
@@ -381,7 +387,33 @@ final class ScannableURLProviderTest extends TestCase {
 
 		// If $include_conditionals has is_date, this should return a URL.
 		$this->scannable_url_provider = new ScannableURLProvider( [], [ 'is_date' ], 20 );
-		$parsed_page_url              = wp_parse_url( $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
-		$this->assertStringContainsString( $year, $parsed_page_url['query'] );
+		$this->assertStringContainsString( get_year_link( $year ), $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
+
+		// If all posts are deleted, then nothing should be returned.
+		$query = new WP_Query(
+			[
+				'post_type'      => 'post',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			]
+		);
+		foreach ( $query->get_posts() as $deleted_post ) {
+			wp_delete_post( $deleted_post );
+		}
+		$this->assertNull( $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
+
+		// Same goes if there is only one post and it lacks a year.
+		$timeless_post = self::factory()->post->create();
+		global $wpdb;
+		$wpdb->update(
+			$wpdb->posts,
+			[
+				'post_date'     => '0000-00-00 00:00:00',
+				'post_date_gmt' => '0000-00-00 00:00:00',
+			],
+			[ 'ID' => $timeless_post ]
+		);
+		clean_post_cache( $timeless_post );
+		$this->assertNull( $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
 	}
 }

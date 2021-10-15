@@ -346,17 +346,37 @@ final class ScannableURLProvider implements Service {
 	}
 
 	/**
-	 * Gets a single date page URL, like https://example.com/?year=2018.
+	 * Gets a single date page URL, like https://example.com/2018/.
 	 *
-	 * @return string|null An example search page, or null.
+	 * @return string|null An example year archive URL, or null.
 	 */
 	private function get_date_page() {
 		if ( ! $this->is_template_supported( 'is_date' ) ) {
 			return null;
 		}
 
-		// @todo This should use get_year_link() and it should use the year of the most recent-published post.
-		return add_query_arg( 'year', gmdate( 'Y' ), home_url( '/' ) );
+		$query = new WP_Query(
+			[
+				'post_type'      => 'post',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'orderby'        => 'date',
+				'order'          => 'DESC',
+			]
+		);
+		$posts = $query->get_posts();
+
+		$latest_post = array_shift( $posts );
+		if ( ! $latest_post ) {
+			return null;
+		}
+
+		$year = (int) get_the_date( 'Y', $latest_post );
+		if ( ! $year ) {
+			return null;
+		}
+
+		return get_year_link( $year );
 	}
 
 	/**
