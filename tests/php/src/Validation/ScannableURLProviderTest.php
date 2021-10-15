@@ -43,6 +43,9 @@ final class ScannableURLProviderTest extends TestCase {
 	 * Test retrieval of urls.
 	 *
 	 * @covers ::get_urls()
+	 * @covers ::get_options()
+	 * @covers ::get_supportable_templates()
+	 * @covers ::is_template_supported()
 	 */
 	public function test_count_urls_to_validate() {
 		$user = self::factory()->user->create();

@@ -154,7 +154,7 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$initial_url_count = count( $initial_urls );
 		$this->assertGreaterThan( 0, $initial_url_count );
 
-		delete_option( URLValidationCron::OPTION_KEY );
+		update_option( URLValidationCron::OPTION_KEY, '' );
 
 		// Verify that processing will enqueue URLs (if none are queued) and process one.
 		for ( $i = 1; $i <= $initial_url_count; $i++ ) {

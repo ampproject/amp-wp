@@ -46,6 +46,7 @@ class Test_AMP_CLI_Validation_Command extends DependencyInjectedTestCase {
 	 * Test validate_urls.
 	 *
 	 * @covers ::validate_urls()
+	 * @covers \AmpProject\AmpWP\Validation\ScannableURLProvider::set_limit_per_type()
 	 */
 	public function test_validate_urls() {
 		$number_of_posts = 20;
