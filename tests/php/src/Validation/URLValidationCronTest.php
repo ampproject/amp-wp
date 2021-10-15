@@ -5,6 +5,7 @@ namespace AmpProject\AmpWP\Tests\Validation;
 use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
@@ -140,10 +141,11 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 	 * @covers ::process()
 	 * @covers ::dequeue()
 	 */
-	public function test_validate_urls() {
+	public function test_process_and_dequeue() {
 		/** @var ScannableURLProvider $scannable_url_provider */
 		$scannable_url_provider = $this->get_private_property( $this->test_instance, 'scannable_url_provider' );
 
+		self::factory()->post->create();
 		$initial_urls      = wp_list_pluck( $scannable_url_provider->get_urls(), 'url' );
 		$initial_url_count = count( $initial_urls );
 		$this->assertGreaterThan( 0, $initial_url_count );

@@ -230,6 +230,8 @@ final class ScannableURLProviderTest extends TestCase {
 	 * @covers ::is_template_supported()
 	 */
 	public function test_is_template_supported() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+
 		$author_conditional = 'is_author';
 		$search_conditional = 'is_search';
 
@@ -345,6 +347,8 @@ final class ScannableURLProviderTest extends TestCase {
 	 * @covers ::get_search_page()
 	 */
 	public function test_get_search_page() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+
 		// Normally, this should return a string, unless the user has opted out of the search template.
 		$this->assertTrue( is_string( $this->call_private_method( $this->scannable_url_provider, 'get_search_page' ) ) );
 
@@ -363,6 +367,9 @@ final class ScannableURLProviderTest extends TestCase {
 	 * @covers ::get_date_page()
 	 */
 	public function test_get_date_page() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->scannable_url_provider = new ScannableURLProvider( [], [], 20 );
+
 		$year = gmdate( 'Y' );
 
 		// Normally, this should return the date page, unless the user has opted out of that template.
