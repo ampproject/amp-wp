@@ -382,7 +382,7 @@ final class ScannableURLProvider implements Service {
 		}
 
 		$year = (int) get_the_date( 'Y', $latest_post );
-		if ( ! $year ) {
+		if ( $year <= 0 ) {
 			return null;
 		}
 
