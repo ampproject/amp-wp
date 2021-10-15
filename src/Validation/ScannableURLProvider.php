@@ -326,7 +326,17 @@ final class ScannableURLProvider implements Service {
 		}
 
 		foreach ( get_users( compact( 'offset', 'number' ) ) as $author ) {
-			$author_page_urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
+			$authored_post_query = new WP_Query(
+				[
+					'post_type'      => 'post',
+					'post_status'    => 'publish',
+					'author'         => $author->ID,
+					'posts_per_page' => 1,
+				]
+			);
+			if ( count( $authored_post_query->get_posts() ) > 0 ) {
+				$author_page_urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
+			}
 		}
 
 		return $author_page_urls;

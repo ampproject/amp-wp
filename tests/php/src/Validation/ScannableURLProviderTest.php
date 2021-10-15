@@ -45,8 +45,11 @@ final class ScannableURLProviderTest extends TestCase {
 	 * @covers ::get_urls()
 	 */
 	public function test_count_urls_to_validate() {
+		$user = self::factory()->user->create();
+		self::factory()->post->create( [ 'post_author' => $user ] );
+
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$number_original_urls = 4;
+		$number_original_urls = 6;
 
 		$this->assertCount( $number_original_urls, $this->scannable_url_provider->get_urls() );
 
@@ -63,11 +66,7 @@ final class ScannableURLProviderTest extends TestCase {
 			);
 		}
 
-		/*
-		 * Add the number of new posts, original URLs, and 1 for the $category that all of them have.
-		 * And ensure that the tested method finds a URL for all of them.
-		 */
-		$expected_url_count = $number_new_posts + $number_original_urls + 1;
+		$expected_url_count = $number_new_posts + $number_original_urls;
 		$this->assertCount( $expected_url_count, $this->scannable_url_provider->get_urls() );
 
 		$this->scannable_url_provider = new ScannableURLProvider( [], [], 100 );
