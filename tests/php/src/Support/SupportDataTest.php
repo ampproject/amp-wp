@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP\Support\Tests;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 use AMP_Validated_URL_Post_Type;
 
 /**
@@ -19,7 +19,7 @@ use AMP_Validated_URL_Post_Type;
  * @group support-admin
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportData
  */
-class SupportDataTest extends WP_UnitTestCase {
+class SupportDataTest extends TestCase {
 
 	use PrivateAccess;
 
