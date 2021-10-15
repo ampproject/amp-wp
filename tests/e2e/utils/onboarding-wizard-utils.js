@@ -84,9 +84,11 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 		await clickMode( mode );
 	}
 
-	await clickNextButton();
-
-	await page.waitForSelector( '.done' );
+	await Promise.all( [
+		clickNextButton(),
+		page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ) ),
+		page.waitForSelector( '.done' ),
+	] );
 }
 
 export async function completeWizard( { technical = true, mode, readerTheme = 'legacy' } ) {
