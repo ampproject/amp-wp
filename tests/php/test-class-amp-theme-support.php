@@ -702,6 +702,22 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertArrayHasKey( 'is_home', $supportable_templates );
 		$this->assertArrayNotHasKey( 'parent', $supportable_templates['is_home'] );
 
+		// Test that overrides work.
+		$this->assertTrue( $supportable_templates['is_singular']['supported'] );
+		$this->assertTrue( $supportable_templates['is_home']['supported'] );
+		$this->assertTrue( $supportable_templates['is_date']['supported'] );
+		$this->assertTrue( $supportable_templates['is_404']['supported'] );
+		$overridden_supportable_templates = AMP_Theme_Support::get_supportable_templates(
+			[
+				Option::ALL_TEMPLATES_SUPPORTED => false,
+				Option::SUPPORTED_TEMPLATES     => [ 'is_date', 'is_404' ],
+			]
+		);
+		$this->assertFalse( $overridden_supportable_templates['is_singular']['supported'] );
+		$this->assertFalse( $overridden_supportable_templates['is_home']['supported'] );
+		$this->assertTrue( $overridden_supportable_templates['is_date']['supported'] );
+		$this->assertTrue( $overridden_supportable_templates['is_404']['supported'] );
+
 		// Test common templates.
 		$this->assertArrayHasKey( 'is_singular', $supportable_templates );
 		$this->assertArrayHasKey( 'is_archive', $supportable_templates );
@@ -747,7 +763,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		);
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		$this->assertArrayHasKey( 'is_custom', $supportable_templates );
-		remove_all_filters( 'amp_supportable_templates' );
 	}
 
 	/**
