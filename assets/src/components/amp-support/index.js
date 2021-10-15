@@ -89,7 +89,7 @@ export function AMPSupport( props ) {
 					{
 						__html: sprintf(
 							/* translators: %s is the URL to create a new support topic */
-							__( 'In order to best assist you, please click the Send Data button below to send the following site information to our private database. Once you have done so, copy the the resulting Support UUID in the blue box that appears and include the ID in a new <a href="%s" rel="noreferrer" target="_blank">support forum topic</a>. You do not have to submit data to get support, but our team will be able to help you more effectively if you do so.', 'amp' ),
+							__( 'In order to best assist you, please tap the Send Data button below to send the following site information to our private database. Once you have done so, copy the the resulting Support UUID in the blue box that appears and include the ID in a new <a href="%s" rel="noreferrer" target="_blank">support forum topic</a>. You do not have to submit data to get support, but our team will be able to help you more effectively if you do so.', 'amp' ),
 							'https://wordpress.org/support/plugin/amp/#new-topic-0',
 						),
 					}
