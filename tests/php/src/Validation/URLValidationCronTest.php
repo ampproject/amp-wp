@@ -187,9 +187,15 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$data = get_option( URLValidationCron::OPTION_KEY );
 		$this->assertCount( $initial_url_count - 1, $data['urls'] );
 
+		$this->test_instance->process();
+		$this->assertEquals( $before_request_count + 2, $this->request_count );
+		$data = get_option( URLValidationCron::OPTION_KEY );
+		$this->assertCount( $initial_url_count - 2, $data['urls'] );
+
 		// Now test once the validated environment has changed, that the URLs are re-queued.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->test_instance->process();
+		$data = get_option( URLValidationCron::OPTION_KEY );
 		$this->assertCount( $initial_url_count - 1, $data['urls'] );
 	}
 

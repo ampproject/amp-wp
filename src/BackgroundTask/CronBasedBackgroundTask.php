@@ -22,7 +22,6 @@ abstract class CronBasedBackgroundTask implements Service, Registerable {
 	const DEFAULT_INTERVAL_HOURLY      = 'hourly';
 	const DEFAULT_INTERVAL_TWICE_DAILY = 'twicedaily';
 	const DEFAULT_INTERVAL_DAILY       = 'daily';
-	const DEFAULT_INTERVAL_WEEKLY      = 'weekly';
 
 	/**
 	 * BackgroundTaskDeactivator instance.
