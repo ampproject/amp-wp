@@ -14,6 +14,7 @@ export async function goToOnboardingWizard() {
 }
 
 export async function clickNextButton() {
+	await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
 	await expect( page ).toClick( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
 }
 
@@ -27,11 +28,18 @@ export async function moveToTechnicalScreen() {
 	await expect( page ).toMatchElement( '.technical-background-option' );
 }
 
-export async function moveToTemplateModeScreen( { technical } ) {
+export async function moveToSiteScanScreen( { technical } ) {
 	await moveToTechnicalScreen();
 
 	const radioSelector = technical ? '#technical-background-enable' : '#technical-background-disable';
 	await expect( page ).toClick( radioSelector );
+
+	await clickNextButton();
+	await expect( page ).toMatchElement( '.site-scan' );
+}
+
+export async function moveToTemplateModeScreen( { technical } ) {
+	await moveToSiteScanScreen( { technical } );
 
 	await clickNextButton();
 	await expect( page ).toMatchElement( '.template-mode-option' );
