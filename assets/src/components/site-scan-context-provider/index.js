@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { STANDARD } from '../../common/constants';
+import { READER, STANDARD } from '../../common/constants';
 import { useAsyncError } from '../../utils/use-async-error';
 import { Options } from '../options-context-provider';
 import { getSiteIssues } from './get-site-issues';
@@ -253,8 +253,10 @@ export function SiteScanContextProvider( {
 	const stale = hasModifiedOptions || hasStaleResults;
 
 	const previewPermalink = useMemo( () => {
-		return scannableUrls.find( ( { type } ) => type === 'home' )?.[ urlType ] || homeUrl;
-	}, [ homeUrl, scannableUrls, urlType ] );
+		const pageTypes = themeSupport === READER ? [ 'post', 'page' ] : [ 'home' ];
+
+		return scannableUrls.find( ( { type } ) => pageTypes.includes( type ) )?.[ urlType ] || homeUrl;
+	}, [ homeUrl, scannableUrls, themeSupport, urlType ] );
 
 	/**
 	 * Preflight check.
