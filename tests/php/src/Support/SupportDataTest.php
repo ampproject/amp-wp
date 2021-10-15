@@ -517,6 +517,7 @@ class SupportDataTest extends WP_UnitTestCase {
 						'id'   => $post->ID,
 						'type' => 'post',
 					],
+					AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY => AMP_Validated_URL_Post_Type::get_validated_environment(),
 				],
 			]
 		);

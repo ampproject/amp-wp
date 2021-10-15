@@ -95,6 +95,7 @@ class SupportCliCommandTest extends WP_UnitTestCase {
 						'id'   => $post->ID,
 						'type' => 'post',
 					],
+					\AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY => \AMP_Validated_URL_Post_Type::get_validated_environment(),
 				],
 			]
 		);
@@ -124,8 +125,8 @@ class SupportCliCommandTest extends WP_UnitTestCase {
 		);
 		$output = ob_get_clean();
 
-		$this->assertContains( wp_json_encode( $amp_validated_url->post_title ), $output );
-		$this->assertContains( wp_json_encode( '/wp-includes/js/jquery/jquery.js?ver=__normalized__' ), $output );
-		$this->assertContains( wp_json_encode( 'DISALLOWED_TAG' ), $output );
+		$this->assertStringContainsString( wp_json_encode( $amp_validated_url->post_title ), $output );
+		$this->assertStringContainsString( wp_json_encode( '/wp-includes/js/jquery/jquery.js?ver=__normalized__' ), $output );
+		$this->assertStringContainsString( wp_json_encode( 'DISALLOWED_TAG' ), $output );
 	}
 }
