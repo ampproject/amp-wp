@@ -7,20 +7,30 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use WP_Admin_Bar;
-use WP_Post;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\QueryVar;
+use WP_Admin_Bar;
+use WP_Post;
 
 /**
  * Service that adds support links throughout the plugin's UI.
  *
+ * @since 2.2
  * @internal
  */
-class SupportLink implements Service, Conditional, Registerable {
+class SupportLink implements Service, Delayed, Conditional, Registerable {
+
+	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		return 'wp_loaded';
+	}
 
 	/**
 	 * Check whether the conditional object is currently needed.
@@ -42,15 +52,16 @@ class SupportLink implements Service, Conditional, Registerable {
 		// Add support link to Admin Bar.
 		add_action( 'admin_bar_menu', [ $this, 'admin_bar_menu' ], 105 );
 
-		// Add support link to meta box.
-		add_filter( 'amp_validated_url_status_actions', [ $this, 'amp_validated_url_status_actions' ], 10, 2 );
+		if ( is_admin() ) {
+			// Add support link to meta box.
+			add_filter( 'amp_validated_url_status_actions', [ $this, 'amp_validated_url_status_actions' ], 10, 2 );
 
-		// Add support link to Post row actions.
-		add_filter( 'post_row_actions', [ $this, 'post_row_actions' ], PHP_INT_MAX, 2 );
+			// Add support link to Post row actions.
+			add_filter( 'post_row_actions', [ $this, 'post_row_actions' ], PHP_INT_MAX, 2 );
 
-		// Plugin row Support link.
-		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
-
+			// Plugin row Support link.
+			add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
+		}
 	}
 
 	/**
@@ -66,13 +77,7 @@ class SupportLink implements Service, Conditional, Registerable {
 			return;
 		}
 
-		// Get the AMP Validated URL post ID.
-		$current_url = remove_query_arg(
-			array_merge( wp_removable_query_args(), [ QueryVar::NOAMP ] ),
-			amp_get_current_url()
-		);
-
-		$post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $current_url );
+		$post = AMP_Validated_URL_Post_Type::get_invalid_url_post( amp_get_current_url() );
 
 		$wp_admin_bar->add_node(
 			[
