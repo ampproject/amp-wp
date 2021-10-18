@@ -394,6 +394,9 @@ class SupportDataTest extends DependencyInjectedTestCase {
 	public function test_get_theme_info() {
 
 		$theme_info = $this->instance->get_theme_info();
+		if ( ! isset( $theme_info[0] ) ) {
+			$this->markTestSkipped( 'No active theme.' );
+		}
 
 		$active_theme = SupportData::normalize_theme_info( wp_get_theme() );
 
