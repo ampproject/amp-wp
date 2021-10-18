@@ -7,17 +7,18 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use AmpProject\AmpWP\Infrastructure\Delayed;
-use WP_Admin_Bar;
-use WP_Post;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use WP_Admin_Bar;
+use WP_Post;
 
 /**
  * Service that adds support links throughout the plugin's UI.
  *
+ * @since 2.2
  * @internal
  */
 class SupportLink implements Service, Delayed, Conditional, Registerable {

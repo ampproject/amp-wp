@@ -7,11 +7,11 @@
 
 namespace AmpProject\AmpWP\Support;
 
+use AmpProject\AmpWP\Infrastructure\CliCommand;
 use AmpProject\AmpWP\Infrastructure\Injector;
+use AmpProject\AmpWP\Infrastructure\Service;
 use WP_CLI;
 use function WP_CLI\Utils\get_flag_value;
-use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Infrastructure\CliCommand;
 
 /**
  * Service class for support.

@@ -11,12 +11,12 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use WP_REST_Server;
+use WP_Error;
+use WP_HTTP_Response;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
-use WP_HTTP_Response;
-use WP_Error;
+use WP_REST_Server;
 
 /**
  * Class SupportRESTController
