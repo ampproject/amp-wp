@@ -127,7 +127,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 								'dependency_type'   => 'script',
 								'handle'            => 'hello-script',
 								'dependency_handle' => 'jquery-core',
-								'text'              => 'Start of the content. ' . home_url( '/adiitional.css' ) . ' End of the content',
+								'text'              => 'Start of the content. ' . home_url( '/additional.css' ) . ' End of the content',
 							],
 						],
 					],
@@ -482,8 +482,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 
 		$plugin_info = SupportData::normalize_plugin_info( 'amp/amp.php' );
 
-		$themes     = wp_get_themes();
-		$theme_info = array_pop( $themes );
+		$theme_info = wp_get_theme();
 		$theme_info = SupportData::normalize_theme_info( $theme_info );
 
 		$data = [
@@ -518,7 +517,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 					'dependency_type'   => 'script',
 					'handle'            => 'hello-script',
 					'dependency_handle' => 'jquery-core',
-					'text'              => 'Start of the content. ' . home_url( '/adiitional.css' ) . ' End of the content',
+					'text'              => 'Start of the content. ' . home_url( '/additional.css' ) . ' End of the content',
 				],
 				'expected' => [
 					'dependency_handle' => 'jquery-core',
@@ -530,7 +529,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 					'line'              => 350,
 					'name'              => $plugin_info['slug'],
 					'priority'          => 10,
-					'text'              => 'Start of the content. /adiitional.css End of the content',
+					'text'              => 'Start of the content. /additional.css End of the content',
 					'type'              => 'plugin',
 					'version'           => $plugin_info['version'],
 				],

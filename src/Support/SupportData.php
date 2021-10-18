@@ -516,10 +516,8 @@ class SupportData {
 		 * All theme info.
 		 */
 		if ( empty( $theme_versions ) || ! is_array( $theme_versions ) ) {
-
-			$theme_list = array_merge( [ wp_get_theme() ], wp_get_themes() );
-
-			foreach ( $theme_list as $theme ) {
+			foreach ( array_unique( [ get_template(), get_stylesheet() ] ) as $theme_slug ) {
+				$theme = wp_get_theme( $theme_slug );
 				if ( ! $theme->errors() ) {
 					$theme_versions[ $theme->get_stylesheet() ] = $theme->get( 'Version' );
 				}
