@@ -7,13 +7,14 @@
 
 namespace AmpProject\AmpWP\Support;
 
-use WP_Error;
-use WP_Theme;
-use WP_Post;
-use WP_Term;
 use AMP_Options_Manager;
 use AMP_Validated_URL_Post_Type;
+use WP_Error;
+use WP_Post;
+use WP_Query;
 use WP_Site_Health;
+use WP_Term;
+use WP_Theme;
 
 /**
  * Class SupportData
@@ -597,7 +598,7 @@ class SupportData {
 			}
 		}
 
-		$query            = new \WP_Query( $query_args );
+		$query            = new WP_Query( $query_args );
 		$amp_error_posts  = $query->get_posts();
 		$amp_invalid_urls = [];
 
