@@ -311,9 +311,26 @@ class SupportData {
 	 */
 	public function get_theme_info() {
 
-		$themes   = [ wp_get_theme() ];
-		$response = array_map( __CLASS__ . '::normalize_theme_info', $themes );
-		$response = array_filter( $response );
+		$themes = [
+			wp_get_theme(),
+		];
+		if ( wp_get_theme()->parent() ) {
+			$themes[] = wp_get_theme()->parent();
+		}
+
+		$themes = array_filter(
+			$themes,
+			static function ( WP_Theme $theme ) {
+				return ! $theme->errors();
+			}
+		);
+
+		$response = array_map(
+			static function( WP_Theme $theme ) {
+				return self::normalize_theme_info( $theme );
+			},
+			$themes
+		);
 
 		return array_values( $response );
 	}
@@ -439,7 +456,7 @@ class SupportData {
 			'author'       => $theme_object->get( 'Author' ),
 			'author_url'   => $theme_object->get( 'AuthorURI' ),
 			'is_active'    => ( $theme_object->get_stylesheet() === $active_theme->get_stylesheet() ),
-			'parent_theme' => $active_theme->parent() ? $active_theme->get_template() : null,
+			'parent_theme' => $theme_object->parent() ? $theme_object->get_template() : null,
 		];
 
 		return $theme_data;
