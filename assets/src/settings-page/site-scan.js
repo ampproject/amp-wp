@@ -200,7 +200,7 @@ function SiteScanInProgress() {
 				? 100
 				: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
 			} />
-			<p>
+			<p className="settings-site-scan__status">
 				{ isCompleted
 					? __( 'Scan complete', 'amp' )
 					: sprintf(

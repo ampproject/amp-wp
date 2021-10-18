@@ -140,7 +140,7 @@ export function SiteScan() {
 						? 100
 						: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
 					} />
-					<p>
+					<p className="site-scan__status">
 						{ isCompleted
 							? __( 'Scan complete', 'amp' )
 							: sprintf(

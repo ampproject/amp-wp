@@ -7,6 +7,7 @@ import { visitAdminPage, activateTheme, installTheme } from '@wordpress/e2e-test
  * Internal dependencies
  */
 import { completeWizard, cleanUpSettings, clickMode, scrollToElement } from '../../utils/onboarding-wizard-utils';
+import { setTemplateMode } from '../../utils/amp-settings-utils';
 
 describe( 'AMP settings screen newly activated', () => {
 	beforeEach( async () => {
@@ -169,15 +170,6 @@ describe( 'AMP settings screen Review panel', () => {
 		await cleanUpSettings();
 	} );
 
-	async function changeAndSaveTemplateMode( mode ) {
-		await clickMode( mode );
-
-		await Promise.all( [
-			scrollToElement( { selector: '.amp-settings-nav button[type="submit"]', click: true } ),
-			page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ), { timeout: 10000 } ),
-		] );
-	}
-
 	it( 'is present on the page', async () => {
 		await page.waitForSelector( '.settings-site-review' );
 		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
@@ -188,7 +180,7 @@ describe( 'AMP settings screen Review panel', () => {
 	} );
 
 	it( 'button redirects to an AMP page in transitional mode', async () => {
-		await changeAndSaveTemplateMode( 'transitional' );
+		await setTemplateMode( 'transitional' );
 
 		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
 		await page.waitForNavigation();
@@ -206,7 +198,7 @@ describe( 'AMP settings screen Review panel', () => {
 	} );
 
 	it( 'button redirects to an AMP page in standard mode', async () => {
-		await changeAndSaveTemplateMode( 'standard' );
+		await setTemplateMode( 'standard' );
 
 		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
 		await page.waitForNavigation();
@@ -229,7 +221,7 @@ describe( 'AMP settings screen Review panel', () => {
 		await page.waitForSelector( '#amp-settings-root' );
 		await expect( page ).not.toMatchElement( '.settings-site-review' );
 
-		await changeAndSaveTemplateMode( 'standard' );
+		await setTemplateMode( 'standard' );
 
 		await page.waitForSelector( '.settings-site-review' );
 		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
