@@ -7,10 +7,11 @@
 
 namespace AmpProject\AmpWP\Support\Tests;
 
+use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AMP_Validated_URL_Post_Type;
+use WP_Error;
 use stdClass;
 
 /**
@@ -281,7 +282,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 		$instance = new SupportData( [] );
 		$response = $instance->send_data();
 
-		$this->assertInstanceOf( 'WP_Error', $response );
+		$this->assertInstanceOf( WP_Error::class, $response );
 
 		remove_filter( 'pre_http_request', $callback_wp_remote );
 	}
