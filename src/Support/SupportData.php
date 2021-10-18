@@ -874,12 +874,16 @@ class SupportData {
 			$content = (array) $content;
 		}
 
-		return array_map(
-			static function ( $item ) {
-				return self::remove_domain( $item );
-			},
-			$content
-		);
+		if ( is_array( $content ) ) {
+			return array_map(
+				static function ( $item ) {
+					return self::remove_domain( $item );
+				},
+				$content
+			);
+		}
+
+		return $content;
 	}
 
 	/**
