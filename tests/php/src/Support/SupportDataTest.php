@@ -482,7 +482,8 @@ class SupportDataTest extends DependencyInjectedTestCase {
 
 		$plugin_info = SupportData::normalize_plugin_info( 'amp/amp.php' );
 
-		$theme_info = wp_get_theme();
+		$themes     = wp_get_themes();
+		$theme_info = array_pop( $themes );
 		$theme_info = SupportData::normalize_theme_info( $theme_info );
 
 		$data = [

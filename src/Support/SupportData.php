@@ -490,7 +490,6 @@ class SupportData {
 		}
 
 		static $plugin_versions = [];
-		static $theme_versions  = [];
 
 		/**
 		 * All plugin info
@@ -513,18 +512,6 @@ class SupportData {
 		}
 
 		/**
-		 * All theme info.
-		 */
-		if ( empty( $theme_versions ) || ! is_array( $theme_versions ) ) {
-			foreach ( array_unique( [ get_template(), get_stylesheet() ] ) as $theme_slug ) {
-				$theme = wp_get_theme( $theme_slug );
-				if ( ! $theme->errors() ) {
-					$theme_versions[ $theme->get_stylesheet() ] = $theme->get( 'Version' );
-				}
-			}
-		}
-
-		/**
 		 * Normalize error source.
 		 */
 
@@ -539,9 +526,10 @@ class SupportData {
 		}
 
 		if ( 'plugin' === $source['type'] ) {
-			$source['version'] = $plugin_versions[ $source['name'] ];
+			$source['version'] = isset( $plugin_versions[ $source['name'] ] ) ? $plugin_versions[ $source['name'] ] : 'n/a';
 		} elseif ( 'theme' === $source['type'] ) {
-			$source['version'] = $theme_versions[ $source['name'] ];
+			$theme             = wp_get_theme( $source['name'] );
+			$source['version'] = ! $theme->errors() ? $theme->get( 'Version' ) : 'n/a';
 		}
 
 		if ( ! empty( $source['text'] ) ) {
