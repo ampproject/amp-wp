@@ -753,7 +753,7 @@ class AMP_Validated_URL_Post_Type {
 	 * @param string $url URL.
 	 * @return string Normalized URL.
 	 */
-	protected static function normalize_url_for_storage( $url ) {
+	public static function normalize_url_for_storage( $url ) {
 		// Only ever store the canonical version.
 		if ( ! amp_is_canonical() ) {
 			$url = amp_remove_paired_endpoint( $url );

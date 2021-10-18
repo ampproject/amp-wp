@@ -7,11 +7,12 @@
 
 namespace AmpProject\AmpWP\Support\Tests;
 
-use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Support\SupportData;
-use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AmpProject\AmpWP\Tests\TestCase;
 use AMP_Validated_URL_Post_Type;
+use AmpProject\AmpWP\Support\SupportData;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use WP_Error;
+use stdClass;
 
 /**
  * Tests for SupportData.
@@ -19,7 +20,7 @@ use AMP_Validated_URL_Post_Type;
  * @group support-admin
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportData
  */
-class SupportDataTest extends TestCase {
+class SupportDataTest extends DependencyInjectedTestCase {
 
 	use PrivateAccess;
 
@@ -39,32 +40,12 @@ class SupportDataTest extends TestCase {
 
 		parent::setUp();
 
-		$this->instance = new SupportData( [] );
+		$this->instance = $this->injector->make( SupportData::class );
 	}
 
 	/**
-	 * @covers ::set_args
-	 */
-	public function test_set_args() {
-
-		$this->instance->set_args( [ 'post_ids' => [ 1, 2, 3 ] ] );
-
-		$this->assertEquals(
-			[ 'post_ids' => [ 1, 2, 3 ] ],
-			$this->get_private_property( $this->instance, 'args' )
-		);
-
-		$this->instance->set_args( [] );
-
-		$this->assertEquals(
-			[],
-			$this->get_private_property( $this->instance, 'args' )
-		);
-	}
-
-	/**
-	 * @covers ::__construct
-	 * @covers ::parse_args
+	 * @covers ::__construct()
+	 * @covers ::parse_args()
 	 */
 	public function test_parse_args() {
 
@@ -86,7 +67,9 @@ class SupportDataTest extends TestCase {
 		];
 
 		$expected = array_map(
-			SupportData::class . '::normalize_url_for_storage',
+			static function ( $url ) {
+				return AMP_Validated_URL_Post_Type::normalize_url_for_storage( $url );
+			},
 			[
 				get_permalink( $url_post_id ),
 				get_term_link( $term_id ),
@@ -102,29 +85,137 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::send_data
-	 * @covers ::get_data
+	 * Create validated URL.
+	 *
+	 * @return array Validated URL posts.
+	 */
+	public function create_validated_url() {
+
+		$plugin_info = SupportData::normalize_plugin_info( 'amp/amp.php' );
+
+		$post = $this->factory()->post->create_and_get(
+			[
+				'post_content' => 'Some post content',
+			]
+		);
+
+		$term = $this->factory()->term->create_and_get();
+
+		$validated_url_post_content = wp_json_encode(
+			[
+				[
+					'term_slug' => '1',
+					'data'      => [
+						'node_name'       => 'script',
+						'parent_name'     => 'head',
+						'code'            => 'DISALLOWED_TAG',
+						'type'            => 'js_error',
+						'node_attributes' => [
+							'src' => home_url( '/wp-includes/js/jquery/jquery.js?ver=__normalized__' ),
+							'id'  => 'jquery-core-js',
+						],
+						'node_type'       => 1,
+						'sources'         => [
+							[
+								'type'              => 'plugin',
+								'name'              => $plugin_info['slug'],
+								'file'              => $plugin_info['slug'],
+								'line'              => 350,
+								'function'          => 'dummy_function',
+								'hook'              => 'wp_enqueue_scripts',
+								'priority'          => 10,
+								'dependency_type'   => 'script',
+								'handle'            => 'hello-script',
+								'dependency_handle' => 'jquery-core',
+								'text'              => 'Start of the content. ' . home_url( '/additional.css' ) . ' End of the content',
+							],
+						],
+					],
+				],
+			]
+		);
+
+		$validated_posts = [];
+
+		$post_url                = AMP_Validated_URL_Post_Type::normalize_url_for_storage( get_permalink( $post ) );
+		$validated_posts['post'] = $this->factory()->post->create_and_get(
+			[
+				'post_title'   => $post_url,
+				'post_name'    => md5( $post_url ),
+				'post_type'    => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'post_content' => $validated_url_post_content,
+				'meta_input'   => [
+					'_amp_queried_object' => [
+						'id'   => $post->ID,
+						'type' => 'post',
+					],
+					AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY => AMP_Validated_URL_Post_Type::get_validated_environment(),
+				],
+			]
+		);
+
+		$term_url                = AMP_Validated_URL_Post_Type::normalize_url_for_storage( get_term_link( $term ) );
+		$validated_posts['term'] = $this->factory()->post->create_and_get(
+			[
+				'post_title'   => $term_url,
+				'post_name'    => md5( $term_url ),
+				'post_type'    => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'post_content' => $validated_url_post_content,
+				'meta_input'   => [
+					'_amp_queried_object' => [
+						'id'   => $term->term_id,
+						'type' => 'term',
+					],
+					AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY => AMP_Validated_URL_Post_Type::get_validated_environment(),
+				],
+			]
+		);
+
+		$search_url                = AMP_Validated_URL_Post_Type::normalize_url_for_storage( home_url( '?s=example' ) );
+		$validated_posts['search'] = $this->factory()->post->create_and_get(
+			[
+				'post_title'   => $search_url,
+				'post_name'    => md5( $search_url ),
+				'post_type'    => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'post_content' => $validated_url_post_content,
+				'meta_input'   => [
+					'_amp_queried_object' => [
+						'type' => 'search',
+					],
+					AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY => AMP_Validated_URL_Post_Type::get_validated_environment(),
+				],
+			]
+		);
+
+		return $validated_posts;
+	}
+
+	/**
+	 * @covers ::send_data()
+	 * @covers ::get_data()
 	 */
 	public function test_send_data() {
 
-		// Mock http request.
-		$support_data = [];
+		$this->create_validated_url();
 
-		$callback_wp_remote = static function ( $preempt, $parsed_args ) use ( &$support_data ) {
+		// Mock http request.
+		$support_data      = [];
+		$expected_response = [
+			'status' => 'ok',
+			'data'   => [
+				'uuid' => 'ampwp-563e5de8-3129-55fb-af71-a6fbd9ef5026',
+			],
+		];
+
+		$callback_wp_remote = static function ( $preempt, $parsed_args ) use ( &$support_data, $expected_response ) {
 
 			$support_data = $parsed_args['body'];
 
 			return [
-				'body' => wp_json_encode(
-					[
-						'status' => 'ok',
-						'data'   => [
-							'uuid' => 'ampwp-563e5de8-3129-55fb-af71-a6fbd9ef5026',
-						],
-					]
-				),
+				'body' => wp_json_encode( $expected_response ),
 			];
 		};
+
 		add_filter( 'pre_http_request', $callback_wp_remote, 10, 2 );
 
 		$instance = new SupportData( [] );
@@ -151,9 +242,58 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
+	 * @covers ::get_data()
+	 * @covers ::get_amp_urls()
+	 */
+	public function test_get_data_with_specific_url() {
+
+		$this->create_validated_url();
+
+		$search_urls = home_url( '?s=example' );
+
+		$instance = new SupportData(
+			[
+				'urls' => [
+					$search_urls,
+				],
+			]
+		);
+
+		$output = $instance->get_data();
+
+		$this->assertCount( 1, $output['urls'] );
+		$this->assertEquals(
+			AMP_Validated_URL_Post_Type::normalize_url_for_storage( $search_urls ),
+			$output['urls'][0]['url']
+		);
+	}
+
+	/**
+	 * @covers ::send_data()
+	 */
+	public function test_send_data_with_error() {
+		$callback_wp_remote = static function ( $preempt, $parsed_args ) use ( &$support_data ) {
+
+			$support_data = $parsed_args['body'];
+
+			return [
+				'body' => 'some invalid string',
+			];
+		};
+		add_filter( 'pre_http_request', $callback_wp_remote, 10, 2 );
+
+		$instance = new SupportData( [] );
+		$response = $instance->send_data();
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+
+		remove_filter( 'pre_http_request', $callback_wp_remote );
+	}
+
+	/**
 	 * Test get_error_log method.
 	 *
-	 * @covers ::get_error_log
+	 * @covers ::get_error_log()
 	 */
 	public function test_get_error_log() {
 
@@ -166,28 +306,7 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::normalize_url_for_storage
-	 */
-	public function test_normalize_url_for_storage() {
-
-		$url_not_normalized = add_query_arg(
-			[
-				QueryVar::NOAMP => '',
-				'preview_id'    => 123,
-			],
-			'http://google.com/#anchor'
-		);
-
-		$this->assertSame(
-			'https://google.com/',
-			SupportData::normalize_url_for_storage(
-				$url_not_normalized
-			)
-		);
-	}
-
-	/**
-	 * @covers ::get_site_info
+	 * @covers ::get_site_info()
 	 */
 	public function test_get_site_info() {
 
@@ -223,8 +342,8 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::get_plugin_info
-	 * @covers ::normalize_plugin_info
+	 * @covers ::get_plugin_info()
+	 * @covers ::normalize_plugin_info()
 	 */
 	public function test_get_plugin_info() {
 
@@ -272,12 +391,15 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::get_theme_info
-	 * @covers ::normalize_theme_info
+	 * @covers ::get_theme_info()
+	 * @covers ::normalize_theme_info()
 	 */
 	public function test_get_theme_info() {
 
 		$theme_info = $this->instance->get_theme_info();
+		if ( ! isset( $theme_info[0] ) ) {
+			$this->markTestSkipped( 'No active theme.' );
+		}
 
 		$active_theme = SupportData::normalize_theme_info( wp_get_theme() );
 
@@ -348,9 +470,9 @@ class SupportDataTest extends TestCase {
 
 	/**
 	 * @dataProvider normalize_error_data_provider
-	 * @covers ::normalize_error
-	 * @covers ::remove_domain
-	 * @covers ::generate_hash
+	 * @covers ::normalize_error()
+	 * @covers ::remove_domain()
+	 * @covers ::generate_hash()
 	 */
 	public function test_normalize_error( $input, $expected ) {
 
@@ -402,7 +524,7 @@ class SupportDataTest extends TestCase {
 					'dependency_type'   => 'script',
 					'handle'            => 'hello-script',
 					'dependency_handle' => 'jquery-core',
-					'text'              => 'Start of the content. ' . home_url( '/adiitional.css' ) . ' End of the content',
+					'text'              => 'Start of the content. ' . home_url( '/additional.css' ) . ' End of the content',
 				],
 				'expected' => [
 					'dependency_handle' => 'jquery-core',
@@ -414,7 +536,7 @@ class SupportDataTest extends TestCase {
 					'line'              => 350,
 					'name'              => $plugin_info['slug'],
 					'priority'          => 10,
-					'text'              => 'Start of the content. /adiitional.css End of the content',
+					'text'              => 'Start of the content. /additional.css End of the content',
 					'type'              => 'plugin',
 					'version'           => $plugin_info['version'],
 				],
@@ -452,8 +574,8 @@ class SupportDataTest extends TestCase {
 
 	/**
 	 * @dataProvider normalize_error_source_data_provider
-	 * @covers ::normalize_error_source
-	 * @covers ::generate_hash
+	 * @covers ::normalize_error_source()
+	 * @covers ::generate_hash()
 	 */
 	public function test_normalize_error_source( $input, $expected ) {
 
@@ -461,73 +583,10 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * Create validated URL.
-	 *
-	 * @return \WP_Post Validated URL post.
-	 */
-	public function create_validated_url() {
-
-		$plugin_info = SupportData::normalize_plugin_info( 'amp/amp.php' );
-
-		$post = $this->factory()->post->create_and_get(
-			[
-				'post_content' => 'Some post content',
-			]
-		);
-
-		return $this->factory()->post->create_and_get(
-			[
-				'post_title'   => get_permalink( $post ),
-				'post_type'    => \AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-				'post_content' => wp_json_encode(
-					[
-						[
-							'term_slug' => '1',
-							'data'      => [
-								'node_name'       => 'script',
-								'parent_name'     => 'head',
-								'code'            => 'DISALLOWED_TAG',
-								'type'            => 'js_error',
-								'node_attributes' => [
-									'src' => home_url( '/wp-includes/js/jquery/jquery.js?ver=__normalized__' ),
-									'id'  => 'jquery-core-js',
-								],
-								'node_type'       => 1,
-								'sources'         => [
-									[
-										'type'            => 'plugin',
-										'name'            => $plugin_info['slug'],
-										'file'            => $plugin_info['slug'],
-										'line'            => 350,
-										'function'        => 'dummy_function',
-										'hook'            => 'wp_enqueue_scripts',
-										'priority'        => 10,
-										'dependency_type' => 'script',
-										'handle'          => 'hello-script',
-										'dependency_handle' => 'jquery-core',
-										'text'            => 'Start of the content. ' . home_url( '/adiitional.css' ) . ' End of the content',
-									],
-								],
-							],
-						],
-					]
-				),
-				'meta_input'   => [
-					'_amp_queried_object' => [
-						'id'   => $post->ID,
-						'type' => 'post',
-					],
-					AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY => AMP_Validated_URL_Post_Type::get_validated_environment(),
-				],
-			]
-		);
-	}
-
-	/**
 	 * Test get_amp_urls method.
 	 *
-	 * @covers ::get_amp_urls
-	 * @covers ::get_stylesheet_info
+	 * @covers ::get_amp_urls()
+	 * @covers ::get_stylesheet_info()
 	 */
 	public function test_get_amp_urls() {
 
@@ -536,7 +595,7 @@ class SupportDataTest extends TestCase {
 
 		$this->assertCount( 1, $data['errors'] );
 		$this->assertCount( 1, $data['error_sources'] );
-		$this->assertCount( 1, $data['urls'] );
+		$this->assertCount( 3, $data['urls'] );
 
 		$keys = [
 			'url',
@@ -555,7 +614,7 @@ class SupportDataTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::get_home_url
+	 * @covers ::get_home_url()
 	 */
 	public function test_get_home_url() {
 
@@ -566,6 +625,66 @@ class SupportDataTest extends TestCase {
 		$home_url      = untrailingslashit( $home_url );
 
 		$this->assertEquals( $home_url, SupportData::get_home_url() );
+	}
 
+	/**
+	 * @covers ::remove_domain()
+	 */
+	public function test_remove_domain() {
+
+		// Test 1: With string.
+		$input    = home_url( '/sample-page/' );
+		$expected = '/sample-page/';
+
+		$this->assertEquals( $expected, SupportData::remove_domain( $input ) );
+
+		// Test 2: With array and object.
+		$input_object        = new stdClass();
+		$input_object->key_1 = 'value_1';
+		$input_object->key_2 = 'value_2';
+		$input_object->key_3 = home_url( '/example-page/' );
+		$input_object->key_4 = [
+			'value 1',
+			home_url( '/sample-page/' ),
+			home_url( '/sample-page-2/' ),
+		];
+		$input_array         = (object) $input_object;
+
+		$expected = [
+			'key_1' => 'value_1',
+			'key_2' => 'value_2',
+			'key_3' => '/example-page/',
+			'key_4' => [
+				'value 1',
+				'/sample-page/',
+				'/sample-page-2/',
+			],
+		];
+
+		$this->assertEquals( $expected, SupportData::remove_domain( $input_object ) );
+		$this->assertEquals( $expected, SupportData::remove_domain( $input_array ) );
+	}
+
+	/**
+	 * @covers ::generate_hash()
+	 */
+	public function test_generate_hash() {
+
+		$this->assertEmpty( SupportData::generate_hash( '' ) );
+
+		$input_data        = new stdClass();
+		$input_data->key_1 = 'value_1';
+		$input_data->key_2 = 'value_2';
+		$input_data->key_3 = 'value_3';
+
+		$expected_data = (array) $input_data;
+
+		ksort( $expected_data );
+
+		$expected = hash( 'sha256', wp_json_encode( $expected_data ) );
+
+		$this->assertEquals( $expected, SupportData::generate_hash( $input_data ) );
+
+		$this->assertEquals( $expected, SupportData::generate_hash( (array) $input_data ) );
 	}
 }

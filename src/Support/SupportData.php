@@ -7,13 +7,21 @@
 
 namespace AmpProject\AmpWP\Support;
 
+use AMP_Options_Manager;
+use AMP_Validated_URL_Post_Type;
 use WP_Error;
+use WP_Post;
+use WP_Query;
+use WP_Site_Health;
+use WP_Term;
 use WP_Theme;
-use AmpProject\AmpWP\QueryVar;
 
 /**
  * Class SupportData
  * To prepare and send support data to insights server.
+ *
+ * @internal
+ * @since 2.2
  */
 class SupportData {
 
@@ -59,18 +67,6 @@ class SupportData {
 	 * @param array $args Arguments for AMP Send data.
 	 */
 	public function __construct( $args = [] ) {
-		$this->set_args( $args );
-	}
-
-	/**
-	 * To set argument for the class.
-	 *
-	 * @param array $args New arguments for instance.
-	 *
-	 * @return void
-	 */
-	public function set_args( $args = [] ) {
-
 		$this->args = ( ! empty( $args ) && is_array( $args ) ) ? $args : [];
 
 		$this->parse_args();
@@ -132,7 +128,12 @@ class SupportData {
 			}
 		}
 
-		$this->urls = array_map( __CLASS__ . '::normalize_url_for_storage', $this->urls );
+		$this->urls = array_map(
+			static function ( $url ) {
+				return AMP_Validated_URL_Post_Type::normalize_url_for_storage( $url );
+			},
+			$this->urls
+		);
 		$this->urls = array_values( array_unique( $this->urls ) );
 
 	}
@@ -153,14 +154,24 @@ class SupportData {
 			sprintf( '%s/api/v1/support/', $endpoint ),
 			[
 				// We need long timeout here, in case the data being sent is large or the network connection is slow.
-				'timeout'  => 3000, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+				'timeout'  => 30, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 				'body'     => $data,
 				'compress' => true,
 			]
 		);
 
 		if ( ! is_wp_error( $response ) ) {
-			$response = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			$response_body   = wp_remote_retrieve_body( $response );
+			$response        = json_decode( $response_body, true );
+			$json_last_error = json_last_error();
+
+			if ( JSON_ERROR_NONE !== $json_last_error ) {
+				return new WP_Error(
+					'malformed_json_amp_insight_endpoint',
+					json_last_error_msg()
+				);
+			}
 		}
 
 		return $response;
@@ -198,55 +209,6 @@ class SupportData {
 	}
 
 	/**
-	 * Normalize a URL for storage.
-	 *
-	 * The AMP query param is removed to facilitate switching between standard and transitional.
-	 * The URL scheme is also normalized to HTTPS to help with transition from HTTP to HTTPS.
-	 *
-	 * @since 2.2
-	 *
-	 * @reference AMP_Validated_URL_Post_Type::normalize_url_for_storage
-	 *
-	 * @param string $url URL.
-	 *
-	 * @return string Normalized URL.
-	 */
-	public static function normalize_url_for_storage( $url ) {
-
-		// Only ever store the canonical version.
-		if ( ! amp_is_canonical() ) {
-			$url = amp_remove_paired_endpoint( $url );
-		}
-
-		// Remove fragment identifier in the rare case it could be provided. It is irrelevant for validation.
-		$url = strtok( $url, '#' );
-
-		// Query args to be removed from validated URLs.
-		$removable_query_vars = array_merge(
-			wp_removable_query_args(),
-			[ 'preview_id', 'preview_nonce', 'preview', QueryVar::NOAMP ]
-		);
-
-		// Normalize query args, removing all that are not recognized or which are removable.
-		$url_parts = explode( '?', $url, 2 );
-		if ( 2 === count( $url_parts ) ) {
-			$args = wp_parse_args( $url_parts[1] );
-			foreach ( $removable_query_vars as $removable_query_arg ) {
-				unset( $args[ $removable_query_arg ] );
-			}
-			$url = $url_parts[0];
-			if ( ! empty( $args ) ) {
-				$url = $url_parts[0] . '?' . build_query( $args );
-			}
-		}
-
-		// Normalize the scheme as HTTPS.
-		$url = set_url_scheme( $url, 'https' );
-
-		return $url;
-	}
-
-	/**
 	 * To get site info.
 	 *
 	 * @since 2.2
@@ -257,29 +219,42 @@ class SupportData {
 
 		global $wpdb;
 
-		$wp_type = is_multisite() ? ( defined( 'SUBDOMAIN_INSTALL' ) && SUBDOMAIN_INSTALL ) ? 'subdomain' : 'subdir' : 'single';
+		$wp_type = 'single';
+
+		if ( is_multisite() && ( defined( 'SUBDOMAIN_INSTALL' ) && SUBDOMAIN_INSTALL ) ) {
+			$wp_type = 'subdomain';
+		} elseif ( is_multisite() ) {
+			$wp_type = 'subdir';
+		}
 
 		$active_theme = wp_get_theme();
 		$active_theme = static::normalize_theme_info( $active_theme );
 
-		$amp_settings = \AMP_Options_Manager::get_options();
+		$amp_settings = AMP_Options_Manager::get_options();
 		$amp_settings = ( ! empty( $amp_settings ) && is_array( $amp_settings ) ) ? $amp_settings : [];
 
 		$loopback_status = '';
 
-		if ( class_exists( 'Health_Check_Loopback' ) ) {
-			$loopback_status = \Health_Check_Loopback::can_perform_loopback();
+		if ( class_exists( 'WP_Site_Health' ) ) {
+			$site_health     = method_exists( 'WP_Site_Health', 'get_instance' ) ? WP_Site_Health::get_instance() : new WP_Site_Health();
+			$loopback_status = $site_health->can_perform_loopback();
 			$loopback_status = ( ! empty( $loopback_status->status ) ) ? $loopback_status->status : '';
+		}
+
+		if ( function_exists( 'wp_is_https_supported' ) ) {
+			$is_ssl = wp_is_https_supported();
+		} else {
+			$is_ssl = is_ssl();
 		}
 
 		$site_info = [
 			'site_url'                    => static::get_home_url(),
 			'site_title'                  => get_bloginfo( 'site_title' ),
 			'php_version'                 => phpversion(),
-			'mysql_version'               => $wpdb->get_var( 'SELECT VERSION();' ), // phpcs:ignore
+			'mysql_version'               => $wpdb->db_version(),
 			'wp_version'                  => get_bloginfo( 'version' ),
 			'wp_language'                 => get_bloginfo( 'language' ),
-			'wp_https_status'             => is_ssl() ? true : false,
+			'wp_https_status'             => $is_ssl,
 			'wp_multisite'                => $wp_type,
 			'wp_active_theme'             => $active_theme,
 			'object_cache_status'         => wp_using_ext_object_cache(),
@@ -316,7 +291,12 @@ class SupportData {
 		}
 
 		$active_plugins = array_values( array_unique( $active_plugins ) );
-		$plugin_info    = array_map( __CLASS__ . '::normalize_plugin_info', $active_plugins );
+		$plugin_info    = array_map(
+			static function ( $active_plugin ) {
+				return self::normalize_plugin_info( $active_plugin );
+			},
+			$active_plugins
+		);
 		$plugin_info    = array_filter( $plugin_info );
 
 		return array_values( $plugin_info );
@@ -331,9 +311,26 @@ class SupportData {
 	 */
 	public function get_theme_info() {
 
-		$themes   = [ wp_get_theme() ];
-		$response = array_map( __CLASS__ . '::normalize_theme_info', $themes );
-		$response = array_filter( $response );
+		$themes = [
+			wp_get_theme(),
+		];
+		if ( wp_get_theme()->parent() ) {
+			$themes[] = wp_get_theme()->parent();
+		}
+
+		$themes = array_filter(
+			$themes,
+			static function ( WP_Theme $theme ) {
+				return ! $theme->errors();
+			}
+		);
+
+		$response = array_map(
+			static function( WP_Theme $theme ) {
+				return self::normalize_theme_info( $theme );
+			},
+			$themes
+		);
 
 		return array_values( $response );
 	}
@@ -358,20 +355,28 @@ class SupportData {
 			];
 		}
 
-		$file        = file( $error_log_path );
-		$max_lines   = max( 0, count( $file ) - 200 );
-		$file_length = count( $file );
-		$contents    = [];
+		$no_of_lines = 200;
 
-		for ( $i = $max_lines; $i < $file_length; $i ++ ) {
-			if ( ! empty( $file[ $i ] ) ) {
-				$contents[] = sanitize_text_field( $file[ $i ] );
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+		$file  = @fopen( $error_log_path, 'r' );
+		$lines = [];
+
+		if ( is_resource( $file ) ) {
+			while ( ! feof( $file ) ) {
+				$line       = fgets( $file );
+				$lines[]    = $line;
+				$line_count = count( $lines );
+				if ( $line_count > $no_of_lines ) {
+					array_shift( $lines );
+				}
 			}
+
+			fclose( $file );
 		}
 
 		return [
 			'log_errors' => ini_get( 'log_errors' ),
-			'contents'   => implode( "\n", $contents ),
+			'contents'   => implode( "\n", $lines ),
 		];
 	}
 
@@ -386,8 +391,8 @@ class SupportData {
 	 */
 	public static function normalize_plugin_info( $plugin_file ) {
 
-		$absolute_plugin_file = WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $plugin_file;
-		if ( ! file_exists( $absolute_plugin_file ) ) {
+		$absolute_plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+		if ( 0 !== validate_file( $absolute_plugin_file ) || ! file_exists( $absolute_plugin_file ) ) {
 			return [];
 		}
 
@@ -451,7 +456,7 @@ class SupportData {
 			'author'       => $theme_object->get( 'Author' ),
 			'author_url'   => $theme_object->get( 'AuthorURI' ),
 			'is_active'    => ( $theme_object->get_stylesheet() === $active_theme->get_stylesheet() ),
-			'parent_theme' => $active_theme->get_template(),
+			'parent_theme' => $theme_object->parent() ? $theme_object->get_template() : null,
 		];
 
 		return $theme_data;
@@ -476,11 +481,7 @@ class SupportData {
 
 		$error_data['text'] = ( ! empty( $error_data['text'] ) ) ? trim( $error_data['text'] ) : '';
 
-		$error_data = wp_json_encode( $error_data );
 		$error_data = static::remove_domain( $error_data );
-		$error_data = json_decode( $error_data, true );
-
-		ksort( $error_data );
 
 		/**
 		 * Generate new slug after removing site specific data.
@@ -506,7 +507,6 @@ class SupportData {
 		}
 
 		static $plugin_versions = [];
-		static $theme_versions  = [];
 
 		/**
 		 * All plugin info
@@ -516,24 +516,15 @@ class SupportData {
 			$plugin_list = get_plugins();
 			$plugin_list = array_keys( $plugin_list );
 			$plugin_list = array_values( array_unique( $plugin_list ) );
-			$plugin_list = array_map( __CLASS__ . '::normalize_plugin_info', $plugin_list );
+			$plugin_list = array_map(
+				static function ( $plugin ) {
+					return self::normalize_plugin_info( $plugin );
+				},
+				$plugin_list
+			);
 
 			foreach ( $plugin_list as $plugin ) {
 				$plugin_versions[ $plugin['slug'] ] = $plugin['version'];
-			}
-		}
-
-		/**
-		 * All theme info.
-		 */
-		if ( empty( $theme_versions ) || ! is_array( $theme_versions ) ) {
-
-			$theme_list = array_merge( [ wp_get_theme() ], wp_get_themes() );
-
-			foreach ( $theme_list as $theme ) {
-				if ( ! $theme->errors() ) {
-					$theme_versions[ $theme->get_stylesheet() ] = $theme->get( 'Version' );
-				}
 			}
 		}
 
@@ -552,9 +543,10 @@ class SupportData {
 		}
 
 		if ( 'plugin' === $source['type'] ) {
-			$source['version'] = $plugin_versions[ $source['name'] ];
+			$source['version'] = isset( $plugin_versions[ $source['name'] ] ) ? $plugin_versions[ $source['name'] ] : 'n/a';
 		} elseif ( 'theme' === $source['type'] ) {
-			$source['version'] = $theme_versions[ $source['name'] ];
+			$theme             = wp_get_theme( $source['name'] );
+			$source['version'] = ! $theme->errors() ? $theme->get( 'Version' ) : 'n/a';
 		}
 
 		if ( ! empty( $source['text'] ) ) {
@@ -581,20 +573,21 @@ class SupportData {
 	 * @return array List amp validated URLs.
 	 */
 	public function get_amp_urls() {
-
-		global $wpdb;
-
-		$query = "SELECT ID, post_title, post_content FROM {$wpdb->posts} WHERE `post_type`='amp_validated_url'";
+		$query_args = [
+			'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+			'posts_per_page' => 100,
+		];
 
 		if ( ! empty( $this->urls ) && is_array( $this->urls ) ) {
-			$placeholder = implode( ', ', array_fill( 0, count( $this->urls ), '%s' ) );
-			$query      .= ' AND post_title IN ( ' . $placeholder . ' ) ';
-			$query_data  = $this->urls;
+
+			$query_args['post_name__in'] = array_map(
+				static function ( $url ) {
+					return md5( $url );
+				},
+				$this->urls
+			);
 
 		} else {
-
-			$query     .= ' LIMIT %d, %d';
-			$query_data = [ 0, 100 ];
 
 			/**
 			 * If argument provided and we don't have URL data.
@@ -613,9 +606,8 @@ class SupportData {
 			}
 		}
 
-		// This query needs to be uncached and it is prepared, yet there's false positive in PHPCS because of using variable instead of string in prepare.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
-		$amp_error_posts  = $wpdb->get_results( $wpdb->prepare( $query, $query_data ) );
+		$query            = new WP_Query( $query_args );
+		$amp_error_posts  = $query->get_posts();
 		$amp_invalid_urls = [];
 
 		/**
@@ -638,7 +630,7 @@ class SupportData {
 			}
 
 			// Empty array for post staleness means post is NOT stale.
-			if ( ! empty( \AMP_Validated_URL_Post_Type::get_post_staleness( $amp_error_post->ID ) ) ) {
+			if ( ! empty( AMP_Validated_URL_Post_Type::get_post_staleness( $amp_error_post->ID ) ) ) {
 				continue;
 			}
 
@@ -712,10 +704,12 @@ class SupportData {
 
 			switch ( $object_type ) {
 				case 'post':
-					$object_subtype = get_post( $amp_queried_object['id'] )->post_type;
+					$post_object    = get_post( $amp_queried_object['id'] );
+					$object_subtype = ( ! empty( $post_object ) && $post_object instanceof WP_Post ) ? $post_object->post_type : '';
 					break;
 				case 'term':
-					$object_subtype = get_term( $amp_queried_object['id'] )->taxonomy;
+					$term_object    = get_term( $amp_queried_object['id'] );
+					$object_subtype = ( ! empty( $term_object ) && $term_object instanceof WP_Term ) ? $term_object->taxonomy : '';
 					break;
 				case 'user':
 					break;
@@ -763,7 +757,7 @@ class SupportData {
 	 */
 	public static function get_stylesheet_info( $post_id ) {
 
-		$stylesheets = get_post_meta( $post_id, \AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true );
+		$stylesheets = get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true );
 
 		if ( empty( $stylesheets ) ) {
 			return [];
@@ -861,14 +855,16 @@ class SupportData {
 	 *
 	 * @since 2.2
 	 *
-	 * @param string $content Content from home_url need to remove.
+	 * @param string|array|object $content Content from home_url need to remove.
 	 *
-	 * @return string Content after removing home_url.
+	 * @return string|array Content after removing home_url.
 	 */
 	public static function remove_domain( $content ) {
 
 		if ( empty( $content ) ) {
 			return '';
+		} elseif ( is_numeric( $content ) ) {
+			return $content;
 		}
 
 		$home_url = static::get_home_url();
@@ -879,7 +875,22 @@ class SupportData {
 		 */
 		$regex = "/http[s]?:\\\\{0,5}\/\\\\{0,5}\/$home_url/mU";
 
-		$content = preg_replace( $regex, '', $content );
+		if ( is_string( $content ) ) {
+			return preg_replace( $regex, '', $content );
+		}
+
+		if ( is_object( $content ) ) {
+			$content = (array) $content;
+		}
+
+		if ( is_array( $content ) ) {
+			return array_map(
+				static function ( $item ) {
+					return self::remove_domain( $item );
+				},
+				$content
+			);
+		}
 
 		return $content;
 	}
