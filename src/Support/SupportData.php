@@ -439,7 +439,7 @@ class SupportData {
 			'author'       => $theme_object->get( 'Author' ),
 			'author_url'   => $theme_object->get( 'AuthorURI' ),
 			'is_active'    => ( $theme_object->get_stylesheet() === $active_theme->get_stylesheet() ),
-			'parent_theme' => $active_theme->get_template(),
+			'parent_theme' => $active_theme->parent() ? $active_theme->get_template() : null,
 		];
 
 		return $theme_data;
