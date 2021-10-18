@@ -108,7 +108,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[
 					[
 						'code'                 => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
-						'spec_name'            => 'noscript enclosure for boilerplate',
+						'spec_name'            => 'noscript enclosure for amp style tags',
 						'required_parent_name' => 'head',
 					],
 				],
@@ -632,12 +632,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 							</amp-story-page>
 							<amp-story-page id="cover">
 								<amp-story-grid-layer template="fill">
-							 		<amp-story-panning-media layout="fill"></amp-story-panning-media>
+									<amp-story-panning-media layout="fill">
+										<amp-img src="https://example.com/img.jpg" layout="fill"></amp-img>
+									</amp-story-panning-media>
 								</amp-story-grid-layer>
 								<amp-story-page-outlink layout="nodisplay" cta-image="https://example.com/img/logo.jpg" cta-accent-color="navy" cta-accent-element="background">
 									<a href="https://www.google.com/search?q=why+do+cats+purr+so+loud" title="Link Description"></a>
 								</amp-story-page-outlink>
-						 	</amp-story-page>
+							</amp-story-page>
 							<amp-story-social-share layout="nodisplay">
 								<script type="application/json">{"shareProviders": ["facebook","whatsapp"]}</script>
 							</amp-story-social-share>
