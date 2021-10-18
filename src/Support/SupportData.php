@@ -291,7 +291,12 @@ class SupportData {
 		}
 
 		$active_plugins = array_values( array_unique( $active_plugins ) );
-		$plugin_info    = array_map( __CLASS__ . '::normalize_plugin_info', $active_plugins );
+		$plugin_info    = array_map(
+			static function ( $active_plugin ) {
+				return self::normalize_plugin_info( $active_plugin );
+			},
+			$active_plugins
+		);
 		$plugin_info    = array_filter( $plugin_info );
 
 		return array_values( $plugin_info );
