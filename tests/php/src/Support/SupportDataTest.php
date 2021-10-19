@@ -300,6 +300,38 @@ class SupportDataTest extends DependencyInjectedTestCase {
 		$this->assertArrayHasKey( 'log_errors', $output );
 		$this->assertArrayHasKey( 'contents', $output );
 
+		$previous_config = [
+			'log_errors' => ini_get( 'log_errors' ),
+			'error_log'  => ini_get( 'error_log' ),
+		];
+
+		$log_path = WP_CONTENT_DIR . '/debug.log';
+
+		ini_set( 'log_errors', 1 ); // phpcs:ignore WordPress.PHP.IniSet.log_errors_Blacklisted, WordPress.PHP.IniSet.Risky
+		ini_set( 'error_log', $log_path ); // phpcs:ignore WordPress.PHP.IniSet.log_errors_Blacklisted, WordPress.PHP.IniSet.Risky
+
+		$input_content    = '';
+		$expected_content = '';
+
+		for ( $i = 1; $i <= 300; $i ++ ) {
+			$input_content .= "Line: $i\n";
+		}
+
+		for ( $i = 101; $i <= 300; $i ++ ) {
+			$expected_content .= "Line: $i\n";
+		}
+		$expected_content = trim( $expected_content, "\n" );
+
+		file_put_contents( $log_path, $input_content );
+		$output = $instance->get_error_log();
+
+		$this->assertEquals( $expected_content, $output['contents'] );
+
+		$this->unlink( $log_path );
+
+		// Reset config.
+		ini_set( 'log_errors', $previous_config['log_errors'] ); // phpcs:ignore WordPress.PHP.IniSet.log_errors_Blacklisted, WordPress.PHP.IniSet.Risky
+		ini_set( 'error_log', $previous_config['error_log'] ); // phpcs:ignore WordPress.PHP.IniSet.log_errors_Blacklisted, WordPress.PHP.IniSet.Risky
 	}
 
 	/**
