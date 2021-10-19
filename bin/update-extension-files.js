@@ -15,12 +15,6 @@ class UpdateExtensionFiles {
 	 */
 	constructor() {
 		( async () => {
-			if ( fs.existsSync( PLUGINS_FILE ) && fs.existsSync( THEMES_FILE ) ) {
-				// eslint-disable-next-line no-console
-				console.log( `Files already exist (${ PLUGINS_FILE } and ${ THEMES_FILE }) so exiting.` );
-				return;
-			}
-
 			this.plugins = [];
 			this.themes = [];
 

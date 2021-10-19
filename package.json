@@ -102,7 +102,6 @@
     "build:dev": "cross-env NODE_ENV=development npm-run-all 'build:!(dev|prod)'",
     "build:prod": "cross-env NODE_ENV=production npm-run-all 'build:!(dev|prod)'",
     "build:prepare": "grunt clean",
-    "build:extension-files": "node ./bin/update-extension-files.js",
     "build:js": "wp-scripts build",
     "build:run": "grunt build",
     "build:zip": "grunt create-build-zip",
@@ -136,7 +135,8 @@
     "test:js:help": "wp-scripts test-unit-js --help",
     "test:js:watch": "npm run test:js -- --watch",
     "test:php": "vendor/bin/phpunit",
-    "test:php:help": "npm run test:php -- --help"
+    "test:php:help": "npm run test:php -- --help",
+    "update-ecosystem-files": "node ./bin/update-extension-files.js"
   },
   "npmpackagejsonlint": {
     "extends": "@wordpress/npm-package-json-lint-config",
