@@ -7,6 +7,8 @@
 // phpcs:disable Squiz.Commenting.FileComment.Missing
 // phpcs:disable Generic.Files.EndFileNewline
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment
+
+// NOTICE: This file was auto-generated with: npm run update-ecosystem-files.
 return array (
   0 => 
   array (

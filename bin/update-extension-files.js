@@ -96,13 +96,13 @@ class UpdateExtensionFiles {
 
 		if ( this.plugins ) {
 			let output = await this.convertToPhpArray( this.plugins );
-			output = `<?php ${ phpcsDisableComments }return ${ output };`;
+			output = `<?php ${ phpcsDisableComments }\n// NOTICE: This file was auto-generated with: npm run update-ecosystem-files.\nreturn ${ output };`;
 			fs.writeFileSync( PLUGINS_FILE, output );
 		}
 
 		if ( this.themes ) {
 			let output = await this.convertToPhpArray( this.themes );
-			output = `<?php ${ phpcsDisableComments }return ${ output };`;
+			output = `<?php ${ phpcsDisableComments }\n// NOTICE: This file was auto-generated with: npm run update-ecosystem-files.\nreturn ${ output };`;
 			fs.writeFileSync( THEMES_FILE, output );
 		}
 	}
