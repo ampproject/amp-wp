@@ -502,7 +502,6 @@ def ParseRules(repo_directory, out_dir):
 			if 'bento' not in extensions_versions[extension_name]:
 				logging.info( 'Warning: bento_supported_version found but bento not meta not obtained for ' + extension_name )
 			elif extension_script_list[0]['tag_spec']['extension_spec']['bento_supported_version'][0] != extensions_versions[extension_name]['bento']['version']:
-				bento_supported_version = extension_script_list[0]['tag_spec']['extension_spec']['bento_supported_version'][0]
 				logging.info( 'Warning: bento_supported_version does not match the bento meta version for ' + extension_name )
 
 			# Remove redundant information.
