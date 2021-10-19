@@ -173,7 +173,7 @@ class SupportScreen implements Conditional, Service, Registerable {
 			];
 		}
 
-		$support_data = $this->injector->make( SupportData::class, [ 'args' => $args ] );
+		$support_data = $this->injector->make( SupportData::class, compact( 'args' ) );
 		$data         = $support_data->get_data();
 
 		wp_add_inline_script(
