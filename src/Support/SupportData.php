@@ -355,24 +355,40 @@ class SupportData {
 			];
 		}
 
-		$no_of_lines = 200;
+		$max_lines = 200;
 
 		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
-		$file  = @fopen( $error_log_path, 'r' );
-		$lines = [];
+		$file         = @fopen( $error_log_path, 'r' );
+		$lines        = [];
+		$current_line = '';
+		$position     = 0;
 
 		if ( is_resource( $file ) ) {
-			while ( ! feof( $file ) ) {
-				$line       = fgets( $file );
-				$lines[]    = $line;
-				$line_count = count( $lines );
-				if ( $line_count > $no_of_lines ) {
-					array_shift( $lines );
+
+			while ( -1 !== fseek( $file, $position, SEEK_END ) ) {
+				$char = fgetc( $file );
+
+				if ( PHP_EOL === $char ) {
+					$lines[]      = $current_line;
+					$current_line = '';
+
+					if ( count( $lines ) > $max_lines ) {
+						break;
+					}
+				} else {
+					$current_line = $char . $current_line;
 				}
+
+				$position--;
 			}
+
+			$lines[] = $current_line;
 
 			fclose( $file );
 		}
+
+		$lines = array_filter( $lines );
+		$lines = array_reverse( $lines );
 
 		return [
 			'log_errors' => ini_get( 'log_errors' ),
