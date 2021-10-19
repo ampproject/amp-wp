@@ -55,6 +55,8 @@
 	</rule>
 	<rule ref="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned">
 		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
+		<exclude-pattern>includes/amp-plugins.php</exclude-pattern>
+		<exclude-pattern>includes/amp-themes.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.WP.AlternativeFunctions">
 		<exclude-pattern>bin/*</exclude-pattern>
@@ -129,6 +131,36 @@
 		<properties>
 			<property name="allowUnusedParametersBeforeUsed" value="true"/>
 		</properties>
+	</rule>
+
+	<!-- Ignore rules which are violated by the output of var_export(). -->
+	<rule ref="WordPress.Arrays.ArrayIndentation">
+		<exclude-pattern>includes/amp-plugins.php</exclude-pattern>
+		<exclude-pattern>includes/amp-themes.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WhiteSpace.PrecisionAlignment">
+		<exclude-pattern>includes/amp-plugins.php</exclude-pattern>
+		<exclude-pattern>includes/amp-themes.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Arrays.ArrayDeclarationSpacing">
+		<exclude-pattern>includes/amp-plugins.php</exclude-pattern>
+		<exclude-pattern>includes/amp-themes.php</exclude-pattern>
+	</rule>
+	<rule ref="Generic.WhiteSpace.DisallowSpaceIndent">
+		<exclude-pattern>includes/amp-plugins.php</exclude-pattern>
+		<exclude-pattern>includes/amp-themes.php</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Arrays.DisallowLongArraySyntax">
+		<exclude-pattern>includes/amp-plugins.php</exclude-pattern>
+		<exclude-pattern>includes/amp-themes.php</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FileComment.Missing">
+		<exclude-pattern>includes/amp-plugins.php</exclude-pattern>
+		<exclude-pattern>includes/amp-themes.php</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Files.EndFileNewline">
+		<exclude-pattern>includes/amp-plugins.php</exclude-pattern>
+		<exclude-pattern>includes/amp-themes.php</exclude-pattern>
 	</rule>
 
 	<arg value="s"/>
