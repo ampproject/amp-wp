@@ -911,6 +911,10 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			},
 		];
 
+		// Run the script sanitizer to unwrap noscript elements.
+		$sanitizer = new AMP_Script_Sanitizer( $dom, $args );
+		$sanitizer->sanitize();
+
 		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
