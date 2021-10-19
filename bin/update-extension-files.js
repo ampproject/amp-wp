@@ -196,6 +196,8 @@ class UpdateExtensionFiles {
 	 * @return {Promise<null|*>} Theme object from WP org.
 	 */
 	async fetchThemeFromWporg( slug ) {
+		// eslint-disable-next-line no-console
+		console.log( `Fetching theme ${ slug } from WordPress.org.` );
 		const filters = {
 			search: slug,
 			page: 1,
@@ -246,6 +248,8 @@ class UpdateExtensionFiles {
 	 */
 	async prepareThemeData( item ) {
 		const imageRequestUrl = item._links[ 'wp:featuredmedia' ][ 0 ].href;
+		// eslint-disable-next-line no-console
+		console.log( `Fetching theme data: ${ imageRequestUrl }` );
 		let attachment = await axios.get( imageRequestUrl );
 		attachment = attachment.data;
 
@@ -267,6 +271,8 @@ class UpdateExtensionFiles {
 	 * @return {Promise<null|*>} Plugin object from WP org.
 	 */
 	async fetchPluginFromWporg( slug ) {
+		// eslint-disable-next-line no-console
+		console.log( `Fetching plugin ${ slug } from WordPress.org.` );
 		const filters = {
 			search: slug,
 			page: 1,
@@ -317,6 +323,8 @@ class UpdateExtensionFiles {
 	 */
 	async preparePluginData( item ) {
 		const imageRequestUrl = item._links[ 'wp:featuredmedia' ][ 0 ].href;
+		// eslint-disable-next-line no-console
+		console.log( `Fetching theme data: ${ imageRequestUrl }` );
 		let attachment = await axios.get( imageRequestUrl );
 		attachment = attachment.data;
 

@@ -169,10 +169,6 @@ module.exports = function( grunt ) {
 			paths.push( 'assets/js/**/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
 
-			// Include auto-generated files.
-			paths.push( 'includes/amp-plugins.php' );
-			paths.push( 'includes/amp-themes.php' );
-
 			if ( 'development' === process.env.NODE_ENV ) {
 				paths.push( 'assets/js/**/*.js.map' );
 				paths.push( 'assets/css/*.css.map' );
