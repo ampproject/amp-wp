@@ -7,7 +7,6 @@ import { visitAdminPage, activateTheme, installTheme } from '@wordpress/e2e-test
  * Internal dependencies
  */
 import { completeWizard, cleanUpSettings, clickMode, scrollToElement } from '../../utils/onboarding-wizard-utils';
-import { setTemplateMode } from '../../utils/amp-settings-utils';
 
 describe( 'AMP settings screen newly activated', () => {
 	beforeEach( async () => {
@@ -134,96 +133,5 @@ describe( 'Saving', () => {
 		await expect( page ).not.toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
 
 		await testSave();
-	} );
-} );
-
-describe( 'AMP settings screen Review panel', () => {
-	let testPost;
-
-	beforeAll( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		testPost = await page.evaluate( () => wp.apiFetch( {
-			path: '/wp/v2/posts',
-			method: 'POST',
-			data: { title: 'Test Post', status: 'publish' },
-		} ) );
-	} );
-
-	afterAll( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		if ( testPost?.id ) {
-			await page.evaluate( ( id ) => wp.apiFetch( {
-				path: `/wp/v2/posts/${ id }`,
-				method: 'DELETE',
-				data: { force: true },
-			} ), testPost.id );
-		}
-	} );
-
-	beforeEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-	} );
-
-	afterEach( async () => {
-		await cleanUpSettings();
-	} );
-
-	it( 'is present on the page', async () => {
-		await page.waitForSelector( '.settings-site-review' );
-		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
-		await expect( page ).toMatchElement( 'h3', { text: 'Need help?' } );
-		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /support forums/i } );
-		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /different template mode/i } );
-		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /how the AMP plugin works/i } );
-	} );
-
-	it( 'button redirects to an AMP page in transitional mode', async () => {
-		await setTemplateMode( 'transitional' );
-
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
-
-		await page.waitForSelector( 'html[amp]' );
-		await expect( page ).toMatchElement( 'html[amp]' );
-	} );
-
-	it( 'button redirects to an AMP page in reader mode', async () => {
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
-
-		await page.waitForSelector( 'html[amp]' );
-		await expect( page ).toMatchElement( 'html[amp]' );
-	} );
-
-	it( 'button redirects to an AMP page in standard mode', async () => {
-		await setTemplateMode( 'standard' );
-
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
-
-		await page.waitForSelector( 'html[amp]' );
-		await expect( page ).toMatchElement( 'html[amp]' );
-	} );
-
-	it( 'can be dismissed and shows up again only after a template mode change', async () => {
-		await page.waitForSelector( '.settings-site-review' );
-		await expect( page ).toMatchElement( 'button', { text: 'Dismiss' } );
-		await expect( page ).toClick( 'button', { text: 'Dismiss' } );
-
-		// Give the Review panel some time disappear.
-		await page.waitForTimeout( 100 );
-		await expect( page ).not.toMatchElement( '.settings-site-review' );
-
-		// There should be no Review panel after page reload.
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-		await page.waitForSelector( '#amp-settings-root' );
-		await expect( page ).not.toMatchElement( '.settings-site-review' );
-
-		await setTemplateMode( 'standard' );
-
-		await page.waitForSelector( '.settings-site-review' );
-		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
 	} );
 } );
