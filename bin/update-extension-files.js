@@ -6,12 +6,21 @@ const fs = require( 'fs' );
 const { getPluginsList, getThemesList } = require( 'wporg-api-client' );
 const axios = require( 'axios' );
 
+const PLUGINS_FILE = 'includes/amp-plugins.php';
+const THEMES_FILE = 'includes/amp-themes.php';
+
 class UpdateExtensionFiles {
 	/**
 	 * Construct method.
 	 */
 	constructor() {
 		( async () => {
+			if ( fs.existsSync( PLUGINS_FILE ) && fs.existsSync( THEMES_FILE ) ) {
+				// eslint-disable-next-line no-console
+				console.log( `Files already exist (${ PLUGINS_FILE } and ${ THEMES_FILE }) so exiting.` );
+				return;
+			}
+
 			this.plugins = [];
 			this.themes = [];
 
@@ -80,13 +89,13 @@ class UpdateExtensionFiles {
 		if ( this.plugins ) {
 			let output = await this.convertToPhpArray( this.plugins );
 			output = `<?php\nreturn ${ output };`;
-			fs.writeFileSync( 'includes/amp-plugins.php', output );
+			fs.writeFileSync( PLUGINS_FILE, output );
 		}
 
 		if ( this.themes ) {
 			let output = await this.convertToPhpArray( this.themes );
 			output = `<?php\nreturn ${ output };`;
-			fs.writeFileSync( 'includes/amp-themes.php', output );
+			fs.writeFileSync( THEMES_FILE, output );
 		}
 	}
 
