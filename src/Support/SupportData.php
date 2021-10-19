@@ -361,7 +361,7 @@ class SupportData {
 		$file         = @fopen( $error_log_path, 'r' );
 		$lines        = [];
 		$current_line = '';
-		$position     = -2;
+		$position     = 0;
 
 		if ( is_resource( $file ) ) {
 
@@ -382,9 +382,12 @@ class SupportData {
 				$position--;
 			}
 
+			$lines[] = $current_line;
+
 			fclose( $file );
 		}
 
+		$lines = array_filter( $lines );
 		$lines = array_reverse( $lines );
 
 		return [
