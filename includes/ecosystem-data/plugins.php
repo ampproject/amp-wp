@@ -1,4 +1,12 @@
-<?php
+<?php // phpcs:disable Squiz.Commenting.FileComment.Missing
+// phpcs:disable WordPress.Arrays.ArrayIndentation
+// phpcs:disable WordPress.WhiteSpace.PrecisionAlignment
+// phpcs:disable WordPress.Arrays.ArrayDeclarationSpacing
+// phpcs:disable Generic.WhiteSpace.DisallowSpaceIndent
+// phpcs:disable Generic.Arrays.DisallowLongArraySyntax
+// phpcs:disable Squiz.Commenting.FileComment.Missing
+// phpcs:disable Generic.Files.EndFileNewline
+// phpcs:disable WordPress.Arrays.MultipleStatementAlignment
 return array (
   0 => 
   array (

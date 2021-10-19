@@ -46,35 +46,6 @@ class AMPPluginsTest extends TestCase {
 		$wp_styles  = null;
 
 		$this->instance = new AMPPlugins();
-
-		$file_path            = TESTS_PLUGIN_DIR . '/includes/amp-plugins.php';
-		$this->is_file_exists = file_exists( $file_path );
-
-		if ( ! $this->is_file_exists ) {
-			$data = [
-				[
-					'name' => 'Akismet',
-					'slug' => 'akismet',
-				],
-			];
-
-			$file_content = "<?php\nreturn " . var_export( $data, true ) . ';'; // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
-			file_put_contents( $file_path, $file_content );
-		}
-	}
-
-	/**
-	 * Tear down.
-	 *
-	 * @inheritdoc
-	 */
-	public function tearDown() {
-
-		parent::tearDown();
-
-		if ( ! $this->is_file_exists ) {
-			$this->unlink( TESTS_PLUGIN_DIR . '/includes/amp-plugins.php' );
-		}
 	}
 
 	/**
@@ -84,57 +55,15 @@ class AMPPluginsTest extends TestCase {
 
 		$plugins = $this->instance->get_plugins();
 
-		if ( $this->is_file_exists ) {
-			$expected_plugins = include TESTS_PLUGIN_DIR . '/includes/amp-plugins.php';
+		$expected_plugins = include TESTS_PLUGIN_DIR . '/includes/ecosystem-data/plugins.php';
 
-			$expected = array_map(
-				static function ( $theme ) {
+		$expected = array_map(
+			static function ( $theme ) {
 
-					return AMPPlugins::normalize_plugin_data( $theme );
-				},
-				$expected_plugins
-			);
-		} else {
-			$expected = [
-				[
-					'name'                     => 'Akismet',
-					'slug'                     => 'akismet',
-					'version'                  => '',
-					'author'                   => '',
-					'author_profile'           => '',
-					'requires'                 => '',
-					'tested'                   => '',
-					'requires_php'             => '',
-					'rating'                   => 0,
-					'ratings'                  => [
-						1 => 0,
-						2 => 0,
-						3 => 0,
-						4 => 0,
-						5 => 0,
-					],
-					'num_ratings'              => 0,
-					'support_threads'          => 0,
-					'support_threads_resolved' => 0,
-					'active_installs'          => 0,
-					'downloaded'               => 0,
-					'last_updated'             => '',
-					'added'                    => '',
-					'homepage'                 => '',
-					'short_description'        => '',
-					'description'              => '',
-					'download_link'            => '',
-					'tags'                     => [],
-					'donate_link'              => '',
-					'icons'                    => [
-						'1x'  => '',
-						'2x'  => '',
-						'svg' => '',
-					],
-					'wporg'                    => false,
-				],
-			];
-		}
+				return AMPPlugins::normalize_plugin_data( $theme );
+			},
+			$expected_plugins
+		);
 
 		$this->assertEquals( $expected, $plugins );
 	}

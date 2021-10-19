@@ -65,18 +65,11 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	public function get_plugins() {
 
 		if ( ! is_array( $this->plugins ) ) {
-			$file_path = AMP__DIR__ . '/includes/amp-plugins.php';
-
-			if ( file_exists( $file_path ) ) {
-				$this->plugins = include $file_path;
-			}
-
-			$this->plugins = ( ! empty( $this->plugins ) && is_array( $this->plugins ) ) ? $this->plugins : [];
 			$this->plugins = array_map(
 				static function ( $plugin ) {
 					return self::normalize_plugin_data( $plugin );
 				},
-				$this->plugins
+				require __DIR__ . '/../../includes/ecosystem-data/plugins.php'
 			);
 		}
 

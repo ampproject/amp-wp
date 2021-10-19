@@ -6,8 +6,8 @@ const fs = require( 'fs' );
 const { getPluginsList, getThemesList } = require( 'wporg-api-client' );
 const axios = require( 'axios' );
 
-const PLUGINS_FILE = 'includes/amp-plugins.php';
-const THEMES_FILE = 'includes/amp-themes.php';
+const PLUGINS_FILE = 'includes/ecosystem-data/plugins.php';
+const THEMES_FILE = 'includes/ecosystem-data/themes.php';
 
 class UpdateExtensionFiles {
 	/**
@@ -86,15 +86,29 @@ class UpdateExtensionFiles {
 	 * @return {Promise<void>}
 	 */
 	async storeData() {
+		const phpcsDisables = [
+			'Squiz.Commenting.FileComment.Missing',
+			'WordPress.Arrays.ArrayIndentation',
+			'WordPress.WhiteSpace.PrecisionAlignment',
+			'WordPress.Arrays.ArrayDeclarationSpacing',
+			'Generic.WhiteSpace.DisallowSpaceIndent',
+			'Generic.Arrays.DisallowLongArraySyntax',
+			'Squiz.Commenting.FileComment.Missing',
+			'Generic.Files.EndFileNewline',
+			'WordPress.Arrays.MultipleStatementAlignment',
+		];
+
+		const phpcsDisableComments = phpcsDisables.map( ( rule ) => `// phpcs:disable ${ rule }\n` ).join( '' );
+
 		if ( this.plugins ) {
 			let output = await this.convertToPhpArray( this.plugins );
-			output = `<?php\nreturn ${ output };`;
+			output = `<?php ${ phpcsDisableComments }return ${ output };`;
 			fs.writeFileSync( PLUGINS_FILE, output );
 		}
 
 		if ( this.themes ) {
 			let output = await this.convertToPhpArray( this.themes );
-			output = `<?php\nreturn ${ output };`;
+			output = `<?php ${ phpcsDisableComments }return ${ output };`;
 			fs.writeFileSync( THEMES_FILE, output );
 		}
 	}

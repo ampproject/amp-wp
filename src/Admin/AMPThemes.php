@@ -42,19 +42,11 @@ class AMPThemes implements Service, Registerable {
 	public function get_themes() {
 
 		if ( ! is_array( $this->themes ) ) {
-			$file_path = AMP__DIR__ . '/includes/amp-themes.php';
-
-			if ( file_exists( $file_path ) ) {
-				$this->themes = include $file_path;
-			}
-
-			$this->themes = ( ! empty( $this->themes ) && is_array( $this->themes ) ) ? $this->themes : [];
 			$this->themes = array_map(
 				static function ( $theme ) {
-
 					return self::normalize_theme_data( $theme );
 				},
-				$this->themes
+				require __DIR__ . '/../../includes/ecosystem-data/themes.php'
 			);
 		}
 
