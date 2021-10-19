@@ -361,7 +361,7 @@ class SupportData {
 		$file         = @fopen( $error_log_path, 'r' );
 		$lines        = [];
 		$current_line = '';
-		$position     = - 2;
+		$position     = -2;
 
 		if ( is_resource( $file ) ) {
 
@@ -372,7 +372,7 @@ class SupportData {
 					$lines[]      = $current_line;
 					$current_line = '';
 
-					if ( count( $lines ) >= $max_lines ) {
+					if ( count( $lines ) > $max_lines ) {
 						break;
 					}
 				} else {
