@@ -143,14 +143,10 @@ class UpdateExtensionFiles {
 		const regex = /wordpress\.org\/plugins\/(.[^\/]+)\/?/;
 		const ecosystemUrl = item?.meta?.ampps_ecosystem_url;
 		const matches = regex.exec( ecosystemUrl );
-		let plugin = null;
+		let plugin;
 
-		// WordPress org plugin.
-		if ( null !== matches ) {
-			plugin = await this.fetchPluginFromWporg( matches[ 1 ] );
-		} else {
-			plugin = await this.fetchPluginFromWporg( item.slug );
-		}
+		const slug = null !== matches ? matches[ 1 ] : item.slug;
+		plugin = await this.fetchPluginFromWporg( slug );
 
 		// Plugin data for amp-wp.org
 		if ( null === matches || null === plugin ) {
@@ -172,14 +168,10 @@ class UpdateExtensionFiles {
 		const regex = /wordpress\.org\/themes\/(.[^\/]+)\/?/;
 		const ecosystemUrl = item?.meta?.ampps_ecosystem_url;
 		const matches = regex.exec( ecosystemUrl );
-		let theme = null;
+		let theme;
 
-		// WordPress org plugin.
-		if ( null !== matches ) {
-			theme = await this.fetchThemeFromWporg( matches[ 1 ] );
-		} else {
-			theme = await this.fetchThemeFromWporg( item.slug );
-		}
+		const slug = null !== matches ? matches[ 1 ] : item.slug;
+		theme = await this.fetchThemeFromWporg( slug );
 
 		// Theme data for amp-wp.org
 		if ( null === matches || null === theme ) {
