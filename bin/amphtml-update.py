@@ -471,7 +471,7 @@ def ParseRules(repo_directory, out_dir):
 		if extensions_versions[ extension['name'] ]['latest'] is not None and extensions_versions[ extension['name'] ]['latest'] != extension['latestVersion']:
 			logging.info('Warning: latestVersion mismatch for ' + extension['name'])
 		extensions_versions[ extension['name'] ]['latest'] = extension['latestVersion']
-		if 'options' in extension and 'wrapper' in extension['options'] and extension['options']['wrapper'] == 'bento':
+		if 'options' in extension and ( ( 'bento' in extension['options'] and extension['options']['bento'] ) or ( 'wrapper' in extension['options'] and extension['options']['wrapper'] == 'bento' ) ):
 			extensions_versions[ extension['name'] ]['bento'] = {
 				'version': extension['version'],
 				'has_css': extension['options'].get( 'hasCss', False ),
@@ -496,6 +496,16 @@ def ParseRules(repo_directory, out_dir):
 		if 'bento' in extensions_versions[extension_name] and extensions_versions[extension_name]['bento']['version'] not in validator_versions:
 			logging.info( 'Skipping bento for ' + extension_name + ' since version ' + extensions_versions[extension_name]['bento']['version'] + ' is not yet valid' )
 			del extensions_versions[extension_name]['bento']
+
+		# Verify bento_supported_version matches the version info in the bundle file.
+		if 'bento_supported_version' in extension_script_list[0]['tag_spec']['extension_spec']:
+			if 'bento' not in extensions_versions[extension_name]:
+				logging.info( 'Warning: bento_supported_version found but bento not meta not obtained for ' + extension_name )
+			elif extension_script_list[0]['tag_spec']['extension_spec']['bento_supported_version'][0] != extensions_versions[extension_name]['bento']['version']:
+				logging.info( 'Warning: bento_supported_version does not match the bento meta version for ' + extension_name )
+
+			# Remove redundant information.
+			del extension_script_list[0]['tag_spec']['extension_spec']['bento_supported_version']
 
 		validator_versions = sorted( validator_versions, key=lambda version: map(int, version.split('.') ) )
 		extension_script_list[0]['tag_spec']['extension_spec']['version'] = validator_versions

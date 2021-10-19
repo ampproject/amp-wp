@@ -108,7 +108,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[
 					[
 						'code'                 => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
-						'spec_name'            => 'noscript enclosure for boilerplate',
+						'spec_name'            => 'noscript enclosure for amp style tags',
 						'required_parent_name' => 'head',
 					],
 				],
@@ -592,6 +592,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 									</amp-twitter>
 								</amp-story-page-attachment>
 							</amp-story-page>
+							<amp-story-page id="page1" auto-advance-after="video">
+								<amp-story-grid-layer template="fill">
+									<amp-video id="video" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" poster="https://example.com/poster.jpg" width="1280" height="720" layout="responsive" autoplay captions-id="captions">
+										<track kind="subtitles" src="https://example.com/captions.vtt" srclang="en" default>
+									</amp-video>
+								</amp-story-grid-layer>
+								<amp-story-grid-layer template="vertical" class="bottom">
+									<div class="scrim">
+										<amp-story-captions id="captions" layout="fixed-height" height="100"></amp-story-captions>
+										<div class="static-text">This element is always below captions and never overlaps.</div>
+									</div>
+								</amp-story-grid-layer>
+							</amp-story-page>
 							<amp-story-page id="interactive-poll">
 								<amp-story-grid-layer template="fill">
 									<amp-story-interactive-poll id="correct-poll" endpoint="https://webstoriesinteractivity-beta.web.app/api/v1" theme="dark" chip-style="shadow" class="nice-quiz" prompt-text="What country do you like the most?" option-1-text="France" option-1-confetti="🇺🇾" option-1-results-category="Dog" option-2-text="Spain" option-2-confetti="🇺🇾" option-2-results-category="Cat" option-3-text="Uruguay" option-3-confetti="🇺🇾" option-3-results-category="Bunny" option-4-text="Brazil" option-4-confetti="🇺🇾" option-4-results-category="Mouse">
@@ -619,12 +632,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 							</amp-story-page>
 							<amp-story-page id="cover">
 								<amp-story-grid-layer template="fill">
-							 		<amp-story-panning-media layout="fill"></amp-story-panning-media>
+									<amp-story-panning-media layout="fill">
+										<amp-img src="https://example.com/img.jpg" layout="fill"></amp-img>
+									</amp-story-panning-media>
 								</amp-story-grid-layer>
 								<amp-story-page-outlink layout="nodisplay" cta-image="https://example.com/img/logo.jpg" cta-accent-color="navy" cta-accent-element="background">
 									<a href="https://www.google.com/search?q=why+do+cats+purr+so+loud" title="Link Description"></a>
 								</amp-story-page-outlink>
-						 	</amp-story-page>
+							</amp-story-page>
 							<amp-story-social-share layout="nodisplay">
 								<script type="application/json">{"shareProviders": ["facebook","whatsapp"]}</script>
 							</amp-story-social-share>
@@ -649,6 +664,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 							'amp-story-panning-media',
 							'amp-date-display',
 							'amp-mustache',
+							'amp-story-captions',
 						],
 						[
 							[

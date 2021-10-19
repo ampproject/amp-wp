@@ -1378,6 +1378,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'amp-story-360'             => 'v0/amp-story-360-0.1.js',
 			'amp-story-auto-ads'        => 'v0/amp-story-auto-ads-0.1.js',
 			'amp-story-auto-analytics'  => 'v0/amp-story-auto-analytics-0.1.js',
+			'amp-story-captions'        => 'v0/amp-story-captions-0.1.js',
 			'amp-story-interactive'     => 'v0/amp-story-interactive-0.1.js',
 			'amp-story-panning-media'   => 'v0/amp-story-panning-media-0.1.js',
 			'amp-story-player'          => 'v0/amp-story-player-0.1.js',
