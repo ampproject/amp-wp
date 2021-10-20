@@ -1,44 +1,131 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage } from '@wordpress/e2e-test-utils';
+import {
+	activateTheme,
+	deleteTheme,
+	installTheme,
+	visitAdminPage,
+} from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
-import { cleanUpSettings } from '../../utils/onboarding-wizard-utils';
-import { setTemplateMode } from '../../utils/amp-settings-utils';
+import {
+	activatePlugin,
+	deactivatePlugin,
+	installPlugin,
+	setTemplateMode,
+	uninstallPlugin,
+} from '../../utils/amp-settings-utils';
+import { cleanUpSettings, scrollToElement } from '../../utils/onboarding-wizard-utils';
 import { testSiteScanning } from '../../utils/site-scan-utils';
 
 describe( 'AMP settings screen Site Scan panel', () => {
-	beforeEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
+	beforeAll( async () => {
+		await installTheme( 'twentytwentyone' );
+		await installTheme( 'hestia' );
+		await installPlugin( 'autoptimize' );
 	} );
 
-	afterEach( async () => {
+	afterAll( async () => {
+		await cleanUpSettings();
+		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwentyone' } );
+		await uninstallPlugin( 'autoptimize' );
+	} );
+
+	beforeEach( async () => {
 		await cleanUpSettings();
 	} );
 
-	it( 'is present on the page and allows triggering a site scan', async () => {
+	async function triggerSiteRescan() {
 		await page.waitForSelector( '#template-modes' );
 
 		// Switch template mode so that we have stale results for sure.
-		const selectedMode = await page.$eval( '#template-modes input[checked]', ( el ) => el.getAttribute( 'id' ) );
-		await setTemplateMode( selectedMode.includes( 'transitional' ) ? 'standard' : 'transitional' );
+		await setTemplateMode( 'transitional' );
 
 		await page.waitForSelector( '.settings-site-scan' );
 		await expect( page ).toMatchElement( 'h2', { text: 'Site Scan' } );
-		await expect( page ).toMatchElement( 'button.is-primary', { text: 'Rescan Site' } );
 
-		// Start site scan.
-		await expect( page ).toClick( 'button.is-primary', { text: 'Rescan Site' } );
+		// Start the site scan.
+		await Promise.all( [
+			scrollToElement( { selector: '.settings-site-scan__footer button.is-primary', click: true } ),
+			testSiteScanning( {
+				statusElementClassName: 'settings-site-scan__status',
+				isAmpFirst: false,
+			} ),
+			expect( page ).toMatchElement( '.settings-site-scan__footer a.is-primary', { text: 'Browse Site', timeout: 10000 } ),
+		] );
+	}
 
-		await testSiteScanning( {
-			statusElementClassName: 'settings-site-scan__status',
-			isAmpFirst: false,
-		} );
+	it( 'does not list issues if an AMP compatible theme is activated', async () => {
+		await activateTheme( 'twentytwentyone' );
 
-		await page.waitForSelector( '.settings-site-scan__footer a.is-primary' );
-		await expect( page ).toMatchElement( '.settings-site-scan__footer a.is-primary', { text: 'Browse Site' } );
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await triggerSiteRescan();
+
+		await expect( page ).toMatchElement( '.settings-site-scan .amp-notice--success' );
+
+		await expect( page ).not.toMatchElement( '.site-scan-results--themes' );
+		await expect( page ).not.toMatchElement( '.site-scan-results--plugins' );
+
+		// Switch template mode to check if the scan results are marked as stale.
+		await setTemplateMode( 'standard' );
+
+		await expect( page ).toMatchElement( '.settings-site-scan .amp-notice--info', { text: /^Stale results/ } );
+	} );
+
+	it( 'lists Hestia theme as causing AMP incompatibility', async () => {
+		await activateTheme( 'hestia' );
+
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await expect( page ).toMatchElement( '.settings-site-scan .amp-notice--info', { text: /^Stale results/ } );
+
+		await triggerSiteRescan();
+
+		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__heading[data-badge-content="1"]', { text: /^Themes/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__source-name', { text: /Hestia/ } );
+	} );
+
+	it( 'lists Autoptimize plugin as causing AMP incompatibility', async () => {
+		await activateTheme( 'twentytwentyone' );
+		await activatePlugin( 'autoptimize' );
+
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await expect( page ).toMatchElement( '.settings-site-scan .amp-notice--info', { text: /^Stale results/ } );
+
+		await triggerSiteRescan();
+
+		await expect( page ).not.toMatchElement( '.site-scan-results--themes' );
+
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__heading[data-badge-content="1"]', { text: /^Plugins/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/ } );
+
+		await deactivatePlugin( 'autoptimize' );
+	} );
+
+	it( 'lists Hestia theme and Autoptimize plugin for causing AMP incompatibilities', async () => {
+		await activateTheme( 'hestia' );
+		await activatePlugin( 'autoptimize' );
+
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await expect( page ).toMatchElement( '.settings-site-scan .amp-notice--info', { text: /^Stale results/ } );
+
+		await triggerSiteRescan();
+
+		await expect( page ).toMatchElement( '.site-scan-results--themes' );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins' );
+
+		const totalIssuesCount = await page.$$eval( '.site-scan-results__source', ( sources ) => sources.length );
+		expect( totalIssuesCount ).toBe( 2 );
+
+		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__source-name', { text: /Hestia/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/ } );
+
+		await deactivatePlugin( 'autoptimize' );
 	} );
 } );

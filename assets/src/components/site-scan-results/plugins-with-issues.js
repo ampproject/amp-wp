@@ -33,6 +33,7 @@ export function PluginsWithIssues( { issues = [], validatedUrlsLink, ...props } 
 			count={ issues.length }
 			sources={ sources }
 			validatedUrlsLink={ validatedUrlsLink }
+			className="site-scan-results--plugins"
 			{ ...props }
 		/>
 	);

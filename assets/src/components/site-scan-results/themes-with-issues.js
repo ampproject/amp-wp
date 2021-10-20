@@ -28,11 +28,12 @@ export function ThemesWithIssues( { issues = [], validatedUrlsLink, ...props } )
 
 	return (
 		<SiteScanResults
-			title={ __( 'Themes with AMP incompatibilty', 'amp' ) }
+			title={ __( 'Themes with AMP incompatibility', 'amp' ) }
 			icon={ <IconWebsitePaintBrush /> }
 			count={ issues.length }
 			sources={ sources }
 			validatedUrlsLink={ validatedUrlsLink }
+			className="site-scan-results--themes"
 			{ ...props }
 		/>
 	);
