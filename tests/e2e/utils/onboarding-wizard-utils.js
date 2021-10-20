@@ -110,20 +110,20 @@ export async function testCloseButton( { exists = true } ) {
 	}
 }
 
-export async function testPreviousButton( { exists = true, disabled = false } ) {
+export async function testPreviousButton( { exists = true, text = 'Previous', disabled = false } ) {
 	if ( exists ) {
-		await expect( page ).toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
+		await expect( page ).toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text } );
 	} else {
-		await expect( page ).not.toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
+		await expect( page ).not.toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text } );
 	}
 }
 
-export function testNextButton( { element = 'button', text, disabled = false } ) {
-	expect( page ).toMatchElement( `${ element }${ disabled ? '[disabled]' : '' }`, { text } );
+export async function testNextButton( { element = 'button', text = 'Next', disabled = false } ) {
+	await expect( page ).toMatchElement( `${ element }${ disabled ? '[disabled]' : '' }`, { text } );
 }
 
-export function testTitle( { text, element = 'h1' } ) {
-	expect( page ).toMatchElement( element, { text } );
+export async function testTitle( { text, element = 'h1' } ) {
+	await expect( page ).toMatchElement( element, { text } );
 }
 
 /**
@@ -144,7 +144,6 @@ export async function cleanUpSettings() {
 				theme_support: 'reader',
 				plugin_configured: false,
 			} } ),
-		],
-		);
+		] );
 	} );
 }

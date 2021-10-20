@@ -26,8 +26,8 @@ describe( 'Template mode', () => {
 
 		await expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
 
-		testNextButton( { text: 'Next', disabled: true } );
-		testPreviousButton( { text: 'Previous' } );
+		await testNextButton( { text: 'Next', disabled: true } );
+		await testPreviousButton( { text: 'Previous' } );
 	} );
 
 	it( 'should allow options to be selected', async () => {
@@ -40,7 +40,7 @@ describe( 'Template mode', () => {
 		await clickMode( 'reader' );
 		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Reader' } );
 
-		testNextButton( { text: 'Next' } );
+		await testNextButton( { text: 'Next' } );
 	} );
 } );
 
