@@ -23,14 +23,13 @@ import { testSiteScanning } from '../../utils/site-scan-utils';
 
 describe( 'AMP settings screen Site Scan panel', () => {
 	beforeAll( async () => {
-		await installTheme( 'twentytwentyone' );
 		await installTheme( 'hestia' );
 		await installPlugin( 'autoptimize' );
 	} );
 
 	afterAll( async () => {
 		await cleanUpSettings();
-		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwentyone' } );
+		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
 		await uninstallPlugin( 'autoptimize' );
 	} );
 
@@ -59,7 +58,7 @@ describe( 'AMP settings screen Site Scan panel', () => {
 	}
 
 	it( 'does not list issues if an AMP compatible theme is activated', async () => {
-		await activateTheme( 'twentytwentyone' );
+		await activateTheme( 'twentytwenty' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
@@ -90,7 +89,7 @@ describe( 'AMP settings screen Site Scan panel', () => {
 	} );
 
 	it( 'lists Autoptimize plugin as causing AMP incompatibility', async () => {
-		await activateTheme( 'twentytwentyone' );
+		await activateTheme( 'twentytwenty' );
 		await activatePlugin( 'autoptimize' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
