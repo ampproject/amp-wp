@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -19,10 +20,11 @@ import { SiteScanResults } from './index';
  * Renders a list of themes that cause issues.
  *
  * @param {Object} props                   Component props.
+ * @param {string} props.className         Component class name.
  * @param {Array}  props.issues            List of theme issues.
- * @param {Array}  props.validatedUrlsLink URL to the Validated URLs page.
+ * @param {string} props.validatedUrlsLink URL to the Validated URLs page.
  */
-export function ThemesWithIssues( { issues = [], validatedUrlsLink, ...props } ) {
+export function ThemesWithIssues( { issues = [], validatedUrlsLink, className, ...props } ) {
 	const themesData = useNormalizedThemesData();
 	const sources = issues?.map( ( slug ) => themesData?.[ slug ] ?? { name: slug } ) || [];
 
@@ -33,13 +35,14 @@ export function ThemesWithIssues( { issues = [], validatedUrlsLink, ...props } )
 			count={ issues.length }
 			sources={ sources }
 			validatedUrlsLink={ validatedUrlsLink }
-			className="site-scan-results--themes"
+			className={ classnames( 'site-scan-results--themes', className ) }
 			{ ...props }
 		/>
 	);
 }
 
 ThemesWithIssues.propTypes = {
+	className: PropTypes.string,
 	issues: PropTypes.array.isRequired,
 	validatedUrlsLink: PropTypes.string,
 };

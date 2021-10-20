@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -19,10 +20,11 @@ import { SiteScanResults } from './index';
  * Render a list of plugins that cause issues.
  *
  * @param {Object} props                   Component props.
+ * @param {string} props.className         Component class name.
  * @param {Array}  props.issues            List of plugins issues.
- * @param {Array}  props.validatedUrlsLink URL to the Validated URLs page.
+ * @param {string} props.validatedUrlsLink URL to the Validated URLs page.
  */
-export function PluginsWithIssues( { issues = [], validatedUrlsLink, ...props } ) {
+export function PluginsWithIssues( { issues = [], validatedUrlsLink, className, ...props } ) {
 	const pluginsData = useNormalizedPluginsData();
 	const sources = issues?.map( ( slug ) => pluginsData?.[ slug ] ?? { name: slug } ) || [];
 
@@ -33,13 +35,14 @@ export function PluginsWithIssues( { issues = [], validatedUrlsLink, ...props } 
 			count={ issues.length }
 			sources={ sources }
 			validatedUrlsLink={ validatedUrlsLink }
-			className="site-scan-results--plugins"
+			className={ classnames( 'site-scan-results--plugins', className ) }
 			{ ...props }
 		/>
 	);
 }
 
 PluginsWithIssues.propTypes = {
+	className: PropTypes.string,
 	issues: PropTypes.array.isRequired,
 	validatedUrlsLink: PropTypes.string,
 };
