@@ -29,7 +29,7 @@ class UpdateExtensionFiles {
 	 * @return {Promise<void>}
 	 */
 	async fetchData() {
-		let totalPage = 1;
+		let totalPage;
 		const pluginTerm = 552;
 		const themeTerm = 245;
 		const url = 'https://amp-wp.org/wp-json/wp/v2/ecosystem';
@@ -50,9 +50,7 @@ class UpdateExtensionFiles {
 				break;
 			}
 
-			// eslint-disable-next-line guard-for-in
-			for ( const index in items ) {
-				const item = items[ index ];
+			for ( const item of items ) {
 				const ecosystemTerm = item.ecosystem_types.pop();
 
 				if ( ecosystemTerm === pluginTerm ) {
@@ -206,7 +204,7 @@ class UpdateExtensionFiles {
 	 */
 	async fetchThemeFromWporg( slug ) {
 		// eslint-disable-next-line no-console
-		console.log( `Fetching theme ${ slug } from WordPress.org.` );
+		console.log( `Fetching theme "${ slug }" from WordPress.org.` );
 		const filters = {
 			search: slug,
 			page: 1,
@@ -214,12 +212,13 @@ class UpdateExtensionFiles {
 		};
 
 		const response = await this.getThemesList( filters );
-		const items = response?.data?.themes;
+		let items = response?.data?.themes;
+		items = Array.isArray( items ) ? items : Object.values( items );
 
-		for ( const index in items ) {
-			if ( slug === items[ index ].slug ) {
-				items[ index ].wporg = true;
-				return items[ index ];
+		for ( const item of items ) {
+			if ( slug === item.slug ) {
+				item.wporg = true;
+				return item;
 			}
 		}
 
@@ -240,7 +239,7 @@ class UpdateExtensionFiles {
 			try {
 				// eslint-disable-next-line no-await-in-loop
 				const responseData = await getThemesList( filter );
-				return responseData.data;
+				return responseData;
 			} catch ( exception ) {
 				error = exception;
 			}
@@ -281,7 +280,7 @@ class UpdateExtensionFiles {
 	 */
 	async fetchPluginFromWporg( slug ) {
 		// eslint-disable-next-line no-console
-		console.log( `Fetching plugin ${ slug } from WordPress.org.` );
+		console.log( `Fetching plugin "${ slug }" from WordPress.org.` );
 		const filters = {
 			search: slug,
 			page: 1,
@@ -289,12 +288,13 @@ class UpdateExtensionFiles {
 		};
 
 		const response = await this.getPluginsList( filters );
-		const items = response?.data?.plugins;
+		let items = response?.data?.plugins;
+		items = Array.isArray( items ) ? items : Object.values( items );
 
-		for ( const index in items ) {
-			if ( slug === items[ index ].slug ) {
-				items[ index ].wporg = true;
-				return items[ index ];
+		for ( const item of items ) {
+			if ( slug === item.slug ) {
+				item.wporg = true;
+				return item;
 			}
 		}
 

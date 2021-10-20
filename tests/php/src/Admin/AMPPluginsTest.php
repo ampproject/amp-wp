@@ -167,7 +167,7 @@ class AMPPluginsTest extends TestCase {
 		$this->assertEquals(
 			10,
 			has_filter(
-				'install_plugins_table_api_args_px_enhancing',
+				'install_plugins_table_api_args_amp-compatible',
 				[ $this->instance, 'tab_args' ]
 			)
 		);
@@ -185,7 +185,7 @@ class AMPPluginsTest extends TestCase {
 		);
 		$this->assertEquals(
 			10,
-			has_action( 'install_plugins_px_enhancing', 'display_plugins_table' )
+			has_action( 'install_plugins_amp-compatible', 'display_plugins_table' )
 		);
 
 		set_current_screen( 'plugins' );
@@ -212,7 +212,7 @@ class AMPPluginsTest extends TestCase {
 	public function test_add_tab() {
 
 		$this->assertArrayHasKey(
-			'px_enhancing',
+			'amp-compatible',
 			$this->instance->add_tab( [] )
 		);
 	}
@@ -224,7 +224,7 @@ class AMPPluginsTest extends TestCase {
 
 		$output = $this->instance->tab_args();
 
-		$this->assertArrayHasKey( 'px_enhancing', $output );
+		$this->assertArrayHasKey( 'amp-compatible', $output );
 		$this->assertArrayHasKey( 'per_page', $output );
 		$this->assertArrayHasKey( 'page', $output );
 	}
@@ -242,8 +242,8 @@ class AMPPluginsTest extends TestCase {
 
 		// Test 2: Request for PX compatible data.
 		$args = [
-			'px_enhancing' => true,
-			'per_page'     => 36,
+			'amp-compatible' => true,
+			'per_page'       => 36,
 		];
 
 		$response = $this->instance->plugins_api( $response, 'query_themes', $args );

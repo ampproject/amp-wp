@@ -153,7 +153,7 @@ class AMPThemesTest extends TestCase {
 
 		// Test 2: Request for PX compatible data.
 		$args = [
-			'browse'   => 'px_enhancing',
+			'browse'   => 'amp-compatible',
 			'per_page' => 36,
 		];
 

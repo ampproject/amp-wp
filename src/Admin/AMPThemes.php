@@ -180,7 +180,7 @@ class AMPThemes implements Service, Registerable {
 	public function themes_api( $response, $action, $args ) {
 
 		$args = (array) $args;
-		if ( ! isset( $args['browse'] ) || 'px_enhancing' !== $args['browse'] ) {
+		if ( ! isset( $args['browse'] ) || 'amp-compatible' !== $args['browse'] ) {
 			return $response;
 		}
 

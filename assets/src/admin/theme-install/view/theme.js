@@ -43,7 +43,7 @@ export default wpThemeView.extend( {
 			tooltipElement.classList.add( 'tooltiptext' );
 
 			tooltipElement.append(
-				__( 'This theme follow best practice and is known to work well with AMP plugin.', 'amp' ),
+				__( 'This theme is known to work well with the AMP plugin.', 'amp' ),
 			);
 
 			messageElement.append( iconElement );

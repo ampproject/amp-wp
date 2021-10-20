@@ -35,9 +35,9 @@ const ampThemeInstall = {
 
 		anchorElement.append( spanElement );
 		anchorElement.append( ' ' );
-		anchorElement.append( __( 'PX Enhancing', 'amp' ) );
+		anchorElement.append( __( 'AMP Compatible', 'amp' ) );
 		anchorElement.setAttribute( 'href', '#' );
-		anchorElement.setAttribute( 'data-sort', 'px_enhancing' );
+		anchorElement.setAttribute( 'data-sort', 'amp-compatible' );
 
 		listItem.appendChild( anchorElement );
 
