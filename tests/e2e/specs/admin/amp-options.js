@@ -152,7 +152,7 @@ describe( 'AMP settings screen Review panel', () => {
 	afterAll( async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		if ( testPost.id ) {
+		if ( testPost?.id ) {
 			await page.evaluate( ( id ) => wp.apiFetch( {
 				path: `/wp/v2/posts/${ id }`,
 				method: 'DELETE',

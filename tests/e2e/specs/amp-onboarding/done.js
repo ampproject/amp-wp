@@ -55,14 +55,14 @@ describe( 'Done', () => {
 	afterAll( async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		if ( testPost.id ) {
+		if ( testPost?.id ) {
 			await page.evaluate( ( id ) => wp.apiFetch( {
 				path: `/wp/v2/posts/${ id }`,
 				method: 'DELETE',
 				data: { force: true },
 			} ), testPost.id );
 		}
-		if ( testPage.id ) {
+		if ( testPage?.id ) {
 			await page.evaluate( ( id ) => wp.apiFetch( {
 				path: `/wp/v2/pages/${ id }`,
 				method: 'DELETE',
