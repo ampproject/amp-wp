@@ -1,3 +1,7 @@
+.plugin-icon {
+	object-fit: contain; /* Account for non-square icons being used. */
+}
+
 .extension-card-px-message {
 	text-align: center;
 	padding: 7px 20px;
