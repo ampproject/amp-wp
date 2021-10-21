@@ -215,7 +215,7 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 
 		return array_merge(
 			[
-				'amp-compatible' => '<span class="amp-logo-icon"></span> ' . esc_html__( 'AMP Compatible', 'amp' ),
+				'amp-compatible' => esc_html__( 'AMP Compatible', 'amp' ),
 			],
 			$tabs
 		);

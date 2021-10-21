@@ -30,11 +30,7 @@ const ampThemeInstall = {
 
 		const listItem = document.createElement( 'li' );
 		const anchorElement = document.createElement( 'a' );
-		const spanElement = document.createElement( 'span' );
-		spanElement.classList.add( 'amp-logo-icon' );
 
-		anchorElement.append( spanElement );
-		anchorElement.append( ' ' );
 		anchorElement.append( __( 'AMP Compatible', 'amp' ) );
 		anchorElement.setAttribute( 'href', '#' );
 		anchorElement.setAttribute( 'data-sort', 'amp-compatible' );
