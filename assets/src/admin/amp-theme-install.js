@@ -37,7 +37,7 @@ const ampThemeInstall = {
 
 		listItem.appendChild( anchorElement );
 
-		filterLinks.prepend( listItem );
+		filterLinks.appendChild( listItem );
 	},
 
 	/**

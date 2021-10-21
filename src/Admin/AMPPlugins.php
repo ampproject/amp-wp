@@ -214,10 +214,10 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 	public function add_tab( $tabs ) {
 
 		return array_merge(
+			$tabs,
 			[
 				'amp-compatible' => esc_html__( 'AMP Compatible', 'amp' ),
-			],
-			$tabs
+			]
 		);
 	}
 
