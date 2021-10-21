@@ -19,6 +19,7 @@ async function testCommonDoneStepElements() {
 	await expect( page ).toMatchElement( '.done__list li', { text: /different template mode/i } );
 	await expect( page ).toMatchElement( '.done__list li', { text: /how the AMP plugin works/i } );
 
+	await expect( page ).toMatchElement( 'p', { text: /Browse your site/i } );
 	await expect( page ).toMatchElement( '.done__preview-iframe' );
 
 	await expect( '.done__links-container a' ).not.countToBe( 0 );
@@ -119,5 +120,15 @@ describe( 'Done', () => {
 		await expect( page ).toMatchElement( '.done__preview-iframe' );
 
 		await expect( '.done__preview-container input[type="checkbox"]' ).countToBe( 1 );
+	} );
+
+	it( 'does not render site preview in reader mode if there are no posts and pages', async () => {
+		await trashAllPosts();
+		await trashAllPosts( 'page' );
+
+		await moveToDoneScreen( { mode: 'reader' } );
+
+		await expect( page ).toMatchElement( 'h1', { text: 'Done' } );
+		await expect( page ).not.toMatchElement( '.done__preview-iframe' );
 	} );
 } );

@@ -40,7 +40,7 @@ export function SiteReview() {
 		return null;
 	}
 
-	const previewPermalink = STANDARD === themeSupport ? HOME_URL : pairedUrlExamples[ pairedUrlStructure ][ 0 ];
+	const previewPermalink = STANDARD === themeSupport ? HOME_URL : pairedUrlExamples?.[ pairedUrlStructure ]?.[ 0 ] ?? HOME_URL;
 
 	return (
 		<AMPDrawer

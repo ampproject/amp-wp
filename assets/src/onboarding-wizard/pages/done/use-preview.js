@@ -15,9 +15,11 @@ import { Options } from '../../../components/options-context-provider';
 import { STANDARD } from '../../../common/constants';
 
 export function usePreview() {
+	const hasPreview = PREVIEW_URLS.length > 0;
+
 	const { editedOptions: { theme_support: themeSupport } } = useContext( Options );
 	const [ isPreviewingAMP, setIsPreviewingAMP ] = useState( themeSupport !== STANDARD );
-	const [ previewedPageType, setPreviewedPageType ] = useState( PREVIEW_URLS[ 0 ].type );
+	const [ previewedPageType, setPreviewedPageType ] = useState( hasPreview ? PREVIEW_URLS[ 0 ].type : null );
 
 	const toggleIsPreviewingAMP = () => setIsPreviewingAMP( ( mode ) => ! mode );
 	const setActivePreviewLink = ( link ) => setPreviewedPageType( link.type );
@@ -32,10 +34,11 @@ export function usePreview() {
 	const previewUrl = useMemo( () => previewLinks.find( ( link ) => link.isActive )?.url, [ previewLinks ] );
 
 	return {
-		previewLinks,
-		setActivePreviewLink,
-		previewUrl,
+		hasPreview,
 		isPreviewingAMP,
+		previewLinks,
+		previewUrl,
+		setActivePreviewLink,
 		toggleIsPreviewingAMP,
 	};
 }
