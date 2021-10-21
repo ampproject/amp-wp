@@ -1084,9 +1084,16 @@ class AMP_Validated_URL_Post_Type {
 		return [
 			'theme'   => $theme,
 			'plugins' => wp_list_pluck( $plugin_registry->get_plugins( true, false ), 'Version' ), // @todo What about multiple plugins being in the same directory?
-			'options' => [
-				Option::THEME_SUPPORT => AMP_Options_Manager::get_option( Option::THEME_SUPPORT ),
-			],
+			'options' => wp_array_slice_assoc(
+				AMP_Options_Manager::get_options(),
+				[
+					Option::ALL_TEMPLATES_SUPPORTED,
+					Option::READER_THEME,
+					Option::SUPPORTED_POST_TYPES,
+					Option::SUPPORTED_TEMPLATES,
+					Option::THEME_SUPPORT,
+				]
+			),
 		];
 	}
 
@@ -1149,7 +1156,14 @@ class AMP_Validated_URL_Post_Type {
 		} else {
 			$old_options = [];
 		}
-		$option_differences = array_diff_assoc( $old_options, $new_validated_environment['options'] );
+		$option_differences = [];
+		foreach ( $new_validated_environment['options'] as $option => $value ) {
+			if ( ! isset( $old_options[ $option ] ) ) {
+				$option_differences[ $option ] = null;
+			} elseif ( $old_options[ $option ] !== $value ) {
+				$option_differences[ $option ] = $old_options[ $option ];
+			}
+		}
 		if ( ! empty( $option_differences ) ) {
 			$staleness['options'] = $option_differences;
 		}

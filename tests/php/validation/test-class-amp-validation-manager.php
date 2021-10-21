@@ -1459,7 +1459,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * @covers ::wrap_block_callbacks()
+	 * @covers AMP_Validation_Manager::wrap_block_callbacks()
 	 * @covers AMP_Validation_Callback_Wrapper::get_callback_function()
 	 */
 	public function test_wrap_block_callbacks() {

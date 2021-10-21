@@ -686,9 +686,15 @@ class AMP_Theme_Support {
 	/**
 	 * Get the templates which can be supported.
 	 *
+	 * @param array $options Optional AMP options to override what has been saved.
 	 * @return array Supportable templates.
 	 */
-	public static function get_supportable_templates() {
+	public static function get_supportable_templates( $options = [] ) {
+		$options = array_merge(
+			AMP_Options_Manager::get_options(),
+			$options
+		);
+
 		$templates = [
 			'is_singular' => [
 				'label' => __( 'Singular', 'amp' ),
@@ -798,8 +804,8 @@ class AMP_Theme_Support {
 		 */
 		$templates = apply_filters( 'amp_supportable_templates', $templates );
 
-		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
-		$are_all_supported   = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
+		$supported_templates = $options[ Option::SUPPORTED_TEMPLATES ];
+		$are_all_supported   = $options[ Option::ALL_TEMPLATES_SUPPORTED ];
 
 		$did_filter_supply_supported = false;
 		$did_filter_supply_immutable = false;

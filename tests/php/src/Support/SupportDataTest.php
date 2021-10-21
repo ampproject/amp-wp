@@ -171,6 +171,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 						'id'   => $post->ID,
 						'type' => 'post',
 					],
+					AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY => AMP_Validated_URL_Post_Type::get_validated_environment(),
 				],
 			]
 		);
@@ -187,6 +188,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 						'id'   => $term->term_id,
 						'type' => 'term',
 					],
+					AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY => AMP_Validated_URL_Post_Type::get_validated_environment(),
 				],
 			]
 		);
@@ -202,6 +204,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 					'_amp_queried_object' => [
 						'type' => 'search',
 					],
+					AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY => AMP_Validated_URL_Post_Type::get_validated_environment(),
 				],
 			]
 		);

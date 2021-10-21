@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
@@ -599,15 +600,34 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		$this->assertArrayHasKey( 'theme', $old_env );
 		$this->assertArrayHasKey( 'plugins', $old_env );
 		$this->assertEquals( [ 'twentysixteen' => wp_get_theme( 'twentysixteen' )->get( 'Version' ) ], $old_env['theme'] );
-		$this->assertEquals( [ Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ], $old_env['options'] );
+		$this->assertEquals(
+			[
+				Option::THEME_SUPPORT           => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				Option::ALL_TEMPLATES_SUPPORTED => true,
+				Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
+				Option::SUPPORTED_POST_TYPES    => [ 'post', 'page' ],
+				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
+			],
+			$old_env['options']
+		);
 
 		switch_theme( 'twentyseventeen' );
 		update_option( 'active_plugins', [ 'foo/foo.php', 'baz.php' ] );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$new_env = AMP_Validated_URL_Post_Type::get_validated_environment();
 		$this->assertNotEquals( $old_env, $new_env );
 		$this->assertEquals( [ 'twentyseventeen' => wp_get_theme( 'twentyseventeen' )->get( 'Version' ) ], $new_env['theme'] );
-		$this->assertEquals( [ Option::THEME_SUPPORT => AMP_Theme_Support::STANDARD_MODE_SLUG ], $new_env['options'] );
+		$this->assertEquals(
+			[
+				Option::THEME_SUPPORT           => AMP_Theme_Support::STANDARD_MODE_SLUG,
+				Option::ALL_TEMPLATES_SUPPORTED => false,
+				Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
+				Option::SUPPORTED_POST_TYPES    => [ 'post', 'page' ],
+				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
+			],
+			$new_env['options']
+		);
 	}
 
 	/**
