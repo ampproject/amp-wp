@@ -137,6 +137,30 @@ describe( 'Saving', () => {
 } );
 
 describe( 'AMP settings screen Review panel', () => {
+	let testPost;
+
+	beforeAll( async () => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		testPost = await page.evaluate( () => wp.apiFetch( {
+			path: '/wp/v2/posts',
+			method: 'POST',
+			data: { title: 'Test Post', status: 'publish' },
+		} ) );
+	} );
+
+	afterAll( async () => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		if ( testPost.id ) {
+			await page.evaluate( ( id ) => wp.apiFetch( {
+				path: `/wp/v2/posts/${ id }`,
+				method: 'DELETE',
+				data: { force: true },
+			} ), testPost.id );
+		}
+	} );
+
 	beforeEach( async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 	} );
@@ -145,10 +169,13 @@ describe( 'AMP settings screen Review panel', () => {
 		await cleanUpSettings();
 	} );
 
-	async function clickBrowseSiteInTemplateMode( mode ) {
+	async function changeAndSaveTemplateMode( mode ) {
 		await clickMode( mode );
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
+
+		await Promise.all( [
+			scrollToElement( { selector: '.amp-settings-nav button[type="submit"]', click: true } ),
+			page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ), { timeout: 10000 } ),
+		] );
 	}
 
 	it( 'is present on the page', async () => {
@@ -161,21 +188,28 @@ describe( 'AMP settings screen Review panel', () => {
 	} );
 
 	it( 'button redirects to an AMP page in transitional mode', async () => {
-		await clickBrowseSiteInTemplateMode( 'transitional' );
+		await changeAndSaveTemplateMode( 'transitional' );
+
+		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
+		await page.waitForNavigation();
 
 		await page.waitForSelector( 'html[amp]' );
 		await expect( page ).toMatchElement( 'html[amp]' );
 	} );
 
 	it( 'button redirects to an AMP page in reader mode', async () => {
-		await clickBrowseSiteInTemplateMode( 'reader' );
+		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
+		await page.waitForNavigation();
 
 		await page.waitForSelector( 'html[amp]' );
 		await expect( page ).toMatchElement( 'html[amp]' );
 	} );
 
 	it( 'button redirects to an AMP page in standard mode', async () => {
-		await clickBrowseSiteInTemplateMode( 'standard' );
+		await changeAndSaveTemplateMode( 'standard' );
+
+		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
+		await page.waitForNavigation();
 
 		await page.waitForSelector( 'html[amp]' );
 		await expect( page ).toMatchElement( 'html[amp]' );
@@ -195,11 +229,7 @@ describe( 'AMP settings screen Review panel', () => {
 		await page.waitForSelector( '#amp-settings-root' );
 		await expect( page ).not.toMatchElement( '.settings-site-review' );
 
-		await clickMode( 'standard' );
-
-		await expect( page ).toClick( 'button', { text: 'Save' } );
-		await page.waitForSelector( '.amp-save-success-notice' );
-		await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
+		await changeAndSaveTemplateMode( 'standard' );
 
 		await page.waitForSelector( '.settings-site-review' );
 		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
