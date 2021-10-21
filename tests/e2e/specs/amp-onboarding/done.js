@@ -1,3 +1,7 @@
+/**
+ * WordPress dependencies
+ */
+import { trashAllPosts, visitAdminPage } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -29,6 +33,43 @@ async function testCommonDoneStepElements() {
 }
 
 describe( 'Done', () => {
+	let testPost;
+	let testPage;
+
+	beforeAll( async () => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		testPost = await page.evaluate( () => wp.apiFetch( {
+			path: '/wp/v2/posts',
+			method: 'POST',
+			data: { title: 'Test Post', status: 'publish' },
+		} ) );
+		testPage = await page.evaluate( () => wp.apiFetch( {
+			path: '/wp/v2/pages',
+			method: 'POST',
+			data: { title: 'Test Page', status: 'publish' },
+		} ) );
+	} );
+
+	afterAll( async () => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		if ( testPost.id ) {
+			await page.evaluate( ( id ) => wp.apiFetch( {
+				path: `/wp/v2/posts/${ id }`,
+				method: 'DELETE',
+				data: { force: true },
+			} ), testPost.id );
+		}
+		if ( testPage.id ) {
+			await page.evaluate( ( id ) => wp.apiFetch( {
+				path: `/wp/v2/pages/${ id }`,
+				method: 'DELETE',
+				data: { force: true },
+			} ), testPage.id );
+		}
+	} );
+
 	afterEach( async () => {
 		await cleanUpSettings();
 	} );

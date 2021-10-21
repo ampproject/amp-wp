@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost, visitAdminPage } from '@wordpress/e2e-test-utils';
+import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
 export const NEXT_BUTTON_SELECTOR = '#next-button';
 export const PREV_BUTTON_SELECTOR = '.amp-settings-nav__prev-next button:not(.is-primary)';
@@ -9,7 +9,6 @@ export const PREV_BUTTON_SELECTOR = '.amp-settings-nav__prev-next button:not(.is
 export async function goToOnboardingWizard() {
 	await visitAdminPage( 'index.php' );
 	await expect( page ).not.toMatchElement( '#amp-onboarding-wizard' );
-	await createNewPost(); // So that there is a post to appear on the done screen.
 	await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
 	await expect( page ).toMatchElement( '#amp-onboarding-wizard' );
 }
