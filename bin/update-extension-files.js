@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-const { exec } = require( 'child_process' );
+const { execSync } = require( 'child_process' );
 const fs = require( 'fs' );
 const { getPluginsList, getThemesList } = require( 'wporg-api-client' );
 const axios = require( 'axios' );
@@ -19,7 +19,7 @@ class UpdateExtensionFiles {
 			this.themes = [];
 
 			await this.fetchData();
-			await this.storeData();
+			this.storeData();
 		} )();
 	}
 
@@ -74,10 +74,8 @@ class UpdateExtensionFiles {
 
 	/**
 	 * Store plugins and theme data in JSON respective file.
-	 *
-	 * @return {Promise<void>}
 	 */
-	async storeData() {
+	storeData() {
 		const phpcsDisables = [
 			'Squiz.Commenting.FileComment.Missing',
 			'WordPress.Arrays.ArrayIndentation',
@@ -93,36 +91,16 @@ class UpdateExtensionFiles {
 		const phpcsDisableComments = phpcsDisables.map( ( rule ) => `// phpcs:disable ${ rule }\n` ).join( '' );
 
 		if ( this.plugins ) {
-			let output = await this.convertToPhpArray( this.plugins );
+			let output = this.convertToPhpArray( this.plugins );
 			output = `<?php ${ phpcsDisableComments }\n// NOTICE: This file was auto-generated with: npm run update-ecosystem-files.\nreturn ${ output };`;
 			fs.writeFileSync( PLUGINS_FILE, output );
 		}
 
 		if ( this.themes ) {
-			let output = await this.convertToPhpArray( this.themes );
+			let output = this.convertToPhpArray( this.themes );
 			output = `<?php ${ phpcsDisableComments }\n// NOTICE: This file was auto-generated with: npm run update-ecosystem-files.\nreturn ${ output };`;
 			fs.writeFileSync( THEMES_FILE, output );
 		}
-	}
-
-	/**
-	 * Execute given command in shell and return the output.
-	 *
-	 * @param {string} command Shell command.
-	 * @return {Promise<object>} Output or error from shell command.
-	 */
-	executeCommand( command ) {
-		return new Promise( ( done, failed ) => {
-			exec( command, ( error, stdout, stderr ) => {
-				if ( error ) {
-					error.stdout = stdout;
-					error.stderr = stderr;
-					failed( error );
-					return;
-				}
-				done( { stdout, stderr } );
-			} );
-		} );
 	}
 
 	/**
@@ -131,21 +109,17 @@ class UpdateExtensionFiles {
 	 * @param {Object} object An object that needs to convert into a PHP array.
 	 * @return {string|null} PHP array in string.
 	 */
-	async convertToPhpArray( object ) {
+	convertToPhpArray( object ) {
 		if ( 'object' !== typeof object ) {
 			return null;
 		}
 
-		const tempFilePath = '/tmp/amp.json';
 		const json = JSON.stringify( object );
-		const command = `php -r 'var_export( json_decode( file_get_contents( "${ tempFilePath }" ), true ) );'`;
+		const command = `php -r 'var_export( json_decode( file_get_contents( "php://stdin" ), true ) );'`;
+		let output = execSync( command, { input: json } );
+		output = output.toString();
 
-		fs.writeFileSync( tempFilePath, json );
-		const output = await this.executeCommand( command );
-
-		fs.unlinkSync( tempFilePath );
-
-		return ( output.stdout ) ? output.stdout : 'array()';
+		return ( output && 'NULL' !== output ) ? output : 'array()';
 	}
 
 	/**
