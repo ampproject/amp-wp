@@ -52,6 +52,10 @@
 	background-color: #ffefef;
 }
 
+.amp-notice.amp-notice--plain {
+	padding: 1px 5px;
+}
+
 .amp-notice--small {
 	font-size: 14px;
 	line-height: 1.5;

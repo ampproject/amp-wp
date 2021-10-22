@@ -20,13 +20,10 @@ jest.mock( '../index' );
 
 let returnValue = {};
 
-function ComponentContainingHook( { skipInactive } ) {
-	returnValue = useNormalizedPluginsData( { skipInactive } );
+function ComponentContainingHook() {
+	returnValue = useNormalizedPluginsData();
 	return null;
 }
-ComponentContainingHook.propTypes = {
-	skipInactive: PropTypes.bool,
-};
 
 const Providers = ( { children, fetchingPlugins, plugins = [] } ) => (
 	<ErrorContextProvider>
@@ -105,19 +102,20 @@ describe( 'useNormalizedPluginsData', () => {
 						},
 					] }
 				>
-					<ComponentContainingHook skipInactive={ false } />
+					<ComponentContainingHook />
 				</Providers>,
 				container,
 			);
 		} );
 
-		expect( returnValue ).toMatchObject( {
+		expect( returnValue ).toStrictEqual( {
 			'acme-inc': {
 				author: 'Acme Inc.',
 				author_uri: 'http://example.com',
 				name: 'Acme Plugin',
 				plugin: 'acme-inc',
 				status: 'inactive',
+				slug: 'acme-inc',
 				version: '1.0.1',
 			},
 			amp: {
@@ -126,37 +124,8 @@ describe( 'useNormalizedPluginsData', () => {
 				name: 'AMP',
 				plugin: 'amp/amp',
 				status: 'active',
+				slug: 'amp',
 				version: '2.2.0-alpha',
-			},
-		} );
-	} );
-
-	it( 'skips inactive plugins', () => {
-		act( () => {
-			render(
-				<Providers
-					fetchingPlugins={ false }
-					plugins={ [
-						{
-							plugin: 'acme-inc',
-							status: 'inactive',
-						},
-						{
-							plugin: 'amp/amp',
-							status: 'active',
-						},
-					] }
-				>
-					<ComponentContainingHook skipInactive={ true } />
-				</Providers>,
-				container,
-			);
-		} );
-
-		expect( returnValue ).toMatchObject( {
-			amp: {
-				plugin: 'amp/amp',
-				status: 'active',
 			},
 		} );
 	} );

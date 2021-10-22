@@ -8,7 +8,7 @@ import { useContext, useEffect, useState } from '@wordpress/element';
  */
 import { Themes } from './index';
 
-export function useNormalizedThemesData( { skipInactive = true } = {} ) {
+export function useNormalizedThemesData() {
 	const { fetchingThemes, themes } = useContext( Themes );
 	const [ normalizedThemesData, setNormalizedThemesData ] = useState( [] );
 
@@ -18,26 +18,21 @@ export function useNormalizedThemesData( { skipInactive = true } = {} ) {
 		}
 
 		setNormalizedThemesData( () => themes.reduce( ( acc, source ) => {
-			const { status, stylesheet } = source;
-
-			if ( ! stylesheet ) {
-				return acc;
-			}
-
-			if ( skipInactive && status !== 'active' ) {
+			if ( ! source?.stylesheet ) {
 				return acc;
 			}
 
 			return {
 				...acc,
-				[ stylesheet ]: Object.keys( source ).reduce( ( props, key ) => ( {
+				[ source.stylesheet ]: Object.keys( source ).reduce( ( props, key ) => ( {
 					...props,
+					slug: source.stylesheet,
 					// Flatten every prop that contains a `raw` member.
 					[ key ]: source[ key ]?.raw ?? source[ key ],
 				} ), {} ),
 			};
 		}, {} ) );
-	}, [ skipInactive, fetchingThemes, themes ] );
+	}, [ fetchingThemes, themes ] );
 
 	return normalizedThemesData;
 }

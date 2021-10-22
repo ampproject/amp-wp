@@ -55,6 +55,7 @@
 	flex-flow: row nowrap;
 	font-size: 14px;
 	margin: 0;
+	min-height: 3.5rem;
 	padding: 1rem;
 
 	&:nth-child(even) {
@@ -70,6 +71,10 @@
 	font-weight: 700;
 }
 
+.site-scan-results__source-name--inactive {
+	color: var(--gray);
+}
+
 .site-scan-results__source-author::before {
 	border-left: 1px solid;
 	content: "";
@@ -79,7 +84,8 @@
 	vertical-align: middle;
 }
 
-.site-scan-results__source-version {
+.site-scan-results__source-version,
+.site-scan-results__source-notice {
 	margin-left: auto;
 }
 

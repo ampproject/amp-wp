@@ -20,13 +20,10 @@ jest.mock( '../index' );
 
 let returnValue = {};
 
-function ComponentContainingHook( { skipInactive } ) {
-	returnValue = useNormalizedThemesData( { skipInactive } );
+function ComponentContainingHook() {
+	returnValue = useNormalizedThemesData();
 	return null;
 }
-ComponentContainingHook.propTypes = {
-	skipInactive: PropTypes.bool,
-};
 
 const Providers = ( { children, fetchingThemes, themes = [] } ) => (
 	<ErrorContextProvider>
@@ -105,17 +102,18 @@ describe( 'useNormalizedThemesData', () => {
 						},
 					] }
 				>
-					<ComponentContainingHook skipInactive={ false } />
+					<ComponentContainingHook />
 				</Providers>,
 				container,
 			);
 		} );
 
-		expect( returnValue ).toMatchObject( {
+		expect( returnValue ).toStrictEqual( {
 			twentyfifteen: {
 				author: 'the WordPress team',
 				author_uri: 'https://wordpress.org/',
 				name: 'Twenty Fifteen',
+				slug: 'twentyfifteen',
 				stylesheet: 'twentyfifteen',
 				status: 'inactive',
 				version: '3.0',
@@ -124,39 +122,10 @@ describe( 'useNormalizedThemesData', () => {
 				author: 'the WordPress team',
 				author_uri: 'https://wordpress.org/',
 				name: 'Twenty Twenty',
+				slug: 'twentytwenty',
 				stylesheet: 'twentytwenty',
 				status: 'active',
 				version: '1.7',
-			},
-		} );
-	} );
-
-	it( 'skips inactive plugins', () => {
-		act( () => {
-			render(
-				<Providers
-					fetchingThemes={ false }
-					themes={ [
-						{
-							stylesheet: 'twentyfifteen',
-							status: 'inactive',
-						},
-						{
-							stylesheet: 'twentytwenty',
-							status: 'active',
-						},
-					] }
-				>
-					<ComponentContainingHook skipInactive={ true } />
-				</Providers>,
-				container,
-			);
-		} );
-
-		expect( returnValue ).toMatchObject( {
-			twentytwenty: {
-				stylesheet: 'twentytwenty',
-				status: 'active',
 			},
 		} );
 	} );

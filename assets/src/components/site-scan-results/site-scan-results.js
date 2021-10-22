@@ -14,26 +14,24 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.scss';
-import { Loading } from '../loading';
 import { Selectable } from '../selectable';
-import { SourcesList } from './sources-list';
 
 /**
  * Renders a panel with a site scan results.
  *
  * @param {Object}  props                   Component props.
+ * @param {Object}  props.children          Component children.
  * @param {number}  props.count             Issues count.
  * @param {string}  props.className         Additional class names.
  * @param {Element} props.icon              Panel icon.
- * @param {Array}   props.sources           Array of issues sources data.
  * @param {string}  props.title             Panel title.
  * @param {string}  props.validatedUrlsLink URL to the Validated URLs page.
  */
 export function SiteScanResults( {
+	children,
 	count,
 	className,
 	icon,
-	sources,
 	title,
 	validatedUrlsLink,
 } ) {
@@ -52,9 +50,7 @@ export function SiteScanResults( {
 				</p>
 			</div>
 			<div className="site-scan-results__content">
-				{ sources.length === 0
-					? <Loading />
-					: <SourcesList sources={ sources } /> }
+				{ children }
 				{ validatedUrlsLink && (
 					<p className="site-scan-results__cta">
 						<ExternalLink href={ validatedUrlsLink }>
@@ -68,10 +64,10 @@ export function SiteScanResults( {
 }
 
 SiteScanResults.propTypes = {
+	children: PropTypes.any,
 	count: PropTypes.number,
 	className: PropTypes.string,
 	icon: PropTypes.element,
-	sources: PropTypes.array,
 	title: PropTypes.string,
 	validatedUrlsLink: PropTypes.string,
 };

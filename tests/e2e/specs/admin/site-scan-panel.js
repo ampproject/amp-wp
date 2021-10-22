@@ -127,4 +127,34 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 		await deactivatePlugin( 'autoptimize' );
 	} );
+
+	it( 'displays a notice if a plugin has been deactivated or removed', async () => {
+		await activateTheme( 'twentytwenty' );
+		await activatePlugin( 'autoptimize' );
+
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await triggerSiteRescan();
+
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/ } );
+
+		// Deactivate the plugin and test.
+		await deactivatePlugin( 'autoptimize' );
+
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-notice', { text: /This plugin has been deactivated since last site scan./ } );
+
+		// Uninstall the plugin and test.
+		await uninstallPlugin( 'autoptimize' );
+
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-slug', { text: /autoptimize/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-notice', { text: /This plugin has been uninstalled since last site scan./ } );
+
+		// Clean up.
+		await installPlugin( 'autoptimize' );
+	} );
 } );

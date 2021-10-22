@@ -8,7 +8,7 @@ import { useContext, useEffect, useState } from '@wordpress/element';
  */
 import { Plugins } from './index';
 
-export function useNormalizedPluginsData( { skipInactive = true } = {} ) {
+export function useNormalizedPluginsData() {
 	const { fetchingPlugins, plugins } = useContext( Plugins );
 	const [ normalizedPluginsData, setNormalizedPluginsData ] = useState( [] );
 
@@ -17,29 +17,24 @@ export function useNormalizedPluginsData( { skipInactive = true } = {} ) {
 			return;
 		}
 
-		setNormalizedPluginsData( () => plugins.reduce( ( acc, source ) => {
-			const { status, plugin } = source;
+		setNormalizedPluginsData( plugins.reduce( ( acc, source ) => {
+			const slug = source?.plugin?.match( /^(?:[^\/]*\/)?(.*?)$/ )?.[ 1 ];
 
-			if ( skipInactive && status !== 'active' ) {
-				return acc;
-			}
-
-			const pluginSlug = plugin.match( /^(?:[^\/]*\/)?(.*?)$/ )[ 1 ];
-
-			if ( ! pluginSlug ) {
+			if ( ! slug ) {
 				return acc;
 			}
 
 			return {
 				...acc,
-				[ pluginSlug ]: Object.keys( source ).reduce( ( props, key ) => ( {
+				[ slug ]: Object.keys( source ).reduce( ( props, key ) => ( {
 					...props,
+					slug,
 					// Flatten every prop that contains a `raw` member.
 					[ key ]: source[ key ]?.raw ?? source[ key ],
 				} ), {} ),
 			};
 		}, {} ) );
-	}, [ fetchingPlugins, plugins, skipInactive ] );
+	}, [ fetchingPlugins, plugins ] );
 
 	return normalizedPluginsData;
 }
