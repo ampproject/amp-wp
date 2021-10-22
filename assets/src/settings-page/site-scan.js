@@ -40,14 +40,15 @@ import useDelayedFlag from '../utils/use-delayed-flag';
 export function SiteScan( { onSiteScan } ) {
 	const {
 		cancelSiteScan,
+		didSiteScan,
 		isCancelled,
 		isCompleted,
 		isFailed,
 		isInitializing,
 		isReady,
+		previewPermalink,
 		stale,
 		startSiteScan,
-		previewPermalink,
 	} = useContext( SiteScanContext );
 
 	/**
@@ -60,37 +61,6 @@ export function SiteScan( { onSiteScan } ) {
 	 * brief moment.
 	 */
 	const isDelayedCompleted = useDelayedFlag( isCompleted );
-
-	/**
-	 * Get footer content.
-	 */
-	const getFooterContent = useCallback( () => {
-		if ( isCancelled || isFailed || ( stale && ( isReady || isDelayedCompleted ) ) ) {
-			return (
-				<Button
-					onClick={ () => {
-						if ( onSiteScan ) {
-							onSiteScan();
-						}
-						startSiteScan( { cache: true } );
-					} }
-					isPrimary={ true }
-				>
-					{ __( 'Rescan Site', 'amp' ) }
-				</Button>
-			);
-		}
-
-		if ( ! stale && isDelayedCompleted ) {
-			return (
-				<Button href={ previewPermalink } isPrimary={ true }>
-					{ __( 'Browse Site', 'amp' ) }
-				</Button>
-			);
-		}
-
-		return null;
-	}, [ isCancelled, isDelayedCompleted, isFailed, isReady, onSiteScan, previewPermalink, stale, startSiteScan ] );
 
 	/**
 	 * Get main content.
@@ -127,9 +97,47 @@ export function SiteScan( { onSiteScan } ) {
 		return <SiteScanInProgress />;
 	}, [ isCancelled, isDelayedCompleted, isFailed, isInitializing, isReady ] );
 
+	/**
+	 * Get footer content.
+	 */
+	const getFooterContent = useCallback( () => {
+		function triggerSiteScan() {
+			if ( typeof onSiteScan === 'function' ) {
+				onSiteScan();
+			}
+			startSiteScan( { cache: true } );
+		}
+
+		if ( isCancelled || isFailed || ( stale && ( isReady || isDelayedCompleted ) ) ) {
+			return (
+				<Button onClick={ triggerSiteScan } isPrimary={ true }>
+					{ __( 'Rescan Site', 'amp' ) }
+				</Button>
+			);
+		}
+
+		if ( ! didSiteScan ) {
+			return (
+				<Button onClick={ triggerSiteScan } isPrimary={ true }>
+					{ __( 'Scan Site', 'amp' ) }
+				</Button>
+			);
+		}
+
+		if ( ! stale && isDelayedCompleted ) {
+			return (
+				<Button href={ previewPermalink } isPrimary={ true }>
+					{ __( 'Browse Site', 'amp' ) }
+				</Button>
+			);
+		}
+
+		return null;
+	}, [ didSiteScan, isCancelled, isDelayedCompleted, isFailed, isReady, onSiteScan, previewPermalink, stale, startSiteScan ] );
+
 	return (
 		<SiteScanDrawer
-			initialOpen={ ! isReady || stale }
+			initialOpen={ ! isReady || stale || ! didSiteScan }
 			labelExtra={ stale && ( isReady || isDelayedCompleted ) ? (
 				<AMPNotice type={ NOTICE_TYPE_PLAIN } size={ NOTICE_SIZE_SMALL }>
 					{ __( 'Stale results', 'amp' ) }
@@ -221,12 +229,26 @@ function SiteScanInProgress() {
  */
 function SiteScanSummary() {
 	const {
+		didSiteScan,
 		isReady,
 		pluginIssues,
 		stale,
 		themeIssues,
 	} = useContext( SiteScanContext );
 	const hasSiteIssues = themeIssues.length > 0 || pluginIssues.length > 0;
+
+	if ( isReady && ! didSiteScan ) {
+		return (
+			<AMPNotice
+				type={ NOTICE_TYPE_INFO }
+				size={ NOTICE_SIZE_LARGE }
+			>
+				<p>
+					{ __( 'The site has not been scanned yet. Scan your site to ensure everything is working properly.', 'amp' ) }
+				</p>
+			</AMPNotice>
+		);
+	}
 
 	return (
 		<>

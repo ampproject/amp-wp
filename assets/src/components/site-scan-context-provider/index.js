@@ -250,6 +250,10 @@ export function SiteScanContextProvider( {
 		);
 	}, [ frozenModifiedOptions, modifiedOptions ] );
 
+	const didSiteScan = useMemo( () => {
+		return Boolean( scannableUrls.find( ( scannableUrl ) => scannableUrl?.validated_url_post ) );
+	}, [ scannableUrls ] );
+
 	const stale = hasModifiedOptions || hasStaleResults;
 
 	const previewPermalink = useMemo( () => {
@@ -398,6 +402,7 @@ export function SiteScanContextProvider( {
 			value={ {
 				cancelSiteScan,
 				currentlyScannedUrlIndex,
+				didSiteScan,
 				isBusy: [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ),
 				isCancelled: status === STATUS_CANCELLED,
 				isCompleted: status === STATUS_COMPLETED,
