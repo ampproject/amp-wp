@@ -9,6 +9,7 @@
 namespace AmpProject\AmpWP\Validation;
 
 use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -63,7 +64,7 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 					'callback'            => [ $this, 'get_items' ],
 					'args'                => [],
 					'permission_callback' => static function () {
-						return current_user_can( \AMP_Validation_Manager::VALIDATE_CAPABILITY );
+						return current_user_can( AMP_Validation_Manager::VALIDATE_CAPABILITY );
 					},
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
