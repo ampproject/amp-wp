@@ -109,41 +109,57 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 	 * 'search') and a URL to a corresponding AMP page (`amp_url`).
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 *
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		return rest_ensure_response(
 			array_map(
-				function ( $entry ) {
-					if ( amp_is_canonical() ) {
-						$entry['amp_url'] = $entry['url'];
-					} else {
-						$entry['amp_url'] = $this->paired_routing->add_endpoint( $entry['url'] );
-					}
-
-					$validated_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $entry['url'] );
-					if ( $validated_url_post instanceof WP_Post ) {
-						$entry['validation_errors'] = [];
-
-						$data = json_decode( $validated_url_post->post_content, true );
-						if ( is_array( $data ) ) {
-							$entry['validation_errors'] = wp_list_pluck( $data, 'data' );
-						}
-
-						$entry['validated_url_post'] = [
-							'id'        => $validated_url_post->ID,
-							'edit_link' => get_edit_post_link( $validated_url_post->ID, 'raw' ),
-						];
-
-						$entry['stale'] = ( count( AMP_Validated_URL_Post_Type::get_post_staleness( $validated_url_post ) ) > 0 );
-					}
-
-					return $entry;
+				function ( $item ) use ( $request ) {
+					return $this->prepare_item_for_response( $item, $request )->get_data();
 				},
 				$this->scannable_url_provider->get_urls()
 			)
 		);
+	}
+
+	/**
+	 * Prepares the scannable URL entry for the REST response.
+	 *
+	 * @param array           $item    Scannable URL entry.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function prepare_item_for_response( $item, $request ) {
+		$item = wp_array_slice_assoc( $item, [ 'url', 'type', 'label' ] );
+
+		if ( amp_is_canonical() ) {
+			$item['amp_url'] = $item['url'];
+		} else {
+			$item['amp_url'] = $this->paired_routing->add_endpoint( $item['url'] );
+		}
+
+		$validated_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $item['url'] );
+		if ( $validated_url_post instanceof WP_Post ) {
+			$item['validation_errors'] = [];
+
+			$data = json_decode( $validated_url_post->post_content, true );
+			if ( is_array( $data ) ) {
+				$item['validation_errors'] = wp_list_pluck( $data, 'data' );
+			}
+
+			$item['validated_url_post'] = [
+				'id'        => $validated_url_post->ID,
+				'edit_link' => get_edit_post_link( $validated_url_post->ID, 'raw' ),
+			];
+
+			$item['stale'] = ( count( AMP_Validated_URL_Post_Type::get_post_staleness( $validated_url_post ) ) > 0 );
+		} else {
+			$item['validation_errors']  = null;
+			$item['validated_url_post'] = null;
+			$item['stale']              = null;
+		}
+
+		return rest_ensure_response( $item );
 	}
 
 	/**
@@ -157,23 +173,56 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 			'title'      => 'amp-wp-' . $this->rest_base,
 			'type'       => 'object',
 			'properties' => [
-				'url'     => [
-					'description' => __( 'Page URL.', 'amp' ),
+				'url'                => [
+					'description' => __( 'URL', 'amp' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'readonly'    => true,
 					'context'     => [ 'view' ],
 				],
-				'amp_url' => [
-					'description' => __( 'AMP URL.', 'amp' ),
+				'amp_url'            => [
+					'description' => __( 'AMP URL', 'amp' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'readonly'    => true,
 					'context'     => [ 'view' ],
 				],
-				'type'    => [
-					'description' => __( 'Page type.', 'amp' ),
+				'type'               => [
+					'description' => __( 'Type', 'amp' ),
 					'type'        => 'string',
+					'readonly'    => true,
+					'context'     => [ 'view' ],
+				],
+				'label'              => [
+					'description' => __( 'Label', 'amp' ),
+					'type'        => 'string',
+					'readonly'    => true,
+					'context'     => [ 'view' ],
+				],
+				'validated_url_post' => [
+					'description' => __( 'Validated URL post if previously scanned.', 'amp' ),
+					'type'        => [ 'object', 'null' ],
+					'properties'  => [
+						'id'        => [
+							'type' => 'integer',
+						],
+						'edit_link' => [
+							'type'   => 'string',
+							'format' => 'uri',
+						],
+					],
+					'readonly'    => true,
+					'context'     => [ 'view' ],
+				],
+				'validation_errors'  => [
+					'description' => __( 'Validation errors for validated URL if previously scanned.', 'amp' ),
+					'type'        => [ 'array', 'null' ],
+					'readonly'    => true,
+					'context'     => [ 'view' ],
+				],
+				'stale'              => [
+					'description' => __( 'Whether the Validated URL post is stale.', 'amp' ),
+					'type'        => [ 'boolean', 'null' ],
 					'readonly'    => true,
 					'context'     => [ 'view' ],
 				],
