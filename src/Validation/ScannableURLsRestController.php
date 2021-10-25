@@ -28,7 +28,11 @@ use WP_REST_Server;
  */
 final class ScannableURLsRestController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
-	/** @var ScannableURLProvider ScannableURLProvider instance. */
+	/**
+	 * ScannableURLProvider instance.
+	 *
+	 * @var ScannableURLProvider
+	 */
 	private $scannable_url_provider;
 
 	/**
@@ -62,14 +66,30 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 				[
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_items' ],
+					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 					'args'                => [],
-					'permission_callback' => static function () {
-						return current_user_can( AMP_Validation_Manager::VALIDATE_CAPABILITY );
-					},
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
 		);
+	}
+
+	/**
+	 * Checks if a given request has access to get items.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
+	 */
+	public function get_items_permissions_check( $request ) {
+		if ( ! AMP_Validation_Manager::has_cap() ) {
+			return new WP_Error(
+				'amp_rest_cannot_validate_urls',
+				__( 'Sorry, you are not allowed to access validation data.', 'amp' ),
+				[ 'status' => rest_authorization_required_code() ]
+			);
+		}
+
+		return true;
 	}
 
 	/**
