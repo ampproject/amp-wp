@@ -1,10 +1,18 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from '@wordpress/element';
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useReducer,
+	useRef,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import isShallowEqual from '@wordpress/is-shallow-equal';
 import { addQueryArgs } from '@wordpress/url';
+import { usePrevious } from '@wordpress/compose';
 
 /**
  * External dependencies
@@ -14,26 +22,12 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { READER, STANDARD } from '../../common/constants';
+import { STANDARD } from '../../common/constants';
 import { useAsyncError } from '../../utils/use-async-error';
 import { Options } from '../options-context-provider';
 import { getSiteIssues } from './get-site-issues';
 
 export const SiteScan = createContext();
-
-/**
- * Array containing option keys that - when changed on the client side  - should
- * make the scan results stale.
- *
- * @type {string[]}
- */
-const OPTIONS_INVALIDATING_SITE_SCAN = [
-	'all_templates_supported',
-	'supported_post_types',
-	'supported_templates',
-	'suppressed_plugins',
-	'theme_support',
-];
 
 /**
  * Site Scan Actions.
@@ -67,7 +61,6 @@ const STATUS_CANCELLED = 'STATUS_CANCELLED';
 const INITIAL_STATE = {
 	cache: false,
 	currentlyScannedUrlIndex: 0,
-	frozenModifiedOptions: {},
 	scannableUrls: [],
 	status: '',
 };
@@ -85,6 +78,7 @@ function siteScanReducer( state, action ) {
 			return {
 				...state,
 				status: STATUS_REQUEST_SCANNABLE_URLS,
+				currentlyScannedUrlIndex: INITIAL_STATE.currentlyScannedUrlIndex,
 			};
 		}
 		case ACTION_SCANNABLE_URLS_FETCH: {
@@ -94,17 +88,10 @@ function siteScanReducer( state, action ) {
 			};
 		}
 		case ACTION_SCANNABLE_URLS_RECEIVE: {
-			if ( action?.scannableUrls?.length > 0 ) {
-				return {
-					...state,
-					status: STATUS_READY,
-					scannableUrls: action.scannableUrls,
-				};
-			}
-
 			return {
 				...state,
-				status: STATUS_COMPLETED,
+				status: action.scannableUrls?.length > 0 ? STATUS_READY : STATUS_COMPLETED,
+				scannableUrls: action.scannableUrls,
 			};
 		}
 		case ACTION_SCAN_INITIALIZE: {
@@ -117,7 +104,6 @@ function siteScanReducer( state, action ) {
 				status: STATUS_IDLE,
 				cache: action.cache,
 				currentlyScannedUrlIndex: INITIAL_STATE.currentlyScannedUrlIndex,
-				frozenModifiedOptions: action.modifiedOptions,
 			};
 		}
 		case ACTION_SCAN_VALIDATE_URL: {
@@ -135,7 +121,6 @@ function siteScanReducer( state, action ) {
 						...state.scannableUrls[ action.scannedUrlIndex ],
 						stale: false,
 						error: action.error ?? false,
-						revalidated: ! Boolean( action.error ),
 						validated_url_post: action.error ? {} : action.validatedUrlPost,
 						validation_errors: action.error ? [] : action.validationErrors,
 					},
@@ -187,7 +172,6 @@ function siteScanReducer( state, action ) {
  * @param {boolean} props.ampFirst                    Whether scanning should be done with Standard mode being forced.
  * @param {?any}    props.children                    Component children.
  * @param {boolean} props.fetchCachedValidationErrors Whether to fetch cached validation errors on mount.
- * @param {string}  props.homeUrl                     Site home URL.
  * @param {string}  props.scannableUrlsRestPath       The REST path for interacting with the scannable URL resources.
  * @param {string}  props.validateNonce               The AMP validate nonce.
  */
@@ -195,12 +179,11 @@ export function SiteScanContextProvider( {
 	ampFirst = false,
 	children,
 	fetchCachedValidationErrors = false,
-	homeUrl,
 	scannableUrlsRestPath,
 	validateNonce,
 } ) {
 	const {
-		modifiedOptions,
+		didSaveOptions,
 		originalOptions: {
 			theme_support: themeSupport,
 		},
@@ -210,22 +193,23 @@ export function SiteScanContextProvider( {
 	const {
 		cache,
 		currentlyScannedUrlIndex,
-		frozenModifiedOptions,
 		scannableUrls,
 		status,
 	} = state;
 	const urlType = ampFirst || themeSupport === STANDARD ? 'url' : 'amp_url';
+	const previewPermalink = scannableUrls?.[ 0 ]?.[ urlType ] ?? '';
 
 	/**
 	 * Memoize properties.
 	 */
-	const { pluginIssues, themeIssues, hasStaleResults } = useMemo( () => {
+	const { pluginIssues, themeIssues, didSiteScan, stale } = useMemo( () => {
 		// Skip if the scan is in progress.
 		if ( ! [ STATUS_READY, STATUS_COMPLETED ].includes( status ) ) {
 			return {
 				pluginIssues: [],
 				themeIssues: [],
-				hasStaleResults: false,
+				didSiteScan: false,
+				stale: false,
 			};
 		}
 
@@ -235,32 +219,10 @@ export function SiteScanContextProvider( {
 		return {
 			pluginIssues: siteIssues.pluginIssues,
 			themeIssues: siteIssues.themeIssues,
-			hasStaleResults: Boolean( scannableUrls.find( ( scannableUrl ) => scannableUrl?.stale === true ) ),
+			didSiteScan: scannableUrls.some( ( scannableUrl ) => Boolean( scannableUrl?.validation_errors ) ),
+			stale: scannableUrls.some( ( scannableUrl ) => scannableUrl?.stale === true ),
 		};
 	}, [ scannableUrls, status ] );
-
-	const hasModifiedOptions = useMemo( () => {
-		return Boolean(
-			Object
-				.keys( modifiedOptions )
-				.find( ( key ) =>
-					OPTIONS_INVALIDATING_SITE_SCAN.includes( key ) &&
-					! isShallowEqual( modifiedOptions[ key ], frozenModifiedOptions[ key ] ),
-				),
-		);
-	}, [ frozenModifiedOptions, modifiedOptions ] );
-
-	const didSiteScan = useMemo( () => {
-		return Boolean( scannableUrls.find( ( scannableUrl ) => scannableUrl?.validated_url_post ) );
-	}, [ scannableUrls ] );
-
-	const stale = hasModifiedOptions || hasStaleResults;
-
-	const previewPermalink = useMemo( () => {
-		const pageTypes = themeSupport === READER ? [ 'post', 'page' ] : [ 'home' ];
-
-		return scannableUrls.find( ( { type } ) => pageTypes.includes( type ) )?.[ urlType ] || homeUrl;
-	}, [ homeUrl, scannableUrls, themeSupport, urlType ] );
 
 	/**
 	 * Preflight check.
@@ -290,9 +252,8 @@ export function SiteScanContextProvider( {
 		dispatch( {
 			type: ACTION_SCAN_INITIALIZE,
 			cache: args?.cache,
-			modifiedOptions,
 		} );
-	}, [ modifiedOptions ] );
+	}, [] );
 
 	const cancelSiteScan = useCallback( () => {
 		dispatch( { type: ACTION_SCAN_CANCEL } );
@@ -306,6 +267,16 @@ export function SiteScanContextProvider( {
 			dispatch( { type: ACTION_SCAN_CANCEL } );
 		}
 	}, [ stale, status ] );
+
+	/**
+	 * Monitor changes to the options.
+	 */
+	const previousDidSaveOptions = usePrevious( didSaveOptions );
+	useEffect( () => {
+		if ( ! previousDidSaveOptions && didSaveOptions ) {
+			dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
+		}
+	}, [ didSaveOptions, previousDidSaveOptions ] );
 
 	/**
 	 * Fetch scannable URLs from the REST endpoint.
@@ -374,7 +345,6 @@ export function SiteScanContextProvider( {
 					dispatch( {
 						type: ACTION_SCAN_RECEIVE_VALIDATION_ERRORS,
 						scannedUrlIndex: currentlyScannedUrlIndex,
-						revalidated: data.revalidated,
 						validatedUrlPost: data.validated_url_post,
 						validationErrors: data.results.map( ( { error } ) => error ),
 					} );
@@ -426,7 +396,6 @@ SiteScanContextProvider.propTypes = {
 	ampFirst: PropTypes.bool,
 	children: PropTypes.any,
 	fetchCachedValidationErrors: PropTypes.bool,
-	homeUrl: PropTypes.string,
 	scannableUrlsRestPath: PropTypes.string,
 	validateNonce: PropTypes.string,
 };

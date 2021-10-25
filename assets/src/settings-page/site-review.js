@@ -100,9 +100,11 @@ export function SiteReview() {
 					} } />
 				</ul>
 				<div className="settings-site-review__actions">
-					<Button href={ previewPermalink } isPrimary={ true }>
-						{ __( 'Browse Site', 'amp' ) }
-					</Button>
+					{ previewPermalink && (
+						<Button href={ previewPermalink } isPrimary={ true }>
+							{ __( 'Browse Site', 'amp' ) }
+						</Button>
+					) }
 					<Button
 						onClick={ () => {
 							saveReviewPanelDismissedForTemplateMode( themeSupport );

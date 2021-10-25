@@ -12,7 +12,6 @@ import {
 	APP_ROOT_ID,
 	CLOSE_LINK,
 	CURRENT_THEME,
-	HOME_URL,
 	SETTINGS_LINK,
 	OPTIONS_REST_PATH,
 	READER_THEMES_REST_PATH,
@@ -88,7 +87,6 @@ export function Providers( { children } ) {
 										<TemplateModeOverrideContextProvider>
 											<SiteScanContextProvider
 												ampFirst={ true }
-												homeUrl={ HOME_URL }
 												scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 												validateNonce={ VALIDATE_NONCE }
 											>

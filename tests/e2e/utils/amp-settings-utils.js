@@ -18,18 +18,11 @@ import { scrollToElement } from './onboarding-wizard-utils';
 
 export async function setTemplateMode( mode ) {
 	// Set template mode.
-	const modeSelector = `#template-mode-${ mode }-container input`;
-
-	await page.waitForSelector( modeSelector );
-	await scrollToElement( { selector: modeSelector, click: true } );
+	await scrollToElement( { selector: `#template-mode-${ mode }`, click: true } );
 
 	// Save options and wait for the request to succeed.
-	const saveButtonSelector = '.amp-settings-nav button[type="submit"]';
-
-	await page.waitForSelector( saveButtonSelector );
-
 	await Promise.all( [
-		scrollToElement( { selector: saveButtonSelector, click: true } ),
+		scrollToElement( { selector: '.amp-settings-nav button[type="submit"]', click: true } ),
 		page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ), { timeout: 10000 } ),
 	] );
 }
