@@ -22,6 +22,14 @@ const ampPluginInstall = {
 	},
 
 	/**
+	 * Check if "AMP Compatible" tab is open or not.
+	 */
+	isAMPCompatibleTab() {
+		const queryString = window.location.search;
+		return ( queryString && -1 !== queryString.indexOf( 'tab=amp-compatible' ) );
+	},
+
+	/**
 	 * Add message for AMP Compatibility in AMP-compatible plugins card after search result comes in.
 	 */
 	addAMPMessageInSearchResult() {
@@ -31,6 +39,11 @@ const ampPluginInstall = {
 			const callback = debounce( () => {
 				if ( 'undefined' !== typeof wp.updates.searchRequest ) {
 					wp.updates.searchRequest.done( () => {
+						const wrap = document.querySelector( '.plugin-install-tab-amp-compatible' );
+						if ( wrap ) {
+							wrap.classList.remove( 'plugin-install-tab-amp-compatible' );
+							wrap.classList.add( 'plugin-install-tab-search-result' );
+						}
 						this.addAmpMessage();
 					} );
 				}
@@ -45,6 +58,10 @@ const ampPluginInstall = {
 	 * Add message for AMP Compatibility in AMP-compatible plugins card.
 	 */
 	addAmpMessage() {
+		if ( this.isAMPCompatibleTab() ) {
+			return;
+		}
+
 		for ( const pluginSlug of AMP_PLUGINS ) {
 			const pluginCardElement = document.querySelector( `.plugin-card.plugin-card-${ pluginSlug }` );
 
@@ -77,11 +94,13 @@ const ampPluginInstall = {
 	 * Remove the additional info from plugin card in "AMP Compatible" tab.
 	 */
 	removeAdditionalInfo() {
-		const pluginCardBottom = document.querySelectorAll( '.plugin-install-tab-amp-compatible .plugin-card-bottom' );
+		if ( this.isAMPCompatibleTab() ) {
+			const pluginCardBottom = document.querySelectorAll( '.plugin-install-tab-amp-compatible .plugin-card-bottom' );
 
-		if ( pluginCardBottom ) {
-			for ( const elementNode of pluginCardBottom ) {
-				elementNode.remove();
+			if ( pluginCardBottom ) {
+				for ( const elementNode of pluginCardBottom ) {
+					elementNode.remove();
+				}
 			}
 		}
 	},

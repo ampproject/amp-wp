@@ -34,6 +34,10 @@
 	vertical-align: top;
 }
 
+.plugin-install-tab-amp-compatible .plugin-card-bottom {
+	display: none;
+}
+
 .extension-card-px-message .tooltiptext {
 	visibility: hidden;
 	width: 60%;
