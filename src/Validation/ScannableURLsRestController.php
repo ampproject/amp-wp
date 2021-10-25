@@ -13,6 +13,7 @@ use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\PairedRouting;
 use WP_Error;
 use WP_Post;
 use WP_REST_Controller;
@@ -36,6 +37,13 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 	private $scannable_url_provider;
 
 	/**
+	 * PairedRouting instance.
+	 *
+	 * @var PairedRouting
+	 */
+	private $paired_routing;
+
+	/**
 	 * Get the action to use for registering the service.
 	 *
 	 * @return string Registration action to use.
@@ -48,11 +56,13 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 	 * Constructor.
 	 *
 	 * @param ScannableURLProvider $scannable_url_provider Instance of ScannableURLProvider class.
+	 * @param PairedRouting        $paired_routing         Instance of PairedRouting.
 	 */
-	public function __construct( ScannableURLProvider $scannable_url_provider ) {
+	public function __construct( ScannableURLProvider $scannable_url_provider, PairedRouting $paired_routing ) {
 		$this->namespace              = 'amp/v1';
 		$this->rest_base              = 'scannable-urls';
 		$this->scannable_url_provider = $scannable_url_provider;
+		$this->paired_routing         = $paired_routing;
 	}
 
 	/**
@@ -105,8 +115,12 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		return rest_ensure_response(
 			array_map(
-				static function ( $entry ) {
-					$entry['amp_url'] = amp_add_paired_endpoint( $entry['url'] );
+				function ( $entry ) {
+					if ( amp_is_canonical() ) {
+						$entry['amp_url'] = $entry['url'];
+					} else {
+						$entry['amp_url'] = $this->paired_routing->add_endpoint( $entry['url'] );
+					}
 
 					$validated_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $entry['url'] );
 					if ( $validated_url_post instanceof WP_Post ) {
