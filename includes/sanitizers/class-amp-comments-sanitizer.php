@@ -252,7 +252,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		// Mark the comment-reply script as being PX-verified, which was not done in the script sanitizer because
 		// we had to wait until after the form sanitizer ran to find out if we could conditionally serve valid AMP.
 		ValidationExemption::mark_node_as_px_verified( $comment_reply_script );
-		$comment_reply_script->setAttributeNode( $this->dom->createAttribute( 'defer' ) );
+		$comment_reply_script->setAttributeNode( $this->dom->createAttribute( Attribute::DEFER ) );
 
 		// Make sure that that inline styles are not transformed or else they will break comment-reply styling.
 		if ( $this->style_sanitizer ) {

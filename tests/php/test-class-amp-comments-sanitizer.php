@@ -165,7 +165,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 			);
 			$this->assertInstanceOf( Element::class, $script->parentNode );
 			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $script ) );
-			$this->assertTrue( $script->hasAttribute( 'defer' ) );
+			$this->assertTrue( $script->hasAttribute( Attribute::DEFER ) );
 			$this->assertNull( $dom->getElementById( 'ampCommentThreading' ) );
 
 			$this->assertFalse( $style_sanitizer->get_arg( 'transform_important_qualifiers' ) );
