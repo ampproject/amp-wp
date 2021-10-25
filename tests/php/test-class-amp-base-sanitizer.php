@@ -34,7 +34,7 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	public function tearDown() {
 		parent::tearDown();
 		AMP_Validation_Manager::reset_validation_results();
-		AMP_Validation_Manager::$is_validate_request = false;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 	}
 
 	/**
