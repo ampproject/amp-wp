@@ -16,7 +16,6 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Validation\ScannableURLProvider;
 
 /**
  * AMP setup wizard submenu page class.

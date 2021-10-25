@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AMP_Options_Manager;
 
@@ -25,6 +26,8 @@ use AMP_Options_Manager;
  * @coversDefaultClass \AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage
  */
 class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Test instance.
@@ -116,13 +119,32 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 	 * Tests OnboardingWizardSubmenuPage::enqueue_assets
 	 *
 	 * @covers ::enqueue_assets()
+	 * @covers ::add_preload_rest_paths()
 	 */
 	public function test_enqueue_assets() {
 		$handle = 'amp-onboarding-wizard';
 
+		$rest_preloader = $this->get_private_property( $this->onboarding_wizard_submenu_page, 'rest_preloader' );
+		$this->assertCount( 0, $this->get_private_property( $rest_preloader, 'paths' ) );
+
 		$this->onboarding_wizard_submenu_page->enqueue_assets( $this->onboarding_wizard_submenu_page->screen_handle() );
 		$this->assertTrue( wp_script_is( $handle ) );
 		$this->assertTrue( wp_style_is( $handle ) );
+
+		if ( function_exists( 'rest_preload_api_request' ) ) {
+			$this->assertEqualSets(
+				[
+					'/amp/v1/options',
+					'/amp/v1/reader-themes',
+					'/amp/v1/scannable-urls?_fields%5B0%5D=url&_fields%5B1%5D=amp_url&_fields%5B2%5D=type&_fields%5B3%5D=label',
+					'/wp/v2/plugins',
+					'/wp/v2/settings',
+					'/wp/v2/themes',
+					'/wp/v2/users/me',
+				],
+				$this->get_private_property( $rest_preloader, 'paths' )
+			);
+		}
 	}
 
 	/** @return array */
