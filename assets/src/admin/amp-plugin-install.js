@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { AMP_PLUGINS, NONE_WPORG_PLUGINS } from 'amp-plugins'; // From WP inline script.
+import { AMP_PLUGINS } from 'amp-plugins'; // From WP inline script.
 import { debounce } from 'lodash';
 
 const ampPluginInstall = {
@@ -74,19 +74,14 @@ const ampPluginInstall = {
 	},
 
 	/**
-	 * Remove the additional info from plugin card if plugin is none wporg plugin.
+	 * Remove the additional info from plugin card in "AMP Compatible" tab.
 	 */
 	removeAdditionalInfo() {
-		for ( const pluginSlug of NONE_WPORG_PLUGINS ) {
-			const pluginCardElement = document.querySelector( `.plugin-card.plugin-card-${ pluginSlug }` );
+		const pluginCardBottom = document.querySelectorAll( '.plugin-install-tab-amp-compatible .plugin-card-bottom' );
 
-			if ( ! pluginCardElement ) {
-				continue;
-			}
-
-			const pluginCardBottom = pluginCardElement.querySelector( '.plugin-card-bottom' );
-			if ( pluginCardBottom ) {
-				pluginCardBottom.remove();
+		if ( pluginCardBottom ) {
+			for ( const elementNode of pluginCardBottom ) {
+				elementNode.remove();
 			}
 		}
 	},

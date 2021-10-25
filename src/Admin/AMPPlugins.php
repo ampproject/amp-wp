@@ -181,17 +181,8 @@ class AMPPlugins implements Conditional, Delayed, Service, Registerable {
 			AMP__VERSION
 		);
 
-		$none_wporg = [];
-
-		foreach ( $this->get_plugins() as $plugin ) {
-			if ( true !== $plugin['wporg'] ) {
-				$none_wporg[] = $plugin['slug'];
-			}
-		}
-
 		$js_data = [
-			'AMP_PLUGINS'        => wp_list_pluck( $this->get_plugins(), 'slug' ),
-			'NONE_WPORG_PLUGINS' => $none_wporg,
+			'AMP_PLUGINS' => wp_list_pluck( $this->get_plugins(), 'slug' ),
 		];
 
 		wp_add_inline_script(
