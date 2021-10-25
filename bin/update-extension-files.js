@@ -191,8 +191,15 @@ class UpdateExtensionFiles {
 
 		for ( const item of items ) {
 			if ( slug === item.slug ) {
-				item.wporg = true;
-				return item;
+				return {
+					name: item.name,
+					slug: item.slug,
+					preview_url: item.preview_url,
+					screenshot_url: item.screenshot_url,
+					homepage: item.homepage,
+					description: item.description,
+					wporg: true,
+				};
 			}
 		}
 
@@ -267,8 +274,15 @@ class UpdateExtensionFiles {
 
 		for ( const item of items ) {
 			if ( slug === item.slug ) {
-				item.wporg = true;
-				return item;
+				return {
+					name: item.name,
+					slug: item.slug,
+					homepage: item.homepage,
+					short_description: item.short_description,
+					description: item.description,
+					icons: item.icons,
+					wporg: true,
+				};
 			}
 		}
 
