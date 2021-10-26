@@ -23,7 +23,7 @@ import { SiteScanResults } from './index';
  *
  * @param {Object} props           Component props.
  * @param {string} props.className Component class name.
- * @param {Array}  props.issues    List of plugins issues.
+ * @param {string[]}  props.issues List of plugins issues.
  */
 export function PluginsWithIssues( { issues = [], className, ...props } ) {
 	const pluginsData = useNormalizedPluginsData();

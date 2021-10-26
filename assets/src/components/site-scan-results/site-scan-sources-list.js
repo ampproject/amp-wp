@@ -8,6 +8,7 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
@@ -55,7 +56,7 @@ export function SiteScanSourcesList( {
 							{ author && (
 								<span className="site-scan-results__source-author">
 									{ sprintf(
-										// translators: %s is an author name.
+										/* translators: %s is an author name. */
 										__( 'by %s', 'amp' ),
 										author,
 									) }
@@ -64,7 +65,7 @@ export function SiteScanSourcesList( {
 							{ version && (
 								<span className="site-scan-results__source-version">
 									{ sprintf(
-										// translators: %s is a version number.
+										/* translators: %s is a version number. */
 										__( 'Version %s', 'amp' ),
 										version,
 									) }

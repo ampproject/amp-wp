@@ -50,7 +50,7 @@ export function ThemesContextProvider( {
 	}, [] );
 
 	/**
-	 * Fetches validated URL data.
+	 * Fetches the themes data.
 	 */
 	useEffect( () => {
 		if ( error || themes.length > 0 || fetchingThemes ) {
