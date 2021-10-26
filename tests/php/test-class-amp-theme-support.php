@@ -1690,7 +1690,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		$ordered_contains = [
 			'<html amp=""',
 			'<meta charset="' . Document\Encoding::AMP . '">',
-			'<meta name="viewport" content="width=device-width">',
 			'<link rel="modulepreload" href="https://cdn.ampproject.org/v0.mjs" as="script" crossorigin="anonymous">',
 			'<link rel="preconnect" href="https://cdn.ampproject.org">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
@@ -1720,6 +1719,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 			'#<style amp-boilerplate(="")?>#',
 			'#<noscript><style amp-boilerplate(="")?>#',
+			'<meta name="viewport" content="width=device-width">',
 			'</head>',
 		];
 
