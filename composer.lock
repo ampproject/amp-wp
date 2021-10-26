@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3ad7ca7867265c28ba9c31b6f46179af",
+    "content-hash": "6ad026ad5dde05f90ac11f2b769b166b",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "0.8.0",
+            "version": "0.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "6197885e527aa9a94a18a31a63b27e604b305b4e"
+                "reference": "5a40ad6a1b0c109cc9dd9b0948c4d59bad54857c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/6197885e527aa9a94a18a31a63b27e604b305b4e",
-                "reference": "6197885e527aa9a94a18a31a63b27e604b305b4e",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/5a40ad6a1b0c109cc9dd9b0948c4d59bad54857c",
+                "reference": "5a40ad6a1b0c109cc9dd9b0948c4d59bad54857c",
                 "shasum": ""
             },
             "require": {
@@ -72,9 +72,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.8.0"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.8.1"
             },
-            "time": "2021-10-23T06:39:16+00:00"
+            "time": "2021-10-26T09:57:33+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -288,7 +288,7 @@
     "packages-dev": [
         {
             "name": "ampproject/php-css-parser-install-plugin",
-            "version": "dev-develop",
+            "version": "dev-upgrade/amp-toolbox-php-0.8.0",
             "dist": {
                 "type": "path",
                 "url": "./php-css-parser-install-composer-plugin",
