@@ -34,7 +34,7 @@ describe( 'getSlugsFromValidationResults', () => {
 			},
 			{
 				sources: [
-					{ type: 'plugin', name: 'foo-bar.php' },
+					{ type: 'plugin', name: 'foo-bar/foo-bar.php' },
 				],
 			},
 			{
@@ -58,7 +58,28 @@ describe( 'getSlugsFromValidationResults', () => {
 
 		const slugs = getSlugsFromValidationResults( validationResult );
 
-		expect( slugs.plugins ).toStrictEqual( [ 'gutenberg', 'jetpack', 'foo-bar' ] );
-		expect( slugs.themes ).toStrictEqual( expect.arrayContaining( [ 'twentytwenty' ] ) );
+		expect( slugs.plugins ).toStrictEqual( [ 'jetpack', 'foo-bar' ] );
+		expect( slugs.themes ).toStrictEqual( [ 'twentytwenty' ] );
+	} );
+
+	it( 'returns Gutenberg if it is the only plugin', () => {
+		const validationResult = [
+			{
+				sources: [
+					{ type: 'plugin', name: 'gutenberg' },
+				],
+			},
+			{
+				sources: [
+					{ type: 'theme', name: 'twentytwenty' },
+					{ type: 'core', name: 'wp-includes' },
+				],
+			},
+		];
+
+		const slugs = getSlugsFromValidationResults( validationResult );
+
+		expect( slugs.plugins ).toStrictEqual( [ 'gutenberg' ] );
+		expect( slugs.themes ).toStrictEqual( [ 'twentytwenty' ] );
 	} );
 } );

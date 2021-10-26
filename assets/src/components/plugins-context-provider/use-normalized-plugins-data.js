@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { getPluginSlugFromPath } from '../../common/helpers';
 import { Plugins } from './index';
 
 export function useNormalizedPluginsData() {
@@ -18,7 +19,7 @@ export function useNormalizedPluginsData() {
 		}
 
 		setNormalizedPluginsData( plugins.reduce( ( acc, source ) => {
-			const slug = source?.plugin?.match( /^(?:[^\/]*\/)?(.*?)$/ )?.[ 1 ];
+			const slug = getPluginSlugFromPath( source?.plugin );
 
 			if ( ! slug ) {
 				return acc;
