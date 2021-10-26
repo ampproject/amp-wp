@@ -68,27 +68,35 @@ function isInitiallyOpen( mode, selectionDetails, savedCurrentMode ) {
 /**
  * The interface for the mode selection screen. Avoids using context for easier testing.
  *
- * @param {Object}  props                                 Component props.
- * @param {boolean} props.currentThemeIsAmongReaderThemes Whether the currently active theme is in the list of reader themes.
- * @param {boolean} props.developerToolsOption            Whether the user has enabled developer tools.
- * @param {boolean} props.firstTimeInWizard               Whether the wizard is running for the first time.
- * @param {boolean} props.technicalQuestionChanged        Whether the user changed their technical question from the previous option.
- * @param {Array}   props.pluginIssues                    The plugin issues found in the site scan.
- * @param {string}  props.savedCurrentMode                The current selected mode saved in the database.
- * @param {Array}   props.themeIssues                     The theme issues found in the site scan.
+ * @param {Object}   props                                 Component props.
+ * @param {boolean}  props.currentThemeIsAmongReaderThemes Whether the currently active theme is in the list of reader themes.
+ * @param {boolean}  props.developerToolsOption            Whether the user has enabled developer tools.
+ * @param {boolean}  props.firstTimeInWizard               Whether the wizard is running for the first time.
+ * @param {boolean}  props.technicalQuestionChanged        Whether the user changed their technical question from the previous option.
+ * @param {string[]} props.pluginsWithAMPIncompatibility   A list of plugin slugs causing AMP incompatibility.
+ * @param {string}   props.savedCurrentMode                The current selected mode saved in the database.
+ * @param {string[]} props.themesWithAMPIncompatibility    A list of theme slugs causing AMP incompatibility.
  */
-export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOption, firstTimeInWizard, technicalQuestionChanged, pluginIssues, savedCurrentMode, themeIssues } ) {
+export function ScreenUI( {
+	currentThemeIsAmongReaderThemes,
+	developerToolsOption,
+	firstTimeInWizard,
+	technicalQuestionChanged,
+	pluginsWithAMPIncompatibility,
+	savedCurrentMode,
+	themesWithAMPIncompatibility,
+} ) {
 	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
 
 	const selectionDetails = useMemo( () => getSelectionDetails(
 		{
 			currentThemeIsAmongReaderThemes,
 			userIsTechnical,
-			hasScanResults: null !== pluginIssues && null !== themeIssues,
-			hasPluginIssues: pluginIssues && 0 < pluginIssues.length,
-			hasThemeIssues: themeIssues && 0 < themeIssues.length,
+			hasScanResults: null !== pluginsWithAMPIncompatibility && null !== themesWithAMPIncompatibility,
+			hasPluginsWithAMPIncompatibility: pluginsWithAMPIncompatibility && 0 < pluginsWithAMPIncompatibility.length,
+			hasThemesWithAMPIncompatibility: themesWithAMPIncompatibility && 0 < themesWithAMPIncompatibility.length,
 		},
-	), [ currentThemeIsAmongReaderThemes, themeIssues, pluginIssues, userIsTechnical ] );
+	), [ currentThemeIsAmongReaderThemes, themesWithAMPIncompatibility, pluginsWithAMPIncompatibility, userIsTechnical ] );
 
 	return (
 		<form>
@@ -124,7 +132,7 @@ ScreenUI.propTypes = {
 	developerToolsOption: PropTypes.bool,
 	firstTimeInWizard: PropTypes.bool,
 	technicalQuestionChanged: PropTypes.bool,
-	pluginIssues: PropTypes.arrayOf( PropTypes.string ),
+	pluginsWithAMPIncompatibility: PropTypes.arrayOf( PropTypes.string ),
 	savedCurrentMode: PropTypes.string,
-	themeIssues: PropTypes.arrayOf( PropTypes.string ),
+	themesWithAMPIncompatibility: PropTypes.arrayOf( PropTypes.string ),
 };

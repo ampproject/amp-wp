@@ -19,24 +19,24 @@ import { SiteScanSourcesList } from './site-scan-sources-list';
 import { SiteScanResults } from './index';
 
 /**
- * Renders a list of themes that cause issues.
+ * Render a list of themes that cause AMP Incompatibility.
  *
- * @param {Object} props           Component props.
- * @param {string} props.className Component class name.
- * @param {Array}  props.issues    List of theme issues.
+ * @param {Object}   props           Component props.
+ * @param {string}   props.className Component class name.
+ * @param {string[]} props.slugs     List of theme slugs.
  */
-export function ThemesWithIssues( { issues = [], className, ...props } ) {
+export function ThemesWithAmpIncompatibility( { className, slugs = [], ...props } ) {
 	const themesData = useNormalizedThemesData();
-	const sources = useMemo( () => issues?.map( ( slug ) => themesData?.[ slug ] ?? {
+	const sources = useMemo( () => slugs?.map( ( slug ) => themesData?.[ slug ] ?? {
 		slug,
 		status: 'uninstalled',
-	} ) || [], [ issues, themesData ] );
+	} ) || [], [ slugs, themesData ] );
 
 	return (
 		<SiteScanResults
 			title={ __( 'Themes with AMP incompatibility', 'amp' ) }
 			icon={ <IconWebsitePaintBrush /> }
-			count={ issues.length }
+			count={ slugs.length }
 			sources={ sources }
 			className={ classnames( 'site-scan-results--themes', className ) }
 			{ ...props }
@@ -50,8 +50,7 @@ export function ThemesWithIssues( { issues = [], className, ...props } ) {
 	);
 }
 
-ThemesWithIssues.propTypes = {
+ThemesWithAmpIncompatibility.propTypes = {
 	className: PropTypes.string,
-	issues: PropTypes.array.isRequired,
-	validatedUrlsLink: PropTypes.string,
+	slugs: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };

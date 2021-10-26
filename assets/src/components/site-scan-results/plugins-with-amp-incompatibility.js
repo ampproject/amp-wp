@@ -19,24 +19,24 @@ import { SiteScanSourcesList } from './site-scan-sources-list';
 import { SiteScanResults } from './index';
 
 /**
- * Render a list of plugins that cause issues.
+ * Render a list of plugins that cause AMP Incompatibility.
  *
  * @param {Object}   props           Component props.
  * @param {string}   props.className Component class name.
- * @param {string[]} props.issues    List of plugins issues.
+ * @param {string[]} props.slugs     List of plugins slugs.
  */
-export function PluginsWithIssues( { issues = [], className, ...props } ) {
+export function PluginsWithAmpIncompatibility( { className, slugs = [], ...props } ) {
 	const pluginsData = useNormalizedPluginsData();
-	const sources = useMemo( () => issues?.map( ( slug ) => pluginsData?.[ slug ] ?? {
+	const sources = useMemo( () => slugs?.map( ( slug ) => pluginsData?.[ slug ] ?? {
 		slug,
 		status: 'uninstalled',
-	} ) || [], [ issues, pluginsData ] );
+	} ) || [], [ pluginsData, slugs ] );
 
 	return (
 		<SiteScanResults
 			title={ __( 'Plugins with AMP incompatibility', 'amp' ) }
 			icon={ <IconLaptopPlug /> }
-			count={ issues.length }
+			count={ slugs.length }
 			className={ classnames( 'site-scan-results--plugins', className ) }
 			{ ...props }
 		>
@@ -49,7 +49,7 @@ export function PluginsWithIssues( { issues = [], className, ...props } ) {
 	);
 }
 
-PluginsWithIssues.propTypes = {
+PluginsWithAmpIncompatibility.propTypes = {
 	className: PropTypes.string,
-	issues: PropTypes.array.isRequired,
+	slugs: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };

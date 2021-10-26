@@ -1,14 +1,14 @@
 /**
- * Retrieve plugin and theme issues from the validation results.
+ * Retrieve slugs of plugins and themes from a list of validation results.
  *
  * See the corresponding PHP logic in `\AMP_Validated_URL_Post_Type::render_sources_column()`.
  *
  * @param {Array} validationResults
- * @return {Object} An object consisting of arrays with plugin and theme issues.
+ * @return {Object} An object consisting of `pluginSlugs` and `themeSlugs` arrays.
  */
-export function getSiteIssues( validationResults = [] ) {
-	const pluginIssues = new Set();
-	const themeIssues = new Set();
+export function getSlugsFromValidationResults( validationResults = [] ) {
+	const plugins = new Set();
+	const themes = new Set();
 
 	for ( const result of validationResults ) {
 		if ( ! result.sources ) {
@@ -22,15 +22,15 @@ export function getSiteIssues( validationResults = [] ) {
 			}
 
 			if ( source.type === 'plugin' && source.name !== 'amp' ) {
-				pluginIssues.add( source.name.match( /(.*?)(?:\.php)?$/ )[ 1 ] );
+				plugins.add( source.name.match( /(.*?)(?:\.php)?$/ )[ 1 ] );
 			} else if ( source.type === 'theme' ) {
-				themeIssues.add( source.name );
+				themes.add( source.name );
 			}
 		}
 	}
 
 	return {
-		pluginIssues: [ ...pluginIssues ],
-		themeIssues: [ ...themeIssues ],
+		plugins: [ ...plugins ],
+		themes: [ ...themes ],
 	};
 }

@@ -1,3 +1,3 @@
 export { SiteScanResults } from './site-scan-results';
-export { ThemesWithIssues } from './themes-with-issues';
-export { PluginsWithIssues } from './plugins-with-issues';
+export { ThemesWithAmpIncompatibility } from './themes-with-amp-incompatibility';
+export { PluginsWithAmpIncompatibility } from './plugins-with-amp-incompatibility';

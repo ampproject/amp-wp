@@ -21,7 +21,7 @@ import { Loading } from '../../../components/loading';
 import { Selectable } from '../../../components/selectable';
 import { IconLandscapeHillsCogs } from '../../../components/svg/landscape-hills-cogs';
 import { ProgressBar } from '../../../components/progress-bar';
-import { PluginsWithIssues, ThemesWithIssues } from '../../../components/site-scan-results';
+import { PluginsWithAmpIncompatibility, ThemesWithAmpIncompatibility } from '../../../components/site-scan-results';
 import useDelayedFlag from '../../../utils/use-delayed-flag';
 
 /**
@@ -37,10 +37,10 @@ export function SiteScan() {
 		isFailed,
 		isInitializing,
 		isReady,
-		pluginIssues,
+		pluginsWithAMPIncompatibility,
 		scannableUrls,
 		startSiteScan,
-		themeIssues,
+		themesWithAMPIncompatibility,
 	} = useContext( SiteScanContext );
 	const { developerToolsOption } = useContext( User );
 	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
@@ -103,24 +103,24 @@ export function SiteScan() {
 				title={ __( 'Scan complete', 'amp' ) }
 				headerContent={ (
 					<p>
-						{ themeIssues.length > 0 || pluginIssues.length > 0
+						{ themesWithAMPIncompatibility.length > 0 || pluginsWithAMPIncompatibility.length > 0
 							? __( 'Site scan found issues on your site. Proceed to the next step to follow recommendations for choosing a template mode.', 'amp' )
 							: __( 'Site scan found no issues on your site. Proceed to the next step to follow recommendations for choosing a template mode.', 'amp' )
 						}
 					</p>
 				) }
 			>
-				{ themeIssues.length > 0 && (
-					<ThemesWithIssues
+				{ themesWithAMPIncompatibility.length > 0 && (
+					<ThemesWithAmpIncompatibility
 						className="site-scan__section"
-						issues={ themeIssues }
+						slugs={ themesWithAMPIncompatibility }
 						validatedUrlsLink={ userIsTechnical ? VALIDATED_URLS_LINK : null }
 					/>
 				) }
-				{ pluginIssues.length > 0 && (
-					<PluginsWithIssues
+				{ pluginsWithAMPIncompatibility.length > 0 && (
+					<PluginsWithAmpIncompatibility
 						className="site-scan__section"
-						issues={ pluginIssues }
+						slugs={ pluginsWithAMPIncompatibility }
 						validatedUrlsLink={ userIsTechnical ? VALIDATED_URLS_LINK : null }
 					/>
 				) }

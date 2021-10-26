@@ -22,13 +22,13 @@ export const NON_TECHNICAL = 'nonTechnical';
  * Returns the degree to which each mode is recommended for the current site and user.
  *
  * @param {Object}  args
- * @param {boolean} args.currentThemeIsAmongReaderThemes Whether the currently active theme is in the reader themes list.
- * @param {boolean} args.userIsTechnical                 Whether the user answered yes to the technical question.
- * @param {boolean} args.hasPluginIssues                 Whether the site scan found plugin issues.
- * @param {boolean} args.hasThemeIssues                  Whether the site scan found theme issues.
- * @param {boolean} args.hasScanResults                  Whether there are available scan results.
+ * @param {boolean} args.currentThemeIsAmongReaderThemes  Whether the currently active theme is in the reader themes list.
+ * @param {boolean} args.userIsTechnical                  Whether the user answered yes to the technical question.
+ * @param {boolean} args.hasPluginsWithAMPIncompatibility Whether the site scan found plugins with AMP incompatibility.
+ * @param {boolean} args.hasThemesWithAMPIncompatibility  Whether the site scan found themes with AMP incompatibility.
+ * @param {boolean} args.hasScanResults                   Whether there are available scan results.
  */
-export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTechnical, hasPluginIssues, hasThemeIssues, hasScanResults = true } ) {
+export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTechnical, hasPluginsWithAMPIncompatibility, hasThemesWithAMPIncompatibility, hasScanResults = true } ) {
 	// Handle case where scanning has failed or did not run.
 	if ( ! hasScanResults ) {
 		return {
@@ -54,9 +54,9 @@ export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTe
 	}
 
 	switch ( true ) {
-		case hasThemeIssues && hasPluginIssues && userIsTechnical:
-		case hasThemeIssues && ! hasPluginIssues && userIsTechnical:
-		case ! hasThemeIssues && hasPluginIssues && userIsTechnical:
+		case hasThemesWithAMPIncompatibility && hasPluginsWithAMPIncompatibility && userIsTechnical:
+		case hasThemesWithAMPIncompatibility && ! hasPluginsWithAMPIncompatibility && userIsTechnical:
+		case ! hasThemesWithAMPIncompatibility && hasPluginsWithAMPIncompatibility && userIsTechnical:
 			return {
 				[ READER ]: {
 					recommendationLevel: NEUTRAL,
@@ -81,8 +81,8 @@ export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTe
 				},
 			};
 
-		case hasThemeIssues && hasPluginIssues && ! userIsTechnical:
-		case ! hasThemeIssues && hasPluginIssues && ! userIsTechnical:
+		case hasThemesWithAMPIncompatibility && hasPluginsWithAMPIncompatibility && ! userIsTechnical:
+		case ! hasThemesWithAMPIncompatibility && hasPluginsWithAMPIncompatibility && ! userIsTechnical:
 			return {
 				[ READER ]: {
 					recommendationLevel: RECOMMENDED,
@@ -105,7 +105,7 @@ export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTe
 				},
 			};
 
-		case hasThemeIssues && ! hasPluginIssues && ! userIsTechnical:
+		case hasThemesWithAMPIncompatibility && ! hasPluginsWithAMPIncompatibility && ! userIsTechnical:
 			return {
 				[ READER ]: {
 					recommendationLevel: RECOMMENDED,
@@ -129,7 +129,7 @@ export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTe
 				},
 			};
 
-		case ! hasThemeIssues && ! hasPluginIssues && userIsTechnical:
+		case ! hasThemesWithAMPIncompatibility && ! hasPluginsWithAMPIncompatibility && userIsTechnical:
 			return {
 				[ READER ]: {
 					recommendationLevel: NOT_RECOMMENDED,
@@ -151,7 +151,7 @@ export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTe
 				},
 			};
 
-		case ! hasThemeIssues && ! hasPluginIssues && ! userIsTechnical:
+		case ! hasThemesWithAMPIncompatibility && ! hasPluginsWithAMPIncompatibility && ! userIsTechnical:
 			return {
 				[ READER ]: {
 					recommendationLevel: NOT_RECOMMENDED,

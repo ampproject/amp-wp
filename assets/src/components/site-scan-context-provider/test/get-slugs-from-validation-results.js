@@ -1,11 +1,11 @@
 /**
  * Internal dependencies
  */
-import { getSiteIssues } from '../get-site-issues';
+import { getSlugsFromValidationResults } from '../get-slugs-from-validation-results';
 
-describe( 'getSiteIssues', () => {
+describe( 'getSlugsFromValidationResults', () => {
 	it( 'returns empty arrays if no validation results are passed', () => {
-		expect( getSiteIssues() ).toMatchObject( { pluginIssues: [], themeIssues: [] } );
+		expect( getSlugsFromValidationResults() ).toMatchObject( { plugins: [], themes: [] } );
 	} );
 
 	it( 'returns plugin and theme issues', () => {
@@ -56,9 +56,9 @@ describe( 'getSiteIssues', () => {
 			},
 		];
 
-		const issues = getSiteIssues( validationResult );
+		const slugs = getSlugsFromValidationResults( validationResult );
 
-		expect( issues.pluginIssues ).toStrictEqual( expect.arrayContaining( [ 'gutenberg', 'jetpack', 'foo-bar' ] ) );
-		expect( issues.themeIssues ).toStrictEqual( expect.arrayContaining( [ 'twentytwenty' ] ) );
+		expect( slugs.plugins ).toStrictEqual( [ 'gutenberg', 'jetpack', 'foo-bar' ] );
+		expect( slugs.themes ).toStrictEqual( expect.arrayContaining( [ 'twentytwenty' ] ) );
 	} );
 } );

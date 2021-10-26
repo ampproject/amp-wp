@@ -17,7 +17,7 @@ import { useCallback, useContext, useEffect } from '@wordpress/element';
 import { AMPDrawer } from '../components/amp-drawer';
 import { IconLandscapeHillsCogsAlt } from '../components/svg/landscape-hills-cogs-alt';
 import { ProgressBar } from '../components/progress-bar';
-import { PluginsWithIssues, ThemesWithIssues } from '../components/site-scan-results';
+import { PluginsWithAmpIncompatibility, ThemesWithAmpIncompatibility } from '../components/site-scan-results';
 import { SiteScan as SiteScanContext } from '../components/site-scan-context-provider';
 import { Loading } from '../components/loading';
 import {
@@ -231,11 +231,11 @@ function SiteScanSummary() {
 	const {
 		didSiteScan,
 		isReady,
-		pluginIssues,
+		pluginsWithAMPIncompatibility,
 		stale,
-		themeIssues,
+		themesWithAMPIncompatibility,
 	} = useContext( SiteScanContext );
-	const hasSiteIssues = themeIssues.length > 0 || pluginIssues.length > 0;
+	const hasSiteIssues = themesWithAMPIncompatibility.length > 0 || pluginsWithAMPIncompatibility.length > 0;
 
 	if ( isReady && ! didSiteScan ) {
 		return (
@@ -294,15 +294,15 @@ function SiteScanSummary() {
 					) }
 				</>
 			) }
-			{ themeIssues.length > 0 && (
-				<ThemesWithIssues
-					issues={ themeIssues }
+			{ themesWithAMPIncompatibility.length > 0 && (
+				<ThemesWithAmpIncompatibility
+					slugs={ themesWithAMPIncompatibility }
 					validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
 				/>
 			) }
-			{ pluginIssues.length > 0 && (
-				<PluginsWithIssues
-					issues={ pluginIssues }
+			{ pluginsWithAMPIncompatibility.length > 0 && (
+				<PluginsWithAmpIncompatibility
+					slugs={ pluginsWithAMPIncompatibility }
 					validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
 				/>
 			) }

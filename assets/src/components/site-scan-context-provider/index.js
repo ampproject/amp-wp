@@ -25,7 +25,7 @@ import PropTypes from 'prop-types';
 import { STANDARD } from '../../common/constants';
 import { useAsyncError } from '../../utils/use-async-error';
 import { Options } from '../options-context-provider';
-import { getSiteIssues } from './get-site-issues';
+import { getSlugsFromValidationResults } from './get-slugs-from-validation-results';
 
 export const SiteScan = createContext();
 
@@ -202,23 +202,28 @@ export function SiteScanContextProvider( {
 	/**
 	 * Memoize properties.
 	 */
-	const { pluginIssues, themeIssues, didSiteScan, stale } = useMemo( () => {
+	const {
+		pluginsWithAMPIncompatibility,
+		themesWithAMPIncompatibility,
+		didSiteScan,
+		stale,
+	} = useMemo( () => {
 		// Skip if the scan is in progress.
 		if ( ! [ STATUS_READY, STATUS_COMPLETED ].includes( status ) ) {
 			return {
-				pluginIssues: [],
-				themeIssues: [],
+				pluginsWithAMPIncompatibility: [],
+				themesWithAMPIncompatibility: [],
 				didSiteScan: false,
 				stale: false,
 			};
 		}
 
 		const validationErrors = scannableUrls.reduce( ( acc, scannableUrl ) => [ ...acc, ...scannableUrl?.validation_errors ?? [] ], [] );
-		const siteIssues = getSiteIssues( validationErrors );
+		const slugs = getSlugsFromValidationResults( validationErrors );
 
 		return {
-			pluginIssues: siteIssues.pluginIssues,
-			themeIssues: siteIssues.themeIssues,
+			pluginsWithAMPIncompatibility: slugs.plugins,
+			themesWithAMPIncompatibility: slugs.themes,
 			didSiteScan: scannableUrls.some( ( scannableUrl ) => Boolean( scannableUrl?.validation_errors ) ),
 			stale: scannableUrls.some( ( scannableUrl ) => scannableUrl?.stale === true ),
 		};
@@ -379,12 +384,12 @@ export function SiteScanContextProvider( {
 				isFailed: status === STATUS_FAILED,
 				isInitializing: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
 				isReady: status === STATUS_READY,
-				pluginIssues,
+				pluginsWithAMPIncompatibility,
 				previewPermalink,
 				scannableUrls,
 				stale,
 				startSiteScan,
-				themeIssues,
+				themesWithAMPIncompatibility,
 			} }
 		>
 			{ children }
