@@ -218,7 +218,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 		$query_vars = [];
 
 		// Add rel=amphtml.
-		if ( ! $excluded ) {
+		if ( ! $excluded && ! $this->is_webpage_type_element( $element ) ) {
 			$rel[] = Attribute::REL_AMPHTML;
 			$rel   = array_diff(
 				$rel,
@@ -309,5 +309,15 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Determine whether given element is of WebPage type
+	 * 
+	 * @param DOMElement $element Element.
+	 * @return bool Whether if given element is of WebPage type.
+	 */
+	public function is_webpage_type_element( $element ) {
+		return $element instanceof DOMElement && 'WebPage' === $element->getAttribute( 'typeof' );
 	}
 }
