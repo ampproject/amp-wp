@@ -129,7 +129,7 @@ function siteScanReducer( state, action ) {
 			};
 		}
 		case ACTION_SCAN_NEXT_URL: {
-			if ( state.status === STATUS_CANCELLED ) {
+			if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( state.status ) ) {
 				return state;
 			}
 
@@ -265,16 +265,8 @@ export function SiteScanContextProvider( {
 	}, [] );
 
 	/**
-	 * Cancel scan and invalidate current results whenever options change.
-	 */
-	useEffect( () => {
-		if ( stale && [ STATUS_IN_PROGRESS, STATUS_IDLE ].includes( status ) ) {
-			dispatch( { type: ACTION_SCAN_CANCEL } );
-		}
-	}, [ stale, status ] );
-
-	/**
-	 * Monitor changes to the options.
+	 * Whenever options change, cancel the current scan (if in progress) and
+	 * refetch the scannable URLs.
 	 */
 	const previousDidSaveOptions = usePrevious( didSaveOptions );
 	useEffect( () => {
