@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { useCallback, useContext, useEffect, useState } from '@wordpress/element';
+import { useCallback, useContext, useEffect, useMemo, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -19,6 +19,7 @@ import { IconLandscapeHillsCogsAlt } from '../components/svg/landscape-hills-cog
 import { ProgressBar } from '../components/progress-bar';
 import { PluginsWithAmpIncompatibility, ThemesWithAmpIncompatibility } from '../components/site-scan-results';
 import { SiteScan as SiteScanContext } from '../components/site-scan-context-provider';
+import { User } from '../components/user-context-provider';
 import { Loading } from '../components/loading';
 import {
 	AMPNotice,
@@ -244,6 +245,8 @@ function SiteScanSummary() {
 		themesWithAmpIncompatibility,
 	} = useContext( SiteScanContext );
 	const hasSiteIssues = themesWithAmpIncompatibility.length > 0 || pluginsWithAmpIncompatibility.length > 0;
+	const { developerToolsOption } = useContext( User );
+	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
 
 	if ( isReady && ! hasSiteScanResults ) {
 		return (
@@ -309,13 +312,21 @@ function SiteScanSummary() {
 			{ themesWithAmpIncompatibility.length > 0 && (
 				<ThemesWithAmpIncompatibility
 					slugs={ themesWithAmpIncompatibility }
-					validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
+					callToAction={ userIsTechnical && ! stale ? (
+						<a href={ VALIDATED_URLS_LINK }>
+							{ __( 'AMP Validated URLs page', 'amp' ) }
+						</a>
+					) : null }
 				/>
 			) }
 			{ pluginsWithAmpIncompatibility.length > 0 && (
 				<PluginsWithAmpIncompatibility
 					slugs={ pluginsWithAmpIncompatibility }
-					validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
+					callToAction={ userIsTechnical && ! stale ? (
+						<a href={ VALIDATED_URLS_LINK }>
+							{ __( 'AMP Validated URLs page', 'amp' ) }
+						</a>
+					) : null }
 				/>
 			) }
 		</>

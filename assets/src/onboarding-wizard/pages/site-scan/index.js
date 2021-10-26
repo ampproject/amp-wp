@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
  */
 import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { ExternalLink } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -114,14 +115,22 @@ export function SiteScan() {
 					<ThemesWithAmpIncompatibility
 						className="site-scan__section"
 						slugs={ themesWithAmpIncompatibility }
-						validatedUrlsLink={ userIsTechnical ? VALIDATED_URLS_LINK : null }
+						callToAction={ userIsTechnical && (
+							<ExternalLink href={ VALIDATED_URLS_LINK }>
+								{ __( 'AMP Validated URLs page', 'amp' ) }
+							</ExternalLink>
+						) }
 					/>
 				) }
 				{ pluginsWithAmpIncompatibility.length > 0 && (
 					<PluginsWithAmpIncompatibility
 						className="site-scan__section"
 						slugs={ pluginsWithAmpIncompatibility }
-						validatedUrlsLink={ userIsTechnical ? VALIDATED_URLS_LINK : null }
+						callToAction={ userIsTechnical && (
+							<ExternalLink href={ VALIDATED_URLS_LINK }>
+								{ __( 'AMP Validated URLs page', 'amp' ) }
+							</ExternalLink>
+						) }
 					/>
 				) }
 			</SiteScanPanel>

@@ -19,21 +19,21 @@ import { Selectable } from '../selectable';
 /**
  * Renders a panel with a site scan results.
  *
- * @param {Object}  props                   Component props.
- * @param {Object}  props.children          Component children.
- * @param {number}  props.count             Incompatibilities count.
- * @param {string}  props.className         Additional class names.
- * @param {Element} props.icon              Panel icon.
- * @param {string}  props.title             Panel title.
- * @param {string}  props.validatedUrlsLink URL to the Validated URLs page.
+ * @param {Object}  props              Component props.
+ * @param {Object}  props.callToAction A call to action element.
+ * @param {Object}  props.children     Component children.
+ * @param {number}  props.count        Incompatibilities count.
+ * @param {string}  props.className    Additional class names.
+ * @param {Element} props.icon         Panel icon.
+ * @param {string}  props.title        Panel title.
  */
 export function SiteScanResults( {
+	callToAction,
 	children,
-	count,
 	className,
+	count,
 	icon,
 	title,
-	validatedUrlsLink,
 } ) {
 	return (
 		<Selectable className={ classnames( 'site-scan-results', className ) }>
@@ -51,11 +51,9 @@ export function SiteScanResults( {
 			</div>
 			<div className="site-scan-results__content">
 				{ children }
-				{ validatedUrlsLink && (
+				{ callToAction && (
 					<p className="site-scan-results__cta">
-						<ExternalLink href={ validatedUrlsLink }>
-							{ __( 'AMP Validated URLs page', 'amp' ) }
-						</ExternalLink>
+						{ callToAction }
 					</p>
 				) }
 			</div>
@@ -64,10 +62,10 @@ export function SiteScanResults( {
 }
 
 SiteScanResults.propTypes = {
+	callToAction: PropTypes.element,
 	children: PropTypes.any,
-	count: PropTypes.number,
 	className: PropTypes.string,
+	count: PropTypes.number,
 	icon: PropTypes.element,
 	title: PropTypes.string,
-	validatedUrlsLink: PropTypes.string,
 };
