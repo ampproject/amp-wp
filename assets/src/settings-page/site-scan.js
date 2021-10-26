@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { useCallback, useContext, useEffect } from '@wordpress/element';
+import { useCallback, useContext, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -40,16 +40,20 @@ import useDelayedFlag from '../utils/use-delayed-flag';
 export function SiteScan( { onSiteScan } ) {
 	const {
 		cancelSiteScan,
-		didSiteScan,
+		hasSiteScanResults,
+		isBusy,
 		isCancelled,
 		isCompleted,
 		isFailed,
 		isInitializing,
 		isReady,
+		pluginsWithAMPIncompatibility,
 		previewPermalink,
 		stale,
 		startSiteScan,
+		themesWithAMPIncompatibility,
 	} = useContext( SiteScanContext );
+	const hasSiteIssues = themesWithAMPIncompatibility.length > 0 || pluginsWithAMPIncompatibility.length > 0;
 
 	/**
 	 * Cancel scan when component unmounts.
@@ -61,6 +65,18 @@ export function SiteScan( { onSiteScan } ) {
 	 * brief moment.
 	 */
 	const isDelayedCompleted = useDelayedFlag( isCompleted );
+	const isSummary = isReady || isDelayedCompleted;
+
+	/**
+	 * Check if the scanner has been triggered at least once in the current
+	 * session by a user.
+	 */
+	const [ hasSiteScanBeenTriggered, setHasSiteScanBeenTriggered ] = useState( false );
+	useEffect( () => {
+		if ( ! hasSiteScanBeenTriggered && isBusy ) {
+			setHasSiteScanBeenTriggered( true );
+		}
+	}, [ hasSiteScanBeenTriggered, isBusy ] );
 
 	/**
 	 * Get main content.
@@ -90,60 +106,41 @@ export function SiteScan( { onSiteScan } ) {
 			);
 		}
 
-		if ( isReady || isDelayedCompleted ) {
+		if ( isSummary ) {
 			return <SiteScanSummary />;
 		}
 
 		return <SiteScanInProgress />;
-	}, [ isCancelled, isDelayedCompleted, isFailed, isInitializing, isReady ] );
-
-	/**
-	 * Get footer content.
-	 */
-	const getFooterContent = useCallback( () => {
-		function triggerSiteScan() {
-			if ( typeof onSiteScan === 'function' ) {
-				onSiteScan();
-			}
-			startSiteScan( { cache: true } );
-		}
-
-		if ( isCancelled || isFailed || ( stale && ( isReady || isDelayedCompleted ) ) ) {
-			return (
-				<Button onClick={ triggerSiteScan } isPrimary={ true }>
-					{ __( 'Rescan Site', 'amp' ) }
-				</Button>
-			);
-		}
-
-		if ( ! didSiteScan ) {
-			return (
-				<Button onClick={ triggerSiteScan } isPrimary={ true }>
-					{ __( 'Scan Site', 'amp' ) }
-				</Button>
-			);
-		}
-
-		if ( ! stale && isDelayedCompleted ) {
-			return (
-				<Button href={ previewPermalink } isPrimary={ true }>
-					{ __( 'Browse Site', 'amp' ) }
-				</Button>
-			);
-		}
-
-		return null;
-	}, [ didSiteScan, isCancelled, isDelayedCompleted, isFailed, isReady, onSiteScan, previewPermalink, stale, startSiteScan ] );
+	}, [ isCancelled, isFailed, isInitializing, isSummary ] );
 
 	return (
 		<SiteScanDrawer
-			initialOpen={ ! isReady || stale || ! didSiteScan }
+			initialOpen={ ! hasSiteScanResults || ! ( isReady && ! hasSiteIssues && ! hasSiteScanBeenTriggered ) }
 			labelExtra={ stale && ( isReady || isDelayedCompleted ) ? (
 				<AMPNotice type={ NOTICE_TYPE_PLAIN } size={ NOTICE_SIZE_SMALL }>
 					{ __( 'Stale results', 'amp' ) }
 				</AMPNotice>
 			) : null }
-			footerContent={ getFooterContent() }
+			footerContent={ ( isSummary || isFailed || isCancelled ) && (
+				<>
+					<Button
+						onClick={ () => {
+							if ( typeof onSiteScan === 'function' ) {
+								onSiteScan();
+							}
+							startSiteScan( { cache: true } );
+						} }
+						isPrimary={ true }
+					>
+						{ hasSiteScanResults ? __( 'Rescan Site', 'amp' ) : __( 'Scan Site', 'amp' ) }
+					</Button>
+					{ hasSiteScanResults && (
+						<Button href={ previewPermalink } isLink={ true }>
+							{ __( 'Browse Site', 'amp' ) }
+						</Button>
+					) }
+				</>
+			) }
 		>
 			{ getContent() }
 		</SiteScanDrawer>
@@ -229,7 +226,7 @@ function SiteScanInProgress() {
  */
 function SiteScanSummary() {
 	const {
-		didSiteScan,
+		hasSiteScanResults,
 		isReady,
 		pluginsWithAMPIncompatibility,
 		stale,
@@ -237,14 +234,21 @@ function SiteScanSummary() {
 	} = useContext( SiteScanContext );
 	const hasSiteIssues = themesWithAMPIncompatibility.length > 0 || pluginsWithAMPIncompatibility.length > 0;
 
-	if ( isReady && ! didSiteScan ) {
+	if ( isReady && ! hasSiteScanResults ) {
 		return (
-			<AMPNotice
-				type={ NOTICE_TYPE_INFO }
-				size={ NOTICE_SIZE_LARGE }
-			>
+			<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
 				<p>
 					{ __( 'The site has not been scanned yet. Scan your site to ensure everything is working properly.', 'amp' ) }
+				</p>
+			</AMPNotice>
+		);
+	}
+
+	if ( isReady && ! hasSiteIssues ) {
+		return (
+			<AMPNotice type={ NOTICE_TYPE_SUCCESS } size={ NOTICE_SIZE_LARGE }>
+				<p>
+					{ __( 'Site scan found no issues on your site. Browse your site to ensure everything is working as expected.', 'amp' ) }
 				</p>
 			</AMPNotice>
 		);
@@ -253,14 +257,11 @@ function SiteScanSummary() {
 	return (
 		<>
 			{ isReady ? (
-				<AMPNotice
-					type={ stale ? NOTICE_TYPE_INFO : NOTICE_TYPE_SUCCESS }
-					size={ NOTICE_SIZE_LARGE }
-				>
+				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
 					<p>
 						{ stale
 							? __( 'Stale results. Rescan your site to ensure everything is working properly.', 'amp' )
-							: __( 'No changes since your last scan. Browse your site to ensure everything is working as expected.', 'amp' )
+							: __( 'No changes since your last scan.', 'amp' )
 						}
 					</p>
 				</AMPNotice>
@@ -288,7 +289,7 @@ function SiteScanSummary() {
 					{ ! hasSiteIssues && ! stale && (
 						<AMPNotice type={ NOTICE_TYPE_SUCCESS } size={ NOTICE_SIZE_LARGE }>
 							<p>
-								{ __( 'Site scan found no issues on your site.', 'amp' ) }
+								{ __( 'Site scan found no issues on your site. Browse your site to ensure everything is working as expected.', 'amp' ) }
 							</p>
 						</AMPNotice>
 					) }

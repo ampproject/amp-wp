@@ -203,18 +203,18 @@ export function SiteScanContextProvider( {
 	 * Memoize properties.
 	 */
 	const {
+		hasSiteScanResults,
 		pluginsWithAMPIncompatibility,
-		themesWithAMPIncompatibility,
-		didSiteScan,
 		stale,
+		themesWithAMPIncompatibility,
 	} = useMemo( () => {
 		// Skip if the scan is in progress.
 		if ( ! [ STATUS_READY, STATUS_COMPLETED ].includes( status ) ) {
 			return {
+				hasSiteScanResults: false,
 				pluginsWithAMPIncompatibility: [],
-				themesWithAMPIncompatibility: [],
-				didSiteScan: false,
 				stale: false,
+				themesWithAMPIncompatibility: [],
 			};
 		}
 
@@ -222,10 +222,10 @@ export function SiteScanContextProvider( {
 		const slugs = getSlugsFromValidationResults( validationErrors );
 
 		return {
+			hasSiteScanResults: scannableUrls.some( ( scannableUrl ) => Boolean( scannableUrl?.validation_errors ) ),
 			pluginsWithAMPIncompatibility: slugs.plugins,
-			themesWithAMPIncompatibility: slugs.themes,
-			didSiteScan: scannableUrls.some( ( scannableUrl ) => Boolean( scannableUrl?.validation_errors ) ),
 			stale: scannableUrls.some( ( scannableUrl ) => scannableUrl?.stale === true ),
+			themesWithAMPIncompatibility: slugs.themes,
 		};
 	}, [ scannableUrls, status ] );
 
@@ -377,7 +377,7 @@ export function SiteScanContextProvider( {
 			value={ {
 				cancelSiteScan,
 				currentlyScannedUrlIndex,
-				didSiteScan,
+				hasSiteScanResults,
 				isBusy: [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ),
 				isCancelled: status === STATUS_CANCELLED,
 				isCompleted: status === STATUS_COMPLETED,
