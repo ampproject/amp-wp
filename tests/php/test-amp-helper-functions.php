@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 
@@ -19,6 +20,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 	use HandleValidation;
 	use LoadsCoreThemes;
+	use PrivateAccess;
 
 	/**
 	 * The mock Site Icon value to use in a filter.
@@ -50,7 +52,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 */
 	public function tearDown() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Validation_Manager::$is_validate_request = false;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 		global $wp_scripts, $pagenow, $show_admin_bar, $current_screen;
 		$wp_scripts     = null;
 		$show_admin_bar = null;
