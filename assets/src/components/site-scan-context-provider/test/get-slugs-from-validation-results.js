@@ -8,7 +8,7 @@ describe( 'getSlugsFromValidationResults', () => {
 		expect( getSlugsFromValidationResults() ).toMatchObject( { plugins: [], themes: [] } );
 	} );
 
-	it( 'returns plugin and theme issues', () => {
+	it( 'returns plugin and theme slugs', () => {
 		const validationResult = [
 			{
 				sources: [
@@ -62,7 +62,7 @@ describe( 'getSlugsFromValidationResults', () => {
 		expect( slugs.themes ).toStrictEqual( [ 'twentytwenty' ] );
 	} );
 
-	it( 'returns Gutenberg if it is the only plugin', () => {
+	it( 'returns Gutenberg if it is the only plugin in the list', () => {
 		const validationResult = [
 			{
 				sources: [

@@ -21,7 +21,7 @@ import { Selectable } from '../selectable';
  *
  * @param {Object}  props                   Component props.
  * @param {Object}  props.children          Component children.
- * @param {number}  props.count             Issues count.
+ * @param {number}  props.count             Incompatibilities count.
  * @param {string}  props.className         Additional class names.
  * @param {Element} props.icon              Panel icon.
  * @param {string}  props.title             Panel title.
