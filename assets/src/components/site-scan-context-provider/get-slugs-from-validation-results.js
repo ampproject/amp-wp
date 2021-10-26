@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getPluginSlugFromPath } from '../../common/helpers';
+import { getPluginSlugFromPath } from '../../common/helpers/get-plugin-slug-from-path';
 
 /**
  * Retrieve slugs of plugins and themes from a list of validation results.

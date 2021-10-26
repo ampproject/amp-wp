@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getPluginSlugFromPath } from '../index';
+import { getPluginSlugFromPath } from '../get-plugin-slug-from-path';
 
 describe( 'getPluginSlugFromPath', () => {
 	it( 'should return an empty string if no path is provided', () => {

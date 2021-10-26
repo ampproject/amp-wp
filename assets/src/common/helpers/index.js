@@ -221,13 +221,3 @@ export const setImageFromURL = ( { url, id, width, height, onSelect, dispatchIma
 	onSelect( data ); // @todo Does this do anything?
 	dispatchImage( id );
 };
-
-/**
- * Retrieve plugin slug out of the source path.
- *
- * @param {string} path Plugin source path.
- * @return {string} Plugin slug.
- */
-export function getPluginSlugFromPath( path = '' ) {
-	return path?.match( /^(?:[^\/]*\/)*([^.]*)/ )?.[ 1 ] || '';
-}

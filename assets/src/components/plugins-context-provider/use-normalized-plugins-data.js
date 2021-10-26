@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { getPluginSlugFromPath } from '../../common/helpers';
+import { getPluginSlugFromPath } from '../../common/helpers/get-plugin-slug-from-path';
 import { Plugins } from './index';
 
 export function useNormalizedPluginsData() {
