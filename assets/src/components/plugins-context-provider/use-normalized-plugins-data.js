@@ -18,15 +18,15 @@ export function useNormalizedPluginsData() {
 			return;
 		}
 
-		setNormalizedPluginsData( plugins.reduce( ( acc, source ) => {
+		setNormalizedPluginsData( plugins.reduce( ( accumulatedPluginsData, source ) => {
 			const slug = getPluginSlugFromPath( source?.plugin );
 
 			if ( ! slug ) {
-				return acc;
+				return accumulatedPluginsData;
 			}
 
 			return {
-				...acc,
+				...accumulatedPluginsData,
 				[ slug ]: Object.keys( source ).reduce( ( props, key ) => ( {
 					...props,
 					slug,

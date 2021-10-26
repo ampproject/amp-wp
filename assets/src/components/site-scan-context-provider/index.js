@@ -218,7 +218,7 @@ export function SiteScanContextProvider( {
 			};
 		}
 
-		const validationErrors = scannableUrls.reduce( ( acc, scannableUrl ) => [ ...acc, ...scannableUrl?.validation_errors ?? [] ], [] );
+		const validationErrors = scannableUrls.reduce( ( accumulatedValidationErrors, scannableUrl ) => [ ...accumulatedValidationErrors, ...scannableUrl?.validation_errors ?? [] ], [] );
 		const slugs = getSlugsFromValidationResults( validationErrors );
 
 		return {

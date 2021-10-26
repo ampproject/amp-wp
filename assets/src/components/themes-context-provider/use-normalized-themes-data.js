@@ -17,13 +17,13 @@ export function useNormalizedThemesData() {
 			return;
 		}
 
-		setNormalizedThemesData( () => themes.reduce( ( acc, source ) => {
+		setNormalizedThemesData( () => themes.reduce( ( accumulatedThemesData, source ) => {
 			if ( ! source?.stylesheet ) {
-				return acc;
+				return accumulatedThemesData;
 			}
 
 			return {
-				...acc,
+				...accumulatedThemesData,
 				[ source.stylesheet ]: Object.keys( source ).reduce( ( props, key ) => ( {
 					...props,
 					slug: source.stylesheet,
