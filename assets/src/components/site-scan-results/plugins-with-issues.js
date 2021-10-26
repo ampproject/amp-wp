@@ -21,9 +21,9 @@ import { SiteScanResults } from './index';
 /**
  * Render a list of plugins that cause issues.
  *
- * @param {Object} props           Component props.
- * @param {string} props.className Component class name.
- * @param {string[]}  props.issues List of plugins issues.
+ * @param {Object}   props           Component props.
+ * @param {string}   props.className Component class name.
+ * @param {string[]} props.issues    List of plugins issues.
  */
 export function PluginsWithIssues( { issues = [], className, ...props } ) {
 	const pluginsData = useNormalizedPluginsData();
