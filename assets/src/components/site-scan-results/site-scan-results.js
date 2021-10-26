@@ -1,8 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { ExternalLink, VisuallyHidden } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { VisuallyHidden } from '@wordpress/components';
 
 /**
  * External dependencies
