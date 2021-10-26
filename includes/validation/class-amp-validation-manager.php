@@ -251,7 +251,7 @@ class AMP_Validation_Manager {
 
 		add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
 		add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
-		add_action( 'wp', [ __CLASS__, 'maybe_fail_validate_request' ], 10 );
+		add_action( 'wp', [ __CLASS__, 'maybe_fail_validate_request' ] );
 		add_action( 'wp', [ __CLASS__, 'maybe_send_cached_validate_response' ], 20 );
 		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
 
