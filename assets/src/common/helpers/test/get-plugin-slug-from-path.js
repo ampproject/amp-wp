@@ -1,17 +1,17 @@
 /**
  * Internal dependencies
  */
-import { getPluginSlugFromPath } from '../get-plugin-slug-from-path';
+import { getPluginSlugFromFile } from '../get-plugin-slug-from-file';
 
-describe( 'getPluginSlugFromPath', () => {
+describe( 'getPluginSlugFromFile', () => {
 	it( 'should return an empty string if no path is provided', () => {
-		expect( getPluginSlugFromPath() ).toBe( '' );
+		expect( getPluginSlugFromFile() ).toBe( '' );
 	} );
 
 	it( 'should return correct plugin slug', () => {
-		expect( getPluginSlugFromPath( 'foo' ) ).toBe( 'foo' );
-		expect( getPluginSlugFromPath( 'foo.php' ) ).toBe( 'foo' );
-		expect( getPluginSlugFromPath( 'foo/bar' ) ).toBe( 'bar' );
-		expect( getPluginSlugFromPath( 'foo/baz.php' ) ).toBe( 'baz' );
+		expect( getPluginSlugFromFile( 'foo' ) ).toBe( 'foo' );
+		expect( getPluginSlugFromFile( 'foo.php' ) ).toBe( 'foo' );
+		expect( getPluginSlugFromFile( 'foo/bar' ) ).toBe( 'foo' );
+		expect( getPluginSlugFromFile( 'foo/baz.php' ) ).toBe( 'foo' );
 	} );
 } );

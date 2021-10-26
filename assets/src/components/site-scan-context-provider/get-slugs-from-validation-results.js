@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getPluginSlugFromPath } from '../../common/helpers/get-plugin-slug-from-path';
+import { getPluginSlugFromFile } from '../../common/helpers/get-plugin-slug-from-file';
 
 /**
  * Retrieve slugs of plugins and themes from a list of validation results.
@@ -22,7 +22,7 @@ export function getSlugsFromValidationResults( validationResults = [] ) {
 
 		for ( const source of result.sources ) {
 			if ( source.type === 'plugin' ) {
-				plugins.add( getPluginSlugFromPath( source.name ) );
+				plugins.add( getPluginSlugFromFile( source.name ) );
 			} else if ( source.type === 'theme' ) {
 				themes.add( source.name );
 			}
