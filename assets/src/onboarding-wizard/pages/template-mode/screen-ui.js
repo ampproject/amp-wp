@@ -73,18 +73,18 @@ function isInitiallyOpen( mode, selectionDetails, savedCurrentMode ) {
  * @param {boolean}  props.developerToolsOption            Whether the user has enabled developer tools.
  * @param {boolean}  props.firstTimeInWizard               Whether the wizard is running for the first time.
  * @param {boolean}  props.technicalQuestionChanged        Whether the user changed their technical question from the previous option.
- * @param {string[]} props.pluginsWithAMPIncompatibility   A list of plugin slugs causing AMP incompatibility.
+ * @param {string[]} props.pluginsWithAmpIncompatibility   A list of plugin slugs causing AMP incompatibility.
  * @param {string}   props.savedCurrentMode                The current selected mode saved in the database.
- * @param {string[]} props.themesWithAMPIncompatibility    A list of theme slugs causing AMP incompatibility.
+ * @param {string[]} props.themesWithAmpIncompatibility    A list of theme slugs causing AMP incompatibility.
  */
 export function ScreenUI( {
 	currentThemeIsAmongReaderThemes,
 	developerToolsOption,
 	firstTimeInWizard,
 	technicalQuestionChanged,
-	pluginsWithAMPIncompatibility,
+	pluginsWithAmpIncompatibility,
 	savedCurrentMode,
-	themesWithAMPIncompatibility,
+	themesWithAmpIncompatibility,
 } ) {
 	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
 
@@ -92,11 +92,11 @@ export function ScreenUI( {
 		{
 			currentThemeIsAmongReaderThemes,
 			userIsTechnical,
-			hasScanResults: null !== pluginsWithAMPIncompatibility && null !== themesWithAMPIncompatibility,
-			hasPluginsWithAMPIncompatibility: pluginsWithAMPIncompatibility && 0 < pluginsWithAMPIncompatibility.length,
-			hasThemesWithAMPIncompatibility: themesWithAMPIncompatibility && 0 < themesWithAMPIncompatibility.length,
+			hasScanResults: null !== pluginsWithAmpIncompatibility && null !== themesWithAmpIncompatibility,
+			hasPluginsWithAMPIncompatibility: pluginsWithAmpIncompatibility && 0 < pluginsWithAmpIncompatibility.length,
+			hasThemesWithAMPIncompatibility: themesWithAmpIncompatibility && 0 < themesWithAmpIncompatibility.length,
 		},
-	), [ currentThemeIsAmongReaderThemes, themesWithAMPIncompatibility, pluginsWithAMPIncompatibility, userIsTechnical ] );
+	), [ currentThemeIsAmongReaderThemes, themesWithAmpIncompatibility, pluginsWithAmpIncompatibility, userIsTechnical ] );
 
 	return (
 		<form>
@@ -132,7 +132,7 @@ ScreenUI.propTypes = {
 	developerToolsOption: PropTypes.bool,
 	firstTimeInWizard: PropTypes.bool,
 	technicalQuestionChanged: PropTypes.bool,
-	pluginsWithAMPIncompatibility: PropTypes.arrayOf( PropTypes.string ),
+	pluginsWithAmpIncompatibility: PropTypes.arrayOf( PropTypes.string ),
 	savedCurrentMode: PropTypes.string,
-	themesWithAMPIncompatibility: PropTypes.arrayOf( PropTypes.string ),
+	themesWithAmpIncompatibility: PropTypes.arrayOf( PropTypes.string ),
 };

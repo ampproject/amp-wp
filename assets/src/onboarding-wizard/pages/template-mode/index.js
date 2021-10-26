@@ -23,7 +23,7 @@ export function TemplateMode() {
 	const { setCanGoForward } = useContext( Navigation );
 	const { editedOptions, originalOptions, updateOptions } = useContext( Options );
 	const { developerToolsOption } = useContext( User );
-	const { pluginsWithAMPIncompatibility, themesWithAMPIncompatibility } = useContext( SiteScan );
+	const { pluginsWithAmpIncompatibility, themesWithAmpIncompatibility } = useContext( SiteScan );
 	const { currentTheme } = useContext( ReaderThemes );
 	const { technicalQuestionChangedAtLeastOnce } = useContext( TemplateModeOverride );
 
@@ -60,13 +60,13 @@ export function TemplateMode() {
 				currentThemeIsAmongReaderThemes={ currentTheme.is_reader_theme }
 				developerToolsOption={ developerToolsOption }
 				firstTimeInWizard={ false === originalOptions.plugin_configured }
-				pluginsWithAMPIncompatibility={ pluginsWithAMPIncompatibility }
+				pluginsWithAmpIncompatibility={ pluginsWithAmpIncompatibility }
 				savedCurrentMode={ originalOptions.theme_support }
 				setCurrentMode={ ( mode ) => {
 					updateOptions( { theme_support: mode } );
 				} }
 				technicalQuestionChanged={ technicalQuestionChangedAtLeastOnce }
-				themesWithAMPIncompatibility={ themesWithAMPIncompatibility }
+				themesWithAmpIncompatibility={ themesWithAmpIncompatibility }
 			/>
 		</div>
 	);

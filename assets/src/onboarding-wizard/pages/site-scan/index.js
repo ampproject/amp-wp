@@ -37,10 +37,10 @@ export function SiteScan() {
 		isFailed,
 		isInitializing,
 		isReady,
-		pluginsWithAMPIncompatibility,
+		pluginsWithAmpIncompatibility,
 		scannableUrls,
 		startSiteScan,
-		themesWithAMPIncompatibility,
+		themesWithAmpIncompatibility,
 	} = useContext( SiteScanContext );
 	const { developerToolsOption } = useContext( User );
 	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
@@ -103,24 +103,24 @@ export function SiteScan() {
 				title={ __( 'Scan complete', 'amp' ) }
 				headerContent={ (
 					<p>
-						{ themesWithAMPIncompatibility.length > 0 || pluginsWithAMPIncompatibility.length > 0
+						{ themesWithAmpIncompatibility.length > 0 || pluginsWithAmpIncompatibility.length > 0
 							? __( 'Site scan found issues on your site. Proceed to the next step to follow recommendations for choosing a template mode.', 'amp' )
 							: __( 'Site scan found no issues on your site. Proceed to the next step to follow recommendations for choosing a template mode.', 'amp' )
 						}
 					</p>
 				) }
 			>
-				{ themesWithAMPIncompatibility.length > 0 && (
+				{ themesWithAmpIncompatibility.length > 0 && (
 					<ThemesWithAmpIncompatibility
 						className="site-scan__section"
-						slugs={ themesWithAMPIncompatibility }
+						slugs={ themesWithAmpIncompatibility }
 						validatedUrlsLink={ userIsTechnical ? VALIDATED_URLS_LINK : null }
 					/>
 				) }
-				{ pluginsWithAMPIncompatibility.length > 0 && (
+				{ pluginsWithAmpIncompatibility.length > 0 && (
 					<PluginsWithAmpIncompatibility
 						className="site-scan__section"
-						slugs={ pluginsWithAMPIncompatibility }
+						slugs={ pluginsWithAmpIncompatibility }
 						validatedUrlsLink={ userIsTechnical ? VALIDATED_URLS_LINK : null }
 					/>
 				) }

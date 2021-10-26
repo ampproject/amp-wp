@@ -204,17 +204,17 @@ export function SiteScanContextProvider( {
 	 */
 	const {
 		hasSiteScanResults,
-		pluginsWithAMPIncompatibility,
+		pluginsWithAmpIncompatibility,
 		stale,
-		themesWithAMPIncompatibility,
+		themesWithAmpIncompatibility,
 	} = useMemo( () => {
 		// Skip if the scan is in progress.
 		if ( ! [ STATUS_READY, STATUS_COMPLETED ].includes( status ) ) {
 			return {
 				hasSiteScanResults: false,
-				pluginsWithAMPIncompatibility: [],
+				pluginsWithAmpIncompatibility: [],
 				stale: false,
-				themesWithAMPIncompatibility: [],
+				themesWithAmpIncompatibility: [],
 			};
 		}
 
@@ -223,9 +223,9 @@ export function SiteScanContextProvider( {
 
 		return {
 			hasSiteScanResults: scannableUrls.some( ( scannableUrl ) => Boolean( scannableUrl?.validation_errors ) ),
-			pluginsWithAMPIncompatibility: slugs.plugins,
+			pluginsWithAmpIncompatibility: slugs.plugins,
 			stale: scannableUrls.some( ( scannableUrl ) => scannableUrl?.stale === true ),
-			themesWithAMPIncompatibility: slugs.themes,
+			themesWithAmpIncompatibility: slugs.themes,
 		};
 	}, [ scannableUrls, status ] );
 
@@ -385,12 +385,12 @@ export function SiteScanContextProvider( {
 				isInitializing: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
 				isReady: status === STATUS_READY,
 				isSiteScannable: scannableUrls.length > 0,
-				pluginsWithAMPIncompatibility,
+				pluginsWithAmpIncompatibility,
 				previewPermalink,
 				scannableUrls,
 				stale,
 				startSiteScan,
-				themesWithAMPIncompatibility,
+				themesWithAmpIncompatibility,
 			} }
 		>
 			{ children }

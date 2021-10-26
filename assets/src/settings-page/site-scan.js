@@ -48,13 +48,13 @@ export function SiteScan( { onSiteScan } ) {
 		isInitializing,
 		isReady,
 		isSiteScannable,
-		pluginsWithAMPIncompatibility,
+		pluginsWithAmpIncompatibility,
 		previewPermalink,
 		stale,
 		startSiteScan,
-		themesWithAMPIncompatibility,
+		themesWithAmpIncompatibility,
 	} = useContext( SiteScanContext );
-	const hasSiteIssues = themesWithAMPIncompatibility.length > 0 || pluginsWithAMPIncompatibility.length > 0;
+	const hasSiteIssues = themesWithAmpIncompatibility.length > 0 || pluginsWithAmpIncompatibility.length > 0;
 
 	/**
 	 * Cancel scan when component unmounts.
@@ -239,11 +239,11 @@ function SiteScanSummary() {
 	const {
 		hasSiteScanResults,
 		isReady,
-		pluginsWithAMPIncompatibility,
+		pluginsWithAmpIncompatibility,
 		stale,
-		themesWithAMPIncompatibility,
+		themesWithAmpIncompatibility,
 	} = useContext( SiteScanContext );
-	const hasSiteIssues = themesWithAMPIncompatibility.length > 0 || pluginsWithAMPIncompatibility.length > 0;
+	const hasSiteIssues = themesWithAmpIncompatibility.length > 0 || pluginsWithAmpIncompatibility.length > 0;
 
 	if ( isReady && ! hasSiteScanResults ) {
 		return (
@@ -306,15 +306,15 @@ function SiteScanSummary() {
 					) }
 				</>
 			) }
-			{ themesWithAMPIncompatibility.length > 0 && (
+			{ themesWithAmpIncompatibility.length > 0 && (
 				<ThemesWithAmpIncompatibility
-					slugs={ themesWithAMPIncompatibility }
+					slugs={ themesWithAmpIncompatibility }
 					validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
 				/>
 			) }
-			{ pluginsWithAMPIncompatibility.length > 0 && (
+			{ pluginsWithAmpIncompatibility.length > 0 && (
 				<PluginsWithAmpIncompatibility
-					slugs={ pluginsWithAMPIncompatibility }
+					slugs={ pluginsWithAmpIncompatibility }
 					validatedUrlsLink={ stale ? '' : VALIDATED_URLS_LINK }
 				/>
 			) }
