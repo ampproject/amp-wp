@@ -414,6 +414,15 @@ abstract class AMP_Base_Sanitizer {
 				$attributes['layout'] = 'fill';
 				return $attributes;
 			}
+
+			// If the width and height styles are provided (in percentage of pixels), override the width/height attributes.
+			$px_or_percentage_unit_pattern = '/^(\d+(?:\.\d+)?%|\d+(?:\.\d+)?(?=px))/';
+			if ( isset( $styles['height'] ) && preg_match( $px_or_percentage_unit_pattern, $styles['height'], $matches ) ) {
+				$attributes['height'] = $matches[1];
+			}
+			if ( isset( $styles['width'] ) && preg_match( $px_or_percentage_unit_pattern, $styles['width'], $matches ) ) {
+				$attributes['width'] = $matches[1];
+			}
 		}
 
 		if ( isset( $attributes['width'], $attributes['height'] ) && '100%' === $attributes['width'] && '100%' === $attributes['height'] ) {
