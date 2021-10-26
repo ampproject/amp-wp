@@ -144,6 +144,22 @@ class AMP_Iframe_Converter_Test extends TestCase {
 				',
 			],
 
+			'iframe_with_percentage_width_style_and_pixel_height_style' => [
+				'<iframe style="width: 100%; height: 200px;" frameborder="no" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1"></iframe>',
+				'<amp-iframe style="width: 100%; height: 200px;" frameborder="0" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1" height="200" width="auto" layout="fixed-height" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation"></amp-iframe>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
+			'iframe_with_pixel_width_style_and_pixel_height_style' => [
+				'<iframe style="width: 200.25px; height: 200.75px;" frameborder="no" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1"></iframe>',
+				'<amp-iframe style="width: 200.25px; height: 200.75px;" frameborder="0" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1" height="200.75" width="200.25" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic" class="amp-wp-enforced-sizes"></amp-iframe>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
 			'iframe_with_width_only'                    => [
 				'<iframe src="https://example.com/video/132886713" width="600"></iframe>',
 				'
