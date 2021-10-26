@@ -47,6 +47,7 @@ export function SiteScan( { onSiteScan } ) {
 		isFailed,
 		isInitializing,
 		isReady,
+		isSiteScannable,
 		pluginsWithAMPIncompatibility,
 		previewPermalink,
 		stale,
@@ -106,22 +107,32 @@ export function SiteScan( { onSiteScan } ) {
 			);
 		}
 
+		if ( ! isSiteScannable ) {
+			return (
+				<AMPNotice type={ NOTICE_TYPE_ERROR } size={ NOTICE_SIZE_LARGE }>
+					<p>
+						{ __( 'Your site cannot be scanned. There are no AMP-enabled URLs available.', 'amp' ) }
+					</p>
+				</AMPNotice>
+			);
+		}
+
 		if ( isSummary ) {
 			return <SiteScanSummary />;
 		}
 
 		return <SiteScanInProgress />;
-	}, [ isCancelled, isFailed, isInitializing, isSummary ] );
+	}, [ isCancelled, isFailed, isInitializing, isSiteScannable, isSummary ] );
 
 	return (
 		<SiteScanDrawer
-			initialOpen={ ! hasSiteScanResults || ! ( isReady && ! hasSiteIssues && ! hasSiteScanBeenTriggered ) }
+			initialOpen={ ! hasSiteScanResults || stale || ! ( isReady && ! hasSiteIssues && ! hasSiteScanBeenTriggered ) }
 			labelExtra={ stale && ( isReady || isDelayedCompleted ) ? (
 				<AMPNotice type={ NOTICE_TYPE_PLAIN } size={ NOTICE_SIZE_SMALL }>
 					{ __( 'Stale results', 'amp' ) }
 				</AMPNotice>
 			) : null }
-			footerContent={ ( isSummary || isFailed || isCancelled ) && (
+			footerContent={ isSiteScannable && ( isSummary || isFailed || isCancelled ) && (
 				<>
 					<Button
 						onClick={ () => {
@@ -244,7 +255,7 @@ function SiteScanSummary() {
 		);
 	}
 
-	if ( isReady && ! hasSiteIssues ) {
+	if ( isReady && ! hasSiteIssues && ! stale ) {
 		return (
 			<AMPNotice type={ NOTICE_TYPE_SUCCESS } size={ NOTICE_SIZE_LARGE }>
 				<p>
