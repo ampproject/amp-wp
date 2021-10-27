@@ -19,11 +19,11 @@ export function useNormalizedPluginsData() {
 		}
 
 		setNormalizedPluginsData( plugins.reduce( ( accumulatedPluginsData, source ) => {
-			const slug = getPluginSlugFromFile( source?.plugin );
-
-			if ( ! slug ) {
+			if ( ! source?.plugin ) {
 				return accumulatedPluginsData;
 			}
+
+			const slug = getPluginSlugFromFile( source.plugin );
 
 			return {
 				...accumulatedPluginsData,

@@ -12,5 +12,5 @@
  * @return {string} Plugin slug.
  */
 export function getPluginSlugFromFile( path = '' ) {
-	return path.split( '/' )?.[ 0 ]?.split( '.' )?.[ 0 ];
+	return path.replace( /\/.*$/, '' ).replace( /\.php$/, '' );
 }
