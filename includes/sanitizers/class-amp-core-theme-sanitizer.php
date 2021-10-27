@@ -7,11 +7,11 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
 use AmpProject\Role;
-use AmpProject\AmpWP\Services;
 
 /**
  * Class AMP_Core_Theme_Sanitizer
@@ -2414,19 +2414,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				]
 			);
 
-			if ( $this->update_twentynineteen_main_nested_menu( $sub_menu ) ) {
-				$back_button = $this->get_first_element( $xpaths['close_button_in_submenu'], $sub_menu );
-				if ( ! empty( $back_button ) ) {
-					$back_button->setAttribute( 'on', "tap:$sidebar_id.close" );
-				}
+			$this->update_twentynineteen_main_nested_menu( $sub_menu );
 
-				$amp_nested_menu->appendChild( $sub_menu );
-			}
+			$sub_menu->setAttribute( 'class', $sub_menu->getAttribute( 'class' ) . ' expanded-true' );
 
 			// Handle button.
 			$expand_button->setAttribute( 'on', "tap:$sidebar_id" );
-			$sub_menu->setAttribute( 'class', $sub_menu->getAttribute( 'class' ) . ' expanded-true' );
+			$back_button = $this->get_first_element( $xpaths['close_button_in_submenu'], $sub_menu );
+			if ( ! empty( $back_button ) ) {
+				$back_button->setAttribute( 'on', "tap:$sidebar_id.close" );
+			}
 
+			$amp_nested_menu->appendChild( $sub_menu );
 			$amp_sidebar->appendChild( $amp_nested_menu );
 			$menu_item->appendChild( $amp_sidebar );
 		}
@@ -2437,7 +2436,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param Element $sub_menu Element of sub menu from main navigation.
 	 *
-	 * @return bool True on success, Otherwise False.
+	 * @return void
 	 */
 	public function update_twentynineteen_main_nested_menu( Element $sub_menu ) {
 
@@ -2450,7 +2449,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$menu_items = $this->dom->xpath->query( $xpaths['menu_items'], $sub_menu );
 		if ( ! $menu_items instanceof DOMNodeList || 0 >= $menu_items->length ) {
-			return true;
+			return;
 		}
 
 		/** @var Element $menu_item */
@@ -2485,7 +2484,5 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$amp_nested_menu_div->appendChild( $nested_sub_menu );
 			$menu_item->appendChild( $amp_nested_menu_div );
 		}
-
-		return true;
 	}
 }
