@@ -219,10 +219,13 @@ async function setupBrowser() {
  */
 async function createTestData() {
 	await visitAdminPage( 'admin.php', 'page=amp-options' );
-	await Promise.all( [
-		page.evaluate( () => wp.apiFetch( { path: '/wp/v2/posts', method: 'POST', data: { title: 'Test Post 1', status: 'publish' } } ) ),
-		page.evaluate( () => wp.apiFetch( { path: '/wp/v2/posts', method: 'POST', data: { title: 'Test Post 2', status: 'publish' } } ) ),
-	] );
+	await page.waitForSelector( '.amp-settings-nav' );
+	await page.evaluate( async () => {
+		await Promise.all( [
+			wp.apiFetch( { path: '/wp/v2/posts', method: 'POST', data: { title: 'Test Post 1', status: 'publish' } } ),
+			wp.apiFetch( { path: '/wp/v2/posts', method: 'POST', data: { title: 'Test Post 2', status: 'publish' } } ),
+		] );
+	} );
 }
 
 /**

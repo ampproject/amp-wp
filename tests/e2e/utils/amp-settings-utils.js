@@ -23,7 +23,7 @@ export async function setTemplateMode( mode ) {
 	// Save options and wait for the request to succeed.
 	await Promise.all( [
 		scrollToElement( { selector: '.amp-settings-nav button[type="submit"]', click: true } ),
-		page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ), { timeout: 10000 } ),
+		page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ) ),
 	] );
 }
 

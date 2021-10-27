@@ -22,29 +22,32 @@ import { cleanUpSettings, scrollToElement } from '../../utils/onboarding-wizard-
 import { testSiteScanning } from '../../utils/site-scan-utils';
 
 describe( 'AMP settings screen Site Scan panel', () => {
+	const timeout = 10000;
+
 	beforeAll( async () => {
 		await installTheme( 'hestia' );
 		await installPlugin( 'autoptimize' );
+
+		await cleanUpSettings();
+
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+		await setTemplateMode( 'transitional' );
 	} );
 
 	afterAll( async () => {
-		await cleanUpSettings();
 		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
 		await uninstallPlugin( 'autoptimize' );
-	} );
 
-	beforeEach( async () => {
 		await cleanUpSettings();
 	} );
 
 	async function triggerSiteRescan() {
-		await page.waitForSelector( '#template-modes' );
+		await expect( page ).toMatchElement( '#site-scan h2', { text: 'Site Scan' } );
 
-		// Switch template mode so that we have stale results for sure.
-		await setTemplateMode( 'transitional' );
-
-		await page.waitForSelector( '.settings-site-scan' );
-		await expect( page ).toMatchElement( 'h2', { text: 'Site Scan' } );
+		const isPanelCollapsed = await page.$eval( '#site-scan .components-panel__body-toggle', ( el ) => el.ariaExpanded === 'false' );
+		if ( isPanelCollapsed ) {
+			await scrollToElement( { selector: '#site-scan .components-panel__body-toggle', click: true } );
+		}
 
 		// Start the site scan.
 		await Promise.all( [
@@ -53,25 +56,30 @@ describe( 'AMP settings screen Site Scan panel', () => {
 				statusElementClassName: 'settings-site-scan__status',
 				isAmpFirst: false,
 			} ),
-			expect( page ).toMatchElement( '.settings-site-scan__footer a.is-primary', { text: 'Browse Site', timeout: 10000 } ),
 		] );
+
+		await expect( page ).toMatchElement( '.settings-site-scan__footer .is-primary', { text: 'Rescan Site', timeout } );
+		await expect( page ).toMatchElement( '.settings-site-scan__footer .is-link', { text: 'Browse Site' } );
 	}
 
 	it( 'does not list issues if an AMP compatible theme is activated', async () => {
-		await activateTheme( 'twentytwenty' );
-
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
 		await triggerSiteRescan();
 
-		await expect( page ).toMatchElement( '.settings-site-scan .amp-notice--success' );
+		await expect( page ).toMatchElement( '.settings-site-scan .amp-notice--success', { timeout } );
 
 		await expect( page ).not.toMatchElement( '.site-scan-results--themes' );
 		await expect( page ).not.toMatchElement( '.site-scan-results--plugins' );
 
-		// Switch template mode to check if the scan results are marked as stale.
+		// Reload the page and confirm that the panel is collapsed.
+		await page.reload();
+		await expect( page ).toMatchElement( '#site-scan .components-panel__body-toggle[aria-expanded="false"]' );
+
+		// Switch template mode to check if the scan results are marked as stale and the panel is initially expanded.
 		await setTemplateMode( 'standard' );
 
+		await expect( page ).toMatchElement( '#site-scan .components-panel__body-toggle[aria-expanded="true"]', { timeout } );
 		await expect( page ).toMatchElement( '.settings-site-scan .amp-notice--info', { text: /^Stale results/ } );
 	} );
 
@@ -80,11 +88,9 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await expect( page ).toMatchElement( '.settings-site-scan .amp-notice--info', { text: /^Stale results/ } );
-
 		await triggerSiteRescan();
 
-		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__heading[data-badge-content="1"]', { text: /^Themes/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__heading[data-badge-content="1"]', { text: /^Themes/, timeout } );
 		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__source-name', { text: /Hestia/ } );
 	} );
 
@@ -94,14 +100,12 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await expect( page ).toMatchElement( '.settings-site-scan .amp-notice--info', { text: /^Stale results/ } );
-
 		await triggerSiteRescan();
 
-		await expect( page ).not.toMatchElement( '.site-scan-results--themes' );
-
-		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__heading[data-badge-content="1"]', { text: /^Plugins/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__heading[data-badge-content="1"]', { text: /^Plugins/, timeout } );
 		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/ } );
+
+		await expect( page ).not.toMatchElement( '.site-scan-results--themes' );
 
 		await deactivatePlugin( 'autoptimize' );
 	} );
@@ -112,11 +116,9 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await expect( page ).toMatchElement( '.settings-site-scan .amp-notice--info', { text: /^Stale results/ } );
-
 		await triggerSiteRescan();
 
-		await expect( page ).toMatchElement( '.site-scan-results--themes' );
+		await expect( page ).toMatchElement( '.site-scan-results--themes', { timeout } );
 		await expect( page ).toMatchElement( '.site-scan-results--plugins' );
 
 		const totalIssuesCount = await page.$$eval( '.site-scan-results__source', ( sources ) => sources.length );
@@ -136,7 +138,7 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 		await triggerSiteRescan();
 
-		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/, timeout } );
 
 		// Deactivate the plugin and test.
 		await deactivatePlugin( 'autoptimize' );
