@@ -8,9 +8,10 @@
 
 use AmpProject\Amp;
 use AmpProject\Attribute;
+use AmpProject\Dom\Element;
 use AmpProject\Extension;
 use AmpProject\Role;
-use AmpProject\Dom\Element;
+use AmpProject\AmpWP\Services;
 
 /**
  * Class AMP_Core_Theme_Sanitizer
@@ -316,6 +317,20 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public static function get_supported_themes() {
 		return self::$supported_themes;
+	}
+
+	/**
+	 * Determine if the current request is from a mobile device or not.
+	 *
+	 * @since 2.2
+	 *
+	 * @see MobileRedirection::is_mobile_request()
+	 *
+	 * @return bool True if request is from mobile device Otherwise False.
+	 */
+	public static function is_mobile_request() {
+
+		return Services::get( 'mobile_redirection' )->is_mobile_request();
 	}
 
 	/**
@@ -1157,7 +1172,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
-				<?php elseif ( 'twentynineteen' === get_template() ) : ?>
+				<?php elseif ( 'twentynineteen' === get_template() && self::is_mobile_request() ) : ?>
 					.amp-twentynineteen-main-navigation {
 						max-width: 100vw;
 						width: 100vw;
@@ -2342,6 +2357,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return void
 	 */
 	public function update_twentynineteen_mobile_main_menu() {
+
+		if ( ! self::is_mobile_request() ) {
+			return;
+		}
 
 		$xpaths = [
 			'main_menu'               => '//nav[ @id = "site-navigation" ]//ul[ @class = "main-menu"]',
