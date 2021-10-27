@@ -55,7 +55,7 @@ describe( 'Settings screen when reader theme is active theme', () => {
 		await clickMode( 'reader' );
 		await scrollToElement( { selector: '#template-mode-reader-container .components-panel__body-toggle', click: true } );
 
-		await scrollToElement( { selector: '#reader-themes .amp-notice__body' } );
+		await scrollToElement( { selector: '#reader-themes .components-panel__body-toggle', click: true } );
 		await expect( page ).toMatchElement( '.amp-notice__body', { text: /^Your active theme/ } );
 
 		await activateTheme( 'twentytwenty' );
