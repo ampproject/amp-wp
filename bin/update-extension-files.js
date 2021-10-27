@@ -32,7 +32,7 @@ class UpdateExtensionFiles {
 		let totalPage;
 		const pluginTerm = 552;
 		const themeTerm = 245;
-		const url = 'https://amp-wp.org/wp-json/wp/v2/ecosystem';
+		const url = 'https://amp-wp.org/wp-json/wp/v2/ecosystem?_embed';
 
 		const queryParams = {
 			ecosystem_types: [ themeTerm, pluginTerm ],
@@ -139,7 +139,7 @@ class UpdateExtensionFiles {
 
 		// Plugin data for amp-wp.org
 		if ( null === matches || null === plugin ) {
-			plugin = await this.preparePluginData( item );
+			plugin = this.preparePluginData( item );
 		}
 
 		delete plugin.description;
@@ -164,7 +164,7 @@ class UpdateExtensionFiles {
 
 		// Theme data for amp-wp.org
 		if ( null === matches || null === theme ) {
-			theme = await this.prepareThemeData( item );
+			theme = this.prepareThemeData( item );
 		}
 
 		return theme;
@@ -233,15 +233,14 @@ class UpdateExtensionFiles {
 	 * Transform theme data fetched from amp-wp.org to compatible with theme install screen.
 	 *
 	 * @param {Object} item Theme object.
-	 * @return {Promise<Object>} Theme object compatible for theme install screen.
+	 * @return {Object} Theme object compatible for theme install screen.
 	 */
-	async prepareThemeData( item ) {
-		const imageRequestUrl = item._links[ 'wp:featuredmedia' ][ 0 ].href;
-		// eslint-disable-next-line no-console
-		console.log( `Fetching theme data: ${ imageRequestUrl }` );
-		let attachment = await axios.get( imageRequestUrl );
-		attachment = attachment.data;
+	prepareThemeData( item ) {
+		if ( ! item._embedded?.[ 'wp:featuredmedia' ]?.[ 0 ] ) {
+			throw new Error( `Missing featured image for theme '${ item.slug }'` );
+		}
 
+		const attachment = item._embedded[ 'wp:featuredmedia' ][ 0 ];
 		return {
 			name: item.title.rendered,
 			slug: item.slug,
@@ -316,15 +315,14 @@ class UpdateExtensionFiles {
 	 * Transform plugin data fetched from amp-wp.org to compatible with theme install screen.
 	 *
 	 * @param {Object} item Plugin object.
-	 * @return {Promise<Object>} Plugin object compatible for plugin install screen.
+	 * @return {Object} Plugin object compatible for plugin install screen.
 	 */
-	async preparePluginData( item ) {
-		const imageRequestUrl = item._links[ 'wp:featuredmedia' ][ 0 ].href;
-		// eslint-disable-next-line no-console
-		console.log( `Fetching theme data: ${ imageRequestUrl }` );
-		let attachment = await axios.get( imageRequestUrl );
-		attachment = attachment.data;
+	preparePluginData( item ) {
+		if ( ! item._embedded?.[ 'wp:featuredmedia' ]?.[ 0 ] ) {
+			throw new Error( `Missing featured image for ${ item.slug }` );
+		}
 
+		const attachment = item._embedded[ 'wp:featuredmedia' ][ 0 ];
 		return {
 			name: item.title.rendered,
 			slug: item.slug,
