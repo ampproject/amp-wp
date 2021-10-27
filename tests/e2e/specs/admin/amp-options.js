@@ -63,18 +63,7 @@ describe( 'Settings screen when reader theme is active theme', () => {
 } );
 
 describe( 'Mode info notices', () => {
-	it( 'shows expected notices for theme with built-in support', async () => {
-		await activateTheme( 'twentytwenty' );
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		await expect( page ).toMatchElement( '#template-mode-standard-container .amp-notice--info' );
-		await expect( page ).toMatchElement( '#template-mode-transitional-container .amp-notice--info' );
-
-		await clickMode( 'reader' );
-
-		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--warning' );
-	} );
-
+	it.todo( 'shows expected notices for theme with built-in support' );
 	it.todo( 'shows expected notices for theme with paired flag false' );
 	it.todo( 'shows expected notices for theme that only supports reader mode' );
 } );
