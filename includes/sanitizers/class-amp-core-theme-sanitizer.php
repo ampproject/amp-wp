@@ -1184,6 +1184,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						background: inherit;
 					}
 
+					.main-navigation .main-menu .menu-item-has-children.off-canvas .sub-menu.expanded-true {
+						transform: none;
+					}
+
 					.main-navigation .sub-menu > li {
 						position: static;
 						display: flex;

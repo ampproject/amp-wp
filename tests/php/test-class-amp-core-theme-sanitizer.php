@@ -71,7 +71,7 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	 * @dataProvider get_theme_features_config_data_provider
 	 * @covers ::get_theme_features_config()
 	 */
-	public function test_get_theme_features_config( $theme_slug, $args = [], $expected ) {
+	public function test_get_theme_features_config( $theme_slug, $args, $expected ) {
 
 		$this->assertEquals(
 			$expected,
