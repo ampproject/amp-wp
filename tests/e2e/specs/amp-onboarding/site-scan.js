@@ -23,7 +23,7 @@ import {
 	uninstallPlugin,
 } from '../../utils/amp-settings-utils';
 
-describe( 'Site Scan', () => {
+describe( 'Onboarding Wizard Site Scan Step', () => {
 	beforeAll( async () => {
 		await installTheme( 'hestia' );
 		await installPlugin( 'autoptimize' );
@@ -48,11 +48,11 @@ describe( 'Site Scan', () => {
 			} ),
 		] );
 
-		await testNextButton( { text: 'Next' } );
-		await testPreviousButton( { text: 'Previous' } );
-
 		await expect( page ).toMatchElement( '.site-scan__heading', { text: 'Scan complete', timeout: 10000 } );
 		await expect( page ).toMatchElement( '.site-scan__section p', { text: /Site scan found no issues/ } );
+
+		await testNextButton( { text: 'Next' } );
+		await testPreviousButton( { text: 'Previous' } );
 	} );
 
 	it( 'should list out plugin and theme issues after the scan', async () => {
