@@ -2379,14 +2379,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		/** @var Element $menu_item */
 		foreach ( $menu_items as $index => $menu_item ) {
-			$menu_item->setAttribute( 'class', $menu_item->getAttribute( 'class' ) . ' off-canvas' );
-
 			$expand_button = $this->get_first_element( $xpaths['expand_button'], $menu_item );
 			$sub_menu      = $this->get_first_element( $xpaths['submenu'], $menu_item );
 
 			if ( empty( $expand_button ) || empty( $sub_menu ) ) {
 				continue;
 			}
+
+			$menu_item->setAttribute( 'class', $menu_item->getAttribute( 'class' ) . ' off-canvas' );
 
 			$sidebar_id = "primary_nav_$index";
 
