@@ -374,7 +374,7 @@ export function SiteScanContextProvider( {
 				isCancelled: status === STATUS_CANCELLED,
 				isCompleted: status === STATUS_COMPLETED,
 				isFailed: status === STATUS_FAILED,
-				isInitializing: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
+				isFetchingScannableUrls: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
 				isReady: status === STATUS_READY,
 				isSiteScannable: scannableUrls.length > 0,
 				pluginsWithAmpIncompatibility,

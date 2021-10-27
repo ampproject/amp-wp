@@ -136,6 +136,7 @@ export function TemplateModeOption( { children, details, detailsUrl, initialOpen
 			selected={ mode === themeSupport }
 		>
 			<div className="template-mode-selection__details">
+				{ children }
 				{ Array.isArray( details ) && (
 					<ul className="template-mode-selection__details-list">
 						{ details.map( ( detail, index ) => (
@@ -148,7 +149,7 @@ export function TemplateModeOption( { children, details, detailsUrl, initialOpen
 						) ) }
 					</ul>
 				) }
-				{ ! Array.isArray( details ) && (
+				{ details && ! Array.isArray( details ) && (
 					<p>
 						<span dangerouslySetInnerHTML={ { __html: details } } />
 						{ detailsUrl && (
@@ -161,7 +162,6 @@ export function TemplateModeOption( { children, details, detailsUrl, initialOpen
 						) }
 					</p>
 				) }
-				{ children }
 			</div>
 		</AMPDrawer>
 	);
@@ -172,7 +172,7 @@ TemplateModeOption.propTypes = {
 	details: PropTypes.oneOfType( [
 		PropTypes.string,
 		PropTypes.arrayOf( PropTypes.string ),
-	] ).isRequired,
+	] ),
 	detailsUrl: PropTypes.string,
 	initialOpen: PropTypes.bool,
 	labelExtra: PropTypes.node,

@@ -7,9 +7,7 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
-use AMP_Theme_Support;
 use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Manager;
 use AmpProject\AmpWP\DependencySupport;
@@ -249,15 +247,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
 			'SCANNABLE_URLS_REST_PATH'           => '/amp/v1/scannable-urls',
-			'IS_CORE_THEME'                      => in_array(
-				get_stylesheet(),
-				AMP_Core_Theme_Sanitizer::get_supported_themes(),
-				true
-			),
 			'LEGACY_THEME_SLUG'                  => ReaderThemes::DEFAULT_READER_THEME,
 			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
-			'THEME_SUPPORT_ARGS'                 => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE' => UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,

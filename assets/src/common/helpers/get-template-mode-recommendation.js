@@ -4,10 +4,11 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
-import { READER, STANDARD, TRANSITIONAL } from '../../../common/constants';
+import { READER, STANDARD, TRANSITIONAL } from '../constants';
 
 // Recommendation levels.
 export const RECOMMENDED = 'recommended';
@@ -23,14 +24,20 @@ export const NON_TECHNICAL = 'nonTechnical';
  *
  * @param {Object}  args
  * @param {boolean} args.currentThemeIsAmongReaderThemes  Whether the currently active theme is in the reader themes list.
+ * @param {boolean} args.hasPluginsWithAmpIncompatibility Whether the site scan found plugins with AMP incompatibility.
+ * @param {boolean} args.hasSiteScanResults               Whether there are available site scan results.
+ * @param {boolean} args.hasThemesWithAmpIncompatibility  Whether the site scan found themes with AMP incompatibility.
  * @param {boolean} args.userIsTechnical                  Whether the user answered yes to the technical question.
- * @param {boolean} args.hasPluginsWithAMPIncompatibility Whether the site scan found plugins with AMP incompatibility.
- * @param {boolean} args.hasThemesWithAMPIncompatibility  Whether the site scan found themes with AMP incompatibility.
- * @param {boolean} args.hasScanResults                   Whether there are available scan results.
  */
-export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTechnical, hasPluginsWithAMPIncompatibility, hasThemesWithAMPIncompatibility, hasScanResults = true } ) {
+export function getTemplateModeRecommendation( {
+	currentThemeIsAmongReaderThemes,
+	hasPluginsWithAmpIncompatibility,
+	hasSiteScanResults,
+	hasThemesWithAmpIncompatibility,
+	userIsTechnical,
+} ) {
 	// Handle case where scanning has failed or did not run.
-	if ( ! hasScanResults ) {
+	if ( ! hasSiteScanResults ) {
 		return {
 			[ READER ]: {
 				recommendationLevel: ( userIsTechnical || currentThemeIsAmongReaderThemes ) ? RECOMMENDED : NEUTRAL,
@@ -54,9 +61,9 @@ export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTe
 	}
 
 	switch ( true ) {
-		case hasThemesWithAMPIncompatibility && hasPluginsWithAMPIncompatibility && userIsTechnical:
-		case hasThemesWithAMPIncompatibility && ! hasPluginsWithAMPIncompatibility && userIsTechnical:
-		case ! hasThemesWithAMPIncompatibility && hasPluginsWithAMPIncompatibility && userIsTechnical:
+		case hasThemesWithAmpIncompatibility && hasPluginsWithAmpIncompatibility && userIsTechnical:
+		case hasThemesWithAmpIncompatibility && ! hasPluginsWithAmpIncompatibility && userIsTechnical:
+		case ! hasThemesWithAmpIncompatibility && hasPluginsWithAmpIncompatibility && userIsTechnical:
 			return {
 				[ READER ]: {
 					recommendationLevel: NEUTRAL,
@@ -81,8 +88,8 @@ export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTe
 				},
 			};
 
-		case hasThemesWithAMPIncompatibility && hasPluginsWithAMPIncompatibility && ! userIsTechnical:
-		case ! hasThemesWithAMPIncompatibility && hasPluginsWithAMPIncompatibility && ! userIsTechnical:
+		case hasThemesWithAmpIncompatibility && hasPluginsWithAmpIncompatibility && ! userIsTechnical:
+		case ! hasThemesWithAmpIncompatibility && hasPluginsWithAmpIncompatibility && ! userIsTechnical:
 			return {
 				[ READER ]: {
 					recommendationLevel: RECOMMENDED,
@@ -105,7 +112,7 @@ export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTe
 				},
 			};
 
-		case hasThemesWithAMPIncompatibility && ! hasPluginsWithAMPIncompatibility && ! userIsTechnical:
+		case hasThemesWithAmpIncompatibility && ! hasPluginsWithAmpIncompatibility && ! userIsTechnical:
 			return {
 				[ READER ]: {
 					recommendationLevel: RECOMMENDED,
@@ -129,7 +136,7 @@ export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTe
 				},
 			};
 
-		case ! hasThemesWithAMPIncompatibility && ! hasPluginsWithAMPIncompatibility && userIsTechnical:
+		case ! hasThemesWithAmpIncompatibility && ! hasPluginsWithAmpIncompatibility && userIsTechnical:
 			return {
 				[ READER ]: {
 					recommendationLevel: NOT_RECOMMENDED,
@@ -151,7 +158,7 @@ export function getSelectionDetails( { currentThemeIsAmongReaderThemes, userIsTe
 				},
 			};
 
-		case ! hasThemesWithAMPIncompatibility && ! hasPluginsWithAMPIncompatibility && ! userIsTechnical:
+		case ! hasThemesWithAmpIncompatibility && ! hasPluginsWithAmpIncompatibility && ! userIsTechnical:
 			return {
 				[ READER ]: {
 					recommendationLevel: NOT_RECOMMENDED,

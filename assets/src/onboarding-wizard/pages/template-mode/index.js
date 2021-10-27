@@ -21,13 +21,11 @@ import { ScreenUI } from './screen-ui';
  */
 export function TemplateMode() {
 	const { setCanGoForward } = useContext( Navigation );
-	const { editedOptions, originalOptions, updateOptions } = useContext( Options );
+	const { editedOptions: { theme_support: themeSupport }, originalOptions, updateOptions } = useContext( Options );
 	const { developerToolsOption } = useContext( User );
-	const { pluginsWithAmpIncompatibility, themesWithAmpIncompatibility } = useContext( SiteScan );
-	const { currentTheme } = useContext( ReaderThemes );
+	const { hasSiteScanResults, pluginsWithAmpIncompatibility, themesWithAmpIncompatibility } = useContext( SiteScan );
+	const { currentTheme: { is_reader_theme: currentThemeIsAmongReaderThemes } } = useContext( ReaderThemes );
 	const { technicalQuestionChangedAtLeastOnce } = useContext( TemplateModeOverride );
-
-	const { theme_support: themeSupport } = editedOptions;
 
 	/**
 	 * Allow moving forward.
@@ -57,9 +55,10 @@ export function TemplateMode() {
 			</div>
 			<ScreenUI
 				currentMode={ themeSupport }
-				currentThemeIsAmongReaderThemes={ currentTheme.is_reader_theme }
+				currentThemeIsAmongReaderThemes={ currentThemeIsAmongReaderThemes }
 				developerToolsOption={ developerToolsOption }
 				firstTimeInWizard={ false === originalOptions.plugin_configured }
+				hasSiteScanResults={ hasSiteScanResults }
 				pluginsWithAmpIncompatibility={ pluginsWithAmpIncompatibility }
 				savedCurrentMode={ originalOptions.theme_support }
 				setCurrentMode={ ( mode ) => {

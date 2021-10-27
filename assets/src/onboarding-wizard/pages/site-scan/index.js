@@ -36,7 +36,7 @@ export function SiteScan() {
 		isCancelled,
 		isCompleted,
 		isFailed,
-		isInitializing,
+		isFetchingScannableUrls,
 		isReady,
 		pluginsWithAmpIncompatibility,
 		scannableUrls,
@@ -71,7 +71,7 @@ export function SiteScan() {
 	 */
 	const isDelayedCompleted = useDelayedFlag( isCompleted );
 
-	if ( isInitializing ) {
+	if ( isFetchingScannableUrls ) {
 		return (
 			<SiteScanPanel
 				title={ __( 'Please wait a minute…', 'amp' ) }
@@ -115,22 +115,22 @@ export function SiteScan() {
 					<ThemesWithAmpIncompatibility
 						className="site-scan__section"
 						slugs={ themesWithAmpIncompatibility }
-						callToAction={ userIsTechnical && (
+						callToAction={ userIsTechnical ? (
 							<ExternalLink href={ VALIDATED_URLS_LINK }>
 								{ __( 'Review Validated URLs', 'amp' ) }
 							</ExternalLink>
-						) }
+						) : null }
 					/>
 				) }
 				{ pluginsWithAmpIncompatibility.length > 0 && (
 					<PluginsWithAmpIncompatibility
 						className="site-scan__section"
 						slugs={ pluginsWithAmpIncompatibility }
-						callToAction={ userIsTechnical && (
+						callToAction={ userIsTechnical ? (
 							<ExternalLink href={ VALIDATED_URLS_LINK }>
 								{ __( 'Review Validated URLs', 'amp' ) }
 							</ExternalLink>
-						) }
+						) : null }
 					/>
 				) }
 			</SiteScanPanel>

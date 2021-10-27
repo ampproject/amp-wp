@@ -46,7 +46,7 @@ export function SiteScan( { onSiteScan } ) {
 		isCancelled,
 		isCompleted,
 		isFailed,
-		isInitializing,
+		isFetchingScannableUrls,
 		isReady,
 		isSiteScannable,
 		pluginsWithAmpIncompatibility,
@@ -84,7 +84,7 @@ export function SiteScan( { onSiteScan } ) {
 	 * Get main content.
 	 */
 	const getContent = useCallback( () => {
-		if ( isInitializing ) {
+		if ( isFetchingScannableUrls ) {
 			return <Loading />;
 		}
 
@@ -123,7 +123,7 @@ export function SiteScan( { onSiteScan } ) {
 		}
 
 		return <SiteScanInProgress />;
-	}, [ isCancelled, isFailed, isInitializing, isSiteScannable, isSummary ] );
+	}, [ isCancelled, isFailed, isFetchingScannableUrls, isSiteScannable, isSummary ] );
 
 	return (
 		<SiteScanDrawer

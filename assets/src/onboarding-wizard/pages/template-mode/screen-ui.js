@@ -23,8 +23,8 @@ import { READER, STANDARD, TRANSITIONAL } from '../../../common/constants';
 import {
 	RECOMMENDED,
 	NOT_RECOMMENDED,
-	getSelectionDetails,
-} from './get-selection-details';
+	getTemplateModeRecommendation,
+} from '../../../common/helpers/get-template-mode-recommendation';
 
 /**
  * Small notice indicating a mode is recommended.
@@ -72,6 +72,7 @@ function isInitiallyOpen( mode, selectionDetails, savedCurrentMode ) {
  * @param {boolean}  props.currentThemeIsAmongReaderThemes Whether the currently active theme is in the list of reader themes.
  * @param {boolean}  props.developerToolsOption            Whether the user has enabled developer tools.
  * @param {boolean}  props.firstTimeInWizard               Whether the wizard is running for the first time.
+ * @param {boolean}  props.hasSiteScanResults              Whether there are available site scan results.
  * @param {boolean}  props.technicalQuestionChanged        Whether the user changed their technical question from the previous option.
  * @param {string[]} props.pluginsWithAmpIncompatibility   A list of plugin slugs causing AMP incompatibility.
  * @param {string}   props.savedCurrentMode                The current selected mode saved in the database.
@@ -81,47 +82,46 @@ export function ScreenUI( {
 	currentThemeIsAmongReaderThemes,
 	developerToolsOption,
 	firstTimeInWizard,
-	technicalQuestionChanged,
+	hasSiteScanResults,
 	pluginsWithAmpIncompatibility,
 	savedCurrentMode,
+	technicalQuestionChanged,
 	themesWithAmpIncompatibility,
 } ) {
-	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
-
-	const selectionDetails = useMemo( () => getSelectionDetails(
+	const templateModeRecommendation = useMemo( () => getTemplateModeRecommendation(
 		{
 			currentThemeIsAmongReaderThemes,
-			userIsTechnical,
-			hasScanResults: null !== pluginsWithAmpIncompatibility && null !== themesWithAmpIncompatibility,
-			hasPluginsWithAMPIncompatibility: pluginsWithAmpIncompatibility && 0 < pluginsWithAmpIncompatibility.length,
-			hasThemesWithAMPIncompatibility: themesWithAmpIncompatibility && 0 < themesWithAmpIncompatibility.length,
+			hasPluginsWithAmpIncompatibility: pluginsWithAmpIncompatibility?.length > 0,
+			hasSiteScanResults,
+			hasThemesWithAmpIncompatibility: themesWithAmpIncompatibility?.length > 0,
+			userIsTechnical: developerToolsOption === true,
 		},
-	), [ currentThemeIsAmongReaderThemes, themesWithAmpIncompatibility, pluginsWithAmpIncompatibility, userIsTechnical ] );
+	), [ currentThemeIsAmongReaderThemes, developerToolsOption, hasSiteScanResults, pluginsWithAmpIncompatibility, themesWithAmpIncompatibility ] );
 
 	return (
 		<form>
 			<TemplateModeOption
-				details={ selectionDetails[ READER ].details }
-				initialOpen={ isInitiallyOpen( READER, selectionDetails, savedCurrentMode ) }
+				details={ templateModeRecommendation[ READER ].details }
+				initialOpen={ isInitiallyOpen( READER, templateModeRecommendation, savedCurrentMode ) }
 				mode={ READER }
 				previouslySelected={ savedCurrentMode === READER && technicalQuestionChanged && ! firstTimeInWizard }
-				labelExtra={ selectionDetails[ READER ].recommendationLevel === RECOMMENDED ? <RecommendedNotice /> : null }
+				labelExtra={ templateModeRecommendation[ READER ].recommendationLevel === RECOMMENDED ? <RecommendedNotice /> : null }
 			/>
 
 			<TemplateModeOption
-				details={ selectionDetails[ TRANSITIONAL ].details }
-				initialOpen={ isInitiallyOpen( TRANSITIONAL, selectionDetails, savedCurrentMode ) }
+				details={ templateModeRecommendation[ TRANSITIONAL ].details }
+				initialOpen={ isInitiallyOpen( TRANSITIONAL, templateModeRecommendation, savedCurrentMode ) }
 				mode={ TRANSITIONAL }
 				previouslySelected={ savedCurrentMode === TRANSITIONAL && technicalQuestionChanged && ! firstTimeInWizard }
-				labelExtra={ selectionDetails[ TRANSITIONAL ].recommendationLevel === RECOMMENDED ? <RecommendedNotice /> : null }
+				labelExtra={ templateModeRecommendation[ TRANSITIONAL ].recommendationLevel === RECOMMENDED ? <RecommendedNotice /> : null }
 			/>
 
 			<TemplateModeOption
-				details={ selectionDetails[ STANDARD ].details }
-				initialOpen={ isInitiallyOpen( STANDARD, selectionDetails, savedCurrentMode ) }
+				details={ templateModeRecommendation[ STANDARD ].details }
+				initialOpen={ isInitiallyOpen( STANDARD, templateModeRecommendation, savedCurrentMode ) }
 				mode={ STANDARD }
 				previouslySelected={ savedCurrentMode === STANDARD && technicalQuestionChanged && ! firstTimeInWizard }
-				labelExtra={ selectionDetails[ STANDARD ].recommendationLevel === RECOMMENDED ? <RecommendedNotice /> : null }
+				labelExtra={ templateModeRecommendation[ STANDARD ].recommendationLevel === RECOMMENDED ? <RecommendedNotice /> : null }
 			/>
 		</form>
 	);
@@ -131,6 +131,7 @@ ScreenUI.propTypes = {
 	currentThemeIsAmongReaderThemes: PropTypes.bool.isRequired,
 	developerToolsOption: PropTypes.bool,
 	firstTimeInWizard: PropTypes.bool,
+	hasSiteScanResults: PropTypes.bool,
 	technicalQuestionChanged: PropTypes.bool,
 	pluginsWithAmpIncompatibility: PropTypes.arrayOf( PropTypes.string ),
 	savedCurrentMode: PropTypes.string,
