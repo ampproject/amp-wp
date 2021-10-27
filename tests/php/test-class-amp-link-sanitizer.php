@@ -152,12 +152,6 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'webpage-link'        => [
-				'href'         => $post_link,
-				'typeof'       => 'WebPage',
-				'expected_amp' => true,
-				'expected_rel' => null,
-			],
 		];
 
 		$admin_bar_link_href = home_url( '/?do_something' );
@@ -167,9 +161,6 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			$html .= sprintf( '<a id="%s" href="%s"', esc_attr( $id ), esc_attr( $link_data['href'] ) );
 			if ( isset( $link_data['rel'] ) ) {
 				$html .= sprintf( ' rel="%s"', esc_attr( $link_data['rel'] ) );
-			}
-			if ( isset( $link_data['typeof'] ) ) {
-				$html .= sprintf( ' typeof="%s"', esc_attr( $link_data['typeof'] ) );
 			}
 			$html .= '>Link</a>';
 		}
