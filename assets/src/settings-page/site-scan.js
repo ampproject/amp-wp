@@ -314,7 +314,7 @@ function SiteScanSummary() {
 					slugs={ themesWithAmpIncompatibility }
 					callToAction={ userIsTechnical && ! stale ? (
 						<a href={ VALIDATED_URLS_LINK }>
-							{ __( 'AMP Validated URLs page', 'amp' ) }
+							{ __( 'Review Validated URLs', 'amp' ) }
 						</a>
 					) : null }
 				/>
@@ -324,7 +324,7 @@ function SiteScanSummary() {
 					slugs={ pluginsWithAmpIncompatibility }
 					callToAction={ userIsTechnical && ! stale ? (
 						<a href={ VALIDATED_URLS_LINK }>
-							{ __( 'AMP Validated URLs page', 'amp' ) }
+							{ __( 'Review Validated URLs', 'amp' ) }
 						</a>
 					) : null }
 				/>

@@ -117,7 +117,7 @@ export function SiteScan() {
 						slugs={ themesWithAmpIncompatibility }
 						callToAction={ userIsTechnical && (
 							<ExternalLink href={ VALIDATED_URLS_LINK }>
-								{ __( 'AMP Validated URLs page', 'amp' ) }
+								{ __( 'Review Validated URLs', 'amp' ) }
 							</ExternalLink>
 						) }
 					/>
@@ -128,7 +128,7 @@ export function SiteScan() {
 						slugs={ pluginsWithAmpIncompatibility }
 						callToAction={ userIsTechnical && (
 							<ExternalLink href={ VALIDATED_URLS_LINK }>
-								{ __( 'AMP Validated URLs page', 'amp' ) }
+								{ __( 'Review Validated URLs', 'amp' ) }
 							</ExternalLink>
 						) }
 					/>
