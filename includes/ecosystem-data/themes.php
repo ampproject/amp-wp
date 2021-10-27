@@ -124,15 +124,11 @@ return array (
   array (
     'name' => 'Occasio',
     'slug' => 'occasio',
-    'preview_url' => 'https://themezee.com/themes/occasio/',
-    'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/12/occasio.jpg',
-    'homepage' => 'https://themezee.com/themes/occasio/',
-    'description' => '
-
-
-<p>A sleek and modern Blogging &amp; Magazine theme, carefully designed for writers using the Gutenberg Block Editor.</p>
-',
-    'wporg' => false,
+    'preview_url' => 'https://wp-themes.com/occasio/',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/occasio/screenshot.jpg?ver=1.0.7',
+    'homepage' => 'https://wordpress.org/themes/occasio/',
+    'description' => 'Occasio is a sleek and modern Blogging &amp; Magazine WordPress Theme, carefully designed for writers using the Gutenberg Block Editor. The theme supports several blog layouts, extensive post settings and various page templates. It is also AMP-ready and accessible. Start your blog now!',
+    'wporg' => true,
   ),
   12 => 
   array (
@@ -297,7 +293,7 @@ return array (
   28 => 
   array (
     'name' => 'Stow',
-    'slug' => 'stow-2',
+    'slug' => 'stow',
     'preview_url' => 'https://wordpress.com/theme/stow',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/stow.jpg',
     'homepage' => 'https://wordpress.com/theme/stow',
@@ -325,7 +321,7 @@ return array (
   30 => 
   array (
     'name' => 'Rivington',
-    'slug' => 'rivington-2',
+    'slug' => 'rivington',
     'preview_url' => 'https://wordpress.com/theme/rivington',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/rivington.jpg',
     'homepage' => 'https://wordpress.com/theme/rivington',
@@ -339,7 +335,7 @@ return array (
   31 => 
   array (
     'name' => 'Redhill',
-    'slug' => 'redhill-2',
+    'slug' => 'redhill',
     'preview_url' => 'https://wordpress.com/theme/redhill',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/redhill.jpg',
     'homepage' => 'https://wordpress.com/theme/redhill',
@@ -353,7 +349,7 @@ return array (
   32 => 
   array (
     'name' => 'Morden',
-    'slug' => 'morden-2',
+    'slug' => 'morden',
     'preview_url' => 'https://wordpress.com/theme/morden',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/morden.jpg',
     'homepage' => 'https://wordpress.com/theme/morden',
@@ -367,7 +363,7 @@ return array (
   33 => 
   array (
     'name' => 'Maywood',
-    'slug' => 'maywood-2',
+    'slug' => 'maywood',
     'preview_url' => 'https://wordpress.com/theme/maywood',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/maywood.jpg',
     'homepage' => 'https://wordpress.com/theme/maywood',
@@ -395,7 +391,7 @@ return array (
   35 => 
   array (
     'name' => 'Leven',
-    'slug' => 'leven-2',
+    'slug' => 'leven',
     'preview_url' => 'https://wordpress.com/theme/leven',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/leven.jpg',
     'homepage' => 'https://wordpress.com/theme/leven',
@@ -409,7 +405,7 @@ return array (
   36 => 
   array (
     'name' => 'Hever',
-    'slug' => 'hever-2',
+    'slug' => 'hever',
     'preview_url' => 'https://wordpress.com/theme/hever',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/hever.jpg',
     'homepage' => 'https://wordpress.com/theme/hever',
@@ -423,7 +419,7 @@ return array (
   37 => 
   array (
     'name' => 'Exford',
-    'slug' => 'exford-2',
+    'slug' => 'exford',
     'preview_url' => 'https://wordpress.com/theme/exford',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/exford.jpg',
     'homepage' => 'https://wordpress.com/theme/exford',
@@ -437,7 +433,7 @@ return array (
   38 => 
   array (
     'name' => 'Brompton',
-    'slug' => 'brompton-2',
+    'slug' => 'brompton',
     'preview_url' => 'https://wordpress.com/theme/brompton',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/brompton.jpg',
     'homepage' => 'https://wordpress.com/theme/brompton',
@@ -451,7 +447,7 @@ return array (
   39 => 
   array (
     'name' => 'Barnsbury',
-    'slug' => 'barnsbury-2',
+    'slug' => 'barnsbury',
     'preview_url' => 'https://wordpress.com/theme/barnsbury',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/Barnsbury.jpg',
     'homepage' => 'https://wordpress.com/theme/barnsbury',
@@ -465,7 +461,7 @@ return array (
   40 => 
   array (
     'name' => 'Balasana',
-    'slug' => 'balasana-2',
+    'slug' => 'balasana',
     'preview_url' => 'https://wordpress.com/theme/balasana',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/Balasana.jpg',
     'homepage' => 'https://wordpress.com/theme/balasana',
@@ -479,7 +475,7 @@ return array (
   41 => 
   array (
     'name' => 'Alves',
-    'slug' => 'alves-2',
+    'slug' => 'alves',
     'preview_url' => 'https://wordpress.com/theme/alves',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/Alves.jpg',
     'homepage' => 'https://wordpress.com/theme/alves',
@@ -493,7 +489,7 @@ return array (
   42 => 
   array (
     'name' => 'Varia',
-    'slug' => 'varia-2',
+    'slug' => 'varia',
     'preview_url' => 'https://wordpress.com/theme/varia',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/08/varia.jpg',
     'homepage' => 'https://wordpress.com/theme/varia',
@@ -605,7 +601,7 @@ return array (
   52 => 
   array (
     'name' => 'Scott',
-    'slug' => 'scott-2',
+    'slug' => 'scott',
     'preview_url' => 'https://github.com/Automattic/newspack-theme/releases',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/01/scott.jpg',
     'homepage' => 'https://github.com/Automattic/newspack-theme/releases',
@@ -619,7 +615,7 @@ return array (
   53 => 
   array (
     'name' => 'Katharine',
-    'slug' => 'katharine-2',
+    'slug' => 'katharine',
     'preview_url' => 'https://github.com/Automattic/newspack-theme/releases',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/01/katharine.jpg',
     'homepage' => 'https://github.com/Automattic/newspack-theme/releases',
@@ -633,7 +629,7 @@ return array (
   54 => 
   array (
     'name' => 'Joseph',
-    'slug' => 'joseph-2',
+    'slug' => 'joseph',
     'preview_url' => 'https://github.com/Automattic/newspack-theme/releases',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/01/joseph-1.jpg',
     'homepage' => 'https://github.com/Automattic/newspack-theme/releases',
@@ -647,7 +643,7 @@ return array (
   55 => 
   array (
     'name' => 'Nelson',
-    'slug' => 'nelson-2',
+    'slug' => 'nelson',
     'preview_url' => 'https://github.com/Automattic/newspack-theme/releases',
     'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2020/01/nelson.jpg',
     'homepage' => 'https://github.com/Automattic/newspack-theme/releases',
@@ -775,7 +771,7 @@ return array (
     'name' => 'Neve',
     'slug' => 'neve',
     'preview_url' => 'https://wp-themes.com/neve/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/neve/screenshot.png?ver=3.0.6',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/neve/screenshot.png?ver=3.0.9',
     'homepage' => 'https://wordpress.org/themes/neve/',
     'description' => 'Neve is a super fast, easily customizable, multi-purpose theme. It’s perfect for blogs, small business, startups, agencies, firms, e-commerce shops (WooCommerce storefront) as well as personal portfolio sites and most types of projects. A fully AMP optimized and responsive theme, Neve will load in mere seconds and adapt perfectly on any viewing device. While it is lightweight and has a minimalist design, the theme is highly extendable, it has a highly SEO optimized code, resulting in top rankings in Google search results. Neve works perfectly with Gutenberg and the most popular page builders (Elementor, Brizy, Beaver Builder, Visual Composer, SiteOrigin, Divi). Neve is also WooCommerce ready, responsive, RTL &amp; translation ready. Look no further. Neve is the perfect theme for you!',
     'wporg' => true,

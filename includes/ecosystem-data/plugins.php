@@ -15,7 +15,7 @@ return array (
     'name' => 'Podcast Player &#8211; Your Podcasting Companion',
     'slug' => 'podcast-player',
     'homepage' => 'https://vedathemes.com/podcast-player/',
-    'short_description' => 'Showcase your podcast only using podcasting feed url. Use custom widget, shortcode or editor block&hellip;',
+    'short_description' => 'Showcase your podcast only using podcasting feed url. Use custom widget, shortcode or editor block to display podcast player anywhere on your site.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/podcast-player/assets/icon-256x256.png?rev=2025683',
@@ -40,7 +40,7 @@ return array (
     'name' => 'ShortPixel Image Optimizer',
     'slug' => 'shortpixel-image-optimiser',
     'homepage' => 'https://shortpixel.com/',
-    'short_description' => 'Speed up your website &amp; boost your SEO by compressing old &amp; new images and PDFs. Optimize and convert WebP &amp; AVIF.',
+    'short_description' => 'Speed up your website &amp; boost your SEO by compressing old &amp; new images and&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/shortpixel-image-optimiser/assets/icon-128x128.png?rev=1038819',
@@ -92,7 +92,7 @@ return array (
     'name' => 'YARPP &#8211; Yet Another Related Posts Plugin',
     'slug' => 'yet-another-related-posts-plugin',
     'homepage' => 'https://yarpp.com/',
-    'short_description' => 'The best WordPress plugin for displaying related posts. Simple and flexible, with a powerful proven&hellip;',
+    'short_description' => 'The best WordPress plugin for displaying related posts. Simple and flexible, with a powerful proven algorithm and inbuilt caching.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/yet-another-related-posts-plugin/assets/icon-128x128.png?rev=2549977',
@@ -118,7 +118,7 @@ return array (
     'name' => 'Floating Button',
     'slug' => 'floating-button',
     'homepage' => 'https://wordpress.org/plugins/floating-button/',
-    'short_description' => 'Easily create a custom sticky floating buttons. The Floating Button will be the effective solution&hellip;',
+    'short_description' => 'Easily create a custom sticky floating buttons. The Floating Button will be the effective solution for increasing the recognition of your web resource',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/floating-button/assets/icon-128x128.png?rev=2533016',
@@ -145,7 +145,7 @@ return array (
     'name' => 'WP Recipe Maker',
     'slug' => 'wp-recipe-maker',
     'homepage' => 'http://bootstrapped.ventures/wp-recipe-maker/',
-    'short_description' => 'The easy and user-friendly recipe plugin for everyone. Automatic JSON-LD metadata for food AND how-to recipes will improve your SEO!',
+    'short_description' => 'The easy and user-friendly recipe plugin for everyone. Automatic JSON-LD metadata for food AND how-to&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/wp-recipe-maker/assets/icon-128x128.png?rev=1491788',
@@ -158,7 +158,7 @@ return array (
     'name' => 'Slim SEO &#8211; Fast &amp; Automated WordPress SEO Plugin',
     'slug' => 'slim-seo',
     'homepage' => 'https://wpslimseo.com',
-    'short_description' => 'A full-featured SEO plugin for WordPress that&#039;s lightweight, blazing fast with minimum configuration. No bloats,&hellip;',
+    'short_description' => 'A full-featured SEO plugin for WordPress that&#039;s lightweight, blazing fast with minimum configuration. No bloats, no ads and just works!',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/slim-seo/assets/icon.svg?rev=2005049',
@@ -197,7 +197,7 @@ return array (
     'name' => 'Blackhole for Bad Bots',
     'slug' => 'blackhole-bad-bots',
     'homepage' => 'https://perishablepress.com/blackhole-bad-bots/',
-    'short_description' => 'Blackhole is a WordPress security plugin that detects and traps bad bots in a virtual&hellip;',
+    'short_description' => 'Blackhole is a WordPress security plugin that detects and traps bad bots in a virtual black hole, where they are denied access to your entire site.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/blackhole-bad-bots/assets/icon-128x128.png?rev=1471215',
@@ -210,7 +210,7 @@ return array (
     'name' => 'Page View Count',
     'slug' => 'page-views-count',
     'homepage' => '',
-    'short_description' => 'Places an icon, all time views count and views today count at the bottom of&hellip;',
+    'short_description' => 'Places an icon, all time views count and views today count at the bottom of posts, pages and custom post types on any WordPress website.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/page-views-count/assets/icon.svg?rev=986301',
@@ -239,7 +239,7 @@ return array (
     'name' => 'Newspack Newsletters',
     'slug' => 'newspack-newsletters',
     'homepage' => 'https://newspack.pub',
-    'short_description' => 'Create email newsletters with the Gutenberg editor and distribute them with your Mailchimp or Constant&hellip;',
+    'short_description' => 'Create email newsletters with the Gutenberg editor and distribute them with your Mailchimp or Constant Contact mailing lists.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/newspack-newsletters/assets/icon.svg?rev=2475195',
@@ -253,7 +253,7 @@ return array (
     'name' => 'Web Stories',
     'slug' => 'web-stories',
     'homepage' => 'https://wp.stories.google/',
-    'short_description' => 'Web Stories are a visual storytelling format for the open web which immerses your readers&hellip;',
+    'short_description' => 'Web Stories are a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/web-stories/assets/icon.svg?rev=2386543',
@@ -267,7 +267,7 @@ return array (
     'name' => 'Jetpack &#8211; WP Security, Backup, Speed, &amp; Growth',
     'slug' => 'jetpack',
     'homepage' => 'https://jetpack.com',
-    'short_description' => 'Improve your WP security with powerful one-click tools like backup and malware scan. Get essential free tools including stats, CDN and social sharing.',
+    'short_description' => 'Improve your WP security with powerful one-click tools like backup and malware scan. Get essential&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/jetpack/assets/icon.svg?rev=2394525',
@@ -294,7 +294,7 @@ return array (
     'name' => 'Antispam Bee',
     'slug' => 'antispam-bee',
     'homepage' => 'https://antispambee.pluginkollektiv.org/',
-    'short_description' => 'Antispam plugin with a sophisticated tool set for effective day to day comment and trackback spam-fighting. Build with data protection and privacy in  &hellip;',
+    'short_description' => 'Antispam plugin with a sophisticated tool set for effective day to day comment and trackback&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/antispam-bee/assets/icon-128x128.png?rev=977629',
@@ -347,7 +347,7 @@ return array (
     'name' => 'Page Builder Gutenberg Blocks – CoBlocks',
     'slug' => 'coblocks',
     'homepage' => '',
-    'short_description' => 'CoBlocks is a suite of page builder WordPress blocks for Gutenberg, with 10+ new blocks and a true page builder experience with rows and columns.',
+    'short_description' => 'CoBlocks is a suite of page builder WordPress blocks for Gutenberg, with 10+ new blocks&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/coblocks/assets/icon-128x128.jpg?rev=2243972',
@@ -438,7 +438,7 @@ return array (
     'name' => 'Rank Math SEO – Best SEO Plugin For WordPress To Increase Your SEO Traffic',
     'slug' => 'seo-by-rank-math',
     'homepage' => 'https://s.rankmath.com/home',
-    'short_description' => 'Rank Math SEO is the Best WordPress SEO plugin combines the features of many SEO&hellip;',
+    'short_description' => 'Rank Math SEO is the Best WordPress SEO plugin combines the features of many SEO tools in a single package &amp; helps you multiply your SEO traffic.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/seo-by-rank-math/assets/icon.svg?rev=2348086',
@@ -452,7 +452,7 @@ return array (
     'name' => 'Head, Footer and Post Injections',
     'slug' => 'header-footer',
     'homepage' => 'https://www.satollo.net/plugins/header-footer',
-    'short_description' => 'Header and Footer plugin let you to add html code to the head and footer&hellip;',
+    'short_description' => 'Header and Footer plugin let you to add html code to the head and footer sections of your blog... and more!',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/header-footer/assets/icon-256x256.png?rev=1064219',
@@ -505,7 +505,7 @@ return array (
     'name' => 'Schema',
     'slug' => 'schema',
     'homepage' => 'https://schema.press',
-    'short_description' => 'Get the next generation of Schema Structured Data to enhance your WordPress site presentation in Google search results.',
+    'short_description' => 'Get the next generation of Schema Structured Data to enhance your WordPress site presentation in&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/schema/assets/icon-128x128.png?rev=1750172',
@@ -530,7 +530,7 @@ return array (
     'name' => 'Pym.js Embeds',
     'slug' => 'pym-shortcode',
     'homepage' => 'https://github.com/INN/pym-shortcode',
-    'short_description' => 'A WordPress block and shortcode for embedding iframes that are responsive horizontally and vertically, using the NPR Visuals Team&#039;s Pym.js.',
+    'short_description' => 'A WordPress block and shortcode for embedding iframes that are responsive horizontally and vertically, using&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/pym-shortcode/assets/icon.svg?rev=1944461',
@@ -567,19 +567,16 @@ return array (
   ),
   42 => 
   array (
-    'name' => 'Site Kit by Google',
+    'name' => 'Site Kit by Google &#8211; Analytics, Search Console, AdSense, Speed',
     'slug' => 'google-site-kit',
-    'homepage' => 'https://sitekit.withgoogle.com/',
-    'short_description' => '<p>Site Kit is the official WordPress plugin from Google for insights about how people find and use your site. Site Kit is the one-stop solution to deploy, manage, and get insights from critical Google tools to make the site successful on the web. It provides authoritative, up-to-date insights from multiple Google products directly on the</p>
-<p class="is-style-arrow-link"><a class="moretag" href="https://amp-wp.org/ecosystem/google-site-kit/">Read More</a></p>
-',
+    'homepage' => 'https://sitekit.withgoogle.com',
+    'short_description' => 'Site Kit is a one-stop solution for WordPress users to use everything Google has to offer to make them successful on the web.',
     'icons' => 
     array (
-      '1x' => 'https://amp-wp.org/wp-content/uploads/2019/12/site-kit-by-google-logo-285x160.png',
-      '2x' => 'https://amp-wp.org/wp-content/uploads/2019/12/site-kit-by-google-logo-372x209.png',
-      'svg' => '',
+      '1x' => 'https://ps.w.org/google-site-kit/assets/icon-128x128.png?rev=2181376',
+      '2x' => 'https://ps.w.org/google-site-kit/assets/icon-256x256.png?rev=2181376',
     ),
-    'wporg' => false,
+    'wporg' => true,
   ),
   43 => 
   array (
@@ -682,7 +679,7 @@ return array (
     'name' => 'WP GDPR Cookie Notice',
     'slug' => 'wp-gdpr-cookie-notice',
     'homepage' => 'https://wordpress.org/plugins/wp-gdpr-cookie-notice/',
-    'short_description' => 'Simple performant cookie consent notice that supports AMP, Web Stories, granular cookie control and live&hellip;',
+    'short_description' => 'Simple performant cookie consent notice that supports AMP, Web Stories, granular cookie control and live preview customization.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/wp-gdpr-cookie-notice/assets/icon-128x128.png?rev=2042024',
@@ -695,7 +692,7 @@ return array (
     'name' => 'WordPress Share Buttons Plugin – AddThis',
     'slug' => 'addthis',
     'homepage' => 'https://wordpress.org/plugins/addthis/',
-    'short_description' => 'Now compatible with the AMP Plugin! Free Share Buttons from AddThis. Share to Messenger, WhatsApp, Facebook, Twitter, Pinterest and many more.',
+    'short_description' => 'Now compatible with the AMP Plugin! Free Share Buttons from AddThis. Share to Messenger, WhatsApp,&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/addthis/assets/icon-128x128.png?rev=1223867',
@@ -735,7 +732,7 @@ return array (
     'name' => 'Gutenberg',
     'slug' => 'gutenberg',
     'homepage' => 'https://github.com/WordPress/gutenberg',
-    'short_description' => 'The Gutenberg plugin provides editing, customization, and site building features to WordPress. This beta plugin allows you to test bleeding-edge featu &hellip;',
+    'short_description' => 'The Gutenberg plugin provides editing, customization, and site building features to WordPress. This beta plugin&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/gutenberg/assets/icon-128x128.jpg?rev=1776042',
@@ -745,17 +742,16 @@ return array (
   ),
   55 => 
   array (
-    'name' => 'Setka Editor',
+    'name' => 'Page-Builder for Content Experience &#8211; Setka Editor',
     'slug' => 'setka-editor',
-    'homepage' => 'https://setka.io/',
-    'short_description' => '<p>Setka Editor is the first WYSIWYG plugin with page builder functionality.</p>
-',
+    'homepage' => 'https://editor.setka.io/',
+    'short_description' => 'A WordPress plugin for beautiful content that converts. The editor you’ve been waiting for to design your&hellip;',
     'icons' => 
     array (
-      '1x' => 'https://amp-wp.org/wp-content/uploads/2018/11/Setka-Banner-285x160.jpg',
-      '2x' => 'https://amp-wp.org/wp-content/uploads/2018/11/Setka-Banner-372x209.jpg',
-      'svg' => '',
+      '1x' => 'https://ps.w.org/setka-editor/assets/icon.svg?rev=2408232',
+      '2x' => 'https://ps.w.org/setka-editor/assets/icon-256x256.png?rev=2408232',
+      'svg' => 'https://ps.w.org/setka-editor/assets/icon.svg?rev=2408232',
     ),
-    'wporg' => false,
+    'wporg' => true,
   ),
 );
