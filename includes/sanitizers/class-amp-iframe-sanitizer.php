@@ -158,18 +158,32 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Find the "figure" parent node, if exists.
+			$figure_node = null;
+			if ( $node->parentNode instanceof DOMElement && 'figure' === $node->parentNode->tagName ) {
+				$figure_node = $node->parentNode;
+			}
+			if ( $node->parentNode->parentNode instanceof DOMElement && 'figure' === $node->parentNode->parentNode->tagName ) {
+				$figure_node = $node->parentNode->parentNode;
+			}
+
+			/**
+			 * Skip element if it's a "WP Embed", dedicated sanitizer will convert it to <amp-wordpress-embed>.
+			 *
+			 * @see: https://github.com/ampproject/amp-wp/issues/809
+			 */
+			if (
+				null !== $figure_node
+				&&
+				in_array( 'is-type-wp-embed', explode( ' ', $figure_node->getAttribute( Attribute::CLASS_ ) ), true )
+			) {
+				continue;
+			}
+
 			$this->did_convert_elements = true;
 			if ( empty( $normalized_attributes[ Attribute::LAYOUT ] ) && ! empty( $normalized_attributes[ Attribute::HEIGHT ] ) && ! empty( $normalized_attributes[ Attribute::WIDTH ] ) ) {
 
 				// Set layout to responsive if the iframe is aligned to full width.
-				$figure_node = null;
-				if ( $node->parentNode instanceof DOMElement && 'figure' === $node->parentNode->tagName ) {
-					$figure_node = $node->parentNode;
-				}
-				if ( $node->parentNode->parentNode instanceof DOMElement && 'figure' === $node->parentNode->parentNode->tagName ) {
-					$figure_node = $node->parentNode->parentNode;
-				}
-
 				if (
 					! empty( $this->args['align_wide_support'] )
 					&& $figure_node
