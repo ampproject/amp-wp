@@ -1188,6 +1188,16 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						transform: none;
 					}
 
+					.admin-bar .main-navigation .main-menu .menu-item-has-children.off-canvas .sub-menu.expanded-true {
+						top: 0;
+						height: inherit;
+					}
+
+					.admin-bar .amp-twentynineteen-main-navigation {
+						top: 46px;
+						height: calc(100vh - 46px);
+					}
+
 					.main-navigation .sub-menu > li {
 						position: static;
 						display: flex;
