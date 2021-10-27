@@ -10,32 +10,13 @@ import { cleanUpSettings, scrollToElement } from '../../utils/onboarding-wizard-
 import { setTemplateMode } from '../../utils/amp-settings-utils';
 
 describe( 'AMP settings screen Review panel', () => {
-	let testPost;
+	const timeout = 10000;
 
 	beforeAll( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		testPost = await page.evaluate( () => wp.apiFetch( {
-			path: '/wp/v2/posts',
-			method: 'POST',
-			data: { title: 'Test Post', status: 'publish' },
-		} ) );
-	} );
-
-	afterAll( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		if ( testPost?.id ) {
-			await page.evaluate( ( id ) => wp.apiFetch( {
-				path: `/wp/v2/posts/${ id }`,
-				method: 'DELETE',
-				data: { force: true },
-			} ), testPost.id );
-		}
+		await cleanUpSettings();
 	} );
 
 	beforeEach( async () => {
-		await cleanUpSettings();
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 	} );
 
@@ -55,16 +36,20 @@ describe( 'AMP settings screen Review panel', () => {
 	it( 'button redirects to an AMP page in transitional mode', async () => {
 		await setTemplateMode( 'transitional' );
 
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
+		await Promise.all( [
+			scrollToElement( { selector: '.settings-site-review__actions .is-primary', click: true, timeout } ),
+			page.waitForNavigation( { timeout } ),
+		] );
 
 		const htmlAttributes = await page.$eval( 'html', ( el ) => el.getAttributeNames() );
 		await expect( htmlAttributes ).toContain( 'amp' );
 	} );
 
 	it( 'button redirects to an AMP page in reader mode', async () => {
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
+		await Promise.all( [
+			scrollToElement( { selector: '.settings-site-review__actions .is-primary', click: true, timeout } ),
+			page.waitForNavigation( { timeout } ),
+		] );
 
 		const htmlAttributes = await page.$eval( 'html', ( el ) => el.getAttributeNames() );
 		await expect( htmlAttributes ).toContain( 'amp' );
@@ -73,8 +58,10 @@ describe( 'AMP settings screen Review panel', () => {
 	it( 'button redirects to an AMP page in standard mode', async () => {
 		await setTemplateMode( 'standard' );
 
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
+		await Promise.all( [
+			scrollToElement( { selector: '.settings-site-review__actions .is-primary', click: true, timeout } ),
+			page.waitForNavigation( { timeout } ),
+		] );
 
 		const htmlAttributes = await page.$eval( 'html', ( el ) => el.getAttributeNames() );
 		await expect( htmlAttributes ).toContain( 'amp' );
