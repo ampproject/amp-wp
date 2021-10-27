@@ -22,7 +22,10 @@ export function getSlugsFromValidationResults( validationResults = [] ) {
 
 		for ( const source of result.sources ) {
 			if ( source.type === 'plugin' ) {
-				plugins.add( getPluginSlugFromFile( source.name ) );
+				const pluginSlug = getPluginSlugFromFile( source.name );
+				if ( 'gutenberg' !== pluginSlug || result.sources.length === 1 ) {
+					plugins.add( pluginSlug );
+				}
 			} else if ( source.type === 'theme' ) {
 				themes.add( source.name );
 			}
@@ -32,10 +35,6 @@ export function getSlugsFromValidationResults( validationResults = [] ) {
 	// Skip including AMP in the summary, since AMP is like core.
 	plugins.delete( 'amp' );
 
-	// Skip including Gutenberg in the summary if there is another plugin, since Gutenberg is like core.
-	if ( plugins.size > 1 && plugins.has( 'gutenberg' ) ) {
-		plugins.delete( 'gutenberg' );
-	}
 
 	return {
 		plugins: [ ...plugins ],

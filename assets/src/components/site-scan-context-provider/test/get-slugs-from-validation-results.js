@@ -58,7 +58,7 @@ describe( 'getSlugsFromValidationResults', () => {
 
 		const slugs = getSlugsFromValidationResults( validationResult );
 
-		expect( slugs.plugins ).toStrictEqual( [ 'jetpack', 'foo-bar' ] );
+		expect( slugs.plugins ).toStrictEqual( [ 'gutenberg', 'jetpack', 'foo-bar' ] );
 		expect( slugs.themes ).toStrictEqual( [ 'twentytwenty' ] );
 	} );
 
