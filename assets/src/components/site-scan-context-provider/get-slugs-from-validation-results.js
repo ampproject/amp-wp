@@ -35,7 +35,6 @@ export function getSlugsFromValidationResults( validationResults = [] ) {
 	// Skip including AMP in the summary, since AMP is like core.
 	plugins.delete( 'amp' );
 
-
 	return {
 		plugins: [ ...plugins ],
 		themes: [ ...themes ],

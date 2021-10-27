@@ -62,7 +62,7 @@ describe( 'getSlugsFromValidationResults', () => {
 		expect( slugs.themes ).toStrictEqual( [ 'twentytwenty' ] );
 	} );
 
-	it( 'returns Gutenberg if it is the only plugin in the list', () => {
+	it( 'returns Gutenberg if it is the only plugin for a single validation error', () => {
 		const validationResult = [
 			{
 				sources: [
@@ -81,5 +81,20 @@ describe( 'getSlugsFromValidationResults', () => {
 
 		expect( slugs.plugins ).toStrictEqual( [ 'gutenberg' ] );
 		expect( slugs.themes ).toStrictEqual( [ 'twentytwenty' ] );
+	} );
+
+	it( 'does not return Gutenberg if there are other plugins for the same validation error', () => {
+		const validationResult = [
+			{
+				sources: [
+					{ type: 'plugin', name: 'gutenberg' },
+					{ type: 'plugin', name: 'jetpack' },
+				],
+			},
+		];
+
+		const slugs = getSlugsFromValidationResults( validationResult );
+
+		expect( slugs.plugins ).toStrictEqual( [ 'jetpack' ] );
 	} );
 } );
