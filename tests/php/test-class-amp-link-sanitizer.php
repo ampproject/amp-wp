@@ -59,12 +59,12 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			'home-link'           => [
 				'href'         => home_url( '/' ),
 				'expected_amp' => true,
-				'expected_rel' => 'amphtml',
+				'expected_rel' => null,
 			],
 			'internal-link'       => [
 				'href'         => $post_link,
 				'expected_amp' => true,
-				'expected_rel' => 'amphtml',
+				'expected_rel' => null,
 			],
 			'non_amp_to_amp_rel'  => [
 				'href'         => $post_link,
@@ -104,7 +104,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'rel'          => 'ugc',
 				'href'         => home_url( '/some/user/generated/data/' ),
 				'expected_amp' => true,
-				'expected_rel' => 'ugc amphtml',
+				'expected_rel' => 'ugc',
 			],
 			'page-anchor'         => [
 				'href'         => '#top',
@@ -114,7 +114,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			'other-page-anchor'   => [
 				'href'         => $post_link . '#top',
 				'expected_amp' => true,
-				'expected_rel' => 'amphtml',
+				'expected_rel' => null,
 			],
 			'external-link'       => [
 				'href'         => 'https://external.example.com/',

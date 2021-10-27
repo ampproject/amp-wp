@@ -557,7 +557,7 @@ final class MobileRedirection implements Service, Registerable {
 			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $this->paired_routing->remove_endpoint( amp_get_current_url() ) );
 			$text = __( 'Exit mobile version', 'amp' );
 		} else {
-			$rel  = [ Attribute::REL_AMPHTML ];
+			$rel  = [];
 			$url  = $this->get_current_amp_url();
 			$text = __( 'Go to mobile version', 'amp' );
 		}
