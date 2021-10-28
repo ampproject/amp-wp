@@ -194,6 +194,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			if ( empty( $link_data['expected_rel'] ) ) {
 				$this->assertDoesNotMatchRegularExpression( '/(^|\s)amphtml(\s|$)/', $rel, "ID: $id" );
 			} else {
+				$this->assertTrue( $element->hasAttribute( 'rel' ) );
 				$this->assertEquals( $link_data['expected_rel'], $element->getAttribute( 'rel' ), "ID: $id" );
 			}
 
@@ -203,8 +204,6 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				( isset( $link_data['expected_rel'] ) && empty( $link_data['expected_rel'] ) )
 			) {
 				$this->assertFalse( $element->hasAttribute( 'rel' ) );
-			} else {
-				$this->assertTrue( $element->hasAttribute( 'rel' ) );
 			}
 
 			if ( $paired && $link_data['expected_amp'] ) {
