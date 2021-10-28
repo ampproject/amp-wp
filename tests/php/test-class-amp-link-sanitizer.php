@@ -90,6 +90,12 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'rel'          => 'noamphtml ',
 				'expected_rel' => null,
 			],
+			'empty_rel'  => [
+				'href'         => $post_link,
+				'expected_amp' => false,
+				'rel'          => '',
+				'expected_rel' => null,
+			],
 			'excluded_amp_link'   => [
 				'href'         => $excluded_amp_link,
 				'expected_amp' => false,
@@ -159,7 +165,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		$html = sprintf( '<div id="wpadminbar"><a id="admin-bar-link" href="%s"></a></div>', esc_url( $admin_bar_link_href ) );
 		foreach ( $links as $id => $link_data ) {
 			$html .= sprintf( '<a id="%s" href="%s"', esc_attr( $id ), esc_attr( $link_data['href'] ) );
-			if ( isset( $link_data['rel'] ) ) {
+			if ( isset( $link_data['rel'] ) && ! empty( $link_data['rel'] ) ) {
 				$html .= sprintf( ' rel="%s"', esc_attr( $link_data['rel'] ) );
 			}
 			$html .= '>Link</a>';
@@ -189,6 +195,14 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				$this->assertDoesNotMatchRegularExpression( '/(^|\s)amphtml(\s|$)/', $rel, "ID: $id" );
 			} else {
 				$this->assertEquals( $link_data['expected_rel'], $element->getAttribute( 'rel' ), "ID: $id" );
+			}
+
+			if (
+				( isset( $link_data['rel'] ) && empty( $link_data['rel'] ) )
+				&&
+				( isset( $link_data['expected_rel'] ) && empty( $link_data['expected_rel'] ) )
+			) {
+				$this->assertFalse( $element->hasAttribute( 'rel' ) );
 			}
 
 			if ( $paired && $link_data['expected_amp'] ) {
