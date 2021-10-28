@@ -64,10 +64,18 @@ describe( 'Settings screen when reader theme is active theme', () => {
 } );
 
 describe( 'Mode info notices', () => {
-	it( 'show information in the Template Mode section if site scan results are stale', async () => {
+	const timeout = 10000;
+
+	beforeEach( async () => {
 		await cleanUpSettings();
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
+	} );
 
+	afterEach( async () => {
+		await cleanUpSettings();
+	} );
+
+	it( 'show information in the Template Mode section if site scan results are stale', async () => {
 		// Trigger a site scan.
 		await page.waitForSelector( '#site-scan' );
 
@@ -77,16 +85,22 @@ describe( 'Mode info notices', () => {
 		}
 
 		await scrollToElement( { selector: '#site-scan .settings-site-scan__footer .is-primary', click: true } );
-		await expect( page ).toMatchElement( '#site-scan .settings-site-scan__footer .is-primary', { text: 'Rescan Site', timeout: 10000 } );
+		await expect( page ).toMatchElement( '#site-scan .settings-site-scan__footer .is-primary', { text: 'Rescan Site', timeout } );
+
+		await scrollToElement( { selector: '#template-modes' } );
 
 		// Confirm there is no notice about stale results.
 		const noticeXpath = '//*[@id="template-modes"]/*[contains(@class, "amp-notice--info")]/*[contains(text(), "Site Scan results are stale")]';
+
 		const noticeBefore = await page.$x( noticeXpath );
 		expect( noticeBefore ).toHaveLength( 0 );
 
 		// Change template mode to make the scan results stale.
 		await setTemplateMode( 'transitional' );
-		await page.waitForSelector( '.settings-site-scan__footer .is-primary', { timeout: 10000 } );
+
+		await page.waitForSelector( '.settings-site-scan__footer .is-primary', { timeout } );
+
+		await scrollToElement( { selector: '#template-modes' } );
 
 		const noticeAfter = await page.$x( noticeXpath );
 		expect( noticeAfter ).toHaveLength( 1 );
