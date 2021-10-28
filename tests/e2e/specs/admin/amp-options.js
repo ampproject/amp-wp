@@ -7,6 +7,7 @@ import { visitAdminPage, activateTheme, installTheme } from '@wordpress/e2e-test
  * Internal dependencies
  */
 import { completeWizard, cleanUpSettings, clickMode, scrollToElement } from '../../utils/onboarding-wizard-utils';
+import { setTemplateMode } from '../../utils/amp-settings-utils';
 
 describe( 'AMP settings screen newly activated', () => {
 	beforeEach( async () => {
@@ -63,6 +64,34 @@ describe( 'Settings screen when reader theme is active theme', () => {
 } );
 
 describe( 'Mode info notices', () => {
+	it( 'show information in the Template Mode section if site scan results are stale', async () => {
+		await cleanUpSettings();
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		// Trigger a site scan.
+		await page.waitForSelector( '#site-scan' );
+
+		const isPanelCollapsed = await page.$eval( '#site-scan .components-panel__body-toggle', ( el ) => el.ariaExpanded === 'false' );
+		if ( isPanelCollapsed ) {
+			await scrollToElement( { selector: '#site-scan .components-panel__body-toggle', click: true } );
+		}
+
+		await scrollToElement( { selector: '#site-scan .settings-site-scan__footer .is-primary', click: true } );
+		await expect( page ).toMatchElement( '#site-scan .settings-site-scan__footer .is-primary', { text: 'Rescan Site', timeout: 10000 } );
+
+		// Confirm there is no notice about stale results.
+		const noticeXpath = '//*[@id="template-modes"]/*[contains(@class, "amp-notice--info")]/*[contains(text(), "Site Scan results are stale")]';
+		const noticeBefore = await page.$x( noticeXpath );
+		expect( noticeBefore ).toHaveLength( 0 );
+
+		// Change template mode to make the scan results stale.
+		await setTemplateMode( 'transitional' );
+		await page.waitForSelector( '.settings-site-scan__footer .is-primary', { timeout: 10000 } );
+
+		const noticeAfter = await page.$x( noticeXpath );
+		expect( noticeAfter ).toHaveLength( 1 );
+	} );
+
 	it.todo( 'shows expected notices for theme with built-in support' );
 	it.todo( 'shows expected notices for theme with paired flag false' );
 	it.todo( 'shows expected notices for theme that only supports reader mode' );
