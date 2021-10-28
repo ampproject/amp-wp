@@ -18,6 +18,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AMP_Options_Manager;
 
 /**
@@ -27,6 +28,8 @@ use AMP_Options_Manager;
  * @coversDefaultClass \AmpProject\AmpWP\Admin\OptionsMenu
  */
 class OptionsMenuTest extends DependencyInjectedTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Instance of OptionsMenu
@@ -171,10 +174,16 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		$this->assertFalse( wp_style_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
 	}
 
-	/** @covers ::enqueue_assets() */
+	/**
+	 * @covers ::enqueue_assets()
+	 * @covers ::add_preload_rest_paths()
+	 */
 	public function test_enqueue_assets_right_hook_suffix() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		set_current_screen( $this->instance->screen_handle() );
+
+		$rest_preloader = $this->get_private_property( $this->instance, 'rest_preloader' );
+		$this->assertCount( 0, $this->get_private_property( $rest_preloader, 'paths' ) );
 
 		$this->assertFalse( wp_script_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
 		$this->assertFalse( wp_style_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
@@ -191,12 +200,19 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( 'USER_FIELD_DEVELOPER_TOOLS_ENABLED', $script_before );
 		$this->assertStringContainsString( 'USERS_RESOURCE_REST_PATH', $script_before );
 
-		$wp_api_fetch_after = implode( "\n", wp_scripts()->get_data( 'wp-api-fetch', 'after' ) );
 		if ( function_exists( 'rest_preload_api_request' ) ) {
-			$this->assertStringContainsString( wp_json_encode( '/amp/v1/options' ), $wp_api_fetch_after );
-			$this->assertStringContainsString( wp_json_encode( '/amp/v1/reader-themes' ), $wp_api_fetch_after );
-			$this->assertStringContainsString( wp_json_encode( '/wp/v2/settings' ), $wp_api_fetch_after );
-			$this->assertStringContainsString( wp_json_encode( '/wp/v2/users/me' ), $wp_api_fetch_after );
+			$this->assertEqualSets(
+				[
+					'/amp/v1/options',
+					'/amp/v1/reader-themes',
+					'/amp/v1/scannable-urls?_fields%5B0%5D=url&_fields%5B1%5D=amp_url&_fields%5B2%5D=type&_fields%5B3%5D=label&_fields%5B4%5D=validation_errors&_fields%5B5%5D=stale',
+					'/wp/v2/plugins',
+					'/wp/v2/settings',
+					'/wp/v2/themes',
+					'/wp/v2/users/me',
+				],
+				$this->get_private_property( $rest_preloader, 'paths' )
+			);
 		}
 	}
 

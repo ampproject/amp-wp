@@ -12,6 +12,7 @@ import {
 	isOfflineMode,
 	setBrowserViewport,
 	trashAllPosts,
+	visitAdminPage,
 } from '@wordpress/e2e-test-utils';
 
 /**
@@ -214,6 +215,20 @@ async function setupBrowser() {
 }
 
 /**
+ * Create test posts so that the WordPress instance has some data.
+ */
+async function createTestData() {
+	await visitAdminPage( 'admin.php', 'page=amp-options' );
+	await page.waitForSelector( '.amp-settings-nav' );
+	await page.evaluate( async () => {
+		await Promise.all( [
+			wp.apiFetch( { path: '/wp/v2/posts', method: 'POST', data: { title: 'Test Post 1', status: 'publish' } } ),
+			wp.apiFetch( { path: '/wp/v2/posts', method: 'POST', data: { title: 'Test Post 2', status: 'publish' } } ),
+		] );
+	} );
+}
+
+/**
  * Before every test suite run, delete all content created by the test. This ensures
  * other posts/comments/etc. aren't dirtying tests and tests don't depend on
  * each other's side-effects.
@@ -225,6 +240,7 @@ beforeAll( async () => {
 	observeConsoleLogging();
 	await setupBrowser();
 	await trashAllPosts();
+	await createTestData();
 	await cleanUpSettings();
 	await page.setDefaultNavigationTimeout( 10000 );
 	await page.setDefaultTimeout( 10000 );

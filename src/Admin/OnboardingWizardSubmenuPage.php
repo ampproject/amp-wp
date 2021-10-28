@@ -9,12 +9,13 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
+use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Manager;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Validation\ScannableURLProvider;
 
 /**
  * AMP setup wizard submenu page class.
@@ -70,27 +71,18 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	private $loading_error;
 
 	/**
-	 * ScannableURLProvider instance.
-	 *
-	 * @var ScannableURLProvider
-	 */
-	private $scannable_url_provider;
-
-	/**
 	 * OnboardingWizardSubmenuPage constructor.
 	 *
-	 * @param GoogleFonts          $google_fonts           An instance of the GoogleFonts service.
-	 * @param ReaderThemes         $reader_themes          An instance of the ReaderThemes class.
-	 * @param RESTPreloader        $rest_preloader         An instance of the RESTPreloader class.
-	 * @param LoadingError         $loading_error          An instance of the LoadingError class.
-	 * @param ScannableURLProvider $scannable_url_provider An instance of the ScannableURLProvider class.
+	 * @param GoogleFonts   $google_fonts   An instance of the GoogleFonts service.
+	 * @param ReaderThemes  $reader_themes  An instance of the ReaderThemes class.
+	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
+	 * @param LoadingError  $loading_error  An instance of the LoadingError class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, LoadingError $loading_error, ScannableURLProvider $scannable_url_provider ) {
-		$this->google_fonts           = $google_fonts;
-		$this->reader_themes          = $reader_themes;
-		$this->rest_preloader         = $rest_preloader;
-		$this->loading_error          = $loading_error;
-		$this->scannable_url_provider = $scannable_url_provider;
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, LoadingError $loading_error ) {
+		$this->google_fonts   = $google_fonts;
+		$this->reader_themes  = $reader_themes;
+		$this->rest_preloader = $rest_preloader;
+		$this->loading_error  = $loading_error;
 	}
 
 	/**
@@ -224,7 +216,13 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		$theme           = wp_get_theme();
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
-		$amp_settings_link = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
+		$amp_settings_link       = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
+		$amp_validated_urls_link = admin_url(
+			add_query_arg(
+				[ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ],
+				'edit.php'
+			)
+		);
 
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
@@ -247,13 +245,15 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
 			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
+			'SCANNABLE_URLS_REST_PATH'           => '/amp/v1/scannable-urls',
 			'SETTINGS_LINK'                      => $amp_settings_link,
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
-			'PREVIEW_URLS'                       => $this->get_preview_urls( $this->scannable_url_provider->get_urls() ),
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
+			'VALIDATE_NONCE'                     => AMP_Validation_Manager::get_amp_validate_nonce(),
+			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
 		];
 
 		wp_add_inline_script(
@@ -288,7 +288,14 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		$paths = [
 			'/amp/v1/options',
 			'/amp/v1/reader-themes',
+			add_query_arg(
+				'_fields',
+				[ 'url', 'amp_url', 'type', 'label' ],
+				'/amp/v1/scannable-urls'
+			),
+			'/wp/v2/plugins',
 			'/wp/v2/settings',
+			'/wp/v2/themes',
 			'/wp/v2/users/me',
 		];
 
@@ -311,22 +318,5 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 
 		// Default to the AMP Settings page if a referrer link could not be determined.
 		return menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
-	}
-
-	/**
-	 * Add AMP URLs to the list of scannable URLs.
-	 *
-	 * @since 2.2
-	 *
-	 * @param array $scannable_urls Array of scannable URLs.
-	 *
-	 * @return array Preview URLs.
-	 */
-	public function get_preview_urls( $scannable_urls ) {
-		foreach ( $scannable_urls as &$scannable_url ) {
-			$scannable_url['amp_url'] = amp_add_paired_endpoint( $scannable_url['url'] );
-		}
-
-		return $scannable_urls;
 	}
 }

@@ -24,6 +24,8 @@ use WP_REST_Server;
 /**
  * URLValidationRESTController class.
  *
+ * @todo This can now be eliminated in favor of making validate requests to the frontend with `?amp_validate[cache]=true`.
+ *
  * @since 2.1
  * @internal
  */
