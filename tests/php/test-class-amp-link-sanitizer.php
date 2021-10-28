@@ -90,9 +90,9 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'rel'          => 'noamphtml ',
 				'expected_rel' => null,
 			],
-			'empty_rel'  => [
+			'empty_rel'           => [
 				'href'         => $post_link,
-				'expected_amp' => false,
+				'expected_amp' => true,
 				'rel'          => '',
 				'expected_rel' => null,
 			],
