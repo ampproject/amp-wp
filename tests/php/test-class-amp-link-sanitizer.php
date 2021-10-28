@@ -203,6 +203,8 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				( isset( $link_data['expected_rel'] ) && empty( $link_data['expected_rel'] ) )
 			) {
 				$this->assertFalse( $element->hasAttribute( 'rel' ) );
+			} else {
+				$this->assertTrue( $element->hasAttribute( 'rel' ) );
 			}
 
 			if ( $paired && $link_data['expected_amp'] ) {
