@@ -32,12 +32,12 @@ export function useTemplateModeRecommendation() {
 		stale,
 		themesWithAmpIncompatibility,
 	} = useContext( SiteScanContext );
-	const { originalDeveloperToolsOption } = useContext( User );
+	const { developerToolsOption, fetchingUser, savingDeveloperToolsOption } = useContext( User );
 	const { fetchingOptions, savingOptions } = useContext( Options );
 	const [ templateModeRecommendation, setTemplateModeRecommendation ] = useState( null );
 
 	useLayoutEffect( () => {
-		if ( isBusy || isFetchingScannableUrls || fetchingOptions || savingOptions ) {
+		if ( isBusy || isFetchingScannableUrls || fetchingOptions || savingOptions || fetchingUser || savingDeveloperToolsOption ) {
 			return;
 		}
 
@@ -46,9 +46,9 @@ export function useTemplateModeRecommendation() {
 			hasPluginIssues: pluginsWithAmpIncompatibility?.length > 0,
 			hasSiteScanResults: hasSiteScanResults && ! stale,
 			hasThemeIssues: themesWithAmpIncompatibility?.length > 0,
-			userIsTechnical: originalDeveloperToolsOption === true,
+			userIsTechnical: developerToolsOption === true,
 		} ) );
-	}, [ currentThemeIsAmongReaderThemes, fetchingOptions, hasSiteScanResults, isBusy, isFetchingScannableUrls, originalDeveloperToolsOption, pluginsWithAmpIncompatibility?.length, savingOptions, stale, themesWithAmpIncompatibility?.length ] );
+	}, [ currentThemeIsAmongReaderThemes, developerToolsOption, fetchingOptions, fetchingUser, hasSiteScanResults, isBusy, isFetchingScannableUrls, pluginsWithAmpIncompatibility?.length, savingDeveloperToolsOption, savingOptions, stale, themesWithAmpIncompatibility?.length ] );
 
 	return {
 		templateModeRecommendation,
