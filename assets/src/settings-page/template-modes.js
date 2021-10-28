@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useCallback, useContext, useMemo } from '@wordpress/element';
+import { useCallback, useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -21,13 +21,15 @@ import {
 	NOTICE_TYPE_WARNING,
 } from '../components/amp-notice';
 import { Options } from '../components/options-context-provider';
-import { User } from '../components/user-context-provider';
-import { SiteScan as SiteScanContext } from '../components/site-scan-context-provider';
 import { READER, STANDARD, TRANSITIONAL } from '../common/constants';
 import { AMPDrawer } from '../components/amp-drawer';
 import { ReaderThemes } from '../components/reader-themes-context-provider';
 import { ReaderThemeCarousel } from '../components/reader-theme-carousel';
-import { getTemplateModeRecommendation, NOT_RECOMMENDED, RECOMMENDED } from '../common/helpers/get-template-mode-recommendation';
+import {
+	NOT_RECOMMENDED,
+	RECOMMENDED,
+	useTemplateModeRecommendation,
+} from '../components/use-template-mode-recommendation';
 
 /**
  * Small notice indicating a mode is recommended.
@@ -65,33 +67,11 @@ export function TemplateModes( { focusReaderThemes } ) {
 		},
 		updateOptions,
 	} = useContext( Options );
-	const {
-		currentTheme: {
-			is_reader_theme: currentThemeIsAmongReaderThemes,
-		},
-		selectedTheme,
-		templateModeWasOverridden,
-	} = useContext( ReaderThemes );
-	const {
-		hasSiteScanResults,
-		isFetchingScannableUrls,
-		pluginsWithAmpIncompatibility,
-		themesWithAmpIncompatibility,
-	} = useContext( SiteScanContext );
-	const { developerToolsOption } = useContext( User );
-
-	const templateModeRecommendation = useMemo( () => getTemplateModeRecommendation(
-		{
-			currentThemeIsAmongReaderThemes,
-			hasPluginsWithAmpIncompatibility: pluginsWithAmpIncompatibility?.length > 0,
-			hasSiteScanResults,
-			hasThemesWithAmpIncompatibility: themesWithAmpIncompatibility?.length > 0,
-			userIsTechnical: developerToolsOption === true,
-		},
-	), [ currentThemeIsAmongReaderThemes, developerToolsOption, hasSiteScanResults, pluginsWithAmpIncompatibility?.length, themesWithAmpIncompatibility?.length ] );
+	const { selectedTheme, templateModeWasOverridden } = useContext( ReaderThemes );
+	const { templateModeRecommendation, staleTemplateModeRecommendation } = useTemplateModeRecommendation();
 
 	const getLabelForTemplateMode = useCallback( ( mode ) => {
-		if ( isFetchingScannableUrls ) {
+		if ( ! templateModeRecommendation ) {
 			return null;
 		}
 
@@ -103,7 +83,7 @@ export function TemplateModes( { focusReaderThemes } ) {
 			default:
 				return null;
 		}
-	}, [ isFetchingScannableUrls, templateModeRecommendation ] );
+	}, [ templateModeRecommendation ] );
 
 	return (
 		<section className="template-modes" id="template-modes">
@@ -115,8 +95,13 @@ export function TemplateModes( { focusReaderThemes } ) {
 					{ __( 'Because you selected a Reader theme that is the same as your site\'s active theme, your site has automatically been switched to Transitional template mode.', 'amp' ) }
 				</AMPNotice>
 			) }
+			{ staleTemplateModeRecommendation && (
+				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
+					{ __( 'Because the Site Scan results are stale, the Template Mode recommendation may not be accurate. Rescan your site to ensure the recommendation is up to date.', 'amp' ) }
+				</AMPNotice>
+			) }
 			<TemplateModeOption
-				details={ isFetchingScannableUrls ? null : templateModeRecommendation[ STANDARD ].details }
+				details={ templateModeRecommendation?.[ STANDARD ]?.details }
 				detailsUrl="https://amp-wp.org/documentation/getting-started/standard/"
 				initialOpen={ false }
 				mode={ STANDARD }
@@ -187,14 +172,14 @@ export function TemplateModes( { focusReaderThemes } ) {
 				}
 			</TemplateModeOption>
 			<TemplateModeOption
-				details={ isFetchingScannableUrls ? null : templateModeRecommendation[ TRANSITIONAL ].details }
+				details={ templateModeRecommendation?.[ TRANSITIONAL ]?.details }
 				detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/"
 				initialOpen={ false }
 				mode={ TRANSITIONAL }
 				labelExtra={ getLabelForTemplateMode( TRANSITIONAL ) }
 			/>
 			<TemplateModeOption
-				details={ isFetchingScannableUrls ? null : templateModeRecommendation[ READER ].details }
+				details={ templateModeRecommendation?.[ READER ]?.details }
 				detailsUrl="https://amp-wp.org/documentation/getting-started/reader/"
 				initialOpen={ false }
 				mode={ READER }

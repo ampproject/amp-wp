@@ -8,10 +8,8 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.scss';
+import { useTemplateModeRecommendation } from '../../../components/use-template-mode-recommendation';
 import { Navigation } from '../../components/navigation-context-provider';
-import { ReaderThemes } from '../../../components/reader-themes-context-provider';
-import { SiteScan } from '../../../components/site-scan-context-provider';
-import { User } from '../../../components/user-context-provider';
 import { Options } from '../../../components/options-context-provider';
 import { TemplateModeOverride } from '../../components/template-mode-override-context-provider';
 import { ScreenUI } from './screen-ui';
@@ -21,11 +19,9 @@ import { ScreenUI } from './screen-ui';
  */
 export function TemplateMode() {
 	const { setCanGoForward } = useContext( Navigation );
-	const { editedOptions: { theme_support: themeSupport }, originalOptions, updateOptions } = useContext( Options );
-	const { developerToolsOption } = useContext( User );
-	const { hasSiteScanResults, pluginsWithAmpIncompatibility, themesWithAmpIncompatibility } = useContext( SiteScan );
-	const { currentTheme: { is_reader_theme: currentThemeIsAmongReaderThemes } } = useContext( ReaderThemes );
+	const { editedOptions: { theme_support: themeSupport }, originalOptions } = useContext( Options );
 	const { technicalQuestionChangedAtLeastOnce } = useContext( TemplateModeOverride );
+	const { templateModeRecommendation } = useTemplateModeRecommendation();
 
 	/**
 	 * Allow moving forward.
@@ -55,17 +51,10 @@ export function TemplateMode() {
 			</div>
 			<ScreenUI
 				currentMode={ themeSupport }
-				currentThemeIsAmongReaderThemes={ currentThemeIsAmongReaderThemes }
-				developerToolsOption={ developerToolsOption }
 				firstTimeInWizard={ false === originalOptions.plugin_configured }
-				hasSiteScanResults={ hasSiteScanResults }
-				pluginsWithAmpIncompatibility={ pluginsWithAmpIncompatibility }
 				savedCurrentMode={ originalOptions.theme_support }
-				setCurrentMode={ ( mode ) => {
-					updateOptions( { theme_support: mode } );
-				} }
 				technicalQuestionChanged={ technicalQuestionChangedAtLeastOnce }
-				themesWithAmpIncompatibility={ themesWithAmpIncompatibility }
+				templateModeRecommendation={ templateModeRecommendation }
 			/>
 		</div>
 	);
