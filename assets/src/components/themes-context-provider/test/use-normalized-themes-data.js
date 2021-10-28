@@ -99,7 +99,7 @@ describe( 'useNormalizedThemesData', () => {
 							stylesheet: 'twentytwenty',
 							status: 'active',
 							version: '1.7',
-						}
+						},
 					] }
 				>
 					<ComponentContainingHook />
