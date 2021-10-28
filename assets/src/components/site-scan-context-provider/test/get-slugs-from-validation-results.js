@@ -6,6 +6,7 @@ import { getSlugsFromValidationResults } from '../get-slugs-from-validation-resu
 describe( 'getSlugsFromValidationResults', () => {
 	it( 'returns empty arrays if no validation results are passed', () => {
 		expect( getSlugsFromValidationResults() ).toMatchObject( { plugins: [], themes: [] } );
+		expect( getSlugsFromValidationResults( [ { foo: 'bar' } ] ) ).toMatchObject( { plugins: [], themes: [] } );
 	} );
 
 	it( 'returns plugin and theme slugs', () => {

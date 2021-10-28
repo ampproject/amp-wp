@@ -19,10 +19,6 @@ export function useNormalizedPluginsData() {
 		}
 
 		setNormalizedPluginsData( plugins.reduce( ( accumulatedPluginsData, source ) => {
-			if ( ! source?.plugin ) {
-				return accumulatedPluginsData;
-			}
-
 			const slug = getPluginSlugFromFile( source.plugin );
 
 			return {

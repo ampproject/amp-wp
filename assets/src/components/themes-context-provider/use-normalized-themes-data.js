@@ -17,21 +17,15 @@ export function useNormalizedThemesData() {
 			return;
 		}
 
-		setNormalizedThemesData( () => themes.reduce( ( accumulatedThemesData, source ) => {
-			if ( ! source?.stylesheet ) {
-				return accumulatedThemesData;
-			}
-
-			return {
-				...accumulatedThemesData,
-				[ source.stylesheet ]: Object.keys( source ).reduce( ( props, key ) => ( {
-					...props,
-					slug: source.stylesheet,
-					// Flatten every prop that contains a `raw` member.
-					[ key ]: source[ key ]?.raw ?? source[ key ],
-				} ), {} ),
-			};
-		}, {} ) );
+		setNormalizedThemesData( () => themes.reduce( ( accumulatedThemesData, source ) => ( {
+			...accumulatedThemesData,
+			[ source.stylesheet ]: Object.keys( source ).reduce( ( props, key ) => ( {
+				...props,
+				slug: source.stylesheet,
+				// Flatten every prop that contains a `raw` member.
+				[ key ]: source[ key ]?.raw ?? source[ key ],
+			} ), {} ),
+		} ), {} ) );
 	}, [ fetchingThemes, themes ] );
 
 	return normalizedThemesData;
