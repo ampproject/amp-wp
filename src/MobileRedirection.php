@@ -553,7 +553,7 @@ final class MobileRedirection implements Service, Registerable {
 
 		$is_amp = amp_is_request();
 		if ( $is_amp ) {
-			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
+			$rel  = [ Attribute::REL_NOFOLLOW ];
 			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $this->paired_routing->remove_endpoint( amp_get_current_url() ) );
 			$text = __( 'Exit mobile version', 'amp' );
 		} else {

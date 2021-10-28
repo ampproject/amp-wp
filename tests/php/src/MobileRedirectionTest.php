@@ -646,7 +646,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 		$url = $is_amp ? amp_get_permalink( $post_id ) : get_permalink( $post_id );
 
-		$link_rel = $is_amp ? 'noamphtml nofollow' : '';
+		$link_rel = $is_amp ? 'nofollow' : '';
 
 		if ( $is_paired_browsing ) {
 			$this->register_paired_browsing_service();
