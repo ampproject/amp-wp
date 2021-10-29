@@ -2428,7 +2428,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			$sub_menu->setAttribute( 'class', $sub_menu->getAttribute( 'class' ) . ' expanded-true' );
 
-			// Handle button.
+			// Handle buttons.
 			$expand_button->setAttribute( 'on', "tap:$sidebar_id" );
 			$back_button = $this->get_first_element( $xpaths['close_button_in_submenu'], $sub_menu );
 			if ( ! empty( $back_button ) ) {
@@ -2442,9 +2442,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Update the markup of nested menu to AMP compatible markup.
+	 * Update the markup of the nested menu to AMP compatible markup.
 	 *
-	 * @param Element $sub_menu Element of sub menu from main navigation.
+	 * @param Element $sub_menu Element of sub-menu from main navigation.
 	 *
 	 * @return void
 	 */
