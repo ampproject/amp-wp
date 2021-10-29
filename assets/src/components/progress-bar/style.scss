@@ -1,0 +1,33 @@
+:root {
+	--amp-progress-bar-color: var(--amp-brand);
+	--amp-progress-bar-height: 34px;
+}
+
+.progress-bar {
+	border: 2px solid var(--amp-progress-bar-color);
+	border-radius: var(--amp-progress-bar-height);
+	height: var(--amp-progress-bar-height);
+	margin-bottom: 1.5rem;
+	margin-top: 1.5rem;
+	overflow: hidden;
+}
+
+.progress-bar__track {
+	border-radius: var(--amp-progress-bar-height);
+	height: calc(100% - 8px);
+	margin: 4px;
+	overflow: hidden;
+	position: relative;
+	width: calc(100% - 8px);
+}
+
+.progress-bar__indicator {
+	background-color: var(--amp-progress-bar-color);
+	border-radius: var(--amp-progress-bar-height);
+	height: 100%;
+	left: 0;
+	position: absolute;
+	top: 0;
+	transition: transform 800ms ease-out;
+	width: 100%;
+}
