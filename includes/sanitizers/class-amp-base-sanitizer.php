@@ -422,31 +422,24 @@ abstract class AMP_Base_Sanitizer {
 
 			// Make sure the width and height styles are copied to the width and height attributes since AMP will ultimately inline them as styles.
 			$pending_attributes = [];
-			$last_unit          = null;
+			$seen_units         = [];
 			foreach ( wp_array_slice_assoc( $styles, [ 'height', 'width' ] ) as $dimension => $value ) {
 				$value = $this->sanitize_dimension( $value, $dimension );
 				if ( '' === $value ) {
 					continue;
 				}
 
-				$this_unit = null;
 				if ( 'auto' !== $value ) {
 					$this_unit = preg_replace( '/^.*\d/', '', $value );
 					if ( ! $this_unit ) {
 						$this_unit = 'px';
 					}
-				}
-
-				// If the units do not match, then we have to abort since AMP requires this.
-				if ( $last_unit && $this_unit && $last_unit !== $this_unit ) {
-					$pending_attributes = [];
-					break;
+					$seen_units[ $this_unit ] = true;
 				}
 
 				$pending_attributes[ $dimension ] = $value;
-				$last_unit                        = $this_unit;
 			}
-			if ( $pending_attributes ) {
+			if ( $pending_attributes && count( $seen_units ) <= 1 ) {
 				$attributes = array_merge( $attributes, $pending_attributes );
 			}
 		}
