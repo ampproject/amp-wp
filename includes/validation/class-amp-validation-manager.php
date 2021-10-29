@@ -5,7 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\DevTools\FileReflection;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
@@ -696,16 +695,10 @@ class AMP_Validation_Manager {
 		add_filter( 'embed_oembed_html', [ __CLASS__, 'decorate_embed_source' ], PHP_INT_MAX, 3 );
 		add_filter( 'the_content', [ __CLASS__, 'add_block_source_comments' ], 8 ); // The do_blocks() function runs at priority 9.
 
-		// @todo add_filter( 'the_editor_content' ); // Flag all enqueued TinyMCE scripts as being sourced by the callback.
-		// @todo add_filter( 'quicktags_settings' ); // Flag all enqueued Quicktags scripts as being sourced by the callback.
-
 		add_filter(
 			'the_editor',
 			function ( $editor ) {
 				$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find theme/plugin responsible for calling.
-
-//				error_log( json_encode( self::$hook_source_stack, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
-//				return $editor;
 
 				$file_reflection = Services::get( 'dev_tools.file_reflection' );
 
@@ -722,53 +715,7 @@ class AMP_Validation_Manager {
 						}
 						break;
 					}
-//
-//					continue;
-//
-//					$source = $file_reflection->get_file_source( $call_stack['file'] );
-//					if (
-//						empty( $source )
-//						||
-//						FileReflection::TYPE_CORE === $source[ FileReflection::SOURCE_TYPE ]
-//						||
-//						(
-//							FileReflection::TYPE_PLUGIN === $source[ FileReflection::SOURCE_TYPE ]
-//							&&
-//							'amp' === $source[ FileReflection::SOURCE_NAME ]
-//						)
-//					) {
-//						continue;
-//					}
-//
-//					error_log( json_encode( $call_stack, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
-//
-//					error_log( json_encode( $source, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
-//
-//
-//
-//
-//					if ( '{closure}' === $call_stack['function'] ) {
-//
-//					}
-
-
-//					if ( '{closure}' === $call_stack['function'] ) {
-//						$called_functions[] = 'Closure::__invoke';
-//					} elseif ( isset( $call_stack['class'] ) ) {
-//						$called_functions[] = sprintf( '%s::%s', $call_stack['class'], $call_stack['function'] );
-//					} else {
-//						$called_functions[] = $call_stack['function'];
-//					}
 				}
-//
-//				self::$wp_editor_backtraces[] = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS );
-//
-//
-//				$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
-//				$callback_source     = $callback_reflection->get_source( $render_callback );
-//
-//				$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS );
-//				error_log( json_encode( $backtrace, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 
 				return $editor;
 			}
@@ -1401,16 +1348,6 @@ class AMP_Validation_Manager {
 					'_WP_Editors::force_uncompressed_tinymce' === $source['function']
 				) {
 					$indirect_sources = self::$wp_editor_sources;
-				}
-
-				if ( '_WP_Editors::force_uncompressed_tinymce' === $source['function'] ) {
-					error_log('boom');
-					error_log( json_encode( $source, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
-				}
-
-				if ( '_WP_Editors::editor_js' === $source['function'] ) {
-					error_log('var ajaxurl =??');
-					error_log( json_encode( $indirect_sources, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 				}
 
 				/**
