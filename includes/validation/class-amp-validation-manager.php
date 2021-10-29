@@ -1028,25 +1028,22 @@ class AMP_Validation_Manager {
 				if ( $matches['handle'] !== $style_handle ) {
 					continue;
 				}
-				foreach ( self::$enqueued_style_sources as $enqueued_style_sources_handle => $enqueued_style_sources ) {
-					if (
-						$enqueued_style_sources_handle !== $style_handle
-						&&
-						wp_styles()->query( $enqueued_style_sources_handle, 'done' )
-						&&
-						self::has_dependency( wp_styles(), $enqueued_style_sources_handle, $style_handle )
-					) {
-						$sources = array_merge(
-							array_map(
-								static function ( $enqueued_style_source ) use ( $style_handle ) {
-									$enqueued_style_source['dependency_handle'] = $style_handle;
-									return $enqueued_style_source;
-								},
-								$enqueued_style_sources
-							),
-							$sources
-						);
-					}
+
+				foreach (
+					self::find_done_dependent_handles( wp_styles(), $style_handle, array_keys( self::$enqueued_style_sources ) )
+					as
+					$enqueued_style_sources_handle
+				) {
+					$sources = array_merge(
+						array_map(
+							static function ( $enqueued_style_source ) use ( $style_handle ) {
+								$enqueued_style_source['dependency_handle'] = $style_handle;
+								return $enqueued_style_source;
+							},
+							self::$enqueued_style_sources[ $enqueued_style_sources_handle ]
+						),
+						$sources
+					);
 				}
 			}
 		}
@@ -1100,25 +1097,22 @@ class AMP_Validation_Manager {
 					if ( ! self::is_matching_script( $node, $script_handle ) ) {
 						continue;
 					}
-					foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
-						if (
-							$enqueued_script_sources_handle !== $script_handle
-							&&
-							wp_scripts()->query( $enqueued_script_sources_handle, 'done' )
-							&&
-							self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle )
-						) {
-							$sources = array_merge(
-								array_map(
-									static function ( $enqueued_script_source ) use ( $script_handle ) {
-										$enqueued_script_source['dependency_handle'] = $script_handle;
-										return $enqueued_script_source;
-									},
-									$enqueued_script_sources
-								),
-								$sources
-							);
-						}
+
+					foreach (
+						self::find_done_dependent_handles( wp_scripts(), $script_handle, array_keys( self::$enqueued_script_sources ) )
+						as
+						$enqueued_script_sources_handle
+					) {
+						$sources = array_merge(
+							array_map(
+								static function ( $enqueued_script_source ) use ( $script_handle ) {
+									$enqueued_script_source['dependency_handle'] = $script_handle;
+									return $enqueued_script_source;
+								},
+								self::$enqueued_script_sources[ $enqueued_script_sources_handle ]
+							),
+							$sources
+						);
 					}
 				}
 			} elseif ( $node->firstChild instanceof DOMText ) {
@@ -1141,25 +1135,22 @@ class AMP_Validation_Manager {
 					if ( isset( self::$enqueued_script_sources[ $script_handle ] ) ) {
 						$sources = array_merge( $sources, self::$enqueued_script_sources[ $script_handle ] );
 					}
-					foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
-						if (
-							$enqueued_script_sources_handle !== $script_handle
-							&&
-							wp_scripts()->query( $enqueued_script_sources_handle, 'done' )
-							&&
-							self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle )
-						) {
-							$sources = array_merge(
-								array_map(
-									static function ( $enqueued_script_source ) use ( $script_handle ) {
-										$enqueued_script_source['dependency_handle'] = $script_handle;
-										return $enqueued_script_source;
-									},
-									$enqueued_script_sources
-								),
-								$sources
-							);
-						}
+
+					foreach (
+						self::find_done_dependent_handles( wp_scripts(), $script_handle, array_keys( self::$enqueued_script_sources ) )
+						as
+						$enqueued_script_sources_handle
+					) {
+						$sources = array_merge(
+							array_map(
+								static function ( $enqueued_script_source ) use ( $script_handle ) {
+									$enqueued_script_source['dependency_handle'] = $script_handle;
+									return $enqueued_script_source;
+								},
+								self::$enqueued_script_sources[ $enqueued_script_sources_handle ]
+							),
+							$sources
+						);
 					}
 				} else {
 					// Identify the inline script sources.
@@ -1185,25 +1176,22 @@ class AMP_Validation_Manager {
 							if ( isset( self::$enqueued_script_sources[ $script_handle ] ) ) {
 								$sources = array_merge( $sources, self::$enqueued_script_sources[ $script_handle ] );
 							}
-							foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
-								if (
-									$enqueued_script_sources_handle !== $script_handle
-									&&
-									wp_scripts()->query( $enqueued_script_sources_handle, 'done' )
-									&&
-									self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle )
-								) {
-									$sources = array_merge(
-										array_map(
-											static function ( $enqueued_script_source ) use ( $script_handle ) {
-												$enqueued_script_source['dependency_handle'] = $script_handle;
-												return $enqueued_script_source;
-											},
-											$enqueued_script_sources
-										),
-										$sources
-									);
-								}
+
+							foreach (
+								self::find_done_dependent_handles( wp_scripts(), $script_handle, array_keys( self::$enqueued_script_sources ) )
+								as
+								$enqueued_script_sources_handle
+							) {
+								$sources = array_merge(
+									array_map(
+										static function ( $enqueued_script_source ) use ( $script_handle ) {
+											$enqueued_script_source['dependency_handle'] = $script_handle;
+											return $enqueued_script_source;
+										},
+										self::$enqueued_script_sources[ $enqueued_script_sources_handle ]
+									),
+									$sources
+								);
 							}
 						}
 					}
@@ -1221,6 +1209,30 @@ class AMP_Validation_Manager {
 		$sources = array_values( array_unique( $sources, SORT_REGULAR ) );
 
 		return $sources;
+	}
+
+	/**
+	 * Find dependent handles that have been printed.
+	 *
+	 * @param WP_Dependencies $dependencies Dependencies.
+	 * @param string          $handle Handle.
+	 * @param string[]        $enqueued_handles Enqueued handles.
+	 * @return string[] Found handles.
+	 */
+	private static function find_done_dependent_handles( WP_Dependencies $dependencies, $handle, $enqueued_handles ) {
+		$dependent_handles = [];
+		foreach ( $enqueued_handles as $enqueued_handle ) {
+			if (
+				$handle !== $enqueued_handle
+				&&
+				wp_scripts()->query( $enqueued_handle, 'done' )
+				&&
+				self::has_dependency( $dependencies, $enqueued_handle, $handle )
+			) {
+				$dependent_handles[] = $enqueued_handle;
+			}
+		}
+		return $dependent_handles;
 	}
 
 	/**
