@@ -1223,9 +1223,9 @@ class AMP_Validation_Manager {
 		$dependent_handles = [];
 		foreach ( $enqueued_handles as $enqueued_handle ) {
 			if (
-				$handle !== $enqueued_handle
+				$enqueued_handle !== $handle
 				&&
-				wp_scripts()->query( $enqueued_handle, 'done' )
+				$dependencies->query( $enqueued_handle, 'done' )
 				&&
 				self::has_dependency( $dependencies, $enqueued_handle, $handle )
 			) {
