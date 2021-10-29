@@ -32,6 +32,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 	 *
 	 * @dataProvider get_amp_to_amp_navigation_data
 	 * @covers AMP_Link_Sanitizer::process_links()
+	 * @covers AMP_Link_Sanitizer::process_element()
 	 *
 	 * @param bool $paired Paired.
 	 */
@@ -107,10 +108,10 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'expected_rel' => null,
 			],
 			'ugc-link'            => [
-				'rel'          => 'ugc',
+				'rel'          => 'ugc nofollow',
 				'href'         => home_url( '/some/user/generated/data/' ),
 				'expected_amp' => true,
-				'expected_rel' => 'ugc',
+				'expected_rel' => 'ugc nofollow',
 			],
 			'page-anchor'         => [
 				'href'         => '#top',
