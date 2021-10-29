@@ -1208,6 +1208,13 @@ class AMP_Validation_Manager {
 						}
 					}
 				}
+
+				// Add indirect sources for inline scripts added by wp_editor().
+				foreach ( $sources as $source ) {
+					if ( isset( $source['function'] ) && '_WP_Editors::editor_js' === $source['function'] ) {
+						$sources = array_merge( $sources, self::$wp_editor_sources );
+					}
+				}
 			}
 		}
 
