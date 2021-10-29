@@ -1124,14 +1124,20 @@ class AMP_Validation_Manager {
 			} elseif ( $node->firstChild instanceof DOMText ) {
 				$text = $node->textContent;
 
+				$script_handle = null;
+				$script_type   = null;
 				if (
 					$node->hasAttribute( Attribute::ID )
 					&&
-					preg_match( '/^(?P<handle>.+)-js-translations$/', $node->getAttribute( Attribute::ID ), $matches )
+					preg_match( '/^(.+)-js-(extra|after|before|translations)/', $node->getAttribute( Attribute::ID ), $matches )
 				) {
+					$script_handle = $matches[1];
+					$script_type   = $matches[2];
+				}
+
+				if ( 'translations' === $script_type ) {
 
 					// Obtain sources for script translations.
-					$script_handle = $matches['handle'];
 					if ( isset( self::$enqueued_script_sources[ $script_handle ] ) ) {
 						$sources = array_merge( $sources, self::$enqueued_script_sources[ $script_handle ] );
 					}
@@ -1156,14 +1162,49 @@ class AMP_Validation_Manager {
 						}
 					}
 				} else {
-
 					// Identify the inline script sources.
 					foreach ( self::$extra_script_sources as $extra_data => $extra_sources ) {
-						if ( false !== strpos( $text, $extra_data ) ) {
+						if ( false === strpos( $text, $extra_data ) ) {
+							continue;
+						}
+
+						$has_non_core = false;
+						foreach ( $extra_sources as $extra_source ) {
+							if ( 'core' !== $extra_source['type'] ) {
+								$has_non_core = true;
+								break;
+							}
+						}
+
+						if ( $has_non_core ) {
 							$sources = array_merge(
 								$sources,
 								$extra_sources
 							);
+						} else {
+							if ( isset( self::$enqueued_script_sources[ $script_handle ] ) ) {
+								$sources = array_merge( $sources, self::$enqueued_script_sources[ $script_handle ] );
+							}
+							foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
+								if (
+									$enqueued_script_sources_handle !== $script_handle
+									&&
+									wp_scripts()->query( $enqueued_script_sources_handle, 'done' )
+									&&
+									self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle )
+								) {
+									$sources = array_merge(
+										array_map(
+											static function ( $enqueued_script_source ) use ( $script_handle ) {
+												$enqueued_script_source['dependency_handle'] = $script_handle;
+												return $enqueued_script_source;
+											},
+											$enqueued_script_sources
+										),
+										$sources
+									);
+								}
+							}
 						}
 					}
 				}
