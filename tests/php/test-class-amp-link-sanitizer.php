@@ -37,12 +37,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 	 * @param bool $paired Paired.
 	 */
 	public function test_amp_to_amp_navigation( $paired ) {
-		// Enable pretty permalinks to keep the AMP slug as the only query var.
-		global $wp_rewrite;
-		update_option( 'permalink_structure', '/%postname%/' );
-		$wp_rewrite->use_trailing_slashes = true;
-		$wp_rewrite->init();
-		$wp_rewrite->flush_rules();
+		$this->set_permalink_structure( '/%postname%/' );
 
 		$post_link         = get_permalink(
 			self::factory()->post->create(
