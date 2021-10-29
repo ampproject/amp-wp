@@ -7,6 +7,7 @@ import { visitAdminPage, activateTheme, installTheme } from '@wordpress/e2e-test
  * Internal dependencies
  */
 import { completeWizard, cleanUpSettings, clickMode, scrollToElement } from '../../utils/onboarding-wizard-utils';
+import { setTemplateMode } from '../../utils/amp-settings-utils';
 
 describe( 'AMP settings screen newly activated', () => {
 	beforeEach( async () => {
@@ -55,7 +56,7 @@ describe( 'Settings screen when reader theme is active theme', () => {
 		await clickMode( 'reader' );
 		await scrollToElement( { selector: '#template-mode-reader-container .components-panel__body-toggle', click: true } );
 
-		await scrollToElement( { selector: '#reader-themes .amp-notice__body' } );
+		await scrollToElement( { selector: '#reader-themes .components-panel__body-toggle', click: true } );
 		await expect( page ).toMatchElement( '.amp-notice__body', { text: /^Your active theme/ } );
 
 		await activateTheme( 'twentytwenty' );
@@ -63,18 +64,49 @@ describe( 'Settings screen when reader theme is active theme', () => {
 } );
 
 describe( 'Mode info notices', () => {
-	it( 'shows expected notices for theme with built-in support', async () => {
-		await activateTheme( 'twentytwenty' );
+	const timeout = 10000;
+
+	beforeEach( async () => {
+		await cleanUpSettings();
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		await expect( page ).toMatchElement( '#template-mode-standard-container .amp-notice--info' );
-		await expect( page ).toMatchElement( '#template-mode-transitional-container .amp-notice--info' );
-
-		await clickMode( 'reader' );
-
-		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--warning' );
 	} );
 
+	afterEach( async () => {
+		await cleanUpSettings();
+	} );
+
+	it( 'show information in the Template Mode section if site scan results are stale', async () => {
+		// Trigger a site scan.
+		await page.waitForSelector( '#site-scan' );
+
+		const isPanelCollapsed = await page.$eval( '#site-scan .components-panel__body-toggle', ( el ) => el.ariaExpanded === 'false' );
+		if ( isPanelCollapsed ) {
+			await scrollToElement( { selector: '#site-scan .components-panel__body-toggle', click: true } );
+		}
+
+		await scrollToElement( { selector: '#site-scan .settings-site-scan__footer .is-primary', click: true } );
+		await expect( page ).toMatchElement( '#site-scan .settings-site-scan__footer .is-primary', { text: 'Rescan Site', timeout } );
+
+		await scrollToElement( { selector: '#template-modes' } );
+
+		// Confirm there is no notice about stale results.
+		const noticeXpath = '//*[@id="template-modes"]/*[contains(@class, "amp-notice--info")]/*[contains(text(), "Site Scan results are stale")]';
+
+		const noticeBefore = await page.$x( noticeXpath );
+		expect( noticeBefore ).toHaveLength( 0 );
+
+		// Change template mode to make the scan results stale.
+		await setTemplateMode( 'transitional' );
+
+		await page.waitForSelector( '.settings-site-scan__footer .is-primary', { timeout } );
+
+		await scrollToElement( { selector: '#template-modes' } );
+
+		const noticeAfter = await page.$x( noticeXpath );
+		expect( noticeAfter ).toHaveLength( 1 );
+	} );
+
+	it.todo( 'shows expected notices for theme with built-in support' );
 	it.todo( 'shows expected notices for theme with paired flag false' );
 	it.todo( 'shows expected notices for theme that only supports reader mode' );
 } );
@@ -133,105 +165,5 @@ describe( 'Saving', () => {
 		await expect( page ).not.toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
 
 		await testSave();
-	} );
-} );
-
-describe( 'AMP settings screen Review panel', () => {
-	let testPost;
-
-	beforeAll( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		testPost = await page.evaluate( () => wp.apiFetch( {
-			path: '/wp/v2/posts',
-			method: 'POST',
-			data: { title: 'Test Post', status: 'publish' },
-		} ) );
-	} );
-
-	afterAll( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		if ( testPost?.id ) {
-			await page.evaluate( ( id ) => wp.apiFetch( {
-				path: `/wp/v2/posts/${ id }`,
-				method: 'DELETE',
-				data: { force: true },
-			} ), testPost.id );
-		}
-	} );
-
-	beforeEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-	} );
-
-	afterEach( async () => {
-		await cleanUpSettings();
-	} );
-
-	async function changeAndSaveTemplateMode( mode ) {
-		await clickMode( mode );
-
-		await Promise.all( [
-			scrollToElement( { selector: '.amp-settings-nav button[type="submit"]', click: true } ),
-			page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ), { timeout: 10000 } ),
-		] );
-	}
-
-	it( 'is present on the page', async () => {
-		await page.waitForSelector( '.settings-site-review' );
-		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
-		await expect( page ).toMatchElement( 'h3', { text: 'Need help?' } );
-		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /support forums/i } );
-		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /different template mode/i } );
-		await expect( page ).toMatchElement( '.settings-site-review__list li', { text: /how the AMP plugin works/i } );
-	} );
-
-	it( 'button redirects to an AMP page in transitional mode', async () => {
-		await changeAndSaveTemplateMode( 'transitional' );
-
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
-
-		await page.waitForSelector( 'html[amp]' );
-		await expect( page ).toMatchElement( 'html[amp]' );
-	} );
-
-	it( 'button redirects to an AMP page in reader mode', async () => {
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
-
-		await page.waitForSelector( 'html[amp]' );
-		await expect( page ).toMatchElement( 'html[amp]' );
-	} );
-
-	it( 'button redirects to an AMP page in standard mode', async () => {
-		await changeAndSaveTemplateMode( 'standard' );
-
-		await expect( page ).toClick( 'a', { text: 'Browse Site' } );
-		await page.waitForNavigation();
-
-		await page.waitForSelector( 'html[amp]' );
-		await expect( page ).toMatchElement( 'html[amp]' );
-	} );
-
-	it( 'can be dismissed and shows up again only after a template mode change', async () => {
-		await page.waitForSelector( '.settings-site-review' );
-		await expect( page ).toMatchElement( 'button', { text: 'Dismiss' } );
-		await expect( page ).toClick( 'button', { text: 'Dismiss' } );
-
-		// Give the Review panel some time disappear.
-		await page.waitForTimeout( 100 );
-		await expect( page ).not.toMatchElement( '.settings-site-review' );
-
-		// There should be no Review panel after page reload.
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-		await page.waitForSelector( '#amp-settings-root' );
-		await expect( page ).not.toMatchElement( '.settings-site-review' );
-
-		await changeAndSaveTemplateMode( 'standard' );
-
-		await page.waitForSelector( '.settings-site-review' );
-		await expect( page ).toMatchElement( 'h2', { text: 'Review' } );
 	} );
 } );

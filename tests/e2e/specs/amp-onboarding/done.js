@@ -1,9 +1,4 @@
 /**
- * WordPress dependencies
- */
-import { trashAllPosts, visitAdminPage } from '@wordpress/e2e-test-utils';
-
-/**
  * Internal dependencies
  */
 import { testCloseButton, cleanUpSettings, moveToDoneScreen } from '../../utils/onboarding-wizard-utils';
@@ -34,43 +29,6 @@ async function testCommonDoneStepElements() {
 }
 
 describe( 'Done', () => {
-	let testPost;
-	let testPage;
-
-	beforeAll( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		testPost = await page.evaluate( () => wp.apiFetch( {
-			path: '/wp/v2/posts',
-			method: 'POST',
-			data: { title: 'Test Post', status: 'publish' },
-		} ) );
-		testPage = await page.evaluate( () => wp.apiFetch( {
-			path: '/wp/v2/pages',
-			method: 'POST',
-			data: { title: 'Test Page', status: 'publish' },
-		} ) );
-	} );
-
-	afterAll( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		if ( testPost?.id ) {
-			await page.evaluate( ( id ) => wp.apiFetch( {
-				path: `/wp/v2/posts/${ id }`,
-				method: 'DELETE',
-				data: { force: true },
-			} ), testPost.id );
-		}
-		if ( testPage?.id ) {
-			await page.evaluate( ( id ) => wp.apiFetch( {
-				path: `/wp/v2/pages/${ id }`,
-				method: 'DELETE',
-				data: { force: true },
-			} ), testPage.id );
-		}
-	} );
-
 	afterEach( async () => {
 		await cleanUpSettings();
 	} );
@@ -118,15 +76,5 @@ describe( 'Done', () => {
 
 		await expect( page ).toMatchElement( 'p', { text: /Reader mode/i } );
 		await expect( page ).toMatchElement( '.done__preview-container input[type="checkbox"]' );
-	} );
-
-	it( 'does not render site preview in reader mode if there are no posts and pages', async () => {
-		await trashAllPosts();
-		await trashAllPosts( 'page' );
-
-		await moveToDoneScreen( { mode: 'reader' } );
-
-		await expect( page ).toMatchElement( 'h1', { text: 'Done' } );
-		await expect( page ).not.toMatchElement( '.done__preview-iframe' );
 	} );
 } );

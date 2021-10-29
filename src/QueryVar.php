@@ -32,6 +32,17 @@ interface QueryVar {
 	const AMP = 'amp';
 
 	/**
+	 * Query var which overrides the template mode to be Standard (aka AMP-first aka canonical).
+	 *
+	 * This is only honored during validation requests or if the user has validation capability.
+	 *
+	 * @see \AMP_Validation_Manager::is_validate_request()
+	 * @see \AMP_Validation_Manager::has_cap()
+	 * @var string
+	 */
+	const AMP_FIRST = 'amp-first';
+
+	/**
 	 * Query var used to signal the request for an non-AMP page.
 	 *
 	 * This is used in a paired mode (Transitional or Reader) in two ways:
