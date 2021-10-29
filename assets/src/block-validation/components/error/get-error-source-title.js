@@ -9,14 +9,14 @@ import { pluginNames, themeName, themeSlug } from 'amp-block-validation';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
- * Attempts to get the title of the plugin or theme responsible for an error.
+ * Retrieve sources keyed by type.
  *
- * Adapted from AMP_Validated_URL_Post_Type::render_sources_column PHP method.
- *
- * @param {Object[]} sources Error source details from the PHP backtrace.
+ * @param {Object} sources
+ * @return {{core: *[], plugin: *[], 'mu-plugin': *[], blocks: *[], theme: *[], embed: *[]}} Keyed sources.
  */
-export function getErrorSourceTitle( sources = [] ) {
+function getKeyedSources( sources ) {
 	const keyedSources = { theme: [], plugin: [], 'mu-plugin': [], embed: [], core: [], blocks: [] };
+
 	for ( const source of sources ) {
 		if ( source.type && source.type in keyedSources ) {
 			keyedSources[ source.type ].push( source );
@@ -25,16 +25,32 @@ export function getErrorSourceTitle( sources = [] ) {
 		}
 	}
 
+	return keyedSources;
+}
+
+/**
+ * Attempts to get the title of the plugin or theme responsible for an error.
+ *
+ * Adapted from AMP_Validated_URL_Post_Type::render_sources_column PHP method.
+ *
+ * @param {Object[]} sources Error source details from the PHP backtrace.
+ */
+export function getErrorSourceTitle( sources = [] ) {
+	const keyedSources = getKeyedSources( sources );
 	const output = [];
-	const uniquePluginNames = [ ...new Set( keyedSources.plugin.map( ( { name } ) => name ) ) ];
-	const muPluginNames = [ ...new Set( keyedSources[ 'mu-plugin' ].map( ( { name } ) => name ) ) ];
-	const combinedPluginNames = [ ...uniquePluginNames, ...muPluginNames ];
+	const uniquePluginNames = new Set( keyedSources.plugin.map( ( { name } ) => name ) );
+	const muPluginNames = new Set( keyedSources[ 'mu-plugin' ].map( ( { name } ) => name ) );
+	let combinedPluginNames = [ ...uniquePluginNames, ...muPluginNames ];
+
+	if ( combinedPluginNames.length > 1 ) {
+		combinedPluginNames = combinedPluginNames.filter( ( slug ) => ! slug.match( /^gutenberg/i ) );
+	}
 
 	if ( 1 === combinedPluginNames.length ) {
 		output.push( pluginNames[ combinedPluginNames[ 0 ] ] || combinedPluginNames[ 0 ] );
 	} else {
-		const pluginCount = uniquePluginNames.length;
-		const muPluginCount = muPluginNames.length;
+		const pluginCount = uniquePluginNames.size;
+		const muPluginCount = muPluginNames.size;
 
 		if ( 0 < pluginCount ) {
 			output.push( sprintf( '%1$s (%2$d)', __( 'Plugins', 'amp' ), pluginCount ) );
@@ -68,6 +84,10 @@ export function getErrorSourceTitle( sources = [] ) {
 
 	if ( 0 === output.length && 0 < keyedSources.core.length ) {
 		output.push( __( 'Core', 'amp' ) );
+	}
+
+	if ( 0 === output.length && 0 < sources.length ) {
+		output.push( __( 'Unknown', 'amp' ) );
 	}
 
 	return output.join( ', ' );
