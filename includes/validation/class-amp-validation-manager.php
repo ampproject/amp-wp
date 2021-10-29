@@ -1434,13 +1434,7 @@ class AMP_Validation_Manager {
 				}
 
 				$indirect_sources = [];
-				if (
-					'_WP_Editors::enqueue_scripts' === $source['function']
-					||
-					'_WP_Editors::editor_js' === $source['function'] // @todo This is actually printing script! So there is no handle.
-					||
-					'_WP_Editors::force_uncompressed_tinymce' === $source['function']
-				) {
+				if ( '_WP_Editors::enqueue_scripts' === $source['function'] ) {
 					$indirect_sources = self::$wp_editor_sources;
 				}
 
