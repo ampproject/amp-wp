@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -20,7 +19,7 @@ const ampThemeInstall = {
 	},
 
 	/**
-	 * Add new tab for PX Enhanced theme in theme install page.
+	 * Add a new tab for PX Enhanced theme in theme install page.
 	 */
 	addTab() {
 		const filterLinks = document.querySelector( '.filter-links' );
@@ -31,7 +30,6 @@ const ampThemeInstall = {
 		const listItem = document.createElement( 'li' );
 		const anchorElement = document.createElement( 'a' );
 
-		anchorElement.append( __( 'AMP Compatible', 'amp' ) );
 		anchorElement.setAttribute( 'href', '#' );
 		anchorElement.setAttribute( 'data-sort', 'amp-compatible' );
 

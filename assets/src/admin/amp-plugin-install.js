@@ -84,14 +84,13 @@ const ampPluginInstall = {
 			messageElement.append( iconElement );
 			messageElement.append( tooltipElement );
 			messageElement.append( ' ' );
-			messageElement.append( __( 'AMP Compatible', 'amp' ) );
 
 			pluginCardElement.appendChild( messageElement );
 		}
 	},
 
 	/**
-	 * Remove the additional info from plugin card in "AMP Compatible" tab.
+	 * Remove the additional info from the plugin card in the "AMP Compatible" tab.
 	 */
 	removeAdditionalInfo() {
 		if ( this.isAMPCompatibleTab() ) {

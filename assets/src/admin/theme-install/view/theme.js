@@ -49,7 +49,6 @@ export default wpThemeView.extend( {
 			messageElement.append( iconElement );
 			messageElement.append( tooltipElement );
 			messageElement.append( ' ' );
-			messageElement.append( __( 'AMP Compatible', 'amp' ) );
 
 			element.appendChild( messageElement );
 		}
@@ -102,7 +101,7 @@ export default wpThemeView.extend( {
 	},
 
 	/**
-	 * Check if theme is AMP compatible or not.
+	 * Check if a theme is AMP compatible or not.
 	 *
 	 * @param {string} slug Theme slug.
 	 * @return {boolean} True if theme is AMP compatible, Otherwise False.
@@ -112,7 +111,7 @@ export default wpThemeView.extend( {
 	},
 
 	/**
-	 * Check if theme is from WordPress org or not.
+	 * Check if a theme is from WordPress org or not.
 	 *
 	 * @param {string} slug Theme slug.
 	 * @return {boolean} True if theme is listed in WordPress org, Otherwise False.
