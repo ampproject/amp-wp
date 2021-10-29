@@ -81,7 +81,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		parent::tearDown();
 		unset( $GLOBALS['show_admin_bar'] );
-		AMP_Validation_Manager::$is_validate_request = false;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 		AMP_Validation_Manager::reset_validation_results();
 		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
 		remove_theme_support( 'custom-header' );
@@ -702,6 +702,22 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertArrayHasKey( 'is_home', $supportable_templates );
 		$this->assertArrayNotHasKey( 'parent', $supportable_templates['is_home'] );
 
+		// Test that overrides work.
+		$this->assertTrue( $supportable_templates['is_singular']['supported'] );
+		$this->assertTrue( $supportable_templates['is_home']['supported'] );
+		$this->assertTrue( $supportable_templates['is_date']['supported'] );
+		$this->assertTrue( $supportable_templates['is_404']['supported'] );
+		$overridden_supportable_templates = AMP_Theme_Support::get_supportable_templates(
+			[
+				Option::ALL_TEMPLATES_SUPPORTED => false,
+				Option::SUPPORTED_TEMPLATES     => [ 'is_date', 'is_404' ],
+			]
+		);
+		$this->assertFalse( $overridden_supportable_templates['is_singular']['supported'] );
+		$this->assertFalse( $overridden_supportable_templates['is_home']['supported'] );
+		$this->assertTrue( $overridden_supportable_templates['is_date']['supported'] );
+		$this->assertTrue( $overridden_supportable_templates['is_404']['supported'] );
+
 		// Test common templates.
 		$this->assertArrayHasKey( 'is_singular', $supportable_templates );
 		$this->assertArrayHasKey( 'is_archive', $supportable_templates );
@@ -747,7 +763,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		);
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		$this->assertArrayHasKey( 'is_custom', $supportable_templates );
-		remove_all_filters( 'amp_supportable_templates' );
 	}
 
 	/**
@@ -1941,16 +1956,82 @@ class Test_AMP_Theme_Support extends TestCase {
 	}
 
 	/**
-	 * Test prepare_response when validating an invalid AMP page.
+	 * Test prepare_response when validating a non-AMP page.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
-	public function test_prepare_response_for_validating_invalid_amp_page() {
-		AMP_Validation_Manager::$is_validate_request = true;
+	public function test_prepare_response_for_validating_non_amp_page() {
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 
 		$response = AMP_Theme_Support::prepare_response( '' );
 		$this->assertJson( $response );
 		$this->assertStringContainsString( 'RENDERED_PAGE_NOT_AMP', $response );
+	}
+
+	/** @return array */
+	public function get_data_to_test_prepare_response_for_validating_amp_page() {
+		return [
+			'no-store'                  => [
+				'args' => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+				],
+			],
+			'store'                     => [
+				'args' => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE => true,
+				],
+			],
+			'store_but_omit_styleshets' => [
+				'args' => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE => true,
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS => true,
+				],
+			],
+		];
+	}
+
+	/**
+	 * Test prepare_response when validating an AMP page.
+	 *
+	 * @dataProvider get_data_to_test_prepare_response_for_validating_amp_page
+	 * @covers AMP_Theme_Support::prepare_response()
+	 * @covers AMP_Validation_Manager::send_validate_response()
+	 */
+	public function test_prepare_response_for_validating_amp_page( $args ) {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->go_to( '/' );
+
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = $args;
+		AMP_Validation_Manager::init_validate_request();
+		AMP_Theme_Support::finish_init();
+		$response = AMP_Theme_Support::prepare_response( '<html amp><head><style>body{color:red}</style></head><body><amp-layout layout="bad"></amp-layout></body></html>' );
+		$this->assertJson( $response );
+		$data = json_decode( $response, true );
+		$this->assertArrayHasKey( 'http_status_code', $data );
+		$this->assertArrayHasKey( 'php_fatal_error', $data );
+		$this->assertArrayHasKey( 'queried_object', $data );
+		$this->assertArrayHasKey( 'url', $data );
+		if ( ! empty( $args[ AMP_Validation_Manager::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS ] ) ) {
+			$this->assertArrayNotHasKey( 'stylesheets', $data );
+		} else {
+			$this->assertArrayHasKey( 'stylesheets', $data );
+		}
+		$this->assertArrayHasKey( 'results', $data );
+		$this->assertCount( 1, $data['results'] );
+		$this->assertEquals( 'SPECIFIED_LAYOUT_INVALID', $data['results'][0]['error']['code'] );
+		$this->assertTrue( $data['revalidated'] );
+
+		if ( ! empty( $args[ AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE ] ) ) {
+			$this->assertArrayHasKey( 'validated_url_post', $data );
+			$this->assertArrayHasKey( 'id', $data['validated_url_post'] );
+			$this->assertArrayHasKey( 'edit_link', $data['validated_url_post'] );
+			$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_type( $data['validated_url_post']['id'] ) );
+		} else {
+			$this->assertArrayNotHasKey( 'validated_url_post', $data );
+		}
 	}
 
 	/**

@@ -32,6 +32,9 @@ function amp_init_customizer() {
 /**
  * Get permalink for the first AMP-eligible post.
  *
+ * @todo Eliminate this in favor of ScannableURLProvider::get_posts_by_type().
+ * @see \AmpProject\AmpWP\Validation\ScannableURLProvider::get_posts_by_type()
+ *
  * @internal
  * @return string|null URL on success, null if none found.
  */

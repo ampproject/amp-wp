@@ -686,9 +686,15 @@ class AMP_Theme_Support {
 	/**
 	 * Get the templates which can be supported.
 	 *
+	 * @param array $options Optional AMP options to override what has been saved.
 	 * @return array Supportable templates.
 	 */
-	public static function get_supportable_templates() {
+	public static function get_supportable_templates( $options = [] ) {
+		$options = array_merge(
+			AMP_Options_Manager::get_options(),
+			$options
+		);
+
 		$templates = [
 			'is_singular' => [
 				'label' => __( 'Singular', 'amp' ),
@@ -798,8 +804,8 @@ class AMP_Theme_Support {
 		 */
 		$templates = apply_filters( 'amp_supportable_templates', $templates );
 
-		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
-		$are_all_supported   = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
+		$supported_templates = $options[ Option::SUPPORTED_TEMPLATES ];
+		$are_all_supported   = $options[ Option::ALL_TEMPLATES_SUPPORTED ];
 
 		$did_filter_supply_supported = false;
 		$did_filter_supply_immutable = false;
@@ -1908,7 +1914,7 @@ class AMP_Theme_Support {
 			}
 			$did_redirect = $status_code >= 300 && $status_code < 400 && $sent_location_header;
 
-			if ( AMP_Validation_Manager::$is_validate_request && ! $did_redirect ) {
+			if ( AMP_Validation_Manager::is_validate_request() && ! $did_redirect ) {
 				if ( ! headers_sent() ) {
 					status_header( 400 );
 					header( 'Content-Type: application/json; charset=utf-8' );
@@ -1967,7 +1973,7 @@ class AMP_Theme_Support {
 
 		$dom = Document::fromHtml( $response, Options::DEFAULTS );
 
-		if ( AMP_Validation_Manager::$is_validate_request ) {
+		if ( AMP_Validation_Manager::is_validate_request() ) {
 			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
 		}
 
@@ -2023,18 +2029,12 @@ class AMP_Theme_Support {
 		do_action( 'amp_server_timing_stop', 'amp_sanitizer' );
 
 		// Respond early with results if performing a validate request.
-		if ( AMP_Validation_Manager::$is_validate_request ) {
-			status_header( 200 );
-			header( 'Content-Type: application/json; charset=utf-8' );
-			$data = [
-				'http_status_code' => $status_code,
-				'php_fatal_error'  => false,
-			];
-			if ( $last_error && in_array( $last_error['type'], [ E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_PARSE ], true ) ) {
-				$data['php_fatal_error'] = $last_error;
-			}
-			$data = array_merge( $data, AMP_Validation_Manager::get_validate_response_data( $sanitization_results ) );
-			return wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		if ( AMP_Validation_Manager::is_validate_request() ) {
+			return AMP_Validation_Manager::send_validate_response(
+				$sanitization_results,
+				$status_code,
+				$last_error
+			);
 		}
 
 		/**

@@ -753,7 +753,7 @@ class AMP_Validated_URL_Post_Type {
 	 * @param string $url URL.
 	 * @return string Normalized URL.
 	 */
-	protected static function normalize_url_for_storage( $url ) {
+	public static function normalize_url_for_storage( $url ) {
 		// Only ever store the canonical version.
 		if ( ! amp_is_canonical() ) {
 			$url = amp_remove_paired_endpoint( $url );
@@ -765,7 +765,7 @@ class AMP_Validated_URL_Post_Type {
 		// Query args to be removed from validated URLs.
 		$removable_query_vars = array_merge(
 			wp_removable_query_args(),
-			[ 'preview_id', 'preview_nonce', 'preview', QueryVar::NOAMP ]
+			[ 'preview_id', 'preview_nonce', 'preview', QueryVar::NOAMP, AMP_Validation_Manager::VALIDATE_QUERY_VAR ]
 		);
 
 		// Normalize query args, removing all that are not recognized or which are removable.
@@ -1084,9 +1084,16 @@ class AMP_Validated_URL_Post_Type {
 		return [
 			'theme'   => $theme,
 			'plugins' => wp_list_pluck( $plugin_registry->get_plugins( true, false ), 'Version' ), // @todo What about multiple plugins being in the same directory?
-			'options' => [
-				Option::THEME_SUPPORT => AMP_Options_Manager::get_option( Option::THEME_SUPPORT ),
-			],
+			'options' => wp_array_slice_assoc(
+				AMP_Options_Manager::get_options(),
+				[
+					Option::ALL_TEMPLATES_SUPPORTED,
+					Option::READER_THEME,
+					Option::SUPPORTED_POST_TYPES,
+					Option::SUPPORTED_TEMPLATES,
+					Option::THEME_SUPPORT,
+				]
+			),
 		];
 	}
 
@@ -1149,7 +1156,14 @@ class AMP_Validated_URL_Post_Type {
 		} else {
 			$old_options = [];
 		}
-		$option_differences = array_diff_assoc( $old_options, $new_validated_environment['options'] );
+		$option_differences = [];
+		foreach ( $new_validated_environment['options'] as $option => $value ) {
+			if ( ! isset( $old_options[ $option ] ) ) {
+				$option_differences[ $option ] = null;
+			} elseif ( $old_options[ $option ] !== $value ) {
+				$option_differences[ $option ] = $old_options[ $option ];
+			}
+		}
 		if ( ! empty( $option_differences ) ) {
 			$staleness['options'] = $option_differences;
 		}

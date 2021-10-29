@@ -7,10 +7,12 @@ import {
 	HAS_DEPENDENCY_SUPPORT,
 	OPTIONS_REST_PATH,
 	READER_THEMES_REST_PATH,
+	SCANNABLE_URLS_REST_PATH,
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 	USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 	USERS_RESOURCE_REST_PATH,
+	VALIDATE_NONCE,
 } from 'amp-settings';
 
 /**
@@ -38,6 +40,9 @@ import { AMPDrawer } from '../components/amp-drawer';
 import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
 import { ErrorScreen } from '../components/error-screen';
 import { User, UserContextProvider } from '../components/user-context-provider';
+import { PluginsContextProvider } from '../components/plugins-context-provider';
+import { ThemesContextProvider } from '../components/themes-context-provider';
+import { SiteScanContextProvider } from '../components/site-scan-context-provider';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
@@ -48,6 +53,7 @@ import { Analytics } from './analytics';
 import { PairedUrlStructure } from './paired-url-structure';
 import { MobileRedirection } from './mobile-redirection';
 import { DeveloperTools } from './developer-tools';
+import { SiteScan } from './site-scan';
 import { DeleteDataAtUninstall } from './delete-data-at-uninstall';
 
 const { ajaxurl: wpAjaxUrl } = global;
@@ -86,7 +92,18 @@ function Providers( { children } ) {
 								updatesNonce={ UPDATES_NONCE }
 								wpAjaxUrl={ wpAjaxUrl }
 							>
-								{ children }
+								<PluginsContextProvider hasErrorBoundary={ true }>
+									<ThemesContextProvider hasErrorBoundary={ true }>
+										<SiteScanContextProvider
+											ampFirst={ false }
+											fetchCachedValidationErrors={ true }
+											scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
+											validateNonce={ VALIDATE_NONCE }
+										>
+											{ children }
+										</SiteScanContextProvider>
+									</ThemesContextProvider>
+								</PluginsContextProvider>
 							</ReaderThemesContextProvider>
 						</UserContextProvider>
 					</OptionsContextProvider>
@@ -182,6 +199,10 @@ function Root( { appRoot } ) {
 		};
 	}, [ fetchingOptions ] );
 
+	const focusSiteScanSection = useCallback( () => {
+		setFocusedSection( 'site-scan' );
+	}, [] );
+
 	if ( false !== fetchingOptions || null === templateModeWasOverridden ) {
 		return <Loading />;
 	}
@@ -194,6 +215,7 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 			<Welcome />
+			<SiteScan onSiteScan={ focusSiteScanSection } />
 			<SiteReview />
 			<form onSubmit={ onSubmit }>
 				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />

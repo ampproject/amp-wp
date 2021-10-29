@@ -1,4 +1,3 @@
-
 /**
  * Internal dependencies
  */
@@ -15,6 +14,7 @@ async function testCommonDoneStepElements() {
 	await expect( page ).toMatchElement( '.done__list li', { text: /different template mode/i } );
 	await expect( page ).toMatchElement( '.done__list li', { text: /how the AMP plugin works/i } );
 
+	await expect( page ).toMatchElement( 'p', { text: /Browse your site/i } );
 	await expect( page ).toMatchElement( '.done__preview-iframe' );
 
 	await expect( '.done__links-container a' ).not.countToBe( 0 );
@@ -41,7 +41,7 @@ describe( 'Done', () => {
 		await testCommonDoneStepElements();
 
 		await expect( page ).toMatchElement( 'p', { text: /Standard mode/i } );
-		await expect( '.done__preview-container input[type="checkbox"]' ).countToBe( 0 );
+		await expect( page ).not.toMatchElement( '.done__preview-container input[type="checkbox"]' );
 	} );
 
 	it( 'renders transitional mode site review screen', async () => {
@@ -52,7 +52,7 @@ describe( 'Done', () => {
 		await testCommonDoneStepElements();
 
 		await expect( page ).toMatchElement( 'p', { text: /Transitional mode/i } );
-		await expect( '.done__preview-container input[type="checkbox"]:checked' ).countToBe( 1 );
+		await expect( page ).toMatchElement( '.done__preview-container input[type="checkbox"]:checked' );
 
 		await page.waitForSelector( '.done__preview-iframe' );
 		const originalIframeSrc = await page.$eval( '.done__preview-iframe', ( e ) => e.getAttribute( 'src' ) );
@@ -64,7 +64,7 @@ describe( 'Done', () => {
 
 		expect( updatedIframeSrc ).not.toBe( originalIframeSrc );
 
-		await expect( '.done__preview-container input[type="checkbox"]:not(:checked)' ).countToBe( 1 );
+		await expect( page ).toMatchElement( '.done__preview-container input[type="checkbox"]:not(:checked)' );
 	} );
 
 	it( 'renders reader mode site review screen', async () => {
@@ -75,8 +75,6 @@ describe( 'Done', () => {
 		await testCommonDoneStepElements();
 
 		await expect( page ).toMatchElement( 'p', { text: /Reader mode/i } );
-		await expect( page ).toMatchElement( '.done__preview-iframe' );
-
-		await expect( '.done__preview-container input[type="checkbox"]' ).countToBe( 1 );
+		await expect( page ).toMatchElement( '.done__preview-container input[type="checkbox"]' );
 	} );
 } );
