@@ -1367,6 +1367,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 			AMP_Gfycat_Embed_Handler::class       => [],
 			AMP_Imgur_Embed_Handler::class        => [],
 			AMP_Scribd_Embed_Handler::class       => [],
+			AMP_WordPress_Embed_Handler::class    => [],
 			AMP_WordPress_TV_Embed_Handler::class => [],
 		],
 		$post
