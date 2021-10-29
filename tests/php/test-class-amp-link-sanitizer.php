@@ -166,7 +166,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		$html = sprintf( '<div id="wpadminbar"><a id="admin-bar-link" href="%s"></a></div>', esc_url( $admin_bar_link_href ) );
 		foreach ( $links as $id => $link_data ) {
 			$html .= sprintf( '<a id="%s" href="%s"', esc_attr( $id ), esc_attr( $link_data['href'] ) );
-			if ( isset( $link_data['rel'] ) && ! empty( $link_data['rel'] ) ) {
+			if ( ! empty( $link_data['rel'] ) ) {
 				$html .= sprintf( ' rel="%s"', esc_attr( $link_data['rel'] ) );
 			}
 			$html .= '>Link</a>';
