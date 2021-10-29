@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\DevTools\FileReflection;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
@@ -196,6 +197,13 @@ class AMP_Validation_Manager {
 	 * @var array<string, callable>
 	 */
 	protected static $original_block_render_callbacks = [];
+
+	/**
+	 * Collection of backtraces for when wp_editor() was called.
+	 *
+	 * @var array
+	 */
+	protected static $wp_editor_sources = [];
 
 	/**
 	 * Whether a validate request is being performed.
@@ -687,6 +695,84 @@ class AMP_Validation_Manager {
 		add_filter( 'do_shortcode_tag', [ __CLASS__, 'decorate_shortcode_source' ], PHP_INT_MAX, 2 );
 		add_filter( 'embed_oembed_html', [ __CLASS__, 'decorate_embed_source' ], PHP_INT_MAX, 3 );
 		add_filter( 'the_content', [ __CLASS__, 'add_block_source_comments' ], 8 ); // The do_blocks() function runs at priority 9.
+
+		// @todo add_filter( 'the_editor_content' ); // Flag all enqueued TinyMCE scripts as being sourced by the callback.
+		// @todo add_filter( 'quicktags_settings' ); // Flag all enqueued Quicktags scripts as being sourced by the callback.
+
+		add_filter(
+			'the_editor',
+			function ( $editor ) {
+				$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find theme/plugin responsible for calling.
+
+//				error_log( json_encode( self::$hook_source_stack, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+//				return $editor;
+
+				$file_reflection = Services::get( 'dev_tools.file_reflection' );
+
+				// Find the first plugin/theme in the call stack.
+				foreach ( $backtrace as $call ) {
+					if (
+						isset( $call['function'], $call['file'] )
+						&&
+						'wp_editor' === $call['function']
+					) {
+						$source = $file_reflection->get_file_source( $call['file'] );
+						if ( $source ) {
+							self::$wp_editor_sources[] = $source;
+						}
+						break;
+					}
+//
+//					continue;
+//
+//					$source = $file_reflection->get_file_source( $call_stack['file'] );
+//					if (
+//						empty( $source )
+//						||
+//						FileReflection::TYPE_CORE === $source[ FileReflection::SOURCE_TYPE ]
+//						||
+//						(
+//							FileReflection::TYPE_PLUGIN === $source[ FileReflection::SOURCE_TYPE ]
+//							&&
+//							'amp' === $source[ FileReflection::SOURCE_NAME ]
+//						)
+//					) {
+//						continue;
+//					}
+//
+//					error_log( json_encode( $call_stack, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+//
+//					error_log( json_encode( $source, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+//
+//
+//
+//
+//					if ( '{closure}' === $call_stack['function'] ) {
+//
+//					}
+
+
+//					if ( '{closure}' === $call_stack['function'] ) {
+//						$called_functions[] = 'Closure::__invoke';
+//					} elseif ( isset( $call_stack['class'] ) ) {
+//						$called_functions[] = sprintf( '%s::%s', $call_stack['class'], $call_stack['function'] );
+//					} else {
+//						$called_functions[] = $call_stack['function'];
+//					}
+				}
+//
+//				self::$wp_editor_backtraces[] = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS );
+//
+//
+//				$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
+//				$callback_source     = $callback_reflection->get_source( $render_callback );
+//
+//				$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS );
+//				error_log( json_encode( $backtrace, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+
+				return $editor;
+			}
+		);
 	}
 
 	/**
@@ -842,6 +928,7 @@ class AMP_Validation_Manager {
 		self::$extra_script_sources            = [];
 		self::$extra_style_sources             = [];
 		self::$original_block_render_callbacks = [];
+		self::$wp_editor_sources               = [];
 	}
 
 	/**
@@ -1305,6 +1392,27 @@ class AMP_Validation_Manager {
 					continue;
 				}
 
+				$indirect_sources = [];
+				if (
+					'_WP_Editors::enqueue_scripts' === $source['function']
+					||
+					'_WP_Editors::editor_js' === $source['function'] // @todo This is actually printing script! So there is no handle.
+					||
+					'_WP_Editors::force_uncompressed_tinymce' === $source['function']
+				) {
+					$indirect_sources = self::$wp_editor_sources;
+				}
+
+				if ( '_WP_Editors::force_uncompressed_tinymce' === $source['function'] ) {
+					error_log('boom');
+					error_log( json_encode( $source, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+				}
+
+				if ( '_WP_Editors::editor_js' === $source['function'] ) {
+					error_log('var ajaxurl =??');
+					error_log( json_encode( $indirect_sources, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+				}
+
 				/**
 				 * Reflection.
 				 *
@@ -1332,7 +1440,7 @@ class AMP_Validation_Manager {
 				$wrapped_callback   = self::wrapped_callback(
 					array_merge(
 						$callback,
-						compact( 'priority', 'source' )
+						compact( 'priority', 'source', 'indirect_sources' )
 					)
 				);
 
