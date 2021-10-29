@@ -66,7 +66,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'href'         => $post_link,
 				'expected_amp' => false,
 				'rel'          => 'noamphtml',
-				'expected_rel' => null,
+				'expected_rel' => 'noamphtml',
 			],
 			'two_rel'             => [
 				'href'         => $post_link,
@@ -84,7 +84,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'href'         => $post_link,
 				'expected_amp' => false,
 				'rel'          => 'noamphtml ',
-				'expected_rel' => null,
+				'expected_rel' => 'noamphtml ',
 			],
 			'empty_rel'           => [
 				'href'         => $post_link,
@@ -127,7 +127,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'href'         => 'https://external.example.com/',
 				'expected_amp' => false,
 				'rel'          => 'noamphtml',
-				'expected_rel' => null,
+				'expected_rel' => 'noamphtml',
 			],
 			'php-file-link'       => [
 				'href'         => site_url( '/wp-login.php' ),
@@ -186,20 +186,11 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		foreach ( $links as $id => $link_data ) {
 			$element = $dom->getElementById( $id );
 			$this->assertInstanceOf( 'DOMElement', $element, "ID: $id" );
-			$rel = (string) $element->getAttribute( 'rel' );
 			if ( empty( $link_data['expected_rel'] ) ) {
-				$this->assertDoesNotMatchRegularExpression( '/(^|\s)amphtml(\s|$)/', $rel, "ID: $id" );
+				$this->assertFalse( $element->hasAttribute( 'rel' ), "ID: $id" );
 			} else {
-				$this->assertTrue( $element->hasAttribute( 'rel' ) );
+				$this->assertTrue( $element->hasAttribute( 'rel' ), "ID: $id" );
 				$this->assertEquals( $link_data['expected_rel'], $element->getAttribute( 'rel' ), "ID: $id" );
-			}
-
-			if (
-				( isset( $link_data['rel'] ) && empty( $link_data['rel'] ) )
-				&&
-				( isset( $link_data['expected_rel'] ) && empty( $link_data['expected_rel'] ) )
-			) {
-				$this->assertFalse( $element->hasAttribute( 'rel' ) );
 			}
 
 			if ( $paired && $link_data['expected_amp'] ) {

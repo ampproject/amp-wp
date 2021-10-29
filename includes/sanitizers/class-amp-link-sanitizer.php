@@ -224,6 +224,8 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			);
 			if ( ! empty( $rel ) ) {
 				$element->setAttribute( Attribute::REL, implode( ' ', $rel ) );
+			} else {
+				$element->removeAttribute( Attribute::REL );
 			}
 		}
 
