@@ -1151,6 +1151,36 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					);
 				},
 			],
+
+			'wp_editor_has_scripts_attributed'           => [
+				static function () {
+					add_action(
+						'wp_body_open',
+						static function () {
+							wp_editor( '', 'content' );
+						}
+					);
+				},
+				[
+					'//script[ @id = "wp-dom-ready-js" ]',
+					'//script[ @id = "wp-dom-ready-js-translations" ]',
+					'//script[ @id = "quicktags-js" ]',
+					'//script[ @id = "quicktags-js-extra" ]',
+					'//script[ contains( text(), "window.wpActiveEditor" ) ]',
+				],
+				function ( ...$sources_sets ) {
+					$this->assertCount( 5, $sources_sets );
+					foreach ( $sources_sets as $sources ) {
+						$amp_source_count = 0;
+						foreach ( $sources as $source ) {
+							if ( 'plugin' === $source['type'] && 'amp' === $source['name'] ) {
+								$amp_source_count++;
+							}
+						}
+						$this->assertGreaterThanOrEqual( 1, $amp_source_count );
+					}
+				},
+			],
 		];
 	}
 
@@ -1161,11 +1191,15 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers AMP_Validation_Manager::locate_sources()
 	 * @covers AMP_Validation_Callback_Wrapper
 	 *
-	 * @param callable $callback Callback set up (add actions).
-	 * @param string   $xpath    Expression to find the target element to get sources for.
-	 * @param callable $assert   Function to assert the expected sources.
+	 * @param callable        $callback Callback set up (add actions).
+	 * @param string|string[] $xpaths   Expression to find the target element to get sources for.
+	 * @param callable        $assert   Function to assert the expected sources.
 	 */
-	public function test_locate_sources_e2e( $callback, $xpath, $assert ) {
+	public function test_locate_sources_e2e( $callback, $xpaths, $assert ) {
+		if ( is_string( $xpaths ) ) {
+			$xpaths = [ $xpaths ];
+		}
+
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		$callback();
@@ -1180,6 +1214,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				<?php wp_head(); ?>
 			</head>
 			<body>
+				<?php wp_body_open(); ?>
 				<?php wp_footer(); ?>
 			</body>
 		</html>
@@ -1188,11 +1223,18 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
-		$element = $dom->xpath->query( $xpath )->item( 0 );
-		$this->assertInstanceOf( 'DOMElement', $element );
-		$sources = AMP_Validation_Manager::locate_sources( $element );
-		$this->assertNotEmpty( $sources );
-		$assert( $sources );
+		$sources_sets = [];
+		foreach ( $xpaths as $xpath ) {
+			$query = $dom->xpath->query( $xpath );
+			foreach ( $query as $element ) {
+				$this->assertInstanceOf( DOMElement::class, $element );
+				$sources = AMP_Validation_Manager::locate_sources( $element );
+				$this->assertNotEmpty( $sources );
+				$sources_sets[] = $sources;
+			}
+		}
+
+		call_user_func_array( $assert, $sources_sets );
 	}
 
 	/**
