@@ -1214,7 +1214,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				<?php wp_head(); ?>
 			</head>
 			<body>
-				<?php wp_body_open(); ?>
+				<?php do_action( 'wp_body_open' ); ?>
 				<?php wp_footer(); ?>
 			</body>
 		</html>
