@@ -1166,19 +1166,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @param callable $assert   Function to assert the expected sources.
 	 */
 	public function test_locate_sources_e2e( $callback, $xpath, $assert ) {
-		// @todo Remove once https://github.com/WordPress/gutenberg/pull/23104 is in a release.
-		// Temporarily fixes an issue with PHP errors being thrown in Gutenberg v8.3.0 on PHP 7.4.
-		$theme_features = [
-			'editor-color-palette',
-			'editor-gradient-presets',
-			'editor-font-sizes',
-		];
-		foreach ( $theme_features as $theme_feature ) {
-			if ( ! current_theme_supports( $theme_feature ) ) {
-				add_theme_support( $theme_feature, [] );
-			}
-		}
-
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		$callback();
