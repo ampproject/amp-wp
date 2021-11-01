@@ -1050,10 +1050,19 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					add_action(
 						'wp_enqueue_scripts',
 						static function () {
+							wp_register_script(
+								'bar',
+								'https://example.com/bar.js',
+								[],
+								'0.1',
+								true
+							);
+							wp_add_inline_script( 'bar', '/*Hello after Bar!*/', 'after' );
+
 							wp_enqueue_script(
 								'baz',
 								'https://example.com/baz.js',
-								[],
+								[ 'bar' ],
 								'0.1',
 								true
 							);
@@ -1061,8 +1070,26 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 						}
 					);
 				},
-				'//script[ contains( text(), "Hello before Baz!" ) ]',
-				function ( $sources ) {
+				[
+					'//script[ contains( text(), "Hello after Bar!" ) ]',
+					'//script[ contains( text(), "Hello before Baz!" ) ]',
+				],
+				function ( ...$sources_sets ) {
+					$this->assertCount( 2, $sources_sets );
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'extra_key'       => 'after',
+							'text'            => '/*Hello after Bar!*/',
+							'handle'          => 'bar',
+						],
+						$sources_sets[0][2]
+					);
 					$this->assertArraySubset(
 						[
 							'type'            => 'plugin',
@@ -1075,7 +1102,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 							'text'            => '/*Hello before Baz!*/',
 							'handle'          => 'baz',
 						],
-						$sources[2]
+						$sources_sets[1][2]
 					);
 				},
 			],
@@ -1153,7 +1180,18 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			],
 
 			'wp_editor_has_scripts_attributed'           => [
-				static function () {
+				function () {
+					if ( version_compare( get_bloginfo( 'version' ), '5.2', '<=' ) ) {
+						$this->markTestSkipped( 'The script ID attribute was only added to inline scripts in WP 5.2.' );
+					}
+
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_add_inline_script( 'jquery-core', '/*After before-jquery*/', 'before' );
+							wp_add_inline_script( 'jquery-core', '/*After after-jquery*/', 'after' );
+						}
+					);
 					add_action(
 						'wp_body_open',
 						static function () {
@@ -1162,6 +1200,8 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					);
 				},
 				[
+					'//script[ @id = "jquery-core-js-before" ]',
+					'//script[ @id = "jquery-core-js-after" ]',
 					'//script[ @id = "wp-dom-ready-js" ]',
 					'//script[ @id = "wp-dom-ready-js-translations" ]',
 					'//script[ @id = "quicktags-js" ]',
@@ -1169,7 +1209,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'//script[ contains( text(), "window.wpActiveEditor" ) ]',
 				],
 				function ( ...$sources_sets ) {
-					$this->assertCount( 5, $sources_sets );
+					$this->assertCount( 7, $sources_sets );
 					foreach ( $sources_sets as $sources ) {
 						$amp_source_count = 0;
 						foreach ( $sources as $source ) {
