@@ -2680,6 +2680,40 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$font_display_rule->setValue( 'optional' );
 			$ruleset->addRule( $font_display_rule );
 		}
+
+		/**
+		 * Preload each font files
+		 */
+		foreach ( $ruleset->getRules( 'src' ) as $src_property ) {
+			$value      = $src_property->getValue();
+			$font_files = array_filter(
+				array_map(
+					function( $path ) {
+						return substr( $path, 0, strpos( $path, '"' ) );
+					},
+					explode( 'url("', $value )
+				),
+				function( $path ) {
+					return 'http' === substr( $path, 0, 4 );
+				}
+			);
+
+			if ( ! empty( $font_files ) ) {
+				foreach ( $font_files as $font_file ) {
+					$link = AMP_DOM_Utils::create_node(
+						$this->dom,
+						'link',
+						[
+							'rel'         => 'preload',
+							'as'          => 'font',
+							'href'        => $font_file,
+							'crossorigin' => '',
+						]
+					);
+					$this->dom->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
+				}
+			}
+		}
 	}
 
 	/**
