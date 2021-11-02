@@ -18,7 +18,7 @@ use stdClass;
  * @since 2.2
  * @internal
  */
-class AMPThemes implements Service, Registerable {
+class AmpThemes implements Service, Registerable {
 
 	/**
 	 * Assets handle.

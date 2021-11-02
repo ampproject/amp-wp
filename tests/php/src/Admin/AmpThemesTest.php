@@ -1,27 +1,27 @@
 <?php
 /**
- * Tests for AMPThemes
+ * Tests for AmpThemes
  *
  * @package AmpProject\AmpWP\Tests
  */
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
-use AmpProject\AmpWP\Admin\AMPThemes;
+use AmpProject\AmpWP\Admin\AmpThemes;
 use AmpProject\AmpWP\Tests\TestCase;
 use stdClass;
 
 /**
- * Tests for AMPThemes.
+ * Tests for AmpThemes.
  *
- * @coversDefaultClass \AmpProject\AmpWP\Admin\AMPThemes
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\AmpThemes
  */
-class AMPThemesTest extends TestCase {
+class AmpThemesTest extends TestCase {
 
 	/**
-	 * Instance of AMPThemes
+	 * Instance of AmpThemes
 	 *
-	 * @var AMPThemes
+	 * @var AmpThemes
 	 */
 	public $instance;
 
@@ -44,7 +44,7 @@ class AMPThemesTest extends TestCase {
 		$wp_scripts = null;
 		$wp_styles  = null;
 
-		$this->instance = new AMPThemes();
+		$this->instance = new AmpThemes();
 	}
 
 	/**
@@ -57,7 +57,7 @@ class AMPThemesTest extends TestCase {
 
 		$expected = array_map(
 			static function ( $theme ) {
-				return AMPThemes::normalize_theme_data( $theme );
+				return AmpThemes::normalize_theme_data( $theme );
 			},
 			$expected_themes
 		);
@@ -101,7 +101,7 @@ class AMPThemesTest extends TestCase {
 
 		$this->assertEquals(
 			$expected,
-			AMPThemes::normalize_theme_data( $input )
+			AmpThemes::normalize_theme_data( $input )
 		);
 	}
 
@@ -136,7 +136,7 @@ class AMPThemesTest extends TestCase {
 	 */
 	public function test_enqueue_scripts() {
 		$this->instance->enqueue_scripts();
-		$this->assertTrue( wp_script_is( AMPThemes::ASSET_HANDLE ) );
+		$this->assertTrue( wp_script_is( AmpThemes::ASSET_HANDLE ) );
 		$this->assertTrue( wp_style_is( 'amp-admin' ) );
 	}
 

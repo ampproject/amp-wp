@@ -21,7 +21,7 @@ use function get_current_screen;
  * @since 2.2
  * @internal
  */
-class AMPPlugins implements Conditional, Delayed, Service, Registerable {
+class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 
 	/**
 	 * Assets handle.

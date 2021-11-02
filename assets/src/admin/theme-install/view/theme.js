@@ -33,7 +33,7 @@ export default wpThemeView.extend( {
 			slug = data?.id;
 		}
 
-		if ( slug && this.isAMPTheme( slug ) ) {
+		if ( slug && this.isAmpTheme( slug ) ) {
 			const messageElement = document.createElement( 'div' );
 			const iconElement = document.createElement( 'span' );
 			const tooltipElement = document.createElement( 'span' );
@@ -106,7 +106,7 @@ export default wpThemeView.extend( {
 	 * @param {string} slug Theme slug.
 	 * @return {boolean} True if theme is AMP compatible, Otherwise False.
 	 */
-	isAMPTheme( slug ) {
+	isAmpTheme( slug ) {
 		return AMP_THEMES.includes( slug );
 	},
 

@@ -18,13 +18,13 @@ const ampPluginInstall = {
 	init() {
 		this.addAmpMessage();
 		this.removeAdditionalInfo();
-		this.addAMPMessageInSearchResult();
+		this.addAmpMessageInSearchResult();
 	},
 
 	/**
 	 * Check if "AMP Compatible" tab is open or not.
 	 */
-	isAMPCompatibleTab() {
+	isAmpCompatibleTab() {
 		const queryString = window.location.search;
 		return ( queryString && -1 !== queryString.indexOf( 'tab=amp-compatible' ) );
 	},
@@ -32,7 +32,7 @@ const ampPluginInstall = {
 	/**
 	 * Add message for AMP Compatibility in AMP-compatible plugins card after search result comes in.
 	 */
-	addAMPMessageInSearchResult() {
+	addAmpMessageInSearchResult() {
 		const pluginInstallSearch = document.querySelector( '.plugin-install-php .wp-filter-search' );
 
 		if ( pluginInstallSearch ) {
@@ -58,7 +58,7 @@ const ampPluginInstall = {
 	 * Add message for AMP Compatibility in AMP-compatible plugins card.
 	 */
 	addAmpMessage() {
-		if ( this.isAMPCompatibleTab() ) {
+		if ( this.isAmpCompatibleTab() ) {
 			return;
 		}
 
@@ -93,7 +93,7 @@ const ampPluginInstall = {
 	 * Remove the additional info from the plugin card in the "AMP Compatible" tab.
 	 */
 	removeAdditionalInfo() {
-		if ( this.isAMPCompatibleTab() ) {
+		if ( this.isAmpCompatibleTab() ) {
 			const pluginCardBottom = document.querySelectorAll( '.plugin-install-tab-amp-compatible .plugin-card-bottom' );
 
 			if ( pluginCardBottom ) {

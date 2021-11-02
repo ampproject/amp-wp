@@ -1,27 +1,27 @@
 <?php
 /**
- * Tests for AMPPlugins
+ * Tests for AmpPlugins
  *
  * @package AmpProject\AmpWP\Tests
  */
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
-use AmpProject\AmpWP\Admin\AMPPlugins;
+use AmpProject\AmpWP\Admin\AmpPlugins;
 use AmpProject\AmpWP\Tests\TestCase;
 use stdClass;
 
 /**
- * Tests for AMPPlugins.
+ * Tests for AmpPlugins.
  *
- * @coversDefaultClass \AmpProject\AmpWP\Admin\AMPPlugins
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\AmpPlugins
  */
-class AMPPluginsTest extends TestCase {
+class AmpPluginsTest extends TestCase {
 
 	/**
-	 * Instance of AMPPlugins
+	 * Instance of AmpPlugins
 	 *
-	 * @var AMPPlugins
+	 * @var AmpPlugins
 	 */
 	public $instance;
 
@@ -45,7 +45,7 @@ class AMPPluginsTest extends TestCase {
 		$wp_scripts = null;
 		$wp_styles  = null;
 
-		$this->instance = new AMPPlugins();
+		$this->instance = new AmpPlugins();
 	}
 
 	/**
@@ -60,7 +60,7 @@ class AMPPluginsTest extends TestCase {
 		$expected = array_map(
 			static function ( $theme ) {
 
-				return AMPPlugins::normalize_plugin_data( $theme );
+				return AmpPlugins::normalize_plugin_data( $theme );
 			},
 			$expected_plugins
 		);
@@ -125,7 +125,7 @@ class AMPPluginsTest extends TestCase {
 
 		$this->assertEquals(
 			$expected,
-			AMPPlugins::normalize_plugin_data( $input )
+			AmpPlugins::normalize_plugin_data( $input )
 		);
 	}
 
@@ -134,7 +134,7 @@ class AMPPluginsTest extends TestCase {
 	 */
 	public function test_get_registration_action() {
 
-		$this->assertEquals( 'current_screen', AMPPlugins::get_registration_action() );
+		$this->assertEquals( 'current_screen', AmpPlugins::get_registration_action() );
 	}
 
 	/**
@@ -143,11 +143,11 @@ class AMPPluginsTest extends TestCase {
 	public function test_is_needed() {
 
 		// Test 1: None admin request.
-		$this->assertFalse( AMPPlugins::is_needed() );
+		$this->assertFalse( AmpPlugins::is_needed() );
 
 		// Test 2: Admin request.
 		set_current_screen( 'index.php' );
-		$this->assertTrue( AMPPlugins::is_needed() );
+		$this->assertTrue( AmpPlugins::is_needed() );
 
 		set_current_screen( 'front' );
 	}
@@ -202,7 +202,7 @@ class AMPPluginsTest extends TestCase {
 	 */
 	public function test_enqueue_scripts() {
 		$this->instance->enqueue_scripts();
-		$this->assertTrue( wp_script_is( AMPPlugins::ASSET_HANDLE ) );
+		$this->assertTrue( wp_script_is( AmpPlugins::ASSET_HANDLE ) );
 		$this->assertTrue( wp_style_is( 'amp-admin' ) );
 	}
 
