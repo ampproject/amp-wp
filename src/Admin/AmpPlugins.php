@@ -33,9 +33,9 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	/**
 	 * List of AMP plugins.
 	 *
-	 * @var array|bool
+	 * @var array
 	 */
-	protected $plugins = false;
+	protected $plugins = [];
 
 	/**
 	 * Get the action to use for registering the service.
@@ -65,7 +65,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	 */
 	public function get_plugins() {
 
-		if ( ! is_array( $this->plugins ) ) {
+		if ( count( $this->plugins ) === 0 ) {
 			$this->plugins = array_map(
 				static function ( $plugin ) {
 					return self::normalize_plugin_data( $plugin );
@@ -249,9 +249,10 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 			return $response;
 		}
 
-		$total_page    = ceil( count( $this->get_plugins() ) / $args['per_page'] );
+		$plugins       = $this->get_plugins();
+		$total_page    = ceil( count( $plugins ) / $args['per_page'] );
 		$page          = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
-		$plugin_chunks = array_chunk( (array) $this->get_plugins(), $args['per_page'] );
+		$plugin_chunks = array_chunk( $plugins, $args['per_page'] );
 		$plugins       = ( ! empty( $plugin_chunks[ $page - 1 ] ) && is_array( $plugin_chunks[ $page - 1 ] ) ) ? $plugin_chunks[ $page - 1 ] : [];
 
 		$response          = new stdClass();
@@ -259,7 +260,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 		$response->info    = [
 			'page'    => $page,
 			'pages'   => $total_page,
-			'results' => count( $this->get_plugins() ),
+			'results' => count( $plugins ),
 		];
 
 		return $response;

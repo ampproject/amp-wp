@@ -32,9 +32,9 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 	/**
 	 * List of AMP themes.
 	 *
-	 * @var array|bool
+	 * @var array
 	 */
-	protected $themes = false;
+	protected $themes = [];
 
 	/**
 	 * Get the action to use for registering the service.
@@ -71,7 +71,7 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 	 */
 	public function get_themes() {
 
-		if ( ! is_array( $this->themes ) ) {
+		if ( count( $this->themes ) === 0 ) {
 			$this->themes = array_map(
 				static function ( $theme ) {
 					return self::normalize_theme_data( $theme );
@@ -177,14 +177,16 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 
 		$none_wporg = [];
 
+		$slugs = [];
 		foreach ( $this->get_themes() as $theme ) {
+			$slugs[] = $theme['slug'];
 			if ( ! isset( $theme['wporg'] ) || true !== $theme['wporg'] ) {
 				$none_wporg[] = $theme['slug'];
 			}
 		}
 
 		$js_data = [
-			'AMP_THEMES'        => wp_list_pluck( $this->get_themes(), 'slug' ),
+			'AMP_THEMES'        => $slugs,
 			'NONE_WPORG_THEMES' => $none_wporg,
 		];
 
@@ -219,8 +221,9 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 
 		$args['per_page'] = ( ! empty( $args['per_page'] ) ) ? $args['per_page'] : 36;
 
+		$themes       = $this->get_themes();
 		$page         = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
-		$theme_chunks = array_chunk( (array) $this->get_themes(), $args['per_page'] );
+		$theme_chunks = array_chunk( $themes, $args['per_page'] );
 		$themes       = ( ! empty( $theme_chunks[ $page - 1 ] ) && is_array( $theme_chunks[ $page - 1 ] ) ) ? $theme_chunks[ $page - 1 ] : [];
 
 		if ( 'query_themes' === $action ) {
@@ -234,7 +237,7 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 		$response->info = [
 			'page'    => $page,
 			'pages'   => count( $theme_chunks ),
-			'results' => count( (array) $this->get_themes() ),
+			'results' => count( $themes ),
 		];
 
 		return $response;
