@@ -34,34 +34,31 @@ const ampPluginInstall = {
 	 */
 	addAmpMessageInSearchResult() {
 		const pluginFilterForm = document.getElementById( 'plugin-filter' );
-		if ( ! pluginFilterForm ) {
+		const pluginInstallSearch = document.querySelector( '.plugin-install-php .wp-filter-search' );
+		if ( ! pluginFilterForm || ! pluginInstallSearch ) {
 			return;
 		}
 
 		let mutationObserver;
 
-		const pluginInstallSearch = document.querySelector( '.plugin-install-php .wp-filter-search' );
-		if ( pluginInstallSearch ) {
-			const callback = debounce( () => {
-				// Replace the class for our custom AMP-compatible tab once doing a search.
-				const wrap = document.querySelector( '.plugin-install-tab-amp-compatible' );
-				if ( wrap ) {
-					wrap.classList.remove( 'plugin-install-tab-amp-compatible' );
-					wrap.classList.add( 'plugin-install-tab-search-result' );
-				}
+		const startSearchResults = debounce( () => {
+			// Replace the class for our custom AMP-compatible tab once doing a search.
+			const wrap = document.querySelector( '.plugin-install-tab-amp-compatible' );
+			if ( wrap ) {
+				wrap.classList.remove( 'plugin-install-tab-amp-compatible' );
+				wrap.classList.add( 'plugin-install-tab-search-result' );
+			}
 
-				// Start watching for changes the first time a search is being made.
-				if ( ! mutationObserver ) {
-					mutationObserver = new MutationObserver( () => {
-						this.addAmpMessage();
-					} );
-					mutationObserver.observe( pluginFilterForm, { childList: true } );
-				}
-			}, 1000 ); // See timeout in core: <https://github.com/WordPress/WordPress/blob/b87617e2719d114d123a88ed7e489170f0204735/wp-admin/js/updates.js#L2578>
+			// Start watching for changes the first time a search is being made.
+			if ( ! mutationObserver ) {
+				mutationObserver = new MutationObserver( () => {
+					this.addAmpMessage();
+				} );
+				mutationObserver.observe( pluginFilterForm, { childList: true } );
+			}
+		}, 1000 ); // See timeout in core: <https://github.com/WordPress/WordPress/blob/b87617e2719d114d123a88ed7e489170f0204735/wp-admin/js/updates.js#L2578>
 
-			pluginInstallSearch.addEventListener( 'keyup', callback );
-			pluginInstallSearch.addEventListener( 'input', callback );
-		}
+		pluginInstallSearch.addEventListener( 'input', startSearchResults, { once: true } );
 	},
 
 	/**
