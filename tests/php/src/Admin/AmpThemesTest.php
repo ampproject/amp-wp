@@ -114,7 +114,7 @@ class AmpThemesTest extends TestCase {
 
 		$this->instance->register();
 
-		$this->assertEquals( 10, has_filter( 'themes_api', [ $this->instance, 'themes_api' ] ) );
+		$this->assertEquals( 10, has_filter( 'themes_api', [ $this->instance, 'filter_themes_api' ] ) );
 		$this->assertEquals( 10, has_action( 'current_screen', [ $this->instance, 'register_hooks' ] ) );
 
 		set_current_screen( 'front' );
@@ -141,14 +141,14 @@ class AmpThemesTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::themes_api()
+	 * @covers ::filter_themes_api()
 	 */
-	public function test_themes_api() {
+	public function test_filter_themes_api() {
 		$this->instance->register();
 		$response = new stdClass();
 
 		// Test 1: Normal request.
-		$response = $this->instance->themes_api( $response, 'query_themes', [ 'per_page' => 36 ] );
+		$response = $this->instance->filter_themes_api( $response, 'query_themes', [ 'per_page' => 36 ] );
 		$this->assertEmpty( (array) $response );
 
 		// Test 2: Request for AMP-compatible data.
@@ -157,7 +157,7 @@ class AmpThemesTest extends TestCase {
 			'per_page' => 36,
 		];
 
-		$response = $this->instance->themes_api( $response, 'query_themes', $args );
+		$response = $this->instance->filter_themes_api( $response, 'query_themes', $args );
 		$this->assertIsArray( $response->info );
 		$this->assertArrayHasKey( 'page', $response->info );
 		$this->assertArrayHasKey( 'pages', $response->info );

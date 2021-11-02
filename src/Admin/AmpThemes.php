@@ -97,7 +97,7 @@ class AmpThemes implements Service, Registerable {
 	 */
 	public function register() {
 
-		add_filter( 'themes_api', [ $this, 'themes_api' ], 10, 3 );
+		add_filter( 'themes_api', [ $this, 'filter_themes_api' ], 10, 3 );
 
 		if ( ! wp_doing_ajax() && is_admin() ) {
 			add_action( 'current_screen', [ $this, 'register_hooks' ] );
@@ -177,7 +177,7 @@ class AmpThemes implements Service, Registerable {
 	 *
 	 * @return object List of AMP compatible plugins.
 	 */
-	public function themes_api( $response, $action, $args ) {
+	public function filter_themes_api( $response, $action, $args ) {
 
 		$args = (array) $args;
 		if ( ! isset( $args['browse'] ) || 'amp-compatible' !== $args['browse'] ) {
