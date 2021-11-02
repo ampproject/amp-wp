@@ -11,9 +11,9 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use stdClass;
 use WP_Screen;
 use function get_current_screen;
+use stdClass;
 
 /**
  * Add new tab (AMP) in plugin install screen in WordPress admin.
