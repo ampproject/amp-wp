@@ -78,6 +78,13 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 				},
 				require __DIR__ . '/../../includes/ecosystem-data/themes.php'
 			);
+
+			usort(
+				$this->themes,
+				static function ( $a, $b ) {
+					return strcasecmp( $a['name'], $b['name'] );
+				}
+			);
 		}
 
 		return $this->themes;

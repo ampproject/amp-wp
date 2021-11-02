@@ -72,6 +72,13 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 				},
 				require __DIR__ . '/../../includes/ecosystem-data/plugins.php'
 			);
+
+			usort(
+				$this->plugins,
+				static function ( $a, $b ) {
+					return strcasecmp( $a['name'], $b['name'] );
+				}
+			);
 		}
 
 		return $this->plugins;

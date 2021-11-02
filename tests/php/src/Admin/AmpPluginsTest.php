@@ -65,7 +65,7 @@ class AmpPluginsTest extends TestCase {
 			$expected_plugins
 		);
 
-		$this->assertEquals( $expected, $plugins );
+		$this->assertEqualSets( $expected, $plugins );
 	}
 
 	/**

@@ -99,7 +99,7 @@ class AmpThemesTest extends TestCase {
 			$expected_themes
 		);
 
-		$this->assertEquals( $expected, $themes );
+		$this->assertEqualSets( $expected, $themes );
 	}
 
 	/**
