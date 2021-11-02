@@ -73,7 +73,7 @@ const ampPluginInstall = {
 			const iconElement = document.createElement( 'span' );
 			const tooltipElement = document.createElement( 'span' );
 
-			messageElement.classList.add( 'extension-card-px-message' );
+			messageElement.classList.add( 'amp-extension-card-message' );
 			iconElement.classList.add( 'amp-logo-icon' );
 			tooltipElement.classList.add( 'tooltiptext' );
 
