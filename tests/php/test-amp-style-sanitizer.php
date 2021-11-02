@@ -1898,20 +1898,20 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$this->assertStringNotContainsString( 'data:', $actual_stylesheets[0] );
 		$this->assertStringContainsString( 'fonts/NonBreakingSpaceOverride.woff2', $actual_stylesheets[0] );
 		$this->assertStringContainsString( 'fonts/NonBreakingSpaceOverride.woff', $actual_stylesheets[0] );
-		$this->assertStringContainsString( 'font-display:swap', $actual_stylesheets[0] );
+		$this->assertStringContainsString( 'font-display:optional', $actual_stylesheets[0] );
 
 		// Check font not included in theme, but included in plugin.
 		$this->assertStringContainsString( '@font-face{font-family:"Genericons";', $actual_stylesheets[1] );
 		$this->assertStringContainsString( 'format("woff")', $actual_stylesheets[1] );
 		$this->assertStringNotContainsString( 'data:', $actual_stylesheets[1] );
 		$this->assertStringContainsString( 'assets/fonts/genericons.woff', $actual_stylesheets[1] );
-		$this->assertStringContainsString( 'font-display:swap', $actual_stylesheets[1] );
+		$this->assertStringContainsString( 'font-display:optional', $actual_stylesheets[1] );
 
 		// Check font not included anywhere, so must remain inline.
 		$this->assertStringContainsString( '@font-face{font-family:"Custom";', $actual_stylesheets[2] );
 		$this->assertStringContainsString( 'url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA")', $actual_stylesheets[2] );
 		$this->assertStringContainsString( 'format("woff")', $actual_stylesheets[2] );
-		$this->assertStringNotContainsString( 'font-display:swap', $actual_stylesheets[2] );
+		$this->assertStringNotContainsString( 'font-display:optional', $actual_stylesheets[2] );
 	}
 
 	/**

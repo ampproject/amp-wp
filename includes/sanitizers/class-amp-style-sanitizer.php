@@ -2667,15 +2667,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} // End foreach $source_data_url_objects.
 		} // End foreach $src_properties.
 
-		/*
-		 * If a data: URL has been replaced with an external file URL, then we add a font-display:swap to the @font-face
+		/**
+		 * If a data: URL has been replaced with an external file URL, then we add a font-display:optional to the @font-face
 		 * rule if one isn't already present. This prevents FO
 		 *
-		 *  If no font-display is already present, add font-display:swap since the font is now being loaded externally.
+		 * If no font-display is already present, add font-display:optional since the font is now being loaded externally.
+		 *
+		 * @see: https://github.com/ampproject/amp-wp/issues/6036
 		 */
 		if ( $converted_count && 0 === count( $ruleset->getRules( 'font-display' ) ) ) {
 			$font_display_rule = new Rule( 'font-display' );
-			$font_display_rule->setValue( 'swap' );
+			$font_display_rule->setValue( 'optional' );
 			$ruleset->addRule( $font_display_rule );
 		}
 	}
