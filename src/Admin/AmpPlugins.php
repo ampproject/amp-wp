@@ -242,7 +242,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	 *
 	 * @return stdClass|array List of AMP compatible plugins.
 	 */
-	public function plugins_api( $response, $action, $args ) {
+	public function plugins_api( $response, /** @noinspection PhpUnusedParameterInspection */ $action, $args ) {
 
 		$args = (array) $args;
 		if ( ! isset( $args['amp-compatible'] ) ) {
@@ -304,7 +304,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	 *
 	 * @return string[] An array of the plugin's metadata
 	 */
-	public function plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data ) {
+	public function plugin_row_meta( $plugin_meta, /** @noinspection PhpUnusedParameterInspection */ $plugin_file, $plugin_data ) {
 
 		$amp_plugins = wp_list_pluck( $this->get_plugins(), 'slug' );
 
