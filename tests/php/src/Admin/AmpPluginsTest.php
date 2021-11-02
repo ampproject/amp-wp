@@ -309,7 +309,7 @@ class AmpPluginsTest extends TestCase {
 		$output = $this->instance->plugin_row_meta( $plugin_meta, '', [ 'slug' => 'akismet' ] );
 
 		$this->assertContains(
-			'<span><span class="amp-logo-icon small"></span>&nbsp;AMP Compatible</span>',
+			'AMP Compatible',
 			$output
 		);
 	}

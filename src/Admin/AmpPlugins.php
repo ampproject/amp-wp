@@ -308,10 +308,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 		$amp_plugins = wp_list_pluck( $this->get_plugins(), 'slug' );
 
 		if ( ! empty( $plugin_data['slug'] ) && in_array( $plugin_data['slug'], $amp_plugins, true ) ) {
-			$plugin_meta[] = sprintf(
-				'<span><span class="amp-logo-icon small"></span>&nbsp;%s</span>',
-				esc_html__( 'AMP Compatible', 'amp' )
-			);
+			$plugin_meta[] = esc_html__( 'AMP Compatible', 'amp' );
 		}
 
 		return $plugin_meta;
