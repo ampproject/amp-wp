@@ -48,6 +48,43 @@ class AmpThemesTest extends TestCase {
 	}
 
 	/**
+	 * @covers ::get_registration_action()
+	 */
+	public function test_get_registration_action() {
+
+		$this->assertEquals( 'admin_init', AmpThemes::get_registration_action() );
+	}
+
+	/**
+	 * @covers ::is_needed()
+	 */
+	public function test_is_needed() {
+
+		// Test 1: Not admin request.
+		$this->assertFalse( AmpThemes::is_needed() );
+
+		// Test 2: Admin request.
+		set_current_screen( 'index.php' );
+		$this->assertTrue( AmpThemes::is_needed() );
+
+		// Test 3: Filter disables.
+		add_filter(
+			'amp_compatible_ecosystem_shown',
+			static function ( $shown, $type ) {
+				if ( 'themes' === $type ) {
+					$shown = false;
+				}
+				return $shown;
+			},
+			10,
+			2
+		);
+		$this->assertFalse( AmpThemes::is_needed() );
+
+		set_current_screen( 'front' );
+	}
+
+	/**
 	 * @covers ::get_themes()
 	 */
 	public function test_get_themes() {

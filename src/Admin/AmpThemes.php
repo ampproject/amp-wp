@@ -7,6 +7,8 @@
 
 namespace AmpProject\AmpWP\Admin;
 
+use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Screen;
@@ -18,7 +20,7 @@ use stdClass;
  * @since 2.2
  * @internal
  */
-class AmpThemes implements Service, Registerable {
+class AmpThemes implements Service, Registerable, Conditional, Delayed {
 
 	/**
 	 * Assets handle.
@@ -33,6 +35,34 @@ class AmpThemes implements Service, Registerable {
 	 * @var array|bool
 	 */
 	protected $themes = false;
+
+	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+
+		return 'admin_init';
+	}
+
+	/**
+	 * Check whether the conditional object is currently needed.
+	 *
+	 * @return bool Whether the conditional object is needed.
+	 */
+	public static function is_needed() {
+
+		/**
+		 * Filters whether to show AMP compatible ecosystem in the admin.
+		 *
+		 * @since 2.2
+		 *
+		 * @param bool   $shown Whether to show AMP-compatible themes and plugins in the admin.
+		 * @param string $type  The type of ecosystem component being shown. May be either 'themes' or 'plugins'.
+		 */
+		return is_admin() && apply_filters( 'amp_compatible_ecosystem_shown', true, 'themes' );
+	}
 
 	/**
 	 * Get list of AMP themes.

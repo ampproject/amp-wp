@@ -142,12 +142,26 @@ class AmpPluginsTest extends TestCase {
 	 */
 	public function test_is_needed() {
 
-		// Test 1: None admin request.
+		// Test 1: Not admin request.
 		$this->assertFalse( AmpPlugins::is_needed() );
 
 		// Test 2: Admin request.
 		set_current_screen( 'index.php' );
 		$this->assertTrue( AmpPlugins::is_needed() );
+
+		// Test 3: Filter disables.
+		add_filter(
+			'amp_compatible_ecosystem_shown',
+			static function ( $shown, $type ) {
+				if ( 'plugins' === $type ) {
+					$shown = false;
+				}
+				return $shown;
+			},
+			10,
+			2
+		);
+		$this->assertFalse( AmpPlugins::is_needed() );
 
 		set_current_screen( 'front' );
 	}

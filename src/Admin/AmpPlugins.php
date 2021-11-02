@@ -54,7 +54,8 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	 */
 	public static function is_needed() {
 
-		return is_admin();
+		/** This filter is documented in src/Admin/AmpThemes.php */
+		return is_admin() && apply_filters( 'amp_compatible_ecosystem_shown', true, 'plugins' );
 	}
 
 	/**
