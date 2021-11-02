@@ -1,6 +1,7 @@
 /**
  * WordPress dependencies
  */
+import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
 
 /**
@@ -32,6 +33,7 @@ const ampThemeInstall = {
 
 		anchorElement.setAttribute( 'href', '#' );
 		anchorElement.setAttribute( 'data-sort', 'amp-compatible' );
+		anchorElement.append( __( 'AMP Compatible', 'amp' ) );
 
 		listItem.appendChild( anchorElement );
 
