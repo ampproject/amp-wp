@@ -16,8 +16,11 @@ const ampPluginInstall = {
 	 * Init function.
 	 */
 	init() {
-		this.addAmpMessage();
-		this.removeAdditionalInfo();
+		if ( this.isAmpCompatibleTab() ) {
+			this.removeAdditionalInfo();
+		} else {
+			this.addAmpMessage();
+		}
 		this.addAmpMessageInSearchResult();
 	},
 
@@ -65,10 +68,6 @@ const ampPluginInstall = {
 	 * Add message for AMP Compatibility in AMP-compatible plugins card.
 	 */
 	addAmpMessage() {
-		if ( this.isAmpCompatibleTab() ) {
-			return;
-		}
-
 		for ( const pluginSlug of AMP_PLUGINS ) {
 			const pluginCardElement = document.querySelector( `.plugin-card.plugin-card-${ pluginSlug }` );
 
@@ -105,14 +104,9 @@ const ampPluginInstall = {
 	 * Remove the additional info from the plugin card in the "AMP Compatible" tab.
 	 */
 	removeAdditionalInfo() {
-		if ( this.isAmpCompatibleTab() ) {
-			const pluginCardBottom = document.querySelectorAll( '.plugin-install-tab-amp-compatible .plugin-card-bottom' );
-
-			if ( pluginCardBottom ) {
-				for ( const elementNode of pluginCardBottom ) {
-					elementNode.remove();
-				}
-			}
+		const pluginCardBottom = document.querySelectorAll( '.plugin-install-tab-amp-compatible .plugin-card-bottom' );
+		for ( const elementNode of pluginCardBottom ) {
+			elementNode.remove();
 		}
 	},
 };
