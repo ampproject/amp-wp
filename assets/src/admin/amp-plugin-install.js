@@ -25,8 +25,8 @@ const ampPluginInstall = {
 	 * Check if "AMP Compatible" tab is open or not.
 	 */
 	isAmpCompatibleTab() {
-		const queryString = window.location.search;
-		return ( queryString && -1 !== queryString.indexOf( 'tab=amp-compatible' ) );
+		const queryParams = new URLSearchParams( window.location.search.substr( 1 ) );
+		return queryParams.get( 'tab' ) === 'amp-compatible';
 	},
 
 	/**
