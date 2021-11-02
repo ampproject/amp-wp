@@ -240,7 +240,7 @@ class AmpPluginsTest extends TestCase {
 		$response = $this->instance->plugins_api( $response, 'query_themes', [ 'per_page' => 36 ] );
 		$this->assertEmpty( (array) $response );
 
-		// Test 2: Request for PX compatible data.
+		// Test 2: Request for AMP-compatible data.
 		$args = [
 			'amp-compatible' => true,
 			'per_page'       => 36,

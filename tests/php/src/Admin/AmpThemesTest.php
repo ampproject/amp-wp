@@ -151,7 +151,7 @@ class AmpThemesTest extends TestCase {
 		$response = $this->instance->themes_api( $response, 'query_themes', [ 'per_page' => 36 ] );
 		$this->assertEmpty( (array) $response );
 
-		// Test 2: Request for PX compatible data.
+		// Test 2: Request for AMP-compatible data.
 		$args = [
 			'browse'   => 'amp-compatible',
 			'per_page' => 36,

@@ -19,7 +19,7 @@ const ampThemeInstall = {
 	},
 
 	/**
-	 * Add a new tab for PX Enhanced theme in theme install page.
+	 * Add a new tab for AMP-compatible themes on theme install page.
 	 */
 	addTab() {
 		const filterLinks = document.querySelector( '.filter-links' );
