@@ -91,6 +91,16 @@ describe( 'getErrorSorceTitle', () => {
 		) ).toBe( 'Inactive theme(s)' );
 	} );
 
+	it( 'returns block name for block', () => {
+		expect( getErrorSourceTitle(
+			[
+				{
+					block_name: 'Some Block',
+				},
+			],
+		) ).toBe( 'Some Block' );
+	} );
+
 	it( 'returns Embed for embed', () => {
 		expect( getErrorSourceTitle( [
 			{

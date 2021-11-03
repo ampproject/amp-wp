@@ -23,7 +23,7 @@ import { registerBlockType, createBlock } from '@wordpress/blocks';
 import { Error } from '../index';
 import { createStore } from '../../../store';
 
-let container, pluginBlock, themeBlock, coreBlock, unknownBlock;
+let container, pluginBlock, muPluginBlock, themeBlock, coreBlock, unknownBlock;
 
 const TEST_PLUGIN_BLOCK = 'my-plugin/test-block';
 const TEST_MU_PLUGIN_BLOCK = 'my-mu-plugin/test-block';
@@ -70,17 +70,29 @@ registerBlockType( TEST_UNKNOWN_BLOCK, {
 
 function createTestStoreAndBlocks() {
 	pluginBlock = createBlock( TEST_PLUGIN_BLOCK, {} );
+	muPluginBlock = createBlock( TEST_MU_PLUGIN_BLOCK, {} );
 	themeBlock = createBlock( TEST_THEME_BLOCK, {} );
 	coreBlock = createBlock( TEST_CORE_BLOCK, {} );
 	unknownBlock = createBlock( TEST_UNKNOWN_BLOCK, {} );
 
-	dispatch( 'core/block-editor' ).insertBlocks( [ pluginBlock, themeBlock, coreBlock, unknownBlock ] );
+	dispatch( 'core/block-editor' ).insertBlocks( [ pluginBlock, muPluginBlock, themeBlock, coreBlock, unknownBlock ] );
 
 	createStore( {
 		reviewLink: 'http://site.test/wp-admin',
 		validationErrors: [
 			{
 				clientId: pluginBlock.clientId,
+				code: 'DISALLOWED_TAG',
+				status: 3,
+				term_id: 12,
+				title: 'Invalid script: <code>jquery.js</code>',
+				error: {
+					type: 'js_error',
+					sources: [],
+				},
+			},
+			{
+				clientId: muPluginBlock.clientId,
 				code: 'DISALLOWED_TAG',
 				status: 3,
 				term_id: 12,
@@ -132,6 +144,9 @@ function getTestBlock( type ) {
 		case 'plugin':
 		case 'removed':
 			return pluginBlock;
+
+		case 'mu-plugin':
+			return muPluginBlock;
 
 		case 'theme':
 			return themeBlock;
