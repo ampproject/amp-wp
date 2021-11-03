@@ -15,11 +15,11 @@ return array (
     'name' => 'Podcast Player &#8211; Your Podcasting Companion',
     'slug' => 'podcast-player',
     'homepage' => 'https://vedathemes.com/podcast-player/',
-    'short_description' => 'Showcase your podcast only using podcasting feed url. Use custom widget, shortcode or editor block to display podcast player anywhere on your site.',
+    'short_description' => 'Showcase your podcast only using podcasting feed url. Use widget, shortcode or editor block to&hellip;',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/podcast-player/assets/icon-256x256.png?rev=2025683',
-      '2x' => 'https://ps.w.org/podcast-player/assets/icon-256x256.png?rev=2025683',
+      '1x' => 'https://ps.w.org/podcast-player/assets/icon-256x256.png?rev=2622629',
+      '2x' => 'https://ps.w.org/podcast-player/assets/icon-256x256.png?rev=2622629',
     ),
     'wporg' => true,
   ),
@@ -28,7 +28,7 @@ return array (
     'name' => 'WPSSO Schema JSON-LD Markup',
     'slug' => 'wpsso-schema-json-ld',
     'homepage' => 'https://wpsso.com/extend/plugins/wpsso-schema-json-ld/',
-    'short_description' => 'Discontinued / deprecated add-on: The features of this plugin were merged into WPSSO Core v9.0.0.',
+    'short_description' => 'Discontinued add-on: The features of this plugin were integrated into WPSSO Core v9.0.0.',
     'icons' => 
     array (
       'default' => 'https://s.w.org/plugins/geopattern-icon/wpsso-schema-json-ld.svg',
@@ -40,7 +40,7 @@ return array (
     'name' => 'ShortPixel Image Optimizer',
     'slug' => 'shortpixel-image-optimiser',
     'homepage' => 'https://shortpixel.com/',
-    'short_description' => 'Speed up your website &amp; boost your SEO by compressing old &amp; new images and&hellip;',
+    'short_description' => 'Speed up your website &amp; boost your SEO by compressing old &amp; new images and PDFs. Optimize and convert WebP &amp; AVIF.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/shortpixel-image-optimiser/assets/icon-128x128.png?rev=1038819',
@@ -80,7 +80,7 @@ return array (
     'name' => 'Flex Posts &#8211; Widget and Gutenberg Block',
     'slug' => 'flex-posts',
     'homepage' => 'https://tajam.id/flex-posts/',
-    'short_description' => 'A widget to display posts with thumbnails in various layouts. Fits nicely in any widget&hellip;',
+    'short_description' => 'A widget to display posts with thumbnails in various layouts. Fits nicely in any widget area size.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/flex-posts/assets/icon-128x128.png?rev=1871802',
@@ -118,7 +118,7 @@ return array (
     'name' => 'Floating Button',
     'slug' => 'floating-button',
     'homepage' => 'https://wordpress.org/plugins/floating-button/',
-    'short_description' => 'Easily create a custom sticky floating buttons. The Floating Button will be the effective solution for increasing the recognition of your web resource',
+    'short_description' => 'Easily create a custom sticky floating buttons. The Floating Button will be the effective solution&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/floating-button/assets/icon-128x128.png?rev=2533016',
@@ -145,7 +145,7 @@ return array (
     'name' => 'WP Recipe Maker',
     'slug' => 'wp-recipe-maker',
     'homepage' => 'http://bootstrapped.ventures/wp-recipe-maker/',
-    'short_description' => 'The easy and user-friendly recipe plugin for everyone. Automatic JSON-LD metadata for food AND how-to&hellip;',
+    'short_description' => 'The easy and user-friendly recipe plugin for everyone. Automatic JSON-LD metadata for food AND how-to recipes will improve your SEO!',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/wp-recipe-maker/assets/icon-128x128.png?rev=1491788',
@@ -158,7 +158,7 @@ return array (
     'name' => 'Slim SEO &#8211; Fast &amp; Automated WordPress SEO Plugin',
     'slug' => 'slim-seo',
     'homepage' => 'https://wpslimseo.com',
-    'short_description' => 'A full-featured SEO plugin for WordPress that&#039;s lightweight, blazing fast with minimum configuration. No bloats, no ads and just works!',
+    'short_description' => 'A full-featured SEO plugin for WordPress that&#039;s lightweight, blazing fast with minimum configuration. No bloats,&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/slim-seo/assets/icon.svg?rev=2005049',
@@ -171,7 +171,7 @@ return array (
     'name' => 'Schema &amp; Structured Data for WP &amp; AMP',
     'slug' => 'schema-and-structured-data-for-wp',
     'homepage' => '',
-    'short_description' => 'Schema &amp; Structured Data for WP &amp; AMP adds Google Rich Snippets markup according to&hellip;',
+    'short_description' => 'Schema &amp; Structured Data for WP &amp; AMP adds Google Rich Snippets markup according to Schema.org guidelines to structure your site for SEO.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/schema-and-structured-data-for-wp/assets/icon-128x128.png?rev=1922284',
@@ -210,7 +210,7 @@ return array (
     'name' => 'Page View Count',
     'slug' => 'page-views-count',
     'homepage' => '',
-    'short_description' => 'Places an icon, all time views count and views today count at the bottom of posts, pages and custom post types on any WordPress website.',
+    'short_description' => 'Places an icon, all time views count and views today count at the bottom of&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/page-views-count/assets/icon.svg?rev=986301',
@@ -239,7 +239,7 @@ return array (
     'name' => 'Newspack Newsletters',
     'slug' => 'newspack-newsletters',
     'homepage' => 'https://newspack.pub',
-    'short_description' => 'Create email newsletters with the Gutenberg editor and distribute them with your Mailchimp or Constant Contact mailing lists.',
+    'short_description' => 'Create email newsletters with the Gutenberg editor and distribute them with your Mailchimp or Constant&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/newspack-newsletters/assets/icon.svg?rev=2475195',
@@ -267,7 +267,7 @@ return array (
     'name' => 'Jetpack &#8211; WP Security, Backup, Speed, &amp; Growth',
     'slug' => 'jetpack',
     'homepage' => 'https://jetpack.com',
-    'short_description' => 'Improve your WP security with powerful one-click tools like backup and malware scan. Get essential&hellip;',
+    'short_description' => 'Improve your WP security with powerful one-click tools like backup and malware scan. Get essential free tools including stats, CDN and social sharing.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/jetpack/assets/icon.svg?rev=2394525',
@@ -281,7 +281,7 @@ return array (
     'name' => 'Easy Notification Bar',
     'slug' => 'easy-notification-bar',
     'homepage' => 'https://wordpress.org/plugins/easy-notification-bar/',
-    'short_description' => 'Easily add a custom top bar notification message to on your site with live customization&hellip;',
+    'short_description' => 'Easily add a custom top bar notification message to on your site with live customization options via the WordPress customizer.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/easy-notification-bar/assets/icon-128x128.png?rev=2515988',
@@ -294,7 +294,7 @@ return array (
     'name' => 'Antispam Bee',
     'slug' => 'antispam-bee',
     'homepage' => 'https://antispambee.pluginkollektiv.org/',
-    'short_description' => 'Antispam plugin with a sophisticated tool set for effective day to day comment and trackback&hellip;',
+    'short_description' => 'Antispam plugin with a sophisticated tool set for effective day to day comment and trackback spam-fighting. Build with data protection and privacy in  &hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/antispam-bee/assets/icon-128x128.png?rev=977629',
@@ -347,7 +347,7 @@ return array (
     'name' => 'Page Builder Gutenberg Blocks – CoBlocks',
     'slug' => 'coblocks',
     'homepage' => '',
-    'short_description' => 'CoBlocks is a suite of page builder WordPress blocks for Gutenberg, with 10+ new blocks&hellip;',
+    'short_description' => 'CoBlocks is a suite of page builder WordPress blocks for Gutenberg, with 10+ new blocks and a true page builder experience with rows and columns.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/coblocks/assets/icon-128x128.jpg?rev=2243972',
@@ -360,7 +360,7 @@ return array (
     'name' => 'Simple Author Box',
     'slug' => 'simple-author-box',
     'homepage' => 'https://wpauthorbox.com/',
-    'short_description' => 'Add a responsive author box with social icons to any post. Great author box for&hellip;',
+    'short_description' => 'Add a responsive author box with social icons to any post. Great author box for any site!',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/simple-author-box/assets/icon-128x128.jpg?rev=1821054',
@@ -438,7 +438,7 @@ return array (
     'name' => 'Rank Math SEO – Best SEO Plugin For WordPress To Increase Your SEO Traffic',
     'slug' => 'seo-by-rank-math',
     'homepage' => 'https://s.rankmath.com/home',
-    'short_description' => 'Rank Math SEO is the Best WordPress SEO plugin combines the features of many SEO tools in a single package &amp; helps you multiply your SEO traffic.',
+    'short_description' => 'Rank Math SEO is the Best WordPress SEO plugin combines the features of many SEO&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/seo-by-rank-math/assets/icon.svg?rev=2348086',
@@ -505,7 +505,7 @@ return array (
     'name' => 'Schema',
     'slug' => 'schema',
     'homepage' => 'https://schema.press',
-    'short_description' => 'Get the next generation of Schema Structured Data to enhance your WordPress site presentation in&hellip;',
+    'short_description' => 'Get the next generation of Schema Structured Data to enhance your WordPress site presentation in Google search results.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/schema/assets/icon-128x128.png?rev=1750172',
@@ -518,7 +518,7 @@ return array (
     'name' => 'Iframely &#8211; rich media embeds for 2000+ publishers',
     'slug' => 'iframely',
     'homepage' => 'http://wordpress.org/plugins/iframely/',
-    'short_description' => 'Iframely extends WordPress default rich media embeds and adds support of over 2000 more providers&hellip;',
+    'short_description' => 'Iframely extends WordPress default rich media embeds and adds support of over 2000 more providers and cards as URL previews for the rest of the Web.',
     'icons' => 
     array (
       'default' => 'https://s.w.org/plugins/geopattern-icon/iframely.svg',
@@ -598,7 +598,7 @@ return array (
     'name' => 'Advanced Ads – Ad Manager &amp; AdSense',
     'slug' => 'advanced-ads',
     'homepage' => 'https://wpadvancedads.com',
-    'short_description' => 'Manage and optimize all ad types. Support for Google AdSense Auto ads, Amazon, image banners, HTML, page builder, ad widget, ad rotations, ads.txt',
+    'short_description' => 'Manage and optimize all ad types. Support for Google AdSense Auto ads, Amazon, image banners,&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/advanced-ads/assets/icon-128x128.gif?rev=2293174',
@@ -679,7 +679,7 @@ return array (
     'name' => 'WP GDPR Cookie Notice',
     'slug' => 'wp-gdpr-cookie-notice',
     'homepage' => 'https://wordpress.org/plugins/wp-gdpr-cookie-notice/',
-    'short_description' => 'Simple performant cookie consent notice that supports AMP, Web Stories, granular cookie control and live preview customization.',
+    'short_description' => 'Simple performant cookie consent notice that supports AMP, Web Stories, granular cookie control and live&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/wp-gdpr-cookie-notice/assets/icon-128x128.png?rev=2042024',
@@ -692,7 +692,7 @@ return array (
     'name' => 'WordPress Share Buttons Plugin – AddThis',
     'slug' => 'addthis',
     'homepage' => 'https://wordpress.org/plugins/addthis/',
-    'short_description' => 'Now compatible with the AMP Plugin! Free Share Buttons from AddThis. Share to Messenger, WhatsApp,&hellip;',
+    'short_description' => 'Now compatible with the AMP Plugin! Free Share Buttons from AddThis. Share to Messenger, WhatsApp, Facebook, Twitter, Pinterest and many more.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/addthis/assets/icon-128x128.png?rev=1223867',
@@ -732,7 +732,7 @@ return array (
     'name' => 'Gutenberg',
     'slug' => 'gutenberg',
     'homepage' => 'https://github.com/WordPress/gutenberg',
-    'short_description' => 'The Gutenberg plugin provides editing, customization, and site building features to WordPress. This beta plugin&hellip;',
+    'short_description' => 'The Gutenberg plugin provides editing, customization, and site building features to WordPress. This beta plugin allows you to test bleeding-edge featu &hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/gutenberg/assets/icon-128x128.jpg?rev=1776042',
