@@ -263,18 +263,19 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 			return $response;
 		}
 
-		$plugins       = $this->get_plugins();
-		$total_page    = ceil( count( $plugins ) / $args['per_page'] );
-		$page          = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
-		$plugin_chunks = array_chunk( $plugins, $args['per_page'] );
-		$plugins       = ( ! empty( $plugin_chunks[ $page - 1 ] ) && is_array( $plugin_chunks[ $page - 1 ] ) ) ? $plugin_chunks[ $page - 1 ] : [];
+		$plugins        = $this->get_plugins();
+		$plugins_count  = count( $plugins );
+		$total_page     = ceil( $plugins_count / $args['per_page'] );
+		$page           = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
+		$plugins_chunks = array_chunk( $plugins, $args['per_page'] );
+		$plugins_chunk  = ( ! empty( $plugins_chunks[ $page - 1 ] ) && is_array( $plugins_chunks[ $page - 1 ] ) ) ? $plugins_chunks[ $page - 1 ] : [];
 
 		$response          = new stdClass();
-		$response->plugins = $plugins;
+		$response->plugins = $plugins_chunk;
 		$response->info    = [
 			'page'    => $page,
 			'pages'   => $total_page,
-			'results' => count( $this->get_plugins() ),
+			'results' => $plugins_count,
 		];
 
 		return $response;
