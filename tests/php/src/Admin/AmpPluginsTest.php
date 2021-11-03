@@ -26,13 +26,6 @@ class AmpPluginsTest extends TestCase {
 	public $instance;
 
 	/**
-	 * Flag for AMP-compatible plugins file initially exists or not.
-	 *
-	 * @var bool
-	 */
-	protected $is_file_exists = false;
-
-	/**
 	 * Setup.
 	 *
 	 * @inheritdoc
@@ -156,6 +149,7 @@ class AmpPluginsTest extends TestCase {
 				if ( 'plugins' === $type ) {
 					$shown = false;
 				}
+
 				return $shown;
 			},
 			10,
@@ -202,7 +196,7 @@ class AmpPluginsTest extends TestCase {
 			has_action( 'install_plugins_amp-compatible', 'display_plugins_table' )
 		);
 
-		set_current_screen( 'plugins' );
+		set_current_screen( 'plugin-install' );
 		$this->instance->register();
 		$this->assertEquals(
 			10,

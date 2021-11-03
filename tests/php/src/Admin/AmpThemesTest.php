@@ -26,13 +26,6 @@ class AmpThemesTest extends TestCase {
 	public $instance;
 
 	/**
-	 * Flag for AMP-compatible themes file initially exists or not.
-	 *
-	 * @var bool
-	 */
-	protected $is_file_exists = false;
-
-	/**
 	 * Setup.
 	 *
 	 * @inheritdoc
