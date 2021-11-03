@@ -1608,6 +1608,11 @@ function amp_get_content_sanitizers( $post = null ) {
 			$dev_mode_xpaths[] = '//style[ @id = "custom-theme-colors" ]';
 		}
 
+		// Mark the script output by wp_comment_form_unfiltered_html_nonce() as being in dev mode.
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			$dev_mode_xpaths[] = '//script[ not( @src ) and preceding-sibling::input[ @name = "_wp_unfiltered_html_comment_disabled" ] and contains( text(), "_wp_unfiltered_html_comment_disabled" ) ]';
+		}
+
 		$sanitizers = array_merge(
 			[
 				AMP_Dev_Mode_Sanitizer::class => [

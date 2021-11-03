@@ -1806,6 +1806,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
 
 		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, and now also with admin bar showing.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_filter( 'show_admin_bar', '__return_true' );
 		$sanitizers = amp_get_content_sanitizers();
@@ -1819,6 +1820,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 					'//*[ @id = "wpadminbar" ]',
 					'//*[ @id = "wpadminbar" ]//*',
 					'//style[ @id = "admin-bar-inline-css" ]',
+					'//script[ not( @src ) and preceding-sibling::input[ @name = "_wp_unfiltered_html_comment_disabled" ] and contains( text(), "_wp_unfiltered_html_comment_disabled" ) ]',
 				]
 			),
 			$sanitizers[ AMP_Dev_Mode_Sanitizer::class ]['element_xpaths']
