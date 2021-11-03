@@ -161,9 +161,9 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 
 		add_filter( 'install_plugins_tabs', [ $this, 'add_tab' ] );
 		add_filter( 'install_plugins_table_api_args_' . self::AMP_COMPATIBLE, [ $this, 'filter_plugins_table_api_args' ] );
-		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 10, 3 );
-		add_filter( 'plugin_install_action_links', [ $this, 'action_links' ], 10, 2 );
-		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 3 );
+		add_filter( 'plugins_api', [ $this, 'filter_plugins_api' ], 10, 3 );
+		add_filter( 'plugin_install_action_links', [ $this, 'filter_action_links' ], 10, 2 );
+		add_filter( 'plugin_row_meta', [ $this, 'filter_plugin_row_meta' ], 10, 3 );
 
 		add_action( 'install_plugins_' . self::AMP_COMPATIBLE, 'display_plugins_table' );
 	}
@@ -256,7 +256,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	 *
 	 * @return stdClass|array List of AMP compatible plugins.
 	 */
-	public function plugins_api( $response, /** @noinspection PhpUnusedParameterInspection */ $action, $args ) {
+	public function filter_plugins_api( $response, /** @noinspection PhpUnusedParameterInspection */ $action, $args ) {
 
 		$args = (array) $args;
 		if ( ! isset( $args[ self::AMP_COMPATIBLE ] ) ) {
@@ -288,7 +288,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	 *
 	 * @return array List of action button's markup for plugin card.
 	 */
-	public function action_links( $actions, $plugin ) {
+	public function filter_action_links( $actions, $plugin ) {
 
 		if ( isset( $plugin['wporg'] ) && true !== $plugin['wporg'] ) {
 			$actions = [];
@@ -319,7 +319,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	 *
 	 * @return string[] An array of the plugin's metadata
 	 */
-	public function plugin_row_meta( $plugin_meta, /** @noinspection PhpUnusedParameterInspection */ $plugin_file, $plugin_data ) {
+	public function filter_plugin_row_meta( $plugin_meta, /** @noinspection PhpUnusedParameterInspection */ $plugin_file, $plugin_data ) {
 
 		$amp_plugins = wp_list_pluck( $this->get_plugins(), 'slug' );
 

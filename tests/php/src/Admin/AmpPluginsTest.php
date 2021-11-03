@@ -181,15 +181,15 @@ class AmpPluginsTest extends TestCase {
 		);
 		$this->assertEquals(
 			10,
-			has_filter( 'plugins_api', [ $this->instance, 'plugins_api' ] )
+			has_filter( 'plugins_api', [ $this->instance, 'filter_plugins_api' ] )
 		);
 		$this->assertEquals(
 			10,
-			has_filter( 'plugin_install_action_links', [ $this->instance, 'action_links' ] )
+			has_filter( 'plugin_install_action_links', [ $this->instance, 'filter_action_links' ] )
 		);
 		$this->assertEquals(
 			10,
-			has_filter( 'plugin_row_meta', [ $this->instance, 'plugin_row_meta' ] )
+			has_filter( 'plugin_row_meta', [ $this->instance, 'filter_plugin_row_meta' ] )
 		);
 		$this->assertEquals(
 			10,
@@ -238,14 +238,14 @@ class AmpPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::plugins_api()
+	 * @covers ::filter_plugins_api()
 	 */
-	public function test_plugins_api() {
+	public function test_filter_plugins_api() {
 		$this->instance->register();
 		$response = new stdClass();
 
 		// Test 1: Normal request.
-		$response = $this->instance->plugins_api( $response, 'query_themes', [ 'per_page' => 36 ] );
+		$response = $this->instance->filter_plugins_api( $response, 'query_themes', [ 'per_page' => 36 ] );
 		$this->assertEmpty( (array) $response );
 
 		// Test 2: Request for AMP-compatible data.
@@ -254,7 +254,7 @@ class AmpPluginsTest extends TestCase {
 			'per_page'       => 36,
 		];
 
-		$response = $this->instance->plugins_api( $response, 'query_themes', $args );
+		$response = $this->instance->filter_plugins_api( $response, 'query_themes', $args );
 
 		$this->assertIsArray( $response->info );
 		$this->assertArrayHasKey( 'page', $response->info );
@@ -264,9 +264,9 @@ class AmpPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::action_links()
+	 * @covers ::filter_action_links()
 	 */
-	public function test_action_links() {
+	public function test_filter_action_links() {
 
 		// Test 1: wporg plugins
 		$actions     = [
@@ -275,7 +275,7 @@ class AmpPluginsTest extends TestCase {
 		$plugin_data = [
 			'wporg' => true,
 		];
-		$output      = $this->instance->action_links( $actions, $plugin_data );
+		$output      = $this->instance->filter_action_links( $actions, $plugin_data );
 		$this->assertEquals( $actions, $output );
 
 		// Test 2: wporg plugin.
@@ -284,7 +284,7 @@ class AmpPluginsTest extends TestCase {
 			'name'     => 'Sample Plugin',
 			'homepage' => 'https://sample-plugin.com',
 		];
-		$output      = $this->instance->action_links( $actions, $plugin_data );
+		$output      = $this->instance->filter_action_links( $actions, $plugin_data );
 		$this->assertIsArray( $output );
 		$this->assertEquals(
 			sprintf(
@@ -298,9 +298,9 @@ class AmpPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::plugin_row_meta()
+	 * @covers ::filter_plugin_row_meta()
 	 */
-	public function test_plugin_row_meta() {
+	public function test_filter_plugin_row_meta() {
 
 		$this->instance->register();
 
@@ -310,11 +310,11 @@ class AmpPluginsTest extends TestCase {
 		];
 
 		// Test 1: None AMP plugin.
-		$output = $this->instance->plugin_row_meta( $plugin_meta, '', [ 'slug' => 'example' ] );
+		$output = $this->instance->filter_plugin_row_meta( $plugin_meta, '', [ 'slug' => 'example' ] );
 		$this->assertEquals( $plugin_meta, $output );
 
 		// Test 2: None AMP plugin.
-		$output = $this->instance->plugin_row_meta( $plugin_meta, '', [ 'slug' => 'akismet' ] );
+		$output = $this->instance->filter_plugin_row_meta( $plugin_meta, '', [ 'slug' => 'akismet' ] );
 
 		$this->assertContains(
 			'AMP Compatible',
