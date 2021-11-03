@@ -8,11 +8,14 @@
 
 namespace AmpProject\AmpWP\Validation;
 
+use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PairedRouting;
 use WP_Error;
 use WP_Post;
@@ -77,7 +80,14 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_items' ],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
-					'args'                => [],
+					'args'                => [
+						'force_standard_mode' => [
+							'description' => __( 'Indicates whether to force Standard template mode.', 'amp' ),
+							'type'        => 'boolean',
+							'required'    => false,
+							'default'     => false,
+						],
+					],
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
@@ -112,6 +122,19 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		// Allow query parameter to force a response to be served with Standard mode (AMP-first). This is used as
+		// part of Site Scanning in order to determine if the primary theme is suitable for serving AMP.
+		if ( ! amp_is_canonical() && $request->get_param( 'force_standard_mode' ) ) {
+			add_filter(
+				'option_' . AMP_Options_Manager::OPTION_NAME,
+				function ( $options ) {
+					$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+
+					return $options;
+				}
+			);
+		}
+
 		return rest_ensure_response(
 			array_map(
 				function ( $item ) use ( $request ) {
