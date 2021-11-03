@@ -5,14 +5,14 @@ import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
 
 /**
- * Internal dependencies
- */
-import ampViewTheme from './theme-install/view/theme';
-
-/**
  * External dependencies
  */
 import { AMP_COMPATIBLE } from 'amp-themes'; // From WP inline script.
+
+/**
+ * Internal dependencies
+ */
+import ampViewTheme from './theme-install/view/theme';
 
 const ampThemeInstall = {
 
