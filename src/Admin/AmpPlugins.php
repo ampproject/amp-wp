@@ -24,6 +24,13 @@ use stdClass;
 class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 
 	/**
+	 * Slug for amp-compatible.
+	 *
+	 * @var string
+	 */
+	const AMP_COMPATIBLE = 'amp-compatible';
+
+	/**
 	 * Assets handle.
 	 *
 	 * @var string
@@ -153,12 +160,12 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 		}
 
 		add_filter( 'install_plugins_tabs', [ $this, 'add_tab' ] );
-		add_filter( 'install_plugins_table_api_args_amp-compatible', [ $this, 'tab_args' ] );
+		add_filter( 'install_plugins_table_api_args_' . self::AMP_COMPATIBLE, [ $this, 'tab_args' ] );
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 10, 3 );
 		add_filter( 'plugin_install_action_links', [ $this, 'action_links' ], 10, 2 );
 		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 3 );
 
-		add_action( 'install_plugins_amp-compatible', 'display_plugins_table' );
+		add_action( 'install_plugins_' . self::AMP_COMPATIBLE, 'display_plugins_table' );
 	}
 
 	/**
@@ -189,7 +196,8 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 		);
 
 		$js_data = [
-			'AMP_PLUGINS' => wp_list_pluck( $this->get_plugins(), 'slug' ),
+			'AMP_COMPATIBLE' => self::AMP_COMPATIBLE,
+			'AMP_PLUGINS'    => wp_list_pluck( $this->get_plugins(), 'slug' ),
 		];
 
 		wp_add_inline_script(
@@ -214,7 +222,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 		return array_merge(
 			$tabs,
 			[
-				'amp-compatible' => esc_html__( 'AMP Compatible', 'amp' ),
+				self::AMP_COMPATIBLE => esc_html__( 'AMP Compatible', 'amp' ),
 			]
 		);
 	}
@@ -233,9 +241,9 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 		$page       = max( 1, $pagenum );
 
 		return [
-			'amp-compatible' => true,
-			'per_page'       => $per_page,
-			'page'           => $page,
+			self::AMP_COMPATIBLE => true,
+			'per_page'           => $per_page,
+			'page'               => $page,
 		];
 	}
 
@@ -251,7 +259,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	public function plugins_api( $response, /** @noinspection PhpUnusedParameterInspection */ $action, $args ) {
 
 		$args = (array) $args;
-		if ( ! isset( $args['amp-compatible'] ) ) {
+		if ( ! isset( $args[ self::AMP_COMPATIBLE ] ) ) {
 			return $response;
 		}
 

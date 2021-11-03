@@ -23,6 +23,13 @@ use stdClass;
 class AmpThemes implements Service, Registerable, Conditional, Delayed {
 
 	/**
+	 * Slug for amp-compatible.
+	 *
+	 * @var string
+	 */
+	const AMP_COMPATIBLE = 'amp-compatible';
+
+	/**
 	 * Assets handle.
 	 *
 	 * @var string
@@ -193,6 +200,7 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 		}
 
 		$js_data = [
+			'AMP_COMPATIBLE'    => self::AMP_COMPATIBLE,
 			'AMP_THEMES'        => $slugs,
 			'NONE_WPORG_THEMES' => $none_wporg,
 		];
@@ -219,7 +227,7 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 	public function filter_themes_api( $response, $action, $args ) {
 
 		$args = (array) $args;
-		if ( ! isset( $args['browse'] ) || 'amp-compatible' !== $args['browse'] ) {
+		if ( ! isset( $args['browse'] ) || self::AMP_COMPATIBLE !== $args['browse'] ) {
 			return $response;
 		}
 

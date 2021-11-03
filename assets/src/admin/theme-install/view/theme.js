@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { AMP_THEMES, NONE_WPORG_THEMES } from 'amp-themes'; // From WP inline script.
+import { AMP_THEMES, AMP_COMPATIBLE, NONE_WPORG_THEMES } from 'amp-themes'; // From WP inline script.
 
 const wpThemeView = wp.themes.view.Theme;
 
@@ -17,7 +17,7 @@ export default wpThemeView.extend( {
 	 */
 	isAmpCompatibleTab() {
 		const queryParams = new URLSearchParams( window.location.search.substr( 1 ) );
-		return queryParams.get( 'browse' ) === 'amp-compatible';
+		return queryParams.get( 'browse' ) === AMP_COMPATIBLE;
 	},
 
 	/**

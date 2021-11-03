@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { AMP_PLUGINS } from 'amp-plugins'; // From WP inline script.
+import { AMP_PLUGINS, AMP_COMPATIBLE } from 'amp-plugins'; // From WP inline script.
 import { debounce } from 'lodash';
 
 const ampPluginInstall = {
@@ -31,7 +31,7 @@ const ampPluginInstall = {
 	 */
 	isAmpCompatibleTab() {
 		const queryParams = new URLSearchParams( window.location.search.substr( 1 ) );
-		return queryParams.get( 'tab' ) === 'amp-compatible';
+		return queryParams.get( 'tab' ) === AMP_COMPATIBLE;
 	},
 
 	/**

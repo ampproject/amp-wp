@@ -9,6 +9,11 @@ import domReady from '@wordpress/dom-ready';
  */
 import ampViewTheme from './theme-install/view/theme';
 
+/**
+ * External dependencies
+ */
+import { AMP_COMPATIBLE } from 'amp-themes'; // From WP inline script.
+
 const ampThemeInstall = {
 
 	/**
@@ -32,7 +37,7 @@ const ampThemeInstall = {
 		const anchorElement = document.createElement( 'a' );
 
 		anchorElement.setAttribute( 'href', '#' );
-		anchorElement.setAttribute( 'data-sort', 'amp-compatible' );
+		anchorElement.setAttribute( 'data-sort', AMP_COMPATIBLE );
 		anchorElement.append( __( 'AMP Compatible', 'amp' ) );
 
 		listItem.appendChild( anchorElement );
