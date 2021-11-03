@@ -234,7 +234,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	 */
 	public function filter_plugins_table_api_args() {
 
-		$per_page   = 100; // @todo There are currently 56 plugins, so this will show all. This is done because pagination is not working.
+		$per_page   = 36;
 		$total_page = ceil( count( $this->get_plugins() ) / $per_page );
 		$pagenum    = isset( $_REQUEST['paged'] ) ? (int) $_REQUEST['paged'] : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$pagenum    = ( $pagenum > $total_page ) ? $total_page : $pagenum;
@@ -263,18 +263,18 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 			return $response;
 		}
 
-		$plugins       = $this->get_plugins();
-		$total_page    = ceil( count( $plugins ) / $args['per_page'] );
-		$page          = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
-		$plugin_chunks = array_chunk( $plugins, $args['per_page'] );
-		$plugins       = ( ! empty( $plugin_chunks[ $page - 1 ] ) && is_array( $plugin_chunks[ $page - 1 ] ) ) ? $plugin_chunks[ $page - 1 ] : [];
+		$page           = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
+		$plugins        = $this->get_plugins();
+		$plugins_count  = count( $plugins );
+		$plugins_chunks = array_chunk( $plugins, $args['per_page'] );
+		$plugins_chunk  = ( ! empty( $plugins_chunks[ $page - 1 ] ) && is_array( $plugins_chunks[ $page - 1 ] ) ) ? $plugins_chunks[ $page - 1 ] : [];
 
 		$response          = new stdClass();
-		$response->plugins = $plugins;
+		$response->plugins = $plugins_chunk;
 		$response->info    = [
 			'page'    => $page,
-			'pages'   => $total_page,
-			'results' => count( $plugins ),
+			'pages'   => count( $plugins_chunks ),
+			'results' => $plugins_count,
 		];
 
 		return $response;
