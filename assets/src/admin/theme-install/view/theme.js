@@ -13,6 +13,14 @@ const wpThemeView = wp.themes.view.Theme;
 export default wpThemeView.extend( {
 
 	/**
+	 * Check if "AMP Compatible" tab is open or not.
+	 */
+	isAmpCompatibleTab() {
+		const queryParams = new URLSearchParams( window.location.search.substr( 1 ) );
+		return queryParams.get( 'browse' ) === 'amp-compatible';
+	},
+
+	/**
 	 * Render theme card.
 	 *
 	 * @param {...any} args Render arguments.
@@ -34,22 +42,33 @@ export default wpThemeView.extend( {
 		}
 
 		if ( slug && this.isAmpTheme( slug ) ) {
-			const messageElement = document.createElement( 'div' );
-			const iconElement = document.createElement( 'span' );
-			const tooltipElement = document.createElement( 'span' );
+			/*
+			 * Note: the setTimeout is needed because when the user taps on the AMP Compatible tab, the UI will render
+			 * before history.pushState() is called, meaning isAmpCompatibleTab cannot be called yet to inspect the
+			 * current location. By waiting for the next tick, we can safely read it.
+			 */
+			setTimeout( () => {
+				if ( this.isAmpCompatibleTab() ) {
+					return;
+				}
 
-			messageElement.classList.add( 'amp-extension-card-message' );
-			iconElement.classList.add( 'amp-logo-icon' );
-			tooltipElement.classList.add( 'tooltiptext' );
+				const messageElement = document.createElement( 'div' );
+				const iconElement = document.createElement( 'span' );
+				const tooltipElement = document.createElement( 'span' );
 
-			tooltipElement.append(
-				__( 'This is known to work well with the AMP plugin.', 'amp' ),
-			);
+				messageElement.classList.add( 'amp-extension-card-message' );
+				iconElement.classList.add( 'amp-logo-icon' );
+				tooltipElement.classList.add( 'tooltiptext' );
 
-			messageElement.append( iconElement );
-			messageElement.append( tooltipElement );
+				tooltipElement.append(
+					__( 'This is known to work well with the AMP plugin.', 'amp' ),
+				);
 
-			element.appendChild( messageElement );
+				messageElement.append( iconElement );
+				messageElement.append( tooltipElement );
+
+				element.appendChild( messageElement );
+			} );
 		}
 
 		if ( slug && ! this.isWPORGTheme( slug ) ) {
