@@ -61,6 +61,7 @@
     "@wordpress/jest-puppeteer-axe": "3.1.0",
     "@wordpress/plugins": "4.0.3",
     "@wordpress/scripts": "18.1.0",
+    "axios": "0.21.1",
     "babel-plugin-inline-react-svg": "2.0.1",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "copy-webpack-plugin": "9.0.1",
@@ -92,7 +93,8 @@
     "react-test-renderer": "17.0.2",
     "rtlcss-webpack-plugin": "4.0.6",
     "svgo": "2.7.0",
-    "webpackbar": "5.0.0-3"
+    "webpackbar": "5.0.0-3",
+    "wporg-api-client": "1.0.1"
   },
   "scripts": {
     "build:dev": "cross-env NODE_ENV=development npm-run-all 'build:!(dev|prod)'",
@@ -131,7 +133,8 @@
     "test:js:help": "wp-scripts test-unit-js --help",
     "test:js:watch": "npm run test:js -- --watch",
     "test:php": "vendor/bin/phpunit",
-    "test:php:help": "npm run test:php -- --help"
+    "test:php:help": "npm run test:php -- --help",
+    "update-ecosystem-files": "node ./bin/update-extension-files.js"
   },
   "npmpackagejsonlint": {
     "extends": "@wordpress/npm-package-json-lint-config",
