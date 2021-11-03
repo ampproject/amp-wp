@@ -29,6 +29,7 @@ use Sabberworm\CSS\RuleSet\AtRuleSet;
 use Sabberworm\CSS\OutputFormat;
 use Sabberworm\CSS\Property\Import;
 use Sabberworm\CSS\CSSList\AtRuleBlockList;
+use Sabberworm\CSS\Value\CSSFunction;
 use Sabberworm\CSS\Value\RuleValueList;
 use Sabberworm\CSS\Value\URL;
 use Sabberworm\CSS\Value\Value;
@@ -2519,7 +2520,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Obtain the font-family name to guess the filename.
-		$font_family   = null;
 		$font_basename = null;
 		$properties    = $ruleset->getRules( 'font-family' );
 		if ( isset( $properties[0] ) ) {
@@ -2599,24 +2599,43 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * @var URL[]    $source_data_url_objects
 			 */
 			$source_data_url_objects = [];
-			foreach ( $sources as $i => $source ) {
-				if ( $source[0] instanceof URL ) {
-					$value = $source[0]->getURL()->getString();
-					if ( 'data:' === substr( $value, 0, 5 ) ) {
-						$source_data_url_objects[ $i ] = $source[0];
-					} else {
-						$source_file_urls[ $i ] = $value;
-					}
+			foreach ( $sources as $source ) {
+				if ( count( $source ) !== 2 ) {
+					continue;
+				}
+				list( $url, $format ) = $source;
+				if (
+					! $url instanceof URL
+					||
+					! $format instanceof CSSFunction
+					||
+					$format->getName() !== 'format'
+					||
+					count( $format->getArguments() ) !== 1
+				) {
+					continue;
+				}
+
+				list( $format_value ) = $format->getArguments();
+				$format_value         = trim( $format_value, '"\'' );
+
+				$value = $url->getURL()->getString();
+				if ( 'data:' === substr( $value, 0, 5 ) ) {
+					$source_data_url_objects[ $format_value ] = $source[0];
+				} else {
+					$source_file_urls[] = $value;
 				}
 			}
 
 			// Convert data: URLs into regular URLs, assuming there will be a file present (e.g. woff fonts in core themes).
-			foreach ( $source_data_url_objects as $i => $data_url ) {
+			foreach ( $source_data_url_objects as $format => $data_url ) {
 				$mime_type = strtok( substr( $data_url->getURL()->getString(), 5 ), ';' );
-				if ( ! $mime_type ) {
-					continue;
+				if ( $mime_type ) {
+					$extension = preg_replace( ':.+/(.+-)?:', '', $mime_type );
+				} else {
+					$extension = $format;
 				}
-				$extension = preg_replace( ':.+/(.+-)?:', '', $mime_type );
+				$extension = sanitize_key( $extension );
 
 				$guessed_urls = [];
 
