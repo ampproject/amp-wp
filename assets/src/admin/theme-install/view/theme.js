@@ -48,7 +48,6 @@ export default wpThemeView.extend( {
 
 			messageElement.append( iconElement );
 			messageElement.append( tooltipElement );
-			messageElement.append( ' ' );
 
 			element.appendChild( messageElement );
 		}
@@ -57,7 +56,7 @@ export default wpThemeView.extend( {
 			const siteLinkButton = document.createElement( 'a' );
 			siteLinkButton.classList.add( 'button' );
 			siteLinkButton.classList.add( 'button-primary' );
-			siteLinkButton.innerText = __( 'Visit Site', 'amp' );
+			siteLinkButton.append( __( 'Visit Site', 'amp' ) );
 
 			if ( data?.preview_url ) {
 				siteLinkButton.setAttribute( 'href', data.preview_url );
@@ -74,13 +73,14 @@ export default wpThemeView.extend( {
 
 			const themeActions = element.querySelector( '.theme-actions' );
 			if ( themeActions ) {
-				themeActions.innerText = '';
-				themeActions.appendChild( siteLinkButton );
+				themeActions.textContent = ''; // Remove children.
+				themeActions.append( siteLinkButton );
 			}
 
 			const moreDetail = element.querySelector( '.more-details' );
 			if ( moreDetail ) {
-				moreDetail.innerText = __( 'Visit site', 'amp' );
+				moreDetail.textContent = ''; // Remove children.
+				moreDetail.append( __( 'Visit Site', 'amp' ) );
 			}
 		}
 	},

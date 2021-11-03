@@ -94,7 +94,6 @@ const ampPluginInstall = {
 
 			messageElement.append( iconElement );
 			messageElement.append( tooltipElement );
-			messageElement.append( ' ' );
 
 			pluginCardElement.appendChild( messageElement );
 		}
