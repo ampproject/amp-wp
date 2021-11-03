@@ -86,7 +86,6 @@ export function Providers( { children } ) {
 									>
 										<TemplateModeOverrideContextProvider>
 											<SiteScanContextProvider
-												ampFirst={ true }
 												scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 												validateNonce={ VALIDATE_NONCE }
 											>

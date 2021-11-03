@@ -22,6 +22,7 @@ import {
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../../components/options-context-provider';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
+import { SiteScan } from '../../../components/site-scan-context-provider';
 import { User } from '../../../components/user-context-provider';
 import { IconLaptopToggles } from '../../../components/svg/icon-laptop-toggles';
 import { IconLaptopSearch } from '../../../components/svg/icon-laptop-search';
@@ -47,6 +48,7 @@ export function Done() {
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
+	const { isFetchingScannableUrls } = useContext( SiteScan );
 	const {
 		hasPreview,
 		isPreviewingAMP,
@@ -83,7 +85,7 @@ export function Done() {
 		}
 	}, [ didSaveDeveloperToolsOption, savingDeveloperToolsOption, saveDeveloperToolsOption ] );
 
-	if ( savingOptions || savingDeveloperToolsOption || downloadingTheme || hasOptionsChanges ) {
+	if ( savingOptions || savingDeveloperToolsOption || downloadingTheme || hasOptionsChanges || isFetchingScannableUrls ) {
 		return <Saving />;
 	}
 

@@ -41,6 +41,7 @@ import useDelayedFlag from '../utils/use-delayed-flag';
 export function SiteScan( { onSiteScan } ) {
 	const {
 		cancelSiteScan,
+		fetchScannableUrls,
 		hasSiteScanResults,
 		isBusy,
 		isCancelled,
@@ -58,9 +59,13 @@ export function SiteScan( { onSiteScan } ) {
 	const hasSiteIssues = themesWithAmpIncompatibility.length > 0 || pluginsWithAmpIncompatibility.length > 0;
 
 	/**
-	 * Cancel scan when component unmounts.
+	 * Fetch scannable URLs on mount; cancel site scan if the component unmounts.
 	 */
-	useEffect( () => () => cancelSiteScan(), [ cancelSiteScan ] );
+	useEffect( () => {
+		fetchScannableUrls();
+
+		return cancelSiteScan;
+	}, [ cancelSiteScan, fetchScannableUrls ] );
 
 	/**
 	 * Delay the `isCompleted` flag so that the progress bar stays at 100% for a
