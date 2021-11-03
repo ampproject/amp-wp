@@ -1926,16 +1926,12 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'theme_slug'    => 'twentynineteen',
 				'expected_urls' => [
 					'/themes/twentynineteen/fonts/NonBreakingSpaceOverride.woff2',
-					'/themes/twentynineteen/fonts/NonBreakingSpaceOverride.woff',
 				],
 			],
 			(object) [
 				'theme_slug'    => 'twentytwenty',
 				'expected_urls' => [
 					'/plugins/amp/assets/fonts/nonbreakingspaceoverride.woff2',
-					'/plugins/amp/assets/fonts/nonbreakingspaceoverride.woff',
-					'/themes/twentytwenty/assets/fonts/inter/Inter-upright-var.woff2',
-					'/themes/twentytwenty/assets/fonts/inter/Inter-italic-var.woff2',
 				],
 			],
 			(object) [
@@ -1970,7 +1966,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			$link_elements       = $dom->getElementsByTagName( 'link' );
 			$link_elements_count = $link_elements->length;
 
-			$this->assertEquals( $link_elements_count, count( $test_case->expected_urls ) );
+			$this->assertEquals( count( $test_case->expected_urls ), $link_elements_count );
 
 			for ( $i = 0; $i < $link_elements_count; $i++ ) {
 				$this->assertEquals(

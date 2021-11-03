@@ -2541,7 +2541,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Attempt to transform data: URLs in src properties to be external file URLs.
-		$converted_count = 0;
+		$converted_data_urls = [];
 		foreach ( $src_properties as $src_property ) {
 			$value = $src_property->getValue();
 			if ( ! ( $value instanceof RuleValueList ) ) {
@@ -2648,7 +2648,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$path = $this->get_validated_url_file_path( $guessed_url, [ 'woff', 'woff2', 'ttf', 'otf', 'svg' ] );
 					if ( ! is_wp_error( $path ) ) {
 						$data_url->getURL()->setString( $guessed_url );
-						$converted_count++;
+						$converted_data_urls[] = $data_url;
 						continue 2;
 					}
 				}
@@ -2662,57 +2662,38 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				];
 				if ( in_array( $font_filename, $bundled_fonts, true ) ) {
 					$data_url->getURL()->setString( plugin_dir_url( AMP__FILE__ ) . "assets/fonts/$font_filename" );
-					$converted_count++;
+					$converted_data_urls[] = $data_url;
 				}
 			} // End foreach $source_data_url_objects.
 		} // End foreach $src_properties.
 
-		/**
+		/*
 		 * If a data: URL has been replaced with an external file URL, then we add a font-display:optional to the @font-face
-		 * rule if one isn't already present. This prevents FO
+		 * rule if one isn't already present. This prevents a flash of unstyled text (FOUT).
 		 *
 		 * If no font-display is already present, add font-display:optional since the font is now being loaded externally.
 		 *
 		 * @see: https://github.com/ampproject/amp-wp/issues/6036
 		 */
-		if ( $converted_count && 0 === count( $ruleset->getRules( 'font-display' ) ) ) {
+		if ( count( $converted_data_urls ) > 0 && 0 === count( $ruleset->getRules( 'font-display' ) ) ) {
 			$font_display_rule = new Rule( 'font-display' );
 			$font_display_rule->setValue( 'optional' );
 			$ruleset->addRule( $font_display_rule );
 		}
 
-		/**
-		 * Preload each font files
-		 */
-		foreach ( $ruleset->getRules( 'src' ) as $src_property ) {
-			$value      = $src_property->getValue();
-			$font_files = array_filter(
-				array_map(
-					function( $path ) {
-						return substr( $path, 0, strpos( $path, '"' ) );
-					},
-					explode( 'url("', $value )
-				),
-				function( $path ) {
-					return 'http' === substr( $path, 0, 4 );
-				}
+		// Preload the first data: URL that was converted to an external file.
+		if ( isset( $converted_data_urls[0] ) ) {
+			$link = AMP_DOM_Utils::create_node(
+				$this->dom,
+				Tag::LINK,
+				[
+					Attribute::REL         => Attribute::REL_PRELOAD,
+					Attribute::AS_         => 'font',
+					Attribute::HREF        => $converted_data_urls[0]->getURL()->getString(),
+					Attribute::CROSSORIGIN => '',
+				]
 			);
-
-			if ( ! empty( $font_files ) ) {
-				foreach ( $font_files as $font_file ) {
-					$link = AMP_DOM_Utils::create_node(
-						$this->dom,
-						'link',
-						[
-							'rel'         => 'preload',
-							'as'          => 'font',
-							'href'        => $font_file,
-							'crossorigin' => '',
-						]
-					);
-					$this->dom->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
-				}
-			}
+			$this->dom->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
 		}
 	}
 
