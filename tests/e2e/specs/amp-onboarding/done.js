@@ -1,7 +1,12 @@
 /**
  * Internal dependencies
  */
-import { testCloseButton, cleanUpSettings, moveToDoneScreen } from '../../utils/onboarding-wizard-utils';
+import {
+	testCloseButton,
+	cleanUpSettings,
+	moveToDoneScreen,
+	scrollToElement,
+} from '../../utils/onboarding-wizard-utils';
 
 async function testCommonDoneStepElements() {
 	await expect( page ).toMatchElement( 'h1', { text: 'Done' } );
@@ -21,7 +26,10 @@ async function testCommonDoneStepElements() {
 
 	const originalIframeSrc = await page.$eval( '.done__preview-iframe', ( e ) => e.getAttribute( 'src' ) );
 
-	await expect( page ).toClick( '.done__links-container a:not([class*="--active"])' );
+	await Promise.all( [
+		scrollToElement( { selector: '.done__links-container a:not([class*="--active"])', click: true } ),
+		page.waitForXPath( `//iframe[@class="done__preview-iframe"][not(@src="${ originalIframeSrc }")]` ),
+	] );
 
 	const updatedIframeSrc = await page.$eval( '.done__preview-iframe', ( e ) => e.getAttribute( 'src' ) );
 
@@ -54,12 +62,13 @@ describe( 'Done', () => {
 		await expect( page ).toMatchElement( 'p', { text: /Transitional mode/i } );
 		await expect( page ).toMatchElement( '.done__preview-container input[type="checkbox"]:checked' );
 
-		await page.waitForSelector( '.done__preview-iframe' );
 		const originalIframeSrc = await page.$eval( '.done__preview-iframe', ( e ) => e.getAttribute( 'src' ) );
 
-		await expect( page ).toClick( '.done__preview-container input[type="checkbox"]' );
+		await Promise.all( [
+			scrollToElement( { selector: '.done__preview-container input[type="checkbox"]', click: true } ),
+			page.waitForXPath( `//iframe[@class="done__preview-iframe"][not(@src="${ originalIframeSrc }")]` ),
+		] );
 
-		await page.waitForSelector( '.done__preview-iframe' );
 		const updatedIframeSrc = await page.$eval( '.done__preview-iframe', ( e ) => e.getAttribute( 'src' ) );
 
 		expect( updatedIframeSrc ).not.toBe( originalIframeSrc );
