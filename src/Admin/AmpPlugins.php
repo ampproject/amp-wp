@@ -295,7 +295,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 
 			if ( ! empty( $plugin['homepage'] ) ) {
 				$actions[] = sprintf(
-					'<a href="%s" target="_blank" aria-label="%s">%s</a>',
+					'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">%s</a>',
 					esc_url( $plugin['homepage'] ),
 					esc_attr(
 						/* translators: %s: Plugin name */

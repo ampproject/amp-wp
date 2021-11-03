@@ -78,12 +78,13 @@ export default wpThemeView.extend( {
 			siteLinkButton.append( __( 'Visit Site', 'amp' ) );
 
 			if ( data?.preview_url ) {
-				siteLinkButton.setAttribute( 'href', data.preview_url );
+				siteLinkButton.href = data.preview_url;
 			} else {
-				siteLinkButton.setAttribute( 'href', data.homepage );
+				siteLinkButton.href = data.homepage;
 			}
 
-			siteLinkButton.setAttribute( 'target', '_blank' );
+			siteLinkButton.target = '_blank';
+			siteLinkButton.rel = 'noopener noreferrer';
 			siteLinkButton.setAttribute( 'aria-label', sprintf(
 				/* translators: %s: theme name. */
 				__( 'Visit site of %s theme', 'amp' ),
@@ -115,7 +116,7 @@ export default wpThemeView.extend( {
 		if ( this.isWPORGTheme( data.slug ) ) {
 			wpThemeView.prototype.preview.apply( this, args );
 		} else if ( data?.preview_url ) {
-			window.open( data.preview_url, '_blank' );
+			window.open( data.preview_url, '_blank', 'noopener,noreferrer' );
 		}
 	},
 
