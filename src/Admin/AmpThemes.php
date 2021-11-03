@@ -142,10 +142,7 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 	public function register() {
 
 		add_filter( 'themes_api', [ $this, 'filter_themes_api' ], 10, 3 );
-
-		if ( ! wp_doing_ajax() && is_admin() ) {
-			add_action( 'current_screen', [ $this, 'register_hooks' ] );
-		}
+		add_action( 'current_screen', [ $this, 'register_hooks' ] );
 	}
 
 	/**
@@ -156,7 +153,6 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 	public function register_hooks() {
 
 		$screen = get_current_screen();
-
 		if ( $screen instanceof WP_Screen && in_array( $screen->id, [ 'themes', 'theme-install' ], true ) ) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		}
@@ -218,17 +214,17 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 	/**
 	 * Filter the response of API call to wordpress.org for theme data.
 	 *
-	 * @param bool|object $response List of AMP compatible theme.
-	 * @param string      $action   API Action.
-	 * @param array       $args     Args for plugin list.
+	 * @param false|object|array $override Whether to override the WordPress.org Themes API. Default false.
+	 * @param string             $action   API Action.
+	 * @param array              $args     Args for themes list.
 	 *
-	 * @return object List of AMP compatible plugins.
+	 * @return object List of AMP compatible themes.
 	 */
-	public function filter_themes_api( $response, $action, $args ) {
+	public function filter_themes_api( $override, $action, $args ) {
 
 		$args = (array) $args;
 		if ( ! isset( $args['browse'] ) || self::AMP_COMPATIBLE !== $args['browse'] ) {
-			return $response;
+			return $override;
 		}
 
 		$response         = new stdClass();
