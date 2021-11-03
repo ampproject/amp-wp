@@ -223,7 +223,7 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 	public function filter_themes_api( $override, $action, $args ) {
 
 		$args = (array) $args;
-		if ( ! isset( $args['browse'] ) || self::AMP_COMPATIBLE !== $args['browse'] ) {
+		if ( ! isset( $args['browse'] ) || self::AMP_COMPATIBLE !== $args['browse'] || 'query_themes' !== $action ) {
 			return $override;
 		}
 
@@ -240,14 +240,12 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 			foreach ( $themes as $i => $theme ) {
 				$response->themes[ $i ] = (object) $theme;
 			}
-		} else {
-			$response->themes = $themes;
 		}
 
 		$response->info = [
 			'page'    => $page,
 			'pages'   => count( $theme_chunks ),
-			'results' => count( $themes ),
+			'results' => count( $this->get_themes() ),
 		];
 
 		return $response;
