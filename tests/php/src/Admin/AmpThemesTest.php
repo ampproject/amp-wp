@@ -52,12 +52,15 @@ class AmpThemesTest extends TestCase {
 	 * @covers ::is_needed()
 	 */
 	public function test_is_needed() {
+		set_current_screen( 'front' );
 
 		// Test 1: Not admin request.
+		$this->assertFalse( is_admin() );
 		$this->assertFalse( AmpThemes::is_needed() );
 
 		// Test 2: Admin request.
 		set_current_screen( 'index.php' );
+		$this->assertTrue( is_admin() );
 		$this->assertTrue( AmpThemes::is_needed() );
 
 		// Test 3: Filter disables.
