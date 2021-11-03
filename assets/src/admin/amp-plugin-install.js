@@ -26,6 +26,8 @@ const ampPluginInstall = {
 
 	/**
 	 * Check if "AMP Compatible" tab is open or not.
+	 *
+	 * @return {boolean} Is AMP-compatible tab.
 	 */
 	isAmpCompatibleTab() {
 		const queryParams = new URLSearchParams( window.location.search.substr( 1 ) );
@@ -42,9 +44,9 @@ const ampPluginInstall = {
 			return;
 		}
 
-		let mutationObserver;
-
 		const startSearchResults = debounce( () => {
+			pluginInstallSearch.removeEventListener( 'input', startSearchResults, { once: true } ); // For IE 11 which doesn't support once events.
+
 			// Replace the class for our custom AMP-compatible tab once doing a search.
 			const wrap = document.querySelector( '.plugin-install-tab-amp-compatible' );
 			if ( wrap ) {
@@ -53,12 +55,10 @@ const ampPluginInstall = {
 			}
 
 			// Start watching for changes the first time a search is being made.
-			if ( ! mutationObserver ) {
-				mutationObserver = new MutationObserver( () => {
-					this.addAmpMessage();
-				} );
-				mutationObserver.observe( pluginFilterForm, { childList: true } );
-			}
+			const mutationObserver = new MutationObserver( () => {
+				this.addAmpMessage();
+			} );
+			mutationObserver.observe( pluginFilterForm, { childList: true } );
 		}, 1000 ); // See timeout in core: <https://github.com/WordPress/WordPress/blob/b87617e2719d114d123a88ed7e489170f0204735/wp-admin/js/updates.js#L2578>
 
 		pluginInstallSearch.addEventListener( 'input', startSearchResults, { once: true } );
