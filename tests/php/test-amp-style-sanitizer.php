@@ -1915,6 +1915,82 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	}
 
 	/**
+	 * Test that font files are preloaded with <link> element.
+	 *
+	 * @covers AMP_Style_Sanitizer::process_font_face_at_rule()
+	 */
+	public function test_font_files_preloading() {
+		$at_least_one_run = false;
+		$test_cases       = [
+			(object) [
+				'theme_slug'    => 'twentynineteen',
+				'expected_urls' => [
+					'/themes/twentynineteen/fonts/NonBreakingSpaceOverride.woff2',
+					'/themes/twentynineteen/fonts/NonBreakingSpaceOverride.woff',
+				],
+			],
+			(object) [
+				'theme_slug'    => 'twentytwenty',
+				'expected_urls' => [
+					'/plugins/amp/assets/fonts/nonbreakingspaceoverride.woff2',
+					'/plugins/amp/assets/fonts/nonbreakingspaceoverride.woff',
+					'/themes/twentytwenty/assets/fonts/inter/Inter-upright-var.woff2',
+					'/themes/twentytwenty/assets/fonts/inter/Inter-italic-var.woff2',
+				],
+			],
+			(object) [
+				'theme_slug'    => 'twentytwentyone',
+				'expected_urls' => [], // Twenty Twenty-One theme uses system font stack, no extra fonts are enqueued.
+			],
+		];
+
+		foreach ( $test_cases as $test_case ) {
+			$theme = new WP_Theme( $test_case->theme_slug, ABSPATH . 'wp-content/themes' );
+			if ( ! $theme->errors() ) {
+				$at_least_one_run = true;
+			}
+
+			$html  = '<html amp><head><meta charset="utf-8">';
+			$html .= sprintf( '<link rel="stylesheet" href="%s">', esc_url( $theme->get_stylesheet_directory_uri() . '/style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+			$html .= '</head><body></body></html>';
+
+			$dom         = Document::fromHtml( $html, Options::DEFAULTS );
+			$error_codes = [];
+			$sanitizer   = new AMP_Style_Sanitizer(
+				$dom,
+				[
+					'use_document_element' => true,
+				]
+			);
+			$sanitizer->sanitize();
+			$this->assertEquals( [], $error_codes );
+
+			$link_elements       = $dom->getElementsByTagName( 'link' );
+			$link_elements_count = $link_elements->length;
+
+			$this->assertEquals( $link_elements_count, count( $test_case->expected_urls ) );
+
+			for ( $i = 0; $i < $link_elements_count; $i++ ) {
+				$this->assertEquals(
+					substr_compare(
+						$link_elements->item( $i )->getAttribute( 'href' ),
+						$test_case->expected_urls[ $i ],
+						- strlen( $test_case->expected_urls[ $i ] )
+					),
+					0
+				);
+				$this->assertEquals( $link_elements->item( $i )->getAttribute( 'rel' ), 'preload' );
+				$this->assertEquals( $link_elements->item( $i )->getAttribute( 'as' ), 'font' );
+				$this->assertEquals( $link_elements->item( $i )->getAttribute( 'crossorigin' ), '' );
+			}
+		}
+
+		if ( false === $at_least_one_run ) {
+			$this->markTestSkipped( 'None of default themes is installed.' );
+		}
+	}
+
+	/**
 	 * Test that auto-removal (tree shaking) does not remove rules for classes mentioned in class and [class] attributes.
 	 *
 	 * @covers AMP_Style_Sanitizer::get_used_class_names()
