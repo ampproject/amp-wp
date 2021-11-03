@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP;
 use AmpProject\AmpWP\Admin;
 use AmpProject\AmpWP\BackgroundTask;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
+use AmpProject\AmpWP\EntityRegistrantDetection\EntityRegistrantDetectionManager;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation;
@@ -100,6 +101,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'dev_tools.likely_culprit_detector'  => DevTools\LikelyCulpritDetector::class,
 		'dev_tools.user_access'              => DevTools\UserAccess::class,
 		'editor.editor_support'              => Editor\EditorSupport::class,
+		'entity_registrant_detection'        => EntityRegistrantDetectionManager::class,
 		'extra_theme_and_plugin_headers'     => ExtraThemeAndPluginHeaders::class,
 		'loading_error'                      => LoadingError::class,
 		'mobile_redirection'                 => MobileRedirection::class,
@@ -113,6 +115,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'plugin_suppression'                 => PluginSuppression::class,
 		'reader_theme_loader'                => ReaderThemeLoader::class,
 		'reader_theme_support_features'      => ReaderThemeSupportFeatures::class,
+		'rest.entity_registrant_detection'   => EntityRegistrantDetection\RestController::class,
 		'rest.options_controller'            => OptionsRESTController::class,
 		'rest.scannable_urls_controller'     => Validation\ScannableURLsRestController::class,
 		'rest.validation_counts_controller'  => Validation\ValidationCountsRestController::class,
