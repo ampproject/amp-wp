@@ -160,7 +160,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 		}
 
 		add_filter( 'install_plugins_tabs', [ $this, 'add_tab' ] );
-		add_filter( 'install_plugins_table_api_args_' . self::AMP_COMPATIBLE, [ $this, 'tab_args' ] );
+		add_filter( 'install_plugins_table_api_args_' . self::AMP_COMPATIBLE, [ $this, 'filter_plugins_table_api_args' ] );
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 10, 3 );
 		add_filter( 'plugin_install_action_links', [ $this, 'action_links' ], 10, 2 );
 		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 3 );
@@ -228,13 +228,13 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	}
 
 	/**
-	 * To modify args for AMP tab in plugin install screen.
+	 * Modify args for the plugins_api query on the AMP-compatible tab in plugin install screen.
 	 *
 	 * @return array
 	 */
-	public function tab_args() {
+	public function filter_plugins_table_api_args() {
 
-		$per_page   = 36;
+		$per_page   = 100; // @todo There are currently 56 plugins, so this will show all. This is done because pagination is not working.
 		$total_page = ceil( count( $this->get_plugins() ) / $per_page );
 		$pagenum    = isset( $_REQUEST['paged'] ) ? absint( $_REQUEST['paged'] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$pagenum    = ( $pagenum > $total_page ) ? $total_page : $pagenum;

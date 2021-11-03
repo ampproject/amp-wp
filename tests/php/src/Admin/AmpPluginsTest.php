@@ -176,7 +176,7 @@ class AmpPluginsTest extends TestCase {
 			10,
 			has_filter(
 				'install_plugins_table_api_args_amp-compatible',
-				[ $this->instance, 'tab_args' ]
+				[ $this->instance, 'filter_plugins_table_api_args' ]
 			)
 		);
 		$this->assertEquals(
@@ -226,11 +226,11 @@ class AmpPluginsTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::tab_args()
+	 * @covers ::filter_plugins_table_api_args()
 	 */
-	public function test_tab_args() {
+	public function test_filter_plugins_table_api_args() {
 
-		$output = $this->instance->tab_args();
+		$output = $this->instance->filter_plugins_table_api_args();
 
 		$this->assertArrayHasKey( 'amp-compatible', $output );
 		$this->assertArrayHasKey( 'per_page', $output );
