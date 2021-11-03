@@ -92,7 +92,7 @@
     "postcss-preset-env": "6.7.0",
     "react-test-renderer": "17.0.2",
     "rtlcss-webpack-plugin": "4.0.6",
-    "svgo": "2.7.0",
+    "svgo": "2.8.0",
     "webpackbar": "5.0.0-3",
     "wporg-api-client": "1.0.1"
   },
