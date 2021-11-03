@@ -136,7 +136,7 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 				[
 					'/amp/v1/options',
 					'/amp/v1/reader-themes',
-					'/amp/v1/scannable-urls?_fields%5B0%5D=url&_fields%5B1%5D=amp_url&_fields%5B2%5D=type&_fields%5B3%5D=label',
+					'/amp/v1/scannable-urls?_fields%5B0%5D=url&_fields%5B1%5D=amp_url&_fields%5B2%5D=type&_fields%5B3%5D=label&force_standard_mode=1',
 					'/wp/v2/plugins',
 					'/wp/v2/settings',
 					'/wp/v2/themes',
