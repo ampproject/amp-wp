@@ -236,7 +236,7 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 
 		$per_page   = 100; // @todo There are currently 56 plugins, so this will show all. This is done because pagination is not working.
 		$total_page = ceil( count( $this->get_plugins() ) / $per_page );
-		$pagenum    = isset( $_REQUEST['paged'] ) ? absint( $_REQUEST['paged'] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$pagenum    = isset( $_REQUEST['paged'] ) ? (int) $_REQUEST['paged'] : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$pagenum    = ( $pagenum > $total_page ) ? $total_page : $pagenum;
 		$page       = max( 1, $pagenum );
 

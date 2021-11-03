@@ -230,11 +230,10 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 		$response         = new stdClass();
 		$response->themes = [];
 
-		$args['per_page'] = ( ! empty( $args['per_page'] ) ) ? $args['per_page'] : 36;
-
+		$per_page     = max( 36, isset( $args['per_page'] ) ? (int) $args['per_page'] : 0 );
+		$page         = max( 1, isset( $args['page'] ) ? (int) $args['page'] : 0 );
 		$themes       = $this->get_themes();
-		$page         = ( ! empty( $args['page'] ) && 0 < (int) $args['page'] ) ? (int) $args['page'] : 1;
-		$theme_chunks = array_chunk( $themes, $args['per_page'] );
+		$theme_chunks = array_chunk( $themes, $per_page );
 		$themes       = ( ! empty( $theme_chunks[ $page - 1 ] ) && is_array( $theme_chunks[ $page - 1 ] ) ) ? $theme_chunks[ $page - 1 ] : [];
 
 		if ( 'query_themes' === $action ) {
