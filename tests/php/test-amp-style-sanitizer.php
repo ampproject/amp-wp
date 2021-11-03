@@ -1946,9 +1946,11 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 		foreach ( $test_cases as $test_case ) {
 			$theme = new WP_Theme( $test_case->theme_slug, ABSPATH . 'wp-content/themes' );
-			if ( ! $theme->errors() ) {
-				$at_least_one_run = true;
+			if ( $theme->errors() ) {
+				continue;
 			}
+
+			$at_least_one_run = true;
 
 			$html  = '<html amp><head><meta charset="utf-8">';
 			$html .= sprintf( '<link rel="stylesheet" href="%s">', esc_url( $theme->get_stylesheet_directory_uri() . '/style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
