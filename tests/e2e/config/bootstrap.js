@@ -261,6 +261,7 @@ afterAll( () => {
 /**
  * `expect` extension to count the number of elements with a given selector on the page.
  */
+// eslint-disable-next-line jest/require-hook
 expect.extend( {
 	async countToBe( selector, expected ) {
 		const count = await page.$$eval( selector, ( els ) => els.length );

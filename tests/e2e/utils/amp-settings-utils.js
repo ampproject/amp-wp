@@ -70,3 +70,24 @@ export async function uninstallPlugin( slug ) {
 		await _uninstallPlugin( slug );
 	}
 }
+
+export async function cleanUpValidatedUrls() {
+	await switchUserToAdmin();
+	await visitAdminPage( 'edit.php', 'post_type=amp_validated_url' );
+	await page.waitForSelector( 'h1' );
+
+	const bulkSelector = await page.$( '#bulk-action-selector-top' );
+
+	if ( ! bulkSelector ) {
+		return;
+	}
+
+	await page.waitForSelector( '[id^=cb-select-all-]' );
+	await page.click( '[id^=cb-select-all-]' );
+
+	await page.select( '#bulk-action-selector-top', 'delete' );
+
+	await page.click( '#doaction' );
+	await page.waitForXPath( '//*[contains(@class, "updated notice")]/p[contains(text(), "forgotten")]' );
+	await switchUserToTest();
+}

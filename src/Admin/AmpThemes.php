@@ -223,31 +223,28 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 	public function filter_themes_api( $override, $action, $args ) {
 
 		$args = (array) $args;
-		if ( ! isset( $args['browse'] ) || self::AMP_COMPATIBLE !== $args['browse'] ) {
+		if ( ! isset( $args['browse'] ) || self::AMP_COMPATIBLE !== $args['browse'] || 'query_themes' !== $action ) {
 			return $override;
 		}
 
 		$response         = new stdClass();
 		$response->themes = [];
 
-		$per_page     = max( 36, isset( $args['per_page'] ) ? (int) $args['per_page'] : 0 );
-		$page         = max( 1, isset( $args['page'] ) ? (int) $args['page'] : 0 );
-		$themes       = $this->get_themes();
-		$theme_chunks = array_chunk( $themes, $per_page );
-		$themes       = ( ! empty( $theme_chunks[ $page - 1 ] ) && is_array( $theme_chunks[ $page - 1 ] ) ) ? $theme_chunks[ $page - 1 ] : [];
+		$per_page      = max( 36, isset( $args['per_page'] ) ? (int) $args['per_page'] : 0 );
+		$page          = max( 1, isset( $args['page'] ) ? (int) $args['page'] : 0 );
+		$themes        = $this->get_themes();
+		$themes_count  = count( $themes );
+		$themes_chunks = array_chunk( $themes, $per_page );
+		$themes_chunk  = ( ! empty( $themes_chunks[ $page - 1 ] ) && is_array( $themes_chunks[ $page - 1 ] ) ) ? $themes_chunks[ $page - 1 ] : [];
 
-		if ( 'query_themes' === $action ) {
-			foreach ( $themes as $i => $theme ) {
-				$response->themes[ $i ] = (object) $theme;
-			}
-		} else {
-			$response->themes = $themes;
+		foreach ( $themes_chunk as $theme ) {
+			$response->themes[] = (object) $theme;
 		}
 
 		$response->info = [
 			'page'    => $page,
-			'pages'   => count( $theme_chunks ),
-			'results' => count( $themes ),
+			'pages'   => count( $themes_chunks ),
+			'results' => $themes_count,
 		];
 
 		return $response;
