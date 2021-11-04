@@ -97,7 +97,7 @@ class CallbackWrapper {
 	}
 
 	/**
-	 * Set the source of callback function.
+	 * Set the source of a callback function.
 	 *
 	 * @return void
 	 */
@@ -128,7 +128,7 @@ class CallbackWrapper {
 	}
 
 	/**
-	 * Find the different of registered entities between before and after executing function.
+	 * Find the difference of registered entities between before and after executing function.
 	 *
 	 * @return void
 	 */

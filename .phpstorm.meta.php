@@ -50,6 +50,7 @@ namespace PHPSTORM_META {
 			'plugin_suppression'                 => \AmpProject\AmpWP\PluginSuppression::class,
 			'reader_theme_loader'                => \AmpProject\AmpWP\ReaderThemeLoader::class,
 			'reader_theme_support_features'      => \AmpProject\AmpWP\ReaderThemeSupportFeatures::class,
+			'rest.entity_registrant_detection'   => \AmpProject\AmpWP\EntityRegistrantDetection\RestController::class,
 			'rest.options_controller'            => \AmpProject\AmpWP\OptionsRESTController::class,
 			'rest.scannable_urls_controller'     => \AmpProject\AmpWP\Validation\ScannableURLsRestController::class,
 			'rest.validation_counts_controller'  => \AmpProject\AmpWP\Validation\ValidationCountsRestController::class,
