@@ -11,7 +11,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Retrieve sources keyed by type.
  *
- * @param {Object} sources
+ * @param {Object[]} sources Error source details from the PHP backtrace.
  * @return {{core: *[], plugin: *[], 'mu-plugin': *[], blocks: *[], theme: *[], embed: *[]}} Keyed sources.
  */
 function getKeyedSources( sources ) {
@@ -43,7 +43,7 @@ export function getErrorSourceTitle( sources = [] ) {
 	let combinedPluginNames = [ ...uniquePluginNames, ...muPluginNames ];
 
 	if ( combinedPluginNames.length > 1 ) {
-		combinedPluginNames = combinedPluginNames.filter( ( slug ) => ! slug.match( /^gutenberg/i ) );
+		combinedPluginNames = combinedPluginNames.filter( ( slug ) => slug !== 'gutenberg' );
 	}
 
 	if ( 1 === combinedPluginNames.length ) {

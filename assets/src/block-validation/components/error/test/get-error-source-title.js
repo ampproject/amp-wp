@@ -49,7 +49,7 @@ describe( 'getErrorSorceTitle', () => {
 		expect( getErrorSourceTitle( [
 			{
 				type: 'plugin',
-				name: 'gutenberg-11.3.0',
+				name: 'gutenberg',
 			},
 			{
 				type: 'plugin',
