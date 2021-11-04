@@ -163,7 +163,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertEquals( 100, has_filter( 'map_meta_cap', self::TESTED_CLASS . '::map_meta_cap' ) );
 		$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', self::TESTED_CLASS . '::enqueue_block_validation' ) );
 
-		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::print_plugin_notice' ) );
+		$this->assertEquals( 10, has_action( 'pre_current_active_plugins', self::TESTED_CLASS . '::print_plugin_notice' ) );
 
 		$this->assertEquals( 101, has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 
@@ -2600,44 +2600,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * Test for validate_after_plugin_activation().
-	 *
-	 * @covers AMP_Validation_Manager::validate_after_plugin_activation()
-	 */
-	public function test_validate_after_plugin_activation() {
-		add_filter( 'amp_pre_get_permalink', '__return_empty_string' );
-		$r = AMP_Validation_Manager::validate_after_plugin_activation();
-		$this->assertInstanceOf( 'WP_Error', $r );
-		$this->assertEquals( 'no_published_post_url_available', $r->get_error_code() );
-		remove_filter( 'amp_pre_get_permalink', '__return_empty_string' );
-
-		$validation_error = [
-			'code' => 'example',
-		];
-
-		$validation = [
-			'results' => [
-				[
-					'error'     => $validation_error,
-					'sanitized' => false,
-				],
-			],
-		];
-
-		self::factory()->post->create();
-		$filter = static function() use ( $validation ) {
-			return [
-				'body' => wp_json_encode( $validation ),
-			];
-		};
-		add_filter( 'pre_http_request', $filter, 10, 3 );
-		$r = AMP_Validation_Manager::validate_after_plugin_activation();
-		remove_filter( 'pre_http_request', $filter );
-		$this->assertEquals( [ $validation_error ], $r );
-		$this->assertEquals( [ $validation_error ], get_transient( AMP_Validation_Manager::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY ) );
-	}
-
-	/**
 	 * Get validation errors.
 	 *
 	 * @return array
@@ -2858,46 +2820,15 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 */
 	public function test_print_plugin_notice() {
 		global $pagenow;
+
 		$output = get_echo( [ AMP_Validation_Manager::class, 'print_plugin_notice' ] );
 		$this->assertEmpty( $output );
+
 		$pagenow          = 'plugins.php';
 		$_GET['activate'] = 'true';
 
-		$cache_plugins_backup = wp_cache_get( 'plugins', 'plugins' );
-
-		$plugins = [
-			'' => [
-				$this->plugin_name => [
-					'Name' => 'Foo Bar',
-				],
-			],
-		];
-
-		wp_cache_set( 'plugins', $plugins, 'plugins' );
-
-		set_transient(
-			AMP_Validation_Manager::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY,
-			[
-				[
-					'code'    => 'example',
-					'sources' => [
-						[
-							'type' => 'plugin',
-							'name' => 'foo-bar',
-						],
-					],
-				],
-			]
-		);
 		$output = get_echo( [ AMP_Validation_Manager::class, 'print_plugin_notice' ] );
-		$this->assertStringContainsString( 'Warning: The following plugin may be incompatible with AMP', $output );
-		$this->assertStringContainsString( 'Foo Bar', $output );
-		$this->assertStringContainsString( 'More details', $output );
-		$this->assertStringContainsString( admin_url( 'edit.php' ), $output );
-
-		if ( $cache_plugins_backup ) {
-			wp_cache_set( 'plugins', $cache_plugins_backup, 'plugins' );
-		}
+		$this->assertStringContainsString( '<div id="site-scan-notice"></div>', $output );
 	}
 
 	/**
