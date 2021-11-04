@@ -33,7 +33,7 @@
 		color: #787c82;
 		content: "\f153";
 		display: block;
-		font: normal 16px/20px dashicons;
+		font: normal 16px/20px dashicons; // stylelint-disable-line font-family-no-missing-generic-family-keyword
 		-webkit-font-smoothing: antialiased;
 		height: 20px;
 		-moz-osx-font-smoothing: grayscale;
