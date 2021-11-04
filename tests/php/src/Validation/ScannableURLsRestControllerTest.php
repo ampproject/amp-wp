@@ -145,7 +145,7 @@ class ScannableURLsRestControllerTest extends DependencyInjectedTestCase {
 
 		// Test `force_standard_mode` query parameter.
 		$request_with_forced_standard_mode = new WP_REST_Request( 'GET', '/amp/v1/scannable-urls' );
-		$request_with_forced_standard_mode->set_param( 'force_standard_mode', 'true' );
+		$request_with_forced_standard_mode->set_param( ScannableURLsRestController::FORCE_STANDARD_MODE, 'true' );
 		$response_with_forced_standard_mode = rest_get_server()->dispatch( $request_with_forced_standard_mode );
 
 		$this->assertFalse( $response_with_forced_standard_mode->is_error() );

@@ -16,6 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
+use AmpProject\AmpWP\Validation\ScannableURLsRestController;
 
 /**
  * AMP setup wizard submenu page class.
@@ -290,8 +291,8 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'/amp/v1/reader-themes',
 			add_query_arg(
 				[
-					'_fields'             => [ 'url', 'amp_url', 'type', 'label' ],
-					'force_standard_mode' => 1,
+					'_fields' => [ 'url', 'amp_url', 'type', 'label' ],
+					ScannableURLsRestController::FORCE_STANDARD_MODE => 1,
 				],
 				'/amp/v1/scannable-urls'
 			),

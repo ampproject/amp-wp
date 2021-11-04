@@ -33,6 +33,13 @@ use WP_REST_Server;
 final class ScannableURLsRestController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
 	/**
+	 * Query param to force standard mode.
+	 *
+	 * @var string
+	 */
+	const FORCE_STANDARD_MODE = 'force_standard_mode';
+
+	/**
 	 * ScannableURLProvider instance.
 	 *
 	 * @var ScannableURLProvider
@@ -81,7 +88,7 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 					'callback'            => [ $this, 'get_items' ],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 					'args'                => [
-						'force_standard_mode' => [
+						self::FORCE_STANDARD_MODE => [
 							'description' => __( 'Indicates whether to force Standard template mode.', 'amp' ),
 							'type'        => 'boolean',
 							'required'    => false,
@@ -130,7 +137,7 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 			'default_option_' . AMP_Options_Manager::OPTION_NAME,
 			'option_' . AMP_Options_Manager::OPTION_NAME,
 		];
-		if ( ! amp_is_canonical() && $request->get_param( 'force_standard_mode' ) ) {
+		if ( ! amp_is_canonical() && $request->get_param( self::FORCE_STANDARD_MODE ) ) {
 			$options_filter = static function ( $options ) {
 				$options[ Option::THEME_SUPPORT ]           = AMP_Theme_Support::STANDARD_MODE_SLUG;
 				$options[ Option::ALL_TEMPLATES_SUPPORTED ] = true;
