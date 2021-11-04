@@ -244,8 +244,8 @@ class AMP_Validation_Manager {
 		AMP_Validation_Error_Taxonomy::register();
 
 		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'enqueue_block_validation' ] );
-		add_action( 'pre_current_active_plugins', [ __CLASS__, 'print_plugin_notice' ] );
-		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_plugin_notice_assets' ] );
+		add_action( 'pre_current_active_plugins', [ __CLASS__, 'print_site_scan_notice' ] );
+		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_site_scan_notice_assets' ] );
 		add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
 		add_action( 'wp', [ __CLASS__, 'maybe_fail_validate_request' ] );
 		add_action( 'wp', [ __CLASS__, 'maybe_send_cached_validate_response' ], 20 );
@@ -2565,7 +2565,14 @@ class AMP_Validation_Manager {
 		}
 	}
 
-	private static function should_show_activate_plugin_notice() {
+	/**
+	 * Check if the Site Scan notice should be displayed.
+	 *
+	 * The notice should be shown only after activating a plugin.
+	 *
+	 * @return bool
+	 */
+	private static function should_render_site_scan_notice() {
 		return ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
@@ -2574,14 +2581,19 @@ class AMP_Validation_Manager {
 	 *
 	 * @return void
 	 */
-	public static function print_plugin_notice() {
-		if ( self::should_show_activate_plugin_notice() ) {
+	public static function print_site_scan_notice() {
+		if ( self::should_render_site_scan_notice() ) {
 			echo '<div id="site-scan-notice"></div>';
 		}
 	}
 
-	public static function enqueue_plugin_notice_assets( $hook ) {
-		if ( 'plugins.php' !== $hook || ! self::should_show_activate_plugin_notice() ) {
+	/**
+	 * Enqueue Site Scan notice assets.
+	 *
+	 * @param string $hook The current admin page.
+	 */
+	public static function enqueue_site_scan_notice_assets( $hook ) {
+		if ( 'plugins.php' !== $hook || ! self::should_render_site_scan_notice() ) {
 			return;
 		}
 
