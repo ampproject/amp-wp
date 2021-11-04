@@ -33,40 +33,42 @@ const TEST_UNKNOWN_BLOCK = 'unknown/test-block';
 
 global.URL = class {};
 
-registerBlockType( TEST_PLUGIN_BLOCK, {
-	attributes: {},
-	save: noop,
-	category: 'widgets',
-	title: 'test plugin block',
-} );
+function registerBlockTypes() {
+	registerBlockType( TEST_PLUGIN_BLOCK, {
+		attributes: {},
+		save: noop,
+		category: 'widgets',
+		title: 'test plugin block',
+	} );
 
-registerBlockType( TEST_MU_PLUGIN_BLOCK, {
-	attributes: {},
-	save: noop,
-	category: 'widgets',
-	title: 'test mu-plugin block',
-} );
+	registerBlockType( TEST_MU_PLUGIN_BLOCK, {
+		attributes: {},
+		save: noop,
+		category: 'widgets',
+		title: 'test mu-plugin block',
+	} );
 
-registerBlockType( TEST_THEME_BLOCK, {
-	attributes: {},
-	save: noop,
-	category: 'widgets',
-	title: 'test theme block',
-} );
+	registerBlockType( TEST_THEME_BLOCK, {
+		attributes: {},
+		save: noop,
+		category: 'widgets',
+		title: 'test theme block',
+	} );
 
-registerBlockType( TEST_CORE_BLOCK, {
-	attributes: {},
-	save: noop,
-	category: 'widgets',
-	title: 'test core block',
-} );
+	registerBlockType( TEST_CORE_BLOCK, {
+		attributes: {},
+		save: noop,
+		category: 'widgets',
+		title: 'test core block',
+	} );
 
-registerBlockType( TEST_UNKNOWN_BLOCK, {
-	attributes: {},
-	save: noop,
-	category: 'widgets',
-	title: 'test unknown block',
-} );
+	registerBlockType( TEST_UNKNOWN_BLOCK, {
+		attributes: {},
+		save: noop,
+		category: 'widgets',
+		title: 'test unknown block',
+	} );
+}
 
 function createTestStoreAndBlocks() {
 	pluginBlock = createBlock( TEST_PLUGIN_BLOCK, {} );
@@ -149,6 +151,7 @@ function getTestBlock( type ) {
 
 describe( 'Error', () => {
 	beforeAll( () => {
+		registerBlockTypes();
 		createTestStoreAndBlocks();
 	} );
 
