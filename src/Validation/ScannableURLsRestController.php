@@ -122,17 +122,32 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+
 		// Allow query parameter to force a response to be served with Standard mode (AMP-first). This is used as
 		// part of Site Scanning in order to determine if the primary theme is suitable for serving AMP.
+		$options_filter = null;
+		$filtered_hooks = [
+			'default_option_' . AMP_Options_Manager::OPTION_NAME,
+			'option_' . AMP_Options_Manager::OPTION_NAME,
+		];
 		if ( ! amp_is_canonical() && $request->get_param( 'force_standard_mode' ) ) {
-			add_filter(
-				'option_' . AMP_Options_Manager::OPTION_NAME,
-				function ( $options ) {
-					$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+			$options_filter = static function ( $options ) {
+				$options[ Option::THEME_SUPPORT ]           = AMP_Theme_Support::STANDARD_MODE_SLUG;
+				$options[ Option::ALL_TEMPLATES_SUPPORTED ] = true;
+				return $options;
+			};
 
-					return $options;
-				}
-			);
+			foreach ( $filtered_hooks as $filter_hook ) {
+				add_filter( $filter_hook, $options_filter );
+			}
+		}
+
+		$urls = $this->scannable_url_provider->get_urls();
+
+		if ( $options_filter ) {
+			foreach ( $filtered_hooks as $filter_hook ) {
+				remove_filter( $filter_hook, $options_filter );
+			}
 		}
 
 		return rest_ensure_response(
@@ -140,7 +155,7 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 				function ( $item ) use ( $request ) {
 					return $this->prepare_item_for_response( $item, $request )->get_data();
 				},
-				$this->scannable_url_provider->get_urls()
+				$urls
 			)
 		);
 	}

@@ -259,10 +259,13 @@ class AMP_Validation_Manager {
 		// is only honored when doing a validation request or when the user is able to do validation. This is used as
 		// part of Site Scanning in order to determine if the primary theme is suitable for serving AMP.
 		if ( ! amp_is_canonical() ) {
-			add_filter(
+			$filter_hooks = [
+				'default_option_' . AMP_Options_Manager::OPTION_NAME,
 				'option_' . AMP_Options_Manager::OPTION_NAME,
-				[ __CLASS__, 'filter_options_for_standard_mode_when_amp_first_override' ]
-			);
+			];
+			foreach ( $filter_hooks as $filter_hook ) {
+				add_filter( $filter_hook, [ __CLASS__, 'filter_options_for_standard_mode_when_amp_first_override' ] );
+			}
 		}
 	}
 

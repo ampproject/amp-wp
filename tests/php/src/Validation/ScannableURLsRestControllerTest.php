@@ -142,6 +142,15 @@ class ScannableURLsRestControllerTest extends DependencyInjectedTestCase {
 				$this->assertNull( $scannable_url_entry['stale'] );
 			}
 		}
+
+		// Test `force_standard_mode` query parameter.
+		$request_with_forced_standard_mode = new WP_REST_Request( 'GET', '/amp/v1/scannable-urls' );
+		$request_with_forced_standard_mode->set_param( 'force_standard_mode', 'true' );
+		$response_with_forced_standard_mode = rest_get_server()->dispatch( $request_with_forced_standard_mode );
+
+		$this->assertFalse( $response_with_forced_standard_mode->is_error() );
+		$scannable_urls_in_standard_mode = $response_with_forced_standard_mode->get_data();
+		$this->assertGreaterThan( 2, count( $scannable_urls_in_standard_mode ), 'Expected more than two URLs since in Standard mode.' );
 	}
 
 	/**
