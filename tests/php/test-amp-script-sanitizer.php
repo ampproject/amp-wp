@@ -8,14 +8,18 @@
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\DevMode;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\Extension;
+use AmpProject\Attribute;
 use AmpProject\Tag;
 
 /**
  * Test AMP_Script_Sanitizer.
  *
- * @covers AMP_Script_Sanitizer
+ * @coversDefaultClass AMP_Script_Sanitizer
  */
 class AMP_Script_Sanitizer_Test extends TestCase {
 
@@ -67,12 +71,15 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 						<script>document.write("Hey.")</script>
 						<noscript data-amp-no-unwrap><span>No script</span></noscript>
 					</body></html>',
-				'
-					<html data-ampdevmode=""><head><meta charset="utf-8"></head><body>
-						<script data-ampdevmode="">document.write("Hey.")</script>
+				sprintf(
+					'
+					<html><head><meta charset="utf-8"></head><body>
+						<script %s>document.write("Hey.")</script>
 						<noscript data-amp-no-unwrap><span>No script</span></noscript>
 					</body></html>
-				',
+					',
+					ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE
+				),
 				[
 					'sanitize_js_scripts'       => true,
 					'unwrap_noscripts'          => true, // This will be ignored because of the kept script.
@@ -159,15 +166,18 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 						<script type="module" src="https://example.com/3"></script>
 					</body></html>
 				',
-				'
-					<html data-ampdevmode>
-					<head><meta charset="utf-8"></head>
-					<body>
-						<script src="https://example.com/1" data-ampdevmode></script>
-						<script type="text/javascript" src="https://example.com/2" data-ampdevmode></script>
-						<script type="module" src="https://example.com/3" data-ampdevmode></script>
-					</body></html>
-				',
+				sprintf(
+					'
+						<html>
+						<head><meta charset="utf-8"></head>
+						<body>
+							<script src="https://example.com/1" %1$s></script>
+							<script type="text/javascript" src="https://example.com/2" %1$s></script>
+							<script type="module" src="https://example.com/3" %1$s></script>
+						</body></html>
+					',
+					ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE
+				),
 				[
 					'sanitize_js_scripts'       => true,
 					'validation_error_callback' => '__return_false',
@@ -255,14 +265,17 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 						<button on="tap:warning-message.hide">Cool, thanks!</button>
 					</body></html>
 				',
-				'
-					<html data-ampdevmode><head><meta charset="utf-8"></head>
-					<body data-ampdevmode onload="alert(\'Hey there.\')">
-						<noscript>I should not get unwrapped.</noscript>
-						<div id="warning-message">Warning...</div>
-						<button on="tap:warning-message.hide">Cool, thanks!</button>
-					</body></html>
-				',
+				sprintf(
+					'
+						<html><head><meta charset="utf-8"></head>
+						<body %s="onload" onload="alert(\'Hey there.\')">
+							<noscript>I should not get unwrapped.</noscript>
+							<div id="warning-message">Warning...</div>
+							<button on="tap:warning-message.hide">Cool, thanks!</button>
+						</body></html>
+					',
+					ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE
+				),
 				[
 					'sanitize_js_scripts'       => true,
 					'validation_error_callback' => '__return_false',
@@ -307,7 +320,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 	 * @param string $source        Source.
 	 * @param string $expected      Expected.
 	 * @param array $sanitizer_args Sanitizer args.
-	 * @covers AMP_Script_Sanitizer::sanitize()
+	 * @covers ::sanitize()
 	 */
 	public function test_sanitize( $source, $expected = null, $sanitizer_args = [], $expected_error_codes = [] ) {
 		if ( null === $expected ) {
@@ -343,67 +356,152 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 	/** @return array */
 	public function get_data_to_test_cascading_sanitizer_argument_changes_with_custom_scripts() {
 		return [
-			'custom_scripts_removed' => [ true ],
-			'custom_scripts_kept'    => [ false ],
+			'custom_scripts_removed'         => [ 3 ],
+			'custom_scripts_px_verified'     => [ 2 ],
+			'custom_scripts_amp_unvalidated' => [ 1 ],
 		];
 	}
 
 	/**
 	 * @dataProvider get_data_to_test_cascading_sanitizer_argument_changes_with_custom_scripts
 	 *
-	 * @covers AMP_Script_Sanitizer::init()
+	 * @covers ::init()
 	 *
-	 * @param bool $remove_custom_scripts Remove custom scripts.
+	 * @param int $level Level.
 	 */
-	public function test_cascading_sanitizer_argument_changes_with_custom_scripts( $remove_custom_scripts ) {
+	public function test_cascading_sanitizer_argument_changes_with_custom_scripts( $level ) {
+
+		add_filter(
+			'pre_http_request',
+			static function( $preempt, $request, $url ) {
+				$r = [
+					'response' => [
+						'code'    => 200,
+						'message' => 'OK',
+					],
+					'headers'  => [ 'content-type' => 'text/css' ],
+				];
+				if ( 'https://example.com/head.css' === $url ) {
+					$preempt = array_merge(
+						$r,
+						[ 'body' => 'head{background-color:white}' ]
+					);
+				} elseif ( 'https://example.com/body.css' === $url ) {
+					$preempt = array_merge(
+						$r,
+						[ 'body' => 'body{background-color:black}' ]
+					);
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		switch ( $level ) {
+			case 3:
+				$tag_exemption_attribute  = '';
+				$attr_exemption_attribute = '';
+				break;
+			case 2:
+				$tag_exemption_attribute  = ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE;
+				$attr_exemption_attribute = ValidationExemption::PX_VERIFIED_ATTRS_ATTRIBUTE . '="onload"';
+				break;
+			default:
+				$tag_exemption_attribute  = ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE;
+				$attr_exemption_attribute = ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE . '="onload"';
+		}
+
+		// @todo In level 1, deny-listed CSS properties like -moz-binding and behavior should be allowed. Nevertheless, these are very rare now (since they are obsolete).
 		$dom = Document::fromHtml(
-			'
-			<html>
-				<head>
-					<style>body { background: red; } body.loaded { background: green; }</style>
-				</head>
-				<body>
-					<img src="https://example.com/logo.png" width="300" height="100" alt="Logo">
-					<form action="https://example.com/subscribe/" method="post">
-						<input type="email" name="email">
-					</form>
-					<script>document.addEventListener("DOMContentLoaded", () => document.body.classList.add("loaded"))</script>
-				</body>
-			</html>
-			',
+			sprintf(
+				'
+				<html>
+					<head>
+						<style>
+						/*comment*/
+						body { background: red; }
+						body.loaded { background: green; }
+						img { outline: solid 1px red; }
+						audio { outline: solid 1px green !important; }
+						video { outline: solid 1px blue; }
+						iframe { outline: solid 1px black; }
+						</style>
+						<link rel="stylesheet" type="text/css" href="https://example.com/head.css">
+					</head>
+					<body onload="doSomething()" %s>
+						<img src="https://example.com/logo.png" width="300" height="100" alt="Logo">
+						<audio src="https://example.com/music.mp3" width="300" height="100"></audio>
+						<video src="https://example.com/movie.mp4" width="640" height="480"></video>
+						<iframe src="https://example.com/" width="100" height="400"></iframe>
+						<amp-facebook-page width="340" height="130" layout="responsive" data-href="https://www.facebook.com/imdb/"></amp-facebook-page>
+						<form action="https://example.com/subscribe/" method="post">
+							<input type="email" name="email">
+						</form>
+						<div id="blueviolet" style="color:blueviolet !important;">Blue Violet</div>
+						<script %s>document.addEventListener("DOMContentLoaded", () => document.body.classList.add("loaded"))</script>
+						<link rel="stylesheet" href="https://example.com/body.css">
+						<style>
+						body:after{content:' . str_repeat( 'a', 75000 ) . '}
+						</style>
+					</body>
+				</html>
+				',
+				$attr_exemption_attribute,
+				$tag_exemption_attribute
+			),
 			Options::DEFAULTS
 		);
 
 		$sanitizers = [
-			AMP_Script_Sanitizer::class => new AMP_Script_Sanitizer(
+			AMP_Script_Sanitizer::class            => new AMP_Script_Sanitizer(
 				$dom,
 				[
-					'sanitize_js_scripts'       => true,
-					'validation_error_callback' => function () use ( $remove_custom_scripts ) {
-						return $remove_custom_scripts;
-					},
+					'sanitize_js_scripts' => true,
 				]
 			),
-			AMP_Img_Sanitizer::class    => new AMP_Img_Sanitizer(
+			AMP_Form_Sanitizer::class              => new AMP_Form_Sanitizer(
+				$dom,
+				[
+					'native_post_forms_allowed' => 'never', // Overridden by AMP_Script_Sanitizer when there is a kept script.
+				]
+			),
+			AMP_Img_Sanitizer::class               => new AMP_Img_Sanitizer(
 				$dom,
 				[
 					'native_img_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
-			AMP_Form_Sanitizer::class   => new AMP_Form_Sanitizer(
+			AMP_Video_Sanitizer::class             => new AMP_Video_Sanitizer(
 				$dom,
 				[
-					'native_post_forms_allowed' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
-					'validation_error_callback' => function () use ( $remove_custom_scripts ) {
-						return $remove_custom_scripts;
-					},
+					'native_video_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
-			AMP_Style_Sanitizer::class  => new AMP_Style_Sanitizer(
+			AMP_Audio_Sanitizer::class             => new AMP_Audio_Sanitizer(
+				$dom,
+				[
+					'native_audio_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+				]
+			),
+			AMP_Iframe_Sanitizer::class            => new AMP_Iframe_Sanitizer(
+				$dom,
+				[
+					'native_iframe_used' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+				]
+			),
+			AMP_Style_Sanitizer::class             => new AMP_Style_Sanitizer(
+				$dom,
+				[
+					'use_document_element'     => true,
+					'disable_style_processing' => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+				]
+			),
+			AMP_Tag_And_Attribute_Sanitizer::class => new AMP_Tag_And_Attribute_Sanitizer(
 				$dom,
 				[
 					'use_document_element' => true,
-					'skip_tree_shaking'    => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
+					'prefer_bento'         => false, // Overridden by AMP_Script_Sanitizer when there is a kept script.
 				]
 			),
 		];
@@ -417,28 +515,233 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$sanitizer->sanitize();
 		}
 
+		$style_element_query = $dom->xpath->query( '//style' );
+		$link_element_query  = $dom->xpath->query( '//link[ @rel = "stylesheet" ]' );
+		$first_style         = $style_element_query->item( 0 );
+		$this->assertEquals( $level > 1, $first_style->hasAttribute( Attribute::AMP_CUSTOM ) );
+		$this->assertEquals( 1 === $level ? 2 : 1, $style_element_query->length, 'Expected styles to be concatenated into one style.' );
+		$this->assertEquals( 1 === $level ? 2 : 0, $link_element_query->length, 'Expected external stylesheets to be left as-is in Level 1 only.' );
+
+		$css_text = join(
+			'',
+			array_map(
+				function ( Element $element ) {
+					return $element->textContent;
+				},
+				iterator_to_array( $style_element_query )
+			)
+		);
+
+		foreach ( $style_element_query as $style_element ) {
+			$this->assertEquals(
+				3 !== $level,
+				ValidationExemption::is_px_verified_for_node( $style_element )
+			);
+		}
+		foreach ( $link_element_query as $link_element ) {
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $link_element ) );
+		}
+
 		$this->assertEquals(
-			$remove_custom_scripts ? 0 : 1,
+			3 === $level ? 0 : 1,
 			$dom->getElementsByTagName( Tag::SCRIPT )->length
 		);
+
+		if ( 1 === $level ) {
+			$this->assertStringContainsString( '/*comment*/', $css_text );
+		} else {
+			$this->assertStringNotContainsString( '/*comment*/', $css_text );
+		}
+		if ( $level > 1 ) {
+			$this->assertStringContainsString( 'head{background-color:white}', $css_text );
+			$this->assertStringContainsString( 'body{background-color:black}', $css_text );
+		} else {
+			$this->assertStringNotContainsString( 'head{background-color:white}', $css_text );
+			$this->assertStringNotContainsString( 'body{background-color:black}', $css_text );
+		}
+
 		$this->assertEquals(
-			$remove_custom_scripts ? 1 : 0,
+			1 === $level ? 0 : 1,
 			$dom->getElementsByTagName( Extension::IMG )->length,
 			'Expected IMG to be converted to AMP-IMG when custom scripts are removed.'
 		);
+		$this->assertRegExp(
+			1 === $level ? '/}\s*img\s*{/' : '/}amp-img{/',
+			$css_text
+		);
 
-		if ( $remove_custom_scripts ) {
-			$this->assertEquals( 1, $dom->xpath->query( '//form[ @method = "post" and @action-xhr ]' )->length );
-		} else {
-			$this->assertEquals( 1, $dom->xpath->query( '//form[ @method = "post" and @action ]' )->length );
+		$this->assertEquals(
+			1 === $level ? 0 : 1,
+			$dom->getElementsByTagName( Extension::VIDEO )->length,
+			'Expected VIDEO to be converted to AMP-VIDEO when custom scripts are removed.'
+		);
+		$this->assertRegExp(
+			1 === $level ? '/}\s*video\s*{/' : '/}amp-video{/',
+			$css_text
+		);
+
+		$this->assertEquals(
+			1 !== $level ? 1 : 0,
+			$dom->getElementsByTagName( Extension::AUDIO )->length,
+			'Expected AUDIO to be converted to AMP-AUDIO when custom scripts are removed.'
+		);
+
+		switch ( $level ) {
+			case 1:
+				$this->assertRegExp( '/}\s*audio\s*{\s*outline:\s*solid 1px green !important/', $css_text );
+				break;
+			case 2:
+				$this->assertStringContainsString( '}amp-audio{', $css_text );
+				break;
+			case 3:
+				$this->assertStringContainsString( ':not(#_) amp-audio{', $css_text );
+				break;
 		}
 
-		$style = $dom->getElementsByTagName( Tag::STYLE )->item( 0 );
-		if ( $remove_custom_scripts ) {
-			$this->assertStringStartsWith( "body{background:red}\n", $style->textContent );
+		$blueviolet_div = $dom->getElementById( 'blueviolet' );
+		if ( $level < 3 ) {
+			$this->assertSame( 'color:blueviolet !important;', $blueviolet_div->getAttribute( 'style' ), 'Expected style attribute to be left as-is in level under 3.' );
+			$this->assertStringNotContainsString( 'blueviolet', $css_text, 'Expected blueviolet not to be concatenated under level 3.' );
 		} else {
-			$this->assertStringStartsWith( "body{background:red}body.loaded{background:green}\n", $style->textContent );
+			$this->assertFalse( $blueviolet_div->hasAttribute( 'style' ), 'Expected no style attribute in level 3.' );
+			$this->assertStringContainsString( 'blueviolet', $css_text, 'Expected ' );
 		}
+
+		$this->assertEquals(
+			1 === $level ? 0 : 1,
+			$dom->getElementsByTagName( Extension::IFRAME )->length,
+			'Expected IFRAME to be converted to AMP-IFRAME when custom scripts are removed.'
+		);
+		$this->assertRegExp(
+			1 === $level ? '/}\s*iframe\s*{/' : '/}amp-iframe{/',
+			$css_text
+		);
+
+		$post_form = $dom->xpath->query( '//form[ @method = "post" ]' )->item( 0 );
+		$this->assertInstanceOf( Element::class, $post_form );
+		$this->assertEquals( 3 === $level, $post_form->hasAttribute( Attribute::ACTION_XHR ) );
+		$this->assertEquals( 3 !== $level, $post_form->hasAttribute( Attribute::ACTION ) );
+
+		if ( 1 === $level ) {
+			$this->assertStringContainsString( 'body.loaded', $css_text );
+		} else {
+			$this->assertStringNotContainsString( 'body.loaded', $css_text );
+		}
+		if ( 3 === $level ) {
+			$this->assertStringNotContainsString( 'body:after{', $css_text );
+		} else {
+			$this->assertStringContainsString( 'body:after{', $css_text );
+		}
+
+		// Verify that prefer_bento got set.
+		$scripts = $sanitizers[ AMP_Tag_And_Attribute_Sanitizer::class ]->get_scripts();
+		if ( 3 === $level ) {
+			$this->assertArrayHasKey( Extension::FACEBOOK_PAGE, $scripts );
+			$this->assertArrayNotHasKey( Extension::FACEBOOK, $scripts );
+		} else {
+			$this->assertArrayNotHasKey( Extension::FACEBOOK_PAGE, $scripts );
+			$this->assertArrayHasKey( Extension::FACEBOOK, $scripts );
+		}
+	}
+
+	/** @return array */
+	public function get_comment_reply_allowed_values() {
+		$values = [
+			'always',
+			'conditionally',
+			'never',
+		];
+
+		$data = [];
+		foreach ( $values as $value ) {
+			$data[ $value ] = [ 'comment_reply_allowed' => $value ];
+		}
+		return $data;
+	}
+
+	/**
+	 * @dataProvider get_comment_reply_allowed_values
+	 * @param string $comment_reply_allowed
+	 * @covers ::sanitize_js_script_elements()
+	 */
+	public function test_sanitize_js_script_elements_for_comment_reply( $comment_reply_allowed ) {
+		$dom = Document::fromHtml(
+			'
+			<html>
+				<head></head>
+				<body>
+					<script id="comment-reply-js" src="https://example.com/comment-reply.js"></script>
+				</body>
+			</html>
+			',
+			Options::DEFAULTS
+		);
+
+		$sanitizer = new AMP_Script_Sanitizer(
+			$dom,
+			[
+				'sanitize_js_scripts'   => true,
+				'comment_reply_allowed' => $comment_reply_allowed,
+			]
+		);
+
+		$script = $dom->getElementById( 'comment-reply-js' );
+		$this->assertInstanceOf( Element::class, $script );
+		$sanitizer->sanitize();
+
+		if ( 'always' === $comment_reply_allowed ) {
+			$this->assertInstanceOf( Element::class, $script->parentNode );
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $script ) );
+		} elseif ( 'never' === $comment_reply_allowed ) {
+			$this->assertNull( $script->parentNode );
+			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
+		} else {
+			$this->assertInstanceOf( Element::class, $script->parentNode );
+			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
+		}
+	}
+
+	/**
+	 * @see wp_comment_form_unfiltered_html_nonce()
+	 * @covers ::sanitize_js_script_elements()
+	 */
+	public function test_sanitize_js_script_elements_for_wp_unfiltered_html_comment_script() {
+		add_filter(
+			'map_meta_cap',
+			static function ( $caps, $cap ) {
+				if ( 'unfiltered_html' === $cap ) {
+					$caps = [ 'exist' ];
+				}
+				return $caps;
+			},
+			10,
+			2
+		);
+		$this->assertTrue( current_user_can( 'unfiltered_html' ) );
+
+		$dom = Document::fromHtml(
+			'
+			<html data-ampdevmode>
+				<head></head>
+				<body>' . get_echo( 'wp_comment_form_unfiltered_html_nonce' ) . '</body>
+			</html>
+			',
+			Options::DEFAULTS
+		);
+
+		$sanitizer = new AMP_Script_Sanitizer(
+			$dom,
+			[
+				'sanitize_js_scripts' => true,
+			]
+		);
+
+		$sanitizer->sanitize();
+
+		$script = $dom->getElementsByTagName( Tag::SCRIPT )->item( 0 );
+		$this->assertInstanceOf( Element::class, $script );
+		$this->assertStringContainsString( '_wp_unfiltered_html_comment_disabled', $script->textContent );
+		$this->assertTrue( DevMode::hasExemptionForNode( $script ) );
 	}
 
 	/**

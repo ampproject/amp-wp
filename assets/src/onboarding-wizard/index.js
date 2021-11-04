@@ -15,9 +15,11 @@ import {
 	SETTINGS_LINK,
 	OPTIONS_REST_PATH,
 	READER_THEMES_REST_PATH,
+	SCANNABLE_URLS_REST_PATH,
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 	USERS_RESOURCE_REST_PATH,
+	VALIDATE_NONCE,
 } from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
 
@@ -33,11 +35,13 @@ import { ReaderThemesContextProvider } from '../components/reader-themes-context
 import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
 import { ErrorScreen } from '../components/error-screen';
+import { SiteScanContextProvider } from '../components/site-scan-context-provider';
 import { UserContextProvider } from '../components/user-context-provider';
+import { PluginsContextProvider } from '../components/plugins-context-provider';
+import { ThemesContextProvider } from '../components/themes-context-provider';
 import { PAGES } from './pages';
 import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
-import { SiteScanContextProvider } from './components/site-scan-context-provider';
 import { TemplateModeOverrideContextProvider } from './components/template-mode-override-context-provider';
 
 const { ajaxurl: wpAjaxUrl } = global;
@@ -71,19 +75,27 @@ export function Providers( { children } ) {
 						usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 					>
 						<NavigationContextProvider pages={ PAGES }>
-							<ReaderThemesContextProvider
-								currentTheme={ CURRENT_THEME }
-								hasErrorBoundary={ true }
-								wpAjaxUrl={ wpAjaxUrl }
-								readerThemesRestPath={ READER_THEMES_REST_PATH }
-								updatesNonce={ UPDATES_NONCE }
-							>
-								<TemplateModeOverrideContextProvider>
-									<SiteScanContextProvider>
-										{ children }
-									</SiteScanContextProvider>
-								</TemplateModeOverrideContextProvider>
-							</ReaderThemesContextProvider>
+							<PluginsContextProvider hasErrorBoundary={ true }>
+								<ThemesContextProvider hasErrorBoundary={ true }>
+									<ReaderThemesContextProvider
+										currentTheme={ CURRENT_THEME }
+										hasErrorBoundary={ true }
+										wpAjaxUrl={ wpAjaxUrl }
+										readerThemesRestPath={ READER_THEMES_REST_PATH }
+										updatesNonce={ UPDATES_NONCE }
+									>
+										<TemplateModeOverrideContextProvider>
+											<SiteScanContextProvider
+												ampFirst={ true }
+												scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
+												validateNonce={ VALIDATE_NONCE }
+											>
+												{ children }
+											</SiteScanContextProvider>
+										</TemplateModeOverrideContextProvider>
+									</ReaderThemesContextProvider>
+								</ThemesContextProvider>
+							</PluginsContextProvider>
 						</NavigationContextProvider>
 					</UserContextProvider>
 				</OptionsContextProvider>

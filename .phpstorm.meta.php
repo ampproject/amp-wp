@@ -50,7 +50,9 @@ namespace PHPSTORM_META {
 			'reader_theme_loader'                => \AmpProject\AmpWP\ReaderThemeLoader::class,
 			'reader_theme_support_features'      => \AmpProject\AmpWP\ReaderThemeSupportFeatures::class,
 			'rest.options_controller'            => \AmpProject\AmpWP\OptionsRESTController::class,
+			'rest.scannable_urls_controller'     => \AmpProject\AmpWP\Validation\ScannableURLsRestController::class,
 			'rest.validation_counts_controller'  => \AmpProject\AmpWP\Validation\ValidationCountsRestController::class,
+			'sandboxing'                         => \AmpProject\AmpWP\Sandboxing::class,
 			'save_post_validation_event'         => \AmpProject\AmpWP\Validation\SavePostValidationEvent::class,
 			'server_timing'                      => \AmpProject\AmpWP\Instrumentation\ServerTiming::class,
 			'site_health_integration'            => \AmpProject\AmpWP\Admin\SiteHealth::class,
@@ -59,6 +61,8 @@ namespace PHPSTORM_META {
 			'url_validation_cron'                => \AmpProject\AmpWP\Validation\URLValidationCron::class,
 			'url_validation_rest_controller'     => \AmpProject\AmpWP\Validation\URLValidationRESTController::class,
 			'validated_url_stylesheet_gc'        => \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+			'validation.scannable_url_provider'  => \AmpProject\AmpWP\Validation\ScannableURLProvider::class,
+			'validation.url_validation_provider' => \AmpProject\AmpWP\Validation\URLValidationProvider::class,
 		] )
 	);
 

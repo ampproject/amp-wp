@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 
@@ -81,13 +82,6 @@ abstract class AMP_Base_Sanitizer {
 	protected $root_element;
 
 	/**
-	 * Keep track of nodes that should not be removed to prevent duplicated validation errors since sanitization is rejected.
-	 *
-	 * @var array
-	 */
-	private $nodes_to_keep = [];
-
-	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.2
@@ -141,9 +135,37 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get arg.
+	 *
+	 * @since 2.2
+	 *
+	 * @param string $key Arg key.
+	 * @return mixed Args.
+	 */
+	public function get_arg( $key ) {
+		if ( array_key_exists( $key, $this->args ) ) {
+			return $this->args[ $key ];
+		}
+		return null;
+	}
+
+	/**
+	 * Get args.
+	 *
+	 * @since 2.2
+	 *
+	 * @return array Args.
+	 */
+	public function get_args() {
+		return $this->args;
+	}
+
+	/**
 	 * Update args.
 	 *
 	 * Merges the supplied args with the existing args.
+	 *
+	 * @since 2.2
 	 *
 	 * @param array $args Args.
 	 */
@@ -480,8 +502,7 @@ abstract class AMP_Base_Sanitizer {
 			return false;
 		}
 
-		// Prevent double-reporting nodes that are rejected for sanitization.
-		if ( isset( $this->nodes_to_keep[ $node->nodeName ] ) && in_array( $node, $this->nodes_to_keep[ $node->nodeName ], true ) ) {
+		if ( ValidationExemption::is_amp_unvalidated_for_node( $node ) || ValidationExemption::is_px_verified_for_node( $node ) ) {
 			return false;
 		}
 
@@ -494,7 +515,7 @@ abstract class AMP_Base_Sanitizer {
 
 			$node->parentNode->removeChild( $node );
 		} else {
-			$this->nodes_to_keep[ $node->nodeName ][] = $node;
+			ValidationExemption::mark_node_as_amp_unvalidated( $node );
 		}
 		return $should_remove;
 	}
@@ -529,6 +550,10 @@ abstract class AMP_Base_Sanitizer {
 			return false;
 		}
 
+		if ( ValidationExemption::is_amp_unvalidated_for_node( $node ) || ValidationExemption::is_px_verified_for_node( $node ) ) {
+			return false;
+		}
+
 		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 		if ( $should_remove ) {
 			$allow_empty  = ! empty( $attr_spec[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] );
@@ -538,6 +563,8 @@ abstract class AMP_Base_Sanitizer {
 			} else {
 				$element->removeAttributeNode( $node );
 			}
+		} else {
+			ValidationExemption::mark_node_as_amp_unvalidated( $node );
 		}
 
 		return $should_remove;

@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { HOME_URL } from 'amp-settings';
-
-/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
@@ -19,6 +14,7 @@ import { IconLaptopSearch } from '../components/svg/icon-laptop-search';
 import { Options } from '../components/options-context-provider';
 import { User } from '../components/user-context-provider';
 import { READER, STANDARD, TRANSITIONAL } from '../common/constants';
+import { SiteScan as SiteScanContext } from '../components/site-scan-context-provider';
 
 /**
  * Review component on the settings screen.
@@ -29,18 +25,13 @@ export function SiteReview() {
 		saveReviewPanelDismissedForTemplateMode,
 		savingReviewPanelDismissedForTemplateMode,
 	} = useContext( User );
+	const { previewPermalink } = useContext( SiteScanContext );
 	const { originalOptions } = useContext( Options );
-	const {
-		paired_url_examples: pairedUrlExamples,
-		paired_url_structure: pairedUrlStructure,
-		theme_support: themeSupport,
-	} = originalOptions;
+	const { theme_support: themeSupport } = originalOptions;
 
 	if ( savingReviewPanelDismissedForTemplateMode || reviewPanelDismissedForTemplateMode === themeSupport ) {
 		return null;
 	}
-
-	const previewPermalink = STANDARD === themeSupport ? HOME_URL : pairedUrlExamples[ pairedUrlStructure ][ 0 ];
 
 	return (
 		<AMPDrawer
@@ -109,9 +100,11 @@ export function SiteReview() {
 					} } />
 				</ul>
 				<div className="settings-site-review__actions">
-					<Button href={ previewPermalink } isPrimary={ true }>
-						{ __( 'Browse Site', 'amp' ) }
-					</Button>
+					{ previewPermalink && (
+						<Button href={ previewPermalink } isPrimary={ true }>
+							{ __( 'Browse Site', 'amp' ) }
+						</Button>
+					) }
 					<Button
 						onClick={ () => {
 							saveReviewPanelDismissedForTemplateMode( themeSupport );

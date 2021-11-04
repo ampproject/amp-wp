@@ -45,11 +45,13 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		add_filter(
 			'pre_http_request',
 			function( $r, /** @noinspection PhpUnusedParameterInspection */ $args, $url ) {
-				if ( false === strpos( $url, 'amp_validate=' ) ) {
+				$url_query_vars = [];
+				parse_str( wp_parse_url( $url, PHP_URL_QUERY ), $url_query_vars );
+				if ( ! array_key_exists( AMP_Validation_Manager::VALIDATE_QUERY_VAR, $url_query_vars ) ) {
 					return $r;
 				}
 
-				$this->attempted_validate_request_urls[] = remove_query_arg( [ 'amp_validate', 'amp_cache_bust' ], $url );
+				$this->attempted_validate_request_urls[] = remove_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, $url );
 				return [
 					'body'     => '',
 					'response' => [

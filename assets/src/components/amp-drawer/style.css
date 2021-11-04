@@ -25,9 +25,7 @@
 	padding-left: 0.75rem;
 	padding-right: 0.75rem;
 	overflow: hidden;
-	position: absolute;
-	top: 0;
-	z-index: 1;
+	flex-grow: 1;
 
 	@media (min-width: 783px) {
 		padding-left: 3rem;
@@ -43,6 +41,14 @@
 
 .amp-drawer__heading h3 {
 	margin-bottom: 0;
+}
+
+.amp-drawer__heading svg {
+	margin-right: 1rem;
+}
+
+.amp-drawer__label-extra svg {
+	fill: none;
 }
 
 .amp .amp-drawer .components-panel__body-title {
@@ -63,7 +69,6 @@
 	border-radius: 5px;
 	display: flex;
 	align-items: center;
-	justify-content: center;
 }
 
 .amp .amp-drawer .components-panel__body-title button {
@@ -77,16 +82,15 @@
 }
 
 
-.amp .amp-drawer .components-panel__body-title button span {
+.amp .amp-drawer .components-panel__body-title > button > span {
 	align-items: center;
 	display: flex;
-	height: 100%;
-	margin-left: auto;
 	justify-content: center;
 	width: var(--panel-button-width);
+	order: 100;
 }
 
-.amp .amp-drawer .components-panel__body-title svg {
+.amp .amp-drawer .components-panel__body-toggle.components-button .components-panel__arrow {
 	height: 30px;
 	position: static;
 	transform: none;
@@ -98,7 +102,8 @@
 	}
 }
 
-.amp .amp-drawer--handle-type-full-width .components-panel__body-title svg {
+
+.amp .amp-drawer--handle-type-full-width .components-panel__body-title > button > svg {
 	margin-left: auto;
 
 	@media (min-width: 783px) {
@@ -108,6 +113,11 @@
 
 .amp.amp .amp-drawer .components-panel__body-toggle {
 	border-radius: 5px;
+}
+
+.amp .amp-drawer .components-panel__body-title .amp-notice {
+	font-family: var(--font-default);
+	font-weight: 400;
 }
 
 .amp .amp-drawer__panel-body {
@@ -135,6 +145,7 @@
 
 .amp .amp-drawer--handle-type-right .amp-drawer__heading {
 	right: var(--panel-button-width);
+	width: calc(100% - var(--panel-button-width));
 }
 
 .amp-drawer--handle-type-right .components-panel__body-title {

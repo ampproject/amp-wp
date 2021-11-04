@@ -14,9 +14,11 @@ use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
 
 /**
  * Test AMP_Style_Sanitizer.
@@ -72,6 +74,12 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-bb01159{color:#0f0}',
 				],
+			],
+
+			'span_empty_style' => [
+				'<span style=" ">This is default.</span>',
+				'<span>This is default.</span>',
+				[],
 			],
 
 			'span_one_style_bad_format' => [
@@ -714,10 +722,11 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					<style> .amp-referrer-www-google-com { color: red; } </style>
 					<style> .amp-active { color: green } </style>
 					<style> .amp-carousel-slide { outline: solid 1px red; } </style>
-					<style> .amp-date-picker-selecting { outline: solid 2px red; } </style>
+					<style> .amp-date-picker-selecting { outline: solid 2px red; } .CalendarDay { color:black; } </style>
 					<style> .amp-form-submit-success { color: green; } </style>
 					<style> .amp-access-laterpay-container { color: purple} </style>
 					<style> .amp-image-lightbox-caption { color: brown} </style>
+					<style> .user-valid, .user-invalid { outline: solid 1px red; } </style>
 					<style> .amp-live-list-item-new { color: lime} #my-live-list [data-tombstone] { display: block; }</style>
 					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} #sidebar1[open] { outline: solid 1px red; }</style>
 					<style> .amp-sticky-ad-close-button { color: aliceblue} </style>
@@ -753,10 +762,11 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					'.amp-referrer-www-google-com{color:red}',
 					'.amp-active{color:green}',
 					'.amp-carousel-slide{outline:solid 1px red}',
-					'.amp-date-picker-selecting{outline:solid 2px red}',
+					'.amp-date-picker-selecting{outline:solid 2px red}.CalendarDay{color:black}',
 					'.amp-form-submit-success{color:green}',
 					'.amp-access-laterpay-container{color:purple}',
 					'.amp-image-lightbox-caption{color:brown}',
+					'.user-valid,.user-invalid{outline:solid 1px red}',
 					'.amp-live-list-item-new{color:lime}#my-live-list [data-tombstone]{display:block}',
 					'.amp-sidebar-toolbar-target-hidden{color:lavender}#sidebar1[open]{outline:solid 1px red}',
 					'.amp-sticky-ad-close-button{color:aliceblue}',
@@ -855,6 +865,13 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	/**
 	 * Test style elements and link elements.
 	 *
+	 * @covers AMP_Style_Sanitizer::get_stylesheet_from_url()
+	 * @covers AMP_Style_Sanitizer::fetch_external_stylesheet()
+	 * @covers AMP_Style_Sanitizer::has_used_tag_names()
+	 * @covers AMP_Style_Sanitizer::has_used_class_name()
+	 * @covers AMP_Style_Sanitizer::has_used_attributes()
+	 * @covers AMP_Style_Sanitizer::is_class_allowed_in_amp_date_picker()
+	 *
 	 * @dataProvider get_link_and_style_test_data
 	 * @param string $source               Source.
 	 * @param array  $expected_stylesheets Expected stylesheets.
@@ -894,6 +911,10 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			},
 		];
 
+		// Run the script sanitizer to unwrap noscript elements.
+		$sanitizer = new AMP_Script_Sanitizer( $dom, $args );
+		$sanitizer->sanitize();
+
 		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
@@ -921,6 +942,56 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		if ( $actual_stylesheets ) {
 			$this->assertStringContainsString( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
 		}
+	}
+
+	/**
+	 * Add test coverage for the property_allowlist condition in process_css_declaration_block which is not currently reachable given the spec.
+	 *
+	 * @covers AMP_Style_Sanitizer::process_css_declaration_block()
+	 */
+	public function test_allowlisted_properties_in_declaration_block() {
+		$dom = Document::fromHtml(
+			'
+			<html>
+				<head>
+					<style>body { unrecognized: "property"; color: black; }</style>
+				</head>
+				<body></body>
+			</html>
+			',
+			Options::DEFAULTS
+		);
+
+		$actual_error_codes = [];
+
+		$sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			[
+				'use_document_element' => true,
+				'validation_error_callback' => static function( $error ) use ( &$actual_error_codes ) {
+					$actual_error_codes[] = $error['code'];
+					return true;
+				},
+			]
+		);
+
+		$spec                              = $this->get_private_property( $sanitizer, 'style_custom_cdata_spec' );
+		$spec['css_spec']['declaration'][] = 'color';
+		$this->set_private_property( $sanitizer, 'style_custom_cdata_spec', $spec );
+
+		$sanitizer->sanitize();
+
+		$this->assertEquals(
+			[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY ],
+			$actual_error_codes
+		);
+
+		$this->assertEquals(
+			[
+				'body{color:black}',
+			],
+			$sanitizer->get_stylesheets()
+		);
 	}
 
 	/**
@@ -959,6 +1030,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$args = [
 			'use_document_element' => true,
 			'skip_tree_shaking'    => true,
+			'allow_excessive_css'  => true,
 		];
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
@@ -973,42 +1045,13 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$this->assertStringStartsWith( '.selective-refresh-container{', $actual_stylesheets[0] );
 		$this->assertStringStartsWith( '.my-partial{', $actual_stylesheets[1] );
 		$this->assertGreaterThan( 75000, strlen( implode( '', $actual_stylesheets ) ) );
+
+		ValidationExemption::is_px_verified_for_node( $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 ) );
 	}
 
 	/** @return array */
 	public function get_data_to_test_transform_important_qualifiers_arg() {
-		return [
-			'transform' => [
-				true,
-				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo{color:red}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo[data-amp-original-style*="blue"]{outline:solid 2px green}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-9605c4d{background:blue}',
-				],
-				null,
-			],
-			'no_transform' => [
-				false,
-				[
-					'.foo{color:red !important}',
-					'.foo[style*="blue"]{outline:solid 2px green !important}',
-				],
-				'background: blue !important',
-			],
-		];
-	}
-
-	/**
-	 * Test that transformation of !important qualifiers (and processing of style attributes) can be turned off.
-	 *
-	 * @dataProvider get_data_to_test_transform_important_qualifiers_arg
-	 * @param bool        $transform_important_qualifiers Sanitizer args.
-	 * @param array       $expected_stylesheets           Expected stylesheets.
-	 * @param string|null $expected_style_attr            Inline style attribute value, or null if not expected.
-	 */
-	public function test_transform_important_qualifiers_arg( $transform_important_qualifiers, $expected_stylesheets, $expected_style_attr ) {
-		$dom = Document::fromHtml(
-			'
+		$html = '
 			<html>
 				<head>
 					<style>
@@ -1017,17 +1060,162 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					<style>
 					.foo[style*="blue"] { outline: solid 2px green !important; }
 					</style>
+					<style>
+					.i-amphtml-illegal { color: black; }
+					</style>
 				</head>
 				<body>
 					<div class="foo" style="background: blue !important"></div>
+					<div class="bar" style="background: red"></div>
+					<div class="baz i-amphtml-illegal"></div>
 				</body>
 			</html>
-			',
-			Options::DEFAULTS
-		);
+		';
+
+		$html_important_keyframes = '
+			<html>
+				<head>
+					<style>
+					body {
+						animation-name: foo;
+					}
+					@keyframes foo {
+						from {
+							opacity: 0 !important;
+						}
+						to {
+							opacity: 100 !important;
+						}
+					}
+					</style>
+				</head>
+				<body></body>
+			</html>
+		';
+
+		return [
+			'transform' => [
+				true, // transform_important_qualifiers
+				true, // should_sanitize
+				$html,
+				[
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo{color:red}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo[data-amp-original-style*="blue"]{outline:solid 2px green}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-9605c4d{background:blue}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-32bb249{background:red}',
+				],
+				'<style amp-custom>',
+				'
+					<div class="foo amp-wp-9605c4d" data-amp-original-style="background: blue !important"></div>
+					<div class="bar amp-wp-32bb249" data-amp-original-style="background: red"></div>
+					<div class="baz"></div>
+				',
+				[
+					AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR,
+					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
+				],
+			],
+			'no_transform' => [
+				false, // transform_important_qualifiers
+				true, // should_sanitize
+				$html,
+				[
+					'.foo{color:red !important}',
+					'.foo[style*="blue"]{outline:solid 2px green !important}',
+				],
+				'<style amp-custom ' . ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE . '>',
+				'
+					<div class="foo" style="background: blue !important" data-px-verified-attrs="style"></div>
+					<div class="bar" style="background: red"></div>
+					<div class="baz"></div>
+				',
+				[
+					AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR,
+					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
+				],
+			],
+			'no_transform_no_sanitize' => [
+				false, // transform_important_qualifiers
+				false, // should_sanitize
+				$html,
+				[
+					'.foo{color:red !important}',
+					'.foo[style*="blue"]{outline:solid 2px green !important}',
+					'.i-amphtml-illegal{color:black}',
+				],
+				'<style amp-custom ' . ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE . '>',
+				'
+					<div class="foo" style="background: blue !important" data-px-verified-attrs="style"></div>
+					<div class="bar" style="background: red"></div>
+					<div class="baz i-amphtml-illegal" ' . ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE . '="class"></div>
+				',
+				[
+					AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR,
+					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
+				],
+			],
+			'transform_keyframes_and_sanitize' => [
+				true, // transform_important_qualifiers
+				true, // should_sanitize
+				$html_important_keyframes,
+				[
+					'body{animation-name:foo}@keyframes foo{from{opacity:0}to{opacity:100}}',
+				],
+				'<style amp-custom>',
+				'',
+				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT ],
+			],
+			'transform_keyframes_and_no_sanitize' => [
+				true, // transform_important_qualifiers
+				false, // should_sanitize
+				$html_important_keyframes,
+				[
+					'body{animation-name:foo}@keyframes foo{from{opacity:0 !important}to{opacity:100 !important}}',
+				],
+				sprintf( '<style amp-custom %s>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				'',
+				[
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT,
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT,
+				],
+			],
+			'transform_keyframes_not_and_no_sanitize' => [
+				false, // transform_important_qualifiers
+				false, // should_sanitize
+				$html_important_keyframes,
+				[
+					'body{animation-name:foo}@keyframes foo{from{opacity:0 !important}to{opacity:100 !important}}',
+				],
+				sprintf( '<style amp-custom %s>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'',
+				[],
+			],
+		];
+	}
+
+	/**
+	 * Test that transformation of !important qualifiers (and processing of style attributes) can be turned off.
+	 *
+	 * @dataProvider get_data_to_test_transform_important_qualifiers_arg
+	 * @param bool    $transform_important_qualifiers Sanitizer args.
+	 * @param bool    $should_sanitize                Whether invalid markup should be sanitized.
+	 * @param string  $html_input                     HTML input document.
+	 * @param array   $expected_stylesheets           Expected stylesheets.
+	 * @param string  $expected_custom_css_start_tag  Custom CSS start style tag.
+	 * @param string  $expected_body_markup           Expected body markup.
+	 * @param string[] $expected_error_codes          Expected validation error codes.
+	 */
+	public function test_transform_important_qualifiers_arg( $transform_important_qualifiers, $should_sanitize, $html_input, $expected_stylesheets, $expected_custom_css_start_tag, $expected_body_markup, $expected_error_codes ) {
+		$dom = Document::fromHtml( $html_input, Options::DEFAULTS );
+
+		$actual_error_codes = [];
 
 		$args = [
-			'use_document_element' => true,
+			'use_document_element'      => true,
+			'validation_error_callback' => static function ( $validation_error ) use ( $should_sanitize, &$actual_error_codes ) {
+				$actual_error_codes[] = $validation_error['code'];
+				return $should_sanitize;
+			},
 		];
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom, array_merge( $args, compact( 'transform_important_qualifiers' ) ) );
@@ -1041,12 +1229,22 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			array_values( array_filter( $sanitizer->get_stylesheets() ) )
 		);
 
-		$style_attr = $dom->xpath->query( '//*/@style' )->item( 0 );
-		if ( $style_attr instanceof DOMAttr ) {
-			$style_attr = $style_attr->nodeValue;
-		}
+		$amp_custom_style = $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+		$this->assertInstanceOf( Element::class, $amp_custom_style );
 
-		$this->assertEquals( $expected_style_attr, $style_attr );
+		$this->assertEqualMarkup(
+			$expected_custom_css_start_tag,
+			preg_replace( '/(?<=>).+/s', '', $dom->saveHTML( $amp_custom_style ) )
+		);
+
+		$body_markup = trim( preg_replace( ':</?body[>]*>:', '', $dom->saveHTML( $dom->body ) ) );
+
+		$this->assertEqualMarkup(
+			$expected_body_markup,
+			$body_markup
+		);
+
+		$this->assertEquals( $expected_error_codes, $actual_error_codes );
 	}
 
 	/**
@@ -1206,6 +1404,38 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'.wp-block-pullquote:not(.is-style-solid-color)[style*="border-color"] { border: 2px solid; }',
 				'.wp-block-pullquote:not(.is-style-solid-color)[data-amp-original-style*="border-color"]{border:2px solid}',
 			],
+			'converted_elements_used' => [
+				'
+					<video width="100" height="200" src="https://example.com/video.mp4"></video>
+					<audio width="100" height="200" src="https://example.com/audio.mp3"></audio>
+					<img width="100" height="200" src="https://example.com/img.jpg">
+					<iframe width="100" height="200" src="https://example.com/page.html"></iframe>
+				',
+				'audio { color:red; } video { color:blue; } img { color:green; } iframe { color:yellow; }',
+				'amp-audio{color:red}amp-video{color:blue}amp-img{color:green}amp-iframe{color:yellow}',
+				[
+					AMP_Img_Sanitizer::class    => [ 'native_img_used' => false ],
+					AMP_Audio_Sanitizer::class  => [ 'native_audio_used' => false ],
+					AMP_Video_Sanitizer::class  => [ 'native_video_used' => false ],
+					AMP_Iframe_Sanitizer::class => [ 'native_iframe_used' => false ],
+				],
+			],
+			'native_elements_used' => [
+				'
+					<video width="100" height="200" src="https://example.com/video.mp4"></video>
+					<audio width="100" height="200" src="https://example.com/audio.mp3"></audio>
+					<img width="100" height="200" src="https://example.com/img.jpg">
+					<iframe width="100" height="200" src="https://example.com/page.html"></iframe>
+				',
+				'audio { color:red; } video { color:blue; } img { color:green; } iframe { color:yellow; }',
+				'audio{color:red}video{color:blue}img{color:green}iframe{color:yellow}',
+				[
+					AMP_Img_Sanitizer::class    => [ 'native_img_used' => true ],
+					AMP_Audio_Sanitizer::class  => [ 'native_audio_used' => true ],
+					AMP_Video_Sanitizer::class  => [ 'native_video_used' => true ],
+					AMP_Iframe_Sanitizer::class => [ 'native_iframe_used' => true ],
+				],
+			],
 		];
 	}
 
@@ -1219,12 +1449,19 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * @param string $input  Input stylesheet.
 	 * @param string $output Output stylesheet.
 	 */
-	public function test_amp_selector_conversion( $markup, $input, $output ) {
+	public function test_amp_selector_conversion( $markup, $input, $output, $sanitizers_args = [] ) {
 		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body>$markup</body></html>";
 		$dom  = Document::fromHtml( $html, Options::DEFAULTS );
 
 		$sanitizer_classes = amp_get_content_sanitizers();
-		$sanitized         = AMP_Content_Sanitizer::sanitize_document(
+		foreach ( $sanitizers_args as $sanitizer_class => $sanitizer_args ) {
+			$sanitizer_classes[ $sanitizer_class ] = array_merge(
+				$sanitizer_classes[ $sanitizer_class ],
+				$sanitizer_args
+			);
+		}
+
+		$sanitized = AMP_Content_Sanitizer::sanitize_document(
 			$dom,
 			$sanitizer_classes,
 			[
@@ -1827,6 +2064,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Test handling of stylesheets with relative background-image URLs.
 	 *
 	 * @covers AMP_Style_Sanitizer::real_path_urls()
+	 * @covers AMP_Style_Sanitizer::unrelativize_path()
+	 * @covers AMP_Style_Sanitizer::reconstruct_url()
 	 */
 	public function test_relative_background_url_handling() {
 		$html = '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="' . esc_url( admin_url( 'css/common.css' ) ) . '"></head><body><span class="spinner"></span></body></html>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
@@ -1896,6 +2135,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 *
 	 * @dataProvider get_http_stylesheets
 	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 * @covers AMP_Style_Sanitizer::fetch_external_stylesheet()
 	 *
 	 * @param string $href                 Request URL.
 	 * @param string $content_type         Content type.
@@ -1968,6 +2208,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Test cache-control support when retrieving external stylesheets.
 	 *
 	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 * @covers AMP_Style_Sanitizer::fetch_external_stylesheet()
 	 */
 	public function test_external_stylesheet_cache_control() {
 		$request_count = 0;
@@ -2243,12 +2484,19 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<style amp-keyframes="">@keyframes spin{to{transform:rotate(1turn)}}</style>',
 				[],
 			],
+
+			'keyframes_with_non_declaration_block' => [
+				'<style amp-keyframes>@keyframes bad { from { opacity:0 } to { opacity:1 } @media { body { color:red; } } }</style>',
+				'<style amp-keyframes="">@keyframes bad{from{opacity:0}to{opacity:1}}</style>',
+				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_DECLARATION ],
+			],
 		];
 	}
 
 	/**
 	 * Test amp-keyframe styles.
 	 *
+	 * @covers AMP_Style_Sanitizer::process_css_keyframes()
 	 * @dataProvider get_keyframe_data
 	 * @param string $source   Markup to process.
 	 * @param string $expected The markup to expect.
@@ -2748,7 +2996,10 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Test CSS imports.
 	 *
 	 * @dataProvider get_import_test_data
+	 * @covers AMP_Style_Sanitizer::fetch_external_stylesheet()
 	 * @covers AMP_Style_Sanitizer::splice_imported_stylesheet()
+	 * @covers AMP_Style_Sanitizer::process_css_list()
+	 * @covers AMP_Style_Sanitizer::replace_inside_css_list()
 	 *
 	 * @param array|string $stylesheet_urls             Stylesheet URLs.
 	 * @param string       $style_element               HTML markup for the stylesheet URL.
@@ -2824,6 +3075,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 *
 	 * @expectedIncorrectUsage wp_enqueue_style
 	 * @covers AMP_Style_Sanitizer::splice_imported_stylesheet()
+	 * @covers AMP_Style_Sanitizer::process_css_list()
 	 */
 	public function test_css_import_font() {
 		$stylesheet_url = 'http://fonts.googleapis.com/css?family=Merriweather:300|PT+Serif:400i|Open+Sans:800|Zilla+Slab:300,400,500|Montserrat:800|Muli:400&subset=cyrillic-ext,latin-ext,cyrillic,greek,greek-ext,vietnamese';
@@ -2940,6 +3192,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Get prioritization test data.
 	 *
 	 * @todo Refactor to use custom theme or existing theme instead of requiring Twenty Ten.
+	 *
+	 * @covers AMP_Style_Sanitizer::remove_admin_bar_if_css_excluded()
 	 *
 	 * @return array
 	 */
@@ -3401,5 +3655,70 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 		$content = $dom->saveHTML( $dom->documentElement );
 		$this->assertEquals( $expected, $content );
+	}
+
+	/**
+	 * Test that stylesheet processing can be disabled (for level 1 sandboxing).
+	 *
+	 * @covers AMP_Style_Sanitizer::sanitize()
+	 */
+	public function test_disable_style_processing() {
+		$dom = Document::fromHtml(
+			'
+				<html>
+					<head>
+						<style>
+						/*comment*/
+						body { background: red; }
+						body.loaded { background: green; }
+						audio { outline: solid 1px green !important; }
+						</style>
+						<link rel="stylesheet" type="text/css" href="https://example.com/head.css">
+						<link rel="canonical" href="https://example.com/">
+					</head>
+					<body onload="doSomething()" %s>
+						<div id="blueviolet" style="color:blueviolet !important;">Blue Violet</div>
+						<link rel="stylesheet" href="https://example.com/body1.css">
+						<link rel="stylesheet" type="text/css" href="https://example.com/body2.css">
+						<style>
+						body:after{content:' . str_repeat( 'a', 75000 ) . '}
+						</style>
+					</body>
+				</html>
+			',
+			Options::DEFAULTS
+		);
+
+		$sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			[
+				'use_document_element'     => true,
+				'disable_style_processing' => true,
+			]
+		);
+		$sanitizer->sanitize();
+		$this->assertCount( 0, $sanitizer->get_stylesheets() );
+
+		$style_query = $dom->xpath->query( '//style' );
+		$this->assertEquals( 2, $style_query->length );
+		foreach ( $style_query as $style_element ) {
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $style_element ) );
+		}
+		$this->assertStringContainsString( '/*comment*/', $style_query->item( 0 )->textContent );
+		$this->assertStringContainsString( 'body.loaded', $style_query->item( 0 )->textContent );
+		$this->assertStringContainsString( 'audio { outline: solid 1px green !important; }', $style_query->item( 0 )->textContent );
+
+		$link_query = $dom->xpath->query( '//link[ @rel = "stylesheet" ]' );
+		$this->assertEquals( 3, $link_query->length );
+		foreach ( $link_query as $link_element ) {
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $link_element ) );
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $link_element->getAttributeNode( 'rel' ) ) );
+			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $link_element->getAttributeNode( 'href' ) ) );
+		}
+		$this->assertFalse( ValidationExemption::is_px_verified_for_node( $dom->xpath->query( '//link[ @rel = "canonical" ]' )->item( 0 ) ) );
+
+		$style_attribute = $dom->getElementById( 'blueviolet' )->getAttributeNode( 'style' );
+		$this->assertTrue( ValidationExemption::is_px_verified_for_node( $style_attribute ) );
+		$this->assertEquals( 'color:blueviolet !important;', $style_attribute->nodeValue );
 	}
 }

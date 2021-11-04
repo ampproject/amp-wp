@@ -6,6 +6,8 @@
  * @since 0.7
  */
 
+use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
 use AmpProject\Dom\Element;
@@ -21,11 +23,11 @@ use AmpProject\Dom\Element;
 class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Validation error code emitted when native POST forms are opted-into and one is encountered.
+	 * Validation error code emitted when there is a POST form with action-xhr but only native POST forms are used.
 	 *
 	 * @var string
 	 */
-	const FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR = 'FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR';
+	const POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED = 'POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED';
 
 	/**
 	 * Placeholder for default args, to be set in child classes.
@@ -33,14 +35,14 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'native_post_forms_allowed' => false,
+		'native_post_forms_allowed' => 'never',
 	];
 
 	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
-	 *      @type bool $native_post_forms_allowed When true, a user can decide via validation error status to convert to an XHR form.
+	 *      @type string $native_post_forms_allowed Whether to convert POST forms to use action-xhr instead. Can be 'never', 'always', or 'conditionally' (if more than comments form).
 	 * }
 	 */
 	protected $args;
@@ -61,82 +63,99 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.7
 	 */
 	public function sanitize() {
-
-		/**
-		 * Node list.
-		 *
-		 * @var DOMNodeList $nodes
-		 */
-		$nodes     = $this->dom->getElementsByTagName( self::$tag );
-		$num_nodes = $nodes->length;
-
-		if ( 0 === $num_nodes ) {
+		$form_elements = $this->dom->getElementsByTagName( self::$tag );
+		if ( 0 === $form_elements->length ) {
 			return;
 		}
 
-		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node = $nodes->item( $i );
-			if ( ! $node instanceof Element || DevMode::hasExemptionForNode( $node ) ) {
+		/** @var Element[] $post_form_elements */
+		$post_form_elements = [];
+
+		foreach ( $form_elements as $form_element ) {
+			if ( ! $form_element instanceof Element || DevMode::hasExemptionForNode( $form_element ) ) {
 				continue;
 			}
 
-			// In HTML, the default method is 'get'.
+			// Normalize the method.
 			$method = 'get';
-			if ( $node->getAttribute( 'method' ) ) {
-				$method = strtolower( $node->getAttribute( 'method' ) );
+			if ( $form_element->getAttribute( Attribute::METHOD ) ) {
+				$method = strtolower( $form_element->getAttribute( Attribute::METHOD ) );
 			} else {
-				$node->setAttribute( 'method', $method );
+				$form_element->setAttribute( Attribute::METHOD, $method );
 			}
 
-			$action_url = $this->get_action_url( $node->getAttribute( 'action' ) );
-
-			$xhr_action = $node->getAttribute( 'action-xhr' );
-
-			// Make HTTP URLs protocol-less, since HTTPS is required for forms.
-			if ( 'http://' === strtolower( substr( $action_url, 0, 7 ) ) ) {
-				$action_url = substr( $action_url, 5 );
-			}
-
-			/*
-			 * According to the AMP spec:
-			 * For GET submissions, provide at least one of action or action-xhr.
-			 * This attribute is required for method=GET. For method=POST, the
-			 * action attribute is invalid, use action-xhr instead.
-			 */
 			if ( 'get' === $method ) {
-				if ( $action_url !== $node->getAttribute( 'action' ) ) {
-					$node->setAttribute( 'action', $action_url );
-				}
+				$this->normalize_action_attribute( $form_element );
+				$this->normalize_target_attribute( $form_element );
 			} elseif ( 'post' === $method ) {
-				// If native POST forms are allowed, raise an error that gives the user the option to convert to an
-				// AMP-valid form with action-xhr. If the status of the validation error is 'removed', then the
-				// conversion will be performed. Otherwise, if the status is 'kept' then the POST form will be retained
-				// in the page by marking it with AMP dev mode, and the amp-form extension will be omitted from being
-				// added to the page.
-				if ( ! $xhr_action && $this->args['native_post_forms_allowed'] ) {
-					$validation_error = [
-						'code' => self::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR,
-					];
-					if ( ! $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) ) ) {
-						$node->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
-						$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
-						continue;
-					}
-				}
-
-				$node->removeAttribute( 'action' );
-				if ( ! $xhr_action ) {
-					// Record that action was converted to action-xhr.
-					$action_url = add_query_arg( AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR, 1, $action_url );
-					$node->setAttribute( 'action-xhr', $action_url );
-					// Append success/error handlers if not found.
-					$this->ensure_response_message_elements( $node );
-				} elseif ( 'http://' === substr( $xhr_action, 0, 7 ) ) {
-					$node->setAttribute( 'action-xhr', substr( $xhr_action, 5 ) );
-				}
+				$post_form_elements[] = $form_element;
 			}
+		}
 
-			$this->normalize_target_attribute( $node );
+		// Convert post forms to use action-xhr if post forms are never allowed or if native forms are conditionally
+		// allowed but the only form is the comments form which we are able to safely convert to use action-xhr.
+		if (
+			'never' === $this->args['native_post_forms_allowed']
+			||
+			(
+				'conditionally' === $this->args['native_post_forms_allowed']
+				&&
+				count( $post_form_elements ) === 1
+				&&
+				$this->is_comments_form_element( $post_form_elements[0] )
+			)
+		) {
+			foreach ( $post_form_elements as $post_form_element ) {
+				$this->normalize_target_attribute( $post_form_element );
+				$this->convert_post_form_to_action_xhr( $post_form_element );
+			}
+		} else {
+			foreach ( $post_form_elements as $post_form_element ) {
+				$this->handle_native_post_form( $post_form_element );
+			}
+		}
+	}
+
+	/**
+	 * Convert post form to use action-xhr.
+	 *
+	 * @param Element $post_form_element Post form.
+	 */
+	protected function convert_post_form_to_action_xhr( Element $post_form_element ) {
+		$action_url = $this->normalize_action_attribute( $post_form_element );
+		$action_xhr = $post_form_element->getAttribute( Attribute::ACTION_XHR );
+
+		$post_form_element->removeAttribute( Attribute::ACTION );
+		if ( ! $action_xhr ) {
+			// Record that action was converted to action-xhr.
+			$action_url = add_query_arg( AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR, 1, $action_url );
+			$post_form_element->setAttribute( Attribute::ACTION_XHR, $action_url );
+			// Append success/error handlers if not found.
+			$this->ensure_response_message_elements( $post_form_element );
+		} elseif ( 'http://' === substr( $action_xhr, 0, 7 ) ) {
+			$post_form_element->setAttribute( Attribute::ACTION_XHR, substr( $action_xhr, 5 ) );
+		}
+	}
+
+	/**
+	 * Handle native post form.
+	 *
+	 * If native post forms are used, then mark any POST forms as being unvalidated for AMP. Note that it is
+	 * an all or nothing proposition with forms, where there cannot be some POST forms with [action] and
+	 * others with [action-xhr]. The former is incompatible with the amp-form extension but the latter
+	 * fundamentally depends on it. So it's one or the other.
+	 *
+	 * @param Element $post_form_element Post form.
+	 */
+	protected function handle_native_post_form( Element $post_form_element ) {
+		if ( $post_form_element->hasAttribute( Attribute::ACTION_XHR ) ) {
+			// @todo Consider rewriting action-xhr to action? Or include a shim which implements the amp-form functionality?
+			$this->remove_invalid_child(
+				$post_form_element,
+				[ 'code' => self::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED ]
+			);
+		} else {
+			ValidationExemption::mark_node_as_px_verified( $post_form_element );
 		}
 	}
 
@@ -150,14 +169,40 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param Element $form_element Form element.
 	 */
 	protected function normalize_target_attribute( Element $form_element ) {
-		$target = $form_element->getAttribute( 'target' );
+		$target = $form_element->getAttribute( Attribute::TARGET );
 		if ( '_top' !== $target ) {
 			if ( ! $target || in_array( $target, [ '_self', '_parent' ], true ) ) {
-				$form_element->setAttribute( 'target', '_top' );
+				$form_element->setAttribute( Attribute::TARGET, '_top' );
 			} elseif ( '_blank' !== $target ) {
-				$form_element->setAttribute( 'target', '_blank' );
+				$form_element->setAttribute( Attribute::TARGET, '_blank' );
 			}
 		}
+	}
+
+	/**
+	 * Normalize form action attribute.
+	 *
+	 * @param Element $form_element Form element.
+	 * @return string Normalized action URL.
+	 */
+	protected function normalize_action_attribute( Element $form_element ) {
+		$action_url = $this->get_action_url( $form_element->getAttribute( Attribute::ACTION ) );
+		$form_element->setAttribute( Attribute::ACTION, $action_url );
+		return $action_url;
+	}
+
+	/**
+	 * Determine whether the form is for the comments.
+	 *
+	 * @param Element $form_element Form element.
+	 * @return bool Is comments form.
+	 */
+	protected function is_comments_form_element( Element $form_element ) {
+		return (
+			'commentform' === $form_element->getAttribute( Attribute::ID )
+			&&
+			'wp-comments-post.php' === basename( wp_parse_url( $form_element->getAttribute( Attribute::ACTION ), PHP_URL_PATH ) )
+		);
 	}
 
 	/**

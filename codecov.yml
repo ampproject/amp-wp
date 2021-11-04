@@ -39,3 +39,4 @@ ignore:
   - "/back-compat"
   - "/docs/**/*"
   - ".phpstorm.meta.php"
+  - "/includes/ecosystem-data/*"

@@ -12,15 +12,14 @@ import { useContext } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import './style.css';
+import { READER, STANDARD, TRANSITIONAL } from '../../common/constants';
+import { AMPDrawer, HANDLE_TYPE_RIGHT } from '../amp-drawer';
 import { AMPInfo } from '../amp-info';
 import { Standard } from '../svg/standard';
 import { Transitional } from '../svg/transitional';
 import { Reader } from '../svg/reader';
 import { Options } from '../options-context-provider';
-
-import './style.css';
-import { READER, STANDARD, TRANSITIONAL } from '../../common/constants';
-import { AMPDrawer, HANDLE_TYPE_RIGHT } from '../amp-drawer';
 
 /**
  * Mode-specific illustration.
@@ -82,7 +81,7 @@ export function getId( mode ) {
  *
  * @param {Object}        props                    Component props.
  * @param {string|Object} props.children           Section content.
- * @param {string}        props.details            Mode details.
+ * @param {string|Array}  props.details            The template mode details.
  * @param {string}        props.detailsUrl         Mode details URL.
  * @param {string}        props.mode               The template mode.
  * @param {boolean}       props.previouslySelected Optional. Whether the option was selected previously.
@@ -137,14 +136,32 @@ export function TemplateModeOption( { children, details, detailsUrl, initialOpen
 			selected={ mode === themeSupport }
 		>
 			<div className="template-mode-selection__details">
-				<p>
-					<span dangerouslySetInnerHTML={ { __html: details } } />
-					{ ' ' }
-					<a href={ detailsUrl } target="_blank" rel="noreferrer noopener">
-						{ __( 'Learn more.', 'amp' ) }
-					</a>
-				</p>
 				{ children }
+				{ Array.isArray( details ) && (
+					<ul className="template-mode-selection__details-list">
+						{ details.map( ( detail, index ) => (
+							<li
+								key={ index }
+								className="template-mode-selection__details-list-item"
+								/* dangerouslySetInnerHTML reason: `detail` may contain `strong` elements. */
+								dangerouslySetInnerHTML={ { __html: detail } }
+							/>
+						) ) }
+					</ul>
+				) }
+				{ details && ! Array.isArray( details ) && (
+					<p>
+						<span dangerouslySetInnerHTML={ { __html: details } } />
+						{ detailsUrl && (
+							<>
+								{ ' ' }
+								<a href={ detailsUrl } target="_blank" rel="noreferrer noopener">
+									{ __( 'Learn more.', 'amp' ) }
+								</a>
+							</>
+						) }
+					</p>
+				) }
 			</div>
 		</AMPDrawer>
 	);
@@ -152,8 +169,11 @@ export function TemplateModeOption( { children, details, detailsUrl, initialOpen
 
 TemplateModeOption.propTypes = {
 	children: PropTypes.any,
-	details: PropTypes.string.isRequired,
-	detailsUrl: PropTypes.string.isRequired,
+	details: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.arrayOf( PropTypes.string ),
+	] ),
+	detailsUrl: PropTypes.string,
 	initialOpen: PropTypes.bool,
 	labelExtra: PropTypes.node,
 	mode: PropTypes.oneOf( [ READER, STANDARD, TRANSITIONAL ] ).isRequired,

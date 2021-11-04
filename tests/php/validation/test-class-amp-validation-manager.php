@@ -140,10 +140,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::$validation_error_status_overrides = [];
 		$_REQUEST = [];
 		unset( $GLOBALS['current_screen'] );
-		AMP_Validation_Manager::$is_validate_request = false;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 		AMP_Validation_Manager::$hook_source_stack   = [];
 		AMP_Validation_Manager::$validation_results  = [];
 		AMP_Validation_Manager::reset_validation_results();
+		unset( $_REQUEST['post_type'] ); // phpcs:ignore
 		parent::tearDown();
 	}
 
@@ -167,7 +168,205 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertEquals( 101, has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 
 		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'maybe_fail_validate_request' ] ) );
+		$this->assertEquals( 20, has_action( 'wp', [ self::TESTED_CLASS, 'maybe_send_cached_validate_response' ] ) );
 		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'override_validation_error_statuses' ] ) );
+
+		$this->assertEquals(
+			10,
+			has_filter(
+				'option_' . AMP_Options_Manager::OPTION_NAME,
+				[ self::TESTED_CLASS, 'filter_options_for_standard_mode_when_amp_first_override' ]
+			)
+		);
+	}
+
+	/** @return array */
+	public function get_data_to_test_filter_options_for_standard_mode_when_amp_first_override() {
+		$set_query_var = static function () {
+			$_GET[ QueryVar::AMP_FIRST ] = '';
+		};
+		$set_admin_user = static function () {
+			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		};
+		$set_validate_request = function () {
+			$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
+		};
+
+		$set_admin_dashboard = static function () {
+			set_current_screen( 'index.php' );
+		};
+
+		$set_global_validated_url_post = static function ( $url ) {
+			$GLOBALS['post'] = self::factory()->post->create_and_get(
+				[
+					'post_title' => $url,
+					'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				]
+			);
+			setup_postdata( $GLOBALS['post'] );
+		};
+
+		$set_validated_url_post_list_screen = static function () {
+			$GLOBALS['hook_suffix'] = 'edit.php';
+			$_REQUEST['post_type'] = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
+			set_current_screen();
+		};
+
+		$set_validated_url_post_edit_screen = static function () {
+			$GLOBALS['hook_suffix'] = 'post.php';
+			$_REQUEST['post_type'] = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
+			set_current_screen();
+		};
+
+		return [
+			'frontend_no_query_var'                    => [
+				'set_up'          => static function () {},
+				'expect_override' => false,
+			],
+			'frontend_query_var_not_allowed'           => [
+				'set_up'          => $set_query_var,
+				'expect_override' => false,
+			],
+			'frontend_query_var_with_admin_user'       => [
+				'set_up'          => static function () use ( $set_query_var, $set_admin_user ) {
+					$set_query_var();
+					$set_admin_user();
+				},
+				'expect_override' => true,
+			],
+			'frontend_query_var_with_validate_request' => [
+				'set_up'          => static function () use ( $set_query_var, $set_validate_request ) {
+					$set_query_var();
+					$set_validate_request();
+				},
+				'expect_override' => true,
+			],
+			'frontend_query_var_with_admin_user_and_validate_request' => [
+				'set_up'          => static function () use ( $set_query_var, $set_admin_user, $set_validate_request ) {
+					$set_query_var();
+					$set_admin_user();
+					$set_validate_request();
+				},
+				'expect_override' => true,
+			],
+			'frontend_no_query_var_with_admin_user_and_validate_request' => [
+				'set_up'          => static function () use ( $set_query_var, $set_admin_user, $set_validate_request ) {
+					$set_admin_user();
+					$set_validate_request();
+				},
+				'expect_override' => false,
+			],
+
+			'admin_validation_request_for_new_non_override_url' => [
+				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
+					$set_admin_user();
+					$set_admin_dashboard();
+					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
+					$_GET['url']    = home_url();
+				},
+				'expect_override' => false,
+			],
+
+			'admin_validation_request_for_new_yes_override_url' => [
+				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
+					$set_admin_user();
+					$set_admin_dashboard();
+					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
+					$_GET['url']    = add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) );
+				},
+				'expect_override' => true,
+			],
+
+			'admin_validation_request_for_existing_non_override_url' => [
+				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
+					$set_admin_user();
+					$set_admin_dashboard();
+					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
+					$_GET['post']    = self::factory()->post->create(
+						[
+							'post_title' => home_url(),
+							'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+						]
+					);
+				},
+				'expect_override' => false,
+			],
+
+			'admin_validation_request_for_existing_yes_override_url' => [
+				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
+					$set_admin_user();
+					$set_admin_dashboard();
+					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
+					$_GET['post']    = self::factory()->post->create(
+						[
+							'post_title' => add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) ),
+							'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+						]
+					);
+				},
+				'expect_override' => true,
+			],
+
+			'admin_on_dashboard'                       => [
+				'set_up'          => static function () use ( $set_admin_user, $set_admin_dashboard ) {
+					$set_admin_user();
+					$set_admin_dashboard();
+				},
+				'expect_override' => false,
+			],
+			'admin_on_post_list_screen_not_amp_override_url' => [
+				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_list_screen ) {
+					$set_admin_user();
+					$set_global_validated_url_post( home_url( '/' ) );
+					$set_validated_url_post_list_screen();
+				},
+				'expect_override' => false,
+			],
+			'admin_on_post_list_screen_yes_amp_override_url' => [
+				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_list_screen ) {
+					$set_admin_user();
+					$set_global_validated_url_post( add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) ) );
+					$set_validated_url_post_list_screen();
+				},
+				'expect_override' => true,
+			],
+
+			'admin_on_edit_post_screen_not_amp_override_url' => [
+				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_edit_screen ) {
+					$set_admin_user();
+					$set_global_validated_url_post( home_url( '/' ) );
+					$set_validated_url_post_edit_screen();
+				},
+				'expect_override' => false,
+			],
+
+			'admin_on_edit_post_screen_not_amp_override_url' => [
+				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_edit_screen ) {
+					$set_admin_user();
+					$set_global_validated_url_post( add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) ) );
+					$set_validated_url_post_edit_screen();
+				},
+				'expect_override' => true,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_filter_options_for_standard_mode_when_amp_first_override
+	 * @covers AMP_Validation_Manager::is_amp_first_override_request()
+	 * @covers AMP_Validation_Manager::filter_options_for_standard_mode_when_amp_first_override()
+	 * @covers AMP_Validation_Manager::is_amp_first_override_url()
+	 */
+	public function test_filter_options_for_standard_mode_when_amp_first_override( $set_up, $expect_override ) {
+		$set_up();
+
+		$options_with_reader   = [ Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG ];
+		$options_with_standard = [ Option::THEME_SUPPORT => AMP_Theme_Support::STANDARD_MODE_SLUG ];
+
+		$this->assertEquals(
+			$expect_override ? $options_with_standard : $options_with_reader,
+			AMP_Validation_Manager::filter_options_for_standard_mode_when_amp_first_override( $options_with_reader )
+		);
 	}
 
 	/**
@@ -194,11 +393,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		};
 
 		// Verify there is no output if it is not a validation request.
-		AMP_Validation_Manager::$is_validate_request = false;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 		$this->assertEmpty( $get_output() );
 
 		// Verify there is no output if it is an AMP request.
-		AMP_Validation_Manager::$is_validate_request = true;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertEmpty( $get_output() );
@@ -210,7 +409,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( 'AMP_NOT_REQUESTED', $output );
 
 		// Verify correct response if AMP not available.
-		AMP_Validation_Manager::$is_validate_request = true;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		add_filter(
@@ -228,6 +427,15 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( 'AMP_NOT_AVAILABLE', $output );
 	}
 
+	/** @covers AMP_Validation_Manager::is_validate_request() */
+	public function test_is_validate_request() {
+		$this->assertFalse( AMP_Validation_Manager::is_validate_request() );
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
+		$this->assertTrue( AMP_Validation_Manager::is_validate_request() );
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
+		$this->assertFalse( AMP_Validation_Manager::is_validate_request() );
+	}
+
 	/**
 	 * Test init_validate_request without error.
 	 *
@@ -236,12 +444,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	public function test_init_validate_request_without_error() {
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
 		AMP_Validation_Manager::init_validate_request();
-		$this->assertFalse( AMP_Validation_Manager::$is_validate_request );
+		$this->assertFalse( AMP_Validation_Manager::is_validate_request() );
 
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = wp_slash( AMP_Validation_Manager::get_amp_validate_nonce() ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->assertTrue( AMP_Validation_Manager::should_validate_response() );
 		AMP_Validation_Manager::init_validate_request();
-		$this->assertTrue( AMP_Validation_Manager::$is_validate_request );
+		$this->assertTrue( AMP_Validation_Manager::is_validate_request() );
 	}
 
 	/**
@@ -617,7 +825,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers AMP_Validation_Manager::add_validation_error()
 	 */
 	public function test_add_validation_error_track_removed() {
-		AMP_Validation_Manager::$is_validate_request = true;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 		$this->assertEmpty( AMP_Validation_Manager::$validation_results );
 
 		$that = $this;
@@ -1459,7 +1667,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * @covers ::wrap_block_callbacks()
+	 * @covers AMP_Validation_Manager::wrap_block_callbacks()
 	 * @covers AMP_Validation_Callback_Wrapper::get_callback_function()
 	 */
 	public function test_wrap_block_callbacks() {
@@ -1880,6 +2088,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * Test should_validate_response.
 	 *
 	 * @covers AMP_Validation_Manager::should_validate_response()
+	 * @covers AMP_Validation_Manager::get_validate_request_args()
 	 */
 	public function test_should_validate_response() {
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
@@ -1959,6 +2168,274 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertEquals( '{"foo":"bar <b>foo<\/b>"}', $dom->getElementById( 'first' )->textContent );
 		$this->assertEquals( 'body { color: blue; }body { color: red; }body { color: white; }', $dom->getElementById( 'second' )->textContent );
 		$this->assertEquals( '/* start custom scripts! */document.write("hello!")/* end custom scripts! */', $dom->getElementById( 'third' )->textContent );
+	}
+
+	/** @return array */
+	public function get_data_to_test_send_validate_response() {
+		return [
+			'ok_no_error_store'    => [
+				'status_code' => 200,
+				'last_error'  => null,
+				'args'        => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE            => true,
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS => true,
+				],
+				'save_error'  => false,
+			],
+			'ok_no_error_no_store' => [
+				'status_code' => 200,
+				'last_error'  => null,
+				'args'        => [],
+				'save_error'  => false,
+			],
+			'fatal_error_store'    => [
+				'status_code' => 500,
+				'last_error'  => [
+					'type'    => E_ERROR,
+					'message' => 'Something bad happened.',
+					'file'    => __FILE__,
+					'line'    => __LINE__,
+				],
+				'args'        => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE => true,
+				],
+				'save_error'  => false,
+			],
+			'warning_store'        => [
+				'status_code' => 200,
+				'last_error'  => [
+					'type'    => E_WARNING,
+					'message' => 'Something kinda bad happened.',
+					'file'    => __FILE__,
+					'line'    => __LINE__,
+				],
+				'args'        => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE => true,
+				],
+				'save_error'  => false,
+			],
+			'store_failure'        => [
+				'status_code' => 200,
+				'last_error'  => null,
+				'args'        => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE => true,
+				],
+				'save_error'  => true,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_send_validate_response
+	 * @covers \AMP_Validation_Manager::send_validate_response()
+	 * @covers \AMP_Validation_Manager::get_validate_request_args()
+	 */
+	public function test_send_validate_response( $status_code, $last_error, $args, $save_error ) {
+		$source_html          = '<html amp><head><style>body{color:red}</style></head><body><amp-layout layout="bad"></amp-layout></body></html>';
+		$sanitizer_classes    = amp_get_content_sanitizers();
+		$sanitizer_classes    = AMP_Validation_Manager::filter_sanitizer_args( $sanitizer_classes );
+		$sanitization_results = AMP_Content_Sanitizer::sanitize_document(
+			AMP_DOM_Utils::get_dom_from_content( $source_html ),
+			$sanitizer_classes,
+			[]
+		);
+
+		if ( $save_error ) {
+			add_filter( 'wp_insert_post_empty_content', '__return_true' );
+		}
+
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = $args;
+
+		$response = AMP_Validation_Manager::send_validate_response( $sanitization_results, $status_code, $last_error );
+		$this->assertJson( $response );
+		$data = json_decode( $response, true );
+
+		if ( $save_error ) {
+			$this->assertSame(
+				[
+					'code'    => 'empty_content',
+					'message' => 'Content, title, and excerpt are empty.',
+				],
+				$data
+			);
+			return;
+		}
+
+		$this->assertArrayHasKey( 'http_status_code', $data );
+		$this->assertArrayHasKey( 'php_fatal_error', $data );
+		$this->assertArrayHasKey( 'queried_object', $data );
+		$this->assertArrayHasKey( 'url', $data );
+		if ( ! empty( $args[ AMP_Validation_Manager::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS ] ) ) {
+			$this->assertArrayNotHasKey( 'stylesheets', $data );
+		} else {
+			$this->assertArrayHasKey( 'stylesheets', $data );
+			$this->assertCount( 1, $data['stylesheets'] );
+		}
+		$this->assertArrayHasKey( 'results', $data );
+
+		$this->assertEquals( $status_code, $data['http_status_code'] );
+		if ( $last_error && in_array( $last_error['type'], [ E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_PARSE ], true ) ) {
+			$this->assertIsArray( $data['php_fatal_error'] );
+			$this->assertEquals( $last_error, $data['php_fatal_error'] );
+		} else {
+			$this->assertFalse( $data['php_fatal_error'] );
+		}
+
+		$this->assertCount( 1, $data['results'] );
+		$this->assertEquals( 'SPECIFIED_LAYOUT_INVALID', $data['results'][0]['error']['code'] );
+
+		if ( ! empty( $args[ AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHE ] ) ) {
+			$this->assertArrayHasKey( 'validated_url_post', $data );
+			$this->assertArrayHasKey( 'id', $data['validated_url_post'] );
+			$this->assertArrayHasKey( 'edit_link', $data['validated_url_post'] );
+			$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_type( $data['validated_url_post']['id'] ) );
+		} else {
+			$this->assertArrayNotHasKey( 'validated_url_post', $data );
+		}
+	}
+
+	/** @return array */
+	public function get_data_to_test_maybe_send_cached_validate_response() {
+		return [
+			'no_validate_request'                       => [
+				'cached'   => null,
+				'stale'    => null,
+				'args'     => [],
+				'expected' => false,
+			],
+			'not_asking_for_cached'                     => [
+				'cached'   => false,
+				'stale'    => false,
+				'args'     => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+				],
+				'expected' => false,
+			],
+			'asking_for_fresh_cache_without_one_stored' => [
+				'cached'   => false,
+				'stale'    => false,
+				'args'     => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHED_IF_FRESH => true,
+				],
+				'expected' => false,
+			],
+			'asking_for_fresh_cache_but_stale_stored'   => [
+				'cached'   => true,
+				'stale'    => true,
+				'args'     => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHED_IF_FRESH => true,
+				],
+				'expected' => false,
+			],
+			'asking_for_fresh_cache_and_fresh_stored'   => [
+				'cached'   => true,
+				'stale'    => false,
+				'args'     => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHED_IF_FRESH => true,
+				],
+				'expected' => true,
+			],
+			'asking_for_fresh_cache_and_fresh_stored_sans_styles' => [
+				'cached'   => true,
+				'stale'    => false,
+				'args'     => [
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_NONCE => AMP_Validation_Manager::get_amp_validate_nonce(),
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_CACHED_IF_FRESH => true,
+					AMP_Validation_Manager::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS => true,
+				],
+				'expected' => true,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_maybe_send_cached_validate_response
+	 * @covers \AMP_Validation_Manager::maybe_send_cached_validate_response()
+	 * @covers \AMP_Validation_Manager::get_validate_request_args()
+	 */
+	public function test_maybe_send_cached_validate_response( $cached, $stale, $args, $expected ) {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$post_id = self::factory()->post->create();
+		$url     = get_permalink( $post_id );
+		$this->go_to( $url );
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = $args;
+		AMP_Validation_Manager::init_validate_request();
+
+		$validated_url_post_id = null;
+		if ( $cached ) {
+			$source_html          = '<html amp><head><style>body{color:red}</style></head><body><amp-layout layout="bad"></amp-layout></body></html>';
+			$sanitizer_classes    = amp_get_content_sanitizers();
+			$sanitizer_classes    = AMP_Validation_Manager::filter_sanitizer_args( $sanitizer_classes );
+			$sanitization_results = AMP_Content_Sanitizer::sanitize_document(
+				AMP_DOM_Utils::get_dom_from_content( $source_html ),
+				$sanitizer_classes,
+				[]
+			);
+			$data = AMP_Validation_Manager::get_validate_response_data( $sanitization_results );
+
+			$validation_errors = wp_list_pluck( $data['results'], 'error' );
+
+			$validated_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
+				$validation_errors,
+				$url,
+				$data
+			);
+			$this->assertIsInt( $validated_url_post_id );
+
+			if ( $stale ) {
+				$validated_environment = get_post_meta( $validated_url_post_id, AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY, true );
+
+				$validated_environment['plugins']['foo'] = '1.0';
+				update_post_meta( $validated_url_post_id, AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY, $validated_environment );
+			}
+		}
+
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter(
+			'wp_die_ajax_handler',
+			function () {
+				return function () {};
+			}
+		);
+
+		$response = get_echo( [ AMP_Validation_Manager::class, 'maybe_send_cached_validate_response' ] );
+
+		if ( ! $expected ) {
+			$this->assertEmpty( $response );
+			return;
+		}
+
+		$this->assertJson( $response );
+		$data = json_decode( $response, true );
+		$this->assertIsArray( $data );
+
+		$this->assertArrayHasKey( 'http_status_code', $data );
+		$this->assertArrayHasKey( 'php_fatal_error', $data );
+		$this->assertArrayHasKey( 'queried_object', $data );
+		$this->assertArrayHasKey( 'url', $data );
+		$this->assertFalse( $data['revalidated'] );
+		$this->assertEquals( $url, $data['url'] );
+		if ( ! empty( $args[ AMP_Validation_Manager::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS ] ) ) {
+			$this->assertArrayNotHasKey( 'stylesheets', $data );
+		} else {
+			$this->assertArrayHasKey( 'stylesheets', $data );
+			$this->assertCount( 1, $data['stylesheets'] );
+		}
+
+		$this->assertArrayHasKey( 'results', $data );
+		$this->assertFalse( $data['php_fatal_error'] );
+
+		$this->assertCount( 1, $data['results'] );
+		$this->assertEquals( 'SPECIFIED_LAYOUT_INVALID', $data['results'][0]['error']['code'] );
+
+		$this->assertArrayHasKey( 'validated_url_post', $data );
+		$this->assertArrayHasKey( 'id', $data['validated_url_post'] );
+		$this->assertEquals( $validated_url_post_id, $data['validated_url_post']['id'] );
+		$this->assertArrayHasKey( 'edit_link', $data['validated_url_post'] );
+		$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_type( $data['validated_url_post']['id'] ) );
 	}
 
 	/**
@@ -2305,7 +2782,10 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 		$stylesheets = [ [ 'CSS!' ] ];
 		$filter        = function( $pre, $r, $url ) use ( $validation_errors, $php_error, $queried_object, $stylesheets, $after_matter ) {
-			$this->assertStringContainsString( AMP_Validation_Manager::VALIDATE_QUERY_VAR . '=', $url );
+			$url_query_vars = [];
+			parse_str( wp_parse_url( $url, PHP_URL_QUERY ), $url_query_vars );
+			$this->assertArrayHasKey( AMP_Validation_Manager::VALIDATE_QUERY_VAR, $url_query_vars );
+			$this->assertIsArray( $url_query_vars[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] );
 
 			$validation = [
 				'results'         => [],
