@@ -1,7 +1,4 @@
-/**
- * External dependencies
- */
-import jQuery from 'jquery';
+/* global jQuery */
 
 /**
  * WordPress dependencies

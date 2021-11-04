@@ -79,7 +79,7 @@
         "plugin:jest/all"
       ],
       "rules": {
-        "jest/lowercase-name": [
+        "jest/prefer-lowercase-title": [
           "error",
           {
             "ignore": [ "describe" ]
@@ -97,7 +97,7 @@
         "plugin:jest/all"
       ],
       "rules": {
-        "jest/lowercase-name": [
+        "jest/prefer-lowercase-title": [
           "error",
           {
             "ignore": [ "describe" ]

@@ -18,17 +18,6 @@ import { BLOCK_VALIDATION_STORE_KEY, createStore } from '../../store';
 jest.mock( '@wordpress/data/build/components/use-select', () => jest.fn() );
 jest.mock( '@wordpress/compose/build/hooks/use-debounce', () => ( fn ) => fn );
 
-createStore( {
-	isPostDirty: false,
-} );
-
-register( createReduxStore( 'test/use-post-dirty-state-updates', {
-	reducer: ( state = {} ) => ( { ...state } ),
-	actions: {
-		change: () => ( { type: 'DUMMY' } ),
-	},
-} ) );
-
 describe( 'usePostDirtyStateChanges', () => {
 	let container = null;
 	const getEditedPostContent = jest.fn();
@@ -51,6 +40,19 @@ describe( 'usePostDirtyStateChanges', () => {
 			...overrides,
 		} ) );
 	}
+
+	beforeAll( () => {
+		createStore( {
+			isPostDirty: false,
+		} );
+
+		register( createReduxStore( 'test/use-post-dirty-state-updates', {
+			reducer: ( state = {} ) => ( { ...state } ),
+			actions: {
+				change: () => ( { type: 'DUMMY' } ),
+			},
+		} ) );
+	} );
 
 	beforeEach( () => {
 		container = document.createElement( 'div' );
