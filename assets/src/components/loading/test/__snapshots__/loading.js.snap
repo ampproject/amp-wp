@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`the Loading component matches the snapshot 1`] = `
+<div
+  className="amp-spinner-container"
+>
+  <span
+    className="components-spinner css-pz2hpy-StyledSpinner e1s472tg0"
+  />
+</div>
+`;

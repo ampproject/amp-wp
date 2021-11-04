@@ -245,6 +245,7 @@ class AMP_Validation_Manager {
 
 		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'enqueue_block_validation' ] );
 		add_action( 'pre_current_active_plugins', [ __CLASS__, 'print_plugin_notice' ] );
+		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_plugin_notice_assets' ] );
 		add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
 		add_action( 'wp', [ __CLASS__, 'maybe_fail_validate_request' ] );
 		add_action( 'wp', [ __CLASS__, 'maybe_send_cached_validate_response' ], 20 );
@@ -2564,17 +2565,65 @@ class AMP_Validation_Manager {
 		}
 	}
 
+	private static function should_show_activate_plugin_notice() {
+		return ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	}
+
 	/**
 	 * On activating a plugin, render an admin notice that will do an async client-side Site Scan.
 	 *
 	 * @return void
 	 */
 	public static function print_plugin_notice() {
-		if ( empty( $_GET['activate'] ) && empty( $_GET['activate-multi'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( self::should_show_activate_plugin_notice() ) {
+			echo '<div id="site-scan-notice"></div>';
+		}
+	}
+
+	public static function enqueue_plugin_notice_assets( $hook ) {
+		if ( 'plugins.php' !== $hook || ! self::should_show_activate_plugin_notice() ) {
 			return;
 		}
 
-		echo '<div id="site-scan-notice"></div>';
+		$slug = 'amp-site-scan-notice';
+
+		$asset_file   = AMP__DIR__ . '/assets/js/' . $slug . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
+
+		wp_enqueue_script(
+			$slug,
+			amp_get_asset_url( "js/{$slug}.js" ),
+			$dependencies,
+			$version,
+			true
+		);
+
+		wp_enqueue_style(
+			$slug,
+			amp_get_asset_url( "css/{$slug}.css" ),
+			false,
+			AMP__VERSION
+		);
+
+		$data = [
+			'APP_ROOT_ID'              => 'site-scan-notice',
+			'OPTIONS_REST_PATH'        => '/amp/v1/options',
+			'SCANNABLE_URLS_REST_PATH' => '/amp/v1/scannable-urls',
+			'VALIDATE_NONCE'           => self::get_amp_validate_nonce(),
+		];
+
+		wp_add_inline_script(
+			$slug,
+			sprintf(
+				'var ampSiteScanNotice = %s;',
+				wp_json_encode( $data )
+			),
+			'before'
+		);
+
+		// @todo: Add REST preloader.
 	}
 
 	/**
