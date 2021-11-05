@@ -83,7 +83,13 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 		 * sufficient check when that URL is being mocked.
 		 */
 		if ( false !== strpos( $url, '%3Fv%3DkfVsfOSbJY0%3Fhl%3Den' ) ) {
-			return $preempt;
+			return [
+				'body'     => 'Bad Request',
+				'response' => [
+					'code'    => 400,
+					'message' => 'Bad Request',
+				],
+			];
 		}
 
 		unset( $r );

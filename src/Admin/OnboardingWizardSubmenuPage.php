@@ -16,6 +16,8 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
+use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Validation\ScannableURLsRestController;
 
 /**
  * AMP setup wizard submenu page class.
@@ -216,7 +218,10 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		$theme           = wp_get_theme();
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
-		$amp_settings_link       = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
+		$amp_settings_link       = add_query_arg(
+			[ QueryVar::AMP_SCAN_IF_STALE => 1 ],
+			menu_page_url( AMP_Options_Manager::OPTION_NAME, false )
+		);
 		$amp_validated_urls_link = admin_url(
 			add_query_arg(
 				[ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ],
@@ -229,6 +234,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
 			'LEGACY_THEME_SLUG'                  => ReaderThemes::DEFAULT_READER_THEME,
 			'APP_ROOT_ID'                        => self::APP_ROOT_ID,
+			'AMP_SCAN_IF_STALE'                  => QueryVar::AMP_SCAN_IF_STALE,
 			'CUSTOMIZER_LINK'                    => add_query_arg(
 				[
 					'return' => rawurlencode( $amp_settings_link ),
@@ -289,8 +295,10 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'/amp/v1/options',
 			'/amp/v1/reader-themes',
 			add_query_arg(
-				'_fields',
-				[ 'url', 'amp_url', 'type', 'label' ],
+				[
+					'_fields' => [ 'url', 'amp_url', 'type', 'label' ],
+					ScannableURLsRestController::FORCE_STANDARD_MODE => 1,
+				],
 				'/amp/v1/scannable-urls'
 			),
 			'/wp/v2/plugins',

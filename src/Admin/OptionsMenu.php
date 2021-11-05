@@ -16,6 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
+use AmpProject\AmpWP\QueryVar;
 
 /**
  * OptionsMenu class.
@@ -236,6 +237,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 		$js_data = [
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
+			'AMP_SCAN_IF_STALE'                  => QueryVar::AMP_SCAN_IF_STALE,
 			'CURRENT_THEME'                      => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),

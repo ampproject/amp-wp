@@ -13,6 +13,7 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AMP_Options_Manager;
 
@@ -28,6 +29,7 @@ use AMP_Options_Manager;
 class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 
 	use PrivateAccess;
+	use ThemesApiRequestMocking;
 
 	/**
 	 * Test instance.
@@ -52,6 +54,8 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 		$this->onboarding_wizard_submenu_page = $this->injector->make( OnboardingWizardSubmenuPage::class );
 
 		$this->options_menu = $this->injector->make( OptionsMenu::class );
+
+		$this->add_reader_themes_request_filter();
 	}
 
 	/** @covers ::__construct() */
@@ -136,7 +140,7 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 				[
 					'/amp/v1/options',
 					'/amp/v1/reader-themes',
-					'/amp/v1/scannable-urls?_fields%5B0%5D=url&_fields%5B1%5D=amp_url&_fields%5B2%5D=type&_fields%5B3%5D=label',
+					'/amp/v1/scannable-urls?_fields%5B0%5D=url&_fields%5B1%5D=amp_url&_fields%5B2%5D=type&_fields%5B3%5D=label&force_standard_mode=1',
 					'/wp/v2/plugins',
 					'/wp/v2/settings',
 					'/wp/v2/themes',

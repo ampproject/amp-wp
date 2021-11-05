@@ -18,7 +18,9 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use AMP_Options_Manager;
 
 /**
@@ -29,6 +31,8 @@ use AMP_Options_Manager;
  */
 class OptionsMenuTest extends DependencyInjectedTestCase {
 
+	use HomeUrlLoopbackRequestMocking;
+	use ThemesApiRequestMocking;
 	use PrivateAccess;
 
 	/**
@@ -49,6 +53,9 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		$site_health = $this->injector->make( SiteHealth::class );
 
 		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError(), $site_health );
+
+		$this->add_reader_themes_request_filter();
+		$this->add_home_url_loopback_request_mocking();
 	}
 
 	/**

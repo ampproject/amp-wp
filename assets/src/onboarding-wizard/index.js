@@ -4,11 +4,13 @@
 import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
  */
 import {
+	AMP_SCAN_IF_STALE,
 	APP_ROOT_ID,
 	CLOSE_LINK,
 	CURRENT_THEME,
@@ -86,7 +88,6 @@ export function Providers( { children } ) {
 									>
 										<TemplateModeOverrideContextProvider>
 											<SiteScanContextProvider
-												ampFirst={ true }
 												scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 												validateNonce={ VALIDATE_NONCE }
 											>
@@ -126,7 +127,11 @@ domReady( () => {
 
 	render(
 		<Providers>
-			<SetupWizard closeLink={ CLOSE_LINK } finishLink={ SETTINGS_LINK } appRoot={ root } />
+			<SetupWizard
+				closeLink={ addQueryArgs( CLOSE_LINK, { [ AMP_SCAN_IF_STALE ]: 1 } ) }
+				finishLink={ addQueryArgs( SETTINGS_LINK, { [ AMP_SCAN_IF_STALE ]: 1 } ) }
+				appRoot={ root }
+			/>
 		</Providers>,
 		root,
 	);

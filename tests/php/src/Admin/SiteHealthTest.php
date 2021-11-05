@@ -13,6 +13,7 @@ use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
 use WP_REST_Server;
@@ -25,6 +26,7 @@ use WP_Error;
  */
 class SiteHealthTest extends TestCase {
 
+	use HomeUrlLoopbackRequestMocking;
 	use PrivateAccess;
 
 	/**
@@ -68,6 +70,8 @@ class SiteHealthTest extends TestCase {
 
 		$this->original_wp_rest_server = isset( $GLOBALS['wp_rest_server'] ) ? $GLOBALS['wp_rest_server'] : null;
 		$GLOBALS['wp_rest_server']     = null;
+
+		$this->add_home_url_loopback_request_mocking();
 	}
 
 	/**
@@ -816,7 +820,7 @@ class SiteHealthTest extends TestCase {
 					],
 				];
 			},
-			10,
+			20,
 			2
 		);
 
@@ -852,7 +856,7 @@ class SiteHealthTest extends TestCase {
 			];
 		};
 
-		add_filter( 'pre_http_request', $callback );
+		add_filter( 'pre_http_request', $callback, 20 );
 
 		// Test 1: Assert for fresh result. (Even cached result is exist.)
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
@@ -861,7 +865,7 @@ class SiteHealthTest extends TestCase {
 
 		$this->assertTrue( $this->instance->has_page_caching() );
 
-		remove_filter( 'pre_http_request', $callback );
+		remove_filter( 'pre_http_request', $callback, 20 );
 
 		// Test 2: Test for cached result.
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'yes', DAY_IN_SECONDS );
@@ -894,7 +898,7 @@ class SiteHealthTest extends TestCase {
 			];
 		};
 
-		add_filter( 'pre_http_request', $return_error );
+		add_filter( 'pre_http_request', $return_error, 20 );
 
 		// Test 1: Assert for fresh result (which is then cached).
 		$this->assertEquals(
@@ -902,8 +906,8 @@ class SiteHealthTest extends TestCase {
 			$this->instance->has_page_caching()
 		);
 
-		remove_filter( 'pre_http_request', $return_error );
-		add_filter( 'pre_http_request', $return_cached_response );
+		remove_filter( 'pre_http_request', $return_error, 20 );
+		add_filter( 'pre_http_request', $return_cached_response, 20 );
 
 		// Test 2: Test for cached result.
 		$this->assertEquals(
@@ -917,8 +921,8 @@ class SiteHealthTest extends TestCase {
 			$this->instance->has_page_caching( false )
 		);
 
-		remove_filter( 'pre_http_request', $return_cached_response );
-		add_filter( 'pre_http_request', $return_error );
+		remove_filter( 'pre_http_request', $return_cached_response, 20 );
+		add_filter( 'pre_http_request', $return_error, 20 );
 
 		// Test 4: Test for non-cached result again now that no error is returned.
 		$this->assertSame(

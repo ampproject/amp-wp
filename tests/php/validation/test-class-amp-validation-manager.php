@@ -175,15 +175,15 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			10,
 			has_filter(
 				'option_' . AMP_Options_Manager::OPTION_NAME,
-				[ self::TESTED_CLASS, 'filter_options_for_standard_mode_when_amp_first_override' ]
+				[ self::TESTED_CLASS, 'filter_options_when_force_standard_mode_request' ]
 			)
 		);
 	}
 
 	/** @return array */
-	public function get_data_to_test_filter_options_for_standard_mode_when_amp_first_override() {
-		$set_query_var = static function () {
-			$_GET[ QueryVar::AMP_FIRST ] = '';
+	public function get_data_to_test_filter_options_when_force_standard_mode_request() {
+		$set_frontend_force_standard_mode_query_var = static function () {
+			$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = [ AMP_Validation_Manager::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE => 1 ];
 		};
 		$set_admin_user = static function () {
 			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
@@ -192,180 +192,59 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 		};
 
-		$set_admin_dashboard = static function () {
-			set_current_screen( 'index.php' );
-		};
-
-		$set_global_validated_url_post = static function ( $url ) {
-			$GLOBALS['post'] = self::factory()->post->create_and_get(
-				[
-					'post_title' => $url,
-					'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-				]
-			);
-			setup_postdata( $GLOBALS['post'] );
-		};
-
-		$set_validated_url_post_list_screen = static function () {
-			$GLOBALS['hook_suffix'] = 'edit.php';
-			$_REQUEST['post_type'] = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
-			set_current_screen();
-		};
-
-		$set_validated_url_post_edit_screen = static function () {
-			$GLOBALS['hook_suffix'] = 'post.php';
-			$_REQUEST['post_type'] = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
-			set_current_screen();
-		};
-
 		return [
 			'frontend_no_query_var'                    => [
 				'set_up'          => static function () {},
 				'expect_override' => false,
 			],
 			'frontend_query_var_not_allowed'           => [
-				'set_up'          => $set_query_var,
+				'set_up'          => $set_frontend_force_standard_mode_query_var,
 				'expect_override' => false,
 			],
-			'frontend_query_var_with_admin_user'       => [
-				'set_up'          => static function () use ( $set_query_var, $set_admin_user ) {
-					$set_query_var();
-					$set_admin_user();
-				},
-				'expect_override' => true,
-			],
 			'frontend_query_var_with_validate_request' => [
-				'set_up'          => static function () use ( $set_query_var, $set_validate_request ) {
-					$set_query_var();
+				'set_up'          => static function () use ( $set_frontend_force_standard_mode_query_var, $set_validate_request ) {
+					$set_frontend_force_standard_mode_query_var();
 					$set_validate_request();
 				},
 				'expect_override' => true,
 			],
 			'frontend_query_var_with_admin_user_and_validate_request' => [
-				'set_up'          => static function () use ( $set_query_var, $set_admin_user, $set_validate_request ) {
-					$set_query_var();
+				'set_up'          => static function () use ( $set_frontend_force_standard_mode_query_var, $set_admin_user, $set_validate_request ) {
+					$set_frontend_force_standard_mode_query_var();
 					$set_admin_user();
 					$set_validate_request();
 				},
 				'expect_override' => true,
 			],
 			'frontend_no_query_var_with_admin_user_and_validate_request' => [
-				'set_up'          => static function () use ( $set_query_var, $set_admin_user, $set_validate_request ) {
+				'set_up'          => static function () use ( $set_frontend_force_standard_mode_query_var, $set_admin_user, $set_validate_request ) {
 					$set_admin_user();
 					$set_validate_request();
 				},
 				'expect_override' => false,
 			],
-
-			'admin_validation_request_for_new_non_override_url' => [
-				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
-					$set_admin_user();
-					$set_admin_dashboard();
-					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
-					$_GET['url']    = home_url();
-				},
-				'expect_override' => false,
-			],
-
-			'admin_validation_request_for_new_yes_override_url' => [
-				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
-					$set_admin_user();
-					$set_admin_dashboard();
-					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
-					$_GET['url']    = add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) );
-				},
-				'expect_override' => true,
-			],
-
-			'admin_validation_request_for_existing_non_override_url' => [
-				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
-					$set_admin_user();
-					$set_admin_dashboard();
-					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
-					$_GET['post']    = self::factory()->post->create(
-						[
-							'post_title' => home_url(),
-							'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-						]
-					);
-				},
-				'expect_override' => false,
-			],
-
-			'admin_validation_request_for_existing_yes_override_url' => [
-				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
-					$set_admin_user();
-					$set_admin_dashboard();
-					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
-					$_GET['post']    = self::factory()->post->create(
-						[
-							'post_title' => add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) ),
-							'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-						]
-					);
-				},
-				'expect_override' => true,
-			],
-
-			'admin_on_dashboard'                       => [
-				'set_up'          => static function () use ( $set_admin_user, $set_admin_dashboard ) {
-					$set_admin_user();
-					$set_admin_dashboard();
-				},
-				'expect_override' => false,
-			],
-			'admin_on_post_list_screen_not_amp_override_url' => [
-				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_list_screen ) {
-					$set_admin_user();
-					$set_global_validated_url_post( home_url( '/' ) );
-					$set_validated_url_post_list_screen();
-				},
-				'expect_override' => false,
-			],
-			'admin_on_post_list_screen_yes_amp_override_url' => [
-				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_list_screen ) {
-					$set_admin_user();
-					$set_global_validated_url_post( add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) ) );
-					$set_validated_url_post_list_screen();
-				},
-				'expect_override' => true,
-			],
-
-			'admin_on_edit_post_screen_not_amp_override_url' => [
-				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_edit_screen ) {
-					$set_admin_user();
-					$set_global_validated_url_post( home_url( '/' ) );
-					$set_validated_url_post_edit_screen();
-				},
-				'expect_override' => false,
-			],
-
-			'admin_on_edit_post_screen_not_amp_override_url' => [
-				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_edit_screen ) {
-					$set_admin_user();
-					$set_global_validated_url_post( add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) ) );
-					$set_validated_url_post_edit_screen();
-				},
-				'expect_override' => true,
-			],
 		];
 	}
 
 	/**
-	 * @dataProvider get_data_to_test_filter_options_for_standard_mode_when_amp_first_override
-	 * @covers AMP_Validation_Manager::is_amp_first_override_request()
-	 * @covers AMP_Validation_Manager::filter_options_for_standard_mode_when_amp_first_override()
-	 * @covers AMP_Validation_Manager::is_amp_first_override_url()
+	 * @dataProvider get_data_to_test_filter_options_when_force_standard_mode_request
+	 * @covers AMP_Validation_Manager::filter_options_when_force_standard_mode_request()
+	 *
+	 * @param callback $set_up
+	 * @param bool     $expect_override
 	 */
-	public function test_filter_options_for_standard_mode_when_amp_first_override( $set_up, $expect_override ) {
+	public function test_filter_options_when_force_standard_mode_request( $set_up, $expect_override ) {
 		$set_up();
 
 		$options_with_reader   = [ Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG ];
-		$options_with_standard = [ Option::THEME_SUPPORT => AMP_Theme_Support::STANDARD_MODE_SLUG ];
+		$options_with_standard = [
+			Option::THEME_SUPPORT           => AMP_Theme_Support::STANDARD_MODE_SLUG,
+			Option::ALL_TEMPLATES_SUPPORTED => true,
+		];
 
 		$this->assertEquals(
 			$expect_override ? $options_with_standard : $options_with_reader,
-			AMP_Validation_Manager::filter_options_for_standard_mode_when_amp_first_override( $options_with_reader )
+			AMP_Validation_Manager::filter_options_when_force_standard_mode_request( $options_with_reader )
 		);
 	}
 

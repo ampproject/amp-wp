@@ -98,7 +98,7 @@ export async function completeWizard( { technical = true, mode, readerTheme = 'l
 	} else {
 		await expect( page ).toClick( '#next-button' );
 	}
-	await page.waitForSelector( '#amp-settings' );
+	await page.waitForSelector( '#amp-settings', { timeout: 30000 } );
 	await expect( page ).toMatchElement( '#amp-settings' );
 }
 

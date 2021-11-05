@@ -59,8 +59,8 @@ const STATUS_CANCELLED = 'STATUS_CANCELLED';
  * @type {Object}
  */
 const INITIAL_STATE = {
-	cache: false,
 	currentlyScannedUrlIndex: 0,
+	forceStandardMode: false,
 	scannableUrls: [],
 	status: '',
 };
@@ -79,6 +79,7 @@ function siteScanReducer( state, action ) {
 				...state,
 				status: STATUS_REQUEST_SCANNABLE_URLS,
 				currentlyScannedUrlIndex: INITIAL_STATE.currentlyScannedUrlIndex,
+				forceStandardMode: action?.forceStandardMode ?? false,
 			};
 		}
 		case ACTION_SCANNABLE_URLS_FETCH: {
@@ -102,7 +103,6 @@ function siteScanReducer( state, action ) {
 			return {
 				...state,
 				status: STATUS_IDLE,
-				cache: action.cache,
 				currentlyScannedUrlIndex: INITIAL_STATE.currentlyScannedUrlIndex,
 			};
 		}
@@ -169,14 +169,12 @@ function siteScanReducer( state, action ) {
  * Context provider for site scanning.
  *
  * @param {Object}  props                             Component props.
- * @param {boolean} props.ampFirst                    Whether scanning should be done with Standard mode being forced.
  * @param {?any}    props.children                    Component children.
  * @param {boolean} props.fetchCachedValidationErrors Whether to fetch cached validation errors on mount.
  * @param {string}  props.scannableUrlsRestPath       The REST path for interacting with the scannable URL resources.
  * @param {string}  props.validateNonce               The AMP validate nonce.
  */
 export function SiteScanContextProvider( {
-	ampFirst = false,
 	children,
 	fetchCachedValidationErrors = false,
 	scannableUrlsRestPath,
@@ -191,12 +189,12 @@ export function SiteScanContextProvider( {
 	const { setAsyncError } = useAsyncError();
 	const [ state, dispatch ] = useReducer( siteScanReducer, INITIAL_STATE );
 	const {
-		cache,
 		currentlyScannedUrlIndex,
+		forceStandardMode,
 		scannableUrls,
 		status,
 	} = state;
-	const urlType = ampFirst || themeSupport === STANDARD ? 'url' : 'amp_url';
+	const urlType = forceStandardMode || themeSupport === STANDARD ? 'url' : 'amp_url';
 	const previewPermalink = scannableUrls?.[ 0 ]?.[ urlType ] ?? '';
 
 	/**
@@ -232,17 +230,9 @@ export function SiteScanContextProvider( {
 	/**
 	 * Preflight check.
 	 */
-	useEffect( () => {
-		if ( status ) {
-			return;
-		}
-
-		if ( ! validateNonce ) {
-			throw new Error( 'Invalid site scan configuration' );
-		}
-
-		dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
-	}, [ status, validateNonce ] );
+	if ( ! validateNonce ) {
+		throw new Error( 'Invalid site scan configuration' );
+	}
 
 	/**
 	 * This component sets state inside async functions. Use this ref to prevent
@@ -253,11 +243,15 @@ export function SiteScanContextProvider( {
 		hasUnmounted.current = true;
 	}, [] );
 
-	const startSiteScan = useCallback( ( args = {} ) => {
+	const fetchScannableUrls = useCallback( ( args = {} ) => {
 		dispatch( {
-			type: ACTION_SCAN_INITIALIZE,
-			cache: args?.cache,
+			type: ACTION_SCANNABLE_URLS_REQUEST,
+			forceStandardMode: args?.forceStandardMode,
 		} );
+	}, [] );
+
+	const startSiteScan = useCallback( () => {
+		dispatch( { type: ACTION_SCAN_INITIALIZE } );
 	}, [] );
 
 	const cancelSiteScan = useCallback( () => {
@@ -271,9 +265,9 @@ export function SiteScanContextProvider( {
 	const previousDidSaveOptions = usePrevious( didSaveOptions );
 	useEffect( () => {
 		if ( ! previousDidSaveOptions && didSaveOptions ) {
-			dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
+			fetchScannableUrls();
 		}
-	}, [ didSaveOptions, previousDidSaveOptions ] );
+	}, [ didSaveOptions, fetchScannableUrls, previousDidSaveOptions ] );
 
 	/**
 	 * Fetch scannable URLs from the REST endpoint.
@@ -291,6 +285,7 @@ export function SiteScanContextProvider( {
 				const response = await apiFetch( {
 					path: addQueryArgs( scannableUrlsRestPath, {
 						_fields: fetchCachedValidationErrors ? [ ...fields, 'validation_errors', 'stale' ] : fields,
+						force_standard_mode: forceStandardMode ? 1 : undefined,
 					} ),
 				} );
 
@@ -306,7 +301,7 @@ export function SiteScanContextProvider( {
 				setAsyncError( e );
 			}
 		} )();
-	}, [ fetchCachedValidationErrors, scannableUrlsRestPath, setAsyncError, status ] );
+	}, [ fetchCachedValidationErrors, forceStandardMode, scannableUrlsRestPath, setAsyncError, status ] );
 
 	/**
 	 * Scan site URLs sequentially.
@@ -322,12 +317,12 @@ export function SiteScanContextProvider( {
 			try {
 				const url = scannableUrls[ currentlyScannedUrlIndex ][ urlType ];
 				const args = {
-					'amp-first': ampFirst || undefined,
 					amp_validate: {
-						cache: cache || undefined,
+						cache: true,
+						cache_bust: Math.random(),
+						force_standard_mode: forceStandardMode || undefined,
 						nonce: validateNonce,
 						omit_stylesheets: true,
-						cache_bust: Math.random(),
 					},
 				};
 
@@ -362,13 +357,14 @@ export function SiteScanContextProvider( {
 
 			dispatch( { type: ACTION_SCAN_NEXT_URL } );
 		} )();
-	}, [ ampFirst, cache, currentlyScannedUrlIndex, scannableUrls, setAsyncError, status, urlType, validateNonce ] );
+	}, [ currentlyScannedUrlIndex, forceStandardMode, scannableUrls, setAsyncError, status, urlType, validateNonce ] );
 
 	return (
 		<SiteScan.Provider
 			value={ {
 				cancelSiteScan,
 				currentlyScannedUrlIndex,
+				fetchScannableUrls,
 				hasSiteScanResults,
 				isBusy: [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ),
 				isCancelled: status === STATUS_CANCELLED,
@@ -391,7 +387,6 @@ export function SiteScanContextProvider( {
 }
 
 SiteScanContextProvider.propTypes = {
-	ampFirst: PropTypes.bool,
 	children: PropTypes.any,
 	fetchCachedValidationErrors: PropTypes.bool,
 	scannableUrlsRestPath: PropTypes.string,
