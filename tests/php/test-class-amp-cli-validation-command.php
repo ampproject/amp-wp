@@ -39,7 +39,7 @@ class Test_AMP_CLI_Validation_Command extends DependencyInjectedTestCase {
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->validation = $this->injector->make( ValidationCommand::class );
-		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
+		$this->add_validate_response_mocking_filter();
 	}
 
 	/**

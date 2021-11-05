@@ -32,7 +32,7 @@ final class ScannableURLProviderTest extends TestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->scannable_url_provider = new ScannableURLProvider( [], 20 );
-		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
+		$this->add_validate_response_mocking_filter();
 	}
 
 	/** @covers ::__construct() */

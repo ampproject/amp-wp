@@ -392,7 +392,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		if ( $use_previous_result ) {
 			$has_page_caching = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
 			if ( is_wp_error( $has_page_caching ) ) {
-				return $has_page_caching; 
+				return $has_page_caching;
 			} elseif ( $has_page_caching ) {
 				return ( 'yes' === $has_page_caching );
 			}
@@ -428,7 +428,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		}
 
 		for ( $i = 1; $i <= 3; $i++ ) {
-			$http_response = wp_remote_get( home_url(), compact( 'sslverify', 'headers' ) );
+			$http_response = wp_remote_get( home_url( '/' ), compact( 'sslverify', 'headers' ) );
 			if ( is_wp_error( $http_response ) ) {
 				return $http_response;
 			}

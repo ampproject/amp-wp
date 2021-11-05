@@ -19,6 +19,26 @@ trait ThemesApiRequestMocking {
 	 */
 	protected static $api_reader_themes = [
 		[
+			'name'           => 'Twenty Twenty One',
+			'slug'           => 'twentytwentyone',
+			'version'        => '1.3',
+			'preview_url'    => 'https://wp-themes.com/twentytwenty',
+			'author'         =>
+				[
+					'user_nicename' => 'wordpressdotorg',
+					'profile'       => 'https://profiles.wordpress.org/wordpressdotorg',
+					'avatar'        => 'https://secure.gravatar.com/avatar/61ee2579b8905e62b4b4045bdc92c11a?s=96&d=monsterid&r=g',
+					'display_name'  => 'WordPress.org',
+				],
+			'screenshot_url' => '//ts.w.org/wp-content/themes/twentytwentyone/screenshot.png?ver=1.3',
+			'rating'         => 86,
+			'num_ratings'    => '37',
+			'homepage'       => 'https://wordpress.org/themes/twentytwentyone/',
+			'description'    => '...',
+			'requires'       => '4.7',
+			'requires_php'   => '5.2.4',
+		],
+		[
 			'name'           => 'Twenty Twenty',
 			'slug'           => 'twentytwenty',
 			'version'        => '1.3',

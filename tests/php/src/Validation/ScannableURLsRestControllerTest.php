@@ -7,8 +7,10 @@
 
 namespace AmpProject\AmpWP\Tests\Validation;
 
+use AMP_Options_Manager;
 use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\ScannableURLsRestController;
@@ -39,7 +41,7 @@ class ScannableURLsRestControllerTest extends DependencyInjectedTestCase {
 
 		do_action( 'rest_api_init' );
 		$this->controller = $this->injector->make( ScannableURLsRestController::class );
-		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
+		$this->add_validate_response_mocking_filter();
 	}
 
 	/** @covers ::get_registration_action() */
@@ -144,6 +146,12 @@ class ScannableURLsRestControllerTest extends DependencyInjectedTestCase {
 		}
 
 		// Test `force_standard_mode` query parameter.
+		AMP_Options_Manager::update_options(
+			[
+				Option::ALL_TEMPLATES_SUPPORTED => false,
+				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
+			]
+		);
 		$request_with_forced_standard_mode = new WP_REST_Request( 'GET', '/amp/v1/scannable-urls' );
 		$request_with_forced_standard_mode->set_param( ScannableURLsRestController::FORCE_STANDARD_MODE, 'true' );
 		$response_with_forced_standard_mode = rest_get_server()->dispatch( $request_with_forced_standard_mode );

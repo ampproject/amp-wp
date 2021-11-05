@@ -38,6 +38,7 @@ class Test_Reader_Theme_REST_Controller extends TestCase {
 		delete_transient( 'amp_themes_wporg' );
 		do_action( 'rest_api_init' );
 		$this->controller = new AMP_Reader_Theme_REST_Controller( new ReaderThemes() );
+		$this->add_reader_themes_request_filter();
 	}
 
 	/**
@@ -157,7 +158,6 @@ class Test_Reader_Theme_REST_Controller extends TestCase {
 		};
 		add_filter( 'themes_api_result', $filter_cb );
 
-		$this->add_reader_themes_request_filter();
 		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
 		$headers  = $response->get_headers();
 		$this->assertArrayHasKey( 'X-AMP-Theme-API-Error', $headers );
