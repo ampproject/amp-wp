@@ -75,7 +75,7 @@ export function SiteScan( { onSiteScan } ) {
 	useEffect( () => {
 		const path = getPathAndQueryString( document.location.href );
 
-		if ( ! isReady || ! hasQueryArg( path, 'scan-if-stale' ) ) {
+		if ( ! isReady || ! hasQueryArg( path, 'amp-scan-if-stale' ) ) {
 			return;
 		}
 
@@ -83,7 +83,7 @@ export function SiteScan( { onSiteScan } ) {
 			startSiteScan();
 		}
 
-		window.history.replaceState( {}, '', removeQueryArgs( path, 'scan-if-stale' ) );
+		window.history.replaceState( {}, '', removeQueryArgs( path, 'amp-scan-if-stale' ) );
 	}, [ isReady, stale, startSiteScan ] );
 
 	/**

@@ -128,7 +128,7 @@ domReady( () => {
 		<Providers>
 			<SetupWizard
 				closeLink={ CLOSE_LINK }
-				finishLink={ addQueryArgs( SETTINGS_LINK, { 'scan-if-stale': 1 } ) }
+				finishLink={ addQueryArgs( SETTINGS_LINK, { 'amp-scan-if-stale': 1 } ) }
 				appRoot={ root }
 			/>
 		</Providers>,
