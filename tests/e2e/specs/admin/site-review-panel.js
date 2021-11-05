@@ -10,7 +10,7 @@ import { cleanUpSettings, scrollToElement } from '../../utils/onboarding-wizard-
 import { setTemplateMode } from '../../utils/amp-settings-utils';
 
 describe( 'AMP settings screen Review panel', () => {
-	const timeout = 10000;
+	const timeout = 30000;
 
 	beforeAll( async () => {
 		await cleanUpSettings();

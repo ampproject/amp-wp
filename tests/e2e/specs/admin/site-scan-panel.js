@@ -23,7 +23,7 @@ import { cleanUpSettings, completeWizard, scrollToElement } from '../../utils/on
 import { testSiteScanning } from '../../utils/site-scan-utils';
 
 describe( 'AMP settings screen Site Scan panel', () => {
-	const timeout = 10000;
+	const timeout = 30000;
 
 	beforeAll( async () => {
 		await installTheme( 'hestia' );
