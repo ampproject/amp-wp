@@ -13,12 +13,13 @@ import {
  */
 import {
 	activatePlugin,
+	cleanUpValidatedUrls,
 	deactivatePlugin,
 	installPlugin,
 	setTemplateMode,
 	uninstallPlugin,
 } from '../../utils/amp-settings-utils';
-import { cleanUpSettings, scrollToElement } from '../../utils/onboarding-wizard-utils';
+import { cleanUpSettings, completeWizard, scrollToElement } from '../../utils/onboarding-wizard-utils';
 import { testSiteScanning } from '../../utils/site-scan-utils';
 
 describe( 'AMP settings screen Site Scan panel', () => {
@@ -158,5 +159,28 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 		// Clean up.
 		await installPlugin( 'autoptimize' );
+	} );
+} );
+
+describe( 'after completing the Onboarding Wizard and landing on the AMP Settings screen', () => {
+	beforeEach( async () => {
+		await cleanUpValidatedUrls();
+		await cleanUpSettings();
+	} );
+
+	it( 'the Site Scan panel does not display a stale message if the Standard mode was selected in the Wizard', async () => {
+		await completeWizard( { technical: true, mode: 'standard' } );
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await expect( page ).toMatchElement( '#site-scan .amp-drawer__heading', { text: 'Site Scan' } );
+		await expect( page ).not.toMatchElement( '#site-scan .amp-drawer__label-extra .amp-notice', { text: 'Stale results' } );
+	} );
+
+	it( 'the Site Scan panel displays a stale message if the Transitional mode was selected in the Wizard', async () => {
+		await completeWizard( { technical: true, mode: 'transitional' } );
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await expect( page ).toMatchElement( '#site-scan .amp-drawer__heading', { text: 'Site Scan' } );
+		await expect( page ).toMatchElement( '#site-scan .amp-drawer__label-extra .amp-notice', { text: 'Stale results' } );
 	} );
 } );
