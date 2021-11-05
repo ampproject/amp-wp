@@ -217,7 +217,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		$theme           = wp_get_theme();
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
-		$amp_settings_link       = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
+		$amp_settings_link       = add_query_arg( 'amp-scan-if-stale', 1, menu_page_url( AMP_Options_Manager::OPTION_NAME, false ) );
 		$amp_validated_urls_link = admin_url(
 			add_query_arg(
 				[ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ],
