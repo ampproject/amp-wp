@@ -75,7 +75,7 @@ describe( 'Mode info notices', () => {
 		await completeWizard( { technical: true, mode: 'transitional' } );
 
 		// When there are no site scan results, no notice in the Template Mode section should be displayed.
-		await expect( page ).not.toMatchElement( '#template-modes h2', { text: 'Template Mode', timeout } );
+		await expect( page ).toMatchElement( '#template-modes h2', { text: 'Template Mode', timeout } );
 		await expect( page ).not.toMatchElement( '#template-modes h2 + .amp-notice--info' );
 
 		// Trigger the site scan.
