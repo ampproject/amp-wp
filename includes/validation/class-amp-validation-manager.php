@@ -288,7 +288,8 @@ class AMP_Validation_Manager {
 			&&
 			self::get_validate_request_args()[ self::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE ]
 		) {
-			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+			$options[ Option::THEME_SUPPORT ]           = AMP_Theme_Support::STANDARD_MODE_SLUG;
+			$options[ Option::ALL_TEMPLATES_SUPPORTED ] = true;
 		}
 
 		return $options;

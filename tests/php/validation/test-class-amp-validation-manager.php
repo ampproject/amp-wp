@@ -237,7 +237,10 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$set_up();
 
 		$options_with_reader   = [ Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG ];
-		$options_with_standard = [ Option::THEME_SUPPORT => AMP_Theme_Support::STANDARD_MODE_SLUG ];
+		$options_with_standard = [
+			Option::THEME_SUPPORT           => AMP_Theme_Support::STANDARD_MODE_SLUG,
+			Option::ALL_TEMPLATES_SUPPORTED => true,
+		];
 
 		$this->assertEquals(
 			$expect_override ? $options_with_standard : $options_with_reader,
