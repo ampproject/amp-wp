@@ -2,6 +2,7 @@
 
 namespace AmpProject\AmpWP\Tests\Validation;
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AMP_Options_Manager;
 use AMP_Post_Meta_Box;
@@ -46,7 +47,7 @@ final class ScannableURLProviderTest extends TestCase {
 	 * @covers ::get_supportable_templates()
 	 * @covers ::is_template_supported()
 	 */
-	public function test_count_urls_to_validate() {
+	public function test_count_urls_to_validate_in_standard_mode() {
 		$user = self::factory()->user->create();
 		self::factory()->post->create( [ 'post_author' => $user ] );
 
@@ -94,6 +95,72 @@ final class ScannableURLProviderTest extends TestCase {
 		$this->assertFalse( is_wp_error( $result ) );
 
 		$this->assertCount( $expected_url_count, $this->scannable_url_provider->get_urls() );
+	}
+
+	/**
+	 * Test retrieval of urls in legacy Reader mode.
+	 *
+	 * @covers ::get_urls()
+	 * @covers ::get_supportable_templates()
+	 * @covers ::is_template_supported()
+	 */
+	public function test_count_urls_to_validate_in_legacy_reader_mode() {
+		$user_id = self::factory()->user->create();
+		$term_id = self::factory()->term->create( [ 'taxonomy' => 'category' ] );
+		$post_id = self::factory()->post->create(
+			[
+				'post_type'   => 'post',
+				'post_author' => $user_id,
+				'tax_input'   => [ 'category' => $term_id ],
+			]
+		);
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
+
+		$this->assertEqualSets(
+			[
+				get_permalink( $post_id ),
+			],
+			wp_list_pluck( $this->scannable_url_provider->get_urls(), 'url' )
+		);
+		$this->assertEqualSets(
+			[ 'is_singular' ],
+			array_keys(
+				array_filter(
+					$this->scannable_url_provider->get_supportable_templates(),
+					static function ( $supportable_template ) {
+						return ! empty( $supportable_template['supported'] );
+					}
+				)
+			)
+		);
+
+		$page1_id = self::factory()->post->create( [ 'page_type' => 'page' ] );
+		$page2_id = self::factory()->post->create( [ 'page_type' => 'page' ] );
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $page1_id );
+		update_option( 'page_for_posts', $page2_id );
+
+		$this->assertEqualSets(
+			[
+				get_permalink( $post_id ),
+				get_permalink( $page1_id ),
+				get_permalink( $page2_id ),
+			],
+			wp_list_pluck( $this->scannable_url_provider->get_urls(), 'url' )
+		);
+		$this->assertEqualSets(
+			[ 'is_singular', 'is_home', 'is_front_page' ],
+			array_keys(
+				array_filter(
+					$this->scannable_url_provider->get_supportable_templates(),
+					static function ( $supportable_template ) {
+						return ! empty( $supportable_template['supported'] );
+					}
+				)
+			)
+		);
 	}
 
 	/**

@@ -55,7 +55,7 @@ final class ScannableURLProvider implements Service {
 	 *
 	 * @see AMP_Theme_Support::get_supportable_templates()
 	 *
-	 * @return array
+	 * @return array Supportable templates.
 	 */
 	public function get_supportable_templates() {
 		$options = AMP_Options_Manager::get_options();
