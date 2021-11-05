@@ -175,7 +175,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			10,
 			has_filter(
 				'option_' . AMP_Options_Manager::OPTION_NAME,
-				[ self::TESTED_CLASS, 'filter_options_for_standard_mode_when_amp_first_override' ]
+				[ self::TESTED_CLASS, 'filter_options_when_force_standard_mode_request' ]
 			)
 		);
 	}
