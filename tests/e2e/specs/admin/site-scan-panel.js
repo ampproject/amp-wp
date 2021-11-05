@@ -162,7 +162,7 @@ describe( 'AMP settings screen Site Scan panel', () => {
 	} );
 } );
 
-describe( 'after completing the Onboarding Wizard and landing on the AMP Settings screen', () => {
+describe( 'Site Scan panel on AMP Settings screen after completing the Onboarding Wizard', () => {
 	const timeout = 30000;
 
 	beforeEach( async () => {
@@ -170,14 +170,14 @@ describe( 'after completing the Onboarding Wizard and landing on the AMP Setting
 		await cleanUpSettings();
 	} );
 
-	it( 'the Site Scan panel does not display a stale message if the Standard mode was selected in the Wizard', async () => {
+	it( 'does not display a stale message if the Standard mode was selected in the Wizard', async () => {
 		await completeWizard( { technical: true, mode: 'standard' } );
 
 		await expect( page ).toMatchElement( '#site-scan .amp-drawer__heading', { text: 'Site Scan', timeout } );
 		await expect( page ).not.toMatchElement( '#site-scan .amp-drawer__label-extra .amp-notice', { text: 'Stale results' } );
 	} );
 
-	it( 'the Site Scan is started automatically if Transitional mode was selected in the Wizard', async () => {
+	it( 'auto-starts a site scan if Transitional mode was selected in the Wizard', async () => {
 		await completeWizard( { technical: true, mode: 'transitional' } );
 
 		await expect( page ).toMatchElement( '#site-scan .amp-drawer__heading', { text: 'Site Scan', timeout } );
