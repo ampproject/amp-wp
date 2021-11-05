@@ -10,6 +10,7 @@ import { addQueryArgs } from '@wordpress/url';
  * External dependencies
  */
 import {
+	AMP_SCAN_IF_STALE,
 	APP_ROOT_ID,
 	CLOSE_LINK,
 	CURRENT_THEME,
@@ -128,7 +129,7 @@ domReady( () => {
 		<Providers>
 			<SetupWizard
 				closeLink={ CLOSE_LINK }
-				finishLink={ addQueryArgs( SETTINGS_LINK, { 'amp-scan-if-stale': 1 } ) }
+				finishLink={ addQueryArgs( SETTINGS_LINK, { [ AMP_SCAN_IF_STALE ]: 1 } ) }
 				appRoot={ root }
 			/>
 		</Providers>,

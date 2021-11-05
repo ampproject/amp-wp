@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { VALIDATED_URLS_LINK } from 'amp-settings'; // From WP inline script.
+import { AMP_SCAN_IF_STALE, VALIDATED_URLS_LINK } from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
 
 /**
@@ -75,7 +75,7 @@ export function SiteScan( { onSiteScan } ) {
 	useEffect( () => {
 		const path = getPathAndQueryString( document.location.href );
 
-		if ( ! isReady || ! hasQueryArg( path, 'amp-scan-if-stale' ) ) {
+		if ( ! isReady || ! hasQueryArg( path, AMP_SCAN_IF_STALE ) ) {
 			return;
 		}
 
@@ -83,7 +83,7 @@ export function SiteScan( { onSiteScan } ) {
 			startSiteScan();
 		}
 
-		window.history.replaceState( {}, '', removeQueryArgs( path, 'amp-scan-if-stale' ) );
+		window.history.replaceState( {}, '', removeQueryArgs( path, AMP_SCAN_IF_STALE ) );
 	}, [ isReady, stale, startSiteScan ] );
 
 	/**
