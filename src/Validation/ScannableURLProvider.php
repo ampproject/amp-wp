@@ -24,15 +24,6 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 final class ScannableURLProvider implements Service {
 
 	/**
-	 * Overrides to AMP Settings.
-	 *
-	 * @todo This does not work as expected because amp_is_post_supported() is not going to reflect the override.
-	 *
-	 * @var array
-	 */
-	private $option_overrides = [];
-
-	/**
 	 * Template conditionals to restrict results to.
 	 *
 	 * @var string[]
@@ -47,26 +38,14 @@ final class ScannableURLProvider implements Service {
 	private $limit_per_type;
 
 	/**
-	 * @param array    $option_overrides     Overrides to AMP settings.
+	 * Construct.
+	 *
 	 * @param string[] $include_conditionals Template conditionals to restrict results to.
 	 * @param int      $limit_per_type       Limit of URLs to obtain per type.
 	 */
-	public function __construct( $option_overrides = [], $include_conditionals = [], $limit_per_type = 1 ) {
-		$this->option_overrides     = $option_overrides;
+	public function __construct( $include_conditionals = [], $limit_per_type = 1 ) {
 		$this->include_conditionals = $include_conditionals;
 		$this->limit_per_type       = $limit_per_type;
-	}
-
-	/**
-	 * Get options with overrides merged on top.
-	 *
-	 * @return array
-	 */
-	private function get_options() {
-		return array_merge(
-			AMP_Options_Manager::get_options(),
-			$this->option_overrides
-		);
 	}
 
 	/**
@@ -79,7 +58,7 @@ final class ScannableURLProvider implements Service {
 	 * @return array
 	 */
 	public function get_supportable_templates() {
-		$options = $this->get_options();
+		$options = AMP_Options_Manager::get_options();
 
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates( $options );
 
