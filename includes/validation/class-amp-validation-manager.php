@@ -68,6 +68,13 @@ class AMP_Validation_Manager {
 	const VALIDATE_QUERY_VAR_CACHE_BUST = 'cache_bust';
 
 	/**
+	 * Key for amp_validate query var array to force Standard template mode.
+	 *
+	 * @var string
+	 */
+	const VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE = 'force_standard_mode';
+
+	/**
 	 * Meta capability for validation.
 	 *
 	 * Note that this is mapped to 'manage_options' by default via `AMP_Validation_Manager::map_meta_cap()`. Using a
@@ -264,7 +271,7 @@ class AMP_Validation_Manager {
 				'option_' . AMP_Options_Manager::OPTION_NAME,
 			];
 			foreach ( $filter_hooks as $filter_hook ) {
-				add_filter( $filter_hook, [ __CLASS__, 'filter_options_for_standard_mode_when_amp_first_override' ] );
+				add_filter( $filter_hook, [ __CLASS__, 'filter_options_when_force_standard_mode_request' ] );
 			}
 		}
 	}
@@ -275,15 +282,15 @@ class AMP_Validation_Manager {
 	 * @param array $options Options.
 	 * @return array Filtered options.
 	 */
-	public static function filter_options_for_standard_mode_when_amp_first_override( $options ) {
-		if ( self::is_amp_first_override_request() ) {
+	public static function filter_options_when_force_standard_mode_request( $options ) {
+		if ( self::is_force_standard_mode_request() ) {
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
 		}
 		return $options;
 	}
 
 	/**
-	 * Determine whether the request includes the AMP-first override.
+	 * Determine whether the request forces the Standard mode (AMP-First).
 	 *
 	 * The logic in here is admittedly a mess. It was first worked out in the context of the Web Stories plugin to
 	 * force a single web story to be served without any paired endpoint when a site is running the AMP plugin in
@@ -295,12 +302,13 @@ class AMP_Validation_Manager {
 	 *
 	 * @return bool Whether
 	 */
-	private static function is_amp_first_override_request() {
+	private static function is_force_standard_mode_request() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 
 		// Frontend.
+		$args = self::get_validate_request_args();
 		if (
-			isset( $_GET[ QueryVar::AMP_FIRST ] )
+			$args[ self::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE ]
 			&&
 			( self::is_validate_request() || self::has_cap() )
 		) {
@@ -323,7 +331,7 @@ class AMP_Validation_Manager {
 				(
 					isset( $_GET['url'] )
 					&&
-					self::is_amp_first_override_url( esc_url_raw( $_GET['url'] ) )
+					isset( $_GET[ self::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE ] )
 				)
 				||
 				// Subsequent admin request to validate a URL.
@@ -332,45 +340,15 @@ class AMP_Validation_Manager {
 					&&
 					get_post_type( (int) $_GET['post'] ) === AMP_Validated_URL_Post_Type::POST_TYPE_SLUG
 					&&
-					self::is_amp_first_override_url( get_post( (int) $_GET['post'] )->post_title )
+					isset( $_GET[ self::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE ] )
 				)
 			)
 		) {
 			return true;
 		}
 
-		// Admin screen for validated URL screen and Validated URLs post list table (where this may only return true
-		// selectively based on the current post in the loop).
-		$current_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if (
-			$current_screen instanceof WP_Screen
-			&&
-			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === $current_screen->post_type
-			&&
-			self::is_amp_first_override_url( get_post()->post_title )
-		) {
-			return true;
-		}
-
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		return false;
-	}
-
-	/**
-	 * Determine whether the URL includes the AMP-first override query var.
-	 *
-	 * @since 2.2
-	 *
-	 * @param string $url URL.
-	 * @return bool Whether the URL has the AMP-first override.
-	 */
-	private static function is_amp_first_override_url( $url ) {
-		$query_string = wp_parse_url( $url, PHP_URL_QUERY );
-		$query_vars   = [];
-		if ( $query_string ) {
-			wp_parse_str( $query_string, $query_vars );
-		}
-		return array_key_exists( QueryVar::AMP_FIRST, $query_vars );
 	}
 
 	/**
@@ -675,10 +653,11 @@ class AMP_Validation_Manager {
 	 */
 	private static function get_validate_request_args() {
 		$defaults = [
-			self::VALIDATE_QUERY_VAR_NONCE            => null,
-			self::VALIDATE_QUERY_VAR_CACHE            => false,
-			self::VALIDATE_QUERY_VAR_CACHED_IF_FRESH  => false,
-			self::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS => false,
+			self::VALIDATE_QUERY_VAR_NONCE               => null,
+			self::VALIDATE_QUERY_VAR_CACHE               => false,
+			self::VALIDATE_QUERY_VAR_CACHED_IF_FRESH     => false,
+			self::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS    => false,
+			self::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE => false,
 		];
 
 		if ( ! isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended

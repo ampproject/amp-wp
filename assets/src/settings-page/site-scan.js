@@ -145,7 +145,7 @@ export function SiteScan( { onSiteScan } ) {
 							if ( typeof onSiteScan === 'function' ) {
 								onSiteScan();
 							}
-							startSiteScan( { cache: true } );
+							startSiteScan();
 						} }
 						isPrimary={ true }
 					>

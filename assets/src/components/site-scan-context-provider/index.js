@@ -59,7 +59,6 @@ const STATUS_CANCELLED = 'STATUS_CANCELLED';
  * @type {Object}
  */
 const INITIAL_STATE = {
-	cache: false,
 	currentlyScannedUrlIndex: 0,
 	scannableUrls: [],
 	status: '',
@@ -103,7 +102,6 @@ function siteScanReducer( state, action ) {
 			return {
 				...state,
 				status: STATUS_IDLE,
-				cache: action.cache,
 				currentlyScannedUrlIndex: INITIAL_STATE.currentlyScannedUrlIndex,
 			};
 		}
@@ -190,7 +188,6 @@ export function SiteScanContextProvider( {
 	const { setAsyncError } = useAsyncError();
 	const [ state, dispatch ] = useReducer( siteScanReducer, INITIAL_STATE );
 	const {
-		cache,
 		currentlyScannedUrlIndex,
 		forceStandardMode,
 		scannableUrls,
@@ -252,11 +249,8 @@ export function SiteScanContextProvider( {
 		} );
 	}, [] );
 
-	const startSiteScan = useCallback( ( args = {} ) => {
-		dispatch( {
-			type: ACTION_SCAN_INITIALIZE,
-			cache: args?.cache,
-		} );
+	const startSiteScan = useCallback( () => {
+		dispatch( { type: ACTION_SCAN_INITIALIZE } );
 	}, [] );
 
 	const cancelSiteScan = useCallback( () => {
@@ -322,12 +316,12 @@ export function SiteScanContextProvider( {
 			try {
 				const url = scannableUrls[ currentlyScannedUrlIndex ][ urlType ];
 				const args = {
-					'amp-first': forceStandardMode || undefined,
 					amp_validate: {
-						cache: cache || undefined,
+						cache: true,
+						cache_bust: Math.random(),
+						force_standard_mode: forceStandardMode || undefined,
 						nonce: validateNonce,
 						omit_stylesheets: true,
-						cache_bust: Math.random(),
 					},
 				};
 
@@ -362,7 +356,7 @@ export function SiteScanContextProvider( {
 
 			dispatch( { type: ACTION_SCAN_NEXT_URL } );
 		} )();
-	}, [ cache, currentlyScannedUrlIndex, forceStandardMode, scannableUrls, setAsyncError, status, urlType, validateNonce ] );
+	}, [ currentlyScannedUrlIndex, forceStandardMode, scannableUrls, setAsyncError, status, urlType, validateNonce ] );
 
 	return (
 		<SiteScan.Provider
