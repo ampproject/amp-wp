@@ -128,7 +128,7 @@ domReady( () => {
 	render(
 		<Providers>
 			<SetupWizard
-				closeLink={ CLOSE_LINK }
+				closeLink={ addQueryArgs( CLOSE_LINK, { [ AMP_SCAN_IF_STALE ]: 1 } ) }
 				finishLink={ addQueryArgs( SETTINGS_LINK, { [ AMP_SCAN_IF_STALE ]: 1 } ) }
 				appRoot={ root }
 			/>
