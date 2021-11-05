@@ -60,6 +60,7 @@ const STATUS_CANCELLED = 'STATUS_CANCELLED';
  */
 const INITIAL_STATE = {
 	currentlyScannedUrlIndex: 0,
+	forceStandardMode: false,
 	scannableUrls: [],
 	status: '',
 };
@@ -78,7 +79,7 @@ function siteScanReducer( state, action ) {
 				...state,
 				status: STATUS_REQUEST_SCANNABLE_URLS,
 				currentlyScannedUrlIndex: INITIAL_STATE.currentlyScannedUrlIndex,
-				forceStandardMode: action?.forceStandardMode ?? state.forceStandardMode,
+				forceStandardMode: action?.forceStandardMode ?? false,
 			};
 		}
 		case ACTION_SCANNABLE_URLS_FETCH: {
