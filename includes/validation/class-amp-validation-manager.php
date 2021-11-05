@@ -283,72 +283,15 @@ class AMP_Validation_Manager {
 	 * @return array Filtered options.
 	 */
 	public static function filter_options_when_force_standard_mode_request( $options ) {
-		if ( self::is_force_standard_mode_request() ) {
+		if (
+			self::is_validate_request()
+			&&
+			self::get_validate_request_args()[ self::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE ]
+		) {
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
 		}
+
 		return $options;
-	}
-
-	/**
-	 * Determine whether the request forces the Standard mode (AMP-First).
-	 *
-	 * The logic in here is admittedly a mess. It was first worked out in the context of the Web Stories plugin to
-	 * force a single web story to be served without any paired endpoint when a site is running the AMP plugin in
-	 * a paired template mode (Transitional or Reader).
-	 *
-	 * @since 2.2
-	 * @see \Google\Web_Stories\Integrations\AMP::get_request_post_type()
-	 * @link https://github.com/google/web-stories-wp/pull/3621
-	 *
-	 * @return bool Whether
-	 */
-	private static function is_force_standard_mode_request() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-
-		// Frontend.
-		$args = self::get_validate_request_args();
-		if (
-			$args[ self::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE ]
-			&&
-			( self::is_validate_request() || self::has_cap() )
-		) {
-			return true;
-		}
-
-		// If not in the admin or the user doesn't have the validate capability, then abort.
-		if ( ! is_admin() || ! self::has_cap() ) {
-			return false;
-		}
-
-		// Admin request for validation.
-		if (
-			isset( $_GET['action'] )
-			&&
-			self::VALIDATE_QUERY_VAR === $_GET['action']
-			&&
-			(
-				// First admin request to validate a URL.
-				(
-					isset( $_GET['url'] )
-					&&
-					isset( $_GET[ self::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE ] )
-				)
-				||
-				// Subsequent admin request to validate a URL.
-				(
-					isset( $_GET['post'] )
-					&&
-					get_post_type( (int) $_GET['post'] ) === AMP_Validated_URL_Post_Type::POST_TYPE_SLUG
-					&&
-					isset( $_GET[ self::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE ] )
-				)
-			)
-		) {
-			return true;
-		}
-
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
-		return false;
 	}
 
 	/**
