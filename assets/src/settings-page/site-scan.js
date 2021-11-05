@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useCallback, useContext, useEffect, useMemo, useState } from '@wordpress/element';
+import { getPathAndQueryString, hasQueryArg, removeQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -66,6 +67,19 @@ export function SiteScan( { onSiteScan } ) {
 
 		return cancelSiteScan;
 	}, [ cancelSiteScan, fetchScannableUrls ] );
+
+	/**
+	 * If the results are stale and the user is coming from the Onboarding
+	 * Wizard, a site scan should be triggered right away.
+	 */
+	useEffect( () => {
+		const path = getPathAndQueryString( document.location.href );
+
+		if ( isReady && stale && hasQueryArg( path, 'scan-if-stale' ) ) {
+			startSiteScan();
+			window.history.replaceState( {}, '', removeQueryArgs( path, 'scan-if-stale' ) );
+		}
+	}, [ isReady, stale, startSiteScan ] );
 
 	/**
 	 * Delay the `isCompleted` flag so that the progress bar stays at 100% for a

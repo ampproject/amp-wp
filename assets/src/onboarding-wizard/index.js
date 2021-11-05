@@ -4,6 +4,7 @@
 import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
@@ -125,7 +126,11 @@ domReady( () => {
 
 	render(
 		<Providers>
-			<SetupWizard closeLink={ CLOSE_LINK } finishLink={ SETTINGS_LINK } appRoot={ root } />
+			<SetupWizard
+				closeLink={ CLOSE_LINK }
+				finishLink={ addQueryArgs( SETTINGS_LINK, { 'scan-if-stale': 1 } ) }
+				appRoot={ root }
+			/>
 		</Providers>,
 		root,
 	);
