@@ -50,10 +50,7 @@ export function useTemplateModeRecommendation() {
 		} ) );
 	}, [ currentThemeIsAmongReaderThemes, developerToolsOption, fetchingOptions, fetchingUser, hasSiteScanResults, isBusy, isFetchingScannableUrls, pluginsWithAmpIncompatibility?.length, savingDeveloperToolsOption, savingOptions, stale, themesWithAmpIncompatibility?.length ] );
 
-	return {
-		templateModeRecommendation,
-		staleTemplateModeRecommendation: stale,
-	};
+	return templateModeRecommendation;
 }
 
 /* eslint-disable complexity */
