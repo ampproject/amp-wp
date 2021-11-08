@@ -887,8 +887,11 @@ class AMP_Allowed_Tags_Generated {
 					'sticky' => array(
 						'value' => array(
 							'',
-							'top',
 							'bottom',
+							'bottom-right',
+							'left',
+							'right',
+							'top',
 						),
 					),
 					'template' => array(),
