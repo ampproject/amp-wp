@@ -8,8 +8,7 @@ import { useContext, useLayoutEffect, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { READER, STANDARD, TRANSITIONAL } from '../../common/constants';
-import { ReaderThemes } from '../reader-themes-context-provider';
-import { SiteScan as SiteScanContext } from '../site-scan-context-provider';
+import { SiteScan } from '../site-scan-context-provider';
 import { User } from '../user-context-provider';
 import { Options } from '../options-context-provider';
 
@@ -23,7 +22,6 @@ export const TECHNICAL = 'technical';
 export const NON_TECHNICAL = 'nonTechnical';
 
 export function useTemplateModeRecommendation() {
-	const { currentTheme: { is_reader_theme: currentThemeIsAmongReaderThemes } } = useContext( ReaderThemes );
 	const {
 		hasSiteScanResults,
 		isBusy,
@@ -31,7 +29,7 @@ export function useTemplateModeRecommendation() {
 		pluginsWithAmpIncompatibility,
 		stale,
 		themesWithAmpIncompatibility,
-	} = useContext( SiteScanContext );
+	} = useContext( SiteScan );
 	const { developerToolsOption, fetchingUser, savingDeveloperToolsOption } = useContext( User );
 	const { fetchingOptions, savingOptions } = useContext( Options );
 	const [ templateModeRecommendation, setTemplateModeRecommendation ] = useState( null );
@@ -42,13 +40,12 @@ export function useTemplateModeRecommendation() {
 		}
 
 		setTemplateModeRecommendation( getTemplateModeRecommendation( {
-			currentThemeIsAmongReaderThemes,
 			hasPluginIssues: pluginsWithAmpIncompatibility?.length > 0,
-			hasSiteScanResults: hasSiteScanResults && ! stale,
+			hasFreshSiteScanResults: hasSiteScanResults && ! stale,
 			hasThemeIssues: themesWithAmpIncompatibility?.length > 0,
 			userIsTechnical: developerToolsOption === true,
 		} ) );
-	}, [ currentThemeIsAmongReaderThemes, developerToolsOption, fetchingOptions, fetchingUser, hasSiteScanResults, isBusy, isFetchingScannableUrls, pluginsWithAmpIncompatibility?.length, savingDeveloperToolsOption, savingOptions, stale, themesWithAmpIncompatibility?.length ] );
+	}, [ developerToolsOption, fetchingOptions, fetchingUser, hasSiteScanResults, isBusy, isFetchingScannableUrls, pluginsWithAmpIncompatibility?.length, savingDeveloperToolsOption, savingOptions, stale, themesWithAmpIncompatibility?.length ] );
 
 	return templateModeRecommendation;
 }
@@ -59,20 +56,65 @@ export function useTemplateModeRecommendation() {
  * Returns the degree to which each mode is recommended for the current site and user.
  *
  * @param {Object}  args
- * @param {boolean} args.currentThemeIsAmongReaderThemes Whether the currently active theme is in the reader themes list.
- * @param {boolean} args.hasPluginIssues                 Whether the site scan found plugins with AMP incompatibility.
- * @param {boolean} args.hasSiteScanResults              Whether there are available site scan results.
- * @param {boolean} args.hasThemeIssues                  Whether the site scan found themes with AMP incompatibility.
- * @param {boolean} args.userIsTechnical                 Whether the user answered yes to the technical question.
+ * @param {boolean} args.hasPluginIssues         Whether the site scan found plugins with AMP incompatibility.
+ * @param {boolean} args.hasFreshSiteScanResults Whether fresh site scan results are available.
+ * @param {boolean} args.hasThemeIssues          Whether the site scan found themes with AMP incompatibility.
+ * @param {boolean} args.userIsTechnical         Whether the user answered yes to the technical question.
  */
 export function getTemplateModeRecommendation( {
-	currentThemeIsAmongReaderThemes,
 	hasPluginIssues,
-	hasSiteScanResults,
+	hasFreshSiteScanResults,
 	hasThemeIssues,
 	userIsTechnical,
 } ) {
 	switch ( true ) {
+		/**
+		 * No site scan results or stale results.
+		 */
+		case ! hasFreshSiteScanResults && userIsTechnical:
+			return {
+				[ READER ]: {
+					recommendationLevel: NEUTRAL,
+					details: [
+						__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
+					],
+				},
+				[ TRANSITIONAL ]: {
+					recommendationLevel: NEUTRAL,
+					details: [
+						__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
+					],
+				},
+				[ STANDARD ]: {
+					recommendationLevel: NEUTRAL,
+					details: [
+						__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
+					],
+				},
+			};
+
+		case ! hasFreshSiteScanResults && ! userIsTechnical:
+			return {
+				[ READER ]: {
+					recommendationLevel: NEUTRAL,
+					details: [
+						__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
+					],
+				},
+				[ TRANSITIONAL ]: {
+					recommendationLevel: NEUTRAL,
+					details: [
+						__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
+					],
+				},
+				[ STANDARD ]: {
+					recommendationLevel: NEUTRAL,
+					details: [
+						__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
+					],
+				},
+			};
+
 		/**
 		 * #1
 		 */
@@ -282,97 +324,6 @@ export function getTemplateModeRecommendation( {
 					recommendationLevel: NEUTRAL,
 					details: [
 						__( '<b>Recommended choice if you can commit</b> to always choosing plugins that are AMP compatible when extending your site.', 'amp' ),
-					],
-				},
-			};
-
-		/**
-		 * No site scan scenarios.
-		 */
-		case ! hasSiteScanResults && currentThemeIsAmongReaderThemes && ! userIsTechnical:
-			return {
-				[ READER ]: {
-					recommendationLevel: RECOMMENDED,
-					details: [
-						__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ TRANSITIONAL ]: {
-					recommendationLevel: RECOMMENDED,
-					details: [
-						__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ STANDARD ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
-					],
-				},
-			};
-
-		case ! hasSiteScanResults && currentThemeIsAmongReaderThemes && userIsTechnical:
-			return {
-				[ READER ]: {
-					recommendationLevel: RECOMMENDED,
-					details: [
-						__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ TRANSITIONAL ]: {
-					recommendationLevel: RECOMMENDED,
-					details: [
-						__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ STANDARD ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
-					],
-				},
-			};
-
-		case ! hasSiteScanResults && ! currentThemeIsAmongReaderThemes && ! userIsTechnical:
-			return {
-				[ READER ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ TRANSITIONAL ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ STANDARD ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
-					],
-				},
-			};
-
-		case ! hasSiteScanResults && ! currentThemeIsAmongReaderThemes && userIsTechnical:
-			return {
-				[ READER ]: {
-					recommendationLevel: RECOMMENDED,
-					details: [
-						__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ TRANSITIONAL ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ STANDARD ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
 					],
 				},
 			};
