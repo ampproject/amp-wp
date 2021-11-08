@@ -294,18 +294,20 @@ function SiteScanSummary() {
 
 	return (
 		<>
-			<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
-				{ stale && (
+			{ stale && (
+				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
 					<p>
 						{ __( 'Stale results. Rescan your site to ensure everything is working properly.', 'amp' ) }
 					</p>
-				) }
-				{ ! stale && isReady && (
+				</AMPNotice>
+			) }
+			{ ! stale && isReady && (
+				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
 					<p>
 						{ __( 'No changes since your last scan.', 'amp' ) }
 					</p>
-				) }
-			</AMPNotice>
+				</AMPNotice>
+			) }
 			{ themesWithAmpIncompatibility.length > 0 && (
 				<ThemesWithAmpIncompatibility
 					slugs={ themesWithAmpIncompatibility }
