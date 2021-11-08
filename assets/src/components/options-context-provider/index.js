@@ -3,6 +3,7 @@
  */
 import { createContext, useEffect, useState, useRef, useCallback, useContext } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
@@ -38,6 +39,7 @@ function waitASecond() {
  */
 export function OptionsContextProvider( { children, optionsRestPath, populateDefaultValues, hasErrorBoundary = false, delaySave = false } ) {
 	const [ updates, setUpdates ] = useState( {} );
+	const [ fetchingPluginSuppression, setFetchingPluginSuppression ] = useState( false );
 	const [ fetchingOptions, setFetchingOptions ] = useState( null );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
@@ -54,6 +56,52 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 	useEffect( () => () => {
 		hasUnmounted.current = true;
 	}, [] );
+
+	/**
+	 * Fetches plugin suppression data.
+	 */
+	const refetchPluginSuppression = useCallback( () => {
+		if ( error || fetchingPluginSuppression ) {
+			return;
+		}
+
+		/**
+		 * Fetches suppression data from the REST endpoint.
+		 */
+		( async () => {
+			setFetchingPluginSuppression( true );
+
+			try {
+				const fetchedPluginSuppression = await apiFetch( {
+					path: addQueryArgs( optionsRestPath, {
+						_fields: [ 'suppressed_plugins', 'suppressible_plugins' ],
+					} ),
+				} );
+
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				setOriginalOptions( {
+					...originalOptions,
+					...fetchedPluginSuppression,
+				} );
+			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				setError( e );
+
+				if ( hasErrorBoundary ) {
+					setAsyncError( e );
+				}
+				return;
+			}
+
+			setFetchingPluginSuppression( false );
+		} )();
+	}, [ error, fetchingPluginSuppression, hasErrorBoundary, optionsRestPath, originalOptions, setAsyncError, setError ] );
 
 	/**
 	 * Fetches options.
@@ -202,6 +250,7 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 					unsetOption,
 					updateOptions,
 					readerModeWasOverridden,
+					refetchPluginSuppression,
 					setReaderModeWasOverridden,
 					modifiedOptions,
 				}
