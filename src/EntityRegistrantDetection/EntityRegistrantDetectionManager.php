@@ -191,6 +191,12 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 					];
 					break;
 				case 'shortcode':
+					global $shortcode_tags;
+
+					if ( ! isset( $shortcode_tags[ $entity ] ) ) {
+						break;
+					}
+
 					self::$shortcodes_source[ $entity ] = [
 						'tag'    => $entity,
 						'source' => $source,
