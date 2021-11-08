@@ -207,7 +207,9 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 	 */
 	public function register() {
 
-		add_action( 'all', [ $this, 'wrap_hook_callbacks' ] );
+		$int_min = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+
+		add_action( 'all', [ $this, 'wrap_hook_callbacks' ], $int_min );
 	}
 
 	/**
@@ -229,12 +231,14 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 
 		foreach ( $wp_filter[ $hook ]->callbacks as $priority => &$callbacks ) {
 			foreach ( $callbacks as &$callback ) {
-				$callback['function'] = self::wrapped_callback(
-					array_merge(
-						$callback,
-						compact( 'priority', 'hook' )
-					)
-				);
+				if ( ! $callback['function'] instanceof CallbackWrapper ) {
+					$callback['function'] = self::wrapped_callback(
+						array_merge(
+							$callback,
+							compact( 'priority', 'hook' )
+						)
+					);
+				}
 			}
 		}
 
@@ -243,12 +247,18 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 	/**
 	 * Wrap the given callable function.
 	 *
-	 * @param callable $callback Callback function.
+	 * @param array $callback [
+	 *     The callback data.
+	 *     @type callable $function
+	 *     @type int      $accepted_args
+	 *     @type int      $priority
+	 *     @type int      $hook
+	 * ]
 	 *
 	 * @return CallbackWrapper Instance of CallbackWrapper.
 	 */
 	protected static function wrapped_callback( $callback ) {
 
-		return ( ! $callback['function'] instanceof CallbackWrapper ) ? new CallbackWrapper( $callback ) : $callback['function'];
+		return new CallbackWrapper( $callback );
 	}
 }

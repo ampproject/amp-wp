@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\EntityRegistrantDetection;
 
 use AmpProject\AmpWP\Services;
+use ArrayAccess;
 use WP_Block_Type_Registry;
 
 /**
@@ -17,7 +18,7 @@ use WP_Block_Type_Registry;
  * @package AmpProject\AmpWP
  * @internal
  */
-class CallbackWrapper {
+class CallbackWrapper implements ArrayAccess {
 
 	/**
 	 * Callback data.
@@ -52,6 +53,8 @@ class CallbackWrapper {
 	 *     The callback data.
 	 *     @type callable $function
 	 *     @type int      $accepted_args
+	 *     @type int      $priority
+	 *     @type int      $hook
 	 * ]
 	 */
 	public function __construct( $callback ) {
@@ -176,5 +179,70 @@ class CallbackWrapper {
 			'block'     => array_keys( $block_types ),
 			'shortcode' => array_keys( $shortcode_tags ),
 		];
+	}
+
+	/**
+	 * Offset exists.
+	 *
+	 * @param mixed $offset Offset.
+	 *
+	 * @return bool Exists.
+	 */
+	public function offsetExists( $offset ) {
+
+		if ( ! is_array( $this->callback ) ) {
+			return false;
+		}
+
+		return isset( $this->callback[ $offset ] );
+	}
+
+	/**
+	 * Offset get.
+	 *
+	 * @param mixed $offset Offset.
+	 *
+	 * @return mixed|null Value.
+	 */
+	public function offsetGet( $offset ) {
+
+		if ( is_array( $this->callback ) && isset( $this->callback[ $offset ] ) ) {
+			return $this->callback[ $offset ];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Offset set.
+	 *
+	 * @param mixed $offset Offset.
+	 * @param mixed $value  Value.
+	 */
+	public function offsetSet( $offset, $value ) {
+
+		if ( ! is_array( $this->callback ) ) {
+			return;
+		}
+
+		if ( is_null( $offset ) ) {
+			$this->callback[] = $value;
+		} else {
+			$this->callback[ $offset ] = $value;
+		}
+	}
+
+	/**
+	 * Offset unset.
+	 *
+	 * @param mixed $offset Offset.
+	 */
+	public function offsetUnset( $offset ) {
+
+		if ( ! is_array( $this->callback ) ) {
+			return;
+		}
+
+		unset( $this->callback[ $offset ] );
 	}
 }
