@@ -7,7 +7,7 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 
 /**
@@ -21,11 +21,17 @@ import { SiteScanResults } from './index';
 /**
  * Render a list of themes that cause AMP Incompatibility.
  *
- * @param {Object}   props           Component props.
- * @param {string}   props.className Component class name.
- * @param {string[]} props.slugs     List of theme slugs.
+ * @param {Object}   props              Component props.
+ * @param {string}   props.className    Component class name.
+ * @param {boolean}  props.showHelpText Show additional help text above the issues list.
+ * @param {string[]} props.slugs        List of theme slugs.
  */
-export function ThemesWithAmpIncompatibility( { className, slugs = [], ...props } ) {
+export function ThemesWithAmpIncompatibility( {
+	className,
+	showHelpText = false,
+	slugs = [],
+	...props
+} ) {
 	const themesData = useNormalizedThemesData();
 	const sources = useMemo( () => slugs?.map( ( slug ) => themesData?.[ slug ] ?? {
 		slug,
@@ -37,10 +43,20 @@ export function ThemesWithAmpIncompatibility( { className, slugs = [], ...props 
 			title={ __( 'Themes with AMP incompatibility', 'amp' ) }
 			icon={ <IconWebsitePaintBrush /> }
 			count={ slugs.length }
-			sources={ sources }
 			className={ classnames( 'site-scan-results--themes', className ) }
 			{ ...props }
 		>
+			{ showHelpText && (
+				<p
+					dangerouslySetInnerHTML={ {
+						__html: sprintf(
+							// translators: placeholder stands for page anchors.
+							__( 'Because of theme issues we’ve found, you’ll want to switch your template mode. Please see <a href="%s">template mode recommendations</a> below.', 'amp' ),
+							'#template-modes',
+						),
+					} }
+				/>
+			) }
 			<SiteScanSourcesList
 				sources={ sources }
 				inactiveSourceNotice={ __( 'This theme has been deactivated since last site scan.' ) }
@@ -52,5 +68,6 @@ export function ThemesWithAmpIncompatibility( { className, slugs = [], ...props 
 
 ThemesWithAmpIncompatibility.propTypes = {
 	className: PropTypes.string,
+	showHelpText: PropTypes.bool,
 	slugs: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };
