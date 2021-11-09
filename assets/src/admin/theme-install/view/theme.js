@@ -72,10 +72,14 @@ export default wpThemeView.extend( {
 		}
 
 		if ( slug && ! this.isWPORGTheme( slug ) ) {
+			const externalLinkIcon = document.createElement( 'span' );
+			externalLinkIcon.classList.add( 'dashicons' );
+			externalLinkIcon.classList.add( 'dashicons-external' );
+
 			const siteLinkButton = document.createElement( 'a' );
 			siteLinkButton.classList.add( 'button' );
 			siteLinkButton.classList.add( 'button-primary' );
-			siteLinkButton.append( __( 'Visit Site', 'amp' ) );
+			siteLinkButton.append( __( 'Visit Site', 'amp' ), externalLinkIcon );
 
 			if ( data?.preview_url ) {
 				siteLinkButton.href = data.preview_url;
@@ -100,7 +104,7 @@ export default wpThemeView.extend( {
 			const moreDetail = element.querySelector( '.more-details' );
 			if ( moreDetail ) {
 				moreDetail.textContent = ''; // Remove children.
-				moreDetail.append( __( 'Visit Site', 'amp' ) );
+				moreDetail.append( __( 'Visit Site', 'amp' ), externalLinkIcon.cloneNode( true ) );
 			}
 		}
 	},
