@@ -32,12 +32,12 @@ export function SiteScan() {
 	const { setCanGoForward } = useContext( Navigation );
 	const {
 		cancelSiteScan,
-		currentlyScannedUrlIndex,
 		isCancelled,
 		isCompleted,
 		isFailed,
 		isFetchingScannableUrls,
 		isReady,
+		mostRecentlyScannedUrlIndex,
 		pluginsWithAmpIncompatibility,
 		scannableUrls,
 		startSiteScan,
@@ -45,6 +45,7 @@ export function SiteScan() {
 	} = useContext( SiteScanContext );
 	const { developerToolsOption } = useContext( User );
 	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
+
 	/**
 	 * Cancel scan on component unmount.
 	 */
@@ -147,7 +148,7 @@ export function SiteScan() {
 					</p>
 					<ProgressBar value={ isCompleted
 						? 100
-						: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
+						: ( mostRecentlyScannedUrlIndex / scannableUrls.length * 100 )
 					} />
 					<p className="site-scan__status">
 						{ isCompleted
@@ -155,9 +156,9 @@ export function SiteScan() {
 							: sprintf(
 								// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.
 								__( 'Scanning %1$d/%2$d URLs: Checking %3$s…', 'amp' ),
-								currentlyScannedUrlIndex + 1,
+								mostRecentlyScannedUrlIndex + 1,
 								scannableUrls.length,
-								scannableUrls[ currentlyScannedUrlIndex ]?.label,
+								scannableUrls[ mostRecentlyScannedUrlIndex ]?.label,
 							)
 						}
 					</p>
