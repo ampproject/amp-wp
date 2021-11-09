@@ -2,7 +2,7 @@
 /**
  * Test case for EntityRegistrantDetectionManager
  *
- * @package AmpProject\AmpWP\Support\Tests
+ * @package AmpProject\AmpWP\EntityRegistrantDetection\Tests
  */
 
 namespace AmpProject\AmpWP\EntityRegistrantDetection\Tests;

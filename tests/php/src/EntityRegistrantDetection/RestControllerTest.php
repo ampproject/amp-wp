@@ -2,7 +2,7 @@
 /**
  * Test case for RestController
  *
- * @package AmpProject\AmpWP\Support\Tests
+ * @package AmpProject\AmpWP\EntityRegistrantDetection\Tests
  */
 
 namespace AmpProject\AmpWP\EntityRegistrantDetection\Tests;
@@ -71,6 +71,8 @@ class RestControllerTest extends DependencyInjectedTestCase {
 	 * @covers ::register()
 	 */
 	public function test_register() {
+
+		$this->instance->register();
 
 		$rest_server = rest_get_server();
 

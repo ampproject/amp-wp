@@ -54,7 +54,7 @@ class CallbackWrapper implements ArrayAccess {
 	 *     @type callable $function
 	 *     @type int      $accepted_args
 	 *     @type int      $priority
-	 *     @type int      $hook
+	 *     @type string   $hook
 	 * ]
 	 */
 	public function __construct( $callback ) {
@@ -145,6 +145,7 @@ class CallbackWrapper implements ArrayAccess {
 				$final_registered_entities[ $entity_type ],
 				$this->registered_entities[ $entity_type ]
 			);
+			$different = array_values( $different );
 
 			if ( $different && empty( $this->source ) ) {
 				$this->set_source();
