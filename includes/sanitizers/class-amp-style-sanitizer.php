@@ -2540,6 +2540,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet_base_url = trailingslashit( $stylesheet_base_url );
 		}
 
+		// Define array of fonts to be preloaded.
+		$fonts_to_preload = [];
+
 		// Attempt to transform data: URLs in src properties to be external file URLs.
 		$converted_data_urls = [];
 		foreach ( $src_properties as $src_property ) {
@@ -2684,6 +2687,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$converted_data_urls[] = $data_url;
 				}
 			} // End foreach $source_data_url_objects.
+
+			// Loop through fonts loaded from files.
+			foreach ( $source_file_urls as $source_file_url ) {
+				$properties = $ruleset->getRules( 'font-display' );
+
+				if ( ! isset( $properties[0] ) ) {
+					// If a given font is loaded from file and without font-display property, add font-display:optional and preload it.
+					$font_display_rule = new Rule( 'font-display' );
+					$font_display_rule->setValue( 'optional' );
+					$ruleset->addRule( $font_display_rule );
+					$fonts_to_preload[] = $source_file_url;
+				} else if ( 'optional' === $properties[0]->getValue() ) {
+					// If a given font is loaded from file and with font-display:optional, preload it.
+					$fonts_to_preload[] = $source_file_url;
+				}
+			} // End foreach $source_file_urls.
 		} // End foreach $src_properties.
 
 		/*
@@ -2698,21 +2717,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$font_display_rule = new Rule( 'font-display' );
 			$font_display_rule->setValue( 'optional' );
 			$ruleset->addRule( $font_display_rule );
+			$fonts_to_preload[] = $converted_data_urls[0]->getURL()->getString();
 		}
 
 		// Preload the first data: URL that was converted to an external file.
-		if ( isset( $converted_data_urls[0] ) ) {
-			$link = AMP_DOM_Utils::create_node(
-				$this->dom,
-				Tag::LINK,
-				[
-					Attribute::REL         => Attribute::REL_PRELOAD,
-					Attribute::AS_         => 'font',
-					Attribute::HREF        => $converted_data_urls[0]->getURL()->getString(),
-					Attribute::CROSSORIGIN => '',
-				]
-			);
-			$this->dom->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
+		if ( ! empty( $fonts_to_preload ) ) {
+			foreach ( $fonts_to_preload as $font_to_preload ) {
+				$link = AMP_DOM_Utils::create_node(
+					$this->dom,
+					Tag::LINK,
+					[
+						Attribute::REL         => Attribute::REL_PRELOAD,
+						Attribute::AS_         => 'font',
+						Attribute::HREF        => $font_to_preload,
+						Attribute::CROSSORIGIN => '',
+					]
+				);
+				$this->dom->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
+			}
 		}
 	}
 
