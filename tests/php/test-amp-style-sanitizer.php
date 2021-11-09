@@ -213,7 +213,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<style>@charset "UTF-8"; @charset "UTF-8"; @charset "UTF-8"; html:lang(zz){ color: gray; } @media screen and ( max-width: 640px ) { body { font-size: small; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); } @-moz-document url-prefix() { body { color:red; } } @supports (display: grid) { div { display: grid; } } @-moz-keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } } @keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } }</style><div></div>',
 				'<div></div>',
 				[
-					'@media screen and ( max-width: 640px ){body{font-size:small}}@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2")}@-moz-document url-prefix(){body{color:red}}@supports (display: grid){div{display:grid}}@-moz-keyframes appear{from{opacity:0}to{opacity:1}}@keyframes appear{from{opacity:0}to{opacity:1}}',
+					'@media screen and ( max-width: 640px ){body{font-size:small}}@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2");font-display:optional}@-moz-document url-prefix(){body{color:red}}@supports (display: grid){div{display:grid}}@-moz-keyframes appear{from{opacity:0}to{opacity:1}}@keyframes appear{from{opacity:0}to{opacity:1}}',
 				],
 			],
 
@@ -2112,7 +2112,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'.b{color:blue}',
 				'#exists{color:white}',
 				'span{color:white}',
-				'@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2")}',
+				'@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2");font-display:optional}',
 				'.b{background:lightblue}',
 				'@media screen and (max-width: 1000px){@supports (display: grid){.b::before{content:"@media screen and (max-width: 1000px) {"}.b::after{content:"}"}}}@media print{@media print{@media print{.b{color:blue}}}}@media screen and (min-width: 750px) and (max-width: 999px){.b::before{content:"@media screen and (max-width: 1000px) {}";content:"@media screen and (max-width: 1000px) {}"}}',
 			],
