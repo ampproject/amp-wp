@@ -198,6 +198,13 @@ class AMP_Validation_Manager {
 	protected static $original_block_render_callbacks = [];
 
 	/**
+	 * Collection of backtraces for when wp_editor() was called.
+	 *
+	 * @var array
+	 */
+	protected static $wp_editor_sources = [];
+
+	/**
 	 * Whether a validate request is being performed.
 	 *
 	 * When responding to a request to validate a URL, instead of an HTML document being returned, a JSON document is
@@ -687,6 +694,38 @@ class AMP_Validation_Manager {
 		add_filter( 'do_shortcode_tag', [ __CLASS__, 'decorate_shortcode_source' ], PHP_INT_MAX, 2 );
 		add_filter( 'embed_oembed_html', [ __CLASS__, 'decorate_embed_source' ], PHP_INT_MAX, 3 );
 		add_filter( 'the_content', [ __CLASS__, 'add_block_source_comments' ], 8 ); // The do_blocks() function runs at priority 9.
+		add_filter( 'the_editor', [ __CLASS__, 'filter_the_editor_to_detect_sources' ] );
+	}
+
+	/**
+	 * Filter `the_editor` to detect the theme/plugin responsible for calling it `wp_editor()`.
+	 *
+	 * @since 2.2
+	 * @see wp_editor()
+	 *
+	 * @param string $output Editor's HTML markup.
+	 * @return string Editor's HTML markup (unchanged).
+	 */
+	public static function filter_the_editor_to_detect_sources( $output ) {
+		$file_reflection = Services::get( 'dev_tools.file_reflection' );
+
+		// Find the first plugin/theme in the call stack.
+		$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find theme/plugin responsible for calling.
+		foreach ( $backtrace as $call ) {
+			if (
+				isset( $call['function'], $call['file'] )
+				&&
+				'wp_editor' === $call['function']
+			) {
+				$source = $file_reflection->get_file_source( $call['file'] );
+				if ( $source ) {
+					self::$wp_editor_sources[] = $source;
+				}
+				break;
+			}
+		}
+
+		return $output;
 	}
 
 	/**
@@ -842,6 +881,7 @@ class AMP_Validation_Manager {
 		self::$extra_script_sources            = [];
 		self::$extra_style_sources             = [];
 		self::$original_block_render_callbacks = [];
+		self::$wp_editor_sources               = [];
 	}
 
 	/**
@@ -994,25 +1034,22 @@ class AMP_Validation_Manager {
 				if ( $matches['handle'] !== $style_handle ) {
 					continue;
 				}
-				foreach ( self::$enqueued_style_sources as $enqueued_style_sources_handle => $enqueued_style_sources ) {
-					if (
-						$enqueued_style_sources_handle !== $style_handle
-						&&
-						wp_styles()->query( $enqueued_style_sources_handle, 'done' )
-						&&
-						self::has_dependency( wp_styles(), $enqueued_style_sources_handle, $style_handle )
-					) {
-						$sources = array_merge(
-							array_map(
-								static function ( $enqueued_style_source ) use ( $style_handle ) {
-									$enqueued_style_source['dependency_handle'] = $style_handle;
-									return $enqueued_style_source;
-								},
-								$enqueued_style_sources
-							),
-							$sources
-						);
-					}
+
+				foreach (
+					self::find_done_dependent_handles( wp_styles(), $style_handle, array_keys( self::$enqueued_style_sources ) )
+					as
+					$enqueued_style_sources_handle
+				) {
+					$sources = array_merge(
+						array_map(
+							static function ( $enqueued_style_source ) use ( $style_handle ) {
+								$enqueued_style_source['dependency_handle'] = $style_handle;
+								return $enqueued_style_source;
+							},
+							self::$enqueued_style_sources[ $enqueued_style_sources_handle ]
+						),
+						$sources
+					);
 				}
 			}
 		}
@@ -1066,37 +1103,110 @@ class AMP_Validation_Manager {
 					if ( ! self::is_matching_script( $node, $script_handle ) ) {
 						continue;
 					}
-					foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
-						if (
-							$enqueued_script_sources_handle !== $script_handle
-							&&
-							wp_scripts()->query( $enqueued_script_sources_handle, 'done' )
-							&&
-							self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle )
-						) {
-							$sources = array_merge(
-								array_map(
-									static function ( $enqueued_script_source ) use ( $script_handle ) {
-										$enqueued_script_source['dependency_handle'] = $script_handle;
-										return $enqueued_script_source;
-									},
-									$enqueued_script_sources
-								),
-								$sources
-							);
-						}
+
+					foreach (
+						self::find_done_dependent_handles( wp_scripts(), $script_handle, array_keys( self::$enqueued_script_sources ) )
+						as
+						$enqueued_script_sources_handle
+					) {
+						$sources = array_merge(
+							array_map(
+								static function ( $enqueued_script_source ) use ( $script_handle ) {
+									$enqueued_script_source['dependency_handle'] = $script_handle;
+									return $enqueued_script_source;
+								},
+								self::$enqueued_script_sources[ $enqueued_script_sources_handle ]
+							),
+							$sources
+						);
 					}
 				}
 			} elseif ( $node->firstChild instanceof DOMText ) {
 				$text = $node->textContent;
 
-				// Identify the inline script sources.
-				foreach ( self::$extra_script_sources as $extra_data => $extra_sources ) {
-					if ( false !== strpos( $text, $extra_data ) ) {
+				$script_handle = null;
+				$script_type   = null;
+				if (
+					$node->hasAttribute( Attribute::ID )
+					&&
+					preg_match( '/^(.+)-js-(extra|after|before|translations)/', $node->getAttribute( Attribute::ID ), $matches )
+				) {
+					$script_handle = $matches[1];
+					$script_type   = $matches[2];
+				}
+
+				if ( 'translations' === $script_type ) {
+
+					// Obtain sources for script translations.
+					if ( isset( self::$enqueued_script_sources[ $script_handle ] ) ) {
+						$sources = array_merge( $sources, self::$enqueued_script_sources[ $script_handle ] );
+					}
+
+					foreach (
+						self::find_done_dependent_handles( wp_scripts(), $script_handle, array_keys( self::$enqueued_script_sources ) )
+						as
+						$enqueued_script_sources_handle
+					) {
 						$sources = array_merge(
-							$sources,
-							$extra_sources
+							array_map(
+								static function ( $enqueued_script_source ) use ( $script_handle ) {
+									$enqueued_script_source['dependency_handle'] = $script_handle;
+									return $enqueued_script_source;
+								},
+								self::$enqueued_script_sources[ $enqueued_script_sources_handle ]
+							),
+							$sources
 						);
+					}
+				} else {
+					// Identify the inline script sources.
+					foreach ( self::$extra_script_sources as $extra_data => $extra_sources ) {
+						if ( false === strpos( $text, $extra_data ) ) {
+							continue;
+						}
+
+						$has_non_core = false;
+						foreach ( $extra_sources as $extra_source ) {
+							if ( 'core' !== $extra_source['type'] ) {
+								$has_non_core = true;
+								break;
+							}
+						}
+
+						if ( $has_non_core ) {
+							$sources = array_merge(
+								$sources,
+								$extra_sources
+							);
+						} else {
+							if ( isset( self::$enqueued_script_sources[ $script_handle ] ) ) {
+								$sources = array_merge( $sources, self::$enqueued_script_sources[ $script_handle ] );
+							}
+
+							foreach (
+								self::find_done_dependent_handles( wp_scripts(), $script_handle, array_keys( self::$enqueued_script_sources ) )
+								as
+								$enqueued_script_sources_handle
+							) {
+								$sources = array_merge(
+									array_map(
+										static function ( $enqueued_script_source ) use ( $script_handle ) {
+											$enqueued_script_source['dependency_handle'] = $script_handle;
+											return $enqueued_script_source;
+										},
+										self::$enqueued_script_sources[ $enqueued_script_sources_handle ]
+									),
+									$sources
+								);
+							}
+						}
+					}
+				}
+
+				// Add indirect sources for inline scripts added by wp_editor().
+				foreach ( $sources as $source ) {
+					if ( isset( $source['function'] ) && '_WP_Editors::editor_js' === $source['function'] ) {
+						$sources = array_merge( $sources, self::$wp_editor_sources );
 					}
 				}
 			}
@@ -1105,6 +1215,30 @@ class AMP_Validation_Manager {
 		$sources = array_values( array_unique( $sources, SORT_REGULAR ) );
 
 		return $sources;
+	}
+
+	/**
+	 * Find dependent handles that have been printed.
+	 *
+	 * @param WP_Dependencies $dependencies Dependencies.
+	 * @param string          $handle Handle.
+	 * @param string[]        $enqueued_handles Enqueued handles.
+	 * @return string[] Found handles.
+	 */
+	private static function find_done_dependent_handles( WP_Dependencies $dependencies, $handle, $enqueued_handles ) {
+		$dependent_handles = [];
+		foreach ( $enqueued_handles as $enqueued_handle ) {
+			if (
+				$enqueued_handle !== $handle
+				&&
+				$dependencies->query( $enqueued_handle, 'done' )
+				&&
+				self::has_dependency( $dependencies, $enqueued_handle, $handle )
+			) {
+				$dependent_handles[] = $enqueued_handle;
+			}
+		}
+		return $dependent_handles;
 	}
 
 	/**
@@ -1305,6 +1439,11 @@ class AMP_Validation_Manager {
 					continue;
 				}
 
+				$indirect_sources = [];
+				if ( '_WP_Editors::enqueue_scripts' === $source['function'] ) {
+					$indirect_sources = self::$wp_editor_sources;
+				}
+
 				/**
 				 * Reflection.
 				 *
@@ -1332,7 +1471,7 @@ class AMP_Validation_Manager {
 				$wrapped_callback   = self::wrapped_callback(
 					array_merge(
 						$callback,
-						compact( 'priority', 'source' )
+						compact( 'priority', 'source', 'indirect_sources' )
 					)
 				);
 
@@ -1519,12 +1658,7 @@ class AMP_Validation_Manager {
 
 		// Check if any functions in call stack are output buffering display handlers.
 		$called_functions = [];
-		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {
-			$arg = DEBUG_BACKTRACE_IGNORE_ARGS; // phpcs:ignore PHPCompatibility.Constants.NewConstants.debug_backtrace_ignore_argsFound
-		} else {
-			$arg = false;
-		}
-		$backtrace = debug_backtrace( $arg ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find out if we are in a buffering display handler.
+		$backtrace        = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find out if we are in a buffering display handler.
 		foreach ( $backtrace as $call_stack ) {
 			if ( '{closure}' === $call_stack['function'] ) {
 				$called_functions[] = 'Closure::__invoke';

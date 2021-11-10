@@ -29,6 +29,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 *     @type callable $function
 	 *     @type int      $accepted_args
 	 *     @type array    $source
+	 *     @type array    $indirect_sources
 	 * }
 	 */
 	public function __construct( $callback ) {
@@ -217,6 +218,11 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 */
 	protected function finalize_styles( WP_Styles $wp_styles, array $before_registered, array $before_enqueued, array $before_extras ) {
 
+		$sources = [ $this->callback['source'] ];
+		if ( ! empty( $this->callback['indirect_sources'] ) ) {
+			$sources = array_merge( $sources, $this->callback['indirect_sources'] );
+		}
+
 		// Keep track of which source enqueued the styles.
 		// Note: Only the first time a style is registered/enqueued will be detected.
 		$added_handles = array_unique(
@@ -226,11 +232,13 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 			)
 		);
 		foreach ( $added_handles as $handle ) {
-			AMP_Validation_Manager::$enqueued_style_sources[ $handle ][] = array_merge(
-				$this->callback['source'],
-				[ 'dependency_type' => 'style' ],
-				compact( 'handle' )
-			);
+			foreach ( $sources as $source ) {
+				AMP_Validation_Manager::$enqueued_style_sources[ $handle ][] = array_merge(
+					$source,
+					[ 'dependency_type' => 'style' ],
+					compact( 'handle' )
+				);
+			}
 		}
 
 		// Keep track of which source added an inline style.
@@ -244,15 +252,17 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 				array_filter( isset( $before_extras[ $handle ]['after'] ) ? (array) $before_extras[ $handle ]['after'] : [] )
 			);
 			foreach ( $additions as $addition ) {
-				AMP_Validation_Manager::$extra_style_sources[ $handle ][ $addition ][] = array_merge(
-					$this->callback['source'],
-					[
-						'dependency_type' => 'style',
-						'extra_key'       => 'after',
-						'text'            => $addition,
-					],
-					compact( 'handle' )
-				);
+				foreach ( $sources as $source ) {
+					AMP_Validation_Manager::$extra_style_sources[ $handle ][ $addition ][] = array_merge(
+						$source,
+						[
+							'dependency_type' => 'style',
+							'extra_key'       => 'after',
+							'text'            => $addition,
+						],
+						compact( 'handle' )
+					);
+				}
 			}
 		}
 	}
@@ -268,6 +278,11 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 * @param array[]    $before_extras     Script extras before invocation.
 	 */
 	protected function finalize_scripts( WP_Scripts $wp_scripts, array $before_registered, array $before_enqueued, array $before_extras ) {
+
+		$sources = [ $this->callback['source'] ];
+		if ( ! empty( $this->callback['indirect_sources'] ) ) {
+			$sources = array_merge( $sources, $this->callback['indirect_sources'] );
+		}
 
 		// Keep track of which source enqueued the scripts.
 		// Note: Only the first time a script is registered/enqueued will be detected.
@@ -286,11 +301,13 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 			}
 
 			foreach ( $handles as $handle ) {
-				AMP_Validation_Manager::$enqueued_script_sources[ $handle ][] = array_merge(
-					$this->callback['source'],
-					[ 'dependency_type' => 'script' ],
-					compact( 'handle' )
-				);
+				foreach ( $sources as $source ) {
+					AMP_Validation_Manager::$enqueued_script_sources[ $handle ][] = array_merge(
+						$source,
+						[ 'dependency_type' => 'script' ],
+						compact( 'handle' )
+					);
+				}
 			}
 		}
 
@@ -327,15 +344,17 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 					array_filter( $before )
 				);
 				foreach ( $additions as $addition ) {
-					AMP_Validation_Manager::$extra_script_sources[ $addition ][] = array_merge(
-						$this->callback['source'],
-						[
-							'dependency_type' => 'script',
-							'extra_key'       => $key,
-							'text'            => $addition,
-						],
-						compact( 'handle' )
-					);
+					foreach ( $sources as $source ) {
+						AMP_Validation_Manager::$extra_script_sources[ $addition ][] = array_merge(
+							$source,
+							[
+								'dependency_type' => 'script',
+								'extra_key'       => $key,
+								'text'            => $addition,
+							],
+							compact( 'handle' )
+						);
+					}
 				}
 			}
 		}
