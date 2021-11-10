@@ -21,6 +21,103 @@ use WP_Block_Type_Registry;
 class CallbackWrapper implements ArrayAccess {
 
 	/**
+	 * List of default entities.
+	 *
+	 * @var array [
+	 *     @type array $post_type List of default post types slug.
+	 *     @type array $taxonomy  List of default taxonomy slug.
+	 *     @type array $block     List of default block type.
+	 *     @type array $shortcode List of default shortcode.
+	 * ]
+	 */
+	const DEFAULT_ENTITIES = [
+		'post_type' => [
+			'post',
+			'page',
+			'attachment',
+			'revision',
+			'nav_menu_item',
+		],
+		'taxonomy'  => [
+			'category',
+			'post_tag',
+			'nav_menu',
+			'post_format',
+		],
+		'block'     => [
+			'core/archives',
+			'core/block',
+			'core/calendar',
+			'core/categories',
+			'core/file',
+			'core/latest-comments',
+			'core/latest-posts',
+			'core/legacy-widget',
+			'core/loginout',
+			'core/page-list',
+			'core/post-content',
+			'core/post-date',
+			'core/post-excerpt',
+			'core/post-featured-image',
+			'core/post-terms',
+			'core/post-title',
+			'core/post-template',
+			'core/query',
+			'core/query-pagination',
+			'core/query-pagination-next',
+			'core/query-pagination-numbers',
+			'core/query-pagination-previous',
+			'core/query-title',
+			'core/rss',
+			'core/search',
+			'core/shortcode',
+			'core/site-tagline',
+			'core/site-logo',
+			'core/site-title',
+			'core/social-link',
+			'core/tag-cloud',
+			'core/audio',
+			'core/button',
+			'core/buttons',
+			'core/code',
+			'core/column',
+			'core/columns',
+			'core/cover',
+			'core/embed',
+			'core/freeform',
+			'core/gallery',
+			'core/group',
+			'core/heading',
+			'core/html',
+			'core/image',
+			'core/list',
+			'core/media-text',
+			'core/missing',
+			'core/more',
+			'core/nextpage',
+			'core/paragraph',
+			'core/preformatted',
+			'core/pullquote',
+			'core/quote',
+			'core/separator',
+			'core/social-links',
+			'core/spacer',
+			'core/table',
+			'core/text-columns',
+			'core/verse',
+			'core/video',
+		],
+		'shortcode' => [
+			'caption',
+			'gallery',
+			'audio',
+			'video',
+			'playlist',
+			'embed',
+		],
+	];
+
+	/**
 	 * Callback data.
 	 *
 	 * @var array
@@ -143,7 +240,8 @@ class CallbackWrapper implements ArrayAccess {
 
 			$different = array_diff(
 				$final_registered_entities[ $entity_type ],
-				$this->registered_entities[ $entity_type ]
+				$this->registered_entities[ $entity_type ],
+				self::DEFAULT_ENTITIES[ $entity_type ]
 			);
 			$different = array_values( $different );
 
