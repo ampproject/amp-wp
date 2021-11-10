@@ -609,8 +609,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_action( 'all', [ self::TESTED_CLASS, 'wrap_hook_callbacks' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
-		$this->assertEquals( PHP_INT_MAX, has_action( 'do_shortcode_tag', [ self::TESTED_CLASS, 'decorate_shortcode_source' ] ) );
-		$this->assertEquals( 8, has_action( 'the_content', [ self::TESTED_CLASS, 'add_block_source_comments' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'do_shortcode_tag', [ self::TESTED_CLASS, 'decorate_shortcode_source' ] ) );
+		$this->assertEquals( 8, has_filter( 'the_content', [ self::TESTED_CLASS, 'add_block_source_comments' ] ) );
+		$this->assertEquals( 10, has_filter( 'the_editor', [ self::TESTED_CLASS, 'filter_the_editor_to_detect_sources' ] ) );
 	}
 
 	/**
@@ -1229,6 +1230,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 *
 	 * @dataProvider get_locate_sources_data
 	 * @covers AMP_Validation_Manager::locate_sources()
+	 * @covers AMP_Validation_Manager::filter_the_editor_to_detect_sources()
 	 * @covers AMP_Validation_Callback_Wrapper
 	 *
 	 * @param callable        $callback Callback set up (add actions).

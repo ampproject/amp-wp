@@ -694,32 +694,38 @@ class AMP_Validation_Manager {
 		add_filter( 'do_shortcode_tag', [ __CLASS__, 'decorate_shortcode_source' ], PHP_INT_MAX, 2 );
 		add_filter( 'embed_oembed_html', [ __CLASS__, 'decorate_embed_source' ], PHP_INT_MAX, 3 );
 		add_filter( 'the_content', [ __CLASS__, 'add_block_source_comments' ], 8 ); // The do_blocks() function runs at priority 9.
+		add_filter( 'the_editor', [ __CLASS__, 'filter_the_editor_to_detect_sources' ] );
+	}
 
-		add_filter(
-			'the_editor',
-			function ( $editor ) {
-				$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find theme/plugin responsible for calling.
+	/**
+	 * Filter `the_editor` to detect the theme/plugin responsible for calling it `wp_editor()`.
+	 *
+	 * @since 2.2
+	 * @see wp_editor()
+	 *
+	 * @param string $output Editor's HTML markup.
+	 * @return string Editor's HTML markup (unchanged).
+	 */
+	public static function filter_the_editor_to_detect_sources( $output ) {
+		$file_reflection = Services::get( 'dev_tools.file_reflection' );
 
-				$file_reflection = Services::get( 'dev_tools.file_reflection' );
-
-				// Find the first plugin/theme in the call stack.
-				foreach ( $backtrace as $call ) {
-					if (
-						isset( $call['function'], $call['file'] )
-						&&
-						'wp_editor' === $call['function']
-					) {
-						$source = $file_reflection->get_file_source( $call['file'] );
-						if ( $source ) {
-							self::$wp_editor_sources[] = $source;
-						}
-						break;
-					}
+		// Find the first plugin/theme in the call stack.
+		$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find theme/plugin responsible for calling.
+		foreach ( $backtrace as $call ) {
+			if (
+				isset( $call['function'], $call['file'] )
+				&&
+				'wp_editor' === $call['function']
+			) {
+				$source = $file_reflection->get_file_source( $call['file'] );
+				if ( $source ) {
+					self::$wp_editor_sources[] = $source;
 				}
-
-				return $editor;
+				break;
 			}
-		);
+		}
+
+		return $output;
 	}
 
 	/**
