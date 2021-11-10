@@ -30,9 +30,9 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 			],
 			'simple_url' => [
 				'https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/' . PHP_EOL,
-				'<p><amp-wordpress-embed layout="fixed-height" height="200" title="&#8220;Proposal for a Performance team&#8221; &#8212; Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/"></p>' . PHP_EOL .
-				'<blockquote class="wp-embedded-content" placeholder><p><a href="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/">Proposal for a Performance team</a></p></blockquote>' . PHP_EOL .
-				'<p><button overflow>Expand</button></amp-wordpress-embed></p>' . PHP_EOL,
+				'<p><amp-wordpress-embed height="200" title="&#8220;Proposal for a Performance team&#8221; &#8212; Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/"></p>' . PHP_EOL .
+				'<blockquote class="wp-embedded-content" data-secret="%s" placeholder><p><a href="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/">Proposal for a Performance team</a></p></blockquote>' . PHP_EOL .
+				'<p><button overflow type="button">Expand</button></amp-wordpress-embed></p>' . PHP_EOL,
 			],
 		];
 	}
@@ -49,6 +49,12 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 		$embed = new AMP_WordPress_Embed_Handler();
 		$embed->register_embed();
 		$filtered_content = apply_filters( 'the_content', $source );
+
+		// Extract "data-secret" attr value.
+		preg_match( '/data-secret="(?P<secret>[^"]*)"/', $filtered_content, $matches );
+		if ( isset( $matches['secret'] ) ) {
+			$expected = sprintf( $expected, $matches['secret'] );
+		}
 
 		$this->assertEquals( $expected, $filtered_content );
 	}

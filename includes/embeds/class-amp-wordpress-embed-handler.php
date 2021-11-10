@@ -5,6 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\Attribute;
+use AmpProject\Extension;
+
 /**
  * Class AMP_WordPress_Embed_Handler
  *
@@ -69,26 +72,32 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 		 *      scrolling="no">
 		 * </iframe>
 		 */
-		if ( ! preg_match( '#<blockquote class="wp-embedded-content" data-secret="\w+">(.+?)</blockquote>#s', $cache, $matches ) ) {
+		if ( ! preg_match( '#<blockquote\s+(?P<attrs>[^>]*class="[^"]*wp-embedded-content[^>]*)>(?P<contents>.+?)</blockquote>#s', $cache, $matches ) ) {
 			return $cache;
 		}
-		$placeholder = sprintf( '<blockquote class="wp-embedded-content" placeholder>%s</blockquote>', $matches[1] );
+		$placeholder = sprintf( '<blockquote %s>%s</blockquote>', $matches['attrs'] . ' placeholder', $matches['contents'] );
 
 		$attributes = [
-			'height' => $this->args['height'],
-			'title'  => '',
+			Attribute::HEIGHT => $this->args['height'],
+			Attribute::TITLE  => '',
 		];
 		if ( preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+?)"#s', $cache, $matches ) ) {
-			$attributes['title'] = $matches['title'];
+			$attributes[ Attribute::TITLE ] = $matches['title'];
 		}
 
-		return sprintf(
-			'<amp-wordpress-embed layout="fixed-height" height="%d" title="%s" data-url="%s">%s<button overflow>%s</button></amp-wordpress-embed>',
-			esc_attr( $attributes['height'] ),
-			esc_attr( $attributes['title'] ),
-			esc_url( $url ),
-			$placeholder,
-			esc_html__( 'Expand', 'amp' )
+		return AMP_HTML_Utils::build_tag(
+			Extension::WORDPRESS_EMBED,
+			array_merge(
+				$attributes,
+				[
+					'data-url' => esc_url( $url ),
+				]
+			),
+			sprintf(
+				'%s%s',
+				$placeholder,
+				$this->create_overflow_button_markup( __( 'Expand', 'amp' ) )
+			)
 		);
 	}
 }
