@@ -62,7 +62,6 @@ const STATUS_CANCELLED = 'STATUS_CANCELLED';
 const INITIAL_STATE = {
 	currentlyScannedUrlIndexes: [],
 	forceStandardMode: false,
-	mostRecentlyScannedUrlIndex: -1,
 	scannableUrls: [],
 	status: '',
 	urlIndexesPendingScan: [],
@@ -120,7 +119,6 @@ function siteScanReducer( state, action ) {
 				...state,
 				status: STATUS_IDLE,
 				currentlyScannedUrlIndexes: [],
-				mostRecentlyScannedUrlIndex: -1,
 				urlIndexesPendingScan: state.scannableUrls.map( ( url, index ) => index ),
 			};
 		}
@@ -136,7 +134,6 @@ function siteScanReducer( state, action ) {
 					...state.currentlyScannedUrlIndexes,
 					action.currentlyScannedUrlIndex,
 				],
-				mostRecentlyScannedUrlIndex: action.currentlyScannedUrlIndex,
 				urlIndexesPendingScan: state.urlIndexesPendingScan.filter( ( index ) => index !== action.currentlyScannedUrlIndex ),
 			};
 		}
@@ -179,7 +176,6 @@ function siteScanReducer( state, action ) {
 				...state,
 				status: STATUS_CANCELLED,
 				currentlyScannedUrlIndexes: [],
-				mostRecentlyScannedUrlIndex: -1,
 				urlIndexesPendingScan: [],
 			};
 		}
@@ -215,7 +211,6 @@ export function SiteScanContextProvider( {
 	const {
 		currentlyScannedUrlIndexes,
 		forceStandardMode,
-		mostRecentlyScannedUrlIndex,
 		scannableUrls,
 		urlIndexesPendingScan,
 		status,
@@ -438,10 +433,10 @@ export function SiteScanContextProvider( {
 				isFetchingScannableUrls: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
 				isReady: status === STATUS_READY,
 				isSiteScannable: scannableUrls.length > 0,
-				mostRecentlyScannedUrlIndex,
 				pluginsWithAmpIncompatibility,
 				previewPermalink,
 				scannableUrls,
+				scannedUrlsMaxIndex: Math.min( scannableUrls.length, ...urlIndexesPendingScan ) - 1,
 				stale,
 				startSiteScan,
 				themesWithAmpIncompatibility,
