@@ -2724,17 +2724,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			&&
 			1 <= count( $font_files )
 		) {
-			$link = AMP_DOM_Utils::create_node(
-				$this->dom,
-				Tag::LINK,
-				[
-					Attribute::REL         => Attribute::REL_PRELOAD,
-					Attribute::AS_         => 'font',
-					Attribute::HREF        => $font_files[0],
-					Attribute::CROSSORIGIN => '',
-				]
-			);
-			$this->dom->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
+			$this->dom->links->addPreload( $font_files[0], 'font' );
 		}
 	}
 
