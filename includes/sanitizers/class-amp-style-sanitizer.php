@@ -140,6 +140,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool     $skip_tree_shaking              Whether tree shaking should be skipped.
 	 *      @type bool     $allow_excessive_css            Whether to allow CSS to exceed the allowed max bytes (without raising validation errors).
 	 *      @type bool     $transform_important_qualifiers Whether !important rules should be transformed. This also necessarily transform inline style attributes.
+	 *      @type string[] $font_face_display_overrides    Array of the font family names and the font-display value they should each have.
 	 * }
 	 */
 	protected $args;
@@ -167,6 +168,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'skip_tree_shaking'              => false,
 		'allow_excessive_css'            => false,
 		'transform_important_qualifiers' => true,
+		'font_face_display_overrides'    => [
+			'NonBreakingSpaceOverride' => 'optional',
+			'Inter var'                => 'optional',
+			'Genericons'               => 'auto',
+		],
 	];
 
 	/**
@@ -1656,6 +1662,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					'parsed_cache_variant',
 					'dynamic_element_selectors',
 					'transform_important_qualifiers',
+					'font_face_display_overrides',
 				]
 			),
 			[
@@ -2540,11 +2547,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet_base_url = trailingslashit( $stylesheet_base_url );
 		}
 
-		// Define array of fonts to be preloaded.
-		$fonts_to_preload = [];
+		// Define array of font files.
+		$font_files = [];
 
 		// Attempt to transform data: URLs in src properties to be external file URLs.
-		$converted_data_urls = [];
 		foreach ( $src_properties as $src_property ) {
 			$value = $src_property->getValue();
 			if ( ! ( $value instanceof RuleValueList ) ) {
@@ -2627,6 +2633,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$source_data_url_objects[ $format_value ] = $source[0];
 				} else {
 					$source_file_urls[] = $value;
+					$font_files[]       = $value;
 				}
 			}
 
@@ -2670,7 +2677,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$path = $this->get_validated_url_file_path( $guessed_url, [ 'woff', 'woff2', 'ttf', 'otf', 'svg' ] );
 					if ( ! is_wp_error( $path ) ) {
 						$data_url->getURL()->setString( $guessed_url );
-						$converted_data_urls[] = $data_url;
+						$font_files[] = $guessed_url;
 						continue 2;
 					}
 				}
@@ -2683,58 +2690,51 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					'genericons.woff',
 				];
 				if ( in_array( $font_filename, $bundled_fonts, true ) ) {
-					$data_url->getURL()->setString( plugin_dir_url( AMP__FILE__ ) . "assets/fonts/$font_filename" );
-					$converted_data_urls[] = $data_url;
+					$font_file = plugin_dir_url( AMP__FILE__ ) . "assets/fonts/$font_filename";
+					$data_url->getURL()->setString( $font_file );
+					$font_files[] = $font_file;
 				}
 			} // End foreach $source_data_url_objects.
-
-			// Loop through fonts loaded from files.
-			foreach ( $source_file_urls as $source_file_url ) {
-				$properties = $ruleset->getRules( 'font-display' );
-
-				if ( ! isset( $properties[0] ) ) {
-					// If a given font is loaded from file and without font-display property, add font-display:optional and preload it.
-					$font_display_rule = new Rule( 'font-display' );
-					$font_display_rule->setValue( 'optional' );
-					$ruleset->addRule( $font_display_rule );
-					$fonts_to_preload[] = $source_file_url;
-				} else if ( 'optional' === $properties[0]->getValue() ) {
-					// If a given font is loaded from file and with font-display:optional, preload it.
-					$fonts_to_preload[] = $source_file_url;
-				}
-			} // End foreach $source_file_urls.
 		} // End foreach $src_properties.
 
-		/*
-		 * If a data: URL has been replaced with an external file URL, then we add a font-display:optional to the @font-face
-		 * rule if one isn't already present. This prevents a flash of unstyled text (FOUT).
-		 *
-		 * If no font-display is already present, add font-display:optional since the font is now being loaded externally.
-		 *
-		 * @see: https://github.com/ampproject/amp-wp/issues/6036
+		/**
+		 * Override the 'font-display' property to improve font performance.
 		 */
-		if ( count( $converted_data_urls ) > 0 && 0 === count( $ruleset->getRules( 'font-display' ) ) ) {
+		if ( isset( $font_family ) && in_array( $font_family, array_keys( $this->args['font_face_display_overrides'] ), true ) ) {
+			$properties = $ruleset->getRules( 'font-display' );
+			if ( isset( $properties[0] ) ) {
+				$ruleset->removeRule( $properties[0] );
+			}
+
 			$font_display_rule = new Rule( 'font-display' );
-			$font_display_rule->setValue( 'optional' );
+			$font_display_rule->setValue( $this->args['font_face_display_overrides'][ $font_family ] );
 			$ruleset->addRule( $font_display_rule );
-			$fonts_to_preload[] = $converted_data_urls[0]->getURL()->getString();
 		}
 
-		// Preload the first data: URL that was converted to an external file.
-		if ( ! empty( $fonts_to_preload ) ) {
-			foreach ( $fonts_to_preload as $font_to_preload ) {
-				$link = AMP_DOM_Utils::create_node(
-					$this->dom,
-					Tag::LINK,
-					[
-						Attribute::REL         => Attribute::REL_PRELOAD,
-						Attribute::AS_         => 'font',
-						Attribute::HREF        => $font_to_preload,
-						Attribute::CROSSORIGIN => '',
-					]
-				);
-				$this->dom->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
-			}
+		/**
+		 * If the font-display is auto, block, or swap then we should automatically add the preload link for the first font file.
+		 */
+		$properties = $ruleset->getRules( 'font-display' );
+		if (
+			(
+				( isset( $properties[0] ) && in_array( $properties[0]->getValue(), [ 'auto', 'block', 'swap' ], true ) )
+				||
+				( ! isset( $properties[0] ) ) // Defaults to 'auto', hence should be preloaded as well.
+			)
+			&&
+			1 <= count( $font_files )
+		) {
+			$link = AMP_DOM_Utils::create_node(
+				$this->dom,
+				Tag::LINK,
+				[
+					Attribute::REL         => Attribute::REL_PRELOAD,
+					Attribute::AS_         => 'font',
+					Attribute::HREF        => $font_files[0],
+					Attribute::CROSSORIGIN => '',
+				]
+			);
+			$this->dom->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
 		}
 	}
 
