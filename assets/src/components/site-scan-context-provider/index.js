@@ -294,21 +294,21 @@ export function SiteScanContextProvider( {
 	/**
 	 * Delay concurrent validation requests.
 	 */
-	const [ canRequestUrlValidation, setCanRequestUrlValidation ] = useState( true );
+	const [ shouldDelayValidationRequest, setShouldDelayValidationRequest ] = useState( false );
 	useEffect( () => {
 		let clearTimeout = () => {};
 
-		if ( ! canRequestUrlValidation ) {
+		if ( shouldDelayValidationRequest ) {
 			( async () => {
 				await new Promise( ( resolve ) => {
 					clearTimeout = setTimeout( resolve, CONCURRENT_VALIDATION_REQUESTS_WAIT_MS );
 				} );
-				setCanRequestUrlValidation( true );
+				setShouldDelayValidationRequest( false );
 			} )();
 		}
 
 		return clearTimeout;
-	}, [ canRequestUrlValidation ] );
+	}, [ shouldDelayValidationRequest ] );
 
 	/**
 	 * Fetch scannable URLs from the REST endpoint.
@@ -364,11 +364,11 @@ export function SiteScanContextProvider( {
 			return;
 		}
 
-		if ( ! canRequestUrlValidation || currentlyScannedUrlIndexes.length >= CONCURRENT_VALIDATION_REQUESTS_MAX_COUNT ) {
+		if ( shouldDelayValidationRequest || currentlyScannedUrlIndexes.length >= CONCURRENT_VALIDATION_REQUESTS_MAX_COUNT ) {
 			return;
 		}
 
-		setCanRequestUrlValidation( false );
+		setShouldDelayValidationRequest( true );
 
 		const currentlyScannedUrlIndex = urlIndexesPendingScan.shift();
 
@@ -416,9 +416,9 @@ export function SiteScanContextProvider( {
 				...results,
 			} );
 
-			setCanRequestUrlValidation( true );
+			setShouldDelayValidationRequest( false );
 		} )();
-	}, [ canRequestUrlValidation, forceStandardMode, currentlyScannedUrlIndexes.length, urlIndexesPendingScan, scannableUrls, status, urlType, validateNonce ] );
+	}, [ currentlyScannedUrlIndexes.length, forceStandardMode, scannableUrls, shouldDelayValidationRequest, status, urlIndexesPendingScan, urlType, validateNonce ] );
 
 	return (
 		<SiteScan.Provider
