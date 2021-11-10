@@ -18,6 +18,7 @@ use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
+use AmpProject\RequestDestination;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\Property\Selector;
@@ -2724,7 +2725,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			&&
 			1 <= count( $font_files )
 		) {
-			$this->dom->links->addPreload( $font_files[0], 'font' );
+			$this->dom->links->addPreload( $font_files[0], RequestDestination::FONT );
 		}
 	}
 
