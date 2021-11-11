@@ -292,11 +292,11 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 
 		if ( isset( $plugin['wporg'] ) && true !== $plugin['wporg'] ) {
 			$actions       = [];
-			$external_icon = '<span class="dashicons dashicons-external"></span>';
+			$external_icon = '<span aria-hidden="true" class="dashicons dashicons-external"></span>';
 
 			if ( ! empty( $plugin['homepage'] ) ) {
 				$actions[] = sprintf(
-					'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">%s%s</a>',
+					'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">%s<span class="screen-reader-text">(opens in a new tab)</span>%s</a>',
 					esc_url( $plugin['homepage'] ),
 					esc_attr(
 						/* translators: %s: Plugin name */
