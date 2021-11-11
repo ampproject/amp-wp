@@ -1203,8 +1203,30 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						display: flex;
 					}
 
+					.main-navigation ul.main-menu > li {
+						line-height: 1.5;
+					}
+
 					.main-navigation .sub-menu > li.menu-item-has-children .submenu-expand {
 						position: static;
+					}
+
+					.main-navigation .main-menu > li.menu-item-has-children .submenu-expand {
+						display: inline-block;
+						margin-left: 0.25rem;
+						margin-right: 0.5rem;
+						background: #0073aa;
+						color: #FFF;
+						border-radius: 50%;
+						width: 20px;
+						height: 20px;
+						vertical-align: middle;
+					}
+
+					.main-navigation .main-menu > li.menu-item-has-children .submenu-expand svg {
+						position: relative;
+						top: -2px;
+						left: -2px;
 					}
 
 					.main-navigation .main-menu .menu-item-has-children.off-canvas .sub-menu > li > a,
