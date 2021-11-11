@@ -2428,19 +2428,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			$menu_item->setAttribute( Attribute::CLASS_, $menu_item->getAttribute( Attribute::CLASS_ ) . ' off-canvas' );
 
-			$sidebar_id = "primary_nav_$index";
-
 			// AMP Sidebar.
 			$amp_sidebar = AMP_DOM_Utils::create_node(
 				$this->dom,
 				Extension::SIDEBAR,
 				[
-					Attribute::ID     => $sidebar_id,
 					Attribute::LAYOUT => Layout::NODISPLAY,
 					Attribute::CLASS_ => 'amp-twentynineteen-main-navigation',
 					Attribute::SIDE   => is_rtl() ? 'left' : 'right',
 				]
 			);
+
+			$sidebar_id = $this->dom->getElementId( $amp_sidebar );
 
 			// AMP nested menu.
 			$amp_nested_menu = AMP_DOM_Utils::create_node(
@@ -2485,7 +2484,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		];
 
 		$menu_items = $this->dom->xpath->query( $xpaths['menu_items'], $sub_menu );
-		if ( ! $menu_items instanceof DOMNodeList || 0 >= $menu_items->length ) {
+		if ( 0 === $menu_items->length ) {
 			return;
 		}
 
