@@ -9,6 +9,7 @@ import {
 	useMemo,
 	useReducer,
 	useRef,
+	useState,
 } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
@@ -32,26 +33,26 @@ export const SiteScan = createContext();
 /**
  * Site Scan Actions.
  */
-const ACTION_SCANNABLE_URLS_REQUEST = 'ACTION_SCANNABLE_URLS_REQUEST';
-const ACTION_SCANNABLE_URLS_FETCH = 'ACTION_SCANNABLE_URLS_FETCH';
-const ACTION_SCANNABLE_URLS_RECEIVE = 'ACTION_SCANNABLE_URLS_RECEIVE';
-const ACTION_SCAN_INITIALIZE = 'ACTION_SCAN_INITIALIZE';
-const ACTION_SCAN_VALIDATE_URL = 'ACTION_SCAN_VALIDATE_URL';
-const ACTION_SCAN_RECEIVE_VALIDATION_ERRORS = 'ACTION_SCAN_RECEIVE_VALIDATION_ERRORS';
-const ACTION_SCAN_NEXT_URL = 'ACTION_SCAN_NEXT_URL';
-const ACTION_SCAN_CANCEL = 'ACTION_SCAN_CANCEL';
+export const ACTION_SCANNABLE_URLS_REQUEST = 'ACTION_SCANNABLE_URLS_REQUEST';
+export const ACTION_SCANNABLE_URLS_FETCH = 'ACTION_SCANNABLE_URLS_FETCH';
+export const ACTION_SCANNABLE_URLS_RECEIVE = 'ACTION_SCANNABLE_URLS_RECEIVE';
+export const ACTION_SCAN_INITIALIZE = 'ACTION_SCAN_INITIALIZE';
+export const ACTION_SCAN_URL = 'ACTION_SCAN_URL';
+export const ACTION_SCAN_RECEIVE_RESULTS = 'ACTION_SCAN_RECEIVE_RESULTS';
+export const ACTION_SCAN_COMPLETE = 'ACTION_SCAN_COMPLETE';
+export const ACTION_SCAN_CANCEL = 'ACTION_SCAN_CANCEL';
 
 /**
  * Site Scan Statuses.
  */
-const STATUS_REQUEST_SCANNABLE_URLS = 'STATUS_REQUEST_SCANNABLE_URLS';
-const STATUS_FETCHING_SCANNABLE_URLS = 'STATUS_FETCHING_SCANNABLE_URLS';
-const STATUS_READY = 'STATUS_READY';
-const STATUS_IDLE = 'STATUS_IDLE';
-const STATUS_IN_PROGRESS = 'STATUS_IN_PROGRESS';
-const STATUS_COMPLETED = 'STATUS_COMPLETED';
-const STATUS_FAILED = 'STATUS_FAILED';
-const STATUS_CANCELLED = 'STATUS_CANCELLED';
+export const STATUS_REQUEST_SCANNABLE_URLS = 'STATUS_REQUEST_SCANNABLE_URLS';
+export const STATUS_FETCHING_SCANNABLE_URLS = 'STATUS_FETCHING_SCANNABLE_URLS';
+export const STATUS_READY = 'STATUS_READY';
+export const STATUS_IDLE = 'STATUS_IDLE';
+export const STATUS_IN_PROGRESS = 'STATUS_IN_PROGRESS';
+export const STATUS_COMPLETED = 'STATUS_COMPLETED';
+export const STATUS_FAILED = 'STATUS_FAILED';
+export const STATUS_CANCELLED = 'STATUS_CANCELLED';
 
 /**
  * Initial Site Scan state.
@@ -59,11 +60,26 @@ const STATUS_CANCELLED = 'STATUS_CANCELLED';
  * @type {Object}
  */
 const INITIAL_STATE = {
-	currentlyScannedUrlIndex: 0,
+	currentlyScannedUrlIndexes: [],
 	forceStandardMode: false,
 	scannableUrls: [],
 	status: '',
+	urlIndexesPendingScan: [],
 };
+
+/**
+ * The maximum number of validation requests that can be issued concurrently.
+ *
+ * @type {number}
+ */
+const CONCURRENT_VALIDATION_REQUESTS_MAX_COUNT = 3;
+
+/**
+ * The number of milliseconds to wait between subsequent validation requests.
+ *
+ * @type {number}
+ */
+const CONCURRENT_VALIDATION_REQUESTS_WAIT_MS = 500;
 
 /**
  * Site Scan Reducer.
@@ -72,13 +88,12 @@ const INITIAL_STATE = {
  * @param {Object} action Action to call.
  * @return {Object} New state.
  */
-function siteScanReducer( state, action ) {
+export function siteScanReducer( state, action ) {
 	switch ( action.type ) {
 		case ACTION_SCANNABLE_URLS_REQUEST: {
 			return {
 				...state,
 				status: STATUS_REQUEST_SCANNABLE_URLS,
-				currentlyScannedUrlIndex: INITIAL_STATE.currentlyScannedUrlIndex,
 				forceStandardMode: action?.forceStandardMode ?? false,
 			};
 		}
@@ -103,44 +118,48 @@ function siteScanReducer( state, action ) {
 			return {
 				...state,
 				status: STATUS_IDLE,
-				currentlyScannedUrlIndex: INITIAL_STATE.currentlyScannedUrlIndex,
+				currentlyScannedUrlIndexes: [],
+				urlIndexesPendingScan: state.scannableUrls.map( ( url, index ) => index ),
 			};
 		}
-		case ACTION_SCAN_VALIDATE_URL: {
+		case ACTION_SCAN_URL: {
+			if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( state.status ) ) {
+				return state;
+			}
+
 			return {
 				...state,
 				status: STATUS_IN_PROGRESS,
+				currentlyScannedUrlIndexes: [
+					...state.currentlyScannedUrlIndexes,
+					action.currentlyScannedUrlIndex,
+				],
+				urlIndexesPendingScan: state.urlIndexesPendingScan.filter( ( index ) => index !== action.currentlyScannedUrlIndex ),
 			};
 		}
-		case ACTION_SCAN_RECEIVE_VALIDATION_ERRORS: {
+		case ACTION_SCAN_RECEIVE_RESULTS: {
+			if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( state.status ) ) {
+				return state;
+			}
+
 			return {
 				...state,
+				status: STATUS_IDLE,
+				currentlyScannedUrlIndexes: state.currentlyScannedUrlIndexes.filter( ( index ) => index !== action.currentlyScannedUrlIndex ),
 				scannableUrls: [
-					...state.scannableUrls.slice( 0, action.scannedUrlIndex ),
+					...state.scannableUrls.slice( 0, action.currentlyScannedUrlIndex ),
 					{
-						...state.scannableUrls[ action.scannedUrlIndex ],
+						...state.scannableUrls[ action.currentlyScannedUrlIndex ],
 						stale: false,
 						error: action.error ?? false,
 						validated_url_post: action.error ? {} : action.validatedUrlPost,
 						validation_errors: action.error ? [] : action.validationErrors,
 					},
-					...state.scannableUrls.slice( action.scannedUrlIndex + 1 ),
+					...state.scannableUrls.slice( action.currentlyScannedUrlIndex + 1 ),
 				],
 			};
 		}
-		case ACTION_SCAN_NEXT_URL: {
-			if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( state.status ) ) {
-				return state;
-			}
-
-			if ( state.currentlyScannedUrlIndex < state.scannableUrls.length - 1 ) {
-				return {
-					...state,
-					status: STATUS_IDLE,
-					currentlyScannedUrlIndex: state.currentlyScannedUrlIndex + 1,
-				};
-			}
-
+		case ACTION_SCAN_COMPLETE: {
 			const hasFailed = state.scannableUrls.every( ( scannableUrl ) => Boolean( scannableUrl.error ) );
 
 			return {
@@ -156,7 +175,8 @@ function siteScanReducer( state, action ) {
 			return {
 				...state,
 				status: STATUS_CANCELLED,
-				currentlyScannedUrlIndex: INITIAL_STATE.currentlyScannedUrlIndex,
+				currentlyScannedUrlIndexes: [],
+				urlIndexesPendingScan: [],
 			};
 		}
 		default: {
@@ -189,9 +209,10 @@ export function SiteScanContextProvider( {
 	const { setAsyncError } = useAsyncError();
 	const [ state, dispatch ] = useReducer( siteScanReducer, INITIAL_STATE );
 	const {
-		currentlyScannedUrlIndex,
+		currentlyScannedUrlIndexes,
 		forceStandardMode,
 		scannableUrls,
+		urlIndexesPendingScan,
 		status,
 	} = state;
 	const urlType = forceStandardMode || themeSupport === STANDARD ? 'url' : 'amp_url';
@@ -265,9 +286,29 @@ export function SiteScanContextProvider( {
 	const previousDidSaveOptions = usePrevious( didSaveOptions );
 	useEffect( () => {
 		if ( ! previousDidSaveOptions && didSaveOptions ) {
+			cancelSiteScan();
 			fetchScannableUrls();
 		}
-	}, [ didSaveOptions, fetchScannableUrls, previousDidSaveOptions ] );
+	}, [ cancelSiteScan, didSaveOptions, fetchScannableUrls, previousDidSaveOptions ] );
+
+	/**
+	 * Delay concurrent validation requests.
+	 */
+	const [ shouldDelayValidationRequest, setShouldDelayValidationRequest ] = useState( false );
+	useEffect( () => {
+		let clearTimeout = () => {};
+
+		if ( shouldDelayValidationRequest ) {
+			( async () => {
+				await new Promise( ( resolve ) => {
+					clearTimeout = setTimeout( resolve, CONCURRENT_VALIDATION_REQUESTS_WAIT_MS );
+				} );
+				setShouldDelayValidationRequest( false );
+			} )();
+		}
+
+		return clearTimeout;
+	}, [ shouldDelayValidationRequest ] );
 
 	/**
 	 * Fetch scannable URLs from the REST endpoint.
@@ -307,15 +348,41 @@ export function SiteScanContextProvider( {
 	 * Scan site URLs sequentially.
 	 */
 	useEffect( () => {
-		( async () => {
-			if ( status !== STATUS_IDLE ) {
-				return;
+		if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ) ) {
+			return;
+		}
+
+		/**
+		 * If there are no more URLs to scan and no URLs are scanned at the
+		 * moment, finish the site scan.
+		 */
+		if ( urlIndexesPendingScan.length === 0 ) {
+			if ( currentlyScannedUrlIndexes.length === 0 ) {
+				dispatch( { type: ACTION_SCAN_COMPLETE } );
 			}
 
-			dispatch( { type: ACTION_SCAN_VALIDATE_URL } );
+			return;
+		}
+
+		if ( shouldDelayValidationRequest || currentlyScannedUrlIndexes.length >= CONCURRENT_VALIDATION_REQUESTS_MAX_COUNT ) {
+			return;
+		}
+
+		setShouldDelayValidationRequest( true );
+
+		const currentlyScannedUrlIndex = urlIndexesPendingScan.shift();
+
+		dispatch( {
+			type: ACTION_SCAN_URL,
+			currentlyScannedUrlIndex,
+		} );
+
+		( async () => {
+			const results = {};
 
 			try {
-				const url = scannableUrls[ currentlyScannedUrlIndex ][ urlType ];
+				const scannableUrl = scannableUrls[ currentlyScannedUrlIndex ];
+				const url = scannableUrl[ urlType ];
 				const args = {
 					amp_validate: {
 						cache: true,
@@ -334,36 +401,29 @@ export function SiteScanContextProvider( {
 				}
 
 				if ( response.ok ) {
-					dispatch( {
-						type: ACTION_SCAN_RECEIVE_VALIDATION_ERRORS,
-						scannedUrlIndex: currentlyScannedUrlIndex,
-						validatedUrlPost: data.validated_url_post,
-						validationErrors: data.results.map( ( { error } ) => error ),
-					} );
+					results.validatedUrlPost = data.validated_url_post;
+					results.validationErrors = data.results.map( ( { error } ) => error );
 				} else {
-					dispatch( {
-						type: ACTION_SCAN_RECEIVE_VALIDATION_ERRORS,
-						scannedUrlIndex: currentlyScannedUrlIndex,
-						error: data?.code || true,
-					} );
+					results.error = data?.code || true;
 				}
 			} catch ( e ) {
-				dispatch( {
-					type: ACTION_SCAN_RECEIVE_VALIDATION_ERRORS,
-					scannedUrlIndex: currentlyScannedUrlIndex,
-					error: true,
-				} );
+				results.error = true;
 			}
 
-			dispatch( { type: ACTION_SCAN_NEXT_URL } );
+			dispatch( {
+				type: ACTION_SCAN_RECEIVE_RESULTS,
+				currentlyScannedUrlIndex,
+				...results,
+			} );
+
+			setShouldDelayValidationRequest( false );
 		} )();
-	}, [ currentlyScannedUrlIndex, forceStandardMode, scannableUrls, setAsyncError, status, urlType, validateNonce ] );
+	}, [ currentlyScannedUrlIndexes.length, forceStandardMode, scannableUrls, shouldDelayValidationRequest, status, urlIndexesPendingScan, urlType, validateNonce ] );
 
 	return (
 		<SiteScan.Provider
 			value={ {
 				cancelSiteScan,
-				currentlyScannedUrlIndex,
 				fetchScannableUrls,
 				hasSiteScanResults,
 				isBusy: [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ),
@@ -376,6 +436,7 @@ export function SiteScanContextProvider( {
 				pluginsWithAmpIncompatibility,
 				previewPermalink,
 				scannableUrls,
+				scannedUrlsMaxIndex: Math.min( scannableUrls.length, ...urlIndexesPendingScan ) - 1,
 				stale,
 				startSiteScan,
 				themesWithAmpIncompatibility,
