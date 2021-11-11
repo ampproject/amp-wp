@@ -77,8 +77,6 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 			return;
 		}
 
-		$post = AMP_Validated_URL_Post_Type::get_invalid_url_post( amp_get_current_url() );
-
 		$wp_admin_bar->add_node(
 			[
 				'parent' => 'amp',
@@ -87,8 +85,8 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 				'href'   => esc_url(
 					add_query_arg(
 						[
-							'page'    => 'amp-support',
-							'post_id' => $post ? $post->ID : 0,
+							'page' => 'amp-support',
+							'url'  => rawurlencode( amp_get_current_url() ),
 						],
 						admin_url( 'admin.php' )
 					)
@@ -112,8 +110,8 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 		}
 
 		$query_args = [
-			'page'    => 'amp-support',
-			'post_id' => $post->ID,
+			'page' => 'amp-support',
+			'url'  => rawurlencode( $post->post_title ),
 		];
 
 		$actions['amp-support'] = sprintf(
@@ -140,8 +138,8 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 		}
 
 		$query_args = [
-			'page'    => 'amp-support',
-			'post_id' => $post->ID,
+			'page' => 'amp-support',
+			'url'  => rawurlencode( $post->post_title ),
 		];
 
 		$actions['amp-support'] = sprintf(
