@@ -11,7 +11,9 @@ use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
+use AmpProject\Layout;
 use AmpProject\Role;
+use AmpProject\Tag;
 
 /**
  * Class AMP_Core_Theme_Sanitizer
@@ -1211,10 +1213,15 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						position: static;
 					}
 
-					.main-navigation .main-menu > li.menu-item-has-children .submenu-expand {
+					.main-navigation .main-menu > li.menu-item-has-children > .submenu-expand {
 						display: inline-block;
-						margin-left: 0.25rem;
-						margin-right: 0.5rem;
+						<?php if ( is_rtl() ) : ?>
+							margin-left: 0.5rem;
+							margin-right: 0.25rem;
+						<?php else : ?>
+							margin-left: 0.25rem;
+							margin-right: 0.5rem;
+						<?php endif; ?>
 						background: #0073aa;
 						color: #FFF;
 						border-radius: 50%;
@@ -1223,10 +1230,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						vertical-align: middle;
 					}
 
-					.main-navigation .main-menu > li.menu-item-has-children .submenu-expand svg {
+					.main-navigation .main-menu > li.menu-item-has-children > .submenu-expand svg {
 						position: relative;
 						top: -2px;
-						left: -2px;
+						<?php if ( is_rtl() ) : ?>
+							right: -2px;
+						<?php else : ?>
+							left: -2px;
+						<?php endif; ?>
 					}
 
 					.main-navigation .main-menu .menu-item-has-children.off-canvas .sub-menu > li > a,
@@ -2368,18 +2379,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param Element $context_node The optional context node can be specified for doing relative XPath queries.
 	 *                              By default, the queries are relative to the root element.
 	 *
-	 * @return Element|bool Return Element if exists otherwise False.
+	 * @return Element|null Return Element if exists otherwise null.
 	 */
 	protected function get_first_element( $expression, $context_node = null ) {
 
-		if ( empty( $expression ) ) {
-			return false;
-		}
-
 		$dom_node_list = $this->dom->xpath->query( $expression, $context_node );
-		if ( ! $dom_node_list instanceof DOMNodeList || 0 >= $dom_node_list->length ) {
-			return false;
-		}
 
 		/** @var Element $dom_node */
 		$dom_node = $dom_node_list->item( 0 );
@@ -2422,7 +2426,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$menu_item->setAttribute( 'class', $menu_item->getAttribute( 'class' ) . ' off-canvas' );
+			$menu_item->setAttribute( Attribute::CLASS_, $menu_item->getAttribute( Attribute::CLASS_ ) . ' off-canvas' );
 
 			$sidebar_id = "primary_nav_$index";
 
@@ -2432,8 +2436,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				Extension::SIDEBAR,
 				[
 					Attribute::ID     => $sidebar_id,
-					Attribute::LAYOUT => 'nodisplay',
+					Attribute::LAYOUT => Layout::NODISPLAY,
 					Attribute::CLASS_ => 'amp-twentynineteen-main-navigation',
+					Attribute::SIDE   => is_rtl() ? 'left' : 'right',
 				]
 			);
 
@@ -2442,19 +2447,19 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$this->dom,
 				Extension::NESTED_MENU,
 				[
-					Attribute::LAYOUT => 'fill',
+					Attribute::LAYOUT => Layout::FILL,
 				]
 			);
 
 			$this->update_twentynineteen_main_nested_menu( $sub_menu );
 
-			$sub_menu->setAttribute( 'class', $sub_menu->getAttribute( 'class' ) . ' expanded-true' );
+			$sub_menu->setAttribute( Attribute::CLASS_, $sub_menu->getAttribute( Attribute::CLASS_ ) . ' expanded-true' );
 
 			// Handle buttons.
-			$expand_button->setAttribute( 'on', "tap:$sidebar_id" );
+			$expand_button->addAmpAction( 'tap', $sidebar_id );
 			$back_button = $this->get_first_element( $xpaths['close_button_in_submenu'], $sub_menu );
 			if ( ! empty( $back_button ) ) {
-				$back_button->setAttribute( 'on', "tap:$sidebar_id.close" );
+				$back_button->addAmpAction( 'tap', "$sidebar_id.close" );
 			}
 
 			$amp_nested_menu->appendChild( $sub_menu );
@@ -2496,23 +2501,23 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			$back_button = $this->get_first_element( $xpaths['back_button'], $nested_sub_menu );
 			if ( ! empty( $back_button ) ) {
-				$back_button->setAttribute( 'amp-nested-submenu-close', '' );
+				$back_button->setAttribute( Attribute::AMP_NESTED_SUBMENU_CLOSE, '' );
 			}
 
 			$open_button = $this->get_first_element( $xpaths['expand_button'], $menu_item );
 			if ( ! empty( $open_button ) ) {
-				$open_button->setAttribute( 'amp-nested-submenu-open', '' );
+				$open_button->setAttribute( Attribute::AMP_NESTED_SUBMENU_OPEN, '' );
 			}
 
 			$amp_nested_menu_div = AMP_DOM_Utils::create_node(
 				$this->dom,
-				'div',
+				Tag::DIV,
 				[
 					Attribute::AMP_NESTED_SUBMENU => '',
 				]
 			);
 
-			$nested_sub_menu->setAttribute( 'class', $nested_sub_menu->getAttribute( 'class' ) . ' expanded-true' );
+			$nested_sub_menu->setAttribute( Attribute::CLASS_, $nested_sub_menu->getAttribute( Attribute::CLASS_ ) . ' expanded-true' );
 			$amp_nested_menu_div->appendChild( $nested_sub_menu );
 			$menu_item->appendChild( $amp_nested_menu_div );
 		}
