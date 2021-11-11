@@ -40,7 +40,7 @@ final class SavePostValidationEventTest extends TestCase {
 	public function setUp() {
 		$this->test_instance         = new SavePostValidationEvent( new BackgroundTaskDeactivator(), new UserAccess(), new URLValidationProvider() );
 		$this->dev_tools_user_access = new UserAccess();
-		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
+		$this->add_validate_response_mocking_filter();
 	}
 
 	/** @covers ::__construct() */

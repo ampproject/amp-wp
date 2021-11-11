@@ -2,6 +2,7 @@
 
 namespace AmpProject\AmpWP\Tests\Validation;
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AMP_Options_Manager;
 use AMP_Post_Meta_Box;
@@ -30,8 +31,8 @@ final class ScannableURLProviderTest extends TestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->scannable_url_provider = new ScannableURLProvider( [], [], 20 );
-		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
+		$this->scannable_url_provider = new ScannableURLProvider( [], 20 );
+		$this->add_validate_response_mocking_filter();
 	}
 
 	/** @covers ::__construct() */
@@ -43,11 +44,10 @@ final class ScannableURLProviderTest extends TestCase {
 	 * Test retrieval of urls.
 	 *
 	 * @covers ::get_urls()
-	 * @covers ::get_options()
 	 * @covers ::get_supportable_templates()
 	 * @covers ::is_template_supported()
 	 */
-	public function test_count_urls_to_validate() {
+	public function test_count_urls_to_validate_in_standard_mode() {
 		$user = self::factory()->user->create();
 		self::factory()->post->create( [ 'post_author' => $user ] );
 
@@ -56,7 +56,7 @@ final class ScannableURLProviderTest extends TestCase {
 
 		$this->assertCount( $number_original_urls, $this->scannable_url_provider->get_urls() );
 
-		$this->scannable_url_provider = new ScannableURLProvider( [], [], 100 );
+		$this->scannable_url_provider = new ScannableURLProvider( [], 100 );
 
 		$category         = self::factory()->term->create( [ 'taxonomy' => 'category' ] );
 		$number_new_posts = 50;
@@ -72,7 +72,7 @@ final class ScannableURLProviderTest extends TestCase {
 		$expected_url_count = $number_new_posts + $number_original_urls;
 		$this->assertCount( $expected_url_count, $this->scannable_url_provider->get_urls() );
 
-		$this->scannable_url_provider = new ScannableURLProvider( [], [], 100 );
+		$this->scannable_url_provider = new ScannableURLProvider( [], 100 );
 
 		$number_of_new_terms        = 20;
 		$expected_url_count        += $number_of_new_terms;
@@ -95,6 +95,72 @@ final class ScannableURLProviderTest extends TestCase {
 		$this->assertFalse( is_wp_error( $result ) );
 
 		$this->assertCount( $expected_url_count, $this->scannable_url_provider->get_urls() );
+	}
+
+	/**
+	 * Test retrieval of urls in legacy Reader mode.
+	 *
+	 * @covers ::get_urls()
+	 * @covers ::get_supportable_templates()
+	 * @covers ::is_template_supported()
+	 */
+	public function test_count_urls_to_validate_in_legacy_reader_mode() {
+		$user_id = self::factory()->user->create();
+		$term_id = self::factory()->term->create( [ 'taxonomy' => 'category' ] );
+		$post_id = self::factory()->post->create(
+			[
+				'post_type'   => 'post',
+				'post_author' => $user_id,
+				'tax_input'   => [ 'category' => $term_id ],
+			]
+		);
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
+
+		$this->assertEqualSets(
+			[
+				get_permalink( $post_id ),
+			],
+			wp_list_pluck( $this->scannable_url_provider->get_urls(), 'url' )
+		);
+		$this->assertEqualSets(
+			[ 'is_singular' ],
+			array_keys(
+				array_filter(
+					$this->scannable_url_provider->get_supportable_templates(),
+					static function ( $supportable_template ) {
+						return ! empty( $supportable_template['supported'] );
+					}
+				)
+			)
+		);
+
+		$page1_id = self::factory()->post->create( [ 'page_type' => 'page' ] );
+		$page2_id = self::factory()->post->create( [ 'page_type' => 'page' ] );
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $page1_id );
+		update_option( 'page_for_posts', $page2_id );
+
+		$this->assertEqualSets(
+			[
+				get_permalink( $post_id ),
+				get_permalink( $page1_id ),
+				get_permalink( $page2_id ),
+			],
+			wp_list_pluck( $this->scannable_url_provider->get_urls(), 'url' )
+		);
+		$this->assertEqualSets(
+			[ 'is_singular', 'is_home', 'is_front_page' ],
+			array_keys(
+				array_filter(
+					$this->scannable_url_provider->get_supportable_templates(),
+					static function ( $supportable_template ) {
+						return ! empty( $supportable_template['supported'] );
+					}
+				)
+			)
+		);
 	}
 
 	/**
@@ -127,7 +193,7 @@ final class ScannableURLProviderTest extends TestCase {
 			AMP_Post_Meta_Box::ENABLED_STATUS
 		);
 
-		$this->scannable_url_provider = new ScannableURLProvider( [], [], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [], 20 );
 
 		// In AMP-first, the IDs should include all of the newly-created posts.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -174,11 +240,11 @@ final class ScannableURLProviderTest extends TestCase {
 		$this->assertEquals( [ $second_author_url ], $actual_urls );
 
 		// If $include_conditionals is set and does not have is_author, this should not return a URL.
-		$this->scannable_url_provider = new ScannableURLProvider( [], [ 'is_category' ], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [ 'is_category' ], 20 );
 		$this->assertEquals( [], $this->call_private_method( $this->scannable_url_provider, 'get_author_page_urls', [ 1, 0 ] ) );
 
 		// If $include_conditionals is set and has is_author, this should return URLs.
-		$this->scannable_url_provider = new ScannableURLProvider( [], [ 'is_author' ], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [ 'is_author' ], 20 );
 		$this->assertEquals(
 			[ $first_author_url, $second_author_url ],
 			$this->call_private_method( $this->scannable_url_provider, 'get_author_page_urls', [ 2, 0 ] )
@@ -204,14 +270,14 @@ final class ScannableURLProviderTest extends TestCase {
 		}
 
 		// When the user has not checked the boxes for 'Categories' and 'Tags,' this should be false.
-		$this->scannable_url_provider = new ScannableURLProvider( [], [], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [], 20 );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_author' ] );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertFalse( $this->call_private_method( $this->scannable_url_provider, 'does_taxonomy_support_amp', [ $taxonomy ] ) );
 		}
 
-		$this->scannable_url_provider = new ScannableURLProvider( [], [], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [], 20 );
 
 		// When the user has checked the Option::ALL_TEMPLATES_SUPPORTED box, this should always be true.
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
@@ -224,7 +290,8 @@ final class ScannableURLProviderTest extends TestCase {
 		 * If the user passed allowed conditionals to the WP-CLI command like wp amp validate-site --include=is_category,is_tag
 		 * these should be supported taxonomies.
 		 */
-		$this->scannable_url_provider = new ScannableURLProvider( [ Option::ALL_TEMPLATES_SUPPORTED => true ], [ 'is_category', 'is_tag' ], 20 );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
+		$this->scannable_url_provider = new ScannableURLProvider( [ 'is_category', 'is_tag' ], 20 );
 		$this->assertTrue( $this->call_private_method( $this->scannable_url_provider, 'does_taxonomy_support_amp', [ 'category' ] ) );
 		$this->assertTrue( $this->call_private_method( $this->scannable_url_provider, 'does_taxonomy_support_amp', [ 'tag' ] ) );
 		$this->assertFalse( $this->call_private_method( $this->scannable_url_provider, 'does_taxonomy_support_amp', [ 'author' ] ) );
@@ -244,12 +311,12 @@ final class ScannableURLProviderTest extends TestCase {
 
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ $author_conditional ] );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
-		$this->scannable_url_provider = new ScannableURLProvider( [], [], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [], 20 );
 		$this->assertTrue( $this->call_private_method( $this->scannable_url_provider, 'is_template_supported', [ $author_conditional ] ) );
 		$this->assertFalse( $this->call_private_method( $this->scannable_url_provider, 'is_template_supported', [ $search_conditional ] ) );
 
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ $search_conditional ] );
-		$this->scannable_url_provider = new ScannableURLProvider( [], [], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [], 20 );
 		$this->assertTrue( $this->call_private_method( $this->scannable_url_provider, 'is_template_supported', [ $search_conditional ] ) );
 		$this->assertFalse( $this->call_private_method( $this->scannable_url_provider, 'is_template_supported', [ $author_conditional ] ) );
 	}
@@ -360,11 +427,11 @@ final class ScannableURLProviderTest extends TestCase {
 		$this->assertTrue( is_string( $this->call_private_method( $this->scannable_url_provider, 'get_search_page' ) ) );
 
 		// If $include_conditionals is set and does not have is_search, this should not return a URL.
-		$this->scannable_url_provider = new ScannableURLProvider( [], [ 'is_author' ], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [ 'is_author' ], 20 );
 		$this->assertEquals( null, $this->call_private_method( $this->scannable_url_provider, 'get_search_page' ) );
 
 		// If $include_conditionals has is_search, this should return a URL.
-		$this->scannable_url_provider = new ScannableURLProvider( [], [ 'is_search' ], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [ 'is_search' ], 20 );
 		$this->assertTrue( is_string( $this->call_private_method( $this->scannable_url_provider, 'get_search_page' ) ) );
 	}
 
@@ -379,7 +446,7 @@ final class ScannableURLProviderTest extends TestCase {
 		$post = self::factory()->post->create();
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->scannable_url_provider = new ScannableURLProvider( [], [], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [], 20 );
 
 		$year = get_the_date( 'Y', $post );
 
@@ -389,11 +456,11 @@ final class ScannableURLProviderTest extends TestCase {
 		$this->assertStringContainsString( get_year_link( $year ), $url );
 
 		// If $include_conditionals is set and does not have is_date, this should not return a URL.
-		$this->scannable_url_provider = new ScannableURLProvider( [], [ 'is_search' ], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [ 'is_search' ], 20 );
 		$this->assertEquals( null, $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
 
 		// If $include_conditionals has is_date, this should return a URL.
-		$this->scannable_url_provider = new ScannableURLProvider( [], [ 'is_date' ], 20 );
+		$this->scannable_url_provider = new ScannableURLProvider( [ 'is_date' ], 20 );
 		$this->assertStringContainsString( get_year_link( $year ), $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
 
 		// If all posts are deleted, then nothing should be returned.

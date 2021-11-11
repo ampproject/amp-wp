@@ -48,7 +48,7 @@ describe( 'Onboarding Wizard Site Scan Step', () => {
 			} ),
 		] );
 
-		await expect( page ).toMatchElement( '.site-scan__heading', { text: 'Scan complete', timeout: 10000 } );
+		await expect( page ).toMatchElement( '.site-scan__heading', { text: 'Scan complete', timeout: 30000 } );
 		await expect( page ).toMatchElement( '.site-scan__section p', { text: /Site scan found no issues/ } );
 
 		await testNextButton( { text: 'Next' } );
@@ -66,7 +66,7 @@ describe( 'Onboarding Wizard Site Scan Step', () => {
 			isAmpFirst: true,
 		} );
 
-		await expect( page ).toMatchElement( '.site-scan__heading', { text: 'Scan complete', timeout: 10000 } );
+		await expect( page ).toMatchElement( '.site-scan__heading', { text: 'Scan complete', timeout: 30000 } );
 		await expect( page ).toMatchElement( '.site-scan__section p', { text: /Site scan found issues/ } );
 
 		await expect( page ).toMatchElement( '.site-scan-results--themes' );

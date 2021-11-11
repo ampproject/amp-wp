@@ -8,11 +8,14 @@
 
 namespace AmpProject\AmpWP\Validation;
 
+use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PairedRouting;
 use WP_Error;
 use WP_Post;
@@ -28,6 +31,13 @@ use WP_REST_Server;
  * @internal
  */
 final class ScannableURLsRestController extends WP_REST_Controller implements Delayed, Service, Registerable {
+
+	/**
+	 * Query param to force standard mode.
+	 *
+	 * @var string
+	 */
+	const FORCE_STANDARD_MODE = 'force_standard_mode';
 
 	/**
 	 * ScannableURLProvider instance.
@@ -77,7 +87,14 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_items' ],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
-					'args'                => [],
+					'args'                => [
+						self::FORCE_STANDARD_MODE => [
+							'description' => __( 'Indicates whether to force Standard template mode.', 'amp' ),
+							'type'        => 'boolean',
+							'required'    => false,
+							'default'     => false,
+						],
+					],
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
@@ -112,12 +129,40 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+
+		// Allow query parameter to force a response to be served with Standard mode (AMP-first). This is used as
+		// part of Site Scanning in order to determine if the primary theme is suitable for serving AMP.
+		$options_filter = null;
+		$filtered_hooks = [
+			'default_option_' . AMP_Options_Manager::OPTION_NAME,
+			'option_' . AMP_Options_Manager::OPTION_NAME,
+		];
+		if ( ! amp_is_canonical() && $request->get_param( self::FORCE_STANDARD_MODE ) ) {
+			$options_filter = static function ( $options ) {
+				$options[ Option::THEME_SUPPORT ]           = AMP_Theme_Support::STANDARD_MODE_SLUG;
+				$options[ Option::ALL_TEMPLATES_SUPPORTED ] = true;
+				return $options;
+			};
+
+			foreach ( $filtered_hooks as $filter_hook ) {
+				add_filter( $filter_hook, $options_filter );
+			}
+		}
+
+		$urls = $this->scannable_url_provider->get_urls();
+
+		if ( $options_filter ) {
+			foreach ( $filtered_hooks as $filter_hook ) {
+				remove_filter( $filter_hook, $options_filter );
+			}
+		}
+
 		return rest_ensure_response(
 			array_map(
 				function ( $item ) use ( $request ) {
 					return $this->prepare_item_for_response( $item, $request )->get_data();
 				},
-				$this->scannable_url_provider->get_urls()
+				$urls
 			)
 		);
 	}

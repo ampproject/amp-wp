@@ -338,6 +338,7 @@ class AMP_Service_Worker {
 			<head>
 				<meta charset="utf-8">
 				<title><?php esc_html_e( 'Service Worker Installation', 'amp' ); ?></title>
+				<meta name="robots" content="noindex">
 			</head>
 			<body>
 				<?php esc_html_e( 'Installing service worker...', 'amp' ); ?>

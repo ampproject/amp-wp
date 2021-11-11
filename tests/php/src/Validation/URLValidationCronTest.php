@@ -38,11 +38,13 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 		$this->test_instance = $this->injector->make( URLValidationCron::class );
 		add_filter(
 			'pre_http_request',
-			function () {
+			function ( $pre ) {
 				$this->request_count++;
-				return $this->get_validate_response();
+				return $pre;
 			}
 		);
+
+		$this->add_validate_response_mocking_filter();
 	}
 
 	/**

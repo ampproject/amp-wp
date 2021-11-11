@@ -7,7 +7,7 @@ import { visitAdminPage, activateTheme, installTheme } from '@wordpress/e2e-test
  * Internal dependencies
  */
 import { completeWizard, cleanUpSettings, clickMode, scrollToElement } from '../../utils/onboarding-wizard-utils';
-import { setTemplateMode } from '../../utils/amp-settings-utils';
+import { cleanUpValidatedUrls, setTemplateMode } from '../../utils/amp-settings-utils';
 
 describe( 'AMP settings screen newly activated', () => {
 	beforeEach( async () => {
@@ -64,46 +64,32 @@ describe( 'Settings screen when reader theme is active theme', () => {
 } );
 
 describe( 'Mode info notices', () => {
-	const timeout = 10000;
+	const timeout = 30000;
 
 	beforeEach( async () => {
-		await cleanUpSettings();
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-	} );
-
-	afterEach( async () => {
+		await cleanUpValidatedUrls();
 		await cleanUpSettings();
 	} );
 
 	it( 'show information in the Template Mode section if site scan results are stale', async () => {
-		// Trigger a site scan.
-		await page.waitForSelector( '#site-scan' );
+		await completeWizard( { technical: true, mode: 'transitional' } );
 
-		const isPanelCollapsed = await page.$eval( '#site-scan .components-panel__body-toggle', ( el ) => el.ariaExpanded === 'false' );
-		if ( isPanelCollapsed ) {
-			await scrollToElement( { selector: '#site-scan .components-panel__body-toggle', click: true } );
-		}
+		// When there are no site scan results, no notice in the Template Mode section should be displayed.
+		await expect( page ).toMatchElement( '#template-modes h2', { text: 'Template Mode', timeout } );
+		await expect( page ).not.toMatchElement( '#template-modes h2 + .amp-notice--info' );
 
-		await scrollToElement( { selector: '#site-scan .settings-site-scan__footer .is-primary', click: true } );
-		await expect( page ).toMatchElement( '#site-scan .settings-site-scan__footer .is-primary', { text: 'Rescan Site', timeout } );
-
-		await scrollToElement( { selector: '#template-modes' } );
-
-		// Confirm there is no notice about stale results.
-		const noticeXpath = '//*[@id="template-modes"]/*[contains(@class, "amp-notice--info")]/*[contains(text(), "Site Scan results are stale")]';
-
-		const noticeBefore = await page.$x( noticeXpath );
-		expect( noticeBefore ).toHaveLength( 0 );
-
-		// Change template mode to make the scan results stale.
-		await setTemplateMode( 'transitional' );
-
+		// Trigger the site scan.
+		await expect( page ).toMatchElement( '#site-scan .amp-drawer__heading', { text: 'Site Scan' } );
+		await Promise.all( [
+			scrollToElement( { selector: '.settings-site-scan__footer .is-primary', click: true } ),
+			page.waitForSelector( '.settings-site-scan__status' ),
+		] );
 		await page.waitForSelector( '.settings-site-scan__footer .is-primary', { timeout } );
 
-		await scrollToElement( { selector: '#template-modes' } );
-
-		const noticeAfter = await page.$x( noticeXpath );
-		expect( noticeAfter ).toHaveLength( 1 );
+		// Change the template mode to make the scan results stale and confirm the notice is displayed.
+		await setTemplateMode( 'standard' );
+		await page.waitForSelector( '.settings-site-scan__footer .is-primary', { timeout } );
+		await expect( page ).toMatchElement( '#template-modes h2 + .amp-notice--info' );
 	} );
 
 	it.todo( 'shows expected notices for theme with built-in support' );
@@ -112,17 +98,21 @@ describe( 'Mode info notices', () => {
 } );
 
 describe( 'AMP Settings Screen after wizard', () => {
+	const timeout = 30000;
+
 	beforeEach( async () => {
-		await completeWizard( { technical: true, mode: 'standard' } );
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
+		await cleanUpValidatedUrls();
+		await cleanUpSettings();
 	} );
 
 	afterEach( async () => {
 		await cleanUpSettings();
 	} );
 
-	it( 'has main page components', async () => {
-		await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings' } );
+	it( 'has main page components and does not display a stale message if the Standard mode was selected in the Wizard', async () => {
+		await completeWizard( { technical: true, mode: 'standard' } );
+
+		await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings', timeout } );
 		await expect( page ).toMatchElement( 'h2', { text: 'AMP Settings Configured' } );
 		await expect( page ).toMatchElement( 'a', { text: 'Reopen Wizard' } );
 		await expect( page ).toPassAxeTests( {
@@ -130,6 +120,17 @@ describe( 'AMP Settings Screen after wizard', () => {
 				'#wpadminbar',
 			],
 		} );
+
+		await expect( page ).toMatchElement( '#site-scan .amp-drawer__heading', { text: 'Site Scan' } );
+		await expect( page ).not.toMatchElement( '#site-scan .amp-drawer__label-extra .amp-notice', { text: 'Stale results' } );
+	} );
+
+	it( 'auto-starts a site scan if Transitional mode was selected in the Wizard', async () => {
+		await completeWizard( { technical: true, mode: 'transitional' } );
+
+		await expect( page ).toMatchElement( '#site-scan .amp-drawer__heading', { text: 'Site Scan', timeout } );
+		await expect( page ).toMatchElement( '#site-scan .progress-bar' );
+		await expect( page ).toMatchElement( '#site-scan button', { text: 'Rescan Site', timeout } );
 	} );
 } );
 

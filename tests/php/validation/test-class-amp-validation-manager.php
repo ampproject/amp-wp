@@ -175,15 +175,15 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			10,
 			has_filter(
 				'option_' . AMP_Options_Manager::OPTION_NAME,
-				[ self::TESTED_CLASS, 'filter_options_for_standard_mode_when_amp_first_override' ]
+				[ self::TESTED_CLASS, 'filter_options_when_force_standard_mode_request' ]
 			)
 		);
 	}
 
 	/** @return array */
-	public function get_data_to_test_filter_options_for_standard_mode_when_amp_first_override() {
-		$set_query_var = static function () {
-			$_GET[ QueryVar::AMP_FIRST ] = '';
+	public function get_data_to_test_filter_options_when_force_standard_mode_request() {
+		$set_frontend_force_standard_mode_query_var = static function () {
+			$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = [ AMP_Validation_Manager::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE => 1 ];
 		};
 		$set_admin_user = static function () {
 			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
@@ -192,180 +192,59 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', true );
 		};
 
-		$set_admin_dashboard = static function () {
-			set_current_screen( 'index.php' );
-		};
-
-		$set_global_validated_url_post = static function ( $url ) {
-			$GLOBALS['post'] = self::factory()->post->create_and_get(
-				[
-					'post_title' => $url,
-					'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-				]
-			);
-			setup_postdata( $GLOBALS['post'] );
-		};
-
-		$set_validated_url_post_list_screen = static function () {
-			$GLOBALS['hook_suffix'] = 'edit.php';
-			$_REQUEST['post_type'] = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
-			set_current_screen();
-		};
-
-		$set_validated_url_post_edit_screen = static function () {
-			$GLOBALS['hook_suffix'] = 'post.php';
-			$_REQUEST['post_type'] = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
-			set_current_screen();
-		};
-
 		return [
 			'frontend_no_query_var'                    => [
 				'set_up'          => static function () {},
 				'expect_override' => false,
 			],
 			'frontend_query_var_not_allowed'           => [
-				'set_up'          => $set_query_var,
+				'set_up'          => $set_frontend_force_standard_mode_query_var,
 				'expect_override' => false,
 			],
-			'frontend_query_var_with_admin_user'       => [
-				'set_up'          => static function () use ( $set_query_var, $set_admin_user ) {
-					$set_query_var();
-					$set_admin_user();
-				},
-				'expect_override' => true,
-			],
 			'frontend_query_var_with_validate_request' => [
-				'set_up'          => static function () use ( $set_query_var, $set_validate_request ) {
-					$set_query_var();
+				'set_up'          => static function () use ( $set_frontend_force_standard_mode_query_var, $set_validate_request ) {
+					$set_frontend_force_standard_mode_query_var();
 					$set_validate_request();
 				},
 				'expect_override' => true,
 			],
 			'frontend_query_var_with_admin_user_and_validate_request' => [
-				'set_up'          => static function () use ( $set_query_var, $set_admin_user, $set_validate_request ) {
-					$set_query_var();
+				'set_up'          => static function () use ( $set_frontend_force_standard_mode_query_var, $set_admin_user, $set_validate_request ) {
+					$set_frontend_force_standard_mode_query_var();
 					$set_admin_user();
 					$set_validate_request();
 				},
 				'expect_override' => true,
 			],
 			'frontend_no_query_var_with_admin_user_and_validate_request' => [
-				'set_up'          => static function () use ( $set_query_var, $set_admin_user, $set_validate_request ) {
+				'set_up'          => static function () use ( $set_frontend_force_standard_mode_query_var, $set_admin_user, $set_validate_request ) {
 					$set_admin_user();
 					$set_validate_request();
 				},
 				'expect_override' => false,
 			],
-
-			'admin_validation_request_for_new_non_override_url' => [
-				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
-					$set_admin_user();
-					$set_admin_dashboard();
-					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
-					$_GET['url']    = home_url();
-				},
-				'expect_override' => false,
-			],
-
-			'admin_validation_request_for_new_yes_override_url' => [
-				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
-					$set_admin_user();
-					$set_admin_dashboard();
-					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
-					$_GET['url']    = add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) );
-				},
-				'expect_override' => true,
-			],
-
-			'admin_validation_request_for_existing_non_override_url' => [
-				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
-					$set_admin_user();
-					$set_admin_dashboard();
-					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
-					$_GET['post']    = self::factory()->post->create(
-						[
-							'post_title' => home_url(),
-							'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-						]
-					);
-				},
-				'expect_override' => false,
-			],
-
-			'admin_validation_request_for_existing_yes_override_url' => [
-				'set_up'          => static function () use ( $set_admin_dashboard, $set_admin_user ) {
-					$set_admin_user();
-					$set_admin_dashboard();
-					$_GET['action'] = AMP_Validation_Manager::VALIDATE_QUERY_VAR;
-					$_GET['post']    = self::factory()->post->create(
-						[
-							'post_title' => add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) ),
-							'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-						]
-					);
-				},
-				'expect_override' => true,
-			],
-
-			'admin_on_dashboard'                       => [
-				'set_up'          => static function () use ( $set_admin_user, $set_admin_dashboard ) {
-					$set_admin_user();
-					$set_admin_dashboard();
-				},
-				'expect_override' => false,
-			],
-			'admin_on_post_list_screen_not_amp_override_url' => [
-				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_list_screen ) {
-					$set_admin_user();
-					$set_global_validated_url_post( home_url( '/' ) );
-					$set_validated_url_post_list_screen();
-				},
-				'expect_override' => false,
-			],
-			'admin_on_post_list_screen_yes_amp_override_url' => [
-				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_list_screen ) {
-					$set_admin_user();
-					$set_global_validated_url_post( add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) ) );
-					$set_validated_url_post_list_screen();
-				},
-				'expect_override' => true,
-			],
-
-			'admin_on_edit_post_screen_not_amp_override_url' => [
-				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_edit_screen ) {
-					$set_admin_user();
-					$set_global_validated_url_post( home_url( '/' ) );
-					$set_validated_url_post_edit_screen();
-				},
-				'expect_override' => false,
-			],
-
-			'admin_on_edit_post_screen_not_amp_override_url' => [
-				'set_up'          => static function () use ( $set_admin_user, $set_global_validated_url_post, $set_validated_url_post_edit_screen ) {
-					$set_admin_user();
-					$set_global_validated_url_post( add_query_arg( QueryVar::AMP_FIRST, '', home_url( '/' ) ) );
-					$set_validated_url_post_edit_screen();
-				},
-				'expect_override' => true,
-			],
 		];
 	}
 
 	/**
-	 * @dataProvider get_data_to_test_filter_options_for_standard_mode_when_amp_first_override
-	 * @covers AMP_Validation_Manager::is_amp_first_override_request()
-	 * @covers AMP_Validation_Manager::filter_options_for_standard_mode_when_amp_first_override()
-	 * @covers AMP_Validation_Manager::is_amp_first_override_url()
+	 * @dataProvider get_data_to_test_filter_options_when_force_standard_mode_request
+	 * @covers AMP_Validation_Manager::filter_options_when_force_standard_mode_request()
+	 *
+	 * @param callback $set_up
+	 * @param bool     $expect_override
 	 */
-	public function test_filter_options_for_standard_mode_when_amp_first_override( $set_up, $expect_override ) {
+	public function test_filter_options_when_force_standard_mode_request( $set_up, $expect_override ) {
 		$set_up();
 
 		$options_with_reader   = [ Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG ];
-		$options_with_standard = [ Option::THEME_SUPPORT => AMP_Theme_Support::STANDARD_MODE_SLUG ];
+		$options_with_standard = [
+			Option::THEME_SUPPORT           => AMP_Theme_Support::STANDARD_MODE_SLUG,
+			Option::ALL_TEMPLATES_SUPPORTED => true,
+		];
 
 		$this->assertEquals(
 			$expect_override ? $options_with_standard : $options_with_reader,
-			AMP_Validation_Manager::filter_options_for_standard_mode_when_amp_first_override( $options_with_reader )
+			AMP_Validation_Manager::filter_options_when_force_standard_mode_request( $options_with_reader )
 		);
 	}
 
@@ -730,8 +609,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_action( 'all', [ self::TESTED_CLASS, 'wrap_hook_callbacks' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
-		$this->assertEquals( PHP_INT_MAX, has_action( 'do_shortcode_tag', [ self::TESTED_CLASS, 'decorate_shortcode_source' ] ) );
-		$this->assertEquals( 8, has_action( 'the_content', [ self::TESTED_CLASS, 'add_block_source_comments' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'do_shortcode_tag', [ self::TESTED_CLASS, 'decorate_shortcode_source' ] ) );
+		$this->assertEquals( 8, has_filter( 'the_content', [ self::TESTED_CLASS, 'add_block_source_comments' ] ) );
+		$this->assertEquals( 10, has_filter( 'the_editor', [ self::TESTED_CLASS, 'filter_the_editor_to_detect_sources' ] ) );
 	}
 
 	/**
@@ -1171,10 +1051,19 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					add_action(
 						'wp_enqueue_scripts',
 						static function () {
+							wp_register_script(
+								'bar',
+								'https://example.com/bar.js',
+								[],
+								'0.1',
+								true
+							);
+							wp_add_inline_script( 'bar', '/*Hello after Bar!*/', 'after' );
+
 							wp_enqueue_script(
 								'baz',
 								'https://example.com/baz.js',
-								[],
+								[ 'bar' ],
 								'0.1',
 								true
 							);
@@ -1182,8 +1071,26 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 						}
 					);
 				},
-				'//script[ contains( text(), "Hello before Baz!" ) ]',
-				function ( $sources ) {
+				[
+					'//script[ contains( text(), "Hello after Bar!" ) ]',
+					'//script[ contains( text(), "Hello before Baz!" ) ]',
+				],
+				function ( ...$sources_sets ) {
+					$this->assertCount( 2, $sources_sets );
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'extra_key'       => 'after',
+							'text'            => '/*Hello after Bar!*/',
+							'handle'          => 'bar',
+						],
+						$sources_sets[0][2]
+					);
 					$this->assertArraySubset(
 						[
 							'type'            => 'plugin',
@@ -1196,7 +1103,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 							'text'            => '/*Hello before Baz!*/',
 							'handle'          => 'baz',
 						],
-						$sources[2]
+						$sources_sets[1][2]
 					);
 				},
 			],
@@ -1272,6 +1179,49 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					);
 				},
 			],
+
+			'wp_editor_has_scripts_attributed'           => [
+				function () {
+					if ( version_compare( get_bloginfo( 'version' ), '5.2', '<=' ) ) {
+						$this->markTestSkipped( 'The script ID attribute was only added to inline scripts in WP 5.2.' );
+					}
+
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_add_inline_script( 'jquery-core', '/*After before-jquery*/', 'before' );
+							wp_add_inline_script( 'jquery-core', '/*After after-jquery*/', 'after' );
+						}
+					);
+					add_action(
+						'wp_body_open',
+						static function () {
+							wp_editor( '', 'content' );
+						}
+					);
+				},
+				[
+					'//script[ @id = "jquery-core-js-before" ]',
+					'//script[ @id = "jquery-core-js-after" ]',
+					'//script[ @id = "wp-dom-ready-js" ]',
+					'//script[ @id = "wp-dom-ready-js-translations" ]',
+					'//script[ @id = "quicktags-js" ]',
+					'//script[ @id = "quicktags-js-extra" ]',
+					'//script[ contains( text(), "window.wpActiveEditor" ) ]',
+				],
+				function ( ...$sources_sets ) {
+					$this->assertCount( 7, $sources_sets );
+					foreach ( $sources_sets as $sources ) {
+						$amp_source_count = 0;
+						foreach ( $sources as $source ) {
+							if ( 'plugin' === $source['type'] && 'amp' === $source['name'] ) {
+								$amp_source_count++;
+							}
+						}
+						$this->assertGreaterThanOrEqual( 1, $amp_source_count );
+					}
+				},
+			],
 		];
 	}
 
@@ -1280,24 +1230,16 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 *
 	 * @dataProvider get_locate_sources_data
 	 * @covers AMP_Validation_Manager::locate_sources()
+	 * @covers AMP_Validation_Manager::filter_the_editor_to_detect_sources()
 	 * @covers AMP_Validation_Callback_Wrapper
 	 *
-	 * @param callable $callback Callback set up (add actions).
-	 * @param string   $xpath    Expression to find the target element to get sources for.
-	 * @param callable $assert   Function to assert the expected sources.
+	 * @param callable        $callback Callback set up (add actions).
+	 * @param string|string[] $xpaths   Expression to find the target element to get sources for.
+	 * @param callable        $assert   Function to assert the expected sources.
 	 */
-	public function test_locate_sources_e2e( $callback, $xpath, $assert ) {
-		// @todo Remove once https://github.com/WordPress/gutenberg/pull/23104 is in a release.
-		// Temporarily fixes an issue with PHP errors being thrown in Gutenberg v8.3.0 on PHP 7.4.
-		$theme_features = [
-			'editor-color-palette',
-			'editor-gradient-presets',
-			'editor-font-sizes',
-		];
-		foreach ( $theme_features as $theme_feature ) {
-			if ( ! current_theme_supports( $theme_feature ) ) {
-				add_theme_support( $theme_feature, [] );
-			}
+	public function test_locate_sources_e2e( $callback, $xpaths, $assert ) {
+		if ( is_string( $xpaths ) ) {
+			$xpaths = [ $xpaths ];
 		}
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -1314,6 +1256,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				<?php wp_head(); ?>
 			</head>
 			<body>
+				<?php do_action( 'wp_body_open' ); ?>
 				<?php wp_footer(); ?>
 			</body>
 		</html>
@@ -1322,11 +1265,18 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$dom = Document::fromHtml( $html, Options::DEFAULTS );
 
-		$element = $dom->xpath->query( $xpath )->item( 0 );
-		$this->assertInstanceOf( 'DOMElement', $element );
-		$sources = AMP_Validation_Manager::locate_sources( $element );
-		$this->assertNotEmpty( $sources );
-		$assert( $sources );
+		$sources_sets = [];
+		foreach ( $xpaths as $xpath ) {
+			$query = $dom->xpath->query( $xpath );
+			foreach ( $query as $element ) {
+				$this->assertInstanceOf( DOMElement::class, $element );
+				$sources = AMP_Validation_Manager::locate_sources( $element );
+				$this->assertNotEmpty( $sources );
+				$sources_sets[] = $sources;
+			}
+		}
+
+		call_user_func_array( $assert, $sources_sets );
 	}
 
 	/**
@@ -2993,7 +2943,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			'wp-hooks',
 			'wp-i18n',
 			'wp-plugins',
-			'wp-polyfill',
 			'wp-url',
 		];
 

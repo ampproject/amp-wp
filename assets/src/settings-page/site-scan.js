@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { VALIDATED_URLS_LINK } from 'amp-settings'; // From WP inline script.
+import { AMP_SCAN_IF_STALE, VALIDATED_URLS_LINK } from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
 
 /**
@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useCallback, useContext, useEffect, useMemo, useState } from '@wordpress/element';
+import { getPathAndQueryString, hasQueryArg, removeQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -41,6 +42,7 @@ import useDelayedFlag from '../utils/use-delayed-flag';
 export function SiteScan( { onSiteScan } ) {
 	const {
 		cancelSiteScan,
+		fetchScannableUrls,
 		hasSiteScanResults,
 		isBusy,
 		isCancelled,
@@ -58,9 +60,31 @@ export function SiteScan( { onSiteScan } ) {
 	const hasSiteIssues = themesWithAmpIncompatibility.length > 0 || pluginsWithAmpIncompatibility.length > 0;
 
 	/**
-	 * Cancel scan when component unmounts.
+	 * Fetch scannable URLs on mount; cancel site scan if the component unmounts.
 	 */
-	useEffect( () => () => cancelSiteScan(), [ cancelSiteScan ] );
+	useEffect( () => {
+		fetchScannableUrls();
+
+		return cancelSiteScan;
+	}, [ cancelSiteScan, fetchScannableUrls ] );
+
+	/**
+	 * If the results are stale and the user is coming from the Onboarding
+	 * Wizard, a site scan should be triggered right away.
+	 */
+	useEffect( () => {
+		const path = getPathAndQueryString( document.location.href );
+
+		if ( ! isReady || ! hasQueryArg( path, AMP_SCAN_IF_STALE ) ) {
+			return;
+		}
+
+		if ( stale ) {
+			startSiteScan();
+		}
+
+		window.history.replaceState( {}, '', removeQueryArgs( path, AMP_SCAN_IF_STALE ) );
+	}, [ isReady, stale, startSiteScan ] );
 
 	/**
 	 * Delay the `isCompleted` flag so that the progress bar stays at 100% for a
@@ -140,7 +164,7 @@ export function SiteScan( { onSiteScan } ) {
 							if ( typeof onSiteScan === 'function' ) {
 								onSiteScan();
 							}
-							startSiteScan( { cache: true } );
+							startSiteScan();
 						} }
 						isPrimary={ true }
 					>
@@ -203,9 +227,9 @@ SiteScanDrawer.propTypes = {
  */
 function SiteScanInProgress() {
 	const {
-		currentlyScannedUrlIndex,
 		isCompleted,
 		scannableUrls,
+		scannedUrlsMaxIndex,
 	} = useContext( SiteScanContext );
 
 	return (
@@ -215,7 +239,7 @@ function SiteScanInProgress() {
 			</p>
 			<ProgressBar value={ isCompleted
 				? 100
-				: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
+				: ( scannedUrlsMaxIndex / scannableUrls.length * 100 )
 			} />
 			<p className="settings-site-scan__status">
 				{ isCompleted
@@ -223,9 +247,9 @@ function SiteScanInProgress() {
 					: sprintf(
 						// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.
 						__( 'Scanning %1$d/%2$d URLs: Checking %3$s…', 'amp' ),
-						currentlyScannedUrlIndex + 1,
+						scannedUrlsMaxIndex + 1,
 						scannableUrls.length,
-						scannableUrls[ currentlyScannedUrlIndex ]?.label,
+						scannableUrls[ scannedUrlsMaxIndex ]?.label,
 					)
 				}
 			</p>

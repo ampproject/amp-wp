@@ -48,7 +48,7 @@ class URLValidationRESTControllerTest extends TestCase {
 		do_action( 'rest_api_init' );
 		$this->user_access = new UserAccess();
 		$this->controller  = new URLValidationRESTController( new URLValidationProvider(), $this->user_access );
-		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
+		$this->add_validate_response_mocking_filter();
 	}
 
 	/** @covers ::get_registration_action() */

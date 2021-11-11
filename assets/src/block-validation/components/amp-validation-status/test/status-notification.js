@@ -23,8 +23,6 @@ describe( 'AMPValidationStatusNotification', () => {
 	const autosave = jest.fn();
 	const savePost = jest.fn();
 
-	useDispatch.mockImplementation( () => ( { autosave, savePost } ) );
-
 	function setupUseSelect( overrides ) {
 		useSelect.mockImplementation( () => ( {
 			fetchingErrorsRequestErrorMessage: '',
@@ -40,9 +38,11 @@ describe( 'AMPValidationStatusNotification', () => {
 		} ) );
 	}
 
-	beforeEach( () => {
-		jest.clearAllMocks();
+	beforeAll( () => {
+		useDispatch.mockImplementation( () => ( { autosave, savePost } ) );
+	} );
 
+	beforeEach( () => {
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 	} );
