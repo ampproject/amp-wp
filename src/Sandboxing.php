@@ -176,6 +176,8 @@ final class Sandboxing implements Service, Registerable, Conditional {
 				return $error;
 			}
 		);
+
+		add_action( 'amp_finalize_dom', [ $this, 'finalize_document' ], 10, 2 );
 	}
 
 	/**

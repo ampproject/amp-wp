@@ -2177,9 +2177,16 @@ class AMP_Theme_Support {
 			}
 		}
 
-		if ( Sandboxing::is_needed() ) {
-			Services::get( 'sandboxing' )->finalize_document( $dom, $effective_sandboxing_level );
-		}
+		/**
+		 * Fires immediately before the DOM is serialized to send as the response body.
+		 *
+		 * @since 2.2
+		 * @internal
+		 *
+		 * @param Document $dom                        Document prior to serialization.
+		 * @param int      $effective_sandboxing_level Effective sandboxing level.
+		 */
+		do_action( 'amp_finalize_dom', $dom, $effective_sandboxing_level );
 
 		$response = $dom->saveHTML();
 
