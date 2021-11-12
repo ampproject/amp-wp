@@ -44,7 +44,7 @@ export function SandboxingLevel( { focusedSection } ) {
 			initialOpen={ 'sandboxing-level' === focusedSection }
 		>
 			<p>
-				{ __( 'Try out a more flexible AMP by generating pages that use AMP components without requiring AMP validity! By selecting a sandboxing level, you are indicating the minimum degree of sanitization. For example, if you selected level 1 but have a page without any POST form and no custom scripts, it will still be served as valid AMP, the same as if you had selected level 3.', 'amp' ) }
+				{ __( 'Try out a more flexible AMP by generating pages that use AMP components without requiring AMP validity! By selecting a sandboxing level, you are indicating the minimum degree of sanitization. For example, if you selected the loose leve but have a page without any POST form and no custom scripts, it will still be served as valid AMP—the same as if you had selected the strict level.', 'amp' ) }
 			</p>
 			<ol>
 				<li>
@@ -60,7 +60,7 @@ export function SandboxingLevel( { focusedSection } ) {
 						<strong>
 							{ __( 'Loose:', 'amp' ) }
 						</strong>
-						{ ' ' + __( 'Do not remove any AMP-invalid markup by default, including custom scripts. CSS tree-shaking is disabled.', 'amp' ) }
+						{ ' ' + __( 'Do not remove any AMP-invalid markup by default, including custom scripts. CSS processing is disabled.', 'amp' ) }
 					</label>
 				</li>
 				<li>
@@ -76,7 +76,7 @@ export function SandboxingLevel( { focusedSection } ) {
 						<strong>
 							{ __( 'Moderate:', 'amp' ) }
 						</strong>
-						{ ' ' + __( 'Remove non-AMP markup, but allow POST forms. CSS tree shaking is enabled.', 'amp' ) }
+						{ ' ' + __( 'Remove anything invalid AMP except for POST forms, excessive CSS, and other PX-verified markup.', 'amp' ) }
 					</label>
 				</li>
 				<li>
@@ -92,7 +92,7 @@ export function SandboxingLevel( { focusedSection } ) {
 						<strong>
 							{ __( 'Strict:', 'amp' ) }
 						</strong>
-						{ ' ' + __( 'Require valid AMP.', 'amp' ) }
+						{ ' ' + __( 'Require valid AMP, removing all markup that causes validation errors.', 'amp' ) }
 					</label>
 				</li>
 
