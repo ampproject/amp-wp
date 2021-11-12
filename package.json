@@ -20,7 +20,7 @@
   },
   "engines": {
     "node": ">= 14",
-    "npm": ">= 6.14"
+    "npm": ">= 6.14 <7"
   },
   "dependencies": {
     "@wordpress/api-fetch": "5.2.5",
@@ -29,7 +29,7 @@
     "@wordpress/compose": "5.0.5",
     "@wordpress/date": "4.2.2",
     "@wordpress/dom-ready": "3.2.2",
-    "@wordpress/editor": "12.0.3",
+    "@wordpress/editor": "12.0.4",
     "@wordpress/element": "4.0.3",
     "@wordpress/escape-html": "2.2.2",
     "@wordpress/html-entities": "3.2.2",
@@ -54,8 +54,8 @@
     "@wordpress/browserslist-config": "4.1.0",
     "@wordpress/data": "6.1.3",
     "@wordpress/dependency-extraction-webpack-plugin": "3.2.1",
-    "@wordpress/e2e-test-utils": "5.4.6",
-    "@wordpress/edit-post": "5.0.6",
+    "@wordpress/e2e-test-utils": "5.4.7",
+    "@wordpress/edit-post": "5.0.7",
     "@wordpress/eslint-plugin": "9.2.0",
     "@wordpress/hooks": "3.2.1",
     "@wordpress/jest-puppeteer-axe": "3.1.0",
