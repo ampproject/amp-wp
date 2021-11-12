@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Support;
 
 use AMP_Options_Manager;
 use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Manager;
 use WP_Error;
 use WP_Post;
 use WP_Query;
@@ -598,6 +599,11 @@ class SupportData {
 
 			$query_args['post_name__in'] = array_map(
 				static function ( $url ) {
+					// Validate and store validation data for the URL if data do not exist.
+					if ( ! post_exists( $url ) ) {
+						AMP_Validation_Manager::validate_url_and_store( $url );
+					}
+
 					return md5( $url );
 				},
 				$this->urls
