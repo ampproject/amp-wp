@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Support\Tests;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use WP_Error;
 use stdClass;
@@ -22,7 +23,7 @@ use stdClass;
  */
 class SupportDataTest extends DependencyInjectedTestCase {
 
-	use PrivateAccess;
+	use PrivateAccess, HomeUrlLoopbackRequestMocking;
 
 	/**
 	 * Instance of OptionsMenu
@@ -51,6 +52,8 @@ class SupportDataTest extends DependencyInjectedTestCase {
 		foreach ( array_keys( $this->previous_ini_config ) as $key ) {
 			$this->previous_ini_config[ $key ] = ini_get( $key );
 		}
+
+		$this->add_home_url_loopback_request_mocking();
 	}
 
 	/**

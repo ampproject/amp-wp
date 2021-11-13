@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 import { Logo } from '../components/svg/logo';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
 import { useWindowWidth } from '../utils/use-window-width';
+import { SiteScan } from '../components/site-scan-context-provider';
 import { Stepper } from './components/stepper';
 import { Nav, CloseLink } from './components/nav';
 import { Navigation } from './components/navigation-context-provider';
@@ -46,6 +47,12 @@ function PageComponentSideEffects( { children } ) {
 export function SetupWizard( { closeLink, finishLink, appRoot } ) {
 	const { isMobile } = useWindowWidth();
 	const { activePageIndex, currentPage: { title, PageComponent, showTitle }, moveBack, moveForward, pages } = useContext( Navigation );
+	const { fetchScannableUrls } = useContext( SiteScan );
+
+	// Fetch the AMP-first scannable URLs needed for the Site Scan step.
+	useEffect( () => {
+		fetchScannableUrls( { forceStandardMode: true } );
+	}, [ fetchScannableUrls ] );
 
 	const PageComponentWithSideEffects = useMemo( () => () => (
 		<PageComponentSideEffects>
