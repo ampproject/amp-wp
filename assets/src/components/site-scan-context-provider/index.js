@@ -390,7 +390,7 @@ export function SiteScanContextProvider( {
 
 		setShouldDelayValidationRequest( true );
 
-		const currentlyScannedUrlIndex = urlIndexesPendingScan.shift();
+		const currentlyScannedUrlIndex = urlIndexesPendingScan[ 0 ];
 
 		dispatch( {
 			type: ACTION_SCAN_URL,
