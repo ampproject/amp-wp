@@ -10,9 +10,11 @@ import {
 	ACTION_SCAN_URL,
 	ACTION_SCAN_RECEIVE_RESULTS,
 	ACTION_SCAN_COMPLETE,
+	ACTION_SCAN_SUCCESS,
 	ACTION_SCAN_CANCEL,
 	STATUS_REQUEST_SCANNABLE_URLS,
 	STATUS_FETCHING_SCANNABLE_URLS,
+	STATUS_REFETCHING_PLUGIN_SUPPRESSION,
 	STATUS_READY,
 	STATUS_IDLE,
 	STATUS_IN_PROGRESS,
@@ -269,7 +271,7 @@ describe( 'siteScanReducer', () => {
 		}, {
 			type: ACTION_SCAN_COMPLETE,
 		} ) ).toStrictEqual( {
-			status: STATUS_COMPLETED,
+			status: STATUS_REFETCHING_PLUGIN_SUPPRESSION,
 			scannableUrls: [
 				{ error: false },
 				{ error: true },
@@ -289,6 +291,17 @@ describe( 'siteScanReducer', () => {
 				{ error: true },
 				{ error: true },
 			],
+		} );
+	} );
+
+	/**
+	 * ACTION_SCAN_SUCCESS
+	 */
+	it( 'returns previous state for ACTION_SCAN_SUCCESS', () => {
+		expect( siteScanReducer( { status }, {
+			type: ACTION_SCAN_SUCCESS,
+		} ) ).toStrictEqual( {
+			status: STATUS_COMPLETED,
 		} );
 	} );
 
