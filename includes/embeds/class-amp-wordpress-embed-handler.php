@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\Dom\Document;
 use AmpProject\Attribute;
 use AmpProject\Extension;
 
@@ -29,75 +30,110 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected $DEFAULT_HEIGHT = 200;
 
 	/**
+	 * Tag.
+	 *
+	 * @var string embed HTML iframe tag to identify and replace with AMP version.
+	 */
+	protected $sanitize_tag = 'iframe';
+
+	/**
+	 * Tag.
+	 *
+	 * @var string AMP amp-twitter tag
+	 */
+	private $amp_tag = Extension::WORDPRESS_EMBED;
+
+	/**
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 100, 2 );
+		// Not implemented.
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 100 );
+		// Not implemented.
 	}
 
 	/**
-	 * Filter oEmbed HTML for WordPress to convert to AMP.
+	 * Sanitize WordPress embed raw embeds.
 	 *
-	 * @param string $cache Cache for oEmbed.
-	 * @param string $url   Embed URL.
-	 * @return string Embed.
+	 * @param Document $dom Document.
+	 *
+	 * @return void
 	 */
-	public function filter_embed_oembed_html( $cache, $url ) {
-		/*
-		 * Example WordPress embed HTML that would be present in $cache.
-		 *
-		 * <blockquote class="wp-embedded-content" data-secret="xUuZHketRt">
-		 *     <a href="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/">New Embeds Feature in WordPress 4.4</a>
-		 * </blockquote>
-		 * <iframe
-		 *      title="&#8220;New Embeds Feature in WordPress 4.4&#8221; &#8212; Make WordPress Core"
-		 *      class="wp-embedded-content"
-		 *      sandbox="allow-scripts"
-		 *      security="restricted"
-		 *      style="position: absolute; clip: rect(1px, 1px, 1px, 1px);"
-		 *      src="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/embed/#?secret=xUuZHketRt"
-		 *      data-secret="xUuZHketRt"
-		 *      width="600"
-		 *      height="338"
-		 *      frameborder="0"
-		 *      marginwidth="0"
-		 *      marginheight="0"
-		 *      scrolling="no">
-		 * </iframe>
-		 */
-		if ( ! preg_match( '#<blockquote\s+(?P<attrs>[^>]*class="[^"]*wp-embedded-content[^>]*)>(?P<contents>.+?)</blockquote>#s', $cache, $matches ) ) {
-			return $cache;
-		}
-		$placeholder = sprintf( '<blockquote %s>%s</blockquote>', $matches['attrs'] . ' placeholder', $matches['contents'] );
+	public function sanitize_raw_embeds( Document $dom ) {
+		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
+		$num_nodes = $nodes->length;
 
+		if ( 0 === $num_nodes ) {
+			return;
+		}
+
+		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			$node = $nodes->item( $i );
+			if ( ! $node instanceof DOMElement ) {
+				continue;
+			}
+
+			if ( $this->is_raw_embed( $node ) ) {
+				$this->create_amp_wordpress_embed_and_replace_node( $dom, $node );
+
+				// If embeds in the DOM are wrapped by `wpautop()`, unwrap them.
+				$embed_nodes = $dom->xpath->query( "//p/{$this->amp_tag}" );
+				if ( $embed_nodes->length ) {
+					foreach ( $embed_nodes as $embed_node ) {
+						$this->unwrap_p_element( $embed_node );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Checks whether it's a WordPress embed blockquote or not.
+	 *
+	 * @param DOMElement $node The DOMNode to adjust and replace.
+	 * @return bool Whether node is for raw embed.
+	 */
+	private function is_raw_embed( $node ) {
+		$class_attr = $node->getAttribute( 'class' );
+		return null !== $class_attr && false !== strpos( $class_attr, 'wp-embedded-content' );
+	}
+
+	/**
+	 * Make final modifications to DOMNode
+	 *
+	 * @param Document   $dom  The HTML Document.
+	 * @param DOMElement $node The DOMNode to adjust and replace.
+	 */
+	private function create_amp_wordpress_embed_and_replace_node( Document $dom, DOMElement $node ) {
+
+		$node_html  = $dom->saveHTML( $node );
 		$attributes = [
 			Attribute::HEIGHT => $this->args['height'],
 			Attribute::TITLE  => '',
 		];
-		if ( preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+?)"#s', $cache, $matches ) ) {
+
+		if ( preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+?)"#s', $node_html, $matches ) ) {
 			$attributes[ Attribute::TITLE ] = $matches['title'];
 		}
 
-		return AMP_HTML_Utils::build_tag(
-			Extension::WORDPRESS_EMBED,
-			array_merge(
-				$attributes,
-				[
-					'data-url' => esc_url( $url ),
-				]
-			),
-			sprintf(
-				'%s%s',
-				$placeholder,
-				$this->create_overflow_button_markup( __( 'Expand', 'amp' ) )
-			)
+		if ( preg_match( '#<iframe[^>]*?src="(?P<src>[^"]+?)"#s', $node_html, $matches ) ) {
+			$attributes['data-url'] = $matches['src'];
+		}
+
+		$new_node = AMP_DOM_Utils::create_node(
+			$dom,
+			$this->amp_tag,
+			$attributes
 		);
+
+		$new_node->appendChild( $this->create_overflow_button_element( $dom, __( 'Expand', 'amp' ) ) );
+		$node->parentNode->replaceChild( $new_node, $node );
+
+		$this->did_convert_elements = true;
 	}
 }
