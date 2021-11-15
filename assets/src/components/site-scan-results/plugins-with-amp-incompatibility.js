@@ -3,18 +3,21 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import { AMP_COMPATIBLE_PLUGINS_URL } from 'amp-settings'; // From WP inline script.
 
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { useMemo } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { createInterpolateElement, useMemo } from '@wordpress/element';
+import { ExternalLink } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { useNormalizedPluginsData } from '../plugins-context-provider/use-normalized-plugins-data';
 import { IconLaptopPlug } from '../svg/laptop-plug';
+import { isExternalUrl } from '../../common/helpers/is-external-url';
 import { SiteScanSourcesList } from './site-scan-sources-list';
 import { SiteScanResults } from './index';
 
@@ -47,15 +50,24 @@ export function PluginsWithAmpIncompatibility( {
 			{ ...props }
 		>
 			{ showHelpText && (
-				<p
-					dangerouslySetInnerHTML={ {
-						__html: sprintf(
-							// translators: placeholder stands for page anchors.
-							__( 'Because of plugin issues we’ve uncovered, you may want to <a href="%s">review and suppress plugins</a>.', 'amp' ),
-							'#template-modes',
-						),
-					} }
-				/>
+				<p>
+					{ createInterpolateElement(
+						__( 'Because of plugin issues we’ve uncovered, you may want to <a>review and suppress plugins</a>.', 'amp' ),
+						{
+							// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
+							a: <a href="#plugin-suppression" />,
+						},
+					) }
+					{ AMP_COMPATIBLE_PLUGINS_URL ? createInterpolateElement(
+						` ${ __( 'You may also want to browse <a>AMP compatible plugins</a>.', 'amp' ) }`,
+						{
+							a: isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL )
+								? <ExternalLink href={ AMP_COMPATIBLE_PLUGINS_URL } />
+								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
+								: <a href={ AMP_COMPATIBLE_PLUGINS_URL } />,
+						},
+					) : '' }
+				</p>
 			) }
 			<SiteScanSourcesList
 				sources={ sources }
