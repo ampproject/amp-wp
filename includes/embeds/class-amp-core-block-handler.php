@@ -51,6 +51,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		'core/archives'   => 'ampify_archives_block',
 		'core/video'      => 'ampify_video_block',
 		'core/file'       => 'ampify_file_block',
+		'core/navigation' => 'ampify_navigation_block',
 	];
 
 	/**
@@ -254,6 +255,43 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function dequeue_block_library_file_script() {
 		wp_dequeue_script( 'wp-block-library-file' );
+	}
+
+	/**
+	 * Ampify navigation block.
+	 *
+	 * ...
+	 *
+	 * @see render_block_core_navigation()
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 * @return string Filtered block content.
+	 */
+	public function ampify_navigation_block( $block_content, $block ) {
+		$overlayMenu = isset( $block['attrs']['overlayMenu'] ) ? $block['attrs']['overlayMenu'] : 'off';
+		if ( 'off' === $overlayMenu ) {
+			return $block_content;
+		}
+
+		if ( ! preg_match( '#<div\s+(?P<attrs>[^>]*class="[^"]*wp-block-navigation__responsive-container-content[^>]*)>(?P<contents>.+?)</div>#s', $block_content, $matches ) ) {
+			return $block_content;
+		}
+
+		add_action( 'wp_print_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
+		add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
+
+		return sprintf(
+			'<amp-sidebar id="sidebar1" layout="nodisplay" side="left" class="wp-block-navigation__responsive-container is-menu-open">%s</amp-sidebar><button on="tap:sidebar1.open">Open</button>',
+			$matches['contents']
+		);
+	}
+
+	/**
+	 * Dequeue wp-block-navigation-view script.
+	 */
+	public function dequeue_block_navigation_view_script() {
+		wp_dequeue_script( 'wp-block-navigation-view' );
 	}
 
 	/**
