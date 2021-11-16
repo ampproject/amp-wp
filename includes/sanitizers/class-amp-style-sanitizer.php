@@ -2528,10 +2528,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Obtain the font-family name to guess the filename.
+		$font_family   = null;
 		$font_basename = null;
 		$properties    = $ruleset->getRules( 'font-family' );
-		if ( isset( $properties[0] ) ) {
-			$font_family = trim( $properties[0]->getValue(), '"\'' );
+		$property      = end( $properties );
+		if ( $property instanceof Rule ) {
+			$font_family = trim( $property->getValue(), '"\'' );
 
 			// Remove all non-word characters from the font family to serve as the filename.
 			$font_basename = preg_replace( '/[^A-Za-z0-9_\-]/', '', $font_family ); // Same as sanitize_key() minus case changes.
@@ -2698,29 +2700,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} // End foreach $source_data_url_objects.
 		} // End foreach $src_properties.
 
-		/**
-		 * Override the 'font-display' property to improve font performance.
-		 */
-		if ( isset( $font_family ) && in_array( $font_family, array_keys( $this->args['font_face_display_overrides'] ), true ) ) {
-			$properties = $ruleset->getRules( 'font-display' );
-			if ( isset( $properties[0] ) ) {
-				$ruleset->removeRule( $properties[0] );
-			}
-
+		// Override the 'font-display' property to improve font performance.
+		if ( $font_family && in_array( $font_family, array_keys( $this->args['font_face_display_overrides'] ), true ) ) {
+			$ruleset->removeRule( 'font-display' );
 			$font_display_rule = new Rule( 'font-display' );
 			$font_display_rule->setValue( $this->args['font_face_display_overrides'][ $font_family ] );
 			$ruleset->addRule( $font_display_rule );
 		}
 
-		/**
-		 * If the font-display is auto, block, or swap then we should automatically add the preload link for the first font file.
-		 */
+		// If the font-display is auto, block, or swap then we should automatically add the preload link for the first font file.
 		$properties = $ruleset->getRules( 'font-display' );
+		$property   = end( $properties ); // Last since the last property wins in CSS.
 		if (
 			(
-				( isset( $properties[0] ) && in_array( $properties[0]->getValue(), [ 'auto', 'block', 'swap' ], true ) )
+				// Defaults to 'auto', hence should be preloaded as well.
+				! $property instanceof Rule
 				||
-				( ! isset( $properties[0] ) ) // Defaults to 'auto', hence should be preloaded as well.
+				in_array( $property->getValue(), [ 'auto', 'block', 'swap' ], true )
 			)
 			&&
 			1 <= count( $font_files )
