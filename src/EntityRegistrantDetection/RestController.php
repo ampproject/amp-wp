@@ -25,6 +25,13 @@ use WP_REST_Server;
 class RestController extends WP_REST_Controller implements Service, Registerable, Delayed {
 
 	/**
+	 * Instance of EntityRegistrantDetectionManager.
+	 *
+	 * @var EntityRegistrantDetectionManager
+	 */
+	protected $detection_manager;
+
+	/**
 	 * The namespace of this controller's route.
 	 *
 	 * @var string
@@ -47,11 +54,14 @@ class RestController extends WP_REST_Controller implements Service, Registerable
 
 	/**
 	 * Constructor.
+	 *
+	 * @param EntityRegistrantDetectionManager $detection_manager Instance of EntityRegistrantDetectionManager.
 	 */
-	public function __construct() {
+	public function __construct( EntityRegistrantDetectionManager $detection_manager ) {
 
-		$this->namespace = 'amp/v1';
-		$this->rest_base = 'entity-registrants';
+		$this->namespace         = 'amp/v1';
+		$this->rest_base         = 'entity-registrants';
+		$this->detection_manager = $detection_manager;
 	}
 
 	/**
@@ -99,6 +109,14 @@ class RestController extends WP_REST_Controller implements Service, Registerable
 	 */
 	public function get_items_permissions_check( $request ) {
 
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return new WP_Error(
+				'rest_forbidden',
+				__( 'Sorry, you are not allowed to fetch entity registrant detail.', 'amp' ),
+				[ 'status' => rest_authorization_required_code() ]
+			);
+		}
+
 		$nonce_value = $request->get_param( EntityRegistrantDetectionManager::NONCE_QUERY_VAR );
 
 		if ( ! EntityRegistrantDetectionManager::verify_nonce( $nonce_value ) ) {
@@ -108,7 +126,7 @@ class RestController extends WP_REST_Controller implements Service, Registerable
 			);
 		}
 
-		return current_user_can( 'manage_options' );
+		return true;
 	}
 
 	/**
@@ -120,13 +138,6 @@ class RestController extends WP_REST_Controller implements Service, Registerable
 	 */
 	public function get_items( $request ) {
 
-		return rest_ensure_response(
-			[
-				'post_types' => EntityRegistrantDetectionManager::$post_types_source,
-				'taxonomies' => EntityRegistrantDetectionManager::$taxonomies_source,
-				'blocks'     => EntityRegistrantDetectionManager::$blocks_source,
-				'shortcodes' => EntityRegistrantDetectionManager::$shortcodes_source,
-			]
-		);
+		return rest_ensure_response( $this->detection_manager->get_registered_entities() );
 	}
 }

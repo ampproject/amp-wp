@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\EntityRegistrantDetection\Tests;
 
 use AmpProject\AmpWP\EntityRegistrantDetection\CallbackWrapper;
 use AmpProject\AmpWP\EntityRegistrantDetection\EntityRegistrantDetectionManager;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
@@ -53,6 +54,17 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 			'hook'     => 'init',
 			'priority' => 5,
 		];
+	}
+
+	/**
+	 * @covers ::__construct()
+	 */
+	public function test_construct() {
+
+		$this->assertInstanceOf(
+			Injector::class,
+			$this->get_private_property( $this->instance, 'injector' )
+		);
 	}
 
 	/**
@@ -120,15 +132,15 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 	public function test_add_source_post_type() {
 
 		$this->assertFalse(
-			EntityRegistrantDetectionManager::add_source(
+			$this->instance->add_source(
 				'invalid_entity_type',
 				'invalid_entity',
 				$this->source
 			)
 		);
 
-		EntityRegistrantDetectionManager::add_source( 'post_type', 'invalid_post', $this->source );
-		EntityRegistrantDetectionManager::add_source( 'post_type', 'post', $this->source );
+		$this->instance->add_source( 'post_type', 'invalid_post', $this->source );
+		$this->instance->add_source( 'post_type', 'post', $this->source );
 
 		$post_types_source = $this->get_private_property( $this->instance, 'post_types_source' );
 
@@ -150,7 +162,7 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 	 */
 	public function test_add_source_taxonomy() {
 
-		EntityRegistrantDetectionManager::add_source( 'taxonomy', [ 'invalid_taxonomy', 'category' ], $this->source );
+		$this->instance->add_source( 'taxonomy', [ 'invalid_taxonomy', 'category' ], $this->source );
 
 		$taxonomies_source = $this->get_private_property( $this->instance, 'taxonomies_source' );
 
@@ -172,7 +184,7 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 	 */
 	public function test_add_source_shortcode() {
 
-		EntityRegistrantDetectionManager::add_source( 'shortcode', [ 'invalid_shortcode', 'gallery' ], $this->source );
+		$this->instance->add_source( 'shortcode', [ 'invalid_shortcode', 'gallery' ], $this->source );
 
 		$shortcodes_source = $this->get_private_property( $this->instance, 'shortcodes_source' );
 
@@ -193,7 +205,7 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 	 */
 	public function test_add_source_block() {
 
-		EntityRegistrantDetectionManager::add_source( 'block', [ 'invalid_block', 'core/button' ], $this->source );
+		$this->instance->add_source( 'block', [ 'invalid_block', 'core/button' ], $this->source );
 
 		$blocks_source = $this->get_private_property( $this->instance, 'blocks_source' );
 
@@ -209,6 +221,19 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 		);
 
 		$this->assertArrayHasKey( 'attributes', $blocks_source['core/button'] );
+	}
+
+	/**
+	 * @covers ::get_registered_entities()
+	 */
+	public function test_get_registered_entities() {
+
+		$output = $this->instance->get_registered_entities();
+
+		foreach ( [ 'post_types', 'taxonomies', 'blocks', 'shortcodes' ] as $entity_type ) {
+			$this->assertArrayHasKey( $entity_type, $output );
+		}
+
 	}
 
 	/**
@@ -271,8 +296,8 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 
 		$this->assertInstanceOf(
 			CallbackWrapper::class,
-			$this->call_private_static_method(
-				EntityRegistrantDetectionManager::class,
+			$this->call_private_method(
+				$this->instance,
 				'wrapped_callback',
 				[ $callable ]
 			)

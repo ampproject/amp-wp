@@ -214,6 +214,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			DependencySupport::class,
 			DevTools\CallbackReflection::class,
 			DevTools\FileReflection::class,
+			EntityRegistrantDetectionManager::class,
 			ReaderThemeLoader::class,
 			ReaderThemeSupportFeatures::class,
 			BackgroundTask\BackgroundTaskDeactivator::class,

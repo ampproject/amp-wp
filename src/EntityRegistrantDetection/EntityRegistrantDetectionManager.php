@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\EntityRegistrantDetection;
 
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Block_Type;
@@ -35,32 +36,49 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 	const NONCE_QUERY_VAR = 'amp_entity_registrant_detection_nonce';
 
 	/**
+	 * Injector.
+	 *
+	 * @var Injector
+	 */
+	private $injector;
+
+	/**
 	 * List of registered post-type.
 	 *
 	 * @var array
 	 */
-	public static $post_types_source = [];
+	protected $post_types_source = [];
 
 	/**
 	 * List of registered taxonomy.
 	 *
 	 * @var array
 	 */
-	public static $taxonomies_source = [];
+	protected $taxonomies_source = [];
 
 	/**
 	 * List of registered shortcode.
 	 *
 	 * @var array
 	 */
-	public static $shortcodes_source = [];
+	protected $shortcodes_source = [];
 
 	/**
 	 * List of registered block type.
 	 *
 	 * @var array
 	 */
-	public static $blocks_source = [];
+	protected $blocks_source = [];
+
+	/**
+	 * Constructor.
+	 *
+	 * @param Injector $injector Injector.
+	 */
+	public function __construct( Injector $injector ) {
+
+		$this->injector = $injector;
+	}
 
 	/**
 	 * Get the action to use for registering the service.
@@ -106,7 +124,7 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 	 */
 	public static function verify_nonce( $value ) {
 
-		return hash_equals( $value, self::get_nonce() );
+		return ( ! empty( $value ) ) ? hash_equals( $value, self::get_nonce() ) : false;
 	}
 
 	/**
@@ -118,7 +136,7 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 	 *
 	 * @return bool True on success, Otherwise False.
 	 */
-	public static function add_source( $entity_type, $entities, $source ) {
+	public function add_source( $entity_type, $entities, $source ) {
 
 		$allowed_entity_types = [
 			'post_type',
@@ -148,7 +166,7 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 						break;
 					}
 
-					self::$post_types_source[ $entity ] = [
+					$this->post_types_source[ $entity ] = [
 						'name'         => $post_type->label,
 						'slug'         => $post_type->name,
 						'description'  => $post_type->description,
@@ -163,7 +181,7 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 						break;
 					}
 
-					self::$taxonomies_source[ $entity ] = [
+					$this->taxonomies_source[ $entity ] = [
 						'name'         => $taxonomy->label,
 						'slug'         => $taxonomy->name,
 						'description'  => $taxonomy->description,
@@ -180,7 +198,7 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 
 					$block_type = $block_types[ $entity ];
 
-					self::$blocks_source[ $entity ] = [
+					$this->blocks_source[ $entity ] = [
 						'name'        => $block_type->name,
 						'title'       => $block_type->name,
 						'description' => $block_type->description,
@@ -197,7 +215,7 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 						break;
 					}
 
-					self::$shortcodes_source[ $entity ] = [
+					$this->shortcodes_source[ $entity ] = [
 						'tag'    => $entity,
 						'source' => $source,
 					];
@@ -206,6 +224,21 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get list of registered entities.
+	 *
+	 * @return array List of registered entities.
+	 */
+	public function get_registered_entities() {
+
+		return [
+			'post_types' => $this->post_types_source,
+			'taxonomies' => $this->taxonomies_source,
+			'blocks'     => $this->blocks_source,
+			'shortcodes' => $this->shortcodes_source,
+		];
 	}
 
 	/**
@@ -238,7 +271,7 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 		foreach ( $wp_filter[ $hook ]->callbacks as $priority => &$callbacks ) {
 			foreach ( $callbacks as &$callback ) {
 				if ( ! $callback['function'] instanceof CallbackWrapper ) {
-					$callback['function'] = self::wrapped_callback(
+					$callback['function'] = $this->wrapped_callback(
 						array_merge(
 							$callback,
 							compact( 'priority', 'hook' )
@@ -263,8 +296,8 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 	 *
 	 * @return CallbackWrapper Instance of CallbackWrapper.
 	 */
-	protected static function wrapped_callback( $callback ) {
+	protected function wrapped_callback( $callback ) {
 
-		return new CallbackWrapper( $callback );
+		return $this->injector->make( CallbackWrapper::class, compact( 'callback' ) );
 	}
 }

@@ -7,14 +7,16 @@
 
 namespace AmpProject\AmpWP\EntityRegistrantDetection\Tests;
 
+use AmpProject\AmpWP\DevTools\CallbackReflection;
 use AmpProject\AmpWP\EntityRegistrantDetection\CallbackWrapper;
+use AmpProject\AmpWP\EntityRegistrantDetection\EntityRegistrantDetectionManager;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * @coversDefaultClass \AmpProject\AmpWP\EntityRegistrantDetection\CallbackWrapper
  */
-class CallbackWrapperTest extends TestCase {
+class CallbackWrapperTest extends DependencyInjectedTestCase {
 
 	use PrivateAccess;
 
@@ -30,17 +32,34 @@ class CallbackWrapperTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	protected function setUp() {
+	public function setUp() {
 
 		parent::setUp();
 
-		$this->instance = new CallbackWrapper(
-			[
-				'function'      => [ __CLASS__, 'register_entities' ],
-				'accepted_args' => 0,
-				'priority'      => 10,
-				'hook'          => 'init',
-			]
+		$callback = [
+			'function'      => [ __CLASS__, 'register_entities' ],
+			'accepted_args' => 0,
+			'priority'      => 10,
+			'hook'          => 'init',
+		];
+
+		$this->instance = $this->injector->make( CallbackWrapper::class, compact( 'callback' ) );
+
+	}
+
+	/**
+	 * @covers ::__construct()
+	 */
+	public function test_construct() {
+
+		$this->assertInstanceOf(
+			EntityRegistrantDetectionManager::class,
+			$this->get_private_property( $this->instance, 'detection_manager' )
+		);
+
+		$this->assertInstanceOf(
+			CallbackReflection::class,
+			$this->get_private_property( $this->instance, 'callback_reflection' )
 		);
 
 	}

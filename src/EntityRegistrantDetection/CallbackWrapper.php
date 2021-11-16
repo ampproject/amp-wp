@@ -7,7 +7,7 @@
 
 namespace AmpProject\AmpWP\EntityRegistrantDetection;
 
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\DevTools\CallbackReflection;
 use ArrayAccess;
 use WP_Block_Type_Registry;
 
@@ -144,9 +144,25 @@ class CallbackWrapper implements ArrayAccess {
 	protected $registered_entities;
 
 	/**
+	 * Instance of EntityRegistrantDetectionManager.
+	 *
+	 * @var EntityRegistrantDetectionManager
+	 */
+	protected $detection_manager;
+
+	/**
+	 * Callback reflection.
+	 *
+	 * @var CallbackReflection
+	 */
+	protected $callback_reflection;
+
+	/**
 	 * AMP_Validation_Callback_Wrapper constructor.
 	 *
-	 * @param array $callback [
+	 * @param EntityRegistrantDetectionManager $detection_manager   Instance of EntityRegistrantDetectionManager.
+	 * @param CallbackReflection               $callback_reflection Instance of CallbackReflection.
+	 * @param array                            $callback            [
 	 *     The callback data.
 	 *     @type callable $function
 	 *     @type int      $accepted_args
@@ -154,8 +170,10 @@ class CallbackWrapper implements ArrayAccess {
 	 *     @type string   $hook
 	 * ]
 	 */
-	public function __construct( $callback ) {
+	public function __construct( EntityRegistrantDetectionManager $detection_manager, CallbackReflection $callback_reflection, $callback ) {
 
+		$this->detection_manager   = $detection_manager;
+		$this->callback_reflection = $callback_reflection;
 		$this->callback            = $callback;
 		$this->registered_entities = [
 			'post_type' => [],
@@ -203,8 +221,7 @@ class CallbackWrapper implements ArrayAccess {
 	 */
 	protected function set_source() {
 
-		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
-		$this->source        = $callback_reflection->get_source( $this->get_callback_function() );
+		$this->source = $this->callback_reflection->get_source( $this->get_callback_function() );
 
 		unset( $this->source['reflection'] );
 
@@ -251,7 +268,7 @@ class CallbackWrapper implements ArrayAccess {
 
 			$this->registered_entities[ $entity_type ] = $different;
 
-			EntityRegistrantDetectionManager::add_source( $entity_type, $different, $this->source );
+			$this->detection_manager->add_source( $entity_type, $different, $this->source );
 		}
 
 	}

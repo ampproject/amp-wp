@@ -72,7 +72,7 @@ class RestControllerTest extends DependencyInjectedTestCase {
 	 */
 	public function test_register() {
 
-		$this->instance->register();
+		do_action( 'rest_api_init' );
 
 		$rest_server = rest_get_server();
 
@@ -103,7 +103,27 @@ class RestControllerTest extends DependencyInjectedTestCase {
 		$this->assertTrue( $response->is_error() );
 		$this->assertEquals( 'rest_missing_callback_param', $response_data['code'] );
 
-		// Test 2: Invalid nonce.
+		// Test 2: Valid nonce without user access.
+		$request->set_query_params(
+			[
+				EntityRegistrantDetectionManager::NONCE_QUERY_VAR => EntityRegistrantDetectionManager::get_nonce(),
+			]
+		);
+
+		$response      = rest_get_server()->dispatch( $request );
+		$response_data = $response->get_data();
+		$this->assertTrue( $response->is_error() );
+		$this->assertEquals( 'rest_forbidden', $response_data['code'] );
+
+		// Test 3: Invalid nonce with user access.
+		wp_set_current_user(
+			self::factory()->user->create(
+				[
+					'role' => 'administrator',
+				]
+			)
+		);
+
 		$request->set_query_params(
 			[
 				EntityRegistrantDetectionManager::NONCE_QUERY_VAR => 'invalid_nonce',
@@ -116,25 +136,11 @@ class RestControllerTest extends DependencyInjectedTestCase {
 		$this->assertTrue( $response->is_error() );
 		$this->assertEquals( 'http_request_failed', $response_data['code'] );
 
-		// Test 3: Valid nonce without user access.
+		// Test 4: Valid nonce with user access.
 		$request->set_query_params(
 			[
 				EntityRegistrantDetectionManager::NONCE_QUERY_VAR => EntityRegistrantDetectionManager::get_nonce(),
 			]
-		);
-
-		$response      = rest_get_server()->dispatch( $request );
-		$response_data = $response->get_data();
-		$this->assertTrue( $response->is_error() );
-		$this->assertEquals( 'rest_forbidden', $response_data['code'] );
-
-		// Test 4: Valid nonce with user access.
-		wp_set_current_user(
-			self::factory()->user->create(
-				[
-					'role' => 'administrator',
-				]
-			)
 		);
 
 		$response      = rest_get_server()->dispatch( $request );
