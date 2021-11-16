@@ -121,8 +121,8 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 			'wp_trunk_post_url'  => [
 				self::WP_59_ALPHA_POST_URL . PHP_EOL,
 				'
-					<amp-wordpress-embed height="200" title="&#8220;Proposal for a Performance team&#8221; &#8212; Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/">
-						<blockquote class="wp-embedded-content" data-secret="%s" placeholder>
+					<amp-wordpress-embed height="200" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/#?secret=%1$s">
+						<blockquote class="wp-embedded-content" data-secret="%1$s" placeholder>
 							<p><a href="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/">Proposal for a Performance team</a></p>
 						</blockquote>
 						<button overflow type="button">Expand</button>
@@ -132,12 +132,33 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 			'wp_stable_post_url' => [
 				self::WP_58_STABLE_POST_URL . PHP_EOL,
 				'
-					<amp-wordpress-embed data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/" height="200" title="&#8220;Proposal for a Performance team&#8221; &#8212; Make WordPress Core">
-						<blockquote class="wp-embedded-content" data-secret="%s" placeholder>
+					<amp-wordpress-embed data-url="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/embed/#?secret=%1$s" height="200" title="“Introducing v2.0 of the official AMP Plugin for WordPress” — AMP for WordPress">
+						<blockquote class="wp-embedded-content" data-secret="%1$s" placeholder>
 							<p><a href="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/">Introducing v2.0 of the official AMP Plugin for WordPress</a></p>
 						</blockquote>
 						<button overflow type="button">Expand</button>
 					</amp-wordpress-embed>
+				',
+			],
+			'wp_embed_block'     => [
+				'
+					<!-- wp:embed {"url":"' . self::WP_59_ALPHA_POST_URL . '","type":"wp-embed","providerNameSlug":"make-wordpress-core"} -->
+					<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core"><div class="wp-block-embed__wrapper">
+					' . self::WP_59_ALPHA_POST_URL . '
+					</div></figure>
+					<!-- /wp:embed -->
+				',
+				'
+					<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core">
+						<div class="wp-block-embed__wrapper">
+							<amp-wordpress-embed height="200" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/#?secret=%1$s">
+								<blockquote class="wp-embedded-content" data-secret="%1$s" placeholder>
+									<a href="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/">Proposal for a Performance team</a>
+								</blockquote>
+								<button overflow type="button">Expand</button>
+							</amp-wordpress-embed>
+						</div>
+					</figure>
 				',
 			],
 		];
@@ -181,21 +202,21 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 
 		$embed = new AMP_WordPress_Embed_Handler();
 		$embed->register_embed();
+
 		$filtered_content = apply_filters( 'the_content', $source );
+		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$embed->sanitize_raw_embeds( $dom );
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		// Extract "data-secret" attr value.
-		preg_match( '/data-secret="(?P<secret>[^"]*)"/', $filtered_content, $matches );
+		preg_match( '/data-secret="(?P<secret>[^"]*)"/', $content, $matches );
 		if ( isset( $matches['secret'] ) ) {
 			$expected = sprintf( $expected, $matches['secret'] );
 		}
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
-		$this->assertSimilarMarkup( $expected, $filtered_content, 'Response bodies for HTTP requests: ' . var_export( $http_response_bodies, true ) );
-
-		$embed->unregister_embed();
-
-		$after_filtered_content = apply_filters( 'the_content', $source );
-		$this->assertStringNotContainsString( '<amp-wordpress-embed', $after_filtered_content );
+		$this->assertSimilarMarkup( $expected, $content, 'Response bodies for HTTP requests: ' . var_export( $http_response_bodies, true ) );
 	}
 
 	/**

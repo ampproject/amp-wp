@@ -128,7 +128,16 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		if ( preg_match( '#<iframe[^>]*?src="(?P<src>[^"]+?)"#s', $iframe_html, $matches ) ) {
-			$attributes['data-url'] = $matches['src'];
+			$data_url     = $matches['src'];
+			$valid_secret = $blockquote->getAttribute( 'data-secret' );
+			if ( null !== $valid_secret && preg_match_all( '/secret=([^#&?]+)/', $matches['src'], $secrets ) ) {
+				foreach ( $secrets[1] as $secret ) {
+					if ( $secret !== $valid_secret ) {
+						$data_url = str_replace( "#?secret=$secret", '', $data_url );
+					}
+				}
+			}
+			$attributes['data-url'] = $data_url;
 		}
 
 		$amp_wordpress_embed_node = AMP_DOM_Utils::create_node(
