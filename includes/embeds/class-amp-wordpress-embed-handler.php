@@ -47,14 +47,15 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		// Not implemented.
+		// This is not needed when post embeds are embedded via <amp-wordpress-embed>. See <https://github.com/ampproject/amp-wp/issues/809>.
+		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		// Not implemented.
+		add_action( 'wp_head', 'wp_oembed_add_host_js' );
 	}
 
 	/**

@@ -847,7 +847,6 @@ class AMP_Theme_Support {
 
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 ); // @todo Instead of function, the script output by wp_post_preview_js() should get data-ampdevmode.
-		remove_action( 'wp_head', 'wp_oembed_add_host_js' ); // This is not needed when post embeds are embedded via <amp-wordpress-embed>. See <https://github.com/ampproject/amp-wp/issues/809>.
 
 		// Replace JS-based emoji with PHP-based, if the JS-based emoji replacement was not already removed.
 		if ( has_action( 'wp_head', 'print_emoji_detection_script' ) ) {
