@@ -249,9 +249,12 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_WordPress_Embed_Handler();
 		$embed->register_embed();
-		$source = apply_filters( 'the_content', $source );
 
-		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$filtered_content = apply_filters( 'the_content', $source );
+		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$embed->sanitize_raw_embeds( $dom );
+
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
