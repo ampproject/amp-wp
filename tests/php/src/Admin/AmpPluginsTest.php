@@ -288,10 +288,11 @@ class AmpPluginsTest extends TestCase {
 		$this->assertIsArray( $output );
 		$this->assertEquals(
 			sprintf(
-				'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="Site link of %s">%s</a>',
+				'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="Site link of %s">%s<span class="screen-reader-text">(opens in a new tab)</span>%s</a>',
 				esc_url( $plugin_data['homepage'] ),
 				esc_html( $plugin_data['name'] ),
-				esc_html__( 'Visit site', 'amp' )
+				esc_html__( 'Visit site', 'amp' ),
+				'<span aria-hidden="true" class="dashicons dashicons-external"></span>'
 			),
 			$output[0]
 		);
