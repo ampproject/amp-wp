@@ -1608,6 +1608,19 @@ function amp_get_content_sanitizers( $post = null ) {
 			$dev_mode_xpaths[] = '//style[ @id = "custom-theme-colors" ]';
 		}
 
+		// Mark the script output by wp_comment_form_unfiltered_html_nonce() as being in dev mode.
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			$dev_mode_xpaths[] = '//script[ not( @src ) and preceding-sibling::input[ @name = "_wp_unfiltered_html_comment_disabled" ] and contains( text(), "_wp_unfiltered_html_comment_disabled" ) ]';
+		}
+
+		// Mark the script output by wp_post_preview_js() as being in dev mode.
+		if ( is_preview() && get_queried_object() instanceof WP_Post ) {
+			$dev_mode_xpaths[] = sprintf(
+				'//script[ not( @src ) and contains( text(), "document.location.search" ) and contains( text(), "preview=true" ) and contains( text(), "unload" ) and contains( text(), "window.name" ) and contains( text(), "wp-preview-%d" ) ]',
+				get_queried_object_id()
+			);
+		}
+
 		$sanitizers = array_merge(
 			[
 				AMP_Dev_Mode_Sanitizer::class => [
