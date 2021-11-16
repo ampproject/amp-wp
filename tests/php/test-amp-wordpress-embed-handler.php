@@ -114,11 +114,11 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	 */
 	public function get_conversion_data() {
 		return [
-			'no_embed'            => [
+			'no_embed'                      => [
 				'Hello world.',
 				'<p>Hello world.</p>',
 			],
-			'wp_trunk_post_url'   => [
+			'wp_trunk_post_url'             => [
 				self::WP_59_ALPHA_POST_URL . PHP_EOL,
 				'
 					<amp-wordpress-embed height="200" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/#?secret=%1$s">
@@ -129,7 +129,7 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 					</amp-wordpress-embed>
 				',
 			],
-			'wp_stable_post_url'  => [
+			'wp_stable_post_url'            => [
 				self::WP_58_STABLE_POST_URL . PHP_EOL,
 				'
 					<amp-wordpress-embed data-url="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/embed/#?secret=%1$s" height="200" title="“Introducing v2.0 of the official AMP Plugin for WordPress” — AMP for WordPress">
@@ -140,7 +140,7 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 					</amp-wordpress-embed>
 				',
 			],
-			'wp_embed_block'      => [
+			'wp_embed_block'                => [
 				'
 					<!-- wp:embed {"url":"' . self::WP_59_ALPHA_POST_URL . '","type":"wp-embed","providerNameSlug":"make-wordpress-core"} -->
 					<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core"><div class="wp-block-embed__wrapper">
@@ -161,7 +161,7 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 					</figure>
 				',
 			],
-			'two_wp_embed_blocks' => [
+			'two_wp_embed_blocks'           => [
 				'
 					<!-- wp:embed {"url":"' . self::WP_59_ALPHA_POST_URL . '","type":"wp-embed","providerNameSlug":"make-wordpress-core"} -->
 					<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core"><div class="wp-block-embed__wrapper">
@@ -197,6 +197,23 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 						</div>
 					</figure>
 			
+				',
+			],
+			'wp_trunk_and_stable_post_urls' => [
+				self::WP_59_ALPHA_POST_URL . PHP_EOL . self::WP_58_STABLE_POST_URL . PHP_EOL,
+				'
+					<amp-wordpress-embed height="200" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/#?secret=%1$s">
+						<blockquote class="wp-embedded-content" data-secret="%1$s" placeholder>
+							<p><a href="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/">Proposal for a Performance team</a></p>
+						</blockquote>
+						<button overflow type="button">Expand</button>
+					</amp-wordpress-embed>
+					<amp-wordpress-embed data-url="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/embed/#?secret=%2$s" height="200" title="“Introducing v2.0 of the official AMP Plugin for WordPress” — AMP for WordPress">
+						<blockquote class="wp-embedded-content" data-secret="%2$s" placeholder>
+							<p><a href="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/">Introducing v2.0 of the official AMP Plugin for WordPress</a></p>
+						</blockquote>
+						<button overflow type="button">Expand</button>
+					</amp-wordpress-embed>
 				',
 			],
 		];

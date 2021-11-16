@@ -93,7 +93,7 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 		if ( $blockquote_nodes->length ) {
 			foreach ( $blockquote_nodes as $index => $blockquote_node ) {
 				$blockquote_node->setAttribute( 'data-tmp-id', $index );
-				$closest_iframe = $dom->xpath->query( '//blockquote[ @data-tmp-id = "' . $index . '" ]/following-sibling::iframe[ @class = "wp-embedded-content" ]' );
+				$closest_iframe = $dom->xpath->query( '//blockquote[ @data-tmp-id = "' . $index . '" ]/following-sibling::iframe[1]' );
 				$blockquote_node->removeAttribute( 'data-tmp-id' );
 
 				if ( 1 === $closest_iframe->length ) {
