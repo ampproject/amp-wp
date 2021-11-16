@@ -296,13 +296,14 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 
 			if ( ! empty( $plugin['homepage'] ) ) {
 				$actions[] = sprintf(
-					'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">%s<span class="screen-reader-text">(opens in a new tab)</span>%s</a>',
+					'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">%s<span class="screen-reader-text">%s</span>%s</a>',
 					esc_url( $plugin['homepage'] ),
 					esc_attr(
 						/* translators: %s: Plugin name */
 						sprintf( __( 'Site link of %s', 'amp' ), $plugin['name'] )
 					),
 					esc_html__( 'Visit site', 'amp' ),
+					esc_html__( '(opens in a new tab)', 'amp' ),
 					$external_icon
 				);
 			}
