@@ -1828,6 +1828,39 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * Test amp_get_content_sanitizers().
+	 *
+	 * @covers ::amp_get_content_sanitizers()
+	 * @see \wp_post_preview_js()
+	 */
+	public function test_amp_get_content_sanitizers_with_post_preview() {
+		$user_id = self::factory()->user->create( [ 'role' => 'author' ] );
+		wp_set_current_user( $user_id );
+		$post = self::factory()->post->create(
+			[
+				'post_status' => 'draft',
+				'post_author' => $user_id,
+			]
+		);
+		$this->go_to( get_preview_post_link( $post ) );
+
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertTrue( is_admin_bar_showing() );
+		$this->assertTrue( amp_is_dev_mode() );
+		$this->assertTrue( is_preview() );
+		$this->assertArrayHasKey( AMP_Dev_Mode_Sanitizer::class, $sanitizers );
+		$this->assertEqualSets(
+			[
+				'//*[ @id = "wpadminbar" ]',
+				'//*[ @id = "wpadminbar" ]//*',
+				'//style[ @id = "admin-bar-inline-css" ]',
+				'//script[ not( @src ) and contains( text(), "document.location.search" ) and contains( text(), "preview=true" ) and contains( text(), "unload" ) and contains( text(), "window.name" ) and contains( text(), "wp-preview-' . $post . '" ) ]',
+			],
+			$sanitizers[ AMP_Dev_Mode_Sanitizer::class ]['element_xpaths']
+		);
+	}
+
+	/**
 	 * Test deprecated $post param for amp_get_content_sanitizers().
 	 *
 	 * @covers ::amp_get_content_sanitizers()
