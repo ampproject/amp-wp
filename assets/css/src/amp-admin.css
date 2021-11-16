@@ -12,6 +12,11 @@
 	margin-left: 5px;
 }
 
+.theme-browser .theme .theme-screenshot img {
+	height: 100%;
+	object-fit: contain;
+}
+
 .amp-extension-card-message {
 	text-align: center;
 	padding: 0;
