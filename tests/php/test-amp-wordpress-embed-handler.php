@@ -264,4 +264,28 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 
 		$this->assertEquals( $expected, $scripts );
 	}
+
+	/**
+	 * Test register_embed.
+	 *
+	 * @covers AMP_WordPress_Embed_Handler::register_embed()
+	 */
+	public function test__register_embed() {
+		$embed = new AMP_WordPress_Embed_Handler();
+		$embed->register_embed();
+
+		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
+	}
+
+	/**
+	 * Test unregister_embed.
+	 *
+	 * @covers AMP_WordPress_Embed_Handler::unregister_embed()
+	 */
+	public function test__unregister_embed() {
+		$embed = new AMP_WordPress_Embed_Handler();
+		$embed->unregister_embed();
+
+		$this->assertEquals( 10, has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
+	}
 }
