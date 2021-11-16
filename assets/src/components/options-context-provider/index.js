@@ -41,6 +41,7 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 	const [ updates, setUpdates ] = useState( {} );
 	const [ fetchingPluginSuppression, setFetchingPluginSuppression ] = useState( false );
 	const [ fetchingOptions, setFetchingOptions ] = useState( null );
+	const [ savedOptions, setSavedOptions ] = useState( {} );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
 	const [ originalOptions, setOriginalOptions ] = useState( {} );
@@ -177,7 +178,7 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 
 			// Ensure this promise lasts at least a second so that the "Saving Options" load screen is
 			// visible long enough for the user to see it is happening.
-			const [ savedOptions ] = await Promise.all(
+			const [ retrievedOptions ] = await Promise.all(
 				[
 					apiFetch(
 						{
@@ -194,7 +195,7 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 				return;
 			}
 
-			setOriginalOptions( savedOptions );
+			setOriginalOptions( retrievedOptions );
 			setError( null );
 		} catch ( e ) {
 			if ( true === hasUnmounted.current ) {
@@ -212,6 +213,7 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 		}
 
 		setModifiedOptions( { ...modifiedOptions, ...updates } );
+		setSavedOptions( updates );
 
 		setUpdates( {} );
 		setDidSaveOptions( true );
@@ -246,6 +248,7 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 					updates,
 					originalOptions,
 					saveOptions,
+					savedOptions,
 					savingOptions,
 					unsetOption,
 					updateOptions,

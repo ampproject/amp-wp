@@ -198,10 +198,8 @@ final class PluginSuppression implements Service, Registerable {
 		$option                    = $options[ Option::SUPPRESSED_PLUGINS ];
 		$posted_suppressed_plugins = $new_options[ Option::SUPPRESSED_PLUGINS ];
 
-		$plugins           = $this->plugin_registry->get_plugins( true );
-		$errors_by_source  = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
-		$urls_by_frequency = [];
-		$changes           = 0;
+		$plugins          = $this->plugin_registry->get_plugins( true );
+		$errors_by_source = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
 		foreach ( $posted_suppressed_plugins as $plugin_slug => $suppressed ) {
 			if ( ! isset( $plugins[ $plugin_slug ] ) ) {
 				unset( $option[ $plugin_slug ] );
@@ -211,20 +209,8 @@ final class PluginSuppression implements Service, Registerable {
 			$suppressed = rest_sanitize_boolean( $suppressed );
 			if ( isset( $option[ $plugin_slug ] ) && ! $suppressed ) {
 
-				// Gather the URLs on which the error occurred, keeping track of the frequency so that we can use the URL with the most errors to re-validate.
-				if ( ! empty( $option[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] ) ) {
-					foreach ( $option[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] as $url ) {
-						if ( ! isset( $urls_by_frequency[ $url ] ) ) {
-							$urls_by_frequency[ $url ] = 0;
-						}
-						$urls_by_frequency[ $url ]++;
-					}
-				}
-
 				// Remove the plugin from being suppressed.
 				unset( $option[ $plugin_slug ] );
-
-				$changes++;
 			} elseif ( ! isset( $option[ $plugin_slug ] ) && $suppressed && array_key_exists( $plugin_slug, $plugins ) ) {
 
 				// Capture the URLs that the error occurred on so we can check them again when the plugin is re-activated.
@@ -250,35 +236,7 @@ final class PluginSuppression implements Service, Registerable {
 					Option::SUPPRESSED_PLUGINS_USERNAME  => $user instanceof WP_User ? $user->user_nicename : null,
 					Option::SUPPRESSED_PLUGINS_ERRORING_URLS => array_unique( array_filter( $urls ) ),
 				];
-				$changes++;
 			}
-		}
-
-		// When the suppressed plugins changed, re-validate so validation errors can be re-computed with the plugins newly-suppressed or un-suppressed.
-		if ( $changes > 0 ) {
-			add_action(
-				'update_option_' . AMP_Options_Manager::OPTION_NAME,
-				static function () use ( $urls_by_frequency ) {
-					$url = null;
-					if ( count( $urls_by_frequency ) > 0 ) {
-						arsort( $urls_by_frequency );
-						$url = key( $urls_by_frequency );
-					} else {
-						$validated_url_posts = get_posts(
-							[
-								'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-								'posts_per_page' => 1,
-							]
-						);
-						if ( count( $validated_url_posts ) > 0 ) {
-							$url = AMP_Validated_URL_Post_Type::get_url_from_post( $validated_url_posts[0] );
-						}
-					}
-					if ( $url ) {
-						AMP_Validation_Manager::validate_url_and_store( $url );
-					}
-				}
-			);
 		}
 
 		$options[ Option::SUPPRESSED_PLUGINS ] = $option;

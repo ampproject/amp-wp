@@ -13,7 +13,6 @@ import {
 } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
-import { usePrevious } from '@wordpress/compose';
 
 /**
  * External dependencies
@@ -209,10 +208,10 @@ export function SiteScanContextProvider( {
 	validateNonce,
 } ) {
 	const {
-		didSaveOptions,
 		originalOptions: {
 			theme_support: themeSupport,
 		},
+		savedOptions,
 		refetchPluginSuppression,
 	} = useContext( Options );
 	const { setAsyncError } = useAsyncError();
@@ -292,13 +291,26 @@ export function SiteScanContextProvider( {
 	 * Whenever options change, cancel the current scan (if in progress) and
 	 * refetch the scannable URLs.
 	 */
-	const previousDidSaveOptions = usePrevious( didSaveOptions );
 	useEffect( () => {
-		if ( ! previousDidSaveOptions && didSaveOptions ) {
-			cancelSiteScan();
-			fetchScannableUrls();
+		if ( Object.keys( savedOptions ).length > 0 ) {
+			dispatch( { type: ACTION_SCAN_CANCEL } );
+			dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
 		}
-	}, [ cancelSiteScan, didSaveOptions, fetchScannableUrls, previousDidSaveOptions ] );
+	}, [ savedOptions ] );
+
+	/**
+	 * Trigger site scan if the suppressed plugins list has changed and the
+	 * scanner is ready to start a scan.
+	 */
+	useEffect( () => {
+		if (
+			status === STATUS_READY &&
+			savedOptions?.suppressed_plugins &&
+			Object.keys( savedOptions?.suppressed_plugins ).length > 0
+		) {
+			dispatch( { type: ACTION_SCAN_INITIALIZE } );
+		}
+	}, [ savedOptions, status ] );
 
 	/**
 	 * Delay concurrent validation requests.

@@ -159,4 +159,28 @@ describe( 'AMP settings screen Site Scan panel', () => {
 		// Clean up.
 		await installPlugin( 'autoptimize' );
 	} );
+
+	it( 'automatically triggers a scan if Plugin Suppression option has changed', async () => {
+		await activatePlugin( 'autoptimize' );
+
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		// Suppress the plugin.
+		await scrollToElement( { selector: '#plugin-suppression .components-panel__body-toggle', click: true } );
+		await expect( page ).toSelect( '#suppressed-plugins-table tbody tr:first-child .column-status select', 'Suppressed' );
+		await scrollToElement( { selector: '#site-scan' } );
+
+		// Save options.
+		await Promise.all( [
+			scrollToElement( { selector: '.amp-settings-nav button[type="submit"]', click: true } ),
+			page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ) ),
+		] );
+
+		await testSiteScanning( {
+			statusElementClassName: 'settings-site-scan__status',
+			isAmpFirst: false,
+		} );
+
+		await deactivatePlugin( 'autoptimize' );
+	} );
 } );
