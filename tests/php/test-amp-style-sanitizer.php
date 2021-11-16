@@ -1949,6 +1949,11 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				],
 				'html'          => '<html amp><head><meta charset="utf-8"><style>@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2");font-display:swap}@font-face{font-family:"Roboto";src:url("/fonts/Roboto-Regular-webfont.woff2") format("woff2");font-display:optional}@font-face{font-family:"Lato";src:url("/fonts/Lato-Regular-webfont.woff2") format("woff2"),url("/fonts/Lato-Regular-webfont.woff") format("woff")}</style></head><body></body></html>',
 			],
+			'custom_inlined' => [
+				'theme_slug'    => '',
+				'expected_urls' => [], // No preload link should be present because the data: URL was not converted into an external link.
+				'html'          => '<html amp><head><meta charset="utf-8"><style>@font-face{font-family:"Open Sans";src:url("data:application/font-woff2;charset=utf-8;base64,...") format("woff2"), url("/fonts/OpenSans-Regular-webfont.woff") format("woff");font-display:swap}</style></head><body></body></html>',
+			],
 		];
 	}
 
@@ -1984,7 +1989,14 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$link_elements       = $dom->getElementsByTagName( 'link' );
 		$link_elements_count = $link_elements->length;
 
-		$this->assertEquals( count( $expected_urls ), $link_elements_count );
+		$actual_urls = array_map(
+			static function ( Element $link_element ) {
+				return $link_element->getAttribute( 'href' );
+			},
+			iterator_to_array( $link_elements )
+		);
+
+		$this->assertEqualSets( $expected_urls, $actual_urls );
 
 		for ( $i = 0; $i < $link_elements_count; $i++ ) {
 			$this->assertStringEndsWith(
