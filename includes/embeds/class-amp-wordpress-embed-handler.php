@@ -79,15 +79,15 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			if ( $this->is_raw_embed( $node ) ) {
-				$this->create_amp_wordpress_embed_and_replace_node( $dom, $node );
-
 				// If embeds in the DOM are wrapped by `wpautop()`, unwrap them.
-				$embed_nodes = $dom->xpath->query( "//p/{$this->amp_tag}" );
+				$embed_nodes = $dom->xpath->query( '//p/iframe[ @class = "wp-embedded-content" ]' );
 				if ( $embed_nodes->length ) {
 					foreach ( $embed_nodes as $embed_node ) {
 						$this->unwrap_p_element( $embed_node );
 					}
 				}
+
+				$this->create_amp_wordpress_embed_and_replace_node( $dom, $node );
 			}
 		}
 	}
