@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProgressBar matches the snapshot 1`] = `
+<div
+  aria-valuemax="100"
+  aria-valuemin="0"
+  aria-valuenow={33}
+  className="progress-bar"
+  role="progressbar"
+>
+  <div
+    className="progress-bar__track"
+  >
+    <div
+      className="progress-bar__indicator"
+      style={
+        Object {
+          "transform": "translateX(-67%)",
+          "transitionDuration": "800ms",
+        }
+      }
+    />
+  </div>
+</div>
+`;

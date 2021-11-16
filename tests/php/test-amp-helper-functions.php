@@ -1390,6 +1390,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'amp-story-interactive'     => 'v0/amp-story-interactive-0.1.js',
 			'amp-story-panning-media'   => 'v0/amp-story-panning-media-0.1.js',
 			'amp-story-player'          => 'v0/amp-story-player-0.1.js',
+			'amp-story-shopping'        => 'v0/amp-story-shopping-0.1.js',
 			'amp-stream-gallery'        => 'v0/amp-stream-gallery-0.1.js',
 			'amp-subscriptions'         => 'v0/amp-subscriptions-0.1.js',
 			'amp-subscriptions-google'  => 'v0/amp-subscriptions-google-0.1.js',
@@ -1557,6 +1558,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'amp-story-interactive'     => 'v0/amp-story-interactive-0.1.js',
 			'amp-story-panning-media'   => 'v0/amp-story-panning-media-0.1.js',
 			'amp-story-player'          => 'v0/amp-story-player-0.1.js',
+			'amp-story-shopping'        => 'v0/amp-story-shopping-0.1.js',
 			'amp-stream-gallery'        => 'v0/amp-stream-gallery-1.0.js',
 			'amp-subscriptions'         => 'v0/amp-subscriptions-0.1.js',
 			'amp-subscriptions-google'  => 'v0/amp-subscriptions-google-0.1.js',
@@ -1804,6 +1806,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
 
 		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, and now also with admin bar showing.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_filter( 'show_admin_bar', '__return_true' );
 		$sanitizers = amp_get_content_sanitizers();
@@ -1817,8 +1820,42 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 					'//*[ @id = "wpadminbar" ]',
 					'//*[ @id = "wpadminbar" ]//*',
 					'//style[ @id = "admin-bar-inline-css" ]',
+					'//script[ not( @src ) and preceding-sibling::input[ @name = "_wp_unfiltered_html_comment_disabled" ] and contains( text(), "_wp_unfiltered_html_comment_disabled" ) ]',
 				]
 			),
+			$sanitizers[ AMP_Dev_Mode_Sanitizer::class ]['element_xpaths']
+		);
+	}
+
+	/**
+	 * Test amp_get_content_sanitizers().
+	 *
+	 * @covers ::amp_get_content_sanitizers()
+	 * @see \wp_post_preview_js()
+	 */
+	public function test_amp_get_content_sanitizers_with_post_preview() {
+		$user_id = self::factory()->user->create( [ 'role' => 'author' ] );
+		wp_set_current_user( $user_id );
+		$post = self::factory()->post->create(
+			[
+				'post_status' => 'draft',
+				'post_author' => $user_id,
+			]
+		);
+		$this->go_to( get_preview_post_link( $post ) );
+
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertTrue( is_admin_bar_showing() );
+		$this->assertTrue( amp_is_dev_mode() );
+		$this->assertTrue( is_preview() );
+		$this->assertArrayHasKey( AMP_Dev_Mode_Sanitizer::class, $sanitizers );
+		$this->assertEqualSets(
+			[
+				'//*[ @id = "wpadminbar" ]',
+				'//*[ @id = "wpadminbar" ]//*',
+				'//style[ @id = "admin-bar-inline-css" ]',
+				'//script[ not( @src ) and contains( text(), "document.location.search" ) and contains( text(), "preview=true" ) and contains( text(), "unload" ) and contains( text(), "window.name" ) and contains( text(), "wp-preview-' . $post . '" ) ]',
+			],
 			$sanitizers[ AMP_Dev_Mode_Sanitizer::class ]['element_xpaths']
 		);
 	}

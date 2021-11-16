@@ -225,7 +225,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional, Delaye
 		// Mark enqueued script for AMP dev mode so that it is not removed.
 		// @todo Revisit with <https://github.com/google/site-kit-wp/pull/505#discussion_r348683617>.
 		$dev_mode_handles = array_merge(
-			[ $handle, 'wp-i18n', 'wp-hooks', 'regenerator-runtime' ],
+			[ $handle, 'wp-i18n', 'wp-hooks', 'regenerator-runtime', 'wp-polyfill' ],
 			$dependencies
 		);
 		add_filter(

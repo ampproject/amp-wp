@@ -887,8 +887,11 @@ class AMP_Allowed_Tags_Generated {
 					'sticky' => array(
 						'value' => array(
 							'',
-							'top',
 							'bottom',
+							'bottom-right',
+							'left',
+							'right',
+							'top',
 						),
 					),
 					'template' => array(),
@@ -7041,6 +7044,76 @@ class AMP_Allowed_Tags_Generated {
 						'amp-story-player',
 					),
 					'spec_url' => 'https://amp.dev/documentation/components/amp-story-player/',
+				),
+			),
+		),
+		'amp-story-shopping-attachment' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
+					'requires_extension' => array(
+						'amp-story-shopping',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-shopping/',
+				),
+			),
+		),
+		'amp-story-shopping-config' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
+					'requires_extension' => array(
+						'amp-story-shopping',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-shopping/',
+				),
+			),
+		),
+		'amp-story-shopping-tag' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							5,
+						),
+					),
+					'mandatory_ancestor' => 'amp-story-grid-layer',
+					'requires_extension' => array(
+						'amp-story-shopping',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-shopping/',
 				),
 			),
 		),
@@ -18094,10 +18167,6 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
-						'bento' => array(
-							'has_css' => false,
-							'version' => '1.0',
-						),
 						'latest' => '1.0',
 						'name' => 'amp-render',
 						'requires_usage' => true,
@@ -18685,6 +18754,37 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'spec_url' => 'https://amp.dev/documentation/components/amp-story-player/',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'latest' => '0.1',
+						'name' => 'amp-story-shopping',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
 				),
 			),
 			array(

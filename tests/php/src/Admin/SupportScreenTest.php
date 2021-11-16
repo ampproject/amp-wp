@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\SupportScreen;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
 
 /**
  * Tests for SupportMenu.
@@ -17,6 +18,8 @@ use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
  * @coversDefaultClass \AmpProject\AmpWP\Admin\SupportScreen
  */
 class SupportScreenTest extends DependencyInjectedTestCase {
+
+	use HomeUrlLoopbackRequestMocking;
 
 	/**
 	 * Instance of SupportMenu
@@ -36,6 +39,7 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 
 		$this->instance = $this->injector->make( SupportScreen::class );
 
+		$this->add_home_url_loopback_request_mocking();
 	}
 
 	/** @covers ::__construct() */

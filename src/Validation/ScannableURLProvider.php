@@ -24,21 +24,6 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 final class ScannableURLProvider implements Service {
 
 	/**
-	 * AMP Settings (options).
-	 *
-	 * @see ScannableURLProvider::get_options()
-	 * @var null|array
-	 */
-	private $options = null;
-
-	/**
-	 * Overrides to AMP Settings.
-	 *
-	 * @var array
-	 */
-	private $option_overrides = [];
-
-	/**
 	 * Template conditionals to restrict results to.
 	 *
 	 * @var string[]
@@ -53,37 +38,14 @@ final class ScannableURLProvider implements Service {
 	private $limit_per_type;
 
 	/**
-	 * Supportable templates.
+	 * Construct.
 	 *
-	 * @see ScannableURLProvider::get_supportable_templates()
-	 * @var null|array
-	 */
-	private $supportable_templates = null;
-
-	/**
-	 * @param array    $option_overrides     Overrides to AMP settings.
 	 * @param string[] $include_conditionals Template conditionals to restrict results to.
 	 * @param int      $limit_per_type       Limit of URLs to obtain per type.
 	 */
-	public function __construct( $option_overrides = [], $include_conditionals = [], $limit_per_type = 1 ) {
-		$this->option_overrides     = $option_overrides;
+	public function __construct( $include_conditionals = [], $limit_per_type = 1 ) {
 		$this->include_conditionals = $include_conditionals;
 		$this->limit_per_type       = $limit_per_type;
-	}
-
-	/**
-	 * Get options with overrides merged on top.
-	 *
-	 * @return array
-	 */
-	private function get_options() {
-		if ( null === $this->options ) {
-			$this->options = array_merge(
-				AMP_Options_Manager::get_options(),
-				$this->option_overrides
-			);
-		}
-		return $this->options;
 	}
 
 	/**
@@ -93,32 +55,30 @@ final class ScannableURLProvider implements Service {
 	 *
 	 * @see AMP_Theme_Support::get_supportable_templates()
 	 *
-	 * @return array
+	 * @return array Supportable templates.
 	 */
-	private function get_supportable_templates() {
-		if ( null === $this->supportable_templates ) {
-			$options = $this->get_options();
+	public function get_supportable_templates() {
+		$options = AMP_Options_Manager::get_options();
 
-			$this->supportable_templates = AMP_Theme_Support::get_supportable_templates( $options );
+		$supportable_templates = AMP_Theme_Support::get_supportable_templates( $options );
 
-			if (
-				AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
-				&&
-				ReaderThemes::DEFAULT_READER_THEME === $options[ Option::READER_THEME ]
-			) {
-				$allowed_templates = [
-					'is_singular',
-				];
-				if ( 'page' === get_option( 'show_on_front' ) ) {
-					$allowed_templates[] = 'is_home';
-					$allowed_templates[] = 'is_front_page';
-				}
-				foreach ( array_diff( array_keys( $this->supportable_templates ), $allowed_templates ) as $template ) {
-					$this->supportable_templates[ $template ]['supported'] = false;
-				}
+		if (
+			AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
+			&&
+			ReaderThemes::DEFAULT_READER_THEME === $options[ Option::READER_THEME ]
+		) {
+			$allowed_templates = [
+				'is_singular',
+			];
+			if ( 'page' === get_option( 'show_on_front' ) ) {
+				$allowed_templates[] = 'is_home';
+				$allowed_templates[] = 'is_front_page';
+			}
+			foreach ( array_diff( array_keys( $supportable_templates ), $allowed_templates ) as $template ) {
+				$supportable_templates[ $template ]['supported'] = false;
 			}
 		}
-		return $this->supportable_templates;
+		return $supportable_templates;
 	}
 
 	/**

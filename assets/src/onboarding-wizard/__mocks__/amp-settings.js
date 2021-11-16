@@ -1,4 +1,5 @@
 module.exports = {
+	AMP_SCAN_IF_STALE: 'amp-scan-if-stale',
 	APP_ROOT_ID: 'amp-onboarding-wizard',
 	CLOSE_LINK: 'http://site.test/wp-admin/?page=amp-options',
 	CURRENT_THEME: {

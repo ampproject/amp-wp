@@ -546,7 +546,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 									<amp-img id="object1" animate-in="rotate-in-left" src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
 									</amp-img>
 									<!-- Note: The viewbox attribute must currently be lower-case due to https://github.com/ampproject/amp-wp/issues/2045 -->
-									<svg viewbox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+									<svg viewbox="0 0 100 100"><circle cx="50" cy="50" r="50" /></svg>
 								</amp-story-grid-layer>
 								<amp-story-grid-layer template="vertical">
 									<h1 animate-in="fly-in-left" animate-in-duration="0.5s" animate-in-delay="0.4s" animate-in-after="object1">Hello, amp-story!</h1>
@@ -2890,7 +2890,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				<button on="tap:sidebar1">Open Sidebar</button>
 				<amp-sidebar id="sidebar1" layout="nodisplay" style="width:300px">
 					<amp-nested-menu layout="fill">
-						<svg viewbox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+						<svg viewbox="0 0 100 100"><circle cx="50" cy="50" r="50" /></svg>
 						<ul>
 							<li>
 								<h4 amp-nested-submenu-open>Open Sub-Menu</h4>

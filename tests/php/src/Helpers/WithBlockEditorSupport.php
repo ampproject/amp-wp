@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Tests\Helpers;
 
 use AMP_Options_Manager;
 use AmpProject\AmpWP\Option;
+use WP_Error;
 use WP_User;
 
 /**
@@ -25,7 +26,12 @@ trait WithBlockEditorSupport {
 	 */
 	public function setup_environment( $post_type_uses_block_editor, $post_type_supports_amp, $post_type = 'foo' ) {
 		if ( $post_type_uses_block_editor ) {
+			$block_http_request = static function () {
+				return new WP_Error( 'request_blocked', 'Request blocked' );
+			};
+			add_filter( 'pre_http_request', $block_http_request );
 			set_current_screen( 'post.php' );
+			remove_filter( 'pre_http_request', $block_http_request );
 			add_filter( 'replace_editor', '__return_false' );
 			add_filter( 'use_block_editor_for_post', '__return_true' );
 		}

@@ -1,0 +1,79 @@
+.plugin-icon {
+	object-fit: contain; /* Account for non-square icons being used. */
+}
+
+.plugin-card {
+	position: relative;
+}
+
+.theme-browser .theme .dashicons-external,
+.plugin-action-buttons .dashicons-external {
+	vertical-align: text-bottom;
+	margin-left: 5px;
+}
+
+.theme-browser .theme .theme-screenshot img {
+	height: 100%;
+	object-fit: contain;
+}
+
+.amp-extension-card-message {
+	text-align: center;
+	padding: 0;
+	clear: both;
+	background-color: #fff;
+	color: #3c434a;
+	position: absolute;
+	top: -10px;
+	left: -10px;
+	border-radius: 15px;
+}
+
+.amp-logo-icon {
+	background-image: url("../images/amp-logo-icon.svg");
+	background-color: transparent;
+	background-size: 30px;
+	height: 30px;
+	width: 30px;
+	display: inline-block;
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+.amp-logo-icon.small {
+	background-size: 15px 15px;
+	height: 15px;
+	width: 15px;
+}
+
+.plugin-install-tab-amp-compatible .plugin-card-bottom {
+	display: none;
+}
+
+.amp-extension-card-message .tooltiptext {
+	visibility: hidden;
+	width: 60%;
+	background-color: rgba(0, 0, 0, 0.8);
+	color: #fff;
+	text-align: center;
+	border-radius: 6px;
+	padding: 5px;
+	position: absolute;
+	z-index: 1;
+	left: 40px;
+	min-width: 200px;
+}
+
+.tooltiptext::after {
+	content: "";
+	position: absolute;
+	top: 10px;
+	right: 100%;
+	border-width: 7px;
+	border-style: solid;
+	border-color: transparent rgba(0, 0, 0, 0.8) transparent transparent;
+}
+
+.amp-extension-card-message:hover .tooltiptext {
+	visibility: visible;
+}

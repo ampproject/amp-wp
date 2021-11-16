@@ -17,7 +17,7 @@ describe( 'welcome', () => {
 	it( 'should contain content', async () => {
 		await expect( page ).toMatchElement( '.welcome' );
 
-		testPreviousButton( { exists: false } );
-		testNextButton( { text: 'Next' } );
+		await testPreviousButton( { exists: false } );
+		await testNextButton( { text: 'Next' } );
 	} );
 } );

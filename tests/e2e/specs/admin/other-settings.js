@@ -13,9 +13,8 @@ const panelSelector = '#other-settings .components-panel__body-toggle';
 describe( 'Other settings', () => {
 	beforeEach( async () => {
 		await completeWizard( { mode: 'transitional' } );
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await page.waitForSelector( panelSelector );
+		await page.waitForSelector( panelSelector, { timeout: 30000 } );
 		await scrollToElement( { selector: panelSelector, click: true } );
 	} );
 

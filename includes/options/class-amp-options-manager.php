@@ -344,7 +344,7 @@ class AMP_Options_Manager {
 			$options[ OPTION::ANALYTICS ] = $new_analytics_option;
 		}
 
-		if ( isset( $new_options[ Option::READER_THEME ] ) ) {
+		if ( isset( $new_options[ Option::READER_THEME ] ) && $new_options[ Option::READER_THEME ] !== $options[ Option::READER_THEME ] ) {
 			$reader_theme_slugs = wp_list_pluck( ( new ReaderThemes() )->get_themes(), 'slug' );
 			if ( in_array( $new_options[ Option::READER_THEME ], $reader_theme_slugs, true ) ) {
 				$options[ Option::READER_THEME ] = $new_options[ Option::READER_THEME ];
