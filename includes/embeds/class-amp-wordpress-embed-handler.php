@@ -32,13 +32,6 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Tag.
 	 *
-	 * @var string embed HTML iframe tag to identify and replace with AMP version.
-	 */
-	protected $sanitize_tag = 'iframe';
-
-	/**
-	 * Tag.
-	 *
 	 * @var string AMP amp-twitter tag
 	 */
 	private $amp_tag = Extension::WORDPRESS_EMBED;
@@ -66,74 +59,89 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return void
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
-		$num_nodes = $nodes->length;
+		$pairs = $this->find_blockquote_iframe_pairs( $dom );
 
-		if ( 0 === $num_nodes ) {
-			return;
-		}
-
-		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement ) {
+		foreach ( $pairs as $pair ) {
+			if ( ! $pair['blockquote'] instanceof DOMElement || ! $pair['iframe'] instanceof DOMElement ) {
 				continue;
 			}
 
-			if ( $this->is_raw_embed( $node ) ) {
-				// If embeds in the DOM are wrapped by `wpautop()`, unwrap them.
-				$embed_nodes = $dom->xpath->query( '//p/iframe[ @class = "wp-embedded-content" ]' );
-				if ( $embed_nodes->length ) {
-					foreach ( $embed_nodes as $embed_node ) {
-						$this->unwrap_p_element( $embed_node );
-					}
-				}
-
-				$this->create_amp_wordpress_embed_and_replace_node( $dom, $node );
-			}
+			$this->create_amp_wordpress_embed_and_replace_node( $dom, $pair['blockquote'], $pair['iframe'] );
 		}
 	}
 
 	/**
-	 * Checks whether it's a WordPress embed blockquote or not.
+	 * Find <blockquote> & <iframe> pairs of WordPress embeds
 	 *
-	 * @param DOMElement $node The DOMNode to adjust and replace.
-	 * @return bool Whether node is for raw embed.
+	 * @param Document $dom Document.
+	 * 
+	 * @return array
 	 */
-	private function is_raw_embed( $node ) {
-		$class_attr = $node->getAttribute( 'class' );
-		return null !== $class_attr && false !== strpos( $class_attr, 'wp-embedded-content' );
+	private function find_blockquote_iframe_pairs( $dom ) {
+
+		$pairs = [];
+
+		// If iframes with ".wp-embedded-content" class name in the DOM are wrapped by `wpautop()`, unwrap them.
+		$iframe_nodes = $dom->xpath->query( '//p/iframe[ @class = "wp-embedded-content" ]' );
+		if ( $iframe_nodes->length ) {
+			foreach ( $iframe_nodes as $iframe_node ) {
+				$this->unwrap_p_element( $iframe_node );
+			}
+		}
+
+		$blockquote_nodes = $dom->xpath->query( '//blockquote[ @class = "wp-embedded-content" ]' );
+		if ( $blockquote_nodes->length ) {
+			foreach ( $blockquote_nodes as $index => $blockquote_node ) {
+				$blockquote_node->setAttribute( 'data-tmp-id', $index );
+				$closest_iframe = $dom->xpath->query( '//blockquote[ @data-tmp-id = "' . $index . '" ]/following-sibling::iframe[ @class = "wp-embedded-content" ]' );
+				$blockquote_node->removeAttribute( 'data-tmp-id' );
+
+				if ( 1 === $closest_iframe->length ) {
+					$pairs[] = [
+						'blockquote' => $blockquote_node,
+						'iframe'     => $closest_iframe->item( 0 ),
+					];
+				}
+			}
+		}
+
+		return $pairs;
 	}
 
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param Document   $dom  The HTML Document.
-	 * @param DOMElement $node The DOMNode to adjust and replace.
+	 * @param Document   $dom        The HTML Document.
+	 * @param DOMElement $blockquote The blockquote DOMNode to be moved inside <amp-wordpress-embed>.
+	 * @param DOMElement $iframe     The iframe DOMNode to be replaced with <amp-wordpress-embed>.
 	 */
-	private function create_amp_wordpress_embed_and_replace_node( Document $dom, DOMElement $node ) {
+	private function create_amp_wordpress_embed_and_replace_node( Document $dom, DOMElement $blockquote, DOMElement $iframe ) {
 
-		$node_html  = $dom->saveHTML( $node );
-		$attributes = [
+		$iframe_html = $dom->saveHTML( $iframe );
+		$attributes  = [
 			Attribute::HEIGHT => $this->args['height'],
 			Attribute::TITLE  => '',
 		];
 
-		if ( preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+?)"#s', $node_html, $matches ) ) {
+		if ( preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+?)"#s', $iframe_html, $matches ) ) {
 			$attributes[ Attribute::TITLE ] = $matches['title'];
 		}
 
-		if ( preg_match( '#<iframe[^>]*?src="(?P<src>[^"]+?)"#s', $node_html, $matches ) ) {
+		if ( preg_match( '#<iframe[^>]*?src="(?P<src>[^"]+?)"#s', $iframe_html, $matches ) ) {
 			$attributes['data-url'] = $matches['src'];
 		}
 
-		$new_node = AMP_DOM_Utils::create_node(
+		$amp_wordpress_embed_node = AMP_DOM_Utils::create_node(
 			$dom,
 			$this->amp_tag,
 			$attributes
 		);
 
-		$new_node->appendChild( $this->create_overflow_button_element( $dom, __( 'Expand', 'amp' ) ) );
-		$node->parentNode->replaceChild( $new_node, $node );
+		$blockquote->setAttribute( 'placeholder', null );
+		$amp_wordpress_embed_node->appendChild( $blockquote );
+		$amp_wordpress_embed_node->appendChild( $this->create_overflow_button_element( $dom, __( 'Expand', 'amp' ) ) );
+
+		$iframe->parentNode->replaceChild( $amp_wordpress_embed_node, $iframe );
 
 		$this->did_convert_elements = true;
 	}
