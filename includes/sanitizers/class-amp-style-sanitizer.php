@@ -172,7 +172,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'font_face_display_overrides'    => [
 			'NonBreakingSpaceOverride' => 'optional',
 			'Inter var'                => 'optional',
-			'Genericons'               => 'auto',
+			'Genericons'               => 'block',
 		],
 	];
 

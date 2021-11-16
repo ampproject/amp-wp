@@ -1905,7 +1905,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$this->assertStringContainsString( 'format("woff")', $actual_stylesheets[1] );
 		$this->assertStringNotContainsString( 'data:', $actual_stylesheets[1] );
 		$this->assertStringContainsString( 'assets/fonts/genericons.woff', $actual_stylesheets[1] );
-		$this->assertStringContainsString( 'font-display:auto', $actual_stylesheets[1] );
+		$this->assertStringContainsString( 'font-display:block', $actual_stylesheets[1] );
 
 		// Check font not included anywhere, so must remain inline.
 		$this->assertStringContainsString( '@font-face{font-family:"Custom";', $actual_stylesheets[2] );
