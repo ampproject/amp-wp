@@ -41,12 +41,6 @@
 	width: 15px;
 }
 
-.theme-browser .theme {
-	float: none;
-	display: inline-block;
-	vertical-align: top;
-}
-
 .plugin-install-tab-amp-compatible .plugin-card-bottom {
 	display: none;
 }
