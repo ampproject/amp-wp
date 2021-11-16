@@ -1498,6 +1498,8 @@ function amp_get_content_sanitizers( $post = null ) {
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
 		],
 
+		AMP_Bento_Sanitizer::class             => [],
+
 		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
 		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
 		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
@@ -1645,6 +1647,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
+		AMP_Bento_Sanitizer::class, // Bento scripts may be preserved here.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for images, videos, audios, comments, forms, and styles.
 		AMP_Form_Sanitizer::class, // Must come before comments sanitizer.
 		AMP_Comments_Sanitizer::class, // Also must come after the form sanitizer.
