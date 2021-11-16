@@ -176,6 +176,8 @@ final class Sandboxing implements Service, Registerable, Conditional {
 				return $error;
 			}
 		);
+
+		add_action( 'amp_finalize_dom', [ $this, 'finalize_document' ], 10, 2 );
 	}
 
 	/**
@@ -198,10 +200,48 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	}
 
 	/**
+	 * Remove required AMP markup if not used.
+	 *
+	 * @param Document $dom                        Document.
+	 * @param int      $effective_sandboxing_level Effective sandboxing level.
+	 */
+	private function remove_required_amp_markup_if_not_used( Document $dom, $effective_sandboxing_level ) {
+		if ( 3 === $effective_sandboxing_level ) {
+			// When valid AMP is the target, don't remove the scripts since it won't be valid AMP.
+			return;
+		}
+
+		$amp_scripts = $dom->xpath->query( '//script[ @custom-element or @custom-template ]' );
+		if ( $amp_scripts->length > 0 ) {
+			return;
+		}
+
+		// Remove runtime script(s).
+		$runtime_scripts = $dom->xpath->query( '//script[ @async and @src and starts-with( @src, "https://cdn.ampproject.org/" ) and contains( @src, "v0" ) ]' );
+		foreach ( $runtime_scripts as $runtime_script ) {
+			if ( $runtime_script instanceof Element ) {
+				$runtime_script->parentNode->removeChild( $runtime_script );
+			}
+		}
+
+		// Remove runtime style.
+		$runtime_style = $dom->xpath->query( './style[ @amp-runtime ]', $dom->head )->item( 0 );
+		if ( $runtime_style instanceof Element ) {
+			$dom->head->removeChild( $runtime_style );
+		}
+
+		// Remove preconnect link.
+		$preconnect_link = $dom->xpath->query( './link[ @href = "https://cdn.ampproject.org" ]', $dom->head )->item( 0 );
+		if ( $preconnect_link instanceof Element ) {
+			$dom->head->removeChild( $preconnect_link );
+		}
+	}
+
+	/**
 	 * Finalize document.
 	 *
-	 * @param Document $dom Document.
-	 * @param int|null $effective_sandboxing_level Effective sandboxing level.
+	 * @param Document $dom                        Document.
+	 * @param int      $effective_sandboxing_level Effective sandboxing level.
 	 */
 	public function finalize_document( Document $dom, $effective_sandboxing_level ) {
 		$actual_sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_LEVEL );
@@ -210,6 +250,8 @@ final class Sandboxing implements Service, Registerable, Conditional {
 		if ( $meta_generator instanceof DOMAttr ) {
 			$meta_generator->nodeValue .= "; sandboxing-level={$actual_sandboxing_level}:{$effective_sandboxing_level}";
 		}
+
+		$this->remove_required_amp_markup_if_not_used( $dom, $effective_sandboxing_level );
 
 		$amp_admin_bar_menu_item = $dom->xpath->query( '//div[ @id = "wpadminbar" ]//li[ @id = "wp-admin-bar-amp" ]/a' )->item( 0 );
 		if ( $amp_admin_bar_menu_item instanceof Element ) {

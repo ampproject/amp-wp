@@ -196,25 +196,35 @@ class SandboxingTest extends DependencyInjectedTestCase {
 	/** @return array */
 	public function get_data_to_test_finalize_document() {
 		return [
-			'level_3_to_3'        => [
-				'min_level'      => 3,
-				'body'           => '<div></div>',
-				'expected_level' => 3,
+			'level_3_to_3'         => [
+				'min_level'                    => 3,
+				'body'                         => '<div></div>',
+				'expected_level'               => 3,
+				'expected_required_amp_markup' => true,
 			],
-			'level_1_to_2'        => [
-				'min_level'      => 1,
-				'body'           => sprintf( '<div %s></div>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
-				'expected_level' => 2,
+			'level_1_to_2'         => [
+				'min_level'                    => 1,
+				'body'                         => sprintf( '<div %s></div>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'expected_level'               => 2,
+				'expected_required_amp_markup' => false,
 			],
-			'level_1_to_1'        => [
-				'min_level'      => 1,
-				'body'           => sprintf( '<div %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
-				'expected_level' => 1,
+			'level_1_to_2_with_v0' => [
+				'min_level'                    => 1,
+				'body'                         => sprintf( '<script src="https://cdn.ampproject.org/v0/amp-analytics-0.1.mjs" async="" custom-element="amp-analytics" type="module" crossorigin="anonymous"></script><script async nomodule src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js" crossorigin="anonymous" custom-element="amp-analytics"></script><div %s></div>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'expected_level'               => 2,
+				'expected_required_amp_markup' => true,
 			],
-			'level_1_to_1_with_2' => [
-				'min_level'      => 1,
-				'body'           => sprintf( '<div %s></div><div %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE, ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
-				'expected_level' => 1,
+			'level_1_to_1'         => [
+				'min_level'                    => 1,
+				'body'                         => sprintf( '<div %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				'expected_level'               => 1,
+				'expected_required_amp_markup' => false,
+			],
+			'level_1_to_1_with_2'  => [
+				'min_level'                    => 1,
+				'body'                         => sprintf( '<div %s></div><div %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE, ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'expected_level'               => 1,
+				'expected_required_amp_markup' => false,
 			],
 		];
 	}
@@ -223,8 +233,9 @@ class SandboxingTest extends DependencyInjectedTestCase {
 	 * @dataProvider get_data_to_test_finalize_document
 	 * @covers ::get_effective_level()
 	 * @covers ::finalize_document()
+	 * @covers ::remove_required_amp_markup_if_not_used()
 	 */
-	public function test_finalize_document_and_get_effective_level( $min_level, $body, $expected_level ) {
+	public function test_finalize_document_and_get_effective_level( $min_level, $body, $expected_level, $expected_required_amp_markup ) {
 		AMP_Options_Manager::update_option( Sandboxing::OPTION_LEVEL, $min_level );
 
 		$dom = Document::fromHtml(
@@ -232,6 +243,10 @@ class SandboxingTest extends DependencyInjectedTestCase {
 				'
 				<html>
 					<head>
+						<link rel="preconnect" href="https://cdn.ampproject.org">
+						<style amp-runtime="" i-amphtml-version="012110290545003">html{/*...*/}</style>
+						<script async="" src="https://cdn.ampproject.org/v0.mjs" type="module" crossorigin="anonymous"></script>
+						<script async nomodule src="https://cdn.ampproject.org/v0.js" crossorigin="anonymous"></script>
 						<meta name="generator" content="AMP Plugin v2.1; foo=bar">
 					</head>
 					<body>%s</body>
@@ -249,5 +264,16 @@ class SandboxingTest extends DependencyInjectedTestCase {
 		$meta = $dom->xpath->query( '//meta[ @name = "generator" ]' )->item( 0 );
 		$this->assertInstanceOf( Element::class, $meta );
 		$this->assertStringEndsWith( "foo=bar; sandboxing-level={$min_level}:{$expected_level}", $meta->getAttribute( Attribute::CONTENT ) );
+
+		$expressions = [
+			'//link[ @rel = "preconnect" and @href = "https://cdn.ampproject.org" ]',
+			'//style[ @amp-runtime ]',
+			'//script[ @src = "https://cdn.ampproject.org/v0.mjs" ]',
+			'//script[ @src = "https://cdn.ampproject.org/v0.js" ]',
+		];
+		foreach ( $expressions as $expression ) {
+			$this->assertEquals( $expected_required_amp_markup ? 1 : 0, $dom->xpath->query( $expression )->length, $expression );
+		}
+
 	}
 }

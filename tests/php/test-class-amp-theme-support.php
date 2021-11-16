@@ -1698,7 +1698,21 @@ class Test_AMP_Theme_Support extends TestCase {
 			return AMP_Theme_Support::prepare_response( $original_html );
 		};
 
+		$amp_finalize_dom_count = did_action( 'amp_finalize_dom' );
+		add_action(
+			'amp_finalize_dom',
+			function ( $dom, $effective_sandboxing_level ) {
+				$this->assertInstanceOf( Document::class, $dom );
+				$this->assertIsInt( $effective_sandboxing_level );
+				$this->assertSame( 3, $effective_sandboxing_level );
+			},
+			10,
+			2
+		);
+
 		$sanitized_html = $call_prepare_response();
+
+		$this->assertSame( $amp_finalize_dom_count + 1, did_action( 'amp_finalize_dom' ) );
 
 		$this->assertStringNotContainsString( 'handle=', $sanitized_html );
 		$this->assertEquals( 2, did_action( 'wp_print_scripts' ) );
@@ -1938,7 +1952,22 @@ class Test_AMP_Theme_Support extends TestCase {
 			</body>
 		</html>
 		<?php
+
+		$amp_finalize_dom_count = did_action( 'amp_finalize_dom' );
+		add_action(
+			'amp_finalize_dom',
+			function ( $dom, $effective_sandboxing_level ) use ( $converted ) {
+				$this->assertInstanceOf( Document::class, $dom );
+				$this->assertIsInt( $effective_sandboxing_level );
+				$this->assertSame( $converted ? 3 : 2, $effective_sandboxing_level );
+			},
+			10,
+			2
+		);
+
 		$html = AMP_Theme_Support::prepare_response( ob_get_clean() );
+
+		$this->assertSame( $amp_finalize_dom_count + 1, did_action( 'amp_finalize_dom' ) );
 
 		$dom = Document::fromHtml( $html );
 
