@@ -2620,11 +2620,13 @@ class AMP_Validation_Manager {
 		);
 
 		$data = [
-			'AMP_COMPATIBLE_PLUGINS_URL' => current_user_can( 'install_plugins' ) ? admin_url( '/plugin-install.php?tab=amp-compatible' ) : 'https://amp-wp.org/ecosystem/plugins/',
-			'APP_ROOT_ID'                => 'site-scan-notice',
-			'OPTIONS_REST_PATH'          => '/amp/v1/options',
-			'SCANNABLE_URLS_REST_PATH'   => '/amp/v1/scannable-urls',
-			'VALIDATE_NONCE'             => self::get_amp_validate_nonce(),
+			'AMP_COMPATIBLE_PLUGINS_URL'         => current_user_can( 'install_plugins' ) ? admin_url( '/plugin-install.php?tab=amp-compatible' ) : 'https://amp-wp.org/ecosystem/plugins/',
+			'APP_ROOT_ID'                        => 'site-scan-notice',
+			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
+			'SCANNABLE_URLS_REST_PATH'           => '/amp/v1/scannable-urls',
+			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
+			'VALIDATE_NONCE'                     => self::get_amp_validate_nonce(),
 		];
 
 		wp_add_inline_script(

@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useContext, useEffect } from '@wordpress/element';
+import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -13,6 +13,7 @@ import { AMP_COMPATIBLE_PLUGINS_URL } from 'amp-site-scan-notice'; // From WP in
  * Internal dependencies
  */
 import { SiteScan } from '../../components/site-scan-context-provider';
+import { User } from '../../components/user-context-provider';
 import {
 	ADMIN_NOTICE_TYPE_ERROR,
 	ADMIN_NOTICE_TYPE_INFO,
@@ -35,6 +36,8 @@ export function SiteScanNotice() {
 		pluginsWithAmpIncompatibility,
 		startSiteScan,
 	} = useContext( SiteScan );
+	const { developerToolsOption } = useContext( User );
+	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
 
 	// Cancel scan on component unmount.
 	useEffect( () => cancelSiteScan, [ cancelSiteScan ] );
@@ -79,15 +82,17 @@ export function SiteScanNotice() {
 				<p>
 					{ __( 'AMP Plugin found validation errors.', 'amp' ) }
 				</p>
-				<details>
-					<a
-						href={ AMP_COMPATIBLE_PLUGINS_URL }
-						className="button"
-						{ ...isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL ) ? { target: '_blank', rel: 'noreferrer' } : {} }
-					>
-						{ __( 'View Compatible Plugins List', 'amp' ) }
-					</a>
-				</details>
+				{ userIsTechnical && (
+					<details>
+						<a
+							href={ AMP_COMPATIBLE_PLUGINS_URL }
+							className="button"
+							{ ...isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL ) ? { target: '_blank', rel: 'noreferrer' } : {} }
+						>
+							{ __( 'View Compatible Plugins List', 'amp' ) }
+						</a>
+					</details>
+				) }
 			</AdminNotice>
 		);
 	}
