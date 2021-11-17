@@ -24,7 +24,9 @@ final class PairedUrl implements Service {
 	 * @return string URL.
 	 */
 	public function remove_query_var( $url ) {
-		return remove_query_arg( amp_get_slug(), $url );
+		$url = remove_query_arg( amp_get_slug(), $url );
+		$url = str_replace( '?#', '#', $url ); // See <https://core.trac.wordpress.org/ticket/44499>.
+		return $url;
 	}
 
 	/**
