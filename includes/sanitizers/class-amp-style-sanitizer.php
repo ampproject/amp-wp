@@ -2550,8 +2550,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet_base_url = trailingslashit( $stylesheet_base_url );
 		}
 
-		// Define array of font files.
-		$font_files = [];
+		// Obtain the font file path (if any) and the first font src type.
+		$font_file      = '';
+		$first_src_type = '';
 
 		// Attempt to transform data: URLs in src properties to be external file URLs.
 		foreach ( $src_properties as $src_property ) {
@@ -2634,9 +2635,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$value = $url->getURL()->getString();
 				if ( 'data:' === substr( $value, 0, 5 ) ) {
 					$source_data_url_objects[ $format_value ] = $source[0];
+					if ( empty( $first_src_type ) ) {
+						$first_src_type = 'inline';
+					}
 				} else {
 					$source_file_urls[] = $value;
-					$font_files[]       = $value;
+					if ( empty( $first_src_type ) ) {
+						$first_src_type = 'file';
+						$font_file      = $value;
+					}
 				}
 			}
 
@@ -2680,7 +2687,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$path = $this->get_validated_url_file_path( $guessed_url, [ 'woff', 'woff2', 'ttf', 'otf', 'svg' ] );
 					if ( ! is_wp_error( $path ) ) {
 						$data_url->getURL()->setString( $guessed_url );
-						$font_files[] = $guessed_url;
+						if ( 'inline' === $first_src_type ) {
+							$first_src_type = 'file';
+							$font_file      = $guessed_url;
+						}
 						continue 2;
 					}
 				}
@@ -2695,7 +2705,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( in_array( $font_filename, $bundled_fonts, true ) ) {
 					$font_file = plugin_dir_url( AMP__FILE__ ) . "assets/fonts/$font_filename";
 					$data_url->getURL()->setString( $font_file );
-					$font_files[] = $font_file;
+					if ( 'inline' === $first_src_type ) {
+						$first_src_type = 'file';
+						$font_file      = $font_file;
+					}
 				}
 			} // End foreach $source_data_url_objects.
 		} // End foreach $src_properties.
@@ -2719,9 +2732,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				in_array( $property->getValue(), [ 'auto', 'block', 'swap' ], true )
 			)
 			&&
-			1 <= count( $font_files )
+			'file' === $first_src_type
+			&&
+			! empty( $font_file )
 		) {
-			$this->dom->links->addPreload( $font_files[0], RequestDestination::FONT );
+			$this->dom->links->addPreload( $font_file, RequestDestination::FONT );
 		}
 	}
 
