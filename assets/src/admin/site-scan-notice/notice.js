@@ -2,12 +2,15 @@
  * WordPress dependencies
  */
 import { useContext, useEffect, useMemo } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * External dependencies
  */
-import { AMP_COMPATIBLE_PLUGINS_URL } from 'amp-site-scan-notice'; // From WP inline script.
+import {
+	AMP_COMPATIBLE_PLUGINS_URL,
+	SETTINGS_LINK,
+} from 'amp-site-scan-notice'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -23,6 +26,10 @@ import {
 } from '../../components/admin-notice';
 import { Loading } from '../../components/loading';
 import { isExternalUrl } from '../../common/helpers/is-external-url';
+
+// Define Plugin Suppression link.
+const PLUGIN_SUPPRESSION_LINK = new URL( SETTINGS_LINK );
+PLUGIN_SUPPRESSION_LINK.hash = 'plugin-suppression';
 
 export function SiteScanNotice() {
 	const {
@@ -79,9 +86,15 @@ export function SiteScanNotice() {
 	if ( isCompleted && pluginsWithAmpIncompatibility.length > 0 ) {
 		return (
 			<AdminNotice type={ ADMIN_NOTICE_TYPE_WARNING } { ...commonNoticeProps }>
-				<p>
-					{ __( 'AMP Plugin found validation errors.', 'amp' ) }
-				</p>
+				<p
+					dangerouslySetInnerHTML={ {
+						__html: sprintf(
+							/* translators: the placeholder is a link to the Plugin Suppression Settings panel. */
+							__( 'AMP Plugin found validation errors. <a href="%s">Review Plugin Suppression Settings</a>', 'amp' ),
+							PLUGIN_SUPPRESSION_LINK,
+						),
+					} }
+				/>
 				{ userIsTechnical && (
 					<details>
 						<a

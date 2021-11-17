@@ -2623,6 +2623,7 @@ class AMP_Validation_Manager {
 			'AMP_COMPATIBLE_PLUGINS_URL'         => current_user_can( 'install_plugins' ) ? admin_url( '/plugin-install.php?tab=amp-compatible' ) : 'https://amp-wp.org/ecosystem/plugins/',
 			'APP_ROOT_ID'                        => 'site-scan-notice',
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
+			'SETTINGS_LINK'                      => menu_page_url( AMP_Options_Manager::OPTION_NAME, false ),
 			'SCANNABLE_URLS_REST_PATH'           => '/amp/v1/scannable-urls',
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
