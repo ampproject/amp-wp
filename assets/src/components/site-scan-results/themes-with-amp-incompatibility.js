@@ -52,14 +52,14 @@ export function ThemesWithAmpIncompatibility( {
 			{ showHelpText && (
 				<p>
 					{ createInterpolateElement(
-						__( 'Because of theme issues we’ve found, you’ll want to switch your template mode. Please see <a>template mode recommendations</a> below.', 'amp' ),
+						__( 'Because of theme issue(s) we’ve found, you’ll want to consider a different <a>template mode</a> below.', 'amp' ),
 						{
 							// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 							a: <a href="#template-modes" />,
 						},
 					) }
 					{ AMP_COMPATIBLE_THEMES_URL ? createInterpolateElement(
-						` ${ __( 'You may also want to browse <a>AMP compatible themes</a>.', 'amp' ) }`,
+						` ${ __( 'You may also want to browse alternative <a>AMP compatible themes</a>.', 'amp' ) }`,
 						{
 							a: isExternalUrl( AMP_COMPATIBLE_THEMES_URL )
 								? <ExternalLink href={ AMP_COMPATIBLE_THEMES_URL } />

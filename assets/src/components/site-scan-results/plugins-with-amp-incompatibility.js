@@ -52,14 +52,14 @@ export function PluginsWithAmpIncompatibility( {
 			{ showHelpText && (
 				<p>
 					{ createInterpolateElement(
-						__( 'Because of plugin issues we’ve uncovered, you may want to <a>review and suppress plugins</a>.', 'amp' ),
+						__( 'Because of plugin issue(s) detected, you may want to <a>review and suppress plugins</a>.', 'amp' ),
 						{
 							// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 							a: <a href="#plugin-suppression" />,
 						},
 					) }
 					{ AMP_COMPATIBLE_PLUGINS_URL ? createInterpolateElement(
-						` ${ __( 'You may also want to browse <a>AMP compatible plugins</a>.', 'amp' ) }`,
+						` ${ __( 'You may also want to browse alternative <a>AMP compatible plugins</a>.', 'amp' ) }`,
 						{
 							a: isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL )
 								? <ExternalLink href={ AMP_COMPATIBLE_PLUGINS_URL } />
