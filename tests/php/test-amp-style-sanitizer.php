@@ -1975,37 +1975,40 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			$html .= '</head><body></body></html>';
 		}
 
-		$dom         = Document::fromHtml( $html, Options::DEFAULTS );
-		$error_codes = [];
-		$sanitizer   = new AMP_Style_Sanitizer(
-			$dom,
-			[
-				'use_document_element' => true,
-			]
-		);
-		$sanitizer->sanitize();
-		$this->assertEquals( [], $error_codes );
-
-		$link_elements       = $dom->getElementsByTagName( 'link' );
-		$link_elements_count = $link_elements->length;
-
-		$actual_urls = array_map(
-			static function ( Element $link_element ) {
-				return $link_element->getAttribute( 'href' );
-			},
-			iterator_to_array( $link_elements )
-		);
-
-		$this->assertEqualSets( $expected_urls, $actual_urls );
-
-		for ( $i = 0; $i < $link_elements_count; $i++ ) {
-			$this->assertStringEndsWith(
-				$expected_urls[ $i ],
-				$link_elements->item( $i )->getAttribute( 'href' )
+		// Do the assertions twice in order to ensure that preloads are still added when the CSS is cached.
+		foreach ( [ 'false', 'true' ] as $is_cached ) {
+			$dom         = Document::fromHtml( $html, Options::DEFAULTS );
+			$error_codes = [];
+			$sanitizer   = new AMP_Style_Sanitizer(
+				$dom,
+				[
+					'use_document_element' => true,
+				]
 			);
-			$this->assertEquals( $link_elements->item( $i )->getAttribute( 'rel' ), 'preload' );
-			$this->assertEquals( $link_elements->item( $i )->getAttribute( 'as' ), 'font' );
-			$this->assertEquals( $link_elements->item( $i )->getAttribute( 'crossorigin' ), '' );
+			$sanitizer->sanitize();
+			$this->assertEquals( [], $error_codes, "Is cached: $is_cached" );
+
+			$link_elements       = $dom->getElementsByTagName( 'link' );
+			$link_elements_count = $link_elements->length;
+
+			$actual_urls = array_map(
+				static function ( Element $link_element ) {
+					return $link_element->getAttribute( 'href' );
+				},
+				iterator_to_array( $link_elements )
+			);
+
+			$this->assertEqualSets( $expected_urls, $actual_urls, "Is cached: $is_cached" );
+
+			for ( $i = 0; $i < $link_elements_count; $i ++ ) {
+				$this->assertStringEndsWith(
+					$expected_urls[ $i ],
+					$link_elements->item( $i )->getAttribute( 'href' )
+				);
+				$this->assertEquals( $link_elements->item( $i )->getAttribute( 'rel' ), 'preload' );
+				$this->assertEquals( $link_elements->item( $i )->getAttribute( 'as' ), 'font' );
+				$this->assertEquals( $link_elements->item( $i )->getAttribute( 'crossorigin' ), '' );
+			}
 		}
 	}
 
