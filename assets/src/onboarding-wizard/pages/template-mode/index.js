@@ -21,7 +21,7 @@ export function TemplateMode() {
 	const { setCanGoForward } = useContext( Navigation );
 	const { editedOptions: { theme_support: themeSupport }, originalOptions } = useContext( Options );
 	const { technicalQuestionChangedAtLeastOnce } = useContext( TemplateModeOverride );
-	const { templateModeRecommendation } = useTemplateModeRecommendation();
+	const templateModeRecommendation = useTemplateModeRecommendation();
 
 	/**
 	 * Allow moving forward.

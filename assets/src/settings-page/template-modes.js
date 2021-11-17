@@ -66,7 +66,7 @@ export function TemplateModes( { focusReaderThemes } ) {
 		},
 	} = useContext( Options );
 	const { selectedTheme, templateModeWasOverridden } = useContext( ReaderThemes );
-	const { templateModeRecommendation, staleTemplateModeRecommendation } = useTemplateModeRecommendation();
+	const templateModeRecommendation = useTemplateModeRecommendation();
 
 	const getLabelForTemplateMode = useCallback( ( mode ) => {
 		if ( ! templateModeRecommendation ) {
@@ -91,11 +91,6 @@ export function TemplateModes( { focusReaderThemes } ) {
 			{ templateModeWasOverridden && (
 				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
 					{ __( 'Because you selected a Reader theme that is the same as your site\'s active theme, your site has automatically been switched to Transitional template mode.', 'amp' ) }
-				</AMPNotice>
-			) }
-			{ staleTemplateModeRecommendation && (
-				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
-					{ __( 'Because the Site Scan results are stale, the Template Mode recommendation may not be accurate. Rescan your site to ensure the recommendation is up to date.', 'amp' ) }
 				</AMPNotice>
 			) }
 			<TemplateModeOption
