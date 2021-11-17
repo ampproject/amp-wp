@@ -23,6 +23,7 @@ use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\Property\Selector;
 use Sabberworm\CSS\RuleSet\RuleSet;
+use Sabberworm\CSS\Parsing\SourceException;
 use Sabberworm\CSS\Property\AtRule;
 use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\CSSList\KeyFrame;
@@ -1934,7 +1935,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			);
 			$important_count    = $processed_css_list['important_count'];
 			$imported_font_urls = $processed_css_list['imported_font_urls'];
-		} catch ( Exception $exception ) {
+		} catch ( SourceException $exception ) {
 			$error = [
 				'code'      => self::CSS_SYNTAX_PARSE_ERROR,
 				'message'   => $exception->getMessage(),
