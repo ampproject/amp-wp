@@ -459,6 +459,7 @@ export function SiteScanContextProvider( {
 				isCompleted: [ STATUS_REFETCHING_PLUGIN_SUPPRESSION, STATUS_COMPLETED ].includes( status ),
 				isFailed: status === STATUS_FAILED,
 				isFetchingScannableUrls: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
+				isInitializing: ! Boolean( status ),
 				isReady: status === STATUS_READY,
 				isSiteScannable: scannableUrls.length > 0,
 				pluginsWithAmpIncompatibility,

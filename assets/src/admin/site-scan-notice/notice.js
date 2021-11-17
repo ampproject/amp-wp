@@ -20,11 +20,13 @@ import { Loading } from '../../components/loading';
 export function SiteScanNotice() {
 	const {
 		cancelSiteScan,
+		fetchScannableUrls,
 		isBusy,
 		isCancelled,
 		isCompleted,
 		isFailed,
 		isFetchingScannableUrls,
+		isInitializing,
 		isReady,
 		pluginsWithAmpIncompatibility,
 		startSiteScan,
@@ -32,20 +34,26 @@ export function SiteScanNotice() {
 
 	const hasIssues = pluginsWithAmpIncompatibility.length > 0;
 	const failed = isFailed || isCancelled;
-	const inProgress = isBusy || isFetchingScannableUrls || isReady;
+	const inProgress = isBusy || isInitializing || isFetchingScannableUrls || isReady;
 	const foundNoIssues = isCompleted && ! hasIssues;
 	const foundIssues = isCompleted && hasIssues;
 
 	/**
-	 * Start site scan right after component is mounted and scanner is ready. Cancel scan on unmount.
+	 * Cancel scan on component unmount.
+	 */
+	useEffect( () => cancelSiteScan, [ cancelSiteScan ] );
+
+	/**
+	 * Fetch scannable URLs on mount. Start site scan right after the component
+	 * is mounted and the scanner is ready.
 	 */
 	useEffect( () => {
-		if ( isReady ) {
+		if ( isInitializing ) {
+			fetchScannableUrls();
+		} else if ( isReady ) {
 			startSiteScan();
 		}
-
-		return cancelSiteScan;
-	}, [ cancelSiteScan, isReady, startSiteScan ] );
+	}, [ fetchScannableUrls, isInitializing, isReady, startSiteScan ] );
 
 	let noticeType = ADMIN_NOTICE_TYPE_INFO;
 	if ( failed ) {
