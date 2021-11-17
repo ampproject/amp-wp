@@ -2705,10 +2705,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( in_array( $font_filename, $bundled_fonts, true ) ) {
 					$font_file = plugin_dir_url( AMP__FILE__ ) . "assets/fonts/$font_filename";
 					$data_url->getURL()->setString( $font_file );
-					if ( 'inline' === $first_src_type ) {
-						$first_src_type = 'file';
-						$font_file      = $font_file;
-					}
+					$first_src_type = 'file';
 				}
 			} // End foreach $source_data_url_objects.
 		} // End foreach $src_properties.
