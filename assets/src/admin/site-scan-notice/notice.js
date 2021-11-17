@@ -5,6 +5,11 @@ import { useContext, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
+ * External dependencies
+ */
+import { AMP_COMPATIBLE_PLUGINS_URL } from 'amp-site-scan-notice'; // From WP inline script.
+
+/**
  * Internal dependencies
  */
 import { SiteScan } from '../../components/site-scan-context-provider';
@@ -16,37 +21,25 @@ import {
 	AdminNotice,
 } from '../../components/admin-notice';
 import { Loading } from '../../components/loading';
+import { isExternalUrl } from '../../common/helpers/is-external-url';
 
 export function SiteScanNotice() {
 	const {
 		cancelSiteScan,
 		fetchScannableUrls,
-		isBusy,
 		isCancelled,
 		isCompleted,
 		isFailed,
-		isFetchingScannableUrls,
 		isInitializing,
 		isReady,
 		pluginsWithAmpIncompatibility,
 		startSiteScan,
 	} = useContext( SiteScan );
 
-	const hasIssues = pluginsWithAmpIncompatibility.length > 0;
-	const failed = isFailed || isCancelled;
-	const inProgress = isBusy || isInitializing || isFetchingScannableUrls || isReady;
-	const foundNoIssues = isCompleted && ! hasIssues;
-	const foundIssues = isCompleted && hasIssues;
-
-	/**
-	 * Cancel scan on component unmount.
-	 */
+	// Cancel scan on component unmount.
 	useEffect( () => cancelSiteScan, [ cancelSiteScan ] );
 
-	/**
-	 * Fetch scannable URLs on mount. Start site scan right after the component
-	 * is mounted and the scanner is ready.
-	 */
+	// Fetch scannable URLs on mount. Start site scan right after the component is mounted and the scanner is ready.
 	useEffect( () => {
 		if ( isInitializing ) {
 			fetchScannableUrls();
@@ -55,58 +48,56 @@ export function SiteScanNotice() {
 		}
 	}, [ fetchScannableUrls, isInitializing, isReady, startSiteScan ] );
 
-	let noticeType = ADMIN_NOTICE_TYPE_INFO;
-	if ( failed ) {
-		noticeType = ADMIN_NOTICE_TYPE_ERROR;
-	} else if ( foundNoIssues ) {
-		noticeType = ADMIN_NOTICE_TYPE_SUCCESS;
-	} else if ( foundIssues ) {
-		noticeType = ADMIN_NOTICE_TYPE_WARNING;
+	const commonNoticeProps = {
+		isDismissible: true,
+		onDismiss: cancelSiteScan,
+	};
+
+	if ( isFailed || isCancelled ) {
+		return (
+			<AdminNotice type={ ADMIN_NOTICE_TYPE_ERROR } { ...commonNoticeProps }>
+				<p>
+					{ __( 'AMP plugin could not check your site for compatibility issues.', 'amp' ) }
+				</p>
+			</AdminNotice>
+		);
+	}
+
+	if ( isCompleted && pluginsWithAmpIncompatibility.length === 0 ) {
+		return (
+			<AdminNotice type={ ADMIN_NOTICE_TYPE_SUCCESS } { ...commonNoticeProps }>
+				<p>
+					{ __( 'AMP plugin found no validation errors.', 'amp' ) }
+				</p>
+			</AdminNotice>
+		);
+	}
+
+	if ( isCompleted && pluginsWithAmpIncompatibility.length > 0 ) {
+		return (
+			<AdminNotice type={ ADMIN_NOTICE_TYPE_WARNING } { ...commonNoticeProps }>
+				<p>
+					{ __( 'AMP Plugin found validation errors.', 'amp' ) }
+				</p>
+				<details>
+					<a
+						href={ AMP_COMPATIBLE_PLUGINS_URL }
+						className="button"
+						{ ...isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL ) ? { target: '_blank', rel: 'noreferrer' } : {} }
+					>
+						{ __( 'View Compatible Plugins List', 'amp' ) }
+					</a>
+				</details>
+			</AdminNotice>
+		);
 	}
 
 	return (
-		<AdminNotice
-			type={ noticeType }
-			isDismissible={ true }
-			onDismiss={ cancelSiteScan }
-		>
-			{ failed && <SiteScanFailed /> }
-			{ inProgress && <SiteScanInProgress /> }
-			{ foundNoIssues && <SiteScanFoundNoIssues /> }
-			{ foundIssues && <SiteScanFoundIssues /> }
+		<AdminNotice type={ ADMIN_NOTICE_TYPE_INFO } { ...commonNoticeProps }>
+			<p>
+				{ __( 'AMP plugin is checking you site for compatibility issues', 'amp' ) }
+				<Loading inline={ true } />
+			</p>
 		</AdminNotice>
-	);
-}
-
-function SiteScanInProgress() {
-	return (
-		<p>
-			{ __( 'AMP plugin is checking you site for compatibility issues', 'amp' ) }
-			<Loading inline={ true } />
-		</p>
-	);
-}
-
-function SiteScanFoundNoIssues() {
-	return (
-		<p>
-			{ __( 'AMP plugin found no validation errors.', 'amp' ) }
-		</p>
-	);
-}
-
-function SiteScanFoundIssues() {
-	return (
-		<p>
-			{ __( 'AMP Plugin found validation errors.', 'amp' ) }
-		</p>
-	);
-}
-
-function SiteScanFailed() {
-	return (
-		<p>
-			{ __( 'AMP plugin could not check your site for compatibility issues.', 'amp' ) }
-		</p>
 	);
 }

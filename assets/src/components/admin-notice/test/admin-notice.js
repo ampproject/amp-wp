@@ -22,7 +22,7 @@ import {
 
 let container;
 
-describe( 'the AdminNotice component', () => {
+describe( 'AdminNotice', () => {
 	beforeEach( () => {
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
