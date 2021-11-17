@@ -227,9 +227,9 @@ SiteScanDrawer.propTypes = {
  */
 function SiteScanInProgress() {
 	const {
-		currentlyScannedUrlIndex,
 		isCompleted,
 		scannableUrls,
+		scannedUrlsMaxIndex,
 	} = useContext( SiteScanContext );
 
 	return (
@@ -239,7 +239,7 @@ function SiteScanInProgress() {
 			</p>
 			<ProgressBar value={ isCompleted
 				? 100
-				: ( currentlyScannedUrlIndex / scannableUrls.length * 100 )
+				: ( scannedUrlsMaxIndex / scannableUrls.length * 100 )
 			} />
 			<p className="settings-site-scan__status">
 				{ isCompleted
@@ -247,9 +247,9 @@ function SiteScanInProgress() {
 					: sprintf(
 						// translators: 1: currently scanned URL index; 2: scannable URLs count; 3: scanned page type.
 						__( 'Scanning %1$d/%2$d URLs: Checking %3$s…', 'amp' ),
-						currentlyScannedUrlIndex + 1,
+						scannedUrlsMaxIndex + 1,
 						scannableUrls.length,
-						scannableUrls[ currentlyScannedUrlIndex ]?.label,
+						scannableUrls[ scannedUrlsMaxIndex ]?.label,
 					)
 				}
 			</p>
