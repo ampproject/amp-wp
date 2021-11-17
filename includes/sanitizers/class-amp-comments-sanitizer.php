@@ -59,15 +59,58 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.7
 	 */
 	public function sanitize() {
-		foreach ( $this->dom->getElementsByTagName( Tag::FORM ) as $comment_form ) {
-			$action = $comment_form->getAttribute( Attribute::ACTION_XHR );
+
+		// Find the comment form (which may not have the commentform ID).
+		$comment_form = null;
+		foreach ( $this->dom->getElementsByTagName( Tag::FORM ) as $form ) {
+			$action = $form->getAttribute( Attribute::ACTION_XHR );
 			if ( ! $action ) {
-				$action = $comment_form->getAttribute( Attribute::ACTION );
+				$action = $form->getAttribute( Attribute::ACTION );
 			}
 			$action_path = wp_parse_url( $action, PHP_URL_PATH );
 			if ( $action_path && 'wp-comments-post.php' === basename( $action_path ) ) {
-				$this->ampify_threaded_comments( $comment_form );
+				$comment_form = $form;
+				break;
 			}
+		}
+
+		// Handle the comment reply script.
+		$comment_reply_script            = $this->get_comment_reply_script();
+		$should_ampify_comment_threading = false;
+		if ( $comment_reply_script instanceof Element ) {
+			if ( 'never' === $this->args['ampify_comment_threading'] ) {
+				$this->prepare_native_comment_reply( $comment_reply_script );
+				$should_ampify_comment_threading = false;
+			} elseif (
+				'always' === $this->args['ampify_comment_threading']
+				||
+				(
+					'conditionally' === $this->args['ampify_comment_threading']
+					&&
+					(
+						// If there isn't even a comment form on the page, then the comment-reply script shouldn't be here at all.
+						! $comment_form instanceof Element
+						||
+						// If the form has an action-xhr attribute, then it's going to be an AMP page and we need ampified comment threading.
+						$comment_form->hasAttribute( Attribute::ACTION_XHR )
+					)
+				)
+			) {
+				// Remove the script and then proceed with the amp-bind implementation below.
+				$comment_reply_script->parentNode->removeChild( $comment_reply_script );
+				$should_ampify_comment_threading = true;
+			} else {
+				// This is the conditionally-no case.
+				$this->prepare_native_comment_reply( $comment_reply_script );
+
+				// Do not proceed with the AMP-bind implementation for threaded comments since the comment-reply script was included.
+				$should_ampify_comment_threading = false;
+			}
+		}
+
+		// Now based on the comment reply script handling above, ampify the comment form.
+		if ( get_option( 'thread_comments' ) && $comment_form && $should_ampify_comment_threading ) {
+			$this->ampify_threaded_comments( $comment_form );
 		}
 
 		if ( $this->args['comments_live_list'] ) {
@@ -80,47 +123,25 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Ampify threaded comments by utilizing amp-bind to implement comment reply functionality.
+	 * Get comment reply script.
 	 *
-	 * The logic here is only needed if:
-	 * 1. Threaded comments is enabled, and
-	 * 2. The comment-reply script was not added to the page.
+	 * @return Element|null
+	 */
+	protected function get_comment_reply_script() {
+		$element = $this->dom->getElementById( 'comment-reply-js' );
+		if ( $element instanceof Element && Tag::SCRIPT === $element->tagName ) {
+			return $element;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Ampify threaded comments by utilizing amp-bind to implement comment reply functionality.
 	 *
 	 * @param Element $comment_form Comment form.
 	 */
 	protected function ampify_threaded_comments( Element $comment_form ) {
-		if ( ! get_option( 'thread_comments' ) ) {
-			return;
-		}
-
-		$comment_reply_script = $this->dom->xpath->query( '//script[ @id = "comment-reply-js" ]' )->item( 0 );
-		if ( 'never' === $this->args['ampify_comment_threading'] ) {
-			if ( $comment_reply_script instanceof Element ) {
-				$this->prepare_native_comment_reply( $comment_reply_script );
-			}
-			return;
-		}
-
-		if ( $comment_reply_script instanceof Element ) {
-			if (
-				'always' === $this->args['ampify_comment_threading']
-				||
-				(
-					'conditionally' === $this->args['ampify_comment_threading']
-					&&
-					$comment_form->hasAttribute( Attribute::ACTION_XHR )
-				)
-			) {
-				// Remove the script and then proceed with the amp-bind implementation below.
-				$comment_reply_script->parentNode->removeChild( $comment_reply_script );
-			} else {
-				// This is the conditionally-no case.
-				$this->prepare_native_comment_reply( $comment_reply_script );
-
-				// Do not proceed with the AMP-bind implementation for threaded comments since the comment-reply script was included.
-				return;
-			}
-		}
 
 		// Create reply state.
 		$amp_state = $this->dom->createElement( Extension::STATE );

@@ -7,7 +7,7 @@ import { visitAdminPage, activateTheme, installTheme } from '@wordpress/e2e-test
  * Internal dependencies
  */
 import { completeWizard, cleanUpSettings, clickMode, scrollToElement } from '../../utils/onboarding-wizard-utils';
-import { cleanUpValidatedUrls, setTemplateMode } from '../../utils/amp-settings-utils';
+import { cleanUpValidatedUrls } from '../../utils/amp-settings-utils';
 
 describe( 'AMP settings screen newly activated', () => {
 	beforeEach( async () => {
@@ -61,40 +61,6 @@ describe( 'Settings screen when reader theme is active theme', () => {
 
 		await activateTheme( 'twentytwenty' );
 	} );
-} );
-
-describe( 'Mode info notices', () => {
-	const timeout = 30000;
-
-	beforeEach( async () => {
-		await cleanUpValidatedUrls();
-		await cleanUpSettings();
-	} );
-
-	it( 'show information in the Template Mode section if site scan results are stale', async () => {
-		await completeWizard( { technical: true, mode: 'transitional' } );
-
-		// When there are no site scan results, no notice in the Template Mode section should be displayed.
-		await expect( page ).toMatchElement( '#template-modes h2', { text: 'Template Mode', timeout } );
-		await expect( page ).not.toMatchElement( '#template-modes h2 + .amp-notice--info' );
-
-		// Trigger the site scan.
-		await expect( page ).toMatchElement( '#site-scan .amp-drawer__heading', { text: 'Site Scan' } );
-		await Promise.all( [
-			scrollToElement( { selector: '.settings-site-scan__footer .is-primary', click: true } ),
-			page.waitForSelector( '.settings-site-scan__status' ),
-		] );
-		await page.waitForSelector( '.settings-site-scan__footer .is-primary', { timeout } );
-
-		// Change the template mode to make the scan results stale and confirm the notice is displayed.
-		await setTemplateMode( 'standard' );
-		await page.waitForSelector( '.settings-site-scan__footer .is-primary', { timeout } );
-		await expect( page ).toMatchElement( '#template-modes h2 + .amp-notice--info' );
-	} );
-
-	it.todo( 'shows expected notices for theme with built-in support' );
-	it.todo( 'shows expected notices for theme with paired flag false' );
-	it.todo( 'shows expected notices for theme that only supports reader mode' );
 } );
 
 describe( 'AMP Settings Screen after wizard', () => {

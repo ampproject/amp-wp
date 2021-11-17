@@ -8,8 +8,7 @@ import { useContext, useLayoutEffect, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { READER, STANDARD, TRANSITIONAL } from '../../common/constants';
-import { ReaderThemes } from '../reader-themes-context-provider';
-import { SiteScan as SiteScanContext } from '../site-scan-context-provider';
+import { SiteScan } from '../site-scan-context-provider';
 import { User } from '../user-context-provider';
 import { Options } from '../options-context-provider';
 
@@ -23,7 +22,6 @@ export const TECHNICAL = 'technical';
 export const NON_TECHNICAL = 'nonTechnical';
 
 export function useTemplateModeRecommendation() {
-	const { currentTheme: { is_reader_theme: currentThemeIsAmongReaderThemes } } = useContext( ReaderThemes );
 	const {
 		hasSiteScanResults,
 		isBusy,
@@ -31,7 +29,7 @@ export function useTemplateModeRecommendation() {
 		pluginsWithAmpIncompatibility,
 		stale,
 		themesWithAmpIncompatibility,
-	} = useContext( SiteScanContext );
+	} = useContext( SiteScan );
 	const { developerToolsOption, fetchingUser, savingDeveloperToolsOption } = useContext( User );
 	const { fetchingOptions, savingOptions } = useContext( Options );
 	const [ templateModeRecommendation, setTemplateModeRecommendation ] = useState( null );
@@ -42,18 +40,14 @@ export function useTemplateModeRecommendation() {
 		}
 
 		setTemplateModeRecommendation( getTemplateModeRecommendation( {
-			currentThemeIsAmongReaderThemes,
 			hasPluginIssues: pluginsWithAmpIncompatibility?.length > 0,
-			hasSiteScanResults: hasSiteScanResults && ! stale,
+			hasFreshSiteScanResults: hasSiteScanResults && ! stale,
 			hasThemeIssues: themesWithAmpIncompatibility?.length > 0,
 			userIsTechnical: developerToolsOption === true,
 		} ) );
-	}, [ currentThemeIsAmongReaderThemes, developerToolsOption, fetchingOptions, fetchingUser, hasSiteScanResults, isBusy, isFetchingScannableUrls, pluginsWithAmpIncompatibility?.length, savingDeveloperToolsOption, savingOptions, stale, themesWithAmpIncompatibility?.length ] );
+	}, [ developerToolsOption, fetchingOptions, fetchingUser, hasSiteScanResults, isBusy, isFetchingScannableUrls, pluginsWithAmpIncompatibility?.length, savingDeveloperToolsOption, savingOptions, stale, themesWithAmpIncompatibility?.length ] );
 
-	return {
-		templateModeRecommendation,
-		staleTemplateModeRecommendation: stale,
-	};
+	return templateModeRecommendation;
 }
 
 /* eslint-disable complexity */
@@ -62,44 +56,84 @@ export function useTemplateModeRecommendation() {
  * Returns the degree to which each mode is recommended for the current site and user.
  *
  * @param {Object}  args
- * @param {boolean} args.currentThemeIsAmongReaderThemes Whether the currently active theme is in the reader themes list.
- * @param {boolean} args.hasPluginIssues                 Whether the site scan found plugins with AMP incompatibility.
- * @param {boolean} args.hasSiteScanResults              Whether there are available site scan results.
- * @param {boolean} args.hasThemeIssues                  Whether the site scan found themes with AMP incompatibility.
- * @param {boolean} args.userIsTechnical                 Whether the user answered yes to the technical question.
+ * @param {boolean} args.hasPluginIssues         Whether the site scan found plugins with AMP incompatibility.
+ * @param {boolean} args.hasFreshSiteScanResults Whether fresh site scan results are available.
+ * @param {boolean} args.hasThemeIssues          Whether the site scan found themes with AMP incompatibility.
+ * @param {boolean} args.userIsTechnical         Whether the user answered yes to the technical question.
  */
 export function getTemplateModeRecommendation( {
-	currentThemeIsAmongReaderThemes,
 	hasPluginIssues,
-	hasSiteScanResults,
+	hasFreshSiteScanResults,
 	hasThemeIssues,
 	userIsTechnical,
 } ) {
+	/* eslint-disable @wordpress/no-unused-vars-before-return */
+	const mobileRedirectionNote = __( 'If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' );
+	const readerModeDescription = __( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>.', 'amp' ) + ' ' + mobileRedirectionNote;
+	const transitionalModeDescription = __( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>.', 'amp' ) + ' ' + mobileRedirectionNote;
+	const standardModeDescription = __( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' );
+	const pluginIncompatibilityNote = __( 'To address plugin compatibility issue(s), you may need to use Plugin Suppression to disable incompatible plugins on AMP pages or else select an alternative AMP-compatible plugin.', 'amp' );
+	const readerNoteWhenThemeIssuesPresent = __( 'Recommended if you want to enable AMP on your site despite the detected compatibility issue(s).', 'amp' );
+	const transitionalNoteWhenThemeIssuesPresent = __( 'Recommended so you can progressively enable AMP on your site while still making the non-AMP version available to visitors for functionality that is not AMP-compatible. Choose this mode if compatibility issues can be fixed or if your theme degrades gracefully when JavaScript is disabled.', 'amp' );
+	const notRecommendedDueToCompleteCompatibility = __( 'Not recommended as your site has no AMP compatibility issues detected.', 'amp' );
+	const notRecommendedUntilIncompatibilitiesFixed = __( 'Not recommended until you can fix the detected compatibility issue(s).', 'amp' );
+	const recommendedDueToNoThemeIncompatibilities = __( 'Recommended since there were no theme compatibility issues detected.', 'amp' );
+	const notRecommendedDueToIncompatibilities = __( 'Not recommended due to compatibility issue(s) which may break key site functionality, without developer assistance.', 'amp' );
+	/* eslint-enable @wordpress/no-unused-vars-before-return */
+
 	switch ( true ) {
+		/**
+		 * No site scan results or stale results.
+		 */
+		case ! hasFreshSiteScanResults:
+			return {
+				[ READER ]: {
+					recommendationLevel: NEUTRAL,
+					details: [
+						readerModeDescription,
+					],
+				},
+				[ TRANSITIONAL ]: {
+					recommendationLevel: NEUTRAL,
+					details: [
+						transitionalModeDescription,
+					],
+				},
+				[ STANDARD ]: {
+					recommendationLevel: NEUTRAL,
+					details: [
+						standardModeDescription,
+					],
+				},
+			};
+
 		/**
 		 * #1
 		 */
 		case hasThemeIssues && hasPluginIssues && userIsTechnical:
 			return {
 				[ READER ]: {
-					recommendationLevel: NEUTRAL,
+					recommendationLevel: RECOMMENDED,
 					details: [
-						__( 'Possible choice if you want to enable AMP on your site despite the compatibility issues found.', 'amp' ),
-						__( 'Your site will have <b>non-AMP and AMP versions</b>, each with its own theme.', 'amp' ),
+						readerModeDescription,
+						readerNoteWhenThemeIssuesPresent,
+						pluginIncompatibilityNote,
 					],
 				},
 				[ TRANSITIONAL ]: {
 					recommendationLevel: NEUTRAL,
 					details: [
-						__( 'Choose this mode temporarily if issues can be fixed or if your theme degrades gracefully when JavaScript is disabled.', 'amp' ),
-						__( 'Your site will have <b>non-AMP and AMP versions</b> with the same theme.', 'amp' ),
+						transitionalModeDescription,
+						transitionalNoteWhenThemeIssuesPresent,
+						pluginIncompatibilityNote,
 					],
 				},
 				[ STANDARD ]: {
-					recommendationLevel: RECOMMENDED,
+					recommendationLevel: NOT_RECOMMENDED,
 					details: [
-						__( '<b>Recommended</b>, if you can fix the issues detected with plugins with and your theme.', 'amp' ),
-						__( 'Your site will be completely AMP (except where you opt-out of AMP for specific areas), and will use a single theme.', 'amp' ),
+						standardModeDescription,
+						notRecommendedUntilIncompatibilitiesFixed,
+						pluginIncompatibilityNote,
 					],
 				},
 			};
@@ -112,20 +146,25 @@ export function getTemplateModeRecommendation( {
 				[ READER ]: {
 					recommendationLevel: RECOMMENDED,
 					details: [
-						__( '<b>Recommended</b> as an easy way to enable AMP on your site despite the issues detected during site scanning.', 'amp' ),
-						__( 'Your site will have non-AMP and AMP versions, each using its own theme.', 'amp' ),
+						readerModeDescription,
+						readerNoteWhenThemeIssuesPresent,
+						pluginIncompatibilityNote,
 					],
 				},
 				[ TRANSITIONAL ]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
-						__( '<b>Not recommended</b> as key functionality may be missing and development work might be required.', 'amp' ),
+						transitionalModeDescription,
+						notRecommendedDueToIncompatibilities,
+						pluginIncompatibilityNote,
 					],
 				},
 				[ STANDARD ]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
-						__( '<b>Not recommended</b> as key functionality may be missing and development work might be required.', 'amp' ),
+						standardModeDescription,
+						notRecommendedDueToIncompatibilities,
+						pluginIncompatibilityNote,
 					],
 				},
 			};
@@ -136,24 +175,24 @@ export function getTemplateModeRecommendation( {
 		case hasThemeIssues && ! hasPluginIssues && userIsTechnical:
 			return {
 				[ READER ]: {
-					recommendationLevel: NEUTRAL,
+					recommendationLevel: RECOMMENDED,
 					details: [
-						__( 'Possible choice if you want to enable AMP on your site despite the compatibility issues found.', 'amp' ),
-						__( 'Your site will have <b>non-AMP and AMP versions</b>, each with its own theme.', 'amp' ),
+						readerModeDescription,
+						readerNoteWhenThemeIssuesPresent,
 					],
 				},
 				[ TRANSITIONAL ]: {
-					recommendationLevel: NEUTRAL,
+					recommendationLevel: RECOMMENDED,
 					details: [
-						__( 'Choose this mode temporarily if issues can be fixed or if your theme degrades gracefully when JavaScript is disabled.', 'amp' ),
-						__( 'Your site will have <b>non-AMP and AMP versions</b> with the same theme.', 'amp' ),
+						transitionalModeDescription,
+						transitionalNoteWhenThemeIssuesPresent,
 					],
 				},
 				[ STANDARD ]: {
-					recommendationLevel: RECOMMENDED,
+					recommendationLevel: NEUTRAL,
 					details: [
-						__( '<b>Recommended</b>, if you can fix the issues detected with plugins with and your theme.', 'amp' ),
-						__( 'Your site will be completely AMP (except where you opt-out of AMP for specific areas), and will use a single theme.', 'amp' ),
+						standardModeDescription,
+						notRecommendedUntilIncompatibilitiesFixed,
 					],
 				},
 			};
@@ -166,21 +205,22 @@ export function getTemplateModeRecommendation( {
 				[ READER ]: {
 					recommendationLevel: RECOMMENDED,
 					details: [
-						__( '<b>Recommended to easily enable AMP</b> on your site despite the issues detected on your theme.', 'amp' ),
-						__( 'Your site will have non-AMP and AMP versions, each using its own theme.', 'amp' ),
+						readerModeDescription,
+						readerNoteWhenThemeIssuesPresent,
 					],
 				},
 				[ TRANSITIONAL ]: {
-					recommendationLevel: NEUTRAL,
+					recommendationLevel: NOT_RECOMMENDED,
 					details: [
-						__( 'Choose this mode if your theme degrades gracefully when JavaScript is disabled.', 'amp' ),
-						__( 'Your site will have <b>non-AMP and AMP versions</b> with the same theme.', 'amp' ),
+						transitionalModeDescription,
+						notRecommendedDueToIncompatibilities,
 					],
 				},
 				[ STANDARD ]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
-						__( '<b>Not recommended</b> as key functionality may be missing and development work might be required.', 'amp' ),
+						standardModeDescription,
+						notRecommendedDueToIncompatibilities,
 					],
 				},
 			};
@@ -191,24 +231,26 @@ export function getTemplateModeRecommendation( {
 		case ! hasThemeIssues && hasPluginIssues && userIsTechnical:
 			return {
 				[ READER ]: {
-					recommendationLevel: NEUTRAL,
+					recommendationLevel: NOT_RECOMMENDED,
 					details: [
-						__( 'Possible choice if you want to enable AMP on your site despite the compatibility issues found.', 'amp' ),
-						__( 'Your site will have <b>non-AMP and AMP versions</b>, each with its own theme.', 'amp' ),
+						readerModeDescription,
+						pluginIncompatibilityNote,
 					],
 				},
 				[ TRANSITIONAL ]: {
-					recommendationLevel: NEUTRAL,
+					recommendationLevel: RECOMMENDED,
 					details: [
-						__( 'Choose this mode temporarily if issues can be fixed or if your theme degrades gracefully when JavaScript is disabled.', 'amp' ),
-						__( 'Your site will have <b>non-AMP and AMP versions</b> with the same theme.', 'amp' ),
+						transitionalModeDescription,
+						recommendedDueToNoThemeIncompatibilities,
+						pluginIncompatibilityNote,
 					],
 				},
 				[ STANDARD ]: {
-					recommendationLevel: RECOMMENDED,
+					recommendationLevel: NEUTRAL,
 					details: [
-						__( '<b>Recommended</b>, if you can fix the issues detected with plugins with and your theme.', 'amp' ),
-						__( 'Your site will be completely AMP (except where you opt-out of AMP for specific areas), and will use a single theme.', 'amp' ),
+						standardModeDescription,
+						notRecommendedUntilIncompatibilitiesFixed,
+						pluginIncompatibilityNote,
 					],
 				},
 			};
@@ -221,20 +263,24 @@ export function getTemplateModeRecommendation( {
 				[ READER ]: {
 					recommendationLevel: RECOMMENDED,
 					details: [
-						__( '<b>Recommended</b> as an easy way to enable AMP on your site despite the issues detected during site scanning.', 'amp' ),
-						__( 'Your site will have non-AMP and AMP versions, each using its own theme.', 'amp' ),
+						readerModeDescription,
+						pluginIncompatibilityNote,
 					],
 				},
 				[ TRANSITIONAL ]: {
-					recommendationLevel: NOT_RECOMMENDED,
+					recommendationLevel: RECOMMENDED,
 					details: [
-						__( '<b>Not recommended</b> as key functionality may be missing and development work might be required.', 'amp' ),
+						transitionalModeDescription,
+						recommendedDueToNoThemeIncompatibilities,
+						pluginIncompatibilityNote,
 					],
 				},
 				[ STANDARD ]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
-						__( '<b>Not recommended</b> as key functionality may be missing and development work might be required.', 'amp' ),
+						standardModeDescription,
+						notRecommendedDueToIncompatibilities,
+						pluginIncompatibilityNote,
 					],
 				},
 			};
@@ -247,19 +293,22 @@ export function getTemplateModeRecommendation( {
 				[ READER ]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
-						__( '<b>Not recommended</b> as you have an AMP-compatible theme and no issues were detected with any of the plugins on your site.', 'amp' ),
+						readerModeDescription,
+						notRecommendedDueToCompleteCompatibility,
 					],
 				},
 				[ TRANSITIONAL ]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
-						__( '<b>Not recommended</b> as you have an AMP-compatible theme and no issues were detected with any of the plugins on your site.', 'amp' ),
+						transitionalModeDescription,
+						notRecommendedDueToCompleteCompatibility,
 					],
 				},
 				[ STANDARD ]: {
 					recommendationLevel: RECOMMENDED,
 					details: [
-						__( '<b>Recommended</b> as you have an AMP-compatible theme and no issues were detected with any of the plugins on your site.', 'amp' ),
+						standardModeDescription,
+						__( 'Recommended as you have an AMP-compatible theme and no issues were detected with any of the plugins on your site.', 'amp' ),
 					],
 				},
 			};
@@ -272,110 +321,22 @@ export function getTemplateModeRecommendation( {
 				[ READER ]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
-						__( '<b>Not recommended</b> as you have an AMP-compatible theme and no issues were detected with any of the plugins on your site.', 'amp' ),
+						readerModeDescription,
+						notRecommendedDueToCompleteCompatibility,
 					],
 				},
 				[ TRANSITIONAL ]: {
 					recommendationLevel: NEUTRAL,
 					details: [
-						__( '<b>Recommended choice if you can’t commit</b> to choosing plugins that are AMP compatible when extending your site. This mode will make it easy to keep AMP content even if non-AMP-compatible plugins are used later on.', 'amp' ),
+						transitionalModeDescription,
+						__( 'Recommended if you can’t commit to choosing plugins that are AMP compatible when extending your site. This mode will make it easy to keep AMP content even if non-AMP-compatible plugins are used later on.', 'amp' ),
 					],
 				},
 				[ STANDARD ]: {
 					recommendationLevel: NEUTRAL,
 					details: [
-						__( '<b>Recommended choice if you can commit</b> to always choosing plugins that are AMP compatible when extending your site.', 'amp' ),
-					],
-				},
-			};
-
-		/**
-		 * No site scan scenarios.
-		 */
-		case ! hasSiteScanResults && currentThemeIsAmongReaderThemes && ! userIsTechnical:
-			return {
-				[ READER ]: {
-					recommendationLevel: RECOMMENDED,
-					details: [
-						__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ TRANSITIONAL ]: {
-					recommendationLevel: RECOMMENDED,
-					details: [
-						__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ STANDARD ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
-					],
-				},
-			};
-
-		case ! hasSiteScanResults && currentThemeIsAmongReaderThemes && userIsTechnical:
-			return {
-				[ READER ]: {
-					recommendationLevel: RECOMMENDED,
-					details: [
-						__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ TRANSITIONAL ]: {
-					recommendationLevel: RECOMMENDED,
-					details: [
-						__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ STANDARD ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
-					],
-				},
-			};
-
-		case ! hasSiteScanResults && ! currentThemeIsAmongReaderThemes && ! userIsTechnical:
-			return {
-				[ READER ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ TRANSITIONAL ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ STANDARD ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
-					],
-				},
-			};
-
-		case ! hasSiteScanResults && ! currentThemeIsAmongReaderThemes && userIsTechnical:
-			return {
-				[ READER ]: {
-					recommendationLevel: RECOMMENDED,
-					details: [
-						__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ TRANSITIONAL ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ),
-					],
-				},
-				[ STANDARD ]: {
-					recommendationLevel: NEUTRAL,
-					details: [
-						__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
+						standardModeDescription,
+						__( 'Recommended if you can commit to always choosing plugins that are AMP compatible when extending your site.', 'amp' ),
 					],
 				},
 			};

@@ -14,12 +14,10 @@ describe( 'getTemplateModeRecommendation', () => {
 			} );
 		} );
 
-		[ true, false ].forEach( ( hasSiteScanResults ) => {
-			[ true, false ].forEach( ( currentThemeIsAmongReaderThemes ) => {
-				[ true, false ].forEach( ( userIsTechnical ) => {
-					const cb = () => getTemplateModeRecommendation( { userIsTechnical, hasSiteScanResults, currentThemeIsAmongReaderThemes } );
-					expect( cb ).not.toThrow();
-				} );
+		[ true, false ].forEach( ( hasFreshSiteScanResults ) => {
+			[ true, false ].forEach( ( userIsTechnical ) => {
+				const cb = () => getTemplateModeRecommendation( { userIsTechnical, hasFreshSiteScanResults } );
+				expect( cb ).not.toThrow();
 			} );
 		} );
 	} );
