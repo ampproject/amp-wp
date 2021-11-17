@@ -256,7 +256,7 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 	}
 
 	/**
-	 * Add plugin metadata for AMP compatibility in theme listing page.
+	 * Add theme metadata for AMP compatibility in theme listing page.
 	 *
 	 * @param string[] $theme_meta An array of the theme's metadata.
 	 * @param string   $stylesheet Directory name of the theme.
