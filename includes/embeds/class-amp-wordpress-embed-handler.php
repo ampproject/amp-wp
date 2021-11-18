@@ -112,8 +112,9 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		// Remove the secret which will be handled by amp-wordpress-embed.
 		$src = preg_replace( '/#\?secret=.+/', '', $src );
+		$blockquote->removeAttribute( 'data-secret' );
 
-		$attributes['data-url'] = $src;
+		$attributes[ Attribute::DATA_URL ] = $src;
 
 		$amp_wordpress_embed_node = AMP_DOM_Utils::create_node(
 			$dom,
@@ -122,9 +123,8 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 		);
 
 		$blockquote->setAttributeNode( $dom->createAttribute( Attribute::PLACEHOLDER ) );
-
 		$amp_wordpress_embed_node->appendChild( $blockquote );
-		$amp_wordpress_embed_node->appendChild( $this->create_overflow_button_element( $dom, __( 'Expand', 'amp' ) ) );
+		$amp_wordpress_embed_node->appendChild( $this->create_overflow_button_element( $dom ) );
 
 		$iframe->parentNode->replaceChild( $amp_wordpress_embed_node, $iframe );
 

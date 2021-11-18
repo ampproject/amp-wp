@@ -121,22 +121,22 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 			'wp_trunk_post_url'             => [
 				self::WP_59_ALPHA_POST_URL . PHP_EOL,
 				'
-					<amp-wordpress-embed height="200" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/#?secret=%1$s">
-						<blockquote class="wp-embedded-content" data-secret="%1$s" placeholder>
+					<amp-wordpress-embed height="200" layout="fixed-height" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/">
+						<blockquote class="wp-embedded-content" placeholder>
 							<p><a href="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/">Proposal for a Performance team</a></p>
 						</blockquote>
-						<button overflow type="button">Expand</button>
+						<button overflow type="button">See more</button>
 					</amp-wordpress-embed>
 				',
 			],
 			'wp_stable_post_url'            => [
 				self::WP_58_STABLE_POST_URL . PHP_EOL,
 				'
-					<amp-wordpress-embed data-url="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/embed/#?secret=%1$s" height="200" title="“Introducing v2.0 of the official AMP Plugin for WordPress” — AMP for WordPress">
-						<blockquote class="wp-embedded-content" data-secret="%1$s" placeholder>
+					<amp-wordpress-embed data-url="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/embed/" height="200" layout="fixed-height" title="“Introducing v2.0 of the official AMP Plugin for WordPress” — AMP for WordPress">
+						<blockquote class="wp-embedded-content" placeholder>
 							<p><a href="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/">Introducing v2.0 of the official AMP Plugin for WordPress</a></p>
 						</blockquote>
-						<button overflow type="button">Expand</button>
+						<button overflow type="button">See more</button>
 					</amp-wordpress-embed>
 				',
 			],
@@ -151,11 +151,11 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 				'
 					<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core">
 						<div class="wp-block-embed__wrapper">
-							<amp-wordpress-embed height="200" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/#?secret=%1$s">
-								<blockquote class="wp-embedded-content" data-secret="%1$s" placeholder>
+							<amp-wordpress-embed height="200" layout="fixed-height" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/">
+								<blockquote class="wp-embedded-content" placeholder>
 									<a href="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/">Proposal for a Performance team</a>
 								</blockquote>
-								<button overflow type="button">Expand</button>
+								<button overflow type="button">See more</button>
 							</amp-wordpress-embed>
 						</div>
 					</figure>
@@ -178,41 +178,41 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 				'
 					<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core">
 						<div class="wp-block-embed__wrapper">
-							<amp-wordpress-embed height="200" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/#?secret=%1$s">
-								<blockquote class="wp-embedded-content" data-secret="%1$s" placeholder="">
+							<amp-wordpress-embed height="200" layout="fixed-height" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/">
+								<blockquote class="wp-embedded-content" placeholder>
 									<a href="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/">Proposal for a Performance team</a>
 								</blockquote>
-								<button overflow type="button">Expand</button>
+								<button overflow type="button">See more</button>
 							</amp-wordpress-embed>
 						</div>
 					</figure>
 					<figure class="wp-block-embed is-type-wp-embed is-provider-amp-for-wordpress wp-block-embed-amp-for-wordpress">
 						<div class="wp-block-embed__wrapper">
-							<amp-wordpress-embed height="200" title="“Introducing v2.0 of the official AMP Plugin for WordPress” — AMP for WordPress" data-url="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/embed/#?secret=%2$s">
-								<blockquote class="wp-embedded-content" data-secret="%2$s" placeholder="">
+							<amp-wordpress-embed height="200" layout="fixed-height" title="“Introducing v2.0 of the official AMP Plugin for WordPress” — AMP for WordPress" data-url="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/embed/">
+								<blockquote class="wp-embedded-content" placeholder>
 									<a href="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/">Introducing v2.0 of the official AMP Plugin for WordPress</a>
 								</blockquote>
-								<button overflow type="button">Expand</button>
+								<button overflow type="button">See more</button>
 							</amp-wordpress-embed>
 						</div>
 					</figure>
-			
+
 				',
 			],
 			'wp_trunk_and_stable_post_urls' => [
 				self::WP_59_ALPHA_POST_URL . PHP_EOL . self::WP_58_STABLE_POST_URL . PHP_EOL,
 				'
-					<amp-wordpress-embed height="200" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/#?secret=%1$s">
-						<blockquote class="wp-embedded-content" data-secret="%1$s" placeholder>
+					<amp-wordpress-embed height="200" layout="fixed-height" title="“Proposal for a Performance team” — Make WordPress Core" data-url="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/embed/">
+						<blockquote class="wp-embedded-content" placeholder>
 							<p><a href="https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/">Proposal for a Performance team</a></p>
 						</blockquote>
-						<button overflow type="button">Expand</button>
+						<button overflow type="button">See more</button>
 					</amp-wordpress-embed>
-					<amp-wordpress-embed data-url="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/embed/#?secret=%2$s" height="200" title="“Introducing v2.0 of the official AMP Plugin for WordPress” — AMP for WordPress">
-						<blockquote class="wp-embedded-content" data-secret="%2$s" placeholder>
+					<amp-wordpress-embed data-url="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/embed/" height="200" layout="fixed-height" title="“Introducing v2.0 of the official AMP Plugin for WordPress” — AMP for WordPress">
+						<blockquote class="wp-embedded-content" placeholder>
 							<p><a href="https://amp-wp.org/introducing-v2-0-of-the-official-amp-plugin-for-wordpress/">Introducing v2.0 of the official AMP Plugin for WordPress</a></p>
 						</blockquote>
-						<button overflow type="button">Expand</button>
+						<button overflow type="button">See more</button>
 					</amp-wordpress-embed>
 				',
 			],
@@ -263,14 +263,6 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 		$embed->sanitize_raw_embeds( $dom );
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-
-		// Extract "data-secret" attr value.
-		preg_match_all( '/data-secret="(?P<secret>[^"]*)"/', $content, $matches );
-		if ( isset( $matches['secret'] ) ) {
-			foreach ( $matches['secret'] as $index => $secret ) {
-				$expected = str_replace( '%' . ( $index + 1 ) . '$s', $secret, $expected );
-			}
-		}
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
 		$this->assertSimilarMarkup( $expected, $content, 'Response bodies for HTTP requests: ' . var_export( $http_response_bodies, true ) );
