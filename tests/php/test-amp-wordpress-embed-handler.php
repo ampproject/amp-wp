@@ -222,9 +222,8 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	/**
 	 * Test conversion.
 	 *
-	 * @covers ::register_embed()
-	 * @covers ::unregister_embed()
-	 * @covers ::filter_embed_oembed_html()
+	 * @covers ::sanitize_raw_embeds()
+	 * @covers ::create_amp_wordpress_embed_and_replace_node()
 	 * @dataProvider get_conversion_data
 	 *
 	 * @param string $source   Source.
@@ -315,26 +314,20 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	}
 
 	/**
-	 * Test register_embed.
+	 * Test register_embed and unregister_embed.
 	 *
-	 * @covers AMP_WordPress_Embed_Handler::register_embed()
+	 * @covers ::register_embed()
+	 * @covers ::unregister_embed()
 	 */
-	public function test__register_embed() {
+	public function test_register_and_unregister_embed() {
 		$embed = new AMP_WordPress_Embed_Handler();
+
+		$this->assertEquals( 10, has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
+
 		$embed->register_embed();
-
 		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
-	}
 
-	/**
-	 * Test unregister_embed.
-	 *
-	 * @covers AMP_WordPress_Embed_Handler::unregister_embed()
-	 */
-	public function test__unregister_embed() {
-		$embed = new AMP_WordPress_Embed_Handler();
 		$embed->unregister_embed();
-
 		$this->assertEquals( 10, has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
 	}
 }
