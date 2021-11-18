@@ -306,7 +306,7 @@ export function SiteScanContextProvider( {
 		if (
 			status === STATUS_READY &&
 			savedOptions?.suppressed_plugins &&
-			Object.keys( savedOptions?.suppressed_plugins ).length > 0
+			Object.keys( savedOptions.suppressed_plugins ).length > 0
 		) {
 			dispatch( { type: ACTION_SCAN_INITIALIZE } );
 		}
