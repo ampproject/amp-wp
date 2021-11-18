@@ -8,6 +8,7 @@
 use AmpProject\Dom\Document;
 use AmpProject\Attribute;
 use AmpProject\Extension;
+use AmpProject\Dom\Element;
 
 /**
  * Class AMP_WordPress_Embed_Handler
@@ -40,7 +41,6 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		// This is not needed when post embeds are embedded via <amp-wordpress-embed>. See <https://github.com/ampproject/amp-wp/issues/809>.
 		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 	}
 
@@ -59,63 +59,30 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return void
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$pairs = $this->find_blockquote_iframe_pairs( $dom );
 
-		foreach ( $pairs as $pair ) {
-			if ( ! $pair['blockquote'] instanceof DOMElement || ! $pair['iframe'] instanceof DOMElement ) {
-				continue;
-			}
+		$embed_iframes = $dom->xpath->query( '//iframe[ @class = "wp-embedded-content" ]' );
+		foreach ( $embed_iframes as $embed_iframe ) {
+			/** @var Element $embed_iframe */
 
-			$this->create_amp_wordpress_embed_and_replace_node( $dom, $pair['blockquote'], $pair['iframe'] );
-		}
-	}
+			// If the post embed iframe got wrapped in a paragraph by `wpautop()`, unwrap it. This happens not with
+			// the Embed block but it does with the [embed] shortcode.
+			$this->unwrap_p_element( $embed_iframe );
 
-	/**
-	 * Find <blockquote> & <iframe> pairs of WordPress embeds
-	 *
-	 * @param Document $dom Document.
-	 * 
-	 * @return array
-	 */
-	private function find_blockquote_iframe_pairs( $dom ) {
-
-		$pairs = [];
-
-		// If iframes with ".wp-embedded-content" class name in the DOM are wrapped by `wpautop()`, unwrap them.
-		$iframe_nodes = $dom->xpath->query( '//p/iframe[ @class = "wp-embedded-content" ]' );
-		if ( $iframe_nodes->length ) {
-			foreach ( $iframe_nodes as $iframe_node ) {
-				$this->unwrap_p_element( $iframe_node );
+			$embed_blockquote = $dom->xpath->query( './preceding-sibling::blockquote[ @class = "wp-embedded-content" ]', $embed_iframe )->item( 0 );
+			if ( $embed_blockquote instanceof Element ) {
+				$this->create_amp_wordpress_embed_and_replace_node( $dom, $embed_blockquote, $embed_iframe );
 			}
 		}
-
-		$blockquote_nodes = $dom->xpath->query( '//blockquote[ @class = "wp-embedded-content" ]' );
-		if ( $blockquote_nodes->length ) {
-			foreach ( $blockquote_nodes as $index => $blockquote_node ) {
-				$blockquote_node->setAttribute( 'data-tmp-id', $index );
-				$closest_iframe = $dom->xpath->query( '//blockquote[ @data-tmp-id = "' . $index . '" ]/following-sibling::iframe[1]' );
-				$blockquote_node->removeAttribute( 'data-tmp-id' );
-
-				if ( 1 === $closest_iframe->length ) {
-					$pairs[] = [
-						'blockquote' => $blockquote_node,
-						'iframe'     => $closest_iframe->item( 0 ),
-					];
-				}
-			}
-		}
-
-		return $pairs;
 	}
 
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param Document   $dom        The HTML Document.
-	 * @param DOMElement $blockquote The blockquote DOMNode to be moved inside <amp-wordpress-embed>.
-	 * @param DOMElement $iframe     The iframe DOMNode to be replaced with <amp-wordpress-embed>.
+	 * @param Document $dom        The HTML Document.
+	 * @param Element  $blockquote The blockquote to be moved inside <amp-wordpress-embed>.
+	 * @param Element  $iframe     The iframe to be replaced with <amp-wordpress-embed>.
 	 */
-	private function create_amp_wordpress_embed_and_replace_node( Document $dom, DOMElement $blockquote, DOMElement $iframe ) {
+	private function create_amp_wordpress_embed_and_replace_node( Document $dom, Element $blockquote, Element $iframe ) {
 
 		$iframe_html = $dom->saveHTML( $iframe );
 		$attributes  = [
