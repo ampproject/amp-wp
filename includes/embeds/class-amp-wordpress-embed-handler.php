@@ -9,6 +9,7 @@ use AmpProject\Attribute;
 use AmpProject\Extension;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
+use AmpProject\Layout;
 use AmpProject\Tag;
 
 /**
@@ -34,7 +35,7 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Tag.
 	 *
-	 * @var string AMP amp-twitter tag
+	 * @var string AMP amp-wordpress-embed tag
 	 */
 	private $amp_tag = Extension::WORDPRESS_EMBED;
 
@@ -61,7 +62,7 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
 
-		$embed_iframes = $dom->xpath->query( '//iframe[ @class = "wp-embedded-content" ]', $dom->body );
+		$embed_iframes = $dom->xpath->query( '//iframe[ @src and @class = "wp-embedded-content" ]', $dom->body );
 		foreach ( $embed_iframes as $embed_iframe ) {
 			/** @var Element $embed_iframe */
 
@@ -99,28 +100,20 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function create_amp_wordpress_embed_and_replace_node( Document $dom, Element $blockquote, Element $iframe ) {
 
-		$iframe_html = $dom->saveHTML( $iframe );
-		$attributes  = [
+		$attributes = [
 			Attribute::HEIGHT => $this->args['height'],
-			Attribute::TITLE  => '',
+			Attribute::LAYOUT => Layout::FIXED_HEIGHT,
 		];
-
-		if ( preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+?)"#s', $iframe_html, $matches ) ) {
-			$attributes[ Attribute::TITLE ] = $matches['title'];
+		if ( $iframe->hasAttribute( Attribute::TITLE ) ) {
+			$attributes[ Attribute::TITLE ] = $iframe->getAttribute( Attribute::TITLE );
 		}
 
-		if ( preg_match( '#<iframe[^>]*?src="(?P<src>[^"]+?)"#s', $iframe_html, $matches ) ) {
-			$data_url     = $matches['src'];
-			$valid_secret = $blockquote->getAttribute( 'data-secret' );
-			if ( null !== $valid_secret && preg_match_all( '/secret=([^#&?]+)/', $matches['src'], $secrets ) ) {
-				foreach ( $secrets[1] as $secret ) {
-					if ( $secret !== $valid_secret ) {
-						$data_url = str_replace( "#?secret=$secret", '', $data_url );
-					}
-				}
-			}
-			$attributes['data-url'] = $data_url;
-		}
+		$src = $iframe->getAttribute( Attribute::SRC );
+
+		// Remove the secret which will be handled by amp-wordpress-embed.
+		$src = preg_replace( '/#\?secret=.+/', '', $src );
+
+		$attributes['data-url'] = $src;
 
 		$amp_wordpress_embed_node = AMP_DOM_Utils::create_node(
 			$dom,
@@ -128,7 +121,8 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 			$attributes
 		);
 
-		$blockquote->setAttribute( 'placeholder', null );
+		$blockquote->setAttributeNode( $dom->createAttribute( Attribute::PLACEHOLDER ) );
+
 		$amp_wordpress_embed_node->appendChild( $blockquote );
 		$amp_wordpress_embed_node->appendChild( $this->create_overflow_button_element( $dom, __( 'Expand', 'amp' ) ) );
 
