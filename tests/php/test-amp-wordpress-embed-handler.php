@@ -141,13 +141,16 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 				',
 			],
 			'wp_embed_block'                => [
-				'
-					<!-- wp:embed {"url":"' . self::WP_59_ALPHA_POST_URL . '","type":"wp-embed","providerNameSlug":"make-wordpress-core"} -->
-					<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core"><div class="wp-block-embed__wrapper">
-					' . self::WP_59_ALPHA_POST_URL . '
-					</div></figure>
-					<!-- /wp:embed -->
-				',
+				sprintf(
+					'
+						<!-- wp:embed {"url":"%1$s","type":"wp-embed","providerNameSlug":"make-wordpress-core"} -->
+						<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core"><div class="wp-block-embed__wrapper">
+						%1$s
+						</div></figure>
+						<!-- /wp:embed -->
+					',
+					self::WP_59_ALPHA_POST_URL
+				),
 				'
 					<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core">
 						<div class="wp-block-embed__wrapper">
@@ -162,19 +165,23 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 				',
 			],
 			'two_wp_embed_blocks'           => [
-				'
-					<!-- wp:embed {"url":"' . self::WP_59_ALPHA_POST_URL . '","type":"wp-embed","providerNameSlug":"make-wordpress-core"} -->
-					<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core"><div class="wp-block-embed__wrapper">
-					' . self::WP_59_ALPHA_POST_URL . '
-					</div></figure>
-					<!-- /wp:embed -->
+				sprintf(
+					'
+						<!-- wp:embed {"url":"%1$s","type":"wp-embed","providerNameSlug":"make-wordpress-core"} -->
+						<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core"><div class="wp-block-embed__wrapper">
+						%1$s
+						</div></figure>
+						<!-- /wp:embed -->
 
-					<!-- wp:embed {"url":"' . self::WP_58_STABLE_POST_URL . '","type":"wp-embed","providerNameSlug":"amp-for-wordpress"} -->
-					<figure class="wp-block-embed is-type-wp-embed is-provider-amp-for-wordpress wp-block-embed-amp-for-wordpress"><div class="wp-block-embed__wrapper">
-					' . self::WP_58_STABLE_POST_URL . '
-					</div></figure>
-					<!-- /wp:embed -->
-				',
+						<!-- wp:embed {"url":"%2$s","type":"wp-embed","providerNameSlug":"amp-for-wordpress"} -->
+						<figure class="wp-block-embed is-type-wp-embed is-provider-amp-for-wordpress wp-block-embed-amp-for-wordpress"><div class="wp-block-embed__wrapper">
+						%2$s
+						</div></figure>
+						<!-- /wp:embed -->
+					',
+					self::WP_59_ALPHA_POST_URL,
+					self::WP_58_STABLE_POST_URL
+				),
 				'
 					<figure class="wp-block-embed is-type-wp-embed is-provider-make-wordpress-core wp-block-embed-make-wordpress-core">
 						<div class="wp-block-embed__wrapper">
