@@ -198,8 +198,7 @@ final class PluginSuppression implements Service, Registerable {
 		$option                    = $options[ Option::SUPPRESSED_PLUGINS ];
 		$posted_suppressed_plugins = $new_options[ Option::SUPPRESSED_PLUGINS ];
 
-		$plugins          = $this->plugin_registry->get_plugins( true );
-		$errors_by_source = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
+		$plugins = $this->plugin_registry->get_plugins( true );
 		foreach ( $posted_suppressed_plugins as $plugin_slug => $suppressed ) {
 			if ( ! isset( $plugins[ $plugin_slug ] ) ) {
 				unset( $option[ $plugin_slug ] );
@@ -212,21 +211,6 @@ final class PluginSuppression implements Service, Registerable {
 				// Remove the plugin from being suppressed.
 				unset( $option[ $plugin_slug ] );
 			} elseif ( ! isset( $option[ $plugin_slug ] ) && $suppressed && array_key_exists( $plugin_slug, $plugins ) ) {
-
-				// Capture the URLs that the error occurred on so we can check them again when the plugin is re-activated.
-				$urls = [];
-				if ( isset( $errors_by_source['plugin'][ $plugin_slug ] ) ) {
-					foreach ( $errors_by_source['plugin'][ $plugin_slug ] as $validation_error ) {
-						$urls = array_merge(
-							$urls,
-							array_map(
-								[ AMP_Validated_URL_Post_Type::class, 'get_url_from_post' ],
-								$validation_error['post_ids']
-							)
-						);
-					}
-				}
-
 				$user = wp_get_current_user();
 
 				$option[ $plugin_slug ] = [
@@ -234,7 +218,6 @@ final class PluginSuppression implements Service, Registerable {
 					Option::SUPPRESSED_PLUGINS_LAST_VERSION => $plugins[ $plugin_slug ]['Version'],
 					Option::SUPPRESSED_PLUGINS_TIMESTAMP => time(),
 					Option::SUPPRESSED_PLUGINS_USERNAME  => $user instanceof WP_User ? $user->user_nicename : null,
-					Option::SUPPRESSED_PLUGINS_ERRORING_URLS => array_unique( array_filter( $urls ) ),
 				];
 			}
 		}

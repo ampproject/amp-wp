@@ -202,13 +202,6 @@ interface Option {
 	const SUPPRESSED_PLUGINS_USERNAME = 'username';
 
 	/**
-	 * Suppressed plugins, erroring URLs.
-	 *
-	 * @var string
-	 */
-	const SUPPRESSED_PLUGINS_ERRORING_URLS = 'erroring_urls';
-
-	/**
 	 * Version of the AMP plugin for which the options were last saved.
 	 *
 	 * This allows for recognizing updates and triggering update-specific logic.
