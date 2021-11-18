@@ -5,10 +5,11 @@
  * @package AMP
  */
 
-use AmpProject\Dom\Document;
 use AmpProject\Attribute;
 use AmpProject\Extension;
+use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
+use AmpProject\Tag;
 
 /**
  * Class AMP_WordPress_Embed_Handler
@@ -60,16 +61,30 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
 
-		$embed_iframes = $dom->xpath->query( '//iframe[ @class = "wp-embedded-content" ]' );
+		$embed_iframes = $dom->xpath->query( '//iframe[ @class = "wp-embedded-content" ]', $dom->body );
 		foreach ( $embed_iframes as $embed_iframe ) {
 			/** @var Element $embed_iframe */
 
 			// If the post embed iframe got wrapped in a paragraph by `wpautop()`, unwrap it. This happens not with
 			// the Embed block but it does with the [embed] shortcode.
-			$this->unwrap_p_element( $embed_iframe );
+			$is_wrapped_in_paragraph = (
+				$embed_iframe->parentNode instanceof Element
+				&&
+				Tag::P === $embed_iframe->parentNode->tagName
+			);
 
-			$embed_blockquote = $dom->xpath->query( './preceding-sibling::blockquote[ @class = "wp-embedded-content" ]', $embed_iframe )->item( 0 );
+			$embed_blockquote = $dom->xpath->query(
+				'./preceding-sibling::blockquote[ @class = "wp-embedded-content" ]',
+				$is_wrapped_in_paragraph ? $embed_iframe->parentNode : $embed_iframe
+			)->item( 0 );
 			if ( $embed_blockquote instanceof Element ) {
+
+				// Note that unwrap_p_element() is not being used here because it will do nothing if the paragraph
+				// happens to have an attribute on it, which is possible with the_content filters.
+				if ( $is_wrapped_in_paragraph && $embed_iframe->parentNode->parentNode instanceof Element ) {
+					$embed_iframe->parentNode->parentNode->replaceChild( $embed_iframe, $embed_iframe->parentNode );
+				}
+
 				$this->create_amp_wordpress_embed_and_replace_node( $dom, $embed_blockquote, $embed_iframe );
 			}
 		}
