@@ -62,7 +62,7 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
 
-		$embed_iframes = $dom->xpath->query( '//iframe[ @src and @class = "wp-embedded-content" ]', $dom->body );
+		$embed_iframes = $dom->xpath->query( '//iframe[ @src and contains( concat( " ", normalize-space( @class ), " " ), " wp-embedded-content " ) ]', $dom->body );
 		foreach ( $embed_iframes as $embed_iframe ) {
 			/** @var Element $embed_iframe */
 
@@ -75,7 +75,7 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 			);
 
 			$embed_blockquote = $dom->xpath->query(
-				'./preceding-sibling::blockquote[ @class = "wp-embedded-content" ]',
+				'./preceding-sibling::blockquote[ contains( concat( " ", normalize-space( @class ), " " ), " wp-embedded-content " ) ]',
 				$is_wrapped_in_paragraph ? $embed_iframe->parentNode : $embed_iframe
 			)->item( 0 );
 			if ( $embed_blockquote instanceof Element ) {
