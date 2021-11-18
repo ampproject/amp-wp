@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Support\Tests;
 
 use AmpProject\AmpWP\Support\SupportRESTController;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use WP_Error;
 use WP_REST_Request;
 
@@ -18,6 +19,8 @@ use WP_REST_Request;
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportRESTController
  */
 class SupportRESTControllerTest extends DependencyInjectedTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Instance of OptionsMenu
@@ -46,6 +49,28 @@ class SupportRESTControllerTest extends DependencyInjectedTestCase {
 		$this->assertEquals(
 			'rest_api_init',
 			SupportRESTController::get_registration_action()
+		);
+	}
+
+	/**
+	 * @covers ::register()
+	 */
+	public function test_register() {
+
+		do_action( 'rest_api_init' );
+
+		$rest_server = rest_get_server();
+
+		$namespaces = $this->get_private_property( $rest_server, 'namespaces' );
+
+		$this->assertContains(
+			'amp/v1',
+			$rest_server->get_namespaces()
+		);
+
+		$this->assertContains(
+			'/amp/v1/send-diagnostic',
+			array_keys( $namespaces['amp/v1'] )
 		);
 	}
 
