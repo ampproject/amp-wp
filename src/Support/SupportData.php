@@ -40,7 +40,12 @@ class SupportData {
 	 *
 	 * @since 2.2
 	 *
-	 * @var array
+	 * @var array [
+	 *     @type array $urls                   Optional
+	 *     @type array $term_ids               Optional
+	 *     @type array $post_ids               Optional
+	 *     @type array $amp_validated_post_ids Optional
+	 * ]
 	 */
 	public $args = [];
 
@@ -552,18 +557,33 @@ class SupportData {
 		$allowed_types  = [ 'plugin', 'theme' ];
 		$source['type'] = ( ! empty( $source['type'] ) ) ? strtolower( trim( $source['type'] ) ) : '';
 
+		if ( ! empty( $source['sources'] ) && is_array( $source['sources'] ) ) {
+			foreach ( $source['sources'] as $index => $inner_source ) {
+				$source['sources'][ $index ] = self::normalize_error_source( $inner_source );
+			}
+
+			$source['sources'] = array_values( array_filter( $source['sources'] ) );
+		}
+
+
 		/**
 		 * Do not include wp-core sources.
+		 * But allow if source have sub sources.
 		 */
-		if ( empty( $source['type'] ) || ! in_array( $source['type'], $allowed_types, true ) ) {
+		if (
+			( empty( $source['type'] ) || ! in_array( $source['type'], $allowed_types, true ) ) &&
+			empty( $source['sources'] )
+		) {
 			return [];
 		}
 
-		if ( 'plugin' === $source['type'] ) {
-			$source['version'] = isset( $plugin_versions[ $source['name'] ] ) ? $plugin_versions[ $source['name'] ] : 'n/a';
-		} elseif ( 'theme' === $source['type'] ) {
-			$theme             = wp_get_theme( $source['name'] );
-			$source['version'] = ! $theme->errors() ? $theme->get( 'Version' ) : 'n/a';
+		if ( ! empty( $source['type'] ) ) {
+			if ( 'plugin' === $source['type'] ) {
+				$source['version'] = isset( $plugin_versions[ $source['name'] ] ) ? $plugin_versions[ $source['name'] ] : 'n/a';
+			} elseif ( 'theme' === $source['type'] ) {
+				$theme             = wp_get_theme( $source['name'] );
+				$source['version'] = ! $theme->errors() ? $theme->get( 'Version' ) : 'n/a';
+			}
 		}
 
 		if ( ! empty( $source['text'] ) ) {
@@ -587,37 +607,43 @@ class SupportData {
 	 *
 	 * @since 2.2
 	 *
-	 * @return array List amp validated URLs.
+	 * @return array [
+	 *     List amp validated URLs.
+	 *     @type array    $errors        List of error for given instance of Validated post.
+	 *     @type array    $error_sources List of error sources for given instance of Validated post.
+	 *     @type string[] $urls          List of front-end URL.
+	 * ]
 	 */
 	public function get_amp_urls() {
-		$query_args = [
-			'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-			'posts_per_page' => 100,
-		];
 
-		if ( ! empty( $this->urls ) && is_array( $this->urls ) ) {
+		/**
+		 * List of invalid AMP URLs.
+		 */
+		$amp_invalid_urls = [];
 
-			$query_args['post_name__in'] = array_map(
-				static function ( $url ) {
-					// Validate and store validation data for the URL if data do not exist.
-					if ( ! post_exists( $url ) ) {
-						AMP_Validation_Manager::validate_url_and_store( $url );
-					}
+		/**
+		 * Error Information
+		 */
+		$errors = [];
 
-					return md5( $url );
-				},
-				$this->urls
-			);
+		/**
+		 * Error Source information.
+		 */
+		$error_sources = [];
 
-		} else {
+		if ( empty( $this->urls ) ) {
 
 			/**
 			 * If argument provided and we don't have URL data.
 			 * then return empty values.
 			 */
-			if ( ! empty( $this->args['post_ids'] ) ||
-				! empty( $this->args['term_ids'] ) ||
-				! empty( $this->args['urls'] ) ||
+			if (
+				! empty( $this->args['post_ids'] )
+				||
+				! empty( $this->args['term_ids'] )
+				||
+				! empty( $this->args['urls'] )
+				||
 				! empty( $this->args['amp_validated_post_ids'] )
 			) {
 				return [
@@ -626,11 +652,98 @@ class SupportData {
 					'urls'          => [],
 				];
 			}
+
+			// If no specific URL requested.
+			$query_args = [
+				'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'posts_per_page' => 100,
+				'post_status'    => 'publish',
+				'meta_key'       => AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY,
+				'meta_value'     => maybe_serialize( AMP_Validated_URL_Post_Type::get_validated_environment() ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			];
+
+			$query               = new WP_Query( $query_args );
+			$amp_validated_posts = $query->get_posts();
+
+			foreach ( $amp_validated_posts as $amp_validated_post ) {
+				$validation_data = $this->process_raw_post_errors( $amp_validated_post );
+
+				if (
+					! empty( $validation_data['errors'] )
+					&&
+					! empty( $validation_data['error_sources'] )
+					&&
+					! empty( $validation_data['url'] )
+				) {
+					$errors             = array_merge( $errors, $validation_data['errors'] );
+					$error_sources      = array_merge( $error_sources, $validation_data['error_sources'] );
+					$amp_invalid_urls[] = $validation_data['url'];
+				}
+			}
+		} else { // If we have specific URL requested.
+
+			foreach ( $this->urls as $url ) {
+
+				// Check request URL have validated data if not then validate URL.
+				$amp_validated_post_id = post_exists( $url, '', '', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
+
+				if ( empty( $amp_validated_post_id ) ) {
+					$validity              = AMP_Validation_Manager::validate_url_and_store( $url );
+					$amp_validated_post_id = $validity['post_id'];
+				}
+
+				// If validation data is exists for URL then check if those data stalled or not, If stalled then revalidate.
+				$is_stalled = ! empty( AMP_Validated_URL_Post_Type::get_post_staleness( $amp_validated_post_id ) );
+				if ( $is_stalled ) {
+					$validity = AMP_Validation_Manager::validate_url_and_store( $url );
+				}
+
+				$amp_validated_post = get_post( $amp_validated_post_id );
+				$validation_data    = $this->process_raw_post_errors( $amp_validated_post );
+
+				if (
+					! empty( $validation_data['errors'] )
+					&&
+					! empty( $validation_data['error_sources'] )
+					&&
+					! empty( $validation_data['url'] )
+				) {
+					$errors             = array_merge( $errors, $validation_data['errors'] );
+					$error_sources      = array_merge( $error_sources, $validation_data['error_sources'] );
+					$amp_invalid_urls[] = $validation_data['url'];
+				}
+			}
 		}
 
-		$query            = new WP_Query( $query_args );
-		$amp_error_posts  = $query->get_posts();
-		$amp_invalid_urls = [];
+		return [
+			'errors'        => $errors,
+			'error_sources' => $error_sources,
+			'urls'          => $amp_invalid_urls,
+		];
+
+	}
+
+	/**
+	 * Process AMP errors for single AMP validated post.
+	 *
+	 * @param WP_Post $amp_validated_post Instance of AMP Validated Post.
+	 *
+	 * @return array [
+	 *     @type array    $errors             List of error for given instance of Validated post.
+	 *     @type array    $error_sources      List of error sources for given instance of Validated post.
+	 *     @type string   $url                Front-end URL.
+	 * ]
+	 */
+	protected function process_raw_post_errors( WP_Post $amp_validated_post ) {
+
+		if ( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $amp_validated_post->post_type ) {
+			return [];
+		}
+
+		// Empty array for post staleness means post is NOT stale.
+		if ( ! empty( AMP_Validated_URL_Post_Type::get_post_staleness( $amp_validated_post->ID ) ) ) {
+			return [];
+		}
 
 		/**
 		 * Error Information
@@ -642,126 +755,106 @@ class SupportData {
 		 */
 		$error_source_list = [];
 
+		$validation_errors_raw = json_decode( $amp_validated_post->post_content, true );
+		$validation_errors     = [];
+
 		/**
-		 * Post loop.
+		 * Error loop.
 		 */
-		foreach ( $amp_error_posts as $amp_error_post ) {
+		foreach ( $validation_errors_raw as $validation_error ) {
 
-			if ( empty( $amp_error_post ) ) {
+			$error_data    = ( ! empty( $validation_error['data'] ) && is_array( $validation_error['data'] ) ) ? $validation_error['data'] : [];
+			$error_sources = ( ! empty( $error_data['sources'] ) && is_array( $error_data['sources'] ) ) ? $error_data['sources'] : [];
+
+			if ( empty( $error_data ) || empty( $error_sources ) ) {
 				continue;
 			}
 
-			// Empty array for post staleness means post is NOT stale.
-			if ( ! empty( AMP_Validated_URL_Post_Type::get_post_staleness( $amp_error_post->ID ) ) ) {
-				continue;
-			}
+			unset( $error_data['sources'] );
+			$error_data = static::normalize_error( $error_data );
 
-			$post_errors_raw = json_decode( $amp_error_post->post_content, true );
-			$post_errors     = [];
-
-			if ( empty( $post_errors_raw ) ) {
-				continue;
+			/**
+			 * Store error data in all error list.
+			 */
+			if ( ! empty( $error_data ) && is_array( $error_data ) ) {
+				$error_list[ $error_data['error_slug'] ] = $error_data;
 			}
 
 			/**
-			 * Error loop.
+			 * Source loop.
 			 */
-			foreach ( $post_errors_raw as $post_error ) {
-
-				$error_data    = ( ! empty( $post_error['data'] ) && is_array( $post_error['data'] ) ) ? $post_error['data'] : [];
-				$error_sources = ( ! empty( $error_data['sources'] ) && is_array( $error_data['sources'] ) ) ? $error_data['sources'] : [];
-
-				if ( empty( $error_data ) || empty( $error_sources ) ) {
-					continue;
-				}
-
-				unset( $error_data['sources'] );
-				$error_data = static::normalize_error( $error_data );
+			foreach ( $error_sources as $index => $source ) {
+				$source['error_slug']    = $error_data['error_slug'];
+				$error_sources[ $index ] = static::normalize_error_source( $source );
 
 				/**
-				 * Store error data in all error list.
+				 * Store error source in all error_source list.
 				 */
-				if ( ! empty( $error_data ) && is_array( $error_data ) ) {
-					$error_list[ $error_data['error_slug'] ] = $error_data;
-				}
-
-				/**
-				 * Source loop.
-				 */
-				foreach ( $error_sources as $index => $source ) {
-					$source['error_slug']    = $error_data['error_slug'];
-					$error_sources[ $index ] = static::normalize_error_source( $source );
-
-					/**
-					 * Store error source in all error_source list.
-					 */
-					if ( ! empty( $error_sources[ $index ] ) && is_array( $error_sources[ $index ] ) ) {
-						$error_source_list[ $error_sources[ $index ]['error_source_slug'] ] = $error_sources[ $index ];
-					}
-				}
-
-				$error_sources      = array_filter( $error_sources );
-				$error_source_slugs = wp_list_pluck( $error_sources, 'error_source_slug' );
-				$error_source_slugs = array_values( array_unique( $error_source_slugs ) );
-
-				if ( ! empty( $error_source_slugs ) && is_array( $error_source_slugs ) ) {
-					$post_errors[] = [
-						'error_slug' => $error_data['error_slug'],
-						'sources'    => $error_source_slugs,
-					];
+				if ( ! empty( $error_sources[ $index ] ) && is_array( $error_sources[ $index ] ) ) {
+					$error_source_list[ $error_sources[ $index ]['error_source_slug'] ] = $error_sources[ $index ];
 				}
 			}
 
-			// Object information.
-			$amp_queried_object = get_post_meta( $amp_error_post->ID, '_amp_queried_object', true );
-			$object_type        = ( ! empty( $amp_queried_object['type'] ) ) ? $amp_queried_object['type'] : '';
-			$object_subtype     = '';
+			$error_sources      = array_filter( $error_sources );
+			$error_source_slugs = wp_list_pluck( $error_sources, 'error_source_slug' );
+			$error_source_slugs = array_values( array_unique( $error_source_slugs ) );
 
-			if ( empty( $object_type ) ) {
-
-				if ( false !== strpos( $amp_error_post->post_title, '?s=' ) ) {
-					$object_type = 'search';
-				}
+			if ( ! empty( $error_source_slugs ) && is_array( $error_source_slugs ) ) {
+				$validation_errors[] = [
+					'error_slug' => $error_data['error_slug'],
+					'sources'    => $error_source_slugs,
+				];
 			}
-
-			switch ( $object_type ) {
-				case 'post':
-					$post_object    = get_post( $amp_queried_object['id'] );
-					$object_subtype = ( ! empty( $post_object ) && $post_object instanceof WP_Post ) ? $post_object->post_type : '';
-					break;
-				case 'term':
-					$term_object    = get_term( $amp_queried_object['id'] );
-					$object_subtype = ( ! empty( $term_object ) && $term_object instanceof WP_Term ) ? $term_object->taxonomy : '';
-					break;
-				case 'user':
-					break;
-			}
-
-			// Stylesheet info.
-			$stylesheet_info       = static::get_stylesheet_info( $amp_error_post->ID );
-			$css_budget_percentage = ( ! empty( $stylesheet_info['css_budget_percentage'] ) ) ? $stylesheet_info['css_budget_percentage'] : 0;
-			$css_budget_percentage = intval( $css_budget_percentage );
-
-			if ( empty( $post_errors ) && $css_budget_percentage < 100 ) {
-				continue;
-			}
-
-			$amp_invalid_urls[] = [
-				'url'                   => $amp_error_post->post_title,
-				'object_type'           => $object_type,
-				'object_subtype'        => $object_subtype,
-				'css_size_before'       => ( ! empty( $stylesheet_info['css_size_before'] ) ) ? $stylesheet_info['css_size_before'] : '',
-				'css_size_after'        => ( ! empty( $stylesheet_info['css_size_after'] ) ) ? $stylesheet_info['css_size_after'] : '',
-				'css_size_excluded'     => ( ! empty( $stylesheet_info['css_size_excluded'] ) ) ? $stylesheet_info['css_size_excluded'] : '',
-				'css_budget_percentage' => $css_budget_percentage,
-				'errors'                => $post_errors,
-			];
 		}
+
+		// Object information.
+		$amp_queried_object = get_post_meta( $amp_validated_post->ID, '_amp_queried_object', true );
+		$object_type        = ( ! empty( $amp_queried_object['type'] ) ) ? $amp_queried_object['type'] : '';
+		$object_subtype     = '';
+
+		if ( empty( $object_type ) ) {
+			if ( false !== strpos( $amp_validated_post->post_title, '?s=' ) ) {
+				$object_type = 'search';
+			}
+		}
+
+		switch ( $object_type ) {
+			case 'post':
+				$post_object    = get_post( $amp_queried_object['id'] );
+				$object_subtype = ( ! empty( $post_object ) && $post_object instanceof WP_Post ) ? $post_object->post_type : '';
+				break;
+			case 'term':
+				$term_object    = get_term( $amp_queried_object['id'] );
+				$object_subtype = ( ! empty( $term_object ) && $term_object instanceof WP_Term ) ? $term_object->taxonomy : '';
+				break;
+			case 'user':
+				break;
+		}
+
+		// Stylesheet info.
+		$stylesheet_info       = static::get_stylesheet_info( $amp_validated_post->ID );
+		$css_budget_percentage = ( ! empty( $stylesheet_info['css_budget_percentage'] ) ) ? $stylesheet_info['css_budget_percentage'] : 0;
+		$css_budget_percentage = intval( $css_budget_percentage );
+
+		if ( empty( $validation_errors ) && $css_budget_percentage < 100 ) {
+			return [];
+		}
+
+		$amp_invalid_url = [
+			'url'                   => $amp_validated_post->post_title,
+			'object_type'           => $object_type,
+			'object_subtype'        => $object_subtype,
+			'css_size_before'       => ( ! empty( $stylesheet_info['css_size_before'] ) ) ? $stylesheet_info['css_size_before'] : '',
+			'css_size_after'        => ( ! empty( $stylesheet_info['css_size_after'] ) ) ? $stylesheet_info['css_size_after'] : '',
+			'css_size_excluded'     => ( ! empty( $stylesheet_info['css_size_excluded'] ) ) ? $stylesheet_info['css_size_excluded'] : '',
+			'css_budget_percentage' => $css_budget_percentage,
+			'errors'                => $validation_errors,
+		];
 
 		return [
 			'errors'        => $error_list,
 			'error_sources' => $error_source_list,
-			'urls'          => $amp_invalid_urls,
+			'url'           => $amp_invalid_url,
 		];
 
 	}

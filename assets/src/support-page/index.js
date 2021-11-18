@@ -11,6 +11,7 @@ import {
 	restEndpoint,
 	args,
 	data,
+	ampValidatedPostCount,
 } from 'amp-support'; // From WP inline script.
 
 /**
@@ -44,6 +45,7 @@ domReady( () => {
 						restEndpoint={ restEndpoint }
 						args={ args }
 						data={ data }
+						ampValidatedPostCount={ ampValidatedPostCount }
 					/>
 				</ErrorBoundary>
 			</ErrorContextProvider>
