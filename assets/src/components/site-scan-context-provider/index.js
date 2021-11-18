@@ -303,14 +303,10 @@ export function SiteScanContextProvider( {
 	 * scanner is ready to start a scan.
 	 */
 	useEffect( () => {
-		if (
-			status === STATUS_READY &&
-			savedOptions?.suppressed_plugins &&
-			Object.keys( savedOptions.suppressed_plugins ).length > 0
-		) {
+		if ( status === STATUS_READY && Object.keys( savedOptions.suppressed_plugins || {} ).length > 0 ) {
 			dispatch( { type: ACTION_SCAN_INITIALIZE } );
 		}
-	}, [ savedOptions, status ] );
+	}, [ savedOptions?.suppressed_plugins, status ] );
 
 	/**
 	 * Delay concurrent validation requests.
