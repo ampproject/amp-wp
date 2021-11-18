@@ -66,6 +66,12 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 		foreach ( $embed_iframes as $embed_iframe ) {
 			/** @var Element $embed_iframe */
 
+			// Remove embed script included when user copies HTML Embed code, per get_post_embed_html().
+			$embed_script = $dom->xpath->query( './following-sibling::script[ contains( text(), "wp.receiveEmbedMessage" ) ]', $embed_iframe )->item( 0 );
+			if ( $embed_script instanceof Element ) {
+				$embed_script->parentNode->removeChild( $embed_script );
+			}
+
 			// If the post embed iframe got wrapped in a paragraph by `wpautop()`, unwrap it. This happens not with
 			// the Embed block but it does with the [embed] shortcode.
 			$is_wrapped_in_paragraph = (
@@ -73,6 +79,11 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 				&&
 				Tag::P === $embed_iframe->parentNode->tagName
 			);
+
+			// If the iframe is wrapped in a paragraph, but it's not the only node, then abort.
+			if ( $is_wrapped_in_paragraph && 1 !== $embed_iframe->parentNode->childNodes->length ) {
+				continue;
+			}
 
 			$embed_blockquote = $dom->xpath->query(
 				'./preceding-sibling::blockquote[ contains( concat( " ", normalize-space( @class ), " " ), " wp-embedded-content " ) ]',
