@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 
 /**
@@ -104,9 +105,15 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 				]
 			);
 
-			$amp_o2_player = AMP_DOM_Utils::create_node( $dom, self::$amp_tag, $component_attributes );
-
 			$parent_node = $node->parentNode;
+
+			// Remove the ID from the original node so that PHP DOM doesn't fail to set it on the replacement element.
+			if ( $parent_node->hasAttribute( Attribute::ID ) ) {
+				$component_attributes['id'] = $parent_node->getAttribute( Attribute::ID );
+				$parent_node->removeAttribute( Attribute::ID );
+			}
+
+			$amp_o2_player = AMP_DOM_Utils::create_node( $dom, self::$amp_tag, $component_attributes );
 
 			// replaces the wrapper that contains the script with amp-o2-player element.
 			$parent_node->parentNode->replaceChild( $amp_o2_player, $parent_node );

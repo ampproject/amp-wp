@@ -88,9 +88,14 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$amp_element = $this->dom->createElement( $amp_name );
-			foreach ( $bento_element->attributes as $attribute ) {
+			while ( $bento_element->attributes->length ) {
 				/** @var DOMAttr $attribute */
-				$amp_element->setAttribute( $attribute->nodeName, $attribute->nodeValue );
+				$attribute = $bento_element->attributes->item( 0 );
+
+				// Essential for unique attributes like ID, or else PHP DOM will keep it referencing the old element.
+				$bento_element->removeAttributeNode( $attribute );
+
+				$amp_element->setAttributeNode( $attribute );
 			}
 
 			while ( $bento_element->firstChild instanceof DOMNode ) {

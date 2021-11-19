@@ -160,6 +160,9 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$new_attributes = $this->set_layout( $new_attributes );
 
+			// Remove the ID from the original node so that PHP DOM doesn't fail to set it on the replacement element.
+			$node->removeAttribute( Attribute::ID );
+
 			/**
 			 * Original node.
 			 *

@@ -1583,6 +1583,48 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					'.stateful'   => false,
 				],
 			],
+			'bento_accordion_with_id' => [
+				'
+					<bento-accordion id="my-accordion">
+						<section>
+							<h2>Section 1</h2>
+							<div>Content in section 1.</div>
+						</section>
+					</bento-accordion>
+				',
+				[
+					'#my-accordion' => true,
+					'amp-accordion#my-accordion' => true,
+				],
+			],
+			'amp_replacement_elements_with_id' => [
+				'
+					<img id="my-img" src="https://example.com/foo.png" width="100" height="100">
+					<audio id="my-audio" src="https://example.com/foo.mp3" width="100" height="100"></audio>
+					<video id="my-video" src="https://example.com/foo.mp4" width="100" height="100"></video>
+					<iframe id="my-iframe" src="https://example.com/foo.mp4" width="100" height="100"></iframe>
+					<object id="my-object" data="https://example.com/foo.pd4" type="application/pdf"></object>
+					<div id="my-playbuzz" class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>
+					<div id="my-o2" class="vdb_player"><script type="text/javascript" src="//delivery.vidible.tv/jsonp/pid=59521379f3bdc970c5c9d75e/vid=5b11a50d0239e257abfdf16a/59521191e9399f3a7d7de88f.js?m.embeded=cms_video_plugin_chromeExtension"></script></div>
+				',
+				[
+					'#my-img' => true,
+					'amp-img#my-img' => true,
+					'#my-audio' => true,
+					'amp-audio#my-audio' => true,
+					'#my-video' => true,
+					'amp-video#my-video' => true,
+					'#my-iframe' => true,
+					'amp-iframe#my-iframe' => true,
+					'#my-object' => true,
+					'amp-google-document-embed#my-object' => true,
+					'#my-playbuzz' => true,
+					'amp-playbuzz#my-playbuzz' => true,
+					'#my-o2' => true,
+					'amp-o2-player#my-o2' => true,
+					// @todo Embeds?
+				],
+			],
 		];
 	}
 
@@ -1590,6 +1632,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Test attribute selector tree shaking.
 	 *
 	 * @dataProvider get_attribute_selector_data
+	 * @covers AMP_Base_Sanitizer::get_selector_conversion_mapping
 	 *
 	 * @param string $markup      Source HTML markup.
 	 * @param array  $selectors   Mapping of selectors to whether they are expected.
@@ -1605,24 +1648,30 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			)
 		);
 
-		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$style</style></head><body>$markup</body></html>";
-		$dom  = Document::fromHtml( $html, Options::DEFAULTS );
+		// The toggling of the 'add_noscript_fallback' arg is to catch a bizzare PHP DOM issue whereby if you replace
+		// an element in a Document, and that replaced element had an ID, the element will still be returned by
+		// getElementById even though it is no longer inside of the document. When add_noscript_fallback is false,
+		// then the original img (for example) will not be inside of the document (?).
+		foreach ( [ true, false ] as $add_noscript_fallback ) {
+			$html = "<html amp><head><meta charset=utf-8><style amp-custom>$style</style></head><body>$markup</body></html>";
+			$dom  = Document::fromHtml( $html, Options::DEFAULTS );
 
-		$sanitizer_classes = amp_get_content_sanitizers();
+			$sanitized = AMP_Content_Sanitizer::sanitize_document(
+				$dom,
+				amp_get_content_sanitizers(),
+				array_merge(
+					compact( 'add_noscript_fallback' ),
+					[ 'use_document_element' => true ]
+				)
+			);
 
-		$sanitized = AMP_Content_Sanitizer::sanitize_document(
-			$dom,
-			$sanitizer_classes,
-			[
-				'use_document_element' => true,
-			]
-		);
+			$stylesheets = array_values( $sanitized['stylesheets'] );
 
-		$stylesheets = array_values( $sanitized['stylesheets'] );
+			$actual_selectors   = array_values( array_filter( preg_split( '/{.+?}/s', $stylesheets[0] ) ) );
+			$expected_selectors = array_keys( array_filter( $selectors ) );
 
-		$actual_selectors   = array_values( array_filter( preg_split( '/{.+?}/s', $stylesheets[0] ) ) );
-		$expected_selectors = array_keys( array_filter( $selectors ) );
-		$this->assertEqualSets( $expected_selectors, $actual_selectors );
+			$this->assertEqualSets( $expected_selectors, $actual_selectors, sprintf( 'add_noscript_fallback is %s', wp_json_encode( $add_noscript_fallback ) ) );
+		}
 	}
 
 	/**
