@@ -155,7 +155,12 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	public function register() {
 
 		$screen = get_current_screen();
-		if ( $screen instanceof WP_Screen && 'plugin-install' === $screen->id ) {
+
+		if (
+			$screen instanceof WP_Screen
+			&&
+			in_array( $screen->id, [ 'plugin-install', 'plugin-install-network' ], true )
+		) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		}
 

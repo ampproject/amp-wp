@@ -148,6 +148,7 @@ class AmpThemesTest extends TestCase {
 		$this->instance->register();
 
 		$this->assertEquals( 10, has_filter( 'themes_api', [ $this->instance, 'filter_themes_api' ] ) );
+		$this->assertEquals( 10, has_filter( 'theme_row_meta', [ $this->instance, 'filter_theme_row_meta' ] ) );
 		$this->assertEquals( 10, has_action( 'current_screen', [ $this->instance, 'register_hooks' ] ) );
 
 		set_current_screen( 'front' );
@@ -196,5 +197,21 @@ class AmpThemesTest extends TestCase {
 		$this->assertArrayHasKey( 'pages', $response->info );
 		$this->assertArrayHasKey( 'results', $response->info );
 		$this->assertIsArray( $response->themes );
+	}
+
+	/**
+	 * @covers ::filter_theme_row_meta()
+	 */
+	public function test_filter_theme_row_meta() {
+
+		$this->assertEmpty( $this->instance->filter_theme_row_meta( [], 'non-amp' ) );
+
+		$this->assertEquals(
+			[
+				'AMP Compatible',
+			],
+			$this->instance->filter_theme_row_meta( [], 'astra' )
+		);
+
 	}
 }
