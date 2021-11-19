@@ -267,7 +267,7 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 
 		$amp_themes = wp_list_pluck( $this->get_themes(), 'slug' );
 
-		if ( ! empty( $stylesheet ) && in_array( $stylesheet, $amp_themes, true ) ) {
+		if ( in_array( $stylesheet, $amp_themes, true ) ) {
 			$theme_meta[] = esc_html__( 'AMP Compatible', 'amp' );
 		}
 
