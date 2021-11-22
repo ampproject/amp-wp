@@ -19,12 +19,12 @@ import { Selectable } from '../selectable';
 import { AMPNotice, NOTICE_SIZE_SMALL, NOTICE_TYPE_ERROR, NOTICE_TYPE_INFO } from '../amp-notice';
 import ClipboardButton from '../clipboard-button';
 import { Details } from './details';
-import { Notices } from './notices';
 import { Plugins } from './plugins';
 import { RawData } from './raw-data';
 import { SiteInfo } from './site-info';
 import { Themes } from './themes';
 import { ValidatedUrls } from './validated-urls';
+import { ValidationResultsNotice } from './validation-results-notice';
 
 /**
  * AMP Support component.
@@ -96,7 +96,7 @@ export function AMPSupport( props ) {
 					}
 				} />
 
-				{ <Notices data={ data } args={ args } ampValidatedPostCount={ ampValidatedPostCount } /> }
+				<ValidationResultsNotice data={ data } args={ args } ampValidatedPostCount={ ampValidatedPostCount } />
 
 				<div className="amp-support__body">
 

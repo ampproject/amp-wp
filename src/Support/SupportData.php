@@ -693,9 +693,9 @@ class SupportData {
 				}
 
 				// If validation data is exists for URL then check if those data stalled or not, If stalled then revalidate.
-				$is_stalled = ! empty( AMP_Validated_URL_Post_Type::get_post_staleness( $amp_validated_post_id ) );
-				if ( $is_stalled ) {
-					$validity = AMP_Validation_Manager::validate_url_and_store( $url );
+				$is_stale = ! empty( AMP_Validated_URL_Post_Type::get_post_staleness( $amp_validated_post_id ) );
+				if ( $is_stale ) {
+					AMP_Validation_Manager::validate_url_and_store( $url );
 				}
 
 				$amp_validated_post = get_post( $amp_validated_post_id );

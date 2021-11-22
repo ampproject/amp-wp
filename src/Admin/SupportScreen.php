@@ -214,10 +214,11 @@ class SupportScreen implements Conditional, Service, Registerable {
 		];
 		$query      = new WP_Query( $query_args );
 
-		return [
-			'all'   => intval( $amp_validated_post_count->publish ),
-			'valid' => intval( $query->found_posts ),
-		];
+		$all   = intval( $amp_validated_post_count->publish );
+		$fresh = intval( $query->found_posts );
+		$stale = $all - $fresh;
+
+		return compact( 'all', 'fresh', 'stale' );
 	}
 
 	/**
