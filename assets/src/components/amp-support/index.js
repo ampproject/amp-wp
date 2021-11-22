@@ -199,6 +199,7 @@ AMPSupport.propTypes = {
 	} ),
 	ampValidatedPostCount: PropTypes.shape( {
 		all: PropTypes.number.isRequired,
-		valid: PropTypes.number.isRequired,
+		fresh: PropTypes.number.isRequired,
+		stale: PropTypes.number.isRequired,
 	} ),
 };
