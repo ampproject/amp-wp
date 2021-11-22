@@ -136,11 +136,16 @@ class SupportData {
 
 		$this->urls = array_map(
 			static function ( $url ) {
-				return AMP_Validated_URL_Post_Type::normalize_url_for_storage( $url );
+
+				if ( filter_var( $url, FILTER_VALIDATE_URL ) ) {
+					return AMP_Validated_URL_Post_Type::normalize_url_for_storage( $url );
+				}
+
+				return false;
 			},
 			$this->urls
 		);
-		$this->urls = array_values( array_unique( $this->urls ) );
+		$this->urls = array_values( array_unique( array_filter( $this->urls ) ) );
 
 	}
 
@@ -688,7 +693,12 @@ class SupportData {
 				$amp_validated_post_id = post_exists( $url, '', '', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 
 				if ( empty( $amp_validated_post_id ) ) {
-					$validity              = AMP_Validation_Manager::validate_url_and_store( $url );
+					$validity = AMP_Validation_Manager::validate_url_and_store( $url );
+
+					if ( ! is_array( $validity ) || is_wp_error( $validity ) ) {
+						continue;
+					}
+
 					$amp_validated_post_id = $validity['post_id'];
 				}
 

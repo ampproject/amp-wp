@@ -164,12 +164,13 @@ class SupportScreen implements Conditional, Service, Registerable {
 			AMP__VERSION
 		);
 
-		$args    = [];
-		$amp_url = isset( $_GET['url'] ) ? esc_url_raw( $_GET['url'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$args = [];
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$amp_url = isset( $_GET['url'] ) ? $_GET['url'] : '';
 
-		if ( ! empty( $amp_url ) ) {
+		if ( ! empty( $amp_url ) && filter_var( $amp_url, FILTER_VALIDATE_URL ) ) {
 			$args = [
-				'urls' => [ $amp_url ],
+				'urls' => [ esc_url_raw( $amp_url ) ],
 			];
 		}
 
