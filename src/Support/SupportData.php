@@ -576,7 +576,8 @@ class SupportData {
 		 * But allow if source have sub sources.
 		 */
 		if (
-			( empty( $source['type'] ) || ! in_array( $source['type'], $allowed_types, true ) ) &&
+			( empty( $source['type'] ) || ! in_array( $source['type'], $allowed_types, true ) )
+			&&
 			empty( $source['sources'] )
 		) {
 			return [];
