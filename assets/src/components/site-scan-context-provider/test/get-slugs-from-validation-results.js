@@ -1,101 +1,167 @@
 /**
  * Internal dependencies
  */
-import { getSlugsFromValidationResults } from '../get-slugs-from-validation-results';
+import { getSourcesFromScannableUrls } from '../get-sources-from-scannable-urls';
 
-describe( 'getSlugsFromValidationResults', () => {
-	it( 'returns empty arrays if no validation results are passed', () => {
-		expect( getSlugsFromValidationResults() ).toMatchObject( { plugins: [], themes: [] } );
-		expect( getSlugsFromValidationResults( [ { foo: 'bar' } ] ) ).toMatchObject( { plugins: [], themes: [] } );
+describe( 'getSourcesFromScannableUrls', () => {
+	it( 'returns empty arrays if no scannable URLs are passed', () => {
+		expect( getSourcesFromScannableUrls() ).toMatchObject( { plugins: [], themes: [] } );
+		expect( getSourcesFromScannableUrls( [ { url: 'https://example.com/' } ] ) ).toMatchObject( { plugins: [], themes: [] } );
 	} );
 
 	it( 'returns plugin and theme slugs', () => {
-		const validationResult = [
+		const scannableUrls = [
 			{
-				sources: [
-					{ type: 'core', name: 'wp-includes' },
-					{ type: 'plugin', name: 'amp' },
+				url: 'https://example.com/',
+				validation_errors: [
+					{
+						sources: [
+							{ type: 'plugin', name: 'gutenberg' },
+						],
+					},
+					{
+						sources: [
+							{ type: 'core', name: 'wp-includes' },
+							{ type: 'plugin', name: 'amp' },
+						],
+					},
 				],
 			},
 			{
-				sources: [
-					{ type: 'plugin', name: 'gutenberg' },
+				url: 'https://example.com/foo/',
+				validation_errors: [
+					{
+						sources: [
+							{ type: 'core', name: 'wp-includes' },
+							{ type: 'plugin', name: 'jetpack' },
+						],
+					},
+					{
+						sources: [
+							{ type: 'plugin', name: 'jetpack' },
+						],
+					},
+					{
+						sources: [
+							{ type: 'plugin', name: 'foo-bar/foo-bar.php' },
+						],
+					},
 				],
 			},
 			{
-				sources: [
-					{ type: 'core', name: 'wp-includes' },
-					{ type: 'plugin', name: 'jetpack' },
+				url: 'https://example.com/bar/',
+				validation_errors: [
+					{
+						sources: [
+							{ type: 'theme', name: 'twentytwenty' },
+							{ type: 'core', name: 'wp-includes' },
+						],
+					},
+					{
+						sources: [
+							{ type: 'core', name: 'wp-includes' },
+						],
+					},
 				],
 			},
 			{
-				sources: [
-					{ type: 'plugin', name: 'jetpack' },
-				],
-			},
-			{
-				sources: [
-					{ type: 'plugin', name: 'foo-bar/foo-bar.php' },
-				],
-			},
-			{
-				sources: [
-					{ type: 'theme', name: 'twentytwenty' },
-					{ type: 'core', name: 'wp-includes' },
-				],
-			},
-			{
-				sources: [
-					{ type: 'core', name: 'wp-includes' },
-				],
-			},
-			{
-				sources: [
-					{ type: 'theme', name: 'twentytwenty' },
-					{ type: 'core', name: 'wp-includes' },
+				url: 'https://example.com/baz/',
+				validation_errors: [
+					{
+						sources: [
+							{ type: 'theme', name: 'twentytwenty' },
+							{ type: 'core', name: 'wp-includes' },
+						],
+					},
+					{
+						sources: [
+							{ type: 'plugin', name: 'jetpack' },
+						],
+					},
 				],
 			},
 		];
 
-		const slugs = getSlugsFromValidationResults( validationResult );
+		const slugs = getSourcesFromScannableUrls( scannableUrls );
 
-		expect( slugs.plugins ).toStrictEqual( [ 'gutenberg', 'jetpack', 'foo-bar' ] );
-		expect( slugs.themes ).toStrictEqual( [ 'twentytwenty' ] );
+		expect( slugs.plugins ).toStrictEqual( [
+			{
+				slug: 'gutenberg',
+				urls: [
+					'https://example.com/',
+				],
+			},
+			{
+				slug: 'jetpack',
+				urls: [
+					'https://example.com/foo/',
+					'https://example.com/baz/',
+				],
+			},
+			{
+				slug: 'foo-bar',
+				urls: [
+					'https://example.com/foo/',
+				],
+			},
+		] );
+		expect( slugs.themes ).toStrictEqual( [
+			{
+				slug: 'twentytwenty',
+				urls: [
+					'https://example.com/bar/',
+					'https://example.com/baz/',
+				],
+			},
+		] );
 	} );
 
 	it( 'returns Gutenberg if it is the only plugin for a single validation error', () => {
-		const validationResult = [
+		const scannableUrls = [
 			{
-				sources: [
-					{ type: 'plugin', name: 'gutenberg' },
-				],
-			},
-			{
-				sources: [
-					{ type: 'theme', name: 'twentytwenty' },
-					{ type: 'core', name: 'wp-includes' },
+				url: 'https://example.com/',
+				validation_errors: [
+					{
+						sources: [
+							{ type: 'plugin', name: 'gutenberg' },
+						],
+					},
 				],
 			},
 		];
 
-		const slugs = getSlugsFromValidationResults( validationResult );
+		const slugs = getSourcesFromScannableUrls( scannableUrls );
 
-		expect( slugs.plugins ).toStrictEqual( [ 'gutenberg' ] );
-		expect( slugs.themes ).toStrictEqual( [ 'twentytwenty' ] );
+		expect( slugs.plugins ).toStrictEqual( [
+			{
+				slug: 'gutenberg',
+				urls: [ 'https://example.com/' ],
+			},
+		] );
 	} );
 
 	it( 'does not return Gutenberg if there are other plugins for the same validation error', () => {
-		const validationResult = [
+		const scannableUrls = [
 			{
-				sources: [
-					{ type: 'plugin', name: 'gutenberg' },
-					{ type: 'plugin', name: 'jetpack' },
+				url: 'https://example.com/',
+				validation_errors: [
+					{
+						sources: [
+							{ type: 'plugin', name: 'gutenberg' },
+							{ type: 'plugin', name: 'jetpack' },
+						],
+					},
 				],
 			},
 		];
 
-		const slugs = getSlugsFromValidationResults( validationResult );
+		const slugs = getSourcesFromScannableUrls( scannableUrls );
 
-		expect( slugs.plugins ).toStrictEqual( [ 'jetpack' ] );
+		expect( slugs.plugins ).toStrictEqual( [
+			{
+				slug: 'jetpack',
+				urls: [ 'https://example.com/' ],
+			},
+		] );
 	} );
 } );

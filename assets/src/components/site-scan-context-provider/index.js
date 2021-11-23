@@ -25,7 +25,7 @@ import PropTypes from 'prop-types';
 import { STANDARD } from '../../common/constants';
 import { useAsyncError } from '../../utils/use-async-error';
 import { Options } from '../options-context-provider';
-import { getSlugsFromValidationResults } from './get-slugs-from-validation-results';
+import { getSourcesFromScannableUrls } from './get-sources-from-scannable-urls';
 
 export const SiteScan = createContext();
 
@@ -245,8 +245,7 @@ export function SiteScanContextProvider( {
 			};
 		}
 
-		const validationErrors = scannableUrls.reduce( ( accumulatedValidationErrors, scannableUrl ) => [ ...accumulatedValidationErrors, ...scannableUrl?.validation_errors ?? [] ], [] );
-		const slugs = getSlugsFromValidationResults( validationErrors );
+		const slugs = getSourcesFromScannableUrls( scannableUrls );
 
 		return {
 			hasSiteScanResults: scannableUrls.some( ( scannableUrl ) => Boolean( scannableUrl?.validation_errors ) ),

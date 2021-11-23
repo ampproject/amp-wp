@@ -310,7 +310,7 @@ function SiteScanSummary() {
 			) }
 			{ themesWithAmpIncompatibility.length > 0 && (
 				<ThemesWithAmpIncompatibility
-					slugs={ themesWithAmpIncompatibility }
+					slugs={ themesWithAmpIncompatibility.map( ( { slug } ) => slug ) }
 					showHelpText={ true }
 					callToAction={ userIsTechnical && ! stale ? (
 						<a href={ VALIDATED_URLS_LINK }>
@@ -321,7 +321,7 @@ function SiteScanSummary() {
 			) }
 			{ pluginsWithAmpIncompatibility.length > 0 && (
 				<PluginsWithAmpIncompatibility
-					slugs={ pluginsWithAmpIncompatibility }
+					slugs={ pluginsWithAmpIncompatibility.map( ( { slug } ) => slug ) }
 					showHelpText={ true }
 					callToAction={ userIsTechnical && ! stale ? (
 						<a href={ VALIDATED_URLS_LINK }>
