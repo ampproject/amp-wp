@@ -12,6 +12,7 @@ use AmpProject\AmpWP\EntityRegistrantDetection\EntityRegistrantDetectionManager;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use WP_Block_Type_Registry;
 
 /**
  * @coversDefaultClass \AmpProject\AmpWP\EntityRegistrantDetection\EntityRegistrantDetectionManager
@@ -209,7 +210,10 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
 		}
 
-		$this->instance->add_source( 'block', [ 'invalid_block', 'core/paragraph' ], $this->source );
+		$block_types = WP_Block_Type_Registry::get_instance()->get_all_registered();
+		$block_type  = array_shift( $block_types );
+
+		$this->instance->add_source( 'block', [ 'invalid_block', $block_type->name ], $this->source );
 
 		$blocks_source = $this->get_private_property( $this->instance, 'blocks_source' );
 
@@ -217,14 +221,14 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 
 		$this->assertArraySubset(
 			[
-				'name'   => 'core/paragraph',
-				'title'  => 'core/paragraph',
+				'name'   => $block_type->name,
+				'title'  => $block_type->title,
 				'source' => $this->source,
 			],
-			$blocks_source['core/paragraph']
+			$blocks_source[ $block_type->name ]
 		);
 
-		$this->assertArrayHasKey( 'attributes', $blocks_source['core/paragraph'] );
+		$this->assertArrayHasKey( 'attributes', $blocks_source[ $block_type->name ] );
 	}
 
 	/**
