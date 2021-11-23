@@ -245,7 +245,9 @@ export function SiteScanContextProvider( {
 			};
 		}
 
-		const slugs = getSourcesFromScannableUrls( scannableUrls );
+		const slugs = getSourcesFromScannableUrls( scannableUrls, {
+			useAmpUrls: urlType === 'amp_url',
+		} );
 
 		return {
 			hasSiteScanResults: scannableUrls.some( ( scannableUrl ) => Boolean( scannableUrl?.validation_errors ) ),
@@ -253,7 +255,7 @@ export function SiteScanContextProvider( {
 			stale: scannableUrls.some( ( scannableUrl ) => scannableUrl?.stale === true ),
 			themesWithAmpIncompatibility: slugs.themes,
 		};
-	}, [ scannableUrls, status ] );
+	}, [ scannableUrls, status, urlType ] );
 
 	/**
 	 * Preflight check.

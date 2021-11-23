@@ -164,4 +164,34 @@ describe( 'getSourcesFromScannableUrls', () => {
 			},
 		] );
 	} );
+
+	it( 'returns a correct type of URL', () => {
+		const scannableUrls = [
+			{
+				url: 'https://example.com/',
+				amp_url: 'https://example.com/?amp=1',
+				validation_errors: [
+					{
+						sources: [
+							{ type: 'plugin', name: 'foo' },
+						],
+					},
+				],
+			},
+		];
+
+		expect( getSourcesFromScannableUrls( scannableUrls, { useAmpUrls: false } ).plugins ).toStrictEqual( [
+			{
+				slug: 'foo',
+				urls: [ 'https://example.com/' ],
+			},
+		] );
+
+		expect( getSourcesFromScannableUrls( scannableUrls, { useAmpUrls: true } ).plugins ).toStrictEqual( [
+			{
+				slug: 'foo',
+				urls: [ 'https://example.com/?amp=1' ],
+			},
+		] );
+	} );
 } );
