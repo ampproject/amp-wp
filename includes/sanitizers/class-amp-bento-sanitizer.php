@@ -5,9 +5,11 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
 use AmpProject\Dom\Element;
-use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\CssLength;
+use AmpProject\Layout;
 
 /**
  * Convert all bento-prefixed components into amp-prefixed components, or else mark them as PX-verified if they have no
@@ -117,6 +119,8 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 				$amp_element->appendChild( $bento_element->removeChild( $bento_element->firstChild ) );
 			}
 
+			$this->adapt_layout_styles( $amp_element );
+
 			$bento_element->parentNode->replaceChild( $amp_element, $bento_element );
 
 			$bento_elements_converted[ $bento_name ] = true;
@@ -195,6 +199,66 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 			$this->tag_and_attribute_sanitizer->update_args(
 				[ 'prefer_bento' => true ]
 			);
+		}
+	}
+
+	/**
+	 * Adapt inline styles from Bento element to AMP layout attributes.
+	 *
+	 * This will try its best to convert `width`, `height`, and `aspect-ratio` inline styles over to their corresponding
+	 * AMP layout attributes. In order for a Bento component to be AMP-compatible, it needs to utilize inline styles
+	 * for its dimensions rather than rely on a stylesheet rule.
+	 *
+	 * @param Element $amp_element AMP element (converted from Bento).
+	 */
+	private function adapt_layout_styles( Element $amp_element ) {
+		$style_string = $amp_element->getAttribute( Attribute::STYLE );
+		if ( ! $style_string ) {
+			return;
+		}
+
+		$styles = $this->parse_style_string( $style_string );
+
+		$layout_attributes = [];
+
+		if ( isset( $styles['height'] ) ) {
+			$height = new CssLength( $styles['height'] );
+			$height->validate( false, false );
+			if ( $height->isValid() ) {
+				$layout_attributes[ Attribute::HEIGHT ] = $height->getNumeral() . ( $height->getUnit() !== 'px' ? $height->getUnit() : '' );
+				unset( $styles['height'] );
+			}
+		}
+
+		if ( ! isset( $styles['width'] ) || '100%' === $styles['width'] ) {
+			$layout_attributes[ Attribute::WIDTH ]  = 'auto';
+			$layout_attributes[ Attribute::LAYOUT ] = Layout::FIXED_HEIGHT;
+			unset( $styles['width'] );
+		} else {
+			$height = new CssLength( $styles['width'] );
+			$height->validate( false, false );
+			if ( $height->isValid() ) {
+				$layout_attributes[ Attribute::WIDTH ] = $height->getNumeral() . ( $height->getUnit() !== 'px' ? $height->getUnit() : '' );
+				unset( $styles['width'] );
+			}
+		}
+
+		if (
+			isset( $styles['aspect-ratio'] )
+			&&
+			preg_match( '#(?P<width>\d+(?:.\d+)?)(?:\s*/\s*(?P<height>\d+(?:.\d+)?))?#', $styles['aspect-ratio'], $matches )
+		) {
+			$layout_attributes[ Attribute::HEIGHT ] = isset( $matches['height'] ) ? $matches['height'] : '1';
+			$layout_attributes[ Attribute::WIDTH ]  = $matches['width'];
+			$layout_attributes[ Attribute::LAYOUT ] = Layout::RESPONSIVE;
+			unset( $styles['aspect-ratio'] );
+		}
+
+		if ( $layout_attributes ) {
+			$amp_element->setAttribute( Attribute::STYLE, $this->reassemble_style_string( $styles ) );
+			foreach ( $layout_attributes as $attribute_name => $attribute_value ) {
+				$amp_element->setAttribute( $attribute_name, $attribute_value );
+			}
 		}
 	}
 }

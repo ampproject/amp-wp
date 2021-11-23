@@ -181,7 +181,13 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 							<script nomodule="" src="https://cdn.ampproject.org/bento.js"></script>
 							<script type="module" async src="https://cdn.ampproject.org/v0/bento-timeago-1.0.mjs"></script>
 							<script nomodule async src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"></script>
+							<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-instagram-1.0.css">
+							<script type="module" async src="https://cdn.ampproject.org/v0/bento-instagram-1.0.mjs"></script>
+							<script nomodule async src="https://cdn.ampproject.org/v0/bento-instagram-1.0.js"></script>
 							<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-timeago-1.0.css">
+							<script type="module" src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.mjs" crossorigin="anonymous"></script>
+							<script nomodule src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js" crossorigin="anonymous"></script>
+							<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.css" crossorigin="anonymous">
 							<script type="module" async="" src="https://cdn.ampproject.org/v0/bento-marquee-1.0.mjs"></script>
 							<script nomodule="" async="" src="https://cdn.ampproject.org/v0/bento-marquee-1.0.js"></script>
 							<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-marquee-1.0.css">
@@ -211,7 +217,13 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 							</style>
 						</head>
 						<body>
-						    <bento-timeago id="timeago" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2017 00.37</bento-timeago>
+						    <bento-timeago id="timeago" style="height: 30px; border: solid 1px green;" datetime="2017-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2017 00.37</bento-timeago>
+							<bento-instagram id="my-instagram" data-shortcode="CKXYAzuj7TE" data-captioned style="height: 800px; width: 400px"></bento-instagram>
+							<bento-instagram id="my-instagram" data-shortcode="CKXYAzuj7TE" data-captioned style="height: 80em; width: 40em"></bento-instagram>
+							<bento-soundcloud data-trackid="89299804" data-visual="true" style="aspect-ratio: 16 / 9"></bento-soundcloud>
+							<bento-soundcloud data-trackid="89299804" data-visual="true" style="aspect-ratio: 9.00 / 16.00"></bento-soundcloud>
+							<bento-soundcloud data-trackid="89299804" data-visual="true" style="aspect-ratio: 0.5"></bento-soundcloud>
+							<bento-wordpress-embed id="my-embed" style="width:100%; height: 400px" data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></bento-wordpress-embed>
 							<bento-marquee id="marquee">
 								<h2>News flash!!!</h2>
 							</bento-marquee>
@@ -227,12 +239,19 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 							<script type="module" async="" src="https://cdn.ampproject.org/v0/bento-marquee-1.0.mjs" data-px-verified-tag></script>
 							<script nomodule="" async="" src="https://cdn.ampproject.org/v0/bento-marquee-1.0.js" data-px-verified-tag></script>
 							<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-marquee-1.0.css" data-px-verified-tag data-px-verified-attrs="href">
-							<style amp-custom>#timeago{color:red}amp-timeago#timeago{color:blue}#marquee{display:block;outline:solid 2px red}bento-marquee#marquee{outline:solid 2px green}bento-marquee h2{text-transform:uppercase}
+							<style amp-custom>#timeago{color:red}amp-timeago#timeago{color:blue}#marquee{display:block;outline:solid 2px red}bento-marquee#marquee{outline:solid 2px green}bento-marquee h2{text-transform:uppercase}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c437205{border:solid 1px green}
 
 							/*# sourceURL="amp-custom.css" */</style>
 						</head>
 						<body>
-							<amp-timeago id="timeago" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2017 00.37</amp-timeago>
+							<amp-timeago class="amp-wp-c437205" data-amp-original-style="border:solid 1px green" id="timeago" height="30" width="auto" layout="fixed-height" datetime="2017-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2017 00.37</amp-timeago>
+							<amp-instagram id="my-instagram" data-shortcode="CKXYAzuj7TE" data-captioned width="400" height="800"></amp-instagram>
+							<amp-instagram id="my-instagram" data-shortcode="CKXYAzuj7TE" data-captioned width="40em" height="80em"></amp-instagram>
+							<amp-soundcloud data-trackid="89299804" data-visual="true" height="9" width="16" layout="responsive"></amp-soundcloud>
+							<amp-soundcloud data-trackid="89299804" data-visual="true" height="16.00" width="9.00" layout="responsive"></amp-soundcloud>
+							<amp-soundcloud data-trackid="89299804" data-visual="true" height="1" width="0.5" layout="responsive"></amp-soundcloud>
+							<amp-wordpress-embed id="my-embed" height="400" width="auto" layout="fixed-height" data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></amp-wordpress-embed>
+
 							<bento-marquee data-px-verified-tag id="marquee">
 								<h2>News flash!!!</h2>
 							</bento-marquee>
@@ -312,6 +331,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 	 * @covers ::sanitize()
 	 * @covers ::has_light_shadow_dom()
 	 * @covers ::get_selector_conversion_mapping()
+	 * @covers ::adapt_layout_styles()
 	 */
 	public function test_sanitize( $source, $expected = null, $sanitizer_args = [], $expected_error_codes = [], $expect_prefer_bento = false ) {
 		if ( null === $expected ) {
