@@ -224,7 +224,7 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 			$blocks_source['core/paragraph']
 		);
 
-		$this->assertArrayHasKey( 'attributes', $blocks_source['core/button'] );
+		$this->assertArrayHasKey( 'attributes', $blocks_source['core/paragraph'] );
 	}
 
 	/**
