@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`the AdminNotice component matches the snapshot 1`] = `
+exports[`AdminNotice matches the snapshot 1`] = `
 <div
   className="admin-notice admin-notice--info"
 />

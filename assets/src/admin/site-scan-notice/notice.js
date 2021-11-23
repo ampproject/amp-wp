@@ -59,6 +59,7 @@ export function SiteScanNotice() {
 	}, [ fetchScannableUrls, isInitializing, isReady, startSiteScan ] );
 
 	const commonNoticeProps = {
+		className: 'amp-site-scan-notice',
 		isDismissible: true,
 		onDismiss: cancelSiteScan,
 	};

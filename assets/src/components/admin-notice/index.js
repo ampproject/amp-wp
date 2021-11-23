@@ -26,12 +26,14 @@ export const ADMIN_NOTICE_TYPE_ERROR = 'error';
  *
  * @param {Object}   props               Component props.
  * @param {Element}  props.children      Component children.
+ * @param {string}   props.className     Additional class names.
  * @param {boolean}  props.isDismissible Indicates whether the notice should be dismissible.
  * @param {Function} props.onDismiss     Function to be called whenever the notice gets dismissed.
  * @param {string}   props.type          Specifies type of the notice.
  */
 export function AdminNotice( {
 	children,
+	className,
 	isDismissible = false,
 	onDismiss,
 	type = ADMIN_NOTICE_TYPE_INFO,
@@ -52,7 +54,7 @@ export function AdminNotice( {
 
 	return (
 		<div
-			className={ classnames( 'admin-notice', {
+			className={ classnames( 'admin-notice', className, {
 				'admin-notice--dismissible': isDismissible,
 				'admin-notice--info': type === ADMIN_NOTICE_TYPE_INFO,
 				'admin-notice--success': type === ADMIN_NOTICE_TYPE_SUCCESS,
@@ -78,6 +80,7 @@ export function AdminNotice( {
 
 AdminNotice.propTypes = {
 	children: PropTypes.any,
+	className: PropTypes.string,
 	isDismissible: PropTypes.bool,
 	onDismiss: PropTypes.func,
 	type: PropTypes.oneOf( [
