@@ -23,6 +23,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { ErrorContextProvider } from '../../components/error-context-provider';
 import { OptionsContextProvider } from '../../components/options-context-provider';
+import { PluginsContextProvider } from '../../components/plugins-context-provider';
 import { SiteScanContextProvider } from '../../components/site-scan-context-provider';
 import { UserContextProvider } from '../../components/user-context-provider';
 import { ErrorScreen } from '../../components/error-screen';
@@ -55,12 +56,14 @@ function Providers( { children } ) {
 						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
 						usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 					>
-						<SiteScanContextProvider
-							scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
-							validateNonce={ VALIDATE_NONCE }
-						>
-							{ children }
-						</SiteScanContextProvider>
+						<PluginsContextProvider hasErrorBoundary={ true }>
+							<SiteScanContextProvider
+								scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
+								validateNonce={ VALIDATE_NONCE }
+							>
+								{ children }
+							</SiteScanContextProvider>
+						</PluginsContextProvider>
 					</UserContextProvider>
 				</OptionsContextProvider>
 			</ErrorBoundary>

@@ -161,6 +161,7 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 				[
 					'/amp/v1/options',
 					'/amp/v1/scannable-urls?_fields%5B0%5D=url&_fields%5B1%5D=amp_url&_fields%5B2%5D=type&_fields%5B3%5D=label',
+					'/wp/v2/plugins',
 					'/wp/v2/users/me',
 				],
 				$this->get_private_property( $rest_preloader, 'paths' )

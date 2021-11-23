@@ -26,6 +26,7 @@ import {
 } from '../../components/admin-notice';
 import { Loading } from '../../components/loading';
 import { isExternalUrl } from '../../common/helpers/is-external-url';
+import { PluginsWithAmpIncompatibility } from './plugins-with-amp-incompatibility';
 
 // Define Plugin Suppression link.
 const PLUGIN_SUPPRESSION_LINK = new URL( SETTINGS_LINK );
@@ -97,16 +98,17 @@ export function SiteScanNotice() {
 					} }
 				/>
 				{ userIsTechnical && (
-					<details>
-						<a
-							href={ AMP_COMPATIBLE_PLUGINS_URL }
-							className="button"
-							{ ...isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL ) ? { target: '_blank', rel: 'noreferrer' } : {} }
-						>
-							{ __( 'View Compatible Plugins List', 'amp' ) }
-						</a>
-					</details>
+					<PluginsWithAmpIncompatibility pluginsWithAmpIncompatibility={ pluginsWithAmpIncompatibility } />
 				) }
+				<div className="amp-site-scan-notice__cta">
+					<a
+						href={ AMP_COMPATIBLE_PLUGINS_URL }
+						className="button"
+						{ ...isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL ) ? { target: '_blank', rel: 'noreferrer' } : {} }
+					>
+						{ __( 'View Compatible Plugins List', 'amp' ) }
+					</a>
+				</div>
 			</AdminNotice>
 		);
 	}
@@ -114,7 +116,7 @@ export function SiteScanNotice() {
 	return (
 		<AdminNotice type={ ADMIN_NOTICE_TYPE_INFO } { ...commonNoticeProps }>
 			<p>
-				{ __( 'AMP plugin is checking you site for compatibility issues', 'amp' ) }
+				{ __( 'AMP plugin is checking your site for compatibility issues', 'amp' ) }
 				<Loading inline={ true } />
 			</p>
 		</AdminNotice>
