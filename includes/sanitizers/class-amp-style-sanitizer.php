@@ -416,15 +416,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Declare that this sanitizer doesn't involve light shadow DOM.
-	 *
-	 * @return false
-	 */
-	public function has_light_shadow_dom() {
-		return false;
-	}
-
-	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.7

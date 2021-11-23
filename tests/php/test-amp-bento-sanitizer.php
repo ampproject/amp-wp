@@ -271,6 +271,8 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 									color: red;
 								}
 							</style>
+
+							<script type="module" async src="https://cdn.ampproject.org/v0/bento-invalid.mjs"></script>
 						</head>
 						<body>
 						    Hello World!!
@@ -291,7 +293,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 					</html>
 				',
 				'sanitizer_args'       => [],
-				'expected_error_codes' => [],
+				'expected_error_codes' => [ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 				'expect_prefer_bento'  => false,
 			],
 		];

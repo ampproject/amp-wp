@@ -155,7 +155,8 @@ abstract class AMP_Base_Sanitizer {
 	 * keys in the selector conversion mapping should be used as `dynamic_element_selectors`.
 	 *
 	 * In other words, this method indicates whether keys in the conversion mapping are ancestors of elements which are
-	 * created at runtime.
+	 * created at runtime. This method is only relevant when the `get_selector_conversion_mapping()` method returns a
+	 * mapping.
 	 *
 	 * @since 2.2
 	 * @see AMP_Style_Sanitizer::ampify_ruleset_selectors()
