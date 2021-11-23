@@ -163,8 +163,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertEquals( 100, has_filter( 'map_meta_cap', self::TESTED_CLASS . '::map_meta_cap' ) );
 		$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', self::TESTED_CLASS . '::enqueue_block_validation' ) );
 
-		$this->assertEquals( 10, has_action( 'pre_current_active_plugins', self::TESTED_CLASS . '::print_plugin_notice' ) );
-
 		$this->assertEquals( 101, has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 
 		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'maybe_fail_validate_request' ] ) );
@@ -2811,24 +2809,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$decoded_messages = AMP_Validation_Manager::unserialize_validation_error_messages( 'badhash:badencoding' );
 		$this->assertNull( $decoded_messages );
-	}
-
-	/**
-	 * Test for print_plugin_notice()
-	 *
-	 * @covers AMP_Validation_Manager::print_plugin_notice()
-	 */
-	public function test_print_plugin_notice() {
-		global $pagenow;
-
-		$output = get_echo( [ AMP_Validation_Manager::class, 'print_plugin_notice' ] );
-		$this->assertEmpty( $output );
-
-		$pagenow          = 'plugins.php';
-		$_GET['activate'] = 'true';
-
-		$output = get_echo( [ AMP_Validation_Manager::class, 'print_plugin_notice' ] );
-		$this->assertStringContainsString( '<div id="site-scan-notice"></div>', $output );
 	}
 
 	/**
