@@ -241,6 +241,11 @@ const handleFiltering = () => {
  * Handles searching for errors via the <input> and the 'Search Errors' <button>.
  */
 const handleSearching = () => {
+	const searchButton = document.getElementById( 'search-submit' );
+	if ( ! searchButton ) {
+		return;
+	}
+
 	const onClick = ( event ) => {
 		event.preventDefault();
 		if ( ! event.target.matches( 'input' ) ) {
@@ -275,7 +280,7 @@ const handleSearching = () => {
 		updateShowingErrorsRow( numberErrorsDisplaying, detailsQuery.length );
 	};
 
-	document.getElementById( 'search-submit' ).addEventListener( 'click', onClick );
+	searchButton.addEventListener( 'click', onClick );
 };
 
 /**
