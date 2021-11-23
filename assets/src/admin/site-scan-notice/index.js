@@ -21,6 +21,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import './style.scss';
 import { ErrorContextProvider } from '../../components/error-context-provider';
 import { OptionsContextProvider } from '../../components/options-context-provider';
 import { PluginsContextProvider } from '../../components/plugins-context-provider';
