@@ -222,7 +222,7 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 		$this->assertArraySubset(
 			[
 				'name'   => $block_type->name,
-				'title'  => $block_type->title,
+				'title'  => isset( $block_type->title ) ? $block_type->title : '',
 				'source' => $this->source,
 			],
 			$blocks_source[ $block_type->name ]
