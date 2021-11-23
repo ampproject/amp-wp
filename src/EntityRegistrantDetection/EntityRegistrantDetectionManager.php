@@ -190,18 +190,20 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 					];
 					break;
 				case 'block':
-					$block_types = WP_Block_Type_Registry::get_instance()->get_all_registered();
-
-					if ( empty( $block_types[ $entity ] ) || ! $block_types[ $entity ] instanceof WP_Block_Type ) {
+					if ( ! class_exists( 'WP_Block_Type_Registry' ) ) {
 						break;
 					}
 
-					$block_type = $block_types[ $entity ];
+					$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $entity );
+
+					if ( empty( $block_type ) || ! $block_type instanceof WP_Block_Type ) {
+						break;
+					}
 
 					$this->blocks_source[ $entity ] = [
 						'name'        => $block_type->name,
 						'title'       => $block_type->name,
-						'description' => $block_type->description,
+						'description' => $block_type->description ?: '',
 						'category'    => $block_type->category,
 						'attributes'  => $block_type->get_attributes(),
 						'is_dynamic'  => $block_type->is_dynamic(),

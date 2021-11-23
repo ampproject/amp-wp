@@ -205,7 +205,11 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 	 */
 	public function test_add_source_block() {
 
-		$this->instance->add_source( 'block', [ 'invalid_block', 'core/button' ], $this->source );
+		if ( version_compare( get_bloginfo( 'version' ), '5.0.0', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+
+		$this->instance->add_source( 'block', [ 'invalid_block', 'core/paragraph' ], $this->source );
 
 		$blocks_source = $this->get_private_property( $this->instance, 'blocks_source' );
 
@@ -213,11 +217,11 @@ class EntityRegistrantDetectionManagerTest extends DependencyInjectedTestCase {
 
 		$this->assertArraySubset(
 			[
-				'name'   => 'core/button',
-				'title'  => 'core/button',
+				'name'   => 'core/paragraph',
+				'title'  => 'core/paragraph',
 				'source' => $this->source,
 			],
-			$blocks_source['core/button']
+			$blocks_source['core/paragraph']
 		);
 
 		$this->assertArrayHasKey( 'attributes', $blocks_source['core/button'] );
