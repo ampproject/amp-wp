@@ -31,7 +31,7 @@ export function useTemplateModeRecommendation() {
 		themesWithAmpIncompatibility,
 	} = useContext( SiteScan );
 	const { developerToolsOption, fetchingUser, savingDeveloperToolsOption } = useContext( User );
-	const { fetchingOptions, savingOptions } = useContext( Options );
+	const { fetchingOptions, originalOptions, savedOptions, savingOptions } = useContext( Options );
 	const [ templateModeRecommendation, setTemplateModeRecommendation ] = useState( null );
 
 	useLayoutEffect( () => {
@@ -39,13 +39,20 @@ export function useTemplateModeRecommendation() {
 			return;
 		}
 
+		const currentOptions = { ...originalOptions, ...savedOptions };
+
+		// Plugins are considered suppressed only if they are active (included in the `suppressible_plugins` object).
+		const hasSuppressedPlugins = Object.entries( currentOptions?.suppressed_plugins || {} )
+			.some( ( [ slug, suppressed ] ) => suppressed && Boolean( currentOptions.suppressible_plugins?.[ slug ] ) );
+
 		setTemplateModeRecommendation( getTemplateModeRecommendation( {
 			hasPluginIssues: pluginsWithAmpIncompatibility?.length > 0,
 			hasFreshSiteScanResults: hasSiteScanResults && ! stale,
+			hasSuppressedPlugins,
 			hasThemeIssues: themesWithAmpIncompatibility?.length > 0,
 			userIsTechnical: developerToolsOption === true,
 		} ) );
-	}, [ developerToolsOption, fetchingOptions, fetchingUser, hasSiteScanResults, isBusy, isFetchingScannableUrls, pluginsWithAmpIncompatibility?.length, savingDeveloperToolsOption, savingOptions, stale, themesWithAmpIncompatibility?.length ] );
+	}, [ developerToolsOption, fetchingOptions, fetchingUser, hasSiteScanResults, isBusy, isFetchingScannableUrls, originalOptions, pluginsWithAmpIncompatibility?.length, savedOptions, savingDeveloperToolsOption, savingOptions, stale, themesWithAmpIncompatibility?.length ] );
 
 	return templateModeRecommendation;
 }
@@ -56,14 +63,16 @@ export function useTemplateModeRecommendation() {
  * Returns the degree to which each mode is recommended for the current site and user.
  *
  * @param {Object}  args
- * @param {boolean} args.hasPluginIssues         Whether the site scan found plugins with AMP incompatibility.
  * @param {boolean} args.hasFreshSiteScanResults Whether fresh site scan results are available.
+ * @param {boolean} args.hasPluginIssues         Whether the site scan found plugins with AMP incompatibility.
+ * @param {boolean} args.hasSuppressedPlugins    Whether there are any suppressed plugins.
  * @param {boolean} args.hasThemeIssues          Whether the site scan found themes with AMP incompatibility.
  * @param {boolean} args.userIsTechnical         Whether the user answered yes to the technical question.
  */
 export function getTemplateModeRecommendation( {
-	hasPluginIssues,
 	hasFreshSiteScanResults,
+	hasPluginIssues,
+	hasSuppressedPlugins,
 	hasThemeIssues,
 	userIsTechnical,
 } ) {
@@ -298,17 +307,18 @@ export function getTemplateModeRecommendation( {
 					],
 				},
 				[ TRANSITIONAL ]: {
-					recommendationLevel: NOT_RECOMMENDED,
+					recommendationLevel: hasSuppressedPlugins ? RECOMMENDED : NOT_RECOMMENDED,
 					details: [
 						transitionalModeDescription,
 						notRecommendedDueToCompleteCompatibility,
 					],
 				},
 				[ STANDARD ]: {
-					recommendationLevel: RECOMMENDED,
+					recommendationLevel: hasSuppressedPlugins ? NOT_RECOMMENDED : RECOMMENDED,
 					details: [
 						standardModeDescription,
 						__( 'Recommended as you have an AMP-compatible theme and no issues were detected with any of the plugins on your site.', 'amp' ),
+						hasSuppressedPlugins ? __( 'Not recommended because you have suppressed plugins.', 'amp' ) : null,
 					],
 				},
 			};
@@ -326,7 +336,7 @@ export function getTemplateModeRecommendation( {
 					],
 				},
 				[ TRANSITIONAL ]: {
-					recommendationLevel: NEUTRAL,
+					recommendationLevel: hasSuppressedPlugins ? RECOMMENDED : NEUTRAL,
 					details: [
 						transitionalModeDescription,
 						__( 'Recommended if you can’t commit to choosing plugins that are AMP compatible when extending your site. This mode will make it easy to keep AMP content even if non-AMP-compatible plugins are used later on.', 'amp' ),
@@ -337,6 +347,7 @@ export function getTemplateModeRecommendation( {
 					details: [
 						standardModeDescription,
 						__( 'Recommended if you can commit to always choosing plugins that are AMP compatible when extending your site.', 'amp' ),
+						hasSuppressedPlugins ? __( 'Not recommended because you have suppressed plugins.', 'amp' ) : null,
 					],
 				},
 			};
