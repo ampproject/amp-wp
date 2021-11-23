@@ -48,6 +48,18 @@ class CallbackWrapperTest extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * Tear down.
+	 *
+	 * @inheritDoc
+	 */
+	public function tearDown() {
+
+		parent::tearDown();
+
+		self::unregister_entities();
+	}
+
+	/**
 	 * @covers ::__construct()
 	 */
 	public function test_construct() {
@@ -81,6 +93,19 @@ class CallbackWrapperTest extends DependencyInjectedTestCase {
 				'render_callback' => '__return_empty_string',
 			]
 		);
+	}
+
+	/**
+	 * Unregister entities.
+	 */
+	public static function unregister_entities() {
+		unregister_post_type( 'amp_test_post_type' );
+
+		unregister_taxonomy( 'amp_test_taxonomy' );
+
+		remove_shortcode( 'amp_test_shortcode' );
+
+		unregister_block_type( 'amp/test-block' );
 	}
 
 	/**
