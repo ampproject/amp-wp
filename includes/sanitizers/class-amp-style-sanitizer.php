@@ -416,6 +416,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Declare that this sanitizer doesn't involve light shadow DOM.
+	 *
+	 * @return false
+	 */
+	public function has_light_shadow_dom() {
+		return false;
+	}
+
+	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.7
@@ -908,13 +917,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				// Prevent selectors like `amp-img img` getting deleted since `img` does not occur in the DOM.
-				// @todo This should be strictly limited to sanitizers that convert elements and have a light shadow DOM.
-				// It should apply to amp-img but not to the Bento sanitizer, as right doing `bento-accordion foo`
-				// will result in the selector never being tree-shaken even though the `foo` tag is not in the DOM.
-				$this->args['dynamic_element_selectors'] = array_merge(
-					$this->args['dynamic_element_selectors'],
-					$this->selector_mappings[ $html_selectors ]
-				);
+				if ( $sanitizer->has_light_shadow_dom() ) {
+					$this->args['dynamic_element_selectors'] = array_merge(
+						$this->args['dynamic_element_selectors'],
+						$this->selector_mappings[ $html_selectors ]
+					);
+				}
 			}
 		}
 

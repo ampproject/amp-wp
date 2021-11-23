@@ -62,6 +62,24 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Indicate that the selector conversion mappings do not involve light shadow DOM.
+	 *
+	 * For example, with `bento-base-carousel`, the descendant `h2` elements will be present in the document initially.
+	 * So a selector like `bento-base-carousel h2` will not have issues with tree shaking when it is converted into
+	 * `amp-base-carousel h2`. Additionally, Bento components by definition use the _actual_ real shadow DOM, so if
+	 * there were a selector like `bento-foo div` then the `div` would never match an element since is beyond the
+	 * shadow boundary, and tree shaking should be free to remove such a selector. Selectors that are targeting
+	 * slotted elements are not inside the shadow DOM, so for example `bento-base-carousel img` will target an actual
+	 * element in the initial DOM, even though `bento-base-carousel` has other elements that are beyond the shadow
+	 * DOM boundary.
+	 *
+	 * @return false
+	 */
+	public function has_light_shadow_dom() {
+		return false;
+	}
+
+	/**
 	 * Sanitize.
 	 */
 	public function sanitize() {
