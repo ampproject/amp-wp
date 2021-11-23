@@ -84,9 +84,6 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 		$bento_elements = $this->dom->xpath->query( self::XPATH_BENTO_ELEMENTS_QUERY, $this->dom->body );
-		if ( 0 === $bento_elements->length ) {
-			return;
-		}
 
 		$bento_elements_discovered = [];
 		$bento_elements_converted  = [];
@@ -143,6 +140,7 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 				$link->parentNode->removeChild( $link );
 			} else {
 				ValidationExemption::mark_node_as_px_verified( $link );
+				ValidationExemption::mark_node_as_px_verified( $link->getAttributeNode( Attribute::HREF ) );
 			}
 		}
 
@@ -189,11 +187,11 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// If bento-prefixed components were converted to amp-prefixed ones, then ensure that the tag-and-attribute
-		// sanitizer will prefer Bento components when validating and that it will use the Bento versions of component
-		// scripts, and ultimately AMP_Theme_Support::ensure_required_markup() will add the Bento experiment opt-in
-		// which is still required at the moment.
-		if ( count( $bento_elements_converted ) > 0 && $this->tag_and_attribute_sanitizer ) {
+		// If bento-prefixed components were discovered, then ensure that the tag-and-attribute sanitizer will prefer
+		// Bento components when validating and that it will use the Bento versions of component scripts, and ultimately
+		// AMP_Theme_Support::ensure_required_markup() will add the Bento experiment opt-in which is still required at
+		// the moment.
+		if ( count( $bento_elements_discovered ) > 0 && $this->tag_and_attribute_sanitizer ) {
 			$this->tag_and_attribute_sanitizer->update_args(
 				[ 'prefer_bento' => true ]
 			);
