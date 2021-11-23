@@ -204,7 +204,7 @@ class EntityRegistrantDetectionManager implements Service, Registerable, Delayed
 						'name'        => $block_type->name,
 						'title'       => isset( $block_type->title ) ? $block_type->title : '',
 						'description' => isset( $block_type->description ) ? $block_type->description : '',
-						'category'    => $block_type->category,
+						'category'    => isset( $block_type->category ) ? $block_type->category : '',
 						'attributes'  => $block_type->get_attributes(),
 						'is_dynamic'  => $block_type->is_dynamic(),
 						'source'      => $source,
