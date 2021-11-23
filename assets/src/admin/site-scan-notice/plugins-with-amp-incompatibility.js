@@ -15,6 +15,12 @@ import PropTypes from 'prop-types';
 import { Plugins } from '../../components/plugins-context-provider';
 import { getPluginSlugFromFile } from '../../common/helpers/get-plugin-slug-from-file';
 
+/**
+ * Render a DETAILS element for each plugin causing AMP incompatibilities.
+ *
+ * @param {Object} props                               Component props.
+ * @param {Array}  props.pluginsWithAmpIncompatibility Array of plugins with AMP incompatibilities.
+ */
 export function PluginsWithAmpIncompatibility( { pluginsWithAmpIncompatibility } ) {
 	const { fetchingPlugins, plugins } = useContext( Plugins );
 
