@@ -306,7 +306,10 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 	 * @param array  $sanitizer_args       Sanitizer args.
 	 * @param array  $expected_error_codes Expected error codes.
 	 * @param bool   $expect_prefer_bento  Whether expecting prefer_bento to be set.
+	 * @covers ::init()
 	 * @covers ::sanitize()
+	 * @covers ::has_light_shadow_dom()
+	 * @covers ::get_selector_conversion_mapping()
 	 */
 	public function test_sanitize( $source, $expected = null, $sanitizer_args = [], $expected_error_codes = [], $expect_prefer_bento = false ) {
 		if ( null === $expected ) {

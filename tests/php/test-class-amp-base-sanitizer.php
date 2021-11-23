@@ -201,6 +201,12 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 		$this->assertEquals( [], $sanitizer->get_selector_conversion_mapping() );
 	}
 
+	/** @covers ::has_light_shadow_dom() */
+	public function test_has_light_shadow_dom() {
+		$sanitizer = new StubSanitizer( new Document() );
+		$this->assertSame( true, $sanitizer->has_light_shadow_dom() );
+	}
+
 	/**
 	 * @covers ::update_args()
 	 * @covers ::get_args()

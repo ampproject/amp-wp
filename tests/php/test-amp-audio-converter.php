@@ -57,8 +57,8 @@ class AMP_Audio_Converter_Test extends TestCase {
 			],
 
 			'simple_audio' => [
-				'<audio src="https://example.com/audio/file.ogg" data-foo="bar"></audio>',
-				'<amp-audio src="https://example.com/audio/file.ogg" data-foo="bar" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>',
+				'<audio id="simple" src="https://example.com/audio/file.ogg" data-foo="bar"></audio>',
+				'<amp-audio id="simple" src="https://example.com/audio/file.ogg" data-foo="bar" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>',
 				[
 					'add_noscript_fallback' => true,
 				],

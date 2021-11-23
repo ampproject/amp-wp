@@ -1632,7 +1632,9 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	 * Test attribute selector tree shaking.
 	 *
 	 * @dataProvider get_attribute_selector_data
-	 * @covers AMP_Base_Sanitizer::get_selector_conversion_mapping
+	 * @covers AMP_Base_Sanitizer::get_selector_conversion_mapping()
+	 * @covers AMP_Base_Sanitizer::has_light_shadow_dom()
+	 * @covers AMP_Style_Sanitizer::has_light_shadow_dom()
 	 *
 	 * @param string $markup      Source HTML markup.
 	 * @param array  $selectors   Mapping of selectors to whether they are expected.
