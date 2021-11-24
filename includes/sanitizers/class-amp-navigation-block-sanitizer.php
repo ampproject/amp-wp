@@ -36,16 +36,16 @@ class AMP_Navigation_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize the navigation block contained by <nav> element.
 	 *
 	 * Steps:
+	 * - "fake" the "open" state by adding `is-menu-open has-modal-open` classes to `div.wp-block-navigation__responsive-container`
+	 * - add `on="tap:menuX.open"` to `button.wp-block-navigation__responsive-container-open` element
+	 * - add `on="tap:menu1.close"` to `button.wp-block-navigation__responsive-container-close` element
+	 * - wrap `div.wp-block-navigation__responsive-container` with `<amp-lightbox id="menuX" layout="nodisplay">...</amp-lightbox>`
+	 * - remove `data-micromodal-trigger` and `data-micromodal-close` attributes
+	 * - remove `aria-expanded` and `aria-modal` attributes
+	 * - duplicate `div.wp-block-navigation__responsive-container` (original one, without extra classes) outside the `amp-lightbox` wrapper
+	 * - dequeue the `wp-block-navigation-view` script (see AMP_Navigation_Block_Sanitizer::add_buffering_hooks method)
 	 *
-	 * 1. "fake" the "open" state by adding is-menu-open has-modal-open classes to div.wp-block-navigation__responsive-container
-	 * 2. add on="tap:menuX.open" to button.wp-block-navigation__responsive-container-open element
-	 * 3. add on="tap:menu1.close" to button.wp-block-navigation__responsive-container-close element
-	 * 4. wrap div.wp-block-navigation__responsive-container with <amp-lightbox id="menuX" layout="nodisplay">...</amp-lightbox>
-	 * 5. remove data-micromodal-trigger and data-micromodal-close attributes
-	 * 6. remove aria-expanded and aria-modal attributes
-	 * 7. duplicate div.wp-block-navigation__responsive-container (original one, without extra classes) outside the amp-lightbox wrapper
-	 * 8. dequeue the wp-block-navigation-view script (see AMP_Navigation_Block_Sanitizer::add_buffering_hooks method)
-	 *
+	 * @see https://github.com/ampproject/amp-wp/issues/6319#issuecomment-978246093
 	 * @since 2.2
 	 */
 	public function sanitize() {
