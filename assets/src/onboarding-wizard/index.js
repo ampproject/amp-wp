@@ -88,6 +88,8 @@ export function Providers( { children } ) {
 									>
 										<TemplateModeOverrideContextProvider>
 											<SiteScanContextProvider
+												fetchCachedValidationErrors={ false }
+												resetOnOptionsChange={ false }
 												scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 												validateNonce={ VALIDATE_NONCE }
 											>
