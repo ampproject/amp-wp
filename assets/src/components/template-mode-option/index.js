@@ -139,7 +139,7 @@ export function TemplateModeOption( { children, details, detailsUrl, initialOpen
 				{ children }
 				{ Array.isArray( details ) && (
 					<ul className="template-mode-selection__details-list">
-						{ details.map( ( detail, index ) => (
+						{ details.filter( Boolean ).map( ( detail, index ) => (
 							<li
 								key={ index }
 								className="template-mode-selection__details-list-item"
