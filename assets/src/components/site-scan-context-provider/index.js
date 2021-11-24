@@ -466,7 +466,7 @@ export function SiteScanContextProvider( {
 				pluginsWithAmpIncompatibility,
 				previewPermalink,
 				scannableUrls,
-				scannedUrlsMaxIndex: Math.min( scannableUrls.length, ...urlIndexesPendingScan ) - 1,
+				scannedUrlsMaxIndex: ( [ STATUS_IN_PROGRESS, STATUS_IDLE ].includes( status ) ? Math.min( scannableUrls.length, ...urlIndexesPendingScan ) : 0 ) - 1,
 				stale,
 				startSiteScan,
 				themesWithAmpIncompatibility,
