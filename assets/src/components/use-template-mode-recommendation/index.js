@@ -88,6 +88,7 @@ export function getTemplateModeRecommendation( {
 	const notRecommendedUntilIncompatibilitiesFixed = __( 'Not recommended until you can fix the detected compatibility issue(s).', 'amp' );
 	const recommendedDueToNoThemeIncompatibilities = __( 'Recommended since there were no theme compatibility issues detected.', 'amp' );
 	const notRecommendedDueToIncompatibilities = __( 'Not recommended due to compatibility issue(s) which may break key site functionality, without developer assistance.', 'amp' );
+	const notRecommendedDueToSuppressedPlugins = __( 'Not recommended because you have suppressed plugins.', 'amp' );
 	/* eslint-enable @wordpress/no-unused-vars-before-return */
 
 	switch ( true ) {
@@ -318,7 +319,7 @@ export function getTemplateModeRecommendation( {
 					details: [
 						standardModeDescription,
 						__( 'Recommended as you have an AMP-compatible theme and no issues were detected with any of the plugins on your site.', 'amp' ),
-						hasSuppressedPlugins ? __( 'Not recommended because you have suppressed plugins.', 'amp' ) : null,
+						hasSuppressedPlugins ? notRecommendedDueToSuppressedPlugins : null,
 					],
 				},
 			};
@@ -347,7 +348,7 @@ export function getTemplateModeRecommendation( {
 					details: [
 						standardModeDescription,
 						__( 'Recommended if you can commit to always choosing plugins that are AMP compatible when extending your site.', 'amp' ),
-						hasSuppressedPlugins ? __( 'Not recommended because you have suppressed plugins.', 'amp' ) : null,
+						hasSuppressedPlugins ? notRecommendedDueToSuppressedPlugins : null,
 					],
 				},
 			};
