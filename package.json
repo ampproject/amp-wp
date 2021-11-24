@@ -71,7 +71,7 @@
     "eslint": "7.32.0",
     "eslint-plugin-eslint-comments": "3.2.0",
     "eslint-plugin-import": "2.25.2",
-    "eslint-plugin-jest": "25.0.5",
+    "eslint-plugin-jest": "25.3.0",
     "eslint-plugin-jsdoc": "37.0.3",
     "eslint-plugin-react": "7.26.1",
     "eslint-plugin-react-hooks": "4.2.0",
