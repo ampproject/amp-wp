@@ -76,6 +76,8 @@ class AMP_Navigation_Block_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Dequeue wp-block-navigation-view script.
+	 *
+	 * @since 2.2
 	 */
 	public static function dequeue_block_navigation_view_script() {
 		wp_dequeue_script( 'wp-block-navigation-view' );
