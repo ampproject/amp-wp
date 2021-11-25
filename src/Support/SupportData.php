@@ -666,6 +666,7 @@ class SupportData {
 				'post_status'    => 'publish',
 				'meta_key'       => AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY,
 				'meta_value'     => maybe_serialize( AMP_Validated_URL_Post_Type::get_validated_environment() ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				's'              => 'term_slug',
 			];
 
 			$query               = new WP_Query( $query_args );
