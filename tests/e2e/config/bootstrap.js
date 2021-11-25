@@ -7,6 +7,7 @@ import { get } from 'lodash';
  * WordPress dependencies
  */
 import {
+	activateTheme,
 	clearLocalStorage,
 	enablePageDialogAccept,
 	installTheme,
@@ -21,7 +22,6 @@ import {
  */
 import { cleanUpSettings } from '../utils/onboarding-wizard-utils';
 import { installLocalPlugin } from '../utils/amp-settings-utils';
-import { activateTheme } from '../../../../gutenberg/packages/e2e-test-utils';
 
 /**
  * Environment variables

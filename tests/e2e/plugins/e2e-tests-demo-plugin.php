@@ -7,12 +7,18 @@
  * Author URI:  https://github.com/ampproject/amp-wp/graphs/contributors
  */
 
-add_action( 'wp_footer', function () {
-	?>
+add_action(
+	'wp_footer',
+	function () {
+		?>
 	<bad-tag></bad-tag>
-	<?php
-} );
+		<?php
+	} 
+);
 
-add_shortcode( 'bad-tag-shortcode', function () {
-	return '<bad-tag-shortcode></bad-tag-shortcode>';
-} );
+add_shortcode(
+	'bad-tag-shortcode',
+	function () {
+		return '<bad-tag-shortcode></bad-tag-shortcode>';
+	} 
+);
