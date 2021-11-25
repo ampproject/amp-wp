@@ -9,6 +9,7 @@ import { get } from 'lodash';
 import {
 	clearLocalStorage,
 	enablePageDialogAccept,
+	installTheme,
 	isOfflineMode,
 	setBrowserViewport,
 	trashAllPosts,
@@ -20,6 +21,7 @@ import {
  */
 import { cleanUpSettings } from '../utils/onboarding-wizard-utils';
 import { installLocalPlugin } from '../utils/amp-settings-utils';
+import { activateTheme } from '../../../../gutenberg/packages/e2e-test-utils';
 
 /**
  * Environment variables
@@ -230,6 +232,15 @@ async function createTestData() {
 }
 
 /**
+ * Install themes and plugins needed in tests.
+ */
+async function setupThemesAndPlugins() {
+	await installLocalPlugin( 'e2e-tests-demo-plugin' );
+	await installTheme( 'hestia' );
+	await activateTheme( 'twentytwenty' );
+}
+
+/**
  * Before every test suite run, delete all content created by the test. This ensures
  * other posts/comments/etc. aren't dirtying tests and tests don't depend on
  * each other's side-effects.
@@ -240,7 +251,7 @@ beforeAll( async () => {
 	enablePageDialogAccept();
 	observeConsoleLogging();
 	await setupBrowser();
-	await installLocalPlugin( 'e2e-tests-demo-plugin' );
+	await setupThemesAndPlugins();
 	await trashAllPosts();
 	await createTestData();
 	await cleanUpSettings();

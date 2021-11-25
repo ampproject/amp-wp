@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { activateTheme, deleteTheme, installTheme, visitAdminPage } from '@wordpress/e2e-test-utils';
+import { activateTheme, visitAdminPage } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -20,8 +20,6 @@ describe( 'AMP settings screen Site Scan panel', () => {
 	const timeout = 30000;
 
 	beforeAll( async () => {
-		await installTheme( 'hestia' );
-
 		await cleanUpSettings();
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
@@ -29,8 +27,7 @@ describe( 'AMP settings screen Site Scan panel', () => {
 	} );
 
 	afterAll( async () => {
-		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
-
+		await activateTheme( 'twentytwenty' );
 		await cleanUpSettings();
 	} );
 

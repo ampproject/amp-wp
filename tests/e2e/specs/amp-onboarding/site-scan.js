@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { activateTheme, deleteTheme, installTheme } from '@wordpress/e2e-test-utils';
+import { activateTheme } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -11,12 +11,8 @@ import { testSiteScanning } from '../../utils/site-scan-utils';
 import { activatePlugin, deactivatePlugin } from '../../utils/amp-settings-utils';
 
 describe( 'Onboarding Wizard Site Scan Step', () => {
-	beforeAll( async () => {
-		await installTheme( 'hestia' );
-	} );
-
 	afterAll( async () => {
-		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
+		await activateTheme( 'twentytwenty' );
 	} );
 
 	it( 'should start a site scan immediately', async () => {
