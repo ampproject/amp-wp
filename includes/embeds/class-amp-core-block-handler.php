@@ -264,13 +264,13 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * Steps:
 	 * - "fake" the "open" state by adding `is-menu-open has-modal-open` classes to `div.wp-block-navigation__responsive-container`
-	 * - add `on="tap:navigationX.open"` to `button.wp-block-navigation__responsive-container-open` element
-	 * - add `on="tap:navigationX.close"` to `button.wp-block-navigation__responsive-container-close` element
-	 * - wrap `div.wp-block-navigation__responsive-container` with `<amp-lightbox id="navigationX" layout="nodisplay">...</amp-lightbox>`
+	 * - add `on="tap:{id}.open"` to `button.wp-block-navigation__responsive-container-open` element
+	 * - add `on="tap:{id}.close"` to `button.wp-block-navigation__responsive-container-close` element
+	 * - wrap `div.wp-block-navigation__responsive-container` with `<amp-lightbox id="{id}" layout="nodisplay">...</amp-lightbox>`
 	 * - remove `data-micromodal-trigger` and `data-micromodal-close` attributes
 	 * - remove `aria-expanded` and `aria-modal` attributes
 	 * - duplicate `div.wp-block-navigation__responsive-container` (original one, without extra classes) outside the `amp-lightbox` wrapper and unwrap it from modal-related wrappers
-	 * - dequeue the `wp-block-navigation-view` script (see AMP_Navigation_Block_Sanitizer::add_buffering_hooks method)
+	 * - dequeue the `wp-block-navigation-view` script
 	 *
 	 * @see https://github.com/ampproject/amp-wp/issues/6319#issuecomment-978246093
 	 * @see render_block_core_navigation()
@@ -349,7 +349,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		];
 
 		foreach ( $unwanted_attributes as $unwanted_attribute ) {
-			$items = $dom->xpath->query( sprintf( '//*[@%s]', $unwanted_attribute ), $node );
+			$items = $dom->xpath->query( sprintf( '//*[ @%s ]', $unwanted_attribute ), $node );
 			foreach ( $items as $item ) {
 				if ( ! $item instanceof DOMElement ) {
 					continue;
