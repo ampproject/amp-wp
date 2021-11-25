@@ -7,4 +7,12 @@
  * Author URI:  https://github.com/ampproject/amp-wp/graphs/contributors
  */
 
-// Silence is golden.
+add_action( 'wp_footer', function () {
+	?>
+	<bad-tag></bad-tag>
+	<?php
+} );
+
+add_shortcode( 'bad-tag-shortcode', function () {
+	return '<bad-tag-shortcode></bad-tag-shortcode>';
+} );

@@ -19,6 +19,7 @@ import {
  * Internal dependencies
  */
 import { cleanUpSettings } from '../utils/onboarding-wizard-utils';
+import { installLocalPlugin } from '../utils/amp-settings-utils';
 
 /**
  * Environment variables
@@ -239,6 +240,7 @@ beforeAll( async () => {
 	enablePageDialogAccept();
 	observeConsoleLogging();
 	await setupBrowser();
+	await installLocalPlugin( 'e2e-tests-demo-plugin' );
 	await trashAllPosts();
 	await createTestData();
 	await cleanUpSettings();
