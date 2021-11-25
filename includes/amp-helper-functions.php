@@ -1533,7 +1533,6 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Tag_And_Attribute_Sanitizer::class => [
 			'prefer_bento' => amp_is_bento_enabled(),
 		],
-		AMP_Navigation_Block_Sanitizer::class  => [],
 	];
 
 	if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
@@ -1649,7 +1648,6 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Style_Sanitizer::class,
 		AMP_Meta_Sanitizer::class,
 		AMP_Tag_And_Attribute_Sanitizer::class,
-		AMP_Navigation_Block_Sanitizer::class,
 	];
 	foreach ( $expected_final_sanitizer_order as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
