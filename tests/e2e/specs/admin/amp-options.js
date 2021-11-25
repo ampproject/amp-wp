@@ -11,6 +11,7 @@ import { cleanUpValidatedUrls } from '../../utils/amp-settings-utils';
 
 describe( 'AMP settings screen newly activated', () => {
 	beforeEach( async () => {
+		await cleanUpSettings();
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 	} );
 
@@ -68,7 +69,6 @@ describe( 'AMP Settings Screen after wizard', () => {
 
 	beforeEach( async () => {
 		await cleanUpValidatedUrls();
-		await cleanUpSettings();
 	} );
 
 	afterEach( async () => {

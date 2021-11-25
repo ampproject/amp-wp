@@ -11,10 +11,6 @@ import { testSiteScanning } from '../../utils/site-scan-utils';
 import { activatePlugin, deactivatePlugin } from '../../utils/amp-settings-utils';
 
 describe( 'Onboarding Wizard Site Scan Step', () => {
-	afterAll( async () => {
-		await activateTheme( 'twentytwenty' );
-	} );
-
 	it( 'should start a site scan immediately', async () => {
 		await moveToSiteScanScreen( { technical: true } );
 

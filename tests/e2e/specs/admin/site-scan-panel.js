@@ -13,22 +13,14 @@ import {
 	setTemplateMode,
 	uninstallPlugin,
 } from '../../utils/amp-settings-utils';
-import { cleanUpSettings, scrollToElement } from '../../utils/onboarding-wizard-utils';
+import { completeWizard, scrollToElement } from '../../utils/onboarding-wizard-utils';
 import { testSiteScanning } from '../../utils/site-scan-utils';
 
 describe( 'AMP settings screen Site Scan panel', () => {
 	const timeout = 30000;
 
 	beforeAll( async () => {
-		await cleanUpSettings();
-
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-		await setTemplateMode( 'transitional' );
-	} );
-
-	afterAll( async () => {
-		await activateTheme( 'twentytwenty' );
-		await cleanUpSettings();
+		await completeWizard( { technical: true, mode: 'transitional' } );
 	} );
 
 	async function triggerSiteRescan() {
@@ -82,6 +74,8 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__heading[data-badge-content="1"]', { text: /^Themes/, timeout } );
 		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__source-name', { text: /Hestia/ } );
+
+		await activateTheme( 'twentytwenty' );
 	} );
 
 	it( 'lists E2E Tests Demo Plugin as causing AMP incompatibility', async () => {
@@ -117,6 +111,7 @@ describe( 'AMP settings screen Site Scan panel', () => {
 		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__source-name', { text: /Hestia/ } );
 		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /E2E Tests Demo Plugin/ } );
 
+		await activateTheme( 'twentytwenty' );
 		await deactivatePlugin( 'e2e-tests-demo-plugin' );
 	} );
 

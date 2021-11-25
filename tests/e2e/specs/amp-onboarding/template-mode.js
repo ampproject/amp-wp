@@ -11,7 +11,6 @@ import {
 	clickMode,
 	testNextButton,
 	testPreviousButton,
-	cleanUpSettings,
 } from '../../utils/onboarding-wizard-utils';
 
 describe( 'Template mode', () => {
@@ -45,10 +44,6 @@ describe( 'Template mode', () => {
 } );
 
 describe( 'Template mode recommendations with reader theme active', () => {
-	beforeEach( async () => {
-		await activateTheme( 'twentytwenty' );
-	} );
-
 	it( 'makes correct recommendations when user is not technical and the current theme is a reader theme', async () => {
 		await moveToTemplateModeScreen( { technical: false } );
 
