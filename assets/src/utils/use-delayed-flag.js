@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 
 /**
  * Delay setting a flag value.
@@ -17,11 +17,24 @@ export default function useDelayedFlag( flag, { delay = 500 } = {} ) {
 	 */
 	const [ delayedFlag, setDelayedFlag ] = useState( flag );
 
+	/**
+	 * This component sets state inside async functions. Use this ref to prevent
+	 * state updates after unmount.
+	 */
+	const hasUnmounted = useRef( false );
+	useEffect( () => () => {
+		hasUnmounted.current = true;
+	}, [] );
+
 	useEffect( () => {
 		let cleanup = () => {};
 
 		if ( flag && ! delayedFlag ) {
-			cleanup = setTimeout( () => setDelayedFlag( true ), delay );
+			cleanup = setTimeout( () => {
+				if ( ! hasUnmounted.current ) {
+					setDelayedFlag( true );
+				}
+			}, delay );
 		} else if ( ! flag && delayedFlag ) {
 			setDelayedFlag( false );
 		}
