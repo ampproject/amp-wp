@@ -21,15 +21,15 @@ import {
  */
 import { scrollToElement } from './onboarding-wizard-utils';
 
-export async function setTemplateMode( mode ) {
-	// Set template mode.
-	await scrollToElement( { selector: `#template-mode-${ mode }`, click: true } );
+export async function saveSettings() {
+	await expect( page ).toClick( 'button', { text: 'Save' } );
+	await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
+	await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
+}
 
-	// Save options and wait for the request to succeed.
-	await Promise.all( [
-		scrollToElement( { selector: '.amp-settings-nav button[type="submit"]', click: true } ),
-		page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ) ),
-	] );
+export async function setTemplateMode( mode ) {
+	await scrollToElement( { selector: `#template-mode-${ mode }`, click: true } );
+	await saveSettings();
 }
 
 export async function isPluginInstalled( slug, settings ) {

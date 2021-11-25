@@ -7,7 +7,7 @@ import { visitAdminPage, activateTheme, installTheme } from '@wordpress/e2e-test
  * Internal dependencies
  */
 import { completeWizard, cleanUpSettings, clickMode, scrollToElement } from '../../utils/onboarding-wizard-utils';
-import { cleanUpValidatedUrls } from '../../utils/amp-settings-utils';
+import { cleanUpValidatedUrls, saveSettings } from '../../utils/amp-settings-utils';
 
 describe( 'AMP settings screen newly activated', () => {
 	beforeEach( async () => {
@@ -110,12 +110,6 @@ describe( 'Saving', () => {
 	} );
 
 	it( 'allows saving', async () => {
-		const testSave = async () => {
-			await expect( page ).toClick( 'button', { text: 'Save' } );
-			await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
-			await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
-		};
-
 		// Save button exists.
 		await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
 
@@ -125,12 +119,12 @@ describe( 'Saving', () => {
 		// Button should be enabled.
 		await expect( page ).toMatchElement( 'button:not([disabled])', { text: 'Save' } );
 
-		await testSave();
+		await saveSettings();
 
 		// Success notice should disappear on additional change.
 		await clickMode( 'standard' );
 		await expect( page ).not.toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
 
-		await testSave();
+		await saveSettings();
 	} );
 } );

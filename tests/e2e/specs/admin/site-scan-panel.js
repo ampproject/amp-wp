@@ -10,6 +10,7 @@ import {
 	activatePlugin,
 	deactivatePlugin,
 	installLocalPlugin,
+	saveSettings,
 	setTemplateMode,
 	uninstallPlugin,
 } from '../../utils/amp-settings-utils';
@@ -153,14 +154,9 @@ describe( 'AMP settings screen Site Scan panel', () => {
 		// Suppress the plugin.
 		await scrollToElement( { selector: '#plugin-suppression .components-panel__body-toggle', click: true } );
 		await expect( page ).toSelect( '#suppressed-plugins-table tbody tr:first-child .column-status select', 'Suppressed' );
+		await saveSettings();
+
 		await scrollToElement( { selector: '#site-scan' } );
-
-		// Save options.
-		await Promise.all( [
-			scrollToElement( { selector: '.amp-settings-nav button[type="submit"]', click: true } ),
-			page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ) ),
-		] );
-
 		await testSiteScanning( {
 			statusElementClassName: 'settings-site-scan__status',
 			isAmpFirst: false,
