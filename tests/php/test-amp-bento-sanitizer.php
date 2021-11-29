@@ -332,6 +332,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 	 * @covers ::has_light_shadow_dom()
 	 * @covers ::get_selector_conversion_mapping()
 	 * @covers ::adapt_layout_styles()
+	 * @covers ::get_bento_component_name_from_url()
 	 */
 	public function test_sanitize( $source, $expected = null, $sanitizer_args = [], $expected_error_codes = [], $expect_prefer_bento = false ) {
 		if ( null === $expected ) {

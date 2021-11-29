@@ -132,8 +132,11 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 		);
 		foreach ( $links as $link ) {
 			/** @var Element $link */
-			$basename   = basename( wp_parse_url( $link->getAttribute( Attribute::HREF ), PHP_URL_PATH ) );
-			$bento_name = preg_replace( '/-\d+\.\d+\.css$/', '', $basename );
+			$bento_name = $this->get_bento_component_name_from_url( $link->getAttribute( Attribute::HREF ) );
+			if ( ! $bento_name ) {
+				continue;
+			}
+
 			if (
 				// If the Bento element doesn't exist in the page, remove the extraneous stylesheet.
 				! array_key_exists( $bento_name, $bento_elements_discovered )
@@ -157,11 +160,10 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 		);
 		foreach ( $scripts as $script ) {
 			/** @var Element $script */
-			$basename = basename( wp_parse_url( $script->getAttribute( Attribute::SRC ), PHP_URL_PATH ) );
-			if ( ! preg_match( '#^(bento-.*?)-\d+\.\d+\.m?js#', $basename, $matches ) ) {
+			$bento_name = $this->get_bento_component_name_from_url( $script->getAttribute( Attribute::SRC ) );
+			if ( ! $bento_name ) {
 				continue;
 			}
-			$bento_name = $matches[1];
 
 			if (
 				// If the Bento element doesn't exist in the page, remove the extraneous script.
@@ -199,6 +201,21 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 			$this->tag_and_attribute_sanitizer->update_args(
 				[ 'prefer_bento' => true ]
 			);
+		}
+	}
+
+	/**
+	 * Parse Bento component name from a Bento CDN URL.
+	 *
+	 * @param string $url URL for script or stylesheet.
+	 * @return string|null Bento component name or null if no match was made.
+	 */
+	private function get_bento_component_name_from_url( $url ) {
+		$path = wp_parse_url( $url, PHP_URL_PATH );
+		if ( $path && preg_match( '#^(bento-.*?)-\d+\.\d+\.(m?js|css)#', basename( $path ), $matches ) ) {
+			return $matches[1];
+		} else {
+			return null;
 		}
 	}
 
