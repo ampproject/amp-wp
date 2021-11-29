@@ -218,11 +218,13 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 						</head>
 						<body>
 						    <bento-timeago id="timeago" style="height: 30px; border: solid 1px green;" datetime="2017-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2017 00.37</bento-timeago>
-							<bento-instagram id="my-instagram" data-shortcode="CKXYAzuj7TE" data-captioned style="height: 800px; width: 400px"></bento-instagram>
-							<bento-instagram id="my-instagram" data-shortcode="CKXYAzuj7TE" data-captioned style="height: 80em; width: 40em"></bento-instagram>
-							<bento-soundcloud data-trackid="89299804" data-visual="true" style="aspect-ratio: 16 / 9"></bento-soundcloud>
-							<bento-soundcloud data-trackid="89299804" data-visual="true" style="aspect-ratio: 9.00 / 16.00"></bento-soundcloud>
-							<bento-soundcloud data-trackid="89299804" data-visual="true" style="aspect-ratio: 0.5"></bento-soundcloud>
+							<bento-instagram id="my-instagram1" data-shortcode="CKXYAzuj7TE" data-captioned style="height: 800px; width: 400px"></bento-instagram>
+							<bento-instagram id="my-instagram2" data-shortcode="CKXYAzuj7TE" data-captioned style="height: 80em; width: 40em"></bento-instagram>
+							<bento-soundcloud id="sc1" data-trackid="89299804" data-visual="true" style="aspect-ratio: 16 / 9"></bento-soundcloud>
+							<bento-soundcloud id="sc2" data-trackid="89299804" data-visual="true" style="aspect-ratio: 9.12 / 16.34"></bento-soundcloud>
+							<bento-soundcloud id="sc3" data-trackid="89299804" data-visual="true" style="aspect-ratio: 0.5"></bento-soundcloud>
+							<bento-soundcloud id="sc4" data-trackid="89299804" data-visual="true" style="aspect-ratio: 2 / 1; max-width: 500px;"></bento-soundcloud>
+							<bento-soundcloud id="sc5" data-trackid="89299804" data-visual="true" style="aspect-ratio: 1 / 2; max-width: 500px;"></bento-soundcloud>
 							<bento-wordpress-embed id="my-embed" style="width:100%; height: 400px" data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></bento-wordpress-embed>
 							<div style="position:relative; width:100%; height: 400px;">
 								<bento-wordpress-embed id="my-fill-embed" style="position:absolute; width:100%; height: 100%;" data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></bento-wordpress-embed>
@@ -248,11 +250,13 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 						</head>
 						<body>
 							<amp-timeago class="amp-wp-c437205" data-amp-original-style="border:solid 1px green" id="timeago" height="30" width="auto" layout="fixed-height" datetime="2017-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2017 00.37</amp-timeago>
-							<amp-instagram id="my-instagram" data-shortcode="CKXYAzuj7TE" data-captioned width="400" height="800"></amp-instagram>
-							<amp-instagram id="my-instagram" data-shortcode="CKXYAzuj7TE" data-captioned width="40em" height="80em"></amp-instagram>
-							<amp-soundcloud data-trackid="89299804" data-visual="true" height="9" width="16" layout="responsive"></amp-soundcloud>
-							<amp-soundcloud data-trackid="89299804" data-visual="true" height="16.00" width="9.00" layout="responsive"></amp-soundcloud>
-							<amp-soundcloud data-trackid="89299804" data-visual="true" height="1" width="0.5" layout="responsive"></amp-soundcloud>
+							<amp-instagram id="my-instagram1" data-shortcode="CKXYAzuj7TE" data-captioned width="400" height="800"></amp-instagram>
+							<amp-instagram id="my-instagram2" data-shortcode="CKXYAzuj7TE" data-captioned width="40em" height="80em"></amp-instagram>
+							<amp-soundcloud id="sc1" data-trackid="89299804" data-visual="true" height="9" width="16" layout="responsive"></amp-soundcloud>
+							<amp-soundcloud id="sc2"data-trackid="89299804" data-visual="true" height="16.34" width="9.12" layout="responsive"></amp-soundcloud>
+							<amp-soundcloud id="sc3"data-trackid="89299804" data-visual="true" height="1" width="0.5" layout="responsive"></amp-soundcloud>
+							<amp-soundcloud id="sc4"data-trackid="89299804" data-visual="true" height="250" width="500" layout="intrinsic"></amp-soundcloud>
+							<amp-soundcloud id="sc5"data-trackid="89299804" data-visual="true" height="1000" width="500" layout="intrinsic"></amp-soundcloud>
 							<amp-wordpress-embed id="my-embed" height="400" width="auto" layout="fixed-height" data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></amp-wordpress-embed>
 							<div class="amp-wp-4ce7767" data-amp-original-style="position:relative; width:100%; height: 400px;">
 								<amp-wordpress-embed data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/" id="my-fill-embed" layout="fill"></amp-wordpress-embed>

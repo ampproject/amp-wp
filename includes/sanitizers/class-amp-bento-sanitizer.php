@@ -10,6 +10,7 @@ use AmpProject\Attribute;
 use AmpProject\Dom\Element;
 use AmpProject\CssLength;
 use AmpProject\Layout;
+use AmpProject\LengthUnit;
 
 /**
  * Convert all bento-prefixed components into amp-prefixed components, or else mark them as PX-verified if they have no
@@ -299,12 +300,12 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 		$layout_attributes = [];
 
 		// Obtain the height.
-		if ( isset( $styles['height'] ) ) {
-			$height = new CssLength( $styles['height'] );
+		if ( isset( $styles[ Attribute::HEIGHT ] ) ) {
+			$height = new CssLength( $styles[ Attribute::HEIGHT ] );
 			$height->validate( false, false );
 			if ( $height->isValid() ) {
-				$layout_attributes[ Attribute::HEIGHT ] = $height->getNumeral() . ( $height->getUnit() !== 'px' ? $height->getUnit() : '' );
-				unset( $styles['height'] );
+				$layout_attributes[ Attribute::HEIGHT ] = $height->getNumeral() . ( $height->getUnit() !== LengthUnit::PX ? $height->getUnit() : '' );
+				unset( $styles[ Attribute::HEIGHT ] );
 			}
 		}
 
@@ -312,32 +313,56 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			in_array( Layout::TO_SPEC[ Layout::FIXED_HEIGHT ], $supported_layouts, true )
 			&&
-			( ! isset( $styles['width'] ) || '100%' === $styles['width'] )
+			( ! isset( $styles[ Attribute::WIDTH ] ) || '100%' === $styles[ Attribute::WIDTH ] )
 		) {
-			$layout_attributes[ Attribute::WIDTH ]  = 'auto';
+			$layout_attributes[ Attribute::WIDTH ]  = CssLength::AUTO;
 			$layout_attributes[ Attribute::LAYOUT ] = Layout::FIXED_HEIGHT;
-			unset( $styles['width'] );
-		} elseif ( isset( $styles['width'] ) ) {
-			$width = new CssLength( $styles['width'] );
+			unset( $styles[ Attribute::WIDTH ] );
+		} elseif ( isset( $styles[ Attribute::WIDTH ] ) ) {
+			$width = new CssLength( $styles[ Attribute::WIDTH ] );
 			$width->validate( false, false );
 			if ( $width->isValid() ) {
-				$layout_attributes[ Attribute::WIDTH ] = $width->getNumeral() . ( $width->getUnit() !== 'px' ? $width->getUnit() : '' );
-				unset( $styles['width'] );
+				$layout_attributes[ Attribute::WIDTH ] = $width->getNumeral() . ( $width->getUnit() !== LengthUnit::PX ? $width->getUnit() : '' );
+				unset( $styles[ Attribute::WIDTH ] );
 			}
 		}
 
-		// @todo Add support for intrinsic.
+		$supports_responsive = in_array( Layout::TO_SPEC[ Layout::RESPONSIVE ], $supported_layouts, true );
+		$supports_intrinsic  = in_array( Layout::TO_SPEC[ Layout::INTRINSIC ], $supported_layouts, true );
 		if (
-			isset( $styles['aspect-ratio'] )
+			isset( $styles[ Attribute::ASPECT_RATIO ] )
 			&&
-			in_array( Layout::TO_SPEC[ Layout::RESPONSIVE ], $supported_layouts, true )
+			( $supports_responsive || $supports_intrinsic )
 			&&
-			preg_match( '#(?P<width>\d+(?:.\d+)?)(?:\s*/\s*(?P<height>\d+(?:.\d+)?))?#', $styles['aspect-ratio'], $matches )
+			preg_match( '#(?P<width>\d+(?:.\d+)?)(?:\s*/\s*(?P<height>\d+(?:.\d+)?))?#', $styles[ Attribute::ASPECT_RATIO ], $matches )
 		) {
-			$layout_attributes[ Attribute::HEIGHT ] = isset( $matches['height'] ) ? $matches['height'] : '1';
-			$layout_attributes[ Attribute::WIDTH ]  = $matches['width'];
-			$layout_attributes[ Attribute::LAYOUT ] = Layout::RESPONSIVE;
-			unset( $styles['aspect-ratio'] );
+			$height = isset( $matches[ Attribute::HEIGHT ] ) ? (float) $matches[ Attribute::HEIGHT ] : 1.0;
+			$width  = (float) $matches[ Attribute::WIDTH ];
+
+			// Derive intrinsic width and height when max-width is supplied.
+			$intrinsic_width = null;
+			if ( isset( $styles[ Attribute::MAX_WIDTH ] ) ) {
+				$intrinsic_width = new CssLength( $styles[ Attribute::MAX_WIDTH ] );
+				$intrinsic_width->validate( false, false );
+				if ( $intrinsic_width->isValid() && $intrinsic_width->getUnit() === LengthUnit::PX ) {
+					unset( $styles[ Attribute::MAX_WIDTH ] );
+				} else {
+					$intrinsic_width = null;
+				}
+			}
+
+			if ( $intrinsic_width ) {
+				$height = ( $height / $width ) * $intrinsic_width->getNumeral();
+				$width  = $intrinsic_width->getNumeral();
+			} else {
+				$supports_intrinsic = false;
+			}
+
+			$layout_attributes[ Attribute::LAYOUT ] = $supports_intrinsic ? Layout::INTRINSIC : Layout::RESPONSIVE;
+			$layout_attributes[ Attribute::HEIGHT ] = (string) $height;
+			$layout_attributes[ Attribute::WIDTH ]  = (string) $width;
+
+			unset( $styles[ Attribute::ASPECT_RATIO ] );
 		}
 
 		if ( $layout_attributes ) {
