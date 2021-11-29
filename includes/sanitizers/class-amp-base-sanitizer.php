@@ -393,12 +393,21 @@ abstract class AMP_Base_Sanitizer {
 			}
 
 			// Apply fill layout if width & height are 100%.
-			if ( isset( $styles['position'], $attributes['width'], $attributes['height'] )
-				&& 'absolute' === $styles['position']
-				&& '100%' === $attributes['width']
-				&& '100%' === $attributes['height']
+			if (
+				( isset( $styles['position'] ) && 'absolute' === $styles['position'] )
+				&& (
+					( isset( $attributes['width'] ) && '100%' === $attributes['width'] )
+					||
+					( isset( $styles['width'] ) && '100%' === $styles['width'] )
+				)
+				&& (
+					( isset( $attributes['height'] ) && '100%' === $attributes['height'] )
+					||
+					( isset( $styles['height'] ) && '100%' === $styles['height'] )
+				)
 			) {
-				unset( $attributes['style'], $styles['position'], $attributes['width'], $attributes['height'] );
+				unset( $attributes['style'], $attributes['width'], $attributes['height'] );
+				unset( $styles['position'], $styles['width'], $styles['height'] );
 				if ( ! empty( $styles ) ) {
 					$attributes['style'] = $this->reassemble_style_string( $styles );
 				}

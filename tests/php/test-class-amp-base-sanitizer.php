@@ -131,11 +131,20 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 				],
 			],
 
-			'fill_both_dimensions_and_absolute_position' => [
+			'fill_both_dimension_attrs_and_absolute_position' => [
 				[
 					'width'  => '100%',
 					'height' => '100%',
 					'style'  => 'position:absolute',
+				],
+				[
+					'layout' => 'fill',
+				],
+			],
+
+			'fill_both_dimensions_styles_and_absolute_position' => [
+				[
+					'style' => 'width: 100%; height:100%; position:absolute',
 				],
 				[
 					'layout' => 'fill',
