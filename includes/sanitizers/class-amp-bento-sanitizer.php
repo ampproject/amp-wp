@@ -235,10 +235,10 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 			$layout_attributes[ Attribute::LAYOUT ] = Layout::FIXED_HEIGHT;
 			unset( $styles['width'] );
 		} else {
-			$height = new CssLength( $styles['width'] );
-			$height->validate( false, false );
-			if ( $height->isValid() ) {
-				$layout_attributes[ Attribute::WIDTH ] = $height->getNumeral() . ( $height->getUnit() !== 'px' ? $height->getUnit() : '' );
+			$width = new CssLength( $styles['width'] );
+			$width->validate( false, false );
+			if ( $width->isValid() ) {
+				$layout_attributes[ Attribute::WIDTH ] = $width->getNumeral() . ( $width->getUnit() !== 'px' ? $width->getUnit() : '' );
 				unset( $styles['width'] );
 			}
 		}
