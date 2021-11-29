@@ -31,9 +31,9 @@ import {
 export function ValidationResultsNotice( { data, args, ampValidatedPostCount } ) {
 	const isSpecificUrlRequest = 0 < args?.urls?.length;
 	const hasErrors = 0 < data.errors?.length || 0 < data.urls?.length;
-	const hasAllStaleResult = 0 < ampValidatedPostCount.all && ampValidatedPostCount.all === ampValidatedPostCount.stale;
-	const hasSomeStaleResult = 0 < ampValidatedPostCount.fresh && 0 < ampValidatedPostCount.stale;
-	const hasAllFreshResult = 0 < ampValidatedPostCount.all && ampValidatedPostCount.all === ampValidatedPostCount.fresh;
+	const hasAllStaleResults = 0 < ampValidatedPostCount.all && ampValidatedPostCount.all === ampValidatedPostCount.stale;
+	const hasSomeStaleResults = 0 < ampValidatedPostCount.fresh && 0 < ampValidatedPostCount.stale;
+	const hasAllFreshResults = 0 < ampValidatedPostCount.all && ampValidatedPostCount.all === ampValidatedPostCount.fresh;
 
 	// The site doesn't have any validated URLs.
 	if ( ! isSpecificUrlRequest && 0 === ampValidatedPostCount.all ) {
@@ -45,7 +45,7 @@ export function ValidationResultsNotice( { data, args, ampValidatedPostCount } )
 	}
 
 	// All validated URLs of site is stale.
-	if ( ! isSpecificUrlRequest && hasAllStaleResult ) {
+	if ( ! isSpecificUrlRequest && hasAllStaleResults ) {
 		return (
 			<AMPNotice type={ NOTICE_TYPE_WARNING } size={ NOTICE_SIZE_SMALL }>
 				{ __( 'The validation data is stale. Go to the AMP Settings page and rescan you site before sending a support request.', 'amp' ) }
@@ -54,7 +54,7 @@ export function ValidationResultsNotice( { data, args, ampValidatedPostCount } )
 	}
 
 	// The site doesn't have any AMP errors but there are some stalled result.
-	if ( ! isSpecificUrlRequest && ! hasErrors && hasSomeStaleResult ) {
+	if ( ! isSpecificUrlRequest && ! hasErrors && hasSomeStaleResults ) {
 		return (
 			<AMPNotice type={ NOTICE_TYPE_WARNING } size={ NOTICE_SIZE_SMALL }>
 				{ __( 'We found no issues on your site but there are some stale validation results. Browse your site to ensure everything is working as expected.', 'amp' ) }
@@ -63,7 +63,7 @@ export function ValidationResultsNotice( { data, args, ampValidatedPostCount } )
 	}
 
 	// All validated URLs of site is stale.
-	if ( ! isSpecificUrlRequest && ! hasErrors && hasAllFreshResult ) {
+	if ( ! isSpecificUrlRequest && ! hasErrors && hasAllFreshResults ) {
 		return (
 			<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_SMALL }>
 				{ __( 'We found no issues on your site. Browse your site to ensure everything is working as expected.', 'amp' ) }
