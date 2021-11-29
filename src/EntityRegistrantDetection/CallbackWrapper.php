@@ -204,10 +204,8 @@ class CallbackWrapper implements ArrayAccess {
 
 		$this->prepare();
 
-		$result = call_user_func_array(
-			$this->get_callback_function(),
-			array_slice( $args, 0, (int) $this->callback['accepted_args'] )
-		);
+		$callback = $this->get_callback_function();
+		$result   = $callback( ...array_slice( $args, 0, (int) $this->callback['accepted_args'] ) );
 
 		$this->finalize();
 
