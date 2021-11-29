@@ -139,10 +139,10 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Determine whether the resulting AMP element uses a "light" shadow DOM.
 	 *
-	 * Sometimes AMP components serve as wrappers for native elements, like `amp-img` for `img`. In this case, when this
+	 * Sometimes AMP components serve as wrappers for native elements, like `amp-img` for `img`. When this
 	 * is the case, authors sometimes will want to style the shadow element (such as to set object-fit). Normally if a
 	 * selector contains `img` then the style sanitizer will always convert this to `amp-img` (and `amp-anim`), which
-	 * may break the author's intended selector target. So the when using a sanitizer's selector conversion mapping to
+	 * may break the author's intended selector target. So when using a sanitizer's selector conversion mapping to
 	 * rewrite non-AMP to AMP selectors, it will first check to see if the selector already mentions an AMP tag and if
 	 * so it will skip the conversions for that selector. In this way, an `amp-img img` selector will not get converted
 	 * into `amp-img amp-img`. The selector mapping also is involved when doing tree shaking. In the case of the
