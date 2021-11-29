@@ -283,6 +283,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Filtered block content.
 	 */
 	public function ampify_navigation_block( $block_content, $block ) {
+		add_action( 'wp_print_scripts', [ get_class(), 'dequeue_block_navigation_view_script' ], 0 );
+		add_action( 'wp_print_footer_scripts', [ get_class(), 'dequeue_block_navigation_view_script' ], 0 );
+
 		if ( isset( $block['attrs']['overlayMenu'] ) && 'never' === $block['attrs']['overlayMenu'] ) {
 			return $block_content;
 		}
@@ -301,9 +304,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		if ( ! $container_node instanceof DOMElement ) {
 			return $block_content;
 		}
-
-		add_action( 'wp_print_scripts', [ get_class(), 'dequeue_block_navigation_view_script' ], 0 );
-		add_action( 'wp_print_footer_scripts', [ get_class(), 'dequeue_block_navigation_view_script' ], 0 );
 
 		$unique_id = $container_node->getAttribute( Attribute::ID );
 		$container_node->removeAttribute( Attribute::ID );
