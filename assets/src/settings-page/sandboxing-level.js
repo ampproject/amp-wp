@@ -44,7 +44,7 @@ export function SandboxingLevel( { focusedSection } ) {
 			initialOpen={ 'sandboxing-level' === focusedSection }
 		>
 			<p>
-				{ __( 'Try out a more flexible AMP by generating pages that use AMP components without requiring AMP validity! By selecting a sandboxing level, you are indicating the minimum degree of sanitization. For example, if you selected the loose leve but have a page without any POST form and no custom scripts, it will still be served as valid AMP—the same as if you had selected the strict level.', 'amp' ) }
+				{ __( 'Try out a more flexible AMP by generating pages that use AMP components without requiring AMP validity! By selecting a sandboxing level, you are indicating the minimum degree of sanitization. For example, if you selected the loose level but have a page without any POST form and no custom scripts, it will still be served as valid AMP—the same as if you had selected the strict level.', 'amp' ) }
 			</p>
 			<ol>
 				<li>
