@@ -26,7 +26,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 	 */
 	public function get_sanitizer_data() {
 		return [
-			'bento-accordion-with-styles'   => [
+			'bento-accordion-with-styles'       => [
 				'source'               => '
 					<html>
 						<head>
@@ -40,7 +40,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 							<script type="module" async="" src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs"></script>
 							<script nomodule="" async="" src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"></script>
 							<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css">
-							<bento-accordion id="my-accordion" class="foo" data-bar="baz &amp; quux">
+							<bento-accordion id="my-accordion" class="foo" data-bar="baz &amp; quux" style="border: solid 1px black">
 								<section>
 									<h2>Section 1</h2>
 									<div>Content in section 1.</div>
@@ -80,14 +80,14 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 					<html>
 						<head>
 							<meta charset="utf-8">
-							<style amp-custom>#my-accordion{display:block;outline:solid 2px red}amp-accordion#my-accordion{outline:solid 2px green}amp-accordion h2{text-transform:uppercase}
+							<style amp-custom>#my-accordion{display:block;outline:solid 2px red}amp-accordion#my-accordion{outline:solid 2px green}amp-accordion h2{text-transform:uppercase}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-a33452e{border:solid 1px black}
 
 							/*# sourceURL="amp-custom.css" */</style>
 						</head>
 						<body>
 							<p>The following should have a green outline.</p>
 
-							<amp-accordion id="my-accordion" class="foo" data-bar="baz &amp; quux">
+							<amp-accordion id="my-accordion" class="foo amp-wp-a33452e" data-amp-original-style="border: solid 1px black" data-bar="baz &amp; quux">
 								<section>
 									<h2>Section 1</h2>
 									<div>Content in section 1.</div>
@@ -112,7 +112,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 				'expect_prefer_bento'  => true,
 			],
 
-			'non-amp-bento-component'       => [
+			'non-amp-bento-component'           => [
 				'source'               => '
 					<html>
 						<head>
@@ -172,7 +172,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 				'expect_prefer_bento'  => true,
 			],
 
-			'both-amp-and-bento-components' => [
+			'both-amp-and-bento-components'     => [
 				'source'               => '
 					<html>
 						<head>
@@ -224,6 +224,9 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 							<bento-soundcloud data-trackid="89299804" data-visual="true" style="aspect-ratio: 9.00 / 16.00"></bento-soundcloud>
 							<bento-soundcloud data-trackid="89299804" data-visual="true" style="aspect-ratio: 0.5"></bento-soundcloud>
 							<bento-wordpress-embed id="my-embed" style="width:100%; height: 400px" data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></bento-wordpress-embed>
+							<div style="position:relative; width:100%; height: 400px;">
+								<bento-wordpress-embed id="my-fill-embed" style="position:absolute; width:100%; height: 100%;" data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></bento-wordpress-embed>
+							</div>
 							<bento-marquee id="marquee">
 								<h2>News flash!!!</h2>
 							</bento-marquee>
@@ -239,7 +242,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 							<script type="module" async="" src="https://cdn.ampproject.org/v0/bento-marquee-1.0.mjs" data-px-verified-tag></script>
 							<script nomodule="" async="" src="https://cdn.ampproject.org/v0/bento-marquee-1.0.js" data-px-verified-tag></script>
 							<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-marquee-1.0.css" data-px-verified-tag data-px-verified-attrs="href">
-							<style amp-custom>#timeago{color:red}amp-timeago#timeago{color:blue}#marquee{display:block;outline:solid 2px red}bento-marquee#marquee{outline:solid 2px green}bento-marquee h2{text-transform:uppercase}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c437205{border:solid 1px green}
+							<style amp-custom>#timeago{color:red}amp-timeago#timeago{color:blue}#marquee{display:block;outline:solid 2px red}bento-marquee#marquee{outline:solid 2px green}bento-marquee h2{text-transform:uppercase}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c437205{border:solid 1px green}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-4ce7767{position:relative;width:100%;height:400px}
 
 							/*# sourceURL="amp-custom.css" */</style>
 						</head>
@@ -251,6 +254,9 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 							<amp-soundcloud data-trackid="89299804" data-visual="true" height="16.00" width="9.00" layout="responsive"></amp-soundcloud>
 							<amp-soundcloud data-trackid="89299804" data-visual="true" height="1" width="0.5" layout="responsive"></amp-soundcloud>
 							<amp-wordpress-embed id="my-embed" height="400" width="auto" layout="fixed-height" data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></amp-wordpress-embed>
+							<div class="amp-wp-4ce7767" data-amp-original-style="position:relative; width:100%; height: 400px;">
+								<amp-wordpress-embed data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/" id="my-fill-embed" layout="fill"></amp-wordpress-embed>
+							</div>
 
 							<bento-marquee data-px-verified-tag id="marquee">
 								<h2>News flash!!!</h2>
@@ -263,7 +269,60 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 				'expect_prefer_bento'  => true,
 			],
 
-			'no-bento-components'           => [
+			'bento-components-hidden-initially' => [
+				'source'               => '
+					<html>
+						<head>
+							<script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+							<script type="module" async src="https://cdn.ampproject.org/bento.mjs"></script>
+							<script type="module" src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.mjs" crossorigin="anonymous"></script>
+							<script nomodule src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.js" crossorigin="anonymous"></script>
+							<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-sidebar-1.0.css" crossorigin="anonymous">
+							<script type="module" async src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.mjs"></script>
+							<script nomodule async src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"></script>
+							<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css">
+						</head>
+						<body>
+							<bento-sidebar id="sidebar1" side="left">
+								<button id="close-sidebar">Close</button>
+							</bento-sidebar>
+							<bento-sidebar id="sidebar2" side="left" hidden>
+								<button id="close-sidebar">Close</button>
+							</bento-sidebar>
+							<bento-lightbox id="my-lightbox">
+								Lightboxed content
+								<button id="close-button">Close lightbox</button>
+							</bento-lightbox>
+							<bento-instagram id="my-instagram" data-shortcode="CKXYAzuj7TE" data-captioned hidden></bento-instagram>
+						</body>
+					</html>
+				',
+				'expected'             => '
+					<html>
+						<head>
+							<meta charset="utf-8">
+						</head>
+						<body>
+							<amp-sidebar id="sidebar1" side="left" layout="nodisplay">
+								<button id="close-sidebar">Close</button>
+							</amp-sidebar>
+							<amp-sidebar id="sidebar2" side="left" layout="nodisplay">
+								<button id="close-sidebar">Close</button>
+							</amp-sidebar>
+							<amp-lightbox id="my-lightbox" layout="nodisplay">
+								Lightboxed content
+								<button id="close-button">Close lightbox</button>
+							</amp-lightbox>
+							<amp-instagram id="my-instagram" data-shortcode="CKXYAzuj7TE" data-captioned layout="nodisplay"></amp-instagram>
+						</body>
+					</html>
+				',
+				'sanitizer_args'       => [],
+				'expected_error_codes' => [],
+				'expect_prefer_bento'  => true,
+			],
+
+			'no-bento-components'               => [
 				'source'               => '
 					<html>
 						<head>
@@ -315,6 +374,62 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 				'expected_error_codes' => [ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 				'expect_prefer_bento'  => false,
 			],
+
+			'bento-mathml'                      => [
+				'source'               => '
+					<html>
+						<head></head>
+						<body>
+							<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+							<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+							<script type="module" src="https://cdn.ampproject.org/v0/bento-mathml-1.0.mjs" crossorigin="anonymous"></script>
+							<script nomodule src="https://cdn.ampproject.org/v0/bento-mathml-1.0.js" crossorigin="anonymous"></script>
+							<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-mathml-1.0.css" crossorigin="anonymous">
+
+							<h2>The Quadratic Formula</h2>
+							<bento-mathml
+							  style="height: 40px"
+							  data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"
+							></bento-mathml>
+
+							<h2>Inline formula</h2>
+							<p>
+							  This is an example of a formula,
+							  <bento-mathml
+							    style="height: 40px; width: 147px"
+							    inline
+							    data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"
+							  ></bento-mathml>
+							  placed inline in the middle of a block of text.
+							</p>
+						</body>
+					</html>
+				',
+				'expected'             => '
+					<html>
+						<head>
+							<meta charset="utf-8">
+							<style amp-custom>:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-3ef80bd{height:40px}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-120213e{height:40px;width:147px}
+
+							/*# sourceURL="amp-custom.css" */</style>
+						</head>
+						<body>
+							<h2>The Quadratic Formula</h2>
+							<amp-mathml class="amp-wp-3ef80bd" data-amp-original-style="height: 40px" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
+
+							<h2>Inline formula</h2>
+							<p>
+							  This is an example of a formula,
+							  <amp-mathml class="amp-wp-120213e" data-amp-original-style="height: 40px; width: 147px" inline data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
+							  placed inline in the middle of a block of text.
+							</p>
+						</body>
+					</html>
+				',
+				'sanitizer_args'       => [],
+				'expected_error_codes' => [],
+				'expect_prefer_bento'  => true,
+			],
 		];
 	}
 
@@ -333,6 +448,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 	 * @covers ::get_selector_conversion_mapping()
 	 * @covers ::adapt_layout_styles()
 	 * @covers ::get_bento_component_name_from_url()
+	 * @covers \AMP_Base_Sanitizer::set_layout()
 	 */
 	public function test_sanitize( $source, $expected = null, $sanitizer_args = [], $expected_error_codes = [], $expect_prefer_bento = false ) {
 		if ( null === $expected ) {

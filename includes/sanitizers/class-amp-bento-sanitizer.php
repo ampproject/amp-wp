@@ -229,8 +229,68 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param Element $amp_element AMP element (converted from Bento).
 	 */
 	private function adapt_layout_styles( Element $amp_element ) {
+		$supported_layouts = [];
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( $amp_element->tagName ) as $rule_spec ) {
+			if ( isset( $rule_spec['tag_spec']['amp_layout']['supported_layouts'] ) ) {
+				$supported_layouts = array_merge( $supported_layouts, $rule_spec['tag_spec']['amp_layout']['supported_layouts'] );
+			}
+		}
+		$supported_layouts = array_unique( $supported_layouts );
+
+		// If no layouts are supported, then there is nothing to do.
+		if ( count( $supported_layouts ) === 0 ) {
+			return;
+		}
+
+		// If nodisplay is the only supported layout or nodisplay is supported the
+		// element is hidden, then give it the nodisplay layout.
+		if (
+			[ Layout::TO_SPEC[ Layout::NODISPLAY ] ] === $supported_layouts
+			||
+			(
+				$amp_element->hasAttribute( Attribute::HIDDEN )
+				&&
+				in_array( Layout::TO_SPEC[ Layout::NODISPLAY ], $supported_layouts )
+			)
+		) {
+			$amp_element->setAttribute( Attribute::LAYOUT, Layout::NODISPLAY );
+			$amp_element->removeAttribute( Attribute::HIDDEN );
+			return;
+		}
+
+		// Since Bento elements don't support width/height attributes (currently),
+		// obtain the inline styles or else abort if none are provided.
 		$style_string = $amp_element->getAttribute( Attribute::STYLE );
 		if ( ! $style_string ) {
+			return;
+		}
+
+		// Re-use set_layout method to detect fill layout (only).
+		if ( in_array( Layout::TO_SPEC[ Layout::FILL ], $supported_layouts, true ) ) {
+			$attributes = $this->set_layout( [ Attribute::STYLE => $style_string ] );
+			if ( isset( $attributes[ Attribute::LAYOUT ] ) && Layout::FILL === $attributes[ Attribute::LAYOUT ] ) {
+				$amp_element->setAttributes( $attributes );
+				if ( ! array_key_exists( Attribute::STYLE, $attributes ) ) {
+					$amp_element->removeAttribute( Attribute::STYLE );
+				}
+				return;
+			}
+		}
+
+		// If there are no layouts that support width and height, then abort.
+		if (
+			0 === count(
+				array_intersect(
+					$supported_layouts,
+					[
+						Layout::TO_SPEC[ Layout::FIXED ],
+						Layout::TO_SPEC[ Layout::FIXED_HEIGHT ],
+						Layout::TO_SPEC[ Layout::INTRINSIC ],
+						Layout::TO_SPEC[ Layout::RESPONSIVE ],
+					]
+				)
+			)
+		) {
 			return;
 		}
 
@@ -238,6 +298,7 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 
 		$layout_attributes = [];
 
+		// Obtain the height.
 		if ( isset( $styles['height'] ) ) {
 			$height = new CssLength( $styles['height'] );
 			$height->validate( false, false );
@@ -247,11 +308,16 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! isset( $styles['width'] ) || '100%' === $styles['width'] ) {
+		// Obtain the width.
+		if (
+			in_array( Layout::TO_SPEC[ Layout::FIXED_HEIGHT ], $supported_layouts, true )
+			&&
+			( ! isset( $styles['width'] ) || '100%' === $styles['width'] )
+		) {
 			$layout_attributes[ Attribute::WIDTH ]  = 'auto';
 			$layout_attributes[ Attribute::LAYOUT ] = Layout::FIXED_HEIGHT;
 			unset( $styles['width'] );
-		} else {
+		} elseif ( isset( $styles['width'] ) ) {
 			$width = new CssLength( $styles['width'] );
 			$width->validate( false, false );
 			if ( $width->isValid() ) {
@@ -260,8 +326,11 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		// @todo Add support for intrinsic.
 		if (
 			isset( $styles['aspect-ratio'] )
+			&&
+			in_array( Layout::TO_SPEC[ Layout::RESPONSIVE ], $supported_layouts, true )
 			&&
 			preg_match( '#(?P<width>\d+(?:.\d+)?)(?:\s*/\s*(?P<height>\d+(?:.\d+)?))?#', $styles['aspect-ratio'], $matches )
 		) {
@@ -273,9 +342,7 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( $layout_attributes ) {
 			$amp_element->setAttribute( Attribute::STYLE, $this->reassemble_style_string( $styles ) );
-			foreach ( $layout_attributes as $attribute_name => $attribute_value ) {
-				$amp_element->setAttribute( $attribute_name, $attribute_value );
-			}
+			$amp_element->setAttributes( $layout_attributes );
 		}
 	}
 }
