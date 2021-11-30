@@ -7789,6 +7789,9 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'volume' => array(
+						'value_regex' => '^((0?\\.[1-9]+)?|1(\\.0*)?)$',
+					),
 				),
 				'tag_spec' => array(
 					'amp_layout' => array(
@@ -10854,6 +10857,7 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'xssi-prefix' => array(),
 				),
 				'tag_spec' => array(
 					'disallowed_ancestor' => array(
@@ -13327,6 +13331,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'content' => array(),
 					'itemprop' => array(),
+					'media' => array(),
 					'name' => array(
 						'disallowed_value_regex' => '(^|\\s)(amp-.*|amp4ads-.*|apple-itunes-app|content-disposition|revisit-after|viewport)(\\s|$)',
 					),
