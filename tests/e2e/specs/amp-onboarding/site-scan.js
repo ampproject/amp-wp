@@ -41,7 +41,7 @@ describe( 'Onboarding Wizard Site Scan Step', () => {
 			expect( page ).toMatchElement( '.amp-onboarding-wizard-panel h1', { text: 'Site Scan' } ),
 			expect( page ).toMatchElement( '.site-scan__heading', { text: 'Please wait a minute' } ),
 			testNextButton( { text: 'Next', disabled: true } ),
-			testPreviousButton( { text: 'Previous' } ),
+			testPreviousButton( { text: 'Previous', disabled: true } ),
 			testSiteScanning( {
 				statusElementClassName: 'site-scan__status',
 				isAmpFirst: true,
