@@ -322,6 +322,11 @@ export function SiteScanContextProvider( {
 				await new Promise( ( resolve ) => {
 					clearTimeout = setTimeout( resolve, CONCURRENT_VALIDATION_REQUESTS_WAIT_MS );
 				} );
+
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
 				setShouldDelayValidationRequest( false );
 			} )();
 		}
@@ -369,6 +374,10 @@ export function SiteScanContextProvider( {
 					scannableUrls: response,
 				} );
 			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
 				setAsyncError( e );
 			}
 		} )();
@@ -437,6 +446,10 @@ export function SiteScanContextProvider( {
 					results.error = data?.code || true;
 				}
 			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
 				results.error = true;
 			}
 
