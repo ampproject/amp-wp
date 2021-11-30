@@ -64,18 +64,24 @@ export default wpThemeView.extend( {
 					__( 'This is known to work well with the AMP plugin.', 'amp' ),
 				);
 
-				messageElement.append( iconElement );
-				messageElement.append( tooltipElement );
+				messageElement.append( iconElement, tooltipElement );
 
 				element.appendChild( messageElement );
 			} );
 		}
 
 		if ( slug && ! this.isWPORGTheme( slug ) ) {
+			const externalLinkIcon = document.createElement( 'span' );
+			externalLinkIcon.classList.add( 'dashicons', 'dashicons-external' );
+			externalLinkIcon.setAttribute( 'aria-hidden', 'true' );
+
+			const screenReaderText = document.createElement( 'span' );
+			screenReaderText.classList.add( 'screen-reader-text' );
+			screenReaderText.append( __( '(opens in a new tab)', 'amp' ) );
+
 			const siteLinkButton = document.createElement( 'a' );
-			siteLinkButton.classList.add( 'button' );
-			siteLinkButton.classList.add( 'button-primary' );
-			siteLinkButton.append( __( 'Visit Site', 'amp' ) );
+			siteLinkButton.classList.add( 'button', 'button-primary' );
+			siteLinkButton.append( __( 'Visit Site', 'amp' ), screenReaderText, externalLinkIcon );
 
 			if ( data?.preview_url ) {
 				siteLinkButton.href = data.preview_url;
@@ -100,7 +106,7 @@ export default wpThemeView.extend( {
 			const moreDetail = element.querySelector( '.more-details' );
 			if ( moreDetail ) {
 				moreDetail.textContent = ''; // Remove children.
-				moreDetail.append( __( 'Visit Site', 'amp' ) );
+				moreDetail.append( __( 'Visit Site', 'amp' ), externalLinkIcon.cloneNode( true ) );
 			}
 		}
 	},

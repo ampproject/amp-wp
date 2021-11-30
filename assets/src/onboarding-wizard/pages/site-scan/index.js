@@ -72,7 +72,7 @@ export function SiteScan() {
 	 */
 	const isDelayedCompleted = useDelayedFlag( isCompleted );
 
-	if ( isFetchingScannableUrls ) {
+	if ( isFetchingScannableUrls || isReady ) {
 		return (
 			<SiteScanPanel
 				title={ __( 'Please wait a minute…', 'amp' ) }

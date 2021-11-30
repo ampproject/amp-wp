@@ -282,7 +282,7 @@ function SiteScanSummary() {
 		);
 	}
 
-	if ( isReady && ! hasSiteIssues && ! stale ) {
+	if ( ! hasSiteIssues && ! stale ) {
 		return (
 			<AMPNotice type={ NOTICE_TYPE_SUCCESS } size={ NOTICE_SIZE_LARGE }>
 				<p>
@@ -294,48 +294,24 @@ function SiteScanSummary() {
 
 	return (
 		<>
-			{ isReady ? (
+			{ stale && (
 				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
 					<p>
-						{ stale
-							? __( 'Stale results. Rescan your site to ensure everything is working properly.', 'amp' )
-							: __( 'No changes since your last scan.', 'amp' )
-						}
+						{ __( 'Stale results. Rescan your site to ensure everything is working properly.', 'amp' ) }
 					</p>
 				</AMPNotice>
-			) : (
-				<>
-					{ stale && (
-						<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
-							<p>
-								{ __( 'Stale results. Rescan your site to ensure everything is working properly.', 'amp' ) }
-							</p>
-						</AMPNotice>
-					) }
-					{ hasSiteIssues && (
-						<p
-							dangerouslySetInnerHTML={ {
-								__html: sprintf(
-									// translators: placeholders stand for page anchors.
-									__( 'Because of issues we’ve uncovered, you’ll want to switch your template mode. Please see <a href="%1$s">template mode recommendations</a> below. Because of plugin issues, you may also want to <a href="%2$s">review and suppress plugins</a>.', 'amp' ),
-									'#template-modes',
-									'#plugin-suppression',
-								),
-							} }
-						/>
-					) }
-					{ ! hasSiteIssues && ! stale && (
-						<AMPNotice type={ NOTICE_TYPE_SUCCESS } size={ NOTICE_SIZE_LARGE }>
-							<p>
-								{ __( 'Site scan found no issues on your site. Browse your site to ensure everything is working as expected.', 'amp' ) }
-							</p>
-						</AMPNotice>
-					) }
-				</>
+			) }
+			{ ! stale && isReady && (
+				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
+					<p>
+						{ __( 'No changes since your last scan.', 'amp' ) }
+					</p>
+				</AMPNotice>
 			) }
 			{ themesWithAmpIncompatibility.length > 0 && (
 				<ThemesWithAmpIncompatibility
 					slugs={ themesWithAmpIncompatibility }
+					showHelpText={ true }
 					callToAction={ userIsTechnical && ! stale ? (
 						<a href={ VALIDATED_URLS_LINK }>
 							{ __( 'Review Validated URLs', 'amp' ) }
@@ -346,6 +322,7 @@ function SiteScanSummary() {
 			{ pluginsWithAmpIncompatibility.length > 0 && (
 				<PluginsWithAmpIncompatibility
 					slugs={ pluginsWithAmpIncompatibility }
+					showHelpText={ true }
 					callToAction={ userIsTechnical && ! stale ? (
 						<a href={ VALIDATED_URLS_LINK }>
 							{ __( 'Review Validated URLs', 'amp' ) }

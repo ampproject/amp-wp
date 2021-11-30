@@ -236,6 +236,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		);
 
 		$js_data = [
+			'AMP_COMPATIBLE_THEMES_URL'          => current_user_can( 'install_themes' ) ? admin_url( '/theme-install.php?browse=amp-compatible' ) : 'https://amp-wp.org/ecosystem/themes/',
+			'AMP_COMPATIBLE_PLUGINS_URL'         => current_user_can( 'install_plugins' ) ? admin_url( '/plugin-install.php?tab=amp-compatible' ) : 'https://amp-wp.org/ecosystem/plugins/',
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
 			'AMP_SCAN_IF_STALE'                  => QueryVar::AMP_SCAN_IF_STALE,
 			'CURRENT_THEME'                      => [

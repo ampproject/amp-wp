@@ -142,6 +142,7 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 	public function register() {
 
 		add_filter( 'themes_api', [ $this, 'filter_themes_api' ], 10, 3 );
+		add_filter( 'theme_row_meta', [ $this, 'filter_theme_row_meta' ], 10, 2 );
 		add_action( 'current_screen', [ $this, 'register_hooks' ] );
 	}
 
@@ -153,7 +154,11 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 	public function register_hooks() {
 
 		$screen = get_current_screen();
-		if ( $screen instanceof WP_Screen && in_array( $screen->id, [ 'themes', 'theme-install' ], true ) ) {
+		if (
+			$screen instanceof WP_Screen
+			&&
+			in_array( $screen->id, [ 'themes', 'theme-install', 'theme-install-network' ], true )
+		) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		}
 	}
@@ -248,5 +253,24 @@ class AmpThemes implements Service, Registerable, Conditional, Delayed {
 		];
 
 		return $response;
+	}
+
+	/**
+	 * Add theme metadata for AMP compatibility in theme listing page.
+	 *
+	 * @param string[] $theme_meta An array of the theme's metadata.
+	 * @param string   $stylesheet Directory name of the theme.
+	 *
+	 * @return string[] An array of the theme's metadata.
+	 */
+	public function filter_theme_row_meta( $theme_meta, $stylesheet ) {
+
+		$amp_themes = wp_list_pluck( $this->get_themes(), 'slug' );
+
+		if ( in_array( $stylesheet, $amp_themes, true ) ) {
+			$theme_meta[] = esc_html__( 'AMP Compatible', 'amp' );
+		}
+
+		return $theme_meta;
 	}
 }

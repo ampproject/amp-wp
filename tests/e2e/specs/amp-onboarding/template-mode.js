@@ -104,13 +104,16 @@ describe( 'Template mode recommendations with non-reader-theme active', () => {
 	it( 'makes correct recommendations when user is technical and the current theme is not a reader theme', async () => {
 		await moveToTemplateModeScreen( { technical: true } );
 
-		// The Standard mode should be recommended.
-		await expect( page ).toMatchElement( '#template-mode-standard-container .components-panel__body-title button[aria-expanded="true"]' );
-		await expect( page ).toMatchElement( '#template-mode-standard-container .amp-notice--success' );
+		// The Reader mode should be recommended.
+		await expect( page ).toMatchElement( '#template-mode-reader-container .components-panel__body-title button[aria-expanded="true"]' );
+		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--success' );
 
-		// The Reader and Transitional options should be collapsed.
-		await expect( page ).toMatchElement( '#template-mode-reader-container .components-panel__body-title button[aria-expanded="false"]' );
-		await expect( page ).toMatchElement( '#template-mode-transitional-container .components-panel__body-title button[aria-expanded="false"]' );
+		// Transitional should be recommended.
+		await expect( page ).toMatchElement( '#template-mode-transitional-container .components-panel__body-title button[aria-expanded="true"]' );
+		await expect( page ).toMatchElement( '#template-mode-transitional-container .amp-notice--success' );
+
+		// The Standard option should not be recommended.
+		await expect( page ).toMatchElement( '#template-mode-standard-container .components-panel__body-title button[aria-expanded="false"]' );
 	} );
 } );
 

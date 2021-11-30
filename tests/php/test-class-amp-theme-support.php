@@ -772,17 +772,11 @@ class Test_AMP_Theme_Support extends TestCase {
 	 */
 	public function test_add_hooks() {
 		AMP_Theme_Support::add_hooks();
-		$this->assertFalse( has_action( 'wp_head', 'wp_post_preview_js' ) );
 		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
 
+		$this->assertEquals( 10, has_filter( 'wp_resource_hints', [ self::TESTED_CLASS, 'filter_resource_hints_to_remove_emoji_dns_prefetch' ] ) );
 		$this->assertFalse( has_action( 'wp_head', 'print_emoji_detection_script' ) );
 		$this->assertFalse( has_action( 'wp_print_styles', 'print_emoji_styles' ) );
-		$this->assertEquals( 10, has_action( 'wp_print_styles', [ AMP_Theme_Support::class, 'print_emoji_styles' ] ) );
-		$this->assertEquals( 10, has_filter( 'the_title', 'wp_staticize_emoji' ) );
-		$this->assertEquals( 10, has_filter( 'the_excerpt', 'wp_staticize_emoji' ) );
-		$this->assertEquals( 10, has_filter( 'the_content', 'wp_staticize_emoji' ) );
-		$this->assertEquals( 10, has_filter( 'comment_text', 'wp_staticize_emoji' ) );
-		$this->assertEquals( 10, has_filter( 'widget_text', 'wp_staticize_emoji' ) );
 
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ) );
 		$this->assertEquals( 0, has_action( 'wp_enqueue_scripts', [ self::TESTED_CLASS, 'enqueue_assets' ] ) );
@@ -795,6 +789,28 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertEquals( $priority, has_action( 'template_redirect', [ self::TESTED_CLASS, 'start_output_buffering' ] ) );
 
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', [ self::TESTED_CLASS, 'amend_header_image_with_video_header' ] ) );
+	}
+
+	/** @covers AMP_Theme_Support::filter_resource_hints_to_remove_emoji_dns_prefetch() */
+	public function test_filter_resource_hints_to_remove_emoji_dns_prefetch() {
+		$hints = [
+			'preconnect'   => [
+				'https://example.com/',
+			],
+			'dns-prefetch' => [
+				'https://example.prg/',
+				apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/13.0.0/svg/' ),
+			],
+		];
+
+		$filtered_hints = [];
+		foreach ( $hints as $rel => $urls ) {
+			$filtered_hints[ $rel ] = AMP_Theme_Support::filter_resource_hints_to_remove_emoji_dns_prefetch( $urls, $rel );
+		}
+
+		$this->assertEquals( $hints['preconnect'], $filtered_hints['preconnect'] );
+		$this->assertNotEquals( $hints['dns-prefetch'], $filtered_hints['dns-prefetch'] );
+		$this->assertEquals( [ 'https://example.prg/' ], $filtered_hints['dns-prefetch'] );
 	}
 
 	/**
@@ -1682,7 +1698,21 @@ class Test_AMP_Theme_Support extends TestCase {
 			return AMP_Theme_Support::prepare_response( $original_html );
 		};
 
+		$amp_finalize_dom_count = did_action( 'amp_finalize_dom' );
+		add_action(
+			'amp_finalize_dom',
+			function ( $dom, $effective_sandboxing_level ) {
+				$this->assertInstanceOf( Document::class, $dom );
+				$this->assertIsInt( $effective_sandboxing_level );
+				$this->assertSame( 3, $effective_sandboxing_level );
+			},
+			10,
+			2
+		);
+
 		$sanitized_html = $call_prepare_response();
+
+		$this->assertSame( $amp_finalize_dom_count + 1, did_action( 'amp_finalize_dom' ) );
 
 		$this->assertStringNotContainsString( 'handle=', $sanitized_html );
 		$this->assertEquals( 2, did_action( 'wp_print_scripts' ) );
@@ -1922,7 +1952,22 @@ class Test_AMP_Theme_Support extends TestCase {
 			</body>
 		</html>
 		<?php
+
+		$amp_finalize_dom_count = did_action( 'amp_finalize_dom' );
+		add_action(
+			'amp_finalize_dom',
+			function ( $dom, $effective_sandboxing_level ) use ( $converted ) {
+				$this->assertInstanceOf( Document::class, $dom );
+				$this->assertIsInt( $effective_sandboxing_level );
+				$this->assertSame( $converted ? 3 : 2, $effective_sandboxing_level );
+			},
+			10,
+			2
+		);
+
 		$html = AMP_Theme_Support::prepare_response( ob_get_clean() );
+
+		$this->assertSame( $amp_finalize_dom_count + 1, did_action( 'amp_finalize_dom' ) );
 
 		$dom = Document::fromHtml( $html );
 
