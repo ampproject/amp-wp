@@ -60,6 +60,10 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 				'<form method="get" action="http://example.org/example-page/"></form>',
 				'<form method="get" action="//example.org/example-page/" target="_top"></form>',
 			],
+			'form_with_get_method_and_action_xhr' => [
+				'<form method="get" action="//example.org/example-page/" action-xhr="//example.org/wp-json/foo/submissions/" xssi-prefix=")]}"></form>',
+				'<form method="get" action="//example.org/example-page/" target="_top" action-xhr="//example.org/wp-json/foo/submissions/" xssi-prefix=")]}"></form>',
+			],
 			'form_with_http_action_and_port' => [
 				'<form method="get" action="http://example.org:8080/example-page/"></form>',
 				'<form method="get" action="//example.org:8080/example-page/" target="_top"></form>',
