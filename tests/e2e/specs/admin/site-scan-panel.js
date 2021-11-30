@@ -1,12 +1,7 @@
 /**
  * WordPress dependencies
  */
-import {
-	activateTheme,
-	deleteTheme,
-	installTheme,
-	visitAdminPage,
-} from '@wordpress/e2e-test-utils';
+import { activateTheme, visitAdminPage } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -14,31 +9,19 @@ import {
 import {
 	activatePlugin,
 	deactivatePlugin,
-	installPlugin,
+	installLocalPlugin,
+	saveSettings,
 	setTemplateMode,
 	uninstallPlugin,
 } from '../../utils/amp-settings-utils';
-import { cleanUpSettings, scrollToElement } from '../../utils/onboarding-wizard-utils';
+import { completeWizard, scrollToElement } from '../../utils/onboarding-wizard-utils';
 import { testSiteScanning } from '../../utils/site-scan-utils';
 
 describe( 'AMP settings screen Site Scan panel', () => {
 	const timeout = 30000;
 
 	beforeAll( async () => {
-		await installTheme( 'hestia' );
-		await installPlugin( 'autoptimize' );
-
-		await cleanUpSettings();
-
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-		await setTemplateMode( 'transitional' );
-	} );
-
-	afterAll( async () => {
-		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
-		await uninstallPlugin( 'autoptimize' );
-
-		await cleanUpSettings();
+		await completeWizard( { technical: true, mode: 'transitional' } );
 	} );
 
 	async function triggerSiteRescan() {
@@ -92,27 +75,29 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__heading[data-badge-content="1"]', { text: /^Themes/, timeout } );
 		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__source-name', { text: /Hestia/ } );
+
+		await activateTheme( 'twentytwenty' );
 	} );
 
-	it( 'lists Autoptimize plugin as causing AMP incompatibility', async () => {
+	it( 'lists E2E Tests Demo Plugin as causing AMP incompatibility', async () => {
 		await activateTheme( 'twentytwenty' );
-		await activatePlugin( 'autoptimize' );
+		await activatePlugin( 'e2e-tests-demo-plugin' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
 		await triggerSiteRescan();
 
 		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__heading[data-badge-content="1"]', { text: /^Plugins/, timeout } );
-		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /E2E Tests Demo Plugin/ } );
 
 		await expect( page ).not.toMatchElement( '.site-scan-results--themes' );
 
-		await deactivatePlugin( 'autoptimize' );
+		await deactivatePlugin( 'e2e-tests-demo-plugin' );
 	} );
 
-	it( 'lists Hestia theme and Autoptimize plugin for causing AMP incompatibilities', async () => {
+	it( 'lists Hestia theme and E2E Tests Demo Plugin for causing AMP incompatibilities', async () => {
 		await activateTheme( 'hestia' );
-		await activatePlugin( 'autoptimize' );
+		await activatePlugin( 'e2e-tests-demo-plugin' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
@@ -125,62 +110,58 @@ describe( 'AMP settings screen Site Scan panel', () => {
 		expect( totalIssuesCount ).toBe( 2 );
 
 		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__source-name', { text: /Hestia/ } );
-		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /E2E Tests Demo Plugin/ } );
 
-		await deactivatePlugin( 'autoptimize' );
+		await activateTheme( 'twentytwenty' );
+		await deactivatePlugin( 'e2e-tests-demo-plugin' );
 	} );
 
 	it( 'displays a notice if a plugin has been deactivated or removed', async () => {
 		await activateTheme( 'twentytwenty' );
-		await activatePlugin( 'autoptimize' );
+		await activatePlugin( 'e2e-tests-demo-plugin' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
 		await triggerSiteRescan();
 
-		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/, timeout } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /E2E Tests Demo Plugin/, timeout } );
 
 		// Deactivate the plugin and test.
-		await deactivatePlugin( 'autoptimize' );
+		await deactivatePlugin( 'e2e-tests-demo-plugin' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /E2E Tests Demo Plugin/ } );
 		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-notice', { text: /This plugin has been deactivated since last site scan./ } );
 
 		// Uninstall the plugin and test.
-		await uninstallPlugin( 'autoptimize' );
+		await uninstallPlugin( 'e2e-tests-demo-plugin' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-slug', { text: /autoptimize/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-slug', { text: /e2e-tests-demo-plugin/ } );
 		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-notice', { text: /This plugin has been uninstalled since last site scan./ } );
 
 		// Clean up.
-		await installPlugin( 'autoptimize' );
+		await installLocalPlugin( 'e2e-tests-demo-plugin' );
 	} );
 
 	it( 'automatically triggers a scan if Plugin Suppression option has changed', async () => {
-		await activatePlugin( 'autoptimize' );
+		await activatePlugin( 'e2e-tests-demo-plugin' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
 		// Suppress the plugin.
 		await scrollToElement( { selector: '#plugin-suppression .components-panel__body-toggle', click: true } );
 		await expect( page ).toSelect( '#suppressed-plugins-table tbody tr:first-child .column-status select', 'Suppressed' );
+		await saveSettings();
+
 		await scrollToElement( { selector: '#site-scan' } );
-
-		// Save options.
-		await Promise.all( [
-			scrollToElement( { selector: '.amp-settings-nav button[type="submit"]', click: true } ),
-			page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ) ),
-		] );
-
 		await testSiteScanning( {
 			statusElementClassName: 'settings-site-scan__status',
 			isAmpFirst: false,
 		} );
 
-		await deactivatePlugin( 'autoptimize' );
+		await deactivatePlugin( 'e2e-tests-demo-plugin' );
 	} );
 } );

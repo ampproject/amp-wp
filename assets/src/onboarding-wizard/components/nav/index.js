@@ -21,6 +21,7 @@ import { Options } from '../../../components/options-context-provider';
 import { User } from '../../../components/user-context-provider';
 import { READER } from '../../../common/constants';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
+import { SiteScan } from '../../../components/site-scan-context-provider';
 import { useWindowWidth } from '../../../utils/use-window-width';
 
 /**
@@ -66,6 +67,7 @@ export function Nav( { closeLink, finishLink } ) {
 	} = useContext( Options );
 	const { savingDeveloperToolsOption } = useContext( User );
 	const { downloadingTheme } = useContext( ReaderThemes );
+	const { isBusy } = useContext( SiteScan );
 
 	let nextText;
 	let nextLink;
@@ -103,6 +105,7 @@ export function Nav( { closeLink, finishLink } ) {
 						)
 						: (
 							<Button
+								disabled={ isBusy }
 								className="amp-settings-nav__prev"
 								onClick={ moveBack }
 							>

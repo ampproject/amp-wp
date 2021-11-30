@@ -1898,20 +1898,118 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		$this->assertStringNotContainsString( 'data:', $actual_stylesheets[0] );
 		$this->assertStringContainsString( 'fonts/NonBreakingSpaceOverride.woff2', $actual_stylesheets[0] );
 		$this->assertStringContainsString( 'fonts/NonBreakingSpaceOverride.woff', $actual_stylesheets[0] );
-		$this->assertStringContainsString( 'font-display:swap', $actual_stylesheets[0] );
+		$this->assertStringContainsString( 'font-display:optional', $actual_stylesheets[0] );
 
 		// Check font not included in theme, but included in plugin.
 		$this->assertStringContainsString( '@font-face{font-family:"Genericons";', $actual_stylesheets[1] );
 		$this->assertStringContainsString( 'format("woff")', $actual_stylesheets[1] );
 		$this->assertStringNotContainsString( 'data:', $actual_stylesheets[1] );
 		$this->assertStringContainsString( 'assets/fonts/genericons.woff', $actual_stylesheets[1] );
-		$this->assertStringContainsString( 'font-display:swap', $actual_stylesheets[1] );
+		$this->assertStringContainsString( 'font-display:block', $actual_stylesheets[1] );
 
 		// Check font not included anywhere, so must remain inline.
 		$this->assertStringContainsString( '@font-face{font-family:"Custom";', $actual_stylesheets[2] );
 		$this->assertStringContainsString( 'url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA")', $actual_stylesheets[2] );
 		$this->assertStringContainsString( 'format("woff")', $actual_stylesheets[2] );
-		$this->assertStringNotContainsString( 'font-display:swap', $actual_stylesheets[2] );
+		$this->assertStringNotContainsString( 'font-display:', $actual_stylesheets[2] );
+	}
+
+	/** @return array */
+	public function get_data_to_test_font_files_preloading() {
+		return [
+			'twentynineteen' => [
+				'theme_slug'    => 'twentynineteen',
+				'expected_urls' => [], // Twenty Nineteen theme uses "NonBreakingSpaceOverride" font which should use 'font-display:optional' property, thus should not be preloaded.
+			],
+			'twentytwenty' => [
+				'theme_slug'    => 'twentytwenty',
+				'expected_urls' => [], // Twenty Twenty theme uses "Inter var" and "NonBreakingSpaceOverride" font which should use 'font-display:optional' property, thus should not be preloaded.
+			],
+			'twentytwentyone' => [
+				'theme_slug'    => 'twentytwentyone',
+				'expected_urls' => [], // Twenty Twenty-One theme uses system font stack, no extra fonts are enqueued.
+			],
+			'custom_swap'     => [
+				'theme_slug'    => '',
+				'expected_urls' => [
+					'/fonts/OpenSans-Regular-webfont.woff2',
+				],
+				'html'          => '<html amp><head><meta charset="utf-8"><style>@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2");font-display:swap}</style></head><body></body></html>',
+			],
+			'custom_optional' => [
+				'theme_slug'    => '',
+				'expected_urls' => [],
+				'html'          => '<html amp><head><meta charset="utf-8"><style>@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2");font-display:optional}</style></head><body></body></html>',
+			],
+			'custom_combined' => [
+				'theme_slug'    => '',
+				'expected_urls' => [
+					'/fonts/OpenSans-Regular-webfont.woff2',
+					'/fonts/Lato-Regular-webfont.woff2',
+				],
+				'html'          => '<html amp><head><meta charset="utf-8"><style>@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2");font-display:swap}@font-face{font-family:"Roboto";src:url("/fonts/Roboto-Regular-webfont.woff2") format("woff2");font-display:optional}@font-face{font-family:"Lato";src:url("/fonts/Lato-Regular-webfont.woff2") format("woff2"),url("/fonts/Lato-Regular-webfont.woff") format("woff")}</style></head><body></body></html>',
+			],
+			'custom_inlined' => [
+				'theme_slug'    => '',
+				'expected_urls' => [], // No preload link should be present because the data: URL was not converted into an external link.
+				'html'          => '<html amp><head><meta charset="utf-8"><style>@font-face{font-family:"Open Sans";src:url("data:application/font-woff2;charset=utf-8;base64,...") format("woff2"), url("/fonts/OpenSans-Regular-webfont.woff") format("woff");font-display:swap}</style></head><body></body></html>',
+			],
+		];
+	}
+
+	/**
+	 * Test that font files are preloaded with <link> element.
+	 *
+	 * @dataProvider get_data_to_test_font_files_preloading
+	 * @covers AMP_Style_Sanitizer::process_font_face_at_rule()
+	 */
+	public function test_font_files_preloading( $theme_slug, $expected_urls, $html = '' ) {
+		if ( ! empty( $theme_slug ) ) {
+			$theme = new WP_Theme( $theme_slug, ABSPATH . 'wp-content/themes' );
+			if ( $theme->errors() ) {
+				$this->markTestSkipped( $theme->errors()->get_error_message() );
+			}
+
+			$html  = '<html amp><head><meta charset="utf-8">';
+			$html .= sprintf( '<link rel="stylesheet" href="%s">', esc_url( $theme->get_stylesheet_directory_uri() . '/style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+			$html .= '</head><body></body></html>';
+		}
+
+		// Do the assertions twice in order to ensure that preloads are still added when the CSS is cached.
+		foreach ( [ 'false', 'true' ] as $is_cached ) {
+			$dom         = Document::fromHtml( $html, Options::DEFAULTS );
+			$error_codes = [];
+			$sanitizer   = new AMP_Style_Sanitizer(
+				$dom,
+				[
+					'use_document_element' => true,
+				]
+			);
+			$sanitizer->sanitize();
+			$this->assertEquals( [], $error_codes, "Is cached: $is_cached" );
+
+			$link_elements       = $dom->getElementsByTagName( 'link' );
+			$link_elements_count = $link_elements->length;
+
+			$actual_urls = array_map(
+				static function ( Element $link_element ) {
+					return $link_element->getAttribute( 'href' );
+				},
+				iterator_to_array( $link_elements )
+			);
+
+			$this->assertEqualSets( $expected_urls, $actual_urls, "Is cached: $is_cached" );
+
+			for ( $i = 0; $i < $link_elements_count; $i ++ ) {
+				$this->assertStringEndsWith(
+					$expected_urls[ $i ],
+					$link_elements->item( $i )->getAttribute( 'href' )
+				);
+				$this->assertEquals( $link_elements->item( $i )->getAttribute( 'rel' ), 'preload' );
+				$this->assertEquals( $link_elements->item( $i )->getAttribute( 'as' ), 'font' );
+				$this->assertEquals( $link_elements->item( $i )->getAttribute( 'crossorigin' ), '' );
+			}
+		}
 	}
 
 	/**

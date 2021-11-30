@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { activateTheme, deleteTheme, installTheme } from '@wordpress/e2e-test-utils';
+import { activateTheme } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -11,7 +11,6 @@ import {
 	clickMode,
 	testNextButton,
 	testPreviousButton,
-	cleanUpSettings,
 } from '../../utils/onboarding-wizard-utils';
 
 describe( 'Template mode', () => {
@@ -45,10 +44,6 @@ describe( 'Template mode', () => {
 } );
 
 describe( 'Template mode recommendations with reader theme active', () => {
-	beforeEach( async () => {
-		await activateTheme( 'twentytwenty' );
-	} );
-
 	it( 'makes correct recommendations when user is not technical and the current theme is a reader theme', async () => {
 		await moveToTemplateModeScreen( { technical: false } );
 
@@ -79,14 +74,12 @@ describe( 'Template mode recommendations with reader theme active', () => {
 } );
 
 describe( 'Template mode recommendations with non-reader-theme active', () => {
-	beforeEach( async () => {
-		await cleanUpSettings();
-		await installTheme( 'hestia' );
+	beforeAll( async () => {
 		await activateTheme( 'hestia' );
 	} );
 
-	afterEach( async () => {
-		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
+	afterAll( async () => {
+		await activateTheme( 'twentytwenty' );
 	} );
 
 	it( 'makes correct recommendations when user is not technical and the current theme is not a reader theme', async () => {
