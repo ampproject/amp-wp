@@ -68,7 +68,7 @@ export function AMPSupport( props ) {
 					setUuid( response.data.uuid );
 				} else {
 					setSubmitSupportRequest( false );
-					throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
+					throw new Error( __( 'Failed to send support request. Please try again later.', 'amp' ) );
 				}
 			} catch ( exception ) {
 				setError( exception.message );
@@ -89,7 +89,7 @@ export function AMPSupport( props ) {
 					{
 						__html: sprintf(
 							/* translators: %s is the URL to create a new support topic */
-							__( 'In order to best assist you, please submit the following information to our private database. Once you have done so, copy the the resulting support ID and mention it in a <a href="%s" rel="noreferrer" target="_blank">support forum topic</a>. You do not have to submit data to get support, but our team will be able to help you more effectively if you do so.', 'amp' ),
+							__( 'In order to best assist you, please tap the Send Data button below to send the following site information to our private database. Once you have done so, copy the the resulting Support UUID in the blue box that appears and include the ID in a new <a href="%s" rel="noreferrer" target="_blank">support forum topic</a>. You do not have to submit data to get support, but our team will be able to help you more effectively if you do so.', 'amp' ),
 							'https://wordpress.org/support/plugin/amp/#new-topic-0',
 						),
 					}

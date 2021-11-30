@@ -30,15 +30,15 @@ jest.mock( '../amp-toolbar-button', () => ( {
 		return null;
 	} } ) );
 
-registerBlockType( TEST_BLOCK, {
-	attributes: {},
-	save: noop,
-	category: 'widgets',
-	title: 'test block',
-} );
-
 describe( 'withAMPToolbarButton: filtering with errors', () => {
 	beforeAll( () => {
+		registerBlockType( TEST_BLOCK, {
+			attributes: {},
+			save: noop,
+			category: 'widgets',
+			title: 'test block',
+		} );
+
 		block = createBlock( TEST_BLOCK, {} );
 		dispatch( 'core/block-editor' ).insertBlock( block );
 

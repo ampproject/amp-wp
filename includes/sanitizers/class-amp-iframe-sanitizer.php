@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
 use AmpProject\Attribute;
 use AmpProject\Layout;
@@ -66,6 +67,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type bool   $add_noscript_fallback Whether to add a noscript fallback.
 	 *     @type string $current_origin        The current origin serving the page. Normally this will be the $_SERVER[HTTP_HOST].
 	 *     @type string $alias_origin          An alternative origin which can be supplied which is used when encountering same-origin iframes.
+	 *     @type bool   $native_iframe_used    Whether an HTML5 iframe element should be used instead of amp-iframe.
 	 * }
 	 */
 	protected $DEFAULT_ARGS = [
@@ -73,6 +75,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		'add_noscript_fallback' => true,
 		'current_origin'        => null,
 		'alias_origin'          => null,
+		'native_iframe_used'    => false,
 	];
 
 	/**
@@ -81,6 +84,9 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
+		if ( $this->args['native_iframe_used'] ) {
+			return [];
+		}
 		return [
 			'iframe' => [
 				'amp-iframe',
@@ -120,6 +126,12 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Skip element if already inside of an AMP element as a noscript fallback, or if it has a dev mode exemption.
 			if ( $this->is_inside_amp_noscript( $node ) || DevMode::hasExemptionForNode( $node ) ) {
+				continue;
+			}
+
+			// If using native <iframe> instead of converting to <amp-iframe>, just mark the element as being unvalidated.
+			if ( $this->args['native_iframe_used'] ) {
+				ValidationExemption::mark_node_as_px_verified( $node );
 				continue;
 			}
 

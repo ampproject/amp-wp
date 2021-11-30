@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 
@@ -19,6 +20,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 	use HandleValidation;
 	use LoadsCoreThemes;
+	use PrivateAccess;
 
 	/**
 	 * The mock Site Icon value to use in a filter.
@@ -50,7 +52,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 */
 	public function tearDown() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Validation_Manager::$is_validate_request = false;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 		global $wp_scripts, $pagenow, $show_admin_bar, $current_screen;
 		$wp_scripts     = null;
 		$show_admin_bar = null;
@@ -127,6 +129,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
 		$this->assertEquals( 10, has_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous' ) );
+		$this->assertEquals( 10, has_filter( 'all_plugins', 'amp_modify_plugin_description' ) );
 	}
 
 	/** @covers ::amp_bootstrap_plugin() */
@@ -651,7 +654,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/?amp' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/?amp=1' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/amp/?amp=1' ) );
-		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_paired_endpoint( 'https://example.com/foo/?amp#bar' ) );
+		$this->assertEquals( 'https://example.com/foo/#bar', amp_remove_paired_endpoint( 'https://example.com/foo/?amp#bar' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/amp/' ) );
 		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_paired_endpoint( 'https://example.com/foo/amp/?blaz' ) );
 	}
@@ -1383,9 +1386,11 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'amp-story-360'             => 'v0/amp-story-360-0.1.js',
 			'amp-story-auto-ads'        => 'v0/amp-story-auto-ads-0.1.js',
 			'amp-story-auto-analytics'  => 'v0/amp-story-auto-analytics-0.1.js',
+			'amp-story-captions'        => 'v0/amp-story-captions-0.1.js',
 			'amp-story-interactive'     => 'v0/amp-story-interactive-0.1.js',
 			'amp-story-panning-media'   => 'v0/amp-story-panning-media-0.1.js',
 			'amp-story-player'          => 'v0/amp-story-player-0.1.js',
+			'amp-story-shopping'        => 'v0/amp-story-shopping-0.1.js',
 			'amp-stream-gallery'        => 'v0/amp-stream-gallery-0.1.js',
 			'amp-subscriptions'         => 'v0/amp-subscriptions-0.1.js',
 			'amp-subscriptions-google'  => 'v0/amp-subscriptions-google-0.1.js',
@@ -1476,7 +1481,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'amp-date-picker'           => 'v0/amp-date-picker-0.1.js',
 			'amp-delight-player'        => 'v0/amp-delight-player-0.1.js',
 			'amp-dynamic-css-classes'   => 'v0/amp-dynamic-css-classes-0.1.js',
-			'amp-embedly-card'          => 'v0/amp-embedly-card-0.1.js',
+			'amp-embedly-card'          => 'v0/amp-embedly-card-1.0.js',
 			'amp-experiment'            => 'v0/amp-experiment-0.1.js',
 			'amp-facebook'              => 'v0/amp-facebook-1.0.js',
 			'amp-facebook-comments'     => 'v0/amp-facebook-comments-0.1.js',
@@ -1492,7 +1497,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'amp-gist'                  => 'v0/amp-gist-0.1.js',
 			'amp-google-document-embed' => 'v0/amp-google-document-embed-0.1.js',
 			'amp-hulu'                  => 'v0/amp-hulu-0.1.js',
-			'amp-iframe'                => 'v0/amp-iframe-0.1.js',
+			'amp-iframe'                => 'v0/amp-iframe-1.0.js',
 			'amp-iframely'              => 'v0/amp-iframely-0.1.js',
 			'amp-ima-video'             => 'v0/amp-ima-video-0.1.js',
 			'amp-image-lightbox'        => 'v0/amp-image-lightbox-0.1.js',
@@ -1510,7 +1515,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'amp-link-rewriter'         => 'v0/amp-link-rewriter-0.1.js',
 			'amp-list'                  => 'v0/amp-list-0.1.js',
 			'amp-live-list'             => 'v0/amp-live-list-0.1.js',
-			'amp-mathml'                => 'v0/amp-mathml-0.1.js',
+			'amp-mathml'                => 'v0/amp-mathml-1.0.js',
 			'amp-mega-menu'             => 'v0/amp-mega-menu-0.1.js',
 			'amp-megaphone'             => 'v0/amp-megaphone-0.1.js',
 			'amp-minute-media-player'   => 'v0/amp-minute-media-player-0.1.js',
@@ -1538,20 +1543,22 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'amp-script'                => 'v0/amp-script-0.1.js',
 			'amp-selector'              => 'v0/amp-selector-1.0.js',
 			'amp-shadow'                => 'shadow-v0.js',
-			'amp-sidebar'               => 'v0/amp-sidebar-0.1.js',
+			'amp-sidebar'               => 'v0/amp-sidebar-1.0.js',
 			'amp-skimlinks'             => 'v0/amp-skimlinks-0.1.js',
 			'amp-smartlinks'            => 'v0/amp-smartlinks-0.1.js',
 			'amp-social-share'          => 'v0/amp-social-share-1.0.js',
-			'amp-soundcloud'            => 'v0/amp-soundcloud-0.1.js',
+			'amp-soundcloud'            => 'v0/amp-soundcloud-1.0.js',
 			'amp-springboard-player'    => 'v0/amp-springboard-player-0.1.js',
 			'amp-sticky-ad'             => 'v0/amp-sticky-ad-1.0.js',
 			'amp-story'                 => 'v0/amp-story-1.0.js',
 			'amp-story-360'             => 'v0/amp-story-360-0.1.js',
 			'amp-story-auto-ads'        => 'v0/amp-story-auto-ads-0.1.js',
 			'amp-story-auto-analytics'  => 'v0/amp-story-auto-analytics-0.1.js',
+			'amp-story-captions'        => 'v0/amp-story-captions-0.1.js',
 			'amp-story-interactive'     => 'v0/amp-story-interactive-0.1.js',
 			'amp-story-panning-media'   => 'v0/amp-story-panning-media-0.1.js',
 			'amp-story-player'          => 'v0/amp-story-player-0.1.js',
+			'amp-story-shopping'        => 'v0/amp-story-shopping-0.1.js',
 			'amp-stream-gallery'        => 'v0/amp-stream-gallery-1.0.js',
 			'amp-subscriptions'         => 'v0/amp-subscriptions-0.1.js',
 			'amp-subscriptions-google'  => 'v0/amp-subscriptions-google-0.1.js',
@@ -1601,20 +1608,28 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'amp-accordion'        => 'v0/amp-accordion-1.0.css',
 			'amp-base-carousel'    => 'v0/amp-base-carousel-1.0.css',
 			'amp-brightcove'       => 'v0/amp-brightcove-1.0.css',
+			'amp-date-countdown'   => 'v0/amp-date-countdown-1.0.css',
+			'amp-date-display'     => 'v0/amp-date-display-1.0.css',
+			'amp-embedly-card'     => 'v0/amp-embedly-card-1.0.css',
 			'amp-facebook'         => 'v0/amp-facebook-1.0.css',
 			'amp-fit-text'         => 'v0/amp-fit-text-1.0.css',
+			'amp-iframe'           => 'v0/amp-iframe-1.0.css',
 			'amp-inline-gallery'   => 'v0/amp-inline-gallery-1.0.css',
 			'amp-instagram'        => 'v0/amp-instagram-1.0.css',
 			'amp-lightbox'         => 'v0/amp-lightbox-1.0.css',
 			'amp-lightbox-gallery' => 'v0/amp-lightbox-gallery-1.0.css',
+			'amp-mathml'           => 'v0/amp-mathml-1.0.css',
 			'amp-selector'         => 'v0/amp-selector-1.0.css',
+			'amp-sidebar'          => 'v0/amp-sidebar-1.0.css',
 			'amp-social-share'     => 'v0/amp-social-share-1.0.css',
+			'amp-soundcloud'       => 'v0/amp-soundcloud-1.0.css',
 			'amp-stream-gallery'   => 'v0/amp-stream-gallery-1.0.css',
 			'amp-timeago'          => 'v0/amp-timeago-1.0.css',
 			'amp-twitter'          => 'v0/amp-twitter-1.0.css',
 			'amp-video'            => 'v0/amp-video-1.0.css',
 			'amp-video-iframe'     => 'v0/amp-video-iframe-1.0.css',
 			'amp-vimeo'            => 'v0/amp-vimeo-1.0.css',
+			'amp-wordpress-embed'  => 'v0/amp-wordpress-embed-1.0.css',
 			'amp-youtube'          => 'v0/amp-youtube-1.0.css',
 		];
 
@@ -1695,21 +1710,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * Test amp_is_native_post_form_allowed().
-	 *
-	 * @covers ::amp_is_native_post_form_allowed()
-	 */
-	public function test_amp_is_native_post_form_allowed() {
-		$this->assertFalse( amp_is_native_post_form_allowed(), 'Expected to be disabled by default for now.' );
-
-		add_filter( 'amp_native_post_form_allowed', '__return_true' );
-		$this->assertTrue( amp_is_native_post_form_allowed() );
-
-		add_filter( 'amp_native_post_form_allowed', '__return_false', 20 );
-		$this->assertFalse( amp_is_native_post_form_allowed() );
-	}
-
-	/**
 	 * Test deprecated $post param for amp_get_content_embed_handlers().
 	 *
 	 * @covers ::amp_get_content_embed_handlers()
@@ -1759,7 +1759,14 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			}
 		);
 		$ordered_sanitizers = array_keys( amp_get_content_sanitizers() );
-		$this->assertEquals( 'Even_After_Validating_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 5 ] );
+		$this->assertGreaterThan(
+			array_search( 'Even_After_Validating_Sanitizer', $ordered_sanitizers, true ),
+			array_search( AMP_Script_Sanitizer::class, $ordered_sanitizers, true )
+		);
+		$this->assertGreaterThan(
+			array_search( AMP_Core_Theme_Sanitizer::class, $ordered_sanitizers, true ),
+			array_search( AMP_Script_Sanitizer::class, $ordered_sanitizers, true )
+		);
 		$this->assertEquals( AMP_Layout_Sanitizer::class, $ordered_sanitizers[ count( $ordered_sanitizers ) - 4 ] );
 		$this->assertEquals( AMP_Style_Sanitizer::class, $ordered_sanitizers[ count( $ordered_sanitizers ) - 3 ] );
 		$this->assertEquals( AMP_Meta_Sanitizer::class, $ordered_sanitizers[ count( $ordered_sanitizers ) - 2 ] );
@@ -1799,6 +1806,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
 
 		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, and now also with admin bar showing.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_filter( 'show_admin_bar', '__return_true' );
 		$sanitizers = amp_get_content_sanitizers();
@@ -1812,8 +1820,42 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 					'//*[ @id = "wpadminbar" ]',
 					'//*[ @id = "wpadminbar" ]//*',
 					'//style[ @id = "admin-bar-inline-css" ]',
+					'//script[ not( @src ) and preceding-sibling::input[ @name = "_wp_unfiltered_html_comment_disabled" ] and contains( text(), "_wp_unfiltered_html_comment_disabled" ) ]',
 				]
 			),
+			$sanitizers[ AMP_Dev_Mode_Sanitizer::class ]['element_xpaths']
+		);
+	}
+
+	/**
+	 * Test amp_get_content_sanitizers().
+	 *
+	 * @covers ::amp_get_content_sanitizers()
+	 * @see \wp_post_preview_js()
+	 */
+	public function test_amp_get_content_sanitizers_with_post_preview() {
+		$user_id = self::factory()->user->create( [ 'role' => 'author' ] );
+		wp_set_current_user( $user_id );
+		$post = self::factory()->post->create(
+			[
+				'post_status' => 'draft',
+				'post_author' => $user_id,
+			]
+		);
+		$this->go_to( get_preview_post_link( $post ) );
+
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertTrue( is_admin_bar_showing() );
+		$this->assertTrue( amp_is_dev_mode() );
+		$this->assertTrue( is_preview() );
+		$this->assertArrayHasKey( AMP_Dev_Mode_Sanitizer::class, $sanitizers );
+		$this->assertEqualSets(
+			[
+				'//*[ @id = "wpadminbar" ]',
+				'//*[ @id = "wpadminbar" ]//*',
+				'//style[ @id = "admin-bar-inline-css" ]',
+				'//script[ not( @src ) and contains( text(), "document.location.search" ) and contains( text(), "preview=true" ) and contains( text(), "unload" ) and contains( text(), "window.name" ) and contains( text(), "wp-preview-' . $post . '" ) ]',
+			],
 			$sanitizers[ AMP_Dev_Mode_Sanitizer::class ]['element_xpaths']
 		);
 	}
@@ -2415,6 +2457,26 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertStringNotContainsString( '?', $permalink );
 		$url = $permalink . $suffix;
 		$this->assertEquals( $is_amp, amp_has_paired_endpoint( $url ) );
+	}
+
+	/**
+	 * @covers ::amp_modify_plugin_description()
+	 */
+	public function test_amp_modify_plugin_description() {
+		$input = [
+			'amp/amp.php' => [
+				'Description' => 'An easier path to great Page Experience for everyone. Powered by AMP. <em class="amp-deletion-notice"><strong>Deletion Note:</strong> To delete all plugin data with uninstallation, first activate the plugin, <strong>Go to Settings screen > Scroll to “Other” section in Advanced settings > Enable “Delete plugin data upon uninstall” toggle</strong> (if you haven\'t done so already).</em>',
+			],
+			'foo/foo.php' => [
+				'Description' => 'This is not about foo[d]!',
+			],
+		];
+
+		$expected = $input;
+
+		$expected['amp/amp.php']['Description'] = 'An easier path to great Page Experience for everyone. Powered by AMP.';
+
+		$this->assertEquals( $expected, amp_modify_plugin_description( $input ) );
 	}
 
 	/**

@@ -7,7 +7,9 @@
 
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Sandboxing;
 use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
 use AmpProject\Tag;
@@ -28,6 +30,49 @@ class AMP_Validation_Manager {
 	 * @var string
 	 */
 	const VALIDATE_QUERY_VAR = 'amp_validate';
+
+	/**
+	 * Key for amp_validate query var array for nonce to authorize validation.
+	 *
+	 * @var string
+	 */
+	const VALIDATE_QUERY_VAR_NONCE = 'nonce';
+
+	/**
+	 * Key for amp_validate query var array for whether to store the validation results in an amp_validated_url post.
+	 *
+	 * @var string
+	 */
+	const VALIDATE_QUERY_VAR_CACHE = 'cache';
+
+	/**
+	 * Key for amp_validate query var array for whether to return previously-stored the validation results if an
+	 * amp_validated_url post exists for the URL and it is not stale.
+	 *
+	 * @var string
+	 */
+	const VALIDATE_QUERY_VAR_CACHED_IF_FRESH = 'cached_if_fresh';
+
+	/**
+	 * Key for amp_validate query var array for whether to omit stylesheets data.
+	 *
+	 * @var string
+	 */
+	const VALIDATE_QUERY_VAR_OMIT_STYLESHEETS = 'omit_stylesheets';
+
+	/**
+	 * Key for amp_validate query var array to bust the cache.
+	 *
+	 * @var string
+	 */
+	const VALIDATE_QUERY_VAR_CACHE_BUST = 'cache_bust';
+
+	/**
+	 * Key for amp_validate query var array to force Standard template mode.
+	 *
+	 * @var string
+	 */
+	const VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE = 'force_standard_mode';
 
 	/**
 	 * Meta capability for validation.
@@ -53,13 +98,6 @@ class AMP_Validation_Manager {
 	 * @var string
 	 */
 	const VALIDATION_ERROR_TERM_STATUS_QUERY_VAR = 'amp_validation_error_term_status';
-
-	/**
-	 * Query var for cache-busting.
-	 *
-	 * @var string
-	 */
-	const CACHE_BUST_QUERY_VAR = 'amp_cache_bust';
 
 	/**
 	 * Transient key to store validation errors when activating a plugin.
@@ -160,6 +198,13 @@ class AMP_Validation_Manager {
 	protected static $original_block_render_callbacks = [];
 
 	/**
+	 * Collection of backtraces for when wp_editor() was called.
+	 *
+	 * @var array
+	 */
+	protected static $wp_editor_sources = [];
+
+	/**
 	 * Whether a validate request is being performed.
 	 *
 	 * When responding to a request to validate a URL, instead of an HTML document being returned, a JSON document is
@@ -169,7 +214,7 @@ class AMP_Validation_Manager {
 	 *
 	 * @var bool
 	 */
-	public static $is_validate_request = false;
+	protected static $is_validate_request = false;
 
 	/**
 	 * Overrides for validation errors.
@@ -221,7 +266,40 @@ class AMP_Validation_Manager {
 		add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
 		add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
 		add_action( 'wp', [ __CLASS__, 'maybe_fail_validate_request' ] );
+		add_action( 'wp', [ __CLASS__, 'maybe_send_cached_validate_response' ], 20 );
 		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
+
+		// Allow query parameter to force a response to be served with Standard mode (AMP-first). This query parameter
+		// is only honored when doing a validation request or when the user is able to do validation. This is used as
+		// part of Site Scanning in order to determine if the primary theme is suitable for serving AMP.
+		if ( ! amp_is_canonical() ) {
+			$filter_hooks = [
+				'default_option_' . AMP_Options_Manager::OPTION_NAME,
+				'option_' . AMP_Options_Manager::OPTION_NAME,
+			];
+			foreach ( $filter_hooks as $filter_hook ) {
+				add_filter( $filter_hook, [ __CLASS__, 'filter_options_when_force_standard_mode_request' ] );
+			}
+		}
+	}
+
+	/**
+	 * Filter AMP options to set Standard template mode if it is an AMP-override request.
+	 *
+	 * @param array $options Options.
+	 * @return array Filtered options.
+	 */
+	public static function filter_options_when_force_standard_mode_request( $options ) {
+		if (
+			self::is_validate_request()
+			&&
+			self::get_validate_request_args()[ self::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE ]
+		) {
+			$options[ Option::THEME_SUPPORT ]           = AMP_Theme_Support::STANDARD_MODE_SLUG;
+			$options[ Option::ALL_TEMPLATES_SUPPORTED ] = true;
+		}
+
+		return $options;
 	}
 
 	/**
@@ -273,7 +351,13 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_auto_accepted( $error = null ) {
 
-		if ( $error && amp_is_canonical() ) {
+		if (
+			$error
+			&&
+			amp_is_canonical()
+			&&
+			! Sandboxing::is_needed() // @todo Remove this once Sandboxing no longer experimental.
+		) {
 			// Excessive CSS on AMP-first sites must not be removed by default since removing CSS can severely break a site.
 			$accepted = AMP_Style_Sanitizer::STYLESHEET_TOO_LONG !== $error['code'];
 		} else {
@@ -478,7 +562,7 @@ class AMP_Validation_Manager {
 	 * @since 2.1
 	 */
 	public static function maybe_fail_validate_request() {
-		if ( ! self::$is_validate_request || amp_is_request() ) {
+		if ( ! self::is_validate_request() || amp_is_request() ) {
 			return;
 		}
 
@@ -490,6 +574,69 @@ class AMP_Validation_Manager {
 			$message = __( 'The requested URL is not an AMP page.', 'amp' );
 		}
 		wp_send_json( compact( 'code', 'message' ), 400 );
+	}
+
+	/**
+	 * Whether a validate request is being performed.
+	 *
+	 * When responding to a request to validate a URL, instead of an HTML document being returned, a JSON document is
+	 * returned with any errors that were encountered during validation.
+	 *
+	 * @see AMP_Validation_Manager::get_validate_response_data()
+	 *
+	 * @return bool
+	 */
+	public static function is_validate_request() {
+		return self::$is_validate_request;
+	}
+
+	/**
+	 * Get validate request args.
+	 *
+	 * @return array {
+	 *     Args.
+	 *
+	 *     @type string|null $nonce            None to authorize validate request or null if none was supplied.
+	 *     @type bool        $cache            Whether to store results in amp_validated_url post.
+	 *     @type bool        $cached_if_fresh  Whether to return previously-stored results if not stale.
+	 *     @type bool        $omit_stylesheets Whether to omit stylesheet data in the validate response.
+	 * }
+	 */
+	private static function get_validate_request_args() {
+		$defaults = [
+			self::VALIDATE_QUERY_VAR_NONCE               => null,
+			self::VALIDATE_QUERY_VAR_CACHE               => false,
+			self::VALIDATE_QUERY_VAR_CACHED_IF_FRESH     => false,
+			self::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS    => false,
+			self::VALIDATE_QUERY_VAR_FORCE_STANDARD_MODE => false,
+		];
+
+		if ( ! isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return $defaults;
+		}
+
+		$unsanitized_values = $_GET[ self::VALIDATE_QUERY_VAR ]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		if ( is_string( $unsanitized_values ) ) {
+			$unsanitized_values = [
+				self::VALIDATE_QUERY_VAR_NONCE => $unsanitized_values,
+			];
+		} elseif ( ! is_array( $unsanitized_values ) ) {
+			return $defaults;
+		}
+
+		$args = $defaults;
+		foreach ( $unsanitized_values as $key => $unsanitized_value ) {
+			switch ( $key ) {
+				case self::VALIDATE_QUERY_VAR_NONCE:
+					$args[ $key ] = sanitize_key( $unsanitized_value );
+					break;
+				default:
+					$args[ $key ] = rest_sanitize_boolean( $unsanitized_value );
+			}
+		}
+
+		return $args;
 	}
 
 	/**
@@ -547,6 +694,38 @@ class AMP_Validation_Manager {
 		add_filter( 'do_shortcode_tag', [ __CLASS__, 'decorate_shortcode_source' ], PHP_INT_MAX, 2 );
 		add_filter( 'embed_oembed_html', [ __CLASS__, 'decorate_embed_source' ], PHP_INT_MAX, 3 );
 		add_filter( 'the_content', [ __CLASS__, 'add_block_source_comments' ], 8 ); // The do_blocks() function runs at priority 9.
+		add_filter( 'the_editor', [ __CLASS__, 'filter_the_editor_to_detect_sources' ] );
+	}
+
+	/**
+	 * Filter `the_editor` to detect the theme/plugin responsible for calling it `wp_editor()`.
+	 *
+	 * @since 2.2
+	 * @see wp_editor()
+	 *
+	 * @param string $output Editor's HTML markup.
+	 * @return string Editor's HTML markup (unchanged).
+	 */
+	public static function filter_the_editor_to_detect_sources( $output ) {
+		$file_reflection = Services::get( 'dev_tools.file_reflection' );
+
+		// Find the first plugin/theme in the call stack.
+		$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find theme/plugin responsible for calling.
+		foreach ( $backtrace as $call ) {
+			if (
+				isset( $call['function'], $call['file'] )
+				&&
+				'wp_editor' === $call['function']
+			) {
+				$source = $file_reflection->get_file_source( $call['file'] );
+				if ( $source ) {
+					self::$wp_editor_sources[] = $source;
+				}
+				break;
+			}
+		}
+
+		return $output;
 	}
 
 	/**
@@ -625,7 +804,7 @@ class AMP_Validation_Manager {
 			$node = $data['node'];
 		}
 
-		if ( self::$is_validate_request ) {
+		if ( self::is_validate_request() ) {
 			if ( ! empty( $error['sources'] ) ) {
 				$sources = $error['sources'];
 			} elseif ( $node ) {
@@ -702,6 +881,7 @@ class AMP_Validation_Manager {
 		self::$extra_script_sources            = [];
 		self::$extra_style_sources             = [];
 		self::$original_block_render_callbacks = [];
+		self::$wp_editor_sources               = [];
 	}
 
 	/**
@@ -854,25 +1034,22 @@ class AMP_Validation_Manager {
 				if ( $matches['handle'] !== $style_handle ) {
 					continue;
 				}
-				foreach ( self::$enqueued_style_sources as $enqueued_style_sources_handle => $enqueued_style_sources ) {
-					if (
-						$enqueued_style_sources_handle !== $style_handle
-						&&
-						wp_styles()->query( $enqueued_style_sources_handle, 'done' )
-						&&
-						self::has_dependency( wp_styles(), $enqueued_style_sources_handle, $style_handle )
-					) {
-						$sources = array_merge(
-							array_map(
-								static function ( $enqueued_style_source ) use ( $style_handle ) {
-									$enqueued_style_source['dependency_handle'] = $style_handle;
-									return $enqueued_style_source;
-								},
-								$enqueued_style_sources
-							),
-							$sources
-						);
-					}
+
+				foreach (
+					self::find_done_dependent_handles( wp_styles(), $style_handle, array_keys( self::$enqueued_style_sources ) )
+					as
+					$enqueued_style_sources_handle
+				) {
+					$sources = array_merge(
+						array_map(
+							static function ( $enqueued_style_source ) use ( $style_handle ) {
+								$enqueued_style_source['dependency_handle'] = $style_handle;
+								return $enqueued_style_source;
+							},
+							self::$enqueued_style_sources[ $enqueued_style_sources_handle ]
+						),
+						$sources
+					);
 				}
 			}
 		}
@@ -926,37 +1103,110 @@ class AMP_Validation_Manager {
 					if ( ! self::is_matching_script( $node, $script_handle ) ) {
 						continue;
 					}
-					foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
-						if (
-							$enqueued_script_sources_handle !== $script_handle
-							&&
-							wp_scripts()->query( $enqueued_script_sources_handle, 'done' )
-							&&
-							self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle )
-						) {
-							$sources = array_merge(
-								array_map(
-									static function ( $enqueued_script_source ) use ( $script_handle ) {
-										$enqueued_script_source['dependency_handle'] = $script_handle;
-										return $enqueued_script_source;
-									},
-									$enqueued_script_sources
-								),
-								$sources
-							);
-						}
+
+					foreach (
+						self::find_done_dependent_handles( wp_scripts(), $script_handle, array_keys( self::$enqueued_script_sources ) )
+						as
+						$enqueued_script_sources_handle
+					) {
+						$sources = array_merge(
+							array_map(
+								static function ( $enqueued_script_source ) use ( $script_handle ) {
+									$enqueued_script_source['dependency_handle'] = $script_handle;
+									return $enqueued_script_source;
+								},
+								self::$enqueued_script_sources[ $enqueued_script_sources_handle ]
+							),
+							$sources
+						);
 					}
 				}
 			} elseif ( $node->firstChild instanceof DOMText ) {
 				$text = $node->textContent;
 
-				// Identify the inline script sources.
-				foreach ( self::$extra_script_sources as $extra_data => $extra_sources ) {
-					if ( false !== strpos( $text, $extra_data ) ) {
+				$script_handle = null;
+				$script_type   = null;
+				if (
+					$node->hasAttribute( Attribute::ID )
+					&&
+					preg_match( '/^(.+)-js-(extra|after|before|translations)/', $node->getAttribute( Attribute::ID ), $matches )
+				) {
+					$script_handle = $matches[1];
+					$script_type   = $matches[2];
+				}
+
+				if ( 'translations' === $script_type ) {
+
+					// Obtain sources for script translations.
+					if ( isset( self::$enqueued_script_sources[ $script_handle ] ) ) {
+						$sources = array_merge( $sources, self::$enqueued_script_sources[ $script_handle ] );
+					}
+
+					foreach (
+						self::find_done_dependent_handles( wp_scripts(), $script_handle, array_keys( self::$enqueued_script_sources ) )
+						as
+						$enqueued_script_sources_handle
+					) {
 						$sources = array_merge(
-							$sources,
-							$extra_sources
+							array_map(
+								static function ( $enqueued_script_source ) use ( $script_handle ) {
+									$enqueued_script_source['dependency_handle'] = $script_handle;
+									return $enqueued_script_source;
+								},
+								self::$enqueued_script_sources[ $enqueued_script_sources_handle ]
+							),
+							$sources
 						);
+					}
+				} else {
+					// Identify the inline script sources.
+					foreach ( self::$extra_script_sources as $extra_data => $extra_sources ) {
+						if ( false === strpos( $text, $extra_data ) ) {
+							continue;
+						}
+
+						$has_non_core = false;
+						foreach ( $extra_sources as $extra_source ) {
+							if ( 'core' !== $extra_source['type'] ) {
+								$has_non_core = true;
+								break;
+							}
+						}
+
+						if ( $has_non_core ) {
+							$sources = array_merge(
+								$sources,
+								$extra_sources
+							);
+						} else {
+							if ( isset( self::$enqueued_script_sources[ $script_handle ] ) ) {
+								$sources = array_merge( $sources, self::$enqueued_script_sources[ $script_handle ] );
+							}
+
+							foreach (
+								self::find_done_dependent_handles( wp_scripts(), $script_handle, array_keys( self::$enqueued_script_sources ) )
+								as
+								$enqueued_script_sources_handle
+							) {
+								$sources = array_merge(
+									array_map(
+										static function ( $enqueued_script_source ) use ( $script_handle ) {
+											$enqueued_script_source['dependency_handle'] = $script_handle;
+											return $enqueued_script_source;
+										},
+										self::$enqueued_script_sources[ $enqueued_script_sources_handle ]
+									),
+									$sources
+								);
+							}
+						}
+					}
+				}
+
+				// Add indirect sources for inline scripts added by wp_editor().
+				foreach ( $sources as $source ) {
+					if ( isset( $source['function'] ) && '_WP_Editors::editor_js' === $source['function'] ) {
+						$sources = array_merge( $sources, self::$wp_editor_sources );
 					}
 				}
 			}
@@ -965,6 +1215,30 @@ class AMP_Validation_Manager {
 		$sources = array_values( array_unique( $sources, SORT_REGULAR ) );
 
 		return $sources;
+	}
+
+	/**
+	 * Find dependent handles that have been printed.
+	 *
+	 * @param WP_Dependencies $dependencies Dependencies.
+	 * @param string          $handle Handle.
+	 * @param string[]        $enqueued_handles Enqueued handles.
+	 * @return string[] Found handles.
+	 */
+	private static function find_done_dependent_handles( WP_Dependencies $dependencies, $handle, $enqueued_handles ) {
+		$dependent_handles = [];
+		foreach ( $enqueued_handles as $enqueued_handle ) {
+			if (
+				$enqueued_handle !== $handle
+				&&
+				$dependencies->query( $enqueued_handle, 'done' )
+				&&
+				self::has_dependency( $dependencies, $enqueued_handle, $handle )
+			) {
+				$dependent_handles[] = $enqueued_handle;
+			}
+		}
+		return $dependent_handles;
 	}
 
 	/**
@@ -1165,6 +1439,11 @@ class AMP_Validation_Manager {
 					continue;
 				}
 
+				$indirect_sources = [];
+				if ( '_WP_Editors::enqueue_scripts' === $source['function'] ) {
+					$indirect_sources = self::$wp_editor_sources;
+				}
+
 				/**
 				 * Reflection.
 				 *
@@ -1192,7 +1471,7 @@ class AMP_Validation_Manager {
 				$wrapped_callback   = self::wrapped_callback(
 					array_merge(
 						$callback,
-						compact( 'priority', 'source' )
+						compact( 'priority', 'source', 'indirect_sources' )
 					)
 				);
 
@@ -1379,12 +1658,7 @@ class AMP_Validation_Manager {
 
 		// Check if any functions in call stack are output buffering display handlers.
 		$called_functions = [];
-		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {
-			$arg = DEBUG_BACKTRACE_IGNORE_ARGS; // phpcs:ignore PHPCompatibility.Constants.NewConstants.debug_backtrace_ignore_argsFound
-		} else {
-			$arg = false;
-		}
-		$backtrace = debug_backtrace( $arg ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find out if we are in a buffering display handler.
+		$backtrace        = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find out if we are in a buffering display handler.
 		foreach ( $backtrace as $call_stack ) {
 			if ( '{closure}' === $call_stack['function'] ) {
 				$called_functions[] = 'Closure::__invoke';
@@ -1472,12 +1746,13 @@ class AMP_Validation_Manager {
 	 *                       validate response should be served.
 	 */
 	public static function should_validate_response() {
-		if ( ! isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$args = self::get_validate_request_args();
+
+		if ( null === $args[ self::VALIDATE_QUERY_VAR_NONCE ] ) {
 			return false;
 		}
 
-		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! hash_equals( self::get_amp_validate_nonce(), $validate_key ) ) {
+		if ( ! hash_equals( self::get_amp_validate_nonce(), $args[ self::VALIDATE_QUERY_VAR_NONCE ] ) ) {
 			return new WP_Error(
 				'http_request_failed',
 				__( 'Nonce authentication failed.', 'amp' )
@@ -1577,6 +1852,144 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Send validate response.
+	 *
+	 * @since 2.2
+	 * @see AMP_Theme_Support::prepare_response()
+	 *
+	 * @param array      $sanitization_results Sanitization results.
+	 * @param int        $status_code          Status code.
+	 * @param array|null $last_error           Last error.
+	 * @return string JSON.
+	 */
+	public static function send_validate_response( $sanitization_results, $status_code, $last_error ) {
+		status_header( 200 );
+		if ( ! headers_sent() ) {
+			header( 'Content-Type: application/json; charset=utf-8' );
+		}
+		$data = [
+			'http_status_code' => $status_code,
+			'php_fatal_error'  => false,
+		];
+		if ( $last_error && in_array( $last_error['type'], [ E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_PARSE ], true ) ) {
+			$data['php_fatal_error'] = $last_error;
+		}
+		$data = array_merge( $data, self::get_validate_response_data( $sanitization_results ) );
+
+		$args = self::get_validate_request_args();
+
+		$data['revalidated'] = true;
+
+		if ( $args[ self::VALIDATE_QUERY_VAR_CACHE ] ) {
+			$validation_errors = wp_list_pluck( $data['results'], 'error' );
+
+			$validated_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
+				$validation_errors,
+				amp_get_current_url(),
+				$data
+			);
+			if ( is_wp_error( $validated_url_post_id ) ) {
+				status_header( 500 );
+				return wp_json_encode(
+					[
+						'code'    => $validated_url_post_id->get_error_code(),
+						'message' => $validated_url_post_id->get_error_message(),
+					]
+				);
+			} else {
+				status_header( 201 );
+				$data['validated_url_post'] = [
+					'id'        => $validated_url_post_id,
+					'edit_link' => get_edit_post_link( $validated_url_post_id, 'raw' ),
+				];
+			}
+		}
+
+		if ( $args[ self::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS ] ) {
+			unset( $data['stylesheets'] );
+		}
+
+		$data['url'] = remove_query_arg( self::VALIDATE_QUERY_VAR, $data['url'] );
+
+		return wp_json_encode( $data, JSON_UNESCAPED_SLASHES );
+	}
+
+	/**
+	 * Send cached validate response if it is requested and available.
+	 *
+	 * When a validate request is made with the `amp_validate[cached_if_fresh]=true` query parameter, before a page
+	 * begins rendering a check is made for whether there is already an `amp_validated_url` post for the current URL.
+	 * If there is, and the post is not stale, then the previous results are returned without re-rendering page and
+	 * obtaining the validation data.
+	 */
+	public static function maybe_send_cached_validate_response() {
+		if ( ! self::is_validate_request() ) {
+			return;
+		}
+		$args = self::get_validate_request_args();
+
+		if ( ! $args[ self::VALIDATE_QUERY_VAR_CACHED_IF_FRESH ] ) {
+			return;
+		}
+
+		$post = AMP_Validated_URL_Post_Type::get_invalid_url_post( amp_get_current_url() );
+		if ( ! ( $post instanceof WP_Post ) ) {
+			return;
+		}
+
+		$staleness = AMP_Validated_URL_Post_Type::get_post_staleness( $post );
+		if ( count( $staleness ) > 0 ) {
+			return;
+		}
+
+		$response = [
+			'http_status_code'   => 200, // Note: This is not currently cached in postmeta.
+			'php_fatal_error'    => false,
+			'results'            => [],
+			'queried_object'     => null,
+			'url'                => null,
+			'revalidated'        => false, // Since cached was used.
+			'validated_url_post' => [
+				'id'        => $post->ID,
+				'edit_link' => get_edit_post_link( $post->ID, 'raw' ),
+			],
+		];
+
+		if ( ! $args[ self::VALIDATE_QUERY_VAR_OMIT_STYLESHEETS ] ) {
+			$stylesheets = get_post_meta( $post->ID, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true );
+			if ( $stylesheets ) {
+				$response['stylesheets'] = json_decode( $stylesheets, true );
+			}
+		}
+
+		$stored_validation_errors = json_decode( $post->post_content, true );
+		if ( is_array( $stored_validation_errors ) ) {
+			$response['results'] = array_map(
+				static function ( $stored_validation_error ) {
+					$error     = $stored_validation_error['data'];
+					$sanitized = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error );
+					return compact( 'error', 'sanitized' );
+				},
+				$stored_validation_errors
+			);
+		}
+
+		$queried_object = get_post_meta( $post->ID, AMP_Validated_URL_Post_Type::QUERIED_OBJECT_POST_META_KEY, true );
+		if ( $queried_object ) {
+			$response['queried_object'] = $queried_object;
+		}
+
+		$php_fatal_error = get_post_meta( $post->ID, AMP_Validated_URL_Post_Type::PHP_FATAL_ERROR_POST_META_KEY, true );
+		if ( $php_fatal_error ) {
+			$response['php_fatal_error'] = $php_fatal_error;
+		}
+
+		$response['url'] = AMP_Validated_URL_Post_Type::get_url_from_post( $post );
+
+		wp_send_json( $response, 200, JSON_UNESCAPED_SLASHES );
+	}
+
+	/**
 	 * Finalize validation.
 	 *
 	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()
@@ -1618,26 +2031,16 @@ class AMP_Validation_Manager {
 		}
 
 		/*
-		 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
-		 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
-		 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
+		 * In AMP-first, documents with invalid AMP markup can still be served. The amp attribute will be omitted in
+		 * order to prevent GSC from complaining about a validation error already surfaced inside of WordPress.
+		 * This is intended to not serve dirty AMP, but rather a non-AMP document (intentionally not valid AMP) that
+		 * contains the AMP runtime and AMP components.
 		 *
 		 * Otherwise, if in Paired AMP then redirect to the non-AMP version if the current user isn't an user who
 		 * can manage validation error statuses (access developer tools) and change the AMP options for the template
 		 * mode. Such users should be able to see kept invalid markup on the AMP page even though it is invalid.
 		 */
 		if ( amp_is_canonical() ) {
-			$dom->documentElement->removeAttribute( Attribute::AMP );
-			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
-			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
-
-			/*
-			 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
-			 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
-			 */
-			$script = $dom->createElement( Tag::SCRIPT );
-			$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
-			$dom->head->appendChild( $script );
 			return true;
 		}
 
@@ -1777,7 +2180,7 @@ class AMP_Validation_Manager {
 		}
 
 		if ( isset( $sanitizers[ AMP_Style_Sanitizer::class ] ) ) {
-			$sanitizers[ AMP_Style_Sanitizer::class ]['should_locate_sources'] = self::$is_validate_request;
+			$sanitizers[ AMP_Style_Sanitizer::class ]['should_locate_sources'] = self::is_validate_request();
 
 			$css_validation_errors = [];
 			foreach ( self::$validation_error_status_overrides as $slug => $status ) {
@@ -1870,8 +2273,10 @@ class AMP_Validation_Manager {
 		}
 
 		$added_query_vars = [
-			self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
-			self::CACHE_BUST_QUERY_VAR => wp_rand(),
+			self::VALIDATE_QUERY_VAR => [
+				self::VALIDATE_QUERY_VAR_NONCE      => self::get_amp_validate_nonce(),
+				self::VALIDATE_QUERY_VAR_CACHE_BUST => wp_rand(),
+			],
 		];
 
 		// Ensure the URL to be validated is on the site.

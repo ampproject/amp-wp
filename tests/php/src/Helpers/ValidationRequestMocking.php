@@ -35,11 +35,22 @@ trait ValidationRequestMocking {
 	}
 
 	/**
+	 * Add filter to mock validate responses.
+	 */
+	public function add_validate_response_mocking_filter() {
+		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ], 10, 3 );
+	}
+
+	/**
 	 * Construct a WP HTTP response for a validation request.
 	 *
 	 * @return array The response.
 	 */
-	public function get_validate_response() {
+	public function get_validate_response( $r, /** @noinspection PhpUnusedParameterInspection */ $args, $url ) {
+		if ( false === strpos( $url, 'amp_validate' ) ) {
+			return $r;
+		}
+
 		$mock_validation = [
 			'results' => [
 				[

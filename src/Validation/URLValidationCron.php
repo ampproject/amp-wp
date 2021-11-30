@@ -3,14 +3,15 @@
  * WP cron process to validate URLs in the background.
  *
  * @package AMP
- * @since 2.1
+ * @since   2.1
  */
 
 namespace AmpProject\AmpWP\Validation;
 
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\RecurringBackgroundTask;
-use AmpProject\AmpWP\Infrastructure\Conditional;
+use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Manager;
 
 /**
  * URLValidationCron class.
@@ -19,7 +20,23 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
  *
  * @internal
  */
-final class URLValidationCron extends RecurringBackgroundTask implements Conditional {
+final class URLValidationCron extends RecurringBackgroundTask {
+
+	/**
+	 * The cron action name.
+	 *
+	 * Note that only one queued URL is currently validated at a time.
+	 *
+	 * @var string
+	 */
+	const BACKGROUND_TASK_NAME = 'amp_validate_urls';
+
+	/**
+	 * Option key to store queue for URL validation.
+	 *
+	 * @var string
+	 */
+	const OPTION_KEY = 'amp_url_validation_queue';
 
 	/**
 	 * ScannableURLProvider instance.
@@ -29,65 +46,14 @@ final class URLValidationCron extends RecurringBackgroundTask implements Conditi
 	private $scannable_url_provider;
 
 	/**
-	 * URLValidationProvider instance.
-	 *
-	 * @var URLValidationProvider
-	 */
-	private $url_validation_provider;
-
-	/**
-	 * The cron action name.
-	 *
-	 * @var string
-	 */
-	const BACKGROUND_TASK_NAME = 'amp_validate_urls';
-
-	/**
-	 * The length of time, in seconds, to sleep between each URL validation.
-	 *
-	 * @var int
-	 */
-	const DEFAULT_SLEEP_TIME = 1;
-
-	/**
-	 * Check whether the service is currently needed.
-	 *
-	 * @return bool Whether needed.
-	 */
-	public static function is_needed() {
-		/**
-		 * Filters whether to enable URL validation cron tasks.
-		 *
-		 * This is a feature flag used to control whether the sample set of site URLs are scanned on a daily basis and
-		 * whether post permalinks are scheduled for immediate validation as soon as they are updated by a user who has
-		 * DevTools turned off. This conditional flag will be removed once Site Scanning is implemented, likely in v2.2.
-		 *
-		 * @link https://github.com/ampproject/amp-wp/issues/5750
-		 * @link https://github.com/ampproject/amp-wp/issues/4779
-		 * @link https://github.com/ampproject/amp-wp/issues/4795
-		 * @link https://github.com/ampproject/amp-wp/issues/4719
-		 * @link https://github.com/ampproject/amp-wp/issues/5671
-		 * @link https://github.com/ampproject/amp-wp/issues/5101
-		 * @link https://github.com/ampproject/amp-wp/issues?q=label%3A%22Site+Scanning%22
-		 *
-		 * @param bool $enabled Enabled.
-		 * @internal
-		 */
-		return apply_filters( 'amp_temp_validation_cron_tasks_enabled', false );
-	}
-
-	/**
-	 * Class constructor.
+	 * Constructor.
 	 *
 	 * @param BackgroundTaskDeactivator $background_task_deactivator Service that deactivates background events.
-	 * @param ScannableURLProvider      $scannable_url_provider ScannableURLProvider instance.
-	 * @param URLValidationProvider     $url_validation_provider URLValidationProvider instance.
+	 * @param ScannableURLProvider      $scannable_url_provider      ScannableURLProvider instance.
 	 */
-	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, ScannableURLProvider $scannable_url_provider, URLValidationProvider $url_validation_provider ) {
+	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, ScannableURLProvider $scannable_url_provider ) {
 		parent::__construct( $background_task_deactivator );
-
-		$this->scannable_url_provider  = $scannable_url_provider;
-		$this->url_validation_provider = $url_validation_provider;
+		$this->scannable_url_provider = $scannable_url_provider;
 	}
 
 	/**
@@ -96,15 +62,58 @@ final class URLValidationCron extends RecurringBackgroundTask implements Conditi
 	 * @param mixed[] ...$args Unused callback arguments.
 	 */
 	public function process( ...$args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$urls       = $this->scannable_url_provider->get_urls();
-		$sleep_time = $this->get_sleep_time();
-
-		foreach ( $urls as $url ) {
-			$this->url_validation_provider->get_url_validation( $url['url'], $url['type'] );
-			if ( $sleep_time ) {
-				sleep( $sleep_time );
-			}
+		$url = $this->dequeue();
+		if ( $url ) {
+			AMP_Validation_Manager::validate_url_and_store( $url );
 		}
+	}
+
+	/**
+	 * Dequeue to obtain URL to validate.
+	 *
+	 * @return string|null URL to validate or null if there is nothing queued up.
+	 */
+	protected function dequeue() {
+		$data = get_option( self::OPTION_KEY, [] );
+		if ( ! is_array( $data ) ) {
+			$data = [];
+		}
+
+		$data = array_merge(
+			[
+				'urls'      => [],
+				'timestamp' => 0,
+				'env'       => [],
+			],
+			$data
+		);
+
+		$current_env = AMP_Validated_URL_Post_Type::get_validated_environment();
+
+		// When the validated environment changes, make sure the URLs and timestamp are reset so that new URLs are obtained.
+		if ( $data['timestamp'] && $data['env'] !== $current_env ) {
+			$data['urls']      = [];
+			$data['timestamp'] = 0;
+		}
+
+		// If there are no URLs queued, then obtain a new set.
+		if ( empty( $data['urls'] ) ) {
+
+			// If it has been less than a week since the last enqueueing, then do nothing.
+			if ( time() - $data['timestamp'] < WEEK_IN_SECONDS ) {
+				return null;
+			}
+
+			$data['urls']      = wp_list_pluck( $this->scannable_url_provider->get_urls(), 'url' );
+			$data['timestamp'] = time();
+		}
+
+		$url = array_shift( $data['urls'] );
+
+		$data['env'] = $current_env;
+		update_option( self::OPTION_KEY, $data );
+
+		return $url ?: null;
 	}
 
 	/**
@@ -126,22 +135,6 @@ final class URLValidationCron extends RecurringBackgroundTask implements Conditi
 	 * @return string An existing interval name.
 	 */
 	protected function get_interval() {
-		return self::DEFAULT_INTERVAL_DAILY;
-	}
-
-	/**
-	 * Provides the length of time, in seconds, to sleep between validating URLs.
-	 *
-	 * @return int
-	 */
-	private function get_sleep_time() {
-
-		/**
-		 * Filters the length of time to sleep between validating URLs.
-		 *
-		 * @since 2.1
-		 * @param int The number of seconds. Default 1. Setting to 0 or a negative numbers disables all throttling.
-		 */
-		return max( (int) apply_filters( 'amp_url_validation_sleep_time', self::DEFAULT_SLEEP_TIME ), 0 );
+		return self::DEFAULT_INTERVAL_HOURLY;
 	}
 }

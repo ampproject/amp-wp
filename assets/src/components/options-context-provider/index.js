@@ -3,6 +3,7 @@
  */
 import { createContext, useEffect, useState, useRef, useCallback, useContext } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
@@ -38,10 +39,13 @@ function waitASecond() {
  */
 export function OptionsContextProvider( { children, optionsRestPath, populateDefaultValues, hasErrorBoundary = false, delaySave = false } ) {
 	const [ updates, setUpdates ] = useState( {} );
+	const [ fetchingPluginSuppression, setFetchingPluginSuppression ] = useState( false );
 	const [ fetchingOptions, setFetchingOptions ] = useState( null );
+	const [ savedOptions, setSavedOptions ] = useState( {} );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
 	const [ originalOptions, setOriginalOptions ] = useState( {} );
+	const [ modifiedOptions, setModifiedOptions ] = useState( {} );
 
 	const { error, setError } = useContext( ErrorContext );
 	const { setAsyncError } = useAsyncError();
@@ -53,6 +57,52 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 	useEffect( () => () => {
 		hasUnmounted.current = true;
 	}, [] );
+
+	/**
+	 * Fetches plugin suppression data.
+	 */
+	const refetchPluginSuppression = useCallback( () => {
+		if ( error || fetchingPluginSuppression ) {
+			return;
+		}
+
+		/**
+		 * Fetches suppression data from the REST endpoint.
+		 */
+		( async () => {
+			setFetchingPluginSuppression( true );
+
+			try {
+				const fetchedPluginSuppression = await apiFetch( {
+					path: addQueryArgs( optionsRestPath, {
+						_fields: [ 'suppressed_plugins', 'suppressible_plugins' ],
+					} ),
+				} );
+
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				setOriginalOptions( {
+					...originalOptions,
+					...fetchedPluginSuppression,
+				} );
+			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				setError( e );
+
+				if ( hasErrorBoundary ) {
+					setAsyncError( e );
+				}
+				return;
+			}
+
+			setFetchingPluginSuppression( false );
+		} )();
+	}, [ error, fetchingPluginSuppression, hasErrorBoundary, optionsRestPath, originalOptions, setAsyncError, setError ] );
 
 	/**
 	 * Fetches options.
@@ -128,7 +178,7 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 
 			// Ensure this promise lasts at least a second so that the "Saving Options" load screen is
 			// visible long enough for the user to see it is happening.
-			const [ savedOptions ] = await Promise.all(
+			const [ retrievedOptions ] = await Promise.all(
 				[
 					apiFetch(
 						{
@@ -145,7 +195,7 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 				return;
 			}
 
-			setOriginalOptions( savedOptions );
+			setOriginalOptions( retrievedOptions );
 			setError( null );
 		} catch ( e ) {
 			if ( true === hasUnmounted.current ) {
@@ -162,10 +212,13 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 			return;
 		}
 
+		setModifiedOptions( { ...modifiedOptions, ...updates } );
+		setSavedOptions( updates );
+
 		setUpdates( {} );
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ delaySave, hasErrorBoundary, optionsRestPath, setAsyncError, originalOptions, setError, updates ] );
+	}, [ delaySave, hasErrorBoundary, optionsRestPath, setAsyncError, originalOptions, setError, updates, modifiedOptions ] );
 
 	/**
 	 * Updates options in state.
@@ -195,11 +248,14 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 					updates,
 					originalOptions,
 					saveOptions,
+					savedOptions,
 					savingOptions,
 					unsetOption,
 					updateOptions,
 					readerModeWasOverridden,
+					refetchPluginSuppression,
 					setReaderModeWasOverridden,
+					modifiedOptions,
 				}
 			}
 		>

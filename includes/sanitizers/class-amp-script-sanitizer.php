@@ -6,6 +6,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Element;
@@ -54,8 +55,9 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'unwrap_noscripts'    => true,
-		'sanitize_js_scripts' => false,
+		'unwrap_noscripts'      => true,
+		'sanitize_js_scripts'   => false,
+		'comment_reply_allowed' => 'never', // Can be 'never' , 'always', or 'conditionally'.
 	];
 
 	/**
@@ -78,25 +80,18 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	protected $kept_script_count = 0;
 
 	/**
-	 * Style sanitizer.
+	 * Number of kept nodes which were PX-verified.
 	 *
-	 * @var AMP_Style_Sanitizer
+	 * @var int
 	 */
-	protected $style_sanitizer;
+	protected $px_verified_kept_node_count = 0;
 
 	/**
-	 * Image sanitizer.
+	 * Sanitizers.
 	 *
-	 * @var AMP_Img_Sanitizer
+	 * @var AMP_Base_Sanitizer[]
 	 */
-	protected $img_sanitizer;
-
-	/**
-	 * Form sanitizer.
-	 *
-	 * @var AMP_Form_Sanitizer
-	 */
-	protected $form_sanitizer;
+	protected $sanitizers = [];
 
 	/**
 	 * Init.
@@ -106,29 +101,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	public function init( $sanitizers ) {
 		parent::init( $sanitizers );
 
-		if (
-			array_key_exists( AMP_Style_Sanitizer::class, $sanitizers )
-			&&
-			$sanitizers[ AMP_Style_Sanitizer::class ] instanceof AMP_Style_Sanitizer
-		) {
-			$this->style_sanitizer = $sanitizers[ AMP_Style_Sanitizer::class ];
-		}
-
-		if (
-			array_key_exists( AMP_Img_Sanitizer::class, $sanitizers )
-			&&
-			$sanitizers[ AMP_Img_Sanitizer::class ] instanceof AMP_Img_Sanitizer
-		) {
-			$this->img_sanitizer = $sanitizers[ AMP_Img_Sanitizer::class ];
-		}
-
-		if (
-			array_key_exists( AMP_Form_Sanitizer::class, $sanitizers )
-			&&
-			$sanitizers[ AMP_Form_Sanitizer::class ] instanceof AMP_Form_Sanitizer
-		) {
-			$this->form_sanitizer = $sanitizers[ AMP_Form_Sanitizer::class ];
-		}
+		$this->sanitizers = $sanitizers;
 	}
 
 	/**
@@ -144,23 +117,42 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 		// If custom scripts were kept (after sanitize_js_script_elements() ran) it's important that noscripts not be
 		// unwrapped or else this could result in the JS and no-JS fallback experiences both being present on the page.
 		// So unwrapping is only done when no custom scripts were retained (and the sanitizer arg opts-in to unwrap).
-		if ( 0 === $this->kept_script_count && ! empty( $this->args['unwrap_noscripts'] ) ) {
+		if ( 0 === $this->kept_script_count && 0 === $this->px_verified_kept_node_count && ! empty( $this->args['unwrap_noscripts'] ) ) {
 			$this->unwrap_noscript_elements();
 		}
 
-		// When there are kept custom scripts, skip tree shaking since it's likely JS will toggle classes that have
-		// associated style rules.
+		$sanitizer_arg_updates = [];
+
+		// When there are kept custom scripts, turn off conversion to AMP components since scripts may be attempting to
+		// query for them directly, and skip tree shaking since it's likely JS will toggle classes that have associated
+		// style rules.
 		// @todo There should be an attribute on script tags that opt-in to keeping tree shaking and/or to indicate what class names need to be included.
-		// @todo Depending on the size of the underlying stylesheets, this may need to retain the use of external styles to prevent inlining excessive CSS. This may involve writing minified CSS to disk, or skipping style processing altogether if no selector conversions are needed.
 		if ( $this->kept_script_count > 0 ) {
-			if ( $this->style_sanitizer ) {
-				$this->style_sanitizer->update_args( [ 'skip_tree_shaking' => true ] );
-			}
-			if ( $this->img_sanitizer ) {
-				$this->img_sanitizer->update_args( [ 'native_img_used' => true ] );
-			}
-			if ( $this->form_sanitizer ) {
-				$this->form_sanitizer->update_args( [ 'native_post_forms_allowed' => true ] );
+			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['disable_style_processing'] = true;
+			$sanitizer_arg_updates[ AMP_Video_Sanitizer::class ]['native_video_used']        = true;
+			$sanitizer_arg_updates[ AMP_Audio_Sanitizer::class ]['native_audio_used']        = true;
+			$sanitizer_arg_updates[ AMP_Iframe_Sanitizer::class ]['native_iframe_used']      = true;
+
+			// Once amp-img is deprecated, these won't be needed and an <img> won't prevent strict sandboxing level for valid AMP.
+			// Note that AMP_Core_Theme_Sanitizer would have already run, so we can't update it here. Nevertheless,
+			// the native_img_used flag was already enabled by the Sandboxing service.
+			// @todo We should consider doing this when there are PX-verified scripts as well. This will be the default in AMP eventually anyway, as amp-img is being deprecated.
+			$sanitizer_arg_updates[ AMP_Gallery_Block_Sanitizer::class ]['native_img_used'] = true;
+			$sanitizer_arg_updates[ AMP_Img_Sanitizer::class ]['native_img_used']           = true;
+		}
+
+		// When custom scripts are on the page, use Bento AMP components whenever possible and turn off some CSS
+		// processing is unnecessary for a valid AMP page and which can break custom scripts.
+		if ( $this->px_verified_kept_node_count > 0 || $this->kept_script_count > 0 ) {
+			$sanitizer_arg_updates[ AMP_Tag_And_Attribute_Sanitizer::class ]['prefer_bento']       = true;
+			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['transform_important_qualifiers'] = false;
+			$sanitizer_arg_updates[ AMP_Style_Sanitizer::class ]['allow_excessive_css']            = true;
+			$sanitizer_arg_updates[ AMP_Form_Sanitizer::class ]['native_post_forms_allowed']       = 'always';
+		}
+
+		foreach ( $sanitizer_arg_updates as $sanitizer_class => $sanitizer_args ) {
+			if ( array_key_exists( $sanitizer_class, $this->sanitizers ) ) {
+				$this->sanitizers[ $sanitizer_class ]->update_args( $sanitizer_args );
 			}
 		}
 	}
@@ -243,9 +235,17 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				]'
 		);
 
+		$comment_reply_script = null;
+
 		/** @var Element $script */
 		foreach ( $scripts as $script ) {
-			if ( DevMode::hasExemptionForNode( $script ) ) {
+			if ( DevMode::hasExemptionForNode( $script ) ) { // @todo Should this also skip when AMP-unvalidated?
+				continue;
+			}
+
+			if ( ValidationExemption::is_px_verified_for_node( $script ) ) {
+				$this->px_verified_kept_node_count++;
+				// @todo Consider forcing any PX-verified script to have async/defer if not module. For inline scripts, hack via data: URL?
 				continue;
 			}
 
@@ -255,13 +255,17 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
+				// Defer consideration of commenting scripts until we've seen what other scripts are kept on the page.
+				if ( $script->getAttribute( Attribute::ID ) === 'comment-reply-js' ) {
+					$comment_reply_script = $script;
+					continue;
+				}
+
 				$removed = $this->remove_invalid_child(
 					$script,
 					[ 'code' => self::CUSTOM_EXTERNAL_SCRIPT ]
 				);
 				if ( ! $removed ) {
-					$script->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
-					$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
 					$this->kept_script_count++;
 				}
 			} else {
@@ -270,13 +274,25 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
+				// As a special case, mark the script output by wp_comment_form_unfiltered_html_nonce() as being in dev-mode
+				// since it is output when the user is authenticated (when they can unfiltered_html), and since it has no
+				// impact on PX we can just ignore it.
+				if (
+					$script->previousSibling instanceof Element
+					&&
+					Tag::INPUT === $script->previousSibling->tagName
+					&&
+					$script->previousSibling->getAttribute( Attribute::NAME ) === '_wp_unfiltered_html_comment_disabled'
+				) {
+					$script->setAttributeNode( $this->dom->createAttribute( DevMode::DEV_MODE_ATTRIBUTE ) );
+					continue;
+				}
+
 				$removed = $this->remove_invalid_child(
 					$script,
 					[ 'code' => self::CUSTOM_INLINE_SCRIPT ]
 				);
 				if ( ! $removed ) {
-					$script->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
-					$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
 					$this->kept_script_count++;
 				}
 			}
@@ -313,15 +329,31 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Since the attribute has been PX-verified, move along.
+			if ( ValidationExemption::is_px_verified_for_node( $event_handler_attribute ) ) {
+				$this->px_verified_kept_node_count++;
+				continue;
+			}
+
 			$removed = $this->remove_invalid_attribute(
 				$element,
 				$event_handler_attribute,
 				[ 'code' => self::CUSTOM_EVENT_HANDLER_ATTR ]
 			);
 			if ( ! $removed ) {
-				$element->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
-				$this->dom->documentElement->setAttribute( DevMode::DEV_MODE_ATTRIBUTE, '' );
 				$this->kept_script_count++;
+			}
+		}
+
+		// Handle the comment-reply script, removing it if it's not never allowed, marking it as PX-verified if it is
+		// always allowed, or leaving it alone if it is 'conditionally' allowed since it will be dealt with later
+		// in the AMP_Comments_Sanitizer.
+		if ( $comment_reply_script ) {
+			if ( 'never' === $this->args['comment_reply_allowed'] ) {
+				$comment_reply_script->parentNode->removeChild( $comment_reply_script );
+			} elseif ( 'always' === $this->args['comment_reply_allowed'] ) {
+				// Prevent the comment-reply script from being removed later in the comments sanitizer.
+				ValidationExemption::mark_node_as_px_verified( $comment_reply_script );
 			}
 		}
 	}

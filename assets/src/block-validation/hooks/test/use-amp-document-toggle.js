@@ -23,8 +23,6 @@ describe( 'useAMPDocumentToggle', () => {
 
 	const editPost = jest.fn();
 
-	useDispatch.mockImplementation( () => ( { editPost } ) );
-
 	function ComponentContainingHook() {
 		returnValue = useAMPDocumentToggle();
 
@@ -36,6 +34,10 @@ describe( 'useAMPDocumentToggle', () => {
 
 		render( <ComponentContainingHook />, container );
 	}
+
+	beforeAll( () => {
+		useDispatch.mockImplementation( () => ( { editPost } ) );
+	} );
 
 	beforeEach( () => {
 		container = document.createElement( 'div' );

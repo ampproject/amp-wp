@@ -38,6 +38,7 @@
 				<directory suffix=".php">svn</directory>
 				<directory suffix=".php">tests</directory>
 				<directory suffix=".php">vendor</directory>
+				<directory suffix=".php">includes/ecosystem-data</directory>
 				<file>.phpstorm.meta.php</file>
 			</exclude>
 		</whitelist>

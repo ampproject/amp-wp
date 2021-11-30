@@ -28,11 +28,22 @@ export const HANDLE_TYPE_RIGHT = 'right';
  * @param {any}     props.heading     Content for the drawer heading.
  * @param {string}  props.id          A unique ID for the component.
  * @param {boolean} props.initialOpen Whether the drawer should be initially open.
+ * @param {Object}  props.labelExtra  Optional. Extra content to display on the right side of the option label.
  * @param {boolean} props.selected    Whether to apply the selectable components selected CSS class.
  * @param {string}  props.hiddenTitle A title to go with the button that expands the drawer.
  * @param {string}  props.handleType  Display style for the drawer handle. Either 'full-width' or 'right'.
  */
-export function AMPDrawer( { children = null, className, heading, handleType = HANDLE_TYPE_FULL_WIDTH, id, initialOpen = false, selected = false, hiddenTitle } ) {
+export function AMPDrawer( {
+	children = null,
+	className,
+	heading,
+	handleType = HANDLE_TYPE_FULL_WIDTH,
+	id,
+	initialOpen = false,
+	labelExtra = null,
+	selected = false,
+	hiddenTitle,
+} ) {
 	const [ opened, setOpened ] = useState( initialOpen );
 	const [ resetStatus, setResetStatus ] = useState( null );
 
@@ -94,9 +105,16 @@ export function AMPDrawer( { children = null, className, heading, handleType = H
 			selected={ selected }
 		>
 			{ handleType === HANDLE_TYPE_RIGHT && (
-				<div className="amp-drawer__heading">
-					{ heading }
-				</div>
+				<>
+					<div className="amp-drawer__heading">
+						{ heading }
+					</div>
+					{ labelExtra && (
+						<div className="amp-drawer__label-extra">
+							{ labelExtra }
+						</div>
+					) }
+				</>
 			) }
 			{ 'resetting' !== resetStatus && (
 				<PanelBody
@@ -105,9 +123,16 @@ export function AMPDrawer( { children = null, className, heading, handleType = H
 							{ hiddenTitle }
 						</VisuallyHidden>
 					) : (
-						<div className="amp-drawer__heading">
-							{ heading }
-						</div>
+						<>
+							<div className="amp-drawer__heading">
+								{ heading }
+							</div>
+							{ labelExtra && (
+								<div className="amp-drawer__label-extra">
+									{ labelExtra }
+								</div>
+							) }
+						</>
 					) }
 					className="amp-drawer__panel-body"
 					initialOpen={ initialOpen }
@@ -129,5 +154,6 @@ AMPDrawer.propTypes = {
 	hiddenTitle: PropTypes.node.isRequired,
 	id: PropTypes.string.isRequired,
 	initialOpen: PropTypes.bool,
+	labelExtra: PropTypes.node,
 	selected: PropTypes.bool,
 };

@@ -32,16 +32,12 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 	 *
 	 * @dataProvider get_amp_to_amp_navigation_data
 	 * @covers AMP_Link_Sanitizer::process_links()
+	 * @covers AMP_Link_Sanitizer::process_element()
 	 *
 	 * @param bool $paired Paired.
 	 */
 	public function test_amp_to_amp_navigation( $paired ) {
-		// Enable pretty permalinks to keep the AMP slug as the only query var.
-		global $wp_rewrite;
-		update_option( 'permalink_structure', '/%postname%/' );
-		$wp_rewrite->use_trailing_slashes = true;
-		$wp_rewrite->init();
-		$wp_rewrite->flush_rules();
+		$this->set_permalink_structure( '/%postname%/' );
 
 		$post_link         = get_permalink(
 			self::factory()->post->create(
@@ -59,18 +55,18 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			'home-link'           => [
 				'href'         => home_url( '/' ),
 				'expected_amp' => true,
-				'expected_rel' => 'amphtml',
+				'expected_rel' => null,
 			],
 			'internal-link'       => [
 				'href'         => $post_link,
 				'expected_amp' => true,
-				'expected_rel' => 'amphtml',
+				'expected_rel' => null,
 			],
 			'non_amp_to_amp_rel'  => [
 				'href'         => $post_link,
 				'expected_amp' => false,
 				'rel'          => 'noamphtml',
-				'expected_rel' => null,
+				'expected_rel' => 'noamphtml',
 			],
 			'two_rel'             => [
 				'href'         => $post_link,
@@ -88,6 +84,12 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'href'         => $post_link,
 				'expected_amp' => false,
 				'rel'          => 'noamphtml ',
+				'expected_rel' => 'noamphtml ',
+			],
+			'empty_rel'           => [
+				'href'         => $post_link,
+				'expected_amp' => true,
+				'rel'          => '',
 				'expected_rel' => null,
 			],
 			'excluded_amp_link'   => [
@@ -101,10 +103,10 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'expected_rel' => null,
 			],
 			'ugc-link'            => [
-				'rel'          => 'ugc',
+				'rel'          => 'ugc nofollow',
 				'href'         => home_url( '/some/user/generated/data/' ),
 				'expected_amp' => true,
-				'expected_rel' => 'ugc amphtml',
+				'expected_rel' => 'ugc nofollow',
 			],
 			'page-anchor'         => [
 				'href'         => '#top',
@@ -114,7 +116,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			'other-page-anchor'   => [
 				'href'         => $post_link . '#top',
 				'expected_amp' => true,
-				'expected_rel' => 'amphtml',
+				'expected_rel' => null,
 			],
 			'external-link'       => [
 				'href'         => 'https://external.example.com/',
@@ -125,7 +127,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'href'         => 'https://external.example.com/',
 				'expected_amp' => false,
 				'rel'          => 'noamphtml',
-				'expected_rel' => null,
+				'expected_rel' => 'noamphtml',
 			],
 			'php-file-link'       => [
 				'href'         => site_url( '/wp-login.php' ),
@@ -159,7 +161,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		$html = sprintf( '<div id="wpadminbar"><a id="admin-bar-link" href="%s"></a></div>', esc_url( $admin_bar_link_href ) );
 		foreach ( $links as $id => $link_data ) {
 			$html .= sprintf( '<a id="%s" href="%s"', esc_attr( $id ), esc_attr( $link_data['href'] ) );
-			if ( isset( $link_data['rel'] ) ) {
+			if ( ! empty( $link_data['rel'] ) ) {
 				$html .= sprintf( ' rel="%s"', esc_attr( $link_data['rel'] ) );
 			}
 			$html .= '>Link</a>';
@@ -184,10 +186,10 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		foreach ( $links as $id => $link_data ) {
 			$element = $dom->getElementById( $id );
 			$this->assertInstanceOf( 'DOMElement', $element, "ID: $id" );
-			$rel = (string) $element->getAttribute( 'rel' );
 			if ( empty( $link_data['expected_rel'] ) ) {
-				$this->assertDoesNotMatchRegularExpression( '/(^|\s)amphtml(\s|$)/', $rel, "ID: $id" );
+				$this->assertFalse( $element->hasAttribute( 'rel' ), "ID: $id" );
 			} else {
+				$this->assertTrue( $element->hasAttribute( 'rel' ), "ID: $id" );
 				$this->assertEquals( $link_data['expected_rel'], $element->getAttribute( 'rel' ), "ID: $id" );
 			}
 

@@ -248,9 +248,4 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 		$this->assertTrue( has_action( 'admin_enqueue_scripts' ) );
 		$this->assertTrue( has_action( 'post_submitbox_misc_actions' ) );
 	}
-
-	/** @covers ::amp_should_use_new_onboarding() */
-	public function test_amp_should_use_new_onboarding() {
-		$this->markTestIncomplete( 'This function may be eliminated as of https://github.com/ampproject/amp-wp/pull/6225' );
-	}
 }

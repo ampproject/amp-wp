@@ -7,15 +7,9 @@
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
-use AmpProject\AmpWP\Admin\GoogleFonts;
-use AmpProject\AmpWP\Admin\OptionsMenu;
-use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\Admin\SupportScreen;
-use AmpProject\AmpWP\DependencySupport;
-use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Support\SupportData;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
 
 /**
  * Tests for SupportMenu.
@@ -23,7 +17,9 @@ use AmpProject\AmpWP\Tests\TestCase;
  * @group support-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\SupportScreen
  */
-class SupportScreenTest extends TestCase {
+class SupportScreenTest extends DependencyInjectedTestCase {
+
+	use HomeUrlLoopbackRequestMocking;
 
 	/**
 	 * Instance of SupportMenu
@@ -41,8 +37,9 @@ class SupportScreenTest extends TestCase {
 
 		parent::setUp();
 
-		$option_menu    = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError() );
-		$this->instance = new SupportScreen( $option_menu, new GoogleFonts(), new SupportData() );
+		$this->instance = $this->injector->make( SupportScreen::class );
+
+		$this->add_home_url_loopback_request_mocking();
 	}
 
 	/** @covers ::__construct() */

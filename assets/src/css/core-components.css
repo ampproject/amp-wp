@@ -26,11 +26,6 @@
 	background: var(--amp-settings-color-background);
 }
 
-.amp .components-button.components-panel__body-toggle svg {
-	height: 30px;
-	width: 30px;
-}
-
 .amp .components-button.is-link,
 .amp .components-button.is-link:hover,
 .amp .components-button.is-link:hover:not(:disabled),

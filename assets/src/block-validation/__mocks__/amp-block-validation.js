@@ -1,23 +1,23 @@
 module.exports = {
 	blockSources: {
 		'my-plugin/test-block': {
-			source: 'plugin',
+			type: 'plugin',
 			title: 'My plugin',
 		},
 		'my-mu-plugin/test-block': {
-			source: 'mu-plugin',
+			type: 'mu-plugin',
 			title: 'My MU plugin',
 		},
 		'my-theme/test-block': {
-			source: 'theme',
+			type: 'theme',
 			title: 'My theme',
 		},
 		'core/test-block': {
-			source: '',
+			type: '',
 			title: 'WordPress core',
 		},
 		'unknown/test-block': {
-			source: '',
+			type: '',
 			name: '',
 		},
 	},

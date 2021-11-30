@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP;
 
 use AmpProject\AmpWP\Admin;
 use AmpProject\AmpWP\BackgroundTask;
+use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation;
@@ -20,10 +21,10 @@ use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\AmpWP\Support\SupportCliCommand;
 use AmpProject\AmpWP\Support\SupportRESTController;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
+use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLValidationCron;
-use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
+use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\Optimizer;
-
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
 use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
@@ -81,6 +82,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.polyfills'                    => Admin\Polyfills::class,
 		'admin.user_rest_endpoint_extension' => Admin\UserRESTEndpointExtension::class,
 		'admin.validation_counts'            => Admin\ValidationCounts::class,
+		'admin.amp_plugins'                  => Admin\AmpPlugins::class,
+		'admin.amp_themes'                   => Admin\AmpThemes::class,
 		'amp_slug_customization_watcher'     => AmpSlugCustomizationWatcher::class,
 		'background_task_deactivator'        => BackgroundTaskDeactivator::class,
 		'cli.command_namespace'              => Cli\CommandNamespaceRegistration::class,
@@ -111,7 +114,9 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'reader_theme_loader'                => ReaderThemeLoader::class,
 		'reader_theme_support_features'      => ReaderThemeSupportFeatures::class,
 		'rest.options_controller'            => OptionsRESTController::class,
+		'rest.scannable_urls_controller'     => Validation\ScannableURLsRestController::class,
 		'rest.validation_counts_controller'  => Validation\ValidationCountsRestController::class,
+		'sandboxing'                         => Sandboxing::class,
 		'save_post_validation_event'         => SavePostValidationEvent::class,
 		'server_timing'                      => Instrumentation\ServerTiming::class,
 		'site_health_integration'            => Admin\SiteHealth::class,
@@ -120,6 +125,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'url_validation_cron'                => URLValidationCron::class,
 		'url_validation_rest_controller'     => Validation\URLValidationRESTController::class,
 		'validated_url_stylesheet_gc'        => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+		'validation.scannable_url_provider'  => ScannableURLProvider::class,
+		'validation.url_validation_provider' => URLValidationProvider::class,
 	];
 
 	/**

@@ -8,7 +8,7 @@ module.exports = {
 	"**/*.js": [
 		"npm run lint:js"
 	],
-	"**/!(amp).php": [
+	"**/!(amp.php).php": [
 		"npm run lint:php"
 	],
 	"amp.php": [

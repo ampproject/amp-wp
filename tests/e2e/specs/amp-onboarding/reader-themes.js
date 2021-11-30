@@ -10,7 +10,7 @@ describe( 'Reader themes', () => {
 
 	it( 'shows the correct active stepper item', async () => {
 		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
-		expect( itemCount ).toBe( 5 );
+		expect( itemCount ).toBe( 6 );
 
 		await expect( page ).toMatchElement( '.amp-stepper__item--active', { text: 'Theme Selection' } );
 	} );
@@ -20,8 +20,8 @@ describe( 'Reader themes', () => {
 		expect( itemCount ).toBe( 11 );
 
 		await expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
-		testNextButton( { text: 'Next', disabled: true } );
-		testPreviousButton( { text: 'Previous' } );
+		await testNextButton( { text: 'Next', disabled: true } );
+		await testPreviousButton( { text: 'Previous' } );
 	} );
 
 	it( 'should allow different themes to be selected', async () => {
@@ -34,7 +34,7 @@ describe( 'Reader themes', () => {
 		await selectReaderTheme( 'twentysixteen' );
 		await expect( page ).toMatchElement( '.selectable--selected h4', { text: 'Twenty Sixteen' } );
 
-		testNextButton( { text: 'Next' } );
+		await testNextButton( { text: 'Next' } );
 	} );
 } );
 

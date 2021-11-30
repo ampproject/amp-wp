@@ -7,17 +7,42 @@
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Dom\Document;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
 /**
  * Class AMP_Iframe_Converter_Test
  *
- * @covers AMP_Iframe_Sanitizer
+ * @coversDefaultClass \AMP_Iframe_Sanitizer
  */
 class AMP_Iframe_Converter_Test extends TestCase {
 
 	use MarkupComparison;
+
+	/** @covers ::get_selector_conversion_mapping() */
+	public function test_get_selector_conversion_mapping() {
+		$dom = Document::fromHtmlFragment( '<p>Hello world</p>' );
+
+		$with_defaults = new AMP_Iframe_Sanitizer( $dom );
+		$this->assertEquals(
+			[ 'iframe' => [ 'amp-iframe' ] ],
+			$with_defaults->get_selector_conversion_mapping()
+		);
+
+		$with_false_native_used = new AMP_Iframe_Sanitizer( $dom, [ 'native_iframe_used' => false ] );
+		$this->assertEquals(
+			[ 'iframe' => [ 'amp-iframe' ] ],
+			$with_false_native_used->get_selector_conversion_mapping()
+		);
+
+		$with_true_native_used = new AMP_Iframe_Sanitizer( $dom, [ 'native_iframe_used' => true ] );
+		$this->assertEquals(
+			[],
+			$with_true_native_used->get_selector_conversion_mapping()
+		);
+	}
 
 	/**
 	 * Data provider.
@@ -44,6 +69,14 @@ class AMP_Iframe_Converter_Test extends TestCase {
 				[
 					'add_noscript_fallback' => true,
 					'add_placeholder'       => true,
+				],
+			],
+
+			'simple_native_iframe'                             => [
+				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
+				sprintf( '<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen %s></iframe>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				[
+					'native_iframe_used' => true,
 				],
 			],
 
@@ -593,6 +626,11 @@ class AMP_Iframe_Converter_Test extends TestCase {
 	 * Test converter.
 	 *
 	 * @dataProvider get_data
+	 * @covers ::sanitize()
+	 * @covers ::normalize_attributes()
+	 * @covers ::get_origin_from_url()
+	 * @covers ::build_placeholder()
+	 * @covers ::sanitize_boolean_digit()
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
@@ -619,6 +657,8 @@ class AMP_Iframe_Converter_Test extends TestCase {
 
 	/**
 	 * Test HTTPS required.
+	 *
+	 * @covers ::sanitize()
 	 */
 	public function test__https_required() {
 		$source   = '<iframe src="http://example.com/embed/132886713"></iframe>';
@@ -640,6 +680,9 @@ class AMP_Iframe_Converter_Test extends TestCase {
 
 	/**
 	 * Test get_scripts() did not convert.
+	 *
+	 * @covers ::sanitize()
+	 * @covers ::get_scripts()
 	 */
 	public function test_get_scripts__didnt_convert() {
 		$source   = '<p>Hello World</p>';
@@ -661,6 +704,9 @@ class AMP_Iframe_Converter_Test extends TestCase {
 
 	/**
 	 * Test get_scripts() did convert.
+	 *
+	 * @covers ::sanitize()
+	 * @covers ::get_scripts()
 	 */
 	public function test_get_scripts__did_convert() {
 		$source   = '<iframe src="https://example.com/embed/132886713" width="500" height="281"></iframe>';
@@ -682,6 +728,8 @@ class AMP_Iframe_Converter_Test extends TestCase {
 
 	/**
 	 * Test args placeholder.
+	 *
+	 * @covers ::sanitize()
 	 */
 	public function test__args__placeholder() {
 		$source   = '<p><iframe src="https://example.com/video/132886713" width="500" height="281"></iframe></p>';

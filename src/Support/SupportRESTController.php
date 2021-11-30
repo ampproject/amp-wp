@@ -8,21 +8,23 @@
 namespace AmpProject\AmpWP\Support;
 
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Services;
-use WP_REST_Server;
+use WP_Error;
+use WP_HTTP_Response;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
-use WP_HTTP_Response;
-use WP_Error;
+use WP_REST_Server;
 
 /**
  * Class SupportRESTController
  * REST API support to send AMP support data.
  *
  * @package AmpProject\AmpWP\Support
+ * @internal
+ * @since 2.2
  */
 class SupportRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
@@ -34,20 +36,20 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 	public $namespace = 'amp/v1';
 
 	/**
-	 * SupportData instance.
+	 * Injector.
 	 *
-	 * @var SupportData
+	 * @var Injector
 	 */
-	public $support_data;
+	private $injector;
 
 	/**
 	 * Class constructor.
 	 *
-	 * @param SupportData $support_data An instance of the SupportData service.
+	 * @param Injector $injector Injector.
 	 */
-	public function __construct( SupportData $support_data ) {
+	public function __construct( Injector $injector ) {
 
-		$this->support_data = $support_data;
+		$this->injector = $injector;
 	}
 
 	/**
@@ -101,10 +103,10 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 		$request_args = $request->get_param( 'args' );
 		$request_args = ( ! empty( $request_args ) && is_array( $request_args ) ) ? $request_args : [];
 
-		$this->support_data->set_args( $request_args );
-		$support_response = $this->support_data->send_data();
+		$support_data     = $this->injector->make( SupportData::class, [ 'args' => $request_args ] );
+		$support_response = $support_data->send_data();
 
-		$response = new \WP_Error(
+		$response = new WP_Error(
 			'fail_to_send_data',
 			'Failed to send support request. Please try again after some time',
 			[ 'status' => 500 ]

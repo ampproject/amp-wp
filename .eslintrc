@@ -60,7 +60,7 @@
     "react/no-unused-prop-types": "error",
     "react/self-closing-comp": "error",
     "import/no-unresolved": [ "error", {
-      "ignore": [ "jquery", "amp-block-editor-data", "amp-settings", "amp-support", "amp-block-validation" ]
+      "ignore": [ "jquery", "amp-block-editor-data", "amp-settings", "amp-themes", "amp-plugins", "amp-support", "amp-block-validation" ]
     } ],
     "import/order": [ "error", { "groups": [ "builtin", [ "external", "unknown" ], "internal", "parent", "sibling", "index" ] } ],
     "jsdoc/check-indentation": "error",
@@ -79,7 +79,7 @@
         "plugin:jest/all"
       ],
       "rules": {
-        "jest/lowercase-name": [
+        "jest/prefer-lowercase-title": [
           "error",
           {
             "ignore": [ "describe" ]
@@ -97,7 +97,7 @@
         "plugin:jest/all"
       ],
       "rules": {
-        "jest/lowercase-name": [
+        "jest/prefer-lowercase-title": [
           "error",
           {
             "ignore": [ "describe" ]

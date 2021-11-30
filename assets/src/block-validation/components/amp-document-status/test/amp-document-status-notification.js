@@ -27,11 +27,6 @@ describe( 'AMPDocumentStatusNotification', () => {
 	const openGeneralSidebar = jest.fn();
 	const closePublishSidebar = jest.fn();
 
-	useDispatch.mockImplementation( () => ( {
-		openGeneralSidebar,
-		closePublishSidebar,
-	} ) );
-
 	function setupHooks(
 		useSelectOverrides = {},
 		useErrorsFetchingStateChangesOverrides = {},
@@ -57,8 +52,15 @@ describe( 'AMPDocumentStatusNotification', () => {
 		} ) );
 	}
 
+	beforeAll( () => {
+		useDispatch.mockImplementation( () => ( {
+			openGeneralSidebar,
+			closePublishSidebar,
+		} ) );
+	} );
+
 	beforeEach( () => {
-		jest.clearAllMocks();
+		// jest.clearAllMocks();
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 	} );
