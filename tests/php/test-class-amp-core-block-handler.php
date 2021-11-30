@@ -409,8 +409,6 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			foreach ( $unwanted_attributes as $unwanted_attribute ) {
 				$this->assertTrue( false === strpos( $content, $unwanted_attribute ) );
 			}
-
-			var_dump( $content );
 		}
 	}
 
