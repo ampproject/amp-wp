@@ -266,6 +266,38 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	}
 
 	/**
+	 * Test navigation block
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
+	 */
+	public function test_ampify_navigation_block() {
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$post_id = wp_insert_post(
+			[
+				'post_title'   => 'Test',
+				'post_content' => 'Test',
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+			],
+			true
+		);
+
+		$content = do_blocks(
+			'
+			<!-- wp:navigation {"overlayMenu":"always","layout":{"type":"flex","setCascadingProperties":true,"justifyContent":"center"}} -->
+			<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":false} /-->
+			<!-- /wp:navigation -->
+			'
+		);
+
+		$this->assertFalse( wp_script_is( 'wp-block-navigation-view', 'enqueued' ) );
+		var_dump( $content );
+	}
+
+	/**
 	 * Test process_categories_widgets.
 	 *
 	 * @covers AMP_Core_Block_Handler::process_categories_widgets()
