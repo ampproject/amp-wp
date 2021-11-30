@@ -243,15 +243,15 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		// If nodisplay is the only supported layout or nodisplay is supported the
-		// element is hidden, then give it the nodisplay layout.
+		// If nodisplay is the only supported layout or nodisplay is supported and
+		// the element is hidden, then give it the nodisplay layout.
 		if (
 			[ Layout::TO_SPEC[ Layout::NODISPLAY ] ] === $supported_layouts
 			||
 			(
 				$amp_element->hasAttribute( Attribute::HIDDEN )
 				&&
-				in_array( Layout::TO_SPEC[ Layout::NODISPLAY ], $supported_layouts )
+				in_array( Layout::TO_SPEC[ Layout::NODISPLAY ], $supported_layouts, true )
 			)
 		) {
 			$amp_element->setAttribute( Attribute::LAYOUT, Layout::NODISPLAY );
