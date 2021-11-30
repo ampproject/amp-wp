@@ -332,7 +332,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$this->assertEquals( true === $should_convert ? 1 : 0, $amp_lightboxes->length );
 
 		if ( true === $should_convert ) {
-			$amp_lightbox = $amp_lightboxes->getItem( 0 );
+			$amp_lightbox = $amp_lightboxes->item( 0 );
 			$this->assertTrue( $amp_lightbox->hasAttribute( 'id' ) );
 			$this->assertTrue( $amp_lightbox->hasAttribute( 'layout' ) );
 			$this->assertEquals( 'nodisplay', $amp_lightbox->getAttribute( 'layout' ) );
