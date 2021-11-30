@@ -296,10 +296,10 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 *
 	 * Expect that:
 	 * - "wp-block-navigation-view" script is not enqueued,
-	 * - "button.wp-block-navigation__responsive-container-open" have on="tap:{id}.open" attribute,
-	 * - "button.wp-block-navigation__responsive-container-close" have on="tap:{id}.close" attribute,
+	 * - "button.wp-block-navigation__responsive-container-open" has on="tap:{id}.open" attribute,
+	 * - "button.wp-block-navigation__responsive-container-close" has on="tap:{id}.close" attribute,
 	 * - there are two "div.wp-block-navigation__responsive-container" elements, one of them is directly
-	 *   wrapped by <amp-lightbox id="{id}" layout="nodisplay"> and have "is-menu-open has-modal-open" classes,
+	 *   wrapped by <amp-lightbox id="{id}" layout="nodisplay"> and has "is-menu-open has-modal-open" classes,
 	 * - there are no unwanted attributes: "aria-expanded", "aria-modal", "data-micromodal-trigger", "data-micromodal-close".
 	 *
 	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
@@ -349,6 +349,57 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 			$this->assertEquals( sprintf( 'tap:%s.open', $amp_lightbox_id ), $open_button_node->getAttribute( 'on' ) );
 			$this->assertEquals( sprintf( 'tap:%s.close', $amp_lightbox_id ), $close_button_node->getAttribute( 'on' ) );
+
+			// Expect that there are two "div.wp-block-navigation__responsive-container" elements, one of them is directly
+			// wrapped by <amp-lightbox id="{id}" layout="nodisplay"> and has "is-menu-open has-modal-open" classes.
+			$containers   = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container' ) );
+			$expectations = [
+				[
+					'element'    => $containers->item( 0 ),
+					'is_open'    => false,
+					'parent_tag' => 'nav',
+				],
+				[
+					'element'    => $containers->item( 1 ),
+					'is_open'    => true,
+					'parent_tag' => 'amp-lightbox',
+				],
+			];
+
+			$this->assertEquals( count( $expectations ), $containers->length );
+
+			foreach ( $expectations as $expectation ) {
+				$has_open_class = false !== strpos( $expectation['element']->getAttribute( 'class' ), 'is-menu-open has-modal-open' );
+				$this->assertEquals( $expectation['is_open'], $has_open_class );
+				$this->assertEquals( $expectation['parent_tag'], $expectation['element']->parentNode->tagName );
+			}
+
+			// Expect that there are two "div.wp-block-navigation__responsive-container-content" elements, and:
+			// - first one is directly wrapped by "div.wp-block-navigation__responsive-container" element and does not has an ID attribute,
+			// - second one is not directly wrapped by "div.wp-block-navigation__responsive-container" element and does has an ID attribute.
+			$contents     = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container-content' ) );
+			$expectations = [
+				[
+					'element'      => $contents->item( 0 ),
+					'has_id'       => false,
+					'parent_class' => 'wp-block-navigation__responsive-container',
+				],
+				[
+					'element'      => $contents->item( 1 ),
+					'has_id'       => true,
+					'parent_class' => 'wp-block-navigation__responsive-dialog',
+				],
+			];
+
+			$this->assertEquals( count( $expectations ), $contents->length );
+
+			foreach ( $expectations as $expectation ) {
+				$this->assertEquals( $expectation['has_id'], $expectation['element']->hasAttribute( 'id' ) );
+				$this->assertTrue( false !== strpos( $expectation['element']->parentNode->getAttribute( 'class' ), $expectation['parent_class'] ) );
+			}
+
+			// Expect that there are no unwanted attributes: "aria-expanded", "aria-modal", "data-micromodal-trigger", "data-micromodal-close".
+			// ...
 		}
 	}
 
