@@ -280,14 +280,14 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 				',
 				true,
 			],
-			'never-overlay-menu' => [
+			'never-overlay-menu'  => [
 				'
 				<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","setCascadingProperties":true,"justifyContent":"center"}} -->
 				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":false} /-->
 				<!-- /wp:navigation -->
 				',
 				false,
-			]
+			],
 		];
 	}
 
@@ -309,6 +309,10 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 * @param boolean $should_convert Whether if navigation block is expected to be converted or not.
 	 */
 	public function test_ampify_navigation_block( $source, $should_convert ) {
+		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '10.7', '<' ) ) {
+			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
+		}
+
 		$handler = new AMP_Core_Block_Handler();
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
@@ -332,13 +336,19 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$this->assertEquals( true === $should_convert ? 1 : 0, $amp_lightboxes->length );
 
 		if ( true === $should_convert ) {
+			$class_query  = '//%1$s[ contains( concat( " ", normalize-space( @class ), " " ), " %2$s " ) ]';
 			$amp_lightbox = $amp_lightboxes->item( 0 );
+
 			$this->assertTrue( $amp_lightbox->hasAttribute( 'id' ) );
 			$this->assertTrue( $amp_lightbox->hasAttribute( 'layout' ) );
 			$this->assertEquals( 'nodisplay', $amp_lightbox->getAttribute( 'layout' ) );
 
-			$amp_lightbox_id = $amp_lightbox->getAttribute( 'id' );
-			var_dump( $amp_lightbox_id );
+			$amp_lightbox_id   = $amp_lightbox->getAttribute( 'id' );
+			$open_button_node  = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation__responsive-container-open' ) )->item( 0 );
+			$close_button_node = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation__responsive-container-close' ) )->item( 0 );
+
+			$this->assertEquals( sprintf( 'tap:%s.open', $amp_lightbox_id ), $open_button_node->getAttribute( 'on' ) );
+			$this->assertEquals( sprintf( 'tap:%s.close', $amp_lightbox_id ), $close_button_node->getAttribute( 'on' ) );
 		}
 	}
 

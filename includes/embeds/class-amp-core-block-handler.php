@@ -309,7 +309,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		$container_node->removeAttribute( Attribute::ID );
 
 		$cloned_container_node = $container_node->cloneNode( true );
-		$cloned_container_node->setAttribute( Attribute::CLASS_, trim( $cloned_container_node->getAttribute( Attribute::CLASS_ ) ) . ' is-menu-open has-modal-open' );
+		if ( $cloned_container_node instanceof DOMElement ) {
+			$cloned_container_node->setAttribute( Attribute::CLASS_, trim( $cloned_container_node->getAttribute( Attribute::CLASS_ ) ) . ' is-menu-open has-modal-open' );
+		}
 
 		$amp_lightbox_node = AMP_DOM_Utils::create_node(
 			$dom,
