@@ -399,7 +399,18 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			}
 
 			// Expect that there are no unwanted attributes: "aria-expanded", "aria-modal", "data-micromodal-trigger", "data-micromodal-close".
-			// ...
+			$unwanted_attributes = [
+				'aria-expanded',
+				'aria-modal',
+				'data-micromodal-trigger',
+				'data-micromodal-close',
+			];
+
+			foreach ( $unwanted_attributes as $unwanted_attribute ) {
+				$this->assertTrue( false === strpos( $content, $unwanted_attribute ) );
+			}
+
+			var_dump( $content );
 		}
 	}
 
