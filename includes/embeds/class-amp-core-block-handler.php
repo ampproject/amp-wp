@@ -263,14 +263,14 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * Ampify navigation block contained by <nav> element.
 	 *
 	 * Steps:
-	 * - "fake" the "open" state by adding `is-menu-open has-modal-open` classes to `div.wp-block-navigation__responsive-container`
-	 * - add `on="tap:{id}.open"` to `button.wp-block-navigation__responsive-container-open` element
-	 * - add `on="tap:{id}.close"` to `button.wp-block-navigation__responsive-container-close` element
-	 * - wrap `div.wp-block-navigation__responsive-container` with `<amp-lightbox id="{id}" layout="nodisplay">...</amp-lightbox>`
-	 * - remove `data-micromodal-trigger` and `data-micromodal-close` attributes
-	 * - remove `aria-expanded` and `aria-modal` attributes
-	 * - duplicate `div.wp-block-navigation__responsive-container` (original one, without extra classes) outside the `amp-lightbox` wrapper and unwrap it from modal-related wrappers
-	 * - dequeue the `wp-block-navigation-view` script
+	 * - "fake" the "open" state by adding `is-menu-open has-modal-open` classes to `div.wp-block-navigation__responsive-container`,
+	 * - add `on="tap:{id}.open"` to `button.wp-block-navigation__responsive-container-open` element,
+	 * - add `on="tap:{id}.close"` to `button.wp-block-navigation__responsive-container-close` element,
+	 * - wrap `div.wp-block-navigation__responsive-container` with `<amp-lightbox id="{id}" layout="nodisplay">...</amp-lightbox>`,
+	 * - remove `data-micromodal-trigger` and `data-micromodal-close` attributes,
+	 * - remove `aria-expanded` and `aria-modal` attributes,
+	 * - duplicate `div.wp-block-navigation__responsive-container` (original one, without extra classes) outside the `amp-lightbox` wrapper and unwrap it from modal-related wrappers,
+	 * - dequeue the `wp-block-navigation-view` script.
 	 *
 	 * @see https://github.com/ampproject/amp-wp/issues/6319#issuecomment-978246093
 	 * @see render_block_core_navigation()

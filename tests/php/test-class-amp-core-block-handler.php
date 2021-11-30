@@ -266,11 +266,49 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	}
 
 	/**
+	 * Get conversion data for navigation block
+	 *
+	 * @return array
+	 */
+	public function get_navigation_block_conversion_data() {
+		return [
+			'always-overlay-menu' => [
+				'
+				<!-- wp:navigation {"overlayMenu":"always","layout":{"type":"flex","setCascadingProperties":true,"justifyContent":"center"}} -->
+				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":false} /-->
+				<!-- /wp:navigation -->
+				',
+				true,
+			],
+			'never-overlay-menu' => [
+				'
+				<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","setCascadingProperties":true,"justifyContent":"center"}} -->
+				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":false} /-->
+				<!-- /wp:navigation -->
+				',
+				false,
+			]
+		];
+	}
+
+	/**
 	 * Test navigation block
 	 *
+	 * Expect that:
+	 * - "wp-block-navigation-view" script is not enqueued,
+	 * - "button.wp-block-navigation__responsive-container-open" have on="tap:{id}.open" attribute,
+	 * - "button.wp-block-navigation__responsive-container-close" have on="tap:{id}.close" attribute,
+	 * - there are two "div.wp-block-navigation__responsive-container" elements, one of them is directly
+	 *   wrapped by <amp-lightbox id="{id}" layout="nodisplay"> and have "is-menu-open has-modal-open" classes,
+	 * - there are no unwanted attributes: "aria-expanded", "aria-modal", "data-micromodal-trigger", "data-micromodal-close".
+	 *
 	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
+	 * @dataProvider get_navigation_block_conversion_data
+	 *
+	 * @param string  $source         Source.
+	 * @param boolean $should_convert Whether if navigation block is expected to be converted or not.
 	 */
-	public function test_ampify_navigation_block() {
+	public function test_ampify_navigation_block( $source, $should_convert ) {
 		$handler = new AMP_Core_Block_Handler();
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
@@ -285,16 +323,23 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			true
 		);
 
-		$content = do_blocks(
-			'
-			<!-- wp:navigation {"overlayMenu":"always","layout":{"type":"flex","setCascadingProperties":true,"justifyContent":"center"}} -->
-			<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":false} /-->
-			<!-- /wp:navigation -->
-			'
-		);
+		$content = do_blocks( $source );
+		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
 
 		$this->assertFalse( wp_script_is( 'wp-block-navigation-view', 'enqueued' ) );
-		var_dump( $content );
+
+		$amp_lightboxes = $dom->getElementsByTagName( 'amp-lightbox' );
+		$this->assertEquals( true === $should_convert ? 1 : 0, $amp_lightboxes->length );
+
+		if ( true === $should_convert ) {
+			$amp_lightbox = $amp_lightboxes->getItem( 0 );
+			$this->assertTrue( $amp_lightbox->hasAttribute( 'id' ) );
+			$this->assertTrue( $amp_lightbox->hasAttribute( 'layout' ) );
+			$this->assertEquals( 'nodisplay', $amp_lightbox->getAttribute( 'layout' ) );
+
+			$amp_lightbox_id = $amp_lightbox->getAttribute( 'id' );
+			var_dump( $amp_lightbox_id );
+		}
 	}
 
 	/**
