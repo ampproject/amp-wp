@@ -26,12 +26,12 @@ import {
 describe( 'Onboarding Wizard Site Scan Step', () => {
 	beforeAll( async () => {
 		await installTheme( 'hestia' );
-		await installPlugin( 'akismet' );
+		await installPlugin( 'contact-form-7' );
 	} );
 
 	afterAll( async () => {
 		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
-		await uninstallPlugin( 'akismet' );
+		await uninstallPlugin( 'contact-form-7' );
 	} );
 
 	it( 'should start a site scan immediately', async () => {
@@ -57,7 +57,7 @@ describe( 'Onboarding Wizard Site Scan Step', () => {
 
 	it( 'should list out plugin and theme issues after the scan', async () => {
 		await activateTheme( 'hestia' );
-		await activatePlugin( 'akismet' );
+		await activatePlugin( 'contact-form-7' );
 
 		await moveToSiteScanScreen( { technical: true } );
 
@@ -76,12 +76,12 @@ describe( 'Onboarding Wizard Site Scan Step', () => {
 		expect( totalIssuesCount ).toBe( 2 );
 
 		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__source-name', { text: /Hestia/ } );
-		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Contact Form 7/ } );
 
 		await testNextButton( { text: 'Next' } );
 		await testPreviousButton( { text: 'Previous' } );
 
-		await deactivatePlugin( 'akismet' );
+		await deactivatePlugin( 'contact-form-7' );
 		await activateTheme( 'twentytwenty' );
 	} );
 } );
