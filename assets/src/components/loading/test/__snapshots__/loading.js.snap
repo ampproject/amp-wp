@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`the Loading component matches the snapshot 1`] = `
+exports[`the Loading component matches the snapshots 1`] = `
 <div
   className="amp-spinner-container"
 >
@@ -8,4 +8,14 @@ exports[`the Loading component matches the snapshot 1`] = `
     className="components-spinner css-pz2hpy-StyledSpinner e1s472tg0"
   />
 </div>
+`;
+
+exports[`the Loading component matches the snapshots 2`] = `
+<span
+  className="amp-spinner-container amp-spinner-container--inline"
+>
+  <span
+    className="components-spinner css-pz2hpy-StyledSpinner e1s472tg0"
+  />
+</span>
 `;

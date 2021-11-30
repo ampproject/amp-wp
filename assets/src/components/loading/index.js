@@ -22,12 +22,14 @@ import './style.css';
  */
 // @todo WIP: Updated design needed.
 export function Loading( { inline = false } ) {
+	const Tag = inline ? 'span' : 'div';
+
 	return (
-		<div className={ classnames( 'amp-spinner-container', {
+		<Tag className={ classnames( 'amp-spinner-container', {
 			'amp-spinner-container--inline': inline,
 		} ) }>
 			<Spinner />
-		</div>
+		</Tag>
 	);
 }
 

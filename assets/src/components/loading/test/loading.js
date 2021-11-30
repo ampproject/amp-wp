@@ -27,10 +27,12 @@ describe( 'the Loading component', () => {
 		container = null;
 	} );
 
-	it( 'matches the snapshot', () => {
-		const wrapper = create( <Loading /> );
+	it( 'matches the snapshots', () => {
+		const wrapperBlock = create( <Loading /> );
+		const wrapperInline = create( <Loading inline={ true } /> );
 
-		expect( wrapper.toJSON() ).toMatchSnapshot();
+		expect( wrapperBlock.toJSON() ).toMatchSnapshot();
+		expect( wrapperInline.toJSON() ).toMatchSnapshot();
 	} );
 
 	it( 'renders a loading spinner', () => {
@@ -42,6 +44,7 @@ describe( 'the Loading component', () => {
 		} );
 
 		expect( container.querySelector( '.amp-spinner-container' ) ).not.toBeNull();
+		expect( container.querySelector( '.amp-spinner-container' ).tagName ).toBe( 'DIV' );
 		expect( container.querySelector( '.components-spinner' ) ).not.toBeNull();
 	} );
 
@@ -54,5 +57,6 @@ describe( 'the Loading component', () => {
 		} );
 
 		expect( container.querySelector( '.amp-spinner-container--inline' ) ).not.toBeNull();
+		expect( container.querySelector( '.amp-spinner-container--inline' ).tagName ).toBe( 'SPAN' );
 	} );
 } );
