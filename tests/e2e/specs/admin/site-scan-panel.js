@@ -26,7 +26,7 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 	beforeAll( async () => {
 		await installTheme( 'hestia' );
-		await installPlugin( 'autoptimize' );
+		await installPlugin( 'akismet' );
 
 		await cleanUpSettings();
 
@@ -36,7 +36,7 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 	afterAll( async () => {
 		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
-		await uninstallPlugin( 'autoptimize' );
+		await uninstallPlugin( 'akismet' );
 
 		await cleanUpSettings();
 	} );
@@ -96,7 +96,7 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 	it( 'lists Autoptimize plugin as causing AMP incompatibility', async () => {
 		await activateTheme( 'twentytwenty' );
-		await activatePlugin( 'autoptimize' );
+		await activatePlugin( 'akismet' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
@@ -107,12 +107,12 @@ describe( 'AMP settings screen Site Scan panel', () => {
 
 		await expect( page ).not.toMatchElement( '.site-scan-results--themes' );
 
-		await deactivatePlugin( 'autoptimize' );
+		await deactivatePlugin( 'akismet' );
 	} );
 
 	it( 'lists Hestia theme and Autoptimize plugin for causing AMP incompatibilities', async () => {
 		await activateTheme( 'hestia' );
-		await activatePlugin( 'autoptimize' );
+		await activatePlugin( 'akismet' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
@@ -127,12 +127,12 @@ describe( 'AMP settings screen Site Scan panel', () => {
 		await expect( page ).toMatchElement( '.site-scan-results--themes .site-scan-results__source-name', { text: /Hestia/ } );
 		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/ } );
 
-		await deactivatePlugin( 'autoptimize' );
+		await deactivatePlugin( 'akismet' );
 	} );
 
 	it( 'displays a notice if a plugin has been deactivated or removed', async () => {
 		await activateTheme( 'twentytwenty' );
-		await activatePlugin( 'autoptimize' );
+		await activatePlugin( 'akismet' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
@@ -141,7 +141,7 @@ describe( 'AMP settings screen Site Scan panel', () => {
 		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-name', { text: /Autoptimize/, timeout } );
 
 		// Deactivate the plugin and test.
-		await deactivatePlugin( 'autoptimize' );
+		await deactivatePlugin( 'akismet' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
@@ -149,19 +149,19 @@ describe( 'AMP settings screen Site Scan panel', () => {
 		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-notice', { text: /This plugin has been deactivated since last site scan./ } );
 
 		// Uninstall the plugin and test.
-		await uninstallPlugin( 'autoptimize' );
+		await uninstallPlugin( 'akismet' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-slug', { text: /autoptimize/ } );
+		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-slug', { text: /akismet/ } );
 		await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-notice', { text: /This plugin has been uninstalled since last site scan./ } );
 
 		// Clean up.
-		await installPlugin( 'autoptimize' );
+		await installPlugin( 'akismet' );
 	} );
 
 	it( 'automatically triggers a scan if Plugin Suppression option has changed', async () => {
-		await activatePlugin( 'autoptimize' );
+		await activatePlugin( 'akismet' );
 
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
@@ -181,6 +181,6 @@ describe( 'AMP settings screen Site Scan panel', () => {
 			isAmpFirst: false,
 		} );
 
-		await deactivatePlugin( 'autoptimize' );
+		await deactivatePlugin( 'akismet' );
 	} );
 } );

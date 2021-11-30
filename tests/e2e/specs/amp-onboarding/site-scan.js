@@ -26,12 +26,12 @@ import {
 describe( 'Onboarding Wizard Site Scan Step', () => {
 	beforeAll( async () => {
 		await installTheme( 'hestia' );
-		await installPlugin( 'autoptimize' );
+		await installPlugin( 'akismet' );
 	} );
 
 	afterAll( async () => {
 		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
-		await uninstallPlugin( 'autoptimize' );
+		await uninstallPlugin( 'akismet' );
 	} );
 
 	it( 'should start a site scan immediately', async () => {
@@ -57,7 +57,7 @@ describe( 'Onboarding Wizard Site Scan Step', () => {
 
 	it( 'should list out plugin and theme issues after the scan', async () => {
 		await activateTheme( 'hestia' );
-		await activatePlugin( 'autoptimize' );
+		await activatePlugin( 'akismet' );
 
 		await moveToSiteScanScreen( { technical: true } );
 
@@ -81,7 +81,7 @@ describe( 'Onboarding Wizard Site Scan Step', () => {
 		await testNextButton( { text: 'Next' } );
 		await testPreviousButton( { text: 'Previous' } );
 
-		await deactivatePlugin( 'autoptimize' );
+		await deactivatePlugin( 'akismet' );
 		await activateTheme( 'twentytwenty' );
 	} );
 } );
