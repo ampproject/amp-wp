@@ -18,11 +18,13 @@ import { NavigationContextProvider } from '../../navigation-context-provider';
 import { UserContextProvider } from '../../../../components/user-context-provider';
 import { OptionsContextProvider } from '../../../../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../../../../components/reader-themes-context-provider';
+import { SiteScanContextProvider } from '../../../../components/site-scan-context-provider';
 import { STANDARD, READER } from '../../../../common/constants';
 
 jest.mock( '../../../../components/options-context-provider' );
 jest.mock( '../../../../components/reader-themes-context-provider' );
 jest.mock( '../../../../components/user-context-provider' );
+jest.mock( '../../../../components/site-scan-context-provider' );
 
 let container;
 
@@ -40,11 +42,13 @@ const testPages = [
 const Providers = ( { children, pages, themeSupport = READER, downloadingTheme = false } ) => (
 	<OptionsContextProvider themeSupport={ themeSupport }>
 		<UserContextProvider>
-			<NavigationContextProvider pages={ pages }>
-				<ReaderThemesContextProvider downloadingTheme={ downloadingTheme }>
-					{ children }
-				</ReaderThemesContextProvider>
-			</NavigationContextProvider>
+			<SiteScanContextProvider>
+				<NavigationContextProvider pages={ pages }>
+					<ReaderThemesContextProvider downloadingTheme={ downloadingTheme }>
+						{ children }
+					</ReaderThemesContextProvider>
+				</NavigationContextProvider>
+			</SiteScanContextProvider>
 		</UserContextProvider>
 	</OptionsContextProvider>
 );

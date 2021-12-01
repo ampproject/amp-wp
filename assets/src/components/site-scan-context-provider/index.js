@@ -198,12 +198,14 @@ export function siteScanReducer( state, action ) {
  * @param {Object}  props                             Component props.
  * @param {?any}    props.children                    Component children.
  * @param {boolean} props.fetchCachedValidationErrors Whether to fetch cached validation errors on mount.
+ * @param {boolean} props.resetOnOptionsChange        Whether to reset scanner and refetch scannable URLs whenever AMP options are changed.
  * @param {string}  props.scannableUrlsRestPath       The REST path for interacting with the scannable URL resources.
  * @param {string}  props.validateNonce               The AMP validate nonce.
  */
 export function SiteScanContextProvider( {
 	children,
 	fetchCachedValidationErrors = false,
+	resetOnOptionsChange = false,
 	scannableUrlsRestPath,
 	validateNonce,
 } ) {
@@ -292,11 +294,11 @@ export function SiteScanContextProvider( {
 	 * refetch the scannable URLs.
 	 */
 	useEffect( () => {
-		if ( Object.keys( savedOptions ).length > 0 ) {
+		if ( resetOnOptionsChange && Object.keys( savedOptions ).length > 0 ) {
 			dispatch( { type: ACTION_SCAN_CANCEL } );
 			dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
 		}
-	}, [ savedOptions ] );
+	}, [ resetOnOptionsChange, savedOptions ] );
 
 	/**
 	 * Trigger site scan if the suppressed plugins list has changed and the
@@ -320,6 +322,11 @@ export function SiteScanContextProvider( {
 				await new Promise( ( resolve ) => {
 					clearTimeout = setTimeout( resolve, CONCURRENT_VALIDATION_REQUESTS_WAIT_MS );
 				} );
+
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
 				setShouldDelayValidationRequest( false );
 			} )();
 		}
@@ -367,6 +374,10 @@ export function SiteScanContextProvider( {
 					scannableUrls: response,
 				} );
 			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
 				setAsyncError( e );
 			}
 		} )();
@@ -435,6 +446,10 @@ export function SiteScanContextProvider( {
 					results.error = data?.code || true;
 				}
 			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
 				results.error = true;
 			}
 
@@ -464,7 +479,7 @@ export function SiteScanContextProvider( {
 				pluginsWithAmpIncompatibility,
 				previewPermalink,
 				scannableUrls,
-				scannedUrlsMaxIndex: Math.min( scannableUrls.length, ...urlIndexesPendingScan ) - 1,
+				scannedUrlsMaxIndex: ( [ STATUS_IN_PROGRESS, STATUS_IDLE ].includes( status ) ? Math.min( scannableUrls.length, ...urlIndexesPendingScan ) : 0 ) - 1,
 				stale,
 				startSiteScan,
 				themesWithAmpIncompatibility,
@@ -478,6 +493,7 @@ export function SiteScanContextProvider( {
 SiteScanContextProvider.propTypes = {
 	children: PropTypes.any,
 	fetchCachedValidationErrors: PropTypes.bool,
+	resetOnOptionsChange: PropTypes.bool,
 	scannableUrlsRestPath: PropTypes.string,
 	validateNonce: PropTypes.string,
 };
