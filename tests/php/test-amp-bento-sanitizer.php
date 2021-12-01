@@ -225,6 +225,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 							<bento-soundcloud id="sc3" data-trackid="89299804" data-visual="true" style="aspect-ratio: 0.5"></bento-soundcloud>
 							<bento-soundcloud id="sc4" data-trackid="89299804" data-visual="true" style="aspect-ratio: 2 / 1; max-width: 500px;"></bento-soundcloud>
 							<bento-soundcloud id="sc5" data-trackid="89299804" data-visual="true" style="aspect-ratio: 1 / 2; max-width: 500px;"></bento-soundcloud>
+							<bento-soundcloud id="sc6" data-trackid="89299804" data-visual="true" style="aspect-ratio: 1 / 2; max-width: 50vw;"></bento-soundcloud>
 							<bento-wordpress-embed id="my-embed" style="width:100%; height: 400px" data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></bento-wordpress-embed>
 							<div style="position:relative; width:100%; height: 400px;">
 								<bento-wordpress-embed id="my-fill-embed" style="position:absolute; width:100%; height: 100%;" data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></bento-wordpress-embed>
@@ -244,7 +245,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 							<script type="module" async="" src="https://cdn.ampproject.org/v0/bento-marquee-1.0.mjs" data-px-verified-tag></script>
 							<script nomodule="" async="" src="https://cdn.ampproject.org/v0/bento-marquee-1.0.js" data-px-verified-tag></script>
 							<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-marquee-1.0.css" data-px-verified-tag data-px-verified-attrs="href">
-							<style amp-custom>#timeago{color:red}amp-timeago#timeago{color:blue}#marquee{display:block;outline:solid 2px red}bento-marquee#marquee{outline:solid 2px green}bento-marquee h2{text-transform:uppercase}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c437205{border:solid 1px green}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-4ce7767{position:relative;width:100%;height:400px}
+							<style amp-custom>#timeago{color:red}amp-timeago#timeago{color:blue}#marquee{display:block;outline:solid 2px red}bento-marquee#marquee{outline:solid 2px green}bento-marquee h2{text-transform:uppercase}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c437205{border:solid 1px green}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-4d7586b{max-width:50vw}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-4ce7767{position:relative;width:100%;height:400px}
 
 							/*# sourceURL="amp-custom.css" */</style>
 						</head>
@@ -253,10 +254,11 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 							<amp-instagram id="my-instagram1" data-shortcode="CKXYAzuj7TE" data-captioned width="400" height="800"></amp-instagram>
 							<amp-instagram id="my-instagram2" data-shortcode="CKXYAzuj7TE" data-captioned width="40em" height="80em"></amp-instagram>
 							<amp-soundcloud id="sc1" data-trackid="89299804" data-visual="true" height="9" width="16" layout="responsive"></amp-soundcloud>
-							<amp-soundcloud id="sc2"data-trackid="89299804" data-visual="true" height="16.34" width="9.12" layout="responsive"></amp-soundcloud>
-							<amp-soundcloud id="sc3"data-trackid="89299804" data-visual="true" height="1" width="0.5" layout="responsive"></amp-soundcloud>
-							<amp-soundcloud id="sc4"data-trackid="89299804" data-visual="true" height="250" width="500" layout="intrinsic"></amp-soundcloud>
-							<amp-soundcloud id="sc5"data-trackid="89299804" data-visual="true" height="1000" width="500" layout="intrinsic"></amp-soundcloud>
+							<amp-soundcloud id="sc2" data-trackid="89299804" data-visual="true" height="16.34" width="9.12" layout="responsive"></amp-soundcloud>
+							<amp-soundcloud id="sc3" data-trackid="89299804" data-visual="true" height="1" width="0.5" layout="responsive"></amp-soundcloud>
+							<amp-soundcloud id="sc4" data-trackid="89299804" data-visual="true" height="250" width="500" layout="intrinsic"></amp-soundcloud>
+							<amp-soundcloud id="sc5" data-trackid="89299804" data-visual="true" height="1000" width="500" layout="intrinsic"></amp-soundcloud>
+							<amp-soundcloud id="sc6" class="amp-wp-4d7586b" data-amp-original-style="max-width:50vw" data-trackid="89299804" data-visual="true" height="2" width="1" layout="responsive"></amp-soundcloud>
 							<amp-wordpress-embed id="my-embed" height="400" width="auto" layout="fixed-height" data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></amp-wordpress-embed>
 							<div class="amp-wp-4ce7767" data-amp-original-style="position:relative; width:100%; height: 400px;">
 								<amp-wordpress-embed data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/" id="my-fill-embed" layout="fill"></amp-wordpress-embed>
@@ -432,6 +434,62 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 				',
 				'sanitizer_args'       => [],
 				'expected_error_codes' => [],
+				'expect_prefer_bento'  => true,
+			],
+
+			'bento-no-layout-available'         => [
+				'source'               => '
+					<html>
+						<head>
+							<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+							<script nomodule="" src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+
+							<script type="module" src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.mjs" crossorigin="anonymous"></script>
+							<script nomodule="" src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js" crossorigin="anonymous"></script>
+
+							<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css" crossorigin="anonymous">
+
+							<style>
+							bento-base-carousel,
+							bento-base-carousel div {
+								aspect-ratio: 4/1;
+							}
+							.red {
+								background: darkred;
+							}
+							.blue {
+								background: steelblue;
+							}
+							.green {
+								background: seagreen;
+							}
+							</style>
+						</head>
+						<body>
+							<bento-base-carousel id="my-carousel">
+								<div class="red"></div>
+								<div class="blue"></div>
+								<div class="green"></div>
+							</bento-base-carousel>
+						</body>
+					</html>
+				',
+				// Note: It's somewhat unexpected that the styles are still in the document since the element was removed.
+				// But this is because the tree shaking happened before the tag-and-attribute sanitizer ran, so at the
+				// time of tree shaking the bento-base-carousel element was still in the document.
+				'expected'             => '
+					<html>
+						<head>
+							<meta charset="utf-8">
+							<style amp-custom>amp-base-carousel,amp-base-carousel div{aspect-ratio:4/1}.red{background:darkred}.blue{background:steelblue}.green{background:seagreen} /*# sourceURL="amp-custom.css" */</style>
+						</head>
+						<body></body>
+					</html>
+				',
+				'sanitizer_args'       => [],
+				'expected_error_codes' => [
+					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
+				],
 				'expect_prefer_bento'  => true,
 			],
 		];
