@@ -362,7 +362,7 @@ class AMP_Validation_Error_Taxonomy {
 		$term = get_term( (int) $term_id, self::TAXONOMY_SLUG );
 
 		// Skip if the term count was not actually 0.
-		if ( ! $term || 0 !== $term->count ) {
+		if ( ! $term instanceof WP_Term || 0 !== $term->count ) {
 			return false;
 		}
 
@@ -2867,8 +2867,8 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$action              = sanitize_key( $_REQUEST['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$term_ids            = isset( $_POST['delete_tags'] ) ? array_map( 'sanitize_key', $_POST['delete_tags'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$single_term_id      = isset( $_GET['term_id'] ) ? sanitize_key( $_GET['term_id'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$term_ids            = isset( $_POST['delete_tags'] ) ? array_filter( array_map( 'intval', (array) $_POST['delete_tags'] ) ) : []; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$single_term_id      = isset( $_GET['term_id'] ) ? (int) $_GET['term_id'] : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$redirect_query_args = [
 			'action'       => 'edit',
 			'amp_actioned' => $action,

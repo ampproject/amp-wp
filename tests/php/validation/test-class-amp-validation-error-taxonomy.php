@@ -1404,7 +1404,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 
 		// Because the action is incorrect, the tested method should exit and not update the validation error term.
 		$_REQUEST['action']   = 'incorrect-action';
-		$_POST['delete_tags'] = [ $error_term->term_id ];
+		$_POST['delete_tags'] = [ (string) $error_term->term_id ];
 		$correct_post_type    = self::factory()->post->create( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
 		$this->assertEquals( get_term( $error_term->term_id )->term_group, $initial_accepted_status );
 
