@@ -5,6 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\Attribute;
+use AmpProject\Dom\Element;
+
 /**
  * Class AMP_Playbuzz_Sanitizer
  *
@@ -67,6 +70,7 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			/** @var Element $node */
 			$node = $nodes->item( $i );
 
 			if ( self::$pb_class !== $node->getAttribute( 'class' ) ) {
@@ -80,6 +84,9 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! isset( $new_attributes['data-item'] ) && ! isset( $new_attributes['src'] ) ) {
 				continue;
 			}
+
+			// Remove the ID from the original node so that PHP DOM doesn't fail to set it on the replacement element.
+			$node->removeAttribute( Attribute::ID );
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-playbuzz', $new_attributes );
 
@@ -132,6 +139,7 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 				case 'data-game-info':
 				case 'data-comments':
 				case 'class':
+				case 'id':
 					$out[ $name ] = $value;
 					break;
 
