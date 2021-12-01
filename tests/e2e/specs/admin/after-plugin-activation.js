@@ -13,12 +13,7 @@ describe( 'After plugin activation', () => {
 	const timeout = 30000;
 
 	beforeAll( async () => {
-		await installPlugin( 'autoptimize' );
 		await completeWizard( { technical: true, mode: 'transitional' } );
-	} );
-
-	afterAll( async () => {
-		await uninstallPlugin( 'autoptimize' );
 	} );
 
 	beforeEach( async () => {
@@ -38,28 +33,28 @@ describe( 'After plugin activation', () => {
 		await page.waitForSelector( `tr[data-slug="gutenberg"] .deactivate a` );
 
 		await expect( page ).toMatchElement( '#amp-site-scan-notice' );
-		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /AMP plugin is checking your site for compatibility issues/ } );
-		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /AMP plugin found no validation errors/, timeout } );
+		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /Checking your site for AMP compatibility issues/ } );
+		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /No AMP compatibility issues detected/, timeout } );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice .amp-admin-notice--success' );
 		await expect( page ).not.toMatchElement( '#amp-site-scan-notice summary' );
 		await expect( page ).not.toMatchElement( '#amp-site-scan-notice .amp-site-scan-notice__cta' );
 	} );
 
-	it( 'site scan is triggered automatically and returns validation issues for Autoptimize', async () => {
-		// Activate Autoptimize.
-		await page.click( `tr[data-slug="autoptimize"] .activate a` );
-		await page.waitForSelector( `tr[data-slug="autoptimize"] .deactivate a` );
+	it( 'site scan is triggered automatically and returns validation issues for E2E Tests Demo Plugin', async () => {
+		// Activate the demo plugin.
+		await page.click( `tr[data-slug="e2e-tests-demo-plugin"] .activate a` );
+		await page.waitForSelector( `tr[data-slug="e2e-tests-demo-plugin"] .deactivate a` );
 
 		await expect( page ).toMatchElement( '#amp-site-scan-notice' );
-		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /AMP plugin is checking your site for compatibility issues/ } );
+		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /Checking your site for AMP compatibility issues/ } );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /AMP Plugin found validation errors/, timeout } );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice .amp-admin-notice--warning' );
-		await expect( page ).toMatchElement( '#amp-site-scan-notice summary', { text: /Validation issues caused by Autoptimize/ } );
-		await expect( page ).toMatchElement( '#amp-site-scan-notice .button', { text: /View Compatible Plugins List/ } );
+		await expect( page ).toMatchElement( '#amp-site-scan-notice summary', { text: /Validation issues caused by E2E Tests Demo Plugin/ } );
+		await expect( page ).toMatchElement( '#amp-site-scan-notice .button', { text: /View AMP-Compatible Plugins/ } );
 
-		// Deactivate Autoptimize.
-		await page.click( `tr[data-slug="autoptimize"] .deactivate a` );
-		await page.waitForSelector( `tr[data-slug="autoptimize"] .delete a` );
+		// Deactivate the demo plugin.
+		await page.click( `tr[data-slug="e2e-tests-demo-plugin"] .deactivate a` );
+		await page.waitForSelector( `tr[data-slug="e2e-tests-demo-plugin"] .delete a` );
 
 		await expect( page ).not.toMatchElement( '#amp-site-scan-notice' );
 	} );
