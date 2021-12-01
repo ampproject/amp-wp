@@ -111,7 +111,7 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 
 		// If dependency support is absent, then abort because is_needed will never be true.
 		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			return;
+			$this->markTestSkipped( 'WP install lacks dependency support.' );
 		}
 
 		$_GET = array_fill_keys( $query_params, true );
