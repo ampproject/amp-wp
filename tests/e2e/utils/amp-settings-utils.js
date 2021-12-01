@@ -34,7 +34,7 @@ export async function setTemplateMode( mode ) {
 
 export async function isPluginInstalled( slug, settings ) {
 	await switchUserToAdmin();
-	await visitAdminPage( 'plugins.php' );
+	await visitAdminPage( 'plugins.php', '' );
 	await page.waitForSelector( 'h1', { text: 'Plugins' } );
 
 	const found = await page.$( `tr${ settings?.checkIsActivated ? '.active' : '' }[data-slug="${ slug }"]` );
@@ -68,7 +68,7 @@ export async function installLocalPlugin( slug ) {
 	}
 
 	await switchUserToAdmin();
-	await visitAdminPage( 'plugin-install.php' );
+	await visitAdminPage( 'plugin-install.php', '' );
 	await page.waitForSelector( 'h1', { text: /Add Plugins/ } );
 
 	await page.click( '.upload-view-toggle' );

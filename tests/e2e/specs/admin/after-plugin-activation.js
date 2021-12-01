@@ -23,7 +23,7 @@ describe( 'After plugin activation', () => {
 
 	beforeEach( async () => {
 		await switchUserToAdmin();
-		await visitAdminPage( 'plugins.php' );
+		await visitAdminPage( 'plugins.php', '' );
 	} );
 
 	it( 'site scan is triggered automatically and displays no validation issues for Gutenberg', async () => {
