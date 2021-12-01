@@ -45,7 +45,7 @@ function Providers( { children } ) {
 	return (
 		<ErrorContextProvider>
 			<ErrorBoundary
-				title={ __( 'The Site Scanner has experienced an error.', 'amp' ) }
+				title={ __( 'The AMP Site Scanner has experienced an error.', 'amp' ) }
 			>
 				<OptionsContextProvider
 					hasErrorBoundary={ true }

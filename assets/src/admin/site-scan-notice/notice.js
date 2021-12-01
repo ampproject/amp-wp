@@ -69,7 +69,7 @@ export function SiteScanNotice() {
 		return (
 			<AdminNotice type={ ADMIN_NOTICE_TYPE_ERROR } { ...commonNoticeProps }>
 				<p>
-					{ __( 'AMP plugin could not check your site for compatibility issues.', 'amp' ) }
+					{ __( 'AMP could not check your site for compatibility issues.', 'amp' ) }
 				</p>
 			</AdminNotice>
 		);
@@ -79,7 +79,7 @@ export function SiteScanNotice() {
 		return (
 			<AdminNotice type={ ADMIN_NOTICE_TYPE_SUCCESS } { ...commonNoticeProps }>
 				<p>
-					{ __( 'AMP plugin found no validation errors.', 'amp' ) }
+					{ __( 'No AMP compatibility issues detected.', 'amp' ) }
 				</p>
 			</AdminNotice>
 		);
@@ -106,7 +106,7 @@ export function SiteScanNotice() {
 						className="button"
 						{ ...isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL ) ? { target: '_blank', rel: 'noreferrer' } : {} }
 					>
-						{ __( 'View Compatible Plugins List', 'amp' ) }
+						{ __( 'View AMP-Compatible Plugins', 'amp' ) }
 					</a>
 				</div>
 			</AdminNotice>
@@ -116,7 +116,7 @@ export function SiteScanNotice() {
 	return (
 		<AdminNotice type={ ADMIN_NOTICE_TYPE_INFO } { ...commonNoticeProps }>
 			<p>
-				{ __( 'AMP plugin is checking your site for compatibility issues', 'amp' ) }
+				{ __( 'Checking your site for AMP compatibility issues…', 'amp' ) }
 				<Loading inline={ true } />
 			</p>
 		</AdminNotice>
