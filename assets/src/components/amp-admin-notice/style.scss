@@ -1,4 +1,4 @@
-.admin-notice {
+.amp-admin-notice {
 	background: #fff;
 	border: 1px solid #c3c4c7;
 	border-left-width: 4px;
@@ -12,12 +12,12 @@
 	}
 }
 
-.admin-notice--dismissible {
+.amp-admin-notice--dismissible {
 	padding-right: 38px;
 	position: relative;
 }
 
-.admin-notice__dismiss {
+.amp-admin-notice__dismiss {
 	background: 0 0;
 	border: none;
 	color: #787c82;
@@ -56,18 +56,18 @@
 	}
 }
 
-.admin-notice--success {
+.amp-admin-notice--success {
 	border-left-color: #00a32a;
 }
 
-.admin-notice--warning {
+.amp-admin-notice--warning {
 	border-left-color: #dba617;
 }
 
-.admin-notice--error {
+.amp-admin-notice--error {
 	border-left-color: #d63638;
 }
 
-.admin-notice--info {
+.amp-admin-notice--info {
 	border-left-color: #72aee6;
 }

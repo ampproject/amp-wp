@@ -18,12 +18,12 @@ import {
 import { SiteScan } from '../../components/site-scan-context-provider';
 import { User } from '../../components/user-context-provider';
 import {
-	ADMIN_NOTICE_TYPE_ERROR,
-	ADMIN_NOTICE_TYPE_INFO,
-	ADMIN_NOTICE_TYPE_SUCCESS,
-	ADMIN_NOTICE_TYPE_WARNING,
-	AdminNotice,
-} from '../../components/admin-notice';
+	AMP_ADMIN_NOTICE_TYPE_ERROR,
+	AMP_ADMIN_NOTICE_TYPE_INFO,
+	AMP_ADMIN_NOTICE_TYPE_SUCCESS,
+	AMP_ADMIN_NOTICE_TYPE_WARNING,
+	AmpAdminNotice,
+} from '../../components/amp-admin-notice';
 import { Loading } from '../../components/loading';
 import { isExternalUrl } from '../../common/helpers/is-external-url';
 import { PluginsWithAmpIncompatibility } from './plugins-with-amp-incompatibility';
@@ -67,27 +67,27 @@ export function SiteScanNotice() {
 
 	if ( isFailed || isCancelled ) {
 		return (
-			<AdminNotice type={ ADMIN_NOTICE_TYPE_ERROR } { ...commonNoticeProps }>
+			<AmpAdminNotice type={ AMP_ADMIN_NOTICE_TYPE_ERROR } { ...commonNoticeProps }>
 				<p>
 					{ __( 'AMP could not check your site for compatibility issues.', 'amp' ) }
 				</p>
-			</AdminNotice>
+			</AmpAdminNotice>
 		);
 	}
 
 	if ( isCompleted && pluginsWithAmpIncompatibility.length === 0 ) {
 		return (
-			<AdminNotice type={ ADMIN_NOTICE_TYPE_SUCCESS } { ...commonNoticeProps }>
+			<AmpAdminNotice type={ AMP_ADMIN_NOTICE_TYPE_SUCCESS } { ...commonNoticeProps }>
 				<p>
 					{ __( 'No AMP compatibility issues detected.', 'amp' ) }
 				</p>
-			</AdminNotice>
+			</AmpAdminNotice>
 		);
 	}
 
 	if ( isCompleted && pluginsWithAmpIncompatibility.length > 0 ) {
 		return (
-			<AdminNotice type={ ADMIN_NOTICE_TYPE_WARNING } { ...commonNoticeProps }>
+			<AmpAdminNotice type={ AMP_ADMIN_NOTICE_TYPE_WARNING } { ...commonNoticeProps }>
 				<p
 					dangerouslySetInnerHTML={ {
 						__html: sprintf(
@@ -109,16 +109,16 @@ export function SiteScanNotice() {
 						{ __( 'View AMP-Compatible Plugins', 'amp' ) }
 					</a>
 				</div>
-			</AdminNotice>
+			</AmpAdminNotice>
 		);
 	}
 
 	return (
-		<AdminNotice type={ ADMIN_NOTICE_TYPE_INFO } { ...commonNoticeProps }>
+		<AmpAdminNotice type={ AMP_ADMIN_NOTICE_TYPE_INFO } { ...commonNoticeProps }>
 			<p>
 				{ __( 'Checking your site for AMP compatibility issues…', 'amp' ) }
 				<Loading inline={ true } />
 			</p>
-		</AdminNotice>
+		</AmpAdminNotice>
 	);
 }

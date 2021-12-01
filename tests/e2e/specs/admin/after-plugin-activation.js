@@ -40,7 +40,7 @@ describe( 'After plugin activation', () => {
 		await expect( page ).toMatchElement( '#amp-site-scan-notice' );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /AMP plugin is checking your site for compatibility issues/ } );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /AMP plugin found no validation errors/, timeout } );
-		await expect( page ).toMatchElement( '#amp-site-scan-notice .admin-notice--success' );
+		await expect( page ).toMatchElement( '#amp-site-scan-notice .amp-admin-notice--success' );
 		await expect( page ).not.toMatchElement( '#amp-site-scan-notice summary' );
 		await expect( page ).not.toMatchElement( '#amp-site-scan-notice .amp-site-scan-notice__cta' );
 	} );
@@ -53,7 +53,7 @@ describe( 'After plugin activation', () => {
 		await expect( page ).toMatchElement( '#amp-site-scan-notice' );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /AMP plugin is checking your site for compatibility issues/ } );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /AMP Plugin found validation errors/, timeout } );
-		await expect( page ).toMatchElement( '#amp-site-scan-notice .admin-notice--warning' );
+		await expect( page ).toMatchElement( '#amp-site-scan-notice .amp-admin-notice--warning' );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice summary', { text: /Validation issues caused by Autoptimize/ } );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice .button', { text: /View Compatible Plugins List/ } );
 
