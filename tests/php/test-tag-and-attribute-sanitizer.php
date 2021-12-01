@@ -3453,7 +3453,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				'<html amp><head><meta charset="utf-8"><meta name="amp-story-generator-name" content="Web Stories for WordPress"><meta name="amp-story-generator-version" content="1.2.3"></head><body></body></html>',
 				null, // No change.
 			],
-			'meta_theme_color'                    => [
+			'meta_theme_color'                        => [
 				'<html amp><head><meta charset="utf-8"><meta name="theme-color" content="#ecd96f" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0b3e05" media="(prefers-color-scheme: dark)"></head><body></body></html>',
 				null, // No change.
 			],
