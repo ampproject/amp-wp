@@ -97,6 +97,7 @@ function Providers( { children } ) {
 									<ThemesContextProvider hasErrorBoundary={ true }>
 										<SiteScanContextProvider
 											fetchCachedValidationErrors={ true }
+											resetOnOptionsChange={ true }
 											scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 											validateNonce={ VALIDATE_NONCE }
 										>

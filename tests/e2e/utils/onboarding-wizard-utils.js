@@ -46,6 +46,7 @@ export async function moveToTemplateModeScreen( { technical } ) {
 }
 
 export async function scrollToElement( { selector, click = false } ) {
+	await page.waitForSelector( selector );
 	await page.evaluate( ( options ) => {
 		const el = document.querySelector( options.selector );
 		if ( el ) {
