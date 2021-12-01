@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Sandboxing;
 use AmpProject\AmpWP\Tests\TestCase;
 
 /**
@@ -120,6 +121,8 @@ class Test_AMP_Options_Manager extends TestCase {
 				Option::PAIRED_URL_STRUCTURE     => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 				Option::LATE_DEFINED_SLUG        => null,
 				Option::DELETE_DATA_AT_UNINSTALL => true,
+				Sandboxing::OPTION_ENABLED       => false,
+				Sandboxing::OPTION_LEVEL         => 1,
 			],
 			AMP_Options_Manager::get_options()
 		);
