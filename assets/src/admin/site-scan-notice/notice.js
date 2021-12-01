@@ -1,8 +1,8 @@
 /**
  * WordPress dependencies
  */
-import { useContext, useEffect, useMemo } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { useContext, useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * External dependencies
@@ -16,7 +16,6 @@ import {
  * Internal dependencies
  */
 import { SiteScan } from '../../components/site-scan-context-provider';
-import { User } from '../../components/user-context-provider';
 import {
 	AMP_ADMIN_NOTICE_TYPE_ERROR,
 	AMP_ADMIN_NOTICE_TYPE_INFO,
@@ -44,8 +43,6 @@ export function SiteScanNotice() {
 		pluginsWithAmpIncompatibility,
 		startSiteScan,
 	} = useContext( SiteScan );
-	const { developerToolsOption } = useContext( User );
-	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
 
 	// Cancel scan on component unmount.
 	useEffect( () => cancelSiteScan, [ cancelSiteScan ] );
@@ -88,12 +85,7 @@ export function SiteScanNotice() {
 	if ( isCompleted && pluginsWithAmpIncompatibility.length > 0 ) {
 		return (
 			<AmpAdminNotice type={ AMP_ADMIN_NOTICE_TYPE_WARNING } { ...commonNoticeProps }>
-				<p>
-					{ __( 'AMP compatibility issues discovered with the following plugins:', 'amp' ) }
-				</p>
-				{ userIsTechnical && (
-					<PluginsWithAmpIncompatibility pluginsWithAmpIncompatibility={ pluginsWithAmpIncompatibility } />
-				) }
+				<PluginsWithAmpIncompatibility pluginsWithAmpIncompatibility={ pluginsWithAmpIncompatibility } />
 				<div className="amp-site-scan-notice__cta">
 					<a href={ PLUGIN_SUPPRESSION_LINK } className="button">
 						{ __( 'Review Plugin Suppression', 'amp' ) }
