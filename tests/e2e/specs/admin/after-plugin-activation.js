@@ -47,9 +47,10 @@ describe( 'After plugin activation', () => {
 
 		await expect( page ).toMatchElement( '#amp-site-scan-notice' );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /Checking your site for AMP compatibility issues/ } );
-		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /AMP Plugin found validation errors/, timeout } );
+		await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /AMP compatibility issues discovered with the following plugins/, timeout } );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice .amp-admin-notice--warning' );
-		await expect( page ).toMatchElement( '#amp-site-scan-notice summary', { text: /Validation issues caused by E2E Tests Demo Plugin/ } );
+		await expect( page ).toMatchElement( '#amp-site-scan-notice summary', { text: /E2E Tests Demo Plugin/ } );
+		await expect( page ).toMatchElement( '#amp-site-scan-notice .button', { text: /Review Plugin Suppression/ } );
 		await expect( page ).toMatchElement( '#amp-site-scan-notice .button', { text: /View AMP-Compatible Plugins/ } );
 
 		// Deactivate the demo plugin.

@@ -88,19 +88,16 @@ export function SiteScanNotice() {
 	if ( isCompleted && pluginsWithAmpIncompatibility.length > 0 ) {
 		return (
 			<AmpAdminNotice type={ AMP_ADMIN_NOTICE_TYPE_WARNING } { ...commonNoticeProps }>
-				<p
-					dangerouslySetInnerHTML={ {
-						__html: sprintf(
-							/* translators: the placeholder is a link to the Plugin Suppression Settings panel. */
-							__( 'AMP Plugin found validation errors. <a href="%s">Review Plugin Suppression Settings</a>', 'amp' ),
-							PLUGIN_SUPPRESSION_LINK,
-						),
-					} }
-				/>
+				<p>
+					{ __( 'AMP compatibility issues discovered with the following plugins:', 'amp' ) }
+				</p>
 				{ userIsTechnical && (
 					<PluginsWithAmpIncompatibility pluginsWithAmpIncompatibility={ pluginsWithAmpIncompatibility } />
 				) }
 				<div className="amp-site-scan-notice__cta">
+					<a href={ PLUGIN_SUPPRESSION_LINK } className="button">
+						{ __( 'Review Plugin Suppression', 'amp' ) }
+					</a>
 					<a
 						href={ AMP_COMPATIBLE_PLUGINS_URL }
 						className="button"

@@ -1,5 +1,11 @@
 .amp-site-scan-notice__cta {
+	display: flex;
+	flex-flow: row;
 	margin: 0.5rem 0 1rem;
+
+	> .button + .button {
+		margin-left: 0.5rem;
+	}
 }
 
 .amp-site-scan-notice__plugin-details {

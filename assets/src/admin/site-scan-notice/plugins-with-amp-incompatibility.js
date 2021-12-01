@@ -40,19 +40,22 @@ export function PluginsWithAmpIncompatibility( { pluginsWithAmpIncompatibility }
 			key={ pluginWithAmpIncompatibility.slug }
 			className="amp-site-scan-notice__plugin-details"
 		>
-			<summary className="amp-site-scan-notice__plugin-summary">
-				{ sprintf(
-					/* translators: 1: plugin name; 2: number of URLs with validation issues. */
-					_n(
-						'Validation issues caused by %1$s in %2$d URL',
-						'Validation issues caused by %1$s in %2$d URLs',
+			<summary
+				className="amp-site-scan-notice__plugin-summary"
+				dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						/* translators: 1: plugin name; 2: number of URLs with AMP validation issues. */
+						_n(
+							'<b>%1$s</b> on %2$d URL',
+							'<b>%1$s</b> on %2$d URLs',
+							pluginWithAmpIncompatibility.urls.length,
+							'amp',
+						),
+						pluginNames[ pluginWithAmpIncompatibility.slug ],
 						pluginWithAmpIncompatibility.urls.length,
-						'amp',
 					),
-					pluginNames[ pluginWithAmpIncompatibility.slug ],
-					pluginWithAmpIncompatibility.urls.length,
-				) }
-			</summary>
+				} }
+			/>
 			<ul className="amp-site-scan-notice__urls-list">
 				{ pluginWithAmpIncompatibility.urls.map( ( url ) => (
 					<li key={ url }>
