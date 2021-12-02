@@ -93,7 +93,7 @@ export function SiteScanNotice() {
 					<a
 						href={ AMP_COMPATIBLE_PLUGINS_URL }
 						className="button"
-						{ ...isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL ) ? { target: '_blank', rel: 'noreferrer' } : {} }
+						{ ...isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL ) ? { target: '_blank', rel: 'noopener noreferrer' } : {} }
 					>
 						{ __( 'View AMP-Compatible Plugins', 'amp' ) }
 					</a>
