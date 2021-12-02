@@ -115,7 +115,7 @@ export function SiteScan() {
 				{ themesWithAmpIncompatibility.length > 0 && (
 					<ThemesWithAmpIncompatibility
 						className="site-scan__section"
-						slugs={ themesWithAmpIncompatibility }
+						slugs={ themesWithAmpIncompatibility.map( ( { slug } ) => slug ) }
 						callToAction={ userIsTechnical ? (
 							<ExternalLink href={ VALIDATED_URLS_LINK }>
 								{ __( 'Review Validated URLs', 'amp' ) }
@@ -126,7 +126,7 @@ export function SiteScan() {
 				{ pluginsWithAmpIncompatibility.length > 0 && (
 					<PluginsWithAmpIncompatibility
 						className="site-scan__section"
-						slugs={ pluginsWithAmpIncompatibility }
+						slugs={ pluginsWithAmpIncompatibility.map( ( { slug } ) => slug ) }
 						callToAction={ userIsTechnical ? (
 							<ExternalLink href={ VALIDATED_URLS_LINK }>
 								{ __( 'Review Validated URLs', 'amp' ) }

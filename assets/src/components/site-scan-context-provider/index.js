@@ -25,7 +25,7 @@ import PropTypes from 'prop-types';
 import { STANDARD } from '../../common/constants';
 import { useAsyncError } from '../../utils/use-async-error';
 import { Options } from '../options-context-provider';
-import { getSlugsFromValidationResults } from './get-slugs-from-validation-results';
+import { getSourcesFromScannableUrls } from './get-sources-from-scannable-urls';
 
 export const SiteScan = createContext();
 
@@ -247,8 +247,9 @@ export function SiteScanContextProvider( {
 			};
 		}
 
-		const validationErrors = scannableUrls.reduce( ( accumulatedValidationErrors, scannableUrl ) => [ ...accumulatedValidationErrors, ...scannableUrl?.validation_errors ?? [] ], [] );
-		const slugs = getSlugsFromValidationResults( validationErrors );
+		const slugs = getSourcesFromScannableUrls( scannableUrls, {
+			useAmpUrls: urlType === 'amp_url',
+		} );
 
 		return {
 			hasSiteScanResults: scannableUrls.some( ( scannableUrl ) => Boolean( scannableUrl?.validation_errors ) ),
@@ -256,7 +257,7 @@ export function SiteScanContextProvider( {
 			stale: scannableUrls.some( ( scannableUrl ) => scannableUrl?.stale === true ),
 			themesWithAmpIncompatibility: slugs.themes,
 		};
-	}, [ scannableUrls, status ] );
+	}, [ scannableUrls, status, urlType ] );
 
 	/**
 	 * Preflight check.
@@ -315,7 +316,7 @@ export function SiteScanContextProvider( {
 	 */
 	const [ shouldDelayValidationRequest, setShouldDelayValidationRequest ] = useState( false );
 	useEffect( () => {
-		let clearTimeout = () => {};
+		let clearTimeout;
 
 		if ( shouldDelayValidationRequest ) {
 			( async () => {
@@ -331,7 +332,11 @@ export function SiteScanContextProvider( {
 			} )();
 		}
 
-		return clearTimeout;
+		return () => {
+			if ( typeof clearTimeout === 'function' ) {
+				clearTimeout();
+			}
+		};
 	}, [ shouldDelayValidationRequest ] );
 
 	/**
@@ -474,6 +479,7 @@ export function SiteScanContextProvider( {
 				isCompleted: [ STATUS_REFETCHING_PLUGIN_SUPPRESSION, STATUS_COMPLETED ].includes( status ),
 				isFailed: status === STATUS_FAILED,
 				isFetchingScannableUrls: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
+				isInitializing: ! Boolean( status ),
 				isReady: status === STATUS_READY,
 				isSiteScannable: scannableUrls.length > 0,
 				pluginsWithAmpIncompatibility,
