@@ -917,10 +917,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				// Prevent selectors like `amp-img img` getting deleted since `img` does not occur in the DOM.
-				$this->args['dynamic_element_selectors'] = array_merge(
-					$this->args['dynamic_element_selectors'],
-					$this->selector_mappings[ $html_selectors ]
-				);
+				if ( $sanitizer->has_light_shadow_dom() ) {
+					$this->args['dynamic_element_selectors'] = array_merge(
+						$this->args['dynamic_element_selectors'],
+						$this->selector_mappings[ $html_selectors ]
+					);
+				}
 			}
 		}
 

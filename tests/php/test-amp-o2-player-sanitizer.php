@@ -31,8 +31,8 @@ class AMP_O2_Player_Sanitizer_Test extends TestCase {
 			],
 
 			'o2_player_item'                         => [
-				'<div class="vdb_player"><script type="text/javascript" src="//delivery.vidible.tv/jsonp/pid=59521379f3bdc970c5c9d75e/vid=5b11a50d0239e257abfdf16a/59521191e9399f3a7d7de88f.js?m.embeded=cms_video_plugin_chromeExtension"></script></div>',// phpcs:ignore
-				'<amp-o2-player data-pid="59521379f3bdc970c5c9d75e" data-vid="5b11a50d0239e257abfdf16a" data-bcid="59521191e9399f3a7d7de88f" data-macros="m.playback=click" layout="responsive" width="480" height="270"></amp-o2-player>',
+				'<div id="o2" class="vdb_player"><script type="text/javascript" src="//delivery.vidible.tv/jsonp/pid=59521379f3bdc970c5c9d75e/vid=5b11a50d0239e257abfdf16a/59521191e9399f3a7d7de88f.js?m.embeded=cms_video_plugin_chromeExtension"></script></div>',// phpcs:ignore
+				'<amp-o2-player data-pid="59521379f3bdc970c5c9d75e" data-vid="5b11a50d0239e257abfdf16a" data-bcid="59521191e9399f3a7d7de88f" data-macros="m.playback=click" layout="responsive" width="480" height="270" id="o2"></amp-o2-player>',
 			],
 
 			'o2_player_item_without_required_fields' => [

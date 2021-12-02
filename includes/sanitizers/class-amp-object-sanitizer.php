@@ -87,8 +87,12 @@ class AMP_Object_Sanitizer extends AMP_Base_Sanitizer {
 
 		$attributes_to_copy = [ Attribute::ID, Attribute::CLASS_ ];
 		foreach ( $attributes_to_copy as $attribute_name ) {
-			if ( $element->hasAttribute( $attribute_name ) ) {
-				$attributes[ $attribute_name ] = $element->getAttribute( $attribute_name );
+			$attribute = $element->getAttributeNode( $attribute_name );
+			if ( $attribute instanceof DOMAttr ) {
+				// Remove the attribute from the original node so that PHP DOM doesn't fail to set it on the replacement element (as happens with ID).
+				$element->removeAttributeNode( $attribute );
+
+				$attributes[ $attribute_name ] = $attribute->value;
 			}
 		}
 
