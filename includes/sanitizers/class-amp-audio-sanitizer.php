@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Attribute;
 use AmpProject\DevMode;
 
 /**
@@ -89,6 +90,9 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! empty( $new_attributes['src'] ) ) {
 				$sources[] = $new_attributes['src'];
 			}
+
+			// Remove the ID from the original node so that PHP DOM doesn't fail to set it on the replacement element.
+			$node->removeAttribute( Attribute::ID );
 
 			/**
 			 * Original node.
