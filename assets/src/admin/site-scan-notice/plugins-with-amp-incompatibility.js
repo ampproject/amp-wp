@@ -69,7 +69,7 @@ export function PluginsWithAmpIncompatibility( { pluginsWithAmpIncompatibility }
 					<ul className="amp-site-scan-notice__urls-list">
 						{ pluginWithAmpIncompatibility.urls.map( ( url ) => (
 							<li key={ url }>
-								<a href={ url }>
+								<a href={ url } target="_blank" rel="noopener noreferrer">
 									{ url }
 								</a>
 							</li>
