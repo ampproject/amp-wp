@@ -69,7 +69,7 @@ export function AmpAdminNotice( {
 					onClick={ dismissHandler }
 					className="amp-admin-notice__dismiss"
 				>
-					<VisuallyHidden>
+					<VisuallyHidden as="span">
 						{ __( 'Dismiss', 'amp' ) }
 					</VisuallyHidden>
 				</button>

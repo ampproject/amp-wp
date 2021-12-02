@@ -123,7 +123,7 @@ final class PluginActivationSiteScan implements Conditional, Delayed, Service, R
 		wp_enqueue_style(
 			self::ASSET_HANDLE,
 			amp_get_asset_url( 'css/' . self::ASSET_HANDLE . '.css' ),
-			false,
+			[ 'wp-components' ],
 			AMP__VERSION
 		);
 
