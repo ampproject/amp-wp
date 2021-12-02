@@ -9,9 +9,9 @@ namespace AmpProject\AmpWP\Embed;
 
 use AmpProject\AmpWP\Component\Carousel;
 use AmpProject\AmpWP\Dom\ElementList;
-use AmpProject\Attribute;
 use AmpProject\Dom\Document;
-use AmpProject\Tag;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 use DOMElement;
 use DOMNodeList;
 

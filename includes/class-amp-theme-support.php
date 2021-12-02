@@ -6,26 +6,26 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Optimizer\OptimizerService;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Sandboxing;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\RequestDestination;
+use AmpProject\Html\Tag;
 use AmpProject\Optimizer;
 use AmpProject\Optimizer\Configuration\TransformedIdentifierConfiguration;
 use AmpProject\Optimizer\Transformer\TransformedIdentifier;
-use AmpProject\RequestDestination;
-use AmpProject\Tag;
-use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
-use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration;
-use AmpProject\AmpWP\Sandboxing;
 
 /**
  * Class AMP_Theme_Support

@@ -7,12 +7,12 @@
 
 namespace AmpProject\AmpWP;
 
+use AMP_HTTP;
 use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\Attribute;
-use AMP_Theme_Support;
-use AMP_HTTP;
+use AmpProject\Html\Attribute;
 
 /**
  * Service for redirecting mobile users to the AMP version of a page.

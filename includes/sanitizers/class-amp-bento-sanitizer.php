@@ -6,11 +6,11 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
-use AmpProject\Dom\Element;
 use AmpProject\CssLength;
+use AmpProject\Dom\Element;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\LengthUnit;
 use AmpProject\Layout;
-use AmpProject\LengthUnit;
 
 /**
  * Convert all bento-prefixed components into amp-prefixed components, or else mark them as PX-verified if they have no

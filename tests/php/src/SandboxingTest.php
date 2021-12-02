@@ -2,21 +2,21 @@
 
 namespace AmpProject\AmpWP\Tests;
 
+use AMP_Comments_Sanitizer;
+use AMP_Form_Sanitizer;
+use AMP_Options_Manager;
+use AMP_Script_Sanitizer;
+use AMP_Theme_Support;
+use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Sandboxing;
-use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Infrastructure\Registerable;
-use AmpProject\AmpWP\Infrastructure\Conditional;
-use AMP_Options_Manager;
-use AMP_Theme_Support;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AMP_Script_Sanitizer;
-use AMP_Form_Sanitizer;
-use AMP_Comments_Sanitizer;
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
+use AmpProject\Html\Attribute;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Sandboxing */
 class SandboxingTest extends DependencyInjectedTestCase {
