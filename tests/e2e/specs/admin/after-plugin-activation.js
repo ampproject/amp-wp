@@ -21,9 +21,9 @@ describe( 'After plugin activation', () => {
 		await page.waitForSelector( `tr[data-slug="${ slug }"] .deactivate a` );
 	}
 
-	describe( 'for a technical user', () => {
+	describe( 'for a user', () => {
 		beforeAll( async () => {
-			await completeWizard( { technical: true, mode: 'transitional' } );
+			await completeWizard( { mode: 'transitional' } );
 			await visitAdminPage( 'plugins.php', '' );
 		} );
 
@@ -71,28 +71,6 @@ describe( 'After plugin activation', () => {
 			if ( withoutGutenberg ) {
 				await activate( 'gutenberg' );
 			}
-		} );
-	} );
-
-	describe( 'for a non-technical user', () => {
-		beforeAll( async () => {
-			await completeWizard( { technical: false, mode: 'transitional' } );
-			await visitAdminPage( 'plugins.php', '' );
-		} );
-
-		it( 'site scan is triggered automatically and displays only a name of a plugin causing AMP compatibility issues', async () => {
-			await activate( 'e2e-tests-demo-plugin' );
-
-			await expect( page ).toMatchElement( '#amp-site-scan-notice' );
-			await expect( page ).toMatchElement( '#amp-site-scan-notice p', { text: /AMP compatibility issues discovered with E2E Tests Demo Plugin/, timeout } );
-			await expect( page ).toMatchElement( '#amp-site-scan-notice .amp-admin-notice--warning' );
-			await expect( page ).not.toMatchElement( '#amp-site-scan-notice details' );
-			await expect( page ).toMatchElement( '#amp-site-scan-notice .button', { text: /Review Plugin Suppression/ } );
-			await expect( page ).toMatchElement( '#amp-site-scan-notice .button', { text: /View AMP-Compatible Plugins/ } );
-
-			await deactivate( 'e2e-tests-demo-plugin' );
-
-			await expect( page ).not.toMatchElement( '#amp-site-scan-notice' );
 		} );
 	} );
 } );

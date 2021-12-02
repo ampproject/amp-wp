@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useContext, useMemo } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import { _n, sprintf } from '@wordpress/i18n';
 
 /**
@@ -13,7 +13,6 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { Plugins } from '../../components/plugins-context-provider';
-import { User } from '../../components/user-context-provider';
 import { getPluginSlugFromFile } from '../../common/helpers/get-plugin-slug-from-file';
 
 /**
@@ -24,8 +23,6 @@ import { getPluginSlugFromFile } from '../../common/helpers/get-plugin-slug-from
  */
 export function PluginsWithAmpIncompatibility( { pluginsWithAmpIncompatibility } ) {
 	const { fetchingPlugins, plugins } = useContext( Plugins );
-	const { developerToolsOption } = useContext( User );
-	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
 
 	if ( fetchingPlugins ) {
 		return null;
@@ -37,27 +34,6 @@ export function PluginsWithAmpIncompatibility( { pluginsWithAmpIncompatibility }
 			[ getPluginSlugFromFile( plugin.plugin ) ]: plugin.name,
 		};
 	}, {} );
-
-	if ( ! userIsTechnical ) {
-		return (
-			<p
-				dangerouslySetInnerHTML={ {
-					__html: sprintf(
-						/* translators: %s is a name of a plugin or a list of plugin names separated with commas. */
-						_n(
-							'AMP compatibility issues discovered with %s.',
-							'AMP compatibility issues discovered with the following plugins: %s.',
-							pluginsWithAmpIncompatibility.length,
-							'amp',
-						),
-						pluginsWithAmpIncompatibility
-							.map( ( pluginWithAmpIncompatibility ) => `<b>${ pluginNames[ pluginWithAmpIncompatibility.slug ] }</b>` )
-							.join( ', ' ),
-					),
-				} }
-			/>
-		);
-	}
 
 	return (
 		<>
