@@ -286,7 +286,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		add_action( 'wp_print_scripts', [ get_class(), 'dequeue_block_navigation_view_script' ], 0 );
 		add_action( 'wp_print_footer_scripts', [ get_class(), 'dequeue_block_navigation_view_script' ], 0 );
 
-		if ( isset( $block['attrs']['overlayMenu'] ) && 'never' === $block['attrs']['overlayMenu'] ) {
+		$overlay_menu = isset( $block['attrs']['overlayMenu'] ) ? $block['attrs']['overlayMenu'] : '';
+		if ( 'never' === $overlay_menu ) {
 			return $block_content;
 		}
 
@@ -325,15 +326,20 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		$amp_lightbox_node->appendChild( $cloned_container_node );
 		$node->appendChild( $amp_lightbox_node );
 
-		// Unwrap original container content out of "wp-block-navigation__responsive-close" and "wp-block-navigation__responsive-dialog" wrappers.
-		$content_node = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container-content' ), $container_node )->item( 0 );
-		$close_node   = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-close' ), $container_node )->item( 0 );
+		if ( 'always' === $overlay_menu ) {
+			// No need to duplicate container node if overlay menu is always displayed.
+			$node->removeChild( $container_node );
+		} else {
+			// Unwrap original container content out of "wp-block-navigation__responsive-close" and "wp-block-navigation__responsive-dialog" wrappers.
+			$content_node = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container-content' ), $container_node )->item( 0 );
+			$close_node   = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-close' ), $container_node )->item( 0 );
 
-		if ( $content_node instanceof DOMElement && $close_node instanceof DOMElement ) {
-			$content_node->removeAttribute( Attribute::ID );
+			if ( $content_node instanceof DOMElement && $close_node instanceof DOMElement ) {
+				$content_node->removeAttribute( Attribute::ID );
 
-			$container_node->appendChild( $content_node );
-			$container_node->removeChild( $close_node );
+				$container_node->appendChild( $content_node );
+				$container_node->removeChild( $close_node );
+			}
 		}
 
 		// Extend "open" and "close" buttons.
