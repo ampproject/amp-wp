@@ -3755,6 +3755,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Skip stylesheets that were completely tree-shaken and mark as included.
+			if ( 0 === $this->pending_stylesheets[ $i ]['final_size'] ) {
+				$this->pending_stylesheets[ $i ]['included'] = true;
+				continue;
+			}
+
 			$is_stylesheet_excessive = $concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes;
 
 			// Report validation error if size is now too big.
