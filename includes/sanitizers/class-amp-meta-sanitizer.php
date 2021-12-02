@@ -10,7 +10,7 @@
  * @package AMP
  */
 
-use AmpProject\Dom\Document;
+use AmpProject\Encoding;
 use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
 
@@ -295,7 +295,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			$this->dom,
 			Tag::META,
 			[
-				Attribute::CHARSET => Document\Encoding::AMP,
+				Attribute::CHARSET => Encoding::AMP,
 			]
 		);
 	}
