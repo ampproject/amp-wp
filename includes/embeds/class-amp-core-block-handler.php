@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\Amp;
 use AmpProject\Attribute;
 use AmpProject\Extension;
 use AmpProject\Layout;
@@ -42,6 +43,13 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @var int
 	 */
 	private $category_widget_count = 0;
+
+	/**
+	 * Count of the navigation blocks encountered.
+	 *
+	 * @var int
+	 */
+	private $navigation_block_count = 0;
 
 	/**
 	 * Methods to ampify blocks.
@@ -286,13 +294,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		add_action( 'wp_print_scripts', [ get_class(), 'dequeue_block_navigation_view_script' ], 0 );
 		add_action( 'wp_print_footer_scripts', [ get_class(), 'dequeue_block_navigation_view_script' ], 0 );
 
-		$overlay_menu = isset( $block['attrs']['overlayMenu'] ) ? $block['attrs']['overlayMenu'] : '';
-		if ( 'never' === $overlay_menu ) {
-			return $block_content;
-		}
-
-		$class_query = '//%1$s[ contains( concat( " ", normalize-space( @class ), " " ), " %2$s " ) ]';
-
 		$dom = new Document();
 		$dom->loadHTML( $block_content );
 
@@ -301,72 +302,111 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			return $block_content;
 		}
 
+		$this->navigation_block_count++;
+
+		$class_query    = '//%1$s[ contains( concat( " ", normalize-space( @class ), " " ), " %2$s " ) ]';
 		$container_node = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container' ), $node )->item( 0 );
-		if ( ! $container_node instanceof DOMElement ) {
-			return $block_content;
-		}
 
-		$unique_id = $container_node->getAttribute( Attribute::ID );
-		$container_node->removeAttribute( Attribute::ID );
+		// Implement support for navigation menu in modal.
+		$overlay_menu = isset( $block['attrs']['overlayMenu'] ) ? $block['attrs']['overlayMenu'] : '';
+		if ( $container_node instanceof DOMElement && 'never' !== $overlay_menu ) {
+			$unique_id = $container_node->getAttribute( Attribute::ID );
+			$container_node->removeAttribute( Attribute::ID );
 
-		$cloned_container_node = $container_node->cloneNode( true );
-		if ( $cloned_container_node instanceof DOMElement ) {
-			$cloned_container_node->setAttribute( Attribute::CLASS_, trim( $cloned_container_node->getAttribute( Attribute::CLASS_ ) ) . ' is-menu-open has-modal-open' );
-		}
-
-		$amp_lightbox_node = AMP_DOM_Utils::create_node(
-			$dom,
-			Extension::LIGHTBOX,
-			[
-				Attribute::ID     => $unique_id,
-				Attribute::LAYOUT => Layout::NODISPLAY,
-			]
-		);
-
-		$amp_lightbox_node->appendChild( $cloned_container_node );
-		$node->appendChild( $amp_lightbox_node );
-
-		if ( 'always' === $overlay_menu ) {
-			// No need to duplicate container node if overlay menu is always displayed.
-			$node->removeChild( $container_node );
-		} else {
-			// Unwrap original container content out of "wp-block-navigation__responsive-close" and "wp-block-navigation__responsive-dialog" wrappers.
-			$content_node = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container-content' ), $container_node )->item( 0 );
-			$close_node   = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-close' ), $container_node )->item( 0 );
-
-			if ( $content_node instanceof DOMElement && $close_node instanceof DOMElement ) {
-				$content_node->removeAttribute( Attribute::ID );
-
-				$container_node->appendChild( $content_node );
-				$container_node->removeChild( $close_node );
+			$cloned_container_node = $container_node->cloneNode( true );
+			if ( $cloned_container_node instanceof DOMElement ) {
+				$cloned_container_node->setAttribute( Attribute::CLASS_, trim( $cloned_container_node->getAttribute( Attribute::CLASS_ ) ) . ' is-menu-open has-modal-open' );
 			}
-		}
 
-		// Extend "open" and "close" buttons.
-		$open_button_node  = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation__responsive-container-open' ), $node )->item( 0 );
-		$close_button_node = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation__responsive-container-close' ), $node )->item( 0 );
+			$amp_lightbox_node = AMP_DOM_Utils::create_node(
+				$dom,
+				Extension::LIGHTBOX,
+				[
+					Attribute::ID     => $unique_id,
+					Attribute::LAYOUT => Layout::NODISPLAY,
+				]
+			);
 
-		if ( $open_button_node instanceof DOMElement && $close_button_node instanceof DOMElement ) {
-			$open_button_node->setAttribute( 'on', sprintf( 'tap:%s.open', $unique_id ) );
-			$close_button_node->setAttribute( 'on', sprintf( 'tap:%s.close', $unique_id ) );
-		}
+			$amp_lightbox_node->appendChild( $cloned_container_node );
+			$node->appendChild( $amp_lightbox_node );
 
-		// Remove unwanted attributes.
-		$unwanted_attributes = [
-			'aria-expanded',
-			'aria-modal',
-			'data-micromodal-trigger',
-			'data-micromodal-close',
-		];
+			if ( 'always' === $overlay_menu ) {
+				// No need to duplicate container node if overlay menu is always displayed.
+				$node->removeChild( $container_node );
+			} else {
+				// Unwrap original container content out of "wp-block-navigation__responsive-close" and "wp-block-navigation__responsive-dialog" wrappers.
+				$content_node = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container-content' ), $container_node )->item( 0 );
+				$close_node   = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-close' ), $container_node )->item( 0 );
 
-		foreach ( $unwanted_attributes as $unwanted_attribute ) {
-			$items = $dom->xpath->query( sprintf( '//*[ @%s ]', $unwanted_attribute ), $node );
-			foreach ( $items as $item ) {
-				if ( ! $item instanceof DOMElement ) {
-					continue;
+				if ( $content_node instanceof DOMElement && $close_node instanceof DOMElement ) {
+					$content_node->removeAttribute( Attribute::ID );
+
+					$container_node->appendChild( $content_node );
+					$container_node->removeChild( $close_node );
 				}
-				$item->removeAttribute( $unwanted_attribute );
 			}
+
+			// Extend "open" and "close" buttons.
+			$open_button_node  = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation__responsive-container-open' ), $node )->item( 0 );
+			$close_button_node = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation__responsive-container-close' ), $node )->item( 0 );
+
+			if ( $open_button_node instanceof DOMElement && $close_button_node instanceof DOMElement ) {
+				$open_button_node->setAttribute( 'on', sprintf( 'tap:%s.open', $unique_id ) );
+				$close_button_node->setAttribute( 'on', sprintf( 'tap:%s.close', $unique_id ) );
+			}
+
+			// Remove unwanted attributes.
+			$unwanted_attributes = [
+				'aria-expanded',
+				'aria-modal',
+				'data-micromodal-trigger',
+				'data-micromodal-close',
+			];
+
+			foreach ( $unwanted_attributes as $unwanted_attribute ) {
+				$items = $dom->xpath->query( sprintf( '//*[ @%s ]', $unwanted_attribute ), $node );
+				foreach ( $items as $item ) {
+					if ( ! $item instanceof DOMElement ) {
+						continue;
+					}
+					$item->removeAttribute( $unwanted_attribute );
+				}
+			}
+		}
+
+		// Implement support for submenus opened on click.
+		$submenus = $dom->xpath->query( sprintf( $class_query, 'li', 'open-on-click wp-block-navigation-submenu' ), $node );
+		foreach ( $submenus as $submenu_index => $submenu ) {
+			if ( ! $submenu instanceof DOMElement ) {
+				continue;
+			}
+			if ( false !== strpos( $submenu->getNodePath(), 'amp-lightbox' ) ) {
+				continue;
+			}
+
+			$toggle_submenu_button = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation-submenu__toggle' ), $submenu )->item( 0 );
+			if ( ! $toggle_submenu_button instanceof DOMElement ) {
+				continue;
+			}
+
+			$state_id = sprintf(
+				'toggle_%1$s_%2$s',
+				$this->navigation_block_count,
+				$submenu_index
+			);
+
+			$script_el = $dom->createElement( 'script' );
+			$script_el->setAttribute( 'type', 'application/json' );
+			$script_el->appendChild( $dom->createTextNode( wp_json_encode( false ) ) );
+
+			$state_el = $dom->createElement( Extension::STATE );
+			$state_el->setAttribute( Attribute::ID, $state_id );
+			$state_el->appendChild( $script_el );
+
+			$toggle_submenu_button->appendChild( $state_el );
+			$toggle_submenu_button->setAttribute( Attribute::ON, sprintf( "tap:AMP.setState({ $state_id: ! $state_id })" ) );
+			$toggle_submenu_button->setAttribute( Attribute::ARIA_EXPANDED, 'false' );
+			$toggle_submenu_button->setAttribute( Amp::BIND_DATA_ATTR_PREFIX . Attribute::ARIA_EXPANDED, "$state_id ? 'true' : 'false'" );
 		}
 
 		return $dom->saveHTML( $node );
