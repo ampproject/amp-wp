@@ -316,7 +316,7 @@ export function SiteScanContextProvider( {
 	 */
 	const [ shouldDelayValidationRequest, setShouldDelayValidationRequest ] = useState( false );
 	useEffect( () => {
-		let clearTimeout = () => {};
+		let clearTimeout;
 
 		if ( shouldDelayValidationRequest ) {
 			( async () => {
@@ -332,7 +332,11 @@ export function SiteScanContextProvider( {
 			} )();
 		}
 
-		return clearTimeout;
+		return () => {
+			if ( typeof clearTimeout === 'function' ) {
+				clearTimeout();
+			}
+		};
 	}, [ shouldDelayValidationRequest ] );
 
 	/**
