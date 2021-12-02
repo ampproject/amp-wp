@@ -67,6 +67,8 @@ final class PluginActivationSiteScan implements Conditional, Delayed, Service, R
 		return (
 			is_admin()
 			&&
+			! is_network_admin()
+			&&
 			'plugins.php' === $pagenow
 			&&
 			(
