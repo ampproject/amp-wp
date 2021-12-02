@@ -10,9 +10,9 @@
  * @package AMP
  */
 
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\Dom\Document;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Meta_Sanitizer.

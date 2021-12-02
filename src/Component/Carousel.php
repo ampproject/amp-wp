@@ -7,10 +7,10 @@
 
 namespace AmpProject\AmpWP\Component;
 
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Dom\ElementList;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 use DOMElement;
 use AMP_DOM_Utils;
 

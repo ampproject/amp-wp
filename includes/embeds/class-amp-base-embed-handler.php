@@ -7,10 +7,10 @@
  * @package  AMP
  */
 
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Base_Embed_Handler

@@ -14,7 +14,7 @@ use AMP_Script_Sanitizer;
 use AMP_Form_Sanitizer;
 use AMP_Comments_Sanitizer;
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 

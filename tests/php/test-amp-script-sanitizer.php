@@ -13,8 +13,8 @@ use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
-use AmpProject\Attribute;
-use AmpProject\Tag;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 
 /**
  * Test AMP_Script_Sanitizer.

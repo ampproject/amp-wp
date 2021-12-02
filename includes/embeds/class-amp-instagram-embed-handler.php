@@ -6,8 +6,8 @@
  */
 
 use AmpProject\Dom\Document;
-use AmpProject\Tag;
-use AmpProject\Attribute;
+use AmpProject\Html\Tag;
+use AmpProject\Html\Attribute;
 
 /**
  * Class AMP_Instagram_Embed_Handler

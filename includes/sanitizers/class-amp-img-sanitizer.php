@@ -6,10 +6,10 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Layout;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Img_Sanitizer

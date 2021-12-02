@@ -7,7 +7,7 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
 use AmpProject\Dom\Element;

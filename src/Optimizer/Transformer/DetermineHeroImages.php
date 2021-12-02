@@ -7,7 +7,7 @@
 
 namespace AmpProject\AmpWP\Optimizer\Transformer;
 
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use AmpProject\Optimizer\ErrorCollection;

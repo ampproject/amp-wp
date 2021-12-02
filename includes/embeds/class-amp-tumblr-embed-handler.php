@@ -6,9 +6,9 @@
  * @since 0.7
  */
 
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\Dom\Document;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Tumblr_Embed_Handler

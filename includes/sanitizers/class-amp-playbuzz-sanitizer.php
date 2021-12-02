@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\Dom\Element;
 
 /**

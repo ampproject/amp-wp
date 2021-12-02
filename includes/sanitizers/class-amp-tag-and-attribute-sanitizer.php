@@ -9,14 +9,14 @@
 
 use AmpProject\Amp;
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\CssLength;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use AmpProject\Layout;
 use AmpProject\Extension;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.

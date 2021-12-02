@@ -5,12 +5,12 @@
  * @package AMP
  */
 
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
 use AmpProject\Layout;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_YouTube_Embed_Handler

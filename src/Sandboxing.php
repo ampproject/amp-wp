@@ -17,8 +17,8 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
-use AmpProject\Attribute;
-use AmpProject\Tag;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 use DOMAttr;
 
 /**

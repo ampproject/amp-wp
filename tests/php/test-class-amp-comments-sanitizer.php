@@ -11,9 +11,9 @@ use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
 use AmpProject\Extension;
-use AmpProject\Tag;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 
 /**
  * Tests for AMP_Comments_Sanitizer class.

@@ -7,11 +7,11 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Script_Sanitizer

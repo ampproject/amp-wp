@@ -11,8 +11,8 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Sandboxing;
 use AmpProject\AmpWP\Services;
-use AmpProject\Attribute;
-use AmpProject\Tag;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 use AmpProject\Dom\Document;
 use AmpProject\Exception\MaxCssByteCountExceeded;
 

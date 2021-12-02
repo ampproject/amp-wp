@@ -14,7 +14,8 @@ use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
+use AmpProject\Encoding;
+use AmpProject\Html\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use org\bovigo\vfs;
@@ -1719,7 +1720,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$ordered_contains = [
 			'<html amp=""',
-			'<meta charset="' . Document\Encoding::AMP . '">',
+			'<meta charset="' . Encoding::AMP . '">',
 			'<meta name="viewport" content="width=device-width">',
 			'<link rel="modulepreload" href="https://cdn.ampproject.org/v0.mjs" as="script" crossorigin="anonymous">',
 			'<link rel="preconnect" href="https://cdn.ampproject.org">',

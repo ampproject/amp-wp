@@ -4,7 +4,7 @@ namespace AmpProject\AmpWP\Tests\Optimizer;
 
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Optimizer\HeroCandidateFiltering;
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AMP_Options_Manager;
 use AmpProject\AmpWP\Option;
 use AMP_Theme_Support;
