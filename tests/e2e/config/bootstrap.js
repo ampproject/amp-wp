@@ -21,7 +21,7 @@ import {
  * Internal dependencies
  */
 import { cleanUpSettings } from '../utils/onboarding-wizard-utils';
-import { installLocalPlugin } from '../utils/amp-settings-utils';
+import { deactivatePlugin, installLocalPlugin } from '../utils/amp-settings-utils';
 
 /**
  * Environment variables
@@ -236,6 +236,10 @@ async function createTestData() {
  */
 async function setupThemesAndPlugins() {
 	await installLocalPlugin( 'e2e-tests-demo-plugin' );
+
+	// If the demo plugin has been already installed it might be activated, too.
+	await deactivatePlugin( 'e2e-tests-demo-plugin' );
+
 	await installTheme( 'hestia' );
 	await activateTheme( 'twentytwenty' );
 }

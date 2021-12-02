@@ -45,6 +45,7 @@ namespace PHPSTORM_META {
 			'paired_routing'                     => \AmpProject\AmpWP\PairedRouting::class,
 			'paired_url'                         => \AmpProject\AmpWP\PairedUrl::class,
 			'plugin_activation_notice'           => \AmpProject\AmpWP\Admin\PluginActivationNotice::class,
+			'plugin_activation_site_scan'        => \AmpProject\AmpWP\Admin\PluginActivationSiteScan::class,
 			'plugin_registry'                    => \AmpProject\AmpWP\PluginRegistry::class,
 			'plugin_suppression'                 => \AmpProject\AmpWP\PluginSuppression::class,
 			'reader_theme_loader'                => \AmpProject\AmpWP\ReaderThemeLoader::class,

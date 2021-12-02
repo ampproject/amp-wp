@@ -7,7 +7,7 @@
 
 use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\Layout;
 
 /**

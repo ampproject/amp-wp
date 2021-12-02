@@ -6,8 +6,8 @@
  */
 
 use AmpProject\Dom\Document;
-use AmpProject\Attribute;
-use AmpProject\Tag;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Link_Sanitizer.

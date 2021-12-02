@@ -5,8 +5,8 @@
  * @package AMP
  */
 
-use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Html\Attribute;
 
 /**
  * Class AMP_O2_Player_Sanitizer
