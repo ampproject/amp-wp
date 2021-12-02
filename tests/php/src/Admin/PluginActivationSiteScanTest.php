@@ -15,6 +15,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AMP_Validation_Manager;
 
 /**
  * Tests for PluginActivationSiteScan class.
@@ -55,45 +56,59 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 	/** @return array */
 	public function get_data_to_test_is_needed() {
 		return [
-			'not_admin_screen'                       => [
+			'not_admin_screen'                           => [
 				'screen_hook'  => '',
 				'query_params' => [],
 				'expected'     => false,
+				'role'         => 'administrator',
 			],
-			'not_admin_screen_with_get_activate'     => [
+			'not_admin_screen_with_get_activate'         => [
 				'screen_hook'  => '',
 				'query_params' => [ 'activate' ],
 				'expected'     => false,
+				'role'         => 'administrator',
 			],
-			'admin_index_no_get_vars'                => [
+			'admin_index_no_get_vars'                    => [
 				'screen_hook'  => 'index.php',
 				'query_params' => [],
 				'expected'     => false,
+				'role'         => 'administrator',
 			],
-			'plugins_screen_no_get_vars'             => [
+			'plugins_screen_no_get_vars'                 => [
 				'screen_hook'  => 'plugins.php',
 				'query_params' => [],
 				'expected'     => false,
+				'role'         => 'administrator',
 			],
-			'admin_index_with_get_activate'          => [
+			'admin_index_with_get_activate'              => [
 				'screen_hook'  => 'index.php',
 				'query_params' => [ 'activate' ],
 				'expected'     => false,
+				'role'         => 'administrator',
 			],
-			'plugins_screen_with_get_activate'       => [
+			'plugins_screen_with_get_activate'           => [
 				'screen_hook'  => 'plugins.php',
 				'query_params' => [ 'activate' ],
 				'expected'     => true,
+				'role'         => 'administrator',
 			],
-			'admin_index_with_get_activate_multi'    => [
+			'plugins_screen_with_get_activate_not_admin' => [
+				'screen_hook'  => 'plugins.php',
+				'query_params' => [ 'activate' ],
+				'expected'     => false,
+				'role'         => 'editor',
+			],
+			'admin_index_with_get_activate_multi'        => [
 				'screen_hook'  => 'index.php',
 				'query_params' => [ 'activate-multi' ],
 				'expected'     => false,
+				'role'         => 'administrator',
 			],
-			'plugins_screen_with_get_activate_multi' => [
+			'plugins_screen_with_get_activate_multi'     => [
 				'screen_hook'  => 'plugins.php',
 				'query_params' => [ 'activate-multi' ],
 				'expected'     => true,
+				'role'         => 'administrator',
 			],
 		];
 	}
@@ -105,8 +120,9 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 	 * @param string $screen_hook  Current screen hook.
 	 * @param array  $query_params GET query parameters.
 	 * @param bool   $expected     Expected value.
+	 * @param string $role         User role.
 	 */
-	public function test_is_needed( $screen_hook, $query_params, $expected ) {
+	public function test_is_needed( $screen_hook, $query_params, $expected, $role ) {
 		global $pagenow;
 
 		// If dependency support is absent, then abort because is_needed will never be true.
@@ -121,6 +137,7 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 			set_current_screen( $screen_hook );
 		}
 
+		wp_set_current_user( self::factory()->user->create( compact( 'role' ) ) );
 		$this->assertEquals( $expected, PluginActivationSiteScan::is_needed() );
 	}
 
@@ -129,7 +146,7 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 	 *
 	 * @covers ::register
 	 */
-	public function test_register() {
+	public function test_register_with_cap() {
 		$this->plugin_activation_site_scan->register();
 		$this->assertEquals( 10, has_action( 'pre_current_active_plugins', [ $this->plugin_activation_site_scan, 'render_notice' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->plugin_activation_site_scan, 'enqueue_assets' ] ) );

@@ -76,6 +76,8 @@ final class PluginActivationSiteScan implements Conditional, Delayed, Service, R
 				||
 				! empty( $_GET['activate-multi'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			)
+			&&
+			AMP_Validation_Manager::has_cap()
 		);
 	}
 
