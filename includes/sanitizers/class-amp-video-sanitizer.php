@@ -6,8 +6,8 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Html\Attribute;
 use AmpProject\DevMode;
+use AmpProject\Html\Attribute;
 
 /**
  * Class AMP_Video_Sanitizer

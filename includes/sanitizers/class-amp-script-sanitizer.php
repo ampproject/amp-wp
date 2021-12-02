@@ -7,10 +7,10 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Html\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
+use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
 
 /**

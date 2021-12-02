@@ -7,12 +7,12 @@
 
 namespace AmpProject\AmpWP\Component;
 
-use AmpProject\Html\Attribute;
-use AmpProject\Dom\Document;
+use AMP_DOM_Utils;
 use AmpProject\AmpWP\Dom\ElementList;
+use AmpProject\Dom\Document;
+use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
 use DOMElement;
-use AMP_DOM_Utils;
 
 /**
  * Class Carousel

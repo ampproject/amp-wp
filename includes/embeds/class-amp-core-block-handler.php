@@ -5,8 +5,8 @@
  * @package AMP
  */
 
-use AmpProject\Html\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Html\Attribute;
 
 /**
  * Class AMP_Core_Block_Handler

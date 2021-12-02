@@ -5,11 +5,11 @@
  * @package AMP
  */
 
-use AmpProject\Html\Attribute;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
-use AmpProject\Layout;
+use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
+use AmpProject\Layout;
 
 /**
  * Class AMP_Object_Sanitizer

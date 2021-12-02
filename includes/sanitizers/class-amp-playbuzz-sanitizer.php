@@ -5,8 +5,8 @@
  * @package AMP
  */
 
-use AmpProject\Html\Attribute;
 use AmpProject\Dom\Element;
+use AmpProject\Html\Attribute;
 
 /**
  * Class AMP_Playbuzz_Sanitizer

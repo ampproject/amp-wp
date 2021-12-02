@@ -10,8 +10,8 @@
  * @package AMP
  */
 
-use AmpProject\Html\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
 
 /**
