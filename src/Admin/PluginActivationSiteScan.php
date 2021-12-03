@@ -132,14 +132,12 @@ final class PluginActivationSiteScan implements Conditional, Delayed, Service, R
 		);
 
 		$data = [
-			'AMP_COMPATIBLE_PLUGINS_URL'         => $this->get_amp_compatible_plugins_url(),
-			'APP_ROOT_ID'                        => self::APP_ROOT_ID,
-			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
-			'SETTINGS_LINK'                      => menu_page_url( AMP_Options_Manager::OPTION_NAME, false ),
-			'SCANNABLE_URLS_REST_PATH'           => '/amp/v1/scannable-urls',
-			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
-			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : '',
+			'AMP_COMPATIBLE_PLUGINS_URL' => $this->get_amp_compatible_plugins_url(),
+			'APP_ROOT_ID'                => self::APP_ROOT_ID,
+			'OPTIONS_REST_PATH'          => '/amp/v1/options',
+			'SETTINGS_LINK'              => menu_page_url( AMP_Options_Manager::OPTION_NAME, false ),
+			'SCANNABLE_URLS_REST_PATH'   => '/amp/v1/scannable-urls',
+			'VALIDATE_NONCE'             => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : '',
 		];
 
 		wp_add_inline_script(
