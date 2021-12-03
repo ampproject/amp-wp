@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\CssLength;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 
@@ -297,23 +298,27 @@ abstract class AMP_Base_Sanitizer {
 			return '';
 		}
 
-		// Allow special 'auto' value for fixed-height layout.
-		if ( 'width' === $dimension && 'auto' === $value ) {
-			return $value;
-		}
-
 		// Accepts both integers and floats & prevents negative values.
 		if ( is_numeric( $value ) ) {
 			return max( 0, (float) $value );
 		}
 
-		if ( AMP_String_Utils::endswith( $value, 'px' ) ) {
-			return absint( $value );
+		if ( AMP_String_Utils::endswith( $value, '%' ) && 'width' === $dimension ) {
+			if ( '100%' === $value ) {
+				return 'auto';
+			} elseif ( isset( $this->args['content_max_width'] ) ) {
+				$percentage = absint( $value ) / 100;
+				return round( $percentage * $this->args['content_max_width'] );
+			}
 		}
 
-		if ( AMP_String_Utils::endswith( $value, '%' ) && 'width' === $dimension && isset( $this->args['content_max_width'] ) ) {
-			$percentage = absint( $value ) / 100;
-			return round( $percentage * $this->args['content_max_width'] );
+		$length = new CssLength( $value );
+		$length->validate( 'width' === $dimension, false );
+		if ( $length->isValid() ) {
+			if ( $length->isAuto() ) {
+				return 'auto';
+			}
+			return $length->getNumeral() . ( $length->getUnit() === 'px' ? '' : $length->getUnit() );
 		}
 
 		return '';
@@ -414,6 +419,29 @@ abstract class AMP_Base_Sanitizer {
 				$attributes['layout'] = 'fill';
 				return $attributes;
 			}
+
+			// Make sure the width and height styles are copied to the width and height attributes since AMP will ultimately inline them as styles.
+			$pending_attributes = [];
+			$seen_units         = [];
+			foreach ( wp_array_slice_assoc( $styles, [ 'height', 'width' ] ) as $dimension => $value ) {
+				$value = $this->sanitize_dimension( $value, $dimension );
+				if ( '' === $value ) {
+					continue;
+				}
+
+				if ( 'auto' !== $value ) {
+					$this_unit = preg_replace( '/^.*\d/', '', $value );
+					if ( ! $this_unit ) {
+						$this_unit = 'px';
+					}
+					$seen_units[ $this_unit ] = true;
+				}
+
+				$pending_attributes[ $dimension ] = $value;
+			}
+			if ( $pending_attributes && count( $seen_units ) <= 1 ) {
+				$attributes = array_merge( $attributes, $pending_attributes );
+			}
 		}
 
 		if ( isset( $attributes['width'], $attributes['height'] ) && '100%' === $attributes['width'] && '100%' === $attributes['height'] ) {
@@ -424,7 +452,7 @@ abstract class AMP_Base_Sanitizer {
 				unset( $attributes['width'] );
 				$attributes['height'] = self::FALLBACK_HEIGHT;
 			}
-			if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] ) {
+			if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] || 'auto' === $attributes['width'] ) {
 				$attributes['layout'] = 'fixed-height';
 				$attributes['width']  = 'auto';
 			}
