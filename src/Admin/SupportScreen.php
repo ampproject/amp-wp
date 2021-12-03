@@ -8,11 +8,13 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Support\SupportData;
 use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Manager;
 use WP_Query;
 
 /**
@@ -21,7 +23,7 @@ use WP_Query;
  * @internal
  * @since 2.2
  */
-class SupportScreen implements Conditional, Service, Registerable {
+class SupportScreen implements Conditional, Delayed, Service, Registerable {
 
 	/**
 	 * Handle for JS file.
@@ -52,6 +54,18 @@ class SupportScreen implements Conditional, Service, Registerable {
 	private $google_fonts;
 
 	/**
+	 * Get registration action.
+	 *
+	 * Note that this runs at `init` so that it comes after the user is set. It can't use admin_init even though it the
+	 * `is_needed()` method calls `is_admin()` since it adds an `admin_menu` action which runs _before_ `admin_init`.
+	 *
+	 * @return string
+	 */
+	public static function get_registration_action() {
+		return 'init';
+	}
+
+	/**
 	 * Class constructor.
 	 *
 	 * @param Injector    $injector     Injector.
@@ -74,7 +88,7 @@ class SupportScreen implements Conditional, Service, Registerable {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		return is_admin();
+		return is_admin() && AMP_Validation_Manager::has_cap();
 	}
 
 	/**
