@@ -110,7 +110,7 @@ class SupportRESTControllerTest extends DependencyInjectedTestCase {
 				],
 				'expected'         => new \WP_Error(
 					'fail_to_send_data',
-					'Failed to send support request. Please try again after some time',
+					'Failed to send support request. Please try again later.',
 					[ 'status' => 500 ]
 				),
 			],
