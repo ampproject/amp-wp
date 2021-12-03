@@ -69,6 +69,19 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 
 		register_rest_route(
 			$this->namespace,
+			'/get-diagnostic',
+			[
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'args'                => [],
+					'permission_callback' => [ $this, 'permission_callback' ],
+					'callback'            => [ $this, 'get_item' ],
+				],
+			]
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/send-diagnostic',
 			[
 				[
@@ -89,6 +102,22 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 	public function permission_callback() {
 
 		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Get AMP support data.
+	 *
+	 * @param WP_REST_Request $request REST API request.
+	 *
+	 * @return array|WP_Error|WP_REST_Response REST API response.
+	 */
+	public function get_item( $request ) {
+
+		$request_args = $request->get_param( 'args' );
+		$request_args = ( ! empty( $request_args ) && is_array( $request_args ) ) ? $request_args : [];
+		$support_data = $this->injector->make( SupportData::class, [ 'args' => $request_args ] );
+
+		return $support_data->get_data();
 	}
 
 	/**

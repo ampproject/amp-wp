@@ -53,7 +53,7 @@ export function ValidationResultsNotice( { data, args, ampValidatedPostCount } )
 		);
 	}
 
-	// The site doesn't have any AMP errors but there are some stalled result.
+	// The site doesn't have any AMP errors but there are some stale results.
 	if ( ! isSpecificUrlRequest && ! hasErrors && hasSomeStaleResults ) {
 		return (
 			<AMPNotice type={ NOTICE_TYPE_WARNING } size={ NOTICE_SIZE_SMALL }>

@@ -199,7 +199,7 @@ class SupportScreen implements Conditional, Service, Registerable {
 	 *
 	 * @return array [
 	 *     @type int $all Count of all AMP validated URL post.
-	 *     @type int $valid Count of all AMP validated URL post that are not stalled.
+	 *     @type int $valid Count of all AMP validated URL posts that are not stale.
 	 * ]
 	 */
 	public function get_amp_validated_post_counts() {

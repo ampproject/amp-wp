@@ -111,7 +111,7 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 
 		$query_args = [
 			'page' => 'amp-support',
-			'url'  => rawurlencode( $post->post_title ),
+			'url'  => rawurlencode( AMP_Validated_URL_Post_Type::get_url_from_post( $post ) ),
 		];
 
 		$actions['amp-support'] = sprintf(
@@ -139,7 +139,7 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 
 		$query_args = [
 			'page' => 'amp-support',
-			'url'  => rawurlencode( $post->post_title ),
+			'url'  => rawurlencode( AMP_Validated_URL_Post_Type::get_url_from_post( $post ) ),
 		];
 
 		$actions['amp-support'] = sprintf(

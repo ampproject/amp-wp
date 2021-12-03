@@ -692,7 +692,8 @@ class SupportData {
 			foreach ( $this->urls as $url ) {
 
 				// Check request URL have validated data if not then validate URL.
-				$amp_validated_post_id = post_exists( $url, '', '', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
+				$amp_validated_post    = AMP_Validated_URL_Post_Type::get_invalid_url_post( $url );
+				$amp_validated_post_id = isset( $amp_validated_post->ID ) ? $amp_validated_post->ID : null;
 
 				if ( empty( $amp_validated_post_id ) ) {
 					$validity = AMP_Validation_Manager::validate_url_and_store( $url );
@@ -704,10 +705,10 @@ class SupportData {
 					$amp_validated_post_id = $validity['post_id'];
 				}
 
-				// If validation data is exists for URL then check if those data stalled or not, If stalled then revalidate.
+				// If validation data is exists for URL then check if it is stale or not. If it is stale, then revalidate.
 				$is_stale = ! empty( AMP_Validated_URL_Post_Type::get_post_staleness( $amp_validated_post_id ) );
 				if ( $is_stale ) {
-					AMP_Validation_Manager::validate_url_and_store( $url );
+					AMP_Validation_Manager::validate_url_and_store( $url, $amp_validated_post_id );
 				}
 
 				$amp_validated_post = get_post( $amp_validated_post_id );
