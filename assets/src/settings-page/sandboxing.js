@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useContext } from '@wordpress/element';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { CheckboxControl } from '@wordpress/components';
 
