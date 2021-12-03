@@ -198,8 +198,9 @@ class SupportScreen implements Conditional, Service, Registerable {
 	 * Get count of amp validated post.
 	 *
 	 * @return array [
-	 *     @type int $all Count of all AMP validated URL post.
-	 *     @type int $valid Count of all AMP validated URL posts that are not stale.
+	 *     @type int $all   Count of all AMP validated URL post.
+	 *     @type int $valid Count of non-stale AMP validated URL posts.
+	 *     @type int $stale Count of stale AMP validated URL posts.
 	 * ]
 	 */
 	public function get_amp_validated_post_counts() {

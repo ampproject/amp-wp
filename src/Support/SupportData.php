@@ -41,10 +41,10 @@ class SupportData {
 	 * @since 2.2
 	 *
 	 * @var array [
-	 *     @type array $urls                   Optional
-	 *     @type array $term_ids               Optional
-	 *     @type array $post_ids               Optional
-	 *     @type array $amp_validated_post_ids Optional
+	 *     @type string[] $urls                   Optional
+	 *     @type int[]    $term_ids               Optional
+	 *     @type int[]    $post_ids               Optional
+	 *     @type int[]    $amp_validated_post_ids Optional
 	 * ]
 	 */
 	public $args = [];
@@ -624,16 +624,22 @@ class SupportData {
 
 		/**
 		 * List of invalid AMP URLs.
+		 *
+		 * @var string[]
 		 */
 		$amp_invalid_urls = [];
 
 		/**
 		 * Error Information
+		 *
+		 * @var array
 		 */
 		$errors = [];
 
 		/**
 		 * Error Source information.
+		 *
+		 * @var array
 		 */
 		$error_sources = [];
 
@@ -758,20 +764,29 @@ class SupportData {
 
 		/**
 		 * Error Information
+		 *
+		 * @var array
 		 */
 		$error_list = [];
 
 		/**
 		 * Error Source information.
+		 *
+		 * @var array
 		 */
 		$error_source_list = [];
 
 		$validation_errors_raw = json_decode( $amp_validated_post->post_content, true );
-		$validation_errors     = [];
+		if ( ! is_array( $validation_errors_raw ) ) {
+			$validation_errors_raw = [];
+		}
 
 		/**
 		 * Error loop.
+		 *
+		 * @var array
 		 */
+		$validation_errors = [];
 		foreach ( $validation_errors_raw as $validation_error ) {
 
 			$error_data    = ( ! empty( $validation_error['data'] ) && is_array( $validation_error['data'] ) ) ? $validation_error['data'] : [];

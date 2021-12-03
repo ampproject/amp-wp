@@ -44,7 +44,7 @@ export function ValidationResultsNotice( { data, args, ampValidatedPostCount } )
 		);
 	}
 
-	// All validated URLs of site is stale.
+	// All validated URLs of site are stale.
 	if ( ! isSpecificUrlRequest && hasAllStaleResults ) {
 		return (
 			<AMPNotice type={ NOTICE_TYPE_WARNING } size={ NOTICE_SIZE_SMALL }>
@@ -62,7 +62,7 @@ export function ValidationResultsNotice( { data, args, ampValidatedPostCount } )
 		);
 	}
 
-	// All validated URLs of site is stale.
+	// All validated URLs are stale.
 	if ( ! isSpecificUrlRequest && ! hasErrors && hasAllFreshResults ) {
 		return (
 			<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_SMALL }>
