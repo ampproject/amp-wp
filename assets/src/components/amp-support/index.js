@@ -68,10 +68,10 @@ export function AMPSupport( props ) {
 				if ( undefined !== response.success && undefined !== response?.data?.uuid ) {
 					setUuid( response.data.uuid );
 				} else {
-					setSubmitSupportRequest( false );
 					throw new Error( __( 'Failed to send support request. Please try again later.', 'amp' ) );
 				}
 			} catch ( exception ) {
+				setSubmitSupportRequest( false );
 				setError( exception.message );
 			} finally {
 				setSending( false );
