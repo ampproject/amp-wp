@@ -166,7 +166,7 @@ class SupportScreen implements Conditional, Service, Registerable {
 
 		$args = [];
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$amp_url = isset( $_GET['url'] ) ? esc_url_raw( $_GET['url'] ) : '';
+		$amp_url = isset( $_GET['url'] ) ? esc_url_raw( wp_unslash( $_GET['url'] ) ) : '';
 
 		if ( ! empty( $amp_url ) ) {
 			$args = [
