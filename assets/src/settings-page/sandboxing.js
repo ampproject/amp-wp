@@ -18,12 +18,12 @@ import { AMPDrawer } from '../components/amp-drawer';
 import { STANDARD } from '../common/constants';
 
 /**
- * Component rendering the sandboxing level.
+ * Component rendering the Sandboxing experiment.
  *
  * @param {Object} props                Component props.
  * @param {string} props.focusedSection Focused section.
  */
-export function SandboxingLevel( { focusedSection } ) {
+export function Sandboxing( { focusedSection } ) {
 	const { updateOptions, editedOptions: {
 		sandboxing_enabled: sandboxingEnabled,
 		sandboxing_level: sandboxingLevel,
@@ -38,12 +38,12 @@ export function SandboxingLevel( { focusedSection } ) {
 		<AMPDrawer
 			heading={ (
 				<h3>
-					{ __( 'Sandboxing Level (Experimental)', 'amp' ) }
+					{ __( 'Sandboxing (Experimental)', 'amp' ) }
 				</h3>
 			) }
-			hiddenTitle={ __( 'Sandboxing Level (Experimental)', 'amp' ) }
-			id="sandboxing-level"
-			initialOpen={ 'sandboxing-level' === focusedSection }
+			hiddenTitle={ __( 'Sandboxing (Experimental)', 'amp' ) }
+			id="sandboxing"
+			initialOpen={ 'sandboxing' === focusedSection }
 		>
 			<p>
 				{ __( 'Try out a more flexible AMP by generating pages that use AMP components without requiring AMP validity! By selecting a sandboxing level, you are indicating the minimum degree of sanitization. For example, if you selected the loose leve but have a page without any POST form and no custom scripts, it will still be served as valid AMP—the same as if you had selected the strict level.', 'amp' ) }
@@ -115,6 +115,6 @@ export function SandboxingLevel( { focusedSection } ) {
 		</AMPDrawer>
 	);
 }
-SandboxingLevel.propTypes = {
+Sandboxing.propTypes = {
 	focusedSection: PropTypes.string,
 };
