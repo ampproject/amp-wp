@@ -253,11 +253,11 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'SCANNABLE_URLS_REST_PATH'           => '/amp/v1/scannable-urls',
 			'LEGACY_THEME_SLUG'                  => ReaderThemes::DEFAULT_READER_THEME,
 			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
-			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
+			'UPDATES_NONCE'                      => current_user_can( 'install_themes' ) ? wp_create_nonce( 'updates' ) : '',
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE' => UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
-			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : null,
+			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : '',
 			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
 			'HAS_PAGE_CACHING'                   => $this->site_health->has_page_caching( true ),
 		];

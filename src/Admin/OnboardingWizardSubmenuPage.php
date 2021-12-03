@@ -255,10 +255,10 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'SETTINGS_LINK'                      => $amp_settings_link,
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
-			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
+			'UPDATES_NONCE'                      => current_user_can( 'install_themes' ) ? wp_create_nonce( 'updates' ) : '',
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
-			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : null,
+			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : '',
 			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
 		];
 
