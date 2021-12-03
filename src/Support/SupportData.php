@@ -754,7 +754,7 @@ class SupportData {
 		}
 
 		// Empty array for post staleness means post is NOT stale.
-		if ( ! empty( AMP_Validated_URL_Post_Type::get_post_staleness( $amp_validated_post->ID ) ) ) {
+		if ( ! empty( AMP_Validated_URL_Post_Type::get_post_staleness( $amp_validated_post ) ) ) {
 			return [];
 		}
 
