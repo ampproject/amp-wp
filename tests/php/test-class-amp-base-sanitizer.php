@@ -305,13 +305,13 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 
 			'100%_width__with_max' => [
 				[ '100%', 'width' ],
-				600,
+				'auto',
 				[ 'content_max_width' => 600 ],
 			],
 
 			'100%_width__no_max'   => [
 				[ '100%', 'width' ],
-				'',
+				'auto',
 			],
 
 			'50%_width__with_max'  => [
