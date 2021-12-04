@@ -13,7 +13,6 @@ import {
 } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
-import { usePrevious } from '@wordpress/compose';
 
 /**
  * External dependencies
@@ -26,7 +25,7 @@ import PropTypes from 'prop-types';
 import { STANDARD } from '../../common/constants';
 import { useAsyncError } from '../../utils/use-async-error';
 import { Options } from '../options-context-provider';
-import { getSlugsFromValidationResults } from './get-slugs-from-validation-results';
+import { getSourcesFromScannableUrls } from './get-sources-from-scannable-urls';
 
 export const SiteScan = createContext();
 
@@ -40,6 +39,7 @@ export const ACTION_SCAN_INITIALIZE = 'ACTION_SCAN_INITIALIZE';
 export const ACTION_SCAN_URL = 'ACTION_SCAN_URL';
 export const ACTION_SCAN_RECEIVE_RESULTS = 'ACTION_SCAN_RECEIVE_RESULTS';
 export const ACTION_SCAN_COMPLETE = 'ACTION_SCAN_COMPLETE';
+export const ACTION_SCAN_SUCCESS = 'ACTION_SCAN_SUCCESS';
 export const ACTION_SCAN_CANCEL = 'ACTION_SCAN_CANCEL';
 
 /**
@@ -47,6 +47,7 @@ export const ACTION_SCAN_CANCEL = 'ACTION_SCAN_CANCEL';
  */
 export const STATUS_REQUEST_SCANNABLE_URLS = 'STATUS_REQUEST_SCANNABLE_URLS';
 export const STATUS_FETCHING_SCANNABLE_URLS = 'STATUS_FETCHING_SCANNABLE_URLS';
+export const STATUS_REFETCHING_PLUGIN_SUPPRESSION = 'STATUS_REFETCHING_PLUGIN_SUPPRESSION';
 export const STATUS_READY = 'STATUS_READY';
 export const STATUS_IDLE = 'STATUS_IDLE';
 export const STATUS_IN_PROGRESS = 'STATUS_IN_PROGRESS';
@@ -164,7 +165,13 @@ export function siteScanReducer( state, action ) {
 
 			return {
 				...state,
-				status: hasFailed ? STATUS_FAILED : STATUS_COMPLETED,
+				status: hasFailed ? STATUS_FAILED : STATUS_REFETCHING_PLUGIN_SUPPRESSION,
+			};
+		}
+		case ACTION_SCAN_SUCCESS: {
+			return {
+				...state,
+				status: STATUS_COMPLETED,
 			};
 		}
 		case ACTION_SCAN_CANCEL: {
@@ -191,20 +198,23 @@ export function siteScanReducer( state, action ) {
  * @param {Object}  props                             Component props.
  * @param {?any}    props.children                    Component children.
  * @param {boolean} props.fetchCachedValidationErrors Whether to fetch cached validation errors on mount.
+ * @param {boolean} props.resetOnOptionsChange        Whether to reset scanner and refetch scannable URLs whenever AMP options are changed.
  * @param {string}  props.scannableUrlsRestPath       The REST path for interacting with the scannable URL resources.
  * @param {string}  props.validateNonce               The AMP validate nonce.
  */
 export function SiteScanContextProvider( {
 	children,
 	fetchCachedValidationErrors = false,
+	resetOnOptionsChange = false,
 	scannableUrlsRestPath,
 	validateNonce,
 } ) {
 	const {
-		didSaveOptions,
 		originalOptions: {
 			theme_support: themeSupport,
 		},
+		savedOptions,
+		refetchPluginSuppression,
 	} = useContext( Options );
 	const { setAsyncError } = useAsyncError();
 	const [ state, dispatch ] = useReducer( siteScanReducer, INITIAL_STATE );
@@ -237,8 +247,9 @@ export function SiteScanContextProvider( {
 			};
 		}
 
-		const validationErrors = scannableUrls.reduce( ( accumulatedValidationErrors, scannableUrl ) => [ ...accumulatedValidationErrors, ...scannableUrl?.validation_errors ?? [] ], [] );
-		const slugs = getSlugsFromValidationResults( validationErrors );
+		const slugs = getSourcesFromScannableUrls( scannableUrls, {
+			useAmpUrls: urlType === 'amp_url',
+		} );
 
 		return {
 			hasSiteScanResults: scannableUrls.some( ( scannableUrl ) => Boolean( scannableUrl?.validation_errors ) ),
@@ -246,7 +257,7 @@ export function SiteScanContextProvider( {
 			stale: scannableUrls.some( ( scannableUrl ) => scannableUrl?.stale === true ),
 			themesWithAmpIncompatibility: slugs.themes,
 		};
-	}, [ scannableUrls, status ] );
+	}, [ scannableUrls, status, urlType ] );
 
 	/**
 	 * Preflight check.
@@ -283,32 +294,61 @@ export function SiteScanContextProvider( {
 	 * Whenever options change, cancel the current scan (if in progress) and
 	 * refetch the scannable URLs.
 	 */
-	const previousDidSaveOptions = usePrevious( didSaveOptions );
 	useEffect( () => {
-		if ( ! previousDidSaveOptions && didSaveOptions ) {
-			cancelSiteScan();
-			fetchScannableUrls();
+		if ( resetOnOptionsChange && Object.keys( savedOptions ).length > 0 ) {
+			dispatch( { type: ACTION_SCAN_CANCEL } );
+			dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
 		}
-	}, [ cancelSiteScan, didSaveOptions, fetchScannableUrls, previousDidSaveOptions ] );
+	}, [ resetOnOptionsChange, savedOptions ] );
+
+	/**
+	 * Trigger site scan if the suppressed plugins list has changed and the
+	 * scanner is ready to start a scan.
+	 */
+	useEffect( () => {
+		if ( status === STATUS_READY && Object.keys( savedOptions.suppressed_plugins || {} ).length > 0 ) {
+			dispatch( { type: ACTION_SCAN_INITIALIZE } );
+		}
+	}, [ savedOptions?.suppressed_plugins, status ] );
 
 	/**
 	 * Delay concurrent validation requests.
 	 */
 	const [ shouldDelayValidationRequest, setShouldDelayValidationRequest ] = useState( false );
 	useEffect( () => {
-		let clearTimeout = () => {};
+		let timeoutId;
 
 		if ( shouldDelayValidationRequest ) {
 			( async () => {
 				await new Promise( ( resolve ) => {
-					clearTimeout = setTimeout( resolve, CONCURRENT_VALIDATION_REQUESTS_WAIT_MS );
+					timeoutId = setTimeout( resolve, CONCURRENT_VALIDATION_REQUESTS_WAIT_MS );
 				} );
+
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
 				setShouldDelayValidationRequest( false );
 			} )();
 		}
 
-		return clearTimeout;
+		return () => {
+			if ( timeoutId ) {
+				clearTimeout( timeoutId );
+			}
+		};
 	}, [ shouldDelayValidationRequest ] );
+
+	/**
+	 * Once the site scan is complete, refetch the plugin suppression data so
+	 * that the suppressed table is updated with the latest validation errors.
+	 */
+	useEffect( () => {
+		if ( status === STATUS_REFETCHING_PLUGIN_SUPPRESSION ) {
+			refetchPluginSuppression();
+			dispatch( { type: ACTION_SCAN_SUCCESS } );
+		}
+	}, [ refetchPluginSuppression, status ] );
 
 	/**
 	 * Fetch scannable URLs from the REST endpoint.
@@ -339,6 +379,10 @@ export function SiteScanContextProvider( {
 					scannableUrls: response,
 				} );
 			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
 				setAsyncError( e );
 			}
 		} )();
@@ -370,7 +414,7 @@ export function SiteScanContextProvider( {
 
 		setShouldDelayValidationRequest( true );
 
-		const currentlyScannedUrlIndex = urlIndexesPendingScan.shift();
+		const currentlyScannedUrlIndex = urlIndexesPendingScan[ 0 ];
 
 		dispatch( {
 			type: ACTION_SCAN_URL,
@@ -407,6 +451,10 @@ export function SiteScanContextProvider( {
 					results.error = data?.code || true;
 				}
 			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
 				results.error = true;
 			}
 
@@ -428,15 +476,16 @@ export function SiteScanContextProvider( {
 				hasSiteScanResults,
 				isBusy: [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ),
 				isCancelled: status === STATUS_CANCELLED,
-				isCompleted: status === STATUS_COMPLETED,
+				isCompleted: [ STATUS_REFETCHING_PLUGIN_SUPPRESSION, STATUS_COMPLETED ].includes( status ),
 				isFailed: status === STATUS_FAILED,
 				isFetchingScannableUrls: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
+				isInitializing: ! Boolean( status ),
 				isReady: status === STATUS_READY,
 				isSiteScannable: scannableUrls.length > 0,
 				pluginsWithAmpIncompatibility,
 				previewPermalink,
 				scannableUrls,
-				scannedUrlsMaxIndex: Math.min( scannableUrls.length, ...urlIndexesPendingScan ) - 1,
+				scannedUrlsMaxIndex: ( [ STATUS_IN_PROGRESS, STATUS_IDLE ].includes( status ) ? Math.min( scannableUrls.length, ...urlIndexesPendingScan ) : 0 ) - 1,
 				stale,
 				startSiteScan,
 				themesWithAmpIncompatibility,
@@ -450,6 +499,7 @@ export function SiteScanContextProvider( {
 SiteScanContextProvider.propTypes = {
 	children: PropTypes.any,
 	fetchCachedValidationErrors: PropTypes.bool,
+	resetOnOptionsChange: PropTypes.bool,
 	scannableUrlsRestPath: PropTypes.string,
 	validateNonce: PropTypes.string,
 };

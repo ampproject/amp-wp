@@ -149,7 +149,7 @@ class SupportLinkTest extends TestCase {
 		);
 
 		$this->assertStringContainsString(
-			"post_id=$post->ID",
+			sprintf( 'url=%s', rawurlencode( $post->post_title ) ),
 			$actions['amp-support']
 		);
 	}
@@ -182,7 +182,7 @@ class SupportLinkTest extends TestCase {
 		);
 
 		$this->assertStringContainsString(
-			"post_id=$post->ID",
+			sprintf( 'url=%s', rawurlencode( $post->post_title ) ),
 			$actions['amp-support']
 		);
 	}

@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { activateTheme, deleteTheme, installTheme } from '@wordpress/e2e-test-utils';
+import { activateTheme } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -11,7 +11,6 @@ import {
 	clickMode,
 	testNextButton,
 	testPreviousButton,
-	cleanUpSettings,
 } from '../../utils/onboarding-wizard-utils';
 
 describe( 'Template mode', () => {
@@ -45,10 +44,6 @@ describe( 'Template mode', () => {
 } );
 
 describe( 'Template mode recommendations with reader theme active', () => {
-	beforeEach( async () => {
-		await activateTheme( 'twentytwenty' );
-	} );
-
 	it( 'makes correct recommendations when user is not technical and the current theme is a reader theme', async () => {
 		await moveToTemplateModeScreen( { technical: false } );
 
@@ -79,14 +74,12 @@ describe( 'Template mode recommendations with reader theme active', () => {
 } );
 
 describe( 'Template mode recommendations with non-reader-theme active', () => {
-	beforeEach( async () => {
-		await cleanUpSettings();
-		await installTheme( 'hestia' );
+	beforeAll( async () => {
 		await activateTheme( 'hestia' );
 	} );
 
-	afterEach( async () => {
-		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
+	afterAll( async () => {
+		await activateTheme( 'twentytwenty' );
 	} );
 
 	it( 'makes correct recommendations when user is not technical and the current theme is not a reader theme', async () => {
@@ -104,13 +97,16 @@ describe( 'Template mode recommendations with non-reader-theme active', () => {
 	it( 'makes correct recommendations when user is technical and the current theme is not a reader theme', async () => {
 		await moveToTemplateModeScreen( { technical: true } );
 
-		// The Standard mode should be recommended.
-		await expect( page ).toMatchElement( '#template-mode-standard-container .components-panel__body-title button[aria-expanded="true"]' );
-		await expect( page ).toMatchElement( '#template-mode-standard-container .amp-notice--success' );
+		// The Reader mode should be recommended.
+		await expect( page ).toMatchElement( '#template-mode-reader-container .components-panel__body-title button[aria-expanded="true"]' );
+		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--success' );
 
-		// The Reader and Transitional options should be collapsed.
-		await expect( page ).toMatchElement( '#template-mode-reader-container .components-panel__body-title button[aria-expanded="false"]' );
-		await expect( page ).toMatchElement( '#template-mode-transitional-container .components-panel__body-title button[aria-expanded="false"]' );
+		// Transitional should be recommended.
+		await expect( page ).toMatchElement( '#template-mode-transitional-container .components-panel__body-title button[aria-expanded="true"]' );
+		await expect( page ).toMatchElement( '#template-mode-transitional-container .amp-notice--success' );
+
+		// The Standard option should not be recommended.
+		await expect( page ).toMatchElement( '#template-mode-standard-container .components-panel__body-title button[aria-expanded="false"]' );
 	} );
 } );
 

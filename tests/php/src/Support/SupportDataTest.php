@@ -218,6 +218,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 	/**
 	 * @covers ::send_data()
 	 * @covers ::get_data()
+	 * @covers ::process_raw_post_errors()
 	 */
 	public function test_send_data() {
 
@@ -269,6 +270,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 	/**
 	 * @covers ::get_data()
 	 * @covers ::get_amp_urls()
+	 * @covers ::process_raw_post_errors()
 	 */
 	public function test_get_data_with_specific_url() {
 
@@ -634,6 +636,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 	 *
 	 * @covers ::get_amp_urls()
 	 * @covers ::get_stylesheet_info()
+	 * @covers ::process_raw_post_errors()
 	 */
 	public function test_get_amp_urls() {
 

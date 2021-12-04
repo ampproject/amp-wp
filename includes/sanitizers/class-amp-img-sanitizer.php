@@ -6,10 +6,10 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
 use AmpProject\DevMode;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 use AmpProject\Layout;
-use AmpProject\Tag;
 
 /**
  * Class AMP_Img_Sanitizer
@@ -391,6 +391,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		} else {
 			$new_tag = 'amp-img';
 		}
+
+		// Remove ID since it would be a duplicate and because if it is not removed before replacing the element with
+		// another element that has the same ID, the removed element would still get returned by getElementById even
+		// when it is no longer in the Document.
+		$node->removeAttribute( Attribute::ID );
 
 		$img_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
 		$node->parentNode->replaceChild( $img_node, $node );

@@ -130,6 +130,7 @@ const admin = {
 	externals: {
 		'amp-themes': 'ampThemes',
 		'amp-plugins': 'ampPlugins',
+		'amp-site-scan-notice': 'ampSiteScanNotice',
 	},
 	entry: {
 		'amp-validation-tooltips': './assets/src/admin/amp-validation-tooltips.js',
@@ -137,6 +138,7 @@ const admin = {
 		'amp-paired-browsing-client': './assets/src/admin/paired-browsing/client.js',
 		'amp-theme-install': './assets/src/admin/amp-theme-install.js',
 		'amp-plugin-install': './assets/src/admin/amp-plugin-install.js',
+		'amp-site-scan-notice': './assets/src/admin/site-scan-notice/index.js',
 	},
 	plugins: [
 		...sharedConfig.plugins,

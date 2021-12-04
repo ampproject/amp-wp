@@ -131,11 +131,20 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 				],
 			],
 
-			'fill_both_dimensions_and_absolute_position' => [
+			'fill_both_dimension_attrs_and_absolute_position' => [
 				[
 					'width'  => '100%',
 					'height' => '100%',
 					'style'  => 'position:absolute',
+				],
+				[
+					'layout' => 'fill',
+				],
+			],
+
+			'fill_both_dimensions_styles_and_absolute_position' => [
+				[
+					'style' => 'width: 100%; height:100%; position:absolute',
 				],
 				[
 					'layout' => 'fill',
@@ -199,6 +208,12 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	public function test_get_selector_conversion_mapping() {
 		$sanitizer = new StubSanitizer( new Document() );
 		$this->assertEquals( [], $sanitizer->get_selector_conversion_mapping() );
+	}
+
+	/** @covers ::has_light_shadow_dom() */
+	public function test_has_light_shadow_dom() {
+		$sanitizer = new StubSanitizer( new Document() );
+		$this->assertSame( true, $sanitizer->has_light_shadow_dom() );
 	}
 
 	/**
@@ -290,13 +305,13 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 
 			'100%_width__with_max' => [
 				[ '100%', 'width' ],
-				600,
+				'auto',
 				[ 'content_max_width' => 600 ],
 			],
 
 			'100%_width__no_max'   => [
 				[ '100%', 'width' ],
-				'',
+				'auto',
 			],
 
 			'50%_width__with_max'  => [

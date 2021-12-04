@@ -7,13 +7,13 @@
 
 use AmpProject\Amp;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AmpProject\Dom\Document;
-use AmpProject\Dom\Element;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\Extension;
-use AmpProject\Tag;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 
 /**
  * Tests for AMP_Comments_Sanitizer class.
@@ -110,6 +110,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	 * @covers ::sanitize()
 	 * @covers ::ampify_threaded_comments()
 	 * @covers ::prepare_native_comment_reply()
+	 * @covers ::get_comment_reply_script()
 	 */
 	public function test_ampify_threaded_comments( $ampify_comment_threading, $comments_form_has_action_xhr, $expect_ampify_comment_threading ) {
 		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
@@ -165,7 +166,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 			);
 			$this->assertInstanceOf( Element::class, $script->parentNode );
 			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $script ) );
-			$this->assertTrue( $script->hasAttribute( 'defer' ) );
+			$this->assertTrue( $script->hasAttribute( Attribute::DEFER ) );
 			$this->assertNull( $dom->getElementById( 'ampCommentThreading' ) );
 
 			$this->assertFalse( $style_sanitizer->get_arg( 'transform_important_qualifiers' ) );
@@ -228,6 +229,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	/**
 	 * Test AMP_Comments_Sanitizer::add_amp_live_list_comment_attributes.
 	 *
+	 * @covers ::sanitize()
 	 * @covers ::add_amp_live_list_comment_attributes()
 	 */
 	public function test_add_amp_live_list_comment_attributes() {

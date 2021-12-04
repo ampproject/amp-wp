@@ -109,6 +109,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'paired_routing'                     => PairedRouting::class,
 		'paired_url'                         => PairedUrl::class,
 		'plugin_activation_notice'           => Admin\PluginActivationNotice::class,
+		'plugin_activation_site_scan'        => Admin\PluginActivationSiteScan::class,
 		'plugin_registry'                    => PluginRegistry::class,
 		'plugin_suppression'                 => PluginSuppression::class,
 		'reader_theme_loader'                => ReaderThemeLoader::class,

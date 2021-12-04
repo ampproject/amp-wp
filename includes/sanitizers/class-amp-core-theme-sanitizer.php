@@ -8,12 +8,12 @@
 
 use AmpProject\Amp;
 use AmpProject\AmpWP\Services;
-use AmpProject\Attribute;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Role;
+use AmpProject\Html\Tag;
 use AmpProject\Layout;
-use AmpProject\Role;
-use AmpProject\Tag;
 
 /**
  * Class AMP_Core_Theme_Sanitizer

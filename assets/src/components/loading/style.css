@@ -4,6 +4,12 @@
 	justify-content: center;
 }
 
+.amp-spinner-container--inline {
+	display: inline-flex;
+	margin: 0 0.5em;
+	vertical-align: middle;
+}
+
 .amp-spinner-container .components-spinner {
 	margin: 0;
 }

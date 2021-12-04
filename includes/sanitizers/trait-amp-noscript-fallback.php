@@ -6,7 +6,7 @@
  */
 
 use AmpProject\Dom\Document;
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 
 /**
  * Trait AMP_Noscript_Fallback
