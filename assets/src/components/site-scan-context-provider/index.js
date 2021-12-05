@@ -316,12 +316,12 @@ export function SiteScanContextProvider( {
 	 */
 	const [ shouldDelayValidationRequest, setShouldDelayValidationRequest ] = useState( false );
 	useEffect( () => {
-		let clearTimeout;
+		let timeoutId;
 
 		if ( shouldDelayValidationRequest ) {
 			( async () => {
 				await new Promise( ( resolve ) => {
-					clearTimeout = setTimeout( resolve, CONCURRENT_VALIDATION_REQUESTS_WAIT_MS );
+					timeoutId = setTimeout( resolve, CONCURRENT_VALIDATION_REQUESTS_WAIT_MS );
 				} );
 
 				if ( true === hasUnmounted.current ) {
@@ -333,8 +333,8 @@ export function SiteScanContextProvider( {
 		}
 
 		return () => {
-			if ( typeof clearTimeout === 'function' ) {
-				clearTimeout();
+			if ( timeoutId ) {
+				clearTimeout( timeoutId );
 			}
 		};
 	}, [ shouldDelayValidationRequest ] );
