@@ -839,7 +839,8 @@ class SupportData {
 		$object_subtype     = '';
 
 		if ( empty( $object_type ) ) {
-			if ( false !== strpos( $amp_validated_post->post_title, '?s=' ) ) {
+			$amp_validated_post_url = AMP_Validated_URL_Post_Type::get_url_from_post( $amp_validated_post );
+			if ( false !== strpos( $amp_validated_post_url, '?s=' ) ) {
 				$object_type = 'search';
 			}
 		}
@@ -867,7 +868,7 @@ class SupportData {
 		}
 
 		$amp_invalid_url = [
-			'url'                   => $amp_validated_post->post_title,
+			'url'                   => AMP_Validated_URL_Post_Type::get_url_from_post( $amp_validated_post ),
 			'object_type'           => $object_type,
 			'object_subtype'        => $object_subtype,
 			'css_size_before'       => ( ! empty( $stylesheet_info['css_size_before'] ) ) ? $stylesheet_info['css_size_before'] : '',
