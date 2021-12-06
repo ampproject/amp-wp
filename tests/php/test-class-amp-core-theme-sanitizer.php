@@ -746,13 +746,6 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
 
-		// Test 1: Empty xpath.
-		$this->assertFalse( $this->call_private_method( $sanitizer, 'get_first_element', [ '' ] ) );
-
-		// Test 1: Invalid xpath.
-		$this->assertFalse( $this->call_private_method( $sanitizer, 'get_first_element', [ '//ul//li[ @class = "menu-item invalid" ]' ] ) );
-
-		// Test 3: Valid xpath.
 		$xpath = '//ul//li[ @class = "menu-item" ]';
 		$this->assertEquals(
 			$dom->xpath->query( $xpath )->item( 0 ),
@@ -877,25 +870,66 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 				'expected' => '<nav id="site-navigation" class="main-navigation" aria-label="Top Menu">
 	<div class="menu-testing-menu-container">
 		<ul id="menu-testing-menu" class="main-menu">
-			<li id="menu-item-7630" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7630 off-canvas">
+			<li id="menu-item-7630" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7630">
 				<a href="#" aria-haspopup="true" aria-expanded="false">Pages</a>
-				<button class="submenu-expand" tabindex="-1" on="tap:primary_nav_0">Open</button>
-				
-			<amp-sidebar id="primary_nav_0" layout="nodisplay" class="amp-twentynineteen-main-navigation"><amp-nested-menu layout="fill"><ul class="sub-menu expanded-true">
+				<button class="submenu-expand display-on-desktop" tabindex="-1">Open</button>
+				<ul class="sub-menu display-on-desktop">
 					<li id="menu-item--1" class="mobile-parent-nav-menu-item menu-item--1">
-						<button class="menu-item-link-return" tabindex="-1" on="tap:primary_nav_0.close">Pages</button>
+						<button class="menu-item-link-return" tabindex="-1">Pages</button>
+					</li>
+					<li id="menu-item-7682" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-7682">
+						<a href="https://amp-dev.test/about/page-image-alignment/">Page Image Alignment</a>
+					</li>
+				</ul>
+			<button class="submenu-expand display-on-mobile" tabindex="-1" on="tap:i-amp-0">Open</button><amp-sidebar layout="nodisplay" class="amp-twentynineteen-main-navigation" side="right" id="i-amp-0"><amp-nested-menu layout="fill"><ul class="sub-menu expanded-true display-on-mobile">
+					<li id="menu-item--1" class="mobile-parent-nav-menu-item menu-item--1">
+						<button class="menu-item-link-return" tabindex="-1" on="tap:i-amp-0.close">Pages</button>
 					</li>
 					<li id="menu-item-7682" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-7682">
 						<a href="https://amp-dev.test/about/page-image-alignment/">Page Image Alignment</a>
 					</li>
 				</ul></amp-nested-menu></amp-sidebar></li>
-			<li id="menu-item-7635" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7635 off-canvas">
+			<li id="menu-item-7635" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7635">
 				<a href="#" aria-haspopup="true" aria-expanded="false">Depth</a>
-				<button class="submenu-expand" tabindex="-1" on="tap:primary_nav_1">Open</button>
-				
-			<amp-sidebar id="primary_nav_1" layout="nodisplay" class="amp-twentynineteen-main-navigation"><amp-nested-menu layout="fill"><ul class="sub-menu expanded-true">
+				<button class="submenu-expand display-on-desktop" tabindex="-1">Open</button>
+				<ul class="sub-menu display-on-desktop">
 					<li id="menu-item--3" class="mobile-parent-nav-menu-item menu-item--3">
-						<button class="menu-item-link-return" tabindex="-1" on="tap:primary_nav_1.close">Depth</button>
+						<button class="menu-item-link-return" tabindex="-1">Depth</button>
+					</li>
+					<li id="menu-item-7636" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7636">
+						<a href="#" aria-haspopup="true" aria-expanded="false">Level 01</a>
+						<button class="submenu-expand" tabindex="-1">Open</button>
+						<ul class="sub-menu">
+							<li id="menu-item--4" class="mobile-parent-nav-menu-item menu-item--4">
+								<button class="menu-item-link-return" tabindex="-1">Level 01</button>
+							</li>
+							<li id="menu-item-7637" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7637">
+								<a href="#" aria-haspopup="true" aria-expanded="false">Level 02</a>
+								<button class="submenu-expand" tabindex="-1">Open</button>
+								<ul class="sub-menu">
+									<li id="menu-item--5" class="mobile-parent-nav-menu-item menu-item--5">
+										<button class="menu-item-link-return" tabindex="-1">Level 02</button>
+									</li>
+									<li id="menu-item-7638" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7638">
+										<a href="#" aria-haspopup="true" aria-expanded="false">Level 03</a>
+										<button class="submenu-expand" tabindex="-1">Open</button>
+										<ul class="sub-menu">
+											<li id="menu-item--6" class="mobile-parent-nav-menu-item menu-item--6">
+												<button class="menu-item-link-return" tabindex="-1">Level 03</button>
+											</li>
+											<li id="menu-item-7639" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7639">
+												<a href="#" aria-haspopup="true" aria-expanded="false">Level 04</a>
+											</li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			<button class="submenu-expand display-on-mobile" tabindex="-1" on="tap:i-amp-1">Open</button><amp-sidebar layout="nodisplay" class="amp-twentynineteen-main-navigation" side="right" id="i-amp-1"><amp-nested-menu layout="fill"><ul class="sub-menu expanded-true display-on-mobile">
+					<li id="menu-item--3" class="mobile-parent-nav-menu-item menu-item--3">
+						<button class="menu-item-link-return" tabindex="-1" on="tap:i-amp-1.close">Depth</button>
 					</li>
 					<li id="menu-item-7636" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7636">
 						<a href="#" aria-haspopup="true" aria-expanded="false">Level 01</a>
@@ -944,35 +978,11 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	}
 
 	/**
-	 * @covers ::update_twentynineteen_mobile_main_menu()
-	 */
-	public function test_update_twentynineteen_mobile_main_menu_on_desktop() {
-
-		add_filter( 'amp_pre_is_mobile', '__return_false' );
-
-		$data = $this->update_twentynineteen_mobile_main_menu_data_provider();
-		$data = $data['full_menu'];
-
-		$dom = AMP_DOM_Utils::get_dom_from_content( $data['input'] );
-		( new AMP_Core_Theme_Sanitizer( $dom ) )->update_twentynineteen_mobile_main_menu();
-
-		$this->assertEquals(
-			$data['input'],
-			AMP_DOM_Utils::get_content_from_dom( $dom )
-		);
-
-		remove_filter( 'amp_pre_is_mobile', '__return_false' );
-	}
-
-	/**
 	 * @dataProvider update_twentynineteen_mobile_main_menu_data_provider()
 	 * @covers ::update_twentynineteen_mobile_main_menu()
 	 * @covers ::update_twentynineteen_main_nested_menu()
 	 */
 	public function test_update_twentynineteen_mobile_main_menu( $input, $expected ) {
-
-		add_filter( 'amp_pre_is_mobile', '__return_true' );
-
 		$dom = AMP_DOM_Utils::get_dom_from_content( $input );
 		( new AMP_Core_Theme_Sanitizer( $dom ) )->update_twentynineteen_mobile_main_menu();
 
@@ -980,7 +990,5 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 			$expected,
 			AMP_DOM_Utils::get_content_from_dom( $dom )
 		);
-
-		remove_filter( 'amp_pre_is_mobile', '__return_true' );
 	}
 }
