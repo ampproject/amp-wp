@@ -6,7 +6,12 @@ import { activateTheme } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { moveToSiteScanScreen, testNextButton, testPreviousButton } from '../../utils/onboarding-wizard-utils';
+import {
+	goToOnboardingWizard,
+	moveToSiteScanScreen,
+	testNextButton,
+	testPreviousButton,
+} from '../../utils/onboarding-wizard-utils';
 import { testSiteScanning } from '../../utils/site-scan-utils';
 import { activatePlugin, deactivatePlugin } from '../../utils/amp-settings-utils';
 
@@ -60,5 +65,14 @@ describe( 'Onboarding Wizard Site Scan Step', () => {
 
 		await deactivatePlugin( 'e2e-tests-demo-plugin' );
 		await activateTheme( 'twentytwenty' );
+	} );
+
+	it( 'should not be present if the user has no validate capability', async () => {
+		await activatePlugin( 'do-not-allow-amp-validate-capability' );
+		await goToOnboardingWizard();
+
+		await expect( page ).not.toMatchElement( '.amp-stepper__item-title', { text: 'Site Scan' } );
+
+		await deactivatePlugin( 'do-not-allow-amp-validate-capability' );
 	} );
 } );

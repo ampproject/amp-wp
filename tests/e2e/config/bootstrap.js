@@ -236,9 +236,11 @@ async function createTestData() {
  */
 async function setupThemesAndPlugins() {
 	await installLocalPlugin( 'e2e-tests-demo-plugin' );
+	await installLocalPlugin( 'do-not-allow-amp-validate-capability' );
 
-	// If the demo plugin has been already installed it might be activated, too.
+	// If the plugins have been already installed, they may be activated, too. Try deactivating them, just in case.
 	await deactivatePlugin( 'e2e-tests-demo-plugin' );
+	await deactivatePlugin( 'do-not-allow-amp-validate-capability' );
 
 	await installTheme( 'hestia' );
 	await activateTheme( 'twentytwenty' );

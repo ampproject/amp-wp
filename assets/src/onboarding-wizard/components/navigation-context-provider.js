@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { Options } from '../../components/options-context-provider';
+import { SiteScan } from '../../components/site-scan-context-provider';
 import { READER } from '../../common/constants';
 
 export const Navigation = createContext();
@@ -26,16 +27,21 @@ export function NavigationContextProvider( { children, pages } ) {
 	const [ currentPage, setCurrentPage ] = useState( pages[ 0 ] );
 	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 2.1.
 	const { editedOptions } = useContext( Options );
+	const { isSkipped } = useContext( SiteScan );
 
 	const { theme_support: themeSupport } = editedOptions;
 
-	const adaptedPages = useMemo( () => {
-		if ( READER === themeSupport ) {
-			return pages;
+	const adaptedPages = useMemo( () => pages.filter( ( page ) => {
+		if ( READER !== themeSupport && 'theme-selection' === page.slug ) {
+			return false;
 		}
 
-		return pages.filter( ( page ) => 'theme-selection' !== page.slug );
-	}, [ pages, themeSupport ] );
+		if ( isSkipped && 'site-scan' === page.slug ) {
+			return false;
+		}
+
+		return true;
+	} ), [ isSkipped, pages, themeSupport ] );
 
 	const activePageIndex = adaptedPages.findIndex( ( adaptedPage ) => adaptedPage.slug === currentPage.slug );
 

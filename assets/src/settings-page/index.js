@@ -42,7 +42,7 @@ import { ErrorScreen } from '../components/error-screen';
 import { User, UserContextProvider } from '../components/user-context-provider';
 import { PluginsContextProvider } from '../components/plugins-context-provider';
 import { ThemesContextProvider } from '../components/themes-context-provider';
-import { SiteScanContextProvider } from '../components/site-scan-context-provider';
+import { SiteScanContextProvider, SiteScan as SiteScanContext } from '../components/site-scan-context-provider';
 import { Welcome } from './welcome';
 import { Sandboxing } from './sandboxing';
 import { TemplateModes } from './template-modes';
@@ -152,6 +152,7 @@ function Root( { appRoot } ) {
 	const { hasOptionsChanges, fetchingOptions, saveOptions } = useContext( Options );
 	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption } = useContext( User );
 	const { templateModeWasOverridden } = useContext( ReaderThemes );
+	const { isSkipped } = useContext( SiteScanContext );
 
 	/**
 	 * Handle the form submit event.
@@ -216,7 +217,9 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 			<Welcome />
-			<SiteScan onSiteScan={ focusSiteScanSection } />
+			{ ! isSkipped && (
+				<SiteScan onSiteScan={ focusSiteScanSection } />
+			) }
 			<SiteReview />
 			<form onSubmit={ onSubmit }>
 				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />

@@ -39,6 +39,10 @@ class SupportLinkTest extends TestCase {
 
 		parent::setUp();
 
+		if ( ! class_exists( 'WP_Site_Health' ) ) {
+			$this->markTestSkipped( 'Test requires Site Health.' );
+		}
+
 		$this->instance = new SupportLink();
 	}
 

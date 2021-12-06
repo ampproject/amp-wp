@@ -16,6 +16,7 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AMP_Options_Manager;
+use AMP_Validation_Manager;
 
 /**
  * Tests for OnboardingWizardSubmenuPage class.
@@ -56,6 +57,17 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 		$this->options_menu = $this->injector->make( OptionsMenu::class );
 
 		$this->add_reader_themes_request_filter();
+	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
 	}
 
 	/** @covers ::__construct() */
@@ -119,14 +131,40 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 		$this->assertEquals( $this->onboarding_wizard_submenu_page->screen_handle(), 'admin_page_amp-onboarding-wizard' );
 	}
 
+	/** @return array */
+	public function get_can_validate_data() {
+		return [
+			'can_validate'    => [ true ],
+			'cannot_validate' => [ false ],
+		];
+	}
+
 	/**
 	 * Tests OnboardingWizardSubmenuPage::enqueue_assets
 	 *
+	 * @dataProvider get_can_validate_data
 	 * @covers ::enqueue_assets()
 	 * @covers ::add_preload_rest_paths()
+	 *
+	 * @param bool $can_validate
 	 */
-	public function test_enqueue_assets() {
+	public function test_enqueue_assets( $can_validate ) {
 		$handle = 'amp-onboarding-wizard';
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		if ( ! $can_validate ) {
+			add_filter(
+				'map_meta_cap',
+				function ( $caps, $cap ) {
+					if ( AMP_Validation_Manager::VALIDATE_CAPABILITY === $cap ) {
+						$caps[] = 'do_not_allow';
+					}
+					return $caps;
+				},
+				10,
+				3
+			);
+		}
+		$this->assertEquals( $can_validate, AMP_Validation_Manager::has_cap() );
 
 		$rest_preloader = $this->get_private_property( $this->onboarding_wizard_submenu_page, 'rest_preloader' );
 		$this->assertCount( 0, $this->get_private_property( $rest_preloader, 'paths' ) );
@@ -134,6 +172,16 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 		$this->onboarding_wizard_submenu_page->enqueue_assets( $this->onboarding_wizard_submenu_page->screen_handle() );
 		$this->assertTrue( wp_script_is( $handle ) );
 		$this->assertTrue( wp_style_is( $handle ) );
+
+		$script_before = implode( '', wp_scripts()->get_data( $handle, 'before' ) );
+		$this->assertStringContainsString( 'var ampSettings', $script_before );
+		$this->assertStringContainsString( 'AMP_OPTIONS_KEY', $script_before );
+		$this->assertStringContainsString( 'VALIDATE_NONCE', $script_before );
+		if ( $can_validate ) {
+			$this->assertStringContainsString( AMP_Validation_Manager::get_amp_validate_nonce(), $script_before );
+		} else {
+			$this->assertStringNotContainsString( AMP_Validation_Manager::get_amp_validate_nonce(), $script_before );
+		}
 
 		if ( function_exists( 'rest_preload_api_request' ) ) {
 			$this->assertEqualSets(

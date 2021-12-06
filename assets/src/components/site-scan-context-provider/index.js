@@ -32,14 +32,13 @@ export const SiteScan = createContext();
 /**
  * Site Scan Actions.
  */
+export const ACTION_SET_STATUS = 'ACTION_SET_STATUS';
 export const ACTION_SCANNABLE_URLS_REQUEST = 'ACTION_SCANNABLE_URLS_REQUEST';
-export const ACTION_SCANNABLE_URLS_FETCH = 'ACTION_SCANNABLE_URLS_FETCH';
 export const ACTION_SCANNABLE_URLS_RECEIVE = 'ACTION_SCANNABLE_URLS_RECEIVE';
 export const ACTION_SCAN_INITIALIZE = 'ACTION_SCAN_INITIALIZE';
 export const ACTION_SCAN_URL = 'ACTION_SCAN_URL';
 export const ACTION_SCAN_RECEIVE_RESULTS = 'ACTION_SCAN_RECEIVE_RESULTS';
 export const ACTION_SCAN_COMPLETE = 'ACTION_SCAN_COMPLETE';
-export const ACTION_SCAN_SUCCESS = 'ACTION_SCAN_SUCCESS';
 export const ACTION_SCAN_CANCEL = 'ACTION_SCAN_CANCEL';
 
 /**
@@ -54,6 +53,7 @@ export const STATUS_IN_PROGRESS = 'STATUS_IN_PROGRESS';
 export const STATUS_COMPLETED = 'STATUS_COMPLETED';
 export const STATUS_FAILED = 'STATUS_FAILED';
 export const STATUS_CANCELLED = 'STATUS_CANCELLED';
+export const STATUS_SKIPPED = 'STATUS_SKIPPED';
 
 /**
  * Initial Site Scan state.
@@ -90,18 +90,24 @@ const CONCURRENT_VALIDATION_REQUESTS_WAIT_MS = 500;
  * @return {Object} New state.
  */
 export function siteScanReducer( state, action ) {
+	// Bail out early if Site Scan is skipped, i.e. if there is no validation nonce provided meaning the current user
+	// does not have capabilities for running AMP validation.
+	if ( state.status === STATUS_SKIPPED ) {
+		return state;
+	}
+
 	switch ( action.type ) {
+		case ACTION_SET_STATUS: {
+			return {
+				...state,
+				status: action.status,
+			};
+		}
 		case ACTION_SCANNABLE_URLS_REQUEST: {
 			return {
 				...state,
 				status: STATUS_REQUEST_SCANNABLE_URLS,
 				forceStandardMode: action?.forceStandardMode ?? false,
-			};
-		}
-		case ACTION_SCANNABLE_URLS_FETCH: {
-			return {
-				...state,
-				status: STATUS_FETCHING_SCANNABLE_URLS,
 			};
 		}
 		case ACTION_SCANNABLE_URLS_RECEIVE: {
@@ -168,12 +174,6 @@ export function siteScanReducer( state, action ) {
 				status: hasFailed ? STATUS_FAILED : STATUS_REFETCHING_PLUGIN_SUPPRESSION,
 			};
 		}
-		case ACTION_SCAN_SUCCESS: {
-			return {
-				...state,
-				status: STATUS_COMPLETED,
-			};
-		}
 		case ACTION_SCAN_CANCEL: {
 			if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( state.status ) ) {
 				return state;
@@ -238,7 +238,7 @@ export function SiteScanContextProvider( {
 		themesWithAmpIncompatibility,
 	} = useMemo( () => {
 		// Skip if the scan is in progress.
-		if ( ! [ STATUS_READY, STATUS_COMPLETED ].includes( status ) ) {
+		if ( ! [ STATUS_READY, STATUS_COMPLETED, STATUS_SKIPPED ].includes( status ) ) {
 			return {
 				hasSiteScanResults: false,
 				pluginsWithAmpIncompatibility: [],
@@ -262,9 +262,14 @@ export function SiteScanContextProvider( {
 	/**
 	 * Preflight check.
 	 */
-	if ( ! validateNonce ) {
-		throw new Error( 'Invalid site scan configuration' );
-	}
+	useEffect( () => {
+		if ( ! validateNonce && status !== STATUS_SKIPPED ) {
+			dispatch( {
+				type: ACTION_SET_STATUS,
+				status: STATUS_SKIPPED,
+			} );
+		}
+	}, [ status, validateNonce ] );
 
 	/**
 	 * This component sets state inside async functions. Use this ref to prevent
@@ -346,7 +351,10 @@ export function SiteScanContextProvider( {
 	useEffect( () => {
 		if ( status === STATUS_REFETCHING_PLUGIN_SUPPRESSION ) {
 			refetchPluginSuppression();
-			dispatch( { type: ACTION_SCAN_SUCCESS } );
+			dispatch( {
+				type: ACTION_SET_STATUS,
+				status: STATUS_COMPLETED,
+			} );
 		}
 	}, [ refetchPluginSuppression, status ] );
 
@@ -359,7 +367,10 @@ export function SiteScanContextProvider( {
 				return;
 			}
 
-			dispatch( { type: ACTION_SCANNABLE_URLS_FETCH } );
+			dispatch( {
+				type: ACTION_SET_STATUS,
+				status: STATUS_FETCHING_SCANNABLE_URLS,
+			} );
 
 			try {
 				const fields = [ 'url', 'amp_url', 'type', 'label' ];
@@ -482,6 +493,7 @@ export function SiteScanContextProvider( {
 				isInitializing: ! Boolean( status ),
 				isReady: status === STATUS_READY,
 				isSiteScannable: scannableUrls.length > 0,
+				isSkipped: status === STATUS_SKIPPED,
 				pluginsWithAmpIncompatibility,
 				previewPermalink,
 				scannableUrls,
