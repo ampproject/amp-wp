@@ -88,7 +88,13 @@ class SupportScreen implements Conditional, Delayed, Service, Registerable {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		return is_admin() && AMP_Validation_Manager::has_cap();
+		return (
+			is_admin()
+			&&
+			current_user_can( 'view_site_health_checks' )
+			&&
+			AMP_Validation_Manager::has_cap()
+		);
 	}
 
 	/**
