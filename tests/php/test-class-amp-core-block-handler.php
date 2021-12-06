@@ -275,7 +275,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			'always-overlay-menu' => [
 				'
 				<!-- wp:navigation {"overlayMenu":"always","layout":{"type":"flex","setCascadingProperties":true,"justifyContent":"center"}} -->
-				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":false} /-->
+				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":%s} /-->
 				<!-- /wp:navigation -->
 				',
 				'always',
@@ -297,7 +297,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			'mobile-overlay-menu' => [
 				'
 				<!-- wp:navigation {"overlayMenu":"mobile","layout":{"type":"flex","setCascadingProperties":true,"justifyContent":"center"}} -->
-				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":false} /-->
+				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":%s} /-->
 				<!-- /wp:navigation -->
 				',
 				'mobile',
@@ -327,7 +327,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			'never-overlay-menu'  => [
 				'
 				<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","setCascadingProperties":true,"justifyContent":"center"}} -->
-				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":false} /-->
+				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":%s} /-->
 				<!-- /wp:navigation -->
 				',
 				'never',
@@ -376,7 +376,8 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			true
 		);
 
-		$content = do_blocks( $source );
+		// Set "openSubmenusOnClick" option to false, this is handled in separated test case.
+		$content = do_blocks( sprintf( $source, 'false' ) );
 		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
 
 		$this->assertFalse( wp_script_is( 'wp-block-navigation-view', 'enqueued' ) );
@@ -438,6 +439,52 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		foreach ( $unwanted_attributes as $unwanted_attribute ) {
 			$this->assertTrue( false === strpos( $content, $unwanted_attribute ) );
 		}
+	}
+
+	/**
+	 * Test submenu opened "on click" in navigation block
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
+	 * @dataProvider get_navigation_block_conversion_data
+	 *
+	 * @param string $source       Source.
+	 * @param string $overlay_menu "Overlay menu" attribute value.
+	 * @param array  $expectations Test expectations for containers and contents div's.
+	 */
+	public function test_ampify_navigation_block_submenu_open_on_click( $source, $overlay_menu, $expectations ) {
+		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '10.7', '<' ) ) {
+			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
+		}
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$menu_id   = wp_create_nav_menu( 'Test menu' );
+		$parent_id = wp_update_nav_menu_item(
+			$menu_id,
+			0, [
+				'menu-item-title'  => 'AMP',
+				'menu-item-url'    => 'https://amp.dev/',
+				'menu-item-status' => 'publish',
+			]
+		);
+
+		wp_update_nav_menu_item(
+			$menu_id,
+			0, [
+				'menu-item-title'     => 'How it works',
+				'menu-item-url'       => 'https://amp.dev/about/how-amp-works/',
+				'menu-item-status'    => 'publish',
+				'menu-item-parent-id' => $parent_id,
+			]
+		);
+
+		// Set "openSubmenusOnClick" option to true.
+		$content = do_blocks( sprintf( $source, 'true' ) );
+		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
+
+		var_dump( $content );
 	}
 
 	/**
