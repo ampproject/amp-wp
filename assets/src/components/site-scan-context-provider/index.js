@@ -32,6 +32,7 @@ export const SiteScan = createContext();
 /**
  * Site Scan Actions.
  */
+export const ACTION_SET_STATUS = 'ACTION_SET_STATUS';
 export const ACTION_SCANNABLE_URLS_REQUEST = 'ACTION_SCANNABLE_URLS_REQUEST';
 export const ACTION_SCANNABLE_URLS_FETCH = 'ACTION_SCANNABLE_URLS_FETCH';
 export const ACTION_SCANNABLE_URLS_RECEIVE = 'ACTION_SCANNABLE_URLS_RECEIVE';
@@ -54,6 +55,7 @@ export const STATUS_IN_PROGRESS = 'STATUS_IN_PROGRESS';
 export const STATUS_COMPLETED = 'STATUS_COMPLETED';
 export const STATUS_FAILED = 'STATUS_FAILED';
 export const STATUS_CANCELLED = 'STATUS_CANCELLED';
+export const STATUS_SKIPPED = 'STATUS_SKIPPED';
 
 /**
  * Initial Site Scan state.
@@ -90,7 +92,19 @@ const CONCURRENT_VALIDATION_REQUESTS_WAIT_MS = 500;
  * @return {Object} New state.
  */
 export function siteScanReducer( state, action ) {
+	// Bail out early if Site Scan is skipped, i.e. if there is no validation nonce provided meaning the current user
+	// does not have capabilities for running AMP validation.
+	if ( state.status === STATUS_SKIPPED ) {
+		return state;
+	}
+
 	switch ( action.type ) {
+		case ACTION_SET_STATUS: {
+			return {
+				...state,
+				status: action.status,
+			};
+		}
 		case ACTION_SCANNABLE_URLS_REQUEST: {
 			return {
 				...state,
@@ -238,7 +252,7 @@ export function SiteScanContextProvider( {
 		themesWithAmpIncompatibility,
 	} = useMemo( () => {
 		// Skip if the scan is in progress.
-		if ( ! [ STATUS_READY, STATUS_COMPLETED ].includes( status ) ) {
+		if ( ! [ STATUS_READY, STATUS_COMPLETED, STATUS_SKIPPED ].includes( status ) ) {
 			return {
 				hasSiteScanResults: false,
 				pluginsWithAmpIncompatibility: [],
@@ -262,9 +276,14 @@ export function SiteScanContextProvider( {
 	/**
 	 * Preflight check.
 	 */
-	if ( ! validateNonce ) {
-		throw new Error( 'Invalid site scan configuration' );
-	}
+	useEffect( () => {
+		if ( ! validateNonce && status !== STATUS_SKIPPED ) {
+			dispatch( {
+				type: ACTION_SET_STATUS,
+				status: STATUS_SKIPPED,
+			} );
+		}
+	}, [ status, validateNonce ] );
 
 	/**
 	 * This component sets state inside async functions. Use this ref to prevent
@@ -482,6 +501,7 @@ export function SiteScanContextProvider( {
 				isInitializing: ! Boolean( status ),
 				isReady: status === STATUS_READY,
 				isSiteScannable: scannableUrls.length > 0,
+				isSkipped: status === STATUS_SKIPPED,
 				pluginsWithAmpIncompatibility,
 				previewPermalink,
 				scannableUrls,
