@@ -332,18 +332,8 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 				',
 				'never',
 				[
-					'containers' => [
-						[
-							'is_open'    => false,
-							'parent_tag' => 'nav',
-						],
-					],
-					'contents'   => [
-						[
-							'has_id'       => true,
-							'parent_class' => 'wp-block-navigation__responsive-container',
-						],
-					],
+					'containers' => [],
+					'contents'   => [],
 				],
 			],
 		];
