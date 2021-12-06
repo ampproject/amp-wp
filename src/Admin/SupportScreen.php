@@ -83,6 +83,21 @@ class SupportScreen implements Conditional, Delayed, Service, Registerable {
 	}
 
 	/**
+	 * Determine whether the user has the capability to access the support screen.
+	 *
+	 * @return bool Whether user has the capability.
+	 */
+	public static function has_cap() {
+		return (
+			current_user_can( 'view_site_health_checks' )
+			&&
+			current_user_can( 'manage_options' )
+			&&
+			AMP_Validation_Manager::has_cap()
+		);
+	}
+
+	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
@@ -91,9 +106,7 @@ class SupportScreen implements Conditional, Delayed, Service, Registerable {
 		return (
 			is_admin()
 			&&
-			current_user_can( 'view_site_health_checks' )
-			&&
-			AMP_Validation_Manager::has_cap()
+			self::has_cap()
 		);
 	}
 

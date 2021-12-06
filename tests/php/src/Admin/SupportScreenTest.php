@@ -66,18 +66,23 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * @covers ::is_needed
+	 * @covers ::is_needed()
+	 * @covers ::has_cap()
 	 */
 	public function test_is_needed() {
 
 		// Without mocking.
 		$this->assertFalse( SupportScreen::is_needed() );
+		$this->assertFalse( SupportScreen::has_cap() );
 
 		// Mock the is_admin() with required user caps.
-		set_current_screen( $this->instance->screen_handle() );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		add_filter( 'amp_support_menu_is_enabled', '__return_true', 999 );
+		$this->assertFalse( SupportScreen::is_needed() );
+		$this->assertTrue( SupportScreen::has_cap() );
+
+		set_current_screen( $this->instance->screen_handle() );
 		$this->assertTrue( SupportScreen::is_needed() );
+		$this->assertTrue( SupportScreen::has_cap() );
 
 		// Access denied when user cannot validate.
 		add_filter(
@@ -92,6 +97,7 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 			3
 		);
 		$this->assertFalse( SupportScreen::is_needed() );
+		$this->assertFalse( SupportScreen::has_cap() );
 
 		// Reset data.
 		unset( $GLOBALS['current_screen'] );
