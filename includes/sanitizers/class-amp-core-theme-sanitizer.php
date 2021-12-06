@@ -322,20 +322,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Determine if the current request is from a mobile device or not.
-	 *
-	 * @since 2.2
-	 *
-	 * @see MobileRedirection::is_mobile_request()
-	 *
-	 * @return bool True if request is from mobile device Otherwise False.
-	 */
-	public static function is_mobile_request() {
-
-		return Services::get( 'mobile_redirection' )->is_mobile_request();
-	}
-
-	/**
 	 * Get the acceptable validation errors.
 	 *
 	 * @since 1.0
@@ -1174,76 +1160,116 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
-				<?php elseif ( 'twentynineteen' === get_template() && self::is_mobile_request() ) : ?>
+				<?php elseif ( 'twentynineteen' === get_template() ) : ?>
 					.amp-twentynineteen-main-navigation {
 						max-width: 100vw;
 						width: 100vw;
+						height: 100vh;
 					}
-					.main-navigation .sub-menu > li > a:hover,
-					.main-navigation .sub-menu > li > a:focus,
-					.main-navigation .sub-menu > li > .menu-item-link-return:hover,
-					.main-navigation .sub-menu > li > .menu-item-link-return:focus {
-						background: inherit;
-					}
-
-					.main-navigation .main-menu .menu-item-has-children.off-canvas .sub-menu.expanded-true {
-						transform: none;
-					}
-
-					.admin-bar .main-navigation .main-menu .menu-item-has-children.off-canvas .sub-menu.expanded-true {
-						top: 0;
-						height: inherit;
-					}
-
 					.admin-bar .amp-twentynineteen-main-navigation {
 						top: 46px;
 						height: calc(100vh - 46px);
 					}
 
-					.main-navigation .sub-menu > li {
+					.amp-twentynineteen-main-navigation .sub-menu > li > a:hover,
+					.amp-twentynineteen-main-navigation .sub-menu > li > a:focus,
+					.amp-twentynineteen-main-navigation .sub-menu > li > .menu-item-link-return:hover,
+					.amp-twentynineteen-main-navigation .sub-menu > li > .menu-item-link-return:focus {
+						background: inherit;
+					}
+
+					.amp-twentynineteen-main-navigation .sub-menu > li {
 						position: static;
 						display: flex;
 					}
 
-					.main-navigation ul.main-menu > li {
-						line-height: 1.5;
-					}
-
-					.main-navigation .sub-menu > li.menu-item-has-children .submenu-expand {
+					.amp-twentynineteen-main-navigation .sub-menu > li.menu-item-has-children .submenu-expand {
 						position: static;
 					}
 
-					.main-navigation .main-menu > li.menu-item-has-children > .submenu-expand {
-						display: inline-block;
-						<?php if ( is_rtl() ) : ?>
-							margin-left: 0.5rem;
-							margin-right: 0.25rem;
-						<?php else : ?>
-							margin-left: 0.25rem;
-							margin-right: 0.5rem;
-						<?php endif; ?>
-						background: #0073aa;
-						color: #FFF;
-						border-radius: 50%;
-						width: 20px;
-						height: 20px;
-						vertical-align: middle;
+					.amp-twentynineteen-main-navigation .sub-menu.expanded-true {
+						display: table;
+						margin-top: 0;
+						opacity: 1;
+						padding-left: 0;
+						left: 0;
+						top: 0;
+						right: 0;
+						bottom: 0;
+						position: static;
+						z-index: 100000; /* Make sure appears above mobile admin bar */
+						width: 100vw;
+						height: 100%;
+						max-width: 100vw;
 					}
 
-					.main-navigation .main-menu > li.menu-item-has-children > .submenu-expand svg {
-						position: relative;
-						top: -2px;
+					.amp-twentynineteen-main-navigation .sub-menu > li.mobile-parent-nav-menu-item {
+						display: block;
+					}
+
+					.amp-twentynineteen-main-navigation .submenu-expand .svg-icon {
 						<?php if ( is_rtl() ) : ?>
-							right: -2px;
+							transform: rotate(90deg);
 						<?php else : ?>
-							left: -2px;
+							transform: rotate(270deg);
 						<?php endif; ?>
 					}
 
-					.main-navigation .main-menu .menu-item-has-children.off-canvas .sub-menu > li > a,
-					.main-navigation .main-menu .menu-item-has-children.off-canvas .sub-menu > li > .menu-item-link-return {
+					.amp-twentynineteen-main-navigation .sub-menu > li > a,
+					.amp-twentynineteen-main-navigation .sub-menu > li > .menu-item-link-return {
 						flex-grow: 1;
 						max-width: none;
+					}
+
+					.amp-twentynineteen-main-navigation .sub-menu > li > .menu-item-link-return .svg-icon {
+						<?php if ( is_rtl() ) : ?>
+							transform: rotate(180deg);
+						<?php endif; ?>
+					}
+
+					.main-navigation .main-menu > li.menu-item-has-children > .submenu-expand.display-on-mobile,
+					.display-on-mobile {
+						display: none;
+					}
+
+					@media only screen and (max-width: 768px) {
+						.display-on-mobile {
+							display: block;
+						}
+
+						.main-navigation .main-menu .menu-item-has-children:not(.off-canvas):hover > .sub-menu,
+						.main-navigation .main-menu .menu-item-has-children:not(.off-canvas):focus > .sub-menu,
+						.main-navigation .main-menu > li.menu-item-has-children .submenu-expand.display-on-desktop,
+						.display-on-desktop {
+							display: none;
+						}
+
+						.main-navigation .main-menu > li.menu-item-has-children > .submenu-expand.display-on-mobile svg {
+							position: relative;
+							top: -2px;
+							<?php if ( is_rtl() ) : ?>
+								right: -2px;
+							<?php else : ?>
+								left: -2px;
+							<?php endif; ?>
+						}
+
+						.main-navigation .main-menu > li.menu-item-has-children > .submenu-expand.display-on-mobile {
+							display: inline-block;
+							<?php if ( is_rtl() ) : ?>
+								margin-left: 0.5rem;
+								margin-right: 0.25rem;
+							<?php else : ?>
+								margin-left: 0.25rem;
+								margin-right: 0.5rem;
+							<?php endif; ?>
+							background: #0073aa;
+							color: #FFF;
+							border-radius: 50%;
+							width: 20px;
+							height: 20px;
+							vertical-align: middle;
+						}
 					}
 				<?php elseif ( 'twentyseventeen' === get_template() ) : ?>
 					/* Show the button*/
@@ -2398,10 +2424,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function update_twentynineteen_mobile_main_menu() {
 
-		if ( ! self::is_mobile_request() ) {
-			return;
-		}
-
 		$xpaths = [
 			'main_menu'               => '//nav[ @id = "site-navigation" ]//ul[ @class = "main-menu"]',
 			'top_menu_items'          => './li[ contains( @class, "menu-item" ) and contains( @class, "menu-item-has-children" ) ]',
@@ -2426,8 +2448,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$menu_item->setAttribute( Attribute::CLASS_, $menu_item->getAttribute( Attribute::CLASS_ ) . ' off-canvas' );
-
 			// AMP Sidebar.
 			$amp_sidebar = AMP_DOM_Utils::create_node(
 				$this->dom,
@@ -2450,18 +2470,31 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				]
 			);
 
-			$this->update_twentynineteen_main_nested_menu( $sub_menu );
+			// Clone the sub-menu and expand button for AMP navigation.
+			/** @var Element $amp_sub_menu */
+			$amp_sub_menu = $sub_menu->cloneNode( true );
 
-			$sub_menu->setAttribute( Attribute::CLASS_, $sub_menu->getAttribute( Attribute::CLASS_ ) . ' expanded-true' );
+			/** @var Element $amp_expand_button */
+			$amp_expand_button = $expand_button->cloneNode( true );
+
+			$sub_menu->setAttribute( Attribute::CLASS_, $sub_menu->getAttribute( Attribute::CLASS_ ) . ' display-on-desktop' );
+			$expand_button->setAttribute( Attribute::CLASS_, $expand_button->getAttribute( Attribute::CLASS_ ) . ' display-on-desktop' );
+
+			$menu_item->appendChild( $amp_expand_button );
+			$menu_item->appendChild( $amp_sub_menu );
+			$this->update_twentynineteen_main_nested_menu( $amp_sub_menu );
+
+			$amp_sub_menu->setAttribute( Attribute::CLASS_, $amp_sub_menu->getAttribute( Attribute::CLASS_ ) . ' expanded-true display-on-mobile' );
+			$amp_expand_button->setAttribute( Attribute::CLASS_, $amp_expand_button->getAttribute( Attribute::CLASS_ ) . ' display-on-mobile' );
 
 			// Handle buttons.
-			$expand_button->addAmpAction( 'tap', $sidebar_id );
-			$back_button = $this->get_first_element( $xpaths['close_button_in_submenu'], $sub_menu );
+			$amp_expand_button->addAmpAction( 'tap', $sidebar_id );
+			$back_button = $this->get_first_element( $xpaths['close_button_in_submenu'], $amp_sub_menu );
 			if ( ! empty( $back_button ) ) {
 				$back_button->addAmpAction( 'tap', "$sidebar_id.close" );
 			}
 
-			$amp_nested_menu->appendChild( $sub_menu );
+			$amp_nested_menu->appendChild( $amp_sub_menu );
 			$amp_sidebar->appendChild( $amp_nested_menu );
 			$menu_item->appendChild( $amp_sidebar );
 		}
