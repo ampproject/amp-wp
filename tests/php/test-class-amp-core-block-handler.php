@@ -468,9 +468,15 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		);
 
 		return [
-			'never'  => sprintf( '<!-- wp:navigation {"navigationMenuId":%d,"openSubmenusOnClick":true,"overlayMenu":"never"} /-->', $menu_id ),
-			'mobile' => sprintf( '<!-- wp:navigation {"navigationMenuId":%d,"openSubmenusOnClick":true} /-->', $menu_id ),
-			'always' => sprintf( '<!-- wp:navigation {"navigationMenuId":%d,"openSubmenusOnClick":true,"overlayMenu":"always"} /-->', $menu_id ),
+			'never'  => [
+				sprintf( '<!-- wp:navigation {"navigationMenuId":%s,"openSubmenusOnClick":true,"overlayMenu":"never"} /-->', $menu_id ),
+			],
+			'mobile' => [
+				sprintf( '<!-- wp:navigation {"navigationMenuId":%s,"openSubmenusOnClick":true} /-->', $menu_id ),
+			],
+			'always' => [
+				sprintf( '<!-- wp:navigation {"navigationMenuId":%s,"openSubmenusOnClick":true,"overlayMenu":"always"} /-->', $menu_id ),
+			],
 		];
 	}
 
