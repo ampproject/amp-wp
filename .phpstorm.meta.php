@@ -62,6 +62,7 @@ namespace PHPSTORM_META {
 			'url_validation_cron'                => \AmpProject\AmpWP\Validation\URLValidationCron::class,
 			'url_validation_rest_controller'     => \AmpProject\AmpWP\Validation\URLValidationRESTController::class,
 			'validated_url_stylesheet_gc'        => \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+			'validation_data_gc'                 => \AmpProject\AmpWP\BackgroundTask\ValidationDataGarbageCollection::class,
 			'validation.scannable_url_provider'  => \AmpProject\AmpWP\Validation\ScannableURLProvider::class,
 			'validation.url_validation_provider' => \AmpProject\AmpWP\Validation\URLValidationProvider::class,
 		] )
