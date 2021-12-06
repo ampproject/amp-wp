@@ -9,12 +9,11 @@ use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Sandboxing;
 use AmpProject\AmpWP\Services;
-use AmpProject\Attribute;
-use AmpProject\Tag;
 use AmpProject\Dom\Document;
 use AmpProject\Exception\MaxCssByteCountExceeded;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Validation_Manager
@@ -98,13 +97,6 @@ class AMP_Validation_Manager {
 	 * @var string
 	 */
 	const VALIDATION_ERROR_TERM_STATUS_QUERY_VAR = 'amp_validation_error_term_status';
-
-	/**
-	 * Transient key to store validation errors when activating a plugin.
-	 *
-	 * @var string
-	 */
-	const PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY = 'amp_plugin_activation_validation_errors';
 
 	/**
 	 * The errors encountered when validating.
@@ -251,19 +243,6 @@ class AMP_Validation_Manager {
 		AMP_Validation_Error_Taxonomy::register();
 
 		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'enqueue_block_validation' ] );
-
-		// Add actions for checking theme support is present to determine plugin compatibility and show validation links in the admin bar.
-		// @todo Eliminate this in favor of async validation. See <https://github.com/ampproject/amp-wp/issues/5101>.
-		add_action(
-			'activate_plugin',
-			static function() {
-				if ( ! has_action( 'shutdown', [ __CLASS__, 'validate_after_plugin_activation' ] ) && self::get_dev_tools_user_access()->is_user_enabled() ) {
-					add_action( 'shutdown', [ __CLASS__, 'validate_after_plugin_activation' ] ); // Shutdown so all plugins will have been activated.
-				}
-			}
-		);
-
-		add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
 		add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
 		add_action( 'wp', [ __CLASS__, 'maybe_fail_validate_request' ] );
 		add_action( 'wp', [ __CLASS__, 'maybe_send_cached_validate_response' ], 20 );
@@ -351,13 +330,7 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_auto_accepted( $error = null ) {
 
-		if (
-			$error
-			&&
-			amp_is_canonical()
-			&&
-			! Sandboxing::is_needed() // @todo Remove this once Sandboxing no longer experimental.
-		) {
+		if ( $error && amp_is_canonical() ) {
 			// Excessive CSS on AMP-first sites must not be removed by default since removing CSS can severely break a site.
 			$accepted = AMP_Style_Sanitizer::STYLESHEET_TOO_LONG !== $error['code'];
 		} else {
@@ -2210,29 +2183,6 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Validates the latest published post.
-	 *
-	 * @return array|WP_Error The validation errors, or WP_Error.
-	 */
-	public static function validate_after_plugin_activation() {
-		$url = amp_admin_get_preview_permalink();
-		if ( ! $url ) {
-			return new WP_Error( 'no_published_post_url_available' );
-		}
-		$validity = self::validate_url_and_store( $url );
-		if ( is_wp_error( $validity ) ) {
-			return $validity;
-		}
-		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
-		if ( is_array( $validity ) && count( $validation_errors ) > 0 ) { // @todo This should only warn when there are unaccepted validation errors.
-			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validation_errors, 60 );
-		} else {
-			delete_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
-		}
-		return $validation_errors;
-	}
-
-	/**
 	 * Validate a URL to be validated.
 	 *
 	 * @param string $url URL.
@@ -2603,64 +2553,6 @@ class AMP_Validation_Manager {
 						$support_forum_message,
 					]
 				);
-		}
-	}
-
-	/**
-	 * On activating a plugin, display a notice if a plugin causes an AMP validation error.
-	 *
-	 * @todo Eliminate this in favor of async validation. See <https://github.com/ampproject/amp-wp/issues/5101>.
-	 * @return void
-	 */
-	public static function print_plugin_notice() {
-		global $pagenow;
-		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$validation_errors = get_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
-			if ( empty( $validation_errors ) || ! is_array( $validation_errors ) ) {
-				return;
-			}
-			delete_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
-			$errors          = AMP_Validation_Error_Taxonomy::summarize_validation_errors( $validation_errors );
-			$invalid_plugins = isset( $errors[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ]['plugin'] ) ? array_unique( $errors[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ]['plugin'] ) : null;
-			if ( isset( $invalid_plugins ) ) {
-				$reported_plugins = [];
-				$plugin_registry  = Services::get( 'plugin_registry' );
-				foreach ( $invalid_plugins as $plugin_slug ) {
-					$plugin_data        = $plugin_registry->get_plugin_from_slug( $plugin_slug );
-					$plugin_name        = is_array( $plugin_data ) ? $plugin_data['data']['Name'] : $plugin_slug;
-					$reported_plugins[] = $plugin_name;
-				}
-
-				$more_details_link = sprintf(
-					'<a href="%s">%s</a>',
-					esc_url(
-						add_query_arg(
-							'post_type',
-							AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-							admin_url( 'edit.php' )
-						)
-					),
-					__( 'More details', 'amp' )
-				);
-
-				printf(
-					'<div class="notice notice-warning is-dismissible"><p>%s %s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
-					esc_html(
-						sprintf(
-							/* translators: %s is comma-separated list of one or more plugins */
-							_n(
-								'Warning: The following plugin may be incompatible with AMP: %s.',
-								'Warning: The following plugins may be incompatible with AMP: %s.',
-								count( $invalid_plugins ),
-								'amp'
-							),
-							implode( ', ', $reported_plugins ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						)
-					),
-					$more_details_link, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					esc_html__( 'Dismiss this notice.', 'amp' )
-				);
-			}
 		}
 	}
 

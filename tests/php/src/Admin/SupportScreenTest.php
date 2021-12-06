@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
+use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Admin\SupportScreen;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
@@ -159,5 +160,45 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 		$content = ob_get_clean();
 
 		$this->assertStringContainsString( '<div id="amp-support-root"></div>', $content );
+	}
+
+	/**
+	 * @covers ::get_amp_validated_post_counts()
+	 */
+	public function test_get_amp_validated_post_counts() {
+
+		$validated_environment = AMP_Validated_URL_Post_Type::get_validated_environment();
+
+		$this->factory()->post->create_and_get(
+			[
+				'post_title' => home_url( 'sample-page-for-amp-validation' ),
+				'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'meta_input' => [
+					AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY => $validated_environment,
+				],
+			]
+		);
+
+		$stale_validated_environment                             = $validated_environment;
+		$stale_validated_environment['options']['theme_support'] = 'standard';
+
+		$this->factory()->post->create_and_get(
+			[
+				'post_title' => home_url( 'sample-page-for-amp-validation-stale' ),
+				'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'meta_input' => [
+					AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY => $stale_validated_environment,
+				],
+			]
+		);
+
+		$this->assertEquals(
+			[
+				'all'   => 2,
+				'fresh' => 1,
+				'stale' => 1,
+			],
+			$this->instance->get_amp_validated_post_counts()
+		);
 	}
 }

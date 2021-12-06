@@ -6,8 +6,8 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
 use AmpProject\DevMode;
+use AmpProject\Html\Attribute;
 
 /**
  * Class AMP_Video_Sanitizer
@@ -156,9 +156,33 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
 			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
-				$new_attributes['layout'] = 'responsive';
+				$new_attributes['layout'] = 'intrinsic';
 			}
 			$new_attributes = $this->set_layout( $new_attributes );
+
+			// Strip out redundant aspect-ratio style which was added in AMP_Core_Block_Handler::ampify_video_block().
+			if ( isset( $new_attributes[ Attribute::STYLE ], $new_attributes[ Attribute::WIDTH ], $new_attributes[ Attribute::HEIGHT ] ) ) {
+				$styles = $this->parse_style_string( $new_attributes[ Attribute::STYLE ] );
+				if (
+					isset( $styles[ Attribute::ASPECT_RATIO ] )
+					&&
+					(
+						preg_replace( '/\s/', '', $styles[ Attribute::ASPECT_RATIO ] )
+						===
+						sprintf( '%d/%d', $new_attributes[ Attribute::WIDTH ], $new_attributes[ Attribute::HEIGHT ] )
+					)
+				) {
+					unset( $styles[ Attribute::ASPECT_RATIO ] );
+					if ( empty( $styles ) ) {
+						unset( $new_attributes[ Attribute::STYLE ] );
+					} else {
+						$new_attributes[ Attribute::STYLE ] = $this->reassemble_style_string( $styles );
+					}
+				}
+			}
+
+			// Remove the ID from the original node so that PHP DOM doesn't fail to set it on the replacement element.
+			$node->removeAttribute( Attribute::ID );
 
 			/**
 			 * Original node.

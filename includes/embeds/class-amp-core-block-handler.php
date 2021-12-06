@@ -6,10 +6,10 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\Attribute;
 use AmpProject\Extension;
 use AmpProject\Layout;
 use AmpProject\Dom\Document;
+use AmpProject\Html\Attribute;
 
 /**
  * Class AMP_Core_Block_Handler
@@ -212,13 +212,26 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$meta_data = wp_get_attachment_metadata( $block['attrs']['id'] );
-		if ( isset( $meta_data['width'], $meta_data['height'] ) ) {
-			$block_content = preg_replace(
-				'/(?<=<video\s)/',
-				sprintf( 'width="%d" height="%d" ', $meta_data['width'], $meta_data['height'] ),
-				$block_content
-			);
+		if ( ! isset( $meta_data['width'], $meta_data['height'] ) ) {
+			return $block_content;
 		}
+
+		$block_content = preg_replace_callback(
+			'/(?<=<video)\s[^>]+/',
+			static function ( $matches ) use ( $meta_data ) {
+				$attrs = $matches[0];
+				if ( ! preg_match( '/\s(width|height|style)=/', $attrs ) ) {
+					$attrs .= sprintf(
+						' width="%1$d" height="%2$d" style="aspect-ratio:%1$d/%2$d"',
+						$meta_data['width'],
+						$meta_data['height']
+					);
+				}
+				return $attrs;
+			},
+			$block_content,
+			1
+		);
 
 		return $block_content;
 	}

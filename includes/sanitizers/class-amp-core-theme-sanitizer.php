@@ -7,8 +7,8 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\Attribute;
-use AmpProject\Role;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Role;
 
 /**
  * Class AMP_Core_Theme_Sanitizer

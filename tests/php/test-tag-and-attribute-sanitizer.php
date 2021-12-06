@@ -553,7 +553,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 									<h2 scale-start="1.0" scale-end="200.1" translate-x="100px" translate-y="200px">Scaled</h2>
 									<amp-twitter width="375" height="472" layout="responsive" data-tweetid="885634330868850689"></amp-twitter>
 									<amp-twitter interactive width="375" height="472" layout="responsive" data-tweetid="885634330868850689"></amp-twitter>
-									<amp-video autoplay loop width="720" height="960" poster="https://amp.dev/static/samples/img/story_video_dog_cover.jpg" layout="responsive" cache="google">
+									<amp-video autoplay volume="0.5" loop width="720" height="960" poster="https://amp.dev/static/samples/img/story_video_dog_cover.jpg" layout="responsive" cache="google">
 										<source src="https://amp.dev/static/samples/video/story_video_dog.mp4" type="video/mp4">
 									</amp-video>
 									<amp-date-display datetime="2017-08-02T15:05:05.000" layout="fixed" width="360" height="20"><template type="amp-mustache"><div>{{dayName}} {{day}} {{monthName}} {{year}} {{hourTwoDigit}}:{{minuteTwoDigit}}:{{secondTwoDigit}}</div></template></amp-date-display>
@@ -3451,6 +3451,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 			],
 			'meta_story_meta_tags'                    => [
 				'<html amp><head><meta charset="utf-8"><meta name="amp-story-generator-name" content="Web Stories for WordPress"><meta name="amp-story-generator-version" content="1.2.3"></head><body></body></html>',
+				null, // No change.
+			],
+			'meta_theme_color'                        => [
+				'<html amp><head><meta charset="utf-8"><meta name="theme-color" content="#ecd96f" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0b3e05" media="(prefers-color-scheme: dark)"></head><body></body></html>',
 				null, // No change.
 			],
 			'link_without_valid_mandatory_href'       => [

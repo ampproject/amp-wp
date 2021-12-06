@@ -12,6 +12,8 @@ use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Support\SupportData;
+use AMP_Validated_URL_Post_Type;
+use WP_Query;
 
 /**
  * SupportScreen class to add support page under AMP menu page in WordPress admin.
@@ -162,14 +164,13 @@ class SupportScreen implements Conditional, Service, Registerable {
 			AMP__VERSION
 		);
 
-		$args    = [];
-		$post_id = isset( $_GET['post_id'] ) ? (int) $_GET['post_id'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$args = [];
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$amp_url = isset( $_GET['url'] ) ? esc_url_raw( wp_unslash( $_GET['url'] ) ) : '';
 
-		if ( ! empty( $post_id ) && 0 < intval( $post_id ) ) {
+		if ( ! empty( $amp_url ) ) {
 			$args = [
-				'amp_validated_post_ids' => [
-					$post_id,
-				],
+				'urls' => [ $amp_url ],
 			];
 		}
 
@@ -182,14 +183,44 @@ class SupportScreen implements Conditional, Service, Registerable {
 				'var ampSupport = %s;',
 				wp_json_encode(
 					[
-						'restEndpoint' => get_rest_url( null, 'amp/v1/send-diagnostic' ),
-						'args'         => $args,
-						'data'         => $data,
+						'restEndpoint'          => get_rest_url( null, 'amp/v1/send-diagnostic' ),
+						'args'                  => $args,
+						'data'                  => $data,
+						'ampValidatedPostCount' => $this->get_amp_validated_post_counts(),
 					]
 				)
 			),
 			'before'
 		);
+	}
+
+	/**
+	 * Get count of amp validated post.
+	 *
+	 * @return array [
+	 *     @type int $all   Count of all AMP validated URL post.
+	 *     @type int $valid Count of non-stale AMP validated URL posts.
+	 *     @type int $stale Count of stale AMP validated URL posts.
+	 * ]
+	 */
+	public function get_amp_validated_post_counts() {
+
+		$amp_validated_post_count = wp_count_posts( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
+
+		$query_args = [
+			'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+			'posts_per_page' => 1,
+			'post_status'    => 'publish',
+			'meta_key'       => AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY,
+			'meta_value'     => maybe_serialize( AMP_Validated_URL_Post_Type::get_validated_environment() ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		];
+		$query      = new WP_Query( $query_args );
+
+		$all   = intval( $amp_validated_post_count->publish );
+		$fresh = intval( $query->found_posts );
+		$stale = $all - $fresh;
+
+		return compact( 'all', 'fresh', 'stale' );
 	}
 
 	/**

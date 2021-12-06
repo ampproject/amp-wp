@@ -6,7 +6,7 @@
  */
 
 use AmpProject\AmpWP\Embed\HandlesGalleryEmbed;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Gallery_Block_Sanitizer

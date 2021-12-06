@@ -18,12 +18,13 @@ import './style.scss';
 import { Selectable } from '../selectable';
 import { AMPNotice, NOTICE_SIZE_SMALL, NOTICE_TYPE_ERROR, NOTICE_TYPE_INFO } from '../amp-notice';
 import ClipboardButton from '../clipboard-button';
+import { Details } from './details';
+import { Plugins } from './plugins';
+import { RawData } from './raw-data';
 import { SiteInfo } from './site-info';
 import { Themes } from './themes';
-import { Plugins } from './plugins';
 import { ValidatedUrls } from './validated-urls';
-import { RawData } from './raw-data';
-import { Details } from './details';
+import { ValidationResultsNotice } from './validation-results-notice';
 
 /**
  * AMP Support component.
@@ -32,7 +33,7 @@ import { Details } from './details';
  * @return {JSX.Element} Markup for AMP support component
  */
 export function AMPSupport( props ) {
-	const { data, restEndpoint, args } = props;
+	const { data, restEndpoint, args, ampValidatedPostCount } = props;
 
 	const [ sending, setSending ] = useState( false );
 	const [ uuid, setUuid ] = useState( null );
@@ -67,10 +68,10 @@ export function AMPSupport( props ) {
 				if ( undefined !== response.success && undefined !== response?.data?.uuid ) {
 					setUuid( response.data.uuid );
 				} else {
-					setSubmitSupportRequest( false );
 					throw new Error( __( 'Failed to send support request. Please try again later.', 'amp' ) );
 				}
 			} catch ( exception ) {
+				setSubmitSupportRequest( false );
 				setError( exception.message );
 			} finally {
 				setSending( false );
@@ -94,6 +95,9 @@ export function AMPSupport( props ) {
 						),
 					}
 				} />
+
+				<ValidationResultsNotice data={ data } args={ args } ampValidatedPostCount={ ampValidatedPostCount } />
+
 				<div className="amp-support__body">
 
 					{ data.site_info && <SiteInfo siteInfo={ data.site_info } /> }
@@ -161,6 +165,7 @@ export function AMPSupport( props ) {
 					<AMPNotice
 						type={ NOTICE_TYPE_INFO }
 						size={ NOTICE_SIZE_SMALL }
+						className={ 'amp-notice--uuid' }
 					>
 						{ __( 'Support UUID: ', 'amp' ) }
 						<code>
@@ -191,5 +196,10 @@ AMPSupport.propTypes = {
 		site_info: PropTypes.object,
 		themes: PropTypes.array,
 		urls: PropTypes.array,
+	} ),
+	ampValidatedPostCount: PropTypes.shape( {
+		all: PropTypes.number.isRequired,
+		fresh: PropTypes.number.isRequired,
+		stale: PropTypes.number.isRequired,
 	} ),
 };

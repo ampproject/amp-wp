@@ -108,7 +108,7 @@ class SupportRESTController extends WP_REST_Controller implements Delayed, Servi
 
 		$response = new WP_Error(
 			'fail_to_send_data',
-			'Failed to send support request. Please try again after some time',
+			__( 'Failed to send support request. Please try again later.', 'amp' ),
 			[ 'status' => 500 ]
 		);
 

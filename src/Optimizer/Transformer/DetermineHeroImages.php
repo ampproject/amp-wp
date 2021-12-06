@@ -7,9 +7,9 @@
 
 namespace AmpProject\AmpWP\Optimizer\Transformer;
 
-use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
+use AmpProject\Html\Attribute;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\ImageDimensions;
 use AmpProject\Optimizer\Transformer;

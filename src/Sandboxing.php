@@ -12,13 +12,12 @@ use AMP_Form_Sanitizer;
 use AMP_Options_Manager;
 use AMP_Script_Sanitizer;
 use AMP_Style_Sanitizer;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
-use AmpProject\Attribute;
-use AmpProject\Tag;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 use DOMAttr;
 
 /**
@@ -28,7 +27,14 @@ use DOMAttr;
  * @since 2.2
  * @internal
  */
-final class Sandboxing implements Service, Registerable, Conditional {
+final class Sandboxing implements Service, Registerable {
+
+	/**
+	 * Option key for enabling sandboxing.
+	 *
+	 * @var string
+	 */
+	const OPTION_ENABLED = 'sandboxing_enabled';
 
 	/**
 	 * Option key for sandboxing level.
@@ -46,33 +52,21 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	const LEVELS = [ 1, 2, 3 ];
 
 	/**
-	 * Default sandboxing level.
+	 * Default sandboxing options schema.
 	 *
-	 * Note: This will eventually move to level 1 as the default.
-	 *
-	 * @var int
+	 * @var array
 	 */
-	const DEFAULT_LEVEL = 3;
-
-	/**
-	 * Whether service is needed.
-	 *
-	 * @return bool
-	 */
-	public static function is_needed() {
-		/**
-		 * Filters whether experimental sandboxing is enabled.
-		 *
-		 * Note: This filter will be removed and the service as a whole will no longer be Conditional once the feature
-		 * is no longer experimental.
-		 *
-		 * @internal
-		 * @since 2.2
-		 *
-		 * @param bool $enabled Sandboxing enabled.
-		 */
-		return (bool) apply_filters( 'amp_experimental_sandboxing_enabled', false );
-	}
+	const DEFAULT_OPTIONS_SCHEMA = [
+		self::OPTION_ENABLED => [
+			'type'    => 'bool',
+			'default' => false,
+		],
+		self::OPTION_LEVEL   => [
+			'type'    => 'int',
+			'enum'    => self::LEVELS,
+			'default' => 1,
+		],
+	];
 
 	/**
 	 * Register.
@@ -94,13 +88,7 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	public function filter_rest_options_schema( $schema ) {
 		return array_merge(
 			$schema,
-			[
-				self::OPTION_LEVEL => [
-					'type'    => 'int',
-					'enum'    => self::LEVELS,
-					'default' => self::DEFAULT_LEVEL,
-				],
-			]
+			self::DEFAULT_OPTIONS_SCHEMA
 		);
 	}
 
@@ -111,7 +99,9 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	 * @return array Defaults.
 	 */
 	public function filter_default_options( $defaults ) {
-		$defaults[ self::OPTION_LEVEL ] = self::DEFAULT_LEVEL;
+		foreach ( self::DEFAULT_OPTIONS_SCHEMA as $option_name => $option_schema ) {
+			$defaults[ $option_name ] = $option_schema['default'];
+		}
 		return $defaults;
 	}
 
@@ -123,6 +113,9 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	 * @return array Sanitized options.
 	 */
 	public function sanitize_options( $options, $new_options ) {
+		if ( isset( $new_options[ self::OPTION_ENABLED ] ) ) {
+			$options[ self::OPTION_ENABLED ] = (bool) $new_options[ self::OPTION_ENABLED ];
+		}
 		if (
 			isset( $new_options[ self::OPTION_LEVEL ] )
 			&&
@@ -141,6 +134,10 @@ final class Sandboxing implements Service, Registerable, Conditional {
 		// AMP to non-AMP and omit the amphtml link (in which case it would only be relevant when mobile redirection is
 		// enabled).
 		if ( ! amp_is_canonical() ) {
+			return;
+		}
+
+		if ( ! AMP_Options_Manager::get_option( self::OPTION_ENABLED ) ) {
 			return;
 		}
 

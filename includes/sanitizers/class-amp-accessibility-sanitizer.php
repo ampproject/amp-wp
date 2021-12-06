@@ -5,8 +5,8 @@
  * @package AmpProject\AmpWP
  */
 
-use AmpProject\Attribute;
-use AmpProject\Role;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Role;
 
 /**
  * Sanitizes attributes required for AMP accessibility requirements.
