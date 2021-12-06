@@ -82,6 +82,22 @@ class AMP_Video_Converter_Test extends TestCase {
 				],
 			],
 
+			'video_with_aspect-ratio' => [
+				'<video width="300" height="500" style="aspect-ratio: 300 / 500" src="https://example.com/video.mp4"></video>',
+				'<amp-video width="300" height="500" src="https://example.com/video.mp4" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a></amp-video>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
+			'video_with_aspect-ratio_and_more' => [
+				'<video width="300" height="500" style="border: solid 1px red; aspect-ratio: 300/500; outline: solid 1px blue;" src="https://example.com/video.mp4"></video>',
+				'<amp-video width="300" height="500" style="border:solid 1px red;outline:solid 1px blue" src="https://example.com/video.mp4" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a></amp-video>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
 			'video_without_dimensions' => [
 				'<video src="https://example.com/file.mp4"></video>',
 				'<amp-video src="https://example.com/file.mp4" class="amp-wp-unknown-size" height="400" layout="fixed-height" width="auto"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
