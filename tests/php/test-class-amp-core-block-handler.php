@@ -278,7 +278,51 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":false} /-->
 				<!-- /wp:navigation -->
 				',
-				true,
+				'always',
+				[
+					'containers' => [
+						[
+							'is_open'    => true,
+							'parent_tag' => 'amp-lightbox',
+						],
+					],
+					'contents'   => [
+						[
+							'has_id'       => true,
+							'parent_class' => 'wp-block-navigation__responsive-dialog',
+						],
+					],
+				],
+			],
+			'mobile-overlay-menu' => [
+				'
+				<!-- wp:navigation {"overlayMenu":"mobile","layout":{"type":"flex","setCascadingProperties":true,"justifyContent":"center"}} -->
+				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":false} /-->
+				<!-- /wp:navigation -->
+				',
+				'mobile',
+				[
+					'containers' => [
+						[
+							'is_open'    => false,
+							'parent_tag' => 'nav',
+						],
+						[
+							'is_open'    => true,
+							'parent_tag' => 'amp-lightbox',
+						],
+					],
+					'contents'   => [
+						[
+							'has_id'       => false,
+							'parent_class' => 'wp-block-navigation__responsive-container',
+						],
+						[
+							'has_id'       => true,
+							'parent_class' => 'wp-block-navigation__responsive-dialog',
+						],
+					],
+				],
 			],
 			'never-overlay-menu'  => [
 				'
@@ -286,7 +330,21 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 				<!-- wp:page-list {"isNavigationChild":true,"showSubmenuIcon":true,"openSubmenusOnClick":false} /-->
 				<!-- /wp:navigation -->
 				',
-				false,
+				'never',
+				[
+					'containers' => [
+						[
+							'is_open'    => false,
+							'parent_tag' => 'nav',
+						],
+					],
+					'contents'   => [
+						[
+							'has_id'       => true,
+							'parent_class' => 'wp-block-navigation__responsive-container',
+						],
+					],
+				],
 			],
 		];
 	}
@@ -305,10 +363,11 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
 	 * @dataProvider get_navigation_block_conversion_data
 	 *
-	 * @param string  $source         Source.
-	 * @param boolean $should_convert Whether if navigation block is expected to be converted or not.
+	 * @param string $source       Source.
+	 * @param string $overlay_menu "Overlay menu" attribute value.
+	 * @param array  $expectations Test expectations for containers and contents div's.
 	 */
-	public function test_ampify_navigation_block( $source, $should_convert ) {
+	public function test_ampify_navigation_block( $source, $overlay_menu, $expectations ) {
 		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '10.7', '<' ) ) {
 			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
 		}
@@ -333,10 +392,13 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$this->assertFalse( wp_script_is( 'wp-block-navigation-view', 'enqueued' ) );
 
 		$amp_lightboxes = $dom->getElementsByTagName( 'amp-lightbox' );
-		$this->assertEquals( true === $should_convert ? 1 : 0, $amp_lightboxes->length );
+		$this->assertEquals( 'never' !== $overlay_menu ? 1 : 0, $amp_lightboxes->length );
 
-		if ( true === $should_convert ) {
-			$class_query  = '//%1$s[ contains( concat( " ", normalize-space( @class ), " " ), " %2$s " ) ]';
+		$class_query = '//%1$s[ contains( concat( " ", normalize-space( @class ), " " ), " %2$s " ) ]';
+
+		// Expect that "mobile" and "always" overlayed menus are wrapped by <amp-lightbox> element,
+		// and that open/close buttons are set correctly.
+		if ( 'never' !== $overlay_menu ) {
 			$amp_lightbox = $amp_lightboxes->item( 0 );
 
 			$this->assertTrue( $amp_lightbox->hasAttribute( 'id' ) );
@@ -349,66 +411,42 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 			$this->assertEquals( sprintf( 'tap:%s.open', $amp_lightbox_id ), $open_button_node->getAttribute( 'on' ) );
 			$this->assertEquals( sprintf( 'tap:%s.close', $amp_lightbox_id ), $close_button_node->getAttribute( 'on' ) );
+		}
 
-			// Expect that there are two "div.wp-block-navigation__responsive-container" elements, one of them is directly
-			// wrapped by <amp-lightbox id="{id}" layout="nodisplay"> and has "is-menu-open has-modal-open" classes.
-			$containers   = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container' ) );
-			$expectations = [
-				[
-					'element'    => $containers->item( 0 ),
-					'is_open'    => false,
-					'parent_tag' => 'nav',
-				],
-				[
-					'element'    => $containers->item( 1 ),
-					'is_open'    => true,
-					'parent_tag' => 'amp-lightbox',
-				],
-			];
+		// Expect that "div.wp-block-navigation__responsive-container" elements are wrapped correctly,
+		// has expected class names, and are or are not duplicated.
+		$containers = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container' ) );
+		$this->assertEquals( count( $expectations['containers'] ), $containers->length );
 
-			$this->assertEquals( count( $expectations ), $containers->length );
+		foreach ( $expectations['containers'] as $index => $expectation ) {
+			$element        = $containers->item( $index );
+			$has_open_class = false !== strpos( $element->getAttribute( 'class' ), 'is-menu-open has-modal-open' );
+			$this->assertEquals( $expectation['is_open'], $has_open_class );
+			$this->assertEquals( $expectation['parent_tag'], $element->parentNode->tagName );
+		}
 
-			foreach ( $expectations as $expectation ) {
-				$has_open_class = false !== strpos( $expectation['element']->getAttribute( 'class' ), 'is-menu-open has-modal-open' );
-				$this->assertEquals( $expectation['is_open'], $has_open_class );
-				$this->assertEquals( $expectation['parent_tag'], $expectation['element']->parentNode->tagName );
-			}
+		// Expect that there are two "div.wp-block-navigation__responsive-container-content" elements, and:
+		// - first one is directly wrapped by "div.wp-block-navigation__responsive-container" element and does not has an ID attribute,
+		// - second one is not directly wrapped by "div.wp-block-navigation__responsive-container" element and does has an ID attribute.
+		$contents = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container-content' ) );
+		$this->assertEquals( count( $expectations['contents'] ), $contents->length );
 
-			// Expect that there are two "div.wp-block-navigation__responsive-container-content" elements, and:
-			// - first one is directly wrapped by "div.wp-block-navigation__responsive-container" element and does not has an ID attribute,
-			// - second one is not directly wrapped by "div.wp-block-navigation__responsive-container" element and does has an ID attribute.
-			$contents     = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container-content' ) );
-			$expectations = [
-				[
-					'element'      => $contents->item( 0 ),
-					'has_id'       => false,
-					'parent_class' => 'wp-block-navigation__responsive-container',
-				],
-				[
-					'element'      => $contents->item( 1 ),
-					'has_id'       => true,
-					'parent_class' => 'wp-block-navigation__responsive-dialog',
-				],
-			];
+		foreach ( $expectations['contents'] as $index => $expectation ) {
+			$element = $contents->item( $index );
+			$this->assertEquals( $expectation['has_id'], $element->hasAttribute( 'id' ) );
+			$this->assertTrue( false !== strpos( $element->parentNode->getAttribute( 'class' ), $expectation['parent_class'] ) );
+		}
 
-			$this->assertEquals( count( $expectations ), $contents->length );
+		// Expect that there are no unwanted attributes: "aria-expanded", "aria-modal", "data-micromodal-trigger", "data-micromodal-close".
+		$unwanted_attributes = [
+			'aria-expanded',
+			'aria-modal',
+			'data-micromodal-trigger',
+			'data-micromodal-close',
+		];
 
-			foreach ( $expectations as $expectation ) {
-				$this->assertEquals( $expectation['has_id'], $expectation['element']->hasAttribute( 'id' ) );
-				$this->assertTrue( false !== strpos( $expectation['element']->parentNode->getAttribute( 'class' ), $expectation['parent_class'] ) );
-			}
-
-			// Expect that there are no unwanted attributes: "aria-expanded", "aria-modal", "data-micromodal-trigger", "data-micromodal-close".
-			$unwanted_attributes = [
-				'aria-expanded',
-				'aria-modal',
-				'data-micromodal-trigger',
-				'data-micromodal-close',
-			];
-
-			foreach ( $unwanted_attributes as $unwanted_attribute ) {
-				$this->assertTrue( false === strpos( $content, $unwanted_attribute ) );
-			}
+		foreach ( $unwanted_attributes as $unwanted_attribute ) {
+			$this->assertTrue( false === strpos( $content, $unwanted_attribute ) );
 		}
 	}
 
