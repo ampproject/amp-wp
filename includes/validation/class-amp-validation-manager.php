@@ -9,7 +9,6 @@ use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Sandboxing;
 use AmpProject\AmpWP\Services;
 use AmpProject\Dom\Document;
 use AmpProject\Exception\MaxCssByteCountExceeded;
@@ -331,13 +330,7 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_auto_accepted( $error = null ) {
 
-		if (
-			$error
-			&&
-			amp_is_canonical()
-			&&
-			! Sandboxing::is_needed() // @todo Remove this once Sandboxing no longer experimental.
-		) {
+		if ( $error && amp_is_canonical() ) {
 			// Excessive CSS on AMP-first sites must not be removed by default since removing CSS can severely break a site.
 			$accepted = AMP_Style_Sanitizer::STYLESHEET_TOO_LONG !== $error['code'];
 		} else {

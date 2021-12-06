@@ -82,6 +82,15 @@ amp-carousel .amp-wp-gallery-caption {
 }
 
 /*
+ * Ensure the aspect-ratio is respected when added by \AMP_Core_Block_Handler::ampify_video_block(). This is only needed
+ * when in the loose sandboxing level where a <video> is not converted into <amp-video>, and yet the width/height are
+ * both being added. See also <https://github.com/WordPress/gutenberg/pull/37052>.
+ */
+.wp-block-video video {
+	height: auto;
+}
+
+/*
  * Ensure the button used to expand AMP components is placed in the bottom left hand corner of the component,
  * where it's most likely to be seen.
  */
