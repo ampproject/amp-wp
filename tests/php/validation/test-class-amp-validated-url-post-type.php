@@ -588,6 +588,20 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 	}
 
 	/**
+	 * @covers \AMP_Validated_URL_Post_Type::garbage_collect_validated_urls()
+	 */
+	public function test_garbage_collect_validated_urls() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * @covers \AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect()
+	 */
+	public function test_is_post_safe_to_garbage_collect() {
+		$this->markTestIncomplete();
+	}
+
+	/**
 	 * Test get_validated_environment().
 	 *
 	 * @covers \AMP_Validated_URL_Post_Type::get_validated_environment()

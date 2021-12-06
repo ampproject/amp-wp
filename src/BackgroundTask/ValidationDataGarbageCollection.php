@@ -67,6 +67,5 @@ final class ValidationDataGarbageCollection extends RecurringBackgroundTask {
 
 		// Finally, delete validation errors which may now be empty.
 		AMP_Validation_Error_Taxonomy::delete_empty_terms();
-
 	}
 }
