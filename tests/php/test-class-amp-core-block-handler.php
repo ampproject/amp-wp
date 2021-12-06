@@ -152,7 +152,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
-		$this->assertStringContainsString( '<video width="560" height="320" ', $content );
+		$this->assertStringContainsString( 'width="560" height="320" style="aspect-ratio:560/320"', $content );
 	}
 
 	/**

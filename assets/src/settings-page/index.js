@@ -44,7 +44,7 @@ import { PluginsContextProvider } from '../components/plugins-context-provider';
 import { ThemesContextProvider } from '../components/themes-context-provider';
 import { SiteScanContextProvider } from '../components/site-scan-context-provider';
 import { Welcome } from './welcome';
-import { SandboxingLevel } from './sandboxing-level';
+import { Sandboxing } from './sandboxing';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { SettingsFooter } from './settings-footer';
@@ -223,7 +223,6 @@ function Root( { appRoot } ) {
 				<h2 id="advanced-settings">
 					{ __( 'Advanced Settings', 'amp' ) }
 				</h2>
-				<SandboxingLevel focusedSection={ focusedSection } />
 				<AMPDrawer
 					heading={ (
 						<h3>
@@ -261,6 +260,7 @@ function Root( { appRoot } ) {
 				>
 					<Analytics />
 				</AMPDrawer>
+				<Sandboxing focusedSection={ focusedSection } />
 				<PairedUrlStructure focusedSection={ focusedSection } />
 				<AMPDrawer
 					className="amp-other-settings"
