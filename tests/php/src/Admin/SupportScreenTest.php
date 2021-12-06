@@ -8,7 +8,12 @@
 namespace AmpProject\AmpWP\Tests\Admin;
 
 use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Manager;
 use AmpProject\AmpWP\Admin\SupportScreen;
+use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
 
@@ -46,7 +51,18 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 	/** @covers ::__construct() */
 	public function test__construct() {
 
+		$this->assertInstanceOf( Conditional::class, $this->instance );
+		$this->assertInstanceOf( Delayed::class, $this->instance );
+		$this->assertInstanceOf( Registerable::class, $this->instance );
+		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( SupportScreen::class, $this->instance );
+	}
+
+	/**
+	 * @covers ::get_registration_action
+	 */
+	public function test_get_registration_action() {
+		$this->assertEquals( 'init', SupportScreen::get_registration_action() );
 	}
 
 	/**
@@ -57,13 +73,25 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 		// Without mocking.
 		$this->assertFalse( SupportScreen::is_needed() );
 
-		// Mock the is_admin()
+		// Mock the is_admin() with required user caps.
 		set_current_screen( $this->instance->screen_handle() );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-
 		add_filter( 'amp_support_menu_is_enabled', '__return_true', 999 );
-
 		$this->assertTrue( SupportScreen::is_needed() );
+
+		// Access denied when user cannot validate.
+		add_filter(
+			'map_meta_cap',
+			function ( $caps, $cap ) {
+				if ( AMP_Validation_Manager::VALIDATE_CAPABILITY === $cap ) {
+					$caps[] = 'do_not_allow';
+				}
+				return $caps;
+			},
+			10,
+			3
+		);
+		$this->assertFalse( SupportScreen::is_needed() );
 
 		// Reset data.
 		unset( $GLOBALS['current_screen'] );
