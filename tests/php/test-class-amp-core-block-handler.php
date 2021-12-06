@@ -445,42 +445,49 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 *
 	 * @return array
 	 */
-	/*
 	public function get_navigation_block_submenu_open_on_click_data() {
-
-		$menu_id   = wp_create_nav_menu( 'Test menu' );
-		$parent_id = wp_update_nav_menu_item(
-			$menu_id,
-			0, [
-				'menu-item-title'  => 'AMP',
-				'menu-item-url'    => 'https://amp.dev/',
-				'menu-item-status' => 'publish',
-			]
-		);
-
-		wp_update_nav_menu_item(
-			$menu_id,
-			0, [
-				'menu-item-title'     => 'How it works',
-				'menu-item-url'       => 'https://amp.dev/about/how-amp-works/',
-				'menu-item-status'    => 'publish',
-				'menu-item-parent-id' => $parent_id,
-			]
-		);
-
 		return [
 			'never'  => [
-				sprintf( '<!-- wp:navigation {"navigationMenuId":%s,"openSubmenusOnClick":true,"overlayMenu":"never"} /-->', $menu_id ),
-			],
-			'mobile' => [
-				sprintf( '<!-- wp:navigation {"navigationMenuId":%s,"openSubmenusOnClick":true} /-->', $menu_id ),
-			],
-			'always' => [
-				sprintf( '<!-- wp:navigation {"navigationMenuId":%s,"openSubmenusOnClick":true,"overlayMenu":"always"} /-->', $menu_id ),
+				'
+				<nav class="wp-block-navigation">
+					<ul class="wp-block-navigation__container">
+						<li class="wp-block-navigation-item wp-block-navigation-link">
+							<a class="wp-block-navigation-item__content" href="http://localhost.develop"><span class="wp-block-navigation-item__label">Home</span></a>
+						</li>
+						<li class="wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+							<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false">
+								<span class="wp-block-navigation-item__label">Posts</span>
+								<span class="wp-block-navigation__submenu-icon">
+									<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg>
+								</span>
+							</button>
+							<ul class="wp-block-navigation__submenu-container">
+								<li class="wp-block-navigation-item wp-block-navigation-link">
+									<a class="wp-block-navigation-item__content" href="http://localhost.develop/2021/11/24/archives-block/"><span class="wp-block-navigation-item__label">Archives block</span></a>
+								</li>
+								<li class="wp-block-navigation-item wp-block-navigation-link">
+									<a class="wp-block-navigation-item__content" href="http://localhost.develop/2021/11/24/just-empty-post/"><span class="wp-block-navigation-item__label">Just empty post</span></a>
+								</li>
+								<li class="wp-block-navigation-item wp-block-navigation-link">
+									<a class="wp-block-navigation-item__content" href="http://localhost.develop/2021/11/22/test-bad-shortcode/"><span class="wp-block-navigation-item__label">Test bad shortcode</span></a>
+								</li>
+								<li class="wp-block-navigation-item current-menu-item wp-block-navigation-link">
+									<a class="wp-block-navigation-item__content" href="http://localhost.develop/2021/11/11/responsive-menu/" aria-current="page"><span class="wp-block-navigation-item__label">Responsive menu</span></a>
+								</li>
+								<li class="wp-block-navigation-item wp-block-navigation-link">
+									<a class="wp-block-navigation-item__content" href="http://localhost.develop/2021/10/27/test-embeds/"><span class="wp-block-navigation-item__label">Test embeds</span></a>
+								</li>
+							</ul>
+						</li>
+						<li class="wp-block-navigation-item wp-block-navigation-link">
+							<a class="wp-block-navigation-item__content" href="http://localhost.develop/sample-page/"><span class="wp-block-navigation-item__label">Sample Page</span></a>
+						</li>
+					</ul>
+				</nav>
+				'
 			],
 		];
 	}
-	*/
 
 	/**
 	 * Test submenu opened "on click" in navigation block
@@ -492,7 +499,6 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 * @param string $overlay_menu "Overlay menu" attribute value.
 	 * @param array  $expectations Test expectations for containers and contents div's.
 	 */
-	/*
 	public function test_ampify_navigation_block_submenu_open_on_click( $source ) {
 		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '10.7', '<' ) ) {
 			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
@@ -502,52 +508,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
 
-		$content = do_blocks( $source );
-		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
-
-		var_dump( $content );
-	}
-	*/
-
-	/**
-	 * Test submenu opened "on click" in navigation block
-	 *
-	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
-	 *
-	 * @param string $source       Source.
-	 * @param string $overlay_menu "Overlay menu" attribute value.
-	 * @param array  $expectations Test expectations for containers and contents div's.
-	 */
-	public function test_ampify_navigation_block_submenu_open_on_click() {
-		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '10.7', '<' ) ) {
-			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
-		}
-
-		$menu_id   = wp_create_nav_menu( 'Test menu' );
-		$parent_id = wp_update_nav_menu_item(
-			$menu_id,
-			0, [
-				'menu-item-title'  => 'AMP',
-				'menu-item-url'    => 'https://amp.dev/',
-				'menu-item-status' => 'publish',
-			]
-		);
-
-		wp_update_nav_menu_item(
-			$menu_id,
-			0, [
-				'menu-item-title'     => 'How it works',
-				'menu-item-url'       => 'https://amp.dev/about/how-amp-works/',
-				'menu-item-status'    => 'publish',
-				'menu-item-parent-id' => $parent_id,
-			]
-		);
-
-		$handler = new AMP_Core_Block_Handler();
-		$handler->unregister_embed(); // Make sure we are on the initial clean state.
-		$handler->register_embed();
-
-		$content = do_blocks( sprintf( '<!-- wp:navigation {"navigationMenuId":%s,"openSubmenusOnClick":true} /-->', $menu_id ) );
+		$content = apply_filters( 'the_content', $source );
 		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
 
 		var_dump( $content );
