@@ -484,7 +484,12 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 						</li>
 					</ul>
 				</nav>
-				'
+				',
+				[
+					'attrs' => [
+						'overlayMenu' => 'never',
+					],
+				],
 			],
 		];
 	}
@@ -495,20 +500,17 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
 	 * @dataProvider get_navigation_block_submenu_open_on_click_data
 	 *
-	 * @param string $source       Source.
-	 * @param string $overlay_menu "Overlay menu" attribute value.
-	 * @param array  $expectations Test expectations for containers and contents div's.
+	 * @param string $block_content Block content (before being ampified).
+	 * @param string $block         Block attributes.
+	 * @param array  $expectations  Test expectations for containers and contents div's.
 	 */
-	public function test_ampify_navigation_block_submenu_open_on_click( $source ) {
+	public function test_ampify_navigation_block_submenu_open_on_click( $block_content, $block ) {
 		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '10.7', '<' ) ) {
 			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
 		}
 
 		$handler = new AMP_Core_Block_Handler();
-		$handler->unregister_embed(); // Make sure we are on the initial clean state.
-		$handler->register_embed();
-
-		$content = apply_filters( 'the_content', $source );
+		$content = $handler->ampify_navigation_block( $block_content, $block );
 		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
 
 		var_dump( $content );
