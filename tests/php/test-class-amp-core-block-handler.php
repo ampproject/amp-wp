@@ -478,7 +478,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 * Test submenu opened "on click" in navigation block
 	 *
 	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
-	 * @dataProvider get_navigation_block_conversion_data
+	 * @dataProvider get_navigation_block_submenu_open_on_click_data
 	 *
 	 * @param string $source       Source.
 	 * @param string $overlay_menu "Overlay menu" attribute value.
