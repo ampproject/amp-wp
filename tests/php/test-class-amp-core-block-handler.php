@@ -445,6 +445,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 *
 	 * @return array
 	 */
+	/*
 	public function get_navigation_block_submenu_open_on_click_data() {
 
 		$menu_id   = wp_create_nav_menu( 'Test menu' );
@@ -479,6 +480,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			],
 		];
 	}
+	*/
 
 	/**
 	 * Test submenu opened "on click" in navigation block
@@ -490,6 +492,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 * @param string $overlay_menu "Overlay menu" attribute value.
 	 * @param array  $expectations Test expectations for containers and contents div's.
 	 */
+	/*
 	public function test_ampify_navigation_block_submenu_open_on_click( $source ) {
 		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '10.7', '<' ) ) {
 			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
@@ -500,6 +503,51 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$handler->register_embed();
 
 		$content = do_blocks( $source );
+		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
+
+		var_dump( $content );
+	}
+	*/
+
+	/**
+	 * Test submenu opened "on click" in navigation block
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
+	 *
+	 * @param string $source       Source.
+	 * @param string $overlay_menu "Overlay menu" attribute value.
+	 * @param array  $expectations Test expectations for containers and contents div's.
+	 */
+	public function test_ampify_navigation_block_submenu_open_on_click() {
+		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '10.7', '<' ) ) {
+			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
+		}
+
+		$menu_id   = wp_create_nav_menu( 'Test menu' );
+		$parent_id = wp_update_nav_menu_item(
+			$menu_id,
+			0, [
+				'menu-item-title'  => 'AMP',
+				'menu-item-url'    => 'https://amp.dev/',
+				'menu-item-status' => 'publish',
+			]
+		);
+
+		wp_update_nav_menu_item(
+			$menu_id,
+			0, [
+				'menu-item-title'     => 'How it works',
+				'menu-item-url'       => 'https://amp.dev/about/how-amp-works/',
+				'menu-item-status'    => 'publish',
+				'menu-item-parent-id' => $parent_id,
+			]
+		);
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$content = do_blocks( sprintf( '<!-- wp:navigation {"navigationMenuId":%s,"openSubmenusOnClick":true} /-->', $menu_id ) );
 		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
 
 		var_dump( $content );
