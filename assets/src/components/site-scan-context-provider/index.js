@@ -34,13 +34,11 @@ export const SiteScan = createContext();
  */
 export const ACTION_SET_STATUS = 'ACTION_SET_STATUS';
 export const ACTION_SCANNABLE_URLS_REQUEST = 'ACTION_SCANNABLE_URLS_REQUEST';
-export const ACTION_SCANNABLE_URLS_FETCH = 'ACTION_SCANNABLE_URLS_FETCH';
 export const ACTION_SCANNABLE_URLS_RECEIVE = 'ACTION_SCANNABLE_URLS_RECEIVE';
 export const ACTION_SCAN_INITIALIZE = 'ACTION_SCAN_INITIALIZE';
 export const ACTION_SCAN_URL = 'ACTION_SCAN_URL';
 export const ACTION_SCAN_RECEIVE_RESULTS = 'ACTION_SCAN_RECEIVE_RESULTS';
 export const ACTION_SCAN_COMPLETE = 'ACTION_SCAN_COMPLETE';
-export const ACTION_SCAN_SUCCESS = 'ACTION_SCAN_SUCCESS';
 export const ACTION_SCAN_CANCEL = 'ACTION_SCAN_CANCEL';
 
 /**
@@ -112,12 +110,6 @@ export function siteScanReducer( state, action ) {
 				forceStandardMode: action?.forceStandardMode ?? false,
 			};
 		}
-		case ACTION_SCANNABLE_URLS_FETCH: {
-			return {
-				...state,
-				status: STATUS_FETCHING_SCANNABLE_URLS,
-			};
-		}
 		case ACTION_SCANNABLE_URLS_RECEIVE: {
 			return {
 				...state,
@@ -180,12 +172,6 @@ export function siteScanReducer( state, action ) {
 			return {
 				...state,
 				status: hasFailed ? STATUS_FAILED : STATUS_REFETCHING_PLUGIN_SUPPRESSION,
-			};
-		}
-		case ACTION_SCAN_SUCCESS: {
-			return {
-				...state,
-				status: STATUS_COMPLETED,
 			};
 		}
 		case ACTION_SCAN_CANCEL: {
@@ -365,7 +351,10 @@ export function SiteScanContextProvider( {
 	useEffect( () => {
 		if ( status === STATUS_REFETCHING_PLUGIN_SUPPRESSION ) {
 			refetchPluginSuppression();
-			dispatch( { type: ACTION_SCAN_SUCCESS } );
+			dispatch( {
+				type: ACTION_SET_STATUS,
+				status: STATUS_COMPLETED,
+			} );
 		}
 	}, [ refetchPluginSuppression, status ] );
 
@@ -378,7 +367,10 @@ export function SiteScanContextProvider( {
 				return;
 			}
 
-			dispatch( { type: ACTION_SCANNABLE_URLS_FETCH } );
+			dispatch( {
+				type: ACTION_SET_STATUS,
+				status: STATUS_FETCHING_SCANNABLE_URLS,
+			} );
 
 			try {
 				const fields = [ 'url', 'amp_url', 'type', 'label' ];
