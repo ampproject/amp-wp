@@ -43,6 +43,10 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 
 		parent::setUp();
 
+		if ( ! class_exists( 'WP_Site_Health' ) ) {
+			$this->markTestSkipped( 'Test requires Site Health.' );
+		}
+
 		$this->instance = $this->injector->make( SupportScreen::class );
 
 		$this->add_home_url_loopback_request_mocking();
