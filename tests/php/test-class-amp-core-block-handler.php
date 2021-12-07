@@ -447,7 +447,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 */
 	public function get_navigation_block_submenu_open_on_click_data() {
 		return [
-			'never-with-one-dropdown'  => [
+			'never-with-one-dropdown'   => [
 				'
 				<nav class="wp-block-navigation">
 					<ul class="wp-block-navigation__container">
@@ -479,7 +479,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 					],
 				],
 			],
-			'never-with-two-dropdowns' => [
+			'never-with-two-dropdowns'  => [
 				'
 				<nav class="wp-block-navigation">
 					<ul class="wp-block-navigation__container">
@@ -518,6 +518,242 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 				[
 					'attrs' => [
 						'overlayMenu' => 'never',
+					],
+				],
+			],
+			'mobile-with-one-dropdown'  => [
+				'
+				<nav class="is-responsive wp-block-navigation">
+					<button aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open" data-micromodal-trigger="modal-61ae909b7e229">
+						<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
+							<rect x="4" y="7.5" width="16" height="1.5" />
+							<rect x="4" y="15" width="16" height="1.5" />
+						</svg>
+					</button>
+					<div class="wp-block-navigation__responsive-container" style="" id="modal-61ae909b7e229">
+						<div class="wp-block-navigation__responsive-close" tabindex="-1" data-micromodal-close>
+							<div class="wp-block-navigation__responsive-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-61ae909b7e229-title">
+								<button aria-label="Close menu" data-micromodal-close class="wp-block-navigation__responsive-container-close">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false">
+										<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
+									</svg>
+								</button>
+								<div class="wp-block-navigation__responsive-container-content" id="modal-61ae909b7e229-content">
+									<ul class="wp-block-navigation__container">
+										<li class="wp-block-navigation-item wp-block-navigation-link">
+											<a class="wp-block-navigation-item__content" href="https://example.com"><span class="wp-block-navigation-item__label">Home</span></a>
+										</li>
+										<li class="wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+											<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false">
+												<span class="wp-block-navigation-item__label">Posts</span>
+												<span class="wp-block-navigation__submenu-icon">
+													<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false">
+														<path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path>
+													</svg>
+												</span>
+											</button>
+											<ul class="wp-block-navigation__submenu-container">
+												<li class="wp-block-navigation-item wp-block-navigation-link">
+													<a class="wp-block-navigation-item__content" href="https://example.com/2021/11/24/archives-block/"><span class="wp-block-navigation-item__label">Archives block</span></a>
+												</li>
+											</ul>
+										</li>
+										<li class="wp-block-navigation-item wp-block-navigation-link">
+											<a class="wp-block-navigation-item__content" href="https://example.com/sample-page/"><span class="wp-block-navigation-item__label">Sample Page</span></a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</nav>
+				',
+				[
+					'attrs' => [
+						'overlayMenu' => 'mobile',
+					],
+				],
+			],
+			'mobile-with-two-dropdowns' => [
+				'
+				<nav class="is-responsive wp-block-navigation">
+					<button aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open" data-micromodal-trigger="modal-61ae909b7e229">
+						<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
+							<rect x="4" y="7.5" width="16" height="1.5" />
+							<rect x="4" y="15" width="16" height="1.5" />
+						</svg>
+					</button>
+					<div class="wp-block-navigation__responsive-container" style="" id="modal-61ae909b7e229">
+						<div class="wp-block-navigation__responsive-close" tabindex="-1" data-micromodal-close>
+							<div class="wp-block-navigation__responsive-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-61ae909b7e229-title">
+								<button aria-label="Close menu" data-micromodal-close class="wp-block-navigation__responsive-container-close">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false">
+										<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
+									</svg>
+								</button>
+								<div class="wp-block-navigation__responsive-container-content" id="modal-61ae909b7e229-content">
+									<ul class="wp-block-navigation__container">
+										<li class="wp-block-navigation-item wp-block-navigation-link">
+											<a class="wp-block-navigation-item__content" href="https://example.com"><span class="wp-block-navigation-item__label">Home</span></a>
+										</li>
+										<li class="wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+											<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false">
+												<span class="wp-block-navigation-item__label">Posts</span>
+												<span class="wp-block-navigation__submenu-icon">
+													<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false">
+														<path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path>
+													</svg>
+												</span>
+											</button>
+											<ul class="wp-block-navigation__submenu-container">
+												<li class="wp-block-navigation-item wp-block-navigation-link">
+													<a class="wp-block-navigation-item__content" href="https://example.com/2021/11/24/archives-block/"><span class="wp-block-navigation-item__label">Archives block</span></a>
+												</li>
+											</ul>
+										</li>
+										<li class="wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+											<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false">
+												<span class="wp-block-navigation-item__label">Posts</span>
+												<span class="wp-block-navigation__submenu-icon">
+													<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false">
+														<path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path>
+													</svg>
+												</span>
+											</button>
+											<ul class="wp-block-navigation__submenu-container">
+												<li class="wp-block-navigation-item wp-block-navigation-link">
+													<a class="wp-block-navigation-item__content" href="https://example.com/2021/11/24/archives-block/"><span class="wp-block-navigation-item__label">Archives block</span></a>
+												</li>
+											</ul>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</nav>
+				',
+				[
+					'attrs' => [
+						'overlayMenu' => 'mobile',
+					],
+				],
+			],
+			'always-with-one-dropdown'  => [
+				'
+				<nav class="is-responsive wp-block-navigation">
+					<button aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open always-shown" data-micromodal-trigger="modal-61ae909b863c2">
+						<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
+							<rect x="4" y="7.5" width="16" height="1.5" />
+							<rect x="4" y="15" width="16" height="1.5" />
+						</svg>
+					</button>
+					<div class="wp-block-navigation__responsive-container hidden-by-default" style="" id="modal-61ae909b863c2">
+						<div class="wp-block-navigation__responsive-close" tabindex="-1" data-micromodal-close>
+							<div class="wp-block-navigation__responsive-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-61ae909b863c2-title">
+								<button aria-label="Close menu" data-micromodal-close class="wp-block-navigation__responsive-container-close">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false">
+										<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
+									</svg>
+								</button>
+								<div class="wp-block-navigation__responsive-container-content" id="modal-61ae909b863c2-content">
+									<ul class="wp-block-navigation__container">
+										<li class="wp-block-navigation-item wp-block-navigation-link">
+											<a class="wp-block-navigation-item__content" href="https://example.com"><span class="wp-block-navigation-item__label">Home</span></a>
+										</li>
+										<li class="wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+											<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false">
+												<span class="wp-block-navigation-item__label">Posts</span>
+												<span class="wp-block-navigation__submenu-icon">
+													<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false">
+														<path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path>
+													</svg>
+												</span>
+											</button>
+											<ul class="wp-block-navigation__submenu-container">
+												<li class="wp-block-navigation-item wp-block-navigation-link">
+													<a class="wp-block-navigation-item__content" href="https://example.com/2021/11/24/archives-block/"><span class="wp-block-navigation-item__label">Archives block</span></a>
+												</li>
+											</ul>
+										</li>
+										<li class="wp-block-navigation-item wp-block-navigation-link">
+											<a class="wp-block-navigation-item__content" href="https://example.com/sample-page/"><span class="wp-block-navigation-item__label">Sample Page</span></a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</nav>
+				',
+				[
+					'attrs' => [
+						'overlayMenu' => 'always',
+					],
+				],
+			],
+			'always-with-two-dropdowns' => [
+				'
+				<nav class="is-responsive wp-block-navigation">
+					<button aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open always-shown" data-micromodal-trigger="modal-61ae909b863c2">
+						<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
+							<rect x="4" y="7.5" width="16" height="1.5" />
+							<rect x="4" y="15" width="16" height="1.5" />
+						</svg>
+					</button>
+					<div class="wp-block-navigation__responsive-container hidden-by-default" style="" id="modal-61ae909b863c2">
+						<div class="wp-block-navigation__responsive-close" tabindex="-1" data-micromodal-close>
+							<div class="wp-block-navigation__responsive-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-61ae909b863c2-title">
+								<button aria-label="Close menu" data-micromodal-close class="wp-block-navigation__responsive-container-close">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false">
+										<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
+									</svg>
+								</button>
+								<div class="wp-block-navigation__responsive-container-content" id="modal-61ae909b863c2-content">
+									<ul class="wp-block-navigation__container">
+										<li class="wp-block-navigation-item wp-block-navigation-link">
+											<a class="wp-block-navigation-item__content" href="https://example.com"><span class="wp-block-navigation-item__label">Home</span></a>
+										</li>
+										<li class="wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+											<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false">
+												<span class="wp-block-navigation-item__label">Posts</span>
+												<span class="wp-block-navigation__submenu-icon">
+													<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false">
+														<path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path>
+													</svg>
+												</span>
+											</button>
+											<ul class="wp-block-navigation__submenu-container">
+												<li class="wp-block-navigation-item wp-block-navigation-link">
+													<a class="wp-block-navigation-item__content" href="https://example.com/2021/11/24/archives-block/"><span class="wp-block-navigation-item__label">Archives block</span></a>
+												</li>
+											</ul>
+										</li>
+										<li class="wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+											<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false">
+												<span class="wp-block-navigation-item__label">Posts</span>
+												<span class="wp-block-navigation__submenu-icon">
+													<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false">
+														<path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path>
+													</svg>
+												</span>
+											</button>
+											<ul class="wp-block-navigation__submenu-container">
+												<li class="wp-block-navigation-item wp-block-navigation-link">
+													<a class="wp-block-navigation-item__content" href="https://example.com/2021/11/24/archives-block/"><span class="wp-block-navigation-item__label">Archives block</span></a>
+												</li>
+											</ul>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</nav>
+				',
+				[
+					'attrs' => [
+						'overlayMenu' => 'always',
 					],
 				],
 			],
