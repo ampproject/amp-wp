@@ -274,7 +274,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 	 */
 	public function test_get_data_with_specific_url() {
 
-		$this->create_validated_url();
+		$amp_validated_posts = $this->create_validated_url();
 
 		$search_urls = home_url( '?s=example' );
 
@@ -290,7 +290,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 
 		$this->assertCount( 1, $output['urls'] );
 		$this->assertEquals(
-			AMP_Validated_URL_Post_Type::normalize_url_for_storage( $search_urls ),
+			AMP_Validated_URL_Post_Type::get_url_from_post( $amp_validated_posts['search'] ),
 			$output['urls'][0]['url']
 		);
 	}
