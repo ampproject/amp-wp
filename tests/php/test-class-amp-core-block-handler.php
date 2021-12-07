@@ -351,6 +351,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 * - there are no unwanted attributes: "aria-expanded", "aria-modal", "data-micromodal-trigger", "data-micromodal-close".
 	 *
 	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
+	 * @covers \AMP_Core_Block_Handler::dequeue_block_navigation_view_script()
 	 * @dataProvider get_navigation_block_conversion_data
 	 *
 	 * @param string $source       Source.
