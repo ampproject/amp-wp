@@ -271,9 +271,10 @@ final class Sandboxing implements Service, Registerable {
 			$amp_link = $dom->xpath->query( './a', $amp_admin_bar_menu_item )->item( 0 );
 			if ( $amp_link instanceof Element ) {
 				$span = $dom->createElement( Tag::SPAN );
-				$amp_link->appendChild( $dom->createTextNode( ' ' ) );
-				$span->textContent = $text;
 				$span->setAttribute( Attribute::TITLE, $title );
+				$span->textContent = $text;
+
+				$amp_link->appendChild( $dom->createTextNode( ' ' ) );
 				$amp_link->appendChild( $span );
 			}
 
@@ -281,15 +282,17 @@ final class Sandboxing implements Service, Registerable {
 			if ( $amp_submenu_ul instanceof Element ) {
 				$level_li = $dom->createElement( Tag::LI );
 				$level_li->setAttribute( Attribute::ID, 'wp-admin-bar-amp-sandboxing-level' );
+
 				$link = $dom->createElement( Tag::A );
 				$link->setAttribute( Attribute::CLASS_, 'ab-item' );
+				$link->textContent = $title;
 				if ( current_user_can( 'manage_options' ) ) {
 					$link->setAttribute(
 						Attribute::HREF,
 						add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) . '#sandboxing'
 					);
 				}
-				$link->textContent = $title;
+
 				$level_li->appendChild( $link );
 				$amp_submenu_ul->appendChild( $level_li );
 			}
