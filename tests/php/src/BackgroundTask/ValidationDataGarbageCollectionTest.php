@@ -6,7 +6,6 @@
 namespace AmpProject\AmpWP\Tests\BackgroundTask;
 
 use AMP_Options_Manager;
-use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use AmpProject\AmpWP\BackgroundTask\ValidationDataGarbageCollection;
