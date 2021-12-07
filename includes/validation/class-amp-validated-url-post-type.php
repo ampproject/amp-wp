@@ -1005,7 +1005,7 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Garbage-collect validated URL posts.
 	 *
-	 * Now with Site Scanning in v2.2, the most recently-published post will be validated on a weekly basis. If the user
+	 * Now with Site Scanning in v2.2, the most recently published post will be validated on a weekly basis. If the user
 	 * never sees the list of Validated URLs--such as when the user doesn't have DevTools turned on--the end result is
 	 * a perpetual increase in the number of validated URLs. Over time this will result in validation data taking up
 	 * more and more of the database. When all of the validation errors associated with a validated URL are unreviewed,
