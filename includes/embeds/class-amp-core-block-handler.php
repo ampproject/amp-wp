@@ -316,9 +316,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$this->navigation_block_count++;
-
-		$class_query    = '//%1$s[ contains( concat( " ", normalize-space( @class ), " " ), " %2$s " ) ]';
-		$container_node = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container' ), $node )->item( 0 );
+		$container_node = $dom->xpath->query( '//div[ contains( concat( " ", normalize-space( @class ), " " ), " wp-block-navigation__responsive-container " ) ]', $node )->item( 0 );
 
 		// Implement support for navigation menu in modal.
 		$overlay_menu = isset( $block['attrs']['overlayMenu'] ) ? $block['attrs']['overlayMenu'] : '';
@@ -348,8 +346,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				$node->removeChild( $container_node );
 			} else {
 				// Unwrap original container content out of "wp-block-navigation__responsive-close" and "wp-block-navigation__responsive-dialog" wrappers.
-				$content_node = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container-content' ), $container_node )->item( 0 );
-				$close_node   = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-close' ), $container_node )->item( 0 );
+				$content_node = $dom->xpath->query( '//div[ contains( concat( " ", normalize-space( @class ), " " ), " wp-block-navigation__responsive-container-content " ) ]', $container_node )->item( 0 );
+				$close_node   = $dom->xpath->query( '//div[ contains( concat( " ", normalize-space( @class ), " " ), " wp-block-navigation__responsive-close " ) ]', $container_node )->item( 0 );
 
 				if ( $content_node instanceof DOMElement && $close_node instanceof DOMElement ) {
 					$content_node->removeAttribute( Attribute::ID );
@@ -360,8 +358,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			// Extend "open" and "close" buttons.
-			$open_button_node  = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation__responsive-container-open' ), $node )->item( 0 );
-			$close_button_node = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation__responsive-container-close' ), $node )->item( 0 );
+			$open_button_node  = $dom->xpath->query( '//button[ contains( concat( " ", normalize-space( @class ), " " ), " wp-block-navigation__responsive-container-open " ) ]', $node )->item( 0 );
+			$close_button_node = $dom->xpath->query( '//button[ contains( concat( " ", normalize-space( @class ), " " ), " wp-block-navigation__responsive-container-close " ) ]', $node )->item( 0 );
 
 			if ( $open_button_node instanceof DOMElement && $close_button_node instanceof DOMElement ) {
 				$open_button_node->setAttribute( 'on', sprintf( 'tap:%s.open', $unique_id ) );
@@ -388,8 +386,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		// Implement support for submenus opened on click.
-		$submenus = $dom->xpath->query( sprintf( $class_query, 'li', 'open-on-click wp-block-navigation-submenu' ), $node );
-		foreach ( $submenus as $submenu_index => $submenu ) {
+		$submenus      = $dom->xpath->query( '//li[ contains( concat( " ", normalize-space( @class ), " " ), " open-on-click " ) ]', $node );
+		$submenu_index = 0;
+		foreach ( $submenus as $submenu ) {
 			if ( ! $submenu instanceof DOMElement ) {
 				continue;
 			}
@@ -397,7 +396,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				continue;
 			}
 
-			$toggle_submenu_button = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation-submenu__toggle' ), $submenu )->item( 0 );
+			$toggle_submenu_button = $dom->xpath->query( './button[ contains( concat( " ", normalize-space( @class ), " " ), " wp-block-navigation-submenu__toggle " ) ]', $submenu )->item( 0 );
 			if ( ! $toggle_submenu_button instanceof DOMElement ) {
 				continue;
 			}
@@ -420,6 +419,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			$toggle_submenu_button->setAttribute( Attribute::ON, sprintf( "tap:AMP.setState({ $state_id: ! $state_id })" ) );
 			$toggle_submenu_button->setAttribute( Attribute::ARIA_EXPANDED, 'false' );
 			$toggle_submenu_button->setAttribute( Amp::BIND_DATA_ATTR_PREFIX . Attribute::ARIA_EXPANDED, "$state_id ? 'true' : 'false'" );
+
+			$submenu_index++;
 		}
 
 		return $dom->saveHTML( $node );

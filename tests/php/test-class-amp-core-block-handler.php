@@ -384,8 +384,6 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$amp_lightboxes = $dom->getElementsByTagName( 'amp-lightbox' );
 		$this->assertEquals( 'never' !== $overlay_menu ? 1 : 0, $amp_lightboxes->length );
 
-		$class_query = '//%1$s[ contains( concat( " ", normalize-space( @class ), " " ), " %2$s " ) ]';
-
 		// Expect that "mobile" and "always" overlayed menus are wrapped by <amp-lightbox> element,
 		// and that open/close buttons are set correctly.
 		if ( 'never' !== $overlay_menu ) {
@@ -396,8 +394,8 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			$this->assertEquals( 'nodisplay', $amp_lightbox->getAttribute( 'layout' ) );
 
 			$amp_lightbox_id   = $amp_lightbox->getAttribute( 'id' );
-			$open_button_node  = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation__responsive-container-open' ) )->item( 0 );
-			$close_button_node = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation__responsive-container-close' ) )->item( 0 );
+			$open_button_node  = $dom->xpath->query( '//button[ contains( concat( " ", normalize-space( @class ), " " ), " wp-block-navigation__responsive-container-open " ) ]' )->item( 0 );
+			$close_button_node = $dom->xpath->query( '//button[ contains( concat( " ", normalize-space( @class ), " " ), " wp-block-navigation__responsive-container-close " ) ]' )->item( 0 );
 
 			$this->assertEquals( sprintf( 'tap:%s.open', $amp_lightbox_id ), $open_button_node->getAttribute( 'on' ) );
 			$this->assertEquals( sprintf( 'tap:%s.close', $amp_lightbox_id ), $close_button_node->getAttribute( 'on' ) );
@@ -405,7 +403,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 		// Expect that "div.wp-block-navigation__responsive-container" elements are wrapped correctly,
 		// has expected class names, and are or are not duplicated.
-		$containers = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container' ) );
+		$containers = $dom->xpath->query( '//div[ contains( concat( " ", normalize-space( @class ), " " ), " wp-block-navigation__responsive-container " ) ]' );
 		$this->assertEquals( count( $expectations['containers'] ), $containers->length );
 
 		foreach ( $expectations['containers'] as $index => $expectation ) {
@@ -418,7 +416,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		// Expect that there are two "div.wp-block-navigation__responsive-container-content" elements, and:
 		// - first one is directly wrapped by "div.wp-block-navigation__responsive-container" element and does not has an ID attribute,
 		// - second one is not directly wrapped by "div.wp-block-navigation__responsive-container" element and does has an ID attribute.
-		$contents = $dom->xpath->query( sprintf( $class_query, 'div', 'wp-block-navigation__responsive-container-content' ) );
+		$contents = $dom->xpath->query( '//div[ contains( concat( " ", normalize-space( @class ), " " ), " wp-block-navigation__responsive-container-content " ) ]' );
 		$this->assertEquals( count( $expectations['contents'] ), $contents->length );
 
 		foreach ( $expectations['contents'] as $index => $expectation ) {
@@ -775,11 +773,10 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
 		}
 
-		$handler     = new AMP_Core_Block_Handler();
-		$content     = $handler->ampify_navigation_block( $block_content, $block );
-		$dom         = AMP_DOM_Utils::get_dom_from_content( $content );
-		$class_query = '//%1$s[ contains( concat( " ", normalize-space( @class ), " " ), " %2$s " ) ]';
-		$buttons     = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation-submenu__toggle' ) );
+		$handler = new AMP_Core_Block_Handler();
+		$content = $handler->ampify_navigation_block( $block_content, $block );
+		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
+		$buttons = $dom->xpath->query( '//button[ contains( concat( " ", normalize-space( @class ), " " ), " wp-block-navigation-submenu__toggle " ) ]' );
 
 		foreach ( $buttons as $button_index => $button ) {
 			if ( ! $button instanceof DOMElement ) {
