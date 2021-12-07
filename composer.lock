@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "128631d6ac18e385427d495e6976cab0",
+    "content-hash": "81d14dc3514fb12af3807087e9422b8c",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "0.9.1",
+            "version": "0.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "e3fcdd949ec8c5838eb535bc0f40a8530490b625"
+                "reference": "80c7f1a69f18fc90dfeaeeb7e6516e1b52f5da9d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/e3fcdd949ec8c5838eb535bc0f40a8530490b625",
-                "reference": "e3fcdd949ec8c5838eb535bc0f40a8530490b625",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/80c7f1a69f18fc90dfeaeeb7e6516e1b52f5da9d",
+                "reference": "80c7f1a69f18fc90dfeaeeb7e6516e1b52f5da9d",
                 "shasum": ""
             },
             "require": {
@@ -64,7 +64,10 @@
             "autoload": {
                 "psr-4": {
                     "AmpProject\\": "src/"
-                }
+                },
+                "files": [
+                    "include/compatibility-fixes.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -73,9 +76,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.9.1"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.9.2"
             },
-            "time": "2021-12-02T22:21:58+00:00"
+            "time": "2021-12-07T17:08:09+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -289,7 +292,7 @@
     "packages-dev": [
         {
             "name": "ampproject/php-css-parser-install-plugin",
-            "version": "dev-remove/sandboxing-filter-opt-in",
+            "version": "dev-fix/update-amp-toolbox-to-0.9.2",
             "dist": {
                 "type": "path",
                 "url": "./php-css-parser-install-composer-plugin",
