@@ -782,6 +782,9 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			if ( ! $button instanceof DOMElement ) {
 				continue;
 			}
+			if ( false !== strpos( $button->getNodePath(), 'amp-lightbox' ) ) {
+				continue;
+			}
 
 			$this->assertTrue( $button->hasAttribute( 'aria-expanded' ) );
 			$this->assertEquals( 'false', $button->getAttribute( 'aria-expanded' ) );
@@ -792,7 +795,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			$this->assertTrue( $button->hasAttribute( 'data-amp-bind-aria-expanded' ) );
 			$this->assertEquals( sprintf( "toggle_1_%d ? 'true' : 'false'", $button_index ), $button->getAttribute( 'data-amp-bind-aria-expanded' ) );
 
-			$amp_states = $dom->xpath->query( '//amp-state', $button );
+			$amp_states = $dom->xpath->query( './amp-state', $button );
 			$this->assertEquals( 1, $amp_states->length );
 
 			$amp_state = $amp_states->item( 0 );
