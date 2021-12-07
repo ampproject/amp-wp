@@ -587,6 +587,213 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		$this->assertEquals( 'Also preserved!', get_post_meta( $old_post_id, 'other', true ) );
 	}
 
+	/** @return int */
+	public function create_vanilla_post() {
+		return self::factory()->post->create(
+			[
+				'post_type' => 'post',
+				'post_date' => gmdate( 'Y-m-d H:i:s', strtotime( '1 month ago' ) ),
+			]
+		);
+	}
+
+	public function touch_validated_environment() {
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, ! AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
+	}
+
+	/**
+	 * @param int $post_id
+	 * @param int $timestamp
+	 */
+	public function update_post_date( $post_id, $timestamp ) {
+		$this->assertNotInstanceOf(
+			WP_Error::class,
+			wp_update_post(
+				[
+					'ID'            => $post_id,
+					'post_date'     => gmdate( 'Y-m-d H:i:s', $timestamp ),
+					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $timestamp ),
+				],
+				true
+			)
+		);
+	}
+
+	/**
+	 * @covers \AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect()
+	 * @covers \AMP_Validated_URL_Post_Type::garbage_collect_validated_urls()
+	 */
+	public function test_is_post_safe_to_garbage_collect_not_validated_url() {
+		$vanilla_post_id = $this->create_vanilla_post();
+
+		// Try giving a non-validated URL post a validated environment meta just to make sure it is truly ignored.
+		update_post_meta( $vanilla_post_id, AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY, [ 'theme' => 'old' ] );
+
+		$this->assertFalse( AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect( get_post( $vanilla_post_id ) ) );
+
+		AMP_Validated_URL_Post_Type::garbage_collect_validated_urls();
+
+		$this->assertSame( 'publish', get_post_status( $vanilla_post_id ) );
+	}
+
+	/**
+	 * @covers \AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect()
+	 * @covers \AMP_Validated_URL_Post_Type::garbage_collect_validated_urls()
+	 */
+	public function test_is_post_safe_to_garbage_collect_non_stale_validated_url() {
+		$vanilla_post_id = $this->create_vanilla_post();
+
+		$validated_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
+			[],
+			home_url( '/' )
+		);
+
+		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_post_staleness( $validated_url_post_id ) );
+		$this->assertFalse( AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect( get_post( $validated_url_post_id ) ) );
+
+		AMP_Validated_URL_Post_Type::garbage_collect_validated_urls();
+
+		$this->assertSame( 'publish', get_post_status( $validated_url_post_id ) );
+		$this->assertSame( 'publish', get_post_status( $vanilla_post_id ) );
+	}
+
+	/** @return array */
+	public function get_error_sets() {
+		return [
+			'none' => [
+				'errors' => [],
+			],
+			'some' => [
+				'errors' => [
+					[ 'code' => 'foo' ],
+					[ 'code' => 'bar' ],
+					[ 'code' => 'baz' ],
+				],
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_error_sets
+	 * @covers \AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect()
+	 * @covers \AMP_Validated_URL_Post_Type::garbage_collect_validated_urls()
+	 *
+	 * @param array $errors
+	 */
+	public function test_is_post_safe_to_garbage_collect_stale_validated_url_with_one_old_and_one_new( $errors ) {
+		$vanilla_post_id = $this->create_vanilla_post();
+
+		$old_post_id = AMP_Validated_URL_Post_Type::store_validation_errors( $errors, home_url( '/old/' ) );
+		$this->update_post_date( $old_post_id, strtotime( '2 weeks ago' ) );
+		$new_post_id = AMP_Validated_URL_Post_Type::store_validation_errors( $errors, home_url( '/new/' ) );
+
+		$this->touch_validated_environment();
+		$this->assertNotEmpty( AMP_Validated_URL_Post_Type::get_post_staleness( $old_post_id ) );
+		$this->assertNotEmpty( AMP_Validated_URL_Post_Type::get_post_staleness( $new_post_id ) );
+		$this->assertTrue( AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect( get_post( $old_post_id ) ) );
+		$this->assertTrue( AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect( get_post( $new_post_id ) ) );
+
+		// Since this only garbage-collects posts that are older then 1 week, the new one will remain.
+		AMP_Validated_URL_Post_Type::garbage_collect_validated_urls();
+
+		$this->assertFalse( get_post_status( $old_post_id ) );
+		$this->assertSame( 'publish', get_post_status( $new_post_id ) );
+		$this->assertSame( 'publish', get_post_status( $vanilla_post_id ) );
+	}
+
+	/** @return array */
+	public function get_validation_error_term_groups() {
+		$cases = [];
+		foreach ( [ true, false ] as $add_fresh ) {
+			$suffix = $add_fresh ? '_with_fresh_present' : '_without_fresh_present';
+
+			$cases = array_merge(
+				$cases,
+				[
+					'removed_reviewed' . $suffix => [
+						'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+						'add_fresh'  => $add_fresh,
+					],
+					'kept_unreviewed' . $suffix  => [
+						'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+						'add_fresh'  => $add_fresh,
+					],
+					'kept_reviewed' . $suffix    => [
+						'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+						'add_fresh'  => $add_fresh,
+					],
+				]
+			);
+		}
+
+		return $cases;
+	}
+
+	/**
+	 * @dataProvider get_validation_error_term_groups
+	 * @covers \AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect()
+	 * @covers \AMP_Validated_URL_Post_Type::garbage_collect_validated_urls()
+	 *
+	 * @param int $term_group
+	 */
+	public function test_is_post_safe_to_garbage_collect_with_reviewed_or_kept_errors( $term_group, $add_fresh ) {
+		$vanilla_post_id = $this->create_vanilla_post();
+
+		$errors = [
+			[ 'code' => 'foo' ],
+			[ 'code' => 'bar' ],
+			[ 'code' => 'baz' ],
+		];
+
+		$stale_post_id = AMP_Validated_URL_Post_Type::store_validation_errors( $errors, home_url( '/stale/' ) );
+		$this->update_post_date( $stale_post_id, strtotime( '2 weeks ago' ) );
+		$this->touch_validated_environment();
+		$this->assertNotEmpty( AMP_Validated_URL_Post_Type::get_post_staleness( $stale_post_id ) );
+
+		$fresh_post_id = null;
+		if ( $add_fresh ) {
+			$fresh_post_id = AMP_Validated_URL_Post_Type::store_validation_errors( $errors, home_url( '/fresh/' ) );
+			$this->assertEmpty( AMP_Validated_URL_Post_Type::get_post_staleness( $fresh_post_id ) );
+		}
+
+		$term_ids = wp_get_post_terms( $stale_post_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'fields' => 'ids' ] );
+		$this->assertCount( 3, $term_ids );
+
+		$expected_count = $add_fresh ? 2 : 1;
+		foreach ( $term_ids as $term_id ) {
+			$this->assertCount(
+				$expected_count,
+				get_objects_in_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG )
+			);
+		}
+
+		// Update the term group for the first term.
+		wp_update_term(
+			$term_ids[0],
+			AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+			compact( 'term_group' )
+		);
+
+		if ( $add_fresh ) {
+			$this->assertFalse( AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect( get_post( $fresh_post_id ) ) );
+			$this->assertTrue( AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect( get_post( $stale_post_id ) ) );
+		} else {
+			$this->assertFalse( AMP_Validated_URL_Post_Type::is_post_safe_to_garbage_collect( get_post( $stale_post_id ) ) );
+		}
+
+		// Since this only garbage-collects posts that are older then 1 week, the new one will remain.
+		AMP_Validated_URL_Post_Type::garbage_collect_validated_urls();
+
+		if ( $add_fresh ) {
+			$this->assertSame( 'publish', get_post_status( $fresh_post_id ) );
+			$this->assertFalse( get_post_status( $stale_post_id ) );
+		} else {
+			$this->assertSame( 'publish', get_post_status( $stale_post_id ) );
+		}
+
+		$this->assertSame( 'publish', get_post_status( $vanilla_post_id ) );
+	}
+
 	/**
 	 * Test get_validated_environment().
 	 *

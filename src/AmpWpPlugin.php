@@ -126,6 +126,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'url_validation_cron'                => URLValidationCron::class,
 		'url_validation_rest_controller'     => Validation\URLValidationRESTController::class,
 		'validated_url_stylesheet_gc'        => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+		'validated_data_gc'                  => BackgroundTask\ValidationDataGarbageCollection::class,
 		'validation.scannable_url_provider'  => ScannableURLProvider::class,
 		'validation.url_validation_provider' => URLValidationProvider::class,
 	];

@@ -1003,6 +1003,128 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
+	 * Garbage-collect validated URL posts.
+	 *
+	 * Now with Site Scanning in v2.2, the most recently published post will be validated on a weekly basis. If the user
+	 * never sees the list of Validated URLs--such as when the user doesn't have DevTools turned on--the end result is
+	 * a perpetual increase in the number of validated URLs. Over time this will result in validation data taking up
+	 * more and more of the database. When all of the validation errors associated with a validated URL are unreviewed,
+	 * or if all of the validation errors are related to other validated URLs as well, then there is no need to keep
+	 * the old validated URLs in perpetuity. They should be garbage-collected.
+	 *
+	 * @since 2.2
+	 *
+	 * @param int          $count  Count of batch size to delete. Default is 100.
+	 * @param string|array $before Date before which to find amp_validated_url posts to delete.
+	 *                             Accepts strtotime()-compatible string, or array of 'year', 'month', 'day' values.
+	 * @return int Count of deleted posts.
+	 */
+	public static function garbage_collect_validated_urls( $count = 100, $before = '1 week ago' ) {
+		$deleted = 0;
+
+		// The random order in this query is needed in case the oldest 100 URLs end up not being eligible for garbage-
+		// collection. In that case, garbage collection would get stuck. So by getting a random set of validated URLs
+		// we can prevent the garbage collection from ceasing to function.
+		$query = new WP_Query(
+			[
+				'post_type'      => self::POST_TYPE_SLUG,
+				'orderby'        => 'rand', // phpcs:ignore WordPressVIPMinimum.Performance.OrderByRand.orderby_orderby -- Due to garbage collection, there should not be more than a dozen posts.
+				'posts_per_page' => $count,
+				'date_query'     => [
+					[
+						'before' => $before,
+					],
+				],
+			]
+		);
+		foreach ( $query->get_posts() as $post ) {
+			if ( ! self::is_post_safe_to_garbage_collect( $post ) ) {
+				continue;
+			}
+
+			if ( wp_delete_post( $post->ID ) ) {
+				$deleted++;
+			}
+		}
+
+		return $deleted;
+	}
+
+	/**
+	 * Check whether an amp_validated_url post is safe to garbage-collect.
+	 *
+	 * @since 2.2
+	 *
+	 * @param WP_Post $validated_url_post Validated URL post.
+	 * @return bool Whether safe to garbage-collect.
+	 */
+	public static function is_post_safe_to_garbage_collect( WP_Post $validated_url_post ) {
+		// Check sanity.
+		if ( self::POST_TYPE_SLUG !== $validated_url_post->post_type ) {
+			return false;
+		}
+
+		// Skip non-stale validated URLs.
+		if ( count( self::get_post_staleness( $validated_url_post ) ) === 0 ) {
+			return false;
+		}
+
+		$validation_error_terms = wp_get_post_terms( $validated_url_post->ID, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		if ( ! is_array( $validation_error_terms ) ) {
+			return false;
+		}
+
+		/** @var WP_Term[] $validation_error_terms */
+		foreach ( $validation_error_terms as $validation_error_term ) {
+			// If this error is associated with other URL(s), the reference count will remain non-zero if this validated
+			// URL is garbage-collected, and thus the term will not be removed as part of the Clear Empty operation.
+			if ( $validation_error_term->count > 1 ) {
+				continue;
+			}
+
+			// If the validation error has been reviewed (aka acknowledged), then check to make sure that the
+			// validation error is associated with at least one other URL. This is so that when a user clicks
+			// Clear Empty they won't inadvertently clear out the reviewed validation error terms. This is only
+			// relevant when the user has DevTools turned on, as this is the way that a term could have the
+			// reviewed state in the first place.
+			if (
+				in_array(
+					$validation_error_term->term_group,
+					[
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+					],
+					true
+				)
+			) {
+				// This URL is the only one that is associated with the term, so it's not safe to garbage collect.
+				return false;
+			}
+
+			// If the term's removal status is not the same as the default removed status for the validation
+			// error, and this is the only instance of that validation error for a URL, then skip removing the URL.
+			$is_sanitized = in_array(
+				$validation_error_term->term_group,
+				[
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+				],
+				true
+			);
+			$error_data   = json_decode( $validation_error_term->description, true );
+			if (
+				is_array( $error_data )
+				&&
+				AMP_Validation_Manager::is_sanitization_auto_accepted( $error_data ) !== $is_sanitized
+			) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get recent validation errors by source.
 	 *
 	 * @since 2.0
