@@ -250,31 +250,49 @@ final class Sandboxing implements Service, Registerable {
 
 		$this->remove_required_amp_markup_if_not_used( $dom, $effective_sandboxing_level );
 
-		$amp_admin_bar_menu_item = $dom->xpath->query( '//div[ @id = "wpadminbar" ]//li[ @id = "wp-admin-bar-amp" ]/a' )->item( 0 );
+		$amp_admin_bar_menu_item = $dom->xpath->query( '//div[ @id = "wpadminbar" ]//li[ @id = "wp-admin-bar-amp" ]' )->item( 0 );
 		if ( $amp_admin_bar_menu_item instanceof Element ) {
-			$span = $dom->createElement( Tag::SPAN );
-			$span->setAttribute(
-				Attribute::TITLE,
-				sprintf(
-					/* translators: %d is the effective sandboxing level */
-					__( 'Effective sandboxing level: %d', 'amp' ),
-					$effective_sandboxing_level
-				)
-			);
+
 			switch ( $effective_sandboxing_level ) {
 				case 1:
-					$text = '1️⃣';
+					$text  = '1️⃣';
+					$title = __( 'Sandboxing level: Loose (1)', 'amp' );
 					break;
 				case 2:
-					$text = '2️⃣';
+					$text  = '2️⃣';
+					$title = __( 'Sandboxing level: Moderate (2)', 'amp' );
 					break;
 				default:
-					$text = '3️⃣';
+					$text  = '3️⃣';
+					$title = __( 'Sandboxing level: Strict (3)', 'amp' );
 					break;
 			}
-			$span->textContent = $text;
-			$amp_admin_bar_menu_item->appendChild( $dom->createTextNode( ' ' ) );
-			$amp_admin_bar_menu_item->appendChild( $span );
+
+			$amp_link = $dom->xpath->query( './a', $amp_admin_bar_menu_item )->item( 0 );
+			if ( $amp_link instanceof Element ) {
+				$span = $dom->createElement( Tag::SPAN );
+				$amp_link->appendChild( $dom->createTextNode( ' ' ) );
+				$span->textContent = $text;
+				$span->setAttribute( Attribute::TITLE, $title );
+				$amp_link->appendChild( $span );
+			}
+
+			$amp_submenu_ul = $dom->xpath->query( './div/ul[ @id = "wp-admin-bar-amp-default" ]', $amp_admin_bar_menu_item )->item( 0 );
+			if ( $amp_submenu_ul instanceof Element ) {
+				$level_li = $dom->createElement( Tag::LI );
+				$level_li->setAttribute( Attribute::ID, 'wp-admin-bar-amp-sandboxing-level' );
+				$link = $dom->createElement( Tag::A );
+				$link->setAttribute( Attribute::CLASS_, 'ab-item' );
+				if ( current_user_can( 'manage_options' ) ) {
+					$link->setAttribute(
+						Attribute::HREF,
+						add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) . '#sandboxing'
+					);
+				}
+				$link->textContent = $title;
+				$level_li->appendChild( $link );
+				$amp_submenu_ul->appendChild( $level_li );
+			}
 		}
 	}
 }
