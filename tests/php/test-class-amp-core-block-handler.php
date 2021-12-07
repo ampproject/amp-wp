@@ -447,12 +447,12 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 */
 	public function get_navigation_block_submenu_open_on_click_data() {
 		return [
-			'never'  => [
+			'never-with-one-dropdown'  => [
 				'
 				<nav class="wp-block-navigation">
 					<ul class="wp-block-navigation__container">
 						<li class="wp-block-navigation-item wp-block-navigation-link">
-							<a class="wp-block-navigation-item__content" href="http://localhost.develop"><span class="wp-block-navigation-item__label">Home</span></a>
+							<a class="wp-block-navigation-item__content" href="https://example.com"><span class="wp-block-navigation-item__label">Home</span></a>
 						</li>
 						<li class="wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
 							<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false">
@@ -463,24 +463,54 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 							</button>
 							<ul class="wp-block-navigation__submenu-container">
 								<li class="wp-block-navigation-item wp-block-navigation-link">
-									<a class="wp-block-navigation-item__content" href="http://localhost.develop/2021/11/24/archives-block/"><span class="wp-block-navigation-item__label">Archives block</span></a>
-								</li>
-								<li class="wp-block-navigation-item wp-block-navigation-link">
-									<a class="wp-block-navigation-item__content" href="http://localhost.develop/2021/11/24/just-empty-post/"><span class="wp-block-navigation-item__label">Just empty post</span></a>
-								</li>
-								<li class="wp-block-navigation-item wp-block-navigation-link">
-									<a class="wp-block-navigation-item__content" href="http://localhost.develop/2021/11/22/test-bad-shortcode/"><span class="wp-block-navigation-item__label">Test bad shortcode</span></a>
-								</li>
-								<li class="wp-block-navigation-item current-menu-item wp-block-navigation-link">
-									<a class="wp-block-navigation-item__content" href="http://localhost.develop/2021/11/11/responsive-menu/" aria-current="page"><span class="wp-block-navigation-item__label">Responsive menu</span></a>
-								</li>
-								<li class="wp-block-navigation-item wp-block-navigation-link">
-									<a class="wp-block-navigation-item__content" href="http://localhost.develop/2021/10/27/test-embeds/"><span class="wp-block-navigation-item__label">Test embeds</span></a>
+									<a class="wp-block-navigation-item__content" href="https://example.com/2021/11/24/archives-block/"><span class="wp-block-navigation-item__label">Archives block</span></a>
 								</li>
 							</ul>
 						</li>
 						<li class="wp-block-navigation-item wp-block-navigation-link">
-							<a class="wp-block-navigation-item__content" href="http://localhost.develop/sample-page/"><span class="wp-block-navigation-item__label">Sample Page</span></a>
+							<a class="wp-block-navigation-item__content" href="https://example.com/sample-page/"><span class="wp-block-navigation-item__label">Sample Page</span></a>
+						</li>
+					</ul>
+				</nav>
+				',
+				[
+					'attrs' => [
+						'overlayMenu' => 'never',
+					],
+				],
+			],
+			'never-with-two-dropdowns' => [
+				'
+				<nav class="wp-block-navigation">
+					<ul class="wp-block-navigation__container">
+						<li class="wp-block-navigation-item wp-block-navigation-link">
+							<a class="wp-block-navigation-item__content" href="https://example.com"><span class="wp-block-navigation-item__label">Home</span></a>
+						</li>
+						<li class="wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+							<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false">
+								<span class="wp-block-navigation-item__label">Posts</span>
+								<span class="wp-block-navigation__submenu-icon">
+									<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg>
+								</span>
+							</button>
+							<ul class="wp-block-navigation__submenu-container">
+								<li class="wp-block-navigation-item wp-block-navigation-link">
+									<a class="wp-block-navigation-item__content" href="https://example.com/2021/11/24/archives-block/"><span class="wp-block-navigation-item__label">Archives block</span></a>
+								</li>
+							</ul>
+						</li>
+						<li class="wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+							<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false">
+								<span class="wp-block-navigation-item__label">Posts</span>
+								<span class="wp-block-navigation__submenu-icon">
+									<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg>
+								</span>
+							</button>
+							<ul class="wp-block-navigation__submenu-container">
+								<li class="wp-block-navigation-item wp-block-navigation-link">
+									<a class="wp-block-navigation-item__content" href="https://example.com/2021/11/24/archives-block/"><span class="wp-block-navigation-item__label">Archives block</span></a>
+								</li>
+							</ul>
 						</li>
 					</ul>
 				</nav>
@@ -509,11 +539,33 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
 		}
 
-		$handler = new AMP_Core_Block_Handler();
-		$content = $handler->ampify_navigation_block( $block_content, $block );
-		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
+		$handler     = new AMP_Core_Block_Handler();
+		$content     = $handler->ampify_navigation_block( $block_content, $block );
+		$dom         = AMP_DOM_Utils::get_dom_from_content( $content );
+		$class_query = '//%1$s[ contains( concat( " ", normalize-space( @class ), " " ), " %2$s " ) ]';
+		$buttons     = $dom->xpath->query( sprintf( $class_query, 'button', 'wp-block-navigation-submenu__toggle' ) );
 
-		var_dump( $content );
+		foreach ( $buttons as $button_index => $button ) {
+			if ( ! $button instanceof DOMElement ) {
+				continue;
+			}
+
+			$this->assertTrue( $button->hasAttribute( 'aria-expanded' ) );
+			$this->assertEquals( 'false', $button->getAttribute( 'aria-expanded' ) );
+
+			$this->assertTrue( $button->hasAttribute( 'on' ) );
+			$this->assertEquals( sprintf( 'tap:AMP.setState({ toggle_1_%1$d: ! toggle_1_%1$d })', $button_index ), $button->getAttribute( 'on' ) );
+
+			$this->assertTrue( $button->hasAttribute( 'data-amp-bind-aria-expanded' ) );
+			$this->assertEquals( sprintf( "toggle_1_%d ? 'true' : 'false'", $button_index ), $button->getAttribute( 'data-amp-bind-aria-expanded' ) );
+
+			$amp_states = $dom->xpath->query( '//amp-state', $button );
+			$this->assertEquals( 1, $amp_states->length );
+
+			$amp_state = $amp_states->item( 0 );
+			$this->assertTrue( $amp_state->hasAttribute( 'id' ) );
+			$this->assertEquals( sprintf( 'toggle_1_%d', $button_index ), $amp_state->getAttribute( 'id' ) );
+		}
 	}
 
 	/**
