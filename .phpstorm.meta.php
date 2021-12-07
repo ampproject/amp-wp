@@ -54,7 +54,6 @@ namespace PHPSTORM_META {
 			'rest.scannable_urls_controller'     => \AmpProject\AmpWP\Validation\ScannableURLsRestController::class,
 			'rest.validation_counts_controller'  => \AmpProject\AmpWP\Validation\ValidationCountsRestController::class,
 			'sandboxing'                         => \AmpProject\AmpWP\Sandboxing::class,
-			'save_post_validation_event'         => \AmpProject\AmpWP\Validation\SavePostValidationEvent::class,
 			'server_timing'                      => \AmpProject\AmpWP\Instrumentation\ServerTiming::class,
 			'site_health_integration'            => \AmpProject\AmpWP\Admin\SiteHealth::class,
 			'support'                            => \AmpProject\AmpWP\Support\SupportCliCommand::class,
