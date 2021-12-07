@@ -76,7 +76,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Handle the comment reply script.
 		$comment_reply_script            = $this->get_comment_reply_script();
-		$should_ampify_comment_threading = false;
+		$should_ampify_comment_threading = 'always' === $this->args['ampify_comment_threading'];
 		if ( $comment_reply_script instanceof Element ) {
 			if ( 'never' === $this->args['ampify_comment_threading'] ) {
 				$this->prepare_native_comment_reply( $comment_reply_script );
