@@ -81,25 +81,35 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	/** @return array */
 	public function get_data_to_test_ampify_threaded_comments_always_and_conditionally() {
 		return [
-			'never'             => [
+			'never'                 => [
 				'ampify_comment_threading'        => 'never',
 				'comments_form_has_action_xhr'    => false,
 				'expect_ampify_comment_threading' => false,
+				'comment_reply_script_present'    => true,
 			],
-			'always'            => [
+			'always'                => [
 				'ampify_comment_threading'        => 'always',
 				'comments_form_has_action_xhr'    => true,
 				'expect_ampify_comment_threading' => true,
+				'comment_reply_script_present'    => true,
 			],
-			'conditionally_no'  => [
+			'always_without_script' => [
+				'ampify_comment_threading'        => 'always',
+				'comments_form_has_action_xhr'    => true,
+				'expect_ampify_comment_threading' => true,
+				'comment_reply_script_present'    => false,
+			],
+			'conditionally_no'      => [
 				'ampify_comment_threading'        => 'conditionally',
 				'comments_form_has_action_xhr'    => false,
 				'expect_ampify_comment_threading' => false,
+				'comment_reply_script_present'    => true,
 			],
-			'conditionally_yes' => [
+			'conditionally_yes'     => [
 				'ampify_comment_threading'        => 'conditionally',
 				'comments_form_has_action_xhr'    => true,
 				'expect_ampify_comment_threading' => true,
+				'comment_reply_script_present'    => true,
 			],
 		];
 	}
@@ -112,14 +122,14 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	 * @covers ::prepare_native_comment_reply()
 	 * @covers ::get_comment_reply_script()
 	 */
-	public function test_ampify_threaded_comments( $ampify_comment_threading, $comments_form_has_action_xhr, $expect_ampify_comment_threading ) {
+	public function test_ampify_threaded_comments( $ampify_comment_threading, $comments_form_has_action_xhr, $expect_ampify_comment_threading, $comment_reply_script_present ) {
 		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
 			$this->markTestSkipped( 'Skipping because the script ID attribute was added in WP 5.2.' );
 		}
 
 		update_option( 'thread_comments', '1' );
 		setup_postdata( get_the_ID() );
-		$dom = $this->get_document_with_comments( get_the_ID() );
+		$dom = $this->get_document_with_comments( get_the_ID(), false, $comment_reply_script_present );
 
 		$comment_form = $dom->getElementById( 'commentform' );
 		$this->assertInstanceOf( Element::class, $comment_form );
@@ -149,9 +159,13 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 		// Ensure initial state.
 		$this->assertFalse( $comment_form->hasAttribute( Attribute::ON ) );
 		$script = $dom->getElementById( 'comment-reply-js' );
-		$this->assertInstanceOf( Element::class, $script );
-		$this->assertInstanceOf( Element::class, $script->parentNode );
-		$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
+		if ( $comment_reply_script_present ) {
+			$this->assertInstanceOf( Element::class, $script );
+			$this->assertInstanceOf( Element::class, $script->parentNode );
+			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
+		} else {
+			$this->assertNull( $script );
+		}
 
 		// Sanitize.
 		foreach ( $sanitizers as $sanitizer ) {
@@ -171,10 +185,12 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 
 			$this->assertFalse( $style_sanitizer->get_arg( 'transform_important_qualifiers' ) );
 		} else {
-			$this->assertNull( $script->parentNode );
+			if ( $comment_reply_script_present ) {
+				$this->assertNull( $script->parentNode );
+			}
 
 			$json_script = $dom->xpath->query( '//amp-state[ @id = "ampCommentThreading" ]/script[ @type = "application/json" ]' )->item( 0 );
-			$this->assertInstanceOf( Element::class, $json_script );
+			$this->assertInstanceOf( Element::class, $json_script, 'Expected ampCommentThreading amp-state to be present.' );
 			$this->assertEquals(
 				[
 					'replyTo'       => '',
@@ -285,11 +301,12 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	/**
 	 * Get document with comments and comment form.
 	 *
-	 * @param int $post_id        Post ID.
-	 * @param bool $add_live_list Add live list.
+	 * @param int  $post_id                    Post ID.
+	 * @param bool $add_live_list              Add live list.
+	 * @param bool $print_comment_reply_script Whether to print the comment reply script.
 	 * @return Document
 	 */
-	protected function get_document_with_comments( $post_id, $add_live_list = false ) {
+	protected function get_document_with_comments( $post_id, $add_live_list = false, $print_comment_reply_script = true ) {
 		/** @var WP_Comment[] $comments */
 		$parent_comments = self::factory()->comment->create_post_comments( $post_id, 2 );
 		$reply_comments  = self::factory()->comment->create_post_comments(
@@ -311,7 +328,7 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 			echo '</amp-live-list>';
 		}
 		comment_form();
-		if ( get_option( 'thread_comments' ) ) {
+		if ( get_option( 'thread_comments' ) && $print_comment_reply_script ) {
 			wp_print_scripts( [ 'comment-reply' ] );
 		}
 		$html = ob_get_clean();
