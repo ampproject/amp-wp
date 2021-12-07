@@ -63,9 +63,43 @@ final class ValidationDataGarbageCollection extends RecurringBackgroundTask {
 	 * @return void
 	 */
 	public function process( ...$args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		AMP_Validated_URL_Post_Type::garbage_collect_validated_urls( 100, '1 week ago' );
 
-		// Finally, delete validation errors which may now be empty.
-		AMP_Validation_Error_Taxonomy::delete_empty_terms();
+		/**
+		 * Filters the count of eligible validated URLs that should be garbage collected.
+		 *
+		 * If this is filtered to be zero or less, then garbage collection is disabled.
+		 *
+		 * @since 2.2
+		 *
+		 * @param int $count Validated URL count. Default 100.
+		 */
+		$count = apply_filters( 'amp_validation_data_gc_url_count', 100 );
+		if ( $count <= 0 ) {
+			return;
+		}
+
+		/**
+		 * Filters the date before which validated URLs will be garbage collected.
+		 *
+		 * @since 2.2
+		 *
+		 * @param string|array $before Date before which to find amp_validated_url posts to delete. Default '1 week ago'.
+		 *                             Accepts strtotime()-compatible string, or array of 'year', 'month', 'day' values.
+		 */
+		$before = apply_filters( 'amp_validation_data_gc_before', '1 week ago' );
+
+		AMP_Validated_URL_Post_Type::garbage_collect_validated_urls( $count, $before );
+
+		/**
+		 * Filters whether to delete empty terms during validation garbage collection.
+		 *
+		 * @since 2.2
+		 *
+		 * @param bool $enabled Whether enabled. Default true.
+		 */
+		if ( apply_filters( 'amp_validation_data_gc_delete_empty_terms', true ) ) {
+			// Finally, delete validation errors which may now be empty.
+			AMP_Validation_Error_Taxonomy::delete_empty_terms();
+		}
 	}
 }
