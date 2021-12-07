@@ -22,6 +22,7 @@ use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use AMP_Options_Manager;
+use AMP_Validation_Manager;
 
 /**
  * Tests for OptionsMenu.
@@ -181,13 +182,38 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		$this->assertFalse( wp_style_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
 	}
 
+	/** @return array */
+	public function get_can_validate_data() {
+		return [
+			'can_validate'    => [ true ],
+			'cannot_validate' => [ false ],
+		];
+	}
+
 	/**
+	 * @dataProvider get_can_validate_data
 	 * @covers ::enqueue_assets()
 	 * @covers ::add_preload_rest_paths()
+	 *
+	 * @param bool $can_validate
 	 */
-	public function test_enqueue_assets_right_hook_suffix() {
+	public function test_enqueue_assets_right_hook_suffix( $can_validate ) {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		set_current_screen( $this->instance->screen_handle() );
+		if ( ! $can_validate ) {
+			add_filter(
+				'map_meta_cap',
+				function ( $caps, $cap ) {
+					if ( AMP_Validation_Manager::VALIDATE_CAPABILITY === $cap ) {
+						$caps[] = 'do_not_allow';
+					}
+					return $caps;
+				},
+				10,
+				3
+			);
+		}
+		$this->assertEquals( $can_validate, AMP_Validation_Manager::has_cap() );
 
 		$rest_preloader = $this->get_private_property( $this->instance, 'rest_preloader' );
 		$this->assertCount( 0, $this->get_private_property( $rest_preloader, 'paths' ) );
@@ -206,6 +232,11 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( 'var ampSettings', $script_before );
 		$this->assertStringContainsString( 'USER_FIELD_DEVELOPER_TOOLS_ENABLED', $script_before );
 		$this->assertStringContainsString( 'USERS_RESOURCE_REST_PATH', $script_before );
+		if ( $can_validate ) {
+			$this->assertStringContainsString( AMP_Validation_Manager::get_amp_validate_nonce(), $script_before );
+		} else {
+			$this->assertStringNotContainsString( AMP_Validation_Manager::get_amp_validate_nonce(), $script_before );
+		}
 
 		if ( function_exists( 'rest_preload_api_request' ) ) {
 			$this->assertEqualSets(

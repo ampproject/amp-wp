@@ -6,8 +6,6 @@ import {
 	APP_ROOT_ID,
 	OPTIONS_REST_PATH,
 	SCANNABLE_URLS_REST_PATH,
-	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-	USERS_RESOURCE_REST_PATH,
 	VALIDATE_NONCE,
 } from 'amp-site-scan-notice'; // From WP inline script.
 
@@ -26,7 +24,6 @@ import { ErrorContextProvider } from '../../components/error-context-provider';
 import { OptionsContextProvider } from '../../components/options-context-provider';
 import { PluginsContextProvider } from '../../components/plugins-context-provider';
 import { SiteScanContextProvider } from '../../components/site-scan-context-provider';
-import { UserContextProvider } from '../../components/user-context-provider';
 import { ErrorScreen } from '../../components/error-screen';
 import { ErrorBoundary } from '../../components/error-boundary';
 import { SiteScanNotice } from './notice';
@@ -52,20 +49,14 @@ function Providers( { children } ) {
 					optionsRestPath={ OPTIONS_REST_PATH }
 					populateDefaultValues={ false }
 				>
-					<UserContextProvider
-						onlyFetchIfPluginIsConfigured={ true }
-						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
-						usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
-					>
-						<PluginsContextProvider hasErrorBoundary={ true }>
-							<SiteScanContextProvider
-								scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
-								validateNonce={ VALIDATE_NONCE }
-							>
-								{ children }
-							</SiteScanContextProvider>
-						</PluginsContextProvider>
-					</UserContextProvider>
+					<PluginsContextProvider hasErrorBoundary={ true }>
+						<SiteScanContextProvider
+							scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
+							validateNonce={ VALIDATE_NONCE }
+						>
+							{ children }
+						</SiteScanContextProvider>
+					</PluginsContextProvider>
 				</OptionsContextProvider>
 			</ErrorBoundary>
 		</ErrorContextProvider>

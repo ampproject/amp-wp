@@ -41,6 +41,14 @@ describe( 'After plugin activation', () => {
 		await expect( page ).not.toMatchElement( '#amp-site-scan-notice .amp-site-scan-notice__cta' );
 	} );
 
+	it( 'site scan is not triggered if the user has no validation capability', async () => {
+		await activate( 'do-not-allow-amp-validate-capability' );
+
+		await expect( page ).not.toMatchElement( '#amp-site-scan-notice' );
+
+		await deactivate( 'do-not-allow-amp-validate-capability' );
+	} );
+
 	it.each( [
 		'with Gutenberg active',
 		'without Gutenberg active',
