@@ -14,7 +14,7 @@ Array keys are AMP element names and array values are their respective Javascrip
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:181](/includes/sanitizers/class-amp-base-sanitizer.php#L181-L183)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:238](/includes/sanitizers/class-amp-base-sanitizer.php#L238-L240)
 
 <details>
 <summary>Show Code</summary>

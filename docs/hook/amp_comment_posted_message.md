@@ -8,7 +8,7 @@ Filters the message when comment submitted success message when
 
 ### Source
 
-:link: [includes/class-amp-http.php:486](/includes/class-amp-http.php#L486)
+:link: [includes/class-amp-http.php:493](/includes/class-amp-http.php#L493)
 
 <details>
 <summary>Show Code</summary>

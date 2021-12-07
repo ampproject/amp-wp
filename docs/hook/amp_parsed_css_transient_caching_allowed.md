@@ -14,7 +14,7 @@ When this is filtered to be false, parsed CSS will not be stored in transients. 
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1627](/includes/amp-helper-functions.php#L1627)
+:link: [includes/amp-helper-functions.php:1645](/includes/amp-helper-functions.php#L1645)
 
 <details>
 <summary>Show Code</summary>

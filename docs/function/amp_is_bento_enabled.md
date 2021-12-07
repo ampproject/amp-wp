@@ -14,7 +14,7 @@ When Bento is enabled, newer experimental versions of AMP components are used wh
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:887](/includes/amp-helper-functions.php#L887-L900)
+:link: [includes/amp-helper-functions.php:912](/includes/amp-helper-functions.php#L912-L925)
 
 <details>
 <summary>Show Code</summary>

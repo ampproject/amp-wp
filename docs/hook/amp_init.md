@@ -8,7 +8,7 @@ Triggers on init when AMP plugin is active.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:116](/includes/amp-helper-functions.php#L116)
+:link: [includes/amp-helper-functions.php:119](/includes/amp-helper-functions.php#L119)
 
 <details>
 <summary>Show Code</summary>

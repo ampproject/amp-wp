@@ -16,7 +16,7 @@ This function cannot be called before the parse_query action because it needs to
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:796](/includes/amp-helper-functions.php#L796-L798)
+:link: [includes/amp-helper-functions.php:821](/includes/amp-helper-functions.php#L821-L823)
 
 <details>
 <summary>Show Code</summary>
