@@ -72,7 +72,7 @@ export function ThemesWithAmpIncompatibility( {
 			<SiteScanSourcesList
 				sources={ sources }
 				inactiveSourceNotice={ __( 'This theme has been deactivated since last site scan.' ) }
-				uninstalledSourceNotice={ __( 'This theme has been uninstalled or the themes data is not available.' ) }
+				uninstalledSourceNotice={ __( 'This theme has been uninstalled or its metadata is unavailable.' ) }
 			/>
 		</SiteScanResults>
 	);
