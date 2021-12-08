@@ -303,7 +303,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			),
 			'/wp/v2/plugins',
 			'/wp/v2/settings',
-			'/wp/v2/themes',
+			'/wp/v2/themes?status=active',
 			'/wp/v2/users/me',
 		];
 

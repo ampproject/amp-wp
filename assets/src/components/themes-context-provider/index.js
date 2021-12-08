@@ -62,7 +62,7 @@ export function ThemesContextProvider( {
 
 			try {
 				const fetchedThemes = await apiFetch( {
-					path: '/wp/v2/themes',
+					path: '/wp/v2/themes?status=active',
 				} );
 
 				if ( hasUnmounted.current === true ) {
