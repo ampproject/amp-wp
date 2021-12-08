@@ -93,8 +93,8 @@ function Providers( { children } ) {
 								updatesNonce={ UPDATES_NONCE }
 								wpAjaxUrl={ wpAjaxUrl }
 							>
-								<PluginsContextProvider hasErrorBoundary={ true }>
-									<ThemesContextProvider hasErrorBoundary={ true }>
+								<PluginsContextProvider>
+									<ThemesContextProvider>
 										<SiteScanContextProvider
 											fetchCachedValidationErrors={ true }
 											resetOnOptionsChange={ true }

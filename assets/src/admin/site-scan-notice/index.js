@@ -49,7 +49,7 @@ function Providers( { children } ) {
 					optionsRestPath={ OPTIONS_REST_PATH }
 					populateDefaultValues={ false }
 				>
-					<PluginsContextProvider hasErrorBoundary={ true }>
+					<PluginsContextProvider>
 						<SiteScanContextProvider
 							scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 							validateNonce={ VALIDATE_NONCE }
