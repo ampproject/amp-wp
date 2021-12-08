@@ -70,6 +70,25 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * @covers ::check_core_version()
+	 */
+	public function test_check_core_version() {
+
+		global $wp_version;
+
+		$original_wp_version = $wp_version;
+
+		$wp_version = '4.9';
+		$this->assertFalse( SupportScreen::check_core_version() );
+
+		$wp_version = '5.2';
+		$this->assertTrue( SupportScreen::check_core_version() );
+
+		$wp_version = $original_wp_version;
+		$this->assertTrue( SupportScreen::check_core_version() );
+	}
+
+	/**
 	 * @covers ::is_needed()
 	 * @covers ::has_cap()
 	 */
