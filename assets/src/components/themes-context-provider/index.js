@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { createContext, useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 export const Themes = createContext();
 
@@ -44,7 +45,9 @@ export function ThemesContextProvider( { children } ) {
 
 			try {
 				const fetchedThemes = await apiFetch( {
-					path: '/wp/v2/themes?status=active',
+					path: addQueryArgs( '/wp/v2/themes', {
+						_fields: [ 'author', 'name', 'status', 'stylesheet', 'version' ],
+					} ),
 				} );
 
 				if ( hasUnmounted.current === true ) {

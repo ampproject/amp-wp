@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { createContext, useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 export const Plugins = createContext();
 
@@ -44,7 +45,9 @@ export function PluginsContextProvider( { children } ) {
 
 			try {
 				const fetchedPlugins = await apiFetch( {
-					path: '/wp/v2/plugins',
+					path: addQueryArgs( '/wp/v2/plugins', {
+						_fields: [ 'author', 'name', 'plugin', 'status', 'version' ],
+					} ),
 				} );
 
 				if ( hasUnmounted.current === true ) {

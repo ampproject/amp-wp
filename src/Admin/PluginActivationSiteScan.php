@@ -182,7 +182,11 @@ final class PluginActivationSiteScan implements Conditional, Delayed, Service, R
 				],
 				'/amp/v1/scannable-urls'
 			),
-			'/wp/v2/plugins',
+			add_query_arg(
+				'_fields',
+				[ 'author', 'name', 'plugin', 'status', 'version' ],
+				'/wp/v2/plugins'
+			),
 			'/wp/v2/users/me',
 		];
 
