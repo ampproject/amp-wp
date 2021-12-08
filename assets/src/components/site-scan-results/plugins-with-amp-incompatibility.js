@@ -72,7 +72,7 @@ export function PluginsWithAmpIncompatibility( {
 			<SiteScanSourcesList
 				sources={ sources }
 				inactiveSourceNotice={ __( 'This plugin has been deactivated since last site scan.' ) }
-				uninstalledSourceNotice={ __( 'This plugin has been uninstalled since last site scan.' ) }
+				uninstalledSourceNotice={ __( 'This plugin has been uninstalled or the plugins data is not available.' ) }
 			/>
 		</SiteScanResults>
 	);
