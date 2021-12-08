@@ -128,6 +128,11 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertEquals( 9, has_action( 'plugins_loaded', '_amp_bootstrap_customizer' ) );
 
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
+		if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
+			$this->assertEquals( 1000, has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_script_loader_tag' ) );
+		} else {
+			$this->assertFalse( has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_script_loader_tag' ) );
+		}
 		$this->assertEquals( 10, has_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous' ) );
 		$this->assertEquals( 10, has_filter( 'all_plugins', 'amp_modify_plugin_description' ) );
 	}
@@ -143,6 +148,19 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		foreach ( self::BOOTSTRAPPED_FILTERS as $filter ) {
 			$this->assertFalse( has_filter( $filter ) );
 		}
+	}
+
+	/** @covers ::amp_ensure_id_attribute_script_loader_tag() */
+	public function test_amp_ensure_id_attribute_script_loader_tag() {
+		$this->assertEquals(
+			'<script id="foo-js" src="foo.js"></script>',
+			amp_ensure_id_attribute_script_loader_tag( '<script src="foo.js"></script>', 'foo' )
+		);
+
+		$this->assertEquals(
+			'<script src="foo.js" id="bar"></script>',
+			amp_ensure_id_attribute_script_loader_tag( '<script src="foo.js" id="bar"></script>', 'foo' )
+		);
 	}
 
 	/** @covers ::amp_init() */

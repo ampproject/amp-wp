@@ -951,9 +951,16 @@ class AMP_Validation_Manager {
 	 * @return bool
 	 */
 	protected static function is_matching_script( DOMElement $element, $script_handle ) {
+
+		// Use the ID attribute which was added to printed scripts after WP ?.?.
+		if ( $element->getAttribute( Attribute::ID ) === "{$script_handle}-js" ) {
+			return true;
+		}
+
 		if ( ! isset( wp_scripts()->registered[ $script_handle ] ) ) {
 			return false;
 		}
+
 		$script_dependency = wp_scripts()->registered[ $script_handle ];
 		if ( empty( $script_dependency->src ) ) {
 			return false;
@@ -1002,7 +1009,7 @@ class AMP_Validation_Manager {
 			&&
 			'link' === $node->nodeName
 			&&
-			preg_match( '/(?P<handle>.+)-css$/', (string) $node->getAttribute( 'id' ), $matches )
+			preg_match( '/(?P<handle>.+)-css$/', (string) $node->getAttribute( Attribute::ID ), $matches )
 			&&
 			wp_styles()->query( $matches['handle'] )
 		);
@@ -1047,9 +1054,9 @@ class AMP_Validation_Manager {
 			&&
 			$node->firstChild instanceof DOMText
 			&&
-			$node->hasAttribute( 'id' )
+			$node->hasAttribute( Attribute::ID )
 			&&
-			preg_match( '/^(?P<handle>.+)-inline-css$/', $node->getAttribute( 'id' ), $matches )
+			preg_match( '/^(?P<handle>.+)-inline-css$/', $node->getAttribute( Attribute::ID ), $matches )
 			&&
 			wp_styles()->query( $matches['handle'] )
 			&&
