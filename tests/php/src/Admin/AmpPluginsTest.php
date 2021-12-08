@@ -134,15 +134,22 @@ class AmpPluginsTest extends TestCase {
 	 * @covers ::is_needed()
 	 */
 	public function test_is_needed() {
+		global $wp_version;
+		$original_wp_version = $wp_version;
 
 		// Test 1: Not admin request.
 		$this->assertFalse( AmpPlugins::is_needed() );
 
-		// Test 2: Admin request.
+		// Test 2: Check with older version of WordPress.
+		$wp_version = '4.9';
+		$this->assertFalse( AmpPlugins::is_needed() );
+
+		// Test 3: Admin request in supported WordPress .
+		$wp_version = '5.6';
 		set_current_screen( 'index.php' );
 		$this->assertTrue( AmpPlugins::is_needed() );
 
-		// Test 3: Filter disables.
+		// Test 4: Filter disables.
 		add_filter(
 			'amp_compatible_ecosystem_shown',
 			static function ( $shown, $type ) {
@@ -158,6 +165,7 @@ class AmpPluginsTest extends TestCase {
 		$this->assertFalse( AmpPlugins::is_needed() );
 
 		set_current_screen( 'front' );
+		$wp_version = $original_wp_version;
 	}
 
 	/**

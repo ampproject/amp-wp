@@ -124,7 +124,6 @@ class SupportScreen implements Conditional, Delayed, Service, Registerable {
 			&&
 			is_admin()
 			&&
-			// Note: The view_site_health_checks capability was introduced in WordPress 5.2, so this will return false in older versions.
 			self::has_cap()
 		);
 	}
