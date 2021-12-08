@@ -101,7 +101,7 @@ Please see the [FAQs on amp-wp.org](https://amp-wp.org/documentation/frequently-
 
 ### Preview how your site looks across desktop and mobile before finalising changes.
 
-![Preview how your site looks across desktop and mobile before finalising changes.](.wordpress-org/screenshot-4.png)
+![Preview how your site looks across desktop and mobile before finalising changes.](.wordpress-org/screenshot-7.png)
 
 ### Customize the design of AMP pages in the Customizer.
 
@@ -109,7 +109,7 @@ Please see the [FAQs on amp-wp.org](https://amp-wp.org/documentation/frequently-
 
 ### Reopen the onboarding wizard, change individual options, or manage advanced settings.
 
-![Reopen the onboarding wizard, change individual options, or manage advanced settings.](.wordpress-org/screenshot-6.png)
+![Reopen the onboarding wizard, change individual options, or manage advanced settings.](.wordpress-org/screenshot-8.png)
 
 ## Changelog
 
