@@ -670,10 +670,14 @@ class AMP_Validation_Manager {
 		// The `WP_Block_Type_Registry` class was added in WordPress 5.0.0. Because of that it sometimes caused issues
 		// on the AMP Validated URL screen when on WordPress 4.9.
 		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
-			add_filter( 'the_content', [
-				__CLASS__,
-				'add_block_source_comments'
-			], 8 ); // The do_blocks() function runs at priority 9.
+			add_filter(
+				'the_content',
+				[
+					__CLASS__,
+					'add_block_source_comments',
+				],
+				8
+			); // The do_blocks() function runs at priority 9.
 		}
 
 		add_filter( 'the_editor', [ __CLASS__, 'filter_the_editor_to_detect_sources' ] );
