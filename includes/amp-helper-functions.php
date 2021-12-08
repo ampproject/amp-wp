@@ -1172,16 +1172,22 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
  * @since 2.2
  * @internal
  *
- * @param string $tag    The <script> tag for the enqueued script.
+ * @param string $tag    The script tag for the enqueued script.
  * @param string $handle The script's registered handle.
  * @return string Filtered script.
  */
 function amp_ensure_id_attribute_script_loader_tag( $tag, $handle ) {
-	if ( false === strpos( $tag, ' id="' ) ) {
-		$tag = str_replace(
-			'<script ',
-			sprintf( '<script id="%s" ', esc_attr( "$handle-js" ) ),
-			$tag
+	if ( 0 !== strpos( $handle, 'amp-' ) ) {
+		$tag = preg_replace_callback(
+			'/(<script[>]*?\ssrc=["\'].*?["\'])([>]*?>)/',
+			static function ( $matches ) use ( $handle ) {
+				if ( false === strpos( $matches[0], 'id=' ) ) {
+					return $matches[1] . sprintf( ' id="%s"', esc_attr( "$handle-js" ) ) . $matches[2];
+				}
+				return $matches[0];
+			},
+			$tag,
+			1
 		);
 	}
 	return $tag;
