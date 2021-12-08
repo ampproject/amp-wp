@@ -157,6 +157,16 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			amp_ensure_id_attribute_script_loader_tag( '<script src="foo.js"></script>', 'foo' )
 		);
 
+		$this->assertEquals(
+			'<script data-before src="foo.js" id="foo-js" data-after></script>',
+			amp_ensure_id_attribute_script_loader_tag( '<script data-before src="foo.js" data-after></script>', 'foo' )
+		);
+
+		$this->assertEquals(
+			'<script type=\'text/javascript\' src=\'https://wordpress-stable.lndo.site/wp-includes/js/comment-reply.min.js?ver=5.0.14\' id="comment-reply-js"></script>',
+			amp_ensure_id_attribute_script_loader_tag( '<script type=\'text/javascript\' src=\'https://wordpress-stable.lndo.site/wp-includes/js/comment-reply.min.js?ver=5.0.14\'></script>', 'comment-reply' )
+		);
+
 		$inline_script_before = '<script>/* inline script id="hello" */</script>';
 		$inline_script_after  = '<script id="after">/* inline script */</script>';
 		$this->assertEquals(

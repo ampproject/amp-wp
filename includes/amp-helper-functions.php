@@ -1179,7 +1179,7 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
 function amp_ensure_id_attribute_script_loader_tag( $tag, $handle ) {
 	if ( 0 !== strpos( $handle, 'amp-' ) ) {
 		$tag = preg_replace_callback(
-			'/(<script[>]*?\ssrc=["\'].*?["\'])([>]*?>)/',
+			'/(<script[^>]*?\ssrc=["\'].*?["\'])([^>]*?>)/',
 			static function ( $matches ) use ( $handle ) {
 				if ( false === strpos( $matches[0], 'id=' ) ) {
 					return $matches[1] . sprintf( ' id="%s"', esc_attr( "$handle-js" ) ) . $matches[2];
