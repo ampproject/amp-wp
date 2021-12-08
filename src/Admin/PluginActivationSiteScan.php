@@ -13,11 +13,11 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AMP_Validation_Manager;
-use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Services;
 
 /**
  * Class PluginActivationSiteScan
@@ -66,6 +66,8 @@ final class PluginActivationSiteScan implements Conditional, Delayed, Service, R
 
 		return (
 			is_admin()
+			&&
+			Services::get( 'dependency_support' )->has_support()
 			&&
 			! is_network_admin()
 			&&

@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Services;
 use WP_Screen;
 use function get_current_screen;
 use stdClass;
@@ -60,6 +61,10 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
+
+		if ( ! Services::get( 'dependency_support' )->has_support() ) {
+			return false;
+		}
 
 		/** This filter is documented in src/Admin/AmpThemes.php */
 		return is_admin() && apply_filters( 'amp_compatible_ecosystem_shown', true, 'plugins' );
