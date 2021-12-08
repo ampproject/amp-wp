@@ -11,7 +11,8 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use WP_Error;
 
 /**
@@ -23,7 +24,9 @@ use WP_Error;
  *
  * @coversDefaultClass \AmpProject\AmpWP\DevTools\UserAccess
  */
-class UserAccessTest extends TestCase {
+class UserAccessTest extends DependencyInjectedTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Test instance.
@@ -35,7 +38,7 @@ class UserAccessTest extends TestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->dev_tools_user_access = new UserAccess();
+		$this->dev_tools_user_access = $this->injector->make( UserAccess::class );
 	}
 
 	/**
@@ -61,12 +64,14 @@ class UserAccessTest extends TestCase {
 		$admin_user  = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
 		$editor_user = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
 
-		$this->assertTrue( $this->dev_tools_user_access->is_user_enabled( $admin_user ) );
-		$this->assertTrue( $this->dev_tools_user_access->is_user_enabled( $admin_user->ID ) );
+		$has_dependency_support = $this->get_private_property( $this->dev_tools_user_access, 'dependency_support' )->has_support();
+
+		$this->assertEquals( $has_dependency_support, $this->dev_tools_user_access->is_user_enabled( $admin_user ) );
+		$this->assertEquals( $has_dependency_support, $this->dev_tools_user_access->is_user_enabled( $admin_user->ID ) );
 		$this->assertFalse( $this->dev_tools_user_access->is_user_enabled( $editor_user ) );
 		$this->assertFalse( $this->dev_tools_user_access->is_user_enabled( $editor_user->ID ) );
 		wp_set_current_user( $admin_user->ID );
-		$this->assertTrue( $this->dev_tools_user_access->is_user_enabled() );
+		$this->assertEquals( $has_dependency_support, $this->dev_tools_user_access->is_user_enabled() );
 		$this->dev_tools_user_access->set_user_enabled( $admin_user, false );
 		$this->assertFalse( $this->dev_tools_user_access->is_user_enabled() );
 		wp_set_current_user( $editor_user->ID );
