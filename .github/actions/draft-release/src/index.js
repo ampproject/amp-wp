@@ -23,7 +23,7 @@ async function main() {
 			throw new Error('Unable to parse Version from plugin bootstrap PHP file.');
 		}
 
-		if (!tagName.startsWith(milestone)) {
+		if (!tagName.startsWith(milestone.replace(/^v/, ''))) {
 			throw new Error('Milestone mismatch with PHP plugin bootstrap version.');
 		}
 
