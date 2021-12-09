@@ -143,7 +143,9 @@ class URLValidationRESTControllerTest extends DependencyInjectedTestCase {
 				],
 				'post',
 				'administrator',
-				version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ? 'amp_post_preview_denied' : 'rest_invalid_param',
+				( new DependencySupport() )->has_support()
+					? ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ? 'amp_post_preview_denied' : 'rest_invalid_param' )
+					: 'amp_rest_no_dev_tools',
 			],
 
 			'bad_preview2' => [

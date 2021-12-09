@@ -70,9 +70,12 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		} else {
 			$this->assertFalse( $amp_post_type->show_in_menu );
 		}
-		$this->assertTrue( $amp_post_type->show_in_admin_bar );
+		$this->assertEquals( ( new DependencySupport() )->has_support(), $amp_post_type->show_in_admin_bar );
 		$this->assertStringNotContainsString( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
-		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'update_validated_url_menu_item' ] ) );
+		$this->assertEquals(
+			( new DependencySupport() )->has_support() ? 10 : false,
+			has_action( 'admin_menu', [ self::TESTED_CLASS, 'update_validated_url_menu_item' ] )
+		);
 
 		// Make sure that add_admin_hooks() gets called.
 		set_current_screen( 'index.php' );
