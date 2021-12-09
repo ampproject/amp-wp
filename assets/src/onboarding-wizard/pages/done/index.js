@@ -48,7 +48,7 @@ export function Done() {
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
-	const { isFetchingScannableUrls } = useContext( SiteScan );
+	const { fetchScannableUrls, isCompleted, isFetchingScannableUrls } = useContext( SiteScan );
 	const {
 		hasPreview,
 		isPreviewingAMP,
@@ -75,6 +75,15 @@ export function Done() {
 			saveOptions();
 		}
 	}, [ didSaveOptions, saveOptions, savingOptions ] );
+
+	/**
+	 * Refetches the scannable URLs after options are saved.
+	 */
+	useEffect( () => {
+		if ( didSaveOptions && isCompleted && ! isFetchingScannableUrls ) {
+			fetchScannableUrls();
+		}
+	}, [ didSaveOptions, fetchScannableUrls, isCompleted, isFetchingScannableUrls ] );
 
 	/**
 	 * Triggers saving of user options on arrival of this screen.
