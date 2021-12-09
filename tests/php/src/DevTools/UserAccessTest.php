@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Tests\DevTools;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
@@ -219,13 +220,19 @@ class UserAccessTest extends DependencyInjectedTestCase {
 		$this->assertFalse( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
 
 		$user->set_role( 'administrator' );
-		$this->assertTrue( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
+		$this->assertEquals(
+			( new DependencySupport() )->has_support(),
+			$this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] )
+		);
 
 		update_user_meta( $user->ID, 'amp_dev_tools_enabled', 'false' );
 		$this->assertFalse( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
 
 		update_user_meta( $user->ID, 'amp_dev_tools_enabled', 'true' );
-		$this->assertTrue( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
+		$this->assertEquals(
+			( new DependencySupport() )->has_support(),
+			$this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] )
+		);
 	}
 
 	/**

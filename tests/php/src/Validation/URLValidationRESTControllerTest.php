@@ -7,10 +7,10 @@
 
 namespace AmpProject\AmpWP\Tests\Validation;
 
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
-use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\URLValidationRESTController;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -78,7 +78,12 @@ class URLValidationRESTControllerTest extends DependencyInjectedTestCase {
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->user_access->set_user_enabled( wp_get_current_user(), true );
-		$this->assertTrue( $this->controller->create_item_permissions_check( new WP_REST_Request( 'POST', '/amp/v1/validate-post-url/' ) ) );
+		$value = $this->controller->create_item_permissions_check( new WP_REST_Request( 'POST', '/amp/v1/validate-post-url/' ) );
+		if ( ( new DependencySupport() )->has_support() ) {
+			$this->assertTrue( $value );
+		} else {
+			$this->assertWPError( $value );
+		}
 	}
 
 	/** @covers ::is_valid_preview_nonce() */
@@ -148,7 +153,7 @@ class URLValidationRESTControllerTest extends DependencyInjectedTestCase {
 				],
 				'post',
 				'administrator',
-				'amp_post_preview_denied',
+				( new DependencySupport() )->has_support() ? 'amp_post_preview_denied' : 'amp_rest_no_dev_tools',
 			],
 
 			'post_id'      => [
@@ -198,7 +203,11 @@ class URLValidationRESTControllerTest extends DependencyInjectedTestCase {
 		$request->set_body_params( $params );
 		$response = rest_get_server()->dispatch( $request );
 
-		if ( true === $expected_validity ) {
+		if ( ! ( new DependencySupport() )->has_support() && true === $expected_validity ) {
+			$this->assertTrue( $response->is_error() );
+			$error = $response->as_error();
+			$this->assertEquals( 'amp_rest_no_dev_tools', $error->get_error_code() );
+		} elseif ( true === $expected_validity ) {
 			$this->assertFalse( $response->is_error() );
 			$data = $response->get_data();
 
