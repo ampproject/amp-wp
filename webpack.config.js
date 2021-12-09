@@ -202,7 +202,6 @@ const wpPolyfills = {
 		).handle }.js`,
 		path: path.resolve( __dirname, 'assets/js' ),
 		library: [ 'wp', '[name]' ],
-		libraryTarget: 'this',
 	},
 	plugins: [
 		new DependencyExtractionWebpackPlugin( {
