@@ -835,6 +835,22 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 			],
 			$new_env['options']
 		);
+
+		$reader_theme = wp_get_theme( 'twentysixteen' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme->get_stylesheet() );
+		$reader_env = AMP_Validated_URL_Post_Type::get_validated_environment();
+		$this->assertEquals( [ $reader_theme->get_stylesheet() => $reader_theme->get( 'Version' ) ], $reader_env['theme'] );
+		$this->assertEquals(
+			[
+				Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
+				Option::ALL_TEMPLATES_SUPPORTED => false,
+				Option::READER_THEME            => $reader_theme->get_stylesheet(),
+				Option::SUPPORTED_POST_TYPES    => [ 'post', 'page' ],
+				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
+			],
+			$reader_env['options']
+		);
 	}
 
 	/**
