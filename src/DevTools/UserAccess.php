@@ -12,6 +12,7 @@ namespace AmpProject\AmpWP\DevTools;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Validation_Manager;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -25,6 +26,18 @@ use WP_User;
  * @internal
  */
 final class UserAccess implements Service, Registerable {
+
+	/** @var DependencySupport */
+	private $dependency_support;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param DependencySupport $dependency_support DependencySupport instance.
+	 */
+	public function __construct( DependencySupport $dependency_support ) {
+		$this->dependency_support = $dependency_support;
+	}
 
 	/**
 	 * User meta key enabling or disabling developer tools.
@@ -50,6 +63,14 @@ final class UserAccess implements Service, Registerable {
 	 * @return bool Whether developer tools are enabled for the user.
 	 */
 	public function is_user_enabled( $user = null ) {
+		// Note: This is somewhat of a shortcut for blocking access to the validation UI on unsupported versions of WP.
+		// It works because we're already using this method in many places to check if the user interface should be
+		// shown, and its the user interface which is particularly problematic on older versions of WP due to the
+		// JavaScript dependencies.
+		if ( ! $this->dependency_support->has_support() ) {
+			return false;
+		}
+
 		if ( null === $user ) {
 			$user = wp_get_current_user();
 		} elseif ( ! $user instanceof WP_User ) {

@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\DevTools\UserAccess;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
@@ -58,7 +59,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$this->assertFalse( $taxonomy_object->show_tagcloud );
 		$this->assertFalse( $taxonomy_object->show_in_quick_edit );
 		$this->assertFalse( $taxonomy_object->hierarchical );
-		$this->assertTrue( $taxonomy_object->show_in_menu );
+		$this->assertEquals( ( new DependencySupport() )->has_support(), $taxonomy_object->show_in_menu );
 		$this->assertFalse( $taxonomy_object->meta_box_cb );
 		$this->assertEquals( 'AMP Validation Error Index', $taxonomy_object->label );
 		$this->assertEquals( 'do_not_allow', $taxonomy_object->cap->assign_terms );
@@ -565,7 +566,10 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$this->assertEquals( 10, has_filter( 'terms_clauses', [ self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ self::TESTED_CLASS, 'add_admin_notices' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', [ self::TESTED_CLASS, 'filter_tag_row_actions' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ] ) );
+		$this->assertEquals(
+			( new DependencySupport() )->has_support() ? 10 : false,
+			has_action( 'admin_menu', [ self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ] )
+		);
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_custom_column', [ self::TESTED_CLASS, 'filter_manage_custom_columns' ] ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', [ self::TESTED_CLASS, 'add_single_post_sortable_columns' ] ) );
 		$this->assertEquals( 10, has_filter( 'posts_where', [ self::TESTED_CLASS, 'filter_posts_where_for_validation_error_status' ] ) );
