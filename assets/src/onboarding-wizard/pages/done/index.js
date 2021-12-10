@@ -3,6 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect } from '@wordpress/element';
+import { usePrevious } from '@wordpress/compose';
 
 /**
  * External dependencies
@@ -48,7 +49,7 @@ export function Done() {
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
-	const { fetchScannableUrls, isCompleted, isFetchingScannableUrls } = useContext( SiteScan );
+	const { fetchScannableUrls, isFetchingScannableUrls } = useContext( SiteScan );
 	const {
 		hasPreview,
 		isPreviewingAMP,
@@ -79,11 +80,12 @@ export function Done() {
 	/**
 	 * Refetches the scannable URLs after options are saved.
 	 */
+	const didFetchScannableUrls = usePrevious( isFetchingScannableUrls );
 	useEffect( () => {
-		if ( didSaveOptions && isCompleted && ! isFetchingScannableUrls ) {
+		if ( ! isFetchingScannableUrls && ! didFetchScannableUrls && didSaveOptions ) {
 			fetchScannableUrls();
 		}
-	}, [ didSaveOptions, fetchScannableUrls, isCompleted, isFetchingScannableUrls ] );
+	}, [ didFetchScannableUrls, didSaveOptions, fetchScannableUrls, isFetchingScannableUrls ] );
 
 	/**
 	 * Triggers saving of user options on arrival of this screen.
