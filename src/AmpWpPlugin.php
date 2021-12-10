@@ -69,6 +69,9 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @var string[]
 	 */
 	const SERVICES = [
+		// @todo This currently has to appear first to prevent a fatal error during activation. See <https://github.com/ampproject/amp-wp/pull/6773#discussion_r767010989>.
+		'dependency_support'                 => DependencySupport::class,
+
 		'admin.analytics_menu'               => Admin\AnalyticsOptionsSubmenu::class,
 		'admin.google_fonts'                 => Admin\GoogleFonts::class,
 		'admin.onboarding_menu'              => Admin\OnboardingWizardSubmenu::class,
@@ -91,7 +94,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'cli.validation_command'             => Cli\ValidationCommand::class,
 		'css_transient_cache.ajax_handler'   => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'        => BackgroundTask\MonitorCssTransientCaching::class,
-		'dependency_support'                 => DependencySupport::class,
 		'dev_tools.block_sources'            => DevTools\BlockSources::class,
 		'dev_tools.callback_reflection'      => DevTools\CallbackReflection::class,
 		'dev_tools.error_page'               => DevTools\ErrorPage::class,
