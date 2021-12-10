@@ -1193,7 +1193,13 @@ class AMP_Validated_URL_Post_Type {
 		$plugin_registry = Services::get( 'plugin_registry' );
 
 		$theme     = [];
-		$theme_obj = wp_get_theme();
+		$theme_obj = null;
+		if ( Services::get( 'reader_theme_loader' )->is_enabled() ) {
+			$theme_obj = Services::get( 'reader_theme_loader' )->get_reader_theme();
+		}
+		if ( ! $theme_obj instanceof WP_Theme ) {
+			$theme_obj = wp_get_theme();
+		}
 		if ( ! $theme_obj->errors() ) {
 			$theme[ $theme_obj->get_stylesheet() ] = $theme_obj->get( 'Version' );
 
