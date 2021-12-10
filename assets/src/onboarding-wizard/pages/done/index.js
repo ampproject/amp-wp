@@ -2,8 +2,7 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useEffect } from '@wordpress/element';
-import { usePrevious } from '@wordpress/compose';
+import { useContext, useEffect, useState } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -78,14 +77,15 @@ export function Done() {
 	}, [ didSaveOptions, saveOptions, savingOptions ] );
 
 	/**
-	 * Refetches the scannable URLs after options are saved.
+	 * Refetches the scannable URLs after options are saved for the first time.
 	 */
-	const didFetchScannableUrls = usePrevious( isFetchingScannableUrls );
+	const [ shouldRefetchScannableUrls, setShouldRefetchScannableUrls ] = useState( true );
 	useEffect( () => {
-		if ( ! isFetchingScannableUrls && ! didFetchScannableUrls && didSaveOptions ) {
+		if ( didSaveOptions && shouldRefetchScannableUrls ) {
 			fetchScannableUrls();
+			setShouldRefetchScannableUrls( false );
 		}
-	}, [ didFetchScannableUrls, didSaveOptions, fetchScannableUrls, isFetchingScannableUrls ] );
+	}, [ didSaveOptions, fetchScannableUrls, shouldRefetchScannableUrls ] );
 
 	/**
 	 * Triggers saving of user options on arrival of this screen.
