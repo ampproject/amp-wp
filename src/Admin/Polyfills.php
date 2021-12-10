@@ -172,7 +172,8 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable, Ha
 			'wp-components',
 			amp_get_asset_url( 'css/wp-components.css' ),
 			[],
-			'13.0.3'
+			// Ideally, the version number should be updated whenever the `@wordpress/components` package is bumped.
+			'19.1.3'
 		);
 	}
 

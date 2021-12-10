@@ -288,8 +288,8 @@ const settingsPage = {
 	...sharedConfig,
 	entry: {
 		'wp-api-fetch': './assets/src/polyfills/api-fetch.js',
-		'wp-components': '@wordpress/components/build-style/style.css',
 		'amp-settings': './assets/src/settings-page',
+
 	},
 	externals: {
 		'amp-settings': 'ampSettings',
@@ -388,7 +388,12 @@ const supportPage = {
 const styles = {
 	...sharedConfig,
 	entry: () => {
-		const entries = {};
+		const entries = {
+			// The `wp-components.css` is not available in WordPress 4.9 but we need it on the AMP Settings screen and
+			// in the Onboarding Wizard. It needs to be manually added to the build.
+			'wp-components': './node_modules/@wordpress/components/build-style/style.css',
+		};
+
 		const dir = './assets/css/src';
 		fs.readdirSync( dir ).forEach( ( fileName ) => {
 			const fullPath = `${ dir }/${ fileName }`;
