@@ -251,6 +251,9 @@ const onboardingWizard = {
 				switch ( handle ) {
 					case 'lodash':
 					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
+					case '@wordpress/url':
 					case '@wordpress/i18n':
 						return defaultRequestToHandle( handle );
 
@@ -262,6 +265,9 @@ const onboardingWizard = {
 				switch ( external ) {
 					case 'lodash':
 					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
+					case '@wordpress/url':
 					case '@wordpress/i18n':
 						return defaultRequestToExternal( external );
 
