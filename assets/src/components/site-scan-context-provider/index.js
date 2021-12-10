@@ -323,13 +323,18 @@ export function SiteScanContextProvider( {
 	 * that the suppressed table is updated with the latest validation errors.
 	 */
 	useEffect( () => {
-		if ( refetchPluginSuppressionOnScanComplete && status === STATUS_REFETCHING_PLUGIN_SUPPRESSION ) {
-			refetchPluginSuppression();
-			dispatch( {
-				type: ACTION_SET_STATUS,
-				status: STATUS_COMPLETED,
-			} );
+		if ( status !== STATUS_REFETCHING_PLUGIN_SUPPRESSION ) {
+			return;
 		}
+
+		if ( refetchPluginSuppressionOnScanComplete ) {
+			refetchPluginSuppression();
+		}
+
+		dispatch( {
+			type: ACTION_SET_STATUS,
+			status: STATUS_COMPLETED,
+		} );
 	}, [ refetchPluginSuppression, refetchPluginSuppressionOnScanComplete, status ] );
 
 	/**
