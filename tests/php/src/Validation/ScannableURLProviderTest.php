@@ -105,18 +105,51 @@ final class ScannableURLProviderTest extends TestCase {
 	 * @covers ::is_template_supported()
 	 */
 	public function test_count_urls_to_validate_in_legacy_reader_mode() {
-		$user_id = self::factory()->user->create();
-		$term_id = self::factory()->term->create( [ 'taxonomy' => 'category' ] );
-		$post_id = self::factory()->post->create(
+		$this->scannable_url_provider->set_limit_per_type( 1 );
+
+		$user_id  = self::factory()->user->create();
+		$term_id  = self::factory()->term->create( [ 'taxonomy' => 'category' ] );
+		$post_id  = self::factory()->post->create(
 			[
 				'post_type'   => 'post',
 				'post_author' => $user_id,
 				'tax_input'   => [ 'category' => $term_id ],
 			]
 		);
+		$page1_id = self::factory()->post->create( [ 'post_type' => 'page' ] );
+		$page2_id = self::factory()->post->create( [ 'post_type' => 'page' ] );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
+		$this->assertTrue( amp_is_legacy() );
+
+		// Test showing latest posts on front.
+		update_option( 'show_on_front', 'posts' );
+		$this->assertEqualSets(
+			[
+				get_permalink( $post_id ),
+				get_permalink( $page2_id ),
+			],
+			wp_list_pluck( $this->scannable_url_provider->get_urls(), 'url' )
+		);
+		$this->assertEqualSets(
+			[ 'is_singular' ],
+			array_keys(
+				array_filter(
+					$this->scannable_url_provider->get_supportable_templates(),
+					static function ( $supportable_template ) {
+						return ! empty( $supportable_template['supported'] );
+					}
+				)
+			)
+		);
+
+		// Test when there is a page_on_front and a page_on_front, but these pages do not have AMP enabled.
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $page1_id );
+		update_option( 'page_for_posts', $page2_id );
+		$this->assertFalse( amp_is_post_supported( $page1_id ) );
+		$this->assertFalse( amp_is_post_supported( $page2_id ) );
 
 		$this->assertEqualSets(
 			[
@@ -136,18 +169,20 @@ final class ScannableURLProviderTest extends TestCase {
 			)
 		);
 
-		$page1_id = self::factory()->post->create( [ 'page_type' => 'page' ] );
-		$page2_id = self::factory()->post->create( [ 'page_type' => 'page' ] );
-		update_option( 'show_on_front', 'page' );
-		update_option( 'page_on_front', $page1_id );
-		update_option( 'page_for_posts', $page2_id );
-
+		// Enable AMP for both page_on_front and page_on_front.
+		update_post_meta( $page1_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, AMP_Post_Meta_Box::ENABLED_STATUS );
+		update_post_meta( $page2_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, AMP_Post_Meta_Box::ENABLED_STATUS );
+		$this->assertTrue( amp_is_post_supported( $page1_id ) );
+		$this->assertTrue( amp_is_post_supported( $page2_id ) );
 		$this->assertEqualSets(
-			[
-				get_permalink( $post_id ),
-				get_permalink( $page1_id ),
-				get_permalink( $page2_id ),
-			],
+			array_unique(
+				[
+					get_permalink( $post_id ),
+					get_permalink( $page1_id ),
+					get_permalink( $page2_id ),
+					home_url( '/' ), // Same as $page1_id since page_on_front.
+				]
+			),
 			wp_list_pluck( $this->scannable_url_provider->get_urls(), 'url' )
 		);
 		$this->assertEqualSets(
