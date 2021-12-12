@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Services;
@@ -22,7 +23,7 @@ use stdClass;
  * @since 2.2
  * @internal
  */
-class AmpPlugins implements Conditional, Delayed, Service, Registerable {
+class AmpPlugins implements Conditional, Delayed, HasRequirements, Service, Registerable {
 
 	/**
 	 * Slug for amp-compatible.
@@ -53,6 +54,15 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	public static function get_registration_action() {
 
 		return 'current_screen';
+	}
+
+	/**
+	 * Get the list of service IDs required for this service to be registered.
+	 *
+	 * @return string[] List of required services.
+	 */
+	public static function get_requirements() {
+		return [ 'dependency_support' ];
 	}
 
 	/**
