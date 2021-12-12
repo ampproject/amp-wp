@@ -8,7 +8,9 @@ use AmpProject\AmpWP\Infrastructure\ServiceContainer;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer\SimpleServiceContainer;
 use AmpProject\AmpWP\Tests\Fixture\DummyService;
 use AmpProject\AmpWP\Tests\Fixture\DummyServiceBasedPlugin;
+use AmpProject\AmpWP\Tests\Fixture\DummyServiceWithCondition;
 use AmpProject\AmpWP\Tests\Fixture\DummyServiceWithDelay;
+use AmpProject\AmpWP\Tests\Fixture\DummyServiceWithReferencingCondition;
 use AmpProject\AmpWP\Tests\Fixture\DummyServiceWithRequirements;
 use AmpProject\AmpWP\Tests\TestCase;
 
@@ -63,7 +65,6 @@ final class ServiceBasedPluginTest extends TestCase {
 		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
 			->enableOriginalConstructor()
 			->setConstructorArgs( [ true, null, $container ] )
-			->setMethods()
 			->setMethodsExcept(
 				[
 					'register',
@@ -234,6 +235,87 @@ final class ServiceBasedPluginTest extends TestCase {
 		$this->assertInstanceof( DummyServiceWithDelay::class, $container->get( 'service_a' ) );
 		$this->assertTrue( $container->has( 'service_b' ) );
 		$this->assertInstanceof( DummyService::class, $container->get( 'service_b' ) );
+		$this->assertTrue( $container->has( 'service_with_requirements' ) );
+		$this->assertInstanceof( DummyServiceWithRequirements::class, $container->get( 'service_with_requirements' ) );
+	}
+
+	public function test_it_handles_conditions_for_requirements() {
+		$container = new SimpleServiceContainer();
+		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
+		                  ->enableOriginalConstructor()
+		                  ->setConstructorArgs( [ true, null, $container ] )
+		                  ->setMethodsExcept(
+			                  [
+				                  'collect_missing_requirements',
+				                  'register',
+				                  'register_services',
+				                  'requirements_are_met',
+				                  'get_container',
+				                  'get_service_classes',
+			                  ]
+		                  )
+		                  ->getMock();
+
+		$service_callback = static function ( $services ) {
+			return array_merge(
+				$services,
+				[
+					'service_with_requirements' => DummyServiceWithRequirements::class,
+					'service_a'                 => DummyServiceWithCondition::class,
+				]
+			);
+		};
+
+		add_filter( 'services', $service_callback );
+
+		$plugin->register();
+
+		$this->assertEquals( 4, count( $container ) );
+		$this->assertTrue( $container->has( 'service_a' ) );
+		$this->assertInstanceof( DummyServiceWithCondition::class, $container->get( 'service_a' ) );
+		$this->assertTrue( $container->has( 'service_b' ) );
+		$this->assertInstanceof( DummyService::class, $container->get( 'service_b' ) );
+		$this->assertTrue( $container->has( 'service_with_requirements' ) );
+		$this->assertInstanceof( DummyServiceWithRequirements::class, $container->get( 'service_with_requirements' ) );
+	}
+
+	public function test_it_handles_referencing_conditions_for_requirements() {
+		$container = new SimpleServiceContainer();
+		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
+		                  ->enableOriginalConstructor()
+		                  ->setConstructorArgs( [ true, null, $container ] )
+		                  ->setMethodsExcept(
+			                  [
+				                  'collect_missing_requirements',
+				                  'register',
+				                  'register_services',
+				                  'requirements_are_met',
+				                  'get_container',
+				                  'get_service_classes',
+			                  ]
+		                  )
+		                  ->getMock();
+
+		$service_callback = static function ( $services ) {
+			return array_merge(
+				$services,
+				[
+					'service_with_requirements' => DummyServiceWithRequirements::class,
+					'service_b'                 => DummyServiceWithReferencingCondition::class,
+					'service_a'                 => DummyService::class,
+				]
+			);
+		};
+
+		add_filter( 'services', $service_callback );
+
+		$plugin->register();
+
+		$this->assertEquals( 4, count( $container ) );
+		$this->assertTrue( $container->has( 'service_a' ) );
+		$this->assertInstanceof( DummyServiceWithReferencingCondition::class, $container->get( 'service_b' ) );
+		$this->assertTrue( $container->has( 'service_b' ) );
+		$this->assertInstanceof( DummyService::class, $container->get( 'service_a' ) );
 		$this->assertTrue( $container->has( 'service_with_requirements' ) );
 		$this->assertInstanceof( DummyServiceWithRequirements::class, $container->get( 'service_with_requirements' ) );
 	}
