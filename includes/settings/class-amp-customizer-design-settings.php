@@ -74,7 +74,7 @@ class AMP_Customizer_Design_Settings {
 	 */
 	public static function init_customizer() {
 		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			return; // @codeCoverageIgnore
+			return;
 		}
 		add_action( 'amp_customizer_register_settings', [ __CLASS__, 'register_customizer_settings' ] );
 		add_action( 'amp_customizer_register_ui', [ __CLASS__, 'register_customizer_ui' ] );

@@ -11,7 +11,7 @@ use AmpProject\AmpWP\Tests\TestCase;
 /**
  * Class Test_AMP_Customizer_Design_Settings
  *
- * @covers AMP_Customizer_Design_Settings
+ * @coversDefaultClass \AMP_Customizer_Design_Settings
  */
 class Test_AMP_Customizer_Design_Settings extends TestCase {
 
@@ -20,26 +20,108 @@ class Test_AMP_Customizer_Design_Settings extends TestCase {
 		return parent::setUpBeforeClass();
 	}
 
+	/** @var string */
+	private $original_wp_version;
+
 	/**
-	 * Test is_amp_customizer_enabled().
+	 * Setup.
 	 *
-	 * @covers AMP_Customizer_Design_Settings::is_amp_customizer_enabled
+	 * @inheritDoc
 	 */
-	public function test_is_amp_customizer_enabled() {
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, 'foo' );
-		$this->assertEquals( false, AMP_Customizer_Design_Settings::is_amp_customizer_enabled() );
+	public function setUp() {
+		parent::setUp();
 
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		$this->assertEquals( true, AMP_Customizer_Design_Settings::is_amp_customizer_enabled() );
+		global $wp_version;
+		$this->original_wp_version = $wp_version;
+	}
 
-		add_filter( 'amp_customizer_is_enabled', '__return_false' );
-		$this->assertEquals( false, AMP_Customizer_Design_Settings::is_amp_customizer_enabled() );
+	/**
+	 * Tear down.
+	 *
+	 * @inheritDoc
+	 */
+	public function tearDown() {
+		parent::tearDown();
+
+		global $wp_version;
+		$wp_version = $this->original_wp_version;
+	}
+
+	/** @return array */
+	public function get_data_to_test_is_amp_customizer_enabled() {
+		return [
+			'transitional_mode' => [
+				static function () {
+					AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+				},
+				false,
+			],
+			'reader_mode'       => [
+				static function () {
+					AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+				},
+				true,
+			],
+			'filter_disabled'   => [
+				static function () {
+					AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+					add_filter( 'amp_customizer_is_enabled', '__return_false' );
+				},
+				false,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_is_amp_customizer_enabled
+	 * @covers ::is_amp_customizer_enabled()
+	 * @covers ::init()
+	 */
+	public function test_is_amp_customizer_enabled_and_init( callable $set_up, $enabled ) {
+		remove_all_actions( 'amp_customizer_init' );
+		remove_all_actions( 'amp_customizer_get_settings' );
+
+		$set_up();
+		$this->assertEquals( $enabled, AMP_Customizer_Design_Settings::is_amp_customizer_enabled() );
+		AMP_Customizer_Design_Settings::init();
+
+		$this->assertEquals( $enabled ? 10 : false, has_action( 'amp_customizer_init', [ AMP_Customizer_Design_Settings::class, 'init_customizer' ] ) );
+		$this->assertEquals( $enabled ? 10 : false, has_filter( 'amp_customizer_get_settings', [ AMP_Customizer_Design_Settings::class, 'append_settings' ] ) );
+
+	}
+
+	/** @return array */
+	public function get_data_to_test_init_customized() {
+		return [
+			'has_dependency_support'     => [ true ],
+			'not_has_dependency_support' => [ false ],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_init_customized
+	 * @covers ::init_customizer()
+	 */
+	public function test_init_customizer( $has_dependency_support ) {
+		remove_all_actions( 'amp_customizer_register_settings' );
+		remove_all_actions( 'amp_customizer_register_ui' );
+		remove_all_actions( 'amp_customizer_enqueue_preview_scripts' );
+
+		if ( $has_dependency_support ) {
+			$GLOBALS['wp_version'] = '5.6';
+		} else {
+			$GLOBALS['wp_version'] = '5.5';
+		}
+		AMP_Customizer_Design_Settings::init_customizer();
+		$this->assertEquals( $has_dependency_support ? 10 : false, has_action( 'amp_customizer_register_settings', [ AMP_Customizer_Design_Settings::class, 'register_customizer_settings' ] ) );
+		$this->assertEquals( $has_dependency_support ? 10 : false, has_action( 'amp_customizer_register_ui', [ AMP_Customizer_Design_Settings::class, 'register_customizer_ui' ] ) );
+		$this->assertEquals( $has_dependency_support ? 10 : false, has_action( 'amp_customizer_enqueue_preview_scripts', [ AMP_Customizer_Design_Settings::class, 'enqueue_customizer_preview_scripts' ] ) );
 	}
 
 	/**
 	 * Test register_customizer_settings().
 	 *
-	 * @covers AMP_Customizer_Design_Settings::register_customizer_settings
+	 * @covers ::register_customizer_settings()
 	 */
 	public function test_register_customizer_settings() {
 		$wp_customize = new WP_Customize_Manager();
@@ -58,7 +140,7 @@ class Test_AMP_Customizer_Design_Settings extends TestCase {
 	/**
 	 * Test register_customizer_ui().
 	 *
-	 * @covers AMP_Customizer_Design_Settings::register_customizer_ui
+	 * @covers ::register_customizer_ui()
 	 */
 	public function test_register_customizer_ui() {
 		$wp_customize = new WP_Customize_Manager();
@@ -98,7 +180,7 @@ class Test_AMP_Customizer_Design_Settings extends TestCase {
 	/**
 	 * Test sanitize_color_scheme().
 	 *
-	 * @covers AMP_Customizer_Design_Settings::sanitize_color_scheme
+	 * @covers ::sanitize_color_scheme()
 	 * @dataProvider get_color_schemes
 	 *
 	 * @param string $color_scheme Color scheme.
