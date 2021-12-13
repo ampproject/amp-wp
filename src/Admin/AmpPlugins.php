@@ -73,7 +73,7 @@ class AmpPlugins implements Conditional, Delayed, HasRequirements, Service, Regi
 	public static function is_needed() {
 
 		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			return false;
+			return false; // @codeCoverageIgnore
 		}
 
 		/** This filter is documented in src/Admin/AmpThemes.php */

@@ -18,6 +18,7 @@ use AmpProject\AmpWP\Services;
 function amp_init_customizer() {
 
 	if ( ! Services::get( 'dependency_support' )->has_support() ) {
+		// @codeCoverageIgnoreStart
 		add_action(
 			'customize_controls_init',
 			static function () {
@@ -46,6 +47,7 @@ function amp_init_customizer() {
 				}
 			}
 		);
+		// @codeCoverageIgnoreEnd
 	}
 
 	// Fire up the AMP Customizer.

@@ -68,7 +68,7 @@ final class UserAccess implements Service, Registerable {
 		// shown, and its the user interface which is particularly problematic on older versions of WP due to the
 		// JavaScript dependencies.
 		if ( ! $this->dependency_support->has_support() ) {
-			return false;
+			return false; // @codeCoverageIgnore
 		}
 
 		if ( null === $user ) {

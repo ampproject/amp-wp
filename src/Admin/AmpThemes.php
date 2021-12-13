@@ -51,7 +51,6 @@ class AmpThemes implements Service, HasRequirements, Registerable, Conditional, 
 	 * @return string Registration action to use.
 	 */
 	public static function get_registration_action() {
-
 		return 'admin_init';
 	}
 
@@ -72,7 +71,7 @@ class AmpThemes implements Service, HasRequirements, Registerable, Conditional, 
 	public static function is_needed() {
 
 		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			return false;
+			return false; // @codeCoverageIgnore
 		}
 
 		/**
