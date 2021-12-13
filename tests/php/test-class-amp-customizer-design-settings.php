@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\TestCase;
 
@@ -112,6 +113,8 @@ class Test_AMP_Customizer_Design_Settings extends TestCase {
 		} else {
 			$GLOBALS['wp_version'] = '5.5';
 		}
+		$has_dependency_support = ( new DependencySupport() )->has_support(); // To account for Gutenberg being active.
+
 		AMP_Customizer_Design_Settings::init_customizer();
 		$this->assertEquals( $has_dependency_support ? 10 : false, has_action( 'amp_customizer_register_settings', [ AMP_Customizer_Design_Settings::class, 'register_customizer_settings' ] ) );
 		$this->assertEquals( $has_dependency_support ? 10 : false, has_action( 'amp_customizer_register_ui', [ AMP_Customizer_Design_Settings::class, 'register_customizer_ui' ] ) );
