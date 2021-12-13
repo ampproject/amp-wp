@@ -15,6 +15,7 @@ use AMP_Options_Manager;
 use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Services;
@@ -25,7 +26,7 @@ use AmpProject\AmpWP\Services;
  * @since 2.2
  * @internal
  */
-final class PluginActivationSiteScan implements Conditional, Delayed, Service, Registerable {
+final class PluginActivationSiteScan implements Conditional, Delayed, HasRequirements, Service, Registerable {
 	/**
 	 * Handle for JS file.
 	 *
@@ -46,6 +47,15 @@ final class PluginActivationSiteScan implements Conditional, Delayed, Service, R
 	 * @var RESTPreloader
 	 */
 	private $rest_preloader;
+
+	/**
+	 * Get the list of service IDs required for this service to be registered.
+	 *
+	 * @return string[] List of required services.
+	 */
+	public static function get_requirements() {
+		return [ 'dependency_support' ];
+	}
 
 	/**
 	 * OnboardingWizardSubmenuPage constructor.
