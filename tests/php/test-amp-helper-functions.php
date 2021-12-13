@@ -1273,7 +1273,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		add_filter(
 			'script_loader_tag',
 			static function ( $script ) {
-				return preg_replace( "/ id='amp-[^']+?'/", '', $script );
+				return preg_replace( '/ id=(["\'])amp-.*?\1/', '', $script );
 			}
 		);
 
