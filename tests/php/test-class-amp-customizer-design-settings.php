@@ -80,7 +80,7 @@ class Test_AMP_Customizer_Design_Settings extends TestCase {
 	 */
 	public function test_is_amp_customizer_enabled_and_init( callable $set_up, $enabled ) {
 		remove_all_actions( 'amp_customizer_init' );
-		remove_all_actions( 'amp_customizer_get_settings' );
+		remove_all_filters( 'amp_customizer_get_settings' );
 
 		$set_up();
 		$this->assertEquals( $enabled, AMP_Customizer_Design_Settings::is_amp_customizer_enabled() );
