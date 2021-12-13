@@ -71,7 +71,7 @@ class AmpThemes implements Service, HasRequirements, Registerable, Conditional, 
 	public static function is_needed() {
 
 		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			return false; // @codeCoverageIgnore
+			return false;
 		}
 
 		/**

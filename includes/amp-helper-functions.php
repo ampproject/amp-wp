@@ -94,7 +94,7 @@ function amp_bootstrap_plugin() {
 
 	// Ensure ID attribute is present in WP<5.5.
 	if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
-		add_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag', 1000, 2 ); // @codeCoverageIgnore
+		add_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag', ~PHP_INT_MAX, 2 ); // @codeCoverageIgnore
 	}
 
 	// Ensure crossorigin=anonymous is added to font links.

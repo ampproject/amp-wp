@@ -129,7 +129,10 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
 		if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
-			$this->assertEquals( 1000, has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag' ) );
+			$this->assertEquals(
+				defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants
+				has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag' )
+			);
 		} else {
 			$this->assertFalse( has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag' ) );
 		}
