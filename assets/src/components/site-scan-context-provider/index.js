@@ -108,6 +108,8 @@ export function siteScanReducer( state, action ) {
 				...state,
 				status: STATUS_REQUEST_SCANNABLE_URLS,
 				forceStandardMode: action?.forceStandardMode ?? false,
+				currentlyScannedUrlIndexes: [],
+				urlIndexesPendingScan: [],
 			};
 		}
 		case ACTION_SCANNABLE_URLS_RECEIVE: {
@@ -303,7 +305,6 @@ export function SiteScanContextProvider( {
 	 */
 	useEffect( () => {
 		if ( resetOnOptionsChange && Object.keys( savedOptions ).length > 0 ) {
-			dispatch( { type: ACTION_SCAN_CANCEL } );
 			dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
 		}
 	}, [ resetOnOptionsChange, savedOptions ] );
@@ -491,6 +492,7 @@ export function SiteScanContextProvider( {
 			value={ {
 				cancelSiteScan,
 				fetchScannableUrls,
+				forceStandardMode,
 				hasSiteScanResults,
 				isBusy: [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ),
 				isCancelled: status === STATUS_CANCELLED,

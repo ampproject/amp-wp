@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -48,7 +48,7 @@ export function Done() {
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
-	const { fetchScannableUrls, isFetchingScannableUrls } = useContext( SiteScan );
+	const { fetchScannableUrls, forceStandardMode, isFetchingScannableUrls } = useContext( SiteScan );
 	const {
 		hasPreview,
 		isPreviewingAMP,
@@ -77,15 +77,13 @@ export function Done() {
 	}, [ didSaveOptions, saveOptions, savingOptions ] );
 
 	/**
-	 * Refetches the scannable URLs after options are saved for the first time.
+	 * Refetches the scannable URLs if they have been requested with Standard mode forced last time.
 	 */
-	const [ shouldRefetchScannableUrls, setShouldRefetchScannableUrls ] = useState( true );
 	useEffect( () => {
-		if ( didSaveOptions && shouldRefetchScannableUrls ) {
+		if ( didSaveOptions && forceStandardMode ) {
 			fetchScannableUrls();
-			setShouldRefetchScannableUrls( false );
 		}
-	}, [ didSaveOptions, fetchScannableUrls, shouldRefetchScannableUrls ] );
+	}, [ didSaveOptions, fetchScannableUrls, forceStandardMode ] );
 
 	/**
 	 * Triggers saving of user options on arrival of this screen.
