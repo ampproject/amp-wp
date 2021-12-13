@@ -277,7 +277,9 @@ function Root( { appRoot } ) {
 					initialOpen={ 'other-settings' === focusedSection }
 				>
 					<MobileRedirection />
-					<DeveloperTools />
+					{ HAS_DEPENDENCY_SUPPORT && (
+						<DeveloperTools />
+					) }
 					<DeleteDataAtUninstall />
 				</AMPDrawer>
 				<SettingsFooter />

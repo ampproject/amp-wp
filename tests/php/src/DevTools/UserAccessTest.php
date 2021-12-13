@@ -165,6 +165,7 @@ class UserAccessTest extends DependencyInjectedTestCase {
 	/**
 	 * Tests UserAccess::print_personal_options
 	 *
+	 * @covers ::can_modify_option
 	 * @covers ::print_personal_options
 	 */
 	public function test_print_personal_options() {
@@ -182,12 +183,18 @@ class UserAccessTest extends DependencyInjectedTestCase {
 
 		ob_start();
 		$this->dev_tools_user_access->print_personal_options( $admin_user );
-		$this->assertStringContainsString( 'checkbox', ob_get_clean() );
+		$output = ob_get_clean();
+		if ( ( new DependencySupport() )->has_support() ) {
+			$this->assertStringContainsString( 'checkbox', $output );
+		} else {
+			$this->assertStringNotContainsString( 'checkbox', $output );
+		}
 	}
 
 	/**
 	 * Tests UserAccess::update_user_setting
 	 *
+	 * @covers ::can_modify_option
 	 * @covers ::update_user_setting
 	 */
 	public function test_update_user_setting() {
@@ -201,10 +208,10 @@ class UserAccessTest extends DependencyInjectedTestCase {
 		wp_set_current_user( $admin_user->ID );
 		$this->assertFalse( $this->dev_tools_user_access->update_user_setting( $editor_user->ID ) );
 
-		$this->assertTrue( $this->dev_tools_user_access->update_user_setting( $admin_user->ID ) );
-		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
+		$this->assertEquals( ( new DependencySupport() )->has_support(), $this->dev_tools_user_access->update_user_setting( $admin_user->ID ) );
+		$this->assertEquals( ( new DependencySupport() )->has_support(), $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
 		$_POST[ UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] = null;
-		$this->assertTrue( $this->dev_tools_user_access->update_user_setting( $admin_user->ID ) );
+		$this->assertEquals( ( new DependencySupport() )->has_support(), $this->dev_tools_user_access->update_user_setting( $admin_user->ID ) );
 		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
 	}
 

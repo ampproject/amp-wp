@@ -147,12 +147,28 @@ final class UserAccess implements Service, Registerable {
 	}
 
 	/**
+	 * Determine whether the option can be modified.
+	 *
+	 * @param int $user_id User ID.
+	 * @return bool Whether the option can be modified.
+	 */
+	private function can_modify_option( $user_id ) {
+		return (
+			$this->dependency_support->has_support()
+			&&
+			current_user_can( 'edit_user', $user_id )
+			&&
+			AMP_Validation_Manager::has_cap( $user_id )
+		);
+	}
+
+	/**
 	 * Add the developer tools checkbox to the user edit screen.
 	 *
 	 * @param WP_User $profile_user Current user being edited.
 	 */
 	public function print_personal_options( $profile_user ) {
-		if ( ! current_user_can( 'edit_user', $profile_user->ID ) || ! AMP_Validation_Manager::has_cap( $profile_user ) ) {
+		if ( ! $this->can_modify_option( $profile_user->ID ) ) {
 			return;
 		}
 		?>
@@ -177,7 +193,7 @@ final class UserAccess implements Service, Registerable {
 	 * @return bool Whether update was successful.
 	 */
 	public function update_user_setting( $user_id ) {
-		if ( ! current_user_can( 'edit_user', $user_id ) || ! AMP_Validation_Manager::has_cap( $user_id ) ) {
+		if ( ! $this->can_modify_option( $user_id ) ) {
 			return false;
 		}
 		$enabled = isset( $_POST[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] ) && rest_sanitize_boolean( wp_unslash( $_POST[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce handled by user-edit.php; sanitization used is sanitized.
