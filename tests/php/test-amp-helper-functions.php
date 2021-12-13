@@ -36,19 +36,29 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 */
 	private $server_var_backup;
 
+	/** @var string */
+	private $original_wp_version;
+
 	/**
 	 * Set up.
+	 *
+	 * @inheritDoc
 	 */
 	public function setUp() {
 		parent::setUp();
 		$this->server_var_backup = $_SERVER;
 		remove_theme_support( 'amp' );
 
+		global $wp_version;
+		$this->original_wp_version = $wp_version;
+
 		$this->register_core_themes();
 	}
 
 	/**
-	 * After a test method runs, reset any state in WordPress the test method might have changed.
+	 * Tear down.
+	 *
+	 * @inheritDoc
 	 */
 	public function tearDown() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
@@ -79,6 +89,9 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		if ( did_action( 'add_attachment' ) ) {
 			$this->remove_added_uploads();
 		}
+
+		global $wp_version;
+		$wp_version = $this->original_wp_version;
 
 		parent::tearDown();
 	}
@@ -117,9 +130,21 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		}
 	}
 
-	/** @covers ::amp_bootstrap_plugin() */
-	public function test_amp_bootstrap_plugin() {
+	/** @return array */
+	public function get_data_to_test_amp_bootstrap_plugin() {
+		return [
+			'5.4' => [ '5.4', true ],
+			'5.5' => [ '5.5', false ],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_amp_bootstrap_plugin
+	 * @covers ::amp_bootstrap_plugin()
+	 */
+	public function test_amp_bootstrap_plugin( $wp_version, $needs_script_loader_tag_filter ) {
 		$this->remove_bootstrapped_hooks();
+		$GLOBALS['wp_version'] = $wp_version;
 		amp_bootstrap_plugin();
 
 		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );
@@ -128,7 +153,8 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertEquals( 9, has_action( 'plugins_loaded', '_amp_bootstrap_customizer' ) );
 
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
-		if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
+
+		if ( $needs_script_loader_tag_filter ) {
 			$this->assertEquals(
 				defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants
 				has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag' )
