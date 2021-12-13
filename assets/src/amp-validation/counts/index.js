@@ -11,15 +11,35 @@ import domReady from '@wordpress/dom-ready';
 import './style.css';
 
 /**
- * Updates a menu item with its count.
+ * Sets the loading state on a menu item.
+ *
+ * @param {string} itemId Menu item ID.
+ */
+function setMenuItemIsLoading( itemId ) {
+	const itemEl = document.getElementById( itemId );
+
+	if ( ! itemEl || itemEl.querySelector( '.amp-count-loading' ) ) {
+		return;
+	}
+
+	const loadingEl = document.createElement( 'span' );
+
+	loadingEl.classList.add( 'amp-count-loading' );
+	itemEl.classList.add( 'awaiting-mod' );
+
+	itemEl.append( loadingEl );
+}
+
+/**
+ * Sets a menu item count value.
  *
  * If the count is not a number or is `0`, the element that contains the count is instead removed (as it would be no
- * longer relevant). If the count is -1, a loading indicator will be added to the menu item.
+ * longer relevant).
  *
  * @param {string} itemId Menu item ID.
  * @param {number} count  Count to set.
  */
-function updateMenuItem( itemId, count ) {
+function setMenuItemCountValue( itemId, count ) {
 	const itemEl = document.getElementById( itemId );
 
 	if ( ! itemEl ) {
@@ -28,15 +48,8 @@ function updateMenuItem( itemId, count ) {
 
 	if ( isNaN( count ) || count === 0 ) {
 		itemEl.parentNode.removeChild( itemEl );
-	} else if ( count > 0 ) {
+	} else {
 		itemEl.textContent = count.toLocaleString();
-	} else if ( count === -1 && ! itemEl.querySelector( '.amp-count-loading' ) ) {
-		const loadingEl = document.createElement( 'span' );
-
-		loadingEl.classList.add( 'amp-count-loading' );
-		itemEl.classList.add( 'awaiting-mod' );
-
-		itemEl.append( loadingEl );
 	}
 }
 
@@ -44,8 +57,8 @@ function updateMenuItem( itemId, count ) {
  * Initializes the 'Validated URLs' and 'Error Index' menu items.
  */
 function initializeMenuItemCounts() {
-	updateMenuItem( 'new-error-index-count', -1 );
-	updateMenuItem( 'new-validation-url-count', -1 );
+	setMenuItemIsLoading( 'new-error-index-count' );
+	setMenuItemIsLoading( 'new-validation-url-count' );
 }
 
 /**
@@ -58,8 +71,8 @@ function initializeMenuItemCounts() {
 function updateMenuItemCounts( counts ) {
 	const { validated_urls: newValidatedUrlCount, errors: newErrorCount } = counts;
 
-	updateMenuItem( 'new-error-index-count', newErrorCount );
-	updateMenuItem( 'new-validation-url-count', newValidatedUrlCount );
+	setMenuItemCountValue( 'new-error-index-count', newErrorCount );
+	setMenuItemCountValue( 'new-validation-url-count', newValidatedUrlCount );
 }
 
 /**
