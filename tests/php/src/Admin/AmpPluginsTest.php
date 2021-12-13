@@ -25,20 +25,37 @@ class AmpPluginsTest extends TestCase {
 	 */
 	public $instance;
 
+	/** @var string */
+	private $original_wp_version;
+
 	/**
 	 * Setup.
 	 *
-	 * @inheritdoc
+	 * @inheritDoc
 	 */
 	public function setUp() {
 
 		parent::setUp();
 
-		global $wp_scripts, $wp_styles;
+		global $wp_scripts, $wp_styles, $wp_version;
 		$wp_scripts = null;
 		$wp_styles  = null;
 
 		$this->instance = new AmpPlugins();
+
+		$this->original_wp_version = $wp_version;
+	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritDoc
+	 */
+	public function tearDown() {
+		parent::tearDown();
+
+		global $wp_version;
+		$wp_version = $this->original_wp_version;
 	}
 
 	/**
@@ -135,7 +152,6 @@ class AmpPluginsTest extends TestCase {
 	 */
 	public function test_is_needed() {
 		global $wp_version;
-		$original_wp_version = $wp_version;
 
 		// Test 1: Not admin request.
 		$this->assertFalse( AmpPlugins::is_needed() );
@@ -165,7 +181,6 @@ class AmpPluginsTest extends TestCase {
 		$this->assertFalse( AmpPlugins::is_needed() );
 
 		set_current_screen( 'front' );
-		$wp_version = $original_wp_version;
 	}
 
 	/**
