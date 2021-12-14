@@ -11,6 +11,16 @@ import domReady from '@wordpress/dom-ready';
 import './style.css';
 
 /**
+ * Get session storage key for storing the previously-fetched count.
+ *
+ * @param {string} itemId Menu item ID.
+ * @return {string} Session storage key.
+ */
+function getSessionStorageKey( itemId ) {
+	return `${ itemId }-last-count`;
+}
+
+/**
  * Sets the loading state on a menu item.
  *
  * @param {string} itemId Menu item ID.
@@ -22,12 +32,15 @@ function setMenuItemIsLoading( itemId ) {
 		return;
 	}
 
-	const loadingEl = document.createElement( 'span' );
+	// Add a loading spinner if we haven't obtained the count before or the last count was not zero.
+	const lastCount = sessionStorage.getItem( getSessionStorageKey( itemId ) );
+	if ( ! lastCount || '0' !== lastCount ) {
+		const loadingEl = document.createElement( 'span' );
+		loadingEl.classList.add( 'amp-count-loading' );
+		itemEl.append( loadingEl );
 
-	loadingEl.classList.add( 'amp-count-loading' );
-	itemEl.classList.add( 'awaiting-mod' );
-
-	itemEl.append( loadingEl );
+		itemEl.classList.add( 'awaiting-mod' );
+	}
 }
 
 /**
@@ -48,8 +61,12 @@ function setMenuItemCountValue( itemId, count ) {
 
 	if ( isNaN( count ) || count === 0 ) {
 		itemEl.parentNode.removeChild( itemEl );
+		sessionStorage.setItem( getSessionStorageKey( itemId ), '0' );
 	} else {
-		itemEl.textContent = count.toLocaleString();
+		const text = count.toLocaleString();
+		itemEl.textContent = text;
+		itemEl.classList.add( 'awaiting-mod' ); // In case it wasn't set in setMenuItemIsLoading().
+		sessionStorage.setItem( getSessionStorageKey( itemId ), text );
 	}
 }
 
