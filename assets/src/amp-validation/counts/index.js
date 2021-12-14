@@ -125,15 +125,13 @@ domReady( () => {
 		return;
 	}
 
+	initializeMenuItemCounts();
+
 	// If the AMP submenu is opened, fetch validation counts as soon as possible. Thanks to the preload middleware for
 	// `wp.apiFetch`, the validation count data should be available right away, so no actual HTTP request will be made.
 	if ( ampMenuItem.classList.contains( 'wp-menu-open' ) ) {
-		initializeMenuItemCounts();
 		fetchValidationCounts();
-
-		return;
+	} else {
+		createObserver( ampMenuItem );
 	}
-
-	initializeMenuItemCounts( true );
-	createObserver( ampMenuItem );
 } );
