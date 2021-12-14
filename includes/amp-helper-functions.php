@@ -94,7 +94,7 @@ function amp_bootstrap_plugin() {
 
 	// Ensure ID attribute is present in WP<5.5.
 	if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
-		add_filter( 'script_loader_tag', 'amp_ensure_id_attribute_script_loader_tag', 1000, 2 );
+		add_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag', ~PHP_INT_MAX, 2 );
 	}
 
 	// Ensure crossorigin=anonymous is added to font links.
@@ -1165,8 +1165,8 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
 /**
  * Ensure ID attribute is added to printed scripts.
  *
- * Core started adding in WP 5.5. This is used both by validation logic for sourcing attribution as well as in the
- * script and comments sanitizers.
+ * Core started adding the ID attribute in WP 5.5. This attribute is used both by validation logic for sourcing
+ * attribution as well as in the script and comments sanitizers.
  *
  * @link https://core.trac.wordpress.org/changeset/48295
  * @since 2.2
@@ -1176,20 +1176,18 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
  * @param string $handle The script's registered handle.
  * @return string Filtered script.
  */
-function amp_ensure_id_attribute_script_loader_tag( $tag, $handle ) {
-	if ( 0 !== strpos( $handle, 'amp-' ) ) {
-		$tag = preg_replace_callback(
-			'/(<script[^>]*?\ssrc=["\'].*?["\'])([^>]*?>)/',
-			static function ( $matches ) use ( $handle ) {
-				if ( false === strpos( $matches[0], 'id=' ) ) {
-					return $matches[1] . sprintf( ' id="%s"', esc_attr( "$handle-js" ) ) . $matches[2];
-				}
-				return $matches[0];
-			},
-			$tag,
-			1
-		);
-	}
+function amp_ensure_id_attribute_on_script_loader_tag( $tag, $handle ) {
+	$tag = preg_replace_callback(
+		'/(<script[^>]*?\ssrc=(["\']).*?\2)([^>]*?>)/',
+		static function ( $matches ) use ( $handle ) {
+			if ( false === strpos( $matches[0], 'id=' ) ) {
+				return $matches[1] . sprintf( ' id="%s"', esc_attr( "$handle-js" ) ) . $matches[3];
+			}
+			return $matches[0];
+		},
+		$tag,
+		1
+	);
 	return $tag;
 }
 

@@ -36,19 +36,29 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 */
 	private $server_var_backup;
 
+	/** @var string */
+	private $original_wp_version;
+
 	/**
 	 * Set up.
+	 *
+	 * @inheritDoc
 	 */
 	public function setUp() {
 		parent::setUp();
 		$this->server_var_backup = $_SERVER;
 		remove_theme_support( 'amp' );
 
+		global $wp_version;
+		$this->original_wp_version = $wp_version;
+
 		$this->register_core_themes();
 	}
 
 	/**
-	 * After a test method runs, reset any state in WordPress the test method might have changed.
+	 * Tear down.
+	 *
+	 * @inheritDoc
 	 */
 	public function tearDown() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
@@ -79,6 +89,9 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		if ( did_action( 'add_attachment' ) ) {
 			$this->remove_added_uploads();
 		}
+
+		global $wp_version;
+		$wp_version = $this->original_wp_version;
 
 		parent::tearDown();
 	}
@@ -117,9 +130,21 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		}
 	}
 
-	/** @covers ::amp_bootstrap_plugin() */
-	public function test_amp_bootstrap_plugin() {
+	/** @return array */
+	public function get_data_to_test_amp_bootstrap_plugin() {
+		return [
+			'5.4' => [ '5.4', true ],
+			'5.5' => [ '5.5', false ],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_amp_bootstrap_plugin
+	 * @covers ::amp_bootstrap_plugin()
+	 */
+	public function test_amp_bootstrap_plugin( $wp_version, $needs_script_loader_tag_filter ) {
 		$this->remove_bootstrapped_hooks();
+		$GLOBALS['wp_version'] = $wp_version;
 		amp_bootstrap_plugin();
 
 		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );
@@ -128,10 +153,14 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$this->assertEquals( 9, has_action( 'plugins_loaded', '_amp_bootstrap_customizer' ) );
 
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
-		if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
-			$this->assertEquals( 1000, has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_script_loader_tag' ) );
+
+		if ( $needs_script_loader_tag_filter ) {
+			$this->assertEquals(
+				defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants
+				has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag' )
+			);
 		} else {
-			$this->assertFalse( has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_script_loader_tag' ) );
+			$this->assertFalse( has_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag' ) );
 		}
 		$this->assertEquals( 10, has_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous' ) );
 		$this->assertEquals( 10, has_filter( 'all_plugins', 'amp_modify_plugin_description' ) );
@@ -150,28 +179,38 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		}
 	}
 
-	/** @covers ::amp_ensure_id_attribute_script_loader_tag() */
-	public function test_amp_ensure_id_attribute_script_loader_tag() {
+	/** @covers ::amp_ensure_id_attribute_on_script_loader_tag() */
+	public function test_amp_ensure_id_attribute_on_script_loader_tag() {
 		$this->assertEquals(
 			'<script src="foo.js" id="foo-js"></script>',
-			amp_ensure_id_attribute_script_loader_tag( '<script src="foo.js"></script>', 'foo' )
+			amp_ensure_id_attribute_on_script_loader_tag( '<script src="foo.js"></script>', 'foo' )
 		);
 
 		$this->assertEquals(
 			'<script data-before src="foo.js" id="foo-js" data-after></script>',
-			amp_ensure_id_attribute_script_loader_tag( '<script data-before src="foo.js" data-after></script>', 'foo' )
+			amp_ensure_id_attribute_on_script_loader_tag( '<script data-before src="foo.js" data-after></script>', 'foo' )
+		);
+
+		$this->assertEquals(
+			'<script data-before src="foo.js?bar=\'baz\'" id="foo-js" data-after></script>',
+			amp_ensure_id_attribute_on_script_loader_tag( '<script data-before src="foo.js?bar=\'baz\'" data-after></script>', 'foo' )
+		);
+
+		$this->assertEquals(
+			"<script data-before src='foo.js?bar=\"baz\"' id=\"foo-js\" data-after></script>",
+			amp_ensure_id_attribute_on_script_loader_tag( "<script data-before src='foo.js?bar=\"baz\"' data-after></script>", 'foo' )
 		);
 
 		$this->assertEquals(
 			'<script type=\'text/javascript\' src=\'https://wordpress-stable.lndo.site/wp-includes/js/comment-reply.min.js?ver=5.0.14\' id="comment-reply-js"></script>',
-			amp_ensure_id_attribute_script_loader_tag( '<script type=\'text/javascript\' src=\'https://wordpress-stable.lndo.site/wp-includes/js/comment-reply.min.js?ver=5.0.14\'></script>', 'comment-reply' )
+			amp_ensure_id_attribute_on_script_loader_tag( '<script type=\'text/javascript\' src=\'https://wordpress-stable.lndo.site/wp-includes/js/comment-reply.min.js?ver=5.0.14\'></script>', 'comment-reply' )
 		);
 
 		$inline_script_before = '<script>/* inline script id="hello" */</script>';
 		$inline_script_after  = '<script id="after">/* inline script */</script>';
 		$this->assertEquals(
 			$inline_script_before . '<script src="foo.js" id="foo-js"></script>' . $inline_script_after,
-			amp_ensure_id_attribute_script_loader_tag(
+			amp_ensure_id_attribute_on_script_loader_tag(
 				$inline_script_before . '<script src="foo.js"></script>' . $inline_script_after,
 				'foo'
 			)
@@ -180,19 +219,19 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$foo_script = '<script src="foo.js" id="bar"></script>';
 		$this->assertEquals(
 			$foo_script,
-			amp_ensure_id_attribute_script_loader_tag( $foo_script, 'foo' )
+			amp_ensure_id_attribute_on_script_loader_tag( $foo_script, 'foo' )
 		);
 
 		$foo_script = '<script id=\'bar\' src=\'foo.js\'></script>';
 		$this->assertEquals(
 			$foo_script,
-			amp_ensure_id_attribute_script_loader_tag( $foo_script, 'foo' )
+			amp_ensure_id_attribute_on_script_loader_tag( $foo_script, 'foo' )
 		);
 
-		$amp_runtime_script = '<script src="https://cdn.ampproject.org/v0.js"></script>';
+		$amp_runtime_script = '<script src="https://cdn.ampproject.org/v0.js" id="amp-runtime-js"></script>';
 		$this->assertEquals(
 			$amp_runtime_script,
-			amp_ensure_id_attribute_script_loader_tag( $amp_runtime_script, 'amp-runtime' )
+			amp_ensure_id_attribute_on_script_loader_tag( $amp_runtime_script, 'amp-runtime' )
 		);
 	}
 
@@ -1260,7 +1299,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		add_filter(
 			'script_loader_tag',
 			static function ( $script ) {
-				return preg_replace( "/ id='amp-[^']+?'/", '', $script );
+				return preg_replace( '/ id=(["\'])amp-.*?\1/', '', $script );
 			}
 		);
 
