@@ -23,7 +23,7 @@
 	display: inline-block;
 }
 
-body.no-js #new-validation-url-count,
-body.no-js #new-error-index-count {
+body.no-js #amp-new-validation-url-count,
+body.no-js #amp-new-error-index-count {
 	display: none;
 }

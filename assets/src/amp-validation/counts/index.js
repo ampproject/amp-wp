@@ -57,8 +57,8 @@ function setMenuItemCountValue( itemId, count ) {
  * Initializes the 'Validated URLs' and 'Error Index' menu items.
  */
 function initializeMenuItemCounts() {
-	setMenuItemIsLoading( 'new-error-index-count' );
-	setMenuItemIsLoading( 'new-validation-url-count' );
+	setMenuItemIsLoading( 'amp-new-error-index-count' );
+	setMenuItemIsLoading( 'amp-new-validation-url-count' );
 }
 
 /**
@@ -71,8 +71,8 @@ function initializeMenuItemCounts() {
 function updateMenuItemCounts( counts ) {
 	const { validated_urls: newValidatedUrlCount, errors: newErrorCount } = counts;
 
-	setMenuItemCountValue( 'new-error-index-count', newErrorCount );
-	setMenuItemCountValue( 'new-validation-url-count', newValidatedUrlCount );
+	setMenuItemCountValue( 'amp-new-error-index-count', newErrorCount );
+	setMenuItemCountValue( 'amp-new-validation-url-count', newValidatedUrlCount );
 }
 
 /**

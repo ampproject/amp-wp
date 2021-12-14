@@ -1034,8 +1034,8 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 			'Error Index',
 		];
 		if ( Services::get( 'dependency_support' )->has_support() ) {
-			$expected_submenu[0] .= ' <span id="new-error-index-count"></span>';
-			$expected_submenu[3] .= ' <span id="new-error-index-count"></span>';
+			$expected_submenu[0] .= ' <span id="amp-new-error-index-count"></span>';
+			$expected_submenu[3] .= ' <span id="amp-new-error-index-count"></span>';
 		}
 		$amp_options = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );
