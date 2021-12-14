@@ -46,6 +46,7 @@ final class ScannableURLProviderTest extends TestCase {
 	 * @covers ::get_urls()
 	 * @covers ::get_supportable_templates()
 	 * @covers ::is_template_supported()
+	 * @covers ::get_posts_by_type()
 	 */
 	public function test_count_urls_to_validate_in_standard_mode() {
 		$user = self::factory()->user->create();
@@ -103,6 +104,7 @@ final class ScannableURLProviderTest extends TestCase {
 	 * @covers ::get_urls()
 	 * @covers ::get_supportable_templates()
 	 * @covers ::is_template_supported()
+	 * @covers ::get_posts_by_type()
 	 */
 	public function test_count_urls_to_validate_in_legacy_reader_mode() {
 		$this->scannable_url_provider->set_limit_per_type( 1 );
