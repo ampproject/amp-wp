@@ -93,8 +93,8 @@ function Providers( { children } ) {
 								updatesNonce={ UPDATES_NONCE }
 								wpAjaxUrl={ wpAjaxUrl }
 							>
-								<PluginsContextProvider hasErrorBoundary={ true }>
-									<ThemesContextProvider hasErrorBoundary={ true }>
+								<PluginsContextProvider>
+									<ThemesContextProvider>
 										<SiteScanContextProvider
 											fetchCachedValidationErrors={ true }
 											resetOnOptionsChange={ true }
@@ -277,7 +277,9 @@ function Root( { appRoot } ) {
 					initialOpen={ 'other-settings' === focusedSection }
 				>
 					<MobileRedirection />
-					<DeveloperTools />
+					{ HAS_DEPENDENCY_SUPPORT && (
+						<DeveloperTools />
+					) }
 					<DeleteDataAtUninstall />
 				</AMPDrawer>
 				<SettingsFooter />

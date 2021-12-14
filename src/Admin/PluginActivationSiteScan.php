@@ -13,11 +13,12 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AMP_Validation_Manager;
-use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Services;
 
 /**
  * Class PluginActivationSiteScan
@@ -25,7 +26,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * @since 2.2
  * @internal
  */
-final class PluginActivationSiteScan implements Conditional, Delayed, Service, Registerable {
+final class PluginActivationSiteScan implements Conditional, Delayed, HasRequirements, Service, Registerable {
 	/**
 	 * Handle for JS file.
 	 *
@@ -48,6 +49,15 @@ final class PluginActivationSiteScan implements Conditional, Delayed, Service, R
 	private $rest_preloader;
 
 	/**
+	 * Get the list of service IDs required for this service to be registered.
+	 *
+	 * @return string[] List of required services.
+	 */
+	public static function get_requirements() {
+		return [ 'dependency_support' ];
+	}
+
+	/**
 	 * OnboardingWizardSubmenuPage constructor.
 	 *
 	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
@@ -66,6 +76,8 @@ final class PluginActivationSiteScan implements Conditional, Delayed, Service, R
 
 		return (
 			is_admin()
+			&&
+			Services::get( 'dependency_support' )->has_support()
 			&&
 			! is_network_admin()
 			&&
@@ -180,7 +192,11 @@ final class PluginActivationSiteScan implements Conditional, Delayed, Service, R
 				],
 				'/amp/v1/scannable-urls'
 			),
-			'/wp/v2/plugins',
+			add_query_arg(
+				'_fields',
+				[ 'author', 'name', 'plugin', 'status', 'version' ],
+				'/wp/v2/plugins'
+			),
 			'/wp/v2/users/me',
 		];
 

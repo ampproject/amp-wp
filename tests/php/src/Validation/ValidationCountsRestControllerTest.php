@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Tests\Validation;
 
 use AMP_Validated_URL_Post_Type;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Validation\ValidationCountsRestController;
@@ -59,7 +60,12 @@ class ValidationCountsRestControllerTest extends DependencyInjectedTestCase {
 		$this->assertWPError( $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/unreviewed-validation-counts' ) ) );
 
 		update_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, wp_json_encode( true ) );
-		$this->assertTrue( $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/unreviewed-validation-counts' ) ) );
+		$value = $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/unreviewed-validation-counts' ) );
+		if ( ( new DependencySupport() )->has_support() ) {
+			$this->assertTrue( $value );
+		} else {
+			$this->assertWPError( $value );
+		}
 	}
 
 	/**
@@ -76,6 +82,12 @@ class ValidationCountsRestControllerTest extends DependencyInjectedTestCase {
 		$request = new WP_REST_Request( 'GET', '/amp/v1/unreviewed-validation-counts' );
 
 		$response = rest_get_server()->dispatch( $request );
+
+		if ( ! ( new DependencySupport() )->has_support() ) {
+			$this->assertWPError( $response->as_error() );
+			return;
+		}
+
 		$this->assertEquals(
 			[
 				'validated_urls' => 0,

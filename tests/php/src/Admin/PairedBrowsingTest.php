@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\PairedBrowsing;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\HasRequirements;
@@ -186,9 +187,13 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 
 		// Test when DevTools enabled.
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		$this->assertTrue( $this->instance->dev_tools_user_access->is_user_enabled() );
-		$this->instance->add_admin_bar_menu_item( $wp_admin_bar );
-		$this->assertNotEmpty( $wp_admin_bar->get_node( 'amp-paired-browsing' ) );
+		if ( ( new DependencySupport() )->has_support() ) {
+			$this->assertTrue( $this->instance->dev_tools_user_access->is_user_enabled() );
+			$this->instance->add_admin_bar_menu_item( $wp_admin_bar );
+			$this->assertNotEmpty( $wp_admin_bar->get_node( 'amp-paired-browsing' ) );
+		} else {
+			$this->assertFalse( $this->instance->dev_tools_user_access->is_user_enabled() );
+		}
 	}
 
 	/** @covers ::get_paired_browsing_url() */

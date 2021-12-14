@@ -76,8 +76,8 @@ export function Providers( { children } ) {
 						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
 						usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 					>
-						<PluginsContextProvider hasErrorBoundary={ true }>
-							<ThemesContextProvider hasErrorBoundary={ true }>
+						<PluginsContextProvider>
+							<ThemesContextProvider>
 								<SiteScanContextProvider
 									fetchCachedValidationErrors={ false }
 									resetOnOptionsChange={ false }

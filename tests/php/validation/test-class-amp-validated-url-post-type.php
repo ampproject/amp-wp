@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
@@ -58,16 +59,23 @@ class Test_AMP_Validated_URL_Post_Type extends TestCase {
 		AMP_Validated_URL_Post_Type::register();
 		$amp_post_type = get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 
-		$this->assertStringContainsString( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_types() );
+		$this->assertContains( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_types() );
 		$this->assertEquals( [], get_all_post_type_supports( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, $amp_post_type->name );
 		$this->assertEquals( 'AMP Validated URLs', $amp_post_type->label );
 		$this->assertEquals( false, $amp_post_type->public );
 		$this->assertTrue( $amp_post_type->show_ui );
-		$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
-		$this->assertTrue( $amp_post_type->show_in_admin_bar );
+		if ( ( new DependencySupport() )->has_support() ) {
+			$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
+		} else {
+			$this->assertFalse( $amp_post_type->show_in_menu );
+		}
+		$this->assertEquals( ( new DependencySupport() )->has_support(), $amp_post_type->show_in_admin_bar );
 		$this->assertStringNotContainsString( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
-		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'update_validated_url_menu_item' ] ) );
+		$this->assertEquals(
+			( new DependencySupport() )->has_support() ? 10 : false,
+			has_action( 'admin_menu', [ self::TESTED_CLASS, 'update_validated_url_menu_item' ] )
+		);
 
 		// Make sure that add_admin_hooks() gets called.
 		set_current_screen( 'index.php' );

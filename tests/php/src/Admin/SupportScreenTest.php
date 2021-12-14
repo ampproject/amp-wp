@@ -34,22 +34,39 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 	 */
 	public $instance;
 
+	/** @var string */
+	private $original_wp_version;
+
 	/**
 	 * Setup.
 	 *
 	 * @inheritdoc
 	 */
 	public function setUp() {
-
 		parent::setUp();
 
 		if ( ! class_exists( 'WP_Site_Health' ) ) {
 			$this->markTestSkipped( 'Test requires Site Health.' );
 		}
 
+		global $wp_version;
+		$this->original_wp_version = $wp_version;
+
 		$this->instance = $this->injector->make( SupportScreen::class );
 
 		$this->add_home_url_loopback_request_mocking();
+	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritDoc
+	 */
+	public function tearDown() {
+		parent::tearDown();
+
+		global $wp_version;
+		$wp_version = $this->original_wp_version;
 	}
 
 	/** @covers ::__construct() */
@@ -67,6 +84,28 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 	 */
 	public function test_get_registration_action() {
 		$this->assertEquals( 'init', SupportScreen::get_registration_action() );
+	}
+
+	/**
+	 * @covers ::check_core_version()
+	 */
+	public function test_check_core_version() {
+		global $wp_version;
+
+		// This will always be true by default because setUp calls markTestSkipped if WP_Site_Health doesn't exist.
+		$this->assertTrue( SupportScreen::check_core_version() );
+
+		$wp_version = '4.9';
+		$this->assertFalse( SupportScreen::check_core_version() );
+
+		$wp_version = '5.0';
+		$this->assertFalse( SupportScreen::check_core_version() );
+
+		$wp_version = '5.1';
+		$this->assertFalse( SupportScreen::check_core_version() );
+
+		$wp_version = '5.2';
+		$this->assertTrue( SupportScreen::check_core_version() );
 	}
 
 	/**

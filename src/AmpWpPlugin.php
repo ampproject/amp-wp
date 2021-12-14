@@ -20,7 +20,6 @@ use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\AmpWP\Support\SupportCliCommand;
 use AmpProject\AmpWP\Support\SupportRESTController;
-use AmpProject\AmpWP\Validation\SavePostValidationEvent;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
@@ -118,7 +117,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'rest.scannable_urls_controller'     => Validation\ScannableURLsRestController::class,
 		'rest.validation_counts_controller'  => Validation\ValidationCountsRestController::class,
 		'sandboxing'                         => Sandboxing::class,
-		'save_post_validation_event'         => SavePostValidationEvent::class,
 		'server_timing'                      => Instrumentation\ServerTiming::class,
 		'site_health_integration'            => Admin\SiteHealth::class,
 		'support'                            => SupportCliCommand::class,
