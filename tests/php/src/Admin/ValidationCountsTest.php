@@ -145,23 +145,44 @@ class ValidationCountsTest extends TestCase {
 	public function maybe_add_preload_rest_paths_data() {
 		return [
 			'no_type_post'                => [
-				'screen'              => 'user',
-				'post_type'           => '',
+				'set_up'              => static function () {
+					set_current_screen( 'user' );
+				},
 				'should_preload_path' => false,
 			],
 			'post_type_post'              => [
-				'screen'              => 'edit',
-				'post_type'           => 'post',
+				'set_up'              => static function () {
+					set_current_screen( 'edit' );
+					get_current_screen()->post_type = 'post';
+				},
 				'should_preload_path' => false,
 			],
 			'post_type_page'              => [
-				'screen'              => 'edit',
-				'post_type'           => 'page',
+				'set_up'              => static function () {
+					set_current_screen( 'edit' );
+					get_current_screen()->post_type = 'page';
+				},
 				'should_preload_path' => false,
 			],
 			'post_type_amp_validated_url' => [
-				'screen'              => 'edit',
-				'post_type'           => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'set_up'              => static function () {
+					set_current_screen( 'edit' );
+					get_current_screen()->post_type = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
+				},
+				'should_preload_path' => true,
+			],
+			'settings_screen'             => [
+				'set_up'              => function () {
+					global $pagenow, $plugin_page, $menu;
+					$pagenow     = 'admin.php';
+					$plugin_page = 'amp-options';
+					$menu        = [
+						[
+							2 => $plugin_page,
+						],
+					];
+					$this->assertEquals( AMP_Options_Manager::OPTION_NAME, get_admin_page_parent() );
+				},
 				'should_preload_path' => true,
 			],
 		];
@@ -171,15 +192,12 @@ class ValidationCountsTest extends TestCase {
 	 * @dataProvider maybe_add_preload_rest_paths_data
 	 * @covers ::maybe_add_preload_rest_paths()
 	 */
-	public function test_maybe_add_preload_rest_paths( $screen, $post_type, $should_preload_path ) {
+	public function test_maybe_add_preload_rest_paths( callable $set_up, $should_preload_path ) {
 		if ( ! function_exists( 'rest_preload_api_request' ) ) {
 			$this->markTestIncomplete( 'REST preload is not available so skipping.' );
 		}
 
-		set_current_screen( $screen );
-		if ( ! empty( $post_type ) ) {
-			get_current_screen()->post_type = $post_type;
-		}
+		$set_up();
 
 		$this->call_private_method( $this->instance, 'maybe_add_preload_rest_paths' );
 
