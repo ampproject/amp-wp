@@ -64,7 +64,9 @@ const INITIAL_STATE = {
 	currentlyScannedUrlIndexes: [],
 	forceStandardMode: false,
 	scannableUrls: [],
+	scanOnce: false,
 	status: '',
+	scansCount: 0,
 	urlIndexesPendingScan: [],
 };
 
@@ -89,6 +91,7 @@ const CONCURRENT_VALIDATION_REQUESTS_WAIT_MS = 500;
  * @param {Object} action Action to call.
  * @return {Object} New state.
  */
+//eslint-disable-next-line complexity
 export function siteScanReducer( state, action ) {
 	// Bail out early if Site Scan is skipped, i.e. if there is no validation nonce provided meaning the current user
 	// does not have capabilities for running AMP validation.
@@ -113,9 +116,16 @@ export function siteScanReducer( state, action ) {
 			};
 		}
 		case ACTION_SCANNABLE_URLS_RECEIVE: {
+			if ( ! action.scannableUrls || action.scannableUrls.length === 0 ) {
+				return {
+					...state,
+					status: STATUS_COMPLETED,
+				};
+			}
+
 			return {
 				...state,
-				status: action.scannableUrls?.length > 0 ? STATUS_READY : STATUS_COMPLETED,
+				status: state.scanOnce && state.scansCount > 0 ? STATUS_COMPLETED : STATUS_READY,
 				scannableUrls: action.scannableUrls,
 			};
 		}
@@ -124,10 +134,18 @@ export function siteScanReducer( state, action ) {
 				return state;
 			}
 
+			if ( state.scanOnce && state.scansCount > 0 ) {
+				return {
+					...state,
+					status: STATUS_COMPLETED,
+				};
+			}
+
 			return {
 				...state,
 				status: STATUS_IDLE,
 				currentlyScannedUrlIndexes: [],
+				scansCount: state.scansCount + 1,
 				urlIndexesPendingScan: state.scannableUrls.map( ( url, index ) => index ),
 			};
 		}
@@ -201,8 +219,9 @@ export function siteScanReducer( state, action ) {
  * @param {?any}    props.children                               Component children.
  * @param {boolean} props.fetchCachedValidationErrors            Whether to fetch cached validation errors on mount.
  * @param {boolean} props.refetchPluginSuppressionOnScanComplete Whether to refetch plugin suppression data when site scan is complete.
- * @param {boolean} props.resetOnOptionsChange                   Whether to reset scanner and refetch scannable URLs whenever AMPoptions are changed.
+ * @param {boolean} props.resetOnOptionsChange                   Whether to reset scanner and refetch scannable URLs whenever AMP options are changed.
  * @param {string}  props.scannableUrlsRestPath                  The REST path for interacting with the scannable URL resources.
+ * @param {boolean} props.scanOnce                               Whether to scan only once.
  * @param {string}  props.validateNonce                          The AMP validate nonce.
  */
 export function SiteScanContextProvider( {
@@ -211,6 +230,7 @@ export function SiteScanContextProvider( {
 	refetchPluginSuppressionOnScanComplete = false,
 	resetOnOptionsChange = false,
 	scannableUrlsRestPath,
+	scanOnce = false,
 	validateNonce,
 } ) {
 	const {
@@ -221,7 +241,7 @@ export function SiteScanContextProvider( {
 		refetchPluginSuppression,
 	} = useContext( Options );
 	const { setAsyncError } = useAsyncError();
-	const [ state, dispatch ] = useReducer( siteScanReducer, INITIAL_STATE );
+	const [ state, dispatch ] = useReducer( siteScanReducer, { ...INITIAL_STATE, scanOnce } );
 	const {
 		currentlyScannedUrlIndexes,
 		forceStandardMode,
@@ -523,5 +543,6 @@ SiteScanContextProvider.propTypes = {
 	refetchPluginSuppressionOnScanComplete: PropTypes.bool,
 	resetOnOptionsChange: PropTypes.bool,
 	scannableUrlsRestPath: PropTypes.string,
+	scanOnce: PropTypes.bool,
 	validateNonce: PropTypes.string,
 };

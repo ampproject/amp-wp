@@ -82,6 +82,7 @@ export function Providers( { children } ) {
 									fetchCachedValidationErrors={ false }
 									resetOnOptionsChange={ true }
 									scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
+									scanOnce={ true }
 									validateNonce={ VALIDATE_NONCE }
 								>
 									<NavigationContextProvider pages={ PAGES }>
