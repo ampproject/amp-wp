@@ -1560,7 +1560,8 @@ function amp_get_content_sanitizers( $post = null ) {
 		],
 		AMP_Block_Sanitizer::class             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
 		AMP_Style_Sanitizer::class             => [
-			'skip_tree_shaking' => is_customize_preview(),
+			'skip_tree_shaking'   => is_customize_preview(),
+			'allow_excessive_css' => is_customize_preview(),
 		],
 		AMP_Meta_Sanitizer::class              => [],
 		AMP_Layout_Sanitizer::class            => [],
