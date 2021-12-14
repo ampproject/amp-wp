@@ -71,10 +71,12 @@ final class ScannableURLProvider implements Service {
 				'is_singular',
 			];
 			if ( 'page' === get_option( 'show_on_front' ) ) {
-				if ( get_option( 'page_for_posts' ) && amp_is_post_supported( get_option( 'page_for_posts' ) ) ) {
+				$page_for_posts = get_option( 'page_for_posts' );
+				if ( $page_for_posts && amp_is_post_supported( $page_for_posts ) ) {
 					$allowed_templates[] = 'is_home';
 				}
-				if ( get_option( 'page_on_front' ) && amp_is_post_supported( get_option( 'page_for_posts' ) ) ) {
+				$page_on_front = get_option( 'page_on_front' );
+				if ( $page_on_front && amp_is_post_supported( $page_on_front ) ) {
 					$allowed_templates[] = 'is_front_page';
 				}
 			}
