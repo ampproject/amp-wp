@@ -108,6 +108,8 @@ export function siteScanReducer( state, action ) {
 				...state,
 				status: STATUS_REQUEST_SCANNABLE_URLS,
 				forceStandardMode: action?.forceStandardMode ?? false,
+				currentlyScannedUrlIndexes: [],
+				urlIndexesPendingScan: [],
 			};
 		}
 		case ACTION_SCANNABLE_URLS_RECEIVE: {
@@ -195,16 +197,18 @@ export function siteScanReducer( state, action ) {
 /**
  * Context provider for site scanning.
  *
- * @param {Object}  props                             Component props.
- * @param {?any}    props.children                    Component children.
- * @param {boolean} props.fetchCachedValidationErrors Whether to fetch cached validation errors on mount.
- * @param {boolean} props.resetOnOptionsChange        Whether to reset scanner and refetch scannable URLs whenever AMP options are changed.
- * @param {string}  props.scannableUrlsRestPath       The REST path for interacting with the scannable URL resources.
- * @param {string}  props.validateNonce               The AMP validate nonce.
+ * @param {Object}  props                                        Component props.
+ * @param {?any}    props.children                               Component children.
+ * @param {boolean} props.fetchCachedValidationErrors            Whether to fetch cached validation errors on mount.
+ * @param {boolean} props.refetchPluginSuppressionOnScanComplete Whether to refetch plugin suppression data when site scan is complete.
+ * @param {boolean} props.resetOnOptionsChange                   Whether to reset scanner and refetch scannable URLs whenever AMPoptions are changed.
+ * @param {string}  props.scannableUrlsRestPath                  The REST path for interacting with the scannable URL resources.
+ * @param {string}  props.validateNonce                          The AMP validate nonce.
  */
 export function SiteScanContextProvider( {
 	children,
 	fetchCachedValidationErrors = false,
+	refetchPluginSuppressionOnScanComplete = false,
 	resetOnOptionsChange = false,
 	scannableUrlsRestPath,
 	validateNonce,
@@ -301,7 +305,6 @@ export function SiteScanContextProvider( {
 	 */
 	useEffect( () => {
 		if ( resetOnOptionsChange && Object.keys( savedOptions ).length > 0 ) {
-			dispatch( { type: ACTION_SCAN_CANCEL } );
 			dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
 		}
 	}, [ resetOnOptionsChange, savedOptions ] );
@@ -315,6 +318,25 @@ export function SiteScanContextProvider( {
 			dispatch( { type: ACTION_SCAN_INITIALIZE } );
 		}
 	}, [ savedOptions?.suppressed_plugins, status ] );
+
+	/**
+	 * Once the site scan is complete, refetch the plugin suppression data so
+	 * that the suppressed table is updated with the latest validation errors.
+	 */
+	useEffect( () => {
+		if ( status !== STATUS_REFETCHING_PLUGIN_SUPPRESSION ) {
+			return;
+		}
+
+		if ( refetchPluginSuppressionOnScanComplete ) {
+			refetchPluginSuppression();
+		}
+
+		dispatch( {
+			type: ACTION_SET_STATUS,
+			status: STATUS_COMPLETED,
+		} );
+	}, [ refetchPluginSuppression, refetchPluginSuppressionOnScanComplete, status ] );
 
 	/**
 	 * Delay concurrent validation requests.
@@ -343,20 +365,6 @@ export function SiteScanContextProvider( {
 			}
 		};
 	}, [ shouldDelayValidationRequest ] );
-
-	/**
-	 * Once the site scan is complete, refetch the plugin suppression data so
-	 * that the suppressed table is updated with the latest validation errors.
-	 */
-	useEffect( () => {
-		if ( status === STATUS_REFETCHING_PLUGIN_SUPPRESSION ) {
-			refetchPluginSuppression();
-			dispatch( {
-				type: ACTION_SET_STATUS,
-				status: STATUS_COMPLETED,
-			} );
-		}
-	}, [ refetchPluginSuppression, status ] );
 
 	/**
 	 * Fetch scannable URLs from the REST endpoint.
@@ -484,6 +492,7 @@ export function SiteScanContextProvider( {
 			value={ {
 				cancelSiteScan,
 				fetchScannableUrls,
+				forceStandardMode,
 				hasSiteScanResults,
 				isBusy: [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ),
 				isCancelled: status === STATUS_CANCELLED,
@@ -511,6 +520,7 @@ export function SiteScanContextProvider( {
 SiteScanContextProvider.propTypes = {
 	children: PropTypes.any,
 	fetchCachedValidationErrors: PropTypes.bool,
+	refetchPluginSuppressionOnScanComplete: PropTypes.bool,
 	resetOnOptionsChange: PropTypes.bool,
 	scannableUrlsRestPath: PropTypes.string,
 	validateNonce: PropTypes.string,

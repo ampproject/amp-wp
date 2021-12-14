@@ -80,7 +80,7 @@ export function Providers( { children } ) {
 							<ThemesContextProvider>
 								<SiteScanContextProvider
 									fetchCachedValidationErrors={ false }
-									resetOnOptionsChange={ false }
+									resetOnOptionsChange={ true }
 									scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 									validateNonce={ VALIDATE_NONCE }
 								>
