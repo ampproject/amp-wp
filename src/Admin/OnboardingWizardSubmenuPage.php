@@ -11,6 +11,7 @@ namespace AmpProject\AmpWP\Admin;
 use AMP_Options_Manager;
 use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Manager;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -73,18 +74,27 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	private $loading_error;
 
 	/**
+	 * DependencySupport instance.
+	 *
+	 * @var DependencySupport
+	 */
+	private $dependency_support;
+
+	/**
 	 * OnboardingWizardSubmenuPage constructor.
 	 *
-	 * @param GoogleFonts   $google_fonts   An instance of the GoogleFonts service.
-	 * @param ReaderThemes  $reader_themes  An instance of the ReaderThemes class.
-	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
-	 * @param LoadingError  $loading_error  An instance of the LoadingError class.
+	 * @param GoogleFonts       $google_fonts       An instance of the GoogleFonts service.
+	 * @param ReaderThemes      $reader_themes      An instance of the ReaderThemes class.
+	 * @param RESTPreloader     $rest_preloader     An instance of the RESTPreloader class.
+	 * @param LoadingError      $loading_error      An instance of the LoadingError class.
+	 * @param DependencySupport $dependency_support An instance of the DependencySupport class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, LoadingError $loading_error ) {
-		$this->google_fonts   = $google_fonts;
-		$this->reader_themes  = $reader_themes;
-		$this->rest_preloader = $rest_preloader;
-		$this->loading_error  = $loading_error;
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, LoadingError $loading_error, DependencySupport $dependency_support ) {
+		$this->google_fonts       = $google_fonts;
+		$this->reader_themes      = $reader_themes;
+		$this->rest_preloader     = $rest_preloader;
+		$this->loading_error      = $loading_error;
+		$this->dependency_support = $dependency_support;
 	}
 
 	/**
@@ -250,6 +260,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
+			'HAS_DEPENDENCY_SUPPORT'             => $this->dependency_support->has_support(),
 			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
 			'SCANNABLE_URLS_REST_PATH'           => '/amp/v1/scannable-urls',
 			'SETTINGS_LINK'                      => $amp_settings_link,
@@ -301,9 +312,17 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 				],
 				'/amp/v1/scannable-urls'
 			),
-			'/wp/v2/plugins',
+			add_query_arg(
+				'_fields',
+				[ 'author', 'name', 'plugin', 'status', 'version' ],
+				'/wp/v2/plugins'
+			),
 			'/wp/v2/settings',
-			'/wp/v2/themes',
+			add_query_arg(
+				'_fields',
+				[ 'author', 'name', 'status', 'stylesheet', 'version' ],
+				'/wp/v2/themes'
+			),
 			'/wp/v2/users/me',
 		];
 

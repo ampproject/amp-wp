@@ -163,7 +163,7 @@ describe( 'AMP settings screen Site Scan panel', () => {
 			await visitAdminPage( 'admin.php', 'page=amp-options' );
 
 			await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-slug', { text: /e2e-tests-demo-plugin/ } );
-			await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-notice', { text: /This plugin has been uninstalled since last site scan./ } );
+			await expect( page ).toMatchElement( '.site-scan-results--plugins .site-scan-results__source-notice', { text: /This plugin has been uninstalled or its metadata is unavailable./ } );
 
 			// Clean up.
 			await installLocalPlugin( 'e2e-tests-demo-plugin' );

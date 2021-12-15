@@ -7,6 +7,7 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Option;
@@ -438,11 +439,22 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers AMP_Validation_Manager::add_admin_bar_menu_items()
 	 */
 	public function test_add_admin_bar_menu_items() {
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+
+		if ( ! ( new DependencySupport() )->has_support() ) {
+			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+			AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+			$admin_bar = new WP_Admin_Bar();
+			AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+			$this->assertNull( $admin_bar->get_node( 'amp' ) );
+			$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
+			return;
+		}
+
 		$this->accept_sanitization_by_default( false );
 
 		// No admin bar item when user lacks capability.
 		$this->go_to( home_url( '/' ) );
-		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 		$this->assertFalse( is_admin() );
 		$this->assertFalse( AMP_Validation_Manager::has_cap() );
 		$admin_bar = new WP_Admin_Bar();
@@ -490,20 +502,28 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
-		$this->assertIsObject( $node );
+		if ( ( new DependencySupport() )->has_support() ) {
+			$this->assertIsObject( $node );
+		} else {
+			$this->assertNull( $node );
+		}
 
 		// Admin bar item available in paired mode.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$root_node = $admin_bar->get_node( 'amp' );
-		$this->assertIsObject( $root_node );
-		$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $root_node->href ) ) );
+		if ( ( new DependencySupport() )->has_support() ) {
+			$this->assertIsObject( $root_node );
+			$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $root_node->href ) ) );
 
-		$view_item = $admin_bar->get_node( 'amp-view' );
-		$this->assertIsObject( $view_item );
-		$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
-		$this->assertIsObject( $admin_bar->get_node( 'amp-validity' ) );
+			$view_item = $admin_bar->get_node( 'amp-view' );
+			$this->assertIsObject( $view_item );
+			$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
+			$this->assertIsObject( $admin_bar->get_node( 'amp-validity' ) );
+		} else {
+			$this->assertNull( $root_node );
+		}
 
 		// Lastly, confirm that the settings item is added if the user is an admin.
 		wp_set_current_user( 0 );
@@ -2393,6 +2413,10 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers \AMP_Validation_Manager::add_admin_bar_menu_items()
 	 */
 	public function test_finalize_validation() {
+		if ( ! ( new DependencySupport() )->has_support() ) {
+			$this->markTestSkipped( 'Test requires newer version of WP.' );
+		}
+
 		self::set_capability();
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 		show_admin_bar( true );
@@ -2838,6 +2862,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->setup_environment( true, true );
 		$service->set_user_enabled( wp_get_current_user()->ID, true );
 		AMP_Validation_Manager::enqueue_block_validation();
+
+		if ( ! ( new DependencySupport() )->has_support() ) {
+			$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
+			return;
+		}
+
 		$this->assertTrue( wp_script_is( $slug, 'enqueued' ) );
 
 		$script                = wp_scripts()->registered[ $slug ];

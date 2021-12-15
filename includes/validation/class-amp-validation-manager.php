@@ -666,7 +666,20 @@ class AMP_Validation_Manager {
 
 		add_filter( 'do_shortcode_tag', [ __CLASS__, 'decorate_shortcode_source' ], PHP_INT_MAX, 2 );
 		add_filter( 'embed_oembed_html', [ __CLASS__, 'decorate_embed_source' ], PHP_INT_MAX, 3 );
-		add_filter( 'the_content', [ __CLASS__, 'add_block_source_comments' ], 8 ); // The do_blocks() function runs at priority 9.
+
+		// The `WP_Block_Type_Registry` class was added in WordPress 5.0.0. Because of that it sometimes caused issues
+		// on the AMP Validated URL screen when on WordPress 4.9.
+		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
+			add_filter(
+				'the_content',
+				[
+					__CLASS__,
+					'add_block_source_comments',
+				],
+				8
+			); // The do_blocks() function runs at priority 9.
+		}
+
 		add_filter( 'the_editor', [ __CLASS__, 'filter_the_editor_to_detect_sources' ] );
 	}
 
@@ -938,9 +951,16 @@ class AMP_Validation_Manager {
 	 * @return bool
 	 */
 	protected static function is_matching_script( DOMElement $element, $script_handle ) {
+
+		// Use the ID attribute which was added to printed scripts after WP ?.?.
+		if ( $element->getAttribute( Attribute::ID ) === "{$script_handle}-js" ) {
+			return true;
+		}
+
 		if ( ! isset( wp_scripts()->registered[ $script_handle ] ) ) {
 			return false;
 		}
+
 		$script_dependency = wp_scripts()->registered[ $script_handle ];
 		if ( empty( $script_dependency->src ) ) {
 			return false;
@@ -989,7 +1009,7 @@ class AMP_Validation_Manager {
 			&&
 			'link' === $node->nodeName
 			&&
-			preg_match( '/(?P<handle>.+)-css$/', (string) $node->getAttribute( 'id' ), $matches )
+			preg_match( '/(?P<handle>.+)-css$/', (string) $node->getAttribute( Attribute::ID ), $matches )
 			&&
 			wp_styles()->query( $matches['handle'] )
 		);
@@ -1034,9 +1054,9 @@ class AMP_Validation_Manager {
 			&&
 			$node->firstChild instanceof DOMText
 			&&
-			$node->hasAttribute( 'id' )
+			$node->hasAttribute( Attribute::ID )
 			&&
-			preg_match( '/^(?P<handle>.+)-inline-css$/', $node->getAttribute( 'id' ), $matches )
+			preg_match( '/^(?P<handle>.+)-inline-css$/', $node->getAttribute( Attribute::ID ), $matches )
 			&&
 			wp_styles()->query( $matches['handle'] )
 			&&

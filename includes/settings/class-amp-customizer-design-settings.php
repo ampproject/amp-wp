@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Services;
 
 /**
  * Class AMP_Customizer_Design_Settings
@@ -72,6 +73,9 @@ class AMP_Customizer_Design_Settings {
 	 * Init customizer.
 	 */
 	public static function init_customizer() {
+		if ( ! Services::get( 'dependency_support' )->has_support() ) {
+			return;
+		}
 		add_action( 'amp_customizer_register_settings', [ __CLASS__, 'register_customizer_settings' ] );
 		add_action( 'amp_customizer_register_ui', [ __CLASS__, 'register_customizer_ui' ] );
 		add_action( 'amp_customizer_enqueue_preview_scripts', [ __CLASS__, 'enqueue_customizer_preview_scripts' ] );

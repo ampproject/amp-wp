@@ -69,6 +69,8 @@ describe( 'siteScanReducer', () => {
 		} ) ).toStrictEqual( {
 			status: STATUS_REQUEST_SCANNABLE_URLS,
 			forceStandardMode: false,
+			currentlyScannedUrlIndexes: [],
+			urlIndexesPendingScan: [],
 		} );
 
 		expect( siteScanReducer( {
@@ -79,6 +81,8 @@ describe( 'siteScanReducer', () => {
 		} ) ).toStrictEqual( {
 			status: STATUS_REQUEST_SCANNABLE_URLS,
 			forceStandardMode: true,
+			currentlyScannedUrlIndexes: [],
+			urlIndexesPendingScan: [],
 		} );
 	} );
 

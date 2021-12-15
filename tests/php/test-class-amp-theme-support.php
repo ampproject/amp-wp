@@ -1759,11 +1759,11 @@ class Test_AMP_Theme_Support extends TestCase {
 		foreach ( $ordered_contains as $ordered_contain ) {
 			if ( '#' === substr( $ordered_contain, 0, 1 ) ) {
 				$this->assertEquals( 1, preg_match( $ordered_contain, $sanitized_html, $matches, PREG_OFFSET_CAPTURE ), "Failed to find: $ordered_contain" );
-				$this->assertGreaterThan( $last_position, $matches[0][1], "'$ordered_contain' is not after '$prev_ordered_contain'" );
+				$this->assertGreaterThan( $last_position, $matches[0][1], "'$ordered_contain' is not after '$prev_ordered_contain' in:\n$sanitized_html" );
 				$last_position = $matches[0][1];
 			} else {
 				$this_position = strpos( $sanitized_html, $ordered_contain );
-				$this->assertNotFalse( $this_position, "Failed to find: $ordered_contain" );
+				$this->assertNotFalse( $this_position, "Failed to find: $ordered_contain in:\n$sanitized_html" );
 				$this->assertGreaterThan( $last_position, (int) $this_position, "'$ordered_contain' is not after '$prev_ordered_contain'" );
 				$last_position = $this_position;
 			}
@@ -2088,7 +2088,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		add_filter(
 			'script_loader_tag',
 			static function ( $script ) {
-				return preg_replace( "/ id='amp-[^']+?'/", '', $script );
+				return preg_replace( '/ id=(["\'])amp-.*?\1/', '', $script );
 			}
 		);
 
