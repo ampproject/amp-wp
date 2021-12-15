@@ -16,7 +16,7 @@ Remove the paired AMP endpoint from a given URL.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:2076](/includes/amp-helper-functions.php#L2076-L2088)
+:link: [includes/amp-helper-functions.php:2111](/includes/amp-helper-functions.php#L2111-L2123)
 
 <details>
 <summary>Show Code</summary>
