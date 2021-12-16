@@ -14,7 +14,7 @@ Check the the main query for the context for which metadata should be added.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1850](/includes/amp-helper-functions.php#L1850)
+:link: [includes/amp-helper-functions.php:1923](/includes/amp-helper-functions.php#L1923)
 
 <details>
 <summary>Show Code</summary>

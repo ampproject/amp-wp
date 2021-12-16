@@ -8,11 +8,13 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Support\SupportData;
 use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Manager;
 use WP_Query;
 
 /**
@@ -21,7 +23,7 @@ use WP_Query;
  * @internal
  * @since 2.2
  */
-class SupportScreen implements Conditional, Service, Registerable {
+class SupportScreen implements Conditional, Delayed, Service, Registerable {
 
 	/**
 	 * Handle for JS file.
@@ -29,6 +31,13 @@ class SupportScreen implements Conditional, Service, Registerable {
 	 * @var string
 	 */
 	const ASSET_HANDLE = 'amp-support';
+
+	/**
+	 * The minimum version of WordPress support for the "Support page".
+	 *
+	 * @var string
+	 */
+	const WP_MIN_VERSION = '5.2';
 
 	/**
 	 * Injector.
@@ -52,6 +61,18 @@ class SupportScreen implements Conditional, Service, Registerable {
 	private $google_fonts;
 
 	/**
+	 * Get registration action.
+	 *
+	 * Note that this runs at `init` so that it comes after the user is set. It can't use admin_init even though it the
+	 * `is_needed()` method calls `is_admin()` since it adds an `admin_menu` action which runs _before_ `admin_init`.
+	 *
+	 * @return string
+	 */
+	public static function get_registration_action() {
+		return 'init';
+	}
+
+	/**
 	 * Class constructor.
 	 *
 	 * @param Injector    $injector     Injector.
@@ -69,12 +90,42 @@ class SupportScreen implements Conditional, Service, Registerable {
 	}
 
 	/**
+	 * Determine whether the user has the capability to access the support screen.
+	 *
+	 * @return bool Whether user has the capability.
+	 */
+	public static function has_cap() {
+		return (
+			current_user_can( 'view_site_health_checks' )
+			&&
+			current_user_can( 'manage_options' )
+			&&
+			AMP_Validation_Manager::has_cap()
+		);
+	}
+
+	/**
+	 * Returns whether minimum WordPress version is available for support page or not.
+	 *
+	 * @return bool True if current WordPress's version is greater than or equal to minimum version.
+	 */
+	public static function check_core_version() {
+		return version_compare( get_bloginfo( 'version' ), self::WP_MIN_VERSION, '>=' );
+	}
+
+	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		return is_admin();
+		return (
+			self::check_core_version()
+			&&
+			is_admin()
+			&&
+			self::has_cap()
+		);
 	}
 
 	/**

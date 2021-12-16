@@ -12,7 +12,7 @@ Service for manipulating a paired URL.
 * [`add_path_suffix`](../method/PairedUrl/add_path_suffix.md) - Get paired AMP URL using a endpoint suffix.
 ### Source
 
-:link: [src/PairedUrl.php:18](/src/PairedUrl.php#L18-L146)
+:link: [src/PairedUrl.php:18](/src/PairedUrl.php#L18-L148)
 
 <details>
 <summary>Show Code</summary>
@@ -27,7 +27,9 @@ final class PairedUrl implements Service {
 	 * @return string URL.
 	 */
 	public function remove_query_var( $url ) {
-		return remove_query_arg( amp_get_slug(), $url );
+		$url = remove_query_arg( amp_get_slug(), $url );
+		$url = str_replace( '?#', '#', $url ); // See <https://core.trac.wordpress.org/ticket/44499>.
+		return $url;
 	}
 
 	/**

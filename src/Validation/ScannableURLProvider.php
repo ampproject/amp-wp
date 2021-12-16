@@ -71,8 +71,14 @@ final class ScannableURLProvider implements Service {
 				'is_singular',
 			];
 			if ( 'page' === get_option( 'show_on_front' ) ) {
-				$allowed_templates[] = 'is_home';
-				$allowed_templates[] = 'is_front_page';
+				$page_for_posts = get_option( 'page_for_posts' );
+				if ( $page_for_posts && amp_is_post_supported( $page_for_posts ) ) {
+					$allowed_templates[] = 'is_home';
+				}
+				$page_on_front = get_option( 'page_on_front' );
+				if ( $page_on_front && amp_is_post_supported( $page_on_front ) ) {
+					$allowed_templates[] = 'is_front_page';
+				}
 			}
 			foreach ( array_diff( array_keys( $supportable_templates ), $allowed_templates ) as $template ) {
 				$supportable_templates[ $template ]['supported'] = false;
@@ -110,12 +116,41 @@ final class ScannableURLProvider implements Service {
 		/*
 		 * If 'Your homepage displays' is set to 'Your latest posts', include the homepage.
 		 */
-		if ( 'posts' === get_option( 'show_on_front' ) && $this->is_template_supported( 'is_home' ) ) {
-			$urls[] = [
-				'url'   => home_url( '/' ),
-				'type'  => 'is_home',
-				'label' => __( 'Homepage', 'amp' ),
-			];
+		if ( 'posts' === get_option( 'show_on_front' ) ) {
+			if ( $this->is_template_supported( 'is_home' ) ) {
+				$urls[] = [
+					'url'   => home_url( '/' ),
+					'type'  => 'is_home',
+					'label' => __( 'Homepage', 'amp' ),
+				];
+			}
+		} elseif ( 'page' === get_option( 'show_on_front' ) ) {
+			if (
+				$this->is_template_supported( 'is_front_page' )
+				&&
+				get_option( 'page_on_front' )
+				&&
+				amp_is_post_supported( get_option( 'page_on_front' ) )
+			) {
+				$urls[] = [
+					'url'   => get_permalink( get_option( 'page_on_front' ) ),
+					'type'  => 'is_front_page',
+					'label' => __( 'Homepage', 'amp' ),
+				];
+			}
+			if (
+				$this->is_template_supported( 'is_home' )
+				&&
+				get_option( 'page_for_posts' )
+				&&
+				amp_is_post_supported( get_option( 'page_for_posts' ) )
+			) {
+				$urls[] = [
+					'url'   => get_permalink( get_option( 'page_for_posts' ) ),
+					'type'  => 'is_home',
+					'label' => __( 'Blog', 'amp' ),
+				];
+			}
 		}
 
 		$amp_enabled_taxonomies = array_filter(
@@ -256,6 +291,12 @@ final class ScannableURLProvider implements Service {
 			'order'          => 'DESC',
 			'fields'         => 'ids',
 		];
+		if ( 'page' === get_option( 'show_on_front' ) ) {
+			$args['post__not_in'] = [
+				(int) get_option( 'page_for_posts' ),
+				(int) get_option( 'page_on_front' ),
+			];
+		}
 		if ( is_int( $offset ) ) {
 			$args['offset'] = $offset;
 		}

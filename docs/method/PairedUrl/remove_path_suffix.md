@@ -16,7 +16,7 @@ Strip paired endpoint suffix.
 
 ### Source
 
-:link: [src/PairedUrl.php:52](/src/PairedUrl.php#L52-L61)
+:link: [src/PairedUrl.php:54](/src/PairedUrl.php#L54-L63)
 
 <details>
 <summary>Show Code</summary>

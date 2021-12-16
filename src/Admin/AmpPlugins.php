@@ -9,8 +9,10 @@ namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Services;
 use WP_Screen;
 use function get_current_screen;
 use stdClass;
@@ -21,7 +23,7 @@ use stdClass;
  * @since 2.2
  * @internal
  */
-class AmpPlugins implements Conditional, Delayed, Service, Registerable {
+class AmpPlugins implements Conditional, Delayed, HasRequirements, Service, Registerable {
 
 	/**
 	 * Slug for amp-compatible.
@@ -55,11 +57,24 @@ class AmpPlugins implements Conditional, Delayed, Service, Registerable {
 	}
 
 	/**
+	 * Get the list of service IDs required for this service to be registered.
+	 *
+	 * @return string[] List of required services.
+	 */
+	public static function get_requirements() {
+		return [ 'dependency_support' ];
+	}
+
+	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
+
+		if ( ! Services::get( 'dependency_support' )->has_support() ) {
+			return false;
+		}
 
 		/** This filter is documented in src/Admin/AmpThemes.php */
 		return is_admin() && apply_filters( 'amp_compatible_ecosystem_shown', true, 'plugins' );

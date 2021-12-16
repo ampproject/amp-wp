@@ -3,14 +3,13 @@
  */
 import {
 	siteScanReducer,
+	ACTION_SET_STATUS,
 	ACTION_SCANNABLE_URLS_REQUEST,
-	ACTION_SCANNABLE_URLS_FETCH,
 	ACTION_SCANNABLE_URLS_RECEIVE,
 	ACTION_SCAN_INITIALIZE,
 	ACTION_SCAN_URL,
 	ACTION_SCAN_RECEIVE_RESULTS,
 	ACTION_SCAN_COMPLETE,
-	ACTION_SCAN_SUCCESS,
 	ACTION_SCAN_CANCEL,
 	STATUS_REQUEST_SCANNABLE_URLS,
 	STATUS_FETCHING_SCANNABLE_URLS,
@@ -21,6 +20,7 @@ import {
 	STATUS_COMPLETED,
 	STATUS_FAILED,
 	STATUS_CANCELLED,
+	STATUS_SKIPPED,
 } from '../index';
 
 describe( 'siteScanReducer', () => {
@@ -28,6 +28,36 @@ describe( 'siteScanReducer', () => {
 		expect( () => {
 			siteScanReducer( {}, { type: 'foobar' } );
 		} ).toThrow( 'Unhandled action type: foobar' );
+	} );
+
+	/**
+	 * STATUS_SKIPPED
+	 */
+	it.each( [
+		ACTION_SET_STATUS,
+		ACTION_SCANNABLE_URLS_REQUEST,
+		ACTION_SCANNABLE_URLS_RECEIVE,
+		ACTION_SCAN_INITIALIZE,
+		ACTION_SCAN_URL,
+		ACTION_SCAN_RECEIVE_RESULTS,
+		ACTION_SCAN_COMPLETE,
+		ACTION_SCAN_CANCEL,
+	] )( 'returns previous state for %s if the current status is STATUS_SKIPPED', ( actionType ) => {
+		expect( siteScanReducer( { status: STATUS_SKIPPED }, {
+			type: actionType,
+		} ) ).toStrictEqual( { status: STATUS_SKIPPED } );
+	} );
+
+	/**
+	 * ACTION_SET_STATUS
+	 */
+	it( 'returns correct state for ACTION_SET_STATUS', () => {
+		expect( siteScanReducer( {}, {
+			type: ACTION_SET_STATUS,
+			status: 'foobar',
+		} ) ).toStrictEqual( {
+			status: 'foobar',
+		} );
 	} );
 
 	/**
@@ -39,6 +69,8 @@ describe( 'siteScanReducer', () => {
 		} ) ).toStrictEqual( {
 			status: STATUS_REQUEST_SCANNABLE_URLS,
 			forceStandardMode: false,
+			currentlyScannedUrlIndexes: [],
+			urlIndexesPendingScan: [],
 		} );
 
 		expect( siteScanReducer( {
@@ -49,17 +81,8 @@ describe( 'siteScanReducer', () => {
 		} ) ).toStrictEqual( {
 			status: STATUS_REQUEST_SCANNABLE_URLS,
 			forceStandardMode: true,
-		} );
-	} );
-
-	/**
-	 * ACTION_SCANNABLE_URLS_FETCH
-	 */
-	it( 'returns correct state for ACTION_SCANNABLE_URLS_FETCH', () => {
-		expect( siteScanReducer( {}, {
-			type: ACTION_SCANNABLE_URLS_FETCH,
-		} ) ).toStrictEqual( {
-			status: STATUS_FETCHING_SCANNABLE_URLS,
+			currentlyScannedUrlIndexes: [],
+			urlIndexesPendingScan: [],
 		} );
 	} );
 
@@ -67,20 +90,33 @@ describe( 'siteScanReducer', () => {
 	 * ACTION_SCANNABLE_URLS_RECEIVE
 	 */
 	it( 'returns correct state for ACTION_SCANNABLE_URLS_RECEIVE', () => {
-		expect( siteScanReducer( {}, {
+		expect( siteScanReducer( { scanOnce: false, scansCount: 0 }, {
 			type: ACTION_SCANNABLE_URLS_RECEIVE,
 			scannableUrls: [],
 		} ) ).toStrictEqual( {
 			status: STATUS_COMPLETED,
-			scannableUrls: [],
+			scanOnce: false,
+			scansCount: 0,
 		} );
 
-		expect( siteScanReducer( {}, {
+		expect( siteScanReducer( { scanOnce: false, scansCount: 2 }, {
 			type: ACTION_SCANNABLE_URLS_RECEIVE,
 			scannableUrls: [ 'foo', 'bar' ],
 		} ) ).toStrictEqual( {
 			status: STATUS_READY,
 			scannableUrls: [ 'foo', 'bar' ],
+			scanOnce: false,
+			scansCount: 2,
+		} );
+
+		expect( siteScanReducer( { scanOnce: true, scansCount: 1 }, {
+			type: ACTION_SCANNABLE_URLS_RECEIVE,
+			scannableUrls: [ 'foo', 'bar' ],
+		} ) ).toStrictEqual( {
+			status: STATUS_COMPLETED,
+			scannableUrls: [ 'foo', 'bar' ],
+			scanOnce: true,
+			scansCount: 1,
 		} );
 	} );
 
@@ -106,6 +142,8 @@ describe( 'siteScanReducer', () => {
 	] )( 'returns correct state for ACTION_SCAN_INITIALIZE when initial status is %s', ( status ) => {
 		expect( siteScanReducer( {
 			status,
+			scanOnce: false,
+			scansCount: 0,
 			scannableUrls: [ 'foo', 'bar' ],
 			urlIndexesPendingScan: [],
 		}, {
@@ -113,8 +151,33 @@ describe( 'siteScanReducer', () => {
 		} ) ).toStrictEqual( {
 			status: STATUS_IDLE,
 			currentlyScannedUrlIndexes: [],
+			scanOnce: false,
+			scansCount: 1,
 			scannableUrls: [ 'foo', 'bar' ],
 			urlIndexesPendingScan: [ 0, 1 ],
+		} );
+	} );
+
+	it.each( [
+		STATUS_CANCELLED,
+		STATUS_COMPLETED,
+		STATUS_FAILED,
+		STATUS_READY,
+	] )( 'returns correct state for ACTION_SCAN_INITIALIZE when initial status is %s and scan should be done just once', ( status ) => {
+		expect( siteScanReducer( {
+			status,
+			scanOnce: true,
+			scansCount: 1,
+			scannableUrls: [ 'foo', 'bar' ],
+			urlIndexesPendingScan: [],
+		}, {
+			type: ACTION_SCAN_INITIALIZE,
+		} ) ).toStrictEqual( {
+			status: STATUS_COMPLETED,
+			scanOnce: true,
+			scansCount: 1,
+			scannableUrls: [ 'foo', 'bar' ],
+			urlIndexesPendingScan: [],
 		} );
 	} );
 
@@ -291,17 +354,6 @@ describe( 'siteScanReducer', () => {
 				{ error: true },
 				{ error: true },
 			],
-		} );
-	} );
-
-	/**
-	 * ACTION_SCAN_SUCCESS
-	 */
-	it( 'returns previous state for ACTION_SCAN_SUCCESS', () => {
-		expect( siteScanReducer( { status }, {
-			type: ACTION_SCAN_SUCCESS,
-		} ) ).toStrictEqual( {
-			status: STATUS_COMPLETED,
 		} );
 	} );
 

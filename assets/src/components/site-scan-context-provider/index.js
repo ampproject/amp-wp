@@ -32,14 +32,13 @@ export const SiteScan = createContext();
 /**
  * Site Scan Actions.
  */
+export const ACTION_SET_STATUS = 'ACTION_SET_STATUS';
 export const ACTION_SCANNABLE_URLS_REQUEST = 'ACTION_SCANNABLE_URLS_REQUEST';
-export const ACTION_SCANNABLE_URLS_FETCH = 'ACTION_SCANNABLE_URLS_FETCH';
 export const ACTION_SCANNABLE_URLS_RECEIVE = 'ACTION_SCANNABLE_URLS_RECEIVE';
 export const ACTION_SCAN_INITIALIZE = 'ACTION_SCAN_INITIALIZE';
 export const ACTION_SCAN_URL = 'ACTION_SCAN_URL';
 export const ACTION_SCAN_RECEIVE_RESULTS = 'ACTION_SCAN_RECEIVE_RESULTS';
 export const ACTION_SCAN_COMPLETE = 'ACTION_SCAN_COMPLETE';
-export const ACTION_SCAN_SUCCESS = 'ACTION_SCAN_SUCCESS';
 export const ACTION_SCAN_CANCEL = 'ACTION_SCAN_CANCEL';
 
 /**
@@ -54,6 +53,7 @@ export const STATUS_IN_PROGRESS = 'STATUS_IN_PROGRESS';
 export const STATUS_COMPLETED = 'STATUS_COMPLETED';
 export const STATUS_FAILED = 'STATUS_FAILED';
 export const STATUS_CANCELLED = 'STATUS_CANCELLED';
+export const STATUS_SKIPPED = 'STATUS_SKIPPED';
 
 /**
  * Initial Site Scan state.
@@ -64,7 +64,9 @@ const INITIAL_STATE = {
 	currentlyScannedUrlIndexes: [],
 	forceStandardMode: false,
 	scannableUrls: [],
+	scanOnce: false,
 	status: '',
+	scansCount: 0,
 	urlIndexesPendingScan: [],
 };
 
@@ -89,25 +91,41 @@ const CONCURRENT_VALIDATION_REQUESTS_WAIT_MS = 500;
  * @param {Object} action Action to call.
  * @return {Object} New state.
  */
+//eslint-disable-next-line complexity
 export function siteScanReducer( state, action ) {
+	// Bail out early if Site Scan is skipped, i.e. if there is no validation nonce provided meaning the current user
+	// does not have capabilities for running AMP validation.
+	if ( state.status === STATUS_SKIPPED ) {
+		return state;
+	}
+
 	switch ( action.type ) {
+		case ACTION_SET_STATUS: {
+			return {
+				...state,
+				status: action.status,
+			};
+		}
 		case ACTION_SCANNABLE_URLS_REQUEST: {
 			return {
 				...state,
 				status: STATUS_REQUEST_SCANNABLE_URLS,
 				forceStandardMode: action?.forceStandardMode ?? false,
-			};
-		}
-		case ACTION_SCANNABLE_URLS_FETCH: {
-			return {
-				...state,
-				status: STATUS_FETCHING_SCANNABLE_URLS,
+				currentlyScannedUrlIndexes: [],
+				urlIndexesPendingScan: [],
 			};
 		}
 		case ACTION_SCANNABLE_URLS_RECEIVE: {
+			if ( ! action.scannableUrls || action.scannableUrls?.length === 0 ) {
+				return {
+					...state,
+					status: STATUS_COMPLETED,
+				};
+			}
+
 			return {
 				...state,
-				status: action.scannableUrls?.length > 0 ? STATUS_READY : STATUS_COMPLETED,
+				status: state.scanOnce && state.scansCount > 0 ? STATUS_COMPLETED : STATUS_READY,
 				scannableUrls: action.scannableUrls,
 			};
 		}
@@ -116,10 +134,18 @@ export function siteScanReducer( state, action ) {
 				return state;
 			}
 
+			if ( state.scanOnce && state.scansCount > 0 ) {
+				return {
+					...state,
+					status: STATUS_COMPLETED,
+				};
+			}
+
 			return {
 				...state,
 				status: STATUS_IDLE,
 				currentlyScannedUrlIndexes: [],
+				scansCount: state.scansCount + 1,
 				urlIndexesPendingScan: state.scannableUrls.map( ( url, index ) => index ),
 			};
 		}
@@ -168,12 +194,6 @@ export function siteScanReducer( state, action ) {
 				status: hasFailed ? STATUS_FAILED : STATUS_REFETCHING_PLUGIN_SUPPRESSION,
 			};
 		}
-		case ACTION_SCAN_SUCCESS: {
-			return {
-				...state,
-				status: STATUS_COMPLETED,
-			};
-		}
 		case ACTION_SCAN_CANCEL: {
 			if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( state.status ) ) {
 				return state;
@@ -195,18 +215,22 @@ export function siteScanReducer( state, action ) {
 /**
  * Context provider for site scanning.
  *
- * @param {Object}  props                             Component props.
- * @param {?any}    props.children                    Component children.
- * @param {boolean} props.fetchCachedValidationErrors Whether to fetch cached validation errors on mount.
- * @param {boolean} props.resetOnOptionsChange        Whether to reset scanner and refetch scannable URLs whenever AMP options are changed.
- * @param {string}  props.scannableUrlsRestPath       The REST path for interacting with the scannable URL resources.
- * @param {string}  props.validateNonce               The AMP validate nonce.
+ * @param {Object}  props                                        Component props.
+ * @param {?any}    props.children                               Component children.
+ * @param {boolean} props.fetchCachedValidationErrors            Whether to fetch cached validation errors on mount.
+ * @param {boolean} props.refetchPluginSuppressionOnScanComplete Whether to refetch plugin suppression data when site scan is complete.
+ * @param {boolean} props.resetOnOptionsChange                   Whether to reset scanner and refetch scannable URLs whenever AMP options are changed.
+ * @param {string}  props.scannableUrlsRestPath                  The REST path for interacting with the scannable URL resources.
+ * @param {boolean} props.scanOnce                               Whether to scan only once.
+ * @param {string}  props.validateNonce                          The AMP validate nonce.
  */
 export function SiteScanContextProvider( {
 	children,
 	fetchCachedValidationErrors = false,
+	refetchPluginSuppressionOnScanComplete = false,
 	resetOnOptionsChange = false,
 	scannableUrlsRestPath,
+	scanOnce = false,
 	validateNonce,
 } ) {
 	const {
@@ -217,7 +241,7 @@ export function SiteScanContextProvider( {
 		refetchPluginSuppression,
 	} = useContext( Options );
 	const { setAsyncError } = useAsyncError();
-	const [ state, dispatch ] = useReducer( siteScanReducer, INITIAL_STATE );
+	const [ state, dispatch ] = useReducer( siteScanReducer, { ...INITIAL_STATE, scanOnce } );
 	const {
 		currentlyScannedUrlIndexes,
 		forceStandardMode,
@@ -238,7 +262,7 @@ export function SiteScanContextProvider( {
 		themesWithAmpIncompatibility,
 	} = useMemo( () => {
 		// Skip if the scan is in progress.
-		if ( ! [ STATUS_READY, STATUS_COMPLETED ].includes( status ) ) {
+		if ( ! [ STATUS_READY, STATUS_COMPLETED, STATUS_SKIPPED ].includes( status ) ) {
 			return {
 				hasSiteScanResults: false,
 				pluginsWithAmpIncompatibility: [],
@@ -262,9 +286,14 @@ export function SiteScanContextProvider( {
 	/**
 	 * Preflight check.
 	 */
-	if ( ! validateNonce ) {
-		throw new Error( 'Invalid site scan configuration' );
-	}
+	useEffect( () => {
+		if ( ! validateNonce && status !== STATUS_SKIPPED ) {
+			dispatch( {
+				type: ACTION_SET_STATUS,
+				status: STATUS_SKIPPED,
+			} );
+		}
+	}, [ status, validateNonce ] );
 
 	/**
 	 * This component sets state inside async functions. Use this ref to prevent
@@ -296,7 +325,6 @@ export function SiteScanContextProvider( {
 	 */
 	useEffect( () => {
 		if ( resetOnOptionsChange && Object.keys( savedOptions ).length > 0 ) {
-			dispatch( { type: ACTION_SCAN_CANCEL } );
 			dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
 		}
 	}, [ resetOnOptionsChange, savedOptions ] );
@@ -310,6 +338,25 @@ export function SiteScanContextProvider( {
 			dispatch( { type: ACTION_SCAN_INITIALIZE } );
 		}
 	}, [ savedOptions?.suppressed_plugins, status ] );
+
+	/**
+	 * Once the site scan is complete, refetch the plugin suppression data so
+	 * that the suppressed table is updated with the latest validation errors.
+	 */
+	useEffect( () => {
+		if ( status !== STATUS_REFETCHING_PLUGIN_SUPPRESSION ) {
+			return;
+		}
+
+		if ( refetchPluginSuppressionOnScanComplete ) {
+			refetchPluginSuppression();
+		}
+
+		dispatch( {
+			type: ACTION_SET_STATUS,
+			status: STATUS_COMPLETED,
+		} );
+	}, [ refetchPluginSuppression, refetchPluginSuppressionOnScanComplete, status ] );
 
 	/**
 	 * Delay concurrent validation requests.
@@ -340,17 +387,6 @@ export function SiteScanContextProvider( {
 	}, [ shouldDelayValidationRequest ] );
 
 	/**
-	 * Once the site scan is complete, refetch the plugin suppression data so
-	 * that the suppressed table is updated with the latest validation errors.
-	 */
-	useEffect( () => {
-		if ( status === STATUS_REFETCHING_PLUGIN_SUPPRESSION ) {
-			refetchPluginSuppression();
-			dispatch( { type: ACTION_SCAN_SUCCESS } );
-		}
-	}, [ refetchPluginSuppression, status ] );
-
-	/**
 	 * Fetch scannable URLs from the REST endpoint.
 	 */
 	useEffect( () => {
@@ -359,7 +395,10 @@ export function SiteScanContextProvider( {
 				return;
 			}
 
-			dispatch( { type: ACTION_SCANNABLE_URLS_FETCH } );
+			dispatch( {
+				type: ACTION_SET_STATUS,
+				status: STATUS_FETCHING_SCANNABLE_URLS,
+			} );
 
 			try {
 				const fields = [ 'url', 'amp_url', 'type', 'label' ];
@@ -473,6 +512,7 @@ export function SiteScanContextProvider( {
 			value={ {
 				cancelSiteScan,
 				fetchScannableUrls,
+				forceStandardMode,
 				hasSiteScanResults,
 				isBusy: [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ),
 				isCancelled: status === STATUS_CANCELLED,
@@ -482,6 +522,7 @@ export function SiteScanContextProvider( {
 				isInitializing: ! Boolean( status ),
 				isReady: status === STATUS_READY,
 				isSiteScannable: scannableUrls.length > 0,
+				isSkipped: status === STATUS_SKIPPED,
 				pluginsWithAmpIncompatibility,
 				previewPermalink,
 				scannableUrls,
@@ -499,7 +540,9 @@ export function SiteScanContextProvider( {
 SiteScanContextProvider.propTypes = {
 	children: PropTypes.any,
 	fetchCachedValidationErrors: PropTypes.bool,
+	refetchPluginSuppressionOnScanComplete: PropTypes.bool,
 	resetOnOptionsChange: PropTypes.bool,
 	scannableUrlsRestPath: PropTypes.string,
+	scanOnce: PropTypes.bool,
 	validateNonce: PropTypes.string,
 };

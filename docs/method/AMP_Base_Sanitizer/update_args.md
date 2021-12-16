@@ -14,7 +14,7 @@ Merges the supplied args with the existing args.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:150](/includes/sanitizers/class-amp-base-sanitizer.php#L150-L152)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:207](/includes/sanitizers/class-amp-base-sanitizer.php#L207-L209)
 
 <details>
 <summary>Show Code</summary>

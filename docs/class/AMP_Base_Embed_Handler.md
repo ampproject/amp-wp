@@ -16,7 +16,7 @@ Class AMP_Base_Embed_Handler
 * [`create_overflow_button_markup`](../method/AMP_Base_Embed_Handler/create_overflow_button_markup.md) - Create overflow button markup.
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:20](/includes/embeds/class-amp-base-embed-handler.php#L20-L237)
+:link: [includes/embeds/class-amp-base-embed-handler.php:20](/includes/embeds/class-amp-base-embed-handler.php#L20-L239)
 
 <details>
 <summary>Show Code</summary>
@@ -26,7 +26,9 @@ abstract class AMP_Base_Embed_Handler {
 	/**
 	 * Default width.
 	 *
-	 * @var int
+	 * In some cases, this may be the string 'auto' when a fixed-height layout is used.
+	 *
+	 * @var int|string
 	 */
 	protected $DEFAULT_WIDTH = 600;
 

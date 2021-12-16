@@ -17,7 +17,7 @@ Get paired AMP URL using query var (`?amp=1`).
 
 ### Source
 
-:link: [src/PairedUrl.php:88](/src/PairedUrl.php#L88-L90)
+:link: [src/PairedUrl.php:90](/src/PairedUrl.php#L90-L92)
 
 <details>
 <summary>Show Code</summary>

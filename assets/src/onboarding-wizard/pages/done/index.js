@@ -48,7 +48,7 @@ export function Done() {
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
-	const { isFetchingScannableUrls } = useContext( SiteScan );
+	const { fetchScannableUrls, forceStandardMode, isFetchingScannableUrls } = useContext( SiteScan );
 	const {
 		hasPreview,
 		isPreviewingAMP,
@@ -75,6 +75,15 @@ export function Done() {
 			saveOptions();
 		}
 	}, [ didSaveOptions, saveOptions, savingOptions ] );
+
+	/**
+	 * Refetches the scannable URLs if they have been requested with Standard mode forced last time.
+	 */
+	useEffect( () => {
+		if ( didSaveOptions && forceStandardMode ) {
+			fetchScannableUrls();
+		}
+	}, [ didSaveOptions, fetchScannableUrls, forceStandardMode ] );
 
 	/**
 	 * Triggers saving of user options on arrival of this screen.

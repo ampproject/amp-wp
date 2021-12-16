@@ -266,7 +266,25 @@ class SandboxingTest extends DependencyInjectedTestCase {
 						<script async nomodule src="https://cdn.ampproject.org/v0.js" crossorigin="anonymous"></script>
 						<meta name="generator" content="AMP Plugin v2.1; foo=bar">
 					</head>
-					<body>%s</body>
+					<body>
+						%s
+
+						<div id="wpadminbar" class="nojq">
+							<div class="quicklinks" id="wp-toolbar" role="navigation" aria-label="Toolbar">
+								<ul id="wp-admin-bar-root-default" class="ab-top-menu">
+									<li id="wp-admin-bar-amp" class="menupop">
+										<a class="ab-item" aria-haspopup="true" href="#" title="Validate URL"><span id="amp-admin-bar-item-status-icon" class="ab-icon amp-icon amp-valid"></span> AMP</a>
+										<div class="ab-sub-wrapper">
+											<ul id="wp-admin-bar-amp-default" class="ab-submenu">
+												<li id="wp-admin-bar-amp-settings"><a class="ab-item" href="#">Settings</a></li>
+												<li id="wp-admin-bar-amp-support"><a class="ab-item" href="#">Get support</a></li>
+											</ul>
+										</div>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</body>
 				</html>
 				',
 				$body
@@ -291,6 +309,16 @@ class SandboxingTest extends DependencyInjectedTestCase {
 		foreach ( $expressions as $expression ) {
 			$this->assertEquals( $expected_required_amp_markup ? 1 : 0, $dom->xpath->query( $expression )->length, $expression );
 		}
+
+		$root_path = '//div[ @id = "wpadminbar" ]//li[ @id = "wp-admin-bar-amp" ]';
+		$this->assertInstanceOf(
+			Element::class,
+			$dom->xpath->query( $root_path . '/a/span[ contains( @title, "Sandboxing level" ) ]' )->item( 0 )
+		);
+		$this->assertInstanceOf(
+			Element::class,
+			$dom->xpath->query( $root_path . '//li[ @id = "wp-admin-bar-amp-sandboxing-level" ]//a[ @href and contains( ., "Sandboxing level" ) ]' )->item( 0 )
+		);
 	}
 
 	/**

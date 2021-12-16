@@ -16,7 +16,7 @@ Get paired AMP URL using a endpoint suffix.
 
 ### Source
 
-:link: [src/PairedUrl.php:100](/src/PairedUrl.php#L100-L145)
+:link: [src/PairedUrl.php:102](/src/PairedUrl.php#L102-L147)
 
 <details>
 <summary>Show Code</summary>

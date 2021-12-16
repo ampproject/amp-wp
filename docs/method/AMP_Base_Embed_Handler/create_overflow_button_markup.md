@@ -16,7 +16,7 @@ Create overflow button markup.
 
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:231](/includes/embeds/class-amp-base-embed-handler.php#L231-L236)
+:link: [includes/embeds/class-amp-base-embed-handler.php:233](/includes/embeds/class-amp-base-embed-handler.php#L233-L238)
 
 <details>
 <summary>Show Code</summary>
