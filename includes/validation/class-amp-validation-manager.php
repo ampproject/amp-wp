@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
@@ -376,7 +377,17 @@ class AMP_Validation_Manager {
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar.
 	 */
 	public static function add_admin_bar_menu_items( $wp_admin_bar ) {
-		if ( is_admin() || ! self::get_dev_tools_user_access()->is_user_enabled() || ! amp_is_available() ) {
+
+		$user            = wp_get_current_user();
+		$is_user_enabled = (
+			$user instanceof WP_User
+			&&
+			self::has_cap( $user )
+			&&
+			self::get_dev_tools_user_access()->get_user_enabled( $user )
+		);
+
+		if ( is_admin() || ! $is_user_enabled || ! amp_is_available() ) {
 			self::$amp_admin_bar_item_added = false;
 			return;
 		}
@@ -472,7 +483,7 @@ class AMP_Validation_Manager {
 		}
 
 		// Add settings link to admin bar.
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( OptionsMenu::is_needed() && current_user_can( 'manage_options' ) ) {
 			$wp_admin_bar->add_node(
 				[
 					'parent' => 'amp',
