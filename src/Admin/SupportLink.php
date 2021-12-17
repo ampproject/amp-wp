@@ -53,17 +53,17 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 	public function register() {
 
 		// Add support link to Admin Bar.
-		add_action( 'admin_bar_menu', [ $this, 'admin_bar_menu' ], 105 );
+		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 105 );
 
 		if ( is_admin() ) {
 			// Add support link to meta box.
-			add_filter( 'amp_validated_url_status_actions', [ $this, 'amp_validated_url_status_actions' ], 10, 2 );
+			add_filter( 'amp_validated_url_status_actions', array( $this, 'amp_validated_url_status_actions' ), 10, 2 );
 
 			// Add support link to Post row actions.
-			add_filter( 'post_row_actions', [ $this, 'post_row_actions' ], PHP_INT_MAX, 2 );
+			add_filter( 'post_row_actions', array( $this, 'post_row_actions' ), PHP_INT_MAX, 2 );
 
 			// Plugin row Support link.
-			add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
+			add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
 		}
 	}
 
@@ -81,20 +81,20 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 		}
 
 		$wp_admin_bar->add_node(
-			[
+			array(
 				'parent' => 'amp',
 				'title'  => esc_html__( 'Get support', 'amp' ),
 				'id'     => 'amp-support',
 				'href'   => esc_url(
 					add_query_arg(
-						[
+						array(
 							'page' => 'amp-support',
 							'url'  => rawurlencode( amp_get_current_url() ),
-						],
+						),
 						admin_url( 'admin.php' )
 					)
 				),
-			]
+			)
 		);
 	}
 
@@ -112,15 +112,15 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 			return $actions;
 		}
 
-		$query_args = [
+		$query_args = array(
 			'page' => 'amp-support',
 			'url'  => rawurlencode( AMP_Validated_URL_Post_Type::get_url_from_post( $post ) ),
-		];
+		);
 
 		$actions['amp-support'] = sprintf(
 			'<a href="%s">%s</a>',
 			esc_url( add_query_arg( $query_args, admin_url( 'admin.php' ) ) ),
-			esc_html__( 'Get Support', 'amp' )
+			esc_html__( 'Get support', 'amp' )
 		);
 
 		return $actions;
@@ -140,15 +140,15 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 			return $actions;
 		}
 
-		$query_args = [
+		$query_args = array(
 			'page' => 'amp-support',
 			'url'  => rawurlencode( AMP_Validated_URL_Post_Type::get_url_from_post( $post ) ),
-		];
+		);
 
 		$actions['amp-support'] = sprintf(
 			'<a href="%s">%s</a>',
 			esc_url( add_query_arg( $query_args, admin_url( 'admin.php' ) ) ),
-			esc_html__( 'Get Support', 'amp' )
+			esc_html__( 'Get support', 'amp' )
 		);
 
 		return $actions;
@@ -170,7 +170,7 @@ class SupportLink implements Service, Delayed, Conditional, Registerable {
 				'<a href="%s">%s</a>',
 				esc_url(
 					add_query_arg(
-						[ 'page' => 'amp-support' ],
+						array( 'page' => 'amp-support' ),
 						admin_url( 'admin.php' )
 					)
 				),

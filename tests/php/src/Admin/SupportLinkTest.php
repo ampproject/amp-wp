@@ -65,7 +65,7 @@ class SupportLinkTest extends TestCase {
 		$this->assertFalse( SupportLink::is_needed() );
 
 		// Test 2: Test with admin user.
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 		$this->assertTrue( SupportLink::is_needed() );
 	}
@@ -79,16 +79,16 @@ class SupportLinkTest extends TestCase {
 
 		$this->instance->register();
 
-		$this->assertEquals( 105, has_action( 'admin_bar_menu', [ $this->instance, 'admin_bar_menu' ] ) );
+		$this->assertEquals( 105, has_action( 'admin_bar_menu', array( $this->instance, 'admin_bar_menu' ) ) );
 
 		$this->assertEquals(
 			10,
 			has_filter(
 				'amp_validated_url_status_actions',
-				[
+				array(
 					$this->instance,
 					'amp_validated_url_status_actions',
-				]
+				)
 			)
 		);
 
@@ -96,14 +96,14 @@ class SupportLinkTest extends TestCase {
 			PHP_INT_MAX,
 			has_filter(
 				'post_row_actions',
-				[
+				array(
 					$this->instance,
 					'post_row_actions',
-				]
+				)
 			)
 		);
 
-		$this->assertEquals( 10, has_filter( 'plugin_row_meta', [ $this->instance, 'plugin_row_meta' ] ) );
+		$this->assertEquals( 10, has_filter( 'plugin_row_meta', array( $this->instance, 'plugin_row_meta' ) ) );
 
 		set_current_screen( 'front' );
 	}
@@ -114,7 +114,7 @@ class SupportLinkTest extends TestCase {
 	public function test_admin_bar_menu() {
 
 		// Mock Admin user.
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 		// Set AMP mode.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -140,12 +140,12 @@ class SupportLinkTest extends TestCase {
 	public function test_amp_validated_url_status_actions() {
 
 		$post = $this->factory()->post->create_and_get(
-			[
+			array(
 				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-			]
+			)
 		);
 
-		$actions = $this->instance->amp_validated_url_status_actions( [], $post );
+		$actions = $this->instance->amp_validated_url_status_actions( array(), $post );
 
 		$this->assertStringContainsString(
 			'page=amp-support',
@@ -168,17 +168,17 @@ class SupportLinkTest extends TestCase {
 		// Test 1: With different post type.
 		$post = $this->factory()->post->create_and_get();
 
-		$actions = $this->instance->post_row_actions( [], $post );
+		$actions = $this->instance->post_row_actions( array(), $post );
 		$this->assertEmpty( $actions );
 
 		// Test 2: With "amp_validated_url" post type.
 		$post = $this->factory()->post->create_and_get(
-			[
+			array(
 				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-			]
+			)
 		);
 
-		$actions = $this->instance->post_row_actions( [], $post );
+		$actions = $this->instance->post_row_actions( array(), $post );
 
 		$this->assertStringContainsString(
 			'page=amp-support',
@@ -197,17 +197,17 @@ class SupportLinkTest extends TestCase {
 	public function test_plugin_row_meta() {
 
 		// Test 1: For other than AMP plugin
-		$output = $this->instance->plugin_row_meta( [], 'hello-dolly.php' );
+		$output = $this->instance->plugin_row_meta( array(), 'hello-dolly.php' );
 		$this->assertEmpty( $output );
 
 		// Test 2: For AMP plugin
-		$output = $this->instance->plugin_row_meta( [], 'amp/amp.php' );
+		$output = $this->instance->plugin_row_meta( array(), 'amp/amp.php' );
 
 		$should_have = sprintf(
 			'<a href="%s">%s</a>',
 			esc_url(
 				add_query_arg(
-					[ 'page' => 'amp-support' ],
+					array( 'page' => 'amp-support' ),
 					admin_url( 'admin.php' )
 				)
 			),

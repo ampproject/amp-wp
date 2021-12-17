@@ -63,7 +63,7 @@ export default function AMPValidationStatusNotification() {
 			{
 				supportLink && (
 					<ExternalLink href={ supportLink }>
-						{ __( 'Get Support', 'amp' ) }
+						{ __( 'Get support', 'amp' ) }
 					</ExternalLink>
 				)
 			}
