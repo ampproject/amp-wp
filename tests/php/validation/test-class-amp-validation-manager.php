@@ -441,16 +441,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	public function test_add_admin_bar_menu_items() {
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 
-		if ( ! ( new DependencySupport() )->has_support() ) {
-			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-			AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-			$admin_bar = new WP_Admin_Bar();
-			AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
-			$this->assertNull( $admin_bar->get_node( 'amp' ) );
-			$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
-			return;
-		}
-
 		$this->accept_sanitization_by_default( false );
 
 		// No admin bar item when user lacks capability.
