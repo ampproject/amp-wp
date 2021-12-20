@@ -5,7 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
@@ -482,8 +481,10 @@ class AMP_Validation_Manager {
 			$wp_admin_bar->add_node( $validate_item );
 		}
 
+		$is_option_menu_enabled = (bool) apply_filters( 'amp_options_menu_is_enabled', true );
+
 		// Add settings link to admin bar.
-		if ( OptionsMenu::is_needed() && current_user_can( 'manage_options' ) ) {
+		if ( $is_option_menu_enabled && current_user_can( 'manage_options' ) ) {
 			$wp_admin_bar->add_node(
 				[
 					'parent' => 'amp',

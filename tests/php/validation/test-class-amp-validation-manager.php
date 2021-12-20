@@ -536,6 +536,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertTrue( current_user_can( 'manage_options' ) );
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$this->assertObjectHasAttribute( 'href', $admin_bar->get_node( 'amp-settings' ) );
+
+		add_filter( 'amp_options_menu_is_enabled', '__return_false' );
+		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+		$this->assertObjectHasAttribute( 'href', $admin_bar->get_node( 'amp-settings' ) );
+		remove_filter( 'amp_options_menu_is_enabled', '__return_false' );
 	}
 
 	/**
