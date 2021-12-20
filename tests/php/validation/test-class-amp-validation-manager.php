@@ -492,28 +492,20 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
-		if ( ( new DependencySupport() )->has_support() ) {
-			$this->assertIsObject( $node );
-		} else {
-			$this->assertNull( $node );
-		}
+		$this->assertIsObject( $node );
 
 		// Admin bar item available in paired mode.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$root_node = $admin_bar->get_node( 'amp' );
-		if ( ( new DependencySupport() )->has_support() ) {
-			$this->assertIsObject( $root_node );
-			$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $root_node->href ) ) );
+		$this->assertIsObject( $root_node );
+		$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $root_node->href ) ) );
 
-			$view_item = $admin_bar->get_node( 'amp-view' );
-			$this->assertIsObject( $view_item );
-			$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
-			$this->assertIsObject( $admin_bar->get_node( 'amp-validity' ) );
-		} else {
-			$this->assertNull( $root_node );
-		}
+		$view_item = $admin_bar->get_node( 'amp-view' );
+		$this->assertIsObject( $view_item );
+		$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
+		$this->assertIsObject( $admin_bar->get_node( 'amp-validity' ) );
 
 		// Lastly, confirm that the settings item is added if the user is an admin.
 		wp_set_current_user( 0 );
