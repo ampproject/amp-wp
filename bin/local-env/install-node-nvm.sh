@@ -69,7 +69,7 @@ fi
 if [ "$CI" != "true" ]; then
   # Install/update packages
   echo -e $(status_message "Installing and updating NPM packages..." )
-  npm install
+  npm ci
 
   # Make sure npm is up-to-date
   npm install npm -g
@@ -83,7 +83,7 @@ if [ "$CI" != "true" ] && ! git diff --no-ext-diff --exit-code package-lock.json
 		git checkout package-lock.json
 
 		echo -e $(status_message "Reinstalling NPM packages..." )
-		npm install
+		npm ci
 
 		# Check that it's cleaned up now.
 		if git diff --no-ext-diff --exit-code package-lock.json >/dev/null; then
