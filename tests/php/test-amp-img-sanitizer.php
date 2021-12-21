@@ -91,6 +91,54 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				],
 			],
 
+			'simple_native_server_image_map'           => [
+				'<a href="#"><img src="https://placehold.it/300x300" width="300" height="300" class="align-center" align="top" alt="Alt" border="2" crossorigin="anonymous" hspace="2" importance="high" ismap loading="lazy" name="foo" referrerpolicy="no-referrer" vspace="2"></a>',
+				'<a href="#"><img src="https://placehold.it/300x300" width="300" height="300" class="align-center amp-wp-enforced-sizes" align="top" alt="Alt" border="2" crossorigin="anonymous" hspace="2" importance="high" ismap loading="lazy" name="foo" referrerpolicy="no-referrer" vspace="2" decoding="async"></a>',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'simple_native_client_image_map'           => [
+				'<map name="mainmenu-map"><area shape="circle" coords="25, 25, 75" href="/index.html" alt="Return to home page"><area shape="rect" coords="25, 25, 100, 150" href="/index.html" alt="Shop"></map><img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" usemap="#mainmenu-map">',
+				'<map name="mainmenu-map"><area shape="circle" coords="25, 25, 75" href="/index.html" alt="Return to home page"><area shape="rect" coords="25, 25, 100, 150" href="/index.html" alt="Shop"></map><img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" usemap="#mainmenu-map" decoding="async">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'standard_img_without_srcset'              => [
+				'<img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="">',
+				'<img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" decoding="async">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'standard_img_with_srcset'                 => [
+				'<img width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="">',
+				'<img width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" decoding="async">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'hero_img_without_srcset'                  => [
+				'<img data-hero width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="">',
+				'<img data-hero width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" decoding="async">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'hero_img_with_srcset'                     => [
+				'<img data-hero width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="">',
+				'<img data-hero width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" decoding="async">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
 			'native_image_with_no_dims_and_loading'    => [
 				'<img src="https://placehold.it/150x300" loading="lazy" decoding="sync">',
 				'<img src="https://placehold.it/150x300" loading="lazy" decoding="sync" width="150" height="300" class="amp-wp-enforced-sizes">',
