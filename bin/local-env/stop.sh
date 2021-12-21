@@ -19,5 +19,10 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 # Stop existing containers.
-echo -e $(status_message "Stopping Docker containers...")
-dc down --remove-orphans >/dev/null 2>&1
+if [ "$1" == "--down" ]; then
+	echo -e $(status_message "Stopping and removing Docker containers...")
+	dc down --remove-orphans >/dev/null 2>&1
+else
+	echo -e $(status_message "Stopping Docker containers...")
+	dc stop >/dev/null 2>&1
+fi

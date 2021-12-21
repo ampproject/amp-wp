@@ -111,6 +111,7 @@
     "dev": "wp-scripts start",
     "env:start": "./bin/local-env/start.sh",
     "env:stop": "./bin/local-env/stop.sh",
+    "env:down": "./bin/local-env/stop.sh --down",
     "env:reset-site": "./bin/local-env/install-wordpress.sh --reset-site",
     "generate-changelog": "node bin/release-changelog",
     "lint": "npm-run-all --parallel lint:*",

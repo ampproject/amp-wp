@@ -9,19 +9,26 @@ set -e
 # Change to the expected directory
 cd "$(dirname "$0")/../.."
 
-# Check whether Node and NVM are installed
-. "$(dirname "$0")/install-node-nvm.sh"
+# Check if the container already exists
+if [ "$(dc ps -a | grep $CONTAINER)" ]; then
+	echo -e "\nYour local environment has been already installed, starting now...\n"
 
-# Check whether Composer installed
-. "$(dirname "$0")/install-composer.sh"
+	dc start >/dev/null 2>&1
+else
+	# Check whether Node and NVM are installed
+	. "$(dirname "$0")/install-node-nvm.sh"
 
-# Check whether Docker is installed and running
-. "$(dirname "$0")/launch-containers.sh"
+	# Check whether Composer installed
+	. "$(dirname "$0")/install-composer.sh"
 
-# Set up WordPress Development site.
-# Note: we don't bother installing the test site right now, because that's
-# done on every time `npm run test-e2e` is run.
-. "$(dirname "$0")/install-wordpress.sh"
+	# Check whether Docker is installed and running
+	. "$(dirname "$0")/launch-containers.sh"
+
+	# Set up WordPress Development site.
+	# Note: we don't bother installing the test site right now, because that's
+	# done on every time `npm run test-e2e` is run.
+	. "$(dirname "$0")/install-wordpress.sh"
+fi
 
 ! read -d '' AMP <<"EOT"
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
