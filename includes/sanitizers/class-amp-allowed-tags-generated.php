@@ -6284,6 +6284,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'amp_layout' => array(
 						'supported_layouts' => array(
+							5,
 							6,
 							2,
 							3,
@@ -11413,6 +11414,245 @@ class AMP_Allowed_Tags_Generated {
 		'image' => array(
 			array(
 				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Standard Image',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'data-hero' => array(
+						'dispatch_key' => 1,
+						'mandatory' => true,
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Hero Image',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'sizes' => array(),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Image using srcset',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
 					'alignment-baseline' => array(),
 					'baseline-shift' => array(),
 					'clip' => array(),
@@ -11519,28 +11759,214 @@ class AMP_Allowed_Tags_Generated {
 		'img' => array(
 			array(
 				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
 					'alt' => array(),
-					'attribution' => array(),
 					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
 					'decoding' => array(
-						'value' => array(
+						'value_casei' => array(
 							'async',
-							'auto',
-							'sync',
 						),
 					),
 					'height' => array(),
-					'importance' => array(),
-					'intrinsicsize' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
 					'ismap' => array(),
-					'loading' => array(),
-					'longdesc' => array(
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
 						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
 						'value_url' => array(
 							'protocol' => array(
+								'data',
 								'http',
 								'https',
 							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Standard Img',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'data-hero' => array(
+						'dispatch_key' => 1,
+						'mandatory' => true,
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Hero Img',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
 						),
 					),
 					'sizes' => array(),
@@ -11558,6 +11984,91 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Img using srcset',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'attribution' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+							'auto',
+							'sync',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'intrinsicsize' => array(),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'sizes' => array(),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
 					'width' => array(),
 				),
 				'tag_spec' => array(
