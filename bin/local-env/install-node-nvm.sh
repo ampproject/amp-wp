@@ -1,5 +1,6 @@
 #!/bin/bash
 NVM_VERSION=`curl -Ls -w %{url_effective} -o /dev/null https://github.com/nvm-sh/nvm/releases/latest | rev | cut -d '/' -f 1 | rev`
+NODE_REQUIRED_VERSION=v$(<.nvmrc)
 
 # Exit if any command fails
 set -e
@@ -58,7 +59,7 @@ if [ "$CI" != "true" ] && [ $NVM_VERSION != "v$(nvm --version)" ]; then
 fi
 
 # Check if the current node version is up to date.
-if [ "$CI" != "true" ] && [ "$(nvm current)" != "$(nvm version-remote --lts)" ]; then
+if [ "$CI" != "true" ] && [[ $(nvm current) =~ $NODE_REQUIRED_VERSION.* ]]; then
 	echo -e $(warning_message "Node version does not match the latest long term support version. Please run this command to install and use it:" )
 	echo -e $(warning_message "$(action_format "nvm install")" )
 	echo -e $(warning_message "After that, re-run the setup script to continue." )
