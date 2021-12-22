@@ -18,7 +18,7 @@ On a site in Standard mode, this is the same as `get_permalink()`.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:664](/includes/amp-helper-functions.php#L664-L669)
+:link: [includes/amp-helper-functions.php:669](/includes/amp-helper-functions.php#L669-L674)
 
 <details>
 <summary>Show Code</summary>

@@ -4,11 +4,11 @@
 
 An easier path to great Page Experience for everyone. Powered by AMP.
 
-**Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [albertomedina](https://profiles.wordpress.org/albertomedina), [schlessera](https://profiles.wordpress.org/schlessera), [swissspidy](https://profiles.wordpress.org/swissspidy), [pierlo](https://profiles.wordpress.org/pierlo), [delawski](https://profiles.wordpress.org/delawski/), [johnwatkins0](https://profiles.wordpress.org/johnwatkins0), [joshuawold](https://profiles.wordpress.org/joshuawold)  
+**Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [rtcamp](https://profiles.wordpress.org/rtcamp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [albertomedina](https://profiles.wordpress.org/albertomedina), [schlessera](https://profiles.wordpress.org/schlessera), [delawski](https://profiles.wordpress.org/delawski/), [swissspidy](https://profiles.wordpress.org/swissspidy), [pierlo](https://profiles.wordpress.org/pierlo), [joshuawold](https://profiles.wordpress.org/joshuawold)  
 **Tags:** [page experience](https://wordpress.org/plugins/tags/page-experience), [performance](https://wordpress.org/plugins/tags/performance), [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages)  
 **Requires at least:** 4.9  
-**Tested up to:** 5.8  
-**Stable tag:** 2.1.4  
+**Tested up to:** 5.9  
+**Stable tag:** 2.2.0  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.6
 

@@ -13,7 +13,7 @@ Filters whether to show AMP compatible ecosystem in the admin.
 
 ### Source
 
-:link: [src/Admin/AmpThemes.php:71](/src/Admin/AmpThemes.php#L71)
+:link: [src/Admin/AmpThemes.php:85](/src/Admin/AmpThemes.php#L85)
 
 <details>
 <summary>Show Code</summary>

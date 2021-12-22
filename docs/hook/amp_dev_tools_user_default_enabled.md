@@ -15,7 +15,7 @@ When Reader mode is active, Developer Tools is currently disabled by default.
 
 ### Source
 
-:link: [src/DevTools/UserAccess.php:91](/src/DevTools/UserAccess.php#L91)
+:link: [src/DevTools/UserAccess.php:112](/src/DevTools/UserAccess.php#L112)
 
 <details>
 <summary>Show Code</summary>
