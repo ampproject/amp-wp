@@ -5,7 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
 use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;

@@ -7,7 +7,6 @@
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
-use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Dom\Document;
 
 /**
