@@ -1461,23 +1461,21 @@ class AMP_Validation_Manager {
 				$source['hook']     = $hook;
 				$source['priority'] = $priority;
 				$original_function  = $callback['function'];
-				$wrapped_callback   = self::wrapped_callback(
+
+				$wrapped_callback = new AMP_Validation_Callback_Wrapper(
 					array_merge(
 						$callback,
 						compact( 'priority', 'source', 'indirect_sources' )
-					)
+					),
+					static function () use ( &$callback, $original_function ) {
+						$callback['function'] = $original_function;
+					}
 				);
 
 				if ( 1 === $passed_by_ref ) {
-					$callback['function'] = static function( &$first, ...$other_args ) use ( &$callback, $wrapped_callback, $original_function ) {
-						$callback['function'] = $original_function; // Restore original.
-						return $wrapped_callback->invoke_with_first_ref_arg( $first, ...$other_args );
-					};
+					$callback['function'] = [ $wrapped_callback, 'invoke_with_first_ref_arg' ];
 				} else {
-					$callback['function'] = static function( ...$args ) use ( &$callback, $wrapped_callback, $original_function ) {
-						$callback['function'] = $original_function; // Restore original.
-						return $wrapped_callback( ...$args );
-					};
+					$callback['function'] = $wrapped_callback;
 				}
 			}
 		}

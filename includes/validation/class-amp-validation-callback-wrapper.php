@@ -21,9 +21,16 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	protected $callback;
 
 	/**
+	 * Function to call before invoking the callback.
+	 *
+	 * @var callable|null
+	 */
+	protected $before_invoke;
+
+	/**
 	 * AMP_Validation_Callback_Wrapper constructor.
 	 *
-	 * @param array $callback {
+	 * @param array    $callback {
 	 *     The callback data.
 	 *
 	 *     @type callable $function
@@ -31,9 +38,11 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 *     @type array    $source
 	 *     @type array    $indirect_sources
 	 * }
+	 * @param callable $before_invoke Additional callback to run before invoking original callback. Optional.
 	 */
-	public function __construct( $callback ) {
-		$this->callback = $callback;
+	public function __construct( $callback, $before_invoke = null ) {
+		$this->callback      = $callback;
+		$this->before_invoke = $before_invoke;
 	}
 
 	/**
@@ -124,6 +133,10 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 * @return mixed Response.
 	 */
 	public function __invoke( ...$args ) {
+		if ( $this->before_invoke ) {
+			call_user_func( $this->before_invoke );
+		}
+
 		$preparation = $this->prepare( ...$args );
 
 		$result = call_user_func_array(
@@ -146,6 +159,10 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 * @return mixed
 	 */
 	public function invoke_with_first_ref_arg( &$first_arg, ...$other_args ) {
+		if ( $this->before_invoke ) {
+			call_user_func( $this->before_invoke );
+		}
+
 		$preparation = $this->prepare( $first_arg, ...$other_args );
 
 		$result = $this->callback['function'](
