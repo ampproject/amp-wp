@@ -1,0 +1,14 @@
+{
+  "plugins": [
+    ".",
+    "https://downloads.wordpress.org/plugin/gutenberg.12.2.0.zip",
+    "https://downloads.wordpress.org/plugin/pwa.0.6.0.zip"
+  ],
+  "env": {
+    "tests": {
+      "mappings": {
+        "../wordpress-develop": "WordPress/wordpress-develop#trunk"
+      }
+    }
+  }
+}

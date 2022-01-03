@@ -16,6 +16,11 @@ if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
 	$_test_root = dirname( dirname( dirname( dirname( TESTS_PLUGIN_DIR ) ) ) ) . '/tests/phpunit';
 }
 
+// When run in wp-env context, set the test config file path.
+if ( ! defined( 'WP_TESTS_CONFIG_FILE_PATH' ) && false !== getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) ) {
+	define( 'WP_TESTS_CONFIG_FILE_PATH', getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) );
+}
+
 require $_test_root . '/includes/functions.php';
 
 // Force plugins defined in a constant (supplied by phpunit.xml) to be active at runtime.
