@@ -2,11 +2,7 @@
 
 # Common variables.
 DOCKER_COMPOSE_FILE_OPTIONS="-f $(dirname "$0")/docker-compose.yml"
-# These are the containers and values for the development site.
-CLI='cli'
-CONTAINER='wordpress'
-DATABASE='mysql'
-SITE_TITLE='AMP Dev'
+CONTAINERS=(development e2e phpunit)
 
 ##
 # Ask a Yes/No question, and way for a reply.
@@ -151,21 +147,12 @@ dc() {
 }
 
 ##
-# WP CLI
-#
-# Executes a WP CLI request in the CLI container.
-##
-wp() {
-	dc exec -T -u xfs $CLI wp "$@"
-}
-
-##
 # MySQL CLI.
 #
 # Executes the given MySQL client command in the database container.
 ##
 mysql() {
-	dc exec -T -e MYSQL_PWD=example $DATABASE mysql "$@"
+	dc exec -T -e MYSQL_PWD=password mysql_$CONTAINER mysql "$@"
 }
 
 ##
@@ -174,5 +161,14 @@ mysql() {
 # Executes the given command in the wordpress container.
 ##
 container() {
-	dc exec -T $CONTAINER "$@"
+	dc exec -T wordpress_$CONTAINER "$@"
+}
+
+##
+# WP CLI
+#
+# Executes a WP CLI request in the CLI container.
+##
+wp() {
+	dc exec -T -u xfs cli_$CONTAINER wp "$@"
 }
