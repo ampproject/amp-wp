@@ -6,13 +6,11 @@ import { join } from 'path';
 /**
  * WordPress dependencies
  */
-import { getPageError } from '@wordpress/e2e-test-utils';
+import { createURL, getPageError } from '@wordpress/e2e-test-utils';
 
-function createURLWithHash( WPPath, query = '', hash = '' ) {
-	const url = new URL( process.env.WP_BASE_URL );
+function createURLWithHash( WPPath, query, hash = '' ) {
+	const url = new URL( createURL( WPPath, query ) );
 
-	url.pathname = join( url.pathname, WPPath );
-	url.search = query;
 	url.hash = hash;
 
 	return url.href;
