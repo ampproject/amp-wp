@@ -110,7 +110,7 @@
     "deploy": "grunt deploy",
     "dev": "wp-scripts start",
     "env": "wp-env",
-    "env:start": "wp-env start",
+    "env:start": "wp-env start --xdebug",
     "env:stop": "wp-env stop",
     "env:reset-site": "wp-env clean all",
     "generate-changelog": "node bin/release-changelog",
