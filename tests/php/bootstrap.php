@@ -12,6 +12,8 @@ if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
 	$_test_root = getenv( 'WP_DEVELOP_DIR' ) . '/tests/phpunit';
 } elseif ( file_exists( '/tmp/wordpress-tests/includes/bootstrap.php' ) ) {
 	$_test_root = '/tmp/wordpress-tests';
+} elseif ( file_exists( '/var/www/wordpress-develop/tests/phpunit' ) ) {
+	$_test_root = '/var/www/wordpress-develop/tests/phpunit';
 } else {
 	$_test_root = dirname( dirname( dirname( dirname( TESTS_PLUGIN_DIR ) ) ) ) . '/tests/phpunit';
 }
