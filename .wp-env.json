@@ -8,7 +8,10 @@
       ]
     },
     "tests": {
-      "plugins": [ "." ],
+      "plugins": [
+        ".",
+        "https://downloads.wordpress.org/plugin/gutenberg.12.2.0.zip"
+      ],
       "mappings": {
         "../wordpress-develop": "WordPress/wordpress-develop#trunk"
       }
