@@ -41,6 +41,7 @@ services:
     volumes:
       - wordpress_phpunit_data:/var/www/html
       - ../../:/var/www/html/wp-content/plugins/amp
+      - ../../tmp/wordpress-develop/tests/phpunit/:/var/www/tests/phpunit
     depends_on:
       - mysql_phpunit
 
@@ -81,6 +82,7 @@ services:
     volumes:
       - wordpress_phpunit_data:/var/www/html
       - ../../:/var/www/html/wp-content/plugins/amp
+      - ../../tmp/wordpress-develop/tests/phpunit/:/var/www/tests/phpunit
     env_file:
       - .env.wp
       - .env.wp-phpunit
