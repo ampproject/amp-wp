@@ -247,6 +247,17 @@ async function setupThemesAndPlugins() {
 }
 
 /**
+ * Set pretty permalinks.
+ */
+async function setPrettyPermalinks() {
+	await visitAdminPage( 'options-permalink.php', '' );
+	await page.waitForSelector( 'input[value="/%postname%/"]' );
+	await page.click( 'input[value="/%postname%/"]' );
+	await page.click( 'input[type="submit"]' );
+	await page.waitForSelector( '#setting-error-settings_updated' );
+}
+
+/**
  * Before every test suite run, delete all content created by the test. This ensures
  * other posts/comments/etc. aren't dirtying tests and tests don't depend on
  * each other's side-effects.
@@ -257,6 +268,7 @@ beforeAll( async () => {
 	enablePageDialogAccept();
 	observeConsoleLogging();
 	await setupBrowser();
+	await setPrettyPermalinks();
 	await setupThemesAndPlugins();
 	await trashAllPosts();
 	await createTestData();
