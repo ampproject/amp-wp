@@ -1,127 +1,37 @@
 version: '3.1'
 
 services:
-
-  #
-  # WordPress services
-  #
-  wordpress_development:
+  wordpress:
     image: wordpress
     ports:
-      - "8888:80"
+      - "127.0.0.1:8890:80"
     env_file:
       - .env.wp
-      - .env.wp-development
     volumes:
-      - wordpress_development_data:/var/www/html
+      - wordpress_data:/var/www/html
       - ../../:/var/www/html/wp-content/plugins/amp
     depends_on:
-      - mysql_development
+      - mysql
 
-  wordpress_e2e:
-    image: wordpress
-    ports:
-      - "8889:80"
-    env_file:
-      - .env.wp
-      - .env.wp-e2e
-    volumes:
-      - wordpress_e2e_data:/var/www/html
-      - ../../:/var/www/html/wp-content/plugins/amp
-    depends_on:
-      - mysql_e2e
-
-  wordpress_phpunit:
-    image: wordpress
-    ports:
-      - "8890:80"
-    env_file:
-      - .env.wp
-      - .env.wp-phpunit
-    volumes:
-      - wordpress_phpunit_data:/var/www/html
-      - ../../:/var/www/html/wp-content/plugins/amp
-      - ../../tmp/wordpress-develop/tests/phpunit/:/var/www/tests/phpunit
-    depends_on:
-      - mysql_phpunit
-
-  #
-  # WP-CLI services
-  #
-  cli_development:
+  cli:
     image: wordpress:cli
     user: xfs
     volumes:
-      - wordpress_development_data:/var/www/html
+      - wordpress_data:/var/www/html
       - ../../:/var/www/html/wp-content/plugins/amp
     env_file:
       - .env.wp
-      - .env.wp-development
     depends_on:
-      - mysql_development
-      - wordpress_development
+      - mysql
+      - wordpress
     command: tail -f /dev/null
 
-  cli_e2e:
-    image: wordpress:cli
-    user: xfs
-    volumes:
-      - wordpress_e2e_data:/var/www/html
-      - ../../:/var/www/html/wp-content/plugins/amp
-    env_file:
-      - .env.wp
-      - .env.wp-e2e
-    depends_on:
-      - mysql_e2e
-      - wordpress_e2e
-    command: tail -f /dev/null
-
-  cli_phpunit:
-    image: wordpress:cli
-    user: xfs
-    volumes:
-      - wordpress_phpunit_data:/var/www/html
-      - ../../:/var/www/html/wp-content/plugins/amp
-      - ../../tmp/wordpress-develop/tests/phpunit/:/var/www/tests/phpunit
-    env_file:
-      - .env.wp
-      - .env.wp-phpunit
-    depends_on:
-      - mysql_phpunit
-      - wordpress_phpunit
-    command: tail -f /dev/null
-
-  #
-  # Database services
-  #
-  mysql_development:
+  mysql:
     image: mariadb:10
     restart: always
-    env_file:
-      - .env.db
-    volumes:
-      - mysql_development:/var/lib/mysql
-
-  mysql_e2e:
-    image: mariadb:10
-    restart: always
-    env_file:
-      - .env.db
-    volumes:
-      - mysql_e2e:/var/lib/mysql
-
-  mysql_phpunit:
-    image: mariadb:10
-    restart: always
-    env_file:
-      - .env.db
-    volumes:
-      - mysql_phpunit:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: wordpress_test
 
 volumes:
-  wordpress_development_data:
-  wordpress_e2e_data:
-  wordpress_phpunit_data:
-  mysql_development:
-  mysql_e2e:
-  mysql_phpunit:
+  wordpress_data:

@@ -10,7 +10,7 @@ set -e
 cd "$(dirname "$0")/../.."
 
 # Check if the container already exists
-if [ "$(dc ps -a | grep wordpress_${CONTAINERS[0]})" ]; then
+if [ "$(dc ps -a | grep $CONTAINER)" ]; then
 	echo -e "\nYour local environment has been already installed, starting now...\n"
 
 	dc start >/dev/null 2>&1
@@ -59,18 +59,14 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 
 EOT
 
+CURRENT_URL=$(wp option get siteurl | tr -d '\r')
+
 echo -e "\nWelcome to...\n"
 echo -e "\033[95m$AMP\033[0m"
 
 # Give the user more context to what they should do next: Build the plugin and start testing!
 echo -e "\nRun $(action_format "npm run dev") to build the latest version of the AMP plugin,"
-echo -e "then use the following WordPress instances:"
+echo -e "then open $(action_format "$CURRENT_URL") to get started!"
 
-for CONTAINER in "${CONTAINERS[@]}"
-do
-	CURRENT_URL=$(wp option get siteurl | tr -d '\r')
-	echo -e "- for the $(action_format "$CONTAINER") environment go to $(action_format "$CURRENT_URL")"
-done
-
-echo -e "\n\nAccess the above installs using the following credentials:"
+echo -e "\n\nAccess the above install using the following credentials:"
 echo -e "Default username: $(action_format "admin"), password: $(action_format "password")"
