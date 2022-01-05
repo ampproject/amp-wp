@@ -1237,6 +1237,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							display: block;
 						}
 
+						.main-navigation .main-menu .menu-item-has-children:not(.off-canvas):focus-within > .sub-menu,
 						.main-navigation .main-menu .menu-item-has-children:not(.off-canvas):hover > .sub-menu,
 						.main-navigation .main-menu .menu-item-has-children:not(.off-canvas):focus > .sub-menu,
 						.main-navigation .main-menu > li.menu-item-has-children .submenu-expand.display-on-desktop,
@@ -2488,7 +2489,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$amp_expand_button->setAttribute( Attribute::CLASS_, $amp_expand_button->getAttribute( Attribute::CLASS_ ) . ' display-on-mobile' );
 
 			// Handle buttons.
-			$amp_expand_button->addAmpAction( 'tap', $sidebar_id );
+			$amp_expand_button->addAmpAction( 'tap', "$sidebar_id.open" );
 			$back_button = $this->get_first_element( $xpaths['close_button_in_submenu'], $amp_sub_menu );
 			if ( ! empty( $back_button ) ) {
 				$back_button->addAmpAction( 'tap', "$sidebar_id.close" );
