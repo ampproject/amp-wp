@@ -76,16 +76,16 @@
     ]
   },
   "config": {
-    "platform": {
-      "php": "5.6.20"
-    },
-    "sort-packages": true,
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "civicrm/composer-downloads-plugin": true,
       "ampproject/php-css-parser-install-plugin": true,
       "cweagans/composer-patches": true
-    }
+    },
+    "platform": {
+      "php": "5.6.20"
+    },
+    "sort-packages": true
   },
   "extra": {
     "downloads": {
