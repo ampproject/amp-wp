@@ -90,7 +90,7 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 
 		$main_tag = $this->dom->getElementsByTagName( Tag::MAIN );
 
-		if ( empty( $main_tag ) || 0 === $main_tag->length ) {
+		if ( 0 === $main_tag->length ) {
 			return;
 		}
 
