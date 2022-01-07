@@ -23,7 +23,7 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 		$this->add_role_and_tabindex_to_on_tap_actors();
-		$this->add_gutenberg_the_skip_link();
+		$this->add_skip_link();
 	}
 
 	/**
@@ -75,7 +75,7 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @return void
 	 */
-	public function add_gutenberg_the_skip_link() {
+	public function add_skip_link() {
 
 		// Early exit if not a block theme.
 		if ( ! current_theme_supports( 'block-templates' ) ) {
@@ -149,13 +149,13 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 			Tag::A,
 			[
 				Attribute::CLASS_ => 'skip-link screen-reader-text',
-				Attribute::HREF   => $skip_link_target,
+				Attribute::HREF   => "#$skip_link_target",
 			]
 		);
 
 		$skip_link->appendChild( $this->dom->createTextNode( esc_html__( 'Skip to content', 'amp' ) ) );
 
-		$body->insertBefore( $style_node, $body->firstChild );
 		$body->insertBefore( $skip_link, $body->firstChild );
+		$body->insertBefore( $style_node, $body->firstChild );
 	}
 }
