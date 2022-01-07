@@ -338,7 +338,7 @@ jobs:
         run: npm run build:js
 
       - name: Start Docker environment
-        run: npm run env:start:ci
+        run: npm run env:start
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
@@ -346,7 +346,7 @@ jobs:
         run: npm run test:e2e:ci
 
       - name: Stop Docker environment
-        run: npm run env:stop:ci
+        run: npm run env:stop
         if: always()
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true

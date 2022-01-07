@@ -112,8 +112,6 @@
     "env": "wp-env",
     "env:start": "wp-env start --xdebug",
     "env:stop": "wp-env stop",
-    "env:start:ci": "wp-env start --update",
-    "env:stop:ci": "printf 'y\n' | wp-env destroy",
     "env:reset-site": "wp-env clean all",
     "generate-changelog": "node bin/release-changelog",
     "lint": "npm-run-all --parallel lint:*",
