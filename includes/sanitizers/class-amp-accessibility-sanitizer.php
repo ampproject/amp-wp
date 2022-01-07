@@ -5,8 +5,10 @@
  * @package AmpProject\AmpWP
  */
 
+use AmpProject\Dom\Element;
 use AmpProject\Html\Attribute;
 use AmpProject\Html\Role;
+use AmpProject\Html\Tag;
 
 /**
  * Sanitizes attributes required for AMP accessibility requirements.
@@ -21,6 +23,7 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 		$this->add_role_and_tabindex_to_on_tap_actors();
+		$this->add_gutenberg_the_skip_link();
 	}
 
 	/**
@@ -65,5 +68,94 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Add skip link markup and style.
+	 *
+	 * @return void
+	 */
+	public function add_gutenberg_the_skip_link() {
+
+		// Early exit if not a block theme.
+		if ( ! current_theme_supports( 'block-templates' ) ) {
+			return;
+		}
+
+		// Early exit if not a block template.
+		global $_wp_current_template_content;
+		if ( ! $_wp_current_template_content ) {
+			return;
+		}
+
+		$main_tag = $this->dom->getElementsByTagName( Tag::MAIN );
+
+		if ( empty( $main_tag ) || 0 === $main_tag->length ) {
+			return;
+		}
+
+		$body = $this->dom->getElementsByTagName( Tag::BODY )->item( 0 );
+
+		/** @var Element $main_tag */
+		$main_tag = $main_tag->item( 0 );
+
+		$skip_link_target = $main_tag->getAttribute( Attribute::ID );
+		$skip_link_target = ! empty( $skip_link_target ) ? $skip_link_target : 'wp--skip-link--target';
+
+		// Style for skip link.
+		$style_content = '.skip-link.screen-reader-text {
+				border: 0;
+				clip: rect(1px,1px,1px,1px);
+				clip-path: inset(50%);
+				height: 1px;
+				margin: -1px;
+				overflow: hidden;
+				padding: 0;
+				position: absolute !important;
+				width: 1px;
+				word-wrap: normal !important;
+			}
+
+			.skip-link.screen-reader-text:focus {
+				background-color: #eee;
+				clip: auto !important;
+				clip-path: none;
+				color: #444;
+				display: block;
+				font-size: 1em;
+				height: auto;
+				left: 5px;
+				line-height: normal;
+				padding: 15px 23px 14px;
+				text-decoration: none;
+				top: 5px;
+				width: auto;
+				z-index: 100000;
+			}';
+
+		$style_node = AMP_DOM_Utils::create_node(
+			$this->dom,
+			Tag::STYLE,
+			[
+				Attribute::ID => 'skip-link-styles',
+			]
+		);
+
+		$style_node->appendChild( $this->dom->createTextNode( $style_content ) );
+
+		// Skip link node.
+		$skip_link = AMP_DOM_Utils::create_node(
+			$this->dom,
+			Tag::A,
+			[
+				Attribute::CLASS_ => 'skip-link screen-reader-text',
+				Attribute::HREF   => $skip_link_target,
+			]
+		);
+
+		$skip_link->appendChild( $this->dom->createTextNode( esc_html__( 'Skip to content', 'amp' ) ) );
+
+		$body->insertBefore( $style_node, $body->firstChild );
+		$body->insertBefore( $skip_link, $body->firstChild );
 	}
 }
