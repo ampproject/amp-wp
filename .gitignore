@@ -17,6 +17,7 @@ built
 /phpcs.xml
 /phpunit.xml
 /*.sql
+.wp-env.override.json
 
 # Generated via bin/transform-readme.php
 /readme.txt
