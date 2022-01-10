@@ -23,7 +23,7 @@ import { scrollToElement } from './onboarding-wizard-utils';
 
 export async function saveSettings() {
 	await expect( page ).toClick( 'button', { text: 'Save' } );
-	await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
+	await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save', timeout: 10000 } );
 	await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
 }
 
