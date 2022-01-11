@@ -61,7 +61,7 @@
     "@wordpress/jest-puppeteer-axe": "3.1.1",
     "@wordpress/plugins": "4.0.7",
     "@wordpress/scripts": "19.2.2",
-    "axios": "0.21.2",
+    "axios": "0.24.0",
     "babel-plugin-inline-react-svg": "2.0.1",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "copy-webpack-plugin": "9.0.1",
