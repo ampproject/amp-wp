@@ -1833,7 +1833,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		wp();
 
 		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
-		$this->assertStringContainsString( '<script ' . ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE . '>(self.AMP = self.AMP || []).push(function (AMP) { AMP.toggleExperiment("bento", true); });</script>', $html );
 		$this->assertStringContainsString( 'amp-facebook-1.0', $html ); // As opposed to amp-facebook-page-0.1, since Bento is enabled.
 	}
 
@@ -1850,7 +1849,6 @@ class Test_AMP_Theme_Support extends TestCase {
 		wp();
 
 		$html = AMP_Theme_Support::prepare_response( $this->get_original_html() );
-		$this->assertStringContainsString( '<script ' . ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE . ' data-ampdevmode>(self.AMP = self.AMP || []).push(function (AMP) { AMP.toggleExperiment("bento", true); });</script>', $html );
 		$this->assertStringContainsString( 'amp-facebook-1.0', $html ); // As opposed to amp-facebook-page-0.1, since Bento is enabled.
 	}
 

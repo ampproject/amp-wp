@@ -1553,7 +1553,7 @@ class AMP_Theme_Support {
 			}
 		}
 
-		// Make sure that Bento versions are used when required, either by explicitly requesting Bento or when the document is non-valid AMP.
+		// Make sure that Bento versions are used when explicitly requesting Bento.
 		$is_using_bento = (
 			array_key_exists( AMP_Tag_And_Attribute_Sanitizer::class, $sanitizers )
 			&&
@@ -1575,22 +1575,6 @@ class AMP_Theme_Support {
 					);
 					$bento_extension_count++;
 				}
-			}
-
-			// Enable Bento experiment per <https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/?format=websites#enable-bento-experiment>.
-			// @todo Remove this once Bento no longer requires an experiment to opt-in.
-			if ( $bento_extension_count > 0 ) {
-				$bento_experiment_script = $dom->createElement( Tag::SCRIPT );
-				$bento_experiment_script->appendChild(
-					$dom->createTextNode( '(self.AMP = self.AMP || []).push(function (AMP) { AMP.toggleExperiment("bento", true); });' )
-				);
-
-				ValidationExemption::mark_node_as_px_verified( $bento_experiment_script );
-				if ( DevMode::isActiveForDocument( $dom ) ) {
-					$bento_experiment_script->setAttributeNode( $dom->createAttribute( Attribute::DATA_AMPDEVMODE ) );
-				}
-
-				$dom->head->appendChild( $bento_experiment_script );
 			}
 		}
 
