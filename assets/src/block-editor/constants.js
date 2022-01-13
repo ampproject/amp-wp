@@ -11,7 +11,4 @@ export const MEDIA_BLOCKS = [
 	'core/video',
 ];
 
-export const DEFAULT_WIDTH = 608; // Max-width in the editor.
-export const DEFAULT_HEIGHT = 400;
-
 export const POST_PREVIEW_CLASS = 'editor-post-preview';

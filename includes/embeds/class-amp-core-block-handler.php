@@ -84,10 +84,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		if ( isset( $block['attrs'] ) && 'core/shortcode' !== $block['blockName'] ) {
 			$injected_attributes    = '';
 			$prop_attribute_mapping = [
-				'ampCarousel'  => 'data-amp-carousel',
-				'ampLayout'    => 'data-amp-layout',
-				'ampLightbox'  => 'data-amp-lightbox',
-				'ampNoLoading' => 'data-amp-noloading',
+				'ampCarousel' => 'data-amp-carousel',
+				'ampLightbox' => 'data-amp-lightbox',
 			];
 			foreach ( $prop_attribute_mapping as $prop => $attr ) {
 				if ( isset( $block['attrs'][ $prop ] ) ) {
