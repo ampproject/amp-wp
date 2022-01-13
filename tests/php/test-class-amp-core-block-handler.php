@@ -268,7 +268,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	/** @return array */
 	public function get_test_ampify_gallery_block_data() {
 		return [
-			'core_gallery_with_amp_lightbox' => [
+			'core_gallery_with_amp_lightbox'               => [
 				'
 				<!-- wp:gallery {"ampLightbox":true} -->
 				<figure class="wp-block-gallery">
@@ -288,7 +288,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 				</figure>
 				',
 			],
-			'core_gallery_without_amp_lightbox' => [
+			'core_gallery_without_amp_lightbox'            => [
 				'
 				<!-- wp:gallery {"ampLightbox":false} -->
 				<figure class="wp-block-gallery">
@@ -316,13 +316,13 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 				',
 				'<figure class="wp-block-gallery"></figure>',
 			],
-			'legacy_gallery_with_amp_lightbox' => [
+			'legacy_gallery_with_amp_lightbox'             => [
 				'
 				<!-- wp:gallery {"ids":[101,102],"ampLightbox":true} -->
 				<figure class="wp-block-gallery"><ul class="blocks-gallery-grid"><li class="blocks-gallery-item"><figure><img src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure></li><li class="blocks-gallery-item"><figure><img src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure></li></ul><figcaption class="blocks-gallery-caption">Carousel and Lightbox</figcaption></figure>
 				<!-- /wp:gallery -->
 				',
-				'<figure data-amp-lightbox="true" class="wp-block-gallery"><ul class="blocks-gallery-grid"><li class="blocks-gallery-item"><figure><img src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure></li><li class="blocks-gallery-item"><figure><img src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure></li></ul><figcaption class="blocks-gallery-caption">Carousel and Lightbox</figcaption></figure>'
+				'<figure data-amp-lightbox="true" class="wp-block-gallery"><ul class="blocks-gallery-grid"><li class="blocks-gallery-item"><figure><img src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure></li><li class="blocks-gallery-item"><figure><img src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure></li></ul><figcaption class="blocks-gallery-caption">Carousel and Lightbox</figcaption></figure>',
 			],
 		];
 	}
