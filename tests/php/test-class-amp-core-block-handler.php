@@ -265,6 +265,83 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$this->assertStringNotContainsString( '<style id="amp-wp-file-block">', $content );
 	}
 
+	/** @return array */
+	public function get_test_ampify_gallery_block_data() {
+		return [
+			'core_gallery_with_amp_lightbox' => [
+				'
+				<!-- wp:gallery {"ampLightbox":true} -->
+				<figure class="wp-block-gallery">
+					<!-- wp:image {"id":101} -->
+					<figure class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure>
+					<!-- /wp:image -->
+					<!-- wp:image {"id":102} -->
+					<figure class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure>
+					<!-- /wp:image -->
+				</figure>
+				<!-- /wp:gallery -->
+				',
+				'
+				<figure class="wp-block-gallery">
+					<figure data-amp-lightbox="true" class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure>
+					<figure data-amp-lightbox="true" class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure>
+				</figure>
+				',
+			],
+			'core_gallery_without_amp_lightbox' => [
+				'
+				<!-- wp:gallery {"ampLightbox":false} -->
+				<figure class="wp-block-gallery">
+					<!-- wp:image {"id":101} -->
+					<figure class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure>
+					<!-- /wp:image -->
+					<!-- wp:image {"id":102} -->
+					<figure class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure>
+					<!-- /wp:image -->
+				</figure>
+				<!-- /wp:gallery -->
+				',
+				'
+				<figure class="wp-block-gallery">
+					<figure class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure>
+					<figure class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure>
+				</figure>
+				',
+			],
+			'core_gallery_with_amp_lightbox_and_no_images' => [
+				'
+				<!-- wp:gallery {"ampLightbox":true} -->
+				<figure class="wp-block-gallery"></figure>
+				<!-- /wp:gallery -->
+				',
+				'<figure class="wp-block-gallery"></figure>',
+			],
+			'legacy_gallery_with_amp_lightbox' => [
+				'
+				<!-- wp:gallery {"ids":[101,102],"ampLightbox":true} -->
+				<figure class="wp-block-gallery"><ul class="blocks-gallery-grid"><li class="blocks-gallery-item"><figure><img src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure></li><li class="blocks-gallery-item"><figure><img src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure></li></ul><figcaption class="blocks-gallery-caption">Carousel and Lightbox</figcaption></figure>
+				<!-- /wp:gallery -->
+				',
+				'<figure data-amp-lightbox="true" class="wp-block-gallery"><ul class="blocks-gallery-grid"><li class="blocks-gallery-item"><figure><img src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure></li><li class="blocks-gallery-item"><figure><img src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure></li></ul><figcaption class="blocks-gallery-caption">Carousel and Lightbox</figcaption></figure>'
+			],
+		];
+	}
+
+	/**
+	 * Test that nested image blocks inside a gallery block are getting correct attributes.
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_gallery_block()
+	 *
+	 * @dataProvider get_test_ampify_gallery_block_data
+	 */
+	public function test_ampify_gallery_block( $original_block_content, $expected_block_content ) {
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$this->assertStringNotContainsString( do_blocks( $original_block_content ), $expected_block_content );
+	}
+
 	/**
 	 * Test process_categories_widgets.
 	 *

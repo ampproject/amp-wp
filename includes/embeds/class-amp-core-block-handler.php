@@ -51,6 +51,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		'core/archives'   => 'ampify_archives_block',
 		'core/video'      => 'ampify_video_block',
 		'core/file'       => 'ampify_file_block',
+		'core/gallery'    => 'ampify_gallery_block',
 	];
 
 	/**
@@ -258,6 +259,39 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		);
 
 		return $block_content;
+	}
+
+	/**
+	 * Ampify gallery block.
+	 *
+	 * Apply data-amp-lightbox attribute only to descendant image blocks.
+	 *
+	 * @since 2.3
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 * @return string Filtered block content.
+	 */
+	public function ampify_gallery_block( $block_content, $block ) {
+		if ( empty( $block['innerBlocks'] ) || empty( $block['attrs']['ampLightbox'] ) ) {
+			return $block_content;
+		}
+
+		// Remove the data attribute from the gallery block.
+		$block_content = preg_replace( '/(\sdata-amp-lightbox="true")/', '', $block_content );
+
+		// Add data attributes to nested image blocks.
+		$count = 0;
+		return preg_replace_callback(
+			'/(<figure\s)/',
+			function () use ( &$count ) {
+				$count++;
+
+				// The first match is the gallery block so skip adding the lightbox attribute.
+				return 1 === $count ? '<figure ' : '<figure data-amp-lightbox="true" ';
+			},
+			$block_content
+		);
 	}
 
 	/**
