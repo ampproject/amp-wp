@@ -9,16 +9,15 @@ import { isFunction, isObject, isString } from 'lodash';
  */
 import { __ } from '@wordpress/i18n';
 import { ToggleControl, PanelBody } from '@wordpress/components';
-import { InspectorControls } from '@wordpress/block-editor';
-import { select } from '@wordpress/data';
+import { InspectorControls, store as blockEditorStore } from '@wordpress/block-editor';
+import { select, useSelect } from '@wordpress/data';
 import { cloneElement, isValidElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { TEXT_BLOCKS, MEDIA_BLOCKS } from '../constants';
+import { TEXT_BLOCKS } from '../constants';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../common/constants';
-
 /**
  * Add AMP attributes to every core block.
  *
@@ -31,7 +30,7 @@ export const addAMPAttributes = ( settings, name ) => {
 		return settings;
 	}
 
-	// AMP Carousel settings.
+	// AMP Carousel and AMP Lightbox settings.
 	if ( 'core/gallery' === name ) {
 		if ( ! settings.attributes ) {
 			settings.attributes = {};
@@ -171,12 +170,29 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 		return BlockEdit;
 	}
 
-	const EnhancedBlockEdit = ( props ) => (
-		<>
-			<BlockEdit { ...props } />
-			<AmpInspectorControls { ...props } />
-		</>
-	);
+	const EnhancedBlockEdit = ( props ) => {
+		const { isSelected, name } = props;
+
+		if ( isSelected && 'core/image' === name ) {
+			return (
+				<>
+					<BlockEdit { ...props } />
+					<ImageBlockLayoutAttributes { ...props } />
+				</>
+			);
+		}
+
+		if ( isSelected && 'core/gallery' === name ) {
+			return (
+				<>
+					<BlockEdit { ...props } />
+					<GalleryBlockLayoutAttributes { ...props } />
+				</>
+			);
+		}
+
+		return <BlockEdit { ...props } />;
+	};
 
 	EnhancedBlockEdit.propTypes = {
 		attributes: PropTypes.shape( {
@@ -252,35 +268,50 @@ AmpCarouselToggle.propTypes = {
 };
 
 /**
- * AMP Inspector controls for core blocks.
+ * Inspector controls for Image block.
  *
- * @param {Object}  props            Props.
- * @param {boolean} props.isSelected Whether the current block has been selected or not.
- * @param {string}  props.name       Block name.
+ * @param {Object} props          Props.
+ * @param {string} props.clientId Block client ID.
  * @return {Object} Inspector Controls.
  */
-const AmpInspectorControls = ( props ) => {
-	const { isSelected, name } = props;
+const ImageBlockLayoutAttributes = ( props ) => {
+	const { clientId } = props;
 
-	if ( ! isSelected || ! [ 'core/image', 'core/gallery' ].includes( name ) ) {
+	const isGalleryBlockChild = useSelect( ( _select ) => {
+		return _select( blockEditorStore ).getBlockParentsByBlockName( clientId, 'core/gallery' ).length > 0;
+	}, [ clientId ] );
+
+	if ( isGalleryBlockChild ) {
 		return null;
 	}
 
-	// Lightbox toggle is added on per-image basis. It should not be rendered for the gallery block itself.
 	return (
 		<InspectorControls>
 			<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
-				{ 'core/image' === name && <AmpLightboxToggle { ...props } /> }
-				{ 'core/gallery' === name && <AmpCarouselToggle { ...props } /> }
+				<AmpLightboxToggle { ...props } />
 			</PanelBody>
 		</InspectorControls>
 	);
 };
 
-AmpInspectorControls.propTypes = {
-	isSelected: PropTypes.bool,
-	name: PropTypes.string,
+ImageBlockLayoutAttributes.propTypes = {
+	clientId: PropTypes.string,
 };
+
+/**
+ * Inspector controls for Gallery block.
+ *
+ * @param {Object} props Props.
+ * @return {Object} Inspector Controls.
+ */
+const GalleryBlockLayoutAttributes = ( props ) => (
+	<InspectorControls>
+		<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
+			<AmpLightboxToggle { ...props } />
+			<AmpCarouselToggle { ...props } />
+		</PanelBody>
+	</InspectorControls>
+);
 
 /**
  * Determines whether AMP is enabled for the current post or not.
