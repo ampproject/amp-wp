@@ -51,12 +51,15 @@
 
 .site-scan-results__source {
 	align-items: center;
-	display: flex;
-	flex-flow: row nowrap;
 	font-size: 14px;
 	margin: 0;
 	min-height: 3.5rem;
 	padding: 1rem;
+	max-width: 100%;
+
+	details {
+		margin: 0;
+	}
 
 	&:nth-child(even) {
 		background-color: var(--amp-settings-color-background-light);
@@ -86,7 +89,7 @@
 
 .site-scan-results__source-version,
 .site-scan-results__source-notice {
-	margin-left: auto;
+	float: right;
 }
 
 .site-scan-results__cta.site-scan-results__cta {
@@ -96,4 +99,15 @@
 	.components-external-link__icon {
 		fill: var(--amp-settings-color-brand);
 	}
+}
+
+
+.site-scan-results__source-detail {
+	border: 1px solid #dedede;
+	border-radius: 5px;
+	padding: 15px;
+	max-height: 510px;
+	overflow: scroll;
+	font-size: 12px;
+	line-height: 2;
 }
