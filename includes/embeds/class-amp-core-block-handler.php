@@ -51,6 +51,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		'core/archives'   => 'ampify_archives_block',
 		'core/video'      => 'ampify_video_block',
 		'core/file'       => 'ampify_file_block',
+		'core/navigation' => 'ampify_navigation_block',
 	];
 
 	/**
@@ -267,6 +268,87 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function dequeue_block_library_file_script() {
 		wp_dequeue_script( 'wp-block-library-file' );
+	}
+
+	/**
+	 * Ampify navigation block contained by <nav> element.
+	 *
+	 * @since 2.2.1
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 *
+	 * @return string Filtered block content.
+	 */
+	public function ampify_navigation_block( $block_content, $block ) {
+		add_action( 'wp_print_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
+		add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
+
+		// In case of the "Mobile" option value, the `overlayMenu` attribute is not set at all.
+		if ( ! empty( $block['attrs']['overlayMenu'] ) && 'never' === $block['attrs']['overlayMenu'] ) {
+			return $block_content;
+		}
+
+		// Replace micromodal-trigger with an amp-bind.
+		$modal_id      = '';
+		$block_content = preg_replace_callback(
+			'/\sdata-micromodal-trigger="modal-(\w+)"/',
+			static function ( $matches ) use ( &$modal_id ) {
+				$modal_id = $matches[1];
+
+				return sprintf( ' on="tap:AMP.setState({ modal%1$s: !modal%1$s })"', $modal_id );
+			},
+			$block_content
+		);
+
+		// Add amp-bind to buttons.
+		$block_content = preg_replace_callback(
+			'/(?<=<button)\s[^>]+/',
+			static function ( $matches ) use ( $modal_id ) {
+				return preg_replace(
+					'/\sdata-micromodal-close/',
+					sprintf( ' on="tap:AMP.setState({ modal%1$s: !modal%1$s })"', $modal_id ),
+					$matches[0]
+				);
+			},
+			$block_content
+		);
+
+		// Delete other micromodal-related data attributes.
+		$block_content = preg_replace( '/\sdata-micromodal-close/', '', $block_content );
+
+		// Add amp-bind to the responsive container class name.
+		$block_content = preg_replace(
+			'/(?=\sclass="(\s*wp-block-navigation__responsive-container(?>"|\s+[^"]*))")/',
+			sprintf( ' [class]="modal%s ? \'$1 is-menu-open has-modal-open\' : \'$1\'"', $modal_id ),
+			$block_content
+		);
+
+		// @todo: Find `aria-hidden` attributes in `.wp-block-navigation-submenu__toggle` and add support for toggling submenus with amp-bind.
+		// Ensure aria-expanded and aria-hidden attributes are updated along with the state.
+		$block_content = preg_replace_callback(
+			'/(?=\saria-(expanded|hidden)="\w+")/',
+			static function ( $matches ) use ( $modal_id ) {
+				return sprintf(
+					' [aria-%1$s]="%2$smodal%3$s ? \'true\' : \'false\'"',
+					$matches[1],
+					'expanded' === $matches[1] ? '' : '!',
+					$modal_id
+				);
+			},
+			$block_content
+		);
+
+		return $block_content;
+	}
+
+	/**
+	 * Dequeue wp-block-navigation-view script.
+	 *
+	 * @since 2.2.1
+	 */
+	public function dequeue_block_navigation_view_script() {
+		wp_dequeue_script( 'wp-block-navigation-view' );
 	}
 
 	/**
