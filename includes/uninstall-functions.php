@@ -40,23 +40,13 @@ function delete_options() {
  * @internal
  */
 function delete_user_metadata() {
-	global $wpdb;
-
-	$keys         = [
+	$keys = [
 		'amp_dev_tools_enabled',
 		'amp_review_panel_dismissed_for_template_mode',
 	];
-	$where_clause = [];
-
 	foreach ( $keys as $key ) {
-		$where_clause[] = $wpdb->prepare( ' meta_key = %s ', $key );
+		delete_metadata( 'user', 0, $key, '', true );
 	}
-
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
-	$wpdb->query(
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		"DELETE FROM $wpdb->usermeta WHERE " . implode( ' OR ', $where_clause )
-	);
 }
 
 /**
