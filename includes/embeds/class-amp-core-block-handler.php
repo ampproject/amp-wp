@@ -289,26 +289,63 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			return $block_content;
 		}
 
-		// Replace micromodal-trigger with an amp-bind.
-		$modal_id      = '';
-		$block_content = preg_replace_callback(
+		// Replace micromodal toggle logic with AMP state and set modal state property name based on its ID.
+		$modal_state_property = '';
+		$block_content        = preg_replace_callback(
 			'/\sdata-micromodal-trigger="modal-(\w+)"/',
-			static function ( $matches ) use ( &$modal_id ) {
-				$modal_id = $matches[1];
+			static function ( $matches ) use ( &$modal_state_property ) {
+				$modal_state_property = 'modal_' . $matches[1] . '_expanded';
 
-				return sprintf( ' on="tap:AMP.setState({ modal%1$s: !modal%1$s })"', $modal_id );
+				return sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', $modal_state_property );
 			},
 			$block_content
 		);
 
-		// Add amp-bind to buttons.
-		$block_content = preg_replace_callback(
+		$submenu_toggles_count = 0;
+		$block_content         = preg_replace_callback(
 			'/(?<=<button)\s[^>]+/',
-			static function ( $matches ) use ( $modal_id ) {
-				return preg_replace(
-					'/\sdata-micromodal-close/',
-					sprintf( ' on="tap:AMP.setState({ modal%1$s: !modal%1$s })"', $modal_id ),
-					$matches[0]
+			static function ( $matches ) use ( $modal_state_property, &$submenu_toggles_count ) {
+				$new_block_content = $matches[0];
+
+				// Replace micromodal toggle logic with AMP state.
+				if ( false !== strpos( $new_block_content, ' data-micromodal-close' ) ) {
+					$new_block_content = str_replace(
+						' data-micromodal-close',
+						sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', $modal_state_property ),
+						$new_block_content
+					);
+				}
+
+				if ( false === strpos( $new_block_content, ' aria-expanded' ) ) {
+					return $new_block_content;
+				}
+
+				// Set `aria-expanded` value of the parent modal whenever AMP state changes.
+				if ( false === strpos( $new_block_content, 'wp-block-navigation-submenu__toggle' ) ) {
+					return str_replace(
+						' aria-expanded',
+						sprintf(
+							' [aria-expanded]="%s ? \'true\' : \'false\'" aria-expanded',
+							$modal_state_property
+						),
+						$new_block_content
+					);
+				}
+
+				$submenu_state_property = str_replace(
+					'expanded',
+					'submenu_' . $submenu_toggles_count++ . '_expanded',
+					$modal_state_property
+				);
+
+				// Set `aria-expanded` value of submenus whenever AMP state changes.
+				return str_replace(
+					' aria-expanded',
+					sprintf(
+						' on="tap:AMP.setState({ %1$s: !%1$s })" [aria-expanded]="%1$s ? \'true\' : \'false\'" aria-expanded',
+						$submenu_state_property
+					),
+					$new_block_content
 				);
 			},
 			$block_content
@@ -317,25 +354,17 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		// Delete other micromodal-related data attributes.
 		$block_content = preg_replace( '/\sdata-micromodal-close/', '', $block_content );
 
-		// Add amp-bind to the responsive container class name.
+		// Toggle `aria-hidden` value whenever AMP state changes.
 		$block_content = preg_replace(
-			'/(?=\sclass="(\s*wp-block-navigation__responsive-container(?>"|\s+[^"]*))")/',
-			sprintf( ' [class]="modal%s ? \'$1 is-menu-open has-modal-open\' : \'$1\'"', $modal_id ),
+			'/(?=\saria-hidden="\w+")/',
+			sprintf( ' [aria-hidden]="%s ? \'false\' : \'true\'"', $modal_state_property ),
 			$block_content
 		);
 
-		// @todo: Find `aria-hidden` attributes in `.wp-block-navigation-submenu__toggle` and add support for toggling submenus with amp-bind.
-		// Ensure aria-expanded and aria-hidden attributes are updated along with the state.
-		$block_content = preg_replace_callback(
-			'/(?=\saria-(expanded|hidden)="\w+")/',
-			static function ( $matches ) use ( $modal_id ) {
-				return sprintf(
-					' [aria-%1$s]="%2$smodal%3$s ? \'true\' : \'false\'"',
-					$matches[1],
-					'expanded' === $matches[1] ? '' : '!',
-					$modal_id
-				);
-			},
+		// Change a responsive container class name based on the AMP state.
+		$block_content = preg_replace(
+			'/(?=\sclass="(\s*wp-block-navigation__responsive-container(?>"|\s+[^"]*))")/',
+			sprintf( ' [class]="%s ? \'$1 is-menu-open has-modal-open\' : \'$1\'"', $modal_state_property ),
 			$block_content
 		);
 
