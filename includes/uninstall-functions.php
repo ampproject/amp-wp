@@ -40,13 +40,23 @@ function delete_options() {
  * @internal
  */
 function delete_user_metadata() {
-	$keys = [
+	global $wpdb;
+
+	$keys         = [
 		'amp_dev_tools_enabled',
 		'amp_review_panel_dismissed_for_template_mode',
 	];
+	$where_clause = [];
+
 	foreach ( $keys as $key ) {
-		delete_metadata( 'user', 0, $key, '', true );
+		$where_clause[] = $wpdb->prepare( ' meta_key = %s ', $key );
 	}
+
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
+	$wpdb->query(
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		"DELETE FROM $wpdb->usermeta WHERE " . implode( ' OR ', $where_clause )
+	);
 }
 
 /**
@@ -59,33 +69,19 @@ function delete_posts() {
 
 	global $wpdb;
 
-	$current_page = 0;
-	$per_page     = 1000;
-	$post_type    = 'amp_validated_url';
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
-	do {
-		$offset = $per_page * $current_page;
+	$wpdb->delete(
+		$wpdb->posts,
+		[
+			'post_type' => 'amp_validated_url',
+		]
+	);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
-		$post_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT ID FROM $wpdb->posts WHERE post_type = %s LIMIT %d OFFSET %d;",
-				$post_type,
-				$per_page,
-				$offset
-			)
-		);
+	// Delete orphan post meta data.
+	$wpdb->query( "DELETE meta FROM $wpdb->postmeta AS meta LEFT JOIN $wpdb->posts AS posts ON posts.ID = meta.post_id WHERE posts.ID IS NULL;" );
 
-		if ( empty( $post_ids ) || ! is_array( $post_ids ) ) {
-			break;
-		}
-
-		foreach ( $post_ids as $post_id ) {
-			wp_delete_post( $post_id );
-		}
-
-		$current_page++;
-	} while ( ! empty( $result ) );
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 }
 
 /**
@@ -98,33 +94,25 @@ function delete_terms() {
 
 	global $wpdb;
 
-	$current_page = 0;
-	$per_page     = 1000;
-	$taxonomy     = 'amp_validation_error';
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
-	do {
-		$offset = $per_page * $current_page;
+	$wpdb->delete(
+		$wpdb->term_taxonomy,
+		[
+			'taxonomy' => 'amp_validation_error',
+		]
+	);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
-		$term_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s LIMIT %d OFFSET %d;",
-				$taxonomy,
-				$per_page,
-				$offset
-			)
-		);
+	// Delete orphan relationships.
+	$wpdb->query( "DELETE tr FROM $wpdb->term_relationships AS tr LEFT JOIN $wpdb->posts AS posts ON posts.ID = tr.object_id WHERE posts.ID IS NULL;" );
 
-		if ( empty( $term_ids ) || ! is_array( $term_ids ) ) {
-			break;
-		}
+	// Delete orphan terms.
+	$wpdb->query( "DELETE t FROM $wpdb->terms AS t LEFT JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id WHERE tt.term_id IS NULL;" );
 
-		foreach ( $term_ids as $term_id ) {
-			wp_delete_term( $term_id, $taxonomy );
-		}
+	// Delete orphan term meta.
+	$wpdb->query( "DELETE tm FROM $wpdb->termmeta AS tm LEFT JOIN $wpdb->term_taxonomy AS tt ON tm.term_id = tt.term_id WHERE tt.term_id IS NULL;" );
 
-		$current_page++;
-	} while ( ! empty( $result ) );
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 }
 
 /**
@@ -200,5 +188,8 @@ function remove_plugin_data() {
 		delete_posts();
 		delete_terms();
 		delete_transients();
+
+		// Clear any cached data that has been removed.
+		wp_cache_flush();
 	}
 }

@@ -54,6 +54,7 @@ class Test_Uninstall extends TestCase {
 
 		foreach ( $users as $user ) {
 			update_user_meta( $user, 'amp_dev_tools_enabled', 'Yes' );
+			update_user_meta( $user, 'amp_review_panel_dismissed_for_template_mode', 'Yes' );
 			update_user_meta( $user, 'additional_user_meta', 'Yes' );
 		}
 
@@ -200,6 +201,7 @@ class Test_Uninstall extends TestCase {
 
 		foreach ( $users as $user ) {
 			$this->assertEmpty( get_user_meta( $user, 'amp_dev_tools_enabled', true ) );
+			$this->assertEmpty( get_user_meta( $user, 'amp_review_panel_dismissed_for_template_mode', true ) );
 			$this->assertEquals( 'Yes', get_user_meta( $user, 'additional_user_meta', true ) );
 		}
 	}
