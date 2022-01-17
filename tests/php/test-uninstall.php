@@ -36,10 +36,14 @@ class Test_Uninstall extends TestCase {
 	 * @covers \AmpProject\AmpWP\remove_plugin_data()
 	 */
 	public function test_uninstall_php() {
+		global $wpdb;
 		wp_using_ext_object_cache( false );
 
 		// Create dummy data.
-		$blog_name = 'Sample Blog Name';
+		$blog_name  = 'Sample Blog Name';
+		$meta_key   = 'amp_meta_key';
+		$meta_value = 'amp_meta_value';
+
 		update_option( 'blogname', $blog_name );
 		update_option(
 			'amp-options',
@@ -55,13 +59,19 @@ class Test_Uninstall extends TestCase {
 
 		$amp_validated_post = $this->factory()->post->create_and_get(
 			[
-				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'meta_input' => [
+					$meta_key => $meta_value,
+				],
 			]
 		);
 
 		$page_post = $this->factory()->post->create_and_get(
 			[
-				'post_type' => 'page',
+				'post_type'  => 'page',
+				'meta_input' => [
+					$meta_key => $meta_value,
+				],
 			]
 		);
 
@@ -71,11 +81,17 @@ class Test_Uninstall extends TestCase {
 			]
 		);
 
+		update_term_meta( $amp_error_term->term_id, $meta_key, $meta_value );
+		wp_add_object_terms( $amp_validated_post->ID, $amp_error_term->term_id, 'amp_validation_error' );
+
 		$post_tag_term = $this->factory()->term->create_and_get(
 			[
 				'taxonomy' => 'post_tag',
 			]
 		);
+
+		update_term_meta( $post_tag_term->term_id, $meta_key, $meta_value );
+		wp_add_object_terms( $page_post->ID, $post_tag_term->term_id, 'post_tag' );
 
 		$theme_mod_name = 'amp_customize_setting_modified_timestamps';
 		set_theme_mod( 'color', 'blue' );
@@ -127,12 +143,46 @@ class Test_Uninstall extends TestCase {
 
 		$this->flush_cache();
 
+		// Assert that AMP related data does get deleted.
 		$this->assertEmpty( get_option( AMP_Options_Manager::OPTION_NAME, false ) );
-		$this->assertEmpty( get_post( $amp_validated_post->ID ) );
-		$this->assertEmpty( get_term( $amp_error_term->term_id ) );
 
+		$this->assertEmpty( get_post( $amp_validated_post->ID ) );
+		$this->assertEmpty( get_post_meta( $amp_validated_post->ID, $meta_key, true ) );
+
+		$this->assertEmpty( get_term( $amp_error_term->term_id ) );
+		$this->assertEmpty( get_term_meta( $amp_error_term->term_id, $meta_key, true ) );
+
+		// Assert that there is no data left for `amp_validation_error` taxonomy.
+		$this->assertEmpty(
+			$wpdb->query( "SELECT * FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'amp_validation_error';" )
+		);
+		$this->assertEmpty(
+			$wpdb->query(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d",
+					$amp_error_term->term_id
+				)
+			)
+		);
+
+		// Assert that other than AMP related data does not get deleted.
 		$this->assertTrue( is_a( get_post( $page_post->ID ), 'WP_Post' ) );
+		$this->assertEquals( $meta_value, get_post_meta( $page_post->ID, $meta_key, true ) );
 		$this->assertTrue( is_a( get_term( $post_tag_term->term_id ), 'WP_Term' ) );
+		$this->assertEquals( $meta_value, get_term_meta( $post_tag_term->term_id, $meta_key, true ) );
+
+		// Assert that there is no deleted other than `amp_validation_error` taxonomy.
+		$this->assertNotEmpty(
+			$wpdb->query( "SELECT * FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'post_tag';" )
+		);
+		$this->assertNotEmpty(
+			$wpdb->query(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d",
+					$post_tag_term->term_id
+				)
+			)
+		);
 
 		$this->assertEquals( $blog_name, get_option( 'blogname', false ) );
 
