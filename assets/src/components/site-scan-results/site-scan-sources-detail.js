@@ -53,7 +53,7 @@ export function SiteScanSourcesDetail( {
 
 		for ( const validationError of validationErrors ) {
 			const allowedSources = getAllowedSources( validationError.sources );
-			if ( allowedSources && allowedSources.length ) {
+			if ( allowedSources && 0 < allowedSources.length ) {
 				const error = {
 					...validationError,
 					sources: allowedSources,
@@ -72,7 +72,7 @@ export function SiteScanSourcesDetail( {
 		const validationErrors = scannableUrl.validation_errors;
 		const allowedErrors = getAllowedErrors( validationErrors );
 
-		if ( allowedErrors && allowedErrors.length ) {
+		if ( allowedErrors && 0 < allowedErrors.length ) {
 			const item = {
 				...scannableUrl,
 				validation_errors: allowedErrors,
