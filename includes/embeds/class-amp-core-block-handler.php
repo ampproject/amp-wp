@@ -308,9 +308,11 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 						return $new_block_content;
 					}
 
+					$submenu_toggles_count++;
+
 					$submenu_state_property = str_replace(
 						'expanded',
-						'submenu_' . $submenu_toggles_count++ . '_expanded',
+						'submenu_' . $submenu_toggles_count . '_expanded',
 						$modal_state_property
 					);
 
@@ -340,10 +342,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			$block_content
 		);
 
-		$submenu_toggles_count = 0;
-		$block_content         = preg_replace_callback(
+		$block_content = preg_replace_callback(
 			'/(?<=<button)\s[^>]+/',
-			static function ( $matches ) use ( $modal_state_property, &$submenu_toggles_count ) {
+			static function ( $matches ) use ( $modal_state_property ) {
 				$new_block_content = $matches[0];
 
 				// Skip submenu toggles.
