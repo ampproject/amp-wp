@@ -375,17 +375,22 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		// Delete other micromodal-related data attributes.
 		$block_content = preg_replace( '/\sdata-micromodal-close/', '', $block_content );
 
-		// Toggle `aria-hidden` value whenever AMP state changes.
-		$block_content = preg_replace(
-			'/(?=\saria-hidden="\w+")/',
-			sprintf( ' [aria-hidden]="%s ? \'false\' : \'true\'"', $modal_state_property ),
-			$block_content
-		);
+		// Change a responsive container class name and aria-hidden value based on the AMP state.
+		$block_content = preg_replace_callback(
+			'/(?><.+\sclass="([^"]*wp-block-navigation__responsive-container(?>\s[^"]*)?)"[^>]*>)/',
+			static function ( $matches ) use ( $modal_state_property ) {
+				$new_block_content = str_replace(
+					' class=',
+					sprintf(
+						' [aria-hidden]="%1$s ? \'false\' : \'true\'" aria-hidden="true" [class]="%1$s ? \'%2$s is-menu-open has-modal-open\' : \'%2$s\'" class=',
+						$modal_state_property,
+						$matches[1]
+					),
+					$matches[0]
+				);
 
-		// Change a responsive container class name based on the AMP state.
-		$block_content = preg_replace(
-			'/(?=\sclass="(\s*wp-block-navigation__responsive-container(?>"|\s+[^"]*))")/',
-			sprintf( ' [class]="%s ? \'$1 is-menu-open has-modal-open\' : \'$1\'"', $modal_state_property ),
+				return $new_block_content;
+			},
 			$block_content
 		);
 
