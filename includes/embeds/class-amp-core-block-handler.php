@@ -296,39 +296,37 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		$this->navigation_block_count++;
 		$modal_state_property = "modal_{$this->navigation_block_count}_expanded";
 
-		// Set `aria-expanded` value of submenus whenever AMP state changes if they are opened on click.
-		if ( ! empty( $block['attrs']['openSubmenusOnClick'] ) ) {
-			$submenu_toggles_count = 0;
-			$block_content         = preg_replace_callback(
-				'/(?<=<button)\s[^>]+/',
-				static function ( $matches ) use ( $modal_state_property, &$submenu_toggles_count ) {
-					$new_block_content = $matches[0];
+		// Set `aria-expanded` value of submenus whenever AMP state changes.
+		$submenu_toggles_count = 0;
+		$block_content         = preg_replace_callback(
+			'/(?<=<button)\s[^>]+/',
+			static function ( $matches ) use ( $modal_state_property, &$submenu_toggles_count ) {
+				$new_block_content = $matches[0];
 
-					if ( false === strpos( $new_block_content, 'wp-block-navigation-submenu__toggle' ) ) {
-						return $new_block_content;
-					}
+				if ( false === strpos( $new_block_content, 'wp-block-navigation-submenu__toggle' ) ) {
+					return $new_block_content;
+				}
 
-					$submenu_toggles_count++;
+				$submenu_toggles_count++;
 
-					$submenu_state_property = str_replace(
-						'expanded',
-						'submenu_' . $submenu_toggles_count . '_expanded',
-						$modal_state_property
-					);
+				$submenu_state_property = str_replace(
+					'expanded',
+					'submenu_' . $submenu_toggles_count . '_expanded',
+					$modal_state_property
+				);
 
-					// Set `aria-expanded` value of submenus whenever AMP state changes.
-					return str_replace(
-						' aria-expanded',
-						sprintf(
-							' on="tap:AMP.setState({ %1$s: !%1$s })" [aria-expanded]="%1$s ? \'true\' : \'false\'" aria-expanded',
-							$submenu_state_property
-						),
-						$new_block_content
-					);
-				},
-				$block_content
-			);
-		}
+				// Set `aria-expanded` value of submenus whenever AMP state changes.
+				return str_replace(
+					' aria-expanded',
+					sprintf(
+						' on="tap:AMP.setState({ %1$s: !%1$s })" [aria-expanded]="%1$s ? \'true\' : \'false\'" aria-expanded',
+						$submenu_state_property
+					),
+					$new_block_content
+				);
+			},
+			$block_content
+		);
 
 		// In case of the "Mobile" option value, the `overlayMenu` attribute is not set at all.
 		if ( ! empty( $block['attrs']['overlayMenu'] ) && 'never' === $block['attrs']['overlayMenu'] ) {
