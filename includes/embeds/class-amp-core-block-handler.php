@@ -42,6 +42,13 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	private $category_widget_count = 0;
 
 	/**
+	 * Count of the navigation blocks encountered.
+	 *
+	 * @var int
+	 */
+	private $navigation_block_count = 0;
+
+	/**
 	 * Methods to ampify blocks.
 	 *
 	 * @var array
@@ -281,8 +288,45 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Filtered block content.
 	 */
 	public function ampify_navigation_block( $block_content, $block ) {
-		add_action( 'wp_print_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
-		add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
+		if ( 0 === $this->navigation_block_count ) {
+			add_action( 'wp_print_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
+			add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
+		}
+
+		$this->navigation_block_count++;
+		$modal_state_property = "modal_{$this->navigation_block_count}_expanded";
+
+		// Set `aria-expanded` value of submenus whenever AMP state changes if they are opened on click.
+		if ( ! empty( $block['attrs']['openSubmenusOnClick'] ) ) {
+			$submenu_toggles_count = 0;
+			$block_content         = preg_replace_callback(
+				'/(?<=<button)\s[^>]+/',
+				static function ( $matches ) use ( $modal_state_property, &$submenu_toggles_count ) {
+					$new_block_content = $matches[0];
+
+					if ( false === strpos( $new_block_content, 'wp-block-navigation-submenu__toggle' ) ) {
+						return $new_block_content;
+					}
+
+					$submenu_state_property = str_replace(
+						'expanded',
+						'submenu_' . $submenu_toggles_count++ . '_expanded',
+						$modal_state_property
+					);
+
+					// Set `aria-expanded` value of submenus whenever AMP state changes.
+					return str_replace(
+						' aria-expanded',
+						sprintf(
+							' on="tap:AMP.setState({ %1$s: !%1$s })" [aria-expanded]="%1$s ? \'true\' : \'false\'" aria-expanded',
+							$submenu_state_property
+						),
+						$new_block_content
+					);
+				},
+				$block_content
+			);
+		}
 
 		// In case of the "Mobile" option value, the `overlayMenu` attribute is not set at all.
 		if ( ! empty( $block['attrs']['overlayMenu'] ) && 'never' === $block['attrs']['overlayMenu'] ) {
@@ -290,14 +334,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		// Replace micromodal toggle logic with AMP state and set modal state property name based on its ID.
-		$modal_state_property = '';
-		$block_content        = preg_replace_callback(
-			'/\sdata-micromodal-trigger="modal-(\w+)"/',
-			static function ( $matches ) use ( &$modal_state_property ) {
-				$modal_state_property = 'modal_' . $matches[1] . '_expanded';
-
-				return sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', $modal_state_property );
-			},
+		$block_content = preg_replace(
+			'/\sdata-micromodal-trigger="modal-\w+"/',
+			sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', $modal_state_property ),
 			$block_content
 		);
 
@@ -307,7 +346,12 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			static function ( $matches ) use ( $modal_state_property, &$submenu_toggles_count ) {
 				$new_block_content = $matches[0];
 
-				// Replace micromodal toggle logic with AMP state.
+				// Skip submenu toggles.
+				if ( false !== strpos( $new_block_content, 'wp-block-navigation-submenu__toggle' ) ) {
+					return $new_block_content;
+				}
+
+				// Replace micromodal toggle logic bound with buttons with AMP state.
 				if ( false !== strpos( $new_block_content, ' data-micromodal-close' ) ) {
 					$new_block_content = str_replace(
 						' data-micromodal-close',
@@ -316,34 +360,12 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 					);
 				}
 
-				if ( false === strpos( $new_block_content, ' aria-expanded' ) ) {
-					return $new_block_content;
-				}
-
-				// Set `aria-expanded` value of the parent modal whenever AMP state changes.
-				if ( false === strpos( $new_block_content, 'wp-block-navigation-submenu__toggle' ) ) {
-					return str_replace(
-						' aria-expanded',
-						sprintf(
-							' [aria-expanded]="%s ? \'true\' : \'false\'" aria-expanded',
-							$modal_state_property
-						),
-						$new_block_content
-					);
-				}
-
-				$submenu_state_property = str_replace(
-					'expanded',
-					'submenu_' . $submenu_toggles_count++ . '_expanded',
-					$modal_state_property
-				);
-
-				// Set `aria-expanded` value of submenus whenever AMP state changes.
+				// Set `aria-expanded` value whenever AMP state changes.
 				return str_replace(
 					' aria-expanded',
 					sprintf(
-						' on="tap:AMP.setState({ %1$s: !%1$s })" [aria-expanded]="%1$s ? \'true\' : \'false\'" aria-expanded',
-						$submenu_state_property
+						' [aria-expanded]="%s ? \'true\' : \'false\'" aria-expanded',
+						$modal_state_property
 					),
 					$new_block_content
 				);
