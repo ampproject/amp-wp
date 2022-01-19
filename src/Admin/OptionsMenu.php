@@ -259,7 +259,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
 			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : '',
 			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
-			'HAS_PAGE_CACHING'                   => $this->site_health->has_page_caching( true ),
+			'HAS_PAGE_CACHING'                   => ( 'good' === $this->site_health->has_page_caching( true ) ),
 		];
 
 		wp_add_inline_script(

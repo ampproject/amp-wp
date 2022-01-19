@@ -335,10 +335,9 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return array
 	 */
 	public function page_cache() {
-		$has_page_caching = $this->has_page_caching();
+		$status = $this->has_page_caching();
 
-		$badge_color = 'orange';
-		$status      = 'recommended';
+		$badge_color = 'red';
 		$label       = __( 'Page caching is not detected', 'amp' );
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' ) . '</p>';
@@ -346,16 +345,19 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		/* translators: 1 is Cache-Control, 2 is Expires, and 3 is Age */
 		$description .= '<p>' . sprintf( __( 'Page caching is detected by making three requests to the homepage and looking for %1$s, %2$s, or %3$s HTTP response headers.', 'amp' ), '<code>Cache-Control: max-age=…</code>', '<code>Expires</code>', '<code>Age</code>' );
 
-		if ( is_wp_error( $has_page_caching ) ) {
+		if ( is_wp_error( $status ) ) {
 			$error_info = sprintf(
 				/* translators: 1 is error message, 2 is error code */
 				__( 'Unable to detect page caching due to possible loopback request problem. Please verify that the loopback request test is passing. Error: %1$s (Code: %2$s)', 'amp' ),
-				$has_page_caching->get_error_message(),
-				$has_page_caching->get_error_code()
+				$status->get_error_message(),
+				$status->get_error_code()
 			);
 
 			$description = "<p>$error_info</p>" . $description;
-		} elseif ( true === $has_page_caching ) {
+		} elseif ( 'recommended' === $status ) {
+			$badge_color = 'orange';
+			$label       = __( 'Page caching is not detected', 'amp' );
+		} elseif ( 'good' === $status ) {
 			$badge_color = 'green';
 			$status      = 'good';
 			$label       = __( 'Page caching is detected', 'amp' );
@@ -385,35 +387,89 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 *
 	 * @param bool $use_previous_result Whether to use previous result or not.
 	 *
-	 * @return bool|WP_Error Boolean if the site has page caching or not, or else a WP_Error if unable to determine.
+	 * @return string|WP_Error Boolean if the site has page caching or not, or else a WP_Error if unable to determine.
 	 */
 	public function has_page_caching( $use_previous_result = false ) {
 
 		if ( $use_previous_result ) {
-			$has_page_caching = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
-			if ( is_wp_error( $has_page_caching ) ) {
-				return $has_page_caching;
-			} elseif ( $has_page_caching ) {
-				return ( 'yes' === $has_page_caching );
+			$page_cache_detail = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
+		} else {
+			$page_cache_detail = $this->check_for_page_caching();
+			if ( is_wp_error( $page_cache_detail ) ) {
+				set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_detail, DAY_IN_SECONDS );
+			} else {
+				set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_detail, MONTH_IN_SECONDS );
 			}
 		}
 
-		$has_page_caching = $this->check_for_page_caching();
-		if ( is_wp_error( $has_page_caching ) ) {
-			set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $has_page_caching, DAY_IN_SECONDS );
-		} else {
-			set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $has_page_caching ? 'yes' : 'no', MONTH_IN_SECONDS );
+		if ( is_wp_error( $page_cache_detail ) ) {
+			return $page_cache_detail;
 		}
 
-		return $has_page_caching;
+		$page_speed            = array_sum( $page_cache_detail['response_timing'] ) / count( $page_cache_detail['response_timing'] );
+		$has_page_cache_header = array_filter( $page_cache_detail['page_caching_response_headers'], 'count' );
+		$has_page_cache_header = count( $has_page_cache_header );
+		$result                = 'critical';
+
+		if ( ( $page_speed && $page_speed < 600 ) && $has_page_cache_header ) {
+			$result = 'good';
+		} elseif ( ( $page_speed && $page_speed < 600 ) && ! $has_page_cache_header ) {
+			$result = 'recommended';
+		}
+
+		return $result;
+	}
+
+	/**
+	 * List of header and it's verification callback to verify if page cache is enabled or not.
+	 *
+	 * Note: key is header name and value could be callable function to verify header value.
+	 * Empty value mean existence of header detect page cache is enable.
+	 *
+	 * @return array List of header and it's verification callback.
+	 */
+	protected static function get_page_cache_headers() {
+
+		$cache_hit_callback = static function ( $header_value ) {
+
+			return ( $header_value && false !== strpos( strtolower( $header_value ), 'hit' ) );
+		};
+
+		return [
+			'cache-control'    => static function ( $header_value ) {
+
+				return ( $header_value && preg_match( '/max-age=[1-9]/', $header_value ) );
+			},
+			'expires'          => static function ( $header_value ) {
+
+				return ( $header_value && strtotime( $header_value ) > time() );
+			},
+			'age'              => static function ( $header_value ) {
+
+				return ( $header_value && $header_value > 0 );
+			},
+			'last-modified'    => '',
+			'etag'             => '',
+			'x-cache'          => $cache_hit_callback,
+			'x-proxy-cache'    => $cache_hit_callback,
+			'cf-cache-status'  => $cache_hit_callback,
+			'x-kinsta-cache'   => $cache_hit_callback,
+			'x-cache-enabled'  => static function ( $header_value ) {
+
+				return ( $header_value && 'true' === strtolower( $header_value ) );
+			},
+			'x-cache-disabled' => '',
+			'cf-apo-via'       => '',
+		];
 	}
 
 	/**
 	 * Check if site has page cache enable or not.
 	 *
-	 * @return bool|WP_Error Whether page caching was detected, or else error information.
+	 * @return array|WP_Error Whether page caching was detected, or else error information.
 	 */
-	private function check_for_page_caching() {
+	public function check_for_page_caching() {
+
 		/** This filter is documented in wp-includes/class-wp-http-streams.php */
 		$sslverify = apply_filters( 'https_local_ssl_verify', false );
 
@@ -427,8 +483,14 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			$headers['Authorization'] = 'Basic ' . base64_encode( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) . ':' . wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
 		}
 
+		$response_headers = [];
+		$response_timing  = [];
+
 		for ( $i = 1; $i <= 3; $i++ ) {
+			$start_time    = microtime( true );
 			$http_response = wp_remote_get( home_url( '/' ), compact( 'sslverify', 'headers' ) );
+			$end_time      = microtime( true );
+
 			if ( is_wp_error( $http_response ) ) {
 				return $http_response;
 			}
@@ -439,24 +501,38 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				);
 			}
 
-			$cache_control_header = wp_remote_retrieve_header( $http_response, 'cache-control' );
-			if ( preg_match( '/max-age=[1-9]/', $cache_control_header ) ) {
-				return true;
+			$headers         = [];
+			$caching_headers = self::get_page_cache_headers();
+
+			foreach ( $caching_headers as $header => $callback ) {
+				$header_value = wp_remote_retrieve_header( $http_response, $header );
+
+				if ( empty( $header_value ) ) {
+					continue;
+				}
+
+				if ( ! empty( $callback ) && is_callable( $callback ) && $callback( $header_value ) ) {
+					$headers[] = $header;
+				} else {
+					$headers[] = $header;
+				}
 			}
 
-			$expires_header = wp_remote_retrieve_header( $http_response, 'expires' );
-			if ( $expires_header && strtotime( $expires_header ) > time() ) {
-				return true;
-			}
-
-			// Detect page cache implemented via proxy (e.g. Varnish).
-			$age_header = wp_remote_retrieve_header( $http_response, 'age' );
-			if ( (int) $age_header > 0 ) {
-				return true;
-			}
+			$response_headers[] = $headers;
+			$response_timing[]  = ( $end_time - $start_time ) * 1000;
 		}
 
-		return false;
+		return [
+			'advanced_cache_present'        => (
+				file_exists( WP_CONTENT_DIR . '/advanced-cache.php' )
+				&&
+				( defined( 'WP_CACHE' ) && WP_CACHE )
+				&&
+				apply_filters( 'enable_loading_advanced_cache_dropin', true )
+			),
+			'page_caching_response_headers' => $response_headers,
+			'response_timing'               => $response_timing,
+		];
 	}
 
 	/**
