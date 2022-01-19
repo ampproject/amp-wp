@@ -270,11 +270,11 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 */
 	public function get_ampify_navigation_block_test_data() {
 		return [
-			'navigation_block_mobile_overlay_menu_submenus_open_on_click' => [
+			'navigation_block_mobile_overlay_menu_submenus_open_on_click'       => [
 				'block_attrs'     => [
 					'openSubmenusOnClick' => true,
 				],
-				'block_content'   => '
+				'block_markup'    => '
 					<nav class="wp-container-61e6c93546294 is-responsive wp-block-navigation">
 						<button aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open" data-micromodal-trigger="modal-61e6c935457bd">
 							<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5" /><rect x="4" y="15" width="16" height="1.5" /></svg>
@@ -345,7 +345,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 			],
 			'navigation_block_mobile_overlay_menu_submenus_open_on_hover_click' => [
 				'block_attrs'     => [],
-				'block_content'   => '
+				'block_markup'    => '
 					<nav class="wp-container-61e6c93546294 is-responsive wp-block-navigation">
 						<button aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open" data-micromodal-trigger="modal-61e6c935457bd">
 							<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5" /><rect x="4" y="15" width="16" height="1.5" /></svg>
@@ -414,12 +414,12 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 					</nav>
 				',
 			],
-			'navigation_block_overlay_menu_always_shown' => [
+			'navigation_block_overlay_menu_always_shown'                        => [
 				'block_attrs'     => [
 					'overlayMenu'         => 'always',
 					'openSubmenusOnClick' => true,
 				],
-				'block_content'   => '
+				'block_markup'    => '
 					<nav class="wp-container-61e6c93546294 is-responsive wp-block-navigation">
 						<button aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open always-shown" data-micromodal-trigger="modal-61e6c935457bd">
 							<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5" /><rect x="4" y="15" width="16" height="1.5" /></svg>
@@ -488,12 +488,12 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 					</nav>
 				',
 			],
-			'navigation_block_overlay_menu_never_shown'  => [
+			'navigation_block_overlay_menu_never_shown'                         => [
 				'block_attrs'     => [
 					'overlayMenu'         => 'never',
 					'openSubmenusOnClick' => true,
 				],
-				'block_content'   => '
+				'block_markup'    => '
 					<nav class="wp-container-61e6c93546294 wp-block-navigation">
 						<ul class="wp-block-navigation__container">
 							<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
@@ -547,13 +547,13 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 * @dataProvider get_ampify_navigation_block_test_data
 	 *
 	 * @param array  $block_attrs     Block attributes.
-	 * @param string $block_content   Block original content.
+	 * @param string $block_markup    Block original markup.
 	 * @param string $expected_markup Expected content.
 	 *
 	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
 	 * @covers \AMP_Core_Block_Handler::dequeue_block_navigation_view_script()
 	 */
-	public function test_ampify_navigation_block( $block_attrs, $block_content, $expected_markup ) {
+	public function test_ampify_navigation_block( $block_attrs, $block_markup, $expected_markup ) {
 		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '10.7', '<' ) ) {
 			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
 		}
@@ -564,9 +564,9 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 		$this->assertFalse( wp_script_is( 'wp-block-navigation-view', 'enqueued' ) );
 
-		$this->assertStringContainsString(
+		$this->assertEqualMarkup(
 			$expected_markup,
-			$handler->ampify_navigation_block( $block_content, [ 'attrs' => $block_attrs ] )
+			$handler->ampify_navigation_block( $block_markup, [ 'attrs' => $block_attrs ] )
 		);
 	}
 
