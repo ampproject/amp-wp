@@ -246,7 +246,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 */
 	public function persistent_object_cache() {
 		$is_using_object_cache = wp_using_ext_object_cache();
-		$has_page_caching      = $this->has_page_caching( true );
+		$has_page_caching      = $this->get_page_cache_status( true );
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Persistent object caching is used to more effectively store image dimensions and parsed CSS using a caching backend rather than using the options table in the database.', 'amp' ) . '</p>';
 
@@ -335,7 +335,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return array
 	 */
 	public function page_cache() {
-		$status = $this->has_page_caching();
+		$status = $this->get_page_cache_status();
 
 		$badge_color = 'red';
 		$label       = __( 'Page caching is not detected', 'amp' );
@@ -389,7 +389,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 *
 	 * @return string|WP_Error Boolean if the site has page caching or not, or else a WP_Error if unable to determine.
 	 */
-	public function has_page_caching( $use_previous_result = false ) {
+	public function get_page_cache_status( $use_previous_result = false ) {
 
 		if ( $use_previous_result ) {
 			$page_cache_detail = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );

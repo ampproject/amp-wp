@@ -840,7 +840,7 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::has_page_caching()
+	 * @covers ::get_page_cache_status()
 	 * @covers ::check_for_page_caching()
 	 */
 	public function test_has_page_caching() {
@@ -861,22 +861,22 @@ class SiteHealthTest extends TestCase {
 		// Test 1: Assert for fresh result. (Even cached result is exist.)
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
 
-		$this->assertFalse( $this->instance->has_page_caching( true ) );
+		$this->assertFalse( $this->instance->get_page_cache_status( true ) );
 
-		$this->assertTrue( $this->instance->has_page_caching() );
+		$this->assertTrue( $this->instance->get_page_cache_status() );
 
 		remove_filter( 'pre_http_request', $callback, 20 );
 
 		// Test 2: Test for cached result.
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'yes', DAY_IN_SECONDS );
 
-		$this->assertTrue( $this->instance->has_page_caching( true ) );
+		$this->assertTrue( $this->instance->get_page_cache_status( true ) );
 
 		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
 	}
 
 	/**
-	 * @covers ::has_page_caching()
+	 * @covers ::get_page_cache_status()
 	 * @covers ::check_for_page_caching()
 	 */
 	public function test_has_page_caching_with_error() {
@@ -903,7 +903,7 @@ class SiteHealthTest extends TestCase {
 		// Test 1: Assert for fresh result (which is then cached).
 		$this->assertEquals(
 			$error_object,
-			$this->instance->has_page_caching()
+			$this->instance->get_page_cache_status()
 		);
 
 		remove_filter( 'pre_http_request', $return_error, 20 );
@@ -912,13 +912,13 @@ class SiteHealthTest extends TestCase {
 		// Test 2: Test for cached result.
 		$this->assertEquals(
 			$error_object,
-			$this->instance->has_page_caching( true )
+			$this->instance->get_page_cache_status( true )
 		);
 
 		// Test 3: Test for non-cached result again now that no error is returned.
 		$this->assertSame(
 			true,
-			$this->instance->has_page_caching( false )
+			$this->instance->get_page_cache_status( false )
 		);
 
 		remove_filter( 'pre_http_request', $return_cached_response, 20 );
@@ -927,7 +927,7 @@ class SiteHealthTest extends TestCase {
 		// Test 4: Test for non-cached result again now that no error is returned.
 		$this->assertSame(
 			true,
-			$this->instance->has_page_caching( true )
+			$this->instance->get_page_cache_status( true )
 		);
 	}
 
