@@ -246,7 +246,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 */
 	public function persistent_object_cache() {
 		$is_using_object_cache = wp_using_ext_object_cache();
-		$has_page_caching      = $this->get_page_cache_status( true );
+		$has_page_caching      = 'good' === $this->get_page_cache_status( true );
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Persistent object caching is used to more effectively store image dimensions and parsed CSS using a caching backend rather than using the options table in the database.', 'amp' ) . '</p>';
 
