@@ -17,6 +17,10 @@ import { __, sprintf } from '@wordpress/i18n';
 function getKeyedSources( sources ) {
 	const keyedSources = { theme: [], plugin: [], 'mu-plugin': [], embed: [], core: [], blocks: [] };
 
+	if ( ! sources?.length ) {
+		return keyedSources;
+	}
+
 	for ( const source of sources ) {
 		if ( source.type && source.type in keyedSources ) {
 			keyedSources[ source.type ].push( source );
@@ -86,7 +90,7 @@ export function getErrorSourceTitle( sources = [] ) {
 		output.push( __( 'Core', 'amp' ) );
 	}
 
-	if ( 0 === output.length && 0 < sources.length ) {
+	if ( 0 === output.length && 0 < sources?.length ) {
 		output.push( __( 'Unknown', 'amp' ) );
 	}
 
