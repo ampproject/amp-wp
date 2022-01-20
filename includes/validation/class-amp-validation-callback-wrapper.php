@@ -38,7 +38,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 *     @type array    $source
 	 *     @type array    $indirect_sources
 	 * }
-	 * @param callable $before_invoke Additional callback to run before invoking original callback. Optional.
+	 * @param callable|null $before_invoke Additional callback to run before invoking original callback. Optional.
 	 */
 	public function __construct( $callback, $before_invoke = null ) {
 		$this->callback      = $callback;
@@ -59,7 +59,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 *
 	 * @since 1.5
 	 *
-	 * @param array ...$args Arguments.
+	 * @param mixed $args,... Arguments.
 	 * @return array Preparation data.
 	 *
 	 * @global WP_Scripts|null $wp_scripts

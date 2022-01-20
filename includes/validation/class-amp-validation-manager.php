@@ -1468,6 +1468,8 @@ class AMP_Validation_Manager {
 						compact( 'priority', 'source', 'indirect_sources' )
 					),
 					static function () use ( &$callback, $original_function ) {
+						// Restore the original callback function in case other plugins are introspecting filters.
+						// This logic runs immediately before the original function is actually invoked.
 						$callback['function'] = $original_function;
 					}
 				);

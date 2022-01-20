@@ -42,7 +42,7 @@ final class CallbackReflection implements Service {
 	/**
 	 * Get the underlying callback in case it was wrapped by AMP_Validation_Callback_Wrapper.
 	 *
-	 * @since 2.3
+	 * @since 2.2.1
 	 *
 	 * @param callable $callback Callback.
 	 * @return callable Original callback.
