@@ -773,6 +773,42 @@ class SiteHealthTest extends TestCase {
 				'expected_status' => 'good',
 				'good_basic_auth' => true,
 			],
+			'cf-cache-status'                        => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'cf-cache-status' => 'HIT: 1' ]
+				),
+				'expected_status' => 'good',
+			],
+			'cf-cache-status-with-delay'             => [
+				'responses'          => array_fill(
+					0,
+					3,
+					[ 'cf-cache-status' => 'MISS' ]
+				),
+				'expected_status'    => 'critical',
+				'good_basic_auth'    => null,
+				'delay_the_response' => true,
+			],
+			'x-cache-enabled'                        => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'x-cache-enabled' => 'true' ]
+				),
+				'expected_status' => 'good',
+			],
+			'x-cache-enabled-with-delay'             => [
+				'responses'          => array_fill(
+					0,
+					3,
+					[ 'x-cache-enabled' => 'false' ]
+				),
+				'expected_status'    => 'critical',
+				'good_basic_auth'    => null,
+				'delay_the_response' => true,
+			],
 		];
 	}
 
