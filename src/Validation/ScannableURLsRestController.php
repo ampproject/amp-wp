@@ -189,16 +189,7 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 
 			$data = json_decode( $validated_url_post->post_content, true );
 			if ( is_array( $data ) ) {
-				$item['validation_errors'] = array_map(
-					static function ( $validation_error ) {
-						if ( ! isset( $validation_error['sources'] ) || ! is_array( $validation_error['sources'] ) ) {
-							$validation_error['sources'] = [];
-						}
-
-						return $validation_error;
-					},
-					wp_list_pluck( $data, 'data' )
-				);
+				$item['validation_errors'] = wp_list_pluck( $data, 'data' );
 			}
 
 			$item['validated_url_post'] = [
