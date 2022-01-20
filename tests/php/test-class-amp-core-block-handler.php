@@ -283,8 +283,8 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 				',
 				'
 				<figure class="wp-block-gallery">
-					<figure data-amp-lightbox="true" class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure>
-					<figure data-amp-lightbox="true" class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure>
+					<figure data-amp-lightbox="true" class="wp-block-image"><img data-id="101" src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure>
+					<figure data-amp-lightbox="true" class="wp-block-image"><img data-id="102" src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure>
 				</figure>
 				',
 			],
@@ -303,8 +303,8 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 				',
 				'
 				<figure class="wp-block-gallery">
-					<figure class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure>
-					<figure class="wp-block-image"><img src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure>
+					<figure class="wp-block-image"><img data-id="101" src="https://example.com/content/uploads/2022/01/example1.jpg" alt="" class="wp-image-101"/></figure>
+					<figure class="wp-block-image"><img data-id="102" src="https://example.com/content/uploads/2022/01/example2.jpg" alt="" class="wp-image-102"/></figure>
 				</figure>
 				',
 			],
@@ -339,7 +339,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
 
-		$this->assertStringNotContainsString( do_blocks( $original_block_content ), $expected_block_content );
+		$this->assertEqualMarkup( $expected_block_content, do_blocks( $original_block_content ) );
 	}
 
 	/**
