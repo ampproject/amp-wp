@@ -335,9 +335,10 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return array
 	 */
 	public function page_cache() {
-		$status = $this->get_page_cache_status();
+		$page_cache_status = $this->get_page_cache_status();
 
 		$badge_color = 'red';
+		$status      = is_wp_error( $page_cache_status ) ? 'critical' : $page_cache_status;
 		$label       = __( 'Page caching is not detected', 'amp' );
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' ) . '</p>';
@@ -345,21 +346,20 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		/* translators: 1 is Cache-Control, 2 is Expires, and 3 is Age */
 		$description .= '<p>' . sprintf( __( 'Page caching is detected by making three requests to the homepage and looking for %1$s, %2$s, or %3$s HTTP response headers.', 'amp' ), '<code>Cache-Control: max-age=…</code>', '<code>Expires</code>', '<code>Age</code>' );
 
-		if ( is_wp_error( $status ) ) {
+		if ( is_wp_error( $page_cache_status ) ) {
 			$error_info = sprintf(
 				/* translators: 1 is error message, 2 is error code */
 				__( 'Unable to detect page caching due to possible loopback request problem. Please verify that the loopback request test is passing. Error: %1$s (Code: %2$s)', 'amp' ),
-				$status->get_error_message(),
-				$status->get_error_code()
+				$page_cache_status->get_error_message(),
+				$page_cache_status->get_error_code()
 			);
 
 			$description = "<p>$error_info</p>" . $description;
-		} elseif ( 'recommended' === $status ) {
+		} elseif ( 'recommended' === $page_cache_status ) {
 			$badge_color = 'orange';
 			$label       = __( 'Page caching is not detected', 'amp' );
-		} elseif ( 'good' === $status ) {
+		} elseif ( 'good' === $page_cache_status ) {
 			$badge_color = 'green';
-			$status      = 'good';
 			$label       = __( 'Page caching is detected', 'amp' );
 		}
 
@@ -393,7 +393,9 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		if ( $use_previous_result ) {
 			$page_cache_detail = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
-		} else {
+		}
+
+		if ( ! $use_previous_result || empty( $page_cache_detail ) ) {
 			$page_cache_detail = $this->check_for_page_caching();
 			if ( is_wp_error( $page_cache_detail ) ) {
 				set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_detail, DAY_IN_SECONDS );
@@ -511,10 +513,10 @@ final class SiteHealth implements Service, Registerable, Delayed {
 					continue;
 				}
 
-				if ( ! empty( $callback ) && is_callable( $callback ) && $callback( $header_value ) ) {
-					$headers[] = $header;
-				} else {
-					$headers[] = $header;
+				if ( ! empty( $callback ) && is_callable( $callback ) && true === $callback( $header_value ) ) {
+					$headers[ $header ] = $header_value;
+				} elseif ( empty( $callback ) ) {
+					$headers[ $header ] = $header_value;
 				}
 			}
 
