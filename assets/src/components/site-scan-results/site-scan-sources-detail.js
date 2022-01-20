@@ -52,7 +52,8 @@ export function SiteScanSourcesDetail( {
 		const errors = [];
 
 		for ( const validationError of validationErrors ) {
-			const allowedSources = getAllowedSources( validationError.sources );
+			const sources = validationError.sources || [];
+			const allowedSources = getAllowedSources( sources );
 			if ( allowedSources && 0 < allowedSources.length ) {
 				const error = {
 					...validationError,
@@ -69,7 +70,7 @@ export function SiteScanSourcesDetail( {
 	const extensionScannableUrls = [];
 
 	for ( const scannableUrl of scannableUrls ) {
-		const validationErrors = scannableUrl.validation_errors;
+		const validationErrors = scannableUrl.validation_errors || [];
 		const allowedErrors = getAllowedErrors( validationErrors );
 
 		if ( allowedErrors && 0 < allowedErrors.length ) {
