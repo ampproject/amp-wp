@@ -90,7 +90,7 @@ export function getErrorSourceTitle( sources = [] ) {
 		output.push( __( 'Core', 'amp' ) );
 	}
 
-	if ( 0 === output.length && 0 < sources?.length ) {
+	if ( ! output.length && ! sources?.length ) {
 		output.push( __( 'Unknown', 'amp' ) );
 	}
 
