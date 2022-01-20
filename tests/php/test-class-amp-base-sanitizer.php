@@ -376,7 +376,7 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 				'src' => 'http://example.com/bad.js?ver=__normalized__',
 			],
 			'foo'             => 'bar',
-			'sources'         => null,
+			'sources'         => [],
 			'type'            => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 			'node_type'       => XML_ELEMENT_NODE,
 		];
@@ -519,7 +519,7 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 			'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 			'node_name'       => $child->nodeName,
 			'parent_name'     => $parent_tag,
-			'sources'         => null,
+			'sources'         => [],
 			'type'            => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 			'node_type'       => XML_ELEMENT_NODE,
 			'node_attributes' => [],
