@@ -485,8 +485,8 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			$headers['Authorization'] = 'Basic ' . base64_encode( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) . ':' . wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
 		}
 
-		$response_headers = [];
-		$response_timing  = [];
+		$page_caching_response_headers = [];
+		$response_timing               = [];
 
 		for ( $i = 1; $i <= 3; $i++ ) {
 			$start_time    = microtime( true );
@@ -503,8 +503,8 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				);
 			}
 
-			$headers         = [];
-			$caching_headers = self::get_page_cache_headers();
+			$response_headers = [];
+			$caching_headers  = self::get_page_cache_headers();
 
 			foreach ( $caching_headers as $header => $callback ) {
 				$header_value = wp_remote_retrieve_header( $http_response, $header );
@@ -514,14 +514,14 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				}
 
 				if ( ! empty( $callback ) && is_callable( $callback ) && true === $callback( $header_value ) ) {
-					$headers[ $header ] = $header_value;
+					$response_headers[ $header ] = $header_value;
 				} elseif ( empty( $callback ) ) {
-					$headers[ $header ] = $header_value;
+					$response_headers[ $header ] = $header_value;
 				}
 			}
 
-			$response_headers[] = $headers;
-			$response_timing[]  = ( $end_time - $start_time ) * 1000;
+			$page_caching_response_headers[] = $response_headers;
+			$response_timing[]               = ( $end_time - $start_time ) * 1000;
 		}
 
 		return [
@@ -532,7 +532,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				&&
 				apply_filters( 'enable_loading_advanced_cache_dropin', true )
 			),
-			'page_caching_response_headers' => $response_headers,
+			'page_caching_response_headers' => $page_caching_response_headers,
 			'response_timing'               => $response_timing,
 		];
 	}
