@@ -1364,7 +1364,7 @@ class AMP_Validation_Manager {
 			self::$original_block_render_callbacks[ $args['name'] ] = $original_function;
 		}
 
-		$args['render_callback'] = self::wrapped_callback(
+		$args['render_callback'] = new AMP_Validation_Callback_Wrapper(
 			[
 				'function'      => $original_function,
 				'source'        => $source,
@@ -1396,7 +1396,7 @@ class AMP_Validation_Manager {
 			$accepted_args = 2; // For the $instance and $args arguments.
 			$callback      = compact( 'function', 'accepted_args', 'source' );
 
-			$registered_widget['callback'] = self::wrapped_callback( $callback );
+			$registered_widget['callback'] = new AMP_Validation_Callback_Wrapper( $callback );
 		}
 	}
 
@@ -1670,6 +1670,9 @@ class AMP_Validation_Manager {
 	 * If the sanitizer removes markup,
 	 * this indicates which plugin it was from.
 	 * The call_user_func_array() logic is mainly copied from WP_Hook:apply_filters().
+	 *
+	 * @deprecated No longer used as of 2.2.1.
+	 * @codeCoverageIgnore
 	 *
 	 * @param array $callback {
 	 *     The callback data.
