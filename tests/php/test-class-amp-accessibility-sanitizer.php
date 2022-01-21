@@ -149,7 +149,7 @@ class AMP_Accessibility_Sanitizer_Test extends TestCase {
 			],
 			'without_id'           => [
 				'source'   => '<html><body><main>Hello World!</main></body></html>',
-				'expected' => $style_element . '<a class="skip-link screen-reader-text" href="#wp--skip-link--target">Skip to content</a><main>Hello World!</main>',
+				'expected' => $style_element . '<a class="skip-link screen-reader-text" href="#wp--skip-link--target-0">Skip to content</a><main id="wp--skip-link--target-0">Hello World!</main>',
 			],
 			'without_main_element' => [
 				'source'   => '<html><body><div id="main-container">Hello World!</div></body></html>',

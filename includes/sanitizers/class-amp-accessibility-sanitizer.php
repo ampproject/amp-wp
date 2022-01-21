@@ -99,8 +99,7 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 		/** @var Element $main_tag */
 		$main_tag = $main_tag->item( 0 );
 
-		$skip_link_target = $main_tag->getAttribute( Attribute::ID );
-		$skip_link_target = ! empty( $skip_link_target ) ? $skip_link_target : 'wp--skip-link--target';
+		$skip_link_target = $this->dom->getElementId( $main_tag, 'wp--skip-link--target' );
 
 		// Style for skip link.
 		$style_content = '.skip-link.screen-reader-text {
