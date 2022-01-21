@@ -1629,7 +1629,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 *
 	 * @covers AMP_Validation_Manager::wrap_hook_callbacks()
 	 */
-	function test_callback_wrappers_for_nested_actions() {
+	public function test_callback_wrappers_for_nested_actions() {
 		AMP_Validation_Manager::add_validation_error_sourcing();
 
 		$handle_inner_action = null;

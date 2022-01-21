@@ -30,7 +30,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	/**
 	 * AMP_Validation_Callback_Wrapper constructor.
 	 *
-	 * @param array    $callback {
+	 * @param array         $callback {
 	 *     The callback data.
 	 *
 	 *     @type callable $function
@@ -59,7 +59,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 *
 	 * @since 1.5
 	 *
-	 * @param mixed $args,... Arguments.
+	 * @param mixed ...$args Arguments.
 	 * @return array Preparation data.
 	 *
 	 * @global WP_Scripts|null $wp_scripts
