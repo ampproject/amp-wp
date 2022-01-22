@@ -78,6 +78,9 @@ describe( 'getSourcesFromScannableUrls', () => {
 							{ type: 'plugin', name: 'jetpack' },
 						],
 					},
+					{
+						sources: null,
+					},
 				],
 			},
 		];

@@ -29,6 +29,10 @@ export function getSourcesFromScannableUrls( scannableUrls = [], { useAmpUrls = 
 		}
 
 		for ( const validationError of validationErrors ) {
+			if ( ! validationError?.sources?.length ) {
+				continue;
+			}
+
 			for ( const source of validationError.sources ) {
 				if ( source.type === 'plugin' ) {
 					const pluginSlug = getPluginSlugFromFile( source.name );

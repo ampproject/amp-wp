@@ -91,6 +91,7 @@ abstract class AMP_Base_Embed_Handler {
 	 * Get regex pattern for matching HTML attributes from a given tag name.
 	 *
 	 * @since 1.5.0
+	 * @todo This does not currently work with single-quoted attribute values or non-quoted attributes.
 	 *
 	 * @param string   $html            HTML source haystack.
 	 * @param string   $tag_name        Tag name.
