@@ -1526,15 +1526,22 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$action_no_argument       = 'test_action_no_argument';
 		$action_one_argument      = 'baz_action_one_argument';
 		$action_two_arguments     = 'example_action_two_arguments';
+		$action_pass_var_by_ref   = 'action_pass_var_by_ref';
 		$notice                   = 'Example notice';
 
 		AMP_Validation_Manager::add_validation_error_sourcing();
+
+		$increment_var_by_ref = function ( &$number ) {
+			$number++;
+			echo "<output>$number</output>"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		};
 
 		$added_actions = [
 			[ $action_function_callback, '_amp_show_load_errors_admin_notice' ],
 			[ $action_no_argument, [ $this, 'output_div' ] ],
 			[ $action_one_argument, [ $this, 'output_notice' ] ],
 			[ $action_two_arguments, [ $this, 'output_message' ], 10, 2 ],
+			[ $action_pass_var_by_ref, $increment_var_by_ref ],
 			[ $action_no_output, [ $this, 'get_string' ], 10, 2 ],
 			[ $action_no_tag_output, 'the_ID' ],
 			[ $action_core_output, 'edit_post_link' ],
@@ -1595,6 +1602,16 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$output = ob_get_clean();
 		$this->assertStringContainsString( '<!--amp-source-stack {"type":"core","name":"wp-includes"', $output );
 		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"core","name":"wp-includes"', $output );
+
+		// This action passes a variable by reference.
+		AMP_Theme_Support::start_output_buffering();
+		$number = 0;
+		do_action_ref_array( $action_pass_var_by_ref, [ &$number ] );
+		$this->assertSame( 1, $number );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContainsString( '"hook":"action_pass_var_by_ref","priority":10', $output );
+		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		// This action's callback doesn't echo any markup, so it shouldn't be wrapped in comments.
 		AMP_Theme_Support::start_output_buffering();
