@@ -103,6 +103,10 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 			$original_by_ref_callback,
 			$this->callback_reflection->get_unwrapped_callback( $wrapped_by_ref_callback )
 		);
+		$this->assertSame(
+			$original_by_ref_callback,
+			$this->callback_reflection->get_unwrapped_callback( [ $wrapped_by_ref_callback, 'invoke_with_first_ref_arg' ] )
+		);
 
 		$rewrapped_by_value_callback = new AMP_Validation_Callback_Wrapper(
 			[
@@ -128,6 +132,10 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 		$this->assertSame(
 			$original_by_ref_callback,
 			$this->callback_reflection->get_unwrapped_callback( $rewrapped_by_ref_callback )
+		);
+		$this->assertSame(
+			$original_by_ref_callback,
+			$this->callback_reflection->get_unwrapped_callback( [ $rewrapped_by_ref_callback, 'invoke_with_first_ref_arg' ] )
 		);
 
 		$this->assertSame( 2, $original_by_value_callback( 1 ) );
