@@ -1514,6 +1514,8 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * Test wrap_hook_callbacks.
 	 *
 	 * @covers AMP_Validation_Manager::wrap_hook_callbacks()
+	 * @covers AMP_Validation_Callback_Wrapper::__invoke()
+	 * @covers AMP_Validation_Callback_Wrapper::invoke_with_first_ref_arg()
 	 */
 	public function test_callback_wrappers() {
 		global $post;

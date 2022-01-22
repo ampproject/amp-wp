@@ -165,10 +165,20 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 
 		$preparation = $this->prepare( $first_arg, ...$other_args );
 
-		$result = $this->callback['function'](
-			$first_arg,
-			...array_slice( $other_args, 0, (int) $this->callback['accepted_args'] - 1 )
-		);
+		$function            = $this->callback['function'];
+		$other_accepted_args = array_slice( $other_args, 0, (int) $this->callback['accepted_args'] - 1 );
+
+		if ( $function instanceof self ) {
+			$result = $function->invoke_with_first_ref_arg(
+				$first_arg,
+				...$other_accepted_args
+			);
+		} else {
+			$result = $function(
+				$first_arg,
+				...$other_accepted_args
+			);
+		}
 
 		$this->finalize( $preparation );
 
