@@ -78,12 +78,12 @@ class Test_Uninstall extends TestCase {
 
 		$amp_error_term = $this->factory()->term->create_and_get(
 			[
-				'taxonomy' => 'amp_validation_error',
+				'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
 			]
 		);
 
 		update_term_meta( $amp_error_term->term_id, $meta_key, $meta_value );
-		wp_add_object_terms( $amp_validated_post->ID, $amp_error_term->term_id, 'amp_validation_error' );
+		wp_add_object_terms( $amp_validated_post->ID, $amp_error_term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 
 		$post_tag_term = $this->factory()->term->create_and_get(
 			[
@@ -155,7 +155,12 @@ class Test_Uninstall extends TestCase {
 
 		// Assert that there is no data left for `amp_validation_error` taxonomy.
 		$this->assertEmpty(
-			$wpdb->query( "SELECT * FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'amp_validation_error';" )
+			$wpdb->query(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->term_taxonomy} WHERE taxonomy = %s;",
+					AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG
+				)
+			)
 		);
 		$this->assertEmpty(
 			$wpdb->query(
