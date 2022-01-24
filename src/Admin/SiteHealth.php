@@ -413,9 +413,17 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		$has_page_cache_header = count( $has_page_cache_header );
 		$result                = 'critical';
 
-		if ( ( $page_speed && $page_speed < 600 ) && $has_page_cache_header ) {
+		if (
+			( $page_speed && $page_speed < 600 )
+			&&
+			( $has_page_cache_header || $page_cache_detail['advanced_cache_present'] )
+		) {
 			$result = 'good';
-		} elseif ( ( $page_speed && $page_speed < 600 ) && ! $has_page_cache_header ) {
+		} elseif (
+			( $page_speed && $page_speed < 600 )
+			&&
+			! ( $has_page_cache_header || $page_cache_detail['advanced_cache_present'] )
+		) {
 			$result = 'recommended';
 		}
 
