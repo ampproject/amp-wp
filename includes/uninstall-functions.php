@@ -65,7 +65,13 @@ function delete_posts() {
 	// Delete all post meta data related to "amp_validated_url" post_type.
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE meta FROM $wpdb->postmeta AS meta INNER JOIN $wpdb->posts AS posts ON posts.ID = meta.post_id WHERE posts.post_type = %s;",
+			"
+			DELETE meta
+			FROM $wpdb->postmeta AS meta
+				INNER JOIN $wpdb->posts AS posts
+					ON posts.ID = meta.post_id
+			WHERE posts.post_type = %s;
+			",
 			$post_type
 		)
 	);
@@ -94,7 +100,13 @@ function delete_terms() {
 	// Delete term meta.
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE tm from $wpdb->termmeta AS tm INNER JOIN $wpdb->term_taxonomy AS tt ON  tm.term_id = tt.term_id WHERE tt.taxonomy = %s;",
+			"
+			DELETE tm
+			FROM $wpdb->termmeta AS tm
+				INNER JOIN $wpdb->term_taxonomy AS tt
+					ON tm.term_id = tt.term_id
+			WHERE tt.taxonomy = %s;
+			",
 			$taxonomy
 		)
 	);
@@ -102,7 +114,13 @@ function delete_terms() {
 	// Delete term relationship.
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE tr from $wpdb->term_relationships AS tr INNER JOIN $wpdb->term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy = %s;",
+			"
+			DELETE tr
+			FROM $wpdb->term_relationships AS tr
+				INNER JOIN $wpdb->term_taxonomy AS tt
+					ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			WHERE tt.taxonomy = %s;
+			",
 			$taxonomy
 		)
 	);
@@ -110,7 +128,13 @@ function delete_terms() {
 	// Delete terms.
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE terms from $wpdb->terms AS terms INNER JOIN $wpdb->term_taxonomy AS tt ON  terms.term_id = tt.term_id WHERE tt.taxonomy = %s;",
+			"
+			DELETE terms
+			FROM $wpdb->terms AS terms
+				INNER JOIN $wpdb->term_taxonomy AS tt
+					ON terms.term_id = tt.term_id
+			WHERE tt.taxonomy = %s;
+			",
 			$taxonomy
 		)
 	);
