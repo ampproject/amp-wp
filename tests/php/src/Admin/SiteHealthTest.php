@@ -699,30 +699,30 @@ class SiteHealthTest extends TestCase {
 	public function get_page_cache_data() {
 
 		return [
-			'basic-auth-fail'                        => [
+			'basic-auth-fail'                          => [
 				'responses'       => [
 					'unauthorized',
 				],
 				'expected_status' => 'critical',
 				'good_basic_auth' => false,
 			],
-			'no-cache-control'                       => [
+			'no-cache-control'                         => [
 				'responses'          => array_fill( 0, 3, [] ),
 				'expected_status'    => 'critical',
 				'good_basic_auth'    => null,
 				'delay_the_response' => true,
 			],
-			'no-cache'                               => [
+			'no-cache'                                 => [
 				'responses'       => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
 				'expected_status' => 'recommended',
 			],
-			'no-cache-with-delayed-response'         => [
+			'no-cache-with-delayed-response'           => [
 				'responses'          => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
 				'expected_status'    => 'critical',
 				'good_basic_auth'    => null,
 				'delay_the_response' => true,
 			],
-			'age'                                    => [
+			'age'                                      => [
 				'responses'       => array_fill(
 					0,
 					3,
@@ -730,7 +730,7 @@ class SiteHealthTest extends TestCase {
 				),
 				'expected_status' => 'good',
 			],
-			'cache-control-max-age'                  => [
+			'cache-control-max-age'                    => [
 				'responses'       => array_fill(
 					0,
 					3,
@@ -738,7 +738,7 @@ class SiteHealthTest extends TestCase {
 				),
 				'expected_status' => 'good',
 			],
-			'cache-control-max-age-after-2-requests' => [
+			'cache-control-max-age-after-2-requests'   => [
 				'responses'       => [
 					[],
 					[],
@@ -746,7 +746,7 @@ class SiteHealthTest extends TestCase {
 				],
 				'expected_status' => 'good',
 			],
-			'cache-control-with-future-expires'      => [
+			'cache-control-with-future-expires'        => [
 				'responses'       => array_fill(
 					0,
 					3,
@@ -754,7 +754,7 @@ class SiteHealthTest extends TestCase {
 				),
 				'expected_status' => 'good',
 			],
-			'cache-control-with-past-expires'        => [
+			'cache-control-with-past-expires'          => [
 				'responses'          => array_fill(
 					0,
 					3,
@@ -764,7 +764,7 @@ class SiteHealthTest extends TestCase {
 				'good_basic_auth'    => null,
 				'delay_the_response' => true,
 			],
-			'cache-control-with-basic-auth'          => [
+			'cache-control-with-basic-auth'            => [
 				'responses'       => array_fill(
 					0,
 					3,
@@ -773,7 +773,7 @@ class SiteHealthTest extends TestCase {
 				'expected_status' => 'good',
 				'good_basic_auth' => true,
 			],
-			'cf-cache-status'                        => [
+			'cf-cache-status'                          => [
 				'responses'       => array_fill(
 					0,
 					3,
@@ -781,7 +781,17 @@ class SiteHealthTest extends TestCase {
 				),
 				'expected_status' => 'good',
 			],
-			'cf-cache-status-with-delay'             => [
+			'cf-cache-status-without-header-and-delay' => [
+				'responses'          => array_fill(
+					0,
+					3,
+					[ 'cf-cache-status' => 'MISS' ]
+				),
+				'expected_status'    => 'recommended',
+				'good_basic_auth'    => null,
+				'delay_the_response' => false,
+			],
+			'cf-cache-status-with-delay'               => [
 				'responses'          => array_fill(
 					0,
 					3,
@@ -791,7 +801,7 @@ class SiteHealthTest extends TestCase {
 				'good_basic_auth'    => null,
 				'delay_the_response' => true,
 			],
-			'x-cache-enabled'                        => [
+			'x-cache-enabled'                          => [
 				'responses'       => array_fill(
 					0,
 					3,
@@ -799,7 +809,7 @@ class SiteHealthTest extends TestCase {
 				),
 				'expected_status' => 'good',
 			],
-			'x-cache-enabled-with-delay'             => [
+			'x-cache-enabled-with-delay'               => [
 				'responses'          => array_fill(
 					0,
 					3,
@@ -808,6 +818,30 @@ class SiteHealthTest extends TestCase {
 				'expected_status'    => 'critical',
 				'good_basic_auth'    => null,
 				'delay_the_response' => true,
+			],
+			'x-cache-disabled'                         => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'x-cache-disabled' => 'off' ]
+				),
+				'expected_status' => 'good',
+			],
+			'cf-apo-via'                               => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'cf-apo-via' => 'tcache' ]
+				),
+				'expected_status' => 'good',
+			],
+			'cf-edge-cache'                            => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'cf-edge-cache' => 'cache' ]
+				),
+				'expected_status' => 'good',
 			],
 		];
 	}
@@ -902,9 +936,23 @@ class SiteHealthTest extends TestCase {
 
 	/**
 	 * @covers ::get_page_cache_status()
+	 */
+	public function test_get_page_cache_status_with_legacy_cache_result() {
+
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
+		$this->assertEquals( 'critical', $this->instance->get_page_cache_status( true ) );
+
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'yes', DAY_IN_SECONDS );
+		$this->assertEquals( 'good', $this->instance->get_page_cache_status( true ) );
+
+		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
+	}
+
+	/**
+	 * @covers ::get_page_cache_status()
 	 * @covers ::check_for_page_caching()
 	 */
-	public function test_has_page_caching() {
+	public function test_get_page_cache_status() {
 		$callback = static function () {
 			return [
 				'headers'  => [
@@ -950,7 +998,7 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::get_page_cache_status()
 	 * @covers ::check_for_page_caching()
 	 */
-	public function test_has_page_caching_with_error() {
+	public function test_get_page_cache_status_with_error() {
 		$error_object = new WP_Error( 'error_code', 'Error message.' );
 
 		$return_error = static function () use ( $error_object ) {
