@@ -446,30 +446,42 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		};
 
 		return [
-			'cache-control'    => static function ( $header_value ) {
+			'cache-control'          => static function ( $header_value ) {
 
 				return ( $header_value && preg_match( '/max-age=[1-9]/', $header_value ) );
 			},
-			'expires'          => static function ( $header_value ) {
+			'expires'                => static function ( $header_value ) {
 
 				return ( $header_value && strtotime( $header_value ) > time() );
 			},
-			'age'              => static function ( $header_value ) {
+			'age'                    => static function ( $header_value ) {
 
 				return ( $header_value && $header_value > 0 );
 			},
-			'last-modified'    => '',
-			'etag'             => '',
-			'x-cache'          => $cache_hit_callback,
-			'x-proxy-cache'    => $cache_hit_callback,
-			'cf-cache-status'  => $cache_hit_callback,
-			'x-kinsta-cache'   => $cache_hit_callback,
-			'x-cache-enabled'  => static function ( $header_value ) {
+			'last-modified'          => '',
+			'etag'                   => '',
+			'x-cache'                => $cache_hit_callback,
+			'x-proxy-cache'          => $cache_hit_callback,
+			'cf-cache-status'        => $cache_hit_callback,
+			'x-kinsta-cache'         => $cache_hit_callback,
+			'x-cache-enabled'        => static function ( $header_value ) {
 
 				return ( $header_value && 'true' === strtolower( $header_value ) );
 			},
-			'x-cache-disabled' => '',
-			'cf-apo-via'       => '',
+			'x-cache-disabled'       => static function ( $header_value ) {
+
+				return ( $header_value && 'on' !== strtolower( $header_value ) );
+			},
+			'cf-apo-via'             => static function ( $header_value ) {
+
+				return ( $header_value && false !== strpos( strtolower( $header_value ), 'tcache' ) );
+			},
+			'x-srcache-store-status' => $cache_hit_callback,
+			'x-srcache-fetch-status' => $cache_hit_callback,
+			'cf-edge-cache'          => static function ( $header_value ) {
+
+				return ( $header_value && false !== strpos( strtolower( $header_value ), 'cache' ) );
+			},
 		];
 	}
 
