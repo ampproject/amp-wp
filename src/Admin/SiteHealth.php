@@ -408,6 +408,10 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			return $page_cache_detail;
 		}
 
+		if ( is_string( $page_cache_detail ) ) {
+			return 'yes' === $page_cache_detail ? 'good' : 'critical';
+		}
+
 		$page_speed            = array_sum( $page_cache_detail['response_timing'] ) / count( $page_cache_detail['response_timing'] );
 		$has_page_cache_header = array_filter( $page_cache_detail['page_caching_response_headers'], 'count' );
 		$has_page_cache_header = count( $has_page_cache_header );
@@ -422,7 +426,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		} elseif (
 			( $page_speed && $page_speed < 600 )
 			&&
-			! ( $has_page_cache_header || $page_cache_detail['advanced_cache_present'] )
+			( ! $has_page_cache_header || ! $page_cache_detail['advanced_cache_present'] )
 		) {
 			$result = 'recommended';
 		}
