@@ -296,6 +296,7 @@ class Test_Uninstall extends TestCase {
 
 		$term_meta_keys_before_delete  = $wpdb->get_col( "SELECT meta_key FROM $wpdb->termmeta" );
 		$term_taxonomies_before_delete = $wpdb->get_col( "SELECT taxonomy FROM $wpdb->term_taxonomy" );
+		$term_slugs_before_delete      = $wpdb->get_col( "SELECT slug FROM $wpdb->terms" );
 
 		$validation_error_terms = get_terms(
 			[
@@ -357,6 +358,12 @@ class Test_Uninstall extends TestCase {
 		$this->assertContains( 'post_tag', $term_taxonomies_after_delete );
 		$this->assertContains( 'category', $term_taxonomies_after_delete );
 
+		$term_slugs_after_delete = $wpdb->get_col( "SELECT slug FROM $wpdb->terms" );
+		foreach ( array_diff( $term_slugs_before_delete, $term_slugs_after_delete ) as $deleted_slug ) {
+			$this->assertMatchesRegularExpression( '/^[0-9a-f]{32}$/', $deleted_slug );
+		}
+		$this->assertContains( 'uncategorized', $term_slugs_after_delete );
+
 		$this->assertCount(
 			0,
 			get_terms(
@@ -366,6 +373,21 @@ class Test_Uninstall extends TestCase {
 				]
 			)
 		);
+
+		$term_ids_after_delete = $wpdb->get_col( "SELECT term_id FROM $wpdb->terms" );
+		foreach ( $validation_error_terms as $validation_error_term ) {
+			$this->assertNotContains( $validation_error_term->term_id, $term_ids_after_delete );
+		}
+		foreach ( $term_ids_after_delete as $term_id ) {
+			$term = get_term( $term_id );
+			$this->assertInstanceOf( WP_Term::class, $term );
+			$this->assertNotEquals( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $term->taxonomy );
+			$this->assertTrue( taxonomy_exists( $term->taxonomy ) );
+			if ( 'uncategorized' !== $term->slug ) {
+				$objects = get_objects_in_term( $term_id, [ 'post_tag', 'category' ] );
+				$this->assertNotEmpty( $objects );
+			}
+		}
 	}
 
 	/**
