@@ -6,6 +6,7 @@
  * @since 0.7
  */
 
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 use AmpProject\AmpWP\Tests\TestCase;
@@ -17,6 +18,7 @@ use AmpProject\AmpWP\Tests\TestCase;
  */
 class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
+	use MarkupComparison;
 	use PrivateAccess;
 	use WithoutBlockPreRendering {
 		setUp as public prevent_block_pre_render;
@@ -114,7 +116,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 		$embed = new AMP_YouTube_Embed_Handler();
 		$embed->register_embed();
 		$this->assertEquals( 10, has_filter( 'embed_oembed_html', [ $embed, 'filter_embed_oembed_html' ] ) );
-		$this->assertEquals( 10, has_filter( 'wp_video_shortcode_override', [ $embed, 'video_override' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_video_shortcode_override', [ $embed, 'video_override' ] ) );
 		$embed->unregister_embed();
 		$this->assertFalse( has_filter( 'embed_oembed_html', [ $embed, 'filter_embed_oembed_html' ] ) );
 		$this->assertFalse( has_filter( 'wp_video_shortcode_override', [ $embed, 'video_override' ] ) );
@@ -156,6 +158,10 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 				'source'   => '<iframe src="https://www.youtube.com/feed/library" title="YouTube Library" width="560" height="315"></iframe>',
 				'expected' => '<iframe src="https://www.youtube.com/feed/library" title="YouTube Library" width="560" height="315"></iframe>',
 			],
+			'youtube-fixed-height'   => [
+				'source'   => '<iframe width="100%" height="315" src="https://www.youtube.com/embed/s52JNMT59s8"></iframe>',
+				'expected' => '<amp-youtube layout="fixed-height" width="auto" height="315" data-videoid="s52JNMT59s8"><a placeholder="" href="https://www.youtube.com/watch?v=s52JNMT59s8"><img src="https://i.ytimg.com/vi/s52JNMT59s8/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube>',
+			],
 		];
 	}
 
@@ -166,6 +172,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	 * @covers ::get_amp_component()
 	 * @covers ::get_placeholder_element()
 	 * @covers ::prepare_attributes()
+	 * @covers ::amend_fixed_height_layout()
 	 */
 	public function test_sanitize_raw_embeds( $source, $expected ) {
 
@@ -180,7 +187,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		$this->assertEquals( $expected, trim( $content ) );
+		$this->assertEqualMarkup( $expected, $content );
 	}
 
 	/**
@@ -190,6 +197,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	 * @covers ::video_override()
 	 * @covers ::render()
 	 * @covers ::get_placeholder_markup()
+	 * @covers ::amend_fixed_height_layout()
 	 */
 	public function test_video_override() {
 		remove_all_filters( 'wp_video_shortcode_override' );
@@ -201,8 +209,33 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 		];
 
 		$youtube_shortcode = $this->handler->video_override( '', $attr_youtube );
-		$this->assertStringContainsString( '<amp-youtube', $youtube_shortcode );
-		$this->assertStringContainsString( $youtube_id, $youtube_shortcode );
+		$this->assertEqualMarkup(
+			'<amp-youtube layout="responsive" width="600" height="338" data-videoid="XOY3ZUO6P0k"><a placeholder href="https://youtu.be/XOY3ZUO6P0k"><img src="https://i.ytimg.com/vi/XOY3ZUO6P0k/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube>',
+			$youtube_shortcode
+		);
+
+		// Test when wp_video_shortcode_override filter has already overridden the markup.
+		$youtube_shortcode = $this->handler->video_override( "<iframe width=\"200\" height=\"100\" src=\"$youtube_src\"></iframe>", $attr_youtube );
+		$this->assertEqualMarkup(
+			'<amp-youtube layout="responsive" width="200" height="100" data-videoid="XOY3ZUO6P0k"><a placeholder href="https://youtu.be/XOY3ZUO6P0k"><img src="https://i.ytimg.com/vi/XOY3ZUO6P0k/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube>',
+			$youtube_shortcode
+		);
+
+		// Test 100% width in video shortcode.
+		$youtube_shortcode = $this->handler->video_override(
+			'',
+			array_merge(
+				$attr_youtube,
+				[
+					'width'  => '100%',
+					'height' => '315',
+				]
+			)
+		);
+		$this->assertEqualMarkup(
+			'<amp-youtube layout="fixed-height" width="auto" height="315" data-videoid="XOY3ZUO6P0k"><a placeholder href="https://youtu.be/XOY3ZUO6P0k"><img src="https://i.ytimg.com/vi/XOY3ZUO6P0k/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube>',
+			$youtube_shortcode
+		);
 
 		$vimeo_id        = '64086087';
 		$vimeo_src       = 'https://vimeo.com/' . $vimeo_id;
@@ -313,9 +346,9 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.1', '<' )
 			&& null !== $fallback_for_expected
 		) {
-			$this->assertEquals( $fallback_for_expected, $filtered_content );
+			$this->assertEqualMarkup( $fallback_for_expected, $filtered_content );
 		} else {
-			$this->assertEquals( $expected, $filtered_content );
+			$this->assertEqualMarkup( $expected, $filtered_content );
 		}
 	}
 
