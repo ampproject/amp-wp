@@ -5,12 +5,18 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\TestCase;
-use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Admin\UserRESTEndpointExtension;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
+use AmpProject\AmpWP\DevTools\UserAccess;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 
 use function \AmpProject\AmpWP\delete_options;
+use function \AmpProject\AmpWP\delete_user_metadata;
+use function \AmpProject\AmpWP\delete_posts;
+use function \AmpProject\AmpWP\delete_terms;
+use function \AmpProject\AmpWP\delete_transients;
 
 /**
  * @runInSeparateProcess
@@ -64,7 +70,7 @@ class Test_Uninstall extends TestCase {
 			]
 		);
 
-		$option_keys_before = $wpdb->get_col( "SELECT option_name FROM $wpdb->options" );
+		$options_before_delete = $wpdb->get_col( "SELECT option_name FROM $wpdb->options" );
 
 		delete_options();
 		$this->flush_cache();
@@ -77,16 +83,71 @@ class Test_Uninstall extends TestCase {
 		$this->assertEquals( 'red', $foo_theme_mods['color'] );
 		$this->assertArrayNotHasKey( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY, $foo_theme_mods );
 
-		$option_keys_after = $wpdb->get_col( "SELECT option_name FROM $wpdb->options" );
+		$options_after_delete = $wpdb->get_col( "SELECT option_name FROM $wpdb->options" );
 		$this->assertEqualSets(
 			[
 				AMP_Options_Manager::OPTION_NAME,
 				URLValidationCron::OPTION_KEY,
 				MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY,
 			],
-			array_diff( $option_keys_before, $option_keys_after ),
+			array_diff( $options_before_delete, $options_after_delete ),
 			'Expected only 3 options to have been deleted.'
 		);
+	}
+
+	/**
+	 * @covers \AmpProject\AmpWP\delete_user_metadata()
+	 */
+	public function test_delete_user_metadata() {
+		global $wpdb;
+
+		$user_ids = self::factory()->user->create_many( 3 );
+		foreach ( $user_ids as $user_id ) {
+			update_user_meta( $user_id, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, '...' );
+			update_user_meta( $user_id, UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, '...' );
+			update_user_meta( $user_id, 'additional_user_meta', '...' );
+		}
+
+		$user_meta_keys_before_delete = $wpdb->get_col( "SELECT meta_key FROM $wpdb->usermeta" );
+
+		delete_user_metadata();
+		$this->flush_cache();
+
+		foreach ( $user_ids as $user_id ) {
+			$this->assertEmpty( get_user_meta( $user_id, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, true ) );
+			$this->assertEmpty( get_user_meta( $user_id, UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE, true ) );
+			$this->assertEquals( '...', get_user_meta( $user_id, 'additional_user_meta', true ) );
+		}
+
+		$user_meta_keys_after_delete = $wpdb->get_col( "SELECT meta_key FROM $wpdb->usermeta" );
+		$this->assertEqualSets(
+			[
+				UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+				UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
+			],
+			array_unique( array_diff( $user_meta_keys_before_delete, $user_meta_keys_after_delete ) )
+		);
+	}
+
+	/**
+	 * @covers \AmpProject\AmpWP\delete_posts()
+	 */
+	public function test_delete_posts() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * @covers \AmpProject\AmpWP\delete_terms()
+	 */
+	public function test_delete_terms() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * @covers \AmpProject\AmpWP\delete_transients()
+	 */
+	public function test_delete_transients() {
+		$this->markTestIncomplete();
 	}
 
 	/**
@@ -97,7 +158,7 @@ class Test_Uninstall extends TestCase {
 	 * @covers \AmpProject\AmpWP\delete_transients()
 	 * @covers \AmpProject\AmpWP\remove_plugin_data()
 	 */
-	public function test_uninstall_php() {
+	public function test_remove_plugin_data() {
 		global $wpdb;
 		wp_using_ext_object_cache( false );
 
