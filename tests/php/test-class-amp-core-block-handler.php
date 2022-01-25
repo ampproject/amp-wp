@@ -554,8 +554,8 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 * @covers \AMP_Core_Block_Handler::dequeue_block_navigation_view_script()
 	 */
 	public function test_ampify_navigation_block( $block_attrs, $block_markup, $expected_markup ) {
-		if ( ! defined( 'GUTENBERG_VERSION' ) || version_compare( GUTENBERG_VERSION, '10.7', '<' ) ) {
-			$this->markTestSkipped( 'Requires Gutenberg 10.7 or higher.' );
+		if ( ! function_exists( 'render_block_core_navigation' ) ) {
+			$this->markTestSkipped( 'Navigation block does not exist.' );
 		}
 
 		$handler = new AMP_Core_Block_Handler();
