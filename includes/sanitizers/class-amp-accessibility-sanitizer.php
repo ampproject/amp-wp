@@ -88,16 +88,10 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$main_tag = $this->dom->getElementsByTagName( Tag::MAIN );
-
-		if ( 0 === $main_tag->length ) {
+		$main_tag = $this->dom->getElementsByTagName( Tag::MAIN )->item( 0 );
+		if ( ! $main_tag instanceof Element ) {
 			return;
 		}
-
-		$body = $this->dom->getElementsByTagName( Tag::BODY )->item( 0 );
-
-		/** @var Element $main_tag */
-		$main_tag = $main_tag->item( 0 );
 
 		$skip_link_target = $this->dom->getElementId( $main_tag, 'wp--skip-link--target' );
 
@@ -154,6 +148,7 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 
 		$skip_link->appendChild( $this->dom->createTextNode( esc_html__( 'Skip to content', 'amp' ) ) );
 
+		$body = $this->dom->body;
 		$body->insertBefore( $skip_link, $body->firstChild );
 		$body->insertBefore( $style_node, $body->firstChild );
 	}
