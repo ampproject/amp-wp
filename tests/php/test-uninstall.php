@@ -566,20 +566,20 @@ class Test_Uninstall extends TestCase {
 		// Test 1: With option to keep AMP data ON.
 		AMP_Options_Manager::update_option( Option::DELETE_DATA_AT_UNINSTALL, false );
 
+		$num_queries_before = $wpdb->num_queries;
 		require AMP__DIR__ . '/uninstall.php';
-
 		$this->flush_cache();
-		// @todo Assert no deletions were run.
+		$this->assertEquals( $num_queries_before, $wpdb->num_queries );
 
 		$this->assertNotEmpty( get_option( AMP_Options_Manager::OPTION_NAME, false ) );
 
 		// Test 2: With option to keep AMP data OFF.
 		AMP_Options_Manager::update_option( Option::DELETE_DATA_AT_UNINSTALL, true );
 
+		$num_queries_before = $wpdb->num_queries;
 		require AMP__DIR__ . '/uninstall.php';
-		// @todo Assert that deletions were run.
-
 		$this->flush_cache();
+		$this->assertGreaterThan( $num_queries_before, $wpdb->num_queries );
 
 		// Assert that AMP related data does get deleted.
 		$this->assertEmpty( get_option( AMP_Options_Manager::OPTION_NAME, false ) );
