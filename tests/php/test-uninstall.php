@@ -97,14 +97,13 @@ class Test_Uninstall extends TestCase {
 		$post_tag_term_relationships_row_count = $wpdb->query( $wpdb->prepare( "SELECT * FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d", $post_tag_term->term_id ) );
 		$this->assertGreaterThan( 0, $post_tag_term_relationships_row_count );
 
-		$theme_mod_name = 'amp_customize_setting_modified_timestamps';
 		set_theme_mod( 'color', 'blue' );
-		set_theme_mod( $theme_mod_name, [ 'color' => time() ] );
+		set_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY, [ 'color' => time() ] );
 		update_option(
 			'theme_mods_foo',
 			[
-				'color'         => 'red',
-				$theme_mod_name => [
+				'color' => 'red',
+				AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY => [
 					'color' => time(),
 				],
 			]
@@ -215,10 +214,10 @@ class Test_Uninstall extends TestCase {
 		$this->assertEquals( $blog_name, get_option( 'blogname', false ) );
 
 		$this->assertEquals( 'blue', get_theme_mod( 'color' ) );
-		$this->assertFalse( get_theme_mod( $theme_mod_name ) );
+		$this->assertFalse( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) );
 		$foo_theme_mods = get_option( 'theme_mods_foo' );
 		$this->assertEquals( 'red', $foo_theme_mods['color'] );
-		$this->assertArrayNotHasKey( $theme_mod_name, $foo_theme_mods );
+		$this->assertArrayNotHasKey( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY, $foo_theme_mods );
 
 		foreach ( $transient_groups_to_remove as $transient_group ) {
 			$this->assertEmpty( get_transient( $transient_group ) );
