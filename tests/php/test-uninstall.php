@@ -129,18 +129,243 @@ class Test_Uninstall extends TestCase {
 		);
 	}
 
+	/** @return array */
+	private function create_data() {
+
+		$validated_url_post_ids = [];
+
+		$meta_input = [
+			'public_key'   => 'public value',
+			'_private_key' => 'private value',
+		];
+
+		$post_ids = self::factory()->post->create_many(
+			3,
+			[
+				'post_type'  => 'post',
+				'meta_input' => $meta_input,
+			]
+		);
+
+		$post_tag_terms = self::factory()->term->create_many(
+			5,
+			[
+				'taxonomy' => 'post_tag',
+			]
+		);
+		$category_terms = self::factory()->term->create_many(
+			5,
+			[
+				'taxonomy' => 'category',
+			]
+		);
+		foreach ( array_merge( $post_tag_terms, $category_terms ) as $term_id ) {
+			foreach ( $meta_input as $key => $value ) {
+				update_term_meta( $term_id, $key, $value );
+			}
+		}
+
+		foreach ( $post_ids as $post_id ) {
+			wp_set_object_terms( $post_id, $post_tag_terms, 'post_tag' );
+			wp_set_object_terms( $post_id, $category_terms, 'category' );
+
+			$validated_url_post_ids[] = AMP_Validated_URL_Post_Type::store_validation_errors(
+				[
+					[ 'code' => 'foo' ],
+					[ 'code' => 'bar' ],
+					[ 'code' => 'baz' ],
+				],
+				get_permalink( $post_id ),
+				[
+					'queried_object'  => [
+						'type' => 'post',
+						'id'   => $post_id,
+					],
+					'php_fatal_error' => [
+						'message' => 'Bad',
+						'file'    => __FILE__,
+						'line'    => __LINE__,
+					],
+					'stylesheets'     => [
+						[ '...' ],
+					],
+				]
+			);
+		}
+
+		$page_ids = self::factory()->post->create_many(
+			3,
+			[
+				'post_type'  => 'page',
+				'meta_input' => $meta_input,
+			]
+		);
+		foreach ( $page_ids as $page_id ) {
+			$validated_url_post_ids[] = AMP_Validated_URL_Post_Type::store_validation_errors(
+				[
+					[ 'code' => 'a' ],
+					[ 'code' => 'b' ],
+					[ 'code' => 'c' ],
+				],
+				get_permalink( $page_id ),
+				[
+					'queried_object' => [
+						'type' => 'post',
+						'id'   => $page_id,
+					],
+					'stylesheets'    => [
+						[ '...' ],
+					],
+				]
+			);
+		}
+
+		return compact(
+			'post_ids',
+			'page_ids',
+			'validated_url_post_ids',
+			'post_tag_terms',
+			'category_terms',
+			'meta_input'
+		);
+	}
+
 	/**
 	 * @covers \AmpProject\AmpWP\delete_posts()
 	 */
 	public function test_delete_posts() {
-		$this->markTestIncomplete();
+		global $wpdb;
+
+		$data = $this->create_data();
+
+		$post_types_before_delete     = $wpdb->get_col( "SELECT post_type FROM $wpdb->posts" );
+		$post_meta_keys_before_delete = $wpdb->get_col( "SELECT meta_key FROM $wpdb->postmeta" );
+
+		delete_posts();
+		$this->flush_cache();
+
+		foreach ( $data['post_ids'] as $post_id ) {
+			$this->assertInstanceOf( WP_Post::class, get_post( $post_id ) );
+			foreach ( $data['meta_input'] as $key => $value ) {
+				$this->assertEquals( $value, get_post_meta( $post_id, $key, true ) );
+			}
+		}
+		foreach ( $data['page_ids'] as $page_id ) {
+			$this->assertInstanceOf( WP_Post::class, get_post( $page_id ) );
+			foreach ( $data['meta_input'] as $key => $value ) {
+				$this->assertEquals( $value, get_post_meta( $page_id, $key, true ) );
+			}
+		}
+		foreach ( $data['validated_url_post_ids'] as $id ) {
+			$this->assertEmpty( get_post( $id ) );
+		}
+
+		$post_types_after_delete     = $wpdb->get_col( "SELECT post_type FROM $wpdb->posts" );
+		$post_meta_keys_after_delete = $wpdb->get_col( "SELECT meta_key FROM $wpdb->postmeta" );
+
+		$this->assertEqualSets(
+			[
+				AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+			],
+			array_unique( array_diff( $post_types_before_delete, $post_types_after_delete ) )
+		);
+		$this->assertContains( 'post', $post_types_after_delete );
+		$this->assertContains( 'page', $post_types_after_delete );
+
+		$this->assertEqualSets(
+			[
+				AMP_Validated_URL_Post_Type::PHP_FATAL_ERROR_POST_META_KEY,
+				AMP_Validated_URL_Post_Type::QUERIED_OBJECT_POST_META_KEY,
+				AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY,
+				AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY,
+			],
+			array_unique( array_diff( $post_meta_keys_before_delete, $post_meta_keys_after_delete ) )
+		);
+		foreach ( array_keys( $data['meta_input'] ) as $meta_key ) {
+			$this->assertContains( $meta_key, $post_meta_keys_after_delete );
+		}
 	}
 
 	/**
 	 * @covers \AmpProject\AmpWP\delete_terms()
 	 */
 	public function test_delete_terms() {
-		$this->markTestIncomplete();
+		global $wpdb;
+
+		$data = $this->create_data();
+
+		$term_meta_keys_before_delete  = $wpdb->get_col( "SELECT meta_key FROM $wpdb->termmeta" );
+		$term_taxonomies_before_delete = $wpdb->get_col( "SELECT taxonomy FROM $wpdb->term_taxonomy" );
+
+		$validation_error_terms = get_terms(
+			[
+				'taxonomy'   => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+				'hide_empty' => false,
+			]
+		);
+		$this->assertGreaterThan( 0, count( $validation_error_terms ) );
+
+		delete_terms();
+		$this->flush_cache();
+
+		foreach ( $data['post_ids'] as $post_id ) {
+			$this->assertInstanceOf( WP_Post::class, get_post( $post_id ) );
+			$this->assertEqualSets(
+				$data['post_tag_terms'],
+				wp_list_pluck( wp_get_post_terms( $post_id, 'post_tag' ), 'term_id' )
+			);
+			$this->assertEqualSets(
+				$data['category_terms'],
+				wp_list_pluck( wp_get_post_terms( $post_id, 'category' ), 'term_id' )
+			);
+		}
+
+		foreach ( $validation_error_terms as $term ) {
+			$this->assertEmpty( get_term( $term->term_id ) );
+		}
+		foreach ( $data['post_tag_terms'] as $term_id ) {
+			$this->assertInstanceOf( WP_Term::class, get_term( $term_id ) );
+			foreach ( $data['meta_input'] as $key => $value ) {
+				$this->assertEquals( $value, get_term_meta( $term_id, $key, true ) );
+			}
+		}
+		foreach ( $data['category_terms'] as $term_id ) {
+			$this->assertInstanceOf( WP_Term::class, get_term( $term_id ) );
+			foreach ( $data['meta_input'] as $key => $value ) {
+				$this->assertEquals( $value, get_term_meta( $term_id, $key, true ) );
+			}
+		}
+
+		$term_meta_keys_after_delete = $wpdb->get_col( "SELECT meta_key FROM $wpdb->termmeta" );
+		$this->assertEqualSets(
+			[
+				'created_date_gmt',
+			],
+			array_unique( array_diff( $term_meta_keys_before_delete, $term_meta_keys_after_delete ) )
+		);
+		foreach ( array_keys( $data['meta_input'] ) as $key ) {
+			$this->assertContains( $key, $term_meta_keys_after_delete );
+		}
+
+		$term_taxonomies_after_delete = $wpdb->get_col( "SELECT taxonomy FROM $wpdb->term_taxonomy" );
+		$this->assertEqualSets(
+			[
+				AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+			],
+			array_unique( array_diff( $term_taxonomies_before_delete, $term_taxonomies_after_delete ) )
+		);
+		$this->assertContains( 'post_tag', $term_taxonomies_after_delete );
+		$this->assertContains( 'category', $term_taxonomies_after_delete );
+
+		$this->assertCount(
+			0,
+			get_terms(
+				[
+					'taxonomy'   => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+					'hide_empty' => false,
+				]
+			)
+		);
 	}
 
 	/**
@@ -259,6 +484,7 @@ class Test_Uninstall extends TestCase {
 		require AMP__DIR__ . '/uninstall.php';
 
 		$this->flush_cache();
+		// @todo Assert no deletions were run.
 
 		$this->assertNotEmpty( get_option( AMP_Options_Manager::OPTION_NAME, false ) );
 
@@ -266,6 +492,7 @@ class Test_Uninstall extends TestCase {
 		AMP_Options_Manager::update_option( Option::DELETE_DATA_AT_UNINSTALL, true );
 
 		require AMP__DIR__ . '/uninstall.php';
+		// @todo Assert that deletions were run.
 
 		$this->flush_cache();
 

@@ -75,6 +75,7 @@ function delete_posts() {
 		)
 	);
 
+	// Delete all amp_validated_url posts.
 	$wpdb->delete(
 		$wpdb->posts,
 		compact( 'post_type' )
