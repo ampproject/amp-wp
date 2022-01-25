@@ -90,9 +90,12 @@ class Test_Uninstall extends TestCase {
 				'taxonomy' => 'post_tag',
 			]
 		);
-
 		update_term_meta( $post_tag_term->term_id, $meta_key, $meta_value );
 		wp_add_object_terms( $page_post->ID, $post_tag_term->term_id, 'post_tag' );
+		$post_tag_term_taxonomy_row_count = $wpdb->query( "SELECT * FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'post_tag';" );
+		$this->assertGreaterThan( 0, $post_tag_term_taxonomy_row_count );
+		$post_tag_term_relationships_row_count = $wpdb->query( $wpdb->prepare( "SELECT * FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d", $post_tag_term->term_id ) );
+		$this->assertGreaterThan( 0, $post_tag_term_relationships_row_count );
 
 		$theme_mod_name = 'amp_customize_setting_modified_timestamps';
 		set_theme_mod( 'color', 'blue' );
@@ -170,21 +173,40 @@ class Test_Uninstall extends TestCase {
 				)
 			)
 		);
+		$this->assertEmpty(
+			$wpdb->query(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->terms} WHERE term_id = %d",
+					$amp_error_term->term_id
+				)
+			)
+		);
 
 		// Assert that other than AMP related data does not get deleted.
-		$this->assertTrue( is_a( get_post( $page_post->ID ), 'WP_Post' ) );
+		$this->assertInstanceOf( WP_Post::class, get_post( $page_post->ID ) );
 		$this->assertEquals( $meta_value, get_post_meta( $page_post->ID, $meta_key, true ) );
-		$this->assertTrue( is_a( get_term( $post_tag_term->term_id ), 'WP_Term' ) );
+		$this->assertInstanceOf( WP_Term::class, get_term( $post_tag_term->term_id ) );
 		$this->assertEquals( $meta_value, get_term_meta( $post_tag_term->term_id, $meta_key, true ) );
 
 		// Assert that there is no deleted other than `amp_validation_error` taxonomy.
-		$this->assertNotEmpty(
+		$this->assertEquals(
+			$post_tag_term_taxonomy_row_count,
 			$wpdb->query( "SELECT * FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'post_tag';" )
 		);
-		$this->assertNotEmpty(
+		$this->assertEquals(
+			$post_tag_term_relationships_row_count,
 			$wpdb->query(
 				$wpdb->prepare(
 					"SELECT * FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d",
+					$post_tag_term->term_id
+				)
+			)
+		);
+		$this->assertEquals(
+			1,
+			$wpdb->query(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->terms} WHERE term_id = %d",
 					$post_tag_term->term_id
 				)
 			)
