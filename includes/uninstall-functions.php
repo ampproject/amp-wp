@@ -56,6 +56,7 @@ function delete_user_metadata() {
  */
 function delete_posts() {
 
+	/** @var \wpdb */
 	global $wpdb;
 
 	$post_type = 'amp_validated_url';
@@ -92,24 +93,33 @@ function delete_posts() {
  */
 function delete_terms() {
 
+	// Abort if term splitting has not been done. This is done by WooCommerce so it's
+	// it's also done here for good measure, even though we require WP 4.9+.
+	if ( version_compare( get_bloginfo( 'version' ), '4.2', '<' ) ) {
+		return;
+	}
+
+	/** @var \wpdb */
 	global $wpdb;
 
 	$taxonomy = 'amp_validation_error';
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
-	// Delete term meta.
-	$wpdb->query(
-		$wpdb->prepare(
-			"
+	// Delete term meta (added in WP 4.4).
+	if ( ! empty( $wpdb->termmeta ) ) {
+		$wpdb->query(
+			$wpdb->prepare(
+				"
 			DELETE tm
 			FROM $wpdb->termmeta AS tm
 				INNER JOIN $wpdb->term_taxonomy AS tt
 					ON tm.term_id = tt.term_id
 			WHERE tt.taxonomy = %s;
 			",
-			$taxonomy
-		)
-	);
+				$taxonomy
+			)
+		);
+	}
 
 	// Delete term relationship.
 	$wpdb->query(
@@ -161,6 +171,7 @@ function delete_transients() {
 		return;
 	}
 
+	/** @var \wpdb */
 	global $wpdb;
 
 	$transient_groups = [
