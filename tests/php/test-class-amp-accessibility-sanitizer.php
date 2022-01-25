@@ -112,7 +112,8 @@ class AMP_Accessibility_Sanitizer_Test extends TestCase {
 	 */
 	public function get_skip_link_test_data() {
 
-		$style_element = '<style id="amp-skip-link-styles">.skip-link.screen-reader-text {
+		$style_element = '<style id="amp-skip-link-styles">
+			.skip-link.screen-reader-text {
 				border: 0;
 				clip: rect(1px,1px,1px,1px);
 				clip-path: inset(50%);
@@ -140,7 +141,8 @@ class AMP_Accessibility_Sanitizer_Test extends TestCase {
 				top: 5px;
 				width: auto;
 				z-index: 100000;
-			}</style>';
+			}
+		</style>';
 
 		return [
 			'with_id'              => [

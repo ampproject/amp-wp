@@ -96,7 +96,8 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 		$skip_link_target = $this->dom->getElementId( $main_tag, 'wp--skip-link--target' );
 
 		// Style for skip link.
-		$style_content = '.skip-link.screen-reader-text {
+		$style_content = '
+			.skip-link.screen-reader-text {
 				border: 0;
 				clip: rect(1px,1px,1px,1px);
 				clip-path: inset(50%);
