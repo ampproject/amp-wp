@@ -11,6 +11,7 @@ use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Validation\URLValidationCron;
+use AmpProject\AmpWP\DevTools\BlockSources;
 
 use function \AmpProject\AmpWP\delete_options;
 use function \AmpProject\AmpWP\delete_user_metadata;
@@ -390,11 +391,73 @@ class Test_Uninstall extends TestCase {
 		}
 	}
 
+	/** @return array */
+	public function get_data_to_test_delete_transients() {
+		return [
+			'using_ext_object_cache'     => [ true ],
+			'not_using_ext_object_cache' => [ false ],
+		];
+	}
+
 	/**
+	 * @dataProvider get_data_to_test_delete_transients
 	 * @covers \AmpProject\AmpWP\delete_transients()
 	 */
-	public function test_delete_transients() {
-		$this->markTestIncomplete();
+	public function test_delete_transients( $using_ext_object_cache ) {
+		global $wpdb;
+
+		wp_using_ext_object_cache( $using_ext_object_cache );
+
+		// Non-AMP transients.
+		set_transient( 'foo', 1 );
+		set_transient( 'bar', 2, MINUTE_IN_SECONDS );
+		set_transient( 'baz', 3, HOUR_IN_SECONDS );
+
+		// AMP transients.
+		set_transient( BlockSources::class . BlockSources::CACHE_KEY, '...', BlockSources::CACHE_TIMEOUT );
+		set_transient( 'amp-parsed-stylesheet-v10-1', [ '...' ], MONTH_IN_SECONDS );
+		set_transient( 'amp-parsed-stylesheet-v10-2', [ '...' ], MONTH_IN_SECONDS );
+		set_transient( 'amp-parsed-stylesheet-v10-3', [ '...' ], MONTH_IN_SECONDS );
+		set_transient( 'amp-parsed-stylesheet-v10-3', [ '...' ], MONTH_IN_SECONDS );
+		set_transient( 'amp_error_index_counts', '...' );
+		set_transient( 'amp_has_page_caching', '...' );
+		set_transient( 'amp_img_123abc', '...' );
+		set_transient( 'amp_lock_123abc', '...' );
+		set_transient( 'amp_new_validation_error_urls_count', '...' );
+		set_transient( 'amp_plugin_activation_validation_errors', '...' );
+		set_transient( 'amp_remote_request_101623f47561580a914e5d56e153cf6c', '...' );
+		set_transient( 'amp_themes_wporg', '...', DAY_IN_SECONDS );
+
+		$transient_keys_before_delete = $wpdb->get_col( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE '_transient_%'" );
+		$num_queries_before           = $wpdb->num_queries;
+		delete_transients();
+		$num_queries_after           = $wpdb->num_queries;
+		$transient_keys_after_delete = $wpdb->get_col( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE '_transient_%'" );
+
+		if ( $using_ext_object_cache ) {
+			$this->assertEquals( $num_queries_before, $num_queries_after );
+			$this->assertEquals( $transient_keys_before_delete, $transient_keys_after_delete );
+		} else {
+			$this->assertEquals( $num_queries_before + 1, $num_queries_after );
+			$this->assertContains(
+				'_transient_amp_themes_wporg',
+				$transient_keys_before_delete
+			);
+			$this->assertContains(
+				'_transient_timeout_amp_themes_wporg',
+				$transient_keys_before_delete
+			);
+			$this->assertEqualSets(
+				[
+					'_transient_bar',
+					'_transient_baz',
+					'_transient_foo',
+					'_transient_timeout_bar',
+					'_transient_timeout_baz',
+				],
+				$transient_keys_after_delete
+			);
+		}
 	}
 
 	/**
