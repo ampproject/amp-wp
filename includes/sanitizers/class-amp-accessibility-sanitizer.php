@@ -124,13 +124,14 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 				top: 5px;
 				width: auto;
 				z-index: 100000;
-			}';
+			}
+		';
 
 		$style_node = AMP_DOM_Utils::create_node(
 			$this->dom,
 			Tag::STYLE,
 			[
-				Attribute::ID => 'skip-link-styles',
+				Attribute::ID => 'amp-skip-link-styles',
 			]
 		);
 
