@@ -43,6 +43,11 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		if ( did_action( 'add_attachment' ) ) {
 			$this->remove_added_uploads();
 		}
+
+		global $wp_scripts, $wp_styles;
+		$wp_scripts = null;
+		$wp_styles  = null;
+
 		parent::tearDown();
 	}
 
@@ -263,6 +268,320 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$this->assertFalse( wp_script_is( 'wp-block-library-file', 'enqueued' ) );
 
 		$this->assertStringNotContainsString( '<style id="amp-wp-file-block">', $content );
+	}
+
+	/**
+	 * @return array[]
+	 */
+	public function get_ampify_navigation_block_test_data() {
+		return [
+			'navigation_block_mobile_overlay_menu_submenus_open_on_click' => [
+				'block_attrs'     => [
+					'openSubmenusOnClick' => true,
+				],
+				'block_markup'    => '
+					<nav class="wp-container-61e6c93546294 is-responsive wp-block-navigation">
+						<button aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open" data-micromodal-trigger="modal-61e6c935457bd">
+							<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5" /><rect x="4" y="15" width="16" height="1.5" /></svg>
+						</button>
+						<div class="wp-block-navigation__responsive-container" style="" id="modal-61e6c935457bd">
+							<div class="wp-block-navigation__responsive-close" tabindex="-1" data-micromodal-close>
+								<div class="wp-block-navigation__responsive-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-61e6c935457bd-title">
+									<button aria-label="Close menu" data-micromodal-close class="wp-block-navigation__responsive-container-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false"><path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path></svg></button>
+									<div class="wp-block-navigation__responsive-container-content" id="modal-61e6c935457bd-content">
+										<ul class="wp-block-navigation__container">
+											<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false"><span class="wp-block-navigation-item__label">Page A</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a1"><span class="wp-block-navigation-item__label">Page A1</span></a></li>
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a2"><span class="wp-block-navigation-item__label">Page A2</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false"><span class="wp-block-navigation-item__label">Page B</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item current-menu-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-b1" aria-current="page"><span class="wp-block-navigation-item__label">Page B1</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item wp-block-navigation-link">
+												<a class="wp-block-navigation-item__content" href="https://example.com/page-c"><span class="wp-block-navigation-item__label">Page C</span></a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</nav>
+				',
+				'expected_markup' => '
+					<nav class="wp-container-61e6c93546294 is-responsive wp-block-navigation">
+						<button [aria-expanded]="modal_1_expanded ? \'true\' : \'false\'" aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open" on="tap:AMP.setState({ modal_1_expanded: !modal_1_expanded })">
+							<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5" /><rect x="4" y="15" width="16" height="1.5" /></svg>
+						</button>
+						<div [aria-hidden]="modal_1_expanded ? \'false\' : \'true\'" aria-hidden="true" [class]="modal_1_expanded ? \'wp-block-navigation__responsive-container is-menu-open has-modal-open\' : \'wp-block-navigation__responsive-container\'" class="wp-block-navigation__responsive-container" style="" id="modal-61e6c935457bd">
+							<div class="wp-block-navigation__responsive-close" tabindex="-1">
+								<div class="wp-block-navigation__responsive-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-61e6c935457bd-title">
+									<button aria-label="Close menu" on="tap:AMP.setState({ modal_1_expanded: !modal_1_expanded })" class="wp-block-navigation__responsive-container-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false"><path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path></svg></button>
+									<div class="wp-block-navigation__responsive-container-content" id="modal-61e6c935457bd-content">
+										<ul class="wp-block-navigation__container">
+											<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" on="tap:AMP.setState({ modal_1_submenu_1_expanded: !modal_1_submenu_1_expanded })" [aria-expanded]="modal_1_submenu_1_expanded ? \'true\' : \'false\'" aria-expanded="false"><span class="wp-block-navigation-item__label">Page A</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a1"><span class="wp-block-navigation-item__label">Page A1</span></a></li>
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a2"><span class="wp-block-navigation-item__label">Page A2</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" on="tap:AMP.setState({ modal_1_submenu_2_expanded: !modal_1_submenu_2_expanded })" [aria-expanded]="modal_1_submenu_2_expanded ? \'true\' : \'false\'" aria-expanded="false"><span class="wp-block-navigation-item__label">Page B</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item current-menu-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-b1" aria-current="page"><span class="wp-block-navigation-item__label">Page B1</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item wp-block-navigation-link">
+												<a class="wp-block-navigation-item__content" href="https://example.com/page-c"><span class="wp-block-navigation-item__label">Page C</span></a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</nav>
+				',
+			],
+			'navigation_block_mobile_overlay_menu_submenus_open_on_hover_click' => [
+				'block_attrs'     => [],
+				'block_markup'    => '
+					<nav class="wp-container-61e6c93546294 is-responsive wp-block-navigation">
+						<button aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open" data-micromodal-trigger="modal-61e6c935457bd">
+							<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5" /><rect x="4" y="15" width="16" height="1.5" /></svg>
+						</button>
+						<div class="wp-block-navigation__responsive-container" style="" id="modal-61e6c935457bd">
+							<div class="wp-block-navigation__responsive-close" tabindex="-1" data-micromodal-close>
+								<div class="wp-block-navigation__responsive-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-61e6c935457bd-title">
+									<button aria-label="Close menu" data-micromodal-close class="wp-block-navigation__responsive-container-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false"><path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path></svg></button>
+									<div class="wp-block-navigation__responsive-container-content" id="modal-61e6c935457bd-content">
+										<ul class="wp-block-navigation__container">
+											<li class=" wp-block-navigation-item has-child open-on-hover-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false"><span class="wp-block-navigation-item__label">Page A</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a1"><span class="wp-block-navigation-item__label">Page A1</span></a></li>
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a2"><span class="wp-block-navigation-item__label">Page A2</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item has-child open-on-hover-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false"><span class="wp-block-navigation-item__label">Page B</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item current-menu-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-b1" aria-current="page"><span class="wp-block-navigation-item__label">Page B1</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item wp-block-navigation-link">
+												<a class="wp-block-navigation-item__content" href="https://example.com/page-c"><span class="wp-block-navigation-item__label">Page C</span></a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</nav>
+				',
+				'expected_markup' => '
+					<nav class="wp-container-61e6c93546294 is-responsive wp-block-navigation">
+						<button [aria-expanded]="modal_1_expanded ? \'true\' : \'false\'" aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open" on="tap:AMP.setState({ modal_1_expanded: !modal_1_expanded })">
+							<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5" /><rect x="4" y="15" width="16" height="1.5" /></svg>
+						</button>
+						<div [aria-hidden]="modal_1_expanded ? \'false\' : \'true\'" aria-hidden="true" [class]="modal_1_expanded ? \'wp-block-navigation__responsive-container is-menu-open has-modal-open\' : \'wp-block-navigation__responsive-container\'" class="wp-block-navigation__responsive-container" style="" id="modal-61e6c935457bd">
+							<div class="wp-block-navigation__responsive-close" tabindex="-1">
+								<div class="wp-block-navigation__responsive-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-61e6c935457bd-title">
+									<button aria-label="Close menu" on="tap:AMP.setState({ modal_1_expanded: !modal_1_expanded })" class="wp-block-navigation__responsive-container-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false"><path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path></svg></button>
+									<div class="wp-block-navigation__responsive-container-content" id="modal-61e6c935457bd-content">
+										<ul class="wp-block-navigation__container">
+											<li class=" wp-block-navigation-item has-child open-on-hover-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" on="tap:AMP.setState({ modal_1_submenu_1_expanded: !modal_1_submenu_1_expanded })" [aria-expanded]="modal_1_submenu_1_expanded ? \'true\' : \'false\'" aria-expanded="false"><span class="wp-block-navigation-item__label">Page A</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a1"><span class="wp-block-navigation-item__label">Page A1</span></a></li>
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a2"><span class="wp-block-navigation-item__label">Page A2</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item has-child open-on-hover-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" on="tap:AMP.setState({ modal_1_submenu_2_expanded: !modal_1_submenu_2_expanded })" [aria-expanded]="modal_1_submenu_2_expanded ? \'true\' : \'false\'" aria-expanded="false"><span class="wp-block-navigation-item__label">Page B</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item current-menu-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-b1" aria-current="page"><span class="wp-block-navigation-item__label">Page B1</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item wp-block-navigation-link">
+												<a class="wp-block-navigation-item__content" href="https://example.com/page-c"><span class="wp-block-navigation-item__label">Page C</span></a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</nav>
+				',
+			],
+			'navigation_block_overlay_menu_always_shown' => [
+				'block_attrs'     => [
+					'overlayMenu'         => 'always',
+					'openSubmenusOnClick' => true,
+				],
+				'block_markup'    => '
+					<nav class="wp-container-61e6c93546294 is-responsive wp-block-navigation">
+						<button aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open always-shown" data-micromodal-trigger="modal-61e6c935457bd">
+							<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5" /><rect x="4" y="15" width="16" height="1.5" /></svg>
+						</button>
+						<div class="wp-block-navigation__responsive-container hidden-by-default " style="" id="modal-61e6c935457bd">
+							<div class="wp-block-navigation__responsive-close" tabindex="-1" data-micromodal-close>
+								<div class="wp-block-navigation__responsive-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-61e6c935457bd-title">
+									<button aria-label="Close menu" data-micromodal-close class="wp-block-navigation__responsive-container-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false"><path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path></svg></button>
+									<div class="wp-block-navigation__responsive-container-content" id="modal-61e6c935457bd-content">
+										<ul class="wp-block-navigation__container">
+											<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false"><span class="wp-block-navigation-item__label">Page A</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a1"><span class="wp-block-navigation-item__label">Page A1</span></a></li>
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a2"><span class="wp-block-navigation-item__label">Page A2</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false"><span class="wp-block-navigation-item__label">Page B</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item current-menu-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-b1" aria-current="page"><span class="wp-block-navigation-item__label">Page B1</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item wp-block-navigation-link">
+												<a class="wp-block-navigation-item__content" href="https://example.com/page-c"><span class="wp-block-navigation-item__label">Page C</span></a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</nav>
+				',
+				'expected_markup' => '
+					<nav class="wp-container-61e6c93546294 is-responsive wp-block-navigation">
+						<button [aria-expanded]="modal_1_expanded ? \'true\' : \'false\'" aria-expanded="false" aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open always-shown" on="tap:AMP.setState({ modal_1_expanded: !modal_1_expanded })">
+							<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5" /><rect x="4" y="15" width="16" height="1.5" /></svg>
+						</button>
+						<div [aria-hidden]="modal_1_expanded ? \'false\' : \'true\'" aria-hidden="true" [class]="modal_1_expanded ? \'wp-block-navigation__responsive-container hidden-by-default  is-menu-open has-modal-open\' : \'wp-block-navigation__responsive-container hidden-by-default \'" class="wp-block-navigation__responsive-container hidden-by-default " style="" id="modal-61e6c935457bd">
+							<div class="wp-block-navigation__responsive-close" tabindex="-1">
+								<div class="wp-block-navigation__responsive-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-61e6c935457bd-title">
+									<button aria-label="Close menu" on="tap:AMP.setState({ modal_1_expanded: !modal_1_expanded })" class="wp-block-navigation__responsive-container-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-hidden="true" focusable="false"><path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path></svg></button>
+									<div class="wp-block-navigation__responsive-container-content" id="modal-61e6c935457bd-content">
+										<ul class="wp-block-navigation__container">
+											<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" on="tap:AMP.setState({ modal_1_submenu_1_expanded: !modal_1_submenu_1_expanded })" [aria-expanded]="modal_1_submenu_1_expanded ? \'true\' : \'false\'" aria-expanded="false"><span class="wp-block-navigation-item__label">Page A</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a1"><span class="wp-block-navigation-item__label">Page A1</span></a></li>
+													<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a2"><span class="wp-block-navigation-item__label">Page A2</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+												<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" on="tap:AMP.setState({ modal_1_submenu_2_expanded: !modal_1_submenu_2_expanded })" [aria-expanded]="modal_1_submenu_2_expanded ? \'true\' : \'false\'" aria-expanded="false"><span class="wp-block-navigation-item__label">Page B</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+												<ul class="wp-block-navigation__submenu-container">
+													<li class=" wp-block-navigation-item current-menu-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-b1" aria-current="page"><span class="wp-block-navigation-item__label">Page B1</span></a></li>
+												</ul>
+											</li>
+											<li class=" wp-block-navigation-item wp-block-navigation-link">
+												<a class="wp-block-navigation-item__content" href="https://example.com/page-c"><span class="wp-block-navigation-item__label">Page C</span></a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</nav>
+				',
+			],
+			'navigation_block_overlay_menu_never_shown'  => [
+				'block_attrs'     => [
+					'overlayMenu'         => 'never',
+					'openSubmenusOnClick' => true,
+				],
+				'block_markup'    => '
+					<nav class="wp-container-61e6c93546294 wp-block-navigation">
+						<ul class="wp-block-navigation__container">
+							<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+								<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false"><span class="wp-block-navigation-item__label">Page A</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+								<ul class="wp-block-navigation__submenu-container">
+									<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a1"><span class="wp-block-navigation-item__label">Page A1</span></a></li>
+									<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a2"><span class="wp-block-navigation-item__label">Page A2</span></a></li>
+								</ul>
+							</li>
+							<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+								<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" aria-expanded="false"><span class="wp-block-navigation-item__label">Page B</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+								<ul class="wp-block-navigation__submenu-container">
+									<li class=" wp-block-navigation-item current-menu-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-b1" aria-current="page"><span class="wp-block-navigation-item__label">Page B1</span></a></li>
+								</ul>
+							</li>
+							<li class=" wp-block-navigation-item wp-block-navigation-link">
+								<a class="wp-block-navigation-item__content" href="https://example.com/page-c"><span class="wp-block-navigation-item__label">Page C</span></a>
+							</li>
+						</ul>
+					</nav>
+				',
+				'expected_markup' => '
+					<nav class="wp-container-61e6c93546294 wp-block-navigation">
+						<ul class="wp-block-navigation__container">
+							<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+								<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" on="tap:AMP.setState({ modal_1_submenu_1_expanded: !modal_1_submenu_1_expanded })" [aria-expanded]="modal_1_submenu_1_expanded ? \'true\' : \'false\'" aria-expanded="false"><span class="wp-block-navigation-item__label">Page A</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+								<ul class="wp-block-navigation__submenu-container">
+									<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a1"><span class="wp-block-navigation-item__label">Page A1</span></a></li>
+									<li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-a2"><span class="wp-block-navigation-item__label">Page A2</span></a></li>
+								</ul>
+							</li>
+							<li class=" wp-block-navigation-item has-child open-on-click wp-block-navigation-submenu">
+								<button class="wp-block-navigation-item__content wp-block-navigation-submenu__toggle" on="tap:AMP.setState({ modal_1_submenu_2_expanded: !modal_1_submenu_2_expanded })" [aria-expanded]="modal_1_submenu_2_expanded ? \'true\' : \'false\'" aria-expanded="false"><span class="wp-block-navigation-item__label">Page B</span><span class="wp-block-navigation__submenu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" role="img" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></span></button>
+								<ul class="wp-block-navigation__submenu-container">
+									<li class=" wp-block-navigation-item current-menu-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="https://example.com/page-b1" aria-current="page"><span class="wp-block-navigation-item__label">Page B1</span></a></li>
+								</ul>
+							</li>
+							<li class=" wp-block-navigation-item wp-block-navigation-link">
+								<a class="wp-block-navigation-item__content" href="https://example.com/page-c"><span class="wp-block-navigation-item__label">Page C</span></a>
+							</li>
+						</ul>
+					</nav>
+				',
+			],
+		];
+	}
+
+	/**
+	 * Test ampifying a Navigation Block.
+	 *
+	 * @dataProvider get_ampify_navigation_block_test_data
+	 *
+	 * @param array  $block_attrs     Block attributes.
+	 * @param string $block_markup    Block original markup.
+	 * @param string $expected_markup Expected content.
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_navigation_block()
+	 * @covers \AMP_Core_Block_Handler::dequeue_block_navigation_view_script()
+	 */
+	public function test_ampify_navigation_block( $block_attrs, $block_markup, $expected_markup ) {
+		if ( ! function_exists( 'render_block_core_navigation' ) ) {
+			$this->markTestSkipped( 'Navigation block does not exist.' );
+		}
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$script_handle = 'wp-block-navigation-view';
+		if ( ! wp_script_is( $script_handle, 'registered' ) ) {
+			wp_register_script( $script_handle, 'view.js', [], '1.0', true );
+		}
+		wp_enqueue_script( $script_handle ); // Normally done by render_block_core_navigation().
+
+		$this->assertEqualMarkup(
+			$expected_markup,
+			$handler->ampify_navigation_block( $block_markup, [ 'attrs' => $block_attrs ] )
+		);
+
+		$this->assertEquals( 0, has_action( 'wp_print_scripts', [ $handler, 'dequeue_block_navigation_view_script' ] ) );
+		$this->assertEquals( 0, has_action( 'wp_print_footer_scripts', [ $handler, 'dequeue_block_navigation_view_script' ] ) );
+		$handler->dequeue_block_navigation_view_script();
+		$this->assertFalse( wp_script_is( $script_handle, 'enqueued' ) );
 	}
 
 	/**
