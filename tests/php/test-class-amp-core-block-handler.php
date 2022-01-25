@@ -270,7 +270,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	 */
 	public function get_ampify_navigation_block_test_data() {
 		return [
-			'navigation_block_mobile_overlay_menu_submenus_open_on_click'       => [
+			'navigation_block_mobile_overlay_menu_submenus_open_on_click' => [
 				'block_attrs'     => [
 					'openSubmenusOnClick' => true,
 				],
@@ -414,7 +414,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 					</nav>
 				',
 			],
-			'navigation_block_overlay_menu_always_shown'                        => [
+			'navigation_block_overlay_menu_always_shown' => [
 				'block_attrs'     => [
 					'overlayMenu'         => 'always',
 					'openSubmenusOnClick' => true,
@@ -488,7 +488,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 					</nav>
 				',
 			],
-			'navigation_block_overlay_menu_never_shown'                         => [
+			'navigation_block_overlay_menu_never_shown'  => [
 				'block_attrs'     => [
 					'overlayMenu'         => 'never',
 					'openSubmenusOnClick' => true,
