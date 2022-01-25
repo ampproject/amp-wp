@@ -562,12 +562,19 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
 
-		$this->assertFalse( wp_script_is( 'wp-block-navigation-view', 'enqueued' ) );
+		$script_handle = 'wp-block-navigation-view';
+		$this->assertTrue( wp_script_is( $script_handle, 'registered' ) );
+		wp_enqueue_script( $script_handle ); // Normally done by render_block_core_navigation().
 
 		$this->assertEqualMarkup(
 			$expected_markup,
 			$handler->ampify_navigation_block( $block_markup, [ 'attrs' => $block_attrs ] )
 		);
+
+		$this->assertEquals( 0, has_action( 'wp_print_scripts', [ $handler, 'dequeue_block_navigation_view_script' ] ) );
+		$this->assertEquals( 0, has_action( 'wp_print_footer_scripts', [ $handler, 'dequeue_block_navigation_view_script' ] ) );
+		$handler->dequeue_block_navigation_view_script();
+		$this->assertFalse( wp_script_is( $script_handle, 'enqueued' ) );
 	}
 
 	/**
