@@ -146,7 +146,7 @@ class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 			]
 		);
 
-		$skip_link->appendChild( $this->dom->createTextNode( esc_html__( 'Skip to content', 'amp' ) ) );
+		$skip_link->appendChild( $this->dom->createTextNode( __( 'Skip to content', 'amp' ) ) );
 
 		$body = $this->dom->body;
 		$body->insertBefore( $skip_link, $body->firstChild );
