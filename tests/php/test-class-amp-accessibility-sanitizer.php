@@ -181,6 +181,39 @@ class AMP_Accessibility_Sanitizer_Test extends TestCase {
 
 		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		$this->assertEquals( $expected, $actual );
+		$this->assertEqualMarkup( $expected, $actual );
+	}
+
+	/**
+	 * @covers ::add_skip_link()
+	 */
+	public function test_add_skip_link_for_none_fse_theme() {
+
+		global $_wp_current_template_content, $_wp_theme_features;
+
+		$source   = '<html><body><main id="main-container">Hello World!</main></body></html>';
+		$expected = '<main id="main-container">Hello World!</main>';
+
+		// Test 1: If it's not block theme.
+		unset( $_wp_theme_features['block-templates'] );
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Accessibility_Sanitizer( $dom );
+		$sanitizer->add_skip_link();
+		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEqualMarkup( $expected, $actual );
+
+		// Test 2: If it's not block template.
+		$_wp_theme_features['block-templates'] = true;
+		$_wp_current_template_content          = false;
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Accessibility_Sanitizer( $dom );
+		$sanitizer->add_skip_link();
+		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEqualMarkup( $expected, $actual );
+
 	}
 }
