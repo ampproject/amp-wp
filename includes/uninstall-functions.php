@@ -110,12 +110,12 @@ function delete_terms() {
 		$wpdb->query(
 			$wpdb->prepare(
 				"
-			DELETE tm
-			FROM $wpdb->termmeta AS tm
-				INNER JOIN $wpdb->term_taxonomy AS tt
-					ON tm.term_id = tt.term_id
-			WHERE tt.taxonomy = %s;
-			",
+				DELETE tm
+				FROM $wpdb->termmeta AS tm
+					INNER JOIN $wpdb->term_taxonomy AS tt
+						ON tm.term_id = tt.term_id
+				WHERE tt.taxonomy = %s;
+				",
 				$taxonomy
 			)
 		);
