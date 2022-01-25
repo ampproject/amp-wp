@@ -320,7 +320,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 					' aria-expanded',
 					sprintf(
 						' on="tap:AMP.setState({ %1$s: !%1$s })" [aria-expanded]="%1$s ? \'true\' : \'false\'" aria-expanded',
-						$submenu_state_property
+						esc_attr( $submenu_state_property )
 					),
 					$new_block_content
 				);
@@ -336,7 +336,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		// Replace micromodal toggle logic with AMP state and set modal state property name based on its ID.
 		$block_content = preg_replace(
 			'/\sdata-micromodal-trigger="modal-\w+"/',
-			sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', $modal_state_property ),
+			sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
 			$block_content
 		);
 
@@ -354,7 +354,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				if ( false !== strpos( $new_block_content, ' data-micromodal-close' ) ) {
 					$new_block_content = str_replace(
 						' data-micromodal-close',
-						sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', $modal_state_property ),
+						sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
 						$new_block_content
 					);
 				}
@@ -364,7 +364,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 					' aria-expanded',
 					sprintf(
 						' [aria-expanded]="%s ? \'true\' : \'false\'" aria-expanded',
-						$modal_state_property
+						esc_attr( $modal_state_property )
 					),
 					$new_block_content
 				);
@@ -383,8 +383,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 					' class=',
 					sprintf(
 						' [aria-hidden]="%1$s ? \'false\' : \'true\'" aria-hidden="true" [class]="%1$s ? \'%2$s is-menu-open has-modal-open\' : \'%2$s\'" class=',
-						$modal_state_property,
-						$matches[1]
+						esc_attr( $modal_state_property ),
+						esc_attr( $matches[1] )
 					),
 					$matches[0]
 				);
