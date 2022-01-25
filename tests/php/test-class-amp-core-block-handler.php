@@ -43,6 +43,11 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		if ( did_action( 'add_attachment' ) ) {
 			$this->remove_added_uploads();
 		}
+
+		global $wp_scripts, $wp_styles;
+		$wp_scripts = null;
+		$wp_styles  = null;
+
 		parent::tearDown();
 	}
 
@@ -563,7 +568,9 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$handler->register_embed();
 
 		$script_handle = 'wp-block-navigation-view';
-		$this->assertTrue( wp_script_is( $script_handle, 'registered' ) );
+		if ( ! wp_script_is( $script_handle, 'registered' ) ) {
+			wp_register_script( $script_handle, 'view.js', [], '1.0', true );
+		}
 		wp_enqueue_script( $script_handle ); // Normally done by render_block_core_navigation().
 
 		$this->assertEqualMarkup(
