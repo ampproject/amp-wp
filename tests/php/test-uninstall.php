@@ -7,6 +7,10 @@
 
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
+use AmpProject\AmpWP\Validation\URLValidationCron;
+
+use function \AmpProject\AmpWP\delete_options;
 
 /**
  * @runInSeparateProcess
@@ -20,11 +24,69 @@ class Test_Uninstall extends TestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->was_using_ext_object_cache = wp_using_ext_object_cache();
+		require_once AMP__DIR__ . '/includes/uninstall-functions.php';
 	}
 
 	public function tearDown() {
 		parent::tearDown();
 		wp_using_ext_object_cache( $this->was_using_ext_object_cache );
+	}
+
+	/**
+	 * @covers \AmpProject\AmpWP\delete_options()
+	 */
+	public function test_delete_options() {
+		global $wpdb;
+
+		$reader_theme = 'foo';
+
+		// Non-AMP options.
+		$blog_name = 'Sample Blog Name';
+		update_option( 'blogname', $blog_name );
+		set_theme_mod( 'color', 'blue' );
+
+		// AMP options.
+		AMP_Options_Manager::update_options(
+			[
+				Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				Option::READER_THEME  => $reader_theme,
+			]
+		);
+		update_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY, [] );
+		update_option( URLValidationCron::OPTION_KEY, [] );
+		update_option(
+			"theme_mods_{$reader_theme}",
+			[
+				'color' => 'red',
+				AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY => [
+					'color' => time(),
+				],
+			]
+		);
+
+		$option_keys_before = $wpdb->get_col( "SELECT option_name FROM $wpdb->options" );
+
+		delete_options();
+		$this->flush_cache();
+
+		$this->assertEquals( $blog_name, get_option( 'blogname' ) );
+		$this->assertEquals( 'blue', get_theme_mod( 'color' ) );
+
+		$this->assertFalse( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) );
+		$foo_theme_mods = get_option( 'theme_mods_foo' );
+		$this->assertEquals( 'red', $foo_theme_mods['color'] );
+		$this->assertArrayNotHasKey( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY, $foo_theme_mods );
+
+		$option_keys_after = $wpdb->get_col( "SELECT option_name FROM $wpdb->options" );
+		$this->assertEqualSets(
+			[
+				AMP_Options_Manager::OPTION_NAME,
+				URLValidationCron::OPTION_KEY,
+				MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY,
+			],
+			array_diff( $option_keys_before, $option_keys_after ),
+			'Expected only 3 options to have been deleted.'
+		);
 	}
 
 	/**
