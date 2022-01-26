@@ -339,12 +339,12 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		$badge_color = 'red';
 		$status      = is_wp_error( $page_cache_status ) ? 'critical' : $page_cache_status;
-		$label       = __( 'Page caching is not detected', 'amp' );
+		$label       = __( 'Page caching is not detected and response time is slow.', 'amp' );
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' ) . '</p>';
 
-		/* translators: 1 is Cache-Control, 2 is Expires, and 3 is Age */
-		$description .= '<p>' . sprintf( __( 'Page caching is detected by making three requests to the homepage and looking for %1$s, %2$s, or %3$s HTTP response headers.', 'amp' ), '<code>Cache-Control: max-age=…</code>', '<code>Expires</code>', '<code>Age</code>' );
+		/* translators: List of page cache headers. */
+		$description .= '<p>' . sprintf( __( 'Page caching is detected by looking for an active page caching plugin, making three requests to the homepage and looking for HTTP response headers like: %s.', 'amp' ), '<code>' . implode( '</code>, <code>', array_keys( self::get_page_cache_headers() ) ) . '</code>' );
 
 		if ( is_wp_error( $page_cache_status ) ) {
 			$error_info = sprintf(
@@ -357,7 +357,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			$description = "<p>$error_info</p>" . $description;
 		} elseif ( 'recommended' === $page_cache_status ) {
 			$badge_color = 'orange';
-			$label       = __( 'Page caching is not detected', 'amp' );
+			$label       = __( 'Page caching is not detected, but your response time is OK', 'amp' );
 		} elseif ( 'good' === $page_cache_status ) {
 			$badge_color = 'green';
 			$label       = __( 'Page caching is detected', 'amp' );
@@ -412,22 +412,20 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			return 'yes' === $page_cache_detail ? 'good' : 'critical';
 		}
 
-		$page_speed            = array_sum( $page_cache_detail['response_timing'] ) / count( $page_cache_detail['response_timing'] );
+		$response_timings = $page_cache_detail['response_timing'];
+		rsort( $response_timings );
+		$page_speed = $response_timings[ floor( count( $response_timings ) / 2 ) ];
+
 		$has_page_cache_header = array_filter( $page_cache_detail['page_caching_response_headers'], 'count' );
 		$has_page_cache_header = count( $has_page_cache_header );
 		$result                = 'critical';
 
-		if (
-			( $page_speed && $page_speed < 600 )
-			&&
-			( $has_page_cache_header || $page_cache_detail['advanced_cache_present'] )
-		) {
+		$has_good_response_time = ( $page_speed && $page_speed < 600 );
+		$has_page_caching       = ( $has_page_cache_header || $page_cache_detail['advanced_cache_present'] );
+
+		if ( $has_good_response_time && $has_page_caching ) {
 			$result = 'good';
-		} elseif (
-			( $page_speed && $page_speed < 600 )
-			&&
-			( ! $has_page_cache_header || ! $page_cache_detail['advanced_cache_present'] )
-		) {
+		} elseif ( $has_good_response_time && ! $has_page_caching ) {
 			$result = 'recommended';
 		}
 
@@ -492,7 +490,13 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	/**
 	 * Check if site has page cache enable or not.
 	 *
-	 * @return array|WP_Error Whether page caching was detected, or else error information.
+	 * @return WP_Error|array {
+	 *     Page caching detection details or else error information.
+	 *
+	 *     @type bool  $advanced_cache_present
+	 *     @type array $page_caching_response_headers
+	 *     @type array $response_timing
+	 * }
 	 */
 	public function check_for_page_caching() {
 
@@ -509,6 +513,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			$headers['Authorization'] = 'Basic ' . base64_encode( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) . ':' . wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
 		}
 
+		$caching_headers               = self::get_page_cache_headers();
 		$page_caching_response_headers = [];
 		$response_timing               = [];
 
@@ -528,7 +533,6 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			}
 
 			$response_headers = [];
-			$caching_headers  = self::get_page_cache_headers();
 
 			foreach ( $caching_headers as $header => $callback ) {
 				$header_value = wp_remote_retrieve_header( $http_response, $header );
