@@ -853,7 +853,7 @@ class AMP_Theme_Support {
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
-		// Temporary workarounds for <https://github.com/ampproject/amp-wp/issues/6115>.
+		// The AMP version of the skip link is implemented by AMP_Accessibility_Sanitizer::add_skip_link().
 		remove_action( 'wp_footer', 'gutenberg_the_skip_link' );
 		remove_action( 'wp_footer', 'the_block_template_skip_link' );
 
