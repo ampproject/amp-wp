@@ -1514,10 +1514,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * Test wrap_hook_callbacks.
 	 *
 	 * @covers AMP_Validation_Manager::wrap_hook_callbacks()
+	 * @covers AMP_Validation_Callback_Wrapper::__invoke()
+	 * @covers AMP_Validation_Callback_Wrapper::invoke_with_first_ref_arg()
 	 */
 	public function test_callback_wrappers() {
 		global $post;
-		$that = $this;
 		$post = self::factory()->post->create_and_get();
 		$this->set_capability();
 		$action_no_tag_output     = 'foo_action';
@@ -1527,25 +1528,36 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$action_no_argument       = 'test_action_no_argument';
 		$action_one_argument      = 'baz_action_one_argument';
 		$action_two_arguments     = 'example_action_two_arguments';
+		$action_pass_var_by_ref   = 'action_pass_var_by_ref';
 		$notice                   = 'Example notice';
 
 		AMP_Validation_Manager::add_validation_error_sourcing();
 
-		add_action( $action_function_callback, '_amp_show_load_errors_admin_notice' );
-		add_action( $action_no_argument, [ $this, 'output_div' ] );
-		add_action( $action_one_argument, [ $this, 'output_notice' ] );
-		add_action( $action_two_arguments, [ $this, 'output_message' ], 10, 2 );
-		add_action( $action_no_output, [ $this, 'get_string' ], 10, 2 );
-		add_action( $action_no_tag_output, 'the_ID' );
-		add_action( $action_core_output, 'edit_post_link' );
-		add_action( $action_no_output, '__return_false' );
+		$increment_var_by_ref = function ( &$number ) {
+			$number++;
+			echo "<output>$number</output>"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		};
+
+		$added_actions = [
+			[ $action_function_callback, '_amp_show_load_errors_admin_notice' ],
+			[ $action_no_argument, [ $this, 'output_div' ] ],
+			[ $action_one_argument, [ $this, 'output_notice' ] ],
+			[ $action_two_arguments, [ $this, 'output_message' ], 10, 2 ],
+			[ $action_pass_var_by_ref, $increment_var_by_ref ],
+			[ $action_no_output, [ $this, 'get_string' ], 10, 2 ],
+			[ $action_no_tag_output, 'the_ID' ],
+			[ $action_core_output, 'edit_post_link' ],
+			[ $action_no_output, '__return_false' ],
+		];
+
+		foreach ( $added_actions as $added_action ) {
+			add_action( ...$added_action );
+		}
 
 		// All of the callback functions remain as-is. They will only change for a given hook at the 'all' action.
-		$this->assertEquals( 10, has_action( $action_no_tag_output, 'the_ID' ) );
-		$this->assertEquals( 10, has_action( $action_no_output, [ $this, 'get_string' ] ) );
-		$this->assertEquals( 10, has_action( $action_no_argument, [ $this, 'output_div' ] ) );
-		$this->assertEquals( 10, has_action( $action_one_argument, [ $this, 'output_notice' ] ) );
-		$this->assertEquals( 10, has_action( $action_two_arguments, [ $this, 'output_message' ] ) );
+		foreach ( $added_actions as $added_action ) {
+			$this->assertEquals( 10, has_action( ...$added_action ) );
+		}
 
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_function_callback );
@@ -1593,6 +1605,16 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( '<!--amp-source-stack {"type":"core","name":"wp-includes"', $output );
 		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"core","name":"wp-includes"', $output );
 
+		// This action passes a variable by reference.
+		AMP_Theme_Support::start_output_buffering();
+		$number = 0;
+		do_action_ref_array( $action_pass_var_by_ref, [ &$number ] );
+		$this->assertSame( 1, $number );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContainsString( '"hook":"action_pass_var_by_ref","priority":10', $output );
+		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+
 		// This action's callback doesn't echo any markup, so it shouldn't be wrapped in comments.
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_output );
@@ -1600,20 +1622,49 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertStringNotContainsString( '<!--amp-source-stack ', $output );
 		$this->assertStringNotContainsString( '<!--/amp-source-stack ', $output );
 
+		// All of the callback functions remain as-is after all have been done,
+		//
+		global $wp_filter;
+		foreach ( $added_actions as $added_action ) {
+			list( $action, $callback ) = $added_action;
+			$priority = isset( $added_action[2] ) ? $added_action[2] : 10;
+
+			$this->assertEquals( 10, has_action( ...$added_action ) );
+
+			// Make sure that the before_invoke callback runs as expected.
+			$this->assertArrayHasKey( $action, $wp_filter );
+			$this->assertArrayHasKey( $priority, $wp_filter[ $action ]->callbacks );
+			$key = _wp_filter_build_unique_id( $action, $callback, $priority );
+			$this->assertArrayHasKey( $key, $wp_filter[ $action ]->callbacks[ $priority ] );
+			$this->assertEquals(
+				$callback,
+				$wp_filter[ $action ]->callbacks[ $priority ][ $key ]['function']
+			);
+		}
+	}
+
+	/**
+	 * Test wrap_hook_callbacks.
+	 *
+	 * @covers AMP_Validation_Manager::wrap_hook_callbacks()
+	 */
+	public function test_callback_wrappers_for_nested_actions() {
+		AMP_Validation_Manager::add_validation_error_sourcing();
+
 		$handle_inner_action = null;
 		$handle_outer_action = null;
 
 		// Ensure that nested actions output the expected stack, and that has_action() works as expected in spite of the function wrapping.
-		$handle_outer_action = static function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
-			$that->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
-			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
+		$handle_outer_action = function() use ( &$handle_outer_action, &$handle_inner_action ) {
+			$this->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
+			$this->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 			do_action( 'inner_action' );
-			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
+			$this->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 		};
 		$outer_reflection    = new ReflectionFunction( $handle_outer_action );
-		$handle_inner_action = static function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
-			$that->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
-			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
+		$handle_inner_action = function() use ( &$handle_outer_action, &$handle_inner_action ) {
+			$this->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
+			$this->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 			echo '<b>Hello</b>';
 		};
 		$inner_reflection    = new ReflectionFunction( $handle_inner_action );
@@ -1941,7 +1992,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	/**
 	 * Test wrapped_callback for filters.
 	 *
-	 * @covers AMP_Validation_Manager::wrapped_callback()
+	 * @covers AMP_Validation_Callback_Wrapper
 	 */
 	public function test_filter_wrapped_callback() {
 		$test_string     = 'Filter-amended Value';
@@ -1959,8 +2010,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$value = 'Some Value';
 		apply_filters( 'foo', $value );
-		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $filter_callback );
-			$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $wrapped_callback );
+		$wrapped_callback = new AMP_Validation_Callback_Wrapper( $filter_callback );
 		AMP_Theme_Support::start_output_buffering();
 		$filtered_value = $wrapped_callback( $value );
 		$output = ob_get_clean();
@@ -1971,7 +2021,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	/**
 	 * Test wrapped_callback for actions.
 	 *
-	 * @covers AMP_Validation_Manager::wrapped_callback()
+	 * @covers AMP_Validation_Callback_Wrapper
 	 */
 	public function test_action_wrapped_callback() {
 		$test_string     = "<b class='\nfoo\nbar\n'>Cool!</b>";
@@ -1988,7 +2038,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 
 		do_action( 'bar' ); // So that output buffering will be done.
-		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $action_callback );
+		$wrapped_callback = new AMP_Validation_Callback_Wrapper( $action_callback );
 		$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $wrapped_callback );
 		AMP_Theme_Support::start_output_buffering();
 		$wrapped_callback();
