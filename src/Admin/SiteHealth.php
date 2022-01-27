@@ -398,16 +398,16 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				if ( $page_cache_detail['response_time'] < $this->get_good_response_time_threshold() ) {
 					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span> ' . sprintf(
 						/* translators: %d is the response time in milliseconds */
-						__( 'Median server response time was %1$d milliseconds. This is less than the %2$d millisecond threshold.', 'amp' ),
-						$page_cache_detail['response_time'],
-						$threshold
+						__( 'Median server response time was %1$s milliseconds. This is less than the %2$s millisecond threshold.', 'amp' ),
+						number_format_i18n( $page_cache_detail['response_time'] ),
+						number_format_i18n( $threshold )
 					);
 				} else {
 					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span> ' . sprintf(
 						/* translators: %d is the response time in milliseconds */
-						__( 'Median server response time was %1$d milliseconds. It should be less than %2$d milliseconds.', 'amp' ),
-						$page_cache_detail['response_time'],
-						$threshold
+						__( 'Median server response time was %1$s milliseconds. It should be less than %2$s milliseconds.', 'amp' ),
+						number_format_i18n( $page_cache_detail['response_time'] ),
+						number_format_i18n( $threshold )
 					);
 				}
 
