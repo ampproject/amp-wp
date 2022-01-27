@@ -961,29 +961,35 @@ class SiteHealthTest extends TestCase {
 	 */
 	public function test_get_page_cache_detail_with_legacy_cache_result() {
 
-		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
-		$this->assertEquals(
-			[
-				'status'                 => 'critical',
-				'advanced_cache_present' => null,
-				'headers'                => [],
-				'response_time'          => 0,
-			],
-			$this->instance->get_page_cache_detail( true )
+		add_filter(
+			'pre_http_request',
+			function () {
+				return [
+					'headers'  => [
+						'etag' => '"cool"',
+					],
+					'response' => [
+						'code'    => 200,
+						'message' => 'OK',
+					],
+				];
+			},
+			20,
+			2
 		);
 
-		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'yes', DAY_IN_SECONDS );
-		$this->assertEquals(
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
+
+		$this->assertArraySubset(
 			[
 				'status'                 => 'good',
-				'advanced_cache_present' => null,
-				'headers'                => [],
-				'response_time'          => 0,
+				'advanced_cache_present' => false,
+				'headers'                => [
+					'etag',
+				],
 			],
 			$this->instance->get_page_cache_detail( true )
 		);
-
-		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
 	}
 
 	/**

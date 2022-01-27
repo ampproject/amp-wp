@@ -448,16 +448,21 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return WP_Error|array {
 	 *    Page cache detail or else a WP_Error if unable to determine.
 	 *
-	 *    @type string    $status                 Page cache status. Good, Recommended or Critical.
-	 *    @type bool|null $advanced_cache_present Whether page cache plugin is available or not.
-	 *    @type array     $headers                List of header for page cache.
-	 *    @type float     $response_time          Response time of site.
+	 *    @type string $status                 Page cache status. Good, Recommended or Critical.
+	 *    @type bool   $advanced_cache_present Whether page cache plugin is available or not.
+	 *    @type array  $headers                List of header for page cache.
+	 *    @type float  $response_time          Response time of site.
 	 * }
 	 */
 	public function get_page_cache_detail( $use_previous_result = false ) {
 
 		if ( $use_previous_result ) {
 			$page_cache_detail = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
+
+			// Disregard cached legacy value. Instead of a string, now an array or a WP_Error are stored.
+			if ( is_string( $page_cache_detail ) ) {
+				$page_cache_detail = null;
+			}
 		}
 
 		if ( ! $use_previous_result || empty( $page_cache_detail ) ) {
@@ -471,15 +476,6 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		if ( is_wp_error( $page_cache_detail ) ) {
 			return $page_cache_detail;
-		}
-
-		if ( is_string( $page_cache_detail ) ) {
-			return [
-				'status'                 => 'yes' === $page_cache_detail ? 'good' : 'critical',
-				'advanced_cache_present' => null,
-				'headers'                => [],
-				'response_time'          => 0,
-			];
 		}
 
 		$response_timings = $page_cache_detail['response_timing'];
