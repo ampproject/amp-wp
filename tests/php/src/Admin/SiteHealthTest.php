@@ -935,24 +935,24 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::get_page_cache_status()
+	 * @covers ::get_page_cache_detail()
 	 */
-	public function test_get_page_cache_status_with_legacy_cache_result() {
+	public function test_get_page_cache_detail_with_legacy_cache_result() {
 
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
-		$this->assertEquals( 'critical', $this->instance->get_page_cache_status( true ) );
+		$this->assertEquals( 'critical', $this->instance->get_page_cache_detail( true ) );
 
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'yes', DAY_IN_SECONDS );
-		$this->assertEquals( 'good', $this->instance->get_page_cache_status( true ) );
+		$this->assertEquals( 'good', $this->instance->get_page_cache_detail( true ) );
 
 		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
 	}
 
 	/**
-	 * @covers ::get_page_cache_status()
+	 * @covers ::get_page_cache_detail()
 	 * @covers ::check_for_page_caching()
 	 */
-	public function test_get_page_cache_status() {
+	public function test_get_page_cache_detail() {
 		$callback = static function () {
 			return [
 				'headers'  => [
@@ -975,9 +975,9 @@ class SiteHealthTest extends TestCase {
 		];
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_status, DAY_IN_SECONDS );
 
-		$this->assertEquals( 'recommended', $this->instance->get_page_cache_status( true ) );
+		$this->assertEquals( 'recommended', $this->instance->get_page_cache_detail( true ) );
 
-		$this->assertEquals( 'good', $this->instance->get_page_cache_status() );
+		$this->assertEquals( 'good', $this->instance->get_page_cache_detail() );
 
 		remove_filter( 'pre_http_request', $callback, 20 );
 
@@ -989,16 +989,16 @@ class SiteHealthTest extends TestCase {
 		];
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_status, DAY_IN_SECONDS );
 
-		$this->assertEquals( 'good', $this->instance->get_page_cache_status( true ) );
+		$this->assertEquals( 'good', $this->instance->get_page_cache_detail( true ) );
 
 		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
 	}
 
 	/**
-	 * @covers ::get_page_cache_status()
+	 * @covers ::get_page_cache_detail()
 	 * @covers ::check_for_page_caching()
 	 */
-	public function test_get_page_cache_status_with_error() {
+	public function test_get_page_cache_detail_with_error() {
 		$error_object = new WP_Error( 'error_code', 'Error message.' );
 
 		$return_error = static function () use ( $error_object ) {
@@ -1022,7 +1022,7 @@ class SiteHealthTest extends TestCase {
 		// Test 1: Assert for fresh result (which is then cached).
 		$this->assertEquals(
 			$error_object,
-			$this->instance->get_page_cache_status()
+			$this->instance->get_page_cache_detail()
 		);
 
 		remove_filter( 'pre_http_request', $return_error, 20 );
@@ -1031,13 +1031,13 @@ class SiteHealthTest extends TestCase {
 		// Test 2: Test for cached result.
 		$this->assertEquals(
 			$error_object,
-			$this->instance->get_page_cache_status( true )
+			$this->instance->get_page_cache_detail( true )
 		);
 
 		// Test 3: Test for non-cached result again now that no error is returned.
 		$this->assertEquals(
 			'good',
-			$this->instance->get_page_cache_status( false )
+			$this->instance->get_page_cache_detail( false )
 		);
 
 		remove_filter( 'pre_http_request', $return_cached_response, 20 );
@@ -1046,7 +1046,7 @@ class SiteHealthTest extends TestCase {
 		// Test 4: Test for cached result again now that no error is returned.
 		$this->assertEquals(
 			'good',
-			$this->instance->get_page_cache_status( true )
+			$this->instance->get_page_cache_detail( true )
 		);
 	}
 

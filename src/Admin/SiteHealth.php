@@ -246,7 +246,8 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 */
 	public function persistent_object_cache() {
 		$is_using_object_cache = wp_using_ext_object_cache();
-		$has_page_caching      = 'good' === $this->get_page_cache_status( true );
+		$page_cache_detail     = $this->get_page_cache_detail( true );
+		$has_page_caching      = 'good' === $page_cache_detail['status'];
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Persistent object caching is used to more effectively store image dimensions and parsed CSS using a caching backend rather than using the options table in the database.', 'amp' ) . '</p>';
 
@@ -335,7 +336,8 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return array
 	 */
 	public function page_cache() {
-		$page_cache_status = $this->get_page_cache_status();
+		$page_cache_detail = $this->get_page_cache_detail();
+		$page_cache_status = $page_cache_detail['status'];
 
 		$badge_color = 'red';
 		$status      = is_wp_error( $page_cache_status ) ? 'critical' : $page_cache_status;
@@ -363,6 +365,37 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			$label       = __( 'Page caching is detected', 'amp' );
 		}
 
+		$page_cache_test_summary = [];
+
+		if ( $page_cache_detail['advanced_cache_present'] ) {
+			$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span>' . __( 'Page caching plugin is available.', 'amp' );
+		} else {
+			$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span>' . __( 'Page caching plugin is not available.', 'amp' );
+		}
+
+		if ( empty( $page_cache_detail['response_time'] ) ) {
+			$page_cache_test_summary[] = '<span class="dashicons dashicons-dismiss text-error"></span>' . __( 'We couldn\'t able to find a response time. Please make sure loopback requests are allowed.', 'amp' );
+		} else {
+
+			if ( $page_cache_detail['response_time'] < 600 ) {
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span>' . __( 'Site response time is less than 600 microseconds.', 'amp' );
+			} else {
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span>' . __( 'Site response time is more than 600 microseconds, which is not ideal.', 'amp' );
+			}
+
+			if ( empty( $page_cache_detail['headers'] ) ) {
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span>' . __( 'We could not find any page cache headers in a response.', 'amp' );
+			} else {
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span>' . sprintf(
+					/* translators: List of detected page cache headers. */
+					__( 'These are headers we found in a response. %s', 'amp' ),
+					'<code>' . implode( '</code>, <code>', $page_cache_detail['headers'] ) . '</code>'
+				);
+			}
+		}
+
+		$description .= '<p><ul><li>' . implode( '</li><li>', $page_cache_test_summary ) . '</li></ul></p>';
+
 		return [
 			'badge'       => [
 				'label' => $this->get_badge_label(),
@@ -387,9 +420,16 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 *
 	 * @param bool $use_previous_result Whether to use previous result or not.
 	 *
-	 * @return string|WP_Error Boolean if the site has page caching or not, or else a WP_Error if unable to determine.
+	 * @return WP_Error|array {
+	 *    Page cache detail or else a WP_Error if unable to determine.
+	 *
+	 *    @type string    $status                 Page cache status. Good, Recommended or Critical.
+	 *    @type bool|null $advanced_cache_present Whether page cache plugin is available or not.
+	 *    @type array     $headers                List of header for page cache.
+	 *    @type float     $response_time          Response time of site.
+	 * }
 	 */
-	public function get_page_cache_status( $use_previous_result = false ) {
+	public function get_page_cache_detail( $use_previous_result = false ) {
 
 		if ( $use_previous_result ) {
 			$page_cache_detail = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
@@ -409,7 +449,12 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		}
 
 		if ( is_string( $page_cache_detail ) ) {
-			return 'yes' === $page_cache_detail ? 'good' : 'critical';
+			return [
+				'status'                 => 'yes' === $page_cache_detail ? 'good' : 'critical',
+				'advanced_cache_present' => null,
+				'headers'                => [],
+				'response_time'          => 0,
+			];
 		}
 
 		$response_timings = $page_cache_detail['response_timing'];
@@ -423,13 +468,21 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		$has_good_response_time = ( $page_speed && $page_speed < 600 );
 		$has_page_caching       = ( $has_page_cache_header || $page_cache_detail['advanced_cache_present'] );
 
-		if ( $has_good_response_time && $has_page_caching ) {
-			$result = 'good';
-		} elseif ( $has_good_response_time && ! $has_page_caching ) {
-			$result = 'recommended';
+		if ( $has_good_response_time ) {
+			$result = $has_page_caching ? 'good' : 'recommended';
 		}
 
-		return $result;
+		$headers = [];
+		foreach ( $page_cache_detail['page_caching_response_headers'] as $page_caching_response_headers ) {
+			$headers = array_merge( $headers, array_keys( $page_caching_response_headers ) );
+		}
+
+		return [
+			'status'                 => $result,
+			'advanced_cache_present' => $page_cache_detail['advanced_cache_present'],
+			'headers'                => array_unique( $headers ),
+			'response_time'          => $page_speed,
+		];
 	}
 
 	/**
@@ -1144,6 +1197,16 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 				.wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon {
 					color: #dc3232;
+				}
+
+				.text-success{
+					color: #46b450;
+				}
+				.text-error{
+					color: #dc3232;
+				}
+				.text-warning{
+					color: #dba617;
 				}
 			</style>
 		';
