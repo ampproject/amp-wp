@@ -338,16 +338,16 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	public function page_cache() {
 		$page_cache_detail = $this->get_page_cache_detail();
 
-		$badge_color = 'red';
-		$status      = is_wp_error( $page_cache_detail ) ? 'critical' : $page_cache_detail['status'];
-		$label       = __( 'Page caching is not detected and response time is slow.', 'amp' );
-
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' ) . '</p>';
 
 		/* translators: List of page cache headers. */
-		$description .= '<p>' . sprintf( __( 'Page caching is detected by looking for an active page caching plugin, making three requests to the homepage and looking for HTTP response headers like: %s.', 'amp' ), '<code>' . implode( '</code>, <code>', array_keys( self::get_page_cache_headers() ) ) . '</code>' );
+		$description .= '<p>' . sprintf( __( 'Page caching is detected by looking for an active page caching plugin as well as making three requests to the homepage and looking for one or more of the following HTTP client caching response headers: %s.', 'amp' ), '<code>' . implode( '</code>, <code>', array_keys( self::get_page_cache_headers() ) ) . '</code>' );
 
 		if ( is_wp_error( $page_cache_detail ) ) {
+			$badge_color = 'red';
+			$status      = 'critical';
+			$label       = __( 'Unable to detect the presence of page caching', 'amp' );
+
 			$error_info = sprintf(
 				/* translators: 1 is error message, 2 is error code */
 				__( 'Unable to detect page caching due to possible loopback request problem. Please verify that the loopback request test is passing. Error: %1$s (Code: %2$s)', 'amp' ),
@@ -356,41 +356,65 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			);
 
 			$description = "<p>$error_info</p>" . $description;
-		} elseif ( 'recommended' === $status ) {
+		} elseif ( 'recommended' === $page_cache_detail['status'] ) {
 			$badge_color = 'orange';
+			$status      = $page_cache_detail['status'];
 			$label       = __( 'Page caching is not detected, but your response time is OK', 'amp' );
-		} elseif ( 'good' === $status ) {
+		} elseif ( 'good' === $page_cache_detail['status'] ) {
 			$badge_color = 'green';
+			$status      = $page_cache_detail['status'];
 			$label       = __( 'Page caching is detected', 'amp' );
+		} else {
+			$badge_color = 'red';
+			$status      = $page_cache_detail['status'];
+			$label       = __( 'Page caching is not detected and response time is slow', 'amp' );
 		}
 
 		if ( ! is_wp_error( $page_cache_detail ) ) {
 			$page_cache_test_summary = [];
 
+			// @todo This should only be shown if no client page caching headers are found.
 			if ( $page_cache_detail['advanced_cache_present'] ) {
-				$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span>' . __( 'Page caching plugin is available.', 'amp' );
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span> ' . __( 'A page caching plugin was detected.', 'amp' );
 			} else {
-				$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span>' . __( 'Page caching plugin is not available.', 'amp' );
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span> ' . __( 'A page caching plugin was not detected.', 'amp' );
 			}
 
 			if ( empty( $page_cache_detail['response_time'] ) ) {
-				$page_cache_test_summary[] = '<span class="dashicons dashicons-dismiss text-error"></span>' . __( 'We couldn\'t able to find a response time. Please make sure loopback requests are allowed.', 'amp' );
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-dismiss text-error"></span> ' . __( 'Server response time could not be determined. Verify that loopback requests are working.', 'amp' );
 			} else {
 
+				// @todo The 600 millisecond threshold should be filterable.
 				if ( $page_cache_detail['response_time'] < 600 ) {
-					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span>' . __( 'Site response time is less than 600 microseconds.', 'amp' );
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span> ' . sprintf(
+						/* translators: %d is the response time in milliseconds */
+						__( 'Median server response time was %d milliseconds. This is less than the 600 millisecond threshold.', 'amp' ),
+						$page_cache_detail['response_time']
+					);
 				} else {
-					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span>' . __( 'Site response time is more than 600 microseconds, which is not ideal.', 'amp' );
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span> ' . sprintf(
+						/* translators: %d is the response time in milliseconds */
+						__( 'Median server response time was %d milliseconds. It should be less than 600 milliseconds.', 'amp' ),
+						$page_cache_detail['response_time'],
+						$page_cache_detail['response_time']
+					);
 				}
 
 				if ( empty( $page_cache_detail['headers'] ) ) {
-					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span>' . __( 'We could not find any page cache headers in a response.', 'amp' );
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span> ' . __( 'No client caching response headers were detected in response.', 'amp' );
 				} else {
-					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span>' . sprintf(
-						/* translators: List of detected page cache headers. */
-						__( 'These are headers we found in a response. %s', 'amp' ),
-						'<code>' . implode( '</code>, <code>', $page_cache_detail['headers'] ) . '</code>'
-					);
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span> ' .
+						sprintf(
+							/* translators: List of detected page cache headers. */
+							_n(
+								'There was %d client caching response header detected:',
+								'There were %d client caching response headers detected:',
+								count( $page_cache_detail['headers'] ),
+								'amp'
+							),
+							count( $page_cache_detail['headers'] )
+						) .
+						'<code>' . implode( '</code>, <code>', $page_cache_detail['headers'] ) . '</code>';
 				}
 			}
 

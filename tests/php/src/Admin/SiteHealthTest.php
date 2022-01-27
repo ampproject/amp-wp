@@ -697,6 +697,10 @@ class SiteHealthTest extends TestCase {
 	 * @return array[]
 	 */
 	public function get_page_cache_data() {
+		$recommended_label = 'Page caching is not detected, but your response time is OK';
+		$good_label        = 'Page caching is detected';
+		$critical_label    = 'Page caching is not detected and response time is slow';
+		$error_label       = 'Unable to detect the presence of page caching';
 
 		return [
 			'basic-auth-fail'                          => [
@@ -704,21 +708,25 @@ class SiteHealthTest extends TestCase {
 					'unauthorized',
 				],
 				'expected_status' => 'critical',
+				'expected_label'  => $error_label,
 				'good_basic_auth' => false,
 			],
 			'no-cache-control'                         => [
 				'responses'          => array_fill( 0, 3, [] ),
 				'expected_status'    => 'critical',
+				'expected_label'     => $critical_label,
 				'good_basic_auth'    => null,
 				'delay_the_response' => true,
 			],
 			'no-cache'                                 => [
 				'responses'       => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
 				'expected_status' => 'recommended',
+				'expected_label'  => $recommended_label,
 			],
 			'no-cache-with-delayed-response'           => [
 				'responses'          => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
 				'expected_status'    => 'critical',
+				'expected_label'     => $critical_label,
 				'good_basic_auth'    => null,
 				'delay_the_response' => true,
 			],
@@ -729,6 +737,7 @@ class SiteHealthTest extends TestCase {
 					[ 'age' => '1345' ]
 				),
 				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 			],
 			'cache-control-max-age'                    => [
 				'responses'       => array_fill(
@@ -737,6 +746,7 @@ class SiteHealthTest extends TestCase {
 					[ 'cache-control' => 'public; max-age=600' ]
 				),
 				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 			],
 			'cache-control-max-age-after-2-requests'   => [
 				'responses'       => [
@@ -745,6 +755,7 @@ class SiteHealthTest extends TestCase {
 					[ 'cache-control' => 'public; max-age=600' ],
 				],
 				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 			],
 			'cache-control-with-future-expires'        => [
 				'responses'       => array_fill(
@@ -753,6 +764,7 @@ class SiteHealthTest extends TestCase {
 					[ 'expires' => gmdate( 'r', time() + MINUTE_IN_SECONDS * 10 ) ]
 				),
 				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 			],
 			'cache-control-with-past-expires'          => [
 				'responses'          => array_fill(
@@ -761,6 +773,7 @@ class SiteHealthTest extends TestCase {
 					[ 'expires' => gmdate( 'r', time() - MINUTE_IN_SECONDS * 10 ) ]
 				),
 				'expected_status'    => 'critical',
+				'expected_label'     => $critical_label,
 				'good_basic_auth'    => null,
 				'delay_the_response' => true,
 			],
@@ -771,6 +784,7 @@ class SiteHealthTest extends TestCase {
 					[ 'cache-control' => 'public; max-age=600' ]
 				),
 				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 				'good_basic_auth' => true,
 			],
 			'cf-cache-status'                          => [
@@ -780,6 +794,7 @@ class SiteHealthTest extends TestCase {
 					[ 'cf-cache-status' => 'HIT: 1' ]
 				),
 				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 			],
 			'cf-cache-status-without-header-and-delay' => [
 				'responses'          => array_fill(
@@ -788,6 +803,7 @@ class SiteHealthTest extends TestCase {
 					[ 'cf-cache-status' => 'MISS' ]
 				),
 				'expected_status'    => 'recommended',
+				'expected_label'     => $recommended_label,
 				'good_basic_auth'    => null,
 				'delay_the_response' => false,
 			],
@@ -798,6 +814,7 @@ class SiteHealthTest extends TestCase {
 					[ 'cf-cache-status' => 'MISS' ]
 				),
 				'expected_status'    => 'critical',
+				'expected_label'     => $critical_label,
 				'good_basic_auth'    => null,
 				'delay_the_response' => true,
 			],
@@ -808,6 +825,7 @@ class SiteHealthTest extends TestCase {
 					[ 'x-cache-enabled' => 'true' ]
 				),
 				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 			],
 			'x-cache-enabled-with-delay'               => [
 				'responses'          => array_fill(
@@ -816,6 +834,7 @@ class SiteHealthTest extends TestCase {
 					[ 'x-cache-enabled' => 'false' ]
 				),
 				'expected_status'    => 'critical',
+				'expected_label'     => $critical_label,
 				'good_basic_auth'    => null,
 				'delay_the_response' => true,
 			],
@@ -826,6 +845,7 @@ class SiteHealthTest extends TestCase {
 					[ 'x-cache-disabled' => 'off' ]
 				),
 				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 			],
 			'cf-apo-via'                               => [
 				'responses'       => array_fill(
@@ -834,6 +854,7 @@ class SiteHealthTest extends TestCase {
 					[ 'cf-apo-via' => 'tcache' ]
 				),
 				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 			],
 			'cf-edge-cache'                            => [
 				'responses'       => array_fill(
@@ -842,6 +863,7 @@ class SiteHealthTest extends TestCase {
 					[ 'cf-edge-cache' => 'cache' ]
 				),
 				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 			],
 		];
 	}
@@ -852,18 +874,12 @@ class SiteHealthTest extends TestCase {
 	 * @covers ::get_page_cache_headers()
 	 * @covers ::check_for_page_caching()
 	 */
-	public function test_page_cache( $responses, $expected_status, $good_basic_auth = null, $delay_the_response = false ) {
+	public function test_page_cache( $responses, $expected_status, $expected_label, $good_basic_auth = null, $delay_the_response = false ) {
 
 		$badge_color = [
 			'critical'    => 'red',
 			'recommended' => 'orange',
 			'good'        => 'green',
-		];
-
-		$labels = [
-			'critical'    => 'Page caching is not detected and response time is slow.',
-			'recommended' => 'Page caching is not detected, but your response time is OK',
-			'good'        => 'Page caching is detected',
 		];
 
 		$expected_props = [
@@ -873,7 +889,7 @@ class SiteHealthTest extends TestCase {
 			],
 			'test'   => 'amp_page_cache',
 			'status' => $expected_status,
-			'label'  => $labels[ $expected_status ],
+			'label'  => $expected_label,
 		];
 
 		if ( null !== $good_basic_auth ) {
