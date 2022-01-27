@@ -357,8 +357,8 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' ) . '</p>';
 
-		/* translators: List of page cache headers. */
-		$description .= '<p>' . sprintf( __( 'Page caching is detected by looking for an active page caching plugin as well as making three requests to the homepage and looking for one or more of the following HTTP client caching response headers: %s.', 'amp' ), '<code>' . implode( '</code>, <code>', array_keys( self::get_page_cache_headers() ) ) . '</code>' );
+		$description .= '<p>' . esc_html__( 'Page caching is detected by looking for an active page caching plugin as well as making three requests to the homepage and looking for one or more of the following HTTP client caching response headers:', 'amp' )
+			. ' <code>' . implode( '</code>, <code>', array_keys( self::get_page_cache_headers() ) ) . '.</code>';
 
 		if ( is_wp_error( $page_cache_detail ) ) {
 			$badge_color = 'red';
