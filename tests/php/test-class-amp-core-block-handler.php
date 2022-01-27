@@ -344,7 +344,14 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
 
-		$this->assertEqualMarkup( $expected_block_content, do_blocks( $original_block_content ) );
+		$expected = $expected_block_content;
+		$actual   = do_blocks( $original_block_content );
+
+		// Remove attributes added in WordPress 5.2.
+		$expected = preg_replace( '/ data-id="\d+"/', '', $expected );
+		$actual   = preg_replace( '/ data-id="\d+"/', '', $actual );
+
+		$this->assertEqualMarkup( $expected, $actual );
 	}
 
 	/**
