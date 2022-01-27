@@ -59,7 +59,7 @@ trait HandlesGalleryEmbed {
 				$carousel_element->setAttribute( Attribute::LIGHTBOX, '' );
 			}
 
-			if ( Tag::FIGURE === $gallery_element->tagName  ) {
+			if ( Tag::FIGURE === $gallery_element->tagName ) {
 
 				// Remove gallery container or item wrappers, leaving behind the gallery caption.
 				foreach ( iterator_to_array( $gallery_element->childNodes ) as $child_node ) {
