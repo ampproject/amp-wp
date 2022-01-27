@@ -331,6 +331,23 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
+	 * Get the threshold below which a response time is considered good.
+	 *
+	 * @since 2.2.1
+	 *
+	 * @return int Threshold.
+	 */
+	public function get_good_response_time_threshold() {
+		/**
+		 * Filters the threshold below which a response time is considered good.
+		 *
+		 * @since 2.2.1
+		 * @param int $threshold Threshold in milliseconds.
+		 */
+		return (int) apply_filters( 'amp_page_cache_good_response_time_threshold', 600 );
+	}
+
+	/**
 	 * Get the test result data for whether there is page caching or not.
 	 *
 	 * @return array
@@ -384,19 +401,20 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				$page_cache_test_summary[] = '<span class="dashicons dashicons-dismiss text-error"></span> ' . __( 'Server response time could not be determined. Verify that loopback requests are working.', 'amp' );
 			} else {
 
-				// @todo The 600 millisecond threshold should be filterable.
-				if ( $page_cache_detail['response_time'] < 600 ) {
+				$threshold = $this->get_good_response_time_threshold();
+				if ( $page_cache_detail['response_time'] < $this->get_good_response_time_threshold() ) {
 					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span> ' . sprintf(
 						/* translators: %d is the response time in milliseconds */
-						__( 'Median server response time was %d milliseconds. This is less than the 600 millisecond threshold.', 'amp' ),
-						$page_cache_detail['response_time']
+						__( 'Median server response time was %1$d milliseconds. This is less than the %2$d millisecond threshold.', 'amp' ),
+						$page_cache_detail['response_time'],
+						$threshold
 					);
 				} else {
 					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span> ' . sprintf(
 						/* translators: %d is the response time in milliseconds */
-						__( 'Median server response time was %d milliseconds. It should be less than 600 milliseconds.', 'amp' ),
+						__( 'Median server response time was %1$d milliseconds. It should be less than %2$d milliseconds.', 'amp' ),
 						$page_cache_detail['response_time'],
-						$page_cache_detail['response_time']
+						$threshold
 					);
 				}
 
@@ -486,7 +504,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		$has_page_cache_header = count( $has_page_cache_header );
 		$result                = 'critical';
 
-		$has_good_response_time = ( $page_speed && $page_speed < 600 );
+		$has_good_response_time = ( $page_speed && $page_speed < $this->get_good_response_time_threshold() );
 		$has_page_caching       = ( $has_page_cache_header || $page_cache_detail['advanced_cache_present'] );
 
 		if ( $has_good_response_time ) {

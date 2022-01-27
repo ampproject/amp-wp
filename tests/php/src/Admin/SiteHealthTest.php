@@ -692,6 +692,34 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
+	 * Test get_good_response_time_threshold.
+	 *
+	 * @covers ::get_good_response_time_threshold()
+	 */
+	public function test_get_good_response_time_threshold() {
+		$this->assertSame( 600, $this->instance->get_good_response_time_threshold() );
+
+		add_filter(
+			'amp_page_cache_good_response_time_threshold',
+			static function () {
+				return 200;
+			}
+		);
+
+		$this->assertSame( 200, $this->instance->get_good_response_time_threshold() );
+
+		add_filter(
+			'amp_page_cache_good_response_time_threshold',
+			static function () {
+				return '100';
+			},
+			100
+		);
+
+		$this->assertSame( 100, $this->instance->get_good_response_time_threshold() );
+	}
+
+	/**
 	 * Data provider for $this->test_page_cache()
 	 *
 	 * @return array[]
