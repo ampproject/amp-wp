@@ -390,13 +390,6 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		if ( ! is_wp_error( $page_cache_detail ) ) {
 			$page_cache_test_summary = [];
 
-			// @todo This should only be shown if no client page caching headers are found.
-			if ( $page_cache_detail['advanced_cache_present'] ) {
-				$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span> ' . __( 'A page caching plugin was detected.', 'amp' );
-			} else {
-				$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span> ' . __( 'A page caching plugin was not detected.', 'amp' );
-			}
-
 			if ( empty( $page_cache_detail['response_time'] ) ) {
 				$page_cache_test_summary[] = '<span class="dashicons dashicons-dismiss text-error"></span> ' . __( 'Server response time could not be determined. Verify that loopback requests are working.', 'amp' );
 			} else {
@@ -432,8 +425,15 @@ final class SiteHealth implements Service, Registerable, Delayed {
 							),
 							count( $page_cache_detail['headers'] )
 						) .
-						'<code>' . implode( '</code>, <code>', $page_cache_detail['headers'] ) . '</code>';
+						'<code>' . implode( '</code>, <code>', $page_cache_detail['headers'] ) . '</code>.';
 				}
+			}
+
+			if ( $page_cache_detail['advanced_cache_present'] ) {
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span> ' . __( 'A page caching plugin was detected.', 'amp' );
+			} elseif ( ! ( is_array( $page_cache_detail ) && ! empty( $page_cache_detail['headers'] ) ) ) {
+				// Note: This message is not shown if client caching response headers were present since an external caching layer may be employed.
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span> ' . __( 'A page caching plugin was not detected.', 'amp' );
 			}
 
 			$description .= '<p><ul><li>' . implode( '</li><li>', $page_cache_test_summary ) . '</li></ul></p>';
