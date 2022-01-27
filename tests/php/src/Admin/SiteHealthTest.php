@@ -860,6 +860,12 @@ class SiteHealthTest extends TestCase {
 			'good'        => 'green',
 		];
 
+		$labels = [
+			'critical'    => 'Page caching is not detected and response time is slow.',
+			'recommended' => 'Page caching is not detected, but your response time is OK',
+			'good'        => 'Page caching is detected',
+		];
+
 		$expected_props = [
 			'badge'  => [
 				'label' => 'AMP',
@@ -867,7 +873,7 @@ class SiteHealthTest extends TestCase {
 			],
 			'test'   => 'amp_page_cache',
 			'status' => $expected_status,
-			'label'  => 'good' === $expected_status ? 'Page caching is detected' : 'Page caching is not detected',
+			'label'  => $labels[ $expected_status ],
 		];
 
 		if ( null !== $good_basic_auth ) {
@@ -940,10 +946,26 @@ class SiteHealthTest extends TestCase {
 	public function test_get_page_cache_detail_with_legacy_cache_result() {
 
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
-		$this->assertEquals( 'critical', $this->instance->get_page_cache_detail( true ) );
+		$this->assertEquals(
+			[
+				'status'                 => 'critical',
+				'advanced_cache_present' => null,
+				'headers'                => [],
+				'response_time'          => 0,
+			],
+			$this->instance->get_page_cache_detail( true )
+		);
 
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'yes', DAY_IN_SECONDS );
-		$this->assertEquals( 'good', $this->instance->get_page_cache_detail( true ) );
+		$this->assertEquals(
+			[
+				'status'                 => 'good',
+				'advanced_cache_present' => null,
+				'headers'                => [],
+				'response_time'          => 0,
+			],
+			$this->instance->get_page_cache_detail( true )
+		);
 
 		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
 	}
@@ -975,9 +997,11 @@ class SiteHealthTest extends TestCase {
 		];
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_status, DAY_IN_SECONDS );
 
-		$this->assertEquals( 'recommended', $this->instance->get_page_cache_detail( true ) );
+		$output = $this->instance->get_page_cache_detail( true );
+		$this->assertEquals( 'recommended', $output['status'] );
 
-		$this->assertEquals( 'good', $this->instance->get_page_cache_detail() );
+		$output = $this->instance->get_page_cache_detail();
+		$this->assertEquals( 'good', $output['status'] );
 
 		remove_filter( 'pre_http_request', $callback, 20 );
 
@@ -989,7 +1013,8 @@ class SiteHealthTest extends TestCase {
 		];
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_status, DAY_IN_SECONDS );
 
-		$this->assertEquals( 'good', $this->instance->get_page_cache_detail( true ) );
+		$output = $this->instance->get_page_cache_detail( true );
+		$this->assertEquals( 'good', $output['status'] );
 
 		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
 	}
@@ -1035,19 +1060,17 @@ class SiteHealthTest extends TestCase {
 		);
 
 		// Test 3: Test for non-cached result again now that no error is returned.
-		$this->assertEquals(
-			'good',
-			$this->instance->get_page_cache_detail( false )
-		);
+		$output = $this->instance->get_page_cache_detail( false );
+		$this->assertEquals( 'good', $output['status'] );
+		$this->assertContains( 'cache-control', $output['headers'] );
 
 		remove_filter( 'pre_http_request', $return_cached_response, 20 );
 		add_filter( 'pre_http_request', $return_error, 20 );
 
 		// Test 4: Test for cached result again now that no error is returned.
-		$this->assertEquals(
-			'good',
-			$this->instance->get_page_cache_detail( true )
-		);
+		$output = $this->instance->get_page_cache_detail( true );
+		$this->assertEquals( 'good', $output['status'] );
+		$this->assertContains( 'cache-control', $output['headers'] );
 	}
 
 	/**
