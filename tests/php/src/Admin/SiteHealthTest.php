@@ -788,6 +788,15 @@ class SiteHealthTest extends TestCase {
 				'expected_status' => 'good',
 				'expected_label'  => $good_label,
 			],
+			'etag'                                     => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'etag' => '"1234567890"' ]
+				),
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
+			],
 			'cache-control-max-age-after-2-requests'   => [
 				'responses'       => [
 					[],
@@ -1008,6 +1017,7 @@ class SiteHealthTest extends TestCase {
 
 	/**
 	 * @covers ::get_page_cache_detail()
+	 * @covers ::check_for_page_caching()
 	 */
 	public function test_get_page_cache_detail_with_legacy_cache_result() {
 

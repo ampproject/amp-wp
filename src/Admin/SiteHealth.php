@@ -633,9 +633,11 @@ final class SiteHealth implements Service, Registerable, Delayed {
 					continue;
 				}
 
-				if ( ! empty( $callback ) && is_callable( $callback ) && true === $callback( $header_value ) ) {
-					$response_headers[ $header ] = $header_value;
-				} elseif ( empty( $callback ) ) {
+				if (
+					empty( $callback )
+					||
+					( is_callable( $callback ) && true === $callback( $header_value ) )
+				) {
 					$response_headers[ $header ] = $header_value;
 				}
 			}
@@ -650,6 +652,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				&&
 				( defined( 'WP_CACHE' ) && WP_CACHE )
 				&&
+				/** This filter is documented in wp-settings.php */
 				apply_filters( 'enable_loading_advanced_cache_dropin', true )
 			),
 			'page_caching_response_headers' => $page_caching_response_headers,
