@@ -72,6 +72,18 @@ class SiteHealthTest extends TestCase {
 		$GLOBALS['wp_rest_server']     = null;
 
 		$this->add_home_url_loopback_request_mocking();
+
+		add_filter(
+			'pre_http_request',
+			function ( $r, $args, $url ) {
+				if ( ! $r ) {
+					throw new \Exception( "Attempted to request $url." );
+				}
+				return $r;
+			},
+			1000000,
+			3
+		);
 	}
 
 	/**
@@ -927,14 +939,24 @@ class SiteHealthTest extends TestCase {
 
 		$is_unauthorized = false;
 
+		$threshold = 10;
+		if ( $delay_the_response ) {
+			add_filter(
+				'amp_page_cache_good_response_time_threshold',
+				static function () use ( $threshold ) {
+					return $threshold;
+				}
+			);
+		}
+
 		add_filter(
 			'pre_http_request',
-			function ( $r, $parsed_args ) use ( &$responses, &$is_unauthorized, $good_basic_auth, $delay_the_response ) {
+			function ( $r, $parsed_args ) use ( &$responses, &$is_unauthorized, $good_basic_auth, $delay_the_response, $threshold ) {
 
 				$expected_response = array_shift( $responses );
 
 				if ( $delay_the_response ) {
-					sleep( 1 );
+					usleep( $threshold * 1000 + 1 );
 				}
 
 				if ( 'unauthorized' === $expected_response ) {
