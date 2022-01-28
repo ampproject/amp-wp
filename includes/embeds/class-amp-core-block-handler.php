@@ -286,7 +286,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			return $block_content;
 		}
 
-		$block_content = preg_replace( '/(\sdata-amp-lightbox="\w+")/', '', $block_content );
+		$block_content = preg_replace( '/\sdata-amp-lightbox="\w+"/', '', $block_content );
 
 		// Bail out early if there are no images in the gallery or the lightbox feature is not enabled.
 		if ( empty( $block['innerBlocks'] ) || empty( $block['attrs']['ampLightbox'] ) ) {

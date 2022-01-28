@@ -18,6 +18,7 @@ import { cloneElement, isValidElement } from '@wordpress/element';
  */
 import { TEXT_BLOCKS } from '../constants';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../common/constants';
+
 /**
  * Add AMP attributes to every core block.
  *
