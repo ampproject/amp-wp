@@ -116,7 +116,7 @@ export function siteScanReducer( state, action ) {
 			};
 		}
 		case ACTION_SCANNABLE_URLS_RECEIVE: {
-			const hasScannableUrls = action.scannableUrls?.length > 0;
+			const hasScannableUrls = Array.isArray( action.scannableUrls ) && action.scannableUrls.length > 0;
 			return {
 				...state,
 				status: ( state.scanOnce && state.scansCount > 0 ) || ! hasScannableUrls ? STATUS_COMPLETED : STATUS_READY,
