@@ -395,19 +395,19 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			$page_cache_test_summary = [];
 
 			if ( empty( $page_cache_detail['response_time'] ) ) {
-				$page_cache_test_summary[] = '<span class="dashicons dashicons-dismiss text-error"></span> ' . __( 'Server response time could not be determined. Verify that loopback requests are working.', 'amp' );
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-dismiss"></span> ' . __( 'Server response time could not be determined. Verify that loopback requests are working.', 'amp' );
 			} else {
 
 				$threshold = $this->get_good_response_time_threshold();
 				if ( $page_cache_detail['response_time'] < $threshold ) {
-					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span> ' . sprintf(
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt"></span> ' . sprintf(
 						/* translators: %d is the response time in milliseconds */
 						__( 'Median server response time was %1$s milliseconds. This is less than the %2$s millisecond threshold.', 'amp' ),
 						number_format_i18n( $page_cache_detail['response_time'] ),
 						number_format_i18n( $threshold )
 					);
 				} else {
-					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span> ' . sprintf(
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning"></span> ' . sprintf(
 						/* translators: %d is the response time in milliseconds */
 						__( 'Median server response time was %1$s milliseconds. It should be less than %2$s milliseconds.', 'amp' ),
 						number_format_i18n( $page_cache_detail['response_time'] ),
@@ -416,9 +416,9 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				}
 
 				if ( empty( $page_cache_detail['headers'] ) ) {
-					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span> ' . __( 'No client caching response headers were detected in response.', 'amp' );
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning"></span> ' . __( 'No client caching response headers were detected in response.', 'amp' );
 				} else {
-					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span> ' .
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt"></span> ' .
 						sprintf(
 							/* translators: List of detected page cache headers. */
 							_n(
@@ -434,10 +434,10 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			}
 
 			if ( $page_cache_detail['advanced_cache_present'] ) {
-				$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span> ' . __( 'A page caching plugin was detected.', 'amp' );
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt"></span> ' . __( 'A page caching plugin was detected.', 'amp' );
 			} elseif ( ! ( is_array( $page_cache_detail ) && ! empty( $page_cache_detail['headers'] ) ) ) {
 				// Note: This message is not shown if client caching response headers were present since an external caching layer may be employed.
-				$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span> ' . __( 'A page caching plugin was not detected.', 'amp' );
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-warning"></span> ' . __( 'A page caching plugin was not detected.', 'amp' );
 			}
 
 			$description .= '<ul><li>' . implode( '</li><li>', $page_cache_test_summary ) . '</li></ul>';
@@ -1246,13 +1246,13 @@ final class SiteHealth implements Service, Registerable, Delayed {
 					color: #dc3232;
 				}
 
-				.text-success{
+				#health-check-accordion-block-amp_page_cache .dashicons-yes-alt {
 					color: #46b450;
 				}
-				.text-error{
+				#health-check-accordion-block-amp_page_cache .dashicons-dismiss {
 					color: #dc3232;
 				}
-				.text-warning{
+				#health-check-accordion-block-amp_page_cache .dashicons-warning {
 					color: #dba617;
 				}
 			</style>
