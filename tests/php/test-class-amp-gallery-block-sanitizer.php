@@ -97,20 +97,18 @@ class AMP_Gallery_Block_Sanitizer_Test extends TestCase {
 			'carousel_from_wp59_gallery_block_markup' => [
 				'
 				<figure class="wp-block-gallery has-nested-images columns-default is-cropped" data-amp-carousel="true">
-					<amp-carousel width="2560" height="1920" type="slides" layout="responsive">
-						<figure class="slide">
-							<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Sunset</figcaption>
-						</figure>
-						<figure class="slide">
-							<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Bison</figcaption>
-						</figure>
-						<figure class="slide">
-							<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Sunset</figcaption>
-						</figure>
-					</amp-carousel>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Bison</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
 					<figcaption class="blocks-gallery-caption">Gallery caption!</figcaption>
 				</figure>
 				',
@@ -135,39 +133,35 @@ class AMP_Gallery_Block_Sanitizer_Test extends TestCase {
 			'lightbox_from_wp59_gallery_block_markup' => [
 				'
 				<figure class="wp-block-gallery has-nested-images columns-default is-cropped" data-amp-lightbox="true">
-					<amp-carousel width="2560" height="1920" type="slides" layout="responsive">
-						<figure class="slide">
-							<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Sunset</figcaption>
-						</figure>
-						<figure class="slide">
-							<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Bison</figcaption>
-						</figure>
-						<figure class="slide">
-							<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Sunset</figcaption>
-						</figure>
-					</amp-carousel>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Bison</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
 					<figcaption class="blocks-gallery-caption">Gallery caption!</figcaption>
 				</figure>
 				',
 				'
 				<figure class="wp-block-gallery has-nested-images columns-default is-cropped" data-amp-lightbox="true">
-					<amp-carousel width="2560" height="1920" type="slides" layout="responsive">
-						<figure class="slide">
-							<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover" lightbox=""></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Sunset</figcaption>
-						</figure>
-						<figure class="slide">
-							<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover" lightbox=""></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Bison</figcaption>
-						</figure>
-						<figure class="slide">
-							<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover" lightbox=""></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Sunset</figcaption>
-						</figure>
-					</amp-carousel>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover" lightbox=""></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover" lightbox=""></amp-img></a>
+						<figcaption>Bison</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover" lightbox=""></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
 					<figcaption class="blocks-gallery-caption">Gallery caption!</figcaption>
 				</figure>
 				',
@@ -176,20 +170,18 @@ class AMP_Gallery_Block_Sanitizer_Test extends TestCase {
 			'carousel_with_lightbox_from_wp59_gallery_block_markup' => [
 				'
 				<figure class="wp-block-gallery has-nested-images columns-default is-cropped" data-amp-carousel="true" data-amp-lightbox="true">
-					<amp-carousel width="2560" height="1920" type="slides" layout="responsive">
-						<figure class="slide">
-							<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Sunset</figcaption>
-						</figure>
-						<figure class="slide">
-							<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Bison</figcaption>
-						</figure>
-						<figure class="slide">
-							<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
-							<figcaption class="amp-wp-gallery-caption">Sunset</figcaption>
-						</figure>
-					</amp-carousel>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Bison</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
 					<figcaption class="blocks-gallery-caption">Gallery caption!</figcaption>
 				</figure>
 				',
