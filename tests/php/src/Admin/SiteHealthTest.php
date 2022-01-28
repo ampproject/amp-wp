@@ -72,18 +72,6 @@ class SiteHealthTest extends TestCase {
 		$GLOBALS['wp_rest_server']     = null;
 
 		$this->add_home_url_loopback_request_mocking();
-
-		add_filter(
-			'pre_http_request',
-			function ( $r, $args, $url ) {
-				if ( ! $r ) {
-					throw new \Exception( "Attempted to request $url." );
-				}
-				return $r;
-			},
-			1000000,
-			3
-		);
 	}
 
 	/**
