@@ -1,6 +1,6 @@
 <?php
 /**
- * Class PluginActivationSiteScan.
+ * Class AfterActivationSiteScan.
  *
  * Does an async Site Scan whenever any plugin is activated.
  *
@@ -21,12 +21,12 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Services;
 
 /**
- * Class PluginActivationSiteScan
+ * Class AfterActivationSiteScan
  *
  * @since 2.2
  * @internal
  */
-final class PluginActivationSiteScan implements Conditional, Delayed, HasRequirements, Service, Registerable {
+final class AfterActivationSiteScan implements Conditional, Delayed, HasRequirements, Service, Registerable {
 	/**
 	 * Handle for JS file.
 	 *
@@ -40,6 +40,16 @@ final class PluginActivationSiteScan implements Conditional, Delayed, HasRequire
 	 * @var string
 	 */
 	const APP_ROOT_ID = 'amp-site-scan-notice';
+
+	/**
+	 * HTML ID for the app root sibling element.
+	 *
+	 * Since there is no action for adding notice on `themes.php` screen, we need to inject React root element with JS.
+	 * It is an ID of a success notice saying "New theme activated. Visit site" on the `themes.php` screen.
+	 *
+	 * @var string
+	 */
+	const APP_ROOT_SIBLING_ID = 'message2';
 
 	/**
 	 * RESTPreloader instance.
@@ -81,15 +91,25 @@ final class PluginActivationSiteScan implements Conditional, Delayed, HasRequire
 			&&
 			! is_network_admin()
 			&&
-			'plugins.php' === $pagenow
+			AMP_Validation_Manager::has_cap()
 			&&
 			(
-				! empty( $_GET['activate'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				(
+					'plugins.php' === $pagenow
+					&&
+					(
+						! empty( $_GET['activate'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						||
+						! empty( $_GET['activate-multi'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					)
+				)
 				||
-				! empty( $_GET['activate-multi'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				(
+					'themes.php' === $pagenow
+					&&
+					! empty( $_GET['activated'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				)
 			)
-			&&
-			AMP_Validation_Manager::has_cap()
 		);
 	}
 
@@ -145,7 +165,9 @@ final class PluginActivationSiteScan implements Conditional, Delayed, HasRequire
 
 		$data = [
 			'AMP_COMPATIBLE_PLUGINS_URL' => $this->get_amp_compatible_plugins_url(),
+			'AMP_COMPATIBLE_THEMES_URL'  => $this->get_amp_compatible_themes_url(),
 			'APP_ROOT_ID'                => self::APP_ROOT_ID,
+			'APP_ROOT_SIBLING_ID'        => self::APP_ROOT_SIBLING_ID,
 			'OPTIONS_REST_PATH'          => '/amp/v1/options',
 			'SETTINGS_LINK'              => menu_page_url( AMP_Options_Manager::OPTION_NAME, false ),
 			'SCANNABLE_URLS_REST_PATH'   => '/amp/v1/scannable-urls',
@@ -181,6 +203,22 @@ final class PluginActivationSiteScan implements Conditional, Delayed, HasRequire
 	}
 
 	/**
+	 * Get a URL to AMP compatible themes directory.
+	 *
+	 * For users capable of installing themes, the link should lead to the Theme install page.
+	 * Other users will be directed to the themes page on amp-wp.org.
+	 *
+	 * @return string URL to AMP compatible themes directory.
+	 */
+	protected function get_amp_compatible_themes_url() {
+		if ( current_user_can( 'switch_themes' ) ) {
+			return admin_url( '/theme-install.php?tab=amp-compatible' );
+		}
+
+		return 'https://amp-wp.org/ecosystem/themes/';
+	}
+
+	/**
 	 * Adds REST paths to preload.
 	 */
 	protected function add_preload_rest_paths() {
@@ -196,6 +234,11 @@ final class PluginActivationSiteScan implements Conditional, Delayed, HasRequire
 				'_fields',
 				[ 'author', 'name', 'plugin', 'status', 'version' ],
 				'/wp/v2/plugins'
+			),
+			add_query_arg(
+				'_fields',
+				[ 'author', 'name', 'status', 'stylesheet', 'version' ],
+				'/wp/v2/themes'
 			),
 			'/wp/v2/users/me',
 		];

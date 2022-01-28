@@ -1,12 +1,4 @@
 /**
- * External dependencies
- */
-import {
-	AMP_COMPATIBLE_PLUGINS_URL,
-	SETTINGS_LINK,
-} from 'amp-site-scan-notice'; // From WP inline script.
-
-/**
  * WordPress dependencies
  */
 import { useContext, useEffect } from '@wordpress/element';
@@ -24,12 +16,8 @@ import {
 	AmpAdminNotice,
 } from '../../components/amp-admin-notice';
 import { Loading } from '../../components/loading';
-import { isExternalUrl } from '../../common/helpers/is-external-url';
 import { PluginsWithAmpIncompatibility } from './plugins-with-amp-incompatibility';
-
-// Define Plugin Suppression link.
-const PLUGIN_SUPPRESSION_LINK = new URL( SETTINGS_LINK );
-PLUGIN_SUPPRESSION_LINK.hash = 'plugin-suppression';
+import { ThemeWithAmpIncompatibility } from './theme-with-amp-incompatibility';
 
 export function SiteScanNotice() {
 	const {
@@ -41,6 +29,7 @@ export function SiteScanNotice() {
 		isInitializing,
 		isReady,
 		pluginsWithAmpIncompatibility,
+		themesWithAmpIncompatibility,
 		startSiteScan,
 	} = useContext( SiteScan );
 
@@ -72,32 +61,29 @@ export function SiteScanNotice() {
 		);
 	}
 
-	if ( isCompleted && pluginsWithAmpIncompatibility.length === 0 ) {
-		return (
-			<AmpAdminNotice type={ AMP_ADMIN_NOTICE_TYPE_SUCCESS } { ...commonNoticeProps }>
-				<p>
-					{ __( 'No AMP compatibility issues detected.', 'amp' ) }
-				</p>
-			</AmpAdminNotice>
-		);
-	}
+	if ( isCompleted ) {
+		let elements = [
+			pluginsWithAmpIncompatibility.length > 0 ? <PluginsWithAmpIncompatibility pluginsWithAmpIncompatibility={ pluginsWithAmpIncompatibility } /> : null,
+			themesWithAmpIncompatibility.length > 0 ? <ThemeWithAmpIncompatibility themeWithAmpIncompatibility={ themesWithAmpIncompatibility[ 0 ] } /> : null,
+		];
 
-	if ( isCompleted && pluginsWithAmpIncompatibility.length > 0 ) {
+		// Display the theme information at the top when on the `themes.php` screen.
+		if ( document.location.href.includes( 'themes.php' ) ) {
+			elements = elements.reverse();
+		}
+
+		elements = elements.filter( Boolean );
+
 		return (
-			<AmpAdminNotice type={ AMP_ADMIN_NOTICE_TYPE_WARNING } { ...commonNoticeProps }>
-				<PluginsWithAmpIncompatibility pluginsWithAmpIncompatibility={ pluginsWithAmpIncompatibility } />
-				<div className="amp-site-scan-notice__cta">
-					<a href={ PLUGIN_SUPPRESSION_LINK } className="button">
-						{ __( 'Review Plugin Suppression', 'amp' ) }
-					</a>
-					<a
-						href={ AMP_COMPATIBLE_PLUGINS_URL }
-						className="button"
-						{ ...isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL ) ? { target: '_blank', rel: 'noopener noreferrer' } : {} }
-					>
-						{ __( 'View AMP-Compatible Plugins', 'amp' ) }
-					</a>
-				</div>
+			<AmpAdminNotice
+				type={ elements.length ? AMP_ADMIN_NOTICE_TYPE_WARNING : AMP_ADMIN_NOTICE_TYPE_SUCCESS }
+				{ ...commonNoticeProps }
+			>
+				{ elements.length ? elements : (
+					<p>
+						{ __( 'No AMP compatibility issues detected.', 'amp' ) }
+					</p>
+				) }
 			</AmpAdminNotice>
 		);
 	}

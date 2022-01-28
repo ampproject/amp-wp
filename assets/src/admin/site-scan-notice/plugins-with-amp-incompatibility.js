@@ -2,18 +2,24 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { AMP_COMPATIBLE_PLUGINS_URL, SETTINGS_LINK } from 'amp-site-scan-notice'; // From WP inline script.
 
 /**
  * WordPress dependencies
  */
 import { useContext } from '@wordpress/element';
-import { _n, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { Plugins } from '../../components/plugins-context-provider';
 import { getPluginSlugFromFile } from '../../common/helpers/get-plugin-slug-from-file';
+import { isExternalUrl } from '../../common/helpers/is-external-url';
+
+// Define Plugin Suppression link.
+const PLUGIN_SUPPRESSION_LINK = new URL( SETTINGS_LINK );
+PLUGIN_SUPPRESSION_LINK.hash = 'plugin-suppression';
 
 /**
  * Render a DETAILS element for each plugin causing AMP incompatibilities.
@@ -77,6 +83,18 @@ export function PluginsWithAmpIncompatibility( { pluginsWithAmpIncompatibility }
 					</ul>
 				</details>
 			) ) }
+			<div className="amp-site-scan-notice__cta">
+				<a href={ PLUGIN_SUPPRESSION_LINK } className="button">
+					{ __( 'Review Plugin Suppression', 'amp' ) }
+				</a>
+				<a
+					href={ AMP_COMPATIBLE_PLUGINS_URL }
+					className="button"
+					{ ...isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL ) ? { target: '_blank', rel: 'noopener noreferrer' } : {} }
+				>
+					{ __( 'View AMP-Compatible Plugins', 'amp' ) }
+				</a>
+			</div>
 		</>
 	);
 }
@@ -87,5 +105,5 @@ PluginsWithAmpIncompatibility.propTypes = {
 			slug: PropTypes.string,
 			urls: PropTypes.arrayOf( PropTypes.string ),
 		} ),
-	),
+	).isRequired,
 };
