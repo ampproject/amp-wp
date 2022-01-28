@@ -222,7 +222,7 @@ async function setupBrowser() {
  */
 async function createTestData() {
 	await visitAdminPage( 'admin.php', 'page=amp-options' );
-	await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings' } );
+	await page.waitForSelector( '.amp-settings-nav' );
 	await page.evaluate( async () => {
 		await Promise.all( [
 			wp.apiFetch( { path: '/wp/v2/posts', method: 'POST', data: { title: 'Test Post 1', status: 'publish' } } ),
