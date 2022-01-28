@@ -246,7 +246,8 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 */
 	public function persistent_object_cache() {
 		$is_using_object_cache = wp_using_ext_object_cache();
-		$has_page_caching      = $this->has_page_caching( true );
+		$page_cache_detail     = $this->get_page_cache_detail( true );
+		$has_page_caching      = ( is_array( $page_cache_detail ) && 'good' === $page_cache_detail['status'] );
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Persistent object caching is used to more effectively store image dimensions and parsed CSS using a caching backend rather than using the options table in the database.', 'amp' ) . '</p>';
 
@@ -330,35 +331,116 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
+	 * Get the threshold below which a response time is considered good.
+	 *
+	 * @since 2.2.1
+	 *
+	 * @return int Threshold.
+	 */
+	public function get_good_response_time_threshold() {
+		/**
+		 * Filters the threshold below which a response time is considered good.
+		 *
+		 * @since 2.2.1
+		 * @param int $threshold Threshold in milliseconds.
+		 */
+		return (int) apply_filters( 'amp_page_cache_good_response_time_threshold', 600 );
+	}
+
+	/**
 	 * Get the test result data for whether there is page caching or not.
 	 *
 	 * @return array
 	 */
 	public function page_cache() {
-		$has_page_caching = $this->has_page_caching();
-
-		$badge_color = 'orange';
-		$status      = 'recommended';
-		$label       = __( 'Page caching is not detected', 'amp' );
+		$page_cache_detail = $this->get_page_cache_detail();
 
 		$description = '<p>' . esc_html__( 'The AMP plugin performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'amp' ) . '</p>';
 
-		/* translators: 1 is Cache-Control, 2 is Expires, and 3 is Age */
-		$description .= '<p>' . sprintf( __( 'Page caching is detected by making three requests to the homepage and looking for %1$s, %2$s, or %3$s HTTP response headers.', 'amp' ), '<code>Cache-Control: max-age=…</code>', '<code>Expires</code>', '<code>Age</code>' );
+		$description .= '<p>' . esc_html__( 'Page caching is detected by looking for an active page caching plugin as well as making three requests to the homepage and looking for one or more of the following HTTP client caching response headers:', 'amp' )
+			. ' <code>' . implode( '</code>, <code>', array_keys( self::get_page_cache_headers() ) ) . '.</code>';
 
-		if ( is_wp_error( $has_page_caching ) ) {
+		if ( is_wp_error( $page_cache_detail ) ) {
+			$badge_color = 'red';
+			$status      = 'critical';
+			$label       = __( 'Unable to detect the presence of page caching', 'amp' );
+
 			$error_info = sprintf(
 				/* translators: 1 is error message, 2 is error code */
 				__( 'Unable to detect page caching due to possible loopback request problem. Please verify that the loopback request test is passing. Error: %1$s (Code: %2$s)', 'amp' ),
-				$has_page_caching->get_error_message(),
-				$has_page_caching->get_error_code()
+				$page_cache_detail->get_error_message(),
+				$page_cache_detail->get_error_code()
 			);
 
 			$description = "<p>$error_info</p>" . $description;
-		} elseif ( true === $has_page_caching ) {
+		} elseif ( 'recommended' === $page_cache_detail['status'] ) {
+			$badge_color = 'orange';
+			$status      = $page_cache_detail['status'];
+			$label       = __( 'Page caching is not detected but the server response time is OK', 'amp' );
+		} elseif ( 'good' === $page_cache_detail['status'] ) {
 			$badge_color = 'green';
-			$status      = 'good';
-			$label       = __( 'Page caching is detected', 'amp' );
+			$status      = $page_cache_detail['status'];
+			$label       = __( 'Page caching is detected and the server response time is good', 'amp' );
+		} else {
+			$badge_color = 'red';
+			$status      = $page_cache_detail['status'];
+			if ( empty( $page_cache_detail['headers'] ) && ! $page_cache_detail['advanced_cache_present'] ) {
+				$label = __( 'Page caching is not detected and the server response time is slow', 'amp' );
+			} else {
+				$label = __( 'Page caching is detected but the server response time is still slow', 'amp' );
+			}
+		}
+
+		if ( ! is_wp_error( $page_cache_detail ) ) {
+			$page_cache_test_summary = [];
+
+			if ( empty( $page_cache_detail['response_time'] ) ) {
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-dismiss"></span> ' . __( 'Server response time could not be determined. Verify that loopback requests are working.', 'amp' );
+			} else {
+
+				$threshold = $this->get_good_response_time_threshold();
+				if ( $page_cache_detail['response_time'] < $threshold ) {
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt"></span> ' . sprintf(
+						/* translators: %d is the response time in milliseconds */
+						__( 'Median server response time was %1$s milliseconds. This is less than the %2$s millisecond threshold.', 'amp' ),
+						number_format_i18n( $page_cache_detail['response_time'] ),
+						number_format_i18n( $threshold )
+					);
+				} else {
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning"></span> ' . sprintf(
+						/* translators: %d is the response time in milliseconds */
+						__( 'Median server response time was %1$s milliseconds. It should be less than %2$s milliseconds.', 'amp' ),
+						number_format_i18n( $page_cache_detail['response_time'] ),
+						number_format_i18n( $threshold )
+					);
+				}
+
+				if ( empty( $page_cache_detail['headers'] ) ) {
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning"></span> ' . __( 'No client caching response headers were detected.', 'amp' );
+				} else {
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt"></span> ' .
+						sprintf(
+							/* translators: Placeholder is number of caching headers */
+							_n(
+								'There was %d client caching response header detected:',
+								'There were %d client caching response headers detected:',
+								count( $page_cache_detail['headers'] ),
+								'amp'
+							),
+							count( $page_cache_detail['headers'] )
+						) .
+						' <code>' . implode( '</code>, <code>', $page_cache_detail['headers'] ) . '</code>.';
+				}
+			}
+
+			if ( $page_cache_detail['advanced_cache_present'] ) {
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt"></span> ' . __( 'A page caching plugin was detected.', 'amp' );
+			} elseif ( ! ( is_array( $page_cache_detail ) && ! empty( $page_cache_detail['headers'] ) ) ) {
+				// Note: This message is not shown if client caching response headers were present since an external caching layer may be employed.
+				$page_cache_test_summary[] = '<span class="dashicons dashicons-warning"></span> ' . __( 'A page caching plugin was not detected.', 'amp' );
+			}
+
+			$description .= '<ul><li>' . implode( '</li><li>', $page_cache_test_summary ) . '</li></ul>';
 		}
 
 		return [
@@ -385,35 +467,128 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 *
 	 * @param bool $use_previous_result Whether to use previous result or not.
 	 *
-	 * @return bool|WP_Error Boolean if the site has page caching or not, or else a WP_Error if unable to determine.
+	 * @return WP_Error|array {
+	 *    Page cache detail or else a WP_Error if unable to determine.
+	 *
+	 *    @type string   $status                 Page cache status. Good, Recommended or Critical.
+	 *    @type bool     $advanced_cache_present Whether page cache plugin is available or not.
+	 *    @type string[] $headers                Client caching response headers detected.
+	 *    @type float    $response_time          Response time of site.
+	 * }
 	 */
-	public function has_page_caching( $use_previous_result = false ) {
+	public function get_page_cache_detail( $use_previous_result = false ) {
 
 		if ( $use_previous_result ) {
-			$has_page_caching = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
-			if ( is_wp_error( $has_page_caching ) ) {
-				return $has_page_caching;
-			} elseif ( $has_page_caching ) {
-				return ( 'yes' === $has_page_caching );
+			$page_cache_detail = get_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY );
+
+			// Disregard cached legacy value. Instead of a string, now an array or a WP_Error are stored.
+			if ( is_string( $page_cache_detail ) ) {
+				$page_cache_detail = null;
 			}
 		}
 
-		$has_page_caching = $this->check_for_page_caching();
-		if ( is_wp_error( $has_page_caching ) ) {
-			set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $has_page_caching, DAY_IN_SECONDS );
-		} else {
-			set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $has_page_caching ? 'yes' : 'no', MONTH_IN_SECONDS );
+		if ( ! $use_previous_result || empty( $page_cache_detail ) ) {
+			$page_cache_detail = $this->check_for_page_caching();
+			if ( is_wp_error( $page_cache_detail ) ) {
+				set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_detail, DAY_IN_SECONDS );
+			} else {
+				set_transient( self::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_detail, MONTH_IN_SECONDS );
+			}
 		}
 
-		return $has_page_caching;
+		if ( is_wp_error( $page_cache_detail ) ) {
+			return $page_cache_detail;
+		}
+
+		// Use the median server response time.
+		$response_timings = $page_cache_detail['response_timing'];
+		rsort( $response_timings );
+		$page_speed = $response_timings[ floor( count( $response_timings ) / 2 ) ];
+
+		// Obtain unique set of all client caching response headers.
+		$headers = [];
+		foreach ( $page_cache_detail['page_caching_response_headers'] as $page_caching_response_headers ) {
+			$headers = array_merge( $headers, array_keys( $page_caching_response_headers ) );
+		}
+		$headers = array_unique( $headers );
+
+		// Page caching is detected if there are response headers or a page caching plugin is present.
+		$has_page_caching = ( count( $headers ) > 0 || $page_cache_detail['advanced_cache_present'] );
+
+		if ( $page_speed && $page_speed < $this->get_good_response_time_threshold() ) {
+			$result = $has_page_caching ? 'good' : 'recommended';
+		} else {
+			$result = 'critical';
+		}
+
+		return [
+			'status'                 => $result,
+			'advanced_cache_present' => $page_cache_detail['advanced_cache_present'],
+			'headers'                => $headers,
+			'response_time'          => $page_speed,
+		];
+	}
+
+	/**
+	 * List of header and it's verification callback to verify if page cache is enabled or not.
+	 *
+	 * Note: key is header name and value could be callable function to verify header value.
+	 * Empty value mean existence of header detect page cache is enable.
+	 *
+	 * @return array List of client caching headers and their (optional) verification callbacks.
+	 */
+	protected static function get_page_cache_headers() {
+
+		$cache_hit_callback = static function ( $header_value ) {
+			return false !== strpos( strtolower( $header_value ), 'hit' );
+		};
+
+		return [
+			'cache-control'          => static function ( $header_value ) {
+				return (bool) preg_match( '/max-age=[1-9]/', $header_value );
+			},
+			'expires'                => static function ( $header_value ) {
+				return strtotime( $header_value ) > time();
+			},
+			'age'                    => static function ( $header_value ) {
+				return is_numeric( $header_value ) && $header_value > 0;
+			},
+			'last-modified'          => '',
+			'etag'                   => '',
+			'x-cache'                => $cache_hit_callback,
+			'x-proxy-cache'          => $cache_hit_callback,
+			'cf-cache-status'        => $cache_hit_callback,
+			'x-kinsta-cache'         => $cache_hit_callback,
+			'x-cache-enabled'        => static function ( $header_value ) {
+				return 'true' === strtolower( $header_value );
+			},
+			'x-cache-disabled'       => static function ( $header_value ) {
+				return ( 'on' !== strtolower( $header_value ) );
+			},
+			'cf-apo-via'             => static function ( $header_value ) {
+				return false !== strpos( strtolower( $header_value ), 'tcache' );
+			},
+			'x-srcache-store-status' => $cache_hit_callback,
+			'x-srcache-fetch-status' => $cache_hit_callback,
+			'cf-edge-cache'          => static function ( $header_value ) {
+				return false !== strpos( strtolower( $header_value ), 'cache' );
+			},
+		];
 	}
 
 	/**
 	 * Check if site has page cache enable or not.
 	 *
-	 * @return bool|WP_Error Whether page caching was detected, or else error information.
+	 * @return WP_Error|array {
+	 *     Page caching detection details or else error information.
+	 *
+	 *     @type bool    $advanced_cache_present        Whether a page caching plugin is present.
+	 *     @type array[] $page_caching_response_headers Sets of client caching headers for the responses.
+	 *     @type float[] $response_timing               Response timings.
+	 * }
 	 */
-	private function check_for_page_caching() {
+	public function check_for_page_caching() {
+
 		/** This filter is documented in wp-includes/class-wp-http-streams.php */
 		$sslverify = apply_filters( 'https_local_ssl_verify', false );
 
@@ -427,8 +602,15 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			$headers['Authorization'] = 'Basic ' . base64_encode( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) . ':' . wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
 		}
 
+		$caching_headers               = self::get_page_cache_headers();
+		$page_caching_response_headers = [];
+		$response_timing               = [];
+
 		for ( $i = 1; $i <= 3; $i++ ) {
+			$start_time    = microtime( true );
 			$http_response = wp_remote_get( home_url( '/' ), compact( 'sslverify', 'headers' ) );
+			$end_time      = microtime( true );
+
 			if ( is_wp_error( $http_response ) ) {
 				return $http_response;
 			}
@@ -439,24 +621,39 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				);
 			}
 
-			$cache_control_header = wp_remote_retrieve_header( $http_response, 'cache-control' );
-			if ( preg_match( '/max-age=[1-9]/', $cache_control_header ) ) {
-				return true;
+			$response_headers = [];
+
+			foreach ( $caching_headers as $header => $callback ) {
+				$header_value = wp_remote_retrieve_header( $http_response, $header );
+				if (
+					$header_value
+					&&
+					(
+						empty( $callback )
+						||
+						( is_callable( $callback ) && true === $callback( $header_value ) )
+					)
+				) {
+					$response_headers[ $header ] = $header_value;
+				}
 			}
 
-			$expires_header = wp_remote_retrieve_header( $http_response, 'expires' );
-			if ( $expires_header && strtotime( $expires_header ) > time() ) {
-				return true;
-			}
-
-			// Detect page cache implemented via proxy (e.g. Varnish).
-			$age_header = wp_remote_retrieve_header( $http_response, 'age' );
-			if ( (int) $age_header > 0 ) {
-				return true;
-			}
+			$page_caching_response_headers[] = $response_headers;
+			$response_timing[]               = ( $end_time - $start_time ) * 1000;
 		}
 
-		return false;
+		return [
+			'advanced_cache_present'        => (
+				file_exists( WP_CONTENT_DIR . '/advanced-cache.php' )
+				&&
+				( defined( 'WP_CACHE' ) && WP_CACHE )
+				&&
+				/** This filter is documented in wp-settings.php */
+				apply_filters( 'enable_loading_advanced_cache_dropin', true )
+			),
+			'page_caching_response_headers' => $page_caching_response_headers,
+			'response_timing'               => $response_timing,
+		];
 	}
 
 	/**
@@ -1038,6 +1235,16 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 				.wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon {
 					color: #dc3232;
+				}
+
+				#health-check-accordion-block-amp_page_cache .dashicons-yes-alt {
+					color: #46b450;
+				}
+				#health-check-accordion-block-amp_page_cache .dashicons-dismiss {
+					color: #dc3232;
+				}
+				#health-check-accordion-block-amp_page_cache .dashicons-warning {
+					color: #dba617;
 				}
 			</style>
 		';
