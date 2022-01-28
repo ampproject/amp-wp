@@ -440,7 +440,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				$page_cache_test_summary[] = '<span class="dashicons dashicons-warning text-warning"></span> ' . __( 'A page caching plugin was not detected.', 'amp' );
 			}
 
-			$description .= '<p><ul><li>' . implode( '</li><li>', $page_cache_test_summary ) . '</li></ul></p>';
+			$description .= '<ul><li>' . implode( '</li><li>', $page_cache_test_summary ) . '</li></ul>';
 		}
 
 		return [
