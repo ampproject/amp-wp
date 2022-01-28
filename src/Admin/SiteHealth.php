@@ -500,30 +500,31 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			return $page_cache_detail;
 		}
 
+		// Use the median server response times.
 		$response_timings = $page_cache_detail['response_timing'];
 		rsort( $response_timings );
 		$page_speed = $response_timings[ floor( count( $response_timings ) / 2 ) ];
 
-		$has_page_cache_header = array_filter( $page_cache_detail['page_caching_response_headers'], 'count' );
-		$has_page_cache_header = count( $has_page_cache_header );
-		$result                = 'critical';
-
-		$has_good_response_time = ( $page_speed && $page_speed < $this->get_good_response_time_threshold() );
-		$has_page_caching       = ( $has_page_cache_header || $page_cache_detail['advanced_cache_present'] );
-
-		if ( $has_good_response_time ) {
-			$result = $has_page_caching ? 'good' : 'recommended';
-		}
-
+		// Obtain unique set of all client caching response headers.
 		$headers = [];
 		foreach ( $page_cache_detail['page_caching_response_headers'] as $page_caching_response_headers ) {
 			$headers = array_merge( $headers, array_keys( $page_caching_response_headers ) );
+		}
+		$headers = array_unique( $headers );
+
+		// Page caching is detected if there are response headers or a page caching plugin is present.
+		$has_page_caching = ( count( $headers ) > 0 || $page_cache_detail['advanced_cache_present'] );
+
+		if ( $page_speed && $page_speed < $this->get_good_response_time_threshold() ) {
+			$result = $has_page_caching ? 'good' : 'recommended';
+		} else {
+			$result = 'critical';
 		}
 
 		return [
 			'status'                 => $result,
 			'advanced_cache_present' => $page_cache_detail['advanced_cache_present'],
-			'headers'                => array_unique( $headers ),
+			'headers'                => $headers,
 			'response_time'          => $page_speed,
 		];
 	}
