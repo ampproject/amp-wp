@@ -1,6 +1,11 @@
 /**
  * WordPress dependencies
  */
+/**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-settings'; // From WP inline script.
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { addQueryArgs } from '@wordpress/url';
@@ -9,8 +14,6 @@ import { useContext } from '@wordpress/element';
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
-import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies

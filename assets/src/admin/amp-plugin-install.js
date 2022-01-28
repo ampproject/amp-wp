@@ -1,14 +1,17 @@
 /**
  * WordPress dependencies
  */
+/**
+ * External dependencies
+ */
+import { AMP_PLUGINS, AMP_COMPATIBLE } from 'amp-plugins'; // From WP inline script.
+import { debounce } from 'lodash';
 import domReady from '@wordpress/dom-ready';
 import { __ } from '@wordpress/i18n';
 
 /**
  * External dependencies
  */
-import { AMP_PLUGINS, AMP_COMPATIBLE } from 'amp-plugins'; // From WP inline script.
-import { debounce } from 'lodash';
 
 const ampPluginInstall = {
 

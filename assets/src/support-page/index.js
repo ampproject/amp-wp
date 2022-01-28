@@ -1,9 +1,6 @@
 /**
  * WordPress dependencies
  */
-import domReady from '@wordpress/dom-ready';
-import { render } from '@wordpress/element';
-
 /**
  * External dependencies
  */
@@ -13,6 +10,12 @@ import {
 	data,
 	ampValidatedPostCount,
 } from 'amp-support'; // From WP inline script.
+import domReady from '@wordpress/dom-ready';
+import { render } from '@wordpress/element';
+
+/**
+ * External dependencies
+ */
 
 /**
  * Internal dependencies

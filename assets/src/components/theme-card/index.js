@@ -2,6 +2,10 @@
 /**
  * WordPress dependencies
  */
+/**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
 import { useContext } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
@@ -9,7 +13,6 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies

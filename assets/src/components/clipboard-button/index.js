@@ -1,6 +1,10 @@
 /**
  * WordPress dependencies
  */
+/**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
 import { useRef, useEffect } from '@wordpress/element';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { Button } from '@wordpress/components';
@@ -8,7 +12,6 @@ import { Button } from '@wordpress/components';
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 
 const TIMEOUT = 4000;
 

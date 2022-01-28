@@ -1,6 +1,10 @@
 /**
  * WordPress dependencies
  */
+/**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
 import {
 	createContext,
 	useCallback,
@@ -17,7 +21,6 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies

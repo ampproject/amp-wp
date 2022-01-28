@@ -93,6 +93,7 @@
     "postcss-preset-env": "6.7.0",
     "react-test-renderer": "17.0.2",
     "rtlcss-webpack-plugin": "4.0.6",
+    "semver": "7.3.5",
     "svgo": "2.8.0",
     "webpack-remove-empty-scripts": "0.7.1",
     "webpackbar": "5.0.0-3",

@@ -1,13 +1,16 @@
 /**
  * WordPress dependencies
  */
+/**
+ * External dependencies
+ */
+import { SETTINGS_LINK } from 'amp-settings'; // From WP inline script.
 import { __, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect } from '@wordpress/element';
 
 /**
  * External dependencies
  */
-import { SETTINGS_LINK } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies

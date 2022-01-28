@@ -1,13 +1,15 @@
 /**
  * WordPress dependencies
  */
+/**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 
 /**
  * External dependencies
  */
-
-import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
