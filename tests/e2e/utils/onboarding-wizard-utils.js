@@ -132,7 +132,7 @@ export async function testTitle( { text, element = 'h1' } ) {
  */
 export async function cleanUpSettings() {
 	await visitAdminPage( 'admin.php', 'page=amp-options' );
-	await page.waitForSelector( '.amp-settings-nav' );
+	await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings' } );
 	await page.evaluate( async () => {
 		await Promise.all( [
 			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: {
