@@ -737,9 +737,9 @@ class SiteHealthTest extends TestCase {
 	 * @return array[]
 	 */
 	public function get_page_cache_data() {
-		$recommended_label = 'Page caching is not detected, but your response time is OK';
-		$good_label        = 'Page caching is detected';
-		$critical_label    = 'Page caching is not detected and response time is slow';
+		$recommended_label = 'Page caching is not detected but the server response time is OK';
+		$good_label        = 'Page caching is detected and the server response time is good';
+		$critical_label    = 'Page caching is not detected and the server response time is slow';
 		$error_label       = 'Unable to detect the presence of page caching';
 
 		return [

@@ -376,15 +376,19 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		} elseif ( 'recommended' === $page_cache_detail['status'] ) {
 			$badge_color = 'orange';
 			$status      = $page_cache_detail['status'];
-			$label       = __( 'Page caching is not detected, but your response time is OK', 'amp' );
+			$label       = __( 'Page caching is not detected but the server response time is OK', 'amp' );
 		} elseif ( 'good' === $page_cache_detail['status'] ) {
 			$badge_color = 'green';
 			$status      = $page_cache_detail['status'];
-			$label       = __( 'Page caching is detected', 'amp' );
+			$label       = __( 'Page caching is detected and the server response time is good', 'amp' );
 		} else {
 			$badge_color = 'red';
 			$status      = $page_cache_detail['status'];
-			$label       = __( 'Page caching is not detected and response time is slow', 'amp' );
+			if ( empty( $page_cache_detail['headers'] ) && ! $page_cache_detail['advanced_cache_present'] ) {
+				$label = __( 'Page caching is not detected and the server response time is slow', 'amp' );
+			} else {
+				$label = __( 'Page caching is detected but the server response time is still slow', 'amp' );
+			}
 		}
 
 		if ( ! is_wp_error( $page_cache_detail ) ) {
@@ -425,7 +429,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 							),
 							count( $page_cache_detail['headers'] )
 						) .
-						'<code>' . implode( '</code>, <code>', $page_cache_detail['headers'] ) . '</code>.';
+						' <code>' . implode( '</code>, <code>', $page_cache_detail['headers'] ) . '</code>.';
 				}
 			}
 
