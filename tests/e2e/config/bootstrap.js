@@ -21,7 +21,7 @@ import {
  * Internal dependencies
  */
 import { cleanUpSettings } from '../utils/onboarding-wizard-utils';
-import { deactivatePlugin, installLocalPlugin } from '../utils/amp-settings-utils';
+import { activatePlugin, deactivatePlugin, installLocalPlugin } from '../utils/amp-settings-utils';
 
 /**
  * Environment variables
@@ -235,6 +235,9 @@ async function createTestData() {
  * Install themes and plugins needed in tests.
  */
 async function setupThemesAndPlugins() {
+	// Ensure AMP plugin is activated.
+	await activatePlugin( 'amp' );
+
 	await installLocalPlugin( 'e2e-tests-demo-plugin' );
 	await installLocalPlugin( 'do-not-allow-amp-validate-capability' );
 
