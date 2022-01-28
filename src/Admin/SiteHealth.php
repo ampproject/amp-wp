@@ -420,7 +420,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				} else {
 					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt"></span> ' .
 						sprintf(
-							/* translators: List of detected page cache headers. */
+							/* translators: Placeholder is number of caching headers */
 							_n(
 								'There was %d client caching response header detected:',
 								'There were %d client caching response headers detected:',
@@ -470,10 +470,10 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return WP_Error|array {
 	 *    Page cache detail or else a WP_Error if unable to determine.
 	 *
-	 *    @type string $status                 Page cache status. Good, Recommended or Critical.
-	 *    @type bool   $advanced_cache_present Whether page cache plugin is available or not.
-	 *    @type array  $headers                List of header for page cache.
-	 *    @type float  $response_time          Response time of site.
+	 *    @type string   $status                 Page cache status. Good, Recommended or Critical.
+	 *    @type bool     $advanced_cache_present Whether page cache plugin is available or not.
+	 *    @type string[] $headers                Client caching response headers detected.
+	 *    @type float    $response_time          Response time of site.
 	 * }
 	 */
 	public function get_page_cache_detail( $use_previous_result = false ) {
@@ -500,7 +500,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			return $page_cache_detail;
 		}
 
-		// Use the median server response times.
+		// Use the median server response time.
 		$response_timings = $page_cache_detail['response_timing'];
 		rsort( $response_timings );
 		$page_speed = $response_timings[ floor( count( $response_timings ) / 2 ) ];
