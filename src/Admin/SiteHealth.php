@@ -416,7 +416,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 				}
 
 				if ( empty( $page_cache_detail['headers'] ) ) {
-					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning"></span> ' . __( 'No client caching response headers were detected in response.', 'amp' );
+					$page_cache_test_summary[] = '<span class="dashicons dashicons-warning"></span> ' . __( 'No client caching response headers were detected.', 'amp' );
 				} else {
 					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt"></span> ' .
 						sprintf(
@@ -535,7 +535,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * Note: key is header name and value could be callable function to verify header value.
 	 * Empty value mean existence of header detect page cache is enable.
 	 *
-	 * @return array List of header and it's verification callback.
+	 * @return array List of client caching headers and their (optional) verification callbacks.
 	 */
 	protected static function get_page_cache_headers() {
 
@@ -582,9 +582,9 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return WP_Error|array {
 	 *     Page caching detection details or else error information.
 	 *
-	 *     @type bool  $advanced_cache_present
-	 *     @type array $page_caching_response_headers
-	 *     @type array $response_timing
+	 *     @type bool    $advanced_cache_present        Whether a page caching plugin is present.
+	 *     @type array[] $page_caching_response_headers Sets of client caching headers for the responses.
+	 *     @type float[] $response_timing               Response timings.
 	 * }
 	 */
 	public function check_for_page_caching() {
