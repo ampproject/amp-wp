@@ -540,22 +540,18 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	protected static function get_page_cache_headers() {
 
 		$cache_hit_callback = static function ( $header_value ) {
-
-			return ( $header_value && false !== strpos( strtolower( $header_value ), 'hit' ) );
+			return false !== strpos( strtolower( $header_value ), 'hit' );
 		};
 
 		return [
 			'cache-control'          => static function ( $header_value ) {
-
-				return ( $header_value && preg_match( '/max-age=[1-9]/', $header_value ) );
+				return (bool) preg_match( '/max-age=[1-9]/', $header_value );
 			},
 			'expires'                => static function ( $header_value ) {
-
-				return ( $header_value && strtotime( $header_value ) > time() );
+				return strtotime( $header_value ) > time();
 			},
 			'age'                    => static function ( $header_value ) {
-
-				return ( $header_value && $header_value > 0 );
+				return is_numeric( $header_value ) && $header_value > 0;
 			},
 			'last-modified'          => '',
 			'etag'                   => '',
@@ -564,22 +560,18 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			'cf-cache-status'        => $cache_hit_callback,
 			'x-kinsta-cache'         => $cache_hit_callback,
 			'x-cache-enabled'        => static function ( $header_value ) {
-
-				return ( $header_value && 'true' === strtolower( $header_value ) );
+				return 'true' === strtolower( $header_value );
 			},
 			'x-cache-disabled'       => static function ( $header_value ) {
-
-				return ( $header_value && 'on' !== strtolower( $header_value ) );
+				return ( 'on' !== strtolower( $header_value ) );
 			},
 			'cf-apo-via'             => static function ( $header_value ) {
-
-				return ( $header_value && false !== strpos( strtolower( $header_value ), 'tcache' ) );
+				return false !== strpos( strtolower( $header_value ), 'tcache' );
 			},
 			'x-srcache-store-status' => $cache_hit_callback,
 			'x-srcache-fetch-status' => $cache_hit_callback,
 			'cf-edge-cache'          => static function ( $header_value ) {
-
-				return ( $header_value && false !== strpos( strtolower( $header_value ), 'cache' ) );
+				return false !== strpos( strtolower( $header_value ), 'cache' );
 			},
 		];
 	}
@@ -633,15 +625,14 @@ final class SiteHealth implements Service, Registerable, Delayed {
 
 			foreach ( $caching_headers as $header => $callback ) {
 				$header_value = wp_remote_retrieve_header( $http_response, $header );
-
-				if ( empty( $header_value ) ) {
-					continue;
-				}
-
 				if (
-					empty( $callback )
-					||
-					( is_callable( $callback ) && true === $callback( $header_value ) )
+					$header_value
+					&&
+					(
+						empty( $callback )
+						||
+						( is_callable( $callback ) && true === $callback( $header_value ) )
+					)
 				) {
 					$response_headers[ $header ] = $header_value;
 				}
