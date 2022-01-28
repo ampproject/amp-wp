@@ -399,7 +399,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			} else {
 
 				$threshold = $this->get_good_response_time_threshold();
-				if ( $page_cache_detail['response_time'] < $this->get_good_response_time_threshold() ) {
+				if ( $page_cache_detail['response_time'] < $threshold ) {
 					$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt text-success"></span> ' . sprintf(
 						/* translators: %d is the response time in milliseconds */
 						__( 'Median server response time was %1$s milliseconds. This is less than the %2$s millisecond threshold.', 'amp' ),
