@@ -197,6 +197,7 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 
 	EnhancedBlockEdit.propTypes = {
 		attributes: PropTypes.shape( {
+			ampCarousel: PropTypes.bool,
 			ampLightbox: PropTypes.bool,
 			linkTo: PropTypes.string,
 		} ),
