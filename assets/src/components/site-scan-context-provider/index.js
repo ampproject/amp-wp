@@ -119,17 +119,11 @@ export function siteScanReducer( state, action ) {
 			};
 		}
 		case ACTION_SCANNABLE_URLS_RECEIVE: {
-			if ( ! action.scannableUrls || action.scannableUrls?.length === 0 ) {
-				return {
-					...state,
-					status: STATUS_COMPLETED,
-				};
-			}
-
+			const hasScannableUrls = Array.isArray( action.scannableUrls ) && action.scannableUrls.length > 0;
 			return {
 				...state,
-				status: state.scanOnce && state.scansCount > 0 ? STATUS_COMPLETED : STATUS_READY,
-				scannableUrls: action.scannableUrls,
+				status: ( state.scanOnce && state.scansCount > 0 ) || ! hasScannableUrls ? STATUS_COMPLETED : STATUS_READY,
+				scannableUrls: hasScannableUrls ? action.scannableUrls : [],
 			};
 		}
 		case ACTION_SCAN_INITIALIZE: {

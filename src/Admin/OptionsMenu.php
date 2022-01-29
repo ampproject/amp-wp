@@ -225,8 +225,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
-		$theme           = wp_get_theme();
-		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
+		$theme             = wp_get_theme();
+		$is_reader_theme   = $this->reader_themes->theme_data_exists( get_stylesheet() );
+		$page_cache_detail = $this->site_health->get_page_cache_detail( true );
 
 		$amp_validated_urls_link = admin_url(
 			add_query_arg(
@@ -259,7 +260,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
 			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : '',
 			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
-			'HAS_PAGE_CACHING'                   => $this->site_health->has_page_caching( true ),
+			'HAS_PAGE_CACHING'                   => ( is_array( $page_cache_detail ) && 'good' === $page_cache_detail['status'] ),
 		];
 
 		wp_add_inline_script(
