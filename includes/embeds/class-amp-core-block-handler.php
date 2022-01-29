@@ -58,6 +58,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		'core/archives'   => 'ampify_archives_block',
 		'core/video'      => 'ampify_video_block',
 		'core/file'       => 'ampify_file_block',
+		'core/gallery'    => 'ampify_gallery_block',
 		'core/navigation' => 'ampify_navigation_block',
 	];
 
@@ -92,10 +93,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		if ( isset( $block['attrs'] ) && 'core/shortcode' !== $block['blockName'] ) {
 			$injected_attributes    = '';
 			$prop_attribute_mapping = [
-				'ampCarousel'  => 'data-amp-carousel',
-				'ampLayout'    => 'data-amp-layout',
-				'ampLightbox'  => 'data-amp-lightbox',
-				'ampNoLoading' => 'data-amp-noloading',
+				'ampCarousel' => 'data-amp-carousel',
+				'ampLightbox' => 'data-amp-lightbox',
 			];
 			foreach ( $prop_attribute_mapping as $prop => $attr ) {
 				if ( isset( $block['attrs'][ $prop ] ) ) {
@@ -265,6 +264,44 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			'<style id="amp-wp-file-block">.wp-block-file > .wp-block-file__embed { width:100% }</style>',
 			$block_content,
 			1
+		);
+
+		return $block_content;
+	}
+
+	/**
+	 * Ampify gallery block.
+	 *
+	 * Apply data-amp-lightbox attribute only to descendant image blocks.
+	 *
+	 * @since 2.2.1
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 * @return string Filtered block content.
+	 */
+	public function ampify_gallery_block( $block_content, $block ) {
+		// Skip legacy gallery blocks.
+		if ( ! empty( $block['attrs']['ids'] ) ) {
+			return $block_content;
+		}
+
+		$block_content = preg_replace( '/\sdata-amp-lightbox="\w+"/', '', $block_content );
+
+		// Bail out early if there are no images in the gallery or the lightbox feature is not enabled.
+		if ( empty( $block['innerBlocks'] ) || empty( $block['attrs']['ampLightbox'] ) ) {
+			return $block_content;
+		}
+
+		// Add data attributes to figure elements that are nested in the gallery block.
+		// Note that the first match is the gallery block itself which doesn't need the data-amp-lightbox attribute.
+		$figure_count  = 0;
+		$block_content = preg_replace_callback(
+			'/(?<=<figure\s)/',
+			static function () use ( &$figure_count ) {
+				return 0 < $figure_count++ ? 'data-amp-lightbox="true" ' : '';
+			},
+			$block_content
 		);
 
 		return $block_content;
