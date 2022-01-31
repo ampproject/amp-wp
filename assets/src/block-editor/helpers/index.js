@@ -77,6 +77,13 @@ export const removeAmpFitTextFromBlocks = ( settings, name ) => {
 			settings.deprecated = [];
 		}
 
+		// Prevent adding deprecation a second time.
+		for ( const deprecated of settings.deprecated ) {
+			if ( deprecated.attributes && deprecated.attributes.ampFitText ) {
+				return settings;
+			}
+		}
+
 		settings.deprecated.unshift( {
 			supports: settings.supports,
 			attributes: {
