@@ -9,7 +9,7 @@ import { isFunction, isObject, isString } from 'lodash';
  */
 import { __ } from '@wordpress/i18n';
 import { ToggleControl, PanelBody } from '@wordpress/components';
-import { InspectorControls, store as blockEditorStore } from '@wordpress/block-editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import { select, useSelect } from '@wordpress/data';
 import { cloneElement, isValidElement } from '@wordpress/element';
 
@@ -280,7 +280,7 @@ const ImageBlockLayoutAttributes = ( props ) => {
 	const { clientId } = props;
 
 	const isGalleryBlockChild = useSelect( ( _select ) => {
-		return _select( blockEditorStore ).getBlockParentsByBlockName( clientId, 'core/gallery' ).length > 0;
+		return _select( 'core/block-editor' ).getBlockParentsByBlockName( clientId, 'core/gallery' ).length > 0;
 	}, [ clientId ] );
 
 	if ( isGalleryBlockChild ) {
