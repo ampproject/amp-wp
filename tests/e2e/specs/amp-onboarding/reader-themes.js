@@ -17,7 +17,7 @@ describe( 'Reader themes', () => {
 
 	it( 'main components exist with no selection', async () => {
 		const itemCount = await page.$$eval( '.theme-card', ( els ) => els.length );
-		expect( itemCount ).toBe( 11 );
+		expect( itemCount ).toBe( 12 );
 
 		await expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
 		await testNextButton( { text: 'Next', disabled: true } );
