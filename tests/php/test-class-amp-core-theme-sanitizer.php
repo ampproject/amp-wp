@@ -176,6 +176,7 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	 */
 	public function test_get_supported_themes() {
 		$supported_themes = [
+			'twentytwentytwo',
 			'twentytwentyone',
 			'twentytwenty',
 			'twentynineteen',
