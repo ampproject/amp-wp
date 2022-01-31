@@ -40,6 +40,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected static $supported_themes = [
+		'twentytwentytwo',
 		'twentytwentyone',
 		'twentytwenty',
 		'twentynineteen',
@@ -82,6 +83,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected static function get_theme_features_config( $theme_slug, $args = [] ) {
 		switch ( $theme_slug ) {
+			// Twenty Twenty-Two.
+			case 'twentytwentytwo':
+				return [];
+
+			// Twenty Twenty-One.
 			case 'twentytwentyone':
 				$config = [
 					'dequeue_scripts'                  => [
