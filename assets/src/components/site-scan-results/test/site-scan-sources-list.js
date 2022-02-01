@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import PropTypes from 'prop-types';
 import { act } from 'react-dom/test-utils';
 
 /**
@@ -12,8 +13,28 @@ import { render } from '@wordpress/element';
  * Internal dependencies
  */
 import { SiteScanSourcesList } from '../site-scan-sources-list';
+import { SiteScanContextProvider } from '../../site-scan-context-provider';
+
+jest.mock( '../../site-scan-context-provider' );
 
 let container;
+const Providers = ( { children } ) => {
+	return (
+		<SiteScanContextProvider
+			fetchCachedValidationErrors={ true }
+			refetchPluginSuppressionOnScanComplete={ true }
+			resetOnOptionsChange={ true }
+			scannableUrlsRestPath={ '/amp/v1/scannable-urls' }
+			validateNonce={ 'xyz' }
+		>
+			{ children }
+		</SiteScanContextProvider>
+	);
+};
+
+Providers.propTypes = {
+	children: PropTypes.any,
+};
 
 describe( 'SiteScanSourcesList', () => {
 	beforeEach( () => {
@@ -29,7 +50,9 @@ describe( 'SiteScanSourcesList', () => {
 	it( 'renders a loading spinner if no sources are provided', () => {
 		act( () => {
 			render(
-				<SiteScanSourcesList sources={ [] } />,
+				<Providers>
+					<SiteScanSourcesList sources={ [] } />
+				</Providers>,
 				container,
 			);
 		} );
@@ -40,12 +63,14 @@ describe( 'SiteScanSourcesList', () => {
 	it( 'renders the correct number of sources', () => {
 		act( () => {
 			render(
-				<SiteScanSourcesList
-					sources={ [
-						{ slug: 'foo' },
-						{ slug: 'bar' },
-					] }
-				/>,
+				<Providers>
+					<SiteScanSourcesList
+						sources={ [
+							{ slug: 'foo' },
+							{ slug: 'bar' },
+						] }
+					/>
+				</Providers>,
 				container,
 			);
 		} );
@@ -56,15 +81,19 @@ describe( 'SiteScanSourcesList', () => {
 	it( 'renders active source properties', () => {
 		act( () => {
 			render(
-				<SiteScanSourcesList
-					sources={ [ {
-						author: 'John Doe',
-						name: 'Source name',
-						slug: 'Source slug',
-						status: 'active',
-						version: '1.0.0',
-					} ] }
-				/>,
+				<Providers>
+					<SiteScanSourcesList
+						sources={ [
+							{
+								author: 'John Doe',
+								name: 'Source name',
+								slug: 'Source slug',
+								status: 'active',
+								version: '1.0.0',
+							},
+						] }
+					/>
+				</Providers>,
 				container,
 			);
 		} );
@@ -77,16 +106,18 @@ describe( 'SiteScanSourcesList', () => {
 	it( 'renders inactive source properties', () => {
 		act( () => {
 			render(
-				<SiteScanSourcesList
-					inactiveSourceNotice="Source is inactive"
-					sources={ [ {
-						author: 'John Doe',
-						name: 'Source name',
-						slug: 'Source slug',
-						status: 'inactive',
-						version: '1.0.0',
-					} ] }
-				/>,
+				<Providers>
+					<SiteScanSourcesList
+						inactiveSourceNotice="Source is inactive"
+						sources={ [ {
+							author: 'John Doe',
+							name: 'Source name',
+							slug: 'Source slug',
+							status: 'inactive',
+							version: '1.0.0',
+						} ] }
+					/>
+				</Providers>,
 				container,
 			);
 		} );
@@ -100,13 +131,15 @@ describe( 'SiteScanSourcesList', () => {
 	it( 'renders uninstalled source properties', () => {
 		act( () => {
 			render(
-				<SiteScanSourcesList
-					uninstalledSourceNotice="Source is uninstalled"
-					sources={ [ {
-						slug: 'Source slug',
-						status: 'uninstalled',
-					} ] }
-				/>,
+				<Providers>
+					<SiteScanSourcesList
+						uninstalledSourceNotice="Source is uninstalled"
+						sources={ [ {
+							slug: 'Source slug',
+							status: 'uninstalled',
+						} ] }
+					/>
+				</Providers>,
 				container,
 			);
 		} );
