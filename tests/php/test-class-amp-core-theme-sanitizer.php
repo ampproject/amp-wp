@@ -532,9 +532,8 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$after = implode( '', $extra['after'] );
 
 		$replacements = [
-			'@media only screen'           => '@media only screen and (prefers-color-scheme: dark)',
-			'.is-dark-theme.is-dark-theme' => ':root',
-			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference:not(._) body',
+			'.is-dark-theme.is-dark-theme' => 'body.is-dark-theme',
+			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference body.is-dark-theme',
 		];
 		foreach ( $replacements as $search => $replacement ) {
 			$this->assertStringNotContainsString( "$search {", $after );
@@ -674,16 +673,37 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
 
+		add_filter( 'theme_mod_respect_user_color_preference', '__return_true' );
+
 		$sanitizer->add_twentytwentyone_dark_mode_toggle();
 
 		$this->assertEquals(
-			'.no-js #dark-mode-toggler { display: block; }',
+			sprintf(
+				'
+				.no-js #dark-mode-toggler { display: block; }
+				#dark-mode-toggler > span {
+					margin-%s: 5px;
+				}
+				.dark-mode-button-on {
+					display: none;
+				}
+				body.is-dark-theme .dark-mode-button-on {
+					display: inline-block;
+				}
+				body.is-dark-theme .dark-mode-button-off {
+					display: none;
+				}
+			',
+				is_rtl() ? 'right' : 'left'
+			),
 			$dom->head->getElementsByTagName( 'style' )->item( 0 )->textContent
 		);
 
 		$this->assertEquals(
-			'<button id="dark-mode-toggler" on="tap:AMP.setState({is_dark_theme: !is_dark_theme}),i-amp-0.toggleClass(class=\'is-dark-theme\'),i-amp-1.toggleClass(class=\'is-dark-theme\')" data-amp-bind-aria-pressed="is_dark_theme ? \'true\' : \'false\'">Toggle dark mode</button>',
+			'<button id="dark-mode-toggler" on="tap:AMP.toggleTheme()">Dark Mode:<span class="dark-mode-button-on">On</span><span class="dark-mode-button-off">Off</span></button>',
 			$dom->saveHTML( $dom->getElementById( 'dark-mode-toggler' ) )
 		);
+
+		remove_filter( 'theme_mod_respect_user_color_preference', '__return_true' );
 	}
 }
