@@ -547,11 +547,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		);
 	}
 
-	/**
-	 * Test print script to remove admin bar.
-	 *
-	 * @return void
-	 */
+	/** @covers ::amp_remove_admin_bar_in_phone_preview() */
 	public function test_amp_remove_admin_bar_in_phone_preview() {
 		add_filter( 'amp_dev_mode_enabled', '__return_true', 99 );
 		add_filter( 'show_admin_bar', '__return_true', 99 );
@@ -567,11 +563,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		remove_filter( 'show_admin_bar', '__return_true', 99 );
 	}
 
-	/**
-	 * Test print script to remove admin bar without dev mode.
-	 *
-	 * @return void
-	 */
+	/** @covers ::amp_remove_admin_bar_in_phone_preview() */
 	public function test_amp_remove_admin_bar_in_phone_preview_without_dev_mode() {
 		add_filter( 'amp_dev_mode_enabled', '__return_false', 99 );
 
