@@ -548,6 +548,51 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * Test print script to remove admin bar.
+	 *
+	 * @return void
+	 */
+	public function test_amp_remove_admin_bar_in_phone_preview() {
+		add_filter( 'amp_dev_mode_enabled', '__return_true', 99 );
+		add_filter( 'show_admin_bar', '__return_true', 99 );
+
+		ob_start();
+		amp_remove_admin_bar_in_phone_preview();
+		$output = ob_get_clean();
+
+		$this->assertContains( '<script data-ampdevmode>', $output );
+		$this->assertContains( "'amp-wizard-completion-preview' !== window.name )", $output );
+
+		remove_filter( 'amp_dev_mode_enabled', '__return_true', 99 );
+		remove_filter( 'show_admin_bar', '__return_true', 99 );
+	}
+
+	/**
+	 * Test print script to remove admin bar without dev mode.
+	 *
+	 * @return void
+	 */
+	public function test_amp_remove_admin_bar_in_phone_preview_without_dev_mode() {
+		add_filter( 'amp_dev_mode_enabled', '__return_false', 99 );
+
+		ob_start();
+		amp_remove_admin_bar_in_phone_preview();
+		$output = ob_get_clean();
+		$this->assertEmpty( $output );
+
+		remove_filter( 'amp_dev_mode_enabled', '__return_false', 99 );
+
+		add_filter( 'show_admin_bar', '__return_false', 99 );
+
+		ob_start();
+		amp_remove_admin_bar_in_phone_preview();
+		$output = ob_get_clean();
+		$this->assertEmpty( $output );
+
+		remove_filter( 'show_admin_bar', '__return_false', 99 );
+	}
+
+	/**
 	 * Test amp_get_current_url().
 	 *
 	 * @param callable $assert Assert.
