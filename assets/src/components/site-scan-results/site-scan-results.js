@@ -1,12 +1,12 @@
 /**
- * WordPress dependencies
- */
-
-/**
  * External dependencies
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+
+/**
+ * WordPress dependencies
+ */
 import { VisuallyHidden } from '@wordpress/components';
 
 /**

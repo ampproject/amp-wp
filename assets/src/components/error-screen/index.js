@@ -1,17 +1,14 @@
 /**
- * WordPress dependencies
- */
-/**
  * External dependencies
  */
 import PropTypes from 'prop-types';
+
+/**
+ * WordPress dependencies
+ */
 import { __, sprintf } from '@wordpress/i18n';
 import { Panel } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-
-/**
- * External dependencies
- */
 
 /**
  * Internal dependencies

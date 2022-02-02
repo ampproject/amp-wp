@@ -1,12 +1,12 @@
 /**
- * WordPress dependencies
- */
-
-/**
  * External dependencies
  */
 import PropTypes from 'prop-types';
 import { HAS_DEPENDENCY_SUPPORT } from 'amp-settings'; // From WP inline script.
+
+/**
+ * WordPress dependencies
+ */
 import { createContext, useState, useContext, useMemo } from '@wordpress/element';
 
 /**

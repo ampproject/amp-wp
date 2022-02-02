@@ -1,10 +1,11 @@
 /**
- * WordPress dependencies
- */
-/**
  * External dependencies
  */
 import PropTypes from 'prop-types';
+
+/**
+ * WordPress dependencies
+ */
 import {
 	createContext,
 	useCallback,
@@ -17,10 +18,6 @@ import {
 } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
-
-/**
- * External dependencies
- */
 
 /**
  * Internal dependencies
