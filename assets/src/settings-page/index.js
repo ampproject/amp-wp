@@ -151,7 +151,7 @@ function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
 
 	const { hasOptionsChanges, fetchingOptions, saveOptions } = useContext( Options );
-	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption } = useContext( User );
+	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption, developerToolsOption } = useContext( User );
 	const { templateModeWasOverridden } = useContext( ReaderThemes );
 	const { isSkipped } = useContext( SiteScanContext );
 
@@ -161,13 +161,46 @@ function Root( { appRoot } ) {
 	const onSubmit = useCallback( ( event ) => {
 		event.preventDefault();
 
+		/*
+		 * Adds the developer tools 'Validated URLs' & 'Error Index' on turning ON
+		 * the 'Enable Developer Tools' toggle button and saving.
+		 */
+		const addAmpDevOptions = ( optionTitle, optionUrl ) => {
+			const wpAmpSettings = document.querySelector( '#toplevel_page_amp-options ul' );
+
+			if ( wpAmpSettings === null ) {
+				return;
+			}
+
+			const listElement = document.createElement( 'li' );
+			const anchorElement = document.createElement( 'a' );
+			anchorElement.innerText = optionTitle;
+			anchorElement.setAttribute( 'href', optionUrl );
+			listElement.appendChild( anchorElement );
+			wpAmpSettings.appendChild( listElement );
+		};
+
 		if ( hasOptionsChanges ) {
 			saveOptions();
 		}
+
 		if ( hasDeveloperToolsOptionChange ) {
 			saveDeveloperToolsOption();
+			/*
+			 * Add/Remove Dev Tools 'Validated URLs' & 'Error Index' on 'Enable Developer Tools' ON/OFF on save.
+			 */
+			if ( ! developerToolsOption ) {
+				document.querySelectorAll( '#toplevel_page_amp-options ul li a[href*="post_type=amp_validated_url"]' )
+					.forEach( ( menuItem ) => {
+						menuItem.parentNode.remove();
+					} );
+				return;
+			}
+
+			addAmpDevOptions( __( 'Validated URLs', 'amp' ), 'edit.php?post_type=amp_validated_url' );
+			addAmpDevOptions( __( 'Error Index', 'amp' ), 'edit-tags.php?taxonomy=amp_validation_error&post_type=amp_validated_url' );
 		}
-	}, [ hasDeveloperToolsOptionChange, hasOptionsChanges, saveDeveloperToolsOption, saveOptions ] );
+	}, [ hasDeveloperToolsOptionChange, hasOptionsChanges, saveDeveloperToolsOption, saveOptions, developerToolsOption ] );
 
 	/**
 	 * Scroll to the focused element on load or when it changes.
