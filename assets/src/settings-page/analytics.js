@@ -7,9 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 /**
  * WordPress dependencies
  */
+import { Icon, plus, trash } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect, useRef } from '@wordpress/element';
-import { Icon, plus, trash } from '@wordpress/icons';
 import { Button, TextControl, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
 
 /**
