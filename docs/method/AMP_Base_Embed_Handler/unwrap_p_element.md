@@ -14,7 +14,7 @@ This usually happens while `wpautop()` processes the element.
 
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:147](/includes/embeds/class-amp-base-embed-handler.php#L147-L160)
+:link: [includes/embeds/class-amp-base-embed-handler.php:148](/includes/embeds/class-amp-base-embed-handler.php#L148-L161)
 
 <details>
 <summary>Show Code</summary>

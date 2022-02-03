@@ -60,7 +60,7 @@
         ],
         "hooks": []
     },
-    "14": {
+    "12": {
         "file": {
             "description": "AMP meta box settings.",
             "long_description": "",
@@ -152,7 +152,7 @@
             }
         ]
     },
-    "15": {
+    "13": {
         "file": {
             "description": "Class AMP_Template_Customizer",
             "long_description": "",
@@ -321,7 +321,7 @@
             }
         }
     },
-    "16": {
+    "14": {
         "file": {
             "description": "Callbacks for adding AMP-related things to the admin.",
             "long_description": "",
@@ -365,7 +365,7 @@
             }
         ]
     },
-    "17": {
+    "15": {
         "file": {
             "description": "Callbacks for adding AMP-related things to the main theme.",
             "long_description": "",
@@ -460,7 +460,7 @@
         ],
         "hooks": []
     },
-    "18": {
+    "16": {
         "file": {
             "description": "AMP Helper Functions",
             "long_description": "",
@@ -2811,7 +2811,7 @@
             }
         }
     },
-    "19": {
+    "17": {
         "file": {
             "description": "Callbacks for adding content to an AMP template.",
             "long_description": "",
@@ -2864,7 +2864,7 @@
             }
         ]
     },
-    "23": {
+    "21": {
         "file": {
             "description": "Class AMP_HTTP",
             "long_description": "",
@@ -2905,7 +2905,7 @@
             }
         ]
     },
-    "24": {
+    "22": {
         "file": {
             "description": "AMP Post type support.",
             "long_description": "",
@@ -3034,7 +3034,7 @@
             }
         ]
     },
-    "26": {
+    "24": {
         "file": {
             "description": "Class AMP_Theme_Support",
             "long_description": "",
@@ -3105,7 +3105,7 @@
             }
         }
     },
-    "27": {
+    "25": {
         "file": {
             "description": "Deprecated functions.",
             "long_description": "",
@@ -3586,7 +3586,7 @@
             }
         ]
     },
-    "30": {
+    "28": {
         "file": {
             "description": "Class AMP_Base_Embed_Handler",
             "long_description": "Used by some children.",
@@ -3604,7 +3604,7 @@
                 "name": "AMP_Base_Embed_Handler",
                 "namespace": "global",
                 "line": 20,
-                "end_line": 239,
+                "end_line": 240,
                 "final": false,
                 "abstract": true,
                 "extends": "",
@@ -3835,8 +3835,8 @@
                             "Attribute": "\\AmpProject\\Html\\Attribute",
                             "Tag": "\\AmpProject\\Html\\Tag"
                         },
-                        "line": 100,
-                        "end_line": 118,
+                        "line": 101,
+                        "end_line": 119,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -3865,6 +3865,10 @@
                                 {
                                     "name": "since",
                                     "content": "1.5.0"
+                                },
+                                {
+                                    "name": "todo",
+                                    "content": "This does not currently work with single-quoted attribute values or non-quoted attributes."
                                 },
                                 {
                                     "name": "param",
@@ -3904,43 +3908,43 @@
                             "functions": [
                                 {
                                     "name": "sprintf",
-                                    "line": 101,
-                                    "end_line": 113
-                                },
-                                {
-                                    "name": "preg_quote",
-                                    "line": 103,
-                                    "end_line": 103
-                                },
-                                {
-                                    "name": "implode",
-                                    "line": 104,
-                                    "end_line": 112
-                                },
-                                {
-                                    "name": "array_map",
-                                    "line": 106,
-                                    "end_line": 111
-                                },
-                                {
-                                    "name": "sprintf",
-                                    "line": 108,
-                                    "end_line": 108
-                                },
-                                {
-                                    "name": "preg_quote",
-                                    "line": 108,
-                                    "end_line": 108
-                                },
-                                {
-                                    "name": "preg_match",
-                                    "line": 114,
+                                    "line": 102,
                                     "end_line": 114
                                 },
                                 {
+                                    "name": "preg_quote",
+                                    "line": 104,
+                                    "end_line": 104
+                                },
+                                {
+                                    "name": "implode",
+                                    "line": 105,
+                                    "end_line": 113
+                                },
+                                {
+                                    "name": "array_map",
+                                    "line": 107,
+                                    "end_line": 112
+                                },
+                                {
+                                    "name": "sprintf",
+                                    "line": 109,
+                                    "end_line": 109
+                                },
+                                {
+                                    "name": "preg_quote",
+                                    "line": 109,
+                                    "end_line": 109
+                                },
+                                {
+                                    "name": "preg_match",
+                                    "line": 115,
+                                    "end_line": 115
+                                },
+                                {
                                     "name": "wp_array_slice_assoc",
-                                    "line": 117,
-                                    "end_line": 117
+                                    "line": 118,
+                                    "end_line": 118
                                 }
                             ]
                         }
@@ -3954,8 +3958,8 @@
                             "Attribute": "\\AmpProject\\Html\\Attribute",
                             "Tag": "\\AmpProject\\Html\\Tag"
                         },
-                        "line": 128,
-                        "end_line": 135,
+                        "line": 129,
+                        "end_line": 136,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -3996,13 +4000,13 @@
                             "functions": [
                                 {
                                     "name": "array_filter",
-                                    "line": 129,
-                                    "end_line": 134
+                                    "line": 130,
+                                    "end_line": 135
                                 },
                                 {
                                     "name": "iterator_to_array",
-                                    "line": 130,
-                                    "end_line": 130
+                                    "line": 131,
+                                    "end_line": 131
                                 }
                             ]
                         }
@@ -4016,8 +4020,8 @@
                             "Attribute": "\\AmpProject\\Html\\Attribute",
                             "Tag": "\\AmpProject\\Html\\Tag"
                         },
-                        "line": 147,
-                        "end_line": 160,
+                        "line": 148,
+                        "end_line": 161,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -4058,29 +4062,29 @@
                                     "name": "hasAttributes",
                                     "class": "$parent_node",
                                     "static": false,
-                                    "line": 154,
-                                    "end_line": 154
+                                    "line": 155,
+                                    "end_line": 155
                                 },
                                 {
                                     "name": "get_child_elements",
                                     "class": "\\AMP_Base_Embed_Handler",
                                     "static": false,
-                                    "line": 156,
-                                    "end_line": 156
+                                    "line": 157,
+                                    "end_line": 157
                                 },
                                 {
                                     "name": "replaceChild",
                                     "class": "$parent_node->parentNode",
                                     "static": false,
-                                    "line": 158,
-                                    "end_line": 158
+                                    "line": 159,
+                                    "end_line": 159
                                 }
                             ],
                             "functions": [
                                 {
                                     "name": "count",
-                                    "line": 156,
-                                    "end_line": 156
+                                    "line": 157,
+                                    "end_line": 157
                                 }
                             ]
                         }
@@ -4094,8 +4098,8 @@
                             "Attribute": "\\AmpProject\\Html\\Attribute",
                             "Tag": "\\AmpProject\\Html\\Tag"
                         },
-                        "line": 170,
-                        "end_line": 207,
+                        "line": 171,
+                        "end_line": 208,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -4142,33 +4146,33 @@
                             "functions": [
                                 {
                                     "name": "match_callback",
-                                    "line": 180,
-                                    "end_line": 180
+                                    "line": 181,
+                                    "end_line": 181
                                 },
                                 {
                                     "name": "array_values",
-                                    "line": 188,
-                                    "end_line": 195
+                                    "line": 189,
+                                    "end_line": 196
                                 },
                                 {
                                     "name": "array_filter",
-                                    "line": 189,
-                                    "end_line": 194
+                                    "line": 190,
+                                    "end_line": 195
                                 },
                                 {
                                     "name": "iterator_to_array",
-                                    "line": 190,
-                                    "end_line": 190
+                                    "line": 191,
+                                    "end_line": 191
                                 },
                                 {
                                     "name": "count",
-                                    "line": 198,
-                                    "end_line": 198
+                                    "line": 199,
+                                    "end_line": 199
                                 },
                                 {
                                     "name": "match_callback",
-                                    "line": 202,
-                                    "end_line": 202
+                                    "line": 203,
+                                    "end_line": 203
                                 }
                             ],
                             "methods": [
@@ -4176,15 +4180,15 @@
                                     "name": "removeChild",
                                     "class": "$next_element_sibling->parentNode",
                                     "static": false,
-                                    "line": 181,
-                                    "end_line": 181
+                                    "line": 182,
+                                    "end_line": 182
                                 },
                                 {
                                     "name": "removeChild",
                                     "class": "$next_element_sibling->parentNode",
                                     "static": false,
-                                    "line": 204,
-                                    "end_line": 204
+                                    "line": 205,
+                                    "end_line": 205
                                 }
                             ]
                         }
@@ -4198,8 +4202,8 @@
                             "Attribute": "\\AmpProject\\Html\\Attribute",
                             "Tag": "\\AmpProject\\Html\\Tag"
                         },
-                        "line": 216,
-                        "end_line": 225,
+                        "line": 217,
+                        "end_line": 226,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -4249,8 +4253,8 @@
                             "functions": [
                                 {
                                     "name": "__",
-                                    "line": 218,
-                                    "end_line": 218
+                                    "line": 219,
+                                    "end_line": 219
                                 }
                             ],
                             "methods": [
@@ -4258,29 +4262,29 @@
                                     "name": "createElement",
                                     "class": "$dom",
                                     "static": false,
-                                    "line": 220,
-                                    "end_line": 220
+                                    "line": 221,
+                                    "end_line": 221
                                 },
                                 {
                                     "name": "setAttributeNode",
                                     "class": "$overflow",
                                     "static": false,
-                                    "line": 221,
-                                    "end_line": 221
+                                    "line": 222,
+                                    "end_line": 222
                                 },
                                 {
                                     "name": "createAttribute",
                                     "class": "$dom",
                                     "static": false,
-                                    "line": 221,
-                                    "end_line": 221
+                                    "line": 222,
+                                    "end_line": 222
                                 },
                                 {
                                     "name": "setAttribute",
                                     "class": "$overflow",
                                     "static": false,
-                                    "line": 222,
-                                    "end_line": 222
+                                    "line": 223,
+                                    "end_line": 223
                                 }
                             ]
                         }
@@ -4294,8 +4298,8 @@
                             "Attribute": "\\AmpProject\\Html\\Attribute",
                             "Tag": "\\AmpProject\\Html\\Tag"
                         },
-                        "line": 233,
-                        "end_line": 238,
+                        "line": 234,
+                        "end_line": 239,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -4332,18 +4336,18 @@
                             "functions": [
                                 {
                                     "name": "__",
-                                    "line": 235,
-                                    "end_line": 235
+                                    "line": 236,
+                                    "end_line": 236
                                 },
                                 {
                                     "name": "sprintf",
-                                    "line": 237,
-                                    "end_line": 237
+                                    "line": 238,
+                                    "end_line": 238
                                 },
                                 {
                                     "name": "esc_html",
-                                    "line": 237,
-                                    "end_line": 237
+                                    "line": 238,
+                                    "end_line": 238
                                 }
                             ]
                         }
@@ -4363,7 +4367,7 @@
         ],
         "hooks": []
     },
-    "57": {
+    "55": {
         "file": {
             "description": "Class AMP_Base_Sanitizer",
             "long_description": "",
@@ -6659,7 +6663,7 @@
         ],
         "hooks": []
     },
-    "69": {
+    "67": {
         "file": {
             "description": "Class AMP_Links_Sanitizer.",
             "long_description": "",
@@ -6726,7 +6730,7 @@
             }
         ]
     },
-    "83": {
+    "81": {
         "file": {
             "description": "Class AMP_Customizer_Design_Settings",
             "long_description": "",
@@ -6782,7 +6786,7 @@
             }
         ]
     },
-    "84": {
+    "82": {
         "file": {
             "description": "Class AMP_Customizer_Settings",
             "long_description": "",
@@ -6826,7 +6830,7 @@
             }
         ]
     },
-    "89": {
+    "87": {
         "file": {
             "description": "AMP_Post_Template class.",
             "long_description": "",
@@ -7040,7 +7044,7 @@
             }
         }
     },
-    "92": {
+    "90": {
         "file": {
             "description": "Class AMP_DOM_Utils.",
             "long_description": "",
@@ -8332,7 +8336,7 @@
         ],
         "hooks": []
     },
-    "94": {
+    "92": {
         "file": {
             "description": "Class AMP_Image_Dimension_Extractor",
             "long_description": "",
@@ -8452,7 +8456,7 @@
             }
         ]
     },
-    "98": {
+    "96": {
         "file": {
             "description": "Class AMP_Validation_Error_Taxonomy",
             "long_description": "",
@@ -8588,7 +8592,7 @@
             }
         ]
     },
-    "99": {
+    "97": {
         "file": {
             "description": "Class AMP_Validation_Manager",
             "long_description": "",
@@ -8604,7 +8608,7 @@
         "includes": [
             {
                 "name": "",
-                "line": 2610,
+                "line": 2613,
                 "type": "Require"
             }
         ],
@@ -8690,7 +8694,7 @@
             }
         ]
     },
-    "104": {
+    "102": {
         "file": {
             "description": "Add new tab (AMP) in theme install screen in WordPress admin.",
             "long_description": "",
@@ -8755,7 +8759,7 @@
             }
         ]
     },
-    "109": {
+    "107": {
         "file": {
             "description": "Class OptionsMenu",
             "long_description": "",
@@ -8811,7 +8815,7 @@
             }
         ]
     },
-    "116": {
+    "114": {
         "file": {
             "description": "Fetches and formats data for AMP reader themes.",
             "long_description": "",
@@ -8877,7 +8881,51 @@
             }
         ]
     },
-    "128": {
+    "116": {
+        "file": {
+            "description": "Class SiteHealth.",
+            "long_description": "",
+            "tags": [
+                {
+                    "name": "package",
+                    "content": "AmpProject\\AmpWP"
+                }
+            ]
+        },
+        "path": "src\/Admin\/SiteHealth.php",
+        "root": "\/app\/public\/content\/plugins\/amp",
+        "classes": [],
+        "hooks": [
+            {
+                "name": "amp_page_cache_good_response_time_threshold",
+                "line": 347,
+                "end_line": 347,
+                "type": "filter",
+                "arguments": [
+                    "600"
+                ],
+                "doc": {
+                    "description": "Filters the threshold below which a response time is considered good.",
+                    "long_description": "",
+                    "tags": [
+                        {
+                            "name": "since",
+                            "content": "2.2.1"
+                        },
+                        {
+                            "name": "param",
+                            "content": "Threshold in milliseconds.",
+                            "types": [
+                                "int"
+                            ],
+                            "variable": "$threshold"
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "126": {
         "file": {
             "description": "Class MonitorCssTransientCaching.",
             "long_description": "",
@@ -8948,7 +8996,7 @@
             }
         ]
     },
-    "132": {
+    "130": {
         "file": {
             "description": "Class ValidationDataGarbageCollection.",
             "long_description": "",
@@ -9047,7 +9095,7 @@
             }
         ]
     },
-    "148": {
+    "146": {
         "file": {
             "description": "Class UserAccess.",
             "long_description": "",
@@ -9104,7 +9152,7 @@
             }
         ]
     },
-    "184": {
+    "183": {
         "file": {
             "description": "Class MobileRedirection.",
             "long_description": "",
@@ -9256,7 +9304,7 @@
             }
         }
     },
-    "186": {
+    "185": {
         "file": {
             "description": "Class AmpWPConfiguration.",
             "long_description": "",
@@ -9327,7 +9375,7 @@
             }
         ]
     },
-    "194": {
+    "193": {
         "file": {
             "description": "Class PairedRouting.",
             "long_description": "",
@@ -9367,7 +9415,7 @@
             }
         ]
     },
-    "195": {
+    "194": {
         "file": {
             "description": "Class PairedUrl.",
             "long_description": "",
@@ -9839,7 +9887,7 @@
         ],
         "hooks": []
     },
-    "196": {
+    "195": {
         "file": {
             "description": "Class LegacyReaderUrlStructure.",
             "long_description": "",
@@ -9938,7 +9986,7 @@
             }
         ]
     },
-    "200": {
+    "199": {
         "file": {
             "description": "Abstract class PairedUrlStructure.",
             "long_description": "",
