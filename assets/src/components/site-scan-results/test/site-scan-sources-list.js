@@ -13,22 +13,19 @@ import { render } from '@wordpress/element';
  * Internal dependencies
  */
 import { SiteScanSourcesList } from '../site-scan-sources-list';
-import { SiteScanContextProvider } from '../../site-scan-context-provider';
+import { SiteScan } from '../../site-scan-context-provider';
+import scannableUrls from '../data/scannable-urls';
 
 jest.mock( '../../site-scan-context-provider' );
 
 let container;
 const Providers = ( { children } ) => {
 	return (
-		<SiteScanContextProvider
-			fetchCachedValidationErrors={ true }
-			refetchPluginSuppressionOnScanComplete={ true }
-			resetOnOptionsChange={ true }
-			scannableUrlsRestPath={ '/amp/v1/scannable-urls' }
-			validateNonce={ 'xyz' }
-		>
+		<SiteScan.Provider value={ {
+			scannableUrls,
+		} }>
 			{ children }
-		</SiteScanContextProvider>
+		</SiteScan.Provider>
 	);
 };
 
@@ -101,6 +98,33 @@ describe( 'SiteScanSourcesList', () => {
 		expect( container.querySelector( '.site-scan-results__source-name' ).textContent ).toBe( 'Source name' );
 		expect( container.querySelector( '.site-scan-results__source-author' ).textContent ).toBe( 'by John Doe' );
 		expect( container.querySelector( '.site-scan-results__source-version' ).textContent ).toBe( 'Version 1.0.0' );
+	} );
+
+	it( 'renders active source properties with error detail', () => {
+		act( () => {
+			render(
+				<Providers>
+					<SiteScanSourcesList
+						sources={ [
+							{
+								author: 'John Doe',
+								name: 'Bad Block',
+								slug: 'bad-block',
+								status: 'active',
+								version: '1.0.0',
+							},
+						] }
+					/>
+				</Providers>,
+				container,
+			);
+		} );
+
+		const sourceDetailTextContent = container.querySelector( '.site-scan-results__source-detail' ).textContent;
+
+		expect( sourceDetailTextContent ).toMatch( /"name": "bad-block"/ );
+		expect( sourceDetailTextContent ).not.toMatch( /"name": "wp-includes"/ );
+		expect( sourceDetailTextContent ).not.toMatch( /"code": "DISALLOWED_TAG"/ );
 	} );
 
 	it( 'renders inactive source properties', () => {
