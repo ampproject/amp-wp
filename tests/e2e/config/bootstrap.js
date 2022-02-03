@@ -9,6 +9,8 @@ import { get } from 'lodash';
 import {
 	activateTheme,
 	clearLocalStorage,
+	createMenu,
+	deleteAllMenus,
 	enablePageDialogAccept,
 	installTheme,
 	isOfflineMode,
@@ -27,6 +29,16 @@ import { deactivatePlugin, installLocalPlugin } from '../utils/amp-settings-util
  * Environment variables
  */
 const { PUPPETEER_TIMEOUT } = process.env;
+
+/**
+ * Default browser viewport size.
+ *
+ * @type {{width: number, height: number}}
+ */
+export const DEFAULT_BROWSER_VIEWPORT_SIZE = {
+	width: 1600,
+	height: 1000,
+};
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -210,11 +222,8 @@ async function runAxeTestsForBlockEditor() {
 /**
  * Set up browser.
  */
-async function setupBrowser() {
-	await setBrowserViewport( {
-		width: 1600,
-		height: 1000,
-	} );
+export async function setupBrowser() {
+	await setBrowserViewport( DEFAULT_BROWSER_VIEWPORT_SIZE );
 }
 
 /**
@@ -229,6 +238,36 @@ async function createTestData() {
 			wp.apiFetch( { path: '/wp/v2/posts', method: 'POST', data: { title: 'Test Post 2', status: 'publish' } } ),
 		] );
 	} );
+}
+
+/**
+ * Create test posts so that the WordPress instance has some data.
+ */
+async function createTestMenus() {
+	await deleteAllMenus();
+	await createMenu(
+		{
+			name: 'Test Menu 1',
+		},
+		[
+			{
+				title: 'WordPress.org',
+				url: 'https://wordpress.org',
+				menu_order: 1,
+			},
+			{
+				title: 'Wikipedia.org',
+				url: 'https://wikipedia.org',
+				menu_order: 2,
+			},
+			{
+				title: 'Google',
+				url: 'https://google.com',
+				menu_order: 3,
+				parent: 1,
+			},
+		],
+	);
 }
 
 /**
@@ -260,6 +299,7 @@ beforeAll( async () => {
 	await setupThemesAndPlugins();
 	await trashAllPosts();
 	await createTestData();
+	await createTestMenus();
 	await cleanUpSettings();
 	await page.setDefaultNavigationTimeout( 10000 );
 	await page.setDefaultTimeout( 10000 );
