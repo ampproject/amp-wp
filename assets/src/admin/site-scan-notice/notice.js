@@ -1,16 +1,16 @@
 /**
- * WordPress dependencies
- */
-import { useContext, useEffect } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
-
-/**
  * External dependencies
  */
 import {
 	AMP_COMPATIBLE_PLUGINS_URL,
 	SETTINGS_LINK,
 } from 'amp-site-scan-notice'; // From WP inline script.
+
+/**
+ * WordPress dependencies
+ */
+import { useContext, useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies

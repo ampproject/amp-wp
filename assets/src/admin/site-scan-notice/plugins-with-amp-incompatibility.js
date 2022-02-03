@@ -1,13 +1,13 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { useContext } from '@wordpress/element';
 import { _n, sprintf } from '@wordpress/i18n';
-
-/**
- * External dependencies
- */
-import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
