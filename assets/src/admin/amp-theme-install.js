@@ -1,13 +1,13 @@
 /**
+ * External dependencies
+ */
+import { AMP_COMPATIBLE } from 'amp-themes'; // From WP inline script.
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
-
-/**
- * External dependencies
- */
-import { AMP_COMPATIBLE } from 'amp-themes'; // From WP inline script.
 
 /**
  * Internal dependencies
