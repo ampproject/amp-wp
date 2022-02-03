@@ -14,7 +14,7 @@ import AmpPreviewButton from '../components/amp-preview-button';
  */
 function WrappedAmpPreviewButton() {
 	const root = useRef( null );
-	const postPublishButton = useRef( null );
+	const referenceNode = useRef( null );
 
 	const isViewable = useSelect(
 		( select ) => select( 'core' ).getPostType( select( 'core/editor' ).getEditedPostAttribute( 'type' ) )?.viewable,
@@ -22,25 +22,34 @@ function WrappedAmpPreviewButton() {
 	);
 
 	useEffect( () => {
-		if ( ! root.current && ! postPublishButton.current ) {
-			postPublishButton.current = document.querySelector( '.editor-post-publish-button' );
+		if ( ! root.current && ! referenceNode.current ) {
+			// At first, we try finding the post preview button that is visible only on small screens.
+			// If found, we will use its next sibling so that `insertBefore` gets us to the exact location
+			// we are looking for.
+			referenceNode.current = document.querySelector( '.editor-post-preview' )?.nextSibling;
 
-			// Insert the AMP preview button immediately after the post preview button.
-			if ( postPublishButton.current ) {
+			// Since the mobile post preview button is rendered with a delay, we are using the post publish/update
+			// button as a fallback. Because it is rendered early, our AMP preview button will be visible immediately.
+			if ( ! referenceNode.current ) {
+				referenceNode.current = document.querySelector( '.editor-post-publish-button' );
+			}
+
+			if ( referenceNode.current ) {
 				root.current = document.createElement( 'div' );
 				root.current.className = 'amp-wrapper-post-preview';
-				postPublishButton.current.parentNode.insertBefore( root.current, postPublishButton.current );
+				referenceNode.current.parentNode.insertBefore( root.current, referenceNode.current );
 			}
 		}
 
 		return () => {
-			if ( postPublishButton.current && root.current ) {
-				postPublishButton.current.parentNode.removeChild( root.current );
+			if ( referenceNode.current && root.current ) {
+				referenceNode.current.parentNode.removeChild( root.current );
 				root.current = null;
-				postPublishButton.current = null;
+				referenceNode.current = null;
 			}
 		};
-	}, [] );
+	// We use `isViewable` as a dependency in order to reposition the preview button once the block editor is fully loaded.
+	}, [ isViewable ] );
 
 	// It is unlikely that AMP would be enabled for a non-viewable post type. This is why the Preview button will
 	// always be displayed initially (when `isViewable` is undefined), preventing horizontal layout shift.
