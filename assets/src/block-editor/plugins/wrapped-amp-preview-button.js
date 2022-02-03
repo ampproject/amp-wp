@@ -1,92 +1,69 @@
 /**
- * External dependencies
- */
-import { get } from 'lodash';
-
-/**
  * WordPress dependencies
  */
-import { Component, createPortal } from '@wordpress/element';
-import { withSelect } from '@wordpress/data';
-import { ifCondition, compose, pure } from '@wordpress/compose';
+import { createPortal, useEffect, useRef } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { POST_PREVIEW_CLASS } from '../constants';
 import AmpPreviewButton from '../components/amp-preview-button';
 
 /**
  * A wrapper for the AMP preview button that renders it immediately after the 'Post' preview button, when present.
  */
-class WrappedAmpPreviewButton extends Component {
-	/**
-	 * Constructs the class.
-	 *
-	 * @param {*} args Constructor arguments.
-	 */
-	constructor( ...args ) {
-		super( ...args );
+function WrappedAmpPreviewButton() {
+	const root = useRef( null );
+	const referenceNode = useRef( null );
 
-		this.root = document.createElement( 'div' );
-		this.root.className = 'amp-wrapper-post-preview';
+	const isViewable = useSelect(
+		( select ) => select( 'core' ).getPostType( select( 'core/editor' ).getEditedPostAttribute( 'type' ) )?.viewable,
+		[],
+	);
 
-		this.postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
-	}
+	useEffect( () => {
+		if ( ! root.current && ! referenceNode.current ) {
+			// At first, we try finding the post preview button that is visible only on small screens.
+			// If found, we will use its next sibling so that `insertBefore` gets us to the exact location
+			// we are looking for.
+			referenceNode.current = document.querySelector( '.editor-post-preview' )?.nextSibling;
 
-	/**
-	 * Invoked immediately after a component is mounted (inserted into the tree).
-	 */
-	componentDidMount() {
-		if ( ! this.postPreviewButton ) {
-			return;
+			// Since the mobile post preview button is rendered with a delay, we are using the post publish/update
+			// button as a fallback. Because it is rendered early, our AMP preview button will be visible immediately.
+			if ( ! referenceNode.current ) {
+				referenceNode.current = document.querySelector( '.editor-post-publish-button' );
+			}
+
+			if ( referenceNode.current ) {
+				root.current = document.createElement( 'div' );
+				root.current.className = 'amp-wrapper-post-preview';
+				referenceNode.current.parentNode.insertBefore( root.current, referenceNode.current );
+			}
 		}
 
-		// Insert the AMP preview button immediately after the post preview button.
-		this.postPreviewButton.parentNode.insertBefore( this.root, this.postPreviewButton.nextSibling );
+		return () => {
+			if ( referenceNode.current && root.current ) {
+				referenceNode.current.parentNode.removeChild( root.current );
+				root.current = null;
+				referenceNode.current = null;
+			}
+		};
+	// We use `isViewable` as a dependency in order to reposition the preview button once the block editor is fully loaded.
+	}, [ isViewable ] );
+
+	// It is unlikely that AMP would be enabled for a non-viewable post type. This is why the Preview button will
+	// always be displayed initially (when `isViewable` is undefined), preventing horizontal layout shift.
+	// Once the `isViewable` value is defined (which is after the initial block editor load) and it is `false`,
+	// the Preview button will be hidden causing a minor layout shift.
+	if ( ! root.current || isViewable === false ) {
+		return null;
 	}
 
-	/**
-	 * Invoked immediately before a component is unmounted and destroyed.
-	 */
-	componentWillUnmount() {
-		if ( ! this.postPreviewButton ) {
-			return;
-		}
-
-		this.postPreviewButton.parentNode.removeChild( this.root );
-	}
-
-	/**
-	 * Renders the component.
-	 */
-	render() {
-		if ( ! this.postPreviewButton ) {
-			return null;
-		}
-
-		return createPortal( <AmpPreviewButton />, this.root );
-	}
+	return createPortal( <AmpPreviewButton />, root.current );
 }
 
 export const name = 'amp-preview-button-wrapper';
 
 export const onlyPaired = true;
 
-export const render = pure(
-	compose( [
-		withSelect( ( select ) => {
-			const { getPostType } = select( 'core' );
-			const { getEditedPostAttribute } = select( 'core/editor' );
-
-			const postType = getPostType( getEditedPostAttribute( 'type' ) );
-
-			return {
-				isViewable: get( postType, [ 'viewable' ], false ),
-			};
-		} ),
-		// This HOC creator renders the component only when the condition is true. At that point the 'Post' preview
-		// button should have already been rendered (since it also relies on the same condition for rendering).
-		ifCondition( ( { isViewable } ) => isViewable ),
-	] )( WrappedAmpPreviewButton ),
-);
+export const render = WrappedAmpPreviewButton;

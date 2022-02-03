@@ -1,12 +1,4 @@
 /**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
-import domReady from '@wordpress/dom-ready';
-import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
-
-/**
  * External dependencies
  */
 import {
@@ -24,6 +16,14 @@ import {
 	VALIDATE_NONCE,
 } from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
+
+/**
+ * WordPress dependencies
+ */
+import { render } from '@wordpress/element';
+import domReady from '@wordpress/dom-ready';
+import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
