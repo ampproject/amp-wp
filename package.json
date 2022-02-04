@@ -95,7 +95,7 @@
     "rtlcss-webpack-plugin": "4.0.6",
     "semver": "7.3.5",
     "svgo": "2.8.0",
-    "webpack-remove-empty-scripts": "0.7.1",
+    "webpack-remove-empty-scripts": "0.7.3",
     "webpackbar": "5.0.2",
     "wporg-api-client": "1.0.1"
   },
