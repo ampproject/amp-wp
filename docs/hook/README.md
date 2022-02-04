@@ -49,6 +49,7 @@
 * [`amp_normalized_dimension_extractor_image_url`](amp_normalized_dimension_extractor_image_url.md) - Apply filters on the normalized image URL for dimension extraction.
 * [`amp_optimizer_config`](amp_optimizer_config.md) - Filter the configuration to be used for the AMP Optimizer.
 * [`amp_options_menu_is_enabled`](amp_options_menu_is_enabled.md) - Filter whether to enable the AMP settings.
+* [`amp_page_cache_good_response_time_threshold`](amp_page_cache_good_response_time_threshold.md) - Filters the threshold below which a response time is considered good.
 * [`amp_parsed_css_transient_caching_allowed`](amp_parsed_css_transient_caching_allowed.md) - Filters whether parsed CSS is allowed to be cached in transients.
 * [`amp_post_status_default_enabled`](amp_post_status_default_enabled.md) - Filters whether default AMP status should be enabled or not.
 * [`amp_post_template_analytics`](amp_post_template_analytics.md) - Add amp-analytics tags.
