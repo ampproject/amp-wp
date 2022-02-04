@@ -469,21 +469,19 @@ li.error-kept {
 	}
 }
 
-.amp-analytics-entry__text-inputs {
-	display: flex;
-	flex-wrap: wrap;
+.amp-analytics-entry__select-control .components-select-control {
+	flex-direction: row;
+	align-items: baseline;
 }
 
-.amp .amp-analytics-entry__text-inputs .components-base-control__field {
-	align-items: center;
-	display: flex;
+.amp-analytics-entry__select-control .components-select-control__input {
+	max-width: inherit;
+}
+
+.amp .amp-analytics-entry__select-control .components-input-control__container {
+	display: block;
+	margin-left: 1rem;
 	margin-bottom: 0.75rem;
-	min-width: 240px;
-	padding-right: 2rem;
-}
-
-.amp-analytics-entry__text-inputs .components-base-control__label {
-	margin-bottom: 0;
 }
 
 .amp-analytics-entry .amp-notice {

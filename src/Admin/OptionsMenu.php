@@ -186,6 +186,24 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	}
 
 	/**
+	 * Gets analytics vendors list from data directory.
+	 */
+	public function get_analytics_vendors() {
+		$vendors_list_file = AMP__DIR__ . '/data/analytics-vendors-list.json';
+
+		if ( ! file_exists( $vendors_list_file ) ) {
+			return []; // @codeCoverageIgnore
+		}
+
+		$vendors_list = file_get_contents( $vendors_list_file );
+		$vendors_list = json_decode( $vendors_list, true );
+
+		$error = json_last_error();
+
+		return ! empty( $error ) ? [] : $vendors_list;
+	}
+
+	/**
 	 * Enqueues settings page assets.
 	 *
 	 * @since 2.0
@@ -261,6 +279,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : '',
 			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
 			'HAS_PAGE_CACHING'                   => ( is_array( $page_cache_detail ) && 'good' === $page_cache_detail['status'] ),
+			'ANALYTICS_VENDORS_LIST'             => $this->get_analytics_vendors(),
 		];
 
 		wp_add_inline_script(

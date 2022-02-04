@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
+import { ANALYTICS_VENDORS_LIST as AnalyticsVendors } from 'amp-settings';
 
 /**
  * WordPress dependencies
@@ -10,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Icon, plus, trash } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect, useRef } from '@wordpress/element';
-import { Button, TextControl, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
+import { Button, PanelRow, BaseControl, VisuallyHidden, SelectControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -116,6 +117,13 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 		? defaultValue
 		: config;
 
+	/* Populating options for analytics vendors. */
+	const options = [];
+	options.push( { value: '', label: 'Select Type...' } );
+	[ ...Object.keys( AnalyticsVendors ) ].forEach( ( vendor ) => {
+		options.push( { value: vendor, label: AnalyticsVendors[ vendor ] } );
+	} );
+
 	return (
 		<PanelRow className="amp-analytics-entry">
 			<h4>
@@ -125,18 +133,15 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 				}
 			</h4>
 			<div className="amp-analytics-entry__options" id={ `amp-analytics-entry-${ String( entryIndex ) }` }>
-				<div className="amp-analytics-entry__text-inputs">
-					<TextControl
-						className="option-input"
+				<div className="amp-analytics-entry__select-control">
+					<SelectControl
+						className="option-select"
 						label={ __( 'Type:', 'amp' ) }
 						onChange={ ( newType ) => {
 							onChange( { type: newType } );
 						} }
-						type="text"
-						pattern="^[a-zA-Z0-9_.-]+$"
-						title={ __( 'Must be a valid vendor or left blank for in-house analytics.', 'amp' ) }
-						placeholder={ __( 'Vendor or blank', 'amp' ) }
 						value={ type }
+						options={ options }
 					/>
 				</div>
 
@@ -272,4 +277,3 @@ export function Analytics() {
 		</div>
 	);
 }
-
