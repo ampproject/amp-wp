@@ -174,6 +174,11 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		);
 	}
 
+	/** @covers ::get_analytics_vendors() */
+	public function test_get_analytics_vendors() {
+		$this->assertNotEmpty( $this->instance->get_analytics_vendors() );
+	}
+
 	/** @covers ::enqueue_assets() */
 	public function test_enqueue_assets_wrong_hook_suffix() {
 		$this->instance->enqueue_assets( 'nope' );
