@@ -137,6 +137,7 @@
     "test:js:watch": "npm run test:js -- --watch",
     "test:php": "vendor/bin/phpunit",
     "test:php:help": "npm run test:php -- --help",
+    "update-analytics-vendors": "node ./bin/update-analytics-vendors.js",
     "update-ecosystem-files": "node ./bin/update-extension-files.js"
   },
   "npmpackagejsonlint": {
