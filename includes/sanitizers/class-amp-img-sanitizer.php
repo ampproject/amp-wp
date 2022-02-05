@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
+use AmpProject\Dom\Element;
 use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
 use AmpProject\Layout;
@@ -83,11 +84,67 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Mark node and it's child as being PX-verified.
+	 *
+	 * @param DOMNode $node Node.
+	 *
+	 * @return void
+	 */
+	private static function mark_node_as_px_verified_recursively( DOMNode $node ) {
+
+		ValidationExemption::mark_node_as_px_verified( $node );
+
+		if ( $node->hasChildNodes() ) {
+			foreach ( $node->childNodes as $child_node ) {
+				self::mark_node_as_px_verified_recursively( $child_node );
+			}
+		}
+	}
+
+	/**
+	 * Convert picture element into image element or mark as px verified.
+	 *
+	 * @return void
+	 */
+	protected function process_picture_elements() {
+
+		$nodes     = $this->dom->getElementsByTagName( Tag::PICTURE );
+		$num_nodes = $nodes->length;
+
+		if ( 0 === $num_nodes ) {
+			return;
+		}
+
+		for ( $index = $num_nodes - 1; $index >= 0; $index-- ) {
+
+			/** @var Element $picture_node */
+			$picture_node = $nodes->item( $index );
+
+			if ( true === $this->args['native_img_used'] ) {
+				self::mark_node_as_px_verified_recursively( $picture_node );
+			} else {
+				/** @var DOMNodeList $image_node_list */
+				$image_node_list = $this->dom->xpath->query( './img', $picture_node );
+
+				if ( empty( $image_node_list ) ) {
+					continue;
+				}
+
+				/** @var Element $image_node */
+				$image_node = $image_node_list->item( 0 )->cloneNode( true );
+				$picture_node->parentNode->replaceChild( $image_node, $picture_node );
+			}
+		}
+	}
+
+	/**
 	 * Sanitize the <img> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 */
 	public function sanitize() {
+
+		$this->process_picture_elements();
 
 		/**
 		 * Node list.
