@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\ValidationExemption;
@@ -18,6 +19,8 @@ use AmpProject\Dom\Document;
 class AMP_Img_Sanitizer_Test extends TestCase {
 
 	use PrivateAccess;
+
+	use MarkupComparison;
 
 	/**
 	 * Set up.
@@ -645,5 +648,73 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				'post_type'      => 'attachment',
 			]
 		);
+	}
+
+	/**
+	 * Data provider for $this->test_process_picture_elements()
+	 */
+	public function get_data_for_process_picture_elements() {
+
+		$content = '<div>
+	<picture><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt=""></picture>
+	<picture><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt=""></picture>
+</div>
+<div>
+	<picture><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt=""></picture>
+</div>';
+
+		return [
+			'native_img_used_true'    => [
+				'input'    => $content,
+				'args'     => [
+					'native_img_used' => false,
+				],
+				'expected' => '<div>
+	<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="">
+	<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="">
+</div>
+<div>
+	<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+</div>',
+			],
+			'native_img_used_false'   => [
+				'input'    => $content,
+				'args'     => [
+					'native_img_used' => true,
+				],
+				'expected' => '<div>
+	<picture data-px-verified-tag><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" data-px-verified-tag></picture>
+	<picture data-px-verified-tag><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" data-px-verified-tag></picture>
+</div>
+<div>
+	<picture data-px-verified-tag><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" data-px-verified-tag></picture>
+</div>',
+			],
+			'without_picture_element' => [
+				'input'    => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
+				'args'     => [
+					'native_img_used' => true,
+				],
+				'expected' => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_for_process_picture_elements()
+	 *
+	 * @covers ::mark_node_as_px_verified_recursively()
+	 * @covers ::process_picture_elements()
+	 */
+	public function test_process_picture_elements( $input, $args, $expected ) {
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $input );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, $args );
+
+		$this->call_private_method( $sanitizer, 'process_picture_elements' );
+
+		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEqualMarkup( $expected, $actual );
 	}
 }
