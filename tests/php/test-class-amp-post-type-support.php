@@ -35,15 +35,31 @@ class Test_AMP_Post_Type_Support extends TestCase {
 		register_post_type(
 			'book',
 			[
-				'label'  => 'Book',
-				'public' => true,
+				'label'              => 'Book',
+				'publicly_queryable' => true,
+			]
+		);
+		register_post_type(
+			'car',
+			[
+				'label'              => 'Car',
+				'public'             => false,
+				'publicly_queryable' => true,
 			]
 		);
 		register_post_type(
 			'secret',
 			[
-				'label'  => 'Secret',
-				'public' => false,
+				'label'              => 'Secret',
+				'publicly_queryable' => false,
+			]
+		);
+		register_post_type(
+			'secret_book',
+			[
+				'label'              => 'Secret book',
+				'public'             => true,
+				'publicly_queryable' => false,
 			]
 		);
 
@@ -51,6 +67,7 @@ class Test_AMP_Post_Type_Support extends TestCase {
 			[
 				'post',
 				'page',
+				'car',
 				'attachment',
 				'book',
 			],
@@ -69,6 +86,7 @@ class Test_AMP_Post_Type_Support extends TestCase {
 			[
 				'post',
 				'page',
+				'car',
 				'secret',
 				'book',
 			],
