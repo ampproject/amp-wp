@@ -21,7 +21,7 @@ class Test_AMP_Post_Type_Support extends TestCase {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		foreach ( [ 'book', 'poem', 'secret' ] as $post_type ) {
+		foreach ( [ 'book', 'poem', 'secret', 'car', 'secret_book' ] as $post_type ) {
 			unregister_post_type( $post_type );
 		}
 	}
