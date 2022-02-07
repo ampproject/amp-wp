@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { act } from 'react-dom/test-utils';
 
 /**
@@ -18,28 +17,30 @@ import { useNormalizedPluginsData } from '../use-normalized-plugins-data';
 
 jest.mock( '../index' );
 
-let returnValue = {};
-
-function ComponentContainingHook() {
-	returnValue = useNormalizedPluginsData();
-	return null;
-}
-
-const Providers = ( { children, fetchingPlugins, plugins = [] } ) => (
-	<ErrorContextProvider>
-		<PluginsContextProvider plugins={ plugins } fetchingPlugins={ fetchingPlugins }>
-			{ children }
-		</PluginsContextProvider>
-	</ErrorContextProvider>
-);
-Providers.propTypes = {
-	children: PropTypes.any,
-	fetchingPlugins: PropTypes.bool,
-	plugins: PropTypes.array,
-};
-
 describe( 'useNormalizedPluginsData', () => {
 	let container = null;
+
+	function setup( { fetchingPlugins, plugins } ) {
+		let returnValue;
+
+		function ComponentContainingHook() {
+			returnValue = useNormalizedPluginsData();
+			return null;
+		}
+
+		act( () => {
+			render(
+				<ErrorContextProvider>
+					<PluginsContextProvider fetchingPluging={ fetchingPlugins } plugins={ plugins }>
+						<ComponentContainingHook />
+					</PluginsContextProvider>
+				</ErrorContextProvider>,
+				container,
+			);
+		} );
+
+		return returnValue;
+	}
 
 	beforeEach( () => {
 		container = document.createElement( 'div' );
@@ -50,65 +51,50 @@ describe( 'useNormalizedPluginsData', () => {
 		unmountComponentAtNode( container );
 		container.remove();
 		container = null;
-		returnValue = {};
 	} );
 
-	it( 'returns empty an array if plugins are being fetched', () => {
-		act( () => {
-			render(
-				<Providers
-					fetchingPlugins={ true }
-					plugins={ [ 'foo' ] }
-				>
-					<ComponentContainingHook />
-				</Providers>,
-				container,
-			);
+	it( 'returns an empty object if plugins are being fetched', () => {
+		const normalizedPluginsData = setup( {
+			fetchingPlugins: true,
+			plugins: [],
 		} );
 
-		expect( returnValue ).toHaveLength( 0 );
+		expect( normalizedPluginsData ).toStrictEqual( {} );
 	} );
 
-	it( 'returns a normalized array of plugins', () => {
-		act( () => {
-			render(
-				<Providers
-					fetchingPlugins={ false }
-					plugins={ [
-						{
-							author: {
-								raw: 'Acme Inc.',
-								rendered: '<a href="http://example.com">Acme Inc.</a>',
-							},
-							author_uri: {
-								raw: 'http://example.com',
-								rendered: 'http://example.com',
-							},
-							name: 'Acme Plugin',
-							plugin: 'acme-inc',
-							status: 'inactive',
-							version: '1.0.1',
-						},
-						{
-							author: 'AMP Project Contributors',
-							author_uri: 'https://github.com/ampproject/amp-wp/graphs/contributors',
-							name: {
-								raw: 'AMP',
-								rendered: '<strong>AMP</strong>',
-							},
-							plugin: 'amp/amp',
-							status: 'active',
-							version: '2.2.0-alpha',
-						},
-					] }
-				>
-					<ComponentContainingHook />
-				</Providers>,
-				container,
-			);
+	it( 'returns an object with normalized plugins data', () => {
+		const normalizedPluginsData = setup( {
+			fetchingPlugins: false,
+			plugins: [
+				{
+					author: {
+						raw: 'Acme Inc.',
+						rendered: '<a href="http://example.com">Acme Inc.</a>',
+					},
+					author_uri: {
+						raw: 'http://example.com',
+						rendered: 'http://example.com',
+					},
+					name: 'Acme Plugin',
+					plugin: 'acme-inc',
+					status: 'inactive',
+					version: '1.0.1',
+				},
+				{
+					author: 'AMP Project Contributors',
+					author_uri: 'https://github.com/ampproject/amp-wp/graphs/contributors',
+					name: {
+						raw: 'AMP',
+						rendered: '<strong>AMP</strong>',
+					},
+					plugin: 'amp/amp',
+					status: 'active',
+					version: '2.2.0-alpha',
+				},
+			],
 		} );
 
-		expect( returnValue ).toStrictEqual( {
+		expect( normalizedPluginsData ).toStrictEqual( {
 			'acme-inc': {
 				author: 'Acme Inc.',
 				author_uri: 'http://example.com',
