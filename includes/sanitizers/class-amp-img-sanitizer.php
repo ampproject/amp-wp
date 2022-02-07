@@ -123,7 +123,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			if ( true === $this->args['native_img_used'] ) {
 				self::mark_node_as_px_verified_recursively( $picture_node );
 			} else {
-				/** @var DOMNodeList $image_node_list */
+				/** @var DOMNodeList|false $image_node_list */
 				$image_node_list = $this->dom->xpath->query( './img', $picture_node );
 
 				if ( empty( $image_node_list ) ) {
