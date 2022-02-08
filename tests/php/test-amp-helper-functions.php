@@ -556,8 +556,8 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		amp_remove_admin_bar_in_phone_preview();
 		$output = ob_get_clean();
 
-		$this->assertContains( '<script data-ampdevmode>', $output );
-		$this->assertContains( "'amp-wizard-completion-preview' !== window.name )", $output );
+		$this->assertStringContainsString( '<script data-ampdevmode>', $output );
+		$this->assertStringContainsString( "'amp-wizard-completion-preview' !== window.name )", $output );
 
 		remove_filter( 'amp_dev_mode_enabled', '__return_true', 99 );
 		remove_filter( 'show_admin_bar', '__return_true', 99 );
