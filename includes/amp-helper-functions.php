@@ -201,7 +201,7 @@ function amp_init() {
 /**
  * Remove the admin bar in phone preview of the site in AMP Onboarding Wizard.
  *
- * @since 2.3
+ * @since 2.2.2
  * @internal
  */
 function amp_remove_admin_bar_in_phone_preview() {
