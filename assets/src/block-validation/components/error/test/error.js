@@ -142,26 +142,42 @@ function createTestStoreAndBlocks() {
 }
 
 function getTestBlock( type ) {
+	let testBlock;
+
 	switch ( type ) {
 		case 'plugin':
 		case 'removed':
-			return pluginBlock;
+			testBlock = pluginBlock;
+			break;
 
 		case 'mu-plugin':
-			return muPluginBlock;
+			testBlock = muPluginBlock;
+			break;
 
 		case 'theme':
-			return themeBlock;
+			testBlock = themeBlock;
+			break;
 
 		case 'core':
-			return coreBlock;
+			testBlock = coreBlock;
+			break;
 
 		case 'unknown':
-			return unknownBlock;
+			testBlock = unknownBlock;
+			break;
 
 		default:
-			return null;
+			testBlock = {};
 	}
+
+	return testBlock?.clientId || null;
+}
+
+function getErrorTypeClassName( status ) {
+	return [
+		VALIDATION_ERROR_NEW_REJECTED_STATUS,
+		VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+	].includes( status ) ? 'new' : 'reviewed';
 }
 
 describe( 'Error', () => {
@@ -203,14 +219,12 @@ describe( 'Error', () => {
 			);
 		} );
 
-		const newReviewed = [ VALIDATION_ERROR_NEW_REJECTED_STATUS, VALIDATION_ERROR_NEW_ACCEPTED_STATUS ].includes( status ) ? 'new' : 'reviewed';
-
 		expect( container.firstChild.classList ).toContain( 'amp-error' );
-		expect( container.querySelectorAll( `.amp-error--${ newReviewed }` ) ).toHaveLength( 1 );
+		expect( container.querySelectorAll( `.amp-error--${ getErrorTypeClassName( status ) }` ) ).toHaveLength( 1 );
 		expect( container.querySelector( '.amp-error__details-link' ) ).toBeNull();
-		expect( container.querySelector( `.amp-error--${ newReviewed } button` ) ).not.toBeNull();
+		expect( container.querySelector( `.amp-error--${ getErrorTypeClassName( status ) } button` ) ).not.toBeNull();
 
-		container.querySelector( `.amp-error--${ newReviewed } button` ).click();
+		container.querySelector( `.amp-error--${ getErrorTypeClassName( status ) } button` ).click();
 		expect( container.querySelector( '.amp-error__block-type-icon' ) ).toBeNull();
 		expect( container.querySelector( '.amp-error__details-link' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__select-block' ) ).toBeNull();
@@ -240,14 +254,12 @@ describe( 'Error', () => {
 			);
 		} );
 
-		const newReviewed = [ VALIDATION_ERROR_NEW_REJECTED_STATUS, VALIDATION_ERROR_NEW_ACCEPTED_STATUS ].includes( status ) ? 'new' : 'reviewed';
-
 		expect( container.firstChild.classList ).toContain( 'amp-error' );
-		expect( container.querySelectorAll( `.amp-error--${ newReviewed }` ) ).toHaveLength( 1 );
+		expect( container.querySelectorAll( `.amp-error--${ getErrorTypeClassName( status ) }` ) ).toHaveLength( 1 );
 		expect( container.querySelector( '.amp-error__details-link' ) ).toBeNull();
-		expect( container.querySelector( `.amp-error--${ newReviewed } button` ) ).not.toBeNull();
+		expect( container.querySelector( `.amp-error--${ getErrorTypeClassName( status ) } button` ) ).not.toBeNull();
 
-		container.querySelector( `.amp-error--${ newReviewed } button` ).click();
+		container.querySelector( `.amp-error--${ getErrorTypeClassName( status ) } button` ).click();
 		expect( container.querySelector( '.amp-error__block-type-icon' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__details-link' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__select-block' ) ).not.toBeNull();
@@ -278,10 +290,8 @@ describe( 'Error', () => {
 			);
 		} );
 
-		const newReviewed = [ VALIDATION_ERROR_NEW_REJECTED_STATUS, VALIDATION_ERROR_NEW_ACCEPTED_STATUS ].includes( status ) ? 'new' : 'reviewed';
-
 		expect( container.firstChild.classList ).toContain( 'amp-error' );
-		expect( container.querySelectorAll( `.amp-error--${ newReviewed }` ) ).toHaveLength( 1 );
+		expect( container.querySelectorAll( `.amp-error--${ getErrorTypeClassName( status ) }` ) ).toHaveLength( 1 );
 		expect( container.querySelector( '.amp-error--removed' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__details-link' ) ).toBeNull();
 		expect( container.querySelector( '.amp-error--removed button' ) ).not.toBeNull();
@@ -310,7 +320,6 @@ describe( 'ErrorTypeIcon', () => {
 			'html_attribute_error',
 			'html_element_error',
 			'css_error',
-			'unknown_error',
 		],
 	)( 'shows the correct error icon', ( errorType ) => {
 		act( () => {
@@ -325,35 +334,23 @@ describe( 'ErrorTypeIcon', () => {
 			);
 		} );
 
-		let expectedClass;
-		switch ( errorType ) {
-			case 'html_attribute_error':
-				expectedClass = '.amp-error__error-type-icon--html-attribute-error';
-				break;
+		expect( container.querySelector( `.amp-error__error-type-icon--${ errorType.replace( /_/g, '-' ) }` ) ).not.toBeNull();
+	} );
 
-			case 'html_element_error':
-				expectedClass = '.amp-error__error-type-icon--html-element-error';
-				break;
+	it( 'shows no error icon for unknown error type', () => {
+		act( () => {
+			render(
+				<Error
+					status={ 3 }
+					term_id={ 12 }
+					title="My test error"
+					error={ { type: 'unknown_error', sources: [] } }
+				/>,
+				container,
+			);
+		} );
 
-			case 'js_error':
-				expectedClass = '.amp-error__error-type-icon--js-error';
-				break;
-
-			case 'css_error':
-				expectedClass = '.amp-error__error-type-icon--css-error';
-				break;
-
-			default:
-				expectedClass = null;
-		}
-
-		if ( ! expectedClass ) {
-			// eslint-disable-next-line jest/no-conditional-expect
-			expect( container.querySelector( 'svg[class^=amp-error__error-type-icon]' ) ).toBeNull();
-		} else {
-			// eslint-disable-next-line jest/no-conditional-expect
-			expect( container.querySelector( expectedClass ) ).not.toBeNull();
-		}
+		expect( container.querySelector( 'svg[class^=amp-error__error-type-icon]' ) ).toBeNull();
 	} );
 } );
 
@@ -372,6 +369,7 @@ describe( 'ErrorContent', () => {
 		container = null;
 	} );
 
+	/* eslint-disable jest/no-conditional-in-test */
 	it.each( [
 		null,
 		'plugin',
@@ -393,7 +391,7 @@ describe( 'ErrorContent', () => {
 		],
 		[],
 	) )( 'shows expected content based on whether or not the error has an associated block', ( testBlockSource, status ) => {
-		const clientId = getTestBlock( testBlockSource )?.clientId || null;
+		const clientId = getTestBlock( testBlockSource );
 
 		render(
 			<Error
@@ -452,8 +450,8 @@ describe( 'ErrorContent', () => {
 
 			default:
 				break;
-			/* eslint-enable jest/no-conditional-expect */
 		}
+		/* eslint-enable jest/no-conditional-expect */
 
 		expect( container.innerHTML ).toContain(
 			[ VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS ].includes( status ) ? 'Removed' : 'Kept',
@@ -466,4 +464,5 @@ describe( 'ErrorContent', () => {
 		container.querySelector( '.amp-error__select-block' ).click();
 		expect( select( 'core/block-editor' ).getSelectedBlock().clientId ).toBe( clientId );
 	} );
+	/* eslint-enable jest/no-conditional-in-test */
 } );
