@@ -22,6 +22,11 @@ async function testCommonDoneStepElements() {
 	await expect( page ).toMatchElement( 'p', { text: /Browse your site/i } );
 	await expect( page ).toMatchElement( '.done__preview-iframe' );
 
+	// Checks for admin bar in iframe phone preview.
+	const iframeElement = await page.$( 'iframe[name="amp-wizard-completion-preview"]' );
+	const previewFrame = await iframeElement.contentFrame();
+	await expect( previewFrame ).not.toMatchElement( '#wpadminbar' );
+
 	await expect( '.done__links-container a' ).not.countToBe( 0 );
 
 	const originalIframeSrc = await page.$eval( '.done__preview-iframe', ( e ) => e.getAttribute( 'src' ) );

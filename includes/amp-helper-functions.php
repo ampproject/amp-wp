@@ -194,37 +194,43 @@ function amp_init() {
 	 * Detects whether the current window is in an iframe with the specified `name` attribute. The iframe is created
 	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
 	 */
-	add_action(
-		'wp_print_scripts',
-		function() {
-			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+	add_action( 'wp_head', 'amp_remove_admin_bar_in_phone_preview' );
+	add_action( 'amp_post_template_head', 'amp_remove_admin_bar_in_phone_preview' );
+}
+
+/**
+ * Remove the admin bar in phone preview of the site in AMP Onboarding Wizard.
+ *
+ * @since 2.2.2
+ * @internal
+ */
+function amp_remove_admin_bar_in_phone_preview() {
+	if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+		return;
+	}
+	?>
+	<script data-ampdevmode>
+		( () => {
+			if ( 'amp-wizard-completion-preview' !== window.name ) {
 				return;
 			}
-			?>
-			<script data-ampdevmode>
-				( () => {
-					if ( 'amp-wizard-completion-preview' !== window.name ) {
-						return;
-					}
 
-					/** @type {HTMLStyleElement} */
-					const style = document.createElement( 'style' );
-					style.setAttribute( 'type', 'text/css' );
-					style.appendChild( document.createTextNode( 'html:not(#_) { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
-					document.head.appendChild( style );
+			/** @type {HTMLStyleElement} */
+			const style = document.createElement( 'style' );
+			style.setAttribute( 'type', 'text/css' );
+			style.appendChild( document.createTextNode( 'html:not(#_) { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
+			document.head.appendChild( style );
 
-					document.addEventListener( 'DOMContentLoaded', function() {
-						const adminBar = document.getElementById( 'wpadminbar' );
-						if ( adminBar ) {
-							document.body.classList.remove( 'admin-bar' );
-							adminBar.remove();
-						}
-					});
-				} )();
-			</script>
-			<?php
-		}
-	);
+			document.addEventListener( 'DOMContentLoaded', function() {
+				const adminBar = document.getElementById( 'wpadminbar' );
+				if ( adminBar ) {
+					document.body.classList.remove( 'admin-bar' );
+					adminBar.remove();
+				}
+			});
+		} )();
+	</script>
+	<?php
 }
 
 /**
