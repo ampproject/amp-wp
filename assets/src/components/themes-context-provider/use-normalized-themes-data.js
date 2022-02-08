@@ -10,7 +10,7 @@ import { Themes } from './index';
 
 export function useNormalizedThemesData() {
 	const { fetchingThemes, themes } = useContext( Themes );
-	const [ normalizedThemesData, setNormalizedThemesData ] = useState( [] );
+	const [ normalizedThemesData, setNormalizedThemesData ] = useState( {} );
 
 	useEffect( () => {
 		if ( fetchingThemes || themes.length === 0 ) {

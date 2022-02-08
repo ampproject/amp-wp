@@ -88,6 +88,6 @@ export default ( InitialMediaUpload ) => {
 				}
 				this.frame.close();
 			}, this );
-		}
+		};
 	};
 };

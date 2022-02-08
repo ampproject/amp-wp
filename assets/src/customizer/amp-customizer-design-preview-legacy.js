@@ -25,7 +25,7 @@
 	// AMP background color scheme.
 	wp.customize( 'amp_customizer[color_scheme]', function( value ) {
 		value.bind( function( to ) {
-			var colors = amp_customizer_design.color_schemes[ to ]; // eslint-disable-line no-var
+			var colors = amp_customizer_design.color_schemes[ to ]; // eslint-disable-line no-var, camelcase
 
 			if ( ! colors ) {
 				console.error( 'Selected color scheme "%s" not registered.', to ); // eslint-disable-line no-console

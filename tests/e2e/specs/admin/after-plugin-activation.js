@@ -55,7 +55,7 @@ describe( 'After plugin activation', () => {
 	] )( 'site scan is triggered automatically and displays validation issues for AMP-incompatible plugin %s', async ( title ) => {
 		const withoutGutenberg = title.startsWith( 'without' );
 
-		//eslint-disable-next-line jest/no-if
+		//eslint-disable-next-line jest/no-conditional-in-test
 		if ( withoutGutenberg ) {
 			await deactivate( 'gutenberg' );
 		}
@@ -74,7 +74,7 @@ describe( 'After plugin activation', () => {
 
 		await expect( page ).not.toMatchElement( '#amp-site-scan-notice' );
 
-		//eslint-disable-next-line jest/no-if
+		//eslint-disable-next-line jest/no-conditional-in-test
 		if ( withoutGutenberg ) {
 			await activate( 'gutenberg' );
 		}
