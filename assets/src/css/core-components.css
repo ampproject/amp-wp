@@ -11,7 +11,7 @@
 }
 
 .amp .components-button:not(.components-panel__body-toggle) svg {
-	fill: currentColor;
+	fill: currentcolor;
 	margin: 0 0.5rem;
 	height: 18px;
 	width: 18px;

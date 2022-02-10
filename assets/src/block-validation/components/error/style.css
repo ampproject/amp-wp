@@ -32,7 +32,7 @@
 
 .amp-error__error-type-icon {
 	align-items: center;
-	background-color: currentColor;
+	background-color: currentcolor;
 	border: 1px solid;
 	border-radius: 12px;
 	color: #707070;
@@ -154,7 +154,7 @@
 }
 
 .amp-error__details-link svg path {
-	fill: currentColor;
+	fill: currentcolor;
 }
 
 /*
