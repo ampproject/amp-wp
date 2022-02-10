@@ -93,7 +93,7 @@ class UpdateAnalyticsVendors {
 					// Loop through multiple vendor slugs with same titles and append extra information to title.
 					vendorSlugs.forEach( ( slug ) => {
 						if ( vendorSlugs.indexOf( slug ) === 0 ) {
-							this.vendors[ vendorSlugs[ 0 ] ] = vendorTitle.replace( /(<([^>]+)>)/gi, '' ).trim();
+							this.vendors[ 'N/A' !== slug ? slug : '' ] = vendorTitle.replace( /(<([^>]+)>)/gi, '' ).trim();
 							return;
 						}
 
