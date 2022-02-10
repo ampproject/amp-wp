@@ -112,17 +112,16 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 
 	const defaultValue = vendorConfigs[ type ]?.sample || '{}';
 
-	/** @type {string} value */
-	const value = ( '' === config.trim() || Object.values( vendorConfigs ).find( ( { sample } ) => sample === config ) ) && ! isTextareaFocused()
+	/** @type {string} textareaControlValue */
+	const textareaControlValue = ( '' === config.trim() || Object.values( vendorConfigs ).find( ( { sample } ) => sample === config ) ) && ! isTextareaFocused()
 		? defaultValue
 		: config;
 
 	/* Populating options for analytics vendors. */
-	const options = [];
-	options.push( { value: '', label: 'Select Type...' } );
-	[ ...Object.keys( AnalyticsVendors ) ].forEach( ( vendor ) => {
-		options.push( { value: vendor, label: AnalyticsVendors[ vendor ] } );
-	} );
+	const options = [
+		{ value: '', label: __( 'Select Type…', 'amp' ) },
+		...Object.entries( AnalyticsVendors ).map( ( [ value, label ] ) => ( { value, label } ) ),
+	];
 
 	return (
 		<PanelRow className="amp-analytics-entry">
@@ -159,7 +158,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 					label={ __( 'JSON Configuration:', 'amp' ) }
 				>
 					<textarea
-						rows={ Math.max( 10, ( value.match( /\n/g ) || [] ).length + 1 ) }
+						rows={ Math.max( 10, ( textareaControlValue.match( /\n/g ) || [] ).length + 1 ) }
 						cols="100"
 						className="amp-analytics-input"
 						id={ `analytics-textarea-control-${ entryIndex }` }
@@ -169,7 +168,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 						placeholder="{...}"
 						ref={ textAreaRef }
 						required
-						value={ value }
+						value={ textareaControlValue }
 					/>
 				</BaseControl>
 			</div>
