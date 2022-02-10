@@ -119,7 +119,6 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 
 	/* Populating options for analytics vendors. */
 	const options = [
-		{ value: '', label: __( 'Select Type…', 'amp' ) },
 		...Object.entries( AnalyticsVendors ).map( ( [ value, label ] ) => ( { value, label } ) ),
 	];
 
