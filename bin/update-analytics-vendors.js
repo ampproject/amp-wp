@@ -39,16 +39,12 @@ class UpdateAnalyticsVendors {
 	async fetchData() {
 		// Remote URL for analytics vendors.
 		const url =
-			'https://api.github.com/repos/ampproject/amphtml/contents/extensions/amp-analytics/analytics-vendors-list.md';
+			'https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-analytics/analytics-vendors-list.md';
 		const response = await axios.get( url );
 
-		// Getting encoded content of the file.
-		const encodedContent = response.data.content;
-
-		// Convert base64 to utf8.
-		const decodedContent = Buffer.from( encodedContent, 'base64' );
+		// A new readable stream for response data.
 		const bufferStream = new stream.PassThrough();
-		bufferStream.end( decodedContent );
+		bufferStream.end( response.data );
 
 		// Create a readline interface to read the file line by line.
 		const fileContent = readline.createInterface( {
@@ -92,7 +88,7 @@ class UpdateAnalyticsVendors {
 
 				// Populate vendors object.
 				if ( vendorSlug && vendorTitle ) {
-					const vendorSlugs = vendorSlug.replace( /`/g, '' ).trim().split( ',' );
+					const vendorSlugs = vendorSlug.replace( /[^\w,\/-]/g, '' ).trim().split( ',' );
 
 					// Loop through multiple vendor slugs with same titles and append extra information to title.
 					vendorSlugs.forEach( ( slug ) => {
