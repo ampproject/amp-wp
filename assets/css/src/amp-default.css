@@ -62,6 +62,10 @@ amp-carousel .amp-wp-gallery-caption {
 	padding: 1rem;
 }
 
+amp-carousel .amp-wp-gallery-caption a {
+	color: inherit;
+}
+
 .wp-block-gallery[data-amp-carousel="true"],
 .wp-block-gallery[data-amp-carousel="true"].has-nested-images {
 	display: block;
