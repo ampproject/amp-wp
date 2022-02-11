@@ -2974,7 +2974,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$class       = 'amp' . substr( md5( $value ), 0, 7 );
+		$class       = 'amp-wp-' . substr( md5( $value ), 0, 7 );
 		$specificity = ':not(' . str_repeat( '#_', self::INLINE_SPECIFICITY_MULTIPLIER ) . ')';
 		$rule        = sprintf( '.%s%s{%s}', $class, $specificity, $value );
 
