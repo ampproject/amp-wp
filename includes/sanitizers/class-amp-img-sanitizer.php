@@ -57,6 +57,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = [
 		'add_noscript_fallback' => true,
 		'native_img_used'       => false,
+		'allow_picture'         => false,
 	];
 
 	/**
@@ -84,24 +85,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Mark node and it's child as being PX-verified.
-	 *
-	 * @param DOMNode $node Node.
-	 *
-	 * @return void
-	 */
-	private static function mark_node_as_px_verified_recursively( DOMNode $node ) {
-
-		ValidationExemption::mark_node_as_px_verified( $node );
-
-		if ( $node->hasChildNodes() ) {
-			foreach ( $node->childNodes as $child_node ) {
-				self::mark_node_as_px_verified_recursively( $child_node );
-			}
-		}
-	}
-
-	/**
 	 * Convert picture element into image element or mark as px verified.
 	 *
 	 * @return void
@@ -120,19 +103,22 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			/** @var Element $picture_node */
 			$picture_node = $nodes->item( $index );
 
-			if ( true === $this->args['native_img_used'] ) {
-				self::mark_node_as_px_verified_recursively( $picture_node );
-			} else {
-				/** @var DOMNodeList|false $image_node_list */
-				$image_node_list = $this->dom->xpath->query( './img', $picture_node );
+			if ( true === $this->args['allow_picture'] ) {
+				ValidationExemption::mark_node_as_px_verified( $picture_node );
 
-				if ( empty( $image_node_list ) ) {
-					continue;
+				$child_nodes = $this->dom->xpath->query( './source | ./img', $picture_node );
+
+				foreach ( $child_nodes as $child_node ) {
+					ValidationExemption::mark_node_as_px_verified( $child_node );
 				}
-
+			} else {
 				/** @var Element $image_node */
-				$image_node = $image_node_list->item( 0 )->cloneNode( true );
-				$picture_node->parentNode->replaceChild( $image_node, $picture_node );
+				$image_node = $picture_node->getElementsByTagName( Tag::IMG )->item( 0 );
+
+				if ( $image_node instanceof Element ) {
+					$image_node->parentNode->removeChild( $image_node );
+					$picture_node->parentNode->replaceChild( $image_node, $picture_node );
+				}
 			}
 		}
 	}

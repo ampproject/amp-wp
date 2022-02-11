@@ -656,7 +656,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	public function get_data_for_process_picture_elements() {
 
 		$content = '<div>
-	<picture><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt=""></picture>
+	<picture><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt=""></picture>
 	<picture><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt=""></picture>
 </div>
 <div>
@@ -664,10 +664,10 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 </div>';
 
 		return [
-			'native_img_used_true'    => [
+			'allow_picture_true'      => [
 				'input'    => $content,
 				'args'     => [
-					'native_img_used' => false,
+					'allow_picture' => false,
 				],
 				'expected' => '<div>
 	<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="">
@@ -677,13 +677,13 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
 </div>',
 			],
-			'native_img_used_false'   => [
+			'allow_picture_false'     => [
 				'input'    => $content,
 				'args'     => [
-					'native_img_used' => true,
+					'allow_picture' => true,
 				],
 				'expected' => '<div>
-	<picture data-px-verified-tag><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" data-px-verified-tag></picture>
+	<picture data-px-verified-tag><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" data-px-verified-tag></picture>
 	<picture data-px-verified-tag><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" data-px-verified-tag></picture>
 </div>
 <div>
@@ -693,7 +693,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 			'without_picture_element' => [
 				'input'    => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
 				'args'     => [
-					'native_img_used' => true,
+					'allow_picture' => true,
 				],
 				'expected' => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
 			],
