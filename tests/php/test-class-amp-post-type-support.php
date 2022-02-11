@@ -62,19 +62,6 @@ class Test_AMP_Post_Type_Support extends TestCase {
 				'publicly_queryable' => false,
 			]
 		);
-		register_post_type(
-			'non_amp_book',
-			[
-				'label'  => 'Non AMP book',
-				'public' => true,
-			]
-		);
-		$is_post_type_viewable_callback = static function ( $is_viewable, $post_type ) {
-
-			return 'non_amp_book' === $post_type->name ? false : $is_viewable;
-		};
-
-		add_filter( 'is_post_type_viewable', $is_post_type_viewable_callback, 10, 2 );
 
 		$this->assertEqualSets(
 			[
@@ -105,6 +92,35 @@ class Test_AMP_Post_Type_Support extends TestCase {
 			],
 			AMP_Post_Type_Support::get_eligible_post_types()
 		);
+
+	}
+
+	/**
+	 * Test get_eligible_post_types.
+	 *
+	 * @covers AMP_Post_Type_Support::get_eligible_post_types()
+	 */
+	public function test_get_eligible_post_types_with_filter() {
+
+		if ( version_compare( get_bloginfo( 'version' ), '5.9', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 5.9 or greater than that.' );
+		}
+
+		register_post_type(
+			'non_amp_book',
+			[
+				'label'  => 'Non AMP book',
+				'public' => true,
+			]
+		);
+		$is_post_type_viewable_callback = static function ( $is_viewable, $post_type ) {
+
+			return 'non_amp_book' === $post_type->name ? false : $is_viewable;
+		};
+
+		add_filter( 'is_post_type_viewable', $is_post_type_viewable_callback, 10, 2 );
+
+		$this->assertNotContains( 'non_amp_book', AMP_Post_Type_Support::get_eligible_post_types() );
 
 		remove_filter( 'is_post_type_viewable', $is_post_type_viewable_callback );
 	}
