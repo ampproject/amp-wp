@@ -67,6 +67,9 @@ const vendorConfigs = {
 	},
 };
 
+/* Populating dropdown options by analytics vendors. */
+const AnalyticsVendorsOptions = Object.entries( AnalyticsVendors ).map( ( [ value, label ] ) => ( { value, label } ) );
+
 /**
  * Component for a single analytics entry.
  *
@@ -117,11 +120,6 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 		? defaultValue
 		: config;
 
-	/* Populating options for analytics vendors. */
-	const options = [
-		...Object.entries( AnalyticsVendors ).map( ( [ value, label ] ) => ( { value, label } ) ),
-	];
-
 	return (
 		<PanelRow className="amp-analytics-entry">
 			<h4>
@@ -139,7 +137,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 							onChange( { type: newType } );
 						} }
 						value={ type }
-						options={ options }
+						options={ AnalyticsVendorsOptions }
 					/>
 				</div>
 
