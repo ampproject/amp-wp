@@ -21,7 +21,7 @@ class Test_AMP_Post_Type_Support extends TestCase {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		foreach ( [ 'book', 'poem', 'secret', 'car', 'secret_book' ] as $post_type ) {
+		foreach ( [ 'book', 'poem', 'secret', 'car', 'secret_book', 'non_amp_book' ] as $post_type ) {
 			unregister_post_type( $post_type );
 		}
 	}
@@ -62,6 +62,19 @@ class Test_AMP_Post_Type_Support extends TestCase {
 				'publicly_queryable' => false,
 			]
 		);
+		register_post_type(
+			'non_amp_book',
+			[
+				'label'  => 'Non AMP book',
+				'public' => true,
+			]
+		);
+		$is_post_type_viewable_callback = static function ( $is_viewable, $post_type ) {
+
+			return 'non_amp_book' === $post_type->name ? false : $is_viewable;
+		};
+
+		add_filter( 'is_post_type_viewable', $is_post_type_viewable_callback, 10, 2 );
 
 		$this->assertEqualSets(
 			[
@@ -92,6 +105,8 @@ class Test_AMP_Post_Type_Support extends TestCase {
 			],
 			AMP_Post_Type_Support::get_eligible_post_types()
 		);
+
+		remove_filter( 'is_post_type_viewable', $is_post_type_viewable_callback );
 	}
 
 	/**
