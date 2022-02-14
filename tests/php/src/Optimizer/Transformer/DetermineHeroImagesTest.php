@@ -267,6 +267,34 @@ final class DetermineHeroImagesTest extends TestCase {
 					. '</div>'
 				),
 			],
+
+			'detect first cover block with parallax'       => [
+				$input(
+					'<div class="entry-content">'
+					. '<div class="wp-block-cover alignfull is-light has-parallax" style="background-image:url(https://example.com/cover-block-1.jpg)"><span aria-hidden="true" class="wp-block-cover__gradient-background has-background-dim"></span><div class="wp-block-cover__inner-container"><p class="has-text-align-center" style="font-size:58px;text-transform:capitalize">Hello World !</p></div></div>'
+					. '</div>'
+				),
+				$output(
+					'<div class="entry-content">'
+					. '<div class="wp-block-cover alignfull is-light has-parallax" style="background-image:url(https://example.com/cover-block-1.jpg)" media="https://example.com/cover-block-1.jpg" data-hero-candidate><span aria-hidden="true" class="wp-block-cover__gradient-background has-background-dim"></span><div class="wp-block-cover__inner-container"><p class="has-text-align-center" style="font-size:58px;text-transform:capitalize">Hello World !</p></div></div>'
+					. '</div>'
+				),
+			],
+
+			'detect first normal cover block when there are two cover block' => [
+				$input(
+					'<div class="entry-content">'
+					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
+					. '<div class="wp-block-cover alignfull is-light has-parallax" style="background-image:url(https://example.com/cover-block-1.jpg)"><span aria-hidden="true" class="wp-block-cover__gradient-background has-background-dim"></span><div class="wp-block-cover__inner-container"><p class="has-text-align-center" style="font-size:58px;text-transform:capitalize">Hello World !</p></div></div>'
+					. '</div>'
+				),
+				$output(
+					'<div class="entry-content">'
+					. '<div class="wp-block-cover has-dark-gray-background-color has-background-dim has-custom-content-position is-position-center-left" style="min-height:100vh"><amp-img width="2000" height="1199" class="wp-block-cover__image-background wp-image-2266" alt="" src="https://example.com/cover-block-1.jpg" style="object-position:100% 98%" data-hero-candidate data-object-fit="cover" data-object-position="100% 98%"></amp-img><div class="wp-block-cover__inner-container"><p class="has-text-align-left has-large-font-size">Cover Image with bottom-right positioning, full height, end left-aligned text.</p></div></div>'
+					. '<div class="wp-block-cover alignfull is-light has-parallax" style="background-image:url(https://example.com/cover-block-1.jpg)"><span aria-hidden="true" class="wp-block-cover__gradient-background has-background-dim"></span><div class="wp-block-cover__inner-container"><p class="has-text-align-center" style="font-size:58px;text-transform:capitalize">Hello World !</p></div></div>'
+					. '</div>'
+				),
+			],
 		];
 	}
 
