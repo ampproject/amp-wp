@@ -60,8 +60,8 @@ jobs:
 
           FILE_COUNT=$(php -f bin/determine-modified-files-count.php "$IGNORE_PATH_REGEX" "$MODIFIED_FILES" --invert)
           PHP_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.php|composer\.(json|lock)|phpstan\.neon\.dist" "$MODIFIED_FILES")
-          CSS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php "(.+\.s?css|package\.(json|lock))" "$MODIFIED_FILES")
-          JS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php "(.+\.(js|snap)|package\.(json|lock))" "$MODIFIED_FILES")
+          CSS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.s?css|package\.json|package-lock\.json" "$MODIFIED_FILES")
+          JS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.(js|snap)|package\.json|package-lock\.json" "$MODIFIED_FILES")
 
           echo "Changed file count: $FILE_COUNT"
           echo "Changed PHP file count: $PHP_FILE_COUNT"
