@@ -42,7 +42,7 @@ class AMP_Post_Type_Support {
 	 * @return string[] Post types eligible for AMP.
 	 */
 	public static function get_eligible_post_types() {
-		$post_types = array_values( get_post_types( [], 'names' ) );
+		$post_types = get_post_types( [], 'names' );
 		$post_types = array_filter( $post_types, 'is_post_type_viewable' );
 		$post_types = array_values( $post_types );
 
