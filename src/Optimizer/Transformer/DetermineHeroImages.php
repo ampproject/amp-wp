@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Optimizer\Transformer;
 
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
+use AmpProject\Extension;
 use AmpProject\Html\Attribute;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\ImageDimensions;
@@ -59,7 +60,14 @@ final class DetermineHeroImages implements Transformer {
 	 *
 	 * @var string
 	 */
-	const INITIAL_CONTENT_IMAGE_XPATH_QUERY = './*[1]//amp-img[ not( @data-hero ) ]';
+	const INITIAL_CONTENT_IMAGE_XPATH_QUERY = "./*[1]//amp-img[ not( @data-hero ) ] | ./div[ contains( @class, 'has-parallax' ) and ( contains( @data-amp-original-style, 'background-image' ) or contains( @style, 'background-image' ) ) ]";
+
+	/**
+	 * Regular expression pattern to extract the URL from a CSS background-image property.
+	 *
+	 * @var string
+	 */
+	const CSS_BACKGROUND_IMAGE_URL_REGEX_PATTERN = '/background-image\s*:\s*url\(\s*(?<url>[^)]*\s*)/i';
 
 	/**
 	 * Apply transformations to the provided DOM document.
@@ -181,14 +189,27 @@ final class DetermineHeroImages implements Transformer {
 			return null;
 		}
 
-		$query = $document->xpath->query(
-			self::INITIAL_CONTENT_IMAGE_XPATH_QUERY,
-			$entry_content
-		);
-
+		$query = $document->xpath->query( self::INITIAL_CONTENT_IMAGE_XPATH_QUERY, $entry_content );
 		$image = $query->item( 0 );
-		if ( $image instanceof Element && ! ( new ImageDimensions( $image ) )->isTiny() ) {
-			return $image;
+
+		if ( ! $image instanceof Element ) {
+			return null;
+		}
+
+		if ( Extension::IMG === $image->tagName ) {
+			return ! ( new ImageDimensions( $image ) )->isTiny() ? $image : null;
+		}
+
+		$style = $image->getAttribute( Attribute::STYLE );
+		$style = ! empty( $style ) ? $style : $image->getAttribute( 'data-amp-original-style' );
+
+		if ( ! empty( $style ) ) {
+			preg_match( self::CSS_BACKGROUND_IMAGE_URL_REGEX_PATTERN, $style, $matches );
+
+			if ( ! empty( $matches['url'] ) ) {
+				$image->setAttribute( Attribute::MEDIA, $matches['url'] );
+				return $image;
+			}
 		}
 
 		return null;
