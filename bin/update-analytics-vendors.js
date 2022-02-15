@@ -5,12 +5,13 @@ const { once } = require( 'events' );
 const fs = require( 'fs' );
 const readline = require( 'readline' );
 const stream = require( 'stream' );
+const { execSync } = require( 'child_process' );
 const axios = require( 'axios' );
 
 /**
  * File path of the analytics vendors list.
  */
-const ANALYTICS_VENDORS_FILE = 'data/analytics-vendors-list.json';
+const ANALYTICS_VENDORS_FILE = 'includes/data/analytics-vendors-list.php';
 
 class UpdateAnalyticsVendors {
 	/**
@@ -125,13 +126,45 @@ class UpdateAnalyticsVendors {
 	 * Save data to JSON file.
 	 */
 	saveData() {
+		const phpcsDisables = [
+			'Squiz.Commenting.FileComment.Missing',
+			'WordPress.Arrays.ArrayIndentation',
+			'WordPress.WhiteSpace.PrecisionAlignment',
+			'WordPress.Arrays.ArrayDeclarationSpacing',
+			'Generic.WhiteSpace.DisallowSpaceIndent',
+			'Generic.Arrays.DisallowLongArraySyntax',
+			'Squiz.Commenting.FileComment.Missing',
+			'Generic.Files.EndFileNewline',
+			'WordPress.Arrays.MultipleStatementAlignment',
+		];
+
+		const phpcsDisableComments = phpcsDisables.map( ( rule ) => `// phpcs:disable ${ rule }\n` ).join( '' );
+
 		if ( this.vendors ) {
+			let output = this.convertToPhpArray( this.vendors );
 			// Save vendors to JSON file.
-			fs.writeFileSync(
-				ANALYTICS_VENDORS_FILE,
-				JSON.stringify( this.vendors, null, 4 ),
-			);
+			output = `<?php ${ phpcsDisableComments }\n// NOTICE: This file was auto-generated with: npm run update-analytics-vendors.\nreturn ${ output };`;
+			fs.writeFileSync( ANALYTICS_VENDORS_FILE, output );
 		}
+	}
+
+	/**
+	 * Convert JS object into PHP array variable.
+	 *
+	 * @param {Object} object An object that needs to convert into a PHP array.
+	 * @return {string|null} PHP array in string.
+	 */
+	convertToPhpArray( object ) {
+		if ( 'object' !== typeof object ) {
+			return null;
+		}
+
+		const json = JSON.stringify( object );
+		const command = `php -r 'var_export( json_decode( file_get_contents( "php://stdin" ), true ) );'`;
+		let output = execSync( command, { input: json } );
+		output = output.toString();
+
+		return ( output && 'NULL' !== output ) ? output : 'array()';
 	}
 }
 
