@@ -1956,13 +1956,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				$styles = file_get_contents( $css_file ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
-				/*
-				* To support dark theme mode.
-				*
-				* The AMP provide a global API "AMP.toggleTheme()" to support dark theme by toggling a class in the body element.
-				* However, For dark mode in the "Twenty twenty one" theme, The class need to be toggled in HTML and body element because of CSS variables set at the root level.
-				* In AMP we can not toggle class in HTML element. So here we are changing the location where CSS variables are defined from `:root` to the body element.
-				*/
+				// AMP provides a global API "AMP.toggleTheme()" to support dark theme by toggling a BODY element class.
+				// However, for dark mode in the Twenty Twenty-One theme, the class needs to be toggled on HTML and BODY elements because the CSS variables are set at the root level.
+				// In AMP we cannot toggle HTML classes. So here we are changing the location where CSS variables are defined from `:root` to the BODY element.
 				$styles = str_replace( ':root {', 'body {', $styles );
 
 				// Append extra rules needed for nav menus according to changes made to the document during sanitization.
