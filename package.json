@@ -60,7 +60,7 @@
     "@wordpress/hooks": "3.3.1",
     "@wordpress/jest-puppeteer-axe": "4.0.1",
     "@wordpress/plugins": "4.1.1",
-    "@wordpress/scripts": "21.0.1",
+    "@wordpress/scripts": "21.0.2",
     "axios": "0.26.0",
     "babel-plugin-inline-react-svg": "2.0.1",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
