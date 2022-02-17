@@ -86,9 +86,7 @@ export function SiteScanSourcesList( {
 								</AMPNotice>
 							) }
 						</summary>
-						<div className="site-scan-results__detail-body">
-							<SiteScanSourcesDetail slug={ slug } />
-						</div>
+						{ <SiteScanSourcesDetail slug={ slug } /> }
 					</details>
 				</li>
 			) ) }
