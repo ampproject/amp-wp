@@ -664,7 +664,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 </div>';
 
 		return [
-			'allow_picture_true'      => [
+			'allow_picture_false'                     => [
 				'input'    => $content,
 				'args'     => [
 					'allow_picture' => false,
@@ -677,7 +677,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
 </div>',
 			],
-			'allow_picture_false'     => [
+			'allow_picture_true'                      => [
 				'input'    => $content,
 				'args'     => [
 					'allow_picture' => true,
@@ -690,12 +690,26 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	<picture data-px-verified-tag><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" data-px-verified-tag></picture>
 </div>',
 			],
-			'without_picture_element' => [
+			'without_picture_element'                 => [
 				'input'    => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
 				'args'     => [
 					'allow_picture' => true,
 				],
 				'expected' => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
+			],
+			'picture_without_img_allow_picture_false' => [
+				'input'    => '<picture><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"></picture>',
+				'args'     => [
+					'allow_picture' => false,
+				],
+				'expected' => '<picture><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"></picture>',
+			],
+			'picture_without_img_allow_picture_true'  => [
+				'input'    => '<picture><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"></picture>',
+				'args'     => [
+					'allow_picture' => true,
+				],
+				'expected' => '<picture><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"></picture>',
 			],
 		];
 	}

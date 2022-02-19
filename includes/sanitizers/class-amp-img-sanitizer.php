@@ -91,17 +91,19 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected function process_picture_elements() {
 
-		$nodes     = $this->dom->getElementsByTagName( Tag::PICTURE );
-		$num_nodes = $nodes->length;
+		$nodes = $this->dom->xpath->query( '//picture//img' );
 
-		if ( 0 === $num_nodes ) {
+		if ( 0 === $nodes->length ) {
 			return;
 		}
+
+		$picture_nodes = $this->dom->getElementsByTagName( Tag::PICTURE );
+		$num_nodes     = $nodes->length;
 
 		for ( $index = $num_nodes - 1; $index >= 0; $index-- ) {
 
 			/** @var Element $picture_node */
-			$picture_node = $nodes->item( $index );
+			$picture_node = $picture_nodes->item( $index );
 
 			if ( true === $this->args['allow_picture'] ) {
 				ValidationExemption::mark_node_as_px_verified( $picture_node );
