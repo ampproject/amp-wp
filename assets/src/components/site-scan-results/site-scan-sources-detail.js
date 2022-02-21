@@ -69,8 +69,8 @@ export function SiteScanSourcesDetail( {
 	const [ hasCopied, setHasCopied ] = useState( false );
 	const { scannableUrls } = useContext( SiteScan );
 
-	const jsonData = useMemo( () => {
-		const extensionScannableUrls = scannableUrls.map( ( scannableUrl ) => {
+	const extensionScannableUrls = useMemo( () => {
+		return scannableUrls.map( ( scannableUrl ) => {
 			const validationErrors = scannableUrl.validation_errors || [];
 			const allowedErrors = getAllowedErrors( validationErrors, slug );
 
@@ -83,11 +83,25 @@ export function SiteScanSourcesDetail( {
 
 			return null;
 		} ).filter( Boolean );
-		return JSON.stringify( extensionScannableUrls, null, 4 );
 	}, [ scannableUrls, slug ] );
+
+	const jsonData = JSON.stringify( extensionScannableUrls, null, 4 );
 
 	return (
 		<div className="site-scan-results__detail-body">
+			<ul className="site-scan-results__urls-list">
+				{
+					extensionScannableUrls.map( ( { url } ) => {
+						return (
+							<li key={ url }>
+								<a href={ url } target="_blank" rel="noopener noreferrer">
+									{ url }
+								</a>
+							</li>
+						);
+					} )
+				}
+			</ul>
 			<pre className="site-scan-results__source-detail">
 				{ jsonData }
 			</pre>
