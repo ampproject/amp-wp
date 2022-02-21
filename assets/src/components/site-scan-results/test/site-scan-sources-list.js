@@ -125,6 +125,10 @@ describe( 'SiteScanSourcesList', () => {
 		expect( sourceDetailTextContent ).toMatch( /"name": "bad-block"/ );
 		expect( sourceDetailTextContent ).not.toMatch( /"name": "wp-includes"/ );
 		expect( sourceDetailTextContent ).not.toMatch( /"code": "DISALLOWED_TAG"/ );
+
+		const sourceUrlList = container.querySelector( '.site-scan-results__urls-list' );
+		expect( sourceUrlList ).not.toBeNull();
+		expect( sourceUrlList.innerHTML ).toMatch( /href="https:\/\/example.org\/"/ );
 	} );
 
 	it( 'renders inactive source properties', () => {
