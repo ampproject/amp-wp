@@ -1917,7 +1917,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$styles = file_get_contents( $dark_mode_css_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 				// Allow for rules to override the light theme related rules.
-				$styles = str_replace( '.is-dark-theme.is-dark-theme', 'body.is-dark-theme', $styles );
 				$styles = str_replace( '.respect-color-scheme-preference.is-dark-theme body', '.respect-color-scheme-preference body.is-dark-theme', $styles );
 
 				wp_add_inline_style( $theme_style_handle, $styles );
