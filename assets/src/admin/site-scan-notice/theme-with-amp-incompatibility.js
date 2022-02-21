@@ -1,14 +1,14 @@
 /**
- * WordPress dependencies
- */
-import { createInterpolateElement, useContext } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
-
-/**
  * External dependencies
  */
 import PropTypes from 'prop-types';
 import { AMP_COMPATIBLE_THEMES_URL } from 'amp-site-scan-notice'; // From WP inline script.
+
+/**
+ * WordPress dependencies
+ */
+import { createInterpolateElement, useContext } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
