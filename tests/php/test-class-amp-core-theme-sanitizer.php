@@ -532,7 +532,6 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$after = implode( '', $extra['after'] );
 
 		$replacements = [
-			'.is-dark-theme.is-dark-theme' => 'body.is-dark-theme',
 			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference body.is-dark-theme',
 		];
 		foreach ( $replacements as $search => $replacement ) {
