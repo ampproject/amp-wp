@@ -120,6 +120,10 @@ describe( 'SiteScanSourcesList', () => {
 			);
 		} );
 
+		act( () => {
+			container.querySelector( '.site-scan-results__sources > li > details' ).click();
+		} );
+
 		const sourceDetailTextContent = container.querySelector( '.site-scan-results__source-detail' ).textContent;
 
 		expect( sourceDetailTextContent ).toMatch( /"name": "bad-block"/ );
