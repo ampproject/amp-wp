@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useContext, useState, useMemo } from '@wordpress/element';
+import { ExternalLink } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -91,15 +92,13 @@ export function SiteScanSourcesDetail( {
 		<div className="site-scan-results__detail-body">
 			<ul className="site-scan-results__urls-list">
 				{
-					extensionScannableUrls.map( ( { url } ) => {
-						return (
-							<li key={ url }>
-								<a href={ url } target="_blank" rel="noopener noreferrer">
-									{ url }
-								</a>
-							</li>
-						);
-					} )
+					extensionScannableUrls.map( ( { url } ) => (
+						<li key={ url }>
+							<ExternalLink href={ url }>
+								{ url }
+							</ExternalLink>
+						</li>
+					) )
 				}
 			</ul>
 			<pre className="site-scan-results__source-detail">
