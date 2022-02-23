@@ -71,12 +71,11 @@ describe( 'Twenty Twenty theme on AMP', () => {
 	describe( 'search modal on desktop', () => {
 		beforeEach( async () => {
 			await setBrowserViewport( DEFAULT_BROWSER_VIEWPORT_SIZE );
-
 			await page.goto( createURL( '/' ) );
 			await page.waitForSelector( '#site-header' );
 		} );
 
-		it( 'should be toggled on a button click', async () => {
+		it( 'should be togglable', async () => {
 			await expect( page ).toMatchElement( '.desktop-search-toggle[aria-expanded=false]' );
 			await expect( page ).toMatchElement( '.search-modal', { visible: false } );
 
