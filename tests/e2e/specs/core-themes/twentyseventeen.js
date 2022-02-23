@@ -1,13 +1,7 @@
 /**
  * WordPress dependencies
  */
-import {
-	activateTheme,
-	createURL,
-	installTheme,
-	setBrowserViewport,
-	visitAdminPage,
-} from '@wordpress/e2e-test-utils';
+import { activateTheme, createURL, installTheme, setBrowserViewport, visitAdminPage } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
