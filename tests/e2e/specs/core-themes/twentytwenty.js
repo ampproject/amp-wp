@@ -8,7 +8,7 @@ import { activateTheme, createURL, setBrowserViewport, visitAdminPage } from '@w
  */
 import { setTemplateMode } from '../../utils/amp-settings-utils';
 import { assignMenuToLocation } from '../../utils/assign-menu-to-location';
-import { DEFAULT_BROWSER_VIEWPORT_SIZE } from '../../config/bootstrap';
+import { DEFAULT_BROWSER_VIEWPORT_SIZE, MOBILE_BROWSER_VIEWPORT_SIZE } from '../../config/bootstrap';
 
 describe( 'Twenty Twenty theme on AMP', () => {
 	beforeAll( async () => {
@@ -24,7 +24,7 @@ describe( 'Twenty Twenty theme on AMP', () => {
 		} );
 
 		beforeEach( async () => {
-			await setBrowserViewport( 'small' );
+			await setBrowserViewport( MOBILE_BROWSER_VIEWPORT_SIZE );
 			await page.goto( createURL( '/' ) );
 			await page.waitForSelector( '#site-header' );
 		} );

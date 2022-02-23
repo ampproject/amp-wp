@@ -41,6 +41,16 @@ export const DEFAULT_BROWSER_VIEWPORT_SIZE = {
 };
 
 /**
+ * Mobile browser viewport size.
+ *
+ * @type {{width: number, height: number}}
+ */
+export const MOBILE_BROWSER_VIEWPORT_SIZE = {
+	width: 375,
+	height: 667,
+};
+
+/**
  * Set of console logging types observed to protect against unexpected yet
  * handled (i.e. not catastrophic) errors or warnings. Each key corresponds
  * to the Puppeteer ConsoleMessage type, its value the corresponding function
