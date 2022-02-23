@@ -13,6 +13,7 @@ import {
  * Internal dependencies
  */
 import { setTemplateMode } from '../../utils/amp-settings-utils';
+import { assignMenuToLocation } from '../../utils/assign-menu-to-location';
 import { DEFAULT_BROWSER_VIEWPORT_SIZE } from '../../config/bootstrap';
 
 describe( 'Twenty Seventeen theme on AMP', () => {
@@ -30,12 +31,7 @@ describe( 'Twenty Seventeen theme on AMP', () => {
 
 	describe( 'main navigation on mobile', () => {
 		beforeAll( async () => {
-			// Assign a test menu to Top Menu location.
-			await visitAdminPage( 'nav-menus.php', '' );
-			await page.waitForSelector( 'input[name="menu-locations[top]"]' );
-			await page.click( 'input[name="menu-locations[top]"]' );
-			await page.click( '#save_menu_footer' );
-			await page.waitForSelector( '#message', { text: /Test Menu 1 has been updated/ } );
+			await assignMenuToLocation( 'top' );
 		} );
 
 		beforeEach( async () => {
