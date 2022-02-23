@@ -87,9 +87,23 @@
 	vertical-align: middle;
 }
 
+.site-scan-results__source details summary {
+	display: flex;
+}
+
+.site-scan-results__source details .dashicons {
+	font-size: 14px;
+	margin-top: 2px;
+}
+
+.site-scan-results__source details[open] .dashicons {
+	rotate: 90deg;
+	margin: 0 5px 0 -5px;
+}
+
 .site-scan-results__source-version,
 .site-scan-results__source-notice {
-	float: right;
+	margin-left: auto;
 }
 
 .site-scan-results__cta.site-scan-results__cta {

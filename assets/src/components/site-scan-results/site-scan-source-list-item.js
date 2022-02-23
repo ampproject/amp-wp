@@ -54,6 +54,7 @@ export function SiteScanSourcesListItem( {
 			} }
 		>
 			<summary>
+				<span className="dashicons dashicons-controls-play" />
 				{ name && (
 					<span className={ classnames( 'site-scan-results__source-name', {
 						'site-scan-results__source-name--inactive': [ 'inactive', 'uninstalled' ].includes( status ),
