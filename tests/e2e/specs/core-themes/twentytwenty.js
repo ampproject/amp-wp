@@ -67,4 +67,26 @@ describe( 'Twenty Twenty theme on AMP', () => {
 			await expect( menuItemWithSubmenu ).toMatchElement( '.sub-menu', { visible: false } );
 		} );
 	} );
+
+	describe( 'search modal on desktop', () => {
+		beforeEach( async () => {
+			await setBrowserViewport( DEFAULT_BROWSER_VIEWPORT_SIZE );
+
+			await page.goto( createURL( '/' ) );
+			await page.waitForSelector( '#site-header' );
+		} );
+
+		it( 'should be toggled on a button click', async () => {
+			await expect( page ).toMatchElement( '.desktop-search-toggle[aria-expanded=false]' );
+			await expect( page ).toMatchElement( '.search-modal', { visible: false } );
+
+			await expect( page ).toClick( '.desktop-search-toggle' );
+			await expect( page ).toMatchElement( '.search-toggle[aria-expanded=true]' );
+			await expect( page ).toMatchElement( '.search-modal', { visible: true } );
+
+			await expect( page ).toMatchElement( '.search-modal .close-search-toggle[aria-expanded=true]' );
+			await expect( page ).toClick( '.search-modal .close-search-toggle' );
+			await expect( page ).toMatchElement( '.search-modal', { visible: false } );
+		} );
+	} );
 } );
