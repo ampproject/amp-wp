@@ -49,7 +49,7 @@ describe( 'Twenty Seventeen theme on AMP', () => {
 			await expect( page ).toMatchElement( '#top-menu', { visible: false } );
 		} );
 
-		it( 'should be toggled on a button click', async () => {
+		it( 'should be togglable', async () => {
 			await expect( page ).toClick( '.main-navigation .menu-toggle' );
 			await expect( page ).toMatchElement( '.main-navigation .menu-toggle[aria-expanded=true]' );
 			await expect( page ).toMatchElement( '#top-menu', { visible: true } );

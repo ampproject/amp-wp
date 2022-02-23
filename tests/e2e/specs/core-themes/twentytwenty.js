@@ -38,7 +38,7 @@ describe( 'Twenty Twenty theme on AMP', () => {
 			await expect( page ).toMatchElement( '.menu-modal', { visible: false } );
 		} );
 
-		it( 'should be toggled on a button click', async () => {
+		it( 'should be togglable', async () => {
 			await expect( page ).toClick( '.mobile-nav-toggle' );
 			await expect( page ).toMatchElement( '.mobile-nav-toggle[aria-expanded=true]' );
 			await expect( page ).toMatchElement( '.menu-modal', { visible: true } );
