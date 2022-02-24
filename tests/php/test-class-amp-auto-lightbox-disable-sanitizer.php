@@ -21,17 +21,13 @@ class AMP_Auto_Lightbox_Disable_Sanitizer_Test extends TestCase {
 	 * @covers ::sanitize()
 	 */
 	public function test_sanitize() {
-		$source   = '<html><body class="body-class"></body></html>';
-		$expected = '<html><body class="body-class" data-amp-auto-lightbox-disable></body></html>';
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$source = '<html><body class="body-class"><span>Hello World!</span></body></html>';
+		$dom    = AMP_DOM_Utils::get_dom_from_content( $source );
 
 		$sanitizer = new AMP_Auto_Lightbox_Disable_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
-
-		$this->assertEqualMarkup( $expected, $actual );
-
+		$this->assertTrue( $dom->body->hasAttribute( 'data-amp-auto-lightbox-disable' ) );
 	}
 }
