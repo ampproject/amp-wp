@@ -67,7 +67,7 @@ final class DetermineHeroImages implements Transformer {
 	 *
 	 * @var string
 	 */
-	const CSS_BACKGROUND_IMAGE_URL_REGEX_PATTERN = '/background-image\s*:\s*url\(\s*(?<url>[^)]*\s*)/i';
+	const CSS_BACKGROUND_IMAGE_URL_REGEX_PATTERN = '/background-image\s*:\s*url\(\s*[\'"]?(?<url>.*?)[\'"]?\s*\)/i';
 
 	/**
 	 * Apply transformations to the provided DOM document.
