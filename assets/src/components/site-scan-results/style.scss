@@ -59,6 +59,7 @@
 
 	details {
 		margin: 0;
+		width: 100%;
 	}
 
 	&:nth-child(even) {
@@ -89,16 +90,18 @@
 
 .site-scan-results__source details summary {
 	display: flex;
+	align-items: center;
 }
 
 .site-scan-results__source details .dashicons {
 	font-size: 14px;
-	margin-top: 2px;
+	align-items: center;
+	display: flex;
+	justify-content: center;
 }
 
 .site-scan-results__source details[open] .dashicons {
-	rotate: 90deg;
-	margin: 0 5px 0 -5px;
+	transform: rotate(90deg);
 }
 
 .site-scan-results__source-version,
@@ -121,6 +124,7 @@
 }
 
 .site-scan-results__source-detail {
+	background-color: #fff;
 	border: 1px solid #dedede;
 	border-radius: 5px;
 	padding: 15px;
@@ -128,4 +132,5 @@
 	overflow: scroll;
 	font-size: 12px;
 	line-height: 2;
+	white-space: pre-wrap;
 }
