@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9815013728743c59f4f1e9549c3ce705",
+    "content-hash": "ae5cf018b431d42901d6cd96c882ee1d",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
