@@ -17,7 +17,7 @@
     "ampproject/amp-toolbox": "0.10.0",
     "cweagans/composer-patches": "~1.0",
     "fasterimage/fasterimage": "1.5.0",
-    "sabberworm/php-css-parser": "dev-master#bfdd976"
+    "sabberworm/php-css-parser": "8.4.0"
   },
   "require-dev": {
     "automattic/vipwpcs": "^2.2",
