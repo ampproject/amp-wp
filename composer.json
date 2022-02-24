@@ -80,6 +80,7 @@
     "sort-packages": true
   },
   "extra": {
+    "composer-exit-on-patch-failure": true,
     "downloads": {
       "phpstan": {
         "path": "vendor/bin/phpstan",
