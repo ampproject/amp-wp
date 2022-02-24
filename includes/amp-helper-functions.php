@@ -1608,6 +1608,12 @@ function amp_get_content_sanitizers( $post = null ) {
 		);
 	}
 
+	$is_auto_lightbox_disabled = apply_filters( 'amp_auto_lightbox_disabled', true );
+
+	if ( ! $is_auto_lightbox_disabled ) {
+		$sanitizers[ AMP_Auto_Lightbox_Disable_Sanitizer::class ] = [];
+	}
+
 	/**
 	 * Filters the content sanitizers.
 	 *
