@@ -94,7 +94,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.0.0
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
           cache: npm
@@ -123,7 +123,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.0.0
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
           cache: npm
@@ -261,7 +261,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.0.0
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
           cache: npm
@@ -309,7 +309,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.0.0
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
           cache: npm
@@ -441,7 +441,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.0.0
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
           cache: npm
@@ -594,7 +594,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.0.0
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
           cache: npm
@@ -698,7 +698,7 @@ jobs:
         id: nvm
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.0.0
         with:
           node-version: ${{ steps.nvm.outputs.NVMRC }}
           cache: npm
