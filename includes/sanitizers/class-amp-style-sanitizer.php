@@ -588,6 +588,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// Prevent dark mode class from being tree-shaken.
 		if ( $dark_mode_class ) {
 			$class_names[] = $dark_mode_class;
+		} else {
+			$class_names[] = 'amp-dark-mode';
 		}
 
 		$this->used_class_names = array_fill_keys( $class_names, true );
