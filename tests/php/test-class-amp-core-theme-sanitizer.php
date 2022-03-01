@@ -540,15 +540,28 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		}
 	}
 
-	/** @covers ::amend_twentytwentyone_styles() */
-	public function test_amend_twentytwentyone_styles() {
+	/** @return array */
+	public function get_respect_user_color_preference_data() {
+		return [
+			'enabled'  => [ true ],
+			'disabled' => [ false ],
+		];
+	}
+
+	/**
+	 * @covers ::amend_twentytwentyone_styles()
+	 *
+	 * @dataProvider get_respect_user_color_preference_data
+	 * @param bool $enabled Enabled.
+	 */
+	public function test_amend_twentytwentyone_styles( $enabled ) {
 		$theme_slug = 'twentytwentyone';
 		if ( ! wp_get_theme( $theme_slug )->exists() ) {
 			$this->markTestSkipped();
-			return;
 		}
 
 		switch_theme( $theme_slug );
+		set_theme_mod( 'respect_user_color_preference', $enabled );
 
 		$style_handle = 'twenty-twenty-one-style';
 		wp_enqueue_style( $style_handle, get_theme_file_path( 'style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
@@ -563,6 +576,12 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$this->assertStringContainsString( '@media only screen and (max-width: 481px)', $after );
 		$this->assertStringContainsString( 'button[overflow]:hover', $after );
 		$this->assertStringEndsWith( '/*first*/', $after );
+
+		if ( $enabled ) {
+			$this->assertRegExp( '#/\* Variables \*/\s*body\s*{#', $after );
+		} else {
+			$this->assertRegExp( '#/\* Variables \*/\s*:root\s*{#', $after );
+		}
 	}
 
 	/**
