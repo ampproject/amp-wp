@@ -2130,6 +2130,67 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		);
 	}
 
+	/** @return array */
+	public function get_data_to_test_dark_mode_classes() {
+		return [
+			'default' => [
+				null,
+				[
+					'body.amp-dark-mode{background:black}',
+					'',
+				],
+			],
+			'custom'  => [
+				'is-dark-theme',
+				[
+					'',
+					'body.is-dark-theme{background:black}',
+				],
+			],
+		];
+	}
+
+	/**
+	 * Test that dark mode classes are not stripped out.
+	 *
+	 * @dataProvider get_data_to_test_dark_mode_classes
+	 *
+	 * @covers AMP_Style_Sanitizer::get_used_class_names()
+	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_group()
+	 *
+	 * @param null|string $dark_mode_class
+	 * @param string[]    $expected_stylesheets
+	 */
+	public function test_dark_mode_classes( $dark_mode_class, $expected_stylesheets ) {
+		ob_start();
+		?>
+		<html amp>
+		<head>
+			<meta charset="utf-8">
+			<style>body.amp-dark-mode { background:black; }</style>
+			<style>body.is-dark-theme { background:black; }</style>
+		</head>
+		<body
+			<?php if ( $dark_mode_class ) : ?>
+				data-prefers-dark-mode-class="<?php echo esc_attr( $dark_mode_class ); ?>"
+			<?php endif; ?>
+		>
+		</body>
+		</html>
+		<?php
+		$dom = Document::fromHtml( ob_get_clean(), Options::DEFAULTS );
+
+		$sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			[ 'use_document_element' => true ]
+		);
+		$sanitizer->sanitize();
+		$this->assertEquals(
+			$expected_stylesheets,
+			array_values( $sanitizer->get_stylesheets() )
+		);
+	}
+
 	/**
 	 * Test that auto-removal is performed and that excessive CSS will be removed entirely.
 	 *
