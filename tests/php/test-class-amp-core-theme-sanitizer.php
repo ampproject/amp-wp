@@ -8,7 +8,6 @@
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
-use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
@@ -716,10 +715,8 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$this->assertStringContainsString( '.no-js #dark-mode-toggler', $style->textContent );
 
 		$this->assertEquals(
-			'<button id="dark-mode-toggler" class="fixed-bottom" on="tap:AMP.toggleTheme()">Dark Mode:<span class="dark-mode-button-on">On</span><span class="dark-mode-button-off">Off</span></button>',
+			'<button id="dark-mode-toggler" class="fixed-bottom" on="tap:AMP.toggleTheme()"><span class="dark-mode-button-on">Dark Mode: On</span><span class="dark-mode-button-off">Dark Mode: Off</span></button>',
 			$dom->saveHTML( $button )
 		);
-
-		remove_filter( 'theme_mod_respect_user_color_preference', '__return_true' );
 	}
 }

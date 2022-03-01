@@ -2040,17 +2040,20 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		);
 		$this->dom->body->appendChild( $button );
 
-		$button->nodeValue = __( 'Dark Mode:', 'amp' );
+		/* translators: %s: On/Off */
+		$dark_mode_label = __( 'Dark Mode: %s', 'twentytwentyone' ); // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
+		$dark_mode_off   = sprintf( $dark_mode_label, __( 'Off', 'twentytwentyone' ) ); // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
+		$dark_mode_on    = sprintf( $dark_mode_label, __( 'On', 'twentytwentyone' ) ); // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
 
 		// Create span tag to show `On` for dark mode.
 		$button_text_on = $this->dom->createElement( Tag::SPAN );
 		$button_text_on->setAttribute( Attribute::CLASS_, 'dark-mode-button-on' );
-		$button_text_on->nodeValue = __( 'On', 'amp' );
+		$button_text_on->nodeValue = $dark_mode_on;
 
 		// Create span tag to show `Off` for dark mode.
 		$button_text_off = $this->dom->createElement( Tag::SPAN );
 		$button_text_off->setAttribute( Attribute::CLASS_, 'dark-mode-button-off' );
-		$button_text_off->nodeValue = __( 'Off', 'amp' );
+		$button_text_off->nodeValue = $dark_mode_off;
 
 		// Add button_text_{On, Off} to button.
 		$button->appendChild( $button_text_on );
