@@ -8,6 +8,7 @@
 
 use AmpProject\Amp;
 use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 use AmpProject\Html\Role;
 
 /**
@@ -2027,31 +2028,28 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$button = $this->dom->getElementById( 'dark-mode-toggler' );
-
-		if ( ! $button ) {
-			// Create button element for dark mode toggle.
-			// Dark mode toggle button html and js has been stripped due to removing `the_switch` function.
-			$button = AMP_DOM_Utils::create_node(
-				$this->dom,
-				'button',
-				[
-					'id'    => 'dark-mode-toggler',
-					'class' => 'fixed-bottom',
-				]
-			);
-		}
+		// Create button element for dark mode toggle.
+		// Dark mode toggle button html and js has been omitted due to removing `the_switch` function.
+		$button = AMP_DOM_Utils::create_node(
+			$this->dom,
+			Tag::BUTTON,
+			[
+				Attribute::ID     => 'dark-mode-toggler',
+				Attribute::CLASS_ => 'fixed-bottom',
+			]
+		);
+		$this->dom->body->appendChild( $button );
 
 		$button->nodeValue = __( 'Dark Mode:', 'amp' );
 
 		// Create span tag to show `On` for dark mode.
-		$button_text_on = $this->dom->createElement( 'span' );
-		$button_text_on->setAttribute( 'class', 'dark-mode-button-on' );
+		$button_text_on = $this->dom->createElement( Tag::SPAN );
+		$button_text_on->setAttribute( Attribute::CLASS_, 'dark-mode-button-on' );
 		$button_text_on->nodeValue = __( 'On', 'amp' );
 
 		// Create span tag to show `Off` for dark mode.
-		$button_text_off = $this->dom->createElement( 'span' );
-		$button_text_off->setAttribute( 'class', 'dark-mode-button-off' );
+		$button_text_off = $this->dom->createElement( Tag::SPAN );
+		$button_text_off->setAttribute( Attribute::CLASS_, 'dark-mode-button-off' );
 		$button_text_off->nodeValue = __( 'Off', 'amp' );
 
 		// Add button_text_{On, Off} to button.
@@ -2061,7 +2059,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		// Add button to body.
 		$this->dom->body->appendChild( $button );
 
-		$style              = $this->dom->createElement( 'style' );
+		$style = $this->dom->createElement( Tag::STYLE );
+		$style->setAttribute( Attribute::ID, 'amp-twentytwentyone-dark-mode-toggle-styles' );
 		$style->textContent = sprintf( // We need to add these styles to show On and Off to the user.
 			'
 				.no-js #dark-mode-toggler { display: block; }

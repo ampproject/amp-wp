@@ -7,6 +7,9 @@
 
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
 
@@ -543,8 +546,8 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	/** @return array */
 	public function get_respect_user_color_preference_data() {
 		return [
-			'enabled'  => [ true ],
-			'disabled' => [ false ],
+			'dark_mode_enabled'  => [ true ],
+			'dark_mode_disabled' => [ false ],
 		];
 	}
 
@@ -684,42 +687,37 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	 * Tests add_twentytwentyone_dark_mode_toggle.
 	 *
 	 * @covers ::add_twentytwentyone_dark_mode_toggle()
+	 *
+	 * @dataProvider get_respect_user_color_preference_data
+	 * @param bool $enabled Enabled.
 	 */
-	public function test_add_twentytwentyone_dark_mode_toggle() {
-		$html = '<button id="dark-mode-toggler">Toggle dark mode</button>';
+	public function test_add_twentytwentyone_dark_mode_toggle( $enabled ) {
+		set_theme_mod( 'respect_user_color_preference', $enabled );
 
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom = new Document();
+		$dom->loadHTML( '<html><head></head><body></body></html>' );
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
-
-		add_filter( 'theme_mod_respect_user_color_preference', '__return_true' );
 
 		$sanitizer->add_twentytwentyone_dark_mode_toggle();
 
-		$this->assertEquals(
-			sprintf(
-				'
-				.no-js #dark-mode-toggler { display: block; }
-				#dark-mode-toggler > span {
-					margin-%s: 5px;
-				}
-				.dark-mode-button-on {
-					display: none;
-				}
-				body.is-dark-theme .dark-mode-button-on {
-					display: inline-block;
-				}
-				body.is-dark-theme .dark-mode-button-off {
-					display: none;
-				}
-			',
-				is_rtl() ? 'right' : 'left'
-			),
-			$dom->head->getElementsByTagName( 'style' )->item( 0 )->textContent
-		);
+		$style  = $dom->getElementById( 'amp-twentytwentyone-dark-mode-toggle-styles' );
+		$button = $dom->getElementById( 'dark-mode-toggler' );
+		if ( ! $enabled ) {
+			$this->assertNull( $button );
+			$this->assertNull( $style );
+			return;
+		}
+
+		$this->assertInstanceOf( Element::class, $style );
+		$this->assertInstanceOf( Element::class, $button );
+		$this->assertSame( Tag::STYLE, $style->tagName );
+		$this->assertSame( Tag::BUTTON, $button->tagName );
+
+		$this->assertStringContainsString( '.no-js #dark-mode-toggler', $style->textContent );
 
 		$this->assertEquals(
-			'<button id="dark-mode-toggler" on="tap:AMP.toggleTheme()">Dark Mode:<span class="dark-mode-button-on">On</span><span class="dark-mode-button-off">Off</span></button>',
-			$dom->saveHTML( $dom->getElementById( 'dark-mode-toggler' ) )
+			'<button id="dark-mode-toggler" class="fixed-bottom" on="tap:AMP.toggleTheme()">Dark Mode:<span class="dark-mode-button-on">On</span><span class="dark-mode-button-off">Off</span></button>',
+			$dom->saveHTML( $button )
 		);
 
 		remove_filter( 'theme_mod_respect_user_color_preference', '__return_true' );
