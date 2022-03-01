@@ -2063,12 +2063,12 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 	}
 
 	/**
-	 * Test that auto-removal (tree shaking) does not remove rules for classes mentioned in class and [class] attributes.
+	 * Test that auto-removal (tree shaking) does not remove rules for classes mentioned in class and [class] attributes and the dark mode config.
 	 *
 	 * @covers AMP_Style_Sanitizer::get_used_class_names()
 	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_group()
 	 */
-	public function test_class_amp_bind_preservation() {
+	public function test_class_amp_bind_dark_mode_preservation() {
 		ob_start();
 		?>
 		<html amp>
@@ -2081,9 +2081,10 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				<style>.sidebar2.visible, .sidebar2.displayed, .sidebar2.shown { display:block }</style>
 				<style>.sidebar3.open, .sidebar3.abierto { display:block }</style>
 				<style>.sidebar3.cerrado { display:none }</style>
+				<style>body.is-dark-theme { background:black; color:white; }</style>
 				<style>.nothing { visibility:hidden; }</style>
 			</head>
-			<body>
+			<body data-prefers-dark-mode-class="is-dark-theme">
 				<amp-state id="mySidebar">
 					<script type="application/json">
 						{
@@ -2124,6 +2125,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'.sidebar2.visible,.sidebar2.shown{display:block}',
 				'.sidebar3.open,.sidebar3.abierto{display:block}',
 				'.sidebar3.cerrado{display:none}',
+				'body.is-dark-theme{background:black;color:white}',
 				'',
 			],
 			$actual_stylesheets

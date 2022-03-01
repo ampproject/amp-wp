@@ -590,7 +590,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$class_names[] = $dark_mode_class;
 		}
 
-
 		$this->used_class_names = array_fill_keys( $class_names, true );
 		return $this->used_class_names;
 	}
