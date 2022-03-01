@@ -15,7 +15,7 @@ use AmpProject\Tag;
 /**
  * Class AMP_WordPress_Embed_Handler
  *
- * @since 2.2
+ * @since 2.2.2
  */
 class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 
