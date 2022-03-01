@@ -2038,7 +2038,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				Attribute::CLASS_ => 'fixed-bottom',
 			]
 		);
-		$this->dom->body->appendChild( $button );
 
 		/* translators: %s: On/Off */
 		$dark_mode_label = __( 'Dark Mode: %s', 'twentytwentyone' ); // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
@@ -2066,7 +2065,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$style->setAttribute( Attribute::ID, 'amp-twentytwentyone-dark-mode-toggle-styles' );
 		$style->textContent = sprintf( // We need to add these styles to show On and Off to the user.
 			'
-				.no-js #dark-mode-toggler { display: block; }
+				.no-js #dark-mode-toggler {
+					display: block;
+				}
 				#dark-mode-toggler > span {
 					margin-%s: 5px;
 				}
