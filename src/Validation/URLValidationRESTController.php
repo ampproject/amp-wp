@@ -214,10 +214,15 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			return $validity;
 		}
 
+		$query_args = [
+			'page' => 'amp-support',
+			'url'  => rawurlencode( get_permalink( $post_id ) ),
+		];
+
 		$data = [
 			'results'      => [],
 			'review_link'  => get_edit_post_link( $validity['post_id'], 'raw' ),
-			'support_link' => admin_url( 'admin.php?page=amp-support&post_id=' . $validity['post_id'] ),
+			'support_link' => add_query_arg( $query_args, admin_url( 'admin.php' ) ),
 		];
 
 		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validity['post_id'] ) as $result ) {

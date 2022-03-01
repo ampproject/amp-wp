@@ -1,9 +1,4 @@
 /**
- * WordPress dependencies
- */
-import { registerStore } from '@wordpress/data';
-
-/**
  * External dependencies
  */
 import {
@@ -12,6 +7,11 @@ import {
 	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 	VALIDATION_ERROR_NEW_REJECTED_STATUS,
 } from 'amp-block-validation';
+
+/**
+ * WordPress dependencies
+ */
+import { registerStore } from '@wordpress/data';
 
 export const BLOCK_VALIDATION_STORE_KEY = 'amp/block-validation';
 

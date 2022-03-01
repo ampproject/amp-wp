@@ -21,7 +21,7 @@ Also, calls the mutation callback for it. This tracks all the attributes that we
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:516](/includes/sanitizers/class-amp-base-sanitizer.php#L516-L544)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:608](/includes/sanitizers/class-amp-base-sanitizer.php#L608-L642)
 
 <details>
 <summary>Show Code</summary>
@@ -40,6 +40,9 @@ public function remove_invalid_attribute( $element, $attribute, $validation_erro
 	if ( ! ( $node instanceof DOMAttr ) || $element !== $node->parentNode ) {
 		return false;
 	}
+	if ( ValidationExemption::is_amp_unvalidated_for_node( $node ) || ValidationExemption::is_px_verified_for_node( $node ) ) {
+		return false;
+	}
 	$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 	if ( $should_remove ) {
 		$allow_empty  = ! empty( $attr_spec[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] );
@@ -49,6 +52,8 @@ public function remove_invalid_attribute( $element, $attribute, $validation_erro
 		} else {
 			$element->removeAttributeNode( $node );
 		}
+	} else {
+		ValidationExemption::mark_node_as_amp_unvalidated( $node );
 	}
 	return $should_remove;
 }

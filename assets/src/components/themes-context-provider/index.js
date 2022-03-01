@@ -6,39 +6,22 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import {
-	createContext,
-	useContext,
-	useEffect,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { createContext, useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * Internal dependencies
- */
-import { ErrorContext } from '../error-context-provider';
-import { useAsyncError } from '../../utils/use-async-error';
+import { addQueryArgs } from '@wordpress/url';
 
 export const Themes = createContext();
 
 /**
  * Themes context provider.
  *
- * @param {Object}  props                  Component props.
- * @param {any}     props.children         Component children.
- * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
+ * @param {Object} props          Component props.
+ * @param {any}    props.children Component children.
  */
-export function ThemesContextProvider( {
-	children,
-	hasErrorBoundary = false,
-} ) {
+export function ThemesContextProvider( { children } ) {
 	const [ themes, setThemes ] = useState( [] );
 	const [ fetchingThemes, setFetchingThemes ] = useState( null );
-
-	const { error, setError } = useContext( ErrorContext );
-	const { setAsyncError } = useAsyncError();
+	const [ error, setError ] = useState();
 
 	/**
 	 * This component sets state inside async functions.
@@ -62,7 +45,9 @@ export function ThemesContextProvider( {
 
 			try {
 				const fetchedThemes = await apiFetch( {
-					path: '/wp/v2/themes',
+					path: addQueryArgs( '/wp/v2/themes', {
+						_fields: [ 'author', 'name', 'status', 'stylesheet', 'version' ],
+					} ),
 				} );
 
 				if ( hasUnmounted.current === true ) {
@@ -76,17 +61,11 @@ export function ThemesContextProvider( {
 				}
 
 				setError( e );
-
-				if ( hasErrorBoundary ) {
-					setAsyncError( e );
-				}
-
-				return;
 			}
 
 			setFetchingThemes( false );
 		} )();
-	}, [ error, fetchingThemes, hasErrorBoundary, themes, setAsyncError, setError ] );
+	}, [ error, fetchingThemes, themes ] );
 
 	return (
 		<Themes.Provider
@@ -101,5 +80,4 @@ export function ThemesContextProvider( {
 }
 ThemesContextProvider.propTypes = {
 	children: PropTypes.any,
-	hasErrorBoundary: PropTypes.bool,
 };

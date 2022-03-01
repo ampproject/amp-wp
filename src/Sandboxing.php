@@ -12,13 +12,12 @@ use AMP_Form_Sanitizer;
 use AMP_Options_Manager;
 use AMP_Script_Sanitizer;
 use AMP_Style_Sanitizer;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
-use AmpProject\Attribute;
-use AmpProject\Tag;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 use DOMAttr;
 
 /**
@@ -28,7 +27,14 @@ use DOMAttr;
  * @since 2.2
  * @internal
  */
-final class Sandboxing implements Service, Registerable, Conditional {
+final class Sandboxing implements Service, Registerable {
+
+	/**
+	 * Option key for enabling sandboxing.
+	 *
+	 * @var string
+	 */
+	const OPTION_ENABLED = 'sandboxing_enabled';
 
 	/**
 	 * Option key for sandboxing level.
@@ -46,33 +52,21 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	const LEVELS = [ 1, 2, 3 ];
 
 	/**
-	 * Default sandboxing level.
+	 * Default sandboxing options schema.
 	 *
-	 * Note: This will eventually move to level 1 as the default.
-	 *
-	 * @var int
+	 * @var array
 	 */
-	const DEFAULT_LEVEL = 3;
-
-	/**
-	 * Whether service is needed.
-	 *
-	 * @return bool
-	 */
-	public static function is_needed() {
-		/**
-		 * Filters whether experimental sandboxing is enabled.
-		 *
-		 * Note: This filter will be removed and the service as a whole will no longer be Conditional once the feature
-		 * is no longer experimental.
-		 *
-		 * @internal
-		 * @since 2.2
-		 *
-		 * @param bool $enabled Sandboxing enabled.
-		 */
-		return (bool) apply_filters( 'amp_experimental_sandboxing_enabled', false );
-	}
+	const DEFAULT_OPTIONS_SCHEMA = [
+		self::OPTION_ENABLED => [
+			'type'    => 'bool',
+			'default' => false,
+		],
+		self::OPTION_LEVEL   => [
+			'type'    => 'int',
+			'enum'    => self::LEVELS,
+			'default' => 1,
+		],
+	];
 
 	/**
 	 * Register.
@@ -94,13 +88,7 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	public function filter_rest_options_schema( $schema ) {
 		return array_merge(
 			$schema,
-			[
-				self::OPTION_LEVEL => [
-					'type'    => 'int',
-					'enum'    => self::LEVELS,
-					'default' => self::DEFAULT_LEVEL,
-				],
-			]
+			self::DEFAULT_OPTIONS_SCHEMA
 		);
 	}
 
@@ -111,7 +99,9 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	 * @return array Defaults.
 	 */
 	public function filter_default_options( $defaults ) {
-		$defaults[ self::OPTION_LEVEL ] = self::DEFAULT_LEVEL;
+		foreach ( self::DEFAULT_OPTIONS_SCHEMA as $option_name => $option_schema ) {
+			$defaults[ $option_name ] = $option_schema['default'];
+		}
 		return $defaults;
 	}
 
@@ -123,6 +113,9 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	 * @return array Sanitized options.
 	 */
 	public function sanitize_options( $options, $new_options ) {
+		if ( isset( $new_options[ self::OPTION_ENABLED ] ) ) {
+			$options[ self::OPTION_ENABLED ] = (bool) $new_options[ self::OPTION_ENABLED ];
+		}
 		if (
 			isset( $new_options[ self::OPTION_LEVEL ] )
 			&&
@@ -141,6 +134,10 @@ final class Sandboxing implements Service, Registerable, Conditional {
 		// AMP to non-AMP and omit the amphtml link (in which case it would only be relevant when mobile redirection is
 		// enabled).
 		if ( ! amp_is_canonical() ) {
+			return;
+		}
+
+		if ( ! AMP_Options_Manager::get_option( self::OPTION_ENABLED ) ) {
 			return;
 		}
 
@@ -176,6 +173,8 @@ final class Sandboxing implements Service, Registerable, Conditional {
 				return $error;
 			}
 		);
+
+		add_action( 'amp_finalize_dom', [ $this, 'finalize_document' ], 10, 2 );
 	}
 
 	/**
@@ -198,10 +197,48 @@ final class Sandboxing implements Service, Registerable, Conditional {
 	}
 
 	/**
+	 * Remove required AMP markup if not used.
+	 *
+	 * @param Document $dom                        Document.
+	 * @param int      $effective_sandboxing_level Effective sandboxing level.
+	 */
+	private function remove_required_amp_markup_if_not_used( Document $dom, $effective_sandboxing_level ) {
+		if ( 3 === $effective_sandboxing_level ) {
+			// When valid AMP is the target, don't remove the scripts since it won't be valid AMP.
+			return;
+		}
+
+		$amp_scripts = $dom->xpath->query( '//script[ @custom-element or @custom-template ]' );
+		if ( $amp_scripts->length > 0 ) {
+			return;
+		}
+
+		// Remove runtime script(s).
+		$runtime_scripts = $dom->xpath->query( '//script[ @async and @src and starts-with( @src, "https://cdn.ampproject.org/" ) and contains( @src, "v0" ) ]' );
+		foreach ( $runtime_scripts as $runtime_script ) {
+			if ( $runtime_script instanceof Element ) {
+				$runtime_script->parentNode->removeChild( $runtime_script );
+			}
+		}
+
+		// Remove runtime style.
+		$runtime_style = $dom->xpath->query( './style[ @amp-runtime ]', $dom->head )->item( 0 );
+		if ( $runtime_style instanceof Element ) {
+			$dom->head->removeChild( $runtime_style );
+		}
+
+		// Remove preconnect link.
+		$preconnect_link = $dom->xpath->query( './link[ @href = "https://cdn.ampproject.org" ]', $dom->head )->item( 0 );
+		if ( $preconnect_link instanceof Element ) {
+			$dom->head->removeChild( $preconnect_link );
+		}
+	}
+
+	/**
 	 * Finalize document.
 	 *
-	 * @param Document $dom Document.
-	 * @param int|null $effective_sandboxing_level Effective sandboxing level.
+	 * @param Document $dom                        Document.
+	 * @param int      $effective_sandboxing_level Effective sandboxing level.
 	 */
 	public function finalize_document( Document $dom, $effective_sandboxing_level ) {
 		$actual_sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_LEVEL );
@@ -211,31 +248,54 @@ final class Sandboxing implements Service, Registerable, Conditional {
 			$meta_generator->nodeValue .= "; sandboxing-level={$actual_sandboxing_level}:{$effective_sandboxing_level}";
 		}
 
-		$amp_admin_bar_menu_item = $dom->xpath->query( '//div[ @id = "wpadminbar" ]//li[ @id = "wp-admin-bar-amp" ]/a' )->item( 0 );
+		$this->remove_required_amp_markup_if_not_used( $dom, $effective_sandboxing_level );
+
+		$amp_admin_bar_menu_item = $dom->xpath->query( '//div[ @id = "wpadminbar" ]//li[ @id = "wp-admin-bar-amp" ]' )->item( 0 );
 		if ( $amp_admin_bar_menu_item instanceof Element ) {
-			$span = $dom->createElement( Tag::SPAN );
-			$span->setAttribute(
-				Attribute::TITLE,
-				sprintf(
-					/* translators: %d is the effective sandboxing level */
-					__( 'Effective sandboxing level: %d', 'amp' ),
-					$effective_sandboxing_level
-				)
-			);
+
 			switch ( $effective_sandboxing_level ) {
 				case 1:
-					$text = '1️⃣';
+					$text  = '1️⃣';
+					$title = __( 'Sandboxing level: Loose (1)', 'amp' );
 					break;
 				case 2:
-					$text = '2️⃣';
+					$text  = '2️⃣';
+					$title = __( 'Sandboxing level: Moderate (2)', 'amp' );
 					break;
 				default:
-					$text = '3️⃣';
+					$text  = '3️⃣';
+					$title = __( 'Sandboxing level: Strict (3)', 'amp' );
 					break;
 			}
-			$span->textContent = $text;
-			$amp_admin_bar_menu_item->appendChild( $dom->createTextNode( ' ' ) );
-			$amp_admin_bar_menu_item->appendChild( $span );
+
+			$amp_link = $dom->xpath->query( './a', $amp_admin_bar_menu_item )->item( 0 );
+			if ( $amp_link instanceof Element ) {
+				$span = $dom->createElement( Tag::SPAN );
+				$span->setAttribute( Attribute::TITLE, $title );
+				$span->textContent = $text;
+
+				$amp_link->appendChild( $dom->createTextNode( ' ' ) );
+				$amp_link->appendChild( $span );
+			}
+
+			$amp_submenu_ul = $dom->xpath->query( './div/ul[ @id = "wp-admin-bar-amp-default" ]', $amp_admin_bar_menu_item )->item( 0 );
+			if ( $amp_submenu_ul instanceof Element ) {
+				$level_li = $dom->createElement( Tag::LI );
+				$level_li->setAttribute( Attribute::ID, 'wp-admin-bar-amp-sandboxing-level' );
+
+				$link = $dom->createElement( Tag::A );
+				$link->setAttribute( Attribute::CLASS_, 'ab-item' );
+				$link->textContent = $title;
+				if ( current_user_can( 'manage_options' ) ) {
+					$link->setAttribute(
+						Attribute::HREF,
+						add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) . '#sandboxing'
+					);
+				}
+
+				$level_li->appendChild( $link );
+				$amp_submenu_ul->appendChild( $level_li );
+			}
 		}
 	}
 }

@@ -6,6 +6,17 @@
 	position: relative;
 }
 
+.theme-browser .theme .dashicons-external,
+.plugin-action-buttons .dashicons-external {
+	vertical-align: text-bottom;
+	margin-left: 5px;
+}
+
+.theme-browser .theme .theme-screenshot img {
+	height: 100%;
+	object-fit: contain;
+}
+
 .amp-extension-card-message {
 	text-align: center;
 	padding: 0;
@@ -33,12 +44,6 @@
 	background-size: 15px 15px;
 	height: 15px;
 	width: 15px;
-}
-
-.theme-browser .theme {
-	float: none;
-	display: inline-block;
-	vertical-align: top;
 }
 
 .plugin-install-tab-amp-compatible .plugin-card-bottom {

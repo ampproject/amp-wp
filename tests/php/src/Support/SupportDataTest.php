@@ -218,6 +218,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 	/**
 	 * @covers ::send_data()
 	 * @covers ::get_data()
+	 * @covers ::process_raw_post_errors()
 	 */
 	public function test_send_data() {
 
@@ -269,10 +270,11 @@ class SupportDataTest extends DependencyInjectedTestCase {
 	/**
 	 * @covers ::get_data()
 	 * @covers ::get_amp_urls()
+	 * @covers ::process_raw_post_errors()
 	 */
 	public function test_get_data_with_specific_url() {
 
-		$this->create_validated_url();
+		$amp_validated_posts = $this->create_validated_url();
 
 		$search_urls = home_url( '?s=example' );
 
@@ -288,7 +290,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 
 		$this->assertCount( 1, $output['urls'] );
 		$this->assertEquals(
-			AMP_Validated_URL_Post_Type::normalize_url_for_storage( $search_urls ),
+			AMP_Validated_URL_Post_Type::get_url_from_post( $amp_validated_posts['search'] ),
 			$output['urls'][0]['url']
 		);
 	}
@@ -634,6 +636,7 @@ class SupportDataTest extends DependencyInjectedTestCase {
 	 *
 	 * @covers ::get_amp_urls()
 	 * @covers ::get_stylesheet_info()
+	 * @covers ::process_raw_post_errors()
 	 */
 	public function test_get_amp_urls() {
 

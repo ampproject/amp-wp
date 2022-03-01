@@ -7,12 +7,12 @@
 
 namespace AmpProject\AmpWP\Optimizer\Transformer;
 
-use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\Transformer;
 use AmpProject\Optimizer\TransformerConfiguration;
-use AmpProject\Tag;
 
 /**
  * Ensure there is a schema.org script in the document.

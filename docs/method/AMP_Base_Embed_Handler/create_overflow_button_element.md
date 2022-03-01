@@ -17,7 +17,7 @@ Create overflow button element.
 
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:214](/includes/embeds/class-amp-base-embed-handler.php#L214-L223)
+:link: [includes/embeds/class-amp-base-embed-handler.php:217](/includes/embeds/class-amp-base-embed-handler.php#L217-L226)
 
 <details>
 <summary>Show Code</summary>

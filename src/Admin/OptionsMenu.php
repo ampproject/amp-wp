@@ -225,8 +225,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
-		$theme           = wp_get_theme();
-		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
+		$theme             = wp_get_theme();
+		$is_reader_theme   = $this->reader_themes->theme_data_exists( get_stylesheet() );
+		$page_cache_detail = $this->site_health->get_page_cache_detail( true );
 
 		$amp_validated_urls_link = admin_url(
 			add_query_arg(
@@ -236,6 +237,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		);
 
 		$js_data = [
+			'AMP_COMPATIBLE_THEMES_URL'          => current_user_can( 'install_themes' ) ? admin_url( '/theme-install.php?browse=amp-compatible' ) : 'https://amp-wp.org/ecosystem/themes/',
+			'AMP_COMPATIBLE_PLUGINS_URL'         => current_user_can( 'install_plugins' ) ? admin_url( '/plugin-install.php?tab=amp-compatible' ) : 'https://amp-wp.org/ecosystem/plugins/',
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
 			'AMP_SCAN_IF_STALE'                  => QueryVar::AMP_SCAN_IF_STALE,
 			'CURRENT_THEME'                      => [
@@ -251,13 +254,13 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'SCANNABLE_URLS_REST_PATH'           => '/amp/v1/scannable-urls',
 			'LEGACY_THEME_SLUG'                  => ReaderThemes::DEFAULT_READER_THEME,
 			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
-			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
+			'UPDATES_NONCE'                      => current_user_can( 'install_themes' ) ? wp_create_nonce( 'updates' ) : '',
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE' => UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
-			'VALIDATE_NONCE'                     => AMP_Validation_Manager::get_amp_validate_nonce(),
+			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : '',
 			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
-			'HAS_PAGE_CACHING'                   => $this->site_health->has_page_caching( true ),
+			'HAS_PAGE_CACHING'                   => ( is_array( $page_cache_detail ) && 'good' === $page_cache_detail['status'] ),
 		];
 
 		wp_add_inline_script(
@@ -318,9 +321,17 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				[ 'url', 'amp_url', 'type', 'label', 'validation_errors', 'stale' ],
 				'/amp/v1/scannable-urls'
 			),
-			'/wp/v2/plugins',
+			add_query_arg(
+				'_fields',
+				[ 'author', 'name', 'plugin', 'status', 'version' ],
+				'/wp/v2/plugins'
+			),
 			'/wp/v2/settings',
-			'/wp/v2/themes',
+			add_query_arg(
+				'_fields',
+				[ 'author', 'name', 'status', 'stylesheet', 'version' ],
+				'/wp/v2/themes'
+			),
 			'/wp/v2/users/me',
 		];
 

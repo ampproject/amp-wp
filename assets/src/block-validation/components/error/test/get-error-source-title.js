@@ -5,6 +5,7 @@ import { getErrorSourceTitle } from '../get-error-source-title';
 
 describe( 'getErrorSorceTitle', () => {
 	it( 'returns an empty string if nothing is passed', () => {
+		expect( getErrorSourceTitle( null ) ).toBe( '' );
 		expect( getErrorSourceTitle( [] ) ).toBe( '' );
 	} );
 

@@ -11,14 +11,15 @@ use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
+use AmpProject\Encoding;
+use AmpProject\Html\Attribute;
 use org\bovigo\vfs;
-use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for Theme Support.
@@ -1697,14 +1698,28 @@ class Test_AMP_Theme_Support extends TestCase {
 			return AMP_Theme_Support::prepare_response( $original_html );
 		};
 
+		$amp_finalize_dom_count = did_action( 'amp_finalize_dom' );
+		add_action(
+			'amp_finalize_dom',
+			function ( $dom, $effective_sandboxing_level ) {
+				$this->assertInstanceOf( Document::class, $dom );
+				$this->assertIsInt( $effective_sandboxing_level );
+				$this->assertSame( 3, $effective_sandboxing_level );
+			},
+			10,
+			2
+		);
+
 		$sanitized_html = $call_prepare_response();
+
+		$this->assertSame( $amp_finalize_dom_count + 1, did_action( 'amp_finalize_dom' ) );
 
 		$this->assertStringNotContainsString( 'handle=', $sanitized_html );
 		$this->assertEquals( 2, did_action( 'wp_print_scripts' ) );
 
 		$ordered_contains = [
 			'<html amp=""',
-			'<meta charset="' . Document\Encoding::AMP . '">',
+			'<meta charset="' . Encoding::AMP . '">',
 			'<meta name="viewport" content="width=device-width">',
 			'<link rel="modulepreload" href="https://cdn.ampproject.org/v0.mjs" as="script" crossorigin="anonymous">',
 			'<link rel="preconnect" href="https://cdn.ampproject.org">',
@@ -1743,11 +1758,11 @@ class Test_AMP_Theme_Support extends TestCase {
 		foreach ( $ordered_contains as $ordered_contain ) {
 			if ( '#' === substr( $ordered_contain, 0, 1 ) ) {
 				$this->assertEquals( 1, preg_match( $ordered_contain, $sanitized_html, $matches, PREG_OFFSET_CAPTURE ), "Failed to find: $ordered_contain" );
-				$this->assertGreaterThan( $last_position, $matches[0][1], "'$ordered_contain' is not after '$prev_ordered_contain'" );
+				$this->assertGreaterThan( $last_position, $matches[0][1], "'$ordered_contain' is not after '$prev_ordered_contain' in:\n$sanitized_html" );
 				$last_position = $matches[0][1];
 			} else {
 				$this_position = strpos( $sanitized_html, $ordered_contain );
-				$this->assertNotFalse( $this_position, "Failed to find: $ordered_contain" );
+				$this->assertNotFalse( $this_position, "Failed to find: $ordered_contain in:\n$sanitized_html" );
 				$this->assertGreaterThan( $last_position, (int) $this_position, "'$ordered_contain' is not after '$prev_ordered_contain'" );
 				$last_position = $this_position;
 			}
@@ -1937,7 +1952,22 @@ class Test_AMP_Theme_Support extends TestCase {
 			</body>
 		</html>
 		<?php
+
+		$amp_finalize_dom_count = did_action( 'amp_finalize_dom' );
+		add_action(
+			'amp_finalize_dom',
+			function ( $dom, $effective_sandboxing_level ) use ( $converted ) {
+				$this->assertInstanceOf( Document::class, $dom );
+				$this->assertIsInt( $effective_sandboxing_level );
+				$this->assertSame( $converted ? 3 : 2, $effective_sandboxing_level );
+			},
+			10,
+			2
+		);
+
 		$html = AMP_Theme_Support::prepare_response( ob_get_clean() );
+
+		$this->assertSame( $amp_finalize_dom_count + 1, did_action( 'amp_finalize_dom' ) );
 
 		$dom = Document::fromHtml( $html );
 
@@ -2057,7 +2087,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		add_filter(
 			'script_loader_tag',
 			static function ( $script ) {
-				return preg_replace( "/ id='amp-[^']+?'/", '', $script );
+				return preg_replace( '/ id=(["\'])amp-.*?\1/', '', $script );
 			}
 		);
 

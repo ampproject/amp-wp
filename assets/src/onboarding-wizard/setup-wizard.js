@@ -1,14 +1,14 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Panel } from '@wordpress/components';
-
-/**
- * External dependencies
- */
-import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies

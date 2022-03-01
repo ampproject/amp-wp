@@ -6,26 +6,26 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Optimizer\OptimizerService;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
+use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Sandboxing;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\RequestDestination;
+use AmpProject\Html\Tag;
 use AmpProject\Optimizer;
 use AmpProject\Optimizer\Configuration\TransformedIdentifierConfiguration;
 use AmpProject\Optimizer\Transformer\TransformedIdentifier;
-use AmpProject\RequestDestination;
-use AmpProject\Tag;
-use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadata;
-use AmpProject\AmpWP\Optimizer\Transformer\AmpSchemaOrgMetadataConfiguration;
-use AmpProject\AmpWP\Sandboxing;
 
 /**
  * Class AMP_Theme_Support
@@ -850,7 +850,7 @@ class AMP_Theme_Support {
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
-		// Temporary workarounds for <https://github.com/ampproject/amp-wp/issues/6115>.
+		// The AMP version of the skip link is implemented by AMP_Accessibility_Sanitizer::add_skip_link().
 		remove_action( 'wp_footer', 'gutenberg_the_skip_link' );
 		remove_action( 'wp_footer', 'the_block_template_skip_link' );
 
@@ -2190,9 +2190,16 @@ class AMP_Theme_Support {
 			}
 		}
 
-		if ( Sandboxing::is_needed() ) {
-			Services::get( 'sandboxing' )->finalize_document( $dom, $effective_sandboxing_level );
-		}
+		/**
+		 * Fires immediately before the DOM is serialized to send as the response body.
+		 *
+		 * @since 2.2
+		 * @internal
+		 *
+		 * @param Document $dom                        Document prior to serialization.
+		 * @param int      $effective_sandboxing_level Effective sandboxing level.
+		 */
+		do_action( 'amp_finalize_dom', $dom, $effective_sandboxing_level );
 
 		$response = $dom->saveHTML();
 

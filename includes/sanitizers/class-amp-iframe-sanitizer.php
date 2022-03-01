@@ -7,7 +7,7 @@
 
 use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
-use AmpProject\Attribute;
+use AmpProject\Html\Attribute;
 use AmpProject\Layout;
 
 /**
@@ -182,6 +182,9 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );
 			}
+
+			// Remove the ID from the original node so that PHP DOM doesn't fail to set it on the replacement element.
+			$node->removeAttribute( Attribute::ID );
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $normalized_attributes );
 

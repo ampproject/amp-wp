@@ -1,12 +1,4 @@
 /**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
-import domReady from '@wordpress/dom-ready';
-import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
-
-/**
  * External dependencies
  */
 import {
@@ -24,6 +16,14 @@ import {
 	VALIDATE_NONCE,
 } from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
+
+/**
+ * WordPress dependencies
+ */
+import { render } from '@wordpress/element';
+import domReady from '@wordpress/dom-ready';
+import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -76,28 +76,31 @@ export function Providers( { children } ) {
 						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
 						usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
 					>
-						<NavigationContextProvider pages={ PAGES }>
-							<PluginsContextProvider hasErrorBoundary={ true }>
-								<ThemesContextProvider hasErrorBoundary={ true }>
-									<ReaderThemesContextProvider
-										currentTheme={ CURRENT_THEME }
-										hasErrorBoundary={ true }
-										wpAjaxUrl={ wpAjaxUrl }
-										readerThemesRestPath={ READER_THEMES_REST_PATH }
-										updatesNonce={ UPDATES_NONCE }
-									>
-										<TemplateModeOverrideContextProvider>
-											<SiteScanContextProvider
-												scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
-												validateNonce={ VALIDATE_NONCE }
-											>
+						<PluginsContextProvider>
+							<ThemesContextProvider>
+								<SiteScanContextProvider
+									fetchCachedValidationErrors={ false }
+									resetOnOptionsChange={ true }
+									scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
+									scanOnce={ true }
+									validateNonce={ VALIDATE_NONCE }
+								>
+									<NavigationContextProvider pages={ PAGES }>
+										<ReaderThemesContextProvider
+											currentTheme={ CURRENT_THEME }
+											hasErrorBoundary={ true }
+											wpAjaxUrl={ wpAjaxUrl }
+											readerThemesRestPath={ READER_THEMES_REST_PATH }
+											updatesNonce={ UPDATES_NONCE }
+										>
+											<TemplateModeOverrideContextProvider>
 												{ children }
-											</SiteScanContextProvider>
-										</TemplateModeOverrideContextProvider>
-									</ReaderThemesContextProvider>
-								</ThemesContextProvider>
-							</PluginsContextProvider>
-						</NavigationContextProvider>
+											</TemplateModeOverrideContextProvider>
+										</ReaderThemesContextProvider>
+									</NavigationContextProvider>
+								</SiteScanContextProvider>
+							</ThemesContextProvider>
+						</PluginsContextProvider>
 					</UserContextProvider>
 				</OptionsContextProvider>
 			</ErrorBoundary>

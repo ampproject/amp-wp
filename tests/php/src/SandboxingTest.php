@@ -2,21 +2,20 @@
 
 namespace AmpProject\AmpWP\Tests;
 
+use AMP_Comments_Sanitizer;
+use AMP_Form_Sanitizer;
+use AMP_Options_Manager;
+use AMP_Script_Sanitizer;
+use AMP_Theme_Support;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Sandboxing;
-use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Infrastructure\Registerable;
-use AmpProject\AmpWP\Infrastructure\Conditional;
-use AMP_Options_Manager;
-use AMP_Theme_Support;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AMP_Script_Sanitizer;
-use AMP_Form_Sanitizer;
-use AMP_Comments_Sanitizer;
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
+use AmpProject\Html\Attribute;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Sandboxing */
 class SandboxingTest extends DependencyInjectedTestCase {
@@ -35,14 +34,6 @@ class SandboxingTest extends DependencyInjectedTestCase {
 		$this->assertInstanceOf( Sandboxing::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
-		$this->assertInstanceOf( Conditional::class, $this->instance );
-	}
-
-	/** @covers ::is_needed() */
-	public function test_is_needed() {
-		$this->assertFalse( Sandboxing::is_needed() );
-		add_filter( 'amp_experimental_sandboxing_enabled', '__return_true' );
-		$this->assertTrue( Sandboxing::is_needed() );
 	}
 
 	/**
@@ -75,7 +66,10 @@ class SandboxingTest extends DependencyInjectedTestCase {
 	/** @covers ::filter_default_options() */
 	public function test_filter_default_options() {
 		$this->assertEquals(
-			[ Sandboxing::OPTION_LEVEL => Sandboxing::DEFAULT_LEVEL ],
+			[
+				Sandboxing::OPTION_LEVEL   => 1,
+				Sandboxing::OPTION_ENABLED => false,
+			],
 			$this->instance->filter_default_options( [] )
 		);
 	}
@@ -117,10 +111,25 @@ class SandboxingTest extends DependencyInjectedTestCase {
 
 	/** @covers ::add_hooks() */
 	public function test_add_hooks_not_standard_mode() {
+		$this->register_settings_and_set_user();
 		AMP_Options_Manager::update_options(
 			[
-				Option::THEME_SUPPORT    => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
-				Sandboxing::OPTION_LEVEL => 2,
+				Sandboxing::OPTION_ENABLED => true,
+				Option::THEME_SUPPORT      => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				Sandboxing::OPTION_LEVEL   => 2,
+			]
+		);
+		$this->instance->add_hooks();
+		$this->assertFalse( has_filter( 'amp_meta_generator', [ $this->instance, 'filter_amp_meta_generator' ] ) );
+	}
+
+	/** @covers ::add_hooks() */
+	public function test_add_hooks_without_enabled_level() {
+		$this->register_settings_and_set_user();
+		AMP_Options_Manager::update_options(
+			[
+				Sandboxing::OPTION_ENABLED => false,
+				Option::THEME_SUPPORT      => AMP_Theme_Support::STANDARD_MODE_SLUG,
 			]
 		);
 		$this->instance->add_hooks();
@@ -166,10 +175,12 @@ class SandboxingTest extends DependencyInjectedTestCase {
 	 * @dataProvider get_data_to_test_add_hooks
 	 */
 	public function test_add_hooks( $level, $expected_sanitizer_args ) {
+		$this->register_settings_and_set_user();
 		AMP_Options_Manager::update_options(
 			[
-				Option::THEME_SUPPORT    => AMP_Theme_Support::STANDARD_MODE_SLUG,
-				Sandboxing::OPTION_LEVEL => $level,
+				Sandboxing::OPTION_ENABLED => true,
+				Option::THEME_SUPPORT      => AMP_Theme_Support::STANDARD_MODE_SLUG,
+				Sandboxing::OPTION_LEVEL   => $level,
 			]
 		);
 		$this->instance->add_hooks();
@@ -196,25 +207,35 @@ class SandboxingTest extends DependencyInjectedTestCase {
 	/** @return array */
 	public function get_data_to_test_finalize_document() {
 		return [
-			'level_3_to_3'        => [
-				'min_level'      => 3,
-				'body'           => '<div></div>',
-				'expected_level' => 3,
+			'level_3_to_3'         => [
+				'min_level'                    => 3,
+				'body'                         => '<div></div>',
+				'expected_level'               => 3,
+				'expected_required_amp_markup' => true,
 			],
-			'level_1_to_2'        => [
-				'min_level'      => 1,
-				'body'           => sprintf( '<div %s></div>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
-				'expected_level' => 2,
+			'level_1_to_2'         => [
+				'min_level'                    => 1,
+				'body'                         => sprintf( '<div %s></div>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'expected_level'               => 2,
+				'expected_required_amp_markup' => false,
 			],
-			'level_1_to_1'        => [
-				'min_level'      => 1,
-				'body'           => sprintf( '<div %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
-				'expected_level' => 1,
+			'level_1_to_2_with_v0' => [
+				'min_level'                    => 1,
+				'body'                         => sprintf( '<script src="https://cdn.ampproject.org/v0/amp-analytics-0.1.mjs" async="" custom-element="amp-analytics" type="module" crossorigin="anonymous"></script><script async nomodule src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js" crossorigin="anonymous" custom-element="amp-analytics"></script><div %s></div>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'expected_level'               => 2,
+				'expected_required_amp_markup' => true,
 			],
-			'level_1_to_1_with_2' => [
-				'min_level'      => 1,
-				'body'           => sprintf( '<div %s></div><div %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE, ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
-				'expected_level' => 1,
+			'level_1_to_1'         => [
+				'min_level'                    => 1,
+				'body'                         => sprintf( '<div %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ),
+				'expected_level'               => 1,
+				'expected_required_amp_markup' => false,
+			],
+			'level_1_to_1_with_2'  => [
+				'min_level'                    => 1,
+				'body'                         => sprintf( '<div %s></div><div %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE, ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'expected_level'               => 1,
+				'expected_required_amp_markup' => false,
 			],
 		];
 	}
@@ -223,18 +244,47 @@ class SandboxingTest extends DependencyInjectedTestCase {
 	 * @dataProvider get_data_to_test_finalize_document
 	 * @covers ::get_effective_level()
 	 * @covers ::finalize_document()
+	 * @covers ::remove_required_amp_markup_if_not_used()
 	 */
-	public function test_finalize_document_and_get_effective_level( $min_level, $body, $expected_level ) {
-		AMP_Options_Manager::update_option( Sandboxing::OPTION_LEVEL, $min_level );
+	public function test_finalize_document_and_get_effective_level( $min_level, $body, $expected_level, $expected_required_amp_markup ) {
+		$this->register_settings_and_set_user();
+		AMP_Options_Manager::update_options(
+			[
+				Sandboxing::OPTION_ENABLED => true,
+				Sandboxing::OPTION_LEVEL   => $min_level,
+			]
+		);
 
 		$dom = Document::fromHtml(
 			sprintf(
 				'
 				<html>
 					<head>
+						<link rel="preconnect" href="https://cdn.ampproject.org">
+						<style amp-runtime="" i-amphtml-version="012110290545003">html{/*...*/}</style>
+						<script async="" src="https://cdn.ampproject.org/v0.mjs" type="module" crossorigin="anonymous"></script>
+						<script async nomodule src="https://cdn.ampproject.org/v0.js" crossorigin="anonymous"></script>
 						<meta name="generator" content="AMP Plugin v2.1; foo=bar">
 					</head>
-					<body>%s</body>
+					<body>
+						%s
+
+						<div id="wpadminbar" class="nojq">
+							<div class="quicklinks" id="wp-toolbar" role="navigation" aria-label="Toolbar">
+								<ul id="wp-admin-bar-root-default" class="ab-top-menu">
+									<li id="wp-admin-bar-amp" class="menupop">
+										<a class="ab-item" aria-haspopup="true" href="#" title="Validate URL"><span id="amp-admin-bar-item-status-icon" class="ab-icon amp-icon amp-valid"></span> AMP</a>
+										<div class="ab-sub-wrapper">
+											<ul id="wp-admin-bar-amp-default" class="ab-submenu">
+												<li id="wp-admin-bar-amp-settings"><a class="ab-item" href="#">Settings</a></li>
+												<li id="wp-admin-bar-amp-support"><a class="ab-item" href="#">Get support</a></li>
+											</ul>
+										</div>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</body>
 				</html>
 				',
 				$body
@@ -249,5 +299,34 @@ class SandboxingTest extends DependencyInjectedTestCase {
 		$meta = $dom->xpath->query( '//meta[ @name = "generator" ]' )->item( 0 );
 		$this->assertInstanceOf( Element::class, $meta );
 		$this->assertStringEndsWith( "foo=bar; sandboxing-level={$min_level}:{$expected_level}", $meta->getAttribute( Attribute::CONTENT ) );
+
+		$expressions = [
+			'//link[ @rel = "preconnect" and @href = "https://cdn.ampproject.org" ]',
+			'//style[ @amp-runtime ]',
+			'//script[ @src = "https://cdn.ampproject.org/v0.mjs" ]',
+			'//script[ @src = "https://cdn.ampproject.org/v0.js" ]',
+		];
+		foreach ( $expressions as $expression ) {
+			$this->assertEquals( $expected_required_amp_markup ? 1 : 0, $dom->xpath->query( $expression )->length, $expression );
+		}
+
+		$root_path = '//div[ @id = "wpadminbar" ]//li[ @id = "wp-admin-bar-amp" ]';
+		$this->assertInstanceOf(
+			Element::class,
+			$dom->xpath->query( $root_path . '/a/span[ contains( @title, "Sandboxing level" ) ]' )->item( 0 )
+		);
+		$this->assertInstanceOf(
+			Element::class,
+			$dom->xpath->query( $root_path . '//li[ @id = "wp-admin-bar-amp-sandboxing-level" ]//a[ @href and contains( ., "Sandboxing level" ) ]' )->item( 0 )
+		);
+	}
+
+	/**
+	 * Register settings and set the current user.
+	 */
+	private function register_settings_and_set_user() {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->instance->register();
+		AMP_Options_Manager::register_settings();
 	}
 }

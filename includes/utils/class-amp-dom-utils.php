@@ -8,7 +8,7 @@
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_DOM_Utils

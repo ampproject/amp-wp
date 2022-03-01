@@ -1,15 +1,15 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
+
+/**
  * WordPress dependencies
  */
 import { createContext, useEffect, useState, useRef, useContext, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
-
-/**
- * External dependencies
- */
-import PropTypes from 'prop-types';
-import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
 
 /**
  * Internal dependencies

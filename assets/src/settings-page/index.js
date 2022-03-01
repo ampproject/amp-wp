@@ -42,8 +42,9 @@ import { ErrorScreen } from '../components/error-screen';
 import { User, UserContextProvider } from '../components/user-context-provider';
 import { PluginsContextProvider } from '../components/plugins-context-provider';
 import { ThemesContextProvider } from '../components/themes-context-provider';
-import { SiteScanContextProvider } from '../components/site-scan-context-provider';
+import { SiteScanContextProvider, SiteScan as SiteScanContext } from '../components/site-scan-context-provider';
 import { Welcome } from './welcome';
+import { Sandboxing } from './sandboxing';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { SettingsFooter } from './settings-footer';
@@ -92,10 +93,12 @@ function Providers( { children } ) {
 								updatesNonce={ UPDATES_NONCE }
 								wpAjaxUrl={ wpAjaxUrl }
 							>
-								<PluginsContextProvider hasErrorBoundary={ true }>
-									<ThemesContextProvider hasErrorBoundary={ true }>
+								<PluginsContextProvider>
+									<ThemesContextProvider>
 										<SiteScanContextProvider
 											fetchCachedValidationErrors={ true }
+											refetchPluginSuppressionOnScanComplete={ true }
+											resetOnOptionsChange={ true }
 											scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
 											validateNonce={ VALIDATE_NONCE }
 										>
@@ -150,6 +153,7 @@ function Root( { appRoot } ) {
 	const { hasOptionsChanges, fetchingOptions, saveOptions } = useContext( Options );
 	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption } = useContext( User );
 	const { templateModeWasOverridden } = useContext( ReaderThemes );
+	const { isSkipped } = useContext( SiteScanContext );
 
 	/**
 	 * Handle the form submit event.
@@ -214,7 +218,9 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 			<Welcome />
-			<SiteScan onSiteScan={ focusSiteScanSection } />
+			{ ! isSkipped && (
+				<SiteScan onSiteScan={ focusSiteScanSection } />
+			) }
 			<SiteReview />
 			<form onSubmit={ onSubmit }>
 				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />
@@ -258,6 +264,7 @@ function Root( { appRoot } ) {
 				>
 					<Analytics />
 				</AMPDrawer>
+				<Sandboxing focusedSection={ focusedSection } />
 				<PairedUrlStructure focusedSection={ focusedSection } />
 				<AMPDrawer
 					className="amp-other-settings"
@@ -271,7 +278,9 @@ function Root( { appRoot } ) {
 					initialOpen={ 'other-settings' === focusedSection }
 				>
 					<MobileRedirection />
-					<DeveloperTools />
+					{ HAS_DEPENDENCY_SUPPORT && (
+						<DeveloperTools />
+					) }
 					<DeleteDataAtUninstall />
 				</AMPDrawer>
 				<SettingsFooter />

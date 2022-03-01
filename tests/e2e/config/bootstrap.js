@@ -7,8 +7,10 @@ import { get } from 'lodash';
  * WordPress dependencies
  */
 import {
+	activateTheme,
 	clearLocalStorage,
 	enablePageDialogAccept,
+	installTheme,
 	isOfflineMode,
 	setBrowserViewport,
 	trashAllPosts,
@@ -19,6 +21,7 @@ import {
  * Internal dependencies
  */
 import { cleanUpSettings } from '../utils/onboarding-wizard-utils';
+import { deactivatePlugin, installLocalPlugin } from '../utils/amp-settings-utils';
 
 /**
  * Environment variables
@@ -229,6 +232,21 @@ async function createTestData() {
 }
 
 /**
+ * Install themes and plugins needed in tests.
+ */
+async function setupThemesAndPlugins() {
+	await installLocalPlugin( 'e2e-tests-demo-plugin' );
+	await installLocalPlugin( 'do-not-allow-amp-validate-capability' );
+
+	// If the plugins have been already installed, they may be activated, too. Try deactivating them, just in case.
+	await deactivatePlugin( 'e2e-tests-demo-plugin' );
+	await deactivatePlugin( 'do-not-allow-amp-validate-capability' );
+
+	await installTheme( 'hestia' );
+	await activateTheme( 'twentytwenty' );
+}
+
+/**
  * Before every test suite run, delete all content created by the test. This ensures
  * other posts/comments/etc. aren't dirtying tests and tests don't depend on
  * each other's side-effects.
@@ -239,6 +257,7 @@ beforeAll( async () => {
 	enablePageDialogAccept();
 	observeConsoleLogging();
 	await setupBrowser();
+	await setupThemesAndPlugins();
 	await trashAllPosts();
 	await createTestData();
 	await cleanUpSettings();

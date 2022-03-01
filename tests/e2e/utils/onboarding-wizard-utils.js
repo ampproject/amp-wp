@@ -7,7 +7,7 @@ export const NEXT_BUTTON_SELECTOR = '#next-button';
 export const PREV_BUTTON_SELECTOR = '.amp-settings-nav__prev-next button:not(.is-primary)';
 
 export async function goToOnboardingWizard() {
-	await visitAdminPage( 'index.php' );
+	await visitAdminPage( 'index.php', '' );
 	await expect( page ).not.toMatchElement( '#amp-onboarding-wizard' );
 	await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
 	await expect( page ).toMatchElement( '#amp-onboarding-wizard' );
@@ -46,6 +46,7 @@ export async function moveToTemplateModeScreen( { technical } ) {
 }
 
 export async function scrollToElement( { selector, click = false } ) {
+	await page.waitForSelector( selector );
 	await page.evaluate( ( options ) => {
 		const el = document.querySelector( options.selector );
 		if ( el ) {

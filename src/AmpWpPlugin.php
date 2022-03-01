@@ -20,7 +20,6 @@ use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\AmpWP\Support\SupportCliCommand;
 use AmpProject\AmpWP\Support\SupportRESTController;
-use AmpProject\AmpWP\Validation\SavePostValidationEvent;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
@@ -109,6 +108,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'paired_routing'                     => PairedRouting::class,
 		'paired_url'                         => PairedUrl::class,
 		'plugin_activation_notice'           => Admin\PluginActivationNotice::class,
+		'plugin_activation_site_scan'        => Admin\PluginActivationSiteScan::class,
 		'plugin_registry'                    => PluginRegistry::class,
 		'plugin_suppression'                 => PluginSuppression::class,
 		'reader_theme_loader'                => ReaderThemeLoader::class,
@@ -117,7 +117,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'rest.scannable_urls_controller'     => Validation\ScannableURLsRestController::class,
 		'rest.validation_counts_controller'  => Validation\ValidationCountsRestController::class,
 		'sandboxing'                         => Sandboxing::class,
-		'save_post_validation_event'         => SavePostValidationEvent::class,
 		'server_timing'                      => Instrumentation\ServerTiming::class,
 		'site_health_integration'            => Admin\SiteHealth::class,
 		'support'                            => SupportCliCommand::class,
@@ -125,6 +124,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'url_validation_cron'                => URLValidationCron::class,
 		'url_validation_rest_controller'     => Validation\URLValidationRESTController::class,
 		'validated_url_stylesheet_gc'        => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+		'validated_data_gc'                  => BackgroundTask\ValidationDataGarbageCollection::class,
 		'validation.scannable_url_provider'  => ScannableURLProvider::class,
 		'validation.url_validation_provider' => URLValidationProvider::class,
 	];

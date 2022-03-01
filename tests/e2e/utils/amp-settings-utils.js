@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import path from 'path';
+
+/**
  * WordPress dependencies
  */
 import {
@@ -16,20 +21,20 @@ import {
  */
 import { scrollToElement } from './onboarding-wizard-utils';
 
-export async function setTemplateMode( mode ) {
-	// Set template mode.
-	await scrollToElement( { selector: `#template-mode-${ mode }`, click: true } );
+export async function saveSettings() {
+	await expect( page ).toClick( 'button', { text: 'Save' } );
+	await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
+	await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
+}
 
-	// Save options and wait for the request to succeed.
-	await Promise.all( [
-		scrollToElement( { selector: '.amp-settings-nav button[type="submit"]', click: true } ),
-		page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ) ),
-	] );
+export async function setTemplateMode( mode ) {
+	await scrollToElement( { selector: `#template-mode-${ mode }`, click: true } );
+	await saveSettings();
 }
 
 export async function isPluginInstalled( slug, settings ) {
 	await switchUserToAdmin();
-	await visitAdminPage( 'plugins.php' );
+	await visitAdminPage( 'plugins.php', '' );
 	await page.waitForSelector( 'h1', { text: 'Plugins' } );
 
 	const found = await page.$( `tr${ settings?.checkIsActivated ? '.active' : '' }[data-slug="${ slug }"]` );
@@ -47,6 +52,36 @@ export async function installPlugin( slug ) {
 	if ( ! await isPluginInstalled( slug ) ) {
 		await _installPlugin( slug );
 	}
+}
+
+/**
+ * Install a plugin from a local directory.
+ *
+ * Note that the plugin ZIP archive should be located in the `/tests/e2e/plugins/` folder.
+ * The filename should match the plugin slug provided as a parameter.
+ *
+ * @param {string} slug Plugin slug.
+ */
+export async function installLocalPlugin( slug ) {
+	if ( await isPluginInstalled( slug ) ) {
+		return;
+	}
+
+	await switchUserToAdmin();
+	await visitAdminPage( 'plugin-install.php', '' );
+	await page.waitForSelector( 'h1', { text: /Add Plugins/ } );
+
+	await page.click( '.upload-view-toggle' );
+	await page.waitForSelector( '#pluginzip' );
+
+	const pluginPath = path.join( __dirname, '..', 'plugins', `${ slug }.zip` );
+	await expect( page ).toUploadFile( '#pluginzip', pluginPath );
+
+	await page.waitForSelector( '#install-plugin-submit:not([disabled])' );
+	await page.click( '#install-plugin-submit' );
+	await page.waitForSelector( 'p', { text: /Plugin installed successfully/ } );
+
+	await switchUserToTest();
 }
 
 export async function activatePlugin( slug ) {

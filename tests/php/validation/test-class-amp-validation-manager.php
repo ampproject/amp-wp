@@ -7,6 +7,7 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Dom\Options;
 use AmpProject\AmpWP\Option;
@@ -162,8 +163,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$this->assertEquals( 100, has_filter( 'map_meta_cap', self::TESTED_CLASS . '::map_meta_cap' ) );
 		$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', self::TESTED_CLASS . '::enqueue_block_validation' ) );
-
-		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::print_plugin_notice' ) );
 
 		$this->assertEquals( 101, has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 
@@ -440,11 +439,22 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers AMP_Validation_Manager::add_admin_bar_menu_items()
 	 */
 	public function test_add_admin_bar_menu_items() {
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+
+		if ( ! ( new DependencySupport() )->has_support() ) {
+			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+			AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+			$admin_bar = new WP_Admin_Bar();
+			AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+			$this->assertNull( $admin_bar->get_node( 'amp' ) );
+			$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
+			return;
+		}
+
 		$this->accept_sanitization_by_default( false );
 
 		// No admin bar item when user lacks capability.
 		$this->go_to( home_url( '/' ) );
-		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 		$this->assertFalse( is_admin() );
 		$this->assertFalse( AMP_Validation_Manager::has_cap() );
 		$admin_bar = new WP_Admin_Bar();
@@ -492,20 +502,28 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
-		$this->assertIsObject( $node );
+		if ( ( new DependencySupport() )->has_support() ) {
+			$this->assertIsObject( $node );
+		} else {
+			$this->assertNull( $node );
+		}
 
 		// Admin bar item available in paired mode.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$root_node = $admin_bar->get_node( 'amp' );
-		$this->assertIsObject( $root_node );
-		$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $root_node->href ) ) );
+		if ( ( new DependencySupport() )->has_support() ) {
+			$this->assertIsObject( $root_node );
+			$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $root_node->href ) ) );
 
-		$view_item = $admin_bar->get_node( 'amp-view' );
-		$this->assertIsObject( $view_item );
-		$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
-		$this->assertIsObject( $admin_bar->get_node( 'amp-validity' ) );
+			$view_item = $admin_bar->get_node( 'amp-view' );
+			$this->assertIsObject( $view_item );
+			$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
+			$this->assertIsObject( $admin_bar->get_node( 'amp-validity' ) );
+		} else {
+			$this->assertNull( $root_node );
+		}
 
 		// Lastly, confirm that the settings item is added if the user is an admin.
 		wp_set_current_user( 0 );
@@ -1364,6 +1382,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$rendered_block = do_blocks( AMP_Validation_Manager::add_block_source_comments( $content ) );
 
+		// Remove class name injected by gutenberg_render_layout_support_flag().
+		$rendered_block = preg_replace( '/(?<= class=")wp-container-\w+ /', '', $rendered_block );
+
 		$expected = str_replace(
 			[
 				'{{post_id}}',
@@ -1493,10 +1514,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * Test wrap_hook_callbacks.
 	 *
 	 * @covers AMP_Validation_Manager::wrap_hook_callbacks()
+	 * @covers AMP_Validation_Callback_Wrapper::__invoke()
+	 * @covers AMP_Validation_Callback_Wrapper::invoke_with_first_ref_arg()
 	 */
 	public function test_callback_wrappers() {
 		global $post;
-		$that = $this;
 		$post = self::factory()->post->create_and_get();
 		$this->set_capability();
 		$action_no_tag_output     = 'foo_action';
@@ -1506,25 +1528,36 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$action_no_argument       = 'test_action_no_argument';
 		$action_one_argument      = 'baz_action_one_argument';
 		$action_two_arguments     = 'example_action_two_arguments';
+		$action_pass_var_by_ref   = 'action_pass_var_by_ref';
 		$notice                   = 'Example notice';
 
 		AMP_Validation_Manager::add_validation_error_sourcing();
 
-		add_action( $action_function_callback, '_amp_show_load_errors_admin_notice' );
-		add_action( $action_no_argument, [ $this, 'output_div' ] );
-		add_action( $action_one_argument, [ $this, 'output_notice' ] );
-		add_action( $action_two_arguments, [ $this, 'output_message' ], 10, 2 );
-		add_action( $action_no_output, [ $this, 'get_string' ], 10, 2 );
-		add_action( $action_no_tag_output, 'the_ID' );
-		add_action( $action_core_output, 'edit_post_link' );
-		add_action( $action_no_output, '__return_false' );
+		$increment_var_by_ref = function ( &$number ) {
+			$number++;
+			echo "<output>$number</output>"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		};
+
+		$added_actions = [
+			[ $action_function_callback, '_amp_show_load_errors_admin_notice' ],
+			[ $action_no_argument, [ $this, 'output_div' ] ],
+			[ $action_one_argument, [ $this, 'output_notice' ] ],
+			[ $action_two_arguments, [ $this, 'output_message' ], 10, 2 ],
+			[ $action_pass_var_by_ref, $increment_var_by_ref ],
+			[ $action_no_output, [ $this, 'get_string' ], 10, 2 ],
+			[ $action_no_tag_output, 'the_ID' ],
+			[ $action_core_output, 'edit_post_link' ],
+			[ $action_no_output, '__return_false' ],
+		];
+
+		foreach ( $added_actions as $added_action ) {
+			add_action( ...$added_action );
+		}
 
 		// All of the callback functions remain as-is. They will only change for a given hook at the 'all' action.
-		$this->assertEquals( 10, has_action( $action_no_tag_output, 'the_ID' ) );
-		$this->assertEquals( 10, has_action( $action_no_output, [ $this, 'get_string' ] ) );
-		$this->assertEquals( 10, has_action( $action_no_argument, [ $this, 'output_div' ] ) );
-		$this->assertEquals( 10, has_action( $action_one_argument, [ $this, 'output_notice' ] ) );
-		$this->assertEquals( 10, has_action( $action_two_arguments, [ $this, 'output_message' ] ) );
+		foreach ( $added_actions as $added_action ) {
+			$this->assertEquals( 10, has_action( ...$added_action ) );
+		}
 
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_function_callback );
@@ -1572,6 +1605,16 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( '<!--amp-source-stack {"type":"core","name":"wp-includes"', $output );
 		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"core","name":"wp-includes"', $output );
 
+		// This action passes a variable by reference.
+		AMP_Theme_Support::start_output_buffering();
+		$number = 0;
+		do_action_ref_array( $action_pass_var_by_ref, [ &$number ] );
+		$this->assertSame( 1, $number );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContainsString( '"hook":"action_pass_var_by_ref","priority":10', $output );
+		$this->assertStringContainsString( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+
 		// This action's callback doesn't echo any markup, so it shouldn't be wrapped in comments.
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_output );
@@ -1579,20 +1622,49 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertStringNotContainsString( '<!--amp-source-stack ', $output );
 		$this->assertStringNotContainsString( '<!--/amp-source-stack ', $output );
 
+		// All of the callback functions remain as-is after all have been done,
+		//
+		global $wp_filter;
+		foreach ( $added_actions as $added_action ) {
+			list( $action, $callback ) = $added_action;
+			$priority = isset( $added_action[2] ) ? $added_action[2] : 10;
+
+			$this->assertEquals( 10, has_action( ...$added_action ) );
+
+			// Make sure that the before_invoke callback runs as expected.
+			$this->assertArrayHasKey( $action, $wp_filter );
+			$this->assertArrayHasKey( $priority, $wp_filter[ $action ]->callbacks );
+			$key = _wp_filter_build_unique_id( $action, $callback, $priority );
+			$this->assertArrayHasKey( $key, $wp_filter[ $action ]->callbacks[ $priority ] );
+			$this->assertEquals(
+				$callback,
+				$wp_filter[ $action ]->callbacks[ $priority ][ $key ]['function']
+			);
+		}
+	}
+
+	/**
+	 * Test wrap_hook_callbacks.
+	 *
+	 * @covers AMP_Validation_Manager::wrap_hook_callbacks()
+	 */
+	public function test_callback_wrappers_for_nested_actions() {
+		AMP_Validation_Manager::add_validation_error_sourcing();
+
 		$handle_inner_action = null;
 		$handle_outer_action = null;
 
 		// Ensure that nested actions output the expected stack, and that has_action() works as expected in spite of the function wrapping.
-		$handle_outer_action = static function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
-			$that->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
-			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
+		$handle_outer_action = function() use ( &$handle_outer_action, &$handle_inner_action ) {
+			$this->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
+			$this->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 			do_action( 'inner_action' );
-			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
+			$this->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 		};
 		$outer_reflection    = new ReflectionFunction( $handle_outer_action );
-		$handle_inner_action = static function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
-			$that->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
-			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
+		$handle_inner_action = function() use ( &$handle_outer_action, &$handle_inner_action ) {
+			$this->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
+			$this->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 			echo '<b>Hello</b>';
 		};
 		$inner_reflection    = new ReflectionFunction( $handle_inner_action );
@@ -1920,7 +1992,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	/**
 	 * Test wrapped_callback for filters.
 	 *
-	 * @covers AMP_Validation_Manager::wrapped_callback()
+	 * @covers AMP_Validation_Callback_Wrapper
 	 */
 	public function test_filter_wrapped_callback() {
 		$test_string     = 'Filter-amended Value';
@@ -1938,8 +2010,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$value = 'Some Value';
 		apply_filters( 'foo', $value );
-		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $filter_callback );
-			$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $wrapped_callback );
+		$wrapped_callback = new AMP_Validation_Callback_Wrapper( $filter_callback );
 		AMP_Theme_Support::start_output_buffering();
 		$filtered_value = $wrapped_callback( $value );
 		$output = ob_get_clean();
@@ -1950,7 +2021,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	/**
 	 * Test wrapped_callback for actions.
 	 *
-	 * @covers AMP_Validation_Manager::wrapped_callback()
+	 * @covers AMP_Validation_Callback_Wrapper
 	 */
 	public function test_action_wrapped_callback() {
 		$test_string     = "<b class='\nfoo\nbar\n'>Cool!</b>";
@@ -1967,7 +2038,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		];
 
 		do_action( 'bar' ); // So that output buffering will be done.
-		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $action_callback );
+		$wrapped_callback = new AMP_Validation_Callback_Wrapper( $action_callback );
 		$this->assertInstanceOf( AMP_Validation_Callback_Wrapper::class, $wrapped_callback );
 		AMP_Theme_Support::start_output_buffering();
 		$wrapped_callback();
@@ -2395,6 +2466,10 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers \AMP_Validation_Manager::add_admin_bar_menu_items()
 	 */
 	public function test_finalize_validation() {
+		if ( ! ( new DependencySupport() )->has_support() ) {
+			$this->markTestSkipped( 'Test requires newer version of WP.' );
+		}
+
 		self::set_capability();
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 		show_admin_bar( true );
@@ -2597,44 +2672,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			$this->assertEquals( $expected_callback, $args['validation_error_callback'] );
 		}
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-	}
-
-	/**
-	 * Test for validate_after_plugin_activation().
-	 *
-	 * @covers AMP_Validation_Manager::validate_after_plugin_activation()
-	 */
-	public function test_validate_after_plugin_activation() {
-		add_filter( 'amp_pre_get_permalink', '__return_empty_string' );
-		$r = AMP_Validation_Manager::validate_after_plugin_activation();
-		$this->assertInstanceOf( 'WP_Error', $r );
-		$this->assertEquals( 'no_published_post_url_available', $r->get_error_code() );
-		remove_filter( 'amp_pre_get_permalink', '__return_empty_string' );
-
-		$validation_error = [
-			'code' => 'example',
-		];
-
-		$validation = [
-			'results' => [
-				[
-					'error'     => $validation_error,
-					'sanitized' => false,
-				],
-			],
-		];
-
-		self::factory()->post->create();
-		$filter = static function() use ( $validation ) {
-			return [
-				'body' => wp_json_encode( $validation ),
-			];
-		};
-		add_filter( 'pre_http_request', $filter, 10, 3 );
-		$r = AMP_Validation_Manager::validate_after_plugin_activation();
-		remove_filter( 'pre_http_request', $filter );
-		$this->assertEquals( [ $validation_error ], $r );
-		$this->assertEquals( [ $validation_error ], get_transient( AMP_Validation_Manager::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY ) );
 	}
 
 	/**
@@ -2852,55 +2889,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * Test for print_plugin_notice()
-	 *
-	 * @covers AMP_Validation_Manager::print_plugin_notice()
-	 */
-	public function test_print_plugin_notice() {
-		global $pagenow;
-		$output = get_echo( [ AMP_Validation_Manager::class, 'print_plugin_notice' ] );
-		$this->assertEmpty( $output );
-		$pagenow          = 'plugins.php';
-		$_GET['activate'] = 'true';
-
-		$cache_plugins_backup = wp_cache_get( 'plugins', 'plugins' );
-
-		$plugins = [
-			'' => [
-				$this->plugin_name => [
-					'Name' => 'Foo Bar',
-				],
-			],
-		];
-
-		wp_cache_set( 'plugins', $plugins, 'plugins' );
-
-		set_transient(
-			AMP_Validation_Manager::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY,
-			[
-				[
-					'code'    => 'example',
-					'sources' => [
-						[
-							'type' => 'plugin',
-							'name' => 'foo-bar',
-						],
-					],
-				],
-			]
-		);
-		$output = get_echo( [ AMP_Validation_Manager::class, 'print_plugin_notice' ] );
-		$this->assertStringContainsString( 'Warning: The following plugin may be incompatible with AMP', $output );
-		$this->assertStringContainsString( 'Foo Bar', $output );
-		$this->assertStringContainsString( 'More details', $output );
-		$this->assertStringContainsString( admin_url( 'edit.php' ), $output );
-
-		if ( $cache_plugins_backup ) {
-			wp_cache_set( 'plugins', $cache_plugins_backup, 'plugins' );
-		}
-	}
-
-	/**
 	 * Test enqueue_block_validation.
 	 *
 	 * @covers AMP_Validation_Manager::enqueue_block_validation()
@@ -2927,6 +2915,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->setup_environment( true, true );
 		$service->set_user_enabled( wp_get_current_user()->ID, true );
 		AMP_Validation_Manager::enqueue_block_validation();
+
+		if ( ! ( new DependencySupport() )->has_support() ) {
+			$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
+			return;
+		}
+
 		$this->assertTrue( wp_script_is( $slug, 'enqueued' ) );
 
 		$script                = wp_scripts()->registered[ $slug ];

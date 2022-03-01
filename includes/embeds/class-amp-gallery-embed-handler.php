@@ -7,7 +7,7 @@
 
 use AmpProject\AmpWP\Embed\HandlesGalleryEmbed;
 use AmpProject\Dom\Document;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Gallery_Embed_Handler

@@ -39,6 +39,10 @@ class SupportLinkTest extends TestCase {
 
 		parent::setUp();
 
+		if ( ! class_exists( 'WP_Site_Health' ) ) {
+			$this->markTestSkipped( 'Test requires Site Health.' );
+		}
+
 		$this->instance = new SupportLink();
 	}
 
@@ -149,7 +153,7 @@ class SupportLinkTest extends TestCase {
 		);
 
 		$this->assertStringContainsString(
-			"post_id=$post->ID",
+			sprintf( 'url=%s', rawurlencode( $post->post_title ) ),
 			$actions['amp-support']
 		);
 	}
@@ -182,7 +186,7 @@ class SupportLinkTest extends TestCase {
 		);
 
 		$this->assertStringContainsString(
-			"post_id=$post->ID",
+			sprintf( 'url=%s', rawurlencode( $post->post_title ) ),
 			$actions['amp-support']
 		);
 	}

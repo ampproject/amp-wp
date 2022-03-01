@@ -193,7 +193,14 @@ class SiteHealthTest extends TestCase {
 		];
 
 		wp_using_ext_object_cache( false );
-		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no' );
+
+		$page_cache_status = [
+			'advanced_cache_present'        => false,
+			'page_caching_response_headers' => [ [], [], [] ],
+			'response_timing'               => [ 200, 300, 400 ],
+		];
+
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_status );
 		$output = $this->instance->persistent_object_cache();
 		$this->assertAssocArraySubset(
 			array_merge(
@@ -212,7 +219,14 @@ class SiteHealthTest extends TestCase {
 		$this->assertStringNotContainsString( 'Since page caching was detected', $output['description'] );
 		$this->assertStringContainsString( '/persistent-object-caching/', $output['actions'] );
 
-		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'yes' );
+		$page_cache_status = [
+			'advanced_cache_present'        => true,
+			'page_caching_response_headers' => [ [ 'x-cache' ], [ 'x-cache' ], [ 'x-cache' ] ],
+			'response_timing'               => [ 200, 300, 400 ],
+		];
+
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_status );
+
 		$output = $this->instance->persistent_object_cache();
 		$this->assertAssocArraySubset(
 			array_merge(
@@ -678,76 +692,215 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
+	 * Test get_good_response_time_threshold.
+	 *
+	 * @covers ::get_good_response_time_threshold()
+	 */
+	public function test_get_good_response_time_threshold() {
+		$this->assertSame( 600, $this->instance->get_good_response_time_threshold() );
+
+		add_filter(
+			'amp_page_cache_good_response_time_threshold',
+			static function () {
+				return 200;
+			}
+		);
+
+		$this->assertSame( 200, $this->instance->get_good_response_time_threshold() );
+
+		add_filter(
+			'amp_page_cache_good_response_time_threshold',
+			static function () {
+				return '100';
+			},
+			100
+		);
+
+		$this->assertSame( 100, $this->instance->get_good_response_time_threshold() );
+	}
+
+	/**
 	 * Data provider for $this->test_page_cache()
 	 *
 	 * @return array[]
 	 */
 	public function get_page_cache_data() {
+		$recommended_label = 'Page caching is not detected but the server response time is OK';
+		$good_label        = 'Page caching is detected and the server response time is good';
+		$critical_label    = 'Page caching is not detected and the server response time is slow';
+		$error_label       = 'Unable to detect the presence of page caching';
 
 		return [
-			'basic-auth-fail'                        => [
+			'basic-auth-fail'                          => [
 				'responses'       => [
 					'unauthorized',
 				],
-				'has_page_cache'  => 'http_401',
+				'expected_status' => 'critical',
+				'expected_label'  => $error_label,
 				'good_basic_auth' => false,
 			],
-			'no-cache-control'                       => [
-				'responses'      => array_fill( 0, 3, [] ),
-				'has_page_cache' => false,
+			'no-cache-control'                         => [
+				'responses'          => array_fill( 0, 3, [] ),
+				'expected_status'    => 'critical',
+				'expected_label'     => $critical_label,
+				'good_basic_auth'    => null,
+				'delay_the_response' => true,
 			],
-			'no-cache'                               => [
-				'responses'      => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
-				'has_page_cache' => false,
+			'no-cache'                                 => [
+				'responses'       => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
+				'expected_status' => 'recommended',
+				'expected_label'  => $recommended_label,
 			],
-			'age'                                    => [
-				'responses'      => array_fill(
+			'no-cache-with-delayed-response'           => [
+				'responses'          => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
+				'expected_status'    => 'critical',
+				'expected_label'     => $critical_label,
+				'good_basic_auth'    => null,
+				'delay_the_response' => true,
+			],
+			'age'                                      => [
+				'responses'       => array_fill(
 					0,
 					3,
 					[ 'age' => '1345' ]
 				),
-				'has_page_cache' => true,
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 			],
-			'cache-control-max-age'                  => [
-				'responses'      => array_fill(
-					0,
-					3,
-					[ 'cache-control' => 'public; max-age=600' ]
-				),
-				'has_page_cache' => true,
-			],
-			'cache-control-max-age-after-2-requests' => [
-				'responses'      => [
-					[],
-					[],
-					[ 'cache-control' => 'public; max-age=600' ],
-				],
-				'has_page_cache' => true,
-			],
-			'cache-control-with-future-expires'      => [
-				'responses'      => array_fill(
-					0,
-					3,
-					[ 'expires' => gmdate( 'r', time() + MINUTE_IN_SECONDS * 10 ) ]
-				),
-				'has_page_cache' => true,
-			],
-			'cache-control-with-past-expires'        => [
-				'responses'      => array_fill(
-					0,
-					3,
-					[ 'expires' => gmdate( 'r', time() - MINUTE_IN_SECONDS * 10 ) ]
-				),
-				'has_page_cache' => false,
-			],
-			'cache-control-with-basic-auth'          => [
+			'cache-control-max-age'                    => [
 				'responses'       => array_fill(
 					0,
 					3,
 					[ 'cache-control' => 'public; max-age=600' ]
 				),
-				'has_page_cache'  => true,
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
+			],
+			'etag'                                     => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'etag' => '"1234567890"' ]
+				),
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
+			],
+			'cache-control-max-age-after-2-requests'   => [
+				'responses'       => [
+					[],
+					[],
+					[ 'cache-control' => 'public; max-age=600' ],
+				],
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
+			],
+			'cache-control-with-future-expires'        => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'expires' => gmdate( 'r', time() + MINUTE_IN_SECONDS * 10 ) ]
+				),
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
+			],
+			'cache-control-with-past-expires'          => [
+				'responses'          => array_fill(
+					0,
+					3,
+					[ 'expires' => gmdate( 'r', time() - MINUTE_IN_SECONDS * 10 ) ]
+				),
+				'expected_status'    => 'critical',
+				'expected_label'     => $critical_label,
+				'good_basic_auth'    => null,
+				'delay_the_response' => true,
+			],
+			'cache-control-with-basic-auth'            => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'cache-control' => 'public; max-age=600' ]
+				),
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 				'good_basic_auth' => true,
+			],
+			'cf-cache-status'                          => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'cf-cache-status' => 'HIT: 1' ]
+				),
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
+			],
+			'cf-cache-status-without-header-and-delay' => [
+				'responses'          => array_fill(
+					0,
+					3,
+					[ 'cf-cache-status' => 'MISS' ]
+				),
+				'expected_status'    => 'recommended',
+				'expected_label'     => $recommended_label,
+				'good_basic_auth'    => null,
+				'delay_the_response' => false,
+			],
+			'cf-cache-status-with-delay'               => [
+				'responses'          => array_fill(
+					0,
+					3,
+					[ 'cf-cache-status' => 'MISS' ]
+				),
+				'expected_status'    => 'critical',
+				'expected_label'     => $critical_label,
+				'good_basic_auth'    => null,
+				'delay_the_response' => true,
+			],
+			'x-cache-enabled'                          => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'x-cache-enabled' => 'true' ]
+				),
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
+			],
+			'x-cache-enabled-with-delay'               => [
+				'responses'          => array_fill(
+					0,
+					3,
+					[ 'x-cache-enabled' => 'false' ]
+				),
+				'expected_status'    => 'critical',
+				'expected_label'     => $critical_label,
+				'good_basic_auth'    => null,
+				'delay_the_response' => true,
+			],
+			'x-cache-disabled'                         => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'x-cache-disabled' => 'off' ]
+				),
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
+			],
+			'cf-apo-via'                               => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'cf-apo-via' => 'tcache' ]
+				),
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
+			],
+			'cf-edge-cache'                            => [
+				'responses'       => array_fill(
+					0,
+					3,
+					[ 'cf-edge-cache' => 'cache' ]
+				),
+				'expected_status' => 'good',
+				'expected_label'  => $good_label,
 			],
 		];
 	}
@@ -755,31 +908,26 @@ class SiteHealthTest extends TestCase {
 	/**
 	 * @dataProvider get_page_cache_data
 	 * @covers ::page_cache()
+	 * @covers ::get_page_cache_headers()
 	 * @covers ::check_for_page_caching()
 	 */
-	public function test_page_cache( $responses, $has_page_cache, $good_basic_auth = null ) {
+	public function test_page_cache( $responses, $expected_status, $expected_label, $good_basic_auth = null, $delay_the_response = false ) {
 
-		if ( true === $has_page_cache ) {
-			$expected_props = [
-				'badge'  => [
-					'label' => 'AMP',
-					'color' => 'green',
-				],
-				'test'   => 'amp_page_cache',
-				'status' => 'good',
-				'label'  => 'Page caching is detected',
-			];
-		} else {
-			$expected_props = [
-				'badge'  => [
-					'label' => 'AMP',
-					'color' => 'orange',
-				],
-				'test'   => 'amp_page_cache',
-				'status' => 'recommended',
-				'label'  => 'Page caching is not detected',
-			];
-		}
+		$badge_color = [
+			'critical'    => 'red',
+			'recommended' => 'orange',
+			'good'        => 'green',
+		];
+
+		$expected_props = [
+			'badge'  => [
+				'label' => 'AMP',
+				'color' => $badge_color[ $expected_status ],
+			],
+			'test'   => 'amp_page_cache',
+			'status' => $expected_status,
+			'label'  => $expected_label,
+		];
 
 		if ( null !== $good_basic_auth ) {
 			$_SERVER['PHP_AUTH_USER'] = 'admin';
@@ -788,13 +936,29 @@ class SiteHealthTest extends TestCase {
 
 		$is_unauthorized = false;
 
+		$threshold = 10;
+		if ( $delay_the_response ) {
+			add_filter(
+				'amp_page_cache_good_response_time_threshold',
+				static function () use ( $threshold ) {
+					return $threshold;
+				}
+			);
+		}
+
 		add_filter(
 			'pre_http_request',
-			function ( $r, $parsed_args ) use ( &$responses, &$is_unauthorized, $good_basic_auth ) {
+			function ( $r, $parsed_args ) use ( &$responses, &$is_unauthorized, $good_basic_auth, $delay_the_response, $threshold ) {
+
 				$expected_response = array_shift( $responses );
+
+				if ( $delay_the_response ) {
+					usleep( $threshold * 1000 + 1 );
+				}
 
 				if ( 'unauthorized' === $expected_response ) {
 					$is_unauthorized = true;
+
 					return [
 						'response' => [
 							'code'    => 401,
@@ -840,10 +1004,47 @@ class SiteHealthTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::has_page_caching()
+	 * @covers ::get_page_cache_detail()
 	 * @covers ::check_for_page_caching()
 	 */
-	public function test_has_page_caching() {
+	public function test_get_page_cache_detail_with_legacy_cache_result() {
+
+		add_filter(
+			'pre_http_request',
+			function () {
+				return [
+					'headers'  => [
+						'etag' => '"cool"',
+					],
+					'response' => [
+						'code'    => 200,
+						'message' => 'OK',
+					],
+				];
+			},
+			20,
+			2
+		);
+
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
+
+		$this->assertArraySubset(
+			[
+				'status'                 => 'good',
+				'advanced_cache_present' => false,
+				'headers'                => [
+					'etag',
+				],
+			],
+			$this->instance->get_page_cache_detail( true )
+		);
+	}
+
+	/**
+	 * @covers ::get_page_cache_detail()
+	 * @covers ::check_for_page_caching()
+	 */
+	public function test_get_page_cache_detail() {
 		$callback = static function () {
 			return [
 				'headers'  => [
@@ -859,27 +1060,40 @@ class SiteHealthTest extends TestCase {
 		add_filter( 'pre_http_request', $callback, 20 );
 
 		// Test 1: Assert for fresh result. (Even cached result is exist.)
-		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
+		$page_cache_status = [
+			'advanced_cache_present'        => false,
+			'page_caching_response_headers' => [ [], [], [] ],
+			'response_timing'               => [ 200, 300, 400 ],
+		];
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_status, DAY_IN_SECONDS );
 
-		$this->assertFalse( $this->instance->has_page_caching( true ) );
+		$output = $this->instance->get_page_cache_detail( true );
+		$this->assertEquals( 'recommended', $output['status'] );
 
-		$this->assertTrue( $this->instance->has_page_caching() );
+		$output = $this->instance->get_page_cache_detail();
+		$this->assertEquals( 'good', $output['status'] );
 
 		remove_filter( 'pre_http_request', $callback, 20 );
 
 		// Test 2: Test for cached result.
-		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'yes', DAY_IN_SECONDS );
+		$page_cache_status = [
+			'advanced_cache_present'        => true,
+			'page_caching_response_headers' => [ [ 'x-cache' ], [ 'x-cache' ], [ 'x-cache' ] ],
+			'response_timing'               => [ 200, 300, 400 ],
+		];
+		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, $page_cache_status, DAY_IN_SECONDS );
 
-		$this->assertTrue( $this->instance->has_page_caching( true ) );
+		$output = $this->instance->get_page_cache_detail( true );
+		$this->assertEquals( 'good', $output['status'] );
 
 		delete_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY );
 	}
 
 	/**
-	 * @covers ::has_page_caching()
+	 * @covers ::get_page_cache_detail()
 	 * @covers ::check_for_page_caching()
 	 */
-	public function test_has_page_caching_with_error() {
+	public function test_get_page_cache_detail_with_error() {
 		$error_object = new WP_Error( 'error_code', 'Error message.' );
 
 		$return_error = static function () use ( $error_object ) {
@@ -903,7 +1117,7 @@ class SiteHealthTest extends TestCase {
 		// Test 1: Assert for fresh result (which is then cached).
 		$this->assertEquals(
 			$error_object,
-			$this->instance->has_page_caching()
+			$this->instance->get_page_cache_detail()
 		);
 
 		remove_filter( 'pre_http_request', $return_error, 20 );
@@ -912,23 +1126,21 @@ class SiteHealthTest extends TestCase {
 		// Test 2: Test for cached result.
 		$this->assertEquals(
 			$error_object,
-			$this->instance->has_page_caching( true )
+			$this->instance->get_page_cache_detail( true )
 		);
 
 		// Test 3: Test for non-cached result again now that no error is returned.
-		$this->assertSame(
-			true,
-			$this->instance->has_page_caching( false )
-		);
+		$output = $this->instance->get_page_cache_detail( false );
+		$this->assertEquals( 'good', $output['status'] );
+		$this->assertContains( 'cache-control', $output['headers'] );
 
 		remove_filter( 'pre_http_request', $return_cached_response, 20 );
 		add_filter( 'pre_http_request', $return_error, 20 );
 
-		// Test 4: Test for non-cached result again now that no error is returned.
-		$this->assertSame(
-			true,
-			$this->instance->has_page_caching( true )
-		);
+		// Test 4: Test for cached result again now that no error is returned.
+		$output = $this->instance->get_page_cache_detail( true );
+		$this->assertEquals( 'good', $output['status'] );
+		$this->assertContains( 'cache-control', $output['headers'] );
 	}
 
 	/**

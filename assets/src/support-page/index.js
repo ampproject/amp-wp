@@ -1,17 +1,18 @@
 /**
- * WordPress dependencies
- */
-import domReady from '@wordpress/dom-ready';
-import { render } from '@wordpress/element';
-
-/**
  * External dependencies
  */
 import {
 	restEndpoint,
 	args,
 	data,
+	ampValidatedPostCount,
 } from 'amp-support'; // From WP inline script.
+
+/**
+ * WordPress dependencies
+ */
+import domReady from '@wordpress/dom-ready';
+import { render } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -44,6 +45,7 @@ domReady( () => {
 						restEndpoint={ restEndpoint }
 						args={ args }
 						data={ data }
+						ampValidatedPostCount={ ampValidatedPostCount }
 					/>
 				</ErrorBoundary>
 			</ErrorContextProvider>

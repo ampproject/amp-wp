@@ -19,16 +19,12 @@ import { createStore } from '../../../store';
 import { withAMPToolbarButton } from '../index';
 
 let container, block;
-let toolbarButtonWasRendered = false;
 
 const TEST_BLOCK = 'my-plugin/test-block';
 
 jest.mock( '../amp-toolbar-button', () => ( {
-	AMPToolbarButton() {
-		toolbarButtonWasRendered = true;
-
-		return null;
-	} } ) );
+	AMPToolbarButton: () => <div id="amp-toolbar-button" />,
+} ) );
 
 describe( 'withAMPToolbarButton: filtering with errors', () => {
 	beforeAll( () => {
@@ -70,7 +66,6 @@ describe( 'withAMPToolbarButton: filtering with errors', () => {
 	beforeEach( () => {
 		container = document.createElement( 'ul' );
 		document.body.appendChild( container );
-		toolbarButtonWasRendered = false;
 	} );
 
 	afterEach( () => {
@@ -99,7 +94,7 @@ describe( 'withAMPToolbarButton: filtering with errors', () => {
 		} );
 
 		expect( container.querySelector( '#default-component-element' ) ).not.toBeNull();
-		expect( toolbarButtonWasRendered ).toBe( true );
+		expect( container.querySelector( '#amp-toolbar-button' ) ).not.toBeNull();
 	} );
 
 	it( 'is filtered correctly with a function component', () => {
@@ -121,7 +116,7 @@ describe( 'withAMPToolbarButton: filtering with errors', () => {
 		} );
 
 		expect( container.querySelector( '#default-component-element' ) ).not.toBeNull();
-		expect( toolbarButtonWasRendered ).toBe( true );
+		expect( container.querySelector( '#amp-toolbar-button' ) ).not.toBeNull();
 	} );
 } );
 
@@ -139,7 +134,6 @@ describe( 'withAMPToolbarButton: filtering without errors', () => {
 	beforeEach( () => {
 		container = document.createElement( 'ul' );
 		document.body.appendChild( container );
-		toolbarButtonWasRendered = false;
 	} );
 
 	afterEach( () => {
@@ -168,7 +162,7 @@ describe( 'withAMPToolbarButton: filtering without errors', () => {
 		} );
 
 		expect( container.querySelector( '#default-component-element' ) ).not.toBeNull();
-		expect( toolbarButtonWasRendered ).toBe( false );
+		expect( container.querySelector( '#amp-toolbar-button' ) ).toBeNull();
 	} );
 
 	it( 'is not filtered with a function component and no errors', () => {
@@ -190,6 +184,6 @@ describe( 'withAMPToolbarButton: filtering without errors', () => {
 		} );
 
 		expect( container.querySelector( '#default-component-element' ) ).not.toBeNull();
-		expect( toolbarButtonWasRendered ).toBe( false );
+		expect( container.querySelector( '#amp-toolbar-button' ) ).toBeNull();
 	} );
 } );

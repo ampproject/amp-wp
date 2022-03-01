@@ -88,6 +88,8 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 				'custom_paired_endpoint_sources',
 				'endpoint_path_slug_conflicts',
 				'rewrite_using_permalinks',
+				'sandboxing_enabled',
+				'sandboxing_level',
 			],
 			array_keys( $data )
 		);

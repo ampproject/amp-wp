@@ -12,7 +12,7 @@ Filters the threshold to use for disabling transient caching of stylesheets.
 
 ### Source
 
-:link: [src/BackgroundTask/MonitorCssTransientCaching.php:249](/src/BackgroundTask/MonitorCssTransientCaching.php#L249)
+:link: [src/BackgroundTask/MonitorCssTransientCaching.php:248](/src/BackgroundTask/MonitorCssTransientCaching.php#L248)
 
 <details>
 <summary>Show Code</summary>

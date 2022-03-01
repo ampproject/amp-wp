@@ -19,7 +19,7 @@ Also, calls the mutation callback for it. This tracks all the nodes that were re
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:478](/includes/sanitizers/class-amp-base-sanitizer.php#L478-L500)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:571](/includes/sanitizers/class-amp-base-sanitizer.php#L571-L592)
 
 <details>
 <summary>Show Code</summary>
@@ -29,8 +29,7 @@ public function remove_invalid_child( $node, $validation_error = [] ) {
 	if ( DevMode::isExemptFromValidation( $node ) ) {
 		return false;
 	}
-	// Prevent double-reporting nodes that are rejected for sanitization.
-	if ( isset( $this->nodes_to_keep[ $node->nodeName ] ) && in_array( $node, $this->nodes_to_keep[ $node->nodeName ], true ) ) {
+	if ( ValidationExemption::is_amp_unvalidated_for_node( $node ) || ValidationExemption::is_px_verified_for_node( $node ) ) {
 		return false;
 	}
 	$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
@@ -41,7 +40,7 @@ public function remove_invalid_child( $node, $validation_error = [] ) {
 		}
 		$node->parentNode->removeChild( $node );
 	} else {
-		$this->nodes_to_keep[ $node->nodeName ][] = $node;
+		ValidationExemption::mark_node_as_amp_unvalidated( $node );
 	}
 	return $should_remove;
 }

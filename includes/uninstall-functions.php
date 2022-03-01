@@ -18,7 +18,6 @@ function delete_options() {
 
 	delete_option( 'amp-options' );
 	delete_option( 'amp_css_transient_monitor_time_series' );
-	delete_option( 'amp_customize_setting_modified_timestamps' );
 	delete_option( 'amp_url_validation_queue' ); // See Validation\URLValidationCron::OPTION_KEY.
 
 	$theme_mod_name = 'amp_customize_setting_modified_timestamps';
@@ -57,35 +56,33 @@ function delete_user_metadata() {
  */
 function delete_posts() {
 
+	/** @var \wpdb */
 	global $wpdb;
 
-	$current_page = 0;
-	$per_page     = 1000;
-	$post_type    = 'amp_validated_url';
+	$post_type = 'amp_validated_url';
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
-	do {
-		$offset = $per_page * $current_page;
+	// Delete all post meta data related to "amp_validated_url" post_type.
+	$wpdb->query(
+		$wpdb->prepare(
+			"
+			DELETE meta
+			FROM $wpdb->postmeta AS meta
+				INNER JOIN $wpdb->posts AS posts
+					ON posts.ID = meta.post_id
+			WHERE posts.post_type = %s;
+			",
+			$post_type
+		)
+	);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
-		$post_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT ID FROM $wpdb->posts WHERE post_type = %s LIMIT %d OFFSET %d;",
-				$post_type,
-				$per_page,
-				$offset
-			)
-		);
+	// Delete all amp_validated_url posts.
+	$wpdb->delete(
+		$wpdb->posts,
+		compact( 'post_type' )
+	);
 
-		if ( empty( $post_ids ) || ! is_array( $post_ids ) ) {
-			break;
-		}
-
-		foreach ( $post_ids as $post_id ) {
-			wp_delete_post( $post_id );
-		}
-
-		$current_page++;
-	} while ( ! empty( $result ) );
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 }
 
 /**
@@ -96,35 +93,68 @@ function delete_posts() {
  */
 function delete_terms() {
 
+	// Abort if term splitting has not been done. This is done by WooCommerce so it's
+	// it's also done here for good measure, even though we require WP 4.9+.
+	if ( version_compare( get_bloginfo( 'version' ), '4.2', '<' ) ) {
+		return;
+	}
+
+	/** @var \wpdb */
 	global $wpdb;
 
-	$current_page = 0;
-	$per_page     = 1000;
-	$taxonomy     = 'amp_validation_error';
+	$taxonomy = 'amp_validation_error';
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
-	do {
-		$offset = $per_page * $current_page;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cannot cache result since we're deleting the records.
-		$term_ids = $wpdb->get_col(
+	// Delete term meta (added in WP 4.4).
+	if ( ! empty( $wpdb->termmeta ) ) {
+		$wpdb->query(
 			$wpdb->prepare(
-				"SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s LIMIT %d OFFSET %d;",
-				$taxonomy,
-				$per_page,
-				$offset
+				"
+				DELETE tm
+				FROM $wpdb->termmeta AS tm
+					INNER JOIN $wpdb->term_taxonomy AS tt
+						ON tm.term_id = tt.term_id
+				WHERE tt.taxonomy = %s;
+				",
+				$taxonomy
 			)
 		);
+	}
 
-		if ( empty( $term_ids ) || ! is_array( $term_ids ) ) {
-			break;
-		}
+	// Delete term relationship.
+	$wpdb->query(
+		$wpdb->prepare(
+			"
+			DELETE tr
+			FROM $wpdb->term_relationships AS tr
+				INNER JOIN $wpdb->term_taxonomy AS tt
+					ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			WHERE tt.taxonomy = %s;
+			",
+			$taxonomy
+		)
+	);
 
-		foreach ( $term_ids as $term_id ) {
-			wp_delete_term( $term_id, $taxonomy );
-		}
+	// Delete terms.
+	$wpdb->query(
+		$wpdb->prepare(
+			"
+			DELETE terms
+			FROM $wpdb->terms AS terms
+				INNER JOIN $wpdb->term_taxonomy AS tt
+					ON terms.term_id = tt.term_id
+			WHERE tt.taxonomy = %s;
+			",
+			$taxonomy
+		)
+	);
 
-		$current_page++;
-	} while ( ! empty( $result ) );
+	// Delete term taxonomy.
+	$wpdb->delete(
+		$wpdb->term_taxonomy,
+		compact( 'taxonomy' )
+	);
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 }
 
 /**
@@ -141,6 +171,7 @@ function delete_transients() {
 		return;
 	}
 
+	/** @var \wpdb */
 	global $wpdb;
 
 	$transient_groups = [
@@ -200,5 +231,8 @@ function remove_plugin_data() {
 		delete_posts();
 		delete_terms();
 		delete_transients();
+
+		// Clear any cached data that has been removed.
+		wp_cache_flush();
 	}
 }

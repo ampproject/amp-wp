@@ -18,7 +18,7 @@ Set attributes to node&#039;s parent element according to layout.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:746](/includes/sanitizers/class-amp-base-sanitizer.php#L746-L772)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:844](/includes/sanitizers/class-amp-base-sanitizer.php#L844-L870)
 
 <details>
 <summary>Show Code</summary>

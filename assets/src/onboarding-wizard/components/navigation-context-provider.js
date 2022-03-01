@@ -1,16 +1,19 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+import { HAS_DEPENDENCY_SUPPORT } from 'amp-settings'; // From WP inline script.
+
+/**
  * WordPress dependencies
  */
 import { createContext, useState, useContext, useMemo } from '@wordpress/element';
 
 /**
- * External dependencies
- */
-import PropTypes from 'prop-types';
-/**
  * Internal dependencies
  */
 import { Options } from '../../components/options-context-provider';
+import { SiteScan } from '../../components/site-scan-context-provider';
 import { READER } from '../../common/constants';
 
 export const Navigation = createContext();
@@ -26,16 +29,20 @@ export function NavigationContextProvider( { children, pages } ) {
 	const [ currentPage, setCurrentPage ] = useState( pages[ 0 ] );
 	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 2.1.
 	const { editedOptions } = useContext( Options );
+	const { isSkipped } = useContext( SiteScan );
 
 	const { theme_support: themeSupport } = editedOptions;
 
-	const adaptedPages = useMemo( () => {
-		if ( READER === themeSupport ) {
-			return pages;
-		}
+	const adaptedPages = useMemo( () => pages.filter( ( page ) => (
+		// Do not show the Technical Background step is there is no dependency support.
+		! ( 'technical-background' === page.slug && ! HAS_DEPENDENCY_SUPPORT ) &&
 
-		return pages.filter( ( page ) => 'theme-selection' !== page.slug );
-	}, [ pages, themeSupport ] );
+		// If Site Scan should be skipped, do not show the relevant step in the Wizard.
+		! ( 'site-scan' === page.slug && isSkipped ) &&
+
+		// Theme Selection page should be only accessible for the Reader template mode.
+		! ( 'theme-selection' === page.slug && READER !== themeSupport )
+	) ), [ isSkipped, pages, themeSupport ] );
 
 	const activePageIndex = adaptedPages.findIndex( ( adaptedPage ) => adaptedPage.slug === currentPage.slug );
 

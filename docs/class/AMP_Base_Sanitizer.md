@@ -7,6 +7,9 @@ Class AMP_Base_Sanitizer
 * [`__construct`](../method/AMP_Base_Sanitizer/__construct.md) - AMP_Base_Sanitizer constructor.
 * [`add_buffering_hooks`](../method/AMP_Base_Sanitizer/add_buffering_hooks.md) - Add filters to manipulate output during output buffering before the DOM is constructed.
 * [`get_selector_conversion_mapping`](../method/AMP_Base_Sanitizer/get_selector_conversion_mapping.md) - Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+* [`has_light_shadow_dom`](../method/AMP_Base_Sanitizer/has_light_shadow_dom.md) - Determine whether the resulting AMP element uses a &quot;light&quot; shadow DOM.
+* [`get_arg`](../method/AMP_Base_Sanitizer/get_arg.md) - Get arg.
+* [`get_args`](../method/AMP_Base_Sanitizer/get_args.md) - Get args.
 * [`update_args`](../method/AMP_Base_Sanitizer/update_args.md) - Update args.
 * [`init`](../method/AMP_Base_Sanitizer/init.md) - Run logic before any sanitizers are run.
 * [`sanitize`](../method/AMP_Base_Sanitizer/sanitize.md) - Sanitize the HTML contained in the DOMDocument received by the constructor
@@ -34,7 +37,7 @@ Class AMP_Base_Sanitizer
 * [`get_validate_response_data`](../method/AMP_Base_Sanitizer/get_validate_response_data.md) - Get data that is returned in validate responses.
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:16](/includes/sanitizers/class-amp-base-sanitizer.php#L16-L834)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:18](/includes/sanitizers/class-amp-base-sanitizer.php#L18-L932)
 
 <details>
 <summary>Show Code</summary>
@@ -108,13 +111,6 @@ abstract class AMP_Base_Sanitizer {
 	protected $root_element;
 
 	/**
-	 * Keep track of nodes that should not be removed to prevent duplicated validation errors since sanitization is rejected.
-	 *
-	 * @var array
-	 */
-	private $nodes_to_keep = [];
-
-	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.2
@@ -161,6 +157,8 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 	 *
+	 * @see AMP_Style_Sanitizer::ampify_ruleset_selectors()
+	 *
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
@@ -168,9 +166,69 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Determine whether the resulting AMP element uses a "light" shadow DOM.
+	 *
+	 * Sometimes AMP components serve as wrappers for native elements, like `amp-img` for `img`. When this
+	 * is the case, authors sometimes will want to style the shadow element (such as to set object-fit). Normally if a
+	 * selector contains `img` then the style sanitizer will always convert this to `amp-img` (and `amp-anim`), which
+	 * may break the author's intended selector target. So when using a sanitizer's selector conversion mapping to
+	 * rewrite non-AMP to AMP selectors, it will first check to see if the selector already mentions an AMP tag and if
+	 * so it will skip the conversions for that selector. In this way, an `amp-img img` selector will not get converted
+	 * into `amp-img amp-img`. The selector mapping also is involved when doing tree shaking. In the case of the
+	 * selector `amp-img img`, the tree shaker would normally strip out this selector because no `img` may be present
+	 * in the page as it is added by the AMP runtime (unless noscript fallbacks have been added, and this also
+	 * disregards data-hero images which are added later by AMP Optimizer). So in order to prevent such selectors from
+	 * being stripped out, it's important to include the `amp-img` selector among the `dynamic_element_selectors` so
+	 * that the `img` in the `amp-img img` selector is ignored for the purposes of tree shaking. This method is used
+	 * to indicate which sanitizers are involved in such element conversions. If this method returns true, then the
+	 * keys in the selector conversion mapping should be used as `dynamic_element_selectors`.
+	 *
+	 * In other words, this method indicates whether keys in the conversion mapping are ancestors of elements which are
+	 * created at runtime. This method is only relevant when the `get_selector_conversion_mapping()` method returns a
+	 * mapping.
+	 *
+	 * @since 2.2
+	 * @see AMP_Style_Sanitizer::ampify_ruleset_selectors()
+	 * @see AMP_Base_Sanitizer::get_selector_conversion_mapping()
+	 *
+	 * @return bool Whether light DOM is used.
+	 */
+	public function has_light_shadow_dom() {
+		return true;
+	}
+
+	/**
+	 * Get arg.
+	 *
+	 * @since 2.2
+	 *
+	 * @param string $key Arg key.
+	 * @return mixed Args.
+	 */
+	public function get_arg( $key ) {
+		if ( array_key_exists( $key, $this->args ) ) {
+			return $this->args[ $key ];
+		}
+		return null;
+	}
+
+	/**
+	 * Get args.
+	 *
+	 * @since 2.2
+	 *
+	 * @return array Args.
+	 */
+	public function get_args() {
+		return $this->args;
+	}
+
+	/**
 	 * Update args.
 	 *
 	 * Merges the supplied args with the existing args.
+	 *
+	 * @since 2.2
 	 *
 	 * @param array $args Args.
 	 */
@@ -268,23 +326,27 @@ abstract class AMP_Base_Sanitizer {
 			return '';
 		}
 
-		// Allow special 'auto' value for fixed-height layout.
-		if ( 'width' === $dimension && 'auto' === $value ) {
-			return $value;
-		}
-
 		// Accepts both integers and floats & prevents negative values.
 		if ( is_numeric( $value ) ) {
 			return max( 0, (float) $value );
 		}
 
-		if ( AMP_String_Utils::endswith( $value, 'px' ) ) {
-			return absint( $value );
+		if ( AMP_String_Utils::endswith( $value, '%' ) && 'width' === $dimension ) {
+			if ( '100%' === $value ) {
+				return 'auto';
+			} elseif ( isset( $this->args['content_max_width'] ) ) {
+				$percentage = absint( $value ) / 100;
+				return round( $percentage * $this->args['content_max_width'] );
+			}
 		}
 
-		if ( AMP_String_Utils::endswith( $value, '%' ) && 'width' === $dimension && isset( $this->args['content_max_width'] ) ) {
-			$percentage = absint( $value ) / 100;
-			return round( $percentage * $this->args['content_max_width'] );
+		$length = new CssLength( $value );
+		$length->validate( 'width' === $dimension, false );
+		if ( $length->isValid() ) {
+			if ( $length->isAuto() ) {
+				return 'auto';
+			}
+			return $length->getNumeral() . ( $length->getUnit() === 'px' ? '' : $length->getUnit() );
 		}
 
 		return '';
@@ -364,17 +426,49 @@ abstract class AMP_Base_Sanitizer {
 			}
 
 			// Apply fill layout if width & height are 100%.
-			if ( isset( $styles['position'], $attributes['width'], $attributes['height'] )
-				&& 'absolute' === $styles['position']
-				&& '100%' === $attributes['width']
-				&& '100%' === $attributes['height']
+			if (
+				( isset( $styles['position'] ) && 'absolute' === $styles['position'] )
+				&& (
+					( isset( $attributes['width'] ) && '100%' === $attributes['width'] )
+					||
+					( isset( $styles['width'] ) && '100%' === $styles['width'] )
+				)
+				&& (
+					( isset( $attributes['height'] ) && '100%' === $attributes['height'] )
+					||
+					( isset( $styles['height'] ) && '100%' === $styles['height'] )
+				)
 			) {
-				unset( $attributes['style'], $styles['position'], $attributes['width'], $attributes['height'] );
+				unset( $attributes['style'], $attributes['width'], $attributes['height'] );
+				unset( $styles['position'], $styles['width'], $styles['height'] );
 				if ( ! empty( $styles ) ) {
 					$attributes['style'] = $this->reassemble_style_string( $styles );
 				}
 				$attributes['layout'] = 'fill';
 				return $attributes;
+			}
+
+			// Make sure the width and height styles are copied to the width and height attributes since AMP will ultimately inline them as styles.
+			$pending_attributes = [];
+			$seen_units         = [];
+			foreach ( wp_array_slice_assoc( $styles, [ 'height', 'width' ] ) as $dimension => $value ) {
+				$value = $this->sanitize_dimension( $value, $dimension );
+				if ( '' === $value ) {
+					continue;
+				}
+
+				if ( 'auto' !== $value ) {
+					$this_unit = preg_replace( '/^.*\d/', '', $value );
+					if ( ! $this_unit ) {
+						$this_unit = 'px';
+					}
+					$seen_units[ $this_unit ] = true;
+				}
+
+				$pending_attributes[ $dimension ] = $value;
+			}
+			if ( $pending_attributes && count( $seen_units ) <= 1 ) {
+				$attributes = array_merge( $attributes, $pending_attributes );
 			}
 		}
 
@@ -386,7 +480,7 @@ abstract class AMP_Base_Sanitizer {
 				unset( $attributes['width'] );
 				$attributes['height'] = self::FALLBACK_HEIGHT;
 			}
-			if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] ) {
+			if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] || 'auto' === $attributes['width'] ) {
 				$attributes['layout'] = 'fixed-height';
 				$attributes['width']  = 'auto';
 			}
@@ -507,8 +601,7 @@ abstract class AMP_Base_Sanitizer {
 			return false;
 		}
 
-		// Prevent double-reporting nodes that are rejected for sanitization.
-		if ( isset( $this->nodes_to_keep[ $node->nodeName ] ) && in_array( $node, $this->nodes_to_keep[ $node->nodeName ], true ) ) {
+		if ( ValidationExemption::is_amp_unvalidated_for_node( $node ) || ValidationExemption::is_px_verified_for_node( $node ) ) {
 			return false;
 		}
 
@@ -521,7 +614,7 @@ abstract class AMP_Base_Sanitizer {
 
 			$node->parentNode->removeChild( $node );
 		} else {
-			$this->nodes_to_keep[ $node->nodeName ][] = $node;
+			ValidationExemption::mark_node_as_amp_unvalidated( $node );
 		}
 		return $should_remove;
 	}
@@ -556,6 +649,10 @@ abstract class AMP_Base_Sanitizer {
 			return false;
 		}
 
+		if ( ValidationExemption::is_amp_unvalidated_for_node( $node ) || ValidationExemption::is_px_verified_for_node( $node ) ) {
+			return false;
+		}
+
 		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 		if ( $should_remove ) {
 			$allow_empty  = ! empty( $attr_spec[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] );
@@ -565,6 +662,8 @@ abstract class AMP_Base_Sanitizer {
 			} else {
 				$element->removeAttributeNode( $node );
 			}
+		} else {
+			ValidationExemption::mark_node_as_amp_unvalidated( $node );
 		}
 
 		return $should_remove;

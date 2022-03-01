@@ -92,6 +92,11 @@ function amp_bootstrap_plugin() {
 	// Ensure async and custom-element/custom-template attributes are present on script tags.
 	add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 );
 
+	// Ensure ID attribute is present in WP<5.5.
+	if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
+		add_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag', ~PHP_INT_MAX, 2 );
+	}
+
 	// Ensure crossorigin=anonymous is added to font links.
 	add_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous', 10, 4 );
 
@@ -189,37 +194,43 @@ function amp_init() {
 	 * Detects whether the current window is in an iframe with the specified `name` attribute. The iframe is created
 	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
 	 */
-	add_action(
-		'wp_print_scripts',
-		function() {
-			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+	add_action( 'wp_head', 'amp_remove_admin_bar_in_phone_preview' );
+	add_action( 'amp_post_template_head', 'amp_remove_admin_bar_in_phone_preview' );
+}
+
+/**
+ * Remove the admin bar in phone preview of the site in AMP Onboarding Wizard.
+ *
+ * @since 2.2.2
+ * @internal
+ */
+function amp_remove_admin_bar_in_phone_preview() {
+	if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+		return;
+	}
+	?>
+	<script data-ampdevmode>
+		( () => {
+			if ( 'amp-wizard-completion-preview' !== window.name ) {
 				return;
 			}
-			?>
-			<script data-ampdevmode>
-				( () => {
-					if ( 'amp-wizard-completion-preview' !== window.name ) {
-						return;
-					}
 
-					/** @type {HTMLStyleElement} */
-					const style = document.createElement( 'style' );
-					style.setAttribute( 'type', 'text/css' );
-					style.appendChild( document.createTextNode( 'html:not(#_) { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
-					document.head.appendChild( style );
+			/** @type {HTMLStyleElement} */
+			const style = document.createElement( 'style' );
+			style.setAttribute( 'type', 'text/css' );
+			style.appendChild( document.createTextNode( 'html:not(#_) { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
+			document.head.appendChild( style );
 
-					document.addEventListener( 'DOMContentLoaded', function() {
-						const adminBar = document.getElementById( 'wpadminbar' );
-						if ( adminBar ) {
-							document.body.classList.remove( 'admin-bar' );
-							adminBar.remove();
-						}
-					});
-				} )();
-			</script>
-			<?php
-		}
-	);
+			document.addEventListener( 'DOMContentLoaded', function() {
+				const adminBar = document.getElementById( 'wpadminbar' );
+				if ( adminBar ) {
+					document.body.classList.remove( 'admin-bar' );
+					adminBar.remove();
+				}
+			});
+		} )();
+	</script>
+	<?php
 }
 
 /**
@@ -1158,6 +1169,35 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
 }
 
 /**
+ * Ensure ID attribute is added to printed scripts.
+ *
+ * Core started adding the ID attribute in WP 5.5. This attribute is used both by validation logic for sourcing
+ * attribution as well as in the script and comments sanitizers.
+ *
+ * @link https://core.trac.wordpress.org/changeset/48295
+ * @since 2.2
+ * @internal
+ *
+ * @param string $tag    The script tag for the enqueued script.
+ * @param string $handle The script's registered handle.
+ * @return string Filtered script.
+ */
+function amp_ensure_id_attribute_on_script_loader_tag( $tag, $handle ) {
+	$tag = preg_replace_callback(
+		'/(<script[^>]*?\ssrc=(["\']).*?\2)([^>]*?>)/',
+		static function ( $matches ) use ( $handle ) {
+			if ( false === strpos( $matches[0], 'id=' ) ) {
+				return $matches[1] . sprintf( ' id="%s"', esc_attr( "$handle-js" ) ) . $matches[3];
+			}
+			return $matches[0];
+		},
+		$tag,
+		1
+	);
+	return $tag;
+}
+
+/**
  * Explicitly opt-in to CORS mode by adding the crossorigin attribute to font stylesheet links.
  *
  * This explicitly triggers a CORS request, and gets back a non-opaque response, ensuring that a service
@@ -1499,6 +1539,8 @@ function amp_get_content_sanitizers( $post = null ) {
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
 		],
 
+		AMP_Bento_Sanitizer::class             => [],
+
 		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
 		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
 		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
@@ -1525,7 +1567,8 @@ function amp_get_content_sanitizers( $post = null ) {
 		],
 		AMP_Block_Sanitizer::class             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
 		AMP_Style_Sanitizer::class             => [
-			'skip_tree_shaking' => is_customize_preview(),
+			'skip_tree_shaking'   => is_customize_preview(),
+			'allow_excessive_css' => is_customize_preview(),
 		],
 		AMP_Meta_Sanitizer::class              => [],
 		AMP_Layout_Sanitizer::class            => [],
@@ -1646,6 +1689,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
+		AMP_Bento_Sanitizer::class, // Bento scripts may be preserved here.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for images, videos, audios, comments, forms, and styles.
 		AMP_Form_Sanitizer::class, // Must come before comments sanitizer.
 		AMP_Comments_Sanitizer::class, // Also must come after the form sanitizer.

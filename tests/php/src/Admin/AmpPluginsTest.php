@@ -25,20 +25,37 @@ class AmpPluginsTest extends TestCase {
 	 */
 	public $instance;
 
+	/** @var string */
+	private $original_wp_version;
+
 	/**
 	 * Setup.
 	 *
-	 * @inheritdoc
+	 * @inheritDoc
 	 */
 	public function setUp() {
 
 		parent::setUp();
 
-		global $wp_scripts, $wp_styles;
+		global $wp_scripts, $wp_styles, $wp_version;
 		$wp_scripts = null;
 		$wp_styles  = null;
 
 		$this->instance = new AmpPlugins();
+
+		$this->original_wp_version = $wp_version;
+	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritDoc
+	 */
+	public function tearDown() {
+		parent::tearDown();
+
+		global $wp_version;
+		$wp_version = $this->original_wp_version;
 	}
 
 	/**
@@ -134,15 +151,21 @@ class AmpPluginsTest extends TestCase {
 	 * @covers ::is_needed()
 	 */
 	public function test_is_needed() {
+		global $wp_version;
 
 		// Test 1: Not admin request.
 		$this->assertFalse( AmpPlugins::is_needed() );
 
-		// Test 2: Admin request.
+		// Test 2: Check with older version of WordPress.
+		$wp_version = '4.9';
+		$this->assertFalse( AmpPlugins::is_needed() );
+
+		// Test 3: Admin request in supported WordPress .
+		$wp_version = '5.6';
 		set_current_screen( 'index.php' );
 		$this->assertTrue( AmpPlugins::is_needed() );
 
-		// Test 3: Filter disables.
+		// Test 4: Filter disables.
 		add_filter(
 			'amp_compatible_ecosystem_shown',
 			static function ( $shown, $type ) {
@@ -288,10 +311,11 @@ class AmpPluginsTest extends TestCase {
 		$this->assertIsArray( $output );
 		$this->assertEquals(
 			sprintf(
-				'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="Site link of %s">%s</a>',
+				'<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="Site link of %s">%s<span class="screen-reader-text">(opens in a new tab)</span>%s</a>',
 				esc_url( $plugin_data['homepage'] ),
 				esc_html( $plugin_data['name'] ),
-				esc_html__( 'Visit site', 'amp' )
+				esc_html__( 'Visit site', 'amp' ),
+				'<span aria-hidden="true" class="dashicons dashicons-external"></span>'
 			),
 			$output[0]
 		);

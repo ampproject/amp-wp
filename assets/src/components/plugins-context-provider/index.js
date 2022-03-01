@@ -6,39 +6,22 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import {
-	createContext,
-	useContext,
-	useEffect,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { createContext, useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * Internal dependencies
- */
-import { ErrorContext } from '../error-context-provider';
-import { useAsyncError } from '../../utils/use-async-error';
+import { addQueryArgs } from '@wordpress/url';
 
 export const Plugins = createContext();
 
 /**
  * Plugins context provider.
  *
- * @param {Object}  props                  Component props.
- * @param {any}     props.children         Component children.
- * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
+ * @param {Object} props          Component props.
+ * @param {any}    props.children Component children.
  */
-export function PluginsContextProvider( {
-	children,
-	hasErrorBoundary = false,
-} ) {
+export function PluginsContextProvider( { children } ) {
 	const [ plugins, setPlugins ] = useState( [] );
 	const [ fetchingPlugins, setFetchingPlugins ] = useState( null );
-
-	const { error, setError } = useContext( ErrorContext );
-	const { setAsyncError } = useAsyncError();
+	const [ error, setError ] = useState();
 
 	/**
 	 * This component sets state inside async functions.
@@ -62,7 +45,9 @@ export function PluginsContextProvider( {
 
 			try {
 				const fetchedPlugins = await apiFetch( {
-					path: '/wp/v2/plugins',
+					path: addQueryArgs( '/wp/v2/plugins', {
+						_fields: [ 'author', 'name', 'plugin', 'status', 'version' ],
+					} ),
 				} );
 
 				if ( hasUnmounted.current === true ) {
@@ -76,17 +61,11 @@ export function PluginsContextProvider( {
 				}
 
 				setError( e );
-
-				if ( hasErrorBoundary ) {
-					setAsyncError( e );
-				}
-
-				return;
 			}
 
 			setFetchingPlugins( false );
 		} )();
-	}, [ error, fetchingPlugins, hasErrorBoundary, plugins, setAsyncError, setError ] );
+	}, [ error, fetchingPlugins, plugins ] );
 
 	return (
 		<Plugins.Provider
@@ -101,5 +80,4 @@ export function PluginsContextProvider( {
 }
 PluginsContextProvider.propTypes = {
 	children: PropTypes.any,
-	hasErrorBoundary: PropTypes.bool,
 };
