@@ -276,7 +276,7 @@ final class DetermineHeroImagesTest extends TestCase {
 				),
 				$output(
 					'<div class="entry-content">'
-					. '<div class="wp-block-cover alignfull is-light has-parallax" style="background-image:url(https://example.com/cover-block-1.jpg)" media="https://example.com/cover-block-1.jpg" data-hero-candidate><span aria-hidden="true" class="wp-block-cover__gradient-background has-background-dim"></span><div class="wp-block-cover__inner-container"><p class="has-text-align-center" style="font-size:58px;text-transform:capitalize">Hello World !</p></div></div>'
+					. '<div class="wp-block-cover alignfull is-light has-parallax" style="background-image:url(https://example.com/cover-block-1.jpg)" media="screen" data-hero-candidate><span aria-hidden="true" class="wp-block-cover__gradient-background has-background-dim"></span><div class="wp-block-cover__inner-container"><p class="has-text-align-center" style="font-size:58px;text-transform:capitalize">Hello World !</p></div></div>'
 					. '</div>'
 				),
 			],

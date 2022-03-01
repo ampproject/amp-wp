@@ -207,7 +207,7 @@ final class DetermineHeroImages implements Transformer {
 			preg_match( self::CSS_BACKGROUND_IMAGE_URL_REGEX_PATTERN, $style, $matches );
 
 			if ( ! empty( $matches['url'] ) ) {
-				$image->setAttribute( Attribute::MEDIA, $matches['url'] );
+				$image->setAttribute( Attribute::MEDIA, 'screen' );
 				return $image;
 			}
 		}
