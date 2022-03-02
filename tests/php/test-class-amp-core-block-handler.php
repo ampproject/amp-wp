@@ -832,6 +832,9 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	public function test_process_text_widgets() {
 		$instance_count = 2;
 
+		// Make sure the video shortcode is registered.
+		add_shortcode( 'video', 'wp_video_shortcode' );
+
 		$embed = new AMP_Core_Block_Handler();
 		$embed->register_embed();
 
