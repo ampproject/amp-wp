@@ -18,7 +18,7 @@ class UpdateAnalyticsVendors {
 	 * Construct method.
 	 */
 	constructor() {
-		this.vendors = {};
+		this.vendors = [];
 		this.content = '';
 		this.init();
 	}
@@ -94,7 +94,13 @@ class UpdateAnalyticsVendors {
 					// Loop through multiple vendor slugs with same titles and append extra information to title.
 					vendorSlugs.forEach( ( slug ) => {
 						if ( vendorSlugs.indexOf( slug ) === 0 ) {
-							this.vendors[ 'N/A' !== slug ? slug : '' ] = vendorTitle.replace( /(<([^>]+)>)/gi, '' ).trim();
+							// If vendor is Google Tag Manager, then add it along with In house analytics for '' value.
+							if ( slug === 'N/A' && vendorTitle === 'Google Tag Manager' ) {
+								slug= '';
+								vendorTitle = 'In house analytics / Google Tag Manager';
+							}
+
+							this.vendors[ slug ] = vendorTitle.replace( /(<([^>]+)>)/gi, '' ).trim();
 							return;
 						}
 
@@ -141,6 +147,13 @@ class UpdateAnalyticsVendors {
 		const phpcsDisableComments = phpcsDisables.map( ( rule ) => `// phpcs:disable ${ rule }\n` ).join( '' );
 
 		if ( this.vendors ) {
+			this.vendors = Object.entries( this.vendors ).map( ( [ value, label ] ) => ( { value, label } ) )
+
+			// Sort vendors by label.
+			this.vendors = this.vendors.sort( (a,b) => {
+				return a.label.localeCompare(b.label);
+			});
+
 			let output = this.convertToPhpArray( this.vendors );
 			// Save vendors to JSON file.
 			output = `<?php ${ phpcsDisableComments }\n// NOTICE: This file was auto-generated with: npm run update-analytics-vendors.\nreturn ${ output };`;

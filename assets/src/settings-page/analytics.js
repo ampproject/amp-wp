@@ -67,9 +67,6 @@ const vendorConfigs = {
 	},
 };
 
-/* Populating dropdown options by analytics vendors. */
-const analyticsVendorsOptions = Object.entries( AnalyticsVendors ).map( ( [ value, label ] ) => ( { value, label } ) );
-
 /**
  * Component for a single analytics entry.
  *
@@ -136,8 +133,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 						onChange={ ( newType ) => {
 							onChange( { type: newType } );
 						} }
-						value={ type }
-						options={ analyticsVendorsOptions }
+						options={ AnalyticsVendors }
 					/>
 				</div>
 
