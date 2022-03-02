@@ -72,6 +72,15 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 				</html>
 			';
 		} elseif (
+			strpos( $url, 'https://amp-wp.org/wp-json/oembed/1.0/embed' ) === 0
+			&&
+			isset( $query_vars['url'] )
+			&&
+			self::WP_58_STABLE_POST_URL === $query_vars['url']
+		) {
+			$content_type = 'application/json';
+			$body         = '{"version":"1.0","provider_name":"AMP for WordPress","provider_url":"https:\\/\\/amp-wp.org","author_name":"Alberto Medina","author_url":"https:\\/\\/amp-wp.org\\/author\\/albertomedina\\/","title":"Introducing v2.0 of the official AMP Plugin for WordPress","type":"rich","width":500,"height":282,"html":"<blockquote class=\\"wp-embedded-content\\" data-secret=\\"p6PagXJgLa\\"><a href=\\"https:\\/\\/amp-wp.org\\/introducing-v2-0-of-the-official-amp-plugin-for-wordpress\\/\\">Introducing v2.0 of the official AMP Plugin for WordPress<\\/a><\\/blockquote><iframe sandbox=\\"allow-scripts\\" security=\\"restricted\\" src=\\"https:\\/\\/amp-wp.org\\/introducing-v2-0-of-the-official-amp-plugin-for-wordpress\\/embed\\/#?secret=p6PagXJgLa\\" width=\\"500\\" height=\\"282\\" title=\\"&#8220;Introducing v2.0 of the official AMP Plugin for WordPress&#8221; &#8212; AMP for WordPress\\" data-secret=\\"p6PagXJgLa\\" frameborder=\\"0\\" marginwidth=\\"0\\" marginheight=\\"0\\" scrolling=\\"no\\" class=\\"wp-embedded-content\\"><\\/iframe><script type=\\"text\\/javascript\\">\\n\\/*! This file is auto-generated *\\/\\n!function(c,d){\\"use strict\\";var e=!1,o=!1;if(d.querySelector)if(c.addEventListener)e=!0;if(c.wp=c.wp||{},!c.wp.receiveEmbedMessage)if(c.wp.receiveEmbedMessage=function(e){var t=e.data;if(t)if(t.secret||t.message||t.value)if(!\\/[^a-zA-Z0-9]\\/.test(t.secret)){for(var r,a,i,s=d.querySelectorAll(\'iframe[data-secret=\\"\'+t.secret+\'\\"]\'),n=d.querySelectorAll(\'blockquote[data-secret=\\"\'+t.secret+\'\\"]\'),o=0;o<n.length;o++)n[o].style.display=\\"none\\";for(o=0;o<s.length;o++)if(r=s[o],e.source===r.contentWindow){if(r.removeAttribute(\\"style\\"),\\"height\\"===t.message){if(1e3<(i=parseInt(t.value,10)))i=1e3;else if(~~i<200)i=200;r.height=i}if(\\"link\\"===t.message)if(a=d.createElement(\\"a\\"),i=d.createElement(\\"a\\"),a.href=r.getAttribute(\\"src\\"),i.href=t.value,i.host===a.host)if(d.activeElement===r)c.top.location.href=t.value}}},e)c.addEventListener(\\"message\\",c.wp.receiveEmbedMessage,!1),d.addEventListener(\\"DOMContentLoaded\\",t,!1),c.addEventListener(\\"load\\",t,!1);function t(){if(!o){o=!0;for(var e,t,r,a=-1!==navigator.appVersion.indexOf(\\"MSIE 10\\"),i=!!navigator.userAgent.match(\\/Trident.*rv:11\\\\.\\/),s=d.querySelectorAll(\\"iframe.wp-embedded-content\\"),n=0;n<s.length;n++){if(!(r=(t=s[n]).getAttribute(\\"data-secret\\")))r=Math.random().toString(36).substr(2,10),t.src+=\\"#?secret=\\"+r,t.setAttribute(\\"data-secret\\",r);if(a||i)(e=t.cloneNode(!0)).removeAttribute(\\"security\\"),t.parentNode.replaceChild(e,t);t.contentWindow.postMessage({message:\\"ready\\",secret:r},\\"*\\")}}}}(window,document);\\n<\\/script>\\n","thumbnail_url":"https:\\/\\/amp-wp.org\\/wp-content\\/uploads\\/2020\\/08\\/amp-wp-banner-logo.png","thumbnail_width":500,"thumbnail_height":250}';
+		} elseif (
 			strpos( $url, 'https://make.wordpress.org/core/wp-json/oembed/1.0/embed' ) === 0
 			&&
 			isset( $query_vars['url'] )
@@ -102,6 +111,10 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 					'message' => 'OK',
 				],
 			];
+		}
+
+		if ( false === $pre ) {
+			throw new Exception( "Failed to mock request for $url." );
 		}
 
 		return $pre;
