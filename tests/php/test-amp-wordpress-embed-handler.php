@@ -132,10 +132,6 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 			]
 		);
 
-		$post_url = get_permalink( $post );
-		$data     = get_oembed_response_data_for_url( $post_url, [] );
-		$this->assertIsObject( $data, sprintf( 'Post URL: %s, Post ID: %d, url_to_postid(): %s', $post_url, $post, url_to_postid( $post_url ) ) );
-
 		return [
 			'no_embed'                          => [
 				'Hello world.',
@@ -304,6 +300,7 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 					esc_url( get_permalink( $post ) ),
 					esc_attr( get_the_title( $post ) )
 				),
+				$post,
 			],
 			'internal_post_embed_shortcode'     => [
 				sprintf( '[embed]%s[/embed]', get_permalink( $post ) ),
@@ -321,6 +318,7 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 					esc_url( get_permalink( $post ) ),
 					esc_attr( get_the_title( $post ) )
 				),
+				$post,
 			],
 		];
 	}
@@ -332,10 +330,11 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	 * @covers ::create_amp_wordpress_embed_and_replace_node()
 	 * @dataProvider get_conversion_data
 	 *
-	 * @param string $source   Source.
-	 * @param string $expected Expected.
+	 * @param string   $source    Source.
+	 * @param string   $expected  Expected.
+	 * @param int|null $post_id   Internal post ID.
 	 */
-	public function test__conversion( $source, $expected ) {
+	public function test__conversion( $source, $expected, $post_id = null ) {
 
 		// Capture the response bodies to facilitate updating the request mocking.
 		$http_response_bodies = [];
@@ -359,6 +358,16 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 			1000,
 			3
 		);
+
+		// Ensure the internal post lookup in get_oembed_response_data_for_url() succeeds.
+		if ( $post_id ) {
+			add_filter(
+				'oembed_request_post_id',
+				static function () use ( $post_id ) {
+					return $post_id;
+				}
+			);
+		}
 
 		$embed = new AMP_WordPress_Embed_Handler();
 		$embed->register_embed();
