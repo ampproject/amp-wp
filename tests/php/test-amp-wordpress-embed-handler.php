@@ -113,6 +113,12 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	 * @return array
 	 */
 	public function get_conversion_data() {
+		$post = self::factory()->post->create(
+			[
+				'post_content' => 'Lorem ipsum',
+			]
+		);
+
 		return [
 			'no_embed'                          => [
 				'Hello world.',
@@ -259,6 +265,46 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 					</amp-wordpress-embed>
 				',
 			],
+			'internal_post_embed_block'         => [
+				sprintf(
+					'
+					<!-- wp:embed {"url":"%1$s","type":"wp-embed","providerNameSlug":"wordpress-develop"} -->
+					<figure class="wp-block-embed is-type-wp-embed is-provider-wordpress-develop wp-block-embed-wordpress-develop"><div class="wp-block-embed__wrapper">
+					%1$s
+					</div></figure>
+					<!-- /wp:embed -->
+					',
+					get_permalink( $post )
+				),
+				sprintf(
+					'
+					<figure class="wp-block-embed is-type-wp-embed is-provider-wordpress-develop wp-block-embed-wordpress-develop"><div class="wp-block-embed__wrapper">
+					<amp-wordpress-embed height="200" layout="fixed-height" title="%s" data-url="%s"><blockquote class="wp-embedded-content" placeholder><a href="%s">%s</a></blockquote><button overflow type="button">See more</button></amp-wordpress-embed>
+					</div></figure>
+					',
+					esc_attr( '“' . get_the_title( $post ) . '” — ' . get_bloginfo( 'blogname' ) ),
+					str_replace( '&#038;', '&amp;', esc_url( add_query_arg( 'embed', 'true', get_permalink( $post ) ) ) ),
+					esc_url( get_permalink( $post ) ),
+					esc_attr( get_the_title( $post ) )
+				),
+			],
+			'internal_post_embed_shortcode'     => [
+				sprintf( '[embed]%s[/embed]', get_permalink( $post ) ),
+				sprintf(
+					'
+					<amp-wordpress-embed height="200" layout="fixed-height" title="%s" data-url="%s">
+						<blockquote class="wp-embedded-content" placeholder>
+							<p><a href="%s">%s</a></p>
+						</blockquote>
+						<button overflow type="button">See more</button>
+					</amp-wordpress-embed>
+					',
+					esc_attr( '“' . get_the_title( $post ) . '” — ' . get_bloginfo( 'blogname' ) ),
+					str_replace( '&#038;', '&amp;', esc_url( add_query_arg( 'embed', 'true', get_permalink( $post ) ) ) ),
+					esc_url( get_permalink( $post ) ),
+					esc_attr( get_the_title( $post ) )
+				),
+			],
 		];
 	}
 
@@ -307,7 +353,7 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
-		$this->assertSimilarMarkup( $expected, $content, 'Response bodies for HTTP requests: ' . var_export( $http_response_bodies, true ) );
+		$this->assertSimilarMarkup( $expected, $content, 'Response bodies for HTTP requests: ' . var_export( $http_response_bodies, true ) . "\nActual markup: $content" );
 	}
 
 	/**
