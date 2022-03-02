@@ -96,7 +96,7 @@ class UpdateAnalyticsVendors {
 						if ( vendorSlugs.indexOf( slug ) === 0 ) {
 							// If vendor is Google Tag Manager, then add it along with In house analytics for '' value.
 							if ( slug === 'N/A' && vendorTitle === 'Google Tag Manager' ) {
-								slug= '';
+								slug = '';
 								vendorTitle = 'In house analytics / Google Tag Manager';
 							}
 
@@ -147,12 +147,12 @@ class UpdateAnalyticsVendors {
 		const phpcsDisableComments = phpcsDisables.map( ( rule ) => `// phpcs:disable ${ rule }\n` ).join( '' );
 
 		if ( this.vendors ) {
-			this.vendors = Object.entries( this.vendors ).map( ( [ value, label ] ) => ( { value, label } ) )
+			this.vendors = Object.entries( this.vendors ).map( ( [ value, label ] ) => ( { value, label } ) );
 
 			// Sort vendors by label.
-			this.vendors = this.vendors.sort( (a,b) => {
-				return a.label.localeCompare(b.label);
-			});
+			this.vendors = this.vendors.sort( ( a, b ) => {
+				return a.label.localeCompare( b.label );
+			} );
 
 			let output = this.convertToPhpArray( this.vendors );
 			// Save vendors to JSON file.
