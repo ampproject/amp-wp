@@ -132,6 +132,10 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 			]
 		);
 
+		$post_url = get_permalink( $post );
+		$data     = get_oembed_response_data_for_url( $post_url, [] );
+		$this->assertIsObject( $data, sprintf( 'Post URL: %s, Post ID: %d, url_to_postid(): %s', $post_url, $post, url_to_postid( $post_url ) ) );
+
 		return [
 			'no_embed'                          => [
 				'Hello world.',
