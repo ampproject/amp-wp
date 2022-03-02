@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
-import { ANALYTICS_VENDORS_LIST as AnalyticsVendors } from 'amp-settings';
+import { ANALYTICS_VENDORS_LIST } from 'amp-settings';
 
 /**
  * WordPress dependencies
@@ -133,7 +133,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 						onChange={ ( newType ) => {
 							onChange( { type: newType } );
 						} }
-						options={ AnalyticsVendors }
+						options={ ANALYTICS_VENDORS_LIST }
 					/>
 				</div>
 
