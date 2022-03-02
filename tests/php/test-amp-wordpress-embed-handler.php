@@ -113,9 +113,7 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 			];
 		}
 
-		if ( false === $pre ) {
-			throw new Exception( "Failed to mock request for $url." );
-		}
+		$this->assertIsArray( $pre, "Expected mock for $url." );
 
 		return $pre;
 	}
@@ -131,6 +129,9 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 				'post_content' => 'Lorem ipsum',
 			]
 		);
+
+		$this->assertIsObject( get_oembed_response_data_for_url( get_permalink( $post ), [] ) );
+		$this->assertEquals( 10, has_filter( 'pre_oembed_result', 'wp_filter_pre_oembed_result' ) );
 
 		return [
 			'no_embed'                          => [
