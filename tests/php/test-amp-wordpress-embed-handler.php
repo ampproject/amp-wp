@@ -344,6 +344,7 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 				}
 			);
 
+			$this->assertInstanceOf( 'WP_Post', get_post( $post_id ) );
 			$data = get_oembed_response_data( $post_id, 0 );
 			$this->assertIsArray( $data, 'get_oembed_response_data: ' . wp_json_encode( get_post( $post_id ) ) );
 			$data = get_oembed_response_data_for_url( get_permalink( $post_id ), [] );
