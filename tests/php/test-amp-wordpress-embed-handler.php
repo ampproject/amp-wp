@@ -324,8 +324,7 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	public function test__conversion( $source, $expected, $post_args = [] ) {
 
 		if ( $post_args ) {
-			$post_id = self::factory()->post->create( $post_args );
-
+			$post_id  = self::factory()->post->create( $post_args );
 			$source   = str_replace( '{{url}}', get_permalink( $post_id ), $source );
 			$expected = str_replace( '{{url}}', get_permalink( $post_id ), $expected );
 			$expected = str_replace(
@@ -333,25 +332,6 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 				str_replace( '&#038;', '&amp;', esc_url( add_query_arg( 'embed', 'true', get_permalink( $post_id ) ) ) ),
 				$expected
 			);
-
-			$this->assertEquals( 10, has_filter( 'pre_oembed_result', 'wp_filter_pre_oembed_result' ) );
-
-			// Ensure the internal post lookup in get_oembed_response_data_for_url() succeeds.
-			add_filter(
-				'oembed_request_post_id',
-				static function () use ( $post_id ) {
-					return $post_id;
-				}
-			);
-
-			$this->assertInstanceOf( 'WP_Post', get_post( $post_id ) );
-			$data = get_oembed_response_data( $post_id, 0 );
-			$this->assertIsArray( $data, 'get_oembed_response_data: ' . wp_json_encode( get_post( $post_id ) ) );
-			$data = get_oembed_response_data_for_url( get_permalink( $post_id ), [] );
-			$this->assertIsObject( $data, 'get_oembed_response_data_for_url: ' . wp_json_encode( get_post( $post_id ) ) );
-			$html = _wp_oembed_get_object()->data2html( $data, get_permalink( $post_id ) );
-			$this->assertIsString( $html, 'data2html' );
-			$this->assertStringContainsString( 'wp-embedded-content', $html );
 		}
 
 		// Capture the response bodies to facilitate updating the request mocking.
