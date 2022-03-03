@@ -60,9 +60,15 @@ amp-carousel .amp-wp-gallery-caption {
 	background-color: rgba(0, 0, 0, 0.5);
 	color: #fff;
 	padding: 1rem;
+	margin-bottom: 0;
 }
 
-.wp-block-gallery[data-amp-carousel="true"] {
+amp-carousel .amp-wp-gallery-caption a {
+	color: inherit;
+}
+
+.wp-block-gallery[data-amp-carousel="true"],
+.wp-block-gallery[data-amp-carousel="true"].has-nested-images {
 	display: block;
 	flex-wrap: unset;
 }

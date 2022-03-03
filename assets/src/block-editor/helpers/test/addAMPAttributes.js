@@ -33,19 +33,4 @@ describe( 'addAMPAttributes', () => {
 			},
 		} );
 	} );
-
-	it( 'adds attributes to core embed block', () => {
-		expect(
-			addAMPAttributes( {}, 'core-embed/facebook' ),
-		).toMatchObject( {
-			attributes: {
-				ampLayout: {
-					type: 'string',
-				},
-				ampNoLoading: {
-					type: 'boolean',
-				},
-			},
-		} );
-	} );
 } );

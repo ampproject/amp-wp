@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\DevTools;
 
+use AMP_Validation_Callback_Wrapper;
 use AmpProject\AmpWP\Infrastructure\Service;
 use Exception;
 use ReflectionFunction;
@@ -39,6 +40,37 @@ final class CallbackReflection implements Service {
 	}
 
 	/**
+	 * Get the underlying callback in case it was wrapped by AMP_Validation_Callback_Wrapper.
+	 *
+	 * @since 2.2.1
+	 *
+	 * @param callable $callback Callback.
+	 * @return callable Original callback.
+	 */
+	public function get_unwrapped_callback( $callback ) {
+		while ( $callback ) {
+			if ( $callback instanceof AMP_Validation_Callback_Wrapper ) {
+				$callback = $callback->get_callback_function();
+			} elseif (
+				is_array( $callback )
+				&&
+				is_callable( $callback )
+				&&
+				isset( $callback[0], $callback[1] )
+				&&
+				$callback[0] instanceof AMP_Validation_Callback_Wrapper
+				&&
+				'invoke_with_first_ref_arg' === $callback[1]
+			) {
+				$callback = $callback[0]->get_callback_function();
+			} else {
+				break;
+			}
+		}
+		return $callback;
+	}
+
+	/**
 	 * Gets the plugin or theme of the callback, if one exists.
 	 *
 	 * @param string|array|callable $callback The callback for which to get the
@@ -54,6 +86,8 @@ final class CallbackReflection implements Service {
 	 * }
 	 */
 	public function get_source( $callback ) {
+		$callback = $this->get_unwrapped_callback( $callback );
+
 		$reflection = $this->get_reflection( $callback );
 
 		if ( ! $reflection ) {

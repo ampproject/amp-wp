@@ -16,7 +16,7 @@ Get all child elements of the specified element.
 
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:128](/includes/embeds/class-amp-base-embed-handler.php#L128-L135)
+:link: [includes/embeds/class-amp-base-embed-handler.php:129](/includes/embeds/class-amp-base-embed-handler.php#L129-L136)
 
 <details>
 <summary>Show Code</summary>

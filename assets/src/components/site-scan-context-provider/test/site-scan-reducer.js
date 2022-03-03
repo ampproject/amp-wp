@@ -95,6 +95,7 @@ describe( 'siteScanReducer', () => {
 			scannableUrls: [],
 		} ) ).toStrictEqual( {
 			status: STATUS_COMPLETED,
+			scannableUrls: [],
 			scanOnce: false,
 			scansCount: 0,
 		} );

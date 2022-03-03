@@ -50,7 +50,18 @@ const sharedConfig = {
 					return plugin;
 				},
 			)
-			.filter( ( plugin ) => plugin.constructor.name !== 'CleanWebpackPlugin' ),
+			.filter( ( plugin ) => ! [
+				'CleanWebpackPlugin',
+				/**
+				 * After introducing WordPress/gutenberg#38715, PHP files from the `src` folder are copied over
+				 * to the output directory (i.e. `assets`). To prevent this, the `CopyWebpackPlugin` is excluded
+				 * from the plugins list. It is safe since the only other file type the plugin copies is `block.json`
+				 * that is not used in `amp-wp`.
+				 *
+				 * @see https://github.com/ampproject/amp-wp/issues/6947
+				 */
+				'CopyWebpackPlugin',
+			].includes( plugin.constructor.name ) ),
 		new RtlCssPlugin( {
 			filename: '../css/[name]-rtl.css',
 		} ),
