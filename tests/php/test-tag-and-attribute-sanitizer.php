@@ -1458,7 +1458,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 			],
 
 			'allowed_tag_only'                             => [
-				'<p>Text</p><img src="/path/to/file.jpg">',
+				'<p>Text</p><video src="/path/to/file.jpg"></video>',
 				'<p>Text</p>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR ],

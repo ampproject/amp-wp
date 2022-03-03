@@ -28,6 +28,9 @@ import imp
 
 seen_spec_names = set()
 
+# Note: This is a temporary measure while waiting for resolution of <https://github.com/ampproject/amphtml/issues/36749#issuecomment-996160595>.
+latest_extensions_file_path = os.path.join( os.path.realpath( os.path.dirname(__file__) ), 'latest-extension-versions.json' )
+
 def Die(msg):
 	print >> sys.stderr, msg
 	sys.exit(1)
@@ -451,8 +454,12 @@ def ParseRules(repo_directory, out_dir):
 			tag['tag_spec']['requires_extension'] = requires_extension_versions
 
 	extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.extensions.json' ) ) )
+	latest_versions = json.load( open( latest_extensions_file_path ) )
 	extensions_versions = dict()
 	for extension in extensions:
+		if '-impl' in extension['name'] or '-polyfill' in extension['name']:
+			continue
+
 		if extension['name'] not in extensions_versions:
 			extensions_versions[ extension['name'] ] = {
 				'versions': [],
@@ -463,9 +470,10 @@ def ParseRules(repo_directory, out_dir):
 			extensions_versions[ extension['name'] ]['versions'].extend( extension['version'] )
 		else:
 			extensions_versions[ extension['name'] ]['versions'].append( extension['version'] )
-		if extensions_versions[ extension['name'] ]['latest'] is not None and extensions_versions[ extension['name'] ]['latest'] != extension['latestVersion']:
-			logging.info('Warning: latestVersion mismatch for ' + extension['name'])
-		extensions_versions[ extension['name'] ]['latest'] = extension['latestVersion']
+		if extension['name'] not in latest_versions:
+			raise Exception( 'There is a latest version for ' + extension['name'] )
+		extensions_versions[ extension['name'] ]['latest'] = latest_versions[ extension['name'] ]
+
 		if 'options' in extension and ( ( 'bento' in extension['options'] and extension['options']['bento'] ) or ( 'wrapper' in extension['options'] and extension['options']['wrapper'] == 'bento' ) ):
 			extensions_versions[ extension['name'] ]['bento'] = {
 				'version': extension['version'],
