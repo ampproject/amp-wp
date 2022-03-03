@@ -124,12 +124,6 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	 * @return array
 	 */
 	public function get_conversion_data() {
-		$post = self::factory()->post->create(
-			[
-				'post_content' => 'Lorem ipsum',
-			]
-		);
-
 		return [
 			'no_embed'                          => [
 				'Hello world.',
@@ -277,46 +271,41 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 				',
 			],
 			'internal_post_embed_block'         => [
-				sprintf(
-					'
-					<!-- wp:embed {"url":"%1$s","type":"wp-embed","providerNameSlug":"wordpress-develop"} -->
-					<figure class="wp-block-embed is-type-wp-embed is-provider-wordpress-develop wp-block-embed-wordpress-develop"><div class="wp-block-embed__wrapper">
-					%1$s
-					</div></figure>
-					<!-- /wp:embed -->
-					',
-					get_permalink( $post )
-				),
+				'
+				<!-- wp:embed {"url":"{{url}}","type":"wp-embed","providerNameSlug":"wordpress-develop"} -->
+				<figure class="wp-block-embed is-type-wp-embed is-provider-wordpress-develop wp-block-embed-wordpress-develop"><div class="wp-block-embed__wrapper">
+				{{url}}
+				</div></figure>
+				<!-- /wp:embed -->
+				',
 				sprintf(
 					'
 					<figure class="wp-block-embed is-type-wp-embed is-provider-wordpress-develop wp-block-embed-wordpress-develop"><div class="wp-block-embed__wrapper">
-					<amp-wordpress-embed height="200" layout="fixed-height" title="%s" data-url="%s"><blockquote class="wp-embedded-content" placeholder><a href="%s">%s</a></blockquote><button overflow type="button">See more</button></amp-wordpress-embed>
+					<amp-wordpress-embed height="200" layout="fixed-height" title="%s" data-url="{{data_url}}"><blockquote class="wp-embedded-content" placeholder><a href="{{url}}">Internal</a></blockquote><button overflow type="button">See more</button></amp-wordpress-embed>
 					</div></figure>
 					',
-					esc_attr( '“' . get_the_title( $post ) . '” — ' . get_bloginfo( 'blogname' ) ),
-					str_replace( '&#038;', '&amp;', esc_url( add_query_arg( 'embed', 'true', get_permalink( $post ) ) ) ),
-					esc_url( get_permalink( $post ) ),
-					esc_attr( get_the_title( $post ) )
+					esc_attr( '“Internal” — ' . get_bloginfo( 'blogname' ) )
 				),
-				$post,
+				[
+					'post_title' => 'Internal',
+				],
 			],
 			'internal_post_embed_shortcode'     => [
-				sprintf( '[embed]%s[/embed]', get_permalink( $post ) ),
+				'[embed]{{url}}[/embed]',
 				sprintf(
 					'
-					<amp-wordpress-embed height="200" layout="fixed-height" title="%s" data-url="%s">
+					<amp-wordpress-embed height="200" layout="fixed-height" title="%s" data-url="{{data_url}}">
 						<blockquote class="wp-embedded-content" placeholder>
-							<p><a href="%s">%s</a></p>
+							<p><a href="{{url}}">Internal</a></p>
 						</blockquote>
 						<button overflow type="button">See more</button>
 					</amp-wordpress-embed>
 					',
-					esc_attr( '“' . get_the_title( $post ) . '” — ' . get_bloginfo( 'blogname' ) ),
-					str_replace( '&#038;', '&amp;', esc_url( add_query_arg( 'embed', 'true', get_permalink( $post ) ) ) ),
-					esc_url( get_permalink( $post ) ),
-					esc_attr( get_the_title( $post ) )
+					esc_attr( '“Internal” — ' . get_bloginfo( 'blogname' ) )
 				),
-				$post,
+				[
+					'post_title' => 'Internal',
+				],
 			],
 		];
 	}
@@ -328,14 +317,25 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	 * @covers ::create_amp_wordpress_embed_and_replace_node()
 	 * @dataProvider get_conversion_data
 	 *
-	 * @param string   $source    Source.
-	 * @param string   $expected  Expected.
-	 * @param int|null $post_id   Internal post ID.
+	 * @param string $source    Source.
+	 * @param string $expected  Expected.
+	 * @param array  $post_args Post args.
 	 */
-	public function test__conversion( $source, $expected, $post_id = null ) {
+	public function test__conversion( $source, $expected, $post_args = [] ) {
 
-		$this->assertEquals( 10, has_filter( 'pre_oembed_result', 'wp_filter_pre_oembed_result' ) );
-		if ( $post_id ) {
+		if ( $post_args ) {
+			$post_id = self::factory()->post->create( $post_args );
+
+			$source   = str_replace( '{{url}}', get_permalink( $post_id ), $source );
+			$expected = str_replace( '{{url}}', get_permalink( $post_id ), $expected );
+			$expected = str_replace(
+				'{{data_url}}',
+				str_replace( '&#038;', '&amp;', esc_url( add_query_arg( 'embed', 'true', get_permalink( $post_id ) ) ) ),
+				$expected
+			);
+
+			$this->assertEquals( 10, has_filter( 'pre_oembed_result', 'wp_filter_pre_oembed_result' ) );
+
 			// Ensure the internal post lookup in get_oembed_response_data_for_url() succeeds.
 			add_filter(
 				'oembed_request_post_id',
