@@ -344,10 +344,12 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 				}
 			);
 
+			$data = get_oembed_response_data( $post_id, 0 );
+			$this->assertIsArray( $data, 'get_oembed_response_data: ' . wp_json_encode( get_post( $post_id ) ) );
 			$data = get_oembed_response_data_for_url( get_permalink( $post_id ), [] );
-			$this->assertIsObject( $data );
+			$this->assertIsObject( $data, 'get_oembed_response_data_for_url: ' . wp_json_encode( get_post( $post_id ) ) );
 			$html = _wp_oembed_get_object()->data2html( $data, get_permalink( $post_id ) );
-			$this->assertIsString( $html );
+			$this->assertIsString( $html, 'data2html' );
 			$this->assertStringContainsString( 'wp-embedded-content', $html );
 		}
 
