@@ -336,6 +336,14 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 
 		$this->assertEquals( 10, has_filter( 'pre_oembed_result', 'wp_filter_pre_oembed_result' ) );
 		if ( $post_id ) {
+			// Ensure the internal post lookup in get_oembed_response_data_for_url() succeeds.
+			add_filter(
+				'oembed_request_post_id',
+				static function () use ( $post_id ) {
+					return $post_id;
+				}
+			);
+
 			$data = get_oembed_response_data_for_url( get_permalink( $post_id ), [] );
 			$this->assertIsObject( $data );
 			$html = _wp_oembed_get_object()->data2html( $data, get_permalink( $post_id ) );
@@ -365,16 +373,6 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 			1000,
 			3
 		);
-
-		// Ensure the internal post lookup in get_oembed_response_data_for_url() succeeds.
-		if ( $post_id ) {
-			add_filter(
-				'oembed_request_post_id',
-				static function () use ( $post_id ) {
-					return $post_id;
-				}
-			);
-		}
 
 		$embed = new AMP_WordPress_Embed_Handler();
 		$embed->register_embed();
