@@ -13,6 +13,8 @@ import {
 	USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 	USERS_RESOURCE_REST_PATH,
 	VALIDATE_NONCE,
+	VALIDATED_URLS_LINK,
+	ERROR_INDEX_LINK,
 } from 'amp-settings';
 
 /**
@@ -142,6 +144,66 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 }
 
 /**
+ * Get the element for an AMP admin submenu if it exists.
+ *
+ * @param {string} href Link href.
+ * @return {Element|null} LI element or null if not found.
+ */
+function getAmpAdminMenuItem( href ) {
+	const parsedUrl = new URL( href );
+	const searchParams = new Map( new URLSearchParams( parsedUrl.search ).entries() );
+
+	links:
+	for ( const a of document.querySelectorAll( '#toplevel_page_amp-options ul > li > a' ) ) {
+		if ( ! a.pathname.endsWith( parsedUrl.pathname ) ) {
+			continue;
+		}
+
+		const linkSearchParams = new URLSearchParams( parsedUrl.search );
+		for ( const [ key, value ] of searchParams.entries() ) {
+			if ( linkSearchParams.get( key ) !== value ) {
+				continue links;
+			}
+		}
+
+		return a.parentNode;
+	}
+	return null;
+}
+
+/**
+ * Add an item to the AMP admin submenu.
+ *
+ * @param {string} title Link text.
+ * @param {string} href  Link href.
+ */
+function addAmpAdminMenuItem( title, href ) {
+	const ul = document.querySelector( '#toplevel_page_amp-options ul' );
+	if ( ! ul || getAmpAdminMenuItem( href ) ) {
+		return;
+	}
+
+	const li = document.createElement( 'li' );
+	const a = document.createElement( 'a' );
+	a.innerText = title;
+	a.href = href;
+	li.appendChild( a );
+	ul.appendChild( li );
+}
+
+/**
+ * Remove an item from the AMP admin submenu.
+ *
+ * @param {string} href Link href.
+ */
+function removeAmpAdminMenuItem( href ) {
+	const li = getAmpAdminMenuItem( href );
+	if ( li ) {
+		li.remove();
+	}
+}
+
+/**
  * Settings page application root.
  *
  * @param {Object}  props
@@ -161,44 +223,19 @@ function Root( { appRoot } ) {
 	const onSubmit = useCallback( ( event ) => {
 		event.preventDefault();
 
-		/*
-		 * Adds the developer tools 'Validated URLs' & 'Error Index' on turning ON
-		 * the 'Enable Developer Tools' toggle button and saving.
-		 */
-		const addAmpDevOptions = ( optionTitle, optionUrl ) => {
-			const wpAmpSettings = document.querySelector( '#toplevel_page_amp-options ul' );
-
-			if ( wpAmpSettings === null ) {
-				return;
-			}
-
-			const listElement = document.createElement( 'li' );
-			const anchorElement = document.createElement( 'a' );
-			anchorElement.innerText = optionTitle;
-			anchorElement.setAttribute( 'href', optionUrl );
-			listElement.appendChild( anchorElement );
-			wpAmpSettings.appendChild( listElement );
-		};
-
 		if ( hasOptionsChanges ) {
 			saveOptions();
 		}
 
 		if ( hasDeveloperToolsOptionChange ) {
 			saveDeveloperToolsOption();
-			/*
-			 * Add/Remove Dev Tools 'Validated URLs' & 'Error Index' on 'Enable Developer Tools' ON/OFF on save.
-			 */
-			if ( ! developerToolsOption ) {
-				document.querySelectorAll( '#toplevel_page_amp-options ul li a[href*="post_type=amp_validated_url"]' )
-					.forEach( ( menuItem ) => {
-						menuItem.parentNode.remove();
-					} );
-				return;
+			if ( developerToolsOption ) {
+				addAmpAdminMenuItem( __( 'Validated URLs', 'amp' ), VALIDATED_URLS_LINK );
+				addAmpAdminMenuItem( __( 'Error Index', 'amp' ), ERROR_INDEX_LINK );
+			} else {
+				removeAmpAdminMenuItem( VALIDATED_URLS_LINK );
+				removeAmpAdminMenuItem( ERROR_INDEX_LINK );
 			}
-
-			addAmpDevOptions( __( 'Validated URLs', 'amp' ), 'edit.php?post_type=amp_validated_url' );
-			addAmpDevOptions( __( 'Error Index', 'amp' ), 'edit-tags.php?taxonomy=amp_validation_error&post_type=amp_validated_url' );
 		}
 	}, [ hasDeveloperToolsOptionChange, hasOptionsChanges, saveDeveloperToolsOption, saveOptions, developerToolsOption ] );
 
