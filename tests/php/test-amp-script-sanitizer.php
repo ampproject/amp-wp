@@ -594,7 +594,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 				$this->assertStringContainsString( '}amp-audio{', $css_text );
 				break;
 			case 3:
-				$this->assertStringContainsString( ':not(#_) amp-audio{', $css_text );
+				$this->assertStringContainsString( '}amp-audio:not(#_', $css_text );
 				break;
 		}
 

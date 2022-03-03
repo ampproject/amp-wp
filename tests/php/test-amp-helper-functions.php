@@ -547,6 +547,43 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		);
 	}
 
+	/** @covers ::amp_remove_admin_bar_in_phone_preview() */
+	public function test_amp_remove_admin_bar_in_phone_preview() {
+		add_filter( 'amp_dev_mode_enabled', '__return_true', 99 );
+		add_filter( 'show_admin_bar', '__return_true', 99 );
+
+		ob_start();
+		amp_remove_admin_bar_in_phone_preview();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<script data-ampdevmode>', $output );
+		$this->assertStringContainsString( "'amp-wizard-completion-preview' !== window.name )", $output );
+
+		remove_filter( 'amp_dev_mode_enabled', '__return_true', 99 );
+		remove_filter( 'show_admin_bar', '__return_true', 99 );
+	}
+
+	/** @covers ::amp_remove_admin_bar_in_phone_preview() */
+	public function test_amp_remove_admin_bar_in_phone_preview_without_dev_mode() {
+		add_filter( 'amp_dev_mode_enabled', '__return_false', 99 );
+
+		ob_start();
+		amp_remove_admin_bar_in_phone_preview();
+		$output = ob_get_clean();
+		$this->assertEmpty( $output );
+
+		remove_filter( 'amp_dev_mode_enabled', '__return_false', 99 );
+
+		add_filter( 'show_admin_bar', '__return_false', 99 );
+
+		ob_start();
+		amp_remove_admin_bar_in_phone_preview();
+		$output = ob_get_clean();
+		$this->assertEmpty( $output );
+
+		remove_filter( 'show_admin_bar', '__return_false', 99 );
+	}
+
 	/**
 	 * Test amp_get_current_url().
 	 *

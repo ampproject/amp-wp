@@ -71,7 +71,7 @@ jobs:
       # Needed to later close PR.
       - name: Checkout repo
         if: steps.latest-pr.num != ''
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Close latest open PR
         if: steps.latest-pr.num != ''
@@ -88,7 +88,7 @@ jobs:
     needs: check-gutenberg-release
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           # Fetch history for all branches and tags to allow for successful merge of base branch if needed.
           fetch-depth: 0
@@ -101,14 +101,10 @@ jobs:
         env:
           VERSION: ${{ needs.check-gutenberg-release.outputs.latest-version }}
 
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
-
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.0.0
         with:
-          node-version: ${{ steps.nvm.outputs.NVMRC }}
+          node-version-file: '.nvmrc'
           cache: npm
 
       - name: Configure git user
