@@ -1094,6 +1094,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			foreach ( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $attr_alt_name ) {
 				$attr_spec_list[ $attr_alt_name ] = $attr_spec_list[ $attr_name ];
+
+				// Let alternate attribute reciprocally have this attribute as an alternative.
+				$attr_spec_list[ $attr_alt_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] = [ $attr_name ];
 			}
 		}
 

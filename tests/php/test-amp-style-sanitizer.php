@@ -452,7 +452,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
 					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
 					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
-					AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR,
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 				],

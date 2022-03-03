@@ -5,7 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
 use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
@@ -346,13 +345,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $attributes as $name => $value ) {
 				$node->setAttribute( $name, $value );
 			}
-
-			// Mark element as PX-verified to prevent raising validation errors for an intentionally invalid <img>.
-			// It doesn't make sense to raise a validation error to allow the user to decide whether to convert from
-			// <img> to <amp-img> since the native_img_used arg is the opt-in to not do any such conversion.
-			// @todo Remove once https://github.com/ampproject/amphtml/issues/30442 lands.
-			ValidationExemption::mark_node_as_px_verified( $node );
-
 			return;
 		}
 
