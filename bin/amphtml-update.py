@@ -471,7 +471,7 @@ def ParseRules(repo_directory, out_dir):
 		else:
 			extensions_versions[ extension['name'] ]['versions'].append( extension['version'] )
 		if extension['name'] not in latest_versions:
-			raise Exception( 'There is a latest version for ' + extension['name'] )
+			raise Exception( 'There is no latest version for ' + extension['name'] + ' so please add it to bin/latest-extension-version.json' )
 		extensions_versions[ extension['name'] ]['latest'] = latest_versions[ extension['name'] ]
 
 		if 'options' in extension and ( ( 'bento' in extension['options'] and extension['options']['bento'] ) or ( 'wrapper' in extension['options'] and extension['options']['wrapper'] == 'bento' ) ):
