@@ -212,7 +212,7 @@ final class AfterActivationSiteScan implements Conditional, Delayed, HasRequirem
 	 */
 	protected function get_amp_compatible_themes_url() {
 		if ( current_user_can( 'switch_themes' ) ) {
-			return admin_url( '/theme-install.php?tab=amp-compatible' );
+			return admin_url( '/theme-install.php?browse=amp-compatible' );
 		}
 
 		return 'https://amp-wp.org/ecosystem/themes/';
