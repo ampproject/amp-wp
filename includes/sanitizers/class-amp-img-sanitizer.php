@@ -221,7 +221,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				// Skip directly copying new web platform attributes from img to amp-img which are largely handled by AMP already.
-				case Attribute::IMPORTANCE: // Not supported by AMP.
 				case Attribute::INTRINSICSIZE: // Responsive images handled by amp-img directly.
 					break;
 
