@@ -773,7 +773,6 @@ class Test_AMP_Theme_Support extends TestCase {
 	 */
 	public function test_add_hooks() {
 		AMP_Theme_Support::add_hooks();
-		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
 
 		$this->assertEquals( 10, has_filter( 'wp_resource_hints', [ self::TESTED_CLASS, 'filter_resource_hints_to_remove_emoji_dns_prefetch' ] ) );
 		$this->assertFalse( has_action( 'wp_head', 'print_emoji_detection_script' ) );
@@ -1660,7 +1659,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertStringContainsString( '<amp-img src="test.png"', $output );
 		$this->assertStringContainsString( '<style amp-custom-partial="">', $output );
 		$this->assertStringContainsString( 'amp-img{background:blue}', $output );
-		$this->assertStringContainsString( ':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-b123f72{border:solid 1px red}', $output );
+		$this->assertStringContainsString( '.amp-wp-b123f72:not(#_#_#_#_#_){border:solid 1px red}', $output );
 		$this->assertStringEndsWith( '/*# sourceURL=amp-custom-partial.css */</style>', $output );
 		$this->assertStringNotContainsString( '<script', $output );
 		$this->assertStringNotContainsString( '<html', $output );

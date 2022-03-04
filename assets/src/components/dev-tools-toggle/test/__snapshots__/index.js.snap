@@ -48,8 +48,25 @@ exports[`DevToolsToggle matches snapshot for the loading state 1`] = `
 <div
   className="amp-spinner-container"
 >
-  <span
-    className="components-spinner css-pz2hpy-StyledSpinner e1s472tg0"
-  />
+  <svg
+    className="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+    focusable="false"
+    role="presentation"
+    viewBox="0 0 100 100"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      className="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+      cx="50"
+      cy="50"
+      r="50"
+      vectorEffect="non-scaling-stroke"
+    />
+    <path
+      className="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+      d="m 50 0 a 50 50 0 0 1 50 50"
+      vectorEffect="non-scaling-stroke"
+    />
+  </svg>
 </div>
 `;

@@ -28,6 +28,9 @@ import imp
 
 seen_spec_names = set()
 
+# Note: This is a temporary measure while waiting for resolution of <https://github.com/ampproject/amphtml/issues/36749#issuecomment-996160595>.
+latest_extensions_file_path = os.path.join( os.path.realpath( os.path.dirname(__file__) ), 'latest-extension-versions.json' )
+
 def Die(msg):
 	print >> sys.stderr, msg
 	sys.exit(1)
@@ -451,23 +454,35 @@ def ParseRules(repo_directory, out_dir):
 			tag['tag_spec']['requires_extension'] = requires_extension_versions
 
 	extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.extensions.json' ) ) )
+	bento_extensions = json.load( open( os.path.join( repo_directory, 'build-system/compile/bundles.config.bento.json' ) ) )
+
+	latest_versions = json.load( open( latest_extensions_file_path ) )
 	extensions_versions = dict()
-	for extension in extensions:
-		if extension['name'] not in extensions_versions:
-			extensions_versions[ extension['name'] ] = {
+	for extension in extensions + bento_extensions:
+		if '-impl' in extension['name'] or '-polyfill' in extension['name']:
+			continue
+
+		name = extension['name']
+		is_bento = name.startswith( 'bento-' )
+		if is_bento:
+			name = name.replace( 'bento-', 'amp-' )
+
+		if name not in extensions_versions:
+			extensions_versions[ name ] = {
 				'versions': [],
 				'latest': None,
 			}
 
 		if type(extension['version']) == list:
-			extensions_versions[ extension['name'] ]['versions'].extend( extension['version'] )
+			extensions_versions[ name ]['versions'].extend( extension['version'] )
 		else:
-			extensions_versions[ extension['name'] ]['versions'].append( extension['version'] )
-		if extensions_versions[ extension['name'] ]['latest'] is not None and extensions_versions[ extension['name'] ]['latest'] != extension['latestVersion']:
-			logging.info('Warning: latestVersion mismatch for ' + extension['name'])
-		extensions_versions[ extension['name'] ]['latest'] = extension['latestVersion']
-		if 'options' in extension and ( ( 'bento' in extension['options'] and extension['options']['bento'] ) or ( 'wrapper' in extension['options'] and extension['options']['wrapper'] == 'bento' ) ):
-			extensions_versions[ extension['name'] ]['bento'] = {
+			extensions_versions[ name ]['versions'].append( extension['version'] )
+		if name not in latest_versions:
+			raise Exception( 'There is no latest version for ' + name + ' so please add it to bin/latest-extension-version.json' )
+		extensions_versions[ name ]['latest'] = latest_versions[ name ]
+
+		if is_bento or ( 'options' in extension and ( ( 'bento' in extension['options'] and extension['options']['bento'] ) or ( 'wrapper' in extension['options'] and extension['options']['wrapper'] == 'bento' ) ) ):
+			extensions_versions[ name ]['bento'] = {
 				'version': extension['version'],
 				'has_css': extension['options'].get( 'hasCss', False ),
 			}

@@ -72,7 +72,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<span style="color: #00ff00;">This is green.</span>',
 				'<span data-amp-original-style="color: #00ff00;" class="amp-wp-bb01159">This is green.</span>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-bb01159{color:#0f0}',
+					'.amp-wp-bb01159:not(#_#_#_#_#_){color:#0f0}',
 				],
 			],
 
@@ -86,7 +86,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<span style="color  :   #00ff00">This is green.</span>',
 				'<span data-amp-original-style="color  :   #00ff00" class="amp-wp-0837823">This is green.</span>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-0837823{color:#0f0}',
+					'.amp-wp-0837823:not(#_#_#_#_#_){color:#0f0}',
 				],
 			],
 
@@ -94,7 +94,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<span style="color: #00ff00; background-color: #000;">This is green.</span>',
 				'<span data-amp-original-style="color: #00ff00; background-color: #000;" class="amp-wp-be0c539">This is green.</span>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-be0c539{color:#0f0;background-color:#000}',
+					'.amp-wp-be0c539:not(#_#_#_#_#_){color:#0f0;background-color:#000}',
 				],
 			],
 
@@ -102,7 +102,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<span style="display: none;">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
 				'<span data-amp-original-style="display: none;" class="amp-wp-224b51a">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-224b51a{display:none}',
+					'.amp-wp-224b51a:not(#_#_#_#_#_){display:none}',
 				],
 			],
 
@@ -110,7 +110,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<span style="padding:1px; margin: 2px !important; outline: 3px;">!important is converted.</span>',
 				'<span data-amp-original-style="padding:1px; margin: 2px !important; outline: 3px;" class="amp-wp-6a75598">!important is converted.</span>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-6a75598{padding:1px;outline:3px}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-6a75598{margin:2px}',
+					'.amp-wp-6a75598:not(#_#_#_#_#_){padding:1px;outline:3px}.amp-wp-6a75598:not(#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_){margin:2px}',
 				],
 			],
 
@@ -118,7 +118,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<span style="color: red  !  important;">!important is converted.</span>',
 				'<span data-amp-original-style="color: red  !  important;" class="amp-wp-952600b">!important is converted.</span>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-952600b{color:red}',
+					'.amp-wp-952600b:not(#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_){color:red}',
 				],
 			],
 
@@ -126,7 +126,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<span style="color: red !important; background: blue!important;">!important is converted.</span>',
 				'<span data-amp-original-style="color: red !important; background: blue!important;" class="amp-wp-1e2bfaa">!important is converted.</span>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-1e2bfaa{color:red;background:blue}',
+					'.amp-wp-1e2bfaa:not(#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_){color:red;background:blue}',
 				],
 			],
 
@@ -134,8 +134,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<header id="header" style="display: none;"><h1>This is the header.</h1></header><style>#header { display: block !important;width: 100%;background: #fff; }',
 				'<header id="header" data-amp-original-style="display: none;" class="amp-wp-224b51a"><h1>This is the header.</h1></header>',
 				[
-					'#header{width:100%;background:#fff}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #header{display:block}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-224b51a{display:none}',
+					'#header{width:100%;background:#fff}#header:not(#_#_#_#_#_#_#_){display:block}',
+					'.amp-wp-224b51a:not(#_#_#_#_#_){display:none}',
 				],
 			],
 
@@ -143,8 +143,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<span style="color: #00ff00;"><span style="color: #ff0000;">This is red.</span></span>',
 				'<span data-amp-original-style="color: #00ff00;" class="amp-wp-bb01159"><span data-amp-original-style="color: #ff0000;" class="amp-wp-cc68ddc">This is red.</span></span>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-bb01159{color:#0f0}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cc68ddc{color:#f00}',
+					'.amp-wp-bb01159:not(#_#_#_#_#_){color:#0f0}',
+					'.amp-wp-cc68ddc:not(#_#_#_#_#_){color:#f00}',
 				],
 			],
 
@@ -152,7 +152,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<figure class="alignleft" style="background: #000"></figure>',
 				'<figure class="alignleft amp-wp-2864855" data-amp-original-style="background: #000"></figure>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-2864855{background:#000}',
+					'.amp-wp-2864855:not(#_#_#_#_#_){background:#000}',
 				],
 			],
 
@@ -160,7 +160,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<style>div > span { font-weight:bold !important; font-style: italic; } @media screen and ( max-width: 640px ) { div > span { font-weight:normal !important; font-style: normal; } }</style><div><span>bold!</span></div>',
 				'<div><span>bold!</span></div>',
 				[
-					'div > span{font-style:italic}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) div > span{font-weight:bold}@media screen and ( max-width: 640px ){div > span{font-style:normal}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) div > span{font-weight:normal}}',
+					'div > span{font-style:italic}div > span:not(#_#_#_#_#_#_#_#_){font-weight:bold}@media screen and ( max-width: 640px ){div > span{font-style:normal}div > span:not(#_#_#_#_#_#_#_#_){font-weight:normal}}',
 				],
 			],
 
@@ -178,7 +178,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<span style="color:brown; @media screen { color:green }">invalid @-rule omitted.</span>',
 				'<span data-amp-original-style="color:brown; @media screen { color:green }" class="amp-wp-481af57">invalid @-rule omitted.</span>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-481af57{color:brown}',
+					'.amp-wp-481af57:not(#_#_#_#_#_){color:brown}',
 				],
 				[],
 			],
@@ -247,9 +247,9 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<style>#child {color:red !important} #parent #child {color:pink !important} .foo { color:blue !important; } #me .foo { color: green !important; }</style><div id="parent"><span id="child" class="foo bar baz">one</span><span style="color: yellow;">two</span><span style="color: purple !important;">three</span></div><div id="me"><span class="foo"></span></div>',
 				'<div id="parent"><span id="child" class="foo bar baz">one</span><span data-amp-original-style="color: yellow;" class="amp-wp-64b4fd4">two</span><span data-amp-original-style="color: purple !important;" class="amp-wp-ab79d9e">three</span></div><div id="me"><span class="foo"></span></div>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #child{color:red}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #parent #child{color:pink}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo{color:blue}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #me .foo{color:green}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-64b4fd4{color:yellow}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-ab79d9e{color:purple}',
+					'#child:not(#_#_#_#_#_#_#_){color:red}#parent #child:not(#_#_#_#_#_#_#_#_){color:pink}.foo:not(#_#_#_#_#_#_#_){color:blue}#me .foo:not(#_#_#_#_#_#_#_#_){color:green}',
+					'.amp-wp-64b4fd4:not(#_#_#_#_#_){color:yellow}',
+					'.amp-wp-ab79d9e:not(#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_){color:purple}',
 				],
 			],
 
@@ -265,7 +265,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<table><colgroup><col width="253"/></colgroup></table>',
 				'<table><colgroup><col data-amp-original-style="width: 253px" class="amp-wp-cbcb5c2"></colgroup></table>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cbcb5c2{width:253px}',
+					'.amp-wp-cbcb5c2:not(#_#_#_#_#_){width:253px}',
 				],
 			],
 
@@ -273,7 +273,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<table><colgroup><col width="50%"/></colgroup></table>',
 				'<table><colgroup><col data-amp-original-style="width: 50%" class="amp-wp-cd7753e"></colgroup></table>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cd7753e{width:50%}',
+					'.amp-wp-cd7753e:not(#_#_#_#_#_){width:50%}',
 				],
 			],
 
@@ -288,7 +288,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'<table><colgroup><col width="50" style="background-color: red; width: 60px"/></colgroup></table>',
 				'<table><colgroup><col data-amp-original-style="width: 50px;background-color: red; width: 60px" class="amp-wp-c8aa9e9"></colgroup></table>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c8aa9e9{width:50px;width:60px;background-color:red}',
+					'.amp-wp-c8aa9e9:not(#_#_#_#_#_){width:50px;width:60px;background-color:red}',
 				],
 			],
 
@@ -352,8 +352,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				',
 				[
 					'.custom-population{color:red}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-f2a1aff{color:blue}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-d4ea4c7{outline:solid 1px black}',
+					'.amp-wp-f2a1aff:not(#_#_#_#_#_){color:blue}',
+					'.amp-wp-d4ea4c7:not(#_#_#_#_#_){outline:solid 1px black}',
 				],
 			],
 			'with_mustache_template_script' => [
@@ -386,8 +386,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				',
 				[
 					'.custom-population{color:red}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-f2a1aff{color:blue}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-d4ea4c7{outline:solid 1px black}',
+					'.amp-wp-f2a1aff:not(#_#_#_#_#_){color:blue}',
+					'.amp-wp-d4ea4c7:not(#_#_#_#_#_){outline:solid 1px black}',
 				],
 			],
 			'with_internal_amp_selectors_and_class_names' => [
@@ -452,7 +452,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
 					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
 					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
-					AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR,
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 				],
@@ -531,9 +531,9 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			'multiple_amp_custom_and_other_styles' => [
 				'<html amp><head><meta charset="utf-8"><style amp-custom>b {color:red !important}</style><style amp-custom>i {color:blue}</style><style type="text/css">u {color:green; text-decoration: underline !important}</style></head><body><style>s {color:yellow} /* So !important! */</style><b>1</b><i>i</i><u>u</u><s>s</s></body></html>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) b{color:red}',
+					'b:not(#_#_#_#_#_#_#_#_){color:red}',
 					'i{color:blue}',
-					'u{color:green}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) u{text-decoration:underline}',
+					'u{color:green}u:not(#_#_#_#_#_#_#_#_){text-decoration:underline}',
 					's{color:yellow}',
 				],
 				[],
@@ -547,7 +547,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 					'strong.before-dashicon',
 					'.dashicons-dashboard:before',
 					'strong.after-dashicon',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) s{color:yellow}',
+					's:not(#_#_#_#_#_#_#_#_){color:yellow}',
 				],
 				[],
 			],
@@ -575,8 +575,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 			'style_on_root_element' => [
 				'<html amp style="color:red;"><head><meta charset="utf-8"><style amp-custom>html { background-color: blue !important; }</style></head><body>Hi</body></html>',
 				[
-					'html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_){background-color:blue}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-10b06ba{color:red}',
+					'html:not(#_#_#_#_#_#_#_#_){background-color:blue}',
+					'.amp-wp-10b06ba:not(#_#_#_#_#_){color:red}',
 				],
 				[],
 			],
@@ -1099,10 +1099,10 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				true, // should_sanitize
 				$html,
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo{color:red}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo[data-amp-original-style*="blue"]{outline:solid 2px green}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-9605c4d{background:blue}',
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-32bb249{background:red}',
+					'.foo:not(#_#_#_#_#_#_#_){color:red}',
+					'.foo[data-amp-original-style*="blue"]:not(#_#_#_#_#_#_#_){outline:solid 2px green}',
+					'.amp-wp-9605c4d:not(#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_){background:blue}',
+					'.amp-wp-32bb249:not(#_#_#_#_#_){background:red}',
 				],
 				'<style amp-custom>',
 				'
@@ -2127,6 +2127,67 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				'',
 			],
 			$actual_stylesheets
+		);
+	}
+
+	/** @return array */
+	public function get_data_to_test_dark_mode_classes() {
+		return [
+			'default' => [
+				null,
+				[
+					'body.amp-dark-mode{background:black}',
+					'',
+				],
+			],
+			'custom'  => [
+				'is-dark-theme',
+				[
+					'',
+					'body.is-dark-theme{background:black}',
+				],
+			],
+		];
+	}
+
+	/**
+	 * Test that dark mode classes are not stripped out.
+	 *
+	 * @dataProvider get_data_to_test_dark_mode_classes
+	 *
+	 * @covers AMP_Style_Sanitizer::get_used_class_names()
+	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_group()
+	 *
+	 * @param null|string $dark_mode_class
+	 * @param string[]    $expected_stylesheets
+	 */
+	public function test_dark_mode_classes( $dark_mode_class, $expected_stylesheets ) {
+		ob_start();
+		?>
+		<html amp>
+		<head>
+			<meta charset="utf-8">
+			<style>body.amp-dark-mode { background:black; }</style>
+			<style>body.is-dark-theme { background:black; }</style>
+		</head>
+		<body
+			<?php if ( $dark_mode_class ) : ?>
+				data-prefers-dark-mode-class="<?php echo esc_attr( $dark_mode_class ); ?>"
+			<?php endif; ?>
+		>
+		</body>
+		</html>
+		<?php
+		$dom = Document::fromHtml( ob_get_clean(), Options::DEFAULTS );
+
+		$sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			[ 'use_document_element' => true ]
+		);
+		$sanitizer->sanitize();
+		$this->assertEquals(
+			$expected_stylesheets,
+			array_values( $sanitizer->get_stylesheets() )
 		);
 	}
 
