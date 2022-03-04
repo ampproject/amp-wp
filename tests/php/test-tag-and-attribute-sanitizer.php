@@ -958,6 +958,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				      <input type="submit"
 				        value="Subscribe">
 				    </fieldset>
+				    <input type="image" name="img" src="https://example.com/image.png" width="10" height="30">
 				  </form>
 				',
 				null,
@@ -2778,7 +2779,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 						<ul>
 							<li>
 								<span role="button">Image</span>
-								<div role="dialog">
+								<div role="dialog" aria-modal="true" id="unique_id">
 									<amp-img
 											src="/static/inline-examples/images/image1.jpg"
 											width="300"

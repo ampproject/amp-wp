@@ -148,7 +148,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 			'image_with_new_platform_attributes'       => [
 				'<img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy">',
-				'<amp-img src="https://placehold.it/150x300" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy"></noscript></amp-img>',
+				'<amp-img src="https://placehold.it/150x300" width="150" height="300" importance="low" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy"></noscript></amp-img>',
 				[
 					'add_noscript_fallback' => true,
 				],
