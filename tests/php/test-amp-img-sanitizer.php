@@ -530,7 +530,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 					<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400" width="1210" height="400" data-px-verified-tag data-px-verified-attrs="width height">
 					<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400" width="991" height="400" data-px-verified-tag data-px-verified-attrs="width height">
 					<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400" width="768" height="400" data-px-verified-tag data-px-verified-attrs="width height">
-					<amp-img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" data-px-verified-tag="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder"></noscript></amp-img>
+					<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" data-px-verified-tag>
 				</picture>
 				',
 				[
@@ -757,17 +757,17 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 			<div>
 				<picture>
 					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
-					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" width="298" height="332">
 				</picture>
 				<picture>
 					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
-					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" width="240" height="200">
 				</picture>
 			</div>
 			<div>
 				<picture>
 					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
-					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
 				</picture>
 			</div>
 		';
@@ -780,11 +780,11 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				],
 				'expected' => '
 					<div>
-						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="">
-						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" width="298" height="332">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" width="240" height="200">
 					</div>
 					<div>
-						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
 					</div>
 				',
 			],
@@ -797,17 +797,17 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 					<div>
 						<picture data-px-verified-tag>
 							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
-							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" width="298" height="332" data-px-verified-tag>
 						</picture>
 						<picture data-px-verified-tag>
 							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
-							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" width="240" height="200" data-px-verified-tag>
 						</picture>
 					</div>
 					<div>
 						<picture data-px-verified-tag>
 							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
-							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332" data-px-verified-tag>
 						</picture>
 					</div>
 				',
@@ -868,6 +868,6 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		$this->assertEqualMarkup( $expected, $actual );
+		$this->assertEqualMarkup( $expected, $actual, "Actual content:\n$actual" );
 	}
 }
