@@ -704,16 +704,30 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 	/**
 	 * Data provider for $this->test_process_picture_elements()
+	 *
+	 * @return array
 	 */
 	public function get_data_for_process_picture_elements() {
 
-		$content = '<div>
-	<picture><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt=""></picture>
-	<picture><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt=""></picture>
-</div>
-<div>
-	<picture><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt=""></picture>
-</div>';
+		$content = '
+			<div>
+				<picture>
+					<div class="screen-reader-text"></div>
+					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="">
+				</picture>
+				<picture>
+					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="">
+				</picture>
+			</div>
+			<div>
+				<picture>
+					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+				</picture>
+			</div>
+		';
 
 		return [
 			'allow_picture_false'                     => [
@@ -721,26 +735,40 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				'args'     => [
 					'allow_picture' => false,
 				],
-				'expected' => '<div>
-	<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="">
-	<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="">
-</div>
-<div>
-	<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
-</div>',
+				'expected' => '
+					<div>
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="">
+					</div>
+					<div>
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+					</div>
+				',
 			],
 			'allow_picture_true'                      => [
 				'input'    => $content,
 				'args'     => [
 					'allow_picture' => true,
 				],
-				'expected' => '<div>
-	<picture data-px-verified-tag><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" data-px-verified-tag></picture>
-	<picture data-px-verified-tag><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" data-px-verified-tag></picture>
-</div>
-<div>
-	<picture data-px-verified-tag><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag><img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" data-px-verified-tag></picture>
-</div>',
+				'expected' => '
+					<div>
+						<picture data-px-verified-tag>
+							<div class="screen-reader-text"></div>
+							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" data-px-verified-tag>
+						</picture>
+						<picture data-px-verified-tag>
+							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" data-px-verified-tag>
+						</picture>
+					</div>
+					<div>
+						<picture data-px-verified-tag>
+							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" data-px-verified-tag>
+						</picture>
+					</div>
+				',
 			],
 			'without_picture_element'                 => [
 				'input'    => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
@@ -750,18 +778,38 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				'expected' => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
 			],
 			'picture_without_img_allow_picture_false' => [
-				'input'    => '<picture><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"></picture>',
+				'input'    => '
+					<picture>
+						<div class="screen-reader-text"></div>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					</picture>
+				',
 				'args'     => [
 					'allow_picture' => false,
 				],
-				'expected' => '<picture><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"></picture>',
+				'expected' => '
+					<picture>
+						<div class="screen-reader-text"></div>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					</picture>
+				',
 			],
 			'picture_without_img_allow_picture_true'  => [
-				'input'    => '<picture><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"></picture>',
+				'input'    => '
+					<picture>
+						<div class="screen-reader-text"></div>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					</picture>
+				',
 				'args'     => [
 					'allow_picture' => true,
 				],
-				'expected' => '<picture><div class="screen-reader-text"></div><source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)"></picture>',
+				'expected' => '
+					<picture>
+						<div class="screen-reader-text"></div>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					</picture>
+				',
 			],
 		];
 	}
