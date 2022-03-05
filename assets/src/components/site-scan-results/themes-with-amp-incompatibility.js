@@ -36,10 +36,26 @@ export function ThemesWithAmpIncompatibility( {
 	...props
 } ) {
 	const themesData = useNormalizedThemesData();
-	const sources = useMemo( () => slugs?.map( ( slug ) => themesData?.[ slug ] ?? {
-		slug,
-		status: 'uninstalled',
-	} ) || [], [ slugs, themesData ] );
+	const sources = useMemo(
+		() => slugs?.map( ( slug ) => {
+			const currentThemeData = themesData?.[ slug ];
+
+			if ( ! currentThemeData ) {
+				return {
+					slug,
+					status: 'uninstalled',
+				};
+			}
+
+			const isCurrentThemeParent = themesData?.[ currentThemeData?.child ]?.status === 'active';
+
+			return {
+				...currentThemeData,
+				status: isCurrentThemeParent ? 'active' : currentThemeData.status,
+			};
+		} ),
+		[ slugs, themesData ],
+	);
 
 	return (
 		<SiteScanResults
