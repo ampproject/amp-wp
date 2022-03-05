@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
 use AmpProject\Dom\Element;
 use AmpProject\Html\Attribute;
