@@ -17,7 +17,7 @@ import {
 } from '../../components/amp-admin-notice';
 import { Loading } from '../../components/loading';
 import { PluginsWithAmpIncompatibility } from './plugins-with-amp-incompatibility';
-import { ThemeWithAmpIncompatibility } from './theme-with-amp-incompatibility';
+import { ThemesWithAmpIncompatibility } from './themes-with-amp-incompatibility';
 
 export function SiteScanNotice() {
 	const {
@@ -64,7 +64,7 @@ export function SiteScanNotice() {
 	if ( isCompleted ) {
 		let elements = [
 			pluginsWithAmpIncompatibility.length > 0 ? <PluginsWithAmpIncompatibility pluginsWithAmpIncompatibility={ pluginsWithAmpIncompatibility } /> : null,
-			themesWithAmpIncompatibility.length > 0 ? <ThemeWithAmpIncompatibility themeWithAmpIncompatibility={ themesWithAmpIncompatibility[ 0 ] } /> : null,
+			themesWithAmpIncompatibility.length > 0 ? <ThemesWithAmpIncompatibility themesWithAmpIncompatibility={ themesWithAmpIncompatibility } /> : null,
 		];
 
 		// Display the theme information at the top when on the `themes.php` screen.

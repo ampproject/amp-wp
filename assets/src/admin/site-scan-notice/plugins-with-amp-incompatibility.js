@@ -7,7 +7,7 @@ import { AMP_COMPATIBLE_PLUGINS_URL, SETTINGS_LINK } from 'amp-site-scan-notice'
 /**
  * WordPress dependencies
  */
-import { useContext } from '@wordpress/element';
+import { useContext, useMemo } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 /**
@@ -30,16 +30,17 @@ PLUGIN_SUPPRESSION_LINK.hash = 'plugin-suppression';
 export function PluginsWithAmpIncompatibility( { pluginsWithAmpIncompatibility } ) {
 	const { fetchingPlugins, plugins } = useContext( Plugins );
 
+	const pluginNames = useMemo(
+		() => plugins?.reduce( ( accumulatedPluginNames, plugin ) => ( {
+			...accumulatedPluginNames,
+			[ getPluginSlugFromFile( plugin.plugin ) ]: plugin.name,
+		} ), {} ),
+		[ plugins ],
+	);
+
 	if ( fetchingPlugins ) {
 		return null;
 	}
-
-	const pluginNames = Object.values( plugins ).reduce( ( accumulatedPluginNames, plugin ) => {
-		return {
-			...accumulatedPluginNames,
-			[ getPluginSlugFromFile( plugin.plugin ) ]: plugin.name,
-		};
-	}, {} );
 
 	return (
 		<>
@@ -54,10 +55,10 @@ export function PluginsWithAmpIncompatibility( { pluginsWithAmpIncompatibility }
 			{ pluginsWithAmpIncompatibility.map( ( pluginWithAmpIncompatibility ) => (
 				<details
 					key={ pluginWithAmpIncompatibility.slug }
-					className="amp-site-scan-notice__plugin-details"
+					className="amp-site-scan-notice__source-details"
 				>
 					<summary
-						className="amp-site-scan-notice__plugin-summary"
+						className="amp-site-scan-notice__source-summary"
 						dangerouslySetInnerHTML={ {
 							__html: sprintf(
 								/* translators: 1: plugin name; 2: number of URLs with AMP validation issues. */
