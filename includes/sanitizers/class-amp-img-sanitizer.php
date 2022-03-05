@@ -91,36 +91,25 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected function process_picture_elements() {
 
-		$nodes = $this->dom->xpath->query( '//picture//img' );
-
-		if ( 0 === $nodes->length ) {
+		$picture_img_query = $this->dom->xpath->query( '//picture/img' );
+		if ( 0 === $picture_img_query->length ) {
 			return;
 		}
 
-		$picture_nodes = $this->dom->getElementsByTagName( Tag::PICTURE );
-		$num_nodes     = $nodes->length;
-
-		for ( $index = $num_nodes - 1; $index >= 0; $index-- ) {
-
-			/** @var Element $picture_node */
-			$picture_node = $picture_nodes->item( $index );
+		/** @var Element $img_element */
+		foreach ( $picture_img_query as $img_element ) {
+			/** @var Element $picture_element */
+			$picture_element = $img_element->parentNode;
 
 			if ( true === $this->args['allow_picture'] ) {
-				ValidationExemption::mark_node_as_px_verified( $picture_node );
-
-				$child_nodes = $this->dom->xpath->query( './source | ./img', $picture_node );
-
-				foreach ( $child_nodes as $child_node ) {
-					ValidationExemption::mark_node_as_px_verified( $child_node );
+				ValidationExemption::mark_node_as_px_verified( $img_element );
+				ValidationExemption::mark_node_as_px_verified( $picture_element );
+				foreach ( $picture_element->getElementsByTagName( Tag::SOURCE ) as $source_element ) {
+					ValidationExemption::mark_node_as_px_verified( $source_element );
 				}
 			} else {
-				/** @var Element $image_node */
-				$image_node = $picture_node->getElementsByTagName( Tag::IMG )->item( 0 );
-
-				if ( $image_node instanceof Element ) {
-					$image_node->parentNode->removeChild( $image_node );
-					$picture_node->parentNode->replaceChild( $image_node, $picture_node );
-				}
+				$picture_element->removeChild( $img_element );
+				$picture_element->parentNode->replaceChild( $img_element, $picture_element );
 			}
 		}
 	}
