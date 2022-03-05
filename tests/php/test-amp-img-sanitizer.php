@@ -71,6 +71,18 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * @return array
 	 */
 	public function get_data() {
+		// Note: The width & height attributes on <source> are new. See <https://github.com/whatwg/html/pull/5894>.
+		$picture_source = '
+			<picture>
+				<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400" width="1920" height="400">
+				<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400" width="1600" height="400">
+				<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400" width="1210" height="400">
+				<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400" width="991" height="400">
+				<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400" width="768" height="400">
+				<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder">
+			</picture>
+		';
+
 		return [
 			'no_images'                                => [
 				'<p>Lorem Ipsum Demet Delorit.</p>',
@@ -494,6 +506,38 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				',
 				null, // No Change.
 			],
+
+			'picture_default_args'                     => [
+				$picture_source,
+				'<amp-img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder"></noscript></amp-img>',
+				[],
+			],
+
+			'picture_but_native_img_used'              => [
+				$picture_source,
+				'<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" decoding="async" class="amp-wp-enforced-sizes">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'picture_allowed_but_not_native_img'       => [
+				$picture_source,
+				'
+				<picture data-px-verified-tag>
+					<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400" width="1920" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400" width="1600" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400" width="1210" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400" width="991" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400" width="768" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<amp-img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" data-px-verified-tag="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder"></noscript></amp-img>
+				</picture>
+				',
+				[
+					'allow_picture' => true,
+				],
+			],
+
 		];
 	}
 
@@ -551,7 +595,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$this->assertEqualSets( $error_codes, $expected_error_codes );
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$this->assertEquals( $expected, $content );
+		$this->assertEqualMarkup( $expected, $content, "Actual content:\n$content" );
 	}
 
 	/**

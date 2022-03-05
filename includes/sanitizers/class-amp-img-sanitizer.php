@@ -106,6 +106,14 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				ValidationExemption::mark_node_as_px_verified( $picture_element );
 				foreach ( $picture_element->getElementsByTagName( Tag::SOURCE ) as $source_element ) {
 					ValidationExemption::mark_node_as_px_verified( $source_element );
+
+					// Mark width/height attributes as PX-verified as well since they aren't known yet in the validator. See <https://github.com/whatwg/html/pull/5894>.
+					foreach ( [ Attribute::WIDTH, Attribute::HEIGHT ] as $dimension_attr ) {
+						$attr_node = $source_element->getAttributeNode( $dimension_attr );
+						if ( $attr_node instanceof DOMAttr ) {
+							ValidationExemption::mark_node_as_px_verified( $attr_node );
+						}
+					}
 				}
 			} else {
 				$picture_element->removeChild( $img_element );
