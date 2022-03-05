@@ -103,7 +103,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$picture_element = $img_element->parentNode;
 
 			if ( true === $this->args['allow_picture'] ) {
-				ValidationExemption::mark_node_as_px_verified( $img_element );
 				ValidationExemption::mark_node_as_px_verified( $picture_element );
 				foreach ( $picture_element->getElementsByTagName( Tag::SOURCE ) as $source_element ) {
 					ValidationExemption::mark_node_as_px_verified( $source_element );
@@ -164,15 +163,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$node->parentNode instanceof Element
 					&&
 					(
-						Tag::PICTURE === $node->parentNode->tagName
-						||
-						(
-							Tag::A === $node->parentNode->tagName
-							&&
-							$node->parentNode->parentNode instanceof Element
-							&&
-							Extension::STORY_PLAYER === $node->parentNode->parentNode->tagName
-						)
+						Tag::A === $node->parentNode->tagName
+						&&
+						$node->parentNode->parentNode instanceof Element
+						&&
+						Extension::STORY_PLAYER === $node->parentNode->parentNode->tagName
 					)
 				)
 			) {
@@ -376,7 +371,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param Element $node The img element to adjust and replace.
 	 */
 	private function adjust_and_replace_node( Element $node ) {
-		if ( $this->args['native_img_used'] ) {
+		if ( $this->args['native_img_used'] || ( $node->parentNode instanceof Element && Tag::PICTURE === $node->parentNode->tagName ) ) {
 			$attributes = $this->maybe_add_lightbox_attributes( [], $node ); // @todo AMP doesn't support lightbox on <img> yet.
 
 			// Set decoding=async by default. See <https://core.trac.wordpress.org/ticket/53232>.

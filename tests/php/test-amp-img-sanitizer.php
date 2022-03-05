@@ -530,14 +530,32 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 					<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400" width="1210" height="400" data-px-verified-tag data-px-verified-attrs="width height">
 					<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400" width="991" height="400" data-px-verified-tag data-px-verified-attrs="width height">
 					<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400" width="768" height="400" data-px-verified-tag data-px-verified-attrs="width height">
-					<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" data-px-verified-tag>
+					<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" decoding="async" class="amp-wp-enforced-sizes">
 				</picture>
 				',
 				[
-					'allow_picture' => true,
+					'allow_picture'   => true,
+					'native_img_used' => false,
 				],
 			],
 
+			'picture_allowed_and_native_img_used'      => [
+				$picture_source,
+				'
+				<picture data-px-verified-tag>
+					<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400" width="1920" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400" width="1600" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400" width="1210" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400" width="991" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400" width="768" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" decoding="async" class="amp-wp-enforced-sizes">
+				</picture>
+				',
+				[
+					'allow_picture'   => true,
+					'native_img_used' => true,
+				],
+			],
 		];
 	}
 
@@ -797,17 +815,17 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 					<div>
 						<picture data-px-verified-tag>
 							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
-							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" width="298" height="332" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" width="298" height="332">
 						</picture>
 						<picture data-px-verified-tag>
 							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
-							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" width="240" height="200" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" width="240" height="200">
 						</picture>
 					</div>
 					<div>
 						<picture data-px-verified-tag>
 							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
-							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
 						</picture>
 					</div>
 				',
@@ -823,21 +841,21 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				'input'    => '
 					<picture>
 						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
-						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" data-px-verified-tag>
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
 					</picture>
 				',
 				'args'     => [
 					'allow_picture' => false,
 				],
 				'expected' => '
-					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" data-px-verified-tag>
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
 				',
 			],
 			'picture_without_img_allow_picture_true'  => [
 				'input'    => '
 					<picture>
 						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
-						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" data-px-verified-tag>
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
 					</picture>
 				',
 				'args'     => [
@@ -846,7 +864,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				'expected' => '
 					<picture data-px-verified-tag>
 						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
-						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" data-px-verified-tag>
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
 					</picture>
 				',
 			],
