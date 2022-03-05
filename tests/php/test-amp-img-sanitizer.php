@@ -712,7 +712,6 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$content = '
 			<div>
 				<picture>
-					<div class="screen-reader-text"></div>
 					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
 					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="">
 				</picture>
@@ -753,7 +752,6 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				'expected' => '
 					<div>
 						<picture data-px-verified-tag>
-							<div class="screen-reader-text"></div>
 							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
 							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" data-px-verified-tag>
 						</picture>
@@ -780,7 +778,6 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 			'picture_without_img_allow_picture_false' => [
 				'input'    => '
 					<picture>
-						<div class="screen-reader-text"></div>
 						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
 					</picture>
 				',
@@ -789,7 +786,6 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				],
 				'expected' => '
 					<picture>
-						<div class="screen-reader-text"></div>
 						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
 					</picture>
 				',
@@ -797,7 +793,6 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 			'picture_without_img_allow_picture_true'  => [
 				'input'    => '
 					<picture>
-						<div class="screen-reader-text"></div>
 						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
 					</picture>
 				',
@@ -806,7 +801,6 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				],
 				'expected' => '
 					<picture>
-						<div class="screen-reader-text"></div>
 						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
 					</picture>
 				',
