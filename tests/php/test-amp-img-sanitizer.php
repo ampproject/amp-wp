@@ -556,6 +556,25 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 					'native_img_used' => true,
 				],
 			],
+
+			'allow_picture_but_no_child_img'           => [
+				'
+				<picture>
+					<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400">
+					<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400">
+					<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400">
+					<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400">
+					<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400">
+				</picture>
+				',
+				'',
+				[
+					'allow_picture' => true,
+				],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
+				],
+			],
 		];
 	}
 
@@ -580,7 +599,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected = null, $args = [], $expected_error_codes = [] ) {
-		if ( ! $expected ) {
+		if ( null === $expected ) {
 			$expected = $source;
 		}
 
@@ -865,6 +884,22 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 					<picture data-px-verified-tag>
 						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
 						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+					</picture>
+				',
+			],
+			'picture_but_no_child_img'                => [
+				'input'    => '
+					<picture>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					</picture>
+				',
+				'args'     => [
+					'allow_picture' => true,
+				],
+				// No transformation is done in this case!
+				'expected' => '
+					<picture>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
 					</picture>
 				',
 			],
