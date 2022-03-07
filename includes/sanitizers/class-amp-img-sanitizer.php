@@ -5,7 +5,10 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
+use AmpProject\Extension;
+use AmpProject\Dom\Element;
 use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
 use AmpProject\Layout;
@@ -55,6 +58,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = [
 		'add_noscript_fallback' => true,
 		'native_img_used'       => false,
+		'allow_picture'         => false,
 	];
 
 	/**
@@ -82,11 +86,47 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Convert picture element into image element or mark as px verified.
+	 *
+	 * @return void
+	 */
+	protected function process_picture_elements() {
+
+		$picture_img_query = $this->dom->xpath->query( '//picture/img' );
+
+		/** @var Element $img_element */
+		foreach ( $picture_img_query as $img_element ) {
+			/** @var Element $picture_element */
+			$picture_element = $img_element->parentNode;
+
+			if ( true === $this->args['allow_picture'] ) {
+				ValidationExemption::mark_node_as_px_verified( $picture_element );
+				foreach ( $picture_element->getElementsByTagName( Tag::SOURCE ) as $source_element ) {
+					ValidationExemption::mark_node_as_px_verified( $source_element );
+
+					// Mark width/height attributes as PX-verified as well since they aren't known yet in the validator. See <https://github.com/whatwg/html/pull/5894>.
+					foreach ( [ Attribute::WIDTH, Attribute::HEIGHT ] as $dimension_attr ) {
+						$attr_node = $source_element->getAttributeNode( $dimension_attr );
+						if ( $attr_node instanceof DOMAttr ) {
+							ValidationExemption::mark_node_as_px_verified( $attr_node );
+						}
+					}
+				}
+			} else {
+				$picture_element->removeChild( $img_element );
+				$picture_element->parentNode->replaceChild( $img_element, $picture_element );
+			}
+		}
+	}
+
+	/**
 	 * Sanitize the <img> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 */
 	public function sanitize() {
+
+		$this->process_picture_elements();
 
 		/**
 		 * Node list.
@@ -108,7 +148,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement || DevMode::hasExemptionForNode( $node ) ) {
+			if ( ! $node instanceof Element || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -117,13 +157,15 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				$this->is_inside_amp_noscript( $node )
 				||
 				(
-					$node->parentNode instanceof DOMElement
+					$node->parentNode instanceof Element
 					&&
-					'a' === $node->parentNode->tagName
-					&&
-					$node->parentNode->parentNode instanceof DOMElement
-					&&
-					'amp-story-player' === $node->parentNode->parentNode->tagName
+					(
+						Tag::A === $node->parentNode->tagName
+						&&
+						$node->parentNode->parentNode instanceof Element
+						&&
+						Extension::STORY_PLAYER === $node->parentNode->parentNode->tagName
+					)
 				)
 			) {
 				continue;
@@ -250,7 +292,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * Attempt to determine actual dimensions, otherwise set reasonable defaults.
 	 *
-	 * @param DOMElement[][] $need_dimensions Map <img> @src URLs to node for images with missing dimensions.
+	 * @param Element[][] $need_dimensions Map <img> @src URLs to node for images with missing dimensions.
 	 */
 	private function determine_dimensions( $need_dimensions ) {
 
@@ -258,7 +300,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $dimensions_by_url as $url => $dimensions ) {
 			foreach ( $need_dimensions[ $url ] as $node ) {
-				if ( ! $node instanceof DOMElement ) {
+				if ( ! $node instanceof Element ) {
 					continue;
 				}
 				$class = $node->getAttribute( Attribute::CLASS_ );
@@ -323,10 +365,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param DOMElement $node The img element to adjust and replace.
+	 * @param Element $node The img element to adjust and replace.
 	 */
-	private function adjust_and_replace_node( DOMElement $node ) {
-		if ( $this->args['native_img_used'] ) {
+	private function adjust_and_replace_node( Element $node ) {
+		if ( $this->args['native_img_used'] || ( $node->parentNode instanceof Element && Tag::PICTURE === $node->parentNode->tagName ) ) {
 			$attributes = $this->maybe_add_lightbox_attributes( [], $node ); // @todo AMP doesn't support lightbox on <img> yet.
 
 			// Set decoding=async by default. See <https://core.trac.wordpress.org/ticket/53232>.
@@ -361,7 +403,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			// Use responsive images when a theme supports wide and full-bleed images.
 			if (
 				! empty( $this->args['align_wide_support'] )
-				&& $node->parentNode instanceof DOMElement
+				&& $node->parentNode instanceof Element
 				&& 'figure' === $node->parentNode->nodeName
 				&& preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $node->parentNode->getAttribute( Attribute::CLASS_ ) )
 			) {
@@ -433,7 +475,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function maybe_add_lightbox_attributes( $attributes, $node ) {
 		$parent_node = $node->parentNode;
-		if ( ! ( $parent_node instanceof DOMElement ) || ! ( $parent_node->parentNode instanceof DOMElement ) ) {
+		if ( ! ( $parent_node instanceof Element ) || ! ( $parent_node->parentNode instanceof Element ) ) {
 			return $attributes;
 		}
 
@@ -482,11 +524,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Gets whether a node has the class 'wp-block-image', meaning it is a wrapper for an Image block.
 	 *
-	 * @param DOMElement $node A node to evaluate.
+	 * @param Element $node A node to evaluate.
 	 * @return bool Whether the node has the class 'wp-block-image'.
 	 */
 	private function does_node_have_block_class( $node ) {
-		if ( $node instanceof DOMElement ) {
+		if ( $node instanceof Element ) {
 			$classes = preg_split( '/\s+/', $node->getAttribute( Attribute::CLASS_ ) );
 			if ( in_array( 'wp-block-image', $classes, true ) ) {
 				return true;

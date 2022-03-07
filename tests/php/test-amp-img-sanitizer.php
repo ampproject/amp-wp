@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\Dom\Document;
@@ -17,6 +18,8 @@ use AmpProject\Dom\Document;
 class AMP_Img_Sanitizer_Test extends TestCase {
 
 	use PrivateAccess;
+
+	use MarkupComparison;
 
 	/**
 	 * Set up.
@@ -68,6 +71,18 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * @return array
 	 */
 	public function get_data() {
+		// Note: The width & height attributes on <source> are new. See <https://github.com/whatwg/html/pull/5894>.
+		$picture_source = '
+			<picture>
+				<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400" width="1920" height="400">
+				<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400" width="1600" height="400">
+				<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400" width="1210" height="400">
+				<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400" width="991" height="400">
+				<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400" width="768" height="400">
+				<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder">
+			</picture>
+		';
+
 		return [
 			'no_images'                                => [
 				'<p>Lorem Ipsum Demet Delorit.</p>',
@@ -491,6 +506,75 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				',
 				null, // No Change.
 			],
+
+			'picture_default_args'                     => [
+				$picture_source,
+				'<amp-img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder"></noscript></amp-img>',
+				[],
+			],
+
+			'picture_but_native_img_used'              => [
+				$picture_source,
+				'<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" decoding="async" class="amp-wp-enforced-sizes">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'picture_allowed_but_not_native_img'       => [
+				$picture_source,
+				'
+				<picture data-px-verified-tag>
+					<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400" width="1920" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400" width="1600" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400" width="1210" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400" width="991" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400" width="768" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" decoding="async" class="amp-wp-enforced-sizes">
+				</picture>
+				',
+				[
+					'allow_picture'   => true,
+					'native_img_used' => false,
+				],
+			],
+
+			'picture_allowed_and_native_img_used'      => [
+				$picture_source,
+				'
+				<picture data-px-verified-tag>
+					<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400" width="1920" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400" width="1600" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400" width="1210" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400" width="991" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400" width="768" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" decoding="async" class="amp-wp-enforced-sizes">
+				</picture>
+				',
+				[
+					'allow_picture'   => true,
+					'native_img_used' => true,
+				],
+			],
+
+			'allow_picture_but_no_child_img'           => [
+				'
+				<picture>
+					<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400">
+					<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400">
+					<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400">
+					<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400">
+					<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400">
+				</picture>
+				',
+				'',
+				[
+					'allow_picture' => true,
+				],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
+				],
+			],
 		];
 	}
 
@@ -515,7 +599,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected = null, $args = [], $expected_error_codes = [] ) {
-		if ( ! $expected ) {
+		if ( null === $expected ) {
 			$expected = $source;
 		}
 
@@ -548,7 +632,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$this->assertEqualSets( $error_codes, $expected_error_codes );
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$this->assertEquals( $expected, $content );
+		$this->assertEqualMarkup( $expected, $content, "Actual content:\n$content" );
 	}
 
 	/**
@@ -697,5 +781,146 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				'post_type'      => 'attachment',
 			]
 		);
+	}
+
+	/**
+	 * Data provider for $this->test_process_picture_elements()
+	 *
+	 * @return array
+	 */
+	public function get_data_for_process_picture_elements() {
+
+		$content = '
+			<div>
+				<picture>
+					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" width="298" height="332">
+				</picture>
+				<picture>
+					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" width="240" height="200">
+				</picture>
+			</div>
+			<div>
+				<picture>
+					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
+				</picture>
+			</div>
+		';
+
+		return [
+			'allow_picture_false'                     => [
+				'input'    => $content,
+				'args'     => [
+					'allow_picture' => false,
+				],
+				'expected' => '
+					<div>
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" width="298" height="332">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" width="240" height="200">
+					</div>
+					<div>
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
+					</div>
+				',
+			],
+			'allow_picture_true'                      => [
+				'input'    => $content,
+				'args'     => [
+					'allow_picture' => true,
+				],
+				'expected' => '
+					<div>
+						<picture data-px-verified-tag>
+							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" width="298" height="332">
+						</picture>
+						<picture data-px-verified-tag>
+							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" width="240" height="200">
+						</picture>
+					</div>
+					<div>
+						<picture data-px-verified-tag>
+							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
+						</picture>
+					</div>
+				',
+			],
+			'without_picture_element'                 => [
+				'input'    => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
+				'args'     => [
+					'allow_picture' => true,
+				],
+				'expected' => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
+			],
+			'picture_without_img_allow_picture_false' => [
+				'input'    => '
+					<picture>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+					</picture>
+				',
+				'args'     => [
+					'allow_picture' => false,
+				],
+				'expected' => '
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+				',
+			],
+			'picture_without_img_allow_picture_true'  => [
+				'input'    => '
+					<picture>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" width="240" height="200">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
+					</picture>
+				',
+				'args'     => [
+					'allow_picture' => true,
+				],
+				'expected' => '
+					<picture data-px-verified-tag>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" width="240" height="200" data-px-verified-tag data-px-verified-attrs="width height">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
+					</picture>
+				',
+			],
+			'picture_but_no_child_img'                => [
+				'input'    => '
+					<picture>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					</picture>
+				',
+				'args'     => [
+					'allow_picture' => true,
+				],
+				// No transformation is done in this case!
+				'expected' => '
+					<picture>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					</picture>
+				',
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_for_process_picture_elements()
+	 *
+	 * @covers ::mark_node_as_px_verified_recursively()
+	 * @covers ::process_picture_elements()
+	 */
+	public function test_process_picture_elements( $input, $args, $expected ) {
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $input );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, $args );
+
+		$this->call_private_method( $sanitizer, 'process_picture_elements' );
+
+		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEqualMarkup( $expected, $actual, "Actual content:\n$actual" );
 	}
 }
