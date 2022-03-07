@@ -91,6 +91,10 @@
 .site-scan-results__source details summary {
 	display: flex;
 	align-items: center;
+
+	&::-webkit-details-marker {
+		display: none;
+	}
 }
 
 .site-scan-results__source details .dashicons {
