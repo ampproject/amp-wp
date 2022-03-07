@@ -93,9 +93,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	protected function process_picture_elements() {
 
 		$picture_img_query = $this->dom->xpath->query( '//picture/img' );
-		if ( 0 === $picture_img_query->length ) {
-			return;
-		}
 
 		/** @var Element $img_element */
 		foreach ( $picture_img_query as $img_element ) {

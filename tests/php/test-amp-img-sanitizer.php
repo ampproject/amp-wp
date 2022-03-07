@@ -873,8 +873,8 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 			'picture_without_img_allow_picture_true'  => [
 				'input'    => '
 					<picture>
-						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
-						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" width="240" height="200">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
 					</picture>
 				',
 				'args'     => [
@@ -882,8 +882,8 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				],
 				'expected' => '
 					<picture data-px-verified-tag>
-						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
-						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" width="240" height="200" data-px-verified-tag data-px-verified-attrs="width height">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
 					</picture>
 				',
 			],
