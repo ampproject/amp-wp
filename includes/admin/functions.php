@@ -192,4 +192,7 @@ function amp_bootstrap_admin() {
 
 	$post_meta_box = new AMP_Post_Meta_Box();
 	$post_meta_box->init();
+
+	$amp_plugins = new AMP_Plugins();
+	$amp_plugins->init();
 }
