@@ -25,7 +25,7 @@ import ClipboardButton from '../clipboard-button';
  *
  * @return {Array} List of source that of current plugin/theme.
  */
-function getAllowedSources( sources, slug ) {
+function getAssociatedSources( sources, slug ) {
 	return sources.filter( ( source ) => {
 		return slug === getPluginSlugFromFile( source.name );
 	} );
@@ -39,16 +39,16 @@ function getAllowedSources( sources, slug ) {
  *
  * @return {Array} List of validation errors for current plugin/theme.
  */
-function getAllowedErrors( validationErrors, slug ) {
+function getAssociatedErrors( validationErrors, slug ) {
 	const errors = [];
 
 	for ( const validationError of validationErrors ) {
 		const sources = validationError.sources || [];
-		const allowedSources = getAllowedSources( sources, slug );
-		if ( allowedSources && 0 < allowedSources.length ) {
+		const associatedSources = getAssociatedSources( sources, slug );
+		if ( associatedSources && 0 < associatedSources.length ) {
 			const error = {
 				...validationError,
-				sources: allowedSources,
+				sources: associatedSources,
 			};
 
 			errors.push( error );
@@ -73,12 +73,12 @@ export function SiteScanSourcesDetail( {
 	const extensionScannableUrls = useMemo( () => {
 		return scannableUrls.map( ( scannableUrl ) => {
 			const validationErrors = scannableUrl.validation_errors || [];
-			const allowedErrors = getAllowedErrors( validationErrors, slug );
+			const associatedErrors = getAssociatedErrors( validationErrors, slug );
 
-			if ( allowedErrors?.length > 0 ) {
+			if ( associatedErrors?.length > 0 ) {
 				return {
 					...scannableUrl,
-					validation_errors: allowedErrors,
+					validation_errors: associatedErrors,
 				};
 			}
 
