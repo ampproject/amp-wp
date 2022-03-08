@@ -1901,6 +1901,26 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * @covers ::amp_get_content_sanitizers()
+	 */
+	public function test_amp_get_content_sanitizers_for_lightbox_sanitizer() {
+
+		add_filter( 'amp_auto_lightbox_disabled', '__return_true' );
+
+		$this->assertContains(
+			AMP_Auto_Lightbox_Disable_Sanitizer::class,
+			array_keys( amp_get_content_sanitizers() )
+		);
+
+		remove_all_filters( 'amp_auto_lightbox_disabled' );
+
+		$this->assertNotContains(
+			AMP_Auto_Lightbox_Disable_Sanitizer::class,
+			array_keys( amp_get_content_sanitizers() )
+		);
+	}
+
+	/**
 	 * Test amp_get_content_sanitizers().
 	 *
 	 * @covers ::amp_get_content_sanitizers()
