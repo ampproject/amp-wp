@@ -101,6 +101,9 @@ export function SiteScanSourcesDetail( {
 					) )
 				}
 			</ul>
+			<p className="site-scan-results__source-intro">
+				{ __( 'Raw validation data which you may want to share with the author so they can fix AMP compatibility:', 'amp' ) }
+			</p>
 			<pre className="site-scan-results__source-detail">
 				{ jsonData }
 			</pre>
