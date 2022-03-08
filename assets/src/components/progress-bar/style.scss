@@ -19,6 +19,7 @@
 	overflow: hidden;
 	position: relative;
 	width: calc(100% - 8px);
+	transform: scale(1); // This prevents overflow bug in Safari.
 }
 
 .progress-bar__indicator {
