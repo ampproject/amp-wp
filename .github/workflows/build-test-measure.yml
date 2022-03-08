@@ -403,6 +403,10 @@ jobs:
       # circuit per <https://github.com/actions/runner/issues/662>. The reason why the if statement can't be put on the
       # job as a whole is because the name is variable based on the matrix, and if the condition is not met then the
       # name won't be interpolated in order to match the required jobs set up in branch protection.
+      - name: Notice
+        if: needs.pre-run.outputs.changed-php-count == 0
+        run: echo "No PHP files were changed so no PHP unit tests will run"
+
       - name: Checkout
         if: needs.pre-run.outputs.changed-php-count > 0
         uses: actions/checkout@v3
