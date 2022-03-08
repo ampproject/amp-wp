@@ -343,7 +343,7 @@ jobs:
     name: "Unit test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     runs-on: ubuntu-latest
     needs: pre-run
-    if: needs.pre-run.outputs.changed-file-count > 0
+    if: needs.pre-run.outputs.changed-php-count > 0
     env:
       WP_CORE_DIR: /tmp/wordpress
     services:
