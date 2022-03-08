@@ -7,6 +7,10 @@ on:
     # Once a day (https://crontab.guru/once-a-day)
     - cron: '0 0 * * *'
 
+permissions:
+  pull-requests: write
+  contents: write
+
 # Cancel previous workflow run groups that have not completed.
 concurrency:
   # Group workflow runs by workflow name, along with the head branch ref of the pull request
@@ -168,6 +172,6 @@ jobs:
           gh pr merge --auto --merge "$PR_URL"
         env:
           VERSION: ${{ needs.check-gutenberg-release.outputs.latest-version }}
-          GITHUB_TOKEN: ${{ secrets.GUTENBERG_PACKAGES_UPDATE_TOKEN }}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           BASE_BRANCH: ${{ steps.branches.outputs.base }}
           HEAD_BRANCH: ${{ steps.branches.outputs.head }}
