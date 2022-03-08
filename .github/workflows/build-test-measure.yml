@@ -500,7 +500,7 @@ jobs:
   feature-test-php:
     name: "Feature test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     needs: pre-run
-    if: needs.pre-run.outputs.changed-file-count > 0
+    if: needs.pre-run.outputs.changed-php-count > 0
     runs-on: ubuntu-latest
     env:
       WP_VERSION: ${{ matrix.wp }}
