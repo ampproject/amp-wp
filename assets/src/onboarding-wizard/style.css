@@ -67,9 +67,11 @@ body {
 	margin-right: -20px;
 
 	@media screen and (min-width: 783px) {
+		flex: 1 1 auto;
 		margin-left: 0;
 		margin-right: 0;
-		width: 100%;
+		max-width: var(--setup-page-max-width);
+		width: 75%;
 	}
 }
 
@@ -121,8 +123,10 @@ body {
 	width: 100%;
 
 	@media screen and (min-width: 783px) {
+		flex: 0 0 auto;
 		padding-right: 40px;
 		max-width: var(--stepper-max-width);
+		width: 25%;
 	}
 }
 
