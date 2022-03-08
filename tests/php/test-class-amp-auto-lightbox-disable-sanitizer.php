@@ -5,7 +5,6 @@
  * @package AmpProject\AmpWP
  */
 
-use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\TestCase;
 
 /**
@@ -14,8 +13,6 @@ use AmpProject\AmpWP\Tests\TestCase;
  * @coversDefaultClass AMP_Auto_Lightbox_Disable_Sanitizer
  */
 class AMP_Auto_Lightbox_Disable_Sanitizer_Test extends TestCase {
-
-	use MarkupComparison;
 
 	/**
 	 * @covers ::sanitize()
