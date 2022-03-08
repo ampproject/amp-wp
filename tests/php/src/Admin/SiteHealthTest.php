@@ -751,6 +751,11 @@ class SiteHealthTest extends TestCase {
 				'expected_status' => 'recommended',
 				'expected_label'  => $recommended_label,
 			],
+			'no-cache-arrays'                          => [
+				'responses'       => array_fill( 0, 3, [ 'cache-control' => [ 'no-cache', 'no-store' ] ] ),
+				'expected_status' => 'recommended',
+				'expected_label'  => $recommended_label,
+			],
 			'no-cache-with-delayed-response'           => [
 				'responses'          => array_fill( 0, 3, [ 'cache-control' => 'no-cache' ] ),
 				'expected_status'    => 'critical',
