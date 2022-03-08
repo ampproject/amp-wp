@@ -25,11 +25,11 @@ import ClipboardButton from '../clipboard-button';
  *
  * @return {Array} List of source that of current plugin/theme.
  */
-const getAllowedSources = ( sources, slug ) => {
+function getAllowedSources( sources, slug ) {
 	return sources.filter( ( source ) => {
 		return slug === getPluginSlugFromFile( source.name );
 	} );
-};
+}
 
 /**
  * Get list of errors for current plugin/theme.
@@ -39,7 +39,7 @@ const getAllowedSources = ( sources, slug ) => {
  *
  * @return {Array} List of validation errors for current plugin/theme.
  */
-const getAllowedErrors = ( validationErrors, slug ) => {
+function getAllowedErrors( validationErrors, slug ) {
 	const errors = [];
 
 	for ( const validationError of validationErrors ) {
@@ -56,7 +56,7 @@ const getAllowedErrors = ( validationErrors, slug ) => {
 	}
 
 	return errors;
-};
+}
 
 /**
  * Site scan error source detail component.
