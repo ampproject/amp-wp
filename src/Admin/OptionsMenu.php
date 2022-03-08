@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\DevTools\UserAccess;
@@ -236,6 +237,16 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			)
 		);
 
+		$amp_error_index_link = admin_url(
+			add_query_arg(
+				[
+					'taxonomy'  => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+					'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				],
+				'edit-tags.php'
+			)
+		);
+
 		$js_data = [
 			'AMP_COMPATIBLE_THEMES_URL'          => current_user_can( 'install_themes' ) ? admin_url( '/theme-install.php?browse=amp-compatible' ) : 'https://amp-wp.org/ecosystem/themes/',
 			'AMP_COMPATIBLE_PLUGINS_URL'         => current_user_can( 'install_plugins' ) ? admin_url( '/plugin-install.php?tab=amp-compatible' ) : 'https://amp-wp.org/ecosystem/plugins/',
@@ -260,6 +271,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
 			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : '',
 			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
+			'ERROR_INDEX_LINK'                   => $amp_error_index_link,
 			'HAS_PAGE_CACHING'                   => ( is_array( $page_cache_detail ) && 'good' === $page_cache_detail['status'] ),
 		];
 

@@ -2812,6 +2812,14 @@ class AMP_Validated_URL_Post_Type {
 													$selector_html
 												);
 											}
+											$selector_html = preg_replace(
+												'/:not\((#_)+\)/',
+												sprintf(
+													'<abbr title="%s">$0</abbr>',
+													esc_attr__( 'Pseudo-class selector used to increase specificity for rule extracted from inline styles and/or properties with !important qualifiers.', 'amp' )
+												),
+												$selector_html
+											);
 
 											echo $selector_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
