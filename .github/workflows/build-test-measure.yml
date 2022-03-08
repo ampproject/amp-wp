@@ -343,7 +343,6 @@ jobs:
     name: "Unit test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     runs-on: ubuntu-latest
     needs: pre-run
-    if: needs.pre-run.outputs.changed-php-count > 0
     env:
       WP_CORE_DIR: /tmp/wordpress
     services:
@@ -400,10 +399,16 @@ jobs:
             coverage: false
 
     steps:
+      # Note: The repeated `needs.pre-run.outputs.changed-php-count > 0` checks would be avoided if a step could short-
+      # circuit per <https://github.com/actions/runner/issues/662>. The reason why the if statement can't be put on the
+      # job as a whole is because the name is variable based on the matrix, and if the condition is not met then the
+      # name won't be interpolated in order to match the required jobs set up in branch protection.
       - name: Checkout
+        if: needs.pre-run.outputs.changed-php-count > 0
         uses: actions/checkout@v3
 
       - name: Setup PHP
+        if: needs.pre-run.outputs.changed-php-count > 0
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -412,25 +417,30 @@ jobs:
           ini-values: pcov.directory=.
 
       - name: Shutdown default MySQL service
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: sudo service mysql stop
 
       - name: Verify MariaDB connection
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: |
           while ! mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; do
             sleep 1
           done
 
       - name: Setup Node
+        if: needs.pre-run.outputs.changed-php-count > 0
         uses: actions/setup-node@v3.0.0
         with:
           node-version-file: '.nvmrc'
           cache: npm
 
       - name: Get Composer Cache Directory
+        if: needs.pre-run.outputs.changed-php-count > 0
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
+        if: needs.pre-run.outputs.changed-php-count > 0
         uses: actions/cache@v2
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
@@ -439,29 +449,35 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
       - name: Install Node dependencies
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: npm ci
         env:
           CI: true
 
       - name: Build plugin
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: npm run build:js
 
       # Scan the logs for failing tests and surface that information by creating annotations and log file decorations.
       - name: Setup problem matcher to provide annotations for PHPUnit
+        if: needs.pre-run.outputs.changed-php-count > 0
         # The JSON file is provided by the `shivammathur/setup-php` action. See https://github.com/shivammathur/setup-php#problem-matchers.
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Install WP tests
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: bash bin/ci/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
 
       - name: Post install of WP tests
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: bash bin/ci/after-wp-install.sh ${{ matrix.wp }} ${{ matrix.install-pwa-plugin == true }} /tmp/wordpress-tests
 
       - name: Setup PCOV
-        if: ${{ matrix.coverage == true }}
+        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
         # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, making pcov/clobber
         # unable to be installed.
         run: |
@@ -470,25 +486,26 @@ jobs:
           vendor/bin/pcov clobber
 
       - name: Copy plugin to WP plugins directory
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: cp -r "$PWD" "$WP_CORE_DIR/src/wp-content/plugins/amp"
 
       - name: Run tests
-        if: ${{ matrix.coverage == false }}
+        if: ${{ matrix.coverage == false && needs.pre-run.outputs.changed-php-count > 0 }}
         run: vendor/bin/phpunit --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Run tests with coverage
-        if: ${{ matrix.coverage == true }}
+        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
         run: vendor/bin/phpunit --verbose --coverage-clover build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Run external HTTP tests
-        if: ${{ matrix.external-http == true }}
+        if: ${{ matrix.external-http == true && needs.pre-run.outputs.changed-php-count > 0 }}
         run: vendor/bin/phpunit --testsuite external-http
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Upload code coverage report
-        if: ${{ matrix.coverage == true }}
+        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
         uses: codecov/codecov-action@v2.1.0
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
