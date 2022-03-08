@@ -81,6 +81,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			Tag::IMG => [
 				'amp-img',
 				'amp-anim',
+				'amp-pixel',
 			],
 		];
 	}
@@ -180,6 +181,20 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 						'spec_name'  => 'amp-img',
 					]
 				);
+				continue;
+			}
+
+			// Replace img with amp-pixel when dealing with tracking pixels.
+			if ( self::is_tracking_pixel_url( $node->getAttribute( Attribute::SRC ) ) ) {
+				$amp_pixel_node = AMP_DOM_Utils::create_node(
+					$this->dom,
+					'amp-pixel',
+					[
+						Attribute::SRC    => $node->getAttribute( Attribute::SRC ),
+						Attribute::LAYOUT => Layout::NODISPLAY,
+					]
+				);
+				$node->parentNode->replaceChild( $amp_pixel_node, $node );
 				continue;
 			}
 
@@ -551,5 +566,20 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$ext  = self::$anim_extension;
 		$path = wp_parse_url( $url, PHP_URL_PATH );
 		return substr( $path, -strlen( $ext ) ) === $ext;
+	}
+
+	/**
+	 * Determines if a URL is a known tracking pixel URL.
+	 *
+	 * Currently, only Facebook tracking pixel URL is detected.
+	 *
+	 * @since 2.2.2
+	 *
+	 * @param string $url URL to inspect.
+	 *
+	 * @return bool Returns true if $url is a tracking pixel URL.
+	 */
+	private static function is_tracking_pixel_url( $url ) {
+		return (bool) preg_match( '/http(?>s)?:\/\/(?>www\.)?facebook\.com\/tr\?/i', $url );
 	}
 }

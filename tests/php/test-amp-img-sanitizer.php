@@ -48,13 +48,13 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 		$with_defaults = new AMP_Img_Sanitizer( $dom );
 		$this->assertEquals(
-			[ 'img' => [ 'amp-img', 'amp-anim' ] ],
+			[ 'img' => [ 'amp-img', 'amp-anim', 'amp-pixel' ] ],
 			$with_defaults->get_selector_conversion_mapping()
 		);
 
 		$with_false_native_used = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
 		$this->assertEquals(
-			[ 'img' => [ 'amp-img', 'amp-anim' ] ],
+			[ 'img' => [ 'amp-img', 'amp-anim', 'amp-pixel' ] ],
 			$with_false_native_used->get_selector_conversion_mapping()
 		);
 
@@ -575,6 +575,11 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 					AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
 				],
 			],
+
+			'facebook_pixel_img_to_amp_pixel'          => [
+				'<img height="1" width="1" style="display:none" alt="fbpx" src="https://www.facebook.com/tr?id=123456789012345&ev=PageView&noscript=1" />',
+				'<amp-pixel src="https://www.facebook.com/tr?id=123456789012345&amp;ev=PageView&amp;noscript=1" layout="nodisplay"></amp-pixel>',
+			],
 		];
 	}
 
@@ -922,5 +927,49 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->assertEqualMarkup( $expected, $actual, "Actual content:\n$actual" );
+	}
+
+	/**
+	 * @return array
+	 */
+	public function get_data_for_test_is_tracking_pixel_url() {
+		return [
+			'facebook_pixel_url_no_ssl_no_www' => [
+				'url'      => 'http://facebook.com/tr?id=123456789012345',
+				'expected' => true,
+			],
+			'facebook_pixel_url_no_ssl_www'    => [
+				'url'      => 'http://www.facebook.com/tr?id=123456789012345',
+				'expected' => true,
+			],
+			'facebook_pixel_url_ssl_no_www'    => [
+				'url'      => 'https://facebook.com/tr?id=123456789012345',
+				'expected' => true,
+			],
+			'facebook_pixel_url_ssl_www'       => [
+				'url'      => 'https://www.facebook.com/tr?id=123456789012345',
+				'expected' => true,
+			],
+			'facebook_page_url'                => [
+				'url'      => 'https://www.facebook.com/traffic?id=123456789012345',
+				'expected' => false,
+			],
+			'relative_url'                     => [
+				'url'      => '/tr?id=123456789012345',
+				'expected' => false,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_for_test_is_tracking_pixel_url()
+	 *
+	 * @covers ::is_tracking_pixel_url()
+	 */
+	public function test_is_tracking_pixel_url( $url, $expected ) {
+		$this->assertEquals(
+			$expected,
+			$this->call_private_static_method( 'AMP_Img_Sanitizer', 'is_tracking_pixel_url', [ $url ] )
+		);
 	}
 }
