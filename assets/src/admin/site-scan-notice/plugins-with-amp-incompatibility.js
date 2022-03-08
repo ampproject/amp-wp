@@ -18,8 +18,8 @@ import { getPluginSlugFromFile } from '../../common/helpers/get-plugin-slug-from
 import { isExternalUrl } from '../../common/helpers/is-external-url';
 
 // Define Plugin Suppression link.
-const PLUGIN_SUPPRESSION_LINK = new URL( SETTINGS_LINK );
-PLUGIN_SUPPRESSION_LINK.hash = 'plugin-suppression';
+const pluginSuppressionUrl = new URL( SETTINGS_LINK );
+pluginSuppressionUrl.hash = 'plugin-suppression';
 
 /**
  * Render a DETAILS element for each plugin causing AMP incompatibilities.
@@ -85,7 +85,7 @@ export function PluginsWithAmpIncompatibility( { pluginsWithAmpIncompatibility }
 				</details>
 			) ) }
 			<div className="amp-site-scan-notice__cta">
-				<a href={ PLUGIN_SUPPRESSION_LINK } className="button">
+				<a href={ pluginSuppressionUrl.href } className="button">
 					{ __( 'Review Plugin Suppression', 'amp' ) }
 				</a>
 				<a
