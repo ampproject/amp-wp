@@ -7,7 +7,7 @@ import { activateTheme, createURL, installTheme, setBrowserViewport, visitAdminP
  * Internal dependencies
  */
 import { setTemplateMode } from '../../utils/amp-settings-utils';
-import { assignMenuToLocation } from '../../utils/assign-menu-to-location';
+import { assignMenuToLocation, createTestMenu } from '../../utils/nav-menu-utils';
 import { DEFAULT_BROWSER_VIEWPORT_SIZE, MOBILE_BROWSER_VIEWPORT_SIZE } from '../../config/bootstrap';
 
 describe( 'Twenty Sixteen theme on AMP', () => {
@@ -25,6 +25,7 @@ describe( 'Twenty Sixteen theme on AMP', () => {
 
 	describe( 'main navigation on mobile', () => {
 		beforeAll( async () => {
+			await createTestMenu();
 			await assignMenuToLocation( 'primary' );
 		} );
 
