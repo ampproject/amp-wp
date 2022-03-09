@@ -187,7 +187,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			if ( self::is_tracking_pixel_url( $node->getAttribute( Attribute::SRC ) ) ) {
 				$amp_pixel_node = AMP_DOM_Utils::create_node(
 					$this->dom,
-					'amp-pixel',
+					Extension::PIXEL,
 					[
 						Attribute::SRC    => $node->getAttribute( Attribute::SRC ),
 						Attribute::LAYOUT => Layout::NODISPLAY,
