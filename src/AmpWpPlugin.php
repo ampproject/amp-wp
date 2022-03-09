@@ -70,6 +70,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	const SERVICES = [
 		'admin.analytics_menu'                => Admin\AnalyticsOptionsSubmenu::class,
+		'admin.after_activation_site_scan'    => Admin\AfterActivationSiteScan::class,
 		'admin.google_fonts'                  => Admin\GoogleFonts::class,
 		'admin.onboarding_menu'               => Admin\OnboardingWizardSubmenu::class,
 		'admin.onboarding_wizard'             => Admin\OnboardingWizardSubmenuPage::class,
@@ -109,7 +110,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'paired_routing'                      => PairedRouting::class,
 		'paired_url'                          => PairedUrl::class,
 		'plugin_activation_notice'            => Admin\PluginActivationNotice::class,
-		'plugin_activation_site_scan'         => Admin\PluginActivationSiteScan::class,
 		'plugin_registry'                     => PluginRegistry::class,
 		'plugin_suppression'                  => PluginSuppression::class,
 		'reader_theme_loader'                 => ReaderThemeLoader::class,

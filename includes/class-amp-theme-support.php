@@ -845,9 +845,6 @@ class AMP_Theme_Support {
 	 */
 	public static function add_hooks() {
 
-		// This is not needed when post embeds are embedded via <amp-wordpress-embed>. See <https://github.com/ampproject/amp-wp/issues/809>.
-		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
-
 		// Prevent emoji detection and emoji loading since platforms/browsers now support emoji natively (and Twemoji is not AMP-compatible).
 		add_filter( 'wp_resource_hints', [ __CLASS__, 'filter_resource_hints_to_remove_emoji_dns_prefetch' ], 10, 2 );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );

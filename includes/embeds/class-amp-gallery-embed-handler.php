@@ -46,11 +46,15 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Filter the output of gallery_shortcode().
 	 *
-	 * @param string $html  Markup to filter.
-	 * @param array  $attrs Shortcode attributes.
+	 * @param string       $html  Markup to filter.
+	 * @param array|string $attrs Shortcode attributes, or empty string if there were no shortcode attributes.
 	 * @return string Markup for the gallery.
 	 */
 	protected function filter_post_gallery_markup( $html, $attrs ) {
+		if ( ! is_array( $attrs ) ) {
+			$attrs = [];
+		}
+
 		// Use <amp-carousel> for the gallery if requested via amp-carousel shortcode attribute, or use by default if in legacy Reader mode.
 		// In AMP_Gallery_Block_Sanitizer, this is referred to as carousel_required.
 		$is_carousel = isset( $attrs['amp-carousel'] )
