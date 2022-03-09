@@ -41,8 +41,8 @@ export function ThemesWithAmpIncompatibility( { themesWithAmpIncompatibility } )
 		<>
 			<p>
 				{ _n(
-					'AMP compatibility issues discovered with the following theme:',
-					'AMP compatibility issues discovered with the following themes:',
+					'AMP compatibility issue(s) discovered with the following theme:',
+					'AMP compatibility issue(s) discovered with the following themes:',
 					themesWithAmpIncompatibility.length,
 					'amp',
 				) }

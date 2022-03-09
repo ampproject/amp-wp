@@ -46,8 +46,8 @@ export function PluginsWithAmpIncompatibility( { pluginsWithAmpIncompatibility }
 		<>
 			<p>
 				{ _n(
-					'AMP compatibility issues discovered with the following plugin:',
-					'AMP compatibility issues discovered with the following plugins:',
+					'AMP compatibility issue(s) discovered with the following plugin:',
+					'AMP compatibility issue(s) discovered with the following plugins:',
 					pluginsWithAmpIncompatibility.length,
 					'amp',
 				) }
