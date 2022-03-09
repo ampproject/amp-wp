@@ -1608,7 +1608,17 @@ function amp_get_content_sanitizers( $post = null ) {
 		);
 	}
 
-	$is_auto_lightbox_disabled = apply_filters( 'amp_auto_lightbox_disabled', false );
+	/**
+	 * Filters whether AMP auto-lightbox is disabled.
+	 *
+	 * When disabled, the data-amp-auto-lightbox-disable attribute is added to the body.
+	 *
+	 * @since 2.2.2
+	 * @link https://github.com/ampproject/amphtml/blob/420bc3987f69f6d9cd36e31c013fc9eea4f1b245/docs/spec/auto-lightbox.md#disabling-treatment-explicitly
+	 *
+	 * @param bool $disabled Whether disabled.
+	 */
+	$is_auto_lightbox_disabled = apply_filters( 'amp_auto_lightbox_disabled', true );
 
 	if ( $is_auto_lightbox_disabled ) {
 		$sanitizers[ AMP_Auto_Lightbox_Disable_Sanitizer::class ] = [];
