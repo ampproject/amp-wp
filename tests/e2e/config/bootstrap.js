@@ -9,8 +9,6 @@ import { get } from 'lodash';
 import {
 	activateTheme,
 	clearLocalStorage,
-	createMenu,
-	deleteAllMenus,
 	enablePageDialogAccept,
 	installTheme,
 	isOfflineMode,
@@ -251,36 +249,6 @@ async function createTestData() {
 }
 
 /**
- * Create test posts so that the WordPress instance has some data.
- */
-async function createTestMenus() {
-	await deleteAllMenus();
-	await createMenu(
-		{
-			name: 'Test Menu 1',
-		},
-		[
-			{
-				title: 'WordPress.org',
-				url: 'https://wordpress.org',
-				menu_order: 1,
-			},
-			{
-				title: 'Wikipedia.org',
-				url: 'https://wikipedia.org',
-				menu_order: 2,
-			},
-			{
-				title: 'Google',
-				url: 'https://google.com',
-				menu_order: 3,
-				parent: 1,
-			},
-		],
-	);
-}
-
-/**
  * Install themes and plugins needed in tests.
  */
 async function setupThemesAndPlugins() {
@@ -309,7 +277,6 @@ beforeAll( async () => {
 	await setupThemesAndPlugins();
 	await trashAllPosts();
 	await createTestData();
-	await createTestMenus();
 	await cleanUpSettings();
 	await page.setDefaultNavigationTimeout( 10000 );
 	await page.setDefaultTimeout( 10000 );
