@@ -507,7 +507,7 @@ final class PluginSuppression implements Service, Registerable {
 
 		$screen = get_current_screen();
 
-		if ( ! $screen instanceof WP_Screen || 'plugins' !== $screen->id ) {
+		if ( ! ( $screen instanceof WP_Screen && 'plugins' === $screen->id ) ) {
 			return $plugin_meta;
 		}
 
