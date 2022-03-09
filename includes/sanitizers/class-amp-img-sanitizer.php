@@ -584,7 +584,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		return (
 			isset( $parsed_url['host'], $parsed_url['path'] )
 			&&
-			'facebook.com' === str_replace( 'www.', '',  $parsed_url['host'] )
+			'facebook.com' === str_replace( 'www.', '', $parsed_url['host'] )
 			&&
 			'/tr' === $parsed_url['path']
 		);
