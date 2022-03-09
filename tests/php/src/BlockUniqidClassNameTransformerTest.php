@@ -91,29 +91,29 @@ final class BlockUniqidClassNameTransformerTest extends TestCase {
 	public function get_block_data() {
 		return [
 			'transform_duotone_class_name'           => [
-				'block_content'          => '<div class="wp-duotone-621e12fb51e3a wp-block-cover"></div>',
-				'expected_block_content' => '<div class="wp-duotone-1 wp-block-cover"></div>',
+				'block_content'          => '<div class="wp-duotone-621e12fb51e3a wp-block-cover">This is a super cool class name: <code>wp-duotone-0123456789abc</code>!</div>',
+				'expected_block_content' => '<div class="wp-duotone-1 wp-block-cover">This is a super cool class name: <code>wp-duotone-0123456789abc</code>!</div>',
 				'style_handle'           => 'wp-duotone-621e12fb51e3a',
 				'style_content'          => ".wp-duotone-621e12fb51e3a > .wp-block-cover__image-background, .wp-duotone-621e12fb51e3a > .wp-block-cover__video-background{filter:url(\'#wp-duotone-621e12fb51e3a\') !important;}",
 				'expected_style_content' => ".wp-duotone-1 > .wp-block-cover__image-background, .wp-duotone-1 > .wp-block-cover__video-background{filter:url(\'#wp-duotone-1\') !important;}",
 			],
 			'transform_container_class_name'         => [
-				'block_content'          => '<div class="wp-container-621e133aaf0e2 wp-block-group is-style-default has-black-background-color has-background" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px"></div>',
-				'expected_block_content' => '<div class="wp-container-2 wp-block-group is-style-default has-black-background-color has-background" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px"></div>',
+				'block_content'          => '<div class="wp-container-621e133aaf0e2 wp-block-group is-style-default has-black-background-color has-background" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px">This is a super cool class name: <code>wp-container-0123456789abc</code>!</div>',
+				'expected_block_content' => '<div class="wp-container-2 wp-block-group is-style-default has-black-background-color has-background" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px">This is a super cool class name: <code>wp-container-0123456789abc</code>!</div>',
 				'style_handle'           => null,
 				'style_content'          => null,
 				'expected_style_content' => null,
 			],
 			'ignore_class_names_without_hash'        => [
-				'block_content'          => '<div class="wp-duotone-test wp-block-cover"></div>',
-				'expected_block_content' => '<div class="wp-duotone-test wp-block-cover"></div>',
+				'block_content'          => '<div class="wp-duotone-test wp-block-cover">This is a super cool class name: <code>wp-duotone-0123456789abc</code>!</div>',
+				'expected_block_content' => '<div class="wp-duotone-test wp-block-cover">This is a super cool class name: <code>wp-duotone-0123456789abc</code>!</div>',
 				'style_handle'           => null,
 				'style_content'          => null,
 				'expected_style_content' => null,
 			],
 			'ignore_already_transformed_class_names' => [
-				'block_content'          => '<div class="wp-duotone-1 wp-block-cover"></div>',
-				'expected_block_content' => '<div class="wp-duotone-1 wp-block-cover"></div>',
+				'block_content'          => '<div class="wp-duotone-1 wp-block-cover">This is a super cool class name: <code>wp-duotone-0123456789abc</code>!</div>',
+				'expected_block_content' => '<div class="wp-duotone-1 wp-block-cover">This is a super cool class name: <code>wp-duotone-0123456789abc</code>!</div>',
 				'style_handle'           => null,
 				'style_content'          => null,
 				'expected_style_content' => null,
