@@ -28,9 +28,17 @@ const GOOGLE_ANALYTICS_NOTICE = sprintf(
 	__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
 );
 
+const OTHER_ANALYTICS_NOTICE = sprintf(
+	/* translators: 1: URL to Site Kit plugin directory page, 2: Google Analytics dev guide URL */
+	__( 'Selecting this option will provide support to in-house analytics or Google Tag Manager. For Google Tag Manager please consider using <a href="%1$s" target="_blank" rel="noreferrer">Site Kit by Google</a>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <a href="%2$s" target="_blank" rel="noreferrer">Adding Analytics to your AMP pages</a>.', 'amp' ),
+	__( 'https://wordpress.org/plugins/google-site-kit/', 'amp' ),
+	__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
+);
+
 const vendorConfigs = {
 	'': {
-		sample: '{}',
+		notice: OTHER_ANALYTICS_NOTICE,
+		sample: {},
 	},
 	[ GOOGLE_ANALYTICS_VENDOR ]: {
 		notice: GOOGLE_ANALYTICS_NOTICE,
@@ -133,6 +141,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 						onChange={ ( newType ) => {
 							onChange( { type: newType } );
 						} }
+						value={ type }
 						options={ ANALYTICS_VENDORS_LIST }
 					/>
 				</div>

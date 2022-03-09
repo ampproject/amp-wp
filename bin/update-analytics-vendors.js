@@ -9,9 +9,14 @@ const { execSync } = require( 'child_process' );
 const axios = require( 'axios' );
 
 /**
+ * WordPress dependencies
+ */
+const { __ } = require( '@wordpress/i18n' );
+
+/**
  * File path of the analytics vendors list.
  */
-const ANALYTICS_VENDORS_FILE = 'includes/data/analytics-vendors-list.php';
+const ANALYTICS_VENDORS_FILE = 'includes/ecosystem-data/analytics-vendors.php';
 
 class UpdateAnalyticsVendors {
 	/**
@@ -94,10 +99,9 @@ class UpdateAnalyticsVendors {
 					// Loop through multiple vendor slugs with same titles and append extra information to title.
 					vendorSlugs.forEach( ( slug ) => {
 						if ( vendorSlugs.indexOf( slug ) === 0 ) {
-							// If vendor is Google Tag Manager, then add it along with In house analytics for '' value.
+							// Google Tag Manager will be considered in `other` category along with in-house analytics.
 							if ( slug === 'N/A' && vendorTitle === 'Google Tag Manager' ) {
-								slug = '';
-								vendorTitle = 'In house analytics / Google Tag Manager';
+								return;
 							}
 
 							this.vendors[ slug ] = vendorTitle.replace( /(<([^>]+)>)/gi, '' ).trim();
@@ -153,6 +157,9 @@ class UpdateAnalyticsVendors {
 			this.vendors = this.vendors.sort( ( a, b ) => {
 				return a.label.localeCompare( b.label );
 			} );
+
+			// Add a option to select other vendors. This option will be used to opt for Google Tag Manager or in-house analytics.
+			this.vendors = [ { value: '', label: __( 'Other', 'amp' ) } ].concat( this.vendors );
 
 			let output = this.convertToPhpArray( this.vendors );
 			// Save vendors to JSON file.

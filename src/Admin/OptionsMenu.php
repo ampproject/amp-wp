@@ -189,7 +189,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * Gets analytics vendors list from data directory.
 	 */
 	public function get_analytics_vendors() {
-		$vendors_list_file = AMP__DIR__ . '/includes/data/analytics-vendors-list.php';
+		$vendors_list_file = AMP__DIR__ . '/includes/ecosystem-data/analytics-vendors.php';
 
 		if ( ! file_exists( $vendors_list_file ) ) {
 			return []; // @codeCoverageIgnore

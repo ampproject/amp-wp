@@ -12,168 +12,168 @@
 return array (
   0 => 
   array (
+    'value' => '',
+    'label' => 'Other',
+  ),
+  1 => 
+  array (
     'value' => 'acquialift',
     'label' => 'Acquia Lift',
   ),
-  1 => 
+  2 => 
   array (
     'value' => 'adobeanalytics',
     'label' => 'Adobe Analytics',
   ),
-  2 => 
+  3 => 
   array (
     'value' => 'adobeanalytics_nativeConfig',
     'label' => 'Adobe Analytics (native config)',
   ),
-  3 => 
+  4 => 
   array (
     'value' => 'afsanalytics',
     'label' => 'AFS Analytics',
   ),
-  4 => 
+  5 => 
   array (
     'value' => 'alexametrics',
     'label' => 'Alexa Internet',
   ),
-  5 => 
+  6 => 
   array (
     'value' => 'amplitude',
     'label' => 'Amplitude',
   ),
-  6 => 
+  7 => 
   array (
     'value' => 'appsflyer',
     'label' => 'AppsFlyer',
   ),
-  7 => 
+  8 => 
   array (
     'value' => 'atinternet',
     'label' => 'AT Internet',
   ),
-  8 => 
+  9 => 
   array (
     'value' => 'baiduanalytics',
     'label' => 'Baidu Analytics',
   ),
-  9 => 
+  10 => 
   array (
     'value' => 'blackcrowai',
     'label' => 'Black Crow AI',
   ),
-  10 => 
+  11 => 
   array (
     'value' => 'bluetriangle',
     'label' => 'Blue Triangle',
   ),
-  11 => 
+  12 => 
   array (
     'value' => 'blueconic',
     'label' => 'BlueConic',
   ),
-  12 => 
+  13 => 
   array (
     'value' => 'browsi',
     'label' => 'Browsi',
   ),
-  13 => 
+  14 => 
   array (
     'value' => 'burt',
     'label' => 'Burt',
   ),
-  14 => 
+  15 => 
   array (
     'value' => 'byside',
     'label' => 'BySide',
   ),
-  15 => 
+  16 => 
   array (
     'value' => 'captainmetrics',
     'label' => 'Captain Metrics',
   ),
-  16 => 
+  17 => 
   array (
     'value' => 'chartbeat',
     'label' => 'Chartbeat',
   ),
-  17 => 
+  18 => 
   array (
     'value' => 'clicky',
     'label' => 'Clicky Web Analytics',
   ),
-  18 => 
+  19 => 
   array (
     'value' => 'colanalytics',
     'label' => 'colanalytics',
   ),
-  19 => 
+  20 => 
   array (
     'value' => 'comscore',
     'label' => 'comScore',
   ),
-  20 => 
+  21 => 
   array (
     'value' => 'cxense',
     'label' => 'Cxense',
   ),
-  21 => 
+  22 => 
   array (
     'value' => 'deepbi',
     'label' => 'Deep.BI',
   ),
-  22 => 
+  23 => 
   array (
     'value' => 'dynatrace',
     'label' => 'Dynatrace',
   ),
-  23 => 
+  24 => 
   array (
     'value' => 'epica',
     'label' => 'EPICA',
   ),
-  24 => 
+  25 => 
   array (
     'value' => 'euleriananalytics',
     'label' => 'Eulerian Analytics',
   ),
-  25 => 
+  26 => 
   array (
     'value' => 'facebookpixel',
     'label' => 'Facebook Pixel',
   ),
-  26 => 
+  27 => 
   array (
     'value' => 'gemius',
     'label' => 'Gemius',
   ),
-  27 => 
+  28 => 
   array (
     'value' => 'gfksensic',
     'label' => 'GfK Sensic',
   ),
-  28 => 
+  29 => 
   array (
     'value' => 'googleadwords',
     'label' => 'Google Ads',
   ),
-  29 => 
+  30 => 
   array (
     'value' => 'googleanalytics',
     'label' => 'Google Analytics',
   ),
-  30 => 
+  31 => 
   array (
     'value' => 'gtag',
     'label' => 'gtag',
   ),
-  31 => 
+  32 => 
   array (
     'value' => 'ibeatanalytics',
     'label' => 'Ibeat Analytics',
-  ),
-  32 => 
-  array (
-    'value' => '',
-    'label' => 'In house analytics / Google Tag Manager',
   ),
   33 => 
   array (
