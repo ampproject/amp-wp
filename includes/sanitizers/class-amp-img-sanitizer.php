@@ -81,7 +81,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			Tag::IMG => [
 				'amp-img',
 				'amp-anim',
-				'amp-pixel',
 			],
 		];
 	}
