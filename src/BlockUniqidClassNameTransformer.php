@@ -135,7 +135,10 @@ final class BlockUniqidClassNameTransformer implements Conditional, Service, Reg
 		if ( null === $pattern ) {
 			$combined_block_prefixes = implode( '|', self::CLASS_NAME_PREFIXES );
 
-			$pattern = "/($combined_block_prefixes)[a-f0-9]{13}/";
+			$pattern = sprintf(
+				'/(?P<start_tag_prefix><\w+[^>]*?\sclass="[^"]*?)(?P<class_name_prefix>%s)(?P<uniqid>[a-f0-9]{13})\b/',
+				$combined_block_prefixes
+			);
 		}
 		return $pattern;
 	}
@@ -147,15 +150,18 @@ final class BlockUniqidClassNameTransformer implements Conditional, Service, Reg
 	 * @return string Transformed block content.
 	 */
 	public function transform_class_names_in_block_content( $block_content ) {
-		if ( preg_match( self::get_class_name_regexp_pattern(), $block_content, $matches ) ) {
-			list( $class_name, $class_name_prefix ) = $matches;
+		return preg_replace_callback(
+			self::get_class_name_regexp_pattern(),
+			function( $matches ) {
+				$old_class_name = $matches['class_name_prefix'] . $matches['uniqid'];
+				$new_class_name = wp_unique_id( $matches['class_name_prefix'] );
 
-			$new_class_name                          = wp_unique_id( $class_name_prefix );
-			$this->class_name_mapping[ $class_name ] = $new_class_name;
+				$this->class_name_mapping[ $old_class_name ] = $new_class_name;
 
-			$block_content = str_replace( $class_name, $new_class_name, $block_content );
-		}
-		return $block_content;
+				return $matches['start_tag_prefix'] . $new_class_name;
+			},
+			$block_content
+		);
 	}
 
 	/**
