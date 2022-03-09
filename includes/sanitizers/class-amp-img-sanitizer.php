@@ -185,13 +185,19 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Replace img with amp-pixel when dealing with tracking pixels.
 			if ( self::is_tracking_pixel_url( $node->getAttribute( Attribute::SRC ) ) ) {
+				$attributes = [
+					Attribute::SRC    => $node->getAttribute( Attribute::SRC ),
+					Attribute::LAYOUT => Layout::NODISPLAY,
+				];
+				foreach ( [ Attribute::REFERRERPOLICY ] as $allowed_attribute ) {
+					if ( $node->hasAttribute( $allowed_attribute ) ) {
+						$attributes[ $allowed_attribute ] = $node->getAttribute( $allowed_attribute );
+					}
+				}
 				$amp_pixel_node = AMP_DOM_Utils::create_node(
 					$this->dom,
 					Extension::PIXEL,
-					[
-						Attribute::SRC    => $node->getAttribute( Attribute::SRC ),
-						Attribute::LAYOUT => Layout::NODISPLAY,
-					]
+					$attributes
 				);
 				$node->parentNode->replaceChild( $amp_pixel_node, $node );
 				continue;

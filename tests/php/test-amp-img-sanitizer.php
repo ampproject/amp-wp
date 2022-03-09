@@ -580,6 +580,11 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				'<img height="1" width="1" style="display:none" alt="fbpx" src="https://www.facebook.com/tr?id=123456789012345&ev=PageView&noscript=1" />',
 				'<amp-pixel src="https://www.facebook.com/tr?id=123456789012345&amp;ev=PageView&amp;noscript=1" layout="nodisplay"></amp-pixel>',
 			],
+
+			'facebook_pixel_img_to_amp_pixel_with_referrer' => [
+				'<img height="1" width="1" style="display:none" alt="fbpx" src="https://facebook.com/tr?id=123456789012345&ev=PageView&noscript=1" referrerpolicy="no-referrer">',
+				'<amp-pixel src="https://facebook.com/tr?id=123456789012345&amp;ev=PageView&amp;noscript=1" layout="nodisplay" referrerpolicy="no-referrer"></amp-pixel>',
+			],
 		];
 	}
 
