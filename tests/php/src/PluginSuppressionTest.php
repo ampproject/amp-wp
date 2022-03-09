@@ -656,29 +656,21 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		return [
 			'plugin is not suppressed'                 => [
 				'plugin_file'      => 'plugin.php',
-				'plugin_data'      => [],
 				'current_screen'   => 'plugins',
 				'should_have_meta' => false,
 			],
 			'plugin is suppressed'                     => [
 				'plugin_file'      => 'plugin-one/plugin-one.php',
-				'plugin_data'      => [
-					'slug' => 'plugin-one',
-				],
 				'current_screen'   => 'plugins',
 				'should_have_meta' => true,
 			],
 			'plugin is suppressed without slug'        => [
 				'plugin_file'      => 'plugin-one/plugin-one.php',
-				'plugin_data'      => [],
 				'current_screen'   => 'plugins',
 				'should_have_meta' => true,
 			],
 			'plugin is suppressed on different screen' => [
 				'plugin_file'      => 'plugin-one/plugin-one.php',
-				'plugin_data'      => [
-					'slug' => 'plugin-one',
-				],
 				'current_screen'   => 'plugins-network',
 				'should_have_meta' => false,
 			],
@@ -689,7 +681,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	 * @dataProvider data_provider_for_filter_plugin_row_meta()
 	 * @covers ::filter_plugin_row_meta()
 	 */
-	public function test_filter_plugin_row_meta( $plugin_file, $plugin_data, $current_screen, $should_have_meta ) {
+	public function test_filter_plugin_row_meta( $plugin_file, $current_screen, $should_have_meta ) {
 
 		set_current_screen( $current_screen );
 
@@ -705,7 +697,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			]
 		);
 
-		$output = $this->instance->filter_plugin_row_meta( [], $plugin_file, $plugin_data );
+		$output = $this->instance->filter_plugin_row_meta( [], $plugin_file );
 
 		if ( $should_have_meta ) {
 

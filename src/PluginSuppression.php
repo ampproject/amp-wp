@@ -84,7 +84,7 @@ final class PluginSuppression implements Service, Registerable {
 	public function register() {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
-		add_filter( 'plugin_row_meta', [ $this, 'filter_plugin_row_meta' ], 10, 3 );
+		add_filter( 'plugin_row_meta', [ $this, 'filter_plugin_row_meta' ], 10, 2 );
 
 		add_filter(
 			'register_block_type_args',
@@ -499,11 +499,10 @@ final class PluginSuppression implements Service, Registerable {
 	 *
 	 * @param array  $plugin_meta An array of the plugin's metadata.
 	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
-	 * @param array  $plugin_data An array of plugin data.
 	 *
 	 * @return array An array of the plugin's metadata
 	 */
-	public function filter_plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data ) {
+	public function filter_plugin_row_meta( $plugin_meta, $plugin_file ) {
 
 		$screen = get_current_screen();
 
@@ -512,12 +511,7 @@ final class PluginSuppression implements Service, Registerable {
 		}
 
 		$suppressed_plugins = AMP_Options_Manager::get_option( 'suppressed_plugins' );
-		$plugin_slug        = isset( $plugin_data['slug'] ) ? $plugin_data['slug'] : false;
-
-		if ( empty( $plugin_slug ) ) {
-			$plugin_slug = $this->plugin_registry->get_plugin_slug_from_file( $plugin_file );
-		}
-
+		$plugin_slug        = $this->plugin_registry->get_plugin_slug_from_file( $plugin_file );
 		if ( isset( $suppressed_plugins[ $plugin_slug ] ) ) {
 			$plugin_meta[] = sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
