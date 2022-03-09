@@ -131,9 +131,13 @@ final class BlockUniqidClassNameTransformer implements Conditional, Service, Reg
 	 * @return string Regular expression pattern.
 	 */
 	private static function get_class_name_regexp_pattern() {
-		$combined_block_prefixes = implode( '|', self::CLASS_NAME_PREFIXES );
+		static $pattern = null;
+		if ( null === $pattern ) {
+			$combined_block_prefixes = implode( '|', self::CLASS_NAME_PREFIXES );
 
-		return "/($combined_block_prefixes)[a-f0-9]{13}/";
+			$pattern = "/($combined_block_prefixes)[a-f0-9]{13}/";
+		}
+		return $pattern;
 	}
 
 	/**
