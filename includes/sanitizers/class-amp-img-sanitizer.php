@@ -183,6 +183,26 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Replace img with amp-pixel when dealing with tracking pixels.
+			if ( self::is_tracking_pixel_url( $node->getAttribute( Attribute::SRC ) ) ) {
+				$attributes = [
+					Attribute::SRC    => $node->getAttribute( Attribute::SRC ),
+					Attribute::LAYOUT => Layout::NODISPLAY,
+				];
+				foreach ( [ Attribute::REFERRERPOLICY ] as $allowed_attribute ) {
+					if ( $node->hasAttribute( $allowed_attribute ) ) {
+						$attributes[ $allowed_attribute ] = $node->getAttribute( $allowed_attribute );
+					}
+				}
+				$amp_pixel_node = AMP_DOM_Utils::create_node(
+					$this->dom,
+					Extension::PIXEL,
+					$attributes
+				);
+				$node->parentNode->replaceChild( $amp_pixel_node, $node );
+				continue;
+			}
+
 			// Short-circuit emoji images from needing to make requests out to https://s.w.org/.
 			if ( 'wp-smiley' === $node->getAttribute( Attribute::CLASS_ ) ) {
 				$node->setAttribute( Attribute::WIDTH, '72' );
@@ -551,5 +571,28 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$ext  = self::$anim_extension;
 		$path = wp_parse_url( $url, PHP_URL_PATH );
 		return substr( $path, -strlen( $ext ) ) === $ext;
+	}
+
+	/**
+	 * Determines if a URL is a known tracking pixel URL.
+	 *
+	 * Currently, only Facebook tracking pixel URL is detected.
+	 *
+	 * @since 2.2.2
+	 *
+	 * @param string $url URL to inspect.
+	 *
+	 * @return bool Returns true if $url is a tracking pixel URL.
+	 */
+	private static function is_tracking_pixel_url( $url ) {
+		$parsed_url = wp_parse_url( $url );
+
+		return (
+			isset( $parsed_url['host'], $parsed_url['path'] )
+			&&
+			'facebook.com' === str_replace( 'www.', '', $parsed_url['host'] )
+			&&
+			'/tr' === $parsed_url['path']
+		);
 	}
 }
