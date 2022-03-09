@@ -515,7 +515,7 @@ final class PluginSuppression implements Service, Registerable {
 		if ( isset( $suppressed_plugins[ $plugin_slug ] ) ) {
 			$plugin_meta[] = sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
-				esc_url( admin_url( 'admin.php?page=amp-options' ) ),
+				esc_url( admin_url( 'admin.php?page=amp-options' ) . '#plugin-suppression' ),
 				esc_attr__( 'Visit AMP Settings', 'amp' ),
 				esc_html__( 'Suppressed on AMP Pages', 'amp' )
 			);

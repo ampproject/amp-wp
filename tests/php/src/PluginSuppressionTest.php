@@ -704,7 +704,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			$this->assertEquals(
 				sprintf(
 					'<a href="%s" aria-label="%s">%s</a>',
-					esc_url( admin_url( 'admin.php?page=amp-options' ) ),
+					esc_url( admin_url( 'admin.php?page=amp-options#plugin-suppression' ) ),
 					esc_attr__( 'Visit AMP Settings', 'amp' ),
 					__( 'Suppressed on AMP Pages', 'amp' )
 				),
