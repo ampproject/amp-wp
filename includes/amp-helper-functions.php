@@ -1704,6 +1704,7 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
+		AMP_Auto_Lightbox_Disable_Sanitizer::class,
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
 		AMP_Bento_Sanitizer::class, // Bento scripts may be preserved here.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for images, videos, audios, comments, forms, and styles.
