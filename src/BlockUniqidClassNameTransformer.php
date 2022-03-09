@@ -144,24 +144,18 @@ final class BlockUniqidClassNameTransformer implements Conditional, Service, Reg
 	 * Transform uniqid-based class names in block content.
 	 *
 	 * @param string $block_content Block content.
-	 *
-	 * @return string
+	 * @return string Transformed block content.
 	 */
 	public function transform_class_names_in_block_content( $block_content ) {
-		preg_match( self::get_class_name_regexp_pattern(), $block_content, $matches );
+		if ( preg_match( self::get_class_name_regexp_pattern(), $block_content, $matches ) ) {
+			list( $class_name, $class_name_prefix ) = $matches;
 
-		if ( empty( $matches ) ) {
-			return $block_content;
+			$new_class_name                          = wp_unique_id( $class_name_prefix );
+			$this->class_name_mapping[ $class_name ] = $new_class_name;
+
+			$block_content = str_replace( $class_name, $new_class_name, $block_content );
 		}
-
-		list( $class_name, $class_name_prefix ) = $matches;
-
-		$new_class_name                          = wp_unique_id( $class_name_prefix );
-		$this->class_name_mapping[ $class_name ] = $new_class_name;
-
-		$new_block_content = str_replace( $class_name, $new_class_name, $block_content );
-
-		return $new_block_content;
+		return $block_content;
 	}
 
 	/**
