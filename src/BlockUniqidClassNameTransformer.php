@@ -71,11 +71,6 @@ final class BlockUniqidClassNameTransformer implements Conditional, Service, Reg
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		// At least WP 5.0.3 is needed since `wp_unique_id` has been introduced there.
-		if ( version_compare( get_bloginfo( 'version' ), '5.0.3', '<' ) ) {
-			return false;
-		}
-
 		return (
 			(
 				self::has_gutenberg_plugin()
@@ -154,7 +149,7 @@ final class BlockUniqidClassNameTransformer implements Conditional, Service, Reg
 			self::get_class_name_regexp_pattern(),
 			function( $matches ) {
 				$old_class_name = $matches['class_name_prefix'] . $matches['uniqid'];
-				$new_class_name = wp_unique_id( $matches['class_name_prefix'] );
+				$new_class_name = $this->unique_id( $matches['class_name_prefix'] );
 
 				$this->class_name_mapping[ $old_class_name ] = $new_class_name;
 
@@ -185,8 +180,27 @@ final class BlockUniqidClassNameTransformer implements Conditional, Service, Reg
 			$new_class_name = $this->class_name_mapping[ $handle ];
 
 			foreach ( $wp_styles->registered[ $handle ]->extra['after'] as &$inline_styles ) {
-				$inline_styles = str_replace( $handle, $new_class_name, $inline_styles );
+				$inline_styles = str_replace( "{$handle}", "{$new_class_name}", $inline_styles );
 			}
+		}
+	}
+
+	/**
+	 * Gets unique ID.
+	 *
+	 * This is a polyfill for WordPress <5.0.3.
+	 *
+	 * @see wp_unique_id()
+	 *
+	 * @param string $prefix Prefix for the returned ID.
+	 * @return string Unique ID.
+	 */
+	private static function unique_id( $prefix = '' ) {
+		if ( function_exists( 'wp_unique_id' ) ) {
+			return wp_unique_id( $prefix );
+		} else {
+			static $id_counter = 0;
+			return $prefix . (string) ++$id_counter;
 		}
 	}
 }

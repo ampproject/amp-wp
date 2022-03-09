@@ -28,10 +28,6 @@ final class BlockUniqidClassNameTransformerTest extends TestCase {
 	public function setUp() {
 		parent::setUp();
 
-		if ( version_compare( get_bloginfo( 'version' ), '5.0.3', '<' ) ) {
-			$this->markTestSkipped( 'Block uniqid class name transformer requires WordPress 5.0.3.' );
-		}
-
 		$this->instance = new BlockUniqidClassNameTransformer();
 	}
 
@@ -125,6 +121,7 @@ final class BlockUniqidClassNameTransformerTest extends TestCase {
 	 * @covers ::transform_class_names_in_block_content()
 	 * @covers ::transform_class_names_in_inline_styles()
 	 * @covers ::get_class_name_regexp_pattern()
+	 * @covers ::unique_id()
 	 *
 	 * @dataProvider get_block_data
 	 *
