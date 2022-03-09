@@ -8,6 +8,7 @@ namespace PHPSTORM_META {
 		// TODO: I'd like to use AmpWpPlugin::SERVICES directly here but it doesn't seem to work.
 		map( [
 			'admin.analytics_menu'               => \AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu::class,
+			'admin.after_activation_site_scan'   => \AmpProject\AmpWP\Admin\AfterActivationSiteScan::class,
 			'admin.google_fonts'                 => \AmpProject\AmpWP\Admin\GoogleFonts::class,
 			'admin.onboarding_menu'              => \AmpProject\AmpWP\Admin\OnboardingWizardSubmenu::class,
 			'admin.onboarding_wizard'            => \AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage::class,
@@ -45,7 +46,6 @@ namespace PHPSTORM_META {
 			'paired_routing'                     => \AmpProject\AmpWP\PairedRouting::class,
 			'paired_url'                         => \AmpProject\AmpWP\PairedUrl::class,
 			'plugin_activation_notice'           => \AmpProject\AmpWP\Admin\PluginActivationNotice::class,
-			'plugin_activation_site_scan'        => \AmpProject\AmpWP\Admin\PluginActivationSiteScan::class,
 			'plugin_registry'                    => \AmpProject\AmpWP\PluginRegistry::class,
 			'plugin_suppression'                 => \AmpProject\AmpWP\PluginSuppression::class,
 			'reader_theme_loader'                => \AmpProject\AmpWP\ReaderThemeLoader::class,

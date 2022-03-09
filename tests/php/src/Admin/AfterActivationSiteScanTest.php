@@ -1,13 +1,13 @@
 <?php
 /**
- * Tests for PluginActivationSiteScan class.
+ * Tests for AfterActivationSiteScan class.
  *
  * @package AMP
  */
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
-use AmpProject\AmpWP\Admin\PluginActivationSiteScan;
+use AmpProject\AmpWP\Admin\AfterActivationSiteScan;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -18,29 +18,29 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AMP_Validation_Manager;
 
 /**
- * Tests for PluginActivationSiteScan class.
+ * Tests for AfterActivationSiteScan class.
  *
  * @group plugin-activation-site-scan
  *
  * @since 2.2
  *
- * @coversDefaultClass \AmpProject\AmpWP\Admin\PluginActivationSiteScan
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\AfterActivationSiteScan
  */
-class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
+class AfterActivationSiteScanTest extends DependencyInjectedTestCase {
 
 	use PrivateAccess;
 
 	/**
 	 * Test instance.
 	 *
-	 * @var PluginActivationSiteScan
+	 * @var AfterActivationSiteScan
 	 */
-	private $plugin_activation_site_scan;
+	private $after_activation_site_scan;
 
 	public function setUp() {
 		parent::setUp();
 
-		$this->plugin_activation_site_scan = $this->injector->make( PluginActivationSiteScan::class );
+		$this->after_activation_site_scan = $this->injector->make( AfterActivationSiteScan::class );
 		delete_option( 'amp-options' );
 	}
 
@@ -57,11 +57,11 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 
 	/** @covers ::__construct() */
 	public function test__construct() {
-		$this->assertInstanceOf( PluginActivationSiteScan::class, $this->plugin_activation_site_scan );
-		$this->assertInstanceOf( Conditional::class, $this->plugin_activation_site_scan );
-		$this->assertInstanceOf( Delayed::class, $this->plugin_activation_site_scan );
-		$this->assertInstanceOf( Service::class, $this->plugin_activation_site_scan );
-		$this->assertInstanceOf( Registerable::class, $this->plugin_activation_site_scan );
+		$this->assertInstanceOf( AfterActivationSiteScan::class, $this->after_activation_site_scan );
+		$this->assertInstanceOf( Conditional::class, $this->after_activation_site_scan );
+		$this->assertInstanceOf( Delayed::class, $this->after_activation_site_scan );
+		$this->assertInstanceOf( Service::class, $this->after_activation_site_scan );
+		$this->assertInstanceOf( Registerable::class, $this->after_activation_site_scan );
 	}
 
 	/** @return array */
@@ -121,6 +121,42 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 				'expected'     => true,
 				'role'         => 'administrator',
 			],
+			'plugins_screen_with_get_activated'          => [
+				'screen_hook'  => 'plugins.php',
+				'query_params' => [ 'activated' ],
+				'expected'     => false,
+				'role'         => 'administrator',
+			],
+			'themes_screen_no_get_vars'                  => [
+				'screen_hook'  => 'themes.php',
+				'query_params' => [],
+				'expected'     => false,
+				'role'         => 'administrator',
+			],
+			'admin_index_with_get_activated'             => [
+				'screen_hook'  => 'index.php',
+				'query_params' => [ 'activated' ],
+				'expected'     => false,
+				'role'         => 'administrator',
+			],
+			'themes_screen_with_get_activated'           => [
+				'screen_hook'  => 'themes.php',
+				'query_params' => [ 'activated' ],
+				'expected'     => true,
+				'role'         => 'administrator',
+			],
+			'themes_screen_with_get_activated_not_admin' => [
+				'screen_hook'  => 'themes.php',
+				'query_params' => [ 'activated' ],
+				'expected'     => false,
+				'role'         => 'editor',
+			],
+			'themes_screen_with_get_activate'            => [
+				'screen_hook'  => 'themes.php',
+				'query_params' => [ 'activate' ],
+				'expected'     => false,
+				'role'         => 'administrator',
+			],
 		];
 	}
 
@@ -149,25 +185,25 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 		}
 
 		wp_set_current_user( self::factory()->user->create( compact( 'role' ) ) );
-		$this->assertEquals( $expected, PluginActivationSiteScan::is_needed() );
+		$this->assertEquals( $expected, AfterActivationSiteScan::is_needed() );
 	}
 
 	/**
-	 * Tests PluginActivationSiteScan::register
+	 * Tests AfterActivationSiteScan::register
 	 *
 	 * @covers ::register
 	 */
 	public function test_register_with_cap() {
-		$this->plugin_activation_site_scan->register();
-		$this->assertEquals( 10, has_action( 'pre_current_active_plugins', [ $this->plugin_activation_site_scan, 'render_notice' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->plugin_activation_site_scan, 'enqueue_assets' ] ) );
+		$this->after_activation_site_scan->register();
+		$this->assertEquals( 10, has_action( 'pre_current_active_plugins', [ $this->after_activation_site_scan, 'render_notice' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->after_activation_site_scan, 'enqueue_assets' ] ) );
 	}
 
 	/**
 	 * @covers ::render_notice
 	 */
 	public function test_render_notice() {
-		$this->assertStringContainsString( 'id="amp-site-scan-notice"', get_echo( [ $this->plugin_activation_site_scan, 'render_notice' ] ) );
+		$this->assertStringContainsString( 'id="amp-site-scan-notice"', get_echo( [ $this->after_activation_site_scan, 'render_notice' ] ) );
 	}
 
 	/** @return array */
@@ -204,16 +240,17 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 
 		$handle = 'amp-site-scan-notice';
 
-		$rest_preloader = $this->get_private_property( $this->plugin_activation_site_scan, 'rest_preloader' );
+		$rest_preloader = $this->get_private_property( $this->after_activation_site_scan, 'rest_preloader' );
 		$this->assertCount( 0, $this->get_private_property( $rest_preloader, 'paths' ) );
 
-		$this->plugin_activation_site_scan->enqueue_assets();
+		$this->after_activation_site_scan->enqueue_assets();
 		$this->assertTrue( wp_script_is( $handle ) );
 		$this->assertTrue( wp_style_is( $handle ) );
 
 		$script_before = implode( '', wp_scripts()->get_data( $handle, 'before' ) );
 		$this->assertStringContainsString( 'var ampSiteScanNotice', $script_before );
 		$this->assertStringContainsString( 'AMP_COMPATIBLE_PLUGINS_URL', $script_before );
+		$this->assertStringContainsString( 'AMP_COMPATIBLE_THEMES_URL', $script_before );
 		$this->assertStringContainsString( 'VALIDATE_NONCE', $script_before );
 		if ( $can_validate ) {
 			$this->assertStringContainsString( AMP_Validation_Manager::get_amp_validate_nonce(), $script_before );
@@ -227,6 +264,7 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 					'/amp/v1/options',
 					'/amp/v1/scannable-urls?_fields%5B0%5D=url&_fields%5B1%5D=amp_url&_fields%5B2%5D=type&_fields%5B3%5D=label',
 					'/wp/v2/plugins?_fields%5B0%5D=author&_fields%5B1%5D=name&_fields%5B2%5D=plugin&_fields%5B3%5D=status&_fields%5B4%5D=version',
+					'/wp/v2/themes?_fields%5B0%5D=author&_fields%5B1%5D=name&_fields%5B2%5D=status&_fields%5B3%5D=stylesheet&_fields%5B4%5D=template&_fields%5B5%5D=version',
 					'/wp/v2/users/me',
 				],
 				$this->get_private_property( $rest_preloader, 'paths' )
@@ -239,9 +277,20 @@ class PluginActivationSiteScanTest extends DependencyInjectedTestCase {
 	 */
 	public function test_get_amp_compatible_plugins_url() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		$this->assertStringContainsString( '/plugin-install.php?tab=amp-compatible', $this->call_private_method( $this->plugin_activation_site_scan, 'get_amp_compatible_plugins_url' ) );
+		$this->assertStringContainsString( '/plugin-install.php?tab=amp-compatible', $this->call_private_method( $this->after_activation_site_scan, 'get_amp_compatible_plugins_url' ) );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'author' ] ) );
-		$this->assertSame( 'https://amp-wp.org/ecosystem/plugins/', $this->call_private_method( $this->plugin_activation_site_scan, 'get_amp_compatible_plugins_url' ) );
+		$this->assertSame( 'https://amp-wp.org/ecosystem/plugins/', $this->call_private_method( $this->after_activation_site_scan, 'get_amp_compatible_plugins_url' ) );
+	}
+
+	/**
+	 * @covers ::get_amp_compatible_themes_url
+	 */
+	public function test_get_amp_compatible_themes_url() {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertStringContainsString( '/theme-install.php?browse=amp-compatible', $this->call_private_method( $this->after_activation_site_scan, 'get_amp_compatible_themes_url' ) );
+
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'author' ] ) );
+		$this->assertSame( 'https://amp-wp.org/ecosystem/themes/', $this->call_private_method( $this->after_activation_site_scan, 'get_amp_compatible_themes_url' ) );
 	}
 }
