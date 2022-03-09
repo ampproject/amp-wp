@@ -579,6 +579,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Returns true if $url is a tracking pixel URL.
 	 */
 	private static function is_tracking_pixel_url( $url ) {
-		return (bool) preg_match( '/http(?>s)?:\/\/(?>www\.)?facebook\.com\/tr\?/i', $url );
+		$parsed_url = wp_parse_url( $url );
+		return isset( $parsed_url['host'], $parsed_url['path'] ) && 'facebook.com' === str_replace( 'www.',  $parsed_url['host'] ) && '/tr' === $parsed_url['path'];
 	}
 }
