@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createPortal, useEffect, useRef } from '@wordpress/element';
+import { createPortal, useLayoutEffect, useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -16,50 +16,37 @@ function WrappedAmpPreviewButton() {
 	const root = useRef( null );
 	const referenceNode = useRef( null );
 
-	const isViewable = useSelect(
-		( select ) => select( 'core' ).getPostType( select( 'core/editor' ).getEditedPostAttribute( 'type' ) )?.viewable,
-		[],
-	);
+	const { isEditedPostSaveable, isViewable } = useSelect( ( select ) => ( {
+		isEditedPostSaveable: select( 'core/editor' ).isEditedPostSaveable(),
+		isViewable: select( 'core' ).getPostType( select( 'core/editor' ).getEditedPostAttribute( 'type' ) )?.viewable,
+	} ), [] );
 
-	useEffect( () => {
-		if ( ! root.current && ! referenceNode.current ) {
-			// At first, we try finding the post preview button that is visible only on small screens.
-			// If found, we will use its next sibling so that `insertBefore` gets us to the exact location
-			// we are looking for.
-			referenceNode.current = document.querySelector( '.editor-post-preview' )?.nextSibling;
+	useLayoutEffect( () => {
+		// The AMP preview button should always be inserted right before the publish/update button.
+		referenceNode.current = document.querySelector( '.editor-post-publish-button__button' );
 
-			// Since the mobile post preview button is rendered with a delay, we are using the post publish/update
-			// button as a fallback. Because it is rendered early, our AMP preview button will be visible immediately.
-			if ( ! referenceNode.current ) {
-				referenceNode.current = document.querySelector( '.editor-post-publish-button' );
-			}
-
-			if ( referenceNode.current ) {
+		if ( referenceNode.current?.parentNode ) {
+			if ( ! root.current ) {
 				root.current = document.createElement( 'div' );
 				root.current.className = 'amp-wrapper-post-preview';
-				referenceNode.current.parentNode.insertBefore( root.current, referenceNode.current );
 			}
+
+			referenceNode.current.parentNode.insertBefore( root.current, referenceNode.current );
 		}
 
 		return () => {
 			if ( referenceNode.current && root.current ) {
 				referenceNode.current.parentNode.removeChild( root.current );
-				root.current = null;
 				referenceNode.current = null;
 			}
 		};
-	// We use `isViewable` as a dependency in order to reposition the preview button once the block editor is fully loaded.
-	}, [ isViewable ] );
+		// AMP Preview button should be "refreshed" whenever settings in the post editor header are re-rendered.
+		// The following properties may indicate a change in the toolbar layout:
+		// - Viewable property gets defined once the toolbar has been rendered.
+		// - When saveable property changes, the toolbar is reshuffled heavily.
+	}, [ isEditedPostSaveable, isViewable ] );
 
-	// It is unlikely that AMP would be enabled for a non-viewable post type. This is why the Preview button will
-	// always be displayed initially (when `isViewable` is undefined), preventing horizontal layout shift.
-	// Once the `isViewable` value is defined (which is after the initial block editor load) and it is `false`,
-	// the Preview button will be hidden causing a minor layout shift.
-	if ( ! root.current || isViewable === false ) {
-		return null;
-	}
-
-	return createPortal( <AmpPreviewButton />, root.current );
+	return root.current ? createPortal( <AmpPreviewButton />, root.current ) : null;
 }
 
 export const name = 'amp-preview-button-wrapper';

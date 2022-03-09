@@ -115,4 +115,39 @@ describe( 'useNormalizedThemesData', () => {
 			},
 		} );
 	} );
+
+	it( 'identifies parent and child themes', () => {
+		const normalizedThemesData = setup( {
+			fetchingThemes: false,
+			themes: [
+				{
+					stylesheet: 'parentTheme',
+					template: 'parentTheme',
+					status: 'inactive',
+				},
+				{
+					stylesheet: 'childTheme',
+					template: 'parentTheme',
+					status: 'active',
+				},
+			],
+		} );
+
+		expect( normalizedThemesData ).toStrictEqual( {
+			parentTheme: {
+				slug: 'parentTheme',
+				stylesheet: 'parentTheme',
+				template: 'parentTheme',
+				status: 'inactive',
+				child: 'childTheme',
+			},
+			childTheme: {
+				slug: 'childTheme',
+				stylesheet: 'childTheme',
+				template: 'parentTheme',
+				status: 'active',
+				parent: 'parentTheme',
+			},
+		} );
+	} );
 } );

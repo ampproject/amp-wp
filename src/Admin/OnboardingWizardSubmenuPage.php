@@ -320,7 +320,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'/wp/v2/settings',
 			add_query_arg(
 				'_fields',
-				[ 'author', 'name', 'status', 'stylesheet', 'version' ],
+				[ 'author', 'name', 'status', 'stylesheet', 'template', 'version' ],
 				'/wp/v2/themes'
 			),
 			'/wp/v2/users/me',

@@ -624,17 +624,21 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			$response_headers = [];
 
 			foreach ( $caching_headers as $header => $callback ) {
-				$header_value = wp_remote_retrieve_header( $http_response, $header );
+				$header_values = wp_remote_retrieve_header( $http_response, $header );
+				if ( empty( $header_values ) ) {
+					continue;
+				}
+				$header_values = (array) $header_values;
 				if (
-					$header_value
-					&&
+					empty( $callback )
+					||
 					(
-						empty( $callback )
-						||
-						( is_callable( $callback ) && true === $callback( $header_value ) )
+						is_callable( $callback )
+						&&
+						count( array_filter( $header_values, $callback ) ) > 0
 					)
 				) {
-					$response_headers[ $header ] = $header_value;
+					$response_headers[ $header ] = $header_values;
 				}
 			}
 
