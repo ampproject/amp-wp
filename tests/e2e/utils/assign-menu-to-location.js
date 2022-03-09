@@ -5,8 +5,14 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
 export async function assignMenuToLocation( menuLocationName ) {
 	await visitAdminPage( 'nav-menus.php', '' );
-	await page.waitForSelector( `input[name="menu-locations[${ menuLocationName }]"]` );
-	await page.click( `input[name="menu-locations[${ menuLocationName }]"]` );
+
+	// Bail out if there is no menu location or it is already selected.
+	const menuLocationCheckbox = await page.$( `input:not(:checked)[name="menu-locations[${ menuLocationName }]"]` );
+	if ( ! menuLocationCheckbox ) {
+		return;
+	}
+
+	await menuLocationCheckbox.click();
 	await page.click( '#save_menu_footer' );
 	await page.waitForSelector( '#message', { text: /has been updated/ } );
 }
