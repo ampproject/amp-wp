@@ -969,7 +969,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	public function test_is_tracking_pixel_url( $url, $expected ) {
 		$this->assertEquals(
 			$expected,
-			$this->call_private_static_method( 'AMP_Img_Sanitizer', 'is_tracking_pixel_url', [ $url ] )
+			$this->call_private_static_method( AMP_Img_Sanitizer::class, 'is_tracking_pixel_url', [ $url ] )
 		);
 	}
 }
