@@ -100,9 +100,9 @@ class ReaderThemesTest extends TestCase {
 		$themes = ( new ReaderThemes() )->get_themes();
 
 		$available_theme_slugs = wp_list_pluck( $themes, 'slug' );
-		$this->assertStringContainsString( 'child-of-core', $available_theme_slugs );
-		$this->assertStringNotContainsString( 'custom', $available_theme_slugs );
-		$this->assertStringNotContainsString( 'with-legacy', $available_theme_slugs );
+		$this->assertContains( 'child-of-core', $available_theme_slugs );
+		$this->assertNotContains( 'custom', $available_theme_slugs );
+		$this->assertNotContains( 'with-legacy', $available_theme_slugs );
 	}
 
 	/**

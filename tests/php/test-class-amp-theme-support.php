@@ -1058,8 +1058,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertMatchesRegularExpression( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+example-admin-bar\.js' ] ) . '/', $output );
 
 		$body_classes = get_body_class();
-		$this->assertStringContainsString( 'customize-support', $body_classes );
-		$this->assertStringNotContainsString( 'no-customize-support', $body_classes );
+		$this->assertContains( 'customize-support', $body_classes );
+		$this->assertNotContains( 'no-customize-support', $body_classes );
 	}
 
 	/**
@@ -2443,7 +2443,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$style_slug = 'amp-default';
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
-		$this->assertStringContainsString( $style_slug, wp_styles()->queue );
+		$this->assertContains( $style_slug, wp_styles()->queue );
 	}
 
 	/**

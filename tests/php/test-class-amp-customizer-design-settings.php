@@ -150,7 +150,7 @@ class Test_AMP_Customizer_Design_Settings extends TestCase {
 		AMP_Customizer_Design_Settings::register_customizer_ui( $wp_customize );
 
 		$section_ids = array_keys( $wp_customize->sections() );
-		$this->assertStringContainsString( 'amp_design', $section_ids );
+		$this->assertContains( 'amp_design', $section_ids );
 
 		$control_ids          = array_keys( $wp_customize->controls() );
 		$expected_control_ids = [

@@ -2945,12 +2945,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$this->assertStringContainsString( 'js/amp-block-validation.js', $script->src );
 		$this->assertEqualSets( $expected_dependencies, $script->deps );
-		$this->assertStringContainsString( $slug, wp_scripts()->queue );
+		$this->assertContains( $slug, wp_scripts()->queue );
 
 		$style = wp_styles()->registered[ $slug ];
 		$this->assertStringContainsString( 'css/amp-block-validation.css', $style->src );
 		$this->assertEquals( AMP__VERSION, $style->ver );
-		$this->assertStringContainsString( $slug, wp_styles()->queue );
+		$this->assertContains( $slug, wp_styles()->queue );
 	}
 
 	/**

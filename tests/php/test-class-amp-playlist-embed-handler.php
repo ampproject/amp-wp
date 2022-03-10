@@ -102,14 +102,14 @@ class Test_AMP_Playlist_Embed_Handler extends TestCase {
 		global $post;
 		$playlist_shortcode = 'amp-playlist-shortcode';
 		$this->instance->register_embed();
-		$this->assertStringNotContainsString( 'wp-mediaelement', wp_styles()->queue );
-		$this->assertStringNotContainsString( $playlist_shortcode, wp_styles()->queue );
+		$this->assertNotContains( 'wp-mediaelement', wp_styles()->queue );
+		$this->assertNotContains( $playlist_shortcode, wp_styles()->queue );
 
 		$post               = self::factory()->post->create_and_get();
 		$post->post_content = '[playlist ids="5,3"]';
 		$this->instance->enqueue_styles();
 		$style = wp_styles()->registered[ $playlist_shortcode ];
-		$this->assertStringContainsString( $playlist_shortcode, wp_styles()->queue );
+		$this->assertContains( $playlist_shortcode, wp_styles()->queue );
 		$this->assertEquals( [ 'wp-mediaelement' ], $style->deps );
 		$this->assertEquals( $playlist_shortcode, $style->handle );
 		$this->assertEquals( amp_get_asset_url( 'css/amp-playlist-shortcode.css' ), $style->src );
