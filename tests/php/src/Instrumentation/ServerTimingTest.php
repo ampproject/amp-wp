@@ -348,7 +348,7 @@ final class ServerTimingTest extends DependencyInjectedTestCase {
 		$events     = $this->get_private_property( $server_timing, 'events' );
 		$main_event = $events['main-event'];
 		$main_event->set_duration( 1.2 );
-		$this->assertStringNotContainsString( 'verbose-event', $events );
+		$this->assertNotContains( 'verbose-event', $events );
 
 		$server_timing->send();
 

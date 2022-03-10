@@ -164,8 +164,8 @@ class Test_Reader_Theme_REST_Controller extends TestCase {
 		$this->assertStringStartsWith( 'The request for reader themes from WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.', $headers['X-AMP-Theme-API-Error'] );
 
 		if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
-			$this->assertContains( 'Test message', $headers['X-AMP-Theme-API-Error'] );
-			$this->assertContains( 'amp_test_error', $headers['X-AMP-Theme-API-Error'] );
+			$this->assertStringContainsString( 'Test message', $headers['X-AMP-Theme-API-Error'] );
+			$this->assertStringContainsString( 'amp_test_error', $headers['X-AMP-Theme-API-Error'] );
 		}
 	}
 }

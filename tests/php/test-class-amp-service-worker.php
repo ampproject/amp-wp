@@ -145,7 +145,7 @@ class Test_AMP_Service_Worker extends TestCase {
 		);
 
 		// Comments.
-		$this->assertStringNotContainsString(
+		$this->assertNotContains(
 			wp_scripts()->registered['amp-live-list']->src,
 			$urls
 		);
