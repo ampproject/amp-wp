@@ -694,7 +694,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $supportable_templates as $id => $supportable_template ) {
-			$this->assertNotInternalType( 'numeric', $id );
+			$this->assertIsNotNumeric( $id );
 			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
 			$this->assertTrue( $supportable_template['supported'] );
 			$this->assertFalse( $supportable_template['immutable'] );
@@ -743,7 +743,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		update_option( 'page_on_front', $page_on_front );
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $supportable_templates as $id => $supportable_template ) {
-			$this->assertNotInternalType( 'numeric', $id );
+			$this->assertIsNotNumeric( $id );
 			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
 		}
 		$this->assertArrayHasKey( 'is_front_page', $supportable_templates );
