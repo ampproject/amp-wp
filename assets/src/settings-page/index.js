@@ -7,10 +7,14 @@ import {
 	HAS_DEPENDENCY_SUPPORT,
 	OPTIONS_REST_PATH,
 	READER_THEMES_REST_PATH,
+	SCANNABLE_URLS_REST_PATH,
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 	USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 	USERS_RESOURCE_REST_PATH,
+	VALIDATE_NONCE,
+	VALIDATED_URLS_LINK,
+	ERROR_INDEX_LINK,
 } from 'amp-settings';
 
 /**
@@ -38,7 +42,11 @@ import { AMPDrawer } from '../components/amp-drawer';
 import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
 import { ErrorScreen } from '../components/error-screen';
 import { User, UserContextProvider } from '../components/user-context-provider';
+import { PluginsContextProvider } from '../components/plugins-context-provider';
+import { ThemesContextProvider } from '../components/themes-context-provider';
+import { SiteScanContextProvider, SiteScan as SiteScanContext } from '../components/site-scan-context-provider';
 import { Welcome } from './welcome';
+import { Sandboxing } from './sandboxing';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { SettingsFooter } from './settings-footer';
@@ -48,6 +56,8 @@ import { Analytics } from './analytics';
 import { PairedUrlStructure } from './paired-url-structure';
 import { MobileRedirection } from './mobile-redirection';
 import { DeveloperTools } from './developer-tools';
+import { SiteScan } from './site-scan';
+import { DeleteDataAtUninstall } from './delete-data-at-uninstall';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -85,7 +95,19 @@ function Providers( { children } ) {
 								updatesNonce={ UPDATES_NONCE }
 								wpAjaxUrl={ wpAjaxUrl }
 							>
-								{ children }
+								<PluginsContextProvider>
+									<ThemesContextProvider>
+										<SiteScanContextProvider
+											fetchCachedValidationErrors={ true }
+											refetchPluginSuppressionOnScanComplete={ true }
+											resetOnOptionsChange={ true }
+											scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
+											validateNonce={ VALIDATE_NONCE }
+										>
+											{ children }
+										</SiteScanContextProvider>
+									</ThemesContextProvider>
+								</PluginsContextProvider>
 							</ReaderThemesContextProvider>
 						</UserContextProvider>
 					</OptionsContextProvider>
@@ -122,6 +144,66 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 }
 
 /**
+ * Get the element for an AMP admin submenu if it exists.
+ *
+ * @param {string} href Link href.
+ * @return {Element|null} LI element or null if not found.
+ */
+function getAmpAdminMenuItem( href ) {
+	const parsedUrl = new URL( href );
+	const searchParams = new Map( new URLSearchParams( parsedUrl.search ).entries() );
+
+	links:
+	for ( const a of document.querySelectorAll( '#toplevel_page_amp-options ul > li > a' ) ) {
+		if ( ! a.pathname.endsWith( parsedUrl.pathname ) ) {
+			continue;
+		}
+
+		const linkSearchParams = new URLSearchParams( parsedUrl.search );
+		for ( const [ key, value ] of searchParams.entries() ) {
+			if ( linkSearchParams.get( key ) !== value ) {
+				continue links;
+			}
+		}
+
+		return a.parentNode;
+	}
+	return null;
+}
+
+/**
+ * Add an item to the AMP admin submenu.
+ *
+ * @param {string} title Link text.
+ * @param {string} href  Link href.
+ */
+function addAmpAdminMenuItem( title, href ) {
+	const ul = document.querySelector( '#toplevel_page_amp-options ul' );
+	if ( ! ul || getAmpAdminMenuItem( href ) ) {
+		return;
+	}
+
+	const li = document.createElement( 'li' );
+	const a = document.createElement( 'a' );
+	a.innerText = title;
+	a.href = href;
+	li.appendChild( a );
+	ul.appendChild( li );
+}
+
+/**
+ * Remove an item from the AMP admin submenu.
+ *
+ * @param {string} href Link href.
+ */
+function removeAmpAdminMenuItem( href ) {
+	const li = getAmpAdminMenuItem( href );
+	if ( li ) {
+		li.remove();
+	}
+}
+
+/**
  * Settings page application root.
  *
  * @param {Object}  props
@@ -131,8 +213,9 @@ function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
 
 	const { hasOptionsChanges, fetchingOptions, saveOptions } = useContext( Options );
-	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption } = useContext( User );
+	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption, developerToolsOption } = useContext( User );
 	const { templateModeWasOverridden } = useContext( ReaderThemes );
+	const { isSkipped } = useContext( SiteScanContext );
 
 	/**
 	 * Handle the form submit event.
@@ -143,10 +226,18 @@ function Root( { appRoot } ) {
 		if ( hasOptionsChanges ) {
 			saveOptions();
 		}
+
 		if ( hasDeveloperToolsOptionChange ) {
 			saveDeveloperToolsOption();
+			if ( developerToolsOption ) {
+				addAmpAdminMenuItem( __( 'Validated URLs', 'amp' ), VALIDATED_URLS_LINK );
+				addAmpAdminMenuItem( __( 'Error Index', 'amp' ), ERROR_INDEX_LINK );
+			} else {
+				removeAmpAdminMenuItem( VALIDATED_URLS_LINK );
+				removeAmpAdminMenuItem( ERROR_INDEX_LINK );
+			}
 		}
-	}, [ hasDeveloperToolsOptionChange, hasOptionsChanges, saveDeveloperToolsOption, saveOptions ] );
+	}, [ hasDeveloperToolsOptionChange, hasOptionsChanges, saveDeveloperToolsOption, saveOptions, developerToolsOption ] );
 
 	/**
 	 * Scroll to the focused element on load or when it changes.
@@ -181,6 +272,10 @@ function Root( { appRoot } ) {
 		};
 	}, [ fetchingOptions ] );
 
+	const focusSiteScanSection = useCallback( () => {
+		setFocusedSection( 'site-scan' );
+	}, [] );
+
 	if ( false !== fetchingOptions || null === templateModeWasOverridden ) {
 		return <Loading />;
 	}
@@ -193,6 +288,9 @@ function Root( { appRoot } ) {
 				</AMPNotice>
 			) }
 			<Welcome />
+			{ ! isSkipped && (
+				<SiteScan onSiteScan={ focusSiteScanSection } />
+			) }
 			<SiteReview />
 			<form onSubmit={ onSubmit }>
 				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />
@@ -236,6 +334,7 @@ function Root( { appRoot } ) {
 				>
 					<Analytics />
 				</AMPDrawer>
+				<Sandboxing focusedSection={ focusedSection } />
 				<PairedUrlStructure focusedSection={ focusedSection } />
 				<AMPDrawer
 					className="amp-other-settings"
@@ -249,7 +348,10 @@ function Root( { appRoot } ) {
 					initialOpen={ 'other-settings' === focusedSection }
 				>
 					<MobileRedirection />
-					<DeveloperTools />
+					{ HAS_DEPENDENCY_SUPPORT && (
+						<DeveloperTools />
+					) }
+					<DeleteDataAtUninstall />
 				</AMPDrawer>
 				<SettingsFooter />
 			</form>

@@ -18,19 +18,14 @@ parameters:
 		- %currentWorkingDirectory%/src/
 	bootstrapFiles:
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/wordpress-defines.php
-	autoload_files:
-		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/wordpress-defines.php
 		- %currentWorkingDirectory%/vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+		- %currentWorkingDirectory%/amp.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/wp-cli.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/pwa.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/twentyseventeen.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/legacy-i18n.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/gutenberg.php
-		- %currentWorkingDirectory%/vendor/autoload.php
-		- %currentWorkingDirectory%/amp.php
-		- %currentWorkingDirectory%/includes/amp-frontend-actions.php
-		- %currentWorkingDirectory%/includes/amp-post-template-functions.php
-	excludes_analyse:
+	excludePaths:
 		# PHPStan cannot yet deal with view templates. See https://github.com/phpstan/phpstan/issues/351
 		- %currentWorkingDirectory%/includes/templates/amp-enabled-classic-editor-toggle.php
 	ignoreErrors:

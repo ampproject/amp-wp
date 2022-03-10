@@ -9,18 +9,13 @@
 
 namespace AmpProject\AmpWP\Cli;
 
-use AMP_Options_Manager;
-use AMP_Theme_Support;
 use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
-use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\CliCommand;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
-use AmpProject\AmpWP\Validation\URLScanningContext;
+use AmpProject\AmpWP\Validation\URLValidationProvider;
 use Exception;
 use WP_CLI;
 use WP_CLI\Utils;
@@ -43,6 +38,7 @@ final class ValidationCommand implements Service, CliCommand {
 	 * For example, by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
 	 * But with this flag, validation will ignore these options.
 	 *
+	 * @since 2.2 This is no longer used.
 	 * @var string
 	 */
 	const FLAG_NAME_FORCE_VALIDATION = 'force';
@@ -107,6 +103,17 @@ final class ValidationCommand implements Service, CliCommand {
 	}
 
 	/**
+	 * Construct.
+	 *
+	 * @param URLValidationProvider $url_validation_provider URL validation provider.
+	 * @param ScannableURLProvider  $scannable_url_provider  Scannable URL provider.
+	 */
+	public function __construct( URLValidationProvider $url_validation_provider, ScannableURLProvider $scannable_url_provider ) {
+		$this->url_validation_provider = $url_validation_provider;
+		$this->scannable_url_provider  = $scannable_url_provider;
+	}
+
+	/**
 	 * Crawl the entire site to get AMP validation results.
 	 *
 	 * ## OPTIONS
@@ -121,7 +128,7 @@ final class ValidationCommand implements Service, CliCommand {
 	 * : Only validates a URL if one of the conditionals is true.
 	 *
 	 * [--force]
-	 * : Force validation of URLs even if their associated templates or object types do not have AMP enabled.
+	 * : (Obsolete) Force validation of URLs even if their associated templates or object types do not have AMP enabled.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -134,9 +141,20 @@ final class ValidationCommand implements Service, CliCommand {
 	public function run( /** @noinspection PhpUnusedParameterInspection */ $args, $assoc_args ) {
 		$this->assoc_args = $assoc_args;
 
-		$scannable_url_provider  = $this->get_validation_url_provider();
-		$url_validation_provider = $this->get_validation_provider();
-		$urls                    = $scannable_url_provider->get_urls();
+		if ( Utils\get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false ) ) {
+			WP_CLI::warning( sprintf( 'The --%s argument is obsolete.', self::FLAG_NAME_FORCE_VALIDATION ) );
+		}
+
+		$include_conditionals = Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
+		if ( is_string( $include_conditionals ) ) {
+			$include_conditionals = explode( ',', $include_conditionals );
+		}
+		$this->scannable_url_provider->set_include_conditionals( $include_conditionals );
+
+		$limit_per_type = Utils\get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
+		$this->scannable_url_provider->set_limit_per_type( $limit_per_type );
+
+		$urls = $this->scannable_url_provider->get_urls();
 
 		$number_urls_to_crawl = count( $urls );
 		if ( ! $number_urls_to_crawl ) {
@@ -148,12 +166,7 @@ final class ValidationCommand implements Service, CliCommand {
 					)
 				);
 			} else {
-				WP_CLI::error(
-					sprintf(
-						'All of your templates might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.',
-						self::FLAG_NAME_FORCE_VALIDATION
-					)
-				);
+				WP_CLI::error( 'All of your templates might be unchecked in AMP Settings > Supported Templates.' );
 			}
 		}
 
@@ -168,12 +181,12 @@ final class ValidationCommand implements Service, CliCommand {
 
 		$this->wp_cli_progress->finish();
 
-		$key_template_type = 'Template or content type';
+		$key_template_type = 'Template';
 		$key_url_count     = 'URL Count';
 		$key_validity_rate = 'Validity Rate';
 
 		$table_validation_by_type = [];
-		foreach ( $url_validation_provider->get_validity_by_type() as $type_name => $validity ) {
+		foreach ( $this->url_validation_provider->get_validity_by_type() as $type_name => $validity ) {
 			$table_validation_by_type[] = [
 				$key_template_type => $type_name,
 				$key_url_count     => $validity['total'],
@@ -190,9 +203,9 @@ final class ValidationCommand implements Service, CliCommand {
 		WP_CLI::success(
 			sprintf(
 				'%3$d crawled URLs have invalid markup kept out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.',
-				$url_validation_provider->get_number_validated(),
-				$url_validation_provider->get_total_errors(),
-				$url_validation_provider->get_unaccepted_errors()
+				$this->url_validation_provider->get_number_validated(),
+				$this->url_validation_provider->get_total_errors(),
+				$this->url_validation_provider->get_unaccepted_errors()
 			)
 		);
 
@@ -212,103 +225,17 @@ final class ValidationCommand implements Service, CliCommand {
 	}
 
 	/**
-	 * Provides the ScannableURLProvider instance.
-	 *
-	 * @return ScannableURLProvider
-	 * @throws WP_CLI\ExitException If templates are disallowed by current config.
-	 */
-	private function get_validation_url_provider() {
-		if ( ! is_null( $this->scannable_url_provider ) ) {
-			return $this->scannable_url_provider;
-		}
-
-		$include_conditionals      = Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
-		$force_crawl_urls          = Utils\get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
-		$limit_type_validate_count = Utils\get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
-
-		/*
-		 * Handle the argument and flag passed to the command: --include and --force.
-		 * If the self::INCLUDE_ARGUMENT is present, force crawling of URLs.
-		 * The WP-CLI command should indicate which templates are crawled, not the /wp-admin options.
-		 */
-		if ( ! empty( $include_conditionals ) ) {
-			if ( is_string( $include_conditionals ) ) {
-				$include_conditionals = explode( ',', $include_conditionals );
-			}
-
-			$force_crawl_urls = true;
-		}
-
-		// Handle special case for Legacy Reader mode.
-		if (
-			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
-			&&
-			ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
-		) {
-			$allowed_templates = [
-				'is_singular',
-			];
-			if ( 'page' === get_option( 'show_on_front' ) ) {
-				$allowed_templates[] = 'is_home';
-				$allowed_templates[] = 'is_front_page';
-			}
-
-			$disallowed_templates = array_diff( $include_conditionals, $allowed_templates );
-			if ( ! empty( $disallowed_templates ) ) {
-				WP_CLI::error(
-					sprintf(
-						'Templates not supported in legacy Reader mode with current configuration: %s',
-						implode( ',', $disallowed_templates )
-					)
-				);
-			}
-
-			if ( empty( $include_conditionals ) ) {
-				$include_conditionals = $allowed_templates;
-			}
-		}
-
-		$this->scannable_url_provider = new ScannableURLProvider(
-			new URLScanningContext(
-				$limit_type_validate_count,
-				$include_conditionals,
-				$force_crawl_urls
-			)
-		);
-
-		return $this->scannable_url_provider;
-	}
-
-	/**
-	 * Provides the site scan instance.
-	 *
-	 * @return URLValidationProvider
-	 */
-	private function get_validation_provider() {
-		if ( ! is_null( $this->url_validation_provider ) ) {
-			return $this->url_validation_provider;
-		}
-
-		$this->url_validation_provider = new URLValidationProvider();
-
-		return $this->url_validation_provider;
-	}
-
-	/**
 	 * Validates the URLs.
 	 *
 	 * @param array $urls URLs to validate, or null to get URLs from the scannable URL provider.
 	 */
-	private function validate_urls( $urls = null ) {
-		$url_validation_provider = $this->get_validation_provider();
-
+	private function validate_urls( $urls = [] ) {
 		if ( ! $urls ) {
-			$scannable_url_provider = $this->get_validation_url_provider();
-			$urls                   = $scannable_url_provider->get_urls();
+			$urls = $this->scannable_url_provider->get_urls();
 		}
 
 		foreach ( $urls as $url ) {
-			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'] );
+			$validity = $this->url_validation_provider->get_url_validation( $url['url'], $url['type'] );
 
 			if ( $this->wp_cli_progress ) {
 				$this->wp_cli_progress->tick();

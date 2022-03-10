@@ -11,13 +11,18 @@ use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
+use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\LoadingError;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use AMP_Options_Manager;
+use AMP_Validation_Manager;
 
 /**
  * Tests for OptionsMenu.
@@ -25,7 +30,11 @@ use AMP_Options_Manager;
  * @group options-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\OptionsMenu
  */
-class OptionsMenuTest extends TestCase {
+class OptionsMenuTest extends DependencyInjectedTestCase {
+
+	use HomeUrlLoopbackRequestMocking;
+	use ThemesApiRequestMocking;
+	use PrivateAccess;
 
 	/**
 	 * Instance of OptionsMenu
@@ -41,7 +50,13 @@ class OptionsMenuTest extends TestCase {
 	 */
 	public function set_up() {
 		parent::set_up();
-		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError() );
+
+		$site_health = $this->injector->make( SiteHealth::class );
+
+		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader(), new DependencySupport(), new LoadingError(), $site_health );
+
+		$this->add_reader_themes_request_filter();
+		$this->add_home_url_loopback_request_mocking();
 	}
 
 	/**
@@ -167,10 +182,41 @@ class OptionsMenuTest extends TestCase {
 		$this->assertFalse( wp_style_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
 	}
 
-	/** @covers ::enqueue_assets() */
-	public function test_enqueue_assets_right_hook_suffix() {
+	/** @return array */
+	public function get_can_validate_data() {
+		return [
+			'can_validate'    => [ true ],
+			'cannot_validate' => [ false ],
+		];
+	}
+
+	/**
+	 * @dataProvider get_can_validate_data
+	 * @covers ::enqueue_assets()
+	 * @covers ::add_preload_rest_paths()
+	 *
+	 * @param bool $can_validate
+	 */
+	public function test_enqueue_assets_right_hook_suffix( $can_validate ) {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		set_current_screen( $this->instance->screen_handle() );
+		if ( ! $can_validate ) {
+			add_filter(
+				'map_meta_cap',
+				function ( $caps, $cap ) {
+					if ( AMP_Validation_Manager::VALIDATE_CAPABILITY === $cap ) {
+						$caps[] = 'do_not_allow';
+					}
+					return $caps;
+				},
+				10,
+				3
+			);
+		}
+		$this->assertEquals( $can_validate, AMP_Validation_Manager::has_cap() );
+
+		$rest_preloader = $this->get_private_property( $this->instance, 'rest_preloader' );
+		$this->assertCount( 0, $this->get_private_property( $rest_preloader, 'paths' ) );
 
 		$this->assertFalse( wp_script_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
 		$this->assertFalse( wp_style_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
@@ -186,13 +232,25 @@ class OptionsMenuTest extends TestCase {
 		$this->assertStringContainsString( 'var ampSettings', $script_before );
 		$this->assertStringContainsString( 'USER_FIELD_DEVELOPER_TOOLS_ENABLED', $script_before );
 		$this->assertStringContainsString( 'USERS_RESOURCE_REST_PATH', $script_before );
+		if ( $can_validate ) {
+			$this->assertStringContainsString( AMP_Validation_Manager::get_amp_validate_nonce(), $script_before );
+		} else {
+			$this->assertStringNotContainsString( AMP_Validation_Manager::get_amp_validate_nonce(), $script_before );
+		}
 
-		$wp_api_fetch_after = implode( "\n", wp_scripts()->get_data( 'wp-api-fetch', 'after' ) );
 		if ( function_exists( 'rest_preload_api_request' ) ) {
-			$this->assertStringContainsString( wp_json_encode( '/amp/v1/options' ), $wp_api_fetch_after );
-			$this->assertStringContainsString( wp_json_encode( '/amp/v1/reader-themes' ), $wp_api_fetch_after );
-			$this->assertStringContainsString( wp_json_encode( '/wp/v2/settings' ), $wp_api_fetch_after );
-			$this->assertStringContainsString( wp_json_encode( '/wp/v2/users/me' ), $wp_api_fetch_after );
+			$this->assertEqualSets(
+				[
+					'/amp/v1/options',
+					'/amp/v1/reader-themes',
+					'/amp/v1/scannable-urls?_fields%5B0%5D=url&_fields%5B1%5D=amp_url&_fields%5B2%5D=type&_fields%5B3%5D=label&_fields%5B4%5D=validation_errors&_fields%5B5%5D=stale',
+					'/wp/v2/plugins?_fields%5B0%5D=author&_fields%5B1%5D=name&_fields%5B2%5D=plugin&_fields%5B3%5D=status&_fields%5B4%5D=version',
+					'/wp/v2/settings',
+					'/wp/v2/themes?_fields%5B0%5D=author&_fields%5B1%5D=name&_fields%5B2%5D=status&_fields%5B3%5D=stylesheet&_fields%5B4%5D=template&_fields%5B5%5D=version',
+					'/wp/v2/users/me',
+				],
+				$this->get_private_property( $rest_preloader, 'paths' )
+			);
 		}
 	}
 

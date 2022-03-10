@@ -7,23 +7,25 @@
 
 namespace AmpProject\AmpWP\Tests\Support;
 
-use AmpProject\AmpWP\Support\SupportCliCommand;
-use AmpProject\AmpWP\Support\SupportData;
 use AmpProject\AmpWP\Support\SupportRESTController;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use WP_Error;
+use WP_REST_Request;
 
 /**
  * Test cases for SupportRESTController
  *
  * @coversDefaultClass \AmpProject\AmpWP\Support\SupportRESTController
  */
-class SupportRESTControllerTest extends TestCase {
+class SupportRESTControllerTest extends DependencyInjectedTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Instance of OptionsMenu
 	 *
-	 * @var SupportCliCommand
+	 * @var SupportRESTController
 	 */
 	public $instance;
 
@@ -36,11 +38,11 @@ class SupportRESTControllerTest extends TestCase {
 
 		parent::set_up();
 
-		$this->instance = new SupportRESTController( new SupportData() );
+		$this->instance = $this->injector->make( SupportRESTController::class );
 	}
 
 	/**
-	 * @covers ::get_registration_action
+	 * @covers ::get_registration_action()
 	 */
 	public function test_get_registration_action() {
 
@@ -51,7 +53,29 @@ class SupportRESTControllerTest extends TestCase {
 	}
 
 	/**
-	 * @covers ::permission_callback
+	 * @covers ::register()
+	 */
+	public function test_register() {
+
+		do_action( 'rest_api_init' );
+
+		$rest_server = rest_get_server();
+
+		$namespaces = $this->get_private_property( $rest_server, 'namespaces' );
+
+		$this->assertContains(
+			'amp/v1',
+			$rest_server->get_namespaces()
+		);
+
+		$this->assertContains(
+			'/amp/v1/send-diagnostic',
+			array_keys( $namespaces['amp/v1'] )
+		);
+	}
+
+	/**
+	 * @covers ::permission_callback()
 	 */
 	public function test_permission_callback() {
 
@@ -86,7 +110,7 @@ class SupportRESTControllerTest extends TestCase {
 				],
 				'expected'         => new \WP_Error(
 					'fail_to_send_data',
-					'Failed to send support request. Please try again after some time',
+					'Failed to send support request. Please try again later.',
 					[ 'status' => 500 ]
 				),
 			],
@@ -113,7 +137,7 @@ class SupportRESTControllerTest extends TestCase {
 	 * @param array          $request_response Value to mock for response for API.
 	 * @param array|WP_Error $expected         Expected AJAX response.
 	 *
-	 * @covers ::callback
+	 * @covers ::callback()
 	 */
 	public function test_callback( $request_response, $expected ) {
 
@@ -148,7 +172,7 @@ class SupportRESTControllerTest extends TestCase {
 
 		add_filter( 'pre_http_request', $callback_wp_remote );
 
-		$request  = new \WP_REST_Request( 'POST', $this->instance->namespace . '/send-diagnostic', [] );
+		$request  = new WP_REST_Request( 'POST', $this->instance->namespace . '/send-diagnostic', [] );
 		$response = $this->instance->callback( $request );
 
 		if ( ! is_wp_error( $response ) ) {

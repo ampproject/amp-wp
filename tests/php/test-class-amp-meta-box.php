@@ -171,7 +171,6 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 				'wp-hooks',
 				'wp-i18n',
 				'wp-plugins',
-				'wp-polyfill',
 			],
 			$block_script->deps
 		);

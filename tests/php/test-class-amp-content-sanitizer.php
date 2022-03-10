@@ -38,7 +38,7 @@ class Test_AMP_Content_Sanitizer extends TestCase {
 			$sanitize_results['scripts']
 		);
 		$this->assertEquals(
-			[ ':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-9f6e771{outline:solid 1px red}' ],
+			[ '.amp-wp-9f6e771:not(#_#_#_#_#_){outline:solid 1px red}' ],
 			$sanitize_results['stylesheets']
 		);
 		$this->assertEmpty( $sanitize_results['styles'] );
@@ -72,9 +72,9 @@ class Test_AMP_Content_Sanitizer extends TestCase {
 	public function test_sanitize_all() {
 		$source_html     = '<video style="outline: solid 1px red;" src="https://example.com/foo.mp4" width="100" height="200"></video>';
 		$expected_return = [
-			'<amp-video src="https://example.com/foo.mp4" width="100" height="200" layout="responsive" data-amp-original-style="outline: solid 1px red;" class="amp-wp-9f6e771"><a href="https://example.com/foo.mp4" fallback="">https://example.com/foo.mp4</a><noscript><video src="https://example.com/foo.mp4" width="100" height="200"></video></noscript></amp-video>',
+			'<amp-video src="https://example.com/foo.mp4" width="100" height="200" layout="intrinsic" data-amp-original-style="outline: solid 1px red;" class="amp-wp-9f6e771"><a href="https://example.com/foo.mp4" fallback="">https://example.com/foo.mp4</a><noscript><video src="https://example.com/foo.mp4" width="100" height="200"></video></noscript></amp-video>',
 			[ 'amp-video' => true ],
-			[ ':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-9f6e771{outline:solid 1px red}' ],
+			[ '.amp-wp-9f6e771:not(#_#_#_#_#_){outline:solid 1px red}' ],
 		];
 
 		$actual_return = AMP_Content_Sanitizer::sanitize(

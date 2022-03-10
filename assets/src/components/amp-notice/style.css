@@ -34,7 +34,8 @@
 	background-color: #effbff;
 }
 
-.amp-notice--info svg {
+.amp-notice--info svg,
+.amp-notice--plain svg {
 	color: var(--amp-settings-color-brand);
 }
 
@@ -49,6 +50,10 @@
 
 .amp-notice--error {
 	background-color: #ffefef;
+}
+
+.amp-notice.amp-notice--plain {
+	padding: 1px 5px;
 }
 
 .amp-notice--small {

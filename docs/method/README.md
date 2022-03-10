@@ -16,6 +16,8 @@
 * [`AMP_Base_Sanitizer::clean_up_after_attribute_removal()`](AMP_Base_Sanitizer/clean_up_after_attribute_removal.md) - Cleans up artifacts after the removal of an attribute node.
 * [`AMP_Base_Sanitizer::filter_attachment_layout_attributes()`](AMP_Base_Sanitizer/filter_attachment_layout_attributes.md) - Set attributes to node&#039;s parent element according to layout.
 * [`AMP_Base_Sanitizer::filter_data_amp_attributes()`](AMP_Base_Sanitizer/filter_data_amp_attributes.md) - Set AMP attributes.
+* [`AMP_Base_Sanitizer::get_arg()`](AMP_Base_Sanitizer/get_arg.md) - Get arg.
+* [`AMP_Base_Sanitizer::get_args()`](AMP_Base_Sanitizer/get_args.md) - Get args.
 * ~~[`AMP_Base_Sanitizer::get_body_node()`](AMP_Base_Sanitizer/get_body_node.md) - Get HTML body as DOMElement from Dom\Document received by the constructor.~~
 * [`AMP_Base_Sanitizer::get_data_amp_attributes()`](AMP_Base_Sanitizer/get_data_amp_attributes.md) - Get data-amp-* values from the parent node &#039;figure&#039; added by editor block.
 * [`AMP_Base_Sanitizer::get_scripts()`](AMP_Base_Sanitizer/get_scripts.md) - Return array of values that would be valid as an HTML `script` element.
@@ -23,6 +25,7 @@
 * [`AMP_Base_Sanitizer::get_stylesheets()`](AMP_Base_Sanitizer/get_stylesheets.md) - Get stylesheets.
 * [`AMP_Base_Sanitizer::get_validate_response_data()`](AMP_Base_Sanitizer/get_validate_response_data.md) - Get data that is returned in validate responses.
 * ~~[`AMP_Base_Sanitizer::has_dev_mode_exemption()`](AMP_Base_Sanitizer/has_dev_mode_exemption.md) - Check whether a node is exempt from validation during dev mode.~~
+* [`AMP_Base_Sanitizer::has_light_shadow_dom()`](AMP_Base_Sanitizer/has_light_shadow_dom.md) - Determine whether the resulting AMP element uses a &quot;light&quot; shadow DOM.
 * [`AMP_Base_Sanitizer::init()`](AMP_Base_Sanitizer/init.md) - Run logic before any sanitizers are run.
 * ~~[`AMP_Base_Sanitizer::is_document_in_dev_mode()`](AMP_Base_Sanitizer/is_document_in_dev_mode.md) - Check whether the document of a given node is in dev mode.~~
 * [`AMP_Base_Sanitizer::is_empty_attribute_value()`](AMP_Base_Sanitizer/is_empty_attribute_value.md) - Determine if an attribute value is empty.

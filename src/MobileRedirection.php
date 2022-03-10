@@ -7,12 +7,12 @@
 
 namespace AmpProject\AmpWP;
 
+use AMP_HTTP;
 use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\Attribute;
-use AMP_Theme_Support;
-use AMP_HTTP;
+use AmpProject\Html\Attribute;
 
 /**
  * Service for redirecting mobile users to the AMP version of a page.
@@ -553,11 +553,11 @@ final class MobileRedirection implements Service, Registerable {
 
 		$is_amp = amp_is_request();
 		if ( $is_amp ) {
-			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
+			$rel  = [ Attribute::REL_NOFOLLOW ];
 			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $this->paired_routing->remove_endpoint( amp_get_current_url() ) );
 			$text = __( 'Exit mobile version', 'amp' );
 		} else {
-			$rel  = [ Attribute::REL_AMPHTML ];
+			$rel  = [];
 			$url  = $this->get_current_amp_url();
 			$text = __( 'Go to mobile version', 'amp' );
 		}

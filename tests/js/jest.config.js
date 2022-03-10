@@ -31,6 +31,6 @@ module.exports = {
 	coverageDirectory: '<rootDir>/build/logs',
 	reporters: [
 		[ 'jest-silent-reporter', { useDots: true } ],
-		'<rootDir>/node_modules/@wordpress/scripts/config/jest-github-actions-reporter.js',
+		'<rootDir>/node_modules/@wordpress/scripts/config/jest-github-actions-reporter',
 	],
 };

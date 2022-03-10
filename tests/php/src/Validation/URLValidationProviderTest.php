@@ -25,7 +25,7 @@ final class URLValidationProviderTest extends TestCase {
 	public function set_up() {
 		parent::set_up();
 		$this->url_validation_provider = new URLValidationProvider();
-		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
+		$this->add_validate_response_mocking_filter();
 	}
 
 	/**

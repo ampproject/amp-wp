@@ -1,13 +1,13 @@
 /**
+ * External dependencies
+ */
+import { SETTINGS_LINK } from 'amp-settings'; // From WP inline script.
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect } from '@wordpress/element';
-
-/**
- * External dependencies
- */
-import { SETTINGS_LINK } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -22,6 +22,7 @@ import {
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../../components/options-context-provider';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
+import { SiteScan } from '../../../components/site-scan-context-provider';
 import { User } from '../../../components/user-context-provider';
 import { IconLaptopToggles } from '../../../components/svg/icon-laptop-toggles';
 import { IconLaptopSearch } from '../../../components/svg/icon-laptop-search';
@@ -47,7 +48,15 @@ export function Done() {
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
-	const { previewLinks, setActivePreviewLink, previewUrl, isPreviewingAMP, toggleIsPreviewingAMP } = usePreview();
+	const { fetchScannableUrls, forceStandardMode, isFetchingScannableUrls } = useContext( SiteScan );
+	const {
+		hasPreview,
+		isPreviewingAMP,
+		previewLinks,
+		previewUrl,
+		setActivePreviewLink,
+		toggleIsPreviewingAMP,
+	} = usePreview();
 
 	/**
 	 * Allow the finish button to be enabled.
@@ -68,6 +77,15 @@ export function Done() {
 	}, [ didSaveOptions, saveOptions, savingOptions ] );
 
 	/**
+	 * Refetches the scannable URLs if they have been requested with Standard mode forced last time.
+	 */
+	useEffect( () => {
+		if ( didSaveOptions && forceStandardMode ) {
+			fetchScannableUrls();
+		}
+	}, [ didSaveOptions, fetchScannableUrls, forceStandardMode ] );
+
+	/**
 	 * Triggers saving of user options on arrival of this screen.
 	 */
 	useEffect( () => {
@@ -76,7 +94,7 @@ export function Done() {
 		}
 	}, [ didSaveDeveloperToolsOption, savingDeveloperToolsOption, saveDeveloperToolsOption ] );
 
-	if ( savingOptions || savingDeveloperToolsOption || downloadingTheme || hasOptionsChanges ) {
+	if ( savingOptions || savingDeveloperToolsOption || downloadingTheme || hasOptionsChanges || isFetchingScannableUrls ) {
 		return <Saving />;
 	}
 
@@ -104,39 +122,55 @@ export function Done() {
 					{ __( 'Your site is ready to bring great experiences to your users!', 'amp' ) }
 				</p>
 				{ STANDARD === themeSupport && (
-					<p>
-						{ __( 'In Standard mode there is a single AMP version of your site. Browse your site here to ensure it meets your expectations.', 'amp' ) }
-					</p>
+					<>
+						<p>
+							{ __( 'In Standard mode there is a single AMP version of your site.', 'amp' ) }
+						</p>
+						{ hasPreview && (
+							<p>
+								{ __( 'Browse your site here to ensure it meets your expectations.', 'amp' ) }
+							</p>
+						) }
+					</>
 				) }
 				{ TRANSITIONAL === themeSupport && (
 					<>
 						<p>
 							{ __( 'In Transitional mode AMP and non-AMP versions of your site are served using your currently active theme.', 'amp' ) }
 						</p>
-						<p>
-							{ __( 'Browse your site here to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
-						</p>
+						{ hasPreview && (
+							<p>
+								{ __( 'Browse your site here to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
+							</p>
+						) }
 					</>
 				) }
 				{ READER === themeSupport && (
 					<>
 						<p>
-							{ __( 'In Reader mode AMP is served using your selected Reader theme, and pages for your non-AMP site are served using your primary theme. Browse your site here to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
+							{ __( 'In Reader mode AMP is served using your selected Reader theme, and pages for your non-AMP site are served using your primary theme.', 'amp' ) }
 						</p>
+						{ hasPreview && (
+							<p>
+								{ __( 'Browse your site here to ensure it meets your expectations, and toggle the AMP setting to compare both versions.', 'amp' ) }
+							</p>
+						) }
 						<p>
 							{ __( 'As a last step, use the Customizer to tailor the Reader theme as needed.', 'amp' ) }
 						</p>
 					</>
 				) }
-				<div className="done__links-container">
-					<NavMenu
-						links={ previewLinks }
-						onClick={ ( e, link ) => {
-							e.preventDefault();
-							setActivePreviewLink( link );
-						} }
-					/>
-				</div>
+				{ hasPreview && (
+					<div className="done__links-container">
+						<NavMenu
+							links={ previewLinks }
+							onClick={ ( e, link ) => {
+								e.preventDefault();
+								setActivePreviewLink( link );
+							} }
+						/>
+					</div>
+				) }
 			</div>
 			<div className="done__preview-container">
 				{ READER === themeSupport && downloadingThemeError && (
@@ -144,15 +178,19 @@ export function Done() {
 						{ __( 'There was an error downloading your Reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
 					</AMPNotice>
 				) }
-				{ STANDARD !== themeSupport && (
-					<AMPSettingToggle
-						text={ __( 'AMP', 'amp' ) }
-						checked={ isPreviewingAMP }
-						onChange={ toggleIsPreviewingAMP }
-						compact={ true }
-					/>
+				{ hasPreview && (
+					<>
+						{ STANDARD !== themeSupport && (
+							<AMPSettingToggle
+								text={ __( 'AMP', 'amp' ) }
+								checked={ isPreviewingAMP }
+								onChange={ toggleIsPreviewingAMP }
+								compact={ true }
+							/>
+						) }
+						<Preview url={ previewUrl } />
+					</>
 				) }
-				<Preview url={ previewUrl } />
 			</div>
 			<div className="done__content done__content--secondary">
 				<h2 className="done__icon-title">

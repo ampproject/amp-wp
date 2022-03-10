@@ -1,12 +1,14 @@
 <?php
 /**
- * Class ValidatedUrlCounts.
+ * Class ValidationCounts.
  *
  * @package AmpProject\AmpWP
  */
 
 namespace AmpProject\AmpWP\Admin;
 
+use AMP_Options_Manager;
+use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\HasRequirements;
@@ -29,6 +31,22 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 	 * @var string
 	 */
 	const ASSETS_HANDLE = 'amp-validation-counts';
+
+	/**
+	 * RESTPreloader instance.
+	 *
+	 * @var RESTPreloader
+	 */
+	private $rest_preloader;
+
+	/**
+	 * ValidationCounts constructor.
+	 *
+	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
+	 */
+	public function __construct( RESTPreloader $rest_preloader ) {
+		$this->rest_preloader = $rest_preloader;
+	}
 
 	/**
 	 * Get the action to use for registering the service.
@@ -93,5 +111,23 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 			false,
 			$version
 		);
+
+		$this->maybe_add_preload_rest_paths();
+	}
+
+	/**
+	 * Adds REST paths to preload.
+	 *
+	 * Preload validation counts data on an admin screen that has the AMP Options page as a parent or on any admin
+	 * screen related to `amp_validation_error` post type (which includes the `amp_validation_error` taxonomy).
+	 */
+	protected function maybe_add_preload_rest_paths() {
+		if (
+			AMP_Options_Manager::OPTION_NAME === get_admin_page_parent()
+			||
+			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === get_current_screen()->post_type
+		) {
+			$this->rest_preloader->add_preloaded_path( '/amp/v1/unreviewed-validation-counts' );
+		}
 	}
 }

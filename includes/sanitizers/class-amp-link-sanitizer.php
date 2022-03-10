@@ -6,8 +6,8 @@
  */
 
 use AmpProject\Dom\Document;
-use AmpProject\Attribute;
-use AmpProject\Tag;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Link_Sanitizer.
@@ -217,14 +217,16 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 		$query_vars = [];
 
-		// Add rel=amphtml.
 		if ( ! $excluded ) {
-			$rel[] = Attribute::REL_AMPHTML;
-			$rel   = array_diff(
+			$rel = array_diff(
 				$rel,
 				[ Attribute::REL_NOAMPHTML ]
 			);
-			$element->setAttribute( Attribute::REL, implode( ' ', $rel ) );
+			if ( ! empty( $rel ) ) {
+				$element->setAttribute( Attribute::REL, implode( ' ', $rel ) );
+			} else {
+				$element->removeAttribute( Attribute::REL );
+			}
 		}
 
 		/**

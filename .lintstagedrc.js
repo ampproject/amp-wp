@@ -2,13 +2,13 @@ module.exports = {
 	"package.json": [
 		"npm run lint:pkg-json"
 	],
-	"**/*.css": [
+	"**/*.(css|scss)": [
 		"npm run lint:css"
 	],
 	"**/*.js": [
 		"npm run lint:js"
 	],
-	"**/!(amp).php": [
+	"**/!(amp.php).php": [
 		"npm run lint:php"
 	],
 	"amp.php": [

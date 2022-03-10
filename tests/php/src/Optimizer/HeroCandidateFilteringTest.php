@@ -2,12 +2,12 @@
 
 namespace AmpProject\AmpWP\Tests\Optimizer;
 
-use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Optimizer\HeroCandidateFiltering;
-use AmpProject\Attribute;
 use AMP_Options_Manager;
-use AmpProject\AmpWP\Option;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\Optimizer\HeroCandidateFiltering;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\Html\Attribute;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Optimizer\HeroCandidateFiltering */
 final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {

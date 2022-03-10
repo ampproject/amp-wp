@@ -71,6 +71,7 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 				'mobile_redirect',
 				'plugin_configured',
 				'all_templates_supported',
+				'delete_data_at_uninstall',
 				'suppressed_plugins',
 				'supported_templates',
 				'supported_post_types',
@@ -87,6 +88,8 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 				'custom_paired_endpoint_sources',
 				'endpoint_path_slug_conflicts',
 				'rewrite_using_permalinks',
+				'sandboxing_enabled',
+				'sandboxing_level',
 			],
 			array_keys( $data )
 		);

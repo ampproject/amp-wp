@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\DevTools\UserAccess;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
@@ -60,7 +61,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$this->assertFalse( $taxonomy_object->show_tagcloud );
 		$this->assertFalse( $taxonomy_object->show_in_quick_edit );
 		$this->assertFalse( $taxonomy_object->hierarchical );
-		$this->assertTrue( $taxonomy_object->show_in_menu );
+		$this->assertEquals( ( new DependencySupport() )->has_support(), $taxonomy_object->show_in_menu );
 		$this->assertFalse( $taxonomy_object->meta_box_cb );
 		$this->assertEquals( 'AMP Validation Error Index', $taxonomy_object->label );
 		$this->assertEquals( 'do_not_allow', $taxonomy_object->cap->assign_terms );
@@ -567,7 +568,10 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$this->assertEquals( 10, has_filter( 'terms_clauses', [ self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ self::TESTED_CLASS, 'add_admin_notices' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', [ self::TESTED_CLASS, 'filter_tag_row_actions' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ] ) );
+		$this->assertEquals(
+			( new DependencySupport() )->has_support() ? 10 : false,
+			has_action( 'admin_menu', [ self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ] )
+		);
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_custom_column', [ self::TESTED_CLASS, 'filter_manage_custom_columns' ] ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', [ self::TESTED_CLASS, 'add_single_post_sortable_columns' ] ) );
 		$this->assertEquals( 10, has_filter( 'posts_where', [ self::TESTED_CLASS, 'filter_posts_where_for_validation_error_status' ] ) );
@@ -1032,8 +1036,8 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 			'Error Index',
 		];
 		if ( Services::get( 'dependency_support' )->has_support() ) {
-			$expected_submenu[0] .= ' <span id="new-error-index-count" class="awaiting-mod"><span class="amp-count-loading"></span></span>';
-			$expected_submenu[3] .= ' <span id="new-error-index-count" class="awaiting-mod"><span class="amp-count-loading"></span></span>';
+			$expected_submenu[0] .= ' <span id="amp-new-error-index-count"></span>';
+			$expected_submenu[3] .= ' <span id="amp-new-error-index-count"></span>';
 		}
 		$amp_options = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );
@@ -1406,7 +1410,7 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 
 		// Because the action is incorrect, the tested method should exit and not update the validation error term.
 		$_REQUEST['action']   = 'incorrect-action';
-		$_POST['delete_tags'] = [ $error_term->term_id ];
+		$_POST['delete_tags'] = [ (string) $error_term->term_id ];
 		$correct_post_type    = self::factory()->post->create( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
 		$this->assertEquals( get_term( $error_term->term_id )->term_group, $initial_accepted_status );
 
@@ -1525,6 +1529,34 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		$_REQUEST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce' ] = wp_create_nonce( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION );
 		AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request();
 		$this->assertEquals( 0, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+	}
+
+	/**
+	 * @covers \AMP_Validation_Error_Taxonomy::get_error_title_from_code()
+	 */
+	public function test_get_error_title_from_code() {
+		$this->assertIsString( AMP_Validation_Error_Taxonomy::get_error_title_from_code( [ 'code' => AMP_Form_Sanitizer::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED ] ) );
+		$this->assertIsString(
+			AMP_Validation_Error_Taxonomy::get_error_title_from_code(
+				[
+					'code'            => AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT,
+					'node_attributes' => [
+						'src' => 'https://example.com/foo.js',
+					],
+				]
+			)
+		);
+		$this->assertIsString( AMP_Validation_Error_Taxonomy::get_error_title_from_code( [ 'code' => AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT ] ) );
+		$this->assertIsString(
+			AMP_Validation_Error_Taxonomy::get_error_title_from_code(
+				[
+					'code'      => AMP_Script_Sanitizer::CUSTOM_EVENT_HANDLER_ATTR,
+					'node_name' => 'onclick',
+				]
+			)
+		);
+
+		$this->assertIsString( AMP_Validation_Error_Taxonomy::get_error_title_from_code( [ 'code' => 'TOTALLY_UNKNOWN' ] ) );
 	}
 
 	/**

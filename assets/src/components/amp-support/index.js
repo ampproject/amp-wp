@@ -18,12 +18,13 @@ import './style.scss';
 import { Selectable } from '../selectable';
 import { AMPNotice, NOTICE_SIZE_SMALL, NOTICE_TYPE_ERROR, NOTICE_TYPE_INFO } from '../amp-notice';
 import ClipboardButton from '../clipboard-button';
+import { Details } from './details';
+import { Plugins } from './plugins';
+import { RawData } from './raw-data';
 import { SiteInfo } from './site-info';
 import { Themes } from './themes';
-import { Plugins } from './plugins';
 import { ValidatedUrls } from './validated-urls';
-import { RawData } from './raw-data';
-import { Details } from './details';
+import { ValidationResultsNotice } from './validation-results-notice';
 
 /**
  * AMP Support component.
@@ -32,7 +33,7 @@ import { Details } from './details';
  * @return {JSX.Element} Markup for AMP support component
  */
 export function AMPSupport( props ) {
-	const { data, restEndpoint, args } = props;
+	const { data, restEndpoint, args, ampValidatedPostCount } = props;
 
 	const [ sending, setSending ] = useState( false );
 	const [ uuid, setUuid ] = useState( null );
@@ -67,10 +68,10 @@ export function AMPSupport( props ) {
 				if ( undefined !== response.success && undefined !== response?.data?.uuid ) {
 					setUuid( response.data.uuid );
 				} else {
-					setSubmitSupportRequest( false );
-					throw new Error( __( 'Failed to send support request. Please try again after some time', 'amp' ) );
+					throw new Error( __( 'Failed to send support request. Please try again later.', 'amp' ) );
 				}
 			} catch ( exception ) {
+				setSubmitSupportRequest( false );
 				setError( exception.message );
 			} finally {
 				setSending( false );
@@ -89,11 +90,14 @@ export function AMPSupport( props ) {
 					{
 						__html: sprintf(
 							/* translators: %s is the URL to create a new support topic */
-							__( 'In order to best assist you, please submit the following information to our private database. Once you have done so, copy the the resulting support ID and mention it in a <a href="%s" rel="noreferrer" target="_blank">support forum topic</a>. You do not have to submit data to get support, but our team will be able to help you more effectively if you do so.', 'amp' ),
+							__( 'In order to best assist you, please tap the Send Data button below to send the following site information to our private database. Once you have done so, copy the the resulting Support UUID in the blue box that appears and include the ID in a new <a href="%s" rel="noreferrer" target="_blank">support forum topic</a>. You do not have to submit data to get support, but our team will be able to help you more effectively if you do so.', 'amp' ),
 							'https://wordpress.org/support/plugin/amp/#new-topic-0',
 						),
 					}
 				} />
+
+				<ValidationResultsNotice data={ data } args={ args } ampValidatedPostCount={ ampValidatedPostCount } />
+
 				<div className="amp-support__body">
 
 					{ data.site_info && <SiteInfo siteInfo={ data.site_info } /> }
@@ -161,6 +165,7 @@ export function AMPSupport( props ) {
 					<AMPNotice
 						type={ NOTICE_TYPE_INFO }
 						size={ NOTICE_SIZE_SMALL }
+						className={ 'amp-notice--uuid' }
 					>
 						{ __( 'Support UUID: ', 'amp' ) }
 						<code>
@@ -191,5 +196,10 @@ AMPSupport.propTypes = {
 		site_info: PropTypes.object,
 		themes: PropTypes.array,
 		urls: PropTypes.array,
+	} ),
+	ampValidatedPostCount: PropTypes.shape( {
+		all: PropTypes.number.isRequired,
+		fresh: PropTypes.number.isRequired,
+		stale: PropTypes.number.isRequired,
 	} ),
 };

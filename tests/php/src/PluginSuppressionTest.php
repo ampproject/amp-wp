@@ -14,7 +14,6 @@ use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Validated_URL_Post_Type;
-use AMP_Validation_Manager;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 use Exception;
@@ -29,8 +28,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		set_up as public prevent_block_pre_render;
 	}
 
-	private $attempted_validate_request_urls = [];
-
 	/** @var PluginSuppression */
 	private $instance;
 
@@ -44,25 +41,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		$this->add_reader_themes_request_filter();
 
 		$this->reset_widgets();
-		add_filter(
-			'pre_http_request',
-			function( $r, /** @noinspection PhpUnusedParameterInspection */ $args, $url ) {
-				if ( false === strpos( $url, 'amp_validate=' ) ) {
-					return $r;
-				}
-
-				$this->attempted_validate_request_urls[] = remove_query_arg( [ 'amp_validate', 'amp_cache_bust' ], $url );
-				return [
-					'body'     => '',
-					'response' => [
-						'code'    => 503,
-						'message' => 'Service Unavailable',
-					],
-				];
-			},
-			10,
-			3
-		);
 
 		$plugin_suppression = $this->injector->make( PluginSuppression::class );
 		$plugin_registry    = $this->get_private_property( $plugin_suppression, 'plugin_registry' );
@@ -91,7 +69,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	 * Tear down.
 	 */
 	public function tear_down() {
-		$this->attempted_validate_request_urls = [];
 
 		$GLOBALS['wp_settings_fields']     = [];
 		$GLOBALS['wp_registered_settings'] = [];
@@ -415,7 +392,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Validation_Manager::init();
 
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		// Test initial state.
@@ -425,7 +401,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::SUPPRESSED_PLUGINS, [] );
 		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
 
-		$this->assertCount( 0, $this->attempted_validate_request_urls );
 		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source() );
 
 		$this->populate_validation_errors( home_url( '/' ), $bad_plugin_file_slugs );
@@ -443,7 +418,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		);
 
 		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
-		$this->assertCount( 0, $this->attempted_validate_request_urls );
 
 		// When updating option but both plugins are not suppressed, then no change is made.
 		$this->update_suppressed_plugins_option(
@@ -453,7 +427,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			)
 		);
 		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
-		$this->assertCount( 0, $this->attempted_validate_request_urls, 'Expected no validation request to have been made since no changes were made (as both plugins are still unsuppressed).' );
 
 		// When updating option and both are now suppressed, then a change is made.
 		$this->update_suppressed_plugins_option(
@@ -462,7 +435,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 				'1'
 			)
 		);
-		$this->assertCount( 1, $this->attempted_validate_request_urls, 'Expected one validation request to have been made since no changes were made (as both plugins are still unsuppressed).' );
 		$suppressed_plugins = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
 		$this->assertEqualSets( $bad_plugin_file_slugs, array_keys( $suppressed_plugins ) );
 		foreach ( $suppressed_plugins as $slug => $suppressed_plugin ) {
@@ -470,8 +442,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_TIMESTAMP, $suppressed_plugin );
 			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_USERNAME, $suppressed_plugin );
 			$this->assertEquals( wp_get_current_user()->user_nicename, $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_USERNAME ] );
-			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_ERRORING_URLS, $suppressed_plugin );
-			$this->assertEquals( [ home_url( '/' ) ], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] );
 			$this->assertEquals( $this->injector->make( PluginRegistry::class )->get_plugin_from_slug( $slug )['data']['Version'], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
 		}
 
@@ -484,7 +454,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 				array_fill_keys( $unsuppressed_plugins, '0' )
 			)
 		);
-		$this->assertCount( 2, $this->attempted_validate_request_urls, 'Expected one validation request to have been made since no changes were made (as both plugins are still unsuppressed).' );
 		$this->assertEqualSets( $suppressed_plugins, array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) ) );
 	}
 
@@ -678,5 +647,74 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			throw new Exception( $r->get_error_message() );
 		}
 		return $r;
+	}
+
+	/**
+	 * Data provider for $this->test_filter_plugin_row_meta()
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_for_filter_plugin_row_meta() {
+
+		return [
+			'plugin is not suppressed'                 => [
+				'plugin_file'      => 'plugin.php',
+				'current_screen'   => 'plugins',
+				'should_have_meta' => false,
+			],
+			'plugin is suppressed'                     => [
+				'plugin_file'      => 'plugin-one/plugin-one.php',
+				'current_screen'   => 'plugins',
+				'should_have_meta' => true,
+			],
+			'plugin is suppressed without slug'        => [
+				'plugin_file'      => 'plugin-one/plugin-one.php',
+				'current_screen'   => 'plugins',
+				'should_have_meta' => true,
+			],
+			'plugin is suppressed on different screen' => [
+				'plugin_file'      => 'plugin-one/plugin-one.php',
+				'current_screen'   => 'plugins-network',
+				'should_have_meta' => false,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider data_provider_for_filter_plugin_row_meta()
+	 * @covers ::filter_plugin_row_meta()
+	 */
+	public function test_filter_plugin_row_meta( $plugin_file, $current_screen, $should_have_meta ) {
+
+		set_current_screen( $current_screen );
+
+		// Mock AMP option.
+		AMP_Options_Manager::update_option(
+			'suppressed_plugins',
+			[
+				'plugin-one' => [
+					'last_version' => '1.0',
+					'timestamp'    => 1646316249,
+					'username'     => 'user1',
+				],
+			]
+		);
+
+		$output = $this->instance->filter_plugin_row_meta( [], $plugin_file );
+
+		if ( $should_have_meta ) {
+
+			$this->assertEquals(
+				sprintf(
+					'<a href="%s" aria-label="%s">%s</a>',
+					esc_url( admin_url( 'admin.php?page=amp-options#plugin-suppression' ) ),
+					esc_attr__( 'Visit AMP Settings', 'amp' ),
+					__( 'Suppressed on AMP Pages', 'amp' )
+				),
+				$output[0]
+			);
+		} else {
+			$this->assertEmpty( $output );
+		}
 	}
 }

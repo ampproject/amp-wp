@@ -18,7 +18,7 @@ Check whether a node is exempt from validation during dev mode.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:448](/includes/sanitizers/class-amp-base-sanitizer.php#L448-L451)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:541](/includes/sanitizers/class-amp-base-sanitizer.php#L541-L544)
 
 <details>
 <summary>Show Code</summary>

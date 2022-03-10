@@ -362,7 +362,7 @@ class AMP_Validation_Error_Taxonomy {
 		$term = get_term( (int) $term_id, self::TAXONOMY_SLUG );
 
 		// Skip if the term count was not actually 0.
-		if ( ! $term || 0 !== $term->count ) {
+		if ( ! $term instanceof WP_Term || 0 !== $term->count ) {
 			return false;
 		}
 
@@ -1745,7 +1745,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		if ( ValidationCounts::is_needed() ) {
 			// Append markup to display a loading spinner while the unreviewed count is being fetched.
-			$menu_item_label .= ' <span id="new-error-index-count" class="awaiting-mod"><span class="amp-count-loading"></span></span>';
+			$menu_item_label .= ' <span id="amp-new-error-index-count"></span>';
 		}
 
 		$post_menu_slug = 'edit.php?post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
@@ -2732,7 +2732,7 @@ class AMP_Validation_Error_Taxonomy {
 									<?php elseif ( is_scalar( $value ) ) : ?>
 										<?php echo esc_html( (string) $value ); ?>
 									<?php else : ?>
-										<pre><?php echo esc_html( wp_json_encode( $source, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
+										<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
 									<?php endif; ?>
 								</td>
 							</tr>
@@ -2867,8 +2867,8 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$action              = sanitize_key( $_REQUEST['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$term_ids            = isset( $_POST['delete_tags'] ) ? array_map( 'sanitize_key', $_POST['delete_tags'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$single_term_id      = isset( $_GET['term_id'] ) ? sanitize_key( $_GET['term_id'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$term_ids            = isset( $_POST['delete_tags'] ) ? array_filter( array_map( 'intval', (array) $_POST['delete_tags'] ) ) : []; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$single_term_id      = isset( $_GET['term_id'] ) ? (int) $_GET['term_id'] : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$redirect_query_args = [
 			'action'       => 'edit',
 			'amp_actioned' => $action,
@@ -3341,10 +3341,10 @@ class AMP_Validation_Error_Taxonomy {
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
-			case AMP_Form_Sanitizer::FORM_HAS_POST_METHOD_WITHOUT_ACTION_XHR_ATTR:
+			case AMP_Form_Sanitizer::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED:
 				return sprintf(
 					/* translators: %1$s is 'POST', %2$s is 'action-xhr' */
-					esc_html__( 'Form has %1$s method without %2$s attribute. (Mark as kept to prevent conversion to AMP.)', 'amp' ),
+					esc_html__( 'Native %1$s form has %2$s attribute.', 'amp' ),
 					'<code>POST</code>',
 					'<code>action-xhr</code>'
 				);

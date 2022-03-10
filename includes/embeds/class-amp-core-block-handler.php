@@ -5,8 +5,8 @@
  * @package AMP
  */
 
-use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Html\Attribute;
 
 /**
  * Class AMP_Core_Block_Handler
@@ -42,6 +42,13 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	private $category_widget_count = 0;
 
 	/**
+	 * Count of the navigation blocks encountered.
+	 *
+	 * @var int
+	 */
+	private $navigation_block_count = 0;
+
+	/**
 	 * Methods to ampify blocks.
 	 *
 	 * @var array
@@ -51,6 +58,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		'core/archives'   => 'ampify_archives_block',
 		'core/video'      => 'ampify_video_block',
 		'core/file'       => 'ampify_file_block',
+		'core/gallery'    => 'ampify_gallery_block',
+		'core/navigation' => 'ampify_navigation_block',
 	];
 
 	/**
@@ -84,10 +93,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		if ( isset( $block['attrs'] ) && 'core/shortcode' !== $block['blockName'] ) {
 			$injected_attributes    = '';
 			$prop_attribute_mapping = [
-				'ampCarousel'  => 'data-amp-carousel',
-				'ampLayout'    => 'data-amp-layout',
-				'ampLightbox'  => 'data-amp-lightbox',
-				'ampNoLoading' => 'data-amp-noloading',
+				'ampCarousel' => 'data-amp-carousel',
+				'ampLightbox' => 'data-amp-lightbox',
 			];
 			foreach ( $prop_attribute_mapping as $prop => $attr ) {
 				if ( isset( $block['attrs'][ $prop ] ) ) {
@@ -201,13 +208,26 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$meta_data = wp_get_attachment_metadata( $block['attrs']['id'] );
-		if ( isset( $meta_data['width'], $meta_data['height'] ) ) {
-			$block_content = preg_replace(
-				'/(?<=<video\s)/',
-				sprintf( 'width="%d" height="%d" ', $meta_data['width'], $meta_data['height'] ),
-				$block_content
-			);
+		if ( ! isset( $meta_data['width'], $meta_data['height'] ) ) {
+			return $block_content;
 		}
+
+		$block_content = preg_replace_callback(
+			'/(?<=<video)\s[^>]+/',
+			static function ( $matches ) use ( $meta_data ) {
+				$attrs = $matches[0];
+				if ( ! preg_match( '/\s(width|height|style)=/', $attrs ) ) {
+					$attrs .= sprintf(
+						' width="%1$d" height="%2$d" style="aspect-ratio:%1$d/%2$d"',
+						$meta_data['width'],
+						$meta_data['height']
+					);
+				}
+				return $attrs;
+			},
+			$block_content,
+			1
+		);
 
 		return $block_content;
 	}
@@ -250,10 +270,177 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
+	 * Ampify gallery block.
+	 *
+	 * Apply data-amp-lightbox attribute only to descendant image blocks.
+	 *
+	 * @since 2.2.1
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 * @return string Filtered block content.
+	 */
+	public function ampify_gallery_block( $block_content, $block ) {
+		// Skip legacy gallery blocks.
+		if ( ! empty( $block['attrs']['ids'] ) ) {
+			return $block_content;
+		}
+
+		$block_content = preg_replace( '/\sdata-amp-lightbox="\w+"/', '', $block_content );
+
+		// Bail out early if there are no images in the gallery or the lightbox feature is not enabled.
+		if ( empty( $block['innerBlocks'] ) || empty( $block['attrs']['ampLightbox'] ) ) {
+			return $block_content;
+		}
+
+		// Add data attributes to figure elements that are nested in the gallery block.
+		// Note that the first match is the gallery block itself which doesn't need the data-amp-lightbox attribute.
+		$figure_count  = 0;
+		$block_content = preg_replace_callback(
+			'/(?<=<figure\s)/',
+			static function () use ( &$figure_count ) {
+				return 0 < $figure_count++ ? 'data-amp-lightbox="true" ' : '';
+			},
+			$block_content
+		);
+
+		return $block_content;
+	}
+
+	/**
 	 * Dequeue wp-block-library-file script.
 	 */
 	public function dequeue_block_library_file_script() {
 		wp_dequeue_script( 'wp-block-library-file' );
+	}
+
+	/**
+	 * Ampify navigation block contained by <nav> element.
+	 *
+	 * @since 2.2.1
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 *
+	 * @return string Filtered block content.
+	 */
+	public function ampify_navigation_block( $block_content, $block ) {
+		if ( 0 === $this->navigation_block_count ) {
+			add_action( 'wp_print_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
+			add_action( 'wp_print_footer_scripts', [ $this, 'dequeue_block_navigation_view_script' ], 0 );
+		}
+
+		$this->navigation_block_count++;
+		$modal_state_property = "modal_{$this->navigation_block_count}_expanded";
+
+		// Set `aria-expanded` value of submenus whenever AMP state changes.
+		$submenu_toggles_count = 0;
+		$block_content         = preg_replace_callback(
+			'/(?<=<button)\s[^>]+/',
+			static function ( $matches ) use ( $modal_state_property, &$submenu_toggles_count ) {
+				$new_block_content = $matches[0];
+
+				if ( false === strpos( $new_block_content, 'wp-block-navigation-submenu__toggle' ) ) {
+					return $new_block_content;
+				}
+
+				$submenu_toggles_count++;
+
+				$submenu_state_property = str_replace(
+					'expanded',
+					'submenu_' . $submenu_toggles_count . '_expanded',
+					$modal_state_property
+				);
+
+				// Set `aria-expanded` value of submenus whenever AMP state changes.
+				return str_replace(
+					' aria-expanded',
+					sprintf(
+						' on="tap:AMP.setState({ %1$s: !%1$s })" [aria-expanded]="%1$s ? \'true\' : \'false\'" aria-expanded',
+						esc_attr( $submenu_state_property )
+					),
+					$new_block_content
+				);
+			},
+			$block_content
+		);
+
+		// In case of the "Mobile" option value, the `overlayMenu` attribute is not set at all.
+		if ( ! empty( $block['attrs']['overlayMenu'] ) && 'never' === $block['attrs']['overlayMenu'] ) {
+			return $block_content;
+		}
+
+		// Replace micromodal toggle logic with AMP state and set modal state property name based on its ID.
+		$block_content = preg_replace(
+			'/\sdata-micromodal-trigger="modal-\w+"/',
+			sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
+			$block_content
+		);
+
+		$block_content = preg_replace_callback(
+			'/(?<=<button)\s[^>]+/',
+			static function ( $matches ) use ( $modal_state_property ) {
+				$new_block_content = $matches[0];
+
+				// Skip submenu toggles.
+				if ( false !== strpos( $new_block_content, 'wp-block-navigation-submenu__toggle' ) ) {
+					return $new_block_content;
+				}
+
+				// Replace micromodal toggle logic bound with buttons with AMP state.
+				if ( false !== strpos( $new_block_content, ' data-micromodal-close' ) ) {
+					$new_block_content = str_replace(
+						' data-micromodal-close',
+						sprintf( ' on="tap:AMP.setState({ %1$s: !%1$s })"', esc_attr( $modal_state_property ) ),
+						$new_block_content
+					);
+				}
+
+				// Set `aria-expanded` value whenever AMP state changes.
+				return str_replace(
+					' aria-expanded',
+					sprintf(
+						' [aria-expanded]="%s ? \'true\' : \'false\'" aria-expanded',
+						esc_attr( $modal_state_property )
+					),
+					$new_block_content
+				);
+			},
+			$block_content
+		);
+
+		// Delete other micromodal-related data attributes.
+		$block_content = preg_replace( '/\sdata-micromodal-close/', '', $block_content );
+
+		// Change a responsive container class name and aria-hidden value based on the AMP state.
+		$block_content = preg_replace_callback(
+			'/(?><.+\sclass="([^"]*wp-block-navigation__responsive-container(?>\s[^"]*)?)"[^>]*>)/',
+			static function ( $matches ) use ( $modal_state_property ) {
+				$new_block_content = str_replace(
+					' class=',
+					sprintf(
+						' [aria-hidden]="%1$s ? \'false\' : \'true\'" aria-hidden="true" [class]="%1$s ? \'%2$s is-menu-open has-modal-open\' : \'%2$s\'" class=',
+						esc_attr( $modal_state_property ),
+						esc_attr( $matches[1] )
+					),
+					$matches[0]
+				);
+
+				return $new_block_content;
+			},
+			$block_content
+		);
+
+		return $block_content;
+	}
+
+	/**
+	 * Dequeue wp-block-navigation-view script.
+	 *
+	 * @since 2.2.1
+	 */
+	public function dequeue_block_navigation_view_script() {
+		wp_dequeue_script( 'wp-block-navigation-view' );
 	}
 
 	/**

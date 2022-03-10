@@ -14,7 +14,7 @@ Create a new node w/attributes (a DOMElement) and add to the passed Dom\Document
 
 ### Return value
 
-`\DOMElement|false` - The DOMElement for the given $tag, or false on failure
+`\AmpProject\Dom\Element|false` - The element for the given $tag, or false on failure
 
 ### Source
 

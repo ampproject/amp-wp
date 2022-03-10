@@ -32,8 +32,8 @@ class AMP_Object_Sanitizer_Test extends TestCase {
 			],
 
 			'object element with PDF content type'      => [
-				'<object data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" type="application/pdf"></object>',
-				'<amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf"></amp-google-document-embed>',
+				'<object id="pdf" data="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" type="application/pdf"></object>',
+				'<amp-google-document-embed layout="fixed-height" height="600" src="https://planetpdf.com/planetpdf/pdfs/warnock_camelot.pdf" id="pdf"></amp-google-document-embed>',
 			],
 
 			'two object elements with PDF content type' => [

@@ -13,7 +13,7 @@ Removes the node&#039;s nearest `&lt;script&gt;` sibling with a `src` attribute 
 
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:168](/includes/embeds/class-amp-base-embed-handler.php#L168-L205)
+:link: [includes/embeds/class-amp-base-embed-handler.php:171](/includes/embeds/class-amp-base-embed-handler.php#L171-L208)
 
 <details>
 <summary>Show Code</summary>

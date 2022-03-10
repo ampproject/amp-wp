@@ -7,13 +7,14 @@ export const NEXT_BUTTON_SELECTOR = '#next-button';
 export const PREV_BUTTON_SELECTOR = '.amp-settings-nav__prev-next button:not(.is-primary)';
 
 export async function goToOnboardingWizard() {
-	await visitAdminPage( 'index.php' );
+	await visitAdminPage( 'index.php', '' );
 	await expect( page ).not.toMatchElement( '#amp-onboarding-wizard' );
 	await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
 	await expect( page ).toMatchElement( '#amp-onboarding-wizard' );
 }
 
 export async function clickNextButton() {
+	await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
 	await expect( page ).toClick( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
 }
 
@@ -27,17 +28,25 @@ export async function moveToTechnicalScreen() {
 	await expect( page ).toMatchElement( '.technical-background-option' );
 }
 
-export async function moveToTemplateModeScreen( { technical } ) {
+export async function moveToSiteScanScreen( { technical } ) {
 	await moveToTechnicalScreen();
 
 	const radioSelector = technical ? '#technical-background-enable' : '#technical-background-disable';
 	await expect( page ).toClick( radioSelector );
 
 	await clickNextButton();
+	await expect( page ).toMatchElement( '.site-scan' );
+}
+
+export async function moveToTemplateModeScreen( { technical } ) {
+	await moveToSiteScanScreen( { technical } );
+
+	await clickNextButton();
 	await expect( page ).toMatchElement( '.template-mode-option' );
 }
 
 export async function scrollToElement( { selector, click = false } ) {
+	await page.waitForSelector( selector );
 	await page.evaluate( ( options ) => {
 		const el = document.querySelector( options.selector );
 		if ( el ) {
@@ -76,9 +85,11 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 		await clickMode( mode );
 	}
 
-	await clickNextButton();
-
-	await page.waitForSelector( '.done' );
+	await Promise.all( [
+		clickNextButton(),
+		page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ) ),
+		page.waitForSelector( '.done' ),
+	] );
 }
 
 export async function completeWizard( { technical = true, mode, readerTheme = 'legacy' } ) {
@@ -88,7 +99,7 @@ export async function completeWizard( { technical = true, mode, readerTheme = 'l
 	} else {
 		await expect( page ).toClick( '#next-button' );
 	}
-	await page.waitForSelector( '#amp-settings' );
+	await page.waitForSelector( '#amp-settings', { timeout: 30000 } );
 	await expect( page ).toMatchElement( '#amp-settings' );
 }
 
@@ -100,20 +111,20 @@ export async function testCloseButton( { exists = true } ) {
 	}
 }
 
-export async function testPreviousButton( { exists = true, disabled = false } ) {
+export async function testPreviousButton( { exists = true, text = 'Previous', disabled = false } ) {
 	if ( exists ) {
-		await expect( page ).toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
+		await expect( page ).toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text } );
 	} else {
-		await expect( page ).not.toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
+		await expect( page ).not.toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text } );
 	}
 }
 
-export function testNextButton( { element = 'button', text, disabled = false } ) {
-	expect( page ).toMatchElement( `${ element }${ disabled ? '[disabled]' : '' }`, { text } );
+export async function testNextButton( { element = 'button', text = 'Next', disabled = false } ) {
+	await expect( page ).toMatchElement( `${ element }${ disabled ? '[disabled]' : '' }`, { text } );
 }
 
-export function testTitle( { text, element = 'h1' } ) {
-	expect( page ).toMatchElement( element, { text } );
+export async function testTitle( { text, element = 'h1' } ) {
+	await expect( page ).toMatchElement( element, { text } );
 }
 
 /**
@@ -134,7 +145,6 @@ export async function cleanUpSettings() {
 				theme_support: 'reader',
 				plugin_configured: false,
 			} } ),
-		],
-		);
+		] );
 	} );
 }

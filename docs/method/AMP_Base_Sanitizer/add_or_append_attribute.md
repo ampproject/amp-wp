@@ -17,7 +17,7 @@ Adds key and value to list of attributes, or if the key already exists in the ar
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:390](/includes/sanitizers/class-amp-base-sanitizer.php#L390-L396)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:483](/includes/sanitizers/class-amp-base-sanitizer.php#L483-L489)
 
 <details>
 <summary>Show Code</summary>

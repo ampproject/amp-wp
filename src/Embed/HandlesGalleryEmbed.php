@@ -9,9 +9,9 @@ namespace AmpProject\AmpWP\Embed;
 
 use AmpProject\AmpWP\Component\Carousel;
 use AmpProject\AmpWP\Dom\ElementList;
-use AmpProject\Attribute;
-use AmpProject\Dom\Document;
-use AmpProject\Tag;
+use AmpProject\Dom\Element;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 use DOMElement;
 use DOMNodeList;
 
@@ -58,7 +58,19 @@ trait HandlesGalleryEmbed {
 				$carousel_element->setAttribute( Attribute::LIGHTBOX, '' );
 			}
 
-			$gallery_element->parentNode->replaceChild( $carousel_element, $gallery_element );
+			if ( Tag::FIGURE === $gallery_element->tagName ) {
+
+				// Remove gallery container or item wrappers, leaving behind the gallery caption.
+				foreach ( iterator_to_array( $gallery_element->childNodes ) as $child_node ) {
+					if ( ! ( $child_node instanceof Element && Tag::FIGCAPTION === $child_node->tagName ) ) {
+						$gallery_element->removeChild( $child_node );
+					}
+				}
+
+				$gallery_element->insertBefore( $carousel_element, $gallery_element->firstChild );
+			} else {
+				$gallery_element->parentNode->replaceChild( $carousel_element, $gallery_element );
+			}
 		}
 	}
 
@@ -72,6 +84,8 @@ trait HandlesGalleryEmbed {
 	protected function generate_amp_carousel( DOMNodeList $img_elements, $is_amp_lightbox ) {
 		$images = new ElementList();
 
+		$dom = $img_elements->item( 0 )->ownerDocument;
+
 		foreach ( $img_elements as $img_element ) {
 			$element             = $img_element;
 			$parent_element_name = $img_element->parentNode->nodeName;
@@ -83,8 +97,7 @@ trait HandlesGalleryEmbed {
 			$images = $images->add( $element, $this->get_caption_element( $img_element ) );
 		}
 
-		$node = $img_elements->item( 0 );
-		return new Carousel( Document::fromNode( $node ), $images );
+		return new Carousel( $dom, $images );
 	}
 
 	/**

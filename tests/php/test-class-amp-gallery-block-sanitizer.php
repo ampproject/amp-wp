@@ -7,13 +7,14 @@
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 
 /**
  * Class AMP_Gallery_Block_Sanitizer_Test
  */
 class AMP_Gallery_Block_Sanitizer_Test extends TestCase {
 
-	use PrivateAccess;
+	use PrivateAccess, MarkupComparison;
 
 	/**
 	 * Get data.
@@ -22,68 +23,68 @@ class AMP_Gallery_Block_Sanitizer_Test extends TestCase {
 	 */
 	public function get_data() {
 		return [
-			'no_ul'                               => [
+			'no_ul'                                   => [
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 			],
 
-			'no_a_no_amp_img'                     => [
+			'no_a_no_amp_img'                         => [
 				'<ul class="amp-carousel"><div></div></ul>',
 				'<ul class="amp-carousel"><div></div></ul>',
 			],
 
-			'no_amp_carousel'                     => [
+			'no_amp_carousel'                         => [
 				'<ul><a><amp-img></amp-img></a></ul>',
 				'<ul><a><amp-img></amp-img></a></ul>',
 			],
 
-			'no_block_class'                      => [
+			'no_block_class'                          => [
 				'<ul data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 				'<ul data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 			],
 
-			'data_amp_with_carousel_and_link'     => [
+			'data_amp_with_carousel_and_link'         => [
 				'<ul class="wp-block-gallery" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><figure class="slide"><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400" layout="fill" object-fit="cover"></amp-img></a></figure></amp-carousel>',
 			],
 
-			'data_amp_with_carousel_and_caption'  => [
+			'data_amp_with_carousel_and_caption'      => [
 				'<ul class="wp-block-gallery" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img><figcaption>This is a caption</figcaption></figure></li></ul>',
 				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><figure class="slide"><amp-img src="http://example.com/img.png" width="600" height="400" layout="fill" object-fit="cover"></amp-img><figcaption class="amp-wp-gallery-caption">This is a caption</figcaption></figure></amp-carousel>',
 			],
 
 			// WordPress 5.3 changed the markup for the Gallery block, wrapping it in a <figure>.
-			'data_amp_with_carousel_caption_5_3'  => [
+			'data_amp_with_carousel_caption_5_3'      => [
 				'<figure class="wp-block-gallery" data-amp-carousel="true"><ul><li class="blocks-gallery-item"><figure><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img><figcaption>This is a caption</figcaption></figure></li></ul></figure>',
 				'<figure class="wp-block-gallery" data-amp-carousel="true"><amp-carousel width="600" height="400" type="slides" layout="responsive"><figure class="slide"><amp-img src="http://example.com/img.png" width="600" height="400" layout="fill" object-fit="cover"></amp-img><figcaption class="amp-wp-gallery-caption">This is a caption</figcaption></figure></amp-carousel></figure>',
 			],
 
-			'data_amp_with_lightbox'              => [
+			'data_amp_with_lightbox'                  => [
 				'<ul class="wp-block-gallery" data-amp-lightbox="true"><li class="blocks-gallery-item"><figure><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></figure></li></ul>',
 				'<ul class="wp-block-gallery" data-amp-lightbox="true"><li class="blocks-gallery-item"><figure><amp-img src="http://example.com/img.png" width="600" height="400" lightbox=""></amp-img></figure></li></ul>',
 			],
 
-			'data_amp_with_lightbox_and_link'     => [
+			'data_amp_with_lightbox_and_link'         => [
 				'<ul class="wp-block-gallery" data-amp-lightbox="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 				'<ul class="wp-block-gallery" data-amp-lightbox="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400" lightbox=""></amp-img></a></figure></li></ul>',
 			],
 
-			'data_amp_with_lightbox_5_3'          => [
+			'data_amp_with_lightbox_5_3'              => [
 				'<figure class="wp-block-gallery" data-amp-lightbox="true"><ul><li class="blocks-gallery-item"><figure><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></figure></li></ul></figure>',
 				'<figure class="wp-block-gallery" data-amp-lightbox="true"><ul><li class="blocks-gallery-item"><figure><amp-img src="http://example.com/img.png" width="600" height="400" lightbox=""></amp-img></figure></li></ul></figure>',
 			],
 
-			'data_amp_with_lightbox_and_link_5_3' => [
+			'data_amp_with_lightbox_and_link_5_3'     => [
 				'<figure class="wp-block-gallery" data-amp-lightbox="true"><ul><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul></figure>',
 				'<figure class="wp-block-gallery" data-amp-lightbox="true"><ul><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400" lightbox=""></amp-img></a></figure></li></ul></figure>',
 			],
 
-			'data_amp_with_lightbox_and_carousel' => [
+			'data_amp_with_lightbox_and_carousel'     => [
 				'<ul class="wp-block-gallery" data-amp-lightbox="true" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="1234" height="567"></amp-img></a></figure></li></ul>',
 				'<amp-carousel width="1234" height="567" type="slides" layout="responsive" lightbox=""><figure class="slide"><amp-img src="http://example.com/img.png" width="1234" height="567" layout="fill" object-fit="cover"></amp-img></figure></amp-carousel>',
 			],
 
-			'data_amp_with_lightbox_carousel_5_3' => [
+			'data_amp_with_lightbox_carousel_5_3'     => [
 				'<figure class="wp-block-gallery" data-amp-lightbox="true" data-amp-carousel="true"><ul><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="1234" height="567"></amp-img></a></figure></li></ul></figure>',
 				'<figure class="wp-block-gallery" data-amp-lightbox="true" data-amp-carousel="true"><amp-carousel width="1234" height="567" type="slides" layout="responsive" lightbox=""><figure class="slide"><amp-img src="http://example.com/img.png" width="1234" height="567" layout="fill" object-fit="cover"></amp-img></figure></amp-carousel></figure>',
 			],
@@ -91,6 +92,115 @@ class AMP_Gallery_Block_Sanitizer_Test extends TestCase {
 			'data_amp_with_lightbox_carousel_gallery_caption_5_3' => [
 				'<figure class="wp-block-gallery" data-amp-lightbox="true" data-amp-carousel="true"><ul><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="1234" height="567"></amp-img></a></figure></li></ul><figcaption>This is the gallery caption</figcaption></figure>',
 				'<figure class="wp-block-gallery" data-amp-lightbox="true" data-amp-carousel="true"><amp-carousel width="1234" height="567" type="slides" layout="responsive" lightbox=""><figure class="slide"><amp-img src="http://example.com/img.png" width="1234" height="567" layout="fill" object-fit="cover"></amp-img></figure></amp-carousel><figcaption>This is the gallery caption</figcaption></figure>',
+			],
+
+			'carousel_from_wp59_gallery_block_markup' => [
+				'
+				<figure class="wp-block-gallery has-nested-images columns-default is-cropped" data-amp-carousel="true">
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Bison</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figcaption class="blocks-gallery-caption">Gallery caption!</figcaption>
+				</figure>
+				',
+				'
+				<figure class="wp-block-gallery has-nested-images columns-default is-cropped" data-amp-carousel="true">
+					<amp-carousel width="2560" height="1920" type="slides" layout="responsive">
+						<figure class="slide"><a href="https://example.com/one-scaled.jpg">
+							<amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img>
+						</a></figure>
+						<figure class="slide"><a href="https://example.com/two.jpg">
+							<amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></amp-img>
+						</a></figure>
+						<figure class="slide"><a href="https://example.com/three-scaled.jpg">
+							<amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img>
+						</a></figure>
+					</amp-carousel>
+					<figcaption class="blocks-gallery-caption">Gallery caption!</figcaption>
+				</figure>
+				',
+			],
+
+			'lightbox_from_wp59_gallery_block_markup' => [
+				'
+				<figure class="wp-block-gallery has-nested-images columns-default is-cropped" data-amp-lightbox="true">
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Bison</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figcaption class="blocks-gallery-caption">Gallery caption!</figcaption>
+				</figure>
+				',
+				'
+				<figure class="wp-block-gallery has-nested-images columns-default is-cropped" data-amp-lightbox="true">
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover" lightbox=""></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover" lightbox=""></amp-img></a>
+						<figcaption>Bison</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover" lightbox=""></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figcaption class="blocks-gallery-caption">Gallery caption!</figcaption>
+				</figure>
+				',
+			],
+
+			'carousel_with_lightbox_from_wp59_gallery_block_markup' => [
+				'
+				<figure class="wp-block-gallery has-nested-images columns-default is-cropped" data-amp-carousel="true" data-amp-lightbox="true">
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/one-scaled.jpg"><amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/two.jpg"><amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Bison</figcaption>
+					</figure>
+					<figure class="wp-block-image size-large">
+						<a href="https://example.com/three-scaled.jpg"><amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img></a>
+						<figcaption>Sunset</figcaption>
+					</figure>
+					<figcaption class="blocks-gallery-caption">Gallery caption!</figcaption>
+				</figure>
+				',
+				'
+				<figure class="wp-block-gallery has-nested-images columns-default is-cropped" data-amp-carousel="true" data-amp-lightbox="true">
+					<amp-carousel width="2560" height="1920" type="slides" layout="responsive" lightbox="">
+						<figure class="slide">
+							<amp-img width="2560" height="1920" data-id="4002" src="https://example.com/one-scaled.jpg" alt="" class="wp-image-4002" srcset="https://example.com/one-scaled.jpg 2560w, https://example.com/one-300x225.jpg 300w, https://example.com/one-1024x768.jpg 1024w, https://example.com/one-768x576.jpg 768w, https://example.com/one-1536x1152.jpg 1536w, https://example.com/one-2048x1536.jpg 2048w, https://example.com/one-1568x1176.jpg 1568w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img>
+						</figure>
+						<figure class="slide">
+							<amp-img width="640" height="853" data-id="3004" src="https://example.com/two.jpg" alt="" class="wp-image-3004" srcset="https://example.com/two.jpg 640w, https://example.com/two-225x300.jpg 225w, https://example.com/two-150x200.jpg 150w" sizes="(max-width: 640px) 100vw, 640px" layout="fill" object-fit="cover"></amp-img>
+						</figure>
+						<figure class="slide">
+							<amp-img width="2560" height="1920" data-id="2270" src="https://example.com/three-scaled.jpg" alt="" class="wp-image-2270" srcset="https://example.com/three-scaled.jpg 2560w, https://example.com/three-300x225.jpg 300w, https://example.com/three-1024x768.jpg 1024w, https://example.com/three-768x576.jpg 768w, https://example.com/three-1536x1152.jpg 1536w, https://example.com/three-2048x1536.jpg 2048w, https://example.com/three-1200x900.jpg 1200w" sizes="(max-width: 2560px) 100vw, 2560px" layout="fill" object-fit="cover"></amp-img>
+						</figure>
+					</amp-carousel>
+					<figcaption class="blocks-gallery-caption">Gallery caption!</figcaption>
+				</figure>
+				',
 			],
 		];
 	}
@@ -116,8 +226,8 @@ class AMP_Gallery_Block_Sanitizer_Test extends TestCase {
 		);
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
-		$this->assertEquals( $expected, $content );
+
+		$this->assertEqualMarkup( $expected, $content, "Expected content:\n$content" );
 	}
 
 	/**

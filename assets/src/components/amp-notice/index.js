@@ -12,6 +12,7 @@ import './style.css';
 export const NOTICE_TYPE_ERROR = 'error';
 export const NOTICE_TYPE_WARNING = 'warning';
 export const NOTICE_TYPE_INFO = 'info';
+export const NOTICE_TYPE_PLAIN = 'plain';
 export const NOTICE_TYPE_SUCCESS = 'success';
 
 export const NOTICE_SIZE_SMALL = 'small';
@@ -103,5 +104,5 @@ AMPNotice.propTypes = {
 	children: PropTypes.node,
 	className: PropTypes.string,
 	size: PropTypes.oneOf( [ NOTICE_SIZE_LARGE, NOTICE_SIZE_SMALL ] ),
-	type: PropTypes.oneOf( [ NOTICE_TYPE_INFO, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_ERROR, NOTICE_TYPE_WARNING ] ),
+	type: PropTypes.oneOf( [ NOTICE_TYPE_PLAIN, NOTICE_TYPE_INFO, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_ERROR, NOTICE_TYPE_WARNING ] ),
 };

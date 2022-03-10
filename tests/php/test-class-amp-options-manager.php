@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Sandboxing;
 use AmpProject\AmpWP\Tests\TestCase;
 
 /**
@@ -108,18 +109,21 @@ class Test_AMP_Options_Manager extends TestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
 			[
-				Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
-				Option::SUPPORTED_POST_TYPES    => [ 'post', 'page' ],
-				Option::ANALYTICS               => [],
-				Option::ALL_TEMPLATES_SUPPORTED => true,
-				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
-				Option::SUPPRESSED_PLUGINS      => [],
-				Option::VERSION                 => AMP__VERSION,
-				Option::MOBILE_REDIRECT         => true,
-				Option::READER_THEME            => 'legacy',
-				Option::PLUGIN_CONFIGURED       => false,
-				Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
-				Option::LATE_DEFINED_SLUG       => null,
+				Option::THEME_SUPPORT            => AMP_Theme_Support::READER_MODE_SLUG,
+				Option::SUPPORTED_POST_TYPES     => [ 'post', 'page' ],
+				Option::ANALYTICS                => [],
+				Option::ALL_TEMPLATES_SUPPORTED  => true,
+				Option::SUPPORTED_TEMPLATES      => [ 'is_singular' ],
+				Option::SUPPRESSED_PLUGINS       => [],
+				Option::VERSION                  => AMP__VERSION,
+				Option::MOBILE_REDIRECT          => true,
+				Option::READER_THEME             => 'legacy',
+				Option::PLUGIN_CONFIGURED        => false,
+				Option::PAIRED_URL_STRUCTURE     => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				Option::LATE_DEFINED_SLUG        => null,
+				Option::DELETE_DATA_AT_UNINSTALL => true,
+				Sandboxing::OPTION_ENABLED       => false,
+				Sandboxing::OPTION_LEVEL         => 1,
 			],
 			AMP_Options_Manager::get_options()
 		);
@@ -263,21 +267,25 @@ class Test_AMP_Options_Manager extends TestCase {
 		update_option(
 			AMP_Options_Manager::OPTION_NAME,
 			[
-				Option::VERSION           => AMP__VERSION,
-				Option::PLUGIN_CONFIGURED => false,
+				Option::VERSION                  => AMP__VERSION,
+				Option::PLUGIN_CONFIGURED        => false,
+				Option::DELETE_DATA_AT_UNINSTALL => false,
 			]
 		);
 		$this->assertFalse( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::DELETE_DATA_AT_UNINSTALL ) );
 
 		// Ensure plugin_configured is false when explicitly set as such in the DB.
 		update_option(
 			AMP_Options_Manager::OPTION_NAME,
 			[
-				Option::VERSION           => AMP__VERSION,
-				Option::PLUGIN_CONFIGURED => true,
+				Option::VERSION                  => AMP__VERSION,
+				Option::PLUGIN_CONFIGURED        => true,
+				Option::DELETE_DATA_AT_UNINSTALL => true,
 			]
 		);
 		$this->assertTrue( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+		$this->assertTrue( AMP_Options_Manager::get_option( Option::DELETE_DATA_AT_UNINSTALL ) );
 	}
 
 	/** @return array */

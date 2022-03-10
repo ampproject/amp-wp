@@ -16,7 +16,7 @@ Sets the layout, and possibly the &#039;height&#039; and &#039;width&#039; attri
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:294](/includes/sanitizers/class-amp-base-sanitizer.php#L294-L369)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:355](/includes/sanitizers/class-amp-base-sanitizer.php#L355-L462)
 
 <details>
 <summary>Show Code</summary>
@@ -64,17 +64,46 @@ public function set_layout( $attributes ) {
 			return $attributes;
 		}
 		// Apply fill layout if width & height are 100%.
-		if ( isset( $styles['position'], $attributes['width'], $attributes['height'] )
-			&& 'absolute' === $styles['position']
-			&& '100%' === $attributes['width']
-			&& '100%' === $attributes['height']
+		if (
+			( isset( $styles['position'] ) && 'absolute' === $styles['position'] )
+			&& (
+				( isset( $attributes['width'] ) && '100%' === $attributes['width'] )
+				||
+				( isset( $styles['width'] ) && '100%' === $styles['width'] )
+			)
+			&& (
+				( isset( $attributes['height'] ) && '100%' === $attributes['height'] )
+				||
+				( isset( $styles['height'] ) && '100%' === $styles['height'] )
+			)
 		) {
-			unset( $attributes['style'], $styles['position'], $attributes['width'], $attributes['height'] );
+			unset( $attributes['style'], $attributes['width'], $attributes['height'] );
+			unset( $styles['position'], $styles['width'], $styles['height'] );
 			if ( ! empty( $styles ) ) {
 				$attributes['style'] = $this->reassemble_style_string( $styles );
 			}
 			$attributes['layout'] = 'fill';
 			return $attributes;
+		}
+		// Make sure the width and height styles are copied to the width and height attributes since AMP will ultimately inline them as styles.
+		$pending_attributes = [];
+		$seen_units         = [];
+		foreach ( wp_array_slice_assoc( $styles, [ 'height', 'width' ] ) as $dimension => $value ) {
+			$value = $this->sanitize_dimension( $value, $dimension );
+			if ( '' === $value ) {
+				continue;
+			}
+			if ( 'auto' !== $value ) {
+				$this_unit = preg_replace( '/^.*\d/', '', $value );
+				if ( ! $this_unit ) {
+					$this_unit = 'px';
+				}
+				$seen_units[ $this_unit ] = true;
+			}
+			$pending_attributes[ $dimension ] = $value;
+		}
+		if ( $pending_attributes && count( $seen_units ) <= 1 ) {
+			$attributes = array_merge( $attributes, $pending_attributes );
 		}
 	}
 	if ( isset( $attributes['width'], $attributes['height'] ) && '100%' === $attributes['width'] && '100%' === $attributes['height'] ) {
@@ -85,7 +114,7 @@ public function set_layout( $attributes ) {
 			unset( $attributes['width'] );
 			$attributes['height'] = self::FALLBACK_HEIGHT;
 		}
-		if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] ) {
+		if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] || 'auto' === $attributes['width'] ) {
 			$attributes['layout'] = 'fixed-height';
 			$attributes['width']  = 'auto';
 		}
