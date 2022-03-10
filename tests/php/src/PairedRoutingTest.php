@@ -901,6 +901,8 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	 * @param callable|null $url_callback
 	 */
 	public function test_has_endpoint( $setup_callback, $expected_has_endpoint, $url_callback ) {
+		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query']; // Needed as of <https://github.com/ampproject/amp-wp/pull/6466>.
+
 		if ( $setup_callback ) {
 			$setup_callback( $this->instance );
 		}

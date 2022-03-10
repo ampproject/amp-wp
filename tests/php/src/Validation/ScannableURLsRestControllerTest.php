@@ -8,7 +8,9 @@
 namespace AmpProject\AmpWP\Tests\Validation;
 
 use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AMP_Validation_Manager;
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
@@ -77,6 +79,9 @@ class ScannableURLsRestControllerTest extends DependencyInjectedTestCase {
 	 * @covers ::get_item_schema()
 	 */
 	public function test_get_items() {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) ); // Because the setting was registered and not cleaned up?
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertTrue( amp_is_legacy() );
 		$post_id = self::factory()->post->create( [ 'post_type' => 'post' ] );
 		$page_id = self::factory()->post->create( [ 'post_type' => 'page' ] );

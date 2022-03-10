@@ -56,6 +56,7 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		$this->assertTrue( $this->instance->is_enabled() );
 		$this->assertNotEquals( get_template(), $reader_theme_slug );
 
+		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query']; // Needed as of <https://github.com/ampproject/amp-wp/pull/6466>.
 		set_query_var( amp_get_slug(), 1 );
 		$this->instance->override_theme();
 		$this->assertEquals( get_template(), $reader_theme_slug );
@@ -214,7 +215,7 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
 			$this->markTestSkipped();
 		}
-		wp_reset_query();
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query
 		switch_theme( $active_theme_slug );
 		remove_all_filters( 'sidebars_widgets' );
 
