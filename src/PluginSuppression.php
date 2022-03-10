@@ -18,7 +18,6 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Block_Type_Registry;
 use WP_Hook;
-use WP_Screen;
 use WP_Term;
 use WP_Widget;
 use WP_User;
@@ -504,9 +503,8 @@ final class PluginSuppression implements Service, Registerable {
 	 */
 	public function filter_plugin_row_meta( $plugin_meta, $plugin_file ) {
 
-		$screen = get_current_screen();
-
-		if ( ! ( $screen instanceof WP_Screen && 'plugins' === $screen->id ) ) {
+		// Do not show on the network plugins screen.
+		if ( is_network_admin() ) {
 			return $plugin_meta;
 		}
 
