@@ -1034,7 +1034,7 @@ class SiteHealthTest extends TestCase {
 
 		set_transient( SiteHealth::HAS_PAGE_CACHING_TRANSIENT_KEY, 'no', DAY_IN_SECONDS );
 
-		$this->assertArraySubset(
+		$this->assertAssocArrayContains(
 			[
 				'status'                 => 'good',
 				'advanced_cache_present' => false,

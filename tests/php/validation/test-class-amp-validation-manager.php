@@ -883,7 +883,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//link[ contains( @href, "foo.css" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -914,7 +914,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//link[ contains( @href, "codemirror" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'              => 'plugin',
 							'name'              => 'amp',
@@ -947,7 +947,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//style[ contains( text(), "Hello Baz" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -981,7 +981,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//script[ contains( @src, "foo.js" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -1013,7 +1013,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//script[ contains( @src, "codemirror" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'              => 'plugin',
 							'name'              => 'amp',
@@ -1047,7 +1047,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//script[ contains( text(), "Hello Baz!" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -1095,7 +1095,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				],
 				function ( ...$sources_sets ) {
 					$this->assertCount( 2, $sources_sets );
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -1109,7 +1109,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 						],
 						$sources_sets[0][2]
 					);
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -1144,7 +1144,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//script[ contains( text(), "Hello after Baz!" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -1183,7 +1183,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//link[ contains( @href, "foo.css" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',

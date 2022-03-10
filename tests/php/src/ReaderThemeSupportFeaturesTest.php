@@ -178,7 +178,7 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->add_theme_supports( $theme_supports );
 
 		$filtered = $this->instance->filter_amp_options_updating( $initial_options );
-		$this->assertArraySubset( $initial_options, $filtered );
+		$this->assertAssocArrayContains( $initial_options, $filtered );
 		$this->assertArrayHasKey( Option::PRIMARY_THEME_SUPPORT, $filtered );
 		if ( null === $primary_theme_support ) {
 			$this->assertNull( $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
@@ -286,7 +286,10 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->assertEqualSets( array_keys( $reduced ), array_keys( self::TEST_ALL_THEME_SUPPORTS ) );
 		foreach ( array_keys( self::TEST_ALL_THEME_SUPPORTS ) as $feature ) {
 			$this->assertNotEquals( $reduced[ $feature ], $non_reduced[ $feature ] );
-			$this->assertArraySubset( $reduced[ $feature ], $non_reduced[ $feature ] );
+			$this->assertSame( count( $reduced[ $feature ] ), count( $non_reduced[ $feature ] ) );
+			for ( $i = 0, $len = count( $reduced[ $feature ] ); $i < $len; $i++ ) {
+				$this->assertAssocArrayContains( $reduced[ $feature ][ $i ], $non_reduced[ $feature ][ $i ] );
+			}
 		}
 	}
 

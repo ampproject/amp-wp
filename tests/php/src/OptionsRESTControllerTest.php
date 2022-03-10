@@ -99,7 +99,7 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 		$this->assertEqualSets( array_keys( $plugin_registry->get_plugins( true ) ), array_keys( $data['suppressible_plugins'] ) );
 		$this->assertEquals( null, $data['preview_permalink'] );
 		$this->assertEquals( [], $data['suppressed_plugins'] );
-		$this->assertArraySubset( [ 'post', 'page', 'attachment' ], wp_list_pluck( $data['supportable_post_types'], 'name' ) );
+		$this->assertIndexedArrayContains( [ 'post', 'page', 'attachment' ], wp_list_pluck( $data['supportable_post_types'], 'name' ) );
 		$this->assertEquals( [ 'post', 'page' ], $data['supported_post_types'] );
 		$this->assertContains( 'is_singular', wp_list_pluck( $data['supportable_templates'], 'id' ) );
 		$this->assertEquals( [ 'is_singular' ], $data['supported_templates'] );
@@ -145,7 +145,7 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
 
 		// Verify the invalid settings were not set.
-		$this->assertArraySubset( $valid_params, AMP_Options_Manager::get_options() );
+		$this->assertAssocArrayContains( $valid_params, AMP_Options_Manager::get_options() );
 	}
 
 	/**

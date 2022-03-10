@@ -134,7 +134,7 @@ class Test_AMP_Service_Worker extends TestCase {
 	public function test_get_precached_script_cdn_urls() {
 		$urls = AMP_Service_Worker::get_precached_script_cdn_urls();
 
-		$this->assertArraySubset(
+		$this->assertIndexedArrayContains(
 			[
 				wp_scripts()->registered['amp-runtime']->src,
 				wp_scripts()->registered['amp-bind']->src,
