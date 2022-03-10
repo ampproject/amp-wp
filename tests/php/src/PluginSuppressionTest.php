@@ -645,4 +645,73 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		}
 		return $r;
 	}
+
+	/**
+	 * Data provider for $this->test_filter_plugin_row_meta()
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_for_filter_plugin_row_meta() {
+
+		return [
+			'plugin is not suppressed'                 => [
+				'plugin_file'      => 'plugin.php',
+				'current_screen'   => 'plugins',
+				'should_have_meta' => false,
+			],
+			'plugin is suppressed'                     => [
+				'plugin_file'      => 'plugin-one/plugin-one.php',
+				'current_screen'   => 'plugins',
+				'should_have_meta' => true,
+			],
+			'plugin is suppressed without slug'        => [
+				'plugin_file'      => 'plugin-one/plugin-one.php',
+				'current_screen'   => 'plugins',
+				'should_have_meta' => true,
+			],
+			'plugin is suppressed on different screen' => [
+				'plugin_file'      => 'plugin-one/plugin-one.php',
+				'current_screen'   => 'plugins-network',
+				'should_have_meta' => false,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider data_provider_for_filter_plugin_row_meta()
+	 * @covers ::filter_plugin_row_meta()
+	 */
+	public function test_filter_plugin_row_meta( $plugin_file, $current_screen, $should_have_meta ) {
+
+		set_current_screen( $current_screen );
+
+		// Mock AMP option.
+		AMP_Options_Manager::update_option(
+			'suppressed_plugins',
+			[
+				'plugin-one' => [
+					'last_version' => '1.0',
+					'timestamp'    => 1646316249,
+					'username'     => 'user1',
+				],
+			]
+		);
+
+		$output = $this->instance->filter_plugin_row_meta( [], $plugin_file );
+
+		if ( $should_have_meta ) {
+
+			$this->assertEquals(
+				sprintf(
+					'<a href="%s" aria-label="%s">%s</a>',
+					esc_url( admin_url( 'admin.php?page=amp-options#plugin-suppression' ) ),
+					esc_attr__( 'Visit AMP Settings', 'amp' ),
+					__( 'Suppressed on AMP Pages', 'amp' )
+				),
+				$output[0]
+			);
+		} else {
+			$this->assertEmpty( $output );
+		}
+	}
 }
