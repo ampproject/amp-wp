@@ -832,6 +832,9 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	public function test_process_text_widgets() {
 		$instance_count = 2;
 
+		// Make sure the video shortcode is registered.
+		add_shortcode( 'video', 'wp_video_shortcode' );
+
 		$embed = new AMP_Core_Block_Handler();
 		$embed->register_embed();
 
@@ -903,18 +906,18 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 		foreach ( $text_widgets as $text_widget ) {
 			$video_div = $dom->xpath->query( './/div[ @class = "wp-video" ]', $text_widget )->item( 0 );
-			$this->assertInstanceOf( 'DOMElement', $video_div );
-			$this->assertFalse( $video_div->hasAttribute( 'style' ) );
+			$this->assertInstanceOf( 'DOMElement', $video_div, "HTML was:\n$html" );
+			$this->assertFalse( $video_div->hasAttribute( 'style' ), "Source HTML:\n$html" );
 
 			$amp_video = $video_div->getElementsByTagName( 'amp-video' )->item( 0 );
-			$this->assertInstanceOf( 'DOMElement', $amp_video );
-			$this->assertEquals( $video_metadata['width'], $amp_video->getAttribute( 'width' ) );
-			$this->assertEquals( $video_metadata['height'], $amp_video->getAttribute( 'height' ) );
+			$this->assertInstanceOf( 'DOMElement', $amp_video, "Source HTML:\n$html" );
+			$this->assertEquals( $video_metadata['width'], $amp_video->getAttribute( 'width' ), "Source HTML:\n$html" );
+			$this->assertEquals( $video_metadata['height'], $amp_video->getAttribute( 'height' ), "Source HTML:\n$html" );
 
 			$amp_iframe = $text_widget->getElementsByTagName( 'amp-iframe' )->item( 0 );
-			$this->assertInstanceOf( 'DOMElement', $amp_iframe );
-			$this->assertEquals( '265', $amp_iframe->getAttribute( 'width' ) );
-			$this->assertEquals( '150', $amp_iframe->getAttribute( 'height' ) );
+			$this->assertInstanceOf( 'DOMElement', $amp_iframe, "Source HTML:\n$html" );
+			$this->assertEquals( '265', $amp_iframe->getAttribute( 'width' ), "Source HTML:\n$html" );
+			$this->assertEquals( '150', $amp_iframe->getAttribute( 'height' ), "Source HTML:\n$html" );
 		}
 	}
 }

@@ -1399,6 +1399,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			$expected
 		);
 
+		// Remove class added in <https://github.com/WordPress/gutenberg/pull/38740> to normalize with expected data.
+		$rendered_block = str_replace( ' class="wp-block-latest-posts__post-title"', '', $rendered_block );
+
 		$this->assertEquals(
 			preg_replace( '/(?<=>)\s+(?=<)/', '', str_replace( '%d', $post->ID, $expected ) ),
 			preg_replace( '/(?<=>)\s+(?=<)/', '', $rendered_block )

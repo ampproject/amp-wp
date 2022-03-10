@@ -4,6 +4,7 @@
 import PropTypes from 'prop-types';
 import {
 	APP_ROOT_ID,
+	APP_ROOT_SIBLING_ID,
 	OPTIONS_REST_PATH,
 	SCANNABLE_URLS_REST_PATH,
 	VALIDATE_NONCE,
@@ -24,6 +25,7 @@ import { ErrorContextProvider } from '../../components/error-context-provider';
 import { OptionsContextProvider } from '../../components/options-context-provider';
 import { PluginsContextProvider } from '../../components/plugins-context-provider';
 import { SiteScanContextProvider } from '../../components/site-scan-context-provider';
+import { ThemesContextProvider } from '../../components/themes-context-provider';
 import { ErrorScreen } from '../../components/error-screen';
 import { ErrorBoundary } from '../../components/error-boundary';
 import { SiteScanNotice } from './notice';
@@ -50,12 +52,14 @@ function Providers( { children } ) {
 					populateDefaultValues={ false }
 				>
 					<PluginsContextProvider>
-						<SiteScanContextProvider
-							scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
-							validateNonce={ VALIDATE_NONCE }
-						>
-							{ children }
-						</SiteScanContextProvider>
+						<ThemesContextProvider>
+							<SiteScanContextProvider
+								scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
+								validateNonce={ VALIDATE_NONCE }
+							>
+								{ children }
+							</SiteScanContextProvider>
+						</ThemesContextProvider>
 					</PluginsContextProvider>
 				</OptionsContextProvider>
 			</ErrorBoundary>
@@ -67,10 +71,18 @@ Providers.propTypes = {
 };
 
 domReady( () => {
-	const root = document.getElementById( APP_ROOT_ID );
+	let root = document.getElementById( APP_ROOT_ID );
 
 	if ( ! root ) {
-		return;
+		const rootSibling = document.getElementById( APP_ROOT_SIBLING_ID );
+
+		if ( ! rootSibling ) {
+			return;
+		}
+
+		root = document.createElement( 'div' );
+		root.setAttribute( 'id', APP_ROOT_ID );
+		rootSibling.after( root );
 	}
 
 	errorHandler = ( event ) => {

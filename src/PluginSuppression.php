@@ -83,6 +83,7 @@ final class PluginSuppression implements Service, Registerable {
 	public function register() {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
+		add_filter( 'plugin_row_meta', [ $this, 'filter_plugin_row_meta' ], 10, 2 );
 
 		add_filter(
 			'register_block_type_args',
@@ -490,5 +491,34 @@ final class PluginSuppression implements Service, Registerable {
 			'plugin' === $source['type'] &&
 			in_array( $source['name'], $suppressed_plugins, true )
 		);
+	}
+
+	/**
+	 * Add meta if plugin is suppressed in AMP page.
+	 *
+	 * @param array  $plugin_meta An array of the plugin's metadata.
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 *
+	 * @return array An array of the plugin's metadata
+	 */
+	public function filter_plugin_row_meta( $plugin_meta, $plugin_file ) {
+
+		// Do not show on the network plugins screen.
+		if ( is_network_admin() ) {
+			return $plugin_meta;
+		}
+
+		$suppressed_plugins = AMP_Options_Manager::get_option( 'suppressed_plugins' );
+		$plugin_slug        = $this->plugin_registry->get_plugin_slug_from_file( $plugin_file );
+		if ( isset( $suppressed_plugins[ $plugin_slug ] ) ) {
+			$plugin_meta[] = sprintf(
+				'<a href="%s" aria-label="%s">%s</a>',
+				esc_url( admin_url( 'admin.php?page=amp-options' ) . '#plugin-suppression' ),
+				esc_attr__( 'Visit AMP Settings', 'amp' ),
+				esc_html__( 'Suppressed on AMP Pages', 'amp' )
+			);
+		}
+
+		return $plugin_meta;
 	}
 }
