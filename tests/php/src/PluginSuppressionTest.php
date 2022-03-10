@@ -713,9 +713,5 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		} else {
 			$this->assertEmpty( $output );
 		}
-
-		set_current_screen( 'front' );
-
-		AMP_Options_Manager::update_option( 'suppressed_plugins', [] );
 	}
 }
