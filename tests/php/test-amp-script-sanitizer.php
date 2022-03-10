@@ -565,7 +565,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$dom->getElementsByTagName( Extension::IMG )->length,
 			'Expected IMG to be converted to AMP-IMG when custom scripts are removed.'
 		);
-		$this->assertRegExp(
+		$this->assertMatchesRegularExpression(
 			1 === $level ? '/}\s*img\s*{/' : '/}amp-img{/',
 			$css_text
 		);
@@ -575,7 +575,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$dom->getElementsByTagName( Extension::VIDEO )->length,
 			'Expected VIDEO to be converted to AMP-VIDEO when custom scripts are removed.'
 		);
-		$this->assertRegExp(
+		$this->assertMatchesRegularExpression(
 			1 === $level ? '/}\s*video\s*{/' : '/}amp-video{/',
 			$css_text
 		);
@@ -588,7 +588,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 
 		switch ( $level ) {
 			case 1:
-				$this->assertRegExp( '/}\s*audio\s*{\s*outline:\s*solid 1px green !important/', $css_text );
+				$this->assertMatchesRegularExpression( '/}\s*audio\s*{\s*outline:\s*solid 1px green !important/', $css_text );
 				break;
 			case 2:
 				$this->assertStringContainsString( '}amp-audio{', $css_text );
@@ -612,7 +612,7 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$dom->getElementsByTagName( Extension::IFRAME )->length,
 			'Expected IFRAME to be converted to AMP-IFRAME when custom scripts are removed.'
 		);
-		$this->assertRegExp(
+		$this->assertMatchesRegularExpression(
 			1 === $level ? '/}\s*iframe\s*{/' : '/}amp-iframe{/',
 			$css_text
 		);

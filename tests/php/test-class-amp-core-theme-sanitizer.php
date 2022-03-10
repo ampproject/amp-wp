@@ -580,9 +580,9 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$this->assertStringEndsWith( '/*first*/', $after );
 
 		if ( $enabled ) {
-			$this->assertRegExp( '#/\* Variables \*/\s*body\s*{#', $after );
+			$this->assertMatchesRegularExpression( '#/\* Variables \*/\s*body\s*{#', $after );
 		} else {
-			$this->assertRegExp( '#/\* Variables \*/\s*:root\s*{#', $after );
+			$this->assertMatchesRegularExpression( '#/\* Variables \*/\s*:root\s*{#', $after );
 		}
 	}
 
