@@ -39,16 +39,25 @@ final class BlockUniqidTransformerTest extends TestCase {
 
 	/**
 	 * @covers ::is_needed()
-	 * @covers ::has_gutenberg_plugin()
+	 * @covers ::is_affected_gutenberg_version()
+	 * @covers ::is_affected_wordpress_version()
 	 */
 	public function test_is_needed() {
 		if (
-			! defined( 'GUTENBERG_VERSION' )
-			&&
-			version_compare( get_bloginfo( 'version' ), '5.9', '<' )
+			(
+				defined( 'GUTENBERG_VERSION' )
+				&&
+				version_compare( GUTENBERG_VERSION, '10.7', '>=' )
+				&&
+				version_compare( GUTENBERG_VERSION, '12.7', '<' )
+			)
+			||
+			(
+				version_compare( get_bloginfo( 'version' ), '5.8', '>=' )
+				&&
+				version_compare( get_bloginfo( 'version' ), '6.0', '<' )
+			)
 		) {
-			$this->assertFalse( BlockUniqidTransformer::is_needed() );
-		} else {
 			AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 			$post_id = self::factory()->post->create();
 
@@ -59,6 +68,8 @@ final class BlockUniqidTransformerTest extends TestCase {
 			$this->go_to( amp_get_permalink( $post_id ) );
 			$this->assertTrue( amp_is_request() );
 			$this->assertTrue( BlockUniqidTransformer::is_needed() );
+		} else {
+			$this->assertFalse( BlockUniqidTransformer::is_needed() );
 		}
 	}
 
