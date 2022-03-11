@@ -36,7 +36,13 @@ final class BlockUniqidTransformer implements Conditional, Service, Registerable
 	 * @return bool
 	 */
 	public static function has_gutenberg_plugin() {
-		return defined( 'GUTENBERG_VERSION' );
+		return (
+			defined( 'GUTENBERG_VERSION' )
+			&&
+			version_compare( GUTENBERG_VERSION, '10.7', '>=' )
+			&&
+			version_compare( GUTENBERG_VERSION, '12.7', '<' )
+		);
 	}
 
 	/**
