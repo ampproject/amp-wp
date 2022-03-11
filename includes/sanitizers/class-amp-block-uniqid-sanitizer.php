@@ -28,6 +28,7 @@ class AMP_Block_Uniqid_Sanitizer extends AMP_Base_Sanitizer {
 	const KEY_PREFIXES = [
 		'wp-container-',
 		'wp-duotone-',
+		'wp-duotone-filter-',
 		'wp-elements-',
 	];
 
@@ -115,7 +116,7 @@ class AMP_Block_Uniqid_Sanitizer extends AMP_Base_Sanitizer {
 				}
 				$new_key = $this->key_mapping[ $old_key ];
 
-				if ( 'wp-duotone-' === $matches['prefix'] ) {
+				if ( in_array( $matches['prefix'], [ 'wp-duotone-', 'wp-duotone-filter-' ], true ) ) {
 					$this->transform_duotone_filter( $old_key, $new_key );
 				}
 
