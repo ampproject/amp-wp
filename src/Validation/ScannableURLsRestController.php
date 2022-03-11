@@ -149,7 +149,12 @@ final class ScannableURLsRestController extends WP_REST_Controller implements De
 			}
 		}
 
-		$urls = $this->scannable_url_provider->get_urls();
+		$urls = array_filter(
+			$this->scannable_url_provider->get_urls(),
+			static function ( $item ) {
+				return is_array( $item ) && isset( $item['url'] );
+			}
+		);
 
 		if ( $options_filter ) {
 			foreach ( $filtered_hooks as $filter_hook ) {
