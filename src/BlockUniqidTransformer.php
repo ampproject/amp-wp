@@ -31,11 +31,16 @@ use AMP_Block_Uniqid_Sanitizer;
 final class BlockUniqidTransformer implements Conditional, Service, Registerable {
 
 	/**
-	 * Check whether the Gutenberg plugin is present.
+	 * Check whether the Gutenberg plugin is present and if its one of the affected versions.
+	 *
+	 * Elements was added in 10.7 via WordPress/gutenberg#31524
+	 * Layout was added in 11.2 via WordPress/gutenberg#33359
+	 * Duotone was added in 11.7 via WordPress/gutenberg#34667
+	 * `uniqid` has been replaced by `wp_unique_id` in 12.7 via WordPress/gutenberg#38891
 	 *
 	 * @return bool
 	 */
-	public static function has_gutenberg_plugin() {
+	public static function is_affected_gutenberg_version() {
 		return (
 			defined( 'GUTENBERG_VERSION' )
 			&&
@@ -46,17 +51,33 @@ final class BlockUniqidTransformer implements Conditional, Service, Registerable
 	}
 
 	/**
+	 * Check whether WordPress version is affected by the `uniqid` issue.
+	 *
+	 * The affected WordPress version is 5.9. However, the duotone filter was first
+	 * introduced in WordPress 5.8 and it makes use of the `uniqid`, too.
+	 *
+	 * @todo Once the `uniqid` to `wp_unique_id` fix is backported to core, upper version boundary should be updated (it's set to 6.0 for now).
+	 *
+	 * @return bool
+	 */
+	public static function is_affected_wordpress_version() {
+		return (
+			version_compare( get_bloginfo( 'version' ), '5.8', '>=' )
+			&&
+			version_compare( get_bloginfo( 'version' ), '6.0', '<' )
+		);
+	}
+
+	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
 		return (
-			(
-				self::has_gutenberg_plugin()
-				||
-				version_compare( get_bloginfo( 'version' ), '5.9', '>=' )
-			)
+			self::is_affected_gutenberg_version()
+			||
+			self::is_affected_wordpress_version()
 		);
 	}
 
