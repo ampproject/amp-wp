@@ -156,6 +156,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'disable_style_processing'       => false,
 		'dynamic_element_selectors'      => [
 			'amp-img',
+			'amp-anim',
 			'amp-list',
 			'amp-live-list',
 			'[submit-error]',
