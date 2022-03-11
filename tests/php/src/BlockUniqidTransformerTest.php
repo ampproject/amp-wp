@@ -58,15 +58,6 @@ final class BlockUniqidTransformerTest extends TestCase {
 				version_compare( get_bloginfo( 'version' ), '6.0', '<' )
 			)
 		) {
-			AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-			$post_id = self::factory()->post->create();
-
-			$this->go_to( get_permalink( $post_id ) );
-			$this->assertFalse( amp_is_request() );
-			$this->assertFalse( BlockUniqidTransformer::is_needed() );
-
-			$this->go_to( amp_get_permalink( $post_id ) );
-			$this->assertTrue( amp_is_request() );
 			$this->assertTrue( BlockUniqidTransformer::is_needed() );
 		} else {
 			$this->assertFalse( BlockUniqidTransformer::is_needed() );
