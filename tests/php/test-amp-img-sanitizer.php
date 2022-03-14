@@ -48,7 +48,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 		$with_defaults = new AMP_Img_Sanitizer( $dom );
 		$this->assertEquals(
-			[ 'img' => [ 'amp-img', 'amp-anim' ] ],
+			[],
 			$with_defaults->get_selector_conversion_mapping()
 		);
 
@@ -616,6 +616,11 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$error_codes = [];
 
 		$args = array_merge(
+			[ 'native_img_used' => false ],
+			$args
+		);
+
+		$args = array_merge(
 			[
 				'use_document_element'      => true,
 				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
@@ -728,7 +733,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$expected = [ 'amp-anim' => true ];
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
 		$sanitizer->sanitize();
 
 		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
@@ -753,7 +758,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$expected = '<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>';
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
 		$sanitizer->sanitize();
 
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
@@ -774,7 +779,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$expected = '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>';
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
 		$sanitizer->sanitize();
 
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
