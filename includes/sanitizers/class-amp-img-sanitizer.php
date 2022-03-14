@@ -354,7 +354,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					}
 
 					$node->setAttribute( Attribute::WIDTH, $width );
-					if ( ! isset( $dimensions['width'] ) ) {
+					if ( empty( $dimensions['width'] ) ) {
 						$class .= ' amp-wp-unknown-width';
 					}
 				}
@@ -372,7 +372,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					}
 
 					$node->setAttribute( Attribute::HEIGHT, $height );
-					if ( ! isset( $dimensions['height'] ) ) {
+					if ( empty( $dimensions['height'] ) ) {
 						$class .= ' amp-wp-unknown-height';
 					}
 				}
