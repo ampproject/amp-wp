@@ -30,12 +30,12 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
       - name: Approve PR
         run: gh pr review --approve "$PR_URL"
-        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Enable auto-merge for Dependabot PRs
-        if: ${{ github.event.pull_request.auto_merge == null && steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
+        if: ${{ github.event.pull_request.auto_merge == null && ( steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' ) }}
         run: gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
