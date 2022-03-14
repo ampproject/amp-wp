@@ -655,7 +655,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 */
 	public function test_determine_dimensions_with_zero_width() {
 
-		$source   = '<img src="https://placehold.it/350x150.png" alt="Placeholder!" width="0" height="auto"/>';
+		$source   = '<img src="https://placehold.it/350x150.png" alt="Placeholder!"/>';
 		$expected = '<amp-img src="https://placehold.it/350x150.png" alt="Placeholder!" width="0" height="150" class="amp-wp-enforced-sizes amp-wp-unknown-width"><noscript><img src="https://placehold.it/350x150.png" alt="Placeholder!" width="0" height="150"></noscript></amp-img>';
 
 		$callback = static function ( $extracted_dimensions ) {
@@ -680,7 +680,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 */
 	public function test_determine_dimensions_with_zero_height() {
 
-		$source   = '<img src="https://placehold.it/350x150.png" alt="Placeholder!" width="auto" height="0"/>';
+		$source   = '<img src="https://placehold.it/350x150.png" alt="Placeholder!"/>';
 		$expected = '<amp-img src="https://placehold.it/350x150.png" alt="Placeholder!" width="350" height="0" class="amp-wp-enforced-sizes amp-wp-unknown-height"><noscript><img src="https://placehold.it/350x150.png" alt="Placeholder!" width="350" height="0"></noscript></amp-img>';
 
 		$callback = static function ( $extracted_dimensions ) {
