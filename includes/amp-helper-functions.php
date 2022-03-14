@@ -1469,7 +1469,7 @@ function amp_is_native_img_used() {
 	 *
 	 * @param bool $use_native Whether to use `img`.
 	 */
-	return (bool) apply_filters( 'amp_native_img_used', false );
+	return (bool) apply_filters( 'amp_native_img_used', true );
 }
 
 /**
