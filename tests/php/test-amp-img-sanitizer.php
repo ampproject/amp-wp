@@ -646,6 +646,56 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	}
 
 	/**
+	 * @covers ::determine_dimensions()
+	 */
+	public function test_determine_dimensions_with_zero_width() {
+
+		$source   = '<img src="https://placehold.it/350x150.png" alt="Placeholder!"/>';
+		$expected = '<amp-img src="https://placehold.it/350x150.png" alt="Placeholder!" width="600" height="150" class="amp-wp-unknown-width amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/350x150.png" alt="Placeholder!" width="600" height="150"></noscript></amp-img>';
+
+		$callback = static function ( $extracted_dimensions ) {
+			$extracted_dimensions['https://placehold.it/350x150.png'] = [
+				'width'  => 0,
+				'height' => 150,
+			];
+			return $extracted_dimensions;
+		};
+		add_filter( 'amp_extract_image_dimensions_batch', $callback );
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEqualMarkup( $expected, $content );
+	}
+
+	/**
+	 * @covers ::determine_dimensions()
+	 */
+	public function test_determine_dimensions_with_zero_height() {
+
+		$source   = '<img src="https://placehold.it/350x150.png" alt="Placeholder!"/>';
+		$expected = '<amp-img src="https://placehold.it/350x150.png" alt="Placeholder!" width="350" height="400" class="amp-wp-unknown-height amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/350x150.png" alt="Placeholder!" width="350" height="400"></noscript></amp-img>';
+
+		$callback = static function ( $extracted_dimensions ) {
+			$extracted_dimensions['https://placehold.it/350x150.png'] = [
+				'width'  => 350,
+				'height' => 0,
+			];
+			return $extracted_dimensions;
+		};
+		add_filter( 'amp_extract_image_dimensions_batch', $callback );
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEqualMarkup( $expected, $content );
+	}
+
+	/**
 	 * Test that amp-anim does not get included for a PNG.
 	 *
 	 * @covers ::sanitize()
