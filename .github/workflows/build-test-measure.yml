@@ -451,6 +451,9 @@ jobs:
       - name: Install Composer dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
         run: |
+          # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, preventing phpunit 9.3+
+          # from being installed. It also prevents pcov/clobber from being installed below for the same reason.
+          composer remove --dev phpdocumentor/reflection
           # Remove the composer.lock to always install install the latest PHPUnit.
           rm composer.lock
           composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
@@ -481,10 +484,7 @@ jobs:
 
       - name: Setup PCOV
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, making pcov/clobber
-        # unable to be installed.
         run: |
-          composer remove --dev phpdocumentor/reflection
           composer require --dev --ignore-platform-reqs pcov/clobber
           vendor/bin/pcov clobber
 
