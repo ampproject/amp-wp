@@ -1299,6 +1299,9 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				sprintf( '<div><img class="logo" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ) ),
 				'div img.logo{border:solid 1px red}',
 				'div amp-img.logo{border:solid 1px red}', // Note amp-anim is still tree-shaken because it doesn't occur in the DOM.
+				[
+					AMP_Img_Sanitizer::class => [ 'native_img_used' => false ],
+				],
 			],
 			'img-missing-class' => [
 				sprintf( '<div><img class="logo" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ) ),
@@ -1309,16 +1312,25 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				sprintf( '<div><img class="logo" src="%s" width="200" height="100"><img class="spinner" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ), admin_url( 'images/spinner-2x.gif' ) ),
 				'div img{border:solid 1px red}',
 				'div amp-img,div amp-anim{border:solid 1px red}',
+				[
+					AMP_Img_Sanitizer::class => [ 'native_img_used' => false ],
+				],
 			],
 			'amp-img-and-amp-anim' => [
 				sprintf( '<amp-img class="logo amp-wp-enforced-sizes" src="%s" width="200" height="100" layout="intrinsic"></amp-img><amp-anim class="spinner amp-wp-enforced-sizes" src="%s" width="200" height="100" layout="intrinsic"></amp-anim>', admin_url( 'images/wordpress-logo.png' ), admin_url( 'images/spinner-2x.gif' ) ),
 				'amp-img.amp-wp-enforced-sizes[layout="intrinsic"] > img,amp-anim.amp-wp-enforced-sizes[layout="intrinsic"] > img{object-fit:contain}',
 				'amp-img.amp-wp-enforced-sizes[layout="intrinsic"] > img,amp-anim.amp-wp-enforced-sizes[layout="intrinsic"] > img{object-fit:contain}',
+				[
+					AMP_Img_Sanitizer::class => [ 'native_img_used' => false ],
+				],
 			],
 			'admin-bar-style-selectors' => [
 				'<div id="wpadminbar"><a href="https://example.com/"><amp-img src="https://example.com/foo.png" width="100" height="100"></amp-img><amp-anim src="https://example.com/foo.gif" width="100" height="100"></amp-anim></a></div>',
 				'#wpadminbar a, #wpadminbar a:hover, #wpadminbar a img, #wpadminbar a img:hover { border: none; text-decoration: none; background: none;}',
 				'#wpadminbar a,#wpadminbar a:hover,#wpadminbar a amp-img,#wpadminbar a amp-anim,#wpadminbar a amp-img:hover,#wpadminbar a amp-anim:hover{border:none;text-decoration:none;background:none}',
+				[
+					AMP_Img_Sanitizer::class => [ 'native_img_used' => false ],
+				],
 			],
 			'img_with_amp_img' => [
 				'<amp-img></amp-img>',
@@ -1329,6 +1341,9 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				sprintf( '<div><amp-img class="logo" src="%s" width="200" height="100"></amp-img></div>', admin_url( 'images/wordpress-logo.png' ) ),
 				'div amp-img.logo img{object-fit:cover}',
 				'div amp-img.logo img{object-fit:cover}',
+				[
+					AMP_Img_Sanitizer::class => [ 'native_img_used' => false ],
+				],
 			],
 			'img-tree-shaking' => [
 				sprintf( '<article><img class="logo" src="%s" width="200" height="100"></article>', admin_url( 'images/wordpress-logo.png' ) ),
@@ -1649,6 +1664,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				array_keys( $selectors )
 			)
 		);
+
+		add_filter( 'amp_native_img_used', '__return_false' );
 
 		// The toggling of the 'add_noscript_fallback' arg is to catch a bizzare PHP DOM issue whereby if you replace
 		// an element in a Document, and that replaced element had an ID, the element will still be returned by
@@ -3454,7 +3471,9 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 							?>
 							<figure class="wp-block-audio"><figcaption></figcaption></figure>
 							<div class="wp-block-foo"><figcaption></figcaption></div>
-							<img src="https://example.com/example.jpg" width="100" height="200">
+							<div class="amp-wp-default-form-message">
+								<p>Hi</p>
+							</div>
 							<?php
 						}
 					);
@@ -3477,7 +3496,7 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 					$this->assertStringContainsString( '.wp-block-audio figcaption', $amphtml_source, 'Expected block-library/style.css' );
 					$this->assertStringContainsString( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
-					$this->assertStringContainsString( 'amp-img img', $amphtml_source, 'Expected amp-default.css' );
+					$this->assertStringContainsString( '.amp-wp-default-form-message>p', $amphtml_source, 'Expected amp-default.css' );
 					$this->assertStringContainsString( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
 					$this->assertStringNotContainsString( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
 					$this->assertStringContainsString( 'admin-bar', $amphtml_dom->body->getAttribute( 'class' ) );
