@@ -38,7 +38,7 @@ const OTHER_ANALYTICS_NOTICE = sprintf(
 const vendorConfigs = {
 	'': {
 		notice: OTHER_ANALYTICS_NOTICE,
-		sample: {},
+		sample: '{}',
 	},
 	[ GOOGLE_ANALYTICS_VENDOR ]: {
 		notice: GOOGLE_ANALYTICS_NOTICE,
