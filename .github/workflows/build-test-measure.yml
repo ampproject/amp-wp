@@ -452,7 +452,7 @@ jobs:
         if: needs.pre-run.outputs.changed-php-count > 0
         run: |
           # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, preventing phpunit 9.3+
-          # from being installed. It also prevents pcov/clobber from being installed below for the same reason.
+          # from being installed.
           composer remove --dev phpdocumentor/reflection
           # Remove the composer.lock to always install install the latest PHPUnit.
           rm composer.lock
@@ -481,12 +481,6 @@ jobs:
       - name: Post install of WP tests
         if: needs.pre-run.outputs.changed-php-count > 0
         run: bash bin/ci/after-wp-install.sh ${{ matrix.wp }} ${{ matrix.install-pwa-plugin == true }}
-
-      - name: Setup PCOV
-        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: |
-          composer require --dev --ignore-platform-reqs pcov/clobber
-          vendor/bin/pcov clobber
 
       - name: Copy plugin to WP plugins directory
         if: needs.pre-run.outputs.changed-php-count > 0
