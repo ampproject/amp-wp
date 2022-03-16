@@ -581,7 +581,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * Test validation error overrides for when bad nonce is supplied.
 	 *
 	 * @covers AMP_Validation_Manager::override_validation_error_statuses()
-	 * @expectedException WPDieException
 	 */
 	public function test_override_validation_error_statuses_with_bad_nonce() {
 		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
@@ -592,14 +591,22 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 			],
 		];
-		AMP_Validation_Manager::override_validation_error_statuses();
+
+		$exception = null;
+		try {
+			AMP_Validation_Manager::override_validation_error_statuses();
+		} catch ( Exception $ex ) {
+			$exception = $ex;
+		}
+
+		$this->assertInstanceOf( WPDieException::class, $exception );
+		$this->assertEquals( 'Preview link expired. Please try again.', $exception->getMessage() );
 	}
 
 	/**
 	 * Test validation error overrides for when no nonce is supplied.
 	 *
 	 * @covers AMP_Validation_Manager::override_validation_error_statuses()
-	 * @expectedException WPDieException
 	 */
 	public function test_override_validation_error_statuses_with_no_nonce() {
 		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
@@ -609,7 +616,15 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 			],
 		];
-		AMP_Validation_Manager::override_validation_error_statuses();
+
+		$exception = null;
+		try {
+			AMP_Validation_Manager::override_validation_error_statuses();
+		} catch ( Exception $ex ) {
+			$exception = $ex;
+		}
+		$this->assertInstanceOf( WPDieException::class, $exception );
+		$this->assertEquals( 'Preview link expired. Please try again.', $exception->getMessage() );
 	}
 
 	/**
