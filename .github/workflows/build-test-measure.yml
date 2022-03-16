@@ -471,7 +471,7 @@ jobs:
           # Remove the composer.lock to always install install the latest PHPUnit.
           rm composer.lock
           composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
-          composer require --dev --ignore-platform-reqs --update-with-all-dependencies phpunit/phpunit:${{ matrix.phpunit }}
+          composer require --dev --ignore-platform-reqs phpunit/phpunit:${{ matrix.phpunit }}
 
       - name: Install Node dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
