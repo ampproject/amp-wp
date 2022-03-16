@@ -366,9 +366,7 @@ jobs:
         coverage: [false]
         external-http: [false]
         install-pwa-plugin: [true]
-        php: ['7.4', '7.3', '7.2', '7.1']
         phpunit: ['latest']
-        wp: ['latest']
         include:
           - php: '8.0'
             wp: 'trunk'
@@ -385,22 +383,24 @@ jobs:
             coverage: true
 
           - php: '7.2'
+            wp: 'latest'
             phpunit: '8'
 
           - php: '7.1'
+            wp: 'latest'
             phpunit: '7'
 
           - php: '7.0'
-            phpunit: '6'
             wp: '5.1'
+            phpunit: '6'
 
           - php: '5.6'
             phpunit: '5'
             wp: '5.0'
 
           - php: '5.6'
-            phpunit: '5'
             wp: '4.9'
+            phpunit: '5'
             external-http: true
             install-pwa-plugin: false
 
@@ -461,7 +461,14 @@ jobs:
 
       - name: Install Composer dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
-        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+        run: |
+          # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, preventing phpunit 9.3+
+          # from being installed. This is apparently needed so that WP-CLI can be installed. Otherwise, an error occurs
+          # rearding class "WP_CLI\Loggers\Regular" not being found.
+          composer remove --dev phpdocumentor/reflection
+          # Remove the composer.lock to always install install the latest PHPUnit.
+          rm composer.lock
+          composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
       - name: Install Node dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
