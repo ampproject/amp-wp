@@ -366,20 +366,22 @@ jobs:
         coverage: [false]
         external-http: [false]
         install-pwa-plugin: [true]
-        phpunit: ['9']
         include:
           - php: '8.0'
             wp: 'trunk'
+            phpunit: '9'
             experimental: true
 
           - php: '8.0'
             wp: 'latest'
+            phpunit: '9'
             external-http: true
 
           # PHP 8.0 cannot be used as yet due to the earliest compatible PHPUnit (v9) being unable to run due to the
           # WP test suite enforcing PHPUnit 7 or earlier.
           - php: '7.4'
             wp: 'latest'
+            phpunit: '9'
             coverage: true
 
           - php: '7.2'
