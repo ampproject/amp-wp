@@ -363,9 +363,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        coverage: [false]
+        php: ['8.0']
+        wp: ['latest']
         external-http: [false]
         install-pwa-plugin: [true]
+        coverage: [false]
         include:
           - php: '8.0'
             wp: 'trunk'
