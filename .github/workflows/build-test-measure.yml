@@ -367,6 +367,7 @@ jobs:
         external-http: [false]
         install-pwa-plugin: [true]
         php: ['7.4', '7.3', '7.2', '7.1']
+        phpunit: ['latest']
         wp: ['latest']
         include:
           - php: '8.0'
@@ -383,13 +384,22 @@ jobs:
             wp: 'latest'
             coverage: true
 
+          - php: '7.2'
+            phpunit: '8'
+
+          - php: '7.1'
+            phpunit: '7'
+
           - php: '7.0'
+            phpunit: '6'
             wp: '5.1'
 
           - php: '5.6'
+            phpunit: '5'
             wp: '5.0'
 
           - php: '5.6'
+            phpunit: '5'
             wp: '4.9'
             external-http: true
             install-pwa-plugin: false
@@ -412,6 +422,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+          tools: phpunit:${{ matrix.phpunit }}
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           ini-values: pcov.directory=.
@@ -450,13 +461,7 @@ jobs:
 
       - name: Install Composer dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
-        run: |
-          # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, preventing phpunit 9.3+
-          # from being installed.
-          composer remove --dev phpdocumentor/reflection
-          # Remove the composer.lock to always install install the latest PHPUnit.
-          rm composer.lock
-          composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
       - name: Install Node dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
@@ -488,21 +493,27 @@ jobs:
 
       - name: Run tests
         if: ${{ matrix.coverage == false && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: vendor/bin/phpunit --verbose
+        run: |
+          phpunit --version
+          phpunit --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: vendor/bin/phpunit --verbose --coverage-clover build/logs/clover.xml
+        run: |
+          phpunit --version
+          phpunit --verbose --coverage-clover build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run external HTTP tests
         if: ${{ matrix.external-http == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: vendor/bin/phpunit --testsuite external-http
+        run: |
+          phpunit --version
+          phpunit --testsuite external-http
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
