@@ -366,7 +366,7 @@ jobs:
         coverage: [false]
         external-http: [false]
         install-pwa-plugin: [true]
-        phpunit: ['latest']
+        phpunit: ['9']
         include:
           - php: '8.0'
             wp: 'trunk'
