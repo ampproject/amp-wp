@@ -422,7 +422,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          tools: phpunit:${{ matrix.phpunit }}
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           ini-values: pcov.directory=.
@@ -469,6 +468,7 @@ jobs:
           # Remove the composer.lock to always install install the latest PHPUnit.
           rm composer.lock
           composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+          composer require --dev --ignore-platform-reqs --update-with-all-dependencies phpunit:${{ matrix.phpunit }}
 
       - name: Install Node dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
@@ -500,27 +500,21 @@ jobs:
 
       - name: Run tests
         if: ${{ matrix.coverage == false && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: |
-          phpunit --version
-          phpunit --verbose
+        run: vendor/bin/phpunit --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: |
-          phpunit --version
-          phpunit --verbose --coverage-clover build/logs/clover.xml
+        run: vendor/bin/phpunit --verbose --coverage-clover build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run external HTTP tests
         if: ${{ matrix.external-http == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: |
-          phpunit --version
-          phpunit --testsuite external-http
+        run: vendor/bin/phpunit --testsuite external-http
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
