@@ -167,15 +167,14 @@ class ReenableCssTransientCachingAjaxActionTest extends TestCase {
 	 */
 	public function test_reenable_css_transient_caching( $initial_value, $nonce_action, $user, $expected_output, $final_value ) {
 		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, $initial_value );
+
+		$wp_die_ajax_handler = static function () {
+			return function ( $message ) {
+				throw new WPDieException( $message );
+			};
+		};
 		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter(
-			'wp_die_ajax_handler',
-			static function () {
-				return function ( $message ) {
-					throw new WPDieException( $message );
-				};
-			}
-		);
+		add_filter( 'wp_die_ajax_handler', $wp_die_ajax_handler );
 
 		if ( $user ) {
 			wp_set_current_user( self::factory()->user->create( [ 'role' => $user ] ) );
@@ -200,5 +199,8 @@ class ReenableCssTransientCachingAjaxActionTest extends TestCase {
 			$final_value,
 			AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING )
 		);
+
+		remove_filter( 'wp_doing_ajax', '__return_true' );
+		remove_filter( 'wp_die_ajax_handler', $wp_die_ajax_handler );
 	}
 }
