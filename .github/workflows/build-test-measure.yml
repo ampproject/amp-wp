@@ -500,7 +500,6 @@ jobs:
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
         run: vendor/bin/phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
-        coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
