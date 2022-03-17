@@ -4,6 +4,12 @@
   "license": "GPL-2.0-or-later",
   "type": "wordpress-plugin",
   "homepage": "https://github.com/ampproject/amp-wp",
+  "repositories": [
+    {
+      "type": "github",
+      "url": "https://github.com/ampproject/px-toolbox-php"
+    }
+  ],
   "require": {
     "php": "^5.6 || ^7.0 || ^8.0",
     "ext-curl": "*",
@@ -15,6 +21,7 @@
     "ext-libxml": "*",
     "ext-spl": "*",
     "ampproject/amp-toolbox": "0.10.0",
+    "ampproject/px-toolbox": "dev-main",
     "cweagans/composer-patches": "~1.0",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "8.4.0"
