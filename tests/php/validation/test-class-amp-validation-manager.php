@@ -1222,13 +1222,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'//script[ @id = "jquery-core-js-before" ]',
 					'//script[ @id = "jquery-core-js-after" ]',
 					'//script[ @id = "wp-dom-ready-js" ]',
-					'//script[ @id = "wp-dom-ready-js-translations" ]',
 					'//script[ @id = "quicktags-js" ]',
 					'//script[ @id = "quicktags-js-extra" ]',
 					'//script[ contains( text(), "window.wpActiveEditor" ) ]',
 				],
 				function ( ...$sources_sets ) {
-					$this->assertCount( 7, $sources_sets );
+					$this->assertCount( 6, $sources_sets );
 					foreach ( $sources_sets as $sources ) {
 						$amp_source_count = 0;
 						foreach ( $sources as $source ) {

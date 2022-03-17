@@ -1613,7 +1613,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertTrue( AMP_Theme_Support::is_output_buffering() );
 		$this->assertSame( 3, ob_get_level() );
 
-		echo '<html><head></head><body><img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
+		echo '<html><head></head><body><video src="test.mp4" width="100" height="100"></video><script data-test>document.write(\'Illegal\');</script>';
 		wp_footer();
 
 		// Additional nested output bufferings which aren't getting closed.
@@ -1637,7 +1637,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertStringContainsString( '<html amp', $output );
 		$this->assertStringContainsString( 'foo', $output );
 		$this->assertStringContainsString( 'BAR', $output );
-		$this->assertStringContainsString( '<amp-img src="test.png"', $output );
+		$this->assertStringContainsString( '<amp-video src="test.mp4"', $output );
 		$this->assertStringNotContainsString( '<script data-test', $output );
 
 	}
@@ -1654,11 +1654,11 @@ class Test_AMP_Theme_Support extends TestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
-		$partial = '<img src="test.png" style="border:solid 1px red;"><script data-head>document.write(\'Illegal\');</script><style>img { background:blue }</style>';
+		$partial = '<video src="test.mp4" width="100" height="200" style="border:solid 1px red;"></video><script data-head>document.write(\'Illegal\');</script><style>video { background:blue }</style>';
 		$output  = AMP_Theme_Support::filter_customize_partial_render( $partial );
-		$this->assertStringContainsString( '<amp-img src="test.png"', $output );
+		$this->assertStringContainsString( '<amp-video src="test.mp4"', $output );
 		$this->assertStringContainsString( '<style amp-custom-partial="">', $output );
-		$this->assertStringContainsString( 'amp-img{background:blue}', $output );
+		$this->assertStringContainsString( 'amp-video{background:blue}', $output );
 		$this->assertStringContainsString( '.amp-wp-b123f72:not(#_#_#_#_#_){border:solid 1px red}', $output );
 		$this->assertStringEndsWith( '/*# sourceURL=amp-custom-partial.css */</style>', $output );
 		$this->assertStringNotContainsString( '<script', $output );
@@ -1769,8 +1769,9 @@ class Test_AMP_Theme_Support extends TestCase {
 			$prev_ordered_contain = $ordered_contain;
 		}
 
-		$this->assertStringContainsString( '<noscript><img', $sanitized_html );
-		$this->assertStringContainsString( '<amp-img', $sanitized_html );
+		$this->assertStringNotContainsString( '<noscript><img', $sanitized_html );
+		$this->assertStringContainsString( '<img width="100" height="100" src="https://example.com/hero.png" decoding="async" class="amp-wp-enforced-sizes">', $sanitized_html );
+		$this->assertStringContainsString( '<img width="100" height="100" src="https://example.com/test.png" loading="lazy" decoding="async" class="amp-wp-enforced-sizes">', $sanitized_html );
 
 		$this->assertStringContainsString( '<noscript><audio', $sanitized_html );
 		$this->assertStringContainsString( '<amp-audio', $sanitized_html );
@@ -2162,9 +2163,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		</head>
 		<body><!-- </body></html> -->
 		<div id="dynamic-id-0"></div>
-		<!-- 2nd image is needed for testing <noscript> as first is SSR'ed -->
 		<img width="100" height="100" src="https://example.com/hero.png">
-		<img width="100" height="100" src="https://example.com/test.png">
+		<img width="100" height="100" src="https://example.com/test.png" loading="lazy">
 		<audio src="https://example.com/audios/myaudio.mp3"></audio>
 		<amp-ad type="a9"
 				width="300"
