@@ -195,8 +195,10 @@ class AMP_Block_Uniqid_Sanitizer extends AMP_Base_Sanitizer {
 		if ( function_exists( 'wp_unique_id' ) ) {
 			return wp_unique_id( $prefix );
 		} else {
+			// @codeCoverageIgnoreStart
 			static $id_counter = 0;
 			return $prefix . (string) ++$id_counter;
+			// @codeCoverageIgnoreEnd
 		}
 	}
 }
