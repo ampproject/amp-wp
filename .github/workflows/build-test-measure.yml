@@ -515,6 +515,7 @@ jobs:
         uses: codecov/codecov-action@v2.1.0
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
+          version: "v0.1.15"
           flags: php,unit
           fail_ci_if_error: true
 
