@@ -514,8 +514,9 @@ jobs:
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
         uses: codecov/codecov-action@v2.1.0
         with:
-          file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
-          version: "v0.1.15"
+          file: ./build/logs/clover.xml
+          working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
+          verbose: true
           flags: php,unit
           fail_ci_if_error: true
 
