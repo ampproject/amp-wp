@@ -498,7 +498,7 @@ jobs:
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: vendor/bin/phpunit --verbose --coverage-clover build/logs/clover.xml
+        run: vendor/bin/phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         env:
           WP_TESTS_DIR: /tmp/wordpress-tests-lib
@@ -514,9 +514,7 @@ jobs:
         if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
         uses: codecov/codecov-action@v2.1.0
         with:
-          file: ./build/logs/clover.xml
-          working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
-          verbose: true
+          file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php,unit
           fail_ci_if_error: true
 
