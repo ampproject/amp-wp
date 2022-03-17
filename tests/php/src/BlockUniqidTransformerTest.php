@@ -3,17 +3,13 @@
 namespace AmpProject\AmpWP\Tests;
 
 use AMP_Block_Uniqid_Sanitizer;
-use AMP_Options_Manager;
-use AMP_Theme_Support;
 use AmpProject\AmpWP\BlockUniqidTransformer;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 
 /** @coversDefaultClass \AmpProject\AmpWP\BlockUniqidTransformer */
-final class BlockUniqidTransformerTest extends TestCase {
+final class BlockUniqidTransformerTest extends DependencyInjectedTestCase {
 
 	use MarkupComparison;
 
@@ -32,7 +28,6 @@ final class BlockUniqidTransformerTest extends TestCase {
 	}
 
 	public function test_it_can_be_initialized() {
-		$this->assertInstanceOf( Conditional::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 	}
@@ -43,6 +38,8 @@ final class BlockUniqidTransformerTest extends TestCase {
 	 * @covers ::is_affected_wordpress_version()
 	 */
 	public function test_is_needed() {
+		$instance = $this->injector->make( BlockUniqidTransformer::class );
+
 		if (
 			(
 				defined( 'GUTENBERG_VERSION' )
@@ -58,10 +55,24 @@ final class BlockUniqidTransformerTest extends TestCase {
 				version_compare( get_bloginfo( 'version' ), '6.0', '<' )
 			)
 		) {
-			$this->assertTrue( BlockUniqidTransformer::is_needed() );
+			$this->assertTrue( $instance->is_needed() );
 		} else {
-			$this->assertFalse( BlockUniqidTransformer::is_needed() );
+			$this->assertFalse( $instance->is_needed() );
 		}
+	}
+
+	/**
+	 * @covers ::is_affected_gutenberg_version()
+	 */
+	public function test_is_affected_gutenberg_version() {
+		$this->markTestIncomplete();
+	}
+
+	/**
+	 * @covers ::is_affected_wordpress_version()
+	 */
+	public function test_is_affected_wordpress_version() {
+		$this->markTestIncomplete();
 	}
 
 	/**
@@ -75,10 +86,19 @@ final class BlockUniqidTransformerTest extends TestCase {
 			amp_get_content_sanitizers()
 		);
 
+		// @todo This needs to force the WP version.
 		$this->instance->register();
-		$this->assertArrayHasKey(
-			AMP_Block_Uniqid_Sanitizer::class,
-			amp_get_content_sanitizers()
-		);
+
+		if ( $this->instance->is_needed() ) {
+			$this->assertArrayHasKey(
+				AMP_Block_Uniqid_Sanitizer::class,
+				amp_get_content_sanitizers()
+			);
+		} else {
+			$this->assertArrayNotHasKey(
+				AMP_Block_Uniqid_Sanitizer::class,
+				amp_get_content_sanitizers()
+			);
+		}
 	}
 }

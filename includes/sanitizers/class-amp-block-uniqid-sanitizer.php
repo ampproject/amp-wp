@@ -14,6 +14,7 @@ use AmpProject\Dom\Document;
  * Work around use of uniqid() in blocks which breaks parsed CSS caching.
  *
  * @link https://github.com/ampproject/amp-wp/issues/6925
+ * @link https://github.com/WordPress/gutenberg/issues/38889
  *
  * @since 2.2.2
  * @internal

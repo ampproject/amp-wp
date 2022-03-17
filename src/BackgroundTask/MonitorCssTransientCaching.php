@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\BackgroundTask;
 
 use AMP_Options_Manager;
+use AmpProject\AmpWP\BlockUniqidTransformer;
 use AmpProject\AmpWP\Option;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -53,6 +54,32 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	 * @var int
 	 */
 	const DEFAULT_SAMPLING_RANGE = 14;
+
+	/**
+	 * @string
+	 */
+	const WP_VERSION = 'wp_version';
+
+	/**
+	 * @string
+	 */
+	const GUTENBERG_VERSION = 'gutenberg_version';
+
+	/**
+	 * @var BlockUniqidTransformer
+	 */
+	private $block_uniqid_transformer;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param BackgroundTaskDeactivator $background_task_deactivator Deactivator.
+	 * @param BlockUniqidTransformer    $block_uniqid_transformer    Transformer.
+	 */
+	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, BlockUniqidTransformer $block_uniqid_transformer ) {
+		parent::__construct( $background_task_deactivator );
+		$this->block_uniqid_transformer = $block_uniqid_transformer;
+	}
 
 	/**
 	 * Register the service with the system.
@@ -134,14 +161,20 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	 * @return bool Whether transient caching of stylesheets is disabled.
 	 */
 	private function is_css_transient_caching_disabled() {
-		return AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+		return (bool) AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 	}
 
 	/**
 	 * Disable transient caching of stylesheets.
 	 */
 	private function disable_css_transient_caching() {
-		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
+		AMP_Options_Manager::update_option(
+			Option::DISABLE_CSS_TRANSIENT_CACHING,
+			[
+				self::WP_VERSION        => get_bloginfo( 'version' ),
+				self::GUTENBERG_VERSION => defined( 'GUTENBERG_VERSION' ) ? GUTENBERG_VERSION : null,
+			]
+		);
 	}
 
 	/**
@@ -164,8 +197,35 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	 * @param string $old_version Old version.
 	 */
 	public function handle_plugin_update( $old_version ) {
-		// Reset the disabling of the CSS caching subsystem when updating from versions 1.5.0 or 1.5.1.
-		if ( version_compare( $old_version, '1.5.0', '>=' ) && version_compare( $old_version, '1.5.2', '<' ) ) {
+		$disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+		if ( empty( $disabled ) ) {
+			return;
+		}
+
+		// Obtain the version of WordPress and Gutenberg at which time the functionality was disabled, if available.
+		$wp_version        = isset( $disabled[ self::WP_VERSION ] ) ? $disabled[ self::WP_VERSION ] : null;
+		$gutenberg_version = isset( $disabled[ self::GUTENBERG_VERSION ] ) ? $disabled[ self::GUTENBERG_VERSION ] : null;
+
+		if (
+			// Reset the disabling of the CSS caching subsystem when updating from versions 1.5.0 or 1.5.1.
+			(
+				version_compare( $old_version, '1.5.0', '>=' )
+				&&
+				version_compare( $old_version, '1.5.2', '<' )
+			)
+			||
+			// Reset when it was disabled prior to the versions of WP/Gutenberg being captured,
+			// or if the captured versions were affected at the time of disabling.
+			(
+				empty( $gutenberg_version )
+				||
+				$this->block_uniqid_transformer->is_affected_gutenberg_version( $gutenberg_version )
+				||
+				empty( $wp_version )
+				||
+				$this->block_uniqid_transformer->is_affected_wordpress_version( $wp_version )
+			)
+		) {
 			AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 		}
 	}

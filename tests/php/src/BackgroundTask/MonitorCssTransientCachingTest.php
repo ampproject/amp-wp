@@ -6,14 +6,13 @@
 namespace AmpProject\AmpWP\Tests\BackgroundTask;
 
 use AMP_Options_Manager;
-use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use DateTime;
 
 /** @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching */
-class MonitorCssTransientCachingTest extends TestCase {
+class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 
 	/**
 	 * Whether external object cache is being used.
@@ -51,7 +50,7 @@ class MonitorCssTransientCachingTest extends TestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertFalse( wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME ) );
 
-		$monitor = new MonitorCssTransientCaching( new BackgroundTaskDeactivator() );
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
 		$monitor->schedule_event();
 
 		$timestamp = wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME );
@@ -69,7 +68,7 @@ class MonitorCssTransientCachingTest extends TestCase {
 	public function test_event_can_be_processed() {
 		delete_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY );
 
-		$monitor = new MonitorCssTransientCaching( new BackgroundTaskDeactivator() );
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
 		$monitor->process();
 
 		$this->assertNotFalse( get_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY ) );
@@ -97,7 +96,7 @@ class MonitorCssTransientCachingTest extends TestCase {
 			}
 		);
 
-		$monitor = new MonitorCssTransientCaching( new BackgroundTaskDeactivator() );
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
 
 		// Moving average should be 0.
 		$monitor->process( new DateTime( '2000-01-01' ), 5 );
@@ -137,6 +136,13 @@ class MonitorCssTransientCachingTest extends TestCase {
 			],
 			get_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY )
 		);
-		$this->assertTrue( AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING ) );
+
+		$expected = [
+			MonitorCssTransientCaching::WP_VERSION        => get_bloginfo( 'version' ),
+			MonitorCssTransientCaching::GUTENBERG_VERSION => defined( 'GUTENBERG_VERSION' ) ? GUTENBERG_VERSION : null,
+		];
+
+		$this->assertTrue( (bool) AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING ) );
+		$this->assertEquals( $expected, AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING ) );
 	}
 }
