@@ -223,10 +223,11 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		if ( ! wp_get_theme( self::THEME_PRIMARY )->exists() || ! wp_get_theme( self::THEME_READER )->exists() ) {
 			$this->markTestSkipped();
 		}
+
+		$this->add_theme_supports( self::TEST_ALL_THEME_SUPPORTS );
 		AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, null );
 		switch_theme( self::THEME_PRIMARY );
 		AMP_Options_Manager::update_option( Option::READER_THEME, self::THEME_READER );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		/** @var ReaderThemeLoader $reader_theme_loader */
 		$reader_theme_loader = $this->get_private_property( $this->instance, 'reader_theme_loader' );
@@ -248,7 +249,6 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, null );
 		switch_theme( self::THEME_PRIMARY );
 		AMP_Options_Manager::update_option( Option::READER_THEME, self::THEME_READER );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		/** @var ReaderThemeLoader $reader_theme_loader */
 		$reader_theme_loader = $this->get_private_property( $this->instance, 'reader_theme_loader' );

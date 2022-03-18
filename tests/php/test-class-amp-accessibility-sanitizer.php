@@ -20,9 +20,6 @@ class AMP_Accessibility_Sanitizer_Test extends TestCase {
 	/** @var string */
 	private $original_wp_current_template_content;
 
-	/** @var array */
-	private $original_wp_theme_features;
-
 	/**
 	 * Setup.
 	 *
@@ -32,9 +29,8 @@ class AMP_Accessibility_Sanitizer_Test extends TestCase {
 
 		parent::set_up();
 
-		global $_wp_current_template_content, $_wp_theme_features;
+		global $_wp_current_template_content;
 		$this->original_wp_current_template_content = $_wp_current_template_content;
-		$this->original_wp_theme_features           = $_wp_theme_features;
 	}
 
 	/**
@@ -46,9 +42,8 @@ class AMP_Accessibility_Sanitizer_Test extends TestCase {
 
 		parent::tear_down();
 
-		global $_wp_current_template_content, $_wp_theme_features;
+		global $_wp_current_template_content;
 		$_wp_current_template_content = $this->original_wp_current_template_content;
-		$_wp_theme_features           = $this->original_wp_theme_features;
 	}
 
 	public function get_sanitize_test_data() {

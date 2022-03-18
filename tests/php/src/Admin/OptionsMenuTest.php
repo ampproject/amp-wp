@@ -198,8 +198,6 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 	 * @param bool $can_validate
 	 */
 	public function test_enqueue_assets_right_hook_suffix( $can_validate ) {
-		$initial_action_count = did_action( 'amp_register_polyfills' );
-
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		set_current_screen( $this->instance->screen_handle() );
 		if ( ! $can_validate ) {
@@ -226,7 +224,7 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		remove_all_actions( 'admin_enqueue_scripts' );
 		add_action( 'admin_enqueue_scripts', [ $this->instance, 'enqueue_assets' ] );
 		do_action( 'admin_enqueue_scripts', $this->instance->screen_handle() );
-		$this->assertEquals( $initial_action_count + 1, did_action( 'amp_register_polyfills' ) );
+		$this->assertEquals( 1, did_action( 'amp_register_polyfills' ) );
 
 		$this->assertTrue( wp_script_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
 		$this->assertTrue( wp_style_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );

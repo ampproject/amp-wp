@@ -57,7 +57,6 @@ class ValidationCountsRestControllerTest extends DependencyInjectedTestCase {
 		$this->assertWPError( $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/unreviewed-validation-counts' ) ) );
 
 		wp_set_current_user( $admin_user->ID );
-		update_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, wp_json_encode( false ) );
 		$this->assertWPError( $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/unreviewed-validation-counts' ) ) );
 
 		update_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, wp_json_encode( true ) );

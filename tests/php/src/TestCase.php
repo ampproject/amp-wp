@@ -11,6 +11,33 @@ use Yoast\WPTestUtils\WPIntegration\TestCase as PolyfilledTestCase;
  */
 abstract class TestCase extends PolyfilledTestCase {
 
+	/** @var array */
+	private $original_wp_theme_features;
+
+	/**
+	 * Setup.
+	 *
+	 * @inheritDoc
+	 */
+	public function set_up() {
+		parent::set_up();
+
+		global $_wp_theme_features;
+		$this->original_wp_theme_features = $_wp_theme_features;
+	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritDoc
+	 */
+	public function tear_down() {
+		parent::tear_down();
+
+		global $_wp_theme_features;
+		$_wp_theme_features = $this->original_wp_theme_features;
+	}
+
 	/**
 	 * Assert that one associative array contains another.
 	 *
