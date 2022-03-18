@@ -16,6 +16,7 @@ use AmpProject\AmpWP\Instrumentation;
 use AmpProject\AmpWP\Optimizer\AmpWPConfiguration;
 use AmpProject\AmpWP\Optimizer\HeroCandidateFiltering;
 use AmpProject\AmpWP\Optimizer\OptimizerService;
+use AmpProject\AmpWP\PageExperience;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\AmpWP\Support\SupportCliCommand;
@@ -112,9 +113,12 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'plugin_activation_notice'           => Admin\PluginActivationNotice::class,
 		'plugin_registry'                    => PluginRegistry::class,
 		'plugin_suppression'                 => PluginSuppression::class,
+		'px.analyzer'                        => PageExperience\Analyzer::class,
+		'px.optimizer'                       => PageExperience\Optimizer::class,
 		'reader_theme_loader'                => ReaderThemeLoader::class,
 		'reader_theme_support_features'      => ReaderThemeSupportFeatures::class,
 		'rest.options_controller'            => OptionsRESTController::class,
+		'rest.px.analysis_result'            => PageExperience\AnalysisResultsRestController::class,
 		'rest.scannable_urls_controller'     => Validation\ScannableURLsRestController::class,
 		'rest.validation_counts_controller'  => Validation\ValidationCountsRestController::class,
 		'sandboxing'                         => Sandboxing::class,
@@ -159,7 +163,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	protected function get_bindings() {
 		return [
-			Optimizer\Configuration::class => AmpWPConfiguration::class,
+			Optimizer\Configuration::class  => AmpWPConfiguration::class,
+			PageExperience\Optimizer::class => PageExperience\Engine::class,
 		];
 	}
 
@@ -207,17 +212,17 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	protected function get_shared_instances() {
 		return [
 			AmpSlugCustomizationWatcher::class,
-			PluginRegistry::class,
-			Instrumentation\StopWatch::class,
+			BackgroundTask\BackgroundTaskDeactivator::class,
 			DependencySupport::class,
 			DevTools\CallbackReflection::class,
 			DevTools\FileReflection::class,
+			Injector::class,
+			Instrumentation\StopWatch::class,
+			LoadingError::class,
+			PairedRouting::class,
+			PluginRegistry::class,
 			ReaderThemeLoader::class,
 			ReaderThemeSupportFeatures::class,
-			BackgroundTask\BackgroundTaskDeactivator::class,
-			PairedRouting::class,
-			LoadingError::class,
-			Injector::class,
 		];
 	}
 
@@ -234,16 +239,23 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	protected function get_delegations() {
 		return [
-			Injector::class         => static function () {
+			Injector::class                => static function () {
 				return Services::get( 'injector' );
 			},
-			RemoteGetRequest::class => static function () {
+			RemoteGetRequest::class        => static function () {
 				$fallback_pipeline = new FallbackRemoteGetRequest(
 					new WpHttpRemoteGetRequest(),
 					new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
 				);
 
 				return new CachedRemoteGetRequest( $fallback_pipeline, WEEK_IN_SECONDS );
+			},
+			PageExperience\Analyzer::class => static function () {
+				// Decorate the analysis retrieval with a cache.
+				return new PageExperience\CachedAnalyzer(
+					Services::get( 'injector' )->make( PageExperience\Engine::class ),
+					DAY_IN_SECONDS
+				);
 			},
 		];
 	}
