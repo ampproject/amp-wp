@@ -493,7 +493,7 @@ jobs:
         run: bash bin/ci/after-wp-install.sh ${{ matrix.wp }} ${{ matrix.install-pwa-plugin == true }}
 
       - name: Setup PCOV
-        if: ${{ matrix.coverage == true }}
+        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
         run: |
           composer require --dev --ignore-platform-reqs pcov/clobber
           vendor/bin/pcov clobber
