@@ -15,6 +15,25 @@ final class BlockUniqidTransformerTest extends DependencyInjectedTestCase {
 	use MarkupComparison;
 	use PrivateAccess;
 
+	/** @var string */
+	private $original_wp_version;
+
+	/**
+	 * Set up.
+	 */
+	public function setUp() {
+		parent::setUp();
+		$this->original_wp_version = $GLOBALS['wp_version'];
+	}
+
+	/**
+	 * Tear down.
+	 */
+	public function tearDown() {
+		$GLOBALS['wp_version'] = $this->original_wp_version;
+		parent::tearDown();
+	}
+
 	public function test_it_can_be_initialized() {
 		$instance = $this->injector->make( BlockUniqidTransformer::class );
 		$this->assertSame(

@@ -26,6 +26,9 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 	 */
 	private $was_wp_using_ext_object_cache;
 
+	/** @var string */
+	private $original_wp_version;
+
 	/**
 	 * Set up the tests by clearing the list of scheduled events.
 	 */
@@ -34,6 +37,7 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 		_set_cron_array( [] );
 		$this->was_wp_using_ext_object_cache = wp_using_ext_object_cache();
 		wp_using_ext_object_cache( false );
+		$this->original_wp_version = $GLOBALS['wp_version'];
 	}
 
 	/**
@@ -43,6 +47,7 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 		parent::tearDown();
 		_set_cron_array( [] );
 		wp_using_ext_object_cache( $this->was_wp_using_ext_object_cache );
+		$GLOBALS['wp_version'] = $this->original_wp_version;
 	}
 
 	/**
