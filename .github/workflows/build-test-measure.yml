@@ -486,10 +486,10 @@ jobs:
         run: bash bin/ci/after-wp-install.sh ${{ matrix.wp }} ${{ matrix.install-pwa-plugin == true }}
 
       - name: Setup PCOV
-          if: ${{ matrix.coverage == true }}
-          run: |
-            composer require --dev --ignore-platform-reqs pcov/clobber
-            vendor/bin/pcov clobber
+        if: ${{ matrix.coverage == true }}
+        run: |
+          composer require --dev --ignore-platform-reqs pcov/clobber
+          vendor/bin/pcov clobber
 
       - name: Copy plugin to WP plugins directory
         if: needs.pre-run.outputs.changed-php-count > 0
