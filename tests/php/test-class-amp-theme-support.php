@@ -2153,6 +2153,10 @@ class Test_AMP_Theme_Support extends TestCase {
 			}
 		}
 
+		// Do the same as add_theme_support( 'title-tag' ) but without triggering _doing_it_wrong().
+		global $_wp_theme_features;
+		$_wp_theme_features['title-tag'] = [];
+
 		ob_start();
 		?>
 		<!DOCTYPE html>
