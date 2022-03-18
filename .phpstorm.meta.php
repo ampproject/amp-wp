@@ -22,6 +22,7 @@ namespace PHPSTORM_META {
 			'admin.validation_counts'            => \AmpProject\AmpWP\Admin\ValidationCounts::class,
 			'amp_slug_customization_watcher'     => \AmpProject\AmpWP\AmpSlugCustomizationWatcher::class,
 			'background_task_deactivator'        => \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator::class,
+			'block_uniqid_transformer'           => \AmpProject\AmpWP\BlockUniqidTransformer::class,
 			'cli.command_namespace'              => \AmpProject\AmpWP\CliCli\CommandNamespaceRegistration::class,
 			'cli.optimizer_command'              => \AmpProject\AmpWP\CliCli\OptimizerCommand::class,
 			'cli.transformer_command'            => \AmpProject\AmpWP\CliCli\TransformerCommand::class,
