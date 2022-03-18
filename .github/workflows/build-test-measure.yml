@@ -383,6 +383,13 @@ jobs:
             wp: 'latest'
             coverage: true
 
+          - php: '7.4'
+            wp: 'latest'
+            external-http: true
+
+          - php: '7.3'
+            wp: 'latest'
+
           - php: '7.2'
             wp: 'latest'
 
