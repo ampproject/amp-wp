@@ -43,14 +43,14 @@ class AMP_Block_Uniqid_Sanitizer_Test extends TestCase {
 					',
 				'expected' =>
 					'
-					<figure class="wp-duotone-filter-2 wp-block-image size-large">This is a super cool class name: <code>wp-duotone-filter-622b62d997e58</code>!</figure>
-					<style>.wp-duotone-filter-2 img { filter: url( #wp-duotone-filter-2 ); }</style>
-					<svg xmlns="http://www.w3.org/2000/svg"><defs><filter id="wp-duotone-filter-2"></filter></defs></svg>
+					<figure class="wp-duotone-filter-1 wp-block-image size-large">This is a super cool class name: <code>wp-duotone-filter-622b62d997e58</code>!</figure>
+					<style>.wp-duotone-filter-1 img { filter: url( #wp-duotone-filter-1 ); }</style>
+					<svg xmlns="http://www.w3.org/2000/svg"><defs><filter id="wp-duotone-filter-1"></filter></defs></svg>
 				',
 			],
 			'transform_container_class_name'         => [
 				'content'  => '<div class="wp-container-621e133aaf0e2 wp-block-group is-style-default has-black-background-color has-background" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px">This is a super cool class name: <code>wp-container-0123456789abc</code>!</div>',
-				'expected' => '<div class="wp-container-3 wp-block-group is-style-default has-black-background-color has-background" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px">This is a super cool class name: <code>wp-container-0123456789abc</code>!</div>',
+				'expected' => '<div class="wp-container-1 wp-block-group is-style-default has-black-background-color has-background" style="padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px">This is a super cool class name: <code>wp-container-0123456789abc</code>!</div>',
 			],
 			'transform_elements_class_name'          => [
 				'content'  =>
@@ -60,8 +60,8 @@ class AMP_Block_Uniqid_Sanitizer_Test extends TestCase {
 					',
 				'expected' =>
 					'
-					<p class="wp-elements-4 has-text-align-right has-link-color">This is a super cool class name: <code>wp-elements-622941a2ca7ee</code>!</p>
-					<style>.wp-elements-4 a{color: var(--wp--preset--color--primary);}</style>
+					<p class="wp-elements-1 has-text-align-right has-link-color">This is a super cool class name: <code>wp-elements-622941a2ca7ee</code>!</p>
+					<style>.wp-elements-1 a{color: var(--wp--preset--color--primary);}</style>
 					',
 			],
 			'ignore_class_names_without_hash'        => [
@@ -92,6 +92,9 @@ class AMP_Block_Uniqid_Sanitizer_Test extends TestCase {
 
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		// Normalize auto-incrementing ID to allow tests to be run in isolation.
+		$content = preg_replace( '/-\d+\b/', '-1', $content );
 
 		$this->assertEqualMarkup( $expected, $content );
 	}
