@@ -489,6 +489,12 @@ jobs:
         if: needs.pre-run.outputs.changed-php-count > 0
         run: cp -r "$PWD" "$WP_CORE_DIR/src/wp-content/plugins/amp"
 
+      - name: Setup PCOV
+        if: ${{ matrix.coverage == true }}
+        run: |
+          composer require --dev --ignore-platform-reqs pcov/clobber
+          vendor/bin/pcov clobber
+
       - name: Run tests
         if: ${{ matrix.coverage == false && needs.pre-run.outputs.changed-php-count > 0 }}
         run: vendor/bin/phpunit --verbose
