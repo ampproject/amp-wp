@@ -215,7 +215,8 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
 			$this->markTestSkipped();
 		}
-		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query
+
+		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query']; // Needed as of <https://github.com/ampproject/amp-wp/pull/6466>.
 		switch_theme( $active_theme_slug );
 		remove_all_filters( 'sidebars_widgets' );
 
