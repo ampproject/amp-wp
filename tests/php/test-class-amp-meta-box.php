@@ -567,4 +567,39 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 		$result = $this->instance->get_amp_blocks_in_use();
 		$this->assertEquals( [ 'amp/amp-mathml', 'amp/amp-timeago' ], $result );
 	}
+
+	/**
+	 * Data provider for $this->test_sanitize_status()
+	 *
+	 * @return array
+	 */
+	public function data_provider_for_sanitize_status() {
+
+		return [
+			[
+				'input'    => AMP_Post_Meta_Box::ENABLED_STATUS,
+				'expected' => AMP_Post_Meta_Box::ENABLED_STATUS,
+			],
+			[
+				'input'    => AMP_Post_Meta_Box::DISABLED_STATUS,
+				'expected' => AMP_Post_Meta_Box::DISABLED_STATUS,
+			],
+			[
+				'input'    => 'invalid',
+				'expected' => '',
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider data_provider_for_sanitize_status
+	 * @covers ::sanitize_status()
+	 */
+	public function test_sanitize_status( $input, $expected ) {
+
+		$this->assertEquals(
+			$expected,
+			$this->instance->sanitize_status( $input )
+		);
+	}
 }
