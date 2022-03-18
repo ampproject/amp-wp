@@ -244,52 +244,75 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 3, $monitor->query_css_transient_count() );
 	}
 
+	/** @return array */
+	public function get_data_to_test_handle_plugin_update() {
+		return [
+			'not_disabled'                      => [
+				function ( MonitorCssTransientCaching $monitor ) {
+					$monitor->enable_css_transient_caching();
+					$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
+					$monitor->handle_plugin_update( '2.2.1' );
+				},
+				false,
+			],
+			'old_reset_condition_in_range'      => [
+				function ( MonitorCssTransientCaching $monitor ) {
+					AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
+					$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+					$monitor->handle_plugin_update( '1.5.1' );
+				},
+				false,
+			],
+			'old_reset_condition_outside_range' => [
+				function ( MonitorCssTransientCaching $monitor ) {
+					AMP_Options_Manager::update_option(
+						Option::DISABLE_CSS_TRANSIENT_CACHING,
+						[
+							MonitorCssTransientCaching::WP_VERSION => '999.9',
+							MonitorCssTransientCaching::GUTENBERG_VERSION => '999.9',
+						]
+					);
+					$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+					$monitor->handle_plugin_update( '1.5.2' ); // Should no-op.
+				},
+				true,
+			],
+			'uniqid_before_storing_meta'        => [
+				function ( MonitorCssTransientCaching $monitor ) {
+					AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
+					$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+					$monitor->handle_plugin_update( '2.2.1' );
+				},
+				false,
+			],
+			'uniqid_after_storing_meta'         => [
+				function ( MonitorCssTransientCaching $monitor ) {
+					AMP_Options_Manager::update_option(
+						Option::DISABLE_CSS_TRANSIENT_CACHING,
+						[
+							MonitorCssTransientCaching::WP_VERSION => '999.0',
+							MonitorCssTransientCaching::GUTENBERG_VERSION => '999.9',
+						]
+					);
+					$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+					$monitor->handle_plugin_update( '2.2.2' ); // Should no-op.
+				},
+				true,
+			],
+		];
+	}
+
 	/**
+	 * @dataProvider get_data_to_test_handle_plugin_update
 	 * @covers ::handle_plugin_update()
+	 *
+	 * @param callable $set_up
+	 * @param bool     $expected_disabled
 	 */
-	public function test_handle_plugin_update() {
+	public function test_handle_plugin_update( $set_up, $expected_disabled ) {
 		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
-
-		// Short-circuit condition.
-		$monitor->enable_css_transient_caching();
-		$monitor->handle_plugin_update( '2.2.1' );
-		$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
-
-		// First condition when in range.
-		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
-		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
-		$monitor->handle_plugin_update( '1.5.1' );
-		$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
-
-		// First condition when not in range.
-		AMP_Options_Manager::update_option(
-			Option::DISABLE_CSS_TRANSIENT_CACHING,
-			[
-				MonitorCssTransientCaching::WP_VERSION => '999.9',
-				MonitorCssTransientCaching::GUTENBERG_VERSION => '999.9',
-			]
-		);
-		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
-		$monitor->handle_plugin_update( '1.5.2' ); // Should no-op.
-		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
-
-		// Second condition before storing meta.
-		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
-		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
-		$monitor->handle_plugin_update( '2.2.1' );
-		$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
-
-		// Second condition after storing meta.
-		AMP_Options_Manager::update_option(
-			Option::DISABLE_CSS_TRANSIENT_CACHING,
-			[
-				MonitorCssTransientCaching::WP_VERSION => '999.0',
-				MonitorCssTransientCaching::GUTENBERG_VERSION => '999.9',
-			]
-		);
-		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
-		$monitor->handle_plugin_update( '2.2.2' ); // Should no-op.
-		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+		$set_up( $monitor );
+		$this->assertSame( $expected_disabled, $monitor->is_css_transient_caching_disabled() );
 	}
 
 	/**
