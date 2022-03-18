@@ -11,7 +11,7 @@ use AmpProject\AmpWP\Tests\TestCase;
 /**
  * Test AMP_Block_Uniqid_Sanitizer
  *
- * @covers AMP_Block_Uniqid_Sanitizer
+ * @coversDefaultClass AMP_Block_Uniqid_Sanitizer
  */
 class AMP_Block_Uniqid_Sanitizer_Test extends TestCase {
 
