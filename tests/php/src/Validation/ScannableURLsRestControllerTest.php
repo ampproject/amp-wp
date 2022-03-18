@@ -8,9 +8,7 @@
 namespace AmpProject\AmpWP\Tests\Validation;
 
 use AMP_Options_Manager;
-use AMP_Theme_Support;
 use AMP_Validation_Manager;
-use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
