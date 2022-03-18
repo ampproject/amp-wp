@@ -3453,7 +3453,9 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 							?>
 							<figure class="wp-block-audio"><figcaption></figcaption></figure>
 							<div class="wp-block-foo"><figcaption></figcaption></div>
-							<img src="https://example.com/example.jpg" width="100" height="200">
+							<div class="amp-wp-default-form-message">
+								<p>Hi</p>
+							</div>
 							<?php
 						}
 					);
@@ -3476,7 +3478,8 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 					$this->assertStringContainsString( '.wp-block-audio figcaption', $amphtml_source, 'Expected block-library/style.css' );
 					$this->assertStringContainsString( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
-					$this->assertStringContainsString( 'amp-img img', $amphtml_source, 'Expected amp-default.css' );
+					$amphtml_source = preg_replace( '/\s*>\s*/', '>', $amphtml_source ); // Account for variance in postcss.
+					$this->assertStringContainsString( '.amp-wp-default-form-message>p', $amphtml_source, 'Expected amp-default.css' );
 					$this->assertStringContainsString( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
 					$this->assertStringNotContainsString( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
 					$this->assertStringContainsString( 'admin-bar', $amphtml_dom->body->getAttribute( 'class' ) );
