@@ -221,7 +221,6 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		$this->assertFalse( wp_script_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
 		$this->assertFalse( wp_style_is( OptionsMenu::ASSET_HANDLE, 'enqueued' ) );
 
-		remove_all_actions( 'admin_enqueue_scripts' );
 		add_action( 'admin_enqueue_scripts', [ $this->instance, 'enqueue_assets' ] );
 		do_action( 'admin_enqueue_scripts', $this->instance->screen_handle() );
 		$this->assertEquals( 1, did_action( 'amp_register_polyfills' ) );
