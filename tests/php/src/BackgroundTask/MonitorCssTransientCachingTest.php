@@ -57,6 +57,7 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
 		$monitor->register();
 		$this->assertEquals( 10, has_action( 'amp_plugin_update', [ $monitor, 'handle_plugin_update' ] ) );
+		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $monitor, 'sanitize_disabled_option' ] ) );
 	}
 
 	/**
@@ -201,6 +202,81 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 		$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
 	}
 
+	/** @return array */
+	public function get_data_to_test_sanitize_disabled_option() {
+		return [
+			'true'               => [
+				true,
+				true,
+			],
+			'false'              => [
+				false,
+				null,
+			],
+			'number'             => [
+				123,
+				null,
+			],
+			'bad_array'          => [
+				[ 1, 2, 3 ],
+				null,
+			],
+			'partial_good_array' => [
+				[
+					MonitorCssTransientCaching::WP_VERSION => '123-\o/',
+					MonitorCssTransientCaching::GUTENBERG_VERSION => '45.21<script>//!@#$%^&*()`~',
+					'foo'                                  => 'bar',
+				],
+				[
+					MonitorCssTransientCaching::WP_VERSION => '123-o',
+					MonitorCssTransientCaching::GUTENBERG_VERSION => '45.21script',
+				],
+			],
+			'partial_all_good'   => [
+				[
+					MonitorCssTransientCaching::WP_VERSION => '1.2.3',
+				],
+				[
+					MonitorCssTransientCaching::WP_VERSION => '1.2.3',
+				],
+			],
+			'fully_all_good'     => [
+				[
+					MonitorCssTransientCaching::WP_VERSION => '1.2.3',
+					MonitorCssTransientCaching::GUTENBERG_VERSION => '4.5.6',
+				],
+				[
+					MonitorCssTransientCaching::WP_VERSION => '1.2.3',
+					MonitorCssTransientCaching::GUTENBERG_VERSION => '4.5.6',
+				],
+			],
+		];
+	}
+
+	/**
+	 * @covers ::sanitize_disabled_option()
+	 * @dataProvider get_data_to_test_sanitize_disabled_option
+	 * @param mixed $input
+	 * @param mixed $expected
+	 */
+	public function test_sanitize_disabled_option( $input, $expected ) {
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
+		$options = $monitor->sanitize_disabled_option(
+			[],
+			[
+				Option::DISABLE_CSS_TRANSIENT_CACHING => $input,
+			]
+		);
+
+		if ( array_key_exists( Option::DISABLE_CSS_TRANSIENT_CACHING, $options ) ) {
+			$actual = $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ];
+		} else {
+			$actual = null;
+		}
+
+		$this->assertEquals( $expected, $actual );
+	}
+
 	/**
 	 * @covers ::query_css_transient_count()
 	 */
@@ -247,7 +323,7 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 	/** @return array */
 	public function get_data_to_test_handle_plugin_update() {
 		return [
-			'not_disabled'                      => [
+			'not_disabled'                                => [
 				function ( MonitorCssTransientCaching $monitor ) {
 					$monitor->enable_css_transient_caching();
 					$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
@@ -255,7 +331,7 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 				},
 				false,
 			],
-			'old_reset_condition_in_range'      => [
+			'old_reset_condition_in_range'                => [
 				function ( MonitorCssTransientCaching $monitor ) {
 					AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
 					$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
@@ -263,7 +339,7 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 				},
 				false,
 			],
-			'old_reset_condition_outside_range' => [
+			'old_reset_condition_outside_range'           => [
 				function ( MonitorCssTransientCaching $monitor ) {
 					AMP_Options_Manager::update_option(
 						Option::DISABLE_CSS_TRANSIENT_CACHING,
@@ -277,7 +353,7 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 				},
 				true,
 			],
-			'uniqid_before_storing_meta'        => [
+			'uniqid_before_storing_meta'                  => [
 				function ( MonitorCssTransientCaching $monitor ) {
 					AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
 					$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
@@ -285,7 +361,7 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 				},
 				false,
 			],
-			'uniqid_after_storing_meta'         => [
+			'uniqid_after_storing_meta'                   => [
 				function ( MonitorCssTransientCaching $monitor ) {
 					AMP_Options_Manager::update_option(
 						Option::DISABLE_CSS_TRANSIENT_CACHING,
@@ -296,6 +372,20 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 					);
 					$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
 					$monitor->handle_plugin_update( '2.2.2' ); // Should no-op.
+				},
+				true,
+			],
+			'uniqid_after_storing_meta_and_future_update' => [
+				function ( MonitorCssTransientCaching $monitor ) {
+					AMP_Options_Manager::update_option(
+						Option::DISABLE_CSS_TRANSIENT_CACHING,
+						[
+							MonitorCssTransientCaching::WP_VERSION => '5.9.0',
+							MonitorCssTransientCaching::GUTENBERG_VERSION => null,
+						]
+					);
+					$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+					$monitor->handle_plugin_update( '2.3.0' );
 				},
 				true,
 			],

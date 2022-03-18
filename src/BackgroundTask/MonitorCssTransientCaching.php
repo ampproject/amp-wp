@@ -88,6 +88,7 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	 */
 	public function register() {
 		add_action( 'amp_plugin_update', [ $this, 'handle_plugin_update' ] );
+		add_filter( 'amp_options_updating', [ $this, 'sanitize_disabled_option' ], 10, 2 );
 		parent::register();
 	}
 
@@ -185,6 +186,38 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	}
 
 	/**
+	 * Sanitize the option.
+	 *
+	 * @param array $options     Existing options.
+	 * @param array $new_options New options.
+	 * @return array Sanitized options.
+	 */
+	public function sanitize_disabled_option( $options, $new_options ) {
+		$value = null;
+
+		if ( array_key_exists( Option::DISABLE_CSS_TRANSIENT_CACHING, $new_options ) ) {
+			$unsanitized_value = $new_options[ Option::DISABLE_CSS_TRANSIENT_CACHING ];
+
+			if ( is_bool( $unsanitized_value ) ) {
+				$value = (bool) $unsanitized_value;
+			} elseif ( is_array( $unsanitized_value ) ) {
+				$value = [];
+				foreach ( wp_array_slice_assoc( $unsanitized_value, [ self::WP_VERSION, self::GUTENBERG_VERSION ] ) as $key => $version ) {
+					$value[ $key ] = preg_replace( '/[^a-z0-9_\-.]/', '', $version );
+				}
+			}
+		}
+
+		if ( empty( $value ) ) {
+			unset( $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] );
+		} else {
+			$options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] = $value;
+		}
+
+		return $options;
+	}
+
+	/**
 	 * Query the number of transients containing cache stylesheets.
 	 *
 	 * @return int Count of transients caching stylesheets.
@@ -225,13 +258,15 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 			// Reset when it was disabled prior to the versions of WP/Gutenberg being captured,
 			// or if the captured versions were affected at the time of disabling.
 			(
-				empty( $gutenberg_version )
-				||
-				$this->block_uniqid_transformer->is_affected_gutenberg_version( $gutenberg_version )
-				||
-				empty( $wp_version )
-				||
-				$this->block_uniqid_transformer->is_affected_wordpress_version( $wp_version )
+				version_compare( strtok( $old_version, '-' ), '2.2.2', '<' )
+				&&
+				(
+					! is_array( $disabled )
+					||
+					$this->block_uniqid_transformer->is_affected_gutenberg_version( $gutenberg_version )
+					||
+					$this->block_uniqid_transformer->is_affected_wordpress_version( $wp_version )
+				)
 			)
 		) {
 			$this->enable_css_transient_caching();
