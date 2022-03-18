@@ -7,78 +7,122 @@ use AmpProject\AmpWP\BlockUniqidTransformer;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 /** @coversDefaultClass \AmpProject\AmpWP\BlockUniqidTransformer */
 final class BlockUniqidTransformerTest extends DependencyInjectedTestCase {
 
 	use MarkupComparison;
-
-	/** @var BlockUniqidTransformer */
-	private $instance;
-
-	/**
-	 * Setup.
-	 *
-	 * @inheritdoc
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->instance = new BlockUniqidTransformer();
-	}
+	use PrivateAccess;
 
 	public function test_it_can_be_initialized() {
-		$this->assertInstanceOf( Registerable::class, $this->instance );
-		$this->assertInstanceOf( Service::class, $this->instance );
+		$instance = $this->injector->make( BlockUniqidTransformer::class );
+		$this->assertSame(
+			defined( 'GUTENBERG_VERSION' ) ? GUTENBERG_VERSION : null,
+			$this->get_private_property( $instance, 'gutenberg_version' )
+		);
+		$this->assertInstanceOf( Registerable::class, $instance );
+		$this->assertInstanceOf( Service::class, $instance );
 	}
 
 	/**
-	 * @covers ::is_needed()
+	 * @covers ::is_necessary()
 	 * @covers ::is_affected_gutenberg_version()
 	 * @covers ::is_affected_wordpress_version()
 	 */
-	public function test_is_needed() {
+	public function test_is_necessary() {
 		$instance = $this->injector->make( BlockUniqidTransformer::class );
 
-		if (
-			(
-				defined( 'GUTENBERG_VERSION' )
-				&&
-				version_compare( GUTENBERG_VERSION, '10.7', '>=' )
-				&&
-				version_compare( GUTENBERG_VERSION, '12.7', '<' )
-			)
-			||
-			(
-				version_compare( get_bloginfo( 'version' ), '5.8', '>=' )
-				&&
-				version_compare( get_bloginfo( 'version' ), '6.0', '<' )
-			)
-		) {
-			$this->assertTrue( $instance->is_needed() );
-		} else {
-			$this->assertFalse( $instance->is_needed() );
+		$gutenberg_data = $this->get_data_to_test_is_affected_gutenberg_version();
+		$wp_data        = $this->get_data_to_test_is_affected_wordpress_version();
+
+		foreach ( $wp_data as list( $wp_version, $wp_expected ) ) {
+			$GLOBALS['wp_version'] = $wp_version;
+			foreach ( $gutenberg_data as list( $gb_version, $gb_expected ) ) {
+				$this->set_private_property( $instance, 'gutenberg_version', $gb_version );
+
+				$this->assertSame(
+					$wp_expected || $gb_expected,
+					$instance->is_necessary(),
+					"Unexpected for WP $wp_version and Gutenberg $gb_version"
+				);
+			}
 		}
 	}
 
+	/** @return array */
+	public function get_data_to_test_is_affected_gutenberg_version() {
+		return [
+			'none' => [ null, false ],
+			'10.6' => [ '10.6', false ],
+			'10.7' => [ '10.7', true ],
+			'11.0' => [ '11.0', true ],
+			'12.0' => [ '12.0', true ],
+			'12.6' => [ '12.6', true ],
+			'12.7' => [ '12.7', false ],
+			'13.0' => [ '13.0', false ],
+		];
+	}
+
 	/**
 	 * @covers ::is_affected_gutenberg_version()
+	 * @dataProvider get_data_to_test_is_affected_gutenberg_version
+	 * @param string $gutenberg_version Gutenberg version.
+	 * @param bool   $is_affected       Is affected.
 	 */
-	public function test_is_affected_gutenberg_version() {
-		$this->markTestIncomplete();
+	public function test_is_affected_gutenberg_version( $gutenberg_version, $is_affected ) {
+		$instance = $this->injector->make( BlockUniqidTransformer::class );
+
+		// If Gutenberg is active for the tests, ignore the GUTENBERG_VERSION constant.
+		$this->set_private_property( $instance, 'gutenberg_version', null );
+
+		$this->assertSame( $is_affected, $instance->is_affected_gutenberg_version( $gutenberg_version ) );
+	}
+
+	/** @return array */
+	public function get_data_to_test_is_affected_wordpress_version() {
+		return [
+			'5.7.0' => [ '5.7.0', false ],
+			'5.8.0' => [ '5.8.0', true ],
+			'5.9.0' => [ '5.9.0', true ],
+			'5.9.1' => [ '5.9.1', true ],
+			'5.9.2' => [ '5.9.2', true ],
+			'6.0.0' => [ '6.0.0', false ],
+		];
 	}
 
 	/**
 	 * @covers ::is_affected_wordpress_version()
+	 * @dataProvider get_data_to_test_is_affected_wordpress_version
+	 * @param string $wp_version  WP version.
+	 * @param bool   $is_affected Is affected.
 	 */
-	public function test_is_affected_wordpress_version() {
-		$this->markTestIncomplete();
+	public function test_is_affected_wordpress_version( $wp_version, $is_affected ) {
+		$instance = $this->injector->make( BlockUniqidTransformer::class );
+		$this->assertSame( $is_affected, $instance->is_affected_wordpress_version( $wp_version ) );
+	}
+
+	/** @return array */
+	public function get_data_to_test_register() {
+		return [
+			'necessary'   => [
+				'5.9.0',
+				true,
+			],
+			'unnecessary' => [
+				'6.0.0',
+				false,
+			],
+		];
 	}
 
 	/**
 	 * @covers ::register()
+	 * @dataProvider get_data_to_test_register
+	 * @param string $wp_version WP version.
+	 * @param bool   $expected   Expected.
 	 */
-	public function test_register() {
+	public function test_register( $wp_version, $expected ) {
 		remove_all_filters( 'amp_content_sanitizers' );
 
 		$this->assertArrayNotHasKey(
@@ -86,10 +130,13 @@ final class BlockUniqidTransformerTest extends DependencyInjectedTestCase {
 			amp_get_content_sanitizers()
 		);
 
-		// @todo This needs to force the WP version.
-		$this->instance->register();
+		$instance = $this->injector->make( BlockUniqidTransformer::class );
+		$this->set_private_property( $instance, 'gutenberg_version', null );
+		$GLOBALS['wp_version'] = $wp_version;
 
-		if ( $this->instance->is_needed() ) {
+		$instance->register();
+		$this->assertSame( $expected, $instance->is_necessary() );
+		if ( $expected ) {
 			$this->assertArrayHasKey(
 				AMP_Block_Uniqid_Sanitizer::class,
 				amp_get_content_sanitizers()

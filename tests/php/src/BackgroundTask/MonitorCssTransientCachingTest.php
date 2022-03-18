@@ -6,13 +6,18 @@
 namespace AmpProject\AmpWP\Tests\BackgroundTask;
 
 use AMP_Options_Manager;
+use AMP_Style_Sanitizer;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\Dom\Document;
 use DateTime;
 
 /** @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching */
 class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Whether external object cache is being used.
@@ -41,6 +46,31 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * @covers ::register()
+	 */
+	public function test_register() {
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
+		$monitor->register();
+		$this->assertEquals( 10, has_action( 'amp_plugin_update', [ $monitor, 'handle_plugin_update' ] ) );
+	}
+
+	/**
+	 * @covers ::get_interval()
+	 */
+	public function test_get_interval() {
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
+		$this->assertIsString( $this->call_private_method( $monitor, 'get_interval' ) );
+	}
+
+	/**
+	 * @covers ::get_event_name()
+	 */
+	public function test_get_event_name() {
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
+		$this->assertIsString( $this->call_private_method( $monitor, 'get_event_name' ) );
+	}
+
+	/**
 	 * Test whether an event is actually scheduled when the monitor is registered.
 	 *
 	 * @uses \AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask::schedule_event
@@ -65,7 +95,7 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 	 *
 	 * @covers ::process()
 	 */
-	public function test_event_can_be_processed() {
+	public function test_process_causes_time_series_to_be_stored() {
 		delete_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY );
 
 		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
@@ -78,8 +108,14 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 	 * Test whether transient caching is disabled once it hits the threshold.
 	 *
 	 * @covers ::process()
+	 * @covers ::get_time_series()
+	 * @covers ::get_sampling_range()
+	 * @covers ::persist_time_series()
+	 * @covers ::calculate_average()
+	 * @covers ::get_threshold()
+	 * @covers ::disable_css_transient_caching()
 	 */
-	public function test_transient_caching_is_disabled() {
+	public function test_process_disables_transient_caching_once_threshold_is_reached() {
 		delete_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY );
 		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 
@@ -144,5 +180,146 @@ class MonitorCssTransientCachingTest extends DependencyInjectedTestCase {
 
 		$this->assertTrue( (bool) AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING ) );
 		$this->assertEquals( $expected, AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING ) );
+	}
+
+	/**
+	 * @covers ::enable_css_transient_caching()
+	 * @covers ::disable_css_transient_caching()
+	 * @covers ::is_css_transient_caching_disabled()
+	 */
+	public function test_enable_disable_is_css_transient_caching_disabled() {
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
+		$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
+		$monitor->disable_css_transient_caching();
+		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+		$monitor->enable_css_transient_caching();
+		$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
+	}
+
+	/**
+	 * @covers ::query_css_transient_count()
+	 */
+	public function test_query_css_transient_count() {
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
+
+		$this->assertEquals( 0, $monitor->query_css_transient_count() );
+
+		$dom = new Document();
+		$dom->loadHTML(
+			'
+				<html>
+					<head><style>body { background:red }</style></head>
+					<body style="color:blue"></body>
+				</html>
+			'
+		);
+		$style_sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			[ 'use_document_element' => true ]
+		);
+		$style_sanitizer->sanitize();
+
+		$this->assertEquals( 2, $monitor->query_css_transient_count() );
+
+		$dom = new Document();
+		$dom->loadHTML(
+			'
+				<html>
+					<head><style>body { background:red }</style></head>
+					<body style="color:white"></body>
+				</html>
+			'
+		);
+		$style_sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			[ 'use_document_element' => true ]
+		);
+		$style_sanitizer->sanitize();
+
+		$this->assertEquals( 3, $monitor->query_css_transient_count() );
+	}
+
+	/**
+	 * @covers ::handle_plugin_update()
+	 */
+	public function test_handle_plugin_update() {
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
+
+		// Short-circuit condition.
+		$monitor->enable_css_transient_caching();
+		$monitor->handle_plugin_update( '2.2.1' );
+		$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
+
+		// First condition when in range.
+		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
+		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+		$monitor->handle_plugin_update( '1.5.1' );
+		$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
+
+		// First condition when not in range.
+		AMP_Options_Manager::update_option(
+			Option::DISABLE_CSS_TRANSIENT_CACHING,
+			[
+				MonitorCssTransientCaching::WP_VERSION => '999.9',
+				MonitorCssTransientCaching::GUTENBERG_VERSION => '999.9',
+			]
+		);
+		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+		$monitor->handle_plugin_update( '1.5.2' ); // Should no-op.
+		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+
+		// Second condition before storing meta.
+		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
+		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+		$monitor->handle_plugin_update( '2.2.1' );
+		$this->assertFalse( $monitor->is_css_transient_caching_disabled() );
+
+		// Second condition after storing meta.
+		AMP_Options_Manager::update_option(
+			Option::DISABLE_CSS_TRANSIENT_CACHING,
+			[
+				MonitorCssTransientCaching::WP_VERSION => '999.0',
+				MonitorCssTransientCaching::GUTENBERG_VERSION => '999.9',
+			]
+		);
+		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+		$monitor->handle_plugin_update( '2.2.2' ); // Should no-op.
+		$this->assertTrue( $monitor->is_css_transient_caching_disabled() );
+	}
+
+	/**
+	 * @covers ::get_default_threshold()
+	 */
+	public function test_get_default_threshold() {
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
+		$this->assertIsFloat( $monitor->get_default_threshold() );
+	}
+
+	/**
+	 * @covers ::get_default_sampling_range()
+	 */
+	public function test_get_default_sampling_range() {
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
+		$this->assertIsInt( $monitor->get_default_sampling_range() );
+	}
+
+	/**
+	 * @covers ::get_time_series()
+	 * @covers ::persist_time_series()
+	 */
+	public function test_get_and_persist_time_series() {
+		$monitor = $this->injector->make( MonitorCssTransientCaching::class );
+
+		$this->assertEquals( [], $this->call_private_method( $monitor, 'get_time_series' ) );
+
+		$time_series = [
+			'20220101' => 10,
+			'20220102' => 20,
+			'20220103' => 30,
+		];
+
+		$this->call_private_method( $monitor, 'persist_time_series', [ $time_series ] );
+
+		$this->assertEquals( $time_series, $this->call_private_method( $monitor, 'get_time_series' ) );
 	}
 }

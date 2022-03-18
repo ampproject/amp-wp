@@ -160,14 +160,21 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	 *
 	 * @return bool Whether transient caching of stylesheets is disabled.
 	 */
-	private function is_css_transient_caching_disabled() {
+	public function is_css_transient_caching_disabled() {
 		return (bool) AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+	}
+
+	/**
+	 * Enable transient caching of stylesheets.
+	 */
+	public function enable_css_transient_caching() {
+		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 	}
 
 	/**
 	 * Disable transient caching of stylesheets.
 	 */
-	private function disable_css_transient_caching() {
+	public function disable_css_transient_caching() {
 		AMP_Options_Manager::update_option(
 			Option::DISABLE_CSS_TRANSIENT_CACHING,
 			[
@@ -197,6 +204,7 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	 * @param string $old_version Old version.
 	 */
 	public function handle_plugin_update( $old_version ) {
+		// Note: We cannot use the is_css_transient_caching_disabled method because we need to get the underlying stored value.
 		$disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 		if ( empty( $disabled ) ) {
 			return;
@@ -226,7 +234,7 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 				$this->block_uniqid_transformer->is_affected_wordpress_version( $wp_version )
 			)
 		) {
-			AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+			$this->enable_css_transient_caching();
 		}
 	}
 

@@ -31,6 +31,22 @@ use AmpProject\AmpWP\Infrastructure\Service;
 final class BlockUniqidTransformer implements Service, Registerable {
 
 	/**
+	 * Gutenberg version.
+	 *
+	 * @var string
+	 */
+	private $gutenberg_version = null;
+
+	/**
+	 * Construct.
+	 */
+	public function __construct() {
+		if ( defined( 'GUTENBERG_VERSION' ) ) {
+			$this->gutenberg_version = GUTENBERG_VERSION;
+		}
+	}
+
+	/**
 	 * Check whether the Gutenberg plugin is present and if its one of the affected versions.
 	 *
 	 * Elements was added in 10.7 via WordPress/gutenberg#31524
@@ -42,8 +58,8 @@ final class BlockUniqidTransformer implements Service, Registerable {
 	 * @return bool Whether affected Gutenberg version.
 	 */
 	public function is_affected_gutenberg_version( $version = null ) {
-		if ( empty( $version ) && defined( 'GUTENBERG_VERSION' ) ) {
-			$version = GUTENBERG_VERSION;
+		if ( empty( $version ) ) {
+			$version = $this->gutenberg_version;
 		}
 
 		if ( empty( $version ) ) {
@@ -80,11 +96,11 @@ final class BlockUniqidTransformer implements Service, Registerable {
 	}
 
 	/**
-	 * Check whether the transformer is needed.
+	 * Check whether the transformer is necessary.
 	 *
 	 * @return bool Whether the conditional object is needed.
 	 */
-	public function is_needed() {
+	public function is_necessary() {
 		return (
 			$this->is_affected_gutenberg_version()
 			||
@@ -98,7 +114,7 @@ final class BlockUniqidTransformer implements Service, Registerable {
 	 * @return void
 	 */
 	public function register() {
-		if ( ! $this->is_needed() ) {
+		if ( ! $this->is_necessary() ) {
 			return;
 		}
 
