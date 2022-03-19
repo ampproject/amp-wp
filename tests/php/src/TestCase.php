@@ -22,8 +22,11 @@ abstract class TestCase extends PolyfilledTestCase {
 	public function set_up() {
 		parent::set_up();
 
-		global $_wp_theme_features;
+		global $_wp_theme_features, $wp_query, $wp_the_query;
 		$this->original_wp_theme_features = $_wp_theme_features;
+
+		// This was needed with the upgrade of yoast/wp-test-utils from 0.2.2 to 1.0.0.
+		$wp_the_query = $wp_query;
 	}
 
 	/**
