@@ -30,8 +30,8 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 	 */
 	private $likely_culprit_detector;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->likely_culprit_detector = $this->injector->make( LikelyCulpritDetector::class );
 	}

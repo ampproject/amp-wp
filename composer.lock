@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9f48e9e973598a741cd17589f5b38565",
+    "content-hash": "dba2f76a32254a32db4d3b55c26e8707",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
@@ -6401,27 +6401,25 @@
         },
         {
             "name": "yoast/wp-test-utils",
-            "version": "0.2.2",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Yoast/wp-test-utils.git",
-                "reference": "896f7640d86162ff7a0dc6ce59f8837f284521c5"
+                "reference": "21df3a08974ee62f489f64e34be7f26a32ec872c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Yoast/wp-test-utils/zipball/896f7640d86162ff7a0dc6ce59f8837f284521c5",
-                "reference": "896f7640d86162ff7a0dc6ce59f8837f284521c5",
+                "url": "https://api.github.com/repos/Yoast/wp-test-utils/zipball/21df3a08974ee62f489f64e34be7f26a32ec872c",
+                "reference": "21df3a08974ee62f489f64e34be7f26a32ec872c",
                 "shasum": ""
             },
             "require": {
                 "brain/monkey": "^2.6.0",
                 "php": ">=5.6",
-                "yoast/phpunit-polyfills": "^1.0.0"
+                "yoast/phpunit-polyfills": "^1.0.1"
             },
             "require-dev": {
-                "php-parallel-lint/php-console-highlighter": "^0.5",
-                "php-parallel-lint/php-parallel-lint": "^1.3.0",
-                "yoast/yoastcs": "^2.1.0"
+                "yoast/yoastcs": "^2.2.0"
             },
             "type": "library",
             "extra": {
@@ -6433,6 +6431,10 @@
             "autoload": {
                 "classmap": [
                     "src/"
+                ],
+                "exclude-from-classmap": [
+                    "/src/WPIntegration/TestCase.php",
+                    "/src/WPIntegration/TestCaseNoPolyfills.php"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -6463,7 +6465,7 @@
                 "issues": "https://github.com/Yoast/wp-test-utils/issues",
                 "source": "https://github.com/Yoast/wp-test-utils"
             },
-            "time": "2021-06-21T03:45:02+00:00"
+            "time": "2021-09-27T05:50:36+00:00"
         }
     ],
     "aliases": [],

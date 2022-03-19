@@ -41,8 +41,8 @@ class BlockSourcesTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->instance = $this->get_new_instance();
 	}
@@ -60,10 +60,10 @@ class BlockSourcesTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
-
+	public function tear_down() {
 		$this->instance->clear_block_sources_cache();
+
+		parent::tear_down();
 	}
 
 	/** @covers ::is_needed() */

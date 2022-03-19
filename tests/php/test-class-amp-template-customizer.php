@@ -22,22 +22,23 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 	use PrivateAccess;
 	use LoadsCoreThemes;
 
-	public static function setUpBeforeClass() {
+	public static function set_up_before_class() {
 		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
-		return parent::setUpBeforeClass();
+		parent::set_up_before_class();
 	}
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		unset( $GLOBALS['wp_customize'], $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
 
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**

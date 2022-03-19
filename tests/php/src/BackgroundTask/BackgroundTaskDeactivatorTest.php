@@ -25,7 +25,8 @@ final class BackgroundTaskDeactivatorTest extends TestCase {
 	 */
 	private $test_instance;
 
-	public function setUp() {
+	public function set_up() {
+		parent::set_up();
 		$this->test_instance = new BackgroundTaskDeactivator();
 	}
 

@@ -32,8 +32,8 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 	 */
 	private $callback_reflection;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 
@@ -49,9 +49,9 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 		register_theme_directory( $theme_root );
 	}
 
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		$this->restore_theme_directories();
+		parent::tear_down();
 	}
 
 	/**

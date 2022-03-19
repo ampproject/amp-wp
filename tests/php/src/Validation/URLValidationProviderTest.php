@@ -22,8 +22,8 @@ final class URLValidationProviderTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->url_validation_provider = new URLValidationProvider();
 		$this->add_validate_response_mocking_filter();
 	}
@@ -39,7 +39,7 @@ final class URLValidationProviderTest extends TestCase {
 	public function test_get_url_validation() {
 		$single_post_permalink = get_permalink( self::factory()->post->create() );
 		$this->url_validation_provider->get_url_validation( $single_post_permalink, 'post' );
-		$this->assertStringContainsString( $single_post_permalink, $this->get_validated_urls() );
+		$this->assertContains( $single_post_permalink, $this->get_validated_urls() );
 
 		$number_of_posts = 30;
 		$post_permalinks = [];

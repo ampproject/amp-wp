@@ -29,8 +29,8 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 	/** @var PairedBrowsing */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = $this->injector->make( PairedBrowsing::class );
 	}
 

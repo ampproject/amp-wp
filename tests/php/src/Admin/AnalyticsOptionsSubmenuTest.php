@@ -44,8 +44,8 @@ class AnalyticsOptionsSubmenuTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$site_health = $this->injector->make( SiteHealth::class );
 

@@ -22,17 +22,17 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 	/** @var ReaderThemeLoader */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = $this->injector->make( ReaderThemeLoader::class );
 
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
-
+	public function tear_down() {
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/** @covers ::is_enabled() */
@@ -214,6 +214,7 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
 			$this->markTestSkipped();
 		}
+
 		switch_theme( $active_theme_slug );
 		remove_all_filters( 'sidebars_widgets' );
 
@@ -270,14 +271,14 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		add_theme_support( 'widgets-block-editor' );
 
 		$this->assertNotEmpty( wp_get_sidebars_widgets() );
-		$this->assertStringContainsString( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
+		$this->assertContains( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
 		$this->assertTrue( current_theme_supports( 'widgets-block-editor' ) );
 
 		$this->instance->disable_widgets();
 
 		$this->assertTrue( has_filter( 'sidebars_widgets' ) );
 		$this->assertEquals( [], wp_get_sidebars_widgets() );
-		$this->assertStringNotContainsString( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
+		$this->assertNotContains( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
 		$this->assertFalse( current_theme_supports( 'widgets-block-editor' ) );
 	}
 

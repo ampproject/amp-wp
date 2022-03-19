@@ -3821,7 +3821,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 		$this->assertEqualSets( [ 'amp-sidebar' ], array_keys( $sanitizer->get_scripts() ) );
 
 		$this->assertCount( 1, $actual_errors );
-		$this->assertArraySubset(
+		$this->assertAssocArrayContains(
 			[
 				'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG, // @todo Should be DISALLOWED_SCRIPT_TAG.
 			],

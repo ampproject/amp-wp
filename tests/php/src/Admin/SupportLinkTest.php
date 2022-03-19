@@ -35,9 +35,9 @@ class SupportLinkTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
+	public function set_up() {
 
-		parent::setUp();
+		parent::set_up();
 
 		if ( ! class_exists( 'WP_Site_Health' ) ) {
 			$this->markTestSkipped( 'Test requires Site Health.' );

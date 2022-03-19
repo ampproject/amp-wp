@@ -24,8 +24,8 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		add_filter(
 			'amp_extract_image_dimensions_batch',
 			static function( $urls ) {

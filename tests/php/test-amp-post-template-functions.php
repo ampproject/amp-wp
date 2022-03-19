@@ -12,8 +12,8 @@ use AmpProject\AmpWP\Tests\TestCase;
  */
 class Test_AMP_Post_Template_Functions extends TestCase {
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 	}
 

@@ -42,8 +42,8 @@ class ReaderThemesTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
@@ -58,10 +58,9 @@ class ReaderThemesTest extends TestCase {
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
-
+	public function tear_down() {
 		$this->restore_theme_directories();
+		parent::tear_down();
 	}
 
 	/**
@@ -101,9 +100,9 @@ class ReaderThemesTest extends TestCase {
 		$themes = ( new ReaderThemes() )->get_themes();
 
 		$available_theme_slugs = wp_list_pluck( $themes, 'slug' );
-		$this->assertStringContainsString( 'child-of-core', $available_theme_slugs );
-		$this->assertStringNotContainsString( 'custom', $available_theme_slugs );
-		$this->assertStringNotContainsString( 'with-legacy', $available_theme_slugs );
+		$this->assertContains( 'child-of-core', $available_theme_slugs );
+		$this->assertNotContains( 'custom', $available_theme_slugs );
+		$this->assertNotContains( 'with-legacy', $available_theme_slugs );
 	}
 
 	/**
