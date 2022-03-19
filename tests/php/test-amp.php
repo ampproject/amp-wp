@@ -16,17 +16,17 @@ class Test_AMP extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		remove_theme_support( 'amp' );
 	}
 
 	/**
 	 * Tear down and clean up.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		parent::tear_down();
 	}
 
 	/**

@@ -20,13 +20,13 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 
 	use MarkupComparison;
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function set_up() {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestIncomplete( 'Files needed for testing missing.' );
 		}
@@ -39,7 +39,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		if ( did_action( 'add_attachment' ) ) {
 			$this->remove_added_uploads();
 		}
@@ -48,7 +48,7 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$wp_scripts = null;
 		$wp_styles  = null;
 
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

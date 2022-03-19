@@ -22,19 +22,19 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	use PrivateAccess;
 	use LoadsCoreThemes;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
-
+	public function tear_down() {
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;
 
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**
@@ -580,9 +580,9 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$this->assertStringEndsWith( '/*first*/', $after );
 
 		if ( $enabled ) {
-			$this->assertRegExp( '#/\* Variables \*/\s*body\s*{#', $after );
+			$this->assertMatchesRegularExpression( '#/\* Variables \*/\s*body\s*{#', $after );
 		} else {
-			$this->assertRegExp( '#/\* Variables \*/\s*:root\s*{#', $after );
+			$this->assertMatchesRegularExpression( '#/\* Variables \*/\s*:root\s*{#', $after );
 		}
 	}
 

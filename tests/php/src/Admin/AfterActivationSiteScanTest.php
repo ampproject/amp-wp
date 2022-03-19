@@ -37,8 +37,8 @@ class AfterActivationSiteScanTest extends DependencyInjectedTestCase {
 	 */
 	private $after_activation_site_scan;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->after_activation_site_scan = $this->injector->make( AfterActivationSiteScan::class );
 		delete_option( 'amp-options' );
@@ -49,8 +49,8 @@ class AfterActivationSiteScanTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;
 	}

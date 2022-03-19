@@ -23,18 +23,18 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		AMP_Validation_Manager::reset_validation_results();
 	}
 
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		AMP_Validation_Manager::reset_validation_results();
 		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
+		parent::tear_down();
 	}
 
 	/**

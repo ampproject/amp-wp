@@ -41,16 +41,16 @@ class Test_AMP_Theme_Support extends TestCase {
 	/**
 	 * Set up before class.
 	 */
-	public static function setUpBeforeClass() {
-		parent::setUpBeforeClass();
+	public static function set_up_before_class() {
+		parent::set_up_before_class();
 		AMP_HTTP::$server_timing = true;
 	}
 
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		AMP_Validation_Manager::reset_validation_results();
 		unset( $GLOBALS['current_screen'] );
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
@@ -72,7 +72,7 @@ class Test_AMP_Theme_Support extends TestCase {
 	 *
 	 * @global WP_Scripts $wp_scripts
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		global $wp_scripts, $wp_styles, $wp_admin_bar;
 		$wp_scripts   = null;
 		$wp_styles    = null;
@@ -80,7 +80,6 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$this->set_private_property( AMP_Theme_Support::class, 'metadata', null );
 
-		parent::tearDown();
 		unset( $GLOBALS['show_admin_bar'] );
 		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 		AMP_Validation_Manager::reset_validation_results();
@@ -100,6 +99,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		unregister_post_type( 'book' );
 		unregister_post_type( 'announcement' );
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**
@@ -693,7 +694,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $supportable_templates as $id => $supportable_template ) {
-			$this->assertNotInternalType( 'numeric', $id );
+			$this->assertIsNotNumeric( $id );
 			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
 			$this->assertTrue( $supportable_template['supported'] );
 			$this->assertFalse( $supportable_template['immutable'] );
@@ -742,7 +743,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		update_option( 'page_on_front', $page_on_front );
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $supportable_templates as $id => $supportable_template ) {
-			$this->assertNotInternalType( 'numeric', $id );
+			$this->assertIsNotNumeric( $id );
 			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
 		}
 		$this->assertArrayHasKey( 'is_front_page', $supportable_templates );
@@ -1057,8 +1058,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertMatchesRegularExpression( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+example-admin-bar\.js' ] ) . '/', $output );
 
 		$body_classes = get_body_class();
-		$this->assertStringContainsString( 'customize-support', $body_classes );
-		$this->assertStringNotContainsString( 'no-customize-support', $body_classes );
+		$this->assertContains( 'customize-support', $body_classes );
+		$this->assertNotContains( 'no-customize-support', $body_classes );
 	}
 
 	/**
@@ -2152,6 +2153,10 @@ class Test_AMP_Theme_Support extends TestCase {
 			}
 		}
 
+		// Do the same as add_theme_support( 'title-tag' ) but without triggering _doing_it_wrong().
+		global $_wp_theme_features;
+		$_wp_theme_features['title-tag'] = [];
+
 		ob_start();
 		?>
 		<!DOCTYPE html>
@@ -2442,7 +2447,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$style_slug = 'amp-default';
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
-		$this->assertStringContainsString( $style_slug, wp_styles()->queue );
+		$this->assertContains( $style_slug, wp_styles()->queue );
 	}
 
 	/**

@@ -24,11 +24,11 @@ class AMP_Video_Converter_Test extends TestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		if ( did_action( 'add_attachment' ) ) {
 			$this->remove_added_uploads();
 		}
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/** @covers ::get_selector_conversion_mapping() */

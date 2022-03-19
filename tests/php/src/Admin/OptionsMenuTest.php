@@ -48,8 +48,8 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$site_health = $this->injector->make( SiteHealth::class );
 
@@ -64,10 +64,10 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;
+		parent::tear_down();
 	}
 
 	/** @covers ::is_needed() */

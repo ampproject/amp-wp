@@ -20,7 +20,7 @@ final class AmpWPConfigurationTest extends TestCase {
 		$configuration = new AmpWPConfiguration();
 		$transformers  = $configuration->get( AmpWPConfiguration::KEY_TRANSFORMERS );
 
-		$this->assertStringContainsString( ServerSideRendering::class, $transformers );
+		$this->assertContains( ServerSideRendering::class, $transformers );
 	}
 
 	/**
@@ -33,7 +33,7 @@ final class AmpWPConfigurationTest extends TestCase {
 		$configuration = new AmpWPConfiguration();
 		$transformers  = $configuration->get( AmpWPConfiguration::KEY_TRANSFORMERS );
 
-		$this->assertStringNotContainsString( ServerSideRendering::class, $transformers );
+		$this->assertNotContains( ServerSideRendering::class, $transformers );
 
 		remove_filter( 'amp_enable_ssr', '__return_false' );
 	}

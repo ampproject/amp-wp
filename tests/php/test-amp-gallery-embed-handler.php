@@ -20,16 +20,18 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 
 	private static $original_amp_options;
 
-	public static function setUpBeforeClass() {
+	public static function set_up_before_class() {
+		parent::set_up_before_class();
 		self::$original_amp_options = AMP_Options_Manager::get_options();
 	}
 
-	public static function tearDownAfterClass() {
+	public static function tear_down_after_class() {
 		AMP_Options_Manager::update_options( self::$original_amp_options );
+		parent::tear_down_after_class();
 	}
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 	}
@@ -37,14 +39,14 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
-		parent::tearDown();
-
+	public function tear_down() {
 		if ( did_action( 'add_attachment' ) ) {
 			$this->remove_added_uploads();
 		}
 
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**

@@ -33,8 +33,8 @@ final class URLValidationCronTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->test_instance = $this->injector->make( URLValidationCron::class );
 		add_filter(
 			'pre_http_request',

@@ -32,8 +32,8 @@ class Test_Reader_Theme_REST_Controller extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		delete_transient( 'amp_themes_wporg' );
 		do_action( 'rest_api_init' );
@@ -49,8 +49,8 @@ class Test_Reader_Theme_REST_Controller extends TestCase {
 	public function test_register_routes() {
 		$this->controller->register_routes();
 
-		$this->assertStringContainsString( 'amp/v1', rest_get_server()->get_namespaces() );
-		$this->assertStringContainsString( '/amp/v1/reader-themes', array_keys( rest_get_server()->get_routes( 'amp/v1' ) ) );
+		$this->assertContains( 'amp/v1', rest_get_server()->get_namespaces() );
+		$this->assertContains( '/amp/v1/reader-themes', array_keys( rest_get_server()->get_routes( 'amp/v1' ) ) );
 	}
 
 	/**
@@ -77,7 +77,7 @@ class Test_Reader_Theme_REST_Controller extends TestCase {
 		];
 
 		foreach ( $expected_reader_themes as $expected_reader_theme ) {
-			$this->assertStringContainsString( $expected_reader_theme, $actual_reader_themes );
+			$this->assertContains( $expected_reader_theme, $actual_reader_themes );
 		}
 
 		$filter = static function() {

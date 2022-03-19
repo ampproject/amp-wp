@@ -12,8 +12,8 @@ final class AmpSlugCustomizationWatcherTest extends TestCase {
 	/** @var AmpSlugCustomizationWatcher */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = new AmpSlugCustomizationWatcher();
 	}
 

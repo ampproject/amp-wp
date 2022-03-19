@@ -30,8 +30,8 @@ class UserRESTEndpointExtensionTest extends TestCase {
 	 */
 	private $user_rest_endpoint_extension;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->user_rest_endpoint_extension = new UserRESTEndpointExtension();
 	}

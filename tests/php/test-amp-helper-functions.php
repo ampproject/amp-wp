@@ -44,8 +44,8 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 *
 	 * @inheritDoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->server_var_backup = $_SERVER;
 		remove_theme_support( 'amp' );
 
@@ -60,7 +60,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 *
 	 * @inheritDoc
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 		global $wp_scripts, $pagenow, $show_admin_bar, $current_screen;
@@ -93,7 +93,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		global $wp_version;
 		$wp_version = $this->original_wp_version;
 
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

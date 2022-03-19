@@ -25,7 +25,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	use PrivateAccess;
 	use ThemesApiRequestMocking;
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/** @var PluginSuppression */
@@ -34,7 +34,9 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function set_up() {
+		parent::set_up();
+
 		$this->prevent_block_pre_render();
 		$this->add_reader_themes_request_filter();
 
@@ -66,8 +68,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 
 		$GLOBALS['wp_settings_fields']     = [];
 		$GLOBALS['wp_registered_settings'] = [];
@@ -88,6 +89,8 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			'plugin_file_pattern',
 			null
 		);
+
+		parent::tear_down();
 	}
 
 	/**

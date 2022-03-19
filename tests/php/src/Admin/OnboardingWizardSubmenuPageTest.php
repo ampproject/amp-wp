@@ -49,8 +49,8 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->onboarding_wizard_submenu_page = $this->injector->make( OnboardingWizardSubmenuPage::class );
 
@@ -64,8 +64,8 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;
 	}

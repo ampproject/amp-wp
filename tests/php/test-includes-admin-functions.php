@@ -17,8 +17,8 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 
 	use LoadsCoreThemes;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		remove_all_actions( 'amp_init' );
 		remove_all_actions( 'admin_menu' );
 		remove_all_actions( 'customize_register' );
@@ -26,15 +26,15 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
-
+	public function tear_down() {
 		$this->restore_theme_directories();
 
 		unset(
 			$GLOBALS['submenu'],
 			$GLOBALS['menu']
 		);
+
+		parent::tear_down();
 	}
 
 	/** @covers ::amp_init_customizer() */

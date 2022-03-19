@@ -27,18 +27,18 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	/** @var PairedRouting */
 	private $paired_routing;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->paired_routing = $this->injector->make( PairedRouting::class );
 		$this->instance       = new MobileRedirection( $this->paired_routing );
 	}
 
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		$_COOKIE = [];
 		unset( $GLOBALS['wp_customize'] );
 		AMP_HTTP::$purged_amp_query_vars = [];
 		$GLOBALS['wp_the_query']         = $GLOBALS['wp_query']; // This is missing in core.
+		parent::tear_down();
 	}
 
 	public function test__construct() {
@@ -457,15 +457,15 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 	/** @covers ::get_mobile_user_agents() */
 	public function test_get_mobile_user_agents() {
-		$this->assertStringContainsString( 'Mobile', $this->instance->get_mobile_user_agents() );
-		$this->assertStringNotContainsString( 'Watch', $this->instance->get_mobile_user_agents() );
+		$this->assertContains( 'Mobile', $this->instance->get_mobile_user_agents() );
+		$this->assertNotContains( 'Watch', $this->instance->get_mobile_user_agents() );
 		add_filter(
 			'amp_mobile_user_agents',
 			function ( $user_agents ) {
 				return array_merge( $user_agents, [ 'Watch' ] );
 			}
 		);
-		$this->assertStringContainsString( 'Watch', $this->instance->get_mobile_user_agents() );
+		$this->assertContains( 'Watch', $this->instance->get_mobile_user_agents() );
 	}
 
 	/** @covers ::is_redirection_disabled_via_query_param() */
