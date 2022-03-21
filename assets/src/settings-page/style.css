@@ -469,19 +469,23 @@ li.error-kept {
 	}
 }
 
-.amp-analytics-entry__select-control .components-select-control {
-	flex-direction: row;
-	align-items: baseline;
-}
-
-.amp-analytics-entry__select-control .components-select-control__input {
-	max-width: inherit;
-}
-
-.amp .amp-analytics-entry__select-control .components-input-control__container {
-	display: block;
-	margin-left: 1rem;
+.amp-analytics-entry__text-input {
+	display: flex;
+	flex-wrap: wrap;
 	margin-bottom: 0.75rem;
+}
+
+.amp .amp-analytics-entry__text-input .text-input {
+	padding: 6px 10px;
+    box-shadow: 0 0 0 transparent;
+    transition: box-shadow .1s linear;
+    border-radius: 2px;
+    border: 1px solid #757575;
+}
+
+.amp-analytics-entry__text-input .input-label {
+	margin-bottom: 0;
+	align-self: center;
 }
 
 .amp-analytics-entry .amp-notice {

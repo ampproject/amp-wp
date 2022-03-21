@@ -11,7 +11,7 @@ import { ANALYTICS_VENDORS_LIST } from 'amp-settings';
 import { Icon, plus, trash } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect, useRef } from '@wordpress/element';
-import { Button, PanelRow, BaseControl, VisuallyHidden, SelectControl } from '@wordpress/components';
+import { Button, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -23,21 +23,13 @@ const GOOGLE_ANALYTICS_VENDOR = 'googleanalytics';
 
 const GOOGLE_ANALYTICS_NOTICE = sprintf(
 	/* translators: 1: URL to Site Kit plugin directory page, 2: Google Analytics dev guide URL */
-	__( 'For Google Analytics please consider using <a href="%1$s" target="_blank" rel="noreferrer">Site Kit by Google</a>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <a href="%2$s" target="_blank" rel="noreferrer">Adding Analytics to your AMP pages</a>.', 'amp' ),
-	__( 'https://wordpress.org/plugins/google-site-kit/', 'amp' ),
-	__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
-);
-
-const OTHER_ANALYTICS_NOTICE = sprintf(
-	/* translators: 1: URL to Site Kit plugin directory page, 2: Google Analytics dev guide URL */
-	__( 'Selecting this option will provide support to in-house analytics or Google Tag Manager. For Google Tag Manager please consider using <a href="%1$s" target="_blank" rel="noreferrer">Site Kit by Google</a>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <a href="%2$s" target="_blank" rel="noreferrer">Adding Analytics to your AMP pages</a>.', 'amp' ),
+	__( 'For Google Analytics or Google Tag Manager please consider using <a href="%1$s" target="_blank" rel="noreferrer">Site Kit by Google</a>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <a href="%2$s" target="_blank" rel="noreferrer">Adding Analytics to your AMP pages</a>.', 'amp' ),
 	__( 'https://wordpress.org/plugins/google-site-kit/', 'amp' ),
 	__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
 );
 
 const vendorConfigs = {
 	'': {
-		notice: OTHER_ANALYTICS_NOTICE,
 		sample: '{}',
 	},
 	[ GOOGLE_ANALYTICS_VENDOR ]: {
@@ -73,7 +65,17 @@ const vendorConfigs = {
 			'\t',
 		),
 	},
+	googletagmanager: { // Throw notice to if user enters googletagmanager as vendor.
+		notice: GOOGLE_ANALYTICS_NOTICE,
+		sample: '{}'
+	},
 };
+
+// Array of analytics vendors that AMP supports.
+const vendorsDatalistOptions = [];
+Object.values( ANALYTICS_VENDORS_LIST ).forEach( ( vendor ) => {
+	vendorsDatalistOptions.push( <option key={ vendor.value } value={ vendor.value }> { vendor.label } </option>  );
+} );
 
 /**
  * Component for a single analytics entry.
@@ -134,16 +136,22 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 				}
 			</h4>
 			<div className="amp-analytics-entry__options" id={ `amp-analytics-entry-${ String( entryIndex ) }` }>
-				<div className="amp-analytics-entry__select-control">
-					<SelectControl
-						className="option-select"
-						label={ __( 'Type:', 'amp' ) }
-						onChange={ ( newType ) => {
-							onChange( { type: newType } );
-						} }
+				<div className="amp-analytics-entry__text-input">
+					<label class="input-label" >{ __( 'Type:', 'amp' ) }</label>
+					<input
+						className="text-input"
+						list="vendors"
+						placeholder={ __( 'Vendor or blank', 'amp' ) }
 						value={ type }
-						options={ ANALYTICS_VENDORS_LIST }
+						onChange={ ( newType ) => {
+							onChange( { type: newType.target.value } );
+						} }
 					/>
+					<datalist id="vendors" className="input-datalist" >
+						{
+							vendorsDatalistOptions
+						}
+					</datalist>
 				</div>
 
 				{
@@ -215,7 +223,7 @@ export function Analytics() {
 					{ __html:
 						sprintf(
 							/* translators: 1: AMP Analytics docs URL, 2: amp-analytics, 3: plugin analytics docs URL, 4: {, 5: }, 6: amp-analytics tag, 7: script tag, 8: AMP analytics vendor docs URL, 9: googleanalytics. */
-							__( 'Please see AMP project\'s <a href="%1$s" target="_blank">documentation</a> for %2$s as well as the <a href="%3$s" target="_blank">plugin\'s analytics documentation</a>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %4$s and ending with a %5$s. Do not include any HTML tags like %6$s or %7$s. For the type field, supply one of the <a href="%8$s" target="_blank">available analytics vendors</a> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %9$s.', 'amp' ),
+							__( 'Please see AMP project\'s <a href="%1$s" target="_blank">documentation</a> for %2$s as well as the <a href="%3$s" target="_blank">plugin\'s analytics documentation</a>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %4$s and ending with a %5$s. Do not include any HTML tags like %6$s or %7$s. For the type field, supply one of the <a href="%8$s" target="_blank">available analytics vendors</a> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %9$s. For Google Tag Manager please consider using <a href="%10$s" target="_blank" rel="noreferrer">Site Kit by Google</a> plugin.', 'amp' ),
 							__( 'https://amp.dev/documentation/components/amp-analytics/', 'amp' ),
 							'<code>amp-analytics</code>',
 							__( 'https://amp-wp.org/documentation/getting-started/analytics/', 'amp' ),
@@ -225,6 +233,7 @@ export function Analytics() {
 							'<code>&lt;script&gt;</code>',
 							__( 'https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/', 'amp' ),
 							`<code>${ GOOGLE_ANALYTICS_VENDOR }</code>`,
+							__( 'https://wordpress.org/plugins/google-site-kit/', 'amp' ),
 						),
 					} }
 				/>

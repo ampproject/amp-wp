@@ -12,460 +12,455 @@
 return array (
   0 => 
   array (
-    'value' => '',
-    'label' => 'Other',
-  ),
-  1 => 
-  array (
     'value' => 'acquialift',
     'label' => 'Acquia Lift',
   ),
-  2 => 
+  1 => 
   array (
     'value' => 'adobeanalytics',
     'label' => 'Adobe Analytics',
   ),
-  3 => 
+  2 => 
   array (
     'value' => 'adobeanalytics_nativeConfig',
     'label' => 'Adobe Analytics (native config)',
   ),
-  4 => 
+  3 => 
   array (
     'value' => 'afsanalytics',
     'label' => 'AFS Analytics',
   ),
-  5 => 
+  4 => 
   array (
     'value' => 'alexametrics',
     'label' => 'Alexa Internet',
   ),
-  6 => 
+  5 => 
   array (
     'value' => 'amplitude',
     'label' => 'Amplitude',
   ),
-  7 => 
+  6 => 
   array (
     'value' => 'appsflyer',
     'label' => 'AppsFlyer',
   ),
-  8 => 
+  7 => 
   array (
     'value' => 'atinternet',
     'label' => 'AT Internet',
   ),
-  9 => 
+  8 => 
   array (
     'value' => 'baiduanalytics',
     'label' => 'Baidu Analytics',
   ),
-  10 => 
+  9 => 
   array (
     'value' => 'blackcrowai',
     'label' => 'Black Crow AI',
   ),
-  11 => 
+  10 => 
   array (
     'value' => 'bluetriangle',
     'label' => 'Blue Triangle',
   ),
-  12 => 
+  11 => 
   array (
     'value' => 'blueconic',
     'label' => 'BlueConic',
   ),
-  13 => 
+  12 => 
   array (
     'value' => 'browsi',
     'label' => 'Browsi',
   ),
-  14 => 
+  13 => 
   array (
     'value' => 'burt',
     'label' => 'Burt',
   ),
-  15 => 
+  14 => 
   array (
     'value' => 'byside',
     'label' => 'BySide',
   ),
-  16 => 
+  15 => 
   array (
     'value' => 'captainmetrics',
     'label' => 'Captain Metrics',
   ),
-  17 => 
+  16 => 
   array (
     'value' => 'chartbeat',
     'label' => 'Chartbeat',
   ),
-  18 => 
+  17 => 
   array (
     'value' => 'clicky',
     'label' => 'Clicky Web Analytics',
   ),
-  19 => 
+  18 => 
   array (
     'value' => 'colanalytics',
     'label' => 'colanalytics',
   ),
-  20 => 
+  19 => 
   array (
     'value' => 'comscore',
     'label' => 'comScore',
   ),
-  21 => 
+  20 => 
   array (
     'value' => 'cxense',
     'label' => 'Cxense',
   ),
-  22 => 
+  21 => 
   array (
     'value' => 'deepbi',
     'label' => 'Deep.BI',
   ),
-  23 => 
+  22 => 
   array (
     'value' => 'dynatrace',
     'label' => 'Dynatrace',
   ),
-  24 => 
+  23 => 
   array (
     'value' => 'epica',
     'label' => 'EPICA',
   ),
-  25 => 
+  24 => 
   array (
     'value' => 'euleriananalytics',
     'label' => 'Eulerian Analytics',
   ),
-  26 => 
+  25 => 
   array (
     'value' => 'facebookpixel',
     'label' => 'Facebook Pixel',
   ),
-  27 => 
+  26 => 
   array (
     'value' => 'gemius',
     'label' => 'Gemius',
   ),
-  28 => 
+  27 => 
   array (
     'value' => 'gfksensic',
     'label' => 'GfK Sensic',
   ),
-  29 => 
+  28 => 
   array (
     'value' => 'googleadwords',
     'label' => 'Google Ads',
   ),
-  30 => 
+  29 => 
   array (
     'value' => 'googleanalytics',
     'label' => 'Google Analytics',
   ),
-  31 => 
+  30 => 
   array (
     'value' => 'gtag',
     'label' => 'gtag',
   ),
-  32 => 
+  31 => 
   array (
     'value' => 'ibeatanalytics',
     'label' => 'Ibeat Analytics',
   ),
-  33 => 
+  32 => 
   array (
     'value' => 'infonline',
     'label' => 'INFOnline / IVW',
   ),
-  34 => 
+  33 => 
   array (
     'value' => 'infonline_anonymous',
     'label' => 'INFOnline anonymous',
   ),
-  35 => 
+  34 => 
   array (
     'value' => 'infonline_base',
     'label' => 'INFOnline base',
   ),
-  36 => 
+  35 => 
   array (
     'value' => 'iplabel',
     'label' => 'ip-label',
   ),
-  37 => 
+  36 => 
   array (
     'value' => 'keen',
     'label' => 'Keen',
   ),
-  38 => 
+  37 => 
   array (
     'value' => 'kenshoo',
     'label' => 'Kenshoo',
   ),
-  39 => 
+  38 => 
   array (
     'value' => 'krux',
     'label' => 'Krux',
   ),
-  40 => 
+  39 => 
   array (
     'value' => 'linkpulse',
     'label' => 'Linkpulse',
   ),
-  41 => 
+  40 => 
   array (
     'value' => 'lotame',
     'label' => 'Lotame',
   ),
-  42 => 
+  41 => 
   array (
     'value' => 'mapp_intelligence',
     'label' => 'Mapp Intelligence',
   ),
-  43 => 
+  42 => 
   array (
     'value' => 'marinsoftware',
     'label' => 'Marin Software',
   ),
-  44 => 
+  43 => 
   array (
     'value' => 'mediametrie',
     'label' => 'Médiamétrie',
   ),
-  45 => 
+  44 => 
   array (
     'value' => 'mediarithmics',
     'label' => 'mediarithmics',
   ),
-  46 => 
+  45 => 
   array (
     'value' => 'mediator',
     'label' => 'mediator',
   ),
-  47 => 
+  46 => 
   array (
     'value' => 'memo',
     'label' => 'Memo',
   ),
-  48 => 
+  47 => 
   array (
     'value' => 'moat',
     'label' => 'Moat Analytics',
   ),
-  49 => 
+  48 => 
   array (
     'value' => 'mobify',
     'label' => 'Mobify',
   ),
-  50 => 
+  49 => 
   array (
     'value' => 'moengage',
     'label' => 'MoEngage',
   ),
-  51 => 
+  50 => 
   array (
     'value' => 'mparticle',
     'label' => 'mParticle',
   ),
-  52 => 
+  51 => 
   array (
     'value' => 'navegg',
     'label' => 'Navegg',
   ),
-  53 => 
+  52 => 
   array (
     'value' => 'newrelic',
     'label' => 'New Relic',
   ),
-  54 => 
+  53 => 
   array (
     'value' => 'nielsen',
     'label' => 'Nielsen',
   ),
-  55 => 
+  54 => 
   array (
     'value' => 'nielsen-marketing-cloud',
     'label' => 'Nielsen Marketing Cloud',
   ),
-  56 => 
+  55 => 
   array (
     'value' => 'oewa',
     'label' => 'OEWA',
   ),
-  57 => 
+  56 => 
   array (
     'value' => 'oewadirect',
     'label' => 'oewadirect',
   ),
-  58 => 
+  57 => 
   array (
     'value' => 'oracleInfinityAnalytics',
     'label' => 'Oracle Infinity Analytics',
   ),
-  59 => 
+  58 => 
   array (
     'value' => 'parsely',
     'label' => 'Parsely',
   ),
-  60 => 
+  59 => 
   array (
     'value' => 'permutive',
     'label' => 'Permutive',
   ),
-  61 => 
+  60 => 
   array (
     'value' => 'permutive-ampscript',
     'label' => 'Permutive-ampscript',
   ),
-  62 => 
+  61 => 
   array (
     'value' => 'piano',
     'label' => 'Piano',
   ),
-  63 => 
+  62 => 
   array (
     'value' => 'pinpoll',
     'label' => 'Pinpoll',
   ),
-  64 => 
+  63 => 
   array (
     'value' => 'piStats',
     'label' => 'Pistats',
   ),
-  65 => 
+  64 => 
   array (
     'value' => 'ppasanalytics',
     'label' => 'Piwik PRO Analytics Suite',
   ),
-  66 => 
+  65 => 
   array (
     'value' => 'pressboard',
     'label' => 'Pressboard',
   ),
-  67 => 
+  66 => 
   array (
     'value' => 'quantcast',
     'label' => 'Quantcast Measurement',
   ),
-  68 => 
+  67 => 
   array (
     'value' => 'rakam',
     'label' => 'Rakam',
   ),
-  69 => 
+  68 => 
   array (
     'value' => 'top100',
     'label' => 'Rambler/TOP-100',
   ),
-  70 => 
+  69 => 
   array (
     'value' => 'reppublika',
     'label' => 'reppublika',
   ),
-  71 => 
+  70 => 
   array (
     'value' => 'retargetly',
     'label' => 'Retargetly',
   ),
-  72 => 
+  71 => 
   array (
     'value' => 'rudderstack',
     'label' => 'RudderStack',
   ),
-  73 => 
+  72 => 
   array (
     'value' => 'segment',
     'label' => 'Segment',
   ),
-  74 => 
+  73 => 
   array (
     'value' => 'sensorsanalytics',
     'label' => 'SensorsData',
   ),
-  75 => 
+  74 => 
   array (
     'value' => 'shinystat',
     'label' => 'ShinyStat',
   ),
-  76 => 
+  75 => 
   array (
     'value' => 'snowplow',
     'label' => 'Snowplow Analytics',
   ),
-  77 => 
+  76 => 
   array (
     'value' => 'snowplow_v2',
     'label' => 'Snowplow Analytics (v2)',
   ),
-  78 => 
+  77 => 
   array (
     'value' => 'mpulse',
     'label' => 'SOASTA mPulse',
   ),
-  79 => 
+  78 => 
   array (
     'value' => 'subscriptions-propensity',
     'label' => 'subscriptions-propensity',
   ),
-  80 => 
+  79 => 
   array (
     'value' => 'taboola',
     'label' => 'Taboola',
   ),
-  81 => 
+  80 => 
   array (
     'value' => 'tail',
     'label' => 'Tail',
   ),
-  82 => 
+  81 => 
   array (
     'value' => 'teaanalytics',
     'label' => 'TEA Analytics',
   ),
-  83 => 
+  82 => 
   array (
     'value' => 'tealiumcollect',
     'label' => 'Tealium Collect',
   ),
-  84 => 
+  83 => 
   array (
     'value' => 'topmailru',
     'label' => 'Top.Mail.Ru',
   ),
-  85 => 
+  84 => 
   array (
     'value' => 'treasuredata',
     'label' => 'Treasure Data',
   ),
-  86 => 
+  85 => 
   array (
     'value' => 'umenganalytics',
     'label' => 'Umeng+ Analytics',
   ),
-  87 => 
+  86 => 
   array (
     'value' => 'upscore',
     'label' => 'Upscore',
   ),
-  88 => 
+  87 => 
   array (
     'value' => 'vponanalytics',
     'label' => 'Vpon Analytics',
   ),
-  89 => 
+  88 => 
   array (
     'value' => 'webengage',
     'label' => 'Webengage',
   ),
-  90 => 
+  89 => 
   array (
     'value' => 'webtrekk_v2',
     'label' => 'Webtrekk',
   ),
-  91 => 
+  90 => 
   array (
     'value' => 'metrika',
     'label' => 'Yandex Metrica',

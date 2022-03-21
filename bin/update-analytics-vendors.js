@@ -99,7 +99,10 @@ class UpdateAnalyticsVendors {
 					// Loop through multiple vendor slugs with same titles and append extra information to title.
 					vendorSlugs.forEach( ( slug ) => {
 						if ( vendorSlugs.indexOf( slug ) === 0 ) {
-							// Google Tag Manager will be considered in `other` category along with in-house analytics.
+							/**
+							 * Google Tag Manager will not be supported directly as it requires extra attributes.
+							 * Also, A notice will be thrown if user enters `googletagmanager` as vendor slug.
+							 */
 							if ( slug === 'N/A' && vendorTitle === 'Google Tag Manager' ) {
 								return;
 							}
@@ -157,9 +160,6 @@ class UpdateAnalyticsVendors {
 			this.vendors = this.vendors.sort( ( a, b ) => {
 				return a.label.localeCompare( b.label );
 			} );
-
-			// Add a option to select other vendors. This option will be used to opt for Google Tag Manager or in-house analytics.
-			this.vendors = [ { value: '', label: __( 'Other', 'amp' ) } ].concat( this.vendors );
 
 			let output = this.convertToPhpArray( this.vendors );
 			// Save vendors to JSON file.
