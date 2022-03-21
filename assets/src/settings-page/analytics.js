@@ -67,14 +67,18 @@ const vendorConfigs = {
 	},
 	googletagmanager: { // Throw notice to if user enters googletagmanager as vendor.
 		notice: GOOGLE_ANALYTICS_NOTICE,
-		sample: '{}'
+		sample: '{}',
 	},
 };
 
 // Array of analytics vendors that AMP supports.
 const vendorsDatalistOptions = [];
 Object.values( ANALYTICS_VENDORS_LIST ).forEach( ( vendor ) => {
-	vendorsDatalistOptions.push( <option key={ vendor.value } value={ vendor.value }> { vendor.label } </option>  );
+	vendorsDatalistOptions.push(
+		<option key={ vendor.value } value={ vendor.value }>
+			{ vendor.label }
+		</option>,
+	);
 } );
 
 /**
@@ -137,9 +141,12 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 			</h4>
 			<div className="amp-analytics-entry__options" id={ `amp-analytics-entry-${ String( entryIndex ) }` }>
 				<div className="amp-analytics-entry__text-input">
-					<label class="input-label" >{ __( 'Type:', 'amp' ) }</label>
+					<label className="input-label" htmlFor={ `amp-analytics-entry__text-input-${ String( entryIndex ) }` }>
+						{ __( 'Type:', 'amp' ) }
+					</label>
 					<input
 						className="text-input"
+						id={ `amp-analytics-entry__text-input-${ String( entryIndex ) }` }
 						list="vendors"
 						placeholder={ __( 'Vendor or blank', 'amp' ) }
 						value={ type }

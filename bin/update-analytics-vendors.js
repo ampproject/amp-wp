@@ -1,3 +1,4 @@
+
 /**
  * External dependencies
  */
@@ -7,11 +8,6 @@ const readline = require( 'readline' );
 const stream = require( 'stream' );
 const { execSync } = require( 'child_process' );
 const axios = require( 'axios' );
-
-/**
- * WordPress dependencies
- */
-const { __ } = require( '@wordpress/i18n' );
 
 /**
  * File path of the analytics vendors list.

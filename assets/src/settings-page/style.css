@@ -477,10 +477,10 @@ li.error-kept {
 
 .amp .amp-analytics-entry__text-input .text-input {
 	padding: 6px 10px;
-    box-shadow: 0 0 0 transparent;
-    transition: box-shadow .1s linear;
-    border-radius: 2px;
-    border: 1px solid #757575;
+	box-shadow: 0 0 0 transparent;
+	transition: box-shadow .1s linear;
+	border-radius: 2px;
+	border: 1px solid #757575;
 }
 
 .amp-analytics-entry__text-input .input-label {
