@@ -653,12 +653,14 @@ function amp_get_current_url() {
 	if ( isset( $parsed_url['port'] ) ) {
 		$current_url .= ':' . $parsed_url['port'];
 	}
-	$current_url .= '/';
+	
+	$current_url .= '/' . trim($parsed_url['path'], '/') . '/' ;
 
 	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
+		$current_url .= ltrim( wp_unslash( str_replace($parsed_url['path'], '', $_SERVER['REQUEST_URI']) ), '/' );
 	}
+	
 	return esc_url_raw( $current_url );
 }
 
