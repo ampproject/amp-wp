@@ -10,8 +10,8 @@ import { ANALYTICS_VENDORS_LIST } from 'amp-settings';
  */
 import { Icon, plus, trash } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useEffect, useRef } from '@wordpress/element';
-import { Button, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
+import { createInterpolateElement, useContext, useEffect, useRef } from '@wordpress/element';
+import { Button, TextControl, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -226,24 +226,31 @@ export function Analytics() {
 				<summary>
 					{ __( 'Learn about analytics for AMP.', 'amp' ) }
 				</summary>
-				<p dangerouslySetInnerHTML={
-					{ __html:
-						sprintf(
-							/* translators: 1: AMP Analytics docs URL, 2: amp-analytics, 3: plugin analytics docs URL, 4: {, 5: }, 6: amp-analytics tag, 7: script tag, 8: AMP analytics vendor docs URL, 9: googleanalytics. */
-							__( 'Please see AMP project\'s <a href="%1$s" target="_blank">documentation</a> for %2$s as well as the <a href="%3$s" target="_blank">plugin\'s analytics documentation</a>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %4$s and ending with a %5$s. Do not include any HTML tags like %6$s or %7$s. For the type field, supply one of the <a href="%8$s" target="_blank">available analytics vendors</a> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %9$s. For Google Tag Manager please consider using <a href="%10$s" target="_blank" rel="noreferrer">Site Kit by Google</a> plugin.', 'amp' ),
-							__( 'https://amp.dev/documentation/components/amp-analytics/', 'amp' ),
-							'<code>amp-analytics</code>',
-							__( 'https://amp-wp.org/documentation/getting-started/analytics/', 'amp' ),
-							'<code>{</code>',
-							'<code>}</code>',
-							'<code>&lt;amp-analytics&gt;</code>',
-							'<code>&lt;script&gt;</code>',
-							__( 'https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/', 'amp' ),
-							`<code>${ GOOGLE_ANALYTICS_VENDOR }</code>`,
-							__( 'https://wordpress.org/plugins/google-site-kit/', 'amp' ),
-						),
-					} }
-				/>
+				<p>
+					{
+						createInterpolateElement(
+							sprintf(
+								/* translators: 1: amp-analytics, 2: {, 3: }, 4: amp-analytics tag, 5: script tag, 6: googleanalytics. */
+								__( 'Please see AMP project\'s <AnalyticsDocsUrl>documentation</AnalyticsDocsUrl> for %1$s as well as the <PluginAnalyticsDocsUrl>plugin\'s analytics documentation</PluginAnalyticsDocsUrl>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %2$s and ending with a %3$s. Do not include any HTML tags like %4$s or %5$s. For the type field, supply one of the <VendorDocsUrl>available analytics vendors</VendorDocsUrl> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %6$s.  For Google Tag Manager please consider using <SiteKitUrl>Site Kit by Google</SiteKitUrl> plugin.', 'amp' ),
+								'<code>amp-analytics</code>',
+								'<code>{</code>',
+								'<code>}</code>',
+								'<code>&lt;amp-analytics&gt;</code>',
+								'<code>&lt;script&gt;</code>',
+								`<code>${ GOOGLE_ANALYTICS_VENDOR }</code>`,
+							),
+							{
+								/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
+								AnalyticsDocsUrl: <a href="https://amp.dev/documentation/components/amp-analytics/" target="_blank" rel="noreferrer" />,
+								PluginAnalyticsDocsUrl: <a href="https://amp-wp.org/documentation/getting-started/analytics/" target="_blank" rel="noreferrer" />,
+								VendorDocsUrl: <a href="https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/" target="_blank" rel="noreferrer" />,
+								SiteKitUrl: <a href="https://wordpress.org/plugins/google-site-kit/" target="_blank" rel="noreferrer" />,
+								/* eslint-enable jsx-a11y/anchor-has-content */
+								code: <code />,
+							},
+						)
+					}
+				</p>
 			</details>
 			{ Object.entries( analytics || {} ).map( ( [ key, { type, config } ], index ) => (
 				<AnalyticsEntry
