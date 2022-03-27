@@ -143,15 +143,17 @@ export function TemplateModeOption( { children, details, detailsUrl, initialOpen
 							<li
 								key={ index }
 								className="template-mode-selection__details-list-item"
-								/* dangerouslySetInnerHTML reason: `detail` may contain `strong` elements. */
-								dangerouslySetInnerHTML={ { __html: detail } }
-							/>
+							>
+								{ detail }
+							</li>
 						) ) }
 					</ul>
 				) }
 				{ details && ! Array.isArray( details ) && (
 					<p>
-						<span dangerouslySetInnerHTML={ { __html: details } } />
+						<span>
+							{ details }
+						</span>
 						{ detailsUrl && (
 							<>
 								{ ' ' }
@@ -171,7 +173,8 @@ TemplateModeOption.propTypes = {
 	children: PropTypes.any,
 	details: PropTypes.oneOfType( [
 		PropTypes.string,
-		PropTypes.arrayOf( PropTypes.string ),
+		PropTypes.array,
+		PropTypes.object,
 	] ),
 	detailsUrl: PropTypes.string,
 	initialOpen: PropTypes.bool,

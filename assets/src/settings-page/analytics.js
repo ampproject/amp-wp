@@ -21,11 +21,14 @@ import { AMPNotice, NOTICE_SIZE_SMALL } from '../components/amp-notice';
 
 const GOOGLE_ANALYTICS_VENDOR = 'googleanalytics';
 
-const GOOGLE_ANALYTICS_NOTICE = sprintf(
-	/* translators: 1: URL to Site Kit plugin directory page, 2: Google Analytics dev guide URL */
-	__( 'For Google Analytics or Google Tag Manager please consider using <a href="%1$s" target="_blank" rel="noreferrer">Site Kit by Google</a>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <a href="%2$s" target="_blank" rel="noreferrer">Adding Analytics to your AMP pages</a>.', 'amp' ),
-	__( 'https://wordpress.org/plugins/google-site-kit/', 'amp' ),
-	__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
+const GOOGLE_ANALYTICS_NOTICE = createInterpolateElement(
+	__( 'For Google Analytics or Google Tag Manager please consider using <GoogleSiteKitUrl>Site Kit by Google</GoogleSiteKitUrl>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <GoogleAnalyticsDevGuideUrl>Adding Analytics to your AMP pages</GoogleAnalyticsDevGuideUrl>.', 'amp' ),
+	{
+		/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
+		GoogleSiteKitUrl: <a href="https://wordpress.org/plugins/google-site-kit/" target="_blank" rel="noreferrer" />,
+		GoogleAnalyticsDevGuideUrl: <a href="https://developers.google.com/analytics/devguides/collection/amp-analytics/" target="_blank" rel="noreferrer" />,
+		/* eslint-enable jsx-a11y/anchor-has-content */
+	},
 );
 
 const vendorConfigs = {
@@ -164,8 +167,9 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 				{
 					vendorConfigs[ type ]?.notice && (
 						<AMPNotice size={ NOTICE_SIZE_SMALL }>
-							{ /* dangerouslySetInnerHTML reason: Injection of links. */ }
-							<span dangerouslySetInnerHTML={ { __html: vendorConfigs[ type ].notice } } />
+							<span>
+								{ vendorConfigs[ type ].notice }
+							</span>
 						</AMPNotice>
 					)
 				}

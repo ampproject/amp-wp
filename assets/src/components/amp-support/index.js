@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, createInterpolateElement } from '@wordpress/element';
 import { Button, ExternalLink } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
@@ -85,16 +85,17 @@ export function AMPSupport( props ) {
 				<h2 className="amp-support__heading">
 					{ __( 'AMP Support', 'amp' ) }
 				</h2>
-				{ /* dangerouslySetInnerHTML reason: Injection of links. */ }
-				<p dangerouslySetInnerHTML={
+				<p>
 					{
-						__html: sprintf(
-							/* translators: %s is the URL to create a new support topic */
-							__( 'In order to best assist you, please tap the Send Data button below to send the following site information to our private database. Once you have done so, copy the the resulting Support UUID in the blue box that appears and include the ID in a new <a href="%s" rel="noreferrer" target="_blank">support forum topic</a>. You do not have to submit data to get support, but our team will be able to help you more effectively if you do so.', 'amp' ),
-							'https://wordpress.org/support/plugin/amp/#new-topic-0',
-						),
+						createInterpolateElement(
+							__( 'In order to best assist you, please tap the Send Data button below to send the following site information to our private database. Once you have done so, copy the the resulting Support UUID in the blue box that appears and include the ID in a new <a>support forum topic</a>. You do not have to submit data to get support, but our team will be able to help you more effectively if you do so.', 'amp' ),
+							{
+								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
+								a: <a href="https://wordpress.org/support/plugin/amp/#new-topic-0" rel="noreferrer" target="_blank" />,
+							},
+						)
 					}
-				} />
+				</p>
 
 				<ValidationResultsNotice data={ data } args={ args } ampValidatedPostCount={ ampValidatedPostCount } />
 
