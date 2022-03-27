@@ -432,13 +432,9 @@ exports[`TemplateModeOption matches snapshot 2`] = `
         className="template-mode-selection__details"
       >
         <p>
-          <span
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Reader info",
-              }
-            }
-          />
+          <span>
+            Reader info
+          </span>
            
           <a
             href="https://amp-wp.org/documentation/getting-started/reader/"
@@ -728,13 +724,9 @@ exports[`TemplateModeOption matches snapshot 3`] = `
         className="template-mode-selection__details"
       >
         <p>
-          <span
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Component details",
-              }
-            }
-          />
+          <span>
+            Component details
+          </span>
            
           <a
             href="https://amp-wp.org/documentation/getting-started/reader/"
