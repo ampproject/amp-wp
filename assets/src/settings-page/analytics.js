@@ -239,8 +239,6 @@ export function Analytics() {
 								'<code>amp-analytics</code>',
 								'<code>{</code>',
 								'<code>}</code>',
-								'<code>&lt;amp-analytics&gt;</code>',
-								'<code>&lt;script&gt;</code>',
 								`<code>${ GOOGLE_ANALYTICS_VENDOR }</code>`,
 							),
 							{
@@ -251,6 +249,16 @@ export function Analytics() {
 								SiteKitUrl: <a href="https://wordpress.org/plugins/google-site-kit/" target="_blank" rel="noreferrer" />,
 								/* eslint-enable jsx-a11y/anchor-has-content */
 								code: <code />,
+								AmpAnalyticsTag: (
+									<code>
+										{ '<amp-analytics>' }
+									</code>
+								),
+								ScriptTag: (
+									<code>
+										{ '<script>' }
+									</code>
+								),
 							},
 						)
 					}
