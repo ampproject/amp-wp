@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
+import { ANALYTICS_VENDORS_LIST } from 'amp-settings';
 
 /**
  * WordPress dependencies
@@ -10,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Icon, plus, trash } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect, useRef } from '@wordpress/element';
-import { Button, TextControl, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
+import { Button, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -22,7 +23,7 @@ const GOOGLE_ANALYTICS_VENDOR = 'googleanalytics';
 
 const GOOGLE_ANALYTICS_NOTICE = sprintf(
 	/* translators: 1: URL to Site Kit plugin directory page, 2: Google Analytics dev guide URL */
-	__( 'For Google Analytics please consider using <a href="%1$s" target="_blank" rel="noreferrer">Site Kit by Google</a>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <a href="%2$s" target="_blank" rel="noreferrer">Adding Analytics to your AMP pages</a>.', 'amp' ),
+	__( 'For Google Analytics or Google Tag Manager please consider using <a href="%1$s" target="_blank" rel="noreferrer">Site Kit by Google</a>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <a href="%2$s" target="_blank" rel="noreferrer">Adding Analytics to your AMP pages</a>.', 'amp' ),
 	__( 'https://wordpress.org/plugins/google-site-kit/', 'amp' ),
 	__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
 );
@@ -64,7 +65,21 @@ const vendorConfigs = {
 			'\t',
 		),
 	},
+	googletagmanager: { // Throw notice to if user enters googletagmanager as vendor.
+		notice: GOOGLE_ANALYTICS_NOTICE,
+		sample: '{}',
+	},
 };
+
+// Array of analytics vendors that AMP supports.
+const vendorsDatalistOptions = [];
+for ( const vendor of Object.values( ANALYTICS_VENDORS_LIST ) ) {
+	vendorsDatalistOptions.push(
+		<option key={ vendor.value } value={ vendor.value }>
+			{ vendor.label }
+		</option>,
+	);
+}
 
 /**
  * Component for a single analytics entry.
@@ -111,8 +126,8 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 
 	const defaultValue = vendorConfigs[ type ]?.sample || '{}';
 
-	/** @type {string} value */
-	const value = ( '' === config.trim() || Object.values( vendorConfigs ).find( ( { sample } ) => sample === config ) ) && ! isTextareaFocused()
+	/** @type {string} textareaControlValue */
+	const textareaControlValue = ( '' === config.trim() || Object.values( vendorConfigs ).find( ( { sample } ) => sample === config ) ) && ! isTextareaFocused()
 		? defaultValue
 		: config;
 
@@ -125,19 +140,25 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 				}
 			</h4>
 			<div className="amp-analytics-entry__options" id={ `amp-analytics-entry-${ String( entryIndex ) }` }>
-				<div className="amp-analytics-entry__text-inputs">
-					<TextControl
-						className="option-input"
-						label={ __( 'Type:', 'amp' ) }
-						onChange={ ( newType ) => {
-							onChange( { type: newType } );
-						} }
-						type="text"
-						pattern="^[a-zA-Z0-9_.-]+$"
-						title={ __( 'Must be a valid vendor or left blank for in-house analytics.', 'amp' ) }
+				<div className="amp-analytics-entry__text-input">
+					<label className="input-label" htmlFor={ `amp-analytics-entry__text-input-${ String( entryIndex ) }` }>
+						{ __( 'Type:', 'amp' ) }
+					</label>
+					<input
+						className="text-input"
+						id={ `amp-analytics-entry__text-input-${ String( entryIndex ) }` }
+						list={ `amp-analytics-vendors-${ String( entryIndex ) }` }
 						placeholder={ __( 'Vendor or blank', 'amp' ) }
 						value={ type }
+						onChange={ ( newType ) => {
+							onChange( { type: newType.target.value } );
+						} }
 					/>
+					<datalist id={ `amp-analytics-vendors-${ String( entryIndex ) }` } className="input-datalist" >
+						{
+							vendorsDatalistOptions
+						}
+					</datalist>
 				</div>
 
 				{
@@ -154,7 +175,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 					label={ __( 'JSON Configuration:', 'amp' ) }
 				>
 					<textarea
-						rows={ Math.max( 10, ( value.match( /\n/g ) || [] ).length + 1 ) }
+						rows={ Math.max( 10, ( textareaControlValue.match( /\n/g ) || [] ).length + 1 ) }
 						cols="100"
 						className="amp-analytics-input"
 						id={ `analytics-textarea-control-${ entryIndex }` }
@@ -164,7 +185,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 						placeholder="{...}"
 						ref={ textAreaRef }
 						required
-						value={ value }
+						value={ textareaControlValue }
 					/>
 				</BaseControl>
 			</div>
@@ -209,7 +230,7 @@ export function Analytics() {
 					{ __html:
 						sprintf(
 							/* translators: 1: AMP Analytics docs URL, 2: amp-analytics, 3: plugin analytics docs URL, 4: {, 5: }, 6: amp-analytics tag, 7: script tag, 8: AMP analytics vendor docs URL, 9: googleanalytics. */
-							__( 'Please see AMP project\'s <a href="%1$s" target="_blank">documentation</a> for %2$s as well as the <a href="%3$s" target="_blank">plugin\'s analytics documentation</a>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %4$s and ending with a %5$s. Do not include any HTML tags like %6$s or %7$s. For the type field, supply one of the <a href="%8$s" target="_blank">available analytics vendors</a> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %9$s.', 'amp' ),
+							__( 'Please see AMP project\'s <a href="%1$s" target="_blank">documentation</a> for %2$s as well as the <a href="%3$s" target="_blank">plugin\'s analytics documentation</a>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %4$s and ending with a %5$s. Do not include any HTML tags like %6$s or %7$s. For the type field, supply one of the <a href="%8$s" target="_blank">available analytics vendors</a> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %9$s. For Google Tag Manager please consider using <a href="%10$s" target="_blank" rel="noreferrer">Site Kit by Google</a> plugin.', 'amp' ),
 							__( 'https://amp.dev/documentation/components/amp-analytics/', 'amp' ),
 							'<code>amp-analytics</code>',
 							__( 'https://amp-wp.org/documentation/getting-started/analytics/', 'amp' ),
@@ -219,6 +240,7 @@ export function Analytics() {
 							'<code>&lt;script&gt;</code>',
 							__( 'https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/', 'amp' ),
 							`<code>${ GOOGLE_ANALYTICS_VENDOR }</code>`,
+							__( 'https://wordpress.org/plugins/google-site-kit/', 'amp' ),
 						),
 					} }
 				/>
@@ -272,4 +294,3 @@ export function Analytics() {
 		</div>
 	);
 }
-
