@@ -8,12 +8,9 @@
 namespace AmpProject\AmpWP\Tests\PageExperience;
 
 use AmpProject\AmpWP\Infrastructure\Delayed;
-use AmpProject\AmpWP\PageExperience\Authorization;
-use AmpProject\AmpWP\PageExperience\Engine;
 use AmpProject\AmpWP\PageExperience\AnalysisResultsRestController;
-use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -24,6 +21,8 @@ use WP_REST_Request;
  * @coversDefaultClass \AmpProject\AmpWP\PageExperience\AnalysisResultsRestController
  */
 class AnalysisResultsRestControllerTest extends DependencyInjectedTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Test instance.
@@ -39,7 +38,8 @@ class AnalysisResultsRestControllerTest extends DependencyInjectedTestCase {
 		parent::setUp();
 
 		$stubbed_requests = new StubbedRemoteGetRequest( [ 'https://example.com' => 'bla' ] );
-		$this->controller = Services::get( 'rest.px.')
+		$this->controller = $this->injector->make( AnalysisResultsRestController::class );
+		$this->set_private_property();
 	}
 
 	/** @covers ::get_registration_action() */

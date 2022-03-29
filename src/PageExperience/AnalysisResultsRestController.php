@@ -11,7 +11,6 @@ namespace AmpProject\AmpWP\PageExperience;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Support\SupportData;
 use Exception;
 use PageExperience\Engine\Analysis\Status;
 use WP_Error;
