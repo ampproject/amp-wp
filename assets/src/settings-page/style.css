@@ -580,6 +580,10 @@ li.error-kept {
 	padding-right: 2.25rem;
 }
 
+.amp .settings-site-scan__footer .components-button + .components-button {
+	margin-left: 1rem;
+}
+
 /* Review. */
 #site-review {
 	margin-bottom: 2.5rem;
@@ -637,6 +641,10 @@ li.error-kept {
 	height: 40px;
 	padding-left: 2.25rem;
 	padding-right: 2.25rem;
+}
+
+.amp .settings-site-review__actions .components-button + .components-button {
+	margin-left: 1rem;
 }
 
 /* Other Settings */
