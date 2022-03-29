@@ -147,14 +147,14 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 					<input
 						className="text-input"
 						id={ `amp-analytics-entry__text-input-${ String( entryIndex ) }` }
-						list="vendors"
+						list={ `amp-analytics-vendors-${ String( entryIndex ) }` }
 						placeholder={ __( 'Vendor or blank', 'amp' ) }
 						value={ type }
 						onChange={ ( newType ) => {
 							onChange( { type: newType.target.value } );
 						} }
 					/>
-					<datalist id="vendors" className="input-datalist" >
+					<datalist id={ `amp-analytics-vendors-${ String( entryIndex ) }` } className="input-datalist" >
 						{
 							vendorsDatalistOptions
 						}
