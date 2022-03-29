@@ -20,8 +20,8 @@ class AMP_Tumblr_Embed_Handler_Test extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		// Mock the HTTP request.
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
@@ -30,9 +30,9 @@ class AMP_Tumblr_Embed_Handler_Test extends TestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_request' ] );
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

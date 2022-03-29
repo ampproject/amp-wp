@@ -19,8 +19,8 @@ class Test_AMP_HTTP extends TestCase {
 	/**
 	 * Set up before class.
 	 */
-	public static function setUpBeforeClass() {
-		parent::setUpBeforeClass();
+	public static function set_up_before_class() {
+		parent::set_up_before_class();
 		AMP_HTTP::$server_timing = true;
 	}
 
@@ -29,10 +29,10 @@ class Test_AMP_HTTP extends TestCase {
 	 *
 	 * @global WP_Scripts $wp_scripts
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		AMP_HTTP::$headers_sent          = [];
 		AMP_HTTP::$purged_amp_query_vars = [];
+		parent::tear_down();
 	}
 
 	/**
@@ -42,7 +42,7 @@ class Test_AMP_HTTP extends TestCase {
 	 */
 	public function test_send_header_no_args() {
 		AMP_HTTP::send_header( 'Foo', 'Bar' );
-		$this->assertStringContainsString(
+		$this->assertContains(
 			[
 				'name'        => 'Foo',
 				'value'       => 'Bar',
@@ -66,7 +66,7 @@ class Test_AMP_HTTP extends TestCase {
 				'replace' => false,
 			]
 		);
-		$this->assertStringContainsString(
+		$this->assertContains(
 			[
 				'name'        => 'Foo',
 				'value'       => 'Bar',
@@ -90,7 +90,7 @@ class Test_AMP_HTTP extends TestCase {
 				'status_code' => 400,
 			]
 		);
-		$this->assertStringContainsString(
+		$this->assertContains(
 			[
 				'name'        => 'Foo',
 				'value'       => 'Bar',
@@ -448,7 +448,7 @@ class Test_AMP_HTTP extends TestCase {
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( $url );
 		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertStringContainsString(
+		$this->assertContains(
 			[
 				'name'        => 'AMP-Redirect-To',
 				'value'       => $url,
@@ -457,7 +457,7 @@ class Test_AMP_HTTP extends TestCase {
 			],
 			AMP_HTTP::$headers_sent
 		);
-		$this->assertStringContainsString(
+		$this->assertContains(
 			[
 				'name'        => 'Access-Control-Expose-Headers',
 				'value'       => 'AMP-Redirect-To',
@@ -473,7 +473,7 @@ class Test_AMP_HTTP extends TestCase {
 		$url = home_url( '/', 'http' );
 		AMP_HTTP::intercept_post_request_redirect( $url );
 		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertStringContainsString(
+		$this->assertContains(
 			[
 				'name'        => 'AMP-Redirect-To',
 				'value'       => preg_replace( '#^\w+:#', '', $url ),
@@ -482,7 +482,7 @@ class Test_AMP_HTTP extends TestCase {
 			],
 			AMP_HTTP::$headers_sent
 		);
-		$this->assertStringContainsString(
+		$this->assertContains(
 			[
 				'name'        => 'Access-Control-Expose-Headers',
 				'value'       => 'AMP-Redirect-To',
@@ -497,7 +497,7 @@ class Test_AMP_HTTP extends TestCase {
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( '/new-location/' );
 		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertStringContainsString(
+		$this->assertContains(
 			[
 				'name'        => 'AMP-Redirect-To',
 				'value'       => set_url_scheme( home_url( '/new-location/' ), 'https' ),
@@ -513,7 +513,7 @@ class Test_AMP_HTTP extends TestCase {
 		$url = home_url( '/new-location/' );
 		AMP_HTTP::intercept_post_request_redirect( substr( $url, strpos( $url, ':' ) + 1 ) );
 		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertStringContainsString(
+		$this->assertContains(
 			[
 				'name'        => 'AMP-Redirect-To',
 				'value'       => set_url_scheme( home_url( '/new-location/' ), 'https' ),
@@ -528,7 +528,7 @@ class Test_AMP_HTTP extends TestCase {
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( '' );
 		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertStringContainsString(
+		$this->assertContains(
 			[
 				'name'        => 'AMP-Redirect-To',
 				'value'       => set_url_scheme( home_url(), 'https' ),

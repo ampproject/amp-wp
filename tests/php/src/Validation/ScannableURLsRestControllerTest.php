@@ -36,8 +36,8 @@ class ScannableURLsRestControllerTest extends DependencyInjectedTestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		do_action( 'rest_api_init' );
 		$this->controller = $this->injector->make( ScannableURLsRestController::class );

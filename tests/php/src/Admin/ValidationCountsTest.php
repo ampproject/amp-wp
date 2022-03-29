@@ -44,8 +44,8 @@ class ValidationCountsTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		set_current_screen( 'edit' );
 		get_current_screen()->post_type = 'post';

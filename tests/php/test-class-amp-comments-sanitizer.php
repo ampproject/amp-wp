@@ -31,17 +31,17 @@ class Test_AMP_Comments_Sanitizer extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$GLOBALS['post'] = self::factory()->post->create_and_get();
 
 		$GLOBALS['wp_scripts'] = null;
 	}
 
-	public function tearDown() {
+	public function tear_down() {
 		$GLOBALS['wp_scripts'] = null;
 
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

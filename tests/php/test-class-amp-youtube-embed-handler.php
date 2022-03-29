@@ -21,7 +21,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	use MarkupComparison;
 	use PrivateAccess;
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	protected $youtube_video_id = 'kfVsfOSbJY0';
@@ -44,7 +44,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	/**
 	 * Set up each test.
 	 */
-	public function setUp() {
+	public function set_up() {
 		$this->prevent_block_pre_render();
 
 		$this->handler = new AMP_YouTube_Embed_Handler();
@@ -55,9 +55,9 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_request' ] );
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

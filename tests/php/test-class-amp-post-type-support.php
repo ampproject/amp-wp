@@ -19,11 +19,11 @@ class Test_AMP_Post_Type_Support extends TestCase {
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		foreach ( [ 'book', 'poem', 'secret', 'car', 'secret_book', 'non_amp_book' ] as $post_type ) {
 			unregister_post_type( $post_type );
 		}
+		parent::tear_down();
 	}
 
 	/**

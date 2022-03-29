@@ -25,8 +25,8 @@ class ValidationDataGarbageCollectionTest extends DependencyInjectedTestCase {
 	/** @var ValidationDataGarbageCollection */
 	protected $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = $this->injector->make( ValidationDataGarbageCollection::class );
 	}
 

@@ -17,10 +17,9 @@
     "ampproject/amp-toolbox": "0.10.0",
     "cweagans/composer-patches": "~1.0",
     "fasterimage/fasterimage": "1.5.0",
-    "sabberworm/php-css-parser": "dev-master#bfdd976"
+    "sabberworm/php-css-parser": "8.4.0"
   },
   "require-dev": {
-    "ampproject/php-css-parser-install-plugin": "*",
     "automattic/vipwpcs": "^2.2",
     "civicrm/composer-downloads-plugin": "^3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
@@ -37,18 +36,12 @@
     "wp-cli/wp-cli": "^2.4",
     "wp-cli/wp-cli-tests": "^3.0.11",
     "wp-coding-standards/wpcs": "2.3.0",
-    "yoast/wp-test-utils": "^0.2.2"
+    "yoast/wp-test-utils": "^1.0.0"
   },
   "suggest": {
     "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
     "ext-mbstring": "Used by PHP-CSS-Parser when working with stylesheets."
   },
-  "repositories": [
-    {
-      "type": "path",
-      "url": "./php-css-parser-install-composer-plugin"
-    }
-  ],
   "minimum-stability": "dev",
   "prefer-stable": true,
   "autoload": {
@@ -77,7 +70,6 @@
   },
   "config": {
     "allow-plugins": {
-      "ampproject/php-css-parser-install-plugin": true,
       "civicrm/composer-downloads-plugin": true,
       "cweagans/composer-patches": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
@@ -88,6 +80,7 @@
     "sort-packages": true
   },
   "extra": {
+    "composer-exit-on-patch-failure": true,
     "downloads": {
       "phpstan": {
         "path": "vendor/bin/phpstan",
@@ -100,14 +93,14 @@
         "Fix ReflectionParameter warnings on PHP 8": "patches/phpunit-mock-objects.patch"
       },
       "sabberworm/php-css-parser": {
-        "1. Add additional validation for size unit <https://github.com/sabberworm/PHP-CSS-Parser/pull/193>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/3bc5ded67d77a52b81608cfc97f23b1bb0678e2f%5E...468da3441945e9c1bf402a3340b1d8326723f7d9.patch",
-        "2. Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/d42b64793f2edaffeb663c63e9de79069cdc0831%5E...113df5d55e94e21c6402021dfa959924941d4c29.patch",
-        "3. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/westonruter/PHP-CSS-Parser/compare/master...10a2501c119abafced3e4014aa3c0a3453a86f67.patch"
+        "1. Add additional validation for size unit <https://github.com/sabberworm/PHP-CSS-Parser/pull/350>": "https://github.com/westonruter/PHP-CSS-Parser/commit/5b1d6a4abe43f4311d9b4674913ca665ed8c43aa.diff",
+        "2. Validate name-start code points for identifier <https://github.com/westonruter/PHP-CSS-Parser/pull/2>": "https://github.com/westonruter/PHP-CSS-Parser/commit/9f96bc97fcb1e848a2f6ca6f658009996883dffc.diff",
+        "3. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/westonruter/PHP-CSS-Parser/commit/dc18ba737fd6a611189a5b83729396500676f8dd.diff"
       }
     }
   },
   "scripts": {
-    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi",
+    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi --memory-limit=1G; fi",
     "pre-commit": [
       "npm run lint:staged"
     ],

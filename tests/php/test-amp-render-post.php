@@ -28,7 +28,7 @@ class AMP_Render_Post_Test extends TestCase {
 		$output = get_echo( 'amp_render_post', [ $post_id ] );
 
 		$this->assertStringContainsString( '<html amp', $output, 'Response does not include html tag with amp attribute.' );
-		$this->assertEquals( 1, did_action( 'pre_amp_render_post', 'pre_amp_render_post action fire either did not fire or fired too many times.' ) );
+		$this->assertEquals( 1, did_action( 'pre_amp_render_post' ), 'pre_amp_render_post action fire either did not fire or fired too many times.' );
 	}
 
 	/**

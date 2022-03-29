@@ -31,7 +31,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	use PrivateAccess;
 	use WithBlockEditorSupport;
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/**
@@ -110,7 +110,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @inheritdoc
 	 * @global $wp_registered_widgets
 	 */
-	public function setUp() {
+	public function set_up() {
 		unset( $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
 		$this->prevent_block_pre_render();
 
@@ -134,7 +134,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets;
 		$GLOBALS['wp_widget_factory']     = $this->original_wp_widget_factory;
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
@@ -146,7 +146,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::$validation_results  = [];
 		AMP_Validation_Manager::reset_validation_results();
 		unset( $_REQUEST['post_type'] ); // phpcs:ignore
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**
@@ -581,7 +581,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * Test validation error overrides for when bad nonce is supplied.
 	 *
 	 * @covers AMP_Validation_Manager::override_validation_error_statuses()
-	 * @expectedException WPDieException
 	 */
 	public function test_override_validation_error_statuses_with_bad_nonce() {
 		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
@@ -592,14 +591,22 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 			],
 		];
-		AMP_Validation_Manager::override_validation_error_statuses();
+
+		$exception = null;
+		try {
+			AMP_Validation_Manager::override_validation_error_statuses();
+		} catch ( Exception $ex ) {
+			$exception = $ex;
+		}
+
+		$this->assertInstanceOf( WPDieException::class, $exception );
+		$this->assertEquals( 'Preview link expired. Please try again.', $exception->getMessage() );
 	}
 
 	/**
 	 * Test validation error overrides for when no nonce is supplied.
 	 *
 	 * @covers AMP_Validation_Manager::override_validation_error_statuses()
-	 * @expectedException WPDieException
 	 */
 	public function test_override_validation_error_statuses_with_no_nonce() {
 		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
@@ -609,7 +616,15 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 			],
 		];
-		AMP_Validation_Manager::override_validation_error_statuses();
+
+		$exception = null;
+		try {
+			AMP_Validation_Manager::override_validation_error_statuses();
+		} catch ( Exception $ex ) {
+			$exception = $ex;
+		}
+		$this->assertInstanceOf( WPDieException::class, $exception );
+		$this->assertEquals( 'Preview link expired. Please try again.', $exception->getMessage() );
 	}
 
 	/**
@@ -883,7 +898,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//link[ contains( @href, "foo.css" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -914,7 +929,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//link[ contains( @href, "codemirror" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'              => 'plugin',
 							'name'              => 'amp',
@@ -947,7 +962,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//style[ contains( text(), "Hello Baz" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -981,7 +996,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//script[ contains( @src, "foo.js" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -1013,7 +1028,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//script[ contains( @src, "codemirror" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'              => 'plugin',
 							'name'              => 'amp',
@@ -1047,7 +1062,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//script[ contains( text(), "Hello Baz!" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -1095,7 +1110,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				],
 				function ( ...$sources_sets ) {
 					$this->assertCount( 2, $sources_sets );
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -1109,7 +1124,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 						],
 						$sources_sets[0][2]
 					);
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -1144,7 +1159,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//script[ contains( text(), "Hello after Baz!" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -1183,7 +1198,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 				},
 				'//link[ contains( @href, "foo.css" ) ]',
 				function ( $sources ) {
-					$this->assertArraySubset(
+					$this->assertAssocArrayContains(
 						[
 							'type'            => 'plugin',
 							'name'            => 'amp',
@@ -1222,13 +1237,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'//script[ @id = "jquery-core-js-before" ]',
 					'//script[ @id = "jquery-core-js-after" ]',
 					'//script[ @id = "wp-dom-ready-js" ]',
-					'//script[ @id = "wp-dom-ready-js-translations" ]',
 					'//script[ @id = "quicktags-js" ]',
 					'//script[ @id = "quicktags-js-extra" ]',
 					'//script[ contains( text(), "window.wpActiveEditor" ) ]',
 				],
 				function ( ...$sources_sets ) {
-					$this->assertCount( 7, $sources_sets );
+					$this->assertCount( 6, $sources_sets );
 					foreach ( $sources_sets as $sources ) {
 						$amp_source_count = 0;
 						foreach ( $sources as $source ) {
@@ -1398,6 +1412,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			],
 			$expected
 		);
+
+		// Remove class added in <https://github.com/WordPress/gutenberg/pull/38740> to normalize with expected data.
+		$rendered_block = str_replace( ' class="wp-block-latest-posts__post-title"', '', $rendered_block );
 
 		$this->assertEquals(
 			preg_replace( '/(?<=>)\s+(?=<)/', '', str_replace( '%d', $post->ID, $expected ) ),
@@ -2942,12 +2959,12 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$this->assertStringContainsString( 'js/amp-block-validation.js', $script->src );
 		$this->assertEqualSets( $expected_dependencies, $script->deps );
-		$this->assertStringContainsString( $slug, wp_scripts()->queue );
+		$this->assertContains( $slug, wp_scripts()->queue );
 
 		$style = wp_styles()->registered[ $slug ];
 		$this->assertStringContainsString( 'css/amp-block-validation.css', $style->src );
 		$this->assertEquals( AMP__VERSION, $style->ver );
-		$this->assertStringContainsString( $slug, wp_styles()->queue );
+		$this->assertContains( $slug, wp_styles()->queue );
 	}
 
 	/**
