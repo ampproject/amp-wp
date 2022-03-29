@@ -73,13 +73,13 @@ const vendorConfigs = {
 
 // Array of analytics vendors that AMP supports.
 const vendorsDatalistOptions = [];
-Object.values( ANALYTICS_VENDORS_LIST ).forEach( ( vendor ) => {
+for ( const vendor of Object.values( ANALYTICS_VENDORS_LIST ) ) {
 	vendorsDatalistOptions.push(
 		<option key={ vendor.value } value={ vendor.value }>
 			{ vendor.label }
 		</option>,
 	);
-} );
+}
 
 /**
  * Component for a single analytics entry.
