@@ -196,12 +196,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			return []; // @codeCoverageIgnore
 		}
 
-		// Fetches analytics vendors list as a array.
 		$vendors_list = require $vendors_list_file;
 
-		$error = json_last_error();
-
-		return ! empty( $error ) ? [] : $vendors_list;
+		return $vendors_list;
 	}
 
 	/**
