@@ -779,7 +779,7 @@ jobs:
           path: builds/prod
 
       - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0
         with:
           project_id: ${{ secrets.GCS_PROJECT_ID }}
           service_account_key: ${{ secrets.GCS_APPLICATION_CREDENTIALS }}
