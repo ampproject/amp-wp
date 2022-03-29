@@ -79,8 +79,6 @@ final class BlockUniqidTransformer implements Service, Registerable {
 	 * The affected WordPress version is 5.9. However, the duotone filter was first
 	 * introduced in WordPress 5.8 and it makes use of the `uniqid`, too.
 	 *
-	 * @todo Once the `uniqid` to `wp_unique_id` fix is backported to core, upper version boundary should be updated (it's set to 6.0 for now).
-	 *
 	 * @param string|null $version WordPress core version to check. If null, current version is used.
 	 * @return bool Whether affected WP version.
 	 */
@@ -91,7 +89,7 @@ final class BlockUniqidTransformer implements Service, Registerable {
 		return (
 			version_compare( $version, '5.8', '>=' )
 			&&
-			version_compare( $version, '6.0', '<' )
+			version_compare( $version, '5.9.3', '<' )
 		);
 	}
 

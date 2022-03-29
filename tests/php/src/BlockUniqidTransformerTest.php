@@ -106,6 +106,7 @@ final class BlockUniqidTransformerTest extends DependencyInjectedTestCase {
 			'5.9.0' => [ '5.9.0', true ],
 			'5.9.1' => [ '5.9.1', true ],
 			'5.9.2' => [ '5.9.2', true ],
+			'5.9.3' => [ '5.9.3', false ],
 			'6.0.0' => [ '6.0.0', false ],
 		];
 	}
