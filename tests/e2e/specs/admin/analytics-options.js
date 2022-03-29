@@ -23,12 +23,12 @@ describe( 'AMP analytics options', () => {
 		// Add entry.
 		await expect( page ).toClick( '#amp-analytics-add-entry' );
 		await expect( '.amp-analytics-entry' ).countToBe( 1 );
-		await expect( page ).toFill( '#amp-analytics-entry-1 input[type="text"]', 'googleanalytics' );
+		await expect( page ).toFill( '#amp-analytics-entry-1 input', 'googleanalytics' );
 
 		// Add second entry.
 		await expect( page ).toClick( '#amp-analytics-add-entry' );
 		await expect( '.amp-analytics-entry' ).countToBe( 2 );
-		await expect( page ).toFill( '#amp-analytics-entry-2 input[type="text"]', 'googleanalytics-2' );
+		await expect( page ).toFill( '#amp-analytics-entry-2 input', 'googleanalytics-2' );
 
 		// Save.
 		await expect( page ).toClick( '.amp-settings-nav button[type="submit"]' );
@@ -46,4 +46,3 @@ describe( 'AMP analytics options', () => {
 		await expect( page ).toMatchElement( '.amp .amp-save-success-notice.amp-notice' );
 	} );
 } );
-
