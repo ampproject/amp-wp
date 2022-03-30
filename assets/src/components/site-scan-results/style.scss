@@ -88,24 +88,11 @@
 	vertical-align: middle;
 }
 
-.site-scan-results__source details summary {
-	display: flex;
+.site-scan-results__source .site-scan-results__summary-wrapper {
+	display: inline-flex;
 	align-items: center;
-
-	&::-webkit-details-marker {
-		display: none;
-	}
-}
-
-.site-scan-results__source details .dashicons {
-	font-size: 14px;
-	align-items: center;
-	display: flex;
-	justify-content: center;
-}
-
-.site-scan-results__source details[open] .dashicons {
-	transform: rotate(90deg);
+	margin-left: 4px;
+	width: calc(100% - 20px);
 }
 
 .site-scan-results__source-version,
