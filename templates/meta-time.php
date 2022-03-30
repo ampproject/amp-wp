@@ -26,7 +26,7 @@
 			sprintf(
 				/* translators: %s: the human-readable time difference. */
 				__( '%s ago', 'amp' ),
-				human_time_diff( $this->get( 'post_publish_timestamp' ), time() )
+				human_time_diff( $this->get( 'post_publish_timestamp' ), current_time('timestamp') )
 			)
 		);
 		?>
