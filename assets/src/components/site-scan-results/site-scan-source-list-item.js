@@ -54,50 +54,51 @@ export function SiteScanSourcesListItem( {
 			} }
 		>
 			<summary>
-				<span className="dashicons dashicons-controls-play" />
-				{ name && (
-					<span className={ classnames( 'site-scan-results__source-name', {
-						'site-scan-results__source-name--inactive': [ 'inactive', 'uninstalled' ].includes( status ),
-					} ) }>
-						{ name }
-					</span>
-				) }
-				{ ! name && slug && (
-					<code className="site-scan-results__source-slug">
-						{ slug }
-					</code>
-				) }
-				{ status === 'active' ? (
-					<>
-						{ author && (
-							<span className="site-scan-results__source-author">
-								{ sprintf(
-									/* translators: %s is an author name. */
-									__( 'by %s', 'amp' ),
-									author,
-								) }
-							</span>
-						) }
-						{ version && (
-							<span className="site-scan-results__source-version">
-								{ sprintf(
-									/* translators: %s is a version number. */
-									__( 'Version %s', 'amp' ),
-									version,
-								) }
-							</span>
-						) }
-					</>
-				) : (
-					<AMPNotice
-						className="site-scan-results__source-notice"
-						type={ NOTICE_TYPE_PLAIN }
-						size={ NOTICE_SIZE_SMALL }
-					>
-						{ status === 'inactive' ? inactiveSourceNotice : null }
-						{ status === 'uninstalled' ? uninstalledSourceNotice : null }
-					</AMPNotice>
-				) }
+				<span className="site-scan-results__summary-wrapper">
+					{ name && (
+						<span className={ classnames( 'site-scan-results__source-name', {
+							'site-scan-results__source-name--inactive': [ 'inactive', 'uninstalled' ].includes( status ),
+						} ) }>
+							{ name }
+						</span>
+					) }
+					{ ! name && slug && (
+						<code className="site-scan-results__source-slug">
+							{ slug }
+						</code>
+					) }
+					{ status === 'active' ? (
+						<>
+							{ author && (
+								<span className="site-scan-results__source-author">
+									{ sprintf(
+										/* translators: %s is an author name. */
+										__( 'by %s', 'amp' ),
+										author,
+									) }
+								</span>
+							) }
+							{ version && (
+								<span className="site-scan-results__source-version">
+									{ sprintf(
+										/* translators: %s is a version number. */
+										__( 'Version %s', 'amp' ),
+										version,
+									) }
+								</span>
+							) }
+						</>
+					) : (
+						<AMPNotice
+							className="site-scan-results__source-notice"
+							type={ NOTICE_TYPE_PLAIN }
+							size={ NOTICE_SIZE_SMALL }
+						>
+							{ status === 'inactive' ? inactiveSourceNotice : null }
+							{ status === 'uninstalled' ? uninstalledSourceNotice : null }
+						</AMPNotice>
+					) }
+				</span>
 			</summary>
 			{ hasOpened && <SiteScanSourcesDetail slug={ slug } /> }
 		</details>
