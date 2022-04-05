@@ -114,8 +114,11 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected function get_caption_element( DOMElement $img_element ) {
 		$figcaption_element = null;
-
-		if ( isset( $img_element->nextSibling->nodeName ) && Tag::FIGCAPTION === $img_element->nextSibling->nodeName ) {
+		if (
+			isset( $img_element->nextSibling->nodeName )
+			&& $img_element->nextSibling instanceof DOMElement
+			&& Tag::FIGCAPTION === $img_element->nextSibling->nodeName
+		) {
 			$figcaption_element = $img_element->nextSibling;
 		}
 
@@ -123,6 +126,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			! $figcaption_element
 			&& isset( $img_element->parentNode->nextSibling->nodeName )
+			&& $img_element->parentNode->nextSibling instanceof DOMElement
 			&& Tag::FIGCAPTION === $img_element->parentNode->nextSibling->nodeName
 		) {
 			$figcaption_element = $img_element->parentNode->nextSibling;
