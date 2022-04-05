@@ -8,7 +8,7 @@ exports[`DevToolsToggle matches snapshot 1`] = `
     className="components-base-control components-toggle-control css-wdf2ti-Wrapper e1puf3u4"
   >
     <div
-      className="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+      className="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField e1puf3u3"
     >
       <span
         className="components-form-toggle"
