@@ -12,7 +12,7 @@ Determine whether native `img` should be used instead of converting to `amp-img`
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1453](/includes/amp-helper-functions.php#L1453-L1466)
+:link: [includes/amp-helper-functions.php:1460](/includes/amp-helper-functions.php#L1460-L1473)
 
 <details>
 <summary>Show Code</summary>
@@ -30,7 +30,7 @@ function amp_is_native_img_used() {
 	 *
 	 * @param bool $use_native Whether to use `img`.
 	 */
-	return (bool) apply_filters( 'amp_native_img_used', false );
+	return (bool) apply_filters( 'amp_native_img_used', true );
 }
 ```
 

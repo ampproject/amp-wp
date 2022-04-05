@@ -17,6 +17,7 @@
 ### Filters
 
 * [`amp_analytics_entries`](amp_analytics_entries.md) - Add amp-analytics tags.
+* [`amp_auto_lightbox_disabled`](amp_auto_lightbox_disabled.md) - Filters whether AMP auto-lightbox is disabled.
 * [`amp_bento_enabled`](amp_bento_enabled.md) - Filters whether the use of Bento components is enabled.
 * [`amp_comment_posted_message`](amp_comment_posted_message.md) - Filters the message when comment submitted success message when
 * [`amp_compatible_ecosystem_shown`](amp_compatible_ecosystem_shown.md) - Filters whether to show AMP compatible ecosystem in the admin.
