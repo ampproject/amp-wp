@@ -10,7 +10,7 @@ import { ANALYTICS_VENDORS_LIST } from 'amp-settings';
  */
 import { Icon, plus, trash } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
-import { createInterpolateElement, useContext, useEffect, useRef } from '@wordpress/element';
+import { useContext, useEffect, useRef } from '@wordpress/element';
 import { Button, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
 
 /**
@@ -18,61 +18,9 @@ import { Button, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/compon
  */
 import { Options } from '../components/options-context-provider';
 import { AMPNotice, NOTICE_SIZE_SMALL } from '../components/amp-notice';
+import vendorConfigs from './vendor-configs';
 
 const GOOGLE_ANALYTICS_VENDOR = 'googleanalytics';
-
-const GOOGLE_ANALYTICS_NOTICE = createInterpolateElement(
-	__( 'For Google Analytics or Google Tag Manager please consider using <GoogleSiteKitLink>Site Kit by Google</GoogleSiteKitLink>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <GoogleAnalyticsDevGuideLink>Adding Analytics to your AMP pages</GoogleAnalyticsDevGuideLink>.', 'amp' ),
-	{
-		/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-		GoogleSiteKitLink: <a href="https://wordpress.org/plugins/google-site-kit/" target="_blank" rel="noreferrer" />,
-		GoogleAnalyticsDevGuideLink: <a href="https://developers.google.com/analytics/devguides/collection/amp-analytics/" target="_blank" rel="noreferrer" />,
-		/* eslint-enable jsx-a11y/anchor-has-content */
-	},
-);
-
-const vendorConfigs = {
-	'': {
-		sample: '{}',
-	},
-	[ GOOGLE_ANALYTICS_VENDOR ]: {
-		notice: GOOGLE_ANALYTICS_NOTICE,
-		sample: JSON.stringify(
-			{
-				vars: {
-					account: '👉 ' + __( 'Provide site tracking ID here (e.g. UA-XXXXX-Y)', 'amp' ) + ' 👈',
-				},
-				triggers: {
-					trackPageview: {
-						on: 'visible',
-						request: 'pageview',
-					},
-				},
-			},
-			null,
-			'\t',
-		),
-	},
-	gtag: {
-		notice: GOOGLE_ANALYTICS_NOTICE,
-		sample: JSON.stringify(
-			{
-				vars: {
-					gtag_id: '<GA_MEASUREMENT_ID>',
-					config: {
-						'<GA_MEASUREMENT_ID>': { groups: 'default' },
-					},
-				},
-			},
-			null,
-			'\t',
-		),
-	},
-	googletagmanager: { // Throw notice to if user enters googletagmanager as vendor.
-		notice: GOOGLE_ANALYTICS_NOTICE,
-		sample: '{}',
-	},
-};
 
 // Array of analytics vendors that AMP supports.
 const vendorsDatalistOptions = [];
