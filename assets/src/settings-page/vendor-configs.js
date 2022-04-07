@@ -59,8 +59,8 @@ export default {
 		sample: JSON.stringify(
 			{
 				vars: {
-					atrk_acct: 'YOURACCOUNT',
-					domain: 'YOURDOMAIN',
+					atrk_acct: '<YOURACCOUNT>',
+					domain: '<YOURDOMAIN>',
 				},
 			},
 			null,
@@ -72,7 +72,7 @@ export default {
 		sample: JSON.stringify(
 			{
 				vars: {
-					token: 'your-token',
+					token: '👉 ' + __( 'Provide Token.', 'amp' ) + ' 👈',
 				},
 				triggers: {
 					pageview: {
@@ -90,39 +90,12 @@ export default {
 		sample: JSON.stringify(
 			{
 				vars: {
-					pixelId: '1760516960931795',
+					pixelId: '👉 ' + __( 'Provide Facebook Pixel ID here.', 'amp' ) + ' 👈',
 				},
 				triggers: {
 					trackPageview: {
 						on: 'visible',
 						request: 'pageview',
-					},
-					trackEvent: {
-						on: 'click',
-						selector: '#test1',
-						request: 'event',
-						vars: {
-							eventName: 'ClickedBtn-x',
-						},
-					},
-					trackSearch: {
-						on: 'visible',
-						request: 'eventSearch',
-						vars: {
-							search_string: 'How to use Facebook Pixel in AMP Pages',
-						},
-					},
-					trackAddToWishlist: {
-						on: 'click',
-						selector: '#test1',
-						request: 'eventAddToWishlist',
-						vars: {
-							content_ids: [ '1234' ],
-							content_name: 'The Avengers',
-							content_category: 'Entertainment',
-							value: 1.50,
-							currency: 'USD',
-						},
 					},
 				},
 			},
@@ -130,7 +103,6 @@ export default {
 			'\t',
 		),
 	},
-
 	[ GOOGLE_ANALYTICS_VENDOR ]: {
 		notice: GOOGLE_ANALYTICS_NOTICE,
 		sample: JSON.stringify(
@@ -173,8 +145,8 @@ export default {
 		sample: JSON.stringify(
 			{
 				vars: {
-					appId: '555555',
-					licenseKey: '2fffffffff',
+					appId: '👉 ' + __( 'Provide App ID here.', 'amp' ) + ' 👈',
+					licenseKey: '<LICENSE_KEY>',
 				},
 			},
 			null,
@@ -186,24 +158,23 @@ export default {
 		sample: JSON.stringify(
 			{
 				vars: {
-					apid: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+					apid: '👉 ' + __( 'Provide App ID here.', 'amp' ) + ' 👈',
 					apv: '1.0',
 					section: 'Entertainment',
 					segA: 'Music',
-					segB: 'News',
-					segC: 'Branded_Content',
 				},
 			},
 			null,
 			'\t',
 		),
 	},
+	// Yandex Metrika
 	metrika: {
 		notice: '',
 		sample: JSON.stringify(
 			{
 				vars: {
-					counterId: '71129776',
+					counterId: '<COUNTER_ID>',
 					yaParams: '{\'key\': \'value\'}',
 				},
 				requests: {},
