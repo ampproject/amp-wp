@@ -767,13 +767,13 @@ jobs:
       - build-zip
     steps:
       - name: Download dev build
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: amp-${{ needs.build-zip.outputs.branch-name }}-${{ needs.build-zip.outputs.git-sha-8 }}-dev
           path: builds/dev
 
       - name: Download prod build
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: amp-${{ needs.build-zip.outputs.branch-name }}-${{ needs.build-zip.outputs.git-sha-8 }}-prod
           path: builds/prod
