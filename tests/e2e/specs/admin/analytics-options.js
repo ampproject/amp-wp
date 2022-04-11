@@ -30,6 +30,24 @@ describe( 'AMP analytics options', () => {
 		await expect( '.amp-analytics-entry' ).countToBe( 2 );
 		await expect( page ).toFill( '#amp-analytics-entry-2 input', 'googleanalytics-2' );
 
+		// Add third entry.
+		await expect( page ).toClick( '#amp-analytics-add-entry' );
+		await expect( '.amp-analytics-entry' ).countToBe( 3 );
+		await expect( page ).toFill( '#amp-analytics-entry-3 input', 'alexametrics' );
+
+		await expect( page ).toMatchElement( '#analytics-textarea-control-3', {
+			value: JSON.stringify(
+				{
+					vars: {
+						atrk_acct: '<YOURACCOUNT>',
+						domain: '<YOURDOMAIN>',
+					},
+				},
+				null,
+				'\t',
+			),
+		} );
+
 		// Save.
 		await expect( page ).toClick( '.amp-settings-nav button[type="submit"]' );
 
