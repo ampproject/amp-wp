@@ -215,7 +215,7 @@ function Root( { appRoot } ) {
 	const { hasOptionsChanges, fetchingOptions, saveOptions } = useContext( Options );
 	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption, developerToolsOption } = useContext( User );
 	const { templateModeWasOverridden } = useContext( ReaderThemes );
-	const { isSkipped } = useContext( SiteScanContext );
+	const { isSkipped, isFetchingScannableUrls } = useContext( SiteScanContext );
 
 	/**
 	 * Handle the form submit event.
@@ -248,7 +248,7 @@ function Root( { appRoot } ) {
 		}
 
 		scrollFocusedSectionIntoView( focusedSection );
-	}, [ fetchingOptions, focusedSection, templateModeWasOverridden ] );
+	}, [ fetchingOptions, isFetchingScannableUrls, focusedSection, templateModeWasOverridden ] );
 
 	/**
 	 * Resets the focused element state when the hash changes on the page.
