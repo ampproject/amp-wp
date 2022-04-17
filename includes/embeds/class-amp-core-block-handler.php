@@ -67,6 +67,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		add_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0, 2 );
+		add_filter( 'render_block_data', [ $this, 'filter_render_block_data' ], 0 );
 		add_filter( 'widget_text_content', [ $this, 'preserve_widget_text_element_dimensions' ], PHP_INT_MAX );
 	}
 
@@ -75,7 +76,23 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		remove_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0 );
+		remove_filter( 'render_block_data', [ $this, 'filter_render_block_data' ], 0 );
 		remove_filter( 'widget_text_content', [ $this, 'preserve_widget_text_element_dimensions' ], PHP_INT_MAX );
+	}
+
+	/**
+	 * Set 'data-id' attribute to core/image block.
+	 *
+	 * @param array $parsed_block The block being rendered.
+	 *
+	 * @return array The migrated block object.
+	 */
+	public function filter_render_block_data( $parsed_block ) {
+		if ( 'core/image' === $parsed_block['blockName'] && isset( $parsed_block['attrs']['id'] ) ) {
+			$parsed_block['attrs']['data-id'] = $parsed_block['attrs']['id'];
+		}
+
+		return $parsed_block;
 	}
 
 	/**

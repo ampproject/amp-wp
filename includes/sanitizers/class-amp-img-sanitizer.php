@@ -395,6 +395,28 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Add 'srcset' attribute to image node if lightbox is enabled for that.
+	 *
+	 * @param Element $node Image node.
+	 *
+	 * @return void
+	 */
+	private function set_srcset_for_lightbox_images( Element $node ) {
+
+		if (
+			! $node->hasAttribute( Attribute::SRCSET )
+			&&
+			$node->hasAttribute( 'data-amp-lightbox' )
+			&&
+			$node->hasAttribute( Attribute::DATA_ID )
+		) {
+			$attachment_id = intval( $node->getAttribute( Attribute::DATA_ID ) );
+			$srcset        = wp_get_attachment_image_srcset( $attachment_id, 'full' );
+			$node->setAttribute( Attribute::SRCSET, $srcset );
+		}
+	}
+
+	/**
 	 * Make final modifications to DOMNode
 	 *
 	 * @param Element $node The img element to adjust and replace.
@@ -418,6 +440,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $attributes as $name => $value ) {
 				$node->setAttribute( $name, $value );
 			}
+
+			$this->set_srcset_for_lightbox_images( $node );
 			return;
 		}
 
@@ -464,6 +488,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$img_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
 		$node->parentNode->replaceChild( $img_node, $node );
+		$this->set_srcset_for_lightbox_images( $img_node );
 
 		/*
 		 * Prevent inline style on an image from rendering the amp-img invisible or conflicting with the required display.
