@@ -71,6 +71,93 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 	}
 
 	/**
+	 * Data provider for $this->test_filter_render_block_data();
+	 *
+	 * @return array[][]
+	 */
+	public function get_data_filter_render_block_data() {
+		return [
+			'image_block_with_attachment_id'      => [
+				'input'    => [
+					'blockName'    => 'core/image',
+					'attrs'        => [
+						'id'       => 5,
+						'sizeSlug' => 'thumbnail',
+					],
+					'innerBlocks'  => [],
+					'innerHTML'    => '',
+					'innerContent' => '',
+				],
+				'expected' => [
+					'blockName'    => 'core/image',
+					'attrs'        => [
+						'id'       => 5,
+						'sizeSlug' => 'thumbnail',
+						'data-id'  => 5,
+					],
+					'innerBlocks'  => [],
+					'innerHTML'    => '',
+					'innerContent' => '',
+				],
+			],
+			'image_block_without_attachment_id'   => [
+				'input'    => [
+					'blockName'    => 'core/image',
+					'attrs'        => [
+						'sizeSlug' => 'thumbnail',
+					],
+					'innerBlocks'  => [],
+					'innerHTML'    => '<img src="sample.jpg"/>',
+					'innerContent' => '',
+				],
+				'expected' => [
+					'blockName'    => 'core/image',
+					'attrs'        => [
+						'sizeSlug' => 'thumbnail',
+					],
+					'innerBlocks'  => [],
+					'innerHTML'    => '<img src="sample.jpg"/>',
+					'innerContent' => '',
+				],
+			],
+			'none_image_block_with_attachment_id' => [
+				'input'    => [
+					'blockName'    => 'core/audio',
+					'attrs'        => [
+						'id' => 5,
+					],
+					'innerBlocks'  => [],
+					'innerHTML'    => '',
+					'innerContent' => '',
+				],
+				'expected' => [
+					'blockName'    => 'core/audio',
+					'attrs'        => [
+						'id' => 5,
+					],
+					'innerBlocks'  => [],
+					'innerHTML'    => '',
+					'innerContent' => '',
+				],
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_filter_render_block_data()
+	 * @covers ::filter_render_block_data()
+	 */
+	public function test_filter_render_block_data( $input, $expected ) {
+
+		$instance = new AMP_Core_Block_Handler();
+
+		$this->assertEquals(
+			$expected,
+			$instance->filter_render_block_data( $input )
+		);
+	}
+
+	/**
 	 * Test register_embed().
 	 *
 	 * @covers AMP_Core_Block_Handler::register_embed()

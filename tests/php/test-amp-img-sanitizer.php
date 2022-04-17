@@ -1041,4 +1041,75 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 			$this->call_private_static_method( AMP_Img_Sanitizer::class, 'is_tracking_pixel_url', [ $url ] )
 		);
 	}
+
+	/**
+	 * Test data for $this->set_srcset_for_lightbox_images()
+	 *
+	 * @return array[][]
+	 */
+	public function get_data_set_srcset_for_lightbox_images() {
+		$dom           = new Document();
+		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', 0 );
+
+		return [
+			'lightbox_image_with_data_id_and_without_srcset' => [
+				'dom'                => $dom,
+				'node'               => AMP_DOM_Utils::create_node(
+					$dom,
+					'img',
+					[
+						'data-amp-lightbox' => '',
+						'data-id'           => $attachment_id,
+					]
+				),
+				'should_have_srcset' => true,
+			],
+			'lightbox_image_with_data_id_and_srcset'    => [
+				'dom'                => $dom,
+				'node'               => AMP_DOM_Utils::create_node(
+					$dom,
+					'img',
+					[
+						'data-amp-lightbox' => '',
+						'data-id'           => $attachment_id,
+						'srcset'            => wp_get_attachment_image_srcset( $attachment_id, 'full' ),
+					]
+				),
+				'should_have_srcset' => true,
+			],
+			'lightbox_image_without_data_id_and_srcset' => [
+				'dom'                => $dom,
+				'node'               => AMP_DOM_Utils::create_node(
+					$dom,
+					'img',
+					[
+						'data-amp-lightbox' => '',
+					]
+				),
+				'should_have_srcset' => false,
+			],
+			'none_lightbox_image_with_data_id_and_without_srcset' => [
+				'dom'                => $dom,
+				'node'               => AMP_DOM_Utils::create_node(
+					$dom,
+					'img',
+					[
+						'data-id' => $attachment_id,
+					]
+				),
+				'should_have_srcset' => false,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_set_srcset_for_lightbox_images()
+	 * @covers ::set_srcset_for_lightbox_images()
+	 */
+	public function test_set_srcset_for_lightbox_images( $dom, $node, $should_have_srcset ) {
+		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$this->call_private_method( $sanitizer, 'set_srcset_for_lightbox_images', [ $node ] );
+
+		$this->assertEquals( $should_have_srcset, $node->hasAttribute( 'srcset' ) );
+	}
 }
