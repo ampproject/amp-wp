@@ -58,6 +58,7 @@ import { MobileRedirection } from './mobile-redirection';
 import { DeveloperTools } from './developer-tools';
 import { SiteScan } from './site-scan';
 import { DeleteDataAtUninstall } from './delete-data-at-uninstall';
+import { ToggleUseNativeImgTag } from './toggle-use-native-img-tag';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -352,6 +353,7 @@ function Root( { appRoot } ) {
 						<DeveloperTools />
 					) }
 					<DeleteDataAtUninstall />
+					<ToggleUseNativeImgTag />
 				</AMPDrawer>
 				<SettingsFooter />
 			</form>
