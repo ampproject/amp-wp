@@ -57,7 +57,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $DEFAULT_ARGS = [
 		'add_noscript_fallback' => true,
-		'native_img_used'       => true,
+		'native_img_used'       => false,
 		'allow_picture'         => false,
 	];
 
