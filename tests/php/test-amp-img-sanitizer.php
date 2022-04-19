@@ -48,7 +48,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 		$with_defaults = new AMP_Img_Sanitizer( $dom );
 		$this->assertEquals(
-			[],
+			[ 'img' => [ 'amp-img', 'amp-anim' ] ],
 			$with_defaults->get_selector_conversion_mapping()
 		);
 
