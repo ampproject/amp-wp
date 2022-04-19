@@ -77,7 +77,7 @@
     "eslint-plugin-react": "7.29.4",
     "eslint-plugin-react-hooks": "4.4.0",
     "grunt": "1.5.2",
-    "grunt-contrib-clean": "2.0.0",
+    "grunt-contrib-clean": "2.0.1",
     "grunt-contrib-copy": "1.0.0",
     "grunt-shell": "4.0.0",
     "grunt-wp-deploy": "2.1.2",
