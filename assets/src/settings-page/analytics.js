@@ -11,7 +11,7 @@ import { ANALYTICS_VENDORS_LIST } from 'amp-settings';
 import { Icon, plus, trash } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement, useContext, useEffect, useRef } from '@wordpress/element';
-import { Button, TextControl, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
+import { Button, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -235,7 +235,7 @@ export function Analytics() {
 						createInterpolateElement(
 							sprintf(
 								/* translators: 1: amp-analytics, 2: {, 3: }, 4: amp-analytics tag, 5: script tag, 6: googleanalytics. */
-								__( 'Please see AMP project\'s <AnalyticsDocsUrl>documentation</AnalyticsDocsUrl> for %1$s as well as the <PluginAnalyticsDocsUrl>plugin\'s analytics documentation</PluginAnalyticsDocsUrl>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %2$s and ending with a %3$s. Do not include any HTML tags like %4$s or %5$s. For the type field, supply one of the <VendorDocsUrl>available analytics vendors</VendorDocsUrl> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %6$s.  For Google Tag Manager please consider using <SiteKitUrl>Site Kit by Google</SiteKitUrl> plugin.', 'amp' ),
+								__( 'Please see AMP project\'s <AnalyticsDocsUrl>documentation</AnalyticsDocsUrl> for %1$s as well as the <PluginAnalyticsDocsUrl>plugin\'s analytics documentation</PluginAnalyticsDocsUrl>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %2$s and ending with a %3$s. Do not include any HTML tags like %4$s or %5$s. For the type field, supply one of the <VendorDocsUrl>available analytics vendors</VendorDocsUrl> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %6$s. For Google Tag Manager please consider using <SiteKitUrl>Site Kit by Google</SiteKitUrl> plugin.', 'amp' ),
 								'<code>amp-analytics</code>',
 								'<code>{</code>',
 								'<code>}</code>',

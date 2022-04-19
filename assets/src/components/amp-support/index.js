@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useState, useEffect, createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement, useState, useEffect } from '@wordpress/element';
 import { Button, ExternalLink } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';

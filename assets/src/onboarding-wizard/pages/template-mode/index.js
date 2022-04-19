@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useEffect, useContext, createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement, useEffect, useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
