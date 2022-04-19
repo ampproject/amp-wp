@@ -1834,7 +1834,11 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 * @covers ::amp_is_native_img_used()
 	 */
 	public function test_amp_is_native_img_used() {
-		$this->assertTrue( amp_is_native_img_used(), 'Expected to be disabled by default for now.' );
+		$this->assertFalse( amp_is_native_img_used(), 'Expected to be disabled by default for now.' );
+
+		AMP_Options_Manager::update_option( Option::USE_NATIVE_IMG_TAG, true );
+
+		$this->assertTrue( amp_is_native_img_used(), 'Expected to be enabled after setting up AMP option.' );
 
 		add_filter( 'amp_native_img_used', '__return_false' );
 		$this->assertFalse( amp_is_native_img_used() );

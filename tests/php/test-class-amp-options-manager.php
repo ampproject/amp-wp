@@ -124,6 +124,7 @@ class Test_AMP_Options_Manager extends TestCase {
 				Option::DELETE_DATA_AT_UNINSTALL => true,
 				Sandboxing::OPTION_ENABLED       => false,
 				Sandboxing::OPTION_LEVEL         => 1,
+				Option::USE_NATIVE_IMG_TAG       => false,
 			],
 			AMP_Options_Manager::get_options()
 		);
