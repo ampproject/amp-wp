@@ -7,7 +7,7 @@ import { AMP_COMPATIBLE_PLUGINS_URL, SETTINGS_LINK } from 'amp-site-scan-notice'
 /**
  * WordPress dependencies
  */
-import { useContext, useMemo } from '@wordpress/element';
+import { createInterpolateElement, useContext, useMemo } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 /**
@@ -57,22 +57,26 @@ export function PluginsWithAmpIncompatibility( { pluginsWithAmpIncompatibility }
 					key={ pluginWithAmpIncompatibility.slug }
 					className="amp-site-scan-notice__source-details"
 				>
-					<summary
-						className="amp-site-scan-notice__source-summary"
-						dangerouslySetInnerHTML={ {
-							__html: sprintf(
-								/* translators: 1: plugin name; 2: number of URLs with AMP validation issues. */
-								_n(
-									'<b>%1$s</b> on %2$d URL',
-									'<b>%1$s</b> on %2$d URLs',
+					<summary className="amp-site-scan-notice__source-summary">
+						{
+							createInterpolateElement(
+								sprintf(
+									/* translators: 1: plugin name; 2: number of URLs with AMP validation issues. */
+									_n(
+										'<b>%1$s</b> on %2$d URL',
+										'<b>%1$s</b> on %2$d URLs',
+										pluginWithAmpIncompatibility.urls.length,
+										'amp',
+									),
+									pluginNames[ pluginWithAmpIncompatibility.slug ],
 									pluginWithAmpIncompatibility.urls.length,
-									'amp',
 								),
-								pluginNames[ pluginWithAmpIncompatibility.slug ],
-								pluginWithAmpIncompatibility.urls.length,
-							),
-						} }
-					/>
+								{
+									b: <b />,
+								},
+							)
+						}
+					</summary>
 					<ul className="amp-site-scan-notice__urls-list">
 						{ pluginWithAmpIncompatibility.urls.map( ( url ) => (
 							<li key={ url }>
