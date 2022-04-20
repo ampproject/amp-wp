@@ -79,14 +79,14 @@ export function getId( mode ) {
 /**
  * An individual mode selection component.
  *
- * @param {Object}        props                    Component props.
- * @param {string|Object} props.children           Section content.
- * @param {string|Array}  props.details            The template mode details.
- * @param {string}        props.detailsUrl         Mode details URL.
- * @param {string}        props.mode               The template mode.
- * @param {boolean}       props.previouslySelected Optional. Whether the option was selected previously.
- * @param {Object}        props.labelExtra         Optional. Extra content to display on the right side of the option label.
- * @param {boolean}       props.initialOpen        Whether the panel should be open when the component renders.
+ * @param {Object}              props                    Component props.
+ * @param {string|Object}       props.children           Section content.
+ * @param {string|Array|Object} props.details            The template mode details.
+ * @param {string}              props.detailsUrl         Mode details URL.
+ * @param {string}              props.mode               The template mode.
+ * @param {boolean}             props.previouslySelected Optional. Whether the option was selected previously.
+ * @param {Object}              props.labelExtra         Optional. Extra content to display on the right side of the option label.
+ * @param {boolean}             props.initialOpen        Whether the panel should be open when the component renders.
  */
 export function TemplateModeOption( { children, details, detailsUrl, initialOpen, labelExtra = null, mode, previouslySelected = false } ) {
 	const { editedOptions, updateOptions } = useContext( Options );

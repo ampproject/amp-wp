@@ -235,7 +235,7 @@ export function Analytics() {
 						createInterpolateElement(
 							sprintf(
 								/* translators: 1: amp-analytics, 2: {, 3: }, 4: amp-analytics tag, 5: script tag, 6: googleanalytics. */
-								__( 'Please see AMP project\'s <AnalyticsDocsUrl>documentation</AnalyticsDocsUrl> for %1$s as well as the <PluginAnalyticsDocsUrl>plugin\'s analytics documentation</PluginAnalyticsDocsUrl>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %2$s and ending with a %3$s. Do not include any HTML tags like %4$s or %5$s. For the type field, supply one of the <VendorDocsUrl>available analytics vendors</VendorDocsUrl> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %6$s. For Google Tag Manager please consider using <SiteKitUrl>Site Kit by Google</SiteKitUrl> plugin.', 'amp' ),
+								__( 'Please see AMP project\'s <AnalyticsDocsLink>documentation</AnalyticsDocsLink> for %1$s as well as the <PluginAnalyticsDocsLink>plugin\'s analytics documentation</PluginAnalyticsDocsLink>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %2$s and ending with a %3$s. Do not include any HTML tags like %4$s or %5$s. For the type field, supply one of the <VendorDocsLink>available analytics vendors</VendorDocsLink> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %6$s. For Google Tag Manager please consider using <SiteKitLink>Site Kit by Google</SiteKitLink> plugin.', 'amp' ),
 								'<code>amp-analytics</code>',
 								'<code>{</code>',
 								'<code>}</code>',
@@ -243,10 +243,10 @@ export function Analytics() {
 							),
 							{
 								/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-								AnalyticsDocsUrl: <a href="https://amp.dev/documentation/components/amp-analytics/" target="_blank" rel="noreferrer" />,
-								PluginAnalyticsDocsUrl: <a href="https://amp-wp.org/documentation/getting-started/analytics/" target="_blank" rel="noreferrer" />,
-								VendorDocsUrl: <a href="https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/" target="_blank" rel="noreferrer" />,
-								SiteKitUrl: <a href="https://wordpress.org/plugins/google-site-kit/" target="_blank" rel="noreferrer" />,
+								AnalyticsDocsLink: <a href="https://amp.dev/documentation/components/amp-analytics/" target="_blank" rel="noreferrer" />,
+								PluginAnalyticsDocsLink: <a href="https://amp-wp.org/documentation/getting-started/analytics/" target="_blank" rel="noreferrer" />,
+								VendorDocsLink: <a href="https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/" target="_blank" rel="noreferrer" />,
+								SiteKitLink: <a href="https://wordpress.org/plugins/google-site-kit/" target="_blank" rel="noreferrer" />,
 								/* eslint-enable jsx-a11y/anchor-has-content */
 								code: <code />,
 								AmpAnalyticsTag: (

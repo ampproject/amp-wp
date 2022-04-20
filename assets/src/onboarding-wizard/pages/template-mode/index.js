@@ -42,11 +42,11 @@ export function TemplateMode() {
 				<p>
 					{
 						createInterpolateElement(
-							__( 'Based on site scan results the AMP plugin provides the following choices. Learn more about the <GettingStartedUrl>AMP experience with different modes</GettingStartedUrl> and availability of <EcosystemUrl>AMP components in the ecosystem</EcosystemUrl>.', 'amp' ),
+							__( 'Based on site scan results the AMP plugin provides the following choices. Learn more about the <GettingStartedLink>AMP experience with different modes</GettingStartedLink> and availability of <EcosystemLink>AMP components in the ecosystem</EcosystemLink>.', 'amp' ),
 							{
 								/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-								GettingStartedUrl: <a href="https://amp-wp.org/documentation/getting-started/template-modes/" target="_blank" rel="noreferrer noopener" />,
-								EcosystemUrl: <a href="https://amp-wp.org/ecosystem/" target="_blank" rel="noreferrer noopener" />,
+								GettingStartedLink: <a href="https://amp-wp.org/documentation/getting-started/template-modes/" target="_blank" rel="noreferrer noopener" />,
+								EcosystemLink: <a href="https://amp-wp.org/ecosystem/" target="_blank" rel="noreferrer noopener" />,
 								/* eslint-enable jsx-a11y/anchor-has-content */
 							},
 						)
