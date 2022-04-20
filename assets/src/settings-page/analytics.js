@@ -22,11 +22,11 @@ import { AMPNotice, NOTICE_SIZE_SMALL } from '../components/amp-notice';
 const GOOGLE_ANALYTICS_VENDOR = 'googleanalytics';
 
 const GOOGLE_ANALYTICS_NOTICE = createInterpolateElement(
-	__( 'For Google Analytics or Google Tag Manager please consider using <GoogleSiteKitUrl>Site Kit by Google</GoogleSiteKitUrl>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <GoogleAnalyticsDevGuideUrl>Adding Analytics to your AMP pages</GoogleAnalyticsDevGuideUrl>.', 'amp' ),
+	__( 'For Google Analytics or Google Tag Manager please consider using <GoogleSiteKitLink>Site Kit by Google</GoogleSiteKitLink>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <GoogleAnalyticsDevGuideLink>Adding Analytics to your AMP pages</GoogleAnalyticsDevGuideLink>.', 'amp' ),
 	{
 		/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-		GoogleSiteKitUrl: <a href="https://wordpress.org/plugins/google-site-kit/" target="_blank" rel="noreferrer" />,
-		GoogleAnalyticsDevGuideUrl: <a href="https://developers.google.com/analytics/devguides/collection/amp-analytics/" target="_blank" rel="noreferrer" />,
+		GoogleSiteKitLink: <a href="https://wordpress.org/plugins/google-site-kit/" target="_blank" rel="noreferrer" />,
+		GoogleAnalyticsDevGuideLink: <a href="https://developers.google.com/analytics/devguides/collection/amp-analytics/" target="_blank" rel="noreferrer" />,
 		/* eslint-enable jsx-a11y/anchor-has-content */
 	},
 );
