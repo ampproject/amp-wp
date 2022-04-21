@@ -27,7 +27,7 @@ export function ToggleUseNativeImgTag() {
 		<section className="use-native-img-tag">
 			<AMPSettingToggle
 				checked={ true === useNativeImgTag }
-				title={ __( 'Use native img tag', 'amp' ) }
+				title={ __( 'Use native HTML image tag', 'amp' ) }
 				onChange={ () => {
 					updateOptions( { use_native_img_tag: ! useNativeImgTag } );
 				} }
