@@ -10,7 +10,7 @@ import { ANALYTICS_VENDORS_LIST } from 'amp-settings';
  */
 import { Icon, plus, trash } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useEffect, useRef } from '@wordpress/element';
+import { createInterpolateElement, useContext, useEffect, useRef } from '@wordpress/element';
 import { Button, PanelRow, BaseControl, VisuallyHidden } from '@wordpress/components';
 
 /**

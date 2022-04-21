@@ -21,7 +21,14 @@ export default {
 		sample: '{}',
 	},
 	adobeanalytics: {
-		notice: '',
+		notice: createInterpolateElement(
+			__( '<a>Learn more</a> about Adobe Analytics in AMP.' ),
+			{
+				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
+				a: <a href="https://experienceleague.adobe.com/docs/analytics/implementation/other/amp.html" target="_blank" rel="noreferrer" />,
+				/* eslint-enable jsx-a11y/anchor-has-content */
+			},
+		),
 		sample: JSON.stringify(
 			{
 				requests: {
@@ -55,7 +62,14 @@ export default {
 		),
 	},
 	alexametrics: {
-		notice: '',
+		notice: createInterpolateElement(
+			__( '<a>Learn more</a> about Alexa metrics in AMP.' ),
+			{
+				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
+				a: <a href="https://support.alexa.com/hc/en-us/articles/115004090654-Does-Alexa-have-a-Certify-Code-for-AMP" target="_blank" rel="noreferrer" />,
+				/* eslint-enable jsx-a11y/anchor-has-content */
+			},
+		),
 		sample: JSON.stringify(
 			{
 				vars: {
@@ -68,7 +82,14 @@ export default {
 		),
 	},
 	baiduanalytics: {
-		notice: '',
+		notice: createInterpolateElement(
+			__( '<a>Learn more</a> about Baidu Analytics in AMP.' ),
+			{
+				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
+				a: <a href="https://tongji.baidu.com/web/help/article?id=268&castk=LTE%3D" target="_blank" rel="noreferrer" />,
+				/* eslint-enable jsx-a11y/anchor-has-content */
+			},
+		),
 		sample: JSON.stringify(
 			{
 				vars: {
@@ -86,7 +107,14 @@ export default {
 		),
 	},
 	facebookpixel: {
-		notice: '',
+		notice: createInterpolateElement(
+			__( '<a>Learn more</a> about Facebook Pixel in AMP.' ),
+			{
+				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
+				a: <a href="https://developers.facebook.com/docs/meta-pixel" target="_blank" rel="noreferrer" />,
+				/* eslint-enable jsx-a11y/anchor-has-content */
+			},
+		),
 		sample: JSON.stringify(
 			{
 				vars: {
@@ -141,7 +169,14 @@ export default {
 		sample: '{}',
 	},
 	newrelic: {
-		notice: '',
+		notice: createInterpolateElement(
+			__( '<a>Learn more</a> about New Relic in AMP.' ),
+			{
+				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
+				a: <a href="https://docs.newrelic.com/docs/browser/browser-monitoring/installation/install-browser-monitoring-agent/" target="_blank" rel="noreferrer" />,
+				/* eslint-enable jsx-a11y/anchor-has-content */
+			},
+		),
 		sample: JSON.stringify(
 			{
 				vars: {
@@ -154,7 +189,14 @@ export default {
 		),
 	},
 	nielsen: {
-		notice: '',
+		notice: createInterpolateElement(
+			__( '<a>Learn more</a> about Nielsen in AMP.' ),
+			{
+				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
+				a: <a href="https://engineeringportal.nielsen.com/docs/DCR_Static_Google_AMP_Cloud_API" target="_blank" rel="noreferrer" />,
+				/* eslint-enable jsx-a11y/anchor-has-content */
+			},
+		),
 		sample: JSON.stringify(
 			{
 				vars: {
@@ -170,7 +212,14 @@ export default {
 	},
 	// Yandex Metrika
 	metrika: {
-		notice: '',
+		notice: createInterpolateElement(
+			__( '<a>Learn more</a> about Yandex Metrika in AMP.' ),
+			{
+				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
+				a: <a href="https://yandex.com/support/metrica/code/install-counter-amp.html" target="_blank" rel="noreferrer" />,
+				/* eslint-enable jsx-a11y/anchor-has-content */
+			},
+		),
 		sample: JSON.stringify(
 			{
 				vars: {
