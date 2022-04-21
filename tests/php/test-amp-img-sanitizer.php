@@ -1052,43 +1052,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', 0 );
 
 		return [
-			'lightbox_image_with_data_id_and_without_srcset' => [
-				'dom'                => $dom,
-				'node'               => AMP_DOM_Utils::create_node(
-					$dom,
-					'img',
-					[
-						'data-amp-lightbox' => '',
-						'data-id'           => $attachment_id,
-					]
-				),
-				'should_have_srcset' => true,
-			],
-			'lightbox_image_with_data_id_and_srcset'    => [
-				'dom'                => $dom,
-				'node'               => AMP_DOM_Utils::create_node(
-					$dom,
-					'img',
-					[
-						'data-amp-lightbox' => '',
-						'data-id'           => $attachment_id,
-						'srcset'            => wp_get_attachment_image_srcset( $attachment_id, 'full' ),
-					]
-				),
-				'should_have_srcset' => true,
-			],
-			'lightbox_image_without_data_id_and_srcset' => [
-				'dom'                => $dom,
-				'node'               => AMP_DOM_Utils::create_node(
-					$dom,
-					'img',
-					[
-						'data-amp-lightbox' => '',
-					]
-				),
-				'should_have_srcset' => false,
-			],
-			'none_lightbox_image_with_data_id_and_without_srcset' => [
+			'image_with_data_id_and_without_srcset' => [
 				'dom'                => $dom,
 				'node'               => AMP_DOM_Utils::create_node(
 					$dom,
@@ -1096,6 +1060,27 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 					[
 						'data-id' => $attachment_id,
 					]
+				),
+				'should_have_srcset' => true,
+			],
+			'image_with_data_id_and_srcset'         => [
+				'dom'                => $dom,
+				'node'               => AMP_DOM_Utils::create_node(
+					$dom,
+					'img',
+					[
+						'data-id' => $attachment_id,
+						'srcset'  => wp_get_attachment_image_srcset( $attachment_id, 'full' ),
+					]
+				),
+				'should_have_srcset' => true,
+			],
+			'image_without_data_id_and_srcset'      => [
+				'dom'                => $dom,
+				'node'               => AMP_DOM_Utils::create_node(
+					$dom,
+					'img',
+					[]
 				),
 				'should_have_srcset' => false,
 			],

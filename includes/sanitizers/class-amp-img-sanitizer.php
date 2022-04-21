@@ -406,8 +406,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			! $node->hasAttribute( Attribute::SRCSET )
 			&&
-			$node->hasAttribute( 'data-amp-lightbox' )
-			&&
 			$node->hasAttribute( Attribute::DATA_ID )
 		) {
 			$attachment_id = intval( $node->getAttribute( Attribute::DATA_ID ) );
