@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Embed\HandlesGalleryEmbed;
 use AmpProject\Dom\Document;
+use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
 
 /**
@@ -114,9 +115,27 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			);
 		};
 
+		$filter_image_attributes = static function ( $attr, $attachment ) {
+			$srcset = wp_get_attachment_image_srcset( $attachment->ID, 'full' );
+			$sizes  = wp_calculate_image_sizes( 'full', 0, 0, $attachment->ID );
+
+			$attr[ Attribute::DATA_ID ] = $attachment->ID;
+
+			if ( ! empty( $srcset ) && ! empty( $sizes ) ) {
+				$attr[ Attribute::SRCSET ] = $srcset;
+				$attr[ Attribute::SIZES ]  = $sizes;
+			}
+
+			return $attr;
+		};
+
+		add_filter( 'wp_get_attachment_image_attributes', $filter_image_attributes, 10, 2 );
 		add_filter( 'gallery_style', $filter_gallery_style );
+
 		$gallery_html = gallery_shortcode( $attrs );
+
 		remove_filter( 'gallery_style', $filter_gallery_style );
+		remove_filter( 'wp_get_attachment_image_attributes', $filter_image_attributes );
 
 		return $gallery_html;
 	}
