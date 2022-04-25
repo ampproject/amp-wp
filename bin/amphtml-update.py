@@ -24,7 +24,7 @@ import tempfile
 import collections
 import json
 import google
-import imp
+from collections.abc import Sequence
 
 seen_spec_names = set()
 
@@ -38,49 +38,57 @@ def Die(msg):
 
 def SetupOutDir(out_dir):
 	"""Sets up a clean output directory.
-
 	Args:
-		out_dir: directory name of the output directory.
+	  out_dir: directory name of the output directory. Must not have slashes,
+		dots, etc.
 	"""
+	logging.info('entering ...')
+	assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
 	if os.path.exists(out_dir):
 		subprocess.check_call(['rm', '-rf', out_dir])
 	os.mkdir(out_dir)
+	logging.info('... done')
 
 
 def GenValidatorPb2Py(validator_directory, out_dir):
 	"""Calls the proto compiler to generate validator_pb2.py.
-
 	Args:
-		validator_directory: directory name of the validator.
-		out_dir: directory name of the output directory.
+	  out_dir: directory name of the output directory. Must not have slashes,
+		dots, etc.
 	"""
+	logging.info('entering ...')
+	assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
-	os.chdir( validator_directory )
-	subprocess.check_call(['protoc', 'validator.proto', '--python_out=%s' % out_dir])
-	os.chdir( out_dir )
-	open('__init__.py', 'w').close()
+	subprocess.check_call(
+		['protoc', os.path.join(validator_directory, 'validator.proto'), '--proto_path=%s' % validator_directory, '--python_out=%s' % out_dir])
+	open('%s/__init__.py' % out_dir, 'w').close()
+	logging.info('... done')
 
 def GenValidatorProtoascii(validator_directory, out_dir):
 	"""Assembles the validator protoascii file from the main and extensions.
-
 	Args:
-		validator_directory: directory for where the validator is located, inside the amphtml repo.
-		out_dir: directory name of the output directory.
+	  out_dir: directory name of the output directory. Must not have slashes,
+		dots, etc.
 	"""
+	logging.info('entering ...')
+	assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
-	protoascii_segments = [
-		open(os.path.join(validator_directory, 'validator-main.protoascii')).read(),
-		open(os.path.join(validator_directory, 'validator-svg.protoascii')).read(),
-		open(os.path.join(validator_directory, 'validator-css.protoascii')).read()
-	]
-	extensions = glob.glob(os.path.join(validator_directory, '../extensions/*/validator-*.protoascii'))
+	protoascii_segments = [open(os.path.join(validator_directory, 'validator-main.protoascii')).read()]
+	protoascii_segments.append(open(os.path.join(validator_directory, 'validator-css.protoascii')).read())
+	protoascii_segments.append(open(os.path.join(validator_directory, 'validator-svg.protoascii')).read())
+	extensions = glob.glob(os.path.join(validator_directory, 'extensions/*/validator-*.protoascii'))
+	# In the Github project, the extensions are located in a sibling directory
+	# to the validator rather than a child directory.
+	if not extensions:
+		extensions = glob.glob(os.path.join(validator_directory, '../extensions/*/validator-*.protoascii'))
 	extensions.sort()
 	for extension in extensions:
 		protoascii_segments.append(open(extension).read())
 	f = open('%s/validator.protoascii' % out_dir, 'w')
 	f.write(''.join(protoascii_segments))
 	f.close()
+	logging.info('... done')
 
 
 def GeneratePHP(repo_directory, out_dir):
@@ -94,8 +102,8 @@ def GeneratePHP(repo_directory, out_dir):
 	allowed_tags, attr_lists, descendant_lists, reference_points, versions = ParseRules(repo_directory, out_dir)
 
 	expected_spec_names = (
-		'style amp-custom',
-		'style[amp-keyframes]',
+		b'style amp-custom',
+		b'style[amp-keyframes]',
 	)
 	for expected_spec_name in expected_spec_names:
 		if expected_spec_name not in seen_spec_names:
@@ -120,7 +128,7 @@ def GeneratePHP(repo_directory, out_dir):
 	output = re.sub("'False'", "false", output)
 
 	# Write the php file to STDOUT.
-	print output
+	print( output )
 
 def GenerateHeaderPHP(out):
 	# Output the file's header
@@ -163,14 +171,14 @@ def GenerateAllowedTagsPHP(out, allowed_tags):
 def GenerateLayoutAttributesPHP(out, attr_lists):
 	# Output the attribute list allowed for layouts.
 	out.append('')
-	out.append('\tprivate static $layout_allowed_attrs = %s;' % Phpize( attr_lists['$AMP_LAYOUT_ATTRS'], 1 ).lstrip() )
+	out.append('\tprivate static $layout_allowed_attrs = %s;' % Phpize( attr_lists[b'$AMP_LAYOUT_ATTRS'], 1 ).lstrip() )
 	out.append('')
 
 
 def GenerateGlobalAttributesPHP(out, attr_lists):
 	# Output the globally allowed attribute list.
 	out.append('')
-	out.append('\tprivate static $globally_allowed_attrs = %s;' % Phpize( attr_lists['$GLOBAL_ATTRS'], 1 ).lstrip() )
+	out.append('\tprivate static $globally_allowed_attrs = %s;' % Phpize( attr_lists[b'$GLOBAL_ATTRS'], 1 ).lstrip() )
 	out.append('')
 
 def GenerateReferencePointsPHP(out, reference_points):
@@ -301,9 +309,14 @@ def ParseRules(repo_directory, out_dir):
 	# These imports happen late, within this method because they don't necessarily
 	# exist when the module starts running, and the ones that probably do
 	# are checked by CheckPrereqs.
+	# pylint: disable=g-import-not-at-top
 
 	from google.protobuf import text_format
-	validator_pb2 = imp.load_source('validator_pb2', os.path.join( out_dir, 'validator_pb2.py' ))
+	from google.protobuf import json_format
+	from google.protobuf import descriptor
+
+	sys.path.append(os.getcwd())
+	from amp_validator_dist import validator_pb2
 
 	allowed_tags = {}
 	attr_lists = {}
@@ -361,15 +374,16 @@ def ParseRules(repo_directory, out_dir):
 					continue
 
 				# If we made it here, then start adding the tag_spec
-				if tag_spec.tag_name.lower() not in allowed_tags:
+				tag_name = tag_spec.tag_name.lower()
+				if tag_name not in allowed_tags:
 					tag_list = []
 				else:
-					tag_list = allowed_tags[UnicodeEscape(tag_spec.tag_name).lower()]
+					tag_list = allowed_tags[tag_name]
 
 				gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
 				if gotten_tag_spec is not None:
 					tag_list.append(gotten_tag_spec)
-					allowed_tags[UnicodeEscape(tag_spec.tag_name).lower()] = tag_list
+					allowed_tags[tag_name] = tag_list
 		elif 'descendant_tag_list' == field_desc.name:
 			for _list in field_val:
 				descendant_lists[_list.name] = []
@@ -517,7 +531,7 @@ def ParseRules(repo_directory, out_dir):
 			# Remove redundant information.
 			del extension_script_list[0]['tag_spec']['extension_spec']['bento_supported_version']
 
-		validator_versions = sorted( validator_versions, key=lambda version: map(int, version.split('.') ) )
+		validator_versions = sorted( validator_versions, key=lambda version: list(map(int, version.split('.') )) )
 		extension_script_list[0]['tag_spec']['extension_spec']['version'] = validator_versions
 
 		if 'bento' in extensions_versions[extension_name] and extensions_versions[extension_name]['bento']['version'] in validator_versions:
@@ -593,7 +607,7 @@ def GetTagSpec(tag_spec, attr_lists):
 	if tag_spec.HasField('cdata'):
 		cdata_dict = {}
 		for (field_descriptor, field_value) in tag_spec.cdata.ListFields():
-			if isinstance(field_value, (unicode, str, bool, int)):
+			if isinstance(field_value, (str, bytes, bool, int)):
 				cdata_dict[ field_descriptor.name ] = field_value
 			elif isinstance( field_value, google.protobuf.pyext._message.RepeatedCompositeContainer ):
 				cdata_dict[ field_descriptor.name ] = []
@@ -620,12 +634,12 @@ def GetTagSpec(tag_spec, attr_lists):
 					if not hasattr( field_value, css_spec_field_name ):
 						continue
 					css_spec_field_value = getattr( field_value, css_spec_field_name )
-					if isinstance(css_spec_field_value, (list, collections.Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
+					if isinstance(css_spec_field_value, (list, Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
 						css_spec[ css_spec_field_name ] = [ val for val in css_spec_field_value ]
 					elif hasattr( css_spec_field_value, 'ListFields' ):
 						css_spec[ css_spec_field_name ] = {}
 						for (css_spec_field_item_descriptor, css_spec_field_item_value) in getattr( field_value, css_spec_field_name ).ListFields():
-							if isinstance(css_spec_field_item_value, (list, collections.Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
+							if isinstance(css_spec_field_item_value, (list, Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
 								css_spec[ css_spec_field_name ][ css_spec_field_item_descriptor.name ] = [ val for val in css_spec_field_item_value ]
 							else:
 								css_spec[ css_spec_field_name ][ css_spec_field_item_descriptor.name ] = css_spec_field_item_value
@@ -715,7 +729,7 @@ def GetTagRules(tag_spec):
 
 	# Ignore amp-custom-length-check because the AMP plugin will indicate how close they are to the limit.
 	# TODO: Remove the AMP4EMAIL check once this change is released: <https://github.com/ampproject/amphtml/pull/25246>.
-	if tag_spec.HasField('spec_name') and ( str(tag_spec.spec_name) == 'style amp-custom-length-check' or 'AMP4EMAIL' in str(tag_spec.spec_name) ):
+	if tag_spec.HasField('spec_name') and ( tag_spec.spec_name == 'style amp-custom-length-check' or 'AMP4EMAIL' in tag_spec.spec_name ):
 		return None
 
 	if tag_spec.HasField('extension_spec'):
@@ -892,7 +906,7 @@ def GetValues(attr_spec):
 				# print 'value_property.name: %s' % value_property.name
 				for (key,val) in value_property.ListFields():
 					if val != value_property.name:
-						if isinstance(val, unicode):
+						if isinstance(val, str):
 							val = UnicodeEscape(val)
 						property_dict[UnicodeEscape(key.name)] = val
 				value_properties_dict[UnicodeEscape(value_property.name)] = property_dict
@@ -902,7 +916,7 @@ def GetValues(attr_spec):
 	if attr_spec.HasField('value_url'):
 		value_url_dict = {}
 		for (value_url_key, value_url_val) in attr_spec.value_url.ListFields():
-			if isinstance(value_url_val, (list, collections.Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
+			if isinstance(value_url_val, (list, Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
 				value_url_val_val = []
 				for val in value_url_val:
 					value_url_val_val.append(UnicodeEscape(val))
@@ -956,6 +970,23 @@ def GetMandatoryOf( attr, constraint ):
 
 	return sorted(attributes)
 
+def to_json(data):
+	"""Make data JSON-serializable
+
+	Hat tip to AYHarano via https://stackoverflow.com/a/44060541/93579
+	"""
+	if data is None or isinstance(data, (bool, int, str)):
+		return data
+	if isinstance( data, bytes ):
+		return data.decode('utf8')
+	if isinstance( data, (tuple, range, list) ):
+		return [to_json(item) for item in data]
+	if isinstance(data, (set, frozenset)):
+		return sorted(data)
+	if isinstance(data, (dict, collections.defaultdict)):
+		return {to_json(key): to_json(data[key]) for key in data}
+	raise TypeError
+
 def Phpize(data, indent=0):
 	"""Helper function to convert JSON-serializable data into PHP literals.
 
@@ -964,10 +995,10 @@ def Phpize(data, indent=0):
 	Returns:
 		String formatted as PHP literal.
 	"""
-	json_string = json.dumps(data, sort_keys=True, ensure_ascii=False)
+	json_string = json.dumps(to_json(data), sort_keys=True, ensure_ascii=False)
 
 	pipe = subprocess.Popen(['php', '-r', 'var_export( json_decode( file_get_contents( "php://stdin" ), true ) );'], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)
-	php_stdout = pipe.communicate(input=json_string)[0]
+	php_stdout = pipe.communicate(input=bytes(json_string, 'utf8'))[0]
 	php_exported = php_stdout.decode()
 
 	# Clean up formatting.
@@ -987,12 +1018,10 @@ def Main( repo_directory, out_dir ):
 	logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s', level=logging.INFO)
 
 	validator_directory = os.path.realpath( os.path.join( repo_directory, 'validator' ) )
-	out_dir = os.path.realpath(out_dir)
 
 	SetupOutDir(out_dir)
 	GenValidatorProtoascii(validator_directory, out_dir)
 	GenValidatorPb2Py(validator_directory, out_dir)
-	GenValidatorProtoascii(validator_directory,out_dir)
 	GeneratePHP(repo_directory, out_dir)
 
 if __name__ == '__main__':
@@ -1002,5 +1031,5 @@ if __name__ == '__main__':
 	if not os.path.exists( repo_directory ):
 		Die( "Error: The amphtml directory does not exist: %s" % validator_directory )
 	repo_directory = os.path.realpath( repo_directory )
-	out_dir = os.path.join( tempfile.gettempdir(), 'amp_wp' )
-	Main( repo_directory, out_dir )
+	os.chdir( tempfile.gettempdir() )
+	Main( repo_directory, 'amp_validator_dist' )
