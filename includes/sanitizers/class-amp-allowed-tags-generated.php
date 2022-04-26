@@ -272,6 +272,7 @@ class AMP_Allowed_Tags_Generated {
 			'amp-story-interactive-quiz',
 			'amp-story-interactive-results',
 			'amp-story-panning-media',
+			'amp-story-shopping-tag',
 			'amp-timeago',
 			'amp-twitter',
 			'amp-video',
@@ -1409,6 +1410,7 @@ class AMP_Allowed_Tags_Generated {
 						'supported_layouts' => array(
 							2,
 							3,
+							5,
 							1,
 						),
 					),
@@ -6363,6 +6365,12 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'style-preset' => array(
+						'value' => array(
+							'default',
+							'appear',
+						),
+					),
 				),
 				'tag_spec' => array(
 					'amp_layout' => array(
@@ -6942,6 +6950,7 @@ class AMP_Allowed_Tags_Generated {
 							'amp-story-grid-layer',
 							'amp-story-page-attachment',
 							'amp-story-page-outlink',
+							'amp-story-shopping-attachment',
 						),
 						'mandatory_min_num_child_tags' => 1,
 					),
@@ -7134,41 +7143,33 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-shopping-attachment' => array(
 			array(
 				'attr_spec_list' => array(
-					'media' => array(),
-					'noloading' => array(
+					'cta-text' => array(),
+					'src' => array(
+						'value_url' => array(
+							'allow_relative' => true,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'theme' => array(
 						'value' => array(
-							'',
+							'dark',
+							'light',
 						),
 					),
 				),
 				'tag_spec' => array(
 					'amp_layout' => array(
 						'supported_layouts' => array(
-							1,
+							5,
 						),
 					),
-					'requires_extension' => array(
-						'amp-story-shopping',
-					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-story-shopping/',
-				),
-			),
-		),
-		'amp-story-shopping-config' => array(
-			array(
-				'attr_spec_list' => array(
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'script',
 						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							1,
-						),
+						'mandatory_min_num_child_tags' => 1,
 					),
 					'requires_extension' => array(
 						'amp-story-shopping',
@@ -7180,11 +7181,8 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-shopping-tag' => array(
 			array(
 				'attr_spec_list' => array(
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
+					'data-product-id' => array(
+						'mandatory' => true,
 					),
 				),
 				'tag_spec' => array(
@@ -7896,7 +7894,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'volume' => array(
-						'value_regex' => '^((0?\\.[1-9]+)?|1(\\.0*)?)$',
+						'value_regex' => '^(0(\\.0*)?|(0?\\.[0-9]+)?|1(\\.0*)?)$',
 					),
 				),
 				'tag_spec' => array(
@@ -8410,6 +8408,16 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'noscript',
 					'mandatory_ancestor_suggested_alternative' => 'amp-audio',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-audio/',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'controls' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-audio',
+					'spec_name' => 'amp-audio > audio',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-audio/',
 				),
 			),
@@ -15680,6 +15688,34 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 				),
+				'cdata' => array(
+					'disallowed_cdata_regex' => array(
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-story-shopping-attachment',
+					'requires_extension' => array(
+						'amp-story-shopping',
+					),
+					'spec_name' => 'amp-story-shopping-attachment config script',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-shopping/',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'nonce' => array(),
+					'type' => array(
+						'dispatch_key' => 3,
+						'mandatory' => true,
+						'value_casei' => array(
+							'application/json',
+						),
+					),
+				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-story-bookend',
 					'requires_extension' => array(
@@ -16445,11 +16481,16 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'bento' => array(
+							'has_css' => false,
+							'version' => '1.0',
+						),
 						'latest' => '0.1',
 						'name' => 'amp-audio',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
+							'1.0',
 						),
 					),
 				),
@@ -22903,6 +22944,9 @@ class AMP_Allowed_Tags_Generated {
 				'animate-in-delay' => array(),
 				'animate-in-duration' => array(),
 				'animate-in-timing-function' => array(),
+				'pan-scaling-factor' => array(
+					'value_regex_casei' => '^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$',
+				),
 				'scale-end' => array(
 					'value_regex' => '[0-9]+([.][0-9]+)?',
 				),
@@ -22970,6 +23014,9 @@ class AMP_Allowed_Tags_Generated {
 					'value' => array(
 						'',
 					),
+				),
+				'pan-scaling-factor' => array(
+					'value_regex_casei' => '^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$',
 				),
 				'scale-end' => array(
 					'value_regex' => '[0-9]+([.][0-9]+)?',
@@ -23098,6 +23145,9 @@ class AMP_Allowed_Tags_Generated {
 						'start',
 						'stretch',
 					),
+				),
+				'pan-scaling-factor' => array(
+					'value_regex_casei' => '^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$',
 				),
 				'scale-end' => array(
 					'value_regex' => '[0-9]+([.][0-9]+)?',

@@ -1591,7 +1591,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'amp-animation'                => 'v0/amp-animation-0.1.js',
 			'amp-apester-media'            => 'v0/amp-apester-media-0.1.js',
 			'amp-app-banner'               => 'v0/amp-app-banner-0.1.js',
-			'amp-audio'                    => 'v0/amp-audio-0.1.js',
+			'amp-audio'                    => 'v0/amp-audio-1.0.js',
 			'amp-auto-ads'                 => 'v0/amp-auto-ads-0.1.js',
 			'amp-autocomplete'             => 'v0/amp-autocomplete-0.1.js',
 			'amp-base-carousel'            => 'v0/amp-base-carousel-1.0.js',
