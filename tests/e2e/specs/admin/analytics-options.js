@@ -56,6 +56,7 @@ describe( 'AMP analytics options', () => {
 		// Delete entries.
 		await expect( page ).toClick( '.amp-analytics__delete-button' );
 		await expect( page ).toClick( '.amp-analytics__delete-button' );
+		await expect( page ).toClick( '.amp-analytics__delete-button' );
 
 		await expect( page ).not.toMatchElement( '.amp-analytics-entry' );
 
