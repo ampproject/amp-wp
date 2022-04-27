@@ -116,15 +116,16 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		};
 
 		$filter_image_attributes = static function ( $attr, $attachment, $size ) {
-			$srcset                     = wp_get_attachment_image_srcset( $attachment->ID, 'full' );
+			$srcset = wp_get_attachment_image_srcset( $attachment->ID, 'full' );
+			$sizes  = wp_calculate_image_sizes( $size, 0, 0, $attachment->ID );
+
 			$attr[ Attribute::DATA_ID ] = $attachment->ID;
 
 			if ( ! empty( $srcset ) ) {
 				$attr[ Attribute::SRCSET ] = $srcset;
 			}
 
-			if ( empty( $attr[ Attribute::SIZES ] ) ) {
-				$sizes                    = wp_calculate_image_sizes( $size, 0, 0, $attachment->ID );
+			if ( empty( $attr[ Attribute::SIZES ] ) && ! empty( $sizes ) ) {
 				$attr[ Attribute::SIZES ] = $sizes;
 			}
 
