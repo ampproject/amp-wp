@@ -115,21 +115,23 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			);
 		};
 
-		$filter_image_attributes = static function ( $attr, $attachment ) {
-			$srcset = wp_get_attachment_image_srcset( $attachment->ID, 'full' );
-			$sizes  = wp_calculate_image_sizes( 'full', 0, 0, $attachment->ID );
-
+		$filter_image_attributes = static function ( $attr, $attachment, $size ) {
+			$srcset                     = wp_get_attachment_image_srcset( $attachment->ID, 'full' );
 			$attr[ Attribute::DATA_ID ] = $attachment->ID;
 
-			if ( ! empty( $srcset ) && ! empty( $sizes ) ) {
+			if ( ! empty( $srcset ) ) {
 				$attr[ Attribute::SRCSET ] = $srcset;
-				$attr[ Attribute::SIZES ]  = $sizes;
+			}
+
+			if ( empty( $attr[ Attribute::SIZES ] ) ) {
+				$sizes                    = wp_calculate_image_sizes( $size, 0, 0, $attachment->ID );
+				$attr[ Attribute::SIZES ] = $sizes;
 			}
 
 			return $attr;
 		};
 
-		add_filter( 'wp_get_attachment_image_attributes', $filter_image_attributes, 10, 2 );
+		add_filter( 'wp_get_attachment_image_attributes', $filter_image_attributes, 10, 3 );
 		add_filter( 'gallery_style', $filter_gallery_style );
 
 		$gallery_html = gallery_shortcode( $attrs );
