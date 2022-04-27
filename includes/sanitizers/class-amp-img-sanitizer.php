@@ -416,14 +416,18 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$srcset        = wp_get_attachment_image_srcset( $attachment_id, 'full' );
 			$node->setAttribute( Attribute::SRCSET, $srcset );
 
-			/**
-			 * @var Element
-			 */
-			$parent_node    = $node->parentNode;
-			$parent_classes = $parent_node->getAttribute( Attribute::CLASS_ );
-			$parent_classes = ! empty( $parent_classes ) ? $parent_classes : '';
-			preg_match( '/size-(?P<size>\w+)/i', $parent_classes, $matches );
-			$size = ! empty( $matches['size'] ) ? $matches['size'] : 'thumbnail';
+			$size = 'thumbnail';
+
+			if ( ! empty( $node->parentNode ) ) {
+				/**
+				 * @var Element
+				 */
+				$parent_node    = $node->parentNode;
+				$parent_classes = $parent_node->getAttribute( Attribute::CLASS_ );
+				$parent_classes = ! empty( $parent_classes ) ? $parent_classes : '';
+				preg_match( '/size-(?P<size>\w+)/i', $parent_classes, $matches );
+				$size = ! empty( $matches['size'] ) ? $matches['size'] : 'thumbnail';
+			}
 
 			$sizes = wp_calculate_image_sizes( $size, 0, 0, $attachment_id );
 			$node->setAttribute( Attribute::SIZES, $sizes );
