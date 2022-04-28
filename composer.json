@@ -100,7 +100,7 @@
     }
   },
   "scripts": {
-    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi --memory-limit=4G; fi",
+    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi --memory-limit=1G; fi",
     "pre-commit": [
       "npm run lint:staged"
     ],
