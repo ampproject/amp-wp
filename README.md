@@ -10,7 +10,7 @@ An easier path to great Page Experience for everyone. Powered by AMP.
 **Tested up to:** 5.9  
 **Stable tag:** 2.2.4  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
-**Requires PHP:** 5.6
+**Requires PHP:** 7.0
 
 [![Build Status](https://github.com/ampproject/amp-wp/workflows/Build,%20test%20&%20measure/badge.svg)](https://github.com/ampproject/amp-wp/actions?query=branch%3Adevelop+workflow%3A%22Build%2C+test+%26+measure%22)
 [![Coverage Status](https://img.shields.io/codecov/c/github/ampproject/amp-wp/develop.svg)](https://codecov.io/gh/ampproject/amp-wp)
