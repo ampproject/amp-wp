@@ -130,7 +130,7 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 						<img width="100" height="100" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-1-{{id1}}" data-id="{{id1}}" lightbox="">
 					</dt><dd class="wp-caption-text gallery-caption" id="gallery-1-{{id1}}"> ' . self::CAPTION_TEXT . ' </dd></dl>
 					<dl class="gallery-item"><dt class="gallery-icon landscape">
-						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' data-id="{{id2}}" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" sizes="(max-width: 150px) 100vw, 150px" lightbox="">
+						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' data-id="{{id2}}" lightbox="">
 					</dt></dl>
 					<dl class="gallery-item"><dt class="gallery-icon landscape">
 						<img width="100" height="100" src="{{file3}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' data-id="{{id3}}" lightbox="">
@@ -146,7 +146,7 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 						<img width="100" height="100" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-1-{{id1}}" data-id="{{id1}}" lightbox="">
 					</dt><dd class="wp-caption-text gallery-caption" id="gallery-1-{{id1}}"> ' . self::CAPTION_TEXT . ' </dd></dl>
 					<dl class="gallery-item"><dt class="gallery-icon landscape">
-						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' data-id="{{id2}}" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" sizes="(max-width: 150px) 100vw, 150px" lightbox="">
+						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' data-id="{{id2}}" lightbox="">
 					</dt></dl>
 					<dl class="gallery-item"><dt class="gallery-icon landscape">
 						<img width="100" height="100" src="{{file3}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' data-id="{{id3}}" lightbox="">
