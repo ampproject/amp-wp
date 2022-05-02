@@ -403,21 +403,19 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function set_srcset_for_lightbox_images( Element $node ) {
 
-		if (
-			(
-				! $node->hasAttribute( Attribute::SRCSET )
-				||
-				! $node->hasAttribute( Attribute::SIZES )
-			)
-			&&
-			$node->hasAttribute( Attribute::DATA_ID )
-		) {
+		if ( $node->hasAttribute( Attribute::DATA_ID ) ) {
 			$attachment_id = intval( $node->getAttribute( Attribute::DATA_ID ) );
 			$srcset        = wp_get_attachment_image_srcset( $attachment_id, 'full' );
+
+			if ( empty( $srcset ) ) {
+				return;
+			}
+
+			$thumbnail_image = wp_get_attachment_image_url( $attachment_id );
+			$srcset          = $thumbnail_image . ' 150w, ' . $srcset;
 			$node->setAttribute( Attribute::SRCSET, $srcset );
 
 			$size = 'thumbnail';
-
 			if ( ! empty( $node->parentNode ) ) {
 				/**
 				 * @var Element
@@ -429,6 +427,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				$size = ! empty( $matches['size'] ) ? $matches['size'] : 'thumbnail';
 			}
 
+			$size  = ( 'thumbnail' === $size ) ? [ 50, 50 ] : $size;
 			$sizes = wp_calculate_image_sizes( $size, 0, 0, $attachment_id );
 			$node->setAttribute( Attribute::SIZES, $sizes );
 		}
