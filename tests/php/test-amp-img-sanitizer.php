@@ -1050,6 +1050,8 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$dom           = new Document();
 		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', 0 );
 
+		wp_generate_attachment_metadata( $attachment_id, get_attached_file( $attachment_id ) );
+
 		return [
 			'image_with_data_id_and_without_srcset' => [
 				'dom'                => $dom,
