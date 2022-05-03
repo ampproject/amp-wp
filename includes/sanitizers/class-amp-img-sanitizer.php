@@ -411,8 +411,9 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				return;
 			}
 
+			$thumbnail_size  = get_option( 'thumbnail_size_w', 150 );
 			$thumbnail_image = wp_get_attachment_image_url( $attachment_id );
-			$srcset          = $thumbnail_image . ' 150w, ' . $srcset;
+			$srcset          = sprintf( '%s %sw, %s', $thumbnail_image, $thumbnail_size, $srcset );
 			$node->setAttribute( Attribute::SRCSET, $srcset );
 
 			$size = 'thumbnail';
@@ -427,7 +428,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				$size = ! empty( $matches['size'] ) ? $matches['size'] : 'thumbnail';
 			}
 
-			$size  = ( 'thumbnail' === $size ) ? [ 50, 50 ] : $size;
+			$size  = ( 'thumbnail' === $size ) ? [ absint( $thumbnail_size / 3 ) ] : $size;
 			$sizes = wp_calculate_image_sizes( $size, 0, 0, $attachment_id );
 			$node->setAttribute( Attribute::SIZES, $sizes );
 		}
