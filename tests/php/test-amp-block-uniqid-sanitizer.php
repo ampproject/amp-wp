@@ -76,9 +76,6 @@ class AMP_Block_Uniqid_Sanitizer_Test extends TestCase {
 	}
 
 	/**
-	 * @covers ::transform_class_names_in_content()
-	 * @covers ::transform_class_names_in_inline_styles()
-	 * @covers ::get_class_name_regexp_pattern()
 	 * @covers ::unique_id()
 	 *
 	 * @dataProvider get_block_data
