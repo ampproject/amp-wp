@@ -1,10 +1,10 @@
-diff --git a/src/Framework/MockObject/Generator.php b/src/Framework/MockObject/Generator.php
-index bfb899d..4f44e8d 100644
---- a/src/Framework/MockObject/Generator.php
-+++ b/src/Framework/MockObject/Generator.php
-@@ -1193,13 +1193,13 @@ private function getMethodParameters(ReflectionMethod $method, $forCall = false)
-                     }
+diff --git a/src/Generator.php b/src/Generator.php
+index 8df18bf..a06b8f7 100644
+--- a/src/Generator.php
++++ b/src/Generator.php
+@@ -1151,13 +1151,13 @@ private function getMethodParameters(ReflectionMethod $method, $forCall = false)
 
+                 if ($parameter->hasType() && (string) $parameter->getType() !== 'self') {
                      $typeDeclaration = (string) $parameter->getType() . ' ';
 -                } elseif ($parameter->isArray()) {
 +                } elseif (PHP_VERSION_ID >= 70000 ? $parameter->getType() === 'array' : $parameter->isArray()) {
@@ -17,9 +17,9 @@ index bfb899d..4f44e8d 100644
 -                        $class = $parameter->getClass();
 +                        $class = PHP_VERSION_ID >= 70000 ? $parameter->getType() : $parameter->getClass();
                      } catch (ReflectionException $e) {
-                         throw new PHPUnit_Framework_MockObject_RuntimeException(
-                             sprintf(
-@@ -1214,7 +1214,7 @@ private function getMethodParameters(ReflectionMethod $method, $forCall = false)
+                         throw new RuntimeException(
+                             \sprintf(
+@@ -1172,7 +1172,7 @@ private function getMethodParameters(ReflectionMethod $method, $forCall = false)
                      }
 
                      if ($class !== null) {
