@@ -1,8 +1,8 @@
 diff --git a/src/Generator.php b/src/Generator.php
-index 8df18bf..a06b8f7 100644
+index 28a05b1..81ebd7d 100644
 --- a/src/Generator.php
 +++ b/src/Generator.php
-@@ -1151,13 +1151,13 @@ private function getMethodParameters(ReflectionMethod $method, $forCall = false)
+@@ -1088,13 +1088,13 @@ private function getMethodParameters(ReflectionMethod $method, $forCall = false)
 
                  if ($parameter->hasType() && (string) $parameter->getType() !== 'self') {
                      $typeDeclaration = (string) $parameter->getType() . ' ';
@@ -19,7 +19,7 @@ index 8df18bf..a06b8f7 100644
                      } catch (ReflectionException $e) {
                          throw new RuntimeException(
                              \sprintf(
-@@ -1172,7 +1172,7 @@ private function getMethodParameters(ReflectionMethod $method, $forCall = false)
+@@ -1109,7 +1109,7 @@ private function getMethodParameters(ReflectionMethod $method, $forCall = false)
                      }
 
                      if ($class !== null) {
