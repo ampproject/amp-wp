@@ -575,14 +575,6 @@ jobs:
             wp: '5.1'
             coverage: false
 
-          - php: '5.6'
-            wp: '5.0'
-            coverage: false
-
-          - php: '5.6'
-            wp: '4.9'
-            coverage: false
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
