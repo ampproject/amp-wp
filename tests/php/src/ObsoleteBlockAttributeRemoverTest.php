@@ -21,8 +21,8 @@ final class ObsoleteBlockAttributeRemoverTest extends TestCase {
 		'ampNoLoading' => 'data-amp-noloading',
 	];
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = new ObsoleteBlockAttributeRemover();
 	}
 

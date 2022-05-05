@@ -207,7 +207,7 @@ export function useValidationErrorStateUpdates() {
 	 */
 	useEffect( () => {
 		const newValidationErrors = previousValidationErrors.map( ( validationError ) => {
-			if ( ! validationError.error.sources ) {
+			if ( ! validationError.error.sources?.length ) {
 				return validationError;
 			}
 

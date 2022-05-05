@@ -22,22 +22,23 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 	use PrivateAccess;
 	use LoadsCoreThemes;
 
-	public static function setUpBeforeClass() {
+	public static function set_up_before_class() {
 		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
-		return parent::setUpBeforeClass();
+		parent::set_up_before_class();
 	}
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		unset( $GLOBALS['wp_customize'], $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
 
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**
@@ -193,7 +194,6 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$this->assertFalse( has_action( 'customize_controls_print_footer_scripts', [ $instance, 'print_legacy_controls_templates' ] ) );
 		$this->assertFalse( has_action( 'customize_preview_init', [ $instance, 'init_legacy_preview' ] ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_legacy_customizer_scripts' ] ) );
-		$this->assertFalse( has_action( 'customize_controls_print_footer_scripts', [ $instance, 'add_dark_mode_toggler_button_notice' ] ) );
 
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
 			$this->assertEquals( 'refresh', $setting->transport );
@@ -225,24 +225,6 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$_GET['url']                   = home_url( '/foo/' );
 		$instance->set_reader_preview_url();
 		$this->assertEquals( home_url( '/foo/' ), $wp_customize->get_preview_url() );
-	}
-
-	/**
-	 * @covers AMP_Template_Customizer::init()
-	 * @covers AMP_Template_Customizer::add_dark_mode_toggler_button_notice()
-	 */
-	public function test_init_for_twentytwentyone() {
-		if ( ! wp_get_theme( 'twentytwentyone' )->exists() ) {
-			$this->markTestSkipped();
-		}
-		switch_theme( 'twentytwentyone' );
-
-		$wp_customize = $this->get_customize_manager();
-		$instance     = AMP_Template_Customizer::init( $wp_customize );
-		$this->assertEquals( 10, has_action( 'customize_controls_print_footer_scripts', [ $instance, 'add_dark_mode_toggler_button_notice' ] ) );
-
-		$output = get_echo( [ $instance, 'add_dark_mode_toggler_button_notice' ] );
-		$this->assertStringContainsString( 'wp.customize.control', $output );
 	}
 
 	/**

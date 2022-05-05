@@ -46,7 +46,7 @@ export function ThemesContextProvider( { children } ) {
 			try {
 				const fetchedThemes = await apiFetch( {
 					path: addQueryArgs( '/wp/v2/themes', {
-						_fields: [ 'author', 'name', 'status', 'stylesheet', 'version' ],
+						_fields: [ 'author', 'name', 'status', 'stylesheet', 'template', 'version' ],
 					} ),
 				} );
 

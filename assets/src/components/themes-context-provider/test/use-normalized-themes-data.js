@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { act } from 'react-dom/test-utils';
 
 /**
@@ -18,28 +17,30 @@ import { useNormalizedThemesData } from '../use-normalized-themes-data';
 
 jest.mock( '../index' );
 
-let returnValue = {};
-
-function ComponentContainingHook() {
-	returnValue = useNormalizedThemesData();
-	return null;
-}
-
-const Providers = ( { children, fetchingThemes, themes = [] } ) => (
-	<ErrorContextProvider>
-		<ThemesContextProvider themes={ themes } fetchingThemes={ fetchingThemes }>
-			{ children }
-		</ThemesContextProvider>
-	</ErrorContextProvider>
-);
-Providers.propTypes = {
-	children: PropTypes.any,
-	fetchingThemes: PropTypes.bool,
-	themes: PropTypes.array,
-};
-
 describe( 'useNormalizedThemesData', () => {
 	let container = null;
+
+	function setup( { fetchingThemes, themes } ) {
+		let returnValue;
+
+		function ComponentContainingHook() {
+			returnValue = useNormalizedThemesData();
+			return null;
+		}
+
+		act( () => {
+			render(
+				<ErrorContextProvider>
+					<ThemesContextProvider fetchingThemes={ fetchingThemes } themes={ themes }>
+						<ComponentContainingHook />
+					</ThemesContextProvider>
+				</ErrorContextProvider>,
+				container,
+			);
+		} );
+
+		return returnValue;
+	}
 
 	beforeEach( () => {
 		container = document.createElement( 'div' );
@@ -50,65 +51,50 @@ describe( 'useNormalizedThemesData', () => {
 		unmountComponentAtNode( container );
 		container.remove();
 		container = null;
-		returnValue = {};
 	} );
 
-	it( 'returns empty an array if themes are being fetched', () => {
-		act( () => {
-			render(
-				<Providers
-					fetchingThemes={ true }
-					themes={ [ 'foo' ] }
-				>
-					<ComponentContainingHook />
-				</Providers>,
-				container,
-			);
+	it( 'returns empty an object if themes are being fetched', () => {
+		const normalizedThemesData = setup( {
+			fetchingThemes: true,
+			themes: [],
 		} );
 
-		expect( returnValue ).toHaveLength( 0 );
+		expect( normalizedThemesData ).toStrictEqual( {} );
 	} );
 
-	it( 'returns a normalized array of themes', () => {
-		act( () => {
-			render(
-				<Providers
-					fetchingThemes={ false }
-					themes={ [
-						{
-							author: {
-								raw: 'the WordPress team',
-								rendered: '<a href="https://wordpress.org/">the WordPress team</a>',
-							},
-							author_uri: {
-								raw: 'https://wordpress.org/',
-								rendered: 'https://wordpress.org/',
-							},
-							name: 'Twenty Fifteen',
-							stylesheet: 'twentyfifteen',
-							status: 'inactive',
-							version: '3.0',
-						},
-						{
-							author: 'the WordPress team',
-							author_uri: 'https://wordpress.org/',
-							name: {
-								raw: 'Twenty Twenty',
-								rendered: 'Twenty Twenty',
-							},
-							stylesheet: 'twentytwenty',
-							status: 'active',
-							version: '1.7',
-						},
-					] }
-				>
-					<ComponentContainingHook />
-				</Providers>,
-				container,
-			);
+	it( 'returns an object with normalized themes data', () => {
+		const normalizedThemesData = setup( {
+			fetchingThemes: false,
+			themes: [
+				{
+					author: {
+						raw: 'the WordPress team',
+						rendered: '<a href="https://wordpress.org/">the WordPress team</a>',
+					},
+					author_uri: {
+						raw: 'https://wordpress.org/',
+						rendered: 'https://wordpress.org/',
+					},
+					name: 'Twenty Fifteen',
+					stylesheet: 'twentyfifteen',
+					status: 'inactive',
+					version: '3.0',
+				},
+				{
+					author: 'the WordPress team',
+					author_uri: 'https://wordpress.org/',
+					name: {
+						raw: 'Twenty Twenty',
+						rendered: 'Twenty Twenty',
+					},
+					stylesheet: 'twentytwenty',
+					status: 'active',
+					version: '1.7',
+				},
+			],
 		} );
 
-		expect( returnValue ).toStrictEqual( {
+		expect( normalizedThemesData ).toStrictEqual( {
 			twentyfifteen: {
 				author: 'the WordPress team',
 				author_uri: 'https://wordpress.org/',
@@ -126,6 +112,41 @@ describe( 'useNormalizedThemesData', () => {
 				stylesheet: 'twentytwenty',
 				status: 'active',
 				version: '1.7',
+			},
+		} );
+	} );
+
+	it( 'identifies parent and child themes', () => {
+		const normalizedThemesData = setup( {
+			fetchingThemes: false,
+			themes: [
+				{
+					stylesheet: 'parentTheme',
+					template: 'parentTheme',
+					status: 'inactive',
+				},
+				{
+					stylesheet: 'childTheme',
+					template: 'parentTheme',
+					status: 'active',
+				},
+			],
+		} );
+
+		expect( normalizedThemesData ).toStrictEqual( {
+			parentTheme: {
+				slug: 'parentTheme',
+				stylesheet: 'parentTheme',
+				template: 'parentTheme',
+				status: 'inactive',
+				child: 'childTheme',
+			},
+			childTheme: {
+				slug: 'childTheme',
+				stylesheet: 'childTheme',
+				template: 'parentTheme',
+				status: 'active',
+				parent: 'parentTheme',
 			},
 		} );
 	} );

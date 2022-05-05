@@ -4,7 +4,6 @@ set -e
 
 WP_VERSION=$1
 INSTALL_PWA_PLUGIN=${2-false}
-WP_TESTS_DIR=$3
 
 if [[ -z $WP_VERSION ]]; then
 	echo "usage: $0 <wp-version> [install-pwa-plugin]"

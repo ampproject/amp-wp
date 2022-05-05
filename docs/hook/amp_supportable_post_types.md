@@ -14,7 +14,7 @@ By default the list includes those which are public.
 
 ### Source
 
-:link: [includes/class-amp-post-type-support.php:63](/includes/class-amp-post-type-support.php#L63)
+:link: [includes/class-amp-post-type-support.php:58](/includes/class-amp-post-type-support.php#L58)
 
 <details>
 <summary>Show Code</summary>

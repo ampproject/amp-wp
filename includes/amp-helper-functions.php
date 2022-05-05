@@ -194,37 +194,43 @@ function amp_init() {
 	 * Detects whether the current window is in an iframe with the specified `name` attribute. The iframe is created
 	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
 	 */
-	add_action(
-		'wp_print_scripts',
-		function() {
-			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+	add_action( 'wp_head', 'amp_remove_admin_bar_in_phone_preview' );
+	add_action( 'amp_post_template_head', 'amp_remove_admin_bar_in_phone_preview' );
+}
+
+/**
+ * Remove the admin bar in phone preview of the site in AMP Onboarding Wizard.
+ *
+ * @since 2.2.2
+ * @internal
+ */
+function amp_remove_admin_bar_in_phone_preview() {
+	if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+		return;
+	}
+	?>
+	<script data-ampdevmode>
+		( () => {
+			if ( 'amp-wizard-completion-preview' !== window.name ) {
 				return;
 			}
-			?>
-			<script data-ampdevmode>
-				( () => {
-					if ( 'amp-wizard-completion-preview' !== window.name ) {
-						return;
-					}
 
-					/** @type {HTMLStyleElement} */
-					const style = document.createElement( 'style' );
-					style.setAttribute( 'type', 'text/css' );
-					style.appendChild( document.createTextNode( 'html:not(#_) { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
-					document.head.appendChild( style );
+			/** @type {HTMLStyleElement} */
+			const style = document.createElement( 'style' );
+			style.setAttribute( 'type', 'text/css' );
+			style.appendChild( document.createTextNode( 'html:not(#_) { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
+			document.head.appendChild( style );
 
-					document.addEventListener( 'DOMContentLoaded', function() {
-						const adminBar = document.getElementById( 'wpadminbar' );
-						if ( adminBar ) {
-							document.body.classList.remove( 'admin-bar' );
-							adminBar.remove();
-						}
-					});
-				} )();
-			</script>
-			<?php
-		}
-	);
+			document.addEventListener( 'DOMContentLoaded', function() {
+				const adminBar = document.getElementById( 'wpadminbar' );
+				if ( adminBar ) {
+					document.body.classList.remove( 'admin-bar' );
+					adminBar.remove();
+				}
+			});
+		} )();
+	</script>
+	<?php
 }
 
 /**
@@ -1401,6 +1407,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 			AMP_Gfycat_Embed_Handler::class       => [],
 			AMP_Imgur_Embed_Handler::class        => [],
 			AMP_Scribd_Embed_Handler::class       => [],
+			AMP_WordPress_Embed_Handler::class    => [],
 			AMP_WordPress_TV_Embed_Handler::class => [],
 		],
 		$post
@@ -1462,7 +1469,7 @@ function amp_is_native_img_used() {
 	 *
 	 * @param bool $use_native Whether to use `img`.
 	 */
-	return (bool) apply_filters( 'amp_native_img_used', false );
+	return (bool) apply_filters( 'amp_native_img_used', true );
 }
 
 /**
@@ -1603,6 +1610,22 @@ function amp_get_content_sanitizers( $post = null ) {
 	}
 
 	/**
+	 * Filters whether AMP auto-lightbox is disabled.
+	 *
+	 * When disabled, the data-amp-auto-lightbox-disable attribute is added to the body.
+	 *
+	 * @since 2.2.2
+	 * @link https://github.com/ampproject/amphtml/blob/420bc3987f69f6d9cd36e31c013fc9eea4f1b245/docs/spec/auto-lightbox.md#disabling-treatment-explicitly
+	 *
+	 * @param bool $disabled Whether disabled.
+	 */
+	$is_auto_lightbox_disabled = apply_filters( 'amp_auto_lightbox_disabled', true );
+
+	if ( $is_auto_lightbox_disabled ) {
+		$sanitizers[ AMP_Auto_Lightbox_Disable_Sanitizer::class ] = [];
+	}
+
+	/**
 	 * Filters the content sanitizers.
 	 *
 	 * @since 0.2
@@ -1681,6 +1704,7 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
+		AMP_Auto_Lightbox_Disable_Sanitizer::class,
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
 		AMP_Bento_Sanitizer::class, // Bento scripts may be preserved here.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for images, videos, audios, comments, forms, and styles.

@@ -41,16 +41,16 @@ class Test_AMP_Theme_Support extends TestCase {
 	/**
 	 * Set up before class.
 	 */
-	public static function setUpBeforeClass() {
-		parent::setUpBeforeClass();
+	public static function set_up_before_class() {
+		parent::set_up_before_class();
 		AMP_HTTP::$server_timing = true;
 	}
 
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		AMP_Validation_Manager::reset_validation_results();
 		unset( $GLOBALS['current_screen'] );
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
@@ -72,7 +72,7 @@ class Test_AMP_Theme_Support extends TestCase {
 	 *
 	 * @global WP_Scripts $wp_scripts
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		global $wp_scripts, $wp_styles, $wp_admin_bar;
 		$wp_scripts   = null;
 		$wp_styles    = null;
@@ -80,7 +80,6 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$this->set_private_property( AMP_Theme_Support::class, 'metadata', null );
 
-		parent::tearDown();
 		unset( $GLOBALS['show_admin_bar'] );
 		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
 		AMP_Validation_Manager::reset_validation_results();
@@ -100,6 +99,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		unregister_post_type( 'book' );
 		unregister_post_type( 'announcement' );
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**
@@ -693,7 +694,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $supportable_templates as $id => $supportable_template ) {
-			$this->assertNotInternalType( 'numeric', $id );
+			$this->assertIsNotNumeric( $id );
 			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
 			$this->assertTrue( $supportable_template['supported'] );
 			$this->assertFalse( $supportable_template['immutable'] );
@@ -742,7 +743,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		update_option( 'page_on_front', $page_on_front );
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $supportable_templates as $id => $supportable_template ) {
-			$this->assertNotInternalType( 'numeric', $id );
+			$this->assertIsNotNumeric( $id );
 			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
 		}
 		$this->assertArrayHasKey( 'is_front_page', $supportable_templates );
@@ -773,7 +774,6 @@ class Test_AMP_Theme_Support extends TestCase {
 	 */
 	public function test_add_hooks() {
 		AMP_Theme_Support::add_hooks();
-		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
 
 		$this->assertEquals( 10, has_filter( 'wp_resource_hints', [ self::TESTED_CLASS, 'filter_resource_hints_to_remove_emoji_dns_prefetch' ] ) );
 		$this->assertFalse( has_action( 'wp_head', 'print_emoji_detection_script' ) );
@@ -1058,8 +1058,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertMatchesRegularExpression( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+example-admin-bar\.js' ] ) . '/', $output );
 
 		$body_classes = get_body_class();
-		$this->assertStringContainsString( 'customize-support', $body_classes );
-		$this->assertStringNotContainsString( 'no-customize-support', $body_classes );
+		$this->assertContains( 'customize-support', $body_classes );
+		$this->assertNotContains( 'no-customize-support', $body_classes );
 	}
 
 	/**
@@ -1614,7 +1614,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertTrue( AMP_Theme_Support::is_output_buffering() );
 		$this->assertSame( 3, ob_get_level() );
 
-		echo '<html><head></head><body><img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
+		echo '<html><head></head><body><video src="test.mp4" width="100" height="100"></video><script data-test>document.write(\'Illegal\');</script>';
 		wp_footer();
 
 		// Additional nested output bufferings which aren't getting closed.
@@ -1638,7 +1638,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$this->assertStringContainsString( '<html amp', $output );
 		$this->assertStringContainsString( 'foo', $output );
 		$this->assertStringContainsString( 'BAR', $output );
-		$this->assertStringContainsString( '<amp-img src="test.png"', $output );
+		$this->assertStringContainsString( '<amp-video src="test.mp4"', $output );
 		$this->assertStringNotContainsString( '<script data-test', $output );
 
 	}
@@ -1655,12 +1655,12 @@ class Test_AMP_Theme_Support extends TestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
-		$partial = '<img src="test.png" style="border:solid 1px red;"><script data-head>document.write(\'Illegal\');</script><style>img { background:blue }</style>';
+		$partial = '<video src="test.mp4" width="100" height="200" style="border:solid 1px red;"></video><script data-head>document.write(\'Illegal\');</script><style>video { background:blue }</style>';
 		$output  = AMP_Theme_Support::filter_customize_partial_render( $partial );
-		$this->assertStringContainsString( '<amp-img src="test.png"', $output );
+		$this->assertStringContainsString( '<amp-video src="test.mp4"', $output );
 		$this->assertStringContainsString( '<style amp-custom-partial="">', $output );
-		$this->assertStringContainsString( 'amp-img{background:blue}', $output );
-		$this->assertStringContainsString( ':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-b123f72{border:solid 1px red}', $output );
+		$this->assertStringContainsString( 'amp-video{background:blue}', $output );
+		$this->assertStringContainsString( '.amp-wp-b123f72:not(#_#_#_#_#_){border:solid 1px red}', $output );
 		$this->assertStringEndsWith( '/*# sourceURL=amp-custom-partial.css */</style>', $output );
 		$this->assertStringNotContainsString( '<script', $output );
 		$this->assertStringNotContainsString( '<html', $output );
@@ -1770,8 +1770,9 @@ class Test_AMP_Theme_Support extends TestCase {
 			$prev_ordered_contain = $ordered_contain;
 		}
 
-		$this->assertStringContainsString( '<noscript><img', $sanitized_html );
-		$this->assertStringContainsString( '<amp-img', $sanitized_html );
+		$this->assertStringNotContainsString( '<noscript><img', $sanitized_html );
+		$this->assertStringContainsString( '<img width="100" height="100" src="https://example.com/hero.png" decoding="async" class="amp-wp-enforced-sizes">', $sanitized_html );
+		$this->assertStringContainsString( '<img width="100" height="100" src="https://example.com/test.png" loading="lazy" decoding="async" class="amp-wp-enforced-sizes">', $sanitized_html );
 
 		$this->assertStringContainsString( '<noscript><audio', $sanitized_html );
 		$this->assertStringContainsString( '<amp-audio', $sanitized_html );
@@ -2152,6 +2153,10 @@ class Test_AMP_Theme_Support extends TestCase {
 			}
 		}
 
+		// Do the same as add_theme_support( 'title-tag' ) but without triggering _doing_it_wrong().
+		global $_wp_theme_features;
+		$_wp_theme_features['title-tag'] = [];
+
 		ob_start();
 		?>
 		<!DOCTYPE html>
@@ -2163,9 +2168,8 @@ class Test_AMP_Theme_Support extends TestCase {
 		</head>
 		<body><!-- </body></html> -->
 		<div id="dynamic-id-0"></div>
-		<!-- 2nd image is needed for testing <noscript> as first is SSR'ed -->
 		<img width="100" height="100" src="https://example.com/hero.png">
-		<img width="100" height="100" src="https://example.com/test.png">
+		<img width="100" height="100" src="https://example.com/test.png" loading="lazy">
 		<audio src="https://example.com/audios/myaudio.mp3"></audio>
 		<amp-ad type="a9"
 				width="300"
@@ -2443,7 +2447,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		$style_slug = 'amp-default';
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
-		$this->assertStringContainsString( $style_slug, wp_styles()->queue );
+		$this->assertContains( $style_slug, wp_styles()->queue );
 	}
 
 	/**

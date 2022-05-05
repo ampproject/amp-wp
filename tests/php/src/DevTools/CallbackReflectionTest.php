@@ -7,12 +7,12 @@
 
 namespace AmpProject\AmpWP\Tests\DevTools;
 
+use AMP_Validation_Callback_Wrapper;
 use AmpProject\AmpWP\DevTools\CallbackReflection;
-use AmpProject\AmpWP\DevTools\FileReflection;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use ReflectionFunction;
 use ReflectionMethod;
-use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 
 /**
  * Tests for CallbackReflection class.
@@ -32,8 +32,8 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 	 */
 	private $callback_reflection;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 
@@ -49,9 +49,107 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 		register_theme_directory( $theme_root );
 	}
 
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		$this->restore_theme_directories();
+		parent::tear_down();
+	}
+
+	/**
+	 * Test get_unwrapped_callback().
+	 *
+	 * @covers ::get_unwrapped_callback()
+	 * @covers AMP_Validation_Callback_Wrapper::__invoke()
+	 * @covers AMP_Validation_Callback_Wrapper::invoke_with_first_ref_arg()
+	 */
+	public function test_get_unwrapped_callback() {
+		$original_by_value_callback = function ( $number ) {
+			return $number + 1;
+		};
+		$original_by_ref_callback   = function ( &$number ) {
+			$number++;
+		};
+
+		$this->assertSame(
+			$original_by_value_callback,
+			$this->callback_reflection->get_unwrapped_callback( $original_by_value_callback )
+		);
+		$this->assertSame(
+			$original_by_ref_callback,
+			$this->callback_reflection->get_unwrapped_callback( $original_by_ref_callback )
+		);
+
+		$wrapped_by_value_callback = new AMP_Validation_Callback_Wrapper(
+			[
+				'function'         => $original_by_value_callback,
+				'accepted_args'    => 1,
+				'source'           => [],
+				'indirect_sources' => [],
+			]
+		);
+		$wrapped_by_ref_callback   = new AMP_Validation_Callback_Wrapper(
+			[
+				'function'         => $original_by_ref_callback,
+				'accepted_args'    => 1,
+				'source'           => [],
+				'indirect_sources' => [],
+			]
+		);
+
+		$this->assertSame(
+			$original_by_value_callback,
+			$this->callback_reflection->get_unwrapped_callback( $wrapped_by_value_callback )
+		);
+		$this->assertSame(
+			$original_by_ref_callback,
+			$this->callback_reflection->get_unwrapped_callback( $wrapped_by_ref_callback )
+		);
+		$this->assertSame(
+			$original_by_ref_callback,
+			$this->callback_reflection->get_unwrapped_callback( [ $wrapped_by_ref_callback, 'invoke_with_first_ref_arg' ] )
+		);
+
+		$rewrapped_by_value_callback = new AMP_Validation_Callback_Wrapper(
+			[
+				'function'         => $wrapped_by_value_callback,
+				'accepted_args'    => 1,
+				'source'           => [],
+				'indirect_sources' => [],
+			]
+		);
+		$rewrapped_by_ref_callback   = new AMP_Validation_Callback_Wrapper(
+			[
+				'function'         => $wrapped_by_ref_callback,
+				'accepted_args'    => 1,
+				'source'           => [],
+				'indirect_sources' => [],
+			]
+		);
+
+		$this->assertSame(
+			$original_by_value_callback,
+			$this->callback_reflection->get_unwrapped_callback( $rewrapped_by_value_callback )
+		);
+		$this->assertSame(
+			$original_by_ref_callback,
+			$this->callback_reflection->get_unwrapped_callback( $rewrapped_by_ref_callback )
+		);
+		$this->assertSame(
+			$original_by_ref_callback,
+			$this->callback_reflection->get_unwrapped_callback( [ $rewrapped_by_ref_callback, 'invoke_with_first_ref_arg' ] )
+		);
+
+		$this->assertSame( 2, $original_by_value_callback( 1 ) );
+		$this->assertSame( 2, $wrapped_by_value_callback( 1 ) );
+		$this->assertSame( 2, $rewrapped_by_value_callback( 1 ) );
+
+		$number     = 1;
+		$number_ref = &$number;
+		$original_by_ref_callback( $number_ref );
+		$this->assertSame( 2, $number );
+		$wrapped_by_ref_callback->invoke_with_first_ref_arg( $number_ref );
+		$this->assertSame( 3, $number );
+		$rewrapped_by_ref_callback->invoke_with_first_ref_arg( $number_ref );
+		$this->assertSame( 4, $number );
 	}
 
 	/** @return array */

@@ -7,6 +7,7 @@
 
 use AmpProject\Dom\Document;
 use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 
 /**
  * Trait AMP_Noscript_Fallback
@@ -43,6 +44,15 @@ trait AMP_Noscript_Fallback {
 		);
 
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( $tag ) as $tag_spec ) { // Normally 1 iteration.
+			if (
+				! (
+					( isset( $tag_spec['tag_spec']['mandatory_ancestor'] ) && Tag::NOSCRIPT === $tag_spec['tag_spec']['mandatory_ancestor'] )
+					||
+					( isset( $tag_spec['tag_spec']['mandatory_parent'] ) && Tag::NOSCRIPT === $tag_spec['tag_spec']['mandatory_parent'] )
+				)
+			) {
+				continue;
+			}
 			foreach ( $tag_spec['attr_spec_list'] as $attr_name => $attr_spec ) {
 				$this->noscript_fallback_allowed_attributes[ $attr_name ] = true;
 				if ( isset( $attr_spec['alternative_names'] ) ) {

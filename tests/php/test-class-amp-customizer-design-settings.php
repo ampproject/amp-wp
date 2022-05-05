@@ -16,9 +16,9 @@ use AmpProject\AmpWP\Tests\TestCase;
  */
 class Test_AMP_Customizer_Design_Settings extends TestCase {
 
-	public static function setUpBeforeClass() {
+	public static function set_up_before_class() {
 		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
-		return parent::setUpBeforeClass();
+		parent::set_up_before_class();
 	}
 
 	/** @var string */
@@ -29,8 +29,8 @@ class Test_AMP_Customizer_Design_Settings extends TestCase {
 	 *
 	 * @inheritDoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		global $wp_version;
 		$this->original_wp_version = $wp_version;
@@ -41,8 +41,8 @@ class Test_AMP_Customizer_Design_Settings extends TestCase {
 	 *
 	 * @inheritDoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 
 		global $wp_version;
 		$wp_version = $this->original_wp_version;
@@ -150,7 +150,7 @@ class Test_AMP_Customizer_Design_Settings extends TestCase {
 		AMP_Customizer_Design_Settings::register_customizer_ui( $wp_customize );
 
 		$section_ids = array_keys( $wp_customize->sections() );
-		$this->assertStringContainsString( 'amp_design', $section_ids );
+		$this->assertContains( 'amp_design', $section_ids );
 
 		$control_ids          = array_keys( $wp_customize->controls() );
 		$expected_control_ids = [

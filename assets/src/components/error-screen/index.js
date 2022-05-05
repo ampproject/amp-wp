@@ -1,14 +1,14 @@
 /**
- * WordPress dependencies
- */
-import { __, sprintf } from '@wordpress/i18n';
-import { Panel } from '@wordpress/components';
-import { useState } from '@wordpress/element';
-
-/**
  * External dependencies
  */
 import PropTypes from 'prop-types';
+
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { Panel } from '@wordpress/components';
+import { createInterpolateElement, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -41,14 +41,17 @@ export function ErrorScreen( { error, finishLinkLabel, finishLinkUrl, title } ) 
 					__html: message || __( 'There was an error loading the page.', 'amp' ),
 				} } />
 
-				{ /* dangerouslySetInnerHTML reason: The message contains a link to the AMP support forum. */ }
-				<p dangerouslySetInnerHTML={ {
-					__html: sprintf(
-						// translators: %s is the AMP support forum URL.
-						__( 'Please submit details to our <a href="%s" target="_blank" rel="noreferrer noopener">support forum</a>.', 'amp' ),
-						__( 'https://wordpress.org/support/plugin/amp/', 'amp' ),
-					),
-				} } />
+				<p>
+					{
+						createInterpolateElement(
+							__( 'Please submit details to our <a>support forum</a>.', 'amp' ),
+							{
+								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
+								a: <a href="https://wordpress.org/support/plugin/amp/" target="_blank" rel="noreferrer noopener" />,
+							},
+						)
+					}
+				</p>
 
 				{ stack && (
 					<details>

@@ -25,7 +25,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	use PrivateAccess;
 	use ThemesApiRequestMocking;
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/** @var PluginSuppression */
@@ -34,7 +34,9 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function set_up() {
+		parent::set_up();
+
 		$this->prevent_block_pre_render();
 		$this->add_reader_themes_request_filter();
 
@@ -66,8 +68,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 
 		$GLOBALS['wp_settings_fields']     = [];
 		$GLOBALS['wp_registered_settings'] = [];
@@ -88,6 +89,8 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			'plugin_file_pattern',
 			null
 		);
+
+		parent::tear_down();
 	}
 
 	/**
@@ -644,5 +647,74 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 			throw new Exception( $r->get_error_message() );
 		}
 		return $r;
+	}
+
+	/**
+	 * Data provider for $this->test_filter_plugin_row_meta()
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_for_filter_plugin_row_meta() {
+
+		return [
+			'plugin is not suppressed'                 => [
+				'plugin_file'      => 'plugin.php',
+				'current_screen'   => 'plugins',
+				'should_have_meta' => false,
+			],
+			'plugin is suppressed'                     => [
+				'plugin_file'      => 'plugin-one/plugin-one.php',
+				'current_screen'   => 'plugins',
+				'should_have_meta' => true,
+			],
+			'plugin is suppressed without slug'        => [
+				'plugin_file'      => 'plugin-one/plugin-one.php',
+				'current_screen'   => 'plugins',
+				'should_have_meta' => true,
+			],
+			'plugin is suppressed on different screen' => [
+				'plugin_file'      => 'plugin-one/plugin-one.php',
+				'current_screen'   => 'plugins-network',
+				'should_have_meta' => false,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider data_provider_for_filter_plugin_row_meta()
+	 * @covers ::filter_plugin_row_meta()
+	 */
+	public function test_filter_plugin_row_meta( $plugin_file, $current_screen, $should_have_meta ) {
+
+		set_current_screen( $current_screen );
+
+		// Mock AMP option.
+		AMP_Options_Manager::update_option(
+			'suppressed_plugins',
+			[
+				'plugin-one' => [
+					'last_version' => '1.0',
+					'timestamp'    => 1646316249,
+					'username'     => 'user1',
+				],
+			]
+		);
+
+		$output = $this->instance->filter_plugin_row_meta( [], $plugin_file );
+
+		if ( $should_have_meta ) {
+
+			$this->assertEquals(
+				sprintf(
+					'<a href="%s" aria-label="%s">%s</a>',
+					esc_url( admin_url( 'admin.php?page=amp-options#plugin-suppression' ) ),
+					esc_attr__( 'Visit AMP Settings', 'amp' ),
+					__( 'Suppressed on AMP Pages', 'amp' )
+				),
+				$output[0]
+			);
+		} else {
+			$this->assertEmpty( $output );
+		}
 	}
 }

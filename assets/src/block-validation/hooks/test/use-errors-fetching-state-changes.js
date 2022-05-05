@@ -18,12 +18,20 @@ jest.mock( '@wordpress/data/build/components/use-select', () => jest.fn() );
 
 describe( 'useErrorsFetchingStateChanges', () => {
 	let container = null;
-	let returnValue = {};
 
 	function ComponentContainingHook() {
-		returnValue = useErrorsFetchingStateChanges();
+		const { isFetchingErrors, fetchingErrorsMessage } = useErrorsFetchingStateChanges();
 
-		return null;
+		return (
+			<div>
+				<div id="status">
+					{ isFetchingErrors ? 'Fetching' : 'Idle' }
+				</div>
+				<div id="message">
+					{ fetchingErrorsMessage }
+				</div>
+			</div>
+		);
 	}
 
 	function setupAndRender( overrides ) {
@@ -45,7 +53,6 @@ describe( 'useErrorsFetchingStateChanges', () => {
 		unmountComponentAtNode( container );
 		container.remove();
 		container = null;
-		returnValue = {};
 	} );
 
 	it( 'returns no loading message when errors are not being fetched', () => {
@@ -55,10 +62,8 @@ describe( 'useErrorsFetchingStateChanges', () => {
 			} );
 		} );
 
-		expect( returnValue ).toMatchObject( {
-			isFetchingErrors: false,
-			fetchingErrorsMessage: '',
-		} );
+		expect( container.querySelector( '#status' ).textContent ).toBe( 'Idle' );
+		expect( container.querySelector( '#message' ).textContent ).toBe( '' );
 	} );
 
 	it( 'returns correct status message when a new post is validated', () => {
@@ -69,10 +74,8 @@ describe( 'useErrorsFetchingStateChanges', () => {
 			} );
 		} );
 
-		expect( returnValue ).toMatchObject( {
-			isFetchingErrors: false,
-			fetchingErrorsMessage: expect.stringContaining( 'Validating' ),
-		} );
+		expect( container.querySelector( '#status' ).textContent ).toBe( 'Idle' );
+		expect( container.querySelector( '#message' ).textContent ).toBe( 'Validating content.' );
 	} );
 
 	it( 'returns correct message when fetching errors and re-validating', () => {
@@ -82,10 +85,8 @@ describe( 'useErrorsFetchingStateChanges', () => {
 			} );
 		} );
 
-		expect( returnValue ).toMatchObject( {
-			isFetchingErrors: true,
-			fetchingErrorsMessage: expect.stringContaining( 'Loading' ),
-		} );
+		expect( container.querySelector( '#status' ).textContent ).toBe( 'Fetching' );
+		expect( container.querySelector( '#message' ).textContent ).toBe( 'Loading…' );
 
 		// Simulate state change so that the message is changed.
 		act( () => {
@@ -94,9 +95,7 @@ describe( 'useErrorsFetchingStateChanges', () => {
 			} );
 		} );
 
-		expect( returnValue ).toMatchObject( {
-			isFetchingErrors: false,
-			fetchingErrorsMessage: expect.stringContaining( 'Re-validating' ),
-		} );
+		expect( container.querySelector( '#status' ).textContent ).toBe( 'Idle' );
+		expect( container.querySelector( '#message' ).textContent ).toBe( 'Re-validating content.' );
 	} );
 } );

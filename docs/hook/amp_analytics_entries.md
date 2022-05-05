@@ -14,7 +14,7 @@ This filter allows you to easily insert any amp-analytics tags without needing m
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1259](/includes/amp-helper-functions.php#L1259)
+:link: [includes/amp-helper-functions.php:1265](/includes/amp-helper-functions.php#L1265)
 
 <details>
 <summary>Show Code</summary>

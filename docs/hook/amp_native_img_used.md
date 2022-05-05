@@ -14,13 +14,13 @@ This filter is a feature flag to opt-in to discontinue using `amp-img` (and `amp
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1465](/includes/amp-helper-functions.php#L1465)
+:link: [includes/amp-helper-functions.php:1472](/includes/amp-helper-functions.php#L1472)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-return (bool) apply_filters( 'amp_native_img_used', false );
+return (bool) apply_filters( 'amp_native_img_used', true );
 ```
 
 </details>

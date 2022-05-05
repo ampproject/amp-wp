@@ -33,9 +33,9 @@ class AmpThemesTest extends TestCase {
 	 *
 	 * @inheritDoc
 	 */
-	public function setUp() {
+	public function set_up() {
 
-		parent::setUp();
+		parent::set_up();
 
 		global $wp_scripts, $wp_styles, $wp_version;
 		$wp_scripts = null;
@@ -51,8 +51,8 @@ class AmpThemesTest extends TestCase {
 	 *
 	 * @inheritDoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 
 		global $wp_version;
 		$wp_version = $this->original_wp_version;

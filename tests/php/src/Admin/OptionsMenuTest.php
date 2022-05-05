@@ -48,8 +48,8 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$site_health = $this->injector->make( SiteHealth::class );
 
@@ -64,10 +64,10 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;
+		parent::tear_down();
 	}
 
 	/** @covers ::is_needed() */
@@ -174,6 +174,28 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		);
 	}
 
+	/** @covers ::get_analytics_vendors() */
+	public function test_get_analytics_vendors() {
+		$vendors = $this->instance->get_analytics_vendors();
+		$this->assertIsArray( $vendors );
+		$this->assertNotEmpty( $vendors );
+		$pairs = [];
+		foreach ( $vendors as $vendor ) {
+			$this->assertIsArray( $vendor );
+			$this->assertArrayHasKey( 'value', $vendor );
+			$this->assertArrayHasKey( 'label', $vendor );
+			$pairs[] = $vendor['value'] . ':' . $vendor['label'];
+		}
+		$this->assertIndexedArrayContains(
+			[
+				'adobeanalytics:Adobe Analytics',
+				'googleanalytics:Google Analytics',
+				'gtag:gtag',
+			],
+			$pairs
+		);
+	}
+
 	/** @covers ::enqueue_assets() */
 	public function test_enqueue_assets_wrong_hook_suffix() {
 		$this->instance->enqueue_assets( 'nope' );
@@ -246,7 +268,7 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 					'/amp/v1/scannable-urls?_fields%5B0%5D=url&_fields%5B1%5D=amp_url&_fields%5B2%5D=type&_fields%5B3%5D=label&_fields%5B4%5D=validation_errors&_fields%5B5%5D=stale',
 					'/wp/v2/plugins?_fields%5B0%5D=author&_fields%5B1%5D=name&_fields%5B2%5D=plugin&_fields%5B3%5D=status&_fields%5B4%5D=version',
 					'/wp/v2/settings',
-					'/wp/v2/themes?_fields%5B0%5D=author&_fields%5B1%5D=name&_fields%5B2%5D=status&_fields%5B3%5D=stylesheet&_fields%5B4%5D=version',
+					'/wp/v2/themes?_fields%5B0%5D=author&_fields%5B1%5D=name&_fields%5B2%5D=status&_fields%5B3%5D=stylesheet&_fields%5B4%5D=template&_fields%5B5%5D=version',
 					'/wp/v2/users/me',
 				],
 				$this->get_private_property( $rest_preloader, 'paths' )

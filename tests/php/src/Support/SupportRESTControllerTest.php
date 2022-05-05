@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP\Support\Tests
  */
 
-namespace AmpProject\AmpWP\Support\Tests;
+namespace AmpProject\AmpWP\Tests\Support;
 
 use AmpProject\AmpWP\Support\SupportRESTController;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
@@ -34,9 +34,9 @@ class SupportRESTControllerTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
+	public function set_up() {
 
-		parent::setUp();
+		parent::set_up();
 
 		$this->instance = $this->injector->make( SupportRESTController::class );
 	}

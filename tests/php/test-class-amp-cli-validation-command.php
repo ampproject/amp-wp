@@ -34,8 +34,8 @@ class Test_AMP_CLI_Validation_Command extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->validation = $this->injector->make( ValidationCommand::class );

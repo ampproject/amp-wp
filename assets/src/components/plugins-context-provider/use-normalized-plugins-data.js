@@ -11,7 +11,7 @@ import { Plugins } from './index';
 
 export function useNormalizedPluginsData() {
 	const { fetchingPlugins, plugins } = useContext( Plugins );
-	const [ normalizedPluginsData, setNormalizedPluginsData ] = useState( [] );
+	const [ normalizedPluginsData, setNormalizedPluginsData ] = useState( {} );
 
 	useEffect( () => {
 		if ( fetchingPlugins || plugins.length === 0 ) {

@@ -32,8 +32,8 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
@@ -99,9 +99,9 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 		$this->assertEqualSets( array_keys( $plugin_registry->get_plugins( true ) ), array_keys( $data['suppressible_plugins'] ) );
 		$this->assertEquals( null, $data['preview_permalink'] );
 		$this->assertEquals( [], $data['suppressed_plugins'] );
-		$this->assertArraySubset( [ 'post', 'page', 'attachment' ], wp_list_pluck( $data['supportable_post_types'], 'name' ) );
+		$this->assertIndexedArrayContains( [ 'post', 'page', 'attachment' ], wp_list_pluck( $data['supportable_post_types'], 'name' ) );
 		$this->assertEquals( [ 'post', 'page' ], $data['supported_post_types'] );
-		$this->assertStringContainsString( 'is_singular', wp_list_pluck( $data['supportable_templates'], 'id' ) );
+		$this->assertContains( 'is_singular', wp_list_pluck( $data['supportable_templates'], 'id' ) );
 		$this->assertEquals( [ 'is_singular' ], $data['supported_templates'] );
 	}
 
@@ -145,7 +145,7 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
 
 		// Verify the invalid settings were not set.
-		$this->assertArraySubset( $valid_params, AMP_Options_Manager::get_options() );
+		$this->assertAssocArrayContains( $valid_params, AMP_Options_Manager::get_options() );
 	}
 
 	/**
@@ -156,6 +156,6 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 	public function test_get_item_schema() {
 		$schema = $this->controller->get_item_schema();
 
-		$this->assertStringContainsString( 'theme_support', array_keys( $schema['properties'] ) );
+		$this->assertContains( 'theme_support', array_keys( $schema['properties'] ) );
 	}
 }

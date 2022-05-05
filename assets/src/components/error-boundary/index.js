@@ -24,7 +24,7 @@ export class ErrorBoundary extends Component {
 		exitLinkLabel: PropTypes.string,
 		exitLinkUrl: PropTypes.string,
 		title: PropTypes.string,
-	}
+	};
 
 	constructor( props ) {
 		super( props );

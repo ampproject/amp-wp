@@ -32,8 +32,8 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		global $wp_scripts, $wp_styles;
 		$wp_scripts     = null;
 		$wp_styles      = null;
@@ -45,11 +45,11 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		global $wp_scripts, $wp_styles;
 		$wp_scripts = null;
 		$wp_styles  = null;
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**
@@ -566,5 +566,40 @@ class Test_AMP_Post_Meta_Box extends TestCase {
 
 		$result = $this->instance->get_amp_blocks_in_use();
 		$this->assertEquals( [ 'amp/amp-mathml', 'amp/amp-timeago' ], $result );
+	}
+
+	/**
+	 * Data provider for $this->test_sanitize_status()
+	 *
+	 * @return array
+	 */
+	public function data_provider_for_sanitize_status() {
+
+		return [
+			[
+				'input'    => AMP_Post_Meta_Box::ENABLED_STATUS,
+				'expected' => AMP_Post_Meta_Box::ENABLED_STATUS,
+			],
+			[
+				'input'    => AMP_Post_Meta_Box::DISABLED_STATUS,
+				'expected' => AMP_Post_Meta_Box::DISABLED_STATUS,
+			],
+			[
+				'input'    => 'invalid',
+				'expected' => '',
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider data_provider_for_sanitize_status
+	 * @covers ::sanitize_status()
+	 */
+	public function test_sanitize_status( $input, $expected ) {
+
+		$this->assertEquals(
+			$expected,
+			$this->instance->sanitize_status( $input )
+		);
 	}
 }

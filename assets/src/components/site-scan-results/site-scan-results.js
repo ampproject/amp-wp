@@ -1,13 +1,13 @@
 /**
- * WordPress dependencies
- */
-import { VisuallyHidden } from '@wordpress/components';
-
-/**
  * External dependencies
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+
+/**
+ * WordPress dependencies
+ */
+import { VisuallyHidden } from '@wordpress/components';
 
 /**
  * Internal dependencies

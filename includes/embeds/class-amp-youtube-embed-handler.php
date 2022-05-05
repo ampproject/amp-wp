@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\CssLength;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use AmpProject\Extension;
@@ -92,7 +93,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
-		add_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10, 2 );
+		add_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], PHP_INT_MAX, 2 );
 	}
 
 	/**
@@ -100,7 +101,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
-		remove_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10 );
+		remove_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], PHP_INT_MAX );
 	}
 
 	/**
@@ -145,6 +146,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 				$attributes[ $iframe_prop ] = $props[ $iframe_prop ];
 			}
 		}
+		$attributes = $this->amend_fixed_height_layout( $attributes );
 
 		$placeholder = $this->get_placeholder_markup( $url, $video_id, $attributes );
 
@@ -209,6 +211,8 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			return false;
 		}
 
+		$attributes = $this->amend_fixed_height_layout( $attributes );
+
 		$amp_node = AMP_DOM_Utils::create_node(
 			$dom,
 			Extension::YOUTUBE,
@@ -222,6 +226,24 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return $amp_node;
+	}
+
+	/**
+	 * Amend attributes with fixed-height layout if there is a 100% width present.
+	 *
+	 * @param array $attributes Attributes.
+	 * @return array Amended attributes.
+	 */
+	private function amend_fixed_height_layout( $attributes ) {
+		if (
+			isset( $attributes[ Attribute::WIDTH ] )
+			&&
+			( '100%' === $attributes[ Attribute::WIDTH ] || CssLength::AUTO === $attributes[ Attribute::WIDTH ] )
+		) {
+			$attributes[ Attribute::LAYOUT ] = Layout::FIXED_HEIGHT;
+			$attributes[ Attribute::WIDTH ]  = CssLength::AUTO;
+		}
+		return $attributes;
 	}
 
 	/**
@@ -297,7 +319,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			Attribute::OBJECT_FIT => 'cover',
 		];
 
-		if ( $attributes[ Attribute::TITLE ] ) {
+		if ( ! empty( $attributes[ Attribute::TITLE ] ) ) {
 			$img_attributes[ Attribute::ALT ] = $attributes[ Attribute::TITLE ];
 		}
 
@@ -491,6 +513,11 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		if ( ! $video_id ) {
 			return $html;
+		}
+
+		// Construct a tag so that any width/height attributes will be passed along.
+		if ( ! $html ) {
+			$html = AMP_HTML_Utils::build_tag( Tag::IFRAME, $attr );
 		}
 
 		return $this->render( $html, $src, $video_id );

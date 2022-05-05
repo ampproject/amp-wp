@@ -26,8 +26,8 @@ class FileReflectionTest extends DependencyInjectedTestCase {
 	 */
 	private $file_reflection;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->file_reflection = $this->injector->make( FileReflection::class );
 	}
 

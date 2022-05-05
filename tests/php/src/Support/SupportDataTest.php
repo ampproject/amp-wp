@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP\Support\Tests
  */
 
-namespace AmpProject\AmpWP\Support\Tests;
+namespace AmpProject\AmpWP\Tests\Support;
 
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Support\SupportData;
@@ -43,9 +43,9 @@ class SupportDataTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
+	public function set_up() {
 
-		parent::setUp();
+		parent::set_up();
 
 		$this->instance = $this->injector->make( SupportData::class );
 
@@ -61,8 +61,8 @@ class SupportDataTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 		foreach ( $this->previous_ini_config as $key => $value ) {
 			ini_set( $key, $value ); // phpcs:ignore WordPress.PHP.IniSet.log_errors_Blacklisted, WordPress.PHP.IniSet.Risky
 		}

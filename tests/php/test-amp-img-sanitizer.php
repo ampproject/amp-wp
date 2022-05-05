@@ -5,9 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
-use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Dom\Document;
 
 /**
@@ -19,11 +19,13 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 	use PrivateAccess;
 
+	use MarkupComparison;
+
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		add_filter(
 			'amp_extract_image_dimensions_batch',
 			static function( $urls ) {
@@ -46,7 +48,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 		$with_defaults = new AMP_Img_Sanitizer( $dom );
 		$this->assertEquals(
-			[ 'img' => [ 'amp-img', 'amp-anim' ] ],
+			[],
 			$with_defaults->get_selector_conversion_mapping()
 		);
 
@@ -69,6 +71,18 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * @return array
 	 */
 	public function get_data() {
+		// Note: The width & height attributes on <source> are new. See <https://github.com/whatwg/html/pull/5894>.
+		$picture_source = '
+			<picture>
+				<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400" width="1920" height="400">
+				<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400" width="1600" height="400">
+				<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400" width="1210" height="400">
+				<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400" width="991" height="400">
+				<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400" width="768" height="400">
+				<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder">
+			</picture>
+		';
+
 		return [
 			'no_images'                                => [
 				'<p>Lorem Ipsum Demet Delorit.</p>',
@@ -85,7 +99,55 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 			'simple_native_image'                      => [
 				'<img src="https://placehold.it/300x300" width="300" height="300" class="align-center">',
-				sprintf( '<img src="https://placehold.it/300x300" width="300" height="300" class="align-center amp-wp-enforced-sizes" decoding="async" %s>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'<img src="https://placehold.it/300x300" width="300" height="300" class="align-center amp-wp-enforced-sizes" decoding="async">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'simple_native_server_image_map'           => [
+				'<a href="#"><img src="https://placehold.it/300x300" width="300" height="300" class="align-center" align="top" alt="Alt" border="2" crossorigin="anonymous" hspace="2" importance="high" ismap loading="lazy" name="foo" referrerpolicy="no-referrer" vspace="2"></a>',
+				'<a href="#"><img src="https://placehold.it/300x300" width="300" height="300" class="align-center amp-wp-enforced-sizes" align="top" alt="Alt" border="2" crossorigin="anonymous" hspace="2" importance="high" ismap loading="lazy" name="foo" referrerpolicy="no-referrer" vspace="2" decoding="async"></a>',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'simple_native_client_image_map'           => [
+				'<map name="mainmenu-map"><area shape="circle" coords="25, 25, 75" href="/index.html" alt="Return to home page"><area shape="rect" coords="25, 25, 100, 150" href="/index.html" alt="Shop"></map><img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" usemap="#mainmenu-map">',
+				'<map name="mainmenu-map"><area shape="circle" coords="25, 25, 75" href="/index.html" alt="Return to home page"><area shape="rect" coords="25, 25, 100, 150" href="/index.html" alt="Shop"></map><img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" usemap="#mainmenu-map" decoding="async">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'standard_img_without_srcset'              => [
+				'<img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="">',
+				'<img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" decoding="async">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'standard_img_with_srcset'                 => [
+				'<img width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="">',
+				'<img width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" decoding="async">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'hero_img_without_srcset'                  => [
+				'<img data-hero width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="">',
+				'<img data-hero width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" decoding="async">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'hero_img_with_srcset'                     => [
+				'<img data-hero width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="">',
+				'<img data-hero width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" decoding="async">',
 				[
 					'native_img_used' => true,
 				],
@@ -93,7 +155,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 			'native_image_with_no_dims_and_loading'    => [
 				'<img src="https://placehold.it/150x300" loading="lazy" decoding="sync">',
-				sprintf( '<img src="https://placehold.it/150x300" loading="lazy" decoding="sync" width="150" height="300" class="amp-wp-enforced-sizes" %s>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				'<img src="https://placehold.it/150x300" loading="lazy" decoding="sync" width="150" height="300" class="amp-wp-enforced-sizes">',
 				[
 					'native_img_used' => true,
 				],
@@ -101,7 +163,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 			'image_with_new_platform_attributes'       => [
 				'<img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy">',
-				'<amp-img src="https://placehold.it/150x300" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy"></noscript></amp-img>',
+				'<amp-img src="https://placehold.it/150x300" width="150" height="300" importance="low" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy"></noscript></amp-img>',
 				[
 					'add_noscript_fallback' => true,
 				],
@@ -124,12 +186,17 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 			],
 
 			'image_with_wrong_decoding_and_loading'    => [
+				// @todo Currently decoding=sync is not being flagged as a validation error. Shouldn't it? The loading=eager attribute is.
 				'<img src="https://placehold.it/150x300" width="150" height="300" decoding="sync" loading="eager">',
-				'<amp-img src="https://placehold.it/150x300" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" decoding="sync" loading="eager"></noscript></amp-img>',
+				'<amp-img src="https://placehold.it/150x300" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" decoding="sync"></noscript></amp-img>',
 				[
 					'add_noscript_fallback' => true,
 				],
-				array_fill( 0, 2, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ),
+				[
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_CASEI,
+				],
 			],
 
 			'simple_image_without_noscript'            => [
@@ -439,6 +506,94 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				',
 				null, // No Change.
 			],
+
+			'picture_default_args'                     => [
+				$picture_source,
+				'<amp-img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder"></noscript></amp-img>',
+				[],
+			],
+
+			'picture_but_native_img_used'              => [
+				$picture_source,
+				'<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" decoding="async" class="amp-wp-enforced-sizes">',
+				[
+					'native_img_used' => true,
+				],
+			],
+
+			'picture_allowed_but_not_native_img'       => [
+				$picture_source,
+				'
+				<picture data-px-verified-tag>
+					<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400" width="1920" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400" width="1600" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400" width="1210" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400" width="991" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400" width="768" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" decoding="async" class="amp-wp-enforced-sizes">
+				</picture>
+				',
+				[
+					'allow_picture'   => true,
+					'native_img_used' => false,
+				],
+			],
+
+			'picture_allowed_and_native_img_used'      => [
+				$picture_source,
+				'
+				<picture data-px-verified-tag>
+					<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400" width="1920" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400" width="1600" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400" width="1210" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400" width="991" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400" width="768" height="400" data-px-verified-tag data-px-verified-attrs="width height">
+					<img src="https://via.placeholder.com/460x400" width="460" height="500" alt="Placeholder" decoding="async" class="amp-wp-enforced-sizes">
+				</picture>
+				',
+				[
+					'allow_picture'   => true,
+					'native_img_used' => true,
+				],
+			],
+
+			'allow_picture_but_no_child_img'           => [
+				'
+				<picture>
+					<source media="(min-width: 1400px)" srcset="https://via.placeholder.com/1920x400">
+					<source media="(min-width: 1210px)" srcset="https://via.placeholder.com/1600x400">
+					<source media="(min-width: 991px)" srcset="https://via.placeholder.com/1210x400">
+					<source media="(min-width: 768px)" srcset="https://via.placeholder.com/991x400">
+					<source media="(min-width: 450px)" srcset="https://via.placeholder.com/768x400">
+				</picture>
+				',
+				'',
+				[
+					'allow_picture' => true,
+				],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
+				],
+			],
+
+			'facebook_pixel_img_to_amp_pixel'          => [
+				'<img height="1" width="1" style="display:none" alt="fbpx" src="https://www.facebook.com/tr?id=123456789012345&ev=PageView&noscript=1" />',
+				'<amp-pixel src="https://www.facebook.com/tr?id=123456789012345&amp;ev=PageView&amp;noscript=1" layout="nodisplay"></amp-pixel>',
+			],
+
+			'facebook_pixel_img_to_amp_pixel_with_referrer' => [
+				'<img height="1" width="1" style="display:none" alt="fbpx" src="https://facebook.com/tr?id=123456789012345&ev=PageView&noscript=1" referrerpolicy="no-referrer">',
+				'<amp-pixel src="https://facebook.com/tr?id=123456789012345&amp;ev=PageView&amp;noscript=1" layout="nodisplay" referrerpolicy="no-referrer"></amp-pixel>',
+			],
+
+
+			'hero_img_with_noscript_fallback'          => [
+				'<img data-hero width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="">',
+				'<amp-img data-hero width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt layout="intrinsic" disable-inline-width><noscript><img width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" alt></noscript></amp-img>',
+				[
+					'native_img_used' => false,
+				],
+			],
 		];
 	}
 
@@ -463,11 +618,16 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected = null, $args = [], $expected_error_codes = [] ) {
-		if ( ! $expected ) {
+		if ( null === $expected ) {
 			$expected = $source;
 		}
 
 		$error_codes = [];
+
+		$args = array_merge(
+			[ 'native_img_used' => false ],
+			$args
+		);
 
 		$args = array_merge(
 			[
@@ -496,7 +656,57 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$this->assertEqualSets( $error_codes, $expected_error_codes );
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$this->assertEquals( $expected, $content );
+		$this->assertEqualMarkup( $expected, $content, "Actual content:\n$content" );
+	}
+
+	/**
+	 * @covers ::determine_dimensions()
+	 */
+	public function test_determine_dimensions_with_zero_width() {
+
+		$source   = '<img src="https://placehold.it/350x150.png" alt="Placeholder!"/>';
+		$expected = '<amp-img src="https://placehold.it/350x150.png" alt="Placeholder!" width="600" height="150" class="amp-wp-unknown-width amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/350x150.png" alt="Placeholder!" width="600" height="150"></noscript></amp-img>';
+
+		$callback = static function ( $extracted_dimensions ) {
+			$extracted_dimensions['https://placehold.it/350x150.png'] = [
+				'width'  => 0,
+				'height' => 150,
+			];
+			return $extracted_dimensions;
+		};
+		add_filter( 'amp_extract_image_dimensions_batch', $callback );
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEqualMarkup( $expected, $content );
+	}
+
+	/**
+	 * @covers ::determine_dimensions()
+	 */
+	public function test_determine_dimensions_with_zero_height() {
+
+		$source   = '<img src="https://placehold.it/350x150.png" alt="Placeholder!"/>';
+		$expected = '<amp-img src="https://placehold.it/350x150.png" alt="Placeholder!" width="350" height="400" class="amp-wp-unknown-height amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/350x150.png" alt="Placeholder!" width="350" height="400"></noscript></amp-img>';
+
+		$callback = static function ( $extracted_dimensions ) {
+			$extracted_dimensions['https://placehold.it/350x150.png'] = [
+				'width'  => 350,
+				'height' => 0,
+			];
+			return $extracted_dimensions;
+		};
+		add_filter( 'amp_extract_image_dimensions_batch', $callback );
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEqualMarkup( $expected, $content );
 	}
 
 	/**
@@ -532,7 +742,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$expected = [ 'amp-anim' => true ];
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
 		$sanitizer->sanitize();
 
 		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
@@ -557,7 +767,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$expected = '<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>';
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
 		$sanitizer->sanitize();
 
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
@@ -578,7 +788,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$expected = '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>';
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
 		$sanitizer->sanitize();
 
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
@@ -644,6 +854,191 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				'post_mime_type' => 'image/jpeg',
 				'post_type'      => 'attachment',
 			]
+		);
+	}
+
+	/**
+	 * Data provider for $this->test_process_picture_elements()
+	 *
+	 * @return array
+	 */
+	public function get_data_for_process_picture_elements() {
+
+		$content = '
+			<div>
+				<picture>
+					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" width="298" height="332">
+				</picture>
+				<picture>
+					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" width="240" height="200">
+				</picture>
+			</div>
+			<div>
+				<picture>
+					<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
+				</picture>
+			</div>
+		';
+
+		return [
+			'allow_picture_false'                     => [
+				'input'    => $content,
+				'args'     => [
+					'allow_picture' => false,
+				],
+				'expected' => '
+					<div>
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" width="298" height="332">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" width="240" height="200">
+					</div>
+					<div>
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
+					</div>
+				',
+			],
+			'allow_picture_true'                      => [
+				'input'    => $content,
+				'args'     => [
+					'allow_picture' => true,
+				],
+				'expected' => '
+					<div>
+						<picture data-px-verified-tag>
+							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg?image=1" alt="" width="298" height="332">
+						</picture>
+						<picture data-px-verified-tag>
+							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg?image=2" alt="" width="240" height="200">
+						</picture>
+					</div>
+					<div>
+						<picture data-px-verified-tag>
+							<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" data-px-verified-tag>
+							<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
+						</picture>
+					</div>
+				',
+			],
+			'without_picture_element'                 => [
+				'input'    => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
+				'args'     => [
+					'allow_picture' => true,
+				],
+				'expected' => '<h1>Page heading</h1><ul><li>Item 1</li><li>Item 2</li></ul>',
+			],
+			'picture_without_img_allow_picture_false' => [
+				'input'    => '
+					<picture>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+					</picture>
+				',
+				'args'     => [
+					'allow_picture' => false,
+				],
+				'expected' => '
+					<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="">
+				',
+			],
+			'picture_without_img_allow_picture_true'  => [
+				'input'    => '
+					<picture>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" width="240" height="200">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
+					</picture>
+				',
+				'args'     => [
+					'allow_picture' => true,
+				],
+				'expected' => '
+					<picture data-px-verified-tag>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)" width="240" height="200" data-px-verified-tag data-px-verified-attrs="width height">
+						<img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/painted-hand-298-332.jpg??image=3" alt="" width="298" height="332">
+					</picture>
+				',
+			],
+			'picture_but_no_child_img'                => [
+				'input'    => '
+					<picture>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					</picture>
+				',
+				'args'     => [
+					'allow_picture' => true,
+				],
+				// No transformation is done in this case!
+				'expected' => '
+					<picture>
+						<source srcset="https://interactive-examples.mdn.mozilla.net/media/cc0-images/surfer-240-200.jpg" media="(min-width: 800px)">
+					</picture>
+				',
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_for_process_picture_elements()
+	 *
+	 * @covers ::mark_node_as_px_verified_recursively()
+	 * @covers ::process_picture_elements()
+	 */
+	public function test_process_picture_elements( $input, $args, $expected ) {
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $input );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, $args );
+
+		$this->call_private_method( $sanitizer, 'process_picture_elements' );
+
+		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEqualMarkup( $expected, $actual, "Actual content:\n$actual" );
+	}
+
+	/**
+	 * @return array
+	 */
+	public function get_data_for_test_is_tracking_pixel_url() {
+		return [
+			'facebook_pixel_url_no_ssl_no_www' => [
+				'url'      => 'http://facebook.com/tr?id=123456789012345',
+				'expected' => true,
+			],
+			'facebook_pixel_url_no_ssl_www'    => [
+				'url'      => 'http://www.facebook.com/tr?id=123456789012345',
+				'expected' => true,
+			],
+			'facebook_pixel_url_ssl_no_www'    => [
+				'url'      => 'https://facebook.com/tr?id=123456789012345',
+				'expected' => true,
+			],
+			'facebook_pixel_url_ssl_www'       => [
+				'url'      => 'https://www.facebook.com/tr?id=123456789012345',
+				'expected' => true,
+			],
+			'facebook_page_url'                => [
+				'url'      => 'https://www.facebook.com/traffic?id=123456789012345',
+				'expected' => false,
+			],
+			'relative_url'                     => [
+				'url'      => '/tr?id=123456789012345',
+				'expected' => false,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_for_test_is_tracking_pixel_url()
+	 *
+	 * @covers ::is_tracking_pixel_url()
+	 */
+	public function test_is_tracking_pixel_url( $url, $expected ) {
+		$this->assertEquals(
+			$expected,
+			$this->call_private_static_method( AMP_Img_Sanitizer::class, 'is_tracking_pixel_url', [ $url ] )
 		);
 	}
 }

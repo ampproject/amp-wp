@@ -17,13 +17,17 @@ exports[`ErrorScreen matches snapshot 1`] = `
         }
       }
     />
-    <p
-      dangerouslySetInnerHTML={
-        Object {
-          "__html": "Please submit details to our <a href=\\"https://wordpress.org/support/plugin/amp/\\" target=\\"_blank\\" rel=\\"noreferrer noopener\\">support forum</a>.",
-        }
-      }
-    />
+    <p>
+      Please submit details to our 
+      <a
+        href="https://wordpress.org/support/plugin/amp/"
+        rel="noreferrer noopener"
+        target="_blank"
+      >
+        support forum
+      </a>
+      .
+    </p>
     <details>
       <summary>
         Details
