@@ -140,6 +140,7 @@
     "test:php": "wp-env run phpunit 'WORDPRESS_TABLE_PREFIX=wptests_ /var/www/html/wp-content/plugins/amp/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/amp/phpunit.xml.dist $npm_config_args'",
     "test:php:xdebug": "wp-env run tests-wordpress 'env WORDPRESS_TABLE_PREFIX=wptests_ WP_PHPUNIT__TESTS_CONFIG=/var/www/html/phpunit-wp-config.php /var/www/html/wp-content/plugins/amp/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/amp/phpunit.xml.dist $npm_config_args'",
     "test:php:help": "npm run test:php --args='--help'",
+    "update-analytics-vendors": "node ./bin/update-analytics-vendors.js",
     "update-ecosystem-files": "node ./bin/update-extension-files.js",
     "wp-env": "wp-env"
   },
