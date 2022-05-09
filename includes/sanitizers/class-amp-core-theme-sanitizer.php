@@ -137,6 +137,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_img_display_block_fix'        => $args,
 					'add_twentytwenty_custom_logo_fix' => $args,
 					'add_twentytwenty_current_page_awareness' => [],
+					'show_twentytwenty_desktop_expanded_menu' => [],
 				];
 
 				$theme = wp_get_theme( 'twentytwenty' );
@@ -2183,6 +2184,26 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $menu_toggles as $menu_toggle ) {
 			/** @var DOMElement $menu_toggle */
 			$menu_toggle->removeAttribute( 'onclick' );
+		}
+	}
+
+	/**
+	 * Show "Desktop Expanded Menu" in AMP mode.
+	 * Removes 'no-js' class from menu element.
+	 *
+	 * @return void
+	 */
+	public function show_twentytwenty_desktop_expanded_menu() {
+
+		$xpath         = "//*[@class='header-navigation-wrapper']/div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' header-toggles hide-no-js ' ) ]";
+		$expanded_menu = $this->dom->xpath->query( $xpath )->item( 0 );
+
+		if ( $expanded_menu instanceof DOMElement ) {
+			$class = $expanded_menu->getAttribute( Attribute::CLASS_ );
+			$expanded_menu->setAttribute(
+				Attribute::CLASS_,
+				str_replace( 'hide-no-js', '', $class )
+			);
 		}
 	}
 

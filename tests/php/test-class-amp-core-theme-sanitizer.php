@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use AmpProject\Html\Tag;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
 
@@ -21,6 +22,7 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 
 	use PrivateAccess;
 	use LoadsCoreThemes;
+	use MarkupComparison;
 
 	public function set_up() {
 		parent::set_up();
@@ -718,5 +720,38 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 			'<button id="dark-mode-toggler" class="fixed-bottom" on="tap:AMP.toggleTheme()"><span class="dark-mode-button-on">Dark Mode: On</span><span class="dark-mode-button-off">Dark Mode: Off</span></button>',
 			$dom->saveHTML( $button )
 		);
+	}
+
+	/**
+	 * Test data for $this->test_show_twentytwenty_desktop_expanded_menu()
+	 *
+	 * @return array Test data set.
+	 */
+	public function get_data_show_twentytwenty_desktop_expanded_menu() {
+
+		return [
+			'with-no-js-selector'    => [
+				'input'    => '<div class="header-navigation-wrapper"><div class="header-toggles hide-no-js"></div></div>',
+				'expected' => '<div class="header-navigation-wrapper"><div class="header-toggles "></div></div>',
+			],
+			'without-no-js-selector' => [
+				'input'    => '<div class="header-navigation-wrapper"><div class="header-toggles"></div></div>',
+				'expected' => '<div class="header-navigation-wrapper"><div class="header-toggles"></div></div>',
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_show_twentytwenty_desktop_expanded_menu()
+	 *
+	 * @covers ::show_twentytwenty_desktop_expanded_menu()
+	 */
+	public function test_show_twentytwenty_desktop_expanded_menu( $input, $expected ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $input );
+		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
+
+		$this->call_private_method( $sanitizer, 'show_twentytwenty_desktop_expanded_menu' );
+
+		$this->assertEqualMarkup( $expected, AMP_DOM_Utils::get_content_from_dom( $dom ) );
 	}
 }
