@@ -513,9 +513,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$is_file_url                        = preg_match( '/\.\w+$/', wp_parse_url( $parent_node->getAttribute( Attribute::HREF ), PHP_URL_PATH ) );
 		$is_node_wrapped_in_media_file_link = (
-			'a' === $parent_node->tagName
-			&&
-			( 'figure' === $parent_node->tagName || 'figure' === $parent_node->parentNode->tagName )
+			(
+				'a' === $parent_node->tagName
+				||
+				( 'figure' === $parent_node->tagName || 'figure' === $parent_node->parentNode->tagName )
+			)
 			&&
 			$is_file_url // This should be a link to the media file, not the attachment page.
 		);

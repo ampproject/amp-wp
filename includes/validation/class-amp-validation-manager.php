@@ -699,7 +699,9 @@ class AMP_Validation_Manager {
 		$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find theme/plugin responsible for calling.
 		foreach ( $backtrace as $call ) {
 			if (
-				isset( $call['function'], $call['file'] )
+				! empty( $call['function'] )
+				&&
+				! empty( $call['file'] )
 				&&
 				'wp_editor' === $call['function']
 			) {

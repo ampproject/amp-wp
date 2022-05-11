@@ -41,7 +41,7 @@ final class BlockSources implements Conditional, Service, Registerable {
 	/**
 	 * Block source data.
 	 *
-	 * @var array
+	 * @var array|null
 	 */
 	private $block_sources;
 

@@ -188,13 +188,16 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		/**
+		 * @var array
+		 */
+		$rel = [];
+
 		// Gather the rel values that were attributed to the element.
 		// Note that links and forms may both have this attribute.
 		// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel>.
 		if ( $element->hasAttribute( Attribute::REL ) ) {
 			$rel = array_filter( preg_split( '/\s+/', trim( $element->getAttribute( Attribute::REL ) ) ) );
-		} else {
-			$rel = [];
 		}
 
 		$excluded = (
