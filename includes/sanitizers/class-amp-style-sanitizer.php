@@ -2761,7 +2761,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * @var RuleValueList|string|null
 		 */
-		$property_value = $property->getValue();
+		$property_value = $property instanceof Rule ? $property->getValue() : '';
 
 		if (
 			(
