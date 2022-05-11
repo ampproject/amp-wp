@@ -1906,7 +1906,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
-		$this->assertStringContainsString( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
+		$this->assertStringContainsString( '<html ', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
 		$this->assertStringContainsString( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
 		if ( $with_amp_live_list ) {
 			$this->assertStringContainsString( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
