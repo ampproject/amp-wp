@@ -1,9 +1,9 @@
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { useContext } from '@wordpress/element';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -74,30 +74,39 @@ export function SiteReview() {
 					{ __( 'Need help?', 'amp' ) }
 				</h3>
 				<ul className="settings-site-review__list">
-					{ /* dangerouslySetInnerHTML reason: Injection of a link. */ }
-					<li dangerouslySetInnerHTML={ {
-						__html: sprintf(
-							/* translators: placeholder is a link to support forum. */
-							__( 'Reach out in the <a href="%s" target="_blank" rel="noreferrer noopener">support forums</a>', 'amp' ),
-							'https://wordpress.org/support/plugin/amp/#new-topic-0',
-						),
-					} } />
-					{ /* dangerouslySetInnerHTML reason: Injection of a link. */ }
-					<li dangerouslySetInnerHTML={ {
-						__html: sprintf(
-							/* translators: placeholder is the template mode section anchor. */
-							__( 'Try a different <a href="%s">template mode</a>', 'amp' ),
-							'#template-modes',
-						),
-					} } />
-					{ /* dangerouslySetInnerHTML reason: Injection of a link. */ }
-					<li dangerouslySetInnerHTML={ {
-						__html: sprintf(
-							/* translators: placeholder is a link to the plugin site. */
-							__( '<a href="%s" target="_blank" rel="noreferrer noopener">Learn more</a> how the AMP plugin works', 'amp' ),
-							'https://amp-wp.org/documentation/how-the-plugin-works/',
-						),
-					} } />
+					<li>
+						{
+							createInterpolateElement(
+								__( 'Reach out in the <a>support forums</a>', 'amp' ),
+								{
+									// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
+									a: <a href="https://wordpress.org/support/plugin/amp/#new-topic-0" target="_blank" rel="noreferrer noopener" />,
+								},
+							)
+						}
+					</li>
+					<li>
+						{
+							createInterpolateElement(
+								__( 'Try a different <a>template mode</a>', 'amp' ),
+								{
+									// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
+									a: <a href="#template-modes" />,
+								},
+							)
+						}
+					</li>
+					<li>
+						{
+							createInterpolateElement(
+								__( '<a>Learn more</a> how the AMP plugin works', 'amp' ),
+								{
+									// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
+									a: <a href="https://amp-wp.org/documentation/how-the-plugin-works/" target="_blank" rel="noreferrer noopener" />,
+								},
+							)
+						}
+					</li>
 				</ul>
 				<div className="settings-site-review__actions">
 					{ previewPermalink && (

@@ -7,7 +7,7 @@ import { AMP_COMPATIBLE_THEMES_URL } from 'amp-site-scan-notice'; // From WP inl
 /**
  * WordPress dependencies
  */
-import { useContext, useMemo } from '@wordpress/element';
+import { createInterpolateElement, useContext, useMemo } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 /**
@@ -52,22 +52,26 @@ export function ThemesWithAmpIncompatibility( { themesWithAmpIncompatibility } )
 					key={ themeWithAmpIncompatibility.slug }
 					className="amp-site-scan-notice__source-details"
 				>
-					<summary
-						className="amp-site-scan-notice__source-summary"
-						dangerouslySetInnerHTML={ {
-							__html: sprintf(
-								/* translators: 1: theme name; 2: number of URLs with AMP validation issues. */
-								_n(
-									'<b>%1$s</b> on %2$d URL',
-									'<b>%1$s</b> on %2$d URLs',
+					<summary className="amp-site-scan-notice__source-summary">
+						{
+							createInterpolateElement(
+								sprintf(
+									/* translators: 1: theme name; 2: number of URLs with AMP validation issues. */
+									_n(
+										'<b>%1$s</b> on %2$d URL',
+										'<b>%1$s</b> on %2$d URLs',
+										themeWithAmpIncompatibility.urls.length,
+										'amp',
+									),
+									themeNames[ themeWithAmpIncompatibility.slug ],
 									themeWithAmpIncompatibility.urls.length,
-									'amp',
 								),
-								themeNames[ themeWithAmpIncompatibility.slug ],
-								themeWithAmpIncompatibility.urls.length,
-							),
-						} }
-					/>
+								{
+									b: <b />,
+								},
+							)
+						}
+					</summary>
 					<ul className="amp-site-scan-notice__urls-list">
 						{ themeWithAmpIncompatibility.urls.map( ( url ) => (
 							<li key={ url }>

@@ -8,9 +8,9 @@ An easier path to great Page Experience for everyone. Powered by AMP.
 **Tags:** [page experience](https://wordpress.org/plugins/tags/page-experience), [performance](https://wordpress.org/plugins/tags/performance), [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages)  
 **Requires at least:** 4.9  
 **Tested up to:** 5.9  
-**Stable tag:** 2.2.3  
+**Stable tag:** 2.2.4  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
-**Requires PHP:** 5.6
+**Requires PHP:** 7.0
 
 [![Build Status](https://github.com/ampproject/amp-wp/workflows/Build,%20test%20&%20measure/badge.svg)](https://github.com/ampproject/amp-wp/actions?query=branch%3Adevelop+workflow%3A%22Build%2C+test+%26+measure%22)
 [![Coverage Status](https://img.shields.io/codecov/c/github/ampproject/amp-wp/develop.svg)](https://codecov.io/gh/ampproject/amp-wp)

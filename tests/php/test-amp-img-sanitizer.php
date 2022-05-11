@@ -983,7 +983,6 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	/**
 	 * @dataProvider get_data_for_process_picture_elements()
 	 *
-	 * @covers ::mark_node_as_px_verified_recursively()
 	 * @covers ::process_picture_elements()
 	 */
 	public function test_process_picture_elements( $input, $args, $expected ) {

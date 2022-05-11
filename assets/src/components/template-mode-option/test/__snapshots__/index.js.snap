@@ -127,9 +127,8 @@ exports[`TemplateModeOption matches snapshot 1`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
-            height={24}
+            size={24}
             viewBox="0 0 24 24"
-            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -391,9 +390,8 @@ exports[`TemplateModeOption matches snapshot 2`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
-            height={24}
+            size={24}
             viewBox="0 0 24 24"
-            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -432,13 +430,9 @@ exports[`TemplateModeOption matches snapshot 2`] = `
         className="template-mode-selection__details"
       >
         <p>
-          <span
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Reader info",
-              }
-            }
-          />
+          <span>
+            Reader info
+          </span>
            
           <a
             href="https://amp-wp.org/documentation/getting-started/reader/"
@@ -687,9 +681,8 @@ exports[`TemplateModeOption matches snapshot 3`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
-            height={24}
+            size={24}
             viewBox="0 0 24 24"
-            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -728,13 +721,9 @@ exports[`TemplateModeOption matches snapshot 3`] = `
         className="template-mode-selection__details"
       >
         <p>
-          <span
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Component details",
-              }
-            }
-          />
+          <span>
+            Component details
+          </span>
            
           <a
             href="https://amp-wp.org/documentation/getting-started/reader/"
