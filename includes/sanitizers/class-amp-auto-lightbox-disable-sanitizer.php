@@ -19,6 +19,6 @@ class AMP_Auto_Lightbox_Disable_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return void
 	 */
 	public function sanitize() {
-		$this->dom->body->setAttributeNode( $this->dom->createAttribute( 'data-amp-auto-lightbox-disable' ) );
+		$this->dom->html->setAttributeNode( $this->dom->createAttribute( 'data-amp-auto-lightbox-disable' ) );
 	}
 }

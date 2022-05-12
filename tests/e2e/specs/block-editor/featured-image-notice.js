@@ -35,6 +35,8 @@ describe( 'Featured Image Notice', () => {
 
 		// This should not suggest cropping.
 		await expect( page ).not.toMatch( cropImageText );
+
+		await clickButton( 'Featured image' );
 	} );
 
 	it( 'should display a notice when the image is too small, but not suggest cropping', async () => {
