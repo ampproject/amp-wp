@@ -25,6 +25,6 @@ class AMP_Auto_Lightbox_Disable_Sanitizer_Test extends TestCase {
 		$sanitizer = new AMP_Auto_Lightbox_Disable_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$this->assertTrue( $dom->body->hasAttribute( 'data-amp-auto-lightbox-disable' ) );
+		$this->assertTrue( $dom->html->hasAttribute( 'data-amp-auto-lightbox-disable' ) );
 	}
 }

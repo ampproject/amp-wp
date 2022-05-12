@@ -399,13 +399,12 @@ jobs:
           - php: '7.0'
             wp: '5.1'
 
-          - php: '5.6'
+          - php: '7.0'
             wp: '5.0'
 
-          - php: '5.6'
+          - php: '7.0'
             wp: '4.9'
             external-http: true
-            install-pwa-plugin: false
 
     steps:
       # Note: The repeated `needs.pre-run.outputs.changed-php-count > 0` checks would be avoided if a step could short-
@@ -576,14 +575,6 @@ jobs:
             wp: '5.1'
             coverage: false
 
-          - php: '5.6'
-            wp: '5.0'
-            coverage: false
-
-          - php: '5.6'
-            wp: '4.9'
-            coverage: false
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -703,7 +694,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '5.6'
+          php-version: '7.0'
 
       - name: Setup Node
         uses: actions/setup-node@v3.1.1
