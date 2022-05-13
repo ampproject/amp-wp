@@ -121,7 +121,7 @@ class BlockSourcesTest extends TestCase {
 			$this->instance->get_block_sources()
 		);
 
-		require_once MockPluginEnvironment::BAD_PLUGINS_DIR . '/' . MockPluginEnvironment::BAD_BLOCK_PLUGIN_FILE;
+		require_once AMP__DIR__ . '/' . MockPluginEnvironment::BAD_PLUGINS_DIR . '/' . MockPluginEnvironment::BAD_BLOCK_PLUGIN_FILE;
 
 		$this->assertEquals(
 			[
