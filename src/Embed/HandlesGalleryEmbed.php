@@ -45,7 +45,7 @@ trait HandlesGalleryEmbed {
 		}
 
 		// If the carousel is not required but the lightbox is, add the `lightbox` attribute to each image and return.
-		if ( ! $is_carousel && $is_lightbox ) {
+		if ( $is_lightbox && ! $is_carousel ) {
 			$this->add_lightbox_attribute_to_img_nodes( $img_elements );
 			return;
 		}

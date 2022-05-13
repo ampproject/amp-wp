@@ -13,7 +13,6 @@ services:
 parameters:
 	level: 4
 	inferPrivatePropertyTypeFromConstructor: true
-	treatPhpDocTypesAsCertain: false
 	paths:
 		- %currentWorkingDirectory%/includes/
 		- %currentWorkingDirectory%/src/
