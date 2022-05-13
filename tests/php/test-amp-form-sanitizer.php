@@ -18,6 +18,8 @@ use AmpProject\AmpWP\Tests\TestCase;
  *
  * @group amp-comments
  * @group amp-form
+ *
+ * @coversDefaultClass AMP_Form_Sanitizer
  */
 class AMP_Form_Sanitizer_Test extends TestCase {
 
@@ -251,6 +253,8 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 	 * @param array       $args            Args.
 	 * @param array       $expected_errors Expected errors.
 	 * @dataProvider get_data
+	 *
+	 * @covers ::sanitize()
 	 */
 	public function test_converter( $source, $expected = null, $args = [], $expected_errors = [] ) {
 		if ( is_null( $expected ) ) {
