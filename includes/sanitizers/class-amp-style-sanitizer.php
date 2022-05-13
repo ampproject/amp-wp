@@ -2758,9 +2758,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$properties = $ruleset->getRules( 'font-display' );
 		$property   = end( $properties ); // Last since the last property wins in CSS.
 
-		/**
-		 * @var RuleValueList|string|null
-		 */
+		/** @var RuleValueList|string|null */
 		$property_value = $property instanceof Rule ? $property->getValue() : '';
 
 		if (

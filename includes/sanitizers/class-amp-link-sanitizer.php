@@ -188,9 +188,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		/**
-		 * @var array
-		 */
+		/** @var array */
 		$rel = [];
 
 		// Gather the rel values that were attributed to the element.

@@ -425,9 +425,7 @@ class SupportData {
 
 		require_once ABSPATH . '/wp-admin/includes/plugin.php';
 
-		/**
-		 * @var array
-		 */
+		/** @var array */
 		$plugin_data = get_plugin_data( $absolute_plugin_file );
 
 		$slug = explode( '/', $plugin_file );

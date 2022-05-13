@@ -2068,9 +2068,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
  * @return string|null Script hash or null if the sha384 algorithm is not supported.
  */
 function amp_generate_script_hash( $script ) {
-	/**
-	 * @var false|string
-	 */
+	/** @var false|string */
 	$sha384 = hash( 'sha384', $script, true );
 	if ( false === $sha384 ) {
 		return null;

@@ -212,9 +212,7 @@ final class PluginSuppression implements Service, Registerable {
 				// Remove the plugin from being suppressed.
 				unset( $option[ $plugin_slug ] );
 			} elseif ( ! isset( $option[ $plugin_slug ] ) && $suppressed && array_key_exists( $plugin_slug, $plugins ) ) {
-				/**
-				 * @var WP_User|null
-				 */
+				/** @var WP_User|null */
 				$user = wp_get_current_user();
 
 				$option[ $plugin_slug ] = [
