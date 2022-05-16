@@ -153,8 +153,10 @@ def GenerateHeaderPHP(out):
 def GenerateSpecVersionPHP(out, versions):
 	# Output the version of the spec file and matching validator version
 	if versions['spec_file_revision']:
+		out.append('\t// @phpstan-ignore-next-line')
 		out.append('\tprivate static $spec_file_revision = %d;' % versions['spec_file_revision'])
 	if versions['min_validator_revision_required']:
+		out.append('\t// @phpstan-ignore-next-line')
 		out.append('\tprivate static $minimum_validator_revision_required = %d;' % versions['min_validator_revision_required'])
 
 def GenerateDescendantListsPHP(out, descendant_lists):
