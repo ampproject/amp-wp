@@ -120,7 +120,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 		/** @var DOMElement|null */
 		$admin_bar_container = $this->dom->getElementById( 'wpadminbar' );
 
-		/** @var DOMComment|false */
+		/** @var DOMComment|null */
 		$admin_bar_placeholder = null;
 
 		if ( $admin_bar_container ) {
