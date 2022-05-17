@@ -45,7 +45,7 @@
     "uuid": "8.3.2"
   },
   "devDependencies": {
-    "@actions/github": "5.0.2",
+    "@actions/github": "5.0.3",
     "@babel/core": "7.17.10",
     "@babel/plugin-proposal-class-properties": "7.17.12",
     "@wordpress/babel-preset-default": "6.10.0",
