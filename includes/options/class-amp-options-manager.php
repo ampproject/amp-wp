@@ -38,6 +38,7 @@ class AMP_Options_Manager {
 		Option::PAIRED_URL_STRUCTURE     => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 		Option::PLUGIN_CONFIGURED        => false,
 		Option::DELETE_DATA_AT_UNINSTALL => true,
+		Option::USE_NATIVE_IMG_TAG       => false,
 	];
 
 	/**
@@ -323,6 +324,10 @@ class AMP_Options_Manager {
 
 		if ( isset( $new_options[ Option::DELETE_DATA_AT_UNINSTALL ] ) ) {
 			$options[ Option::DELETE_DATA_AT_UNINSTALL ] = (bool) $new_options[ OPTION::DELETE_DATA_AT_UNINSTALL ];
+		}
+
+		if ( isset( $new_options[ Option::USE_NATIVE_IMG_TAG ] ) ) {
+			$options[ Option::USE_NATIVE_IMG_TAG ] = (bool) $new_options[ OPTION::USE_NATIVE_IMG_TAG ];
 		}
 
 		// Validate analytics.
