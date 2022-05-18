@@ -188,7 +188,7 @@ class AMP_Post_Template {
 	 * @return mixed Value.
 	 */
 	public function get( $property, $default = null ) {
-		if ( ! isset( $this->data ) ) {
+		if ( empty( $this->data ) ) {
 			$this->set_data();
 		}
 

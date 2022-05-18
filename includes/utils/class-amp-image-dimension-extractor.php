@@ -274,7 +274,7 @@ class AMP_Image_Dimension_Extractor {
 	 * Extract dimensions from downloaded images (or transient/cached dimensions from downloaded images)
 	 *
 	 * @param array $dimensions Image urls mapped to dimensions.
-	 * @param false $mode       Deprecated.
+	 * @param bool  $mode       Deprecated.
 	 * @return array Dimensions mapped to image urls, or false if they could not be retrieved
 	 */
 	public static function extract_by_downloading_images( $dimensions, $mode = false ) {

@@ -2627,10 +2627,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Parent.
 		 *
-		 * @var DOMNode $parent
+		 * @var DOMElement|null $parent
 		 */
 		$parent = $node->parentNode;
-		if ( $node && $parent ) {
+		if ( $parent ) {
 			if ( ! $this->remove_invalid_child( $node ) ) {
 				return false;
 			}

@@ -111,7 +111,7 @@ final class ValidationExemption {
 	private static function mark_node_with_exemption_attribute( DOMNode $node, $tag_attribute_name, $attrs_attribute_name ) {
 		if ( $node instanceof Element ) {
 			if ( ! $node->hasAttribute( $tag_attribute_name ) ) {
-				if ( ! $node->ownerDocument ) {
+				if ( null === $node->ownerDocument ) {
 					return false; // @codeCoverageIgnore
 				}
 				$node->setAttributeNode( $node->ownerDocument->createAttribute( $tag_attribute_name ) );

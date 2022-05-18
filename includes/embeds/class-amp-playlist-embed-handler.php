@@ -71,7 +71,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * The removed shortcode callback.
 	 *
-	 * @var callable
+	 * @var callable|null
 	 */
 	public $removed_shortcode_callback;
 

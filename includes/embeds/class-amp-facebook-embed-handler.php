@@ -175,7 +175,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function get_embed_type( DOMElement $node ) {
 		$class_attr = $node->getAttribute( 'class' );
-		if ( null === $class_attr || ! $node->hasAttribute( 'data-href' ) ) {
+		if ( empty( $class_attr ) || ! $node->hasAttribute( 'data-href' ) ) {
 			return null;
 		}
 

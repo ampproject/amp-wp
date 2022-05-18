@@ -138,7 +138,7 @@ class AMP_Post_Type_Support {
 		 * @param int     $post_id Post ID.
 		 * @param WP_Post $post    Post.
 		 */
-		if ( isset( $post->ID ) && true === apply_filters( 'amp_skip_post', false, $post->ID, $post ) ) {
+		if ( ! empty( $post->ID ) && true === apply_filters( 'amp_skip_post', false, $post->ID, $post ) ) {
 			$errors[] = 'skip-post';
 		}
 
