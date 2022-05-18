@@ -67,6 +67,7 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 		$this->assertEqualSets(
 			[
 				'theme_support',
+				'use_native_img_tag',
 				'reader_theme',
 				'mobile_redirect',
 				'plugin_configured',

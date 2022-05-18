@@ -1770,9 +1770,8 @@ class Test_AMP_Theme_Support extends TestCase {
 			$prev_ordered_contain = $ordered_contain;
 		}
 
-		$this->assertStringNotContainsString( '<noscript><img', $sanitized_html );
-		$this->assertStringContainsString( '<img width="100" height="100" src="https://example.com/hero.png" decoding="async" class="amp-wp-enforced-sizes">', $sanitized_html );
-		$this->assertStringContainsString( '<img width="100" height="100" src="https://example.com/test.png" loading="lazy" decoding="async" class="amp-wp-enforced-sizes">', $sanitized_html );
+		$this->assertStringContainsString( '<noscript><img', $sanitized_html );
+		$this->assertStringContainsString( '<amp-img', $sanitized_html );
 
 		$this->assertStringContainsString( '<noscript><audio', $sanitized_html );
 		$this->assertStringContainsString( '<amp-audio', $sanitized_html );

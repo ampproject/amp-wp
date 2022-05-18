@@ -1458,6 +1458,8 @@ function amp_is_dev_mode() {
  * @return bool Whether to use `img`.
  */
 function amp_is_native_img_used() {
+	$use_native_img_tag = AMP_Options_Manager::get_option( Option::USE_NATIVE_IMG_TAG );
+
 	/**
 	 * Filters whether to use the native `img` element rather than convert to `amp-img`.
 	 *
@@ -1469,7 +1471,7 @@ function amp_is_native_img_used() {
 	 *
 	 * @param bool $use_native Whether to use `img`.
 	 */
-	return (bool) apply_filters( 'amp_native_img_used', true );
+	return (bool) apply_filters( 'amp_native_img_used', $use_native_img_tag );
 }
 
 /**
