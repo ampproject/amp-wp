@@ -342,7 +342,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function render_status( $post ) {
 		$verify = (
-			isset( $post->ID )
+			! empty( $post->ID )
 			&&
 			in_array( $post->post_type, AMP_Post_Type_Support::get_supported_post_types(), true )
 			&&

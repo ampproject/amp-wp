@@ -218,7 +218,7 @@ final class PluginSuppression implements Service, Registerable {
 					// Note that we store the version that was suppressed so that we can alert the user when to check again.
 					Option::SUPPRESSED_PLUGINS_LAST_VERSION => $plugins[ $plugin_slug ]['Version'],
 					Option::SUPPRESSED_PLUGINS_TIMESTAMP => time(),
-					Option::SUPPRESSED_PLUGINS_USERNAME  => $user instanceof WP_User ? $user->user_nicename : null,
+					Option::SUPPRESSED_PLUGINS_USERNAME  => $user->ID ? $user->user_nicename : null,
 				];
 			}
 		}

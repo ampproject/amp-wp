@@ -425,6 +425,7 @@ class SupportData {
 
 		require_once ABSPATH . '/wp-admin/includes/plugin.php';
 
+		/** @var array */
 		$plugin_data = get_plugin_data( $absolute_plugin_file );
 
 		$slug = explode( '/', $plugin_file );
@@ -997,7 +998,7 @@ class SupportData {
 	 *
 	 * @since 2.2
 	 *
-	 * @param string|array|object $content Content from home_url need to remove.
+	 * @param mixed $content Content from home_url need to remove.
 	 *
 	 * @return string|array Content after removing home_url.
 	 */

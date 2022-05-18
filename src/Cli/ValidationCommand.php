@@ -16,6 +16,7 @@ use AmpProject\AmpWP\Infrastructure\CliCommand;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
+use cli\progress\Bar;
 use Exception;
 use WP_CLI;
 use WP_CLI\Utils;
@@ -237,7 +238,7 @@ final class ValidationCommand implements Service, CliCommand {
 		foreach ( $urls as $url ) {
 			$validity = $this->url_validation_provider->get_url_validation( $url['url'], $url['type'] );
 
-			if ( $this->wp_cli_progress ) {
+			if ( $this->wp_cli_progress instanceof Bar ) {
 				$this->wp_cli_progress->tick();
 			}
 

@@ -1458,6 +1458,8 @@ function amp_is_dev_mode() {
  * @return bool Whether to use `img`.
  */
 function amp_is_native_img_used() {
+	$use_native_img_tag = AMP_Options_Manager::get_option( Option::USE_NATIVE_IMG_TAG );
+
 	/**
 	 * Filters whether to use the native `img` element rather than convert to `amp-img`.
 	 *
@@ -1469,7 +1471,7 @@ function amp_is_native_img_used() {
 	 *
 	 * @param bool $use_native Whether to use `img`.
 	 */
-	return (bool) apply_filters( 'amp_native_img_used', true );
+	return (bool) apply_filters( 'amp_native_img_used', $use_native_img_tag );
 }
 
 /**
@@ -2068,7 +2070,11 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
  * @return string|null Script hash or null if the sha384 algorithm is not supported.
  */
 function amp_generate_script_hash( $script ) {
-	$sha384 = hash( 'sha384', $script, true );
+	try {
+		$sha384 = hash( 'sha384', $script, true );
+	} catch ( ValueError $e ) {
+		$sha384 = false;
+	}
 	if ( false === $sha384 ) {
 		return null;
 	}

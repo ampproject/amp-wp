@@ -339,6 +339,10 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 						'type'    => 'boolean',
 						'default' => true,
 					],
+					Option::USE_NATIVE_IMG_TAG       => [
+						'type'    => 'boolean',
+						'default' => false,
+					],
 					self::SUPPORTABLE_POST_TYPES     => [
 						'type'     => 'array',
 						'readonly' => true,

@@ -283,6 +283,16 @@ class AMP_Base_Sanitizer_Test extends TestCase {
 				'',
 			],
 
+			'with_string_zero'     => [
+				[ '0', 'width' ],
+				0,
+			],
+
+			'with_int_zero'        => [
+				[ 0, 'width' ],
+				0,
+			],
+
 			'empty_space'          => [
 				[ ' ', 'width' ],
 				'',
