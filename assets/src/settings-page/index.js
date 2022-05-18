@@ -57,8 +57,8 @@ import { PairedUrlStructure } from './paired-url-structure';
 import { MobileRedirection } from './mobile-redirection';
 import { DeveloperTools } from './developer-tools';
 import { SiteScan } from './site-scan';
-import { DeleteDataAtUninstall } from './delete-data-at-uninstall';
 import { ToggleUseNativeImgTag } from './toggle-use-native-img-tag';
+import { DeleteDataAtUninstall } from './delete-data-at-uninstall';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -352,8 +352,8 @@ function Root( { appRoot } ) {
 					{ HAS_DEPENDENCY_SUPPORT && (
 						<DeveloperTools />
 					) }
-					<DeleteDataAtUninstall />
 					<ToggleUseNativeImgTag />
+					<DeleteDataAtUninstall />
 				</AMPDrawer>
 				<SettingsFooter />
 			</form>
