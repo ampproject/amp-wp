@@ -260,7 +260,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			$parsed_url['host'] = $parsed_home_url['host'];
 		}
 
-		if ( ! isset( $parsed_url['port'] ) ) {
+		if ( ! isset( $parsed_url['port'] ) && isset( $parsed_home_url['port'] ) ) {
 			$parsed_url['port'] = $parsed_home_url['port'];
 		}
 

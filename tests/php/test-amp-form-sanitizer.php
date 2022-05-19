@@ -261,8 +261,15 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 			$expected = $source;
 		}
 
-		$source   = str_replace( '//example.org/', '//' . WP_TESTS_DOMAIN . ':' . $_SERVER['SERVER_PORT'] . '/', $source );
-		$expected = str_replace( '//example.org/', '//' . WP_TESTS_DOMAIN . ':' . $_SERVER['SERVER_PORT'] . '/', $expected );
+		// Normalize across different testing environments where WP_TESTS_DOMAIN varies.
+		$current_origin = '//' . WP_TESTS_DOMAIN;
+		if ( isset( $_SERVER['SERVER_PORT'] ) && ! in_array( (string) $_SERVER['SERVER_PORT'], [ '80', '443' ], true ) ) {
+			$current_origin .= ':' . $_SERVER['SERVER_PORT'];
+		}
+		$current_origin .= '/';
+
+		$source   = str_replace( '//example.org/', $current_origin, $source );
+		$expected = str_replace( '//example.org/', $current_origin, $expected );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		if ( ! empty( $args['add_dev_mode'] ) ) {
