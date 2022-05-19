@@ -260,6 +260,10 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 		if ( is_null( $expected ) ) {
 			$expected = $source;
 		}
+
+		$source   = str_replace( '//example.org/', '//' . WP_TESTS_DOMAIN . ':' . $_SERVER['SERVER_PORT'] . '/', $source );
+		$expected = str_replace( '//example.org/', '//' . WP_TESTS_DOMAIN . ':' . $_SERVER['SERVER_PORT'] . '/', $expected );
+
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		if ( ! empty( $args['add_dev_mode'] ) ) {
 			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
