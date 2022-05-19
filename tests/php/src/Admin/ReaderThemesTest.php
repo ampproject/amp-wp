@@ -294,6 +294,16 @@ class ReaderThemesTest extends TestCase {
 	 * @param array   $theme        Theme.
 	 */
 	public function test_get_theme_availability( $get_expected, $can_install, $theme ) {
+
+		// Work around filesystem not yet being writable in Docker environment.
+		add_filter( 'request_filesystem_credentials', '__return_true' );
+		add_filter(
+			'filesystem_method',
+			static function () {
+				return 'direct';
+			}
+		);
+
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$expected = $get_expected();
 		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );
@@ -306,6 +316,16 @@ class ReaderThemesTest extends TestCase {
 	 * @covers ::can_install_theme
 	 */
 	public function test_can_install_theme() {
+
+		// Work around filesystem not yet being writable in Docker environment.
+		add_filter( 'request_filesystem_credentials', '__return_true' );
+		add_filter(
+			'filesystem_method',
+			static function () {
+				return 'direct';
+			}
+		);
+
 		$core_theme = [
 			'name'         => 'Twenty Twelve',
 			'requires'     => false,
