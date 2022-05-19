@@ -24,7 +24,8 @@
       ],
       "plugins": [
         ".",
-        "https://downloads.wordpress.org/plugin/gutenberg.zip"
+        "https://downloads.wordpress.org/plugin/gutenberg.zip",
+        "https://downloads.wordpress.org/plugin/pwa.zip"
       ],
       "mappings": {
         "../wordpress-develop": "WordPress/wordpress-develop#trunk"
