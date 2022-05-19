@@ -8,6 +8,9 @@
       ]
     },
     "tests": {
+      "config": {
+        "WP_DEBUG": true
+      },
       "themes": [
         "https://downloads.wordpress.org/theme/twentyten.zip",
         "https://downloads.wordpress.org/theme/twentyeleven.zip",
