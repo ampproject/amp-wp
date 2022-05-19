@@ -68,3 +68,12 @@ WP_CLI::set_logger( $logger );
  * Load WordPress, which will load the Composer autoload file, and load the MockObject autoloader after that.
  */
 WPIntegration\bootstrap_it();
+
+// Fix up the SERVER_PORT which was just clobbered by tests_reset__SERVER().
+if ( defined( 'WP_HOME' ) ) {
+	$port = wp_parse_url( WP_HOME, PHP_URL_PORT );
+	if ( ! $port ) {
+		$port = '80';
+	}
+	$_SERVER['SERVER_PORT'] = $port;
+}
