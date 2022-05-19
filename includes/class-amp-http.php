@@ -350,19 +350,28 @@ class AMP_HTTP {
 	 * @since 0.7.0
 	 * @since 1.0 Moved to AMP_HTTP class.
 	 * @see wp_redirect()
+	 * @see amp_get_current_url()
+	 * @see AMP_Form_Sanitizer::get_action_url()
 	 *
 	 * @param string $location The location to redirect to.
 	 */
 	public static function intercept_post_request_redirect( $location ) { // phpcs:ignore WordPressVIPMinimum.Hooks.AlwaysReturnInFilter.MissingReturnStatement -- It dies.
 
 		// Make sure relative redirects get made absolute.
+		$parsed_home_url = wp_parse_url( get_home_url() );
+		$parsed_location = wp_parse_url( $location );
+		if ( isset( $parsed_location['host'] ) ) {
+			// Make sure the home port is not accidentally applied to the redirect location URL.
+			unset( $parsed_home_url['port'] );
+		}
+
 		$parsed_location = array_merge(
+			wp_array_slice_assoc( $parsed_home_url, [ 'host', 'port' ] ),
 			[
 				'scheme' => 'https',
-				'host'   => wp_parse_url( home_url(), PHP_URL_HOST ),
 				'path'   => isset( $_SERVER['REQUEST_URI'] ) ? strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ) : '/', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			],
-			wp_parse_url( $location )
+			$parsed_location
 		);
 
 		$absolute_location = '';

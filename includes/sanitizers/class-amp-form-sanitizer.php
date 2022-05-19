@@ -209,6 +209,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get the action URL for the form element.
 	 *
 	 * @see amp_get_current_url()
+	 * @see AMP_HTTP::intercept_post_request_redirect()
 	 * @param string $action_url Action URL.
 	 * @return string Action URL.
 	 */
