@@ -138,6 +138,7 @@
     "test:e2e:ci": "cross-env WP_BASE_URL=http://localhost:8890 wp-scripts test-e2e --config=tests/e2e/jest-ci.config.js --runInBand",
     "test:js": "wp-scripts test-unit-js --config=tests/js/jest.config.js",
     "test:js:help": "wp-scripts test-unit-js --help",
+    "test:js:update-snapshots": "npm run test:js -- --updateSnapshot",
     "test:js:watch": "npm run test:js -- --watch",
     "test:php": "wp-env run phpunit 'WORDPRESS_TABLE_PREFIX=wptests_ WP_TESTS_DIR=/var/www/wordpress-develop/tests/phpunit /var/www/html/wp-content/plugins/amp/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/amp/phpunit.xml.dist $npm_config_args'",
     "test:php:xdebug": "wp-env run tests-wordpress 'env PHP_IDE_CONFIG=serverName=localhost WORDPRESS_TABLE_PREFIX=wptests_ WP_TESTS_DIR=/var/www/wordpress-develop/tests/phpunit WP_PHPUNIT__TESTS_CONFIG=/var/www/html/phpunit-wp-config.php /var/www/html/wp-content/plugins/amp/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/amp/phpunit.xml.dist $npm_config_args'",
