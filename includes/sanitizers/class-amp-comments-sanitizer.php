@@ -21,7 +21,7 @@ use AmpProject\Html\Tag;
  */
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
-	/** @var AMP_Style_Sanitizer */
+	/** @var AMP_Style_Sanitizer|null */
 	private $style_sanitizer;
 
 	/**

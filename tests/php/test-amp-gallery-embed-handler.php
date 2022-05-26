@@ -87,7 +87,7 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 				</amp-carousel>',
 				true,
 			],
-			'shortcode_with_valid_ids'                => [
+			'shortcode_with_valid_ids_in_modern_mode' => [
 				'[gallery ids={{id1}},{{id2}},{{id3}}]',
 				'<style type="text/css"> #gallery-1 { margin: auto; } #gallery-1 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-1 img { border: 2px solid #cfcfcf; } #gallery-1 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
 				<div id="gallery-1" class="gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail">
@@ -212,6 +212,9 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 			AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 			AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		} else {
+			if ( ! wp_get_theme( 'twentyseventeen' )->exists() ) {
+				$this->markTestSkipped( 'Test depends on Twenty Seventeen being installed.' );
+			}
 			AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
 		}
 

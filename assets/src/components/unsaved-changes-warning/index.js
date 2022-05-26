@@ -69,3 +69,6 @@ function WithUserContext( { setUserState } ) {
 
 	return null;
 }
+WithUserContext.propTypes = {
+	setUserState: PropTypes.func,
+};

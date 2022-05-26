@@ -322,7 +322,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Previous meta tag to append to.
 		 *
-		 * @var DOMElement $previous_meta_tag
+		 * @var DOMElement|null $previous_meta_tag
 		 */
 		$previous_meta_tag = null;
 		foreach ( $this->meta_tags as $meta_tag_group ) {

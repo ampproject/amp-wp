@@ -865,7 +865,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						)
 					)
 				);
-				if ( preg_match( $pattern, $html, $matches ) && isset( $matches['width'] ) && isset( $matches['height'] ) ) {
+
+				preg_match( $pattern, $html, $matches );
+
+				if ( isset( $matches['width'], $matches['height'] ) ) {
 					$width  = (int) $matches['width'];
 					$height = (int) $matches['height'];
 
@@ -993,7 +996,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Top navigation element.
 		 *
-		 * @var DOMElement $navigation_top
+		 * @var DOMElement|null $navigation_top
 		 */
 		$navigation_top = $this->dom->xpath->query( '//header[ @id = "masthead" ]//div[ contains( @class, "navigation-top" ) ]' )->item( 0 );
 		if ( ! $navigation_top ) {
@@ -1690,7 +1693,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		while ( $strip_wrapper_levels > 0 ) {
 			$children = [];
 			foreach ( $modal_content_node->childNodes as $child_node ) {
-				if ( $child_node instanceof DOMElement && ! $child_node instanceof DOMComment ) {
+				if ( $child_node instanceof DOMElement ) {
 					$children[] = $child_node;
 				}
 			}
