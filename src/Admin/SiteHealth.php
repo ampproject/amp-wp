@@ -1291,13 +1291,13 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		$status      = 'recommended';
 		$color       = 'orange';
 		$label       = __( 'Publisher Logo is not available.', 'amp' );
-		$description = esc_html__( 'Publisher Logo that used for schema.org metadata. Currently fallback logo is used.', 'amp' );
+		$description = esc_html__( 'Publisher Logo that is used for schema.org metadata. Currently, the fallback logo is used.', 'amp' );
 
 		if ( ! empty( amp_get_publisher_logo( false ) ) ) {
 			$status      = 'good';
 			$color       = 'green';
 			$label       = __( 'Publisher Logo is available.', 'amp' );
-			$description = esc_html__( 'Publisher Logo that used for schema.org metadata.', 'amp' );
+			$description = esc_html__( 'Publisher Logo that is used for schema.org metadata.', 'amp' );
 		}
 
 		return array_merge(
