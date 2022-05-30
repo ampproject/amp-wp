@@ -176,6 +176,7 @@ class SiteHealthTest extends TestCase {
 		$tests = $this->instance->add_tests( [] );
 		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_slug_definition_timing', $tests['direct'] );
+		$this->assertArrayHasKey( 'publisher_logo', $tests['direct'] );
 
 		remove_filter( 'site_url', [ self::class, 'get_idn' ] );
 		remove_filter( 'amp_query_var', [ self::class, 'get_lite_query_var' ] );
@@ -1178,5 +1179,24 @@ class SiteHealthTest extends TestCase {
 			$expected,
 			wp_array_slice_assoc( $actual, array_keys( $expected ) )
 		);
+	}
+
+	/**
+	 * @covers ::publisher_logo()
+	 */
+	public function test_publisher_logo() {
+
+		$output = $this->instance->publisher_logo();
+		$this->assertEquals( 'recommended', $output['status'] );
+
+		add_filter(
+			'amp_site_icon_url',
+			static function () {
+				return 'publisher-logo.png';
+			}
+		);
+
+		$output = $this->instance->publisher_logo();
+		$this->assertEquals( 'good', $output['status'] );
 	}
 }

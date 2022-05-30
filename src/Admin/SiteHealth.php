@@ -212,6 +212,11 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			'test'  => [ $this, 'xdebug_extension' ],
 		];
 
+		$tests['direct']['publisher_logo'] = [
+			'label' => esc_html__( 'Publisher Logo', 'amp' ),
+			'test'  => [ $this, 'publisher_logo' ],
+		];
+
 		if ( $this->supports_async_rest_tests( $tests ) ) {
 			$tests['async'][ self::TEST_PAGE_CACHING ] = [
 				'label'             => esc_html__( 'Page caching', 'amp' ),
@@ -1275,5 +1280,35 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Gets the test result data for whether publisher logo is set or not.
+	 *
+	 * @return array
+	 */
+	public function publisher_logo() {
+		$status      = 'recommended';
+		$color       = 'orange';
+		$label       = __( 'Publisher Logo is not available.', 'amp' );
+		$description = esc_html__( 'Publisher Logo that used for schema.org metadata. Currently fallback logo is used.', 'amp' );
+
+		if ( ! empty( amp_get_publisher_logo( false ) ) ) {
+			$status      = 'good';
+			$color       = 'green';
+			$label       = __( 'Publisher Logo is available.', 'amp' );
+			$description = esc_html__( 'Publisher Logo that used for schema.org metadata.', 'amp' );
+		}
+
+		return array_merge(
+			compact( 'status', 'label', 'description' ),
+			[
+				'badge' => [
+					'label' => $this->get_badge_label(),
+					'color' => $color,
+				],
+				'test'  => 'amp_publisher_logo',
+			]
+		);
 	}
 }
