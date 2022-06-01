@@ -57,8 +57,8 @@ final class LikelyCulpritDetector implements Service {
 	/**
 	 * Detect the themes and plugins responsible for causing the exception.
 	 *
-	 * @param Throwable $throwable Exception or Error to analyze. The Throwable type does not exist in PHP 5,
-	 *                             which is why type is absent from the function parameter.
+	 * @param Throwable|Exception $throwable Exception or Error to analyze. The Throwable type does not exist in PHP 5,
+	 *                                       which is why type is absent from the function parameter.
 	 * @throws InvalidArgumentException If $throwable is not an Exception or an Error.
 	 * @return array {
 	 *     Type and name of extension that is the likely culprit.
@@ -68,6 +68,7 @@ final class LikelyCulpritDetector implements Service {
 	 * }
 	 */
 	public function analyze_throwable( $throwable ) {
+		// @phpstan-ignore-next-line
 		if ( ! ( $throwable instanceof Exception || $throwable instanceof Error ) ) {
 			throw new InvalidArgumentException( 'Parameter must be Throwable (Exception or Error).' );
 		}
