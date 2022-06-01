@@ -1291,7 +1291,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		$status      = 'recommended';
 		$color       = 'orange';
 		$label       = __( 'Publisher Logo is not available.', 'amp' );
-		$description = esc_html__( 'Publisher Logo that is used for schema.org metadata. Currently, the fallback logo is used.', 'amp' );
+		$description = esc_html__( 'Publisher Logo that is used for schema.org metadata. Currently, The fallback logo is used. Please set the publisher logo from "Customizer > Site Identity".', 'amp' );
 
 		if ( ! empty( amp_get_publisher_logo( false ) ) ) {
 			$status      = 'good';
