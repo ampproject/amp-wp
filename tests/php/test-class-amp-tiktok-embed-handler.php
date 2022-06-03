@@ -174,6 +174,9 @@ class Test_AMP_TikTok_Embed_Handler extends TestCase {
 
 		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
 
+		// Remove new data attribute added recently.
+		$actual = str_replace( ' data-embed-from="oembed"', '', $actual );
+
 		$this->assertSimilarMarkup( $expected, $actual );
 	}
 }
