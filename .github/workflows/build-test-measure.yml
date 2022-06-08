@@ -730,7 +730,7 @@ jobs:
 
       - name: Build plugin
         run: |
-          npm run build:${{ matrix.build }}
+          npm run package:${{ matrix.build }}
           mv amp.zip builds/${{ matrix.build }}/amp.zip
         env:
           LAST_PR_COMMIT_HASH: ${{ github.event.pull_request.head.sha }}
