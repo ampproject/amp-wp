@@ -1527,7 +1527,6 @@ function amp_get_content_sanitizers( $post = null ) {
 		],
 		AMP_O2_Player_Sanitizer::class         => [],
 		AMP_Playbuzz_Sanitizer::class          => [],
-		AMP_PWA_Script_Sanitizer::class        => [], // Add PWA plugin sanitizer before Core theme sanitizers as it can contain offline/500 templates.
 		AMP_Core_Theme_Sanitizer::class        => [
 			'template'        => get_template(),
 			'stylesheet'      => get_stylesheet(),
@@ -1542,6 +1541,10 @@ function amp_get_content_sanitizers( $post = null ) {
 		],
 
 		AMP_Bento_Sanitizer::class             => [],
+
+		// The AMP_PWA_Script_Sanitizer run before AMP_Script_Sanitizer, to prevent the script tags
+		// from getting removed in PWA plugin offline/500 templates.
+		AMP_PWA_Script_Sanitizer::class        => [],
 
 		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
 		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
@@ -1707,9 +1710,9 @@ function amp_get_content_sanitizers( $post = null ) {
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
 		AMP_Auto_Lightbox_Disable_Sanitizer::class,
-		AMP_PWA_Script_Sanitizer::class, // Must come before core theme sanitizer as it can contains offline/500 templates.
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
 		AMP_Bento_Sanitizer::class, // Bento scripts may be preserved here.
+		AMP_PWA_Script_Sanitizer::class, // Must come before script sanitizer since PWA offline page scripts are removed.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for images, videos, audios, comments, forms, and styles.
 		AMP_Form_Sanitizer::class, // Must come before comments sanitizer.
 		AMP_Comments_Sanitizer::class, // Also must come after the form sanitizer.
