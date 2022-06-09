@@ -202,10 +202,9 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	public function test_video_override() {
 		remove_all_filters( 'wp_video_shortcode_override' );
 		$this->handler->register_embed();
-		$decoding_attribute = version_compare( get_bloginfo( 'version' ), '6.0', '>' ) ? 'decoding="async"' : '';
-		$youtube_id         = 'XOY3ZUO6P0k';
-		$youtube_src        = 'https://youtu.be/' . $youtube_id;
-		$attr_youtube       = [
+		$youtube_id   = 'XOY3ZUO6P0k';
+		$youtube_src  = 'https://youtu.be/' . $youtube_id;
+		$attr_youtube = [
 			'src' => $youtube_src,
 		];
 
