@@ -7,6 +7,8 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Dom\Element;
+use AmpProject\Html\Attribute;
 
 /**
  * Class AMP_PWA_Script_Sanitizer
@@ -29,7 +31,11 @@ class AMP_PWA_Script_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$scripts = $this->dom->xpath->query( '//script[@id="wp-navigation-request-properties" or @id="wp-offline-page-reload"]' );
+		$scripts = $this->dom->xpath->query( '//script[ @id = "wp-navigation-request-properties" or ( @type = "module" and contains( text(), "checkNetworkAndReload()" ) ) ]' );
+
+		if ( ! $scripts->length ) {
+			return;
+		}
 
 		foreach ( $scripts as $script ) {
 			ValidationExemption::mark_node_as_px_verified( $script );
