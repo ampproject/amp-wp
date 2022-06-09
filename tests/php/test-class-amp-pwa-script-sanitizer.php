@@ -25,6 +25,16 @@ class AMP_PWA_Script_Sanitizer_Test extends TestCase {
 	const SCRIPT_XPATH = '//script[ @id = "wp-navigation-request-properties" or ( @type = "module" and contains( text(), "checkNetworkAndReload()" ) ) ]';
 
 	/**
+	 * Set up.
+	 */
+	public function set_up() {
+		parent::set_up();
+		if ( ! function_exists( 'wp_service_workers' ) ) {
+			$this->markTestSkipped( 'PWA plugin not active.' );
+		}
+	}
+
+	/**
 	 * Get offline or 500 page markup.
 	 *
 	 * @return string
