@@ -29,7 +29,10 @@ class AMP_PWA_Script_Sanitizer_Test extends TestCase {
 	 */
 	public function set_up() {
 		parent::set_up();
-		if ( ! function_exists( 'wp_service_workers' ) ) {
+		if (
+			! ( function_exists( 'is_offline' ) && is_offline() ) &&
+			! ( function_exists( 'is_500' ) && is_500() )
+		) {
 			$this->markTestSkipped( 'PWA plugin not active.' );
 		}
 	}
