@@ -2212,19 +2212,6 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * @covers ::amp_get_publisher_logo()
-	 */
-	public function test_amp_get_publisher_logo_default_value() {
-
-		$this->assertEquals(
-			amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' ),
-			amp_get_publisher_logo()
-		);
-
-		$this->assertNull( amp_get_publisher_logo( false ) );
-	}
-
-	/**
 	 * Test amp_get_schemaorg_metadata().
 	 *
 	 * @covers ::amp_get_schemaorg_metadata()

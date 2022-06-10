@@ -1813,11 +1813,9 @@ function amp_get_post_image_metadata( $post = null ) {
  * @link https://developers.google.com/search/docs/data-types/article#logo-guidelines
  * @internal
  *
- * @param bool|null $default Whether allow to return default value or not.
- *
  * @return string Publisher logo image URL. WordPress logo if no site icon or custom logo defined, and no logo provided via 'amp_site_icon_url' filter.
  */
-function amp_get_publisher_logo( $default = null ) {
+function amp_get_publisher_logo() {
 	$logo_image_url = null;
 
 	/*
@@ -1859,8 +1857,7 @@ function amp_get_publisher_logo( $default = null ) {
 	 */
 	$logo_image_url = apply_filters( 'amp_site_icon_url', $logo_image_url );
 
-	// Fallback to serving the WordPress logo.
-	if ( empty( $logo_image_url ) && false !== $default ) {
+	if ( empty( $logo_image_url ) ) {
 		$logo_image_url = amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' );
 	}
 
