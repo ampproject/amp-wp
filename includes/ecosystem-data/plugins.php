@@ -12,10 +12,114 @@
 return array (
   0 => 
   array (
+    'name' => 'Super Web Share',
+    'slug' => 'super-web-share',
+    'homepage' => 'https://www.superwebshare.com',
+    'short_description' => 'Super Web Share helps to easily add native share prompt to your website for easy&hellip;',
+    'icons' => 
+    array (
+      '1x' => 'https://ps.w.org/super-web-share/assets/icon-128x128.png?rev=1966238',
+    ),
+    'wporg' => true,
+  ),
+  1 => 
+  array (
+    'name' => 'Scriptless Social Sharing',
+    'slug' => 'scriptless-social-sharing',
+    'homepage' => 'https://github.com/robincornett/scriptless-social-sharing',
+    'short_description' => 'This plugin adds super simple social sharing buttons to your content.',
+    'icons' => 
+    array (
+      '1x' => 'https://ps.w.org/scriptless-social-sharing/assets/icon-128x128.jpg?rev=1361689',
+      '2x' => 'https://ps.w.org/scriptless-social-sharing/assets/icon-256x256.jpg?rev=1361689',
+    ),
+    'wporg' => true,
+  ),
+  2 => 
+  array (
+    'name' => 'Meks Easy Social Share',
+    'slug' => 'meks-easy-social-share',
+    'homepage' => '',
+    'short_description' => 'Easily display social share buttons for your posts, pages and custom post types. Supports Facebook,&hellip;',
+    'icons' => 
+    array (
+      '1x' => 'https://ps.w.org/meks-easy-social-share/assets/icon-128x128.png?rev=2092911',
+      '2x' => 'https://ps.w.org/meks-easy-social-share/assets/icon-256x256.png?rev=2092911',
+    ),
+    'wporg' => true,
+  ),
+  3 => 
+  array (
+    'name' => 'Simple Social Icons',
+    'slug' => 'simple-social-icons',
+    'homepage' => 'https://wordpress.org/plugins/simple-social-icons/',
+    'short_description' => 'This plugin allows you to insert social icons in any widget area.',
+    'icons' => 
+    array (
+      '1x' => 'https://ps.w.org/simple-social-icons/assets/icon-128x128.png?rev=1335655',
+      '2x' => 'https://ps.w.org/simple-social-icons/assets/icon-256x256.png?rev=1335655',
+    ),
+    'wporg' => true,
+  ),
+  4 => 
+  array (
+    'name' => 'OneSignal &#8211; Web Push Notifications',
+    'slug' => 'onesignal-free-web-push-notifications',
+    'homepage' => 'https://onesignal.com/',
+    'short_description' => 'Increase engagement and drive more repeat traffic to your WordPress site with push notifications. Now a Wordpress VIP Gold Partner.',
+    'icons' => 
+    array (
+      '1x' => 'https://ps.w.org/onesignal-free-web-push-notifications/assets/icon.svg?rev=1669089',
+      '2x' => 'https://ps.w.org/onesignal-free-web-push-notifications/assets/icon-256x256.png?rev=1669089',
+      'svg' => 'https://ps.w.org/onesignal-free-web-push-notifications/assets/icon.svg?rev=1669089',
+    ),
+    'wporg' => true,
+  ),
+  5 => 
+  array (
+    'name' => 'Rate my Post &#8211; WP Rating System',
+    'slug' => 'rate-my-post',
+    'homepage' => 'https://wordpress.org/plugins/rate-my-post/',
+    'short_description' => 'Rate my Post - WP Rating System allows you to easily add rating functionality to&hellip;',
+    'icons' => 
+    array (
+      '1x' => 'https://ps.w.org/rate-my-post/assets/icon-128x128.png?rev=2045796',
+    ),
+    'wporg' => true,
+  ),
+  6 => 
+  array (
+    'name' => 'Fonts Plugin | Google Fonts Typography',
+    'slug' => 'olympus-google-fonts',
+    'homepage' => 'https://wordpress.org/plugins/olympus-google-fonts/',
+    'short_description' => 'The easiest to use Google Fonts Plugin. No coding required. Optimized for Speed. 1000+ font choices.',
+    'icons' => 
+    array (
+      '1x' => 'https://ps.w.org/olympus-google-fonts/assets/icon-128x128.jpg?rev=2044528',
+      '2x' => 'https://ps.w.org/olympus-google-fonts/assets/icon-256x256.jpg?rev=2044528',
+    ),
+    'wporg' => true,
+  ),
+  7 => 
+  array (
+    'name' => 'Jetpack Boost &#8211; Website Speed, Performance and Critical CSS',
+    'slug' => 'jetpack-boost',
+    'homepage' => 'https://jetpack.com/boost',
+    'short_description' => 'Speed up your website by optimizing page performance with Jetpack Boost!',
+    'icons' => 
+    array (
+      '1x' => 'https://ps.w.org/jetpack-boost/assets/icon.svg?rev=2638358',
+      '2x' => 'https://ps.w.org/jetpack-boost/assets/icon-256x256.png?rev=2638358',
+      'svg' => 'https://ps.w.org/jetpack-boost/assets/icon.svg?rev=2638358',
+    ),
+    'wporg' => true,
+  ),
+  8 => 
+  array (
     'name' => 'Podcast Player &#8211; Your Podcasting Companion',
     'slug' => 'podcast-player',
     'homepage' => 'https://vedathemes.com/podcast-player/',
-    'short_description' => 'Showcase your podcast only using podcasting feed url. Use widget, shortcode or editor block to&hellip;',
+    'short_description' => 'Showcase your podcast only using podcasting feed url. Use widget, shortcode or editor block to display podcast player anywhere on your site.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/podcast-player/assets/icon-256x256.png?rev=2622629',
@@ -23,19 +127,22 @@ return array (
     ),
     'wporg' => true,
   ),
-  1 => 
+  9 => 
   array (
     'name' => 'WPSSO Schema JSON-LD Markup',
-    'slug' => 'wpsso-schema-json-ld',
-    'homepage' => 'https://wpsso.com/extend/plugins/wpsso-schema-json-ld/',
-    'short_description' => 'Discontinued add-on: The features of this plugin were integrated into WPSSO Core v9.0.0.',
+    'slug' => 'wpsso-schema-json-ld-markup',
+    'homepage' => 'https://wordpress.org/plugins/wpsso-schema-json-ld/',
+    'short_description' => '<p>Google Rich Results with JSON-LD structured data for Articles, Carousels (aka Item Lists), Claim Reviews, Events, FAQ pages, How-Tos, Images, Local Business / Local SEO, Organizations, Products, Ratings, Recipes, Restaurants, Reviews, Video Objects, and much more.</p>
+',
     'icons' => 
     array (
-      'default' => 'https://s.w.org/plugins/geopattern-icon/wpsso-schema-json-ld.svg',
+      '1x' => 'https://amp-wp.org/wp-content/uploads/2021/08/wpsso2-285x160.jpg',
+      '2x' => 'https://amp-wp.org/wp-content/uploads/2021/08/wpsso2-372x209.jpg',
+      'svg' => '',
     ),
-    'wporg' => true,
+    'wporg' => false,
   ),
-  2 => 
+  10 => 
   array (
     'name' => 'ShortPixel Image Optimizer',
     'slug' => 'shortpixel-image-optimiser',
@@ -48,12 +155,12 @@ return array (
     ),
     'wporg' => true,
   ),
-  3 => 
+  11 => 
   array (
-    'name' => 'Theme Kit for Twenty Twenty-One &amp; Twenty Twenty (Customization, Gutenberg Blocks, Templates) – Twentig',
+    'name' => 'Twentig – Gutenberg Blocks, Templates, Patterns, Theme Customization',
     'slug' => 'twentig',
     'homepage' => 'https://twentig.com',
-    'short_description' => 'Supercharge your WordPress theme (Twenty Twenty-One &amp; Twenty Twenty) with customization options, enhanced Gutenberg blocks,&hellip;',
+    'short_description' => 'Create and customize your website with enhanced Gutenberg blocks, templates, patterns &amp; Google Fonts. Boost&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/twentig/assets/icon.svg?rev=2569439',
@@ -62,7 +169,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  4 => 
+  12 => 
   array (
     'name' => 'Custom Post Type UI',
     'slug' => 'custom-post-type-ui',
@@ -75,7 +182,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  5 => 
+  13 => 
   array (
     'name' => 'Flex Posts &#8211; Widget and Gutenberg Block',
     'slug' => 'flex-posts',
@@ -87,7 +194,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  6 => 
+  14 => 
   array (
     'name' => 'YARPP &#8211; Yet Another Related Posts Plugin',
     'slug' => 'yet-another-related-posts-plugin',
@@ -100,7 +207,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  7 => 
+  15 => 
   array (
     'name' => 'Superb WordPress Table (SEO Optimized Tables With Schema)',
     'slug' => 'superb-tables',
@@ -113,12 +220,12 @@ return array (
     ),
     'wporg' => true,
   ),
-  8 => 
+  16 => 
   array (
     'name' => 'Floating Button',
     'slug' => 'floating-button',
     'homepage' => 'https://wordpress.org/plugins/floating-button/',
-    'short_description' => 'Easily create a custom sticky floating buttons. The Floating Button will be the effective solution&hellip;',
+    'short_description' => 'Easily create a custom sticky floating buttons. The Floating Button will be the effective solution for increasing the recognition of your web resource',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/floating-button/assets/icon-128x128.png?rev=2533016',
@@ -126,7 +233,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  9 => 
+  17 => 
   array (
     'name' => 'Breadcrumb NavXT',
     'slug' => 'breadcrumb-navxt',
@@ -140,7 +247,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  10 => 
+  18 => 
   array (
     'name' => 'WP Recipe Maker',
     'slug' => 'wp-recipe-maker',
@@ -153,12 +260,12 @@ return array (
     ),
     'wporg' => true,
   ),
-  11 => 
+  19 => 
   array (
     'name' => 'Slim SEO &#8211; Fast &amp; Automated WordPress SEO Plugin',
     'slug' => 'slim-seo',
     'homepage' => 'https://wpslimseo.com',
-    'short_description' => 'A full-featured SEO plugin for WordPress that&#039;s lightweight, blazing fast with minimum configuration. No bloats,&hellip;',
+    'short_description' => 'A full-featured SEO plugin for WordPress that&#039;s lightweight, blazing fast with minimum configuration. No bloats, no ads and just works!',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/slim-seo/assets/icon.svg?rev=2005049',
@@ -166,7 +273,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  12 => 
+  20 => 
   array (
     'name' => 'Schema &amp; Structured Data for WP &amp; AMP',
     'slug' => 'schema-and-structured-data-for-wp',
@@ -179,7 +286,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  13 => 
+  21 => 
   array (
     'name' => 'GenerateBlocks',
     'slug' => 'generateblocks',
@@ -192,7 +299,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  14 => 
+  22 => 
   array (
     'name' => 'Blackhole for Bad Bots',
     'slug' => 'blackhole-bad-bots',
@@ -205,12 +312,12 @@ return array (
     ),
     'wporg' => true,
   ),
-  15 => 
+  23 => 
   array (
     'name' => 'Page View Count',
     'slug' => 'page-views-count',
     'homepage' => '',
-    'short_description' => 'Places an icon, all time views count and views today count at the bottom of&hellip;',
+    'short_description' => 'Places an icon, all time views count and views today count at the bottom of posts, pages and custom post types on any WordPress website.',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/page-views-count/assets/icon.svg?rev=986301',
@@ -219,7 +326,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  16 => 
+  24 => 
   array (
     'name' => 'Newspack Listings',
     'slug' => 'newspack-listings',
@@ -234,12 +341,12 @@ return array (
     ),
     'wporg' => false,
   ),
-  17 => 
+  25 => 
   array (
     'name' => 'Newspack Newsletters',
     'slug' => 'newspack-newsletters',
     'homepage' => 'https://newspack.pub',
-    'short_description' => 'Create email newsletters with the Gutenberg editor and distribute them with your Mailchimp or Constant&hellip;',
+    'short_description' => 'Create email newsletters with the Gutenberg editor and distribute them with your ActiveCampaign, Campaign Monitor, Constant Contact, or Mailchimp mail &hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/newspack-newsletters/assets/icon.svg?rev=2475195',
@@ -248,7 +355,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  18 => 
+  26 => 
   array (
     'name' => 'Web Stories',
     'slug' => 'web-stories',
@@ -262,7 +369,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  19 => 
+  27 => 
   array (
     'name' => 'Jetpack &#8211; WP Security, Backup, Speed, &amp; Growth',
     'slug' => 'jetpack',
@@ -270,13 +377,13 @@ return array (
     'short_description' => 'Improve your WP security with powerful one-click tools like backup and malware scan. Get essential free tools including stats, CDN and social sharing.',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/jetpack/assets/icon.svg?rev=2394525',
-      '2x' => 'https://ps.w.org/jetpack/assets/icon-256x256.png?rev=2394525',
-      'svg' => 'https://ps.w.org/jetpack/assets/icon.svg?rev=2394525',
+      '1x' => 'https://ps.w.org/jetpack/assets/icon.svg?rev=2638128',
+      '2x' => 'https://ps.w.org/jetpack/assets/icon-256x256.png?rev=2638128',
+      'svg' => 'https://ps.w.org/jetpack/assets/icon.svg?rev=2638128',
     ),
     'wporg' => true,
   ),
-  20 => 
+  28 => 
   array (
     'name' => 'Easy Notification Bar',
     'slug' => 'easy-notification-bar',
@@ -289,12 +396,12 @@ return array (
     ),
     'wporg' => true,
   ),
-  21 => 
+  29 => 
   array (
     'name' => 'Antispam Bee',
     'slug' => 'antispam-bee',
     'homepage' => 'https://antispambee.pluginkollektiv.org/',
-    'short_description' => 'Antispam plugin with a sophisticated tool set for effective day to day comment and trackback spam-fighting. Build with data protection and privacy in  &hellip;',
+    'short_description' => 'Antispam plugin with a sophisticated tool set for effective day to day comment and trackback&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/antispam-bee/assets/icon-128x128.png?rev=977629',
@@ -302,7 +409,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  22 => 
+  30 => 
   array (
     'name' => 'SimpleTOC &#8211; Table of Contents Block',
     'slug' => 'simpletoc',
@@ -316,7 +423,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  23 => 
+  31 => 
   array (
     'name' => 'Log in with Google',
     'slug' => 'login-with-google',
@@ -324,12 +431,12 @@ return array (
     'short_description' => 'Minimal plugin that allows WordPress users to log in using Google.',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/login-with-google/assets/icon-128x128.png?rev=2402713',
-      '2x' => 'https://ps.w.org/login-with-google/assets/icon-256x256.png?rev=2402713',
+      '1x' => 'https://ps.w.org/login-with-google/assets/icon-128x128.png?rev=2687701',
+      '2x' => 'https://ps.w.org/login-with-google/assets/icon-256x256.png?rev=2687701',
     ),
     'wporg' => true,
   ),
-  24 => 
+  32 => 
   array (
     'name' => 'Search with Google',
     'slug' => 'search-with-google',
@@ -342,7 +449,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  25 => 
+  33 => 
   array (
     'name' => 'Page Builder Gutenberg Blocks – CoBlocks',
     'slug' => 'coblocks',
@@ -355,7 +462,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  26 => 
+  34 => 
   array (
     'name' => 'Simple Author Box',
     'slug' => 'simple-author-box',
@@ -367,7 +474,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  27 => 
+  35 => 
   array (
     'name' => 'Genesis Blocks',
     'slug' => 'genesis-blocks',
@@ -380,7 +487,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  28 => 
+  36 => 
   array (
     'name' => 'MathML Block',
     'slug' => 'mathml-block',
@@ -393,7 +500,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  29 => 
+  37 => 
   array (
     'name' => 'Calculated Fields Form',
     'slug' => 'calculated-fields-form',
@@ -406,12 +513,12 @@ return array (
     ),
     'wporg' => true,
   ),
-  30 => 
+  38 => 
   array (
     'name' => 'All in One SEO – Best WordPress SEO Plugin – Easily Improve SEO Rankings &amp; Increase Traffic',
     'slug' => 'all-in-one-seo-pack',
     'homepage' => 'https://aioseo.com/',
-    'short_description' => 'The original WordPress SEO plugin. Improve your WordPress SEO rankings and traffic with our comprehensive SEO tools and smart SEO optimizations.',
+    'short_description' => 'The original WordPress SEO plugin. Improve your WordPress SEO rankings and traffic with our comprehensive&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/all-in-one-seo-pack/assets/icon.svg?rev=2443290',
@@ -420,7 +527,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  31 => 
+  39 => 
   array (
     'name' => 'Weglot Translate &#8211; Translate your WordPress website and go multilingual',
     'slug' => 'weglot',
@@ -433,7 +540,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  32 => 
+  40 => 
   array (
     'name' => 'Rank Math SEO – Best SEO Plugin For WordPress To Increase Your SEO Traffic',
     'slug' => 'seo-by-rank-math',
@@ -441,18 +548,18 @@ return array (
     'short_description' => 'Rank Math SEO is the Best WordPress SEO plugin combines the features of many SEO&hellip;',
     'icons' => 
     array (
-      '1x' => 'https://ps.w.org/seo-by-rank-math/assets/icon.svg?rev=2348086',
-      '2x' => 'https://ps.w.org/seo-by-rank-math/assets/icon-256x256.png?rev=2348086',
-      'svg' => 'https://ps.w.org/seo-by-rank-math/assets/icon.svg?rev=2348086',
+      '1x' => 'https://ps.w.org/seo-by-rank-math/assets/icon.svg?rev=2654292',
+      '2x' => 'https://ps.w.org/seo-by-rank-math/assets/icon-256x256.png?rev=2654292',
+      'svg' => 'https://ps.w.org/seo-by-rank-math/assets/icon.svg?rev=2654292',
     ),
     'wporg' => true,
   ),
-  33 => 
+  41 => 
   array (
     'name' => 'Head, Footer and Post Injections',
     'slug' => 'header-footer',
     'homepage' => 'https://www.satollo.net/plugins/header-footer',
-    'short_description' => 'Header and Footer plugin let you to add html code to the head and footer sections of your blog... and more!',
+    'short_description' => 'Header and Footer plugin let you to add html code to the head and footer sections of your blog page, inside posts... and more!',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/header-footer/assets/icon-256x256.png?rev=1064219',
@@ -460,7 +567,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  34 => 
+  42 => 
   array (
     'name' => 'WP Rocket',
     'slug' => 'wp-rocket',
@@ -475,7 +582,7 @@ return array (
     ),
     'wporg' => false,
   ),
-  35 => 
+  43 => 
   array (
     'name' => 'Statify',
     'slug' => 'statify',
@@ -488,7 +595,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  36 => 
+  44 => 
   array (
     'name' => 'LIQUID BLOCKS GALLERY 37+ Free Designs',
     'slug' => 'liquid-blocks',
@@ -500,7 +607,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  37 => 
+  45 => 
   array (
     'name' => 'Schema',
     'slug' => 'schema',
@@ -513,19 +620,21 @@ return array (
     ),
     'wporg' => true,
   ),
-  38 => 
+  46 => 
   array (
-    'name' => 'Iframely &#8211; rich media embeds for 2000+ publishers',
+    'name' => 'Iframely – WP media embeds, cards and blocks',
     'slug' => 'iframely',
-    'homepage' => 'http://wordpress.org/plugins/iframely/',
-    'short_description' => 'Iframely extends WordPress default rich media embeds and adds support of over 2000 more providers and cards as URL previews for the rest of the Web.',
+    'homepage' => 'https://iframely.com/wordpress',
+    'short_description' => 'Iframely cloud extends WordPress embeds with customizable embed blocks for over 1900 rich media publishers.&hellip;',
     'icons' => 
     array (
-      'default' => 'https://s.w.org/plugins/geopattern-icon/iframely.svg',
+      '1x' => 'https://ps.w.org/iframely/assets/icon.svg?rev=2686906',
+      '2x' => 'https://ps.w.org/iframely/assets/icon-256x256.png?rev=2686906',
+      'svg' => 'https://ps.w.org/iframely/assets/icon.svg?rev=2686906',
     ),
     'wporg' => true,
   ),
-  39 => 
+  47 => 
   array (
     'name' => 'Pym.js Embeds',
     'slug' => 'pym-shortcode',
@@ -538,7 +647,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  40 => 
+  48 => 
   array (
     'name' => 'PWA',
     'slug' => 'pwa',
@@ -552,7 +661,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  41 => 
+  49 => 
   array (
     'name' => 'MC4WP: Mailchimp for WordPress',
     'slug' => 'mailchimp-for-wp',
@@ -565,7 +674,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  42 => 
+  50 => 
   array (
     'name' => 'Site Kit by Google &#8211; Analytics, Search Console, AdSense, Speed',
     'slug' => 'google-site-kit',
@@ -578,7 +687,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  43 => 
+  51 => 
   array (
     'name' => 'Newspack Blocks',
     'slug' => 'newspack-blocks',
@@ -593,7 +702,7 @@ return array (
     ),
     'wporg' => false,
   ),
-  44 => 
+  52 => 
   array (
     'name' => 'Advanced Ads – Ad Manager &amp; AdSense',
     'slug' => 'advanced-ads',
@@ -606,7 +715,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  45 => 
+  53 => 
   array (
     'name' => 'Syntax-highlighting Code Block (with Server-side Rendering)',
     'slug' => 'syntax-highlighting-code-block',
@@ -620,12 +729,12 @@ return array (
     ),
     'wporg' => true,
   ),
-  46 => 
+  54 => 
   array (
     'name' => 'Contact Form by WPForms &#8211; Drag &amp; Drop Form Builder for WordPress',
     'slug' => 'wpforms-lite',
     'homepage' => 'https://wpforms.com',
-    'short_description' => 'The best WordPress contact form plugin. Drag &amp; Drop online form builder that helps you create beautiful contact forms with just a few clicks.',
+    'short_description' => 'The best WordPress contact form plugin. Drag &amp; Drop online form builder that helps you&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/wpforms-lite/assets/icon.svg?rev=2574198',
@@ -634,12 +743,12 @@ return array (
     ),
     'wporg' => true,
   ),
-  47 => 
+  55 => 
   array (
     'name' => 'MonsterInsights &#8211; Google Analytics Dashboard for WordPress (Website Stats Made Easy)',
     'slug' => 'google-analytics-for-wordpress',
     'homepage' => 'https://www.monsterinsights.com/?utm_source=liteplugin&utm_medium=pluginheader&utm_campaign=pluginurl&utm_content=7%2E0%2E0',
-    'short_description' => 'The best free Google Analytics plugin for WordPress. See how visitors find and use your website, so you can grow your business.',
+    'short_description' => 'The best free Google Analytics plugin for WordPress. See how visitors find and use your&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/google-analytics-for-wordpress/assets/icon.svg?rev=1598927',
@@ -648,7 +757,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  48 => 
+  56 => 
   array (
     'name' => 'Atomic Blocks &#8211; Gutenberg Blocks Collection',
     'slug' => 'atomic-blocks',
@@ -661,7 +770,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  49 => 
+  57 => 
   array (
     'name' => 'Akismet Spam Protection',
     'slug' => 'akismet',
@@ -674,7 +783,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  50 => 
+  58 => 
   array (
     'name' => 'WP GDPR Cookie Notice',
     'slug' => 'wp-gdpr-cookie-notice',
@@ -687,7 +796,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  51 => 
+  59 => 
   array (
     'name' => 'WordPress Share Buttons Plugin – AddThis',
     'slug' => 'addthis',
@@ -700,7 +809,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  52 => 
+  60 => 
   array (
     'name' => 'BigCommerce For WordPress',
     'slug' => 'bigcommerce',
@@ -713,7 +822,7 @@ return array (
     ),
     'wporg' => true,
   ),
-  53 => 
+  61 => 
   array (
     'name' => 'Yoast SEO',
     'slug' => 'wordpress-seo',
@@ -722,12 +831,12 @@ return array (
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/wordpress-seo/assets/icon.svg?rev=2363699',
-      '2x' => 'https://ps.w.org/wordpress-seo/assets/icon-256x256.png?rev=2363699',
+      '2x' => 'https://ps.w.org/wordpress-seo/assets/icon-256x256.png?rev=2643727',
       'svg' => 'https://ps.w.org/wordpress-seo/assets/icon.svg?rev=2363699',
     ),
     'wporg' => true,
   ),
-  54 => 
+  62 => 
   array (
     'name' => 'Gutenberg',
     'slug' => 'gutenberg',
@@ -740,12 +849,12 @@ return array (
     ),
     'wporg' => true,
   ),
-  55 => 
+  63 => 
   array (
-    'name' => 'Page-Builder for Content Experience &#8211; Setka Editor',
+    'name' => 'A no-code page builder for beautiful performance-based content',
     'slug' => 'setka-editor',
     'homepage' => 'https://editor.setka.io/',
-    'short_description' => 'A WordPress plugin for beautiful content that converts. The editor you’ve been waiting for to design your&hellip;',
+    'short_description' => 'A&nbsp;WordPress plugin to&nbsp;design beautiful performance-based content. Rated as&nbsp;a&nbsp;Top-10 solution for Content Experience and Content Creation&hellip;',
     'icons' => 
     array (
       '1x' => 'https://ps.w.org/setka-editor/assets/icon.svg?rev=2408232',
