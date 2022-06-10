@@ -34,7 +34,7 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 	 *
 	 * @param array $args Widget display data.
 	 * @param array $instance Data for widget.
-	 * @return void.
+	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		if ( ! amp_is_request() ) {
