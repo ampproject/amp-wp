@@ -1857,6 +1857,7 @@ function amp_get_publisher_logo() {
 	 */
 	$logo_image_url = apply_filters( 'amp_site_icon_url', $logo_image_url );
 
+	// Fallback to serving the WordPress logo.
 	if ( empty( $logo_image_url ) ) {
 		$logo_image_url = amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' );
 	}
