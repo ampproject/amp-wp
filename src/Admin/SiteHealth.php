@@ -1293,7 +1293,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 		$label       = __( 'Publisher Logo is not available.', 'amp' );
 		$description = esc_html__( 'Publisher Logo that is used for schema.org metadata. Currently, The fallback logo is used. Please set the publisher logo from "Customizer > Site Identity".', 'amp' );
 
-		if ( amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' ) === amp_get_publisher_logo() ) {
+		if ( amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' ) !== amp_get_publisher_logo() ) {
 			$status      = 'good';
 			$color       = 'green';
 			$label       = __( 'Publisher Logo is available.', 'amp' );
