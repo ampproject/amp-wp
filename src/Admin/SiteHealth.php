@@ -1288,26 +1288,40 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return array
 	 */
 	public function publisher_logo() {
-		$status      = 'recommended';
-		$color       = 'orange';
-		$label       = __( 'Publisher Logo is not available.', 'amp' );
-		$description = esc_html__( 'Publisher Logo that is used for schema.org metadata. Currently, The fallback logo is used. Please set the publisher logo from "Customizer > Site Identity".', 'amp' );
+		$description = esc_html__( 'The publisher logo used in Schema.org metadata. The site icon is used as the publisher logo when it is specified.', 'amp' );
 
 		if ( amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' ) !== amp_get_publisher_logo() ) {
-			$status      = 'good';
-			$color       = 'green';
-			$label       = __( 'Publisher Logo is available.', 'amp' );
-			$description = esc_html__( 'Publisher Logo that is used for schema.org metadata.', 'amp' );
+			$status = 'good';
+			$color  = 'green';
+			$label  = __( 'Publisher logo is defined', 'amp' );
+		} else {
+			$status       = 'recommended';
+			$color        = 'orange';
+			$label        = __( 'Publisher logo is not defined', 'amp' );
+			$description .= ' ' . esc_html__( 'Currently, the fallback WordPress logo is used.', 'amp' );
+		}
+
+		if ( ! has_filter( 'amp_site_icon_url' ) && current_user_can( 'customize' ) ) {
+			$actions = wp_kses_post(
+				sprintf(
+					'<p><a class="button button-secondary" href="%s">%s</a></p>',
+					admin_url( 'customize.php?autofocus[control]=site_icon' ),
+					esc_html__( 'Update site icon', 'amp' )
+				)
+			);
+		} else {
+			$actions = '';
 		}
 
 		return array_merge(
 			compact( 'status', 'label', 'description' ),
 			[
-				'badge' => [
+				'badge'   => [
 					'label' => $this->get_badge_label(),
 					'color' => $color,
 				],
-				'test'  => 'amp_publisher_logo',
+				'actions' => wp_kses_post( $actions ),
+				'test'    => 'amp_publisher_logo',
 			]
 		);
 	}
