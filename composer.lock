@@ -4,11 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3c279b253eb0f24e328043b6f279b958",
+    "content-hash": "491e1bf7d18cd76aed6de7e3d2537ad3",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "dev-main",
+            "version": "0.11.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
@@ -48,7 +48,6 @@
                 "mck89/peast": "Needed to minify the AMP script.",
                 "nette/php-generator": "Needed to generate the validator spec PHP classes and interfaces."
             },
-            "default-branch": true,
             "bin": [
                 "bin/amp"
             ],
@@ -77,7 +76,7 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/main"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.11.2"
             },
             "time": "2022-05-19T09:49:09+00:00"
         },
@@ -6780,7 +6779,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "ampproject/amp-toolbox": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,
