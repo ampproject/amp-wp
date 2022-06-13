@@ -176,7 +176,7 @@ class SiteHealthTest extends TestCase {
 		$tests = $this->instance->add_tests( [] );
 		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_slug_definition_timing', $tests['direct'] );
-		$this->assertArrayHasKey( 'publisher_logo', $tests['direct'] );
+		$this->assertArrayHasKey( 'amp_publisher_logo', $tests['direct'] );
 
 		remove_filter( 'site_url', [ self::class, 'get_idn' ] );
 		remove_filter( 'amp_query_var', [ self::class, 'get_lite_query_var' ] );

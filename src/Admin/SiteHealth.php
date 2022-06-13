@@ -212,7 +212,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			'test'  => [ $this, 'xdebug_extension' ],
 		];
 
-		$tests['direct']['publisher_logo'] = [
+		$tests['direct']['amp_publisher_logo'] = [
 			'label' => esc_html__( 'Publisher Logo', 'amp' ),
 			'test'  => [ $this, 'publisher_logo' ],
 		];
