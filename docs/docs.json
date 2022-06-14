@@ -11,7 +11,7 @@
             ]
         },
         "path": "back-compat\/back-compat.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "functions": [
             {
                 "name": "amp_backcompat_use_v03_templates",
@@ -76,7 +76,7 @@
             ]
         },
         "path": "includes\/admin\/class-amp-post-meta-box.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "includes": [
             {
                 "name": "",
@@ -164,7 +164,7 @@
             ]
         },
         "path": "includes\/admin\/class-amp-template-customizer.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "includes": [
             {
                 "name": "",
@@ -333,7 +333,7 @@
             ]
         },
         "path": "includes\/admin\/functions.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "functions": [],
         "hooks": [
             {
@@ -386,7 +386,7 @@
             ]
         },
         "path": "includes\/amp-frontend-actions.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "uses": {
             "functions": [
                 {
@@ -472,7 +472,7 @@
             ]
         },
         "path": "includes\/amp-helper-functions.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "constants": [
             {
                 "name": "AMP_QUERY_VAR",
@@ -1781,7 +1781,7 @@
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
                 "line": 1460,
-                "end_line": 1473,
+                "end_line": 1475,
                 "arguments": [],
                 "doc": {
                     "description": "Determine whether native `img` should be used instead of converting to `amp-img`.",
@@ -1803,11 +1803,11 @@
                 "hooks": [
                     {
                         "name": "amp_native_img_used",
-                        "line": 1472,
-                        "end_line": 1472,
+                        "line": 1474,
+                        "end_line": 1474,
                         "type": "filter",
                         "arguments": [
-                            "true"
+                            "$use_native_img_tag"
                         ],
                         "doc": {
                             "description": "Filters whether to use the native `img` element rather than convert to `amp-img`.",
@@ -1835,11 +1835,20 @@
                     }
                 ],
                 "uses": {
+                    "methods": [
+                        {
+                            "name": "get_option",
+                            "class": "\\AMP_Options_Manager",
+                            "static": true,
+                            "line": 1461,
+                            "end_line": 1461
+                        }
+                    ],
                     "functions": [
                         {
                             "name": "apply_filters",
-                            "line": 1472,
-                            "end_line": 1472
+                            "line": 1474,
+                            "end_line": 1474
                         }
                     ]
                 }
@@ -1857,8 +1866,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 2070,
-                "end_line": 2081,
+                "line": 2076,
+                "end_line": 2091,
                 "arguments": [
                     {
                         "name": "$script",
@@ -1922,18 +1931,18 @@
                     "functions": [
                         {
                             "name": "hash",
-                            "line": 2071,
-                            "end_line": 2071
+                            "line": 2078,
+                            "end_line": 2078
                         },
                         {
                             "name": "str_replace",
-                            "line": 2075,
-                            "end_line": 2079
+                            "line": 2085,
+                            "end_line": 2089
                         },
                         {
                             "name": "base64_encode",
-                            "line": 2078,
-                            "end_line": 2078
+                            "line": 2088,
+                            "end_line": 2088
                         }
                     ]
                 }
@@ -1951,8 +1960,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 2091,
-                "end_line": 2103,
+                "line": 2101,
+                "end_line": 2113,
                 "arguments": [
                     {
                         "name": "$url",
@@ -1992,54 +2001,54 @@
                             "name": "add_endpoint",
                             "class": "\\AmpProject\\AmpWP\\Services::get('paired_routing')",
                             "static": false,
-                            "line": 2093,
-                            "end_line": 2093
+                            "line": 2103,
+                            "end_line": 2103
                         },
                         {
                             "name": "get",
                             "class": "\\AmpProject\\AmpWP\\Services",
                             "static": true,
-                            "line": 2093,
-                            "end_line": 2093
+                            "line": 2103,
+                            "end_line": 2103
                         },
                         {
                             "name": "getMessage",
                             "class": "$e",
                             "static": false,
-                            "line": 2100,
-                            "end_line": 2100
+                            "line": 2110,
+                            "end_line": 2110
                         }
                     ],
                     "functions": [
                         {
                             "name": "amp_is_enabled",
-                            "line": 2095,
-                            "end_line": 2095
+                            "line": 2105,
+                            "end_line": 2105
                         },
                         {
                             "name": "__",
-                            "line": 2096,
-                            "end_line": 2096
+                            "line": 2106,
+                            "end_line": 2106
                         },
                         {
                             "name": "__",
-                            "line": 2098,
-                            "end_line": 2098
+                            "line": 2108,
+                            "end_line": 2108
                         },
                         {
                             "name": "_doing_it_wrong",
-                            "line": 2100,
-                            "end_line": 2100
+                            "line": 2110,
+                            "end_line": 2110
                         },
                         {
                             "name": "esc_html",
-                            "line": 2100,
-                            "end_line": 2100
+                            "line": 2110,
+                            "end_line": 2110
                         },
                         {
                             "name": "esc_html",
-                            "line": 2100,
-                            "end_line": 2100
+                            "line": 2110,
+                            "end_line": 2110
                         }
                     ]
                 }
@@ -2057,8 +2066,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 2113,
-                "end_line": 2125,
+                "line": 2123,
+                "end_line": 2135,
                 "arguments": [
                     {
                         "name": "$url",
@@ -2098,54 +2107,54 @@
                             "name": "has_endpoint",
                             "class": "\\AmpProject\\AmpWP\\Services::get('paired_routing')",
                             "static": false,
-                            "line": 2115,
-                            "end_line": 2115
+                            "line": 2125,
+                            "end_line": 2125
                         },
                         {
                             "name": "get",
                             "class": "\\AmpProject\\AmpWP\\Services",
                             "static": true,
-                            "line": 2115,
-                            "end_line": 2115
+                            "line": 2125,
+                            "end_line": 2125
                         },
                         {
                             "name": "getMessage",
                             "class": "$e",
                             "static": false,
-                            "line": 2122,
-                            "end_line": 2122
+                            "line": 2132,
+                            "end_line": 2132
                         }
                     ],
                     "functions": [
                         {
                             "name": "amp_is_enabled",
-                            "line": 2117,
-                            "end_line": 2117
+                            "line": 2127,
+                            "end_line": 2127
                         },
                         {
                             "name": "__",
-                            "line": 2118,
-                            "end_line": 2118
+                            "line": 2128,
+                            "end_line": 2128
                         },
                         {
                             "name": "__",
-                            "line": 2120,
-                            "end_line": 2120
+                            "line": 2130,
+                            "end_line": 2130
                         },
                         {
                             "name": "_doing_it_wrong",
-                            "line": 2122,
-                            "end_line": 2122
+                            "line": 2132,
+                            "end_line": 2132
                         },
                         {
                             "name": "esc_html",
-                            "line": 2122,
-                            "end_line": 2122
+                            "line": 2132,
+                            "end_line": 2132
                         },
                         {
                             "name": "esc_html",
-                            "line": 2122,
-                            "end_line": 2122
+                            "line": 2132,
+                            "end_line": 2132
                         }
                     ]
                 }
@@ -2163,8 +2172,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 2135,
-                "end_line": 2147,
+                "line": 2145,
+                "end_line": 2157,
                 "arguments": [
                     {
                         "name": "$url",
@@ -2204,54 +2213,54 @@
                             "name": "remove_endpoint",
                             "class": "\\AmpProject\\AmpWP\\Services::get('paired_routing')",
                             "static": false,
-                            "line": 2137,
-                            "end_line": 2137
+                            "line": 2147,
+                            "end_line": 2147
                         },
                         {
                             "name": "get",
                             "class": "\\AmpProject\\AmpWP\\Services",
                             "static": true,
-                            "line": 2137,
-                            "end_line": 2137
+                            "line": 2147,
+                            "end_line": 2147
                         },
                         {
                             "name": "getMessage",
                             "class": "$e",
                             "static": false,
-                            "line": 2144,
-                            "end_line": 2144
+                            "line": 2154,
+                            "end_line": 2154
                         }
                     ],
                     "functions": [
                         {
                             "name": "amp_is_enabled",
-                            "line": 2139,
-                            "end_line": 2139
+                            "line": 2149,
+                            "end_line": 2149
                         },
                         {
                             "name": "__",
-                            "line": 2140,
-                            "end_line": 2140
+                            "line": 2150,
+                            "end_line": 2150
                         },
                         {
                             "name": "__",
-                            "line": 2142,
-                            "end_line": 2142
+                            "line": 2152,
+                            "end_line": 2152
                         },
                         {
                             "name": "_doing_it_wrong",
-                            "line": 2144,
-                            "end_line": 2144
+                            "line": 2154,
+                            "end_line": 2154
                         },
                         {
                             "name": "esc_html",
-                            "line": 2144,
-                            "end_line": 2144
+                            "line": 2154,
+                            "end_line": 2154
                         },
                         {
                             "name": "esc_html",
-                            "line": 2144,
-                            "end_line": 2144
+                            "line": 2154,
+                            "end_line": 2154
                         }
                     ]
                 }
@@ -2540,11 +2549,11 @@
             },
             "11": {
                 "name": "amp_native_img_used",
-                "line": 1472,
-                "end_line": 1472,
+                "line": 1474,
+                "end_line": 1474,
                 "type": "filter",
                 "arguments": [
-                    "true"
+                    "$use_native_img_tag"
                 ],
                 "doc": {
                     "description": "Filters whether to use the native `img` element rather than convert to `amp-img`.",
@@ -2572,8 +2581,8 @@
             },
             "12": {
                 "name": "amp_to_amp_linking_enabled",
-                "line": 1514,
-                "end_line": 1517,
+                "line": 1516,
+                "end_line": 1519,
                 "type": "filter",
                 "arguments": [
                     "\\AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === \\AMP_Options_Manager::get_option(\\AmpProject\\AmpWP\\Option::THEME_SUPPORT)"
@@ -2599,8 +2608,8 @@
             },
             "13": {
                 "name": "amp_to_amp_excluded_urls",
-                "line": 1604,
-                "end_line": 1604,
+                "line": 1609,
+                "end_line": 1609,
                 "type": "filter",
                 "arguments": [
                     "array()"
@@ -2626,8 +2635,8 @@
             },
             "14": {
                 "name": "amp_auto_lightbox_disabled",
-                "line": 1622,
-                "end_line": 1622,
+                "line": 1627,
+                "end_line": 1627,
                 "type": "filter",
                 "arguments": [
                     "true"
@@ -2658,8 +2667,8 @@
             },
             "15": {
                 "name": "amp_content_sanitizers",
-                "line": 1637,
-                "end_line": 1637,
+                "line": 1642,
+                "end_line": 1642,
                 "type": "filter",
                 "arguments": [
                     "$sanitizers",
@@ -2699,8 +2708,8 @@
             },
             "16": {
                 "name": "amp_dev_mode_element_xpaths",
-                "line": 1650,
-                "end_line": 1650,
+                "line": 1655,
+                "end_line": 1655,
                 "type": "filter",
                 "arguments": [
                     "array()"
@@ -2726,8 +2735,8 @@
             },
             "17": {
                 "name": "amp_parsed_css_transient_caching_allowed",
-                "line": 1703,
-                "end_line": 1703,
+                "line": 1708,
+                "end_line": 1708,
                 "type": "filter",
                 "arguments": [
                     "true"
@@ -2753,8 +2762,8 @@
             },
             "18": {
                 "name": "amp_site_icon_url",
-                "line": 1852,
-                "end_line": 1852,
+                "line": 1858,
+                "end_line": 1858,
                 "type": "filter",
                 "arguments": [
                     "$logo_image_url"
@@ -2780,8 +2789,8 @@
             },
             "19": {
                 "name": "amp_post_template_metadata",
-                "line": 1933,
-                "end_line": 1933,
+                "line": 1939,
+                "end_line": 1939,
                 "type": "filter",
                 "arguments": [
                     "$metadata",
@@ -2816,8 +2825,8 @@
             },
             "20": {
                 "name": "amp_schemaorg_metadata",
-                "line": 1947,
-                "end_line": 1947,
+                "line": 1953,
+                "end_line": 1953,
                 "type": "filter",
                 "arguments": [
                     "$metadata"
@@ -2855,7 +2864,7 @@
             ]
         },
         "path": "includes\/amp-post-template-functions.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "functions": [],
         "hooks": [
             {
@@ -2912,13 +2921,13 @@
             ]
         },
         "path": "includes\/class-amp-http.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
                 "name": "amp_comment_posted_message",
-                "line": 493,
-                "end_line": 493,
+                "line": 502,
+                "end_line": 502,
                 "type": "filter",
                 "arguments": [
                     "$message",
@@ -2953,7 +2962,7 @@
             ]
         },
         "path": "includes\/class-amp-post-type-support.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
@@ -3078,7 +3087,7 @@
             ]
         },
         "path": "includes\/class-amp-theme-support.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": {
             "1": {
@@ -3149,7 +3158,7 @@
             ]
         },
         "path": "includes\/deprecated.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "includes": [
             {
                 "name": "",
@@ -3630,7 +3639,7 @@
             ]
         },
         "path": "includes\/embeds\/class-amp-base-embed-handler.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [
             {
                 "name": "AMP_Base_Embed_Handler",
@@ -4411,7 +4420,7 @@
             ]
         },
         "path": "includes\/embeds\/class-amp-wordpress-embed-handler.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [
             {
                 "name": "AMP_WordPress_Embed_Handler",
@@ -4668,7 +4677,7 @@
             ]
         },
         "path": "includes\/sanitizers\/class-amp-base-sanitizer.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [
             {
                 "name": "AMP_Base_Sanitizer",
@@ -6964,13 +6973,13 @@
             ]
         },
         "path": "includes\/sanitizers\/class-amp-link-sanitizer.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
                 "name": "amp_to_amp_linking_element_excluded",
-                "line": 216,
-                "end_line": 216,
+                "line": 221,
+                "end_line": 221,
                 "type": "filter",
                 "arguments": [
                     "$excluded",
@@ -7019,7 +7028,7 @@
             }
         ]
     },
-    "85": {
+    "86": {
         "file": {
             "description": "Class AMP_Customizer_Design_Settings",
             "long_description": "",
@@ -7031,7 +7040,7 @@
             ]
         },
         "path": "includes\/settings\/class-amp-customizer-design-settings.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "includes": [
             {
                 "name": "",
@@ -7075,7 +7084,7 @@
             }
         ]
     },
-    "86": {
+    "87": {
         "file": {
             "description": "Class AMP_Customizer_Settings",
             "long_description": "",
@@ -7087,7 +7096,7 @@
             ]
         },
         "path": "includes\/settings\/class-amp-customizer-settings.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
@@ -7119,7 +7128,7 @@
             }
         ]
     },
-    "91": {
+    "92": {
         "file": {
             "description": "AMP_Post_Template class.",
             "long_description": "",
@@ -7131,7 +7140,7 @@
             ]
         },
         "path": "includes\/templates\/class-amp-post-template.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "includes": [
             {
                 "name": "",
@@ -7333,7 +7342,7 @@
             }
         }
     },
-    "94": {
+    "95": {
         "file": {
             "description": "Class AMP_DOM_Utils.",
             "long_description": "",
@@ -7345,7 +7354,7 @@
             ]
         },
         "path": "includes\/utils\/class-amp-dom-utils.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [
             {
                 "name": "AMP_DOM_Utils",
@@ -8625,7 +8634,7 @@
         ],
         "hooks": []
     },
-    "96": {
+    "97": {
         "file": {
             "description": "Class AMP_Image_Dimension_Extractor",
             "long_description": "",
@@ -8637,7 +8646,7 @@
             ]
         },
         "path": "includes\/utils\/class-amp-image-dimension-extractor.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
@@ -8745,7 +8754,7 @@
             }
         ]
     },
-    "100": {
+    "101": {
         "file": {
             "description": "Class AMP_Validation_Error_Taxonomy",
             "long_description": "",
@@ -8757,7 +8766,7 @@
             ]
         },
         "path": "includes\/validation\/class-amp-validation-error-taxonomy.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "includes": [
             {
                 "name": "",
@@ -8881,7 +8890,7 @@
             }
         ]
     },
-    "101": {
+    "102": {
         "file": {
             "description": "Class AMP_Validation_Manager",
             "long_description": "",
@@ -8893,11 +8902,11 @@
             ]
         },
         "path": "includes\/validation\/class-amp-validation-manager.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "includes": [
             {
                 "name": "",
-                "line": 2613,
+                "line": 2615,
                 "type": "Require"
             }
         ],
@@ -8947,8 +8956,8 @@
             },
             {
                 "name": "amp_validation_error",
-                "line": 827,
-                "end_line": 827,
+                "line": 829,
+                "end_line": 829,
                 "type": "filter",
                 "arguments": [
                     "$error",
@@ -8983,7 +8992,7 @@
             }
         ]
     },
-    "107": {
+    "108": {
         "file": {
             "description": "Add new tab (AMP) in theme install screen in WordPress admin.",
             "long_description": "",
@@ -8995,7 +9004,7 @@
             ]
         },
         "path": "src\/Admin\/AmpThemes.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "includes": [
             {
                 "name": "",
@@ -9048,7 +9057,7 @@
             }
         ]
     },
-    "112": {
+    "113": {
         "file": {
             "description": "Class OptionsMenu",
             "long_description": "",
@@ -9060,7 +9069,7 @@
             ]
         },
         "path": "src\/Admin\/OptionsMenu.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "includes": [
             {
                 "name": "",
@@ -9109,7 +9118,7 @@
             }
         ]
     },
-    "118": {
+    "119": {
         "file": {
             "description": "Fetches and formats data for AMP reader themes.",
             "long_description": "",
@@ -9125,7 +9134,7 @@
             ]
         },
         "path": "src\/Admin\/ReaderThemes.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "includes": [
             {
                 "name": "",
@@ -9134,17 +9143,17 @@
             },
             {
                 "name": "",
-                "line": 388,
+                "line": 389,
                 "type": "Require Once"
             },
             {
                 "name": "",
-                "line": 392,
+                "line": 393,
                 "type": "Require Once"
             },
             {
                 "name": "",
-                "line": 396,
+                "line": 397,
                 "type": "Require Once"
             }
         ],
@@ -9175,7 +9184,7 @@
             }
         ]
     },
-    "120": {
+    "121": {
         "file": {
             "description": "Class SiteHealth.",
             "long_description": "",
@@ -9187,13 +9196,13 @@
             ]
         },
         "path": "src\/Admin\/SiteHealth.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
                 "name": "amp_page_cache_good_response_time_threshold",
-                "line": 347,
-                "end_line": 347,
+                "line": 352,
+                "end_line": 352,
                 "type": "filter",
                 "arguments": [
                     "600"
@@ -9219,7 +9228,7 @@
             }
         ]
     },
-    "130": {
+    "131": {
         "file": {
             "description": "Class MonitorCssTransientCaching.",
             "long_description": "",
@@ -9231,13 +9240,13 @@
             ]
         },
         "path": "src\/BackgroundTask\/MonitorCssTransientCaching.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
                 "name": "amp_css_transient_monitoring_threshold",
-                "line": 351,
-                "end_line": 351,
+                "line": 352,
+                "end_line": 352,
                 "type": "filter",
                 "arguments": [
                     "self::DEFAULT_THRESHOLD"
@@ -9263,8 +9272,8 @@
             },
             {
                 "name": "amp_css_transient_monitoring_sampling_range",
-                "line": 372,
-                "end_line": 372,
+                "line": 373,
+                "end_line": 373,
                 "type": "filter",
                 "arguments": [
                     "self::DEFAULT_SAMPLING_RANGE"
@@ -9290,7 +9299,7 @@
             }
         ]
     },
-    "134": {
+    "135": {
         "file": {
             "description": "Class ValidationDataGarbageCollection.",
             "long_description": "",
@@ -9302,7 +9311,7 @@
             ]
         },
         "path": "src\/BackgroundTask\/ValidationDataGarbageCollection.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
@@ -9389,7 +9398,7 @@
             }
         ]
     },
-    "151": {
+    "152": {
         "file": {
             "description": "Class UserAccess.",
             "long_description": "",
@@ -9405,7 +9414,7 @@
             ]
         },
         "path": "src\/DevTools\/UserAccess.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
@@ -9446,7 +9455,7 @@
             }
         ]
     },
-    "187": {
+    "188": {
         "file": {
             "description": "Class MobileRedirection.",
             "long_description": "",
@@ -9458,7 +9467,7 @@
             ]
         },
         "path": "src\/MobileRedirection.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": {
             "0": {
@@ -9598,7 +9607,7 @@
             }
         }
     },
-    "189": {
+    "190": {
         "file": {
             "description": "Class AmpWPConfiguration.",
             "long_description": "",
@@ -9610,7 +9619,7 @@
             ]
         },
         "path": "src\/Optimizer\/AmpWPConfiguration.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
@@ -9669,7 +9678,7 @@
             }
         ]
     },
-    "197": {
+    "198": {
         "file": {
             "description": "Class PairedRouting.",
             "long_description": "",
@@ -9681,7 +9690,7 @@
             ]
         },
         "path": "src\/PairedRouting.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
@@ -9709,7 +9718,7 @@
             }
         ]
     },
-    "198": {
+    "199": {
         "file": {
             "description": "Class PairedUrl.",
             "long_description": "",
@@ -9721,7 +9730,7 @@
             ]
         },
         "path": "src\/PairedUrl.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [
             {
                 "name": "PairedUrl",
@@ -10181,7 +10190,7 @@
         ],
         "hooks": []
     },
-    "199": {
+    "200": {
         "file": {
             "description": "Class LegacyReaderUrlStructure.",
             "long_description": "",
@@ -10193,7 +10202,7 @@
             ]
         },
         "path": "src\/PairedUrlStructure\/LegacyReaderUrlStructure.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [],
         "hooks": [
             {
@@ -10280,7 +10289,7 @@
             }
         ]
     },
-    "203": {
+    "204": {
         "file": {
             "description": "Abstract class PairedUrlStructure.",
             "long_description": "",
@@ -10292,7 +10301,7 @@
             ]
         },
         "path": "src\/PairedUrlStructure.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
+        "root": "\/var\/www\/html\/wp-content\/plugins\/amp",
         "classes": [
             {
                 "name": "PairedUrlStructure",

@@ -71,7 +71,7 @@ public function prepare_validation_error( array $error = [], array $data = [] ) 
 					],
 					$text_content
 				);
-			} elseif ( $is_inline_style ) {
+			} else {
 				// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
 				// already be detailed in the stylesheets metabox.
 				$error['text'] = $text_content;

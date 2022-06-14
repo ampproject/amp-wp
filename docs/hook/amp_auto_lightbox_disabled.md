@@ -14,7 +14,7 @@ When disabled, the data-amp-auto-lightbox-disable attribute is added to the body
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1622](/includes/amp-helper-functions.php#L1622)
+:link: [includes/amp-helper-functions.php:1627](/includes/amp-helper-functions.php#L1627)
 
 <details>
 <summary>Show Code</summary>

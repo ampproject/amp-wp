@@ -18,14 +18,18 @@ The sha384 hash used by amp-script is represented not as hexadecimal but as base
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:2070](/includes/amp-helper-functions.php#L2070-L2081)
+:link: [includes/amp-helper-functions.php:2076](/includes/amp-helper-functions.php#L2076-L2091)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
 function amp_generate_script_hash( $script ) {
-	$sha384 = hash( 'sha384', $script, true );
+	try {
+		$sha384 = hash( 'sha384', $script, true );
+	} catch ( ValueError $e ) {
+		$sha384 = false;
+	}
 	if ( false === $sha384 ) {
 		return null;
 	}

@@ -12,7 +12,7 @@ Filters the threshold below which a response time is considered good.
 
 ### Source
 
-:link: [src/Admin/SiteHealth.php:347](/src/Admin/SiteHealth.php#L347)
+:link: [src/Admin/SiteHealth.php:352](/src/Admin/SiteHealth.php#L352)
 
 <details>
 <summary>Show Code</summary>
