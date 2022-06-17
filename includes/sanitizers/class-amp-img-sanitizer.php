@@ -409,11 +409,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			 * @todo Remove this once lightbox is added in `lightboxable-elements` for native img tag in AMP spec.
 			 */
 			if ( isset( $attributes['data-amp-lightbox'] ) || $node->hasAttribute( Attribute::LIGHTBOX ) ) {
-				$node->setAttribute( Attribute::LIGHTBOX, 'true' );
 				$node_attr = $node->getAttributeNode( Attribute::LIGHTBOX );
-				if ( $node_attr instanceof DOMAttr ) {
-					ValidationExemption::mark_node_as_px_verified( $node_attr );
+				if ( ! $node_attr instanceof DOMAttr ) {
+					$node_attr = $this->dom->createAttribute( Attribute::LIGHTBOX );
+					$node->setAttributeNode( $node_attr );
 				}
+				ValidationExemption::mark_node_as_px_verified( $node_attr );
 			}
 
 			// Set decoding=async by default. See <https://core.trac.wordpress.org/ticket/53232>.
