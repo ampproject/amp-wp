@@ -72,8 +72,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public function sanitize() {
-		$native_img_used = amp_is_native_img_used();
-		$class_query     = 'contains( concat( " ", normalize-space( @class ), " " ), " wp-block-gallery " )';
+		$class_query = 'contains( concat( " ", normalize-space( @class ), " " ), " wp-block-gallery " )';
 
 		$gallery_elements = $this->dom->xpath->query(
 			sprintf( './/ul[ %1$s ] | .//figure[ %1$s ]', $class_query ),
@@ -107,7 +106,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$this->process_gallery_embed( $is_amp_carousel, $is_amp_lightbox, $gallery_element, $img_elements );
 		}
 
-		if ( ! $native_img_used ) {
+		if ( ! $this->args['native_img_used'] ) {
 			return;
 		}
 
