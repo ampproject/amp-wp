@@ -110,6 +110,11 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		$img_elements = $this->dom->xpath->query(
+			'.//img[ @layout = "fill" or @object-fit = "cover" ]',
+			$this->dom->body
+		);
+
 		/*
 		* Remove `layout` and `object-fit` attributes from native img as they are not supported by AMP yet.
 		* Add style attribute which is used to set `object-fit` and `layout` attributes.
@@ -123,7 +128,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$remove_object_fit_attr = $img_element->removeAttribute( Attribute::OBJECT_FIT );
 			$style_attr_content     = sprintf( '%s %s', $remove_layout_attr ? $style_layout_fill : '', $remove_object_fit_attr ? $style_object_fit : '' );
 
-			if ( ! empty( $style_attr_content ) ) {
+			if ( ' ' !== $style_attr_content ) {
 				$img_element->setAttribute( Attribute::STYLE, $style_attr_content );
 			}
 		}
