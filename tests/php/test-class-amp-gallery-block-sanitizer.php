@@ -269,7 +269,7 @@ class AMP_Gallery_Block_Sanitizer_Test extends TestCase {
 	 *
 	 * `layout` and `object-fit` will be replaced with a style attribute.
 	 *
-	 * @covers ::sanitize()
+	 * @covers \AMP_Gallery_Block_Sanitizer::sanitize()
 	 */
 	public function test_native_img_tag_has_not_layout_or_object_fit_attrs() {
 		$source   = '<amp-carousel width="600" height="400" type="slides" layout="responsive" lightbox=""><figure class="slide"><img src="http://example.com/img.png" width="600" height="400" layout="fill" object-fit="cover"></figure></amp-carousel>';
