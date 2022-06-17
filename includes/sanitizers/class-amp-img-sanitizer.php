@@ -408,7 +408,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			 * @see <https://github.com/ampproject/amp-wp/issues/7152#issuecomment-1157933188>
 			 * @todo Remove this once lightbox is added in `lightboxable-elements` for native img tag in AMP spec.
 			 */
-			if ( isset( $attributes['data-amp-lightbox'] ) ) {
+			if ( isset( $attributes['data-amp-lightbox'] ) || $node->hasAttribute( Attribute::LIGHTBOX ) ) {
 				$node->setAttribute( Attribute::LIGHTBOX, 'true' );
 				$node_attr = $node->getAttributeNode( Attribute::LIGHTBOX );
 				if ( $node_attr instanceof DOMAttr ) {
