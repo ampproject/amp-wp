@@ -406,7 +406,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			/*
 			 * Mark lightbox as px-verified attribute until it's supported by AMP spec.
 			 * @see <https://github.com/ampproject/amp-wp/issues/7152#issuecomment-1157933188>
-			 * @todo Remove this once lightbox is added in `ightboxable-elements` for native img tag in AMP spec.
+			 * @todo Remove this once lightbox is added in `lightboxable-elements` for native img tag in AMP spec.
 			 */
 			if ( isset( $attributes['data-amp-lightbox'] ) ) {
 				$node->setAttribute( Attribute::LIGHTBOX, 'true' );
