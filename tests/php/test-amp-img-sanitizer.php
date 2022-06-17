@@ -777,6 +777,25 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	}
 
 	/**
+	 * Test an native img tag has px-verified lightbox attributes.
+	 *
+	 * @covers ::sanitize()
+	 */
+	public function test_native_img_tag_has_lightbox_attributes() {
+		$source   = '<figure class="wp-block-image" data-amp-lightbox="true"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>';
+		$expected = '<figure class="wp-block-image" data-amp-lightbox="true"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" lightbox="" data-px-verified-attrs="lightbox" data-amp-lightbox="" decoding="async" class="amp-wp-enforced-sizes"></figure>';
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => true ] );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $content );
+	}
+
+	/**
 	 * Test an Image block wrapped in an <a>, that has right-alignment, links to the media file, and has 'lightbox' selected.
 	 *
 	 * This should have the <a> stripped, as it interferes with the lightbox.
