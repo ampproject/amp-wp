@@ -106,7 +106,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$this->process_gallery_embed( $is_amp_carousel, $is_amp_lightbox, $gallery_element, $img_elements );
 		}
 
-		if ( ! $this->args['native_img_used'] ) {
+		if ( ! isset( $this->args['native_img_used'] ) || ! $this->args['native_img_used'] ) {
 			return;
 		}
 
