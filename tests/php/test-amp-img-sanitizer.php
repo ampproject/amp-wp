@@ -781,7 +781,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 *
 	 * @covers ::sanitize()
 	 */
-	public function test_native_img_tag_has_lightbox_attributes() {
+	public function test_native_img_tag_has_px_verified_lightbox_attr() {
 		$source   = '<figure class="wp-block-image" data-amp-lightbox="true"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>';
 		$expected = '<figure class="wp-block-image" data-amp-lightbox="true"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" lightbox="" data-px-verified-attrs="lightbox" data-amp-lightbox="" decoding="async" class="amp-wp-enforced-sizes"></figure>';
 
