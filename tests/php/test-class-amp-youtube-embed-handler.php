@@ -348,6 +348,10 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.1', '<' )
 			&& null !== $fallback_for_expected
 		) {
+			// Remove the title or alt attribute from $filtered_content if it exists.
+			$filtered_content = preg_replace( '/ title="[^"]*"/', '', $filtered_content );
+			$filtered_content = preg_replace( '/ alt="[^"]*"/', '', $filtered_content );
+
 			$this->assertEqualMarkup( $fallback_for_expected, $filtered_content );
 		} else {
 			$this->assertEqualMarkup( $expected, $filtered_content );
