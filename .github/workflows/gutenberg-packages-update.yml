@@ -112,9 +112,10 @@ jobs:
           cache: npm
 
       - name: Configure git user
+        # Setting up github-action bot as git user <https://github.com/actions/checkout#push-a-commit-using-the-built-in-token>.
         run: |
-          git config user.email "pierregordon@protonmail.com"
-          git config user.name "Pierre Gordon"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
 
       - name: Check if remote branch exists
         id: remote-branch
@@ -138,7 +139,7 @@ jobs:
           HEAD_BRANCH: ${{ steps.branches.outputs.head }}
 
       - name: Install Node dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
         env:
           CI: true
 
@@ -159,19 +160,37 @@ jobs:
         if: steps.packages.outputs.list != 0
         run: |
           git add --all .
-          git commit -m "Update Gutenberg package dependencies"
-          git push origin "$HEAD_BRANCH"
+          git commit -m "Update WordPress NPM packages based on Gutenberg release v$VERSION" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>"
+          git push -u origin "$HEAD_BRANCH"
         env:
+          VERSION: ${{ needs.check-gutenberg-release.outputs.latest-version }}
           HEAD_BRANCH: ${{ steps.branches.outputs.head }}
 
-      - name: Create pull request
+      - name: Draft a pull request
+        id: pr-create
         if: steps.packages.outputs.list != 0 && steps.remote-branch.outputs.exists == 0
         run: |
-          git push -u origin "$HEAD_BRANCH"
-          PR_URL=$(gh pr create --base "$BASE_BRANCH" --title "Update Gutenberg packages after v$VERSION release" --body "" --label dependencies | grep https://)
-          gh pr merge --auto --merge "$PR_URL"
+          PR_BODY=$(node bin/gutenberg-packages-update-pr-body.js "${{ steps.packages.outputs.list }}")
+          PR_URL=$(gh pr create --draft --base "$BASE_BRANCH" --title "Update Gutenberg packages after v$VERSION release" --body "$PR_BODY" --label dependencies | grep https://)
+          echo "::set-output name=pr-url::$PR_URL"
         env:
           VERSION: ${{ needs.check-gutenberg-release.outputs.latest-version }}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           BASE_BRANCH: ${{ steps.branches.outputs.base }}
-          HEAD_BRANCH: ${{ steps.branches.outputs.head }}
+          HEAD_BRANCH: ${{ steps.branches.outputs.head }}"
+
+      # Make PR ready using personal access token to allow workflow to be triggered.
+      - name: Make PR ready
+        if: steps.pr-create.outputs.pr-url != ''
+        run: gh pr ready "$PR_URL"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          PR_URL: ${{ steps.pr-create.outputs.pr-url }}
+
+      - name: Add PR reviewers
+        if: steps.pr-create.outputs.pr-url != ''
+        # Add a PR reviewer so that a notification can be sent to the concerned person.
+        run: gh pr edit "$PR_URL" --add-reviewer ${{ secrets.PR_REVIEWER }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ steps.pr-create.outputs.pr-url }}
