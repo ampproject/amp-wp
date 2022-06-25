@@ -1,7 +1,5 @@
-# This is based on <https://docs.github.com/en/code-security/supply-chain-security/keeping-your-dependencies-updated-automatically/automating-dependabot-with-github-actions#enable-auto-merge-on-a-pull-request>.
-name: Dependabot auto-merge
+name: Pull Requests auto-merge
 
-# Only trigger, when the build workflow succeeded, per <https://stackoverflow.com/a/65698892/93579>.
 on:
   workflow_run:
     workflows: ["Build, test & measure"]
@@ -20,23 +18,19 @@ concurrency:
 
 jobs:
   dependabot:
+    name: Dependabot PR auto-merge
     runs-on: ubuntu-latest
     if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
-      - name: Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@v1.3.3
-        with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-      - name: Enable auto-merge for Dependabot PRs
-        if: ${{ github.event.pull_request.auto_merge == null && ( steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' ) }}
-        run: gh pr merge --auto --merge "$PR_URL"
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Approve and merge the PR
+        if: >
+          contains( github.event.workflow_run.head_commit.message, 'version-update:semver-minor' ) || contains( github.event.workflow_run.head_commit.message, 'version-update:semver-patch' )
+        run: |
+          gh pr review "$PR_NUMBER" --approve --body "LGTM!"
+          gh pr merge "$PR_NUMBER" --auto --merge --delete-branch
         env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - name: Approve PR
-        run: gh pr review --approve "$PR_URL"
-        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
+          PR_NUMBER: ${{github.event.workflow_run.pull_requests[0].number}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
