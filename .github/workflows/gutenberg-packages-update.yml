@@ -177,7 +177,7 @@ jobs:
           VERSION: ${{ needs.check-gutenberg-release.outputs.latest-version }}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           BASE_BRANCH: ${{ steps.branches.outputs.base }}
-          HEAD_BRANCH: ${{ steps.branches.outputs.head }}"
+          HEAD_BRANCH: ${{ steps.branches.outputs.head }}
 
       # Make PR ready using personal access token to allow workflow to be triggered.
       - name: Make PR ready
