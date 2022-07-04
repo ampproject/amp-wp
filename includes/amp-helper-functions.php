@@ -1522,12 +1522,12 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	$sanitizers = [
 		// Embed sanitization must come first because it strips out custom scripts associated with embeds.
-		AMP_Embed_Sanitizer::class             => [
+		AMP_Embed_Sanitizer::class                 => [
 			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
 		],
-		AMP_O2_Player_Sanitizer::class         => [],
-		AMP_Playbuzz_Sanitizer::class          => [],
-		AMP_Core_Theme_Sanitizer::class        => [
+		AMP_O2_Player_Sanitizer::class             => [],
+		AMP_Playbuzz_Sanitizer::class              => [],
+		AMP_Core_Theme_Sanitizer::class            => [
 			'template'        => get_template(),
 			'stylesheet'      => get_stylesheet(),
 			'theme_features'  => [
@@ -1536,50 +1536,53 @@ function amp_get_content_sanitizers( $post = null ) {
 			'native_img_used' => $native_img_used,
 		],
 
-		AMP_Comments_Sanitizer::class          => [
+		AMP_Comments_Sanitizer::class              => [
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
 		],
 
-		AMP_Bento_Sanitizer::class             => [],
+		AMP_Bento_Sanitizer::class                 => [],
 
 		// The AMP_PWA_Script_Sanitizer run before AMP_Script_Sanitizer, to prevent the script tags
 		// from getting removed in PWA plugin offline/500 templates.
-		AMP_PWA_Script_Sanitizer::class        => [],
+		AMP_PWA_Script_Sanitizer::class            => [],
 
 		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
 		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
 		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
 		// performed.
-		AMP_Script_Sanitizer::class            => [],
+		AMP_Script_Sanitizer::class                => [],
 
-		AMP_Srcset_Sanitizer::class            => [],
-		AMP_Img_Sanitizer::class               => [
+		AMP_Srcset_Sanitizer::class                => [],
+		AMP_Img_Sanitizer::class                   => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 			'native_img_used'    => $native_img_used,
 		],
-		AMP_Form_Sanitizer::class              => [],
-		AMP_Video_Sanitizer::class             => [],
-		AMP_Audio_Sanitizer::class             => [],
-		AMP_Object_Sanitizer::class            => [],
-		AMP_Iframe_Sanitizer::class            => [
+		AMP_Form_Sanitizer::class                  => [],
+		AMP_Video_Sanitizer::class                 => [],
+		AMP_Audio_Sanitizer::class                 => [],
+		AMP_Object_Sanitizer::class                => [],
+		AMP_Iframe_Sanitizer::class                => [
 			'add_placeholder'    => true,
 			'current_origin'     => $current_origin,
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
-		AMP_Gallery_Block_Sanitizer::class     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+		AMP_Gallery_Block_Sanitizer::class         => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
 			'native_img_used'   => $native_img_used,
 		],
-		AMP_Block_Sanitizer::class             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
-		AMP_Style_Sanitizer::class             => [
+		AMP_Native_Img_Attributes_Sanitizer::class => [ // Note: Native img attributes sanitizer must come after image sanitizers since its logic is sanitizing the already sanitized images attributes.
+			'native_img_used' => $native_img_used,
+		],
+		AMP_Block_Sanitizer::class                 => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
+		AMP_Style_Sanitizer::class                 => [
 			'skip_tree_shaking'   => is_customize_preview(),
 			'allow_excessive_css' => is_customize_preview(),
 		],
-		AMP_Meta_Sanitizer::class              => [],
-		AMP_Layout_Sanitizer::class            => [],
-		AMP_Accessibility_Sanitizer::class     => [],
+		AMP_Meta_Sanitizer::class                  => [],
+		AMP_Layout_Sanitizer::class                => [],
+		AMP_Accessibility_Sanitizer::class         => [],
 		// Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
-		AMP_Tag_And_Attribute_Sanitizer::class => [
+		AMP_Tag_And_Attribute_Sanitizer::class     => [
 			'prefer_bento' => amp_is_bento_enabled(),
 		],
 	];
@@ -1723,6 +1726,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Object_Sanitizer::class,
 		AMP_Iframe_Sanitizer::class,
 		AMP_Gallery_Block_Sanitizer::class,
+		AMP_Native_Img_Attributes_Sanitizer::class, // Must come after gallery block sanitizer since it sanitizes img attributes.
 		AMP_Block_Sanitizer::class,
 		AMP_Accessibility_Sanitizer::class,
 		AMP_Layout_Sanitizer::class,
