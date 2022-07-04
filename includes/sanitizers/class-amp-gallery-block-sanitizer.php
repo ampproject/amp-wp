@@ -6,7 +6,6 @@
  */
 
 use AmpProject\AmpWP\Embed\HandlesGalleryEmbed;
-use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
 use AmpProject\Dom\Element;
 
@@ -104,33 +103,6 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			);
 
 			$this->process_gallery_embed( $is_amp_carousel, $is_amp_lightbox, $gallery_element, $img_elements );
-		}
-
-		if ( ! isset( $this->args['native_img_used'] ) || ! $this->args['native_img_used'] ) {
-			return;
-		}
-
-		$img_elements = $this->dom->xpath->query(
-			'.//img[ @layout = "fill" or @object-fit = "cover" ]',
-			$this->dom->body
-		);
-
-		/*
-		* Remove `layout` and `object-fit` attributes from native img as they are not supported by AMP yet.
-		* Add style attribute which is used to set `object-fit` and `layout` attributes.
-		* @see <https://github.com/ampproject/amp-wp/issues/7152#issuecomment-1157933188>
-		* @todo Remove this once `layout` and `object-fit` attributes are supported by AMP spec for native img tag.
-		*/
-		$style_layout_fill = 'position:absolute; left:0; right:0; top:0; bottom: 0; width:100%; height:100%;';
-		$style_object_fit  = 'object-fit:cover;';
-		foreach ( $img_elements as $img_element ) {
-			$remove_layout_attr     = $img_element->removeAttribute( Attribute::LAYOUT );
-			$remove_object_fit_attr = $img_element->removeAttribute( Attribute::OBJECT_FIT );
-			$style_attr_content     = sprintf( '%s %s', $remove_layout_attr ? $style_layout_fill : '', $remove_object_fit_attr ? $style_object_fit : '' );
-
-			if ( ' ' !== $style_attr_content ) {
-				$img_element->setAttribute( Attribute::STYLE, $style_attr_content );
-			}
 		}
 	}
 
