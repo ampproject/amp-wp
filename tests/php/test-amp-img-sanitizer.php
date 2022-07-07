@@ -483,8 +483,8 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 			],
 
 			'aligned_image_block_with_lightbox'        => [
-				'<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignleft is-resized"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure></div>',
-				'<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignleft is-resized"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>',
+				'<div class="wp-block-image"><figure data-amp-lightbox="true" class="alignleft is-resized"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure></div>',
+				'<div class="wp-block-image"><figure  data-amp-lightbox="true" class="alignleft is-resized"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>',
 			],
 
 			'test_with_dev_mode'                       => [
@@ -763,8 +763,9 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * @covers ::sanitize()
 	 */
 	public function test_image_block_link_to_media_file_with_lightbox() {
-		$source   = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
-		$expected = '<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>';
+		$image_url = wp_get_attachment_image_url( $this->get_new_attachment_id() );
+		$source    = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><a href="%1$s"><img src="%1$s" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>', $image_url );
+		$expected  = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="%1$s" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="%1$s" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>', $image_url );
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
@@ -803,8 +804,9 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * @covers ::sanitize()
 	 */
 	public function test_image_block_link_to_media_file_and_alignment_with_lightbox() {
-		$source   = sprintf( '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure></div>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
-		$expected = '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>';
+		$image_url = wp_get_attachment_image_url( $this->get_new_attachment_id() );
+		$source    = sprintf( '<div class="wp-block-image"><figure data-amp-lightbox="true" class="alignright size-large"><a href="%1$s"><img src="%1$s" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure></div>', $image_url );
+		$expected  = sprintf( '<div class="wp-block-image"><figure data-amp-lightbox="true" class="alignright size-large"><amp-img src="%1$s" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="%1$s" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>', $image_url );
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
