@@ -197,8 +197,8 @@ jobs:
 
       - name: Normalize composer.json
         run: |
-          composer require --no-interaction --dev ergebnis/composer-normalize --ignore-platform-reqs
           composer config --no-interaction --no-plugins allow-plugins.ergebnis/composer-normalize true
+          composer require --no-interaction --dev ergebnis/composer-normalize --ignore-platform-reqs
           composer --no-interaction normalize --dry-run
 
 #-----------------------------------------------------------------------------------------------------------------------
