@@ -817,50 +817,6 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	}
 
 	/**
-	 * Gets test data for test_does_node_have_block_class(), using a <figure> element.
-	 *
-	 * @see AMP_Img_Sanitizer_Test::test_does_node_have_block_class()
-	 * @return array Test data for function.
-	 */
-	public function get_data_for_node_block_class_test() {
-		return [
-			'has_no_class'           => [
-				'<figure></figure>',
-				false,
-			],
-			'has_wrong_class'        => [
-				'<figure class="completely-wrong-class"></figure>',
-				false,
-			],
-			'only_has_part_of_class' => [
-				'<figure class="wp-block"></figure>',
-				false,
-			],
-			'has_correct_class'      => [
-				'<figure class="wp-block-image"></figure>',
-				true,
-			],
-		];
-	}
-
-	/**
-	 * Test does_node_have_block_class.
-	 *
-	 * @dataProvider get_data_for_node_block_class_test
-	 * @covers ::does_node_have_block_class()
-	 *
-	 * @param string $source The source markup to test.
-	 * @param string $expected The expected return of the tested function, using the source markup.
-	 */
-	public function test_does_node_have_block_class( $source, $expected ) {
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
-		$figures   = $dom->getElementsByTagName( 'figure' );
-
-		$this->assertEquals( $expected, $this->call_private_method( $sanitizer, 'does_node_have_block_class', [ $figures->item( 0 ) ] ) );
-	}
-
-	/**
 	 * Creates a new image attachment, and gets the ID.
 	 *
 	 * @return int|WP_Error The new attachment ID, or WP_Error.
