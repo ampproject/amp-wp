@@ -13,7 +13,7 @@
 
 const args = process.argv.slice( 2 );
 const npmURL = 'https://www.npmjs.com/package/';
-let bodyMessage = '**Following packages were updated:**<br/><br/>';
+let bodyMessage = '**Following packages were updated:**\n\n';
 
 if ( args[ 0 ] ) {
 	args[ 0 ].split( ' ' ).forEach( ( packageName, index ) => {
