@@ -8,6 +8,7 @@
 
 use AmpProject\Html\Attribute;
 use AmpProject\Dom\Element;
+use AmpProject\Layout;
 
 /**
  * Class AMP_Native_Img_Attributes_Sanitizer
@@ -46,27 +47,44 @@ class AMP_Native_Img_Attributes_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		// Images with layout=fill.
 		$img_elements = $this->dom->xpath->query(
-			'.//img[ @layout = "fill" or @object-fit = "cover" ]',
+			'.//img[ @layout = "fill" ]',
 			$this->dom->body
 		);
-
-		if ( ! $img_elements instanceof DOMNodeList || 0 === $img_elements->length ) {
-			return;
+		if ( $img_elements instanceof DOMNodeList ) {
+			foreach ( $img_elements as $img_element ) {
+				/** @var Element $img_element */
+				$img_element->removeAttribute( Attribute::LAYOUT );
+				$img_element->addInlineStyle( 'position:absolute;left:0;right:0;top:0;bottom:0;width:100%;height:100%' );
+			}
 		}
 
-		$style_layout_fill = 'position:absolute; left:0; right:0; top:0; bottom: 0; width:100%; height:100%;';
-		$style_object_fit  = 'object-fit:cover;';
+		// Images with object-fit attributes.
+		$img_elements = $this->dom->xpath->query(
+			'.//img[ @object-fit ]',
+			$this->dom->body
+		);
+		if ( $img_elements instanceof DOMNodeList ) {
+			foreach ( $img_elements as $img_element ) {
+				/** @var Element $img_element */
+				$value = $img_element->getAttribute( Attribute::OBJECT_FIT );
+				$img_element->removeAttribute( Attribute::OBJECT_FIT );
+				$img_element->addInlineStyle( sprintf( 'object-fit:%s', $value ) );
+			}
+		}
 
-		foreach ( $img_elements as $img_element ) {
-			/** @var Element $img_element */
-
-			$remove_layout_attr     = $img_element->removeAttribute( Attribute::LAYOUT );
-			$remove_object_fit_attr = $img_element->removeAttribute( Attribute::OBJECT_FIT );
-			$style_attr_content     = sprintf( '%s %s', $remove_layout_attr ? $style_layout_fill : '', $remove_object_fit_attr ? $style_object_fit : '' );
-
-			if ( ' ' !== $style_attr_content ) {
-				$img_element->setAttribute( Attribute::STYLE, $style_attr_content );
+		// Images with object-position attributes.
+		$img_elements = $this->dom->xpath->query(
+			'.//img[ @object-position ]',
+			$this->dom->body
+		);
+		if ( $img_elements instanceof DOMNodeList ) {
+			foreach ( $img_elements as $img_element ) {
+				/** @var Element $img_element */
+				$value = $img_element->getAttribute( Attribute::OBJECT_POSITION );
+				$img_element->removeAttribute( Attribute::OBJECT_POSITION );
+				$img_element->addInlineStyle( sprintf( 'object-position:%s', $value ) );
 			}
 		}
 	}
