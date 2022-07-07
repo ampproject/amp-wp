@@ -401,7 +401,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function adjust_and_replace_node( Element $node ) {
 		if ( $this->args['native_img_used'] || ( $node->parentNode instanceof Element && Tag::PICTURE === $node->parentNode->tagName ) ) {
-			$attributes = $this->maybe_add_lightbox_attributes( [], $node ); // @todo AMP doesn't support lightbox on <img> yet.
+			$node_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+			$attributes      = $this->maybe_add_lightbox_attributes( $node_attributes, $node ); // @todo AMP doesn't support lightbox on <img> yet.
 
 			/*
 			 * Mark lightbox as px-verified attribute until it's supported by AMP spec.
@@ -525,42 +526,37 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			return $attributes;
 		}
 
-		$is_file_url                        = preg_match( '/\.\w+$/', wp_parse_url( $parent_node->getAttribute( Attribute::HREF ), PHP_URL_PATH ) );
+		$media_file_url = wp_parse_url( $parent_node->getAttribute( Attribute::HREF ), PHP_URL_PATH );
+		$img_src        = wp_parse_url( $attributes['src'], PHP_URL_PATH );
+
 		$is_node_wrapped_in_media_file_link = (
-			(
-				'a' === $parent_node->tagName
-				||
-				( 'figure' === $parent_node->tagName || 'figure' === $parent_node->parentNode->tagName )
-			)
+			'a' === $parent_node->tagName
 			&&
-			$is_file_url // This should be a link to the media file, not the attachment page.
+			$media_file_url === $img_src
 		);
 
 		if ( 'figure' !== $parent_node->tagName && ! $is_node_wrapped_in_media_file_link ) {
 			return $attributes;
 		}
 
-		// Account for blocks that include alignment or images that are wrapped in <a>.
-		// With alignment, the structure changes from figure.wp-block-image > img
-		// to div.wp-block-image > figure > img and the amp-lightbox attribute
-		// can be found on the wrapping div instead of the figure element.
-		$grand_parent = $parent_node->parentNode;
-		if ( $this->does_node_have_block_class( $grand_parent ) ) {
-			$parent_node = $grand_parent;
-		} elseif ( isset( $grand_parent->parentNode ) && $this->does_node_have_block_class( $grand_parent->parentNode ) ) {
-			$parent_node = $grand_parent->parentNode;
-		}
+		$parent_attributes = [];
 
-		$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
+		if ( Tag::FIGURE === $parent_node->tagName ) {
+			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
+		} elseif ( Tag::A === $parent_node->tagName && Tag::FIGURE === $parent_node->parentNode->tagName ) {
+			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node->parentNode );
+		} else {
+			return $attributes;
+		}
 
 		if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
 			$attributes['data-amp-lightbox']   = '';
 			$attributes[ Attribute::LIGHTBOX ] = '';
 
 			/*
-			 * Removes the <a> if the image is wrapped in one, as it can prevent the lightbox from working.
-			 * But this only removes the <a> if it links to the media file, not the attachment page.
-			 */
+			* Removes the <a> if the image is wrapped in one, as it can prevent the lightbox from working.
+			* But this only removes the <a> if it links to the media file, not the attachment page.
+			*/
 			if ( $is_node_wrapped_in_media_file_link ) {
 				$node->parentNode->parentNode->replaceChild( $node, $node->parentNode );
 			}
