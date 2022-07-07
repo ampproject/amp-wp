@@ -566,23 +566,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Gets whether a node has the class 'wp-block-image', meaning it is a wrapper for an Image block.
-	 *
-	 * @param Element $node A node to evaluate.
-	 * @return bool Whether the node has the class 'wp-block-image'.
-	 */
-	private function does_node_have_block_class( $node ) {
-		if ( $node instanceof Element ) {
-			$classes = preg_split( '/\s+/', $node->getAttribute( Attribute::CLASS_ ) );
-			if ( in_array( 'wp-block-image', $classes, true ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * Determines if a URL is considered a GIF URL
 	 *
 	 * @since 0.2
