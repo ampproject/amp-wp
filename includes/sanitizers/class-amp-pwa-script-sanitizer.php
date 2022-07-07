@@ -7,8 +7,6 @@
  */
 
 use AmpProject\AmpWP\ValidationExemption;
-use AmpProject\Dom\Element;
-use AmpProject\Html\Attribute;
 
 /**
  * Class AMP_PWA_Script_Sanitizer

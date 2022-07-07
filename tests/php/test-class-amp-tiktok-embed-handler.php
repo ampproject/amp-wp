@@ -177,6 +177,9 @@ class Test_AMP_TikTok_Embed_Handler extends TestCase {
 		// Remove new data attribute added recently.
 		$actual = str_replace( ' data-embed-from="oembed"', '', $actual );
 
+		// Remove refer param from URL.
+		$actual = str_replace( '?refer=embed', '', $actual );
+
 		$this->assertSimilarMarkup( $expected, $actual );
 	}
 }
