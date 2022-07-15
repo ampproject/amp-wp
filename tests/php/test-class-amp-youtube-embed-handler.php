@@ -344,6 +344,9 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 		$filtered_content = apply_filters( 'the_content', $source );
 
+		// Remove new decoding attribute.
+		$expected = str_replace( ' decoding="async"', '', $expected );
+
 		if (
 			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.1', '<' )
 			&& null !== $fallback_for_expected

@@ -275,6 +275,9 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 		// Normalize auto-incrementing ID.
 		$content = preg_replace( '/\bgallery-\d+/', 'gallery-1', $content );
 
+		// Remove new decoding attribute.
+		$expected = str_replace( ' decoding="async"', '', $expected );
+
 		$this->assertEquals(
 			$this->normalize( $expected ),
 			$this->normalize( $content )
