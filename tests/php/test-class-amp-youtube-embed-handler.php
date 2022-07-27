@@ -259,7 +259,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 	/** @return array */
 	public function get_conversion_data() {
-		$decoding_attribute = version_compare( get_bloginfo( 'version' ), '6.0', '>' ) ? 'decoding="async"' : '';
+		$decoding_attribute = version_compare( get_bloginfo( 'version' ), '6.1-alpha', '>' ) ? 'decoding="async"' : '';
 
 		return [
 			'no_embed'                         => [
