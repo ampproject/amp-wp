@@ -351,8 +351,14 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$expected = preg_replace( '/ data-id="\d+"/', '', $expected );
 		$actual   = preg_replace( '/ data-id="\d+"/', '', $actual );
 
-		// Remove classes added in Gutenberg 12.9.
-		$actual = preg_replace( '/wp-container-\w+ wp-block-gallery-\w+ /', '', $actual );
+		// Remove `is-layout-flex` class name injected by block editor layout styles.
+		$actual = preg_replace( '/(?<= class=")is-layout-flex /', '', $actual );
+
+		// Remove `wp-block-gallery-` class by block_core_gallery_render()
+		$actual = preg_replace( '/(?<= class=")wp-block-gallery-\w+ /', '', $actual );
+
+		// Remove class name injected by gutenberg_render_layout_support_flag().
+		$actual = preg_replace( '/(?<= class=")wp-container-\w+ /', '', $actual );
 
 		$this->assertEqualMarkup( $expected, $actual );
 	}

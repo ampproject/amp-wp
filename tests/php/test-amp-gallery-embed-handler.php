@@ -71,7 +71,7 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 	public function get_conversion_data() {
 		$amp_carousel_caption = '<figcaption class="amp-wp-gallery-caption"> ' . self::CAPTION_TEXT . ' </figcaption>';
 		$loading_attribute    = version_compare( get_bloginfo( 'version' ), '5.5-alpha', '>' ) ? 'loading="lazy"' : '';
-		$decoding_attribute   = version_compare( get_bloginfo( 'version' ), '6.0', '>' ) ? 'decoding="async"' : '';
+		$decoding_attribute   = version_compare( get_bloginfo( 'version' ), '6.1-alpha', '>' ) ? 'decoding="async"' : '';
 
 		return [
 			'shortcode_with_invalid_id'               => [
@@ -274,9 +274,6 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 
 		// Normalize auto-incrementing ID.
 		$content = preg_replace( '/\bgallery-\d+/', 'gallery-1', $content );
-
-		// Remove new decoding attribute.
-		$expected = str_replace( ' decoding="async"', '', $expected );
 
 		$this->assertEquals(
 			$this->normalize( $expected ),
