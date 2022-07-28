@@ -1393,6 +1393,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$rendered_block = do_blocks( AMP_Validation_Manager::add_block_source_comments( $content ) );
 
+		// Remove `is-layout-flex` class name injected by block editor layout styles.
+		$rendered_block = preg_replace( '/(?<= class=")is-layout-flex /', '', $rendered_block );
+
 		// Remove class name injected by gutenberg_render_layout_support_flag().
 		$rendered_block = preg_replace( '/(?<= class=")wp-container-\w+ /', '', $rendered_block );
 

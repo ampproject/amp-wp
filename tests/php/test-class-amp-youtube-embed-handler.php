@@ -259,7 +259,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 	/** @return array */
 	public function get_conversion_data() {
-		$decoding_attribute = version_compare( get_bloginfo( 'version' ), '6.0', '>' ) ? 'decoding="async"' : '';
+		$decoding_attribute = version_compare( get_bloginfo( 'version' ), '6.1-alpha', '>' ) ? 'decoding="async"' : '';
 
 		return [
 			'no_embed'                         => [
@@ -343,9 +343,6 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 		add_filter( 'wp_lazy_loading_enabled', '__return_false' );
 
 		$filtered_content = apply_filters( 'the_content', $source );
-
-		// Remove new decoding attribute.
-		$expected = str_replace( ' decoding="async"', '', $expected );
 
 		if (
 			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.1', '<' )
