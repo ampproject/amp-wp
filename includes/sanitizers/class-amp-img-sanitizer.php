@@ -401,8 +401,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function adjust_and_replace_node( Element $node ) {
 		if ( $this->args['native_img_used'] || ( $node->parentNode instanceof Element && Tag::PICTURE === $node->parentNode->tagName ) ) {
-			$node_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-			$attributes      = $this->maybe_add_lightbox_attributes( $node_attributes, $node ); // @todo AMP doesn't support lightbox on <img> yet.
+			$attributes = $this->maybe_add_lightbox_attributes( [], $node ); // @todo AMP doesn't support lightbox on <img> yet.
 
 			/*
 			 * Mark lightbox as px-verified attribute until it's supported by AMP spec.
