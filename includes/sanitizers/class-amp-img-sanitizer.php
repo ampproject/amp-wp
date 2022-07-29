@@ -529,12 +529,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$img_src        = wp_parse_url( $node->getAttribute( Attribute::SRC ), PHP_URL_PATH );
 
 		$is_node_wrapped_in_media_file_link = (
-			'a' === $parent_node->tagName
+			Tag::A === $parent_node->tagName
 			&&
 			$media_file_url === $img_src
 		);
 
-		if ( 'figure' !== $parent_node->tagName && ! $is_node_wrapped_in_media_file_link ) {
+		if ( Tag::FIGURE !== $parent_node->tagName && ! $is_node_wrapped_in_media_file_link ) {
 			return $attributes;
 		}
 
