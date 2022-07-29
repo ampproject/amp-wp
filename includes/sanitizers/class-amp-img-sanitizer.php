@@ -554,9 +554,9 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$attributes[ Attribute::LIGHTBOX ] = '';
 
 			/*
-			* Removes the <a> if the image is wrapped in one, as it can prevent the lightbox from working.
-			* But this only removes the <a> if it links to the media file, not the attachment page.
-			*/
+			 * Removes the <a> if the image is wrapped in one, as it can prevent the lightbox from working.
+			 * But this only removes the <a> if it links to the media file, not the attachment page.
+			 */
 			if ( $is_node_wrapped_in_media_file_link ) {
 				$node->parentNode->parentNode->replaceChild( $node, $node->parentNode );
 			}
