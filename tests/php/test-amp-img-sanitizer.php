@@ -721,15 +721,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				]
 			);
 
-			if ( Tag::FIGURE === $node->parentNode->tagName ) {
-				$this->assertEqualSets( $expected_attributes, $actual_attributes );
-			} elseif ( Tag::A === $node->parentNode->tagName && Tag::FIGURE === $node->parentNode->parentNode->tagName ) {
-				$this->assertEqualSets( $expected_attributes, $actual_attributes );
-			} else {
-				$this->assertEmpty( $attrs );
-				$this->assertEmpty( $actual_attributes );
-				$this->assertEqualSets( $attrs, $actual_attributes );
-			}
+			$this->assertEqualSets( $expected_attributes, $actual_attributes );
 		}
 	}
 
