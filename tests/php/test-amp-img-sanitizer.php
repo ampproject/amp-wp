@@ -668,22 +668,26 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	public function get_data_for_test_maybe_add_lightbox_attributes() {
 		return [
 			'img_has_no_parent'        => [
-				'input'          => '<img src="https://example.com/image.jpg" />',
-				'expected_attrs' => [],
+				'<img src="https://example.com/image.jpg" />',
+				[],
 			],
 			'img_has_figure_as_parent' => [
-				'input'          => '<figure data-amp-lightbox="true" class="wp-block-image size-large"><img src="https://via.placeholder.com/150" alt="Placeholder" class="wp-image-19"/></figure>',
-				'expected_attrs' => [
+				'<figure data-amp-lightbox="true" class="wp-block-image size-large"><img src="https://via.placeholder.com/150" alt="Placeholder"/></figure>',
+				[
 					'data-amp-lightbox' => '',
 					'lightbox'          => '',
 				],
 			],
 			'img_has_a_url_as_parent'  => [
-				'input'          => '<figure data-amp-lightbox="true" class="wp-block-image size-full"><a href="https://via.placeholder.com/150"><img src="https://via.placeholder.com/150" alt="Placeholder" class="wp-image-9"/></a></figure>',
-				'expected_attrs' => [
+				'<figure data-amp-lightbox="true" class="wp-block-image size-full"><a href="https://via.placeholder.com/150"><img src="https://via.placeholder.com/150" alt="Placeholder"/></a></figure>',
+				[
 					'data-amp-lightbox' => '',
 					'lightbox'          => '',
 				],
+			],
+			'img_has_div_as_parent'    => [
+				'<div><img src="https://via.placeholder.com/150" alt="Placeholder"/></div>',
+				[],
 			],
 		];
 	}
@@ -694,11 +698,11 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * @covers ::maybe_add_lightbox_attributes
 	 *
 	 * @param string $source Source.
-	 * @param array  $expected Expected Node attributes.
+	 * @param array  $expected_attributes Expected Node attributes.
 	 *
 	 * @dataProvider get_data_for_test_maybe_add_lightbox_attributes()
 	 */
-	public function test_maybe_add_lightbox_attributes( $input, $expected_attrs ) {
+	public function test_maybe_add_lightbox_attributes( $input, $expected_attributes ) {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $input );
 		$sanitizer = new AMP_Img_Sanitizer( $dom );
 
@@ -706,16 +710,26 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$nodes = $dom->getElementsByTagName( Tag::IMG );
 
 		foreach ( $nodes as $node ) {
-			$attributes = $this->call_private_method(
+			$attrs = [];
+
+			$actual_attributes = $this->call_private_method(
 				$sanitizer,
 				'maybe_add_lightbox_attributes',
 				[
-					[],
+					$attrs,
 					$node,
-				] 
+				]
 			);
 
-			$this->assertEqualSets( $expected_attrs, $attributes );
+			if ( Tag::FIGURE === $node->parentNode->tagName ) {
+				$this->assertEqualSets( $expected_attributes, $actual_attributes );
+			} elseif ( Tag::A === $node->parentNode->tagName && Tag::FIGURE === $node->parentNode->parentNode->tagName ) {
+				$this->assertEqualSets( $expected_attributes, $actual_attributes );
+			} else {
+				$this->assertEmpty( $attrs );
+				$this->assertEmpty( $actual_attributes );
+				$this->assertEqualSets( $attrs, $actual_attributes );
+			}
 		}
 	}
 
