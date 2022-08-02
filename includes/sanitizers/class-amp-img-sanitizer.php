@@ -546,8 +546,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
 		} elseif ( Tag::A === $parent_node->tagName && Tag::FIGURE === $parent_node->parentNode->tagName ) {
 			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node->parentNode );
-		} else {
-			return $attributes;
 		}
 
 		if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
