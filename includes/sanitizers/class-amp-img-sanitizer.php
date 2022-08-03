@@ -525,33 +525,28 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			return $attributes;
 		}
 
-		$is_file_url                        = preg_match( '/\.\w+$/', wp_parse_url( $parent_node->getAttribute( Attribute::HREF ), PHP_URL_PATH ) );
+		$media_file_url = wp_parse_url( $parent_node->getAttribute( Attribute::HREF ), PHP_URL_PATH );
+
+		/** @var Element $node */
+		$img_src = wp_parse_url( $node->getAttribute( Attribute::SRC ), PHP_URL_PATH );
+
 		$is_node_wrapped_in_media_file_link = (
-			(
-				'a' === $parent_node->tagName
-				||
-				( 'figure' === $parent_node->tagName || 'figure' === $parent_node->parentNode->tagName )
-			)
+			Tag::A === $parent_node->tagName
 			&&
-			$is_file_url // This should be a link to the media file, not the attachment page.
+			$media_file_url === $img_src
 		);
 
-		if ( 'figure' !== $parent_node->tagName && ! $is_node_wrapped_in_media_file_link ) {
+		if ( Tag::FIGURE !== $parent_node->tagName && ! $is_node_wrapped_in_media_file_link ) {
 			return $attributes;
 		}
 
-		// Account for blocks that include alignment or images that are wrapped in <a>.
-		// With alignment, the structure changes from figure.wp-block-image > img
-		// to div.wp-block-image > figure > img and the amp-lightbox attribute
-		// can be found on the wrapping div instead of the figure element.
-		$grand_parent = $parent_node->parentNode;
-		if ( $this->does_node_have_block_class( $grand_parent ) ) {
-			$parent_node = $grand_parent;
-		} elseif ( isset( $grand_parent->parentNode ) && $this->does_node_have_block_class( $grand_parent->parentNode ) ) {
-			$parent_node = $grand_parent->parentNode;
-		}
+		$parent_attributes = [];
 
-		$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
+		if ( Tag::FIGURE === $parent_node->tagName ) {
+			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
+		} elseif ( Tag::A === $parent_node->tagName && Tag::FIGURE === $parent_node->parentNode->tagName ) {
+			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node->parentNode );
+		}
 
 		if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
 			$attributes['data-amp-lightbox']   = '';
@@ -567,23 +562,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $attributes;
-	}
-
-	/**
-	 * Gets whether a node has the class 'wp-block-image', meaning it is a wrapper for an Image block.
-	 *
-	 * @param Element $node A node to evaluate.
-	 * @return bool Whether the node has the class 'wp-block-image'.
-	 */
-	private function does_node_have_block_class( $node ) {
-		if ( $node instanceof Element ) {
-			$classes = preg_split( '/\s+/', $node->getAttribute( Attribute::CLASS_ ) );
-			if ( in_array( 'wp-block-image', $classes, true ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
