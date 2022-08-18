@@ -12,7 +12,7 @@
   "author": "AMP Project Contributors",
   "license": "GPL-2.0-or-later",
   "dependencies": {
-    "@actions/core": "^1.2.7",
+    "@actions/core": "^1.9.1",
     "@actions/github": "^5.0.0",
     "@octokit/action": "^3.8.1",
     "@octokit/request-error": "^2.1.0",
