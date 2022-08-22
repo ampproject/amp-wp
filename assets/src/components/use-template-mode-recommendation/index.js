@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useLayoutEffect, useState } from '@wordpress/element';
+import { createInterpolateElement, useContext, useLayoutEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -78,9 +78,24 @@ export function getTemplateModeRecommendation( {
 } ) {
 	/* eslint-disable @wordpress/no-unused-vars-before-return */
 	const mobileRedirectionNote = __( 'If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' );
-	const readerModeDescription = __( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>.', 'amp' ) + ' ' + mobileRedirectionNote;
-	const transitionalModeDescription = __( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>.', 'amp' ) + ' ' + mobileRedirectionNote;
-	const standardModeDescription = __( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' );
+	const readerModeDescription = createInterpolateElement(
+		__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>.', 'amp' ) + ' ' + mobileRedirectionNote,
+		{
+			b: <b />,
+		},
+	);
+	const transitionalModeDescription = createInterpolateElement(
+		__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>.', 'amp' ) + ' ' + mobileRedirectionNote,
+		{
+			b: <b />,
+		},
+	);
+	const standardModeDescription = createInterpolateElement(
+		__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
+		{
+			b: <b />,
+		},
+	);
 	const pluginIncompatibilityNote = __( 'To address plugin compatibility issue(s), you may need to use Plugin Suppression to disable incompatible plugins on AMP pages or else select an alternative AMP-compatible plugin.', 'amp' );
 	const readerNoteWhenThemeIssuesPresent = __( 'Recommended if you want to enable AMP on your site despite the detected compatibility issue(s).', 'amp' );
 	const transitionalNoteWhenThemeIssuesPresent = __( 'Recommended so you can progressively enable AMP on your site while still making the non-AMP version available to visitors for functionality that is not AMP-compatible. Choose this mode if compatibility issues can be fixed or if your theme degrades gracefully when JavaScript is disabled.', 'amp' );

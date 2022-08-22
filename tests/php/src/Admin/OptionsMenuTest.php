@@ -174,6 +174,28 @@ class OptionsMenuTest extends DependencyInjectedTestCase {
 		);
 	}
 
+	/** @covers ::get_analytics_vendors() */
+	public function test_get_analytics_vendors() {
+		$vendors = $this->instance->get_analytics_vendors();
+		$this->assertIsArray( $vendors );
+		$this->assertNotEmpty( $vendors );
+		$pairs = [];
+		foreach ( $vendors as $vendor ) {
+			$this->assertIsArray( $vendor );
+			$this->assertArrayHasKey( 'value', $vendor );
+			$this->assertArrayHasKey( 'label', $vendor );
+			$pairs[] = $vendor['value'] . ':' . $vendor['label'];
+		}
+		$this->assertIndexedArrayContains(
+			[
+				'adobeanalytics:Adobe Analytics',
+				'googleanalytics:Google Analytics',
+				'gtag:gtag',
+			],
+			$pairs
+		);
+	}
+
 	/** @covers ::enqueue_assets() */
 	public function test_enqueue_assets_wrong_hook_suffix() {
 		$this->instance->enqueue_assets( 'nope' );

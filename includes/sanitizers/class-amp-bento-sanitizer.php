@@ -27,7 +27,7 @@ class AMP_Bento_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Tag and attribute sanitizer.
 	 *
-	 * @var AMP_Base_Sanitizer
+	 * @var AMP_Base_Sanitizer|null
 	 */
 	protected $tag_and_attribute_sanitizer;
 

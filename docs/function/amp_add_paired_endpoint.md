@@ -16,7 +16,7 @@ Turn a given URL into a paired AMP URL.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:2067](/includes/amp-helper-functions.php#L2067-L2079)
+:link: [includes/amp-helper-functions.php:2101](/includes/amp-helper-functions.php#L2101-L2113)
 
 <details>
 <summary>Show Code</summary>

@@ -415,8 +415,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Sanitizes a boolean character (or string) into a '0' or '1' character.
 	 *
-	 * @param string $value A boolean character to sanitize. If a string containing more than a single
-	 *                      character is provided, only the first character is taken into account.
+	 * @param mixed $value A boolean character to sanitize. If a string containing more than a single
+	 *                     character is provided, only the first character is taken into account.
 	 *
 	 * @return string Returns either '0' or '1'.
 	 */

@@ -57,6 +57,7 @@ import { PairedUrlStructure } from './paired-url-structure';
 import { MobileRedirection } from './mobile-redirection';
 import { DeveloperTools } from './developer-tools';
 import { SiteScan } from './site-scan';
+import { ToggleUseNativeImgTag } from './toggle-use-native-img-tag';
 import { DeleteDataAtUninstall } from './delete-data-at-uninstall';
 
 const { ajaxurl: wpAjaxUrl } = global;
@@ -215,7 +216,7 @@ function Root( { appRoot } ) {
 	const { hasOptionsChanges, fetchingOptions, saveOptions } = useContext( Options );
 	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption, developerToolsOption } = useContext( User );
 	const { templateModeWasOverridden } = useContext( ReaderThemes );
-	const { isSkipped } = useContext( SiteScanContext );
+	const { isSkipped, isFetchingScannableUrls } = useContext( SiteScanContext );
 
 	/**
 	 * Handle the form submit event.
@@ -248,7 +249,7 @@ function Root( { appRoot } ) {
 		}
 
 		scrollFocusedSectionIntoView( focusedSection );
-	}, [ fetchingOptions, focusedSection, templateModeWasOverridden ] );
+	}, [ fetchingOptions, isFetchingScannableUrls, focusedSection, templateModeWasOverridden ] );
 
 	/**
 	 * Resets the focused element state when the hash changes on the page.
@@ -351,6 +352,7 @@ function Root( { appRoot } ) {
 					{ HAS_DEPENDENCY_SUPPORT && (
 						<DeveloperTools />
 					) }
+					<ToggleUseNativeImgTag />
 					<DeleteDataAtUninstall />
 				</AMPDrawer>
 				<SettingsFooter />

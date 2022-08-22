@@ -318,7 +318,8 @@ final class ReaderThemes {
 	/**
 	 * Normalize the specified theme data.
 	 *
-	 * @param WP_Theme|array|\stdClass $theme Theme.
+	 * @param mixed $theme Theme.
+	 *
 	 * @return array Normalized theme data.
 	 */
 	private function normalize_theme_data( $theme ) {

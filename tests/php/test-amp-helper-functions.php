@@ -1591,7 +1591,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 			'amp-animation'                => 'v0/amp-animation-0.1.js',
 			'amp-apester-media'            => 'v0/amp-apester-media-0.1.js',
 			'amp-app-banner'               => 'v0/amp-app-banner-0.1.js',
-			'amp-audio'                    => 'v0/amp-audio-0.1.js',
+			'amp-audio'                    => 'v0/amp-audio-1.0.js',
 			'amp-auto-ads'                 => 'v0/amp-auto-ads-0.1.js',
 			'amp-autocomplete'             => 'v0/amp-autocomplete-0.1.js',
 			'amp-base-carousel'            => 'v0/amp-base-carousel-1.0.js',
@@ -1834,7 +1834,11 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 * @covers ::amp_is_native_img_used()
 	 */
 	public function test_amp_is_native_img_used() {
-		$this->assertTrue( amp_is_native_img_used(), 'Expected to be disabled by default for now.' );
+		$this->assertFalse( amp_is_native_img_used(), 'Expected to be disabled by default for now.' );
+
+		AMP_Options_Manager::update_option( Option::USE_NATIVE_IMG_TAG, true );
+
+		$this->assertTrue( amp_is_native_img_used(), 'Expected to be enabled after setting up AMP option.' );
 
 		add_filter( 'amp_native_img_used', '__return_false' );
 		$this->assertFalse( amp_is_native_img_used() );
@@ -1899,6 +1903,10 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		);
 		$this->assertGreaterThan(
 			array_search( AMP_Core_Theme_Sanitizer::class, $ordered_sanitizers, true ),
+			array_search( AMP_Script_Sanitizer::class, $ordered_sanitizers, true )
+		);
+		$this->assertGreaterThan(
+			array_search( AMP_PWA_Script_Sanitizer::class, $ordered_sanitizers, true ),
 			array_search( AMP_Script_Sanitizer::class, $ordered_sanitizers, true )
 		);
 		$this->assertEquals( AMP_Layout_Sanitizer::class, $ordered_sanitizers[ count( $ordered_sanitizers ) - 4 ] );

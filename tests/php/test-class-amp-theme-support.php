@@ -1739,8 +1739,8 @@ class Test_AMP_Theme_Support extends TestCase {
 			'<script type="module" src="https://cdn.ampproject.org/v0/amp-list-0.1.mjs" async custom-element="amp-list" crossorigin="anonymous"></script>',
 			'<script type="module" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.mjs" async custom-element="amp-mathml" crossorigin="anonymous"></script>',
 
-			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
-			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
+			'<link rel="icon" href="' . home_url( '/favicon.png', 'https' ) . '" sizes="32x32">',
+			'<link rel="icon" href="' . home_url( '/favicon.png', 'https' ) . '" sizes="192x192">',
 			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
 
 			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
@@ -1770,9 +1770,8 @@ class Test_AMP_Theme_Support extends TestCase {
 			$prev_ordered_contain = $ordered_contain;
 		}
 
-		$this->assertStringNotContainsString( '<noscript><img', $sanitized_html );
-		$this->assertStringContainsString( '<img width="100" height="100" src="https://example.com/hero.png" decoding="async" class="amp-wp-enforced-sizes">', $sanitized_html );
-		$this->assertStringContainsString( '<img width="100" height="100" src="https://example.com/test.png" loading="lazy" decoding="async" class="amp-wp-enforced-sizes">', $sanitized_html );
+		$this->assertStringContainsString( '<noscript><img', $sanitized_html );
+		$this->assertStringContainsString( '<amp-img', $sanitized_html );
 
 		$this->assertStringContainsString( '<noscript><audio', $sanitized_html );
 		$this->assertStringContainsString( '<amp-audio', $sanitized_html );
@@ -1906,7 +1905,7 @@ class Test_AMP_Theme_Support extends TestCase {
 
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
-		$this->assertStringContainsString( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
+		$this->assertDoesNotMatchRegularExpression( '/<html[^>]*[\s]amp[^>]*>/', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
 		$this->assertStringContainsString( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
 		if ( $with_amp_live_list ) {
 			$this->assertStringContainsString( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );

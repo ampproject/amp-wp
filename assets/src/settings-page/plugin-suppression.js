@@ -7,7 +7,7 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { useContext, Fragment } from '@wordpress/element';
+import { useContext, Fragment, createInterpolateElement } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import { autop } from '@wordpress/autop';
 import { format, dateI18n } from '@wordpress/date';
@@ -158,7 +158,16 @@ function ValidationErrorDetails( { errors } ) {
 							) }>
 							<WrapperElement>
 								<a href={ error.edit_url } target="_blank" rel="noreferrer" title={ error.tooltip }>
-									<span dangerouslySetInnerHTML={ { __html: error.title } } />
+									<span>
+										{
+											createInterpolateElement(
+												error.title,
+												{
+													code: <code />,
+												},
+											)
+										}
+									</span>
 								</a>
 							</WrapperElement>
 						</li>

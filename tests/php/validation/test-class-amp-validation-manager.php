@@ -1338,7 +1338,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			'latest_posts' => [
 				'<!-- wp:latest-posts {"postsToShow":1} /-->',
 				sprintf(
-					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}--><ul class="%6$s"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}-->',
+					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}--><ul class="wp-block-latest-posts wp-block-latest-posts__list"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}-->',
 					$is_gutenberg ? 'plugin' : 'core',
 					$is_gutenberg ? 'gutenberg' : 'wp-includes',
 					$latest_posts_block->render_callback instanceof Closure ? '{closure}' : $latest_posts_block->render_callback,
@@ -1347,10 +1347,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 						? preg_replace( ':.*gutenberg/:', '', $reflection_function->getFileName() )
 						: preg_replace( ':.*wp-includes/:', '', $reflection_function->getFileName() )
 					),
-					$reflection_function->getStartLine(),
-					( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' ) && GUTENBERG_VERSION && version_compare( GUTENBERG_VERSION, '8.8.0', '>=' ) )
-						? 'wp-block-latest-posts__list wp-block-latest-posts'
-						: 'wp-block-latest-posts wp-block-latest-posts__list'
+					$reflection_function->getStartLine()
 				),
 				[
 					'element' => 'ul',
@@ -1396,6 +1393,9 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$rendered_block = do_blocks( AMP_Validation_Manager::add_block_source_comments( $content ) );
 
+		// Remove `is-layout-flex` class name injected by block editor layout styles.
+		$rendered_block = preg_replace( '/(?<= class=")is-layout-flex /', '', $rendered_block );
+
 		// Remove class name injected by gutenberg_render_layout_support_flag().
 		$rendered_block = preg_replace( '/(?<= class=")wp-container-\w+ /', '', $rendered_block );
 
@@ -1415,6 +1415,13 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		// Remove class added in <https://github.com/WordPress/gutenberg/pull/38740> to normalize with expected data.
 		$rendered_block = str_replace( ' class="wp-block-latest-posts__post-title"', '', $rendered_block );
+
+		// Normalize class ordering.
+		$rendered_block = str_replace(
+			'wp-block-latest-posts__list wp-block-latest-posts',
+			'wp-block-latest-posts wp-block-latest-posts__list',
+			$rendered_block
+		);
 
 		$this->assertEquals(
 			preg_replace( '/(?<=>)\s+(?=<)/', '', str_replace( '%d', $post->ID, $expected ) ),

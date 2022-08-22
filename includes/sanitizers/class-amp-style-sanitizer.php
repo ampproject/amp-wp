@@ -258,7 +258,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes
 	 * @since 1.0
-	 * @var array
+	 * @var array|null
 	 */
 	private $used_class_names;
 
@@ -303,7 +303,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Tag names used in document.
 	 *
 	 * @since 1.0
-	 * @var array
+	 * @var array|null
 	 */
 	private $used_tag_names;
 
@@ -2757,12 +2757,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// If the font-display is auto, block, or swap then we should automatically add the preload link for the first font file.
 		$properties = $ruleset->getRules( 'font-display' );
 		$property   = end( $properties ); // Last since the last property wins in CSS.
+
+		/** @var RuleValueList|string|null */
+		$property_value = $property instanceof Rule ? $property->getValue() : '';
+
 		if (
 			(
 				// Defaults to 'auto', hence should be preloaded as well.
 				! $property instanceof Rule
 				||
-				in_array( $property->getValue(), [ 'auto', 'block', 'swap' ], true )
+				in_array( $property_value, [ 'auto', 'block', 'swap' ], true )
 			)
 			&&
 			'file' === $first_src_type
@@ -2969,7 +2973,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function collect_inline_styles( DOMElement $element ) {
 		$attr_node = $element->getAttributeNode( 'style' );
-		if ( ! $attr_node ) {
+		if ( ! $attr_node instanceof DOMAttr ) {
 			return;
 		}
 

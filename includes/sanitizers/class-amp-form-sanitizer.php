@@ -208,18 +208,30 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Get the action URL for the form element.
 	 *
+	 * @see amp_get_current_url()
+	 * @see AMP_HTTP::intercept_post_request_redirect()
 	 * @param string $action_url Action URL.
 	 * @return string Action URL.
 	 */
 	protected function get_action_url( $action_url ) {
+		$parsed_home_url = wp_parse_url( home_url() );
+
 		/*
 		 * In HTML, the default action is just the current URL that the page is served from.
 		 * The action "specifies a server endpoint to handle the form input. The value must be an
 		 * https URL and must not be a link to a CDN".
 		 */
 		if ( ! $action_url ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			return esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
+			$action_url = '//' . $parsed_home_url['host'];
+			if ( isset( $parsed_home_url['port'] ) ) {
+				$action_url .= ':' . $parsed_home_url['port'];
+			}
+			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitization is done below.
+				$action_url .= wp_unslash( $_SERVER['REQUEST_URI'] );
+			}
+
+			return esc_url_raw( $action_url );
 		}
 
 		$parsed_url = wp_parse_url( $action_url );
@@ -246,8 +258,11 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! isset( $parsed_url['host'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$parsed_url['host'] = $_SERVER['HTTP_HOST'];
+			$parsed_url['host'] = $parsed_home_url['host'];
+		}
+
+		if ( ! isset( $parsed_url['port'] ) && isset( $parsed_home_url['port'] ) ) {
+			$parsed_url['port'] = $parsed_home_url['port'];
 		}
 
 		if ( ! isset( $parsed_url['path'] ) ) {

@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\Dom\Document;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Img_Sanitizer_Test
@@ -48,7 +49,7 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 		$with_defaults = new AMP_Img_Sanitizer( $dom );
 		$this->assertEquals(
-			[],
+			[ 'img' => [ 'amp-img', 'amp-anim' ] ],
 			$with_defaults->get_selector_conversion_mapping()
 		);
 
@@ -483,8 +484,8 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 			],
 
 			'aligned_image_block_with_lightbox'        => [
-				'<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignleft is-resized"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure></div>',
-				'<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignleft is-resized"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>',
+				'<div class="wp-block-image"><figure data-amp-lightbox="true" class="alignleft is-resized"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure></div>',
+				'<div class="wp-block-image"><figure  data-amp-lightbox="true" class="alignleft is-resized"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>',
 			],
 
 			'test_with_dev_mode'                       => [
@@ -585,6 +586,15 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 				'<img height="1" width="1" style="display:none" alt="fbpx" src="https://facebook.com/tr?id=123456789012345&ev=PageView&noscript=1" referrerpolicy="no-referrer">',
 				'<amp-pixel src="https://facebook.com/tr?id=123456789012345&amp;ev=PageView&amp;noscript=1" layout="nodisplay" referrerpolicy="no-referrer"></amp-pixel>',
 			],
+
+
+			'hero_img_with_noscript_fallback'          => [
+				'<img data-hero width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="">',
+				'<amp-img data-hero width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt layout="intrinsic" disable-inline-width><noscript><img width="825" height="510" src="https://placehold.it/825x510" srcset="http://placehold.it/1024x768 1024w" sizes="(max-width: 600px) 825px, 1024px" alt></noscript></amp-img>',
+				[
+					'native_img_used' => false,
+				],
+			],
 		];
 	}
 
@@ -648,6 +658,71 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEqualMarkup( $expected, $content, "Actual content:\n$content" );
+	}
+
+	/**
+	 * Data for test_maybe_add_lightbox_attributes.
+	 *
+	 * @return array
+	 */
+	public function get_data_for_test_maybe_add_lightbox_attributes() {
+		return [
+			'img_has_no_parent'        => [
+				'<img src="https://example.com/image.jpg" />',
+				[],
+			],
+			'img_has_figure_as_parent' => [
+				'<figure data-amp-lightbox="true" class="wp-block-image size-large"><img src="https://via.placeholder.com/150" alt="Placeholder"/></figure>',
+				[
+					'data-amp-lightbox' => '',
+					'lightbox'          => '',
+				],
+			],
+			'img_has_a_url_as_parent'  => [
+				'<figure data-amp-lightbox="true" class="wp-block-image size-full"><a href="https://via.placeholder.com/150"><img src="https://via.placeholder.com/150" alt="Placeholder"/></a></figure>',
+				[
+					'data-amp-lightbox' => '',
+					'lightbox'          => '',
+				],
+			],
+			'img_has_div_as_parent'    => [
+				'<div><img src="https://via.placeholder.com/150" alt="Placeholder"/></div>',
+				[],
+			],
+		];
+	}
+
+	/**
+	 * Test maybe add lightbox attributes.
+	 *
+	 * @covers ::maybe_add_lightbox_attributes
+	 *
+	 * @param string $source Source.
+	 * @param array  $expected_attributes Expected Node attributes.
+	 *
+	 * @dataProvider get_data_for_test_maybe_add_lightbox_attributes()
+	 */
+	public function test_maybe_add_lightbox_attributes( $input, $expected_attributes ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $input );
+		$sanitizer = new AMP_Img_Sanitizer( $dom );
+
+		/** @var DOMNodeList $nodes */
+		$nodes = $dom->getElementsByTagName( Tag::IMG );
+
+		foreach ( $nodes as $node ) {
+			$attrs = [];
+
+			$actual_attributes = $this->call_private_method(
+				$sanitizer,
+				'maybe_add_lightbox_attributes',
+				[
+					$attrs,
+					$node,
+				]
+			);
+
+			$this->assertEqualSets( $expected_attributes, $actual_attributes );
+		}
 	}
 
 	/**
@@ -754,11 +829,31 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * @covers ::sanitize()
 	 */
 	public function test_image_block_link_to_media_file_with_lightbox() {
-		$source   = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
-		$expected = '<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>';
+		$image_url = wp_get_attachment_image_url( $this->get_new_attachment_id() );
+		$source    = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><a href="%1$s"><img src="%1$s" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>', $image_url );
+		$expected  = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="%1$s" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="%1$s" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>', $image_url );
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $content );
+	}
+
+	/**
+	 * Test an native img tag has px-verified lightbox attributes.
+	 *
+	 * @covers ::sanitize()
+	 */
+	public function test_native_img_tag_has_px_verified_lightbox_attr() {
+		$source   = '<figure class="wp-block-image" data-amp-lightbox="true"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>';
+		$expected = '<figure class="wp-block-image" data-amp-lightbox="true"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" lightbox="" data-px-verified-attrs="lightbox" data-amp-lightbox="" decoding="async" class="amp-wp-enforced-sizes"></figure>';
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => true ] );
 		$sanitizer->sanitize();
 
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
@@ -775,8 +870,9 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	 * @covers ::sanitize()
 	 */
 	public function test_image_block_link_to_media_file_and_alignment_with_lightbox() {
-		$source   = sprintf( '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure></div>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
-		$expected = '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>';
+		$image_url = wp_get_attachment_image_url( $this->get_new_attachment_id() );
+		$source    = sprintf( '<div class="wp-block-image"><figure data-amp-lightbox="true" class="alignright size-large"><a href="%1$s"><img src="%1$s" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure></div>', $image_url );
+		$expected  = sprintf( '<div class="wp-block-image"><figure data-amp-lightbox="true" class="alignright size-large"><amp-img src="%1$s" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="%1$s" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>', $image_url );
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Img_Sanitizer( $dom, [ 'native_img_used' => false ] );
@@ -786,50 +882,6 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
-	}
-
-	/**
-	 * Gets test data for test_does_node_have_block_class(), using a <figure> element.
-	 *
-	 * @see AMP_Img_Sanitizer_Test::test_does_node_have_block_class()
-	 * @return array Test data for function.
-	 */
-	public function get_data_for_node_block_class_test() {
-		return [
-			'has_no_class'           => [
-				'<figure></figure>',
-				false,
-			],
-			'has_wrong_class'        => [
-				'<figure class="completely-wrong-class"></figure>',
-				false,
-			],
-			'only_has_part_of_class' => [
-				'<figure class="wp-block"></figure>',
-				false,
-			],
-			'has_correct_class'      => [
-				'<figure class="wp-block-image"></figure>',
-				true,
-			],
-		];
-	}
-
-	/**
-	 * Test does_node_have_block_class.
-	 *
-	 * @dataProvider get_data_for_node_block_class_test
-	 * @covers ::does_node_have_block_class()
-	 *
-	 * @param string $source The source markup to test.
-	 * @param string $expected The expected return of the tested function, using the source markup.
-	 */
-	public function test_does_node_have_block_class( $source, $expected ) {
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
-		$figures   = $dom->getElementsByTagName( 'figure' );
-
-		$this->assertEquals( $expected, $this->call_private_method( $sanitizer, 'does_node_have_block_class', [ $figures->item( 0 ) ] ) );
 	}
 
 	/**
@@ -974,7 +1026,6 @@ class AMP_Img_Sanitizer_Test extends TestCase {
 	/**
 	 * @dataProvider get_data_for_process_picture_elements()
 	 *
-	 * @covers ::mark_node_as_px_verified_recursively()
 	 * @covers ::process_picture_elements()
 	 */
 	public function test_process_picture_elements( $input, $args, $expected ) {

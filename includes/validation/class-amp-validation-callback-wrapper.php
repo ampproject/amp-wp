@@ -323,7 +323,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 			$handles = [ $added_handle ];
 
 			// Account for case where registered script is a placeholder for a set of scripts (e.g. jquery).
-			if ( isset( $wp_scripts->registered[ $added_handle ] ) && false === $wp_scripts->registered[ $added_handle ]->src ) {
+			if ( isset( $wp_scripts->registered[ $added_handle ] ) && empty( $wp_scripts->registered[ $added_handle ]->src ) ) {
 				$handles = array_merge( $handles, $wp_scripts->registered[ $added_handle ]->deps );
 			}
 

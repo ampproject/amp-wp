@@ -1,8 +1,8 @@
 /**
  * WordPress dependencies
  */
-import { useEffect, useContext } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { createInterpolateElement, useEffect, useContext } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -39,15 +39,19 @@ export function TemplateMode() {
 				<h1>
 					{ __( 'Template Modes', 'amp' ) }
 				</h1>
-				{ /* dangerouslySetInnerHTML reason: Injection of links. */ }
-				<p dangerouslySetInnerHTML={ {
-					__html: sprintf(
-						/* translators: placeholders are links to amp-wp.org website. */
-						__( 'Based on site scan results the AMP plugin provides the following choices. Learn more about the <a href="%1$s" target="_blank" rel="noreferrer noopener">AMP experience with different modes</a> and availability of <a href="%2$s" target="_blank" rel="noreferrer noopener">AMP components in the ecosystem</a>.', 'amp' ),
-						'https://amp-wp.org/documentation/getting-started/template-modes/',
-						'https://amp-wp.org/ecosystem/',
-					),
-				} } />
+				<p>
+					{
+						createInterpolateElement(
+							__( 'Based on site scan results the AMP plugin provides the following choices. Learn more about the <GettingStartedLink>AMP experience with different modes</GettingStartedLink> and availability of <EcosystemLink>AMP components in the ecosystem</EcosystemLink>.', 'amp' ),
+							{
+								/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
+								GettingStartedLink: <a href="https://amp-wp.org/documentation/getting-started/template-modes/" target="_blank" rel="noreferrer noopener" />,
+								EcosystemLink: <a href="https://amp-wp.org/ecosystem/" target="_blank" rel="noreferrer noopener" />,
+								/* eslint-enable jsx-a11y/anchor-has-content */
+							},
+						)
+					}
+				</p>
 			</div>
 			<ScreenUI
 				currentMode={ themeSupport }

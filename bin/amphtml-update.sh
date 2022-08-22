@@ -17,11 +17,11 @@ BIN_PATH="$(dirname "$0")"
 PROJECT_PATH=$(dirname $BIN_PATH)
 AMPHTML_LOCATION="$1"
 
-if ! command -v python >/dev/null 2>&1 || ! python -c "import google.protobuf" 2>/dev/null; then
+if ! command -v python3 >/dev/null 2>&1 || ! python3 -c "import google.protobuf" 2>/dev/null; then
 	echo "Error: The google.protobuf Python module is not installed."
 	echo
 	echo "On Linux, you can install the required dependencies via:"
-	echo "# apt-get install python protobuf-compiler python-protobuf"
+	echo "# apt-get install python3 protobuf-compiler python3-protobuf"
 	echo
 	echo "On MacOS, Python is already installed but you may install via:"
 	echo "$ pip install --upgrade protobuf"
@@ -52,7 +52,7 @@ else
 fi
 
 # Run script.
-python "$BIN_PATH/amphtml-update.py" "$AMPHTML_LOCATION" > "$PROJECT_PATH/includes/sanitizers/class-amp-allowed-tags-generated.php"
+python3 "$BIN_PATH/amphtml-update.py" "$AMPHTML_LOCATION" > "$PROJECT_PATH/includes/sanitizers/class-amp-allowed-tags-generated.php"
 
 if [[ $CLEANUP == 1 ]]; then
 	rm -r "$AMPHTML_LOCATION"

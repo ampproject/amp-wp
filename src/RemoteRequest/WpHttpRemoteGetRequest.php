@@ -119,17 +119,15 @@ final class WpHttpRemoteGetRequest implements RemoteGetRequest {
 				return new RemoteGetRequestResponse( $response->get_error_message(), [], 500 );
 			}
 
-			if ( ! isset( $response['response']['code'] ) ) {
+			if ( empty( $response['response']['code'] ) ) {
 				return new RemoteGetRequestResponse(
-					isset( $response['response']['message'] )
-						? $response['response']['message']
-						: 'Unknown error',
+					! empty( $response['response']['message'] ) ? $response['response']['message'] : 'Unknown error',
 					[],
 					500
 				);
 			}
 
-			$status = isset( $response['response']['code'] ) ? $response['response']['code'] : 500;
+			$status = $response['response']['code'];
 
 			if ( $status < 200 || $status >= 300 ) {
 				if ( ! $retries_left || in_array( $status, self::RETRYABLE_STATUS_CODES, true ) === false ) {

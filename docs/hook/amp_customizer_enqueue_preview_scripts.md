@@ -12,7 +12,7 @@ Fires when plugins should enqueue their own scripts for the AMP Customizer previ
 
 ### Source
 
-:link: [includes/admin/class-amp-template-customizer.php:745](/includes/admin/class-amp-template-customizer.php#L745)
+:link: [includes/admin/class-amp-template-customizer.php:725](/includes/admin/class-amp-template-customizer.php#L725)
 
 <details>
 <summary>Show Code</summary>
