@@ -179,7 +179,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v3.0.6
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -225,7 +225,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v3.0.6
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -259,7 +259,7 @@ jobs:
           cache: npm
 
       - name: Setup Jest cache
-        uses: actions/cache@v3.0.6
+        uses: actions/cache@v3.0.8
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest
@@ -307,7 +307,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v3.0.6
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -453,7 +453,7 @@ jobs:
 
       - name: Configure Composer cache
         if: needs.pre-run.outputs.changed-php-count > 0
-        uses: actions/cache@v3.0.6
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -607,7 +607,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v3.0.6
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -708,7 +708,7 @@ jobs:
           echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v3.0.6
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
