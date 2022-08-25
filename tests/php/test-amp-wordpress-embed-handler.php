@@ -46,12 +46,14 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 			return $pre;
 		}
 
-		if ( ! $url ) {
+		$parsed_url = wp_parse_url( $url, PHP_URL_QUERY );
+
+		if ( ! $parsed_url ) {
 			return $pre;
 		}
 
 		$query_vars = [];
-		parse_str( wp_parse_url( $url, PHP_URL_QUERY ), $query_vars );
+		parse_str( $parsed_url, $query_vars );
 
 		$content_type = null;
 		$body         = null;
