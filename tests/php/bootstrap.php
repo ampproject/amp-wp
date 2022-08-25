@@ -59,10 +59,13 @@ tests_add_filter( 'muplugins_loaded', 'amp_unit_test_load_plugin_file' );
  */
 define( 'WP_CLI_ROOT', TESTS_PLUGIN_DIR . '/vendor/wp-cli/wp-cli' );
 define( 'WP_CLI_VENDOR_DIR', TESTS_PLUGIN_DIR . '/vendor' );
-require_once WP_CLI_ROOT . '/php/utils.php';
 
-$logger = new WP_CLI\Loggers\Regular( true );
-WP_CLI::set_logger( $logger );
+if ( file_exists( WP_CLI_ROOT . '/php/utils.php' ) ) {
+	require_once WP_CLI_ROOT . '/php/utils.php';
+
+	$logger = new WP_CLI\Loggers\Regular( true );
+	WP_CLI::set_logger( $logger );
+}
 
 /*
  * Load WordPress, which will load the Composer autoload file, and load the MockObject autoloader after that.
