@@ -475,6 +475,11 @@ jobs:
           composer remove --dev phpdocumentor/reflection
           composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
+    # See https://github.com/wp-cli/wp-cli/issues/5484
+      - name: Remove conflicting Requests library
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: composer remove --dev --ignore-platform-reqs --no-interaction --no-scripts  roave/security-advisories wp-cli/export-command wp-cli/extension-command wp-cli/wp-cli wp-cli/wp-cli-tests
+
       # Installs a different PHPUnit version depending on the WP/PHP version combo we're testing against.
       #
       # | WP  / PHP | PHPUnit |
@@ -504,11 +509,6 @@ jobs:
         env:
           WP_VERSION: ${{ matrix.wp }}
           PHP_VERSION: ${{ matrix.php }}
-
-      # See https://github.com/wp-cli/wp-cli/issues/5484
-      - name: Remove conflicting Requests library
-        if: needs.pre-run.outputs.changed-php-count > 0
-        run: composer remove --dev roave/security-advisories wp-cli/export-command wp-cli/extension-command wp-cli/wp-cli wp-cli/wp-cli-tests
 
       - name: Install Node dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
