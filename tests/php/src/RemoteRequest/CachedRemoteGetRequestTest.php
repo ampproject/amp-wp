@@ -34,7 +34,7 @@ class CachedRemoteGetRequestTest extends TestCase {
 
 		$cached_response = new CachedResponse( $body, $headers, $status_code, $expiry );
 		add_filter(
-			"pre_transient_${cache_key}",
+			"pre_transient_{$cache_key}",
 			static function () use ( $cached_response ) {
 				return serialize( $cached_response ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 			}
