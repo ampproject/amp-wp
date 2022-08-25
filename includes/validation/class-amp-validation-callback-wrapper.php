@@ -393,6 +393,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 * @param mixed $offset Offset.
 	 * @param mixed $value  Value.
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetSet( $offset, $value ) {
 		if ( ! is_array( $this->callback['function'] ) ) {
 			return;
