@@ -36,13 +36,17 @@ class AMP_WordPress_Embed_Handler_Test extends TestCase {
 	/**
 	 * Mock HTTP request.
 	 *
-	 * @param mixed  $pre Whether to preempt an HTTP request's return value. Default false.
-	 * @param mixed  $r   HTTP request arguments.
-	 * @param string $url The request URL.
+	 * @param mixed       $pre Whether to preempt an HTTP request's return value. Default false.
+	 * @param mixed       $r   HTTP request arguments.
+	 * @param string|null $url The request URL.
 	 * @return array|false Response data.
 	 */
 	public function mock_http_request( $pre, /** @noinspection PhpUnusedParameterInspection */ $r, $url ) {
 		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+			return $pre;
+		}
+
+		if ( ! $url ) {
 			return $pre;
 		}
 
