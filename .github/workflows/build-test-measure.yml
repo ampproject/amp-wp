@@ -475,6 +475,36 @@ jobs:
           composer remove --dev phpdocumentor/reflection
           composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
+      # Installs a different PHPUnit version depending on the WP/PHP version combo we're testing against.
+      #
+      # | WP  / PHP | PHPUnit |
+      # |-----------|---------|
+      # | 5.0 / 7.0 | 6       |
+      # | 5.7 / 7.2 | 7       |
+      # | 5.9 / 7.2 | 8       |
+      # | 5.9 / 7.4 | 9       |
+      # | *   / 8   | 9       |
+      #
+      # See https://make.wordpress.org/core/handbook/references/phpunit-compatibility-and-wordpress-versions/
+      - name: Update PHPUnit
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: |
+          if [[ $WP_VERSION == "5.7" && $PHP_VERSION == "7.2" ]]; then
+            echo "Installing PHPUnit 7.5.x"
+            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/phpunit:^7.5 --with-dependencies
+          elif [[ $PHP_VERSION == "7.2" ]]; then
+            echo "Installing PHPUnit 8.5.x"
+            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/phpunit:^8.5 --with-dependencies
+            echo "Downgrading phpunit/php-token-stream because the latest version requires PHP 7.3"
+            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/php-token-stream:^3.1.3 --with-dependencies
+          elif [[ $WP_VERSION == "latest" || $WP_VERSION == "trunk" || $PHP_VERSION == "7.4" ]]; then
+            echo "Installing latest version of PHPUnit"
+            composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies
+          fi
+        env:
+          WP_VERSION: ${{ matrix.wp }}
+          PHP_VERSION: ${{ matrix.php }}
+
       - name: Install Node dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
         run: npm ci
