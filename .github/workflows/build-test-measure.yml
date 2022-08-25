@@ -377,6 +377,10 @@ jobs:
             wp: 'trunk'
             experimental: true
 
+          - php: '8.2'
+            wp: 'trunk'
+            experimental: true
+
           - php: '8.0'
             wp: 'latest'
             external-http: true
