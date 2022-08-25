@@ -485,7 +485,7 @@ jobs:
       # | WP  / PHP | PHPUnit |
       # |-----------|---------|
       # | 5.0 / 7.0 | 6       |
-      # | 5.7 / 7.2 | 7       |
+      # | 5.7 / 7.1 | 7       |
       # | 5.9 / 7.2 | 8       |
       # | 5.9 / 7.4 | 9       |
       # | *   / 8   | 9       |
@@ -494,7 +494,7 @@ jobs:
       - name: Update PHPUnit
         if: needs.pre-run.outputs.changed-php-count > 0
         run: |
-          if [[ $WP_VERSION == "5.7" && $PHP_VERSION == "7.2" ]]; then
+          if [[ $PHP_VERSION == "7.1" ]]; then
             echo "Installing PHPUnit 7.5.x"
             composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/phpunit:^7.5 --with-dependencies
           elif [[ $PHP_VERSION == "7.2" ]]; then
