@@ -410,6 +410,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 * @param mixed $offset Offset.
 	 * @return bool Exists.
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetExists( $offset ) {
 		if ( ! is_array( $this->callback['function'] ) ) {
 			return false;
@@ -422,6 +423,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 *
 	 * @param mixed $offset Offset.
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetUnset( $offset ) {
 		if ( ! is_array( $this->callback['function'] ) ) {
 			return;
@@ -435,6 +437,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 * @param mixed $offset Offset.
 	 * @return mixed|null Value.
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetGet( $offset ) {
 		if ( is_array( $this->callback['function'] ) && isset( $this->callback['function'][ $offset ] ) ) {
 			return $this->callback['function'][ $offset ];
