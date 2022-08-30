@@ -229,8 +229,6 @@ class AMP_HTTP {
 
 		if ( defined( 'INTL_IDNA_VARIANT_UTS46' ) ) {
 			$intl_idna_variant = INTL_IDNA_VARIANT_UTS46;
-		} elseif ( defined( 'INTL_IDNA_VARIANT_2003' ) ) {
-			$intl_idna_variant = INTL_IDNA_VARIANT_2003; // phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
 		} else {
 			$intl_idna_variant = 0;
 		}
