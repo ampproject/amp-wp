@@ -91,7 +91,7 @@
     "postcss-import": "14.1.0",
     "postcss-loader": "4.3.0",
     "postcss-nested": "5.0.1",
-    "postcss-preset-env": "7.7.2",
+    "postcss-preset-env": "7.8.0",
     "react-test-renderer": "17.0.2",
     "rtlcss-webpack-plugin": "4.0.7",
     "semver": "7.3.7",
