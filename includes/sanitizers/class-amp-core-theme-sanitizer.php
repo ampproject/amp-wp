@@ -1630,8 +1630,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
 
-		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
-		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
+		$open_xpaths  = $args['open_button_xpath'];
+		$close_xpaths = $args['close_button_xpath'];
 
 		$modal_actions = [
 			"{$modal_id}.open"  => $open_xpaths,
