@@ -26,8 +26,12 @@ exports[`AMPNotice matches snapshots 1`] = `
       <mask
         height="12"
         id="mask-notice-success"
-        mask-type="alpha"
         maskUnits="userSpaceOnUse"
+        style={
+          Object {
+            "maskType": "alpha",
+          }
+        }
         width="16"
         x="10"
         y="12"

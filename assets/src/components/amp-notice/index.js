@@ -31,7 +31,7 @@ function getNoticeIcon( type ) {
 			Icon = () => (
 				<svg width="35" height="36" viewBox="0 0 35 36" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<rect x="1.90112" y="1.98828" width="32.0691" height="32.0691" rx="16.0345" stroke="#00A02F" strokeWidth="2" />
-					<mask id="mask-notice-success" mask-type="alpha" maskUnits="userSpaceOnUse" x="10" y="12" width="16" height="12">
+					<mask id="mask-notice-success" style={ { maskType: 'alpha' } } maskUnits="userSpaceOnUse" x="10" y="12" width="16" height="12">
 						<path d="M15.0921 21.461L11.3924 17.7613L10.1326 19.0122L15.0921 23.9718L25.7387 13.3252L24.4877 12.0742L15.0921 21.461Z" fill="white" />
 					</mask>
 					<g mask="url(#mask-notice-success)">
