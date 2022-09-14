@@ -275,6 +275,11 @@ class AMP_Gallery_Embed_Handler_Test extends TestCase {
 		// Normalize auto-incrementing ID.
 		$content = preg_replace( '/\bgallery-\d+/', 'gallery-1', $content );
 
+		// @TODO: Handle this more appropriately when webp is supported in WP core.
+		// replace .webp with .jpg.
+		$content = str_replace( '-jpg.webp', '.jpg', $content );
+		$content = str_replace( 'jpg.webp', '.jpg', $content );
+
 		$this->assertEquals(
 			$this->normalize( $expected ),
 			$this->normalize( $content )
