@@ -5,40 +5,46 @@ exports[`RedirectToggle matches snapshot 1`] = `
   className="amp-setting-toggle"
 >
   <div
-    className="components-base-control components-toggle-control css-wdf2ti-Wrapper ej5x27r4"
+    className="components-base-control components-toggle-control css-1wgfkcs-Wrapper-boxSizingReset-classes ej5x27r4"
   >
     <div
-      className="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+      className="components-base-control__field css-yj91it-StyledField ej5x27r3"
     >
-      <span
-        className="components-form-toggle is-checked"
+      <div
+        className="components-flex components-h-stack css-79etx6-View-Flex-base-ItemsRow e19lxcc00"
+        data-wp-c16t={true}
+        data-wp-component="HStack"
       >
-        <input
-          checked={true}
-          className="components-form-toggle__input"
-          id="inspector-toggle-control-0"
-          onChange={[Function]}
-          type="checkbox"
-        />
         <span
-          className="components-form-toggle__track"
-        />
-        <span
-          className="components-form-toggle__thumb"
-        />
-      </span>
-      <label
-        className="components-toggle-control__label"
-        htmlFor="inspector-toggle-control-0"
-      >
-        <div
-          className="amp-setting-toggle__label-text"
+          className="components-form-toggle is-checked"
         >
-          <h3>
-            Redirect mobile visitors to AMP
-          </h3>
-        </div>
-      </label>
+          <input
+            checked={true}
+            className="components-form-toggle__input"
+            id="inspector-toggle-control-0"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <span
+            className="components-form-toggle__track"
+          />
+          <span
+            className="components-form-toggle__thumb"
+          />
+        </span>
+        <label
+          className="components-toggle-control__label"
+          htmlFor="inspector-toggle-control-0"
+        >
+          <div
+            className="amp-setting-toggle__label-text"
+          >
+            <h3>
+              Redirect mobile visitors to AMP
+            </h3>
+          </div>
+        </label>
+      </div>
     </div>
   </div>
 </div>

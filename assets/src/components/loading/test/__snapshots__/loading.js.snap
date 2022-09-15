@@ -5,21 +5,23 @@ exports[`the Loading component matches the snapshots 1`] = `
   className="amp-spinner-container"
 >
   <svg
-    className="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+    className="components-spinner css-1igdw1q-StyledSpinner ea4tfvq2"
     focusable="false"
+    height="16"
     role="presentation"
     viewBox="0 0 100 100"
+    width="16"
     xmlns="http://www.w3.org/2000/svg"
   >
     <circle
-      className="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+      className="css-mx768t-SpinnerTrack-commonPathProps ea4tfvq1"
       cx="50"
       cy="50"
       r="50"
       vectorEffect="non-scaling-stroke"
     />
     <path
-      className="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+      className="css-7c7ebc-SpinnerIndicator-commonPathProps ea4tfvq0"
       d="m 50 0 a 50 50 0 0 1 50 50"
       vectorEffect="non-scaling-stroke"
     />
@@ -32,21 +34,23 @@ exports[`the Loading component matches the snapshots 2`] = `
   className="amp-spinner-container amp-spinner-container--inline"
 >
   <svg
-    className="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+    className="components-spinner css-1igdw1q-StyledSpinner ea4tfvq2"
     focusable="false"
+    height="16"
     role="presentation"
     viewBox="0 0 100 100"
+    width="16"
     xmlns="http://www.w3.org/2000/svg"
   >
     <circle
-      className="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+      className="css-mx768t-SpinnerTrack-commonPathProps ea4tfvq1"
       cx="50"
       cy="50"
       r="50"
       vectorEffect="non-scaling-stroke"
     />
     <path
-      className="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+      className="css-7c7ebc-SpinnerIndicator-commonPathProps ea4tfvq0"
       d="m 50 0 a 50 50 0 0 1 50 50"
       vectorEffect="non-scaling-stroke"
     />
