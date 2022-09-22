@@ -433,8 +433,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
-          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
-          ini-values: pcov.directory=.
+          coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
 
       - name: Shutdown default MySQL service
         if: needs.pre-run.outputs.changed-php-count > 0
