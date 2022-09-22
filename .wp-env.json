@@ -1,4 +1,5 @@
 {
+  "core": "WordPress/WordPress#6.0",
   "env": {
     "development": {
       "plugins": [
@@ -28,7 +29,7 @@
         "https://downloads.wordpress.org/plugin/pwa.zip"
       ],
       "mappings": {
-        "../wordpress-develop": "WordPress/wordpress-develop#trunk"
+        "../wordpress-develop": "WordPress/wordpress-develop#6.0"
       }
     }
   }
