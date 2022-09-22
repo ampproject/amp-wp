@@ -1,4 +1,5 @@
 {
+  "core": "WordPress/WordPress#master",
   "env": {
     "development": {
       "plugins": [
