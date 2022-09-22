@@ -35,8 +35,7 @@ final class ElementList implements IteratorAggregate, Countable {
 	 * @param DOMElement|null $caption The caption for the element.
 	 * @return ElementList A clone of this list, with the new element added.
 	 */
-	#[\ReturnTypeWillChange]
-	public function add( DOMElement $element, DOMElement $caption = null ) {
+	public function add( DOMElement $element, DOMElement $caption = null ): ElementList {
 		$cloned_list             = clone $this;
 		$cloned_list->elements[] = null === $caption ? $element : new CaptionedSlide( $element, $caption );
 		return $cloned_list;
@@ -50,8 +49,7 @@ final class ElementList implements IteratorAggregate, Countable {
 	 *
 	 * @return ArrayIterator An iterator with the elements.
 	 */
-	#[\ReturnTypeWillChange]
-	public function getIterator() {
+	public function getIterator(): ArrayIterator {
 		return new ArrayIterator( $this->elements );
 	}
 
@@ -60,8 +58,7 @@ final class ElementList implements IteratorAggregate, Countable {
 	 *
 	 * @return int The number of elements.
 	 */
-	#[\ReturnTypeWillChange]
-	public function count() {
+	public function count(): int {
 		return count( $this->elements );
 	}
 }
