@@ -15,6 +15,7 @@ node_modules
 /amphtml
 /.env
 /.idea/
+/.vscode/
 /phpcs.xml
 /phpunit.xml
 /*.sql
