@@ -639,8 +639,8 @@ class AMP_Script_Sanitizer_Test extends TestCase {
 			$this->assertArrayHasKey( Extension::FACEBOOK_PAGE, $scripts );
 			$this->assertArrayNotHasKey( Extension::FACEBOOK, $scripts );
 		} else {
-			$this->assertArrayNotHasKey( Extension::FACEBOOK_PAGE, $scripts );
-			$this->assertArrayHasKey( Extension::FACEBOOK, $scripts );
+			$this->assertArrayHasKey( Extension::FACEBOOK_PAGE, $scripts );
+			$this->assertArrayNotHasKey( Extension::FACEBOOK, $scripts );
 		}
 	}
 
