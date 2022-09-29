@@ -15,7 +15,6 @@ import { CheckboxControl } from '@wordpress/components';
  */
 import { Options } from '../components/options-context-provider';
 import { AMPDrawer } from '../components/amp-drawer';
-import { STANDARD } from '../common/constants';
 
 /**
  * Component rendering the Sandboxing experiment.
@@ -27,12 +26,7 @@ export function Sandboxing( { focusedSection } ) {
 	const { updateOptions, editedOptions: {
 		sandboxing_enabled: sandboxingEnabled,
 		sandboxing_level: sandboxingLevel,
-		theme_support: themeSupport,
 	} } = useContext( Options );
-
-	if ( STANDARD !== themeSupport ) {
-		return null;
-	}
 
 	return (
 		<AMPDrawer
