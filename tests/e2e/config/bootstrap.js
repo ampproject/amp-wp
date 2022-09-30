@@ -29,6 +29,26 @@ import { deactivatePlugin, installLocalPlugin } from '../utils/amp-settings-util
 const { PUPPETEER_TIMEOUT } = process.env;
 
 /**
+ * Default browser viewport size.
+ *
+ * @type {{width: number, height: number}}
+ */
+export const DEFAULT_BROWSER_VIEWPORT_SIZE = {
+	width: 1600,
+	height: 1000,
+};
+
+/**
+ * Mobile browser viewport size.
+ *
+ * @type {{width: number, height: number}}
+ */
+export const MOBILE_BROWSER_VIEWPORT_SIZE = {
+	width: 375,
+	height: 667,
+};
+
+/**
  * Set of console logging types observed to protect against unexpected yet
  * handled (i.e. not catastrophic) errors or warnings. Each key corresponds
  * to the Puppeteer ConsoleMessage type, its value the corresponding function
@@ -210,11 +230,8 @@ async function runAxeTestsForBlockEditor() {
 /**
  * Set up browser.
  */
-async function setupBrowser() {
-	await setBrowserViewport( {
-		width: 1600,
-		height: 1000,
-	} );
+export async function setupBrowser() {
+	await setBrowserViewport( DEFAULT_BROWSER_VIEWPORT_SIZE );
 }
 
 /**
@@ -247,6 +264,17 @@ async function setupThemesAndPlugins() {
 }
 
 /**
+ * Set pretty permalinks.
+ */
+async function setPrettyPermalinks() {
+	await visitAdminPage( 'options-permalink.php', '' );
+	await page.waitForSelector( 'input[value="/%postname%/"]' );
+	await page.click( 'input[value="/%postname%/"]' );
+	await page.click( 'input[type="submit"]' );
+	await page.waitForSelector( '#setting-error-settings_updated' );
+}
+
+/**
  * Before every test suite run, delete all content created by the test. This ensures
  * other posts/comments/etc. aren't dirtying tests and tests don't depend on
  * each other's side-effects.
@@ -257,6 +285,7 @@ beforeAll( async () => {
 	enablePageDialogAccept();
 	observeConsoleLogging();
 	await setupBrowser();
+	await setPrettyPermalinks();
 	await setupThemesAndPlugins();
 	await trashAllPosts();
 	await createTestData();

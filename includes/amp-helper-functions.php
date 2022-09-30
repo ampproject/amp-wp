@@ -194,37 +194,43 @@ function amp_init() {
 	 * Detects whether the current window is in an iframe with the specified `name` attribute. The iframe is created
 	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
 	 */
-	add_action(
-		'wp_print_scripts',
-		function() {
-			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+	add_action( 'wp_head', 'amp_remove_admin_bar_in_phone_preview' );
+	add_action( 'amp_post_template_head', 'amp_remove_admin_bar_in_phone_preview' );
+}
+
+/**
+ * Remove the admin bar in phone preview of the site in AMP Onboarding Wizard.
+ *
+ * @since 2.2.2
+ * @internal
+ */
+function amp_remove_admin_bar_in_phone_preview() {
+	if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+		return;
+	}
+	?>
+	<script data-ampdevmode>
+		( () => {
+			if ( 'amp-wizard-completion-preview' !== window.name ) {
 				return;
 			}
-			?>
-			<script data-ampdevmode>
-				( () => {
-					if ( 'amp-wizard-completion-preview' !== window.name ) {
-						return;
-					}
 
-					/** @type {HTMLStyleElement} */
-					const style = document.createElement( 'style' );
-					style.setAttribute( 'type', 'text/css' );
-					style.appendChild( document.createTextNode( 'html:not(#_) { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
-					document.head.appendChild( style );
+			/** @type {HTMLStyleElement} */
+			const style = document.createElement( 'style' );
+			style.setAttribute( 'type', 'text/css' );
+			style.appendChild( document.createTextNode( 'html:not(#_) { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
+			document.head.appendChild( style );
 
-					document.addEventListener( 'DOMContentLoaded', function() {
-						const adminBar = document.getElementById( 'wpadminbar' );
-						if ( adminBar ) {
-							document.body.classList.remove( 'admin-bar' );
-							adminBar.remove();
-						}
-					});
-				} )();
-			</script>
-			<?php
-		}
-	);
+			document.addEventListener( 'DOMContentLoaded', function() {
+				const adminBar = document.getElementById( 'wpadminbar' );
+				if ( adminBar ) {
+					document.body.classList.remove( 'admin-bar' );
+					adminBar.remove();
+				}
+			});
+		} )();
+	</script>
+	<?php
 }
 
 /**
@@ -1401,6 +1407,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 			AMP_Gfycat_Embed_Handler::class       => [],
 			AMP_Imgur_Embed_Handler::class        => [],
 			AMP_Scribd_Embed_Handler::class       => [],
+			AMP_WordPress_Embed_Handler::class    => [],
 			AMP_WordPress_TV_Embed_Handler::class => [],
 		],
 		$post
@@ -1451,6 +1458,8 @@ function amp_is_dev_mode() {
  * @return bool Whether to use `img`.
  */
 function amp_is_native_img_used() {
+	$use_native_img_tag = AMP_Options_Manager::get_option( Option::USE_NATIVE_IMG_TAG );
+
 	/**
 	 * Filters whether to use the native `img` element rather than convert to `amp-img`.
 	 *
@@ -1462,7 +1471,7 @@ function amp_is_native_img_used() {
 	 *
 	 * @param bool $use_native Whether to use `img`.
 	 */
-	return (bool) apply_filters( 'amp_native_img_used', false );
+	return (bool) apply_filters( 'amp_native_img_used', $use_native_img_tag );
 }
 
 /**
@@ -1513,13 +1522,12 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	$sanitizers = [
 		// Embed sanitization must come first because it strips out custom scripts associated with embeds.
-		AMP_Embed_Sanitizer::class             => [
+		AMP_Embed_Sanitizer::class                 => [
 			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
 		],
-		AMP_O2_Player_Sanitizer::class         => [],
-		AMP_Playbuzz_Sanitizer::class          => [],
-
-		AMP_Core_Theme_Sanitizer::class        => [
+		AMP_O2_Player_Sanitizer::class             => [],
+		AMP_Playbuzz_Sanitizer::class              => [],
+		AMP_Core_Theme_Sanitizer::class            => [
 			'template'        => get_template(),
 			'stylesheet'      => get_stylesheet(),
 			'theme_features'  => [
@@ -1528,46 +1536,53 @@ function amp_get_content_sanitizers( $post = null ) {
 			'native_img_used' => $native_img_used,
 		],
 
-		AMP_Comments_Sanitizer::class          => [
+		AMP_Comments_Sanitizer::class              => [
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
 		],
 
-		AMP_Bento_Sanitizer::class             => [],
+		AMP_Bento_Sanitizer::class                 => [],
+
+		// The AMP_PWA_Script_Sanitizer run before AMP_Script_Sanitizer, to prevent the script tags
+		// from getting removed in PWA plugin offline/500 templates.
+		AMP_PWA_Script_Sanitizer::class            => [],
 
 		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
 		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
 		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
 		// performed.
-		AMP_Script_Sanitizer::class            => [],
+		AMP_Script_Sanitizer::class                => [],
 
-		AMP_Srcset_Sanitizer::class            => [],
-		AMP_Img_Sanitizer::class               => [
+		AMP_Srcset_Sanitizer::class                => [],
+		AMP_Img_Sanitizer::class                   => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 			'native_img_used'    => $native_img_used,
 		],
-		AMP_Form_Sanitizer::class              => [],
-		AMP_Video_Sanitizer::class             => [],
-		AMP_Audio_Sanitizer::class             => [],
-		AMP_Object_Sanitizer::class            => [],
-		AMP_Iframe_Sanitizer::class            => [
+		AMP_Form_Sanitizer::class                  => [],
+		AMP_Video_Sanitizer::class                 => [],
+		AMP_Audio_Sanitizer::class                 => [],
+		AMP_Object_Sanitizer::class                => [],
+		AMP_Iframe_Sanitizer::class                => [
 			'add_placeholder'    => true,
 			'current_origin'     => $current_origin,
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
-		AMP_Gallery_Block_Sanitizer::class     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+		AMP_Gallery_Block_Sanitizer::class         => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
 			'native_img_used'   => $native_img_used,
 		],
-		AMP_Block_Sanitizer::class             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
-		AMP_Style_Sanitizer::class             => [
+		AMP_Native_Img_Attributes_Sanitizer::class => [ // Note: Native img attributes sanitizer must come after image sanitizers since its logic is sanitizing the already sanitized images attributes.
+			'native_img_used' => $native_img_used,
+		],
+		AMP_Block_Sanitizer::class                 => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
+		AMP_Style_Sanitizer::class                 => [
 			'skip_tree_shaking'   => is_customize_preview(),
 			'allow_excessive_css' => is_customize_preview(),
 		],
-		AMP_Meta_Sanitizer::class              => [],
-		AMP_Layout_Sanitizer::class            => [],
-		AMP_Accessibility_Sanitizer::class     => [],
+		AMP_Meta_Sanitizer::class                  => [],
+		AMP_Layout_Sanitizer::class                => [],
+		AMP_Accessibility_Sanitizer::class         => [],
 		// Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
-		AMP_Tag_And_Attribute_Sanitizer::class => [
+		AMP_Tag_And_Attribute_Sanitizer::class     => [
 			'prefer_bento' => amp_is_bento_enabled(),
 		],
 	];
@@ -1600,6 +1615,22 @@ function amp_get_content_sanitizers( $post = null ) {
 			[ 'paired' => ! amp_is_canonical() ],
 			compact( 'excluded_urls' )
 		);
+	}
+
+	/**
+	 * Filters whether AMP auto-lightbox is disabled.
+	 *
+	 * When disabled, the data-amp-auto-lightbox-disable attribute is added to the body.
+	 *
+	 * @since 2.2.2
+	 * @link https://github.com/ampproject/amphtml/blob/420bc3987f69f6d9cd36e31c013fc9eea4f1b245/docs/spec/auto-lightbox.md#disabling-treatment-explicitly
+	 *
+	 * @param bool $disabled Whether disabled.
+	 */
+	$is_auto_lightbox_disabled = apply_filters( 'amp_auto_lightbox_disabled', true );
+
+	if ( $is_auto_lightbox_disabled ) {
+		$sanitizers[ AMP_Auto_Lightbox_Disable_Sanitizer::class ] = [];
 	}
 
 	/**
@@ -1681,8 +1712,10 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
 	$expected_final_sanitizer_order = [
+		AMP_Auto_Lightbox_Disable_Sanitizer::class,
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
 		AMP_Bento_Sanitizer::class, // Bento scripts may be preserved here.
+		AMP_PWA_Script_Sanitizer::class, // Must come before script sanitizer since PWA offline page scripts are removed.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for images, videos, audios, comments, forms, and styles.
 		AMP_Form_Sanitizer::class, // Must come before comments sanitizer.
 		AMP_Comments_Sanitizer::class, // Also must come after the form sanitizer.
@@ -1693,6 +1726,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Object_Sanitizer::class,
 		AMP_Iframe_Sanitizer::class,
 		AMP_Gallery_Block_Sanitizer::class,
+		AMP_Native_Img_Attributes_Sanitizer::class, // Must come after gallery block sanitizer since it sanitizes img attributes.
 		AMP_Block_Sanitizer::class,
 		AMP_Accessibility_Sanitizer::class,
 		AMP_Layout_Sanitizer::class,
@@ -2044,7 +2078,11 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
  * @return string|null Script hash or null if the sha384 algorithm is not supported.
  */
 function amp_generate_script_hash( $script ) {
-	$sha384 = hash( 'sha384', $script, true );
+	try {
+		$sha384 = hash( 'sha384', $script, true );
+	} catch ( ValueError $e ) {
+		$sha384 = false;
+	}
 	if ( false === $sha384 ) {
 		return null;
 	}

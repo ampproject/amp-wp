@@ -322,7 +322,7 @@ abstract class AMP_Base_Sanitizer {
 	public function sanitize_dimension( $value, $dimension ) {
 
 		// Allows 0 to be used as valid dimension.
-		if ( null === $value ) {
+		if ( empty( $value ) && '0' !== (string) $value ) {
 			return '';
 		}
 
@@ -755,7 +755,7 @@ abstract class AMP_Base_Sanitizer {
 						],
 						$text_content
 					);
-				} elseif ( $is_inline_style ) {
+				} else {
 					// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
 					// already be detailed in the stylesheets metabox.
 					$error['text'] = $text_content;

@@ -1,14 +1,14 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { createContext, useEffect, useState, useRef, useCallback, useContext } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
-
-/**
- * External dependencies
- */
-import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies

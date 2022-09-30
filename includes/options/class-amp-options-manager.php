@@ -38,6 +38,7 @@ class AMP_Options_Manager {
 		Option::PAIRED_URL_STRUCTURE     => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 		Option::PLUGIN_CONFIGURED        => false,
 		Option::DELETE_DATA_AT_UNINSTALL => true,
+		Option::USE_NATIVE_IMG_TAG       => false,
 	];
 
 	/**
@@ -325,6 +326,10 @@ class AMP_Options_Manager {
 			$options[ Option::DELETE_DATA_AT_UNINSTALL ] = (bool) $new_options[ OPTION::DELETE_DATA_AT_UNINSTALL ];
 		}
 
+		if ( isset( $new_options[ Option::USE_NATIVE_IMG_TAG ] ) ) {
+			$options[ Option::USE_NATIVE_IMG_TAG ] = (bool) $new_options[ OPTION::USE_NATIVE_IMG_TAG ];
+		}
+
 		// Validate analytics.
 		if ( isset( $new_options[ Option::ANALYTICS ] ) && $new_options[ Option::ANALYTICS ] !== $options[ Option::ANALYTICS ] ) {
 			$new_analytics_option = [];
@@ -349,12 +354,6 @@ class AMP_Options_Manager {
 			if ( in_array( $new_options[ Option::READER_THEME ], $reader_theme_slugs, true ) ) {
 				$options[ Option::READER_THEME ] = $new_options[ Option::READER_THEME ];
 			}
-		}
-
-		if ( array_key_exists( Option::DISABLE_CSS_TRANSIENT_CACHING, $new_options ) && true === $new_options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] ) {
-			$options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] = true;
-		} else {
-			unset( $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] );
 		}
 
 		/**

@@ -15,7 +15,9 @@
  */
 class AMP_Allowed_Tags_Generated {
 
+	// @phpstan-ignore-next-line
 	private static $spec_file_revision = 1188;
+	// @phpstan-ignore-next-line
 	private static $minimum_validator_revision_required = 475;
 
 	private static $descendant_tag_lists = array(
@@ -272,6 +274,7 @@ class AMP_Allowed_Tags_Generated {
 			'amp-story-interactive-quiz',
 			'amp-story-interactive-results',
 			'amp-story-panning-media',
+			'amp-story-shopping-tag',
 			'amp-timeago',
 			'amp-twitter',
 			'amp-video',
@@ -631,6 +634,7 @@ class AMP_Allowed_Tags_Generated {
 								'feed',
 								'intent',
 								'line',
+								'microsoft-edge',
 								'skype',
 								'sms',
 								'snapchat',
@@ -1408,6 +1412,7 @@ class AMP_Allowed_Tags_Generated {
 						'supported_layouts' => array(
 							2,
 							3,
+							5,
 							1,
 						),
 					),
@@ -3554,6 +3559,81 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-google-read-aloud-player' => array(
+			array(
+				'attr_spec_list' => array(
+					'data-ad-tag-url' => array(
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'data-api-key' => array(
+						'mandatory' => true,
+					),
+					'data-call-to-action-label' => array(),
+					'data-intro' => array(
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'data-locale' => array(
+						'value_regex_casei' => '[a-z]{2}',
+					),
+					'data-outro' => array(
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'data-speakable' => array(
+						'value' => array(
+							'',
+						),
+					),
+					'data-tracking-ids' => array(
+						'mandatory' => true,
+						'value_regex_casei' => '^UA-\\d+-\\d+(\\s*,\\s*UA-\\d+-\\d+)*$',
+					),
+					'data-url' => array(
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'data-voice' => array(
+						'mandatory' => true,
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							2,
+							3,
+						),
+					),
+					'requires_extension' => array(
+						'amp-google-read-aloud-player',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-google-read-aloud-player',
+				),
+			),
+		),
 		'amp-hulu' => array(
 			array(
 				'attr_spec_list' => array(
@@ -3851,6 +3931,13 @@ class AMP_Allowed_Tags_Generated {
 					'data-amp-bind-attribution' => array(),
 					'data-amp-bind-src' => array(),
 					'data-amp-bind-srcset' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
 					'lightbox' => array(),
 					'lightbox-thumbnail-id' => array(
 						'value_regex_casei' => '^[a-z][a-z\\d_-]*',
@@ -6280,10 +6367,17 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'style-preset' => array(
+						'value' => array(
+							'default',
+							'appear',
+						),
+					),
 				),
 				'tag_spec' => array(
 					'amp_layout' => array(
 						'supported_layouts' => array(
+							5,
 							6,
 							2,
 							3,
@@ -6858,6 +6952,7 @@ class AMP_Allowed_Tags_Generated {
 							'amp-story-grid-layer',
 							'amp-story-page-attachment',
 							'amp-story-page-outlink',
+							'amp-story-shopping-attachment',
 						),
 						'mandatory_min_num_child_tags' => 1,
 					),
@@ -7050,41 +7145,33 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-shopping-attachment' => array(
 			array(
 				'attr_spec_list' => array(
-					'media' => array(),
-					'noloading' => array(
+					'cta-text' => array(),
+					'src' => array(
+						'value_url' => array(
+							'allow_relative' => true,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'theme' => array(
 						'value' => array(
-							'',
+							'dark',
+							'light',
 						),
 					),
 				),
 				'tag_spec' => array(
 					'amp_layout' => array(
 						'supported_layouts' => array(
-							1,
+							5,
 						),
 					),
-					'requires_extension' => array(
-						'amp-story-shopping',
-					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-story-shopping/',
-				),
-			),
-		),
-		'amp-story-shopping-config' => array(
-			array(
-				'attr_spec_list' => array(
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'script',
 						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							1,
-						),
+						'mandatory_min_num_child_tags' => 1,
 					),
 					'requires_extension' => array(
 						'amp-story-shopping',
@@ -7096,11 +7183,8 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-shopping-tag' => array(
 			array(
 				'attr_spec_list' => array(
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
+					'data-product-id' => array(
+						'mandatory' => true,
 					),
 				),
 				'tag_spec' => array(
@@ -7138,6 +7222,28 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'descendant_tag_list' => 'amp-story-social-share-allowed-descendants',
 					'mandatory_ancestor' => 'amp-story',
+				),
+			),
+		),
+		'amp-story-subscriptions' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							5,
+						),
+					),
+					'requires_extension' => array(
+						'amp-story-subscriptions',
+					),
 				),
 			),
 		),
@@ -7790,7 +7896,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'volume' => array(
-						'value_regex' => '^((0?\\.[1-9]+)?|1(\\.0*)?)$',
+						'value_regex' => '^(0(\\.0*)?|(0?\\.[0-9]+)?|1(\\.0*)?)$',
 					),
 				),
 				'tag_spec' => array(
@@ -8304,6 +8410,16 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'noscript',
 					'mandatory_ancestor_suggested_alternative' => 'amp-audio',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-audio/',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'controls' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-audio',
+					'spec_name' => 'amp-audio > audio',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-audio/',
 				),
 			),
@@ -11413,6 +11529,246 @@ class AMP_Allowed_Tags_Generated {
 		'image' => array(
 			array(
 				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Standard Image',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'data-hero' => array(
+						'dispatch_key' => 1,
+						'mandatory' => true,
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'sizes' => array(),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Hero Image',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'sizes' => array(),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Image using srcset',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
 					'alignment-baseline' => array(),
 					'baseline-shift' => array(),
 					'clip' => array(),
@@ -11519,28 +11875,136 @@ class AMP_Allowed_Tags_Generated {
 		'img' => array(
 			array(
 				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
 					'alt' => array(),
-					'attribution' => array(),
 					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
 					'decoding' => array(
-						'value' => array(
+						'value_casei' => array(
 							'async',
-							'auto',
-							'sync',
 						),
 					),
 					'height' => array(),
-					'importance' => array(),
-					'intrinsicsize' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
 					'ismap' => array(),
-					'loading' => array(),
-					'longdesc' => array(
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
 						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
 						'value_url' => array(
 							'protocol' => array(
+								'data',
 								'http',
 								'https',
 							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Standard Img',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'data-hero' => array(
+						'dispatch_key' => 1,
+						'mandatory' => true,
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
 						),
 					),
 					'sizes' => array(),
@@ -11558,6 +12022,170 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Hero Img',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'sizes' => array(),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-img',
+						'amp-story',
+					),
+					'spec_name' => 'Img using srcset',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'align' => array(
+						'value_casei' => array(
+							'top',
+							'middle',
+							'bottom',
+							'left',
+							'right',
+						),
+					),
+					'alt' => array(),
+					'attribution' => array(),
+					'border' => array(),
+					'crossorigin' => array(
+						'value_casei' => array(
+							'anonymous',
+							'use-credentials',
+						),
+					),
+					'decoding' => array(
+						'value_casei' => array(
+							'async',
+							'auto',
+							'sync',
+						),
+					),
+					'height' => array(),
+					'hspace' => array(),
+					'importance' => array(
+						'value_casei' => array(
+							'high',
+							'low',
+							'auto',
+						),
+					),
+					'intrinsicsize' => array(),
+					'ismap' => array(),
+					'loading' => array(
+						'value_casei' => array(
+							'lazy',
+						),
+					),
+					'name' => array(),
+					'referrerpolicy' => array(
+						'value_casei' => array(
+							'no-referrer',
+							'no-referrer-when-downgrade',
+							'origin',
+							'origin-when-cross-origin',
+							'same-origin',
+							'strict-origin',
+							'strict-origin-when-cross-origin',
+							'unsafe-url',
+						),
+					),
+					'sizes' => array(),
+					'src' => array(
+						'alternative_names' => array(
+							'srcset',
+						),
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'usemap' => array(),
+					'vspace' => array(),
 					'width' => array(),
 				),
 				'tag_spec' => array(
@@ -11830,6 +12458,85 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'form [method=post]',
 					'spec_name' => 'INPUT [type=password]',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-form/',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'accept' => array(),
+					'accesskey' => array(),
+					'autocomplete' => array(),
+					'autofocus' => array(),
+					'checked' => array(),
+					'data-amp-bind-accept' => array(),
+					'data-amp-bind-accesskey' => array(),
+					'data-amp-bind-autocomplete' => array(),
+					'data-amp-bind-checked' => array(),
+					'data-amp-bind-disabled' => array(),
+					'data-amp-bind-height' => array(),
+					'data-amp-bind-inputmode' => array(),
+					'data-amp-bind-max' => array(),
+					'data-amp-bind-maxlength' => array(),
+					'data-amp-bind-min' => array(),
+					'data-amp-bind-minlength' => array(),
+					'data-amp-bind-multiple' => array(),
+					'data-amp-bind-pattern' => array(),
+					'data-amp-bind-placeholder' => array(),
+					'data-amp-bind-readonly' => array(),
+					'data-amp-bind-required' => array(),
+					'data-amp-bind-selectiondirection' => array(),
+					'data-amp-bind-size' => array(),
+					'data-amp-bind-spellcheck' => array(),
+					'data-amp-bind-step' => array(),
+					'data-amp-bind-type' => array(),
+					'data-amp-bind-value' => array(),
+					'data-amp-bind-width' => array(),
+					'disabled' => array(),
+					'enterkeyhint' => array(),
+					'height' => array(),
+					'inputmode' => array(),
+					'list' => array(),
+					'max' => array(),
+					'maxlength' => array(),
+					'min' => array(),
+					'minlength' => array(),
+					'multiple' => array(),
+					'name' => array(
+						'disallowed_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
+					),
+					'pattern' => array(),
+					'placeholder' => array(),
+					'readonly' => array(),
+					'required' => array(),
+					'selectiondirection' => array(),
+					'size' => array(),
+					'spellcheck' => array(),
+					'src' => array(
+						'disallowed_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'step' => array(),
+					'tabindex' => array(),
+					'type' => array(
+						'dispatch_key' => 2,
+						'mandatory' => true,
+						'value_casei' => array(
+							'image',
+						),
+					),
+					'value' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'form [method=post]',
+					'spec_name' => 'INPUT [type=image]',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-form/',
 				),
 			),
@@ -14983,6 +15690,34 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 				),
+				'cdata' => array(
+					'disallowed_cdata_regex' => array(
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-story-shopping-attachment',
+					'requires_extension' => array(
+						'amp-story-shopping',
+					),
+					'spec_name' => 'amp-story-shopping-attachment config script',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-shopping/',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'nonce' => array(),
+					'type' => array(
+						'dispatch_key' => 3,
+						'mandatory' => true,
+						'value_casei' => array(
+							'application/json',
+						),
+					),
+				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-story-bookend',
 					'requires_extension' => array(
@@ -15271,6 +16006,40 @@ class AMP_Allowed_Tags_Generated {
 						'version' => array(
 							'0.1',
 						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'latest' => '0.1',
+						'name' => 'amp-access-fewcents',
+						'requires_usage' => false,
+						'version' => array(
+							'0.1',
+						),
+					),
+					'requires_extension' => array(
+						'amp-access',
 					),
 				),
 			),
@@ -15714,11 +16483,16 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'bento' => array(
+							'has_css' => false,
+							'version' => '1.0',
+						),
 						'latest' => '0.1',
 						'name' => 'amp-audio',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
+							'1.0',
 						),
 					),
 				),
@@ -16190,11 +16964,16 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'bento' => array(
+							'has_css' => true,
+							'version' => '1.0',
+						),
 						'latest' => '0.1',
 						'name' => 'amp-dailymotion',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
+							'1.0',
 						),
 					),
 				),
@@ -16838,6 +17617,37 @@ class AMP_Allowed_Tags_Generated {
 					'extension_spec' => array(
 						'latest' => '0.1',
 						'name' => 'amp-google-document-embed',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'latest' => '0.1',
+						'name' => 'amp-google-read-aloud-player',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
@@ -18785,6 +19595,37 @@ class AMP_Allowed_Tags_Generated {
 					'extension_spec' => array(
 						'latest' => '0.1',
 						'name' => 'amp-story-shopping',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'latest' => '0.1',
+						'name' => 'amp-story-subscriptions',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
@@ -21581,6 +22422,7 @@ class AMP_Allowed_Tags_Generated {
 		'aria-labelledby' => array(),
 		'aria-level' => array(),
 		'aria-live' => array(),
+		'aria-modal' => array(),
 		'aria-multiline' => array(),
 		'aria-multiselectable' => array(),
 		'aria-orientation' => array(),
@@ -22104,6 +22946,9 @@ class AMP_Allowed_Tags_Generated {
 				'animate-in-delay' => array(),
 				'animate-in-duration' => array(),
 				'animate-in-timing-function' => array(),
+				'pan-scaling-factor' => array(
+					'value_regex_casei' => '^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$',
+				),
 				'scale-end' => array(
 					'value_regex' => '[0-9]+([.][0-9]+)?',
 				),
@@ -22171,6 +23016,9 @@ class AMP_Allowed_Tags_Generated {
 					'value' => array(
 						'',
 					),
+				),
+				'pan-scaling-factor' => array(
+					'value_regex_casei' => '^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$',
 				),
 				'scale-end' => array(
 					'value_regex' => '[0-9]+([.][0-9]+)?',
@@ -22299,6 +23147,9 @@ class AMP_Allowed_Tags_Generated {
 						'start',
 						'stretch',
 					),
+				),
+				'pan-scaling-factor' => array(
+					'value_regex_casei' => '^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$',
 				),
 				'scale-end' => array(
 					'value_regex' => '[0-9]+([.][0-9]+)?',

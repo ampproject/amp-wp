@@ -18,13 +18,13 @@ use AmpProject\AmpWP\Tests\TestCase;
 class Test_AMP_WordPress_TV_Embed_Handler extends TestCase {
 
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function set_up() {
 		$this->prevent_block_pre_render();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );

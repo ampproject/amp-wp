@@ -25,8 +25,12 @@ exports[`Nav matches snapshot 1`] = `
           <mask
             height="19"
             id="close-icon"
-            mask-type="alpha"
             maskUnits="userSpaceOnUse"
+            style={
+              Object {
+                "maskType": "alpha",
+              }
+            }
             width="19"
             x="3"
             y="3"

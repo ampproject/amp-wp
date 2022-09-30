@@ -1,12 +1,12 @@
 /**
- * WordPress dependencies
- */
-import { __, sprintf } from '@wordpress/i18n';
-
-/**
  * External dependencies
  */
 import { AMP_THEMES, AMP_COMPATIBLE, NONE_WPORG_THEMES } from 'amp-themes'; // From WP inline script.
+
+/**
+ * WordPress dependencies
+ */
+import { __, sprintf } from '@wordpress/i18n';
 
 const wpThemeView = wp.themes.view.Theme;
 

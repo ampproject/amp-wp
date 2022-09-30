@@ -15,6 +15,8 @@ describe( 'Enable AMP Toggle', () => {
 
 		// Open the AMP panel if collapsed.
 		const [ collapsedPanel ] = await page.$x( '//button[ contains( @class, "components-panel__body-toggle" ) and @aria-expanded="false" and contains( text(), "AMP" ) ]' );
+
+		//eslint-disable-next-line jest/no-conditional-in-test
 		if ( collapsedPanel ) {
 			await collapsedPanel.click();
 		}

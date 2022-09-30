@@ -80,7 +80,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 					<html>
 						<head>
 							<meta charset="utf-8">
-							<style amp-custom>#my-accordion{display:block;outline:solid 2px red}amp-accordion#my-accordion{outline:solid 2px green}amp-accordion h2{text-transform:uppercase}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-a33452e{border:solid 1px black}
+							<style amp-custom>#my-accordion{display:block;outline:solid 2px red}amp-accordion#my-accordion{outline:solid 2px green}amp-accordion h2{text-transform:uppercase}.amp-wp-a33452e:not(#_#_#_#_#_){border:solid 1px black}
 
 							/*# sourceURL="amp-custom.css" */</style>
 						</head>
@@ -245,7 +245,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 							<script type="module" async="" src="https://cdn.ampproject.org/v0/bento-marquee-1.0.mjs" data-px-verified-tag></script>
 							<script nomodule="" async="" src="https://cdn.ampproject.org/v0/bento-marquee-1.0.js" data-px-verified-tag></script>
 							<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-marquee-1.0.css" data-px-verified-tag data-px-verified-attrs="href">
-							<style amp-custom>#timeago{color:red}amp-timeago#timeago{color:blue}#marquee{display:block;outline:solid 2px red}bento-marquee#marquee{outline:solid 2px green}bento-marquee h2{text-transform:uppercase}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c437205{border:solid 1px green}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-4d7586b{max-width:50vw}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-4ce7767{position:relative;width:100%;height:400px}
+							<style amp-custom>#timeago{color:red}amp-timeago#timeago{color:blue}#marquee{display:block;outline:solid 2px red}bento-marquee#marquee{outline:solid 2px green}bento-marquee h2{text-transform:uppercase}.amp-wp-c437205:not(#_#_#_#_#_){border:solid 1px green}.amp-wp-4d7586b:not(#_#_#_#_#_){max-width:50vw}.amp-wp-4ce7767:not(#_#_#_#_#_){position:relative;width:100%;height:400px}
 
 							/*# sourceURL="amp-custom.css" */</style>
 						</head>
@@ -415,7 +415,7 @@ class AMP_Bento_Sanitizer_Test extends TestCase {
 					<html>
 						<head>
 							<meta charset="utf-8">
-							<style amp-custom>:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-3ef80bd{height:40px}:root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-120213e{height:40px;width:147px}
+							<style amp-custom>.amp-wp-3ef80bd:not(#_#_#_#_#_){height:40px}.amp-wp-120213e:not(#_#_#_#_#_){height:40px;width:147px}
 
 							/*# sourceURL="amp-custom.css" */</style>
 						</head>

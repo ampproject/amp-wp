@@ -958,6 +958,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				      <input type="submit"
 				        value="Subscribe">
 				    </fieldset>
+				    <input type="image" name="img" src="https://example.com/image.png" width="10" height="30">
 				  </form>
 				',
 				null,
@@ -1458,7 +1459,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 			],
 
 			'allowed_tag_only'                             => [
-				'<p>Text</p><img src="/path/to/file.jpg">',
+				'<p>Text</p><video src="/path/to/file.jpg"></video>',
 				'<p>Text</p>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR ],
@@ -2778,7 +2779,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 						<ul>
 							<li>
 								<span role="button">Image</span>
-								<div role="dialog">
+								<div role="dialog" aria-modal="true" id="unique_id">
 									<amp-img
 											src="/static/inline-examples/images/image1.jpg"
 											width="300"
@@ -3820,7 +3821,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 		$this->assertEqualSets( [ 'amp-sidebar' ], array_keys( $sanitizer->get_scripts() ) );
 
 		$this->assertCount( 1, $actual_errors );
-		$this->assertArraySubset(
+		$this->assertAssocArrayContains(
 			[
 				'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG, // @todo Should be DISALLOWED_SCRIPT_TAG.
 			],

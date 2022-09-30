@@ -13,6 +13,8 @@ import {
 	USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
 	USERS_RESOURCE_REST_PATH,
 	VALIDATE_NONCE,
+	VALIDATED_URLS_LINK,
+	ERROR_INDEX_LINK,
 } from 'amp-settings';
 
 /**
@@ -55,6 +57,7 @@ import { PairedUrlStructure } from './paired-url-structure';
 import { MobileRedirection } from './mobile-redirection';
 import { DeveloperTools } from './developer-tools';
 import { SiteScan } from './site-scan';
+import { ToggleUseNativeImgTag } from './toggle-use-native-img-tag';
 import { DeleteDataAtUninstall } from './delete-data-at-uninstall';
 
 const { ajaxurl: wpAjaxUrl } = global;
@@ -142,6 +145,66 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 }
 
 /**
+ * Get the element for an AMP admin submenu if it exists.
+ *
+ * @param {string} href Link href.
+ * @return {Element|null} LI element or null if not found.
+ */
+function getAmpAdminMenuItem( href ) {
+	const parsedUrl = new URL( href );
+	const searchParams = new Map( new URLSearchParams( parsedUrl.search ).entries() );
+
+	links:
+	for ( const a of document.querySelectorAll( '#toplevel_page_amp-options ul > li > a' ) ) {
+		if ( ! a.pathname.endsWith( parsedUrl.pathname ) ) {
+			continue;
+		}
+
+		const linkSearchParams = new URLSearchParams( parsedUrl.search );
+		for ( const [ key, value ] of searchParams.entries() ) {
+			if ( linkSearchParams.get( key ) !== value ) {
+				continue links;
+			}
+		}
+
+		return a.parentNode;
+	}
+	return null;
+}
+
+/**
+ * Add an item to the AMP admin submenu.
+ *
+ * @param {string} title Link text.
+ * @param {string} href  Link href.
+ */
+function addAmpAdminMenuItem( title, href ) {
+	const ul = document.querySelector( '#toplevel_page_amp-options ul' );
+	if ( ! ul || getAmpAdminMenuItem( href ) ) {
+		return;
+	}
+
+	const li = document.createElement( 'li' );
+	const a = document.createElement( 'a' );
+	a.innerText = title;
+	a.href = href;
+	li.appendChild( a );
+	ul.appendChild( li );
+}
+
+/**
+ * Remove an item from the AMP admin submenu.
+ *
+ * @param {string} href Link href.
+ */
+function removeAmpAdminMenuItem( href ) {
+	const li = getAmpAdminMenuItem( href );
+	if ( li ) {
+		li.remove();
+	}
+}
+
+/**
  * Settings page application root.
  *
  * @param {Object}  props
@@ -151,9 +214,9 @@ function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
 
 	const { hasOptionsChanges, fetchingOptions, saveOptions } = useContext( Options );
-	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption } = useContext( User );
+	const { hasDeveloperToolsOptionChange, saveDeveloperToolsOption, developerToolsOption } = useContext( User );
 	const { templateModeWasOverridden } = useContext( ReaderThemes );
-	const { isSkipped } = useContext( SiteScanContext );
+	const { isSkipped, isFetchingScannableUrls } = useContext( SiteScanContext );
 
 	/**
 	 * Handle the form submit event.
@@ -164,10 +227,18 @@ function Root( { appRoot } ) {
 		if ( hasOptionsChanges ) {
 			saveOptions();
 		}
+
 		if ( hasDeveloperToolsOptionChange ) {
 			saveDeveloperToolsOption();
+			if ( developerToolsOption ) {
+				addAmpAdminMenuItem( __( 'Validated URLs', 'amp' ), VALIDATED_URLS_LINK );
+				addAmpAdminMenuItem( __( 'Error Index', 'amp' ), ERROR_INDEX_LINK );
+			} else {
+				removeAmpAdminMenuItem( VALIDATED_URLS_LINK );
+				removeAmpAdminMenuItem( ERROR_INDEX_LINK );
+			}
 		}
-	}, [ hasDeveloperToolsOptionChange, hasOptionsChanges, saveDeveloperToolsOption, saveOptions ] );
+	}, [ hasDeveloperToolsOptionChange, hasOptionsChanges, saveDeveloperToolsOption, saveOptions, developerToolsOption ] );
 
 	/**
 	 * Scroll to the focused element on load or when it changes.
@@ -178,7 +249,7 @@ function Root( { appRoot } ) {
 		}
 
 		scrollFocusedSectionIntoView( focusedSection );
-	}, [ fetchingOptions, focusedSection, templateModeWasOverridden ] );
+	}, [ fetchingOptions, isFetchingScannableUrls, focusedSection, templateModeWasOverridden ] );
 
 	/**
 	 * Resets the focused element state when the hash changes on the page.
@@ -281,6 +352,7 @@ function Root( { appRoot } ) {
 					{ HAS_DEPENDENCY_SUPPORT && (
 						<DeveloperTools />
 					) }
+					<ToggleUseNativeImgTag />
 					<DeleteDataAtUninstall />
 				</AMPDrawer>
 				<SettingsFooter />

@@ -35,8 +35,8 @@ class ReenableCssTransientCachingAjaxActionTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		global $wp_scripts;
 		$wp_scripts = null;
@@ -49,11 +49,11 @@ class ReenableCssTransientCachingAjaxActionTest extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
-
+	public function tear_down() {
 		global $wp_scripts;
 		$wp_scripts = null;
+
+		parent::tear_down();
 	}
 
 	public function test__construct() {

@@ -18,7 +18,7 @@ use AmpProject\AmpWP\Tests\TestCase;
 class Test_AMP_Playlist_Embed_Handler extends TestCase {
 
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/**
@@ -45,7 +45,7 @@ class Test_AMP_Playlist_Embed_Handler extends TestCase {
 	/**
 	 * Set up test.
 	 */
-	public function setUp() {
+	public function set_up() {
 		$this->prevent_block_pre_render();
 		$this->instance = new AMP_Playlist_Embed_Handler();
 	}
@@ -55,11 +55,13 @@ class Test_AMP_Playlist_Embed_Handler extends TestCase {
 	 *
 	 * @global WP_Styles $wp_styles
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		global $wp_styles;
 		$wp_styles = null;
 
 		AMP_Playlist_Embed_Handler::$playlist_id = 0;
+
+		parent::tear_down();
 	}
 
 	/**
@@ -100,14 +102,14 @@ class Test_AMP_Playlist_Embed_Handler extends TestCase {
 		global $post;
 		$playlist_shortcode = 'amp-playlist-shortcode';
 		$this->instance->register_embed();
-		$this->assertStringNotContainsString( 'wp-mediaelement', wp_styles()->queue );
-		$this->assertStringNotContainsString( $playlist_shortcode, wp_styles()->queue );
+		$this->assertNotContains( 'wp-mediaelement', wp_styles()->queue );
+		$this->assertNotContains( $playlist_shortcode, wp_styles()->queue );
 
 		$post               = self::factory()->post->create_and_get();
 		$post->post_content = '[playlist ids="5,3"]';
 		$this->instance->enqueue_styles();
 		$style = wp_styles()->registered[ $playlist_shortcode ];
-		$this->assertStringContainsString( $playlist_shortcode, wp_styles()->queue );
+		$this->assertContains( $playlist_shortcode, wp_styles()->queue );
 		$this->assertEquals( [ 'wp-mediaelement' ], $style->deps );
 		$this->assertEquals( $playlist_shortcode, $style->handle );
 		$this->assertEquals( amp_get_asset_url( 'css/amp-playlist-shortcode.css' ), $style->src );

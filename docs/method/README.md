@@ -55,6 +55,9 @@
 * [`AMP_DOM_Utils::is_node_empty()`](AMP_DOM_Utils/is_node_empty.md) - Determines if a DOMElement&#039;s node is empty or not.
 * ~~[`AMP_DOM_Utils::is_valid_head_node()`](AMP_DOM_Utils/is_valid_head_node.md) - Determine whether a node can be in the head.~~
 * [`AMP_DOM_Utils::merge_amp_actions()`](AMP_DOM_Utils/merge_amp_actions.md) - Merge two sets of AMP events &amp; actions.
+* [`AMP_WordPress_Embed_Handler::register_embed()`](AMP_WordPress_Embed_Handler/register_embed.md) - Register embed.
+* [`AMP_WordPress_Embed_Handler::sanitize_raw_embeds()`](AMP_WordPress_Embed_Handler/sanitize_raw_embeds.md) - Sanitize WordPress embed raw embeds.
+* [`AMP_WordPress_Embed_Handler::unregister_embed()`](AMP_WordPress_Embed_Handler/unregister_embed.md) - Unregister embed.
 * [`PairedUrl::add_path_suffix()`](PairedUrl/add_path_suffix.md) - Get paired AMP URL using a endpoint suffix.
 * [`PairedUrl::add_query_var()`](PairedUrl/add_query_var.md) - Get paired AMP URL using query var (`?amp=1`).
 * [`PairedUrl::has_path_suffix()`](PairedUrl/has_path_suffix.md) - Determine whether the given URL has the endpoint suffix.

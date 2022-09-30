@@ -6,8 +6,8 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { useContext } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import { CheckboxControl } from '@wordpress/components';
 
 /**
@@ -246,16 +246,17 @@ export function SupportedTemplatesFieldset() {
 
 			{ ! allTemplatesSupported ? (
 				<>
-					{ /* dangerouslySetInnerHTML reason: Link embedded in translation string. */ }
-					<p
-						dangerouslySetInnerHTML={ {
-							__html: sprintf(
-								/* translators: placeholder is link to WordPress handbook page about the template hierarchy. */
-								__( 'Limit AMP on a subset of the WordPress <a href="%s" target="_blank" rel="noreferrer">Template Hierarchy</a>:', 'amp' ),
-								'https://developer.wordpress.org/themes/basics/template-hierarchy/',
-							),
-						} }
-					/>
+					<p>
+						{
+							createInterpolateElement(
+								__( 'Limit AMP on a subset of the WordPress <a>Template Hierarchy</a>:', 'amp' ),
+								{
+									// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
+									a: <a href="https://developer.wordpress.org/themes/basics/template-hierarchy/" target="_blank" rel="noreferrer" />,
+								},
+							)
+						}
+					</p>
 
 					<SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
 				</>

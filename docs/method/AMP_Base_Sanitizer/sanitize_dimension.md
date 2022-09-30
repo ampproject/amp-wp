@@ -25,7 +25,7 @@ Sanitizes a CSS dimension specifier while being sensitive to dimension context.
 ```php
 public function sanitize_dimension( $value, $dimension ) {
 	// Allows 0 to be used as valid dimension.
-	if ( null === $value ) {
+	if ( empty( $value ) && '0' !== (string) $value ) {
 		return '';
 	}
 	// Accepts both integers and floats & prevents negative values.

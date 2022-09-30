@@ -7,6 +7,9 @@
 
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
+use AmpProject\Html\Tag;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\TestCase;
 
@@ -19,20 +22,21 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 
 	use PrivateAccess;
 	use LoadsCoreThemes;
+	use MarkupComparison;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
-
+	public function tear_down() {
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;
 
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/**
@@ -583,9 +587,7 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$after = implode( '', $extra['after'] );
 
 		$replacements = [
-			'@media only screen'           => '@media only screen and (prefers-color-scheme: dark)',
-			'.is-dark-theme.is-dark-theme' => ':root',
-			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference:not(._) body',
+			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference body.is-dark-theme',
 		];
 		foreach ( $replacements as $search => $replacement ) {
 			$this->assertStringNotContainsString( "$search {", $after );
@@ -593,15 +595,28 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		}
 	}
 
-	/** @covers ::amend_twentytwentyone_styles() */
-	public function test_amend_twentytwentyone_styles() {
+	/** @return array */
+	public function get_respect_user_color_preference_data() {
+		return [
+			'dark_mode_enabled'  => [ true ],
+			'dark_mode_disabled' => [ false ],
+		];
+	}
+
+	/**
+	 * @covers ::amend_twentytwentyone_styles()
+	 *
+	 * @dataProvider get_respect_user_color_preference_data
+	 * @param bool $enabled Enabled.
+	 */
+	public function test_amend_twentytwentyone_styles( $enabled ) {
 		$theme_slug = 'twentytwentyone';
 		if ( ! wp_get_theme( $theme_slug )->exists() ) {
 			$this->markTestSkipped();
-			return;
 		}
 
 		switch_theme( $theme_slug );
+		set_theme_mod( 'respect_user_color_preference', $enabled );
 
 		$style_handle = 'twenty-twenty-one-style';
 		wp_enqueue_style( $style_handle, get_theme_file_path( 'style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
@@ -616,6 +631,12 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$this->assertStringContainsString( '@media only screen and (max-width: 481px)', $after );
 		$this->assertStringContainsString( 'button[overflow]:hover', $after );
 		$this->assertStringEndsWith( '/*first*/', $after );
+
+		if ( $enabled ) {
+			$this->assertMatchesRegularExpression( '#/\* Variables \*/\s*body\s*{#', $after );
+		} else {
+			$this->assertMatchesRegularExpression( '#/\* Variables \*/\s*:root\s*{#', $after );
+		}
 	}
 
 	/**
@@ -718,23 +739,37 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	 * Tests add_twentytwentyone_dark_mode_toggle.
 	 *
 	 * @covers ::add_twentytwentyone_dark_mode_toggle()
+	 *
+	 * @dataProvider get_respect_user_color_preference_data
+	 * @param bool $enabled Enabled.
 	 */
-	public function test_add_twentytwentyone_dark_mode_toggle() {
-		$html = '<button id="dark-mode-toggler">Toggle dark mode</button>';
+	public function test_add_twentytwentyone_dark_mode_toggle( $enabled ) {
+		set_theme_mod( 'respect_user_color_preference', $enabled );
 
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom = new Document();
+		$dom->loadHTML( '<html><head></head><body></body></html>' );
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
 
 		$sanitizer->add_twentytwentyone_dark_mode_toggle();
 
-		$this->assertEquals(
-			'.no-js #dark-mode-toggler { display: block; }',
-			$dom->head->getElementsByTagName( 'style' )->item( 0 )->textContent
-		);
+		$style  = $dom->getElementById( 'amp-twentytwentyone-dark-mode-toggle-styles' );
+		$button = $dom->getElementById( 'dark-mode-toggler' );
+		if ( ! $enabled ) {
+			$this->assertNull( $button );
+			$this->assertNull( $style );
+			return;
+		}
+
+		$this->assertInstanceOf( Element::class, $style );
+		$this->assertInstanceOf( Element::class, $button );
+		$this->assertSame( Tag::STYLE, $style->tagName );
+		$this->assertSame( Tag::BUTTON, $button->tagName );
+
+		$this->assertStringContainsString( '.no-js #dark-mode-toggler', $style->textContent );
 
 		$this->assertEquals(
-			'<button id="dark-mode-toggler" on="tap:AMP.setState({is_dark_theme: !is_dark_theme}),i-amp-0.toggleClass(class=\'is-dark-theme\'),i-amp-1.toggleClass(class=\'is-dark-theme\')" data-amp-bind-aria-pressed="is_dark_theme ? \'true\' : \'false\'">Toggle dark mode</button>',
-			$dom->saveHTML( $dom->getElementById( 'dark-mode-toggler' ) )
+			'<button id="dark-mode-toggler" class="fixed-bottom" on="tap:AMP.toggleTheme()"><span class="dark-mode-button-on">Dark Mode: On</span><span class="dark-mode-button-off">Dark Mode: Off</span></button>',
+			$dom->saveHTML( $button )
 		);
 	}
 
@@ -934,7 +969,7 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 					<li id="menu-item-7636" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7636">
 						<a href="#" aria-haspopup="true" aria-expanded="false">Level 01</a>
 						<button class="submenu-expand" tabindex="-1" amp-nested-submenu-open="">Open</button>
-						
+
 					<div amp-nested-submenu=""><ul class="sub-menu expanded-true">
 							<li id="menu-item--4" class="mobile-parent-nav-menu-item menu-item--4">
 								<button class="menu-item-link-return" tabindex="-1" amp-nested-submenu-close="">Level 01</button>
@@ -942,7 +977,7 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 							<li id="menu-item-7637" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7637">
 								<a href="#" aria-haspopup="true" aria-expanded="false">Level 02</a>
 								<button class="submenu-expand" tabindex="-1" amp-nested-submenu-open="">Open</button>
-								
+
 							<div amp-nested-submenu=""><ul class="sub-menu expanded-true">
 									<li id="menu-item--5" class="mobile-parent-nav-menu-item menu-item--5">
 										<button class="menu-item-link-return" tabindex="-1" amp-nested-submenu-close="">Level 02</button>
@@ -950,7 +985,7 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 									<li id="menu-item-7638" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-7638">
 										<a href="#" aria-haspopup="true" aria-expanded="false">Level 03</a>
 										<button class="submenu-expand" tabindex="-1" amp-nested-submenu-open="">Open</button>
-										
+
 									<div amp-nested-submenu=""><ul class="sub-menu expanded-true">
 											<li id="menu-item--6" class="mobile-parent-nav-menu-item menu-item--6">
 												<button class="menu-item-link-return" tabindex="-1" amp-nested-submenu-close="">Level 03</button>
@@ -990,5 +1025,38 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 			$expected,
 			AMP_DOM_Utils::get_content_from_dom( $dom )
 		);
+	}
+
+	/**
+	 * Test data for $this->test_show_twentytwenty_desktop_expanded_menu()
+	 *
+	 * @return array Test data set.
+	 */
+	public function get_data_show_twentytwenty_desktop_expanded_menu() {
+
+		return [
+			'with-no-js-selector'    => [
+				'input'    => '<div class="header-navigation-wrapper"><div class="header-toggles hide-no-js"></div></div>',
+				'expected' => '<div class="header-navigation-wrapper"><div class="header-toggles "></div></div>',
+			],
+			'without-no-js-selector' => [
+				'input'    => '<div class="header-navigation-wrapper"><div class="header-toggles"></div></div>',
+				'expected' => '<div class="header-navigation-wrapper"><div class="header-toggles"></div></div>',
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_show_twentytwenty_desktop_expanded_menu()
+	 *
+	 * @covers ::show_twentytwenty_desktop_expanded_menu()
+	 */
+	public function test_show_twentytwenty_desktop_expanded_menu( $input, $expected ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $input );
+		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
+
+		$this->call_private_method( $sanitizer, 'show_twentytwenty_desktop_expanded_menu' );
+
+		$this->assertEqualMarkup( $expected, AMP_DOM_Utils::get_content_from_dom( $dom ) );
 	}
 }

@@ -17,6 +17,7 @@
 ### Filters
 
 * [`amp_analytics_entries`](amp_analytics_entries.md) - Add amp-analytics tags.
+* [`amp_auto_lightbox_disabled`](amp_auto_lightbox_disabled.md) - Filters whether AMP auto-lightbox is disabled.
 * [`amp_bento_enabled`](amp_bento_enabled.md) - Filters whether the use of Bento components is enabled.
 * [`amp_comment_posted_message`](amp_comment_posted_message.md) - Filters the message when comment submitted success message when
 * [`amp_compatible_ecosystem_shown`](amp_compatible_ecosystem_shown.md) - Filters whether to show AMP compatible ecosystem in the admin.
@@ -49,6 +50,7 @@
 * [`amp_normalized_dimension_extractor_image_url`](amp_normalized_dimension_extractor_image_url.md) - Apply filters on the normalized image URL for dimension extraction.
 * [`amp_optimizer_config`](amp_optimizer_config.md) - Filter the configuration to be used for the AMP Optimizer.
 * [`amp_options_menu_is_enabled`](amp_options_menu_is_enabled.md) - Filter whether to enable the AMP settings.
+* [`amp_page_cache_good_response_time_threshold`](amp_page_cache_good_response_time_threshold.md) - Filters the threshold below which a response time is considered good.
 * [`amp_parsed_css_transient_caching_allowed`](amp_parsed_css_transient_caching_allowed.md) - Filters whether parsed CSS is allowed to be cached in transients.
 * [`amp_post_status_default_enabled`](amp_post_status_default_enabled.md) - Filters whether default AMP status should be enabled or not.
 * [`amp_post_template_analytics`](amp_post_template_analytics.md) - Add amp-analytics tags.

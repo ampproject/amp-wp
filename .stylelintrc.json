@@ -19,6 +19,7 @@
       {
         "message": "Selector should use lowercase and separate words with hyphens (selector-id-pattern)"
       }
-    ]
+    ],
+    "value-keyword-case": null
   }
 }

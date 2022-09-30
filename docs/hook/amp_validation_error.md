@@ -15,7 +15,7 @@ This allows plugins to add amend additional properties which can help with more 
 
 ### Source
 
-:link: [includes/validation/class-amp-validation-manager.php:827](/includes/validation/class-amp-validation-manager.php#L827)
+:link: [includes/validation/class-amp-validation-manager.php:829](/includes/validation/class-amp-validation-manager.php#L829)
 
 <details>
 <summary>Show Code</summary>

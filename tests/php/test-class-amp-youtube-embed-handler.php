@@ -6,6 +6,7 @@
  * @since 0.7
  */
 
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 use AmpProject\AmpWP\Tests\TestCase;
@@ -17,9 +18,10 @@ use AmpProject\AmpWP\Tests\TestCase;
  */
 class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
+	use MarkupComparison;
 	use PrivateAccess;
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	protected $youtube_video_id = 'kfVsfOSbJY0';
@@ -42,7 +44,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	/**
 	 * Set up each test.
 	 */
-	public function setUp() {
+	public function set_up() {
 		$this->prevent_block_pre_render();
 
 		$this->handler = new AMP_YouTube_Embed_Handler();
@@ -53,9 +55,9 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_request' ] );
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**
@@ -114,7 +116,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 		$embed = new AMP_YouTube_Embed_Handler();
 		$embed->register_embed();
 		$this->assertEquals( 10, has_filter( 'embed_oembed_html', [ $embed, 'filter_embed_oembed_html' ] ) );
-		$this->assertEquals( 10, has_filter( 'wp_video_shortcode_override', [ $embed, 'video_override' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_video_shortcode_override', [ $embed, 'video_override' ] ) );
 		$embed->unregister_embed();
 		$this->assertFalse( has_filter( 'embed_oembed_html', [ $embed, 'filter_embed_oembed_html' ] ) );
 		$this->assertFalse( has_filter( 'wp_video_shortcode_override', [ $embed, 'video_override' ] ) );
@@ -156,6 +158,10 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 				'source'   => '<iframe src="https://www.youtube.com/feed/library" title="YouTube Library" width="560" height="315"></iframe>',
 				'expected' => '<iframe src="https://www.youtube.com/feed/library" title="YouTube Library" width="560" height="315"></iframe>',
 			],
+			'youtube-fixed-height'   => [
+				'source'   => '<iframe width="100%" height="315" src="https://www.youtube.com/embed/s52JNMT59s8"></iframe>',
+				'expected' => '<amp-youtube layout="fixed-height" width="auto" height="315" data-videoid="s52JNMT59s8"><a placeholder="" href="https://www.youtube.com/watch?v=s52JNMT59s8"><img src="https://i.ytimg.com/vi/s52JNMT59s8/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube>',
+			],
 		];
 	}
 
@@ -166,6 +172,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	 * @covers ::get_amp_component()
 	 * @covers ::get_placeholder_element()
 	 * @covers ::prepare_attributes()
+	 * @covers ::amend_fixed_height_layout()
 	 */
 	public function test_sanitize_raw_embeds( $source, $expected ) {
 
@@ -180,7 +187,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		$this->assertEquals( $expected, trim( $content ) );
+		$this->assertEqualMarkup( $expected, $content );
 	}
 
 	/**
@@ -190,6 +197,7 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 	 * @covers ::video_override()
 	 * @covers ::render()
 	 * @covers ::get_placeholder_markup()
+	 * @covers ::amend_fixed_height_layout()
 	 */
 	public function test_video_override() {
 		remove_all_filters( 'wp_video_shortcode_override' );
@@ -201,8 +209,33 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 		];
 
 		$youtube_shortcode = $this->handler->video_override( '', $attr_youtube );
-		$this->assertStringContainsString( '<amp-youtube', $youtube_shortcode );
-		$this->assertStringContainsString( $youtube_id, $youtube_shortcode );
+		$this->assertEqualMarkup(
+			'<amp-youtube layout="responsive" width="600" height="338" data-videoid="XOY3ZUO6P0k"><a placeholder href="https://youtu.be/XOY3ZUO6P0k"><img src="https://i.ytimg.com/vi/XOY3ZUO6P0k/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube>',
+			$youtube_shortcode
+		);
+
+		// Test when wp_video_shortcode_override filter has already overridden the markup.
+		$youtube_shortcode = $this->handler->video_override( "<iframe width=\"200\" height=\"100\" src=\"$youtube_src\"></iframe>", $attr_youtube );
+		$this->assertEqualMarkup(
+			'<amp-youtube layout="responsive" width="200" height="100" data-videoid="XOY3ZUO6P0k"><a placeholder href="https://youtu.be/XOY3ZUO6P0k"><img src="https://i.ytimg.com/vi/XOY3ZUO6P0k/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube>',
+			$youtube_shortcode
+		);
+
+		// Test 100% width in video shortcode.
+		$youtube_shortcode = $this->handler->video_override(
+			'',
+			array_merge(
+				$attr_youtube,
+				[
+					'width'  => '100%',
+					'height' => '315',
+				]
+			)
+		);
+		$this->assertEqualMarkup(
+			'<amp-youtube layout="fixed-height" width="auto" height="315" data-videoid="XOY3ZUO6P0k"><a placeholder href="https://youtu.be/XOY3ZUO6P0k"><img src="https://i.ytimg.com/vi/XOY3ZUO6P0k/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube>',
+			$youtube_shortcode
+		);
 
 		$vimeo_id        = '64086087';
 		$vimeo_src       = 'https://vimeo.com/' . $vimeo_id;
@@ -226,6 +259,8 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 	/** @return array */
 	public function get_conversion_data() {
+		$decoding_attribute = version_compare( get_bloginfo( 'version' ), '6.1-alpha', '>' ) ? 'decoding="async"' : '';
+
 		return [
 			'no_embed'                         => [
 				'<p>Hello world.</p>',
@@ -234,20 +269,20 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 			'url_simple'                       => [
 				'https://www.youtube.com/watch?v=kfVsfOSbJY0' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" title="Rebecca Black - Friday"><a placeholder href="https://www.youtube.com/watch?v=kfVsfOSbJY0"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0"><a placeholder href="https://www.youtube.com/watch?v=kfVsfOSbJY0"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" title="Rebecca Black - Friday"><a placeholder href="https://www.youtube.com/watch?v=kfVsfOSbJY0"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0"><a placeholder href="https://www.youtube.com/watch?v=kfVsfOSbJY0"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
 			],
 
 			'url_short'                        => [
 				'https://youtu.be/kfVsfOSbJY0' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" title="Rebecca Black - Friday"><a placeholder href="https://youtu.be/kfVsfOSbJY0"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0"><a placeholder href="https://youtu.be/kfVsfOSbJY0"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" title="Rebecca Black - Friday"><a placeholder href="https://youtu.be/kfVsfOSbJY0"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0"><a placeholder href="https://youtu.be/kfVsfOSbJY0"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
 			],
 
 			'url_with_querystring'             => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0&hl=en&fs=1&w=425&h=349' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-hl="en" data-param-fs="1" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0&amp;hl=en&amp;fs=1&amp;w=425&amp;h=349"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-hl="en" data-param-fs="1"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0&amp;hl=en&amp;fs=1&amp;w=425&amp;h=349"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-hl="en" data-param-fs="1" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0&amp;hl=en&amp;fs=1&amp;w=425&amp;h=349"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-hl="en" data-param-fs="1"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0&amp;hl=en&amp;fs=1&amp;w=425&amp;h=349"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
 			],
 
 			// Several reports of invalid URLs that have multiple `?` in the URL.
@@ -258,38 +293,38 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 
 			'embed_url'                        => [
 				'https://www.youtube.com/embed/kfVsfOSbJY0' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" title="Rebecca Black - Friday"><a placeholder href="https://youtube.com/watch?v=kfVsfOSbJY0"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0"><a placeholder href="https://youtube.com/watch?v=kfVsfOSbJY0"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" title="Rebecca Black - Friday"><a placeholder href="https://youtube.com/watch?v=kfVsfOSbJY0"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0"><a placeholder href="https://youtube.com/watch?v=kfVsfOSbJY0"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
 			],
 
 			'with_start_time'                  => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m10s' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="70" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m10s"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="70"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m10s"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="70" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m10s"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="70"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m10s"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
 			],
 
 			'with_start_time_2'                => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0#t=62' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=62"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=62"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=62"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=62"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
 			],
 
 			'with_start_time_3'                => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0#t=62s' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=62s"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=62s"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=62s"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=62s"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
 			],
 
 			'with_start_time_4'                => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="60" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="60"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="60" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="60"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
 			],
 
 			'with_start_time_5'                => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m2' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m2"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m2"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62" title="Rebecca Black - Friday"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m2"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube layout="responsive" width="500" height="281" data-videoid="kfVsfOSbJY0" data-param-start="62"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0#t=1m2"><img ' . $decoding_attribute . ' src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></a></amp-youtube></p>' . PHP_EOL,
 			],
 		];
 	}
@@ -313,9 +348,13 @@ class Test_AMP_YouTube_Embed_Handler extends TestCase {
 			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.1', '<' )
 			&& null !== $fallback_for_expected
 		) {
-			$this->assertEquals( $fallback_for_expected, $filtered_content );
+			// Remove the title or alt attribute from $filtered_content if it exists.
+			$filtered_content = preg_replace( '/ title="[^"]*"/', '', $filtered_content );
+			$filtered_content = preg_replace( '/ alt="[^"]*"/', '', $filtered_content );
+
+			$this->assertEqualMarkup( $fallback_for_expected, $filtered_content );
 		} else {
-			$this->assertEquals( $expected, $filtered_content );
+			$this->assertEqualMarkup( $expected, $filtered_content );
 		}
 	}
 

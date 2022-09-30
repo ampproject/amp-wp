@@ -30,8 +30,8 @@ class PluginActivationNoticeTest extends TestCase {
 	 */
 	private $plugin_activation_notice;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->plugin_activation_notice = new PluginActivationNotice();
 		delete_option( 'amp-options' );

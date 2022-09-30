@@ -26,18 +26,19 @@ jobs:
       changed-php-count: ${{ steps.determine-file-counts.outputs.php-count }}
       changed-css-count: ${{ steps.determine-file-counts.outputs.css-count }}
       changed-js-count: ${{ steps.determine-file-counts.outputs.js-count }}
+      changed-gha-workflow-count: ${{ steps.determine-file-counts.outputs.gha-workflow-count }}
     steps:
       - name: Checkout including last 2 commits
         # Fetch last 2 commits if it's not a PR, so that we can determine the list of modified files.
         if: ${{ github.base_ref == null }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
       - name: Checkout
         # Do usual checkout if it's a PR.
         if: ${{ github.base_ref != null }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Fetch base branch
         # Only fetch base ref if it's a PR.
@@ -60,18 +61,21 @@ jobs:
 
           FILE_COUNT=$(php -f bin/determine-modified-files-count.php "$IGNORE_PATH_REGEX" "$MODIFIED_FILES" --invert)
           PHP_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.php|composer\.(json|lock)|phpstan\.neon\.dist" "$MODIFIED_FILES")
-          CSS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.s?css" "$MODIFIED_FILES")
-          JS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php "(.+\.(js|snap)|package\.(json|lock))" "$MODIFIED_FILES")
+          CSS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.s?css|package\.json|package-lock\.json" "$MODIFIED_FILES")
+          JS_FILE_COUNT=$(php -f bin/determine-modified-files-count.php ".+\.(js|snap)|package\.json|package-lock\.json" "$MODIFIED_FILES")
+          GHA_WORKFLOW_COUNT=$(php -f bin/determine-modified-files-count.php "(\.github\/workflows\/.+\.yml)" "$MODIFIED_FILES")
 
           echo "Changed file count: $FILE_COUNT"
           echo "Changed PHP file count: $PHP_FILE_COUNT"
           echo "Changed CSS file count: $CSS_FILE_COUNT"
           echo "Changed JS file count: $JS_FILE_COUNT"
+          echo "Changed GHA workflow file count: $GHA_WORKFLOW_COUNT"
 
           echo "::set-output name=count::$FILE_COUNT"
           echo "::set-output name=php-count::$PHP_FILE_COUNT"
           echo "::set-output name=css-count::$CSS_FILE_COUNT"
           echo "::set-output name=js-count::$JS_FILE_COUNT"
+          echo "::set-output name=gha-workflow-count::$GHA_WORKFLOW_COUNT"
         env:
           # Ignore Paths:
           # - .github/
@@ -82,21 +86,17 @@ jobs:
 
   lint-css:
     needs: pre-run
-    if: needs.pre-run.outputs.changed-css-count > 0
+    if: needs.pre-run.outputs.changed-css-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     name: 'Lint: CSS'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
+        uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.4.1
         with:
-          node-version: ${{ steps.nvm.outputs.NVMRC }}
+          node-version-file: '.nvmrc'
           cache: npm
 
       - name: Install Node dependencies
@@ -112,20 +112,16 @@ jobs:
   lint-js:
     name: 'Lint: JS'
     needs: pre-run
-    if: needs.pre-run.outputs.changed-js-count > 0
+    if: needs.pre-run.outputs.changed-js-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
+        uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.4.1
         with:
-          node-version: ${{ steps.nvm.outputs.NVMRC }}
+          node-version-file: '.nvmrc'
           cache: npm
 
       - name: Install Node dependencies
@@ -165,16 +161,16 @@ jobs:
   lint-php:
     name: 'Lint: PHP'
     needs: pre-run
-    if: needs.pre-run.outputs.changed-php-count > 0
+    if: needs.pre-run.outputs.changed-php-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: '8.0'
           coverage: none
           tools: cs2pr
 
@@ -183,7 +179,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -201,6 +197,7 @@ jobs:
 
       - name: Normalize composer.json
         run: |
+          composer config --no-interaction --no-plugins allow-plugins.ergebnis/composer-normalize true
           composer require --no-interaction --dev ergebnis/composer-normalize --ignore-platform-reqs
           composer --no-interaction normalize --dry-run
 
@@ -210,16 +207,16 @@ jobs:
     name: 'Static Analysis: PHP'
     runs-on: ubuntu-latest
     needs: pre-run
-    if: needs.pre-run.outputs.changed-php-count > 0
+    if: needs.pre-run.outputs.changed-php-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           # phpstan requires PHP 7.1+.
-          php-version: 7.4
+          php-version: '8.0'
           extensions: dom, iconv, json, libxml, zip
           tools: phpstan
 
@@ -228,7 +225,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -249,24 +246,20 @@ jobs:
     name: 'Unit test: JS'
     runs-on: ubuntu-latest
     needs: pre-run
-    if: needs.pre-run.outputs.changed-js-count > 0
+    if: needs.pre-run.outputs.changed-js-count > 0 || needs.pre-run.outputs.changed-gha-workflow-count > 0
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
+        uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.4.1
         with:
-          node-version: ${{ steps.nvm.outputs.NVMRC }}
+          node-version-file: '.nvmrc'
           cache: npm
 
       - name: Setup Jest cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.8
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest
@@ -280,7 +273,7 @@ jobs:
         run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
 
       - name: Upload code coverage report
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v3
         with:
           file: build/logs/lcov.info
           flags: javascript
@@ -296,21 +289,17 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
-
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
+          php-version: '8.0'
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.4.1
         with:
-          node-version: ${{ steps.nvm.outputs.NVMRC }}
+          node-version-file: '.nvmrc'
           cache: npm
 
       - name: Get Composer Cache Directory
@@ -318,7 +307,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -337,7 +326,7 @@ jobs:
         run: npm run build:js
 
       - name: Start Docker environment
-        run: npm run env:start
+        run: npm run env:start:ci
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
 
@@ -345,7 +334,7 @@ jobs:
         run: npm run test:e2e:ci
 
       - name: Stop Docker environment
-        run: npm run env:stop
+        run: npm run env:stop:ci
         if: always()
         env:
           COMPOSE_INTERACTIVE_NO_CLI: true
@@ -358,7 +347,6 @@ jobs:
     name: "Unit test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     runs-on: ubuntu-latest
     needs: pre-run
-    if: needs.pre-run.outputs.changed-file-count > 0
     env:
       WP_CORE_DIR: /tmp/wordpress
     services:
@@ -375,50 +363,64 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        coverage: [false]
+        php: ['8.0']
+        wp: ['latest']
         external-http: [false]
         install-pwa-plugin: [true]
-        php: ['7.3', '7.2', '7.1']
-        wp: ['latest']
+        coverage: [false]
         include:
           - php: '8.0'
             wp: 'trunk'
             experimental: true
-            coverage: false
-            install-pwa-plugin: true
+
+          - php: '8.0'
+            wp: 'latest'
+            external-http: true
+
+          # PHP 8.0 cannot be used as yet due to the earliest compatible PHPUnit (v9) being unable to run due to the
+          # WP test suite enforcing PHPUnit 7 or earlier.
+          - php: '7.4'
+            wp: 'latest'
+            coverage: true
 
           - php: '7.4'
             wp: 'latest'
             external-http: true
-            coverage: false
-            install-pwa-plugin: true
 
-          - php: '7.4'
+          - php: '7.3'
             wp: 'latest'
-            install-pwa-plugin: true
-            coverage: true
+
+          - php: '7.2'
+            wp: 'latest'
+
+          - php: '7.1'
+            wp: 'latest'
 
           - php: '7.0'
             wp: '5.1'
-            coverage: false
-            install-pwa-plugin: true
 
-          - php: '5.6'
+          - php: '7.0'
             wp: '5.0'
-            coverage: false
-            install-pwa-plugin: true
 
-          - php: '5.6'
+          - php: '7.0'
             wp: '4.9'
             external-http: true
-            install-pwa-plugin: false
-            coverage: false
 
     steps:
+      # Note: The repeated `needs.pre-run.outputs.changed-php-count > 0` checks would be avoided if a step could short-
+      # circuit per <https://github.com/actions/runner/issues/662>. The reason why the if statement can't be put on the
+      # job as a whole is because the name is variable based on the matrix, and if the condition is not met then the
+      # name won't be interpolated in order to match the required jobs set up in branch protection.
+      - name: Notice
+        if: needs.pre-run.outputs.changed-php-count == 0
+        run: echo "No PHP files were changed so no PHP unit tests will run"
+
       - name: Checkout
-        uses: actions/checkout@v2
+        if: needs.pre-run.outputs.changed-php-count > 0
+        uses: actions/checkout@v3
 
       - name: Setup PHP
+        if: needs.pre-run.outputs.changed-php-count > 0
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -427,30 +429,31 @@ jobs:
           ini-values: pcov.directory=.
 
       - name: Shutdown default MySQL service
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: sudo service mysql stop
 
       - name: Verify MariaDB connection
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: |
           while ! mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; do
             sleep 1
           done
 
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
-
       - name: Setup Node
-        uses: actions/setup-node@v2
+        if: needs.pre-run.outputs.changed-php-count > 0
+        uses: actions/setup-node@v3.4.1
         with:
-          node-version: ${{ steps.nvm.outputs.NVMRC }}
+          node-version-file: '.nvmrc'
           cache: npm
 
       - name: Get Composer Cache Directory
+        if: needs.pre-run.outputs.changed-php-count > 0
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v2
+        if: needs.pre-run.outputs.changed-php-count > 0
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -458,57 +461,70 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: |
+          # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency.
+          composer remove --dev phpdocumentor/reflection
+          composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
       - name: Install Node dependencies
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: npm ci
         env:
           CI: true
 
       - name: Build plugin
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: npm run build:js
 
       # Scan the logs for failing tests and surface that information by creating annotations and log file decorations.
       - name: Setup problem matcher to provide annotations for PHPUnit
+        if: needs.pre-run.outputs.changed-php-count > 0
         # The JSON file is provided by the `shivammathur/setup-php` action. See https://github.com/shivammathur/setup-php#problem-matchers.
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Install WP tests
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: bash bin/ci/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
 
       - name: Post install of WP tests
-        run: bash bin/ci/after-wp-install.sh ${{ matrix.wp }} ${{ matrix.install-pwa-plugin == true }} /tmp/wordpress-tests
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: bash bin/ci/after-wp-install.sh ${{ matrix.wp }} ${{ matrix.install-pwa-plugin == true }}
 
       - name: Setup PCOV
-        if: ${{ matrix.coverage == true }}
-        # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, making pcov/clobber
-        # unable to be installed.
+        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
         run: |
-          composer remove --dev phpdocumentor/reflection
           composer require --dev --ignore-platform-reqs pcov/clobber
           vendor/bin/pcov clobber
 
       - name: Copy plugin to WP plugins directory
+        if: needs.pre-run.outputs.changed-php-count > 0
         run: cp -r "$PWD" "$WP_CORE_DIR/src/wp-content/plugins/amp"
 
       - name: Run tests
-        if: ${{ matrix.coverage == false }}
+        if: ${{ matrix.coverage == false && needs.pre-run.outputs.changed-php-count > 0 }}
         run: vendor/bin/phpunit --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
+        env:
+          WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run tests with coverage
-        if: ${{ matrix.coverage == true }}
-        run: vendor/bin/phpunit --verbose --coverage-clover build/logs/clover.xml
+        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
+        run: vendor/bin/phpunit --verbose --coverage-clover ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
+        env:
+          WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Run external HTTP tests
-        if: ${{ matrix.external-http == true }}
+        if: ${{ matrix.external-http == true && needs.pre-run.outputs.changed-php-count > 0 }}
         run: vendor/bin/phpunit --testsuite external-http
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
+        env:
+          WP_TESTS_DIR: /tmp/wordpress-tests-lib
 
       - name: Upload code coverage report
-        if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v2.1.0
+        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
+        uses: codecov/codecov-action@v3
         with:
           file: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp/build/logs/clover.xml
           flags: php,unit
@@ -519,7 +535,7 @@ jobs:
   feature-test-php:
     name: "Feature test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     needs: pre-run
-    if: needs.pre-run.outputs.changed-file-count > 0
+    if: needs.pre-run.outputs.changed-php-count > 0
     runs-on: ubuntu-latest
     env:
       WP_VERSION: ${{ matrix.wp }}
@@ -538,15 +554,15 @@ jobs:
       fail-fast: false
       matrix:
         coverage: [false]
-        php: ['7.3', '7.2', '7.1']
+        php: ['7.4', '7.3', '7.2', '7.1']
         wp: ['latest']
         include:
-          - php: '8.0'
+          - php: '8.1'
             wp: 'trunk'
             experimental: true
             coverage: false
 
-          - php: '7.4'
+          - php: '8.0'
             wp: 'latest'
             coverage: false
 
@@ -559,17 +575,9 @@ jobs:
             wp: '5.1'
             coverage: false
 
-          - php: '5.6'
-            wp: '5.0'
-            coverage: false
-
-          - php: '5.6'
-            wp: '4.9'
-            coverage: false
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -588,14 +596,10 @@ jobs:
             sleep 1
           done
 
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
-
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.4.1
         with:
-          node-version: ${{ steps.nvm.outputs.NVMRC }}
+          node-version-file: '.nvmrc'
           cache: npm
 
       - name: Get Composer Cache Directory
@@ -603,7 +607,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -658,7 +662,7 @@ jobs:
 
       - name: Upload code coverage report
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v3
         with:
           files: ${{ env.COVERAGE_FILES }}
           flags: php,feature
@@ -685,21 +689,17 @@ jobs:
 
     steps:
       - name: Check out source files
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
-
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
+          php-version: '7.0'
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3.4.1
         with:
-          node-version: ${{ steps.nvm.outputs.NVMRC }}
+          node-version-file: '.nvmrc'
           cache: npm
 
       - name: Get Composer Cache Directory
@@ -708,7 +708,7 @@ jobs:
           echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.8
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -730,7 +730,7 @@ jobs:
 
       - name: Build plugin
         run: |
-          npm run build:${{ matrix.build }}
+          npm run package:${{ matrix.build }}
           mv amp.zip builds/${{ matrix.build }}/amp.zip
         env:
           LAST_PR_COMMIT_HASH: ${{ github.event.pull_request.head.sha }}
@@ -744,7 +744,7 @@ jobs:
         run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
 
       - name: Upload build as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}-${{ matrix.build }}
           path: builds/${{ matrix.build }}
@@ -758,19 +758,19 @@ jobs:
       - build-zip
     steps:
       - name: Download dev build
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: amp-${{ needs.build-zip.outputs.branch-name }}-${{ needs.build-zip.outputs.git-sha-8 }}-dev
           path: builds/dev
 
       - name: Download prod build
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: amp-${{ needs.build-zip.outputs.branch-name }}-${{ needs.build-zip.outputs.git-sha-8 }}-prod
           path: builds/prod
 
       - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0
         with:
           project_id: ${{ secrets.GCS_PROJECT_ID }}
           service_account_key: ${{ secrets.GCS_APPLICATION_CREDENTIALS }}
@@ -796,7 +796,7 @@ jobs:
     steps:
       - name: Check if a comment was already made
         id: find-comment
-        uses: peter-evans/find-comment@v1
+        uses: peter-evans/find-comment@v2
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: github-actions[bot]
@@ -814,14 +814,14 @@ jobs:
 
       - name: Create comment on PR with links to plugin builds
         if: ${{ steps.find-comment.outputs.comment-id == '' }}
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: ${{ steps.get-comment-body.outputs.body }}
 
       - name: Update comment on PR with links to plugin builds
         if: ${{ steps.find-comment.outputs.comment-id != '' }}
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v2
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           edit-mode: replace

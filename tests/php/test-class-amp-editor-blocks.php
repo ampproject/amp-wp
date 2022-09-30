@@ -27,8 +27,8 @@ class Test_AMP_Editor_Blocks extends TestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = new AMP_Editor_Blocks();
 	}
 

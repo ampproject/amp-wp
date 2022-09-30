@@ -7,6 +7,8 @@
 
 use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
+use AmpProject\Extension;
+use AmpProject\Dom\Element;
 use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
 use AmpProject\Layout;
@@ -56,6 +58,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = [
 		'add_noscript_fallback' => true,
 		'native_img_used'       => false,
+		'allow_picture'         => false,
 	];
 
 	/**
@@ -83,11 +86,47 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Convert picture element into image element or mark as px verified.
+	 *
+	 * @return void
+	 */
+	protected function process_picture_elements() {
+
+		$picture_img_query = $this->dom->xpath->query( '//picture/img' );
+
+		/** @var Element $img_element */
+		foreach ( $picture_img_query as $img_element ) {
+			/** @var Element $picture_element */
+			$picture_element = $img_element->parentNode;
+
+			if ( true === $this->args['allow_picture'] ) {
+				ValidationExemption::mark_node_as_px_verified( $picture_element );
+				foreach ( $picture_element->getElementsByTagName( Tag::SOURCE ) as $source_element ) {
+					ValidationExemption::mark_node_as_px_verified( $source_element );
+
+					// Mark width/height attributes as PX-verified as well since they aren't known yet in the validator. See <https://github.com/whatwg/html/pull/5894>.
+					foreach ( [ Attribute::WIDTH, Attribute::HEIGHT ] as $dimension_attr ) {
+						$attr_node = $source_element->getAttributeNode( $dimension_attr );
+						if ( $attr_node instanceof DOMAttr ) {
+							ValidationExemption::mark_node_as_px_verified( $attr_node );
+						}
+					}
+				}
+			} else {
+				$picture_element->removeChild( $img_element );
+				$picture_element->parentNode->replaceChild( $img_element, $picture_element );
+			}
+		}
+	}
+
+	/**
 	 * Sanitize the <img> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 */
 	public function sanitize() {
+
+		$this->process_picture_elements();
 
 		/**
 		 * Node list.
@@ -109,7 +148,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement || DevMode::hasExemptionForNode( $node ) ) {
+			if ( ! $node instanceof Element || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -118,13 +157,15 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				$this->is_inside_amp_noscript( $node )
 				||
 				(
-					$node->parentNode instanceof DOMElement
+					$node->parentNode instanceof Element
 					&&
-					'a' === $node->parentNode->tagName
-					&&
-					$node->parentNode->parentNode instanceof DOMElement
-					&&
-					'amp-story-player' === $node->parentNode->parentNode->tagName
+					(
+						Tag::A === $node->parentNode->tagName
+						&&
+						$node->parentNode->parentNode instanceof Element
+						&&
+						Extension::STORY_PLAYER === $node->parentNode->parentNode->tagName
+					)
 				)
 			) {
 				continue;
@@ -139,6 +180,26 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 						'spec_name'  => 'amp-img',
 					]
 				);
+				continue;
+			}
+
+			// Replace img with amp-pixel when dealing with tracking pixels.
+			if ( self::is_tracking_pixel_url( $node->getAttribute( Attribute::SRC ) ) ) {
+				$attributes = [
+					Attribute::SRC    => $node->getAttribute( Attribute::SRC ),
+					Attribute::LAYOUT => Layout::NODISPLAY,
+				];
+				foreach ( [ Attribute::REFERRERPOLICY ] as $allowed_attribute ) {
+					if ( $node->hasAttribute( $allowed_attribute ) ) {
+						$attributes[ $allowed_attribute ] = $node->getAttribute( $allowed_attribute );
+					}
+				}
+				$amp_pixel_node = AMP_DOM_Utils::create_node(
+					$this->dom,
+					Extension::PIXEL,
+					$attributes
+				);
+				$node->parentNode->replaceChild( $amp_pixel_node, $node );
 				continue;
 			}
 
@@ -222,7 +283,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				// Skip directly copying new web platform attributes from img to amp-img which are largely handled by AMP already.
-				case Attribute::IMPORTANCE: // Not supported by AMP.
 				case Attribute::INTRINSICSIZE: // Responsive images handled by amp-img directly.
 					break;
 
@@ -252,7 +312,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * Attempt to determine actual dimensions, otherwise set reasonable defaults.
 	 *
-	 * @param DOMElement[][] $need_dimensions Map <img> @src URLs to node for images with missing dimensions.
+	 * @param Element[][] $need_dimensions Map <img> @src URLs to node for images with missing dimensions.
 	 */
 	private function determine_dimensions( $need_dimensions ) {
 
@@ -260,7 +320,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $dimensions_by_url as $url => $dimensions ) {
 			foreach ( $need_dimensions[ $url ] as $node ) {
-				if ( ! $node instanceof DOMElement ) {
+				if ( ! $node instanceof Element ) {
 					continue;
 				}
 				$class = $node->getAttribute( Attribute::CLASS_ );
@@ -273,34 +333,46 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 				$width  = isset( $this->args['content_max_width'] ) ? $this->args['content_max_width'] : self::FALLBACK_WIDTH;
 				$height = self::FALLBACK_HEIGHT;
-				if ( isset( $dimensions['width'] ) ) {
+				if ( ! empty( $dimensions['width'] ) ) {
 					$width = $dimensions['width'];
 				}
-				if ( isset( $dimensions['height'] ) ) {
+				if ( ! empty( $dimensions['height'] ) ) {
 					$height = $dimensions['height'];
 				}
 
 				if ( ! is_numeric( $node->getAttribute( Attribute::WIDTH ) ) ) {
 
 					// Let width have the right aspect ratio based on the height attribute.
-					if ( is_numeric( $node->getAttribute( Attribute::HEIGHT ) ) && isset( $dimensions['height'], $dimensions['width'] ) ) {
+					if (
+						is_numeric( $node->getAttribute( Attribute::HEIGHT ) )
+						&&
+						! empty( $dimensions['height'] )
+						&&
+						! empty( $dimensions['width'] )
+					) {
 						$width = ( (float) $node->getAttribute( Attribute::HEIGHT ) * $dimensions['width'] ) / $dimensions['height'];
 					}
 
 					$node->setAttribute( Attribute::WIDTH, $width );
-					if ( ! isset( $dimensions['width'] ) ) {
+					if ( empty( $dimensions['width'] ) ) {
 						$class .= ' amp-wp-unknown-width';
 					}
 				}
 				if ( ! is_numeric( $node->getAttribute( Attribute::HEIGHT ) ) ) {
 
 					// Let height have the right aspect ratio based on the width attribute.
-					if ( is_numeric( $node->getAttribute( Attribute::WIDTH ) ) && isset( $dimensions['height'], $dimensions['width'] ) ) {
+					if (
+						is_numeric( $node->getAttribute( Attribute::WIDTH ) )
+						&&
+						! empty( $dimensions['height'] )
+						&&
+						! empty( $dimensions['width'] )
+					) {
 						$height = ( (float) $node->getAttribute( Attribute::WIDTH ) * $dimensions['height'] ) / $dimensions['width'];
 					}
 
 					$node->setAttribute( Attribute::HEIGHT, $height );
-					if ( ! isset( $dimensions['height'] ) ) {
+					if ( empty( $dimensions['height'] ) ) {
 						$class .= ' amp-wp-unknown-height';
 					}
 				}
@@ -325,11 +397,25 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param DOMElement $node The img element to adjust and replace.
+	 * @param Element $node The img element to adjust and replace.
 	 */
-	private function adjust_and_replace_node( DOMElement $node ) {
-		if ( $this->args['native_img_used'] ) {
+	private function adjust_and_replace_node( Element $node ) {
+		if ( $this->args['native_img_used'] || ( $node->parentNode instanceof Element && Tag::PICTURE === $node->parentNode->tagName ) ) {
 			$attributes = $this->maybe_add_lightbox_attributes( [], $node ); // @todo AMP doesn't support lightbox on <img> yet.
+
+			/*
+			 * Mark lightbox as px-verified attribute until it's supported by AMP spec.
+			 * @see <https://github.com/ampproject/amp-wp/issues/7152#issuecomment-1157933188>
+			 * @todo Remove this once lightbox is added in `lightboxable-elements` for native img tag in AMP spec.
+			 */
+			if ( isset( $attributes['data-amp-lightbox'] ) || $node->hasAttribute( Attribute::LIGHTBOX ) ) {
+				$node_attr = $node->getAttributeNode( Attribute::LIGHTBOX );
+				if ( ! $node_attr instanceof DOMAttr ) {
+					$node_attr = $this->dom->createAttribute( Attribute::LIGHTBOX );
+					$node->setAttributeNode( $node_attr );
+				}
+				ValidationExemption::mark_node_as_px_verified( $node_attr );
+			}
 
 			// Set decoding=async by default. See <https://core.trac.wordpress.org/ticket/53232>.
 			if ( ! $node->hasAttribute( Attribute::DECODING ) ) {
@@ -346,13 +432,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $attributes as $name => $value ) {
 				$node->setAttribute( $name, $value );
 			}
-
-			// Mark element as PX-verified to prevent raising validation errors for an intentionally invalid <img>.
-			// It doesn't make sense to raise a validation error to allow the user to decide whether to convert from
-			// <img> to <amp-img> since the native_img_used arg is the opt-in to not do any such conversion.
-			// @todo Remove once https://github.com/ampproject/amphtml/issues/30442 lands.
-			ValidationExemption::mark_node_as_px_verified( $node );
-
 			return;
 		}
 
@@ -370,7 +449,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			// Use responsive images when a theme supports wide and full-bleed images.
 			if (
 				! empty( $this->args['align_wide_support'] )
-				&& $node->parentNode instanceof DOMElement
+				&& $node->parentNode instanceof Element
 				&& 'figure' === $node->parentNode->nodeName
 				&& preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $node->parentNode->getAttribute( Attribute::CLASS_ ) )
 			) {
@@ -442,35 +521,32 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function maybe_add_lightbox_attributes( $attributes, $node ) {
 		$parent_node = $node->parentNode;
-		if ( ! ( $parent_node instanceof DOMElement ) || ! ( $parent_node->parentNode instanceof DOMElement ) ) {
+		if ( ! ( $parent_node instanceof Element ) || ! ( $parent_node->parentNode instanceof Element ) ) {
 			return $attributes;
 		}
 
-		$is_file_url                        = preg_match( '/\.\w+$/', wp_parse_url( $parent_node->getAttribute( Attribute::HREF ), PHP_URL_PATH ) );
+		$media_file_url = wp_parse_url( $parent_node->getAttribute( Attribute::HREF ), PHP_URL_PATH );
+
+		/** @var Element $node */
+		$img_src = wp_parse_url( $node->getAttribute( Attribute::SRC ), PHP_URL_PATH );
+
 		$is_node_wrapped_in_media_file_link = (
-			'a' === $parent_node->tagName
+			Tag::A === $parent_node->tagName
 			&&
-			( 'figure' === $parent_node->tagName || 'figure' === $parent_node->parentNode->tagName )
-			&&
-			$is_file_url // This should be a link to the media file, not the attachment page.
+			$media_file_url === $img_src
 		);
 
-		if ( 'figure' !== $parent_node->tagName && ! $is_node_wrapped_in_media_file_link ) {
+		if ( Tag::FIGURE !== $parent_node->tagName && ! $is_node_wrapped_in_media_file_link ) {
 			return $attributes;
 		}
 
-		// Account for blocks that include alignment or images that are wrapped in <a>.
-		// With alignment, the structure changes from figure.wp-block-image > img
-		// to div.wp-block-image > figure > img and the amp-lightbox attribute
-		// can be found on the wrapping div instead of the figure element.
-		$grand_parent = $parent_node->parentNode;
-		if ( $this->does_node_have_block_class( $grand_parent ) ) {
-			$parent_node = $grand_parent;
-		} elseif ( isset( $grand_parent->parentNode ) && $this->does_node_have_block_class( $grand_parent->parentNode ) ) {
-			$parent_node = $grand_parent->parentNode;
-		}
+		$parent_attributes = [];
 
-		$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
+		if ( Tag::FIGURE === $parent_node->tagName ) {
+			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
+		} elseif ( Tag::A === $parent_node->tagName && Tag::FIGURE === $parent_node->parentNode->tagName ) {
+			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node->parentNode );
+		}
 
 		if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
 			$attributes['data-amp-lightbox']   = '';
@@ -489,23 +565,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Gets whether a node has the class 'wp-block-image', meaning it is a wrapper for an Image block.
-	 *
-	 * @param DOMElement $node A node to evaluate.
-	 * @return bool Whether the node has the class 'wp-block-image'.
-	 */
-	private function does_node_have_block_class( $node ) {
-		if ( $node instanceof DOMElement ) {
-			$classes = preg_split( '/\s+/', $node->getAttribute( Attribute::CLASS_ ) );
-			if ( in_array( 'wp-block-image', $classes, true ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * Determines if a URL is considered a GIF URL
 	 *
 	 * @since 0.2
@@ -518,5 +577,28 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$ext  = self::$anim_extension;
 		$path = wp_parse_url( $url, PHP_URL_PATH );
 		return substr( $path, -strlen( $ext ) ) === $ext;
+	}
+
+	/**
+	 * Determines if a URL is a known tracking pixel URL.
+	 *
+	 * Currently, only Facebook tracking pixel URL is detected.
+	 *
+	 * @since 2.2.2
+	 *
+	 * @param string $url URL to inspect.
+	 *
+	 * @return bool Returns true if $url is a tracking pixel URL.
+	 */
+	private static function is_tracking_pixel_url( $url ) {
+		$parsed_url = wp_parse_url( $url );
+
+		return (
+			isset( $parsed_url['host'], $parsed_url['path'] )
+			&&
+			'facebook.com' === str_replace( 'www.', '', $parsed_url['host'] )
+			&&
+			'/tr' === $parsed_url['path']
+		);
 	}
 }

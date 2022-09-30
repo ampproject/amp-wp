@@ -17,7 +17,7 @@ The element may be either a link (`a` or `area`) or a `form`.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-link-sanitizer.php:216](/includes/sanitizers/class-amp-link-sanitizer.php#L216)
+:link: [includes/sanitizers/class-amp-link-sanitizer.php:221](/includes/sanitizers/class-amp-link-sanitizer.php#L221)
 
 <details>
 <summary>Show Code</summary>

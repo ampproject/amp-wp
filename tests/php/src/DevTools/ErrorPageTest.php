@@ -37,7 +37,11 @@ final class ErrorPageTest extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( '<title>Error Page Title</title>', $output );
 		$this->assertStringContainsString( '<h1>Error Page Title</h1>', $output );
 		$this->assertStringContainsString( '<p>Error Page Message</p>', $output );
-		$this->assertStringContainsString( '<strong>FAILURE</strong> (42) [<em>RuntimeException</em>]', $output );
+		if ( WP_DEBUG ) {
+			$this->assertStringContainsString( '<strong>FAILURE</strong> (42) [<em>RuntimeException</em>]', $output );
+		} else {
+			$this->assertStringNotContainsString( '<strong>FAILURE</strong>', $output );
+		}
 		$this->assertStringContainsString( '<!DOCTYPE html>', $output );
 		$this->assertStringContainsString( '<meta name="viewport"', $output );
 		$this->assertStringContainsString( '<body id="error-page">', $output );

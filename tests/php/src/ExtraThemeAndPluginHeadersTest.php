@@ -12,8 +12,8 @@ final class ExtraThemeAndPluginHeadersTest extends TestCase {
 	/** @var ExtraThemeAndPluginHeaders */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = new ExtraThemeAndPluginHeaders();
 	}
 
@@ -31,6 +31,6 @@ final class ExtraThemeAndPluginHeadersTest extends TestCase {
 
 	/** @covers ::filter_extra_headers() */
 	public function test_filter_extra_headers() {
-		$this->assertStringContainsString( ExtraThemeAndPluginHeaders::AMP_HEADER, $this->instance->filter_extra_headers( [ 'Woo' ] ) );
+		$this->assertContains( ExtraThemeAndPluginHeaders::AMP_HEADER, $this->instance->filter_extra_headers( [ 'Woo' ] ) );
 	}
 }

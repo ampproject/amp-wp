@@ -13,7 +13,7 @@ Filters the content embed handlers.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1381](/includes/amp-helper-functions.php#L1381-L1407)
+:link: [includes/amp-helper-functions.php:1387](/includes/amp-helper-functions.php#L1387-L1414)
 
 <details>
 <summary>Show Code</summary>
@@ -42,6 +42,7 @@ return apply_filters(
 		AMP_Gfycat_Embed_Handler::class       => [],
 		AMP_Imgur_Embed_Handler::class        => [],
 		AMP_Scribd_Embed_Handler::class       => [],
+		AMP_WordPress_Embed_Handler::class    => [],
 		AMP_WordPress_TV_Embed_Handler::class => [],
 	],
 	$post

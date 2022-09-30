@@ -115,15 +115,6 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		$meta_elements = iterator_to_array( $this->dom->getElementsByTagName( static::$tag ), false );
 
 		foreach ( $meta_elements as $meta_element ) {
-
-			// Strip whitespace around equal signs. Won't be needed after <https://github.com/ampproject/amphtml/issues/26496> is resolved.
-			if ( $meta_element->hasAttribute( Attribute::CONTENT ) ) {
-				$meta_element->setAttribute(
-					Attribute::CONTENT,
-					preg_replace( '/\s*=\s*/', '=', $meta_element->getAttribute( Attribute::CONTENT ) )
-				);
-			}
-
 			/**
 			 * Meta tag to process.
 			 *
@@ -331,7 +322,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Previous meta tag to append to.
 		 *
-		 * @var DOMElement $previous_meta_tag
+		 * @var DOMElement|null $previous_meta_tag
 		 */
 		$previous_meta_tag = null;
 		foreach ( $this->meta_tags as $meta_tag_group ) {

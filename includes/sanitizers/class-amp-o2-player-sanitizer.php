@@ -108,7 +108,7 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 			$parent_node = $node->parentNode;
 
 			// Remove the ID from the original node so that PHP DOM doesn't fail to set it on the replacement element.
-			if ( $parent_node->hasAttribute( Attribute::ID ) ) {
+			if ( $parent_node instanceof DOMElement && $parent_node->hasAttribute( Attribute::ID ) ) {
 				$component_attributes['id'] = $parent_node->getAttribute( Attribute::ID );
 				$parent_node->removeAttribute( Attribute::ID );
 			}

@@ -155,6 +155,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = [
 		'disable_style_processing'       => false,
 		'dynamic_element_selectors'      => [
+			'amp-img',
+			'amp-anim',
 			'amp-list',
 			'amp-live-list',
 			'[submit-error]',
@@ -256,7 +258,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes
 	 * @since 1.0
-	 * @var array
+	 * @var array|null
 	 */
 	private $used_class_names;
 
@@ -301,7 +303,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Tag names used in document.
 	 *
 	 * @since 1.0
-	 * @var array
+	 * @var array|null
 	 */
 	private $used_tag_names;
 
@@ -579,6 +581,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					)
 				);
 			}
+		}
+
+		// If using the toggleTheme component, get the theme's dark mode class.
+		// See usage of toggleTheme in <https://github.com/ampproject/amphtml/pull/36958>.
+		$dark_mode_class = $this->dom->body->getAttribute( 'data-prefers-dark-mode-class' );
+
+		// Prevent dark mode class from being tree-shaken.
+		if ( $dark_mode_class ) {
+			$class_names[] = $dark_mode_class;
+		} else {
+			$class_names[] = 'amp-dark-mode';
 		}
 
 		$this->used_class_names = array_fill_keys( $class_names, true );
@@ -1645,7 +1658,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function get_parsed_stylesheet( $stylesheet, $options = [] ) {
 		$cached         = true;
-		$cache_group    = 'amp-parsed-stylesheet-v38'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group    = 'amp-parsed-stylesheet-v39'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 		$use_transients = $this->should_use_transient_caching();
 
 		// @todo If ValidationExemption::is_px_verified_for_node( $this->current_node ) then keep !important.
@@ -2744,12 +2757,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// If the font-display is auto, block, or swap then we should automatically add the preload link for the first font file.
 		$properties = $ruleset->getRules( 'font-display' );
 		$property   = end( $properties ); // Last since the last property wins in CSS.
+
+		/** @var RuleValueList|string|null */
+		$property_value = $property instanceof Rule ? $property->getValue() : '';
+
 		if (
 			(
 				// Defaults to 'auto', hence should be preloaded as well.
 				! $property instanceof Rule
 				||
-				in_array( $property->getValue(), [ 'auto', 'block', 'swap' ], true )
+				in_array( $property_value, [ 'auto', 'block', 'swap' ], true )
 			)
 			&&
 			'file' === $first_src_type
@@ -2917,16 +2934,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( $old_selector->getSpecificity() % 10 > 0 ) {
 						$specificity_multiplier++;
 					}
-					$selector_mod = str_repeat( ':not(#_)', $specificity_multiplier ); // Here "_" is just a short single-char ID.
 
 					$new_selector = $old_selector->getSelector();
 
-					// Amend the selector mod to the first element in selector if it is already the root; otherwise add new root ancestor.
-					if ( preg_match( '/^\s*(html|:root)\b/i', $new_selector, $matches ) ) {
-						$new_selector = substr( $new_selector, 0, strlen( $matches[0] ) ) . $selector_mod . substr( $new_selector, strlen( $matches[0] ) );
+					if ( '#_)' === substr( $new_selector, -3 ) ) {
+						$new_selector = rtrim( $new_selector, ')' ) . str_repeat( '#_', $specificity_multiplier ) . ')';
 					} else {
-						$new_selector = sprintf( ':root%s %s', $selector_mod, $new_selector );
+						$new_selector .= ':not(' . str_repeat( '#_', $specificity_multiplier ) . ')'; // Here "_" is just a short single-char ID.
 					}
+
 					return new Selector( $new_selector );
 				},
 				$ruleset->getSelectors()
@@ -2957,7 +2973,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function collect_inline_styles( DOMElement $element ) {
 		$attr_node = $element->getAttributeNode( 'style' );
-		if ( ! $attr_node ) {
+		if ( ! $attr_node instanceof DOMAttr ) {
 			return;
 		}
 
@@ -2975,9 +2991,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$class = 'amp-wp-' . substr( md5( $value ), 0, 7 );
-		$root  = ':root' . str_repeat( ':not(#_)', self::INLINE_SPECIFICITY_MULTIPLIER );
-		$rule  = sprintf( '%s .%s { %s }', $root, $class, $value );
+		$class       = 'amp-wp-' . substr( md5( $value ), 0, 7 );
+		$specificity = ':not(' . str_repeat( '#_', self::INLINE_SPECIFICITY_MULTIPLIER ) . ')';
+		$rule        = sprintf( '.%s%s{%s}', $class, $specificity, $value );
 
 		$this->set_current_node( $element ); // And sources when needing to be located.
 

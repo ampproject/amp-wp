@@ -18,6 +18,8 @@ use AmpProject\AmpWP\Tests\TestCase;
  *
  * @group amp-comments
  * @group amp-form
+ *
+ * @coversDefaultClass AMP_Form_Sanitizer
  */
 class AMP_Form_Sanitizer_Test extends TestCase {
 
@@ -26,8 +28,8 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( '/current-page/' );
 	}
@@ -35,9 +37,9 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**
@@ -251,11 +253,24 @@ class AMP_Form_Sanitizer_Test extends TestCase {
 	 * @param array       $args            Args.
 	 * @param array       $expected_errors Expected errors.
 	 * @dataProvider get_data
+	 *
+	 * @covers ::sanitize()
 	 */
 	public function test_converter( $source, $expected = null, $args = [], $expected_errors = [] ) {
 		if ( is_null( $expected ) ) {
 			$expected = $source;
 		}
+
+		// Normalize across different testing environments where WP_TESTS_DOMAIN varies.
+		$current_origin = '//' . WP_TESTS_DOMAIN;
+		if ( isset( $_SERVER['SERVER_PORT'] ) && ! in_array( (string) $_SERVER['SERVER_PORT'], [ '80', '443' ], true ) ) {
+			$current_origin .= ':' . $_SERVER['SERVER_PORT'];
+		}
+		$current_origin .= '/';
+
+		$source   = str_replace( '//example.org/', $current_origin, $source );
+		$expected = str_replace( '//example.org/', $current_origin, $expected );
+
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		if ( ! empty( $args['add_dev_mode'] ) ) {
 			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );

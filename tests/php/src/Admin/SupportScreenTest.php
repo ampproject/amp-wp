@@ -42,8 +42,8 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		if ( ! class_exists( 'WP_Site_Health' ) ) {
 			$this->markTestSkipped( 'Test requires Site Health.' );
@@ -62,8 +62,8 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritDoc
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 
 		global $wp_version;
 		$wp_version = $this->original_wp_version;
@@ -92,7 +92,7 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 	public function test_check_core_version() {
 		global $wp_version;
 
-		// This will always be true by default because setUp calls markTestSkipped if WP_Site_Health doesn't exist.
+		// This will always be true by default because set_up calls markTestSkipped if WP_Site_Health doesn't exist.
 		$this->assertTrue( SupportScreen::check_core_version() );
 
 		$wp_version = '4.9';
