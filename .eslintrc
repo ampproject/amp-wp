@@ -56,7 +56,6 @@
     "react/jsx-max-props-per-line": [ "error", { "when":  "multiline" } ],
     "react/jsx-no-literals": "error",
     "react/jsx-no-useless-fragment": "error",
-    "react/jsx-one-expression-per-line": "error",
     "react/no-unused-prop-types": "error",
     "react/self-closing-comp": "error",
     "import/no-unresolved": [ "error", {
