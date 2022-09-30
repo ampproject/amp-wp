@@ -27,16 +27,14 @@ import ampBlackIcon from '../../../images/amp-black-icon.svg';
  * @see https://github.com/WordPress/gutenberg/blob/95e769df1f82f6b0ef587d81af65dd2f48cd1c38/packages/editor/src/components/post-preview-button/index.js#L17-L93
  * @param {Document} targetDocument The target document.
  */
-function writeInterstitialMessage( targetDocument ) {
+function writeInterstitialMessage(targetDocument) {
 	let markup = renderToString(
 		<div className="editor-post-preview-button__interstitial-message">
-			<Icon
-				icon={ ampBlackIcon( { viewBox: '0 0 98 98' } ) }
-			/>
+			<Icon icon={ampBlackIcon({ viewBox: '0 0 98 98' })} />
 			<p>
-				{ __( 'Generating AMP preview…', 'amp' ) }
-			</p>
-		</div>,
+{__('Generating AMP preview…', 'amp')}
+</p>
+		</div>
 	);
 
 	markup += `
@@ -94,8 +92,8 @@ function writeInterstitialMessage( targetDocument ) {
 		</style>
 	`;
 
-	targetDocument.write( markup );
-	targetDocument.title = __( 'Generating AMP preview…', 'amp' );
+	targetDocument.write(markup);
+	targetDocument.title = __('Generating AMP preview…', 'amp');
 	targetDocument.close();
 }
 
@@ -110,11 +108,11 @@ class AmpPreviewButton extends Component {
 	 *
 	 * @param {*} args Constructor arguments.
 	 */
-	constructor( ...args ) {
-		super( ...args );
+	constructor(...args) {
+		super(...args);
 
 		this.buttonRef = createRef();
-		this.openPreviewWindow = this.openPreviewWindow.bind( this );
+		this.openPreviewWindow = this.openPreviewWindow.bind(this);
 	}
 
 	/**
@@ -122,14 +120,14 @@ class AmpPreviewButton extends Component {
 	 *
 	 * @param {Object} prevProps The previous props.
 	 */
-	componentDidUpdate( prevProps ) {
+	componentDidUpdate(prevProps) {
 		const { previewLink } = this.props;
 
 		// This relies on the window being responsible to unset itself when
 		// navigation occurs or a new preview window is opened, to avoid
 		// unintentional forceful redirects.
-		if ( previewLink && ! prevProps.previewLink ) {
-			this.setPreviewWindowLink( previewLink );
+		if (previewLink && !prevProps.previewLink) {
+			this.setPreviewWindowLink(previewLink);
 		}
 	}
 
@@ -139,12 +137,12 @@ class AmpPreviewButton extends Component {
 	 *
 	 * @param {string} url URL to assign as preview window location.
 	 */
-	setPreviewWindowLink( url ) {
+	setPreviewWindowLink(url) {
 		const { previewWindow } = this;
 
-		if ( previewWindow && ! previewWindow.closed ) {
+		if (previewWindow && !previewWindow.closed) {
 			previewWindow.location = url;
-			if ( this.buttonRef.current ) {
+			if (this.buttonRef.current) {
 				this.buttonRef.current.focus();
 			}
 		}
@@ -155,7 +153,7 @@ class AmpPreviewButton extends Component {
 	 */
 	getWindowTarget() {
 		const { postId } = this.props;
-		return `amp-preview-${ postId }`;
+		return `amp-preview-${postId}`;
 	}
 
 	/**
@@ -163,7 +161,7 @@ class AmpPreviewButton extends Component {
 	 *
 	 * @param {Event} event The DOM event.
 	 */
-	openPreviewWindow( event ) {
+	openPreviewWindow(event) {
 		// Our Preview button has its 'href' and 'target' set correctly for a11y
 		// purposes. Unfortunately, though, we can't rely on the default 'click'
 		// handler since sometimes it incorrectly opens a new tab instead of reusing
@@ -175,8 +173,8 @@ class AmpPreviewButton extends Component {
 		const { target } = event;
 
 		// Open up a Preview tab if needed. This is where we'll show the preview.
-		if ( ! this.previewWindow || this.previewWindow.closed ) {
-			this.previewWindow = window.open( '', this.getWindowTarget() );
+		if (!this.previewWindow || this.previewWindow.closed) {
+			this.previewWindow = window.open('', this.getWindowTarget());
 		}
 
 		// Focus the Preview tab. This might not do anything, depending on the browser's
@@ -186,53 +184,68 @@ class AmpPreviewButton extends Component {
 
 		// If we don't need to autosave the post before previewing, then we simply
 		// load the Preview URL in the Preview tab.
-		if ( ! this.props.isAutosaveable ) {
-			this.setPreviewWindowLink( target.href );
+		if (!this.props.isAutosaveable) {
+			this.setPreviewWindowLink(target.href);
 			return;
 		}
 
 		// Request an autosave. This happens asynchronously and causes the component
 		// to update when finished.
-		if ( this.props.isDraft ) {
-			this.props.savePost( { isPreview: true } );
+		if (this.props.isDraft) {
+			this.props.savePost({ isPreview: true });
 		} else {
-			this.props.autosave( { isPreview: true } );
+			this.props.autosave({ isPreview: true });
 		}
 
 		// Display a 'Generating preview' message in the Preview tab while we wait for the
 		// autosave to finish.
-		writeInterstitialMessage( this.previewWindow.document );
+		writeInterstitialMessage(this.previewWindow.document);
 	}
 
 	/**
 	 * Renders the component.
 	 */
 	render() {
-		const { previewLink, currentPostLink, errorMessages, isEnabled, isSaveable, isStandardMode } = this.props;
+		const {
+			previewLink,
+			currentPostLink,
+			errorMessages,
+			isEnabled,
+			isSaveable,
+			isStandardMode,
+		} = this.props;
 
 		// Link to the `?preview=true` URL if we have it, since this lets us see
 		// changes that were autosaved since the post was last published. Otherwise,
 		// just link to the post's URL.
 		const href = previewLink || currentPostLink;
 
-		return isEnabled && ! errorMessages.length && ! isStandardMode && (
-			<Button
-				className="amp-editor-post-preview"
-				href={ href }
-				title={ __( 'Preview AMP', 'amp' ) }
-				isSecondary
-				disabled={ ! isSaveable }
-				onClick={ this.openPreviewWindow }
-				ref={ this.buttonRef }
-			>
-				{ ampFilledIcon( { viewBox: '0 0 62 62', width: 18, height: 18 } ) }
-				<VisuallyHidden as="span">
-					{
-						/* translators: accessibility text */
-						__( '(opens in a new tab)', 'amp' )
-					}
-				</VisuallyHidden>
-			</Button>
+		return (
+			isEnabled &&
+			!errorMessages.length &&
+			!isStandardMode && (
+				<Button
+					className="amp-editor-post-preview"
+					href={href}
+					title={__('Preview AMP', 'amp')}
+					isSecondary
+					disabled={!isSaveable}
+					onClick={this.openPreviewWindow}
+					ref={this.buttonRef}
+				>
+					{ampFilledIcon({
+						viewBox: '0 0 62 62',
+						width: 18,
+						height: 18,
+					})}
+					<VisuallyHidden as="span">
+						{
+							/* translators: accessibility text */
+							__('(opens in a new tab)', 'amp')
+						}
+					</VisuallyHidden>
+				</Button>
+			)
 		);
 	}
 }
@@ -251,49 +264,55 @@ AmpPreviewButton.propTypes = {
 	isStandardMode: PropTypes.bool,
 };
 
-export default compose( [
-	withSelect( ( select, { forcePreviewLink, forceIsAutosaveable } ) => {
+export default compose([
+	withSelect((select, { forcePreviewLink, forceIsAutosaveable }) => {
 		const {
 			getCurrentPostId,
 			getEditedPostAttribute,
 			isEditedPostSaveable,
 			isEditedPostAutosaveable,
 			getEditedPostPreviewLink,
-		} = select( 'core/editor' );
+		} = select('core/editor');
 
 		const {
 			getAmpUrl,
 			getAmpPreviewLink,
 			getErrorMessages,
 			isStandardMode,
-		} = select( 'amp/block-editor' );
+		} = select('amp/block-editor');
 
-		const copyQueryArgs = ( source, destination ) => {
-			const sourceUrl = new URL( source );
-			const destinationUrl = new URL( destination );
-			for ( const [ key, value ] of sourceUrl.searchParams.entries() ) {
-				destinationUrl.searchParams.set( key, value );
+		const copyQueryArgs = (source, destination) => {
+			const sourceUrl = new URL(source);
+			const destinationUrl = new URL(destination);
+			for (const [key, value] of sourceUrl.searchParams.entries()) {
+				destinationUrl.searchParams.set(key, value);
 			}
 			return destinationUrl.href;
 		};
 
 		const initialPreviewLink = getEditedPostPreviewLink();
-		const previewLink = initialPreviewLink ? copyQueryArgs( initialPreviewLink, getAmpPreviewLink() ) : undefined;
+		const previewLink = initialPreviewLink
+			? copyQueryArgs(initialPreviewLink, getAmpPreviewLink())
+			: undefined;
 
 		return {
 			postId: getCurrentPostId(),
 			currentPostLink: getAmpUrl(),
-			previewLink: forcePreviewLink !== undefined ? forcePreviewLink : previewLink,
+			previewLink:
+				forcePreviewLink !== undefined ? forcePreviewLink : previewLink,
 			isSaveable: isEditedPostSaveable(),
 			isAutosaveable: forceIsAutosaveable || isEditedPostAutosaveable(),
-			isDraft: [ 'draft', 'auto-draft' ].indexOf( getEditedPostAttribute( 'status' ) ) !== -1,
+			isDraft:
+				['draft', 'auto-draft'].indexOf(
+					getEditedPostAttribute('status')
+				) !== -1,
 			isEnabled: isAMPEnabled(),
 			errorMessages: getErrorMessages(),
 			isStandardMode: isStandardMode(),
 		};
-	} ),
-	withDispatch( ( dispatch ) => ( {
-		autosave: dispatch( 'core/editor' ).autosave,
-		savePost: dispatch( 'core/editor' ).savePost,
-	} ) ),
-] )( AmpPreviewButton );
+	}),
+	withDispatch((dispatch) => ({
+		autosave: dispatch('core/editor').autosave,
+		savePost: dispatch('core/editor').savePost,
+	})),
+])(AmpPreviewButton);

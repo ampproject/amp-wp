@@ -16,14 +16,14 @@ import { Loading } from '../loading';
  * @param {any}     props.children  The elements to display in the screen.
  * @param {boolean} props.isLoading Flag indicating if the content is loading.
  */
-export function Phone( { children, isLoading = false } ) {
+export function Phone({ children, isLoading = false }) {
 	return (
-		<div className={ `phone ${ isLoading ? 'is-loading' : '' }` }>
+		<div className={`phone ${isLoading ? 'is-loading' : ''}`}>
 			<div className="phone__inner">
 				<div className="phone__overlay">
 					<Loading />
 				</div>
-				{ children }
+				{children}
 			</div>
 		</div>
 	);

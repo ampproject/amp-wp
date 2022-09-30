@@ -20,38 +20,38 @@ import { Phone } from '../../../components/phone';
  * @param {Object} props     Component props.
  * @param {string} props.url URL of the page to be previewed.
  */
-export function Preview( { url } ) {
-	const iframeRef = useRef( null );
-	const [ isLoading, setIsLoading ] = useState( true );
+export function Preview({ url }) {
+	const iframeRef = useRef(null);
+	const [isLoading, setIsLoading] = useState(true);
 
-	useEffect( () => {
-		if ( ! iframeRef.current ) {
+	useEffect(() => {
+		if (!iframeRef.current) {
 			return null;
 		}
 
 		const iframe = iframeRef.current;
-		const onLoad = () => setIsLoading( false );
+		const onLoad = () => setIsLoading(false);
 
-		iframe.addEventListener( 'load', onLoad );
+		iframe.addEventListener('load', onLoad);
 
 		return () => {
-			iframe.removeEventListener( 'load', onLoad );
+			iframe.removeEventListener('load', onLoad);
 		};
-	}, [] );
+	}, []);
 
-	useEffect( () => {
-		if ( url ) {
-			setIsLoading( true );
+	useEffect(() => {
+		if (url) {
+			setIsLoading(true);
 		}
-	}, [ url ] );
+	}, [url]);
 
 	return (
-		<Phone isLoading={ isLoading }>
+		<Phone isLoading={isLoading}>
 			<iframe
 				className="done__preview-iframe"
-				src={ url }
-				ref={ iframeRef }
-				title={ __( 'Site preview', 'amp' ) }
+				src={url}
+				ref={iframeRef}
+				title={__('Site preview', 'amp')}
 				name="amp-wizard-completion-preview"
 			/>
 		</Phone>

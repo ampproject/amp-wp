@@ -1,5 +1,5 @@
 // Note: This is only used in Legacy Reader mode.
-window.ampCustomizePreview = ( function( api ) {
+window.ampCustomizePreview = (function (api) {
 	'use strict';
 
 	const component = {};
@@ -12,13 +12,13 @@ window.ampCustomizePreview = ( function( api ) {
 	 * @param {boolean} data.enabled   - Whether AMP is enabled.
 	 * @return {void}
 	 */
-	component.boot = function boot( data ) {
-		api.bind( 'preview-ready', function() {
-			api.preview.bind( 'active', function() {
-				api.preview.send( 'amp-status', data );
-			} );
-		} );
+	component.boot = function boot(data) {
+		api.bind('preview-ready', function () {
+			api.preview.bind('active', function () {
+				api.preview.send('amp-status', data);
+			});
+		});
 	};
 
 	return component;
-}( wp.customize ) );
+})(wp.customize);

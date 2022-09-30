@@ -26,19 +26,19 @@ import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../common/constants';
  * @param {string} name     Block name.
  * @return {Object} Modified block settings.
  */
-export const addAMPAttributes = ( settings, name ) => {
-	if ( ! isObject( settings ) || ! isString( name ) ) {
+export const addAMPAttributes = (settings, name) => {
+	if (!isObject(settings) || !isString(name)) {
 		return settings;
 	}
 
 	// AMP Carousel and AMP Lightbox settings.
-	if ( 'core/gallery' === name ) {
-		if ( ! settings.attributes ) {
+	if ('core/gallery' === name) {
+		if (!settings.attributes) {
 			settings.attributes = {};
 		}
 		settings.attributes.ampCarousel = {
 			type: 'boolean',
-			default: ! select( 'amp/block-editor' )?.hasThemeSupport(), // @todo We could just default this to false now even in Reader mode since block styles are loaded.
+			default: !select('amp/block-editor')?.hasThemeSupport(), // @todo We could just default this to false now even in Reader mode since block styles are loaded.
 		};
 		settings.attributes.ampLightbox = {
 			type: 'boolean',
@@ -47,8 +47,8 @@ export const addAMPAttributes = ( settings, name ) => {
 	}
 
 	// Add AMP Lightbox settings.
-	if ( 'core/image' === name ) {
-		if ( ! settings.attributes ) {
+	if ('core/image' === name) {
+		if (!settings.attributes) {
 			settings.attributes = {};
 		}
 		settings.attributes.ampLightbox = {
@@ -67,27 +67,27 @@ export const addAMPAttributes = ( settings, name ) => {
  * @param {string} name     Block name.
  * @return {Object} Modified block settings.
  */
-export const removeAmpFitTextFromBlocks = ( settings, name ) => {
-	if ( ! isObject( settings ) || ! isString( name ) ) {
+export const removeAmpFitTextFromBlocks = (settings, name) => {
+	if (!isObject(settings) || !isString(name)) {
 		return settings;
 	}
 
-	if ( TEXT_BLOCKS.includes( name ) ) {
-		if ( ! settings.deprecated ) {
+	if (TEXT_BLOCKS.includes(name)) {
+		if (!settings.deprecated) {
 			settings.deprecated = [];
 		}
 
 		// Prevent adding deprecation a second time.
-		for ( const deprecated of settings.deprecated ) {
-			if ( deprecated.attributes && deprecated.attributes.ampFitText ) {
+		for (const deprecated of settings.deprecated) {
+			if (deprecated.attributes && deprecated.attributes.ampFitText) {
 				return settings;
 			}
 		}
 
-		settings.deprecated.push( {
+		settings.deprecated.push({
 			supports: settings.supports,
 			attributes: {
-				...( settings.attributes || {} ),
+				...(settings.attributes || {}),
 				ampFitText: {
 					type: 'boolean',
 					default: false,
@@ -106,41 +106,49 @@ export const removeAmpFitTextFromBlocks = ( settings, name ) => {
 				},
 				height: {
 					// Needs to be higher than the maximum font size, which defaults to MAX_FONT_SIZE
-					default: 'core/image' === name ? 200 : Math.ceil( MAX_FONT_SIZE / 10 ) * 10,
+					default:
+						'core/image' === name
+							? 200
+							: Math.ceil(MAX_FONT_SIZE / 10) * 10,
 					source: 'attribute',
 					selector: 'amp-fit-text',
 					attribute: 'height',
 				},
 			},
-			save( props ) {
+			save(props) {
 				/* eslint-disable react/prop-types */
 				const { attributes } = props;
 				const fitTextProps = { layout: 'fixed-height' };
 
-				if ( attributes.minFont ) {
-					fitTextProps[ 'min-font-size' ] = attributes.minFont;
+				if (attributes.minFont) {
+					fitTextProps['min-font-size'] = attributes.minFont;
 				}
-				if ( attributes.maxFont ) {
-					fitTextProps[ 'max-font-size' ] = attributes.maxFont;
+				if (attributes.maxFont) {
+					fitTextProps['max-font-size'] = attributes.maxFont;
 				}
-				if ( attributes.height ) {
+				if (attributes.height) {
 					fitTextProps.height = attributes.height;
 				}
 				/* eslint-enable react/prop-types */
 
-				fitTextProps.children = settings.save( props );
+				fitTextProps.children = settings.save(props);
 
-				return <amp-fit-text { ...fitTextProps } />;
+				return <amp-fit-text {...fitTextProps} />;
 			},
-			isEligible( { ampFitText } ) {
+			isEligible({ ampFitText }) {
 				return undefined !== ampFitText;
 			},
-			migrate( attributes ) {
-				const deprecatedAttrs = [ 'ampFitText', 'minFont', 'maxFont', 'height' ];
-				deprecatedAttrs.forEach( ( attr ) => delete attributes[ attr ] );
+			migrate(attributes) {
+				const deprecatedAttrs = [
+					'ampFitText',
+					'minFont',
+					'maxFont',
+					'height',
+				];
+				deprecatedAttrs.forEach((attr) => delete attributes[attr]);
 				return attributes;
 			},
-		} );
+		});
 	}
 
 	return settings;
@@ -157,11 +165,15 @@ export const removeAmpFitTextFromBlocks = ( settings, name ) => {
  * @param {JSX.Element} element Block save result.
  * @return {JSX.Element} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
  */
-export const removeClassFromAmpFitTextBlocks = ( element ) => {
-	if ( isValidElement( element ) && 'amp-fit-text' === element.type && undefined !== element.props.className ) {
+export const removeClassFromAmpFitTextBlocks = (element) => {
+	if (
+		isValidElement(element) &&
+		'amp-fit-text' === element.type &&
+		undefined !== element.props.className
+	) {
 		const { className, ...props } = element.props;
 		props.className = null;
-		element = cloneElement( element, props );
+		element = cloneElement(element, props);
 	}
 
 	return element;
@@ -173,41 +185,41 @@ export const removeClassFromAmpFitTextBlocks = ( element ) => {
  * @param {Function} BlockEdit function.
  * @return {Function} Edit function.
  */
-export const filterBlocksEdit = ( BlockEdit ) => {
-	if ( ! isFunction( BlockEdit ) ) {
+export const filterBlocksEdit = (BlockEdit) => {
+	if (!isFunction(BlockEdit)) {
 		return BlockEdit;
 	}
 
-	const EnhancedBlockEdit = ( props ) => {
+	const EnhancedBlockEdit = (props) => {
 		const { isSelected, name } = props;
 
-		if ( isSelected && 'core/image' === name ) {
+		if (isSelected && 'core/image' === name) {
 			return (
 				<>
-					<BlockEdit { ...props } />
-					<ImageBlockLayoutAttributes { ...props } />
+					<BlockEdit {...props} />
+					<ImageBlockLayoutAttributes {...props} />
 				</>
 			);
 		}
 
-		if ( isSelected && 'core/gallery' === name ) {
+		if (isSelected && 'core/gallery' === name) {
 			return (
 				<>
-					<BlockEdit { ...props } />
-					<GalleryBlockLayoutAttributes { ...props } />
+					<BlockEdit {...props} />
+					<GalleryBlockLayoutAttributes {...props} />
 				</>
 			);
 		}
 
-		return <BlockEdit { ...props } />;
+		return <BlockEdit {...props} />;
 	};
 
 	EnhancedBlockEdit.propTypes = {
-		attributes: PropTypes.shape( {
+		attributes: PropTypes.shape({
 			ampCarousel: PropTypes.bool,
 			ampLightbox: PropTypes.bool,
 			linkTo: PropTypes.string,
-		} ),
+		}),
 		isSelected: PropTypes.bool,
 		name: PropTypes.string,
 		setAttributes: PropTypes.func.isRequired,
@@ -222,29 +234,32 @@ export const filterBlocksEdit = ( BlockEdit ) => {
  * @param {Object} props Props.
  * @return {JSX.Element} Element.
  */
-const AmpLightboxToggle = ( props ) => {
-	const { attributes: { ampLightbox, linkTo }, setAttributes } = props;
+const AmpLightboxToggle = (props) => {
+	const {
+		attributes: { ampLightbox, linkTo },
+		setAttributes,
+	} = props;
 
 	return (
 		<ToggleControl
-			label={ __( 'Add lightbox effect', 'amp' ) }
-			checked={ ampLightbox }
-			onChange={ ( nextValue ) => {
-				setAttributes( { ampLightbox: ! ampLightbox } );
+			label={__('Add lightbox effect', 'amp')}
+			checked={ampLightbox}
+			onChange={(nextValue) => {
+				setAttributes({ ampLightbox: !ampLightbox });
 				// In case of lightbox set linking images to 'none'.
-				if ( nextValue && linkTo && 'none' !== linkTo ) {
-					setAttributes( { linkTo: 'none' } );
+				if (nextValue && linkTo && 'none' !== linkTo) {
+					setAttributes({ linkTo: 'none' });
 				}
-			} }
+			}}
 		/>
 	);
 };
 
 AmpLightboxToggle.propTypes = {
-	attributes: PropTypes.shape( {
+	attributes: PropTypes.shape({
 		ampLightbox: PropTypes.bool,
 		linkTo: PropTypes.string,
-	} ),
+	}),
 	setAttributes: PropTypes.func.isRequired,
 };
 
@@ -257,22 +272,25 @@ AmpLightboxToggle.propTypes = {
  * @param {Function} props.setAttributes          Callback to update attributes.
  * @return {Object} Element.
  */
-const AmpCarouselToggle = ( props ) => {
-	const { attributes: { ampCarousel }, setAttributes } = props;
+const AmpCarouselToggle = (props) => {
+	const {
+		attributes: { ampCarousel },
+		setAttributes,
+	} = props;
 
 	return (
 		<ToggleControl
-			label={ __( 'Display as carousel', 'amp' ) }
-			checked={ ampCarousel }
-			onChange={ () => setAttributes( { ampCarousel: ! ampCarousel } ) }
+			label={__('Display as carousel', 'amp')}
+			checked={ampCarousel}
+			onChange={() => setAttributes({ ampCarousel: !ampCarousel })}
 		/>
 	);
 };
 
 AmpCarouselToggle.propTypes = {
-	attributes: PropTypes.shape( {
+	attributes: PropTypes.shape({
 		ampCarousel: PropTypes.bool,
-	} ),
+	}),
 	setAttributes: PropTypes.func.isRequired,
 };
 
@@ -283,21 +301,29 @@ AmpCarouselToggle.propTypes = {
  * @param {string} props.clientId Block client ID.
  * @return {Object} Inspector Controls.
  */
-const ImageBlockLayoutAttributes = ( props ) => {
+const ImageBlockLayoutAttributes = (props) => {
 	const { clientId } = props;
 
-	const isGalleryBlockChild = useSelect( ( _select ) => {
-		return _select( 'core/block-editor' ).getBlockParentsByBlockName( clientId, 'core/gallery' ).length > 0;
-	}, [ clientId ] );
+	const isGalleryBlockChild = useSelect(
+		(_select) => {
+			return (
+				_select('core/block-editor').getBlockParentsByBlockName(
+					clientId,
+					'core/gallery'
+				).length > 0
+			);
+		},
+		[clientId]
+	);
 
-	if ( isGalleryBlockChild ) {
+	if (isGalleryBlockChild) {
 		return null;
 	}
 
 	return (
 		<InspectorControls>
-			<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
-				<AmpLightboxToggle { ...props } />
+			<PanelBody title={__('AMP Settings', 'amp')}>
+				<AmpLightboxToggle {...props} />
 			</PanelBody>
 		</InspectorControls>
 	);
@@ -313,11 +339,11 @@ ImageBlockLayoutAttributes.propTypes = {
  * @param {Object} props Props.
  * @return {Object} Inspector Controls.
  */
-const GalleryBlockLayoutAttributes = ( props ) => (
+const GalleryBlockLayoutAttributes = (props) => (
 	<InspectorControls>
-		<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
-			<AmpLightboxToggle { ...props } />
-			<AmpCarouselToggle { ...props } />
+		<PanelBody title={__('AMP Settings', 'amp')}>
+			<AmpLightboxToggle {...props} />
+			<AmpCarouselToggle {...props} />
 		</PanelBody>
 	</InspectorControls>
 );
@@ -331,6 +357,6 @@ const GalleryBlockLayoutAttributes = ( props ) => (
  * @return {boolean} Whether AMP is enabled.
  */
 export const isAMPEnabled = () => {
-	const { getEditedPostAttribute } = select( 'core/editor' );
-	return getEditedPostAttribute( 'amp_enabled' ) || false;
+	const { getEditedPostAttribute } = select('core/editor');
+	return getEditedPostAttribute('amp_enabled') || false;
 };

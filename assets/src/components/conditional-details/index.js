@@ -15,19 +15,19 @@ import { Children } from '@wordpress/element';
  * @param {any}    props.children Component children.
  * @param {any}    props.summary  Summary element.
  */
-export function ConditionalDetails( { children, summary } ) {
-	return children && 0 < Children.toArray( children ).filter( ( child ) => child ).length
-		? (
-			<details>
-				<summary>
-					{ summary }
-				</summary>
+export function ConditionalDetails({ children, summary }) {
+	return children &&
+		0 < Children.toArray(children).filter((child) => child).length ? (
+		<details>
+			<summary>
+{summary}
+</summary>
 
-				{ children }
-
-			</details>
-		)
-		: summary;
+			{children}
+		</details>
+	) : (
+		summary
+	);
 }
 
 ConditionalDetails.propTypes = {

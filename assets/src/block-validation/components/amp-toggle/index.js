@@ -20,17 +20,19 @@ export default function AMPToggle() {
 	 * Use a random ID for the HTML input since the AMP toggle may be used
 	 * more than once on the same page.
 	 */
-	const htmlId = useRef( `amp-toggle-${ Math.random().toString( 32 ).substr( -4 ) }` );
+	const htmlId = useRef(
+		`amp-toggle-${Math.random().toString(32).substr(-4)}`
+	);
 
 	return (
 		<>
-			<label htmlFor={ htmlId.current }>
-				{ __( 'Enable AMP', 'amp' ) }
-			</label>
+			<label htmlFor={htmlId.current}>
+{__('Enable AMP', 'amp')}
+</label>
 			<FormToggle
-				checked={ isAMPEnabled }
-				onChange={ toggleAMP }
-				id={ htmlId.current }
+				checked={isAMPEnabled}
+				onChange={toggleAMP}
+				id={htmlId.current}
 			/>
 		</>
 	);

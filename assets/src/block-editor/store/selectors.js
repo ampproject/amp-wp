@@ -4,8 +4,8 @@
  * @param {Object} state Editor state.
  * @return {boolean} Whether the current theme has AMP support.
  */
-export function hasThemeSupport( state ) {
-	return Boolean( state.hasThemeSupport );
+export function hasThemeSupport(state) {
+	return Boolean(state.hasThemeSupport);
 }
 
 /**
@@ -14,7 +14,7 @@ export function hasThemeSupport( state ) {
  * @param {Object} state The editor state.
  * @return {boolean} Whether the DevTools are enabled.
  */
-export function isDevToolsEnabled( state ) {
+export function isDevToolsEnabled(state) {
 	return state.isDevToolsEnabled;
 }
 
@@ -24,8 +24,8 @@ export function isDevToolsEnabled( state ) {
  * @param {Object} state Editor state.
  * @return {boolean} Whether the current site is AMP-first.
  */
-export function isStandardMode( state ) {
-	return Boolean( state.isStandardMode );
+export function isStandardMode(state) {
+	return Boolean(state.isStandardMode);
 }
 
 /**
@@ -34,7 +34,7 @@ export function isStandardMode( state ) {
  * @param {Object} state The editor state.
  * @return {string[]} The validation error messages.
  */
-export function getErrorMessages( state ) {
+export function getErrorMessages(state) {
 	return state.errorMessages;
 }
 
@@ -44,7 +44,7 @@ export function getErrorMessages( state ) {
  * @param {Object} state The editor state.
  * @return {string} The AMP preview link URL.
  */
-export function getAmpPreviewLink( state ) {
+export function getAmpPreviewLink(state) {
 	return state.ampPreviewLink;
 }
 
@@ -54,7 +54,7 @@ export function getAmpPreviewLink( state ) {
  * @param {Object} state The editor state.
  * @return {string} The AMP URL.
  */
-export function getAmpUrl( state ) {
+export function getAmpUrl(state) {
 	return state.ampUrl;
 }
 
@@ -64,6 +64,6 @@ export function getAmpUrl( state ) {
  * @param {Object} state The editor state.
  * @return {string[]} The list of AMP blocks in post.
  */
-export function getAmpBlocksInUse( state ) {
+export function getAmpBlocksInUse(state) {
 	return state.ampBlocksInUse;
 }

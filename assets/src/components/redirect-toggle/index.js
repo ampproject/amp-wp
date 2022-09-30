@@ -11,17 +11,17 @@ import { Options } from '../options-context-provider';
 import { AMPSettingToggle } from '../amp-setting-toggle';
 
 export function RedirectToggle() {
-	const { editedOptions, updateOptions } = useContext( Options );
+	const { editedOptions, updateOptions } = useContext(Options);
 
 	const { mobile_redirect: mobileRedirect } = editedOptions;
 
 	return (
 		<AMPSettingToggle
-			checked={ true === mobileRedirect }
-			title={ __( 'Redirect mobile visitors to AMP', 'amp' ) }
-			onChange={ () => {
-				updateOptions( { mobile_redirect: ! mobileRedirect } );
-			} }
+			checked={true === mobileRedirect}
+			title={__('Redirect mobile visitors to AMP', 'amp')}
+			onChange={() => {
+				updateOptions({ mobile_redirect: !mobileRedirect });
+			}}
 		/>
 	);
 }

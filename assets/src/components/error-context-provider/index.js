@@ -16,12 +16,12 @@ export const ErrorContext = createContext();
  * @param {Object} props          Component props.
  * @param {any}    props.children Component children.
  */
-export function ErrorContextProvider( { children } ) {
-	const [ error, setError ] = useState( null );
+export function ErrorContextProvider({ children }) {
+	const [error, setError] = useState(null);
 
 	return (
-		<ErrorContext.Provider value={ { error, setError } }>
-			{ children }
+		<ErrorContext.Provider value={{ error, setError }}>
+			{children}
 		</ErrorContext.Provider>
 	);
 }

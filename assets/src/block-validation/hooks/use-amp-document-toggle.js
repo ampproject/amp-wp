@@ -8,11 +8,13 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 export function useAMPDocumentToggle() {
 	const isAMPEnabled = useSelect(
-		( select ) => select( 'core/editor' ).getEditedPostAttribute( 'amp_enabled' ) || false,
-		[],
+		(select) =>
+			select('core/editor').getEditedPostAttribute('amp_enabled') ||
+			false,
+		[]
 	);
-	const { editPost } = useDispatch( 'core/editor' );
-	const toggleAMP = () => editPost( { amp_enabled: ! isAMPEnabled } );
+	const { editPost } = useDispatch('core/editor');
+	const toggleAMP = () => editPost({ amp_enabled: !isAMPEnabled });
 
 	return {
 		isAMPEnabled,

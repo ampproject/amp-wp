@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-const _ = require( 'lodash' );
+const _ = require('lodash');
 
 /**
  * Utility function to paginate a GraphQL function using Relay-style cursor pagination.
@@ -13,38 +13,42 @@ const _ = require( 'lodash' );
  * @param {Object}   variables    GraphQL Query variables.
  * @param {string[]} paginatePath Path to field to paginate.
  */
-async function paginateByPath( queryFn, query, variables, paginatePath ) {
-	const nodesPath = [ ...paginatePath, 'nodes' ];
-	const pageInfoPath = [ ...paginatePath, 'pageInfo' ];
-	const endCursorPath = [ ...pageInfoPath, 'endCursor' ];
-	const hasNextPagePath = [ ...pageInfoPath, 'hasNextPage' ];
-	const hasNextPage = ( data ) => _.get( data, hasNextPagePath );
+async function paginateByPath(queryFn, query, variables, paginatePath) {
+	const nodesPath = [...paginatePath, 'nodes'];
+	const pageInfoPath = [...paginatePath, 'pageInfo'];
+	const endCursorPath = [...pageInfoPath, 'endCursor'];
+	const hasNextPagePath = [...pageInfoPath, 'hasNextPage'];
+	const hasNextPage = (data) => _.get(data, hasNextPagePath);
 
-	const data = await queryFn( query, variables );
+	const data = await queryFn(query, variables);
 
-	if ( ! _.has( data, nodesPath ) ) {
+	if (!_.has(data, nodesPath)) {
 		throw new Error(
-			"Data doesn't contain `nodes` field. Make sure the `paginatePath` is set to the field you wish to paginate and that the query includes the `nodes` field.",
+			"Data doesn't contain `nodes` field. Make sure the `paginatePath` is set to the field you wish to paginate and that the query includes the `nodes` field."
 		);
 	}
 
-	if ( ! _.has( data, pageInfoPath ) || ! _.has( data, endCursorPath ) || ! _.has( data, hasNextPagePath ) ) {
+	if (
+		!_.has(data, pageInfoPath) ||
+		!_.has(data, endCursorPath) ||
+		!_.has(data, hasNextPagePath)
+	) {
 		throw new Error(
-			"Data doesn't contain `pageInfo` field with `endCursor` and `hasNextPage` fields. Make sure the `paginatePath` is set to the field you wish to paginate and that the query includes the `pageInfo` field.",
+			"Data doesn't contain `pageInfo` field with `endCursor` and `hasNextPage` fields. Make sure the `paginatePath` is set to the field you wish to paginate and that the query includes the `pageInfo` field."
 		);
 	}
 
-	while ( hasNextPage( data ) ) {
+	while (hasNextPage(data)) {
 		// eslint-disable-next-line no-await-in-loop
-		const newData = await queryFn( query, {
+		const newData = await queryFn(query, {
 			...variables,
-			after: _.get( data, [ ...pageInfoPath, 'endCursor' ] ),
-		} );
-		const newNodes = _.get( newData, nodesPath );
-		const newPageInfo = _.get( newData, pageInfoPath );
+			after: _.get(data, [...pageInfoPath, 'endCursor']),
+		});
+		const newNodes = _.get(newData, nodesPath);
+		const newPageInfo = _.get(newData, pageInfoPath);
 
-		_.set( data, pageInfoPath, newPageInfo );
-		_.update( data, nodesPath, ( d ) => d.concat( newNodes ) );
+		_.set(data, pageInfoPath, newPageInfo);
+		_.update(data, nodesPath, (d) => d.concat(newNodes));
 	}
 
 	return data;

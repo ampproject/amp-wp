@@ -19,37 +19,36 @@ import { Welcome } from './welcome';
 export const PAGES = [
 	{
 		slug: 'welcome',
-		title: __( 'Welcome', 'amp' ),
+		title: __('Welcome', 'amp'),
 		PageComponent: Welcome,
 		showTitle: false,
 	},
 	{
 		slug: 'technical-background',
-		title: __( 'Technical Background', 'amp' ),
+		title: __('Technical Background', 'amp'),
 		PageComponent: TechnicalBackground,
 		showTitle: false,
 	},
 	{
 		slug: 'site-scan',
-		title: __( 'Site Scan', 'amp' ),
+		title: __('Site Scan', 'amp'),
 		PageComponent: SiteScan,
 	},
 	{
 		slug: 'template-modes',
-		title: __( 'Template Modes', 'amp' ),
+		title: __('Template Modes', 'amp'),
 		PageComponent: TemplateMode,
 		showTitle: false,
 	},
 	{
 		slug: 'theme-selection',
-		title: __( 'Theme Selection', 'amp' ),
+		title: __('Theme Selection', 'amp'),
 		PageComponent: ChooseReaderTheme,
 	},
 	{
 		slug: 'done',
-		title: __( 'Done', 'amp' ),
+		title: __('Done', 'amp'),
 		PageComponent: Done,
 		showTitle: false,
 	},
 ];
-

@@ -27,8 +27,8 @@ import { Options } from '../options-context-provider';
  * @param {Object} props      Component props.
  * @param {string} props.mode The template mode.
  */
-function Illustration( { mode } ) {
-	switch ( mode ) {
+function Illustration({ mode }) {
+	switch (mode) {
 		case STANDARD:
 			return <Standard />;
 
@@ -51,16 +51,16 @@ Illustration.propTypes = {
  *
  * @param {string} mode The mode.
  */
-function getTitle( mode ) {
-	switch ( mode ) {
+function getTitle(mode) {
+	switch (mode) {
 		case STANDARD:
-			return __( 'Standard', 'amp' );
+			return __('Standard', 'amp');
 
 		case TRANSITIONAL:
-			return __( 'Transitional', 'amp' );
+			return __('Transitional', 'amp');
 
 		case READER:
-			return __( 'Reader', 'amp' );
+			return __('Reader', 'amp');
 
 		default:
 			return null;
@@ -72,8 +72,8 @@ function getTitle( mode ) {
  *
  * @param {string} mode A template mode.
  */
-export function getId( mode ) {
-	return `template-mode-${ mode }`;
+export function getId(mode) {
+	return `template-mode-${mode}`;
 }
 
 /**
@@ -88,82 +88,98 @@ export function getId( mode ) {
  * @param {Object}              props.labelExtra         Optional. Extra content to display on the right side of the option label.
  * @param {boolean}             props.initialOpen        Whether the panel should be open when the component renders.
  */
-export function TemplateModeOption( { children, details, detailsUrl, initialOpen, labelExtra = null, mode, previouslySelected = false } ) {
-	const { editedOptions, updateOptions } = useContext( Options );
+export function TemplateModeOption({
+	children,
+	details,
+	detailsUrl,
+	initialOpen,
+	labelExtra = null,
+	mode,
+	previouslySelected = false,
+}) {
+	const { editedOptions, updateOptions } = useContext(Options);
 	const { theme_support: themeSupport } = editedOptions;
 
-	const id = getId( mode );
+	const id = getId(mode);
 
 	return (
 		<AMPDrawer
 			className="template-mode-option"
-			handleType={ HANDLE_TYPE_RIGHT }
-			heading={ (
-				<label className="template-mode-option__label" htmlFor={ id }>
+			handleType={HANDLE_TYPE_RIGHT}
+			heading={
+				<label className="template-mode-option__label" htmlFor={id}>
 					<div className="template-mode-selection__input-container">
 						<input
 							type="radio"
-							id={ id }
-							checked={ mode === themeSupport }
-							onChange={ () => {
-								updateOptions( { theme_support: mode } );
-							} }
+							id={id}
+							checked={mode === themeSupport}
+							onChange={() => {
+								updateOptions({ theme_support: mode });
+							}}
 						/>
 					</div>
 					<div className="template-mode-selection__illustration">
-						{ <Illustration mode={ mode } /> }
+						{<Illustration mode={mode} />}
 					</div>
 					<div className="template-mode-selection__description">
 						<h3>
-							{ getTitle( mode ) }
-						</h3>
-						{ previouslySelected && (
+{getTitle(mode)}
+</h3>
+						{previouslySelected && (
 							<AMPInfo>
-								{ __( 'Previously selected', 'amp' ) }
+								{__('Previously selected', 'amp')}
 							</AMPInfo>
-						) }
-						{ labelExtra && (
+						)}
+						{labelExtra && (
 							<div className="template-mode-selection__label-extra">
-								{ labelExtra }
+								{labelExtra}
 							</div>
-						) }
+						)}
 					</div>
 				</label>
-			) }
-			hiddenTitle={ getTitle( mode ) }
-			id={ `${ id }-container` }
-			initialOpen={ 'boolean' === typeof initialOpen ? initialOpen : ( mode && themeSupport && mode === themeSupport ) }
-			selected={ mode === themeSupport }
+			}
+			hiddenTitle={getTitle(mode)}
+			id={`${id}-container`}
+			initialOpen={
+				'boolean' === typeof initialOpen
+					? initialOpen
+					: mode && themeSupport && mode === themeSupport
+			}
+			selected={mode === themeSupport}
 		>
 			<div className="template-mode-selection__details">
-				{ children }
-				{ Array.isArray( details ) && (
+				{children}
+				{Array.isArray(details) && (
 					<ul className="template-mode-selection__details-list">
-						{ details.filter( Boolean ).map( ( detail, index ) => (
+						{details.filter(Boolean).map((detail, index) => (
 							<li
-								key={ index }
+								key={index}
 								className="template-mode-selection__details-list-item"
 							>
-								{ detail }
+								{detail}
 							</li>
-						) ) }
+						))}
 					</ul>
-				) }
-				{ details && ! Array.isArray( details ) && (
+				)}
+				{details && !Array.isArray(details) && (
 					<p>
 						<span>
-							{ details }
-						</span>
-						{ detailsUrl && (
+{details}
+</span>
+						{detailsUrl && (
 							<>
-								{ ' ' }
-								<a href={ detailsUrl } target="_blank" rel="noreferrer noopener">
-									{ __( 'Learn more.', 'amp' ) }
+								{' '}
+								<a
+									href={detailsUrl}
+									target="_blank"
+									rel="noreferrer noopener"
+								>
+									{__('Learn more.', 'amp')}
 								</a>
 							</>
-						) }
+						)}
 					</p>
-				) }
+				)}
 			</div>
 		</AMPDrawer>
 	);
@@ -171,14 +187,14 @@ export function TemplateModeOption( { children, details, detailsUrl, initialOpen
 
 TemplateModeOption.propTypes = {
 	children: PropTypes.any,
-	details: PropTypes.oneOfType( [
+	details: PropTypes.oneOfType([
 		PropTypes.string,
 		PropTypes.array,
 		PropTypes.object,
-	] ),
+	]),
 	detailsUrl: PropTypes.string,
 	initialOpen: PropTypes.bool,
 	labelExtra: PropTypes.node,
-	mode: PropTypes.oneOf( [ READER, STANDARD, TRANSITIONAL ] ).isRequired,
+	mode: PropTypes.oneOf([READER, STANDARD, TRANSITIONAL]).isRequired,
 	previouslySelected: PropTypes.bool,
 };

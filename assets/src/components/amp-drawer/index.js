@@ -33,7 +33,7 @@ export const HANDLE_TYPE_RIGHT = 'right';
  * @param {string}  props.hiddenTitle A title to go with the button that expands the drawer.
  * @param {string}  props.handleType  Display style for the drawer handle. Either 'full-width' or 'right'.
  */
-export function AMPDrawer( {
+export function AMPDrawer({
 	children = null,
 	className,
 	heading,
@@ -43,105 +43,107 @@ export function AMPDrawer( {
 	labelExtra = null,
 	selected = false,
 	hiddenTitle,
-} ) {
-	const [ opened, setOpened ] = useState( initialOpen );
-	const [ resetStatus, setResetStatus ] = useState( null );
+}) {
+	const [opened, setOpened] = useState(initialOpen);
+	const [resetStatus, setResetStatus] = useState(null);
 
 	/**
 	 * Watch for changes to the panel body attributes and set opened state accordingly.
 	 */
-	useEffect( () => {
-		const mutationCallback = ( [ mutation ] ) => {
-			if ( mutation.target.classList.contains( 'is-opened' ) && ! opened ) {
-				setOpened( true );
-			} else if ( opened ) {
-				setOpened( false );
+	useEffect(() => {
+		const mutationCallback = ([mutation]) => {
+			if (mutation.target.classList.contains('is-opened') && !opened) {
+				setOpened(true);
+			} else if (opened) {
+				setOpened(false);
 			}
 		};
 
-		const observer = new global.MutationObserver( mutationCallback );
+		const observer = new global.MutationObserver(mutationCallback);
 
-		const panel = document.getElementById( id )?.querySelector( '.components-panel__body' );
-		if ( panel ) {
-			observer.observe( panel, { attributes: true } );
+		const panel = document
+			.getElementById(id)
+			?.querySelector('.components-panel__body');
+		if (panel) {
+			observer.observe(panel, { attributes: true });
 		}
 
 		return () => {
 			observer.disconnect();
 		};
-	}, [ id, opened ] );
+	}, [id, opened]);
 
 	// Force a rerender when initialOpen changes, only after the first render.
-	useEffect( () => {
-		if ( null === resetStatus ) {
-			setResetStatus( 'waiting' );
+	useEffect(() => {
+		if (null === resetStatus) {
+			setResetStatus('waiting');
 			return;
 		}
 
-		setResetStatus( 'resetting' );
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ initialOpen ] );
+		setResetStatus('resetting');
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [initialOpen]);
 
 	/**
 	 * After the `resetting` render, set status back to waiting.
 	 */
-	useEffect( () => {
-		if ( 'resetting' === resetStatus ) {
-			setResetStatus( 'waiting' );
+	useEffect(() => {
+		if ('resetting' === resetStatus) {
+			setResetStatus('waiting');
 		}
-	}, [ resetStatus ] );
+	}, [resetStatus]);
 
 	return (
 		<Selectable
-			id={ id }
-			className={
-				classnames(
-					'amp-drawer',
-					`amp-drawer--handle-type-${ handleType }`,
-					className,
-					opened ? 'amp-drawer--opened' : '',
-				)
-			}
-			selected={ selected }
+			id={id}
+			className={classnames(
+				'amp-drawer',
+				`amp-drawer--handle-type-${handleType}`,
+				className,
+				opened ? 'amp-drawer--opened' : ''
+			)}
+			selected={selected}
 		>
-			{ handleType === HANDLE_TYPE_RIGHT && (
+			{handleType === HANDLE_TYPE_RIGHT && (
 				<>
 					<div className="amp-drawer__heading">
-						{ heading }
-					</div>
-					{ labelExtra && (
+{heading}
+</div>
+					{labelExtra && (
 						<div className="amp-drawer__label-extra">
-							{ labelExtra }
+							{labelExtra}
 						</div>
-					) }
+					)}
 				</>
-			) }
-			{ 'resetting' !== resetStatus && (
+			)}
+			{'resetting' !== resetStatus && (
 				<PanelBody
-					title={ handleType === HANDLE_TYPE_RIGHT ? (
-						<VisuallyHidden as="span">
-							{ hiddenTitle }
-						</VisuallyHidden>
-					) : (
-						<>
-							<div className="amp-drawer__heading">
-								{ heading }
-							</div>
-							{ labelExtra && (
-								<div className="amp-drawer__label-extra">
-									{ labelExtra }
+					title={
+						handleType === HANDLE_TYPE_RIGHT ? (
+							<VisuallyHidden as="span">
+								{hiddenTitle}
+							</VisuallyHidden>
+						) : (
+							<>
+								<div className="amp-drawer__heading">
+									{heading}
 								</div>
-							) }
-						</>
-					) }
+								{labelExtra && (
+									<div className="amp-drawer__label-extra">
+										{labelExtra}
+									</div>
+								)}
+							</>
+						)
+					}
 					className="amp-drawer__panel-body"
-					initialOpen={ initialOpen }
+					initialOpen={initialOpen}
 				>
 					<div className="amp-drawer__panel-body-inner">
-						{ children }
+						{children}
 					</div>
 				</PanelBody>
-			) }
+			)}
 		</Selectable>
 	);
 }
@@ -149,7 +151,7 @@ export function AMPDrawer( {
 AMPDrawer.propTypes = {
 	children: PropTypes.any,
 	className: PropTypes.string,
-	handleType: PropTypes.oneOf( [ HANDLE_TYPE_FULL_WIDTH, HANDLE_TYPE_RIGHT ] ),
+	handleType: PropTypes.oneOf([HANDLE_TYPE_FULL_WIDTH, HANDLE_TYPE_RIGHT]),
 	heading: PropTypes.node.isRequired,
 	hiddenTitle: PropTypes.node.isRequired,
 	id: PropTypes.string.isRequired,

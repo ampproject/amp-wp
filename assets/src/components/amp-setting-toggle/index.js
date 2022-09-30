@@ -26,43 +26,35 @@ import './style.css';
  * @param {string}        props.text     Toggle text.
  * @param {Object|string} props.title    Toggle title.
  */
-export function AMPSettingToggle( {
+export function AMPSettingToggle({
 	checked,
 	compact = false,
 	disabled = false,
 	onChange,
 	text,
 	title,
-} ) {
+}) {
 	return (
 		<div
-			className={ classnames( 'amp-setting-toggle', {
+			className={classnames('amp-setting-toggle', {
 				'amp-setting-toggle--disabled': disabled,
 				'amp-setting-toggle--compact': compact,
-			} ) }
+			})}
 		>
 			<ToggleControl
-				checked={ ! disabled && checked }
-				label={ (
+				checked={!disabled && checked}
+				label={
 					<div className="amp-setting-toggle__label-text">
-						{
-							title && (
-								isValidElement( title )
-									? title
-									: (
-										<h3>
-											{ title }
-										</h3>
-									)
-							)
-						}
-						{ text && (
-							<p>
-								{ text }
-							</p> ) }
+						{title &&
+							(isValidElement(title) ? title : <h3>
+{title}
+</h3>)}
+						{text && <p>
+{text}
+</p>}
 					</div>
-				) }
-				onChange={ onChange }
+				}
+				onChange={onChange}
 			/>
 		</div>
 	);

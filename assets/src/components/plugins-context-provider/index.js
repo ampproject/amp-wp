@@ -18,63 +18,72 @@ export const Plugins = createContext();
  * @param {Object} props          Component props.
  * @param {any}    props.children Component children.
  */
-export function PluginsContextProvider( { children } ) {
-	const [ plugins, setPlugins ] = useState( [] );
-	const [ fetchingPlugins, setFetchingPlugins ] = useState( null );
-	const [ error, setError ] = useState();
+export function PluginsContextProvider({ children }) {
+	const [plugins, setPlugins] = useState([]);
+	const [fetchingPlugins, setFetchingPlugins] = useState(null);
+	const [error, setError] = useState();
 
 	/**
 	 * This component sets state inside async functions.
 	 * Use this ref to prevent state updates after unmount.
 	 */
-	const hasUnmounted = useRef( false );
-	useEffect( () => () => {
-		hasUnmounted.current = true;
-	}, [] );
+	const hasUnmounted = useRef(false);
+	useEffect(
+		() => () => {
+			hasUnmounted.current = true;
+		},
+		[]
+	);
 
 	/**
 	 * Fetches validated URL data.
 	 */
-	useEffect( () => {
-		if ( error || plugins.length > 0 || fetchingPlugins ) {
+	useEffect(() => {
+		if (error || plugins.length > 0 || fetchingPlugins) {
 			return;
 		}
 
-		( async () => {
-			setFetchingPlugins( true );
+		(async () => {
+			setFetchingPlugins(true);
 
 			try {
-				const fetchedPlugins = await apiFetch( {
-					path: addQueryArgs( '/wp/v2/plugins', {
-						_fields: [ 'author', 'name', 'plugin', 'status', 'version' ],
-					} ),
-				} );
+				const fetchedPlugins = await apiFetch({
+					path: addQueryArgs('/wp/v2/plugins', {
+						_fields: [
+							'author',
+							'name',
+							'plugin',
+							'status',
+							'version',
+						],
+					}),
+				});
 
-				if ( hasUnmounted.current === true ) {
+				if (hasUnmounted.current === true) {
 					return;
 				}
 
-				setPlugins( fetchedPlugins );
-			} catch ( e ) {
-				if ( hasUnmounted.current === true ) {
+				setPlugins(fetchedPlugins);
+			} catch (e) {
+				if (hasUnmounted.current === true) {
 					return;
 				}
 
-				setError( e );
+				setError(e);
 			}
 
-			setFetchingPlugins( false );
-		} )();
-	}, [ error, fetchingPlugins, plugins ] );
+			setFetchingPlugins(false);
+		})();
+	}, [error, fetchingPlugins, plugins]);
 
 	return (
 		<Plugins.Provider
-			value={ {
+			value={{
 				fetchingPlugins,
 				plugins,
-			} }
+			}}
 		>
-			{ children }
+			{children}
 		</Plugins.Provider>
 	);
 }

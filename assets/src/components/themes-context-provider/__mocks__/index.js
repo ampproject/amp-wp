@@ -18,19 +18,19 @@ export const Themes = createContext();
  * @param {boolean} props.fetchingThemes Whether fetching themes or not.
  * @param {Array}   props.themes         An array of fetched themes.
  */
-export function ThemesContextProvider( {
+export function ThemesContextProvider({
 	children,
 	fetchingThemes = false,
 	themes = [],
-} ) {
+}) {
 	return (
-		<Themes.Provider value={
-			{
+		<Themes.Provider
+			value={{
 				fetchingThemes,
 				themes,
-			}
-		}>
-			{ children }
+			}}
+		>
+			{children}
 		</Themes.Provider>
 	);
 }

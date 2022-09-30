@@ -15,13 +15,16 @@ export const name = 'amp-post-status-info';
  * A wrapped AMP toggle component that is rendered for users with disabled Dev Tools.
  */
 function WrappedAMPToggle() {
-	const isDevToolsEnabled = useSelect( ( select ) => select( 'amp/block-editor' ).isDevToolsEnabled(), [] );
+	const isDevToolsEnabled = useSelect(
+		(select) => select('amp/block-editor').isDevToolsEnabled(),
+		[]
+	);
 
 	/**
 	 * When Dev Tools are enabled the `block-validation` shows the entire AMP
 	 * sidebar and a notifications area.
 	 */
-	if ( isDevToolsEnabled ) {
+	if (isDevToolsEnabled) {
 		return null;
 	}
 

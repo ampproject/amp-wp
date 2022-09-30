@@ -16,7 +16,7 @@ import { __ } from '@wordpress/i18n';
 const PrePublishPanel = () => {
 	return (
 		<PluginPrePublishPanel
-			title={ __( 'Featured Image', 'amp' ) }
+			title={__('Featured Image', 'amp')}
 			initialOpen="true"
 		>
 			<PostFeaturedImage />

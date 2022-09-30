@@ -13,32 +13,36 @@ import { render, unmountComponentAtNode } from '@wordpress/element';
  */
 import { SidebarNotificationsContainer } from '../index';
 
-describe( 'SidebarNotificationsContainer', () => {
+describe('SidebarNotificationsContainer', () => {
 	let container;
 
-	beforeEach( () => {
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-	} );
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		unmountComponentAtNode( container );
+	afterEach(() => {
+		unmountComponentAtNode(container);
 		container.remove();
 		container = null;
-	} );
+	});
 
-	it( 'renders sidebar notifications container along with children', () => {
-		act( () => {
+	it('renders sidebar notifications container along with children', () => {
+		act(() => {
 			render(
 				<SidebarNotificationsContainer>
-					{ 'Foo' }
+					{'Foo'}
 				</SidebarNotificationsContainer>,
-				container,
+				container
 			);
-		} );
+		});
 
-		expect( container.querySelector( '.sidebar-notifications-container' ) ).not.toBeNull();
-		expect( container.querySelector( '.sidebar-notifications-container' ).textContent ).toBe( 'Foo' );
-	} );
-} );
-
+		expect(
+			container.querySelector('.sidebar-notifications-container')
+		).not.toBeNull();
+		expect(
+			container.querySelector('.sidebar-notifications-container')
+				.textContent
+		).toBe('Foo');
+	});
+});

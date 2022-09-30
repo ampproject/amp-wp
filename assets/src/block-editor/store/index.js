@@ -13,13 +13,10 @@ import * as selectors from './selectors';
  */
 const MODULE_KEY = 'amp/block-editor';
 
-export default registerStore(
-	MODULE_KEY,
-	{
-		reducer: ( state ) => state,
-		selectors,
-		initialState: {
-			...window.ampBlockEditor,
-		},
+export default registerStore(MODULE_KEY, {
+	reducer: (state) => state,
+	selectors,
+	initialState: {
+		...window.ampBlockEditor,
 	},
-);
+});

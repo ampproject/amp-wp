@@ -28,54 +28,74 @@ import {
  * @param {Object} props.ampValidatedPostCount AMP validated post counts.
  * @return {JSX.Element|null} HTML markup for notice data.
  */
-export function ValidationResultsNotice( { data, args, ampValidatedPostCount } ) {
+export function ValidationResultsNotice({ data, args, ampValidatedPostCount }) {
 	const isSpecificUrlRequest = 0 < args?.urls?.length;
 	const hasErrors = 0 < data.errors?.length || 0 < data.urls?.length;
-	const hasAllStaleResults = 0 < ampValidatedPostCount.all && ampValidatedPostCount.all === ampValidatedPostCount.stale;
-	const hasSomeStaleResults = 0 < ampValidatedPostCount.fresh && 0 < ampValidatedPostCount.stale;
-	const hasAllFreshResults = 0 < ampValidatedPostCount.all && ampValidatedPostCount.all === ampValidatedPostCount.fresh;
+	const hasAllStaleResults =
+		0 < ampValidatedPostCount.all &&
+		ampValidatedPostCount.all === ampValidatedPostCount.stale;
+	const hasSomeStaleResults =
+		0 < ampValidatedPostCount.fresh && 0 < ampValidatedPostCount.stale;
+	const hasAllFreshResults =
+		0 < ampValidatedPostCount.all &&
+		ampValidatedPostCount.all === ampValidatedPostCount.fresh;
 
 	// The site doesn't have any validated URLs.
-	if ( ! isSpecificUrlRequest && 0 === ampValidatedPostCount.all ) {
+	if (!isSpecificUrlRequest && 0 === ampValidatedPostCount.all) {
 		return (
-			<AMPNotice type={ NOTICE_TYPE_WARNING } size={ NOTICE_SIZE_SMALL }>
-				{ __( 'The site has no validation data. Go to the AMP Settings page and scan you site before sending a support request.', 'amp' ) }
+			<AMPNotice type={NOTICE_TYPE_WARNING} size={NOTICE_SIZE_SMALL}>
+				{__(
+					'The site has no validation data. Go to the AMP Settings page and scan you site before sending a support request.',
+					'amp'
+				)}
 			</AMPNotice>
 		);
 	}
 
 	// All validated URLs of site are stale.
-	if ( ! isSpecificUrlRequest && hasAllStaleResults ) {
+	if (!isSpecificUrlRequest && hasAllStaleResults) {
 		return (
-			<AMPNotice type={ NOTICE_TYPE_WARNING } size={ NOTICE_SIZE_SMALL }>
-				{ __( 'The validation data is stale. Go to the AMP Settings page and rescan you site before sending a support request.', 'amp' ) }
+			<AMPNotice type={NOTICE_TYPE_WARNING} size={NOTICE_SIZE_SMALL}>
+				{__(
+					'The validation data is stale. Go to the AMP Settings page and rescan you site before sending a support request.',
+					'amp'
+				)}
 			</AMPNotice>
 		);
 	}
 
 	// The site doesn't have any AMP errors but there are some stale results.
-	if ( ! isSpecificUrlRequest && ! hasErrors && hasSomeStaleResults ) {
+	if (!isSpecificUrlRequest && !hasErrors && hasSomeStaleResults) {
 		return (
-			<AMPNotice type={ NOTICE_TYPE_WARNING } size={ NOTICE_SIZE_SMALL }>
-				{ __( 'We found no issues on your site but there are some stale validation results. Browse your site to ensure everything is working as expected.', 'amp' ) }
+			<AMPNotice type={NOTICE_TYPE_WARNING} size={NOTICE_SIZE_SMALL}>
+				{__(
+					'We found no issues on your site but there are some stale validation results. Browse your site to ensure everything is working as expected.',
+					'amp'
+				)}
 			</AMPNotice>
 		);
 	}
 
 	// All validated URLs are stale.
-	if ( ! isSpecificUrlRequest && ! hasErrors && hasAllFreshResults ) {
+	if (!isSpecificUrlRequest && !hasErrors && hasAllFreshResults) {
 		return (
-			<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_SMALL }>
-				{ __( 'We found no issues on your site. Browse your site to ensure everything is working as expected.', 'amp' ) }
+			<AMPNotice type={NOTICE_TYPE_INFO} size={NOTICE_SIZE_SMALL}>
+				{__(
+					'We found no issues on your site. Browse your site to ensure everything is working as expected.',
+					'amp'
+				)}
 			</AMPNotice>
 		);
 	}
 
 	// If requested URL doesn't have AMP related errors.
-	if ( isSpecificUrlRequest && ! hasErrors ) {
+	if (isSpecificUrlRequest && !hasErrors) {
 		return (
-			<AMPNotice type={ NOTICE_TYPE_SUCCESS } size={ NOTICE_SIZE_SMALL }>
-				{ __( 'The requested URL does not have any AMP validation errors.', 'amp' ) }
+			<AMPNotice type={NOTICE_TYPE_SUCCESS} size={NOTICE_SIZE_SMALL}>
+				{__(
+					'The requested URL does not have any AMP validation errors.',
+					'amp'
+				)}
 			</AMPNotice>
 		);
 	}
@@ -85,17 +105,17 @@ export function ValidationResultsNotice( { data, args, ampValidatedPostCount } )
 
 ValidationResultsNotice.propTypes = {
 	args: PropTypes.any,
-	data: PropTypes.shape( {
+	data: PropTypes.shape({
 		error_sources: PropTypes.array.isRequired,
 		errors: PropTypes.array.isRequired,
 		plugins: PropTypes.array,
 		site_info: PropTypes.object,
 		themes: PropTypes.array,
 		urls: PropTypes.array,
-	} ),
-	ampValidatedPostCount: PropTypes.shape( {
+	}),
+	ampValidatedPostCount: PropTypes.shape({
 		all: PropTypes.number.isRequired,
 		fresh: PropTypes.number.isRequired,
 		stale: PropTypes.number.isRequired,
-	} ),
+	}),
 };

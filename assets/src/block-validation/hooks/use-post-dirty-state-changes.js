@@ -13,14 +13,13 @@ import { BLOCK_VALIDATION_STORE_KEY } from '../store';
 const DELAY_MS = 500;
 
 export function usePostDirtyStateChanges() {
-	const [ content, setContent ] = useState( null );
-	const [ updatedContent, setUpdatedContent ] = useState();
-	const subscription = useRef( null );
+	const [content, setContent] = useState(null);
+	const [updatedContent, setUpdatedContent] = useState();
+	const subscription = useRef(null);
 
-	const {
-		setIsPostDirty,
-		setMaybeIsPostDirty,
-	} = useDispatch( BLOCK_VALIDATION_STORE_KEY );
+	const { setIsPostDirty, setMaybeIsPostDirty } = useDispatch(
+		BLOCK_VALIDATION_STORE_KEY
+	);
 
 	const {
 		getEditedPostContent,
@@ -28,26 +27,39 @@ export function usePostDirtyStateChanges() {
 		hasActiveMetaboxes,
 		isPostDirty,
 		isSavingOrPreviewingPost,
-	} = useSelect( ( select ) => ( {
-		getEditedPostContent: select( 'core/editor' ).getEditedPostContent,
-		hasErrorsFromRemovedBlocks: Boolean( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors().find(
-			( { clientId } ) => clientId && ! select( 'core/block-editor' ).getBlockName( clientId ) ),
-		),
-		hasActiveMetaboxes: select( 'core/edit-post' ).hasMetaBoxes(),
-		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
-		isSavingOrPreviewingPost:
-			( select( 'core/editor' ).isSavingPost() && ! select( 'core/editor' ).isAutosavingPost() ) ||
-			select( 'core/editor' ).isPreviewingPost(),
-	} ), [] );
+	} = useSelect(
+		(select) => ({
+			getEditedPostContent: select('core/editor').getEditedPostContent,
+			hasErrorsFromRemovedBlocks: Boolean(
+				select(BLOCK_VALIDATION_STORE_KEY)
+					.getValidationErrors()
+					.find(
+						({ clientId }) =>
+							clientId &&
+							!select('core/block-editor').getBlockName(clientId)
+					)
+			),
+			hasActiveMetaboxes: select('core/edit-post').hasMetaBoxes(),
+			isPostDirty: select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty(),
+			isSavingOrPreviewingPost:
+				(select('core/editor').isSavingPost() &&
+					!select('core/editor').isAutosavingPost()) ||
+				select('core/editor').isPreviewingPost(),
+		}),
+		[]
+	);
 
 	/**
 	 * Remove subscription when component is unmounted.
 	 */
-	useEffect( () => () => {
-		if ( subscription.current ) {
-			subscription.current();
-		}
-	}, [] );
+	useEffect(
+		() => () => {
+			if (subscription.current) {
+				subscription.current();
+			}
+		},
+		[]
+	);
 
 	/**
 	 * Post is no longer in a dirty state after save.
@@ -56,12 +68,12 @@ export function usePostDirtyStateChanges() {
 	 * gets unsubscribed from the store changes whenever post gets into a dirty
 	 * state.
 	 */
-	useEffect( () => {
-		if ( isPostDirty && isSavingOrPreviewingPost ) {
-			setIsPostDirty( false );
-			setContent( null );
+	useEffect(() => {
+		if (isPostDirty && isSavingOrPreviewingPost) {
+			setIsPostDirty(false);
+			setContent(null);
 		}
-	}, [ isPostDirty, isSavingOrPreviewingPost, setIsPostDirty ] );
+	}, [isPostDirty, isSavingOrPreviewingPost, setIsPostDirty]);
 
 	/**
 	 * Whenever a fresh post content differs from the one that is stored in the
@@ -70,20 +82,20 @@ export function usePostDirtyStateChanges() {
 	 * When the content is null, we're resetting both the `content` and the
 	 * `updatedContent`.
 	 */
-	useEffect( () => {
-		if ( content === null ) {
+	useEffect(() => {
+		if (content === null) {
 			const initialContent = getEditedPostContent();
 
-			setContent( initialContent );
-			setUpdatedContent( initialContent );
+			setContent(initialContent);
+			setUpdatedContent(initialContent);
 
 			return;
 		}
 
-		if ( updatedContent !== content ) {
-			setIsPostDirty( true );
+		if (updatedContent !== content) {
+			setIsPostDirty(true);
 		}
-	}, [ content, getEditedPostContent, setIsPostDirty, updatedContent ] );
+	}, [content, getEditedPostContent, setIsPostDirty, updatedContent]);
 
 	/**
 	 * Post may have changed.
@@ -93,31 +105,42 @@ export function usePostDirtyStateChanges() {
 	 * which used to be in the content but are no longer found, potentially
 	 * due to switching from the visual editor to the code editor.
 	 */
-	useEffect( () => {
-		setMaybeIsPostDirty( ! isPostDirty && ( hasActiveMetaboxes || hasErrorsFromRemovedBlocks ) );
-	}, [ hasActiveMetaboxes, hasErrorsFromRemovedBlocks, isPostDirty, setMaybeIsPostDirty ] );
+	useEffect(() => {
+		setMaybeIsPostDirty(
+			!isPostDirty && (hasActiveMetaboxes || hasErrorsFromRemovedBlocks)
+		);
+	}, [
+		hasActiveMetaboxes,
+		hasErrorsFromRemovedBlocks,
+		isPostDirty,
+		setMaybeIsPostDirty,
+	]);
 
 	/**
 	 * Keep internal content state in sync with editor state.
 	 */
-	const listener = useCallback( () => {
-		setUpdatedContent( getEditedPostContent() );
-	}, [ getEditedPostContent ] );
+	const listener = useCallback(() => {
+		setUpdatedContent(getEditedPostContent());
+	}, [getEditedPostContent]);
 
 	/**
 	 * Debounce calls to the store listener for performance reasons.
 	 */
-	const debouncedListener = useDebounce( listener, DELAY_MS );
+	const debouncedListener = useDebounce(listener, DELAY_MS);
 
 	/**
 	 * Only subscribe to the store changes if the post is not in a dirty state.
 	 */
-	useEffect( () => {
-		if ( isPostDirty && subscription.current ) {
+	useEffect(() => {
+		if (isPostDirty && subscription.current) {
 			subscription.current();
 			subscription.current = null;
-		} else if ( ! isSavingOrPreviewingPost && ! isPostDirty && ! subscription.current ) {
-			subscription.current = subscribe( debouncedListener );
+		} else if (
+			!isSavingOrPreviewingPost &&
+			!isPostDirty &&
+			!subscription.current
+		) {
+			subscription.current = subscribe(debouncedListener);
 		}
-	}, [ debouncedListener, isPostDirty, isSavingOrPreviewingPost ] );
+	}, [debouncedListener, isPostDirty, isSavingOrPreviewingPost]);
 }

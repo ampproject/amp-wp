@@ -20,25 +20,26 @@ import { ListItems } from '../list-items';
  * @param {Array}  props.themes Theme data.
  * @return {JSX.Element|null} HTML markup for theme data.
  */
-export function Themes( { themes } ) {
-	if ( ! Array.isArray( themes ) ) {
+export function Themes({ themes }) {
+	if (!Array.isArray(themes)) {
 		return null;
 	}
 
-	const items = themes.map( ( item ) => {
-		return { value: `${ item.name } ${ item.version ? '(' + item.version + ')' : '' }` };
-	} );
+	const items = themes.map((item) => {
+		return {
+			value: `${item.name} ${
+				item.version ? '(' + item.version + ')' : ''
+			}`,
+		};
+	});
 
 	return (
-		<details open={ false }>
+		<details open={false}>
 			<summary>
-				{ __( 'Themes', 'amp' ) }
-			</summary>
+{__('Themes', 'amp')}
+</summary>
 			<div className="detail-body">
-				<ListItems
-					isDisc={ true }
-					items={ items }
-				/>
+				<ListItems isDisc={true} items={items} />
 			</div>
 		</details>
 	);

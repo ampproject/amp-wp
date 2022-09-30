@@ -28,7 +28,7 @@ import { SiteScanSourcesDetail } from './site-scan-sources-detail';
  * @param {string} props.inactiveSourceNotice    Message to show next to an inactive source.
  * @param {string} props.uninstalledSourceNotice Message to show next to an uninstalled source.
  */
-export function SiteScanSourcesListItem( {
+export function SiteScanSourcesListItem({
 	author,
 	name,
 	slug,
@@ -36,71 +36,83 @@ export function SiteScanSourcesListItem( {
 	version,
 	inactiveSourceNotice,
 	uninstalledSourceNotice,
-} ) {
-	const [ hasOpened, setHasOpened ] = useState( false );
-	const handleKey = ( { key } ) => {
-		if ( [ ' ', 'return' ].includes( key ) ) {
-			setHasOpened( true );
+}) {
+	const [hasOpened, setHasOpened] = useState(false);
+	const handleKey = ({ key }) => {
+		if ([' ', 'return'].includes(key)) {
+			setHasOpened(true);
 		}
 	};
 
 	return (
 		// eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
 		<details
-			open={ false }
-			onKeyDown={ handleKey }
-			onClick={ () => {
-				setHasOpened( true );
-			} }
+			open={false}
+			onKeyDown={handleKey}
+			onClick={() => {
+				setHasOpened(true);
+			}}
 		>
 			<summary>
 				<span className="site-scan-results__summary-wrapper">
-					{ name && (
-						<span className={ classnames( 'site-scan-results__source-name', {
-							'site-scan-results__source-name--inactive': [ 'inactive', 'uninstalled' ].includes( status ),
-						} ) }>
-							{ name }
+					{name && (
+						<span
+							className={classnames(
+								'site-scan-results__source-name',
+								{
+									'site-scan-results__source-name--inactive':
+										['inactive', 'uninstalled'].includes(
+											status
+										),
+								}
+							)}
+						>
+							{name}
 						</span>
-					) }
-					{ ! name && slug && (
+					)}
+					{!name && slug && (
 						<code className="site-scan-results__source-slug">
-							{ slug }
+							{slug}
 						</code>
-					) }
-					{ status === 'active' ? (
+					)}
+					{status === 'active' ? (
 						<>
-							{ author && (
+							{author && (
 								<span className="site-scan-results__source-author">
-									{ sprintf(
+									{sprintf(
 										/* translators: %s is an author name. */
-										__( 'by %s', 'amp' ),
-										author,
-									) }
+										__('by %s', 'amp'),
+										author
+									)}
 								</span>
-							) }
-							{ version && (
+							)}
+							{version && (
 								<span className="site-scan-results__source-version">
-									{ sprintf(
+									{sprintf(
 										/* translators: %s is a version number. */
-										__( 'Version %s', 'amp' ),
-										version,
-									) }
+										__('Version %s', 'amp'),
+										version
+									)}
 								</span>
-							) }
+							)}
 						</>
 					) : (
 						<AMPNotice
 							className="site-scan-results__source-notice"
-							type={ NOTICE_TYPE_PLAIN }
-							size={ NOTICE_SIZE_SMALL }
+							type={NOTICE_TYPE_PLAIN}
+							size={NOTICE_SIZE_SMALL}
 						>
-							{ status === 'inactive' ? inactiveSourceNotice : null }
-							{ status === 'uninstalled' ? uninstalledSourceNotice : null }
+							{status === 'inactive'
+								? inactiveSourceNotice
+								: null}
+							{status === 'uninstalled'
+								? uninstalledSourceNotice
+								: null}
 						</AMPNotice>
-					) }
+					)}
 				</span>
 			</summary>
-			{ hasOpened && <SiteScanSourcesDetail slug={ slug } /> }
+			{hasOpened && <SiteScanSourcesDetail slug={slug} />}
 		</details>
 	);
 }

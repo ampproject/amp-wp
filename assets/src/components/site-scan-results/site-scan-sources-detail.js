@@ -25,10 +25,10 @@ import ClipboardButton from '../clipboard-button';
  *
  * @return {Array} List of source that of current plugin/theme.
  */
-function getAssociatedSources( sources, slug ) {
-	return sources.filter( ( source ) => {
-		return slug === getPluginSlugFromFile( source.name );
-	} );
+function getAssociatedSources(sources, slug) {
+	return sources.filter((source) => {
+		return slug === getPluginSlugFromFile(source.name);
+	});
 }
 
 /**
@@ -39,19 +39,19 @@ function getAssociatedSources( sources, slug ) {
  *
  * @return {Array} List of validation errors for current plugin/theme.
  */
-function getAssociatedErrors( validationErrors, slug ) {
+function getAssociatedErrors(validationErrors, slug) {
 	const errors = [];
 
-	for ( const validationError of validationErrors ) {
+	for (const validationError of validationErrors) {
 		const sources = validationError.sources || [];
-		const associatedSources = getAssociatedSources( sources, slug );
-		if ( associatedSources && 0 < associatedSources.length ) {
+		const associatedSources = getAssociatedSources(sources, slug);
+		if (associatedSources && 0 < associatedSources.length) {
 			const error = {
 				...validationError,
 				sources: associatedSources,
 			};
 
-			errors.push( error );
+			errors.push(error);
 		}
 	}
 
@@ -64,56 +64,62 @@ function getAssociatedErrors( validationErrors, slug ) {
  * @param {Object} props      Component props.
  * @param {string} props.slug Slug of plugin or theme.
  */
-export function SiteScanSourcesDetail( {
-	slug,
-} ) {
-	const [ hasCopied, setHasCopied ] = useState( false );
-	const { scannableUrls } = useContext( SiteScan );
+export function SiteScanSourcesDetail({ slug }) {
+	const [hasCopied, setHasCopied] = useState(false);
+	const { scannableUrls } = useContext(SiteScan);
 
-	const extensionScannableUrls = useMemo( () => {
-		return scannableUrls.map( ( scannableUrl ) => {
-			const validationErrors = scannableUrl.validation_errors || [];
-			const associatedErrors = getAssociatedErrors( validationErrors, slug );
+	const extensionScannableUrls = useMemo(() => {
+		return scannableUrls
+			.map((scannableUrl) => {
+				const validationErrors = scannableUrl.validation_errors || [];
+				const associatedErrors = getAssociatedErrors(
+					validationErrors,
+					slug
+				);
 
-			if ( associatedErrors?.length > 0 ) {
-				return {
-					...scannableUrl,
-					validation_errors: associatedErrors,
-				};
-			}
+				if (associatedErrors?.length > 0) {
+					return {
+						...scannableUrl,
+						validation_errors: associatedErrors,
+					};
+				}
 
-			return null;
-		} ).filter( Boolean );
-	}, [ scannableUrls, slug ] );
+				return null;
+			})
+			.filter(Boolean);
+	}, [scannableUrls, slug]);
 
-	const jsonData = JSON.stringify( extensionScannableUrls, null, 4 );
+	const jsonData = JSON.stringify(extensionScannableUrls, null, 4);
 
 	return (
 		<div className="site-scan-results__detail-body">
 			<ul className="site-scan-results__urls-list">
-				{
-					extensionScannableUrls.map( ( { url } ) => (
-						<li key={ url }>
-							<ExternalLink href={ url }>
-								{ url }
-							</ExternalLink>
-						</li>
-					) )
-				}
+				{extensionScannableUrls.map(({ url }) => (
+					<li key={url}>
+						<ExternalLink href={url}>
+{url}
+</ExternalLink>
+					</li>
+				))}
 			</ul>
 			<p className="site-scan-results__source-intro">
-				{ __( 'Raw validation data which you may want to share with the author so they can fix AMP compatibility:', 'amp' ) }
+				{__(
+					'Raw validation data which you may want to share with the author so they can fix AMP compatibility:',
+					'amp'
+				)}
 			</p>
 			<pre className="site-scan-results__source-detail">
-				{ jsonData }
-			</pre>
+{jsonData}
+</pre>
 			<ClipboardButton
-				isSmall={ true }
-				text={ jsonData }
-				onCopy={ () => setHasCopied( true ) }
-				onFinishCopy={ () => setHasCopied( false ) }
+				isSmall={true}
+				text={jsonData}
+				onCopy={() => setHasCopied(true)}
+				onFinishCopy={() => setHasCopied(false)}
 			>
-				{ hasCopied ? __( 'Copied!', 'amp' ) : __( 'Copy Validation Data', 'amp' ) }
+				{hasCopied
+					? __('Copied!', 'amp')
+					: __('Copy Validation Data', 'amp')}
 			</ClipboardButton>
 		</div>
 	);

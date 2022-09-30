@@ -8,16 +8,13 @@ import { useState, useCallback } from '@wordpress/element';
  * This allows errors to be explicitly thrown.
  */
 export function useAsyncError() {
-	const [ error, setAsyncError ] = useState();
+	const [error, setAsyncError] = useState();
 
-	const memoizedSetError = useCallback(
-		( e ) => {
-			setAsyncError( () => {
-				throw e;
-			} );
-		},
-		[],
-	);
+	const memoizedSetError = useCallback((e) => {
+		setAsyncError(() => {
+			throw e;
+		});
+	}, []);
 
 	return { error, setAsyncError: memoizedSetError };
 }

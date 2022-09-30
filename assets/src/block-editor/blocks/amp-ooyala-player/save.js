@@ -3,8 +3,16 @@
  */
 import PropTypes from 'prop-types';
 
-const BlockSave = ( { attributes } ) => {
-	const { dataEmbedCode, dataPlayerId, dataPcode, dataPlayerVersion, ampLayout, height, width } = attributes;
+const BlockSave = ({ attributes }) => {
+	const {
+		dataEmbedCode,
+		dataPlayerId,
+		dataPcode,
+		dataPlayerVersion,
+		ampLayout,
+		height,
+		width,
+	} = attributes;
 
 	const ooyalaProps = {
 		layout: ampLayout,
@@ -14,16 +22,14 @@ const BlockSave = ( { attributes } ) => {
 		'data-pcode': dataPcode,
 		'data-playerversion': dataPlayerVersion,
 	};
-	if ( 'fixed-height' !== ampLayout && width ) {
+	if ('fixed-height' !== ampLayout && width) {
 		ooyalaProps.width = width;
 	}
-	return (
-		<amp-ooyala-player { ...ooyalaProps } />
-	);
+	return <amp-ooyala-player {...ooyalaProps} />;
 };
 
 BlockSave.propTypes = {
-	attributes: PropTypes.shape( {
+	attributes: PropTypes.shape({
 		ampLayout: PropTypes.string,
 		height: PropTypes.number,
 		width: PropTypes.number,
@@ -31,7 +37,7 @@ BlockSave.propTypes = {
 		dataPlayerId: PropTypes.string,
 		dataPcode: PropTypes.string,
 		dataPlayerVersion: PropTypes.string,
-	} ),
+	}),
 };
 
 export default BlockSave;

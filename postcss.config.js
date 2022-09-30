@@ -1,8 +1,8 @@
 module.exports = {
 	plugins: [
-		require( 'postcss-import' ),
-		require( 'postcss-nested' ),
-		require( 'postcss-preset-env' )( {
+		require('postcss-import'),
+		require('postcss-nested'),
+		require('postcss-preset-env')({
 			stage: 0,
 			preserve: false, // Omit pre-polyfilled CSS.
 			features: {
@@ -14,6 +14,6 @@ module.exports = {
 			autoprefixer: {
 				grid: true,
 			},
-		} ),
+		}),
 	],
 };

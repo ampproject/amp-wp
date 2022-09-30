@@ -15,14 +15,14 @@ import { __ } from '@wordpress/i18n';
  * @param {Object} props.data AMP Support data.
  * @return {JSX.Element|null} HTML markup for raw data.
  */
-export function RawData( { data } ) {
+export function RawData({ data }) {
 	return (
-		<details open={ false }>
+		<details open={false}>
 			<summary>
-				{ __( 'Raw Data', 'amp' ) }
-			</summary>
+{__('Raw Data', 'amp')}
+</summary>
 			<pre className="amp-support__raw-data detail-body">
-				{ JSON.stringify( data, null, 4 ) }
+				{JSON.stringify(data, null, 4)}
 			</pre>
 		</details>
 	);
@@ -31,4 +31,3 @@ export function RawData( { data } ) {
 RawData.propTypes = {
 	data: PropTypes.object.isRequired,
 };
-

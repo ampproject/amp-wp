@@ -12,13 +12,14 @@ import save from './save';
 export const name = 'amp/amp-springboard-player';
 
 export const settings = {
-	title: __( 'AMP Springboard Player', 'amp' ),
-	description: __( 'Displays the Springboard Player used in the Springboard Video Platform', 'amp' ),
+	title: __('AMP Springboard Player', 'amp'),
+	description: __(
+		'Displays the Springboard Player used in the Springboard Video Platform',
+		'amp'
+	),
 	category: 'embed',
 	icon: 'embed-generic',
-	keywords: [
-		__( 'Embed', 'amp' ),
-	],
+	keywords: [__('Embed', 'amp')],
 
 	attributes: {
 		dataSiteId: {

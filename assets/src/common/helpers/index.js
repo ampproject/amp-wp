@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { get, now, template } from 'lodash';
-import { featuredImageMinimumWidth, featuredImageMinimumHeight } from 'amp-block-editor-data';
+import {
+	featuredImageMinimumWidth,
+	featuredImageMinimumHeight,
+} from 'amp-block-editor-data';
 
 /**
  * WordPress dependencies
@@ -12,9 +15,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import {
-	FILE_TYPE_ERROR_VIEW,
-} from '../constants';
+import { FILE_TYPE_ERROR_VIEW } from '../constants';
 
 /**
  * Determines whether whether the image has the minimum required dimensions.
@@ -29,16 +30,15 @@ import {
  * @param {number} dimensions.height Required media height in pixels.
  * @return {boolean} Whether the media has the minimum dimensions.
  */
-export const hasMinimumDimensions = ( media, dimensions ) => {
-	if ( ! media || ! media.width || ! media.height ) {
+export const hasMinimumDimensions = (media, dimensions) => {
+	if (!media || !media.width || !media.height) {
 		return false;
 	}
 
 	const { width, height } = dimensions;
 
 	return (
-		( ! width || media.width >= width ) &&
-		( ! height || media.height >= height )
+		(!width || media.width >= width) && (!height || media.height >= height)
 	);
 };
 
@@ -75,37 +75,74 @@ export const getMinimumFeaturedImageDimensions = () => {
  * @param {number}      dimensions.height          Minimum required height value.
  * @return {string[]|null} Validation errors, or null if there were no errors.
  */
-export const validateFeaturedImage = ( media, dimensions ) => {
-	if ( ! media ) {
-		return [ __( 'Selecting a featured image is required.', 'amp' ) ];
+export const validateFeaturedImage = (media, dimensions) => {
+	if (!media) {
+		return [__('Selecting a featured image is required.', 'amp')];
 	}
 
 	const errors = [];
 
-	if ( ! [ 'image/png', 'image/gif', 'image/jpeg', 'image/webp', 'image/svg+xml' ].includes( media.mime_type ) ) {
+	if (
+		![
+			'image/png',
+			'image/gif',
+			'image/jpeg',
+			'image/webp',
+			'image/svg+xml',
+		].includes(media.mime_type)
+	) {
 		errors.push(
 			/* translators: List of image formats */
-			sprintf( __( 'The featured image must be of either %1$s, %2$s, %3$s, %4$s, or %5$s format.', 'amp' ), 'JPEG', 'PNG', 'GIF', 'WebP', 'SVG' ),
+			sprintf(
+				__(
+					'The featured image must be of either %1$s, %2$s, %3$s, %4$s, or %5$s format.',
+					'amp'
+				),
+				'JPEG',
+				'PNG',
+				'GIF',
+				'WebP',
+				'SVG'
+			)
 		);
 	}
 
-	if ( ! hasMinimumDimensions( media.media_details, dimensions ) ) {
+	if (!hasMinimumDimensions(media.media_details, dimensions)) {
 		const { width, height } = dimensions;
 
-		if ( width && height ) {
+		if (width && height) {
 			errors.push(
 				/* translators: 1: minimum width, 2: minimum height. */
-				sprintf( __( 'The featured image should have a size of at least %1$s by %2$s pixels.', 'amp' ), Math.ceil( width ), Math.ceil( height ) ),
+				sprintf(
+					__(
+						'The featured image should have a size of at least %1$s by %2$s pixels.',
+						'amp'
+					),
+					Math.ceil(width),
+					Math.ceil(height)
+				)
 			);
-		} else if ( dimensions.width ) {
+		} else if (dimensions.width) {
 			errors.push(
 				/* translators: placeholder is minimum width. */
-				sprintf( __( 'The featured image should have a width of at least %s pixels.', 'amp' ), Math.ceil( width ) ),
+				sprintf(
+					__(
+						'The featured image should have a width of at least %s pixels.',
+						'amp'
+					),
+					Math.ceil(width)
+				)
 			);
-		} else if ( dimensions.height ) {
+		} else if (dimensions.height) {
 			errors.push(
 				/* translators: placeholder is minimum height. */
-				sprintf( __( 'The featured image should have a height of at least %s pixels.', 'amp' ), Math.ceil( height ) ),
+				sprintf(
+					__(
+						'The featured image should have a height of at least %s pixels.',
+						'amp'
+					),
+					Math.ceil(height)
+				)
 			);
 		}
 	}
@@ -119,18 +156,15 @@ export const validateFeaturedImage = ( media, dimensions ) => {
  * @param {string} message The message to display in the template.
  * @return {Function} compiledTemplate A function accepting the data, which creates a compiled template.
  */
-export const getNoticeTemplate = ( message ) => {
-	const errorTemplate = template(
-		`<p>${ message }</p>`,
-		{
-			evaluate: /<#([\s\S]+?)#>/g,
-			interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
-			escape: /\{\{([^\}]+?)\}\}(?!\})/g,
-		},
-	);
+export const getNoticeTemplate = (message) => {
+	const errorTemplate = template(`<p>${message}</p>`, {
+		evaluate: /<#([\s\S]+?)#>/g,
+		interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
+		escape: /\{\{([^\}]+?)\}\}(?!\})/g,
+	});
 
-	return ( data ) => {
-		return errorTemplate( data );
+	return (data) => {
+		return errorTemplate(data);
 	};
 };
 
@@ -145,11 +179,11 @@ export const getNoticeTemplate = ( message ) => {
  * @param {Array}  allowedTypes The allowed file types.
  * @return {boolean} Whether the file type is allowed.
  */
-export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
-	const fileType = attachment.get( 'type' );
-	const mimeType = attachment.get( 'mime' );
+export const isFileTypeAllowed = (attachment, allowedTypes) => {
+	const fileType = attachment.get('type');
+	const mimeType = attachment.get('mime');
 
-	if ( ! allowedTypes.includes( fileType ) && ! allowedTypes.includes( mimeType ) ) {
+	if (!allowedTypes.includes(fileType) && !allowedTypes.includes(mimeType)) {
 		return false;
 	}
 
@@ -164,27 +198,31 @@ export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
  * @param {Object} attachment     The selected attachment.
  * @param {Object} SelectionError The error to display.
  */
-export const enforceFileType = function( attachment, SelectionError ) {
-	if ( ! attachment ) {
+export const enforceFileType = function (attachment, SelectionError) {
+	if (!attachment) {
 		return;
 	}
 
-	const allowedTypes = get( this, [ 'options', 'allowedTypes' ], null );
-	const selectButton = this.get( 'select' );
+	const allowedTypes = get(this, ['options', 'allowedTypes'], null);
+	const selectButton = this.get('select');
 
 	// If the file type isn't allowed, display a notice and disable the 'Select' button.
-	if ( allowedTypes && attachment.get( 'type' ) && ! isFileTypeAllowed( attachment, allowedTypes ) ) {
+	if (
+		allowedTypes &&
+		attachment.get('type') &&
+		!isFileTypeAllowed(attachment, allowedTypes)
+	) {
 		this.secondary.set(
 			FILE_TYPE_ERROR_VIEW,
-			new SelectionError( { mimeType: attachment.get( 'mime' ) } ),
+			new SelectionError({ mimeType: attachment.get('mime') })
 		);
-		if ( selectButton && selectButton.model ) {
-			selectButton.model.set( 'disabled', true ); // Disable the button to select the file.
+		if (selectButton && selectButton.model) {
+			selectButton.model.set('disabled', true); // Disable the button to select the file.
 		}
 	} else {
-		this.secondary.unset( FILE_TYPE_ERROR_VIEW );
-		if ( selectButton && selectButton.model ) {
-			selectButton.model.set( 'disabled', false ); // Enable the button to select the file.
+		this.secondary.unset(FILE_TYPE_ERROR_VIEW);
+		if (selectButton && selectButton.model) {
+			selectButton.model.set('disabled', false); // Enable the button to select the file.
 		}
 	}
 };
@@ -200,24 +238,31 @@ export const enforceFileType = function( attachment, SelectionError ) {
  * @param {Function} args.onSelect      A function in the MediaUpload component called on selecting the image.
  * @param {Function} args.dispatchImage A function to dispatch the change in image to the store.
  */
-export const setImageFromURL = ( { url, id, width, height, onSelect, dispatchImage } ) => {
+export const setImageFromURL = ({
+	url,
+	id,
+	width,
+	height,
+	onSelect,
+	dispatchImage,
+}) => {
 	const data = {};
 	data.url = url;
 	data.thumbnail_url = url;
 	data.timestamp = now();
 
-	if ( id ) {
+	if (id) {
 		data.attachment_id = id;
 	}
 
-	if ( width ) {
+	if (width) {
 		data.width = width;
 	}
 
-	if ( height ) {
+	if (height) {
 		data.height = height;
 	}
 
-	onSelect( data ); // @todo Does this do anything?
-	dispatchImage( id );
+	onSelect(data); // @todo Does this do anything?
+	dispatchImage(id);
 };

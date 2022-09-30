@@ -20,76 +20,66 @@ import { ConditionalDetails } from '..';
 
 let container;
 
-describe( 'ConditionalDetails', () => {
-	beforeEach( () => {
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-	} );
+describe('ConditionalDetails', () => {
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		document.body.removeChild( container );
+	afterEach(() => {
+		document.body.removeChild(container);
 		container = null;
-	} );
+	});
 
-	it( 'renders as expected', () => {
+	it('renders as expected', () => {
 		let wrapper = create(
-			<ConditionalDetails summary={ (
+			<ConditionalDetails summary={<div>
+{'Summary'}
+</div>}>
 				<div>
-					{ 'Summary' }
-				</div>
-			) }>
-				<div>
-					{ 'children' }
-				</div>
-			</ConditionalDetails>,
+{'children'}
+</div>
+			</ConditionalDetails>
 		);
-		expect( wrapper.toJSON() ).toMatchSnapshot();
+		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
-			<ConditionalDetails summary={ (
-				<div>
-					{ 'Summary' }
-				</div>
-			) }
-			>
-				{ [ null, null ] }
-			</ConditionalDetails>,
+			<ConditionalDetails summary={<div>
+{'Summary'}
+</div>}>
+				{[null, null]}
+			</ConditionalDetails>
 		);
-		expect( wrapper.toJSON() ).toMatchSnapshot();
-	} );
+		expect(wrapper.toJSON()).toMatchSnapshot();
+	});
 
-	it( 'has correct classes', () => {
-		act( () => {
+	it('has correct classes', () => {
+		act(() => {
 			render(
-				<ConditionalDetails summary={ (
-					<div>
-						{ 'Summary' }
-					</div>
-				) }>
-					{ 'children' }
+				<ConditionalDetails summary={<div>
+{'Summary'}
+</div>}>
+					{'children'}
 				</ConditionalDetails>,
-				container,
+				container
 			);
-		} );
+		});
 
-		expect( container.querySelector( 'details' ) ).not.toBeNull();
-		expect( container.querySelector( 'summary' ) ).not.toBeNull();
+		expect(container.querySelector('details')).not.toBeNull();
+		expect(container.querySelector('summary')).not.toBeNull();
 
-		act( () => {
+		act(() => {
 			render(
-				<ConditionalDetails summary={ (
-					<div>
-						{ 'Summary' }
-					</div>
-				) }
-				>
-					{ [ null, null ] }
+				<ConditionalDetails summary={<div>
+{'Summary'}
+</div>}>
+					{[null, null]}
 				</ConditionalDetails>,
-				container,
+				container
 			);
-		} );
+		});
 
-		expect( container.querySelector( 'summary' ) ).toBeNull();
-		expect( container.querySelector( 'details' ) ).toBeNull();
-	} );
-} );
+		expect(container.querySelector('summary')).toBeNull();
+		expect(container.querySelector('details')).toBeNull();
+	});
+});

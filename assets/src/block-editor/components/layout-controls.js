@@ -18,68 +18,67 @@ import { __, sprintf } from '@wordpress/i18n';
  * @param {Array}    props.ampLayoutOptions Layout options.
  * @return {JSX.Element} Controls.
  */
-const LayoutControls = ( { attributes, setAttributes, ampLayoutOptions } ) => {
+const LayoutControls = ({ attributes, setAttributes, ampLayoutOptions }) => {
 	const { ampLayout, height, width } = attributes;
-	const showHeightNotice = ! height && ( 'fixed' === ampLayout || 'fixed-height' === ampLayout );
-	const showWidthNotice = ! width && 'fixed' === ampLayout;
+	const showHeightNotice =
+		!height && ('fixed' === ampLayout || 'fixed-height' === ampLayout);
+	const showWidthNotice = !width && 'fixed' === ampLayout;
 
 	return (
 		<>
 			<SelectControl
-				label={ __( 'Layout', 'amp' ) }
-				value={ ampLayout }
-				options={ ampLayoutOptions }
-				onChange={ ( value ) => ( setAttributes( { ampLayout: value } ) ) }
+				label={__('Layout', 'amp')}
+				value={ampLayout}
+				options={ampLayoutOptions}
+				onChange={(value) => setAttributes({ ampLayout: value })}
 			/>
-			{ showWidthNotice && (
-				<Notice status="error" isDismissible={ false }>
-					{
-						sprintf(
-							/* translators: %s is the layout name */
-							__( 'Width is required for %s layout', 'amp' ),
-							ampLayout,
-						)
-					}
+			{showWidthNotice && (
+				<Notice status="error" isDismissible={false}>
+					{sprintf(
+						/* translators: %s is the layout name */
+						__('Width is required for %s layout', 'amp'),
+						ampLayout
+					)}
 				</Notice>
-			) }
+			)}
 			<TextControl
 				type="number"
-				label={ __( 'Width (px)', 'amp' ) }
-				value={ width !== undefined ? width : '' }
-				onChange={ ( value ) => ( setAttributes( { width: value } ) ) }
+				label={__('Width (px)', 'amp')}
+				value={width !== undefined ? width : ''}
+				onChange={(value) => setAttributes({ width: value })}
 			/>
-			{ showHeightNotice && (
-				<Notice status="error" isDismissible={ false }>
-					{
-						sprintf(
-							/* translators: %s is the layout name */
-							__( 'Height is required for %s layout', 'amp' ),
-							ampLayout,
-						)
-					}
+			{showHeightNotice && (
+				<Notice status="error" isDismissible={false}>
+					{sprintf(
+						/* translators: %s is the layout name */
+						__('Height is required for %s layout', 'amp'),
+						ampLayout
+					)}
 				</Notice>
-			) }
+			)}
 			<TextControl
 				type="number"
-				label={ __( 'Height (px)', 'amp' ) }
-				value={ height }
-				onChange={ ( value ) => ( setAttributes( { height: value } ) ) }
+				label={__('Height (px)', 'amp')}
+				value={height}
+				onChange={(value) => setAttributes({ height: value })}
 			/>
 		</>
 	);
 };
 
 LayoutControls.propTypes = {
-	attributes: PropTypes.shape( {
+	attributes: PropTypes.shape({
 		ampLayout: PropTypes.string,
 		width: PropTypes.number,
 		height: PropTypes.number,
-	} ).isRequired,
+	}).isRequired,
 	setAttributes: PropTypes.func.isRequired,
-	ampLayoutOptions: PropTypes.arrayOf( PropTypes.shape( {
-		value: PropTypes.string.isRequired,
-		label: PropTypes.string.isRequired,
-	} ) ).isRequired,
+	ampLayoutOptions: PropTypes.arrayOf(
+		PropTypes.shape({
+			value: PropTypes.string.isRequired,
+			label: PropTypes.string.isRequired,
+		})
+	).isRequired,
 };
 
 export default LayoutControls;

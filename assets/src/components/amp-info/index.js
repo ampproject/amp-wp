@@ -17,11 +17,11 @@ import './style.css';
  * @param {?string} props.className Optional extra class names.
  * @param {?Object} props.icon      An SVG icon Component
  */
-export function AMPInfo( { children, className, icon: Icon } ) {
+export function AMPInfo({ children, className, icon: Icon }) {
 	return (
-		<div className={ classnames( 'amp-info', className ) }>
-			{ Icon && <Icon className="amp-info__icon" /> }
-			{ children }
+		<div className={classnames('amp-info', className)}>
+			{Icon && <Icon className="amp-info__icon" />}
+			{children}
 		</div>
 	);
 }

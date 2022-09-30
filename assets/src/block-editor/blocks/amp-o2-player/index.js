@@ -12,13 +12,10 @@ import save from './save';
 export const name = 'amp/amp-o2-player';
 
 export const settings = {
-	title: __( 'AMP O2 Player', 'amp' ),
+	title: __('AMP O2 Player', 'amp'),
 	category: 'embed',
 	icon: 'embed-generic',
-	keywords: [
-		__( 'Embed', 'amp' ),
-		__( 'AOL O2Player', 'amp' ),
-	],
+	keywords: [__('Embed', 'amp'), __('AOL O2Player', 'amp')],
 
 	// @todo Add other useful macro toggles, e.g. showing relevant content.
 	attributes: {

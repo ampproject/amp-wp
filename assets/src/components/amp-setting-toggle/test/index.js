@@ -16,84 +16,100 @@ import { AMPSettingToggle } from '../';
 
 let container;
 
-describe( 'AMPSettingToggle', () => {
-	beforeEach( () => {
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-	} );
+describe('AMPSettingToggle', () => {
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		document.body.removeChild( container );
+	afterEach(() => {
+		document.body.removeChild(container);
 		container = null;
-	} );
+	});
 
-	it( 'matches snapshots', () => {
+	it('matches snapshots', () => {
 		let wrapper = create(
-			<AMPSettingToggle checked={ true } onChange={ () => null } text={ 'My text' } title={ 'My title' } />,
+			<AMPSettingToggle
+				checked={true}
+				onChange={() => null}
+				text={'My text'}
+				title={'My title'}
+			/>
 		);
-		expect( wrapper.toJSON() ).toMatchSnapshot();
+		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
-			<AMPSettingToggle checked={ false } onChange={ () => null } title={ 'My title' } />,
+			<AMPSettingToggle
+				checked={false}
+				onChange={() => null}
+				title={'My title'}
+			/>
 		);
-		expect( wrapper.toJSON() ).toMatchSnapshot();
-	} );
+		expect(wrapper.toJSON()).toMatchSnapshot();
+	});
 
-	it( 'has correct elements and text', () => {
-		act( () => {
-			render(
-				<AMPSettingToggle title="My title" onChange={ () => null } checked={ false }>
-					{ 'children' }
-				</AMPSettingToggle>,
-				container,
-			);
-		} );
-
-		expect( container.querySelector( 'h3' ).textContent ).toBe( 'My title' );
-		expect( container.querySelector( 'p' ) ).toBeNull();
-		expect( container.querySelector( 'input:checked' ) ).toBeNull();
-
-		act( () => {
-			render(
-				<AMPSettingToggle title="My title" onChange={ () => null } checked={ true } text="My text">
-					{ 'children' }
-				</AMPSettingToggle>,
-				container,
-			);
-		} );
-
-		expect( container.querySelector( 'h3' ).textContent ).toBe( 'My title' );
-		expect( container.querySelector( 'p' ).textContent ).toBe( 'My text' );
-		expect( container.querySelector( 'input:checked' ) ).not.toBeNull();
-	} );
-
-	it( 'renders title if it is a valid element', () => {
-		act( () => {
+	it('has correct elements and text', () => {
+		act(() => {
 			render(
 				<AMPSettingToggle
-					title={ (
-						<h6>
-							{ 'My title' }
-						</h6>
-					) }
-					onChange={ () => null }
-					checked={ false }
-				/>,
-				container,
+					title="My title"
+					onChange={() => null}
+					checked={false}
+				>
+					{'children'}
+				</AMPSettingToggle>,
+				container
 			);
-		} );
+		});
 
-		expect( container.querySelector( 'h6' ).textContent ).toBe( 'My title' );
-	} );
+		expect(container.querySelector('h3').textContent).toBe('My title');
+		expect(container.querySelector('p')).toBeNull();
+		expect(container.querySelector('input:checked')).toBeNull();
 
-	it( 'does not render title if nothing is passed', () => {
-		act( () => {
+		act(() => {
 			render(
-				<AMPSettingToggle onChange={ () => null } checked={ false } />,
-				container,
+				<AMPSettingToggle
+					title="My title"
+					onChange={() => null}
+					checked={true}
+					text="My text"
+				>
+					{'children'}
+				</AMPSettingToggle>,
+				container
 			);
-		} );
+		});
 
-		expect( container.querySelector( 'h3' ) ).toBeNull();
-	} );
-} );
+		expect(container.querySelector('h3').textContent).toBe('My title');
+		expect(container.querySelector('p').textContent).toBe('My text');
+		expect(container.querySelector('input:checked')).not.toBeNull();
+	});
+
+	it('renders title if it is a valid element', () => {
+		act(() => {
+			render(
+				<AMPSettingToggle
+					title={<h6>
+{'My title'}
+</h6>}
+					onChange={() => null}
+					checked={false}
+				/>,
+				container
+			);
+		});
+
+		expect(container.querySelector('h6').textContent).toBe('My title');
+	});
+
+	it('does not render title if nothing is passed', () => {
+		act(() => {
+			render(
+				<AMPSettingToggle onChange={() => null} checked={false} />,
+				container
+			);
+		});
+
+		expect(container.querySelector('h3')).toBeNull();
+	});
+});

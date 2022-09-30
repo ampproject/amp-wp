@@ -12,13 +12,11 @@ import save from './save';
 export const name = 'amp/amp-jwplayer';
 
 export const settings = {
-	title: __( 'AMP JW Player', 'amp' ),
-	description: __( 'Displays a cloud-hosted JW Player.', 'amp' ),
+	title: __('AMP JW Player', 'amp'),
+	description: __('Displays a cloud-hosted JW Player.', 'amp'),
 	category: 'embed',
 	icon: 'embed-generic',
-	keywords: [
-		__( 'Embed', 'amp' ),
-	],
+	keywords: [__('Embed', 'amp')],
 
 	attributes: {
 		dataPlayerId: {

@@ -18,9 +18,9 @@ export const PLUGIN_ICON = '';
 export default function AMPDocumentSettingPanel() {
 	return (
 		<PluginDocumentSettingPanel
-			name={ PLUGIN_NAME }
-			title={ __( 'AMP', 'amp' ) }
-			initialOpen={ true }
+			name={PLUGIN_NAME}
+			title={__('AMP', 'amp')}
+			initialOpen={true}
 		>
 			<AMPDocumentStatusNotification />
 		</PluginDocumentSettingPanel>
