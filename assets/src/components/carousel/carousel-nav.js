@@ -30,9 +30,7 @@ function Dot({ id, isHighlighted, label, namespace, onClick }) {
 			onClick={onClick}
 			aria-label={label}
 		>
-			<VisuallyHidden as="span">
-{label}
-</VisuallyHidden>
+			<VisuallyHidden as="span">{label}</VisuallyHidden>
 			{isHighlighted && (
 				<VisuallyHidden as="span">
 					{__('(Selected item)', 'amp')}
@@ -127,12 +125,8 @@ export function CarouselNav({
 				</div>
 			) : (
 				<div className={`${namespace}__item-counter`}>
-					<span>
-{centeredItemIndex + 1}
-</span>
-					<span>
-{items.length}
-</span>
+					<span>{centeredItemIndex + 1}</span>
+					<span>{items.length}</span>
 				</div>
 			)}
 			<Button
@@ -145,9 +139,7 @@ export function CarouselNav({
 				className={`${namespace}__next`}
 				aria-label={__('Next', 'amp')}
 			>
-				<VisuallyHidden as="span">
-{__('Next', 'amp')}
-</VisuallyHidden>
+				<VisuallyHidden as="span">{__('Next', 'amp')}</VisuallyHidden>
 				<svg
 					width="12"
 					height="11"

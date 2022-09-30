@@ -39,15 +39,11 @@ const PairedUrlExamples = ({ pairedUrls }) => {
 
 	return (
 		<details className="amp-paired-url-examples">
-			<summary>
-{__('Examples', 'amp')}
-</summary>
+			<summary>{__('Examples', 'amp')}</summary>
 			{pairedUrls.map((pairedUrl) => {
 				return (
 					<div className="amp-paired-url-example" key={pairedUrl}>
-						<code>
-{pairedUrl}
-</code>
+						<code>{pairedUrl}</code>
 					</div>
 				);
 			})}
@@ -130,8 +126,7 @@ function SlugConflictsNotice({ slug, conflicts }) {
 							) : (
 								entity.label || entity.post_type
 							)}
-							{entity.title && ': ' + entity.title}
-{' '}
+							{entity.title && ': ' + entity.title}{' '}
 							<small>
 								{
 									/* translators: %d is entity ID */
@@ -155,8 +150,7 @@ function SlugConflictsNotice({ slug, conflicts }) {
 							) : (
 								entity.label || entity.taxonomy
 							)}
-							{entity.name && ': ' + entity.name}
-{' '}
+							{entity.name && ': ' + entity.name}{' '}
 							<small>
 								{
 									/* translators: %d is entity ID */
@@ -179,16 +173,13 @@ function SlugConflictsNotice({ slug, conflicts }) {
 						) : (
 							__('User', 'amp')
 						)}
-						{': ' + conflicts.user.name}
-{' '}
+						{': ' + conflicts.user.name}{' '}
 						<small>
-							{
+							{sprintf(
 								/* translators: %d is entity ID */
-								sprintf(
-									__('(ID: %d)', 'amp'),
-									conflicts.user.id
-								)
-							}
+								__('(ID: %d)', 'amp'),
+								conflicts.user.id
+							)}
 						</small>
 					</li>
 				)}
@@ -199,16 +190,13 @@ function SlugConflictsNotice({ slug, conflicts }) {
 							/* translators: %s is post type label */
 							__('Post type: %s', 'amp'),
 							conflicts.post_type.label || '--'
-						)}
-{' '}
+						)}{' '}
 						<small>
-							{
+							{sprintf(
 								/* translators: %s is entity name */
-								sprintf(
-									__('(name: %s)', 'amp'),
-									conflicts.post_type.name
-								)
-							}
+								__('(name: %s)', 'amp'),
+								conflicts.post_type.name
+							)}
 						</small>
 					</li>
 				)}
@@ -219,16 +207,13 @@ function SlugConflictsNotice({ slug, conflicts }) {
 							/* translators: %s is taxonomy label */
 							__('Taxonomy: %s', 'amp'),
 							conflicts.taxonomy.label || '--'
-						)}
-{' '}
+						)}{' '}
 						<small>
-							{
+							{sprintf(
 								/* translators: %s is entity name */
-								sprintf(
-									__('(name: %s)', 'amp'),
-									conflicts.taxonomy.name
-								)
-							}
+								__('(name: %s)', 'amp'),
+								conflicts.taxonomy.name
+							)}
 						</small>
 					</li>
 				)}
@@ -237,9 +222,7 @@ function SlugConflictsNotice({ slug, conflicts }) {
 					<li>
 						{__('Rewrite rules: ', 'amp')}
 						{conflicts.rewrite
-							.map((entity) => <code key={entity}>
-{entity}
-</code>)
+							.map((entity) => <code key={entity}>{entity}</code>)
 							.reduce((prev, curr) => [prev, ', ', curr])}
 					</li>
 				)}
@@ -312,9 +295,7 @@ export function PairedUrlStructure({ focusedSection }) {
 	return (
 		<AMPDrawer
 			className="amp-paired-url-structure"
-			heading={<h3>
-{__('Paired URL Structure', 'amp')}
-</h3>}
+			heading={<h3>{__('Paired URL Structure', 'amp')}</h3>}
 			hiddenTitle={__('Paired URL Structure', 'amp')}
 			id="paired-url-structure"
 			initialOpen={'paired-url-structure' === focusedSection}
@@ -347,8 +328,8 @@ export function PairedUrlStructure({ focusedSection }) {
 					),
 					{
 						em: <em />,
-						// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 						a: (
+							// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 							<a
 								href="https://amp-wp.org/?p=10004"
 								target="_blank"
@@ -384,13 +365,8 @@ export function PairedUrlStructure({ focusedSection }) {
 					/>
 					<label htmlFor="paired_url_structure_query_var">
 						{__('Query parameter', 'amp') + ': '}
-						<code>
-{`?${slug}=1`}
-</code>
-{' '}
-						<em>
-{__('(default)', 'amp')}
-</em>
+						<code>{`?${slug}=1`}</code>{' '}
+						<em>{__('(default)', 'amp')}</em>
 					</label>
 					<PairedUrlExamples
 						pairedUrls={editedOptions.paired_url_examples.query_var}
@@ -417,9 +393,7 @@ export function PairedUrlStructure({ focusedSection }) {
 					/>
 					<label htmlFor="paired_url_structure_path_suffix">
 						{__('Path suffix', 'amp') + ': '}
-						<code>
-{`/${slug}/`}
-</code>
+						<code>{`/${slug}/`}</code>
 						{!endpointSuffixAvailable && (
 							<em>
 								{' ' +
@@ -463,9 +437,7 @@ export function PairedUrlStructure({ focusedSection }) {
 					/>
 					<label htmlFor="paired_url_structure_legacy_transitional">
 						{__('Legacy transitional', 'amp') + ': '}
-						<code>
-{`?${slug}`}
-</code>
+						<code>{`?${slug}`}</code>
 					</label>
 					<PairedUrlExamples
 						pairedUrls={
@@ -496,13 +468,9 @@ export function PairedUrlStructure({ focusedSection }) {
 					/>
 					<label htmlFor="paired_url_structure_legacy_reader">
 						{__('Legacy reader', 'amp') + ': '}
-						<code>
-{`/${slug}/`}
-</code>
+						<code>{`/${slug}/`}</code>
 						{' & '}
-						<code>
-{`?${slug}`}
-</code>
+						<code>{`?${slug}`}</code>
 						{!endpointSuffixAvailable && (
 							<em>
 								{' ' +

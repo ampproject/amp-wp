@@ -17,13 +17,9 @@ export function Details({ open = false, title, description }) {
 		title &&
 		description && (
 			<details open={open}>
-				<summary>
-{title}
-</summary>
+				<summary>{title}</summary>
 				<div className="detail-body">
-					<p className="detail-body-text">
-{description}
-</p>
+					<p className="detail-body-text">{description}</p>
 				</div>
 			</details>
 		)

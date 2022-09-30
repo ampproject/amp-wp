@@ -66,8 +66,8 @@ export function SetupWizard({ closeLink, finishLink, appRoot }) {
 				<PageComponentSideEffects>
 					<PageComponent />
 				</PageComponentSideEffects>
-				// eslint-disable-next-line react-hooks/exhaustive-deps
 			),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[PageComponent]
 	);
 
@@ -79,9 +79,7 @@ export function SetupWizard({ closeLink, finishLink, appRoot }) {
 						{isMobile && <CloseLink closeLink={closeLink} />}
 						<div className="amp-onboarding-wizard__logo-container">
 							<Logo />
-							<h1>
-{__('AMP', 'amp')}
-</h1>
+							<h1>{__('AMP', 'amp')}</h1>
 						</div>
 						<div className="amp-onboarding-wizard-plugin-name">
 							{__('Official AMP Plugin for WordPress', 'amp')}
@@ -91,9 +89,7 @@ export function SetupWizard({ closeLink, finishLink, appRoot }) {
 				</div>
 				<div className="amp-onboarding-wizard-panel-container">
 					<Panel className="amp-onboarding-wizard-panel">
-						{false !== showTitle && <h1>
-{title}
-</h1>}
+						{false !== showTitle && <h1>{title}</h1>}
 						<PageComponentWithSideEffects />
 					</Panel>
 					<Nav

@@ -141,9 +141,7 @@ export function Saving() {
 				/>
 			</svg>
 
-			<h1>
-{__('Saving your settings …', 'amp')}
-</h1>
+			<h1>{__('Saving your settings …', 'amp')}</h1>
 		</div>
 	);
 }

@@ -356,13 +356,9 @@ function Root({ appRoot }) {
 				<TemplateModes
 					focusReaderThemes={'reader-themes' === focusedSection}
 				/>
-				<h2 id="advanced-settings">
-{__('Advanced Settings', 'amp')}
-</h2>
+				<h2 id="advanced-settings">{__('Advanced Settings', 'amp')}</h2>
 				<AMPDrawer
-					heading={<h3>
-{__('Supported Templates', 'amp')}
-</h3>}
+					heading={<h3>{__('Supported Templates', 'amp')}</h3>}
 					hiddenTitle={__('Supported templates', 'amp')}
 					id="supported-templates"
 					initialOpen={'supported-templates' === focusedSection}
@@ -370,9 +366,7 @@ function Root({ appRoot }) {
 					<SupportedTemplates />
 				</AMPDrawer>
 				<AMPDrawer
-					heading={<h3>
-{__('Plugin Suppression', 'amp')}
-</h3>}
+					heading={<h3>{__('Plugin Suppression', 'amp')}</h3>}
 					hiddenTitle={__('Plugin suppression', 'amp')}
 					id="plugin-suppression"
 					initialOpen={'plugin-suppression' === focusedSection}
@@ -381,9 +375,7 @@ function Root({ appRoot }) {
 				</AMPDrawer>
 				<AMPDrawer
 					className="amp-analytics"
-					heading={<h3>
-{__('Analytics', 'amp')}
-</h3>}
+					heading={<h3>{__('Analytics', 'amp')}</h3>}
 					hiddenTitle={__('Analytics', 'amp')}
 					id="analytics-options"
 					initialOpen={'analytics-options' === focusedSection}
@@ -394,9 +386,7 @@ function Root({ appRoot }) {
 				<PairedUrlStructure focusedSection={focusedSection} />
 				<AMPDrawer
 					className="amp-other-settings"
-					heading={<h3>
-{__('Other', 'amp')}
-</h3>}
+					heading={<h3>{__('Other', 'amp')}</h3>}
 					hiddenTitle={__('Other', 'amp')}
 					id="other-settings"
 					initialOpen={'other-settings' === focusedSection}

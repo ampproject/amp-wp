@@ -96,8 +96,8 @@ export function SiteReview() {
 						{createInterpolateElement(
 							__('Reach out in the <a>support forums</a>', 'amp'),
 							{
-								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 								a: (
+									// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 									<a
 										href="https://wordpress.org/support/plugin/amp/#new-topic-0"
 										target="_blank"
@@ -123,8 +123,8 @@ export function SiteReview() {
 								'amp'
 							),
 							{
-								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 								a: (
+									// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 									<a
 										href="https://amp-wp.org/documentation/how-the-plugin-works/"
 										target="_blank"

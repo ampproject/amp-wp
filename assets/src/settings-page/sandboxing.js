@@ -39,9 +39,7 @@ export function Sandboxing({ focusedSection }) {
 
 	return (
 		<AMPDrawer
-			heading={<h3>
-{__('Sandboxing (Experimental)', 'amp')}
-</h3>}
+			heading={<h3>{__('Sandboxing (Experimental)', 'amp')}</h3>}
 			hiddenTitle={__('Sandboxing (Experimental)', 'amp')}
 			id="sandboxing"
 			initialOpen={'sandboxing' === focusedSection}

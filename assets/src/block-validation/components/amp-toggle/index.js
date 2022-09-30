@@ -26,9 +26,7 @@ export default function AMPToggle() {
 
 	return (
 		<>
-			<label htmlFor={htmlId.current}>
-{__('Enable AMP', 'amp')}
-</label>
+			<label htmlFor={htmlId.current}>{__('Enable AMP', 'amp')}</label>
 			<FormToggle
 				checked={isAMPEnabled}
 				onChange={toggleAMP}

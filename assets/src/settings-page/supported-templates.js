@@ -135,12 +135,8 @@ function SupportedPostTypesFieldset() {
 
 	return (
 		<fieldset id="supported_post_types_fieldset">
-			<h4 className="title">
-{__('Content Types', 'amp')}
-</h4>
-			<p>
-{__('Content types enabled for AMP:', 'amp')}
-</p>
+			<h4 className="title">{__('Content Types', 'amp')}</h4>
+			<p>{__('Content types enabled for AMP:', 'amp')}</p>
 			<ul>
 				{supportablePostTypes.map((postTypeObject) => {
 					return (
@@ -294,9 +290,7 @@ export function SupportedTemplatesFieldset() {
 
 	return (
 		<fieldset id="supported_templates_fieldset">
-			<h4 className="title">
-{__('Templates', 'amp')}
-</h4>
+			<h4 className="title">{__('Templates', 'amp')}</h4>
 
 			<SupportedTemplatesToggle />
 
@@ -309,8 +303,8 @@ export function SupportedTemplatesFieldset() {
 								'amp'
 							),
 							{
-								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 								a: (
+									// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 									<a
 										href="https://developer.wordpress.org/themes/basics/template-hierarchy/"
 										target="_blank"

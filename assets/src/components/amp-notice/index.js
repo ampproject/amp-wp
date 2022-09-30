@@ -167,12 +167,8 @@ export function AMPNotice({
 			)}
 			{...props}
 		>
-			<div className="amp-notice__icon">
-{noticeIcon}
-</div>
-			<div className="amp-notice__body">
-{children}
-</div>
+			<div className="amp-notice__icon">{noticeIcon}</div>
+			<div className="amp-notice__body">{children}</div>
 		</div>
 	);
 }

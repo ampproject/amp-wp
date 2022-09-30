@@ -87,9 +87,7 @@ export function TemplateModes({ focusReaderThemes }) {
 
 	return (
 		<section className="template-modes" id="template-modes">
-			<h2>
-{__('Template Mode', 'amp')}
-</h2>
+			<h2>{__('Template Mode', 'amp')}</h2>
 			{templateModeWasOverridden && (
 				<AMPNotice type={NOTICE_TYPE_INFO} size={NOTICE_SIZE_LARGE}>
 					{__(

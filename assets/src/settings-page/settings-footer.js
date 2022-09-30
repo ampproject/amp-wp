@@ -39,11 +39,7 @@ function ErrorNotice({ errorMessage }) {
 		<div className="amp-error-notice">
 			<AMPNotice type={NOTICE_TYPE_ERROR}>
 				<p>
-					<strong>
-{__('Error:', 'amp')}
-</strong> 
-{' '}
-{errorMessage}
+					<strong>{__('Error:', 'amp')}</strong> {errorMessage}
 				</p>
 			</AMPNotice>
 		</div>

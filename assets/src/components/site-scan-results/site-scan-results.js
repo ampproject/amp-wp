@@ -43,17 +43,13 @@ export function SiteScanResults({
 					data-badge-content={count}
 				>
 					{title}
-					<VisuallyHidden as="span">
-{`(${count})`}
-</VisuallyHidden>
+					<VisuallyHidden as="span">{`(${count})`}</VisuallyHidden>
 				</p>
 			</div>
 			<div className="site-scan-results__content">
 				{children}
 				{callToAction && (
-					<p className="site-scan-results__cta">
-{callToAction}
-</p>
+					<p className="site-scan-results__cta">{callToAction}</p>
 				)}
 			</div>
 		</Selectable>

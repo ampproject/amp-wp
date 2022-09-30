@@ -31,9 +31,7 @@ export function ReaderThemeSelection() {
 
 	return (
 		<div className="reader-theme-selection">
-			<p>
-{__('Select the theme template for mobile visitors', 'amp')}
-</p>
+			<p>{__('Select the theme template for mobile visitors', 'amp')}</p>
 			<ThemesAPIError />
 			<div>
 				{0 < availableThemes.length && (
@@ -50,9 +48,7 @@ export function ReaderThemeSelection() {
 
 				{0 < unavailableThemes.length && (
 					<div className="choose-reader-theme__unavailable">
-						<h3>
-{__('Unavailable themes', 'amp')}
-</h3>
+						<h3>{__('Unavailable themes', 'amp')}</h3>
 						<p>
 							{__(
 								'The following themes are compatible but cannot be installed automatically. Please install them manually, or contact your host if you are not able to do so.',

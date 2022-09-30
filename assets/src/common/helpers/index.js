@@ -92,8 +92,8 @@ export const validateFeaturedImage = (media, dimensions) => {
 		].includes(media.mime_type)
 	) {
 		errors.push(
-			/* translators: List of image formats */
 			sprintf(
+				/* translators: List of image formats */
 				__(
 					'The featured image must be of either %1$s, %2$s, %3$s, %4$s, or %5$s format.',
 					'amp'
@@ -112,8 +112,8 @@ export const validateFeaturedImage = (media, dimensions) => {
 
 		if (width && height) {
 			errors.push(
-				/* translators: 1: minimum width, 2: minimum height. */
 				sprintf(
+					/* translators: 1: minimum width, 2: minimum height. */
 					__(
 						'The featured image should have a size of at least %1$s by %2$s pixels.',
 						'amp'
@@ -124,8 +124,8 @@ export const validateFeaturedImage = (media, dimensions) => {
 			);
 		} else if (dimensions.width) {
 			errors.push(
-				/* translators: placeholder is minimum width. */
 				sprintf(
+					/* translators: placeholder is minimum width. */
 					__(
 						'The featured image should have a width of at least %s pixels.',
 						'amp'
@@ -135,8 +135,8 @@ export const validateFeaturedImage = (media, dimensions) => {
 			);
 		} else if (dimensions.height) {
 			errors.push(
-				/* translators: placeholder is minimum height. */
 				sprintf(
+					/* translators: placeholder is minimum height. */
 					__(
 						'The featured image should have a height of at least %s pixels.',
 						'amp'

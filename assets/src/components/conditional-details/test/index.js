@@ -33,20 +33,14 @@ describe('ConditionalDetails', () => {
 
 	it('renders as expected', () => {
 		let wrapper = create(
-			<ConditionalDetails summary={<div>
-{'Summary'}
-</div>}>
-				<div>
-{'children'}
-</div>
+			<ConditionalDetails summary={<div>{'Summary'}</div>}>
+				<div>{'children'}</div>
 			</ConditionalDetails>
 		);
 		expect(wrapper.toJSON()).toMatchSnapshot();
 
 		wrapper = create(
-			<ConditionalDetails summary={<div>
-{'Summary'}
-</div>}>
+			<ConditionalDetails summary={<div>{'Summary'}</div>}>
 				{[null, null]}
 			</ConditionalDetails>
 		);
@@ -56,9 +50,7 @@ describe('ConditionalDetails', () => {
 	it('has correct classes', () => {
 		act(() => {
 			render(
-				<ConditionalDetails summary={<div>
-{'Summary'}
-</div>}>
+				<ConditionalDetails summary={<div>{'Summary'}</div>}>
 					{'children'}
 				</ConditionalDetails>,
 				container
@@ -70,9 +62,7 @@ describe('ConditionalDetails', () => {
 
 		act(() => {
 			render(
-				<ConditionalDetails summary={<div>
-{'Summary'}
-</div>}>
+				<ConditionalDetails summary={<div>{'Summary'}</div>}>
 					{[null, null]}
 				</ConditionalDetails>,
 				container

@@ -89,9 +89,7 @@ describe('AMPSettingToggle', () => {
 		act(() => {
 			render(
 				<AMPSettingToggle
-					title={<h6>
-{'My title'}
-</h6>}
+					title={<h6>{'My title'}</h6>}
 					onChange={() => null}
 					checked={false}
 				/>,

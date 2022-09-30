@@ -79,12 +79,8 @@ function ErrorSource({ clientId, blockTypeName, sources }) {
 
 	return (
 		<>
-			<dt>
-{__('Source', 'amp')}
-</dt>
-			<dd>
-{source}
-</dd>
+			<dt>{__('Source', 'amp')}</dt>
+			<dd>{source}</dd>
 		</>
 	);
 }
@@ -139,18 +135,10 @@ function MarkupStatus({ status }) {
 
 	return (
 		<>
-			<dt>
-{__('Markup status', 'amp')}
-</dt>
-			<dd>
-{keptRemoved}
-</dd>
-			<dt>
-{__('Reviewed', 'amp')}
-</dt>
-			<dd>
-{reviewed}
-</dd>
+			<dt>{__('Markup status', 'amp')}</dt>
+			<dd>{keptRemoved}</dd>
+			<dt>{__('Reviewed', 'amp')}</dt>
+			<dd>{reviewed}</dd>
 		</>
 	);
 }
@@ -166,9 +154,7 @@ MarkupStatus.propTypes = {
 function BlockType({ blockTypeIcon, blockTypeTitle }) {
 	return (
 		<>
-			<dt>
-{__('Block type', 'amp')}
-</dt>
+			<dt>{__('Block type', 'amp')}</dt>
 			<dd>
 				<span className="amp-error__block-type-description">
 					{blockTypeTitle || __('unknown', 'amp')}

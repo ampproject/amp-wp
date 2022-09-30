@@ -30,9 +30,7 @@ describe('Selectable', () => {
 	it('matches snapshot', () => {
 		let wrapper = create(
 			<Selectable selected={true}>
-				<div>
-{'Component children'}
-</div>
+				<div>{'Component children'}</div>
 			</Selectable>
 		);
 		expect(wrapper.toJSON()).toMatchSnapshot();
@@ -44,9 +42,7 @@ describe('Selectable', () => {
 				className="my-cool-class"
 				direction="top"
 			>
-				<div>
-{'Component children'}
-</div>
+				<div>{'Component children'}</div>
 			</Selectable>
 		);
 		expect(wrapper.toJSON()).toMatchSnapshot();
@@ -61,9 +57,7 @@ describe('Selectable', () => {
 					className="my-cool-class"
 					direction="top"
 				>
-					<div>
-{'children'}
-</div>
+					<div>{'children'}</div>
 				</Selectable>,
 				container
 			);
@@ -76,9 +70,7 @@ describe('Selectable', () => {
 		act(() => {
 			render(
 				<Selectable selected={false} ElementName="section">
-					<div>
-{'children'}
-</div>
+					<div>{'children'}</div>
 				</Selectable>,
 				container
 			);

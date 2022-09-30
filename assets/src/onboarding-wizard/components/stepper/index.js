@@ -40,9 +40,7 @@ export function StepperBullet({ activePageIndex, index }) {
 		);
 	}
 
-	return <span className="amp-stepper__bullet">
-{index + 1}
-</span>;
+	return <span className="amp-stepper__bullet">{index + 1}</span>;
 }
 
 StepperBullet.propTypes = {
@@ -80,9 +78,7 @@ export function Stepper({ activePageIndex, pages }) {
 							activePageIndex={activePageIndex}
 							index={index}
 						/>
-						<span className="amp-stepper__item-title">
-{title}
-</span>
+						<span className="amp-stepper__item-title">{title}</span>
 					</li>
 				))}
 			</ul>

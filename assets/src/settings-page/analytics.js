@@ -115,13 +115,11 @@ function AnalyticsEntry({
 	return (
 		<PanelRow className="amp-analytics-entry">
 			<h4>
-				{
+				{sprintf(
 					/* translators: placeholder is the entry index */
-					sprintf(
-						__('Analytics Configuration #%s', 'amp'),
-						entryIndex
-					)
-				}
+					__('Analytics Configuration #%s', 'amp'),
+					entryIndex
+				)}
 			</h4>
 			<div
 				className="amp-analytics-entry__options"
@@ -158,9 +156,7 @@ function AnalyticsEntry({
 
 				{vendorConfigs[type]?.notice && (
 					<AMPNotice size={NOTICE_SIZE_SMALL}>
-						<span>
-{vendorConfigs[type].notice}
-</span>
+						<span>{vendorConfigs[type].notice}</span>
 					</AMPNotice>
 				)}
 
@@ -230,9 +226,7 @@ export function Analytics() {
 			<details
 				open={!Boolean(Object.keys(originalOptions.analytics).length)}
 			>
-				<summary>
-{__('Learn about analytics for AMP.', 'amp')}
-</summary>
+				<summary>{__('Learn about analytics for AMP.', 'amp')}</summary>
 				<p>
 					{createInterpolateElement(
 						sprintf(
@@ -278,12 +272,8 @@ export function Analytics() {
 							),
 							/* eslint-enable jsx-a11y/anchor-has-content */
 							code: <code />,
-							AmpAnalyticsTag: <code>
-{'<amp-analytics>'}
-</code>,
-							ScriptTag: <code>
-{'<script>'}
-</code>,
+							AmpAnalyticsTag: <code>{'<amp-analytics>'}</code>,
+							ScriptTag: <code>{'<script>'}</code>,
 						}
 					)}
 				</p>

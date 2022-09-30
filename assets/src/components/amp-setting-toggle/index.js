@@ -46,12 +46,8 @@ export function AMPSettingToggle({
 				label={
 					<div className="amp-setting-toggle__label-text">
 						{title &&
-							(isValidElement(title) ? title : <h3>
-{title}
-</h3>)}
-						{text && <p>
-{text}
-</p>}
+							(isValidElement(title) ? title : <h3>{title}</h3>)}
+						{text && <p>{text}</p>}
 					</div>
 				}
 				onChange={onChange}

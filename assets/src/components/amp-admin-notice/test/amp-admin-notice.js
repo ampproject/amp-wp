@@ -41,9 +41,7 @@ describe('AmpAdminNotice', () => {
 
 	it('renders a plain AMP admin notice', () => {
 		act(() => {
-			render(<AmpAdminNotice>
-{'Content'}
-</AmpAdminNotice>, container);
+			render(<AmpAdminNotice>{'Content'}</AmpAdminNotice>, container);
 		});
 
 		expect(container.querySelector('.amp-admin-notice')).not.toBeNull();

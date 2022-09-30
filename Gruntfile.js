@@ -198,10 +198,11 @@ module.exports = function (grunt) {
 								matches = content.match(versionRegex);
 								if (matches) {
 									version = matches[2] + '-' + versionAppend;
+									// eslint-disable-next-line no-console
 									console.log(
 										'Updating version in amp.php to ' +
 											version
-									); // eslint-disable-line no-console
+									);
 									content = content.replace(
 										versionRegex,
 										'$1' + version

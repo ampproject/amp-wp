@@ -30,9 +30,7 @@ export function SupportedTemplatesToggle() {
 	return (
 		<AMPSettingToggle
 			checked={true === allTemplatesSupported}
-			title={<p>
-{__('Serve all templates as AMP', 'amp')}
-</p>}
+			title={<p>{__('Serve all templates as AMP', 'amp')}</p>}
 			onChange={() => {
 				updateOptions({
 					all_templates_supported: !allTemplatesSupported,

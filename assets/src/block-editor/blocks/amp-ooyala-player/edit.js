@@ -84,9 +84,7 @@ const BlockEdit = (props) => {
 			)}
 			{!url && (
 				<Placeholder label={__('Ooyala Player', 'amp')}>
-					<p>
-{__('Add required data to use the block.', 'amp')}
-</p>
+					<p>{__('Add required data to use the block.', 'amp')}</p>
 				</Placeholder>
 			)}
 		</>

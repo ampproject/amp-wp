@@ -122,9 +122,7 @@ export function TemplateModeOption({
 						{<Illustration mode={mode} />}
 					</div>
 					<div className="template-mode-selection__description">
-						<h3>
-{getTitle(mode)}
-</h3>
+						<h3>{getTitle(mode)}</h3>
 						{previouslySelected && (
 							<AMPInfo>
 								{__('Previously selected', 'amp')}
@@ -163,9 +161,7 @@ export function TemplateModeOption({
 				)}
 				{details && !Array.isArray(details) && (
 					<p>
-						<span>
-{details}
-</span>
+						<span>{details}</span>
 						{detailsUrl && (
 							<>
 								{' '}

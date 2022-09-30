@@ -135,9 +135,7 @@ export function SiteScan({ onSiteScan }) {
 		if (isFailed) {
 			return (
 				<AMPNotice type={NOTICE_TYPE_ERROR} size={NOTICE_SIZE_LARGE}>
-					<p>
-{__('Site scan failed. Try again.', 'amp')}
-</p>
+					<p>{__('Site scan failed. Try again.', 'amp')}</p>
 				</AMPNotice>
 			);
 		}
@@ -365,9 +363,7 @@ function SiteScanSummary() {
 			)}
 			{!stale && isReady && (
 				<AMPNotice type={NOTICE_TYPE_INFO} size={NOTICE_SIZE_LARGE}>
-					<p>
-{__('No changes since your last scan.', 'amp')}
-</p>
+					<p>{__('No changes since your last scan.', 'amp')}</p>
 				</AMPNotice>
 			)}
 			{themesWithAmpIncompatibility.length > 0 && (

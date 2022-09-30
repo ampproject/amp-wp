@@ -21,9 +21,7 @@ export function ThemesAPIError() {
 
 	return (
 		<AMPNotice type={NOTICE_TYPE_WARNING}>
-			<p>
-{themesAPIError}
-</p>
+			<p>{themesAPIError}</p>
 		</AMPNotice>
 	);
 }

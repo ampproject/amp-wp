@@ -40,12 +40,8 @@ export function ToggleUseNativeImgTag() {
 						'amp'
 					),
 					{
-						ImgTag: <code>
-{'<img>'}
-</code>,
-						AMPImgTag: <code>
-{'<amp-img>'}
-</code>,
+						ImgTag: <code>{'<img>'}</code>,
+						AMPImgTag: <code>{'<amp-img>'}</code>,
 						a: (
 							// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 							<a

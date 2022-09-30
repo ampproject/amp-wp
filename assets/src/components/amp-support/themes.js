@@ -35,9 +35,7 @@ export function Themes({ themes }) {
 
 	return (
 		<details open={false}>
-			<summary>
-{__('Themes', 'amp')}
-</summary>
+			<summary>{__('Themes', 'amp')}</summary>
 			<div className="detail-body">
 				<ListItems isDisc={true} items={items} />
 			</div>

@@ -27,9 +27,7 @@ export function SiteInfo({ siteInfo }) {
 
 	return (
 		<details open={false}>
-			<summary>
-{__('Site Information', 'amp')}
-</summary>
+			<summary>{__('Site Information', 'amp')}</summary>
 			<div className="detail-body">
 				<ListItems
 					heading={__('Site Information', 'amp')}

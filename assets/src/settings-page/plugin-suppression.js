@@ -41,13 +41,11 @@ function SuppressedPluginTime({ suppressedPlugin }) {
 
 	return (
 		<time dateTime={format('c', suppressedPlugin.timestamp)}>
-			{
+			{sprintf(
 				/* translators: placeholder is a formatted date. */
-				sprintf(
-					__('Since %s.', 'amp'),
-					dateI18n(dateFormat, suppressedPlugin.timestamp * 1000)
-				)
-			}
+				__('Since %s.', 'amp'),
+				dateI18n(dateFormat, suppressedPlugin.timestamp * 1000)
+			)}
 		</time>
 	);
 }
@@ -66,13 +64,11 @@ SuppressedPluginTime.propTypes = {
 function SuppressedPluginUsername({ suppressedPlugin }) {
 	return (
 		<span>
-			{
+			{sprintf(
 				/* translators: placeholder is the name of the user who suppressed the plugin */
-				sprintf(
-					__('Done by %s.', 'amp'),
-					suppressedPlugin.user.name || suppressedPlugin.user.slug
-				)
-			}
+				__('Done by %s.', 'amp'),
+				suppressedPlugin.user.name || suppressedPlugin.user.slug
+			)}
 		</span>
 	);
 }
@@ -133,9 +129,7 @@ SuppressedPluginVersion.propTypes = {
  */
 function ValidationErrorDetails({ errors }) {
 	if (errors.length === 0) {
-		return <p>
-{__('No validation errors yet detected.', 'amp')}
-</p>;
+		return <p>{__('No validation errors yet detected.', 'amp')}</p>;
 	}
 
 	return (
@@ -226,9 +220,7 @@ function PluginRow({ pluginKey, pluginDetails }) {
 		editedSuppressedPlugins[pluginKey] !== false;
 
 	const PluginName = () => (
-		<strong className="plugin-name">
-{pluginDetails.Name}
-</strong>
+		<strong className="plugin-name">{pluginDetails.Name}</strong>
 	);
 
 	const errorDetails = (
@@ -237,12 +229,10 @@ function PluginRow({ pluginKey, pluginDetails }) {
 				<p>
 					<SuppressedPluginTime
 						suppressedPlugin={originalSuppressedPlugins[pluginKey]}
-					/>
-{' '}
+					/>{' '}
 					<SuppressedPluginUsername
 						suppressedPlugin={originalSuppressedPlugins[pluginKey]}
-					/>
-{' '}
+					/>{' '}
 					<SuppressedPluginVersion
 						pluginDetails={pluginDetails}
 						suppressedPlugin={originalSuppressedPlugins[pluginKey]}
@@ -302,13 +292,11 @@ function PluginRow({ pluginKey, pluginDetails }) {
 										target="_blank"
 										rel="noreferrer"
 									>
-										{
+										{sprintf(
 											/* translators: placeholder is an author name. */
-											sprintf(
-												__('By %s'),
-												pluginDetails.Author
-											)
-										}
+											__('By %s'),
+											pluginDetails.Author
+										)}
 									</a>
 								) : (
 									/* translators: placeholder is an author name. */
@@ -340,9 +328,7 @@ function PluginRow({ pluginKey, pluginDetails }) {
 
 				{errorDetails}
 			</td>
-			<td className="column-details">
-{errorDetails}
-</td>
+			<td className="column-details">{errorDetails}</td>
 		</tr>
 	);
 }

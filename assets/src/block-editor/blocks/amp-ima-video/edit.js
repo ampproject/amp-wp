@@ -78,9 +78,7 @@ const BlockEdit = (props) => {
 			)}
 			{!dataSet && (
 				<Placeholder label={__('IMA Video', 'amp')}>
-					<p>
-{__('Add required data to use the block.', 'amp')}
-</p>
+					<p>{__('Add required data to use the block.', 'amp')}</p>
 				</Placeholder>
 			)}
 		</>

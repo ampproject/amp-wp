@@ -53,9 +53,7 @@ describe('AMPNotice', () => {
 
 	it('has correct classes', () => {
 		act(() => {
-			render(<AMPNotice>
-{'children'}
-</AMPNotice>, container);
+			render(<AMPNotice>{'children'}</AMPNotice>, container);
 		});
 
 		expect(container.querySelector('div').getAttribute('class')).toBe(

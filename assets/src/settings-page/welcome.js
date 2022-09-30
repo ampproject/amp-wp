@@ -177,8 +177,7 @@ export function Welcome() {
 						{__(
 							'The AMP configuration wizard helps you choose the best configuration settings for your site.',
 							'amp'
-						)}
-{' '}
+						)}{' '}
 						<a href={onboardingWizardLink}>
 							{pluginConfigured
 								? __('Reopen Wizard', 'amp')

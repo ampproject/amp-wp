@@ -31,9 +31,7 @@ function writeInterstitialMessage(targetDocument) {
 	let markup = renderToString(
 		<div className="editor-post-preview-button__interstitial-message">
 			<Icon icon={ampBlackIcon({ viewBox: '0 0 98 98' })} />
-			<p>
-{__('Generating AMP preview…', 'amp')}
-</p>
+			<p>{__('Generating AMP preview…', 'amp')}</p>
 		</div>
 	);
 

@@ -102,9 +102,7 @@ export function SiteScanNotice() {
 				{elements.length ? (
 					elements
 				) : (
-					<p>
-{__('No AMP compatibility issues detected.', 'amp')}
-</p>
+					<p>{__('No AMP compatibility issues detected.', 'amp')}</p>
 				)}
 			</AmpAdminNotice>
 		);

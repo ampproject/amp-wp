@@ -30,9 +30,7 @@ const createNoticeUI = (messages, status) => {
 	return (
 		<Notice status={status} isDismissible={false}>
 			{messages.map((message, index) => {
-				return <p key={`message-${index}`}>
-{message}
-</p>;
+				return <p key={`message-${index}`}>{message}</p>;
 			})}
 		</Notice>
 	);

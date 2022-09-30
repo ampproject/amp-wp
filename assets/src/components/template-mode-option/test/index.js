@@ -39,9 +39,7 @@ describe('TemplateModeOption', () => {
 					details="Standard info"
 					detailsUrl="https://amp-wp.org/documentation/getting-started/standard/"
 				>
-					<div>
-{'Component children'}
-</div>
+					<div>{'Component children'}</div>
 				</TemplateModeOption>
 			</OptionsContextProvider>
 		);
@@ -67,9 +65,7 @@ describe('TemplateModeOption', () => {
 					mode={READER}
 					previouslySelected={true}
 					initialOpen={true}
-					labelExtra={<div>
-{'Extra label content'}
-</div>}
+					labelExtra={<div>{'Extra label content'}</div>}
 				/>
 			</OptionsContextProvider>
 		);
@@ -86,18 +82,14 @@ describe('TemplateModeOption', () => {
 						details="Reader info"
 						detailsUrl="https://amp-wp.org/documentation/getting-started/reader/"
 					>
-						<div id="reader-mode-children">
-{'children'}
-</div>
+						<div id="reader-mode-children">{'children'}</div>
 					</TemplateModeOption>
 					<TemplateModeOption
 						mode={STANDARD}
 						details="Standard info"
 						detailsUrl="https://amp-wp.org/documentation/getting-started/standard/"
 					>
-						<div id="standard-mode-children">
-{'children'}
-</div>
+						<div id="standard-mode-children">{'children'}</div>
 					</TemplateModeOption>
 				</OptionsContextProvider>,
 				container
@@ -118,9 +110,7 @@ describe('TemplateModeOption', () => {
 						details="Transitional info"
 						detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/"
 					>
-						<div id="reader-mode-children">
-{'children'}
-</div>
+						<div id="reader-mode-children">{'children'}</div>
 					</TemplateModeOption>
 					<TemplateModeOption
 						mode={STANDARD}
@@ -128,9 +118,7 @@ describe('TemplateModeOption', () => {
 						details="Standard info"
 						detailsUrl="https://amp-wp.org/documentation/getting-started/standard/"
 					>
-						<div id="standard-mode-children">
-{'children'}
-</div>
+						<div id="standard-mode-children">{'children'}</div>
 					</TemplateModeOption>
 				</OptionsContextProvider>,
 				container
@@ -155,9 +143,7 @@ describe('TemplateModeOption', () => {
 						details="Transitional info"
 						detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/"
 					>
-						<div id="transitional-mode-children">
-{'children'}
-</div>
+						<div id="transitional-mode-children">{'children'}</div>
 					</TemplateModeOption>
 				</OptionsContextProvider>,
 				container
@@ -179,9 +165,7 @@ describe('TemplateModeOption', () => {
 						details="Transitional info"
 						detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/"
 					>
-						<div id="transitional-mode-children">
-{'children'}
-</div>
+						<div id="transitional-mode-children">{'children'}</div>
 					</TemplateModeOption>
 				</OptionsContextProvider>,
 				container

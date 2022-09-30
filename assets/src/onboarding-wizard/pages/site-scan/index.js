@@ -93,9 +93,7 @@ export function SiteScan() {
 				title={__('Scan failed', 'amp')}
 				headerContent={
 					<>
-						<p>
-{__('Site scan was unsuccessful.', 'amp')}
-</p>
+						<p>{__('Site scan was unsuccessful.', 'amp')}</p>
 						<p>
 							{__(
 								'You can trigger the site scan again on the AMP Settings page after completing the Wizard.',
@@ -214,9 +212,7 @@ function SiteScanPanel({ children, headerContent, title }) {
 			<Selectable className="site-scan__section">
 				<div className="site-scan__header">
 					<IconLandscapeHillsCogs />
-					<p className="site-scan__heading">
-{title}
-</p>
+					<p className="site-scan__heading">{title}</p>
 				</div>
 				{headerContent}
 			</Selectable>

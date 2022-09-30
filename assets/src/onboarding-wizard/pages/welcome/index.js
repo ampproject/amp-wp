@@ -197,9 +197,7 @@ export function Welcome() {
 						</defs>
 					</svg>
 				</div>
-				<h1>
-{__('AMP for WordPress', 'amp')}
-</h1>
+				<h1>{__('AMP for WordPress', 'amp')}</h1>
 			</div>
 			<div className="welcome__body">
 				<div className={'welcome__section'}>
@@ -234,15 +232,12 @@ export function Welcome() {
 						</svg>
 					</div>
 					<div className="welcome__section-description">
-						<h4>
-{__('AMP and WordPress', 'amp')}
-</h4>
+						<h4>{__('AMP and WordPress', 'amp')}</h4>
 						<p>
 							{__(
 								'AMP provides support for building beautiful, fast, engaging, secure, and accessible sites, and the AMP plugin makes it easy to take advantage of AMP on WordPress.',
 								'amp'
-							)}
-{' '}
+							)}{' '}
 							<a
 								href="https://amp-wp.org/"
 								target="_blank"
@@ -314,9 +309,7 @@ export function Welcome() {
 						</svg>
 					</div>
 					<div className="welcome__section-description">
-						<h4>
-{__('Configure your site with AMP', 'amp')}
-</h4>
+						<h4>{__('Configure your site with AMP', 'amp')}</h4>
 						<p>
 							{__(
 								'Regardless of technical expertise, the onboarding flow guides you through configuring the plugin in a few easy steps.',
@@ -331,9 +324,7 @@ export function Welcome() {
 						<IconLaptopSearch />
 					</div>
 					<div className="welcome__section-description">
-						<h4>
-{__('Site review', 'amp')}
-</h4>
+						<h4>{__('Site review', 'amp')}</h4>
 						<p>
 							{__(
 								'At the end of onboarding the AMP plugin is fully configured, and your site is ready to start serving great experiences to your users.',

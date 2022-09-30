@@ -32,9 +32,7 @@ export function ErrorScreen({ error, finishLinkLabel, finishLinkUrl, title }) {
 	return (
 		<div className="error-screen-container">
 			<Panel className="error-screen">
-				<h1>
-{title || __('Something went wrong.', 'amp')}
-</h1>
+				<h1>{title || __('Something went wrong.', 'amp')}</h1>
 
 				{/* dangerouslySetInnerHTML reason: WordPress sometimes sends back HTML in error messages. */}
 				<p
@@ -52,8 +50,8 @@ export function ErrorScreen({ error, finishLinkLabel, finishLinkUrl, title }) {
 							'amp'
 						),
 						{
-							// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 							a: (
+								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 								<a
 									href="https://wordpress.org/support/plugin/amp/"
 									target="_blank"
@@ -66,12 +64,8 @@ export function ErrorScreen({ error, finishLinkLabel, finishLinkUrl, title }) {
 
 				{stack && (
 					<details>
-						<summary>
-{__('Details', 'amp')}
-</summary>
-						<pre>
-{stack}
-</pre>
+						<summary>{__('Details', 'amp')}</summary>
+						<pre>{stack}</pre>
 						<ClipboardButton
 							isSmall={true}
 							isSecondary={true}
@@ -88,9 +82,7 @@ export function ErrorScreen({ error, finishLinkLabel, finishLinkUrl, title }) {
 
 				{finishLinkUrl && finishLinkLabel && (
 					<p>
-						<a href={finishLinkUrl}>
-{finishLinkLabel}
-</a>
+						<a href={finishLinkUrl}>{finishLinkLabel}</a>
 					</p>
 				)}
 			</Panel>

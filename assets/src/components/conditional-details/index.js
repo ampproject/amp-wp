@@ -19,9 +19,7 @@ export function ConditionalDetails({ children, summary }) {
 	return children &&
 		0 < Children.toArray(children).filter((child) => child).length ? (
 		<details>
-			<summary>
-{summary}
-</summary>
+			<summary>{summary}</summary>
 
 			{children}
 		</details>

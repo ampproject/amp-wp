@@ -107,8 +107,8 @@ export function AMPSupport(props) {
 							'amp'
 						),
 						{
-							// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 							a: (
+								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 								<a
 									href="https://wordpress.org/support/plugin/amp/#new-topic-0"
 									rel="noreferrer"
@@ -200,9 +200,7 @@ export function AMPSupport(props) {
 						className={'amp-notice--uuid'}
 					>
 						{__('Support UUID: ', 'amp')}
-						<code>
-{uuid}
-</code>
+						<code>{uuid}</code>
 						<ClipboardButton
 							isSmall={true}
 							text={uuid}

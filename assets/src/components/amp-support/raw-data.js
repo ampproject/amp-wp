@@ -18,9 +18,7 @@ import { __ } from '@wordpress/i18n';
 export function RawData({ data }) {
 	return (
 		<details open={false}>
-			<summary>
-{__('Raw Data', 'amp')}
-</summary>
+			<summary>{__('Raw Data', 'amp')}</summary>
 			<pre className="amp-support__raw-data detail-body">
 				{JSON.stringify(data, null, 4)}
 			</pre>

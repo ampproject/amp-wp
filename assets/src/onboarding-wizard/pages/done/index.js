@@ -123,9 +123,7 @@ export function Done() {
 
 	return (
 		<div className="done">
-			<h1 className="done__heading">
-{__('Done', 'amp')}
-</h1>
+			<h1 className="done__heading">{__('Done', 'amp')}</h1>
 			<div className="done__content done__content--primary">
 				<h2 className="done__icon-title">
 					<IconLaptopSearch />
@@ -261,8 +259,8 @@ export function Done() {
 						{createInterpolateElement(
 							__('Reach out in the <a>support forums</a>', 'amp'),
 							{
-								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 								a: (
+									// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 									<a
 										href="https://wordpress.org/support/plugin/amp/#new-topic-0"
 										target="_blank"
@@ -279,8 +277,8 @@ export function Done() {
 								'amp'
 							),
 							{
-								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 								a: (
+									// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 									<a
 										href={SETTINGS_LINK}
 										target="_blank"
@@ -297,8 +295,8 @@ export function Done() {
 								'amp'
 							),
 							{
-								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 								a: (
+									// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 									<a
 										href="https://amp-wp.org/documentation/how-the-plugin-works/"
 										target="_blank"

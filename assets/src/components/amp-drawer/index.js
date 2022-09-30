@@ -106,9 +106,7 @@ export function AMPDrawer({
 		>
 			{handleType === HANDLE_TYPE_RIGHT && (
 				<>
-					<div className="amp-drawer__heading">
-{heading}
-</div>
+					<div className="amp-drawer__heading">{heading}</div>
 					{labelExtra && (
 						<div className="amp-drawer__label-extra">
 							{labelExtra}

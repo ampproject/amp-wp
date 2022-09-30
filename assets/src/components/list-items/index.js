@@ -18,9 +18,7 @@ export function ListItems({ className = '', isDisc = false, heading, items }) {
 		>
 			{heading && (
 				<li className="list-items__item">
-					<h4 className="list-items__heading">
-{heading}
-</h4>
+					<h4 className="list-items__heading">{heading}</h4>
 				</li>
 			)}
 			{items.map((item, index) => {

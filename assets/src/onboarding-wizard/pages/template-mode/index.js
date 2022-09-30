@@ -44,9 +44,7 @@ export function TemplateMode() {
 	return (
 		<div className="template-modes">
 			<div className="template-modes__header">
-				<h1>
-{__('Template Modes', 'amp')}
-</h1>
+				<h1>{__('Template Modes', 'amp')}</h1>
 				<p>
 					{createInterpolateElement(
 						__(

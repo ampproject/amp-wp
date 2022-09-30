@@ -25,12 +25,8 @@ describe('useErrorsFetchingStateChanges', () => {
 
 		return (
 			<div>
-				<div id="status">
-{isFetchingErrors ? 'Fetching' : 'Idle'}
-</div>
-				<div id="message">
-{fetchingErrorsMessage}
-</div>
+				<div id="status">{isFetchingErrors ? 'Fetching' : 'Idle'}</div>
+				<div id="message">{fetchingErrorsMessage}</div>
 			</div>
 		);
 	}

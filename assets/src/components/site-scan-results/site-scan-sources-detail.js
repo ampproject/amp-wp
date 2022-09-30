@@ -96,9 +96,7 @@ export function SiteScanSourcesDetail({ slug }) {
 			<ul className="site-scan-results__urls-list">
 				{extensionScannableUrls.map(({ url }) => (
 					<li key={url}>
-						<ExternalLink href={url}>
-{url}
-</ExternalLink>
+						<ExternalLink href={url}>{url}</ExternalLink>
 					</li>
 				))}
 			</ul>
@@ -108,9 +106,7 @@ export function SiteScanSourcesDetail({ slug }) {
 					'amp'
 				)}
 			</p>
-			<pre className="site-scan-results__source-detail">
-{jsonData}
-</pre>
+			<pre className="site-scan-results__source-detail">{jsonData}</pre>
 			<ClipboardButton
 				isSmall={true}
 				text={jsonData}

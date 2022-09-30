@@ -48,9 +48,7 @@ export function TechnicalBackground() {
 	return (
 		<div className="technical-background">
 			<div className="technical-background__header">
-				<h1>
-{__('Technical Background', 'amp')}
-</h1>
+				<h1>{__('Technical Background', 'amp')}</h1>
 				<p>
 					{__(
 						'To recommend the best AMP experience we’d like to know if you’re a more technical user, or less technical.',

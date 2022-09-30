@@ -76,9 +76,7 @@ describe('withAMPToolbarButton: filtering with errors', () => {
 	it('is filtered correctly with a class component', () => {
 		class UnfilteredComponent extends Component {
 			render() {
-				return <div id="default-component-element">
-{''}
-</div>;
+				return <div id="default-component-element">{''}</div>;
 			}
 		}
 
@@ -96,9 +94,7 @@ describe('withAMPToolbarButton: filtering with errors', () => {
 
 	it('is filtered correctly with a function component', () => {
 		function UnfilteredComponent() {
-			return <div id="default-component-element">
-{''}
-</div>;
+			return <div id="default-component-element">{''}</div>;
 		}
 
 		const FilteredComponent = withAMPToolbarButton(UnfilteredComponent);
@@ -138,9 +134,7 @@ describe('withAMPToolbarButton: filtering without errors', () => {
 	it('is not filtered with a class component and no errors', () => {
 		class UnfilteredComponent extends Component {
 			render() {
-				return <div id="default-component-element">
-{''}
-</div>;
+				return <div id="default-component-element">{''}</div>;
 			}
 		}
 
@@ -158,9 +152,7 @@ describe('withAMPToolbarButton: filtering without errors', () => {
 
 	it('is not filtered with a function component and no errors', () => {
 		function UnfilteredComponent() {
-			return <div id="default-component-element">
-{''}
-</div>;
+			return <div id="default-component-element">{''}</div>;
 		}
 
 		const FilteredComponent = withAMPToolbarButton(UnfilteredComponent);

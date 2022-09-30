@@ -37,18 +37,12 @@ export function SidebarNotification({
 			})}
 		>
 			{iconElement && (
-				<div className="sidebar-notification__icon">
-{iconElement}
-</div>
+				<div className="sidebar-notification__icon">{iconElement}</div>
 			)}
 			<div className="sidebar-notification__content">
-				<p>
-{message}
-</p>
+				<p>{message}</p>
 				{action && (
-					<div className="sidebar-notification__action">
-{action}
-</div>
+					<div className="sidebar-notification__action">{action}</div>
 				)}
 			</div>
 		</div>

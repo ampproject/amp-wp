@@ -72,9 +72,7 @@ export function ToolbarIcon({ broken = false, count }) {
 			) : (
 				<IconSVG hasBadge={Boolean(count)} />
 			)}
-			{0 < count && <div className="amp-error-count-badge">
-{count}
-</div>}
+			{0 < count && <div className="amp-error-count-badge">{count}</div>}
 		</div>
 	);
 }
