@@ -916,7 +916,7 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 						<a href="https://amp-dev.test/about/page-image-alignment/">Page Image Alignment</a>
 					</li>
 				</ul>
-			<button class="submenu-expand display-on-mobile" tabindex="-1" on="tap:i-amp-0">Open</button><amp-sidebar layout="nodisplay" class="amp-twentynineteen-main-navigation" side="right" id="i-amp-0"><amp-nested-menu layout="fill"><ul class="sub-menu expanded-true display-on-mobile">
+			<button class="submenu-expand display-on-mobile" tabindex="-1" on="tap:i-amp-0.open">Open</button><amp-sidebar layout="nodisplay" class="amp-twentynineteen-main-navigation" side="right" id="i-amp-0"><amp-nested-menu layout="fill"><ul class="sub-menu expanded-true display-on-mobile">
 					<li id="menu-item--1" class="mobile-parent-nav-menu-item menu-item--1">
 						<button class="menu-item-link-return" tabindex="-1" on="tap:i-amp-0.close">Pages</button>
 					</li>
@@ -962,7 +962,7 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 						</ul>
 					</li>
 				</ul>
-			<button class="submenu-expand display-on-mobile" tabindex="-1" on="tap:i-amp-1">Open</button><amp-sidebar layout="nodisplay" class="amp-twentynineteen-main-navigation" side="right" id="i-amp-1"><amp-nested-menu layout="fill"><ul class="sub-menu expanded-true display-on-mobile">
+			<button class="submenu-expand display-on-mobile" tabindex="-1" on="tap:i-amp-1.open">Open</button><amp-sidebar layout="nodisplay" class="amp-twentynineteen-main-navigation" side="right" id="i-amp-1"><amp-nested-menu layout="fill"><ul class="sub-menu expanded-true display-on-mobile">
 					<li id="menu-item--3" class="mobile-parent-nav-menu-item menu-item--3">
 						<button class="menu-item-link-return" tabindex="-1" on="tap:i-amp-1.close">Depth</button>
 					</li>
@@ -1021,9 +1021,15 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $input );
 		( new AMP_Core_Theme_Sanitizer( $dom ) )->update_twentynineteen_mobile_main_menu();
 
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		// Normalize multiple spaces to single space.
+		$content  = trim( preg_replace( '/\s+/', ' ', $content ) );
+		$expected = trim( preg_replace( '/\s+/', ' ', $expected ) );
+
 		$this->assertEquals(
 			$expected,
-			AMP_DOM_Utils::get_content_from_dom( $dom )
+			$content
 		);
 	}
 
