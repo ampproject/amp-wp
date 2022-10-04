@@ -59,13 +59,13 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 			'color' => '#FFFFFF',
 		],
 		[
-			'name' => 'Purple',
-			'slug' => 'purple',
+			'name'  => 'Purple',
+			'slug'  => 'purple',
 			'color' => 'var(--base-purple)',
 		],
 		[
-			'name' => 'Yellow',
-			'slug' => 'yellow',
+			'name'  => 'Yellow',
+			'slug'  => 'yellow',
 			'color' => 'rgb(255, 255, 0)',
 		],
 	];
