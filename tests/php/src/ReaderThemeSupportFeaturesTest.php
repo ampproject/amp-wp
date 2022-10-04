@@ -58,6 +58,16 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 			'slug'  => 'white',
 			'color' => '#FFFFFF',
 		],
+		[
+			'name' => 'Purple',
+			'slug' => 'purple',
+			'color' => 'var(--base-purple)',
+		],
+		[
+			'name' => 'Yellow',
+			'slug' => 'yellow',
+			'color' => 'rgb(255, 255, 0)',
+		],
 	];
 
 	const TEST_ALL_THEME_SUPPORTS = [
@@ -387,6 +397,12 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->assertStringContainsString( ':root .is-gigantic-text, :root .has-gigantic-font-size { font-size: 144px; }', $output );
 		$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-gradient-presets">', $output );
 		$this->assertStringContainsString( '.has-yellow-to-purple-gradient-background { background: linear-gradient(160deg, #EEEADD 0%, #D1D1E4 100%); }', $output );
+
+		// assert output string does not contain background color if it is not hexdec compatible but contains color.
+		$this->assertStringNotContainsString( '.has-purple-background-color { background-color: var(--base-purple); color: #000; }', $output );
+		$this->assertStringNotContainsString( '.has-yellow-background-color { background-color: rgb(255, 255, 0); color: #000; }', $output );
+		$this->assertStringContainsString( '.has-purple-color { color: var(--base-purple); }', $output );
+		$this->assertStringContainsString( '.has-yellow-color { color: rgb(255, 255, 0); }', $output );
 	}
 
 	/** @return array */
