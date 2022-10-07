@@ -127,14 +127,26 @@ final class Sandboxing implements Service, Registerable {
 	}
 
 	/**
+	 * Determine sandboxing level if enabled.
+	 *
+	 * @return int Sandboxing level.
+	 */
+	public static function get_sandboxing_level() {
+		if ( ! AMP_Options_Manager::get_option( self::OPTION_ENABLED ) ) {
+			return 0;
+		}
+		return AMP_Options_Manager::get_option( self::OPTION_LEVEL );
+	}
+
+	/**
 	 * Add hooks.
 	 */
 	public function add_hooks() {
-		if ( ! AMP_Options_Manager::get_option( self::OPTION_ENABLED ) ) {
+		$sandboxing_level = self::get_sandboxing_level();
+
+		if ( 0 === $sandboxing_level ) {
 			return;
 		}
-
-		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_LEVEL );
 
 		// Opt-in to the new script sanitization logic in the script sanitizer.
 		add_filter(
