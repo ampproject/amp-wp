@@ -13,6 +13,7 @@ use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Sandboxing;
 
 /**
  * Determine whether AMP is enabled on the current site.
@@ -740,10 +741,15 @@ function amp_add_amphtml_link() {
 		return;
 	}
 
-	$amp_url = amp_add_paired_endpoint( amp_get_current_url() );
+	$amp_url          = amp_add_paired_endpoint( amp_get_current_url() );
+	$sandboxing_level = Sandboxing::get_sandboxing_level();
 	if ( $amp_url ) {
 		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
-		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
+		if ( 1 === $sandboxing_level || 2 === $sandboxing_level ) {
+			printf( '<link rel="alternate" href="%s">', esc_url( $amp_url ) );
+		} else {
+			printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
+		}
 	}
 }
 
