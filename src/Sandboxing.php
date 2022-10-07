@@ -130,13 +130,6 @@ final class Sandboxing implements Service, Registerable {
 	 * Add hooks.
 	 */
 	public function add_hooks() {
-		// Limit to Standard mode for now. To support in Transitional/Reader we'd need to discontinue redirecting invalid
-		// AMP to non-AMP and omit the amphtml link (in which case it would only be relevant when mobile redirection is
-		// enabled).
-		if ( ! amp_is_canonical() ) {
-			return;
-		}
-
 		if ( ! AMP_Options_Manager::get_option( self::OPTION_ENABLED ) ) {
 			return;
 		}
