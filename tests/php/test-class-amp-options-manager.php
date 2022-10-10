@@ -122,8 +122,8 @@ class Test_AMP_Options_Manager extends TestCase {
 				Option::PAIRED_URL_STRUCTURE     => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 				Option::LATE_DEFINED_SLUG        => null,
 				Option::DELETE_DATA_AT_UNINSTALL => true,
-				Sandboxing::OPTION_ENABLED       => false,
-				Sandboxing::OPTION_LEVEL         => 1,
+				Option::SANDBOXING_ENABLED       => false,
+				Option::SANDBOXING_LEVEL         => 1,
 				Option::USE_NATIVE_IMG_TAG       => false,
 			],
 			AMP_Options_Manager::get_options()
