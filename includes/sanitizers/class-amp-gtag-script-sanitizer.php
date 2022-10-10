@@ -9,6 +9,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ValidationExemption;
 
 /**
@@ -18,20 +19,6 @@ use AmpProject\AmpWP\ValidationExemption;
  * @internal
  */
 class AMP_GTag_Script_Sanitizer extends AMP_Base_Sanitizer {
-	/**
-	 * Option key for enabling sandboxing.
-	 *
-	 * @var string
-	 */
-	const OPTION_ENABLED = 'sandboxing_enabled';
-
-	/**
-	 * Option key for sandboxing level.
-	 *
-	 * @todo Move this to the Options interface once no longer experimental.
-	 * @var string
-	 */
-	const OPTION_LEVEL = 'sandboxing_level';
 
 	/**
 	 * Sanitize the AMP response for GA4 scripts.
@@ -39,11 +26,11 @@ class AMP_GTag_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 2.3.1
 	 */
 	public function sanitize() {
-		if ( ! AMP_Options_Manager::get_option( self::OPTION_ENABLED ) ) {
+		if ( ! AMP_Options_Manager::get_option( Option::SANDBOXING_ENABLED ) ) {
 			return;
 		}
 
-		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_LEVEL );
+		$sandboxing_level = AMP_Options_Manager::get_option( Option::SANDBOXING_LEVEL );
 
 		if ( 1 !== $sandboxing_level && 2 !== $sandboxing_level ) {
 			return;
