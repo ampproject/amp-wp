@@ -14,6 +14,7 @@ use AMP_Script_Sanitizer;
 use AMP_Style_Sanitizer;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Option;
 use AmpProject\Dom\Document;
 use AmpProject\Dom\Element;
 use AmpProject\Html\Attribute;
@@ -30,21 +31,6 @@ use DOMAttr;
 final class Sandboxing implements Service, Registerable {
 
 	/**
-	 * Option key for enabling sandboxing.
-	 *
-	 * @var string
-	 */
-	const OPTION_ENABLED = 'sandboxing_enabled';
-
-	/**
-	 * Option key for sandboxing level.
-	 *
-	 * @todo Move this to the Options interface once no longer experimental.
-	 * @var string
-	 */
-	const OPTION_LEVEL = 'sandboxing_level';
-
-	/**
 	 * Sandboxing levels.
 	 *
 	 * @var int[]
@@ -57,11 +43,11 @@ final class Sandboxing implements Service, Registerable {
 	 * @var array
 	 */
 	const DEFAULT_OPTIONS_SCHEMA = [
-		self::OPTION_ENABLED => [
+		Option::SANDBOXING_ENABLED => [
 			'type'    => 'bool',
 			'default' => false,
 		],
-		self::OPTION_LEVEL   => [
+		Option::SANDBOXING_LEVEL   => [
 			'type'    => 'int',
 			'enum'    => self::LEVELS,
 			'default' => 1,
@@ -113,15 +99,15 @@ final class Sandboxing implements Service, Registerable {
 	 * @return array Sanitized options.
 	 */
 	public function sanitize_options( $options, $new_options ) {
-		if ( isset( $new_options[ self::OPTION_ENABLED ] ) ) {
-			$options[ self::OPTION_ENABLED ] = (bool) $new_options[ self::OPTION_ENABLED ];
+		if ( isset( $new_options[ Option::SANDBOXING_ENABLED ] ) ) {
+			$options[ Option::SANDBOXING_ENABLED ] = (bool) $new_options[ Option::SANDBOXING_ENABLED ];
 		}
 		if (
-			isset( $new_options[ self::OPTION_LEVEL ] )
+			isset( $new_options[ Option::SANDBOXING_LEVEL ] )
 			&&
-			in_array( $new_options[ self::OPTION_LEVEL ], self::LEVELS, true )
+			in_array( $new_options[ Option::SANDBOXING_LEVEL ], self::LEVELS, true )
 		) {
-			$options[ self::OPTION_LEVEL ] = $new_options[ self::OPTION_LEVEL ];
+			$options[ Option::SANDBOXING_LEVEL ] = $new_options[ Option::SANDBOXING_LEVEL ];
 		}
 		return $options;
 	}
@@ -137,11 +123,11 @@ final class Sandboxing implements Service, Registerable {
 			return;
 		}
 
-		if ( ! AMP_Options_Manager::get_option( self::OPTION_ENABLED ) ) {
+		if ( ! AMP_Options_Manager::get_option( Option::SANDBOXING_ENABLED ) ) {
 			return;
 		}
 
-		$sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_LEVEL );
+		$sandboxing_level = AMP_Options_Manager::get_option( Option::SANDBOXING_LEVEL );
 
 		// Opt-in to the new script sanitization logic in the script sanitizer.
 		add_filter(
@@ -241,7 +227,7 @@ final class Sandboxing implements Service, Registerable {
 	 * @param int      $effective_sandboxing_level Effective sandboxing level.
 	 */
 	public function finalize_document( Document $dom, $effective_sandboxing_level ) {
-		$actual_sandboxing_level = AMP_Options_Manager::get_option( self::OPTION_LEVEL );
+		$actual_sandboxing_level = AMP_Options_Manager::get_option( Option::SANDBOXING_LEVEL );
 
 		$meta_generator = $dom->xpath->query( '/html/head/meta[ @name = "generator" and starts-with( @content, "AMP Plugin" ) ]/@content' )->item( 0 );
 		if ( $meta_generator instanceof DOMAttr ) {
