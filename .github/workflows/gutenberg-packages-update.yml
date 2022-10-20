@@ -106,7 +106,7 @@ jobs:
           VERSION: ${{ needs.check-gutenberg-release.outputs.latest-version }}
 
       - name: Setup Node
-        uses: actions/setup-node@v3.4.1
+        uses: actions/setup-node@v3.5.1
         with:
           node-version-file: '.nvmrc'
           cache: npm
