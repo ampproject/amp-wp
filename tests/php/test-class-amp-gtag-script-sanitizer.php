@@ -62,15 +62,6 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	}
 
 	/**
-	 * Tear down.
-	 */
-	public function tear_down() {
-		AMP_Options_Manager::update_option( Option::SANDBOXING_ENABLED, $this->sandboxing_enabled );
-		AMP_Options_Manager::update_option( Option::SANDBOXING_LEVEL, $this->sandboxing_level );
-		parent::tear_down();
-	}
-
-	/**
 	 * Get GTag init markup.
 	 *
 	 * @return string
