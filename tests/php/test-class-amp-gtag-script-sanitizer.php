@@ -60,59 +60,50 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	}
 
 	/**
-	 * Do not PX verify script tag if no sandboxing.
-	 *
-	 * @covers ::sanitize
+	 * Get data
 	 */
-	public function test_do_not_px_verify_script_tag_if_no_sandboxing() {
-		$dom = new Document();
-		$dom->loadHTML( self::GTAG_HTML_MARKUP );
-
-		$this->enable_sandboxing( false );
-
-		$sanitizer = new AMP_GTag_Script_Sanitizer( $dom );
-		$sanitizer->sanitize();
-		$scripts = $dom->xpath->query( self::SCRIPT_XPATH );
-
-		$this->assertCount( 2, $scripts );
-		foreach ( $scripts as $script ) {
-			$this->assertSame( Tag::SCRIPT, $script->tagName );
-			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
-		}
+	public function get_data() {
+		return [
+			'do_not_px_verify_script_tag_if_no_sandboxing' => [
+				'enable_sandboxing'  => false,
+				'sandboxing_level'   => null,
+				'expect_px_verified' => false,
+			],
+			'do_not_px_verify_script_tag_if_sandboxing_level_is_strict' => [
+				'enable_sandboxing'  => true,
+				'sandboxing_level'   => 3,
+				'expect_px_verified' => false,
+			],
+			'px_verify_script_tag_if_sandboxing_level_is_moderate' => [
+				'enable_sandboxing'  => true,
+				'sandboxing_level'   => 2,
+				'expect_px_verified' => true,
+			],
+			'px_verify_script_tag_if_sandboxing_level_is_loose' => [
+				'enable_sandboxing'  => true,
+				'sandboxing_level'   => 1,
+				'expect_px_verified' => true,
+			],
+		];
 	}
 
 	/**
-	 * Do not PX verify script tag if sandboxing level is strict.
+	 * @dataProvider get_data
+	 *
+	 * @param bool $enable_sandboxing Whether sandboxing is enabled.
+	 * @param int $sandboxing_level The sandboxing level to set.
+	 * @param bool $expect_px_verified Whether the script tag is expected to be px verified.
 	 *
 	 * @covers ::sanitize
 	 */
-	public function test_do_not_px_verify_script_tag_if_sandboxing_level_is_strict() {
-		$dom = new Document();
-		$dom->loadHTML( self::GTAG_HTML_MARKUP );
-
-		$this->enable_sandboxing( true );
-
-		$sanitizer = new AMP_GTag_Script_Sanitizer( $dom );
-		$sanitizer->sanitize();
-		$scripts = $dom->xpath->query( self::SCRIPT_XPATH );
-
-		$this->assertCount( 2, $scripts );
-		foreach ( $scripts as $script ) {
-			$this->assertSame( Tag::SCRIPT, $script->tagName );
-			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
+	public function test_sanitize( $enable_sandboxing, $sandboxing_level, $expect_px_verified ) {
+		AMP_Options_Manager::update_option( Option::SANDBOXING_ENABLED, $enable_sandboxing );
+		if ( $enable_sandboxing ) {
+			AMP_Options_Manager::update_option( Option::SANDBOXING_LEVEL, $sandboxing_level );
 		}
-	}
 
-	/**
-	 * PX verify script tag if sandboxing level is Moderate.
-	 *
-	 * @covers ::sanitize
-	 */
-	public function test_px_verify_script_tag_if_sandboxing_level_is_moderate() {
 		$dom = new Document();
 		$dom->loadHTML( self::GTAG_HTML_MARKUP );
-
-		$this->enable_sandboxing( true, 2 );
 
 		$sanitizer = new AMP_GTag_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
@@ -121,29 +112,7 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 		$this->assertCount( 2, $scripts );
 		foreach ( $scripts as $script ) {
 			$this->assertSame( Tag::SCRIPT, $script->tagName );
-			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $script ) );
-		}
-	}
-
-	/**
-	 * PX verify script tag if sandboxing level is Loose.
-	 *
-	 * @covers ::sanitize
-	 */
-	public function test_px_verify_script_tag_if_sandboxing_level_is_loose() {
-		$dom = new Document();
-		$dom->loadHTML( self::GTAG_HTML_MARKUP );
-
-		$this->enable_sandboxing( true, 1 );
-
-		$sanitizer = new AMP_GTag_Script_Sanitizer( $dom );
-		$sanitizer->sanitize();
-		$scripts = $dom->xpath->query( self::SCRIPT_XPATH );
-
-		$this->assertCount( 2, $scripts );
-		foreach ( $scripts as $script ) {
-			$this->assertSame( Tag::SCRIPT, $script->tagName );
-			$this->assertTrue( ValidationExemption::is_px_verified_for_node( $script ) );
+			$this->assertEquals( $expect_px_verified, ValidationExemption::is_px_verified_for_node( $script ) );
 		}
 	}
 }
