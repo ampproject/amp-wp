@@ -37,7 +37,7 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	 *
 	 * @var string
 	 */
-	const SCRIPT_XPATH = '//script[ contains( @src, "https://www.googletagmanager.com/gtag/js" ) or contains( text(), "gtag(" ) ]';
+	const SCRIPT_XPATH = '//script[ ( @async and starts-with( @src, "https://www.googletagmanager.com/gtag/js" ) ) or contains( text(), "function gtag(" ) ]';
 
 	/**
 	 * HTML markup with gtag script.
