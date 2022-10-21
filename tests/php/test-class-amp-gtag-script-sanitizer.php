@@ -40,6 +40,13 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	const SCRIPT_XPATH = '//script[ contains( @src, "https://www.googletagmanager.com/gtag/js" ) or contains( text(), "gtag(" ) ]';
 
 	/**
+	 * HTML markup with gtag script.
+	 *
+	 * @var string
+	 */
+	const GTAG_HTML_MARKUP = '<html><head></head><body><script async src="https://www.googletagmanager.com/gtag/js?id=xxxxxx"></script><script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","xxxxxx")</script></body></html>';
+
+	/**
 	 * Enable sandboxing for the test.
 	 *
 	 * @param bool $enabled Whether sandboxing is enabled.
@@ -53,22 +60,13 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	}
 
 	/**
-	 * Get GTag init markup.
-	 *
-	 * @return string
-	 */
-	public function get_gtag_markup() {
-		return '<html><head></head><body><script async src="https://www.googletagmanager.com/gtag/js?id=xxxxxx"></script><script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","xxxxxx")</script></body></html>';
-	}
-
-	/**
 	 * Do not PX verify script tag if no sandboxing.
 	 *
 	 * @covers ::sanitize
 	 */
 	public function test_do_not_px_verify_script_tag_if_no_sandboxing() {
 		$dom = new Document();
-		$dom->loadHTML( $this->get_gtag_markup() );
+		$dom->loadHTML( self::GTAG_HTML_MARKUP );
 
 		$this->enable_sandboxing( false );
 
@@ -90,7 +88,7 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	 */
 	public function test_do_not_px_verify_script_tag_if_sandboxing_level_is_strict() {
 		$dom = new Document();
-		$dom->loadHTML( $this->get_gtag_markup() );
+		$dom->loadHTML( self::GTAG_HTML_MARKUP );
 
 		$this->enable_sandboxing( true );
 
@@ -112,7 +110,7 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	 */
 	public function test_px_verify_script_tag_if_sandboxing_level_is_moderate() {
 		$dom = new Document();
-		$dom->loadHTML( $this->get_gtag_markup() );
+		$dom->loadHTML( self::GTAG_HTML_MARKUP );
 
 		$this->enable_sandboxing( true, 2 );
 
@@ -134,7 +132,7 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	 */
 	public function test_px_verify_script_tag_if_sandboxing_level_is_loose() {
 		$dom = new Document();
-		$dom->loadHTML( $this->get_gtag_markup() );
+		$dom->loadHTML( self::GTAG_HTML_MARKUP );
 
 		$this->enable_sandboxing( true, 1 );
 
