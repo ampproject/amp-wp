@@ -1546,7 +1546,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		// from getting removed in PWA plugin offline/500 templates.
 		AMP_PWA_Script_Sanitizer::class            => [],
 
-		// The AMP_GTag_Script_Sanitizer run before AMP_Script_Sanitizer, to prevent the Google Analytics script tags.
+		// The AMP_GTag_Script_Sanitizer runs before AMP_Script_Sanitizer to mark the the Google Analytics script tags as being PX-verified.
 		AMP_GTag_Script_Sanitizer::class           => [],
 
 		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
