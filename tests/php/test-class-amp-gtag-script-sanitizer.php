@@ -30,7 +30,7 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	 *
 	 * @var string
 	 */
-	const GTAG_HTML_MARKUP = '<html><head></head><body><script async src="https://www.googletagmanager.com/gtag/js?id=xxxxxx"></script><script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","xxxxxx")</script><script src="https://example.com/pixel/js"></script></body></html>';
+	const GTAG_HTML_MARKUP = '<html><head></head><body><script async src="https://www.googletagmanager.com/gtag/js?id=xxxxxx"></script><script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","xxxxxx")</script><script src="https://example.com/pixel/js"></script><script>document.write('Hello world');</script></body></html>';
 
 	/**
 	 * Get data
