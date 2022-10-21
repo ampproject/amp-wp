@@ -29,6 +29,7 @@ use DOMAttr;
  * @internal
  */
 final class Sandboxing implements Service, Registerable {
+
 	/**
 	 * Option key for enabling sandboxing.
 	 *
