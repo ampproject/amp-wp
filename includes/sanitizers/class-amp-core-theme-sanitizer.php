@@ -2475,13 +2475,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return Element|null Return Element if exists otherwise null.
 	 */
 	protected function get_first_element( $expression, $context_node = null ) {
-
+		/** @var DOMNodeList $dom_node_list */
 		$dom_node_list = $this->dom->xpath->query( $expression, $context_node );
 
-		/** @var Element $dom_node */
 		$dom_node = $dom_node_list->item( 0 );
-
-		return $dom_node;
+		return $dom_node instanceof Element ? $dom_node : null;
 	}
 
 	/**
