@@ -2507,7 +2507,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$menu_items = $this->dom->xpath->query( $xpaths['top_menu_items'], $main_menu );
 
 		/** @var Element $menu_item */
-		foreach ( $menu_items as $index => $menu_item ) {
+		foreach ( $menu_items as $menu_item ) {
 			$expand_button = $this->get_first_element( $xpaths['expand_button'], $menu_item );
 			$sub_menu      = $this->get_first_element( $xpaths['submenu'], $menu_item );
 
