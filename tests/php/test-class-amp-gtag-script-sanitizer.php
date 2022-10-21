@@ -48,6 +48,8 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 
 	/**
 	 * Get data
+	 *
+	 * @return array Test data.
 	 */
 	public function get_data() {
 		return [
