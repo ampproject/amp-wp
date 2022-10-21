@@ -29,6 +29,23 @@ use DOMAttr;
  * @internal
  */
 final class Sandboxing implements Service, Registerable {
+	/**
+	 * Option key for enabling sandboxing.
+	 *
+	 * @deprecated Use Options interface for option keys.
+	 *
+	 * @var string
+	 */
+	const OPTION_ENABLED = 'sandboxing_enabled';
+
+	/**
+	 * Option key for sandboxing level.
+	 *
+	 * @deprecated Use Options interface for option keys.
+	 *
+	 * @var string
+	 */
+	const OPTION_LEVEL = 'sandboxing_level';
 
 	/**
 	 * Sandboxing levels.
