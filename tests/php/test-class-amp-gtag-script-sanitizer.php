@@ -30,7 +30,7 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	 *
 	 * @var string
 	 */
-	const GTAG_HTML_MARKUP = '<html><head></head><body><script async src="https://www.googletagmanager.com/gtag/js?id=xxxxxx"></script><script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","xxxxxx")</script><script src="https://example.com/pixel/js"></script><script>document.write('Hello world');</script></body></html>';
+	const GTAG_HTML_MARKUP = '<html><head></head><body><script async src="https://www.googletagmanager.com/gtag/js?id=xxxxxx"></script><script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","xxxxxx")</script><script src="https://example.com/pixel/js"></script><script>document.write("Hello world");</script></body></html>';
 
 	/**
 	 * Get data
@@ -82,12 +82,19 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 
 		$sanitizer = new AMP_GTag_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
-		$scripts = $dom->xpath->query( self::SCRIPT_XPATH );
+		$gtag_scripts  = $dom->xpath->query( self::SCRIPT_XPATH );
+		$other_scripts = $dom->xpath->query( '//script[ not( @async and starts-with( @src, "https://www.googletagmanager.com/gtag/js" ) ) and not( contains( text(), "function gtag(" ) ) ]' );
 
-		$this->assertCount( 2, $scripts );
-		foreach ( $scripts as $script ) {
+		$this->assertCount( 2, $gtag_scripts );
+		foreach ( $gtag_scripts as $script ) {
 			$this->assertSame( Tag::SCRIPT, $script->tagName );
 			$this->assertEquals( $expect_px_verified, ValidationExemption::is_px_verified_for_node( $script ) );
+		}
+
+		$this->assertCount( 2, $other_scripts );
+		foreach ( $other_scripts as $script ) {
+			$this->assertSame( Tag::SCRIPT, $script->tagName );
+			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
 		}
 	}
 }
