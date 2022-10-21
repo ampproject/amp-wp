@@ -19,20 +19,6 @@ use AmpProject\AmpWP\Tests\TestCase;
 class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 
 	/**
-	 * Sandboxing enabled.
-	 *
-	 * @var bool
-	 */
-	private $sandboxing_enabled;
-
-	/**
-	 * Sandboxing level.
-	 *
-	 * @var int
-	 */
-	private $sandboxing_level;
-
-	/**
 	 * XPath query to find the scripts element.
 	 *
 	 * @var string
