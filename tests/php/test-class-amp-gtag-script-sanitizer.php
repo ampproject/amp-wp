@@ -47,19 +47,6 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	const GTAG_HTML_MARKUP = '<html><head></head><body><script async src="https://www.googletagmanager.com/gtag/js?id=xxxxxx"></script><script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","xxxxxx")</script><script src="https://example.com/pixel/js"></script></body></html>';
 
 	/**
-	 * Enable sandboxing for the test.
-	 *
-	 * @param bool $enabled Whether sandboxing is enabled.
-	 * @param int $sandboxing_level The sandboxing level to set.
-	 */
-	public function enable_sandboxing( $enable = true, $level = 3 ) {
-		AMP_Options_Manager::update_option( Option::SANDBOXING_ENABLED, $enable );
-		if ( $enable ) {
-			AMP_Options_Manager::update_option( Option::SANDBOXING_LEVEL, $level );
-		}
-	}
-
-	/**
 	 * Get data
 	 */
 	public function get_data() {
