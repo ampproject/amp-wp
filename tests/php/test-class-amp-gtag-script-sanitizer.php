@@ -40,15 +40,6 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	const SCRIPT_XPATH = '//script[ contains( @src, "https://www.googletagmanager.com/gtag/js" ) or contains( text(), "gtag(" ) ]';
 
 	/**
-	 * Set up.
-	 */
-	public function set_up() {
-		parent::set_up();
-		$this->sandboxing_enabled = AMP_Options_Manager::get_option( Option::SANDBOXING_ENABLED );
-		$this->sandboxing_level   = AMP_Options_Manager::get_option( Option::SANDBOXING_LEVEL );
-	}
-
-	/**
 	 * Enable sandboxing for the test.
 	 *
 	 * @param bool $enabled Whether sandboxing is enabled.
