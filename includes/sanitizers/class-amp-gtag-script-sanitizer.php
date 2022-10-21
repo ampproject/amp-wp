@@ -48,7 +48,7 @@ class AMP_GTag_Script_Sanitizer extends AMP_Base_Sanitizer {
 		 *   gtag('config', 'xxxxxx');
 		 * </script>
 		 */
-		$scripts = $this->dom->xpath->query( '//script[ contains( @src, "https://www.googletagmanager.com/gtag/js" ) or contains( text(), "gtag(" ) ]' );
+		$scripts = $this->dom->xpath->query( '//script[ ( @async and starts-with( @src, "https://www.googletagmanager.com/gtag/js" ) ) or contains( text(), "function gtag(" ) ]' );
 
 		if ( $scripts instanceof DOMNodeList ) {
 			foreach ( $scripts as $script ) {
