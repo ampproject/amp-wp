@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\Dom\Document;
 use AmpProject\Html\Tag;
+use AmpProject\Dom\Element;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\TestCase;
 
@@ -26,11 +27,18 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	const SCRIPT_XPATH = '//script[ ( @async and starts-with( @src, "https://www.googletagmanager.com/gtag/js" ) ) or contains( text(), "function gtag(" ) ]';
 
 	/**
+	 * XPath query to find inline gtag events.
+	 *
+	 * @var string
+	 */
+	const INLINE_GTAG_EVENT_XPATH = '//@*[ substring(name(), 1, 2) = "on" and name() != "on" and contains(., "gtag(") ]';
+
+	/**
 	 * HTML markup with gtag script.
 	 *
 	 * @var string
 	 */
-	const GTAG_HTML_MARKUP = '<html><head></head><body><script async src="https://www.googletagmanager.com/gtag/js?id=xxxxxx"></script><script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","xxxxxx")</script><script src="https://example.com/pixel/js"></script><script>document.write("Hello world");</script></body></html>';
+	const GTAG_HTML_MARKUP = '<html><head></head><body><script async src="https://www.googletagmanager.com/gtag/js?id=xxxxxx"></script><script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","xxxxxx")</script><div><a href="/">Home</a><a href="/contact" onclick=\'gtag("event","click",{event_category:"click",event_label:"contactPage"})\'>Contact</a><form><input type="text" name="name" placeholder="Name"><button onsubmit=\'gtag("event","click",{event_category:"click",event_label:"contactPage"})\' onclick="submit()"></button><button type="reset" onclick="clear()">Reset</button></form></div><script src="https://example.com/pixel/js"></script><script>document.write("Hello world")</script></body></html>';
 
 	/**
 	 * Get data
@@ -85,16 +93,41 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 		$gtag_scripts  = $dom->xpath->query( self::SCRIPT_XPATH );
 		$other_scripts = $dom->xpath->query( '//script[ not( @async and starts-with( @src, "https://www.googletagmanager.com/gtag/js" ) ) and not( contains( text(), "function gtag(" ) ) ]' );
 
+		// Gtag scripts.
 		$this->assertCount( 2, $gtag_scripts );
+		$this->assertInstanceof( DOMNodeList::class, $gtag_scripts );
 		foreach ( $gtag_scripts as $script ) {
+			$this->assertInstanceof( Element::class, $script );
 			$this->assertSame( Tag::SCRIPT, $script->tagName );
 			$this->assertEquals( $expect_px_verified, ValidationExemption::is_px_verified_for_node( $script ) );
 		}
 
 		$this->assertCount( 2, $other_scripts );
+		$this->assertInstanceof( DOMNodeList::class, $other_scripts );
 		foreach ( $other_scripts as $script ) {
+			$this->assertInstanceof( Element::class, $script );
 			$this->assertSame( Tag::SCRIPT, $script->tagName );
 			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $script ) );
+		}
+
+		// Inline Gtag events.
+		$inline_gtag_events  = $dom->xpath->query( self::INLINE_GTAG_EVENT_XPATH );
+		$other_inline_events = $dom->xpath->query( '//@*[ substring(name(), 1, 2) = "on" and name() != "on" and not( contains(., "gtag(") ) ]' );
+
+		$this->assertCount( 2, $inline_gtag_events );
+		$this->assertInstanceof( DOMNodeList::class, $inline_gtag_events );
+		foreach ( $inline_gtag_events as $inline_gtag_event ) {
+			$this->assertInstanceof( DOMAttr::class, $inline_gtag_event );
+			$this->assertStringContainsString( 'on', $inline_gtag_event->nodeName );
+			$this->assertEquals( $expect_px_verified, ValidationExemption::is_px_verified_for_node( $inline_gtag_event ) );
+		}
+
+		$this->assertCount( 2, $other_inline_events );
+		$this->assertInstanceof( DOMNodeList::class, $other_inline_events );
+		foreach ( $other_inline_events as $other_inline_event ) {
+			$this->assertInstanceof( DOMAttr::class, $other_inline_event );
+			$this->assertStringContainsString( 'on', $inline_gtag_event->nodeName );
+			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $other_inline_event ) );
 		}
 	}
 }
