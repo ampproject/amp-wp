@@ -1397,6 +1397,16 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions()
 	 */
 	public function test_handle_single_url_page_bulk_and_inline_actions() {
+		$redirected_url = null;
+		add_filter(
+			'wp_redirect',
+			static function ( $redirect_url ) use ( &$redirected_url ) {
+				$redirected_url = $redirect_url;
+				return false;
+			},
+			PHP_INT_MAX
+		);
+
 		// Create a new error term.
 		$initial_accepted_status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
 		$error_term              = self::factory()->term->create_and_get(
@@ -1423,36 +1433,23 @@ class Test_AMP_Validation_Error_Taxonomy extends TestCase {
 		 * Although the post type is correct, this should not update the post accepted status to be 'accepted'.
 		 * There should be a warning because wp_safe_redirect() should be called at the end of the tested method.
 		 */
-		$e = null;
-		try {
-			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $correct_post_type );
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
+		AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $correct_post_type );
 
-		$this->assertStringContainsString( 'Cannot modify header information', $e->getMessage() );
+		$this->assertSame( '?action=edit&amp_actioned=amp_validation_error_accept&amp_actioned_count=1', $redirected_url );
 		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS );
 
 		// When the action is to 'reject' the error, this should not update the status of the error to 'rejected'.
 		$_REQUEST['action'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
-		try {
-			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $correct_post_type );
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
+		AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $correct_post_type );
 
-		$this->assertStringContainsString( 'Cannot modify header information', $e->getMessage() );
+		$this->assertSame( '?action=edit&amp_actioned=amp_validation_error_reject&amp_actioned_count=1', $redirected_url );
 		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS );
 
 		// When the action is to 'delete' the error, this should delete the error.
 		$_REQUEST['action'] = 'delete';
-		try {
-			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $correct_post_type );
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
+		AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $correct_post_type );
 
-		$this->assertStringContainsString( 'Cannot modify header information', $e->getMessage() );
+		$this->assertSame( '?action=edit&amp_actioned=delete&amp_actioned_count=1', $redirected_url );
 		$this->assertEquals( null, get_term( $error_term->term_id ) );
 	}
 

@@ -2885,13 +2885,14 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		// Even if the user didn't select any errors to bulk edit, redirect back to the same page.
-		wp_safe_redirect(
+		if ( wp_safe_redirect(
 			add_query_arg(
 				$redirect_query_args,
 				get_edit_post_link( $post_id, 'raw' )
 			)
-		);
-		exit();
+		) ) {
+			exit();
+		}
 	}
 
 	/**
