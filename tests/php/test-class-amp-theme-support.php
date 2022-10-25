@@ -2303,10 +2303,16 @@ class Test_AMP_Theme_Support extends TestCase {
 		wp();
 		$output = AMP_Theme_Support::finish_output_buffering( $this->get_original_html() );
 
+		$error_log = stream_get_contents( $capture );
+
 		// Verify that error log was properly populated.
 		$this->assertMatchesRegularExpression(
-			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- FAILURE \(42\) \[RuntimeException\].*/',
-			stream_get_contents( $capture )
+			'/\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response/',
+			$error_log
+		);
+		$this->assertMatchesRegularExpression(
+			'/- FAILURE \(42\) \[RuntimeException\.*/',
+			$error_log
 		);
 
 		// Reset error log back to initial settings.
