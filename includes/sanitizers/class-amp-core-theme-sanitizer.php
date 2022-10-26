@@ -7,9 +7,13 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\Services;
+use AmpProject\Dom\Element;
+use AmpProject\Extension;
 use AmpProject\Html\Attribute;
 use AmpProject\Html\Tag;
 use AmpProject\Html\Role;
+use AmpProject\Layout;
 
 /**
  * Class AMP_Core_Theme_Sanitizer
@@ -162,8 +166,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'wp_print_footer_scripts' => [
 							'twentynineteen_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
 						],
+						'wp_nav_menu'             => [
+							'twentynineteen_add_ellipses_to_nav',
+						],
 					],
 					'adjust_twentynineteen_images' => [],
+					'update_twentynineteen_mobile_main_menu' => [],
+					'add_nav_menu_styles'          => [],
 				];
 
 			// Twenty Seventeen.
@@ -1150,6 +1159,118 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
+				<?php elseif ( 'twentynineteen' === get_template() ) : ?>
+					.amp-twentynineteen-main-navigation {
+						max-width: 100vw;
+						width: 100vw;
+						height: 100vh;
+					}
+					.admin-bar .amp-twentynineteen-main-navigation {
+						top: 46px;
+						height: calc(100vh - 46px);
+					}
+
+					.amp-twentynineteen-main-navigation .sub-menu > li > a:hover,
+					.amp-twentynineteen-main-navigation .sub-menu > li > a:focus,
+					.amp-twentynineteen-main-navigation .sub-menu > li > .menu-item-link-return:hover,
+					.amp-twentynineteen-main-navigation .sub-menu > li > .menu-item-link-return:focus {
+						background: inherit;
+					}
+
+					.amp-twentynineteen-main-navigation .sub-menu > li {
+						position: static;
+						display: flex;
+					}
+
+					.amp-twentynineteen-main-navigation .sub-menu > li.menu-item-has-children .submenu-expand {
+						position: static;
+					}
+
+					.amp-twentynineteen-main-navigation .sub-menu.expanded-true {
+						display: table;
+						margin-top: 0;
+						opacity: 1;
+						padding-left: 0;
+						left: 0;
+						top: 0;
+						right: 0;
+						bottom: 0;
+						position: static;
+						z-index: 100000; /* Make sure appears above mobile admin bar */
+						width: 100vw;
+						height: 100%;
+						max-width: 100vw;
+					}
+
+					.amp-twentynineteen-main-navigation .sub-menu > li.mobile-parent-nav-menu-item {
+						display: block;
+					}
+
+					.amp-twentynineteen-main-navigation .submenu-expand .svg-icon {
+						<?php if ( is_rtl() ) : ?>
+							transform: rotate(90deg);
+						<?php else : ?>
+							transform: rotate(270deg);
+						<?php endif; ?>
+					}
+
+					.amp-twentynineteen-main-navigation .sub-menu > li > a,
+					.amp-twentynineteen-main-navigation .sub-menu > li > .menu-item-link-return {
+						flex-grow: 1;
+						max-width: none;
+					}
+
+					.amp-twentynineteen-main-navigation .sub-menu > li > .menu-item-link-return .svg-icon {
+						<?php if ( is_rtl() ) : ?>
+							transform: rotate(180deg);
+						<?php endif; ?>
+					}
+
+					.main-navigation .main-menu > li.menu-item-has-children > .submenu-expand.display-on-mobile,
+					.display-on-mobile {
+						display: none;
+					}
+
+					@media only screen and (max-width: 768px) {
+						.display-on-mobile {
+							display: block;
+						}
+
+						.main-navigation .main-menu .menu-item-has-children:not(.off-canvas):focus-within > .sub-menu,
+						.main-navigation .main-menu .menu-item-has-children:not(.off-canvas):hover > .sub-menu,
+						.main-navigation .main-menu .menu-item-has-children:not(.off-canvas):focus > .sub-menu,
+						.main-navigation .main-menu > li.menu-item-has-children .submenu-expand.display-on-desktop,
+						.display-on-desktop {
+							display: none;
+						}
+
+						.main-navigation .main-menu > li.menu-item-has-children > .submenu-expand.display-on-mobile svg {
+							position: relative;
+							top: -2px;
+							<?php if ( is_rtl() ) : ?>
+								right: -2px;
+							<?php else : ?>
+								left: -2px;
+							<?php endif; ?>
+						}
+
+						.main-navigation .main-menu > li.menu-item-has-children > .submenu-expand.display-on-mobile {
+							display: inline-block;
+							<?php if ( is_rtl() ) : ?>
+								margin-left: 0.5rem;
+								margin-right: 0.25rem;
+							<?php else : ?>
+								margin-left: 0.25rem;
+								margin-right: 0.5rem;
+							<?php endif; ?>
+							background: #0073aa;
+							color: #FFF;
+							border-radius: 50%;
+							width: 20px;
+							height: 20px;
+							vertical-align: middle;
+						}
+					}
 				<?php elseif ( 'twentyseventeen' === get_template() ) : ?>
 					/* Show the button*/
 					.no-js .menu-toggle {
@@ -2342,5 +2463,160 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		// None of the roles we are looking for match any of the classes.
 		return Role::DIALOG;
+	}
+
+	/**
+	 * Evaluates the given XPath expression and give first Element if exist.
+	 *
+	 * @param string  $expression   The XPath expression to execute.
+	 * @param Element $context_node The optional context node can be specified for doing relative XPath queries.
+	 *                              By default, the queries are relative to the root element.
+	 *
+	 * @return Element|null Return Element if exists otherwise null.
+	 */
+	protected function get_first_element( $expression, $context_node = null ) {
+		/** @var DOMNodeList $dom_node_list */
+		$dom_node_list = $this->dom->xpath->query( $expression, $context_node );
+
+		$dom_node = $dom_node_list->item( 0 );
+		return $dom_node instanceof Element ? $dom_node : null;
+	}
+
+	/**
+	 * Update main navigation menu for "twentynineteen" theme.
+	 *
+	 * @return void
+	 */
+	public function update_twentynineteen_mobile_main_menu() {
+
+		$xpaths = [
+			'main_menu'               => '//nav[ @id = "site-navigation" ]//ul[ @class = "main-menu"]',
+			'top_menu_items'          => './li[ contains( @class, "menu-item" ) and contains( @class, "menu-item-has-children" ) ]',
+			'expand_button'           => './button[ @class = "submenu-expand" ]',
+			'submenu'                 => './ul[ @class = "sub-menu" ]',
+			'close_button_in_submenu' => './li[ contains( @class, "mobile-parent-nav-menu-item" ) ]//button[ contains( @class, "menu-item-link-return" ) ]',
+		];
+
+		$main_menu = $this->get_first_element( $xpaths['main_menu'] );
+		if ( empty( $main_menu ) ) {
+			return;
+		}
+
+		$menu_items = $this->dom->xpath->query( $xpaths['top_menu_items'], $main_menu );
+
+		/** @var Element $menu_item */
+		foreach ( $menu_items as $menu_item ) {
+			$expand_button = $this->get_first_element( $xpaths['expand_button'], $menu_item );
+			$sub_menu      = $this->get_first_element( $xpaths['submenu'], $menu_item );
+
+			if ( empty( $expand_button ) || empty( $sub_menu ) ) {
+				continue;
+			}
+
+			// AMP Sidebar.
+			$amp_sidebar = AMP_DOM_Utils::create_node(
+				$this->dom,
+				Extension::SIDEBAR,
+				[
+					Attribute::LAYOUT => Layout::NODISPLAY,
+					Attribute::CLASS_ => 'amp-twentynineteen-main-navigation',
+					Attribute::SIDE   => is_rtl() ? 'left' : 'right',
+				]
+			);
+
+			$sidebar_id = $this->dom->getElementId( $amp_sidebar );
+
+			// AMP nested menu.
+			$amp_nested_menu = AMP_DOM_Utils::create_node(
+				$this->dom,
+				Extension::NESTED_MENU,
+				[
+					Attribute::LAYOUT => Layout::FILL,
+				]
+			);
+
+			// Clone the sub-menu and expand button for AMP navigation.
+			/** @var Element $amp_sub_menu */
+			$amp_sub_menu = $sub_menu->cloneNode( true );
+
+			/** @var Element $amp_expand_button */
+			$amp_expand_button = $expand_button->cloneNode( true );
+
+			$sub_menu->setAttribute( Attribute::CLASS_, $sub_menu->getAttribute( Attribute::CLASS_ ) . ' display-on-desktop' );
+			$expand_button->setAttribute( Attribute::CLASS_, $expand_button->getAttribute( Attribute::CLASS_ ) . ' display-on-desktop' );
+
+			$menu_item->appendChild( $amp_expand_button );
+			$menu_item->appendChild( $amp_sub_menu );
+			$this->update_twentynineteen_main_nested_menu( $amp_sub_menu );
+
+			$amp_sub_menu->setAttribute( Attribute::CLASS_, $amp_sub_menu->getAttribute( Attribute::CLASS_ ) . ' expanded-true display-on-mobile' );
+			$amp_expand_button->setAttribute( Attribute::CLASS_, $amp_expand_button->getAttribute( Attribute::CLASS_ ) . ' display-on-mobile' );
+
+			// Handle buttons.
+			$amp_expand_button->addAmpAction( 'tap', "$sidebar_id.open" );
+			$back_button = $this->get_first_element( $xpaths['close_button_in_submenu'], $amp_sub_menu );
+			if ( ! empty( $back_button ) ) {
+				$back_button->addAmpAction( 'tap', "$sidebar_id.close" );
+			}
+
+			$amp_nested_menu->appendChild( $amp_sub_menu );
+			$amp_sidebar->appendChild( $amp_nested_menu );
+			$menu_item->appendChild( $amp_sidebar );
+		}
+	}
+
+	/**
+	 * Update the markup of the nested menu to AMP compatible markup.
+	 *
+	 * @param Element $sub_menu Element of sub-menu from main navigation.
+	 *
+	 * @return void
+	 */
+	public function update_twentynineteen_main_nested_menu( Element $sub_menu ) {
+
+		$xpaths = [
+			'menu_items'    => './li[ contains( @class, "menu-item" ) and contains( @class, "menu-item-has-children" ) ]',
+			'expand_button' => './button[ @class = "submenu-expand" ]',
+			'back_button'   => './li[ contains( @class, "mobile-parent-nav-menu-item" ) ]//button[ contains( @class, "menu-item-link-return" ) ]',
+			'submenu'       => './ul[ @class = "sub-menu" ]',
+		];
+
+		$menu_items = $this->dom->xpath->query( $xpaths['menu_items'], $sub_menu );
+		if ( 0 === $menu_items->length ) {
+			return;
+		}
+
+		/** @var Element $menu_item */
+		foreach ( $menu_items as $menu_item ) {
+			$nested_sub_menu = $this->get_first_element( $xpaths['submenu'], $menu_item );
+
+			if ( empty( $nested_sub_menu ) ) {
+				continue;
+			}
+
+			$this->update_twentynineteen_main_nested_menu( $nested_sub_menu );
+
+			$back_button = $this->get_first_element( $xpaths['back_button'], $nested_sub_menu );
+			if ( ! empty( $back_button ) ) {
+				$back_button->setAttribute( Attribute::AMP_NESTED_SUBMENU_CLOSE, '' );
+			}
+
+			$open_button = $this->get_first_element( $xpaths['expand_button'], $menu_item );
+			if ( ! empty( $open_button ) ) {
+				$open_button->setAttribute( Attribute::AMP_NESTED_SUBMENU_OPEN, '' );
+			}
+
+			$amp_nested_menu_div = AMP_DOM_Utils::create_node(
+				$this->dom,
+				Tag::DIV,
+				[
+					Attribute::AMP_NESTED_SUBMENU => '',
+				]
+			);
+
+			$nested_sub_menu->setAttribute( Attribute::CLASS_, $nested_sub_menu->getAttribute( Attribute::CLASS_ ) . ' expanded-true' );
+			$amp_nested_menu_div->appendChild( $nested_sub_menu );
+			$menu_item->appendChild( $amp_nested_menu_div );
+		}
 	}
 }
