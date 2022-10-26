@@ -746,7 +746,7 @@ function amp_add_amphtml_link() {
 	if ( $amp_url ) {
 		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
 		if ( 1 === $sandboxing_level || 2 === $sandboxing_level ) {
-			printf( '<link rel="alternate" href="%s">', esc_url( $amp_url ) );
+			printf( '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">', esc_url( $amp_url ) );
 		} else {
 			printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
 		}
