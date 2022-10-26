@@ -31,7 +31,7 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 	 *
 	 * @var string
 	 */
-	const INLINE_GTAG_EVENT_XPATH = '//@*[ substring(name(), 1, 2) = "on" and name() != "on" and contains(., "gtag(") ]';
+	const INLINE_GTAG_EVENT_XPATH = '//@*[ starts-with(name(), "on") and name() != "on" and contains(., "gtag(") ]';
 
 	/**
 	 * HTML markup with gtag script.
@@ -112,7 +112,7 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 
 		// Inline Gtag events.
 		$inline_gtag_events  = $dom->xpath->query( self::INLINE_GTAG_EVENT_XPATH );
-		$other_inline_events = $dom->xpath->query( '//@*[ substring(name(), 1, 2) = "on" and name() != "on" and not( contains(., "gtag(") ) ]' );
+		$other_inline_events = $dom->xpath->query( '//@*[ starts-with(name(), "on") and name() != "on" and not( contains(., "gtag(") ) ]' );
 
 		$this->assertCount( 2, $inline_gtag_events );
 		$this->assertInstanceof( DOMNodeList::class, $inline_gtag_events );
