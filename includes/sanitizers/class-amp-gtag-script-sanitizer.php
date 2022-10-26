@@ -68,7 +68,7 @@ class AMP_GTag_Script_Sanitizer extends AMP_Base_Sanitizer {
 		$inline_events = $this->dom->xpath->query(
 			'
 				//@*[
-					substring(name(), 1, 2) = "on"
+					starts-with(name(), "on")
 					and
 					name() != "on"
 					and
