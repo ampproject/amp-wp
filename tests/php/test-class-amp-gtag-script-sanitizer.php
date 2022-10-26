@@ -118,7 +118,7 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 		$this->assertInstanceof( DOMNodeList::class, $inline_gtag_events );
 		foreach ( $inline_gtag_events as $inline_gtag_event ) {
 			$this->assertInstanceof( DOMAttr::class, $inline_gtag_event );
-			$this->assertStringContainsString( 'on', $inline_gtag_event->nodeName );
+			$this->assertStringStartsWith( 'on', $inline_gtag_event->nodeName );
 			$this->assertEquals( $expect_px_verified, ValidationExemption::is_px_verified_for_node( $inline_gtag_event ) );
 		}
 
@@ -126,7 +126,7 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 		$this->assertInstanceof( DOMNodeList::class, $other_inline_events );
 		foreach ( $other_inline_events as $other_inline_event ) {
 			$this->assertInstanceof( DOMAttr::class, $other_inline_event );
-			$this->assertStringContainsString( 'on', $inline_gtag_event->nodeName );
+			$this->assertStringStartsWith( 'on', $inline_gtag_event->nodeName );
 			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $other_inline_event ) );
 		}
 	}
