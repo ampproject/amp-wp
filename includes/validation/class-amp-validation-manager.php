@@ -266,7 +266,7 @@ class AMP_Validation_Manager {
 	 * Filter AMP options to set Standard template mode if it is an AMP-override request.
 	 *
 	 * @param array|false $options Options.
-	 * @return array|false Filtered options.
+	 * @return array Filtered options.
 	 */
 	public static function filter_options_when_force_standard_mode_request( $options ) {
 		if ( ! $options ) {

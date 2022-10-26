@@ -2891,7 +2891,7 @@ class AMP_Validation_Error_Taxonomy {
 				get_edit_post_link( $post_id, 'raw' )
 			)
 		) ) {
-			exit();
+			exit(); // @codeCoverageIgnore
 		}
 	}
 
