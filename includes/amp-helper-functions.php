@@ -405,7 +405,7 @@ function amp_is_available() {
 		}
 
 		$message = sprintf(
-			/* translators: 1: amp_is_available() function, 2: amp_is_request() function, 3: is_amp_endpoint() function */
+			/* translators: 1: amp_is_available function, 2: amp_is_request function, 3: is_amp_endpoint function */
 			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly.', 'amp' ),
 			'`amp_is_available()`',
 			'`amp_is_request()`',
