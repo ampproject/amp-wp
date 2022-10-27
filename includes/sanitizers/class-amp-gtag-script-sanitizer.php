@@ -49,15 +49,12 @@ class AMP_GTag_Script_Sanitizer extends AMP_Base_Sanitizer {
 		 * </script>
 		 */
 		$scripts = $this->dom->xpath->query( '//script[ ( @async and starts-with( @src, "https://www.googletagmanager.com/gtag/js" ) ) or contains( text(), "function gtag(" ) ]' );
-
-		if ( 0 === $scripts->length ) {
+		if ( ! $scripts instanceof DOMNodeList || 0 === $scripts->length ) {
 			return;
 		}
 
-		if ( $scripts instanceof DOMNodeList ) {
-			foreach ( $scripts as $script ) {
-				ValidationExemption::mark_node_as_px_verified( $script );
-			}
+		foreach ( $scripts as $script ) {
+			ValidationExemption::mark_node_as_px_verified( $script );
 		}
 
 		/**
