@@ -130,4 +130,59 @@ class AMP_GTag_Script_Sanitizer_Test extends TestCase {
 			$this->assertFalse( ValidationExemption::is_px_verified_for_node( $other_inline_event ) );
 		}
 	}
+
+	/**
+	 * Get data when no gtag script is present.
+	 *
+	 * @return array Test data.
+	 */
+	public function get_no_gtag_data() {
+		return [
+			'when_no_gtag_script_is_present_in_strict_mode' => [
+				'sandboxing_level'   => 3,
+				'expect_px_verified' => false,
+			],
+			'when_no_gtag_script_is_present_in_moderate_mode' => [
+				'sandboxing_level'   => 2,
+				'expect_px_verified' => false,
+			],
+			'when_no_gtag_script_is_present_in_loose_mode' => [
+				'sandboxing_level'   => 1,
+				'expect_px_verified' => false,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_no_gtag_data
+	 *
+	 * Test when no gtag script is present.
+	 *
+	 * @param int $sandboxing_level The sandboxing level to set.
+	 * @param bool $expect_px_verified Whether the script tag is expected to be px verified.
+	 *
+	 * @covers ::sanitize
+	 */
+	public function test_sanitize_when_no_gtag_script( $sandboxing_level, $expect_px_verified ) {
+		$markup = '<html><head><script>console.log("Hello world!");</script></head><body><a href="/contact" onclick=\'gtag("event","click",{event_category:"click",event_label:"contactPage"})\'>Contact</a><p>Hello world!</p></body></html>';
+
+		AMP_Options_Manager::update_option( Option::SANDBOXING_ENABLED, true );
+		AMP_Options_Manager::update_option( Option::SANDBOXING_LEVEL, $sandboxing_level );
+
+		$dom = new Document();
+		$dom->loadHTML( $markup );
+
+		$sanitizer = new AMP_GTag_Script_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$inline_gtag_events = $dom->xpath->query( self::INLINE_GTAG_EVENT_XPATH );
+
+		$this->assertCount( 1, $inline_gtag_events );
+		$this->assertInstanceof( DOMNodeList::class, $inline_gtag_events );
+		foreach ( $inline_gtag_events as $inline_gtag_event ) {
+			$this->assertInstanceof( DOMAttr::class, $inline_gtag_event );
+			$this->assertStringStartsWith( 'on', $inline_gtag_event->nodeName );
+			$this->assertEquals( $expect_px_verified, ValidationExemption::is_px_verified_for_node( $inline_gtag_event ) );
+		}
+	}
 }
