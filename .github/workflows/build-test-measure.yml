@@ -373,15 +373,24 @@ jobs:
             wp: 'trunk'
             experimental: true
 
+          - php: '8.1'
+            wp: 'trunk'
+            experimental: true
+
+          - php: '8.2'
+            wp: 'trunk'
+            experimental: true
+
+          - php: '8.0'
+            wp: 'latest'
+            coverage: true
+
           - php: '8.0'
             wp: 'latest'
             external-http: true
 
-          # PHP 8.0 cannot be used as yet due to the earliest compatible PHPUnit (v9) being unable to run due to the
-          # WP test suite enforcing PHPUnit 7 or earlier.
           - php: '7.4'
             wp: 'latest'
-            coverage: true
 
           - php: '7.4'
             wp: 'latest'
@@ -425,8 +434,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
-          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
-          ini-values: pcov.directory=.
+          coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
 
       - name: Shutdown default MySQL service
         if: needs.pre-run.outputs.changed-php-count > 0
@@ -467,6 +475,41 @@ jobs:
           composer remove --dev phpdocumentor/reflection
           composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
+    # See https://github.com/wp-cli/wp-cli/issues/5484
+      - name: Remove conflicting Requests library
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: composer remove --dev --ignore-platform-reqs --no-interaction --no-scripts  roave/security-advisories wp-cli/export-command wp-cli/extension-command wp-cli/wp-cli wp-cli/wp-cli-tests
+
+      # Installs a different PHPUnit version depending on the WP/PHP version combo we're testing against.
+      #
+      # | WP  / PHP | PHPUnit |
+      # |-----------|---------|
+      # | 5.0 / 7.0 | 6       |
+      # | 5.7 / 7.1 | 7       |
+      # | 5.9 / 7.2 | 8       |
+      # | 5.9 / 7.4 | 9       |
+      # | *   / 8   | 9       |
+      #
+      # See https://make.wordpress.org/core/handbook/references/phpunit-compatibility-and-wordpress-versions/
+      - name: Update PHPUnit
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: |
+          if [[ $PHP_VERSION == "7.1" ]]; then
+            echo "Installing PHPUnit 7.5.x"
+            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/phpunit:^7.5 --with-dependencies
+          elif [[ $PHP_VERSION == "7.2" ]]; then
+            echo "Installing PHPUnit 8.5.x"
+            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/phpunit:^8.5 --with-dependencies
+            echo "Downgrading phpunit/php-token-stream because the latest version requires PHP 7.3"
+            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/php-token-stream:^3.1.3 --with-dependencies
+          elif [[ $WP_VERSION == "latest" || $WP_VERSION == "trunk" || $PHP_VERSION == "7.4" ]]; then
+            echo "Installing latest version of PHPUnit"
+            composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies
+          fi
+        env:
+          WP_VERSION: ${{ matrix.wp }}
+          PHP_VERSION: ${{ matrix.php }}
+
       - name: Install Node dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
         run: npm ci
@@ -490,12 +533,6 @@ jobs:
       - name: Post install of WP tests
         if: needs.pre-run.outputs.changed-php-count > 0
         run: bash bin/ci/after-wp-install.sh ${{ matrix.wp }} ${{ matrix.install-pwa-plugin == true }}
-
-      - name: Setup PCOV
-        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: |
-          composer require --dev --ignore-platform-reqs pcov/clobber
-          vendor/bin/pcov clobber
 
       - name: Copy plugin to WP plugins directory
         if: needs.pre-run.outputs.changed-php-count > 0
