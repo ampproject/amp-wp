@@ -27,7 +27,7 @@
     "mikey179/vfsstream": "1.6.11",
     "mustache/mustache": "^2",
     "php-stubs/wordpress-stubs": "^6.0.0",
-    "phpcompatibility/phpcompatibility-wp": "2.1.3",
+    "phpcompatibility/phpcompatibility-wp": "2.1.4",
     "phpdocumentor/reflection": "~3.0",
     "roave/security-advisories": "dev-latest",
     "sirbrillig/phpcs-variable-analysis": "2.11.9",
