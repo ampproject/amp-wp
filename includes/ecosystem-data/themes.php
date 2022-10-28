@@ -12,6 +12,30 @@
 return array (
   0 => 
   array (
+    'name' => 'Maktub',
+    'slug' => 'maktub',
+    'preview_url' => 'https://estudiopatagon.com/projects/maktub-for-wordpress/',
+    'screenshot_url' => 'https://amp-wp.org/wp-content/uploads/2022/10/maktub-theme.jpeg',
+    'homepage' => 'https://estudiopatagon.com/projects/maktub-for-wordpress/',
+    'description' => '
+
+
+<p><strong>Maktub</strong> is a super modern Blog highly focused on <strong>Speed</strong> and <strong>Typography</strong>. This text-centric theme includes one unique mode “text-mode” which can dramatically increase the rendering time of your website.</p>
+',
+    'wporg' => false,
+  ),
+  1 => 
+  array (
+    'name' => 'Viral News',
+    'slug' => 'viral-news',
+    'preview_url' => 'https://wp-themes.com/viral-news/',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/viral-news/screenshot.jpg?ver=1.4.6',
+    'homepage' => 'https://wordpress.org/themes/viral-news/',
+    'description' => 'Viral News is a Magazine, News WordPress theme focused on a news portal, magazine, newspaper, blog, publishing website. The theme has a clean and minimal design that can be suited for any kind of magazine or blogging website. The theme offers multiple ways to design your website - either from the Elementor Page Builder plugin or Customizer. The theme has 20+ magazine based elements for Elementor that you can drag &amp; drop and play with to create the website of your imagination. Or you can even create your website from the customizer panel with a live preview. The theme has a repeatable drag and drop news/magazine modules in the customizer as well. So it’s upon you to either user Elementor or Customizer. There are 5 widgets that are specially built for news/magazine websites that you can add in the widget areas in the sidebar or footer. Viral News is AMP Compatible, translation ready, SEO optimized, highly customizable, and is compatible with all the major WordPress Plugin. The theme has everything needed to build a complete news, magazine, blog website. Moreover, the theme provides 12+ ready-made demo that you can import with just one click. View our multiple demos - http://demo.hashthemes.com/viral-news',
+    'wporg' => true,
+  ),
+  2 => 
+  array (
     'name' => 'mcms Lite',
     'slug' => 'mcms-lite',
     'preview_url' => 'https://wp-themes.com/mcms-lite/',
@@ -20,87 +44,87 @@ return array (
     'description' => 'mcms is a lightweight block based Gutenberg, FSE and AMP compatible WordPress theme.',
     'wporg' => true,
   ),
-  1 => 
+  3 => 
   array (
     'name' => 'Palm Beach',
     'slug' => 'palm-beach',
     'preview_url' => 'https://wp-themes.com/palm-beach/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/palm-beach/screenshot.jpg?ver=2.0.6',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/palm-beach/screenshot.jpg?ver=2.0.9',
     'homepage' => 'https://wordpress.org/themes/palm-beach/',
     'description' => 'Palm Beach is a professional WordPress theme perfectly suited for a travel magazine. It features a stunning fullscreen slider, beautiful typography and a three-column grid-layout for posts. Head off on vacation now!',
     'wporg' => true,
   ),
-  2 => 
+  4 => 
   array (
     'name' => 'Short News',
     'slug' => 'short-news',
     'preview_url' => 'https://wp-themes.com/short-news/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/short-news/screenshot.png?ver=1.1.3',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/short-news/screenshot.png?ver=1.1.4',
     'homepage' => 'https://wordpress.org/themes/short-news/',
     'description' => 'Short News is perfect for a news, newspaper, magazine or publishing site. We built Short News with performance, usability, and SEO in mind. It’s fast, lightweight, and fully AMP-compatible. Well documented and easy to use even for WordPress beginners. Share your news, stories, ideas and engage your users with a clean reading experience on all devices.',
     'wporg' => true,
   ),
-  3 => 
+  5 => 
   array (
     'name' => 'Dynamico',
     'slug' => 'dynamico',
     'preview_url' => 'https://wp-themes.com/dynamico/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/dynamico/screenshot.jpg?ver=1.0.9',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/dynamico/screenshot.jpg?ver=1.1.1',
     'homepage' => 'https://wordpress.org/themes/dynamico/',
     'description' => 'A responsive, multipurpose Blogging and Magazine WordPress theme with bold colors and fonts. It comes with a featured content area, various blog layouts and extensive post settings. Dynamico is the successor of the popular Dynamic News theme.',
     'wporg' => true,
   ),
-  4 => 
+  6 => 
   array (
     'name' => 'Gambit',
     'slug' => 'gambit',
     'preview_url' => 'https://wp-themes.com/gambit/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/gambit/screenshot.jpg?ver=2.0.6',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/gambit/screenshot.jpg?ver=2.0.9',
     'homepage' => 'https://wordpress.org/themes/gambit/',
     'description' => 'Gambit is a complex and highly flexible WordPress theme perfectly suited for any news, magazine or blog website. It features several different layout options, two sidebars and a stunning featured post slider. The easy to use Magazine Homepage template allows you to create a powerful online magazine in just a few minutes.',
     'wporg' => true,
   ),
-  5 => 
-  array (
-    'name' => 'xMag',
-    'slug' => 'xmag',
-    'preview_url' => 'https://wp-themes.com/xmag/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/xmag/screenshot.png?ver=1.3.2',
-    'homepage' => 'https://wordpress.org/themes/xmag/',
-    'description' => 'xMag is a simple and easy-to-use Magazine WordPress theme. It features a simple and minimal design. We built xMag with performance, usability, and SEO in mind. It’s fast, lightweight, and fully AMP-compatible. With xMag your website will look amazing on all devices to provide a great user experience.',
-    'wporg' => true,
-  ),
-  6 => 
-  array (
-    'name' => 'Type',
-    'slug' => 'type',
-    'preview_url' => 'https://wp-themes.com/type/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/type/screenshot.png?ver=1.1.4',
-    'homepage' => 'https://wordpress.org/themes/type/',
-    'description' => 'Build a professional blog, an online store or a magazine style website with Type WordPress Theme. We built Type with performance, usability, and SEO in mind. It’s fast, lightweight, and fully AMP-compatible. With Type your website will look amazing on all devices to provide a great user experience. It comes with several options to quickly customize your site: quickly upload your Logo, easily combine 4 Header Styles, create an impressive Header Image, showcase your Featured Posts, and more. The Theme includes also a basic support for WooCommerce plugin.',
-    'wporg' => true,
-  ),
   7 => 
   array (
-    'name' => 'ExS',
-    'slug' => 'exs',
-    'preview_url' => 'https://wp-themes.com/exs/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/exs/screenshot.png?ver=1.9.5',
-    'homepage' => 'https://wordpress.org/themes/exs/',
-    'description' => 'ExS theme is a fastest and smallest multipurpose Gutenberg compatible highly customizable theme without 3rd party dependencies. It is designed to have 100% Google Page and LightHouse speed. It has an extra small size of CSS (70kB) and JS (3kB) assets, 100% SEO optimised and valid code and it is 100% mobile friendly. It also has a WooCommerce and Easy Digital Downloads (EDD) plugin support so it will be perfect solution for your online store and e-commerce business. bbPress extended support makes ExS theme perfect for your forum. BuddyPress and Ultimate member support will help to create your social network with ExS theme. WP Job manager and Simple Job Board support will help you to create your job board. The Events Calendar advanced support will help you to create your events site. LearnPress plugin advanced support will help you to create a online courses and online school site. It has unlimited color options, headers and footers layouts, 15+ blog layouts, separate layouts for each category and many more super useful features that you can set up directly in your Customizer with live preview. ExS theme has builtin multiple page templates to perfectly work with any page builder such as Elementor, Beaver Builder, WPBackery, Brizy etc. ExS uses WordPress starter content feature so you can setup your pages immediately after WordPress and theme installation by simply going to Customizer and publish your changes. Theme Demo: https://exsthemewp.com/demo/.',
+    'name' => 'Xmag',
+    'slug' => 'xmag',
+    'preview_url' => 'https://wp-themes.com/xmag/',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/xmag/screenshot.png?ver=1.3.3',
+    'homepage' => 'https://wordpress.org/themes/xmag/',
+    'description' => 'Xmag is a simple and easy-to-use Magazine WordPress theme. It features a simple and minimal design. We built Xmag with performance, usability, and SEO in mind. It’s fast, lightweight, and fully AMP-compatible. With Xmag your website will look amazing on all devices to provide a great user experience.',
     'wporg' => true,
   ),
   8 => 
   array (
+    'name' => 'Type',
+    'slug' => 'type',
+    'preview_url' => 'https://wp-themes.com/type/',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/type/screenshot.png?ver=1.1.5',
+    'homepage' => 'https://wordpress.org/themes/type/',
+    'description' => 'Build a professional blog, an online store or a magazine style website with Type WordPress Theme. We built Type with performance, usability, and SEO in mind. It’s fast, lightweight, and fully AMP-compatible. With Type your website will look amazing on all devices to provide a great user experience. It comes with several options to quickly customize your site: quickly upload your Logo, easily combine 4 Header Styles, create an impressive Header Image, showcase your Featured Posts, and more. The Theme includes also a basic support for WooCommerce plugin.',
+    'wporg' => true,
+  ),
+  9 => 
+  array (
+    'name' => 'ExS',
+    'slug' => 'exs',
+    'preview_url' => 'https://wp-themes.com/exs/',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/exs/screenshot.png?ver=2.0.6',
+    'homepage' => 'https://wordpress.org/themes/exs/',
+    'description' => 'ExS theme is a fastest and smallest multipurpose Gutenberg compatible highly customizable theme without 3rd party dependencies. It is designed to have 100% Google Page and LightHouse speed. It has an extra small size of CSS (70kB) and JS (3kB) assets, 100% SEO optimised and valid code and it is 100% mobile friendly. It also has a WooCommerce and Easy Digital Downloads (EDD) plugin support so it will be perfect solution for your online store and e-commerce business. bbPress extended support makes ExS theme perfect for your forum. BuddyPress and Ultimate member support will help to create your social network with ExS theme. WP Job manager and Simple Job Board support will help you to create your job board. The Events Calendar advanced support will help you to create your events site. LearnPress plugin advanced support will help you to create a online courses and online school site. It has unlimited color options, headers and footers layouts, 15+ blog layouts, separate layouts for each category and many more super useful features that you can set up directly in your Customizer with live preview. ExS theme has builtin multiple page templates to perfectly work with any page builder such as Elementor, Beaver Builder, WPBackery, Brizy etc. ExS uses WordPress starter content feature so you can setup your pages immediately after WordPress and theme installation by simply going to Customizer and publish your changes. Theme Demo: https://exsthemewp.com/demo/.',
+    'wporg' => true,
+  ),
+  10 => 
+  array (
     'name' => 'Sydney',
     'slug' => 'sydney',
     'preview_url' => 'https://wp-themes.com/sydney/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/sydney/screenshot.png?ver=2.06',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/sydney/screenshot.png?ver=2.14',
     'homepage' => 'https://wordpress.org/themes/sydney/',
     'description' => 'Sydney is a powerful business theme that provides a fast way for companies or freelancers to create an awesome online presence. As well as being fully compatible with Elementor, Sydney brings plenty of customization possibilities like access to all Google Fonts, full color control, layout control, logo upload, full screen slider, header image, sticky navigation and much more. Also, Sydney provides all the construction blocks you need to rapidly create an engaging front page. Looking for a quick start with Sydney? With just a few clicks, you can import one of our existing demos (https://athemes.com/sydney-demos/)',
     'wporg' => true,
   ),
-  9 => 
+  11 => 
   array (
     'name' => 'Really Simple',
     'slug' => 'really-simple',
@@ -110,37 +134,37 @@ return array (
     'description' => 'Really Simple is a theme for bloggers and writers who need a ultra light and fast theme. The theme focuses on simplicity and loading speed. Yes, Really Simple Theme is also fully AMP compatible. Check the &gt;&gt; readme.txt &lt;&lt; file and leave the sidebar perfect after WordPress 5.8 update.',
     'wporg' => true,
   ),
-  10 => 
+  12 => 
   array (
     'name' => 'Artpop',
     'slug' => 'artpop',
     'preview_url' => 'https://wp-themes.com/artpop/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/artpop/screenshot.png?ver=1.1.0',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/artpop/screenshot.png?ver=1.1.1',
     'homepage' => 'https://wordpress.org/themes/artpop/',
     'description' => 'Artpop is a beautiful Gutenberg-first WordPress theme, carefully designed to help you build your online brand. We built Artpop with performance, usability, and SEO in mind. It’s fast, lightweight, and fully AMP-compatible. Well documented and easy to use even for WordPress beginners, Artpop is perfect for a blog, personal portfolio, small business website, and WooCommerce storefront. Easily set your logo, change colors, and create awesome layouts to give your website a truly unique look.',
     'wporg' => true,
   ),
-  11 => 
+  13 => 
   array (
     'name' => 'Michelle',
     'slug' => 'michelle',
     'preview_url' => 'https://wp-themes.com/michelle/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/michelle/screenshot.png?ver=1.3.7',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/michelle/screenshot.png?ver=1.3.11',
     'homepage' => 'https://wordpress.org/themes/michelle/',
     'description' => 'Michelle is accessibility ready WordPress theme for creating inclusive websites easily and with fun using block editor. Useful block patterns, block styles, templates and featured posts functionality allow you to build an eyecatching website in no time. Customize site footer and error 404 page content with block editor! The theme also works with Beaver Builder, Elementor, or any other page builder. It also supports theme builders! Michelle elevates your business, eCommerce, portfolio, or blog website. Check out the demo at https://themedemos.webmandesign.eu/michelle/ and documentation at https://webmandesign.github.io/docs/michelle/',
     'wporg' => true,
   ),
-  12 => 
+  14 => 
   array (
     'name' => 'Miniva',
     'slug' => 'miniva',
     'preview_url' => 'https://wp-themes.com/miniva/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/miniva/screenshot.png?ver=1.6.4',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/miniva/screenshot.png?ver=1.6.5',
     'homepage' => 'https://wordpress.org/themes/miniva/',
     'description' => 'A fast, lightweight, and mobile-friendly WordPress theme for bloggers. Miniva is built with simplicity, accessibility and performance in mind. The clean and minimal design helps readers focus on your content. It supports AMP and several Jetpack modules including featured content, infinite scroll, content options and social menu. See the theme demo at https://tajam.id/miniva-demo/',
     'wporg' => true,
   ),
-  13 => 
+  15 => 
   array (
     'name' => 'Iknow',
     'slug' => 'iknow',
@@ -150,17 +174,17 @@ return array (
     'description' => 'Iknow WordPress Theme has a minimalistic, responsive and mobile-friendly design. Easy and fast theme. The theme is perfect for creating Knowledge Base, Helpdesk, Wiki and FAQ websites. Ability to set custom icons for each category and tag. Manage the display of categories on the main page of the site. The integrated post rating system VoteUp/VoteDown. Breadcrumbs for easy site navigation. Custom widget to display the current navigation in a category and in a separate post. You can view the appearance and features of the theme on the site https://wow-company.com/wp-theme-iknow/. Documentation https://wow-company.com/faq/category/wow-themes/iknow/',
     'wporg' => true,
   ),
-  14 => 
+  16 => 
   array (
     'name' => 'Kadence',
     'slug' => 'kadence',
     'preview_url' => 'https://wp-themes.com/kadence/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/kadence/screenshot.png?ver=1.1.19',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/kadence/screenshot.png?ver=1.1.30',
     'homepage' => 'https://wordpress.org/themes/kadence/',
     'description' => 'Kadence Theme is a lightweight yet full featured WordPress theme for creating beautiful fast loading and accessible websites, easier than ever. It features an easy to use drag and drop header and footer builder to build any type of header in minutes. It features a full library of gorgeous starter templates that are easy to modify with our intelligent global font and color controls. With extensive integration with the most popular 3rd party plugins, you can quickly build impressive ecommerce websites, course websites, business websites, and more.',
     'wporg' => true,
   ),
-  15 => 
+  17 => 
   array (
     'name' => 'Izo',
     'slug' => 'izo',
@@ -170,17 +194,17 @@ return array (
     'description' => 'Izo a fast, lightweight, native AMP and fully customizable multipurpose WordPress theme. Features include compatibility with many popular plugins like Elementor and other page builders, WooCommerce, WPML, LifterLMS and more. There is also full support for the new WordPress block editor. Izo is fully responsive and our users can take advantage of the many customizer options to easily change styles. Also, if you\'re looking for a quick start, we\'re offering a bunch of free starter sites, ready to easily import.',
     'wporg' => true,
   ),
-  16 => 
+  18 => 
   array (
     'name' => 'OceanWP',
     'slug' => 'oceanwp',
     'preview_url' => 'https://wp-themes.com/oceanwp/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/oceanwp/screenshot.png?ver=3.3.2',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/oceanwp/screenshot.png?ver=3.3.5',
     'homepage' => 'https://wordpress.org/themes/oceanwp/',
     'description' => 'OceanWP is the perfect theme for your project. Lightweight and highly extendable, it will enable you to create almost any type of website such a blog, portfolio, business website and WooCommerce storefront with a beautiful &amp; professional design. Very fast, responsive, RTL &amp; translation ready, best SEO practices, unique WooCommerce features to increase conversion and much more. You can even edit the settings on tablet &amp; mobile so your site looks good on every device. Work with the most popular page builders as Elementor, Beaver Builder, Brizy, Visual Composer, Divi, SiteOrigin, etc... Developers will love his extensible codebase making it a joy to customize and extend. Best friend of Elementor &amp; WooCommerce. Looking for a Multi-Purpose theme? Look no further! Check the demos to realize that it\'s the only theme you will ever need: https://oceanwp.org/demos/',
     'wporg' => true,
   ),
-  17 => 
+  19 => 
   array (
     'name' => 'Twenty Twenty-One',
     'slug' => 'twentytwentyone',
@@ -190,127 +214,127 @@ return array (
     'description' => 'Twenty Twenty-One is a blank canvas for your ideas and it makes the block editor your best brush. With new block patterns, which allow you to create a beautiful layout in a matter of seconds, this theme’s soft colors and eye-catching — yet timeless — design will let your work shine. Take it for a spin! See how Twenty Twenty-One elevates your portfolio, business website, or personal blog.',
     'wporg' => true,
   ),
-  18 => 
+  20 => 
   array (
     'name' => 'Occasio',
     'slug' => 'occasio',
     'preview_url' => 'https://wp-themes.com/occasio/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/occasio/screenshot.jpg?ver=1.0.9',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/occasio/screenshot.jpg?ver=1.1.2',
     'homepage' => 'https://wordpress.org/themes/occasio/',
     'description' => 'Occasio is a sleek and modern Blogging &amp; Magazine WordPress Theme, carefully designed for writers using the Gutenberg Block Editor. The theme supports several blog layouts, extensive post settings and various page templates. It is also AMP-ready and accessible. Start your blog now!',
     'wporg' => true,
   ),
-  19 => 
+  21 => 
   array (
     'name' => 'Tortuga',
     'slug' => 'tortuga',
     'preview_url' => 'https://wp-themes.com/tortuga/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/tortuga/screenshot.jpg?ver=2.3.5',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/tortuga/screenshot.jpg?ver=2.3.8',
     'homepage' => 'https://wordpress.org/themes/tortuga/',
     'description' => 'Tortuga is a highly flexible and adventurous WordPress theme for your pirate magazine or any news related website. It supports three different post layouts, two sidebar schemes and a Magazine Homepage template based on widgets. Other highlights of Tortuga are the beautiful post slider and header widgets area. Arrr!',
     'wporg' => true,
   ),
-  20 => 
+  22 => 
   array (
     'name' => 'Treville',
     'slug' => 'treville',
     'preview_url' => 'https://wp-themes.com/treville/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/treville/screenshot.jpg?ver=2.1.5',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/treville/screenshot.jpg?ver=2.1.8',
     'homepage' => 'https://wordpress.org/themes/treville/',
     'description' => 'An elegant Blogging &amp; Magazine WordPress Theme with subtle colors and great typography. Treville supports two navigation menus, advanced post settings and a post slider with fullscreen images!',
     'wporg' => true,
   ),
-  21 => 
+  23 => 
   array (
     'name' => 'Wellington',
     'slug' => 'wellington',
     'preview_url' => 'https://wp-themes.com/wellington/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/wellington/screenshot.jpg?ver=2.1.5',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/wellington/screenshot.jpg?ver=2.1.8',
     'homepage' => 'https://wordpress.org/themes/wellington/',
     'description' => 'Wellington is a clean and simple Magazine WordPress theme with beautiful typography and subtle colors. The theme includes two different post layouts, a featured post slider and thoughtful theme settings in the Customizer.',
     'wporg' => true,
   ),
-  22 => 
+  24 => 
   array (
     'name' => 'Poseidon',
     'slug' => 'poseidon',
     'preview_url' => 'https://wp-themes.com/poseidon/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/poseidon/screenshot.jpg?ver=2.3.6',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/poseidon/screenshot.jpg?ver=2.3.9',
     'homepage' => 'https://wordpress.org/themes/poseidon/',
     'description' => 'Poseidon is an elegant designed WordPress theme featuring a splendid fullscreen image slideshow. The clean typography and spacious white layout makes it great to share your stories. You can use the theme as simple blog or easily create a news website with the widget-based Magazine Homepage template.',
     'wporg' => true,
   ),
-  23 => 
+  25 => 
   array (
     'name' => 'Napoli',
     'slug' => 'napoli',
     'preview_url' => 'https://wp-themes.com/napoli/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/napoli/screenshot.jpg?ver=2.2.5',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/napoli/screenshot.jpg?ver=2.2.8',
     'homepage' => 'https://wordpress.org/themes/napoli/',
     'description' => 'Napoli is a beautiful WordPress theme perfectly suited for a food magazine. It features a great featured post slider, smooth typography and a grid-layout for posts. Bon appetit!',
     'wporg' => true,
   ),
-  24 => 
+  26 => 
   array (
     'name' => 'Mercia',
     'slug' => 'mercia',
     'preview_url' => 'https://wp-themes.com/mercia/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/mercia/screenshot.jpg?ver=1.9.9',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/mercia/screenshot.jpg?ver=2.0.2',
     'homepage' => 'https://wordpress.org/themes/mercia/',
     'description' => 'Mercia is a flexible and versatile theme perfect for lifestyle, travel, or fashion magazines. It features a modern and minimalist design with great typropaphy. Of course it works on all screen sizes. With multiple blog layouts and powerful Magazine widgets, you can easily create a stunning and dynamic news website in just a few minutes.',
     'wporg' => true,
   ),
-  25 => 
+  27 => 
   array (
     'name' => 'Maxwell',
     'slug' => 'maxwell',
     'preview_url' => 'https://wp-themes.com/maxwell/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/maxwell/screenshot.jpg?ver=2.3.6',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/maxwell/screenshot.jpg?ver=2.3.9',
     'homepage' => 'https://wordpress.org/themes/maxwell/',
     'description' => 'Maxwell is a minimalistic and elegant WordPress theme featuring an ultra clean magazine layout. With a beautiful typography, various post layouts and a gorgeous featured posts slideshow Maxwell truly helps you to stand out.',
     'wporg' => true,
   ),
-  26 => 
+  28 => 
   array (
     'name' => 'Harrison',
     'slug' => 'harrison',
     'preview_url' => 'https://wp-themes.com/harrison/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/harrison/screenshot.jpg?ver=1.3.6',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/harrison/screenshot.jpg?ver=1.3.9',
     'homepage' => 'https://wordpress.org/themes/harrison/',
     'description' => 'Harrison is a highly versatile WordPress Theme and was specially designed for use with the new WordPress Block Editor. The theme supports the latest Gutenberg features and provides different blog layouts and extensive post settings. The clean and elegant design is perfect to create all kinds of websites. You should really try it!',
     'wporg' => true,
   ),
-  27 => 
+  29 => 
   array (
     'name' => 'Gridbox',
     'slug' => 'gridbox',
     'preview_url' => 'https://wp-themes.com/gridbox/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/gridbox/screenshot.jpg?ver=2.3.6',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/gridbox/screenshot.jpg?ver=2.3.9',
     'homepage' => 'https://wordpress.org/themes/gridbox/',
     'description' => 'Gridbox is a clean and solid WordPress theme featuring a three-column grid-layout for posts. The theme works out of the box and does not require any complicated setup. It is perfectly suited for a simple magazine, blog or portfolio website.',
     'wporg' => true,
   ),
-  28 => 
+  30 => 
   array (
     'name' => 'Chronus',
     'slug' => 'chronus',
     'preview_url' => 'https://wp-themes.com/chronus/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/chronus/screenshot.jpg?ver=2.0.7',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/chronus/screenshot.jpg?ver=2.1',
     'homepage' => 'https://wordpress.org/themes/chronus/',
     'description' => 'Chronus is a fast and lightweight WordPress Theme created for magazines, news websites and personal blogs. The Featured Content section and flexible Magazine Widgets give you the ability to highlight your most important posts on the home page. The minimalistic and responsive design focuses on your content and looks great on any screen size.',
     'wporg' => true,
   ),
-  29 => 
+  31 => 
   array (
     'name' => 'Donovan',
     'slug' => 'donovan',
     'preview_url' => 'https://wp-themes.com/donovan/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/donovan/screenshot.jpg?ver=1.8.6',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/donovan/screenshot.jpg?ver=1.8.9',
     'homepage' => 'https://wordpress.org/themes/donovan/',
     'description' => 'Donovan is a flexible, yet easy-to-use blogging theme with a clean and modern design. It features an elegant mobile-first design, three different blog layouts and extensive post settings. Donovan is perfect for your personal blog or for any content-focused website.',
     'wporg' => true,
   ),
-  30 => 
+  32 => 
   array (
     'name' => 'Yosemite Lite',
     'slug' => 'yosemite-lite',
@@ -320,7 +344,7 @@ return array (
     'description' => 'Yosemite is a beautiful WordPress blog theme for personal blogs. Yosemite has a modern, clean and elegant look and lots of customization for bloggers. Built on the latest technology of WordPress, Yosemite is lightweight, fast and optimized for all mobile phones.',
     'wporg' => true,
   ),
-  31 => 
+  33 => 
   array (
     'name' => 'Justread',
     'slug' => 'justread',
@@ -330,7 +354,7 @@ return array (
     'description' => 'Justread is a clean and modern WordPress theme that focuses on reading experience. Justread has a grid layout with single column content. The theme uses system fonts and SVG for fast loading. Enjoy reading long content with comfortability.',
     'wporg' => true,
   ),
-  32 => 
+  34 => 
   array (
     'name' => 'Floral Lite',
     'slug' => 'floral-lite',
@@ -340,7 +364,7 @@ return array (
     'description' => 'Floral is a beautiful WordPress blog theme for personal blogs. Floral has a modern, clean and elegant look and lots of customization for bloggers. Built on the latest technology of WordPress, Floral is lightweight, fast and optimized for all mobile phones.',
     'wporg' => true,
   ),
-  33 => 
+  35 => 
   array (
     'name' => 'EightyDays Lite',
     'slug' => 'eightydays-lite',
@@ -350,17 +374,17 @@ return array (
     'description' => 'EightyDays is a beautiful WordPress travel theme for travel blogs or magazines. EightyDays has a modern, clean and elegant look and lots of customization for bloggers. Built on the latest technology of WordPress, EightyDays is lightweight, fast and optimized for all mobile phones.',
     'wporg' => true,
   ),
-  34 => 
+  36 => 
   array (
     'name' => 'eStar',
     'slug' => 'estar',
     'preview_url' => 'https://wp-themes.com/estar/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/estar/screenshot.png?ver=1.3.4',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/estar/screenshot.png?ver=1.3.5',
     'homepage' => 'https://wordpress.org/themes/estar/',
     'description' => 'eStar is a super fast, lightweight (less than 10KB on the front end), responsive and highly customizable WordPress theme suitable for blog, personal portfolio and business websites. It works perfectly with Gutenberg and all WordPress blocks. You can also pair it with any page builder plugin like Elementor, Beaver Builder, Visual Composer, SiteOrigin, Divi, Thrive Architect, Brizy and more. eStar is written from scratch with performance, extensibility, usability and SEO in mind. The theme follows best practices, well-coded and follows the latest web standards (HTML5, SVG, JavaScript). Some of the other features: microdata integration, widget areas, sidebar layouts, custom colors, custom Google fonts, translation ready. Looking for a perfect base theme? Look no further. eStar is fast, fully customizable WordPress theme that you can use for building any kind of website like business agencies, corporate, portfolio, education, university portal, consulting, church, restaurant, medical and so on. Learn more about the theme at https://gretathemes.com/wordpress-themes/estar/',
     'wporg' => true,
   ),
-  35 => 
+  37 => 
   array (
     'name' => 'Stow',
     'slug' => 'stow',
@@ -374,7 +398,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  36 => 
+  38 => 
   array (
     'name' => 'Shawburn',
     'slug' => 'shawburn',
@@ -388,7 +412,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  37 => 
+  39 => 
   array (
     'name' => 'Rivington',
     'slug' => 'rivington',
@@ -402,7 +426,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  38 => 
+  40 => 
   array (
     'name' => 'Redhill',
     'slug' => 'redhill',
@@ -416,7 +440,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  39 => 
+  41 => 
   array (
     'name' => 'Morden',
     'slug' => 'morden',
@@ -430,7 +454,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  40 => 
+  42 => 
   array (
     'name' => 'Maywood',
     'slug' => 'maywood',
@@ -444,7 +468,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  41 => 
+  43 => 
   array (
     'name' => 'Mayland',
     'slug' => 'mayland',
@@ -458,7 +482,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  42 => 
+  44 => 
   array (
     'name' => 'Leven',
     'slug' => 'leven',
@@ -472,7 +496,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  43 => 
+  45 => 
   array (
     'name' => 'Hever',
     'slug' => 'hever',
@@ -486,7 +510,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  44 => 
+  46 => 
   array (
     'name' => 'Exford',
     'slug' => 'exford',
@@ -500,7 +524,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  45 => 
+  47 => 
   array (
     'name' => 'Brompton',
     'slug' => 'brompton',
@@ -514,7 +538,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  46 => 
+  48 => 
   array (
     'name' => 'Barnsbury',
     'slug' => 'barnsbury',
@@ -528,7 +552,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  47 => 
+  49 => 
   array (
     'name' => 'Balasana',
     'slug' => 'balasana',
@@ -542,7 +566,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  48 => 
+  50 => 
   array (
     'name' => 'Alves',
     'slug' => 'alves',
@@ -556,7 +580,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  49 => 
+  51 => 
   array (
     'name' => 'Varia',
     'slug' => 'varia',
@@ -570,7 +594,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  50 => 
+  52 => 
   array (
     'name' => 'Activation',
     'slug' => 'activation',
@@ -584,7 +608,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  51 => 
+  53 => 
   array (
     'name' => 'Velux',
     'slug' => 'velux',
@@ -598,7 +622,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  52 => 
+  54 => 
   array (
     'name' => 'Scribbles',
     'slug' => 'scribbles',
@@ -612,7 +636,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  53 => 
+  55 => 
   array (
     'name' => 'Ascension',
     'slug' => 'ascension',
@@ -626,7 +650,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  54 => 
+  56 => 
   array (
     'name' => 'Uptown Style',
     'slug' => 'uptown-style',
@@ -640,17 +664,17 @@ return array (
 ',
     'wporg' => false,
   ),
-  55 => 
+  57 => 
   array (
     'name' => 'Go',
     'slug' => 'go',
     'preview_url' => 'https://wp-themes.com/go/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/go/screenshot.png?ver=1.6.0',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/go/screenshot.png?ver=1.6.5',
     'homepage' => 'https://wordpress.org/themes/go/',
     'description' => 'Go is an innovative, Gutenberg-first WordPress theme, hyper-focused on empowering makers to build beautifully rich websites with WordPress.',
     'wporg' => true,
   ),
-  56 => 
+  58 => 
   array (
     'name' => 'Navigation Pro',
     'slug' => 'navigation-pro',
@@ -664,7 +688,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  57 => 
+  59 => 
   array (
     'name' => 'Memory',
     'slug' => 'memory',
@@ -674,7 +698,7 @@ return array (
     'description' => 'Clean and beautiful personal blog theme.',
     'wporg' => true,
   ),
-  58 => 
+  60 => 
   array (
     'name' => 'Sacha',
     'slug' => 'sacha',
@@ -688,7 +712,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  59 => 
+  61 => 
   array (
     'name' => 'Scott',
     'slug' => 'scott',
@@ -702,7 +726,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  60 => 
+  62 => 
   array (
     'name' => 'Katharine',
     'slug' => 'katharine',
@@ -716,7 +740,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  61 => 
+  63 => 
   array (
     'name' => 'Joseph',
     'slug' => 'joseph',
@@ -730,7 +754,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  62 => 
+  64 => 
   array (
     'name' => 'Nelson',
     'slug' => 'nelson',
@@ -744,7 +768,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  63 => 
+  65 => 
   array (
     'name' => 'Newspack',
     'slug' => 'newspack',
@@ -758,7 +782,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  64 => 
+  66 => 
   array (
     'name' => 'Twenty Twenty',
     'slug' => 'twentytwenty',
@@ -768,7 +792,7 @@ return array (
     'description' => 'Our default theme for 2020 is designed to take full advantage of the flexibility of the block editor. Organizations and businesses have the ability to create dynamic landing pages with endless layouts using the group and column blocks. The centered content column and fine-tuned typography also makes it perfect for traditional blogs. Complete editor styles give you a good idea of what your content will look like, even before you publish. You can give your site a personal touch by changing the background colors and the accent color in the Customizer. The colors of all elements on your site are automatically calculated based on the colors you pick, ensuring a high, accessible color contrast for your visitors.',
     'wporg' => true,
   ),
-  65 => 
+  67 => 
   array (
     'name' => 'Primer',
     'slug' => 'primer',
@@ -782,7 +806,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  66 => 
+  68 => 
   array (
     'name' => 'Essence Pro',
     'slug' => 'essence-pro-theme',
@@ -796,7 +820,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  67 => 
+  69 => 
   array (
     'name' => 'Genesis Framework',
     'slug' => 'genesis-theme-framework',
@@ -810,7 +834,7 @@ return array (
 ',
     'wporg' => false,
   ),
-  68 => 
+  70 => 
   array (
     'name' => 'Twenty Fourteen',
     'slug' => 'twentyfourteen',
@@ -820,7 +844,7 @@ return array (
     'description' => 'In 2014, our default theme lets you create a responsive magazine website with a sleek, modern design. Feature your favorite homepage content in either a grid or a slider. Use the three widget areas to customize your website, and change your content\'s layout with a full-width page template and a contributor page to show off your authors. Creating a magazine website with WordPress has never been easier.',
     'wporg' => true,
   ),
-  69 => 
+  71 => 
   array (
     'name' => 'Twenty Thirteen',
     'slug' => 'twentythirteen',
@@ -830,7 +854,7 @@ return array (
     'description' => 'The 2013 theme for WordPress takes us back to the blog, featuring a full range of post formats, each displayed beautifully in their own unique way. Design details abound, starting with a vibrant color scheme and matching header images, beautiful typography and icons, and a flexible layout that looks great on any device, big or small.',
     'wporg' => true,
   ),
-  70 => 
+  72 => 
   array (
     'name' => 'Twenty Eleven',
     'slug' => 'twentyeleven',
@@ -840,7 +864,7 @@ return array (
     'description' => 'The 2011 theme for WordPress is sophisticated, lightweight, and adaptable. Make it yours with a custom menu, header image, and background -- then go further with available theme options for light or dark color scheme, custom link colors, and three layout choices. Twenty Eleven comes equipped with a Showcase page template that transforms your front page into a showcase to show off your best content, widget support galore (sidebar, three footer areas, and a Showcase page widget area), and a custom "Ephemera" widget to display your Aside, Link, Quote, or Status posts. Included are styles for print and for the admin editor, support for featured images (as custom header images on posts and pages and as large images on featured "sticky" posts), and special styles for six different post formats.',
     'wporg' => true,
   ),
-  71 => 
+  73 => 
   array (
     'name' => 'Twenty Ten',
     'slug' => 'twentyten',
@@ -850,37 +874,37 @@ return array (
     'description' => 'The 2010 theme for WordPress is stylish, customizable, simple, and readable -- make it yours with a custom menu, header image, and background. Twenty Ten supports six widgetized areas (two in the sidebar, four in the footer) and featured images (thumbnails for gallery posts and custom header images for posts and pages). It includes stylesheets for print and the admin Visual Editor, special styles for posts in the "Asides" and "Gallery" categories, and has an optional one-column page template that removes the sidebar.',
     'wporg' => true,
   ),
-  72 => 
+  74 => 
   array (
     'name' => 'Zakra',
     'slug' => 'zakra',
     'preview_url' => 'https://wp-themes.com/zakra/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/zakra/screenshot.jpg?ver=2.1.0',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/zakra/screenshot.jpg?ver=2.1.6',
     'homepage' => 'https://wordpress.org/themes/zakra/',
     'description' => 'Zakra is flexible, fast, lightweight and modern multipurpose theme that comes with many starter free sites (currently 10+ free starter sites and more will be added later) that you can use to make your site beautiful and professional. Check all the starter sites at https://zakratheme.com/demos. Suitable for personal blog, portfolio, WooCommerce stores, business websites and niche-based sites (like Cafe, Spa, Charity, Yoga, Wedding, Dentist, Education etc) as well. Works with Elementor plus other major page builders so you can create any layout you want. The theme is responsive, Gutenberg compatible, SEO friendly, translation ready and major WordPress plugins compatible.',
     'wporg' => true,
   ),
-  73 => 
+  75 => 
   array (
     'name' => 'Neve',
     'slug' => 'neve',
     'preview_url' => 'https://wp-themes.com/neve/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/neve/screenshot.png?ver=3.2.5',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/neve/screenshot.png?ver=3.4.3',
     'homepage' => 'https://wordpress.org/themes/neve/',
     'description' => 'Neve is a super fast, easily customizable, multi-purpose theme. It’s perfect for blogs, small business, startups, agencies, firms, e-commerce shops (WooCommerce storefront) as well as personal portfolio sites and most types of projects. A fully AMP optimized and responsive theme, Neve will load in mere seconds and adapt perfectly on any viewing device. While it is lightweight and has a minimalist design, the theme is highly extendable, it has a highly SEO optimized code, resulting in top rankings in Google search results. Neve works perfectly with Gutenberg and the most popular page builders (Elementor, Brizy, Beaver Builder, Visual Composer, SiteOrigin, Divi). Neve is also WooCommerce ready, responsive, RTL &amp; translation ready. Look no further. Neve is the perfect theme for you!',
     'wporg' => true,
   ),
-  74 => 
+  76 => 
   array (
     'name' => 'Astra',
     'slug' => 'astra',
     'preview_url' => 'https://wp-themes.com/astra/',
-    'screenshot_url' => '//ts.w.org/wp-content/themes/astra/screenshot.jpg?ver=3.8.2',
+    'screenshot_url' => '//ts.w.org/wp-content/themes/astra/screenshot.jpg?ver=3.9.2',
     'homepage' => 'https://wordpress.org/themes/astra/',
     'description' => 'Astra is fast, fully customizable &amp; beautiful WordPress theme suitable for blog, personal portfolio, business website and WooCommerce storefront. It is very lightweight (less than 50KB on frontend) and offers unparalleled speed. Built with SEO in mind, Astra comes with Schema.org code integrated and is Native AMP ready so search engines will love your site. It offers special features and templates so it works perfectly with all page builders like Elementor, Beaver Builder, Visual Composer, SiteOrigin, Divi, etc. Some of the other features: # WooCommerce Ready # Responsive # RTL &amp; Translation Ready # Extendible with premium addons # Regularly updated # Designed, Developed, Maintained &amp; Supported by Brainstorm Force. Looking for a perfect base theme? Look no further. Astra is fast, fully customizable and WooCommerce ready theme that you can use for building any kind of website!',
     'wporg' => true,
   ),
-  75 => 
+  77 => 
   array (
     'name' => 'Twenty Twelve',
     'slug' => 'twentytwelve',
@@ -890,7 +914,7 @@ return array (
     'description' => 'The 2012 theme for WordPress is a fully responsive theme that looks great on any device. Features include a front page template with its own widgets, an optional display font, styling for post formats on both index and single views, and an optional no-sidebar page template. Make it yours with a custom menu, header image, and background.',
     'wporg' => true,
   ),
-  76 => 
+  78 => 
   array (
     'name' => 'Twenty Nineteen',
     'slug' => 'twentynineteen',
@@ -900,7 +924,7 @@ return array (
     'description' => 'Our 2019 default theme is designed to show off the power of the block editor. It features custom styles for all the default blocks, and is built so that what you see in the editor looks like what you\'ll see on your website. Twenty Nineteen is designed to be adaptable to a wide range of websites, whether you’re running a photo blog, launching a new business, or supporting a non-profit. Featuring ample whitespace and modern sans-serif headlines paired with classic serif body text, it\'s built to be beautiful on all screen sizes.',
     'wporg' => true,
   ),
-  77 => 
+  79 => 
   array (
     'name' => 'Twenty Seventeen',
     'slug' => 'twentyseventeen',
@@ -910,7 +934,7 @@ return array (
     'description' => 'Twenty Seventeen brings your site to life with header video and immersive featured images. With a focus on business sites, it features multiple sections on the front page as well as widgets, navigation and social menus, a logo, and more. Personalize its asymmetrical grid with a custom color scheme and showcase your multimedia content with post formats. Our default theme for 2017 works great in many languages, for any abilities, and on any device.',
     'wporg' => true,
   ),
-  78 => 
+  80 => 
   array (
     'name' => 'Twenty Sixteen',
     'slug' => 'twentysixteen',
@@ -920,7 +944,7 @@ return array (
     'description' => 'Twenty Sixteen is a modernized take on an ever-popular WordPress layout — the horizontal masthead with an optional right sidebar that works perfectly for blogs and websites. It has custom color options with beautiful default color schemes, a harmonious fluid grid using a mobile-first approach, and impeccable polish in every detail. Twenty Sixteen will make your WordPress look beautiful everywhere.',
     'wporg' => true,
   ),
-  79 => 
+  81 => 
   array (
     'name' => 'Twenty Fifteen',
     'slug' => 'twentyfifteen',
