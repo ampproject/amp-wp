@@ -136,10 +136,10 @@ final class Sandboxing implements Service, Registerable {
 	 * @return int Sandboxing level.
 	 */
 	public static function get_sandboxing_level() {
-		if ( ! AMP_Options_Manager::get_option( self::OPTION_ENABLED ) ) {
+		if ( ! AMP_Options_Manager::get_option( Option::SANDBOXING_ENABLED ) ) {
 			return 0;
 		}
-		return AMP_Options_Manager::get_option( self::OPTION_LEVEL );
+		return AMP_Options_Manager::get_option( Option::SANDBOXING_LEVEL );
 	}
 
 	/**
