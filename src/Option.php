@@ -208,6 +208,21 @@ interface Option {
 	 */
 	const SUPPRESSED_PLUGINS_USERNAME = 'username';
 
+
+	/**
+	 * Option key for enabling sandboxing.
+	 *
+	 * @var string
+	 */
+	const SANDBOXING_ENABLED = 'sandboxing_enabled';
+
+	/**
+	 * Option key for sandboxing level.
+	 *
+	 * @var string
+	 */
+	const SANDBOXING_LEVEL = 'sandboxing_level';
+
 	/**
 	 * Version of the AMP plugin for which the options were last saved.
 	 *

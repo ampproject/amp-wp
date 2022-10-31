@@ -265,10 +265,14 @@ class AMP_Validation_Manager {
 	/**
 	 * Filter AMP options to set Standard template mode if it is an AMP-override request.
 	 *
-	 * @param array $options Options.
+	 * @param array|false $options Options.
 	 * @return array Filtered options.
 	 */
 	public static function filter_options_when_force_standard_mode_request( $options ) {
+		if ( ! $options ) {
+			$options = [];
+		}
+
 		if (
 			self::is_validate_request()
 			&&
