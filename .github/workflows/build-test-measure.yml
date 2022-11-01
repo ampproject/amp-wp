@@ -574,6 +574,10 @@ jobs:
     needs: pre-run
     runs-on: ubuntu-latest
     # if: needs.pre-run.outputs.changed-php-count > 0
+    strategy:
+      matrix:
+        testsuite: ["default", "external-http"]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -616,11 +620,7 @@ jobs:
 
       - name: Run multisite unit tests
         working-directory: /tmp/amp
-        run: npm run test:php:multisite
-
-      - name: Run multisite external HTTP unit tests
-        working-directory: /tmp/amp
-        run: npm run test:php:multisite -- --testsuite external-http
+        run: npm run test:php:multisite ${{ matrix.testsuite === 'external-http' && '-- --testsuite=' || '' }}${{ matrix.testsuite }}
 
   #-----------------------------------------------------------------------------------------------------------------------
 
