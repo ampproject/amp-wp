@@ -2646,4 +2646,29 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		unset( $site_icon );
 		return self::MOCK_SITE_ICON;
 	}
+
+	/**
+	 * Test get sandboxing level.
+	 *
+	 * @covers ::amp_get_sandboxing_level()
+	 */
+	public function test_amp_get_sandboxing_level() {
+		// If sandboxing is disabled, then the level should be 0.
+		$this->assertEquals( 0, amp_get_sandboxing_level() );
+
+		// Enable sandboxing.
+		AMP_Options_Manager::update_option( Option::SANDBOXING_ENABLED, true );
+
+		// Enable level 1 which is Loose.
+		AMP_Options_Manager::update_option( Option::SANDBOXING_LEVEL, 1 );
+		$this->assertEquals( 1, amp_get_sandboxing_level() );
+
+		// Enable level 2 which is moderate.
+		AMP_Options_Manager::update_option( Option::SANDBOXING_LEVEL, 2 );
+		$this->assertEquals( 2, amp_get_sandboxing_level() );
+
+		// Enable level 3 which is Strict.
+		AMP_Options_Manager::update_option( Option::SANDBOXING_LEVEL, 3 );
+		$this->assertEquals( 3, amp_get_sandboxing_level() );
+	}
 }
