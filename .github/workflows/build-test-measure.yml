@@ -569,6 +569,56 @@ jobs:
 
   #-----------------------------------------------------------------------------------------------------------------------
 
+  unit-test-multisite-php:
+    name: Unit Tests Multisite: PHP 7.4, WP Latest
+    needs: pre-run
+    runs-on: ubuntu-latest
+    if: needs.pre-run.outputs.changed-php-count > 0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3.5.1
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v3.0.11
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Node dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
+
+      - name: Build plugin
+        run: npm run build:js
+
+      - name: Start wp-env
+        run: npm run wp-env start
+
+      - name: Run multisite unit tests
+        run: npm run test:php:multisite
+
+      - name: Run multisite external HTTP unit tests
+        run: npm run test:php:multisite -- --testsuite external-http
+
+
+  #-----------------------------------------------------------------------------------------------------------------------
+
   feature-test-php:
     name: "Feature test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     needs: pre-run
