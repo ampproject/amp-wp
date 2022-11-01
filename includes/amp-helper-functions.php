@@ -742,7 +742,7 @@ function amp_add_amphtml_link() {
 	}
 
 	$amp_url          = amp_add_paired_endpoint( amp_get_current_url() );
-	$sandboxing_level = Sandboxing::get_sandboxing_level();
+	$sandboxing_level = amp_get_sandboxing_level();
 	if ( $amp_url ) {
 		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
 		if ( 1 === $sandboxing_level || 2 === $sandboxing_level ) {
@@ -2168,4 +2168,20 @@ function amp_remove_paired_endpoint( $url ) {
 		_doing_it_wrong( __FUNCTION__, esc_html( $reason ) . ' ' . esc_html( $e->getMessage() ), '2.1.1' );
 		return $url;
 	}
+}
+
+/**
+ * Determine sandboxing level if enabled.
+ *
+ * @return int Following values are possible:
+ *             0: Sandbox is disabled.
+ *             1: Sandboxing level: Loose.
+ *             2: Sandboxing level: Moderate.
+ *             3: Sandboxing level: Strict.
+ */
+function amp_get_sandboxing_level() {
+	if ( ! AMP_Options_Manager::get_option( Option::SANDBOXING_ENABLED ) ) {
+		return 0;
+	}
+	return AMP_Options_Manager::get_option( Option::SANDBOXING_LEVEL );
 }
