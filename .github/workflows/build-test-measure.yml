@@ -607,19 +607,19 @@ jobs:
       - name: Build plugin
         run: npm run build:js
 
-      - name: Copy amp-wp to amp
-        run: cp -r amp-wp amp
+      - name: Move amp-wp to amp
+        run: cp -r "$PWD" "/tmp/amp"
 
       - name: Start wp-env
-        working-directory: amp
+        working-directory: /tmp/amp
         run: npm run wp-env start
 
       - name: Run multisite unit tests
-        working-directory: amp
+        working-directory: /tmp/amp
         run: npm run test:php:multisite
 
       - name: Run multisite external HTTP unit tests
-        working-directory: amp
+        working-directory: /tmp/amp
         run: npm run test:php:multisite -- --testsuite external-http
 
   #-----------------------------------------------------------------------------------------------------------------------
