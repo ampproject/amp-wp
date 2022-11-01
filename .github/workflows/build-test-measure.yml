@@ -620,7 +620,7 @@ jobs:
 
       - name: Run multisite unit tests
         working-directory: /tmp/amp
-        run: npm run test:php:multisite ${{ matrix.testsuite === 'external-http' && '-- --testsuite=' || '' }}${{ matrix.testsuite }}
+        run: npm run test:php:multisite ${{ matrix.testsuite == 'external-http' && '-- --testsuite external-http' || '' }}
 
   #-----------------------------------------------------------------------------------------------------------------------
 
