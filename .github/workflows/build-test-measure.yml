@@ -573,7 +573,7 @@ jobs:
     name: "Unit Tests Multisite: PHP 7.4, WP Latest"
     needs: pre-run
     runs-on: ubuntu-latest
-    if: needs.pre-run.outputs.changed-php-count > 0
+    # if: needs.pre-run.outputs.changed-php-count > 0
     steps:
       - name: Checkout
         uses: actions/checkout@v3
