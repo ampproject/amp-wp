@@ -1008,6 +1008,97 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * Get data for testing amp_add_amphtml_link() in sandboxing mode.
+	 *
+	 * @return array
+	 */
+	public function get_sandboxing_mode_amphtml_urls() {
+		return [
+			'is_sandboxing_disabled'              => [
+				static function() {
+					return [
+						home_url( '/' ),
+						amp_add_paired_endpoint( home_url( '/' ) ),
+						0,
+					];
+				},
+			],
+			'is_set_to_strict_sandboxing_level'   => [
+				static function() {
+					return [
+						home_url( '/' ),
+						amp_add_paired_endpoint( home_url( '/' ) ),
+						3,
+					];
+				},
+			],
+			'is_set_to_moderate_sandboxing_level' => [
+				static function() {
+					return [
+						home_url( '/' ),
+						amp_add_paired_endpoint( home_url( '/' ) ),
+						2,
+					];
+				},
+			],
+			'is_set_to_loose_sandboxing_level'    => [
+				static function() {
+					return [
+						home_url( '/' ),
+						amp_add_paired_endpoint( home_url( '/' ) ),
+						1,
+					];
+				},
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_sandboxing_mode_amphtml_urls()
+	 *
+	 * @covers ::amp_add_amphtml_link()
+	 *
+	 * @param callable $data_provider Provider.
+	 */
+	public function test_amp_add_amphtml_link_sandboxing_mode( $data_provider ) {
+		list( $canonical_url, $amphtml_url, $sandboxing_level ) = $data_provider();
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+
+		if ( $sandboxing_level > 0 ) {
+			AMP_Options_Manager::update_option( Option::SANDBOXING_ENABLED, true );
+			AMP_Options_Manager::update_option( Option::SANDBOXING_LEVEL, $sandboxing_level );
+		}
+
+		$this->accept_sanitization_by_default( false );
+		AMP_Theme_Support::init();
+		$this->assertFalse( amp_is_canonical() );
+
+		$get_amp_html_link = static function() {
+			return get_echo( 'amp_add_amphtml_link' );
+		};
+
+		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link, $sandboxing_level ) {
+			$sandboxing_level = amp_get_sandboxing_level();
+
+			if ( 1 === $sandboxing_level || 2 === $sandboxing_level ) {
+				$this->assertEquals(
+					sprintf( '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">', esc_url( $amphtml_url ) ),
+					$get_amp_html_link()
+				);
+			} else {
+				$this->assertEquals(
+					sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
+					$get_amp_html_link()
+				);
+			}
+		};
+
+		$this->go_to( $canonical_url );
+		$assert_amphtml_link_present();
+	}
+
+	/**
 	 * Test amp_is_available() and amp_is_request() functions.
 	 *
 	 * @covers ::amp_is_available()
