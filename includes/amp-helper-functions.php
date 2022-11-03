@@ -741,10 +741,12 @@ function amp_add_amphtml_link() {
 		return;
 	}
 
-	$amp_url          = amp_add_paired_endpoint( amp_get_current_url() );
-	$sandboxing_level = amp_get_sandboxing_level();
+	$amp_url = amp_add_paired_endpoint( amp_get_current_url() );
+
 	if ( $amp_url ) {
-		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
+		$amp_url          = remove_query_arg( QueryVar::NOAMP, $amp_url );
+		$sandboxing_level = amp_get_sandboxing_level();
+
 		if ( 1 === $sandboxing_level || 2 === $sandboxing_level ) {
 			printf( '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">', esc_url( $amp_url ) );
 		} else {
