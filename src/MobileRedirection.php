@@ -78,14 +78,20 @@ final class MobileRedirection implements Service, Registerable {
 				add_filter( 'get_comments_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For get_comments_link().
 				add_filter( 'respond_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For comments_popup_link().
 			}
-
-			return;
-		}
-
-		// Show `Exit mobile version` link even mobile redirection is disabled and in Reader mode.
-		if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) && $this->is_mobile_request() ) {
-			add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
-			add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
+		} elseif ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+			add_action(
+				'template_redirect',
+				function () {
+					if ( $this->is_mobile_request() ) {
+						add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
+						add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
+						add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
+						add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
+						add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] ); // For legacy Reader mode theme.
+						add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
+					}
+				} 
+			);
 		}
 	}
 
