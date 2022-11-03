@@ -90,7 +90,7 @@ final class MobileRedirection implements Service, Registerable {
 						add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] ); // For legacy Reader mode theme.
 						add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
 					}
-				} 
+				}
 			);
 		}
 	}
@@ -587,6 +587,10 @@ final class MobileRedirection implements Service, Registerable {
 		 * @param string $text Link text to display.
 		 */
 		$text = apply_filters( 'amp_mobile_version_switcher_link_text', $text );
+
+		if ( empty( $text ) ) {
+			return;
+		}
 
 		$hide_switcher = (
 			// The switcher must always be shown in the AMP version to allow accessing the non-AMP version.
