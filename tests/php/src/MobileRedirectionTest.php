@@ -676,6 +676,22 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		} else {
 			$this->assertStringNotContainsString( '<script data-ampdevmode>', $output );
 		}
+
+		// When mobile version switcher text is empty.
+		add_filter( 'amp_mobile_version_switcher_link_text', '__return_empty_string' );
+		ob_start();
+		$this->instance->add_mobile_version_switcher_link();
+		$output = ob_get_clean();
+
+		$this->assertEmpty( $output );
+
+		// When mobile version switcher is disabled.
+		add_filter( 'amp_mobile_version_switcher_used', '__return_false' );
+		ob_start();
+		$this->instance->add_mobile_version_switcher_link();
+		$output = ob_get_clean();
+
+		$this->assertEmpty( $output );
 	}
 
 	/**
