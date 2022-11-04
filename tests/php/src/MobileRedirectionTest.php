@@ -116,6 +116,56 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * Show mobile version switcher link in reader mode when mobile redirection is not enabled.
+	 *
+	 * @covers ::register()
+	 */
+	public function test_register_not_enabled_show_mobile_version_switcher_link_in_reader_mode() {
+		AMP_Options_Manager::update_options(
+			[
+				Option::MOBILE_REDIRECT => false,
+				Option::THEME_SUPPORT   => AMP_Theme_Support::READER_MODE_SLUG,
+			]
+		);
+
+		$this->instance->register();
+
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) );
+		$this->assertSame( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
+
+		$this->assertSame( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
+		$this->assertSame( PHP_INT_MAX, has_action( 'template_redirect', [ $this->instance, 'add_mobile_switcher_link_when_redirection_disabled' ] ) );
+	}
+
+	/**
+	 * @covers ::add_mobile_switcher_link_when_redirection_disabled()
+	 */
+	public function test_add_mobile_switcher_link_when_redirection_disabled() {
+		$this->instance->add_mobile_switcher_link_when_redirection_disabled();
+
+		$this->assertFalse( $this->instance->is_mobile_request() );
+		$this->assertFalse( has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
+		$this->assertFalse( has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+		$this->assertFalse( has_filter( 'amp_to_amp_linking_element_excluded', [ $this->instance, 'filter_amp_to_amp_linking_element_excluded' ] ) );
+		$this->assertFalse( has_filter( 'amp_to_amp_linking_element_query_vars', [ $this->instance, 'filter_amp_to_amp_linking_element_query_vars' ] ) );
+		$this->assertFalse( has_action( 'amp_post_template_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
+		$this->assertFalse( has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+
+		add_filter( 'amp_pre_is_mobile', '__return_true', 10 );
+
+		$this->instance->add_mobile_switcher_link_when_redirection_disabled();
+
+		$this->assertTrue( $this->instance->is_mobile_request() );
+		$this->assertSame( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
+		$this->assertSame( 10, has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+		$this->assertSame( 100, has_filter( 'amp_to_amp_linking_element_excluded', [ $this->instance, 'filter_amp_to_amp_linking_element_excluded' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_to_amp_linking_element_query_vars', [ $this->instance, 'filter_amp_to_amp_linking_element_query_vars' ] ) );
+		$this->assertSame( 10, has_action( 'amp_post_template_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
+		$this->assertSame( 10, has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+	}
+
+	/**
 	 * Assert the service hooks were not added.
 	 *
 	 * @param MobileRedirection $instance
