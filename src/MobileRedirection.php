@@ -81,17 +81,9 @@ final class MobileRedirection implements Service, Registerable {
 		} elseif ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 			add_action(
 				'template_redirect',
-				function () {
-					if ( $this->is_mobile_request() ) {
-						add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
-						add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
-						add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
-						add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
-						add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] ); // For legacy Reader mode theme.
-						add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
-					}
-				}
-			);
+				[ $this, 'add_mobile_switcher_link_when_redirection_disabled' ],
+				PHP_INT_MAX
+			); // For adding the mobile switcher link when redirection is disabled.
 		}
 	}
 
@@ -190,6 +182,20 @@ final class MobileRedirection implements Service, Registerable {
 
 			// Add a link to the footer to allow for navigation to the non-AMP version.
 			add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
+			add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
+		}
+	}
+
+	/**
+	 * Add mobile version switcher link/styles when mobile redirection is not enabled.
+	 */
+	public function add_mobile_switcher_link_when_redirection_disabled() {
+		if ( $this->is_mobile_request() ) {
+			add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
+			add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
+			add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
+			add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
+			add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] ); // For legacy Reader mode theme.
 			add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
 		}
 	}
