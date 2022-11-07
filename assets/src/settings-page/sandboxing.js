@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import PropTypes from 'prop-types';
-
-/**
  * WordPress dependencies
  */
 import { createInterpolateElement, useContext } from '@wordpress/element';
@@ -14,31 +9,18 @@ import { CheckboxControl } from '@wordpress/components';
  * Internal dependencies
  */
 import { Options } from '../components/options-context-provider';
-import { AMPDrawer } from '../components/amp-drawer';
 
 /**
  * Component rendering the Sandboxing experiment.
- *
- * @param {Object} props                Component props.
- * @param {string} props.focusedSection Focused section.
  */
-export function Sandboxing( { focusedSection } ) {
+export function Sandboxing() {
 	const { updateOptions, editedOptions: {
 		sandboxing_enabled: sandboxingEnabled,
 		sandboxing_level: sandboxingLevel,
 	} } = useContext( Options );
 
 	return (
-		<AMPDrawer
-			heading={ (
-				<h3>
-					{ __( 'Sandboxing (Experimental)', 'amp' ) }
-				</h3>
-			) }
-			hiddenTitle={ __( 'Sandboxing (Experimental)', 'amp' ) }
-			id="sandboxing"
-			initialOpen={ 'sandboxing' === focusedSection }
-		>
+		<>
 			<p>
 				{ __( 'Try out a more flexible AMP by generating pages that use AMP components without requiring AMP validity! By selecting a sandboxing level, you are indicating the minimum degree of sanitization. For example, if you selected the loose level but have a page without any POST form and no custom scripts, it will still be served as valid AMP—the same as if you had selected the strict level.', 'amp' ) }
 			</p>
@@ -106,9 +88,6 @@ export function Sandboxing( { focusedSection } ) {
 					</li>
 				</ol>
 			) }
-		</AMPDrawer>
+		</>
 	);
 }
-Sandboxing.propTypes = {
-	focusedSection: PropTypes.string,
-};
