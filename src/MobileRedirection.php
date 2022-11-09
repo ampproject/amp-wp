@@ -191,13 +191,34 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	public function maybe_add_mobile_switcher_hooks() {
 		if ( $this->is_mobile_request() ) {
-			add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
-			add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
-			add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
-			add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
-			add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] ); // For legacy Reader mode theme.
-			add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
+			$this->add_mobile_switcher_head_hooks();
+			$this->add_a2a_linking_hooks();
+			$this->add_mobile_switcher_footer_hooks();
 		}
+	}
+
+	/**
+	 * Add mobile version switcher head hooks.
+	 */
+	private function add_mobile_switcher_head_hooks() {
+		add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
+		add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] ); // For legacy Reader mode theme.
+	}
+
+	/**
+	 * Add mobile version switcher footer hooks.
+	 */
+	private function add_mobile_switcher_footer_hooks() {
+		add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
+		add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
+	}
+
+	/**
+	 * Add AMP-to-AMP linking hooks.
+	 */
+	private function add_a2a_linking_hooks() {
+		add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
+		add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
 	}
 
 	/**
