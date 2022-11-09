@@ -81,7 +81,7 @@ final class MobileRedirection implements Service, Registerable {
 		} elseif ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 			add_action(
 				'template_redirect',
-				[ $this, 'add_mobile_switcher_link_when_redirection_disabled' ],
+				[ $this, 'maybe_add_mobile_switcher_hooks' ],
 				PHP_INT_MAX
 			); // For adding the mobile switcher link when redirection is disabled.
 		}
@@ -189,7 +189,7 @@ final class MobileRedirection implements Service, Registerable {
 	/**
 	 * Add mobile version switcher link/styles when mobile redirection is not enabled.
 	 */
-	public function add_mobile_switcher_link_when_redirection_disabled() {
+	public function maybe_add_mobile_switcher_hooks() {
 		if ( $this->is_mobile_request() ) {
 			add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
 			add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );

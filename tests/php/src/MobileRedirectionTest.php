@@ -135,14 +135,14 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 		$this->assertSame( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
-		$this->assertSame( PHP_INT_MAX, has_action( 'template_redirect', [ $this->instance, 'add_mobile_switcher_link_when_redirection_disabled' ] ) );
+		$this->assertSame( PHP_INT_MAX, has_action( 'template_redirect', [ $this->instance, 'maybe_add_mobile_switcher_hooks' ] ) );
 	}
 
 	/**
-	 * @covers ::add_mobile_switcher_link_when_redirection_disabled()
+	 * @covers ::maybe_add_mobile_switcher_hooks()
 	 */
-	public function test_add_mobile_switcher_link_when_redirection_disabled() {
-		$this->instance->add_mobile_switcher_link_when_redirection_disabled();
+	public function test_maybe_add_mobile_switcher_hooks() {
+		$this->instance->maybe_add_mobile_switcher_hooks();
 
 		$this->assertFalse( $this->instance->is_mobile_request() );
 		$this->assertFalse( has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
@@ -154,7 +154,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 		add_filter( 'amp_pre_is_mobile', '__return_true', 10 );
 
-		$this->instance->add_mobile_switcher_link_when_redirection_disabled();
+		$this->instance->maybe_add_mobile_switcher_hooks();
 
 		$this->assertTrue( $this->instance->is_mobile_request() );
 		$this->assertSame( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
