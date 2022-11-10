@@ -352,13 +352,16 @@ class Test_AMP_Core_Block_Handler extends TestCase {
 		$actual   = preg_replace( '/ data-id="\d+"/', '', $actual );
 
 		// Remove `is-layout-flex` class name injected by block editor layout styles.
-		$actual = preg_replace( '/(?<= class=")is-layout-flex /', '', $actual );
+		$actual = preg_replace( '/\s*(?<= class=")?is-layout-flex\s*/', '', $actual );
 
 		// Remove `wp-block-gallery-` class by block_core_gallery_render()
-		$actual = preg_replace( '/(?<= class=")wp-block-gallery-\w+ /', '', $actual );
+		$actual = preg_replace( '/\s*(?<= class=")?wp-block-gallery-\w+\s*/', '', $actual );
 
 		// Remove class name injected by gutenberg_render_layout_support_flag().
-		$actual = preg_replace( '/(?<= class=")wp-container-\w+ /', '', $actual );
+		$actual = preg_replace( '/\s*(?<= class=")?wp-container-\w+\s*/', '', $actual );
+
+		// Remove whitespace from the class attribute in the end.
+		$actual = preg_replace( '/ class=""/', '', $actual );
 
 		$this->assertEqualMarkup( $expected, $actual );
 	}
