@@ -30,6 +30,8 @@ describe( 'AMP analytics options', () => {
 		await expect( '.amp-analytics-entry' ).countToBe( 2 );
 		await expect( page ).toFill( '#amp-analytics-entry-2 input', 'googleanalytics-2' );
 
+		await scrollToElement( { selector: '#amp-analytics-add-entry' } );
+
 		// Add third entry.
 		await expect( page ).toClick( '#amp-analytics-add-entry' );
 		await expect( '.amp-analytics-entry' ).countToBe( 3 );

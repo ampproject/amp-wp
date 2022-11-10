@@ -53,6 +53,13 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	protected $home_host;
 
 	/**
+	 * Home path.
+	 *
+	 * @var string
+	 */
+	protected $home_path;
+
+	/**
 	 * Content path.
 	 *
 	 * @var string
@@ -79,7 +86,9 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 		parent::__construct( $dom, $args );
 
-		$this->home_host    = wp_parse_url( home_url(), PHP_URL_HOST );
+		$parsed_home        = wp_parse_url( home_url( '/' ) );
+		$this->home_host    = $parsed_home['host'] ?? null;
+		$this->home_path    = $parsed_home['path'] ?? '/';
 		$this->content_path = wp_parse_url( content_url( '/' ), PHP_URL_PATH );
 		$this->admin_path   = wp_parse_url( admin_url(), PHP_URL_PATH );
 	}
@@ -292,6 +301,11 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Skip adding query var to links on other URLs.
 		if ( ! empty( $parsed_url['host'] ) && $this->home_host !== $parsed_url['host'] ) {
+			return false;
+		}
+
+		// Skip adding query var to links on other paths.
+		if ( ! empty( $parsed_url['path'] ) && 0 !== strpos( $parsed_url['path'], $this->home_path ) ) {
 			return false;
 		}
 
