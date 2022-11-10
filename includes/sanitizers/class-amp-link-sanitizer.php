@@ -305,7 +305,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Skip adding query var to links on other paths.
-		if ( ! empty( $parsed_url['path'] ) && false !== strpos( $parsed_url['path'], $this->home_path ) ) {
+		if ( ! empty( $parsed_url['path'] ) && 0 !== strpos( $parsed_url['path'], $this->home_path ) ) {
 			return false;
 		}
 
