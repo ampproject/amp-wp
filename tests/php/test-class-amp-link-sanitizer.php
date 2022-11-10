@@ -339,7 +339,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				false,
 			],
 			'different_host' => [
-				'https://example.org/',
+				'https://cdn.foo.org/',
 				false,
 			],
 			'different_path' => [
