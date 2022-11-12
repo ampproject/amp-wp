@@ -140,6 +140,9 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 	/**
 	 * @covers ::maybe_add_mobile_switcher_hooks()
+	 * @covers ::add_mobile_switcher_head_hooks()
+	 * @covers ::add_mobile_switcher_footer_hooks()
+	 * @covers ::add_a2a_linking_hooks()
 	 */
 	public function test_maybe_add_mobile_switcher_hooks() {
 		$this->instance->maybe_add_mobile_switcher_hooks();
