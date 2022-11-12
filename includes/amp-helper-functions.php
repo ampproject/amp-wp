@@ -748,7 +748,7 @@ function amp_add_amphtml_link() {
 		$sandboxing_level = amp_get_sandboxing_level();
 
 		if ( 1 === $sandboxing_level || 2 === $sandboxing_level ) {
-			echo amp_add_alternate_link( $amp_url ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			amp_add_alternate_link( $amp_url );
 		} else {
 			printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
 		}
@@ -2194,12 +2194,9 @@ function amp_get_sandboxing_level() {
  * @since 2.3.1
  *
  * @param string $url URL to add as alternate.
- * @return string Alternate link.
  */
 function amp_add_alternate_link( $url ) {
-	if ( empty( $url ) ) {
-		return '';
+	if ( $url ) {
+		printf( '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">', esc_url( $url ) );
 	}
-
-	return sprintf( '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">', esc_url( $url ) );
 }

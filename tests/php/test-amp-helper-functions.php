@@ -2769,12 +2769,12 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 * @covers ::amp_add_alternate_link()
 	 */
 	public function test_amp_add_alternate_link() {
-		$alternate_link  = amp_add_alternate_link( 'https://example.org' );
+		$alternate_link  = get_echo( 'amp_add_alternate_link', [ 'https://example.org' ] );
 		$expected_output = '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="https://example.org">';
 
 		$this->assertEquals( $expected_output, $alternate_link );
 
-		$alternate_link  = amp_add_alternate_link( '' );
+		$alternate_link  = get_echo( 'amp_add_alternate_link', [ '' ] );
 		$expected_output = '';
 
 		$this->assertEquals( $expected_output, $alternate_link );

@@ -524,7 +524,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @link https://developers.google.com/search/mobile-sites/mobile-seo/separate-urls#annotation-in-the-html
 	 */
 	public function add_mobile_alternative_link() {
-		echo amp_add_alternate_link( $this->get_current_amp_url() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		amp_add_alternate_link( $this->get_current_amp_url() );
 	}
 
 	/**
