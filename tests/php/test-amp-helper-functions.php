@@ -2762,4 +2762,21 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::SANDBOXING_LEVEL, 3 );
 		$this->assertEquals( 3, amp_get_sandboxing_level() );
 	}
+
+	/**
+	 * Test amp_add_alternate_link
+	 *
+	 * @covers ::amp_add_alternate_link()
+	 */
+	public function test_amp_add_alternate_link() {
+		$alternate_link  = amp_add_alternate_link( 'https://example.org' );
+		$expected_output = '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="https://example.org">';
+
+		$this->assertEquals( $expected_output, $alternate_link );
+
+		$alternate_link  = amp_add_alternate_link( '' );
+		$expected_output = '';
+
+		$this->assertEquals( $expected_output, $alternate_link );
+	}
 }
