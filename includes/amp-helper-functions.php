@@ -13,7 +13,6 @@ use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
-use AmpProject\AmpWP\Sandboxing;
 
 /**
  * Determine whether AMP is enabled on the current site.
