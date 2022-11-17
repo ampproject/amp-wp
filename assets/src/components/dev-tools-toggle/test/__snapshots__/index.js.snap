@@ -55,7 +55,7 @@ exports[`DevToolsToggle matches snapshot for the loading state 1`] = `
   className="amp-spinner-container"
 >
   <svg
-    className="components-spinner css-1igdw1q-StyledSpinner ea4tfvq2"
+    className="components-spinner css-17rkb14-StyledSpinner ea4tfvq2"
     focusable="false"
     height="16"
     role="presentation"
