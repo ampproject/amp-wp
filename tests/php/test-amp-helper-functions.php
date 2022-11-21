@@ -1081,16 +1081,13 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link, $sandboxing_level ) {
 			$sandboxing_level = amp_get_sandboxing_level();
 
-			if ( 1 === $sandboxing_level || 2 === $sandboxing_level ) {
-				$this->assertEquals(
-					sprintf( '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">', esc_url( $amphtml_url ) ),
-					$get_amp_html_link()
-				);
-			} else {
+			if ( 0 === $sandboxing_level || 3 === $sandboxing_level ) {
 				$this->assertEquals(
 					sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
 					$get_amp_html_link()
 				);
+			} else {
+				$this->assertEmpty( $get_amp_html_link() );
 			}
 		};
 
@@ -2761,22 +2758,5 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		// Enable level 3 which is Strict.
 		AMP_Options_Manager::update_option( Option::SANDBOXING_LEVEL, 3 );
 		$this->assertEquals( 3, amp_get_sandboxing_level() );
-	}
-
-	/**
-	 * Test amp_add_alternate_link
-	 *
-	 * @covers ::amp_add_alternate_link()
-	 */
-	public function test_amp_add_alternate_link() {
-		$alternate_link  = get_echo( 'amp_add_alternate_link', [ 'https://example.org' ] );
-		$expected_output = '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="https://example.org">';
-
-		$this->assertEquals( $expected_output, $alternate_link );
-
-		$alternate_link  = get_echo( 'amp_add_alternate_link', [ '' ] );
-		$expected_output = '';
-
-		$this->assertEquals( $expected_output, $alternate_link );
 	}
 }
