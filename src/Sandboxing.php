@@ -205,6 +205,10 @@ final class Sandboxing implements Service, Registerable {
 			return;
 		}
 
+		if ( $dom->ampElements->length > 0 ) {
+			return;
+		}
+
 		$amp_scripts = $dom->xpath->query( '//script[ @custom-element or @custom-template ]' );
 		if ( $amp_scripts->length > 0 ) {
 			return;
