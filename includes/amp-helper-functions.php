@@ -746,9 +746,7 @@ function amp_add_amphtml_link() {
 		$amp_url          = remove_query_arg( QueryVar::NOAMP, $amp_url );
 		$sandboxing_level = amp_get_sandboxing_level();
 
-		if ( 1 === $sandboxing_level || 2 === $sandboxing_level ) {
-			amp_add_alternate_link( $amp_url );
-		} else {
+		if ( 0 === $sandboxing_level || 3 === $sandboxing_level ) {
 			printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
 		}
 	}
@@ -2185,17 +2183,4 @@ function amp_get_sandboxing_level() {
 		return 0;
 	}
 	return AMP_Options_Manager::get_option( Option::SANDBOXING_LEVEL );
-}
-
-/**
- * Add alternate link.
- *
- * @since 2.3.1
- *
- * @param string $url URL to add as alternate.
- */
-function amp_add_alternate_link( $url ) {
-	if ( $url ) {
-		printf( '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">', esc_url( $url ) );
-	}
 }

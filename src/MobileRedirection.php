@@ -64,7 +64,15 @@ final class MobileRedirection implements Service, Registerable {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
-		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && ! amp_is_canonical() ) {
+		$is_mobile_request = AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT );
+		$sandboxing_level  = amp_get_sandboxing_level();
+
+		// Add alternative link if mobile redirection is enabled or sandboxing level is set to loose or moderate.
+		if ( $is_mobile_request || ( 1 === $sandboxing_level || 2 === $sandboxing_level ) ) {
+			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
+		}
+
+		if ( $is_mobile_request && ! amp_is_canonical() ) {
 			add_action( 'template_redirect', [ $this, 'redirect' ], PHP_INT_MAX );
 
 			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
@@ -153,7 +161,6 @@ final class MobileRedirection implements Service, Registerable {
 		$this->add_mobile_switcher_head_hooks();
 
 		if ( ! amp_is_request() ) {
-			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
 			if ( $js ) {
 				// Add mobile redirection script.
 				add_action( 'wp_head', [ $this, 'add_mobile_redirect_script' ], ~PHP_INT_MAX );
@@ -524,7 +531,10 @@ final class MobileRedirection implements Service, Registerable {
 	 * @link https://developers.google.com/search/mobile-sites/mobile-seo/separate-urls#annotation-in-the-html
 	 */
 	public function add_mobile_alternative_link() {
-		amp_add_alternate_link( $this->get_current_amp_url() );
+		printf(
+			'<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">',
+			esc_url( $this->get_current_amp_url() )
+		);
 	}
 
 	/**
