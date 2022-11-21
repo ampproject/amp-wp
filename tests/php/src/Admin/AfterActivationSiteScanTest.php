@@ -276,7 +276,19 @@ class AfterActivationSiteScanTest extends DependencyInjectedTestCase {
 	 * @covers ::get_amp_compatible_plugins_url
 	 */
 	public function test_get_amp_compatible_plugins_url() {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		if ( is_multisite() ) {
+			$user_id = self::factory()->user->create(
+				[
+					'role' => 'administrator',
+				]
+			);
+
+			// Make sure the user is a super admin, for `unfiltered_html` capability.
+			grant_super_admin( $user_id );
+			wp_set_current_user( $user_id );
+		} else {
+			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		}
 		$this->assertStringContainsString( '/plugin-install.php?tab=amp-compatible', $this->call_private_method( $this->after_activation_site_scan, 'get_amp_compatible_plugins_url' ) );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'author' ] ) );
