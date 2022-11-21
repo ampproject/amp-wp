@@ -1963,7 +1963,19 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
 
 		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, and now also with admin bar showing.
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		if ( is_multisite() ) {
+			$user_id = self::factory()->user->create(
+				[
+					'role' => 'administrator',
+				]
+			);
+
+			// Make sure the user is a super admin, for `unfiltered_html` capability.
+			grant_super_admin( $user_id );
+			wp_set_current_user( $user_id );
+		} else {
+			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		}
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_filter( 'show_admin_bar', '__return_true' );
 		$sanitizers = amp_get_content_sanitizers();
