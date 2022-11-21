@@ -2588,6 +2588,12 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 * @param bool   $is_amp
 	 */
 	public function test_amp_has_paired_endpoint_go_to( $paired_url_structure, $suffix, $is_amp ) {
+		if ( is_multisite() ) {
+			$new_blog_id = self::factory()->blog->create();
+
+			switch_to_blog( $new_blog_id );
+		}
+
 		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $paired_url_structure );
 
 		add_filter( 'wp_redirect', '__return_empty_string' ); // Prevent ensure_proper_amp_location() from redirecting.
