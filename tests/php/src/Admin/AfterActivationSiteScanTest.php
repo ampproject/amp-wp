@@ -283,7 +283,6 @@ class AfterActivationSiteScanTest extends DependencyInjectedTestCase {
 				]
 			);
 
-			// Make sure the user is a super admin, for `unfiltered_html` capability.
 			grant_super_admin( $user_id );
 			wp_set_current_user( $user_id );
 		} else {
