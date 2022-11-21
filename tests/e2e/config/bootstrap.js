@@ -260,6 +260,7 @@ async function setupThemesAndPlugins() {
 	await deactivatePlugin( 'do-not-allow-amp-validate-capability' );
 
 	await installTheme( 'hestia' );
+	await installTheme( 'twentytwenty' ); // Ensure that twentytwenty theme is installed.
 	await activateTheme( 'twentytwenty' );
 }
 

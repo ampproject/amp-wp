@@ -146,7 +146,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 			$video_id = $matches[1];
 		}
 
-		return $video_id;
+		return (int) $video_id;
 	}
 
 	/**
