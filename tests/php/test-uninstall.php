@@ -569,7 +569,17 @@ class Test_Uninstall extends TestCase {
 		$num_queries_before = $wpdb->num_queries;
 		require AMP__DIR__ . '/uninstall.php';
 		$this->flush_cache();
-		$this->assertEquals( $num_queries_before, $wpdb->num_queries );
+
+		if ( is_multisite() ) {
+			/*
+			* Multisite has 2 additional queries:
+			* 1. Get sites query.
+			* 2. Switch to blog query.
+			*/
+			$this->assertEquals( $num_queries_before + 2, $wpdb->num_queries );
+		} else {
+			$this->assertEquals( $num_queries_before, $wpdb->num_queries );
+		}
 
 		$this->assertNotEmpty( get_option( AMP_Options_Manager::OPTION_NAME, false ) );
 
