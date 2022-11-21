@@ -68,7 +68,18 @@ class UserRESTEndpointExtensionTest extends TestCase {
 		$server = rest_get_server();
 		$this->user_rest_endpoint_extension->register_rest_field();
 
-		$admin_user  = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
+		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
+
+		if ( is_multisite() ) {
+			$admin_user = self::factory()->user->create_and_get(
+				[
+					'role' => 'administrator',
+				]
+			);
+
+			grant_super_admin( $admin_user->ID );
+		}
+
 		$editor_user = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
 
 		$this->assertSame( '', $this->user_rest_endpoint_extension->get_review_panel_dismissed_for_template_mode( [ 'id' => $admin_user->ID ] ) );
