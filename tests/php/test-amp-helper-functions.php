@@ -2589,9 +2589,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 */
 	public function test_amp_has_paired_endpoint_go_to( $paired_url_structure, $suffix, $is_amp ) {
 		if ( is_multisite() ) {
-			$new_blog_id = self::factory()->blog->create();
-
-			switch_to_blog( $new_blog_id );
+			switch_to_blog( self::factory()->blog->create() );
 		}
 
 		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $paired_url_structure );
