@@ -151,12 +151,29 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
 		$this->assertEquals( $active_theme_slug, get_stylesheet() );
 		$this->assertEquals( $reader_theme_slug, $this->instance->get_reader_theme()->get_stylesheet() );
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		if ( is_multisite() ) {
+			$user_id = self::factory()->user->create(
+				[
+					'role' => 'administrator',
+				]
+			);
+
+			grant_super_admin( $user_id );
+			wp_set_current_user( $user_id );
+		} else {
+			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		}
 
 		// Note that this is added via filter and not called directly because the filtered value is keyed by theme slug,
 		// but the return value of wp_prepare_themes_for_js() is keyed with numeric indices.
 		$this->instance->register(); // This adds a `wp_prepare_themes_for_js` filter.
-		$themes = wp_prepare_themes_for_js();
+		$themes = wp_prepare_themes_for_js(
+			[
+				wp_get_theme( $active_theme_slug ),
+				wp_get_theme( $reader_theme_slug ),
+			]
+		);
 		$this->assertEquals( $active_theme_slug, $themes[0]['id'] );
 		$this->assertStringNotContainsString( 'AMP', $themes[0]['description'] );
 		$this->assertArrayHasKey( 'delete', $themes[0]['actions'], 'The delete key is expected even though the theme is active because the delete option is hidden via the JS template.' );
