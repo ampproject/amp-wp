@@ -65,7 +65,18 @@ class SupportLinkTest extends TestCase {
 		$this->assertFalse( SupportLink::is_needed() );
 
 		// Test 2: Test with admin user.
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		if ( is_multisite() ) {
+			$user_id = self::factory()->user->create(
+				[
+					'role' => 'administrator',
+				]
+			);
+
+			grant_super_admin( $user_id );
+			wp_set_current_user( $user_id );
+		} else {
+			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		}
 
 		$this->assertTrue( SupportLink::is_needed() );
 	}
