@@ -169,6 +169,73 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * Get data for test_mobile_alternate_link_hook
+	 *
+	 * @return array
+	 */
+	public function get_test_mobile_alternate_link_hook() {
+		return [
+			'mobile_redirection_enabled'                 => [
+				[
+					Option::MOBILE_REDIRECT => true,
+				],
+				10,
+			],
+			'sandboxing_set_to_loose'                    => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => true,
+					Option::SANDBOXING_LEVEL   => 1,
+				],
+				10,
+			],
+			'sandboxing_set_to_moderate'                 => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => true,
+					Option::SANDBOXING_LEVEL   => 2,
+				],
+				10,
+			],
+			'sandboxing_set_to_strict'                   => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => true,
+					Option::SANDBOXING_LEVEL   => 3,
+				],
+				false,
+			],
+			'sandboxing_and_mobile_redirection_disabled' => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => false,
+				],
+				false,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_test_mobile_alternate_link_hook
+	 *
+	 * Test action which adds mobile alternative link to head if:
+	 * - mobile redirection is enabled.
+	 * - sandboxing level is set to Loose or Moderate.
+	 *
+	 * @covers ::register()
+	 *
+	 * @param array $options AMP options.
+	 * @param bool|int  $expected Expected result.
+	 */
+	public function test_mobile_alternate_link_hook( $options, $expected ) {
+		AMP_Options_Manager::update_options( $options );
+
+		$this->instance->register();
+
+		$this->assertSame( $expected, has_action( 'wp_head', [ $this->instance, 'add_mobile_alternative_link' ] ) );
+	}
+
+	/**
 	 * Assert the service hooks were not added.
 	 *
 	 * @param MobileRedirection $instance
@@ -326,7 +393,6 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		$this->assertTrue( amp_is_available() );
 		$this->instance->redirect();
 		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
-		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_alternative_link' ] ) );
 		$this->assertEquals( 10, has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 	}
 
