@@ -304,7 +304,19 @@ class ReaderThemesTest extends TestCase {
 			}
 		);
 
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		if ( is_multisite() ) {
+			$user_id = self::factory()->user->create(
+				[
+					'role' => 'administrator',
+				]
+			);
+
+			grant_super_admin( $user_id );
+			wp_set_current_user( $user_id );
+		} else {
+			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		}
+
 		$expected = $get_expected();
 		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );
 		$this->assertEquals( $can_install, $this->reader_themes->can_install_theme( $theme ) );
@@ -344,7 +356,18 @@ class ReaderThemesTest extends TestCase {
 		$this->assertFalse( $this->reader_themes->can_install_theme( $core_theme ) );
 		$this->assertFalse( $this->reader_themes->can_install_theme( $neve_theme ) );
 
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		if ( is_multisite() ) {
+			$user_id = self::factory()->user->create(
+				[
+					'role' => 'administrator',
+				]
+			);
+
+			grant_super_admin( $user_id );
+			wp_set_current_user( $user_id );
+		} else {
+			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		}
 		$this->assertTrue( $this->reader_themes->can_install_theme( $core_theme ) );
 		$this->assertTrue( $this->reader_themes->can_install_theme( $neve_theme ) );
 
