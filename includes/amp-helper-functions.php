@@ -2172,6 +2172,8 @@ function amp_remove_paired_endpoint( $url ) {
 /**
  * Determine sandboxing level if enabled.
  *
+ * @since 2.3.1
+ *
  * @return int Following values are possible:
  *             0: Sandbox is disabled.
  *             1: Sandboxing level: Loose.
