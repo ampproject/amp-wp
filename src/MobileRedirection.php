@@ -68,7 +68,7 @@ final class MobileRedirection implements Service, Registerable {
 		$sandboxing_level  = amp_get_sandboxing_level();
 
 		// Add alternative link if mobile redirection is enabled or sandboxing level is set to loose or moderate.
-		if ( $is_mobile_request || ( 1 === $sandboxing_level || 2 === $sandboxing_level ) ) {
+		if ( ! amp_is_canonical() && ( $is_mobile_request || ( 1 === $sandboxing_level || 2 === $sandboxing_level ) ) ) {
 			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
 		}
 
