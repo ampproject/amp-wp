@@ -177,7 +177,7 @@ final class MobileRedirection implements Service, Registerable {
 			}
 
 			// Add a link to the footer to allow for navigation to the AMP version.
-			$this->add_mobile_switcher_footer_hooks( false );
+			$this->add_mobile_switcher_footer_hooks();
 		} else {
 			if ( ! $js && $this->is_redirection_disabled_via_cookie() ) {
 				$this->set_mobile_redirection_disabled_cookie( false );
@@ -211,15 +211,10 @@ final class MobileRedirection implements Service, Registerable {
 
 	/**
 	 * Add mobile version switcher footer hooks.
-	 *
-	 * @param bool $legacy Whether to add mobile version switcher for legacy Reader mode theme.
 	 */
-	private function add_mobile_switcher_footer_hooks( $legacy = true ) {
+	private function add_mobile_switcher_footer_hooks() {
 		add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
-
-		if ( $legacy ) {
-			add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
-		}
+		add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
 	}
 
 	/**
