@@ -64,15 +64,15 @@ final class MobileRedirection implements Service, Registerable {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
-		$is_mobile_request = AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT );
-		$sandboxing_level  = amp_get_sandboxing_level();
+		$is_mobile_redirect_enabled = AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT );
+		$sandboxing_level           = amp_get_sandboxing_level();
 
 		// Add alternative link if mobile redirection is enabled or sandboxing level is set to loose or moderate.
-		if ( ! amp_is_canonical() && ( $is_mobile_request || ( 1 === $sandboxing_level || 2 === $sandboxing_level ) ) ) {
+		if ( ! amp_is_canonical() && ( $is_mobile_redirect_enabled || ( 1 === $sandboxing_level || 2 === $sandboxing_level ) ) ) {
 			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
 		}
 
-		if ( $is_mobile_request && ! amp_is_canonical() ) {
+		if ( $is_mobile_redirect_enabled && ! amp_is_canonical() ) {
 			add_action( 'template_redirect', [ $this, 'redirect' ], PHP_INT_MAX );
 
 			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
