@@ -175,29 +175,54 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	 */
 	public function get_test_mobile_alternate_link_hook() {
 		return [
-			'mobile_redirection_enabled'                 => [
+			'mobile_redirection_enabled'                   => [
 				[
 					Option::MOBILE_REDIRECT => true,
 				],
-				10,
+				PHP_INT_MAX,
 			],
-			'sandboxing_set_to_loose'                    => [
+			'mobile_redirection_enabled_in_canonical_mode' => [
+				[
+					Option::MOBILE_REDIRECT => true,
+					Option::THEME_SUPPORT   => AMP_Theme_Support::STANDARD_MODE_SLUG,
+				],
+				false,
+			],
+			'sandboxing_set_to_loose'                      => [
 				[
 					Option::MOBILE_REDIRECT    => false,
 					Option::SANDBOXING_ENABLED => true,
 					Option::SANDBOXING_LEVEL   => 1,
 				],
-				10,
+				PHP_INT_MAX,
 			],
-			'sandboxing_set_to_moderate'                 => [
+			'sandboxing_set_to_loose_in_canonical_mode'    => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => true,
+					Option::SANDBOXING_LEVEL   => 1,
+					Option::THEME_SUPPORT      => AMP_Theme_Support::STANDARD_MODE_SLUG,
+				],
+				false,
+			],
+			'sandboxing_set_to_moderate'                   => [
 				[
 					Option::MOBILE_REDIRECT    => false,
 					Option::SANDBOXING_ENABLED => true,
 					Option::SANDBOXING_LEVEL   => 2,
 				],
-				10,
+				PHP_INT_MAX,
 			],
-			'sandboxing_set_to_strict'                   => [
+			'sandboxing_set_to_moderate_in_canonical_mode' => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => true,
+					Option::SANDBOXING_LEVEL   => 2,
+					Option::THEME_SUPPORT      => AMP_Theme_Support::STANDARD_MODE_SLUG,
+				],
+				false,
+			],
+			'sandboxing_set_to_strict'                     => [
 				[
 					Option::MOBILE_REDIRECT    => false,
 					Option::SANDBOXING_ENABLED => true,
@@ -205,7 +230,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 				],
 				false,
 			],
-			'sandboxing_and_mobile_redirection_disabled' => [
+			'sandboxing_and_mobile_redirection_disabled'   => [
 				[
 					Option::MOBILE_REDIRECT    => false,
 					Option::SANDBOXING_ENABLED => false,
@@ -232,7 +257,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 		$this->instance->register();
 
-		$this->assertSame( $expected, has_action( 'wp_head', [ $this->instance, 'add_mobile_alternative_link' ] ) );
+		$this->assertSame( $expected, has_action( 'template_redirect', [ $this->instance, 'add_mobile_alternative_link_head_hook' ] ) );
 	}
 
 	/**
