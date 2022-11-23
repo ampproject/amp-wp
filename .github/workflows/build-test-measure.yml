@@ -606,7 +606,21 @@ jobs:
           CI: true
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
+        run: |
+          # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency.
+          composer remove --dev phpdocumentor/reflection
+          composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+
+      # See https://github.com/wp-cli/wp-cli/issues/5484
+      - name: Remove conflicting Requests library
+        run: composer remove --dev --ignore-platform-reqs --no-interaction --no-scripts  roave/security-advisories wp-cli/export-command wp-cli/extension-command wp-cli/wp-cli wp-cli/wp-cli-tests
+
+      - name: Update PHPUnit
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: |
+          # We are using PHP 7.4 and WP Latest.
+          echo "Installing latest version of PHPUnit"
+          composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies
 
       - name: Build plugin
         run: npm run build:js
