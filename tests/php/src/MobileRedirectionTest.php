@@ -169,17 +169,17 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * Get data for test_mobile_alternate_link_hook
+	 * Get data for test_add_mobile_alternate_link
 	 *
 	 * @return array
 	 */
-	public function get_test_mobile_alternate_link_hook() {
+	public function get_add_mobile_alternate_link() {
 		return [
 			'mobile_redirection_enabled'                   => [
 				[
 					Option::MOBILE_REDIRECT => true,
 				],
-				PHP_INT_MAX,
+				10,
 			],
 			'mobile_redirection_enabled_in_canonical_mode' => [
 				[
@@ -194,7 +194,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 					Option::SANDBOXING_ENABLED => true,
 					Option::SANDBOXING_LEVEL   => 1,
 				],
-				PHP_INT_MAX,
+				10,
 			],
 			'sandboxing_set_to_loose_in_canonical_mode'    => [
 				[
@@ -211,7 +211,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 					Option::SANDBOXING_ENABLED => true,
 					Option::SANDBOXING_LEVEL   => 2,
 				],
-				PHP_INT_MAX,
+				10,
 			],
 			'sandboxing_set_to_moderate_in_canonical_mode' => [
 				[
@@ -241,7 +241,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * @dataProvider get_test_mobile_alternate_link_hook
+	 * @dataProvider get_add_mobile_alternate_link
 	 *
 	 * Test action which adds mobile alternative link to head if:
 	 * - mobile redirection is enabled.
@@ -252,12 +252,12 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	 * @param array $options AMP options.
 	 * @param bool|int  $expected Expected result.
 	 */
-	public function test_mobile_alternate_link_hook( $options, $expected ) {
+	public function test_add_mobile_alternate_link( $options, $expected ) {
 		AMP_Options_Manager::update_options( $options );
 
 		$this->instance->register();
 
-		$this->assertSame( $expected, has_action( 'template_redirect', [ $this->instance, 'add_mobile_alternative_link_head_hook' ] ) );
+		$this->assertSame( $expected, has_action( 'wp_head', [ $this->instance, 'add_mobile_alternative_link' ] ) );
 	}
 
 	/**
