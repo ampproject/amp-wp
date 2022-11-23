@@ -10,6 +10,7 @@ use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\MockAdminUser;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 
@@ -21,6 +22,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	use HandleValidation;
 	use LoadsCoreThemes;
 	use PrivateAccess;
+	use MockAdminUser;
 
 	/**
 	 * The mock Site Icon value to use in a filter.
@@ -1963,19 +1965,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
 
 		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, and now also with admin bar showing.
-		if ( is_multisite() ) {
-			$user_id = self::factory()->user->create(
-				[
-					'role' => 'administrator',
-				]
-			);
-
-			// Make sure the user is a super admin, for `unfiltered_html` capability.
-			grant_super_admin( $user_id );
-			wp_set_current_user( $user_id );
-		} else {
-			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		}
+		$this->mock_admin_user();
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_filter( 'show_admin_bar', '__return_true' );
 		$sanitizers = amp_get_content_sanitizers();

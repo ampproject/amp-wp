@@ -15,6 +15,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\MockAdminUser;
 use AmpProject\AmpWP\Tests\TestCase;
 use WP_REST_Server;
 use WP_Error;
@@ -28,6 +29,7 @@ class SiteHealthTest extends TestCase {
 
 	use HomeUrlLoopbackRequestMocking;
 	use PrivateAccess;
+	use MockAdminUser;
 
 	/**
 	 * Whether external object cache is being used.
@@ -139,18 +141,7 @@ class SiteHealthTest extends TestCase {
 		$this->assertFalse( call_user_func( $route['permission_callback'] ) );
 
 		// Prior to WordPress 5.2, the view_site_health_checks cap didn't exist because Site Health didn't exist.
-		if ( is_multisite() ) {
-			$user_id = self::factory()->user->create(
-				[
-					'role' => 'administrator',
-				]
-			);
-
-			grant_super_admin( $user_id );
-			wp_set_current_user( $user_id );
-		} else {
-			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		}
+		$this->mock_admin_user();
 
 		if ( version_compare( get_bloginfo( 'version' ), '5.2', '>=' ) ) {
 			$this->assertTrue( call_user_func( $route['permission_callback'] ) );
