@@ -698,10 +698,20 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 	/** @covers ::add_mobile_alternative_link() */
 	public function test_add_mobile_alternative_link() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->go_to( '/' );
 		ob_start();
 		$this->instance->add_mobile_alternative_link();
 		$output = ob_get_clean();
+		$this->assertTrue( amp_is_request() );
+		$this->assertEmpty( $output );
 
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->go_to( '/' );
+		ob_start();
+		$this->instance->add_mobile_alternative_link();
+		$output = ob_get_clean();
+		$this->assertFalse( amp_is_request() );
 		$this->assertStringStartsWith( '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)"', $output );
 	}
 
