@@ -572,10 +572,10 @@ class Test_Uninstall extends TestCase {
 
 		if ( is_multisite() ) {
 			/*
-			* Multisite has 2 additional queries:
-			* 1. Get sites query.
-			* 2. Switch to blog query.
-			*/
+			 * Multisite has 2 additional queries:
+			 * 1. Get sites query.
+			 * 2. Switch to blog query.
+			 */
 			$this->assertEquals( $num_queries_before + 2, $wpdb->num_queries );
 		} else {
 			$this->assertEquals( $num_queries_before, $wpdb->num_queries );
