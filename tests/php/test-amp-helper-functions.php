@@ -2579,6 +2579,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 */
 	public function test_amp_has_paired_endpoint_go_to( $paired_url_structure, $suffix, $is_amp ) {
 		if ( is_multisite() ) {
+			// Switch blog in multisite to ensure paired endpoint is working with multiple subdirectory installations.
 			switch_to_blog( self::factory()->blog->create() );
 		}
 
