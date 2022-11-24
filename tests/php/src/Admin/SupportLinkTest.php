@@ -13,6 +13,7 @@ use AMP_Options_Manager;
 use AMP_Validation_Manager;
 use AMP_Theme_Support;
 use AMP_Validated_URL_Post_Type;
+use AmpProject\AmpWP\Tests\Helpers\MockAdminUser;
 use AmpProject\AmpWP\Tests\TestCase;
 
 /**
@@ -22,6 +23,8 @@ use AmpProject\AmpWP\Tests\TestCase;
  * @coversDefaultClass \AmpProject\AmpWP\Admin\SupportLink
  */
 class SupportLinkTest extends TestCase {
+
+	use MockAdminUser;
 
 	/**
 	 * Instance of SupportLink
@@ -65,7 +68,7 @@ class SupportLinkTest extends TestCase {
 		$this->assertFalse( SupportLink::is_needed() );
 
 		// Test 2: Test with admin user.
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->mock_admin_user();
 
 		$this->assertTrue( SupportLink::is_needed() );
 	}

@@ -15,6 +15,7 @@ use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
+use AmpProject\AmpWP\Tests\Helpers\MockAdminUser;
 use AmpProject\AmpWP\Tests\TestCase;
 use Closure;
 use WP_Error;
@@ -28,7 +29,7 @@ use WP_Error;
  */
 class ReaderThemesTest extends TestCase {
 
-	use ThemesApiRequestMocking, LoadsCoreThemes;
+	use ThemesApiRequestMocking, LoadsCoreThemes, MockAdminUser;
 
 	/**
 	 * Test instance.
@@ -304,7 +305,8 @@ class ReaderThemesTest extends TestCase {
 			}
 		);
 
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->mock_admin_user();
+
 		$expected = $get_expected();
 		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );
 		$this->assertEquals( $can_install, $this->reader_themes->can_install_theme( $theme ) );
@@ -344,7 +346,7 @@ class ReaderThemesTest extends TestCase {
 		$this->assertFalse( $this->reader_themes->can_install_theme( $core_theme ) );
 		$this->assertFalse( $this->reader_themes->can_install_theme( $neve_theme ) );
 
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->mock_admin_user();
 		$this->assertTrue( $this->reader_themes->can_install_theme( $core_theme ) );
 		$this->assertTrue( $this->reader_themes->can_install_theme( $neve_theme ) );
 

@@ -1,5 +1,6 @@
 {
   "core": "WordPress/WordPress#master",
+  "phpVersion": "7.4",
   "env": {
     "development": {
       "plugins": [

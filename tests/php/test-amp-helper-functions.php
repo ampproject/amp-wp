@@ -10,6 +10,7 @@ use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\MockAdminUser;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 
@@ -21,6 +22,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	use HandleValidation;
 	use LoadsCoreThemes;
 	use PrivateAccess;
+	use MockAdminUser;
 
 	/**
 	 * The mock Site Icon value to use in a filter.
@@ -2051,7 +2053,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
 
 		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, and now also with admin bar showing.
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->mock_admin_user();
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_filter( 'show_admin_bar', '__return_true' );
 		$sanitizers = amp_get_content_sanitizers();
@@ -2664,6 +2666,11 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 * @param bool   $is_amp
 	 */
 	public function test_amp_has_paired_endpoint_go_to( $paired_url_structure, $suffix, $is_amp ) {
+		if ( is_multisite() ) {
+			// Switch blog in multisite to ensure paired endpoint is working with multiple subdirectory installations.
+			switch_to_blog( self::factory()->blog->create() );
+		}
+
 		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $paired_url_structure );
 
 		add_filter( 'wp_redirect', '__return_empty_string' ); // Prevent ensure_proper_amp_location() from redirecting.
