@@ -25,12 +25,6 @@ trait MockAdminUser {
 		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
 
 		if ( is_multisite() ) {
-			$admin_user = self::factory()->user->create_and_get(
-				[
-					'role' => 'administrator',
-				]
-			);
-
 			grant_super_admin( $admin_user->ID );
 		}
 
