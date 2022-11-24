@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\UserRESTEndpointExtension;
+use AmpProject\AmpWP\Tests\Helpers\MockAdminUser;
 use AmpProject\AmpWP\Tests\TestCase;
 use WP_REST_Request;
 
@@ -22,6 +23,8 @@ use WP_REST_Request;
  * @coversDefaultClass \AmpProject\AmpWP\Admin\UserRESTEndpointExtension
  */
 class UserRESTEndpointExtensionTest extends TestCase {
+
+	use MockAdminUser;
 
 	/**
 	 * Test instance.
@@ -68,17 +71,7 @@ class UserRESTEndpointExtensionTest extends TestCase {
 		$server = rest_get_server();
 		$this->user_rest_endpoint_extension->register_rest_field();
 
-		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
-
-		if ( is_multisite() ) {
-			$admin_user = self::factory()->user->create_and_get(
-				[
-					'role' => 'administrator',
-				]
-			);
-
-			grant_super_admin( $admin_user->ID );
-		}
+		$admin_user = $this->mock_admin_user();
 
 		$editor_user = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
 
