@@ -288,7 +288,7 @@ class AfterActivationSiteScanTest extends DependencyInjectedTestCase {
 	 * @covers ::get_amp_compatible_themes_url
 	 */
 	public function test_get_amp_compatible_themes_url() {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->mock_admin_user();
 		$this->assertStringContainsString( '/theme-install.php?browse=amp-compatible', $this->call_private_method( $this->after_activation_site_scan, 'get_amp_compatible_themes_url' ) );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'author' ] ) );
