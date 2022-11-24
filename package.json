@@ -143,6 +143,7 @@
     "test:js:update-snapshots": "npm run test:js -- --updateSnapshot",
     "test:js:watch": "npm run test:js -- --watch",
     "test:php": "wp-env run phpunit 'env WP_PHPUNIT__TESTS_CONFIG=/wordpress-phpunit/wp-tests-config.php WORDPRESS_TABLE_PREFIX=wptests_ WP_TESTS_DIR=/var/www/wordpress-develop/tests/phpunit /var/www/html/wp-content/plugins/amp/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/amp/phpunit.xml.dist $npm_config_args'",
+    "test:php:multisite": "wp-env run phpunit 'env WP_MULTISITE=1 WP_PHPUNIT__TESTS_CONFIG=/wordpress-phpunit/wp-tests-config.php WORDPRESS_TABLE_PREFIX=wptests_ WP_TESTS_DIR=/var/www/wordpress-develop/tests/phpunit /var/www/html/wp-content/plugins/amp/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/amp/phpunit.xml.dist $npm_config_args'",
     "test:php:xdebug": "wp-env run tests-wordpress 'env PHP_IDE_CONFIG=serverName=localhost WORDPRESS_TABLE_PREFIX=wptests_ WP_TESTS_DIR=/var/www/wordpress-develop/tests/phpunit WP_PHPUNIT__TESTS_CONFIG=/wordpress-phpunit/wp-tests-config.php /var/www/html/wp-content/plugins/amp/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/amp/phpunit.xml.dist $npm_config_args'",
     "test:php:help": "npm run test:php --args='--help'",
     "update-wordpress-packages": "npm i $(npm outdated --parseable | cut -d':' -f 4 | grep @wordpress)",
