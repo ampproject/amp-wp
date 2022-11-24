@@ -18,19 +18,24 @@ trait MockAdminUser {
 
 	/**
 	 * Mock an admin or super admin user.
+	 *
+	 * @return WP_User
 	 */
 	public function mock_admin_user() {
+		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
+
 		if ( is_multisite() ) {
-			$user_id = self::factory()->user->create(
+			$admin_user = self::factory()->user->create_and_get(
 				[
 					'role' => 'administrator',
 				]
 			);
 
-			grant_super_admin( $user_id );
-			wp_set_current_user( $user_id );
-		} else {
-			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+			grant_super_admin( $admin_user->ID );
 		}
+
+		wp_set_current_user( $admin_user->ID );
+
+		return $admin_user;
 	}
 }
