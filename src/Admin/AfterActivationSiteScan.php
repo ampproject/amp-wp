@@ -211,7 +211,7 @@ final class AfterActivationSiteScan implements Conditional, Delayed, HasRequirem
 	 * @return string URL to AMP compatible themes directory.
 	 */
 	protected function get_amp_compatible_themes_url() {
-		if ( current_user_can( 'switch_themes' ) ) {
+		if ( current_user_can( 'install_themes' ) ) {
 			return admin_url( '/theme-install.php?browse=amp-compatible' );
 		}
 
