@@ -98,17 +98,19 @@ final class WpHttpRemoteGetRequest implements RemoteGetRequest {
 	/**
 	 * Do a GET request to retrieve the contents of a remote URL.
 	 *
-	 * @param string $url URL to get.
+	 * @param string $url     URL to get.
+	 * @param array  $headers Optional. Associative array of headers to send with the request. Defaults to empty array.
 	 * @return Response Response for the executed request.
 	 * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
 	 */
-	public function get( $url ) {
+	public function get( $url, $headers = [] ) {
 		$retries_left = $this->retries;
 		do {
 			$args = [
 				'method'    => 'GET',
 				'timeout'   => $this->timeout,
 				'sslverify' => $this->ssl_verify,
+				'headers'   => $headers,
 			];
 
 			$response = wp_remote_get( $url, $args );
@@ -117,17 +119,15 @@ final class WpHttpRemoteGetRequest implements RemoteGetRequest {
 				return new RemoteGetRequestResponse( $response->get_error_message(), [], 500 );
 			}
 
-			if ( ! isset( $response['response']['code'] ) ) {
+			if ( empty( $response['response']['code'] ) ) {
 				return new RemoteGetRequestResponse(
-					isset( $response['response']['message'] )
-						? $response['response']['message']
-						: 'Unknown error',
+					! empty( $response['response']['message'] ) ? $response['response']['message'] : 'Unknown error',
 					[],
 					500
 				);
 			}
 
-			$status = isset( $response['response']['code'] ) ? $response['response']['code'] : 500;
+			$status = $response['response']['code'];
 
 			if ( $status < 200 || $status >= 300 ) {
 				if ( ! $retries_left || in_array( $status, self::RETRYABLE_STATUS_CODES, true ) === false ) {

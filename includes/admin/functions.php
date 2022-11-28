@@ -5,8 +5,10 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Services;
 
 /**
  * Sets up the AMP template editor for the Customizer.
@@ -15,12 +17,45 @@ use AmpProject\AmpWP\QueryVar;
  */
 function amp_init_customizer() {
 
+	if ( ! Services::get( 'dependency_support' )->has_support() ) {
+		// @codeCoverageIgnoreStart
+		add_action(
+			'customize_controls_init',
+			static function () {
+				global $wp_customize;
+				if (
+					Services::get( 'reader_theme_loader' )->is_theme_overridden()
+					||
+					array_intersect( $wp_customize->get_autofocus(), [ 'panel' => AMP_Template_Customizer::PANEL_ID ] )
+					||
+					isset( $_GET[ QueryVar::AMP_PREVIEW ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				) {
+					wp_die(
+						esc_html(
+							sprintf(
+								/* translators: %s is minimum WordPress version */
+								__( 'Customizer for AMP is unavailable due to WordPress being out of date. Please upgrade to WordPress %s or greater.', 'amp' ),
+								DependencySupport::WP_MIN_VERSION
+							)
+						),
+						esc_html__( 'AMP Customizer Unavailable', 'amp' ),
+						[
+							'response'  => 503,
+							'back_link' => true,
+						]
+					);
+				}
+			}
+		);
+		// @codeCoverageIgnoreEnd
+	}
+
 	// Fire up the AMP Customizer.
-	add_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ], 500 );
+	add_action( 'customize_register', [ AMP_Template_Customizer::class, 'init' ], 500 );
 
 	if ( amp_is_legacy() ) {
 		// Add some basic design settings + controls to the Customizer.
-		add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
+		add_action( 'amp_init', [ AMP_Customizer_Design_Settings::class, 'init' ] );
 	}
 
 	// Add a link to the AMP Customizer in Reader mode.
@@ -31,6 +66,9 @@ function amp_init_customizer() {
 
 /**
  * Get permalink for the first AMP-eligible post.
+ *
+ * @todo Eliminate this in favor of ScannableURLProvider::get_posts_by_type().
+ * @see \AmpProject\AmpWP\Validation\ScannableURLProvider::get_posts_by_type()
  *
  * @internal
  * @return string|null URL on success, null if none found.

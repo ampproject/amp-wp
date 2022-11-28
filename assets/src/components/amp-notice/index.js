@@ -12,6 +12,7 @@ import './style.css';
 export const NOTICE_TYPE_ERROR = 'error';
 export const NOTICE_TYPE_WARNING = 'warning';
 export const NOTICE_TYPE_INFO = 'info';
+export const NOTICE_TYPE_PLAIN = 'plain';
 export const NOTICE_TYPE_SUCCESS = 'success';
 
 export const NOTICE_SIZE_SMALL = 'small';
@@ -30,7 +31,7 @@ function getNoticeIcon( type ) {
 			Icon = () => (
 				<svg width="35" height="36" viewBox="0 0 35 36" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<rect x="1.90112" y="1.98828" width="32.0691" height="32.0691" rx="16.0345" stroke="#00A02F" strokeWidth="2" />
-					<mask id="mask-notice-success" mask-type="alpha" maskUnits="userSpaceOnUse" x="10" y="12" width="16" height="12">
+					<mask id="mask-notice-success" style={ { maskType: 'alpha' } } maskUnits="userSpaceOnUse" x="10" y="12" width="16" height="12">
 						<path d="M15.0921 21.461L11.3924 17.7613L10.1326 19.0122L15.0921 23.9718L25.7387 13.3252L24.4877 12.0742L15.0921 21.461Z" fill="white" />
 					</mask>
 					<g mask="url(#mask-notice-success)">
@@ -69,11 +70,11 @@ function getNoticeIcon( type ) {
 /**
  * A warning, info, or success notice similar to those used in WP core.
  *
- * @param {Object} props Component props.
- * @param {string} props.children Notice content, not including the icon.
+ * @param {Object} props           Component props.
+ * @param {string} props.children  Notice content, not including the icon.
  * @param {string} props.className Optional extra class names.
- * @param {string} props.size The notice size.
- * @param {string} props.type The notice type.
+ * @param {string} props.size      The notice size.
+ * @param {string} props.type      The notice type.
  */
 export function AMPNotice( { children, className, size = NOTICE_SIZE_LARGE, type = NOTICE_TYPE_INFO, ...props } ) {
 	const noticeIcon = getNoticeIcon( type );
@@ -103,5 +104,5 @@ AMPNotice.propTypes = {
 	children: PropTypes.node,
 	className: PropTypes.string,
 	size: PropTypes.oneOf( [ NOTICE_SIZE_LARGE, NOTICE_SIZE_SMALL ] ),
-	type: PropTypes.oneOf( [ NOTICE_TYPE_INFO, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_ERROR, NOTICE_TYPE_WARNING ] ),
+	type: PropTypes.oneOf( [ NOTICE_TYPE_PLAIN, NOTICE_TYPE_INFO, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_ERROR, NOTICE_TYPE_WARNING ] ),
 };

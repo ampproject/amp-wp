@@ -16,7 +16,7 @@ Determine whether the given URL has the query var.
 
 ### Source
 
-:link: [src/PairedUrl.php:69](/src/PairedUrl.php#L69-L79)
+:link: [src/PairedUrl.php:71](/src/PairedUrl.php#L71-L81)
 
 <details>
 <summary>Show Code</summary>

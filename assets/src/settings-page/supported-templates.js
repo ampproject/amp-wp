@@ -6,8 +6,8 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { useContext } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import { CheckboxControl } from '@wordpress/components';
 
 /**
@@ -15,6 +15,7 @@ import { CheckboxControl } from '@wordpress/components';
  */
 import { SupportedTemplatesToggle } from '../components/supported-templates-toggle';
 import { Options } from '../components/options-context-provider';
+import { READER } from '../common/constants';
 
 /**
  * Determine whether the supportable templates include the static front page.
@@ -34,7 +35,7 @@ function hasFrontPageTemplate( supportableTemplates ) {
 /**
  * A checkbox for a supportable post type.
  *
- * @param {Object} props Component props.
+ * @param {Object} props                Component props.
  * @param {Object} props.postTypeObject A post type object.
  */
 function PostTypeCheckbox( { postTypeObject } ) {
@@ -145,8 +146,8 @@ function getInclusiveDescendantTemplatesIds( supportableTemplate ) {
 /**
  * List of checkboxes corresponding to supportable templates.
  *
- * @param {Object} props Component props.
- * @param {Array} props.supportableTemplates Array of supportableTemplate objects.
+ * @param {Object} props                      Component props.
+ * @param {Array}  props.supportableTemplates Array of supportableTemplate objects.
  */
 export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
@@ -231,7 +232,7 @@ export function SupportedTemplatesFieldset() {
 		reader_theme: readerTheme,
 	} = editedOptions || {};
 
-	if ( ( 'reader' === themeSupport && 'legacy' === readerTheme ) || ! supportableTemplates ) {
+	if ( ( READER === themeSupport && 'legacy' === readerTheme ) || ! supportableTemplates?.length ) {
 		return null;
 	}
 
@@ -245,25 +246,19 @@ export function SupportedTemplatesFieldset() {
 
 			{ ! allTemplatesSupported ? (
 				<>
-					{ /* dangerouslySetInnerHTML reason: Link embedded in translation string. */ }
-					<p
-						dangerouslySetInnerHTML={ {
-							__html: sprintf(
-								/* translators: placeholder is link to WordPress handbook page about the template hierarchy. */
-								__( 'Limit AMP on a subset of the WordPress <a href="%s" target="_blank" rel="noreferrer">Template Hierarchy</a>:', 'amp' ),
-								'https://developer.wordpress.org/themes/basics/template-hierarchy/',
-							),
-						} }
-					/>
+					<p>
+						{
+							createInterpolateElement(
+								__( 'Limit AMP on a subset of the WordPress <a>Template Hierarchy</a>:', 'amp' ),
+								{
+									// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
+									a: <a href="https://developer.wordpress.org/themes/basics/template-hierarchy/" target="_blank" rel="noreferrer" />,
+								},
+							)
+						}
+					</p>
 
-					{ supportableTemplates
-						? <SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
-						: (
-							<p>
-								{ __( 'Your site does not provide any templates to support.', 'amp' ) }
-							</p>
-						)
-					}
+					<SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
 				</>
 			) : null }
 		</fieldset>

@@ -5,7 +5,7 @@ namespace AmpProject\AmpWP\Tests\Instrumentation;
 use AmpProject\AmpWP\Exception\InvalidEventProperties;
 use AmpProject\AmpWP\Instrumentation\Event;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use PHPUnit\Framework\TestCase;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use stdClass;
 
 final class EventTest extends TestCase {
@@ -84,7 +84,6 @@ final class EventTest extends TestCase {
 			'bool key'                   => [ [ true => 'value' ], InvalidEventProperties::class, 'but found an element key of type integer' ],
 			'string key'                 => [ [ 'key' => 'value' ], false ],
 			'int key'                    => [ [ 42 => 'value' ], InvalidEventProperties::class, 'but found an element key of type int' ],
-			'float key'                  => [ [ 3.14 => 'value' ], InvalidEventProperties::class, 'but found an element key of type integer' ],
 
 			// Type of $properties element value.
 			'null value'                 => [ [ 'key' => null ], InvalidEventProperties::class, 'but found an element value of type NULL' ],

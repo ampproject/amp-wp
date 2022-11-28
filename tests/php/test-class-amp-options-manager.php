@@ -6,18 +6,19 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Sandboxing;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Options_Manager.
  *
  * @covers AMP_Options_Manager
  */
-class Test_AMP_Options_Manager extends WP_UnitTestCase {
+class Test_AMP_Options_Manager extends TestCase {
 
-	use AssertContainsCompatibility, LoadsCoreThemes;
+	use LoadsCoreThemes;
 
 	/**
 	 * Whether the external object cache was enabled.
@@ -29,8 +30,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->was_wp_using_ext_object_cache = $GLOBALS['_wp_using_ext_object_cache'];
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		remove_theme_support( 'amp' );
@@ -42,8 +43,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		$GLOBALS['_wp_using_ext_object_cache'] = $this->was_wp_using_ext_object_cache;
 		unregister_post_type( 'foo' );
 		unregister_post_type( 'book' );
@@ -57,6 +57,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		$this->restore_theme_directories();
 		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query']; // This is missing in core.
+
+		parent::tear_down();
 	}
 
 	/**
@@ -107,18 +109,22 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
 			[
-				Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
-				Option::SUPPORTED_POST_TYPES    => [ 'post', 'page' ],
-				Option::ANALYTICS               => [],
-				Option::ALL_TEMPLATES_SUPPORTED => true,
-				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
-				Option::SUPPRESSED_PLUGINS      => [],
-				Option::VERSION                 => AMP__VERSION,
-				Option::MOBILE_REDIRECT         => false,
-				Option::READER_THEME            => 'legacy',
-				Option::PLUGIN_CONFIGURED       => false,
-				Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
-				Option::LATE_DEFINED_SLUG       => null,
+				Option::THEME_SUPPORT            => AMP_Theme_Support::READER_MODE_SLUG,
+				Option::SUPPORTED_POST_TYPES     => [ 'post', 'page' ],
+				Option::ANALYTICS                => [],
+				Option::ALL_TEMPLATES_SUPPORTED  => true,
+				Option::SUPPORTED_TEMPLATES      => [ 'is_singular' ],
+				Option::SUPPRESSED_PLUGINS       => [],
+				Option::VERSION                  => AMP__VERSION,
+				Option::MOBILE_REDIRECT          => true,
+				Option::READER_THEME             => 'legacy',
+				Option::PLUGIN_CONFIGURED        => false,
+				Option::PAIRED_URL_STRUCTURE     => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				Option::LATE_DEFINED_SLUG        => null,
+				Option::DELETE_DATA_AT_UNINSTALL => true,
+				Option::SANDBOXING_ENABLED       => false,
+				Option::SANDBOXING_LEVEL         => 1,
+				Option::USE_NATIVE_IMG_TAG       => false,
 			],
 			AMP_Options_Manager::get_options()
 		);
@@ -262,21 +268,25 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		update_option(
 			AMP_Options_Manager::OPTION_NAME,
 			[
-				Option::VERSION           => AMP__VERSION,
-				Option::PLUGIN_CONFIGURED => false,
+				Option::VERSION                  => AMP__VERSION,
+				Option::PLUGIN_CONFIGURED        => false,
+				Option::DELETE_DATA_AT_UNINSTALL => false,
 			]
 		);
 		$this->assertFalse( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::DELETE_DATA_AT_UNINSTALL ) );
 
 		// Ensure plugin_configured is false when explicitly set as such in the DB.
 		update_option(
 			AMP_Options_Manager::OPTION_NAME,
 			[
-				Option::VERSION           => AMP__VERSION,
-				Option::PLUGIN_CONFIGURED => true,
+				Option::VERSION                  => AMP__VERSION,
+				Option::PLUGIN_CONFIGURED        => true,
+				Option::DELETE_DATA_AT_UNINSTALL => true,
 			]
 		);
 		$this->assertTrue( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+		$this->assertTrue( AMP_Options_Manager::get_option( Option::DELETE_DATA_AT_UNINSTALL ) );
 	}
 
 	/** @return array */
@@ -689,7 +699,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
 
 		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
-		$this->assertStringContains( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
+		$this->assertStringContainsString( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
 
 		$_SERVER['HTTPS'] = 'on';
 		$set_https_url    = static function ( $url ) {
@@ -718,10 +728,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
 
 		set_current_screen( 'themes' );
-		$this->assertStringContains( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
+		$this->assertStringContainsString( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
 
 		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
-		$this->assertStringContains( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
+		$this->assertStringContainsString( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
 
 		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );

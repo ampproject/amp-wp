@@ -21,7 +21,7 @@ If the element does not have an ID, create one first.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:394](/includes/utils/class-amp-dom-utils.php#L394-L402)
+:link: [includes/utils/class-amp-dom-utils.php:321](/includes/utils/class-amp-dom-utils.php#L321-L329)
 
 <details>
 <summary>Show Code</summary>

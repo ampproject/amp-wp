@@ -7,7 +7,9 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
-use AmpProject\Dom\Document;
+use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Dom\Document\Filter\MustacheScriptTemplates;
+use AmpProject\AmpWP\Tests\TestCase;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
@@ -16,16 +18,18 @@ use AmpProject\Dom\Document;
  *
  * @group amp-comments
  * @group amp-form
+ *
+ * @coversDefaultClass AMP_Form_Sanitizer
  */
-class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Form_Sanitizer_Test extends TestCase {
 
 	use MarkupComparison;
 
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( '/current-page/' );
 	}
@@ -33,9 +37,9 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**
@@ -58,6 +62,10 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 			'form_with_get_method_http_action_and_no_target' => [
 				'<form method="get" action="http://example.org/example-page/"></form>',
 				'<form method="get" action="//example.org/example-page/" target="_top"></form>',
+			],
+			'form_with_get_method_and_action_xhr' => [
+				'<form method="get" action="//example.org/example-page/" action-xhr="//example.org/wp-json/foo/submissions/" xssi-prefix=")]}"></form>',
+				'<form method="get" action="//example.org/example-page/" target="_top" action-xhr="//example.org/wp-json/foo/submissions/" xssi-prefix=")]}"></form>',
 			],
 			'form_with_http_action_and_port' => [
 				'<form method="get" action="http://example.org:8080/example-page/"></form>',
@@ -184,6 +192,9 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 			'form_with_pathless_url' => [
 				'<form method="post" action="//example.com"></form>',
 				'<form method="post" action-xhr="//example.com?_wp_amp_action_xhr_converted=1" target="_top">' . $form_templates . '</form>',
+				[
+					'native_post_forms_allowed' => 'never', // This is the default.
+				],
 			],
 			'test_with_dev_mode' => [
 				'<form data-ampdevmode="" action="javascript:"></form>',
@@ -192,41 +203,101 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 					'add_dev_mode' => true,
 				],
 			],
+			'native_form_with_post_action' => [
+				'<form method="post" action="http://example.com"></form>',
+				sprintf( '<form method="post" action="http://example.com" %s></form>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				[
+					'native_post_forms_allowed' => 'always',
+				],
+				[],
+			],
+			'native_form_with_post_action-xhr' => [
+				'<form method="post" action-xhr="http://example.com"></form>',
+				'',
+				[
+					'native_post_forms_allowed' => 'always',
+				],
+				[ AMP_Form_Sanitizer::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED ],
+			],
+			'comment_form_conditionally_not_native' => [
+				sprintf( '<form id="commentform" method="post" action="%s"></form>', site_url( '/wp-comments-post.php', 'https' ) ),
+				sprintf( '<form id="commentform" method="post" action-xhr="%s" target="_top">%s</form>', site_url( '/wp-comments-post.php?_wp_amp_action_xhr_converted=1', 'https' ), $form_templates ),
+				[
+					'native_post_forms_allowed' => 'conditionally',
+				],
+				[],
+			],
+			'comment_form_conditionally_yes_native' => [
+				sprintf( '<form action="/" method="post"></form><form id="commentform" method="post" action="%s"></form>', site_url( '/wp-comments-post.php', 'https' ) ),
+				sprintf(
+					'
+						<form action="/" method="post" %1$s></form>
+						<form id="commentform" method="post" action="%2$s" %1$s></form>
+					',
+					ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE,
+					site_url( '/wp-comments-post.php', 'https' )
+				),
+				[
+					'native_post_forms_allowed' => 'conditionally',
+				],
+				[],
+			],
 		];
 	}
 
 	/**
 	 * Test html conversion.
 	 *
-	 * @param string      $source   The source HTML.
-	 * @param string|null $expected The expected HTML after conversion. Null means same as $source.
-	 * @param array       $args     Args.
+	 * @param string      $source          The source HTML.
+	 * @param string|null $expected        The expected HTML after conversion. Null means same as $source.
+	 * @param array       $args            Args.
+	 * @param array       $expected_errors Expected errors.
 	 * @dataProvider get_data
+	 *
+	 * @covers ::sanitize()
 	 */
-	public function test_converter( $source, $expected = null, $args = [] ) {
+	public function test_converter( $source, $expected = null, $args = [], $expected_errors = [] ) {
 		if ( is_null( $expected ) ) {
 			$expected = $source;
 		}
+
+		// Normalize across different testing environments where WP_TESTS_DOMAIN varies.
+		$current_origin = '//' . WP_TESTS_DOMAIN;
+		if ( isset( $_SERVER['SERVER_PORT'] ) && ! in_array( (string) $_SERVER['SERVER_PORT'], [ '80', '443' ], true ) ) {
+			$current_origin .= ':' . $_SERVER['SERVER_PORT'];
+		}
+		$current_origin .= '/';
+
+		$source   = str_replace( '//example.org/', $current_origin, $source );
+		$expected = str_replace( '//example.org/', $current_origin, $expected );
+
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		if ( ! empty( $args['add_dev_mode'] ) ) {
 			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		}
 
-		$sanitizer = new AMP_Form_Sanitizer( $dom );
+		$actual_errors                     = [];
+		$args['validation_error_callback'] = static function( $error ) use ( &$actual_errors ) {
+			$actual_errors[] = $error;
+			return true;
+		};
+
+		$sanitizer = new AMP_Form_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
 		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$validating_sanitizer->sanitize();
 
 		// Normalize the contents of the templates.
-		foreach ( $dom->xpath->query( Document::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $dom->body ) as $template ) {
+		foreach ( $dom->xpath->query( MustacheScriptTemplates::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $dom->body ) as $template ) {
 			while ( $template->firstChild ) {
 				$template->removeChild( $template->firstChild );
 			}
 			$template->appendChild( $dom->createTextNode( '...' ) );
 		}
 
-		$this->assertEqualMarkup( AMP_DOM_Utils::get_content_from_dom( $dom ), $expected );
+		$this->assertSimilarMarkup( $expected, AMP_DOM_Utils::get_content_from_dom( $dom ) );
+		$this->assertEquals( wp_list_pluck( $actual_errors, 'code' ), $expected_errors );
 	}
 
 	/**

@@ -91,7 +91,7 @@ const onBeforeUnload = ( event ) => {
  * If this does not exist yet, it creates the element.
  *
  * @param {number} numberErrorsDisplaying - The number of errors displaying.
- * @param {number} totalErrors - The total number of errors, displaying or not.
+ * @param {number} totalErrors            - The total number of errors, displaying or not.
  */
 const updateShowingErrorsRow = ( numberErrorsDisplaying, totalErrors ) => {
 	const showAllButton = document.getElementById( showAllId );
@@ -241,6 +241,11 @@ const handleFiltering = () => {
  * Handles searching for errors via the <input> and the 'Search Errors' <button>.
  */
 const handleSearching = () => {
+	const searchButton = document.getElementById( 'search-submit' );
+	if ( ! searchButton ) {
+		return;
+	}
+
 	const onClick = ( event ) => {
 		event.preventDefault();
 		if ( ! event.target.matches( 'input' ) ) {
@@ -275,7 +280,7 @@ const handleSearching = () => {
 		updateShowingErrorsRow( numberErrorsDisplaying, detailsQuery.length );
 	};
 
-	document.getElementById( 'search-submit' ).addEventListener( 'click', onClick );
+	searchButton.addEventListener( 'click', onClick );
 };
 
 /**

@@ -4,16 +4,15 @@ namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Service;
-use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\DependencySupport */
-class DependencySupportTest extends WP_UnitTestCase {
+class DependencySupportTest extends TestCase {
 
 	/** @var DependencySupport */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->instance = new DependencySupport();
 	}

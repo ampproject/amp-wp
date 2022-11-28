@@ -1,4 +1,10 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { Spinner } from '@wordpress/components';
@@ -9,12 +15,24 @@ import { Spinner } from '@wordpress/components';
 import './style.css';
 
 /**
- * @todo WIP: Updated design needed.
+ * Loading indicator.
+ *
+ * @param {Object}  props        Component props.
+ * @param {boolean} props.inline Display indicator as an inline element.
  */
-export function Loading() {
+// @todo WIP: Updated design needed.
+export function Loading( { inline = false } ) {
+	const Tag = inline ? 'span' : 'div';
+
 	return (
-		<div className="amp-spinner-container">
+		<Tag className={ classnames( 'amp-spinner-container', {
+			'amp-spinner-container--inline': inline,
+		} ) }>
 			<Spinner />
-		</div>
+		</Tag>
 	);
 }
+
+Loading.propTypes = {
+	inline: PropTypes.bool,
+};

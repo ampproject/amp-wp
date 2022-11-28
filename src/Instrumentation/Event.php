@@ -35,7 +35,7 @@ class Event {
 	/**
 	 * Additional properties of the event.
 	 *
-	 * @var string[]
+	 * @var array
 	 */
 	protected $properties;
 

@@ -14,7 +14,7 @@ import AMPToolbarIconBroken from '../../../../images/amp-toolbar-icon-broken.svg
 /**
  * Plugin icon.
  *
- * @param {Object} props
+ * @param {Object}  props
  * @param {boolean} props.hasBadge Whether the icon is showing a number.
  */
 function IconSVG( { hasBadge } ) {
@@ -31,7 +31,7 @@ IconSVG.propTypes = {
 /**
  * Plugin icon when AMP is broken at the URL.
  *
- * @param {Object} props
+ * @param {Object}  props
  * @param {boolean} props.hasBadge Whether the icon is showing a number.
  */
 function BrokenIconSVG( { hasBadge } ) {
@@ -48,9 +48,9 @@ BrokenIconSVG.propTypes = {
 /**
  * The icon to display in the editor toolbar to toggle the editor sidebar.
  *
- * @param {Object} props
+ * @param {Object}  props
  * @param {boolean} props.broken Whether AMP is broken at the URL.
- * @param {number} props.count The number of new errors at the URL.
+ * @param {number}  props.count  The number of new errors at the URL.
  */
 export function ToolbarIcon( { broken = false, count } ) {
 	return (
@@ -81,7 +81,7 @@ export function MoreMenuIcon() {
 /**
  * The status icon to display in the editor sidebar area.
  *
- * @param {Object} props
+ * @param {Object}  props
  * @param {boolean} props.broken Whether AMP is broken at the URL.
  */
 export function StatusIcon( { broken = false } ) {

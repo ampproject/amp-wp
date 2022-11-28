@@ -7,7 +7,7 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { useContext, Fragment } from '@wordpress/element';
+import { useContext, Fragment, createInterpolateElement } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import { autop } from '@wordpress/autop';
 import { format, dateI18n } from '@wordpress/date';
@@ -23,7 +23,7 @@ import { SiteSettings } from '../components/site-settings-provider';
 /**
  * Renders the formatted date for when a plugin was suppressed.
  *
- * @param {Object} props Component props.
+ * @param {Object} props                  Component props.
  * @param {Object} props.suppressedPlugin
  */
 function SuppressedPluginTime( { suppressedPlugin } ) {
@@ -53,7 +53,7 @@ SuppressedPluginTime.propTypes = {
 /**
  * Renders the username of the WP user who suppressed a plugin.
  *
- * @param {Object} props Component props.
+ * @param {Object} props                  Component props.
  * @param {Object} props.suppressedPlugin
  */
 function SuppressedPluginUsername( { suppressedPlugin } ) {
@@ -118,7 +118,7 @@ SuppressedPluginVersion.propTypes = {
  * Renders the validation errors for a plugin that hasn't been suppressed.
  *
  * @param {Object} props
- * @param {Array} props.errors
+ * @param {Array}  props.errors
  */
 function ValidationErrorDetails( { errors } ) {
 	if ( errors.length === 0 ) {
@@ -158,7 +158,16 @@ function ValidationErrorDetails( { errors } ) {
 							) }>
 							<WrapperElement>
 								<a href={ error.edit_url } target="_blank" rel="noreferrer" title={ error.tooltip }>
-									<span dangerouslySetInnerHTML={ { __html: error.title } } />
+									<span>
+										{
+											createInterpolateElement(
+												error.title,
+												{
+													code: <code />,
+												},
+											)
+										}
+									</span>
 								</a>
 							</WrapperElement>
 						</li>
@@ -184,7 +193,7 @@ ValidationErrorDetails.propTypes = {
  *
  * @param {Object} props
  * @param {Object} props.pluginDetails Object containing details about the plugin.
- * @param {string} props.pluginKey A plugin key.
+ * @param {string} props.pluginKey     A plugin key.
  */
 function PluginRow( { pluginKey, pluginDetails } ) {
 	const { editedOptions, originalOptions, updateOptions } = useContext( Options );
@@ -356,7 +365,7 @@ export function PluginSuppression() {
 					</tr>
 				</thead>
 				<tbody>
-					{ Object.keys( suppressiblePlugins || {} ).map( ( pluginKey ) => (
+					{ Object.keys( suppressiblePlugins ).map( ( pluginKey ) => (
 						<PluginRow
 							key={ `plugin-row-${ pluginKey }` }
 							pluginDetails={ suppressiblePlugins[ pluginKey ] }

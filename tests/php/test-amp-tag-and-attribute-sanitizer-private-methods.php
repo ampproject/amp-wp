@@ -4,8 +4,9 @@
 // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\TestCase;
 
-class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCase {
+class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends TestCase {
 
 	use PrivateAccess;
 
@@ -13,7 +14,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	protected $globally_allowed_attrs;
 	protected $layout_allowed_attrs;
 
-	public function setUp() {
+	public function set_up() {
+		parent::set_up();
+
 		$this->allowed_tags           = AMP_Allowed_Tags_Generated::get_allowed_tags();
 		$this->globally_allowed_attrs = AMP_Allowed_Tags_Generated::get_allowed_attributes();
 		$this->layout_allowed_attrs   = AMP_Allowed_Tags_Generated::get_layout_attributes();
@@ -654,6 +657,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
+	/** @return array */
 	public function get_replace_node_with_children_data() {
 		return [
 			'text_child' => [

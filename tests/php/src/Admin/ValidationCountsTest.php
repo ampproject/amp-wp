@@ -10,22 +10,27 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Validated_URL_Post_Type;
+use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\Admin\ValidationCounts;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for ValidationCounts class.
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\ValidationCounts
  */
-class ValidationCountsTest extends WP_UnitTestCase {
+class ValidationCountsTest extends TestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Test instance.
@@ -39,18 +44,23 @@ class ValidationCountsTest extends WP_UnitTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
-		$this->instance = new ValidationCounts();
+		set_current_screen( 'edit' );
+		get_current_screen()->post_type = 'post';
+
+		$this->instance = new ValidationCounts( new RESTPreloader() );
 	}
 
+	/** @covers ::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( ValidationCounts::class, $this->instance );
 		$this->assertInstanceOf( Delayed::class, $this->instance );
 		$this->assertInstanceOf( Conditional::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
+		$this->assertInstanceOf( HasRequirements::class, $this->instance );
 	}
 
 	/**
@@ -60,6 +70,14 @@ class ValidationCountsTest extends WP_UnitTestCase {
 	 */
 	public function test_get_registration_action() {
 		self::assertEquals( 'admin_enqueue_scripts', ValidationCounts::get_registration_action() );
+	}
+
+	/** @covers ::get_requirements() */
+	public function test_get_requirements() {
+		$this->assertSame(
+			[ 'dependency_support', 'dev_tools.user_access' ],
+			ValidationCounts::get_requirements()
+		);
 	}
 
 	/**
@@ -121,5 +139,75 @@ class ValidationCountsTest extends WP_UnitTestCase {
 		unset( $_GET['post'], $_GET['post_type'], $_GET['taxonomy'], $_GET['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		delete_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
 		$this->assertTrue( ValidationCounts::is_needed() );
+	}
+
+	/** @return array */
+	public function maybe_add_preload_rest_paths_data() {
+		return [
+			'no_type_post'                => [
+				'set_up'              => static function () {
+					set_current_screen( 'user' );
+				},
+				'should_preload_path' => false,
+			],
+			'post_type_post'              => [
+				'set_up'              => static function () {
+					set_current_screen( 'edit' );
+					get_current_screen()->post_type = 'post';
+				},
+				'should_preload_path' => false,
+			],
+			'post_type_page'              => [
+				'set_up'              => static function () {
+					set_current_screen( 'edit' );
+					get_current_screen()->post_type = 'page';
+				},
+				'should_preload_path' => false,
+			],
+			'post_type_amp_validated_url' => [
+				'set_up'              => static function () {
+					set_current_screen( 'edit' );
+					get_current_screen()->post_type = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
+				},
+				'should_preload_path' => true,
+			],
+			'settings_screen'             => [
+				'set_up'              => function () {
+					global $pagenow, $plugin_page, $menu;
+					$pagenow     = 'admin.php';
+					$plugin_page = 'amp-options';
+					$menu        = [
+						[
+							2 => $plugin_page,
+						],
+					];
+					$this->assertEquals( AMP_Options_Manager::OPTION_NAME, get_admin_page_parent() );
+				},
+				'should_preload_path' => true,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider maybe_add_preload_rest_paths_data
+	 * @covers ::maybe_add_preload_rest_paths()
+	 */
+	public function test_maybe_add_preload_rest_paths( callable $set_up, $should_preload_path ) {
+		if ( ! function_exists( 'rest_preload_api_request' ) ) {
+			$this->markTestIncomplete( 'REST preload is not available so skipping.' );
+		}
+
+		$set_up();
+
+		$this->call_private_method( $this->instance, 'maybe_add_preload_rest_paths' );
+
+		$rest_preloader = $this->get_private_property( $this->instance, 'rest_preloader' );
+		$paths          = $this->get_private_property( $rest_preloader, 'paths' );
+
+		if ( $should_preload_path ) {
+			$this->assertContains( '/amp/v1/unreviewed-validation-counts', $paths );
+		} else {
+			$this->assertNotContains( '/amp/v1/unreviewed-validation-counts', $paths );
+		}
 	}
 }

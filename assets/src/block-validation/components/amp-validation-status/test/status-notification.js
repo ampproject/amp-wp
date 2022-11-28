@@ -23,8 +23,6 @@ describe( 'AMPValidationStatusNotification', () => {
 	const autosave = jest.fn();
 	const savePost = jest.fn();
 
-	useDispatch.mockImplementation( () => ( { autosave, savePost } ) );
-
 	function setupUseSelect( overrides ) {
 		useSelect.mockImplementation( () => ( {
 			fetchingErrorsRequestErrorMessage: '',
@@ -33,15 +31,18 @@ describe( 'AMPValidationStatusNotification', () => {
 			isFetchingErrors: false,
 			keptMarkupValidationErrorCount: 0,
 			reviewLink: 'http://example.com',
+			supportLink: 'http://example.com/support',
 			unreviewedValidationErrorCount: 0,
 			validationErrorCount: 0,
 			...overrides,
 		} ) );
 	}
 
-	beforeEach( () => {
-		jest.clearAllMocks();
+	beforeAll( () => {
+		useDispatch.mockImplementation( () => ( { autosave, savePost } ) );
+	} );
 
+	beforeEach( () => {
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 	} );

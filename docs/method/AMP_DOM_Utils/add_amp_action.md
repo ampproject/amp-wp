@@ -16,7 +16,7 @@ If the element already contains one or more events or actions, the method will a
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:416](/includes/utils/class-amp-dom-utils.php#L416-L432)
+:link: [includes/utils/class-amp-dom-utils.php:343](/includes/utils/class-amp-dom-utils.php#L343-L359)
 
 <details>
 <summary>Show Code</summary>

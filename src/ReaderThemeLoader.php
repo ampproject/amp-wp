@@ -37,7 +37,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 	/**
 	 * Reader theme.
 	 *
-	 * @var WP_Theme
+	 * @var WP_Theme|null
 	 */
 	private $reader_theme;
 

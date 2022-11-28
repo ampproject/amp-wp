@@ -5,12 +5,14 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\TestCase;
+
 /**
  * Tests for AMP_Image_Dimension_Extractor.
  *
  * @covers AMP_Image_Dimension_Extractor
  */
-class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
+class AMP_Image_Dimension_Extract_Download_Test extends TestCase {
 
 	/**
 	 * Path to non-existing PNG file.
@@ -29,17 +31,17 @@ class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 	/**
 	 * Set up before class, starting PHP server.
 	 */
-	public static function setUpBeforeClass() {
-		parent::setUpBeforeClass();
+	public static function set_up_before_class() {
+		parent::set_up_before_class();
 		self::start_server();
 	}
 
 	/**
 	 * Tear down after class, stopping PHP server.
 	 */
-	public static function tearDownAfterClass() {
-		parent::tearDownAfterClass();
+	public static function tear_down_after_class() {
 		self::stop_server();
+		parent::tear_down_after_class();
 	}
 
 	/**

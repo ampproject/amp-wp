@@ -16,14 +16,16 @@ Strip paired query var.
 
 ### Source
 
-:link: [src/PairedUrl.php:26](/src/PairedUrl.php#L26-L28)
+:link: [src/PairedUrl.php:26](/src/PairedUrl.php#L26-L30)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
 public function remove_query_var( $url ) {
-	return remove_query_arg( amp_get_slug(), $url );
+	$url = remove_query_arg( amp_get_slug(), $url );
+	$url = str_replace( '?#', '#', $url ); // See <https://core.trac.wordpress.org/ticket/44499>.
+	return $url;
 }
 ```
 

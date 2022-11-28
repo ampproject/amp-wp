@@ -7,22 +7,23 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for Post Type Support.
  *
  * @covers AMP_Post_Type_Support
  */
-class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
+class Test_AMP_Post_Type_Support extends TestCase {
 
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
-	public function tearDown() {
-		parent::tearDown();
-		foreach ( [ 'book', 'poem', 'secret' ] as $post_type ) {
+	public function tear_down() {
+		foreach ( [ 'book', 'poem', 'secret', 'car', 'secret_book', 'non_amp_book' ] as $post_type ) {
 			unregister_post_type( $post_type );
 		}
+		parent::tear_down();
 	}
 
 	/**
@@ -34,15 +35,31 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 		register_post_type(
 			'book',
 			[
-				'label'  => 'Book',
-				'public' => true,
+				'label'              => 'Book',
+				'publicly_queryable' => true,
+			]
+		);
+		register_post_type(
+			'car',
+			[
+				'label'              => 'Car',
+				'public'             => false,
+				'publicly_queryable' => true,
 			]
 		);
 		register_post_type(
 			'secret',
 			[
-				'label'  => 'Secret',
-				'public' => false,
+				'label'              => 'Secret',
+				'publicly_queryable' => false,
+			]
+		);
+		register_post_type(
+			'secret_book',
+			[
+				'label'              => 'Secret book',
+				'public'             => true,
+				'publicly_queryable' => false,
 			]
 		);
 
@@ -50,6 +67,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 			[
 				'post',
 				'page',
+				'car',
 				'attachment',
 				'book',
 			],
@@ -68,11 +86,43 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 			[
 				'post',
 				'page',
+				'car',
 				'secret',
 				'book',
 			],
 			AMP_Post_Type_Support::get_eligible_post_types()
 		);
+
+	}
+
+	/**
+	 * Test get_eligible_post_types.
+	 *
+	 * @covers AMP_Post_Type_Support::get_eligible_post_types()
+	 */
+	public function test_get_eligible_post_types_with_filter() {
+
+		if ( version_compare( get_bloginfo( 'version' ), '5.9', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 5.9 or greater than that.' );
+		}
+
+		register_post_type(
+			'non_amp_book',
+			[
+				'label'  => 'Non AMP book',
+				'public' => true,
+			]
+		);
+		$is_post_type_viewable_callback = static function ( $is_viewable, $post_type ) {
+
+			return 'non_amp_book' === $post_type->name ? false : $is_viewable;
+		};
+
+		add_filter( 'is_post_type_viewable', $is_post_type_viewable_callback, 10, 2 );
+
+		$this->assertNotContains( 'non_amp_book', AMP_Post_Type_Support::get_eligible_post_types() );
+
+		remove_filter( 'is_post_type_viewable', $is_post_type_viewable_callback );
 	}
 
 	/**

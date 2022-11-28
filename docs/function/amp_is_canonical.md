@@ -43,7 +43,7 @@ add_theme_support( AMP_Theme_Support::SLUG, array(
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:312](/includes/amp-helper-functions.php#L312-L314)
+:link: [includes/amp-helper-functions.php:348](/includes/amp-helper-functions.php#L348-L350)
 
 <details>
 <summary>Show Code</summary>

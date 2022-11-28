@@ -22,10 +22,6 @@ jest.mock( '@wordpress/api-fetch', () => () => new Promise( ( resolve ) => {
 	resolve( { review_link: 'http://site.test/wp-admin', results: require( '../../store/test/__data__/raw-validation-errors' ).rawValidationErrors } );
 } ) );
 
-createStore( {
-	validationErrors: [],
-} );
-
 describe( 'useValidationErrorStateUpdates', () => {
 	let container;
 
@@ -52,6 +48,12 @@ describe( 'useValidationErrorStateUpdates', () => {
 			...overrides,
 		} ) );
 	}
+
+	beforeAll( () => {
+		createStore( {
+			validationErrors: [],
+		} );
+	} );
 
 	beforeEach( () => {
 		container = document.createElement( 'div' );

@@ -24,6 +24,8 @@ use WP_REST_Server;
 /**
  * URLValidationRESTController class.
  *
+ * @todo This can now be eliminated in favor of making validate requests to the frontend with `?amp_validate[cache]=true`.
+ *
  * @since 2.1
  * @internal
  */
@@ -212,9 +214,15 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			return $validity;
 		}
 
+		$query_args = [
+			'page' => 'amp-support',
+			'url'  => rawurlencode( get_permalink( $post_id ) ),
+		];
+
 		$data = [
-			'results'     => [],
-			'review_link' => get_edit_post_link( $validity['post_id'], 'raw' ),
+			'results'      => [],
+			'review_link'  => get_edit_post_link( $validity['post_id'], 'raw' ),
+			'support_link' => add_query_arg( $query_args, admin_url( 'admin.php' ) ),
 		];
 
 		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validity['post_id'] ) as $result ) {
@@ -264,7 +272,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			'title'      => 'amp-wp-url-validation',
 			'type'       => 'object',
 			'properties' => [
-				'results'     => [
+				'results'      => [
 					'description' => __( 'Validation errors for the post.', 'amp' ),
 					'readonly'    => true,
 					'type'        => 'array',
@@ -312,8 +320,13 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 						],
 					],
 				],
-				'review_link' => [
+				'review_link'  => [
 					'description' => __( 'The URL where validation errors can be reviewed.', 'amp' ),
+					'readonly'    => true,
+					'type'        => 'string',
+				],
+				'support_link' => [
+					'description' => __( 'The URL for AMP support.', 'amp' ),
 					'readonly'    => true,
 					'type'        => 'string',
 				],

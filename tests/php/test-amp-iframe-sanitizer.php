@@ -6,17 +6,43 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Dom\Document;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
 /**
  * Class AMP_Iframe_Converter_Test
  *
- * @covers AMP_Iframe_Sanitizer
+ * @coversDefaultClass \AMP_Iframe_Sanitizer
  */
-class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
+class AMP_Iframe_Converter_Test extends TestCase {
 
 	use MarkupComparison;
+
+	/** @covers ::get_selector_conversion_mapping() */
+	public function test_get_selector_conversion_mapping() {
+		$dom = Document::fromHtmlFragment( '<p>Hello world</p>' );
+
+		$with_defaults = new AMP_Iframe_Sanitizer( $dom );
+		$this->assertEquals(
+			[ 'iframe' => [ 'amp-iframe' ] ],
+			$with_defaults->get_selector_conversion_mapping()
+		);
+
+		$with_false_native_used = new AMP_Iframe_Sanitizer( $dom, [ 'native_iframe_used' => false ] );
+		$this->assertEquals(
+			[ 'iframe' => [ 'amp-iframe' ] ],
+			$with_false_native_used->get_selector_conversion_mapping()
+		);
+
+		$with_true_native_used = new AMP_Iframe_Sanitizer( $dom, [ 'native_iframe_used' => true ] );
+		$this->assertEquals(
+			[],
+			$with_true_native_used->get_selector_conversion_mapping()
+		);
+	}
 
 	/**
 	 * Data provider.
@@ -31,9 +57,9 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 			],
 
 			'simple_iframe'                             => [
-				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
+				'<iframe id="embed" src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
 				'
-					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic">
+					<amp-iframe id="embed" src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic">
 						<span placeholder="" class="amp-wp-iframe-placeholder"></span>
 						<noscript>
 							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0"></iframe>
@@ -43,6 +69,14 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				[
 					'add_noscript_fallback' => true,
 					'add_placeholder'       => true,
+				],
+			],
+
+			'simple_native_iframe'                             => [
+				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
+				sprintf( '<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen %s></iframe>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				[
+					'native_iframe_used' => true,
 				],
 			],
 
@@ -108,6 +142,58 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 						</noscript>
 					</amp-iframe>
 				',
+			],
+
+			'iframe_with_100_percentage_width_style_and_pixel_height_style' => [
+				'<iframe style="width: 100%; height: 200px;" frameborder="no" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1"></iframe>',
+				'<amp-iframe style="width: 100%; height: 200px;" frameborder="0" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1" height="200" width="auto" layout="fixed-height" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation"></amp-iframe>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
+			'iframe_with_pixel_width_style_and_pixel_height_style' => [
+				'<iframe style="width: 200.25px; height: 200.75px;" frameborder="no" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1"></iframe>',
+				'<amp-iframe style="width: 200.25px; height: 200.75px;" frameborder="0" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1" height="200.75" width="200.25" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic" class="amp-wp-enforced-sizes"></amp-iframe>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
+			'iframe_with_vh_width_style_and_vh_height_style' => [
+				'<iframe style="width: 25vh; height:50vh" frameborder="no" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1"></iframe>',
+				'<amp-iframe style="width: 25vh; height:50vh" frameborder="0" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1" height="50vh" width="25vh" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic" class="amp-wp-enforced-sizes"></amp-iframe>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
+			// Note: This case has width=auto instead of width=50% because percentages aren't allowed in AMP. Nevertheless,
+			// the original 50% width will still apply since fixed-height has max-width:100%.
+			'iframe_with_50_percentage_width_style_and_pixel_height_style' => [
+				'<iframe style="width: 50%; height: 200px;" frameborder="no" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1"></iframe>',
+				'<amp-iframe style="width: 50%; height: 200px;" frameborder="0" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1" height="200" layout="fixed-height" width="auto" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation"></amp-iframe>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
+			// AMP requires units to be the same, so when they are not, skip propagating.
+			'iframe_with_50_em_width_style_and_20vh_height_style' => [
+				'<iframe style="width: 50em; height: 20vh;" frameborder="no" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1"></iframe>',
+				'<amp-iframe style="width: 50em; height: 20vh;" frameborder="0" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1" height="400" layout="fixed-height" width="auto" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation"></amp-iframe>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
+			// The pt unit is not supported in AMP so the result is fallback values for width and height.
+			'iframe_with_pt_width_style_and_pt_height_style' => [
+				'<iframe style="width: 123pt; height:50pt" frameborder="no" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1"></iframe>',
+				'<amp-iframe style="width: 123pt; height:50pt" frameborder="0" scrolling="no" src="https://player.captivate.fm/episode/495621d8-6f05-4d95-bbaa-369a9a6189e1" height="400" layout="fixed-height" width="auto" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation"></amp-iframe>',
+				[
+					'add_noscript_fallback' => false,
+				],
 			],
 
 			'iframe_with_width_only'                    => [
@@ -592,6 +678,13 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 	 * Test converter.
 	 *
 	 * @dataProvider get_data
+	 * @covers ::sanitize()
+	 * @covers ::normalize_attributes()
+	 * @covers ::get_origin_from_url()
+	 * @covers ::build_placeholder()
+	 * @covers ::sanitize_boolean_digit()
+	 * @covers \AMP_Base_Sanitizer::set_layout()
+	 * @covers \AMP_Base_Sanitizer::sanitize_dimension()
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
@@ -618,6 +711,8 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test HTTPS required.
+	 *
+	 * @covers ::sanitize()
 	 */
 	public function test__https_required() {
 		$source   = '<iframe src="http://example.com/embed/132886713"></iframe>';
@@ -639,6 +734,9 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test get_scripts() did not convert.
+	 *
+	 * @covers ::sanitize()
+	 * @covers ::get_scripts()
 	 */
 	public function test_get_scripts__didnt_convert() {
 		$source   = '<p>Hello World</p>';
@@ -660,6 +758,9 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test get_scripts() did convert.
+	 *
+	 * @covers ::sanitize()
+	 * @covers ::get_scripts()
 	 */
 	public function test_get_scripts__did_convert() {
 		$source   = '<iframe src="https://example.com/embed/132886713" width="500" height="281"></iframe>';
@@ -681,6 +782,8 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test args placeholder.
+	 *
+	 * @covers ::sanitize()
 	 */
 	public function test__args__placeholder() {
 		$source   = '<p><iframe src="https://example.com/video/132886713" width="500" height="281"></iframe></p>';

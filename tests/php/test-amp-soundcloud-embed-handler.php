@@ -6,16 +6,17 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_SoundCloud_Embed_Handler_Test
  *
  * @covers AMP_SoundCloud_Embed_Handler
  */
-class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
+class AMP_SoundCloud_Embed_Handler_Test extends TestCase {
 
 	use WithoutBlockPreRendering {
-		setUp as public prevent_block_pre_render;
+		set_up as public prevent_block_pre_render;
 	}
 
 	/**
@@ -51,7 +52,7 @@ class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function set_up() {
 		$this->prevent_block_pre_render();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
@@ -60,9 +61,9 @@ class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_request' ] );
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

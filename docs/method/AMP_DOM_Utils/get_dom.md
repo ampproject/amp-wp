@@ -19,7 +19,7 @@ Return a valid Dom\Document representing HTML document passed as a parameter.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:68](/includes/utils/class-amp-dom-utils.php#L68-L78)
+:link: [includes/utils/class-amp-dom-utils.php:58](/includes/utils/class-amp-dom-utils.php#L58-L68)
 
 <details>
 <summary>Show Code</summary>

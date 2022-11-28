@@ -28,15 +28,17 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = [
-		Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
-		Option::SUPPORTED_POST_TYPES    => [ 'post', 'page' ],
-		Option::ANALYTICS               => [],
-		Option::ALL_TEMPLATES_SUPPORTED => true,
-		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
-		Option::VERSION                 => AMP__VERSION,
-		Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
-		Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
-		Option::PLUGIN_CONFIGURED       => false,
+		Option::THEME_SUPPORT            => AMP_Theme_Support::READER_MODE_SLUG,
+		Option::SUPPORTED_POST_TYPES     => [ 'post', 'page' ],
+		Option::ANALYTICS                => [],
+		Option::ALL_TEMPLATES_SUPPORTED  => true,
+		Option::SUPPORTED_TEMPLATES      => [ 'is_singular' ],
+		Option::VERSION                  => AMP__VERSION,
+		Option::READER_THEME             => ReaderThemes::DEFAULT_READER_THEME,
+		Option::PAIRED_URL_STRUCTURE     => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+		Option::PLUGIN_CONFIGURED        => false,
+		Option::DELETE_DATA_AT_UNINSTALL => true,
+		Option::USE_NATIVE_IMG_TAG       => false,
 	];
 
 	/**
@@ -320,6 +322,14 @@ class AMP_Options_Manager {
 			$options[ Option::PLUGIN_CONFIGURED ] = (bool) $new_options[ OPTION::PLUGIN_CONFIGURED ];
 		}
 
+		if ( isset( $new_options[ Option::DELETE_DATA_AT_UNINSTALL ] ) ) {
+			$options[ Option::DELETE_DATA_AT_UNINSTALL ] = (bool) $new_options[ OPTION::DELETE_DATA_AT_UNINSTALL ];
+		}
+
+		if ( isset( $new_options[ Option::USE_NATIVE_IMG_TAG ] ) ) {
+			$options[ Option::USE_NATIVE_IMG_TAG ] = (bool) $new_options[ OPTION::USE_NATIVE_IMG_TAG ];
+		}
+
 		// Validate analytics.
 		if ( isset( $new_options[ Option::ANALYTICS ] ) && $new_options[ Option::ANALYTICS ] !== $options[ Option::ANALYTICS ] ) {
 			$new_analytics_option = [];
@@ -339,17 +349,11 @@ class AMP_Options_Manager {
 			$options[ OPTION::ANALYTICS ] = $new_analytics_option;
 		}
 
-		if ( isset( $new_options[ Option::READER_THEME ] ) ) {
+		if ( isset( $new_options[ Option::READER_THEME ] ) && $new_options[ Option::READER_THEME ] !== $options[ Option::READER_THEME ] ) {
 			$reader_theme_slugs = wp_list_pluck( ( new ReaderThemes() )->get_themes(), 'slug' );
 			if ( in_array( $new_options[ Option::READER_THEME ], $reader_theme_slugs, true ) ) {
 				$options[ Option::READER_THEME ] = $new_options[ Option::READER_THEME ];
 			}
-		}
-
-		if ( array_key_exists( Option::DISABLE_CSS_TRANSIENT_CACHING, $new_options ) && true === $new_options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] ) {
-			$options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] = true;
-		} else {
-			unset( $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] );
 		}
 
 		/**

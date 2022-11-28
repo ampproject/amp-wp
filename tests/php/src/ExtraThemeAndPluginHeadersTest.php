@@ -5,16 +5,15 @@ namespace AmpProject\AmpWP\Tests;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
-use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\ExtraThemeAndPluginHeaders */
-final class ExtraThemeAndPluginHeadersTest extends WP_UnitTestCase {
+final class ExtraThemeAndPluginHeadersTest extends TestCase {
 
 	/** @var ExtraThemeAndPluginHeaders */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = new ExtraThemeAndPluginHeaders();
 	}
 

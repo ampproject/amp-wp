@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useContext } from '@wordpress/element';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -15,6 +15,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Options } from '../components/options-context-provider';
 import { AMPDrawer } from '../components/amp-drawer';
 import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../components/amp-notice';
+import { STANDARD } from '../common/constants';
 
 /**
  * @typedef {{name: string, slug: string, type: string}} Source
@@ -24,7 +25,7 @@ import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../components/am
 /**
  * Paired URL examples.
  *
- * @param {Object} props Component props.
+ * @param {Object} props            Component props.
  * @param {?Array} props.pairedUrls Paired URLs.
  */
 const PairedUrlExamples = ( { pairedUrls } ) => {
@@ -164,25 +165,29 @@ function SlugConflictsNotice( { slug, conflicts } ) {
 					) )
 				) }
 
-				<li>
-					{
-						conflicts.user.edit_link ? (
-							<a href={ conflicts.user.edit_link } target="_blank" rel="noreferrer">
-								{ __( 'User', 'amp' ) }
-							</a>
-						) : (
-							__( 'User', 'amp' )
-						)
-					}
-					{ ': ' + conflicts.user.name }
-					{ ' ' }
-					<small>
-						{
-							/* translators: %d is entity ID */
-							sprintf( __( '(ID: %d)', 'amp' ), conflicts.user.id )
-						}
-					</small>
-				</li>
+				{
+					conflicts.user && (
+						<li>
+							{
+								conflicts.user.edit_link ? (
+									<a href={ conflicts.user.edit_link } target="_blank" rel="noreferrer">
+										{ __( 'User', 'amp' ) }
+									</a>
+								) : (
+									__( 'User', 'amp' )
+								)
+							}
+							{ ': ' + conflicts.user.name }
+							{ ' ' }
+							<small>
+								{
+									/* translators: %d is entity ID */
+									sprintf( __( '(ID: %d)', 'amp' ), conflicts.user.id )
+								}
+							</small>
+						</li>
+					)
+				}
 
 				{
 					conflicts.post_type && (
@@ -281,7 +286,7 @@ SlugConflictsNotice.propTypes = {
 /**
  * Component rendering the paired URL structure.
  *
- * @param {Object} props Component props.
+ * @param {Object} props                Component props.
  * @param {string} props.focusedSection Focused section.
  */
 export function PairedUrlStructure( { focusedSection } ) {
@@ -291,7 +296,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 	const { theme_support: themeSupport } = editedOptions || {};
 
 	// Don't show if the mode is standard or the themeSupport is not yet set.
-	if ( ! themeSupport || 'standard' === themeSupport ) {
+	if ( ! themeSupport || STANDARD === themeSupport ) {
 		return null;
 	}
 
@@ -325,15 +330,18 @@ export function PairedUrlStructure( { focusedSection } ) {
 				</AMPNotice>
 			) }
 
-			<p dangerouslySetInnerHTML={
-				{ __html:
-					sprintf(
-						/* translators: 1: AMP Paired URL Structure documentation URL */
-						__( 'When using the Transitional or Reader template modes, your site is in a “Paired AMP” configuration. Your site\'s canonical URLs are non-AMP, and the separate AMP versions of your pages have AMP-specific URLs. The structure of a paired AMP URL is not important, whether using a query parameter or path suffix. The use of a query parameter is the most compatible across various sites and it has the benefit of not resulting in a 404 if the AMP plugin is deactivated. <em>Note: Changing the paired URL structure can cause AMP pages to temporarily disappear from search results until your site is re-indexed.</em> If you\'re migrating from another AMP plugin with a different paired URL structure, then you may want to change this setting. Otherwise we recommend leaving it as is. <a href="%1$s" target="_blank">Learn more</a>', 'amp' ),
-						__( 'https://amp-wp.org/?p=10004', 'amp' ),
-					),
-				} }
-			/>
+			<p>
+				{
+					createInterpolateElement(
+						__( 'When using the Transitional or Reader template modes, your site is in a “Paired AMP” configuration. Your site\'s canonical URLs are non-AMP, and the separate AMP versions of your pages have AMP-specific URLs. The structure of a paired AMP URL is not important, whether using a query parameter or path suffix. The use of a query parameter is the most compatible across various sites and it has the benefit of not resulting in a 404 if the AMP plugin is deactivated. <em>Note: Changing the paired URL structure can cause AMP pages to temporarily disappear from search results until your site is re-indexed.</em> If you\'re migrating from another AMP plugin with a different paired URL structure, then you may want to change this setting. Otherwise we recommend leaving it as is. <a>Learn more</a>', 'amp' ),
+						{
+							em: <em />,
+							// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
+							a: <a href="https://amp-wp.org/?p=10004" target="_blank" rel="noreferrer" />,
+						},
+					)
+				}
+			</p>
 
 			{ ! endpointSuffixAvailable && (
 				<SlugConflictsNotice slug={ slug } conflicts={ editedOptions.endpoint_path_slug_conflicts } />

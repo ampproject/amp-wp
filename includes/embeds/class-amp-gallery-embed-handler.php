@@ -7,7 +7,7 @@
 
 use AmpProject\AmpWP\Embed\HandlesGalleryEmbed;
 use AmpProject\Dom\Document;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Gallery_Embed_Handler
@@ -24,7 +24,6 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		add_filter( 'post_gallery', [ $this, 'generate_gallery_markup' ], 10, 2 );
-		add_action( 'wp_print_styles', [ $this, 'print_styles' ] );
 	}
 
 	/**
@@ -47,11 +46,15 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Filter the output of gallery_shortcode().
 	 *
-	 * @param string $html  Markup to filter.
-	 * @param array  $attrs Shortcode attributes.
+	 * @param string       $html  Markup to filter.
+	 * @param array|string $attrs Shortcode attributes, or empty string if there were no shortcode attributes.
 	 * @return string Markup for the gallery.
 	 */
 	protected function filter_post_gallery_markup( $html, $attrs ) {
+		if ( ! is_array( $attrs ) ) {
+			$attrs = [];
+		}
+
 		// Use <amp-carousel> for the gallery if requested via amp-carousel shortcode attribute, or use by default if in legacy Reader mode.
 		// In AMP_Gallery_Block_Sanitizer, this is referred to as carousel_required.
 		$is_carousel = isset( $attrs['amp-carousel'] )
@@ -123,7 +126,6 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		remove_filter( 'post_gallery', [ $this, 'generate_gallery_markup' ] );
-		remove_action( 'wp_print_styles', [ $this, 'print_styles' ] );
 	}
 
 	/**
@@ -199,24 +201,5 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return $parent_element;
-	}
-
-	/**
-	 * Prints the Gallery block styling.
-	 *
-	 * It would be better to print this in AMP_Gallery_Block_Sanitizer,
-	 * but by the time that runs, it's too late.
-	 * This rule is copied exactly from block-library/style.css, but the selector here has amp-img >.
-	 * The image sanitizer normally converts the <img> from that original stylesheet <amp-img>,
-	 * but that doesn't have the same effect as applying it to the <img>.
-	 */
-	public function print_styles() {
-		?>
-		<style>
-			.wp-block-gallery.is-cropped .blocks-gallery-item amp-img > img {
-				object-fit: cover;
-			}
-		</style>
-		<?php
 	}
 }

@@ -128,7 +128,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * This is also used in WP_List_Table, like for the 'Bulk Actions' option.
 	 * When this is present, this ensures that this isn't filtered.
 	 *
-	 * @var int
+	 * @var string
 	 */
 	const NO_FILTER_VALUE = '';
 
@@ -362,7 +362,7 @@ class AMP_Validation_Error_Taxonomy {
 		$term = get_term( (int) $term_id, self::TAXONOMY_SLUG );
 
 		// Skip if the term count was not actually 0.
-		if ( ! $term || 0 !== $term->count ) {
+		if ( ! $term instanceof WP_Term || 0 !== $term->count ) {
 			return false;
 		}
 
@@ -1095,7 +1095,7 @@ class AMP_Validation_Error_Taxonomy {
 			&&
 			in_array(
 				$_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ], // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				array_merge( self::get_error_types(), [ (string) self::NO_FILTER_VALUE ] ),
+				array_merge( self::get_error_types(), [ self::NO_FILTER_VALUE ] ),
 				true
 			)
 		) {
@@ -1457,7 +1457,7 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Gets all of the possible error types.
 	 *
-	 * @return array Error types.
+	 * @return string[] Error types.
 	 */
 	public static function get_error_types() {
 		return [ self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ];
@@ -1745,7 +1745,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		if ( ValidationCounts::is_needed() ) {
 			// Append markup to display a loading spinner while the unreviewed count is being fetched.
-			$menu_item_label .= ' <span class="awaiting-mod"><span id="new-error-index-count" class="loading"></span></span>';
+			$menu_item_label .= ' <span id="amp-new-error-index-count"></span>';
 		}
 
 		$post_menu_slug = 'edit.php?post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
@@ -2732,7 +2732,7 @@ class AMP_Validation_Error_Taxonomy {
 									<?php elseif ( is_scalar( $value ) ) : ?>
 										<?php echo esc_html( (string) $value ); ?>
 									<?php else : ?>
-										<pre><?php echo esc_html( wp_json_encode( $source, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
+										<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
 									<?php endif; ?>
 								</td>
 							</tr>
@@ -2867,8 +2867,8 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$action              = sanitize_key( $_REQUEST['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$term_ids            = isset( $_POST['delete_tags'] ) ? array_map( 'sanitize_key', $_POST['delete_tags'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$single_term_id      = isset( $_GET['term_id'] ) ? sanitize_key( $_GET['term_id'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$term_ids            = isset( $_POST['delete_tags'] ) ? array_filter( array_map( 'intval', (array) $_POST['delete_tags'] ) ) : []; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$single_term_id      = isset( $_GET['term_id'] ) ? (int) $_GET['term_id'] : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$redirect_query_args = [
 			'action'       => 'edit',
 			'amp_actioned' => $action,
@@ -2885,13 +2885,14 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		// Even if the user didn't select any errors to bulk edit, redirect back to the same page.
-		wp_safe_redirect(
+		if ( wp_safe_redirect(
 			add_query_arg(
 				$redirect_query_args,
 				get_edit_post_link( $post_id, 'raw' )
 			)
-		);
-		exit();
+		) ) {
+			exit(); // @codeCoverageIgnore
+		}
 	}
 
 	/**
@@ -3339,6 +3340,31 @@ class AMP_Validation_Error_Taxonomy {
 					esc_html__( 'The specified layout %1$s is not supported by tag %2$s.', 'amp' ),
 					'<code>' . esc_html( $validation_error['layout'] ) . '</code>',
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
+				);
+
+			case AMP_Form_Sanitizer::POST_FORM_HAS_ACTION_XHR_WHEN_NATIVE_USED:
+				return sprintf(
+					/* translators: %1$s is 'POST', %2$s is 'action-xhr' */
+					esc_html__( 'Native %1$s form has %2$s attribute.', 'amp' ),
+					'<code>POST</code>',
+					'<code>action-xhr</code>'
+				);
+
+			case AMP_Script_Sanitizer::CUSTOM_EXTERNAL_SCRIPT:
+				return sprintf(
+					/* translators: %s is script basename */
+					esc_html__( 'Custom external script %s encountered', 'amp' ),
+					'<code>' . basename( strtok( $validation_error['node_attributes']['src'], '?#' ) ) . '</code>'
+				);
+
+			case AMP_Script_Sanitizer::CUSTOM_INLINE_SCRIPT:
+				return esc_html__( 'Custom inline script encountered', 'amp' );
+
+			case AMP_Script_Sanitizer::CUSTOM_EVENT_HANDLER_ATTR:
+				return sprintf(
+					/* translators: %s is attribute name */
+					esc_html__( 'Event handler attribute %s encountered', 'amp' ),
+					'<code>' . $validation_error['node_name'] . '</code>'
 				);
 
 			default:

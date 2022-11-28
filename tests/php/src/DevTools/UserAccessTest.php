@@ -9,10 +9,12 @@ namespace AmpProject\AmpWP\Tests\DevTools;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use WP_Error;
-use WP_UnitTestCase;
 
 /**
  * Tests for UserAccess class.
@@ -23,7 +25,9 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\DevTools\UserAccess
  */
-class UserAccessTest extends WP_UnitTestCase {
+class UserAccessTest extends DependencyInjectedTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Test instance.
@@ -32,10 +36,10 @@ class UserAccessTest extends WP_UnitTestCase {
 	 */
 	private $dev_tools_user_access;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
-		$this->dev_tools_user_access = new UserAccess();
+		$this->dev_tools_user_access = $this->injector->make( UserAccess::class );
 	}
 
 	/**
@@ -61,12 +65,14 @@ class UserAccessTest extends WP_UnitTestCase {
 		$admin_user  = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
 		$editor_user = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
 
-		$this->assertTrue( $this->dev_tools_user_access->is_user_enabled( $admin_user ) );
-		$this->assertTrue( $this->dev_tools_user_access->is_user_enabled( $admin_user->ID ) );
+		$has_dependency_support = $this->get_private_property( $this->dev_tools_user_access, 'dependency_support' )->has_support();
+
+		$this->assertEquals( $has_dependency_support, $this->dev_tools_user_access->is_user_enabled( $admin_user ) );
+		$this->assertEquals( $has_dependency_support, $this->dev_tools_user_access->is_user_enabled( $admin_user->ID ) );
 		$this->assertFalse( $this->dev_tools_user_access->is_user_enabled( $editor_user ) );
 		$this->assertFalse( $this->dev_tools_user_access->is_user_enabled( $editor_user->ID ) );
 		wp_set_current_user( $admin_user->ID );
-		$this->assertTrue( $this->dev_tools_user_access->is_user_enabled() );
+		$this->assertEquals( $has_dependency_support, $this->dev_tools_user_access->is_user_enabled() );
 		$this->dev_tools_user_access->set_user_enabled( $admin_user, false );
 		$this->assertFalse( $this->dev_tools_user_access->is_user_enabled() );
 		wp_set_current_user( $editor_user->ID );
@@ -159,6 +165,7 @@ class UserAccessTest extends WP_UnitTestCase {
 	/**
 	 * Tests UserAccess::print_personal_options
 	 *
+	 * @covers ::can_modify_option
 	 * @covers ::print_personal_options
 	 */
 	public function test_print_personal_options() {
@@ -176,12 +183,18 @@ class UserAccessTest extends WP_UnitTestCase {
 
 		ob_start();
 		$this->dev_tools_user_access->print_personal_options( $admin_user );
-		$this->assertContains( 'checkbox', ob_get_clean() );
+		$output = ob_get_clean();
+		if ( ( new DependencySupport() )->has_support() ) {
+			$this->assertStringContainsString( 'checkbox', $output );
+		} else {
+			$this->assertStringNotContainsString( 'checkbox', $output );
+		}
 	}
 
 	/**
 	 * Tests UserAccess::update_user_setting
 	 *
+	 * @covers ::can_modify_option
 	 * @covers ::update_user_setting
 	 */
 	public function test_update_user_setting() {
@@ -195,10 +208,10 @@ class UserAccessTest extends WP_UnitTestCase {
 		wp_set_current_user( $admin_user->ID );
 		$this->assertFalse( $this->dev_tools_user_access->update_user_setting( $editor_user->ID ) );
 
-		$this->assertTrue( $this->dev_tools_user_access->update_user_setting( $admin_user->ID ) );
-		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
+		$this->assertEquals( ( new DependencySupport() )->has_support(), $this->dev_tools_user_access->update_user_setting( $admin_user->ID ) );
+		$this->assertEquals( ( new DependencySupport() )->has_support(), $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
 		$_POST[ UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] = null;
-		$this->assertTrue( $this->dev_tools_user_access->update_user_setting( $admin_user->ID ) );
+		$this->assertEquals( ( new DependencySupport() )->has_support(), $this->dev_tools_user_access->update_user_setting( $admin_user->ID ) );
 		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
 	}
 
@@ -214,13 +227,19 @@ class UserAccessTest extends WP_UnitTestCase {
 		$this->assertFalse( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
 
 		$user->set_role( 'administrator' );
-		$this->assertTrue( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
+		$this->assertEquals(
+			( new DependencySupport() )->has_support(),
+			$this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] )
+		);
 
 		update_user_meta( $user->ID, 'amp_dev_tools_enabled', 'false' );
 		$this->assertFalse( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
 
 		update_user_meta( $user->ID, 'amp_dev_tools_enabled', 'true' );
-		$this->assertTrue( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
+		$this->assertEquals(
+			( new DependencySupport() )->has_support(),
+			$this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] )
+		);
 	}
 
 	/**

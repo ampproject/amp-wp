@@ -488,7 +488,6 @@ final class PairedRouting implements Service, Registerable {
 
 		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
 		add_action( 'wp', [ $this, 'add_paired_request_hooks' ] );
-
 		add_action( 'admin_notices', [ $this, 'add_permalink_settings_notice' ] );
 	}
 
@@ -684,6 +683,7 @@ final class PairedRouting implements Service, Registerable {
 			if ( $this->is_using_path_suffix() ) {
 				// Filter priority of 0 to purge /amp/ before other filters manipulate it.
 				add_filter( 'get_pagenum_link', [ $this, 'filter_get_pagenum_link' ], 0 );
+				add_filter( 'redirect_canonical', [ $this, 'filter_redirect_canonical_to_fix_cpage_requests' ], 0 );
 			}
 		} else {
 			add_action( 'wp_head', 'amp_add_amphtml_link' );
@@ -706,6 +706,7 @@ final class PairedRouting implements Service, Registerable {
 	 *
 	 * @param string $link Pagenum link.
 	 * @return string Fixed pagenum link.
+	 * @global WP_Rewrite $wp_rewrite
 	 */
 	public function filter_get_pagenum_link( $link ) {
 		global $wp_rewrite;
@@ -770,6 +771,38 @@ final class PairedRouting implements Service, Registerable {
 			</p>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Fix up canonical redirect URLs to put the comments pagination base in the right place.
+	 *
+	 * @param string $redirect_url Canonical redirect URL.
+	 * @return string Updated canonical URL.
+	 * @global WP_Rewrite $wp_rewrite
+	 */
+	public function filter_redirect_canonical_to_fix_cpage_requests( $redirect_url ) {
+		global $wp_rewrite;
+
+		if (
+			! empty( $redirect_url )
+			&&
+			get_query_var( 'cpage' )
+			&&
+			$wp_rewrite instanceof WP_Rewrite
+			&&
+			! empty( $wp_rewrite->comments_pagination_base )
+		) {
+			$amp_slug = amp_get_slug();
+			$regex    = sprintf(
+				":/(%s-[0-9]+)/%s/\\1(/*)($|\?|\#):",
+				preg_quote( $wp_rewrite->comments_pagination_base, ':' ),
+				preg_quote( $amp_slug, ':' )
+			);
+
+			$redirect_url = preg_replace( $regex, "/\\1/{$amp_slug}\\2\\3", $redirect_url );
+		}
+
+		return $redirect_url;
 	}
 
 	/**
@@ -1101,15 +1134,15 @@ final class PairedRouting implements Service, Registerable {
 		$requested_url = amp_get_current_url();
 		$redirect_url  = null;
 
-		$endpoint_suffix_removed = $this->paired_url->remove_path_suffix( $requested_url );
-		$query_var_removed       = $this->paired_url->remove_query_var( $requested_url );
+		$has_path_suffix = $this->paired_url->has_path_suffix( $requested_url );
+		$has_query_var   = $this->paired_url->has_query_var( $requested_url );
 		if ( amp_is_canonical() ) {
-			if ( is_404() && $endpoint_suffix_removed !== $requested_url ) {
+			if ( is_404() && $has_path_suffix ) {
 				// Always redirect to strip off /amp/ in the case of a 404.
-				$redirect_url = $endpoint_suffix_removed;
-			} elseif ( $query_var_removed !== $requested_url ) {
+				$redirect_url = $this->paired_url->remove_path_suffix( $requested_url );
+			} elseif ( $has_query_var ) {
 				// Strip extraneous query var from AMP-first sites.
-				$redirect_url = $query_var_removed;
+				$redirect_url = $this->paired_url->remove_query_var( $requested_url );
 			}
 		} else {
 			// Calling wp_old_slug_redirect() here is to account for a site that does not have AMP enabled for the 404 template.
@@ -1121,12 +1154,12 @@ final class PairedRouting implements Service, Registerable {
 			// old_slug_redirect_url which ensures that the AMP endpoint will persist the slug redirect.
 			wp_old_slug_redirect(); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_old_slug_redirect_wp_old_slug_redirect
 
-			if ( is_404() && $endpoint_suffix_removed !== $requested_url ) {
+			if ( is_404() && $has_path_suffix ) {
 				// To account for switching the paired URL structure from `/amp/` to `?amp=1`, add the query var if in Paired
 				// AMP mode. Note this is not necessary to do when sites have switched from a query var to an endpoint suffix
 				// because the query var will always be recognized whereas the reverse is not always true.
 				// This also prevents an infinite URL space under /amp/ endpoint.
-				$redirect_url = $this->add_endpoint( $endpoint_suffix_removed );
+				$redirect_url = $this->add_endpoint( $this->paired_url->remove_path_suffix( $requested_url ) );
 			} elseif ( $this->has_endpoint() && ! amp_is_available() ) {
 				// Redirect to non-AMP URL if AMP is not available.
 				$redirect_url = $this->remove_endpoint( $requested_url );

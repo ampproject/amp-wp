@@ -13,7 +13,7 @@ Filters AMP permalink.
 
 ### Source
 
-:link: [src/PairedUrlStructure/LegacyReaderUrlStructure.php:83](/src/PairedUrlStructure/LegacyReaderUrlStructure.php#L83)
+:link: [src/PairedUrlStructure/LegacyReaderUrlStructure.php:81](/src/PairedUrlStructure/LegacyReaderUrlStructure.php#L81)
 
 <details>
 <summary>Show Code</summary>

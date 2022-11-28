@@ -5,7 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
+use AmpProject\Html\Attribute;
 
 /**
  * Class AMP_Video_Sanitizer
@@ -34,6 +36,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $DEFAULT_ARGS = [
 		'add_noscript_fallback' => true,
+		'native_video_used'     => false,
 	];
 
 	/**
@@ -42,6 +45,9 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
+		if ( $this->args['native_video_used'] ) {
+			return [];
+		}
 		return [
 			'video' => [ 'amp-video', 'amp-youtube' ],
 		];
@@ -60,8 +66,11 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		if ( $this->args['add_noscript_fallback'] ) {
+		if ( $this->args['add_noscript_fallback'] && ! $this->args['native_video_used'] ) {
 			$this->initialize_noscript_allowed_attributes( self::$tag );
+
+			// Omit muted from noscript > video since it causes deprecation warnings in validator.
+			unset( $this->noscript_fallback_allowed_attributes['muted'] );
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
@@ -91,13 +100,6 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			/**
-			 * Original node.
-			 *
-			 * @var DOMElement $old_node
-			 */
-			$old_node = $node->cloneNode( false );
-
 			// Gather all child nodes and supply empty video dimensions from sources.
 			$fallback    = null;
 			$child_nodes = [];
@@ -122,8 +124,20 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				$child_nodes[] = $child_node;
 			}
 
+			// At this point, if we're using native <video>, then we just supply the gathered dimensions if we have them
+			// and then move along.
+			if ( $this->args['native_video_used'] ) {
+				foreach ( [ Attribute::WIDTH, Attribute::HEIGHT ] as $attr_name ) {
+					if ( ! $node->hasAttribute( $attr_name ) && isset( $new_attributes[ $attr_name ] ) ) {
+						$node->setAttribute( $attr_name, $new_attributes[ $attr_name ] );
+					}
+				}
+				ValidationExemption::mark_node_as_px_verified( $node );
+				continue;
+			}
+
 			/*
-			 * Add fallback for audio shortcode which is not present by default since wp_mediaelement_fallback()
+			 * Add fallback for video shortcode which is not present by default since wp_mediaelement_fallback()
 			 * is not called when wp_audio_shortcode_library is filtered from mediaelement to amp.
 			 */
 			if ( ! $fallback && ! empty( $sources ) ) {
@@ -134,11 +148,48 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				$child_nodes[] = $fallback;
 			}
 
+			if ( empty( $new_attributes['width'] ) && empty( $new_attributes['height'] ) ) {
+				$new_attributes[ Attribute::CLASS_ ] = isset( $new_attributes[ Attribute::CLASS_ ] )
+					? $new_attributes[ Attribute::CLASS_ ] . ' amp-wp-unknown-size'
+					: 'amp-wp-unknown-size';
+			}
+
 			$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
 			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
-				$new_attributes['layout'] = 'responsive';
+				$new_attributes['layout'] = 'intrinsic';
 			}
 			$new_attributes = $this->set_layout( $new_attributes );
+
+			// Strip out redundant aspect-ratio style which was added in AMP_Core_Block_Handler::ampify_video_block().
+			if ( isset( $new_attributes[ Attribute::STYLE ], $new_attributes[ Attribute::WIDTH ], $new_attributes[ Attribute::HEIGHT ] ) ) {
+				$styles = $this->parse_style_string( $new_attributes[ Attribute::STYLE ] );
+				if (
+					isset( $styles[ Attribute::ASPECT_RATIO ] )
+					&&
+					(
+						preg_replace( '/\s/', '', $styles[ Attribute::ASPECT_RATIO ] )
+						===
+						sprintf( '%d/%d', $new_attributes[ Attribute::WIDTH ], $new_attributes[ Attribute::HEIGHT ] )
+					)
+				) {
+					unset( $styles[ Attribute::ASPECT_RATIO ] );
+					if ( empty( $styles ) ) {
+						unset( $new_attributes[ Attribute::STYLE ] );
+					} else {
+						$new_attributes[ Attribute::STYLE ] = $this->reassemble_style_string( $styles );
+					}
+				}
+			}
+
+			// Remove the ID from the original node so that PHP DOM doesn't fail to set it on the replacement element.
+			$node->removeAttribute( Attribute::ID );
+
+			/**
+			 * Original node.
+			 *
+			 * @var DOMElement $old_node
+			 */
+			$old_node = $node->cloneNode( false );
 
 			// @todo Make sure poster and artwork attributes are HTTPS.
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
@@ -303,6 +354,14 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				default:
 					$out[ $name ] = $value;
 			}
+		}
+
+		/*
+		 * The amp-video will forcibly be muted whenever it is set to autoplay.
+		 * So omit the `muted` attribute if it exists.
+		 */
+		if ( isset( $out['autoplay'], $out['muted'] ) ) {
+			unset( $out['muted'] );
 		}
 
 		return $out;

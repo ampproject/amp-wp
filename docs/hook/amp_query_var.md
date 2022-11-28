@@ -14,7 +14,7 @@ Warning: This filter may become deprecated.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:579](/includes/amp-helper-functions.php#L579)
+:link: [includes/amp-helper-functions.php:615](/includes/amp-helper-functions.php#L615)
 
 <details>
 <summary>Show Code</summary>

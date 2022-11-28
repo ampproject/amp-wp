@@ -2,84 +2,22 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { ReactElement } from 'react';
 import { isFunction, isObject, isString } from 'lodash';
 
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { SelectControl, ToggleControl, Notice, PanelBody } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { ToggleControl, PanelBody } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
-import { select } from '@wordpress/data';
+import { select, useSelect } from '@wordpress/data';
 import { cloneElement, isValidElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH } from '../constants';
+import { TEXT_BLOCKS } from '../constants';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../common/constants';
-
-const ampLayoutOptions = [
-	{
-		value: 'nodisplay',
-		label: __( 'No Display', 'amp' ),
-		notAvailable: [
-			'core-embed/vimeo',
-			'core-embed/dailymotion',
-			'core-embed/reddit',
-			'core-embed/soundcloud',
-		],
-	},
-	{
-		// Not supported by amp-audio and amp-pixel.
-		value: 'fixed',
-		label: __( 'Fixed', 'amp' ),
-		notAvailable: [
-			'core-embed/soundcloud',
-		],
-	},
-	{
-		// To ensure your AMP element displays, you must specify a width and height for the containing element.
-		value: 'responsive',
-		label: __( 'Responsive', 'amp' ),
-		notAvailable: [
-			'core-embed/soundcloud',
-		],
-	},
-	{
-		value: 'fixed-height',
-		label: __( 'Fixed Height', 'amp' ),
-		notAvailable: [],
-	},
-	{
-		value: 'fill',
-		label: __( 'Fill', 'amp' ),
-		notAvailable: [
-			'core-embed/soundcloud',
-		],
-	},
-	{
-		value: 'flex-item',
-		label: __( 'Flex Item', 'amp' ),
-		notAvailable: [
-			'core-embed/soundcloud',
-		],
-	},
-	{
-		value: 'intrinsic',
-		label: __( 'Intrinsic', 'amp' ),
-		notAvailable: [
-			'core-embed/youtube',
-			'core-embed/facebook',
-			'core-embed/instagram',
-			'core-embed/vimeo',
-			'core-embed/dailymotion',
-			'core-embed/reddit',
-			'core-embed/soundcloud',
-		],
-	},
-];
 
 /**
  * Add AMP attributes to every core block.
@@ -93,7 +31,7 @@ export const addAMPAttributes = ( settings, name ) => {
 		return settings;
 	}
 
-	// AMP Carousel settings.
+	// AMP Carousel and AMP Lightbox settings.
 	if ( 'core/gallery' === name ) {
 		if ( ! settings.attributes ) {
 			settings.attributes = {};
@@ -119,18 +57,6 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	// Layout settings for embeds and media blocks.
-	if ( 0 === name.indexOf( 'core-embed' ) || MEDIA_BLOCKS.includes( name ) ) {
-		if ( ! settings.attributes ) {
-			settings.attributes = {};
-		}
-		settings.attributes.ampLayout = {
-			type: 'string',
-		};
-		settings.attributes.ampNoLoading = {
-			type: 'boolean',
-		};
-	}
 	return settings;
 };
 
@@ -151,7 +77,14 @@ export const removeAmpFitTextFromBlocks = ( settings, name ) => {
 			settings.deprecated = [];
 		}
 
-		settings.deprecated.unshift( {
+		// Prevent adding deprecation a second time.
+		for ( const deprecated of settings.deprecated ) {
+			if ( deprecated.attributes && deprecated.attributes.ampFitText ) {
+				return settings;
+			}
+		}
+
+		settings.deprecated.push( {
 			supports: settings.supports,
 			attributes: {
 				...( settings.attributes || {} ),
@@ -221,8 +154,8 @@ export const removeAmpFitTextFromBlocks = ( settings, name ) => {
  * removed and the deprecation of the block and proceed without error.
  *
  * @see removeAmpFitTextFromBlocks
- * @param {ReactElement} element Block save result.
- * @return {ReactElement} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
+ * @param {JSX.Element} element Block save result.
+ * @return {JSX.Element} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
  */
 export const removeClassFromAmpFitTextBlocks = ( element ) => {
 	if ( isValidElement( element ) && 'amp-fit-text' === element.type && undefined !== element.props.className ) {
@@ -232,34 +165,6 @@ export const removeClassFromAmpFitTextBlocks = ( element ) => {
 	}
 
 	return element;
-};
-
-/**
- * Get layout options depending on the block.
- *
- * @param {string} block Block name.
- * @return {Object[]} Options.
- */
-export const getLayoutOptions = ( block ) => {
-	const layoutOptions = [
-		{
-			value: '',
-			label: __( 'Default', 'amp' ),
-		},
-	];
-
-	for ( const option of ampLayoutOptions ) {
-		const isLayoutAvailable = ! option.notAvailable.includes( block );
-
-		if ( isLayoutAvailable ) {
-			layoutOptions.push( {
-				value: option.value,
-				label: option.label,
-			} );
-		}
-	}
-
-	return layoutOptions;
 };
 
 /**
@@ -273,221 +178,52 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 		return BlockEdit;
 	}
 
-	const EnhancedBlockEdit = function( props ) {
-		const { attributes: { ampLayout }, name } = props;
+	const EnhancedBlockEdit = ( props ) => {
+		const { isSelected, name } = props;
 
-		let inspectorControls;
-
-		if ( 'core/gallery' === name ) {
-			inspectorControls = setUpGalleryInspectorControls( props );
-		} else if ( 'core/image' === name ) {
-			inspectorControls = setUpImageInspectorControls( props );
-		} else if ( MEDIA_BLOCKS.includes( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
-			inspectorControls = setUpInspectorControls( props );
+		if ( isSelected && 'core/image' === name ) {
+			return (
+				<>
+					<BlockEdit { ...props } />
+					<ImageBlockLayoutAttributes { ...props } />
+				</>
+			);
 		}
 
-		// Return just inspector controls in case of 'nodisplay'.
-		if ( ampLayout && 'nodisplay' === ampLayout ) {
-			return [
-				inspectorControls,
-			];
+		if ( isSelected && 'core/gallery' === name ) {
+			return (
+				<>
+					<BlockEdit { ...props } />
+					<GalleryBlockLayoutAttributes { ...props } />
+				</>
+			);
 		}
 
-		return (
-			<>
-				<BlockEdit { ...props } />
-				{ inspectorControls }
-			</>
-		);
+		return <BlockEdit { ...props } />;
 	};
 
 	EnhancedBlockEdit.propTypes = {
 		attributes: PropTypes.shape( {
-			text: PropTypes.string,
-			ampLayout: PropTypes.string,
+			ampCarousel: PropTypes.bool,
+			ampLightbox: PropTypes.bool,
+			linkTo: PropTypes.string,
 		} ),
-		setAttributes: PropTypes.func.isRequired,
+		isSelected: PropTypes.bool,
 		name: PropTypes.string,
+		setAttributes: PropTypes.func.isRequired,
 	};
 
 	return EnhancedBlockEdit;
 };
 
 /**
- * Set width and height in case of image block.
- *
- * @param {Object} props Props.
- * @param {Function} props.setAttributes Callback to set attributes.
- * @param {Object} props.attributes Attributes.
- * @param {string} layout Layout.
- */
-export const setImageBlockLayoutAttributes = ( props, layout ) => {
-	const { attributes, setAttributes } = props;
-	switch ( layout ) {
-		case 'fixed-height':
-			if ( ! attributes.height ) {
-				setAttributes( { height: DEFAULT_HEIGHT } );
-			}
-			// Lightbox doesn't work with fixed height, so unset it.
-			if ( attributes.ampLightbox ) {
-				setAttributes( { ampLightbox: false } );
-			}
-			break;
-
-		case 'fixed':
-			if ( ! attributes.height ) {
-				setAttributes( { height: DEFAULT_HEIGHT } );
-			}
-			if ( ! attributes.width ) {
-				setAttributes( { width: DEFAULT_WIDTH } );
-			}
-			break;
-
-		default:
-			break;
-	}
-};
-
-/**
- * Default setup for inspector controls.
- *
- * @param {Object} props Props.
- * @return {ReactElement} Inspector Controls.
- */
-export const setUpInspectorControls = ( props ) => {
-	const { isSelected } = props;
-
-	if ( ! isSelected ) {
-		return null;
-	}
-
-	return (
-		<InspectorControls>
-			<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
-				<AmpLayoutControl { ...props } />
-				<AmpNoloadingToggle { ...props } />
-			</PanelBody>
-		</InspectorControls>
-	);
-};
-
-setUpInspectorControls.propTypes = {
-	isSelected: PropTypes.bool,
-};
-
-/**
- * Get AMP Layout select control.
- *
- * @deprecated As of v2.1. Blocks with the `ampLayout` attribute will still be able to use the control.
- * @param {Object} props Props.
- * @return {ReactElement} Element.
- */
-export const AmpLayoutControl = ( props ) => {
-	const { name, attributes: { ampLayout }, setAttributes } = props;
-
-	if ( undefined === ampLayout ) {
-		return null;
-	}
-
-	let label = __( 'AMP Layout', 'amp' );
-
-	if ( 'core/image' === name ) {
-		label = __( 'AMP Layout (modifies width/height)', 'amp' );
-	}
-
-	return (
-		<>
-			<Notice
-				status="warning"
-				isDismissible={ false }
-			>
-				<span dangerouslySetInnerHTML={ {
-					__html: sprintf(
-						/* translators: placeholder is link to support forum. */
-						__( 'The AMP Layout setting is deprecated and is slated for removal. Please <a href="%s" target="_blank" rel="noreferrer">report</a> if you need it.', 'amp' ),
-						'https://wordpress.org/support/plugin/amp/#new-topic-0',
-					),
-				} } />
-			</Notice>
-
-			<SelectControl
-				label={ label }
-				value={ ampLayout }
-				options={ getLayoutOptions( name ) }
-				onChange={ ( value ) => {
-					setAttributes( { ampLayout: value } );
-					if ( 'core/image' === props.name ) {
-						setImageBlockLayoutAttributes( props, value );
-					}
-				} }
-			/>
-		</>
-	);
-};
-
-AmpLayoutControl.propTypes = {
-	name: PropTypes.string,
-	attributes: PropTypes.shape( {
-		ampLayout: PropTypes.string,
-	} ),
-	setAttributes: PropTypes.func.isRequired,
-};
-
-/**
- * Get AMP Noloading toggle control.
- *
- * @deprecated As of v2.1. Blocks with the `ampNoLoading` attribute will still be able to use the control.
- * @param {Object} props Props.
- * @return {ReactElement} Element.
- */
-export const AmpNoloadingToggle = ( props ) => {
-	const { attributes: { ampNoLoading }, setAttributes } = props;
-
-	if ( undefined === ampNoLoading ) {
-		return null;
-	}
-
-	const label = __( 'AMP Noloading', 'amp' );
-
-	return (
-		<>
-			<Notice
-				status="warning"
-				isDismissible={ false }
-			>
-				<span dangerouslySetInnerHTML={ {
-					__html: sprintf(
-						/* translators: placeholder is link to support forum. */
-						__( 'The AMP Noloading setting is deprecated and is slated for removal. Please <a href="%s" target="_blank" rel="noreferrer">report</a> if you need it.', 'amp' ),
-						'https://wordpress.org/support/plugin/amp/#new-topic-0',
-					),
-				} } />
-			</Notice>
-
-			<ToggleControl
-				label={ label }
-				checked={ ampNoLoading }
-				onChange={ () => setAttributes( { ampNoLoading: ! ampNoLoading } ) }
-			/>
-		</>
-	);
-};
-
-AmpNoloadingToggle.propTypes = {
-	attributes: PropTypes.shape( {
-		ampNoLoading: PropTypes.bool,
-	} ),
-	setAttributes: PropTypes.func.isRequired,
-};
-
-/**
  * Get AMP Lightbox toggle control.
  *
  * @param {Object} props Props.
- * @return {ReactElement} Element.
+ * @return {JSX.Element} Element.
  */
 const AmpLightboxToggle = ( props ) => {
-	const { attributes: { ampLightbox, linkTo, ampLayout }, setAttributes } = props;
+	const { attributes: { ampLightbox, linkTo }, setAttributes } = props;
 
 	return (
 		<ToggleControl
@@ -495,15 +231,9 @@ const AmpLightboxToggle = ( props ) => {
 			checked={ ampLightbox }
 			onChange={ ( nextValue ) => {
 				setAttributes( { ampLightbox: ! ampLightbox } );
-				if ( nextValue ) {
-					// Lightbox doesn't work with fixed height, so change.
-					if ( 'fixed-height' === ampLayout ) {
-						setAttributes( { ampLayout: 'fixed' } );
-					}
-					// In case of lightbox set linking images to 'none'.
-					if ( linkTo && 'none' !== linkTo ) {
-						setAttributes( { linkTo: 'none' } );
-					}
+				// In case of lightbox set linking images to 'none'.
+				if ( nextValue && linkTo && 'none' !== linkTo ) {
+					setAttributes( { linkTo: 'none' } );
 				}
 			} }
 		/>
@@ -513,7 +243,6 @@ const AmpLightboxToggle = ( props ) => {
 AmpLightboxToggle.propTypes = {
 	attributes: PropTypes.shape( {
 		ampLightbox: PropTypes.bool,
-		ampLayout: PropTypes.string,
 		linkTo: PropTypes.string,
 	} ),
 	setAttributes: PropTypes.func.isRequired,
@@ -548,62 +277,50 @@ AmpCarouselToggle.propTypes = {
 };
 
 /**
- * Set up inspector controls for Image block.
+ * Inspector controls for Image block.
  *
- * @param {Object}  props            Props.
- * @param {boolean} props.isSelected Whether the current block has been selected or not.
+ * @param {Object} props          Props.
+ * @param {string} props.clientId Block client ID.
  * @return {Object} Inspector Controls.
  */
-const setUpImageInspectorControls = ( props ) => {
-	const { isSelected } = props;
+const ImageBlockLayoutAttributes = ( props ) => {
+	const { clientId } = props;
 
-	if ( ! isSelected ) {
+	const isGalleryBlockChild = useSelect( ( _select ) => {
+		return _select( 'core/block-editor' ).getBlockParentsByBlockName( clientId, 'core/gallery' ).length > 0;
+	}, [ clientId ] );
+
+	if ( isGalleryBlockChild ) {
 		return null;
 	}
 
 	return (
 		<InspectorControls>
 			<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
-				<AmpLayoutControl { ...props } />
-				<AmpNoloadingToggle { ...props } />
 				<AmpLightboxToggle { ...props } />
 			</PanelBody>
 		</InspectorControls>
 	);
 };
 
-setUpImageInspectorControls.propTypes = {
-	isSelected: PropTypes.bool,
+ImageBlockLayoutAttributes.propTypes = {
+	clientId: PropTypes.string,
 };
 
 /**
- * Set up inspector controls for Gallery block.
- * Adds ampCarousel attribute for displaying the output as amp-carousel.
+ * Inspector controls for Gallery block.
  *
- * @param {Object}  props            Props.
- * @param {boolean} props.isSelected Whether the current block has been selected or not.
- * @return {Object} Inspector controls.
+ * @param {Object} props Props.
+ * @return {Object} Inspector Controls.
  */
-const setUpGalleryInspectorControls = ( props ) => {
-	const { isSelected } = props;
-
-	if ( ! isSelected ) {
-		return null;
-	}
-
-	return (
-		<InspectorControls>
-			<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
-				<AmpCarouselToggle { ...props } />
-				<AmpLightboxToggle { ...props } />
-			</PanelBody>
-		</InspectorControls>
-	);
-};
-
-setUpGalleryInspectorControls.propTypes = {
-	isSelected: PropTypes.bool,
-};
+const GalleryBlockLayoutAttributes = ( props ) => (
+	<InspectorControls>
+		<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
+			<AmpLightboxToggle { ...props } />
+			<AmpCarouselToggle { ...props } />
+		</PanelBody>
+	</InspectorControls>
+);
 
 /**
  * Determines whether AMP is enabled for the current post or not.

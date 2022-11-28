@@ -7,9 +7,11 @@ import { visitAdminPage, activateTheme, installTheme } from '@wordpress/e2e-test
  * Internal dependencies
  */
 import { completeWizard, cleanUpSettings, clickMode, scrollToElement } from '../../utils/onboarding-wizard-utils';
+import { cleanUpValidatedUrls, saveSettings } from '../../utils/amp-settings-utils';
 
 describe( 'AMP settings screen newly activated', () => {
 	beforeEach( async () => {
+		await cleanUpSettings();
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 	} );
 
@@ -55,42 +57,28 @@ describe( 'Settings screen when reader theme is active theme', () => {
 		await clickMode( 'reader' );
 		await scrollToElement( { selector: '#template-mode-reader-container .components-panel__body-toggle', click: true } );
 
-		await scrollToElement( { selector: '#reader-themes .amp-notice__body' } );
+		await scrollToElement( { selector: '#reader-themes .components-panel__body-toggle', click: true } );
 		await expect( page ).toMatchElement( '.amp-notice__body', { text: /^Your active theme/ } );
 
 		await activateTheme( 'twentytwenty' );
 	} );
 } );
 
-describe( 'Mode info notices', () => {
-	it( 'shows expected notices for theme with built-in support', async () => {
-		await activateTheme( 'twentytwenty' );
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		await expect( page ).toMatchElement( '#template-mode-standard-container .amp-notice--info' );
-		await expect( page ).toMatchElement( '#template-mode-transitional-container .amp-notice--info' );
-
-		await clickMode( 'reader' );
-
-		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--warning' );
-	} );
-
-	it.todo( 'shows expected notices for theme with paired flag false' );
-	it.todo( 'shows expected notices for theme that only supports reader mode' );
-} );
-
 describe( 'AMP Settings Screen after wizard', () => {
+	const timeout = 30000;
+
 	beforeEach( async () => {
-		await completeWizard( { technical: true, mode: 'standard' } );
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
+		await cleanUpValidatedUrls();
 	} );
 
 	afterEach( async () => {
 		await cleanUpSettings();
 	} );
 
-	it( 'has main page components', async () => {
-		await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings' } );
+	it( 'has main page components and does not display a stale message if the Standard mode was selected in the Wizard', async () => {
+		await completeWizard( { technical: true, mode: 'standard' } );
+
+		await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings', timeout } );
 		await expect( page ).toMatchElement( 'h2', { text: 'AMP Settings Configured' } );
 		await expect( page ).toMatchElement( 'a', { text: 'Reopen Wizard' } );
 		await expect( page ).toPassAxeTests( {
@@ -98,6 +86,17 @@ describe( 'AMP Settings Screen after wizard', () => {
 				'#wpadminbar',
 			],
 		} );
+
+		await expect( page ).toMatchElement( '#site-scan .amp-drawer__heading', { text: 'Site Scan' } );
+		await expect( page ).not.toMatchElement( '#site-scan .amp-drawer__label-extra .amp-notice', { text: 'Stale results' } );
+	} );
+
+	it( 'auto-starts a site scan if Transitional mode was selected in the Wizard', async () => {
+		await completeWizard( { technical: true, mode: 'transitional' } );
+
+		await expect( page ).toMatchElement( '#site-scan .amp-drawer__heading', { text: 'Site Scan', timeout } );
+		await expect( page ).toMatchElement( '#site-scan .progress-bar' );
+		await expect( page ).toMatchElement( '#site-scan button', { text: 'Rescan Site', timeout } );
 	} );
 } );
 
@@ -111,29 +110,21 @@ describe( 'Saving', () => {
 	} );
 
 	it( 'allows saving', async () => {
-		const testSave = async () => {
-			await expect( page ).toClick( 'button', { text: 'Save' } );
-			await expect( page ).toMatchElement( 'button[disabled].is-busy', { text: 'Saving' } );
-			await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
-			await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
-		};
-
 		// Save button exists.
 		await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
 
-		// Toggle transistional mode.
-		await expect( page ).toClick( '#template-mode-transitional' );
+		// Toggle transitional mode.
+		await clickMode( 'transitional' );
 
 		// Button should be enabled.
 		await expect( page ).toMatchElement( 'button:not([disabled])', { text: 'Save' } );
 
-		await testSave();
+		await saveSettings();
 
 		// Success notice should disappear on additional change.
-		await expect( page ).toClick( '#template-mode-standard' );
+		await clickMode( 'standard' );
 		await expect( page ).not.toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
 
-		await testSave();
+		await saveSettings();
 	} );
 } );
-

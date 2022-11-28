@@ -1,0 +1,64 @@
+.nav-menu__item {
+	margin: 0;
+
+	& + & {
+		border-top: 1px solid var(--amp-settings-color-border);
+	}
+}
+
+.amp .nav-menu__link {
+	align-items: center;
+	color: var(--amp-settings-color-muted);
+	display: flex;
+	flex-flow: row nowrap;
+	font-size: 14px;
+	justify-content: space-between;
+	padding: 0.75rem 1rem;
+	text-decoration: none;
+	transition: background-color 120ms ease;
+
+	&.nav-menu__link--active,
+	&:hover {
+		background-color: var(--very-light-gray);
+		color: var(--amp-settings-color-muted);
+	}
+
+	&:focus {
+		box-shadow: none;
+	}
+
+	&::after {
+		border: 2px solid;
+		border-bottom: none;
+		border-left: none;
+		content: "";
+		display: block;
+		flex: 0 0 auto;
+		height: 8px;
+		margin-left: 1rem;
+		transform: rotateZ(45deg);
+		width: 8px;
+	}
+}
+
+// Nav menu as a selectable component.
+.nav-menu.selectable {
+	padding: 0;
+
+	.nav-menu__list {
+		margin: 0;
+		padding: 0 1rem;
+	}
+
+	.nav-menu__link {
+		margin: 0 -1rem;
+	}
+
+	.nav-menu__item:first-child .nav-menu__link {
+		border-radius: 8px 8px 0 0;
+	}
+
+	.nav-menu__item:last-child .nav-menu__link {
+		border-radius: 0 0 8px 8px;
+	}
+}

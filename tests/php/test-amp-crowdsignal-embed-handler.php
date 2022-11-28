@@ -6,13 +6,14 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class AMP_Crowdsignal_Embed_Handler_Test
  *
  * @covers AMP_Crowdsignal_Embed_Handler
  */
-class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
+class AMP_Crowdsignal_Embed_Handler_Test extends TestCase {
 
 	use WithoutBlockPreRendering;
 

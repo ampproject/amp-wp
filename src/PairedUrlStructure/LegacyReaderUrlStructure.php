@@ -25,8 +25,10 @@ final class LegacyReaderUrlStructure extends PairedUrlStructure {
 	 * @return string AMP URL.
 	 */
 	public function add_endpoint( $url ) {
-		$post_id = $this->url_to_postid( $url );
+		// Make sure any existing AMP endpoint is removed.
+		$url = $this->remove_endpoint( $url );
 
+		$post_id = $this->url_to_postid( $url );
 		if ( $post_id ) {
 			/**
 			 * Filters the AMP permalink to short-circuit normal generation.
@@ -45,10 +47,6 @@ final class LegacyReaderUrlStructure extends PairedUrlStructure {
 				return $pre_url;
 			}
 		}
-
-		// Make sure any existing AMP endpoint is removed.
-		$url = $this->paired_url->remove_path_suffix( $url );
-		$url = $this->paired_url->remove_query_var( $url );
 
 		$parsed_url    = wp_parse_url( $url );
 		$use_query_var = (

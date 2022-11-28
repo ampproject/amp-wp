@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { Button, Icon } from '@wordpress/components';
+import { Button, Icon, VisuallyHidden } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Component, createRef, renderToString } from '@wordpress/element';
@@ -226,12 +226,12 @@ class AmpPreviewButton extends Component {
 				ref={ this.buttonRef }
 			>
 				{ ampFilledIcon( { viewBox: '0 0 62 62', width: 18, height: 18 } ) }
-				<span className="screen-reader-text">
+				<VisuallyHidden as="span">
 					{
 						/* translators: accessibility text */
 						__( '(opens in a new tab)', 'amp' )
 					}
-				</span>
+				</VisuallyHidden>
 			</Button>
 		);
 	}

@@ -17,7 +17,7 @@ Prepare validation error.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:567](/includes/sanitizers/class-amp-base-sanitizer.php#L567-L659)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:676](/includes/sanitizers/class-amp-base-sanitizer.php#L676-L768)
 
 <details>
 <summary>Show Code</summary>
@@ -71,7 +71,7 @@ public function prepare_validation_error( array $error = [], array $data = [] ) 
 					],
 					$text_content
 				);
-			} elseif ( $is_inline_style ) {
+			} else {
 				// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
 				// already be detailed in the stylesheets metabox.
 				$error['text'] = $text_content;

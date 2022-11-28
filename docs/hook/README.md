@@ -17,7 +17,10 @@
 ### Filters
 
 * [`amp_analytics_entries`](amp_analytics_entries.md) - Add amp-analytics tags.
+* [`amp_auto_lightbox_disabled`](amp_auto_lightbox_disabled.md) - Filters whether AMP auto-lightbox is disabled.
+* [`amp_bento_enabled`](amp_bento_enabled.md) - Filters whether the use of Bento components is enabled.
 * [`amp_comment_posted_message`](amp_comment_posted_message.md) - Filters the message when comment submitted success message when
+* [`amp_compatible_ecosystem_shown`](amp_compatible_ecosystem_shown.md) - Filters whether to show AMP compatible ecosystem in the admin.
 * [`amp_content_embed_handlers`](amp_content_embed_handlers.md) - Filters the content embed handlers.
 * [`amp_content_max_width`](amp_content_max_width.md) - Filters the content max width for Reader templates.
 * [`amp_content_sanitizers`](amp_content_sanitizers.md) - Filters the content sanitizers.
@@ -33,7 +36,7 @@
 * [`amp_enable_optimizer`](amp_enable_optimizer.md) - Filter whether the generated HTML output should be run through the AMP Optimizer or not.
 * [`amp_enable_ssr`](amp_enable_ssr.md) - Filter whether the AMP Optimizer should use server-side rendering or not.
 * [`amp_extract_image_dimensions_batch`](amp_extract_image_dimensions_batch.md) - Filters the dimensions extracted from image URLs.
-* [`amp_extract_image_dimensions_get_user_agent`](amp_extract_image_dimensions_get_user_agent.md) - Filters the user agent for onbtaining the image dimensions.
+* [`amp_extract_image_dimensions_get_user_agent`](amp_extract_image_dimensions_get_user_agent.md) - Filters the user agent for obtaining the image dimensions.
 * [`amp_featured_image_minimum_height`](amp_featured_image_minimum_height.md) - Filters the minimum height required for a featured image.
 * [`amp_featured_image_minimum_width`](amp_featured_image_minimum_width.md) - Filters the minimum width required for a featured image.
 * ~~[`amp_frontend_show_canonical`](amp_frontend_show_canonical.md) - Filters whether to show the amphtml link on the frontend.~~
@@ -43,9 +46,11 @@
 * [`amp_mobile_user_agents`](amp_mobile_user_agents.md) - Filters the list of user agents used to determine if the user agent from the current request is a mobile one.
 * [`amp_mobile_version_switcher_link_text`](amp_mobile_version_switcher_link_text.md) - Filters the text to be used in the mobile switcher link.
 * [`amp_mobile_version_switcher_styles_used`](amp_mobile_version_switcher_styles_used.md) - Filters whether the default mobile version switcher styles are printed.
+* [`amp_native_img_used`](amp_native_img_used.md) - Filters whether to use the native `img` element rather than convert to `amp-img`.
 * [`amp_normalized_dimension_extractor_image_url`](amp_normalized_dimension_extractor_image_url.md) - Apply filters on the normalized image URL for dimension extraction.
 * [`amp_optimizer_config`](amp_optimizer_config.md) - Filter the configuration to be used for the AMP Optimizer.
 * [`amp_options_menu_is_enabled`](amp_options_menu_is_enabled.md) - Filter whether to enable the AMP settings.
+* [`amp_page_cache_good_response_time_threshold`](amp_page_cache_good_response_time_threshold.md) - Filters the threshold below which a response time is considered good.
 * [`amp_parsed_css_transient_caching_allowed`](amp_parsed_css_transient_caching_allowed.md) - Filters whether parsed CSS is allowed to be cached in transients.
 * [`amp_post_status_default_enabled`](amp_post_status_default_enabled.md) - Filters whether default AMP status should be enabled or not.
 * [`amp_post_template_analytics`](amp_post_template_analytics.md) - Add amp-analytics tags.
@@ -66,8 +71,9 @@
 * [`amp_to_amp_excluded_urls`](amp_to_amp_excluded_urls.md) - Filters the list of URLs which are excluded from being included in AMP-to-AMP linking.
 * [`amp_to_amp_linking_element_excluded`](amp_to_amp_linking_element_excluded.md) - Filters whether AMP-to-AMP is excluded for an element.
 * [`amp_to_amp_linking_enabled`](amp_to_amp_linking_enabled.md) - Filters whether AMP-to-AMP linking should be enabled.
-* [`amp_url_validation_limit_per_type`](amp_url_validation_limit_per_type.md) - Filters the number of URLs per content type to check during each run of the validation cron task.
-* [`amp_url_validation_sleep_time`](amp_url_validation_sleep_time.md) - Filters the length of time to sleep between validating URLs.
+* [`amp_validation_data_gc_before`](amp_validation_data_gc_before.md) - Filters the date before which validated URLs will be garbage collected.
+* [`amp_validation_data_gc_delete_empty_terms`](amp_validation_data_gc_delete_empty_terms.md) - Filters whether to delete empty terms during validation garbage collection.
+* [`amp_validation_data_gc_url_count`](amp_validation_data_gc_url_count.md) - Filters the count of eligible validated URLs that should be garbage collected.
 * [`amp_validation_error`](amp_validation_error.md) - Filters the validation error array.
 * [`amp_validation_error_default_sanitized`](amp_validation_error_default_sanitized.md) - Filters whether sanitization is accepted for a newly-encountered validation error .
 * [`amp_validation_error_sanitized`](amp_validation_error_sanitized.md) - Filters whether the validation error should be sanitized.

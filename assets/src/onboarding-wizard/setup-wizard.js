@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { useContext, useEffect, useMemo } from '@wordpress/element';
@@ -6,16 +11,12 @@ import { __ } from '@wordpress/i18n';
 import { Panel } from '@wordpress/components';
 
 /**
- * External dependencies
- */
-import PropTypes from 'prop-types';
-
-/**
  * Internal dependencies
  */
 import { Logo } from '../components/svg/logo';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
 import { useWindowWidth } from '../utils/use-window-width';
+import { SiteScan } from '../components/site-scan-context-provider';
 import { Stepper } from './components/stepper';
 import { Nav, CloseLink } from './components/nav';
 import { Navigation } from './components/navigation-context-provider';
@@ -23,8 +24,8 @@ import { Navigation } from './components/navigation-context-provider';
 /**
  * Side effect wrapper for page component.
  *
- * @param {Object} props Component props.
- * @param {?any} props.children Component children.
+ * @param {Object} props          Component props.
+ * @param {?any}   props.children Component children.
  */
 function PageComponentSideEffects( { children } ) {
 	useEffect( () => {
@@ -38,14 +39,20 @@ function PageComponentSideEffects( { children } ) {
 /**
  * Setup wizard root component.
  *
- * @param {Object} props Component props.
- * @param {string} props.closeLink Link to return to previous user location.
- * @param {string} props.finishLink Exit link.
- * @param {Element} props.appRoot App root element.
+ * @param {Object}  props            Component props.
+ * @param {string}  props.closeLink  Link to return to previous user location.
+ * @param {string}  props.finishLink Exit link.
+ * @param {Element} props.appRoot    App root element.
  */
 export function SetupWizard( { closeLink, finishLink, appRoot } ) {
 	const { isMobile } = useWindowWidth();
 	const { activePageIndex, currentPage: { title, PageComponent, showTitle }, moveBack, moveForward, pages } = useContext( Navigation );
+	const { fetchScannableUrls } = useContext( SiteScan );
+
+	// Fetch the AMP-first scannable URLs needed for the Site Scan step.
+	useEffect( () => {
+		fetchScannableUrls( { forceStandardMode: true } );
+	}, [ fetchScannableUrls ] );
 
 	const PageComponentWithSideEffects = useMemo( () => () => (
 		<PageComponentSideEffects>
@@ -71,7 +78,7 @@ export function SetupWizard( { closeLink, finishLink, appRoot } ) {
 							</h1>
 						</div>
 						<div className="amp-onboarding-wizard-plugin-name">
-							{ __( 'Official WordPress Plugin', 'amp' ) }
+							{ __( 'Official AMP Plugin for WordPress', 'amp' ) }
 						</div>
 					</div>
 					<Stepper

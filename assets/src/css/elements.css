@@ -28,7 +28,7 @@
 }
 
 .amp p {
-	font-size: 16px;
+	font-size: var(--amp-settings-font-size);
 }
 
 .amp,

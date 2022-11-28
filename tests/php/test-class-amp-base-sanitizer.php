@@ -5,31 +5,36 @@
  * @package AMP
  */
 
-use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\StubSanitizer;
+use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 
 /**
  * Test AMP_Base_Sanitizer_Test
  *
- * @covers AMP_Base_Sanitizer
+ * @coversDefaultClass \AMP_Base_Sanitizer
  */
-class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Base_Sanitizer_Test extends TestCase {
+	use PrivateAccess;
 
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		AMP_Validation_Manager::reset_validation_results();
 	}
 
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		AMP_Validation_Manager::reset_validation_results();
-		AMP_Validation_Manager::$is_validate_request = false;
+		$this->set_private_property( AMP_Validation_Manager::class, 'is_validate_request', false );
+		parent::tear_down();
 	}
 
 	/**
@@ -126,11 +131,20 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'fill_both_dimensions_and_absolute_position' => [
+			'fill_both_dimension_attrs_and_absolute_position' => [
 				[
 					'width'  => '100%',
 					'height' => '100%',
 					'style'  => 'position:absolute',
+				],
+				[
+					'layout' => 'fill',
+				],
+			],
+
+			'fill_both_dimensions_styles_and_absolute_position' => [
+				[
+					'style' => 'width: 100%; height:100%; position:absolute',
 				],
 				[
 					'layout' => 'fill',
@@ -190,6 +204,58 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		];
 	}
 
+	/** @covers ::get_selector_conversion_mapping() */
+	public function test_get_selector_conversion_mapping() {
+		$sanitizer = new StubSanitizer( new Document() );
+		$this->assertEquals( [], $sanitizer->get_selector_conversion_mapping() );
+	}
+
+	/** @covers ::has_light_shadow_dom() */
+	public function test_has_light_shadow_dom() {
+		$sanitizer = new StubSanitizer( new Document() );
+		$this->assertSame( true, $sanitizer->has_light_shadow_dom() );
+	}
+
+	/**
+	 * @covers ::update_args()
+	 * @covers ::get_args()
+	 * @covers ::get_arg()
+	 */
+	public function test_update_args() {
+		$sanitizer = new StubSanitizer(
+			new Document(),
+			[
+				'foo' => 1,
+				'bar' => 2,
+			]
+		);
+		$this->assertEquals(
+			[
+				'foo' => 1,
+				'bar' => 2,
+			],
+			$sanitizer->get_args()
+		);
+		$this->assertNull( $sanitizer->get_arg( 'none' ) );
+		$this->assertEquals( 1, $sanitizer->get_arg( 'foo' ) );
+		$sanitizer->update_args(
+			[
+				'foo' => 'one',
+				'baz' => 'three',
+			]
+		);
+		$this->assertEquals( 'one', $sanitizer->get_arg( 'foo' ) );
+		$this->assertEquals(
+			[
+				'foo' => 'one',
+				'bar' => 2,
+				'baz' => 'three',
+			],
+			$sanitizer->get_args()
+		);
+		$this->assertEquals( 'three', $sanitizer->get_arg( 'baz' ) );
+	}
+
 	/**
 	 * Test AMP_Base_Sanitizer::set_layout().
 	 *
@@ -197,7 +263,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param array $source_attributes   Source Attrs.
 	 * @param array $expected_attributes Expected Attrs.
 	 * @param array $args                Args.
-	 * @covers AMP_Base_Sanitizer::set_layout()
+	 * @covers ::set_layout()
 	 */
 	public function test_set_layout( $source_attributes, $expected_attributes, $args = [] ) {
 		$sanitizer           = new StubSanitizer( new Document(), $args );
@@ -215,6 +281,16 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			'empty'                => [
 				[ '', 'width' ],
 				'',
+			],
+
+			'with_string_zero'     => [
+				[ '0', 'width' ],
+				0,
+			],
+
+			'with_int_zero'        => [
+				[ 0, 'width' ],
+				0,
 			],
 
 			'empty_space'          => [
@@ -239,13 +315,13 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 
 			'100%_width__with_max' => [
 				[ '100%', 'width' ],
-				600,
+				'auto',
 				[ 'content_max_width' => 600 ],
 			],
 
 			'100%_width__no_max'   => [
 				[ '100%', 'width' ],
-				'',
+				'auto',
 			],
 
 			'50%_width__with_max'  => [
@@ -273,7 +349,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param array $expected_value Expected Attrs.
 	 * @param array $args           Args.
 	 * @dataProvider get_sanitize_dimension_data
-	 * @covers AMP_Base_Sanitizer::sanitize_dimension()
+	 * @covers ::sanitize_dimension()
 	 */
 	public function test_sanitize_dimension( $source_params, $expected_value, $args = [] ) {
 		$sanitizer                 = new StubSanitizer( new Document(), $args );
@@ -287,9 +363,9 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests remove_invalid_child.
 	 *
-	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
-	 * @covers AMP_Base_Sanitizer::should_sanitize_validation_error()
-	 * @covers AMP_Base_Sanitizer::prepare_validation_error()
+	 * @covers ::remove_invalid_child()
+	 * @covers ::should_sanitize_validation_error()
+	 * @covers ::prepare_validation_error()
 	 */
 	public function test_remove_invalid_child() {
 		$parent_tag_name = 'div';
@@ -357,12 +433,52 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		AMP_Validation_Manager::$validation_results = null;
 	}
 
+	/** @covers ::remove_invalid_child() */
+	public function test_remove_invalid_child_with_validation_exemptions() {
+		// When no exemption attributes are present, the element gets removed.
+		$dom       = Document::fromHtml( '<div id="el"></div>' );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertTrue( $sanitizer->remove_invalid_child( $el ) );
+		$this->assertNull( $el->parentNode );
+
+		// When PX-verified attribute is present, the element does not get removed.
+		$dom       = Document::fromHtml( sprintf( '<div id="el" %s></div>', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ) );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertFalse( $sanitizer->remove_invalid_child( $el ) );
+		$this->assertInstanceOf( Element::class, $el->parentNode );
+
+		// When AMP-unvalidated attribute is present, the element does not get removed.
+		$dom       = Document::fromHtml( sprintf( '<div id="el" %s></div>', ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertFalse( $sanitizer->remove_invalid_child( $el ) );
+		$this->assertInstanceOf( Element::class, $el->parentNode );
+
+		// Ensure that element is marked as being AMP-unvalidated if validation callback prevents removal.
+		$dom       = Document::fromHtml( '<div id="el"></div>' );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass(
+			AMP_Base_Sanitizer::class,
+			[
+				$dom,
+				[
+					'validation_error_callback' => '__return_false',
+				],
+			]
+		);
+		$this->assertFalse( $sanitizer->remove_invalid_child( $el ) );
+		$this->assertInstanceOf( Element::class, $el->parentNode );
+		$this->assertTrue( $el->hasAttribute( ValidationExemption::AMP_UNVALIDATED_TAG_ATTRIBUTE ) );
+	}
+
 	/**
 	 * Tests remove_invalid_child with script text normalization.
 	 *
-	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
-	 * @covers AMP_Base_Sanitizer::should_sanitize_validation_error()
-	 * @covers AMP_Base_Sanitizer::prepare_validation_error()
+	 * @covers ::remove_invalid_child()
+	 * @covers ::should_sanitize_validation_error()
+	 * @covers ::prepare_validation_error()
 	 */
 	public function test_remove_invalid_child_with_script_text_normalization() {
 		$dom        = new Document( '1.0', 'utf-8' );
@@ -447,8 +563,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests remove_invalid_child.
 	 *
-	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
-	 * @covers AMP_Base_Sanitizer::is_exempt_from_validation()
+	 * @covers ::remove_invalid_child()
+	 * @covers ::is_exempt_from_validation()
 	 */
 	public function test_remove_invalid_child_dev_mode() {
 		$id   = 'target';
@@ -483,9 +599,9 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests remove_invalid_child and should_sanitize_validation_error.
 	 *
-	 * @covers AMP_Base_Sanitizer::remove_invalid_attribute()
-	 * @covers AMP_Base_Sanitizer::should_sanitize_validation_error()
-	 * @covers AMP_Base_Sanitizer::prepare_validation_error()
+	 * @covers ::remove_invalid_attribute()
+	 * @covers ::should_sanitize_validation_error()
+	 * @covers ::prepare_validation_error()
 	 */
 	public function test_remove_invalid_attribute() {
 		$that = $this;
@@ -556,8 +672,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests remove_invalid_attribute in dev mode.
 	 *
-	 * @covers AMP_Base_Sanitizer::remove_invalid_attribute()
-	 * @covers AMP_Base_Sanitizer::is_exempt_from_validation()
+	 * @covers ::remove_invalid_attribute()
+	 * @covers ::is_exempt_from_validation()
 	 */
 	public function test_remove_invalid_attribute_dev_mode() {
 		$id   = 'target';
@@ -590,10 +706,50 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertFalse( $element->hasAttribute( $attr ) );
 	}
 
+	/** @covers ::remove_invalid_attribute() */
+	public function test_remove_invalid_attribute_with_validation_exemptions() {
+		// When no exemption attributes are present, the attribute gets removed.
+		$dom       = Document::fromHtml( '<div id="el"></div>' );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertTrue( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertFalse( $el->getAttributeNode( 'id' ) );
+
+		// When PX-verified attribute is present, the attribute does not get removed.
+		$dom       = Document::fromHtml( sprintf( '<div id="el" %s="id"></div>', ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertFalse( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertInstanceOf( DOMAttr::class, $el->getAttributeNode( 'id' ) );
+
+		// When AMP-unvalidated attribute is present, the attribute does not get removed.
+		$dom       = Document::fromHtml( sprintf( '<div id="el" %s="id"></div>', ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass( AMP_Base_Sanitizer::class, [ $dom ] );
+		$this->assertFalse( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertInstanceOf( DOMAttr::class, $el->getAttributeNode( 'id' ) );
+
+		// Ensure that attribute is marked as being AMP-unvalidated if validation callback prevents removal.
+		$dom       = Document::fromHtml( '<div id="el"></div>' );
+		$el        = $dom->getElementById( 'el' );
+		$sanitizer = $this->getMockForAbstractClass(
+			AMP_Base_Sanitizer::class,
+			[
+				$dom,
+				[
+					'validation_error_callback' => '__return_false',
+				],
+			]
+		);
+		$this->assertFalse( $sanitizer->remove_invalid_attribute( $el, 'id' ) );
+		$this->assertInstanceOf( DOMAttr::class, $el->getAttributeNode( 'id' ) );
+		$this->assertEquals( 'id', $el->getAttribute( ValidationExemption::AMP_UNVALIDATED_ATTRS_ATTRIBUTE ) );
+	}
+
 	/**
 	 * Tests get_data_amp_attributes.
 	 *
-	 * @covers AMP_Base_Sanitizer::get_data_amp_attributes()
+	 * @covers ::get_data_amp_attributes()
 	 */
 	public function test_get_data_amp_attributes() {
 		$tag          = 'figure';
@@ -618,7 +774,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests set_data_amp_attributes.
 	 *
-	 * @covers AMP_Base_Sanitizer::filter_data_amp_attributes()
+	 * @covers ::filter_data_amp_attributes()
 	 */
 	public function test_filter_data_amp_attributes() {
 		$amp_data   = [
@@ -641,7 +797,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests set_attachment_layout_attributes.
 	 *
-	 * @covers AMP_Base_Sanitizer::filter_attachment_layout_attributes()
+	 * @covers ::filter_attachment_layout_attributes()
 	 */
 	public function test_filter_attachment_layout_attributes() {
 		$sanitizer    = new StubSanitizer( new Document(), [] );

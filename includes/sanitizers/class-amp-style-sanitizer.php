@@ -5,29 +5,37 @@
  * @package AMP
  */
 
+use AmpProject\Amp;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\RequestDestination;
+use AmpProject\Html\Tag;
 use AmpProject\RemoteGetRequest;
-use Sabberworm\CSS\RuleSet\DeclarationBlock;
-use Sabberworm\CSS\CSSList\CSSList;
-use Sabberworm\CSS\Property\Selector;
-use Sabberworm\CSS\RuleSet\RuleSet;
-use Sabberworm\CSS\Property\AtRule;
-use Sabberworm\CSS\Rule\Rule;
-use Sabberworm\CSS\CSSList\KeyFrame;
-use Sabberworm\CSS\RuleSet\AtRuleSet;
-use Sabberworm\CSS\OutputFormat;
-use Sabberworm\CSS\Property\Import;
 use Sabberworm\CSS\CSSList\AtRuleBlockList;
+use Sabberworm\CSS\CSSList\CSSList;
+use Sabberworm\CSS\CSSList\Document as CSSDocument;
+use Sabberworm\CSS\CSSList\KeyFrame;
+use Sabberworm\CSS\OutputFormat;
+use Sabberworm\CSS\Parsing\SourceException;
+use Sabberworm\CSS\Property\AtRule;
+use Sabberworm\CSS\Property\Import;
+use Sabberworm\CSS\Property\Selector;
+use Sabberworm\CSS\RuleSet\AtRuleSet;
+use Sabberworm\CSS\RuleSet\DeclarationBlock;
+use Sabberworm\CSS\RuleSet\RuleSet;
+use Sabberworm\CSS\Rule\Rule;
+use Sabberworm\CSS\Value\CSSFunction;
 use Sabberworm\CSS\Value\RuleValueList;
 use Sabberworm\CSS\Value\URL;
 use Sabberworm\CSS\Value\Value;
-use Sabberworm\CSS\CSSList\Document as CSSDocument;
 
 /**
  * Class AMP_Style_Sanitizer
@@ -121,15 +129,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
-	 *      @type string[] $dynamic_element_selectors  Selectors for elements (or their ancestors) which contain dynamic content; selectors containing these will not be filtered.
-	 *      @type bool     $use_document_element       Whether the root of the document should be used rather than the body.
-	 *      @type bool     $require_https_src          Require HTTPS URLs.
-	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
-	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
-	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
-	 *      @type string[] $focus_within_classes       Class names in selectors that should be replaced with :focus-within pseudo classes.
-	 *      @type string[] $low_priority_plugins       Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
-	 *      @type bool     $allow_transient_caching    Whether to allow caching parsed CSS in transients. This may need to be disabled when there is highly-variable CSS content.
+	 *      @type bool     $disable_style_processing       Whether arbitrary styles should be allowed. When enabled, external stylesheet links, style elements, and style attributes will all be unprocessed and marked as PX-verified.
+	 *      @type string[] $dynamic_element_selectors      Selectors for elements (or their ancestors) which contain dynamic content; selectors containing these will not be filtered.
+	 *      @type bool     $use_document_element           Whether the root of the document should be used rather than the body.
+	 *      @type bool     $require_https_src              Require HTTPS URLs.
+	 *      @type callable $validation_error_callback      Function to call when a validation error is encountered.
+	 *      @type bool     $should_locate_sources          Whether to locate the sources when reporting validation errors.
+	 *      @type string   $parsed_cache_variant           Additional value by which to vary parsed cache.
+	 *      @type string[] $focus_within_classes           Class names in selectors that should be replaced with :focus-within pseudo classes.
+	 *      @type string[] $low_priority_plugins           Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
+	 *      @type bool     $allow_transient_caching        Whether to allow caching parsed CSS in transients. This may need to be disabled when there is highly-variable CSS content.
+	 *      @type bool     $skip_tree_shaking              Whether tree shaking should be skipped.
+	 *      @type bool     $allow_excessive_css            Whether to allow CSS to exceed the allowed max bytes (without raising validation errors).
+	 *      @type bool     $transform_important_qualifiers Whether !important rules should be transformed. This also necessarily transform inline style attributes.
+	 *      @type string[] $font_face_display_overrides    Array of the font family names and the font-display value they should each have.
 	 * }
 	 */
 	protected $args;
@@ -140,18 +153,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'dynamic_element_selectors' => [
+		'disable_style_processing'       => false,
+		'dynamic_element_selectors'      => [
+			'amp-img',
+			'amp-anim',
 			'amp-list',
 			'amp-live-list',
 			'[submit-error]',
 			'[submit-success]',
 			'amp-script',
+			'amp-story-captions',
 		],
-		'should_locate_sources'     => false,
-		'parsed_cache_variant'      => null,
-		'focus_within_classes'      => [ 'focus' ],
-		'low_priority_plugins'      => [ 'query-monitor' ],
-		'allow_transient_caching'   => true,
+		'should_locate_sources'          => false,
+		'parsed_cache_variant'           => null,
+		'focus_within_classes'           => [ 'focus' ],
+		'low_priority_plugins'           => [ 'query-monitor' ],
+		'allow_transient_caching'        => true,
+		'skip_tree_shaking'              => false,
+		'allow_excessive_css'            => false,
+		'transform_important_qualifiers' => true,
+		'font_face_display_overrides'    => [
+			'NonBreakingSpaceOverride' => 'optional',
+			'Inter var'                => 'optional',
+			'Genericons'               => 'block',
+		],
 	];
 
 	/**
@@ -233,7 +258,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes
 	 * @since 1.0
-	 * @var array
+	 * @var array|null
 	 */
 	private $used_class_names;
 
@@ -278,7 +303,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Tag names used in document.
 	 *
 	 * @since 1.0
-	 * @var array
+	 * @var array|null
 	 */
 	private $used_tag_names;
 
@@ -344,12 +369,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $remote_request;
 
 	/**
-	 * Cached call to is_customize_preview()
+	 * All current sanitizers.
 	 *
-	 * @see is_customize_preview()
-	 * @var bool
+	 * @see AMP_Style_Sanitizer::init()
+	 * @var AMP_Base_Sanitizer[]
 	 */
-	private $is_customize_preview;
+	private $sanitizers = [];
 
 	/**
 	 * Get error codes that can be raised during parsing of CSS.
@@ -516,6 +541,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( $sanitized ) {
 						$mutated = true;
 						continue;
+					} else {
+						ValidationExemption::mark_node_as_amp_unvalidated( $class_attribute );
 					}
 				}
 				$element_classes[] = $class_name;
@@ -527,7 +554,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
-		foreach ( $this->dom->xpath->query( '//*/@' . Document::AMP_BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
+		foreach ( $this->dom->xpath->query( '//*/@' . Amp::BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
 			if ( preg_match_all( '/([\'"])([^\1]*?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
 				$classes = array_merge(
 					$classes,
@@ -554,6 +581,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					)
 				);
 			}
+		}
+
+		// If using the toggleTheme component, get the theme's dark mode class.
+		// See usage of toggleTheme in <https://github.com/ampproject/amphtml/pull/36958>.
+		$dark_mode_class = $this->dom->body->getAttribute( 'data-prefers-dark-mode-class' );
+
+		// Prevent dark mode class from being tree-shaken.
+		if ( $dark_mode_class ) {
+			$class_names[] = $dark_mode_class;
+		} else {
+			$class_names[] = 'amp-dark-mode';
 		}
 
 		$this->used_class_names = array_fill_keys( $class_names, true );
@@ -856,7 +894,32 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function init( $sanitizers ) {
 		parent::init( $sanitizers );
 
-		foreach ( $sanitizers as $sanitizer ) {
+		$this->sanitizers = $sanitizers;
+	}
+
+	/**
+	 * Sanitize CSS styles within the HTML contained in this instance's Dom\Document.
+	 *
+	 * @since 0.4
+	 */
+	public function sanitize() {
+
+		// When style processing is disabled, simply mark all the CSS elements/attributes as PX-verified.
+		if ( $this->args['disable_style_processing'] ) {
+			foreach ( $this->dom->xpath->query( '//link[ @rel = "stylesheet" and @href ] | //style | //*/@style' ) as $node ) {
+				ValidationExemption::mark_node_as_px_verified( $node );
+
+				// Since stylesheet links are allowed in the HEAD if they are for fonts, mark the href specifically as being the exempted attribute.
+				if ( $node instanceof Element && Tag::LINK === $node->tagName ) {
+					ValidationExemption::mark_node_as_px_verified( $node->getAttributeNode( Attribute::HREF ) );
+					ValidationExemption::mark_node_as_px_verified( $node->getAttributeNode( Attribute::REL ) );
+				}
+			}
+			return;
+		}
+
+		// Capture the selector conversion mappings from the other sanitizers.
+		foreach ( $this->sanitizers as $sanitizer ) {
 			foreach ( $sanitizer->get_selector_conversion_mapping() as $html_selectors => $amp_selectors ) {
 				if ( ! isset( $this->selector_mappings[ $html_selectors ] ) ) {
 					$this->selector_mappings[ $html_selectors ] = $amp_selectors;
@@ -867,21 +930,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				// Prevent selectors like `amp-img img` getting deleted since `img` does not occur in the DOM.
-				$this->args['dynamic_element_selectors'] = array_merge(
-					$this->args['dynamic_element_selectors'],
-					$this->selector_mappings[ $html_selectors ]
-				);
+				if ( $sanitizer->has_light_shadow_dom() ) {
+					$this->args['dynamic_element_selectors'] = array_merge(
+						$this->args['dynamic_element_selectors'],
+						$this->selector_mappings[ $html_selectors ]
+					);
+				}
 			}
 		}
-	}
-
-	/**
-	 * Sanitize CSS styles within the HTML contained in this instance's Dom\Document.
-	 *
-	 * @since 0.4
-	 */
-	public function sanitize() {
-		$this->is_customize_preview = is_customize_preview();
 
 		$elements = [];
 
@@ -896,6 +952,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 * in document order. DOMNode::compareDocumentPosition() is not yet implemented.
 		 */
 
+		// @todo Also consider skipping the processing of link and style elements that have data-px-verified-tag.
 		$dev_mode_predicate = '';
 		if ( DevMode::isActiveForDocument( $this->dom ) ) {
 			$dev_mode_predicate = sprintf( ' and not ( @%s )', AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
@@ -912,6 +969,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// If 'width' attribute is present for 'col' tag, convert to proper CSS rule.
+		// @todo The width attribute on the <col> tag is probably something that should just be allowed in AMP.
 		foreach ( $this->dom->getElementsByTagName( 'col' ) as $col ) {
 			/**
 			 * Col element.
@@ -952,12 +1010,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$elements = [];
-		foreach ( $this->dom->xpath->query( "//*[ @style $dev_mode_predicate ]" ) as $element ) {
-			$elements[] = $element;
-		}
-		foreach ( $elements as $element ) {
-			$this->collect_inline_styles( $element );
+		$styled_elements = $this->dom->xpath->query( "//*[ @style $dev_mode_predicate ]" );
+		if ( $this->args['transform_important_qualifiers'] ) {
+			foreach ( iterator_to_array( $styled_elements ) as $element ) {
+				$this->collect_inline_styles( $element );
+			}
+		} else {
+			foreach ( $styled_elements as $element ) {
+				$attr = $element->getAttributeNode( Attribute::STYLE );
+				if ( $attr && preg_match( '/!\s*important/i', $attr->value ) ) {
+					ValidationExemption::mark_node_as_px_verified( $attr );
+				}
+			}
 		}
 
 		$this->finalize_styles();
@@ -1027,7 +1091,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return preg_replace( '/^https?:/', '', $url );
 		};
 
-		if ( $node instanceof DOMElement && 'link' === $node->nodeName ) {
+		if ( $node instanceof DOMElement && 'link' === $node->tagName ) {
 			$element_id      = (string) $node->getAttribute( 'id' );
 			$schemeless_href = $remove_url_scheme( $node->getAttribute( 'href' ) );
 
@@ -1091,13 +1155,35 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 'print' === $node->getAttribute( 'media' ) ) {
 				$priority += $print_priority_base;
 			}
-		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName && $node->hasAttribute( 'id' ) ) {
-			$id                  = $node->getAttribute( 'id' );
-			$is_theme_inline_css = preg_match( '/^(?<handle>.+)-inline-css$/', $id, $matches ) && wp_style_is( $matches['handle'], 'registered' );
-			if ( $is_theme_inline_css && 0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_template_directory_uri() ) ) {
+		} elseif ( $node instanceof DOMElement && 'style' === $node->tagName && $node->hasAttribute( 'id' ) ) {
+			$id         = $node->getAttribute( 'id' );
+			$dependency = null;
+			if ( preg_match( '/^(?<handle>.+)-inline-css$/', $id, $matches ) ) {
+				$dependency = wp_styles()->query( $matches['handle'], 'registered' );
+			}
+
+			if (
+				$dependency
+				&&
+				(
+					0 === strpos( $dependency->src, get_template_directory_uri() )
+					||
+					// Add special case for core theme sanitizer which sets the src of the theme stylesheet to false
+					// in order to attach the amended stylesheet contents as an inline style for AMP-compatibility.
+					// See AMP_Core_Theme_Sanitizer::amend_twentytwentyone_styles() and
+					// AMP_Core_Theme_Sanitizer::amend_twentytwentyone_dark_mode_styles().
+					'twenty-twenty-one-style' === $dependency->handle
+				)
+			) {
 				// Parent theme inline style.
 				$priority = 2;
-			} elseif ( $is_theme_inline_css && get_stylesheet() !== get_template() && 0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_stylesheet_directory_uri() ) ) {
+			} elseif (
+				$dependency
+				&&
+				get_stylesheet() !== get_template()
+				&&
+				0 === strpos( $dependency->src, get_stylesheet_directory_uri() )
+			) {
 				// Child theme inline style.
 				$priority = 12;
 			} elseif ( 'admin-bar-inline-css' === $id ) {
@@ -1324,6 +1410,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet = sprintf( '@media %s { %s }', $media, $stylesheet );
 		}
 
+		// @todo If ValidationExemption::is_px_verified_for_node( $element ) then keep !important.
+		// @todo If ValidationExemption::is_amp_unvalidated_for_node( $element ) then keep invalid markup.
 		$parsed = $this->get_parsed_stylesheet(
 			$stylesheet,
 			[
@@ -1352,6 +1440,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'shake_time'         => null,
 			'cached'             => $parsed['cached'],
 			'imported_font_urls' => $parsed['imported_font_urls'],
+			'important_count'    => $parsed['important_count'],
+			'kept_error_count'   => $parsed['kept_error_count'],
+			'preload_font_urls'  => $parsed['preload_font_urls'],
 		];
 
 		// Remove from DOM since we'll be adding it to a newly-created style[amp-custom] element later.
@@ -1424,6 +1515,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->set_current_node( $element ); // And sources when needing to be located.
 
+		// @todo If ValidationExemption::is_px_verified_for_node( $element ) then keep !important.
+		// @todo If ValidationExemption::is_amp_unvalidated_for_node( $element ) then keep invalid markup.
 		$parsed = $this->get_parsed_stylesheet(
 			$stylesheet,
 			[
@@ -1452,6 +1545,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'shake_time'         => null,
 			'cached'             => $parsed['cached'],
 			'imported_font_urls' => $parsed['imported_font_urls'],
+			'important_count'    => $parsed['important_count'],
+			'kept_error_count'   => $parsed['kept_error_count'],
+			'preload_font_urls'  => $parsed['preload_font_urls'],
 		];
 
 		// Remove now that styles have been processed.
@@ -1547,34 +1643,49 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *    Processed stylesheet.
 	 *
-	 *    @type array  $tokens             Stylesheet tokens, where arrays are tuples for declaration blocks.
-	 *    @type string $hash               MD5 hash of the parsed stylesheet.
-	 *    @type array  $validation_results Validation results, array containing arrays with error and sanitized keys.
-	 *    @type array  $imported_font_urls Imported font stylesheet URLs.
-	 *    @type int    $priority           The priority of the stylesheet.
-	 *    @type float  $parse_time         The time duration it took to parse the stylesheet, in milliseconds.
-	 *    @type float  $shake_time         The time duration it took to tree-shake the stylesheet, in milliseconds.
-	 *    @type bool   $cached             Whether the parsed stylesheet was cached.
+	 *    @type array    $tokens             Stylesheet tokens, where arrays are tuples for declaration blocks.
+	 *    @type string   $hash               MD5 hash of the parsed stylesheet.
+	 *    @type array    $validation_results Validation results, array containing arrays with error and sanitized keys.
+	 *    @type array    $imported_font_urls Imported font stylesheet URLs.
+	 *    @type int      $priority           The priority of the stylesheet.
+	 *    @type float    $parse_time         The time duration it took to parse the stylesheet, in milliseconds.
+	 *    @type float    $shake_time         The time duration it took to tree-shake the stylesheet, in milliseconds.
+	 *    @type bool     $cached             Whether the parsed stylesheet was cached.
+	 *    @type int      $important_count    Number of !important qualifiers.
+	 *    @type int      $kept_error_count   Number of instances of invalid markup causing validation errors which are kept.
+	 *    @type string[] $preload_font_urls  Font URLs to preload.
 	 * }
 	 */
 	private function get_parsed_stylesheet( $stylesheet, $options = [] ) {
-		$parsed         = null;
-		$cache_key      = null;
 		$cached         = true;
-		$cache_group    = 'amp-parsed-stylesheet-v36'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group    = 'amp-parsed-stylesheet-v39'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 		$use_transients = $this->should_use_transient_caching();
 
+		// @todo If ValidationExemption::is_px_verified_for_node( $this->current_node ) then keep !important.
+		// @todo If ValidationExemption::is_amp_unvalidated_for_node( $this->current_node ) then keep invalid markup.
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
 				$options,
-				[ 'property_allowlist', 'property_denylist', 'stylesheet_url', 'allowed_at_rules' ]
+				[
+					'property_allowlist',
+					'property_denylist',
+					'stylesheet_url',
+					'allowed_at_rules',
+				]
 			),
 			wp_array_slice_assoc(
 				$this->args,
-				[ 'should_locate_sources', 'parsed_cache_variant', 'dynamic_element_selectors' ]
+				[
+					'should_locate_sources',
+					'parsed_cache_variant',
+					'dynamic_element_selectors',
+					'transform_important_qualifiers',
+					'font_face_display_overrides',
+				]
 			),
 			[
-				'language' => get_bloginfo( 'language' ), // Used to tree-shake html[lang] selectors.
+				'language'          => get_bloginfo( 'language' ), // Used to tree-shake html[lang] selectors.
+				'selector_mappings' => $this->selector_mappings,
 			]
 		);
 
@@ -1617,6 +1728,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		$parsed['kept_error_count'] = 0;
+		foreach ( $parsed['validation_results'] as $validation_result ) {
+			if ( ! $validation_result['sanitized'] ) {
+				$parsed['kept_error_count']++;
+			}
+		}
+
 		$parsed['cached'] = $cached;
 		return $parsed;
 	}
@@ -1653,11 +1771,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type string $stylesheet_url Original URL for stylesheet when originating via link or @import.
 	 * }
 	 * @return array {
-	 *     Validation results.
+	 *     Results.
 	 *
-	 *     @type array $validation_results Validation results.
-	 *     @type array $imported_font_urls Imported font URLs.
-	 *     @type array $viewport_rules     Extracted viewport rules.
+	 *     @type array    $validation_results Validation results.
+	 *     @type array    $imported_font_urls Imported font URLs.
+	 *     @type array    $viewport_rules     Extracted viewport rules.
+	 *     @type int      $important_count    Number of !important qualifiers.
+	 *     @type string[] $preload_font_urls  Font URLs to preload.
 	 * }
 	 */
 	private function splice_imported_stylesheet( Import $item, CSSList $css_list, $options ) {
@@ -1667,6 +1787,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$at_rule_args       = $item->atRuleArgs();
 		$location           = array_shift( $at_rule_args );
 		$media_query        = array_shift( $at_rule_args );
+		$important_count    = 0;
+		$preload_font_urls  = [];
 
 		if ( isset( $options['stylesheet_url'] ) ) {
 			$this->real_path_urls( [ $location ], $options['stylesheet_url'] );
@@ -1677,7 +1799,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// Prevent importing something that has already been imported, and avoid infinite recursion.
 		if ( isset( $this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] ) ) {
 			$css_list->remove( $item );
-			return compact( 'validation_results', 'imported_font_urls', 'viewport_rules' );
+			return compact( 'validation_results', 'imported_font_urls', 'viewport_rules', 'important_count', 'preload_font_urls' );
 		}
 		$this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] = true;
 
@@ -1700,7 +1822,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'1.0'
 			);
 
-			return compact( 'validation_results', 'imported_font_urls', 'viewport_rules' );
+			return compact( 'validation_results', 'imported_font_urls', 'viewport_rules', 'important_count', 'preload_font_urls' );
 		}
 
 		$stylesheet = $this->get_stylesheet_from_url( $import_stylesheet_url );
@@ -1717,7 +1839,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$validation_results[] = compact( 'error', 'sanitized' );
 
-			return compact( 'validation_results', 'imported_font_urls', 'viewport_rules' );
+			return compact( 'validation_results', 'imported_font_urls', 'viewport_rules', 'important_count', 'preload_font_urls' );
 		}
 
 		if ( $media_query ) {
@@ -1726,13 +1848,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$options['stylesheet_url'] = $import_stylesheet_url;
 
-		$parsed_stylesheet = $this->create_validated_css_document( $stylesheet, $options );
-
-		$validation_results = array_merge(
-			$validation_results,
-			$parsed_stylesheet['validation_results']
-		);
+		$parsed_stylesheet  = $this->create_validated_css_document( $stylesheet, $options );
+		$validation_results = array_merge( $validation_results, $parsed_stylesheet['validation_results'] );
 		$viewport_rules     = $parsed_stylesheet['viewport_rules'];
+		$important_count    = $parsed_stylesheet['important_count'];
+		$preload_font_urls  = $parsed_stylesheet['preload_font_urls'];
 
 		if ( ! empty( $parsed_stylesheet['css_document'] ) ) {
 			/**
@@ -1747,7 +1867,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css_list->remove( $item );
 		}
 
-		return compact( 'validation_results', 'imported_font_urls', 'viewport_rules' );
+		return compact( 'validation_results', 'imported_font_urls', 'viewport_rules', 'important_count', 'preload_font_urls' );
 	}
 
 	/**
@@ -1789,16 +1909,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *    @type CSSDocument $css_document       CSS Document.
 	 *    @type array       $validation_results Validation results, array containing arrays with error and sanitized keys.
 	 *    @type string      $stylesheet_url     Stylesheet URL, if available.
-	 *    @type string      $spec_name          Spec name.
+	 *    @type array       $imported_font_urls Imported font URLs.
 	 *    @type array       $viewport_rules     Extracted viewport rules.
+	 *    @type int         $important_count    Number of !important qualifiers.
+	 *    @type string[]    $preload_font_urls  Font URLs to preload.
 	 * }
 	 */
 	private function create_validated_css_document( $stylesheet_string, $options ) {
 		$validation_results = [];
 		$imported_font_urls = [];
 		$viewport_rules     = [];
+		$important_count    = 0;
+		$preload_font_urls  = [];
 		$css_document       = null;
 
+		// Note that there is no known case where an exception can be thrown here since PHP-CSS-Parser is using lenient parsing.
 		try {
 			// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
 			$stylesheet_string = $this->remove_spaces_from_url_values( $stylesheet_string );
@@ -1829,8 +1954,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$viewport_rules,
 				$processed_css_list['viewport_rules']
 			);
+			$important_count    = $processed_css_list['important_count'];
 			$imported_font_urls = $processed_css_list['imported_font_urls'];
-		} catch ( Exception $exception ) {
+			$preload_font_urls  = array_merge( $preload_font_urls, $processed_css_list['preload_font_urls'] );
+		} catch ( SourceException $exception ) {
 			$error = [
 				'code'      => self::CSS_SYNTAX_PARSE_ERROR,
 				'message'   => $exception->getMessage(),
@@ -1846,7 +1973,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$validation_results[] = compact( 'error', 'sanitized' );
 		}
-		return compact( 'validation_results', 'css_document', 'imported_font_urls', 'viewport_rules' );
+		return compact( 'validation_results', 'css_document', 'imported_font_urls', 'viewport_rules', 'important_count', 'preload_font_urls' );
 	}
 
 	/**
@@ -1863,11 +1990,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *    Parsed stylesheet.
 	 *
-	 *    @type array  $tokens             Stylesheet tokens, where arrays are tuples for declaration blocks.
-	 *    @type string $hash               MD5 hash of the parsed stylesheet.
-	 *    @type array  $validation_results Validation results, array containing arrays with error and sanitized keys.
-	 *    @type array  $imported_font_urls Imported font stylesheet URLs.
-	 *    @type float  $parse_time         The time duration it took to parse the stylesheet, in milliseconds.
+	 *    @type array    $tokens             Stylesheet tokens, where arrays are tuples for declaration blocks.
+	 *    @type string   $hash               MD5 hash of the parsed stylesheet.
+	 *    @type array    $validation_results Validation results, array containing arrays with error and sanitized keys.
+	 *    @type array    $imported_font_urls Imported font stylesheet URLs.
+	 *    @type float    $parse_time         The time duration it took to parse the stylesheet, in milliseconds.
+	 *    @type int      $important_count    Number of !important qualifiers.
+	 *    @type string[] $preload_font_urls  Font URLs to preload.
 	 * }
 	 */
 	private function parse_stylesheet( $stylesheet_string, $options = [] ) {
@@ -2059,6 +2188,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'hash'               => md5( wp_json_encode( $tokens ) ),
 				'parse_time'         => ( microtime( true ) - $start_time ),
 				'viewport_rules'     => $parsed_stylesheet['viewport_rules'],
+				'important_count'    => $parsed_stylesheet['important_count'],
+				'preload_font_urls'  => $parsed_stylesheet['preload_font_urls'],
 			]
 		);
 	}
@@ -2139,22 +2270,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *     Processed CSS list.
 	 *
-	 *     @type array $validation_results Validation results.
-	 *     @type array $viewport_rules     Extracted viewport rules.
-	 *     @type array $imported_font_urls
+	 *     @type array    $validation_results Validation results.
+	 *     @type array    $viewport_rules     Extracted viewport rules.
+	 *     @type array    $imported_font_urls Imported font URLs.
+	 *     @type int      $important_count    Number of !important qualifiers.
+	 *     @type string[] $preload_font_urls  Font URLs to preload.
 	 * }
 	 */
 	private function process_css_list( CSSList $css_list, $options ) {
 		$validation_results = [];
 		$viewport_rules     = [];
 		$imported_font_urls = [];
+		$preload_font_urls  = [];
+		$important_count    = 0;
 
 		foreach ( $css_list->getContents() as $css_item ) {
 			$sanitized = false;
 			if ( $css_item instanceof DeclarationBlock && empty( $options['validate_keyframes'] ) ) {
+				$processed = $this->process_css_declaration_block( $css_item, $css_list, $options );
+
+				$important_count   += $processed['important_count'];
+				$preload_font_urls  = array_merge( $preload_font_urls, $processed['preload_font_urls'] );
 				$validation_results = array_merge(
 					$validation_results,
-					$this->process_css_declaration_block( $css_item, $css_list, $options )
+					$processed['validation_results']
 				);
 			} elseif ( $css_item instanceof AtRuleBlockList ) {
 				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
@@ -2168,18 +2307,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$validation_results[] = compact( 'error', 'sanitized' );
 				}
 				if ( ! $sanitized ) {
-					$at_rule_processed_list = $this->process_css_list( $css_item, $options );
-					$viewport_rules         = array_merge( $viewport_rules, $at_rule_processed_list['viewport_rules'] );
-					$validation_results     = array_merge(
+					$processed          = $this->process_css_list( $css_item, $options );
+					$viewport_rules     = array_merge( $viewport_rules, $processed['viewport_rules'] );
+					$important_count   += $processed['important_count'];
+					$preload_font_urls  = array_merge( $preload_font_urls, $processed['preload_font_urls'] );
+					$validation_results = array_merge(
 						$validation_results,
-						$at_rule_processed_list['validation_results']
+						$processed['validation_results']
 					);
 				}
 			} elseif ( $css_item instanceof Import ) {
 				$imported_stylesheet = $this->splice_imported_stylesheet( $css_item, $css_list, $options );
 				$imported_font_urls  = array_merge( $imported_font_urls, $imported_stylesheet['imported_font_urls'] );
 				$validation_results  = array_merge( $validation_results, $imported_stylesheet['validation_results'] );
+				$preload_font_urls   = array_merge( $preload_font_urls, $imported_stylesheet['preload_font_urls'] );
 				$viewport_rules      = array_merge( $viewport_rules, $imported_stylesheet['viewport_rules'] );
+				$important_count    += $imported_stylesheet['important_count'];
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( preg_match( '/^(-.+-)?viewport$/', $css_item->atRuleName() ) ) {
 					$output_format = new OutputFormat();
@@ -2204,10 +2347,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				if ( ! $sanitized ) {
-					$validation_results = array_merge(
-						$validation_results,
-						$this->process_css_declaration_block( $css_item, $css_list, $options )
-					);
+					$processed          = $this->process_css_declaration_block( $css_item, $css_list, $options );
+					$validation_results = array_merge( $validation_results, $processed['validation_results'] );
+					$important_count   += $processed['important_count'];
+					$preload_font_urls  = array_merge( $preload_font_urls, $processed['preload_font_urls'] );
 				}
 			} elseif ( $css_item instanceof KeyFrame ) {
 				if ( ! in_array( 'keyframes', $options['allowed_at_rules'], true ) ) {
@@ -2222,10 +2365,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				if ( ! $sanitized ) {
-					$validation_results = array_merge(
-						$validation_results,
-						$this->process_css_keyframes( $css_item, $options )
-					);
+					$processed          = $this->process_css_keyframes( $css_item, $options );
+					$validation_results = array_merge( $validation_results, $processed['validation_results'] );
+					$important_count   += $processed['important_count'];
 				}
 			} elseif ( $css_item instanceof AtRule ) {
 				if ( 'charset' === $css_item->atRuleName() ) {
@@ -2262,7 +2404,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		return compact( 'validation_results', 'imported_font_urls', 'viewport_rules' );
+		return compact( 'validation_results', 'imported_font_urls', 'viewport_rules', 'important_count', 'preload_font_urls' );
 	}
 
 	/**
@@ -2318,19 +2460,27 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param CSSList $css_list CSS List.
 	 * @param array   $options  Options.
 	 *
-	 * @return array Validation results.
+	 * @return array {
+	 *     Results.
+	 *
+	 *     @type array    $validation_results Validation results.
+	 *     @type int      $important_count    Number of !important qualifiers.
+	 *     @type string[] $preload_font_urls  Font URLs to preload.
+	 * }
 	 */
 	private function process_css_declaration_block( RuleSet $ruleset, CSSList $css_list, $options ) {
-		$results = [];
+		$validation_results = [];
+		$important_count    = 0;
+		$preload_font_urls  = [];
 
 		if ( $ruleset instanceof DeclarationBlock ) {
-			$results = array_merge(
-				$results,
+			$validation_results = array_merge(
+				$validation_results,
 				$this->ampify_ruleset_selectors( $ruleset )
 			);
 			if ( 0 === count( $ruleset->getSelectors() ) ) {
 				$css_list->remove( $ruleset );
-				return $results;
+				return compact( 'validation_results', 'important_count', 'preload_font_urls' );
 			}
 		}
 
@@ -2351,7 +2501,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( $sanitized ) {
 						$ruleset->removeRule( $property->getRule() );
 					}
-					$results[] = compact( 'error', 'sanitized' );
+					$validation_results[] = compact( 'error', 'sanitized' );
 				}
 			}
 		} else {
@@ -2369,25 +2519,27 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( $sanitized ) {
 						$ruleset->removeRule( $property->getRule() );
 					}
-					$results[] = compact( 'error', 'sanitized' );
+					$validation_results[] = compact( 'error', 'sanitized' );
 				}
 			}
 		}
 
 		if ( $ruleset instanceof AtRuleSet && 'font-face' === $ruleset->atRuleName() ) {
-			$this->process_font_face_at_rule( $ruleset, $options );
+			$preload_font_urls = $this->process_font_face_at_rule( $ruleset, $options );
 		}
 
-		$results = array_merge(
-			$results,
-			$this->transform_important_qualifiers( $ruleset, $css_list, $options )
+		$transformed        = $this->transform_important_qualifiers( $ruleset, $css_list, $options );
+		$validation_results = array_merge(
+			$validation_results,
+			$transformed['validation_results']
 		);
+		$important_count    = $transformed['important_count'];
 
 		// Remove the ruleset if it is now empty.
 		if ( 0 === count( $ruleset->getRules() ) ) {
 			$css_list->remove( $ruleset );
 		}
-		return $results;
+		return compact( 'validation_results', 'important_count', 'preload_font_urls' );
 	}
 
 	/**
@@ -2401,19 +2553,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 *     @type string $stylesheet_url Stylesheet URL, if available.
 	 * }
+	 * @return string[] Font URLs to preload.
 	 */
 	private function process_font_face_at_rule( AtRuleSet $ruleset, $options ) {
 		$src_properties = $ruleset->getRules( 'src' );
 		if ( empty( $src_properties ) ) {
-			return;
+			return [];
 		}
+
+		$preload_font_urls = [];
 
 		// Obtain the font-family name to guess the filename.
 		$font_family   = null;
 		$font_basename = null;
 		$properties    = $ruleset->getRules( 'font-family' );
-		if ( isset( $properties[0] ) ) {
-			$font_family = trim( $properties[0]->getValue(), '"\'' );
+		$property      = end( $properties );
+		if ( $property instanceof Rule ) {
+			$font_family = trim( $property->getValue(), '"\'' );
 
 			// Remove all non-word characters from the font family to serve as the filename.
 			$font_basename = preg_replace( '/[^A-Za-z0-9_\-]/', '', $font_family ); // Same as sanitize_key() minus case changes.
@@ -2430,8 +2586,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet_base_url = trailingslashit( $stylesheet_base_url );
 		}
 
+		// Obtain the font file path (if any) and the first font src type.
+		$font_file      = '';
+		$first_src_type = '';
+
 		// Attempt to transform data: URLs in src properties to be external file URLs.
-		$converted_count = 0;
 		foreach ( $src_properties as $src_property ) {
 			$value = $src_property->getValue();
 			if ( ! ( $value instanceof RuleValueList ) ) {
@@ -2489,24 +2648,50 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * @var URL[]    $source_data_url_objects
 			 */
 			$source_data_url_objects = [];
-			foreach ( $sources as $i => $source ) {
-				if ( $source[0] instanceof URL ) {
-					$value = $source[0]->getURL()->getString();
-					if ( 'data:' === substr( $value, 0, 5 ) ) {
-						$source_data_url_objects[ $i ] = $source[0];
-					} else {
-						$source_file_urls[ $i ] = $value;
+			foreach ( $sources as $source ) {
+				if ( count( $source ) !== 2 ) {
+					continue;
+				}
+				list( $url, $format ) = $source;
+				if (
+					! $url instanceof URL
+					||
+					! $format instanceof CSSFunction
+					||
+					$format->getName() !== 'format'
+					||
+					count( $format->getArguments() ) !== 1
+				) {
+					continue;
+				}
+
+				list( $format_value ) = $format->getArguments();
+				$format_value         = trim( $format_value, '"\'' );
+
+				$value = $url->getURL()->getString();
+				if ( 'data:' === substr( $value, 0, 5 ) ) {
+					$source_data_url_objects[ $format_value ] = $source[0];
+					if ( empty( $first_src_type ) ) {
+						$first_src_type = 'inline';
+					}
+				} else {
+					$source_file_urls[] = $value;
+					if ( empty( $first_src_type ) ) {
+						$first_src_type = 'file';
+						$font_file      = $value;
 					}
 				}
 			}
 
 			// Convert data: URLs into regular URLs, assuming there will be a file present (e.g. woff fonts in core themes).
-			foreach ( $source_data_url_objects as $i => $data_url ) {
+			foreach ( $source_data_url_objects as $format => $data_url ) {
 				$mime_type = strtok( substr( $data_url->getURL()->getString(), 5 ), ';' );
-				if ( ! $mime_type ) {
-					continue;
+				if ( $mime_type ) {
+					$extension = preg_replace( ':.+/(.+-)?:', '', $mime_type );
+				} else {
+					$extension = $format;
 				}
-				$extension = preg_replace( ':.+/(.+-)?:', '', $mime_type );
+				$extension = sanitize_key( $extension );
 
 				$guessed_urls = [];
 
@@ -2538,7 +2723,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$path = $this->get_validated_url_file_path( $guessed_url, [ 'woff', 'woff2', 'ttf', 'otf', 'svg' ] );
 					if ( ! is_wp_error( $path ) ) {
 						$data_url->getURL()->setString( $guessed_url );
-						$converted_count++;
+						if ( 'inline' === $first_src_type ) {
+							$first_src_type = 'file';
+							$font_file      = $guessed_url;
+						}
 						continue 2;
 					}
 				}
@@ -2551,23 +2739,44 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					'genericons.woff',
 				];
 				if ( in_array( $font_filename, $bundled_fonts, true ) ) {
-					$data_url->getURL()->setString( plugin_dir_url( AMP__FILE__ ) . "assets/fonts/$font_filename" );
-					$converted_count++;
+					$font_file = plugin_dir_url( AMP__FILE__ ) . "assets/fonts/$font_filename";
+					$data_url->getURL()->setString( $font_file );
+					$first_src_type = 'file';
 				}
 			} // End foreach $source_data_url_objects.
 		} // End foreach $src_properties.
 
-		/*
-		 * If a data: URL has been replaced with an external file URL, then we add a font-display:swap to the @font-face
-		 * rule if one isn't already present. This prevents FO
-		 *
-		 *  If no font-display is already present, add font-display:swap since the font is now being loaded externally.
-		 */
-		if ( $converted_count && 0 === count( $ruleset->getRules( 'font-display' ) ) ) {
+		// Override the 'font-display' property to improve font performance.
+		if ( $font_family && in_array( $font_family, array_keys( $this->args['font_face_display_overrides'] ), true ) ) {
+			$ruleset->removeRule( 'font-display' );
 			$font_display_rule = new Rule( 'font-display' );
-			$font_display_rule->setValue( 'swap' );
+			$font_display_rule->setValue( $this->args['font_face_display_overrides'][ $font_family ] );
 			$ruleset->addRule( $font_display_rule );
 		}
+
+		// If the font-display is auto, block, or swap then we should automatically add the preload link for the first font file.
+		$properties = $ruleset->getRules( 'font-display' );
+		$property   = end( $properties ); // Last since the last property wins in CSS.
+
+		/** @var RuleValueList|string|null */
+		$property_value = $property instanceof Rule ? $property->getValue() : '';
+
+		if (
+			(
+				// Defaults to 'auto', hence should be preloaded as well.
+				! $property instanceof Rule
+				||
+				in_array( $property_value, [ 'auto', 'block', 'swap' ], true )
+			)
+			&&
+			'file' === $first_src_type
+			&&
+			! empty( $font_file )
+		) {
+			$preload_font_urls[] = $font_file;
+		}
+
+		return $preload_font_urls;
 	}
 
 	/**
@@ -2580,32 +2789,42 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param KeyFrame $css_list Ruleset.
 	 * @param array    $options  Options.
-	 * @return array Validation results.
+	 * @return array {
+	 *     Results.
+	 *
+	 *     @type array $validation_results Validation results.
+	 *     @type int   $important_count    Number of !important qualifiers.
+	 * }
 	 */
 	private function process_css_keyframes( KeyFrame $css_list, $options ) {
-		$results = [];
-		if ( ! empty( $options['property_allowlist'] ) ) {
-			foreach ( $css_list->getContents() as $rules ) {
-				if ( ! ( $rules instanceof DeclarationBlock ) ) {
-					$error     = [
-						'code'      => self::CSS_SYNTAX_INVALID_DECLARATION,
-						'item'      => get_class( $rules ),
-						'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-						'spec_name' => $options['spec_name'],
-					];
-					$sanitized = $this->should_sanitize_validation_error( $error );
-					if ( $sanitized ) {
-						$css_list->remove( $rules );
-					}
-					$results[] = compact( 'error', 'sanitized' );
-					continue;
+		$validation_results = [];
+		$important_count    = 0;
+
+		foreach ( $css_list->getContents() as $rules ) {
+			if ( ! ( $rules instanceof DeclarationBlock ) ) {
+				$error     = [
+					'code'      => self::CSS_SYNTAX_INVALID_DECLARATION,
+					'item'      => get_class( $rules ),
+					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'spec_name' => $options['spec_name'],
+				];
+				$sanitized = $this->should_sanitize_validation_error( $error );
+				if ( $sanitized ) {
+					$css_list->remove( $rules );
 				}
+				$validation_results[] = compact( 'error', 'sanitized' );
+				continue;
+			}
 
-				$results = array_merge(
-					$results,
-					$this->transform_important_qualifiers( $rules, $css_list, $options )
-				);
+			$transformed = $this->transform_important_qualifiers( $rules, $css_list, $options );
 
+			$validation_results = array_merge(
+				$validation_results,
+				$transformed['validation_results']
+			);
+			$important_count   += $transformed['important_count'];
+
+			if ( ! empty( $options['property_allowlist'] ) ) {
 				$properties = $rules->getRules();
 				foreach ( $properties as $property ) {
 					$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
@@ -2621,12 +2840,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						if ( $sanitized ) {
 							$rules->removeRule( $property->getRule() );
 						}
-						$results[] = compact( 'error', 'sanitized' );
+						$validation_results[] = compact( 'error', 'sanitized' );
 					}
 				}
 			}
 		}
-		return $results;
+		return compact( 'validation_results', 'important_count' );
 	}
 
 	/**
@@ -2639,10 +2858,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param RuleSet|DeclarationBlock $ruleset  Rule set.
 	 * @param CSSList                  $css_list CSS List.
 	 * @param array                    $options  Options.
-	 * @return array Validation results.
+	 * @return array {
+	 *     Results.
+	 *
+	 *     @type array $validation_results Validation results.
+	 *     @type int   $important_count    Number of !important qualifiers.
+	 * }
 	 */
 	private function transform_important_qualifiers( RuleSet $ruleset, CSSList $css_list, $options ) {
-		$results = [];
+		$important_count    = 0;
+		$validation_results = [];
 
 		// An !important only makes sense for rulesets that have selectors.
 		$allow_transformation = (
@@ -2654,29 +2879,34 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$properties = $ruleset->getRules();
 		$importants = [];
 		foreach ( $properties as $property ) {
-			if ( $property->getIsImportant() ) {
-				if ( $allow_transformation ) {
-					$importants[] = $property;
+			if ( ! $property->getIsImportant() ) {
+				continue;
+			}
+			if ( ! $this->args['transform_important_qualifiers'] ) {
+				$important_count++;
+			} elseif ( $allow_transformation ) {
+				$importants[] = $property;
+				$property->setIsImportant( false );
+				$ruleset->removeRule( $property->getRule() );
+			} else {
+				$error     = [
+					'code'               => self::CSS_SYNTAX_INVALID_IMPORTANT,
+					'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'css_property_name'  => $property->getRule(),
+					'css_property_value' => $property->getValue(),
+					'spec_name'          => $options['spec_name'],
+				];
+				$sanitized = $this->should_sanitize_validation_error( $error );
+				if ( $sanitized ) {
 					$property->setIsImportant( false );
-					$ruleset->removeRule( $property->getRule() );
 				} else {
-					$error     = [
-						'code'               => self::CSS_SYNTAX_INVALID_IMPORTANT,
-						'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-						'css_property_name'  => $property->getRule(),
-						'css_property_value' => $property->getValue(),
-						'spec_name'          => $options['spec_name'],
-					];
-					$sanitized = $this->should_sanitize_validation_error( $error );
-					if ( $sanitized ) {
-						$property->setIsImportant( false );
-					}
-					$results[] = compact( 'error', 'sanitized' );
+					$important_count++;
 				}
+				$validation_results[] = compact( 'error', 'sanitized' );
 			}
 		}
 		if ( ! $ruleset instanceof DeclarationBlock || ! $allow_transformation || empty( $importants ) ) {
-			return $results;
+			return compact( 'validation_results', 'important_count' );
 		}
 
 		/**
@@ -2704,16 +2934,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( $old_selector->getSpecificity() % 10 > 0 ) {
 						$specificity_multiplier++;
 					}
-					$selector_mod = str_repeat( ':not(#_)', $specificity_multiplier ); // Here "_" is just a short single-char ID.
 
 					$new_selector = $old_selector->getSelector();
 
-					// Amend the selector mod to the first element in selector if it is already the root; otherwise add new root ancestor.
-					if ( preg_match( '/^\s*(html|:root)\b/i', $new_selector, $matches ) ) {
-						$new_selector = substr( $new_selector, 0, strlen( $matches[0] ) ) . $selector_mod . substr( $new_selector, strlen( $matches[0] ) );
+					if ( '#_)' === substr( $new_selector, -3 ) ) {
+						$new_selector = rtrim( $new_selector, ')' ) . str_repeat( '#_', $specificity_multiplier ) . ')';
 					} else {
-						$new_selector = sprintf( ':root%s %s', $selector_mod, $new_selector );
+						$new_selector .= ':not(' . str_repeat( '#_', $specificity_multiplier ) . ')'; // Here "_" is just a short single-char ID.
 					}
+
 					return new Selector( $new_selector );
 				},
 				$ruleset->getSelectors()
@@ -2727,7 +2956,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			array_splice( $contents, $offset + 1, 0, [ $important_ruleset ] );
 			$css_list->setContents( $contents );
 		}
-		return $results;
+		return compact( 'validation_results', 'important_count' );
 	}
 
 	/**
@@ -2744,12 +2973,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function collect_inline_styles( DOMElement $element ) {
 		$attr_node = $element->getAttributeNode( 'style' );
-		if ( ! $attr_node ) {
+		if ( ! $attr_node instanceof DOMAttr ) {
 			return;
 		}
 
 		$value = trim( $attr_node->nodeValue );
 		if ( empty( $value ) ) {
+			$element->removeAttribute( 'style' );
 			return;
 		}
 
@@ -2761,12 +2991,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$class = 'amp-wp-' . substr( md5( $value ), 0, 7 );
-		$root  = ':root' . str_repeat( ':not(#_)', self::INLINE_SPECIFICITY_MULTIPLIER );
-		$rule  = sprintf( '%s .%s { %s }', $root, $class, $value );
+		$class       = 'amp-wp-' . substr( md5( $value ), 0, 7 );
+		$specificity = ':not(' . str_repeat( '#_', self::INLINE_SPECIFICITY_MULTIPLIER ) . ')';
+		$rule        = sprintf( '.%s%s{%s}', $class, $specificity, $value );
 
 		$this->set_current_node( $element ); // And sources when needing to be located.
 
+		// @todo If ValidationExemption::is_px_verified_for_node( $element ) then keep !important.
+		// @todo If ValidationExemption::is_amp_unvalidated_for_node( $element ) then keep invalid markup.
 		$parsed = $this->get_parsed_stylesheet(
 			$rule,
 			[
@@ -2781,18 +3013,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( $parsed['tokens'] ) {
 			$this->pending_stylesheets[] = [
-				'group'         => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
-				'original_size' => strlen( $rule ),
-				'final_size'    => null,
-				'element'       => $element,
-				'origin'        => 'style_attribute',
-				'sources'       => $this->current_sources,
-				'priority'      => $this->get_stylesheet_priority( $attr_node ),
-				'tokens'        => $parsed['tokens'],
-				'hash'          => $parsed['hash'],
-				'parse_time'    => $parsed['parse_time'],
-				'shake_time'    => null,
-				'cached'        => $parsed['cached'],
+				'group'             => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
+				'original_size'     => strlen( $rule ),
+				'final_size'        => null,
+				'element'           => $element,
+				'origin'            => 'style_attribute',
+				'sources'           => $this->current_sources,
+				'priority'          => $this->get_stylesheet_priority( $attr_node ),
+				'tokens'            => $parsed['tokens'],
+				'hash'              => $parsed['hash'],
+				'parse_time'        => $parsed['parse_time'],
+				'shake_time'        => null,
+				'cached'            => $parsed['cached'],
+				'important_count'   => $parsed['important_count'],
+				'kept_error_count'  => $parsed['kept_error_count'],
+				'preload_font_urls' => $parsed['preload_font_urls'],
 			];
 
 			if ( $element->hasAttribute( 'class' ) ) {
@@ -2815,18 +3050,28 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see https://www.ampproject.org/docs/fundamentals/spec#keyframes-stylesheet
 	 */
 	private function finalize_styles() {
+		$preload_font_urls = [];
+
 		$stylesheet_groups = [
 			self::STYLE_AMP_CUSTOM_GROUP_INDEX    => [
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-custom.css */",
 				'cdata_spec'          => $this->style_custom_cdata_spec,
 				'included_count'      => 0,
 				'import_front_matter' => '', // Extra @import statements that are prepended when fetch fails and validation error is rejected.
+				'important_count'     => 0,
+				'kept_error_count'    => 0,
+				'is_excessive_size'   => false,
+				'preload_font_urls'   => [],
 			],
 			self::STYLE_AMP_KEYFRAMES_GROUP_INDEX => [
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-keyframes.css */",
 				'cdata_spec'          => $this->style_keyframes_cdata_spec,
 				'included_count'      => 0,
 				'import_front_matter' => '',
+				'important_count'     => 0,
+				'kept_error_count'    => 0,
+				'is_excessive_size'   => false,
+				'preload_font_urls'   => [],
 			],
 		];
 
@@ -2848,12 +3093,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Process the pending stylesheets.
 		foreach ( array_keys( $stylesheet_groups ) as $group ) {
-			$stylesheet_groups[ $group ]['included_count'] = $this->finalize_stylesheet_group( $group, $stylesheet_groups[ $group ] );
+			$stylesheet_groups[ $group ] = array_merge(
+				$stylesheet_groups[ $group ],
+				$this->finalize_stylesheet_group( $group, $stylesheet_groups[ $group ] )
+			);
 		}
 
 		// If we're not working with the document element (e.g. for Customizer rendered partials) then there is nothing left to do.
 		if ( empty( $this->args['use_document_element'] ) ) {
 			return;
+		}
+
+		// Add the font preloads.
+		foreach ( $stylesheet_groups as $stylesheet_group ) {
+			foreach ( $stylesheet_group['preload_font_urls'] as $preload_font_url ) {
+				$this->dom->links->addPreload( $preload_font_url, RequestDestination::FONT );
+			}
 		}
 
 		// Add style[amp-custom] to document.
@@ -2871,6 +3126,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->amp_custom_style_element = $this->dom->createElement( 'style' );
 			$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
+
+			// When there are kept errors, then mark the element as being AMP-unvalidated. Note that excessive CSS
+			// is not a validation error that is arisen when parsing a stylesheet (as that is emitted when finalizing
+			// a stylesheet group). Otherwise, if there are !important qualifiers or the amount of CSS is greater than
+			// the maximum allowed by AMP, mark the custom style as PX-verified.
+			if ( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['kept_error_count'] > 0 ) {
+				ValidationExemption::mark_node_as_amp_unvalidated( $this->amp_custom_style_element );
+			} elseif (
+				$stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['important_count'] > 0
+				||
+				$stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['is_excessive_size']
+			) {
+				ValidationExemption::mark_node_as_px_verified( $this->amp_custom_style_element );
+			}
+
 			$this->dom->head->appendChild( $this->amp_custom_style_element );
 		}
 
@@ -3199,15 +3469,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Replace the somewhat-meta [style] attribute selectors with attribute selector using the data attribute the original styles are copied into.
-			$selector = preg_replace(
-				'/(?<=\[)style(?=([*$~]?=.*?)?])/is',
-				self::ORIGINAL_STYLE_ATTRIBUTE_NAME,
-				$selector,
-				-1,
-				$count
-			);
-			if ( $count > 0 ) {
-				$has_changed_selectors = true;
+			if ( $this->args['transform_important_qualifiers'] ) {
+				$selector = preg_replace(
+					'/(?<=\[)style(?=([*$~]?=.*?)?])/is',
+					self::ORIGINAL_STYLE_ATTRIBUTE_NAME,
+					$selector,
+					- 1,
+					$count
+				);
+				if ( $count > 0 ) {
+					$has_changed_selectors = true;
+				}
 			}
 
 			/*
@@ -3293,11 +3565,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param int   $group        Group name (either self::STYLE_AMP_CUSTOM_GROUP_INDEX or self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ).
 	 * @param array $group_config Group config.
-	 * @return int Number of included stylesheets in group.
+	 * @return array {
+	 *     Finalized group info.
+	 *
+	 *     @type int      $included_count    Number of included stylesheets in group.
+	 *     @type bool     $is_excessive_size Whether the total is greater than the max bytes allowed.
+	 *     @type int      $important_count   Number of !important qualifiers.
+	 *     @type int      $kept_error_count  Number of validation errors whose markup was kept.
+	 *     @type string[] $preload_font_urls Font URLs to preload.
+	 * }
 	 */
 	private function finalize_stylesheet_group( $group, $group_config ) {
-		$included_count = 0;
-		$max_bytes      = $group_config['cdata_spec']['max_bytes'] - strlen( $group_config['source_map_comment'] );
+		$max_bytes         = $group_config['cdata_spec']['max_bytes'] - strlen( $group_config['source_map_comment'] );
+		$included_count    = 0;
+		$is_excessive_size = false;
+		$concatenated_size = 0;
+		$important_count   = 0;
+		$kept_error_count  = 0;
+		$preload_font_urls = [];
 
 		$previously_seen_stylesheet_index = [];
 		foreach ( $this->pending_stylesheets as $pending_stylesheet_index => &$pending_stylesheet ) {
@@ -3318,7 +3603,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$used_selector_count = 0;
 				$selectors           = [];
 				foreach ( $selectors_parsed as $selector => $parsed_selector ) {
-					$should_include = $this->is_customize_preview || (
+					$should_include = $this->args['skip_tree_shaking'] || (
 						// If all class names are used in the doc.
 						(
 							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
@@ -3476,7 +3761,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		);
 
-		$current_concatenated_size = 0;
 		foreach ( $pending_stylesheet_indices as $i ) {
 			if ( $group !== $this->pending_stylesheets[ $i ]['group'] ) {
 				continue;
@@ -3487,8 +3771,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Skip stylesheets that were completely tree-shaken and mark as included.
+			if ( 0 === $this->pending_stylesheets[ $i ]['final_size'] ) {
+				$this->pending_stylesheets[ $i ]['included'] = true;
+				continue;
+			}
+
+			$is_stylesheet_excessive = $concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes;
+
 			// Report validation error if size is now too big.
-			if ( ! $this->is_customize_preview && $current_concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes ) {
+			if ( ! $this->args['allow_excessive_css'] && $is_stylesheet_excessive ) {
 				$validation_error = [
 					'code'      => self::STYLESHEET_TOO_LONG,
 					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
@@ -3510,11 +3802,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! isset( $this->pending_stylesheets[ $i ]['included'] ) ) {
 				$this->pending_stylesheets[ $i ]['included'] = true;
 				$included_count++;
-				$current_concatenated_size += $this->pending_stylesheets[ $i ]['final_size'];
+				$concatenated_size += $this->pending_stylesheets[ $i ]['final_size'];
+				$preload_font_urls  = array_merge( $preload_font_urls, $this->pending_stylesheets[ $i ]['preload_font_urls'] );
+
+				if ( $is_stylesheet_excessive ) {
+					$is_excessive_size = true;
+				}
+
+				// Note: the following two may be incorrect because the !important property or erroneous rule may have
+				// actually been tree-shaken and thus is no longer in the document.
+				$important_count  += $this->pending_stylesheets[ $i ]['important_count'];
+				$kept_error_count += $this->pending_stylesheets[ $i ]['kept_error_count'];
 			}
 		}
 
-		return $included_count;
+		return compact( 'included_count', 'is_excessive_size', 'important_count', 'kept_error_count', 'preload_font_urls' );
 	}
 
 	/**

@@ -102,16 +102,17 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	 *
 	 * @todo Should this also respect additional Cache-Control directives like 'no-cache'?
 	 *
-	 * @param string $url URL to get.
+	 * @param string $url     URL to get.
+	 * @param array  $headers Optional. Associative array of headers to send with the request. Defaults to empty array.
 	 * @return Response Response for the executed request.
 	 * @throws FailedToGetCachedResponse If retrieving the contents from the URL failed.
 	 */
-	public function get( $url ) {
+	public function get( $url, $headers = [] ) {
 		$cache_key       = self::TRANSIENT_PREFIX . md5( __CLASS__ . $url );
 		$cached_response = get_transient( $cache_key );
 		$headers         = [];
 
-		if ( false !== $cached_response ) {
+		if ( is_string( $cached_response ) ) {
 			if ( PHP_MAJOR_VERSION >= 7 ) {
 				$cached_response = unserialize( $cached_response, [ CachedResponse::class, DateTimeImmutable::class ] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize,PHPCompatibility.FunctionUse.NewFunctionParameters.unserialize_optionsFound
 			} else {
@@ -122,7 +123,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 
 		if ( ! $cached_response instanceof CachedResponse || $cached_response->is_expired() ) {
 			try {
-				$response = $this->remote_request->get( $url );
+				$response = $this->remote_request->get( $url, $headers );
 				$status   = $response->getStatusCode();
 				/** @var DateTimeImmutable $expiry */
 				$expiry  = $this->get_expiry_time( $response );

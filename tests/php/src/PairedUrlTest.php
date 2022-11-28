@@ -11,12 +11,11 @@ class PairedUrlTest extends DependencyInjectedTestCase {
 	/** @var PairedUrl */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = $this->injector->make( PairedUrl::class );
 	}
 
-	/** @covers ::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( PairedUrl::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );

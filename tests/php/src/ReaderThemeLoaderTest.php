@@ -9,8 +9,8 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeLoader;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
+use AmpProject\AmpWP\Tests\Helpers\MockAdminUser;
 use WP_Customize_Manager;
 use WP_Customize_Panel;
 use WP_Theme;
@@ -18,22 +18,22 @@ use WP_Theme;
 /** @coversDefaultClass \AmpProject\AmpWP\ReaderThemeLoader */
 final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility, LoadsCoreThemes;
+	use LoadsCoreThemes, MockAdminUser;
 
 	/** @var ReaderThemeLoader */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = $this->injector->make( ReaderThemeLoader::class );
 
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
-
+	public function tear_down() {
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/** @covers ::is_enabled() */
@@ -152,22 +152,28 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
 		$this->assertEquals( $active_theme_slug, get_stylesheet() );
 		$this->assertEquals( $reader_theme_slug, $this->instance->get_reader_theme()->get_stylesheet() );
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		$this->mock_admin_user();
 
 		// Note that this is added via filter and not called directly because the filtered value is keyed by theme slug,
 		// but the return value of wp_prepare_themes_for_js() is keyed with numeric indices.
 		$this->instance->register(); // This adds a `wp_prepare_themes_for_js` filter.
-		$themes = wp_prepare_themes_for_js();
+		$themes = wp_prepare_themes_for_js(
+			[
+				wp_get_theme( $active_theme_slug ),
+				wp_get_theme( $reader_theme_slug ),
+			]
+		);
 		$this->assertEquals( $active_theme_slug, $themes[0]['id'] );
-		$this->assertStringNotContains( 'AMP', $themes[0]['description'] );
+		$this->assertStringNotContainsString( 'AMP', $themes[0]['description'] );
 		$this->assertArrayHasKey( 'delete', $themes[0]['actions'], 'The delete key is expected even though the theme is active because the delete option is hidden via the JS template.' );
-		$this->assertStringNotContains( amp_get_slug() . '=', $themes[0]['actions']['customize'] );
+		$this->assertStringNotContainsString( amp_get_slug() . '=', $themes[0]['actions']['customize'] );
 		$this->assertArrayNotHasKey( 'ampActiveReaderTheme', $themes[0] );
 		$this->assertArrayNotHasKey( 'ampReaderThemeNotice', $themes[0] );
 
 		$this->assertEquals( $reader_theme_slug, $themes[1]['id'] );
 		$this->assertArrayNotHasKey( 'delete', $themes[1]['actions'] );
-		$this->assertStringContains( amp_get_slug() . '=', $themes[1]['actions']['customize'] );
+		$this->assertStringContainsString( amp_get_slug() . '=', $themes[1]['actions']['customize'] );
 		$this->assertArrayHasKey( 'ampActiveReaderTheme', $themes[1] );
 		$this->assertArrayHasKey( 'ampReaderThemeNotice', $themes[1] );
 	}
@@ -184,7 +190,7 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
 
 		$output = get_echo( [ $this->instance, 'inject_theme_single_template_modifications' ] );
-		$this->assertStringContains( '<script>', $output );
+		$this->assertStringContainsString( '<script>', $output );
 	}
 
 	/** @covers ::get_reader_theme() */
@@ -215,6 +221,7 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
 			$this->markTestSkipped();
 		}
+
 		switch_theme( $active_theme_slug );
 		remove_all_filters( 'sidebars_widgets' );
 

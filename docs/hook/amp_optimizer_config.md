@@ -12,7 +12,7 @@ Filter the configuration to be used for the AMP Optimizer.
 
 ### Source
 
-:link: [src/Optimizer/AmpWPConfiguration.php:87](/src/Optimizer/AmpWPConfiguration.php#L87-L95)
+:link: [src/Optimizer/AmpWPConfiguration.php:87](/src/Optimizer/AmpWPConfiguration.php#L87-L96)
 
 <details>
 <summary>Show Code</summary>
@@ -21,9 +21,10 @@ Filter the configuration to be used for the AMP Optimizer.
 $this->configuration = apply_filters(
 	'amp_optimizer_config',
 	[
-		self::KEY_TRANSFORMERS              => $transformers,
-		Transformer\PreloadHeroImage::class => [
-			Configuration\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
+		self::KEY_TRANSFORMERS                => $transformers,
+		Transformer\OptimizeHeroImages::class => [
+			Configuration\OptimizeHeroImagesConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
+			Configuration\OptimizeHeroImagesConfiguration::MAX_HERO_IMAGE_COUNT          => PHP_INT_MAX,
 		],
 	]
 );

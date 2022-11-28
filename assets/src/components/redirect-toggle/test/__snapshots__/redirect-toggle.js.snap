@@ -2,16 +2,18 @@
 
 exports[`RedirectToggle matches snapshot 1`] = `
 <div
-  className="selectable selectable--bottom"
+  className="amp-setting-toggle"
 >
   <div
-    className="amp-setting-toggle "
+    className="components-base-control components-toggle-control css-1wgfkcs-Wrapper-boxSizingReset-classes ej5x27r4"
   >
     <div
-      className="components-base-control components-toggle-control css-wdf2ti-Wrapper e1puf3u0"
+      className="components-base-control__field css-yj91it-StyledField ej5x27r3"
     >
       <div
-        className="components-base-control__field css-11vcxb9-StyledField e1puf3u1"
+        className="components-flex components-h-stack css-79etx6-View-Flex-base-ItemsRow e19lxcc00"
+        data-wp-c16t={true}
+        data-wp-component="HStack"
       >
         <span
           className="components-form-toggle is-checked"

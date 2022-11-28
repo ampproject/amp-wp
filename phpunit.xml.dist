@@ -2,9 +2,10 @@
 	bootstrap="tests/php/bootstrap.php"
 	backupGlobals="false"
 	colors="true"
-	convertErrorsToExceptions="true"
-	convertNoticesToExceptions="true"
-	convertWarningsToExceptions="true"
+	convertDeprecationsToExceptions="false"
+	convertErrorsToExceptions="false"
+	convertNoticesToExceptions="false"
+	convertWarningsToExceptions="false"
 	defaultTestSuite="default"
 	>
 	<php>
@@ -35,10 +36,10 @@
 				<directory suffix=".php">build</directory>
 				<directory suffix=".php">docs</directory>
 				<directory suffix=".php">node_modules</directory>
-				<directory suffix=".php">qa-tester</directory>
 				<directory suffix=".php">svn</directory>
 				<directory suffix=".php">tests</directory>
 				<directory suffix=".php">vendor</directory>
+				<directory suffix=".php">includes/ecosystem-data</directory>
 				<file>.phpstorm.meta.php</file>
 			</exclude>
 		</whitelist>

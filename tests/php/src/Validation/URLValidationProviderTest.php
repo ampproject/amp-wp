@@ -2,14 +2,13 @@
 
 namespace AmpProject\AmpWP\Tests\Validation;
 
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
+use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
-use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationProvider */
-final class URLValidationProviderTest extends WP_UnitTestCase {
-	use AssertContainsCompatibility, ValidationRequestMocking;
+final class URLValidationProviderTest extends TestCase {
+	use ValidationRequestMocking;
 
 	/**
 	 * Validation provider instance to use.
@@ -23,10 +22,10 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->url_validation_provider = new URLValidationProvider();
-		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
+		$this->add_validate_response_mocking_filter();
 	}
 
 	/**
@@ -49,7 +48,7 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 			$permalink         = get_permalink( self::factory()->post->create() );
 			$post_permalinks[] = $permalink;
 			$validity          = $this->url_validation_provider->get_url_validation( $permalink, 'post' );
-			$this->assertInternalType( 'array', $validity );
+			$this->assertIsArray( $validity );
 		}
 
 		// All of the posts created should be present in the validated URLs.

@@ -7,13 +7,14 @@ export const NEXT_BUTTON_SELECTOR = '#next-button';
 export const PREV_BUTTON_SELECTOR = '.amp-settings-nav__prev-next button:not(.is-primary)';
 
 export async function goToOnboardingWizard() {
-	await visitAdminPage( 'index.php' );
+	await visitAdminPage( 'index.php', '' );
 	await expect( page ).not.toMatchElement( '#amp-onboarding-wizard' );
 	await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
 	await expect( page ).toMatchElement( '#amp-onboarding-wizard' );
 }
 
 export async function clickNextButton() {
+	await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
 	await expect( page ).toClick( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
 }
 
@@ -27,17 +28,25 @@ export async function moveToTechnicalScreen() {
 	await expect( page ).toMatchElement( '.technical-background-option' );
 }
 
-export async function moveToTemplateModeScreen( { technical } ) {
+export async function moveToSiteScanScreen( { technical } ) {
 	await moveToTechnicalScreen();
 
 	const radioSelector = technical ? '#technical-background-enable' : '#technical-background-disable';
 	await expect( page ).toClick( radioSelector );
 
 	await clickNextButton();
+	await expect( page ).toMatchElement( '.site-scan' );
+}
+
+export async function moveToTemplateModeScreen( { technical } ) {
+	await moveToSiteScanScreen( { technical } );
+
+	await clickNextButton();
 	await expect( page ).toMatchElement( '.template-mode-option' );
 }
 
 export async function scrollToElement( { selector, click = false } ) {
+	await page.waitForSelector( selector );
 	await page.evaluate( ( options ) => {
 		const el = document.querySelector( options.selector );
 		if ( el ) {
@@ -67,7 +76,7 @@ export async function selectReaderTheme( theme = 'legacy' ) {
 	await page.$eval( selector, ( el ) => el.click() );
 }
 
-export async function moveToSummaryScreen( { technical = true, mode, readerTheme = 'legacy' } ) {
+export async function moveToDoneScreen( { technical = true, mode, readerTheme = 'legacy' } ) {
 	if ( mode === 'reader' ) {
 		await moveToReaderThemesScreen( { technical } );
 		await selectReaderTheme( readerTheme );
@@ -76,46 +85,21 @@ export async function moveToSummaryScreen( { technical = true, mode, readerTheme
 		await clickMode( mode );
 	}
 
-	await clickNextButton();
-
-	await page.waitForSelector( '.summary' );
+	await Promise.all( [
+		clickNextButton(),
+		page.waitForResponse( ( response ) => response.url().includes( '/wp-json/amp/v1/options' ) ),
+		page.waitForSelector( '.done' ),
+	] );
 }
 
-export async function moveToDoneScreen( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
-	await moveToSummaryScreen( { technical, mode, readerTheme, mobileRedirect } );
-
-	if ( 'standard' !== mode ) {
-		await page.waitForSelector( '.amp-setting-toggle input' );
-
-		const selector = '.amp-setting-toggle .components-form-toggle.is-checked';
-		const checkedMobileRedirect = await page.waitForSelector( selector );
-
-		if ( checkedMobileRedirect && false === mobileRedirect ) {
-			const labelSelector = `${ selector } + label`;
-			await page.evaluate( ( selectorLabel ) => {
-				document.querySelector( selectorLabel ).scrollIntoView();
-			}, labelSelector );
-			await expect( page ).toClick( labelSelector );
-			await page.waitForSelector( '.amp-setting-toggle .components-form-toggle:not(.is-checked)' );
-		} else if ( ! checkedMobileRedirect && true === mobileRedirect ) {
-			await expect( page ).toClick( selector );
-			await page.waitForSelector( selector );
-		}
-	}
-
-	await clickNextButton();
-	await page.waitForTimeout( 1000 );
-	await page.waitForSelector( '.done__preview-container' );
-}
-
-export async function completeWizard( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
-	await moveToDoneScreen( { technical, mode, readerTheme, mobileRedirect } );
+export async function completeWizard( { technical = true, mode, readerTheme = 'legacy' } ) {
+	await moveToDoneScreen( { technical, mode, readerTheme } );
 	if ( 'reader' === mode ) {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 	} else {
 		await expect( page ).toClick( '#next-button' );
 	}
-	await page.waitForSelector( '#amp-settings' );
+	await page.waitForSelector( '#amp-settings', { timeout: 30000 } );
 	await expect( page ).toMatchElement( '#amp-settings' );
 }
 
@@ -127,20 +111,20 @@ export async function testCloseButton( { exists = true } ) {
 	}
 }
 
-export async function testPreviousButton( { exists = true, disabled = false } ) {
+export async function testPreviousButton( { exists = true, text = 'Previous', disabled = false } ) {
 	if ( exists ) {
-		await expect( page ).toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
+		await expect( page ).toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text } );
 	} else {
-		await expect( page ).not.toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
+		await expect( page ).not.toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text } );
 	}
 }
 
-export function testNextButton( { element = 'button', text, disabled = false } ) {
-	expect( page ).toMatchElement( `${ element }${ disabled ? '[disabled]' : '' }`, { text } );
+export async function testNextButton( { element = 'button', text = 'Next', disabled = false } ) {
+	await expect( page ).toMatchElement( `${ element }${ disabled ? '[disabled]' : '' }`, { text } );
 }
 
-export function testTitle( { text, element = 'h1' } ) {
-	expect( page ).toMatchElement( element, { text } );
+export async function testTitle( { text, element = 'h1' } ) {
+	await expect( page ).toMatchElement( element, { text } );
 }
 
 /**
@@ -151,14 +135,16 @@ export async function cleanUpSettings() {
 	await page.waitForSelector( '.amp-settings-nav' );
 	await page.evaluate( async () => {
 		await Promise.all( [
-			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: { amp_dev_tools_enabled: true } } ),
+			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: {
+				amp_dev_tools_enabled: true,
+				amp_review_panel_dismissed_for_template_mode: '',
+			} } ),
 			wp.apiFetch( { path: '/amp/v1/options', method: 'POST', data: {
 				mobile_redirect: false,
 				reader_theme: 'legacy',
 				theme_support: 'reader',
 				plugin_configured: false,
 			} } ),
-		],
-		);
+		] );
 	} );
 }

@@ -5,13 +5,15 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\TestCase;
+
 /**
  * Tests for AMP_Admin_Pointers class.
  *
  * @covers AMP_Admin_Pointers
  * @since 1.0
  */
-class Test_AMP_Admin_Pointers extends WP_UnitTestCase {
+class Test_AMP_Admin_Pointers extends TestCase {
 
 	/**
 	 * The meta key of the dismissed pointers.
@@ -32,8 +34,8 @@ class Test_AMP_Admin_Pointers extends WP_UnitTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = new AMP_Admin_Pointers();
 	}
 

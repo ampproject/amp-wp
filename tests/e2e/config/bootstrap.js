@@ -7,22 +7,46 @@ import { get } from 'lodash';
  * WordPress dependencies
  */
 import {
+	activateTheme,
 	clearLocalStorage,
 	enablePageDialogAccept,
+	installTheme,
 	isOfflineMode,
 	setBrowserViewport,
 	trashAllPosts,
+	visitAdminPage,
 } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
 import { cleanUpSettings } from '../utils/onboarding-wizard-utils';
+import { deactivatePlugin, installLocalPlugin } from '../utils/amp-settings-utils';
 
 /**
  * Environment variables
  */
 const { PUPPETEER_TIMEOUT } = process.env;
+
+/**
+ * Default browser viewport size.
+ *
+ * @type {{width: number, height: number}}
+ */
+export const DEFAULT_BROWSER_VIEWPORT_SIZE = {
+	width: 1600,
+	height: 1000,
+};
+
+/**
+ * Mobile browser viewport size.
+ *
+ * @type {{width: number, height: number}}
+ */
+export const MOBILE_BROWSER_VIEWPORT_SIZE = {
+	width: 375,
+	height: 667,
+};
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -189,6 +213,10 @@ async function runAxeTestsForBlockEditor() {
 			'link-name',
 			'listitem',
 			'region',
+			// Disabled due to this rule being erroneously recorded as a violation after
+			// downgrading package-lock.json to v1 (see https://github.com/ampproject/amp-wp/pull/6618).
+			// This can be reverted once node v16 becomes LTS.
+			'nested-interactive',
 		],
 		exclude: [
 			// Ignores elements created by metaboxes.
@@ -202,11 +230,49 @@ async function runAxeTestsForBlockEditor() {
 /**
  * Set up browser.
  */
-async function setupBrowser() {
-	await setBrowserViewport( {
-		width: 1600,
-		height: 1000,
+export async function setupBrowser() {
+	await setBrowserViewport( DEFAULT_BROWSER_VIEWPORT_SIZE );
+}
+
+/**
+ * Create test posts so that the WordPress instance has some data.
+ */
+async function createTestData() {
+	await visitAdminPage( 'admin.php', 'page=amp-options' );
+	await page.waitForSelector( '.amp-settings-nav' );
+	await page.evaluate( async () => {
+		await Promise.all( [
+			wp.apiFetch( { path: '/wp/v2/posts', method: 'POST', data: { title: 'Test Post 1', status: 'publish' } } ),
+			wp.apiFetch( { path: '/wp/v2/posts', method: 'POST', data: { title: 'Test Post 2', status: 'publish' } } ),
+		] );
 	} );
+}
+
+/**
+ * Install themes and plugins needed in tests.
+ */
+async function setupThemesAndPlugins() {
+	await installLocalPlugin( 'e2e-tests-demo-plugin' );
+	await installLocalPlugin( 'do-not-allow-amp-validate-capability' );
+
+	// If the plugins have been already installed, they may be activated, too. Try deactivating them, just in case.
+	await deactivatePlugin( 'e2e-tests-demo-plugin' );
+	await deactivatePlugin( 'do-not-allow-amp-validate-capability' );
+
+	await installTheme( 'hestia' );
+	await installTheme( 'twentytwenty' ); // Ensure that twentytwenty theme is installed.
+	await activateTheme( 'twentytwenty' );
+}
+
+/**
+ * Set pretty permalinks.
+ */
+async function setPrettyPermalinks() {
+	await visitAdminPage( 'options-permalink.php', '' );
+	await page.waitForSelector( 'input[value="/%postname%/"]' );
+	await page.click( 'input[value="/%postname%/"]' );
+	await page.click( 'input[type="submit"]' );
+	await page.waitForSelector( '#setting-error-settings_updated' );
 }
 
 /**
@@ -220,7 +286,10 @@ beforeAll( async () => {
 	enablePageDialogAccept();
 	observeConsoleLogging();
 	await setupBrowser();
+	await setPrettyPermalinks();
+	await setupThemesAndPlugins();
 	await trashAllPosts();
+	await createTestData();
 	await cleanUpSettings();
 	await page.setDefaultNavigationTimeout( 10000 );
 	await page.setDefaultTimeout( 10000 );
@@ -241,6 +310,7 @@ afterAll( () => {
 /**
  * `expect` extension to count the number of elements with a given selector on the page.
  */
+// eslint-disable-next-line jest/require-hook
 expect.extend( {
 	async countToBe( selector, expected ) {
 		const count = await page.$$eval( selector, ( els ) => els.length );

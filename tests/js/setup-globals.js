@@ -26,3 +26,5 @@ global.wp = {
 };
 
 global.ajaxurl = 'http://site.test/wp-admin/ajax.php';
+
+global.CSS = {};

@@ -3,7 +3,6 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -14,12 +13,12 @@ import { Loading } from '../../../components/loading';
 /**
  * Notification component used in the block editor sidebar.
  *
- * @param {Object} props
- * @param {ReactNode} props.action Call to action element.
- * @param {ReactNode} props.icon Status icon element.
- * @param {boolean} props.isLoading Flag indicating if it's a loading message.
- * @param {boolean} props.isSmall Flag indicating if the notification is small.
- * @param {string} props.message Message text.
+ * @param {Object}      props
+ * @param {JSX.Element} props.action    Call to action element.
+ * @param {JSX.Element} props.icon      Status icon element.
+ * @param {boolean}     props.isLoading Flag indicating if it's a loading message.
+ * @param {boolean}     props.isSmall   Flag indicating if the notification is small.
+ * @param {string}      props.message   Message text.
  */
 export function SidebarNotification( {
 	action,
@@ -64,9 +63,9 @@ SidebarNotification.propTypes = {
 /**
  * Sidebar notifications container component.
  *
- * @param {Object} props
- * @param {Object} props.children Component children.
- * @param {boolean} props.isShady Flag indicating if the component should have a background.
+ * @param {Object}  props
+ * @param {Object}  props.children Component children.
+ * @param {boolean} props.isShady  Flag indicating if the component should have a background.
  */
 export function SidebarNotificationsContainer( { children, isShady } ) {
 	return (

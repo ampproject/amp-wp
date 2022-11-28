@@ -4,7 +4,8 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
+const CssMinimizerPlugin = require( 'css-minimizer-webpack-plugin' );
+const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const WebpackBar = require( 'webpackbar' );
 
@@ -15,34 +16,12 @@ const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const { defaultRequestToExternal, defaultRequestToHandle, camelCaseDash } = require( '@wordpress/dependency-extraction-webpack-plugin/lib/util' );
 
-/**
- * Internal dependencies
- */
-const IgnoreExtraneousStyleAssets = require( './bin/ignore-extraneous-style-assets' );
-
 const sharedConfig = {
 	...defaultConfig,
 	output: {
 		path: path.resolve( process.cwd(), 'assets', 'js' ),
 		filename: '[name].js',
 		chunkFilename: '[name].js',
-	},
-	// TODO: Remove the `module` override once @wordpress/scripts upgrades to PostCSS 8.
-	module: {
-		...defaultConfig.module,
-		rules: defaultConfig.module.rules.map(
-			( rule ) => {
-				const postCssLoader = Array.isArray( rule.use ) && rule.use.find(
-					( loader ) => loader.loader && loader.loader.includes( 'postcss-loader' ),
-				);
-
-				if ( postCssLoader ) {
-					postCssLoader.loader = 'postcss-loader';
-				}
-
-				return rule;
-			},
-		),
 	},
 	plugins: [
 		...defaultConfig.plugins
@@ -58,7 +37,7 @@ const sharedConfig = {
 		new RtlCssPlugin( {
 			filename: '../css/[name]-rtl.css',
 		} ),
-		new IgnoreExtraneousStyleAssets(),
+		new RemoveEmptyScriptsPlugin(),
 	],
 	optimization: {
 		...defaultConfig.optimization,
@@ -70,7 +49,7 @@ const sharedConfig = {
 				style: false,
 			},
 		},
-		minimizer: defaultConfig.optimization.minimizer.concat( [ new OptimizeCSSAssetsPlugin( { } ) ] ),
+		minimizer: defaultConfig.optimization.minimizer.concat( [ new CssMinimizerPlugin() ] ),
 	},
 };
 
@@ -127,10 +106,18 @@ const classicEditor = {
 
 const admin = {
 	...sharedConfig,
+	externals: {
+		'amp-themes': 'ampThemes',
+		'amp-plugins': 'ampPlugins',
+		'amp-site-scan-notice': 'ampSiteScanNotice',
+	},
 	entry: {
 		'amp-validation-tooltips': './assets/src/admin/amp-validation-tooltips.js',
 		'amp-paired-browsing-app': './assets/src/admin/paired-browsing/app.js',
 		'amp-paired-browsing-client': './assets/src/admin/paired-browsing/client.js',
+		'amp-theme-install': './assets/src/admin/amp-theme-install.js',
+		'amp-plugin-install': './assets/src/admin/amp-plugin-install.js',
+		'amp-site-scan-notice': './assets/src/admin/site-scan-notice/index.js',
 	},
 	plugins: [
 		...sharedConfig.plugins,
@@ -159,22 +146,21 @@ const customizer = {
 };
 
 const WORDPRESS_NAMESPACE = '@wordpress/';
-const BABEL_NAMESPACE = '@babel/';
-const gutenbergPackages = [ '@babel/polyfill', '@wordpress/dom-ready', '@wordpress/i18n', '@wordpress/hooks', '@wordpress/html-entities', '@wordpress/url' ].map(
+const gutenbergPackages = [ '@wordpress/polyfill', '@wordpress/dom-ready', '@wordpress/i18n', '@wordpress/hooks', '@wordpress/html-entities', '@wordpress/url' ].map(
 	( packageName ) => {
-		if ( 0 !== packageName.indexOf( WORDPRESS_NAMESPACE ) && 0 !== packageName.indexOf( BABEL_NAMESPACE ) ) {
+		if ( 0 !== packageName.indexOf( WORDPRESS_NAMESPACE ) ) {
 			return null;
 		}
 
 		const camelCaseName = '@wordpress/i18n' === packageName
 			? 'i18n'
-			: camelCaseDash( packageName.replace( WORDPRESS_NAMESPACE, '' ).replace( BABEL_NAMESPACE, '' ) );
+			: camelCaseDash( packageName.replace( WORDPRESS_NAMESPACE, '' ) );
 
-		const handle = packageName.replace( WORDPRESS_NAMESPACE, 'wp-' ).replace( BABEL_NAMESPACE, 'wp-' );
+		const handle = packageName.replace( WORDPRESS_NAMESPACE, 'wp-' );
 
 		return {
 			camelCaseName,
-			entryPath: 'polyfill' === camelCaseName ? path.resolve( __dirname, 'assets/src/polyfills/wp-polyfill' ) : packageName,
+			entryPath: 'polyfill' === camelCaseName ? require.resolve( '@wordpress/babel-preset-default/build/polyfill' ) : packageName,
 			handle,
 			packageName,
 		};
@@ -195,7 +181,6 @@ const wpPolyfills = {
 		).handle }.js`,
 		path: path.resolve( __dirname, 'assets/js' ),
 		library: [ 'wp', '[name]' ],
-		libraryTarget: 'this',
 	},
 	plugins: [
 		new DependencyExtractionWebpackPlugin( {
@@ -285,8 +270,8 @@ const settingsPage = {
 	...sharedConfig,
 	entry: {
 		'wp-api-fetch': './assets/src/polyfills/api-fetch.js',
-		'wp-components': '@wordpress/components/build-style/style.css',
 		'amp-settings': './assets/src/settings-page',
+
 	},
 	externals: {
 		'amp-settings': 'ampSettings',
@@ -298,7 +283,7 @@ const settingsPage = {
 	},
 	plugins: [
 		...sharedConfig.plugins.filter(
-			( plugin ) => ! [ 'DependencyExtractionWebpackPlugin', 'IgnoreExtraneousStyleAssets' ].includes( plugin.constructor.name ),
+			( plugin ) => plugin.constructor.name !== 'DependencyExtractionWebpackPlugin',
 		),
 		new DependencyExtractionWebpackPlugin( {
 			useDefaults: false,
@@ -326,10 +311,57 @@ const settingsPage = {
 				}
 			},
 		} ),
-		// Ensure assets generated by `DependencyExtractionWebpackPlugin` are also ignored for styles entries.
-		new IgnoreExtraneousStyleAssets(),
 		new WebpackBar( {
 			name: 'Settings page',
+			color: '#67b255',
+		} ),
+	],
+};
+
+const supportPage = {
+	...sharedConfig,
+	entry: {
+		'wp-api-fetch': './assets/src/polyfills/api-fetch.js',
+		'amp-support': './assets/src/support-page',
+	},
+	externals: {
+		'amp-support': 'ampSupport',
+	},
+	resolve: {
+		alias: {
+			'@wordpress/api-fetch__non-shim': require.resolve( '@wordpress/api-fetch' ),
+		},
+	},
+	plugins: [
+		...sharedConfig.plugins.filter(
+			( plugin ) => plugin.constructor.name !== 'DependencyExtractionWebpackPlugin',
+		),
+		new DependencyExtractionWebpackPlugin( {
+			useDefaults: false,
+			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: ( handle ) => {
+				switch ( handle ) {
+					case 'lodash':
+					case '@wordpress/api-fetch':
+						return defaultRequestToHandle( handle );
+
+					default:
+						return undefined;
+				}
+			},
+			requestToExternal: ( external ) => {
+				switch ( external ) {
+					case 'lodash':
+					case '@wordpress/api-fetch':
+						return defaultRequestToExternal( external );
+
+					default:
+						return undefined;
+				}
+			},
+		} ),
+		new WebpackBar( {
+			name: 'Support Page',
 			color: '#67b255',
 		} ),
 	],
@@ -338,7 +370,12 @@ const settingsPage = {
 const styles = {
 	...sharedConfig,
 	entry: () => {
-		const entries = {};
+		const entries = {
+			// The `wp-components.css` is not available in WordPress 4.9 but we need it on the AMP Settings screen and
+			// in the Onboarding Wizard. It needs to be manually added to the build.
+			'wp-components': './node_modules/@wordpress/components/build-style/style.css',
+		};
+
 		const dir = './assets/css/src';
 		fs.readdirSync( dir ).forEach( ( fileName ) => {
 			const fullPath = `${ dir }/${ fileName }`;
@@ -373,7 +410,9 @@ const styles = {
 		),
 	},
 	plugins: [
-		...sharedConfig.plugins,
+		...sharedConfig.plugins.filter(
+			( plugin ) => plugin.constructor.name !== 'DependencyExtractionWebpackPlugin',
+		),
 		new WebpackBar( {
 			name: 'Styles',
 			color: '#b763ff',
@@ -404,6 +443,7 @@ module.exports = [
 	wpPolyfills,
 	onboardingWizard,
 	settingsPage,
+	supportPage,
 	styles,
 	mobileRedirection,
 ];

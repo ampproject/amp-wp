@@ -12,9 +12,11 @@ use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AMP_Options_Manager;
+use AMP_Validation_Manager;
 
 /**
  * Tests for OnboardingWizardSubmenuPage class.
@@ -27,7 +29,8 @@ use AMP_Options_Manager;
  */
 class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility;
+	use PrivateAccess;
+	use ThemesApiRequestMocking;
 
 	/**
 	 * Test instance.
@@ -46,12 +49,25 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->onboarding_wizard_submenu_page = $this->injector->make( OnboardingWizardSubmenuPage::class );
 
 		$this->options_menu = $this->injector->make( OptionsMenu::class );
+
+		$this->add_reader_themes_request_filter();
+	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tear_down() {
+		parent::tear_down();
+		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
 	}
 
 	/** @covers ::__construct() */
@@ -96,13 +112,14 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 	 * @covers ::render()
 	 */
 	public function test_render() {
+		wp_scripts(); // Make sure $wp_scripts global is defined for wp_check_widget_editor_deps().
 		set_current_screen( 'admin_page_amp-onboarding-wizard' );
 
 		ob_start();
 
 		$this->onboarding_wizard_submenu_page->render();
 
-		$this->assertStringContains( '<div class="amp" id="amp-onboarding-wizard"></div>', ob_get_clean() );
+		$this->assertStringContainsString( '<div class="amp" id="amp-onboarding-wizard">', ob_get_clean() );
 	}
 
 	/**
@@ -114,17 +131,72 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 		$this->assertEquals( $this->onboarding_wizard_submenu_page->screen_handle(), 'admin_page_amp-onboarding-wizard' );
 	}
 
+	/** @return array */
+	public function get_can_validate_data() {
+		return [
+			'can_validate'    => [ true ],
+			'cannot_validate' => [ false ],
+		];
+	}
+
 	/**
 	 * Tests OnboardingWizardSubmenuPage::enqueue_assets
 	 *
+	 * @dataProvider get_can_validate_data
 	 * @covers ::enqueue_assets()
+	 * @covers ::add_preload_rest_paths()
+	 *
+	 * @param bool $can_validate
 	 */
-	public function test_enqueue_assets() {
+	public function test_enqueue_assets( $can_validate ) {
 		$handle = 'amp-onboarding-wizard';
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		if ( ! $can_validate ) {
+			add_filter(
+				'map_meta_cap',
+				function ( $caps, $cap ) {
+					if ( AMP_Validation_Manager::VALIDATE_CAPABILITY === $cap ) {
+						$caps[] = 'do_not_allow';
+					}
+					return $caps;
+				},
+				10,
+				3
+			);
+		}
+		$this->assertEquals( $can_validate, AMP_Validation_Manager::has_cap() );
+
+		$rest_preloader = $this->get_private_property( $this->onboarding_wizard_submenu_page, 'rest_preloader' );
+		$this->assertCount( 0, $this->get_private_property( $rest_preloader, 'paths' ) );
 
 		$this->onboarding_wizard_submenu_page->enqueue_assets( $this->onboarding_wizard_submenu_page->screen_handle() );
 		$this->assertTrue( wp_script_is( $handle ) );
 		$this->assertTrue( wp_style_is( $handle ) );
+
+		$script_before = implode( '', wp_scripts()->get_data( $handle, 'before' ) );
+		$this->assertStringContainsString( 'var ampSettings', $script_before );
+		$this->assertStringContainsString( 'AMP_OPTIONS_KEY', $script_before );
+		$this->assertStringContainsString( 'VALIDATE_NONCE', $script_before );
+		if ( $can_validate ) {
+			$this->assertStringContainsString( AMP_Validation_Manager::get_amp_validate_nonce(), $script_before );
+		} else {
+			$this->assertStringNotContainsString( AMP_Validation_Manager::get_amp_validate_nonce(), $script_before );
+		}
+
+		if ( function_exists( 'rest_preload_api_request' ) ) {
+			$this->assertEqualSets(
+				[
+					'/amp/v1/options',
+					'/amp/v1/reader-themes',
+					'/amp/v1/scannable-urls?_fields%5B0%5D=url&_fields%5B1%5D=amp_url&_fields%5B2%5D=type&_fields%5B3%5D=label&force_standard_mode=1',
+					'/wp/v2/plugins?_fields%5B0%5D=author&_fields%5B1%5D=name&_fields%5B2%5D=plugin&_fields%5B3%5D=status&_fields%5B4%5D=version',
+					'/wp/v2/settings',
+					'/wp/v2/themes?_fields%5B0%5D=author&_fields%5B1%5D=name&_fields%5B2%5D=status&_fields%5B3%5D=stylesheet&_fields%5B4%5D=template&_fields%5B5%5D=version',
+					'/wp/v2/users/me',
+				],
+				$this->get_private_property( $rest_preloader, 'paths' )
+			);
+		}
 	}
 
 	/** @return array */

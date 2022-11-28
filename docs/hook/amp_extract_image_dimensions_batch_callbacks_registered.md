@@ -8,7 +8,7 @@ Fires after the amp_extract_image_dimensions_batch filter has been added to extr
 
 ### Source
 
-:link: [includes/utils/class-amp-image-dimension-extractor.php:150](/includes/utils/class-amp-image-dimension-extractor.php#L150)
+:link: [includes/utils/class-amp-image-dimension-extractor.php:151](/includes/utils/class-amp-image-dimension-extractor.php#L151)
 
 <details>
 <summary>Show Code</summary>

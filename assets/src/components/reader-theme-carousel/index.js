@@ -26,8 +26,8 @@ export function ReaderThemeCarousel() {
 	/**
 	 * @typedef Theme
 	 * @type {Object}
-	 * @property {string} availability - Availability.
-	 * @property {string} screenshot_url - Screenshot URL.
+	 * @property {string}  availability    - Availability.
+	 * @property {string}  screenshot_url  - Screenshot URL.
 	 * @property {boolean} is_reader_theme - Is Reader theme.
 	 */
 

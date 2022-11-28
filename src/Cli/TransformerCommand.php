@@ -14,7 +14,6 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Optimizer\Configuration;
 use AmpProject\Optimizer\Exception\UnknownConfigurationClass;
 use WP_CLI;
-use WP_CLI\Utils;
 
 /**
  * Commands that deal with the transformers registered with the AMP optimizer. (EXPERIMENTAL)
@@ -186,7 +185,7 @@ final class TransformerCommand implements Service, CliCommand {
 	 * +-------------------+----------------------------+
 	 *
 	 * # Fetch the attribute that is added to store a backup of inlined styles.
-	 * $ wp amp optimizer transformer config PreloadHeroImage --key=inlineStyleBackupAttribute --field=value
+	 * $ wp amp optimizer transformer config OptimizeHeroImages --key=inlineStyleBackupAttribute --field=value
 	 * data-amp-original-style
 	 *
 	 * # Render the configuration of the AmpRuntimeCss transformer as a JSON array.

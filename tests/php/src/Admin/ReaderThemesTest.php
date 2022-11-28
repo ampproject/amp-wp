@@ -13,10 +13,10 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\Helpers\MockAdminUser;
+use AmpProject\AmpWP\Tests\TestCase;
 use Closure;
 use WP_Error;
 
@@ -27,9 +27,9 @@ use WP_Error;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\ReaderThemes
  */
-class ReaderThemesTest extends WP_UnitTestCase {
+class ReaderThemesTest extends TestCase {
 
-	use AssertContainsCompatibility, ThemesApiRequestMocking, LoadsCoreThemes;
+	use ThemesApiRequestMocking, LoadsCoreThemes, MockAdminUser;
 
 	/**
 	 * Test instance.
@@ -43,8 +43,8 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
@@ -59,10 +59,9 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
-
+	public function tear_down() {
 		$this->restore_theme_directories();
+		parent::tear_down();
 	}
 
 	/**
@@ -186,8 +185,8 @@ class ReaderThemesTest extends WP_UnitTestCase {
 			$error->get_error_message()
 		);
 		if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
-			$this->assertStringContains( 'Test message', $error->get_error_message() );
-			$this->assertStringContains( 'amp_test_error', $error->get_error_message() );
+			$this->assertStringContainsString( 'Test message', $error->get_error_message() );
+			$this->assertStringContainsString( 'amp_test_error', $error->get_error_message() );
 		}
 	}
 
@@ -296,7 +295,18 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 * @param array   $theme        Theme.
 	 */
 	public function test_get_theme_availability( $get_expected, $can_install, $theme ) {
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		// Work around filesystem not yet being writable in Docker environment.
+		add_filter( 'request_filesystem_credentials', '__return_true' );
+		add_filter(
+			'filesystem_method',
+			static function () {
+				return 'direct';
+			}
+		);
+
+		$this->mock_admin_user();
+
 		$expected = $get_expected();
 		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );
 		$this->assertEquals( $can_install, $this->reader_themes->can_install_theme( $theme ) );
@@ -308,6 +318,16 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 * @covers ::can_install_theme
 	 */
 	public function test_can_install_theme() {
+
+		// Work around filesystem not yet being writable in Docker environment.
+		add_filter( 'request_filesystem_credentials', '__return_true' );
+		add_filter(
+			'filesystem_method',
+			static function () {
+				return 'direct';
+			}
+		);
+
 		$core_theme = [
 			'name'         => 'Twenty Twelve',
 			'requires'     => false,
@@ -326,7 +346,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		$this->assertFalse( $this->reader_themes->can_install_theme( $core_theme ) );
 		$this->assertFalse( $this->reader_themes->can_install_theme( $neve_theme ) );
 
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->mock_admin_user();
 		$this->assertTrue( $this->reader_themes->can_install_theme( $core_theme ) );
 		$this->assertTrue( $this->reader_themes->can_install_theme( $neve_theme ) );
 

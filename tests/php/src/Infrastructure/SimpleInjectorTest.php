@@ -6,7 +6,7 @@ use AmpProject\AmpWP\Exception\FailedToMakeInstance;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Injector\SimpleInjector;
 use AmpProject\AmpWP\Tests\Fixture;
-use PHPUnit\Framework\TestCase;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use stdClass;
 
 final class SimpleInjectorTest extends TestCase {

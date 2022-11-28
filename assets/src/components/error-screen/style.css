@@ -1,7 +1,7 @@
-* {
+.error-screen-container,
+.error-screen-container * {
 	box-sizing: border-box;
 }
-
 
 .error-screen-container {
 	margin: 3rem auto;
@@ -13,8 +13,31 @@
 .error-screen {
 	padding: 2.25rem;
 	width: 100%;
+	background-color: #fff;
+	border-left: 4px solid #d54e21;
 }
 
 .error-screen h1 {
-	line-height: 1.19;
+	line-height: 1.4;
+	font-size: 1.5rem;
+	font-family: var(--font-poppins);
+	margin: 0 0 1rem;
+	font-weight: 600;
+}
+
+.error-screen p {
+	margin: 1rem 0;
+	font-family: var(--font-noto);
+	font-size: 1rem;
+	line-height: 1.5;
+	word-break: break-word;
+}
+
+.error-screen pre {
+	overflow: auto;
+	padding: 3px 5px 2px 5px;
+	margin: 1rem 1px;
+	background: #f0f0f1;
+	background: rgba(0, 0, 0, .07);
+	font-size: 13px;
 }

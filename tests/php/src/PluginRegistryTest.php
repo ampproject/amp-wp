@@ -6,7 +6,6 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Tests\Helpers\MockPluginEnvironment;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use PHPUnit\Framework\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\PluginRegistry */
 final class PluginRegistryTest extends TestCase {
@@ -73,25 +72,30 @@ final class PluginRegistryTest extends TestCase {
 	public function test_get_mu_plugins_data() {
 		$plugin_registry = new PluginRegistry();
 
+		$expected_keys = [
+			'Name',
+			'PluginURI',
+			'Version',
+			'Description',
+			'Author',
+			'AuthorURI',
+			'TextDomain',
+			'DomainPath',
+			'Network',
+			'RequiresWP',
+			'RequiresPHP',
+			'Title',
+			'AuthorName',
+		];
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.8', '>=' ) ) {
+			$expected_keys[] = 'UpdateURI';
+		}
+
 		$plugins = $this->call_private_method( $plugin_registry, 'get_mu_plugins_data' );
-		$this->assertInternalType( 'array', $plugins );
+		$this->assertIsArray( $plugins );
 		foreach ( $plugins as $plugin_data ) {
 			$this->assertEqualSets(
-				[
-					'Name',
-					'PluginURI',
-					'Version',
-					'Description',
-					'Author',
-					'AuthorURI',
-					'TextDomain',
-					'DomainPath',
-					'Network',
-					'RequiresWP',
-					'RequiresPHP',
-					'Title',
-					'AuthorName',
-				],
+				$expected_keys,
 				array_keys( $plugin_data )
 			);
 		}
@@ -119,19 +123,5 @@ final class PluginRegistryTest extends TestCase {
 		);
 
 		$this->assertNull( $plugin_registry->get_plugin_from_slug( 'nobody' ) );
-	}
-
-	/**
-	 * Asserts that the contents of two un-keyed, single arrays are equal, without accounting for the order of elements.
-	 *
-	 * @see \WP_UnitTestCase_Base::assertEqualSets()
-	 *
-	 * @param array $expected Expected array.
-	 * @param array $actual   Array to check.
-	 */
-	public function assertEqualSets( $expected, $actual ) {
-		sort( $expected );
-		sort( $actual );
-		$this->assertEquals( $expected, $actual );
 	}
 }

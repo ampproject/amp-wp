@@ -227,6 +227,14 @@ class AMP_HTTP {
 			]
 		);
 
+		if ( defined( 'INTL_IDNA_VARIANT_UTS46' ) ) {
+			$intl_idna_variant = INTL_IDNA_VARIANT_UTS46;
+		} elseif ( defined( 'INTL_IDNA_VARIANT_2003' ) ) {
+			$intl_idna_variant = INTL_IDNA_VARIANT_2003; // phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
+		} else {
+			$intl_idna_variant = 0;
+		}
+
 		/*
 		 * From AMP docs:
 		 * "When possible, the Google AMP Cache will create a subdomain for each AMP document's domain by first converting it
@@ -234,10 +242,9 @@ class AMP_HTTP {
 		 * - (dash). For example, pub.com will map to pub-com.cdn.ampproject.org."
 		 */
 		foreach ( $domains as $domain ) {
-			if ( function_exists( 'idn_to_utf8' ) ) {
+			if ( function_exists( 'idn_to_utf8' ) && $intl_idna_variant ) {
 				// The third parameter is set explicitly to prevent issues with newer PHP versions compiled with an old ICU version.
-				// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
-				$domain = idn_to_utf8( $domain, IDNA_DEFAULT, defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : INTL_IDNA_VARIANT_2003 );
+				$domain = idn_to_utf8( $domain, IDNA_DEFAULT, $intl_idna_variant );
 			}
 			$subdomain = str_replace( [ '-', '.' ], [ '--', '-' ], $domain );
 
@@ -343,19 +350,28 @@ class AMP_HTTP {
 	 * @since 0.7.0
 	 * @since 1.0 Moved to AMP_HTTP class.
 	 * @see wp_redirect()
+	 * @see amp_get_current_url()
+	 * @see AMP_Form_Sanitizer::get_action_url()
 	 *
 	 * @param string $location The location to redirect to.
 	 */
 	public static function intercept_post_request_redirect( $location ) { // phpcs:ignore WordPressVIPMinimum.Hooks.AlwaysReturnInFilter.MissingReturnStatement -- It dies.
 
 		// Make sure relative redirects get made absolute.
+		$parsed_home_url = wp_parse_url( get_home_url() );
+		$parsed_location = wp_parse_url( $location );
+		if ( isset( $parsed_location['host'] ) ) {
+			// Make sure the home port is not accidentally applied to the redirect location URL.
+			unset( $parsed_home_url['port'] );
+		}
+
 		$parsed_location = array_merge(
+			wp_array_slice_assoc( $parsed_home_url, [ 'host', 'port' ] ),
 			[
 				'scheme' => 'https',
-				'host'   => wp_parse_url( home_url(), PHP_URL_HOST ),
 				'path'   => isset( $_SERVER['REQUEST_URI'] ) ? strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ) : '/', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			],
-			wp_parse_url( $location )
+			$parsed_location
 		);
 
 		$absolute_location = '';

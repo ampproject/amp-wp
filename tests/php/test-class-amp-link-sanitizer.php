@@ -9,14 +9,11 @@ use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /**
  * Class AMP_Link_Sanitizer_Test
  */
 class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
-
-	use AssertContainsCompatibility;
 
 	/**
 	 * Data for test_amp_to_amp_navigation.
@@ -35,16 +32,12 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 	 *
 	 * @dataProvider get_amp_to_amp_navigation_data
 	 * @covers AMP_Link_Sanitizer::process_links()
+	 * @covers AMP_Link_Sanitizer::process_element()
 	 *
 	 * @param bool $paired Paired.
 	 */
 	public function test_amp_to_amp_navigation( $paired ) {
-		// Enable pretty permalinks to keep the AMP slug as the only query var.
-		global $wp_rewrite;
-		update_option( 'permalink_structure', '/%postname%/' );
-		$wp_rewrite->use_trailing_slashes = true;
-		$wp_rewrite->init();
-		$wp_rewrite->flush_rules();
+		$this->set_permalink_structure( '/%postname%/' );
 
 		$post_link         = get_permalink(
 			self::factory()->post->create(
@@ -62,18 +55,18 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			'home-link'           => [
 				'href'         => home_url( '/' ),
 				'expected_amp' => true,
-				'expected_rel' => 'amphtml',
+				'expected_rel' => null,
 			],
 			'internal-link'       => [
 				'href'         => $post_link,
 				'expected_amp' => true,
-				'expected_rel' => 'amphtml',
+				'expected_rel' => null,
 			],
 			'non_amp_to_amp_rel'  => [
 				'href'         => $post_link,
 				'expected_amp' => false,
 				'rel'          => 'noamphtml',
-				'expected_rel' => null,
+				'expected_rel' => 'noamphtml',
 			],
 			'two_rel'             => [
 				'href'         => $post_link,
@@ -91,6 +84,12 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'href'         => $post_link,
 				'expected_amp' => false,
 				'rel'          => 'noamphtml ',
+				'expected_rel' => 'noamphtml ',
+			],
+			'empty_rel'           => [
+				'href'         => $post_link,
+				'expected_amp' => true,
+				'rel'          => '',
 				'expected_rel' => null,
 			],
 			'excluded_amp_link'   => [
@@ -104,10 +103,10 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'expected_rel' => null,
 			],
 			'ugc-link'            => [
-				'rel'          => 'ugc',
+				'rel'          => 'ugc nofollow',
 				'href'         => home_url( '/some/user/generated/data/' ),
 				'expected_amp' => true,
-				'expected_rel' => 'ugc amphtml',
+				'expected_rel' => 'ugc nofollow',
 			],
 			'page-anchor'         => [
 				'href'         => '#top',
@@ -117,7 +116,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			'other-page-anchor'   => [
 				'href'         => $post_link . '#top',
 				'expected_amp' => true,
-				'expected_rel' => 'amphtml',
+				'expected_rel' => null,
 			],
 			'external-link'       => [
 				'href'         => 'https://external.example.com/',
@@ -128,7 +127,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 				'href'         => 'https://external.example.com/',
 				'expected_amp' => false,
 				'rel'          => 'noamphtml',
-				'expected_rel' => null,
+				'expected_rel' => 'noamphtml',
 			],
 			'php-file-link'       => [
 				'href'         => site_url( '/wp-login.php' ),
@@ -162,7 +161,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		$html = sprintf( '<div id="wpadminbar"><a id="admin-bar-link" href="%s"></a></div>', esc_url( $admin_bar_link_href ) );
 		foreach ( $links as $id => $link_data ) {
 			$html .= sprintf( '<a id="%s" href="%s"', esc_attr( $id ), esc_attr( $link_data['href'] ) );
-			if ( isset( $link_data['rel'] ) ) {
+			if ( ! empty( $link_data['rel'] ) ) {
 				$html .= sprintf( ' rel="%s"', esc_attr( $link_data['rel'] ) );
 			}
 			$html .= '>Link</a>';
@@ -187,17 +186,17 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		foreach ( $links as $id => $link_data ) {
 			$element = $dom->getElementById( $id );
 			$this->assertInstanceOf( 'DOMElement', $element, "ID: $id" );
-			$rel = (string) $element->getAttribute( 'rel' );
 			if ( empty( $link_data['expected_rel'] ) ) {
-				$this->assertNotRegExp( '/(^|\s)amphtml(\s|$)/', $rel, "ID: $id" );
+				$this->assertFalse( $element->hasAttribute( 'rel' ), "ID: $id" );
 			} else {
+				$this->assertTrue( $element->hasAttribute( 'rel' ), "ID: $id" );
 				$this->assertEquals( $link_data['expected_rel'], $element->getAttribute( 'rel' ), "ID: $id" );
 			}
 
 			if ( $paired && $link_data['expected_amp'] ) {
-				$this->assertStringContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
+				$this->assertStringContainsString( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
 			} elseif ( ! $paired || ! $link_data['expected_amp'] ) {
-				$this->assertStringNotContains( '?' . amp_get_slug() . '=1', $element->getAttribute( 'href' ), "ID: $id" );
+				$this->assertStringNotContainsString( '?' . amp_get_slug() . '=1', $element->getAttribute( 'href' ), "ID: $id" );
 			}
 		}
 
@@ -318,9 +317,82 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		add_filter( 'amp_to_amp_linking_enabled', $filter );
 		$sanitizers = amp_get_content_sanitizers();
 		if ( $expected ) {
-			$this->assertArrayHasKey( 'AMP_Link_Sanitizer', $sanitizers );
+			$this->assertArrayHasKey( AMP_Link_Sanitizer::class, $sanitizers );
 		} else {
-			$this->assertArrayNotHasKey( 'AMP_Link_Sanitizer', $sanitizers );
+			$this->assertArrayNotHasKey( AMP_Link_Sanitizer::class, $sanitizers );
 		}
+	}
+
+	/**
+	 * Get data for test_is_frontend_url
+	 *
+	 * @return array
+	 */
+	public function get_test_is_frontend_url() {
+		return [
+			'no_scheme'      => [
+				'//example.com/',
+				false,
+			],
+			'invalid_scheme' => [
+				'ftp://example.com/',
+				false,
+			],
+			'different_host' => [
+				'https://cdn.foo.org/',
+				false,
+			],
+			'different_path' => [
+				home_url( '/foo' ),
+				false,
+			],
+			'php_file'       => [
+				home_url( '/foo.php' ),
+				false,
+			],
+			'feed'           => [
+				home_url( '/feed/' ),
+				false,
+			],
+			'admin'          => [
+				admin_url(),
+				false,
+			],
+			'content'        => [
+				content_url( '/' ),
+				false,
+			],
+			'valid'          => [
+				home_url( '/' ),
+				true,
+			],
+		];
+	}
+
+	/**
+	 * Test is_frontend_url.
+	 *
+	 * @dataProvider get_test_is_frontend_url
+	 * @covers AMP_Link_Sanitizer::is_frontend_url()
+	 *
+	 * @param string $url URL.
+	 * @param bool   $expected Expected.
+	 */
+	public function test_is_frontend_url( $url, $expected ) {
+		$dom = AMP_DOM_Utils::get_dom_from_content( '<a href="https://example.com/">Foo</a>' );
+
+		if ( home_url( '/foo' ) === $url ) {
+			$new_home_url = home_url( '/bar/' );
+
+			add_filter(
+				'home_url',
+				static function() use ( $new_home_url ) {
+					return $new_home_url;
+				}
+			);
+		}
+
+		$sanitizer = new AMP_Link_Sanitizer( $dom );
+		$this->assertEquals( $expected, $sanitizer->is_frontend_url( $url ) );
 	}
 }

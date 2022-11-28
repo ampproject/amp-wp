@@ -16,11 +16,11 @@ import { ErrorTypeIcon } from './error-type-icon';
 /**
  * Panel title component for an individual error.
  *
- * @param {Object} props Component props.
+ * @param {Object}  props            Component props.
  * @param {boolean} props.kept
- * @param {string} props.title Title string from error data.
- * @param {Object} props.error Error details.
- * @param {string} props.error.type Error type.
+ * @param {string}  props.title      Title string from error data.
+ * @param {Object}  props.error      Error details.
+ * @param {string}  props.error.type Error type.
  */
 export function ErrorPanelTitle( {
 	kept,

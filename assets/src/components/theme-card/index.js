@@ -1,3 +1,7 @@
+/**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -5,11 +9,6 @@
 import { useContext } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
-
-/**
- * External dependencies
- */
-import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
@@ -23,15 +22,15 @@ import { Phone } from '../phone';
 /**
  * A selectable card showing a theme in a list of themes.
  *
- * @param {Object} props Component props.
- * @param {string} props.description Theme description.
- * @param {string} props.homepage Link to view more information about the theme.
- * @param {string} props.screenshotUrl URL for screenshot of theme.
- * @param {string} props.slug Theme slug.
- * @param {string} props.name Theme name.
- * @param {boolean} props.disabled Whether the theme is not automatically installable in the current environment.
- * @param {Object} props.style Style object to pass to the Selectable component.
- * @param {string} props.ElementName Name for the wrapper element.
+ * @param {Object}  props               Component props.
+ * @param {string}  props.description   Theme description.
+ * @param {string}  props.homepage      Link to view more information about the theme.
+ * @param {string}  props.screenshotUrl URL for screenshot of theme.
+ * @param {string}  props.slug          Theme slug.
+ * @param {string}  props.name          Theme name.
+ * @param {boolean} props.disabled      Whether the theme is not automatically installable in the current environment.
+ * @param {Object}  props.style         Style object to pass to the Selectable component.
+ * @param {string}  props.ElementName   Name for the wrapper element.
  */
 export function ThemeCard( { description, ElementName = 'li', homepage, screenshotUrl, slug, name, disabled, style } ) {
 	const { editedOptions, updateOptions } = useContext( Options );

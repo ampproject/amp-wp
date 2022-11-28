@@ -12,20 +12,19 @@ import { useContext } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import './style.css';
+import { READER, STANDARD, TRANSITIONAL } from '../../common/constants';
+import { AMPDrawer, HANDLE_TYPE_RIGHT } from '../amp-drawer';
 import { AMPInfo } from '../amp-info';
 import { Standard } from '../svg/standard';
 import { Transitional } from '../svg/transitional';
 import { Reader } from '../svg/reader';
 import { Options } from '../options-context-provider';
 
-import './style.css';
-import { READER, STANDARD, TRANSITIONAL } from '../../common/constants';
-import { AMPDrawer, HANDLE_TYPE_RIGHT } from '../amp-drawer';
-
 /**
  * Mode-specific illustration.
  *
- * @param {Object} props Component props.
+ * @param {Object} props      Component props.
  * @param {string} props.mode The template mode.
  */
 function Illustration( { mode } ) {
@@ -80,14 +79,14 @@ export function getId( mode ) {
 /**
  * An individual mode selection component.
  *
- * @param {Object} props Component props.
- * @param {string|Object} props.children Section content.
- * @param {string} props.details Mode details.
- * @param {string} props.detailsUrl Mode details URL.
- * @param {string} props.mode The template mode.
- * @param {boolean} props.previouslySelected Optional. Whether the option was selected previously.
- * @param {Object} props.labelExtra Optional. Extra content to display on the right side of the option label.
- * @param {boolean} props.initialOpen Whether the panel should be open when the component renders.
+ * @param {Object}              props                    Component props.
+ * @param {string|Object}       props.children           Section content.
+ * @param {string|Array|Object} props.details            The template mode details.
+ * @param {string}              props.detailsUrl         Mode details URL.
+ * @param {string}              props.mode               The template mode.
+ * @param {boolean}             props.previouslySelected Optional. Whether the option was selected previously.
+ * @param {Object}              props.labelExtra         Optional. Extra content to display on the right side of the option label.
+ * @param {boolean}             props.initialOpen        Whether the panel should be open when the component renders.
  */
 export function TemplateModeOption( { children, details, detailsUrl, initialOpen, labelExtra = null, mode, previouslySelected = false } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
@@ -137,14 +136,34 @@ export function TemplateModeOption( { children, details, detailsUrl, initialOpen
 			selected={ mode === themeSupport }
 		>
 			<div className="template-mode-selection__details">
-				<p>
-					<span dangerouslySetInnerHTML={ { __html: details } } />
-					{ ' ' }
-					<a href={ detailsUrl } target="_blank" rel="noreferrer noopener">
-						{ __( 'Learn more.', 'amp' ) }
-					</a>
-				</p>
 				{ children }
+				{ Array.isArray( details ) && (
+					<ul className="template-mode-selection__details-list">
+						{ details.filter( Boolean ).map( ( detail, index ) => (
+							<li
+								key={ index }
+								className="template-mode-selection__details-list-item"
+							>
+								{ detail }
+							</li>
+						) ) }
+					</ul>
+				) }
+				{ details && ! Array.isArray( details ) && (
+					<p>
+						<span>
+							{ details }
+						</span>
+						{ detailsUrl && (
+							<>
+								{ ' ' }
+								<a href={ detailsUrl } target="_blank" rel="noreferrer noopener">
+									{ __( 'Learn more.', 'amp' ) }
+								</a>
+							</>
+						) }
+					</p>
+				) }
 			</div>
 		</AMPDrawer>
 	);
@@ -152,8 +171,12 @@ export function TemplateModeOption( { children, details, detailsUrl, initialOpen
 
 TemplateModeOption.propTypes = {
 	children: PropTypes.any,
-	details: PropTypes.string.isRequired,
-	detailsUrl: PropTypes.string.isRequired,
+	details: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.array,
+		PropTypes.object,
+	] ),
+	detailsUrl: PropTypes.string,
 	initialOpen: PropTypes.bool,
 	labelExtra: PropTypes.node,
 	mode: PropTypes.oneOf( [ READER, STANDARD, TRANSITIONAL ] ).isRequired,

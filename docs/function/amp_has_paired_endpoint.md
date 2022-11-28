@@ -16,7 +16,7 @@ Determine a given URL is for a paired AMP request.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1888](/includes/amp-helper-functions.php#L1888-L1900)
+:link: [includes/amp-helper-functions.php:2123](/includes/amp-helper-functions.php#L2123-L2135)
 
 <details>
 <summary>Show Code</summary>

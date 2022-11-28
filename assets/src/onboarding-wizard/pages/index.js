@@ -7,10 +7,10 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { TechnicalBackground } from './technical-background';
+import { SiteScan } from './site-scan';
 import { TemplateMode } from './template-mode';
 import { ChooseReaderTheme } from './choose-reader-theme';
-import { Summary } from './summary';
-import { Save } from './save';
+import { Done } from './done';
 import { Welcome } from './welcome';
 
 /**
@@ -30,9 +30,15 @@ export const PAGES = [
 		showTitle: false,
 	},
 	{
+		slug: 'site-scan',
+		title: __( 'Site Scan', 'amp' ),
+		PageComponent: SiteScan,
+	},
+	{
 		slug: 'template-modes',
 		title: __( 'Template Modes', 'amp' ),
 		PageComponent: TemplateMode,
+		showTitle: false,
 	},
 	{
 		slug: 'theme-selection',
@@ -40,14 +46,9 @@ export const PAGES = [
 		PageComponent: ChooseReaderTheme,
 	},
 	{
-		slug: 'summary',
-		title: __( 'Review', 'amp' ),
-		PageComponent: Summary,
-	},
-	{
 		slug: 'done',
 		title: __( 'Done', 'amp' ),
-		PageComponent: Save,
+		PageComponent: Done,
 		showTitle: false,
 	},
 ];

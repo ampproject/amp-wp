@@ -1,7 +1,8 @@
 <?php
 
+use AmpProject\AmpWP\Tests\TestCase;
 
-class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Playbuzz_Sanitizer_Test extends TestCase {
 
 	/**
 	 * Data for converter test.
@@ -21,8 +22,8 @@ class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'playbuzz_item_with_data_item'               => [
-				'<div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
-				'<amp-playbuzz class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" height="500"></amp-playbuzz>',
+				'<div id="playbuzz" class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
+				'<amp-playbuzz id="playbuzz" class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" height="500"></amp-playbuzz>',
 			],
 
 			'playbuzz_item_with_data_game'               => [

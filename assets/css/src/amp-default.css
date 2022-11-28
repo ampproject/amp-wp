@@ -4,7 +4,9 @@
  * width such as in the post content so that the contents do not get stretched or cropped.
  * See <https://github.com/ampproject/amphtml/issues/21371#issuecomment-475443219>.
  */
-.amp-wp-enforced-sizes {
+amp-img.amp-wp-enforced-sizes,
+amp-anim.amp-wp-enforced-sizes,
+.amp-wp-unknown-size {
 	object-fit: contain;
 }
 
@@ -58,9 +60,15 @@ amp-carousel .amp-wp-gallery-caption {
 	background-color: rgba(0, 0, 0, 0.5);
 	color: #fff;
 	padding: 1rem;
+	margin-bottom: 0;
 }
 
-.wp-block-gallery[data-amp-carousel="true"] {
+amp-carousel .amp-wp-gallery-caption a {
+	color: inherit;
+}
+
+.wp-block-gallery[data-amp-carousel="true"],
+.wp-block-gallery[data-amp-carousel="true"].has-nested-images {
 	display: block;
 	flex-wrap: unset;
 }
@@ -77,6 +85,15 @@ amp-carousel .amp-wp-gallery-caption {
 .wp-video {
 	margin-bottom: 1.5em;
 	max-width: 100%;
+}
+
+/*
+ * Ensure the aspect-ratio is respected when added by \AMP_Core_Block_Handler::ampify_video_block(). This is only needed
+ * when in the loose sandboxing level where a <video> is not converted into <amp-video>, and yet the width/height are
+ * both being added. See also <https://github.com/WordPress/gutenberg/pull/37052>.
+ */
+.wp-block-video video {
+	height: auto;
 }
 
 /*

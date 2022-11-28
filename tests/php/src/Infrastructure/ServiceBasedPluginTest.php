@@ -8,9 +8,11 @@ use AmpProject\AmpWP\Infrastructure\ServiceContainer;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer\SimpleServiceContainer;
 use AmpProject\AmpWP\Tests\Fixture\DummyService;
 use AmpProject\AmpWP\Tests\Fixture\DummyServiceBasedPlugin;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\Fixture\DummyServiceWithDelay;
+use AmpProject\AmpWP\Tests\Fixture\DummyServiceWithRequirements;
+use AmpProject\AmpWP\Tests\TestCase;
 
-final class ServiceBasedPluginTest extends WP_UnitTestCase {
+final class ServiceBasedPluginTest extends TestCase {
 
 	public function test_it_can_be_instantiated() {
 		$plugin = $this->createMock( ServiceBasedPlugin::class );
@@ -149,6 +151,115 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 		$this->assertInstanceof( DummyService::class, $container->get( 'service_b' ) );
 		$this->assertTrue( $container->has( 'filtered_service' ) );
 		$this->assertInstanceof( DummyService::class, $container->get( 'filtered_service' ) );
+	}
+
+	public function test_it_registers_service_with_requirements() {
+		$container = new SimpleServiceContainer();
+		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
+			->enableOriginalConstructor()
+			->setConstructorArgs( [ true, null, $container ] )
+			->setMethodsExcept(
+				[
+					'collect_missing_requirements',
+					'register',
+					'register_services',
+					'requirements_are_met',
+					'get_container',
+					'get_service_classes',
+				]
+			)
+			->getMock();
+
+		$service_callback = static function ( $services ) {
+			return array_merge(
+				$services,
+				[ 'service_with_requirements' => DummyServiceWithRequirements::class ]
+			);
+		};
+
+		add_filter( 'services', $service_callback );
+
+		$plugin->register();
+
+		$this->assertEquals( 4, count( $container ) );
+		$this->assertTrue( $container->has( 'service_a' ) );
+		$this->assertInstanceof( DummyService::class, $container->get( 'service_a' ) );
+		$this->assertTrue( $container->has( 'service_b' ) );
+		$this->assertInstanceof( DummyService::class, $container->get( 'service_b' ) );
+		$this->assertTrue( $container->has( 'service_with_requirements' ) );
+		$this->assertInstanceof( DummyServiceWithRequirements::class, $container->get( 'service_with_requirements' ) );
+	}
+
+	public function test_it_handles_delays_for_requirements() {
+		$container = new SimpleServiceContainer();
+		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
+			->enableOriginalConstructor()
+			->setConstructorArgs( [ true, null, $container ] )
+			->setMethodsExcept(
+				[
+					'collect_missing_requirements',
+					'register',
+					'register_services',
+					'requirements_are_met',
+					'get_container',
+					'get_service_classes',
+				]
+			)
+			->getMock();
+
+		$service_callback = static function ( $services ) {
+			return array_merge(
+				$services,
+				[
+					'service_a'                 => DummyServiceWithDelay::class,
+					'service_with_requirements' => DummyServiceWithRequirements::class,
+				]
+			);
+		};
+
+		add_filter( 'services', $service_callback );
+
+		$plugin->register();
+
+		$this->assertEquals( 2, count( $container ) );
+		$this->assertFalse( $container->has( 'service_a' ) );
+		$this->assertTrue( $container->has( 'service_b' ) );
+		$this->assertFalse( $container->has( 'service_with_requirements' ) );
+		$this->assertInstanceof( DummyService::class, $container->get( 'service_b' ) );
+
+		do_action( 'some_action' );
+
+		$this->assertEquals( 4, count( $container ) );
+		$this->assertTrue( $container->has( 'service_a' ) );
+		$this->assertInstanceof( DummyServiceWithDelay::class, $container->get( 'service_a' ) );
+		$this->assertTrue( $container->has( 'service_b' ) );
+		$this->assertInstanceof( DummyService::class, $container->get( 'service_b' ) );
+		$this->assertTrue( $container->has( 'service_with_requirements' ) );
+		$this->assertInstanceof( DummyServiceWithRequirements::class, $container->get( 'service_with_requirements' ) );
+	}
+
+	public function test_it_throws_an_exception_if_unrecognized_service_is_required() {
+		$container = new SimpleServiceContainer();
+		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
+			->enableOriginalConstructor()
+			->setConstructorArgs( [ true, null, $container ] )
+			->setMethodsExcept(
+				[
+					'register',
+					'register_services',
+					'get_service_classes',
+				]
+			)
+			->getMock();
+
+		$service_callback = static function () {
+			return [ 'service_with_requirements' => DummyServiceWithRequirements::class ];
+		};
+
+		add_filter( 'services', $service_callback );
+
+		$this->expectExceptionMessage( 'The service ID "service_a" is not recognized and cannot be retrieved.' );
+		$plugin->register();
 	}
 
 	public function test_it_generates_identifiers_as_needed() {

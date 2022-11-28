@@ -12,6 +12,10 @@
 	height: 36px;
 }
 
+.amp-settings-nav__prev-next > .components-button + .components-button {
+	margin-left: 1rem;
+}
+
 .amp-settings-nav__prev {
 	margin-right: 5px;
 }

@@ -18,7 +18,7 @@ Get regex pattern for matching HTML attributes from a given tag name.
 
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:95](/includes/embeds/class-amp-base-embed-handler.php#L95-L113)
+:link: [includes/embeds/class-amp-base-embed-handler.php:101](/includes/embeds/class-amp-base-embed-handler.php#L101-L119)
 
 <details>
 <summary>Show Code</summary>

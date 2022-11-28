@@ -7,9 +7,9 @@ window.ampCustomizePreview = ( function( api ) {
 	/**
 	 * Boot using data sent inline.
 	 *
-	 * @param {Object}  data - PHP exports.
+	 * @param {Object}  data           - PHP exports.
 	 * @param {boolean} data.available - Whether AMP is available.
-	 * @param {boolean} data.enabled - Whether AMP is enabled.
+	 * @param {boolean} data.enabled   - Whether AMP is enabled.
 	 * @return {void}
 	 */
 	component.boot = function boot( data ) {
