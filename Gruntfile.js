@@ -83,8 +83,8 @@ module.exports = function( grunt ) {
 				command: [
 					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
 					'cd build',
-					'composer install --no-dev -o',
-					'composer remove cweagans/composer-patches --update-no-dev -o',
+					'composer install --no-dev -oa',
+					'composer remove cweagans/composer-patches --update-no-dev -oa',
 					'rm -rf ' + productionInstallExcludedFilePatterns.join( ' ' ),
 				].join( ' && ' ),
 			},
