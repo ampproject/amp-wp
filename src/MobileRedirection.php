@@ -526,7 +526,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @link https://developers.google.com/search/mobile-sites/mobile-seo/separate-urls#annotation-in-the-html
 	 */
 	public function add_mobile_alternative_link() {
-		if ( ! amp_is_request() ) {
+		if ( amp_is_available() && ! amp_is_request() ) {
 			printf(
 				'<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">',
 				esc_url( $this->get_current_amp_url() )
