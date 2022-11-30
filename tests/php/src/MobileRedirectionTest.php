@@ -451,6 +451,26 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 	}
 
+	/**
+	 * @covers ::add_mobile_switcher_head_hooks()
+	 * @covers ::add_mobile_switcher_footer_hooks()
+	 * @covers ::add_a2a_linking_hooks()
+	 */
+	public function test_add_mobile_switcher_hooks() {
+		$this->call_private_method( $this->instance, 'add_mobile_switcher_head_hooks' );
+		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_post_template_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
+
+		$this->call_private_method( $this->instance, 'add_mobile_switcher_footer_hooks' );
+		$this->assertEquals( 10, has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+
+		$this->call_private_method( $this->instance, 'add_a2a_linking_hooks' );
+		$this->assertEquals( 0, has_filter( 'amp_to_amp_linking_enabled', '__return_true' ) );
+		$this->assertEquals( 100, has_filter( 'amp_to_amp_linking_element_excluded', [ $this->instance, 'filter_amp_to_amp_linking_element_excluded' ] ) );
+		$this->assertEquals( 10, has_filter( 'amp_to_amp_linking_element_query_vars', [ $this->instance, 'filter_amp_to_amp_linking_element_query_vars' ] ) );
+	}
+
 	/** @covers ::filter_amp_to_amp_linking_element_excluded() */
 	public function test_filter_amp_to_amp_linking_element_excluded() {
 		$home_url_without_noamp = home_url( '/' );
