@@ -116,6 +116,98 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * Get data for test_add_mobile_alternate_link
+	 *
+	 * @return array
+	 */
+	public function get_add_mobile_alternate_link() {
+		return [
+			'mobile_redirection_enabled'                   => [
+				[
+					Option::MOBILE_REDIRECT => true,
+				],
+				10,
+			],
+			'mobile_redirection_enabled_in_canonical_mode' => [
+				[
+					Option::MOBILE_REDIRECT => true,
+					Option::THEME_SUPPORT   => AMP_Theme_Support::STANDARD_MODE_SLUG,
+				],
+				false,
+			],
+			'sandboxing_set_to_loose'                      => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => true,
+					Option::SANDBOXING_LEVEL   => 1,
+				],
+				10,
+			],
+			'sandboxing_set_to_loose_in_canonical_mode'    => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => true,
+					Option::SANDBOXING_LEVEL   => 1,
+					Option::THEME_SUPPORT      => AMP_Theme_Support::STANDARD_MODE_SLUG,
+				],
+				false,
+			],
+			'sandboxing_set_to_moderate'                   => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => true,
+					Option::SANDBOXING_LEVEL   => 2,
+				],
+				10,
+			],
+			'sandboxing_set_to_moderate_in_canonical_mode' => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => true,
+					Option::SANDBOXING_LEVEL   => 2,
+					Option::THEME_SUPPORT      => AMP_Theme_Support::STANDARD_MODE_SLUG,
+				],
+				false,
+			],
+			'sandboxing_set_to_strict'                     => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => true,
+					Option::SANDBOXING_LEVEL   => 3,
+				],
+				false,
+			],
+			'sandboxing_and_mobile_redirection_disabled'   => [
+				[
+					Option::MOBILE_REDIRECT    => false,
+					Option::SANDBOXING_ENABLED => false,
+				],
+				false,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_add_mobile_alternate_link
+	 *
+	 * Test action which adds mobile alternative link to head if:
+	 * - mobile redirection is enabled.
+	 * - sandboxing level is set to Loose or Moderate.
+	 *
+	 * @covers ::register()
+	 *
+	 * @param array $options AMP options.
+	 * @param bool|int  $expected Expected result.
+	 */
+	public function test_add_mobile_alternate_link( $options, $expected ) {
+		AMP_Options_Manager::update_options( $options );
+
+		$this->instance->register();
+
+		$this->assertSame( $expected, has_action( 'wp_head', [ $this->instance, 'add_mobile_alternative_link' ] ) );
+	}
+
+	/**
 	 * Assert the service hooks were not added.
 	 *
 	 * @param MobileRedirection $instance
@@ -273,7 +365,6 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		$this->assertTrue( amp_is_available() );
 		$this->instance->redirect();
 		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
-		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_alternative_link' ] ) );
 		$this->assertEquals( 10, has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 	}
 
@@ -358,6 +449,26 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 		$this->assertEquals( 10, has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 		$this->assertEquals( 10, has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+	}
+
+	/**
+	 * @covers ::add_mobile_switcher_head_hooks()
+	 * @covers ::add_mobile_switcher_footer_hooks()
+	 * @covers ::add_a2a_linking_hooks()
+	 */
+	public function test_add_mobile_switcher_hooks() {
+		$this->call_private_method( $this->instance, 'add_mobile_switcher_head_hooks' );
+		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_post_template_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
+
+		$this->call_private_method( $this->instance, 'add_mobile_switcher_footer_hooks' );
+		$this->assertEquals( 10, has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+
+		$this->call_private_method( $this->instance, 'add_a2a_linking_hooks' );
+		$this->assertEquals( 0, has_filter( 'amp_to_amp_linking_enabled', '__return_true' ) );
+		$this->assertEquals( 100, has_filter( 'amp_to_amp_linking_element_excluded', [ $this->instance, 'filter_amp_to_amp_linking_element_excluded' ] ) );
+		$this->assertEquals( 10, has_filter( 'amp_to_amp_linking_element_query_vars', [ $this->instance, 'filter_amp_to_amp_linking_element_query_vars' ] ) );
 	}
 
 	/** @covers ::filter_amp_to_amp_linking_element_excluded() */
@@ -554,10 +665,20 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 	/** @covers ::add_mobile_alternative_link() */
 	public function test_add_mobile_alternative_link() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->go_to( '/' );
 		ob_start();
 		$this->instance->add_mobile_alternative_link();
 		$output = ob_get_clean();
+		$this->assertTrue( amp_is_request() );
+		$this->assertEmpty( $output );
 
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->go_to( '/' );
+		ob_start();
+		$this->instance->add_mobile_alternative_link();
+		$output = ob_get_clean();
+		$this->assertFalse( amp_is_request() );
 		$this->assertStringStartsWith( '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)"', $output );
 	}
 
@@ -676,6 +797,22 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		} else {
 			$this->assertStringNotContainsString( '<script data-ampdevmode>', $output );
 		}
+
+		// When mobile version switcher text is empty.
+		add_filter( 'amp_mobile_version_switcher_link_text', '__return_empty_string' );
+		ob_start();
+		$this->instance->add_mobile_version_switcher_link();
+		$output = ob_get_clean();
+
+		$this->assertEmpty( $output );
+
+		// When mobile version switcher is disabled.
+		add_filter( 'amp_mobile_version_switcher_used', '__return_false' );
+		ob_start();
+		$this->instance->add_mobile_version_switcher_link();
+		$output = ob_get_clean();
+
+		$this->assertEmpty( $output );
 	}
 
 	/**

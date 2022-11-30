@@ -134,18 +134,11 @@ final class Sandboxing implements Service, Registerable {
 	 * Add hooks.
 	 */
 	public function add_hooks() {
-		// Limit to Standard mode for now. To support in Transitional/Reader we'd need to discontinue redirecting invalid
-		// AMP to non-AMP and omit the amphtml link (in which case it would only be relevant when mobile redirection is
-		// enabled).
-		if ( ! amp_is_canonical() ) {
+		$sandboxing_level = amp_get_sandboxing_level();
+
+		if ( 0 === $sandboxing_level ) {
 			return;
 		}
-
-		if ( ! AMP_Options_Manager::get_option( Option::SANDBOXING_ENABLED ) ) {
-			return;
-		}
-
-		$sandboxing_level = AMP_Options_Manager::get_option( Option::SANDBOXING_LEVEL );
 
 		// Opt-in to the new script sanitization logic in the script sanitizer.
 		add_filter(
@@ -209,6 +202,10 @@ final class Sandboxing implements Service, Registerable {
 	private function remove_required_amp_markup_if_not_used( Document $dom, $effective_sandboxing_level ) {
 		if ( 3 === $effective_sandboxing_level ) {
 			// When valid AMP is the target, don't remove the scripts since it won't be valid AMP.
+			return;
+		}
+
+		if ( $dom->ampElements->length > 0 ) {
 			return;
 		}
 

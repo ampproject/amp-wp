@@ -86,6 +86,7 @@
 				<element value="ownerDocument"/>
 				<element value="DEFAULT_WIDTH"/>
 				<element value="DEFAULT_HEIGHT"/>
+				<element value="ampElements"/>
 			</property>
 		</properties>
 	</rule>
