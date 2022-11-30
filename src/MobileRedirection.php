@@ -86,12 +86,6 @@ final class MobileRedirection implements Service, Registerable {
 				add_filter( 'get_comments_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For get_comments_link().
 				add_filter( 'respond_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For comments_popup_link().
 			}
-		} elseif ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
-			add_action(
-				'template_redirect',
-				[ $this, 'maybe_add_mobile_switcher_hooks' ],
-				PHP_INT_MAX
-			); // For adding the mobile switcher link when redirection is disabled.
 		}
 	}
 
