@@ -185,17 +185,6 @@ final class MobileRedirection implements Service, Registerable {
 	}
 
 	/**
-	 * Add mobile version switcher link/styles when mobile redirection is not enabled.
-	 */
-	public function maybe_add_mobile_switcher_hooks() {
-		if ( $this->is_mobile_request() ) {
-			$this->add_mobile_switcher_head_hooks();
-			$this->add_a2a_linking_hooks();
-			$this->add_mobile_switcher_footer_hooks();
-		}
-	}
-
-	/**
 	 * Add mobile version switcher head hooks.
 	 */
 	private function add_mobile_switcher_head_hooks() {
