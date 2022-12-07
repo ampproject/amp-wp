@@ -2261,6 +2261,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		};
 		foreach ( [ 'wp_head', 'wp_footer', 'amp_post_template_head', 'amp_post_template_footer' ] as $action ) {
 			$wp_actions = [];
+			wp();
 			wp_enqueue_scripts();
 			$input  = '<html><head></head>' . $get_do_action( $action ) . '</html>';
 			$output = AMP_Theme_Support::prepare_response( $input );
