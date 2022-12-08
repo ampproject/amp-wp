@@ -6,7 +6,12 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { createContext, useState, useEffect, useContext } from '@wordpress/element';
+import {
+	createContext,
+	useState,
+	useEffect,
+	useContext,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -24,53 +29,62 @@ export const SiteSettings = createContext();
  * @param {any}     props.children         Component children.
  * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
  */
-export function SiteSettingsProvider( { children, hasErrorBoundary = false } ) {
-	const [ settings, setSettings ] = useState( {} );
-	const [ fetchingSiteSettings, setFetchingSiteSettings ] = useState( false );
+export function SiteSettingsProvider({ children, hasErrorBoundary = false }) {
+	const [settings, setSettings] = useState({});
+	const [fetchingSiteSettings, setFetchingSiteSettings] = useState(false);
 
-	const { error, setError } = useContext( ErrorContext );
+	const { error, setError } = useContext(ErrorContext);
 	const { setAsyncError } = useAsyncError();
 
-	useEffect( () => {
-		if ( error || Object.keys( settings ).length || fetchingSiteSettings ) {
+	useEffect(() => {
+		if (error || Object.keys(settings).length || fetchingSiteSettings) {
 			return () => undefined;
 		}
 
 		let unmounted = false;
 
-		( async () => {
+		(async () => {
 			try {
-				const fetchedSiteSettings = await apiFetch( { path: '/wp/v2/settings' } );
+				const fetchedSiteSettings = await apiFetch({
+					path: '/wp/v2/settings',
+				});
 
-				if ( unmounted ) {
+				if (unmounted) {
 					return;
 				}
 
-				setSettings( fetchedSiteSettings );
-			} catch ( e ) {
-				if ( unmounted ) {
+				setSettings(fetchedSiteSettings);
+			} catch (e) {
+				if (unmounted) {
 					return;
 				}
 
-				setError( e );
+				setError(e);
 
-				if ( hasErrorBoundary ) {
-					setAsyncError( e );
+				if (hasErrorBoundary) {
+					setAsyncError(e);
 				}
 				return;
 			}
 
-			setFetchingSiteSettings( false );
-		} )();
+			setFetchingSiteSettings(false);
+		})();
 
 		return () => {
 			unmounted = true;
 		};
-	}, [ error, settings, fetchingSiteSettings, setError, hasErrorBoundary, setAsyncError ] );
+	}, [
+		error,
+		settings,
+		fetchingSiteSettings,
+		setError,
+		hasErrorBoundary,
+		setAsyncError,
+	]);
 
 	return (
-		<SiteSettings.Provider value={ { settings, fetchingSiteSettings } }>
-			{ children }
+		<SiteSettings.Provider value={{ settings, fetchingSiteSettings }}>
+			{children}
 		</SiteSettings.Provider>
 	);
 }

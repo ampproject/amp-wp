@@ -7,7 +7,14 @@ import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
 /**
  * WordPress dependencies
  */
-import { createContext, useEffect, useState, useRef, useContext, useMemo } from '@wordpress/element';
+import {
+	createContext,
+	useEffect,
+	useState,
+	useRef,
+	useContext,
+	useMemo,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
@@ -33,71 +40,93 @@ export const ReaderThemes = createContext();
  * @param {boolean} props.hasErrorBoundary         Whether the component is wrapped in an error boundary.
  * @param {boolean} props.hideCurrentlyActiveTheme Whether the currently active theme should be hidden in the UI.
  */
-export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, hideCurrentlyActiveTheme = false, readerThemesRestPath, updatesNonce, hasErrorBoundary = false } ) {
+export function ReaderThemesContextProvider({
+	wpAjaxUrl,
+	children,
+	currentTheme,
+	hideCurrentlyActiveTheme = false,
+	readerThemesRestPath,
+	updatesNonce,
+	hasErrorBoundary = false,
+}) {
 	const { setAsyncError } = useAsyncError();
-	const { error, setError } = useContext( ErrorContext );
+	const { error, setError } = useContext(ErrorContext);
 
-	const [ templateModeWasOverridden, setTemplateModeWasOverridden ] = useState( null );
-	const [ themeWasOverridden, setThemeWasOverridden ] = useState( false );
-	const [ themes, setThemes ] = useState( null );
-	const [ fetchingThemes, setFetchingThemes ] = useState( null );
-	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
-	const [ downloadedTheme, setDownloadedTheme ] = useState( false );
-	const [ themesAPIError, setThemesAPIError ] = useState( null );
+	const [templateModeWasOverridden, setTemplateModeWasOverridden] =
+		useState(null);
+	const [themeWasOverridden, setThemeWasOverridden] = useState(false);
+	const [themes, setThemes] = useState(null);
+	const [fetchingThemes, setFetchingThemes] = useState(null);
+	const [downloadingTheme, setDownloadingTheme] = useState(false);
+	const [downloadedTheme, setDownloadedTheme] = useState(false);
+	const [themesAPIError, setThemesAPIError] = useState(null);
 
-	const { didSaveOptions, editedOptions, originalOptions, updateOptions, savingOptions } = useContext( Options );
+	const {
+		didSaveOptions,
+		editedOptions,
+		originalOptions,
+		updateOptions,
+		savingOptions,
+	} = useContext(Options);
 
-	const { reader_theme: originalReaderTheme, theme_support: originalThemeSupport } = originalOptions;
-	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
+	const {
+		reader_theme: originalReaderTheme,
+		theme_support: originalThemeSupport,
+	} = originalOptions;
+	const { reader_theme: readerTheme, theme_support: themeSupport } =
+		editedOptions;
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
-	const hasUnmounted = useRef( false );
-	useEffect( () => () => {
-		hasUnmounted.current = true;
-	}, [] );
+	const hasUnmounted = useRef(false);
+	useEffect(
+		() => () => {
+			hasUnmounted.current = true;
+		},
+		[]
+	);
 
 	/**
 	 * The active reader theme.
 	 */
-	const { originalSelectedTheme, selectedTheme } = useMemo(
-		() => {
-			const emptyTheme = { name: null, availability: null };
-			if ( ! themes ) {
-				return {
-					originalSelectedTheme: emptyTheme,
-					selectedTheme: emptyTheme,
-				};
-			}
-
+	const { originalSelectedTheme, selectedTheme } = useMemo(() => {
+		const emptyTheme = { name: null, availability: null };
+		if (!themes) {
 			return {
-				originalSelectedTheme: themes.find( ( { slug } ) => slug === originalReaderTheme ) || emptyTheme,
-				selectedTheme: themes.find( ( { slug } ) => slug === readerTheme ) || emptyTheme,
+				originalSelectedTheme: emptyTheme,
+				selectedTheme: emptyTheme,
 			};
-		},
-		[ originalReaderTheme, readerTheme, themes ],
-	);
+		}
+
+		return {
+			originalSelectedTheme:
+				themes.find(({ slug }) => slug === originalReaderTheme) ||
+				emptyTheme,
+			selectedTheme:
+				themes.find(({ slug }) => slug === readerTheme) || emptyTheme,
+		};
+	}, [originalReaderTheme, readerTheme, themes]);
 
 	/**
 	 * Handle downloaded theme errors separately from normal error handling because we don't want it to break the application
 	 * after settings have already been saved.
 	 */
-	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
+	const [downloadingThemeError, setDownloadingThemeError] = useState(null);
 
 	/**
 	 * If the currently selected Reader theme is the same as the active theme, change the template mode from Reader to
 	 * Transitional and also set the Reader theme to AMP Legacy.
 	 */
-	useEffect( () => {
+	useEffect(() => {
 		/**
 		 * Set up the initial flag state.
 		 */
-		if ( templateModeWasOverridden === null ) {
+		if (templateModeWasOverridden === null) {
 			/**
 			 * In case of the non-reader modes, set flag as soon as the mode
 			 * becomes available.
 			 */
-			if ( originalThemeSupport && originalThemeSupport !== READER ) {
-				setTemplateModeWasOverridden( false );
+			if (originalThemeSupport && originalThemeSupport !== READER) {
+				setTemplateModeWasOverridden(false);
 
 				return;
 			}
@@ -106,38 +135,46 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			 * When dealing with a reader mode, wait for `originalSelectedTheme`
 			 * to become available.
 			 */
-			if ( originalSelectedTheme.availability ) {
-				setTemplateModeWasOverridden( false );
+			if (originalSelectedTheme.availability) {
+				setTemplateModeWasOverridden(false);
 			}
 		}
 
 		/**
 		 * Recheck the flag if and only if the options have been saved.
 		 */
-		if ( templateModeWasOverridden ) {
-			if ( didSaveOptions ) {
-				setTemplateModeWasOverridden( false );
+		if (templateModeWasOverridden) {
+			if (didSaveOptions) {
+				setTemplateModeWasOverridden(false);
 			}
 
 			return;
 		}
 
-		if ( originalThemeSupport === READER && originalSelectedTheme.availability === 'active' ) {
-			updateOptions(
-				{
-					theme_support: TRANSITIONAL,
-					reader_theme: LEGACY_THEME_SLUG,
-				},
-			);
-			setTemplateModeWasOverridden( true );
+		if (
+			originalThemeSupport === READER &&
+			originalSelectedTheme.availability === 'active'
+		) {
+			updateOptions({
+				theme_support: TRANSITIONAL,
+				reader_theme: LEGACY_THEME_SLUG,
+			});
+			setTemplateModeWasOverridden(true);
 		}
-	}, [ didSaveOptions, originalThemeSupport, originalSelectedTheme.availability, templateModeWasOverridden, updateOptions ] );
+	}, [
+		didSaveOptions,
+		originalThemeSupport,
+		originalSelectedTheme.availability,
+		templateModeWasOverridden,
+		updateOptions,
+	]);
 
 	/**
 	 * If the currently selected theme is not installable or unavailable for selection, set the Reader theme to AMP Legacy.
 	 */
-	useEffect( () => {
-		if ( themeWasOverridden ) { // Only do this once.
+	useEffect(() => {
+		if (themeWasOverridden) {
+			// Only do this once.
 			return;
 		}
 
@@ -145,184 +182,217 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			selectedTheme.availability === 'non-installable' ||
 			USING_FALLBACK_READER_THEME
 		) {
-			updateOptions( { reader_theme: LEGACY_THEME_SLUG } );
-			setThemeWasOverridden( true );
+			updateOptions({ reader_theme: LEGACY_THEME_SLUG });
+			setThemeWasOverridden(true);
 		}
-	}, [ originalSelectedTheme.availability, selectedTheme.availability, themeWasOverridden, updateOptions ] );
+	}, [
+		originalSelectedTheme.availability,
+		selectedTheme.availability,
+		themeWasOverridden,
+		updateOptions,
+	]);
 
 	/**
 	 * Downloads the selected reader theme, if necessary, when options are saved.
 	 */
-	useEffect( () => {
-		if ( ! selectedTheme ) {
+	useEffect(() => {
+		if (!selectedTheme) {
 			return;
 		}
 
-		if ( ! savingOptions || downloadingTheme ) {
+		if (!savingOptions || downloadingTheme) {
 			return;
 		}
 
-		if ( 'installable' !== selectedTheme.availability ) {
+		if ('installable' !== selectedTheme.availability) {
 			return;
 		}
 
 		/**
 		 * Downloads a theme from WordPress.org using the traditional AJAX action.
 		 */
-		( async () => {
-			if ( downloadingTheme || downloadingThemeError ) {
+		(async () => {
+			if (downloadingTheme || downloadingThemeError) {
 				return;
 			}
 
-			setDownloadingTheme( true );
+			setDownloadingTheme(true);
 
 			try {
 				const body = new global.FormData();
-				body.append( 'action', 'install-theme' );
-				body.append( 'slug', selectedTheme.slug );
-				body.append( '_wpnonce', updatesNonce );
+				body.append('action', 'install-theme');
+				body.append('slug', selectedTheme.slug);
+				body.append('_wpnonce', updatesNonce);
 
 				// This is the only fetch request in the setup wizard that doesn't go to a REST endpoint.
 				// We need to use window.fetch to bypass the apiFetch middlewares that are useful for other requests.
 				/** @type {{ok: boolean}} */
-				const response = await global.fetch( wpAjaxUrl, {
+				const response = await global.fetch(wpAjaxUrl, {
 					body,
 					method: 'POST',
-				} );
+				});
 
-				if ( true === hasUnmounted.current ) {
+				if (true === hasUnmounted.current) {
 					return;
 				}
 
-				if ( ! response.ok ) {
-					throw new Error( __( 'Reader theme failed to download.', 'amp' ) );
+				if (!response.ok) {
+					throw new Error(
+						__('Reader theme failed to download.', 'amp')
+					);
 				}
 
-				setDownloadedTheme( selectedTheme.slug );
-			} catch ( e ) {
-				if ( true === hasUnmounted.current ) {
+				setDownloadedTheme(selectedTheme.slug);
+			} catch (e) {
+				if (true === hasUnmounted.current) {
 					return;
 				}
 
-				setDownloadingThemeError( e );
+				setDownloadingThemeError(e);
 			}
 
-			setDownloadingTheme( false );
-		} )();
-	}, [ wpAjaxUrl, downloadingTheme, downloadingThemeError, savingOptions, selectedTheme, themeSupport, updatesNonce ] );
+			setDownloadingTheme(false);
+		})();
+	}, [
+		wpAjaxUrl,
+		downloadingTheme,
+		downloadingThemeError,
+		savingOptions,
+		selectedTheme,
+		themeSupport,
+		updatesNonce,
+	]);
 
 	/**
 	 * Fetches theme data when needed.
 	 */
-	useEffect( () => {
-		if ( fetchingThemes ) {
+	useEffect(() => {
+		if (fetchingThemes) {
 			return;
 		}
 
-		if ( error || ! readerThemesRestPath || themes || READER !== themeSupport ) {
-			setFetchingThemes( false );
+		if (
+			error ||
+			!readerThemesRestPath ||
+			themes ||
+			READER !== themeSupport
+		) {
+			setFetchingThemes(false);
 			return;
 		}
 
 		/**
 		 * Fetch themes from the REST endpoint.
 		 */
-		( async () => {
-			setFetchingThemes( true );
+		(async () => {
+			setFetchingThemes(true);
 
 			try {
 				/** @type {{headers: Headers, json: Function}} */
-				const fetchedThemesResponse = await apiFetch( { path: readerThemesRestPath, parse: false } );
+				const fetchedThemesResponse = await apiFetch({
+					path: readerThemesRestPath,
+					parse: false,
+				});
 
-				setThemesAPIError( fetchedThemesResponse.headers.get( 'X-AMP-Theme-API-Error' ) );
+				setThemesAPIError(
+					fetchedThemesResponse.headers.get('X-AMP-Theme-API-Error')
+				);
 
 				const fetchedThemes = await fetchedThemesResponse.json();
 
-				if ( hasUnmounted.current === true ) {
+				if (hasUnmounted.current === true) {
 					return;
 				}
 
 				// Screenshots are required.
-				setThemes( fetchedThemes );
-			} catch ( e ) {
-				if ( hasUnmounted.current === true ) {
+				setThemes(fetchedThemes);
+			} catch (e) {
+				if (hasUnmounted.current === true) {
 					return;
 				}
 
-				setError( e );
+				setError(e);
 
-				if ( hasErrorBoundary ) {
-					setAsyncError( e );
+				if (hasErrorBoundary) {
+					setAsyncError(e);
 				}
 				return;
 			}
 
-			setFetchingThemes( false );
-		} )();
-	}, [ error, hasErrorBoundary, fetchingThemes, readerThemesRestPath, setAsyncError, setError, themes, themeSupport ] );
+			setFetchingThemes(false);
+		})();
+	}, [
+		error,
+		hasErrorBoundary,
+		fetchingThemes,
+		readerThemesRestPath,
+		setAsyncError,
+		setError,
+		themes,
+		themeSupport,
+	]);
 
-	const { filteredThemes } = useMemo( () => {
+	const { filteredThemes } = useMemo(() => {
 		let newFilteredThemes;
 
-		if ( hideCurrentlyActiveTheme ) {
-			newFilteredThemes = ( themes || [] ).filter( ( theme ) => {
+		if (hideCurrentlyActiveTheme) {
+			newFilteredThemes = (themes || []).filter((theme) => {
 				return 'active' !== theme.availability;
-			} );
+			});
 		} else {
 			newFilteredThemes = themes;
 		}
 
 		return { filteredThemes: newFilteredThemes };
-	}, [ hideCurrentlyActiveTheme, themes ] );
+	}, [hideCurrentlyActiveTheme, themes]);
 
 	/**
 	 * Separate available themes (both installed and installable) from those
 	 * that need to be installed manually.
 	 */
 	const { availableThemes, unavailableThemes } = useMemo(
-		() => ( filteredThemes || [] ).reduce(
-			( collections, theme ) => {
-				if ( theme.availability === 'non-installable' ) {
-					collections.unavailableThemes.push( theme );
-				} else {
-					collections.availableThemes.push( theme );
-				}
+		() =>
+			(filteredThemes || []).reduce(
+				(collections, theme) => {
+					if (theme.availability === 'non-installable') {
+						collections.unavailableThemes.push(theme);
+					} else {
+						collections.availableThemes.push(theme);
+					}
 
-				return collections;
-			},
-			{ availableThemes: [], unavailableThemes: [] },
-		),
-		[ filteredThemes ],
+					return collections;
+				},
+				{ availableThemes: [], unavailableThemes: [] }
+			),
+		[filteredThemes]
 	);
 
 	return (
 		<ReaderThemes.Provider
-			value={
-				{
-					availableThemes,
-					currentTheme,
-					downloadedTheme,
-					downloadingTheme,
-					downloadingThemeError,
-					fetchingThemes,
-					selectedTheme: selectedTheme || {},
-					templateModeWasOverridden,
-					themes: filteredThemes,
-					themesAPIError,
-					unavailableThemes,
-				}
-			}
+			value={{
+				availableThemes,
+				currentTheme,
+				downloadedTheme,
+				downloadingTheme,
+				downloadingThemeError,
+				fetchingThemes,
+				selectedTheme: selectedTheme || {},
+				templateModeWasOverridden,
+				themes: filteredThemes,
+				themesAPIError,
+				unavailableThemes,
+			}}
 		>
-			{ children }
+			{children}
 		</ReaderThemes.Provider>
 	);
 }
 
 ReaderThemesContextProvider.propTypes = {
 	children: PropTypes.any,
-	currentTheme: PropTypes.shape( {
+	currentTheme: PropTypes.shape({
 		name: PropTypes.string.isRequired,
-	} ).isRequired,
+	}).isRequired,
 	hasErrorBoundary: PropTypes.bool,
 	readerThemesRestPath: PropTypes.string.isRequired,
 	hideCurrentlyActiveTheme: PropTypes.bool,

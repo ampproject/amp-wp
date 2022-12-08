@@ -1,4 +1,4 @@
-export default ( [
+export default [
 	{
 		url: 'https://example.org/',
 		type: 'is_front_page',
@@ -8,7 +8,7 @@ export default ( [
 			{
 				code: 'CSS_SYNTAX_INVALID_PROPERTY_NOLIST',
 				css_property_name: 'behavior',
-				css_property_value: 'url(\'/bad.htc\')',
+				css_property_value: "url('/bad.htc')",
 				type: 'css_error',
 				spec_name: 'style amp-custom',
 				node_name: 'link',
@@ -37,7 +37,8 @@ export default ( [
 						name: 'wp-includes',
 						file: 'script-loader.php',
 						line: 2223,
-						function: 'wp_enqueue_registered_block_scripts_and_styles',
+						function:
+							'wp_enqueue_registered_block_scripts_and_styles',
 						hook: 'enqueue_block_assets',
 						priority: 10,
 						dependency_type: 'style',
@@ -70,8 +71,9 @@ export default ( [
 		],
 		validated_url_post: {
 			id: 15350,
-			edit_link: 'https://example.org/wp-admin/post.php?post=15350&action=edit',
+			edit_link:
+				'https://example.org/wp-admin/post.php?post=15350&action=edit',
 		},
 		stale: false,
 	},
-] );
+];

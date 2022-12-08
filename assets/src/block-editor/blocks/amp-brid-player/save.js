@@ -3,8 +3,18 @@
  */
 import PropTypes from 'prop-types';
 
-const BlockSave = ( { attributes } ) => {
-	const { dataPlayer, dataOutstream, dataPartner, ampLayout, width, height, dataVideo, autoPlay, dataPlaylist } = attributes;
+const BlockSave = ({ attributes }) => {
+	const {
+		dataPlayer,
+		dataOutstream,
+		dataPartner,
+		ampLayout,
+		width,
+		height,
+		dataVideo,
+		autoPlay,
+		dataPlaylist,
+	} = attributes;
 
 	const bridProps = {
 		layout: ampLayout,
@@ -12,28 +22,26 @@ const BlockSave = ( { attributes } ) => {
 		'data-player': dataPlayer,
 		'data-partner': dataPartner,
 	};
-	if ( 'fixed-height' !== ampLayout && width ) {
+	if ('fixed-height' !== ampLayout && width) {
 		bridProps.width = width;
 	}
-	if ( dataPlaylist ) {
-		bridProps[ 'data-playlist' ] = dataPlaylist;
+	if (dataPlaylist) {
+		bridProps['data-playlist'] = dataPlaylist;
 	}
-	if ( dataVideo ) {
-		bridProps[ 'data-video' ] = dataVideo;
+	if (dataVideo) {
+		bridProps['data-video'] = dataVideo;
 	}
-	if ( dataOutstream ) {
-		bridProps[ 'data-outstream' ] = dataOutstream;
+	if (dataOutstream) {
+		bridProps['data-outstream'] = dataOutstream;
 	}
-	if ( autoPlay ) {
+	if (autoPlay) {
 		bridProps.autoplay = autoPlay;
 	}
-	return (
-		<amp-brid-player { ...bridProps } />
-	);
+	return <amp-brid-player {...bridProps} />;
 };
 
 BlockSave.propTypes = {
-	attributes: PropTypes.shape( {
+	attributes: PropTypes.shape({
 		autoPlay: PropTypes.bool,
 		dataPartner: PropTypes.string,
 		dataPlayer: PropTypes.string,
@@ -43,7 +51,7 @@ BlockSave.propTypes = {
 		ampLayout: PropTypes.string,
 		width: PropTypes.number,
 		height: PropTypes.number,
-	} ),
+	}),
 };
 
 export default BlockSave;

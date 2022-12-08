@@ -46,7 +46,8 @@ export const ACTION_SCAN_CANCEL = 'ACTION_SCAN_CANCEL';
  */
 export const STATUS_REQUEST_SCANNABLE_URLS = 'STATUS_REQUEST_SCANNABLE_URLS';
 export const STATUS_FETCHING_SCANNABLE_URLS = 'STATUS_FETCHING_SCANNABLE_URLS';
-export const STATUS_REFETCHING_PLUGIN_SUPPRESSION = 'STATUS_REFETCHING_PLUGIN_SUPPRESSION';
+export const STATUS_REFETCHING_PLUGIN_SUPPRESSION =
+	'STATUS_REFETCHING_PLUGIN_SUPPRESSION';
 export const STATUS_READY = 'STATUS_READY';
 export const STATUS_IDLE = 'STATUS_IDLE';
 export const STATUS_IN_PROGRESS = 'STATUS_IN_PROGRESS';
@@ -92,14 +93,14 @@ const CONCURRENT_VALIDATION_REQUESTS_WAIT_MS = 500;
  * @return {Object} New state.
  */
 //eslint-disable-next-line complexity
-export function siteScanReducer( state, action ) {
+export function siteScanReducer(state, action) {
 	// Bail out early if Site Scan is skipped, i.e. if there is no validation nonce provided meaning the current user
 	// does not have capabilities for running AMP validation.
-	if ( state.status === STATUS_SKIPPED ) {
+	if (state.status === STATUS_SKIPPED) {
 		return state;
 	}
 
-	switch ( action.type ) {
+	switch (action.type) {
 		case ACTION_SET_STATUS: {
 			return {
 				...state,
@@ -116,19 +117,32 @@ export function siteScanReducer( state, action ) {
 			};
 		}
 		case ACTION_SCANNABLE_URLS_RECEIVE: {
-			const hasScannableUrls = Array.isArray( action.scannableUrls ) && action.scannableUrls.length > 0;
+			const hasScannableUrls =
+				Array.isArray(action.scannableUrls) &&
+				action.scannableUrls.length > 0;
 			return {
 				...state,
-				status: ( state.scanOnce && state.scansCount > 0 ) || ! hasScannableUrls ? STATUS_COMPLETED : STATUS_READY,
+				status:
+					(state.scanOnce && state.scansCount > 0) ||
+					!hasScannableUrls
+						? STATUS_COMPLETED
+						: STATUS_READY,
 				scannableUrls: hasScannableUrls ? action.scannableUrls : [],
 			};
 		}
 		case ACTION_SCAN_INITIALIZE: {
-			if ( ! [ STATUS_READY, STATUS_COMPLETED, STATUS_FAILED, STATUS_CANCELLED ].includes( state.status ) ) {
+			if (
+				![
+					STATUS_READY,
+					STATUS_COMPLETED,
+					STATUS_FAILED,
+					STATUS_CANCELLED,
+				].includes(state.status)
+			) {
 				return state;
 			}
 
-			if ( state.scanOnce && state.scansCount > 0 ) {
+			if (state.scanOnce && state.scansCount > 0) {
 				return {
 					...state,
 					status: STATUS_COMPLETED,
@@ -140,11 +154,13 @@ export function siteScanReducer( state, action ) {
 				status: STATUS_IDLE,
 				currentlyScannedUrlIndexes: [],
 				scansCount: state.scansCount + 1,
-				urlIndexesPendingScan: state.scannableUrls.map( ( url, index ) => index ),
+				urlIndexesPendingScan: state.scannableUrls.map(
+					(url, index) => index
+				),
 			};
 		}
 		case ACTION_SCAN_URL: {
-			if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( state.status ) ) {
+			if (![STATUS_IDLE, STATUS_IN_PROGRESS].includes(state.status)) {
 				return state;
 			}
 
@@ -155,41 +171,59 @@ export function siteScanReducer( state, action ) {
 					...state.currentlyScannedUrlIndexes,
 					action.currentlyScannedUrlIndex,
 				],
-				urlIndexesPendingScan: state.urlIndexesPendingScan.filter( ( index ) => index !== action.currentlyScannedUrlIndex ),
+				urlIndexesPendingScan: state.urlIndexesPendingScan.filter(
+					(index) => index !== action.currentlyScannedUrlIndex
+				),
 			};
 		}
 		case ACTION_SCAN_RECEIVE_RESULTS: {
-			if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( state.status ) ) {
+			if (![STATUS_IDLE, STATUS_IN_PROGRESS].includes(state.status)) {
 				return state;
 			}
 
 			return {
 				...state,
 				status: STATUS_IDLE,
-				currentlyScannedUrlIndexes: state.currentlyScannedUrlIndexes.filter( ( index ) => index !== action.currentlyScannedUrlIndex ),
+				currentlyScannedUrlIndexes:
+					state.currentlyScannedUrlIndexes.filter(
+						(index) => index !== action.currentlyScannedUrlIndex
+					),
 				scannableUrls: [
-					...state.scannableUrls.slice( 0, action.currentlyScannedUrlIndex ),
+					...state.scannableUrls.slice(
+						0,
+						action.currentlyScannedUrlIndex
+					),
 					{
-						...state.scannableUrls[ action.currentlyScannedUrlIndex ],
+						...state.scannableUrls[action.currentlyScannedUrlIndex],
 						stale: false,
 						error: action.error ?? false,
-						validated_url_post: action.error ? {} : action.validatedUrlPost,
-						validation_errors: action.error ? [] : action.validationErrors,
+						validated_url_post: action.error
+							? {}
+							: action.validatedUrlPost,
+						validation_errors: action.error
+							? []
+							: action.validationErrors,
 					},
-					...state.scannableUrls.slice( action.currentlyScannedUrlIndex + 1 ),
+					...state.scannableUrls.slice(
+						action.currentlyScannedUrlIndex + 1
+					),
 				],
 			};
 		}
 		case ACTION_SCAN_COMPLETE: {
-			const hasFailed = state.scannableUrls.every( ( scannableUrl ) => Boolean( scannableUrl.error ) );
+			const hasFailed = state.scannableUrls.every((scannableUrl) =>
+				Boolean(scannableUrl.error)
+			);
 
 			return {
 				...state,
-				status: hasFailed ? STATUS_FAILED : STATUS_REFETCHING_PLUGIN_SUPPRESSION,
+				status: hasFailed
+					? STATUS_FAILED
+					: STATUS_REFETCHING_PLUGIN_SUPPRESSION,
 			};
 		}
 		case ACTION_SCAN_CANCEL: {
-			if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( state.status ) ) {
+			if (![STATUS_IDLE, STATUS_IN_PROGRESS].includes(state.status)) {
 				return state;
 			}
 
@@ -201,7 +235,7 @@ export function siteScanReducer( state, action ) {
 			};
 		}
 		default: {
-			throw new Error( `Unhandled action type: ${ action.type }` );
+			throw new Error(`Unhandled action type: ${action.type}`);
 		}
 	}
 }
@@ -218,7 +252,7 @@ export function siteScanReducer( state, action ) {
  * @param {boolean} props.scanOnce                               Whether to scan only once.
  * @param {string}  props.validateNonce                          The AMP validate nonce.
  */
-export function SiteScanContextProvider( {
+export function SiteScanContextProvider({
 	children,
 	fetchCachedValidationErrors = false,
 	refetchPluginSuppressionOnScanComplete = false,
@@ -226,16 +260,17 @@ export function SiteScanContextProvider( {
 	scannableUrlsRestPath,
 	scanOnce = false,
 	validateNonce,
-} ) {
+}) {
 	const {
-		originalOptions: {
-			theme_support: themeSupport,
-		},
+		originalOptions: { theme_support: themeSupport },
 		savedOptions,
 		refetchPluginSuppression,
-	} = useContext( Options );
+	} = useContext(Options);
 	const { setAsyncError } = useAsyncError();
-	const [ state, dispatch ] = useReducer( siteScanReducer, { ...INITIAL_STATE, scanOnce } );
+	const [state, dispatch] = useReducer(siteScanReducer, {
+		...INITIAL_STATE,
+		scanOnce,
+	});
 	const {
 		currentlyScannedUrlIndexes,
 		forceStandardMode,
@@ -243,8 +278,9 @@ export function SiteScanContextProvider( {
 		urlIndexesPendingScan,
 		status,
 	} = state;
-	const urlType = forceStandardMode || themeSupport === STANDARD ? 'url' : 'amp_url';
-	const previewPermalink = scannableUrls?.[ 0 ]?.[ urlType ] ?? '';
+	const urlType =
+		forceStandardMode || themeSupport === STANDARD ? 'url' : 'amp_url';
+	const previewPermalink = scannableUrls?.[0]?.[urlType] ?? '';
 
 	/**
 	 * Memoize properties.
@@ -254,9 +290,11 @@ export function SiteScanContextProvider( {
 		pluginsWithAmpIncompatibility,
 		stale,
 		themesWithAmpIncompatibility,
-	} = useMemo( () => {
+	} = useMemo(() => {
 		// Skip if the scan is in progress.
-		if ( ! [ STATUS_READY, STATUS_COMPLETED, STATUS_SKIPPED ].includes( status ) ) {
+		if (
+			![STATUS_READY, STATUS_COMPLETED, STATUS_SKIPPED].includes(status)
+		) {
 			return {
 				hasSiteScanResults: false,
 				pluginsWithAmpIncompatibility: [],
@@ -265,167 +303,193 @@ export function SiteScanContextProvider( {
 			};
 		}
 
-		const slugs = getSourcesFromScannableUrls( scannableUrls, {
+		const slugs = getSourcesFromScannableUrls(scannableUrls, {
 			useAmpUrls: urlType === 'amp_url',
-		} );
+		});
 
 		return {
-			hasSiteScanResults: scannableUrls.some( ( scannableUrl ) => Boolean( scannableUrl?.validation_errors ) ),
+			hasSiteScanResults: scannableUrls.some((scannableUrl) =>
+				Boolean(scannableUrl?.validation_errors)
+			),
 			pluginsWithAmpIncompatibility: slugs.plugins,
-			stale: scannableUrls.some( ( scannableUrl ) => scannableUrl?.stale === true ),
+			stale: scannableUrls.some(
+				(scannableUrl) => scannableUrl?.stale === true
+			),
 			themesWithAmpIncompatibility: slugs.themes,
 		};
-	}, [ scannableUrls, status, urlType ] );
+	}, [scannableUrls, status, urlType]);
 
 	/**
 	 * Preflight check.
 	 */
-	useEffect( () => {
-		if ( ! validateNonce && status !== STATUS_SKIPPED ) {
-			dispatch( {
+	useEffect(() => {
+		if (!validateNonce && status !== STATUS_SKIPPED) {
+			dispatch({
 				type: ACTION_SET_STATUS,
 				status: STATUS_SKIPPED,
-			} );
+			});
 		}
-	}, [ status, validateNonce ] );
+	}, [status, validateNonce]);
 
 	/**
 	 * This component sets state inside async functions. Use this ref to prevent
 	 * state updates after unmount.
 	 */
-	const hasUnmounted = useRef( false );
-	useEffect( () => () => {
-		hasUnmounted.current = true;
-	}, [] );
+	const hasUnmounted = useRef(false);
+	useEffect(
+		() => () => {
+			hasUnmounted.current = true;
+		},
+		[]
+	);
 
-	const fetchScannableUrls = useCallback( ( args = {} ) => {
-		dispatch( {
+	const fetchScannableUrls = useCallback((args = {}) => {
+		dispatch({
 			type: ACTION_SCANNABLE_URLS_REQUEST,
 			forceStandardMode: args?.forceStandardMode,
-		} );
-	}, [] );
+		});
+	}, []);
 
-	const startSiteScan = useCallback( () => {
-		dispatch( { type: ACTION_SCAN_INITIALIZE } );
-	}, [] );
+	const startSiteScan = useCallback(() => {
+		dispatch({ type: ACTION_SCAN_INITIALIZE });
+	}, []);
 
-	const cancelSiteScan = useCallback( () => {
-		dispatch( { type: ACTION_SCAN_CANCEL } );
-	}, [] );
+	const cancelSiteScan = useCallback(() => {
+		dispatch({ type: ACTION_SCAN_CANCEL });
+	}, []);
 
 	/**
 	 * Whenever options change, cancel the current scan (if in progress) and
 	 * refetch the scannable URLs.
 	 */
-	useEffect( () => {
-		if ( resetOnOptionsChange && Object.keys( savedOptions ).length > 0 ) {
-			dispatch( { type: ACTION_SCANNABLE_URLS_REQUEST } );
+	useEffect(() => {
+		if (resetOnOptionsChange && Object.keys(savedOptions).length > 0) {
+			dispatch({ type: ACTION_SCANNABLE_URLS_REQUEST });
 		}
-	}, [ resetOnOptionsChange, savedOptions ] );
+	}, [resetOnOptionsChange, savedOptions]);
 
 	/**
 	 * Trigger site scan if the suppressed plugins list has changed and the
 	 * scanner is ready to start a scan.
 	 */
-	useEffect( () => {
-		if ( status === STATUS_READY && Object.keys( savedOptions.suppressed_plugins || {} ).length > 0 ) {
-			dispatch( { type: ACTION_SCAN_INITIALIZE } );
+	useEffect(() => {
+		if (
+			status === STATUS_READY &&
+			Object.keys(savedOptions.suppressed_plugins || {}).length > 0
+		) {
+			dispatch({ type: ACTION_SCAN_INITIALIZE });
 		}
-	}, [ savedOptions?.suppressed_plugins, status ] );
+	}, [savedOptions?.suppressed_plugins, status]);
 
 	/**
 	 * Once the site scan is complete, refetch the plugin suppression data so
 	 * that the suppressed table is updated with the latest validation errors.
 	 */
-	useEffect( () => {
-		if ( status !== STATUS_REFETCHING_PLUGIN_SUPPRESSION ) {
+	useEffect(() => {
+		if (status !== STATUS_REFETCHING_PLUGIN_SUPPRESSION) {
 			return;
 		}
 
-		if ( refetchPluginSuppressionOnScanComplete ) {
+		if (refetchPluginSuppressionOnScanComplete) {
 			refetchPluginSuppression();
 		}
 
-		dispatch( {
+		dispatch({
 			type: ACTION_SET_STATUS,
 			status: STATUS_COMPLETED,
-		} );
-	}, [ refetchPluginSuppression, refetchPluginSuppressionOnScanComplete, status ] );
+		});
+	}, [
+		refetchPluginSuppression,
+		refetchPluginSuppressionOnScanComplete,
+		status,
+	]);
 
 	/**
 	 * Delay concurrent validation requests.
 	 */
-	const [ shouldDelayValidationRequest, setShouldDelayValidationRequest ] = useState( false );
-	useEffect( () => {
+	const [shouldDelayValidationRequest, setShouldDelayValidationRequest] =
+		useState(false);
+	useEffect(() => {
 		let timeoutId;
 
-		if ( shouldDelayValidationRequest ) {
-			( async () => {
-				await new Promise( ( resolve ) => {
-					timeoutId = setTimeout( resolve, CONCURRENT_VALIDATION_REQUESTS_WAIT_MS );
-				} );
+		if (shouldDelayValidationRequest) {
+			(async () => {
+				await new Promise((resolve) => {
+					timeoutId = setTimeout(
+						resolve,
+						CONCURRENT_VALIDATION_REQUESTS_WAIT_MS
+					);
+				});
 
-				if ( true === hasUnmounted.current ) {
+				if (true === hasUnmounted.current) {
 					return;
 				}
 
-				setShouldDelayValidationRequest( false );
-			} )();
+				setShouldDelayValidationRequest(false);
+			})();
 		}
 
 		return () => {
-			if ( timeoutId ) {
-				clearTimeout( timeoutId );
+			if (timeoutId) {
+				clearTimeout(timeoutId);
 			}
 		};
-	}, [ shouldDelayValidationRequest ] );
+	}, [shouldDelayValidationRequest]);
 
 	/**
 	 * Fetch scannable URLs from the REST endpoint.
 	 */
-	useEffect( () => {
-		( async () => {
-			if ( status !== STATUS_REQUEST_SCANNABLE_URLS ) {
+	useEffect(() => {
+		(async () => {
+			if (status !== STATUS_REQUEST_SCANNABLE_URLS) {
 				return;
 			}
 
-			dispatch( {
+			dispatch({
 				type: ACTION_SET_STATUS,
 				status: STATUS_FETCHING_SCANNABLE_URLS,
-			} );
+			});
 
 			try {
-				const fields = [ 'url', 'amp_url', 'type', 'label' ];
-				const response = await apiFetch( {
-					path: addQueryArgs( scannableUrlsRestPath, {
-						_fields: fetchCachedValidationErrors ? [ ...fields, 'validation_errors', 'stale' ] : fields,
+				const fields = ['url', 'amp_url', 'type', 'label'];
+				const response = await apiFetch({
+					path: addQueryArgs(scannableUrlsRestPath, {
+						_fields: fetchCachedValidationErrors
+							? [...fields, 'validation_errors', 'stale']
+							: fields,
 						force_standard_mode: forceStandardMode ? 1 : undefined,
-					} ),
-				} );
+					}),
+				});
 
-				if ( true === hasUnmounted.current ) {
+				if (true === hasUnmounted.current) {
 					return;
 				}
 
-				dispatch( {
+				dispatch({
 					type: ACTION_SCANNABLE_URLS_RECEIVE,
 					scannableUrls: response,
-				} );
-			} catch ( e ) {
-				if ( true === hasUnmounted.current ) {
+				});
+			} catch (e) {
+				if (true === hasUnmounted.current) {
 					return;
 				}
 
-				setAsyncError( e );
+				setAsyncError(e);
 			}
-		} )();
-	}, [ fetchCachedValidationErrors, forceStandardMode, scannableUrlsRestPath, setAsyncError, status ] );
+		})();
+	}, [
+		fetchCachedValidationErrors,
+		forceStandardMode,
+		scannableUrlsRestPath,
+		setAsyncError,
+		status,
+	]);
 
 	/**
 	 * Scan site URLs sequentially.
 	 */
-	useEffect( () => {
-		if ( ! [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ) ) {
+	useEffect(() => {
+		if (![STATUS_IDLE, STATUS_IN_PROGRESS].includes(status)) {
 			return;
 		}
 
@@ -433,33 +497,37 @@ export function SiteScanContextProvider( {
 		 * If there are no more URLs to scan and no URLs are scanned at the
 		 * moment, finish the site scan.
 		 */
-		if ( urlIndexesPendingScan.length === 0 ) {
-			if ( currentlyScannedUrlIndexes.length === 0 ) {
-				dispatch( { type: ACTION_SCAN_COMPLETE } );
+		if (urlIndexesPendingScan.length === 0) {
+			if (currentlyScannedUrlIndexes.length === 0) {
+				dispatch({ type: ACTION_SCAN_COMPLETE });
 			}
 
 			return;
 		}
 
-		if ( shouldDelayValidationRequest || currentlyScannedUrlIndexes.length >= CONCURRENT_VALIDATION_REQUESTS_MAX_COUNT ) {
+		if (
+			shouldDelayValidationRequest ||
+			currentlyScannedUrlIndexes.length >=
+				CONCURRENT_VALIDATION_REQUESTS_MAX_COUNT
+		) {
 			return;
 		}
 
-		setShouldDelayValidationRequest( true );
+		setShouldDelayValidationRequest(true);
 
-		const currentlyScannedUrlIndex = urlIndexesPendingScan[ 0 ];
+		const currentlyScannedUrlIndex = urlIndexesPendingScan[0];
 
-		dispatch( {
+		dispatch({
 			type: ACTION_SCAN_URL,
 			currentlyScannedUrlIndex,
-		} );
+		});
 
-		( async () => {
+		(async () => {
 			const results = {};
 
 			try {
-				const scannableUrl = scannableUrls[ currentlyScannedUrlIndex ];
-				const url = scannableUrl[ urlType ];
+				const scannableUrl = scannableUrls[currentlyScannedUrlIndex];
+				const url = scannableUrl[urlType];
 				const args = {
 					amp_validate: {
 						cache: true,
@@ -470,63 +538,86 @@ export function SiteScanContextProvider( {
 					},
 				};
 
-				const response = await fetch( addQueryArgs( url, args ) );
+				const response = await fetch(addQueryArgs(url, args));
 				const data = await response.json();
 
-				if ( true === hasUnmounted.current ) {
+				if (true === hasUnmounted.current) {
 					return;
 				}
 
-				if ( response.ok ) {
+				if (response.ok) {
 					results.validatedUrlPost = data.validated_url_post;
-					results.validationErrors = data.results.map( ( { error } ) => error );
+					results.validationErrors = data.results.map(
+						({ error }) => error
+					);
 				} else {
 					results.error = data?.code || true;
 				}
-			} catch ( e ) {
-				if ( true === hasUnmounted.current ) {
+			} catch (e) {
+				if (true === hasUnmounted.current) {
 					return;
 				}
 
 				results.error = true;
 			}
 
-			dispatch( {
+			dispatch({
 				type: ACTION_SCAN_RECEIVE_RESULTS,
 				currentlyScannedUrlIndex,
 				...results,
-			} );
+			});
 
-			setShouldDelayValidationRequest( false );
-		} )();
-	}, [ currentlyScannedUrlIndexes.length, forceStandardMode, scannableUrls, shouldDelayValidationRequest, status, urlIndexesPendingScan, urlType, validateNonce ] );
+			setShouldDelayValidationRequest(false);
+		})();
+	}, [
+		currentlyScannedUrlIndexes.length,
+		forceStandardMode,
+		scannableUrls,
+		shouldDelayValidationRequest,
+		status,
+		urlIndexesPendingScan,
+		urlType,
+		validateNonce,
+	]);
 
 	return (
 		<SiteScan.Provider
-			value={ {
+			value={{
 				cancelSiteScan,
 				fetchScannableUrls,
 				forceStandardMode,
 				hasSiteScanResults,
-				isBusy: [ STATUS_IDLE, STATUS_IN_PROGRESS ].includes( status ),
+				isBusy: [STATUS_IDLE, STATUS_IN_PROGRESS].includes(status),
 				isCancelled: status === STATUS_CANCELLED,
-				isCompleted: [ STATUS_REFETCHING_PLUGIN_SUPPRESSION, STATUS_COMPLETED ].includes( status ),
+				isCompleted: [
+					STATUS_REFETCHING_PLUGIN_SUPPRESSION,
+					STATUS_COMPLETED,
+				].includes(status),
 				isFailed: status === STATUS_FAILED,
-				isFetchingScannableUrls: [ STATUS_REQUEST_SCANNABLE_URLS, STATUS_FETCHING_SCANNABLE_URLS ].includes( status ),
-				isInitializing: ! Boolean( status ),
+				isFetchingScannableUrls: [
+					STATUS_REQUEST_SCANNABLE_URLS,
+					STATUS_FETCHING_SCANNABLE_URLS,
+				].includes(status),
+				isInitializing: !Boolean(status),
 				isReady: status === STATUS_READY,
 				isSiteScannable: scannableUrls.length > 0,
 				isSkipped: status === STATUS_SKIPPED,
 				pluginsWithAmpIncompatibility,
 				previewPermalink,
 				scannableUrls,
-				scannedUrlsMaxIndex: ( [ STATUS_IN_PROGRESS, STATUS_IDLE ].includes( status ) ? Math.min( scannableUrls.length, ...urlIndexesPendingScan ) : 0 ) - 1,
+				scannedUrlsMaxIndex:
+					([STATUS_IN_PROGRESS, STATUS_IDLE].includes(status)
+						? Math.min(
+								scannableUrls.length,
+								...urlIndexesPendingScan
+						  )
+						: 0) - 1,
 				stale,
 				startSiteScan,
 				themesWithAmpIncompatibility,
-			} }
+			}}
 		>
-			{ children }
+			{children}
 		</SiteScan.Provider>
 	);
 }

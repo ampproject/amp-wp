@@ -17,26 +17,23 @@ import { Selectable } from '../selectable';
  * @param {Array}    props.links   List of links.
  * @param {Function} props.onClick Click handler that receives the original event and a clicked link object.
  */
-export function NavMenu( { links = [], onClick } ) {
+export function NavMenu({ links = [], onClick }) {
 	return (
-		<Selectable
-			ElementName="nav"
-			className="nav-menu"
-		>
+		<Selectable ElementName="nav" className="nav-menu">
 			<ul className="nav-menu__list">
-				{ links.map( ( link ) => (
-					<li key={ link.url } className="nav-menu__item">
+				{links.map((link) => (
+					<li key={link.url} className="nav-menu__item">
 						<a
-							className={ classnames( 'nav-menu__link', {
+							className={classnames('nav-menu__link', {
 								'nav-menu__link--active': link.isActive,
-							} ) }
-							href={ link.url }
-							onClick={ ( event ) => onClick( event, link ) }
+							})}
+							href={link.url}
+							onClick={(event) => onClick(event, link)}
 						>
-							{ link.label }
+							{link.label}
 						</a>
 					</li>
-				) ) }
+				))}
 			</ul>
 		</Selectable>
 	);
@@ -44,11 +41,11 @@ export function NavMenu( { links = [], onClick } ) {
 
 NavMenu.propTypes = {
 	links: PropTypes.arrayOf(
-		PropTypes.shape( {
+		PropTypes.shape({
 			url: PropTypes.string,
 			label: PropTypes.string,
 			isActive: PropTypes.bool,
-		} ),
+		})
 	),
 	onClick: PropTypes.func,
 };

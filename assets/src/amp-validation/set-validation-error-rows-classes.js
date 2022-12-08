@@ -4,11 +4,11 @@
  * This is needed because \WP_Terms_List_Table::single_row() does not allow for additional
  * attributes to be added to the <tr> element.
  */
-export default function() {
-	document.querySelectorAll( 'tr[id]' ).forEach( ( row ) => {
-		setStatusNew( row );
-		setStatusKept( row );
-	} );
+export default function () {
+	document.querySelectorAll('tr[id]').forEach((row) => {
+		setStatusNew(row);
+		setStatusKept(row);
+	});
 }
 
 /**
@@ -16,14 +16,14 @@ export default function() {
  *
  * @param {HTMLTableRowElement} row HTML row element.
  */
-function setStatusNew( row ) {
-	const input = row.querySelector( '.amp-validation-error-new' );
+function setStatusNew(row) {
+	const input = row.querySelector('.amp-validation-error-new');
 
-	if ( ! input ) {
+	if (!input) {
 		return;
 	}
 
-	row.classList.toggle( 'new', Boolean( parseInt( input.value ) ) );
+	row.classList.toggle('new', Boolean(parseInt(input.value)));
 }
 
 /**
@@ -31,17 +31,18 @@ function setStatusNew( row ) {
  *
  * @param {HTMLTableRowElement} row HTML row element.
  */
-function setStatusKept( row ) {
-	const input = row.querySelector( '.amp-validation-error-status' );
+function setStatusKept(row) {
+	const input = row.querySelector('.amp-validation-error-status');
 
-	if ( ! input ) {
+	if (!input) {
 		return;
 	}
 
 	const { tagName, value } = input;
-	const hasClass = tagName === 'SELECT'
-		? value === '2' // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS.
-		: value === '0'; // '0' -> kept; '1' -> removed
+	const hasClass =
+		tagName === 'SELECT'
+			? value === '2' // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS.
+			: value === '0'; // '0' -> kept; '1' -> removed
 
-	row.classList.toggle( 'kept', hasClass );
+	row.classList.toggle('kept', hasClass);
 }

@@ -15,51 +15,58 @@ import { PanelBody, Placeholder, TextControl } from '@wordpress/components';
  */
 import { LayoutControls, MediaPlaceholder } from '../../components';
 
-const BlockEdit = ( props ) => {
+const BlockEdit = (props) => {
 	const { attributes, setAttributes } = props;
 	const { dataEmbedId } = attributes;
 	const ampLayoutOptions = [
-		{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
-		{ value: 'fixed-height', label: __( 'Fixed Height', 'amp' ) },
-		{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
-		{ value: 'fill', label: __( 'Fill', 'amp' ) },
-		{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
-
+		{ value: 'responsive', label: __('Responsive', 'amp') },
+		{ value: 'fixed-height', label: __('Fixed Height', 'amp') },
+		{ value: 'fixed', label: __('Fixed', 'amp') },
+		{ value: 'fill', label: __('Fill', 'amp') },
+		{ value: 'flex-item', label: __('Flex-item', 'amp') },
 	];
 	let url = false;
-	if ( dataEmbedId ) {
+	if (dataEmbedId) {
 		url = 'https://media-cdn.beachfrontreach.com/acct_1/video/';
 	}
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Reach Settings', 'amp' ) }>
+				<PanelBody title={__('Reach Settings', 'amp')}>
 					<TextControl
-						label={ __( 'Embed ID (required)', 'amp' ) }
-						value={ dataEmbedId }
-						onChange={ ( value ) => ( setAttributes( { dataEmbedId: value } ) ) }
+						label={__('Embed ID (required)', 'amp')}
+						value={dataEmbedId}
+						onChange={(value) =>
+							setAttributes({ dataEmbedId: value })
+						}
 					/>
-					<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
+					<LayoutControls
+						{...props}
+						ampLayoutOptions={ampLayoutOptions}
+					/>
 				</PanelBody>
 			</InspectorControls>
-			{ url && <MediaPlaceholder name={ __( 'Reach Player', 'amp' ) } url={ url } /> }
-			{
-				! url && (
-					<Placeholder label={ __( 'Reach Player', 'amp' ) }>
-						<p>
-							{ __( 'Add Reach player embed ID to use the block.', 'amp' ) }
-						</p>
-					</Placeholder>
-				)
-			}
+			{url && (
+				<MediaPlaceholder name={__('Reach Player', 'amp')} url={url} />
+			)}
+			{!url && (
+				<Placeholder label={__('Reach Player', 'amp')}>
+					<p>
+						{__(
+							'Add Reach player embed ID to use the block.',
+							'amp'
+						)}
+					</p>
+				</Placeholder>
+			)}
 		</>
 	);
 };
 
 BlockEdit.propTypes = {
-	attributes: PropTypes.shape( {
+	attributes: PropTypes.shape({
 		dataEmbedId: PropTypes.string,
-	} ),
+	}),
 	setAttributes: PropTypes.func.isRequired,
 };
 

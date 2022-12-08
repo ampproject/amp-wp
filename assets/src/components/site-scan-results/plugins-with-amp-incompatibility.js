@@ -29,50 +29,75 @@ import { SiteScanResults } from './index';
  * @param {boolean}  props.showHelpText Show additional help text above the issues list.
  * @param {string[]} props.slugs        List of plugins slugs.
  */
-export function PluginsWithAmpIncompatibility( {
+export function PluginsWithAmpIncompatibility({
 	className,
 	showHelpText = false,
 	slugs = [],
 	...props
-} ) {
+}) {
 	const pluginsData = useNormalizedPluginsData();
-	const sources = useMemo( () => slugs?.map( ( slug ) => pluginsData?.[ slug ] ?? {
-		slug,
-		status: 'uninstalled',
-	} ) || [], [ pluginsData, slugs ] );
+	const sources = useMemo(
+		() =>
+			slugs?.map(
+				(slug) =>
+					pluginsData?.[slug] ?? {
+						slug,
+						status: 'uninstalled',
+					}
+			) || [],
+		[pluginsData, slugs]
+	);
 
 	return (
 		<SiteScanResults
-			title={ __( 'Plugins with AMP incompatibility', 'amp' ) }
-			icon={ <IconLaptopPlug /> }
-			count={ slugs.length }
-			className={ classnames( 'site-scan-results--plugins', className ) }
-			{ ...props }
+			title={__('Plugins with AMP incompatibility', 'amp')}
+			icon={<IconLaptopPlug />}
+			count={slugs.length}
+			className={classnames('site-scan-results--plugins', className)}
+			{...props}
 		>
-			{ showHelpText && (
+			{showHelpText && (
 				<p>
-					{ createInterpolateElement(
-						__( 'Because of plugin issue(s) detected, you may want to <a>review and suppress plugins</a>.', 'amp' ),
+					{createInterpolateElement(
+						__(
+							'Because of plugin issue(s) detected, you may want to <a>review and suppress plugins</a>.',
+							'amp'
+						),
 						{
 							// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
 							a: <a href="#plugin-suppression" />,
-						},
-					) }
-					{ AMP_COMPATIBLE_PLUGINS_URL ? createInterpolateElement(
-						` ${ __( 'You may also want to browse alternative <a>AMP compatible plugins</a>.', 'amp' ) }`,
-						{
-							a: isExternalUrl( AMP_COMPATIBLE_PLUGINS_URL )
-								? <ExternalLink href={ AMP_COMPATIBLE_PLUGINS_URL } />
-								// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
-								: <a href={ AMP_COMPATIBLE_PLUGINS_URL } />,
-						},
-					) : '' }
+						}
+					)}
+					{AMP_COMPATIBLE_PLUGINS_URL
+						? createInterpolateElement(
+								` ${__(
+									'You may also want to browse alternative <a>AMP compatible plugins</a>.',
+									'amp'
+								)}`,
+								{
+									a: isExternalUrl(
+										AMP_COMPATIBLE_PLUGINS_URL
+									) ? (
+										<ExternalLink
+											href={AMP_COMPATIBLE_PLUGINS_URL}
+										/>
+									) : (
+										// eslint-disable-next-line jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string.
+										<a href={AMP_COMPATIBLE_PLUGINS_URL} />
+									),
+								}
+						  )
+						: ''}
 				</p>
-			) }
+			)}
 			<SiteScanSourcesList
-				sources={ sources }
-				inactiveSourceNotice={ __( 'This plugin has been deactivated since last site scan.' ) }
-				uninstalledSourceNotice={ __( 'This plugin has been uninstalled or its metadata is unavailable.' ) }
+				sources={sources}
+				inactiveSourceNotice={__(
+					'This plugin has been deactivated since last site scan.'
+				)}
+				uninstalledSourceNotice={__(
+					'This plugin has been uninstalled or its metadata is unavailable.'
+				)}
 			/>
 		</SiteScanResults>
 	);
@@ -81,5 +106,5 @@ export function PluginsWithAmpIncompatibility( {
 PluginsWithAmpIncompatibility.propTypes = {
 	className: PropTypes.string,
 	showHelpText: PropTypes.bool,
-	slugs: PropTypes.arrayOf( PropTypes.string ).isRequired,
+	slugs: PropTypes.arrayOf(PropTypes.string).isRequired,
 };

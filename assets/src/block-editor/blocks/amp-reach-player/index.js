@@ -12,14 +12,14 @@ import save from './save';
 export const name = 'amp/amp-reach-player';
 
 export const settings = {
-	title: __( 'AMP Reach Player', 'amp' ),
-	description: __( 'Displays the Reach Player configured in the Beachfront Reach platform.', 'amp' ),
+	title: __('AMP Reach Player', 'amp'),
+	description: __(
+		'Displays the Reach Player configured in the Beachfront Reach platform.',
+		'amp'
+	),
 	category: 'embed',
 	icon: 'embed-generic',
-	keywords: [
-		__( 'Embed', 'amp' ),
-		__( 'Beachfront Reach video', 'amp' ),
-	],
+	keywords: [__('Embed', 'amp'), __('Beachfront Reach video', 'amp')],
 
 	attributes: {
 		dataEmbedId: {

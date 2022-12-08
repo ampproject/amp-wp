@@ -17,29 +17,26 @@ import { SiteScanSourcesListItem } from './site-scan-source-list-item';
  * @param {string} props.inactiveSourceNotice    Message to show next to an inactive source.
  * @param {string} props.uninstalledSourceNotice Message to show next to an uninstalled source.
  */
-export function SiteScanSourcesList( {
+export function SiteScanSourcesList({
 	sources,
 	inactiveSourceNotice,
 	uninstalledSourceNotice,
-} ) {
-	if ( sources.length === 0 ) {
+}) {
+	if (sources.length === 0) {
 		return <Loading />;
 	}
 
 	return (
 		<ul className="site-scan-results__sources">
-			{ sources.map( ( source ) => (
-				<li
-					key={ source.slug }
-					className="site-scan-results__source"
-				>
+			{sources.map((source) => (
+				<li key={source.slug} className="site-scan-results__source">
 					<SiteScanSourcesListItem
-						{ ...source }
-						inactiveSourceNotice={ inactiveSourceNotice }
-						uninstalledSourceNotice={ uninstalledSourceNotice }
+						{...source}
+						inactiveSourceNotice={inactiveSourceNotice}
+						uninstalledSourceNotice={uninstalledSourceNotice}
 					/>
 				</li>
-			) ) }
+			))}
 		</ul>
 	);
 }

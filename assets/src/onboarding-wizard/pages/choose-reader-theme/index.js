@@ -16,30 +16,29 @@ import { ReaderThemeSelection } from '../../../components/reader-theme-selection
  * Screen for choosing the Reader theme.
  */
 export function ChooseReaderTheme() {
-	const { canGoForward, setCanGoForward } = useContext( Navigation );
-	const { editedOptions } = useContext( Options );
-	const { fetchingThemes, themes } = useContext( ReaderThemes );
+	const { canGoForward, setCanGoForward } = useContext(Navigation);
+	const { editedOptions } = useContext(Options);
+	const { fetchingThemes, themes } = useContext(ReaderThemes);
 
-	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
+	const { reader_theme: readerTheme, theme_support: themeSupport } =
+		editedOptions;
 
 	/**
 	 * Allow moving forward.
 	 */
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			themes &&
 			readerTheme &&
 			canGoForward === false &&
-			themes.map( ( { slug } ) => slug ).includes( readerTheme )
+			themes.map(({ slug }) => slug).includes(readerTheme)
 		) {
-			setCanGoForward( true );
+			setCanGoForward(true);
 		}
-	}, [ canGoForward, setCanGoForward, readerTheme, themes, themeSupport ] );
+	}, [canGoForward, setCanGoForward, readerTheme, themes, themeSupport]);
 
-	if ( fetchingThemes ) {
-		return (
-			<Loading />
-		);
+	if (fetchingThemes) {
+		return <Loading />;
 	}
 
 	return (

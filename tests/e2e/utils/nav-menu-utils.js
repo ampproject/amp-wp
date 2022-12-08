@@ -1,7 +1,11 @@
 /**
  * WordPress dependencies
  */
-import { createMenu, deleteAllMenus, visitAdminPage } from '@wordpress/e2e-test-utils';
+import {
+	createMenu,
+	deleteAllMenus,
+	visitAdminPage,
+} from '@wordpress/e2e-test-utils';
 
 export async function createTestMenu() {
 	await deleteAllMenus();
@@ -26,20 +30,22 @@ export async function createTestMenu() {
 				menu_order: 3,
 				parent: 1,
 			},
-		],
+		]
 	);
 }
 
-export async function assignMenuToLocation( menuLocationName ) {
-	await visitAdminPage( 'nav-menus.php', '' );
+export async function assignMenuToLocation(menuLocationName) {
+	await visitAdminPage('nav-menus.php', '');
 
 	// Bail out if there is no menu location or it is already selected.
-	const menuLocationCheckbox = await page.$( `input:not(:checked)[name="menu-locations[${ menuLocationName }]"]` );
-	if ( ! menuLocationCheckbox ) {
+	const menuLocationCheckbox = await page.$(
+		`input:not(:checked)[name="menu-locations[${menuLocationName}]"]`
+	);
+	if (!menuLocationCheckbox) {
 		return;
 	}
 
 	await menuLocationCheckbox.click();
-	await page.click( '#save_menu_footer' );
-	await page.waitForSelector( '#message', { text: /has been updated/ } );
+	await page.click('#save_menu_footer');
+	await page.waitForSelector('#message', { text: /has been updated/ });
 }

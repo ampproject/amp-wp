@@ -23,12 +23,11 @@ import AMPToggle from '../amp-toggle';
  */
 export default function AMPDocumentStatusNotification() {
 	const { isAMPEnabled } = useAMPDocumentToggle();
-	const { isFetchingErrors, fetchingErrorsMessage } = useErrorsFetchingStateChanges();
+	const { isFetchingErrors, fetchingErrorsMessage } =
+		useErrorsFetchingStateChanges();
 
-	const {
-		openGeneralSidebar,
-		closePublishSidebar,
-	} = useDispatch( 'core/edit-post' );
+	const { openGeneralSidebar, closePublishSidebar } =
+		useDispatch('core/edit-post');
 
 	const {
 		isPostDirty,
@@ -36,15 +35,26 @@ export default function AMPDocumentStatusNotification() {
 		keptMarkupValidationErrorCount,
 		reviewedValidationErrorCount,
 		unreviewedValidationErrorCount,
-	} = useSelect( ( select ) => ( {
-		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
-		maybeIsPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getMaybeIsPostDirty(),
-		keptMarkupValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getKeptMarkupValidationErrors().length,
-		reviewedValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getReviewedValidationErrors().length,
-		unreviewedValidationErrorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors().length,
-	} ), [] );
+	} = useSelect(
+		(select) => ({
+			isPostDirty: select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty(),
+			maybeIsPostDirty: select(
+				BLOCK_VALIDATION_STORE_KEY
+			).getMaybeIsPostDirty(),
+			keptMarkupValidationErrorCount: select(
+				BLOCK_VALIDATION_STORE_KEY
+			).getKeptMarkupValidationErrors().length,
+			reviewedValidationErrorCount: select(
+				BLOCK_VALIDATION_STORE_KEY
+			).getReviewedValidationErrors().length,
+			unreviewedValidationErrorCount: select(
+				BLOCK_VALIDATION_STORE_KEY
+			).getUnreviewedValidationErrors().length,
+		}),
+		[]
+	);
 
-	if ( ! isAMPEnabled ) {
+	if (!isAMPEnabled) {
 		return (
 			<PanelRow>
 				<AMPToggle />
@@ -52,16 +62,16 @@ export default function AMPDocumentStatusNotification() {
 		);
 	}
 
-	if ( isFetchingErrors ) {
+	if (isFetchingErrors) {
 		return (
 			<>
 				<PanelRow>
 					<AMPToggle />
 				</PanelRow>
 				<SidebarNotification
-					message={ fetchingErrorsMessage }
-					isLoading={ true }
-					isSmall={ true }
+					message={fetchingErrorsMessage}
+					isLoading={true}
+					isSmall={true}
 				/>
 			</>
 		);
@@ -69,83 +79,89 @@ export default function AMPDocumentStatusNotification() {
 
 	const openBlockValidationSidebar = () => {
 		closePublishSidebar();
-		openGeneralSidebar( `${ PLUGIN_NAME }/${ SIDEBAR_NAME }` );
+		openGeneralSidebar(`${PLUGIN_NAME}/${SIDEBAR_NAME}`);
 	};
 
-	if ( isPostDirty || maybeIsPostDirty ) {
+	if (isPostDirty || maybeIsPostDirty) {
 		return (
 			<>
 				<PanelRow>
 					<AMPToggle />
 				</PanelRow>
 				<SidebarNotification
-					icon={ <BellIcon /> }
-					message={ maybeIsPostDirty
-						? __( 'Content may have changed. Trigger validation in the AMP Validation sidebar.', 'amp' )
-						: __( 'Content has changed. Trigger validation in the AMP Validation sidebar.', 'amp' ) }
-					isSmall={ true }
+					icon={<BellIcon />}
+					message={
+						maybeIsPostDirty
+							? __(
+									'Content may have changed. Trigger validation in the AMP Validation sidebar.',
+									'amp'
+							  )
+							: __(
+									'Content has changed. Trigger validation in the AMP Validation sidebar.',
+									'amp'
+							  )
+					}
+					isSmall={true}
 				/>
 				<PanelRow>
 					<Button
-						onClick={ openBlockValidationSidebar }
-						isSecondary={ true }
-						isSmall={ true }
+						onClick={openBlockValidationSidebar}
+						isSecondary={true}
+						isSmall={true}
 					>
-						{ __( 'Open AMP Validation', 'amp' ) }
+						{__('Open AMP Validation', 'amp')}
 					</Button>
 				</PanelRow>
 			</>
 		);
 	}
 
-	if ( keptMarkupValidationErrorCount > 0 ) {
+	if (keptMarkupValidationErrorCount > 0) {
 		return (
 			<>
 				<PanelRow>
 					<AMPToggle />
 				</PanelRow>
 				<SidebarNotification
-					icon={ <AMPValidationErrorsKeptIcon /> }
-					message={
-						sprintf(
-							/* translators: %d is count of validation errors whose invalid markup is kept */
-							_n(
-								'AMP is blocked due to %d validation issue marked as kept.',
-								'AMP is blocked due to %d validation issues marked as kept.',
-								keptMarkupValidationErrorCount,
-								'amp',
-							),
+					icon={<AMPValidationErrorsKeptIcon />}
+					message={sprintf(
+						/* translators: %d is count of validation errors whose invalid markup is kept */
+						_n(
+							'AMP is blocked due to %d validation issue marked as kept.',
+							'AMP is blocked due to %d validation issues marked as kept.',
 							keptMarkupValidationErrorCount,
-						)
-					}
-					isSmall={ true }
+							'amp'
+						),
+						keptMarkupValidationErrorCount
+					)}
+					isSmall={true}
 				/>
 				<PanelRow>
 					<Button
-						onClick={ openBlockValidationSidebar }
-						isSecondary={ true }
-						isSmall={ true }
+						onClick={openBlockValidationSidebar}
+						isSecondary={true}
+						isSmall={true}
 					>
-						{ _n(
+						{_n(
 							'Review issue',
 							'Review issues',
 							keptMarkupValidationErrorCount,
-							'amp',
-						) }
+							'amp'
+						)}
 					</Button>
 				</PanelRow>
 			</>
 		);
 	}
 
-	if ( unreviewedValidationErrorCount > 0 ) {
+	if (unreviewedValidationErrorCount > 0) {
 		return (
 			<>
 				<PanelRow>
 					<AMPToggle />
 				</PanelRow>
 				<SidebarNotification
-					icon={ <StatusIcon broken={ true } /> }
+					icon={<StatusIcon broken={true} />}
 					message={
 						// @todo De-duplicate with what is in AMPValidationStatusNotification.
 						sprintf(
@@ -154,25 +170,25 @@ export default function AMPDocumentStatusNotification() {
 								'AMP is valid, but %d issue needs review.',
 								'AMP is valid, but %d issues need review.',
 								unreviewedValidationErrorCount,
-								'amp',
+								'amp'
 							),
-							unreviewedValidationErrorCount,
+							unreviewedValidationErrorCount
 						)
 					}
-					isSmall={ true }
+					isSmall={true}
 				/>
 				<PanelRow>
 					<Button
-						onClick={ openBlockValidationSidebar }
-						isSecondary={ true }
-						isSmall={ true }
+						onClick={openBlockValidationSidebar}
+						isSecondary={true}
+						isSmall={true}
 					>
-						{ _n(
+						{_n(
 							'Review issue',
 							'Review issues',
 							unreviewedValidationErrorCount,
-							'amp',
-						) }
+							'amp'
+						)}
 					</Button>
 				</PanelRow>
 			</>
@@ -185,35 +201,35 @@ export default function AMPDocumentStatusNotification() {
 				<AMPToggle />
 			</PanelRow>
 			<SidebarNotification
-				icon={ <StatusIcon /> }
+				icon={<StatusIcon />}
 				message={
 					// @todo De-duplicate with what is in AMPValidationStatusNotification.
 					reviewedValidationErrorCount > 0
 						? sprintf(
-							/* translators: %d is count of unreviewed validation error */
-							_n(
-								'AMP is valid. %d issue was reviewed.',
-								'AMP is valid. %d issues were reviewed.',
-								reviewedValidationErrorCount,
-								'amp',
-							),
-							reviewedValidationErrorCount,
-						)
-						: __( 'No AMP validation issues detected.', 'amp' )
+								/* translators: %d is count of unreviewed validation error */
+								_n(
+									'AMP is valid. %d issue was reviewed.',
+									'AMP is valid. %d issues were reviewed.',
+									reviewedValidationErrorCount,
+									'amp'
+								),
+								reviewedValidationErrorCount
+						  )
+						: __('No AMP validation issues detected.', 'amp')
 				}
-				isSmall={ true }
+				isSmall={true}
 			/>
-			{ reviewedValidationErrorCount > 0 && (
+			{reviewedValidationErrorCount > 0 && (
 				<PanelRow>
 					<Button
-						onClick={ openBlockValidationSidebar }
-						isSecondary={ true }
-						isSmall={ true }
+						onClick={openBlockValidationSidebar}
+						isSecondary={true}
+						isSmall={true}
 					>
-						{ __( 'Open AMP Validation', 'amp' ) }
+						{__('Open AMP Validation', 'amp')}
 					</Button>
 				</PanelRow>
-			) }
+			)}
 		</>
 	);
 }

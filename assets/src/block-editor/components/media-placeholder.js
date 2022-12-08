@@ -17,14 +17,15 @@ import { __ } from '@wordpress/i18n';
  * @param {string} props.url  URL.
  * @return {JSX.Element} Placeholder.
  */
-const MediaPlaceholder = ( { name, url } ) => {
+const MediaPlaceholder = ({ name, url }) => {
 	return (
-		<Placeholder label={ name }>
+		<Placeholder label={name}>
+			<p className="components-placeholder__error">{url}</p>
 			<p className="components-placeholder__error">
-				{ url }
-			</p>
-			<p className="components-placeholder__error">
-				{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }
+				{__(
+					'Previews for this are unavailable in the editor, sorry!',
+					'amp'
+				)}
 			</p>
 		</Placeholder>
 	);

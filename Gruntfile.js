@@ -1,6 +1,6 @@
 /* eslint-env node */
 
-module.exports = function( grunt ) {
+module.exports = function (grunt) {
 	'use strict';
 
 	// Root paths to include in the plugin build ZIP when running `npm run build:prod`.
@@ -17,9 +17,7 @@ module.exports = function( grunt ) {
 	];
 
 	// These patterns paths will be excluded from among the above directory.
-	const productionExcludedPathPatterns = [
-		/.*\/src\/.*/,
-	];
+	const productionExcludedPathPatterns = [/.*\/src\/.*/];
 
 	// These will be removed from the build directory after installing but prior to creating a ZIP.
 	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
@@ -46,9 +44,8 @@ module.exports = function( grunt ) {
 		'vendor/bin',
 	];
 
-	grunt.initConfig( {
-
-		pkg: grunt.file.readJSON( 'package.json' ),
+	grunt.initConfig({
+		pkg: grunt.file.readJSON('package.json'),
 
 		// Clean up the build.
 		clean: {
@@ -63,7 +60,7 @@ module.exports = function( grunt ) {
 				],
 			},
 			build: {
-				src: [ 'build' ],
+				src: ['build'],
 			},
 		},
 
@@ -84,13 +81,18 @@ module.exports = function( grunt ) {
 					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
 					'cd build',
 					// Use authoritative class maps in production by appending -oa to the composer install command.
-					`composer install --no-dev -o${ 'development' === process.env.NODE_ENV ? '' : 'a' }`,
-					`composer remove cweagans/composer-patches --update-no-dev -o${ 'development' === process.env.NODE_ENV ? '' : 'a' }`,
-					'rm -rf ' + productionInstallExcludedFilePatterns.join( ' ' ),
-				].join( ' && ' ),
+					`composer install --no-dev -o${
+						'development' === process.env.NODE_ENV ? '' : 'a'
+					}`,
+					`composer remove cweagans/composer-patches --update-no-dev -o${
+						'development' === process.env.NODE_ENV ? '' : 'a'
+					}`,
+					'rm -rf ' + productionInstallExcludedFilePatterns.join(' '),
+				].join(' && '),
 			},
 			create_build_zip: {
-				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',
+				command:
+					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',
 			},
 		},
 
@@ -104,137 +106,157 @@ module.exports = function( grunt ) {
 				},
 			},
 		},
-	} );
+	});
 
 	// Load tasks.
-	grunt.loadNpmTasks( 'grunt-contrib-clean' );
-	grunt.loadNpmTasks( 'grunt-contrib-copy' );
-	grunt.loadNpmTasks( 'grunt-shell' );
-	grunt.loadNpmTasks( 'grunt-wp-deploy' );
+	grunt.loadNpmTasks('grunt-contrib-clean');
+	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-shell');
+	grunt.loadNpmTasks('grunt-wp-deploy');
 
 	// Register tasks.
-	grunt.registerTask( 'default', [
-		'build',
-	] );
+	grunt.registerTask('default', ['build']);
 
-	grunt.registerTask( 'build', function() {
+	grunt.registerTask('build', function () {
 		const done = this.async();
 		const spawnQueue = [];
 		const stdout = [];
 
-		spawnQueue.push(
-			{
-				cmd: 'git',
-				args: [ 'ls-files' ],
-			},
-		);
+		spawnQueue.push({
+			cmd: 'git',
+			args: ['ls-files'],
+		});
 
 		// If the script is executed within a GHA job in a PR, use the last PR commit hash instead of the one from the
 		// currently checked out merge commit.
-		if ( ! process.env.LAST_PR_COMMIT_HASH ) {
-			spawnQueue.push(
-				{
-					cmd: 'git',
-					args: [ '--no-pager', 'log', '-1', '--format=%h', '--date=short' ],
-				},
-			);
+		if (!process.env.LAST_PR_COMMIT_HASH) {
+			spawnQueue.push({
+				cmd: 'git',
+				args: [
+					'--no-pager',
+					'log',
+					'-1',
+					'--format=%h',
+					'--date=short',
+				],
+			});
 		}
 
 		function finalize() {
 			const lsOutput = stdout.shift();
-			const commitHash = process.env.LAST_PR_COMMIT_HASH ? process.env.LAST_PR_COMMIT_HASH.slice( 0, 9 ) : stdout.shift();
-			const versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
+			const commitHash = process.env.LAST_PR_COMMIT_HASH
+				? process.env.LAST_PR_COMMIT_HASH.slice(0, 9)
+				: stdout.shift();
+			const versionAppend =
+				new Date()
+					.toISOString()
+					.replace(/\.\d+/, '')
+					.replace(/-|:/g, '') +
+				'-' +
+				commitHash;
 
-			const paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				const topSegment = file.replace( /\/.*/, '' );
-				if ( ! productionIncludedRootFiles.includes( topSegment ) ) {
-					return false;
-				}
-
-				for ( const productionExcludedPathPattern of productionExcludedPathPatterns ) {
-					if ( productionExcludedPathPattern.test( file ) ) {
+			const paths = lsOutput
+				.trim()
+				.split(/\n/)
+				.filter(function (file) {
+					const topSegment = file.replace(/\/.*/, '');
+					if (!productionIncludedRootFiles.includes(topSegment)) {
 						return false;
 					}
-				}
 
-				return true;
-			} );
+					for (const productionExcludedPathPattern of productionExcludedPathPatterns) {
+						if (productionExcludedPathPattern.test(file)) {
+							return false;
+						}
+					}
 
-			grunt.task.run( 'shell:transform_readme' );
-			paths.push( 'readme.txt' );
+					return true;
+				});
 
-			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
-			paths.push( 'assets/js/**/*.js' );
-			paths.push( 'assets/js/**/*.asset.php' );
-			paths.push( 'assets/css/*.css' );
+			grunt.task.run('shell:transform_readme');
+			paths.push('readme.txt');
 
-			if ( 'development' === process.env.NODE_ENV ) {
-				paths.push( 'assets/js/**/*.js.map' );
-				paths.push( 'assets/css/*.css.map' );
+			paths.push('composer.*'); // Copy in order to be able to do run composer_install.
+			paths.push('assets/js/**/*.js');
+			paths.push('assets/js/**/*.asset.php');
+			paths.push('assets/css/*.css');
+
+			if ('development' === process.env.NODE_ENV) {
+				paths.push('assets/js/**/*.js.map');
+				paths.push('assets/css/*.css.map');
 			}
 
-			grunt.config.set( 'copy', {
+			grunt.config.set('copy', {
 				build: {
 					src: paths,
 					dest: 'build',
 					expand: true,
 					options: {
-						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and README.md.
-						process( content, srcpath ) {
+						noProcess: ['*/**', 'LICENSE'], // That is, only process amp.php and README.md.
+						process(content, srcpath) {
 							let matches, version, versionRegex;
-							if ( /amp\.php$/.test( srcpath ) ) {
-								versionRegex = /(\*\s+Version:\s+)(\d+(\.\d+)+-\w+)/;
+							if (/amp\.php$/.test(srcpath)) {
+								versionRegex =
+									/(\*\s+Version:\s+)(\d+(\.\d+)+-\w+)/;
 
 								// If not a stable build (e.g. 0.7.0-beta), amend the version with the git commit and current timestamp.
-								matches = content.match( versionRegex );
-								if ( matches ) {
-									version = matches[ 2 ] + '-' + versionAppend;
-									console.log( 'Updating version in amp.php to ' + version ); // eslint-disable-line no-console
-									content = content.replace( versionRegex, '$1' + version );
-									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + version );
+								matches = content.match(versionRegex);
+								if (matches) {
+									version = matches[2] + '-' + versionAppend;
+									// eslint-disable-next-line no-console
+									console.log(
+										'Updating version in amp.php to ' +
+											version
+									);
+									content = content.replace(
+										versionRegex,
+										'$1' + version
+									);
+									content = content.replace(
+										/(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/,
+										'$1' + version
+									);
 								}
 
 								// Remove dev mode code blocks.
-								content = content.replace( /\n\/\/\s*DEV_CODE.+?\n}\n/s, '' );
+								content = content.replace(
+									/\n\/\/\s*DEV_CODE.+?\n}\n/s,
+									''
+								);
 							}
 							return content;
 						},
 					},
 				},
-			} );
-			grunt.task.run( 'copy' );
-			grunt.task.run( 'shell:composer_install' );
+			});
+			grunt.task.run('copy');
+			grunt.task.run('shell:composer_install');
 
 			done();
 		}
 
 		function doNext() {
 			const nextSpawnArgs = spawnQueue.shift();
-			if ( ! nextSpawnArgs ) {
+			if (!nextSpawnArgs) {
 				finalize();
 			} else {
-				grunt.util.spawn(
-					nextSpawnArgs,
-					function( err, res ) {
-						if ( err ) {
-							throw new Error( err.message );
-						}
-						stdout.push( res.stdout );
-						doNext();
-					},
-				);
+				grunt.util.spawn(nextSpawnArgs, function (err, res) {
+					if (err) {
+						throw new Error(err.message);
+					}
+					stdout.push(res.stdout);
+					doNext();
+				});
 			}
 		}
 
 		doNext();
-	} );
+	});
 
-	grunt.registerTask( 'create-build-zip', [
-		'shell:create_build_zip',
-	] );
+	grunt.registerTask('create-build-zip', ['shell:create_build_zip']);
 
-	grunt.registerTask( 'deploy', [
+	grunt.registerTask('deploy', [
 		'shell:verify_matching_versions',
 		'wp_deploy',
-	] );
+	]);
 };

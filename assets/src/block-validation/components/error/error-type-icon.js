@@ -22,8 +22,8 @@ import CSSErrorIcon from '../../../../images/amp-css-error-icon.svg';
  * @param {Object} props
  * @param {string} props.type The error type.
  */
-export function ErrorTypeIcon( { type } ) {
-	switch ( type ) {
+export function ErrorTypeIcon({ type }) {
+	switch (type) {
 		case HTML_ATTRIBUTE_ERROR_TYPE:
 		case HTML_ELEMENT_ERROR_TYPE:
 			return <HTMLErrorIcon />;

@@ -6,7 +6,12 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { createContext, useState, useEffect, useContext } from '@wordpress/element';
+import {
+	createContext,
+	useState,
+	useEffect,
+	useContext,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -25,49 +30,70 @@ export const TemplateModeOverride = createContext();
  * @param {Object} props          Component props.
  * @param {any}    props.children Children to consume the context.
  */
-export function TemplateModeOverrideContextProvider( { children } ) {
-	const { editedOptions, originalOptions, updateOptions, readerModeWasOverridden, setReaderModeWasOverridden } = useContext( Options );
-	const { currentPage } = useContext( Navigation );
-	const { selectedTheme, currentTheme } = useContext( ReaderThemes );
-	const { developerToolsOption, fetchingUser, originalDeveloperToolsOption } = useContext( User );
-	const [ respondedToDeveloperToolsOptionChange, setRespondedToDeveloperToolsOptionChange ] = useState( false );
-	const [ mostRecentlySelectedThemeSupport, setMostRecentlySelectedThemeSupport ] = useState( null );
-	const [ technicalQuestionChangedAtLeastOnce, setTechnicalQuestionChangedAtLeastOnce ] = useState( false );
+export function TemplateModeOverrideContextProvider({ children }) {
+	const {
+		editedOptions,
+		originalOptions,
+		updateOptions,
+		readerModeWasOverridden,
+		setReaderModeWasOverridden,
+	} = useContext(Options);
+	const { currentPage } = useContext(Navigation);
+	const { selectedTheme, currentTheme } = useContext(ReaderThemes);
+	const { developerToolsOption, fetchingUser, originalDeveloperToolsOption } =
+		useContext(User);
+	const [
+		respondedToDeveloperToolsOptionChange,
+		setRespondedToDeveloperToolsOptionChange,
+	] = useState(false);
+	const [
+		mostRecentlySelectedThemeSupport,
+		setMostRecentlySelectedThemeSupport,
+	] = useState(null);
+	const [
+		technicalQuestionChangedAtLeastOnce,
+		setTechnicalQuestionChangedAtLeastOnce,
+	] = useState(false);
 
 	const { slug: currentPageSlug } = currentPage || {};
 	const { theme_support: themeSupport } = editedOptions || {};
 	const { theme_support: originalThemeSupport } = originalOptions || {};
 
-	const technicalQuestionChanged = ! fetchingUser && developerToolsOption !== originalDeveloperToolsOption;
+	const technicalQuestionChanged =
+		!fetchingUser && developerToolsOption !== originalDeveloperToolsOption;
 
 	/**
 	 * Persist the "previously selected" note if the technical question is changed, even if it is subsequently restored.
 	 */
-	useEffect( () => {
-		if ( technicalQuestionChanged ) {
-			setTechnicalQuestionChangedAtLeastOnce( true );
+	useEffect(() => {
+		if (technicalQuestionChanged) {
+			setTechnicalQuestionChangedAtLeastOnce(true);
 		}
-	}, [ technicalQuestionChanged ] );
+	}, [technicalQuestionChanged]);
 
 	/**
 	 * When a user makes a theme support selection, save it so it can be restored if needed.
 	 */
-	useEffect( () => {
-		if ( themeSupport ) {
-			setMostRecentlySelectedThemeSupport( themeSupport );
+	useEffect(() => {
+		if (themeSupport) {
+			setMostRecentlySelectedThemeSupport(themeSupport);
 		}
-	}, [ themeSupport ] );
+	}, [themeSupport]);
 
 	/**
 	 * Override with transitional if the user has selected reader mode and their currently active theme is the same as the selected reader theme.
 	 */
-	useEffect( () => {
-		if ( 'done' === currentPageSlug && READER === themeSupport && selectedTheme.name === currentTheme.name ) {
-			if ( ! readerModeWasOverridden ) {
-				updateOptions( { theme_support: 'transitional' } );
-				setReaderModeWasOverridden( true );
+	useEffect(() => {
+		if (
+			'done' === currentPageSlug &&
+			READER === themeSupport &&
+			selectedTheme.name === currentTheme.name
+		) {
+			if (!readerModeWasOverridden) {
+				updateOptions({ theme_support: 'transitional' });
+				setReaderModeWasOverridden(true);
 			} else {
-				setReaderModeWasOverridden( false );
+				setReaderModeWasOverridden(false);
 			}
 		}
 	}, [
@@ -78,31 +104,41 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 		readerModeWasOverridden,
 		updateOptions,
 		setReaderModeWasOverridden,
-	] );
+	]);
 
 	/**
 	 * Unset theme support in current session if the user changes their answer on the technical screen.
 	 */
-	useEffect( () => {
-		if ( fetchingUser || 'technical-background' !== currentPageSlug ) {
+	useEffect(() => {
+		if (fetchingUser || 'technical-background' !== currentPageSlug) {
 			return;
 		}
 
 		// If user has already made a change, don't do anything.
-		if ( ! respondedToDeveloperToolsOptionChange && originalThemeSupport !== themeSupport ) {
-			setRespondedToDeveloperToolsOptionChange( true );
+		if (
+			!respondedToDeveloperToolsOptionChange &&
+			originalThemeSupport !== themeSupport
+		) {
+			setRespondedToDeveloperToolsOptionChange(true);
 			return;
 		}
 
-		if ( ! respondedToDeveloperToolsOptionChange && developerToolsOption !== originalDeveloperToolsOption ) {
-			setRespondedToDeveloperToolsOptionChange( true );
-			updateOptions( { theme_support: undefined } );
+		if (
+			!respondedToDeveloperToolsOptionChange &&
+			developerToolsOption !== originalDeveloperToolsOption
+		) {
+			setRespondedToDeveloperToolsOptionChange(true);
+			updateOptions({ theme_support: undefined });
 		}
 
-		if ( respondedToDeveloperToolsOptionChange && developerToolsOption === originalDeveloperToolsOption ) {
-			const themeSupportToSelect = mostRecentlySelectedThemeSupport || originalThemeSupport;
-			if ( themeSupport !== themeSupportToSelect ) {
-				updateOptions( { theme_support: themeSupportToSelect } );
+		if (
+			respondedToDeveloperToolsOptionChange &&
+			developerToolsOption === originalDeveloperToolsOption
+		) {
+			const themeSupportToSelect =
+				mostRecentlySelectedThemeSupport || originalThemeSupport;
+			if (themeSupport !== themeSupportToSelect) {
+				updateOptions({ theme_support: themeSupportToSelect });
 			}
 		}
 	}, [
@@ -115,11 +151,13 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 		respondedToDeveloperToolsOptionChange,
 		themeSupport,
 		updateOptions,
-	] );
+	]);
 
 	return (
-		<TemplateModeOverride.Provider value={ { technicalQuestionChangedAtLeastOnce } }>
-			{ children }
+		<TemplateModeOverride.Provider
+			value={{ technicalQuestionChangedAtLeastOnce }}
+		>
+			{children}
 		</TemplateModeOverride.Provider>
 	);
 }

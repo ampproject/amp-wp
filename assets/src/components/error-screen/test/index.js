@@ -1,4 +1,3 @@
-
 /**
  * External dependencies
  */
@@ -9,18 +8,18 @@ import { create } from 'react-test-renderer';
  */
 import { ErrorScreen } from '..';
 
-describe( 'ErrorScreen', () => {
-	it( 'matches snapshot', () => {
+describe('ErrorScreen', () => {
+	it('matches snapshot', () => {
 		const wrapper = create(
 			<ErrorScreen
 				finishLinkLabel="Go to homepage"
 				finishLinkUrl="http://my-exit-link.com"
-				error={ {
+				error={{
 					message: 'The application failed',
 					stack: 'ReferenceError: foo is not defined',
-				} }
-			/>,
+				}}
+			/>
 		);
-		expect( wrapper.toJSON() ).toMatchSnapshot();
-	} );
-} );
+		expect(wrapper.toJSON()).toMatchSnapshot();
+	});
+});

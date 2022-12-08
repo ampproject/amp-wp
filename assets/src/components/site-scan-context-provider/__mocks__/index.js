@@ -25,7 +25,7 @@ export const SiteScan = createContext();
  * @param {boolean} props.isSiteScannable
  * @param {boolean} props.stale
  */
-export function SiteScanContextProvider( {
+export function SiteScanContextProvider({
 	children,
 	hasSiteScanResults = false,
 	isBusy = false,
@@ -36,10 +36,10 @@ export function SiteScanContextProvider( {
 	isReady = true,
 	isSiteScannable = false,
 	stale = false,
-} ) {
+}) {
 	return (
-		<SiteScan.Provider value={
-			{
+		<SiteScan.Provider
+			value={{
 				cancelSiteScan: () => {},
 				fetchScannableUrls: () => {},
 				hasSiteScanResults,
@@ -57,9 +57,9 @@ export function SiteScanContextProvider( {
 				stale,
 				startSiteScan: () => {},
 				themesWithAmpIncompatibility: [],
-			}
-		}>
-			{ children }
+			}}
+		>
+			{children}
 		</SiteScan.Provider>
 	);
 }

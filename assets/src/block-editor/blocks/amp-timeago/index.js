@@ -12,13 +12,13 @@ import save from './save';
 export const name = 'amp/amp-timeago';
 
 export const settings = {
-	title: __( 'AMP Timeago', 'amp' ),
+	title: __('AMP Timeago', 'amp'),
 	category: 'common',
 	icon: 'backup',
 	keywords: [
-		__( 'Time difference', 'amp' ),
-		__( 'Time ago', 'amp' ),
-		__( 'Date', 'amp' ),
+		__('Time difference', 'amp'),
+		__('Time ago', 'amp'),
+		__('Date', 'amp'),
 	],
 
 	attributes: {
@@ -54,9 +54,9 @@ export const settings = {
 		},
 	},
 
-	getEditWrapperProps( attributes ) {
+	getEditWrapperProps(attributes) {
 		const { align } = attributes;
-		if ( 'left' === align || 'right' === align || 'center' === align ) {
+		if ('left' === align || 'right' === align || 'center' === align) {
 			return { 'data-align': align };
 		}
 

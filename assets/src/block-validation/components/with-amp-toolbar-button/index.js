@@ -22,23 +22,28 @@ import { AMPToolbarButton } from './amp-toolbar-button';
  * @param {Function} props.BlockEdit Block edit function.
  * @param {string}   props.clientId  Client ID.
  */
-function BlockEditWithToolbar( props ) {
+function BlockEditWithToolbar(props) {
 	const { BlockEdit, clientId } = props;
 
 	const count = useSelect(
-		( select ) => ( select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors() || [] )
-			.filter( ( { clientId: validationErrorClientId } ) => clientId === validationErrorClientId )
-			.length || 0,
-		[ clientId ],
+		(select) =>
+			(
+				select(
+					BLOCK_VALIDATION_STORE_KEY
+				).getUnreviewedValidationErrors() || []
+			).filter(
+				({ clientId: validationErrorClientId }) =>
+					clientId === validationErrorClientId
+			).length || 0,
+		[clientId]
 	);
 
 	return (
 		<>
-			{ 0 < count &&
-				<AMPToolbarButton clientId={ clientId } count={ count } />
-			}
-			<BlockEdit { ...props } />
-
+			{0 < count && (
+				<AMPToolbarButton clientId={clientId} count={count} />
+			)}
+			<BlockEdit {...props} />
 		</>
 	);
 }
@@ -51,6 +56,7 @@ BlockEditWithToolbar.propTypes = {
  * Filters the block edit function of all blocks.
  */
 export const withAMPToolbarButton = createHigherOrderComponent(
-	( BlockEdit ) => ( props ) => <BlockEditWithToolbar { ...props } BlockEdit={ BlockEdit } />,
-	'BlockEditWithAMPToolbar',
+	(BlockEdit) => (props) =>
+		<BlockEditWithToolbar {...props} BlockEdit={BlockEdit} />,
+	'BlockEditWithAMPToolbar'
 );
