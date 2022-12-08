@@ -322,4 +322,77 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			$this->assertArrayNotHasKey( AMP_Link_Sanitizer::class, $sanitizers );
 		}
 	}
+
+	/**
+	 * Get data for test_is_frontend_url
+	 *
+	 * @return array
+	 */
+	public function get_test_is_frontend_url() {
+		return [
+			'no_scheme'      => [
+				'//example.com/',
+				false,
+			],
+			'invalid_scheme' => [
+				'ftp://example.com/',
+				false,
+			],
+			'different_host' => [
+				'https://cdn.foo.org/',
+				false,
+			],
+			'different_path' => [
+				home_url( '/foo' ),
+				false,
+			],
+			'php_file'       => [
+				home_url( '/foo.php' ),
+				false,
+			],
+			'feed'           => [
+				home_url( '/feed/' ),
+				false,
+			],
+			'admin'          => [
+				admin_url(),
+				false,
+			],
+			'content'        => [
+				content_url( '/' ),
+				false,
+			],
+			'valid'          => [
+				home_url( '/' ),
+				true,
+			],
+		];
+	}
+
+	/**
+	 * Test is_frontend_url.
+	 *
+	 * @dataProvider get_test_is_frontend_url
+	 * @covers AMP_Link_Sanitizer::is_frontend_url()
+	 *
+	 * @param string $url URL.
+	 * @param bool   $expected Expected.
+	 */
+	public function test_is_frontend_url( $url, $expected ) {
+		$dom = AMP_DOM_Utils::get_dom_from_content( '<a href="https://example.com/">Foo</a>' );
+
+		if ( home_url( '/foo' ) === $url ) {
+			$new_home_url = home_url( '/bar/' );
+
+			add_filter(
+				'home_url',
+				static function() use ( $new_home_url ) {
+					return $new_home_url;
+				}
+			);
+		}
+
+		$sanitizer = new AMP_Link_Sanitizer( $dom );
+		$this->assertEquals( $expected, $sanitizer->is_frontend_url( $url ) );
+	}
 }

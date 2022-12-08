@@ -80,10 +80,11 @@ module.exports = function (grunt) {
 				command: [
 					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
 					'cd build',
-					'composer install --no-dev -o',
-					'composer remove cweagans/composer-patches --update-no-dev -o',
-					'rm -rf ' + productionInstallExcludedFilePatterns.join(' '),
-				].join(' && '),
+					// Use authoritative class maps in production by appending -oa to the composer install command.
+					`composer install --no-dev -o${ 'development' === process.env.NODE_ENV ? '' : 'a' }`,
+					`composer remove cweagans/composer-patches --update-no-dev -o${ 'development' === process.env.NODE_ENV ? '' : 'a' }`,
+					'rm -rf ' + productionInstallExcludedFilePatterns.join( ' ' ),
+				].join( ' && ' ),
 			},
 			create_build_zip: {
 				command:

@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: Get latest release version
         id: latest-release
-        run: echo "::set-output name=version::$(gh api -X GET repos/wordpress/gutenberg/releases/latest --jq '.name')"
+        run: echo "version=$(gh api -X GET repos/wordpress/gutenberg/releases/latest --jq '.name')" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -40,7 +40,7 @@ jobs:
           if ! egrep -q '^[0-9][0-9]*(\.[0-9][0-9]*)*$' <<< "$LAST_VERSION"; then
             LAST_VERSION='0.0.0'
           fi
-          echo "::set-output name=version::$(echo "$LAST_VERSION")"
+          echo "version=$(echo "$LAST_VERSION")" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           QUERY: 'repo:ampproject/amp-wp is:pr author:app/github-actions is:merged in:title Update Gutenberg packages after'
@@ -50,7 +50,7 @@ jobs:
         run: |
           echo "Last version: $LAST_VER"
           echo "Latest version: $LATEST_VER"
-          echo "::set-output name=outdated::$(php -r 'echo json_encode(version_compare($argv[1], $argv[2], ">"));' "$LATEST_VER" "$LAST_VER")"
+          echo "outdated=$(php -r 'echo json_encode(version_compare($argv[1], $argv[2], ">"));' "$LATEST_VER" "$LAST_VER")" >> $GITHUB_OUTPUT
         env:
           LAST_VER: ${{ steps.last-release.outputs.version }}
           LATEST_VER: ${{ steps.latest-release.outputs.version }}
@@ -66,7 +66,7 @@ jobs:
         id: latest-pr
         run: |
           PR_NUM=$(gh api -X GET search/issues -f q='${{ env.QUERY }}' -f sort='created' -f order='desc' --jq '.items.[0].number')
-          echo "::set-output name=num::$(echo $PR_NUM)"
+          echo "num=$(echo $PR_NUM)" >> $GITHUB_OUTPUT
           echo "Latest PR number: ${PR_NUM}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,13 +100,13 @@ jobs:
       - name: Determine branch name
         id: branches
         run: |
-          echo "::set-output name=base::$(echo ${GITHUB_REF#refs/heads/})"
-          echo "::set-output name=head::$(echo "update/gutenberg-v$VERSION-packages")"
+          echo "base=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+          echo "head=$(echo "update/gutenberg-v$VERSION-packages")" >> $GITHUB_OUTPUT
         env:
           VERSION: ${{ needs.check-gutenberg-release.outputs.latest-version }}
 
       - name: Setup Node
-        uses: actions/setup-node@v3.4.1
+        uses: actions/setup-node@v3.5.1
         with:
           node-version-file: '.nvmrc'
           cache: npm
@@ -118,7 +118,7 @@ jobs:
 
       - name: Check if remote branch exists
         id: remote-branch
-        run: echo ::set-output name=exists::$([[ -z $(git ls-remote --heads origin "$HEAD_BRANCH" ) ]] && echo "0" || echo "1")
+        run: echo "exists=$([[ -z $(git ls-remote --heads origin "$HEAD_BRANCH" ) ]] && echo "0" || echo "1")" >> $GITHUB_OUTPUT
         env:
           HEAD_BRANCH: ${{ steps.branches.outputs.head }}
 
@@ -147,7 +147,7 @@ jobs:
         run: |
           # Get list of latest package versions.
           PACKAGES=$(npm outdated --parseable | cut -d':' -f 4 | grep @wordpress | paste -s -d' ' || echo 0)
-          echo "::set-output name=list::$(echo "$PACKAGES")"
+          echo "list=$(echo "$PACKAGES")" >> $GITHUB_OUTPUT
 
       - name: Update packages
         if: steps.packages.outputs.list != 0

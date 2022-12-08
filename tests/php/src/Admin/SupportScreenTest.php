@@ -15,6 +15,7 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\AmpWP\Tests\Helpers\MockAdminUser;
 use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
 
 /**
@@ -25,7 +26,7 @@ use AmpProject\AmpWP\Tests\Helpers\HomeUrlLoopbackRequestMocking;
  */
 class SupportScreenTest extends DependencyInjectedTestCase {
 
-	use HomeUrlLoopbackRequestMocking;
+	use HomeUrlLoopbackRequestMocking, MockAdminUser;
 
 	/**
 	 * Instance of SupportMenu
@@ -119,7 +120,8 @@ class SupportScreenTest extends DependencyInjectedTestCase {
 		$this->assertFalse( SupportScreen::has_cap() );
 
 		// Mock the is_admin() with required user caps.
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->mock_admin_user();
+
 		$this->assertFalse( SupportScreen::is_needed() );
 		$this->assertTrue( SupportScreen::has_cap() );
 

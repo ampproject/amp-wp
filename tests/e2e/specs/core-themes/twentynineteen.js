@@ -60,15 +60,11 @@ describe('Twenty Nineteen theme on AMP', () => {
 
 			expect(menuItemWithSubmenu).not.toBeNull();
 
-			await expect(menuItemWithSubmenu).toMatchElement('.submenu-expand');
-			await expect(menuItemWithSubmenu).toMatchElement('.sub-menu', {
-				visible: false,
-			});
+			await expect( menuItemWithSubmenu ).toMatchElement( '.display-on-mobile' );
+			await expect( menuItemWithSubmenu ).toMatchElement( '.sub-menu', { visible: false } );
 
-			await expect(menuItemWithSubmenu).toClick('.submenu-expand');
-			await expect(menuItemWithSubmenu).toMatchElement('.sub-menu', {
-				visible: true,
-			});
-		});
-	});
-});
+			await expect( menuItemWithSubmenu ).toClick( '.display-on-mobile' );
+			await expect( menuItemWithSubmenu ).toMatchElement( '.sub-menu', { visible: true } );
+		} );
+	} );
+} );

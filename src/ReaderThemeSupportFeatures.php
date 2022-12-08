@@ -285,6 +285,11 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 				continue;
 			}
 
+			// If not a valid hex color, skip it.
+			if ( ! preg_match( '/^[0-9a-f]{3}[0-9a-f]{3}?$/i', ltrim( $color_option[ self::KEY_COLOR ], '#' ) ) ) {
+				continue;
+			}
+
 			// There is no standard way to retrieve or derive the `color` style property when the editor color is being used
 			// for the background, so the best alternative at the moment is to guess a good default value based on the
 			// luminance of the editor color.

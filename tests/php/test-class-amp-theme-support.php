@@ -2261,6 +2261,7 @@ class Test_AMP_Theme_Support extends TestCase {
 		};
 		foreach ( [ 'wp_head', 'wp_footer', 'amp_post_template_head', 'amp_post_template_footer' ] as $action ) {
 			$wp_actions = [];
+			wp();
 			wp_enqueue_scripts();
 			$input  = '<html><head></head>' . $get_do_action( $action ) . '</html>';
 			$output = AMP_Theme_Support::prepare_response( $input );
@@ -2303,10 +2304,16 @@ class Test_AMP_Theme_Support extends TestCase {
 		wp();
 		$output = AMP_Theme_Support::finish_output_buffering( $this->get_original_html() );
 
+		$error_log = stream_get_contents( $capture );
+
 		// Verify that error log was properly populated.
 		$this->assertMatchesRegularExpression(
-			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- FAILURE \(42\) \[RuntimeException\].*/',
-			stream_get_contents( $capture )
+			'/\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response/',
+			$error_log
+		);
+		$this->assertMatchesRegularExpression(
+			'/- FAILURE \(42\) \[RuntimeException\.*/',
+			$error_log
 		);
 
 		// Reset error log back to initial settings.
@@ -2346,10 +2353,16 @@ class Test_AMP_Theme_Support extends TestCase {
 		wp();
 		$output = AMP_Theme_Support::finish_output_buffering( $this->get_original_html() );
 
+		$error_log = stream_get_contents( $capture );
+
 		// Verify that error log was properly populated.
 		$this->assertMatchesRegularExpression(
-			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- (Undefined class constant \'DOES_NOT_EXIST\'|Undefined constant AMP_Theme_Support::DOES_NOT_EXIST) \(0\) \[Error\].*/',
-			stream_get_contents( $capture )
+			'/\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response/',
+			$error_log
+		);
+		$this->assertMatchesRegularExpression(
+			'/(Undefined class constant \'DOES_NOT_EXIST\'|Undefined constant AMP_Theme_Support::DOES_NOT_EXIST) \(0\) \[Error\].*/',
+			$error_log
 		);
 
 		// Reset error log back to initial settings.

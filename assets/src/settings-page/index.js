@@ -382,8 +382,19 @@ function Root({ appRoot }) {
 				>
 					<Analytics />
 				</AMPDrawer>
-				<Sandboxing focusedSection={focusedSection} />
-				<PairedUrlStructure focusedSection={focusedSection} />
+				<AMPDrawer
+					heading={ (
+						<h3>
+							{ __( 'Sandboxing (Experimental)', 'amp' ) }
+						</h3>
+					) }
+					hiddenTitle={ __( 'Sandboxing (Experimental)', 'amp' ) }
+					id="sandboxing"
+					initialOpen={ 'sandboxing' === focusedSection }
+				>
+					<Sandboxing />
+				</AMPDrawer>
+				<PairedUrlStructure focusedSection={ focusedSection } />
 				<AMPDrawer
 					className="amp-other-settings"
 					heading={<h3>{__('Other', 'amp')}</h3>}

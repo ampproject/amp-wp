@@ -2,10 +2,10 @@
 	bootstrap="tests/php/bootstrap.php"
 	backupGlobals="false"
 	colors="true"
-	convertDeprecationsToExceptions="true"
-	convertErrorsToExceptions="true"
-	convertNoticesToExceptions="true"
-	convertWarningsToExceptions="true"
+	convertDeprecationsToExceptions="false"
+	convertErrorsToExceptions="false"
+	convertNoticesToExceptions="false"
+	convertWarningsToExceptions="false"
 	defaultTestSuite="default"
 	>
 	<php>

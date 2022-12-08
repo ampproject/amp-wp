@@ -3504,7 +3504,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX ],
 			],
 			'cdata_malformed_utf8_json'               => [
-				sprintf( '<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"><script type="application/json">{"wrong": "%s"}</script></amp-ima-video></body></html>', "\xFF" ),
+				sprintf( '<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"><script type="application/json" id="malformed_json">{"wrong": "%s"}</script></amp-ima-video></body></html>', "\xFF" ),
 				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"></amp-ima-video></body></html>',
 				[ 'amp-ima-video' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8 ],
@@ -3752,8 +3752,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends TestCase {
 	 * @param array      $sanitizer_args   Sanitizer args.
 	 */
 	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = [], $sanitizer_args = [] ) {
-		$expected      = isset( $expected ) ? $expected : $source;
-		$dom           = Document::fromHtml( $source, Options::DEFAULTS );
+		$expected = isset( $expected ) ? $expected : $source;
+		$dom      = Document::fromHtml( $source, Options::DEFAULTS );
+
+		// Work around issue where testing in CI is no longer resulting in an error for the cdata_malformed_utf8_json test.
+		// This may be due to a libxml update that is doing some more character conversion during parsing.
+		$malfromed_json_script = $dom->getElementById( 'malformed_json' );
+		if ( $malfromed_json_script ) {
+			$malfromed_json_script->textContent = sprintf( '{"wrong": "%s"}', "\xFF" );
+		}
+
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,

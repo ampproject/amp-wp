@@ -71,11 +71,11 @@ jobs:
           echo "Changed JS file count: $JS_FILE_COUNT"
           echo "Changed GHA workflow file count: $GHA_WORKFLOW_COUNT"
 
-          echo "::set-output name=count::$FILE_COUNT"
-          echo "::set-output name=php-count::$PHP_FILE_COUNT"
-          echo "::set-output name=css-count::$CSS_FILE_COUNT"
-          echo "::set-output name=js-count::$JS_FILE_COUNT"
-          echo "::set-output name=gha-workflow-count::$GHA_WORKFLOW_COUNT"
+          echo "count=$FILE_COUNT" >> $GITHUB_OUTPUT
+          echo "php-count=$PHP_FILE_COUNT" >> $GITHUB_OUTPUT
+          echo "css-count=$CSS_FILE_COUNT" >> $GITHUB_OUTPUT
+          echo "js-count=$JS_FILE_COUNT" >> $GITHUB_OUTPUT
+          echo "gha-workflow-count=$GHA_WORKFLOW_COUNT" >> $GITHUB_OUTPUT
         env:
           # Ignore Paths:
           # - .github/
@@ -94,7 +94,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v3.4.1
+        uses: actions/setup-node@v3.5.1
         with:
           node-version-file: '.nvmrc'
           cache: npm
@@ -119,7 +119,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v3.4.1
+        uses: actions/setup-node@v3.5.1
         with:
           node-version-file: '.nvmrc'
           cache: npm
@@ -176,10 +176,10 @@ jobs:
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Configure Composer cache
-        uses: actions/cache@v3.0.8
+        uses: actions/cache@v3.0.11
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -222,10 +222,10 @@ jobs:
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Configure Composer cache
-        uses: actions/cache@v3.0.8
+        uses: actions/cache@v3.0.11
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -253,13 +253,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v3.4.1
+        uses: actions/setup-node@v3.5.1
         with:
           node-version-file: '.nvmrc'
           cache: npm
 
       - name: Setup Jest cache
-        uses: actions/cache@v3.0.8
+        uses: actions/cache@v3.0.11
         with:
           path: ~/.jest-cache
           key: ${{ runner.os }}-jest
@@ -297,17 +297,17 @@ jobs:
           php-version: '8.0'
 
       - name: Setup Node
-        uses: actions/setup-node@v3.4.1
+        uses: actions/setup-node@v3.5.1
         with:
           node-version-file: '.nvmrc'
           cache: npm
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Configure Composer cache
-        uses: actions/cache@v3.0.8
+        uses: actions/cache@v3.0.11
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -373,15 +373,24 @@ jobs:
             wp: 'trunk'
             experimental: true
 
+          - php: '8.1'
+            wp: 'trunk'
+            experimental: true
+
+          - php: '8.2'
+            wp: 'trunk'
+            experimental: true
+
+          - php: '8.0'
+            wp: 'latest'
+            coverage: true
+
           - php: '8.0'
             wp: 'latest'
             external-http: true
 
-          # PHP 8.0 cannot be used as yet due to the earliest compatible PHPUnit (v9) being unable to run due to the
-          # WP test suite enforcing PHPUnit 7 or earlier.
           - php: '7.4'
             wp: 'latest'
-            coverage: true
 
           - php: '7.4'
             wp: 'latest'
@@ -425,8 +434,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
-          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
-          ini-values: pcov.directory=.
+          coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
 
       - name: Shutdown default MySQL service
         if: needs.pre-run.outputs.changed-php-count > 0
@@ -441,7 +449,7 @@ jobs:
 
       - name: Setup Node
         if: needs.pre-run.outputs.changed-php-count > 0
-        uses: actions/setup-node@v3.4.1
+        uses: actions/setup-node@v3.5.1
         with:
           node-version-file: '.nvmrc'
           cache: npm
@@ -449,11 +457,11 @@ jobs:
       - name: Get Composer Cache Directory
         if: needs.pre-run.outputs.changed-php-count > 0
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Configure Composer cache
         if: needs.pre-run.outputs.changed-php-count > 0
-        uses: actions/cache@v3.0.8
+        uses: actions/cache@v3.0.11
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -466,6 +474,41 @@ jobs:
           # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency.
           composer remove --dev phpdocumentor/reflection
           composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+
+      # See https://github.com/wp-cli/wp-cli/issues/5484
+      - name: Remove conflicting Requests library
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: composer remove --dev --ignore-platform-reqs --no-interaction --no-scripts  roave/security-advisories wp-cli/export-command wp-cli/extension-command wp-cli/wp-cli wp-cli/wp-cli-tests
+
+      # Installs a different PHPUnit version depending on the WP/PHP version combo we're testing against.
+      #
+      # | WP  / PHP | PHPUnit |
+      # |-----------|---------|
+      # | 5.0 / 7.0 | 6       |
+      # | 5.7 / 7.1 | 7       |
+      # | 5.9 / 7.2 | 8       |
+      # | 5.9 / 7.4 | 9       |
+      # | *   / 8   | 9       |
+      #
+      # See https://make.wordpress.org/core/handbook/references/phpunit-compatibility-and-wordpress-versions/
+      - name: Update PHPUnit
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: |
+          if [[ $PHP_VERSION == "7.1" ]]; then
+            echo "Installing PHPUnit 7.5.x"
+            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/phpunit:^7.5 --with-dependencies
+          elif [[ $PHP_VERSION == "7.2" ]]; then
+            echo "Installing PHPUnit 8.5.x"
+            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/phpunit:^8.5 --with-dependencies
+            echo "Downgrading phpunit/php-token-stream because the latest version requires PHP 7.3"
+            composer require --ignore-platform-reqs --no-interaction --no-scripts phpunit/php-token-stream:^3.1.3 --with-dependencies
+          elif [[ $WP_VERSION == "latest" || $WP_VERSION == "trunk" || $PHP_VERSION == "7.4" ]]; then
+            echo "Installing latest version of PHPUnit"
+            composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies
+          fi
+        env:
+          WP_VERSION: ${{ matrix.wp }}
+          PHP_VERSION: ${{ matrix.php }}
 
       - name: Install Node dependencies
         if: needs.pre-run.outputs.changed-php-count > 0
@@ -490,12 +533,6 @@ jobs:
       - name: Post install of WP tests
         if: needs.pre-run.outputs.changed-php-count > 0
         run: bash bin/ci/after-wp-install.sh ${{ matrix.wp }} ${{ matrix.install-pwa-plugin == true }}
-
-      - name: Setup PCOV
-        if: ${{ matrix.coverage == true && needs.pre-run.outputs.changed-php-count > 0 }}
-        run: |
-          composer require --dev --ignore-platform-reqs pcov/clobber
-          vendor/bin/pcov clobber
 
       - name: Copy plugin to WP plugins directory
         if: needs.pre-run.outputs.changed-php-count > 0
@@ -530,7 +567,76 @@ jobs:
           flags: php,unit
           fail_ci_if_error: true
 
-  #-----------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------
+
+  unit-test-multisite-php:
+    name: 'Unit Tests Multisite: PHP 7.4, WP Latest'
+    needs: pre-run
+    runs-on: ubuntu-latest
+    if: needs.pre-run.outputs.changed-php-count > 0
+    strategy:
+      matrix:
+        testsuite: ['default', 'external-http']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3.5.1
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Configure Composer cache
+        uses: actions/cache@v3.0.11
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Node dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Install Composer dependencies
+        run: |
+          # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency.
+          composer remove --dev phpdocumentor/reflection
+          composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+
+      # See https://github.com/wp-cli/wp-cli/issues/5484
+      - name: Remove conflicting Requests library
+        run: composer remove --dev --ignore-platform-reqs --no-interaction --no-scripts  roave/security-advisories wp-cli/export-command wp-cli/extension-command wp-cli/wp-cli wp-cli/wp-cli-tests
+
+      - name: Update PHPUnit
+        if: needs.pre-run.outputs.changed-php-count > 0
+        run: |
+          # We are using PHP 7.4 and WP Latest.
+          echo "Installing latest version of PHPUnit"
+          composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies
+
+      - name: Build plugin
+        run: npm run build:js
+
+      - name: Move amp-wp to amp
+        run: cp -r "$PWD" "/tmp/amp"
+
+      - name: Start wp-env
+        working-directory: /tmp/amp
+        run: npm run wp-env start
+
+      - name: Run multisite unit tests
+        working-directory: /tmp/amp
+        run: npm run test:php:multisite ${{ matrix.testsuite == 'external-http' && '-- --testsuite external-http' || '' }}
+
+#-----------------------------------------------------------------------------------------------------------------------
 
   feature-test-php:
     name: "Feature test${{ matrix.coverage && ' (with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
@@ -597,17 +703,17 @@ jobs:
           done
 
       - name: Setup Node
-        uses: actions/setup-node@v3.4.1
+        uses: actions/setup-node@v3.5.1
         with:
           node-version-file: '.nvmrc'
           cache: npm
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Configure Composer cache
-        uses: actions/cache@v3.0.8
+        uses: actions/cache@v3.0.11
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -697,18 +803,17 @@ jobs:
           php-version: '7.0'
 
       - name: Setup Node
-        uses: actions/setup-node@v3.4.1
+        uses: actions/setup-node@v3.5.1
         with:
           node-version-file: '.nvmrc'
           cache: npm
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Configure Composer cache
-        uses: actions/cache@v3.0.8
+        uses: actions/cache@v3.0.11
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -737,11 +842,11 @@ jobs:
 
       - name: Retrieve branch name
         id: retrieve-branch-name
-        run: echo "::set-output name=branch_name::$(REF=${GITHUB_HEAD_REF:-$GITHUB_REF} && echo ${REF#refs/heads/} | sed 's/\//-/g')"
+        run: echo "branch_name=$(REF=${GITHUB_HEAD_REF:-$GITHUB_REF} && echo ${REF#refs/heads/} | sed 's/\//-/g')" >> $GITHUB_OUTPUT
 
       - name: Retrieve git SHA-8 string
         id: retrieve-git-sha-8
-        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
+        run: echo "sha8=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
 
       - name: Upload build as artifact
         uses: actions/upload-artifact@v3
@@ -810,7 +915,7 @@ jobs:
           - Download [development build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip?${{ github.sha }})
           - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip?${{ github.sha }})"
           body="${body//$'\n'/'%0A'}"
-          echo "::set-output name=body::$body"
+          echo "body=$body" >> $GITHUB_OUTPUT
 
       - name: Create comment on PR with links to plugin builds
         if: ${{ steps.find-comment.outputs.comment-id == '' }}

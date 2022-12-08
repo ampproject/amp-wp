@@ -40,6 +40,8 @@ describe('AMP analytics options', () => {
 			'googleanalytics-2'
 		);
 
+		await scrollToElement( { selector: '#amp-analytics-add-entry' } );
+
 		// Add third entry.
 		await expect(page).toClick('#amp-analytics-add-entry');
 		await expect('.amp-analytics-entry').countToBe(3);
