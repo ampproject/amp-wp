@@ -14,10 +14,13 @@ import { Options } from '../components/options-context-provider';
  * Component rendering the Sandboxing experiment.
  */
 export function Sandboxing() {
-	const { updateOptions, editedOptions: {
-		sandboxing_enabled: sandboxingEnabled,
-		sandboxing_level: sandboxingLevel,
-	} } = useContext( Options );
+	const {
+		updateOptions,
+		editedOptions: {
+			sandboxing_enabled: sandboxingEnabled,
+			sandboxing_level: sandboxingLevel,
+		},
+	} = useContext(Options);
 
 	return (
 		<>
@@ -97,7 +100,7 @@ export function Sandboxing() {
 						</label>
 					</li>
 				</ol>
-			) }
+			)}
 		</>
 	);
 }

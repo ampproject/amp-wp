@@ -264,9 +264,9 @@ async function setupThemesAndPlugins() {
 	await deactivatePlugin('e2e-tests-demo-plugin');
 	await deactivatePlugin('do-not-allow-amp-validate-capability');
 
-	await installTheme( 'hestia' );
-	await installTheme( 'twentytwenty' ); // Ensure that twentytwenty theme is installed.
-	await activateTheme( 'twentytwenty' );
+	await installTheme('hestia');
+	await installTheme('twentytwenty'); // Ensure that twentytwenty theme is installed.
+	await activateTheme('twentytwenty');
 }
 
 /**
