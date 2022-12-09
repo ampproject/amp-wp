@@ -113,8 +113,8 @@ jobs:
 
       - name: Configure git user
         run: |
-          git config user.email "pierregordon@protonmail.com"
-          git config user.name "Pierre Gordon"
+          git config user.name ${{ secrets.GIT_USER }}
+          git config user.email ${{ secrets.GIT_USER_EMAIL }}
 
       - name: Check if remote branch exists
         id: remote-branch
@@ -167,11 +167,22 @@ jobs:
       - name: Create pull request
         if: steps.packages.outputs.list != 0 && steps.remote-branch.outputs.exists == 0
         run: |
-          git push -u origin "$HEAD_BRANCH"
-          PR_URL=$(gh pr create --base "$BASE_BRANCH" --title "Update Gutenberg packages after v$VERSION release" --body "" --label dependencies | grep https://)
+          NPM_URL="https://www.npmjs.com/package"
+          BODY="**Following packages were updated:**"
+          for PACKAGE in $PACKAGES; do
+            PACKAGE_SLUG=$(echo $PACKAGE | sed 's/@/\/v\//2')
+            BODY="$BODY
+
+            - [$PACKAGE]($NPM_URL/$PACKAGE_SLUG)"
+          done
+
+          echo ${BODY//$'\n'/'%0A'}
+
+          PR_URL=$(gh pr create --base "$BASE_BRANCH" --title "Update Gutenberg packages after v$VERSION release" --body "$BODY" --label dependencies | grep https://)
           gh pr merge --auto --merge "$PR_URL"
         env:
           VERSION: ${{ needs.check-gutenberg-release.outputs.latest-version }}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           BASE_BRANCH: ${{ steps.branches.outputs.base }}
           HEAD_BRANCH: ${{ steps.branches.outputs.head }}
+          PACKAGES: ${{ steps.packages.outputs.list }}
