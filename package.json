@@ -61,7 +61,7 @@
     "@wordpress/hooks": "3.22.0",
     "@wordpress/jest-puppeteer-axe": "5.5.0",
     "@wordpress/plugins": "4.20.0",
-    "@wordpress/prettier-config": "2.1.0",
+    "@wordpress/prettier-config": "2.5.0",
     "@wordpress/scripts": "24.6.0",
     "axios": "1.2.1",
     "babel-plugin-inline-react-svg": "2.0.1",
