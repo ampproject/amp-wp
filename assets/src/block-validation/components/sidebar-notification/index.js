@@ -20,34 +20,30 @@ import { Loading } from '../../../components/loading';
  * @param {boolean}     props.isSmall   Flag indicating if the notification is small.
  * @param {string}      props.message   Message text.
  */
-export function SidebarNotification( {
+export function SidebarNotification({
 	action,
 	icon,
 	isLoading = false,
 	isSmall = false,
 	message,
-} ) {
+}) {
 	const iconElement = isLoading ? <Loading /> : icon;
 
 	return (
-		<div className={ classnames( 'sidebar-notification', {
-			'is-loading': isLoading,
-			'is-small': isSmall,
-		} ) }>
-			{ iconElement && (
-				<div className="sidebar-notification__icon">
-					{ iconElement }
-				</div>
-			) }
+		<div
+			className={classnames('sidebar-notification', {
+				'is-loading': isLoading,
+				'is-small': isSmall,
+			})}
+		>
+			{iconElement && (
+				<div className="sidebar-notification__icon">{iconElement}</div>
+			)}
 			<div className="sidebar-notification__content">
-				<p>
-					{ message }
-				</p>
-				{ action && (
-					<div className="sidebar-notification__action">
-						{ action }
-					</div>
-				) }
+				<p>{message}</p>
+				{action && (
+					<div className="sidebar-notification__action">{action}</div>
+				)}
 			</div>
 		</div>
 	);
@@ -67,10 +63,14 @@ SidebarNotification.propTypes = {
  * @param {Object}  props.children Component children.
  * @param {boolean} props.isShady  Flag indicating if the component should have a background.
  */
-export function SidebarNotificationsContainer( { children, isShady } ) {
+export function SidebarNotificationsContainer({ children, isShady }) {
 	return (
-		<div className={ classnames( 'sidebar-notifications-container', { 'is-shady': isShady } ) }>
-			{ children }
+		<div
+			className={classnames('sidebar-notifications-container', {
+				'is-shady': isShady,
+			})}
+		>
+			{children}
 		</div>
 	);
 }

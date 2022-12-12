@@ -13,47 +13,51 @@ import { render, unmountComponentAtNode } from '@wordpress/element';
  */
 import { SidebarNotification } from '../index';
 
-describe( 'SidebarNotification', () => {
+describe('SidebarNotification', () => {
 	let container;
 
-	beforeEach( () => {
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-	} );
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		unmountComponentAtNode( container );
+	afterEach(() => {
+		unmountComponentAtNode(container);
 		container.remove();
 		container = null;
-	} );
+	});
 
-	it( 'renders notification without icon and call to action', () => {
-		act( () => {
-			render( <SidebarNotification message="Foobar" />, container );
-		} );
+	it('renders notification without icon and call to action', () => {
+		act(() => {
+			render(<SidebarNotification message="Foobar" />, container);
+		});
 
-		expect( container.innerHTML ).toMatchSnapshot();
-		expect( container.children ).toHaveLength( 1 );
-		expect( container.querySelector( '.sidebar-notification' ) ).not.toBeNull();
-		expect( container.querySelector( '.sidebar-notification__icon' ) ).toBeNull();
-		expect( container.querySelector( '.sidebar-notification__content' ).textContent ).toBe( 'Foobar' );
-	} );
+		expect(container.innerHTML).toMatchSnapshot();
+		expect(container.children).toHaveLength(1);
+		expect(container.querySelector('.sidebar-notification')).not.toBeNull();
+		expect(
+			container.querySelector('.sidebar-notification__icon')
+		).toBeNull();
+		expect(
+			container.querySelector('.sidebar-notification__content')
+				.textContent
+		).toBe('Foobar');
+	});
 
-	it( 'renders status message with icon and call to action', () => {
-		act( () => {
+	it('renders status message with icon and call to action', () => {
+		act(() => {
 			render(
 				<SidebarNotification
 					message="Foobar"
-					icon={ <svg /> }
-					action={ <button /> }
+					icon={<svg />}
+					action={<button />}
 				/>,
-				container,
+				container
 			);
-		} );
+		});
 
-		expect( container.innerHTML ).toMatchSnapshot();
-		expect( container.querySelector( 'svg' ) ).not.toBeNull();
-		expect( container.querySelector( 'button' ) ).not.toBeNull();
-	} );
-} );
-
+		expect(container.innerHTML).toMatchSnapshot();
+		expect(container.querySelector('svg')).not.toBeNull();
+		expect(container.querySelector('button')).not.toBeNull();
+	});
+});

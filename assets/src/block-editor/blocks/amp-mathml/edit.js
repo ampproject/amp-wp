@@ -9,22 +9,22 @@ import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import { PlainText } from '@wordpress/block-editor';
 
-const BlockEdit = ( { attributes, setAttributes } ) => {
+const BlockEdit = ({ attributes, setAttributes }) => {
 	const { dataFormula } = attributes;
 
 	return (
 		<PlainText
-			value={ dataFormula }
-			placeholder={ __( 'Insert formula', 'amp' ) }
-			onChange={ ( value ) => setAttributes( { dataFormula: value } ) }
+			value={dataFormula}
+			placeholder={__('Insert formula', 'amp')}
+			onChange={(value) => setAttributes({ dataFormula: value })}
 		/>
 	);
 };
 
 BlockEdit.propTypes = {
-	attributes: PropTypes.shape( {
+	attributes: PropTypes.shape({
 		dataFormula: PropTypes.string,
-	} ),
+	}),
 	setAttributes: PropTypes.func.isRequired,
 };
 

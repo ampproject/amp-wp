@@ -22,23 +22,23 @@ let container, block;
 
 const TEST_BLOCK = 'my-plugin/test-block';
 
-jest.mock( '../amp-toolbar-button', () => ( {
+jest.mock('../amp-toolbar-button', () => ({
 	AMPToolbarButton: () => <div id="amp-toolbar-button" />,
-} ) );
+}));
 
-describe( 'withAMPToolbarButton: filtering with errors', () => {
-	beforeAll( () => {
-		registerBlockType( TEST_BLOCK, {
+describe('withAMPToolbarButton: filtering with errors', () => {
+	beforeAll(() => {
+		registerBlockType(TEST_BLOCK, {
 			attributes: {},
 			save: noop,
 			category: 'widgets',
 			title: 'test block',
-		} );
+		});
 
-		block = createBlock( TEST_BLOCK, {} );
-		dispatch( 'core/block-editor' ).insertBlock( block );
+		block = createBlock(TEST_BLOCK, {});
+		dispatch('core/block-editor').insertBlock(block);
 
-		createStore( {
+		createStore({
 			reviewLink: 'http://review-link.test',
 			unreviewedValidationErrors: [
 				{
@@ -60,130 +60,110 @@ describe( 'withAMPToolbarButton: filtering with errors', () => {
 					type: 'js_error',
 				},
 			],
-		} );
-	} );
+		});
+	});
 
-	beforeEach( () => {
-		container = document.createElement( 'ul' );
-		document.body.appendChild( container );
-	} );
+	beforeEach(() => {
+		container = document.createElement('ul');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		document.body.removeChild( container );
+	afterEach(() => {
+		document.body.removeChild(container);
 		container = null;
-	} );
+	});
 
-	it( 'is filtered correctly with a class component', () => {
+	it('is filtered correctly with a class component', () => {
 		class UnfilteredComponent extends Component {
 			render() {
-				return (
-					<div id="default-component-element">
-						{ '' }
-					</div>
-				);
+				return <div id="default-component-element">{''}</div>;
 			}
 		}
 
-		const FilteredComponent = withAMPToolbarButton( UnfilteredComponent );
+		const FilteredComponent = withAMPToolbarButton(UnfilteredComponent);
 
-		act( () => {
-			render(
-				<FilteredComponent clientId={ block.clientId } />,
-				container,
-			);
-		} );
+		act(() => {
+			render(<FilteredComponent clientId={block.clientId} />, container);
+		});
 
-		expect( container.querySelector( '#default-component-element' ) ).not.toBeNull();
-		expect( container.querySelector( '#amp-toolbar-button' ) ).not.toBeNull();
-	} );
+		expect(
+			container.querySelector('#default-component-element')
+		).not.toBeNull();
+		expect(container.querySelector('#amp-toolbar-button')).not.toBeNull();
+	});
 
-	it( 'is filtered correctly with a function component', () => {
+	it('is filtered correctly with a function component', () => {
 		function UnfilteredComponent() {
-			return (
-				<div id="default-component-element">
-					{ '' }
-				</div>
-			);
+			return <div id="default-component-element">{''}</div>;
 		}
 
-		const FilteredComponent = withAMPToolbarButton( UnfilteredComponent );
+		const FilteredComponent = withAMPToolbarButton(UnfilteredComponent);
 
-		act( () => {
-			render(
-				<FilteredComponent clientId={ block.clientId } />,
-				container,
-			);
-		} );
+		act(() => {
+			render(<FilteredComponent clientId={block.clientId} />, container);
+		});
 
-		expect( container.querySelector( '#default-component-element' ) ).not.toBeNull();
-		expect( container.querySelector( '#amp-toolbar-button' ) ).not.toBeNull();
-	} );
-} );
+		expect(
+			container.querySelector('#default-component-element')
+		).not.toBeNull();
+		expect(container.querySelector('#amp-toolbar-button')).not.toBeNull();
+	});
+});
 
-describe( 'withAMPToolbarButton: filtering without errors', () => {
-	beforeAll( () => {
-		block = createBlock( TEST_BLOCK, {} );
-		dispatch( 'core/block-editor' ).insertBlock( block );
+describe('withAMPToolbarButton: filtering without errors', () => {
+	beforeAll(() => {
+		block = createBlock(TEST_BLOCK, {});
+		dispatch('core/block-editor').insertBlock(block);
 
-		createStore( {
+		createStore({
 			reviewLink: 'http://review-link.test',
 			validationErrors: [],
-		} );
-	} );
+		});
+	});
 
-	beforeEach( () => {
-		container = document.createElement( 'ul' );
-		document.body.appendChild( container );
-	} );
+	beforeEach(() => {
+		container = document.createElement('ul');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		document.body.removeChild( container );
+	afterEach(() => {
+		document.body.removeChild(container);
 		container = null;
-	} );
+	});
 
-	it( 'is not filtered with a class component and no errors', () => {
+	it('is not filtered with a class component and no errors', () => {
 		class UnfilteredComponent extends Component {
 			render() {
-				return (
-					<div id="default-component-element">
-						{ '' }
-					</div>
-				);
+				return <div id="default-component-element">{''}</div>;
 			}
 		}
 
-		const FilteredComponent = withAMPToolbarButton( UnfilteredComponent );
+		const FilteredComponent = withAMPToolbarButton(UnfilteredComponent);
 
-		act( () => {
-			render(
-				<FilteredComponent clientId={ block.clientId } />,
-				container,
-			);
-		} );
+		act(() => {
+			render(<FilteredComponent clientId={block.clientId} />, container);
+		});
 
-		expect( container.querySelector( '#default-component-element' ) ).not.toBeNull();
-		expect( container.querySelector( '#amp-toolbar-button' ) ).toBeNull();
-	} );
+		expect(
+			container.querySelector('#default-component-element')
+		).not.toBeNull();
+		expect(container.querySelector('#amp-toolbar-button')).toBeNull();
+	});
 
-	it( 'is not filtered with a function component and no errors', () => {
+	it('is not filtered with a function component and no errors', () => {
 		function UnfilteredComponent() {
-			return (
-				<div id="default-component-element">
-					{ '' }
-				</div>
-			);
+			return <div id="default-component-element">{''}</div>;
 		}
 
-		const FilteredComponent = withAMPToolbarButton( UnfilteredComponent );
+		const FilteredComponent = withAMPToolbarButton(UnfilteredComponent);
 
-		act( () => {
-			render(
-				<FilteredComponent clientId={ block.clientId } />,
-				container,
-			);
-		} );
+		act(() => {
+			render(<FilteredComponent clientId={block.clientId} />, container);
+		});
 
-		expect( container.querySelector( '#default-component-element' ) ).not.toBeNull();
-		expect( container.querySelector( '#amp-toolbar-button' ) ).toBeNull();
-	} );
-} );
+		expect(
+			container.querySelector('#default-component-element')
+		).not.toBeNull();
+		expect(container.querySelector('#amp-toolbar-button')).toBeNull();
+	});
+});

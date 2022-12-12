@@ -7,13 +7,28 @@ import { createInterpolateElement } from '@wordpress/element';
 const GOOGLE_ANALYTICS_VENDOR = 'googleanalytics';
 
 const GOOGLE_ANALYTICS_NOTICE = createInterpolateElement(
-	__( 'For Google Analytics please consider using <GoogleSiteKitLink>Site Kit by Google</GoogleSiteKitLink>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <GoogleAnalyticsDevGuideLink>Adding Analytics to your AMP pages</GoogleAnalyticsDevGuideLink>.', 'amp' ),
+	__(
+		'For Google Analytics please consider using <GoogleSiteKitLink>Site Kit by Google</GoogleSiteKitLink>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <GoogleAnalyticsDevGuideLink>Adding Analytics to your AMP pages</GoogleAnalyticsDevGuideLink>.',
+		'amp'
+	),
 	{
 		/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-		GoogleSiteKitLink: <a href="https://wordpress.org/plugins/google-site-kit/" target="_blank" rel="noreferrer" />,
-		GoogleAnalyticsDevGuideLink: <a href="https://developers.google.com/analytics/devguides/collection/amp-analytics/" target="_blank" rel="noreferrer" />,
+		GoogleSiteKitLink: (
+			<a
+				href="https://wordpress.org/plugins/google-site-kit/"
+				target="_blank"
+				rel="noreferrer"
+			/>
+		),
+		GoogleAnalyticsDevGuideLink: (
+			<a
+				href="https://developers.google.com/analytics/devguides/collection/amp-analytics/"
+				target="_blank"
+				rel="noreferrer"
+			/>
+		),
 		/* eslint-enable jsx-a11y/anchor-has-content */
-	},
+	}
 );
 
 export default {
@@ -22,12 +37,18 @@ export default {
 	},
 	adobeanalytics: {
 		notice: createInterpolateElement(
-			__( '<a>Learn more</a> about Adobe Analytics in AMP.' ),
+			__('<a>Learn more</a> about Adobe Analytics in AMP.'),
 			{
 				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-				a: <a href="https://experienceleague.adobe.com/docs/analytics/implementation/other/amp.html" target="_blank" rel="noreferrer" />,
+				a: (
+					<a
+						href="https://experienceleague.adobe.com/docs/analytics/implementation/other/amp.html"
+						target="_blank"
+						rel="noreferrer"
+					/>
+				),
 				/* eslint-enable jsx-a11y/anchor-has-content */
-			},
+			}
 		),
 		sample: JSON.stringify(
 			{
@@ -53,22 +74,28 @@ export default {
 					},
 					linkers: {
 						enabled: true,
-						destinationDomains: [ 'localhost' ],
+						destinationDomains: ['localhost'],
 					},
 				},
 			},
 			null,
-			'\t',
+			'\t'
 		),
 	},
 	alexametrics: {
 		notice: createInterpolateElement(
-			__( '<a>Learn more</a> about Alexa metrics in AMP.' ),
+			__('<a>Learn more</a> about Alexa metrics in AMP.'),
 			{
 				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-				a: <a href="https://support.alexa.com/hc/en-us/articles/115004090654-Does-Alexa-have-a-Certify-Code-for-AMP" target="_blank" rel="noreferrer" />,
+				a: (
+					<a
+						href="https://support.alexa.com/hc/en-us/articles/115004090654-Does-Alexa-have-a-Certify-Code-for-AMP"
+						target="_blank"
+						rel="noreferrer"
+					/>
+				),
 				/* eslint-enable jsx-a11y/anchor-has-content */
-			},
+			}
 		),
 		sample: JSON.stringify(
 			{
@@ -78,22 +105,28 @@ export default {
 				},
 			},
 			null,
-			'\t',
+			'\t'
 		),
 	},
 	baiduanalytics: {
 		notice: createInterpolateElement(
-			__( '<a>Learn more</a> about Baidu Analytics in AMP.' ),
+			__('<a>Learn more</a> about Baidu Analytics in AMP.'),
 			{
 				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-				a: <a href="https://tongji.baidu.com/web/help/article?id=268&castk=LTE%3D" target="_blank" rel="noreferrer" />,
+				a: (
+					<a
+						href="https://tongji.baidu.com/web/help/article?id=268&castk=LTE%3D"
+						target="_blank"
+						rel="noreferrer"
+					/>
+				),
 				/* eslint-enable jsx-a11y/anchor-has-content */
-			},
+			}
 		),
 		sample: JSON.stringify(
 			{
 				vars: {
-					token: '👉 ' + __( 'Provide Token.', 'amp' ) + ' 👈',
+					token: '👉 ' + __('Provide Token.', 'amp') + ' 👈',
 				},
 				triggers: {
 					pageview: {
@@ -103,22 +136,31 @@ export default {
 				},
 			},
 			null,
-			'\t',
+			'\t'
 		),
 	},
 	facebookpixel: {
 		notice: createInterpolateElement(
-			__( '<a>Learn more</a> about Facebook Pixel in AMP.' ),
+			__('<a>Learn more</a> about Facebook Pixel in AMP.'),
 			{
 				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-				a: <a href="https://developers.facebook.com/docs/meta-pixel" target="_blank" rel="noreferrer" />,
+				a: (
+					<a
+						href="https://developers.facebook.com/docs/meta-pixel"
+						target="_blank"
+						rel="noreferrer"
+					/>
+				),
 				/* eslint-enable jsx-a11y/anchor-has-content */
-			},
+			}
 		),
 		sample: JSON.stringify(
 			{
 				vars: {
-					pixelId: '👉 ' + __( 'Provide Facebook Pixel ID here.', 'amp' ) + ' 👈',
+					pixelId:
+						'👉 ' +
+						__('Provide Facebook Pixel ID here.', 'amp') +
+						' 👈',
 				},
 				triggers: {
 					trackPageview: {
@@ -128,15 +170,21 @@ export default {
 				},
 			},
 			null,
-			'\t',
+			'\t'
 		),
 	},
-	[ GOOGLE_ANALYTICS_VENDOR ]: {
+	[GOOGLE_ANALYTICS_VENDOR]: {
 		notice: GOOGLE_ANALYTICS_NOTICE,
 		sample: JSON.stringify(
 			{
 				vars: {
-					account: '👉 ' + __( 'Provide site tracking ID here (e.g. UA-XXXXX-Y)', 'amp' ) + ' 👈',
+					account:
+						'👉 ' +
+						__(
+							'Provide site tracking ID here (e.g. UA-XXXXX-Y)',
+							'amp'
+						) +
+						' 👈',
 				},
 				triggers: {
 					trackPageview: {
@@ -146,7 +194,7 @@ export default {
 				},
 			},
 			null,
-			'\t',
+			'\t'
 		),
 	},
 	gtag: {
@@ -161,70 +209,89 @@ export default {
 				},
 			},
 			null,
-			'\t',
+			'\t'
 		),
 	},
-	googletagmanager: { // Throw notice to if user enters googletagmanager as vendor.
+	googletagmanager: {
+		// Throw notice to if user enters googletagmanager as vendor.
 		notice: GOOGLE_ANALYTICS_NOTICE,
 		sample: '{}',
 	},
 	newrelic: {
 		notice: createInterpolateElement(
-			__( '<a>Learn more</a> about New Relic in AMP.' ),
+			__('<a>Learn more</a> about New Relic in AMP.'),
 			{
 				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-				a: <a href="https://docs.newrelic.com/docs/browser/browser-monitoring/installation/install-browser-monitoring-agent/" target="_blank" rel="noreferrer" />,
+				a: (
+					<a
+						href="https://docs.newrelic.com/docs/browser/browser-monitoring/installation/install-browser-monitoring-agent/"
+						target="_blank"
+						rel="noreferrer"
+					/>
+				),
 				/* eslint-enable jsx-a11y/anchor-has-content */
-			},
+			}
 		),
 		sample: JSON.stringify(
 			{
 				vars: {
-					appId: '👉 ' + __( 'Provide App ID here.', 'amp' ) + ' 👈',
+					appId: '👉 ' + __('Provide App ID here.', 'amp') + ' 👈',
 					licenseKey: '<LICENSE_KEY>',
 				},
 			},
 			null,
-			'\t',
+			'\t'
 		),
 	},
 	nielsen: {
 		notice: createInterpolateElement(
-			__( '<a>Learn more</a> about Nielsen in AMP.' ),
+			__('<a>Learn more</a> about Nielsen in AMP.'),
 			{
 				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-				a: <a href="https://engineeringportal.nielsen.com/docs/DCR_Static_Google_AMP_Cloud_API" target="_blank" rel="noreferrer" />,
+				a: (
+					<a
+						href="https://engineeringportal.nielsen.com/docs/DCR_Static_Google_AMP_Cloud_API"
+						target="_blank"
+						rel="noreferrer"
+					/>
+				),
 				/* eslint-enable jsx-a11y/anchor-has-content */
-			},
+			}
 		),
 		sample: JSON.stringify(
 			{
 				vars: {
-					apid: '👉 ' + __( 'Provide App ID here.', 'amp' ) + ' 👈',
+					apid: '👉 ' + __('Provide App ID here.', 'amp') + ' 👈',
 					apv: '1.0',
 					section: 'Entertainment',
 					segA: 'Music',
 				},
 			},
 			null,
-			'\t',
+			'\t'
 		),
 	},
 	// Yandex Metrika
 	metrika: {
 		notice: createInterpolateElement(
-			__( '<a>Learn more</a> about Yandex Metrika in AMP.' ),
+			__('<a>Learn more</a> about Yandex Metrika in AMP.'),
 			{
 				/* eslint-disable jsx-a11y/anchor-has-content -- Anchor has content defined in the translated string. */
-				a: <a href="https://yandex.com/support/metrica/code/install-counter-amp.html" target="_blank" rel="noreferrer" />,
+				a: (
+					<a
+						href="https://yandex.com/support/metrica/code/install-counter-amp.html"
+						target="_blank"
+						rel="noreferrer"
+					/>
+				),
 				/* eslint-enable jsx-a11y/anchor-has-content */
-			},
+			}
 		),
 		sample: JSON.stringify(
 			{
 				vars: {
 					counterId: '<COUNTER_ID>',
-					yaParams: '{\'key\': \'value\'}',
+					yaParams: "{'key': 'value'}",
 				},
 				requests: {},
 				triggers: {
@@ -243,15 +310,13 @@ export default {
 						request: 'reachGoal',
 						vars: {
 							goalId: 'superGoalId',
-							yaParams: '{\'inner-key\': \'inner-value\'}',
+							yaParams: "{'inner-key': 'inner-value'}",
 						},
 					},
 					halfScroll: {
 						on: 'scroll',
 						scrollSpec: {
-							verticalBoundaries: [
-								50,
-							],
+							verticalBoundaries: [50],
 						},
 						request: 'reachGoal',
 						vars: {
@@ -261,7 +326,7 @@ export default {
 				},
 			},
 			null,
-			'\t',
+			'\t'
 		),
 	},
 };

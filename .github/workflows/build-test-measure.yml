@@ -909,13 +909,15 @@ jobs:
 
       - name: Get comment body
         id: get-comment-body
-        # Setting a multi-line output requires escaping line-feeds. See <https://github.community/t/set-output-truncates-multiline-strings/16852/3>.
+        # Setting a multi-line output requires escaping line-feeds. See <https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings>.
         run: |
           body="Plugin builds for ${{ github.event.pull_request.head.sha }} are ready :bellhop_bell:!
           - Download [development build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip?${{ github.sha }})
           - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip?${{ github.sha }})"
-          body="${body//$'\n'/'%0A'}"
-          echo "body=$body" >> $GITHUB_OUTPUT
+          delimiter="${body//$'\n'/'%0A'}"
+          echo "body<<${delimiter}" >> $GITHUB_OUTPUT
+          echo "$body" >> $GITHUB_OUTPUT
+          echo "${delimiter}" >> $GITHUB_OUTPUT
 
       - name: Create comment on PR with links to plugin builds
         if: ${{ steps.find-comment.outputs.comment-id == '' }}

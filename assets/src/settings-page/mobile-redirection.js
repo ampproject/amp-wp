@@ -14,12 +14,12 @@ import { STANDARD } from '../common/constants';
  * Mobile redirection section of the settings page.
  */
 export function MobileRedirection() {
-	const { editedOptions } = useContext( Options );
+	const { editedOptions } = useContext(Options);
 
 	const { theme_support: themeSupport } = editedOptions || {};
 
 	// Don't show if the mode is standard or the themeSupport is not yet set.
-	if ( ! themeSupport || STANDARD === themeSupport ) {
+	if (!themeSupport || STANDARD === themeSupport) {
 		return null;
 	}
 

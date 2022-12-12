@@ -15,56 +15,56 @@ import { render } from '@wordpress/element';
 import { RedirectToggle } from '../';
 import { OptionsContextProvider } from '../../options-context-provider';
 
-jest.mock( '../../options-context-provider' );
+jest.mock('../../options-context-provider');
 
 let container;
 
-describe( 'RedirectToggle', () => {
-	beforeEach( () => {
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-	} );
+describe('RedirectToggle', () => {
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		document.body.removeChild( container );
+	afterEach(() => {
+		document.body.removeChild(container);
 		container = null;
-	} );
+	});
 
-	it( 'matches snapshot', () => {
+	it('matches snapshot', () => {
 		const wrapper = create(
 			<OptionsContextProvider>
 				<RedirectToggle />
-			</OptionsContextProvider>,
+			</OptionsContextProvider>
 		);
-		expect( wrapper.toJSON() ).toMatchSnapshot();
-	} );
+		expect(wrapper.toJSON()).toMatchSnapshot();
+	});
 
-	it( 'can be toggled', () => {
-		act( () => {
+	it('can be toggled', () => {
+		act(() => {
 			render(
 				<OptionsContextProvider>
 					<RedirectToggle />
 				</OptionsContextProvider>,
-				container,
+				container
 			);
-		} );
+		});
 
-		expect( container.querySelector( '.is-checked' ) ).not.toBeNull();
+		expect(container.querySelector('.is-checked')).not.toBeNull();
 
-		act(
-			() => {
-				container.querySelector( 'input' ).dispatchEvent( new global.MouseEvent( 'click' ) );
-			},
-		);
+		act(() => {
+			container
+				.querySelector('input')
+				.dispatchEvent(new global.MouseEvent('click'));
+		});
 
-		expect( container.querySelector( 'input:checked' ) ).toBeNull();
+		expect(container.querySelector('input:checked')).toBeNull();
 
-		act(
-			() => {
-				container.querySelector( 'input' ).dispatchEvent( new global.MouseEvent( 'click' ) );
-			},
-		);
+		act(() => {
+			container
+				.querySelector('input')
+				.dispatchEvent(new global.MouseEvent('click'));
+		});
 
-		expect( container.querySelector( '.is-checked' ) ).not.toBeNull();
-	} );
-} );
+		expect(container.querySelector('.is-checked')).not.toBeNull();
+	});
+});

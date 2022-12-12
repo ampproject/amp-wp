@@ -17,15 +17,15 @@ export const User = createContext();
  * @param {any}     props.children
  * @param {boolean} props.fetchingUser
  */
-export function UserContextProvider( { children, fetchingUser } ) {
+export function UserContextProvider({ children, fetchingUser }) {
 	return (
-		<User.Provider value={
-			{
+		<User.Provider
+			value={{
 				savingDeveloperToolsOption: false,
 				fetchingUser,
-			}
-		}>
-			{ children }
+			}}
+		>
+			{children}
 		</User.Provider>
 	);
 }

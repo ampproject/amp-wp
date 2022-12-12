@@ -3,22 +3,20 @@
  */
 import PropTypes from 'prop-types';
 
-const BlockSave = ( { attributes } ) => {
+const BlockSave = ({ attributes }) => {
 	const { dataFormula } = attributes;
 
 	const mathmlProps = {
 		'data-formula': dataFormula,
 		layout: 'container',
 	};
-	return (
-		<amp-mathml { ...mathmlProps } />
-	);
+	return <amp-mathml {...mathmlProps} />;
 };
 
 BlockSave.propTypes = {
-	attributes: PropTypes.shape( {
+	attributes: PropTypes.shape({
 		dataFormula: PropTypes.string,
-	} ),
+	}),
 };
 
 export default BlockSave;

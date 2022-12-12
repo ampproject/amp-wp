@@ -20,31 +20,30 @@ import { ListItems } from '../list-items';
  * @param {Array}  props.plugins Plugins data.
  * @return {JSX.Element|null} HTML markup for plugins data.
  */
-export function Plugins( { plugins } ) {
-	if ( ! Array.isArray( plugins ) ) {
+export function Plugins({ plugins }) {
+	if (!Array.isArray(plugins)) {
 		return null;
 	}
 
-	const items = plugins.map( ( item ) => {
-		return { value: `${ item.name } ${ item.version ? '(' + item.version + ')' : '' }` };
-	} );
+	const items = plugins.map((item) => {
+		return {
+			value: `${item.name} ${
+				item.version ? '(' + item.version + ')' : ''
+			}`,
+		};
+	});
 
 	return (
-		<details open={ false }>
+		<details open={false}>
 			<summary>
-				{
-					sprintf(
-						/* translators: Placeholder is the number of plugins */
-						__( 'Plugins (%s)', 'amp' ),
-						plugins.length,
-					)
-				}
+				{sprintf(
+					/* translators: Placeholder is the number of plugins */
+					__('Plugins (%s)', 'amp'),
+					plugins.length
+				)}
 			</summary>
 			<div className="detail-body">
-				<ListItems
-					isDisc={ true }
-					items={ items }
-				/>
+				<ListItems isDisc={true} items={items} />
 			</div>
 		</details>
 	);
@@ -53,4 +52,3 @@ export function Plugins( { plugins } ) {
 Plugins.propTypes = {
 	plugins: PropTypes.array.isRequired,
 };
-

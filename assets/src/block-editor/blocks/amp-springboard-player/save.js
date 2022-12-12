@@ -3,8 +3,18 @@
  */
 import PropTypes from 'prop-types';
 
-const BlockSave = ( { attributes } ) => {
-	const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems, ampLayout, height, width } = attributes;
+const BlockSave = ({ attributes }) => {
+	const {
+		dataSiteId,
+		dataPlayerId,
+		dataContentId,
+		dataDomain,
+		dataMode,
+		dataItems,
+		ampLayout,
+		height,
+		width,
+	} = attributes;
 	const springboardProps = {
 		layout: ampLayout,
 		height,
@@ -15,26 +25,24 @@ const BlockSave = ( { attributes } ) => {
 		'data-domain': dataDomain,
 		'data-items': dataItems,
 	};
-	if ( 'fixed-height' !== ampLayout && width ) {
+	if ('fixed-height' !== ampLayout && width) {
 		springboardProps.width = attributes.width;
 	}
-	return (
-		<amp-springboard-player { ...springboardProps } />
-	);
+	return <amp-springboard-player {...springboardProps} />;
 };
 
 BlockSave.propTypes = {
-	attributes: PropTypes.shape( {
+	attributes: PropTypes.shape({
 		dataSiteId: PropTypes.string,
 		dataPlayerId: PropTypes.string,
 		dataContentId: PropTypes.string,
 		dataDomain: PropTypes.string,
-		dataMode: PropTypes.oneOf( [ 'video', 'playlist' ] ),
+		dataMode: PropTypes.oneOf(['video', 'playlist']),
 		dataItems: PropTypes.number,
 		ampLayout: PropTypes.string,
 		height: PropTypes.number,
 		width: PropTypes.number,
-	} ),
+	}),
 };
 
 export default BlockSave;

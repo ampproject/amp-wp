@@ -12,13 +12,14 @@ import save from './save';
 export const name = 'amp/amp-ima-video';
 
 export const settings = {
-	title: __( 'AMP IMA Video', 'amp' ),
-	description: __( 'Embeds a video player for instream video ads that are integrated with the IMA SDK', 'amp' ),
+	title: __('AMP IMA Video', 'amp'),
+	description: __(
+		'Embeds a video player for instream video ads that are integrated with the IMA SDK',
+		'amp'
+	),
 	category: 'embed',
 	icon: 'embed-generic',
-	keywords: [
-		__( 'Embed', 'amp' ),
-	],
+	keywords: [__('Embed', 'amp')],
 
 	// @todo Perhaps later add subtitles option and additional source options?
 	attributes: {

@@ -26,8 +26,8 @@ export class ErrorBoundary extends Component {
 		title: PropTypes.string,
 	};
 
-	constructor( props ) {
-		super( props );
+	constructor(props) {
+		super(props);
 
 		this.timeout = null;
 		this.state = { error: null };
@@ -41,21 +41,21 @@ export class ErrorBoundary extends Component {
 		this.mounted = false;
 	}
 
-	componentDidCatch( error ) {
-		this.setState( { error } );
+	componentDidCatch(error) {
+		this.setState({ error });
 	}
 
 	render() {
 		const { error } = this.state;
 		const { children, exitLinkLabel, exitLinkUrl, title } = this.props;
 
-		if ( error ) {
+		if (error) {
 			return (
 				<ErrorScreen
-					error={ error }
-					finishLinkLabel={ exitLinkLabel }
-					finishLinkUrl={ exitLinkUrl }
-					title={ title }
+					error={error}
+					finishLinkLabel={exitLinkLabel}
+					finishLinkUrl={exitLinkUrl}
+					title={title}
 				/>
 			);
 		}

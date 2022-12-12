@@ -7,7 +7,12 @@ import { HAS_DEPENDENCY_SUPPORT } from 'amp-settings'; // From WP inline script.
 /**
  * WordPress dependencies
  */
-import { createContext, useState, useContext, useMemo } from '@wordpress/element';
+import {
+	createContext,
+	useState,
+	useContext,
+	useMemo,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -25,26 +30,37 @@ export const Navigation = createContext();
  * @param {?any}   props.children Component children.
  * @param {Array}  props.pages    Pages in the app.
  */
-export function NavigationContextProvider( { children, pages } ) {
-	const [ currentPage, setCurrentPage ] = useState( pages[ 0 ] );
-	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 2.1.
-	const { editedOptions } = useContext( Options );
-	const { isSkipped } = useContext( SiteScan );
+export function NavigationContextProvider({ children, pages }) {
+	const [currentPage, setCurrentPage] = useState(pages[0]);
+	const [canGoForward, setCanGoForward] = useState(true); // Allow immediately moving forward on first page. @todo This may need to change in 2.1.
+	const { editedOptions } = useContext(Options);
+	const { isSkipped } = useContext(SiteScan);
 
 	const { theme_support: themeSupport } = editedOptions;
 
-	const adaptedPages = useMemo( () => pages.filter( ( page ) => (
-		// Do not show the Technical Background step is there is no dependency support.
-		! ( 'technical-background' === page.slug && ! HAS_DEPENDENCY_SUPPORT ) &&
+	const adaptedPages = useMemo(
+		() =>
+			pages.filter(
+				(page) =>
+					// Do not show the Technical Background step is there is no dependency support.
+					!(
+						'technical-background' === page.slug &&
+						!HAS_DEPENDENCY_SUPPORT
+					) &&
+					// If Site Scan should be skipped, do not show the relevant step in the Wizard.
+					!('site-scan' === page.slug && isSkipped) &&
+					// Theme Selection page should be only accessible for the Reader template mode.
+					!(
+						'theme-selection' === page.slug &&
+						READER !== themeSupport
+					)
+			),
+		[isSkipped, pages, themeSupport]
+	);
 
-		// If Site Scan should be skipped, do not show the relevant step in the Wizard.
-		! ( 'site-scan' === page.slug && isSkipped ) &&
-
-		// Theme Selection page should be only accessible for the Reader template mode.
-		! ( 'theme-selection' === page.slug && READER !== themeSupport )
-	) ), [ isSkipped, pages, themeSupport ] );
-
-	const activePageIndex = adaptedPages.findIndex( ( adaptedPage ) => adaptedPage.slug === currentPage.slug );
+	const activePageIndex = adaptedPages.findIndex(
+		(adaptedPage) => adaptedPage.slug === currentPage.slug
+	);
 
 	const isLastPage = activePageIndex === adaptedPages.length - 1;
 
@@ -52,38 +68,36 @@ export function NavigationContextProvider( { children, pages } ) {
 	 * Navigates back to the previous page.
 	 */
 	const moveBack = () => {
-		setCurrentPage( adaptedPages[ activePageIndex - 1 ] );
-		setCanGoForward( true );
+		setCurrentPage(adaptedPages[activePageIndex - 1]);
+		setCanGoForward(true);
 	};
 
 	/**
 	 * Navigates to the next page. Pages are expected to set canGoForward to true when required actions have been taken.
 	 */
 	const moveForward = () => {
-		if ( isLastPage ) {
+		if (isLastPage) {
 			return;
 		}
 
-		setCurrentPage( adaptedPages[ activePageIndex + 1 ] );
-		setCanGoForward( false ); // Each page is responsible for setting this to true.
+		setCurrentPage(adaptedPages[activePageIndex + 1]);
+		setCanGoForward(false); // Each page is responsible for setting this to true.
 	};
 
 	return (
 		<Navigation.Provider
-			value={
-				{
-					activePageIndex,
-					canGoForward,
-					currentPage,
-					isLastPage,
-					moveBack,
-					moveForward,
-					pages: adaptedPages,
-					setCanGoForward,
-				}
-			}
+			value={{
+				activePageIndex,
+				canGoForward,
+				currentPage,
+				isLastPage,
+				moveBack,
+				moveForward,
+				pages: adaptedPages,
+				setCanGoForward,
+			}}
 		>
-			{ children }
+			{children}
 		</Navigation.Provider>
 	);
 }
@@ -91,11 +105,11 @@ export function NavigationContextProvider( { children, pages } ) {
 NavigationContextProvider.propTypes = {
 	children: PropTypes.any,
 	pages: PropTypes.arrayOf(
-		PropTypes.shape( {
+		PropTypes.shape({
 			PageComponent: PropTypes.func.isRequired,
 			showTitle: PropTypes.bool,
 			slug: PropTypes.string.isRequired,
 			title: PropTypes.string.isRequired,
-		} ),
+		})
 	).isRequired,
 };

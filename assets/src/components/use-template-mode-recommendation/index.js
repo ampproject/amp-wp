@@ -2,7 +2,12 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, useContext, useLayoutEffect, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useContext,
+	useLayoutEffect,
+	useState,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -29,30 +34,61 @@ export function useTemplateModeRecommendation() {
 		pluginsWithAmpIncompatibility,
 		stale,
 		themesWithAmpIncompatibility,
-	} = useContext( SiteScan );
-	const { developerToolsOption, fetchingUser, savingDeveloperToolsOption } = useContext( User );
-	const { fetchingOptions, originalOptions, savedOptions, savingOptions } = useContext( Options );
-	const [ templateModeRecommendation, setTemplateModeRecommendation ] = useState( null );
+	} = useContext(SiteScan);
+	const { developerToolsOption, fetchingUser, savingDeveloperToolsOption } =
+		useContext(User);
+	const { fetchingOptions, originalOptions, savedOptions, savingOptions } =
+		useContext(Options);
+	const [templateModeRecommendation, setTemplateModeRecommendation] =
+		useState(null);
 
-	useLayoutEffect( () => {
-		if ( isBusy || isFetchingScannableUrls || fetchingOptions || savingOptions || fetchingUser || savingDeveloperToolsOption ) {
+	useLayoutEffect(() => {
+		if (
+			isBusy ||
+			isFetchingScannableUrls ||
+			fetchingOptions ||
+			savingOptions ||
+			fetchingUser ||
+			savingDeveloperToolsOption
+		) {
 			return;
 		}
 
 		const currentOptions = { ...originalOptions, ...savedOptions };
 
 		// Plugins are considered suppressed only if they are active (included in the `suppressible_plugins` object).
-		const hasSuppressedPlugins = Object.entries( currentOptions?.suppressed_plugins || {} )
-			.some( ( [ slug, suppressed ] ) => suppressed && Boolean( currentOptions.suppressible_plugins?.[ slug ] ) );
+		const hasSuppressedPlugins = Object.entries(
+			currentOptions?.suppressed_plugins || {}
+		).some(
+			([slug, suppressed]) =>
+				suppressed &&
+				Boolean(currentOptions.suppressible_plugins?.[slug])
+		);
 
-		setTemplateModeRecommendation( getTemplateModeRecommendation( {
-			hasPluginIssues: pluginsWithAmpIncompatibility?.length > 0,
-			hasFreshSiteScanResults: hasSiteScanResults && ! stale,
-			hasSuppressedPlugins,
-			hasThemeIssues: themesWithAmpIncompatibility?.length > 0,
-			userIsTechnical: developerToolsOption === true,
-		} ) );
-	}, [ developerToolsOption, fetchingOptions, fetchingUser, hasSiteScanResults, isBusy, isFetchingScannableUrls, originalOptions, pluginsWithAmpIncompatibility?.length, savedOptions, savingDeveloperToolsOption, savingOptions, stale, themesWithAmpIncompatibility?.length ] );
+		setTemplateModeRecommendation(
+			getTemplateModeRecommendation({
+				hasPluginIssues: pluginsWithAmpIncompatibility?.length > 0,
+				hasFreshSiteScanResults: hasSiteScanResults && !stale,
+				hasSuppressedPlugins,
+				hasThemeIssues: themesWithAmpIncompatibility?.length > 0,
+				userIsTechnical: developerToolsOption === true,
+			})
+		);
+	}, [
+		developerToolsOption,
+		fetchingOptions,
+		fetchingUser,
+		hasSiteScanResults,
+		isBusy,
+		isFetchingScannableUrls,
+		originalOptions,
+		pluginsWithAmpIncompatibility?.length,
+		savedOptions,
+		savingDeveloperToolsOption,
+		savingOptions,
+		stale,
+		themesWithAmpIncompatibility?.length,
+	]);
 
 	return templateModeRecommendation;
 }
@@ -69,66 +105,100 @@ export function useTemplateModeRecommendation() {
  * @param {boolean} args.hasThemeIssues          Whether the site scan found themes with AMP incompatibility.
  * @param {boolean} args.userIsTechnical         Whether the user answered yes to the technical question.
  */
-export function getTemplateModeRecommendation( {
+export function getTemplateModeRecommendation({
 	hasFreshSiteScanResults,
 	hasPluginIssues,
 	hasSuppressedPlugins,
 	hasThemeIssues,
 	userIsTechnical,
-} ) {
+}) {
 	/* eslint-disable @wordpress/no-unused-vars-before-return */
-	const mobileRedirectionNote = __( 'If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' );
+	const mobileRedirectionNote = __(
+		'If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.',
+		'amp'
+	);
 	const readerModeDescription = createInterpolateElement(
-		__( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>.', 'amp' ) + ' ' + mobileRedirectionNote,
+		__(
+			'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>.',
+			'amp'
+		) +
+			' ' +
+			mobileRedirectionNote,
 		{
 			b: <b />,
-		},
+		}
 	);
 	const transitionalModeDescription = createInterpolateElement(
-		__( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>.', 'amp' ) + ' ' + mobileRedirectionNote,
+		__(
+			'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>.',
+			'amp'
+		) +
+			' ' +
+			mobileRedirectionNote,
 		{
 			b: <b />,
-		},
+		}
 	);
 	const standardModeDescription = createInterpolateElement(
-		__( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.', 'amp' ),
+		__(
+			'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>.',
+			'amp'
+		),
 		{
 			b: <b />,
-		},
+		}
 	);
-	const pluginIncompatibilityNote = __( 'To address plugin compatibility issue(s), you may need to use Plugin Suppression to disable incompatible plugins on AMP pages or else select an alternative AMP-compatible plugin.', 'amp' );
-	const readerNoteWhenThemeIssuesPresent = __( 'Recommended if you want to enable AMP on your site despite the detected compatibility issue(s).', 'amp' );
-	const transitionalNoteWhenThemeIssuesPresent = __( 'Recommended so you can progressively enable AMP on your site while still making the non-AMP version available to visitors for functionality that is not AMP-compatible. Choose this mode if compatibility issues can be fixed or if your theme degrades gracefully when JavaScript is disabled.', 'amp' );
-	const notRecommendedDueToCompleteCompatibility = __( 'Not recommended as your site has no AMP compatibility issues detected.', 'amp' );
-	const notRecommendedUntilIncompatibilitiesFixed = __( 'Not recommended until you can fix the detected compatibility issue(s).', 'amp' );
-	const recommendedDueToNoThemeIncompatibilities = __( 'Recommended since there were no theme compatibility issues detected.', 'amp' );
-	const notRecommendedDueToIncompatibilities = __( 'Not recommended due to compatibility issue(s) which may break key site functionality, without developer assistance.', 'amp' );
-	const notRecommendedDueToSuppressedPlugins = __( 'Not recommended because you have suppressed plugins.', 'amp' );
+	const pluginIncompatibilityNote = __(
+		'To address plugin compatibility issue(s), you may need to use Plugin Suppression to disable incompatible plugins on AMP pages or else select an alternative AMP-compatible plugin.',
+		'amp'
+	);
+	const readerNoteWhenThemeIssuesPresent = __(
+		'Recommended if you want to enable AMP on your site despite the detected compatibility issue(s).',
+		'amp'
+	);
+	const transitionalNoteWhenThemeIssuesPresent = __(
+		'Recommended so you can progressively enable AMP on your site while still making the non-AMP version available to visitors for functionality that is not AMP-compatible. Choose this mode if compatibility issues can be fixed or if your theme degrades gracefully when JavaScript is disabled.',
+		'amp'
+	);
+	const notRecommendedDueToCompleteCompatibility = __(
+		'Not recommended as your site has no AMP compatibility issues detected.',
+		'amp'
+	);
+	const notRecommendedUntilIncompatibilitiesFixed = __(
+		'Not recommended until you can fix the detected compatibility issue(s).',
+		'amp'
+	);
+	const recommendedDueToNoThemeIncompatibilities = __(
+		'Recommended since there were no theme compatibility issues detected.',
+		'amp'
+	);
+	const notRecommendedDueToIncompatibilities = __(
+		'Not recommended due to compatibility issue(s) which may break key site functionality, without developer assistance.',
+		'amp'
+	);
+	const notRecommendedDueToSuppressedPlugins = __(
+		'Not recommended because you have suppressed plugins.',
+		'amp'
+	);
 	/* eslint-enable @wordpress/no-unused-vars-before-return */
 
-	switch ( true ) {
+	switch (true) {
 		/**
 		 * No site scan results or stale results.
 		 */
-		case ! hasFreshSiteScanResults:
+		case !hasFreshSiteScanResults:
 			return {
-				[ READER ]: {
+				[READER]: {
 					recommendationLevel: NEUTRAL,
-					details: [
-						readerModeDescription,
-					],
+					details: [readerModeDescription],
 				},
-				[ TRANSITIONAL ]: {
+				[TRANSITIONAL]: {
 					recommendationLevel: NEUTRAL,
-					details: [
-						transitionalModeDescription,
-					],
+					details: [transitionalModeDescription],
 				},
-				[ STANDARD ]: {
+				[STANDARD]: {
 					recommendationLevel: NEUTRAL,
-					details: [
-						standardModeDescription,
-					],
+					details: [standardModeDescription],
 				},
 			};
 
@@ -137,7 +207,7 @@ export function getTemplateModeRecommendation( {
 		 */
 		case hasThemeIssues && hasPluginIssues && userIsTechnical:
 			return {
-				[ READER ]: {
+				[READER]: {
 					recommendationLevel: RECOMMENDED,
 					details: [
 						readerModeDescription,
@@ -145,7 +215,7 @@ export function getTemplateModeRecommendation( {
 						pluginIncompatibilityNote,
 					],
 				},
-				[ TRANSITIONAL ]: {
+				[TRANSITIONAL]: {
 					recommendationLevel: NEUTRAL,
 					details: [
 						transitionalModeDescription,
@@ -153,7 +223,7 @@ export function getTemplateModeRecommendation( {
 						pluginIncompatibilityNote,
 					],
 				},
-				[ STANDARD ]: {
+				[STANDARD]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
 						standardModeDescription,
@@ -166,9 +236,9 @@ export function getTemplateModeRecommendation( {
 		/**
 		 * #2
 		 */
-		case hasThemeIssues && hasPluginIssues && ! userIsTechnical:
+		case hasThemeIssues && hasPluginIssues && !userIsTechnical:
 			return {
-				[ READER ]: {
+				[READER]: {
 					recommendationLevel: RECOMMENDED,
 					details: [
 						readerModeDescription,
@@ -176,7 +246,7 @@ export function getTemplateModeRecommendation( {
 						pluginIncompatibilityNote,
 					],
 				},
-				[ TRANSITIONAL ]: {
+				[TRANSITIONAL]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
 						transitionalModeDescription,
@@ -184,7 +254,7 @@ export function getTemplateModeRecommendation( {
 						pluginIncompatibilityNote,
 					],
 				},
-				[ STANDARD ]: {
+				[STANDARD]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
 						standardModeDescription,
@@ -197,23 +267,23 @@ export function getTemplateModeRecommendation( {
 		/**
 		 * #3
 		 */
-		case hasThemeIssues && ! hasPluginIssues && userIsTechnical:
+		case hasThemeIssues && !hasPluginIssues && userIsTechnical:
 			return {
-				[ READER ]: {
+				[READER]: {
 					recommendationLevel: RECOMMENDED,
 					details: [
 						readerModeDescription,
 						readerNoteWhenThemeIssuesPresent,
 					],
 				},
-				[ TRANSITIONAL ]: {
+				[TRANSITIONAL]: {
 					recommendationLevel: RECOMMENDED,
 					details: [
 						transitionalModeDescription,
 						transitionalNoteWhenThemeIssuesPresent,
 					],
 				},
-				[ STANDARD ]: {
+				[STANDARD]: {
 					recommendationLevel: NEUTRAL,
 					details: [
 						standardModeDescription,
@@ -225,23 +295,23 @@ export function getTemplateModeRecommendation( {
 		/**
 		 * #4
 		 */
-		case hasThemeIssues && ! hasPluginIssues && ! userIsTechnical:
+		case hasThemeIssues && !hasPluginIssues && !userIsTechnical:
 			return {
-				[ READER ]: {
+				[READER]: {
 					recommendationLevel: RECOMMENDED,
 					details: [
 						readerModeDescription,
 						readerNoteWhenThemeIssuesPresent,
 					],
 				},
-				[ TRANSITIONAL ]: {
+				[TRANSITIONAL]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
 						transitionalModeDescription,
 						notRecommendedDueToIncompatibilities,
 					],
 				},
-				[ STANDARD ]: {
+				[STANDARD]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
 						standardModeDescription,
@@ -253,16 +323,13 @@ export function getTemplateModeRecommendation( {
 		/**
 		 * #5
 		 */
-		case ! hasThemeIssues && hasPluginIssues && userIsTechnical:
+		case !hasThemeIssues && hasPluginIssues && userIsTechnical:
 			return {
-				[ READER ]: {
+				[READER]: {
 					recommendationLevel: NOT_RECOMMENDED,
-					details: [
-						readerModeDescription,
-						pluginIncompatibilityNote,
-					],
+					details: [readerModeDescription, pluginIncompatibilityNote],
 				},
-				[ TRANSITIONAL ]: {
+				[TRANSITIONAL]: {
 					recommendationLevel: RECOMMENDED,
 					details: [
 						transitionalModeDescription,
@@ -270,7 +337,7 @@ export function getTemplateModeRecommendation( {
 						pluginIncompatibilityNote,
 					],
 				},
-				[ STANDARD ]: {
+				[STANDARD]: {
 					recommendationLevel: NEUTRAL,
 					details: [
 						standardModeDescription,
@@ -283,16 +350,13 @@ export function getTemplateModeRecommendation( {
 		/**
 		 * #6
 		 */
-		case ! hasThemeIssues && hasPluginIssues && ! userIsTechnical:
+		case !hasThemeIssues && hasPluginIssues && !userIsTechnical:
 			return {
-				[ READER ]: {
+				[READER]: {
 					recommendationLevel: RECOMMENDED,
-					details: [
-						readerModeDescription,
-						pluginIncompatibilityNote,
-					],
+					details: [readerModeDescription, pluginIncompatibilityNote],
 				},
-				[ TRANSITIONAL ]: {
+				[TRANSITIONAL]: {
 					recommendationLevel: RECOMMENDED,
 					details: [
 						transitionalModeDescription,
@@ -300,7 +364,7 @@ export function getTemplateModeRecommendation( {
 						pluginIncompatibilityNote,
 					],
 				},
-				[ STANDARD ]: {
+				[STANDARD]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
 						standardModeDescription,
@@ -313,28 +377,37 @@ export function getTemplateModeRecommendation( {
 		/**
 		 * #7
 		 */
-		case ! hasThemeIssues && ! hasPluginIssues && userIsTechnical:
+		case !hasThemeIssues && !hasPluginIssues && userIsTechnical:
 			return {
-				[ READER ]: {
+				[READER]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
 						readerModeDescription,
 						notRecommendedDueToCompleteCompatibility,
 					],
 				},
-				[ TRANSITIONAL ]: {
-					recommendationLevel: hasSuppressedPlugins ? RECOMMENDED : NOT_RECOMMENDED,
+				[TRANSITIONAL]: {
+					recommendationLevel: hasSuppressedPlugins
+						? RECOMMENDED
+						: NOT_RECOMMENDED,
 					details: [
 						transitionalModeDescription,
 						notRecommendedDueToCompleteCompatibility,
 					],
 				},
-				[ STANDARD ]: {
-					recommendationLevel: hasSuppressedPlugins ? NOT_RECOMMENDED : RECOMMENDED,
+				[STANDARD]: {
+					recommendationLevel: hasSuppressedPlugins
+						? NOT_RECOMMENDED
+						: RECOMMENDED,
 					details: [
 						standardModeDescription,
-						__( 'Recommended as you have an AMP-compatible theme and no issues were detected with any of the plugins on your site.', 'amp' ),
-						hasSuppressedPlugins ? notRecommendedDueToSuppressedPlugins : null,
+						__(
+							'Recommended as you have an AMP-compatible theme and no issues were detected with any of the plugins on your site.',
+							'amp'
+						),
+						hasSuppressedPlugins
+							? notRecommendedDueToSuppressedPlugins
+							: null,
 					],
 				},
 			};
@@ -342,34 +415,49 @@ export function getTemplateModeRecommendation( {
 		/**
 		 * #8
 		 */
-		case ! hasThemeIssues && ! hasPluginIssues && ! userIsTechnical:
+		case !hasThemeIssues && !hasPluginIssues && !userIsTechnical:
 			return {
-				[ READER ]: {
+				[READER]: {
 					recommendationLevel: NOT_RECOMMENDED,
 					details: [
 						readerModeDescription,
 						notRecommendedDueToCompleteCompatibility,
 					],
 				},
-				[ TRANSITIONAL ]: {
-					recommendationLevel: hasSuppressedPlugins ? RECOMMENDED : NEUTRAL,
+				[TRANSITIONAL]: {
+					recommendationLevel: hasSuppressedPlugins
+						? RECOMMENDED
+						: NEUTRAL,
 					details: [
 						transitionalModeDescription,
-						__( 'Recommended if you can’t commit to choosing plugins that are AMP compatible when extending your site. This mode will make it easy to keep AMP content even if non-AMP-compatible plugins are used later on.', 'amp' ),
+						__(
+							'Recommended if you can’t commit to choosing plugins that are AMP compatible when extending your site. This mode will make it easy to keep AMP content even if non-AMP-compatible plugins are used later on.',
+							'amp'
+						),
 					],
 				},
-				[ STANDARD ]: {
+				[STANDARD]: {
 					recommendationLevel: NEUTRAL,
 					details: [
 						standardModeDescription,
-						__( 'Recommended if you can commit to always choosing plugins that are AMP compatible when extending your site.', 'amp' ),
-						hasSuppressedPlugins ? notRecommendedDueToSuppressedPlugins : null,
+						__(
+							'Recommended if you can commit to always choosing plugins that are AMP compatible when extending your site.',
+							'amp'
+						),
+						hasSuppressedPlugins
+							? notRecommendedDueToSuppressedPlugins
+							: null,
 					],
 				},
 			};
 
 		default:
-			throw new Error( __( 'A template mode recommendation case was not accounted for.', 'amp' ) );
+			throw new Error(
+				__(
+					'A template mode recommendation case was not accounted for.',
+					'amp'
+				)
+			);
 	}
 }
 

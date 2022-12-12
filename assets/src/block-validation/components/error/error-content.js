@@ -36,34 +36,34 @@ import { getErrorSourceTitle } from './get-error-source-title';
  * @param {string}   props.blockTypeName Block type name.
  * @param {Object[]} props.sources       List of source objects from the PHP backtrace.
  */
-function ErrorSource( { clientId, blockTypeName, sources } ) {
+function ErrorSource({ clientId, blockTypeName, sources }) {
 	let source;
 
-	const blockSource = blockSources?.[ blockTypeName ];
+	const blockSource = blockSources?.[blockTypeName];
 
-	if ( clientId && 'core/shortcode' !== blockTypeName ) {
-		switch ( blockSource?.type ) {
+	if (clientId && 'core/shortcode' !== blockTypeName) {
+		switch (blockSource?.type) {
 			case 'plugin':
 				source = sprintf(
 					/* translators: %s: plugin name. */
-					__( `%s (plugin)`, 'amp' ),
-					blockSource.title,
+					__(`%s (plugin)`, 'amp'),
+					blockSource.title
 				);
 				break;
 
 			case 'mu-plugin':
 				source = sprintf(
 					/* translators: %s: plugin name. */
-					__( `%s (must-use plugin)`, 'amp' ),
-					blockSource.title,
+					__(`%s (must-use plugin)`, 'amp'),
+					blockSource.title
 				);
 				break;
 
 			case 'theme':
 				source = sprintf(
 					/* translators: %s: theme name. */
-					__( `%s (theme)`, 'amp' ),
-					blockSource.title,
+					__(`%s (theme)`, 'amp'),
+					blockSource.title
 				);
 				break;
 
@@ -73,37 +73,38 @@ function ErrorSource( { clientId, blockTypeName, sources } ) {
 		}
 	}
 
-	if ( ! source ) {
-		source = getErrorSourceTitle( sources );
+	if (!source) {
+		source = getErrorSourceTitle(sources);
 	}
 
 	return (
 		<>
-			<dt>
-				{ __( 'Source', 'amp' ) }
-			</dt>
-			<dd>
-				{ source }
-			</dd>
+			<dt>{__('Source', 'amp')}</dt>
+			<dd>{source}</dd>
 		</>
 	);
 }
 ErrorSource.propTypes = {
 	blockTypeName: PropTypes.string,
 	clientId: PropTypes.string,
-	sources: PropTypes.arrayOf( PropTypes.object ).isRequired,
+	sources: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 /**
  * @param {Object} props
  * @param {number} props.status Error status.
  */
-function MarkupStatus( { status } ) {
+function MarkupStatus({ status }) {
 	let keptRemoved;
-	if ( [ VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS ].includes( status ) ) {
+	if (
+		[
+			VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+		].includes(status)
+	) {
 		keptRemoved = (
 			<span className="amp-error__kept-removed amp-error__kept-removed--removed">
-				{ __( 'Removed', 'amp' ) }
+				{__('Removed', 'amp')}
 				<span>
 					<AMPDelete />
 				</span>
@@ -112,7 +113,7 @@ function MarkupStatus( { status } ) {
 	} else {
 		keptRemoved = (
 			<span className="amp-error__kept-removed amp-error__kept-removed--kept">
-				{ __( 'Kept', 'amp' ) }
+				{__('Kept', 'amp')}
 				<span>
 					<AMPAlert />
 				</span>
@@ -121,26 +122,23 @@ function MarkupStatus( { status } ) {
 	}
 
 	let reviewed;
-	if ( [ VALIDATION_ERROR_ACK_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_REJECTED_STATUS ].includes( status ) ) {
-		reviewed = __( 'Yes', 'amp' );
+	if (
+		[
+			VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			VALIDATION_ERROR_ACK_REJECTED_STATUS,
+		].includes(status)
+	) {
+		reviewed = __('Yes', 'amp');
 	} else {
-		reviewed = __( 'No', 'amp' );
+		reviewed = __('No', 'amp');
 	}
 
 	return (
 		<>
-			<dt>
-				{ __( 'Markup status', 'amp' ) }
-			</dt>
-			<dd>
-				{ keptRemoved }
-			</dd>
-			<dt>
-				{ __( 'Reviewed', 'amp' ) }
-			</dt>
-			<dd>
-				{ reviewed }
-			</dd>
+			<dt>{__('Markup status', 'amp')}</dt>
+			<dd>{keptRemoved}</dd>
+			<dt>{__('Reviewed', 'amp')}</dt>
+			<dd>{reviewed}</dd>
 		</>
 	);
 }
@@ -153,20 +151,18 @@ MarkupStatus.propTypes = {
  * @param {Object} props.blockTypeIcon  Block type icon.
  * @param {string} props.blockTypeTitle Title of the block type.
  */
-function BlockType( { blockTypeIcon, blockTypeTitle } ) {
+function BlockType({ blockTypeIcon, blockTypeTitle }) {
 	return (
 		<>
-			<dt>
-				{ __( 'Block type', 'amp' ) }
-			</dt>
+			<dt>{__('Block type', 'amp')}</dt>
 			<dd>
 				<span className="amp-error__block-type-description">
-					{ blockTypeTitle || __( 'unknown', 'amp' ) }
-					{ blockTypeIcon && (
+					{blockTypeTitle || __('unknown', 'amp')}
+					{blockTypeIcon && (
 						<span className="amp-error__block-type-icon">
-							<BlockIcon icon={ blockTypeIcon } />
+							<BlockIcon icon={blockTypeIcon} />
 						</span>
-					) }
+					)}
 				</span>
 			</dd>
 		</>
@@ -189,59 +185,69 @@ BlockType.propTypes = {
  * @param {Object}   props.error         Error details.
  * @param {Object[]} props.error.sources Sources from the PHP backtrace for the error.
  */
-export function ErrorContent( {
+export function ErrorContent({
 	blockType,
 	clientId,
 	error: { sources },
 	isExternal,
 	removed,
 	status,
-} ) {
+}) {
 	const blockTypeTitle = blockType?.title;
 	const blockTypeName = blockType?.name;
 	const blockTypeIcon = blockType?.icon;
 
 	return (
 		<>
-			{ removed && (
+			{removed && (
 				<p>
-					{ __( 'This error is no longer detected, either because the block was removed or the editor mode was switched.', 'amp' ) }
+					{__(
+						'This error is no longer detected, either because the block was removed or the editor mode was switched.',
+						'amp'
+					)}
 				</p>
-			) }
-			{ isExternal && (
+			)}
+			{isExternal && (
 				<p>
-					{ __( 'This error comes from outside the content (e.g. header or footer).', 'amp' ) }
+					{__(
+						'This error comes from outside the content (e.g. header or footer).',
+						'amp'
+					)}
 				</p>
-			) }
+			)}
 			<dl className="amp-error__details">
-				{ ! ( removed || isExternal ) && (
+				{!(removed || isExternal) && (
 					<BlockType
-						blockTypeIcon={ blockTypeIcon }
-						blockTypeTitle={ blockTypeTitle }
+						blockTypeIcon={blockTypeIcon}
+						blockTypeTitle={blockTypeTitle}
 					/>
-				) }
-				<ErrorSource blockTypeName={ blockTypeName } clientId={ clientId } sources={ sources } />
-				<MarkupStatus status={ status } />
+				)}
+				<ErrorSource
+					blockTypeName={blockTypeName}
+					clientId={clientId}
+					sources={sources}
+				/>
+				<MarkupStatus status={status} />
 			</dl>
 		</>
 	);
 }
 ErrorContent.propTypes = {
-	blockType: PropTypes.shape( {
+	blockType: PropTypes.shape({
 		icon: PropTypes.object,
 		name: PropTypes.string,
 		title: PropTypes.string,
-	} ),
+	}),
 	clientId: PropTypes.string,
-	error: PropTypes.shape( {
-		sources: PropTypes.arrayOf( PropTypes.object ),
-	} ).isRequired,
+	error: PropTypes.shape({
+		sources: PropTypes.arrayOf(PropTypes.object),
+	}).isRequired,
 	isExternal: PropTypes.bool,
 	removed: PropTypes.bool,
-	status: PropTypes.oneOf( [
+	status: PropTypes.oneOf([
 		VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 		VALIDATION_ERROR_ACK_REJECTED_STATUS,
 		VALIDATION_ERROR_NEW_REJECTED_STATUS,
 		VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-	] ).isRequired,
+	]).isRequired,
 };

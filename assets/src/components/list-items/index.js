@@ -9,37 +9,46 @@ import classnames from 'classnames';
  */
 import './style.scss';
 
-export function ListItems( { className = '', isDisc = false, heading, items } ) {
+export function ListItems({ className = '', isDisc = false, heading, items }) {
 	return (
-		<ul className={ classnames( 'list-items', className, { 'list-items--list-style-disc': isDisc } ) }>
-			{ heading && (
+		<ul
+			className={classnames('list-items', className, {
+				'list-items--list-style-disc': isDisc,
+			})}
+		>
+			{heading && (
 				<li className="list-items__item">
-					<h4 className="list-items__heading">
-						{ heading }
-					</h4>
+					<h4 className="list-items__heading">{heading}</h4>
 				</li>
-			) }
-			{ items.map( ( item, index ) => {
+			)}
+			{items.map((item, index) => {
 				return (
-					<li key={ index } className="list-items__item">
-						{ item.label && (
+					<li key={index} className="list-items__item">
+						{item.label && (
 							<strong className="list-items__item-key">
-								{ item.label }
+								{item.label}
 							</strong>
-						) }
-						{ ( item.value || item.url ) ? (
+						)}
+						{item.value || item.url ? (
 							<span className="list-items__item-value">
-								{ item.value }
-								{ item.url && (
-									<a href={ item.url } title={ item.url } target="_blank" rel="noreferrer noopener">
-										{ item.url }
+								{item.value}
+								{item.url && (
+									<a
+										href={item.url}
+										title={item.url}
+										target="_blank"
+										rel="noreferrer noopener"
+									>
+										{item.url}
 									</a>
-								) }
+								)}
 							</span>
-						) : '-' }
+						) : (
+							'-'
+						)}
 					</li>
 				);
-			} ) }
+			})}
 		</ul>
 	);
 }
@@ -48,13 +57,15 @@ ListItems.propTypes = {
 	className: PropTypes.string,
 	heading: PropTypes.string,
 	isDisc: PropTypes.bool,
-	items: PropTypes.arrayOf( PropTypes.shape( {
-		label: PropTypes.string,
-		value: PropTypes.oneOfType( [
-			PropTypes.string,
-			PropTypes.number,
-			PropTypes.node,
-		] ),
-		url: PropTypes.string,
-	} ) ).isRequired,
+	items: PropTypes.arrayOf(
+		PropTypes.shape({
+			label: PropTypes.string,
+			value: PropTypes.oneOfType([
+				PropTypes.string,
+				PropTypes.number,
+				PropTypes.node,
+			]),
+			url: PropTypes.string,
+		})
+	).isRequired,
 };

@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 
-const BlockSave = ( { attributes } ) => {
+const BlockSave = ({ attributes }) => {
 	const { dataEmbedId, ampLayout, height, width } = attributes;
 
 	const reachProps = {
@@ -11,21 +11,19 @@ const BlockSave = ( { attributes } ) => {
 		height,
 		'data-embed-id': dataEmbedId,
 	};
-	if ( 'fixed-height' !== ampLayout && width ) {
+	if ('fixed-height' !== ampLayout && width) {
 		reachProps.width = width;
 	}
-	return (
-		<amp-reach-player { ...reachProps } />
-	);
+	return <amp-reach-player {...reachProps} />;
 };
 
 BlockSave.propTypes = {
-	attributes: PropTypes.shape( {
+	attributes: PropTypes.shape({
 		dataEmbedId: PropTypes.string,
 		ampLayout: PropTypes.string,
 		height: PropTypes.number,
 		width: PropTypes.number,
-	} ),
+	}),
 };
 
 export default BlockSave;
