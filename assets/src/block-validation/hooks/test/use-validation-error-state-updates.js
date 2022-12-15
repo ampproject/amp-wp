@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render, waitFor } from '@testing-library/react';
 
 /**
  * WordPress dependencies
  */
-import { render } from '@wordpress/element';
 import { select, useSelect } from '@wordpress/data';
 
 /**
@@ -35,8 +34,6 @@ jest.mock(
 );
 
 describe('useValidationErrorStateUpdates', () => {
-	let container;
-
 	function ComponentContainingHook() {
 		useValidationErrorStateUpdates();
 
@@ -44,7 +41,7 @@ describe('useValidationErrorStateUpdates', () => {
 	}
 
 	function renderComponentContainingHook() {
-		render(<ComponentContainingHook />, container);
+		render(<ComponentContainingHook />);
 	}
 
 	function setupUseSelect(overrides) {
@@ -69,60 +66,44 @@ describe('useValidationErrorStateUpdates', () => {
 		});
 	});
 
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it('does not trigger validation on an autosave', async () => {
 		// Initial render should trigger validation.
 		setupUseSelect({
 			isAutosavingPost: true,
 			isSavingPost: true,
 		});
-		act(renderComponentContainingHook);
 
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
-		).toHaveLength(0);
+		renderComponentContainingHook();
 
-		// Wait for re-render that follows fetching results.
-		await (
-			() => () =>
-				new Promise((resolve) => {
-					setTimeout(resolve);
-				})
-		)();
+		await waitFor(() => {
+			expect(
+				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+			).toHaveLength(0);
+		});
 
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
-		).toHaveLength(0);
+		await waitFor(() => {
+			expect(
+				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+			).toHaveLength(0);
+		});
 	});
 
 	it('triggers validation on a regular save', async () => {
 		setupUseSelect();
-		act(renderComponentContainingHook);
 
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
-		).toHaveLength(0);
+		renderComponentContainingHook();
 
-		// Wait for re-render that follows fetching results.
-		await (
-			() => () =>
-				new Promise((resolve) => {
-					setTimeout(resolve);
-				})
-		)();
+		await waitFor(() => {
+			expect(
+				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+			).toHaveLength(0);
+		});
 
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
-		).toHaveLength(8);
+		await waitFor(() => {
+			expect(
+				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+			).toHaveLength(8);
+		});
 	});
 
 	it('triggers validation on a preview request', async () => {
@@ -132,19 +113,14 @@ describe('useValidationErrorStateUpdates', () => {
 			isAutosavingPost: true,
 			isSavingPost: true,
 		});
-		act(renderComponentContainingHook);
 
-		// Wait for re-render that follows fetching results.
-		await (
-			() => () =>
-				new Promise((resolve) => {
-					setTimeout(resolve);
-				})
-		)();
+		renderComponentContainingHook();
 
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
-		).toHaveLength(0);
+		await waitFor(() => {
+			expect(
+				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+			).toHaveLength(0);
+		});
 
 		// When the post save is complete but the preview link is invalid, bail.
 		setupUseSelect({
@@ -153,19 +129,14 @@ describe('useValidationErrorStateUpdates', () => {
 			isSavingPost: false,
 			previewLink: 'invalid-url',
 		});
-		act(renderComponentContainingHook);
 
-		// Wait for re-render that follows fetching results.
-		await (
-			() => () =>
-				new Promise((resolve) => {
-					setTimeout(resolve);
-				})
-		)();
+		renderComponentContainingHook();
 
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
-		).toHaveLength(0);
+		await waitFor(() => {
+			expect(
+				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+			).toHaveLength(0);
+		});
 
 		// When the preview link is correct, validation should be triggered.
 		setupUseSelect({
@@ -175,19 +146,14 @@ describe('useValidationErrorStateUpdates', () => {
 			previewLink:
 				'http://site.test/?p=1&preview=1&preview_id=1&preview_nonce=foobar',
 		});
-		act(renderComponentContainingHook);
 
-		// Wait for re-render that follows fetching results.
-		await (
-			() => () =>
-				new Promise((resolve) => {
-					setTimeout(resolve);
-				})
-		)();
+		renderComponentContainingHook();
 
-		expect(
-			select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
-		).toHaveLength(8);
+		await waitFor(() => {
+			expect(
+				select(BLOCK_VALIDATION_STORE_KEY).getValidationErrors()
+			).toHaveLength(8);
+		});
 	});
 });
 

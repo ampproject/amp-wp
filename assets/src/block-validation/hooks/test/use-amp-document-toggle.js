@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render } from '@testing-library/react';
 
 /**
  * WordPress dependencies
  */
-import { render, unmountComponentAtNode } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -20,7 +19,7 @@ jest.mock('@wordpress/data/build/components/use-dispatch/use-dispatch', () =>
 );
 
 describe('useAMPDocumentToggle', () => {
-	let container = null;
+	let container;
 
 	const editPost = jest.fn();
 
@@ -37,50 +36,32 @@ describe('useAMPDocumentToggle', () => {
 	function setupAndRender(isAMPEnabled) {
 		useSelect.mockReturnValue(isAMPEnabled);
 
-		render(<ComponentContainingHook />, container);
+		container = render(<ComponentContainingHook />).container;
 	}
 
 	beforeAll(() => {
 		useDispatch.mockImplementation(() => ({ editPost }));
 	});
 
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
-	});
-
 	it('returns AMP document enable state', () => {
-		act(() => {
-			setupAndRender(false);
-		});
+		setupAndRender(false);
 		expect(container.querySelector('button').textContent).toBe('disabled');
 
-		act(() => {
-			setupAndRender(true);
-		});
+		setupAndRender(true);
+
 		expect(container.querySelector('button').textContent).toBe('enabled');
 	});
 
 	it('toggleAMP disables AMP is it was enabled', () => {
-		act(() => {
-			setupAndRender(true);
-			container.querySelector('button').click();
-		});
+		setupAndRender(true);
+		container.querySelector('button').click();
 
 		expect(editPost).toHaveBeenCalledWith({ amp_enabled: false });
 	});
 
 	it('toggleAMP enables AMP is it was disabled', () => {
-		act(() => {
-			setupAndRender(false);
-			container.querySelector('button').click();
-		});
+		setupAndRender(false);
+		container.querySelector('button').click();
 
 		expect(editPost).toHaveBeenCalledWith({ amp_enabled: true });
 	});

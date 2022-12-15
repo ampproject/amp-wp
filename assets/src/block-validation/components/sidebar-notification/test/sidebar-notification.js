@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
-
-/**
- * WordPress dependencies
- */
-import { render, unmountComponentAtNode } from '@wordpress/element';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -14,23 +9,8 @@ import { render, unmountComponentAtNode } from '@wordpress/element';
 import { SidebarNotification } from '../index';
 
 describe('SidebarNotification', () => {
-	let container;
-
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
-	});
-
 	it('renders notification without icon and call to action', () => {
-		act(() => {
-			render(<SidebarNotification message="Foobar" />, container);
-		});
+		const { container } = render(<SidebarNotification message="Foobar" />);
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.children).toHaveLength(1);
@@ -45,16 +25,13 @@ describe('SidebarNotification', () => {
 	});
 
 	it('renders status message with icon and call to action', () => {
-		act(() => {
-			render(
-				<SidebarNotification
-					message="Foobar"
-					icon={<svg />}
-					action={<button />}
-				/>,
-				container
-			);
-		});
+		const { container } = render(
+			<SidebarNotification
+				message="Foobar"
+				icon={<svg />}
+				action={<button />}
+			/>
+		);
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.querySelector('svg')).not.toBeNull();

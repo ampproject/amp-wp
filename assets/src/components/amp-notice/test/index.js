@@ -1,13 +1,8 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render } from '@testing-library/react';
 import { create } from 'react-test-renderer';
-
-/**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -22,19 +17,7 @@ import {
 	NOTICE_TYPE_PLAIN,
 } from '..';
 
-let container;
-
 describe('AMPNotice', () => {
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it('matches snapshots', () => {
 		let wrapper = create(
 			<AMPNotice type={NOTICE_TYPE_SUCCESS} size={NOTICE_SIZE_LARGE}>
@@ -52,52 +35,41 @@ describe('AMPNotice', () => {
 	});
 
 	it('has correct classes', () => {
-		act(() => {
-			render(<AMPNotice>{'children'}</AMPNotice>, container);
-		});
+		let { container } = render(<AMPNotice>{'children'}</AMPNotice>);
 
 		expect(container.querySelector('div').getAttribute('class')).toBe(
 			'amp-notice amp-notice--info amp-notice--large'
 		);
 
-		act(() => {
-			render(
-				<AMPNotice
-					type={NOTICE_TYPE_SUCCESS}
-					size={NOTICE_SIZE_LARGE}
-					className="my-cool-class"
-				>
-					{'children'}
-				</AMPNotice>,
-				container
-			);
-		});
+		container = render(
+			<AMPNotice
+				type={NOTICE_TYPE_SUCCESS}
+				size={NOTICE_SIZE_LARGE}
+				className="my-cool-class"
+			>
+				{'children'}
+			</AMPNotice>
+		).container;
 
 		expect(container.querySelector('div').getAttribute('class')).toBe(
 			'my-cool-class amp-notice amp-notice--success amp-notice--large'
 		);
 
-		act(() => {
-			render(
-				<AMPNotice type={NOTICE_TYPE_INFO} size={NOTICE_SIZE_SMALL}>
-					{'children'}
-				</AMPNotice>,
-				container
-			);
-		});
+		container = render(
+			<AMPNotice type={NOTICE_TYPE_INFO} size={NOTICE_SIZE_SMALL}>
+				{'children'}
+			</AMPNotice>
+		).container;
 
 		expect(container.querySelector('div').getAttribute('class')).toBe(
 			'amp-notice amp-notice--info amp-notice--small'
 		);
 
-		act(() => {
-			render(
-				<AMPNotice type={NOTICE_TYPE_PLAIN} size={NOTICE_SIZE_SMALL}>
-					{'children'}
-				</AMPNotice>,
-				container
-			);
-		});
+		container = render(
+			<AMPNotice type={NOTICE_TYPE_PLAIN} size={NOTICE_SIZE_SMALL}>
+				{'children'}
+			</AMPNotice>
+		).container;
 
 		expect(container.querySelector('div').getAttribute('class')).toBe(
 			'amp-notice amp-notice--plain amp-notice--small'

@@ -1,32 +1,15 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render } from '@testing-library/react';
 import { create } from 'react-test-renderer';
-
-/**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { Loading } from '..';
 
-let container;
-
 describe('the Loading component', () => {
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it('matches the snapshots', () => {
 		const wrapperBlock = create(<Loading />);
 		const wrapperInline = create(<Loading inline={true} />);
@@ -36,9 +19,7 @@ describe('the Loading component', () => {
 	});
 
 	it('renders a loading spinner', () => {
-		act(() => {
-			render(<Loading />, container);
-		});
+		const { container } = render(<Loading />);
 
 		expect(
 			container.querySelector('.amp-spinner-container')
@@ -50,9 +31,7 @@ describe('the Loading component', () => {
 	});
 
 	it('renders an inline loading spinner', () => {
-		act(() => {
-			render(<Loading inline={true} />, container);
-		});
+		const { container } = render(<Loading inline={true} />);
 
 		expect(
 			container.querySelector('.amp-spinner-container--inline')
