@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render } from '@testing-library/react';
 import { noop } from 'lodash';
 
 /**
  * WordPress dependencies
  */
-import { Component, render } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { dispatch } from '@wordpress/data';
 import { registerBlockType, createBlock } from '@wordpress/blocks';
 import '@wordpress/block-editor'; // Block editor data store needed.
@@ -18,7 +18,7 @@ import '@wordpress/block-editor'; // Block editor data store needed.
 import { createStore } from '../../../store';
 import { withAMPToolbarButton } from '../index';
 
-let container, block;
+let block;
 
 const TEST_BLOCK = 'my-plugin/test-block';
 
@@ -63,16 +63,6 @@ describe('withAMPToolbarButton: filtering with errors', () => {
 		});
 	});
 
-	beforeEach(() => {
-		container = document.createElement('ul');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it('is filtered correctly with a class component', () => {
 		class UnfilteredComponent extends Component {
 			render() {
@@ -82,9 +72,9 @@ describe('withAMPToolbarButton: filtering with errors', () => {
 
 		const FilteredComponent = withAMPToolbarButton(UnfilteredComponent);
 
-		act(() => {
-			render(<FilteredComponent clientId={block.clientId} />, container);
-		});
+		const { container } = render(
+			<FilteredComponent clientId={block.clientId} />
+		);
 
 		expect(
 			container.querySelector('#default-component-element')
@@ -99,9 +89,9 @@ describe('withAMPToolbarButton: filtering with errors', () => {
 
 		const FilteredComponent = withAMPToolbarButton(UnfilteredComponent);
 
-		act(() => {
-			render(<FilteredComponent clientId={block.clientId} />, container);
-		});
+		const { container } = render(
+			<FilteredComponent clientId={block.clientId} />
+		);
 
 		expect(
 			container.querySelector('#default-component-element')
@@ -121,16 +111,6 @@ describe('withAMPToolbarButton: filtering without errors', () => {
 		});
 	});
 
-	beforeEach(() => {
-		container = document.createElement('ul');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it('is not filtered with a class component and no errors', () => {
 		class UnfilteredComponent extends Component {
 			render() {
@@ -140,9 +120,9 @@ describe('withAMPToolbarButton: filtering without errors', () => {
 
 		const FilteredComponent = withAMPToolbarButton(UnfilteredComponent);
 
-		act(() => {
-			render(<FilteredComponent clientId={block.clientId} />, container);
-		});
+		const { container } = render(
+			<FilteredComponent clientId={block.clientId} />
+		);
 
 		expect(
 			container.querySelector('#default-component-element')
@@ -157,9 +137,9 @@ describe('withAMPToolbarButton: filtering without errors', () => {
 
 		const FilteredComponent = withAMPToolbarButton(UnfilteredComponent);
 
-		act(() => {
-			render(<FilteredComponent clientId={block.clientId} />, container);
-		});
+		const { container } = render(
+			<FilteredComponent clientId={block.clientId} />
+		);
 
 		expect(
 			container.querySelector('#default-component-element')

@@ -1,14 +1,9 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render, fireEvent } from '@testing-library/react';
 import { create } from 'react-test-renderer';
 import PropTypes from 'prop-types';
-
-/**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -25,8 +20,6 @@ jest.mock('../../../../components/options-context-provider');
 jest.mock('../../../../components/reader-themes-context-provider');
 jest.mock('../../../../components/user-context-provider');
 jest.mock('../../../../components/site-scan-context-provider');
-
-let container;
 
 const getNavButtons = (containerElement) => ({
 	nextButton: containerElement.querySelector(
@@ -71,16 +64,6 @@ Providers.propTypes = {
 };
 
 describe('Nav', () => {
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it('matches snapshot', () => {
 		const wrapper = create(
 			<Providers pages={testPages}>
@@ -94,17 +77,14 @@ describe('Nav', () => {
 	});
 
 	it('hides previous button on first page', () => {
-		act(() => {
-			render(
-				<Providers pages={testPages}>
-					<Nav
-						closeLink="http://site.test/wp-admin"
-						finishLink="http://site.test"
-					/>
-				</Providers>,
-				container
-			);
-		});
+		const { container } = render(
+			<Providers pages={testPages}>
+				<Nav
+					closeLink="http://site.test/wp-admin"
+					finishLink="http://site.test"
+				/>
+			</Providers>
+		);
 
 		const { nextButton, prevButton } = getNavButtons(container);
 
@@ -113,82 +93,61 @@ describe('Nav', () => {
 	});
 
 	it('changes next button to "Customize" on last page', () => {
-		act(() => {
-			render(
-				<Providers pages={testPages}>
-					<Nav
-						closeLink="http://site.test/wp-admin"
-						finishLink="http://site.test"
-					/>
-				</Providers>,
-				container
-			);
-		});
+		const { container } = render(
+			<Providers pages={testPages}>
+				<Nav
+					closeLink="http://site.test/wp-admin"
+					finishLink="http://site.test"
+				/>
+			</Providers>
+		);
 
 		const { nextButton } = getNavButtons(container);
 
 		expect(nextButton.textContent).toBe('Next');
 
-		act(() => {
-			nextButton.dispatchEvent(
-				new global.MouseEvent('click', { bubbles: true })
-			);
-		});
+		fireEvent.click(nextButton, new MouseEvent('click', { bubbles: true }));
 
 		expect(nextButton.textContent).toBe('Customize');
 	});
 
 	it('close button hides on last page when reader mode is not selected', () => {
-		act(() => {
-			render(
-				<Providers pages={testPages} themeSupport={STANDARD}>
-					<Nav
-						closeLink="http://site.test/wp-admin"
-						finishLink="http://site.test"
-					/>
-				</Providers>,
-				container
-			);
-		});
+		const { container } = render(
+			<Providers pages={testPages} themeSupport={STANDARD}>
+				<Nav
+					closeLink="http://site.test/wp-admin"
+					finishLink="http://site.test"
+				/>
+			</Providers>
+		);
 
 		const { nextButton } = getNavButtons(container);
 		let closeButton = container.querySelector('.amp-settings-nav__close a');
 
 		expect(closeButton).not.toBeNull();
 
-		act(() => {
-			nextButton.dispatchEvent(
-				new global.MouseEvent('click', { bubbles: true })
-			);
-		});
+		fireEvent.click(nextButton, new MouseEvent('click', { bubbles: true }));
 
 		closeButton = container.querySelector('.amp-settings-nav__close a');
 		expect(closeButton).toBeNull();
 	});
 
 	it('close button hides on last page when reader mode is selected', () => {
-		act(() => {
-			render(
-				<Providers pages={testPages}>
-					<Nav
-						closeLink="http://site.test/wp-admin"
-						finishLink="http://site.test"
-					/>
-				</Providers>,
-				container
-			);
-		});
+		const { container } = render(
+			<Providers pages={testPages}>
+				<Nav
+					closeLink="http://site.test/wp-admin"
+					finishLink="http://site.test"
+				/>
+			</Providers>
+		);
 
 		const { nextButton } = getNavButtons(container);
 		let closeButton = container.querySelector('.amp-settings-nav__close a');
 
 		expect(closeButton).not.toBeNull();
 
-		act(() => {
-			nextButton.dispatchEvent(
-				new global.MouseEvent('click', { bubbles: true })
-			);
-		});
+		fireEvent.click(nextButton, new MouseEvent('click', { bubbles: true }));
 
 		closeButton = container.querySelector('.amp-settings-nav__close a');
 		expect(closeButton).not.toBeNull();

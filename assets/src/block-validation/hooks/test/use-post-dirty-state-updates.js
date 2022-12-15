@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render, act } from '@testing-library/react';
 
 /**
  * WordPress dependencies
  */
-import { render, unmountComponentAtNode } from '@wordpress/element';
 import {
 	createReduxStore,
 	dispatch,
@@ -25,7 +24,6 @@ jest.mock('@wordpress/data/build/components/use-select', () => jest.fn());
 jest.mock('@wordpress/compose/build/hooks/use-debounce', () => (fn) => fn);
 
 describe('usePostDirtyStateChanges', () => {
-	let container = null;
 	const getEditedPostContent = jest.fn();
 
 	function ComponentContainingHook() {
@@ -35,7 +33,7 @@ describe('usePostDirtyStateChanges', () => {
 	}
 
 	function renderComponentContainingHook() {
-		render(<ComponentContainingHook />, container);
+		render(<ComponentContainingHook />);
 	}
 
 	function setupUseSelect(overrides) {
@@ -62,40 +60,31 @@ describe('usePostDirtyStateChanges', () => {
 		);
 	});
 
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
-	});
-
 	it('sets dirty state when content changes and clears it after save', () => {
 		// Initial render.
 		getEditedPostContent.mockReturnValue('initial');
 		setupUseSelect();
-		act(() => {
-			renderComponentContainingHook();
-		});
+
+		renderComponentContainingHook();
+
 		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty()).toBe(false);
 
 		// Change content - post should become dirty.
 		getEditedPostContent.mockReturnValue('foo');
+
 		act(() => {
 			dispatch('test/use-post-dirty-state-updates').change();
 		});
+
 		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty()).toBe(true);
 
 		// Save post - dirty state should get cleared.
 		setupUseSelect({
 			isSavingOrPreviewingPost: true,
 		});
-		act(() => {
-			renderComponentContainingHook();
-		});
+
+		renderComponentContainingHook();
+
 		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty()).toBe(false);
 
 		// Change content - getEditedPostContent() should be called again
@@ -103,12 +92,13 @@ describe('usePostDirtyStateChanges', () => {
 		setupUseSelect({
 			isSavingOrPreviewingPost: false,
 		});
-		act(() => {
-			renderComponentContainingHook();
-		});
+
+		renderComponentContainingHook();
+
 		act(() => {
 			dispatch('test/use-post-dirty-state-updates').change();
 		});
+
 		expect(select(BLOCK_VALIDATION_STORE_KEY).getIsPostDirty()).toBe(true);
 	});
 });
