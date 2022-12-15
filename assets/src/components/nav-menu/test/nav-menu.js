@@ -1,20 +1,13 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render, fireEvent } from '@testing-library/react';
 import { create } from 'react-test-renderer';
-
-/**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { NavMenu } from '../index';
-
-let container;
 
 const links = [
 	{
@@ -30,16 +23,6 @@ const links = [
 ];
 
 describe('NavMenu', () => {
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it('matches the snapshot', () => {
 		const wrapper = create(<NavMenu links={links} />);
 
@@ -47,9 +30,7 @@ describe('NavMenu', () => {
 	});
 
 	it('renders a nav menu with a list of links', () => {
-		act(() => {
-			render(<NavMenu links={links} />, container);
-		});
+		const { container } = render(<NavMenu links={links} />);
 
 		expect(container.querySelector('nav')).not.toBeNull();
 		expect(container.querySelector('ul')).not.toBeNull();
@@ -57,9 +38,7 @@ describe('NavMenu', () => {
 	});
 
 	it('contains correct links', () => {
-		act(() => {
-			render(<NavMenu links={links} />, container);
-		});
+		const { container } = render(<NavMenu links={links} />);
 
 		expect(container.querySelector('nav').textContent).toBe('FooBar');
 		expect(container.querySelectorAll('a')).toHaveLength(2);
@@ -80,13 +59,11 @@ describe('NavMenu', () => {
 	it('calls the handler function on click', () => {
 		const handler = jest.fn();
 
-		act(() => {
-			render(<NavMenu links={links} onClick={handler} />, container);
-		});
+		const { container } = render(
+			<NavMenu links={links} onClick={handler} />
+		);
 
-		act(() => {
-			container.querySelector('a').click();
-		});
+		fireEvent.click(container.querySelector('a'));
 
 		expect(handler).toHaveBeenCalledTimes(1);
 

@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render } from '@testing-library/react';
 
 /**
  * WordPress dependencies
  */
-import { render, unmountComponentAtNode } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -17,8 +16,6 @@ import { useErrorsFetchingStateChanges } from '../use-errors-fetching-state-chan
 jest.mock('@wordpress/data/build/components/use-select', () => jest.fn());
 
 describe('useErrorsFetchingStateChanges', () => {
-	let container = null;
-
 	function ComponentContainingHook() {
 		const { isFetchingErrors, fetchingErrorsMessage } =
 			useErrorsFetchingStateChanges();
@@ -38,25 +35,12 @@ describe('useErrorsFetchingStateChanges', () => {
 			...overrides,
 		}));
 
-		render(<ComponentContainingHook />, container);
+		return render(<ComponentContainingHook />);
 	}
 
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
-	});
-
 	it('returns no loading message when errors are not being fetched', () => {
-		act(() => {
-			setupAndRender({
-				isFetchingErrors: false,
-			});
+		const { container } = setupAndRender({
+			isFetchingErrors: false,
 		});
 
 		expect(container.querySelector('#status').textContent).toBe('Idle');
@@ -64,11 +48,9 @@ describe('useErrorsFetchingStateChanges', () => {
 	});
 
 	it('returns correct status message when a new post is validated', () => {
-		act(() => {
-			setupAndRender({
-				isEditedPostNew: true,
-				isFetchingErrors: false,
-			});
+		const { container } = setupAndRender({
+			isEditedPostNew: true,
+			isFetchingErrors: false,
 		});
 
 		expect(container.querySelector('#status').textContent).toBe('Idle');
@@ -78,10 +60,8 @@ describe('useErrorsFetchingStateChanges', () => {
 	});
 
 	it('returns correct message when fetching errors and re-validating', () => {
-		act(() => {
-			setupAndRender({
-				isFetchingErrors: true,
-			});
+		const { container, rerender } = setupAndRender({
+			isFetchingErrors: true,
 		});
 
 		expect(container.querySelector('#status').textContent).toBe('Fetching');
@@ -89,12 +69,12 @@ describe('useErrorsFetchingStateChanges', () => {
 			'Loading…'
 		);
 
-		// Simulate state change so that the message is changed.
-		act(() => {
-			setupAndRender({
-				isFetchingErrors: false,
-			});
-		});
+		useSelect.mockImplementation(() => ({
+			isEditedPostNew: false,
+			isFetchingErrors: false,
+		}));
+
+		rerender(<ComponentContainingHook />);
 
 		expect(container.querySelector('#status').textContent).toBe('Idle');
 		expect(container.querySelector('#message').textContent).toBe(

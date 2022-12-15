@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render } from '@testing-library/react';
 
 /**
  * WordPress dependencies
  */
-import { render, unmountComponentAtNode } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -20,8 +19,6 @@ jest.mock('@wordpress/data/build/components/use-dispatch/use-dispatch', () =>
 );
 
 describe('AMPValidationStatusNotification', () => {
-	let container;
-
 	const autosave = jest.fn();
 	const savePost = jest.fn();
 
@@ -44,25 +41,12 @@ describe('AMPValidationStatusNotification', () => {
 		useDispatch.mockImplementation(() => ({ autosave, savePost }));
 	});
 
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		unmountComponentAtNode(container);
-		container.remove();
-		container = null;
-	});
-
 	it('does not render when errors are being fetched', () => {
 		setupUseSelect({
 			isFetchingErrors: true,
 		});
 
-		act(() => {
-			render(<AMPValidationStatusNotification />, container);
-		});
+		const { container } = render(<AMPValidationStatusNotification />);
 
 		expect(container.children).toHaveLength(0);
 	});
@@ -72,9 +56,7 @@ describe('AMPValidationStatusNotification', () => {
 			isEditedPostNew: true,
 		});
 
-		act(() => {
-			render(<AMPValidationStatusNotification />, container);
-		});
+		const { container } = render(<AMPValidationStatusNotification />);
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.innerHTML).toContain(
@@ -90,9 +72,9 @@ describe('AMPValidationStatusNotification', () => {
 			fetchingErrorsRequestErrorMessage: 'request error message',
 		});
 
-		act(() => {
-			render(<AMPValidationStatusNotification />, container);
-		});
+		let container;
+
+		container = render(<AMPValidationStatusNotification />).container;
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.innerHTML).toContain('request error message');
@@ -108,9 +90,8 @@ describe('AMPValidationStatusNotification', () => {
 			fetchingErrorsRequestErrorMessage: 'request error message',
 		});
 
-		act(() => {
-			render(<AMPValidationStatusNotification />, container);
-		});
+		container = render(<AMPValidationStatusNotification />).container;
+
 		container.querySelector('button').click();
 		expect(savePost).toHaveBeenCalledWith({ isPreview: true });
 	});
@@ -120,9 +101,7 @@ describe('AMPValidationStatusNotification', () => {
 			keptMarkupValidationErrorCount: 2,
 		});
 
-		act(() => {
-			render(<AMPValidationStatusNotification />, container);
-		});
+		const { container } = render(<AMPValidationStatusNotification />);
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.innerHTML).toContain(
@@ -138,9 +117,7 @@ describe('AMPValidationStatusNotification', () => {
 			unreviewedValidationErrorCount: 3,
 		});
 
-		act(() => {
-			render(<AMPValidationStatusNotification />, container);
-		});
+		const { container } = render(<AMPValidationStatusNotification />);
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.innerHTML).toContain(
@@ -156,9 +133,7 @@ describe('AMPValidationStatusNotification', () => {
 			validationErrorCount: 1,
 		});
 
-		act(() => {
-			render(<AMPValidationStatusNotification />, container);
-		});
+		const { container } = render(<AMPValidationStatusNotification />);
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.innerHTML).toContain(
@@ -172,9 +147,7 @@ describe('AMPValidationStatusNotification', () => {
 	it('renders message when there are no AMP validation errors', () => {
 		setupUseSelect();
 
-		act(() => {
-			render(<AMPValidationStatusNotification />, container);
-		});
+		const { container } = render(<AMPValidationStatusNotification />);
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.innerHTML).toContain(

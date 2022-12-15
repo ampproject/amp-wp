@@ -1,32 +1,15 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
+import { render } from '@testing-library/react';
 import { create } from 'react-test-renderer';
-
-/**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { ProgressBar } from '../index';
 
-let container;
-
 describe('ProgressBar', () => {
-	beforeEach(() => {
-		container = document.createElement('div');
-		document.body.appendChild(container);
-	});
-
-	afterEach(() => {
-		document.body.removeChild(container);
-		container = null;
-	});
-
 	it('matches the snapshot', () => {
 		const wrapper = create(<ProgressBar value={33} />);
 
@@ -34,9 +17,7 @@ describe('ProgressBar', () => {
 	});
 
 	it('renders a progress bar', () => {
-		act(() => {
-			render(<ProgressBar value={33} />, container);
-		});
+		const { container } = render(<ProgressBar value={33} />);
 
 		expect(
 			container.querySelector('.progress-bar[role="progressbar"]')
@@ -53,9 +34,7 @@ describe('ProgressBar', () => {
 	});
 
 	it('the bar is shifted correctly', () => {
-		act(() => {
-			render(<ProgressBar value={75} />, container);
-		});
+		const { container } = render(<ProgressBar value={75} />);
 
 		expect(
 			container.querySelector('.progress-bar[aria-valuenow="75"]')
@@ -69,9 +48,7 @@ describe('ProgressBar', () => {
 	});
 
 	it('does not allow the bar to be completely out of view for low values', () => {
-		act(() => {
-			render(<ProgressBar value={1} />, container);
-		});
+		const { container } = render(<ProgressBar value={1} />);
 
 		expect(
 			container.querySelector('.progress-bar[aria-valuenow="1"]')

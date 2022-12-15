@@ -1,19 +1,13 @@
 /**
  * External dependencies
  */
-import { act } from 'react-dom/test-utils';
-
-/**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
  */
 import { CarouselNav } from '../carousel-nav';
 
-let container;
 let itemsContainer;
 
 describe('CarouselNav', () => {
@@ -27,16 +21,12 @@ describe('CarouselNav', () => {
 			itemsContainer.appendChild(item);
 		}
 
-		container = document.createElement('div');
 		document.body.appendChild(itemsContainer);
-		document.body.appendChild(container);
 	});
 
 	afterEach(() => {
 		document.body.removeChild(itemsContainer);
-		document.body.removeChild(container);
 		itemsContainer = null;
-		container = null;
 	});
 
 	it('has main elements', () => {
@@ -44,23 +34,20 @@ describe('CarouselNav', () => {
 		const namespace = 'my-carousel';
 		const items = itemsContainer.querySelectorAll('li');
 
-		act(() => {
-			render(
-				<CarouselNav
-					currentPage={currentPage}
-					items={items}
-					namespace={namespace}
-					nextButtonDisabled={false}
-					prevButtonDisabled={false}
-					setCurrentPage={(newItem) => {
-						currentPage = newItem;
-					}}
-					centeredItemIndex={5}
-					showDots={true}
-				/>,
-				container
-			);
-		});
+		const { container } = render(
+			<CarouselNav
+				currentPage={currentPage}
+				items={items}
+				namespace={namespace}
+				nextButtonDisabled={false}
+				prevButtonDisabled={false}
+				setCurrentPage={(newItem) => {
+					currentPage = newItem;
+				}}
+				centeredItemIndex={5}
+				showDots={true}
+			/>
+		);
 
 		expect(
 			container.querySelector('#my-carousel__prev-button:not(:disabled)')
