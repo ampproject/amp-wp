@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 
 /**
  * WordPress dependencies
@@ -19,8 +19,6 @@ jest.mock('@wordpress/data/build/components/use-dispatch/use-dispatch', () =>
 );
 
 describe('useAMPDocumentToggle', () => {
-	let container;
-
 	const editPost = jest.fn();
 
 	function ComponentContainingHook() {
@@ -36,7 +34,7 @@ describe('useAMPDocumentToggle', () => {
 	function setupAndRender(isAMPEnabled) {
 		useSelect.mockReturnValue(isAMPEnabled);
 
-		container = render(<ComponentContainingHook />).container;
+		return render(<ComponentContainingHook />);
 	}
 
 	beforeAll(() => {
@@ -44,24 +42,26 @@ describe('useAMPDocumentToggle', () => {
 	});
 
 	it('returns AMP document enable state', () => {
-		setupAndRender(false);
+		let { container } = setupAndRender(false);
 		expect(container.querySelector('button').textContent).toBe('disabled');
 
-		setupAndRender(true);
+		({ container } = setupAndRender(true));
 
 		expect(container.querySelector('button').textContent).toBe('enabled');
 	});
 
 	it('toggleAMP disables AMP is it was enabled', () => {
-		setupAndRender(true);
-		container.querySelector('button').click();
+		const { container } = setupAndRender(true);
+
+		fireEvent.click(container.querySelector('button'));
 
 		expect(editPost).toHaveBeenCalledWith({ amp_enabled: false });
 	});
 
 	it('toggleAMP enables AMP is it was disabled', () => {
-		setupAndRender(false);
-		container.querySelector('button').click();
+		const { container } = setupAndRender(false);
+
+		fireEvent.click(container.querySelector('button'));
 
 		expect(editPost).toHaveBeenCalledWith({ amp_enabled: true });
 	});

@@ -47,11 +47,11 @@ describe('Selectable', () => {
 			'my-cool-class selectable selectable--selected selectable--top'
 		);
 
-		container = render(
+		({ container } = render(
 			<Selectable selected={false} ElementName="section">
 				<div>{'children'}</div>
 			</Selectable>
-		).container;
+		));
 
 		expect(container.querySelector('section').getAttribute('class')).toBe(
 			'selectable selectable--left'

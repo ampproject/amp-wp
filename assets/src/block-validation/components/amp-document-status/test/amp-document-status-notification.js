@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 
 /**
  * WordPress dependencies
@@ -100,9 +100,7 @@ describe('AMPDocumentStatusNotification', () => {
 			isPostDirty: true,
 		});
 
-		let container;
-
-		container = render(<AMPDocumentStatusNotification />).container;
+		let { container } = render(<AMPDocumentStatusNotification />);
 
 		expect(container.innerHTML).toContain('Enable AMP');
 		expect(container.innerHTML).toContain('Content has changed.');
@@ -114,12 +112,13 @@ describe('AMPDocumentStatusNotification', () => {
 			maybeIsPostDirty: true,
 		});
 
-		container = render(<AMPDocumentStatusNotification />).container;
+		({ container } = render(<AMPDocumentStatusNotification />));
 
 		expect(container.innerHTML).toContain('Content may have changed.');
 
 		// Simulate button click.
-		container.querySelector('button').click();
+		fireEvent.click(container.querySelector('button'));
+
 		expect(openGeneralSidebar).toHaveBeenCalledTimes(1);
 		expect(closePublishSidebar).toHaveBeenCalledTimes(1);
 	});

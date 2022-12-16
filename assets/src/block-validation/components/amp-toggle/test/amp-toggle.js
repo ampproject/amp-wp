@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -42,7 +42,8 @@ describe('AMPToggle', () => {
 			true
 		);
 
-		container.querySelector('input[type="checkbox"]').click();
+		fireEvent.click(container.querySelector('input[type="checkbox"]'));
+
 		expect(toggleAMP).toHaveBeenCalledTimes(1);
 	});
 });

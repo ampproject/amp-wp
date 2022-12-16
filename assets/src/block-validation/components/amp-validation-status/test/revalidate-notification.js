@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 
 /**
  * WordPress dependencies
@@ -85,7 +85,8 @@ describe('AMPRevalidateNotification', () => {
 			'Re-validate'
 		);
 
-		container.querySelector('button').click();
+		fireEvent.click(container.querySelector('button'));
+
 		expect(autosave).toHaveBeenCalledWith({ isPreview: true });
 	});
 
@@ -103,7 +104,8 @@ describe('AMPRevalidateNotification', () => {
 			'Save draft'
 		);
 
-		container.querySelector('button').click();
+		fireEvent.click(container.querySelector('button'));
+
 		expect(savePost).toHaveBeenCalledWith({ isPreview: true });
 	});
 
