@@ -41,7 +41,7 @@ describe('AMPNotice', () => {
 			'amp-notice amp-notice--info amp-notice--large'
 		);
 
-		container = render(
+		({ container } = render(
 			<AMPNotice
 				type={NOTICE_TYPE_SUCCESS}
 				size={NOTICE_SIZE_LARGE}
@@ -49,27 +49,27 @@ describe('AMPNotice', () => {
 			>
 				{'children'}
 			</AMPNotice>
-		).container;
+		));
 
 		expect(container.querySelector('div').getAttribute('class')).toBe(
 			'my-cool-class amp-notice amp-notice--success amp-notice--large'
 		);
 
-		container = render(
+		({ container } = render(
 			<AMPNotice type={NOTICE_TYPE_INFO} size={NOTICE_SIZE_SMALL}>
 				{'children'}
 			</AMPNotice>
-		).container;
+		));
 
 		expect(container.querySelector('div').getAttribute('class')).toBe(
 			'amp-notice amp-notice--info amp-notice--small'
 		);
 
-		container = render(
+		({ container } = render(
 			<AMPNotice type={NOTICE_TYPE_PLAIN} size={NOTICE_SIZE_SMALL}>
 				{'children'}
 			</AMPNotice>
-		).container;
+		));
 
 		expect(container.querySelector('div').getAttribute('class')).toBe(
 			'amp-notice amp-notice--plain amp-notice--small'
