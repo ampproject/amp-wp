@@ -36,11 +36,11 @@ describe('ConditionalDetails', () => {
 		expect(container.querySelector('details')).not.toBeNull();
 		expect(container.querySelector('summary')).not.toBeNull();
 
-		container = render(
+		({ container } = render(
 			<ConditionalDetails summary={<div>{'Summary'}</div>}>
 				{[null, null]}
 			</ConditionalDetails>
-		).container;
+		));
 
 		expect(container.querySelector('summary')).toBeNull();
 		expect(container.querySelector('details')).toBeNull();

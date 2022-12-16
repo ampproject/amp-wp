@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 
 /**
  * WordPress dependencies
@@ -72,9 +72,7 @@ describe('AMPValidationStatusNotification', () => {
 			fetchingErrorsRequestErrorMessage: 'request error message',
 		});
 
-		let container;
-
-		container = render(<AMPValidationStatusNotification />).container;
+		let { container } = render(<AMPValidationStatusNotification />);
 
 		expect(container.innerHTML).toMatchSnapshot();
 		expect(container.innerHTML).toContain('request error message');
@@ -82,7 +80,8 @@ describe('AMPValidationStatusNotification', () => {
 			container.querySelector('a[href="http://example.com"]')
 		).toBeNull();
 
-		container.querySelector('button').click();
+		fireEvent.click(container.querySelector('button'));
+
 		expect(autosave).toHaveBeenCalledWith({ isPreview: true });
 
 		setupUseSelect({
@@ -90,9 +89,10 @@ describe('AMPValidationStatusNotification', () => {
 			fetchingErrorsRequestErrorMessage: 'request error message',
 		});
 
-		container = render(<AMPValidationStatusNotification />).container;
+		({ container } = render(<AMPValidationStatusNotification />));
 
-		container.querySelector('button').click();
+		fireEvent.click(container.querySelector('button'));
+
 		expect(savePost).toHaveBeenCalledWith({ isPreview: true });
 	});
 

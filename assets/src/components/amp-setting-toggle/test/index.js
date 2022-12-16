@@ -46,7 +46,7 @@ describe('AMPSettingToggle', () => {
 		expect(container.querySelector('p')).toBeNull();
 		expect(container.querySelector('input:checked')).toBeNull();
 
-		container = render(
+		({ container } = render(
 			<AMPSettingToggle
 				title="My title"
 				onChange={() => null}
@@ -55,7 +55,7 @@ describe('AMPSettingToggle', () => {
 			>
 				{'children'}
 			</AMPSettingToggle>
-		).container;
+		));
 
 		expect(container.querySelector('h3').textContent).toBe('My title');
 		expect(container.querySelector('p').textContent).toBe('My text');
