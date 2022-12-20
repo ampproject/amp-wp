@@ -261,4 +261,31 @@ final class OptionCommand implements Service, CliCommand {
 
 		return true;
 	}
+
+	/**
+	 * Do a REST Request
+	 *
+	 * @param string $method HTTP method.
+	 * @param string $route REST route.
+	 * @param array  $assoc_args Associative args.
+	 *
+	 * @return \WP_REST_Response Response object.
+	 */
+	private function do_request( $method, $route, $assoc_args ) {
+		if ( ! defined( 'REST_REQUEST' ) ) {
+			define( 'REST_REQUEST', true );
+		}
+
+		$request = new \WP_REST_Request( $method, $route );
+
+		if ( in_array( $method, [ 'POST', 'PUT' ] ) ) {
+			$request->set_body_params( $assoc_args );
+		} else {
+			foreach ( $assoc_args as $key => $value ) {
+				$request->set_param( $key, $value );
+			}
+		}
+
+		return rest_do_request( $request );
+	}
 }
