@@ -82,7 +82,7 @@
     "grunt-contrib-copy": "1.0.0",
     "grunt-shell": "4.0.0",
     "grunt-wp-deploy": "2.1.2",
-    "husky": "8.0.2",
+    "husky": "8.0.3",
     "jest-silent-reporter": "0.5.0",
     "lint-staged": "13.1.0",
     "lodash": "4.17.21",
