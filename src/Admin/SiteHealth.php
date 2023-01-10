@@ -841,7 +841,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	public function icu_version() {
 		$icu_version       = defined( 'INTL_ICU_VERSION' ) ? INTL_ICU_VERSION : null;
 		$minimum_version   = '4.6';
-		$is_proper_version = version_compare( $icu_version, $minimum_version, '>=' );
+		$is_proper_version = null === $icu_version ? false : version_compare( $icu_version, $minimum_version, '>=' );
 
 		$data = [
 			'badge'       => [
