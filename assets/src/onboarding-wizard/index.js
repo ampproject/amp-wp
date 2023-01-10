@@ -20,7 +20,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { render } from '@wordpress/element';
+import { createRoot, StrictMode } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
@@ -131,22 +131,29 @@ domReady(() => {
 			event.filename &&
 			/amp-onboarding-wizard(\.min)?\.js/.test(event.filename)
 		) {
-			render(<ErrorScreen error={event.error} />, root);
+			createRoot(root).render(
+				<StrictMode>
+					<ErrorScreen error={event.error} />
+				</StrictMode>
+			);
 		}
 	};
 
 	global.addEventListener('error', errorHandler);
 
-	render(
-		<Providers>
-			<SetupWizard
-				closeLink={addQueryArgs(CLOSE_LINK, { [AMP_SCAN_IF_STALE]: 1 })}
-				finishLink={addQueryArgs(SETTINGS_LINK, {
-					[AMP_SCAN_IF_STALE]: 1,
-				})}
-				appRoot={root}
-			/>
-		</Providers>,
-		root
+	createRoot(root).render(
+		<StrictMode>
+			<Providers>
+				<SetupWizard
+					closeLink={addQueryArgs(CLOSE_LINK, {
+						[AMP_SCAN_IF_STALE]: 1,
+					})}
+					finishLink={addQueryArgs(SETTINGS_LINK, {
+						[AMP_SCAN_IF_STALE]: 1,
+					})}
+					appRoot={root}
+				/>
+			</Providers>
+		</StrictMode>
 	);
 });
