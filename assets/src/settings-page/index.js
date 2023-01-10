@@ -27,7 +27,6 @@ import {
 	useState,
 	useEffect,
 	useCallback,
-	StrictMode,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
@@ -427,21 +426,15 @@ domReady(() => {
 	errorHandler = (event) => {
 		// Handle only own errors.
 		if (event.filename && /amp-settings(\.min)?\.js/.test(event.filename)) {
-			createRoot(root).render(
-				<StrictMode>
-					<ErrorScreen error={event.error} />
-				</StrictMode>
-			);
+			createRoot(root).render(<ErrorScreen error={event.error} />);
 		}
 	};
 
 	global.addEventListener('error', errorHandler);
 
 	createRoot(root).render(
-		<StrictMode>
-			<Providers>
-				<Root appRoot={root} />
-			</Providers>
-		</StrictMode>
+		<Providers>
+			<Root appRoot={root} />
+		</Providers>
 	);
 });

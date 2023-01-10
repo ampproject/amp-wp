@@ -7,7 +7,7 @@ import { restEndpoint, args, data, ampValidatedPostCount } from 'amp-support'; /
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { createRoot, StrictMode } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -26,11 +26,7 @@ domReady(() => {
 	const errorHandler = (event) => {
 		// Handle only own errors.
 		if (event.filename && /amp-support(\.min)?\.js/.test(event.filename)) {
-			createRoot(root).render(
-				<StrictMode>
-					<ErrorScreen error={event.error} />
-				</StrictMode>
-			);
+			createRoot(root).render(<ErrorScreen error={event.error} />);
 		}
 	};
 
@@ -38,18 +34,16 @@ domReady(() => {
 
 	if (root) {
 		createRoot(root).render(
-			<StrictMode>
-				<ErrorContextProvider>
-					<ErrorBoundary>
-						<AMPSupport
-							restEndpoint={restEndpoint}
-							args={args}
-							data={data}
-							ampValidatedPostCount={ampValidatedPostCount}
-						/>
-					</ErrorBoundary>
-				</ErrorContextProvider>
-			</StrictMode>
+			<ErrorContextProvider>
+				<ErrorBoundary>
+					<AMPSupport
+						restEndpoint={restEndpoint}
+						args={args}
+						data={data}
+						ampValidatedPostCount={ampValidatedPostCount}
+					/>
+				</ErrorBoundary>
+			</ErrorContextProvider>
 		);
 	}
 });

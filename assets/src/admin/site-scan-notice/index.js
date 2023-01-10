@@ -14,7 +14,7 @@ import {
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { createRoot, StrictMode } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -94,21 +94,15 @@ domReady(() => {
 			event.filename &&
 			/amp-site-scan-notice(\.min)?\.js/.test(event.filename)
 		) {
-			createRoot(root).render(
-				<StrictMode>
-					<ErrorScreen error={event.error} />
-				</StrictMode>
-			);
+			createRoot(root).render(<ErrorScreen error={event.error} />);
 		}
 	};
 
 	global.addEventListener('error', errorHandler);
 
 	createRoot(root).render(
-		<StrictMode>
-			<Providers>
-				<SiteScanNotice />
-			</Providers>
-		</StrictMode>
+		<Providers>
+			<SiteScanNotice />
+		</Providers>
 	);
 });
