@@ -118,7 +118,6 @@ const admin = {
 	externals: {
 		'amp-themes': 'ampThemes',
 		'amp-plugins': 'ampPlugins',
-		'amp-site-scan-notice': 'ampSiteScanNotice',
 	},
 	entry: {
 		'amp-validation-tooltips':
@@ -128,13 +127,64 @@ const admin = {
 			'./assets/src/admin/paired-browsing/client.js',
 		'amp-theme-install': './assets/src/admin/amp-theme-install.js',
 		'amp-plugin-install': './assets/src/admin/amp-plugin-install.js',
-		'amp-site-scan-notice': './assets/src/admin/site-scan-notice/index.js',
 	},
 	plugins: [
 		...sharedConfig.plugins,
 		new WebpackBar({
 			name: 'Admin',
 			color: '#67b255',
+		}),
+	],
+};
+
+const ampSiteScanNotice = {
+	...sharedConfig,
+	externals: {
+		'amp-site-scan-notice': 'ampSiteScanNotice',
+	},
+	entry: {
+		'amp-site-scan-notice': './assets/src/admin/site-scan-notice/index.js',
+	},
+	plugins: [
+		...sharedConfig.plugins.filter(
+			(plugin) =>
+				plugin.constructor.name !== 'DependencyExtractionWebpackPlugin'
+		),
+		new DependencyExtractionWebpackPlugin({
+			useDefaults: false,
+			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: (handle) => {
+				switch (handle) {
+					case 'lodash':
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
+					case '@wordpress/url':
+					case '@wordpress/i18n':
+						return defaultRequestToHandle(handle);
+
+					default:
+						return undefined;
+				}
+			},
+			requestToExternal: (external) => {
+				switch (external) {
+					case 'lodash':
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
+					case '@wordpress/url':
+					case '@wordpress/i18n':
+						return defaultRequestToExternal(external);
+
+					default:
+						return undefined;
+				}
+			},
+		}),
+		new WebpackBar({
+			name: 'AMP Site Scan Notice',
+			color: '#0A2647',
 		}),
 	],
 };
@@ -491,6 +541,7 @@ module.exports = [
 	blockEditor,
 	classicEditor,
 	admin,
+	ampSiteScanNotice,
 	customizer,
 	wpPolyfills,
 	onboardingWizard,
