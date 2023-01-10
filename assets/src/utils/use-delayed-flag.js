@@ -42,7 +42,9 @@ export default function useDelayedFlag(flag, { delay = 500 } = {}) {
 			setDelayedFlag(false);
 		}
 
-		return cleanup;
+		return () => {
+			clearTimeout(cleanup);
+		};
 	}, [flag, delayedFlag, delay]);
 
 	return delayedFlag;
