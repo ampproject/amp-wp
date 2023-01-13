@@ -19,7 +19,7 @@ The URL for uploading assets to the release.
 ```yaml
 uses: ./.github/actions/draft-release
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 with:
-  milestone: v3.2.1
+    milestone: v3.2.1
 ```

@@ -38,8 +38,8 @@ The official AMP plugin for WordPress is a powerful tool that helps you build us
 
 This plugin can be used by both developers and non-developer users:
 
-- If you are a developer or tech savvy user, you can take advantage of advanced developer tools provided by the AMP plugin to fix validation issues your site may have and reach full AMP compatibility.
-- If you are not a developer or tech savvy user, or you just simply don't want to deal with validation issues and tackling development tasks, the AMP plugin allows you to assemble fully AMP-compatible sites with different configurations taking advantage of AMP-compatible components. The plugin helps you to deal with validation issues by removing invalid AMP markup in cases where it is possible, or altogether suppressing AMP-incompatible plugins on AMP pages.
+-   If you are a developer or tech savvy user, you can take advantage of advanced developer tools provided by the AMP plugin to fix validation issues your site may have and reach full AMP compatibility.
+-   If you are not a developer or tech savvy user, or you just simply don't want to deal with validation issues and tackling development tasks, the AMP plugin allows you to assemble fully AMP-compatible sites with different configurations taking advantage of AMP-compatible components. The plugin helps you to deal with validation issues by removing invalid AMP markup in cases where it is possible, or altogether suppressing AMP-incompatible plugins on AMP pages.
 
 The bottom line is that regardless of your technical expertise, the AMP plugin can be useful to you.
 

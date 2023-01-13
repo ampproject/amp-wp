@@ -11,7 +11,7 @@ const makeRelease = async (tagName, body, commitish) => {
 		release = await octokit.rest.repos.getReleaseByTag({
 			owner,
 			repo,
-			tag: tagName
+			tag: tagName,
 		});
 	} catch (error) {
 		if (error instanceof RequestError && error.status === 404) {
@@ -32,12 +32,14 @@ const makeRelease = async (tagName, body, commitish) => {
 			body,
 			draft: true,
 			prerelease: false,
-			target_commitish: commitish
+			target_commitish: commitish,
 		});
 		core.info(`Successfully drafted a release for ${tagName}`);
 	} else {
 		if (release.draft !== true) {
-			throw new Error(`The ${tagName} release is not a draft. Aborting...`)
+			throw new Error(
+				`The ${tagName} release is not a draft. Aborting...`
+			);
 		}
 
 		releaseResponse = await octokit.rest.repos.updateRelease({
@@ -46,7 +48,7 @@ const makeRelease = async (tagName, body, commitish) => {
 			release_id: release.id,
 			tag_name: tagName,
 			name: tagName,
-			body
+			body,
 		});
 		core.info(`Successfully updated the ${tagName} draft release`);
 	}

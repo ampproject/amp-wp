@@ -5,7 +5,9 @@ Official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile Page
 ## Reference Documentation
 
 ### [▹ Classes](class/README.md)
-### [▹ Methods](method/README.md)
-### [▹ Functions](function/README.md)
-### [▹ Hooks](hook/README.md)
 
+### [▹ Methods](method/README.md)
+
+### [▹ Functions](function/README.md)
+
+### [▹ Hooks](hook/README.md)

@@ -15,16 +15,22 @@ async function main() {
 		}
 
 		// Get tag name from plugin main PHP file.
-		const pluginFile = fs.readFileSync(path.resolve(process.cwd(), 'amp.php')).toString();
+		const pluginFile = fs
+			.readFileSync(path.resolve(process.cwd(), 'amp.php'))
+			.toString();
 		const matches = /\*\s+Version:\s+(\d+(\.\d+)+-\w+)/.exec(pluginFile);
 		const tagName = matches && matches[1] ? matches[1] : null;
 
 		if (!tagName) {
-			throw new Error('Unable to parse Version from plugin bootstrap PHP file.');
+			throw new Error(
+				'Unable to parse Version from plugin bootstrap PHP file.'
+			);
 		}
 
 		if (!tagName.startsWith(milestone)) {
-			throw new Error('Milestone mismatch with PHP plugin bootstrap version.');
+			throw new Error(
+				'Milestone mismatch with PHP plugin bootstrap version.'
+			);
 		}
 
 		// Get target branch.
@@ -37,11 +43,15 @@ async function main() {
 		// Generate release changelog.
 		const repo = process.env.GITHUB_REPOSITORY;
 		const token = process.env.GITHUB_TOKEN;
-		const releaseBody = await new ReleaseChangelog(repo, milestone, token).generate();
+		const releaseBody = await new ReleaseChangelog(
+			repo,
+			milestone,
+			token
+		).generate();
 
 		// Make GitHub release.
 		const {
-			data: { html_url: htmlUrl, upload_url: assetUploadUrl }
+			data: { html_url: htmlUrl, upload_url: assetUploadUrl },
 		} = await makeRelease(tagName, releaseBody, targetBranch);
 
 		core.info(`Release draft URL: ${htmlUrl}`);
