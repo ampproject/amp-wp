@@ -18,10 +18,6 @@ updates:
     timezone: America/Los_Angeles
   open-pull-requests-limit: 10
   ignore:
-  # Cannot upgrade until @wordpress/scripts supports webpack v5.
-  - dependency-name: postcss-loader
-    versions:
-    - ">= 5"
   # Cannot be updated at the moment due to an incompatibility with `postcss-preset-env`. See https://github.com/ampproject/amp-wp/pull/5675#issuecomment-769197753.
   - dependency-name: postcss-nested
     versions:
