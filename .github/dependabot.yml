@@ -17,10 +17,6 @@ updates:
           timezone: America/Los_Angeles
       open-pull-requests-limit: 10
       ignore:
-          # Use same as @wordpress/element.
-          - dependency-name: react
-            versions:
-                - '>= 18'
           # Updates are handled via the `gutenberg-packages-update` GHA workflow.
           - dependency-name: '@wordpress/*'
 
