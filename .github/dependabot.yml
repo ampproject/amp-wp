@@ -26,10 +26,6 @@ updates:
   - dependency-name: terser-webpack-plugin
     versions:
     - ">= 5"
-  # Cannot upgrade until @wordpress/scripts supports webpack v5.
-  - dependency-name: copy-webpack-plugin
-    versions:
-    - ">= 7"
   # Updates are handled via the `gutenberg-packages-update` GHA workflow.
   - dependency-name: "@wordpress/*"
 
