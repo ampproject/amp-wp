@@ -18,10 +18,10 @@ updates:
     timezone: America/Los_Angeles
   open-pull-requests-limit: 10
   ignore:
-  # Cannot upgrade until @wordpress/element supports react v17.
+  # Use same as @wordpress/element.
   - dependency-name: react
     versions:
-    - ">= 17"
+    - ">= 18"
   # Updates are handled via the `gutenberg-packages-update` GHA workflow.
   - dependency-name: "@wordpress/*"
 
