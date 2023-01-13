@@ -186,4 +186,102 @@ describe('getSourcesFromScannableUrls', () => {
 			},
 		]);
 	});
+
+	it('should continue if validation sources length is null', () => {
+		const scannableUrls = [
+			{
+				url: 'https://foo.example.com/',
+				amp_url: 'https://foo.example.com/?amp=1',
+				validation_errors: [
+					{
+						sources: [{ type: 'plugin', name: 'foo' }],
+					},
+				],
+			},
+			{
+				url: 'https://bar.example.com/',
+				amp_url: 'https://bar.example.com/?amp=1',
+				validation_errors: [
+					{
+						sources: [],
+					},
+				],
+			},
+		];
+
+		expect(
+			getSourcesFromScannableUrls(scannableUrls, { useAmpUrls: false })
+				.plugins
+		).toStrictEqual([
+			{
+				slug: 'foo',
+				urls: ['https://foo.example.com/'],
+			},
+		]);
+
+		expect(
+			getSourcesFromScannableUrls(scannableUrls, { useAmpUrls: true })
+				.plugins
+		).toStrictEqual([
+			{
+				slug: 'foo',
+				urls: ['https://foo.example.com/?amp=1'],
+			},
+		]);
+
+		expect(
+			getSourcesFromScannableUrls(scannableUrls, { useAmpUrls: false })
+				.plugins
+		).not.toStrictEqual([
+			{
+				slug: 'foo',
+				urls: ['https://bar.example.com/'],
+			},
+		]);
+
+		expect(
+			getSourcesFromScannableUrls(scannableUrls, { useAmpUrls: true })
+				.plugins
+		).not.toStrictEqual([
+			{
+				slug: 'foo',
+				urls: ['https://bar.example.com/?amp=1'],
+			},
+		]);
+	});
+
+	it('should continue if it validation sources contains null keys', () => {
+		const scannableUrls = [
+			{
+				url: 'https://foo.example.com/',
+				amp_url: 'https://foo.example.com/?amp=1',
+				validation_errors: [
+					{
+						sources: [
+							{ type: 'plugin', name: 'foo' },
+							null,
+							{ type: 'plugin', name: 'bar' },
+							null,
+						],
+					},
+				],
+			},
+		];
+
+		expect(
+			getSourcesFromScannableUrls(scannableUrls, { useAmpUrls: false })
+				.plugins
+		).toStrictEqual([
+			{ slug: 'foo', urls: ['https://foo.example.com/'] },
+			{ slug: 'bar', urls: ['https://foo.example.com/'] },
+		]);
+
+		expect(
+			getSourcesFromScannableUrls(scannableUrls, { useAmpUrls: true })
+				.plugins
+		).toStrictEqual([
+			{ slug: 'foo', urls: ['https://foo.example.com/?amp=1'] },
+			{ slug: 'bar', urls: ['https://foo.example.com/?amp=1'] },
+		]);
+	});
 });

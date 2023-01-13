@@ -114,6 +114,7 @@ module.exports = {
 				'jest/prefer-expect-assertions': 'off',
 				'jest/prefer-inline-snapshots': 'off',
 				'jest/prefer-snapshot-hint': 'off',
+				'jest/no-untyped-mock-factory': 'off',
 			},
 		},
 		{
