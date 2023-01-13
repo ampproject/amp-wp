@@ -22,10 +22,6 @@ updates:
   - dependency-name: react
     versions:
     - ">= 17"
-  # Cannot upgrade until @wordpress/scripts supports webpack v5.
-  - dependency-name: terser-webpack-plugin
-    versions:
-    - ">= 5"
   # Updates are handled via the `gutenberg-packages-update` GHA workflow.
   - dependency-name: "@wordpress/*"
 
