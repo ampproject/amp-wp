@@ -18,10 +18,6 @@ updates:
     timezone: America/Los_Angeles
   open-pull-requests-limit: 10
   ignore:
-  # Cannot be updated at the moment due to an incompatibility with `postcss-preset-env`. See https://github.com/ampproject/amp-wp/pull/5675#issuecomment-769197753.
-  - dependency-name: postcss-nested
-    versions:
-    - "> 5.0.1"
   # Cannot upgrade until @wordpress/element supports react v17.
   - dependency-name: react
     versions:
