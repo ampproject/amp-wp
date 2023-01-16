@@ -183,14 +183,19 @@ export function Welcome() {
 								? __('Reopen Wizard', 'amp')
 								: __('Open Wizard', 'amp')}
 						</a>
-						{customizerLink && templateModeWasOverridden === false && (
-							<>
-								{` ${_x('or', 'e.g. do this or that', 'amp')} `}
-								<a href={customizerLink}>
-									{__('Customize Reader Theme', 'amp')}
-								</a>
-							</>
-						)}
+						{customizerLink &&
+							templateModeWasOverridden === false && (
+								<>
+									{` ${_x(
+										'or',
+										'e.g. do this or that',
+										'amp'
+									)} `}
+									<a href={customizerLink}>
+										{__('Customize Reader Theme', 'amp')}
+									</a>
+								</>
+							)}
 						{_x('.', 'End of sentence.', 'amp')}
 					</p>
 				</div>

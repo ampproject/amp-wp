@@ -37,6 +37,10 @@ export function getSourcesFromScannableUrls(
 			}
 
 			for (const source of validationError.sources) {
+				if (!source?.type) {
+					continue;
+				}
+
 				if (source.type === 'plugin') {
 					const pluginSlug = getPluginSlugFromFile(source.name);
 
