@@ -9,12 +9,10 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Services;
 use WP_Scripts;
 use WP_Styles;
 
@@ -24,7 +22,7 @@ use WP_Styles;
  * @since 2.0
  * @internal
  */
-final class Polyfills implements Conditional, Delayed, Service, Registerable, HasRequirements {
+final class Polyfills implements Delayed, Service, Registerable, HasRequirements {
 
 	/**
 	 * Get the action to use for registering the service.
@@ -33,15 +31,6 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable, Ha
 	 */
 	public static function get_registration_action() {
 		return 'amp_register_polyfills';
-	}
-
-	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return ! Services::get( 'dependency_support' )->has_support();
 	}
 
 	/**
