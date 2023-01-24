@@ -10,7 +10,6 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Delayed;
-use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Scripts;
@@ -22,7 +21,7 @@ use WP_Styles;
  * @since 2.0
  * @internal
  */
-final class Polyfills implements Delayed, Service, Registerable, HasRequirements {
+final class Polyfills implements Delayed, Service, Registerable {
 
 	/**
 	 * Get the action to use for registering the service.
@@ -31,17 +30,6 @@ final class Polyfills implements Delayed, Service, Registerable, HasRequirements
 	 */
 	public static function get_registration_action() {
 		return 'amp_register_polyfills';
-	}
-
-	/**
-	 * Get the list of service IDs required for this service to be registered.
-	 *
-	 * @return string[] List of required services.
-	 */
-	public static function get_requirements() {
-		return [
-			'dependency_support',
-		];
 	}
 
 	/**
