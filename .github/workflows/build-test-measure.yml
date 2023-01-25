@@ -622,8 +622,8 @@ jobs:
         if: needs.pre-run.outputs.changed-php-count > 0
         run: |
           # We are using PHP 7.4 and WP Latest.
-          echo "Installing latest version of PHPUnit"
-          composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies
+          echo "Installing PHPUnit 9.3"
+          composer require --dev --ignore-platform-reqs phpunit/phpunit:"=9.3" --with-dependencies
 
       - name: Build plugin
         run: npm run build:js
