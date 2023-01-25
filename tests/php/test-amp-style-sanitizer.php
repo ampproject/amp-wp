@@ -19,7 +19,6 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\ValidationExemption;
-use SebastianBergmann\Environment\Console;
 
 /**
  * Test AMP_Style_Sanitizer.
