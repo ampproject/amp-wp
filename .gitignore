@@ -18,6 +18,7 @@ node_modules
 /.vscode/
 /phpcs.xml
 /phpunit.xml
+/.phpunit.result.cache
 /*.sql
 /.wp-env.override.json
 
