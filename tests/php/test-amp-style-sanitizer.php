@@ -19,6 +19,7 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\AmpWP\Tests\TestCase;
 use AmpProject\AmpWP\ValidationExemption;
+use SebastianBergmann\Environment\Console;
 
 /**
  * Test AMP_Style_Sanitizer.
@@ -943,6 +944,38 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 		if ( $actual_stylesheets ) {
 			$this->assertStringContainsString( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
 		}
+	}
+
+	/**
+	 * Test get_stylesheet_from_url with a bad URL.
+	 *
+	 * @covers AMP_Style_Sanitizer::get_stylesheet_from_url()
+	 */
+	public function test_get_stylesheet_from_url_bad_url() {
+		$dom = Document::fromHtml( '<html><head></head><body></body></html>', Options::DEFAULTS );
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, [] );
+
+		$css_url    = 'https://example.com/style.css';
+		$stylesheet = $this->call_private_method( $sanitizer, 'get_stylesheet_from_url', [ $css_url ] );
+
+		$this->assertTrue( is_wp_error( $stylesheet ) );
+		$this->assertInstanceOf( WP_Error::class, $stylesheet );
+		$this->assertStringStartsWith( 'Failed to fetch:', $stylesheet->get_error_message() );
+
+		$css_url    = amp_get_asset_url( 'css/amp-default.css' );
+		$stylesheet = $this->call_private_method( $sanitizer, 'get_stylesheet_from_url', [ $css_url ] );
+
+		$this->assertIsString( $stylesheet );
+		$this->assertNotEmpty( $stylesheet );
+		$this->assertFalse( is_wp_error( $stylesheet ) );
+
+		$css_url    = '/wp-includes/css/admin-bar.css';
+		$stylesheet = $this->call_private_method( $sanitizer, 'get_stylesheet_from_url', [ $css_url ] );
+
+		$this->assertIsString( $stylesheet );
+		$this->assertNotEmpty( $stylesheet );
+		$this->assertFalse( is_wp_error( $stylesheet ) );
 	}
 
 	/**
