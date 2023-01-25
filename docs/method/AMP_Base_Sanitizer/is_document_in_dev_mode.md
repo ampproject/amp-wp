@@ -14,7 +14,7 @@ Check whether the document of a given node is in dev mode.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:422](/includes/sanitizers/class-amp-base-sanitizer.php#L422-L425)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:526](/includes/sanitizers/class-amp-base-sanitizer.php#L526-L529)
 
 <details>
 <summary>Show Code</summary>

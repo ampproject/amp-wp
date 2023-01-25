@@ -102,7 +102,8 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 				'layout'    => 'responsive',
 				'width'     => $this->args['width'],
 				'height'    => $this->args['height'],
-			]
+			],
+			$this->create_overflow_button_markup()
 		);
 	}
 
@@ -174,7 +175,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function get_embed_type( DOMElement $node ) {
 		$class_attr = $node->getAttribute( 'class' );
-		if ( null === $class_attr || ! $node->hasAttribute( 'data-href' ) ) {
+		if ( empty( $class_attr ) || ! $node->hasAttribute( 'data-href' ) ) {
 			return null;
 		}
 
@@ -248,6 +249,8 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 			$amp_tag,
 			$attributes
 		);
+
+		$amp_facebook_node->appendChild( $this->create_overflow_button_element( $dom ) );
 
 		$fallback = null;
 		foreach ( $node->childNodes as $child_node ) {

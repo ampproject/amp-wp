@@ -18,29 +18,29 @@ export const Options = createContext();
  * MOCK.
  *
  * @param {Object} props
- * @param {any} props.children Component children.
+ * @param {any}    props.children     Component children.
  * @param {string} props.themeSupport Default theme support mode in the mock provider.
  */
-export function OptionsContextProvider( { children, themeSupport = READER } ) {
-	const [ updates, updateOptions ] = useState( {} );
-	const [ originalOptions, setOriginalOptions ] = useState( {
+export function OptionsContextProvider({ children, themeSupport = READER }) {
+	const [updates, updateOptions] = useState({});
+	const [originalOptions, setOriginalOptions] = useState({
 		mobile_redirect: true,
 		theme_support: themeSupport,
-	} );
+	});
 
 	return (
-		<Options.Provider value={
-			{
+		<Options.Provider
+			value={{
 				editedOptions: { ...originalOptions, ...updates },
 				originalOptions,
 				setOriginalOptions,
 				updates,
-				updateOptions: ( ( newOptions ) => {
-					updateOptions( { ...updates, newOptions } );
-				} ),
-			}
-		}>
-			{ children }
+				updateOptions: (newOptions) => {
+					updateOptions({ ...updates, newOptions });
+				},
+			}}
+		>
+			{children}
 		</Options.Provider>
 	);
 }

@@ -27,95 +27,99 @@ import { ErrorContent } from './error-content';
 /**
  * Component rendering an individual error. Parent component is a <ul>.
  *
- * @param {Object} args Component props.
+ * @param {Object} args          Component props.
  * @param {string} args.clientId
  * @param {number} args.error
  * @param {number} args.status
  * @param {number} args.term_id
  * @param {number} args.title
  */
-export function Error( { clientId, error, status, term_id: termId, title } ) {
-	const { selectBlock } = useDispatch( 'core/block-editor' );
-	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(), [] );
-	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
-	const kept = status === VALIDATION_ERROR_ACK_REJECTED_STATUS || status === VALIDATION_ERROR_NEW_REJECTED_STATUS;
-	const external = ! Boolean( clientId );
+export function Error({ clientId, error, status, term_id: termId, title }) {
+	const { selectBlock } = useDispatch('core/block-editor');
+	const reviewLink = useSelect(
+		(select) => select(BLOCK_VALIDATION_STORE_KEY).getReviewLink(),
+		[]
+	);
+	const reviewed =
+		status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS ||
+		status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
+	const kept =
+		status === VALIDATION_ERROR_ACK_REJECTED_STATUS ||
+		status === VALIDATION_ERROR_NEW_REJECTED_STATUS;
+	const isExternal = !Boolean(clientId);
 
-	const { blockType, removed } = useSelect( ( select ) => {
-		const blockName = select( 'core/block-editor' ).getBlockName( clientId );
+	const { blockType, removed } = useSelect(
+		(select) => {
+			const blockName =
+				select('core/block-editor').getBlockName(clientId);
 
-		return {
-			removed: clientId && ! blockName,
-			blockType: select( 'core/blocks' ).getBlockType( blockName ),
-		};
-	}, [ clientId ] );
+			return {
+				removed: clientId && !blockName,
+				blockType: select('core/blocks').getBlockType(blockName),
+			};
+		},
+		[clientId]
+	);
 
 	let detailsUrl = null;
-	if ( reviewLink ) {
-		detailsUrl = new URL( reviewLink );
-		detailsUrl.hash = `#tag-${ termId }`;
+	if (reviewLink) {
+		detailsUrl = new URL(reviewLink);
+		detailsUrl.hash = `#tag-${termId}`;
 	}
 
-	const panelClassNames = classnames( 'amp-error', {
+	const panelClassNames = classnames('amp-error', {
 		'amp-error--reviewed': reviewed,
-		'amp-error--new': ! reviewed,
+		'amp-error--new': !reviewed,
 		'amp-error--removed': removed,
 		'amp-error--kept': kept,
-		[ `error-${ clientId }` ]: clientId,
-	} );
+		[`error-${clientId}`]: clientId,
+	});
 
 	return (
 		<PanelBody
-			className={ panelClassNames }
-			title={
-				<ErrorPanelTitle
-					error={ error }
-					kept={ kept }
-					title={ title }
-				/>
-			}
-			initialOpen={ false }
+			className={panelClassNames}
+			title={<ErrorPanelTitle error={error} kept={kept} title={title} />}
+			initialOpen={false}
 		>
 			<ErrorContent
-				blockType={ blockType }
-				clientId={ clientId }
-				error={ error }
-				external={ external }
-				removed={ removed }
-				status={ status }
+				blockType={blockType}
+				clientId={clientId}
+				error={error}
+				isExternal={isExternal}
+				removed={removed}
+				status={status}
 			/>
 
 			<div className="amp-error__actions">
-				{ ! ( removed || external ) && (
+				{!(removed || isExternal) && (
 					<Button
 						className="amp-error__select-block"
 						isSecondary
-						onClick={ () => {
-							selectBlock( clientId );
-						} }
+						onClick={() => {
+							selectBlock(clientId);
+						}}
 					>
-						{ __( 'Select block', 'amp' ) }
+						{__('Select block', 'amp')}
 					</Button>
-				) }
-				{ detailsUrl && (
+				)}
+				{detailsUrl && (
 					<ExternalLink
-						href={ detailsUrl.href }
+						href={detailsUrl.href}
 						className="amp-error__details-link"
 					>
-						{ __( 'View details', 'amp' ) }
+						{__('View details', 'amp')}
 					</ExternalLink>
-				) }
+				)}
 			</div>
-
 		</PanelBody>
 	);
 }
 Error.propTypes = {
 	clientId: PropTypes.string,
-	error: PropTypes.shape( {
-		sources: PropTypes.arrayOf( PropTypes.object ).isRequired,
+	error: PropTypes.shape({
+		sources: PropTypes.arrayOf(PropTypes.object).isRequired,
 		type: PropTypes.string,
-	} ).isRequired,
+	}).isRequired,
 	status: PropTypes.number.isRequired,
 	term_id: PropTypes.number.isRequired,
 	title: PropTypes.string.isRequired,

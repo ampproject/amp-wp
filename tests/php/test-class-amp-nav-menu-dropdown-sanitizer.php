@@ -6,13 +6,14 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Class Test_AMP_Nav_Menu_Dropdown_Sanitizer
  *
  * @covers AMP_Nav_Menu_Dropdown_Sanitizer
  */
-class Test_AMP_Nav_Menu_Dropdown_Sanitizer extends WP_UnitTestCase {
+class Test_AMP_Nav_Menu_Dropdown_Sanitizer extends TestCase {
 
 	use PrivateAccess;
 

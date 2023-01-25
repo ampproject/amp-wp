@@ -18,7 +18,7 @@ Determines if a DOMElement&#039;s node is empty or not.
 
 ### Source
 
-:link: [includes/utils/class-amp-dom-utils.php:299](/includes/utils/class-amp-dom-utils.php#L299-L301)
+:link: [includes/utils/class-amp-dom-utils.php:226](/includes/utils/class-amp-dom-utils.php#L226-L228)
 
 <details>
 <summary>Show Code</summary>

@@ -11,14 +11,13 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeSupportFeatures;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWp\Tests\Helpers\PrivateAccess;
 
 /** @coversDefaultClass \AmpProject\AmpWP\ReaderThemeSupportFeatures */
 final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility, LoadsCoreThemes, PrivateAccess;
+	use LoadsCoreThemes, PrivateAccess;
 
 	const TEST_GRADIENT_PRESETS = [
 		[
@@ -59,6 +58,16 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 			'slug'  => 'white',
 			'color' => '#FFFFFF',
 		],
+		[
+			'name'  => 'Purple',
+			'slug'  => 'purple',
+			'color' => 'var(--base-purple)',
+		],
+		[
+			'name'  => 'Yellow',
+			'slug'  => 'yellow',
+			'color' => 'rgb(255, 255, 0)',
+		],
 	];
 
 	const TEST_ALL_THEME_SUPPORTS = [
@@ -84,17 +93,17 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 	/** @var ReaderThemeSupportFeatures */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = $this->injector->make( ReaderThemeSupportFeatures::class );
 
 		$this->register_core_themes();
 	}
 
-	public function tearDown() {
-		parent::tearDown();
-
+	public function tear_down() {
 		$this->restore_theme_directories();
+
+		parent::tear_down();
 	}
 
 	/** @covers ::__construct() */
@@ -179,12 +188,12 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->add_theme_supports( $theme_supports );
 
 		$filtered = $this->instance->filter_amp_options_updating( $initial_options );
-		$this->assertArraySubset( $initial_options, $filtered );
+		$this->assertAssocArrayContains( $initial_options, $filtered );
 		$this->assertArrayHasKey( Option::PRIMARY_THEME_SUPPORT, $filtered );
 		if ( null === $primary_theme_support ) {
 			$this->assertNull( $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
 		} else {
-			$this->assertInternalType( 'array', $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
+			$this->assertIsArray( $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
 			foreach ( $theme_supports as $feature => $supports ) {
 				$this->assertArrayHasKey( $feature, $filtered[ Option::PRIMARY_THEME_SUPPORT ] );
 				$this->assertEquals(
@@ -224,6 +233,8 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		if ( ! wp_get_theme( self::THEME_PRIMARY )->exists() || ! wp_get_theme( self::THEME_READER )->exists() ) {
 			$this->markTestSkipped();
 		}
+
+		$this->add_theme_supports( self::TEST_ALL_THEME_SUPPORTS );
 		AMP_Options_Manager::update_option( Option::PRIMARY_THEME_SUPPORT, null );
 		switch_theme( self::THEME_PRIMARY );
 		AMP_Options_Manager::update_option( Option::READER_THEME, self::THEME_READER );
@@ -236,7 +247,7 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->assertFalse( wp_next_scheduled( ReaderThemeSupportFeatures::ACTION_UPDATE_CACHED_PRIMARY_THEME_SUPPORT ) );
 
 		$primary_theme_support = AMP_Options_Manager::get_option( Option::PRIMARY_THEME_SUPPORT );
-		$this->assertInternalType( 'array', $primary_theme_support );
+		$this->assertIsArray( $primary_theme_support );
 		$this->assertEqualSets( array_keys( self::TEST_ALL_THEME_SUPPORTS ), array_keys( $primary_theme_support ) );
 	}
 
@@ -285,7 +296,10 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		$this->assertEqualSets( array_keys( $reduced ), array_keys( self::TEST_ALL_THEME_SUPPORTS ) );
 		foreach ( array_keys( self::TEST_ALL_THEME_SUPPORTS ) as $feature ) {
 			$this->assertNotEquals( $reduced[ $feature ], $non_reduced[ $feature ] );
-			$this->assertArraySubset( $reduced[ $feature ], $non_reduced[ $feature ] );
+			$this->assertSame( count( $reduced[ $feature ] ), count( $non_reduced[ $feature ] ) );
+			for ( $i = 0, $len = count( $reduced[ $feature ] ); $i < $len; $i++ ) {
+				$this->assertAssocArrayContains( $reduced[ $feature ][ $i ], $non_reduced[ $feature ][ $i ] );
+			}
 		}
 	}
 
@@ -376,13 +390,19 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 
 		$output = get_echo( [ $this->instance, 'print_theme_support_styles' ] );
 
-		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-color-palette">', $output );
-		$this->assertStringContains( '.has-white-background-color { background-color: #FFFFFF; color: #000; }', $output );
-		$this->assertStringContains( '.has-black-color { color: #000000; }', $output );
-		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
-		$this->assertStringContains( ':root .is-gigantic-text, :root .has-gigantic-font-size { font-size: 144px; }', $output );
-		$this->assertStringContains( '<style id="amp-wp-theme-support-editor-gradient-presets">', $output );
-		$this->assertStringContains( '.has-yellow-to-purple-gradient-background { background: linear-gradient(160deg, #EEEADD 0%, #D1D1E4 100%); }', $output );
+		$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-color-palette">', $output );
+		$this->assertStringContainsString( '.has-white-background-color { background-color: #FFFFFF; color: #000; }', $output );
+		$this->assertStringContainsString( '.has-black-color { color: #000000; }', $output );
+		$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-font-sizes">', $output );
+		$this->assertStringContainsString( ':root .is-gigantic-text, :root .has-gigantic-font-size { font-size: 144px; }', $output );
+		$this->assertStringContainsString( '<style id="amp-wp-theme-support-editor-gradient-presets">', $output );
+		$this->assertStringContainsString( '.has-yellow-to-purple-gradient-background { background: linear-gradient(160deg, #EEEADD 0%, #D1D1E4 100%); }', $output );
+
+		// assert output string does not contain background color if it is not hexdec compatible but contains color.
+		$this->assertStringNotContainsString( '.has-purple-background-color { background-color: var(--base-purple); color: #000; }', $output );
+		$this->assertStringNotContainsString( '.has-yellow-background-color { background-color: rgb(255, 255, 0); color: #000; }', $output );
+		$this->assertStringContainsString( '.has-purple-color { color: var(--base-purple); }', $output );
+		$this->assertStringContainsString( '.has-yellow-color { color: rgb(255, 255, 0); }', $output );
 	}
 
 	/** @return array */

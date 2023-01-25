@@ -1,92 +1,68 @@
 /**
- * External dependencies
- */
-import { get } from 'lodash';
-
-/**
  * WordPress dependencies
  */
-import { Component, createPortal } from '@wordpress/element';
-import { withSelect } from '@wordpress/data';
-import { ifCondition, compose, pure } from '@wordpress/compose';
+import { createPortal, useLayoutEffect, useRef } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { POST_PREVIEW_CLASS } from '../constants';
 import AmpPreviewButton from '../components/amp-preview-button';
 
 /**
  * A wrapper for the AMP preview button that renders it immediately after the 'Post' preview button, when present.
  */
-class WrappedAmpPreviewButton extends Component {
-	/**
-	 * Constructs the class.
-	 *
-	 * @param {*} args Constructor arguments.
-	 */
-	constructor( ...args ) {
-		super( ...args );
+function WrappedAmpPreviewButton() {
+	const root = useRef(null);
+	const referenceNode = useRef(null);
 
-		this.root = document.createElement( 'div' );
-		this.root.className = 'amp-wrapper-post-preview';
+	const { isEditedPostSaveable, isViewable } = useSelect(
+		(select) => ({
+			isEditedPostSaveable: select('core/editor').isEditedPostSaveable(),
+			isViewable: select('core').getPostType(
+				select('core/editor').getEditedPostAttribute('type')
+			)?.viewable,
+		}),
+		[]
+	);
 
-		this.postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
-	}
+	useLayoutEffect(() => {
+		// The AMP preview button should always be inserted right before the publish/update button.
+		referenceNode.current = document.querySelector(
+			'.editor-post-publish-button__button'
+		);
 
-	/**
-	 * Invoked immediately after a component is mounted (inserted into the tree).
-	 */
-	componentDidMount() {
-		if ( ! this.postPreviewButton ) {
-			return;
+		if (referenceNode.current?.parentNode) {
+			if (!root.current) {
+				root.current = document.createElement('div');
+				root.current.className = 'amp-wrapper-post-preview';
+			}
+
+			referenceNode.current.parentNode.insertBefore(
+				root.current,
+				referenceNode.current
+			);
 		}
 
-		// Insert the AMP preview button immediately after the post preview button.
-		this.postPreviewButton.parentNode.insertBefore( this.root, this.postPreviewButton.nextSibling );
-	}
+		return () => {
+			if (referenceNode.current && root.current) {
+				referenceNode.current.parentNode.removeChild(root.current);
+				referenceNode.current = null;
+			}
+		};
+		// AMP Preview button should be "refreshed" whenever settings in the post editor header are re-rendered.
+		// The following properties may indicate a change in the toolbar layout:
+		// - Viewable property gets defined once the toolbar has been rendered.
+		// - When saveable property changes, the toolbar is reshuffled heavily.
+	}, [isEditedPostSaveable, isViewable]);
 
-	/**
-	 * Invoked immediately before a component is unmounted and destroyed.
-	 */
-	componentWillUnmount() {
-		if ( ! this.postPreviewButton ) {
-			return;
-		}
-
-		this.postPreviewButton.parentNode.removeChild( this.root );
-	}
-
-	/**
-	 * Renders the component.
-	 */
-	render() {
-		if ( ! this.postPreviewButton ) {
-			return null;
-		}
-
-		return createPortal( <AmpPreviewButton />, this.root );
-	}
+	return root.current
+		? createPortal(<AmpPreviewButton />, root.current)
+		: null;
 }
 
 export const name = 'amp-preview-button-wrapper';
 
 export const onlyPaired = true;
 
-export const render = pure(
-	compose( [
-		withSelect( ( select ) => {
-			const { getPostType } = select( 'core' );
-			const { getEditedPostAttribute } = select( 'core/editor' );
-
-			const postType = getPostType( getEditedPostAttribute( 'type' ) );
-
-			return {
-				isViewable: get( postType, [ 'viewable' ], false ),
-			};
-		} ),
-		// This HOC creator renders the component only when the condition is true. At that point the 'Post' preview
-		// button should have already been rendered (since it also relies on the same condition for rendering).
-		ifCondition( ( { isViewable } ) => isViewable ),
-	] )( WrappedAmpPreviewButton ),
-);
+export const render = WrappedAmpPreviewButton;

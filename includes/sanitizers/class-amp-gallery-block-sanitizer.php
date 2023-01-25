@@ -6,7 +6,8 @@
  */
 
 use AmpProject\AmpWP\Embed\HandlesGalleryEmbed;
-use AmpProject\Tag;
+use AmpProject\Html\Tag;
+use AmpProject\Dom\Element;
 
 /**
  * Class AMP_Gallery_Block_Sanitizer
@@ -43,6 +44,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array {
 	 *      @type int  $content_max_width Max width of content.
 	 *      @type bool $carousel_required Whether carousels are required. This is used when amp theme support is not present, for back-compat.
+	 *      @type bool $native_img_used   Whether native img is being used.
 	 * }
 	 */
 	protected $args;
@@ -54,33 +56,31 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $DEFAULT_ARGS = [
 		'carousel_required' => false,
+		'native_img'        => false,
 	];
 
 	/**
-	 * Sanitize the gallery block contained by <ul> element where necessary.
+	 * Sanitize the gallery block contained by elements with the wp-block-gallery class.
+	 *
+	 * The markup structure has changed over time:
+	 *
+	 *  - WordPress<5.2: ul.wp-block-gallery > li
+	 *  - WordPress<5.9: figure.wp-block-gallery > ul > li > figure > img
+	 *  - WordPress≥5.9: figure.wp-block-gallery > figure.wp-block-image > img
 	 *
 	 * @since 0.2
 	 */
 	public function sanitize() {
 		$class_query = 'contains( concat( " ", normalize-space( @class ), " " ), " wp-block-gallery " )';
-		$expr        = sprintf(
-			'//ul[ %s ]',
-			implode(
-				' or ',
-				[
-					sprintf( '( parent::figure[ %s ] )', $class_query ),
-					$class_query,
-				]
-			)
+
+		$gallery_elements = $this->dom->xpath->query(
+			sprintf( './/ul[ %1$s ] | .//figure[ %1$s ]', $class_query ),
+			$this->dom->body
 		);
-		$nodes       = $this->dom->xpath->query( $expr );
+		foreach ( $gallery_elements as $gallery_element ) {
+			/** @var Element $gallery_element */
 
-		foreach ( $nodes as $node ) {
-			/** @var DOMElement $node */
-
-			// In WordPress 5.3, the Gallery block's <ul> is wrapped in a <figure class="wp-block-gallery">, so look for that node also.
-			$gallery_node = isset( $node->parentNode ) && AMP_DOM_Utils::has_class( $node->parentNode, self::$class ) ? $node->parentNode : $node;
-			$attributes   = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $gallery_node );
+			$attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $gallery_element );
 
 			$is_amp_lightbox = isset( $attributes['data-amp-lightbox'] ) && rest_sanitize_boolean( $attributes['data-amp-lightbox'] );
 
@@ -94,12 +94,15 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Ensure data-amp-carousel=true attribute is present for proper styling of block.
 			if ( $is_amp_carousel ) {
-				$gallery_node->setAttribute( 'data-amp-carousel', 'true' );
+				$gallery_element->setAttribute( 'data-amp-carousel', 'true' );
 			}
 
-			$img_elements = $node->getElementsByTagName( 'amp-img' );
+			$img_elements = $this->dom->xpath->query(
+				empty( $this->args['native_img_used'] ) ? './/amp-img | .//amp-anim' : './/img',
+				$gallery_element
+			);
 
-			$this->process_gallery_embed( $is_amp_carousel, $is_amp_lightbox, $node, $img_elements );
+			$this->process_gallery_embed( $is_amp_carousel, $is_amp_lightbox, $gallery_element, $img_elements );
 		}
 	}
 
@@ -111,8 +114,11 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected function get_caption_element( DOMElement $img_element ) {
 		$figcaption_element = null;
-
-		if ( isset( $img_element->nextSibling->nodeName ) && Tag::FIGCAPTION === $img_element->nextSibling->nodeName ) {
+		if (
+			isset( $img_element->nextSibling->nodeName )
+			&& $img_element->nextSibling instanceof DOMElement
+			&& Tag::FIGCAPTION === $img_element->nextSibling->nodeName
+		) {
 			$figcaption_element = $img_element->nextSibling;
 		}
 
@@ -120,6 +126,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			! $figcaption_element
 			&& isset( $img_element->parentNode->nextSibling->nodeName )
+			&& $img_element->parentNode->nextSibling instanceof DOMElement
 			&& Tag::FIGCAPTION === $img_element->parentNode->nextSibling->nodeName
 		) {
 			$figcaption_element = $img_element->parentNode->nextSibling;

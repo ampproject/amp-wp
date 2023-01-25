@@ -86,6 +86,7 @@
 				<element value="ownerDocument"/>
 				<element value="DEFAULT_WIDTH"/>
 				<element value="DEFAULT_HEIGHT"/>
+				<element value="ampElements"/>
 			</property>
 		</properties>
 	</rule>
@@ -112,7 +113,7 @@
 	</rule>
 
 	<!-- Include sniffs for PHP cross-version compatibility. -->
-	<config name="testVersion" value="5.6-"/>
+	<config name="testVersion" value="7.0-"/>
 	<rule ref="PHPCompatibilityWP">
 		<exclude-pattern>bin/*</exclude-pattern>
 		<exclude-pattern>tests/php/src/PhpStan/*</exclude-pattern>

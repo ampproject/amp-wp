@@ -1,24 +1,29 @@
 /**
+ * External dependencies
+ */
+import {
+	AMP_SCAN_IF_STALE,
+	APP_ROOT_ID,
+	CLOSE_LINK,
+	CURRENT_THEME,
+	SETTINGS_LINK,
+	OPTIONS_REST_PATH,
+	READER_THEMES_REST_PATH,
+	SCANNABLE_URLS_REST_PATH,
+	UPDATES_NONCE,
+	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+	USERS_RESOURCE_REST_PATH,
+	VALIDATE_NONCE,
+} from 'amp-settings'; // From WP inline script.
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
-
-/**
- * External dependencies
- */
-import {
-	APP_ROOT_ID,
-	CLOSE_LINK,
-	CURRENT_THEME,
-	FINISH_LINK,
-	OPTIONS_REST_PATH,
-	READER_THEMES_REST_PATH,
-	UPDATES_NONCE,
-	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-	USER_REST_PATH,
-} from 'amp-settings'; // From WP inline script.
-import PropTypes from 'prop-types';
+import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -31,51 +36,77 @@ import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
+import { ErrorScreen } from '../components/error-screen';
+import { SiteScanContextProvider } from '../components/site-scan-context-provider';
+import { UserContextProvider } from '../components/user-context-provider';
+import { PluginsContextProvider } from '../components/plugins-context-provider';
+import { ThemesContextProvider } from '../components/themes-context-provider';
 import { PAGES } from './pages';
 import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
-import { UserContextProvider } from './components/user-context-provider';
-import { SiteScanContextProvider } from './components/site-scan-context-provider';
 import { TemplateModeOverrideContextProvider } from './components/template-mode-override-context-provider';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
+let errorHandler;
+
 /**
  * Context providers for the application.
  *
- * @param {Object} props Component props.
- * @param {any} props.children Component children.
+ * @param {Object} props          Component props.
+ * @param {any}    props.children Component children.
  */
-export function Providers( { children } ) {
+export function Providers({ children }) {
+	global.removeEventListener('error', errorHandler);
+
 	return (
 		<ErrorContextProvider>
-			<ErrorBoundary exitLink={ FINISH_LINK } fullScreen={ true }>
-
+			<ErrorBoundary
+				exitLinkLabel={__('Return to AMP settings.', 'amp')}
+				exitLinkUrl={SETTINGS_LINK}
+				title={__('The setup wizard has experienced an error.', 'amp')}
+			>
 				<OptionsContextProvider
-					delaySave={ true }
-					hasErrorBoundary={ true }
-					optionsRestPath={ OPTIONS_REST_PATH }
-					populateDefaultValues={ false }
+					delaySave={true}
+					hasErrorBoundary={true}
+					optionsRestPath={OPTIONS_REST_PATH}
+					populateDefaultValues={false}
 				>
 					<UserContextProvider
-						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
-						userRestPath={ USER_REST_PATH }
+						userOptionDeveloperTools={
+							USER_FIELD_DEVELOPER_TOOLS_ENABLED
+						}
+						usersResourceRestPath={USERS_RESOURCE_REST_PATH}
 					>
-						<NavigationContextProvider pages={ PAGES }>
-							<ReaderThemesContextProvider
-								currentTheme={ CURRENT_THEME }
-								hasErrorBoundary={ true }
-								wpAjaxUrl={ wpAjaxUrl }
-								readerThemesRestPath={ READER_THEMES_REST_PATH }
-								updatesNonce={ UPDATES_NONCE }
-							>
-								<TemplateModeOverrideContextProvider>
-									<SiteScanContextProvider>
-										{ children }
-									</SiteScanContextProvider>
-								</TemplateModeOverrideContextProvider>
-							</ReaderThemesContextProvider>
-						</NavigationContextProvider>
+						<PluginsContextProvider>
+							<ThemesContextProvider>
+								<SiteScanContextProvider
+									fetchCachedValidationErrors={false}
+									resetOnOptionsChange={true}
+									scannableUrlsRestPath={
+										SCANNABLE_URLS_REST_PATH
+									}
+									scanOnce={true}
+									validateNonce={VALIDATE_NONCE}
+								>
+									<NavigationContextProvider pages={PAGES}>
+										<ReaderThemesContextProvider
+											currentTheme={CURRENT_THEME}
+											hasErrorBoundary={true}
+											wpAjaxUrl={wpAjaxUrl}
+											readerThemesRestPath={
+												READER_THEMES_REST_PATH
+											}
+											updatesNonce={UPDATES_NONCE}
+										>
+											<TemplateModeOverrideContextProvider>
+												{children}
+											</TemplateModeOverrideContextProvider>
+										</ReaderThemesContextProvider>
+									</NavigationContextProvider>
+								</SiteScanContextProvider>
+							</ThemesContextProvider>
+						</PluginsContextProvider>
 					</UserContextProvider>
 				</OptionsContextProvider>
 			</ErrorBoundary>
@@ -87,16 +118,35 @@ Providers.propTypes = {
 	children: PropTypes.any,
 };
 
-domReady( () => {
-	const root = document.getElementById( APP_ROOT_ID );
+domReady(() => {
+	const root = document.getElementById(APP_ROOT_ID);
 
-	if ( root ) {
-		render(
-
-			<Providers>
-				<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } appRoot={ root } />
-			</Providers>,
-			root,
-		);
+	if (!root) {
+		return;
 	}
-} );
+
+	errorHandler = (event) => {
+		// Handle only own errors.
+		if (
+			event.filename &&
+			/amp-onboarding-wizard(\.min)?\.js/.test(event.filename)
+		) {
+			render(<ErrorScreen error={event.error} />, root);
+		}
+	};
+
+	global.addEventListener('error', errorHandler);
+
+	render(
+		<Providers>
+			<SetupWizard
+				closeLink={addQueryArgs(CLOSE_LINK, { [AMP_SCAN_IF_STALE]: 1 })}
+				finishLink={addQueryArgs(SETTINGS_LINK, {
+					[AMP_SCAN_IF_STALE]: 1,
+				})}
+				appRoot={root}
+			/>
+		</Providers>,
+		root
+	);
+});

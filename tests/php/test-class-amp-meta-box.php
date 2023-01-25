@@ -5,20 +5,20 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Editor\EditorSupport;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_Post_Meta_Box.
  *
  * @coversDefaultClass AMP_Post_Meta_Box
  */
-class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
+class Test_AMP_Post_Meta_Box extends TestCase {
 
 	use AssertRestApiField;
-	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of AMP_Post_Meta_Box
@@ -32,8 +32,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		global $wp_scripts, $wp_styles;
 		$wp_scripts     = null;
 		$wp_styles      = null;
@@ -45,11 +45,11 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		global $wp_scripts, $wp_styles;
 		$wp_scripts = null;
 		$wp_styles  = null;
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**
@@ -98,16 +98,21 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->instance->enqueue_admin_assets();
 
 		$this->assertTrue( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
-		$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
-		$script_data = wp_scripts()->get_data( AMP_Post_Meta_Box::ASSETS_HANDLE, 'after' );
 
-		if ( empty( $script_data ) ) {
-			$this->markTestIncomplete( 'Script data could not be found.' );
+		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
+			$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
+			$script_data = wp_scripts()->get_data( AMP_Post_Meta_Box::ASSETS_HANDLE, 'after' );
+
+			if ( empty( $script_data ) ) {
+				$this->markTestIncomplete( 'Script data could not be found.' );
+			}
+
+			// Test inline script boot.
+			$this->assertNotSame( false, stripos( wp_json_encode( $script_data ), 'ampPostMetaBox.boot(' ) );
+			unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
+		} else {
+			$this->assertFalse( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 		}
-
-		// Test inline script boot.
-		$this->assertNotSame( false, stripos( wp_json_encode( $script_data ), 'ampPostMetaBox.boot(' ) );
-		unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
 	}
 
 	/**
@@ -126,7 +131,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		if (
 			defined( 'GUTENBERG_VERSION' )
 			&&
-			version_compare( GUTENBERG_VERSION, EditorSupport::GB_MIN_VERSION, '<' )
+			version_compare( GUTENBERG_VERSION, DependencySupport::GB_MIN_VERSION, '<' )
 		) {
 			$this->markTestSkipped( 'The version of Gutenberg installed is not compatible with the plugin.' );
 		}
@@ -161,11 +166,11 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-compose',
 				'wp-data',
 				'wp-edit-post',
+				'wp-editor',
 				'wp-element',
 				'wp-hooks',
 				'wp-i18n',
 				'wp-plugins',
-				'wp-polyfill',
 			],
 			$block_script->deps
 		);
@@ -177,7 +182,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		 * Values are now loaded using wp_inline_script()
 		 */
 		$before = implode( '', $block_script->extra['before'] );
-		$this->assertContains( 'ampBlockEditor', $before );
+		$this->assertStringContainsString( 'ampBlockEditor', $before );
 		$expected_localized_values = [
 			'ampUrl',
 			'ampPreviewLink',
@@ -189,7 +194,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		];
 
 		foreach ( $expected_localized_values as $localized_value ) {
-			$this->assertContains( $localized_value, $before );
+			$this->assertStringContainsString( $localized_value, $before );
 		}
 		unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
 	}
@@ -257,25 +262,33 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		$amp_status_markup = '<div class="misc-pub-section misc-amp-status"';
 		$checkbox_enabled  = '<input id="amp-status-enabled" type="radio" name="amp_status" value="enabled"  checked=\'checked\'>';
+		$no_support_notice = '<div class="notice notice-info notice-alt inline">';
 
 		// This is not in AMP 'canonical mode' but rather reader or transitional mode.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertStringContains( $amp_status_markup, $output );
-		$this->assertStringContains( $checkbox_enabled, $output );
+		$this->assertStringContainsString( $amp_status_markup, $output );
+		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
+			$this->assertStringContainsString( $checkbox_enabled, $output );
+		} else {
+			$this->assertStringContainsString( $no_support_notice, $output );
+		}
 
 		// This is in AMP-first mode with a template that can be rendered.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertStringContains( $amp_status_markup, $output );
-		$this->assertStringContains( $checkbox_enabled, $output );
+		$this->assertStringContainsString( $amp_status_markup, $output );
+		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
+			$this->assertStringContainsString( $checkbox_enabled, $output );
+		} else {
+			$this->assertStringContainsString( $no_support_notice, $output );
+		}
 
-		// Post type no longer supports AMP, so no status input.
+		// Post type no longer supports AMP, so no status input (and no mention of AMP at all).
 		$supported_post_types = array_diff( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ), [ 'post' ] );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertStringContains( 'This post type is not', $output );
-		$this->assertStringNotContains( $checkbox_enabled, $output );
+		$this->assertEmpty( $output );
 		$supported_post_types[] = 'post';
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 
@@ -283,8 +296,12 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertStringContains( 'There are no supported templates.', wp_strip_all_tags( $output ) );
-		$this->assertStringNotContains( $checkbox_enabled, $output );
+		if ( Services::get( 'dependency_support' )->has_support_from_core() ) {
+			$this->assertStringContainsString( 'There are no supported templates.', wp_strip_all_tags( $output ) );
+			$this->assertStringNotContainsString( $checkbox_enabled, $output );
+		} else {
+			$this->assertStringContainsString( $no_support_notice, $output );
+		}
 
 		// User doesn't have the capability to display the metabox.
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
@@ -351,12 +368,12 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/** @covers ::get_error_messages() */
 	public function test_get_error_messages() {
 		$messages = $this->instance->get_error_messages( [ 'template_unsupported' ] );
-		$this->assertStringContains( 'There are no', $messages[0] );
-		$this->assertStringContains( 'page=amp-options', $messages[0] );
+		$this->assertStringContainsString( 'There are no', $messages[0] );
+		$this->assertStringContainsString( 'page=amp-options', $messages[0] );
 
 		$messages = $this->instance->get_error_messages( [ 'post-type-support' ] );
-		$this->assertStringContains( 'This post type is not', $messages[0] );
-		$this->assertStringContains( 'page=amp-options', $messages[0] );
+		$this->assertStringContainsString( 'This post type is not', $messages[0] );
+		$this->assertStringContainsString( 'page=amp-options', $messages[0] );
 
 		$this->assertEquals(
 			[
@@ -549,5 +566,40 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 		$result = $this->instance->get_amp_blocks_in_use();
 		$this->assertEquals( [ 'amp/amp-mathml', 'amp/amp-timeago' ], $result );
+	}
+
+	/**
+	 * Data provider for $this->test_sanitize_status()
+	 *
+	 * @return array
+	 */
+	public function data_provider_for_sanitize_status() {
+
+		return [
+			[
+				'input'    => AMP_Post_Meta_Box::ENABLED_STATUS,
+				'expected' => AMP_Post_Meta_Box::ENABLED_STATUS,
+			],
+			[
+				'input'    => AMP_Post_Meta_Box::DISABLED_STATUS,
+				'expected' => AMP_Post_Meta_Box::DISABLED_STATUS,
+			],
+			[
+				'input'    => 'invalid',
+				'expected' => '',
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider data_provider_for_sanitize_status
+	 * @covers ::sanitize_status()
+	 */
+	public function test_sanitize_status( $input, $expected ) {
+
+		$this->assertEquals(
+			$expected,
+			$this->instance->sanitize_status( $input )
+		);
 	}
 }

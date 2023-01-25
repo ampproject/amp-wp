@@ -7,7 +7,7 @@
  */
 import { __ } from '@wordpress/i18n';
 
-window.ampCustomizeControls = ( function( api, $ ) {
+window.ampCustomizeControls = (function (api, $) {
 	'use strict';
 
 	const component = {
@@ -21,8 +21,8 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			},
 		},
 		tooltipTimeout: 5000,
-		tooltipVisible: new api.Value( false ),
-		tooltipFocused: new api.Value( 0 ),
+		tooltipVisible: new api.Value(false),
+		tooltipFocused: new api.Value(0),
 	};
 
 	/**
@@ -31,21 +31,22 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * @param {Object} data Object data.
 	 * @return {void}
 	 */
-	component.boot = function boot( data ) {
+	component.boot = function boot(data) {
 		component.data = data;
 
 		function initPanel() {
-			api.panel( component.data.panelId, component.panelReady );
+			api.panel(component.data.panelId, component.panelReady);
 		}
 
-		if ( api.state ) {
+		if (api.state) {
 			component.addState();
-			api.bind( 'ready', initPanel );
-		} else { // WP<4.9.
-			api.bind( 'ready', function() {
+			api.bind('ready', initPanel);
+		} else {
+			// WP<4.9.
+			api.bind('ready', function () {
 				component.addState(); // Needed for WP<4.9.
 				initPanel();
-			} );
+			});
 		}
 	};
 
@@ -55,8 +56,8 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * @return {void}
 	 */
 	component.addState = function addState() {
-		api.state.add( 'ampEnabled', new api.Value( false ) );
-		api.state.add( 'ampAvailable', new api.Value( false ) );
+		api.state.add('ampEnabled', new api.Value(false));
+		api.state.add('ampAvailable', new api.Value(false));
 	};
 
 	/**
@@ -65,15 +66,23 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * @param {string} url URL.
 	 * @return {boolean} whether it is an AMP URL.
 	 */
-	component.isAmpUrl = function isAmpUrl( url ) {
-		const urlParser = document.createElement( 'a' ),
-			regexEndpoint = new RegExp( '\\/' + component.data.queryVar + '\\/?$' );
+	component.isAmpUrl = function isAmpUrl(url) {
+		const urlParser = document.createElement('a'),
+			regexEndpoint = new RegExp(
+				'\\/' + component.data.queryVar + '\\/?$'
+			);
 
 		urlParser.href = url;
-		if ( ! _.isUndefined( wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) )[ component.data.queryVar ] ) ) {
+		if (
+			!_.isUndefined(
+				wp.customize.utils.parseQueryString(urlParser.search.substr(1))[
+					component.data.queryVar
+				]
+			)
+		) {
 			return true;
 		}
-		return regexEndpoint.test( urlParser.pathname );
+		return regexEndpoint.test(urlParser.pathname);
 	};
 
 	/**
@@ -82,17 +91,21 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * @param {string} url URL.
 	 * @return {string} non-AMPified URL.
 	 */
-	component.unampifyUrl = function unampifyUrl( url ) {
-		const urlParser = document.createElement( 'a' ),
-			regexEndpoint = new RegExp( '\\/' + component.data.queryVar + '\\/?$' );
+	component.unampifyUrl = function unampifyUrl(url) {
+		const urlParser = document.createElement('a'),
+			regexEndpoint = new RegExp(
+				'\\/' + component.data.queryVar + '\\/?$'
+			);
 
 		urlParser.href = url;
-		urlParser.pathname = urlParser.pathname.replace( regexEndpoint, '' );
+		urlParser.pathname = urlParser.pathname.replace(regexEndpoint, '');
 
-		if ( 1 < urlParser.search.length ) {
-			const params = window.wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) );
-			delete params[ component.data.queryVar ];
-			urlParser.search = $.param( params );
+		if (1 < urlParser.search.length) {
+			const params = window.wp.customize.utils.parseQueryString(
+				urlParser.search.substr(1)
+			);
+			delete params[component.data.queryVar];
+			urlParser.search = $.param(params);
 		}
 
 		return urlParser.href;
@@ -104,10 +117,10 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * @param {string} url URL.
 	 * @return {string} AMPified URL.
 	 */
-	component.ampifyUrl = function ampifyUrl( url ) {
-		const urlParser = document.createElement( 'a' );
-		urlParser.href = component.unampifyUrl( url );
-		if ( urlParser.search.length ) {
+	component.ampifyUrl = function ampifyUrl(url) {
+		const urlParser = document.createElement('a');
+		urlParser.href = component.unampifyUrl(url);
+		if (urlParser.search.length) {
 			urlParser.search += '&';
 		}
 		urlParser.search += component.data.queryVar + '=1';
@@ -120,17 +133,17 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * @return {void}
 	 */
 	component.tryToCloseTooltip = function tryToCloseTooltip() {
-		clearTimeout( component.tooltipTimeoutId );
-		component.tooltipTimeoutId = setTimeout( function() {
-			if ( ! component.tooltipVisible.get() ) {
+		clearTimeout(component.tooltipTimeoutId);
+		component.tooltipTimeoutId = setTimeout(function () {
+			if (!component.tooltipVisible.get()) {
 				return;
 			}
-			if ( 0 < component.tooltipFocused.get() ) {
+			if (0 < component.tooltipFocused.get()) {
 				component.tryToCloseTooltip();
 			} else {
-				component.tooltipVisible.set( false );
+				component.tooltipVisible.set(false);
 			}
-		}, component.tooltipTimeout );
+		}, component.tooltipTimeout);
 	};
 
 	/**
@@ -139,12 +152,12 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * @param {string} url URL.
 	 * @return {string} AMPified URL.
 	 */
-	component.setCurrentAmpUrl = function setCurrentAmpUrl( url ) {
-		const enabled = api.state( 'ampEnabled' ).get();
-		if ( ! enabled && component.isAmpUrl( url ) ) {
-			return component.unampifyUrl( url );
-		} else if ( enabled && ! component.isAmpUrl( url ) ) {
-			return component.ampifyUrl( url );
+	component.setCurrentAmpUrl = function setCurrentAmpUrl(url) {
+		const enabled = api.state('ampEnabled').get();
+		if (!enabled && component.isAmpUrl(url)) {
+			return component.unampifyUrl(url);
+		} else if (enabled && !component.isAmpUrl(url)) {
+			return component.ampifyUrl(url);
 		}
 		return url;
 	};
@@ -155,7 +168,9 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * @return {void}
 	 */
 	component.updatePreviewUrl = function updatePreviewUrl() {
-		api.previewer.previewUrl.set( component.setCurrentAmpUrl( api.previewer.previewUrl.get() ) );
+		api.previewer.previewUrl.set(
+			component.setCurrentAmpUrl(api.previewer.previewUrl.get())
+		);
 	};
 
 	/**
@@ -164,9 +179,9 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * @param {string} url - URL.
 	 * @return {void}
 	 */
-	component.enableAndNavigateToUrl = function enableAndNavigateToUrl( url ) {
-		api.state( 'ampEnabled' ).set( true );
-		api.previewer.previewUrl.set( url );
+	component.enableAndNavigateToUrl = function enableAndNavigateToUrl(url) {
+		api.state('ampEnabled').set(true);
+		api.previewer.previewUrl.set(url);
 	};
 
 	/**
@@ -175,30 +190,33 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * @return {void}
 	 */
 	component.updatePanelNotifications = function updatePanelNotifications() {
-		const panel = api.panel( component.data.panelId );
-		const containers = panel.sections().concat( [ panel ] );
-		if ( api.state( 'ampAvailable' ).get() ) {
-			_.each( containers, function( container ) {
-				container.notifications.remove( 'amp_unavailable' );
-			} );
+		const panel = api.panel(component.data.panelId);
+		const containers = panel.sections().concat([panel]);
+		if (api.state('ampAvailable').get()) {
+			_.each(containers, function (container) {
+				container.notifications.remove('amp_unavailable');
+			});
 		} else {
-			_.each( containers, function( container ) {
-				container.notifications.add( new api.Notification( 'amp_unavailable', {
-					message: component.data.l10n.unavailableMessage,
-					type: 'info',
-					linkText: component.data.l10n.unavailableLinkText,
-					url: component.data.ampUrl,
-					templateId: 'customize-amp-unavailable-notification',
-					render() {
-						const li = api.Notification.prototype.render.call( this );
-						li.find( 'a' ).on( 'click', function( event ) {
-							event.preventDefault();
-							component.enableAndNavigateToUrl( this.href );
-						} );
-						return li;
-					},
-				} ) );
-			} );
+			_.each(containers, function (container) {
+				container.notifications.add(
+					new api.Notification('amp_unavailable', {
+						message: component.data.l10n.unavailableMessage,
+						type: 'info',
+						linkText: component.data.l10n.unavailableLinkText,
+						url: component.data.ampUrl,
+						templateId: 'customize-amp-unavailable-notification',
+						render() {
+							const li =
+								api.Notification.prototype.render.call(this);
+							li.find('a').on('click', function (event) {
+								event.preventDefault();
+								component.enableAndNavigateToUrl(this.href);
+							});
+							return li;
+						},
+					})
+				);
+			});
 		}
 	};
 
@@ -208,159 +226,166 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * @param {wp.customize.Panel} panel The AMP panel.
 	 * @return {void}
 	 */
-	component.panelReady = function panelReady( panel ) {
-		const ampToggleContainer = $( wp.template( 'customize-amp-enabled-toggle' )( {
-			message: component.data.l10n.unavailableMessage,
-			linkText: component.data.l10n.unavailableLinkText,
-			url: component.data.ampUrl,
-		} ) );
-		const checkbox = ampToggleContainer.find( 'input[type=checkbox]' );
-		const tooltip = ampToggleContainer.find( '.tooltip' );
-		const tooltipLink = tooltip.find( 'a' );
+	component.panelReady = function panelReady(panel) {
+		const ampToggleContainer = $(
+			wp.template('customize-amp-enabled-toggle')({
+				message: component.data.l10n.unavailableMessage,
+				linkText: component.data.l10n.unavailableLinkText,
+				url: component.data.ampUrl,
+			})
+		);
+		const checkbox = ampToggleContainer.find('input[type=checkbox]');
+		const tooltip = ampToggleContainer.find('.tooltip');
+		const tooltipLink = tooltip.find('a');
 
 		// AMP panel triggers the input toggle for AMP preview.
-		panel.expanded.bind( function( expanded ) {
-			if ( ! expanded ) {
+		panel.expanded.bind(function (expanded) {
+			if (!expanded) {
 				return;
 			}
-			if ( api.state( 'ampAvailable' ).get() ) {
-				api.state( 'ampEnabled' ).set( panel.expanded.get() );
-			} else if ( ! panel.notifications ) {
+			if (api.state('ampAvailable').get()) {
+				api.state('ampEnabled').set(panel.expanded.get());
+			} else if (!panel.notifications) {
 				/*
 				 * This is only done if panel notifications aren't supported.
 				 * If they are (as of 4.9) then a notification will be shown
 				 * in the panel and its sections when AMP is not available.
 				 */
-				setTimeout( function() {
-					component.tooltipVisible.set( true );
-				}, 250 );
+				setTimeout(function () {
+					component.tooltipVisible.set(true);
+				}, 250);
 			}
-		} );
+		});
 
-		if ( panel.notifications ) {
-			api.state( 'ampAvailable' ).bind( component.updatePanelNotifications );
+		if (panel.notifications) {
+			api.state('ampAvailable').bind(component.updatePanelNotifications);
 			component.updatePanelNotifications();
-			api.section.bind( 'add', component.updatePanelNotifications );
+			api.section.bind('add', component.updatePanelNotifications);
 		}
 
 		// Message coming from previewer.
-		api.previewer.bind( 'amp-status', function( data ) {
-			api.state( 'ampAvailable' ).set( data.available );
-		} );
-		function setInitialAmpEnabledState( data ) {
-			api.state( 'ampEnabled' ).set( data.enabled );
-			api.previewer.unbind( 'amp-status', setInitialAmpEnabledState );
+		api.previewer.bind('amp-status', function (data) {
+			api.state('ampAvailable').set(data.available);
+		});
+		function setInitialAmpEnabledState(data) {
+			api.state('ampEnabled').set(data.enabled);
+			api.previewer.unbind('amp-status', setInitialAmpEnabledState);
 		}
-		api.previewer.bind( 'amp-status', setInitialAmpEnabledState );
+		api.previewer.bind('amp-status', setInitialAmpEnabledState);
 
 		/*
 		 * Persist the presence or lack of the amp=1 param when navigating in the preview,
 		 * even if current page is not yet supported.
 		 */
-		api.previewer.previewUrl.validate = ( function( prevValidate ) {
-			return function( value ) {
-				let val = prevValidate.call( this, value );
-				if ( val ) {
-					val = component.setCurrentAmpUrl( val );
+		api.previewer.previewUrl.validate = (function (prevValidate) {
+			return function (value) {
+				let val = prevValidate.call(this, value);
+				if (val) {
+					val = component.setCurrentAmpUrl(val);
 				}
 				return val;
 			};
-		}( api.previewer.previewUrl.validate ) );
+		})(api.previewer.previewUrl.validate);
 
 		// Listen for ampEnabled state changes.
-		api.state( 'ampEnabled' ).bind( function( enabled ) {
-			checkbox.prop( 'checked', enabled );
+		api.state('ampEnabled').bind(function (enabled) {
+			checkbox.prop('checked', enabled);
 			component.updatePreviewUrl();
 
 			// Preview tablet device when AMP is enabled.
-			if ( enabled ) {
+			if (enabled) {
 				const ampPreviewDevice = 'tablet';
-				if ( ampPreviewDevice in api.settings.previewableDevices ) {
-					api.state( 'previewedDevice' ).set( ampPreviewDevice );
+				if (ampPreviewDevice in api.settings.previewableDevices) {
+					api.state('previewedDevice').set(ampPreviewDevice);
 				}
 			}
-		} );
+		});
 
 		// Listen for ampAvailable state changes.
-		api.state( 'ampAvailable' ).bind( function( available ) {
-			checkbox.toggleClass( 'disabled', ! available );
+		api.state('ampAvailable').bind(function (available) {
+			checkbox.toggleClass('disabled', !available);
 
 			// Show the unavailable tooltip if AMP is enabled.
-			if ( api.state( 'ampEnabled' ).get() ) {
-				component.tooltipVisible.set( ! available );
+			if (api.state('ampEnabled').get()) {
+				component.tooltipVisible.set(!available);
 			}
-		} );
+		});
 
 		// Adding checkbox toggle before device selection.
-		$( '.devices-wrapper' ).prepend( ampToggleContainer );
+		$('.devices-wrapper').prepend(ampToggleContainer);
 
 		// Update tooltip for Customizer collapse button based on whether the pane is shown.
-		const collapseSidebarButton = $( '.collapse-sidebar.button' );
-		const collapseSidebarLabel = collapseSidebarButton.find( '> .collapse-sidebar-label' );
+		const collapseSidebarButton = $('.collapse-sidebar.button');
+		const collapseSidebarLabel = collapseSidebarButton.find(
+			'> .collapse-sidebar-label'
+		);
 		const updateCollapseSidebarTooltip = () => {
-			if ( api.state( 'paneVisible' ).get() ) {
-				collapseSidebarButton.prop( 'title', collapseSidebarLabel.text() );
+			if (api.state('paneVisible').get()) {
+				collapseSidebarButton.prop(
+					'title',
+					collapseSidebarLabel.text()
+				);
 			} else {
-				collapseSidebarButton.prop( 'title', __( 'Show Controls', 'amp' ) );
+				collapseSidebarButton.prop('title', __('Show Controls', 'amp'));
 			}
 		};
 		updateCollapseSidebarTooltip();
-		api.state( 'paneVisible' ).bind( updateCollapseSidebarTooltip );
+		api.state('paneVisible').bind(updateCollapseSidebarTooltip);
 
 		// User clicked link within tooltip, go to linked post in preview.
-		tooltipLink.on( 'click', function( event ) {
+		tooltipLink.on('click', function (event) {
 			event.preventDefault();
-			component.enableAndNavigateToUrl( this.href );
-		} );
+			component.enableAndNavigateToUrl(this.href);
+		});
 
 		// Toggle visibility of tooltip based on tooltipVisible state.
-		component.tooltipVisible.bind( function( visible ) {
-			tooltip.attr( 'aria-hidden', visible ? 'false' : 'true' );
-			if ( visible ) {
-				$( document ).on( 'click.amp-toggle-outside', function( event ) {
-					if ( ! $.contains( ampToggleContainer[ 0 ], event.target ) ) {
-						component.tooltipVisible.set( false );
+		component.tooltipVisible.bind(function (visible) {
+			tooltip.attr('aria-hidden', visible ? 'false' : 'true');
+			if (visible) {
+				$(document).on('click.amp-toggle-outside', function (event) {
+					if (!$.contains(ampToggleContainer[0], event.target)) {
+						component.tooltipVisible.set(false);
 					}
-				} );
+				});
 				tooltip.fadeIn();
 				component.tryToCloseTooltip();
 			} else {
 				tooltip.fadeOut();
-				component.tooltipFocused.set( 0 );
-				$( document ).off( 'click.amp-toggle-outside' );
+				component.tooltipFocused.set(0);
+				$(document).off('click.amp-toggle-outside');
 			}
-		} );
+		});
 
 		// Handle click on checkbox to either enable the AMP preview or show the tooltip.
-		checkbox.on( 'click', function() {
-			this.checked = ! this.checked; // Undo what we just did, since state is managed in ampAvailable change handler.
-			if ( api.state( 'ampAvailable' ).get() ) {
-				api.state( 'ampEnabled' ).set( ! api.state( 'ampEnabled' ).get() );
+		checkbox.on('click', function () {
+			this.checked = !this.checked; // Undo what we just did, since state is managed in ampAvailable change handler.
+			if (api.state('ampAvailable').get()) {
+				api.state('ampEnabled').set(!api.state('ampEnabled').get());
 			} else {
-				component.tooltipVisible.set( true );
+				component.tooltipVisible.set(true);
 			}
-		} );
+		});
 
 		// Keep track of the user's state interacting with the tooltip.
-		tooltip.on( 'mouseenter', function() {
-			if ( ! api.state( 'ampAvailable' ).get() ) {
-				component.tooltipVisible.set( true );
+		tooltip.on('mouseenter', function () {
+			if (!api.state('ampAvailable').get()) {
+				component.tooltipVisible.set(true);
 			}
-			component.tooltipFocused.set( component.tooltipFocused.get() + 1 );
-		} );
-		tooltip.on( 'mouseleave', function() {
-			component.tooltipFocused.set( component.tooltipFocused.get() - 1 );
-		} );
-		tooltipLink.on( 'focus', function() {
-			if ( ! api.state( 'ampAvailable' ).get() ) {
-				component.tooltipVisible.set( true );
+			component.tooltipFocused.set(component.tooltipFocused.get() + 1);
+		});
+		tooltip.on('mouseleave', function () {
+			component.tooltipFocused.set(component.tooltipFocused.get() - 1);
+		});
+		tooltipLink.on('focus', function () {
+			if (!api.state('ampAvailable').get()) {
+				component.tooltipVisible.set(true);
 			}
-			component.tooltipFocused.set( component.tooltipFocused.get() + 1 );
-		} );
-		tooltipLink.on( 'blur', function() {
-			component.tooltipFocused.set( component.tooltipFocused.get() - 1 );
-		} );
+			component.tooltipFocused.set(component.tooltipFocused.get() + 1);
+		});
+		tooltipLink.on('blur', function () {
+			component.tooltipFocused.set(component.tooltipFocused.get() - 1);
+		});
 	};
 
 	return component;
-}( wp.customize, jQuery ) );
+})(wp.customize, jQuery);

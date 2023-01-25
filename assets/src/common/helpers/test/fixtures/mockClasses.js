@@ -10,9 +10,9 @@ export class Mock {
 	 * @param {string} key The key of the value to get.
 	 * @return {*} value The value corresponding to the key.
 	 */
-	get( key ) {
-		if ( this.hasOwnProperty( key ) ) {
-			return this[ key ];
+	get(key) {
+		if (this.hasOwnProperty(key)) {
+			return this[key];
 		}
 
 		return undefined;
@@ -23,10 +23,10 @@ export class Mock {
 	 *
 	 * @param {Object} values The values to set.
 	 */
-	set( values ) {
-		for ( const property in values ) {
-			if ( values.hasOwnProperty( property ) ) {
-				this[ property ] = values[ property ];
+	set(values) {
+		for (const property in values) {
+			if (values.hasOwnProperty(property)) {
+				this[property] = values[property];
 			}
 		}
 	}
@@ -46,8 +46,8 @@ export class AlternateMock extends Mock {
 	 * @param {string} key   The name of the error.
 	 * @param {Object} value The file type error object.
 	 */
-	set( key, value ) {
-		this[ key ] = value;
+	set(key, value) {
+		this[key] = value;
 	}
 
 	/**
@@ -55,8 +55,8 @@ export class AlternateMock extends Mock {
 	 *
 	 * @param {string} key The key of the value to unset.
 	 */
-	unset( key ) {
-		delete this[ key ];
+	unset(key) {
+		delete this[key];
 	}
 }
 
@@ -71,12 +71,12 @@ export class MockSelectionError extends Mock {
 	 *
 	 * @param {Object} errorData Error data.
 	 */
-	constructor( errorData = {} ) {
-		super( errorData );
+	constructor(errorData = {}) {
+		super(errorData);
 
-		for ( const name in errorData ) {
-			if ( errorData.hasOwnProperty( name ) ) {
-				this[ name ] = errorData[ name ];
+		for (const name in errorData) {
+			if (errorData.hasOwnProperty(name)) {
+				this[name] = errorData[name];
 			}
 		}
 	}

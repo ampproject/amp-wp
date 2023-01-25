@@ -8,10 +8,9 @@
 namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\GoogleFonts;
-use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for GoogleFonts class.
@@ -20,7 +19,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\GoogleFonts
  */
-class GoogleFontsTest extends WP_UnitTestCase {
+class GoogleFontsTest extends TestCase {
 
 	/**
 	 * Test instance.
@@ -34,15 +33,14 @@ class GoogleFontsTest extends WP_UnitTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->instance = new GoogleFonts();
 	}
 
 	public function test__construct() {
 		$this->assertInstanceOf( GoogleFonts::class, $this->instance );
-		$this->assertInstanceOf( Delayed::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 	}

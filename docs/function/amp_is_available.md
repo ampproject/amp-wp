@@ -12,7 +12,7 @@ Determine whether AMP is available for the current URL.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:344](/includes/amp-helper-functions.php#L344-L527)
+:link: [includes/amp-helper-functions.php:380](/includes/amp-helper-functions.php#L380-L563)
 
 <details>
 <summary>Show Code</summary>

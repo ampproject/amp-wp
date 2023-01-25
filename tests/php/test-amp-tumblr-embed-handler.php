@@ -6,21 +6,22 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for Tumblr embeds.
  *
  * @coversDefaultClass \AMP_Tumblr_Embed_Handler
  */
-class AMP_Tumblr_Embed_Handler_Test extends WP_UnitTestCase {
+class AMP_Tumblr_Embed_Handler_Test extends TestCase {
 
 	use MarkupComparison;
 
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		// Mock the HTTP request.
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
@@ -29,9 +30,9 @@ class AMP_Tumblr_Embed_Handler_Test extends WP_UnitTestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_request' ] );
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

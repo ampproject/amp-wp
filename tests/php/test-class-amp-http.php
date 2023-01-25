@@ -7,22 +7,20 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\TestCase;
 
 /**
  * Tests for AMP_HTTP.
  *
  * @covers AMP_HTTP
  */
-class Test_AMP_HTTP extends WP_UnitTestCase {
-
-	use AssertContainsCompatibility;
+class Test_AMP_HTTP extends TestCase {
 
 	/**
 	 * Set up before class.
 	 */
-	public static function setUpBeforeClass() {
-		parent::setUpBeforeClass();
+	public static function set_up_before_class() {
+		parent::set_up_before_class();
 		AMP_HTTP::$server_timing = true;
 	}
 
@@ -31,10 +29,10 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 *
 	 * @global WP_Scripts $wp_scripts
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
 		AMP_HTTP::$headers_sent          = [];
 		AMP_HTTP::$purged_amp_query_vars = [];
+		parent::tear_down();
 	}
 
 	/**
@@ -163,8 +161,8 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		foreach ( $all_query_vars as $key => $value ) {
 			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertStringContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertStringContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringContainsString( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringContainsString( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 
 		AMP_HTTP::$purged_amp_query_vars = [];
@@ -174,49 +172,78 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		foreach ( $bad_query_vars as $key => $value ) {
 			$this->assertArrayNotHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayNotHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertStringNotContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertStringNotContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringNotContainsString( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringNotContainsString( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		foreach ( $ok_query_vars as $key => $value ) {
 			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertStringContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertStringContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringContainsString( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringContainsString( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		// phpcs:enable WordPress.CSRF.NonceVerification.NoNonceVerification
+	}
+
+	/** @return array */
+	public function get_data_to_test_get_amp_cache_hosts() {
+		return [
+			'without_idn' => [
+				'has_idn'  => false,
+				'home_url' => 'https://example.com',
+				'site_url' => 'https://smile.example.org',
+				'expected' => [
+					'cdn.ampproject.org',
+					'example-com.cdn.ampproject.org',
+					'example-com.bing-amp.com',
+					'smile-example-org.cdn.ampproject.org',
+					'smile-example-org.bing-amp.com',
+				],
+			],
+			'with_idn'    => [
+				'has_idn'  => true,
+				'home_url' => 'https://example.com',
+				'site_url' => 'https://xn--938h.example.org',
+				'expected' => [
+					'cdn.ampproject.org',
+					'example-com.cdn.ampproject.org',
+					'example-com.bing-amp.com',
+					'🙂-example-org.cdn.ampproject.org',
+					'🙂-example-org.bing-amp.com',
+				],
+			],
+		];
 	}
 
 	/**
 	 * Test get_amp_cache_hosts().
 	 *
+	 * @dataProvider get_data_to_test_get_amp_cache_hosts
+	 *
 	 * @covers AMP_HTTP::get_amp_cache_hosts()
 	 * @covers AMP_HTTP::filter_allowed_redirect_hosts()
 	 */
-	public function test_get_amp_cache_hosts() {
+	public function test_get_amp_cache_hosts( $has_idn, $home_url, $site_url, $expected ) {
+		if ( $has_idn && ! ( defined( 'INTL_IDNA_VARIANT_2003' ) || defined( 'INTL_IDNA_VARIANT_UTS46' ) ) ) {
+			$this->markTestSkipped( 'Skipped because INTL not available.' );
+		}
 
 		// Note that filters are used instead of updating option because of WP_HOME and WP_SITEURL constants.
 		add_filter(
 			'home_url',
-			static function () {
-				return 'https://example.com';
+			static function () use ( $home_url ) {
+				return $home_url;
 			}
 		);
+
 		add_filter(
 			'site_url',
-			static function () {
-				return 'https://example.org';
+			static function () use ( $site_url ) {
+				return $site_url;
 			}
 		);
 
 		$hosts = AMP_HTTP::get_amp_cache_hosts();
 
-		$expected = [
-			'cdn.ampproject.org',
-			'example-org.cdn.ampproject.org',
-			'example-org.bing-amp.com',
-			'example-com.cdn.ampproject.org',
-			'example-com.bing-amp.com',
-		];
 		$this->assertEqualSets( $expected, $hosts );
 
 		$extra_allowed_redirect_hosts = [
@@ -383,10 +410,10 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		$_SERVER['REQUEST_METHOD']                        = 'POST';
 		AMP_HTTP::purge_amp_query_vars();
 		AMP_HTTP::handle_xhr_request();
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', [ 'AMP_HTTP', 'intercept_post_request_redirect' ] ) );
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_post_redirect', [ 'AMP_HTTP', 'filter_comment_post_redirect' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', [ AMP_HTTP::class, 'intercept_post_request_redirect' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_post_redirect', [ AMP_HTTP::class, 'filter_comment_post_redirect' ] ) );
 		$this->assertEquals(
-			[ 'AMP_HTTP', 'handle_wp_die' ],
+			[ AMP_HTTP::class, 'handle_wp_die' ],
 			apply_filters( 'wp_die_handler', '__return_true' )
 		);
 	}

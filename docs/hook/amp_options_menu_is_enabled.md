@@ -12,7 +12,7 @@ Filter whether to enable the AMP settings.
 
 ### Source
 
-:link: [src/Admin/OptionsMenu.php:79](/src/Admin/OptionsMenu.php#L79)
+:link: [src/Admin/OptionsMenu.php:91](/src/Admin/OptionsMenu.php#L91)
 
 <details>
 <summary>Show Code</summary>

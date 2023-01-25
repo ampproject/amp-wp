@@ -128,7 +128,6 @@ exports[`TemplateModeOption matches snapshot 1`] = `
             className="components-panel__arrow"
             focusable={false}
             height={24}
-            role="img"
             viewBox="0 0 24 24"
             width={24}
             xmlns="http://www.w3.org/2000/svg"
@@ -139,7 +138,24 @@ exports[`TemplateModeOption matches snapshot 1`] = `
           </svg>
         </span>
         <span
-          className="components-visually-hidden"
+          className="components-visually-hidden css-1mm2cvy-View e19lxcc00"
+          data-wp-c16t={true}
+          data-wp-component="VisuallyHidden"
+          style={
+            Object {
+              "WebkitClipPath": "inset( 50% )",
+              "border": 0,
+              "clip": "rect(1px, 1px, 1px, 1px)",
+              "clipPath": "inset( 50% )",
+              "height": "1px",
+              "margin": "-1px",
+              "overflow": "hidden",
+              "padding": 0,
+              "position": "absolute",
+              "width": "1px",
+              "wordWrap": "normal",
+            }
+          }
         >
           Standard
         </span>
@@ -376,7 +392,6 @@ exports[`TemplateModeOption matches snapshot 2`] = `
             className="components-panel__arrow"
             focusable={false}
             height={24}
-            role="img"
             viewBox="0 0 24 24"
             width={24}
             xmlns="http://www.w3.org/2000/svg"
@@ -387,7 +402,24 @@ exports[`TemplateModeOption matches snapshot 2`] = `
           </svg>
         </span>
         <span
-          className="components-visually-hidden"
+          className="components-visually-hidden css-1mm2cvy-View e19lxcc00"
+          data-wp-c16t={true}
+          data-wp-component="VisuallyHidden"
+          style={
+            Object {
+              "WebkitClipPath": "inset( 50% )",
+              "border": 0,
+              "clip": "rect(1px, 1px, 1px, 1px)",
+              "clipPath": "inset( 50% )",
+              "height": "1px",
+              "margin": "-1px",
+              "overflow": "hidden",
+              "padding": 0,
+              "position": "absolute",
+              "width": "1px",
+              "wordWrap": "normal",
+            }
+          }
         >
           Reader
         </span>
@@ -400,13 +432,9 @@ exports[`TemplateModeOption matches snapshot 2`] = `
         className="template-mode-selection__details"
       >
         <p>
-          <span
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Reader info",
-              }
-            }
-          />
+          <span>
+            Reader info
+          </span>
            
           <a
             href="https://amp-wp.org/documentation/getting-started/reader/"
@@ -656,7 +684,6 @@ exports[`TemplateModeOption matches snapshot 3`] = `
             className="components-panel__arrow"
             focusable={false}
             height={24}
-            role="img"
             viewBox="0 0 24 24"
             width={24}
             xmlns="http://www.w3.org/2000/svg"
@@ -667,7 +694,24 @@ exports[`TemplateModeOption matches snapshot 3`] = `
           </svg>
         </span>
         <span
-          className="components-visually-hidden"
+          className="components-visually-hidden css-1mm2cvy-View e19lxcc00"
+          data-wp-c16t={true}
+          data-wp-component="VisuallyHidden"
+          style={
+            Object {
+              "WebkitClipPath": "inset( 50% )",
+              "border": 0,
+              "clip": "rect(1px, 1px, 1px, 1px)",
+              "clipPath": "inset( 50% )",
+              "height": "1px",
+              "margin": "-1px",
+              "overflow": "hidden",
+              "padding": 0,
+              "position": "absolute",
+              "width": "1px",
+              "wordWrap": "normal",
+            }
+          }
         >
           Reader
         </span>
@@ -680,13 +724,9 @@ exports[`TemplateModeOption matches snapshot 3`] = `
         className="template-mode-selection__details"
       >
         <p>
-          <span
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": "Component details",
-              }
-            }
-          />
+          <span>
+            Component details
+          </span>
            
           <a
             href="https://amp-wp.org/documentation/getting-started/reader/"

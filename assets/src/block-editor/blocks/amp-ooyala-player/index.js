@@ -12,14 +12,11 @@ import save from './save';
 export const name = 'amp/amp-ooyala-player';
 
 export const settings = {
-	title: __( 'AMP Ooyala Player', 'amp' ),
-	description: __( 'Displays an Ooyala video.', 'amp' ),
+	title: __('AMP Ooyala Player', 'amp'),
+	description: __('Displays an Ooyala video.', 'amp'),
 	category: 'embed',
 	icon: 'embed-generic',
-	keywords: [
-		__( 'Embed', 'amp' ),
-		__( 'Ooyala video', 'amp' ),
-	],
+	keywords: [__('Embed', 'amp'), __('Ooyala video', 'amp')],
 
 	// @todo Add data-config attribute?
 	attributes: {

@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\Amp;
 use AmpProject\Dom\Document;
 
 /**
@@ -78,7 +79,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $this->args['nav_container_toggle_class'] ) ) {
 			$nav_el->setAttribute(
-				Document::AMP_BIND_DATA_ATTR_PREFIX . 'class',
+				Amp::BIND_DATA_ATTR_PREFIX . 'class',
 				sprintf(
 					"%s + ( $state_id ? %s : '' )",
 					wp_json_encode( $nav_el->getAttribute( 'class' ) ),
@@ -104,10 +105,10 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		$button_on = sprintf( "tap:AMP.setState({ $state_id: ! $state_id })" );
 		$button_el->setAttribute( 'on', $button_on );
 		$button_el->setAttribute( 'aria-expanded', 'false' );
-		$button_el->setAttribute( Document::AMP_BIND_DATA_ATTR_PREFIX . 'aria-expanded', "$state_id ? 'true' : 'false'" );
+		$button_el->setAttribute( Amp::BIND_DATA_ATTR_PREFIX . 'aria-expanded', "$state_id ? 'true' : 'false'" );
 		if ( ! empty( $this->args['menu_button_toggle_class'] ) ) {
 			$button_el->setAttribute(
-				Document::AMP_BIND_DATA_ATTR_PREFIX . 'class',
+				Amp::BIND_DATA_ATTR_PREFIX . 'class',
 				sprintf( "%s + ( $state_id ? %s : '' )", wp_json_encode( $button_el->getAttribute( 'class' ) ), wp_json_encode( ' ' . $this->args['menu_button_toggle_class'] ) )
 			);
 		}

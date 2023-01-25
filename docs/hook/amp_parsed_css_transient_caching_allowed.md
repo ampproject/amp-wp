@@ -14,13 +14,13 @@ When this is filtered to be false, parsed CSS will not be stored in transients. 
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1507](/includes/amp-helper-functions.php#L1507)
+:link: [includes/amp-helper-functions.php:1708](/includes/amp-helper-functions.php#L1708)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
+$sanitizers[ AMP_Style_Sanitizer::class ]['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 ```
 
 </details>

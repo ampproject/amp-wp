@@ -7,12 +7,12 @@
 
 namespace AmpProject\AmpWP;
 
+use AMP_HTTP;
 use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\Attribute;
-use AMP_Theme_Support;
-use AMP_HTTP;
+use AmpProject\Html\Attribute;
 
 /**
  * Service for redirecting mobile users to the AMP version of a page.
@@ -64,7 +64,15 @@ final class MobileRedirection implements Service, Registerable {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
-		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && ! amp_is_canonical() ) {
+		$is_mobile_redirect_enabled = AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT );
+		$sandboxing_level           = amp_get_sandboxing_level();
+
+		// Add alternative link if mobile redirection is enabled or sandboxing level is set to loose or moderate.
+		if ( ! amp_is_canonical() && ( $is_mobile_redirect_enabled || ( 1 === $sandboxing_level || 2 === $sandboxing_level ) ) ) {
+			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
+		}
+
+		if ( $is_mobile_redirect_enabled && ! amp_is_canonical() ) {
 			add_action( 'template_redirect', [ $this, 'redirect' ], PHP_INT_MAX );
 
 			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
@@ -88,7 +96,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return array Defaults.
 	 */
 	public function filter_default_options( $defaults ) {
-		$defaults[ Option::MOBILE_REDIRECT ] = false;
+		$defaults[ Option::MOBILE_REDIRECT ] = true;
 		return $defaults;
 	}
 
@@ -144,11 +152,9 @@ final class MobileRedirection implements Service, Registerable {
 		}
 
 		// Print the mobile switcher styles.
-		add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
-		add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] ); // For legacy Reader mode theme.
+		$this->add_mobile_switcher_head_hooks();
 
 		if ( ! amp_is_request() ) {
-			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
 			if ( $js ) {
 				// Add mobile redirection script.
 				add_action( 'wp_head', [ $this, 'add_mobile_redirect_script' ], ~PHP_INT_MAX );
@@ -165,19 +171,41 @@ final class MobileRedirection implements Service, Registerable {
 			}
 
 			// Add a link to the footer to allow for navigation to the AMP version.
-			add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
+			$this->add_mobile_switcher_footer_hooks();
 		} else {
 			if ( ! $js && $this->is_redirection_disabled_via_cookie() ) {
 				$this->set_mobile_redirection_disabled_cookie( false );
 			}
 
-			add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
-			add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
+			$this->add_a2a_linking_hooks();
 
 			// Add a link to the footer to allow for navigation to the non-AMP version.
-			add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
-			add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
+			$this->add_mobile_switcher_footer_hooks();
 		}
+	}
+
+	/**
+	 * Add mobile version switcher head hooks.
+	 */
+	private function add_mobile_switcher_head_hooks() {
+		add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
+		add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] ); // For legacy Reader mode theme.
+	}
+
+	/**
+	 * Add mobile version switcher footer hooks.
+	 */
+	private function add_mobile_switcher_footer_hooks() {
+		add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
+		add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
+	}
+
+	/**
+	 * Add AMP-to-AMP linking hooks.
+	 */
+	private function add_a2a_linking_hooks() {
+		add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
+		add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
 	}
 
 	/**
@@ -268,7 +296,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return bool True if mobile redirection should be done, false otherwise.
 	 */
 	public function is_using_client_side_redirection() {
-		if ( is_customize_preview() || amp_is_dev_mode() ) {
+		if ( is_customize_preview() || Services::has( 'admin.paired_browsing' ) ) {
 			return true;
 		}
 
@@ -481,10 +509,12 @@ final class MobileRedirection implements Service, Registerable {
 	 * @link https://developers.google.com/search/mobile-sites/mobile-seo/separate-urls#annotation-in-the-html
 	 */
 	public function add_mobile_alternative_link() {
-		printf(
-			'<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">',
-			esc_url( $this->get_current_amp_url() )
-		);
+		if ( amp_is_available() && ! amp_is_request() ) {
+			printf(
+				'<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">',
+				esc_url( $this->get_current_amp_url() )
+			);
+		}
 	}
 
 	/**
@@ -553,11 +583,11 @@ final class MobileRedirection implements Service, Registerable {
 
 		$is_amp = amp_is_request();
 		if ( $is_amp ) {
-			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
+			$rel  = [ Attribute::REL_NOFOLLOW ];
 			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $this->paired_routing->remove_endpoint( amp_get_current_url() ) );
 			$text = __( 'Exit mobile version', 'amp' );
 		} else {
-			$rel  = [ Attribute::REL_AMPHTML ];
+			$rel  = [];
 			$url  = $this->get_current_amp_url();
 			$text = __( 'Go to mobile version', 'amp' );
 		}
@@ -573,6 +603,10 @@ final class MobileRedirection implements Service, Registerable {
 		 * @param string $text Link text to display.
 		 */
 		$text = apply_filters( 'amp_mobile_version_switcher_link_text', $text );
+
+		if ( empty( $text ) ) {
+			return;
+		}
 
 		$hide_switcher = (
 			// The switcher must always be shown in the AMP version to allow accessing the non-AMP version.
@@ -591,19 +625,32 @@ final class MobileRedirection implements Service, Registerable {
 			</a>
 		</div>
 
-		<?php if ( amp_is_dev_mode() && ( ! is_customize_preview() || AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) ) : ?>
-			<?php
-			// Note that the switcher link is disabled in Reader mode because there is a separate toggle to switch versions.
+		<?php
+		// Note that the switcher link is disabled in Reader mode because there is a separate toggle to switch versions,
+		// and because there are controls which are AMP-specific which don't apply when switching between versions.
+		$is_amp_reader_customizer = (
+			is_customize_preview()
+			&&
+			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+		);
+
+		$is_possibly_paired_browsing = (
+			Services::has( 'admin.paired_browsing' )
+			&&
+			! is_customize_preview()
+		);
+
+		if ( $is_amp_reader_customizer || $is_possibly_paired_browsing ) :
 			$exports = [
-				'containerId'          => $container_id,
-				'isCustomizePreview'   => is_customize_preview(),
-				'notApplicableMessage' => __( 'This link is not applicable in this context. It remains here for preview purposes only.', 'amp' ),
+				'containerId'              => $container_id,
+				'isReaderCustomizePreview' => $is_amp_reader_customizer,
+				'notApplicableMessage'     => __( 'This link is not applicable in this context. It remains here for preview purposes only.', 'amp' ),
 			];
 			?>
 			<script data-ampdevmode>
-			(function( { containerId, isCustomizePreview, notApplicableMessage } ) {
+			(function( { containerId, isReaderCustomizePreview, notApplicableMessage } ) {
 				addEventListener( 'DOMContentLoaded', () => {
-					if ( isCustomizePreview || [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
+					if ( isReaderCustomizePreview || [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
 						const link = document.querySelector( `#${containerId} a[href]` );
 						link.style.cursor = 'not-allowed';
 						link.addEventListener( 'click', ( event ) => {

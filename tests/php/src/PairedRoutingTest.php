@@ -13,7 +13,6 @@ use AmpProject\AmpWP\PairedUrlStructure\LegacyReaderUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\LegacyTransitionalUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\PathSuffixUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\QueryVarUrlStructure;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Tests\Fixture\DummyPairedUrlStructure;
@@ -24,23 +23,22 @@ use Exception;
 /** @coversDefaultClass \AmpProject\AmpWP\PairedRouting */
 class PairedRoutingTest extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/** @var PairedRouting */
 	private $instance;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		unset( $_SERVER['HTTPS'] );
 		$this->instance = $this->injector->make( PairedRouting::class );
 	}
 
-	public function tearDown() {
+	public function tear_down() {
 		unset( $_SERVER['REQUEST_URI'] );
-		parent::tearDown();
 		unregister_taxonomy( amp_get_slug() );
 		unregister_post_type( amp_get_slug() );
+		parent::tear_down();
 	}
 
 	/** @covers ::__construct() */
@@ -248,7 +246,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 
 	/** @covers ::get_endpoint_path_slug_conflicts() */
 	public function test_get_endpoint_path_slug_conflicts() {
-		$this->assertCount( 0, $this->instance->get_endpoint_path_slug_conflicts() );
+		$this->assertNull( $this->instance->get_endpoint_path_slug_conflicts() );
 
 		// Posts.
 		self::factory()->post->create( [ 'post_name' => amp_get_slug() ] );
@@ -276,21 +274,28 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 			]
 		);
 		$this->assertEquals(
-			[ 'posts', 'terms', 'users' ],
+			[ 'posts', 'terms', 'user' ],
 			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
 		);
 
 		// Post types.
 		register_post_type( amp_get_slug() );
 		$this->assertEquals(
-			[ 'posts', 'terms', 'users', 'post_types' ],
+			[ 'posts', 'terms', 'user', 'post_type' ],
 			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
 		);
 
 		// Taxonomies.
 		register_taxonomy( amp_get_slug(), 'post' );
 		$this->assertEquals(
-			[ 'posts', 'terms', 'users', 'post_types', 'taxonomies' ],
+			[ 'posts', 'terms', 'user', 'post_type', 'taxonomy' ],
+			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
+		);
+
+		// Rewrite endpoint.
+		add_rewrite_endpoint( 'amp', E_ALL );
+		$this->assertEquals(
+			[ 'posts', 'terms', 'user', 'post_type', 'taxonomy', 'rewrite' ],
 			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
 		);
 	}
@@ -608,8 +613,10 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 1000, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
 		if ( $using_path_suffix ) {
 			$this->assertEquals( 0, has_filter( 'get_pagenum_link', [ $this->instance, 'filter_get_pagenum_link' ] ) );
+			$this->assertEquals( 0, has_filter( 'redirect_canonical', [ $this->instance, 'filter_redirect_canonical_to_fix_cpage_requests' ] ) );
 		} else {
 			$this->assertFalse( has_filter( 'get_pagenum_link', [ $this->instance, 'filter_get_pagenum_link' ] ) );
+			$this->assertFalse( has_filter( 'redirect_canonical', [ $this->instance, 'filter_redirect_canonical_to_fix_cpage_requests' ] ) );
 		}
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 	}
@@ -696,7 +703,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEmpty( get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
 
 		set_current_screen( 'options-permalink' );
-		$this->assertStringContains( 'notice-info', get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
+		$this->assertStringContainsString( 'notice-info', get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
 	}
 
 	/** @covers ::is_using_permalinks() */
@@ -1071,6 +1078,28 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	}
 
 	/** @covers ::redirect_extraneous_paired_endpoint() */
+	public function test_redirect_extraneous_paired_endpoint_canonical_when_non_amp_query_var_present() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+
+		$current_url = get_permalink( self::factory()->post->create() ) . '?test=one+two%20three';
+		$this->go_to( $current_url );
+
+		$this->assertTrue( amp_is_canonical() );
+
+		$redirected_url = null;
+		add_filter(
+			'wp_redirect',
+			static function ( $redirect_url ) use ( &$redirected_url ) {
+				$redirected_url = $redirect_url;
+				return null;
+			}
+		);
+		$this->instance->redirect_extraneous_paired_endpoint();
+		$this->assertNull( $redirected_url, "Expected to remain at <$current_url> but hot redirected to <$redirected_url>." );
+	}
+
+	/** @covers ::redirect_extraneous_paired_endpoint() */
 	public function test_redirect_extraneous_paired_endpoint_canonical_404_due_to_suffix() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
@@ -1226,5 +1255,70 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 			$date_archive_url,
 			$redirected_url
 		);
+	}
+
+	/** @return array */
+	public function get_data_to_test_filter_redirect_canonical_to_fix_cpage_requests() {
+		return [
+			'trailing_slashed'                            => [
+				'/comment-page-2/%s/comment-page-2/',
+				'/comment-page-2/%s/',
+			],
+			'untrailing_slashed'                          => [
+				'/comment-page-2/%s/comment-page-2',
+				'/comment-page-2/%s',
+			],
+			'trailing_slashed_with_query_param'           => [
+				'/comment-page-2/%s/comment-page-2/?queryParam=hello',
+				'/comment-page-2/%s/?queryParam=hello',
+			],
+			'untrailing_slashed_with_query_param'         => [
+				'/comment-page-2/%s/comment-page-2?queryParam=hello',
+				'/comment-page-2/%s?queryParam=hello',
+			],
+			'trailing_slashed_with_fragment_identifier'   => [
+				'/comment-page-2/%s/comment-page-2/#footer',
+				'/comment-page-2/%s/#footer',
+			],
+			'untrailing_slashed_with_fragment_identifier' => [
+				'/comment-page-2/%s/comment-page-2#footer',
+				'/comment-page-2/%s#footer',
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_filter_redirect_canonical_to_fix_cpage_requests
+	 *
+	 * @param string $input  Input.
+	 * @param string $output Output.
+	 *
+	 * @covers ::filter_redirect_canonical_to_fix_cpage_requests()
+	 */
+	public function test_filter_redirect_canonical_to_fix_cpage_requests( $input, $output ) {
+		$post = self::factory()->post->create();
+		self::factory()->comment->create_many( 10, [ 'comment_post_ID' => $post ] );
+		update_option( 'page_comments', 1 );
+		update_option( 'comments_per_page', 5 );
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+
+		$permalink = get_permalink( $post );
+		$amp_slug  = amp_get_slug();
+		foreach (
+			[ Option::PAIRED_URL_STRUCTURE_LEGACY_READER, Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX ]
+			as
+			$paired_url_structure
+		) {
+			AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $paired_url_structure );
+
+			$input_url       = untrailingslashit( $permalink ) . sprintf( $input, $amp_slug );
+			$expected_result = untrailingslashit( $permalink ) . sprintf( $output, $amp_slug );
+
+			$this->go_to( $input_url );
+
+			$output_url = $this->instance->filter_redirect_canonical_to_fix_cpage_requests( $input_url );
+
+			$this->assertEquals( $expected_result, $output_url, "Failed for $paired_url_structure" );
+		}
 	}
 }

@@ -16,7 +16,7 @@ Determine whether the given URL has the endpoint suffix.
 
 ### Source
 
-:link: [src/PairedUrl.php:36](/src/PairedUrl.php#L36-L44)
+:link: [src/PairedUrl.php:38](/src/PairedUrl.php#L38-L46)
 
 <details>
 <summary>Show Code</summary>

@@ -7,14 +7,17 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
-use AMP_Theme_Support;
+use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Error_Taxonomy;
+use AMP_Validation_Manager;
+use AmpProject\AmpWP\DependencySupport;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\LoadingError;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Services;
 
 /**
  * OptionsMenu class.
@@ -60,6 +63,15 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 */
 	private $rest_preloader;
 
+	/** @var LoadingError */
+	private $loading_error;
+
+	/** @var SiteHealth */
+	private $site_health;
+
+	/** @var DependencySupport */
+	private $dependency_support;
+
 	/**
 	 * Check whether the conditional object is currently needed.
 	 *
@@ -82,14 +94,20 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	/**
 	 * OptionsMenu constructor.
 	 *
-	 * @param GoogleFonts   $google_fonts An instance of the GoogleFonts service.
-	 * @param ReaderThemes  $reader_themes An instance of the ReaderThemes class.
-	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
+	 * @param GoogleFonts       $google_fonts An instance of the GoogleFonts service.
+	 * @param ReaderThemes      $reader_themes An instance of the ReaderThemes class.
+	 * @param RESTPreloader     $rest_preloader An instance of the RESTPreloader class.
+	 * @param DependencySupport $dependency_support An instance of the DependencySupport class.
+	 * @param LoadingError      $loading_error An instance of the LoadingError class.
+	 * @param SiteHealth        $site_health An instance of the SiteHealth class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader ) {
-		$this->google_fonts   = $google_fonts;
-		$this->reader_themes  = $reader_themes;
-		$this->rest_preloader = $rest_preloader;
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader, DependencySupport $dependency_support, LoadingError $loading_error, SiteHealth $site_health ) {
+		$this->google_fonts       = $google_fonts;
+		$this->reader_themes      = $reader_themes;
+		$this->rest_preloader     = $rest_preloader;
+		$this->dependency_support = $dependency_support;
+		$this->loading_error      = $loading_error;
+		$this->site_health        = $site_health;
 	}
 
 	/**
@@ -169,6 +187,21 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	}
 
 	/**
+	 * Gets analytics vendors list from data directory.
+	 */
+	public function get_analytics_vendors() {
+		$vendors_list_file = AMP__DIR__ . '/includes/ecosystem-data/analytics-vendors.php';
+
+		if ( ! file_exists( $vendors_list_file ) ) {
+			return []; // @codeCoverageIgnore
+		}
+
+		$vendors_list = require $vendors_list_file;
+
+		return $vendors_list;
+	}
+
+	/**
 	 * Enqueues settings page assets.
 	 *
 	 * @since 2.0
@@ -182,8 +215,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
-
-		$amp_slug_customization_watcher = Services::get( 'amp_slug_customization_watcher' );
 
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
@@ -210,30 +241,54 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
-		$theme           = wp_get_theme();
-		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
+		$theme             = wp_get_theme();
+		$is_reader_theme   = $this->reader_themes->theme_data_exists( get_stylesheet() );
+		$page_cache_detail = $this->site_health->get_page_cache_detail( true );
+
+		$amp_validated_urls_link = admin_url(
+			add_query_arg(
+				[ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ],
+				'edit.php'
+			)
+		);
+
+		$amp_error_index_link = admin_url(
+			add_query_arg(
+				[
+					'taxonomy'  => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+					'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				],
+				'edit-tags.php'
+			)
+		);
 
 		$js_data = [
-			'AMP_QUERY_VAR'               => amp_get_slug(),
-			'CURRENT_THEME'               => [
+			'AMP_COMPATIBLE_THEMES_URL'          => current_user_can( 'install_themes' ) ? admin_url( '/theme-install.php?browse=amp-compatible' ) : 'https://amp-wp.org/ecosystem/themes/',
+			'AMP_COMPATIBLE_PLUGINS_URL'         => current_user_can( 'install_plugins' ) ? admin_url( '/plugin-install.php?tab=amp-compatible' ) : 'https://amp-wp.org/ecosystem/plugins/',
+			'AMP_QUERY_VAR'                      => amp_get_slug(),
+			'AMP_SCAN_IF_STALE'                  => QueryVar::AMP_SCAN_IF_STALE,
+			'CURRENT_THEME'                      => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
 				'is_reader_theme' => $is_reader_theme,
 				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
-			'OPTIONS_REST_PATH'           => '/amp/v1/options',
-			'READER_THEMES_REST_PATH'     => '/amp/v1/reader-themes',
-			'IS_CORE_THEME'               => in_array(
-				get_stylesheet(),
-				AMP_Core_Theme_Sanitizer::get_supported_themes(),
-				true
-			),
-			'LEGACY_THEME_SLUG'           => ReaderThemes::DEFAULT_READER_THEME,
-			'USING_FALLBACK_READER_THEME' => $this->reader_themes->using_fallback_theme(),
-			'THEME_SUPPORT_ARGS'          => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_SUPPORTS_READER_MODE'  => AMP_Theme_Support::supports_reader_mode(),
-			'UPDATES_NONCE'               => wp_create_nonce( 'updates' ),
+			'HAS_DEPENDENCY_SUPPORT'             => $this->dependency_support->has_support(),
+			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
+			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
+			'SCANNABLE_URLS_REST_PATH'           => '/amp/v1/scannable-urls',
+			'LEGACY_THEME_SLUG'                  => ReaderThemes::DEFAULT_READER_THEME,
+			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
+			'UPDATES_NONCE'                      => current_user_can( 'install_themes' ) ? wp_create_nonce( 'updates' ) : '',
+			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+			'USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE' => UserRESTEndpointExtension::USER_FIELD_REVIEW_PANEL_DISMISSED_FOR_TEMPLATE_MODE,
+			'USERS_RESOURCE_REST_PATH'           => '/wp/v2/users',
+			'VALIDATE_NONCE'                     => AMP_Validation_Manager::has_cap() ? AMP_Validation_Manager::get_amp_validate_nonce() : '',
+			'VALIDATED_URLS_LINK'                => $amp_validated_urls_link,
+			'ERROR_INDEX_LINK'                   => $amp_error_index_link,
+			'HAS_PAGE_CACHING'                   => ( is_array( $page_cache_detail ) && 'good' === $page_cache_detail['status'] ),
+			'ANALYTICS_VENDORS_LIST'             => $this->get_analytics_vendors(),
 		];
 
 		wp_add_inline_script(
@@ -273,7 +328,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				<?php settings_errors(); ?>
 
 				<div class="amp amp-settings">
-					<div id="amp-settings-root"></div>
+					<div id="amp-settings-root">
+						<?php $this->loading_error->render(); ?>
+					</div>
 				</div>
 			</form>
 		</div>
@@ -287,7 +344,23 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$paths = [
 			'/amp/v1/options',
 			'/amp/v1/reader-themes',
+			add_query_arg(
+				'_fields',
+				[ 'url', 'amp_url', 'type', 'label', 'validation_errors', 'stale' ],
+				'/amp/v1/scannable-urls'
+			),
+			add_query_arg(
+				'_fields',
+				[ 'author', 'name', 'plugin', 'status', 'version' ],
+				'/wp/v2/plugins'
+			),
 			'/wp/v2/settings',
+			add_query_arg(
+				'_fields',
+				[ 'author', 'name', 'status', 'stylesheet', 'template', 'version' ],
+				'/wp/v2/themes'
+			),
+			'/wp/v2/users/me',
 		];
 
 		foreach ( $paths as $path ) {

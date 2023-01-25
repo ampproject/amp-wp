@@ -1,45 +1,130 @@
-
 /**
  * Internal dependencies
  */
-import { testCloseButton, cleanUpSettings, moveToDoneScreen } from '../../utils/onboarding-wizard-utils';
+import {
+	testCloseButton,
+	cleanUpSettings,
+	moveToDoneScreen,
+	scrollToElement,
+} from '../../utils/onboarding-wizard-utils';
 
-describe( 'Done', () => {
-	afterEach( async () => {
+async function testCommonDoneStepElements() {
+	await expect(page).toMatchElement('h1', { text: 'Done' });
+	await expect(page).toMatchElement('h2', { text: 'Review' });
+	await expect(page).toMatchElement('h2', { text: 'Need help?' });
+
+	await expect(page).toMatchElement('.done__list');
+	await expect('.done__list li').countToBe(3);
+	await expect(page).toMatchElement('.done__list li', {
+		text: /support forums/i,
+	});
+	await expect(page).toMatchElement('.done__list li', {
+		text: /different template mode/i,
+	});
+	await expect(page).toMatchElement('.done__list li', {
+		text: /how the AMP plugin works/i,
+	});
+
+	await expect(page).toMatchElement('p', { text: /Browse your site/i });
+	await expect(page).toMatchElement('.done__preview-iframe');
+
+	// Checks for admin bar in iframe phone preview.
+	const iframeElement = await page.$(
+		'iframe[name="amp-wizard-completion-preview"]'
+	);
+	const previewFrame = await iframeElement.contentFrame();
+	await expect(previewFrame).not.toMatchElement('#wpadminbar');
+
+	await expect('.done__links-container a').not.countToBe(0);
+
+	const originalIframeSrc = await page.$eval('.done__preview-iframe', (e) =>
+		e.getAttribute('src')
+	);
+
+	await Promise.all([
+		scrollToElement({
+			selector: '.done__links-container a:not([class*="--active"])',
+			click: true,
+		}),
+		page.waitForXPath(
+			`//iframe[@class="done__preview-iframe"][not(@src="${originalIframeSrc}")]`
+		),
+	]);
+
+	const updatedIframeSrc = await page.$eval('.done__preview-iframe', (e) =>
+		e.getAttribute('src')
+	);
+
+	expect(updatedIframeSrc).not.toBe(originalIframeSrc);
+}
+
+describe('Done', () => {
+	afterEach(async () => {
 		await cleanUpSettings();
-	} );
+	});
 
-	it( 'renders standard mode done screen', async () => {
-		await moveToDoneScreen( { mode: 'standard' } );
+	it('renders standard mode site review screen', async () => {
+		await moveToDoneScreen({ mode: 'standard' });
 
-		testCloseButton( { exists: false } );
+		testCloseButton({ exists: false });
 
-		await expect( page ).toMatchElement( 'h1', { text: 'Your site is ready' } );
-		await expect( page ).toMatchElement( 'p', { text: /standard mode/i } );
-		await expect( page ).toMatchElement( '.phone iframe' );
-		await expect( page ).toMatchElement( 'a', { text: 'Browse AMP' } );
-	} );
+		await testCommonDoneStepElements();
 
-	it( 'renders transitional mode done screen', async () => {
-		await moveToDoneScreen( { mode: 'transitional' } );
+		await expect(page).toMatchElement('p', { text: /Standard mode/i });
+		await expect(page).not.toMatchElement(
+			'.done__preview-container input[type="checkbox"]'
+		);
+	});
 
-		testCloseButton( { exists: false } );
+	it('renders transitional mode site review screen', async () => {
+		await moveToDoneScreen({ mode: 'transitional' });
 
-		await expect( page ).toMatchElement( 'h1', { text: 'Congratulations!' } );
-		await expect( page ).toMatchElement( 'p', { text: /transitional mode/i } );
-		await expect( page ).toMatchElement( '.phone iframe' );
-		await expect( page ).toMatchElement( 'a', { text: 'Browse AMP' } );
-	} );
+		testCloseButton({ exists: false });
 
-	it( 'renders reader mode done screen', async () => {
-		await moveToDoneScreen( { mode: 'reader' } );
+		await testCommonDoneStepElements();
 
-		testCloseButton( { exists: true } );
+		await expect(page).toMatchElement('p', { text: /Transitional mode/i });
+		await expect(page).toMatchElement(
+			'.done__preview-container input[type="checkbox"]:checked'
+		);
 
-		await expect( page ).toMatchElement( 'h1', { text: 'Congratulations!' } );
-		await expect( page ).toMatchElement( '.phone iframe' );
-		await expect( page ).toMatchElement( 'p', { text: /reader mode/i } );
-		await expect( page ).toMatchElement( 'a', { text: 'Browse AMP' } );
-		await expect( page ).toMatchElement( 'a', { text: 'Customize' } );
-	} );
-} );
+		const originalIframeSrc = await page.$eval(
+			'.done__preview-iframe',
+			(e) => e.getAttribute('src')
+		);
+
+		await Promise.all([
+			scrollToElement({
+				selector: '.done__preview-container input[type="checkbox"]',
+				click: true,
+			}),
+			page.waitForXPath(
+				`//iframe[@class="done__preview-iframe"][not(@src="${originalIframeSrc}")]`
+			),
+		]);
+
+		const updatedIframeSrc = await page.$eval(
+			'.done__preview-iframe',
+			(e) => e.getAttribute('src')
+		);
+
+		expect(updatedIframeSrc).not.toBe(originalIframeSrc);
+
+		await expect(page).toMatchElement(
+			'.done__preview-container input[type="checkbox"]:not(:checked)'
+		);
+	});
+
+	it('renders reader mode site review screen', async () => {
+		await moveToDoneScreen({ mode: 'reader' });
+
+		testCloseButton({ exists: true });
+
+		await testCommonDoneStepElements();
+
+		await expect(page).toMatchElement('p', { text: /Reader mode/i });
+		await expect(page).toMatchElement(
+			'.done__preview-container input[type="checkbox"]'
+		);
+	});
+});

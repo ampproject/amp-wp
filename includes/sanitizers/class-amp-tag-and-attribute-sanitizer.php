@@ -7,12 +7,16 @@
  * @package AMP
  */
 
-use AmpProject\Attribute;
+use AmpProject\Amp;
+use AmpProject\AmpWP\ValidationExemption;
 use AmpProject\CssLength;
+use AmpProject\DevMode;
 use AmpProject\Dom\Document;
-use AmpProject\Layout;
+use AmpProject\Dom\Element;
 use AmpProject\Extension;
-use AmpProject\Tag;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
+use AmpProject\Layout;
 
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.
@@ -179,6 +183,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			'amp_allowed_tags'                => AMP_Allowed_Tags_Generated::get_allowed_tags(),
 			'amp_globally_allowed_attributes' => AMP_Allowed_Tags_Generated::get_allowed_attributes(),
 			'amp_layout_allowed_attributes'   => AMP_Allowed_Tags_Generated::get_layout_attributes(),
+			'prefer_bento'                    => false,
 		];
 
 		parent::__construct( $dom, $args );
@@ -223,10 +228,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.7
 	 * @see amp_register_default_scripts()
 	 *
-	 * @return array() Returns component name as array key and true as value (or JavaScript URL string),
-	 *                  respectively. When true then the default component script URL will be used.
-	 *                  Will return an empty array if sanitization has yet to be run
-	 *                  or if it did not find any HTML elements to convert to AMP equivalents.
+	 * @return array Returns component name as array key and true as value (or JavaScript URL string),
+	 *               respectively. When true then the default component script URL will be used.
+	 *               Will return an empty array if sanitization has yet to be run
+	 *               or if it did not find any HTML elements to convert to AMP equivalents.
 	 */
 	public function get_scripts() {
 		return array_fill_keys( array_unique( $this->script_components ), true );
@@ -356,7 +361,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					'',
 					[
 						'^',
-						preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ), // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
+						preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-', '/' ),
 						'(' . implode( '|', array_merge( $extension_spec['version'], [ 'latest' ] ) ) . ')',
 						'\.js$',
 					]
@@ -418,7 +423,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// If it's not an allowed tag, replace the node with it's children.
 			$this->replace_node_with_children( $node );
 
-			// Return early since this node no longer exists.
+			// Return early since we don't know anything about this node to validate it.
 			return null;
 		}
 
@@ -430,6 +435,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$validation_errors          = [];
 		$rule_spec_list             = $this->allowed_tags[ $node->nodeName ];
 		foreach ( $rule_spec_list as $id => $rule_spec ) {
+			// When there are multiple versions of a rule spec, with one specifically for Bento and another for
+			// non-Bento make sure that only the preferred version is considered. Otherwise, the wrong requires_extension
+			// constraint may be applied.
+			if (
+				isset( $rule_spec['tag_spec']['bento'] )
+				&&
+				$this->args['prefer_bento'] !== $rule_spec['tag_spec']['bento']
+			) {
+				continue;
+			}
+
 			$validity = $this->validate_tag_spec_for_node( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] );
 			if ( true === $validity ) {
 				$rule_spec_list_to_validate[ $id ] = $this->get_rule_spec_list_to_validate( $node, $rule_spec );
@@ -814,7 +830,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Check if element needs amp-bind component.
 		if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
 			foreach ( $node->attributes as $name => $value ) {
-				if ( Document::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
+				if ( Amp::BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
 					$script_components[] = 'amp-bind';
 					break;
 				}
@@ -1078,6 +1094,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			foreach ( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $attr_alt_name ) {
 				$attr_spec_list[ $attr_alt_name ] = $attr_spec_list[ $attr_name ];
+
+				// Let alternate attribute reciprocally have this attribute as an alternative.
+				$attr_spec_list[ $attr_alt_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] = [ $attr_name ];
 			}
 		}
 
@@ -1604,7 +1623,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string     $attr_name      Attribute name.
 	 * @param array[]    $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return int:
+	 * @return int
 	 *      - AMP_Rule_Spec::PASS - $attr_name is mandatory and it exists
 	 *      - AMP_Rule_Spec::FAIL - $attr_name is mandatory, but doesn't exist
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name is not mandatory
@@ -1654,7 +1673,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string     $attr_name      Attribute name.
 	 * @param array      $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return int:
+	 * @return int
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1729,7 +1748,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string       $attr_name      Attribute name.
 	 * @param array|string $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return int:
+	 * @return int
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1774,7 +1793,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return int:
+	 * @return int
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1784,7 +1803,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Check 'value_regex' - case sensitive regex match.
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ];
-			$rule_value = str_replace( '/', '\\/', $rule_value );
 
 			/*
 			 * The regex pattern has '^' and '$' though they are not in the AMP spec.
@@ -1808,7 +1826,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return int:
+	 * @return int
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1818,7 +1836,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Check 'value_regex_casei' - case insensitive regex match.
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ];
-			$rule_value = str_replace( '/', '\\/', $rule_value );
 
 			// See note above regarding the '^' and '$' that are added here.
 			if ( preg_match( '/^(' . $rule_value . ')$/ui', $node->getAttribute( $attr_name ) ) ) {
@@ -1839,7 +1856,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return int:
+	 * @return int
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1911,7 +1928,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return int:
+	 * @return int
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1982,7 +1999,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return int:
+	 * @return int
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -2040,7 +2057,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return int:
+	 * @return int
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -2071,7 +2088,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return int:
+	 * @return int
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -2247,7 +2264,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			isset( $attr_spec_list[ $attr_name ] )
 			||
-			( 'data-' === substr( $attr_name, 0, 5 ) && Document::AMP_BIND_DATA_ATTR_PREFIX !== substr( $attr_name, 0, 14 ) )
+			( 'data-' === substr( $attr_name, 0, 5 ) && Amp::BIND_DATA_ATTR_PREFIX !== substr( $attr_name, 0, 14 ) )
 			||
 			// Allow the 'amp' or '⚡' attribute in <html>, like <html ⚡>.
 			( 'html' === $attr_node->parentNode->nodeName && in_array( $attr_node->nodeName, [ 'amp', '⚡' ], true ) )
@@ -2545,16 +2562,35 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.3.3
 	 * @since 1.0 Fix silently removing unrecognized elements.
 	 * @see https://github.com/ampproject/amp-wp/issues/1100
+	 * @see AMP_Base_Sanitizer::remove_invalid_child()
 	 *
 	 * @param DOMElement $node Node.
+	 * @return bool Whether replacement was done.
 	 */
 	private function replace_node_with_children( DOMElement $node ) {
+		if ( DevMode::isExemptFromValidation( $node ) ) {
+			return false;
+		}
+
+		if ( ValidationExemption::is_px_verified_for_node( $node ) || ValidationExemption::is_amp_unvalidated_for_node( $node ) ) {
+			return false;
+		}
+
+		// Replace node with fragment.
+		$should_replace = $this->should_sanitize_validation_error( [], compact( 'node' ) );
+		if ( ! $should_replace ) {
+			ValidationExemption::mark_node_as_amp_unvalidated( $node );
+			return false;
+		}
 
 		// If node has no children or no parent, just remove the node.
-		if ( ! $node->hasChildNodes() || ! $node->parentNode ) {
-			$this->remove_node( $node );
-
-			return;
+		if ( ! $node->hasChildNodes() ) {
+			$parent = $node->parentNode;
+			if ( $parent instanceof Element ) {
+				$parent->removeChild( $node );
+				$this->remove_ancestors_until_not_empty( $parent );
+			}
+			return true;
 		}
 
 		/*
@@ -2571,18 +2607,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$child = $node->firstChild;
 		}
 
-		// Prevent double-reporting nodes that are rejected for sanitization.
-		if ( isset( $this->should_not_replace_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_replace_nodes[ $node->nodeName ], true ) ) {
-			return;
-		}
+		$node->parentNode->replaceChild( $fragment, $node );
+		return true;
 
-		// Replace node with fragment.
-		$should_replace = $this->should_sanitize_validation_error( [], compact( 'node' ) );
-		if ( $should_replace ) {
-			$node->parentNode->replaceChild( $fragment, $node );
-		} else {
-			$this->should_not_replace_nodes[ $node->nodeName ][] = $node;
-		}
 	}
 
 	/**
@@ -2594,19 +2621,35 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.5
 	 *
 	 * @param DOMElement $node Node.
+	 * @return bool Whether removal was done.
 	 */
 	private function remove_node( DOMElement $node ) {
 		/**
 		 * Parent.
 		 *
-		 * @var DOMNode $parent
+		 * @var DOMElement|null $parent
 		 */
 		$parent = $node->parentNode;
-		if ( $node && $parent ) {
-			$this->remove_invalid_child( $node );
+		if ( $parent ) {
+			if ( ! $this->remove_invalid_child( $node ) ) {
+				return false;
+			}
 		}
 
-		// @todo Does this parent removal even make sense anymore? Perhaps limit to <p> only.
+		if ( $parent instanceof Element ) {
+			$this->remove_ancestors_until_not_empty( $parent );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Remove ancestor elements until one has attributes or has child nodes.
+	 *
+	 * @todo Does this parent removal even make sense anymore? Perhaps limit to <p> only.
+	 * @param Element $parent Parent.
+	 */
+	private function remove_ancestors_until_not_empty( Element $parent ) {
 		while ( $parent && ! $parent->hasChildNodes() && ! $parent->hasAttributes() && $this->root_element !== $parent ) {
 			$node   = $parent;
 			$parent = $parent->parentNode;

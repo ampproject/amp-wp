@@ -11,10 +11,10 @@ import './style.css';
 /**
  * Component resembling a desktop computer with a screen.
  *
- * @param {Object} props Component props.
- * @param {any} props.children The elements to display in the screen.
+ * @param {Object} props          Component props.
+ * @param {any}    props.children The elements to display in the screen.
  */
-export function Desktop( { children } ) {
+export function Desktop({ children }) {
 	return (
 		<div className="desktop">
 			<div className="desktop__toolbar">
@@ -22,7 +22,7 @@ export function Desktop( { children } ) {
 				<span />
 				<span />
 			</div>
-			{ children }
+			{children}
 		</div>
 	);
 }

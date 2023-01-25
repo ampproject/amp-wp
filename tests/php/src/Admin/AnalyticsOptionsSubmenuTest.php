@@ -12,8 +12,10 @@ use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Admin\SiteHealth;
+use AmpProject\AmpWP\DependencySupport;
+use AmpProject\AmpWP\LoadingError;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /**
  * Tests for AnalyticsOptionsSubmenu.
@@ -21,9 +23,7 @@ use WP_UnitTestCase;
  * @group options-menu
  * @coversDefaultClass \AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu
  */
-class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
-
-	use AssertContainsCompatibility;
+class AnalyticsOptionsSubmenuTest extends DependencyInjectedTestCase {
 
 	/**
 	 * Instance of OptionsMenu class.
@@ -44,13 +44,18 @@ class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
 	 *
 	 * @inheritdoc
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
+
+		$site_health = $this->injector->make( SiteHealth::class );
 
 		$this->options_menu_instance = new OptionsMenu(
 			new GoogleFonts(),
 			new ReaderThemes(),
-			new RESTPreloader()
+			new RESTPreloader(),
+			new DependencySupport(),
+			new LoadingError(),
+			$site_health
 		);
 		$this->instance              = new AnalyticsOptionsSubmenu( $this->options_menu_instance );
 	}

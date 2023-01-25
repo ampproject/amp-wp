@@ -26,11 +26,6 @@
 	background: var(--amp-settings-color-background);
 }
 
-.amp .components-button.components-panel__body-toggle svg {
-	height: 30px;
-	width: 30px;
-}
-
 .amp .components-button.is-link,
 .amp .components-button.is-link:hover,
 .amp .components-button.is-link:hover:not(:disabled),
@@ -84,6 +79,10 @@
 .amp .components-toggle-control .components-base-control__field .components-toggle-control__label {
 	display: flex;
 	flex-wrap: wrap;
+}
+
+.amp .components-button.is-small {
+	font-size: 0.875rem;
 }
 
 
@@ -181,7 +180,7 @@
 	width: 100%;
 
 	@media screen and (min-width: 783px) {
-		padding: 30px 90px;
+		padding: 20px 90px;
 	}
 }
 

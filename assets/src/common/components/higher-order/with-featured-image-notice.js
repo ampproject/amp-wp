@@ -9,11 +9,32 @@ import { isFunction } from 'lodash';
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Notice } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { validateFeaturedImage, getMinimumFeaturedImageDimensions } from '../../helpers';
+import {
+	validateFeaturedImage,
+	getMinimumFeaturedImageDimensions,
+} from '../../helpers';
+
+/**
+ * Create notice UI for featured image component.
+ *
+ * @param {string[]} messages Notices.
+ * @param {string}   status   Status type of notice.
+ * @return {JSX.Element} Notice component.
+ */
+const createNoticeUI = (messages, status) => {
+	return (
+		<Notice status={status} isDismissible={false}>
+			{messages.map((message, index) => {
+				return <p key={`message-${index}`}>{message}</p>;
+			})}
+		</Notice>
+	);
+};
 
 /**
  * Higher-order component that is used for filtering the PostFeaturedImage component.
@@ -22,45 +43,37 @@ import { validateFeaturedImage, getMinimumFeaturedImageDimensions } from '../../
  *
  * @return {Function} Higher-order component.
  */
-export default createHigherOrderComponent(
-	( PostFeaturedImage ) => {
-		if ( ! isFunction( PostFeaturedImage ) ) {
-			return PostFeaturedImage;
+export default createHigherOrderComponent((PostFeaturedImage) => {
+	if (!isFunction(PostFeaturedImage)) {
+		return PostFeaturedImage;
+	}
+
+	const withFeaturedImageNotice = (props) => {
+		const { media } = props;
+		let noticeUI;
+
+		if (!media) {
+			const message = __(
+				'Selecting a featured image is recommended for an optimal user experience.',
+				'amp'
+			);
+			noticeUI = createNoticeUI([message], 'notice');
+		} else {
+			const errorMessages = validateFeaturedImage(
+				media,
+				getMinimumFeaturedImageDimensions()
+			);
+			noticeUI = errorMessages
+				? createNoticeUI(errorMessages, 'warning')
+				: null;
 		}
 
-		const withFeaturedImageNotice = ( props ) => {
-			const { media } = props;
+		return <PostFeaturedImage {...props} noticeUI={noticeUI} />;
+	};
 
-			const errors = validateFeaturedImage( media, getMinimumFeaturedImageDimensions(), false );
+	withFeaturedImageNotice.propTypes = {
+		media: PropTypes.object,
+	};
 
-			if ( ! errors ) {
-				return <PostFeaturedImage { ...props } />;
-			}
-
-			return (
-				<>
-					<Notice
-						status="notice"
-						isDismissible={ false }
-					>
-						{ errors.map( ( errorMessage, index ) => {
-							return (
-								<p key={ `error-${ index }` }>
-									{ errorMessage }
-								</p>
-							);
-						} ) }
-					</Notice>
-					<PostFeaturedImage { ...props } />
-				</>
-			);
-		};
-
-		withFeaturedImageNotice.propTypes = {
-			media: PropTypes.object,
-		};
-
-		return withFeaturedImageNotice;
-	},
-	'withFeaturedImageNotice',
-);
+	return withFeaturedImageNotice;
+}, 'withFeaturedImageNotice');

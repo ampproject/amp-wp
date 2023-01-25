@@ -14,13 +14,13 @@ Filters whether to skip the post from AMP.
 
 ### Source
 
-:link: [includes/class-amp-post-type-support.php:146](/includes/class-amp-post-type-support.php#L146)
+:link: [includes/class-amp-post-type-support.php:141](/includes/class-amp-post-type-support.php#L141)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-if ( isset( $post->ID ) && true === apply_filters( 'amp_skip_post', false, $post->ID, $post ) ) {
+if ( ! empty( $post->ID ) && true === apply_filters( 'amp_skip_post', false, $post->ID, $post ) ) {
 ```
 
 </details>

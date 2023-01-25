@@ -2,18 +2,15 @@
 
 namespace AmpProject\AmpWP\Tests\Optimizer;
 
-use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
-use AmpProject\AmpWP\Optimizer\HeroCandidateFiltering;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
-use AmpProject\Attribute;
 use AMP_Options_Manager;
-use AmpProject\AmpWP\Option;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\Optimizer\HeroCandidateFiltering;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
+use AmpProject\Html\Attribute;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Optimizer\HeroCandidateFiltering */
 final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
-
-	use AssertContainsCompatibility;
 
 	/** @var string[] */
 	const ARRAY_WITH_DATA_HERO_CANDIDATE_ATTR = [ Attribute::DATA_HERO_CANDIDATE => '' ];
@@ -24,8 +21,8 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->instance = $this->injector->make( HeroCandidateFiltering::class );
 	}
 
@@ -180,6 +177,15 @@ final class HeroCandidateFilteringTest extends DependencyInjectedTestCase {
 		$this->assertEquals(
 			$merged_attrs,
 			$this->instance->filter_attachment_image_attributes( $initial_attrs, $attachment )
+		);
+
+		// When no attachment is provided, then no filtering is done.
+		delete_post_thumbnail( $post_ids[1] );
+		set_post_thumbnail( $post_ids[0], $attachment->ID );
+		$this->go_to( get_permalink( $post_ids[0] ) );
+		$this->assertEquals(
+			$initial_attrs,
+			$this->instance->filter_attachment_image_attributes( $initial_attrs, null )
 		);
 	}
 

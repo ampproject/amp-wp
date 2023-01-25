@@ -48,6 +48,17 @@ body {
 	-webkit-font-smoothing: antialiased;
 }
 
+.amp-onboarding-wizard p a,
+.amp-onboarding-wizard li > a {
+	color: var(--amp-settings-color-black);
+	transition: color 80ms ease;
+}
+
+.amp-onboarding-wizard p a:hover,
+.amp-onboarding-wizard li > a:hover {
+	color: var(--amp-settings-color-brand);
+}
+
 /**
  * Main app panel.
  */
@@ -56,9 +67,11 @@ body {
 	margin-right: -20px;
 
 	@media screen and (min-width: 783px) {
+		flex: 1 1 auto;
 		margin-left: 0;
 		margin-right: 0;
-		width: 100%;
+		max-width: var(--setup-page-max-width);
+		width: 75%;
 	}
 }
 
@@ -78,13 +91,17 @@ body {
 
 .amp-onboarding-wizard-panel h1 {
 	line-height: 1.1;
+
+	@media screen and (min-width: 783px) {
+		margin-top: 0;
+	}
 }
 
 /**
  * Sidebar.
  */
 .amp-onboarding-wizard-plugin-name {
-	color: var(--amp-settings-color-black);
+	color: var(--amp-settings-color-muted);
 	font-size: 16px;
 	line-height: 1.5;
 	padding: 0.5rem 0 0;
@@ -106,8 +123,10 @@ body {
 	width: 100%;
 
 	@media screen and (min-width: 783px) {
+		flex: 0 0 auto;
 		padding-right: 40px;
 		max-width: var(--stepper-max-width);
+		width: 25%;
 	}
 }
 
@@ -166,6 +185,7 @@ body {
 }
 
 .amp-stepper__item-title {
+	color: var(--amp-settings-color-muted);
 	display: none;
 	margin-left: 18px;
 

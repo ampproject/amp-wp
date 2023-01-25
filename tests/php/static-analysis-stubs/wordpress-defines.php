@@ -4,8 +4,6 @@
 
 // There are no core functions to read these constants.
 define( 'ABSPATH', './' );
-define( 'WP_DEBUG', true );
-define( 'WP_DEBUG_LOG', true );
 define( 'WPMU_PLUGIN_DIR', './' );
 define( 'WP_CONTENT_DIR', 'some_string' );
 define( 'WP_CONTENT_URL', 'some_string' );

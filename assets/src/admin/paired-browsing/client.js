@@ -6,30 +6,38 @@ import domReady from '@wordpress/dom-ready';
 const { parent, ampPairedBrowsingClientData } = window;
 const { ampUrl, nonAmpUrl, isAmpDocument } = ampPairedBrowsingClientData;
 
-const nonAmpUrlObject = new URL( nonAmpUrl );
+const nonAmpUrlObject = new URL(nonAmpUrl);
 
 /**
  * Modify document for paired browsing.
  */
 function modifyDocumentForPairedBrowsing() {
 	// Scrolling is not synchronized if `scroll-behavior` is set to `smooth`.
-	document.documentElement.style.setProperty( 'scroll-behavior', 'auto', 'important' );
+	document.documentElement.style.setProperty(
+		'scroll-behavior',
+		'auto',
+		'important'
+	);
 
-	if ( isAmpDocument ) {
+	if (isAmpDocument) {
 		// Hide the paired browsing menu item.
-		const pairedBrowsingMenuItem = document.getElementById( 'wp-admin-bar-amp-paired-browsing' );
-		if ( pairedBrowsingMenuItem ) {
+		const pairedBrowsingMenuItem = document.getElementById(
+			'wp-admin-bar-amp-paired-browsing'
+		);
+		if (pairedBrowsingMenuItem) {
 			pairedBrowsingMenuItem.remove();
 		}
 
 		// Hide menu item to view non-AMP version.
-		const ampViewBrowsingItem = document.getElementById( 'wp-admin-bar-amp-view' );
-		if ( ampViewBrowsingItem ) {
+		const ampViewBrowsingItem = document.getElementById(
+			'wp-admin-bar-amp-view'
+		);
+		if (ampViewBrowsingItem) {
 			ampViewBrowsingItem.remove();
 		}
 	} else {
 		// No need to show the AMP menu in the Non-AMP window.
-		const ampMenuItem = document.getElementById( 'wp-admin-bar-amp' );
+		const ampMenuItem = document.getElementById('wp-admin-bar-amp');
 		ampMenuItem.remove();
 	}
 }
@@ -41,14 +49,14 @@ function modifyDocumentForPairedBrowsing() {
  * @param {string} type Type.
  * @param {Object} data Data.
  */
-function sendMessage( win, type, data = {} ) {
+function sendMessage(win, type, data = {}) {
 	win.postMessage(
 		{
 			type,
 			...data,
 			ampPairedBrowsing: true,
 		},
-		nonAmpUrlObject.origin, // Because the paired browsing app is accessed via the canonical URL.
+		nonAmpUrlObject.origin // Because the paired browsing app is accessed via the canonical URL.
 	);
 }
 
@@ -59,22 +67,28 @@ let initialized = false;
  *
  * @param {MessageEvent} event
  */
-function receiveMessage( event ) {
-	if ( ! event.data || ! event.data.ampPairedBrowsing || ! event.data.type || ! event.source || nonAmpUrlObject.origin !== event.origin ) {
+function receiveMessage(event) {
+	if (
+		!event.data ||
+		!event.data.ampPairedBrowsing ||
+		!event.data.type ||
+		!event.source ||
+		nonAmpUrlObject.origin !== event.origin
+	) {
 		return;
 	}
-	switch ( event.data.type ) {
+	switch (event.data.type) {
 		case 'init':
-			if ( ! initialized ) {
+			if (!initialized) {
 				initialized = true;
-				receiveInit( event.data );
+				receiveInit();
 			}
 			break;
 		case 'scroll':
-			receiveScroll( event.data );
+			receiveScroll(event.data);
 			break;
 		case 'replaceLocation':
-			receiveReplaceLocation( event.data );
+			receiveReplaceLocation(event.data);
 			break;
 		default:
 	}
@@ -84,14 +98,10 @@ function receiveMessage( event ) {
  * Send scroll.
  */
 function sendScroll() {
-	sendMessage(
-		parent,
-		'scroll',
-		{
-			x: window.scrollX,
-			y: window.scrollY,
-		},
-	);
+	sendMessage(parent, 'scroll', {
+		x: window.scrollX,
+		y: window.scrollY,
+	});
 }
 
 /**
@@ -101,8 +111,8 @@ function sendScroll() {
  * @param {number} data.x
  * @param {number} data.y
  */
-function receiveScroll( { x, y } ) {
-	window.scrollTo( x, y );
+function receiveScroll({ x, y }) {
+	window.scrollTo(x, y);
 }
 
 /**
@@ -110,15 +120,13 @@ function receiveScroll( { x, y } ) {
  *
  * @param {MouseEvent} event
  */
-function handleClick( event ) {
+function handleClick(event) {
 	const element = event.target;
-	const link = element.matches( '[href]' ) ? element : element.closest( '[href]' );
-	if ( link ) {
-		sendMessage(
-			parent,
-			'navigate',
-			{ href: link.href },
-		);
+	const link = element.matches('[href]')
+		? element
+		: element.closest('[href]');
+	if (link) {
+		sendMessage(parent, 'navigate', { href: link.href });
 	}
 }
 
@@ -127,31 +135,27 @@ function handleClick( event ) {
  *
  * @param {string} href
  */
-function receiveReplaceLocation( { href } ) {
-	window.location.replace( href );
+function receiveReplaceLocation({ href }) {
+	window.location.replace(href);
 }
 
 /**
  * Send loaded.
  */
 function sendLoaded() {
-	sendMessage(
-		parent,
-		'loaded',
-		{
-			isAmpDocument,
-			ampUrl,
-			nonAmpUrl,
-			documentTitle: document.title,
-		},
-	);
+	sendMessage(parent, 'loaded', {
+		isAmpDocument,
+		ampUrl,
+		nonAmpUrl,
+		documentTitle: document.title,
+	});
 }
 
 /**
  * Send heartbeat.
  */
 function sendHeartbeat() {
-	sendMessage( parent, 'heartbeat' );
+	sendMessage(parent, 'heartbeat');
 }
 
 /**
@@ -159,13 +163,13 @@ function sendHeartbeat() {
  */
 function receiveInit() {
 	sendHeartbeat();
-	setInterval( sendHeartbeat, 500 );
+	setInterval(sendHeartbeat, 500);
 
-	global.document.addEventListener( 'click', handleClick, { passive: true } );
-	global.addEventListener( 'scroll', sendScroll, { passive: true } );
-	domReady( modifyDocumentForPairedBrowsing );
+	global.document.addEventListener('click', handleClick, { passive: true });
+	global.addEventListener('scroll', sendScroll, { passive: true });
+	domReady(modifyDocumentForPairedBrowsing);
 
 	sendLoaded();
 }
 
-global.addEventListener( 'message', receiveMessage );
+global.addEventListener('message', receiveMessage);

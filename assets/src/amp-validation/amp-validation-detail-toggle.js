@@ -17,69 +17,83 @@ const OPEN_CLASS = 'is-open';
  * table column via backend code.
  *
  * @param {string} containerSelector Selector for elements that will have the button added.
- * @param {string} ariaLabel Screen reader label for the button.
+ * @param {string} ariaLabel         Screen reader label for the button.
  * @return {Array} Array of added buttons.
  */
-function addToggleButtons( containerSelector, ariaLabel ) {
-	const addButton = ( container ) => {
-		const button = document.createElement( 'button' );
-		button.setAttribute( 'aria-label', ariaLabel );
-		button.setAttribute( 'type', 'button' );
-		button.setAttribute( 'class', 'error-details-toggle' );
-		container.appendChild( button );
+function addToggleButtons(containerSelector, ariaLabel) {
+	const addButton = (container) => {
+		const button = document.createElement('button');
+		button.setAttribute('aria-label', ariaLabel);
+		button.setAttribute('type', 'button');
+		button.setAttribute('class', 'error-details-toggle');
+		container.appendChild(button);
 
 		return button;
 	};
 
-	return [ ...document.querySelectorAll( containerSelector ) ].map( ( container ) => addButton( container ) );
+	return [...document.querySelectorAll(containerSelector)].map((container) =>
+		addButton(container)
+	);
 }
 
-function addToggleAllListener( { btn, toggleAllButtonSelector = null, targetDetailsSelector } ) {
+function addToggleAllListener({
+	btn,
+	toggleAllButtonSelector = null,
+	targetDetailsSelector,
+}) {
 	let open = false;
 
-	const targetDetails = [ ...document.querySelectorAll( targetDetailsSelector ) ];
+	const targetDetails = [...document.querySelectorAll(targetDetailsSelector)];
 
 	let toggleAllButtons = [];
-	if ( toggleAllButtonSelector ) {
-		toggleAllButtons = [ ...document.querySelectorAll( toggleAllButtonSelector ) ];
+	if (toggleAllButtonSelector) {
+		toggleAllButtons = [
+			...document.querySelectorAll(toggleAllButtonSelector),
+		];
 	}
 
 	const onButtonClick = () => {
-		open = ! open;
-		toggleAllButtons.forEach( ( toggleAllButton ) => {
-			toggleAllButton.classList.toggle( OPEN_CLASS );
-		} );
+		open = !open;
+		toggleAllButtons.forEach((toggleAllButton) => {
+			toggleAllButton.classList.toggle(OPEN_CLASS);
+		});
 
-		targetDetails.forEach( ( detail ) => {
-			if ( open ) {
-				detail.setAttribute( 'open', true );
+		targetDetails.forEach((detail) => {
+			if (open) {
+				detail.setAttribute('open', true);
 			} else {
-				detail.removeAttribute( 'open' );
+				detail.removeAttribute('open');
 			}
-		} );
+		});
 	};
 
-	btn.addEventListener( 'click', onButtonClick );
+	btn.addEventListener('click', onButtonClick);
 }
 
-domReady( () => {
-	addToggleButtons( 'th.column-details.manage-column', __( 'Toggle all details', 'amp' ) )
-		.forEach( ( btn ) => {
-			addToggleAllListener( {
-				btn,
-				toggleAllButtonSelector: '.column-details button.error-details-toggle',
-				targetDetailsSelector: '.column-details details',
-			} );
-		} );
+domReady(() => {
+	addToggleButtons(
+		'th.column-details.manage-column',
+		__('Toggle all details', 'amp')
+	).forEach((btn) => {
+		addToggleAllListener({
+			btn,
+			toggleAllButtonSelector:
+				'.column-details button.error-details-toggle',
+			targetDetailsSelector: '.column-details details',
+		});
+	});
 
-	addToggleButtons( 'th.manage-column.column-sources_with_invalid_output', __( 'Toggle all sources', 'amp' ) )
-		.forEach( ( btn ) => {
-			addToggleAllListener( {
-				btn,
-				toggleAllButtonSelector: '.column-sources_with_invalid_output button.error-details-toggle',
-				targetDetailsSelector: 'details.source',
-			} );
-		} );
+	addToggleButtons(
+		'th.manage-column.column-sources_with_invalid_output',
+		__('Toggle all sources', 'amp')
+	).forEach((btn) => {
+		addToggleAllListener({
+			btn,
+			toggleAllButtonSelector:
+				'.column-sources_with_invalid_output button.error-details-toggle',
+			targetDetailsSelector: 'details.source',
+		});
+	});
 
 	setValidationErrorRowsClasses();
-} );
+});

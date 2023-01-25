@@ -11,10 +11,10 @@ import { DEFAULT_MOBILE_BREAKPOINT } from '../common/constants';
 /**
  * Hook providing the current window width as state.
  *
- * @param {Object} args Hook arguments.
+ * @param {Object} args                  Hook arguments.
  * @param {number} args.mobileBreakpoint The mobile breakpoint in pixels.
  */
-export function useWindowWidth( args = {} ) {
+export function useWindowWidth(args = {}) {
 	args = {
 		...args,
 		mobileBreakpoint: DEFAULT_MOBILE_BREAKPOINT,
@@ -22,19 +22,19 @@ export function useWindowWidth( args = {} ) {
 
 	const { mobileBreakpoint } = args;
 
-	const [ width, setWidth ] = useState( window.innerWidth );
+	const [width, setWidth] = useState(window.innerWidth);
 
-	useEffect( () => {
+	useEffect(() => {
 		const resizeCallback = () => {
-			setWidth( window.innerWidth );
+			setWidth(window.innerWidth);
 		};
 
-		global.addEventListener( 'resize', resizeCallback, { passive: true } );
+		global.addEventListener('resize', resizeCallback, { passive: true });
 
 		return () => {
-			global.removeEventListener( 'resize', resizeCallback );
+			global.removeEventListener('resize', resizeCallback);
 		};
-	}, [] );
+	}, []);
 
 	return { windowWidth: width, isMobile: width < mobileBreakpoint };
 }

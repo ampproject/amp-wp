@@ -8,6 +8,7 @@
 
 namespace AmpProject\AmpWP\Validation;
 
+use AmpProject\AmpWP\Infrastructure\Service;
 use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use WP_Error;
@@ -18,7 +19,7 @@ use WP_Error;
  * @since 2.1
  * @internal
  */
-final class URLValidationProvider {
+final class URLValidationProvider implements Service {
 	/**
 	 * The total number of validation errors, regardless of whether they were accepted.
 	 *

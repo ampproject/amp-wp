@@ -15,7 +15,7 @@ Returning a string value in this filter will bypass the `get_permalink()` from b
 
 ### Source
 
-:link: [src/PairedUrlStructure/LegacyReaderUrlStructure.php:42](/src/PairedUrlStructure/LegacyReaderUrlStructure.php#L42)
+:link: [src/PairedUrlStructure/LegacyReaderUrlStructure.php:44](/src/PairedUrlStructure/LegacyReaderUrlStructure.php#L44)
 
 <details>
 <summary>Show Code</summary>

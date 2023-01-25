@@ -12,7 +12,6 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Styles;
@@ -23,7 +22,7 @@ use WP_Styles;
  * @since 2.0
  * @internal
  */
-final class GoogleFonts implements Conditional, Delayed, Service, Registerable {
+final class GoogleFonts implements Conditional, Service, Registerable {
 
 	/**
 	 * Check whether the conditional object is currently needed.
@@ -32,15 +31,6 @@ final class GoogleFonts implements Conditional, Delayed, Service, Registerable {
 	 */
 	public static function is_needed() {
 		return is_admin() && ! wp_doing_ajax();
-	}
-
-	/**
-	 * Get the action to use for registering the service.
-	 *
-	 * @return string Registration action to use.
-	 */
-	public static function get_registration_action() {
-		return 'plugins_loaded';
 	}
 
 	/**

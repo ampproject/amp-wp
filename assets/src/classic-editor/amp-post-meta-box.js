@@ -1,20 +1,15 @@
-/**
- * External dependencies
- */
-import jQuery from 'jquery';
+/* global jQuery */
 
 /**
  * AMP Post Meta Box.
  *
  * @todo Rename this to be just the ampEditPostScreen?
- *
  * @since 0.6
  */
-window.ampPostMetaBox = ( function( $ ) {
+window.ampPostMetaBox = (function ($) {
 	'use strict';
 
 	const component = {
-
 		/**
 		 * Holds data.
 		 *
@@ -60,15 +55,17 @@ window.ampPostMetaBox = ( function( $ ) {
 	 * @param {Object} data Object data.
 	 * @return {void}
 	 */
-	component.boot = function boot( data ) {
+	component.boot = function boot(data) {
 		component.data = data;
-		$( document ).ready( function() {
-			component.statusRadioInputs = $( '[name="' + component.data.statusInputName + '"]' );
-			if ( component.data.enabled && ! component.data.canonical ) {
+		$(document).ready(function () {
+			component.statusRadioInputs = $(
+				'[name="' + component.data.statusInputName + '"]'
+			);
+			if (component.data.enabled && !component.data.canonical) {
 				component.addPreviewButton();
 			}
 			component.listen();
-		} );
+		});
 	};
 
 	/**
@@ -78,21 +75,24 @@ window.ampPostMetaBox = ( function( $ ) {
 	 * @return {void}
 	 */
 	component.listen = function listen() {
-		$( component.ampPreviewBtnSelector ).on( 'click.amp-post-preview', function( e ) {
-			e.preventDefault();
-			component.onAmpPreviewButtonClick();
-		} );
+		$(component.ampPreviewBtnSelector).on(
+			'click.amp-post-preview',
+			function (e) {
+				e.preventDefault();
+				component.onAmpPreviewButtonClick();
+			}
+		);
 
-		component.statusRadioInputs.prop( 'disabled', true ); // Prevent cementing setting default status as overridden status.
-		$( '.edit-amp-status, [href="#amp_status"]' ).click( function( e ) {
+		component.statusRadioInputs.prop('disabled', true); // Prevent cementing setting default status as overridden status.
+		$('.edit-amp-status, [href="#amp_status"]').click(function (e) {
 			e.preventDefault();
-			component.statusRadioInputs.prop( 'disabled', false );
-			component.toggleAmpStatus( $( e.target ) );
-		} );
+			component.statusRadioInputs.prop('disabled', false);
+			component.toggleAmpStatus($(e.target));
+		});
 
-		$( '#submitpost input[type="submit"]' ).on( 'click', function() {
-			$( component.ampPreviewBtnSelector ).addClass( 'disabled' );
-		} );
+		$('#submitpost input[type="submit"]').on('click', function () {
+			$(component.ampPreviewBtnSelector).addClass('disabled');
+		});
 	};
 
 	/**
@@ -102,17 +102,17 @@ window.ampPostMetaBox = ( function( $ ) {
 	 * @return {void}
 	 */
 	component.addPreviewButton = function addPreviewButton() {
-		const previewBtn = $( component.previewBtnSelector );
+		const previewBtn = $(component.previewBtnSelector);
 		previewBtn
 			.clone()
-			.insertAfter( previewBtn )
-			.prop( {
+			.insertAfter(previewBtn)
+			.prop({
 				href: component.data.previewLink,
-				id: component.ampPreviewBtnSelector.replace( '#', '' ),
-			} )
-			.text( component.data.l10n.ampPreviewBtnLabel )
+				id: component.ampPreviewBtnSelector.replace('#', ''),
+			})
+			.text(component.data.l10n.ampPreviewBtnLabel)
 			.parent()
-			.addClass( 'has-amp-preview' );
+			.addClass('has-amp-preview');
 	};
 
 	/**
@@ -125,16 +125,16 @@ window.ampPostMetaBox = ( function( $ ) {
 	 */
 	component.onAmpPreviewButtonClick = function onAmpPreviewButtonClick() {
 		// Flag the AMP preview referer.
-		const $input = $( '<input>' )
-			.prop( {
+		const $input = $('<input>')
+			.prop({
 				type: 'hidden',
 				name: 'amp-preview',
 				value: 'do-preview',
-			} )
-			.insertAfter( component.ampPreviewBtnSelector );
+			})
+			.insertAfter(component.ampPreviewBtnSelector);
 
 		// Trigger Core preview button and remove AMP flag.
-		$( component.previewBtnSelector ).click();
+		$(component.previewBtnSelector).click();
 		$input.remove();
 	};
 
@@ -145,36 +145,36 @@ window.ampPostMetaBox = ( function( $ ) {
 	 * @param {Object} $target Event target.
 	 * @return {void}
 	 */
-	component.toggleAmpStatus = function toggleAmpStatus( $target ) {
-		const $container = $( '#amp-status-select' );
-		const editAmpStatus = $( '.edit-amp-status' );
+	component.toggleAmpStatus = function toggleAmpStatus($target) {
+		const $container = $('#amp-status-select');
+		const editAmpStatus = $('.edit-amp-status');
 
-		let status = $container.data( 'amp-status' );
+		let status = $container.data('amp-status');
 
 		// Don't modify status on cancel button click.
-		if ( ! $target.hasClass( 'button-cancel' ) ) {
-			status = component.statusRadioInputs.filter( ':checked' ).val();
+		if (!$target.hasClass('button-cancel')) {
+			status = component.statusRadioInputs.filter(':checked').val();
 		}
 
-		const $checked = $( '#amp-status-' + status );
+		const $checked = $('#amp-status-' + status);
 
 		// Toggle elements.
-		editAmpStatus.fadeToggle( component.toggleSpeed, function() {
-			if ( editAmpStatus.is( ':visible' ) ) {
+		editAmpStatus.fadeToggle(component.toggleSpeed, function () {
+			if (editAmpStatus.is(':visible')) {
 				editAmpStatus.focus();
 			} else {
-				$container.find( 'input[type="radio"]' ).first().focus();
+				$container.find('input[type="radio"]').first().focus();
 			}
-		} );
-		$container.slideToggle( component.toggleSpeed );
+		});
+		$container.slideToggle(component.toggleSpeed);
 
 		// Update status.
-		if ( component.data.canSupport ) {
-			$container.data( 'amp-status', status );
-			$checked.prop( 'checked', true );
-			$( '.amp-status-text' ).text( $checked.next().text() );
+		if (component.data.canSupport) {
+			$container.data('amp-status', status);
+			$checked.prop('checked', true);
+			$('.amp-status-text').text($checked.next().text());
 		}
 	};
 
 	return component;
-}( jQuery ) );
+})(jQuery);

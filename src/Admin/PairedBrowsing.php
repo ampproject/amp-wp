@@ -12,11 +12,14 @@ use AMP_Theme_Support;
 use AMP_Validation_Manager;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\HasRequirements;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Services;
 use AmpProject\DevMode;
 use WP_Post;
 use WP_Admin_Bar;
@@ -28,7 +31,7 @@ use AmpProject\AmpWP\DevTools\UserAccess;
  * @since 2.1
  * @internal
  */
-final class PairedBrowsing implements Service, Registerable, Conditional {
+final class PairedBrowsing implements Service, Registerable, Conditional, Delayed, HasRequirements {
 
 	/**
 	 * Query var for requests to open the app.
@@ -52,20 +55,51 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 	public $paired_routing;
 
 	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * This action needs to run late enough in the frontend and the backend for the user to be logged-in and for
+	 * AMP dev mode to be opted-in to.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		return 'wp_loaded';
+	}
+
+	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
 		return (
-			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
-			||
+			Services::get( 'dependency_support' )->has_support()
+			&&
 			(
-				AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
-				&&
-				get_stylesheet() === AMP_Options_Manager::get_option( Option::READER_THEME )
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+				||
+				(
+					AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+					&&
+					get_stylesheet() === AMP_Options_Manager::get_option( Option::READER_THEME )
+				)
 			)
+			&&
+			amp_is_dev_mode()
+			&&
+			is_user_logged_in()
 		);
+	}
+
+	/**
+	 * Get the list of service IDs required for this service to be registered.
+	 *
+	 * @return string[] List of required services.
+	 */
+	public static function get_requirements() {
+		return [
+			'dependency_support',
+		];
 	}
 
 	/**
@@ -119,7 +153,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 	 * Initialize frontend.
 	 */
 	public function init_frontend() {
-		if ( ! amp_is_available() || ! amp_is_dev_mode() ) {
+		if ( ! amp_is_available() ) {
 			return;
 		}
 
@@ -191,7 +225,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 		// Mark enqueued script for AMP dev mode so that it is not removed.
 		// @todo Revisit with <https://github.com/google/site-kit-wp/pull/505#discussion_r348683617>.
 		$dev_mode_handles = array_merge(
-			[ $handle, 'wp-i18n', 'wp-hooks' ],
+			[ $handle, 'wp-i18n', 'wp-hooks', 'regenerator-runtime', 'wp-polyfill' ],
 			$dependencies
 		);
 		add_filter(
@@ -274,13 +308,6 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 	 * @return string Custom template if in paired browsing mode, else the supplied template.
 	 */
 	public function filter_template_include_for_app() {
-		if ( ! amp_is_dev_mode() ) {
-			wp_die(
-				esc_html__( 'Paired browsing is only available when AMP dev mode is enabled (e.g. when logged-in and admin bar is showing).', 'amp' ),
-				esc_html__( 'AMP Paired Browsing Unavailable', 'amp' ),
-				[ 'response' => 403 ]
-			);
-		}
 
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );

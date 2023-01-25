@@ -92,12 +92,20 @@ function amp_bootstrap_plugin() {
 	// Ensure async and custom-element/custom-template attributes are present on script tags.
 	add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 );
 
+	// Ensure ID attribute is present in WP<5.5.
+	if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
+		add_filter( 'script_loader_tag', 'amp_ensure_id_attribute_on_script_loader_tag', ~PHP_INT_MAX, 2 );
+	}
+
 	// Ensure crossorigin=anonymous is added to font links.
 	add_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous', 10, 4 );
 
 	add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
 
 	add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hooked before priority 10 on 'plugins_loaded' to properly unhook core panels.
+
+	// @todo Eliminate this once https://core.trac.wordpress.org/ticket/20578 has finally landed.
+	add_filter( 'all_plugins', 'amp_modify_plugin_description' );
 }
 
 /**
@@ -115,7 +123,7 @@ function amp_init() {
 	 */
 	do_action( 'amp_init' );
 
-	add_filter( 'allowed_redirect_hosts', [ 'AMP_HTTP', 'filter_allowed_redirect_hosts' ] );
+	add_filter( 'allowed_redirect_hosts', [ AMP_HTTP::class, 'filter_allowed_redirect_hosts' ] );
 	AMP_HTTP::purge_amp_query_vars();
 	AMP_HTTP::send_cors_headers();
 	AMP_HTTP::handle_xhr_request();
@@ -186,37 +194,65 @@ function amp_init() {
 	 * Detects whether the current window is in an iframe with the specified `name` attribute. The iframe is created
 	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
 	 */
-	add_action(
-		'wp_print_scripts',
-		function() {
-			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+	add_action( 'wp_head', 'amp_remove_admin_bar_in_phone_preview' );
+	add_action( 'amp_post_template_head', 'amp_remove_admin_bar_in_phone_preview' );
+}
+
+/**
+ * Remove the admin bar in phone preview of the site in AMP Onboarding Wizard.
+ *
+ * @since 2.2.2
+ * @internal
+ */
+function amp_remove_admin_bar_in_phone_preview() {
+	if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+		return;
+	}
+	?>
+	<script data-ampdevmode>
+		( () => {
+			if ( 'amp-wizard-completion-preview' !== window.name ) {
 				return;
 			}
-			?>
-			<script data-ampdevmode>
-				( () => {
-					if ( 'amp-wizard-completion-preview' !== window.name ) {
-						return;
-					}
 
-					/** @type {HTMLStyleElement} */
-					const style = document.createElement( 'style' );
-					style.setAttribute( 'type', 'text/css' );
-					style.appendChild( document.createTextNode( 'html { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
-					document.head.appendChild( style );
+			/** @type {HTMLStyleElement} */
+			const style = document.createElement( 'style' );
+			style.setAttribute( 'type', 'text/css' );
+			style.appendChild( document.createTextNode( 'html:not(#_) { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
+			document.head.appendChild( style );
 
-					document.addEventListener( 'DOMContentLoaded', function() {
-						const adminBar = document.getElementById( 'wpadminbar' );
-						if ( adminBar ) {
-							document.body.classList.remove( 'admin-bar' );
-							adminBar.remove();
-						}
-					});
-				} )();
-			</script>
-			<?php
-		}
-	);
+			document.addEventListener( 'DOMContentLoaded', function() {
+				const adminBar = document.getElementById( 'wpadminbar' );
+				if ( adminBar ) {
+					document.body.classList.remove( 'admin-bar' );
+					adminBar.remove();
+				}
+			});
+		} )();
+	</script>
+	<?php
+}
+
+/**
+ * When AMP plugin is active remove instruction of plugin data removal steps.
+ *
+ * @since 2.2
+ * @internal
+ *
+ * @param array $meta An array of plugins to display in the list table.
+ * @return array An array of plugins to display in the list table.
+ */
+function amp_modify_plugin_description( $meta ) {
+
+	if ( isset( $meta['amp/amp.php']['Description'] ) ) {
+		$meta['amp/amp.php']['Description'] = preg_replace(
+			':\s*<em class=\"amp-deletion-notice\">.+?</em>:',
+			'',
+			$meta['amp/amp.php']['Description']
+		);
+	}
+
+	return $meta;
 }
 
 /**
@@ -368,7 +404,7 @@ function amp_is_available() {
 		}
 
 		$message = sprintf(
-			/* translators: 1: amp_is_available() function, 2: amp_is_request() function, 3: is_amp_endpoint() function */
+			/* translators: 1: amp_is_available function, 2: amp_is_request function, 3: is_amp_endpoint function */
 			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly.', 'amp' ),
 			'`amp_is_available()`',
 			'`amp_is_request()`',
@@ -705,9 +741,14 @@ function amp_add_amphtml_link() {
 	}
 
 	$amp_url = amp_add_paired_endpoint( amp_get_current_url() );
+
 	if ( $amp_url ) {
-		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
-		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
+		$amp_url          = remove_query_arg( QueryVar::NOAMP, $amp_url );
+		$sandboxing_level = amp_get_sandboxing_level();
+
+		if ( 0 === $sandboxing_level || 3 === $sandboxing_level ) {
+			printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
+		}
 	}
 }
 
@@ -874,6 +915,32 @@ function amp_add_generator_metadata() {
 }
 
 /**
+ * Determine whether the use of Bento components is enabled.
+ *
+ * When Bento is enabled, newer experimental versions of AMP components are used which incorporate the next generation
+ * of the component framework.
+ *
+ * @since 2.2
+ * @link https://blog.amp.dev/2021/01/28/bento/
+ *
+ * @return bool Whether Bento components are enabled.
+ */
+function amp_is_bento_enabled() {
+	/**
+	 * Filters whether the use of Bento components is enabled.
+	 *
+	 * When Bento is enabled, newer experimental versions of AMP components are used which incorporate the next generation
+	 * of the component framework.
+	 *
+	 * @since 2.2
+	 * @link https://blog.amp.dev/2021/01/28/bento/
+	 *
+	 * @param bool $enabled Enabled.
+	 */
+	return apply_filters( 'amp_bento_enabled', false );
+}
+
+/**
  * Register default scripts for AMP components.
  *
  * @internal
@@ -914,27 +981,36 @@ function amp_register_default_scripts( $wp_scripts ) {
 	);
 
 	// Register all AMP components as defined in the spec.
-	foreach ( AMP_Allowed_Tags_Generated::get_extension_specs() as $extension_name => $extension_spec ) {
+	$extension_specs = AMP_Allowed_Tags_Generated::get_extension_specs();
+	if ( isset( $extension_specs['amp-carousel'] ) && '0.1' === $extension_specs['amp-carousel']['latest'] ) {
+		/*
+		 * The latestVersion of amp-carousel is 0.1 in https://github.com/ampproject/amphtml/blob/main/build-system/compile/bundles.config.extensions.json
+		 * But we have been using 0.2 since https://github.com/ampproject/amp-wp/pull/3115
+		 * Therefore, we override the latest version to also be 0.2 since it has been shown to be stable.
+		 */
+		$extension_specs['amp-carousel']['latest'] = '0.2';
+	}
+
+	$bento_enabled = amp_is_bento_enabled();
+	foreach ( $extension_specs as $extension_name => $extension_spec ) {
+		if ( $bento_enabled && ! empty( $extension_spec['bento'] ) ) {
+			$version = $extension_spec['bento']['version'];
+		} else {
+			$version = $extension_spec['latest'];
+		}
+
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
 			$extension_name,
-			end( $extension_spec['version'] )
+			$version
 		);
 
 		$wp_scripts->add(
 			$extension_name,
 			$src,
-			[ 'amp-runtime' ],
+			[ 'amp-runtime' ], // @todo Eventually this will not be present for Bento.
 			null
 		);
-	}
-
-	if ( $wp_scripts->query( 'amp-experiment', 'registered' ) ) {
-		/*
-		 * Version 1.0 of amp-experiment is still experimental and requires the user to enable it.
-		 * @todo Revisit once amp-experiment is no longer experimental.
-		 */
-		$wp_scripts->registered['amp-experiment']->src = 'https://cdn.ampproject.org/v0/amp-experiment-0.1.js';
 	}
 }
 
@@ -962,6 +1038,28 @@ function amp_register_default_styles( WP_Styles $styles ) {
 		AMP__VERSION
 	);
 	$styles->add_data( 'amp-icons', 'rtl', 'replace' );
+
+	// These are registered exclusively for non-AMP pages that manually enqueue them. They aren't needed on
+	// AMP pages due to the runtime style being present and because the styles are inlined in the scripts already.
+	if ( amp_is_bento_enabled() ) {
+		foreach ( AMP_Allowed_Tags_Generated::get_extension_specs() as $extension_name => $extension_spec ) {
+			if ( empty( $extension_spec['bento']['has_css'] ) ) {
+				continue;
+			}
+
+			$src = sprintf(
+				'https://cdn.ampproject.org/v0/%s-%s.css',
+				$extension_name,
+				$extension_spec['bento']['version']
+			);
+			$styles->add(
+				$extension_name,
+				$src,
+				[],
+				null
+			);
+		}
+	}
 }
 
 /**
@@ -1072,6 +1170,35 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
 		}
 	}
 
+	return $tag;
+}
+
+/**
+ * Ensure ID attribute is added to printed scripts.
+ *
+ * Core started adding the ID attribute in WP 5.5. This attribute is used both by validation logic for sourcing
+ * attribution as well as in the script and comments sanitizers.
+ *
+ * @link https://core.trac.wordpress.org/changeset/48295
+ * @since 2.2
+ * @internal
+ *
+ * @param string $tag    The script tag for the enqueued script.
+ * @param string $handle The script's registered handle.
+ * @return string Filtered script.
+ */
+function amp_ensure_id_attribute_on_script_loader_tag( $tag, $handle ) {
+	$tag = preg_replace_callback(
+		'/(<script[^>]*?\ssrc=(["\']).*?\2)([^>]*?>)/',
+		static function ( $matches ) use ( $handle ) {
+			if ( false === strpos( $matches[0], 'id=' ) ) {
+				return $matches[1] . sprintf( ' id="%s"', esc_attr( "$handle-js" ) ) . $matches[3];
+			}
+			return $matches[0];
+		},
+		$tag,
+		1
+	);
 	return $tag;
 }
 
@@ -1265,27 +1392,28 @@ function amp_get_content_embed_handlers( $post = null ) {
 	return apply_filters(
 		'amp_content_embed_handlers',
 		[
-			'AMP_Core_Block_Handler'         => [],
-			'AMP_Twitter_Embed_Handler'      => [],
-			'AMP_YouTube_Embed_Handler'      => [],
-			'AMP_Crowdsignal_Embed_Handler'  => [],
-			'AMP_DailyMotion_Embed_Handler'  => [],
-			'AMP_Vimeo_Embed_Handler'        => [],
-			'AMP_SoundCloud_Embed_Handler'   => [],
-			'AMP_Instagram_Embed_Handler'    => [],
-			'AMP_Issuu_Embed_Handler'        => [],
-			'AMP_Meetup_Embed_Handler'       => [],
-			'AMP_Facebook_Embed_Handler'     => [],
-			'AMP_Pinterest_Embed_Handler'    => [],
-			'AMP_Playlist_Embed_Handler'     => [],
-			'AMP_Reddit_Embed_Handler'       => [],
-			'AMP_TikTok_Embed_Handler'       => [],
-			'AMP_Tumblr_Embed_Handler'       => [],
-			'AMP_Gallery_Embed_Handler'      => [],
-			'AMP_Gfycat_Embed_Handler'       => [],
-			'AMP_Imgur_Embed_Handler'        => [],
-			'AMP_Scribd_Embed_Handler'       => [],
-			'AMP_WordPress_TV_Embed_Handler' => [],
+			AMP_Core_Block_Handler::class         => [],
+			AMP_Twitter_Embed_Handler::class      => [],
+			AMP_YouTube_Embed_Handler::class      => [],
+			AMP_Crowdsignal_Embed_Handler::class  => [],
+			AMP_DailyMotion_Embed_Handler::class  => [],
+			AMP_Vimeo_Embed_Handler::class        => [],
+			AMP_SoundCloud_Embed_Handler::class   => [],
+			AMP_Instagram_Embed_Handler::class    => [],
+			AMP_Issuu_Embed_Handler::class        => [],
+			AMP_Meetup_Embed_Handler::class       => [],
+			AMP_Facebook_Embed_Handler::class     => [],
+			AMP_Pinterest_Embed_Handler::class    => [],
+			AMP_Playlist_Embed_Handler::class     => [],
+			AMP_Reddit_Embed_Handler::class       => [],
+			AMP_TikTok_Embed_Handler::class       => [],
+			AMP_Tumblr_Embed_Handler::class       => [],
+			AMP_Gallery_Embed_Handler::class      => [],
+			AMP_Gfycat_Embed_Handler::class       => [],
+			AMP_Imgur_Embed_Handler::class        => [],
+			AMP_Scribd_Embed_Handler::class       => [],
+			AMP_WordPress_Embed_Handler::class    => [],
+			AMP_WordPress_TV_Embed_Handler::class => [],
 		],
 		$post
 	);
@@ -1325,6 +1453,30 @@ function amp_is_dev_mode() {
 			is_customize_preview()
 		)
 	);
+}
+
+/**
+ * Determine whether native `img` should be used instead of converting to `amp-img`.
+ *
+ * @since 2.2
+ *
+ * @return bool Whether to use `img`.
+ */
+function amp_is_native_img_used() {
+	$use_native_img_tag = AMP_Options_Manager::get_option( Option::USE_NATIVE_IMG_TAG );
+
+	/**
+	 * Filters whether to use the native `img` element rather than convert to `amp-img`.
+	 *
+	 * This filter is a feature flag to opt-in to discontinue using `amp-img` (and `amp-anim`) which will be deprecated
+	 * in AMP in the near future. Once this lands in AMP, this filter will switch to defaulting to true instead of false.
+	 *
+	 * @since 2.2
+	 * @link https://github.com/ampproject/amphtml/issues/30442
+	 *
+	 * @param bool $use_native Whether to use `img`.
+	 */
+	return (bool) apply_filters( 'amp_native_img_used', $use_native_img_tag );
 }
 
 /**
@@ -1371,53 +1523,84 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 	);
 
+	$native_img_used = amp_is_native_img_used();
+
 	$sanitizers = [
-		'AMP_Embed_Sanitizer'             => [
+		// Embed sanitization must come first because it strips out custom scripts associated with embeds.
+		AMP_Embed_Sanitizer::class                 => [
 			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
 		],
-		'AMP_Core_Theme_Sanitizer'        => [
-			'template'       => get_template(),
-			'stylesheet'     => get_stylesheet(),
-			'theme_features' => [
+		AMP_O2_Player_Sanitizer::class             => [],
+		AMP_Playbuzz_Sanitizer::class              => [],
+		AMP_Core_Theme_Sanitizer::class            => [
+			'template'        => get_template(),
+			'stylesheet'      => get_stylesheet(),
+			'theme_features'  => [
 				'force_svg_support' => [], // Always replace 'no-svg' class with 'svg' if it exists.
 			],
+			'native_img_used' => $native_img_used,
 		],
-		'AMP_Srcset_Sanitizer'            => [],
-		'AMP_Img_Sanitizer'               => [
-			'align_wide_support' => current_theme_supports( 'align-wide' ),
-		],
-		'AMP_Form_Sanitizer'              => [],
-		'AMP_Comments_Sanitizer'          => [
+
+		AMP_Comments_Sanitizer::class              => [
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
 		],
-		'AMP_Video_Sanitizer'             => [],
-		'AMP_O2_Player_Sanitizer'         => [],
-		'AMP_Audio_Sanitizer'             => [],
-		'AMP_Playbuzz_Sanitizer'          => [],
-		'AMP_Object_Sanitizer'            => [],
-		'AMP_Iframe_Sanitizer'            => [
+
+		AMP_Bento_Sanitizer::class                 => [],
+
+		// The AMP_PWA_Script_Sanitizer run before AMP_Script_Sanitizer, to prevent the script tags
+		// from getting removed in PWA plugin offline/500 templates.
+		AMP_PWA_Script_Sanitizer::class            => [],
+
+		// The AMP_GTag_Script_Sanitizer runs before AMP_Script_Sanitizer to mark the the Google Analytics script tags as being PX-verified.
+		AMP_GTag_Script_Sanitizer::class           => [],
+
+		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
+		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
+		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
+		// performed.
+		AMP_Script_Sanitizer::class                => [],
+
+		AMP_Srcset_Sanitizer::class                => [],
+		AMP_Img_Sanitizer::class                   => [
+			'align_wide_support' => current_theme_supports( 'align-wide' ),
+			'native_img_used'    => $native_img_used,
+		],
+		AMP_Form_Sanitizer::class                  => [],
+		AMP_Video_Sanitizer::class                 => [],
+		AMP_Audio_Sanitizer::class                 => [],
+		AMP_Object_Sanitizer::class                => [],
+		AMP_Iframe_Sanitizer::class                => [
 			'add_placeholder'    => true,
 			'current_origin'     => $current_origin,
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
-		'AMP_Gallery_Block_Sanitizer'     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+		AMP_Gallery_Block_Sanitizer::class         => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
+			'native_img_used'   => $native_img_used,
 		],
-		'AMP_Block_Sanitizer'             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
-		'AMP_Script_Sanitizer'            => [],
-		'AMP_Style_Sanitizer'             => [],
-		'AMP_Meta_Sanitizer'              => [],
-		'AMP_Layout_Sanitizer'            => [],
-		'AMP_Accessibility_Sanitizer'     => [],
-		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+		AMP_Native_Img_Attributes_Sanitizer::class => [ // Note: Native img attributes sanitizer must come after image sanitizers since its logic is sanitizing the already sanitized images attributes.
+			'native_img_used' => $native_img_used,
+		],
+		AMP_Block_Sanitizer::class                 => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
+		AMP_Style_Sanitizer::class                 => [
+			'skip_tree_shaking'   => is_customize_preview(),
+			'allow_excessive_css' => is_customize_preview(),
+		],
+		AMP_Meta_Sanitizer::class                  => [],
+		AMP_Layout_Sanitizer::class                => [],
+		AMP_Accessibility_Sanitizer::class         => [],
+		// Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+		AMP_Tag_And_Attribute_Sanitizer::class     => [
+			'prefer_bento' => amp_is_bento_enabled(),
+		],
 	];
 
 	if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
-		$sanitizers['AMP_Nav_Menu_Toggle_Sanitizer'] = $theme_support_args['nav_menu_toggle'];
+		$sanitizers[ AMP_Nav_Menu_Toggle_Sanitizer::class ] = $theme_support_args['nav_menu_toggle'];
 	}
 
 	if ( ! empty( $theme_support_args['nav_menu_dropdown'] ) ) {
-		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
+		$sanitizers[ AMP_Nav_Menu_Dropdown_Sanitizer::class ] = $theme_support_args['nav_menu_dropdown'];
 	}
 
 	if ( $amp_to_amp_linking_enabled && AMP_Theme_Support::STANDARD_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
@@ -1436,10 +1619,26 @@ function amp_get_content_sanitizers( $post = null ) {
 		 */
 		$excluded_urls = apply_filters( 'amp_to_amp_excluded_urls', [] );
 
-		$sanitizers['AMP_Link_Sanitizer'] = array_merge(
+		$sanitizers[ AMP_Link_Sanitizer::class ] = array_merge(
 			[ 'paired' => ! amp_is_canonical() ],
 			compact( 'excluded_urls' )
 		);
+	}
+
+	/**
+	 * Filters whether AMP auto-lightbox is disabled.
+	 *
+	 * When disabled, the data-amp-auto-lightbox-disable attribute is added to the body.
+	 *
+	 * @since 2.2.2
+	 * @link https://github.com/ampproject/amphtml/blob/420bc3987f69f6d9cd36e31c013fc9eea4f1b245/docs/spec/auto-lightbox.md#disabling-treatment-explicitly
+	 *
+	 * @param bool $disabled Whether disabled.
+	 */
+	$is_auto_lightbox_disabled = apply_filters( 'amp_auto_lightbox_disabled', true );
+
+	if ( $is_auto_lightbox_disabled ) {
+		$sanitizers[ AMP_Auto_Lightbox_Disable_Sanitizer::class ] = [];
 	}
 
 	/**
@@ -1485,9 +1684,22 @@ function amp_get_content_sanitizers( $post = null ) {
 			$dev_mode_xpaths[] = '//style[ @id = "custom-theme-colors" ]';
 		}
 
+		// Mark the script output by wp_comment_form_unfiltered_html_nonce() as being in dev mode.
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			$dev_mode_xpaths[] = '//script[ not( @src ) and preceding-sibling::input[ @name = "_wp_unfiltered_html_comment_disabled" ] and contains( text(), "_wp_unfiltered_html_comment_disabled" ) ]';
+		}
+
+		// Mark the script output by wp_post_preview_js() as being in dev mode.
+		if ( is_preview() && get_queried_object() instanceof WP_Post ) {
+			$dev_mode_xpaths[] = sprintf(
+				'//script[ not( @src ) and contains( text(), "document.location.search" ) and contains( text(), "preview=true" ) and contains( text(), "unload" ) and contains( text(), "window.name" ) and contains( text(), "wp-preview-%d" ) ]',
+				get_queried_object_id()
+			);
+		}
+
 		$sanitizers = array_merge(
 			[
-				'AMP_Dev_Mode_Sanitizer' => [
+				AMP_Dev_Mode_Sanitizer::class => [
 					'element_xpaths' => $dev_mode_xpaths,
 				],
 			],
@@ -1504,10 +1716,34 @@ function amp_get_content_sanitizers( $post = null ) {
 	 * @since 1.5.0
 	 * @param bool $transient_caching_allowed Transient caching allowed.
 	 */
-	$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
+	$sanitizers[ AMP_Style_Sanitizer::class ]['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 
-	// Force layout, style, meta, and validating sanitizers to be at the end.
-	foreach ( [ 'AMP_Layout_Sanitizer', 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
+	// Force core essential sanitizers to appear at the end at the end, with non-essential and third-party sanitizers appearing before.
+	$expected_final_sanitizer_order = [
+		AMP_Auto_Lightbox_Disable_Sanitizer::class,
+		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
+		AMP_Bento_Sanitizer::class, // Bento scripts may be preserved here.
+		AMP_PWA_Script_Sanitizer::class, // Must come before script sanitizer since PWA offline page scripts are removed.
+		AMP_GTag_Script_Sanitizer::class, // Must come before script sanitizer since gtag.js is removed.
+		AMP_Script_Sanitizer::class, // Must come before sanitizers for images, videos, audios, comments, forms, and styles.
+		AMP_Form_Sanitizer::class, // Must come before comments sanitizer.
+		AMP_Comments_Sanitizer::class, // Also must come after the form sanitizer.
+		AMP_Srcset_Sanitizer::class,
+		AMP_Img_Sanitizer::class,
+		AMP_Video_Sanitizer::class,
+		AMP_Audio_Sanitizer::class,
+		AMP_Object_Sanitizer::class,
+		AMP_Iframe_Sanitizer::class,
+		AMP_Gallery_Block_Sanitizer::class,
+		AMP_Native_Img_Attributes_Sanitizer::class, // Must come after gallery block sanitizer since it sanitizes img attributes.
+		AMP_Block_Sanitizer::class,
+		AMP_Accessibility_Sanitizer::class,
+		AMP_Layout_Sanitizer::class,
+		AMP_Style_Sanitizer::class,
+		AMP_Meta_Sanitizer::class,
+		AMP_Tag_And_Attribute_Sanitizer::class,
+	];
+	foreach ( $expected_final_sanitizer_order as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];
 			unset( $sanitizers[ $class_name ] );
@@ -1670,14 +1906,22 @@ function amp_get_schemaorg_metadata() {
 
 	$queried_object = get_queried_object();
 	if ( $queried_object instanceof WP_Post ) {
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.3', '>=' ) ) {
+			$date_published = mysql2date( 'c', $queried_object->post_date, false );
+			$date_modified  = mysql2date( 'c', $queried_object->post_modified, false );
+		} else {
+			$date_published = mysql2date( 'c', $queried_object->post_date_gmt, false );
+			$date_modified  = mysql2date( 'c', $queried_object->post_modified_gmt, false );
+		}
+
 		$metadata = array_merge(
 			$metadata,
 			[
 				'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 				'mainEntityOfPage' => get_permalink(),
 				'headline'         => get_the_title(),
-				'datePublished'    => mysql2date( 'c', $queried_object->post_date_gmt, false ),
-				'dateModified'     => mysql2date( 'c', $queried_object->post_modified_gmt, false ),
+				'datePublished'    => $date_published,
+				'dateModified'     => $date_modified,
 			]
 		);
 
@@ -1843,7 +2087,11 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
  * @return string|null Script hash or null if the sha384 algorithm is not supported.
  */
 function amp_generate_script_hash( $script ) {
-	$sha384 = hash( 'sha384', $script, true );
+	try {
+		$sha384 = hash( 'sha384', $script, true );
+	} catch ( ValueError $e ) {
+		$sha384 = false;
+	}
 	if ( false === $sha384 ) {
 		return null;
 	}
@@ -1919,4 +2167,22 @@ function amp_remove_paired_endpoint( $url ) {
 		_doing_it_wrong( __FUNCTION__, esc_html( $reason ) . ' ' . esc_html( $e->getMessage() ), '2.1.1' );
 		return $url;
 	}
+}
+
+/**
+ * Determine sandboxing level if enabled.
+ *
+ * @since 2.3.1
+ *
+ * @return int Following values are possible:
+ *             0: Sandbox is disabled.
+ *             1: Sandboxing level: Loose.
+ *             2: Sandboxing level: Moderate.
+ *             3: Sandboxing level: Strict.
+ */
+function amp_get_sandboxing_level() {
+	if ( ! AMP_Options_Manager::get_option( Option::SANDBOXING_ENABLED ) ) {
+		return 0;
+	}
+	return AMP_Options_Manager::get_option( Option::SANDBOXING_LEVEL );
 }

@@ -6,18 +6,21 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { testPreviousButton, testNextButton } from '../../utils/onboarding-wizard-utils';
+import {
+	testPreviousButton,
+	testNextButton,
+} from '../../utils/onboarding-wizard-utils';
 
-describe( 'welcome', () => {
-	beforeEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
-		await page.waitForSelector( '.amp-settings-nav__prev-next' );
-	} );
+describe('welcome', () => {
+	beforeEach(async () => {
+		await visitAdminPage('admin.php', 'page=amp-onboarding-wizard');
+		await page.waitForSelector('.amp-settings-nav__prev-next');
+	});
 
-	it( 'should contain content', async () => {
-		await expect( page ).toMatchElement( '.welcome' );
+	it('should contain content', async () => {
+		await expect(page).toMatchElement('.welcome');
 
-		testPreviousButton( { exists: false } );
-		testNextButton( { text: 'Next' } );
-	} );
-} );
+		await testPreviousButton({ exists: false });
+		await testNextButton({ text: 'Next' });
+	});
+});

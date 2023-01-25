@@ -7,7 +7,7 @@ import AMPValidationStatusNotification from './status-notification';
 
 export default function AMPValidationStatus() {
 	return (
-		<SidebarNotificationsContainer isShady={ true }>
+		<SidebarNotificationsContainer isShady={true}>
 			<AMPRevalidateNotification />
 			<AMPValidationStatusNotification />
 		</SidebarNotificationsContainer>

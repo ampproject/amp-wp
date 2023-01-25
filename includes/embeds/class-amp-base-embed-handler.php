@@ -7,7 +7,10 @@
  * @package  AMP
  */
 
-use AmpProject\Tag;
+use AmpProject\Dom\Document;
+use AmpProject\Dom\Element;
+use AmpProject\Html\Attribute;
+use AmpProject\Html\Tag;
 
 /**
  * Class AMP_Base_Embed_Handler
@@ -18,7 +21,9 @@ abstract class AMP_Base_Embed_Handler {
 	/**
 	 * Default width.
 	 *
-	 * @var int
+	 * In some cases, this may be the string 'auto' when a fixed-height layout is used.
+	 *
+	 * @var int|string
 	 */
 	protected $DEFAULT_WIDTH = 600;
 
@@ -86,6 +91,7 @@ abstract class AMP_Base_Embed_Handler {
 	 * Get regex pattern for matching HTML attributes from a given tag name.
 	 *
 	 * @since 1.5.0
+	 * @todo This does not currently work with single-quoted attribute values or non-quoted attributes.
 	 *
 	 * @param string   $html            HTML source haystack.
 	 * @param string   $tag_name        Tag name.
@@ -199,5 +205,36 @@ abstract class AMP_Base_Embed_Handler {
 				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 			}
 		}
+	}
+
+	/**
+	 * Create overflow button element.
+	 *
+	 * @param Document $dom  Document.
+	 * @param string   $text Button text (optional).
+	 * @return Element Button element.
+	 */
+	protected function create_overflow_button_element( Document $dom, $text = null ) {
+		if ( ! $text ) {
+			$text = __( 'See more', 'amp' );
+		}
+		$overflow = $dom->createElement( Tag::BUTTON );
+		$overflow->setAttributeNode( $dom->createAttribute( Attribute::OVERFLOW ) );
+		$overflow->setAttribute( Attribute::TYPE, 'button' );
+		$overflow->textContent = $text;
+		return $overflow;
+	}
+
+	/**
+	 * Create overflow button markup.
+	 *
+	 * @param string $text Button text (optional).
+	 * @return string Button markup.
+	 */
+	protected function create_overflow_button_markup( $text = null ) {
+		if ( ! $text ) {
+			$text = __( 'See more', 'amp' );
+		}
+		return sprintf( '<button overflow type="button">%s</button>', esc_html( $text ) );
 	}
 }

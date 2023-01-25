@@ -21,3 +21,14 @@
 .amp-setting-toggle--disabled .components-toggle-control__label {
 	pointer-events: none;
 }
+
+.amp .amp-setting-toggle--compact .components-form-toggle {
+
+	@media (min-width: 783px) {
+		margin-right: 1rem;
+	}
+}
+
+.amp .amp-setting-toggle--compact .amp-setting-toggle__label-text p {
+	margin: 0;
+}

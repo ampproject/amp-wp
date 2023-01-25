@@ -10,6 +10,7 @@
 namespace AmpProject\AmpWP\Editor;
 
 use AMP_Post_Type_Support;
+use AmpProject\AmpWP\DependencySupport;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
@@ -20,19 +21,17 @@ use AmpProject\AmpWP\Infrastructure\Service;
  */
 final class EditorSupport implements Registerable, Service {
 
-	/**
-	 * The minimum version of Gutenberg supported by editor features.
-	 *
-	 * @var string
-	 */
-	const GB_MIN_VERSION = '9.2.0';
+	/** @var DependencySupport */
+	private $dependency_support;
 
 	/**
-	 * The minimum version of WordPress supported by editor features.
+	 * Constructor.
 	 *
-	 * @var string
+	 * @param DependencySupport $dependency_support DependencySupport instance.
 	 */
-	const WP_MIN_VERSION = '5.6';
+	public function __construct( DependencySupport $dependency_support ) {
+		$this->dependency_support = $dependency_support;
+	}
 
 	/**
 	 * Runs on instantiation.
@@ -45,69 +44,44 @@ final class EditorSupport implements Registerable, Service {
 	 * Shows a notice in the editor if the Gutenberg or WP version prevents plugin features from working.
 	 */
 	public function maybe_show_notice() {
+		if ( $this->dependency_support->has_support() ) {
+			return;
+		}
+
+		if ( ! $this->is_current_screen_block_editor_for_amp_enabled_post_type() ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		wp_add_inline_script(
+			'wp-edit-post',
+			sprintf(
+				'wp.domReady(
+					function () {
+						wp.data.dispatch( "core/notices" ).createWarningNotice( %s )
+					}
+				);',
+				wp_json_encode( __( 'AMP functionality is not available since your version of the Block Editor is too old. Please either update WordPress core to the latest version or activate the Gutenberg plugin.', 'amp' ) )
+			)
+		);
+	}
+
+	/**
+	 * Returns whether the current screen is using the block editor and the post being edited supports AMP.
+	 *
+	 * @return bool
+	 */
+	public function is_current_screen_block_editor_for_amp_enabled_post_type() {
 		$screen = get_current_screen();
-
-		if ( ! $screen ) {
-			return;
-		}
-
-		if ( ! isset( $screen->is_block_editor ) || false === $screen->is_block_editor ) {
-			return;
-		}
-
-		if ( ! in_array( get_post_type(), AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
-			return;
-		}
-
-		if ( $this->editor_supports_amp_block_editor_features() ) {
-			return;
-		}
-
-		if ( current_user_can( 'manage_options' ) ) {
-			wp_add_inline_script(
-				'wp-edit-post',
-				sprintf(
-					'wp.domReady(
-						function () {
-							wp.data.dispatch( "core/notices" ).createWarningNotice( %s )
-						}
-					);',
-					wp_json_encode( __( 'AMP functionality is not available since your version of the Block Editor is too old. Please either update WordPress core to the latest version or activate the Gutenberg plugin. As a last resort, you may use the Classic Editor plugin instead.', 'amp' ) )
-				)
-			);
-		}
-	}
-
-	/**
-	 * Returns whether the editor in the current environment supports plugin features.
-	 *
-	 * @return bool
-	 */
-	public function editor_supports_amp_block_editor_features() {
-		// Check for plugin constant here as well as in the function because editor features won't work in
-		// supported WP versions if an old, unsupported GB version is overriding the editor.
-		if ( defined( 'GUTENBERG_VERSION' ) ) {
-			return $this->has_support_from_gutenberg_plugin();
-		}
-
-		return $this->has_support_from_core();
-	}
-
-	/**
-	 * Returns whether the Gutenberg plugin provides minimal support.
-	 *
-	 * @return bool
-	 */
-	public function has_support_from_gutenberg_plugin() {
-		return defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, self::GB_MIN_VERSION, '>=' );
-	}
-
-	/**
-	 * Returns whether WP core provides minimum Gutenberg support.
-	 *
-	 * @return bool
-	 */
-	public function has_support_from_core() {
-		return version_compare( get_bloginfo( 'version' ), self::WP_MIN_VERSION, '>=' );
+		return (
+			$screen
+			&&
+			! empty( $screen->is_block_editor )
+			&&
+			in_array( get_post_type(), AMP_Post_Type_Support::get_supported_post_types(), true )
+		);
 	}
 }

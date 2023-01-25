@@ -6,26 +6,52 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\ValidationExemption;
+use AmpProject\Dom\Document;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
 /**
  * Class AMP_Video_Converter_Test
  *
- * @covers AMP_Video_Sanitizer
+ * @coversDefaultClass \AMP_Video_Sanitizer
  */
-class AMP_Video_Converter_Test extends WP_UnitTestCase {
+class AMP_Video_Converter_Test extends TestCase {
 
 	use MarkupComparison;
 
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		if ( did_action( 'add_attachment' ) ) {
 			$this->remove_added_uploads();
 		}
-		parent::tearDown();
+		parent::tear_down();
+	}
+
+	/** @covers ::get_selector_conversion_mapping() */
+	public function test_get_selector_conversion_mapping() {
+		$dom = Document::fromHtmlFragment( '<p>Hello world</p>' );
+
+		$with_defaults = new AMP_Video_Sanitizer( $dom );
+		$this->assertEquals(
+			[ 'video' => [ 'amp-video', 'amp-youtube' ] ],
+			$with_defaults->get_selector_conversion_mapping()
+		);
+
+		$with_false_native_used = new AMP_Video_Sanitizer( $dom, [ 'native_video_used' => false ] );
+		$this->assertEquals(
+			[ 'video' => [ 'amp-video', 'amp-youtube' ] ],
+			$with_false_native_used->get_selector_conversion_mapping()
+		);
+
+		$with_true_native_used = new AMP_Video_Sanitizer( $dom, [ 'native_video_used' => true ] );
+		$this->assertEquals(
+			[],
+			$with_true_native_used->get_selector_conversion_mapping()
+		);
 	}
 
 	/**
@@ -41,8 +67,8 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			],
 
 			'simple_video' => [
-				'<video width="300" height="300" src="https://example.com/video.mp4" playsinline webkit-playsinline></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" playsinline></video></noscript></amp-video>',
+				'<video id="vid" width="300" height="300" src="https://example.com/video.mp4" playsinline webkit-playsinline></video>',
+				'<amp-video id="vid" width="300" height="300" src="https://example.com/video.mp4" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" playsinline></video></noscript></amp-video>',
 				[
 					'add_noscript_fallback' => true,
 				],
@@ -50,7 +76,23 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 			'simple_video_without_noscript' => [
 				'<video width="300" height="300" src="https://example.com/video.mp4"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a></amp-video>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
+			'video_with_aspect-ratio' => [
+				'<video width="300" height="500" style="aspect-ratio: 300 / 500" src="https://example.com/video.mp4"></video>',
+				'<amp-video width="300" height="500" src="https://example.com/video.mp4" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a></amp-video>',
+				[
+					'add_noscript_fallback' => false,
+				],
+			],
+
+			'video_with_aspect-ratio_and_more' => [
+				'<video width="300" height="500" style="border: solid 1px red; aspect-ratio: 300/500; outline: solid 1px blue;" src="https://example.com/video.mp4"></video>',
+				'<amp-video width="300" height="500" style="border:solid 1px red;outline:solid 1px blue" src="https://example.com/video.mp4" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a></amp-video>',
 				[
 					'add_noscript_fallback' => false,
 				],
@@ -58,12 +100,25 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 			'video_without_dimensions' => [
 				'<video src="https://example.com/file.mp4"></video>',
-				'<amp-video src="https://example.com/file.mp4" height="400" layout="fixed-height" width="auto"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<amp-video src="https://example.com/file.mp4" class="amp-wp-unknown-size" height="400" layout="fixed-height" width="auto"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+			],
+
+			'video_with_autoplay' => [
+				'<video src="https://example.com/file.mp4" autoplay muted width="160" height="80"></video>',
+				'<amp-video src="https://example.com/file.mp4" autoplay width="160" height="80" layout="intrinsic"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4" autoplay width="160" height="80"></video></noscript></amp-video>',
 			],
 
 			'local_video_without_dimensions' => [
 				sprintf( '<video src="%s"></video>', '{{video_url}}' ),
-				sprintf( '<amp-video src="%1$s" width="560" height="320" layout="responsive"><a href="%1$s" fallback="">%1$s</a><noscript><video src="%1$s"></video></noscript></amp-video>', '{{video_url}}' ),
+				sprintf( '<amp-video src="%1$s" width="560" height="320" layout="intrinsic"><a href="%1$s" fallback="">%1$s</a><noscript><video src="%1$s"></video></noscript></amp-video>', '{{video_url}}' ),
+			],
+
+			'local_video_without_dimensions_and_native' => [
+				sprintf( '<video src="%s"></video>', '{{video_url}}' ),
+				sprintf( '<video src="%s" width="560" height="320" %s></video>', '{{video_url}}', ValidationExemption::PX_VERIFIED_TAG_ATTRIBUTE ),
+				[
+					'native_video_used' => true,
+				],
 			],
 
 			'local_video_without_dimensions_and_with_data_layout' => [
@@ -77,53 +132,53 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			],
 
 			'layout_fill_video_without_dimensions' => [
-				'<video src="https://example.com/file.mp4" layout="fill"></video>',
-				'<amp-video src="https://example.com/file.mp4" layout="fill"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<video src="https://example.com/file.mp4" layout="fill" class="some-file"></video>',
+				'<amp-video src="https://example.com/file.mp4" layout="fill" class="some-file amp-wp-unknown-size"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			],
 
 			'data_layout_fill_video_without_dimensions' => [
 				'<video src="https://example.com/file.mp4" data-amp-layout="fill"></video>',
-				'<amp-video src="https://example.com/file.mp4" layout="fill"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<amp-video src="https://example.com/file.mp4" layout="fill" class="amp-wp-unknown-size"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			],
 
 			'layout_nodisplay_video_without_dimensions' => [
 				'<video src="https://example.com/file.mp4" layout="nodisplay"></video>',
-				'<amp-video src="https://example.com/file.mp4" layout="nodisplay"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<amp-video src="https://example.com/file.mp4" layout="nodisplay" class="amp-wp-unknown-size"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			],
 
 			'layout_fixed_video_without_dimensions' => [
 				'<video src="https://example.com/file.mp4" layout="nodisplay"></video>',
-				'<amp-video src="https://example.com/file.mp4" layout="nodisplay"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<amp-video src="https://example.com/file.mp4" layout="nodisplay" class="amp-wp-unknown-size"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			],
 
 			'autoplay_attribute' => [
 				'<video width="300" height="300" src="https://example.com/video.mp4" autoplay></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" autoplay="" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" autoplay></video></noscript></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" autoplay="" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" autoplay></video></noscript></amp-video>',
 			],
 
 			'autoplay_attribute__false' => [
 				'<video width="300" height="300" src="https://example.com/video.mp4" autoplay="false"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" autoplay="false"></video></noscript></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" autoplay="false"></video></noscript></amp-video>',
 			],
 
 			'video_with_allowlisted_attributes__enabled' => [
 				'<video width="300" height="300" src="https://example.com/video.mp4" controls loop="true" muted="muted"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" controls="" loop="" muted="" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" controls loop="true" muted="muted"></video></noscript></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" controls="" loop="" muted="" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" controls loop="true"></video></noscript></amp-video>',
 			],
 
 			'video_with_allowlisted_attributes__disabled' => [
 				'<video width="300" height="300" src="https://example.com/video.mp4" controls="false" loop="false" muted="false"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" controls="false" loop="false" muted="false"></video></noscript></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" controls="false" loop="false"></video></noscript></amp-video>',
 			],
 
 			'video_with_custom_attribute' => [
 				'<video width="300" height="300" src="https://example.com/video.mp4" onclick="foo()" data-foo="bar"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video>',
 			],
 
 			'video_with_sizes_attribute_is_overridden' => [
 				'<video width="300" height="200" src="https://example.com/file.mp4"></video>',
-				'<amp-video width="300" height="200" src="https://example.com/file.mp4" layout="responsive"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video width="300" height="200" src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<amp-video width="300" height="200" src="https://example.com/file.mp4" layout="intrinsic"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video width="300" height="200" src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			],
 
 			'video_with_children' => [
@@ -134,7 +189,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 					</video>
 				',
 				'
-					<amp-video width="480" height="300" poster="https://example.com/video-image.gif" layout="responsive">
+					<amp-video width="480" height="300" poster="https://example.com/video-image.gif" layout="intrinsic">
 						<source src="https://example.com/video.mp4" type="video/mp4">
 						<source src="https://example.com/video.ogv" type="video/ogg">
 						<a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a>
@@ -160,7 +215,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 			'video_with_noloading_from_editor' => [
 				'<figure data-amp-noloading="true"><video src="https://example.com/file.mp4" height="100" width="100"></video></figure>',
-				'<figure data-amp-noloading="true"><amp-video src="https://example.com/file.mp4" height="100" width="100" noloading="" layout="responsive"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4" height="100" width="100"></video></noscript></amp-video></figure>',
+				'<figure data-amp-noloading="true"><amp-video src="https://example.com/file.mp4" height="100" width="100" noloading="" layout="intrinsic"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4" height="100" width="100"></video></noscript></amp-video></figure>',
 			],
 
 			'multiple_same_video' => [
@@ -171,10 +226,10 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 					<video src="https://example.com/video.mp4" width="480" height="300"></video>
 				',
 				'
-					<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video src="https://example.com/video.mp4" width="480" height="300"></video></noscript></amp-video>
-					<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video src="https://example.com/video.mp4" width="480" height="300"></video></noscript></amp-video>
-					<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video src="https://example.com/video.mp4" width="480" height="300"></video></noscript></amp-video>
-					<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video src="https://example.com/video.mp4" width="480" height="300"></video></noscript></amp-video>
+					<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video src="https://example.com/video.mp4" width="480" height="300"></video></noscript></amp-video>
+					<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video src="https://example.com/video.mp4" width="480" height="300"></video></noscript></amp-video>
+					<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video src="https://example.com/video.mp4" width="480" height="300"></video></noscript></amp-video>
+					<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video src="https://example.com/video.mp4" width="480" height="300"></video></noscript></amp-video>
 				',
 			],
 
@@ -185,15 +240,15 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 					<video src="https://example.com/video3.webm" height="100" width="200"></video>
 				',
 				'
-					<amp-video src="https://example.com/video1.mp4" width="480" height="300" layout="responsive"><a href="https://example.com/video1.mp4" fallback="">https://example.com/video1.mp4</a><noscript><video src="https://example.com/video1.mp4" width="480" height="300"></video></noscript></amp-video>
-					<amp-video src="https://example.com/video2.ogv" width="300" height="480" layout="responsive"><a href="https://example.com/video2.ogv" fallback="">https://example.com/video2.ogv</a><noscript><video src="https://example.com/video2.ogv" width="300" height="480"></video></noscript></amp-video>
-					<amp-video src="https://example.com/video3.webm" height="100" width="200" layout="responsive"><a href="https://example.com/video3.webm" fallback="">https://example.com/video3.webm</a><noscript><video src="https://example.com/video3.webm" height="100" width="200"></video></noscript></amp-video>
+					<amp-video src="https://example.com/video1.mp4" width="480" height="300" layout="intrinsic"><a href="https://example.com/video1.mp4" fallback="">https://example.com/video1.mp4</a><noscript><video src="https://example.com/video1.mp4" width="480" height="300"></video></noscript></amp-video>
+					<amp-video src="https://example.com/video2.ogv" width="300" height="480" layout="intrinsic"><a href="https://example.com/video2.ogv" fallback="">https://example.com/video2.ogv</a><noscript><video src="https://example.com/video2.ogv" width="300" height="480"></video></noscript></amp-video>
+					<amp-video src="https://example.com/video3.webm" height="100" width="200" layout="intrinsic"><a href="https://example.com/video3.webm" fallback="">https://example.com/video3.webm</a><noscript><video src="https://example.com/video3.webm" height="100" width="200"></video></noscript></amp-video>
 				',
 			],
 
 			'https_not_required' => [
 				'<video width="300" height="300" src="http://example.com/video.mp4"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video>',
 			],
 
 			'http_video_with_children' => [
@@ -206,7 +261,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 					</video>
 				',
 				'
-					<amp-video width="480" height="300" poster="https://example.com/poster.jpeg" layout="responsive">
+					<amp-video width="480" height="300" poster="https://example.com/poster.jpeg" layout="intrinsic">
 						<source src="https://example.com/video.mp4" type="video/mp4">
 						<source src="https://example.com/video.ogv" type="video/ogg">
 						<track srclang="en" label="English" kind="subtitles" src="https://example.com/test-en.vtt">
@@ -223,13 +278,13 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			],
 
 			'amp_video_with_fallback' => [
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="intrinsic"><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video>',
 				null,
 			],
 
 			'video_with_fallback' => [
 				'<div id="player"><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></div>',
-				'<div id="player"><!--noscript--><amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video><!--/noscript--></div>',
+				'<div id="player"><!--noscript--><amp-video width="300" height="300" src="https://example.com/video.mp4" layout="intrinsic"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video><!--/noscript--></div>',
 			],
 
 			'test_with_dev_mode' => [
@@ -265,6 +320,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	 * Test converter.
 	 *
 	 * @dataProvider get_data
+	 * @covers ::sanitize()
+	 * @covers ::filter_video_dimensions()
+	 * @covers ::filter_attributes()
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
@@ -302,6 +360,8 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test that HTTPS is enforced.
+	 *
+	 * @covers ::sanitize()
 	 */
 	public function test__https_required() {
 		$source   = '<video width="300" height="300" src="http://example.com/video.mp4"></video>';
@@ -325,6 +385,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test that scripts don't picked up as expected.
+	 *
+	 * @covers ::sanitize()
+	 * @covers ::get_scripts()
 	 */
 	public function test_get_scripts__didnt_convert() {
 		$source   = '<p>Hello World</p>';
@@ -346,6 +409,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test that scripts get picked up.
+	 *
+	 * @covers ::sanitize()
+	 * @covers ::get_scripts()
 	 */
 	public function test_get_scripts__did_convert() {
 		$source   = '<video width="300" height="300" src="https://example.com/video.mp4"></video>';

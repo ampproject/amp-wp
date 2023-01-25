@@ -78,7 +78,7 @@ class AMP_Content {
 		$this->embed_handlers    = $this->register_embed_handlers( $embed_handler_classes );
 		$this->sanitizer_classes = $sanitizer_classes;
 
-		$this->sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = $this->embed_handlers;
+		$this->sanitizer_classes[ AMP_Embed_Sanitizer::class ]['embed_handlers'] = $this->embed_handlers;
 
 		$this->transform();
 	}
@@ -175,10 +175,10 @@ class AMP_Content {
 					__METHOD__,
 					esc_html(
 						sprintf(
-							/* translators: 1: embed handler. 2: AMP_Embed_Handler */
+							/* translators: 1: embed handler. 2: AMP_Base_Embed_Handler */
 							__( 'Embed Handler (%1$s) must extend `%2$s`', 'amp' ),
 							esc_html( $embed_handler_class ),
-							'AMP_Embed_Handler'
+							AMP_Base_Embed_Handler::class
 						)
 					),
 					'0.1'

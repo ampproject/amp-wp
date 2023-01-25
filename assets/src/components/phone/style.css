@@ -24,9 +24,32 @@
 	width: 43px;
 }
 
-.phone-inner {
+.phone__inner {
 	display: flex;
-	background-color: var(--color-gray-medium);
+	background-color: var(--amp-settings-color-dark-gray);
 	flex-grow: 1;
 	overflow: hidden;
+	position: relative;
+}
+
+.phone__overlay {
+	align-items: center;
+	background-color: var(--amp-settings-color-dark-gray);
+	bottom: 0;
+	display: flex;
+	justify-content: center;
+	left: 0;
+	opacity: 0;
+	pointer-events: none;
+	position: absolute;
+	right: 0;
+	top: 0;
+	transition: opacity 0.3s ease, visibility 0.3s ease;
+	visibility: hidden;
+}
+
+.phone.is-loading .phone__overlay {
+	opacity: 1;
+	pointer-events: auto;
+	visibility: visible;
 }

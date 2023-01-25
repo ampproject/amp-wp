@@ -16,15 +16,15 @@ import { Check } from '../../../components/svg/check';
 /**
  * List bullet for a stepper item.
  *
- * @param {Object} props Component props.
+ * @param {Object} props                 Component props.
  * @param {number} props.activePageIndex The index of the currently visible screen.
- * @param {number} props.index The index of the item being rendered.
+ * @param {number} props.index           The index of the item being rendered.
  */
-export function StepperBullet( { activePageIndex, index } ) {
+export function StepperBullet({ activePageIndex, index }) {
 	const isCheckMark = activePageIndex > index;
-	const isCurrent = ( ! isCheckMark ) && activePageIndex === index;
+	const isCurrent = !isCheckMark && activePageIndex === index;
 
-	if ( isCheckMark ) {
+	if (isCheckMark) {
 		return (
 			<span className="amp-stepper__bullet amp-stepper__bullet--check">
 				<Check />
@@ -32,7 +32,7 @@ export function StepperBullet( { activePageIndex, index } ) {
 		);
 	}
 
-	if ( isCurrent ) {
+	if (isCurrent) {
 		return (
 			<span className="amp-stepper__bullet amp-stepper__bullet--dot">
 				<span />
@@ -40,11 +40,7 @@ export function StepperBullet( { activePageIndex, index } ) {
 		);
 	}
 
-	return (
-		<span className="amp-stepper__bullet">
-			{ index + 1 }
-		</span>
-	);
+	return <span className="amp-stepper__bullet">{index + 1}</span>;
 }
 
 StepperBullet.propTypes = {
@@ -55,27 +51,36 @@ StepperBullet.propTypes = {
 /**
  * Stepper component.
  *
- * @param {Object} props Component props.
+ * @param {Object} props                 Component props.
  * @param {number} props.activePageIndex The index of the currently visible screen.
- * @param {Array} props.pages Page objects.
+ * @param {Array}  props.pages           Page objects.
  */
-export function Stepper( { activePageIndex, pages } ) {
-	const instanceId = useInstanceId( Stepper );
+export function Stepper({ activePageIndex, pages }) {
+	const instanceId = useInstanceId(Stepper);
 
 	return (
 		<div className="amp-stepper">
 			<ul>
-				{ pages.map( ( { title }, index ) => (
+				{pages.map(({ title }, index) => (
 					<li
-						className={ `amp-stepper__item ${ index === activePageIndex ? 'amp-stepper__item--active' : '' } ${ activePageIndex > index ? 'amp-stepper__item--done' : '' }` }
-						key={ `${ instanceId }-${ index }` }
+						className={`amp-stepper__item ${
+							index === activePageIndex
+								? 'amp-stepper__item--active'
+								: ''
+						} ${
+							activePageIndex > index
+								? 'amp-stepper__item--done'
+								: ''
+						}`}
+						key={`${instanceId}-${index}`}
 					>
-						<StepperBullet activePageIndex={ activePageIndex } index={ index } />
-						<span className="amp-stepper__item-title">
-							{ title }
-						</span>
+						<StepperBullet
+							activePageIndex={activePageIndex}
+							index={index}
+						/>
+						<span className="amp-stepper__item-title">{title}</span>
 					</li>
-				) ) }
+				))}
 			</ul>
 		</div>
 	);
@@ -84,8 +89,8 @@ export function Stepper( { activePageIndex, pages } ) {
 Stepper.propTypes = {
 	activePageIndex: PropTypes.number.isRequired,
 	pages: PropTypes.arrayOf(
-		PropTypes.shape( {
+		PropTypes.shape({
 			title: PropTypes.string.isRequired,
-		} ),
+		})
 	).isRequired,
 };

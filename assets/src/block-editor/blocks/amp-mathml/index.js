@@ -12,12 +12,12 @@ import save from './save';
 export const name = 'amp/amp-mathml';
 
 export const settings = {
-	title: __( 'AMP MathML', 'amp' ),
+	title: __('AMP MathML', 'amp'),
 	category: 'common',
 	icon: 'welcome-learn-more',
 	keywords: [
-		__( 'Mathematical formula', 'amp' ),
-		__( 'Scientific content ', 'amp' ),
+		__('Mathematical formula', 'amp'),
+		__('Scientific content ', 'amp'),
 	],
 
 	attributes: {
