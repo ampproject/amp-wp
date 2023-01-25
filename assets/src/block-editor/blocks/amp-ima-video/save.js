@@ -3,8 +3,16 @@
  */
 import PropTypes from 'prop-types';
 
-const BlockSave = ( { attributes } ) => {
-	const { width, dataSrc, ampLayout, dataTag, dataDelayAdRequest, height, dataPoster } = attributes;
+const BlockSave = ({ attributes }) => {
+	const {
+		width,
+		dataSrc,
+		ampLayout,
+		dataTag,
+		dataDelayAdRequest,
+		height,
+		dataPoster,
+	} = attributes;
 
 	const imaProps = {
 		layout: ampLayout,
@@ -13,19 +21,17 @@ const BlockSave = ( { attributes } ) => {
 		'data-tag': dataTag,
 		'data-src': dataSrc,
 	};
-	if ( dataPoster ) {
-		imaProps[ 'data-poster' ] = dataPoster;
+	if (dataPoster) {
+		imaProps['data-poster'] = dataPoster;
 	}
-	if ( dataDelayAdRequest ) {
-		imaProps[ 'data-delay-ad-request' ] = dataDelayAdRequest;
+	if (dataDelayAdRequest) {
+		imaProps['data-delay-ad-request'] = dataDelayAdRequest;
 	}
-	return (
-		<amp-ima-video { ...imaProps } />
-	);
+	return <amp-ima-video {...imaProps} />;
 };
 
 BlockSave.propTypes = {
-	attributes: PropTypes.shape( {
+	attributes: PropTypes.shape({
 		width: PropTypes.number,
 		height: PropTypes.number,
 		ampLayout: PropTypes.string,
@@ -33,7 +39,7 @@ BlockSave.propTypes = {
 		dataTag: PropTypes.string,
 		dataDelayAdRequest: PropTypes.string,
 		dataPoster: PropTypes.string,
-	} ),
+	}),
 };
 
 export default BlockSave;

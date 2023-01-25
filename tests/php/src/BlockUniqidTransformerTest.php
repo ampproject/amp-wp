@@ -21,17 +21,17 @@ final class BlockUniqidTransformerTest extends DependencyInjectedTestCase {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->original_wp_version = $GLOBALS['wp_version'];
 	}
 
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		$GLOBALS['wp_version'] = $this->original_wp_version;
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	public function test_it_can_be_initialized() {

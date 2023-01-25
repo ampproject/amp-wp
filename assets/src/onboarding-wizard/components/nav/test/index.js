@@ -21,17 +21,21 @@ import { ReaderThemesContextProvider } from '../../../../components/reader-theme
 import { SiteScanContextProvider } from '../../../../components/site-scan-context-provider';
 import { STANDARD, READER } from '../../../../common/constants';
 
-jest.mock( '../../../../components/options-context-provider' );
-jest.mock( '../../../../components/reader-themes-context-provider' );
-jest.mock( '../../../../components/user-context-provider' );
-jest.mock( '../../../../components/site-scan-context-provider' );
+jest.mock('../../../../components/options-context-provider');
+jest.mock('../../../../components/reader-themes-context-provider');
+jest.mock('../../../../components/user-context-provider');
+jest.mock('../../../../components/site-scan-context-provider');
 
 let container;
 
-const getNavButtons = ( containerElement ) => ( {
-	nextButton: containerElement.querySelector( '.amp-settings-nav__prev-next button.is-primary' ),
-	prevButton: containerElement.querySelector( '.amp-settings-nav__prev-next button:not(.is-primary)' ),
-} );
+const getNavButtons = (containerElement) => ({
+	nextButton: containerElement.querySelector(
+		'.amp-settings-nav__prev-next button.is-primary'
+	),
+	prevButton: containerElement.querySelector(
+		'.amp-settings-nav__prev-next button:not(.is-primary)'
+	),
+});
 
 const MyPageComponent = () => <div />;
 const testPages = [
@@ -39,13 +43,20 @@ const testPages = [
 	{ PageComponent: MyPageComponent, slug: 'slug-2', title: 'Page 1' },
 ];
 
-const Providers = ( { children, pages, themeSupport = READER, downloadingTheme = false } ) => (
-	<OptionsContextProvider themeSupport={ themeSupport }>
+const Providers = ({
+	children,
+	pages,
+	themeSupport = READER,
+	downloadingTheme = false,
+}) => (
+	<OptionsContextProvider themeSupport={themeSupport}>
 		<UserContextProvider>
 			<SiteScanContextProvider>
-				<NavigationContextProvider pages={ pages }>
-					<ReaderThemesContextProvider downloadingTheme={ downloadingTheme }>
-						{ children }
+				<NavigationContextProvider pages={pages}>
+					<ReaderThemesContextProvider
+						downloadingTheme={downloadingTheme}
+					>
+						{children}
 					</ReaderThemesContextProvider>
 				</NavigationContextProvider>
 			</SiteScanContextProvider>
@@ -59,106 +70,127 @@ Providers.propTypes = {
 	downloadingTheme: PropTypes.bool,
 };
 
-describe( 'Nav', () => {
-	beforeEach( () => {
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-	} );
+describe('Nav', () => {
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		document.body.removeChild( container );
+	afterEach(() => {
+		document.body.removeChild(container);
 		container = null;
-	} );
+	});
 
-	it( 'matches snapshot', () => {
+	it('matches snapshot', () => {
 		const wrapper = create(
-			<Providers pages={ testPages }>
-				<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
-			</Providers>,
+			<Providers pages={testPages}>
+				<Nav
+					closeLink="http://site.test/wp-admin"
+					finishLink="http://site.test"
+				/>
+			</Providers>
 		);
-		expect( wrapper.toJSON() ).toMatchSnapshot();
-	} );
+		expect(wrapper.toJSON()).toMatchSnapshot();
+	});
 
-	it( 'hides previous button on first page', () => {
-		act( () => {
+	it('hides previous button on first page', () => {
+		act(() => {
 			render(
-				<Providers pages={ testPages }>
-					<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
+				<Providers pages={testPages}>
+					<Nav
+						closeLink="http://site.test/wp-admin"
+						finishLink="http://site.test"
+					/>
 				</Providers>,
-				container,
+				container
 			);
-		} );
+		});
 
-		const { nextButton, prevButton } = getNavButtons( container );
+		const { nextButton, prevButton } = getNavButtons(container);
 
-		expect( prevButton ).toBeNull();
-		expect( nextButton ).not.toBeNull();
-	} );
+		expect(prevButton).toBeNull();
+		expect(nextButton).not.toBeNull();
+	});
 
-	it( 'changes next button to "Customize" on last page', () => {
-		act( () => {
+	it('changes next button to "Customize" on last page', () => {
+		act(() => {
 			render(
-				<Providers pages={ testPages }>
-					<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
+				<Providers pages={testPages}>
+					<Nav
+						closeLink="http://site.test/wp-admin"
+						finishLink="http://site.test"
+					/>
 				</Providers>,
-				container,
+				container
 			);
-		} );
+		});
 
-		const { nextButton } = getNavButtons( container );
+		const { nextButton } = getNavButtons(container);
 
-		expect( nextButton.textContent ).toBe( 'Next' );
+		expect(nextButton.textContent).toBe('Next');
 
-		act( () => {
-			nextButton.dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
-		} );
+		act(() => {
+			nextButton.dispatchEvent(
+				new global.MouseEvent('click', { bubbles: true })
+			);
+		});
 
-		expect( nextButton.textContent ).toBe( 'Customize' );
-	} );
+		expect(nextButton.textContent).toBe('Customize');
+	});
 
-	it( 'close button hides on last page when reader mode is not selected', () => {
-		act( () => {
+	it('close button hides on last page when reader mode is not selected', () => {
+		act(() => {
 			render(
-				<Providers pages={ testPages } themeSupport={ STANDARD }>
-					<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
+				<Providers pages={testPages} themeSupport={STANDARD}>
+					<Nav
+						closeLink="http://site.test/wp-admin"
+						finishLink="http://site.test"
+					/>
 				</Providers>,
-				container,
+				container
 			);
-		} );
+		});
 
-		const { nextButton } = getNavButtons( container );
-		let closeButton = container.querySelector( '.amp-settings-nav__close a' );
+		const { nextButton } = getNavButtons(container);
+		let closeButton = container.querySelector('.amp-settings-nav__close a');
 
-		expect( closeButton ).not.toBeNull();
+		expect(closeButton).not.toBeNull();
 
-		act( () => {
-			nextButton.dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
-		} );
+		act(() => {
+			nextButton.dispatchEvent(
+				new global.MouseEvent('click', { bubbles: true })
+			);
+		});
 
-		closeButton = container.querySelector( '.amp-settings-nav__close a' );
-		expect( closeButton ).toBeNull();
-	} );
+		closeButton = container.querySelector('.amp-settings-nav__close a');
+		expect(closeButton).toBeNull();
+	});
 
-	it( 'close button hides on last page when reader mode is selected', () => {
-		act( () => {
+	it('close button hides on last page when reader mode is selected', () => {
+		act(() => {
 			render(
-				<Providers pages={ testPages }>
-					<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
+				<Providers pages={testPages}>
+					<Nav
+						closeLink="http://site.test/wp-admin"
+						finishLink="http://site.test"
+					/>
 				</Providers>,
-				container,
+				container
 			);
-		} );
+		});
 
-		const { nextButton } = getNavButtons( container );
-		let closeButton = container.querySelector( '.amp-settings-nav__close a' );
+		const { nextButton } = getNavButtons(container);
+		let closeButton = container.querySelector('.amp-settings-nav__close a');
 
-		expect( closeButton ).not.toBeNull();
+		expect(closeButton).not.toBeNull();
 
-		act( () => {
-			nextButton.dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
-		} );
+		act(() => {
+			nextButton.dispatchEvent(
+				new global.MouseEvent('click', { bubbles: true })
+			);
+		});
 
-		closeButton = container.querySelector( '.amp-settings-nav__close a' );
-		expect( closeButton ).not.toBeNull();
-	} );
-} );
+		closeButton = container.querySelector('.amp-settings-nav__close a');
+		expect(closeButton).not.toBeNull();
+	});
+});

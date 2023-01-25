@@ -441,6 +441,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function dequeue_block_navigation_view_script() {
 		wp_dequeue_script( 'wp-block-navigation-view' );
+		wp_dequeue_script( 'wp-block-navigation-view-2' );
 	}
 
 	/**

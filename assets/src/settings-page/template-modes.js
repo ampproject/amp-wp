@@ -36,8 +36,8 @@ import {
  */
 function RecommendedNotice() {
 	return (
-		<AMPNotice size={ NOTICE_SIZE_SMALL }>
-			{ __( 'Recommended', 'amp' ) }
+		<AMPNotice size={NOTICE_SIZE_SMALL}>
+			{__('Recommended', 'amp')}
 		</AMPNotice>
 	);
 }
@@ -47,8 +47,8 @@ function RecommendedNotice() {
  */
 function NotRecommendedNotice() {
 	return (
-		<AMPNotice size={ NOTICE_SIZE_SMALL } type={ NOTICE_TYPE_WARNING }>
-			{ __( 'Not recommended', 'amp' ) }
+		<AMPNotice size={NOTICE_SIZE_SMALL} type={NOTICE_TYPE_WARNING}>
+			{__('Not recommended', 'amp')}
 		</AMPNotice>
 	);
 }
@@ -59,82 +59,85 @@ function NotRecommendedNotice() {
  * @param {Object}  props                   Component props.
  * @param {boolean} props.focusReaderThemes Whether the reader themes drawer should be opened and focused.
  */
-export function TemplateModes( { focusReaderThemes } ) {
+export function TemplateModes({ focusReaderThemes }) {
 	const {
-		editedOptions: {
-			theme_support: editedThemeSupport,
-		},
-	} = useContext( Options );
-	const { selectedTheme, templateModeWasOverridden } = useContext( ReaderThemes );
+		editedOptions: { theme_support: editedThemeSupport },
+	} = useContext(Options);
+	const { selectedTheme, templateModeWasOverridden } =
+		useContext(ReaderThemes);
 	const templateModeRecommendation = useTemplateModeRecommendation();
 
-	const getLabelForTemplateMode = useCallback( ( mode ) => {
-		if ( ! templateModeRecommendation ) {
-			return null;
-		}
-
-		switch ( templateModeRecommendation[ mode ].recommendationLevel ) {
-			case RECOMMENDED:
-				return <RecommendedNotice />;
-			case NOT_RECOMMENDED:
-				return <NotRecommendedNotice />;
-			default:
+	const getLabelForTemplateMode = useCallback(
+		(mode) => {
+			if (!templateModeRecommendation) {
 				return null;
-		}
-	}, [ templateModeRecommendation ] );
+			}
+
+			switch (templateModeRecommendation[mode].recommendationLevel) {
+				case RECOMMENDED:
+					return <RecommendedNotice />;
+				case NOT_RECOMMENDED:
+					return <NotRecommendedNotice />;
+				default:
+					return null;
+			}
+		},
+		[templateModeRecommendation]
+	);
 
 	return (
 		<section className="template-modes" id="template-modes">
-			<h2>
-				{ __( 'Template Mode', 'amp' ) }
-			</h2>
-			{ templateModeWasOverridden && (
-				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
-					{ __( 'Because you selected a Reader theme that is the same as your site\'s active theme, your site has automatically been switched to Transitional template mode.', 'amp' ) }
+			<h2>{__('Template Mode', 'amp')}</h2>
+			{templateModeWasOverridden && (
+				<AMPNotice type={NOTICE_TYPE_INFO} size={NOTICE_SIZE_LARGE}>
+					{__(
+						"Because you selected a Reader theme that is the same as your site's active theme, your site has automatically been switched to Transitional template mode.",
+						'amp'
+					)}
 				</AMPNotice>
-			) }
+			)}
 			<TemplateModeOption
-				details={ templateModeRecommendation?.[ STANDARD ]?.details }
+				details={templateModeRecommendation?.[STANDARD]?.details}
 				detailsUrl="https://amp-wp.org/documentation/getting-started/standard/"
-				initialOpen={ false }
-				mode={ STANDARD }
-				labelExtra={ getLabelForTemplateMode( STANDARD ) }
+				initialOpen={false}
+				mode={STANDARD}
+				labelExtra={getLabelForTemplateMode(STANDARD)}
 			/>
 			<TemplateModeOption
-				details={ templateModeRecommendation?.[ TRANSITIONAL ]?.details }
+				details={templateModeRecommendation?.[TRANSITIONAL]?.details}
 				detailsUrl="https://amp-wp.org/documentation/getting-started/transitional/"
-				initialOpen={ false }
-				mode={ TRANSITIONAL }
-				labelExtra={ getLabelForTemplateMode( TRANSITIONAL ) }
+				initialOpen={false}
+				mode={TRANSITIONAL}
+				labelExtra={getLabelForTemplateMode(TRANSITIONAL)}
 			/>
 			<TemplateModeOption
-				details={ templateModeRecommendation?.[ READER ]?.details }
+				details={templateModeRecommendation?.[READER]?.details}
 				detailsUrl="https://amp-wp.org/documentation/getting-started/reader/"
-				initialOpen={ false }
-				mode={ READER }
-				labelExtra={ getLabelForTemplateMode( READER ) }
+				initialOpen={false}
+				mode={READER}
+				labelExtra={getLabelForTemplateMode(READER)}
 			/>
-			{ READER === editedThemeSupport && (
+			{READER === editedThemeSupport && (
 				<AMPDrawer
-					selected={ true }
-					heading={ (
+					selected={true}
+					heading={
 						<div className="reader-themes__heading">
 							<h3>
-								{ sprintf(
+								{sprintf(
 									/* translators: placeholder is a theme name. */
-									__( 'Reader theme: %s', 'amp' ),
-									selectedTheme.name || '',
-								) }
+									__('Reader theme: %s', 'amp'),
+									selectedTheme.name || ''
+								)}
 							</h3>
 						</div>
-					) }
-					hiddenTitle={ __( 'Show reader themes', 'amp' ) }
+					}
+					hiddenTitle={__('Show reader themes', 'amp')}
 					id="reader-themes"
-					initialOpen={ focusReaderThemes }
+					initialOpen={focusReaderThemes}
 				>
 					<ReaderThemeCarousel />
 				</AMPDrawer>
-			) }
+			)}
 		</section>
 	);
 }

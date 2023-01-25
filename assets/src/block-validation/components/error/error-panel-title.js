@@ -22,29 +22,37 @@ import { ErrorTypeIcon } from './error-type-icon';
  * @param {Object}  props.error      Error details.
  * @param {string}  props.error.type Error type.
  */
-export function ErrorPanelTitle( {
-	kept,
-	title,
-	error: { type },
-} ) {
+export function ErrorPanelTitle({ kept, title, error: { type } }) {
 	return (
 		<div
 			className="amp-error__panel-title"
-			title={ kept ? __( 'This error has been kept, making this URL not AMP-compatible.', 'amp' ) : '' }
+			title={
+				kept
+					? __(
+							'This error has been kept, making this URL not AMP-compatible.',
+							'amp'
+					  )
+					: ''
+			}
 		>
 			<div className="amp-error__icons">
-				{ type && (
-					<div className={ `amp-error__error-type-icon amp-error__error-type-icon--${ type?.replace( /_/g, '-' ) }` }>
-						<ErrorTypeIcon type={ type } />
+				{type && (
+					<div
+						className={`amp-error__error-type-icon amp-error__error-type-icon--${type?.replace(
+							/_/g,
+							'-'
+						)}`}
+					>
+						<ErrorTypeIcon type={type} />
 					</div>
-				) }
+				)}
 			</div>
 			<div
 				className="amp-error__title"
-				dangerouslySetInnerHTML={ {
+				dangerouslySetInnerHTML={{
 					/* dangerouslySetInnerHTML reason: WordPress sometimes sends back HTML in error messages. */
 					__html: title,
-				} }
+				}}
 			/>
 		</div>
 	);
@@ -52,7 +60,7 @@ export function ErrorPanelTitle( {
 ErrorPanelTitle.propTypes = {
 	kept: PropTypes.bool,
 	title: PropTypes.string.isRequired,
-	error: PropTypes.shape( {
+	error: PropTypes.shape({
 		type: PropTypes.string,
-	} ).isRequired,
+	}).isRequired,
 };

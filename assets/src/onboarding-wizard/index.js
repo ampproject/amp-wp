@@ -56,45 +56,51 @@ let errorHandler;
  * @param {Object} props          Component props.
  * @param {any}    props.children Component children.
  */
-export function Providers( { children } ) {
-	global.removeEventListener( 'error', errorHandler );
+export function Providers({ children }) {
+	global.removeEventListener('error', errorHandler);
 
 	return (
 		<ErrorContextProvider>
 			<ErrorBoundary
-				exitLinkLabel={ __( 'Return to AMP settings.', 'amp' ) }
-				exitLinkUrl={ SETTINGS_LINK }
-				title={ __( 'The setup wizard has experienced an error.', 'amp' ) }
+				exitLinkLabel={__('Return to AMP settings.', 'amp')}
+				exitLinkUrl={SETTINGS_LINK}
+				title={__('The setup wizard has experienced an error.', 'amp')}
 			>
 				<OptionsContextProvider
-					delaySave={ true }
-					hasErrorBoundary={ true }
-					optionsRestPath={ OPTIONS_REST_PATH }
-					populateDefaultValues={ false }
+					delaySave={true}
+					hasErrorBoundary={true}
+					optionsRestPath={OPTIONS_REST_PATH}
+					populateDefaultValues={false}
 				>
 					<UserContextProvider
-						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
-						usersResourceRestPath={ USERS_RESOURCE_REST_PATH }
+						userOptionDeveloperTools={
+							USER_FIELD_DEVELOPER_TOOLS_ENABLED
+						}
+						usersResourceRestPath={USERS_RESOURCE_REST_PATH}
 					>
 						<PluginsContextProvider>
 							<ThemesContextProvider>
 								<SiteScanContextProvider
-									fetchCachedValidationErrors={ false }
-									resetOnOptionsChange={ true }
-									scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
-									scanOnce={ true }
-									validateNonce={ VALIDATE_NONCE }
+									fetchCachedValidationErrors={false}
+									resetOnOptionsChange={true}
+									scannableUrlsRestPath={
+										SCANNABLE_URLS_REST_PATH
+									}
+									scanOnce={true}
+									validateNonce={VALIDATE_NONCE}
 								>
-									<NavigationContextProvider pages={ PAGES }>
+									<NavigationContextProvider pages={PAGES}>
 										<ReaderThemesContextProvider
-											currentTheme={ CURRENT_THEME }
-											hasErrorBoundary={ true }
-											wpAjaxUrl={ wpAjaxUrl }
-											readerThemesRestPath={ READER_THEMES_REST_PATH }
-											updatesNonce={ UPDATES_NONCE }
+											currentTheme={CURRENT_THEME}
+											hasErrorBoundary={true}
+											wpAjaxUrl={wpAjaxUrl}
+											readerThemesRestPath={
+												READER_THEMES_REST_PATH
+											}
+											updatesNonce={UPDATES_NONCE}
 										>
 											<TemplateModeOverrideContextProvider>
-												{ children }
+												{children}
 											</TemplateModeOverrideContextProvider>
 										</ReaderThemesContextProvider>
 									</NavigationContextProvider>
@@ -112,30 +118,35 @@ Providers.propTypes = {
 	children: PropTypes.any,
 };
 
-domReady( () => {
-	const root = document.getElementById( APP_ROOT_ID );
+domReady(() => {
+	const root = document.getElementById(APP_ROOT_ID);
 
-	if ( ! root ) {
+	if (!root) {
 		return;
 	}
 
-	errorHandler = ( event ) => {
+	errorHandler = (event) => {
 		// Handle only own errors.
-		if ( event.filename && /amp-onboarding-wizard(\.min)?\.js/.test( event.filename ) ) {
-			render( <ErrorScreen error={ event.error } />, root );
+		if (
+			event.filename &&
+			/amp-onboarding-wizard(\.min)?\.js/.test(event.filename)
+		) {
+			render(<ErrorScreen error={event.error} />, root);
 		}
 	};
 
-	global.addEventListener( 'error', errorHandler );
+	global.addEventListener('error', errorHandler);
 
 	render(
 		<Providers>
 			<SetupWizard
-				closeLink={ addQueryArgs( CLOSE_LINK, { [ AMP_SCAN_IF_STALE ]: 1 } ) }
-				finishLink={ addQueryArgs( SETTINGS_LINK, { [ AMP_SCAN_IF_STALE ]: 1 } ) }
-				appRoot={ root }
+				closeLink={addQueryArgs(CLOSE_LINK, { [AMP_SCAN_IF_STALE]: 1 })}
+				finishLink={addQueryArgs(SETTINGS_LINK, {
+					[AMP_SCAN_IF_STALE]: 1,
+				})}
+				appRoot={root}
 			/>
 		</Providers>,
-		root,
+		root
 	);
-} );
+});

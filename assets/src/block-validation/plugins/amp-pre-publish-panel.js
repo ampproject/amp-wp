@@ -17,10 +17,7 @@ export const PLUGIN_ICON = '';
  */
 export default function AMPPrePublishPanel() {
 	return (
-		<PluginPrePublishPanel
-			title={ __( 'AMP', 'amp' ) }
-			initialOpen={ true }
-		>
+		<PluginPrePublishPanel title={__('AMP', 'amp')} initialOpen={true}>
 			<AMPDocumentStatusNotification />
 		</PluginPrePublishPanel>
 	);

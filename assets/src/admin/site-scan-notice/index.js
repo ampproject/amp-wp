@@ -38,26 +38,29 @@ let errorHandler;
  * @param {Object} props          Component props.
  * @param {any}    props.children Component children.
  */
-function Providers( { children } ) {
-	global.removeEventListener( 'error', errorHandler );
+function Providers({ children }) {
+	global.removeEventListener('error', errorHandler);
 
 	return (
 		<ErrorContextProvider>
 			<ErrorBoundary
-				title={ __( 'The AMP Site Scanner has experienced an error.', 'amp' ) }
+				title={__(
+					'The AMP Site Scanner has experienced an error.',
+					'amp'
+				)}
 			>
 				<OptionsContextProvider
-					hasErrorBoundary={ true }
-					optionsRestPath={ OPTIONS_REST_PATH }
-					populateDefaultValues={ false }
+					hasErrorBoundary={true}
+					optionsRestPath={OPTIONS_REST_PATH}
+					populateDefaultValues={false}
 				>
 					<PluginsContextProvider>
 						<ThemesContextProvider>
 							<SiteScanContextProvider
-								scannableUrlsRestPath={ SCANNABLE_URLS_REST_PATH }
-								validateNonce={ VALIDATE_NONCE }
+								scannableUrlsRestPath={SCANNABLE_URLS_REST_PATH}
+								validateNonce={VALIDATE_NONCE}
 							>
-								{ children }
+								{children}
 							</SiteScanContextProvider>
 						</ThemesContextProvider>
 					</PluginsContextProvider>
@@ -70,34 +73,37 @@ Providers.propTypes = {
 	children: PropTypes.any,
 };
 
-domReady( () => {
-	let root = document.getElementById( APP_ROOT_ID );
+domReady(() => {
+	let root = document.getElementById(APP_ROOT_ID);
 
-	if ( ! root ) {
-		const rootSibling = document.getElementById( APP_ROOT_SIBLING_ID );
+	if (!root) {
+		const rootSibling = document.getElementById(APP_ROOT_SIBLING_ID);
 
-		if ( ! rootSibling ) {
+		if (!rootSibling) {
 			return;
 		}
 
-		root = document.createElement( 'div' );
-		root.setAttribute( 'id', APP_ROOT_ID );
-		rootSibling.after( root );
+		root = document.createElement('div');
+		root.setAttribute('id', APP_ROOT_ID);
+		rootSibling.after(root);
 	}
 
-	errorHandler = ( event ) => {
+	errorHandler = (event) => {
 		// Handle only own errors.
-		if ( event.filename && /amp-site-scan-notice(\.min)?\.js/.test( event.filename ) ) {
-			render( <ErrorScreen error={ event.error } />, root );
+		if (
+			event.filename &&
+			/amp-site-scan-notice(\.min)?\.js/.test(event.filename)
+		) {
+			render(<ErrorScreen error={event.error} />, root);
 		}
 	};
 
-	global.addEventListener( 'error', errorHandler );
+	global.addEventListener('error', errorHandler);
 
 	render(
 		<Providers>
 			<SiteScanNotice />
 		</Providers>,
-		root,
+		root
 	);
-} );
+});

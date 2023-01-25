@@ -60,15 +60,15 @@ class SandboxingTest extends DependencyInjectedTestCase {
 
 		$filtered = $this->instance->filter_rest_options_schema( $existing );
 		$this->assertArrayHasKey( 'foo', $filtered );
-		$this->assertArrayHasKey( Sandboxing::OPTION_LEVEL, $filtered );
+		$this->assertArrayHasKey( Option::SANDBOXING_LEVEL, $filtered );
 	}
 
 	/** @covers ::filter_default_options() */
 	public function test_filter_default_options() {
 		$this->assertEquals(
 			[
-				Sandboxing::OPTION_LEVEL   => 1,
-				Sandboxing::OPTION_ENABLED => false,
+				Option::SANDBOXING_LEVEL   => 1,
+				Option::SANDBOXING_ENABLED => false,
 			],
 			$this->instance->filter_default_options( [] )
 		);
@@ -77,34 +77,34 @@ class SandboxingTest extends DependencyInjectedTestCase {
 	/** @covers ::sanitize_options() */
 	public function test_sanitize_options() {
 		$this->assertEquals(
-			[ Sandboxing::OPTION_LEVEL => 2 ],
+			[ Option::SANDBOXING_LEVEL => 2 ],
 			$this->instance->sanitize_options(
-				[ Sandboxing::OPTION_LEVEL => 2 ],
-				[ Sandboxing::OPTION_LEVEL => 'bad' ]
+				[ Option::SANDBOXING_LEVEL => 2 ],
+				[ Option::SANDBOXING_LEVEL => 'bad' ]
 			)
 		);
 
 		$this->assertEquals(
-			[ Sandboxing::OPTION_LEVEL => 3 ],
+			[ Option::SANDBOXING_LEVEL => 3 ],
 			$this->instance->sanitize_options(
-				[ Sandboxing::OPTION_LEVEL => 2 ],
-				[ Sandboxing::OPTION_LEVEL => 3 ]
+				[ Option::SANDBOXING_LEVEL => 2 ],
+				[ Option::SANDBOXING_LEVEL => 3 ]
 			)
 		);
 
 		$this->assertEquals(
-			[ Sandboxing::OPTION_LEVEL => 1 ],
+			[ Option::SANDBOXING_LEVEL => 1 ],
 			$this->instance->sanitize_options(
-				[ Sandboxing::OPTION_LEVEL => 1 ],
-				[ Sandboxing::OPTION_LEVEL => 0 ]
+				[ Option::SANDBOXING_LEVEL => 1 ],
+				[ Option::SANDBOXING_LEVEL => 0 ]
 			)
 		);
 
 		$this->assertEquals(
-			[ Sandboxing::OPTION_LEVEL => 1 ],
+			[ Option::SANDBOXING_LEVEL => 1 ],
 			$this->instance->sanitize_options(
-				[ Sandboxing::OPTION_LEVEL => 1 ],
-				[ Sandboxing::OPTION_LEVEL => 4 ]
+				[ Option::SANDBOXING_LEVEL => 1 ],
+				[ Option::SANDBOXING_LEVEL => 4 ]
 			)
 		);
 	}
@@ -114,9 +114,9 @@ class SandboxingTest extends DependencyInjectedTestCase {
 		$this->register_settings_and_set_user();
 		AMP_Options_Manager::update_options(
 			[
-				Sandboxing::OPTION_ENABLED => true,
+				Option::SANDBOXING_ENABLED => true,
 				Option::THEME_SUPPORT      => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
-				Sandboxing::OPTION_LEVEL   => 2,
+				Option::SANDBOXING_LEVEL   => 2,
 			]
 		);
 		$this->instance->add_hooks();
@@ -128,7 +128,7 @@ class SandboxingTest extends DependencyInjectedTestCase {
 		$this->register_settings_and_set_user();
 		AMP_Options_Manager::update_options(
 			[
-				Sandboxing::OPTION_ENABLED => false,
+				Option::SANDBOXING_ENABLED => false,
 				Option::THEME_SUPPORT      => AMP_Theme_Support::STANDARD_MODE_SLUG,
 			]
 		);
@@ -178,9 +178,9 @@ class SandboxingTest extends DependencyInjectedTestCase {
 		$this->register_settings_and_set_user();
 		AMP_Options_Manager::update_options(
 			[
-				Sandboxing::OPTION_ENABLED => true,
+				Option::SANDBOXING_ENABLED => true,
 				Option::THEME_SUPPORT      => AMP_Theme_Support::STANDARD_MODE_SLUG,
-				Sandboxing::OPTION_LEVEL   => $level,
+				Option::SANDBOXING_LEVEL   => $level,
 			]
 		);
 		$this->instance->add_hooks();
@@ -250,8 +250,8 @@ class SandboxingTest extends DependencyInjectedTestCase {
 		$this->register_settings_and_set_user();
 		AMP_Options_Manager::update_options(
 			[
-				Sandboxing::OPTION_ENABLED => true,
-				Sandboxing::OPTION_LEVEL   => $min_level,
+				Option::SANDBOXING_ENABLED => true,
+				Option::SANDBOXING_LEVEL   => $min_level,
 			]
 		);
 
@@ -319,6 +319,89 @@ class SandboxingTest extends DependencyInjectedTestCase {
 			Element::class,
 			$dom->xpath->query( $root_path . '//li[ @id = "wp-admin-bar-amp-sandboxing-level" ]//a[ @href and contains( ., "Sandboxing level" ) ]' )->item( 0 )
 		);
+	}
+
+	/**
+	 * Get data to test remove_required_amp_markup_if_not_used()
+	 *
+	 * @return array
+	 */
+	public function get_data_to_test_remove_required_amp_markup_if_not_used() {
+		return [
+			'do_not_remove_required_amp_markup' => [
+				'body'                         => '<amp-img src="https://example.com/image.jpg" width="100" height="100"></amp-img>',
+				'expected_required_amp_markup' => true,
+			],
+			'remove_required_amp_markup'        => [
+				'body'                         => '<img src="https://example.com/image.jpg" width="100" height="100">',
+				'expected_required_amp_markup' => false,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_to_test_remove_required_amp_markup_if_not_used()
+	 * @covers ::remove_required_amp_markup_if_not_used()
+	 *
+	 * @param string $body Body.
+	 * @param bool   $expected_required_amp_markup Whether expected required AMP markup.
+	 */
+	public function test_remove_required_amp_markup_if_not_used( $body, $expected_required_amp_markup ) {
+		$dom = Document::fromHtml(
+			sprintf(
+				'
+				<html>
+					<head>
+						<link rel="preconnect" href="https://cdn.ampproject.org">
+						<style amp-runtime="" i-amphtml-version="012110290545003">html{/*...*/}</style>
+						<script async="" src="https://cdn.ampproject.org/v0.mjs" type="module" crossorigin="anonymous"></script>
+						<script async nomodule src="https://cdn.ampproject.org/v0.js" crossorigin="anonymous"></script>
+						<meta name="generator" content="AMP Plugin v2.1; foo=bar">
+					</head>
+					<body>
+						%s
+
+						<div id="wpadminbar" class="nojq">
+							<div class="quicklinks" id="wp-toolbar" role="navigation" aria-label="Toolbar">
+								<ul id="wp-admin-bar-root-default" class="ab-top-menu">
+									<li id="wp-admin-bar-amp" class="menupop">
+										<a class="ab-item" aria-haspopup="true" href="#" title="Validate URL"><span id="amp-admin-bar-item-status-icon" class="ab-icon amp-icon amp-valid"></span> AMP</a>
+										<div class="ab-sub-wrapper">
+											<ul id="wp-admin-bar-amp-default" class="ab-submenu">
+												<li id="wp-admin-bar-amp-settings"><a class="ab-item" href="#">Settings</a></li>
+												<li id="wp-admin-bar-amp-support"><a class="ab-item" href="#">Get support</a></li>
+											</ul>
+										</div>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</body>
+				</html>
+				',
+				$body
+			)
+		);
+
+		// Keep effective level to 1 for testing because 3 will bail early.
+		$this->call_private_method( $this->instance, 'remove_required_amp_markup_if_not_used', [ $dom, 1 ] );
+
+		$expressions = [
+			'//link[ @rel = "preconnect" and @href = "https://cdn.ampproject.org" ]',
+			'//style[ @amp-runtime ]',
+			'//script[ @src = "https://cdn.ampproject.org/v0.mjs" ]',
+			'//script[ @src = "https://cdn.ampproject.org/v0.js" ]',
+		];
+
+		if ( $expected_required_amp_markup ) {
+			$this->assertEquals( 1, $dom->ampElements->length );
+		} else {
+			$this->assertEquals( 0, $dom->ampElements->length );
+		}
+
+		foreach ( $expressions as $expression ) {
+			$this->assertEquals( $expected_required_amp_markup ? 1 : 0, $dom->xpath->query( $expression )->length, $expression );
+		}
 	}
 
 	/**

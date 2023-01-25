@@ -20,28 +20,23 @@ import { __ } from '@wordpress/i18n';
  * @param {string}   props.namespace     CSS namespace.
  * @param {Function} props.onClick       Click callback.
  */
-function Dot( { id, isHighlighted, label, namespace, onClick } ) {
+function Dot({ id, isHighlighted, label, namespace, onClick }) {
 	return (
 		<Button
-			className={
-				classnames(
-					`${ namespace }__nav-dot-button`,
-					{ [ `${ namespace }__nav-dot-button--active` ]: isHighlighted },
-				)
-			}
-			id={ id }
-			onClick={ onClick }
-			aria-label={ label }
+			className={classnames(`${namespace}__nav-dot-button`, {
+				[`${namespace}__nav-dot-button--active`]: isHighlighted,
+			})}
+			id={id}
+			onClick={onClick}
+			aria-label={label}
 		>
-			<VisuallyHidden as="span">
-				{ label }
-			</VisuallyHidden>
-			{ isHighlighted && (
+			<VisuallyHidden as="span">{label}</VisuallyHidden>
+			{isHighlighted && (
 				<VisuallyHidden as="span">
-					{ __( '(Selected item)', 'amp' ) }
+					{__('(Selected item)', 'amp')}
 				</VisuallyHidden>
-			) }
-			<span className={ `${ namespace }__nav-dot` } />
+			)}
+			<span className={`${namespace}__nav-dot`} />
 		</Button>
 	);
 }
@@ -66,7 +61,7 @@ Dot.propTypes = {
  * @param {boolean}        props.prevButtonDisabled Whether the prev button is disabled.
  * @param {boolean}        props.nextButtonDisabled Whether the next button is disabled.
  */
-export function CarouselNav( {
+export function CarouselNav({
 	currentPage,
 	items,
 	namespace,
@@ -75,71 +70,97 @@ export function CarouselNav( {
 	setCurrentPage,
 	centeredItemIndex,
 	showDots,
-} ) {
+}) {
 	return (
-		<div className={ `${ namespace }__nav` }>
+		<div className={`${namespace}__nav`}>
 			<Button
-				id={ `${ namespace }__prev-button` }
+				id={`${namespace}__prev-button`}
 				isPrimary
-				disabled={ prevButtonDisabled }
-				onClick={ () => {
-					setCurrentPage( currentPage.previousElementSibling );
-				} }
-				className={ `${ namespace }__prev` }
-				aria-label={ __( 'Previous', 'amp' ) }
+				disabled={prevButtonDisabled}
+				onClick={() => {
+					setCurrentPage(currentPage.previousElementSibling);
+				}}
+				className={`${namespace}__prev`}
+				aria-label={__('Previous', 'amp')}
 			>
 				<VisuallyHidden as="span">
-					{ __( 'Previous', 'amp' ) }
+					{__('Previous', 'amp')}
 				</VisuallyHidden>
-				<svg width="12" height="11" viewBox="0 0 12 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M5.47729 1.19531L1.18289 5.48906L5.47729 9.78347" stroke="#FAFAFC" strokeWidth="2" strokeLinejoin="round" />
-					<path d="M1.15854 5.48828L10.281 5.48828" stroke="#FAFAFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+				<svg
+					width="12"
+					height="11"
+					viewBox="0 0 12 11"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						d="M5.47729 1.19531L1.18289 5.48906L5.47729 9.78347"
+						stroke="#FAFAFC"
+						strokeWidth="2"
+						strokeLinejoin="round"
+					/>
+					<path
+						d="M1.15854 5.48828L10.281 5.48828"
+						stroke="#FAFAFC"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					/>
 				</svg>
-
 			</Button>
-			{ showDots ? (
-				<div className={ `${ namespace }__dots` }>
-					{ [ ...items ].map( ( item, itemIndex ) => (
+			{showDots ? (
+				<div className={`${namespace}__dots`}>
+					{[...items].map((item, itemIndex) => (
 						<Dot
-							id={ `${ namespace }__${ item.id }-dot` }
-							key={ `${ namespace }__${ item.id }-dot` }
-							isHighlighted={ itemIndex === centeredItemIndex }
-							label={ item.getAttribute( 'data-label' ) }
-							namespace={ namespace }
-							onClick={ () => {
-								setCurrentPage( item );
-							} }
+							id={`${namespace}__${item.id}-dot`}
+							key={`${namespace}__${item.id}-dot`}
+							isHighlighted={itemIndex === centeredItemIndex}
+							label={item.getAttribute('data-label')}
+							namespace={namespace}
+							onClick={() => {
+								setCurrentPage(item);
+							}}
 						/>
-					) ) }
+					))}
 				</div>
 			) : (
-				<div className={ `${ namespace }__item-counter` }>
-					<span>
-						{ centeredItemIndex + 1 }
-					</span>
-					<span>
-						{ items.length }
-					</span>
+				<div className={`${namespace}__item-counter`}>
+					<span>{centeredItemIndex + 1}</span>
+					<span>{items.length}</span>
 				</div>
-			) }
+			)}
 			<Button
-				id={ `${ namespace }__next-button` }
+				id={`${namespace}__next-button`}
 				isPrimary
-				disabled={ nextButtonDisabled }
-				onClick={ () => {
-					setCurrentPage( currentPage.nextElementSibling );
-				} }
-				className={ `${ namespace }__next` }
-				aria-label={ __( 'Next', 'amp' ) }
+				disabled={nextButtonDisabled}
+				onClick={() => {
+					setCurrentPage(currentPage.nextElementSibling);
+				}}
+				className={`${namespace}__next`}
+				aria-label={__('Next', 'amp')}
 			>
-				<VisuallyHidden as="span">
-					{ __( 'Next', 'amp' ) }
-				</VisuallyHidden>
-				<svg width="12" height="11" viewBox="0 0 12 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M5.95255 1.19531L10.247 5.48906L5.95255 9.78347" stroke="#FAFAFC" strokeWidth="2" strokeLinejoin="round" />
-					<path d="M10.2712 5.48828L1.14868 5.48828" stroke="#FAFAFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+				<VisuallyHidden as="span">{__('Next', 'amp')}</VisuallyHidden>
+				<svg
+					width="12"
+					height="11"
+					viewBox="0 0 12 11"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						d="M5.95255 1.19531L10.247 5.48906L5.95255 9.78347"
+						stroke="#FAFAFC"
+						strokeWidth="2"
+						strokeLinejoin="round"
+					/>
+					<path
+						d="M10.2712 5.48828L1.14868 5.48828"
+						stroke="#FAFAFC"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					/>
 				</svg>
-
 			</Button>
 		</div>
 	);

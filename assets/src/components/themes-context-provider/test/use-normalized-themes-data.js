@@ -15,12 +15,12 @@ import { ErrorContextProvider } from '../../error-context-provider';
 import { ThemesContextProvider } from '../index';
 import { useNormalizedThemesData } from '../use-normalized-themes-data';
 
-jest.mock( '../index' );
+jest.mock('../index');
 
-describe( 'useNormalizedThemesData', () => {
+describe('useNormalizedThemesData', () => {
 	let container = null;
 
-	function setup( { fetchingThemes, themes } ) {
+	function setup({ fetchingThemes, themes }) {
 		let returnValue;
 
 		function ComponentContainingHook() {
@@ -28,48 +28,52 @@ describe( 'useNormalizedThemesData', () => {
 			return null;
 		}
 
-		act( () => {
+		act(() => {
 			render(
 				<ErrorContextProvider>
-					<ThemesContextProvider fetchingThemes={ fetchingThemes } themes={ themes }>
+					<ThemesContextProvider
+						fetchingThemes={fetchingThemes}
+						themes={themes}
+					>
 						<ComponentContainingHook />
 					</ThemesContextProvider>
 				</ErrorContextProvider>,
-				container,
+				container
 			);
-		} );
+		});
 
 		return returnValue;
 	}
 
-	beforeEach( () => {
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-	} );
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		unmountComponentAtNode( container );
+	afterEach(() => {
+		unmountComponentAtNode(container);
 		container.remove();
 		container = null;
-	} );
+	});
 
-	it( 'returns empty an object if themes are being fetched', () => {
-		const normalizedThemesData = setup( {
+	it('returns empty an object if themes are being fetched', () => {
+		const normalizedThemesData = setup({
 			fetchingThemes: true,
 			themes: [],
-		} );
+		});
 
-		expect( normalizedThemesData ).toStrictEqual( {} );
-	} );
+		expect(normalizedThemesData).toStrictEqual({});
+	});
 
-	it( 'returns an object with normalized themes data', () => {
-		const normalizedThemesData = setup( {
+	it('returns an object with normalized themes data', () => {
+		const normalizedThemesData = setup({
 			fetchingThemes: false,
 			themes: [
 				{
 					author: {
 						raw: 'the WordPress team',
-						rendered: '<a href="https://wordpress.org/">the WordPress team</a>',
+						rendered:
+							'<a href="https://wordpress.org/">the WordPress team</a>',
 					},
 					author_uri: {
 						raw: 'https://wordpress.org/',
@@ -92,9 +96,9 @@ describe( 'useNormalizedThemesData', () => {
 					version: '1.7',
 				},
 			],
-		} );
+		});
 
-		expect( normalizedThemesData ).toStrictEqual( {
+		expect(normalizedThemesData).toStrictEqual({
 			twentyfifteen: {
 				author: 'the WordPress team',
 				author_uri: 'https://wordpress.org/',
@@ -113,11 +117,11 @@ describe( 'useNormalizedThemesData', () => {
 				status: 'active',
 				version: '1.7',
 			},
-		} );
-	} );
+		});
+	});
 
-	it( 'identifies parent and child themes', () => {
-		const normalizedThemesData = setup( {
+	it('identifies parent and child themes', () => {
+		const normalizedThemesData = setup({
 			fetchingThemes: false,
 			themes: [
 				{
@@ -131,9 +135,9 @@ describe( 'useNormalizedThemesData', () => {
 					status: 'active',
 				},
 			],
-		} );
+		});
 
-		expect( normalizedThemesData ).toStrictEqual( {
+		expect(normalizedThemesData).toStrictEqual({
 			parentTheme: {
 				slug: 'parentTheme',
 				stylesheet: 'parentTheme',
@@ -148,6 +152,6 @@ describe( 'useNormalizedThemesData', () => {
 				status: 'active',
 				parent: 'parentTheme',
 			},
-		} );
-	} );
-} );
+		});
+	});
+});

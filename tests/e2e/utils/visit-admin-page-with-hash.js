@@ -8,8 +8,8 @@ import { join } from 'path';
  */
 import { createURL, getPageError } from '@wordpress/e2e-test-utils';
 
-function createURLWithHash( WPPath, query, hash = '' ) {
-	const url = new URL( createURL( WPPath, query ) );
+function createURLWithHash(WPPath, query, hash = '') {
+	const url = new URL(createURL(WPPath, query));
 
 	url.hash = hash;
 
@@ -23,11 +23,13 @@ function createURLWithHash( WPPath, query, hash = '' ) {
  * @param {string} query     String to be serialized as query portion of URL.
  * @param {string} hash      URL hash.
  */
-export async function visitAdminPageWithHash( adminPath, query, hash = '' ) {
-	await page.goto( createURLWithHash( join( 'wp-admin', adminPath ), query, hash ) );
+export async function visitAdminPageWithHash(adminPath, query, hash = '') {
+	await page.goto(
+		createURLWithHash(join('wp-admin', adminPath), query, hash)
+	);
 
 	const error = await getPageError();
-	if ( error ) {
-		throw new Error( 'Unexpected error in page content: ' + error );
+	if (error) {
+		throw new Error('Unexpected error in page content: ' + error);
 	}
 }

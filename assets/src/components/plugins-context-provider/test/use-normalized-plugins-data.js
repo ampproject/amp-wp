@@ -15,12 +15,12 @@ import { ErrorContextProvider } from '../../error-context-provider';
 import { PluginsContextProvider } from '../index';
 import { useNormalizedPluginsData } from '../use-normalized-plugins-data';
 
-jest.mock( '../index' );
+jest.mock('../index');
 
-describe( 'useNormalizedPluginsData', () => {
+describe('useNormalizedPluginsData', () => {
 	let container = null;
 
-	function setup( { fetchingPlugins, plugins } ) {
+	function setup({ fetchingPlugins, plugins }) {
 		let returnValue;
 
 		function ComponentContainingHook() {
@@ -28,42 +28,45 @@ describe( 'useNormalizedPluginsData', () => {
 			return null;
 		}
 
-		act( () => {
+		act(() => {
 			render(
 				<ErrorContextProvider>
-					<PluginsContextProvider fetchingPluging={ fetchingPlugins } plugins={ plugins }>
+					<PluginsContextProvider
+						fetchingPluging={fetchingPlugins}
+						plugins={plugins}
+					>
 						<ComponentContainingHook />
 					</PluginsContextProvider>
 				</ErrorContextProvider>,
-				container,
+				container
 			);
-		} );
+		});
 
 		return returnValue;
 	}
 
-	beforeEach( () => {
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-	} );
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		unmountComponentAtNode( container );
+	afterEach(() => {
+		unmountComponentAtNode(container);
 		container.remove();
 		container = null;
-	} );
+	});
 
-	it( 'returns an empty object if plugins are being fetched', () => {
-		const normalizedPluginsData = setup( {
+	it('returns an empty object if plugins are being fetched', () => {
+		const normalizedPluginsData = setup({
 			fetchingPlugins: true,
 			plugins: [],
-		} );
+		});
 
-		expect( normalizedPluginsData ).toStrictEqual( {} );
-	} );
+		expect(normalizedPluginsData).toStrictEqual({});
+	});
 
-	it( 'returns an object with normalized plugins data', () => {
-		const normalizedPluginsData = setup( {
+	it('returns an object with normalized plugins data', () => {
+		const normalizedPluginsData = setup({
 			fetchingPlugins: false,
 			plugins: [
 				{
@@ -82,7 +85,8 @@ describe( 'useNormalizedPluginsData', () => {
 				},
 				{
 					author: 'AMP Project Contributors',
-					author_uri: 'https://github.com/ampproject/amp-wp/graphs/contributors',
+					author_uri:
+						'https://github.com/ampproject/amp-wp/graphs/contributors',
 					name: {
 						raw: 'AMP',
 						rendered: '<strong>AMP</strong>',
@@ -92,9 +96,9 @@ describe( 'useNormalizedPluginsData', () => {
 					version: '2.2.0-alpha',
 				},
 			],
-		} );
+		});
 
-		expect( normalizedPluginsData ).toStrictEqual( {
+		expect(normalizedPluginsData).toStrictEqual({
 			'acme-inc': {
 				author: 'Acme Inc.',
 				author_uri: 'http://example.com',
@@ -106,13 +110,14 @@ describe( 'useNormalizedPluginsData', () => {
 			},
 			amp: {
 				author: 'AMP Project Contributors',
-				author_uri: 'https://github.com/ampproject/amp-wp/graphs/contributors',
+				author_uri:
+					'https://github.com/ampproject/amp-wp/graphs/contributors',
 				name: 'AMP',
 				plugin: 'amp/amp',
 				status: 'active',
 				slug: 'amp',
 				version: '2.2.0-alpha',
 			},
-		} );
-	} );
-} );
+		});
+	});
+});

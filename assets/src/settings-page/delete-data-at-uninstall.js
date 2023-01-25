@@ -15,9 +15,10 @@ import { Loading } from '../components/loading';
  * Data deletion at uninstallation toggle on the settings page.
  */
 export function DeleteDataAtUninstall() {
-	const { editedOptions, fetchingOptions, updateOptions } = useContext( Options );
+	const { editedOptions, fetchingOptions, updateOptions } =
+		useContext(Options);
 
-	if ( fetchingOptions ) {
+	if (fetchingOptions) {
 		return <Loading />;
 	}
 
@@ -25,14 +26,19 @@ export function DeleteDataAtUninstall() {
 	return (
 		<section className="delete-data-at-uninstall">
 			<AMPSettingToggle
-				checked={ true === deleteDataAtUninstall }
-				title={ __( 'Delete plugin data at uninstall', 'amp' ) }
-				onChange={ () => {
-					updateOptions( { delete_data_at_uninstall: ! deleteDataAtUninstall } );
-				} }
+				checked={true === deleteDataAtUninstall}
+				title={__('Delete plugin data at uninstall', 'amp')}
+				onChange={() => {
+					updateOptions({
+						delete_data_at_uninstall: !deleteDataAtUninstall,
+					});
+				}}
 			/>
 			<p>
-				{ __( 'When you uninstall the plugin you have the choice of whether its data should also be deleted. Examples of plugin data include the settings, validated URLs, and transients used to store image dimensions and parsed stylesheets.', 'amp' ) }
+				{__(
+					'When you uninstall the plugin you have the choice of whether its data should also be deleted. Examples of plugin data include the settings, validated URLs, and transients used to store image dimensions and parsed stylesheets.',
+					'amp'
+				)}
 			</p>
 		</section>
 	);

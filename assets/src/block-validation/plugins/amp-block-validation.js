@@ -18,43 +18,48 @@ import { useAMPDocumentToggle } from '../hooks/use-amp-document-toggle';
 
 export const PLUGIN_NAME = 'amp-block-validation';
 export const SIDEBAR_NAME = 'amp-editor-sidebar';
-export const PLUGIN_TITLE = __( 'AMP Validation', 'amp' );
+export const PLUGIN_TITLE = __('AMP Validation', 'amp');
 export const PLUGIN_ICON = MoreMenuIcon;
 
 /**
  * Provides a dedicated sidebar for the plugin, with toggle buttons in the editor toolbar and more menu.
  */
 export default function AMPBlockValidation() {
-	const { broken, errorCount } = useSelect( ( select ) => ( {
-		broken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
-		errorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors()?.length || 0,
-	} ), [] );
+	const { broken, errorCount } = useSelect(
+		(select) => ({
+			broken: select(
+				BLOCK_VALIDATION_STORE_KEY
+			).getAMPCompatibilityBroken(),
+			errorCount:
+				select(
+					BLOCK_VALIDATION_STORE_KEY
+				).getUnreviewedValidationErrors()?.length || 0,
+		}),
+		[]
+	);
 	const { isAMPEnabled } = useAMPDocumentToggle();
 
 	useValidationErrorStateUpdates();
 	usePostDirtyStateChanges();
 
-	if ( ! isAMPEnabled ) {
+	if (!isAMPEnabled) {
 		return null;
 	}
 
 	return (
 		<>
 			<PluginSidebarMoreMenuItem
-				icon={ <PLUGIN_ICON /> }
-				target={ SIDEBAR_NAME }
+				icon={<PLUGIN_ICON />}
+				target={SIDEBAR_NAME}
 			>
-				{ PLUGIN_TITLE }
+				{PLUGIN_TITLE}
 			</PluginSidebarMoreMenuItem>
 			<PluginSidebar
-				className={ `${ PLUGIN_NAME }-sidebar` }
-				icon={ (
-					<ToolbarIcon count={ errorCount } broken={ broken } />
-				) }
-				name={ SIDEBAR_NAME }
-				title={ PLUGIN_TITLE }
+				className={`${PLUGIN_NAME}-sidebar`}
+				icon={<ToolbarIcon count={errorCount} broken={broken} />}
+				name={SIDEBAR_NAME}
+				title={PLUGIN_TITLE}
 			>
-
 				<Sidebar />
 				<InvalidBlockOutline />
 			</PluginSidebar>

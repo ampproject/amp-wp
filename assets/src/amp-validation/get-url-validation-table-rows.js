@@ -4,13 +4,16 @@
  * @param {Object}  options
  * @param {boolean} options.checkedOnly Whether to return only checked rows.
  */
-export function getURLValidationTableRows( options = {} ) {
-	const rows = [ ...document.querySelectorAll( 'select.amp-validation-error-status' ) ]
-		.map( ( select ) => select.closest( 'tr' ) );
+export function getURLValidationTableRows(options = {}) {
+	const rows = [
+		...document.querySelectorAll('select.amp-validation-error-status'),
+	].map((select) => select.closest('tr'));
 
-	if ( true !== options.checkedOnly ) {
+	if (true !== options.checkedOnly) {
 		return rows;
 	}
 
-	return rows.filter( ( row ) => row.querySelector( '.check-column input[type=checkbox]' ).checked );
+	return rows.filter(
+		(row) => row.querySelector('.check-column input[type=checkbox]').checked
+	);
 }

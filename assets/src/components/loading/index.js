@@ -21,13 +21,15 @@ import './style.css';
  * @param {boolean} props.inline Display indicator as an inline element.
  */
 // @todo WIP: Updated design needed.
-export function Loading( { inline = false } ) {
+export function Loading({ inline = false }) {
 	const Tag = inline ? 'span' : 'div';
 
 	return (
-		<Tag className={ classnames( 'amp-spinner-container', {
-			'amp-spinner-container--inline': inline,
-		} ) }>
+		<Tag
+			className={classnames('amp-spinner-container', {
+				'amp-spinner-container--inline': inline,
+			})}
+		>
 			<Spinner />
 		</Tag>
 	);

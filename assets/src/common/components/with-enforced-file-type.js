@@ -11,7 +11,10 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { EnforcedFileToolbarSelect, getSelectMediaFrame } from './select-media-frame';
+import {
+	EnforcedFileToolbarSelect,
+	getSelectMediaFrame,
+} from './select-media-frame';
 
 const { wp } = window;
 
@@ -25,7 +28,7 @@ const { wp } = window;
  * @param {Function} InitialMediaUpload The MediaUpload component, passed from the filter.
  * @return {Function} The wrapped component.
  */
-export default ( InitialMediaUpload ) => {
+export default (InitialMediaUpload) => {
 	/**
 	 * Partly copied from customize-controls.js.
 	 *
@@ -37,11 +40,11 @@ export default ( InitialMediaUpload ) => {
 		 *
 		 * @param {*} args Constructor arguments.
 		 */
-		constructor( ...args ) {
-			super( ...args );
+		constructor(...args) {
+			super(...args);
 
 			// This class should only be present when only 'video' types are allowed, like in the Core Video block.
-			if ( isEqual( [ 'video/mp4' ], this.props.allowedTypes ) ) {
+			if (isEqual(['video/mp4'], this.props.allowedTypes)) {
 				this.initFileTypeMedia();
 			}
 		}
@@ -56,38 +59,48 @@ export default ( InitialMediaUpload ) => {
 		 * @see wp.media.CroppedImageControl.initFrame
 		 */
 		initFileTypeMedia = () => {
-			const SelectMediaFrame = getSelectMediaFrame( EnforcedFileToolbarSelect );
+			const SelectMediaFrame = getSelectMediaFrame(
+				EnforcedFileToolbarSelect
+			);
 			const previousOnSelect = this.onSelect;
-			const isVideo = isEqual( [ 'video' ], this.props.allowedTypes );
+			const isVideo = isEqual(['video'], this.props.allowedTypes);
 			const queryType = isVideo ? 'video/mp4' : this.props.allowedTypes; // For the Video block, only display .mp4 files.
-			this.frame = new SelectMediaFrame( {
+			this.frame = new SelectMediaFrame({
 				allowedTypes: this.props.allowedTypes,
 				button: {
-					text: __( 'Select', 'amp' ),
+					text: __('Select', 'amp'),
 					close: false,
 				},
 				states: [
-					new wp.media.controller.Library( {
-						title: __( 'Select or Upload Media', 'amp' ),
-						library: wp.media.query( { type: queryType } ),
+					new wp.media.controller.Library({
+						title: __('Select or Upload Media', 'amp'),
+						library: wp.media.query({ type: queryType }),
 						multiple: false,
 						date: false,
 						priority: 20,
-					} ),
+					}),
 				],
-			} );
+			});
 
 			wp.media.frame = this.frame;
-			this.frame.on( 'close', () => {
-				this.initFileTypeMedia();
-			}, this );
+			this.frame.on(
+				'close',
+				() => {
+					this.initFileTypeMedia();
+				},
+				this
+			);
 
-			this.frame.on( 'select', () => {
-				if ( previousOnSelect ) {
-					previousOnSelect();
-				}
-				this.frame.close();
-			}, this );
+			this.frame.on(
+				'select',
+				() => {
+					if (previousOnSelect) {
+						previousOnSelect();
+					}
+					this.frame.close();
+				},
+				this
+			);
 		};
 	};
 };

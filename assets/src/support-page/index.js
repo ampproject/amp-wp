@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	restEndpoint,
-	args,
-	data,
-	ampValidatedPostCount,
-} from 'amp-support'; // From WP inline script.
+import { restEndpoint, args, data, ampValidatedPostCount } from 'amp-support'; // From WP inline script.
 
 /**
  * WordPress dependencies
@@ -26,29 +21,30 @@ import { AMPSupport } from '../components/amp-support';
 import { ErrorScreen } from '../components/error-screen';
 import { ErrorBoundary } from '../components/error-boundary';
 
-domReady( () => {
-	const root = document.getElementById( 'amp-support-root' );
-	const errorHandler = ( event ) => {
+domReady(() => {
+	const root = document.getElementById('amp-support-root');
+	const errorHandler = (event) => {
 		// Handle only own errors.
-		if ( event.filename && /amp-support(\.min)?\.js/.test( event.filename ) ) {
-			render( <ErrorScreen error={ event.error } />, root );
+		if (event.filename && /amp-support(\.min)?\.js/.test(event.filename)) {
+			render(<ErrorScreen error={event.error} />, root);
 		}
 	};
 
-	global.addEventListener( 'error', errorHandler );
+	global.addEventListener('error', errorHandler);
 
-	if ( root ) {
-		render( (
+	if (root) {
+		render(
 			<ErrorContextProvider>
 				<ErrorBoundary>
 					<AMPSupport
-						restEndpoint={ restEndpoint }
-						args={ args }
-						data={ data }
-						ampValidatedPostCount={ ampValidatedPostCount }
+						restEndpoint={restEndpoint}
+						args={args}
+						data={data}
+						ampValidatedPostCount={ampValidatedPostCount}
 					/>
 				</ErrorBoundary>
-			</ErrorContextProvider>
-		), root );
+			</ErrorContextProvider>,
+			root
+		);
 	}
-} );
+});

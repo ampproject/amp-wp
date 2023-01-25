@@ -10,37 +10,40 @@ import { useEffect, useRef, useState } from '@wordpress/element';
  * @param {Object}  args       Arguments.
  * @param {number}  args.delay Delay value in ms.
  */
-export default function useDelayedFlag( flag, { delay = 500 } = {} ) {
+export default function useDelayedFlag(flag, { delay = 500 } = {}) {
 	/**
 	 * Delay the `isCompleted` state so that the progress bar stays at 100% for
 	 * a brief moment.
 	 */
-	const [ delayedFlag, setDelayedFlag ] = useState( flag );
+	const [delayedFlag, setDelayedFlag] = useState(flag);
 
 	/**
 	 * This component sets state inside async functions. Use this ref to prevent
 	 * state updates after unmount.
 	 */
-	const hasUnmounted = useRef( false );
-	useEffect( () => () => {
-		hasUnmounted.current = true;
-	}, [] );
+	const hasUnmounted = useRef(false);
+	useEffect(
+		() => () => {
+			hasUnmounted.current = true;
+		},
+		[]
+	);
 
-	useEffect( () => {
+	useEffect(() => {
 		let cleanup = () => {};
 
-		if ( flag && ! delayedFlag ) {
-			cleanup = setTimeout( () => {
-				if ( ! hasUnmounted.current ) {
-					setDelayedFlag( true );
+		if (flag && !delayedFlag) {
+			cleanup = setTimeout(() => {
+				if (!hasUnmounted.current) {
+					setDelayedFlag(true);
 				}
-			}, delay );
-		} else if ( ! flag && delayedFlag ) {
-			setDelayedFlag( false );
+			}, delay);
+		} else if (!flag && delayedFlag) {
+			setDelayedFlag(false);
 		}
 
 		return cleanup;
-	}, [ flag, delayedFlag, delay ] );
+	}, [flag, delayedFlag, delay]);
 
 	return delayedFlag;
 }

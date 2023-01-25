@@ -17,14 +17,17 @@ export const ReaderThemes = createContext();
  * @param {any}     props.children         Component children.
  * @param {boolean} props.downloadingTheme Whether downloading a theme or not.
  */
-export function ReaderThemesContextProvider( { children, downloadingTheme = false } ) {
+export function ReaderThemesContextProvider({
+	children,
+	downloadingTheme = false,
+}) {
 	return (
-		<ReaderThemes.Provider value={
-			{
+		<ReaderThemes.Provider
+			value={{
 				downloadingTheme,
-			}
-		}>
-			{ children }
+			}}
+		>
+			{children}
 		</ReaderThemes.Provider>
 	);
 }

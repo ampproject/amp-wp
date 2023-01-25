@@ -404,7 +404,7 @@ function amp_is_available() {
 		}
 
 		$message = sprintf(
-			/* translators: 1: amp_is_available() function, 2: amp_is_request() function, 3: is_amp_endpoint() function */
+			/* translators: 1: amp_is_available function, 2: amp_is_request function, 3: is_amp_endpoint function */
 			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly.', 'amp' ),
 			'`amp_is_available()`',
 			'`amp_is_request()`',
@@ -741,9 +741,14 @@ function amp_add_amphtml_link() {
 	}
 
 	$amp_url = amp_add_paired_endpoint( amp_get_current_url() );
+
 	if ( $amp_url ) {
-		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
-		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
+		$amp_url          = remove_query_arg( QueryVar::NOAMP, $amp_url );
+		$sandboxing_level = amp_get_sandboxing_level();
+
+		if ( 0 === $sandboxing_level || 3 === $sandboxing_level ) {
+			printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
+		}
 	}
 }
 
@@ -1546,6 +1551,9 @@ function amp_get_content_sanitizers( $post = null ) {
 		// from getting removed in PWA plugin offline/500 templates.
 		AMP_PWA_Script_Sanitizer::class            => [],
 
+		// The AMP_GTag_Script_Sanitizer runs before AMP_Script_Sanitizer to mark the the Google Analytics script tags as being PX-verified.
+		AMP_GTag_Script_Sanitizer::class           => [],
+
 		// The AMP_Script_Sanitizer runs here because based on whether it allows custom scripts
 		// to be kept, it may impact the behavior of other sanitizers. For example, if custom
 		// scripts are kept then this is a signal that tree shaking in AMP_Style_Sanitizer cannot be
@@ -1716,6 +1724,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		AMP_Core_Theme_Sanitizer::class, // Must come before script sanitizer since onclick attributes are removed.
 		AMP_Bento_Sanitizer::class, // Bento scripts may be preserved here.
 		AMP_PWA_Script_Sanitizer::class, // Must come before script sanitizer since PWA offline page scripts are removed.
+		AMP_GTag_Script_Sanitizer::class, // Must come before script sanitizer since gtag.js is removed.
 		AMP_Script_Sanitizer::class, // Must come before sanitizers for images, videos, audios, comments, forms, and styles.
 		AMP_Form_Sanitizer::class, // Must come before comments sanitizer.
 		AMP_Comments_Sanitizer::class, // Also must come after the form sanitizer.
@@ -2158,4 +2167,22 @@ function amp_remove_paired_endpoint( $url ) {
 		_doing_it_wrong( __FUNCTION__, esc_html( $reason ) . ' ' . esc_html( $e->getMessage() ), '2.1.1' );
 		return $url;
 	}
+}
+
+/**
+ * Determine sandboxing level if enabled.
+ *
+ * @since 2.3.1
+ *
+ * @return int Following values are possible:
+ *             0: Sandbox is disabled.
+ *             1: Sandboxing level: Loose.
+ *             2: Sandboxing level: Moderate.
+ *             3: Sandboxing level: Strict.
+ */
+function amp_get_sandboxing_level() {
+	if ( ! AMP_Options_Manager::get_option( Option::SANDBOXING_ENABLED ) ) {
+		return 0;
+	}
+	return AMP_Options_Manager::get_option( Option::SANDBOXING_LEVEL );
 }

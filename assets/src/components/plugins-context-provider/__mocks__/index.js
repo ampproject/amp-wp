@@ -18,19 +18,19 @@ export const Plugins = createContext();
  * @param {boolean} props.fetchingPlugins Whether fetching plugins or not.
  * @param {Array}   props.plugins         An array of fetched plugins.
  */
-export function PluginsContextProvider( {
+export function PluginsContextProvider({
 	children,
 	fetchingPlugins = false,
 	plugins = [],
-} ) {
+}) {
 	return (
-		<Plugins.Provider value={
-			{
+		<Plugins.Provider
+			value={{
 				fetchingPlugins,
 				plugins,
-			}
-		}>
-			{ children }
+			}}
+		>
+			{children}
 		</Plugins.Provider>
 	);
 }

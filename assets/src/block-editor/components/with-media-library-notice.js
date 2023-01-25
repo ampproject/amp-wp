@@ -11,7 +11,10 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { FeaturedImageToolbarSelect, getSelectMediaFrame } from '../../common/components/select-media-frame';
+import {
+	FeaturedImageToolbarSelect,
+	getSelectMediaFrame,
+} from '../../common/components/select-media-frame';
 import { setImageFromURL } from '../../common/helpers';
 
 const { wp } = window;
@@ -25,12 +28,13 @@ const { wp } = window;
  * @param {Object}   minImageDimensions Minimum required image dimensions.
  * @return {Function} The wrapped component.
  */
-export default ( InitialMediaUpload, minImageDimensions ) => {
-	if ( ! isFunction( InitialMediaUpload ) ) {
+export default (InitialMediaUpload, minImageDimensions) => {
+	if (!isFunction(InitialMediaUpload)) {
 		return InitialMediaUpload;
 	}
 
-	const { width: EXPECTED_WIDTH, height: EXPECTED_HEIGHT } = minImageDimensions;
+	const { width: EXPECTED_WIDTH, height: EXPECTED_HEIGHT } =
+		minImageDimensions;
 
 	/**
 	 * Mostly copied from customize-controls.js, with slight changes.
@@ -44,18 +48,21 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 		 *
 		 * @param {*} args Constructor arguments.
 		 */
-		constructor( ...args ) {
-			super( ...args );
+		constructor(...args) {
+			super(...args);
 
 			// @todo This should be a different event.
 			// This class should only be present in the MediaUpload for the Featured Image.
-			if ( 'editor-post-featured-image__media-modal' === this.props.modalClass ) {
-				this.initFeaturedImage = this.initFeaturedImage.bind( this );
+			if (
+				'editor-post-featured-image__media-modal' ===
+				this.props.modalClass
+			) {
+				this.initFeaturedImage = this.initFeaturedImage.bind(this);
 				this.initFeaturedImage();
 			} else {
 				// Restore the original`onOpen` callback as it will be overridden by the parent class.
-				this.frame.off( 'open', this.onOpen );
-				this.frame.on( 'open', super.onOpen.bind( this ) );
+				this.frame.off('open', this.onOpen);
+				this.frame.on('open', super.onOpen.bind(this));
 			}
 		}
 
@@ -68,38 +75,50 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 		 * Adds a suggested width and height.
 		 */
 		initFeaturedImage() {
-			const FeaturedImageSelectMediaFrame = getSelectMediaFrame( FeaturedImageToolbarSelect );
+			const FeaturedImageSelectMediaFrame = getSelectMediaFrame(
+				FeaturedImageToolbarSelect
+			);
 
-			const FeaturedImageLibrary = wp.media.controller.FeaturedImage.extend( {
-				defaults: {
-					...wp.media.controller.FeaturedImage.prototype.defaults,
-					date: false,
-					filterable: false,
-					// Note: These suggestions are shown in the media library image browser.
-					suggestedWidth: EXPECTED_WIDTH,
-					suggestedHeight: EXPECTED_HEIGHT,
-				},
-			} );
+			const FeaturedImageLibrary =
+				wp.media.controller.FeaturedImage.extend({
+					defaults: {
+						...wp.media.controller.FeaturedImage.prototype.defaults,
+						date: false,
+						filterable: false,
+						// Note: These suggestions are shown in the media library image browser.
+						suggestedWidth: EXPECTED_WIDTH,
+						suggestedHeight: EXPECTED_HEIGHT,
+					},
+				});
 
-			this.frame = new FeaturedImageSelectMediaFrame( {
+			this.frame = new FeaturedImageSelectMediaFrame({
 				allowedTypes: this.props.allowedTypes,
 				state: 'featured-image',
-				states: [ new FeaturedImageLibrary(), new wp.media.controller.EditImage() ],
-			} );
+				states: [
+					new FeaturedImageLibrary(),
+					new wp.media.controller.EditImage(),
+				],
+			});
 
-			this.frame.on( 'toolbar:create:featured-image', function( toolbar ) {
-				/**
-				 * @this wp.media.view.MediaFrame.Select
-				 */
-				this.createSelectToolbar( toolbar, {
-					text: wp.media.view.l10n.setFeaturedImage,
-					state: this.options.state,
-				} );
-			}, this.frame );
+			this.frame.on(
+				'toolbar:create:featured-image',
+				function (toolbar) {
+					/**
+					 * @this wp.media.view.MediaFrame.Select
+					 */
+					this.createSelectToolbar(toolbar, {
+						text: wp.media.view.l10n.setFeaturedImage,
+						state: this.options.state,
+					});
+				},
+				this.frame
+			);
 
-			this.frame.on( 'open', this.onOpen );
+			this.frame.on('open', this.onOpen);
 
-			this.frame.state( 'featured-image' ).on( 'select', this.onSelectImage, this );
+			this.frame
+				.state('featured-image')
+				.on('select', this.onSelectImage, this);
 
 			// See wp.media() for this.
 			wp.media.frame = this.frame;
@@ -112,13 +131,13 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 		 */
 		onOpen() {
 			const frameContent = this.frame.content.get();
-			if ( frameContent && frameContent.collection ) {
+			if (frameContent && frameContent.collection) {
 				const collection = frameContent.collection;
 
 				// Clean all attachments we have in memory.
 				collection
 					.toArray()
-					.forEach( ( model ) => model.trigger( 'destroy', model ) );
+					.forEach((model) => model.trigger('destroy', model));
 
 				// Reset has more flag, if library had small amount of items all items may have been loaded before.
 				collection.mirroring._hasMore = true;
@@ -132,19 +151,32 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 		 * Handles image selection.
 		 */
 		onSelectImage() {
-			const attachment = this.frame.state( 'featured-image' ).get( 'selection' ).first().toJSON();
-			const dispatchImage = ( attachmentId ) => {
-				dispatch( 'core/editor' ).editPost( { featured_media: attachmentId } );
+			const attachment = this.frame
+				.state('featured-image')
+				.get('selection')
+				.first()
+				.toJSON();
+			const dispatchImage = (attachmentId) => {
+				dispatch('core/editor').editPost({
+					featured_media: attachmentId,
+				});
 			};
 			const { onSelect } = this.props;
 			const { url, id, width, height } = attachment;
-			setImageFromURL( { url, id, width, height, onSelect, dispatchImage } );
+			setImageFromURL({
+				url,
+				id,
+				width,
+				height,
+				onSelect,
+				dispatchImage,
+			});
 
-			if ( ! wp.media.view.settings.post.featuredImageId ) {
+			if (!wp.media.view.settings.post.featuredImageId) {
 				return;
 			}
 
-			wp.media.featuredImage.set( attachment ? attachment.id : -1 );
+			wp.media.featuredImage.set(attachment ? attachment.id : -1);
 		}
 	};
 };

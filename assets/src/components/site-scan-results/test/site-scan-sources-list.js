@@ -16,15 +16,17 @@ import { SiteScanSourcesList } from '../site-scan-sources-list';
 import { SiteScan } from '../../site-scan-context-provider';
 import scannableUrls from '../data/scannable-urls';
 
-jest.mock( '../../site-scan-context-provider' );
+jest.mock('../../site-scan-context-provider');
 
 let container;
-const Providers = ( { children } ) => {
+const Providers = ({ children }) => {
 	return (
-		<SiteScan.Provider value={ {
-			scannableUrls,
-		} }>
-			{ children }
+		<SiteScan.Provider
+			value={{
+				scannableUrls,
+			}}
+		>
+			{children}
 		</SiteScan.Provider>
 	);
 };
@@ -33,54 +35,53 @@ Providers.propTypes = {
 	children: PropTypes.any,
 };
 
-describe( 'SiteScanSourcesList', () => {
-	beforeEach( () => {
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-	} );
+describe('SiteScanSourcesList', () => {
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		document.body.removeChild( container );
+	afterEach(() => {
+		document.body.removeChild(container);
 		container = null;
-	} );
+	});
 
-	it( 'renders a loading spinner if no sources are provided', () => {
-		act( () => {
+	it('renders a loading spinner if no sources are provided', () => {
+		act(() => {
 			render(
 				<Providers>
-					<SiteScanSourcesList sources={ [] } />
+					<SiteScanSourcesList sources={[]} />
 				</Providers>,
-				container,
+				container
 			);
-		} );
+		});
 
-		expect( container.querySelector( '.amp-spinner-container' ) ).not.toBeNull();
-	} );
+		expect(
+			container.querySelector('.amp-spinner-container')
+		).not.toBeNull();
+	});
 
-	it( 'renders the correct number of sources', () => {
-		act( () => {
+	it('renders the correct number of sources', () => {
+		act(() => {
 			render(
 				<Providers>
 					<SiteScanSourcesList
-						sources={ [
-							{ slug: 'foo' },
-							{ slug: 'bar' },
-						] }
+						sources={[{ slug: 'foo' }, { slug: 'bar' }]}
 					/>
 				</Providers>,
-				container,
+				container
 			);
-		} );
+		});
 
-		expect( container.querySelectorAll( 'li' ) ).toHaveLength( 2 );
-	} );
+		expect(container.querySelectorAll('li')).toHaveLength(2);
+	});
 
-	it( 'renders active source properties', () => {
-		act( () => {
+	it('renders active source properties', () => {
+		act(() => {
 			render(
 				<Providers>
 					<SiteScanSourcesList
-						sources={ [
+						sources={[
 							{
 								author: 'John Doe',
 								name: 'Source name',
@@ -88,24 +89,33 @@ describe( 'SiteScanSourcesList', () => {
 								status: 'active',
 								version: '1.0.0',
 							},
-						] }
+						]}
 					/>
 				</Providers>,
-				container,
+				container
 			);
-		} );
+		});
 
-		expect( container.querySelector( '.site-scan-results__source-name' ).textContent ).toBe( 'Source name' );
-		expect( container.querySelector( '.site-scan-results__source-author' ).textContent ).toBe( 'by John Doe' );
-		expect( container.querySelector( '.site-scan-results__source-version' ).textContent ).toBe( 'Version 1.0.0' );
-	} );
+		expect(
+			container.querySelector('.site-scan-results__source-name')
+				.textContent
+		).toBe('Source name');
+		expect(
+			container.querySelector('.site-scan-results__source-author')
+				.textContent
+		).toBe('by John Doe');
+		expect(
+			container.querySelector('.site-scan-results__source-version')
+				.textContent
+		).toBe('Version 1.0.0');
+	});
 
-	it( 'renders active source properties with error detail', () => {
-		act( () => {
+	it('renders active source properties with error detail', () => {
+		act(() => {
 			render(
 				<Providers>
 					<SiteScanSourcesList
-						sources={ [
+						sources={[
 							{
 								author: 'John Doe',
 								name: 'Bad Block',
@@ -113,73 +123,107 @@ describe( 'SiteScanSourcesList', () => {
 								status: 'active',
 								version: '1.0.0',
 							},
-						] }
+						]}
 					/>
 				</Providers>,
-				container,
+				container
 			);
-		} );
+		});
 
-		act( () => {
-			container.querySelector( '.site-scan-results__sources > li > details' ).click();
-		} );
+		act(() => {
+			container
+				.querySelector('.site-scan-results__sources > li > details')
+				.click();
+		});
 
-		const sourceDetailTextContent = container.querySelector( '.site-scan-results__source-detail' ).textContent;
+		const sourceDetailTextContent = container.querySelector(
+			'.site-scan-results__source-detail'
+		).textContent;
 
-		expect( sourceDetailTextContent ).toMatch( /"name": "bad-block"/ );
-		expect( sourceDetailTextContent ).not.toMatch( /"name": "wp-includes"/ );
-		expect( sourceDetailTextContent ).not.toMatch( /"code": "DISALLOWED_TAG"/ );
+		expect(sourceDetailTextContent).toMatch(/"name": "bad-block"/);
+		expect(sourceDetailTextContent).not.toMatch(/"name": "wp-includes"/);
+		expect(sourceDetailTextContent).not.toMatch(/"code": "DISALLOWED_TAG"/);
 
-		const sourceUrlList = container.querySelector( '.site-scan-results__urls-list' );
-		expect( sourceUrlList ).not.toBeNull();
-		expect( sourceUrlList.innerHTML ).toMatch( /href="https:\/\/example.org\/"/ );
-	} );
+		const sourceUrlList = container.querySelector(
+			'.site-scan-results__urls-list'
+		);
+		expect(sourceUrlList).not.toBeNull();
+		expect(sourceUrlList.innerHTML).toMatch(
+			/href="https:\/\/example.org\/"/
+		);
+	});
 
-	it( 'renders inactive source properties', () => {
-		act( () => {
+	it('renders inactive source properties', () => {
+		act(() => {
 			render(
 				<Providers>
 					<SiteScanSourcesList
 						inactiveSourceNotice="Source is inactive"
-						sources={ [ {
-							author: 'John Doe',
-							name: 'Source name',
-							slug: 'Source slug',
-							status: 'inactive',
-							version: '1.0.0',
-						} ] }
+						sources={[
+							{
+								author: 'John Doe',
+								name: 'Source name',
+								slug: 'Source slug',
+								status: 'inactive',
+								version: '1.0.0',
+							},
+						]}
 					/>
 				</Providers>,
-				container,
+				container
 			);
-		} );
+		});
 
-		expect( container.querySelector( '.site-scan-results__source-name' ).textContent ).toBe( 'Source name' );
-		expect( container.querySelector( '.site-scan-results__source-notice' ).textContent ).toBe( 'Source is inactive' );
-		expect( container.querySelector( '.site-scan-results__source-author' ) ).toBeNull();
-		expect( container.querySelector( '.site-scan-results__source-version' ) ).toBeNull();
-	} );
+		expect(
+			container.querySelector('.site-scan-results__source-name')
+				.textContent
+		).toBe('Source name');
+		expect(
+			container.querySelector('.site-scan-results__source-notice')
+				.textContent
+		).toBe('Source is inactive');
+		expect(
+			container.querySelector('.site-scan-results__source-author')
+		).toBeNull();
+		expect(
+			container.querySelector('.site-scan-results__source-version')
+		).toBeNull();
+	});
 
-	it( 'renders uninstalled source properties', () => {
-		act( () => {
+	it('renders uninstalled source properties', () => {
+		act(() => {
 			render(
 				<Providers>
 					<SiteScanSourcesList
 						uninstalledSourceNotice="Source is uninstalled"
-						sources={ [ {
-							slug: 'Source slug',
-							status: 'uninstalled',
-						} ] }
+						sources={[
+							{
+								slug: 'Source slug',
+								status: 'uninstalled',
+							},
+						]}
 					/>
 				</Providers>,
-				container,
+				container
 			);
-		} );
+		});
 
-		expect( container.querySelector( '.site-scan-results__source-slug' ).textContent ).toBe( 'Source slug' );
-		expect( container.querySelector( '.site-scan-results__source-notice' ).textContent ).toBe( 'Source is uninstalled' );
-		expect( container.querySelector( '.site-scan-results__source-name' ) ).toBeNull();
-		expect( container.querySelector( '.site-scan-results__source-author' ) ).toBeNull();
-		expect( container.querySelector( '.site-scan-results__source-version' ) ).toBeNull();
-	} );
-} );
+		expect(
+			container.querySelector('.site-scan-results__source-slug')
+				.textContent
+		).toBe('Source slug');
+		expect(
+			container.querySelector('.site-scan-results__source-notice')
+				.textContent
+		).toBe('Source is uninstalled');
+		expect(
+			container.querySelector('.site-scan-results__source-name')
+		).toBeNull();
+		expect(
+			container.querySelector('.site-scan-results__source-author')
+		).toBeNull();
+		expect(
+			container.querySelector('.site-scan-results__source-version')
+		).toBeNull();
+	});
+});

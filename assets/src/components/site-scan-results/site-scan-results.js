@@ -26,35 +26,31 @@ import { Selectable } from '../selectable';
  * @param {Element} props.icon         Panel icon.
  * @param {string}  props.title        Panel title.
  */
-export function SiteScanResults( {
+export function SiteScanResults({
 	callToAction,
 	children,
 	className,
 	count,
 	icon,
 	title,
-} ) {
+}) {
 	return (
-		<Selectable className={ classnames( 'site-scan-results', className ) }>
+		<Selectable className={classnames('site-scan-results', className)}>
 			<div className="site-scan-results__header">
-				{ icon }
+				{icon}
 				<p
 					className="site-scan-results__heading"
-					data-badge-content={ count }
+					data-badge-content={count}
 				>
-					{ title }
-					<VisuallyHidden as="span">
-						{ `(${ count })` }
-					</VisuallyHidden>
+					{title}
+					<VisuallyHidden as="span">{`(${count})`}</VisuallyHidden>
 				</p>
 			</div>
 			<div className="site-scan-results__content">
-				{ children }
-				{ callToAction && (
-					<p className="site-scan-results__cta">
-						{ callToAction }
-					</p>
-				) }
+				{children}
+				{callToAction && (
+					<p className="site-scan-results__cta">{callToAction}</p>
+				)}
 			</div>
 		</Selectable>
 	);

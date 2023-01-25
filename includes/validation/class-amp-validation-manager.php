@@ -265,10 +265,14 @@ class AMP_Validation_Manager {
 	/**
 	 * Filter AMP options to set Standard template mode if it is an AMP-override request.
 	 *
-	 * @param array $options Options.
+	 * @param array|false $options Options.
 	 * @return array Filtered options.
 	 */
 	public static function filter_options_when_force_standard_mode_request( $options ) {
+		if ( ! $options ) {
+			$options = [];
+		}
+
 		if (
 			self::is_validate_request()
 			&&
@@ -2028,6 +2032,8 @@ class AMP_Validation_Manager {
 			return true;
 		}
 
+		$sandboxing_level = amp_get_sandboxing_level();
+
 		/*
 		 * In AMP-first, documents with invalid AMP markup can still be served. The amp attribute will be omitted in
 		 * order to prevent GSC from complaining about a validation error already surfaced inside of WordPress.
@@ -2037,8 +2043,10 @@ class AMP_Validation_Manager {
 		 * Otherwise, if in Paired AMP then redirect to the non-AMP version if the current user isn't an user who
 		 * can manage validation error statuses (access developer tools) and change the AMP options for the template
 		 * mode. Such users should be able to see kept invalid markup on the AMP page even though it is invalid.
+		 *
+		 * Also, if sandboxing is not set to strict mode, then the page should be displayed to the user.
 		 */
-		if ( amp_is_canonical() ) {
+		if ( amp_is_canonical() || ( 1 === $sandboxing_level || 2 === $sandboxing_level ) ) {
 			return true;
 		}
 

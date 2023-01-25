@@ -15,76 +15,78 @@ import { render } from '@wordpress/element';
 import { DevToolsToggle } from '../';
 import { UserContextProvider } from '../../user-context-provider';
 
-jest.mock( '../../user-context-provider' );
+jest.mock('../../user-context-provider');
 
 let container;
 
-describe( 'DevToolsToggle', () => {
-	beforeEach( () => {
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-	} );
+describe('DevToolsToggle', () => {
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+	});
 
-	afterEach( () => {
-		document.body.removeChild( container );
+	afterEach(() => {
+		document.body.removeChild(container);
 		container = null;
-	} );
+	});
 
-	it( 'matches snapshot', () => {
+	it('matches snapshot', () => {
 		const wrapper = create(
 			<UserContextProvider>
 				<DevToolsToggle />
-			</UserContextProvider>,
+			</UserContextProvider>
 		);
-		expect( wrapper.toJSON() ).toMatchSnapshot();
-	} );
+		expect(wrapper.toJSON()).toMatchSnapshot();
+	});
 
-	it( 'renders a loading spinner when a user data is fetched', () => {
-		act( () => {
+	it('renders a loading spinner when a user data is fetched', () => {
+		act(() => {
 			render(
-				<UserContextProvider fetchingUser={ true }>
+				<UserContextProvider fetchingUser={true}>
 					<DevToolsToggle />
 				</UserContextProvider>,
-				container,
+				container
 			);
-		} );
-		expect( container.querySelector( '.amp-spinner-container' ) ).not.toBeNull();
-	} );
+		});
+		expect(
+			container.querySelector('.amp-spinner-container')
+		).not.toBeNull();
+	});
 
-	it( 'matches snapshot for the loading state', () => {
+	it('matches snapshot for the loading state', () => {
 		const wrapper = create(
-			<UserContextProvider fetchingUser={ true }>
+			<UserContextProvider fetchingUser={true}>
 				<DevToolsToggle />
-			</UserContextProvider>,
+			</UserContextProvider>
 		);
-		expect( wrapper.toJSON() ).toMatchSnapshot();
-	} );
+		expect(wrapper.toJSON()).toMatchSnapshot();
+	});
 
-	it( 'can be toggled', () => {
-		act( () => {
+	it('can be toggled', () => {
+		act(() => {
 			render(
 				<UserContextProvider>
 					<DevToolsToggle />
 				</UserContextProvider>,
-				container,
+				container
 			);
-		} );
-		expect( container.querySelector( 'input:checked' ) ).toBeNull();
+		});
+		expect(container.querySelector('input:checked')).toBeNull();
 
-		act(
-			() => {
-				container.querySelector( 'input' ).dispatchEvent( new global.MouseEvent( 'click' ) );
-			},
-		);
+		act(() => {
+			container
+				.querySelector('input')
+				.dispatchEvent(new global.MouseEvent('click'));
+		});
 
-		expect( container.querySelector( 'input:checked' ) ).not.toBeNull();
+		expect(container.querySelector('input:checked')).not.toBeNull();
 
-		act(
-			() => {
-				container.querySelector( 'input' ).dispatchEvent( new global.MouseEvent( 'click' ) );
-			},
-		);
+		act(() => {
+			container
+				.querySelector('input')
+				.dispatchEvent(new global.MouseEvent('click'));
+		});
 
-		expect( container.querySelector( 'input:checked' ) ).toBeNull();
-	} );
-} );
+		expect(container.querySelector('input:checked')).toBeNull();
+	});
+});

@@ -20,31 +20,26 @@ import { ListItems } from '../list-items';
  * @param {Array}  props.validatedUrls List of validated URLs.
  * @return {JSX.Element|null} HTML markup for validated urls data.
  */
-export function ValidatedUrls( { validatedUrls } ) {
-	if ( ! Array.isArray( validatedUrls ) ) {
+export function ValidatedUrls({ validatedUrls }) {
+	if (!Array.isArray(validatedUrls)) {
 		return null;
 	}
 
-	const items = validatedUrls.map( ( item ) => ( {
+	const items = validatedUrls.map((item) => ({
 		url: item.url ?? null,
-	} ) );
+	}));
 
 	return (
-		<details open={ false }>
+		<details open={false}>
 			<summary>
-				{
-					sprintf(
-						/* translators: Placeholder is the number of validated URLs. */
-						__( 'Validated URLs (%d)', 'amp' ),
-						validatedUrls.length,
-					)
-				}
+				{sprintf(
+					/* translators: Placeholder is the number of validated URLs. */
+					__('Validated URLs (%d)', 'amp'),
+					validatedUrls.length
+				)}
 			</summary>
 			<div className="detail-body">
-				<ListItems
-					isDisc={ true }
-					items={ items }
-				/>
+				<ListItems isDisc={true} items={items} />
 			</div>
 		</details>
 	);
@@ -53,4 +48,3 @@ export function ValidatedUrls( { validatedUrls } ) {
 ValidatedUrls.propTypes = {
 	validatedUrls: PropTypes.array.isRequired,
 };
-

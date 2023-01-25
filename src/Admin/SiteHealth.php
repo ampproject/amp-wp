@@ -535,6 +535,16 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	}
 
 	/**
+	 * Callback for {@see get_page_cache_headers()}.
+	 *
+	 * @param string $header_value Header value.
+	 * @return bool Whether header contains the value "hit"
+	 */
+	private static function cache_hit_callback( string $header_value ): bool {
+		return false !== stripos( $header_value, 'hit' );
+	}
+
+	/**
 	 * List of header and it's verification callback to verify if page cache is enabled or not.
 	 *
 	 * Note: key is header name and value could be callable function to verify header value.
@@ -543,11 +553,6 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	 * @return array List of client caching headers and their (optional) verification callbacks.
 	 */
 	protected static function get_page_cache_headers() {
-
-		$cache_hit_callback = static function ( $header_value ) {
-			return false !== strpos( strtolower( $header_value ), 'hit' );
-		};
-
 		return [
 			'cache-control'          => static function ( $header_value ) {
 				return (bool) preg_match( '/max-age=[1-9]/', $header_value );
@@ -560,10 +565,10 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			},
 			'last-modified'          => '',
 			'etag'                   => '',
-			'x-cache'                => $cache_hit_callback,
-			'x-proxy-cache'          => $cache_hit_callback,
-			'cf-cache-status'        => $cache_hit_callback,
-			'x-kinsta-cache'         => $cache_hit_callback,
+			'x-cache'                => [ self::class, 'cache_hit_callback' ],
+			'x-proxy-cache'          => [ self::class, 'cache_hit_callback' ],
+			'cf-cache-status'        => [ self::class, 'cache_hit_callback' ],
+			'x-kinsta-cache'         => [ self::class, 'cache_hit_callback' ],
 			'x-cache-enabled'        => static function ( $header_value ) {
 				return 'true' === strtolower( $header_value );
 			},
@@ -573,8 +578,8 @@ final class SiteHealth implements Service, Registerable, Delayed {
 			'cf-apo-via'             => static function ( $header_value ) {
 				return false !== strpos( strtolower( $header_value ), 'tcache' );
 			},
-			'x-srcache-store-status' => $cache_hit_callback,
-			'x-srcache-fetch-status' => $cache_hit_callback,
+			'x-srcache-store-status' => [ self::class, 'cache_hit_callback' ],
+			'x-srcache-fetch-status' => [ self::class, 'cache_hit_callback' ],
 			'cf-edge-cache'          => static function ( $header_value ) {
 				return false !== strpos( strtolower( $header_value ), 'cache' );
 			},
@@ -836,7 +841,7 @@ final class SiteHealth implements Service, Registerable, Delayed {
 	public function icu_version() {
 		$icu_version       = defined( 'INTL_ICU_VERSION' ) ? INTL_ICU_VERSION : null;
 		$minimum_version   = '4.6';
-		$is_proper_version = version_compare( $icu_version, $minimum_version, '>=' );
+		$is_proper_version = null === $icu_version ? false : version_compare( $icu_version, $minimum_version, '>=' );
 
 		$data = [
 			'badge'       => [
