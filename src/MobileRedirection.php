@@ -64,15 +64,20 @@ final class MobileRedirection implements Service, Registerable {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
-		$is_mobile_redirect_enabled = AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT );
+		$is_amp_canonical           = amp_is_canonical();
 		$sandboxing_level           = amp_get_sandboxing_level();
+		$is_mobile_redirect_enabled = AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT );
 
 		// Add alternative link if mobile redirection is enabled or sandboxing level is set to loose or moderate.
-		if ( ! amp_is_canonical() && ( $is_mobile_redirect_enabled || ( 1 === $sandboxing_level || 2 === $sandboxing_level ) ) ) {
+		if ( ! $is_amp_canonical && ( $is_mobile_redirect_enabled || ( 1 === $sandboxing_level || 2 === $sandboxing_level ) ) ) {
 			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
 		}
 
-		if ( $is_mobile_redirect_enabled && ! amp_is_canonical() ) {
+		if ( ! $is_mobile_redirect_enabled && ! $is_amp_canonical ) {
+			add_action( 'template_redirect', [ $this, 'maybe_add_mobile_switcher_link' ] );
+		}
+
+		if ( $is_mobile_redirect_enabled && ! $is_amp_canonical ) {
 			add_action( 'template_redirect', [ $this, 'redirect' ], PHP_INT_MAX );
 
 			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
@@ -180,6 +185,16 @@ final class MobileRedirection implements Service, Registerable {
 			$this->add_a2a_linking_hooks();
 
 			// Add a link to the footer to allow for navigation to the non-AMP version.
+			$this->add_mobile_switcher_footer_hooks();
+		}
+	}
+
+	/**
+	 * Maybe add mobile switcher link in footer.
+	 */
+	public function maybe_add_mobile_switcher_link() {
+		if ( amp_is_request() ) {
+			$this->add_mobile_switcher_head_hooks();
 			$this->add_mobile_switcher_footer_hooks();
 		}
 	}
