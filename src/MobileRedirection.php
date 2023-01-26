@@ -64,27 +64,31 @@ final class MobileRedirection implements Service, Registerable {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
-		$is_mobile_redirect_enabled = AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT );
-		$sandboxing_level           = amp_get_sandboxing_level();
+		if ( ! amp_is_canonical() ) {
+			$sandboxing_level           = amp_get_sandboxing_level();
+			$is_mobile_redirect_enabled = AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT );
 
-		// Add alternative link if mobile redirection is enabled or sandboxing level is set to loose or moderate.
-		if ( ! amp_is_canonical() && ( $is_mobile_redirect_enabled || ( 1 === $sandboxing_level || 2 === $sandboxing_level ) ) ) {
-			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
-		}
+			// Add alternative link if mobile redirection is enabled or sandboxing level is set to loose or moderate.
+			if ( $is_mobile_redirect_enabled || ( 1 === $sandboxing_level || 2 === $sandboxing_level ) ) {
+				add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
+			}
 
-		if ( $is_mobile_redirect_enabled && ! amp_is_canonical() ) {
-			add_action( 'template_redirect', [ $this, 'redirect' ], PHP_INT_MAX );
+			if ( ! $is_mobile_redirect_enabled ) {
+				add_action( 'template_redirect', [ $this, 'maybe_add_mobile_switcher_link' ], PHP_INT_MAX );
+			} else {
+				add_action( 'template_redirect', [ $this, 'redirect' ], PHP_INT_MAX );
 
-			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
-			// A low priority is used so that sites can continue overriding this if they have done so.
-			add_filter( 'amp_to_amp_linking_enabled', '__return_true', 0 );
+				// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
+				// A low priority is used so that sites can continue overriding this if they have done so.
+				add_filter( 'amp_to_amp_linking_enabled', '__return_true', 0 );
 
-			add_filter( 'comment_post_redirect', [ $this, 'filter_comment_post_redirect' ] );
+				add_filter( 'comment_post_redirect', [ $this, 'filter_comment_post_redirect' ] );
 
-			// Amend the comments/respond links to go to non-AMP page when in legacy Reader mode.
-			if ( amp_is_legacy() ) {
-				add_filter( 'get_comments_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For get_comments_link().
-				add_filter( 'respond_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For comments_popup_link().
+				// Amend the comments/respond links to go to non-AMP page when in legacy Reader mode.
+				if ( amp_is_legacy() ) {
+					add_filter( 'get_comments_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For get_comments_link().
+					add_filter( 'respond_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For comments_popup_link().
+				}
 			}
 		}
 	}
@@ -180,6 +184,16 @@ final class MobileRedirection implements Service, Registerable {
 			$this->add_a2a_linking_hooks();
 
 			// Add a link to the footer to allow for navigation to the non-AMP version.
+			$this->add_mobile_switcher_footer_hooks();
+		}
+	}
+
+	/**
+	 * Add mobile switcher link in footer when serving an AMP page.
+	 */
+	public function maybe_add_mobile_switcher_link() {
+		if ( amp_is_request() ) {
+			$this->add_mobile_switcher_head_hooks();
 			$this->add_mobile_switcher_footer_hooks();
 		}
 	}
