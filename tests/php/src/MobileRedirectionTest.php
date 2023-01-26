@@ -466,7 +466,6 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		$this->assertFalse( has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 		$this->assertFalse( has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 
-
 		$this->go_to( '/' );
 		set_query_var( QueryVar::AMP, '1' );
 		$this->instance->maybe_add_mobile_switcher_link();
