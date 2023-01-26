@@ -955,7 +955,21 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom, [] );
 
-		$css_url    = 'https://example.com/style.css';
+		$css_url = 'https://example.com/style.css';
+
+		add_filter(
+			'pre_http_request',
+			static function( $preempt, $request, $url ) use ( $css_url ) {
+				if ( $css_url === $url ) {
+					return new WP_Error( 'http_request_failed', 'Failed to fetch URL.' );
+				}
+
+				return $preempt;
+			},
+			10,
+			3
+		);
+
 		$stylesheet = $this->call_private_method( $sanitizer, 'get_stylesheet_from_url', [ $css_url ] );
 
 		$this->assertTrue( is_wp_error( $stylesheet ) );
