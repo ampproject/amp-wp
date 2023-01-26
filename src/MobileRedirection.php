@@ -190,7 +190,7 @@ final class MobileRedirection implements Service, Registerable {
 	}
 
 	/**
-	 * Maybe add mobile switcher link in footer.
+	 * Add mobile switcher link in footer when serving an AMP page.
 	 */
 	public function maybe_add_mobile_switcher_link() {
 		if ( amp_is_request() ) {
