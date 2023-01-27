@@ -113,6 +113,28 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	}
 
 	/**
+	 * Test add_twentyseventeen_attachment_image_attributes() with zero height logo.
+	 *
+	 * @covers ::add_twentyseventeen_attachment_image_attributes()
+	 */
+	public function test_add_twentyseventeen_attachment_image_attributes_with_zero_height_width() {
+		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', 0 );
+
+		wp_update_attachment_metadata(
+			$attachment_id,
+			[
+				'height' => 0,
+			]
+		);
+		set_theme_mod( 'custom_logo', $attachment_id );
+
+		AMP_Core_Theme_Sanitizer::add_twentyseventeen_attachment_image_attributes( [] );
+		$logo = get_custom_logo();
+
+		$this->assertStringNotContainsString( 'height=', $logo );
+	}
+
+	/**
 	 * @dataProvider get_data_for_using_native_img
 	 * @covers::add_twentytwenty_masthead_styles()
 	 * @param bool $native_img_used Use native img.
@@ -486,6 +508,26 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		} else {
 			$this->assertStringContainsString( $needle, $logo );
 		}
+	}
+
+	/**
+	 * Test add_twentytwenty_custom_logo_fix() with zero height logo.
+	 *
+	 * @covers ::add_twentytwenty_custom_logo_fix()
+	 */
+	public function test_add_twentytwenty_custom_logo_fix_with_zero_height_width() {
+		add_filter(
+			'get_custom_logo',
+			static function () {
+				return '<img src="https://example.com/logo.jpg" width="200" height="0">';
+			}
+		);
+
+		AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix( [] );
+		$logo = get_custom_logo();
+
+		$this->assertStringContainsString( 'width="200"', $logo );
+		$this->assertStringContainsString( 'height="0"', $logo );
 	}
 
 	/**
