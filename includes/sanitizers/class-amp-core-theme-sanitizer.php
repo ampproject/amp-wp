@@ -595,7 +595,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$img_height = (int) $src[2];
 
 				// If height is zero, bail.
-				if ( 0 === $img_height ) {
+				if ( 0 === $img_height || 0 === $img_width ) {
 					return $html;
 				}
 
@@ -890,7 +890,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					$height = (int) $matches['height'];
 
 					// If height is zero, bail.
-					if ( 0 === $height ) {
+					if ( 0 === $height || 0 === $width ) {
 						return $html;
 					}
 
