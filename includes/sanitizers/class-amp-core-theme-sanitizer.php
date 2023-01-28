@@ -591,8 +591,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					return $html;
 				}
 
-				$img_width  = $src[1] ? (int) $src[1] : 0;
-				$img_height = $src[2] ? (int) $src[2] : 0;
+				$img_width  = (int) $src[1];
+				$img_height = (int) $src[2];
 
 				// If height is zero, bail.
 				if ( 0 === $img_height ) {
