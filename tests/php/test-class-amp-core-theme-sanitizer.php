@@ -120,18 +120,20 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	public function test_add_twentyseventeen_attachment_image_attributes_with_zero_height_width() {
 		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', 0 );
 
-		wp_update_attachment_metadata(
-			$attachment_id,
-			[
-				'height' => 0,
-			]
-		);
-		set_theme_mod( 'custom_logo', $attachment_id );
+		foreach ( [ 'height', 'width' ] as $dimension ) {
+			wp_update_attachment_metadata(
+				$attachment_id,
+				[
+					$dimension => 0,
+				]
+			);
+			set_theme_mod( 'custom_logo', $attachment_id );
 
-		AMP_Core_Theme_Sanitizer::add_twentyseventeen_attachment_image_attributes( [] );
-		$logo = get_custom_logo();
+			AMP_Core_Theme_Sanitizer::add_twentyseventeen_attachment_image_attributes( [] );
+			$logo = get_custom_logo();
 
-		$this->assertStringNotContainsString( 'height=', $logo );
+			$this->assertStringNotContainsString( sprintf( '%s=', $dimension ), $logo );
+		}
 	}
 
 	/**
@@ -511,23 +513,49 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	}
 
 	/**
+	 * Get test data for different image sizes.
+	 *
+	 * @return array
+	 */
+	public function get_data_for_image_sizes() {
+		return [
+			'image_height_is_zaro'           => [
+				0,
+				100,
+			],
+			'image_width_is_zaro'            => [
+				100,
+				0,
+			],
+			'image_height_and_width_is_zaro' => [
+				0,
+				0,
+			],
+		];
+	}
+
+	/**
 	 * Test add_twentytwenty_custom_logo_fix() with zero height logo.
 	 *
+	 * @dataProvider get_data_for_image_sizes
 	 * @covers ::add_twentytwenty_custom_logo_fix()
+	 *
+	 * @param int $height Height.
+	 * @param int $width  Width.
 	 */
-	public function test_add_twentytwenty_custom_logo_fix_with_zero_height_width() {
+	public function test_add_twentytwenty_custom_logo_fix_with_zero_height_width( $height, $width ) {
 		add_filter(
 			'get_custom_logo',
-			static function () {
-				return '<img src="https://example.com/logo.jpg" width="200" height="0">';
+			static function () use ( $height, $width ) {
+				return sprintf( '<img src="https://example.com/logo.jpg" width="%d" height="%d">', $width, $height );
 			}
 		);
 
 		AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix( [] );
 		$logo = get_custom_logo();
 
-		$this->assertStringContainsString( 'width="200"', $logo );
-		$this->assertStringContainsString( 'height="0"', $logo );
+		$this->assertStringContainsString( sprintf( 'width="%d"', $width ), $logo );
+		$this->assertStringContainsString( sprintf( 'height="%d"', $height ), $logo );
 	}
 
 	/**
