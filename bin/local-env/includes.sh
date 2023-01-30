@@ -176,3 +176,19 @@ mysql() {
 container() {
 	dc exec -T $CONTAINER "$@"
 }
+
+##
+# Download specific version of Gutenberg plugin.
+#
+# @param {string} version The version of Gutenberg to download.
+##
+download_gutenberg() {
+	local version="$1"
+	# by default save as gutenberg.$version.zip
+	local download_path="${2:-gutenberg.${version}.zip}"
+	local url="https://downloads.wordpress.org/plugin/gutenberg.${version}.zip"
+
+	echo -e $(status_message "Downloading Gutenberg ${version} from ${url}...")
+	download "$url" "$download_path"
+	echo -e $(status_message "Downloaded Gutenberg ${version} to ${download_path}")
+}
