@@ -11,7 +11,6 @@ namespace AmpProject\AmpWP\Cli;
 
 use WP_CLI;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\PluginSuppression;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Infrastructure\CliCommand;
@@ -39,7 +38,6 @@ final class OptionCommand implements Service, CliCommand {
 		Option::READER_THEME,
 		Option::THEME_SUPPORT,
 		Option::MOBILE_REDIRECT,
-		Option::SUPPRESSED_PLUGINS,
 	];
 
 	/**
@@ -57,13 +55,6 @@ final class OptionCommand implements Service, CliCommand {
 	private $reader_themes;
 
 	/**
-	 * PluginSuppression instance.
-	 *
-	 * @var PluginSuppression
-	 */
-	private $plugin_suppression;
-
-	/**
 	 * Get the name under which to register the CLI command.
 	 *
 	 * @return string The name under which to register the CLI command.
@@ -75,12 +66,10 @@ final class OptionCommand implements Service, CliCommand {
 	/**
 	 * OptionCommand constructor.
 	 *
-	 * @param ReaderThemes      $reader_themes ReaderThemes instance.
-	 * @param PluginSuppression $plugin_suppression PluginSuppression instance.
+	 * @param ReaderThemes $reader_themes ReaderThemes instance.
 	 */
-	public function __construct( ReaderThemes $reader_themes, PluginSuppression $plugin_suppression ) {
-		$this->reader_themes      = $reader_themes;
-		$this->plugin_suppression = $plugin_suppression;
+	public function __construct( ReaderThemes $reader_themes ) {
+		$this->reader_themes = $reader_themes;
 	}
 
 	/**
