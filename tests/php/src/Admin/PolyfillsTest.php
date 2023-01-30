@@ -62,14 +62,7 @@ class PolyfillsTest extends TestCase {
 		$this->assertInstanceOf( Polyfills::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Delayed::class, $this->instance );
-		$this->assertInstanceOf( Conditional::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
-		$this->assertInstanceOf( HasRequirements::class, $this->instance );
-	}
-
-	/** @covers ::get_requirements() */
-	public function test_get_requirements() {
-		$this->assertSame( [ 'dependency_support' ], Polyfills::get_requirements() );
 	}
 
 	/**
