@@ -3303,7 +3303,9 @@ class AMP_Validation_Error_Taxonomy {
 					return sprintf(
 						/* translators: %1$s is the invalid attribute value, %2$s is the attribute name */
 						esc_html__( 'Invalid value %1$s for attribute %2$s', 'amp' ),
-						'<code>' . esc_html( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) . '</code>',
+						empty( $validation_error['node_attributes'][ $validation_error['attribute'] ] )
+							? '(' . esc_html__( 'empty', 'amp' ) . ')'
+							: '<code>' . esc_html( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) . '</code>',
 						'<code>' . esc_html( $validation_error['attribute'] ) . '</code>'
 					);
 				} else {
