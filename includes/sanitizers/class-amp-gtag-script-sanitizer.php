@@ -5,7 +5,7 @@
  * - This sanitizer will facilitate using GA4 while waiting on an AMP implementation.
  * - This sanitizer will be only used in Moderate or Loose sandboxing level
  *
- * @since 2.3.1
+ * @since 2.4.0
  * @package AMP
  */
 
@@ -15,7 +15,7 @@ use AmpProject\AmpWP\ValidationExemption;
 /**
  * Class AMP_GTag_Script_Sanitizer
  *
- * @since 2.3.1
+ * @since 2.4.0
  * @internal
  */
 class AMP_GTag_Script_Sanitizer extends AMP_Base_Sanitizer {
@@ -23,7 +23,7 @@ class AMP_GTag_Script_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Sanitize the AMP response for GA4 scripts.
 	 *
-	 * @since 2.3.1
+	 * @since 2.4.0
 	 */
 	public function sanitize() {
 		if ( ! AMP_Options_Manager::get_option( Option::SANDBOXING_ENABLED ) ) {

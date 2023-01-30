@@ -11,7 +11,7 @@ use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 /**
  * Class AMP_Native_Img_Attributes_Sanitizer_Test
  *
- * @since 2.3.1
+ * @since 2.4.0
  * @coversDefaultClass AMP_Native_Img_Attributes_Sanitizer
  */
 class AMP_Native_Img_Attributes_Sanitizer_Test extends TestCase {
