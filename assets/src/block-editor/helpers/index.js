@@ -9,7 +9,10 @@ import { isFunction, isObject, isString } from 'lodash';
  */
 import { __ } from '@wordpress/i18n';
 import { ToggleControl, PanelBody } from '@wordpress/components';
-import { InspectorControls } from '@wordpress/block-editor';
+import {
+	InspectorControls,
+	InspectorAdvancedControls,
+} from '@wordpress/block-editor';
 import { select, useSelect } from '@wordpress/data';
 import { cloneElement, isValidElement } from '@wordpress/element';
 
@@ -340,12 +343,10 @@ ImageBlockLayoutAttributes.propTypes = {
  * @return {Object} Inspector Controls.
  */
 const GalleryBlockLayoutAttributes = (props) => (
-	<InspectorControls>
-		<PanelBody title={__('AMP Settings', 'amp')}>
-			<AmpLightboxToggle {...props} />
-			<AmpCarouselToggle {...props} />
-		</PanelBody>
-	</InspectorControls>
+	<InspectorAdvancedControls>
+		<AmpLightboxToggle {...props} />
+		<AmpCarouselToggle {...props} />
+	</InspectorAdvancedControls>
 );
 
 /**

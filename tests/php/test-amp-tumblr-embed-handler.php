@@ -111,7 +111,7 @@ class AMP_Tumblr_Embed_Handler_Test extends TestCase {
 		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
 		$embed->sanitize_raw_embeds( $dom );
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$this->assertEqualMarkup( $expected, $content );
+		$this->assertEqualMarkup( $expected, $this->maybe_replace_embed_urls( $content ) );
 
 		if ( $url && function_exists( 'do_blocks' ) ) {
 			$embed_block = "<!-- wp:embed {\"url\":\"{$url}\",\"type\":\"rich\",\"providerNameSlug\":\"tumblr\",\"responsive\":true} -->\n<figure class=\"wp-block-embed is-type-rich is-provider-tumblr wp-block-embed-tumblr\"><div class=\"wp-block-embed__wrapper\">\n{$url}\n</div></figure>\n<!-- /wp:embed -->";
@@ -122,7 +122,7 @@ class AMP_Tumblr_Embed_Handler_Test extends TestCase {
 
 			$this->assertEqualMarkup(
 				'<figure class="wp-block-embed is-type-rich is-provider-tumblr wp-block-embed-tumblr"><div class="wp-block-embed__wrapper">' . $expected . '</div></figure>',
-				$content
+				$this->maybe_replace_embed_urls( $content )
 			);
 		}
 
@@ -130,7 +130,7 @@ class AMP_Tumblr_Embed_Handler_Test extends TestCase {
 		$dom = AMP_DOM_Utils::get_dom_from_content( ( new WP_Embed() )->shortcode( [], $url ) );
 		$embed->sanitize_raw_embeds( $dom );
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$this->assertEqualMarkup( $expected, $content );
+		$this->assertEqualMarkup( $expected, $this->maybe_replace_embed_urls( $content ) );
 
 		// Check with no filters applied and with the script pre-remoevd.
 		$content = ( new WP_Embed() )->shortcode( [], $url );
@@ -138,7 +138,24 @@ class AMP_Tumblr_Embed_Handler_Test extends TestCase {
 		$dom     = AMP_DOM_Utils::get_dom_from_content( $content );
 		$embed->sanitize_raw_embeds( $dom );
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$this->assertEqualMarkup( $expected, $content );
+		$this->assertEqualMarkup( $expected, $this->maybe_replace_embed_urls( $content ) );
+	}
+
+	/**
+	 * Replace new embeds URLs with old ones.
+	 *
+	 * @param string $content Content.
+	 *
+	 * @return string Content.
+	 */
+	private function maybe_replace_embed_urls( $content ) {
+		// Replace new embeds url to old ones to maintain consistency.
+		$content = str_replace( 'https://embed.tumblr.com/embed/post/t:-iO5APHPiXyOXM0LJ2Zeqg/92003045635/v2', 'https://embed.tumblr.com/embed/post/2JT2XTaiTxO08wh21dqQrw/92003045635', $content );
+		$content = str_replace( 'https://www.tumblr.com/ifpaintingscouldtext/92003045635/grant-wood-american-gothic-1930', 'https://ifpaintingscouldtext.tumblr.com/post/92003045635/grant-wood-american-gothic-1930', $content );
+		$content = str_replace( 'https://embed.tumblr.com/embed/post/t:F33OkAxLKX6A89MkL0LO6g/184736320764/v2', 'https://embed.tumblr.com/embed/post/O6_eRR6K-z9QGTzdU5HrhQ/184736320764', $content );
+		$content = str_replace( 'https://www.tumblr.com/teded/184736320764/how-do-vaccines-work', 'https://teded.tumblr.com/post/184736320764/how-do-vaccines-work', $content );
+
+		return $content;
 	}
 
 	/**
