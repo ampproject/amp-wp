@@ -591,12 +591,20 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					return $html;
 				}
 
+				$img_width  = (int) $src[1];
+				$img_height = (int) $src[2];
+
+				// If height is zero, bail.
+				if ( 0 === $img_height || 0 === $img_width ) {
+					return $html;
+				}
+
 				if ( 'blank' === get_header_textcolor() && has_custom_header() ) {
 					$height = 200;
 				} else {
 					$height = 80;
 				}
-				$width = $height * ( $src[1] / $src[2] ); // Note that float values are allowed.
+				$width = $height * ( $img_width / $img_height ); // Note that float values are allowed.
 
 				$html = preg_replace( '/(?<=width=")\d+(?=")/', $width, $html );
 				$html = preg_replace( '/(?<=height=")\d+(?=")/', $height, $html );
@@ -880,6 +888,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				if ( isset( $matches['width'], $matches['height'] ) ) {
 					$width  = (int) $matches['width'];
 					$height = (int) $matches['height'];
+
+					// If height is zero, bail.
+					if ( 0 === $height || 0 === $width ) {
+						return $html;
+					}
 
 					$desktop_height = 9; // in rem; see <https://github.com/WordPress/wordpress-develop/blob/ad8d01a7e9e13144d1676b8e6d70c3e81ef703af/src/wp-content/themes/twentytwenty/style.css#L4887>.
 					$mobile_height  = 6; // in rem; see <https://github.com/WordPress/wordpress-develop/blob/ad8d01a7e9e13144d1676b8e6d70c3e81ef703af/src/wp-content/themes/twentytwenty/style.css#L1424>.
