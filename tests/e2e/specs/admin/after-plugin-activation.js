@@ -7,6 +7,11 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
  * Internal dependencies
  */
 import { completeWizard } from '../../utils/onboarding-wizard-utils';
+import {
+	installPlugin,
+	installLocalPlugin,
+	uninstallPlugin,
+} from '../../utils/amp-settings-utils';
 
 describe('After plugin activation', () => {
 	const timeout = 30000;
@@ -22,8 +27,23 @@ describe('After plugin activation', () => {
 	}
 
 	beforeAll(async () => {
+		// Uninstall the latest Gutenberg plugin.
+		await uninstallPlugin('gutenberg');
+
+		// Install the Gutenberg 14.7.3 plugin for React 17 compatibility and test SiteScanNotice on plugins page.
+		await installLocalPlugin('gutenberg.14.7.3');
+
 		await completeWizard({ mode: 'transitional' });
 		await visitAdminPage('plugins.php', '');
+
+		await activate('gutenberg');
+	});
+
+	afterAll(async () => {
+		await uninstallPlugin('gutenberg');
+
+		// Install the latest Gutenberg plugin.
+		await installPlugin('gutenberg');
 	});
 
 	it('site scan is triggered automatically and displays no validation issues for AMP-compatible plugin', async () => {
