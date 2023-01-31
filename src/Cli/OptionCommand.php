@@ -169,11 +169,6 @@ final class OptionCommand implements Service, CliCommand {
 	public function update( $args, $assoc_args ) {
 		list( $option_name, $option_value ) = $args;
 
-		if ( ! in_array( $option_name, self::ALLOWED_OPTIONS, true ) ) {
-			/* translators: %s: option name */
-			WP_CLI::error( sprintf( __( 'You are not allowed to update %s option via the CLI.', 'amp' ), $option_name ) );
-		}
-
 		$this->check_user();
 
 		$options = $this->get_options();
@@ -181,6 +176,11 @@ final class OptionCommand implements Service, CliCommand {
 		if ( ! isset( $options[ $option_name ] ) ) {
 			/* translators: %s: option name */
 			WP_CLI::error( sprintf( __( 'Could not update %s option. Does it exist?', 'amp' ), $option_name ) );
+		}
+
+		if ( ! in_array( $option_name, self::ALLOWED_OPTIONS, true ) ) {
+			/* translators: %s: option name */
+			WP_CLI::error( sprintf( __( 'You are not allowed to update %s option via the CLI.', 'amp' ), $option_name ) );
 		}
 
 		$this->update_option( $option_name, $option_value );
