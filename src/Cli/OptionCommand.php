@@ -55,7 +55,14 @@ final class OptionCommand implements Service, CliCommand {
 	 *
 	 * @var string
 	 */
-	const READER_THEMES = 'reader_themes';
+	const READER_THEMES = 'reader-themes';
+
+	/**
+	 * CLI managed options.
+	 *
+	 * @var string
+	 */
+	const CLI_MANAGED_OPTIONS = 'cli-managed-options';
 
 	/**
 	 * ReaderThemes instance.
@@ -135,7 +142,7 @@ final class OptionCommand implements Service, CliCommand {
 	 * <key>
 	 * : The name of the option to update.
 	 *
-	 * [<value>]
+	 * <value>
 	 * : The new value.
 	 *
 	 * ## EXAMPLES
@@ -170,43 +177,90 @@ final class OptionCommand implements Service, CliCommand {
 	}
 
 	/**
-	 * List AMP options.
+	 * Lists options and their values.
+	 *
+	 * This command can be used to list following options:
+	 * - AMP Plugin options.
+	 * - AMP Plugin options that can be updated via the CLI.
+	 * - Reader themes.
+	 *
+	 * ## OPTIONS
+	 * [<cli-managed-options>]
+	 * : List of options that can be updated via the CLI.
+	 *
+	 * [<reader-themes>]
+	 * : List of Reader themes.
+	 *
+	 * ## EXAMPLES
+	 *
+	 * # List all options.
+	 * $ wp amp option list
+	 * +------------------+----------------+
+	 * | key              | value          |
+	 * +------------------+----------------+
+	 * | theme_support    | standard       |
+	 * | mobile_redirect  | disabled       |
+	 * | reader_theme     | legacy         |
+	 * +------------------+----------------+
+	 *
+	 * # List options that can be updated via the CLI.
+	 * $ wp amp option list cli-managed-options
+	 * theme_support, mobile_redirect, reader_theme
+	 *
+	 * # List Reader themes.
+	 * $ wp amp option list reader-themes
+	 * twentytwenty, twentytwentyone, legacy
 	 *
 	 * @subcommand list
+	 *
+	 * @param array $args Array of positional arguments.
 	 */
-	public function list_() {
+	public function list_( $args = [] ) {
 		$this->check_user();
 
-		$options = $this->get_options();
+		if ( ! empty( $args ) ) {
+			list( $subcommand ) = $args;
 
-		// Add reader themes to the options.
-		$options[ self::READER_THEMES ] = wp_list_pluck( $this->reader_themes->get_themes(), 'slug' );
+			if ( self::CLI_MANAGED_OPTIONS === $subcommand ) {
+				WP_CLI::line( implode( ', ', self::ALLOWED_OPTIONS ) );
+			}
 
-		WP_CLI::line( WP_CLI::colorize( '%y' . __( 'Available options:', 'amp' ) . '%n' ) );
-		WP_CLI\Utils\format_items(
-			'table',
-			array_map(
-				static function ( $option_name, $option_value ) {
-					return compact( 'option_name', 'option_value' );
-				},
-				array_keys( $options ),
-				$options
-			),
-			[ 'option_name', 'option_value' ]
-		);
+			if ( self::READER_THEMES === $subcommand ) {
+				WP_CLI::line( implode( ', ', wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ) ) );
+			}
 
-		WP_CLI::line( '' ); // Add a line break for readability.
-		WP_CLI::line( WP_CLI::colorize( '%y' . __( 'Allowed options to be managed via CLI:', 'amp' ) . '%n' ) );
-		WP_CLI\Utils\format_items(
-			'table',
-			array_map(
-				static function ( $option_name ) {
-					return compact( 'option_name' );
-				},
-				self::ALLOWED_OPTIONS
-			),
-			[ 'option_name' ]
-		);
+			/* translators: %s: subcommand */
+			WP_CLI::error( sprintf( __( 'Invalid subcommand: %s', 'amp' ), $subcommand ) );
+		} else {
+			$options = $this->get_options();
+
+			WP_CLI\Utils\format_items(
+				'table',
+				array_map(
+					static function ( $option_name, $option_value ) {
+						return compact( 'option_name', 'option_value' );
+					},
+					array_keys( $options ),
+					$options
+				),
+				[ 'option_name', 'option_value' ]
+			);
+		}
+	}
+
+	/**
+	 * Check if the user is set up to use the REST API.
+	 *
+	 * @return bool Whether the user is set up to use the REST API.
+	 */
+	private function check_user() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			WP_CLI::error( __( 'Sorry, you are not allowed to manage options for this site.', 'amp' ), false );
+			WP_CLI::line( WP_CLI::colorize( '%y' . __( 'Try using --user=<id|login|email> to set the user context or set it in wp-cli.yml.', 'amp' ) . '%n' ) );
+			WP_CLI::halt( 1 );
+		}
+
+		return true;
 	}
 
 	/**
@@ -247,21 +301,6 @@ final class OptionCommand implements Service, CliCommand {
 
 		/* translators: %s: option name */
 		WP_CLI::success( sprintf( __( 'Updated %s option.', 'amp' ), $option_name ) );
-	}
-
-	/**
-	 * Check if the user is set up to use the REST API.
-	 *
-	 * @return bool Whether the user is set up to use the REST API.
-	 */
-	private function check_user() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			WP_CLI::error( __( 'Sorry, you are not allowed to manage options for this site.', 'amp' ), false );
-			WP_CLI::line( WP_CLI::colorize( '%y' . __( 'Try using --user=<id|login|email> to set the user context or set it in wp-cli.yml.', 'amp' ) . '%n' ) );
-			WP_CLI::halt( 1 );
-		}
-
-		return true;
 	}
 
 	/**
