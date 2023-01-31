@@ -257,7 +257,7 @@ final class OptionCommand implements Service, CliCommand {
 	 */
 	private function check_user() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			WP_CLI::error( __( 'Sorry, you are not allowed to manage options for this site.', 'amp' ), false );
+			WP_CLI::error( __( 'Sorry, you are not allowed to manage options for the AMP plugin for WordPress.', 'amp' ), false );
 			WP_CLI::line( WP_CLI::colorize( '%y' . __( 'Try using --user=<id|login|email> to set the user context or set it in wp-cli.yml.', 'amp' ) . '%n' ) );
 			WP_CLI::halt( 1 );
 		}
