@@ -28,6 +28,16 @@ use AmpProject\AmpWP\Infrastructure\CliCommand;
  * $ wp amp option update theme_support reader
  * Success: Updated theme_support option.
  *
+ * # List AMP plugin options.
+ * $ wp amp option list
+ * +------------------+----------------+
+ * | key              | value          |
+ * +------------------+----------------+
+ * | theme_support    | standard       |
+ * | mobile_redirect  | disabled       |
+ * | reader_theme     | legacy         |
+ * +------------------+----------------+
+ *
  * @since 2.4.0
  */
 final class OptionCommand implements Service, CliCommand {
