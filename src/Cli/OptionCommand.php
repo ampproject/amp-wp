@@ -214,7 +214,7 @@ final class OptionCommand implements Service, CliCommand {
 			WP_CLI::error( sprintf( __( 'Could not update option: %s', 'amp' ), $response->as_error()->get_error_message() ) );
 		}
 
-			/* translators: %s: option name */
+		/* translators: %s: option name */
 		WP_CLI::success( sprintf( __( 'Option %s updated.', 'amp' ), $option_name ) );
 	}
 
