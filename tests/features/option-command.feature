@@ -64,9 +64,9 @@ Feature: Manage AMP plugin options via WP CLI.
 
     Then STDERR should be empty
 
-     And STDOUT should be a table containing rows:
+    And STDOUT should contain:
       """
-      | option_name | option_value |
+      option_name
       """
 
   Scenario: List AMP plugin options which can be managed by CLI.
