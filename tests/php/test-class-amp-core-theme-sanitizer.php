@@ -113,6 +113,30 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 	}
 
 	/**
+	 * Test add_twentyseventeen_attachment_image_attributes() with zero height logo.
+	 *
+	 * @covers ::add_twentyseventeen_attachment_image_attributes()
+	 */
+	public function test_add_twentyseventeen_attachment_image_attributes_with_zero_height_width() {
+		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', 0 );
+
+		foreach ( [ 'height', 'width' ] as $dimension ) {
+			wp_update_attachment_metadata(
+				$attachment_id,
+				[
+					$dimension => 0,
+				]
+			);
+			set_theme_mod( 'custom_logo', $attachment_id );
+
+			AMP_Core_Theme_Sanitizer::add_twentyseventeen_attachment_image_attributes( [] );
+			$logo = get_custom_logo();
+
+			$this->assertStringNotContainsString( sprintf( '%s=', $dimension ), $logo );
+		}
+	}
+
+	/**
 	 * @dataProvider get_data_for_using_native_img
 	 * @covers::add_twentytwenty_masthead_styles()
 	 * @param bool $native_img_used Use native img.
@@ -486,6 +510,52 @@ class AMP_Core_Theme_Sanitizer_Test extends TestCase {
 		} else {
 			$this->assertStringContainsString( $needle, $logo );
 		}
+	}
+
+	/**
+	 * Get test data for different image sizes.
+	 *
+	 * @return array
+	 */
+	public function get_data_for_image_sizes() {
+		return [
+			'image_height_is_zaro'           => [
+				0,
+				100,
+			],
+			'image_width_is_zaro'            => [
+				100,
+				0,
+			],
+			'image_height_and_width_is_zaro' => [
+				0,
+				0,
+			],
+		];
+	}
+
+	/**
+	 * Test add_twentytwenty_custom_logo_fix() with zero height logo.
+	 *
+	 * @dataProvider get_data_for_image_sizes
+	 * @covers ::add_twentytwenty_custom_logo_fix()
+	 *
+	 * @param int $height Height.
+	 * @param int $width  Width.
+	 */
+	public function test_add_twentytwenty_custom_logo_fix_with_zero_height_width( $height, $width ) {
+		add_filter(
+			'get_custom_logo',
+			static function () use ( $height, $width ) {
+				return sprintf( '<img src="https://example.com/logo.jpg" width="%d" height="%d">', $width, $height );
+			}
+		);
+
+		AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix( [] );
+		$logo = get_custom_logo();
+
+		$this->assertStringContainsString( sprintf( 'width="%d"', $width ), $logo );
+		$this->assertStringContainsString( sprintf( 'height="%d"', $height ), $logo );
 	}
 
 	/**

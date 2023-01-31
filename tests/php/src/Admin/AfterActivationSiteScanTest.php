@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\MockAdminUser;
 use AMP_Validation_Manager;
+use _WP_Dependency;
 
 /**
  * Tests for AfterActivationSiteScan class.
@@ -67,6 +68,9 @@ class AfterActivationSiteScanTest extends DependencyInjectedTestCase {
 
 	/** @return array */
 	public function get_data_to_test_is_needed() {
+		$react                             = wp_scripts()->query( 'react' );
+		$should_get_site_activation_notice = $react instanceof _WP_Dependency && version_compare( $react->ver, '18', '<' );
+
 		return [
 			'not_admin_screen'                           => [
 				'screen_hook'  => '',
@@ -101,7 +105,7 @@ class AfterActivationSiteScanTest extends DependencyInjectedTestCase {
 			'plugins_screen_with_get_activate'           => [
 				'screen_hook'  => 'plugins.php',
 				'query_params' => [ 'activate' ],
-				'expected'     => true,
+				'expected'     => $should_get_site_activation_notice,
 				'role'         => 'administrator',
 			],
 			'plugins_screen_with_get_activate_not_admin' => [
@@ -119,7 +123,7 @@ class AfterActivationSiteScanTest extends DependencyInjectedTestCase {
 			'plugins_screen_with_get_activate_multi'     => [
 				'screen_hook'  => 'plugins.php',
 				'query_params' => [ 'activate-multi' ],
-				'expected'     => true,
+				'expected'     => $should_get_site_activation_notice,
 				'role'         => 'administrator',
 			],
 			'plugins_screen_with_get_activated'          => [
@@ -143,7 +147,7 @@ class AfterActivationSiteScanTest extends DependencyInjectedTestCase {
 			'themes_screen_with_get_activated'           => [
 				'screen_hook'  => 'themes.php',
 				'query_params' => [ 'activated' ],
-				'expected'     => true,
+				'expected'     => $should_get_site_activation_notice,
 				'role'         => 'administrator',
 			],
 			'themes_screen_with_get_activated_not_admin' => [

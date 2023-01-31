@@ -2,7 +2,7 @@
 /**
  * Native img attributes sanitizer.
  *
- * @since 2.3.1
+ * @since 2.4.0
  * @package AMP
  */
 
@@ -13,7 +13,7 @@ use AmpProject\Layout;
 /**
  * Class AMP_Native_Img_Attributes_Sanitizer
  *
- * @since 2.3.1
+ * @since 2.4.0
  * @internal
  */
 class AMP_Native_Img_Attributes_Sanitizer extends AMP_Base_Sanitizer {
