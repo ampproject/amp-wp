@@ -26,7 +26,7 @@ use AmpProject\AmpWP\Infrastructure\CliCommand;
  *
  * # Update AMP plugin option.
  * $ wp amp option update theme_support reader
- * Success: Option theme_support updated.
+ * Success: Updated theme_support option.
  *
  * @since 2.4.0
  */
@@ -128,24 +128,33 @@ final class OptionCommand implements Service, CliCommand {
 	}
 
 	/**
-	 * Updates the value for an option.
+	 * Updates an option value.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <key>
+	 * : The name of the option to update.
+	 *
+	 * [<value>]
+	 * : The new value.
+	 *
+	 * ## EXAMPLES
+	 *
+	 * # Update plugin option.
+	 * $ wp amp option update theme_support reader
+	 * Success: Updated theme_support option.
+	 *
+	 * @alias set
 	 *
 	 * @param array $args       Array of positional arguments.
 	 * @param array $assoc_args Associative array of associative arguments.
-	 *
-	 * @alias set
 	 */
 	public function update( $args, $assoc_args ) {
 		list( $option_name, $option_value ) = $args;
 
-		$help_message = __( 'Try using `wp amp option list` to see all available options.', 'amp' );
-
-		// Check if option is allowed to be managed via CLI.
 		if ( ! in_array( $option_name, self::ALLOWED_OPTIONS, true ) ) {
 			/* translators: %s: option name */
-			WP_CLI::error( sprintf( __( 'Option %s is not allowed to be managed via CLI.', 'amp' ), $option_name ), false );
-			WP_CLI::line( WP_CLI::colorize( '%y' . $help_message . '%n' ) );
-			WP_CLI::halt( 1 );
+			WP_CLI::error( sprintf( __( 'You are not allowed to update %s option via the CLI.', 'amp' ), $option_name ) );
 		}
 
 		$this->check_user();
@@ -154,12 +163,9 @@ final class OptionCommand implements Service, CliCommand {
 
 		if ( ! isset( $options[ $option_name ] ) ) {
 			/* translators: %s: option name */
-			WP_CLI::error( sprintf( __( 'Option %s does not exist.', 'amp' ), $option_name ), false );
-			WP_CLI::line( WP_CLI::colorize( '%y' . $help_message . '%n' ) );
-			WP_CLI::halt( 1 );
+			WP_CLI::error( sprintf( __( 'Could not update %s option. Does it exist?', 'amp' ), $option_name ) );
 		}
 
-		// Update the option.
 		$this->update_option( $option_name, $option_value );
 	}
 
@@ -235,12 +241,12 @@ final class OptionCommand implements Service, CliCommand {
 		);
 
 		if ( $response->as_error() ) {
-			/* translators: %s: option name */
-			WP_CLI::error( sprintf( __( 'Could not update option: %s', 'amp' ), $response->as_error()->get_error_message() ) );
+			/* translators: %1$s: option name, %2$s: error message */
+			WP_CLI::error( sprintf( __( 'Could not update %1$s option: %2$s', 'amp' ), $option_name, $response->as_error()->get_error_message() ) );
 		}
 
 		/* translators: %s: option name */
-		WP_CLI::success( sprintf( __( 'Option %s updated.', 'amp' ), $option_name ) );
+		WP_CLI::success( sprintf( __( 'Updated %s option.', 'amp' ), $option_name ) );
 	}
 
 	/**
