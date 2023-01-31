@@ -16,9 +16,19 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Infrastructure\CliCommand;
 
 /**
- * CLI command to manage AMP options.
+ * Retrieves and sets AMP plugin options.
  *
- * @since 2.3.1
+ * ## EXAMPLES
+ *
+ * # Get AMP plugin option.
+ * $ wp amp option get theme_support
+ * standard
+ *
+ * # Update AMP plugin option.
+ * $ wp amp option update theme_support reader
+ * Success: Option theme_support updated.
+ *
+ * @since 2.4.0
  */
 final class OptionCommand implements Service, CliCommand {
 
@@ -75,6 +85,30 @@ final class OptionCommand implements Service, CliCommand {
 	/**
 	 * Gets the value for an option.
 	 *
+	 * ## OPTIONS
+	 *
+	 * <key>
+	 * : Key for the option.
+	 *
+	 * [--format=<format>]
+	 * : Get value in a particular format.
+	 * ---
+	 * default: var_export
+	 * options:
+	 *   - var_export
+	 *   - json
+	 *   - yaml
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 * # Get option.
+	 * $ wp amp option get theme_support
+	 * standard
+	 *
+	 * # Get option in JSON format.
+	 * $ wp amp option get theme_support --format=json
+	 *
 	 * @param array $args       Array of positional arguments.
 	 * @param array $assoc_args Associative array of associative arguments.
 	 */
@@ -87,19 +121,10 @@ final class OptionCommand implements Service, CliCommand {
 
 		if ( ! isset( $options[ $option_name ] ) ) {
 			/* translators: %s: option name */
-			WP_CLI::error( sprintf( __( 'Option %s does not exist.', 'amp' ), $option_name ), false );
-			WP_CLI::line( WP_CLI::colorize( '%y' . __( 'Try using `wp amp option list` to see all available options.', 'amp' ) . '%n' ) );
-			WP_CLI::halt( 1 );
+			WP_CLI::error( sprintf( __( 'Could not get %s option. Does it exist?', 'amp' ), $option_name ) );
 		}
 
-		WP_CLI\Utils\format_items(
-			'table',
-			[
-				'option_name'  => $option_name,
-				'option_value' => $options[ $option_name ],
-			],
-			[ 'option_name', 'option_value' ]
-		);
+		WP_CLI::print_value( $options[ $option_name ], $assoc_args );
 	}
 
 	/**
