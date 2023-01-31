@@ -49,3 +49,51 @@ Feature: Manage AMP plugin options via WP CLI.
       """
       legacy
       """
+
+  Scenario: Get an option when user with right capability is not setup
+    When I try `wp amp option get reader_theme`
+
+    Then STDERR should contain:
+      """
+      Error: Sorry, you are not allowed to manage options for the AMP plugin for WordPress.
+      """
+
+    And STDOUT should contain:
+      """
+      Try using --user=<id|login|email> to set the user context or set it in wp-cli.yml.
+      """
+
+    And the return code should be 1
+
+  Scenario: Use wrong subcommand with list command.
+    When I try `wp amp option list wrong-subcommand --user=admin`
+
+    Then STDERR should be:
+      """
+      Error: Invalid subcommand: wrong-subcommand
+      """
+
+    And STDOUT should be empty
+    And the return code should be 1
+
+  Scenario: Update an option which is not allowed to be managed by CLI
+    When I try `wp amp option update plugin_configured 1 --user=admin`
+
+    Then STDERR should be:
+      """
+      Error: You are not allowed to update plugin_configured option via the CLI.
+      """
+
+    And STDOUT should be empty
+    And the return code should be 1
+
+  Scenario: Update an option which does not exist
+    When I try `wp amp option update non_existent_option 1 --user=admin`
+
+    Then STDERR should be:
+      """
+      Error: Could not update non_existent_option option. Does it exist?
+      """
+
+    And STDOUT should be empty
+    And the return code should be 1
