@@ -223,10 +223,12 @@ final class OptionCommand implements Service, CliCommand {
 
 			if ( self::CLI_MANAGED_OPTIONS === $subcommand ) {
 				WP_CLI::line( implode( ', ', self::ALLOWED_OPTIONS ) );
+				WP_CLI::halt( 0 );
 			}
 
 			if ( self::READER_THEMES === $subcommand ) {
 				WP_CLI::line( implode( ', ', wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ) ) );
+				WP_CLI::halt( 0 );
 			}
 
 			/* translators: %s: subcommand */
