@@ -114,8 +114,6 @@ class Test_AMP_CLI_Option_Command extends DependencyInjectedTestCase {
 	public function test_do_request() {
 		$output = $this->call_private_method( $this->instance, 'do_request', [ 'GET', '/wp/v2/posts', [ 'per_page' => 1 ] ] );
 
-		$this->assertTrue( REST_REQUEST );
-		$this->assertTrue( defined( 'REST_REQUEST' ) );
 		$this->assertTrue( is_array( $output->get_data() ) );
 		$this->assertTrue( $output instanceof WP_REST_Response );
 	}

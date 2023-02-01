@@ -368,10 +368,6 @@ final class OptionCommand implements Service, CliCommand {
 	 * @return \WP_REST_Response Response object.
 	 */
 	private function do_request( $method, $route, $assoc_args ) {
-		if ( ! defined( 'REST_REQUEST' ) ) {
-			define( 'REST_REQUEST', true );
-		}
-
 		$request = new \WP_REST_Request( $method, $route );
 
 		if ( in_array( $method, [ 'POST', 'PUT' ] ) ) {
