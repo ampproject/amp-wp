@@ -143,7 +143,7 @@ final class OptionCommand implements Service, CliCommand {
 
 		if ( $options instanceof WP_Error ) {
 			/* translators: %s: option name */
-			WP_CLI::error( sprintf( __( 'Could not get options: %s', 'amp' ), $options->get_error_message() ) );
+			WP_CLI::error( sprintf( __( 'Could not retrieve options: %s', 'amp' ), $options->get_error_message() ) );
 		}
 
 		if ( ! isset( $options[ $option_name ] ) ) {
@@ -189,7 +189,7 @@ final class OptionCommand implements Service, CliCommand {
 
 		if ( $options instanceof WP_Error ) {
 			/* translators: %s: option name */
-			WP_CLI::error( sprintf( __( 'Could not get options: %s', 'amp' ), $options->get_error_message() ) );
+			WP_CLI::error( sprintf( __( 'Could not retrieve options: %s', 'amp' ), $options->get_error_message() ) );
 		}
 
 		if ( ! isset( $options[ $option_name ] ) ) {
@@ -279,7 +279,7 @@ final class OptionCommand implements Service, CliCommand {
 
 			if ( $options instanceof WP_Error ) {
 				/* translators: %s: option name */
-				WP_CLI::error( sprintf( __( 'Could not get options: %s', 'amp' ), $options->get_error_message() ) );
+				WP_CLI::error( sprintf( __( 'Could not retrieve options: %s', 'amp' ), $options->get_error_message() ) );
 			}
 
 			WP_CLI\Utils\format_items(

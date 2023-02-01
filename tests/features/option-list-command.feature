@@ -68,7 +68,7 @@ Feature: List AMP plugins options
     When I try the WP-CLI command `amp option list --user=admin`
     Then STDERR should be:
       """
-      Error: Could not get options: Endpoint not available at this time.
+      Error: Could not retrieve options: Endpoint not available at this time.
       """
     And STDOUT should be empty
     And the return code should be 1
