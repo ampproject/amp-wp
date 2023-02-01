@@ -142,7 +142,7 @@ final class OptionCommand implements Service, CliCommand {
 		$options = $this->get_options();
 
 		if ( $options instanceof WP_Error ) {
-			/* translators: %s: option name */
+			/* translators: %s: error message */
 			WP_CLI::error( sprintf( __( 'Could not retrieve options: %s', 'amp' ), $options->get_error_message() ) );
 		}
 
@@ -188,7 +188,7 @@ final class OptionCommand implements Service, CliCommand {
 		$options = $this->get_options();
 
 		if ( $options instanceof WP_Error ) {
-			/* translators: %s: option name */
+			/* translators: %s: error message */
 			WP_CLI::error( sprintf( __( 'Could not retrieve options: %s', 'amp' ), $options->get_error_message() ) );
 		}
 
@@ -278,7 +278,7 @@ final class OptionCommand implements Service, CliCommand {
 			$options = $this->get_options();
 
 			if ( $options instanceof WP_Error ) {
-				/* translators: %s: option name */
+				/* translators: %s: error message */
 				WP_CLI::error( sprintf( __( 'Could not retrieve options: %s', 'amp' ), $options->get_error_message() ) );
 			}
 
