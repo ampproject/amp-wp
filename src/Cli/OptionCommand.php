@@ -202,7 +202,15 @@ final class OptionCommand implements Service, CliCommand {
 			WP_CLI::error( sprintf( __( 'You are not allowed to update %s option via the CLI.', 'amp' ), $option_name ) );
 		}
 
-		$this->update_option( $option_name, $option_value );
+		$update = $this->update_option( $option_name, $option_value );
+
+		if ( $update instanceof WP_Error ) {
+			/* translators: %1$s: option name, %2$s: error message */
+			WP_CLI::error( sprintf( __( 'Could not update %1$s option: %2$s', 'amp' ), $option_name, $update->get_error_message() ) );
+		}
+
+		/* translators: %s: option name */
+		WP_CLI::success( sprintf( __( 'Updated %s option.', 'amp' ), $option_name ) );
 	}
 
 	/**
@@ -331,6 +339,8 @@ final class OptionCommand implements Service, CliCommand {
 	 *
 	 * @param string $option_name  Option name.
 	 * @param string $option_value Option value.
+	 *
+	 * @return WP_Error|mixed WP_Error on failure, response data on success.
 	 */
 	private function update_option( $option_name, $option_value ) {
 		$response = $this->do_request(
@@ -342,12 +352,10 @@ final class OptionCommand implements Service, CliCommand {
 		);
 
 		if ( $response->as_error() ) {
-			/* translators: %1$s: option name, %2$s: error message */
-			WP_CLI::error( sprintf( __( 'Could not update %1$s option: %2$s', 'amp' ), $option_name, $response->as_error()->get_error_message() ) );
+			return $response->as_error();
 		}
 
-		/* translators: %s: option name */
-		WP_CLI::success( sprintf( __( 'Updated %s option.', 'amp' ), $option_name ) );
+		return $response->get_data();
 	}
 
 	/**
