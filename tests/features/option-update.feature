@@ -41,7 +41,7 @@ Feature: Update AMP plugins options
     And the return code should be 1
 
   Scenario: Update option when options REST endpoint is not available
-     Given a wp-content/mu-plugins/options-rest-endpoint-mock-response.php file:
+    Given a wp-content/mu-plugins/options-rest-endpoint-mock-response.php file:
       """
       <?php
       add_filter( 'rest_request_after_callbacks', function( $response, $handler, $request ) {
