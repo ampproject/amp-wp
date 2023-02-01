@@ -10,6 +10,7 @@
 namespace AmpProject\AmpWP\Cli;
 
 use WP_CLI;
+use WP_Error;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -132,9 +133,18 @@ final class OptionCommand implements Service, CliCommand {
 	public function get( $args, $assoc_args ) {
 		list( $option_name ) = $args;
 
-		$this->check_user();
+		$user_cap = $this->check_user_cap();
+
+		if ( $user_cap instanceof WP_Error ) {
+			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) );
+		}
 
 		$options = $this->get_options();
+
+		if ( $options instanceof WP_Error ) {
+			/* translators: %s: option name */
+			WP_CLI::error( sprintf( __( 'Could not get options: %s', 'amp' ), $options->get_error_message() ) );
+		}
 
 		if ( ! isset( $options[ $option_name ] ) ) {
 			/* translators: %s: option name */
@@ -169,9 +179,18 @@ final class OptionCommand implements Service, CliCommand {
 	public function update( $args, $assoc_args ) {
 		list( $option_name, $option_value ) = $args;
 
-		$this->check_user();
+		$user_cap = $this->check_user_cap();
+
+		if ( $user_cap instanceof WP_Error ) {
+			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) );
+		}
 
 		$options = $this->get_options();
+
+		if ( $options instanceof WP_Error ) {
+			/* translators: %s: option name */
+			WP_CLI::error( sprintf( __( 'Could not get options: %s', 'amp' ), $options->get_error_message() ) );
+		}
 
 		if ( ! isset( $options[ $option_name ] ) ) {
 			/* translators: %s: option name */
@@ -226,7 +245,11 @@ final class OptionCommand implements Service, CliCommand {
 	 * @param array $args Array of positional arguments.
 	 */
 	public function list_( $args = [] ) {
-		$this->check_user();
+		$user_cap = $this->check_user_cap();
+
+		if ( $user_cap instanceof WP_Error ) {
+			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) );
+		}
 
 		if ( ! empty( $args ) ) {
 			list( $subcommand ) = $args;
@@ -246,6 +269,11 @@ final class OptionCommand implements Service, CliCommand {
 		} else {
 			$options = $this->get_options();
 
+			if ( $options instanceof WP_Error ) {
+				/* translators: %s: option name */
+				WP_CLI::error( sprintf( __( 'Could not get options: %s', 'amp' ), $options->get_error_message() ) );
+			}
+
 			WP_CLI\Utils\format_items(
 				'table',
 				array_map(
@@ -263,13 +291,21 @@ final class OptionCommand implements Service, CliCommand {
 	/**
 	 * Check if the user is set up to use the REST API.
 	 *
-	 * @return bool Whether the user is set up to use the REST API.
+	 * @return true|WP_Error True if the request has permission; WP_Error object otherwise.
 	 */
-	private function check_user() {
+	private function check_user_cap() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			WP_CLI::error( __( 'Sorry, you are not allowed to manage options for the AMP plugin for WordPress.', 'amp' ), false );
-			WP_CLI::line( WP_CLI::colorize( '%y' . __( 'Try using --user=<id|login|email> to set the user context or set it in wp-cli.yml.', 'amp' ) . '%n' ) );
-			WP_CLI::halt( 1 );
+			$cap_error = new WP_Error(
+				'amp_rest_cannot_manage_options',
+				__( 'Sorry, you are not allowed to manage options for the AMP plugin for WordPress.', 'amp' )
+			);
+
+			$cap_error->add(
+				'amp_rest_cannot_manage_options_help',
+				WP_CLI::colorize( '%y' . __( 'Try using --user=<id|login|email> to set the user context or set it in wp-cli.yml.', 'amp' ) . '%n' )
+			);
+
+			return $cap_error;
 		}
 
 		return true;
@@ -278,14 +314,13 @@ final class OptionCommand implements Service, CliCommand {
 	/**
 	 * Get the options.
 	 *
-	 * @return array Options.
+	 * @return WP_Error|mixed WP_Error on failure, response data on success.
 	 */
 	private function get_options() {
 		$response = $this->do_request( 'GET', self::OPTIONS_ENDPOINT, [] );
 
 		if ( $response->as_error() ) {
-			/* translators: %s: option name */
-			WP_CLI::error( sprintf( __( 'Could not get options: %s', 'amp' ), $response->as_error()->get_error_message() ) );
+			return $response->as_error();
 		}
 
 		return $response->get_data();
