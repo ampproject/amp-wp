@@ -36,16 +36,21 @@ Feature: Get AMP plugins options
     Given a wp-content/mu-plugins/options-rest-endpoint-mock-response.php file:
       """
       <?php
-      add_filter( 'rest_request_after_callbacks', function( $response, $handler, $request ) {
-        if ( '/amp/v1/options' === $request->get_route() ) {
-          return new WP_Error(
-            'amp_rest_cannot_manage_options',
-            __( 'Endpoint not available at this time.', 'amp' ),
-          );
-        }
+        add_filter(
+          'rest_request_after_callbacks',
+          function( $response, $handler, $request ) {
+            if ( '/amp/v1/options' === $request->get_route() ) {
+                return new WP_Error(
+                  'amp_rest_cannot_manage_options',
+                  __( 'Endpoint not available at this time.', 'amp' )
+                );
+            }
 
-        return $response;
-      }, 10, 3 );
+            return $response;
+          },
+          10,
+          3
+        );
       """
 
     When I try the WP-CLI command `amp option get theme_support --user=admin`
