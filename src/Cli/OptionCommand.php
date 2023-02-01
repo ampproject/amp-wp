@@ -136,7 +136,7 @@ final class OptionCommand implements Service, CliCommand {
 		$user_cap = $this->check_user_cap();
 
 		if ( $user_cap instanceof WP_Error ) {
-			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) );
+			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . WP_CLI::colorize( '%y' . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) . '%n' ) );
 		}
 
 		$options = $this->get_options();
@@ -182,7 +182,7 @@ final class OptionCommand implements Service, CliCommand {
 		$user_cap = $this->check_user_cap();
 
 		if ( $user_cap instanceof WP_Error ) {
-			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) );
+			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . WP_CLI::colorize( '%y' . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) . '%n' ) );
 		}
 
 		$options = $this->get_options();
@@ -256,7 +256,7 @@ final class OptionCommand implements Service, CliCommand {
 		$user_cap = $this->check_user_cap();
 
 		if ( $user_cap instanceof WP_Error ) {
-			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) );
+			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . WP_CLI::colorize( '%y' . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) . '%n' ) );
 		}
 
 		if ( ! empty( $args ) ) {
@@ -310,7 +310,7 @@ final class OptionCommand implements Service, CliCommand {
 
 			$cap_error->add(
 				'amp_rest_cannot_manage_options_help',
-				WP_CLI::colorize( '%y' . __( 'Try using --user=<id|login|email> to set the user context or set it in wp-cli.yml.', 'amp' ) . '%n' )
+				__( 'Try using --user=<id|login|email> to set the user context or set it in wp-cli.yml.', 'amp' )
 			);
 
 			return $cap_error;
