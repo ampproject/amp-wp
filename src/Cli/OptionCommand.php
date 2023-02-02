@@ -11,6 +11,8 @@ namespace AmpProject\AmpWP\Cli;
 
 use WP_CLI;
 use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -365,7 +367,7 @@ final class OptionCommand implements Service, CliCommand {
 	 * @param string $route REST route.
 	 * @param array  $assoc_args Associative args.
 	 *
-	 * @return \WP_REST_Response Response object.
+	 * @return WP_REST_Response Response object.
 	 */
 	private function do_request( $method, $route, $assoc_args ) {
 		$request = new WP_REST_Request( $method, $route );
