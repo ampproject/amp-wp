@@ -67,20 +67,6 @@ final class OptionCommand implements Service, CliCommand {
 	];
 
 	/**
-	 * Reader themes key.
-	 *
-	 * @var string
-	 */
-	const READER_THEMES = 'reader-themes';
-
-	/**
-	 * CLI managed options.
-	 *
-	 * @var string
-	 */
-	const CLI_MANAGED_OPTIONS = 'cli-managed-options';
-
-	/**
 	 * ReaderThemes instance.
 	 *
 	 * @var ReaderThemes
@@ -219,86 +205,39 @@ final class OptionCommand implements Service, CliCommand {
 	}
 
 	/**
-	 * Lists options and their values.
-	 *
-	 * This command can be used to list following options:
-	 * - AMP Plugin options.
-	 * - AMP Plugin options that can be updated via the CLI.
-	 * - Reader themes.
+	 * List plugin options which can be updated via the CLI.
 	 *
 	 * ## OPTIONS
-	 * [<cli-managed-options>]
-	 * : List of options that can be updated via the CLI.
 	 *
-	 * [<reader-themes>]
-	 * : List of Reader themes.
+	 * [--format=<format>]
+	 * : Get value in a particular format.
+	 * ---
+	 * default: json
+	 * options:
+	 *   - var_export
+	 *   - json
+	 *   - yaml
+	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
-	 * # List all options.
+	 * # List plugin options which can be updated via the CLI.
 	 * $ wp amp option list
-	 * +------------------+----------------+
-	 * | key              | value          |
-	 * +------------------+----------------+
-	 * | theme_support    | standard       |
-	 * | mobile_redirect  | disabled       |
-	 * | reader_theme     | legacy         |
-	 * +------------------+----------------+
-	 *
-	 * # List options that can be updated via the CLI.
-	 * $ wp amp option list cli-managed-options
-	 * theme_support, mobile_redirect, reader_theme
-	 *
-	 * # List Reader themes.
-	 * $ wp amp option list reader-themes
-	 * twentytwenty, twentytwentyone, legacy
+	 * ["reader_theme","theme_support"]
 	 *
 	 * @subcommand list
 	 *
-	 * @param array $args Array of positional arguments.
+	 * @param array $args       Array of positional arguments.
+	 * @param array $assoc_args Associative array of associative arguments.
 	 */
-	public function list_( $args = [] ) {
+	public function list_( $args, $assoc_args ) {
 		$user_cap = $this->check_user_cap();
 
 		if ( $user_cap instanceof WP_Error ) {
 			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . WP_CLI::colorize( '%y' . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) . '%n' ) );
 		}
 
-		if ( ! empty( $args ) ) {
-			list( $subcommand ) = $args;
-
-			if ( self::CLI_MANAGED_OPTIONS === $subcommand ) {
-				WP_CLI::line( implode( ', ', self::ALLOWED_OPTIONS ) );
-				WP_CLI::halt( 0 );
-			}
-
-			if ( self::READER_THEMES === $subcommand ) {
-				WP_CLI::line( implode( ', ', wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ) ) );
-				WP_CLI::halt( 0 );
-			}
-
-			/* translators: %s: subcommand */
-			WP_CLI::error( sprintf( __( 'Invalid subcommand: %s', 'amp' ), $subcommand ) );
-		} else {
-			$options = $this->get_options();
-
-			if ( $options instanceof WP_Error ) {
-				/* translators: %s: error message */
-				WP_CLI::error( sprintf( __( 'Could not retrieve options: %s', 'amp' ), $options->get_error_message() ) );
-			}
-
-			WP_CLI\Utils\format_items(
-				'table',
-				array_map(
-					static function ( $option_name, $option_value ) {
-						return compact( 'option_name', 'option_value' );
-					},
-					array_keys( $options ),
-					$options
-				),
-				[ 'option_name', 'option_value' ]
-			);
-		}
+		WP_CLI::print_value( self::ALLOWED_OPTIONS, $assoc_args );
 	}
 
 	/**
