@@ -241,6 +241,43 @@ final class OptionCommand implements Service, CliCommand {
 	}
 
 	/**
+	 * List reader themes.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--format=<format>]
+	 * : Get value in a particular format.
+	 * ---
+	 * default: json
+	 * options:
+	 *   - var_export
+	 *   - json
+	 *   - yaml
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 * # List reader themes.
+	 * $ wp amp option list-reader-themes
+	 * ["twentytwenty","twentytwentyone","legacy"]
+	 *
+	 * @alias get-reader-themes
+	 * @subcommand list-reader-themes
+	 *
+	 * @param array $args       Array of positional arguments.
+	 * @param array $assoc_args Associative array of associative arguments.
+	 */
+	public function list_reader_themes( $args, $assoc_args ) {
+		$user_cap = $this->check_user_cap();
+
+		if ( $user_cap instanceof WP_Error ) {
+			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . WP_CLI::colorize( '%y' . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) . '%n' ) );
+		}
+
+		WP_CLI::print_value( wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), $assoc_args );
+	}
+
+	/**
 	 * Check if the user is set up to use the REST API.
 	 *
 	 * @return true|WP_Error True if the request has permission; WP_Error object otherwise.
