@@ -11,13 +11,9 @@ trim_trailing_whitespace = true
 indent_style = tab
 indent_size = 4
 
-[*.{json,yml,feature}]
+[{.rtlcssrc,*.json,*.yml,*.feature}]
 indent_style = space
 indent_size = 2
 
 [*.md]
 trim_trailing_whitespace = false
-
-[{.babelrc,.eslintrc,.rtlcssrc}]
-indent_style = space
-indent_size = 2
