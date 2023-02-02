@@ -177,21 +177,9 @@ final class OptionCommand implements Service, CliCommand {
 			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . WP_CLI::colorize( '%y' . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) . '%n' ) );
 		}
 
-		$options = $this->get_options();
-
-		if ( $options instanceof WP_Error ) {
-			/* translators: %s: error message */
-			WP_CLI::error( sprintf( __( 'Could not retrieve options: %s', 'amp' ), $options->get_error_message() ) );
-		}
-
-		if ( ! isset( $options[ $option_name ] ) ) {
-			/* translators: %s: option name */
-			WP_CLI::error( sprintf( __( 'Could not update %s option. Does it exist?', 'amp' ), $option_name ) );
-		}
-
 		if ( ! in_array( $option_name, self::ALLOWED_OPTIONS, true ) ) {
-			/* translators: %s: option name */
-			WP_CLI::error( sprintf( __( 'You are not allowed to update %s option via the CLI.', 'amp' ), $option_name ) );
+			/* translators: %1$s: option name, %2$s: list of allowed options */
+			WP_CLI::error( sprintf( __( 'The option "%1$s" is not among the following options that can currently be managed via CLI: %2$s', 'amp' ), $option_name, implode( ', ', self::ALLOWED_OPTIONS ) ) );
 		}
 
 		$update = $this->update_option( $option_name, $option_value );
