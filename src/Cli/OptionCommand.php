@@ -61,6 +61,9 @@ final class OptionCommand implements Service, CliCommand {
 		Option::READER_THEME,
 		Option::THEME_SUPPORT,
 		Option::MOBILE_REDIRECT,
+		Option::SANDBOXING_ENABLED,
+		Option::SANDBOXING_LEVEL,
+		Option::DELETE_DATA_AT_UNINSTALL,
 	];
 
 	/**
