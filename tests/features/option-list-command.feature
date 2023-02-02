@@ -13,41 +13,63 @@ Feature: List AMP plugins options
     And STDOUT should be empty
     And the return code should be 1
 
-  Scenario: List option with valid user capability
-    When I run the WP-CLI command `amp option list --user=admin`
+  Scenario: List option with valid user capability and no shell pipe
+    When I run `SHELL_PIPE=0 wp amp option list --user=admin`
     Then STDERR should be empty
     And STDOUT should contain:
       """
       option_name
       """
+    And STDOUT should contain:
+      """
+      theme_support
+      """
+    And STDOUT should contain:
+      """
+      sandboxing_enabled
+      """
+    And STDOUT should contain:
+      """
+      delete_data_at_uninstall
+      """
+    And STDOUT should contain:
+      """
+      Only the above listed options can currently be updated via the CLI.
+      """
+    And STDOUT should contain:
+      """
+      Please raise a feature request
+      """
     And the return code should be 0
 
-  Scenario: List options which can be managed by CLI.
-    When I run the WP-CLI command `amp option list cli-managed-options --user=admin`
-    Then STDERR should be empty
-    And STDOUT should be:
-      """
-      reader_theme, theme_support, mobile_redirect
-      """
-    And the return code should be 0
-
-  Scenario: List Reader themes.
-    When I run the WP-CLI command `amp option list reader-themes --user=admin`
+  Scenario: List option with valid user capability and shell pipe
+    When I run `SHELL_PIPE=1 wp amp option list --user=admin`
     Then STDERR should be empty
     And STDOUT should contain:
       """
-      legacy
+      option_name
+      """
+    And STDOUT should contain:
+      """
+      theme_support
+      """
+    And STDOUT should contain:
+      """
+      sandboxing_enabled
+      """
+    And STDOUT should contain:
+      """
+      delete_data_at_uninstall
+      """
+    And STDOUT should not contain:
+      """
+      Only the above listed options can currently be updated via the CLI.
+      """
+    And STDOUT should not contain:
+      """
+      Please raise a feature request
       """
     And the return code should be 0
-
-  Scenario: List option with invalid subcommand
-    When I try the WP-CLI command `amp option list wrong-subcommand --user=admin`
-    Then STDERR should be:
-      """
-      Error: Invalid subcommand: wrong-subcommand
-      """
-    And STDOUT should be empty
-    And the return code should be 1
 
   Scenario: Get option when options REST endpoint is not available
     Given a wp-content/mu-plugins/options-rest-endpoint-mock-response.php file:
@@ -83,11 +105,3 @@ Feature: List AMP plugins options
       """
       user: admin
       """
-
-    When I run the WP-CLI command `amp option list --user=admin`
-    Then STDERR should be empty
-    And STDOUT should contain:
-      """
-      option_name
-      """
-    And the return code should be 0
