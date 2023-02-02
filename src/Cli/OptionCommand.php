@@ -283,7 +283,7 @@ final class OptionCommand implements Service, CliCommand {
 			WP_CLI::line(
 				sprintf(
 					/* translators: %s: wp option get amp-options command */
-					__( '* Only the above listed options can be updated via the CLI. To list all options, use the %s command.', 'amp' ),
+					__( '* Only the above listed options can currently be updated via the CLI. To list all options, use the %s command.', 'amp' ),
 					WP_CLI::colorize( '%Ywp option get amp-options%n' )
 				)
 			);
@@ -291,7 +291,7 @@ final class OptionCommand implements Service, CliCommand {
 			WP_CLI::line(
 				sprintf(
 					/* translators: %s: AMP plugin GitHub issues URL */
-					__( '* Please raise a feature request at %s to add a new option to be managed via the CLI.', 'amp' ),
+					__( '* Please raise a feature request at %s to request a new option to be managed via the CLI.', 'amp' ),
 					WP_CLI::colorize( '%Bhttps://github.com/ampproject/amp-wp/issues%n' )
 				)
 			);
