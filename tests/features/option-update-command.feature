@@ -24,18 +24,18 @@ Feature: Update AMP plugins options
 
   Scenario: Update option which does not exist
     When I try the WP-CLI command `amp option update foo bar --user=admin`
-    Then STDERR should be:
+    Then STDERR should contain:
       """
-      Error: Could not update foo option. Does it exist?
+      Error: The option "foo" is not among the following options that can currently be managed via CLI: reader_theme
       """
     And STDOUT should be empty
     And the return code should be 1
 
   Scenario: Update option which is not allowed to be managed by WP CLI
     When I try the WP-CLI command `amp option update use_native_img_tag true --user=admin`
-    Then STDERR should be:
+    Then STDERR should contain:
       """
-      Error: You are not allowed to update use_native_img_tag option via the CLI.
+      Error: The option "use_native_img_tag" is not among the following options that can currently be managed via CLI: reader_theme
       """
     And STDOUT should be empty
     And the return code should be 1
@@ -64,7 +64,7 @@ Feature: Update AMP plugins options
     When I try the WP-CLI command `amp option update theme_support reader --user=admin`
     Then STDERR should be:
       """
-      Error: Could not retrieve options: Endpoint not available at this time.
+      Error: Could not update "theme_support" option: Endpoint not available at this time.
       """
     And STDOUT should be empty
     And the return code should be 1
