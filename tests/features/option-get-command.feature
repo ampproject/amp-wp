@@ -27,7 +27,7 @@ Feature: Get AMP plugins options
     When I try the WP-CLI command `amp option get foo --user=admin`
     Then STDERR should be:
       """
-      Error: Could not get foo option. Does it exist?
+      Error: Could not get "foo" option. Does it exist?
       """
     And STDOUT should be empty
     And the return code should be 1

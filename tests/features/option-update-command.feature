@@ -18,7 +18,7 @@ Feature: Update AMP plugins options
     Then STDERR should be empty
     And STDOUT should be:
       """
-      Success: Updated theme_support option.
+      Success: Updated "theme_support" option.
       """
     And the return code should be 0
 
@@ -79,6 +79,6 @@ Feature: Update AMP plugins options
     Then STDERR should be empty
     And STDOUT should be:
       """
-      Success: Updated theme_support option.
+      Success: Updated "theme_support" option.
       """
     And the return code should be 0
