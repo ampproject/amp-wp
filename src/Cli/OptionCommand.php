@@ -13,6 +13,7 @@ use WP_CLI;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
+use WP_CLI\Formatter;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -205,25 +206,37 @@ final class OptionCommand implements Service, CliCommand {
 	}
 
 	/**
-	 * List plugin options which can be updated via the CLI.
+	 * List plugin options.
 	 *
 	 * ## OPTIONS
 	 *
 	 * [--format=<format>]
-	 * : Get value in a particular format.
+	 * : The serialization format for the value.
 	 * ---
-	 * default: json
+	 * default: table
 	 * options:
-	 *   - var_export
+	 *   - table
 	 *   - json
+	 *   - csv
+	 *   - count
 	 *   - yaml
 	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
-	 * # List plugin options which can be updated via the CLI.
+	 * # List plugin options.
 	 * $ wp amp option list
-	 * ["reader_theme","theme_support"]
+	 * +--------------------------+--------------+
+	 * | option_name              | option_value |
+	 * +--------------------------+--------------+
+	 * | reader_theme             | legacy       |
+	 * | theme_support            | reader       |
+	 * | delete_data_at_uninstall | 1            |
+	 * +--------------------------+--------------+
+	 *
+	 * # List plugin options in JSON format.
+	 * $ wp amp option list --format=json
+	 * [{"option_name":"reader_theme","option_value":"legacy"},{"option_name":"theme_support","option_value":"reader"},{"option_name":"delete_data_at_uninstall","option_value":"1"}]
 	 *
 	 * @subcommand list
 	 *
@@ -237,7 +250,49 @@ final class OptionCommand implements Service, CliCommand {
 			WP_CLI::error( $user_cap->get_error_message( 'amp_rest_cannot_manage_options' ) . PHP_EOL . WP_CLI::colorize( '%y' . $user_cap->get_error_message( 'amp_rest_cannot_manage_options_help' ) . '%n' ) );
 		}
 
-		WP_CLI::print_value( self::ALLOWED_OPTIONS, $assoc_args );
+		$options = $this->get_options();
+
+		if ( $options instanceof WP_Error ) {
+			/* translators: %s: error message */
+			WP_CLI::error( sprintf( __( 'Could not retrieve options: %s', 'amp' ), $options->get_error_message() ) );
+		}
+
+		$formatter = new Formatter(
+			$assoc_args,
+			[
+				'option_name',
+				'option_value',
+			]
+		);
+
+		$formatter->display_items(
+			array_map(
+				static function ( $option_name ) use ( $options ) {
+					return [
+						'option_name'  => $option_name,
+						'option_value' => $options[ $option_name ],
+					];
+				},
+				self::ALLOWED_OPTIONS
+			)
+		);
+
+		WP_CLI::line( '' );
+		WP_CLI::line(
+			sprintf(
+				/* translators: %s: wp option get amp-options command */
+				__( '* Only the above listed options can be updated via the CLI. To list all options, use the %s command.', 'amp' ),
+				WP_CLI::colorize( '%Ywp option get amp-options%n' )
+			)
+		);
+
+		WP_CLI::line(
+			sprintf(
+				/* translators: %s: AMP plugin GitHub issues URL */
+				__( '* Please raise a feature request at %s to add a new option to be managed via the CLI.', 'amp' ),
+				WP_CLI::colorize( '%Bhttps://github.com/ampproject/amp-wp/issues%n' )
+			)
+		);
 	}
 
 	/**
