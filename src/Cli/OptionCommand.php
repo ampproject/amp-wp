@@ -140,7 +140,7 @@ final class OptionCommand implements Service, CliCommand {
 
 		if ( ! isset( $options[ $option_name ] ) ) {
 			/* translators: %s: option name */
-			WP_CLI::error( sprintf( __( 'Could not get %s option. Does it exist?', 'amp' ), $option_name ) );
+			WP_CLI::error( sprintf( __( 'Could not get "%s" option. Does it exist?', 'amp' ), $option_name ) );
 		}
 
 		WP_CLI::print_value( $options[ $option_name ], $assoc_args );
@@ -190,7 +190,7 @@ final class OptionCommand implements Service, CliCommand {
 		}
 
 		/* translators: %s: option name */
-		WP_CLI::success( sprintf( __( 'Updated %s option.', 'amp' ), $option_name ) );
+		WP_CLI::success( sprintf( __( 'Updated "%s" option.', 'amp' ), $option_name ) );
 	}
 
 	/**
