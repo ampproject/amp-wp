@@ -186,7 +186,7 @@ final class OptionCommand implements Service, CliCommand {
 
 		if ( $update instanceof WP_Error ) {
 			/* translators: %1$s: option name, %2$s: error message */
-			WP_CLI::error( sprintf( __( 'Could not update %1$s option: %2$s', 'amp' ), $option_name, $update->get_error_message() ) );
+			WP_CLI::error( sprintf( __( 'Could not update "%1$s" option: %2$s', 'amp' ), $option_name, $update->get_error_message() ) );
 		}
 
 		/* translators: %s: option name */
