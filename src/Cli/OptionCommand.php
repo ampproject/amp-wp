@@ -182,6 +182,11 @@ final class OptionCommand implements Service, CliCommand {
 			WP_CLI::error( sprintf( __( 'The option "%1$s" is not among the following options that can currently be managed via CLI: %2$s', 'amp' ), $option_name, implode( ', ', self::ALLOWED_OPTIONS ) ) );
 		}
 
+		// Update type for some options.
+		if ( Option::SANDBOXING_LEVEL === $option_name ) {
+			$option_value = (int) $option_value;
+		}
+
 		$update = $this->update_option( $option_name, $option_value );
 
 		if ( $update instanceof WP_Error ) {
