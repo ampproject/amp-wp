@@ -71,7 +71,7 @@ export function SiteScanNotice() {
 		let elements = [
 			pluginsWithAmpIncompatibility.length > 0 ? (
 				<PluginsWithAmpIncompatibility
-					key={pluginsWithAmpIncompatibility.length}
+					key={`plugins-${pluginsWithAmpIncompatibility.length}`}
 					pluginsWithAmpIncompatibility={
 						pluginsWithAmpIncompatibility
 					}
@@ -79,7 +79,7 @@ export function SiteScanNotice() {
 			) : null,
 			themesWithAmpIncompatibility.length > 0 ? (
 				<ThemesWithAmpIncompatibility
-					key={themesWithAmpIncompatibility.length}
+					key={`themes-${themesWithAmpIncompatibility.length}`}
 					themesWithAmpIncompatibility={themesWithAmpIncompatibility}
 				/>
 			) : null,
