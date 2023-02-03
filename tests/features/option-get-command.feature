@@ -1,4 +1,4 @@
-Feature: Get AMP plugins options
+Feature: Get AMP plugin options
 
   Background:
     Given a WP installation with the AMP plugin

@@ -1,4 +1,4 @@
-Feature: List AMP plugins reader themes
+Feature: List AMP plugin reader themes
 
   Background:
     Given a WP installation with the AMP plugin

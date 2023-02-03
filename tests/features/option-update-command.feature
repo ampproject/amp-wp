@@ -1,4 +1,4 @@
-Feature: Update AMP plugins options
+Feature: Update AMP plugin options
 
   Background:
     Given a WP installation with the AMP plugin
