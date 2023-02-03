@@ -91,6 +91,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'cli.optimizer_command'              => Cli\OptimizerCommand::class,
 		'cli.transformer_command'            => Cli\TransformerCommand::class,
 		'cli.validation_command'             => Cli\ValidationCommand::class,
+		'cli.option_command'                 => Cli\OptionCommand::class,
 		'css_transient_cache.ajax_handler'   => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'        => BackgroundTask\MonitorCssTransientCaching::class,
 		'dependency_support'                 => DependencySupport::class,

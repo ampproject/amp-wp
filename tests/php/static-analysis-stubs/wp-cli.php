@@ -102,4 +102,24 @@ namespace WP_CLI\Utils {
 	function get_flag_value( $assoc_args, $flag, $default = null )
 	{
 	}
+
+	/**
+	 * Checks whether the output of the current script is a TTY or a pipe / redirect
+	 *
+	 * Returns true if STDOUT output is being redirected to a pipe or a file; false is
+	 * output is being sent directly to the terminal.
+	 *
+	 * If an env variable SHELL_PIPE exists, returned result depends on its
+	 * value. Strings like 1, 0, yes, no, that validate to booleans are accepted.
+	 *
+	 * To enable ASCII formatting even when the shell is piped, use the
+	 * ENV variable SHELL_PIPE=0.
+	 *
+	 * @access public
+	 *
+	 * @return bool
+	 */
+	function isPiped()
+	{
+	}
 }
