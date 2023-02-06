@@ -192,7 +192,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * Add mobile switcher link in footer when serving an AMP page.
 	 */
 	public function maybe_add_mobile_switcher_link() {
-		if ( amp_is_request() ) {
+		if ( amp_is_request() && AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 			$this->add_mobile_switcher_head_hooks();
 			$this->add_mobile_switcher_footer_hooks();
 		}
