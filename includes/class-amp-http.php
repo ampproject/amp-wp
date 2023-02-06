@@ -79,7 +79,7 @@ class AMP_HTTP {
 		$args = array_merge(
 			[
 				'replace'     => true,
-				'status_code' => null,
+				'status_code' => 0,
 			],
 			$args
 		);
