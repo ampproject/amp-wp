@@ -92,7 +92,7 @@ class AMP_HTTP {
 		header(
 			sprintf( '%s: %s', $name, $value ),
 			$args['replace'],
-			$args['status_code']
+			null === $args['status_code'] ? 0 : (int) $args['status_code']
 		);
 		return true;
 	}
