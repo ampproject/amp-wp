@@ -452,29 +452,56 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	}
 
 	/**
-	 * @covers ::maybe_add_mobile_switcher_link()
+	 * Get data for testing maybe_add_mobile_switcher_link().
+	 *
+	 * @return array
 	 */
-	public function test_maybe_add_mobile_switcher_link() {
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+	public function get_maybe_add_mobile_switcher_link_data() {
+		return [
+			'standard_mode'     => [
+				AMP_Theme_Support::STANDARD_MODE_SLUG,
+				false,
+			],
+			'reader_mode'       => [
+				AMP_Theme_Support::READER_MODE_SLUG,
+				10,
+			],
+			'transitional_mode' => [
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				false,
+			],
+		];
+	}
+
+	/**
+	 * @covers ::maybe_add_mobile_switcher_link()
+	 * @dataProvider get_maybe_add_mobile_switcher_link_data
+	 *
+	 * @param string $theme_support    Theme support mode.
+	 * @param int $expected            Expected priority of the action.
+	 */
+	public function test_maybe_add_mobile_switcher_link( $theme_support, $expected ) {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $theme_support );
 
 		$this->go_to( '/' );
-		$this->instance->maybe_add_mobile_switcher_link();
 
-		$this->assertFalse( amp_is_request() );
-		$this->assertFalse( has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
-		$this->assertFalse( has_action( 'amp_post_template_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
-		$this->assertFalse( has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
-		$this->assertFalse( has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+		if ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $theme_support ) {
+			set_query_var( QueryVar::AMP, 1 );
+		}
 
-		$this->go_to( '/' );
-		set_query_var( QueryVar::AMP, '1' );
+		if ( AMP_Theme_Support::READER_MODE_SLUG === $theme_support ) {
+			$post_id = self::factory()->post->create();
+			$this->go_to( get_permalink( $post_id ) );
+			set_query_var( QueryVar::AMP, 1 );
+		}
+
 		$this->instance->maybe_add_mobile_switcher_link();
 
 		$this->assertTrue( amp_is_request() );
-		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
-		$this->assertEquals( 10, has_action( 'amp_post_template_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
-		$this->assertEquals( 10, has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
-		$this->assertEquals( 10, has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+		$this->assertSame( $expected, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
+		$this->assertSame( $expected, has_action( 'amp_post_template_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
+		$this->assertSame( $expected, has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
+		$this->assertSame( $expected, has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 	}
 
 	/**
