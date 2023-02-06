@@ -79,7 +79,7 @@ class AMP_HTTP {
 		$args = array_merge(
 			[
 				'replace'     => true,
-				'status_code' => null,
+				'status_code' => 0,
 			],
 			$args
 		);
@@ -92,7 +92,7 @@ class AMP_HTTP {
 		header(
 			sprintf( '%s: %s', $name, $value ),
 			$args['replace'],
-			$args['status_code']
+			empty( $args['status_code'] ) ? 0 : (int) $args['status_code']
 		);
 		return true;
 	}

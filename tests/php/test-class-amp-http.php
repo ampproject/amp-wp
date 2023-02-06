@@ -47,7 +47,7 @@ class Test_AMP_HTTP extends TestCase {
 				'name'        => 'Foo',
 				'value'       => 'Bar',
 				'replace'     => true,
-				'status_code' => null,
+				'status_code' => 0,
 			],
 			AMP_HTTP::$headers_sent
 		);
@@ -71,7 +71,7 @@ class Test_AMP_HTTP extends TestCase {
 				'name'        => 'Foo',
 				'value'       => 'Bar',
 				'replace'     => false,
-				'status_code' => null,
+				'status_code' => 0,
 			],
 			AMP_HTTP::$headers_sent
 		);
@@ -116,7 +116,7 @@ class Test_AMP_HTTP extends TestCase {
 		$this->assertEquals( 'desc="Description"', $values[1] );
 		$this->assertStringStartsWith( 'dur=123000.', $values[2] );
 		$this->assertFalse( AMP_HTTP::$headers_sent[0]['replace'] );
-		$this->assertNull( AMP_HTTP::$headers_sent[0]['status_code'] );
+		$this->assertSame( 0, AMP_HTTP::$headers_sent[0]['status_code'] );
 	}
 
 	/**
@@ -133,7 +133,7 @@ class Test_AMP_HTTP extends TestCase {
 		$this->assertEquals( 'name', $values[0] );
 		$this->assertStringStartsWith( 'dur=0.', $values[1] );
 		$this->assertFalse( AMP_HTTP::$headers_sent[0]['replace'] );
-		$this->assertNull( AMP_HTTP::$headers_sent[0]['status_code'] );
+		$this->assertSame( 0, AMP_HTTP::$headers_sent[0]['status_code'] );
 	}
 
 	/**
@@ -295,19 +295,19 @@ class Test_AMP_HTTP extends TestCase {
 					'name'        => 'Access-Control-Allow-Origin',
 					'value'       => home_url(),
 					'replace'     => false,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 				[
 					'name'        => 'Access-Control-Allow-Credentials',
 					'value'       => 'true',
 					'replace'     => true,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 				[
 					'name'        => 'Vary',
 					'value'       => 'Origin',
 					'replace'     => false,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 			],
 			AMP_HTTP::$headers_sent
@@ -326,31 +326,31 @@ class Test_AMP_HTTP extends TestCase {
 					'name'        => 'Access-Control-Allow-Origin',
 					'value'       => 'https://cdn.ampproject.org',
 					'replace'     => false,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 				[
 					'name'        => 'Access-Control-Allow-Credentials',
 					'value'       => 'true',
 					'replace'     => true,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 				[
 					'name'        => 'Vary',
 					'value'       => 'Origin',
 					'replace'     => false,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 				[
 					'name'        => 'AMP-Access-Control-Allow-Source-Origin',
 					'value'       => 'https://cdn.ampproject.org',
 					'replace'     => true,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 				[
 					'name'        => 'Access-Control-Expose-Headers',
 					'value'       => 'AMP-Access-Control-Allow-Source-Origin',
 					'replace'     => false,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 			],
 			AMP_HTTP::$headers_sent
@@ -369,31 +369,31 @@ class Test_AMP_HTTP extends TestCase {
 					'name'        => 'Access-Control-Allow-Origin',
 					'value'       => 'https://cdn.ampproject.org',
 					'replace'     => false,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 				[
 					'name'        => 'Access-Control-Allow-Credentials',
 					'value'       => 'true',
 					'replace'     => true,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 				[
 					'name'        => 'Vary',
 					'value'       => 'Origin',
 					'replace'     => false,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 				[
 					'name'        => 'AMP-Access-Control-Allow-Source-Origin',
 					'value'       => home_url(),
 					'replace'     => true,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 				[
 					'name'        => 'Access-Control-Expose-Headers',
 					'value'       => 'AMP-Access-Control-Allow-Source-Origin',
 					'replace'     => false,
-					'status_code' => null,
+					'status_code' => 0,
 				],
 			],
 			AMP_HTTP::$headers_sent
@@ -453,7 +453,7 @@ class Test_AMP_HTTP extends TestCase {
 				'name'        => 'AMP-Redirect-To',
 				'value'       => $url,
 				'replace'     => true,
-				'status_code' => null,
+				'status_code' => 0,
 			],
 			AMP_HTTP::$headers_sent
 		);
@@ -462,7 +462,7 @@ class Test_AMP_HTTP extends TestCase {
 				'name'        => 'Access-Control-Expose-Headers',
 				'value'       => 'AMP-Redirect-To',
 				'replace'     => false,
-				'status_code' => null,
+				'status_code' => 0,
 			],
 			AMP_HTTP::$headers_sent
 		);
@@ -478,7 +478,7 @@ class Test_AMP_HTTP extends TestCase {
 				'name'        => 'AMP-Redirect-To',
 				'value'       => preg_replace( '#^\w+:#', '', $url ),
 				'replace'     => true,
-				'status_code' => null,
+				'status_code' => 0,
 			],
 			AMP_HTTP::$headers_sent
 		);
@@ -487,7 +487,7 @@ class Test_AMP_HTTP extends TestCase {
 				'name'        => 'Access-Control-Expose-Headers',
 				'value'       => 'AMP-Redirect-To',
 				'replace'     => false,
-				'status_code' => null,
+				'status_code' => 0,
 			],
 			AMP_HTTP::$headers_sent
 		);
@@ -502,7 +502,7 @@ class Test_AMP_HTTP extends TestCase {
 				'name'        => 'AMP-Redirect-To',
 				'value'       => set_url_scheme( home_url( '/new-location/' ), 'https' ),
 				'replace'     => true,
-				'status_code' => null,
+				'status_code' => 0,
 			],
 			AMP_HTTP::$headers_sent
 		);
@@ -518,7 +518,7 @@ class Test_AMP_HTTP extends TestCase {
 				'name'        => 'AMP-Redirect-To',
 				'value'       => set_url_scheme( home_url( '/new-location/' ), 'https' ),
 				'replace'     => true,
-				'status_code' => null,
+				'status_code' => 0,
 			],
 			AMP_HTTP::$headers_sent
 		);
@@ -533,7 +533,7 @@ class Test_AMP_HTTP extends TestCase {
 				'name'        => 'AMP-Redirect-To',
 				'value'       => set_url_scheme( home_url(), 'https' ),
 				'replace'     => true,
-				'status_code' => null,
+				'status_code' => 0,
 			],
 			AMP_HTTP::$headers_sent
 		);
