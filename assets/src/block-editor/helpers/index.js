@@ -344,8 +344,13 @@ ImageBlockLayoutAttributes.propTypes = {
  */
 const GalleryBlockLayoutAttributes = (props) => (
 	<InspectorAdvancedControls>
-		<AmpLightboxToggle {...props} />
-		<AmpCarouselToggle {...props} />
+		<div>
+			<p className="components-base-control__label">
+				{__('AMP Settings', 'amp')}
+			</p>
+			<AmpLightboxToggle {...props} />
+			<AmpCarouselToggle {...props} />
+		</div>
 	</InspectorAdvancedControls>
 );
 
