@@ -20,6 +20,49 @@ const {
 	camelCaseDash,
 } = require('@wordpress/dependency-extraction-webpack-plugin/lib/util');
 
+/**
+ * Internal dependencies
+ */
+const WORDPRESS_NAMESPACE = '@wordpress/';
+
+/**
+ * Prepare packages schema with camelCaseName, entryPath, handle and packageName.
+ *
+ * @param {Array} packages Packages to prepare.
+ *
+ * @return {Array} Prepared packages schema.
+ */
+const preparePackagesSchema = (packages = []) => {
+	return packages
+		.map((packageName) => {
+			if (0 !== packageName.indexOf(WORDPRESS_NAMESPACE)) {
+				return null;
+			}
+
+			const camelCaseName =
+				'@wordpress/i18n' === packageName
+					? 'i18n'
+					: camelCaseDash(
+							packageName.replace(WORDPRESS_NAMESPACE, '')
+					  );
+
+			const handle = packageName.replace(WORDPRESS_NAMESPACE, 'wp-');
+
+			return {
+				camelCaseName,
+				entryPath:
+					'polyfill' === camelCaseName
+						? require.resolve(
+								'@wordpress/babel-preset-default/build/polyfill'
+						  )
+						: packageName,
+				handle,
+				packageName,
+			};
+		})
+		.filter((packageData) => packageData);
+};
+
 const sharedConfig = {
 	...defaultConfig,
 	output: {
@@ -160,40 +203,13 @@ const customizer = {
 	],
 };
 
-const WORDPRESS_NAMESPACE = '@wordpress/';
-const gutenbergPackages = [
+const gutenbergPackages = preparePackagesSchema([
 	'@wordpress/polyfill',
-	'@wordpress/dom-ready',
 	'@wordpress/i18n',
-	'@wordpress/hooks',
 	'@wordpress/html-entities',
 	'@wordpress/url',
-]
-	.map((packageName) => {
-		if (0 !== packageName.indexOf(WORDPRESS_NAMESPACE)) {
-			return null;
-		}
-
-		const camelCaseName =
-			'@wordpress/i18n' === packageName
-				? 'i18n'
-				: camelCaseDash(packageName.replace(WORDPRESS_NAMESPACE, ''));
-
-		const handle = packageName.replace(WORDPRESS_NAMESPACE, 'wp-');
-
-		return {
-			camelCaseName,
-			entryPath:
-				'polyfill' === camelCaseName
-					? require.resolve(
-							'@wordpress/babel-preset-default/build/polyfill'
-					  )
-					: packageName,
-			handle,
-			packageName,
-		};
-	})
-	.filter((packageData) => packageData);
+	'@wordpress/hooks',
+]);
 
 const wpPolyfills = {
 	...sharedConfig,
@@ -253,6 +269,67 @@ const wpPolyfills = {
 		}),
 		new WebpackBar({
 			name: 'WordPress Polyfills',
+			color: '#21a0d0',
+		}),
+	],
+};
+
+const wpDomReady = preparePackagesSchema(['@wordpress/dom-ready']);
+
+const wpDomReadyPackage = {
+	...defaultConfig,
+	externals: {},
+	entry: wpDomReady.reduce(
+		(memo, { camelCaseName, entryPath }) => ({
+			...memo,
+			[camelCaseName]: entryPath,
+		}),
+		{}
+	),
+	output: {
+		devtoolNamespace: 'wp',
+		path: path.resolve(__dirname, 'assets/js'),
+		filename: (pathData) =>
+			`${
+				wpDomReady.find(
+					(packageName) =>
+						pathData.chunk.name === packageName.camelCaseName
+				).handle
+			}.js`,
+		library: {
+			name: ['wp', '[name]'],
+			type: 'window',
+			export: 'default',
+		},
+	},
+	plugins: [
+		new DependencyExtractionWebpackPlugin({
+			useDefaults: false,
+			requestToHandle: (request) => {
+				if (
+					wpDomReady.find(
+						({ packageName }) => packageName === request
+					)
+				) {
+					return undefined;
+				}
+
+				return defaultRequestToHandle(request);
+			},
+			requestToExternal: (request) => {
+				if (
+					wpDomReady.find(
+						({ packageName }) => packageName === request
+					)
+				) {
+					return undefined;
+				}
+
+				return defaultRequestToExternal(request);
+			},
+		}),
+		new WebpackBar({
+			name: 'WordPress domReady Package',
 			color: '#21a0d0',
 		}),
 	],
@@ -493,6 +570,7 @@ module.exports = [
 	admin,
 	customizer,
 	wpPolyfills,
+	wpDomReadyPackage,
 	onboardingWizard,
 	settingsPage,
 	supportPage,

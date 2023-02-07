@@ -189,7 +189,7 @@ class SupportScreen implements Conditional, Delayed, Service, Registerable {
 			return;
 		}
 
-		/** This action is documented in includes/class-amp-theme-support.php */
+		/** This action is documented in src/Admin/OptionsMenu.php */
 		do_action( 'amp_register_polyfills' );
 
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';

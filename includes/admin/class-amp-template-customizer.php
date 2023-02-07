@@ -330,9 +330,6 @@ class AMP_Template_Customizer {
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
-		/** This action is documented in includes/class-amp-theme-support.php */
-		do_action( 'amp_register_polyfills' );
-
 		wp_enqueue_script(
 			$handle,
 			amp_get_asset_url( 'js/amp-customize-controls.js' ),
@@ -585,9 +582,6 @@ class AMP_Template_Customizer {
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
-		/** This action is documented in includes/class-amp-theme-support.php */
-		do_action( 'amp_register_polyfills' );
-
 		wp_enqueue_script(
 			'amp-customize-controls', // Note: This is not 'amp-customize-controls-legacy' to not break existing scripts that have this dependency.
 			amp_get_asset_url( 'js/amp-customize-controls-legacy.js' ),
@@ -644,9 +638,6 @@ class AMP_Template_Customizer {
 		if ( ! current_user_can( 'customize' ) ) {
 			return;
 		}
-
-		/** This action is documented in includes/class-amp-theme-support.php */
-		do_action( 'amp_register_polyfills' );
 
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-preview-legacy.asset.php';
 		$asset        = require $asset_file;
