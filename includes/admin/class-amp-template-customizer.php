@@ -330,11 +330,6 @@ class AMP_Template_Customizer {
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
-		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			/** This action is documented in src/Admin/PairedBrowsing.php */
-			do_action( 'amp_register_polyfills' );
-		}
-
 		wp_enqueue_script(
 			$handle,
 			amp_get_asset_url( 'js/amp-customize-controls.js' ),
@@ -587,11 +582,6 @@ class AMP_Template_Customizer {
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
-		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			/** This action is documented in src/Admin/PairedBrowsing.php */
-			do_action( 'amp_register_polyfills' );
-		}
-
 		wp_enqueue_script(
 			'amp-customize-controls', // Note: This is not 'amp-customize-controls-legacy' to not break existing scripts that have this dependency.
 			amp_get_asset_url( 'js/amp-customize-controls-legacy.js' ),
@@ -647,11 +637,6 @@ class AMP_Template_Customizer {
 		// Bail if user can't customize anyway.
 		if ( ! current_user_can( 'customize' ) ) {
 			return;
-		}
-
-		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			/** This action is documented in src/Admin/PairedBrowsing.php */
-			do_action( 'amp_register_polyfills' );
 		}
 
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-preview-legacy.asset.php';
