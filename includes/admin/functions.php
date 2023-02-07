@@ -16,38 +16,8 @@ use AmpProject\AmpWP\Services;
  * @internal
  */
 function amp_init_customizer() {
-
 	if ( ! Services::get( 'dependency_support' )->has_support() ) {
-		// @codeCoverageIgnoreStart
-		add_action(
-			'customize_controls_init',
-			static function () {
-				global $wp_customize;
-				if (
-					Services::get( 'reader_theme_loader' )->is_theme_overridden()
-					||
-					array_intersect( $wp_customize->get_autofocus(), [ 'panel' => AMP_Template_Customizer::PANEL_ID ] )
-					||
-					isset( $_GET[ QueryVar::AMP_PREVIEW ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				) {
-					wp_die(
-						esc_html(
-							sprintf(
-								/* translators: %s is minimum WordPress version */
-								__( 'Customizer for AMP is unavailable due to WordPress being out of date. Please upgrade to WordPress %s or greater.', 'amp' ),
-								DependencySupport::WP_MIN_VERSION
-							)
-						),
-						esc_html__( 'AMP Customizer Unavailable', 'amp' ),
-						[
-							'response'  => 503,
-							'back_link' => true,
-						]
-					);
-				}
-			}
-		);
-		// @codeCoverageIgnoreEnd
+		return; // @codeCoverageIgnore
 	}
 
 	// Fire up the AMP Customizer.
