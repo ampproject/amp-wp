@@ -89,11 +89,6 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 	 * Enqueue admin assets.
 	 */
 	public function enqueue_scripts() {
-		if ( $this->is_dedicated_plugin_screen() ) {
-			/** This action is documented in src/Admin/PairedBrowsing.php */
-			do_action( 'amp_register_polyfills' );
-		}
-
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSETS_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
