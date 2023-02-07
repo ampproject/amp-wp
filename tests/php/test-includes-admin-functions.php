@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\TestCase;
+use AmpProject\AmpWP\DependencySupport;
 
 /**
  * Class Test_AMP_Admin_Includes_Functions
@@ -39,6 +40,8 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 
 	/** @covers ::amp_init_customizer() */
 	public function test_amp_init_customizer_legacy_reader() {
+		$this->maybe_skip_amp_customizer_test();
+
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 		amp_init_customizer();
@@ -50,6 +53,8 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 
 	/** @covers ::amp_init_customizer() */
 	public function test_amp_init_customizer_modern_reader() {
+		$this->maybe_skip_amp_customizer_test();
+
 		switch_theme( 'twentytwenty' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
@@ -62,6 +67,8 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 
 	/** @covers ::amp_init_customizer() */
 	public function test_amp_init_customizer_canonical() {
+		$this->maybe_skip_amp_customizer_test();
+
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		amp_init_customizer();
 		$this->assertTrue( amp_is_canonical() );
@@ -69,6 +76,15 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 		$this->assertEquals( 500, has_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ] ) );
 		$this->assertFalse( has_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] ) );
 		$this->assertFalse( has_action( 'admin_menu', 'amp_add_customizer_link' ) );
+	}
+
+	/**
+	 * Check if AMP customizer test should be skipped in old WP versions.
+	 */
+	public function maybe_skip_amp_customizer_test() {
+		if ( ! version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' ) ) {
+			$this->markTestSkipped( sprintf( 'WordPress %s is required to run this test as AMP customizer is not available in WordPress %s.', DependencySupport::WP_MIN_VERSION, get_bloginfo( 'version' ) ) );
+		}
 	}
 
 	/** @covers ::amp_admin_get_preview_permalink() */
