@@ -83,7 +83,7 @@ class Test_AMP_Admin_Includes_Functions extends TestCase {
 	 */
 	public function maybe_skip_amp_customizer_test() {
 		if ( ! version_compare( get_bloginfo( 'version' ), DependencySupport::WP_MIN_VERSION, '>=' ) ) {
-			$this->markTestSkipped( sprintf( 'WordPress %s is required to run this test as AMP customizer is not available in WordPress %s.', DependencySupport::WP_MIN_VERSION, get_bloginfo( 'version' ) ) );
+			$this->markTestSkipped( sprintf( 'Skipping as AMP customizer is not supported in WP versions older than %s', DependencySupport::WP_MIN_VERSION ) );
 		}
 	}
 
