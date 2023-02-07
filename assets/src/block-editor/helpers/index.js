@@ -8,7 +8,7 @@ import { isFunction, isObject, isString } from 'lodash';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ToggleControl, PanelBody } from '@wordpress/components';
+import { ToggleControl, PanelBody, BaseControl } from '@wordpress/components';
 import {
 	InspectorControls,
 	InspectorAdvancedControls,
@@ -344,8 +344,13 @@ ImageBlockLayoutAttributes.propTypes = {
  */
 const GalleryBlockLayoutAttributes = (props) => (
 	<InspectorAdvancedControls>
-		<AmpLightboxToggle {...props} />
-		<AmpCarouselToggle {...props} />
+		<BaseControl __nextHasNoMarginBottom>
+			<BaseControl.VisualLabel>
+				{__('AMP Settings', 'amp')}
+			</BaseControl.VisualLabel>
+			<AmpLightboxToggle {...props} />
+			<AmpCarouselToggle {...props} />
+		</BaseControl>
 	</InspectorAdvancedControls>
 );
 
