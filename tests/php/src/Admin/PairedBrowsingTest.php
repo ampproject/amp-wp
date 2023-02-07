@@ -142,7 +142,6 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 
 		// Check that init_client() was not called.
 		$this->assertFalse( has_action( 'admin_bar_menu', [ $this->instance, 'add_admin_bar_menu_item' ] ) );
-		$this->assertEquals( 0, did_action( 'amp_register_polyfills' ) );
 	}
 
 	/**
@@ -161,7 +160,6 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 
 		// Check that init_client() was called.
 		$this->assertEquals( 102, has_action( 'admin_bar_menu', [ $this->instance, 'add_admin_bar_menu_item' ] ) );
-		$this->assertEquals( 1, did_action( 'amp_register_polyfills' ) );
 		$this->assertTrue( wp_script_is( 'amp-paired-browsing-client' ) );
 		$printed_scripts = get_echo( 'wp_print_scripts' );
 		$this->assertStringContainsString( DevMode::DEV_MODE_ATTRIBUTE, $printed_scripts );
@@ -234,10 +232,7 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 
 	/** @covers ::filter_template_include_for_app() */
 	public function test_filter_template_include_for_app_when_allowed() {
-		$this->assertEquals( 0, did_action( 'amp_register_polyfills' ) );
-
 		$include_path = $this->instance->filter_template_include_for_app();
-		$this->assertEquals( 1, did_action( 'amp_register_polyfills' ) );
 		$this->assertTrue( wp_style_is( 'amp-paired-browsing-app' ) );
 		$this->assertTrue( wp_script_is( 'amp-paired-browsing-app' ) );
 
