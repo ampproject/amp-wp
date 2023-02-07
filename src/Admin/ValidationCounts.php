@@ -89,7 +89,7 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 	 * Enqueue admin assets.
 	 */
 	public function enqueue_scripts() {
-		if ( $this->is_options_menu() ) {
+		if ( $this->is_dedicated_plugin_screen() ) {
 			do_action( 'amp_register_polyfills' );
 		}
 
@@ -123,7 +123,7 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 	 * screen related to `amp_validation_error` post type (which includes the `amp_validation_error` taxonomy).
 	 */
 	protected function maybe_add_preload_rest_paths() {
-		if ( $this->is_options_menu() ) {
+		if ( $this->is_dedicated_plugin_screen() ) {
 			$this->rest_preloader->add_preloaded_path( '/amp/v1/unreviewed-validation-counts' );
 		}
 	}
@@ -131,7 +131,7 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 	/**
 	 * Whether the current screen is pages inside the AMP Options menu.
 	 */
-	public function is_options_menu() {
+	public function is_dedicated_plugin_screen() {
 		return (
 			AMP_Options_Manager::OPTION_NAME === get_admin_page_parent()
 			||
