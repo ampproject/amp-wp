@@ -90,6 +90,7 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 	 */
 	public function enqueue_scripts() {
 		if ( $this->is_dedicated_plugin_screen() ) {
+			/** This action is documented in src/Admin/PairedBrowsing.php */
 			do_action( 'amp_register_polyfills' );
 		}
 

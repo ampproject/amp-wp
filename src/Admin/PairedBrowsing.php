@@ -309,7 +309,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional, Delaye
 	 */
 	public function filter_template_include_for_app() {
 
-		/** This action is documented in includes/class-amp-theme-support.php */
+		/** This action is documented in src/Admin/PairedBrowsing.php */
 		do_action( 'amp_register_polyfills' );
 
 		$handle = 'amp-paired-browsing-app';

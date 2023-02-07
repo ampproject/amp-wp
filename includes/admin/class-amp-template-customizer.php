@@ -331,9 +331,7 @@ class AMP_Template_Customizer {
 		$version      = $asset['version'];
 
 		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			/**
-			 * Fires when AMP Polyfills should be registered.
-			 */
+			/** This action is documented in src/Admin/PairedBrowsing.php */
 			do_action( 'amp_register_polyfills' );
 		}
 
@@ -590,9 +588,7 @@ class AMP_Template_Customizer {
 		$version      = $asset['version'];
 
 		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			/**
-			 * Fires when AMP Polyfills should be registered.
-			 */
+			/** This action is documented in src/Admin/PairedBrowsing.php */
 			do_action( 'amp_register_polyfills' );
 		}
 
@@ -654,9 +650,7 @@ class AMP_Template_Customizer {
 		}
 
 		if ( ! Services::get( 'dependency_support' )->has_support() ) {
-			/**
-			 * Fires when AMP Polyfills should be registered.
-			 */
+			/** This action is documented in src/Admin/PairedBrowsing.php */
 			do_action( 'amp_register_polyfills' );
 		}
 
