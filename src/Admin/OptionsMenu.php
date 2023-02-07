@@ -213,7 +213,11 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			return;
 		}
 
-		/** This action is documented in src/Admin/PairedBrowsing.php */
+		/**
+		 * Fires before registering plugin assets that may require core asset polyfills.
+		 *
+		 * @internal
+		 */
 		do_action( 'amp_register_polyfills' );
 
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
