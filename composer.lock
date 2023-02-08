@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3861d79d5949be2f5b78a409c8af97bc",
+    "content-hash": "88b7d0794de483f52a2fec4d5d9f111a",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
-            "version": "dev-main",
+            "version": "0.11.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ampproject/amp-toolbox-php.git",
-                "reference": "bd739ddcc839a70634bfefe012cbcd2268b51f7e"
+                "reference": "56c812508f5ebe538036d75cf0c21de094b316d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/bd739ddcc839a70634bfefe012cbcd2268b51f7e",
-                "reference": "bd739ddcc839a70634bfefe012cbcd2268b51f7e",
+                "url": "https://api.github.com/repos/ampproject/amp-toolbox-php/zipball/56c812508f5ebe538036d75cf0c21de094b316d3",
+                "reference": "56c812508f5ebe538036d75cf0c21de094b316d3",
                 "shasum": ""
             },
             "require": {
@@ -30,7 +30,7 @@
             },
             "require-dev": {
                 "civicrm/composer-downloads-plugin": "^2.1 || ^3.0",
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1 || ^1.0.0",
                 "ext-zip": "*",
                 "mikey179/vfsstream": "^1.6",
                 "php-parallel-lint/php-parallel-lint": "^1.2",
@@ -48,7 +48,6 @@
                 "mck89/peast": "Needed to minify the AMP script.",
                 "nette/php-generator": "Needed to generate the validator spec PHP classes and interfaces."
             },
-            "default-branch": true,
             "bin": [
                 "bin/amp"
             ],
@@ -77,9 +76,9 @@
             "description": "A collection of AMP tools making it easier to publish and host AMP pages with PHP.",
             "support": {
                 "issues": "https://github.com/ampproject/amp-toolbox-php/issues",
-                "source": "https://github.com/ampproject/amp-toolbox-php/tree/main"
+                "source": "https://github.com/ampproject/amp-toolbox-php/tree/0.11.3"
             },
-            "time": "2022-10-20T18:18:35+00:00"
+            "time": "2023-02-07T23:27:03+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -6843,7 +6842,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "ampproject/amp-toolbox": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,
