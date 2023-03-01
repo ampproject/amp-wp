@@ -247,8 +247,7 @@ class SupportData {
 		$loopback_status = '';
 
 		if ( class_exists( 'WP_Site_Health' ) ) {
-			$site_health     = method_exists( 'WP_Site_Health', 'get_instance' ) ? WP_Site_Health::get_instance() : new WP_Site_Health();
-			$loopback_status = $site_health->can_perform_loopback();
+			$loopback_status = ( new WP_Site_Health() )->can_perform_loopback();
 			$loopback_status = ( ! empty( $loopback_status->status ) ) ? $loopback_status->status : '';
 		}
 
