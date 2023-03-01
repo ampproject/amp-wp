@@ -12,6 +12,7 @@ services:
 			- phpstan.broker.dynamicStaticMethodReturnTypeExtension
 parameters:
 	level: 4
+	treatPhpDocTypesAsCertain: false
 	inferPrivatePropertyTypeFromConstructor: true
 	paths:
 		- %currentWorkingDirectory%/includes/
