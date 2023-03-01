@@ -551,7 +551,6 @@ function amp_is_available() {
 		}
 	} elseif ( ! (
 		$queried_object instanceof WP_Post &&
-		$wp_query instanceof WP_Query &&
 		( $wp_query->is_singular() || $wp_query->is_posts_page ) &&
 		amp_is_post_supported( $queried_object ) )
 	) {
