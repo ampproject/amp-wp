@@ -825,7 +825,7 @@ class SupportData {
 			$error_source_slugs = wp_list_pluck( $error_sources, 'error_source_slug' );
 			$error_source_slugs = array_values( array_unique( $error_source_slugs ) );
 
-			if ( ! empty( $error_source_slugs ) && is_array( $error_source_slugs ) ) {
+			if ( ! empty( $error_source_slugs ) ) {
 				$validation_errors[] = [
 					'error_slug' => $error_data['error_slug'],
 					'sources'    => $error_source_slugs,
