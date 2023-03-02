@@ -15,9 +15,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	// @phpstan-ignore-next-line
 	private static $spec_file_revision = 1188;
-	// @phpstan-ignore-next-line
 	private static $minimum_validator_revision_required = 475;
 
 	private static $descendant_tag_lists = array(
