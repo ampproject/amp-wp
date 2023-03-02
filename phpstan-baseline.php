@@ -3,7 +3,7 @@
  * PHPStan Baseline File.
  * All static analysis errors included in this file will be ignored by PHPStan.
  *
- * NOTE: `phpstan analyse —generate-baseline phpstan-baseline.php` should not be used to rewrite this file.
+ * NOTE: `phpstan analyse --generate-baseline phpstan-baseline.php` should not be used to rewrite this file.
  *
  * How to include new errors to be ignored:
  * 1. Run `phpstan analyse --generate-baseline temp-baseline.php` to generate a new temp baseline file.
