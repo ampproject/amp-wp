@@ -30,9 +30,6 @@ parameters:
 	excludePaths:
 		# PHPStan cannot yet deal with view templates. See https://github.com/phpstan/phpstan/issues/351
 		- %currentWorkingDirectory%/includes/templates/amp-enabled-classic-editor-toggle.php
-	ignoreErrors:
-		# Setting src to false indicates a bundle of dependencies.
-		- '#^Property _WP_Dependency::\$src \(string\) does not accept false\.$#'
 	earlyTerminatingMethodCalls:
 		\WP_CLI:
 			- WP_CLI::error
