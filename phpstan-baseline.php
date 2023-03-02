@@ -11,6 +11,8 @@
  *
  * Please be sure to explain why the error should be ignored in the remark above the error.
  *
+ * @codeCoverageIgnore
+ *
  * @package AMP
  */
 
