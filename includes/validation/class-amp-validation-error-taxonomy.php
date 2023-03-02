@@ -2918,7 +2918,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		$updated_count = 0;
 		foreach ( $term_ids as $term_id ) {
-			if ( 'delete' === $action && self::delete_empty_term( $term_id ) ) {
+			if ( self::delete_empty_term( $term_id ) ) {
 				$updated_count++;
 			}
 		}
@@ -2928,7 +2928,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$term_ids_count = count( $term_ids );
-		if ( 'edit.php' === $pagenow && 'delete' === $action && 1 === $updated_count ) {
+		if ( 'edit.php' === $pagenow && 1 === $updated_count ) {
 			// Redirect to error index screen if deleting an validation error with no associated validated URLs.
 			$redirect_to = add_query_arg(
 				[

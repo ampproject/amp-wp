@@ -230,7 +230,7 @@ class AMP_Image_Dimension_Extractor {
 				$image_size = ( ! empty( $image_size ) && is_array( $image_size ) ) ? $image_size : [];
 			}
 
-			if ( ( empty( $image_size ) || ! is_array( $image_size ) ) && file_exists( $image_file ) ) {
+			if ( empty( $image_size ) && file_exists( $image_file ) ) {
 				if ( function_exists( 'wp_getimagesize' ) ) {
 					$image_size = wp_getimagesize( $image_file );
 				} elseif ( function_exists( 'getimagesize' ) ) {

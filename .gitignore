@@ -25,3 +25,6 @@ node_modules
 # Generated via bin/transform-readme.php
 /readme.txt
 /tests/e2e/plugins/gutenberg.14.7.3.zip
+
+# Generated via phpstan analyse --generate-baseline temp-baseline.php
+/temp-baseline.php

@@ -247,8 +247,7 @@ class SupportData {
 		$loopback_status = '';
 
 		if ( class_exists( 'WP_Site_Health' ) ) {
-			$site_health     = method_exists( 'WP_Site_Health', 'get_instance' ) ? WP_Site_Health::get_instance() : new WP_Site_Health();
-			$loopback_status = $site_health->can_perform_loopback();
+			$loopback_status = ( new WP_Site_Health() )->can_perform_loopback();
 			$loopback_status = ( ! empty( $loopback_status->status ) ) ? $loopback_status->status : '';
 		}
 
@@ -826,7 +825,7 @@ class SupportData {
 			$error_source_slugs = wp_list_pluck( $error_sources, 'error_source_slug' );
 			$error_source_slugs = array_values( array_unique( $error_source_slugs ) );
 
-			if ( ! empty( $error_source_slugs ) && is_array( $error_source_slugs ) ) {
+			if ( ! empty( $error_source_slugs ) ) {
 				$validation_errors[] = [
 					'error_slug' => $error_data['error_slug'],
 					'sources'    => $error_source_slugs,

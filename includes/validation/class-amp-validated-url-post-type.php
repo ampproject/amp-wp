@@ -1798,7 +1798,7 @@ class AMP_Validated_URL_Post_Type {
 
 		// Add notice for PHP fatal error during validation request.
 		$post = get_post();
-		if ( $post instanceof WP_Post && 'post' === get_current_screen()->base && self::POST_TYPE_SLUG === get_current_screen()->post_type ) {
+		if ( $post instanceof WP_Post && 'post' === get_current_screen()->base ) {
 			self::render_php_fatal_error_admin_notice( $post );
 		}
 

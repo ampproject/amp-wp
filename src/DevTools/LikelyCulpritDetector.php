@@ -68,7 +68,6 @@ final class LikelyCulpritDetector implements Service {
 	 * }
 	 */
 	public function analyze_throwable( $throwable ) {
-		// @phpstan-ignore-next-line
 		if ( ! ( $throwable instanceof Exception || $throwable instanceof Error ) ) {
 			throw new InvalidArgumentException( 'Parameter must be Throwable (Exception or Error).' );
 		}
