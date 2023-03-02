@@ -1,14 +1,15 @@
 <?php
 /**
  * PHPStan Baseline File.
+ * All static analysis errors included in this file will be ignored by PHPStan.
  *
- * PHPStan will ignore all errors included in this file.
+ * NOTE: `phpstan analyse —generate-baseline phpstan-baseline.php` should not be used to rewrite this file.
  *
- * Do not re-write this file using `phpstan analyse --generate-baseline phpstan-baseline.php`.
- * Instead use `phpstan analyse --generate-baseline temp-baseline.php` and then copy the contents
- * of `temp-baseline.php` to this file with proper formatting.
+ * How to include new errors to be ignored:
+ * 1. Run `phpstan analyse --generate-baseline temp-baseline.php` to generate a new temp baseline file.
+ * 2. Copy the contents of the temp baseline file to this file.
  *
- * Please make sure you state the reason for ignoring the error in the comment above the error.
+ * Please be sure to explain why the error should be ignored in the remark above the error.
  *
  * @package AMP
  */
