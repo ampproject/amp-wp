@@ -6255,16 +6255,16 @@
         },
         {
             "name": "wp-cli/extension-command",
-            "version": "v2.1.9",
+            "version": "v2.1.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/extension-command.git",
-                "reference": "266d53d87f9c381677137cc79ed7805c9c0162a5"
+                "reference": "31ebccb1dfb9d7fdb60d495fd724385f75caa140"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/extension-command/zipball/266d53d87f9c381677137cc79ed7805c9c0162a5",
-                "reference": "266d53d87f9c381677137cc79ed7805c9c0162a5",
+                "url": "https://api.github.com/repos/wp-cli/extension-command/zipball/31ebccb1dfb9d7fdb60d495fd724385f75caa140",
+                "reference": "31ebccb1dfb9d7fdb60d495fd724385f75caa140",
                 "shasum": ""
             },
             "require": {
@@ -6323,9 +6323,9 @@
                 "files": [
                     "extension-command.php"
                 ],
-                "psr-4": {
-                    "": "src/"
-                }
+                "classmap": [
+                    "src/"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -6347,9 +6347,9 @@
             "homepage": "https://github.com/wp-cli/extension-command",
             "support": {
                 "issues": "https://github.com/wp-cli/extension-command/issues",
-                "source": "https://github.com/wp-cli/extension-command/tree/v2.1.9"
+                "source": "https://github.com/wp-cli/extension-command/tree/v2.1.12"
             },
-            "time": "2023-01-12T05:14:36+00:00"
+            "time": "2023-03-03T14:38:19+00:00"
         },
         {
             "name": "wp-cli/mustangostang-spyc",
