@@ -74,6 +74,48 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	const KEY_GRADIENT = 'gradient';
 
 	/**
+	 * Key gradients.
+	 *
+	 * @var string
+	 */
+	const KEY_GRADIENTS = 'gradients';
+
+	/**
+	 * Key palette.
+	 *
+	 * @var string
+	 */
+	const KEY_PALETTE = 'palette';
+
+	/**
+	 * Key fontSizes.
+	 *
+	 * @var string
+	 */
+	const KEY_FONT_SIZES = 'fontSizes';
+
+	/**
+	 * Key typography.
+	 *
+	 * @var string
+	 */
+	const KEY_TYPOGRAPHY = 'typography';
+
+	/**
+	 * Key for `theme` presets in block editor.
+	 *
+	 * @var string
+	 */
+	const KEY_THEME = 'theme';
+
+	/**
+	 * Key for `default` presets in block editor.
+	 *
+	 * @var string
+	 */
+	const KEY_DEFAULT = 'default';
+
+	/**
 	 * Action fired when the cached primary_theme_support should be updated.
 	 *
 	 * @var string
@@ -89,6 +131,17 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		self::FEATURE_EDITOR_COLOR_PALETTE    => [ self::KEY_SLUG, self::KEY_COLOR ],
 		self::FEATURE_EDITOR_GRADIENT_PRESETS => [ self::KEY_SLUG, self::KEY_GRADIENT ],
 		self::FEATURE_EDITOR_FONT_SIZES       => [ self::KEY_SLUG, self::KEY_SIZE ],
+	];
+
+	/**
+	 * The theme.json paths mapping to be fetched using `wp_get_global_settings()`.
+	 *
+	 * @var array[]
+	 */
+	const SUPPORTED_THEME_JSON_FEATURES = [
+		self::FEATURE_EDITOR_COLOR_PALETTE    => [ self::KEY_COLOR, self::KEY_PALETTE ],
+		self::FEATURE_EDITOR_GRADIENT_PRESETS => [ self::KEY_COLOR, self::KEY_GRADIENTS ],
+		self::FEATURE_EDITOR_FONT_SIZES       => [ self::KEY_TYPOGRAPHY, self::KEY_FONT_SIZES ],
 	];
 
 	/**
@@ -203,13 +256,30 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 */
 	public function get_theme_support_features( $reduced = false ) {
 		$features = [];
+
 		foreach ( array_keys( self::SUPPORTED_FEATURES ) as $feature_key ) {
-			$feature_value = current( (array) get_theme_support( $feature_key ) );
+			if ( $this->maybe_use_theme_json() ) {
+				$feature_value   = [];
+				$global_settings = wp_get_global_settings( self::SUPPORTED_THEME_JSON_FEATURES[ $feature_key ], 'theme' );
+
+				if ( isset( $global_settings[ self::KEY_THEME ] ) ) {
+					$feature_value = array_merge( $feature_value, $global_settings[ self::KEY_THEME ] );
+				}
+
+				if ( isset( $global_settings[ self::KEY_DEFAULT ] ) ) {
+					$feature_value = array_merge( $feature_value, $global_settings[ self::KEY_DEFAULT ] );
+				}
+			} else {
+				$feature_value = current( (array) get_theme_support( $feature_key ) );
+			}
+
 			if ( ! is_array( $feature_value ) || empty( $feature_value ) ) {
 				continue;
 			}
+
 			if ( $reduced ) {
 				$features[ $feature_key ] = [];
+
 				foreach ( $feature_value as $item ) {
 					if ( $this->has_required_feature_props( $feature_key, $item ) ) {
 						$features[ $feature_key ][] = wp_array_slice_assoc( $item, self::SUPPORTED_FEATURES[ $feature_key ] );
@@ -219,7 +289,27 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 				$features[ $feature_key ] = $feature_value;
 			}
 		}
+
 		return $features;
+	}
+
+	/**
+	 * Check if theme.json can be used to determine theme support.
+	 * Due to the lack of `wp_get_global_settings()`, this will always return false for WP < 5.9.
+	 *
+	 * @since 2.4.1
+	 *
+	 * @return bool Whether theme.json can be used to determine theme support.
+	 */
+	private function maybe_use_theme_json() {
+		// wp_get_global_settings() is only available in WP 5.9+.
+		if ( ! function_exists( 'wp_get_global_settings' ) ) {
+			return false;
+		}
+
+		// Do not rely on `wp_is_block_theme()` as theme.json can be used in non-block themes.
+		// See: https://developer.wordpress.org/themes/advanced-topics/theme-json/#a-theme-json-can-be-added-to-any-theme.
+		return ( is_readable( get_stylesheet_directory() . '/theme.json' ) ? true : is_readable( get_template_directory() . '/theme.json' ) );
 	}
 
 	/**
