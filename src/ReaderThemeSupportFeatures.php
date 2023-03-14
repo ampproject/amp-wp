@@ -423,27 +423,20 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 				continue;
 			}
 
-			if ( function_exists( 'wp_get_typography_font_size_value' ) ) {
-				printf(
-					':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$s; }',
-					sanitize_key( $font_size[ self::KEY_SLUG ] ),
-					esc_attr( wp_get_typography_font_size_value( $font_size ) )
-				);
-			} else {
-				$font_value_and_unit = $this->get_typography_value_and_unit( $font_size[ self::KEY_SIZE ] );
+			// Just in case the font size is not in the expected format.
+			$font_size[ self::KEY_SIZE ] = $this->get_typography_value_and_unit( $font_size[ self::KEY_SIZE ] );
 
-				if ( empty( $font_value_and_unit ) ) {
-					continue;
-				}
-
-				$font_value_and_unit = $font_value_and_unit['value'] . $font_value_and_unit['unit'];
-
-				printf(
-					':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$s; }',
-					sanitize_key( $font_size[ self::KEY_SLUG ] ),
-					esc_attr( $font_value_and_unit )
-				);
+			if ( empty( $font_size[ self::KEY_SIZE ] ) ) {
+				continue;
 			}
+
+			printf(
+				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$s; }',
+				sanitize_key( $font_size[ self::KEY_SLUG ] ),
+				function_exists( 'wp_get_typography_font_size_value' )
+					? esc_attr( wp_get_typography_font_size_value( $font_size ) )
+					: esc_attr( $font_size[ self::KEY_SIZE ] )
+			);
 		}
 		echo '</style>';
 	}
@@ -516,13 +509,12 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 *     @type int      $root_size_value  Value of root font size for rem|em <-> px conversion. Default `16`.
 	 *     @type string[] $acceptable_units An array of font size units. Default `array( 'rem', 'px', 'em' )`;
 	 * }
-	 * @return array|null An array consisting of `'value'` and `'unit'` properties on success.
-	 *                    `null` on failure.
+	 * @return string|null The value and unit, or null if the value is empty.
 	 */
 	private function get_typography_value_and_unit( $raw_value, $options = [] ) {
 		if ( ! is_string( $raw_value ) && ! is_int( $raw_value ) && ! is_float( $raw_value ) ) {
 			_doing_it_wrong(
-				__FUNCTION__,
+				__METHOD__,
 				esc_html__( 'Raw size value must be a string, integer, or float.', 'default' ),
 				'2.4.1'
 			);
@@ -582,9 +574,6 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			$unit = $options['coerce_to'];
 		}
 
-		return [
-			'value' => round( $value, 3 ),
-			'unit'  => $unit,
-		];
+		return round( $value, 3 ) . $unit;
 	}
 }
