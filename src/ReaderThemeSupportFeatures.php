@@ -475,4 +475,94 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		$lum = ( 0.2126 * $red ) + ( 0.7152 * $green ) + ( 0.0722 * $blue );
 		return (int) round( $lum );
 	}
+
+	/**
+	 * Checks a string for a unit and value and returns an array
+	 * consisting of `'value'` and `'unit'`, e.g. array( '42', 'rem' ).
+	 *
+	 * Copied from `wp_get_typography_value_and_unit()`
+	 *
+	 * @see https://github.com/WordPress/WordPress/blob/9caf1c4adeddff2577c24d622ebbbf278a671271/wp-includes/block-supports/typography.php#L297
+	 *
+	 * @since 2.4.1
+	 *
+	 * @param string|int|float $raw_value Raw size value from theme.json.
+	 * @param array            $options   {
+	 *     Optional. An associative array of options. Default is empty array.
+	 *
+	 *     @type string   $coerce_to        Coerce the value to rem or px. Default `'rem'`.
+	 *     @type int      $root_size_value  Value of root font size for rem|em <-> px conversion. Default `16`.
+	 *     @type string[] $acceptable_units An array of font size units. Default `array( 'rem', 'px', 'em' )`;
+	 * }
+	 * @return array|null An array consisting of `'value'` and `'unit'` properties on success.
+	 *                    `null` on failure.
+	 */
+	private function get_typography_value_and_unit( $raw_value, $options = [] ) {
+		if ( ! is_string( $raw_value ) && ! is_int( $raw_value ) && ! is_float( $raw_value ) ) {
+			_doing_it_wrong(
+				__FUNCTION__,
+				esc_html__( 'Raw size value must be a string, integer, or float.', 'default' ),
+				'2.4.1'
+			);
+			return null;
+		}
+
+		if ( empty( $raw_value ) ) {
+			return null;
+		}
+
+		// Converts numbers to pixel values by default.
+		if ( is_numeric( $raw_value ) ) {
+			$raw_value = $raw_value . 'px';
+		}
+
+		$defaults = [
+			'coerce_to'        => '',
+			'root_size_value'  => 16,
+			'acceptable_units' => [ 'rem', 'px', 'em' ],
+		];
+
+		$options = wp_parse_args( $options, $defaults );
+
+		$acceptable_units_group = implode( '|', $options['acceptable_units'] );
+		$pattern                = '/^(\d*\.?\d+)(' . $acceptable_units_group . '){1,1}$/';
+
+		preg_match( $pattern, $raw_value, $matches );
+
+		// Bails out if not a number value and a px or rem unit.
+		if ( ! isset( $matches[1] ) || ! isset( $matches[2] ) ) {
+			return null;
+		}
+
+		$value = $matches[1];
+		$unit  = $matches[2];
+
+		/*
+		 * Default browser font size. Later, possibly could inject some JS to
+		 * compute this `getComputedStyle( document.querySelector( "html" ) ).fontSize`.
+		 */
+		if ( 'px' === $options['coerce_to'] && ( 'em' === $unit || 'rem' === $unit ) ) {
+			$value = $value * $options['root_size_value'];
+			$unit  = $options['coerce_to'];
+		}
+
+		if ( 'px' === $unit && ( 'em' === $options['coerce_to'] || 'rem' === $options['coerce_to'] ) ) {
+			$value = $value / $options['root_size_value'];
+			$unit  = $options['coerce_to'];
+		}
+
+		/*
+		 * No calculation is required if swapping between em and rem yet,
+		 * since we assume a root size value. Later we might like to differentiate between
+		 * :root font size (rem) and parent element font size (em) relativity.
+		 */
+		if ( ( 'em' === $options['coerce_to'] || 'rem' === $options['coerce_to'] ) && ( 'em' === $unit || 'rem' === $unit ) ) {
+			$unit = $options['coerce_to'];
+		}
+
+		return [
+			'value' => round( $value, 3 ),
+			'unit'  => $unit,
+		];
+	}
 }
