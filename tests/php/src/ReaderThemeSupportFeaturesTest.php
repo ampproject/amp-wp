@@ -472,6 +472,8 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 
 			// Switch back to the current theme.
 			switch_theme( $current_theme );
+		} else {
+			$this->markTestSkipped( 'This test is only relevant for WordPress 5.9 and above.' );
 		}
 	}
 
