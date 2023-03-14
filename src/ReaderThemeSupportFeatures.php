@@ -277,6 +277,11 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 				continue;
 			}
 
+			// Avoid reducing font sizes if theme.json is used for the sake of fluid typography.
+			if ( $this->maybe_use_theme_json() && self::FEATURE_EDITOR_FONT_SIZES === $feature_key ) {
+				$reduced = false;
+			}
+
 			if ( $reduced ) {
 				$features[ $feature_key ] = [];
 
