@@ -417,11 +417,28 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			if ( ! $this->has_required_feature_props( self::FEATURE_EDITOR_FONT_SIZES, $font_size ) ) {
 				continue;
 			}
-			printf(
-				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$spx; }',
-				sanitize_key( $font_size[ self::KEY_SLUG ] ),
-				(float) $font_size[ self::KEY_SIZE ]
-			);
+
+			if ( function_exists( 'wp_get_typography_font_size_value' ) ) {
+				printf(
+					':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$s; }',
+					sanitize_key( $font_size[ self::KEY_SLUG ] ),
+					esc_attr( wp_get_typography_font_size_value( $font_size ) )
+				);
+			} else {
+				$font_value_and_unit = $this->get_typography_value_and_unit( $font_size[ self::KEY_SIZE ] );
+
+				if ( empty( $font_value_and_unit ) ) {
+					continue;
+				}
+
+				$font_value_and_unit = $font_value_and_unit['value'] . $font_value_and_unit['unit'];
+
+				printf(
+					':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$s; }',
+					sanitize_key( $font_size[ self::KEY_SLUG ] ),
+					esc_attr( $font_value_and_unit )
+				);
+			}
 		}
 		echo '</style>';
 	}
