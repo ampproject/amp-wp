@@ -13,6 +13,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeSupportFeatures;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWp\Tests\Helpers\PrivateAccess;
+use org\bovigo\vfs;
 
 /** @coversDefaultClass \AmpProject\AmpWP\ReaderThemeSupportFeatures */
 final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
@@ -426,6 +427,52 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 			$luminance,
 			$this->instance->get_relative_luminance_from_hex( $hex )
 		);
+	}
+
+	/**
+	 * @covers ::maybe_use_theme_json()
+	 */
+	public function test_maybe_use_theme_json() {
+		if ( function_exists( 'wp_get_global_settings' ) ) {
+
+			$current_theme = wp_get_theme()->get_stylesheet();
+
+			switch_theme( 'twentytwentythree' );
+
+			if ( 'twentytwentythree' !== wp_get_theme()->get_stylesheet() ) {
+				$this->markTestSkipped( 'Twenty Twenty Three theme is not activated.' );
+			}
+
+			$this->assertTrue( file_exists( get_stylesheet_directory() . '/theme.json' ) );
+			$this->assertTrue( $this->call_private_method( $this->instance, 'maybe_use_theme_json' ) );
+
+			$themes_directory = 'themes';
+			$mock_theme       = 'example-theme';
+			$mock_directory   = vfs\vfsStream::setup( $themes_directory, null, [ $mock_theme => [] ] );
+
+			// Add filters so that get_template_directory() the theme in the mock filesystem.
+			add_filter(
+				'theme_root',
+				function() use ( $mock_directory ) {
+					return $mock_directory->url();
+				}
+			);
+
+			add_filter(
+				'template',
+				function() use ( $mock_theme ) {
+					return $mock_theme;
+				}
+			);
+
+			$mock_directory->getChild( $mock_theme )->addChild( vfs\vfsStream::newFile( 'theme.json' ) );
+
+			$this->assertTrue( file_exists( get_template_directory() . '/theme.json' ) );
+			$this->assertTrue( $this->call_private_method( $this->instance, 'maybe_use_theme_json' ) );
+
+			// Switch back to the current theme.
+			switch_theme( $current_theme );
+		}
 	}
 
 	/** @param array $features */
