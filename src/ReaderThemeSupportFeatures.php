@@ -474,6 +474,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 
 	/**
 	 * Checks whether a theme or its parent has a theme.json file.
+	 * Checks if `wp_get_global_settings()` exists and bail for WP < 5.9.
 	 *
 	 * Copied from `wp_theme_has_theme_json()`
 	 *
@@ -481,9 +482,14 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 *
 	 * @since 2.4.1
 	 *
-	 * @return bool Returns true if theme or its parent has a theme.json file, false otherwise.
+	 * @return bool False if `wp_get_global_settings()` not exists or theme.json not found, true otherwise.
 	 */
 	private function theme_has_theme_json() {
+		// wp_get_global_settings() is only available in WP 5.9+.
+		if ( ! function_exists( 'wp_get_global_settings' ) ) {
+			return false;
+		}
+
 		static $theme_has_support = null;
 
 		if (
