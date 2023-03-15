@@ -258,7 +258,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		$features = [];
 
 		foreach ( array_keys( self::SUPPORTED_FEATURES ) as $feature_key ) {
-			if ( $this->maybe_use_theme_json() ) {
+			if ( $this->theme_has_theme_json() ) {
 				$feature_value   = [];
 				$global_settings = wp_get_global_settings( self::SUPPORTED_THEME_JSON_FEATURES[ $feature_key ], 'theme' );
 
@@ -278,7 +278,7 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 			}
 
 			// Avoid reducing font sizes if theme.json is used for the sake of fluid typography.
-			if ( $this->maybe_use_theme_json() && self::FEATURE_EDITOR_FONT_SIZES === $feature_key ) {
+			if ( $this->theme_has_theme_json() && self::FEATURE_EDITOR_FONT_SIZES === $feature_key ) {
 				$reduced = false;
 			}
 
@@ -296,25 +296,6 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		}
 
 		return $features;
-	}
-
-	/**
-	 * Check if theme.json can be used to determine theme support.
-	 * Due to the lack of `wp_get_global_settings()`, this will always return false for WP < 5.9.
-	 *
-	 * @since 2.4.1
-	 *
-	 * @return bool Whether theme.json can be used to determine theme support.
-	 */
-	private function maybe_use_theme_json() {
-		// wp_get_global_settings() is only available in WP 5.9+.
-		if ( ! function_exists( 'wp_get_global_settings' ) ) {
-			return false;
-		}
-
-		// Do not rely on `wp_is_block_theme()` as theme.json can be used in non-block themes.
-		// See: https://developer.wordpress.org/themes/advanced-topics/theme-json/#a-theme-json-can-be-added-to-any-theme.
-		return ( is_readable( get_stylesheet_directory() . '/theme.json' ) ? true : is_readable( get_template_directory() . '/theme.json' ) );
 	}
 
 	/**
@@ -489,6 +470,51 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 		// Calculate the luminance.
 		$lum = ( 0.2126 * $red ) + ( 0.7152 * $green ) + ( 0.0722 * $blue );
 		return (int) round( $lum );
+	}
+
+	/**
+	 * Checks whether a theme or its parent has a theme.json file.
+	 *
+	 * Copied from `wp_theme_has_theme_json()`
+	 *
+	 * @see https://github.com/WordPress/wordpress-develop/blob/200868214a1ae0a108dac491677ba82e7541fc8d/src/wp-includes/global-styles-and-settings.php#L384
+	 *
+	 * @since 2.4.1
+	 *
+	 * @return bool Returns true if theme or its parent has a theme.json file, false otherwise.
+	 */
+	private function theme_has_theme_json() {
+		static $theme_has_support = null;
+
+		if (
+			null !== $theme_has_support &&
+
+			/*
+			* Ignore static cache when `WP_DEBUG` is enabled. Why? To avoid interfering with
+			* the theme developer's workflow.
+			*
+			* @todo Replace `WP_DEBUG` once an "in development mode" check is available in Core.
+			*/
+			! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) &&
+
+			/*
+			* Ignore cache when automated test suites are running. Why? To ensure
+			* the static cache is reset between each test.
+			*/
+			! ( defined( 'WP_RUN_CORE_TESTS' ) && WP_RUN_CORE_TESTS )
+		) {
+			return $theme_has_support;
+		}
+
+		// Does the theme have its own theme.json?
+		$theme_has_support = is_readable( get_stylesheet_directory() . '/theme.json' );
+
+		// Look up the parent if the child does not have a theme.json.
+		if ( ! $theme_has_support ) {
+			$theme_has_support = is_readable( get_template_directory() . '/theme.json' );
+		}
+
+		return $theme_has_support;
 	}
 
 	/**
