@@ -17,7 +17,7 @@
     "ampproject/amp-toolbox": "0.11.3",
     "cweagans/composer-patches": "~1.0",
     "fasterimage/fasterimage": "1.5.0",
-    "sabberworm/php-css-parser": "8.4.0"
+    "sabberworm/php-css-parser": "dev-master#cc791ad"
   },
   "require-dev": {
     "automattic/vipwpcs": "^2.2",
@@ -94,9 +94,9 @@
         "Remove 'match' keyword from uses <https://github.com/sebastianbergmann/phpunit/issues/4373>": "patches/remove-match-keyword.patch"
       },
       "sabberworm/php-css-parser": {
-        "1. Add additional validation for size unit <https://github.com/sabberworm/PHP-CSS-Parser/pull/350>": "https://github.com/westonruter/PHP-CSS-Parser/commit/5b1d6a4abe43f4311d9b4674913ca665ed8c43aa.diff",
-        "2. Validate name-start code points for identifier <https://github.com/westonruter/PHP-CSS-Parser/pull/2>": "https://github.com/westonruter/PHP-CSS-Parser/commit/9f96bc97fcb1e848a2f6ca6f658009996883dffc.diff",
-        "3. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/westonruter/PHP-CSS-Parser/commit/dc18ba737fd6a611189a5b83729396500676f8dd.diff"
+        "1. Validate name-start code points for identifier <https://github.com/westonruter/PHP-CSS-Parser/pull/2>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/cc791ad...westonruter:PHP-CSS-Parser:fix/malformed-identifier-without-tests.diff",
+        "2. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/cc791ad...westonruter:PHP-CSS-Parser:fix/selector-comma-parsing-without-tests.diff",
+        "3. Parse simple expressions <https://github.com/sabberworm/PHP-CSS-Parser/pull/389>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/cc791ad...westonruter:PHP-CSS-Parser:fix/expression-parsing-without-tests.diff"
       }
     }
   },
