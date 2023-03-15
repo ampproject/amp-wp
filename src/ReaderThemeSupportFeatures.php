@@ -478,6 +478,8 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 *
 	 * Copied from `wp_theme_has_theme_json()`
 	 *
+	 * @codeCoverageIgnore
+	 *
 	 * @see https://github.com/WordPress/wordpress-develop/blob/200868214a1ae0a108dac491677ba82e7541fc8d/src/wp-includes/global-styles-and-settings.php#L384
 	 *
 	 * @since 2.4.1
@@ -528,6 +530,8 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * consisting of `'value'` and `'unit'`, e.g. array( '42', 'rem' ).
 	 *
 	 * Copied from `wp_get_typography_value_and_unit()`
+	 *
+	 * @codeCoverageIgnore
 	 *
 	 * @see https://github.com/WordPress/WordPress/blob/9caf1c4adeddff2577c24d622ebbbf278a671271/wp-includes/block-supports/typography.php#L297
 	 *
