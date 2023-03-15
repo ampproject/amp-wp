@@ -30,7 +30,7 @@
     "phpcompatibility/phpcompatibility-wp": "2.1.4",
     "phpdocumentor/reflection": "~3.0",
     "roave/security-advisories": "dev-latest",
-    "sirbrillig/phpcs-variable-analysis": "2.11.10",
+    "sirbrillig/phpcs-variable-analysis": "2.11.12",
     "wp-cli/export-command": "^2.0",
     "wp-cli/extension-command": "^2.0",
     "wp-cli/wp-cli": "^2.4",
