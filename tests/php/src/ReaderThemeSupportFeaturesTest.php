@@ -316,6 +316,55 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 		}
 	}
 
+	/**
+	 * Test when a theme with theme.json is active.
+	 *
+	 * @covers ::get_theme_support_features()
+	*/
+	public function test_get_theme_support_features_with_theme_json() {
+		$current_theme = wp_get_theme();
+
+		switch_theme( self::THEME_WITH_THEME_JSON );
+
+		$non_reduced = $this->instance->get_theme_support_features( false );
+
+		$this->assertArrayHasKey( 'editor-color-palette', $non_reduced );
+		$this->assertContains(
+			[
+				'color' => '#9DFF20',
+				'name'  => 'Primary',
+				'slug'  => 'primary',
+			],
+			$non_reduced['editor-color-palette']
+		);
+
+		$this->assertArrayHasKey( 'editor-gradient-presets', $non_reduced );
+		$this->assertContains(
+			[
+				'name'     => 'Vivid cyan blue to vivid purple',
+				'gradient' => 'linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%)',
+				'slug'     => 'vivid-cyan-blue-to-vivid-purple',
+			],
+			$non_reduced['editor-gradient-presets']
+		);
+
+		$this->assertArrayHasKey( 'editor-font-sizes', $non_reduced );
+		$this->assertContains(
+			[
+				'fluid' => [
+					'min' => '0.875rem',
+					'max' => '1rem',
+				],
+				'size'  => '1rem',
+				'slug'  => 'small',
+				'name'  => 'Small',
+			],
+			$non_reduced['editor-font-sizes']
+		);
+
+		switch_theme( $current_theme->get_stylesheet() );
+	}
+
 	/** @covers ::is_reader_request() */
 	public function test_is_reader_request() {
 		if ( ! wp_get_theme( self::THEME_PRIMARY )->exists() || ! wp_get_theme( self::THEME_READER )->exists() ) {
