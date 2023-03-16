@@ -860,6 +860,44 @@ class AMP_Style_Sanitizer_Test extends TestCase {
 				],
 				[],
 			],
+			'complex_css_values' => [
+				'
+				<html>
+					<head>
+						<style>
+							body {
+								background: green;
+								width: calc((100vw - 100px) / 2);
+								height: 100px;
+							}
+						</style>
+						<style>
+							:where(body) {
+								width: min(var(--container-max-width), 100% - calc(var(--container-padding) * 2));
+								margin-inline: auto;
+							}
+						</style>
+						<style>
+							body {
+								--wp--preset--font-size--huge: 42px;
+								--wp--preset--font-size--small: clamp(.875rem,.875rem + ((1vw - .48rem)*0.24),1rem);
+								--wp--preset--font-size--medium: clamp(1rem,1rem + ((1vw - .48rem)*0.24),1.125rem);
+								--wp--preset--font-size--large: clamp(1.5rem,1.5rem + ((1vw - .48rem)*0.24),1.625rem);
+								--wp--preset--font-size--normal: 16px;
+							}
+						</style>
+					</head>
+					<body>
+					</body>
+				</html>
+				',
+				[
+					'body{background:green;width:calc(( 100vw - 100px ) / 2);height:100px}',
+					':where(body){width:min(var(--container-max-width),100% - calc(var(--container-padding) * 2));margin-inline:auto}',
+					'body{--wp--preset--font-size--huge:42px;--wp--preset--font-size--small:clamp(.875rem,.875rem + ((1vw - .48rem) * .24),1rem);--wp--preset--font-size--medium:clamp(1rem,1rem + ((1vw - .48rem) * .24),1.125rem);--wp--preset--font-size--large:clamp(1.5rem,1.5rem + ((1vw - .48rem) * .24),1.625rem);--wp--preset--font-size--normal:16px}',
+				],
+				[],
+			],
 		];
 	}
 
