@@ -11,7 +11,6 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use _WP_Dependency;
 use AMP_Options_Manager;
 use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Conditional;
@@ -41,13 +40,6 @@ final class AfterActivationSiteScan implements Conditional, Delayed, HasRequirem
 	 * @var string
 	 */
 	const APP_ROOT_ID = 'amp-site-scan-notice';
-
-	/**
-	 * React dependency handle.
-	 *
-	 * @var string
-	 */
-	const REACT = 'react';
 
 	/**
 	 * HTML ID for the app root sibling element.
@@ -92,16 +84,12 @@ final class AfterActivationSiteScan implements Conditional, Delayed, HasRequirem
 	public static function is_needed() {
 		global $pagenow;
 
-		$react = wp_scripts()->query( self::REACT );
-
 		return (
 			is_admin()
 			&&
 			Services::get( 'dependency_support' )->has_support()
 			&&
 			! is_network_admin()
-			&&
-			( $react instanceof _WP_Dependency && version_compare( $react->ver, '18', '<' ) )
 			&&
 			AMP_Validation_Manager::has_cap()
 			&&
