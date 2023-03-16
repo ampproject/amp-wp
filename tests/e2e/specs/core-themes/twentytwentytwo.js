@@ -62,6 +62,8 @@ describe('Twenty Twenty-Two theme on AMP', () => {
 		});
 
 		it('should be togglable', async () => {
+			await page.waitForSelector(pageHeaderSelector);
+
 			const pageHeaderElement = await page.$(pageHeaderSelector);
 			expect(pageHeaderElement).not.toBeNull();
 
