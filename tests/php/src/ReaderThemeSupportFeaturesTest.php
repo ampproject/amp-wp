@@ -322,8 +322,9 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 	 * @covers ::get_theme_support_features()
 	*/
 	public function test_get_theme_support_features_with_theme_json() {
-		if ( ! $this->call_private_method( $this->instance, 'theme_has_theme_json' ) ) {
-			$this->markTestSkipped( 'Theme support features from theme.json are not supported in this version of WordPress.' );
+		// wp_get_global_settings() is only available in WP 5.9+.
+		if ( ! function_exists( 'wp_get_global_settings' ) ) {
+			$this->markTestSkipped( 'This test requires WP 5.9+' );
 		}
 
 		$current_theme = wp_get_theme();
