@@ -45,6 +45,12 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 			'size'      => 144,
 			'slug'      => 'gigantic',
 		],
+		[
+			'name'      => 'Huge',
+			'shortName' => 'XXL',
+			'size'      => '',
+			'slug'      => 'huge',
+		],
 	];
 
 	const TEST_COLOR_PALETTE = [
@@ -82,6 +88,13 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 	 * @var string
 	 */
 	const THEME_PRIMARY = 'twentytwenty';
+
+	/**
+	 * Theme with theme.json
+	 *
+	 * @var string
+	 */
+	const THEME_WITH_THEME_JSON = 'twentytwentythree';
 
 	/**
 	 * Reader theme slug.
