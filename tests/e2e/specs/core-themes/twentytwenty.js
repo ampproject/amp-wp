@@ -76,6 +76,10 @@ describe('Twenty Twenty theme on AMP', () => {
 			it('should have a togglable submenu', async () => {
 				await expect(page).toClick('.mobile-nav-toggle');
 
+				await page.waitForSelector(
+					'.menu-modal .menu-item-has-children'
+				);
+
 				const menuItemWithSubmenu = await page.$(
 					'.menu-modal .menu-item-has-children'
 				);

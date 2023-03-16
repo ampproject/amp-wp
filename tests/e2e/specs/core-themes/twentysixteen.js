@@ -81,6 +81,10 @@ describe('Twenty Sixteen theme on AMP', () => {
 		it('should have a togglable submenu', async () => {
 			await expect(page).toClick('#menu-toggle');
 
+			await page.waitForSelector(
+				'#site-navigation .menu-item-has-children'
+			);
+
 			const menuItemWithSubmenu = await page.$(
 				'#site-navigation .menu-item-has-children'
 			);
