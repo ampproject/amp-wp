@@ -23,9 +23,6 @@ cd "$(dirname "$0")/../.."
 # done on every time `npm run test-e2e` is run.
 . "$(dirname "$0")/install-wordpress.sh"
 
-# Install specific version of Gutenberg plugin for e2e tests.
-download_gutenberg "14.7.3" "tests/e2e/plugins/gutenberg.14.7.3.zip"
-
 ! read -d '' AMP <<"EOT"
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMWNXK0OOkkkkOO0KXNWMMMMMMMMMMMMMMMM
