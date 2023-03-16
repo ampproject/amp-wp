@@ -322,6 +322,10 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 	 * @covers ::get_theme_support_features()
 	*/
 	public function test_get_theme_support_features_with_theme_json() {
+		if ( ! $this->call_private_method( $this->instance, 'theme_has_theme_json' ) ) {
+			$this->markTestSkipped( 'Theme support features from theme.json are not supported in this version of WordPress.' );
+		}
+
 		$current_theme = wp_get_theme();
 
 		switch_theme( self::THEME_WITH_THEME_JSON );
