@@ -366,8 +366,6 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 			],
 			$features['editor-font-sizes']
 		);
-
-		switch_theme( $current_theme->get_stylesheet() );
 	}
 
 	/** @covers ::is_reader_request() */
@@ -483,8 +481,6 @@ final class ReaderThemeSupportFeaturesTest extends DependencyInjectedTestCase {
 			$this->assertStringContainsString( 'font-size: clamp(', $output );
 			$this->assertStringContainsString( '+ ((', $output );
 			$this->assertStringContainsString( ':root .has-small-font-size { font-size: clamp(0.875rem, 0.875rem + ((1vw - 0.48rem) * 0.24), 1rem); }', $output );
-
-			switch_theme( $current_theme->get_stylesheet() );
 		}
 	}
 
