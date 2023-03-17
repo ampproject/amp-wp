@@ -551,6 +551,9 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 	 * @return string|null The value and unit, or null if the value is empty.
 	 */
 	private function get_typography_value_and_unit( $raw_value, $options = [] ) {
+		if ( function_exists( 'wp_get_typography_value_and_unit' ) ) {
+			return wp_get_typography_value_and_unit( $raw_value, $options );
+		}
 		if ( ! is_string( $raw_value ) && ! is_int( $raw_value ) && ! is_float( $raw_value ) ) {
 			_doing_it_wrong(
 				__METHOD__,
