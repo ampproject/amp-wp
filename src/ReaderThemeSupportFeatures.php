@@ -415,8 +415,8 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$s; }',
 				sanitize_key( $font_size[ self::KEY_SLUG ] ),
 				function_exists( 'wp_get_typography_font_size_value' )
-					? esc_attr( wp_strip_all_tags( wp_get_typography_font_size_value( $font_size ) ) )
-					: esc_attr( wp_strip_all_tags( $font_size[ self::KEY_SIZE ] ) )
+					? strip_tags( wp_get_typography_font_size_value( $font_size ) )
+					: strip_tags( $font_size[ self::KEY_SIZE ] )
 			);
 		}
 		echo '</style>';
