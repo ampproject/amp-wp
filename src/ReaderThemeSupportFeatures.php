@@ -415,8 +415,10 @@ final class ReaderThemeSupportFeatures implements Service, Registerable {
 				':root .is-%1$s-text, :root .has-%1$s-font-size { font-size: %2$s; }',
 				sanitize_key( $font_size[ self::KEY_SLUG ] ),
 				function_exists( 'wp_get_typography_font_size_value' )
-					? strip_tags( wp_get_typography_font_size_value( $font_size ) )
-					: strip_tags( $font_size[ self::KEY_SIZE ] )
+					// phpcs:disable WordPressVIPMinimum.Functions.StripTags.StripTagsOneParameter
+					? strip_tags( wp_get_typography_font_size_value( $font_size ) ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					: strip_tags( $font_size[ self::KEY_SIZE ] ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					// phpcs:enable WordPressVIPMinimum.Functions.StripTags.StripTagsOneParameter
 			);
 		}
 		echo '</style>';
